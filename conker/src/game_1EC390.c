@@ -1,44 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Particle spawn template for func_15132A4C: the same layout as Particle 0x10..0x8B (see game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot; /* degrees */
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 model;
-    /* 0x58 */ u8  variant;
-    /* 0x59 */ u8  pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8  alpha;
-    /* 0x61 */ u8  updateFn;
-    /* 0x62 */ u8  update2Fn;
-    /* 0x63 */ u8  floorHitFn;
-    /* 0x64 */ u8  floorType3Fn;
-    /* 0x65 */ u8  wallHitFn;
-    /* 0x66 */ u8  destroyFn;
-    /* 0x67 */ u8  squashFn;
-    /* 0x68 */ u8  matrixFn;
-    /* 0x69 */ u8  pad69;
-    /* 0x6A */ u8  unk6A;
-    /* 0x6B */ u8  pad6B;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8  ownerId;
-    /* 0x71 */ u8  pad71;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x78 */ s32 pad78;
-} ParticleSpawn; // size 0x7C
+#include "effects.h"
 
 /* The spawned particle; only its two matrices (Particle.mtx in game_15F680.c) are touched here. */
 typedef struct {

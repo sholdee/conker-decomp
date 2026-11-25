@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
@@ -290,26 +291,24 @@ typedef struct {
     /* 0x82 */ s16 unk82;
 } Spawn15151A38;
 
-/* Particle spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (see game_15F680.c),
- * copied into the new particle. */
-typedef struct {
+/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+typedef struct ParticleSpawn78 {
     /* 0x00 */ f32 radius;
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ struct17 rot;
-    /* 0x1C */ struct17 scale;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ f32 rotVelX;
-    /* 0x44 */ f32 rotVelY;
-    /* 0x48 */ f32 rotVelZ;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
     /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
+    /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 model;
+    /* 0x56 */ u16 model;
     /* 0x58 */ u8 variant;
-    /* 0x5C */ s32 unk5C;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
     /* 0x60 */ u8 alpha;
     /* 0x61 */ u8 updateFn;
     /* 0x62 */ u8 update2Fn;
@@ -319,13 +318,16 @@ typedef struct {
     /* 0x66 */ u8 destroyFn;
     /* 0x67 */ u8 squashFn;
     /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ u8 pad69;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct struct127 *owner;
     /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
     /* 0x74 */ s16 fadeRate;
-} ParticleSpawn;
+    /* 0x76 */ u8 pad76[2];
+} ParticleSpawn78;
 
 /* Spawn request for func_15150D1C. */
 typedef struct {
@@ -354,7 +356,7 @@ extern struct17 D_800AAEEC[];
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_15143134(struct17 *, struct17 *, Mtx *);
 void func_15143794(s16, s16, f32, struct17 *);
-s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
+s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(Spawn15150D1C *, u8, s32);
 void func_151A9834(struct17 *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
 void func_15151A38(Spawn15151A38 *, u8, s32);
@@ -363,7 +365,7 @@ void func_1504715C(FloorInfo *, struct127 *);
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
 void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
-    struct17 vecB;
+    vertex vecB;
     struct17 pos;
     struct17 vecA;
     struct17 vecC;
@@ -373,20 +375,20 @@ void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
     pos.unk4 = obj->y_position + 200.0f;
     pos.unk8 = obj->z_position;
     if (obj->unk1D4) {
-        func_1503F404((s32)obj->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.unk0, &vecB.unk4, &vecB.unk8,
+        func_1503F404((s32)obj->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.x, &vecB.y, &vecB.z,
                       &vecC.unk0, &vecC.unk4, &vecC.unk8);
         {
-            ParticleSpawn piece;
+            ParticleSpawn78 piece;
             const s32 models[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
 
             piece.radius = 1.0f;
             piece.elasticity = 0.6490000486f;
             piece.sizeXZ = piece.sizeY = (obj->xz_scale + obj->y_scale) * 0.5f;
             piece.rot = vecB;
-            piece.scale.unk0 = 1.0f;
-            piece.scale.unk4 = 0.0f;
-            piece.scale.unk8 = 1.0f;
-            piece.rotVelY = 0.0f;
+            piece.scale.x = 1.0f;
+            piece.scale.y = 0.0f;
+            piece.scale.z = 1.0f;
+            piece.rotVel.y = 0.0f;
             piece.variant = 0;
             piece.unk5C = 0;
             piece.alpha = 0xFF;
@@ -413,8 +415,8 @@ void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
-                piece.rotVelX = (func_150ADA68() * 19.75200081f) + -9.876000404f;
-                piece.rotVelZ = (func_150ADA68() * 19.75200081f) + -9.876000404f;
+                piece.rotVel.x = (func_150ADA68() * 19.75200081f) + -9.876000404f;
+                piece.rotVel.z = (func_150ADA68() * 19.75200081f) + -9.876000404f;
                 piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
                 piece.lifetime = (func_150ADA20() % 101U) + 100;
                 func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
@@ -813,48 +815,6 @@ typedef struct {
     s32 unk40;
 } Spawn15153CCC; /* 0x44 */
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 lifetime;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} ParticleDesc; /* 0x70, passed to func_15130280 */
-
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 extern void func_15145EA4(f32 **, struct17 **, Mtx *, s32);
@@ -873,7 +833,7 @@ extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
-    struct17 pos;
+    vertex pos;
     struct17 dir;
     FloorInfo floor;
     EmitShape shape;
@@ -888,9 +848,9 @@ void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
             dsts[0] = &pos;
             dsts[1] = &dir;
             func_15145EA4(srcs, dsts, (Mtx *)obj->unk1D4 + 2, 2);
-            dir.unk0 -= pos.unk0;
-            dir.unk4 -= pos.unk4;
-            dir.unk8 -= pos.unk8;
+            dir.unk0 -= pos.x;
+            dir.unk4 -= pos.y;
+            dir.unk8 -= pos.z;
         }
         func_1504715C(&floor, obj);
         shape.unk0 = 0;
@@ -900,7 +860,7 @@ void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
         {
             Spawn1514FF44 emitA;
 
-            emitA.unk0 = pos;
+            emitA.unk0 = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
             emitA.unkC = 6;
             emitA.unkE = 8;
             emitA.unk10 = 0.03999999911f;
@@ -924,7 +884,7 @@ void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
         {
             Spawn15153CCC emitB;
 
-            emitB.unk0 = pos;
+            emitB.unk0 = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
             emitB.unkC = 10.0f;
             emitB.unk10 = 25.0f;
             emitB.unk14 = 1.253000021f;
@@ -955,44 +915,44 @@ void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
 
             shape.unk28 = 1000.0f;
             count = (func_150ADA20() % 6U) + 5;
-            spawn.unk1D = 0x3E;
-            spawn.unk8 = 0x2203;
+            spawn.texture = 0x3E;
+            spawn.renderMode = 0x2203;
             spawn.unk0 = 0x200005;
             spawn.unk4 = 0;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk14 = 0;
-            spawn.unk15 = 0;
-            spawn.unk16 = 0;
-            spawn.unk17 = 0xFF;
-            spawn.unk18 = 0;
-            spawn.unk19 = 0;
-            spawn.unk1A = 0;
-            spawn.unk1B = 0;
-            spawn.unk1C = 0xFF;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.r = 0;
+            spawn.g = 0;
+            spawn.b = 0;
+            spawn.a = 0xFF;
+            spawn.r2 = 0;
+            spawn.g2 = 0;
+            spawn.b2 = 0;
+            spawn.alpha = 0;
+            spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.unk3C = *(struct17 *)&D_800A5480;
-            spawn.unk22 = 1;
+            spawn.offset = *(vertex *)&D_800A5480;
+            spawn.scaleStart = 1;
             spawn.flags = 0xC007;
-            spawn.unk24 = 1.0f;
-            spawn.lifetime = (func_150ADA20() % 11U) + 40;
-            spawn.unk1E = 1;
-            spawn.unk20 = 0xFF;
-            spawn.unk60 = 6;
-            spawn.unk61 = 8;
-            spawn.unk64 = -1;
-            spawn.unk62 = -1;
-            spawn.unk63 = -1;
-            spawn.unk65 = 11;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.unk68 = 0;
-            spawn.unk2C = 0.0f;
-            spawn.unk28 = 0.0f;
-            spawn.unk6C = 10000.0f;
+            spawn.scaleRate = 1.0f;
+            spawn.timer = (func_150ADA20() % 11U) + 40;
+            spawn.fadeStart = 1;
+            spawn.fadeRate = 0xFF;
+            spawn.primColorMode = 6;
+            spawn.envColorMode = 8;
+            spawn.drawFunc = -1;
+            spawn.updateFunc = -1;
+            spawn.deathFunc = -1;
+            spawn.handlerSet = 11;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.minSize = 0;
+            spawn.height = 0.0f;
+            spawn.width = 0.0f;
+            spawn.maxSize = 10000.0f;
             while (count != 0) {
                 func_1514F808(&shape, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
-                spawn.unk54 = (func_150ADA68() * 1.340000033f) + -2.328999996f;
+                spawn.gravity = (func_150ADA68() * 1.340000033f) + -2.328999996f;
                 particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
                 if (particle != NULL) {
                     particle->effect = func_151CEAAC(NULL, particle, 0, arg1, arg2);

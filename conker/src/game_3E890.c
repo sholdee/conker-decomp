@@ -2,37 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn packet consumed by func_151407D0 and func_1513D2F0 (copied whole, 0x58 bytes). */
-typedef struct {
-    /* 0x00 */ u8 field0;
-    /* 0x01 */ s8 field1;
-    /* 0x02 */ s16 field2;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 field8;
-    /* 0x0C */ s32 fieldC;
-    /* 0x10 */ u8 colour[4];
-    /* 0x14 */ f32 scale[2];
-    /* 0x1C */ Vec3f position;
-    /* 0x28 */ Vec3f rotation;
-    /* 0x34 */ f32 size[3];
-    /* 0x40 */ s32 field40;
-    /* 0x44 */ u8 field44;
-    /* 0x45 */ u8 field45;
-    /* 0x46 */ u8 field46;
-    /* 0x47 */ u8 field47;
-    /* 0x48 */ s32 field48;
-    /* 0x4C */ u8 field4C;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 field50;
-    /* 0x54 */ s16 field54;
-    /* 0x56 */ s16 field56;
-} SpawnPacket; /* size 0x58 */
+#include "effects.h"
 
 /* Emitter parameters passed to func_151407D0 (it is told 0x7C bytes). */
 typedef struct {
@@ -63,12 +33,12 @@ typedef struct {
     f32 unk18;
 } EmitterExtra; /* size 0x1C */
 
-struct181 *func_151407D0(EmitterParams *, s32, SpawnPacket *, u8, u8, u8, u8, s8, u8, s32);
+struct181 *func_151407D0(EmitterParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void func_150113E0(void) {
     EmitterParams params;
-    SpawnPacket packet;
+    ParticleDef packet;
     EmitterExtra extra;
     struct181 *emitter;
 
@@ -80,31 +50,31 @@ void func_150113E0(void) {
     extra.unk14 = 7.0f;
     extra.unk18 = 0.7023000121f;
 
-    packet.field0 = 3;
-    packet.field2 = 0x3403;
+    packet.texture = 3;
+    packet.renderModes = 0x3403;
     packet.lifetime = 300;
-    packet.field8 = 0;
-    packet.fieldC = 0;
-    packet.colour[0] = 230;
-    packet.colour[1] = 100;
-    packet.colour[2] = 0;
-    packet.colour[3] = 255;
-    packet.scale[0] = 100.0f;
-    packet.scale[1] = 100.0f;
-    packet.position.x = 520.0f;
-    packet.position.y = 72.0f;
-    packet.position.z = 2337.0f;
-    packet.rotation.x = 520.0f;
-    packet.rotation.y = 72.0f;
-    packet.rotation.z = 2220.0f;
-    packet.size[0] = 1.0f;
-    packet.size[1] = 1.0f;
-    packet.size[2] = 1.0f;
-    packet.field40 = 0xD2012;
-    packet.field45 = 255;
-    packet.field44 = 255;
-    packet.field46 = 0;
-    packet.field47 = 6;
+    packet.frame = 0;
+    packet.frameSpeed = 0;
+    packet.rgba[0] = 230;
+    packet.rgba[1] = 100;
+    packet.rgba[2] = 0;
+    packet.rgba[3] = 255;
+    packet.width = 100.0f;
+    packet.height = 100.0f;
+    packet.pos.x = 520.0f;
+    packet.pos.y = 72.0f;
+    packet.pos.z = 2337.0f;
+    packet.rot.x = 520.0f;
+    packet.rot.y = 72.0f;
+    packet.rot.z = 2220.0f;
+    packet.scale.x = 1.0f;
+    packet.scale.y = 1.0f;
+    packet.scale.z = 1.0f;
+    packet.flags = 0xD2012;
+    packet.unk45 = 255;
+    packet.unk44 = 255;
+    packet.unk46 = 0;
+    packet.unk47 = 6;
 
     params.unk04 = 175.5f;
     params.unk00 = 175.5f;
@@ -127,34 +97,34 @@ void func_150113E0(void) {
         memcpy(&emitter->unk170, &extra, sizeof(extra));
     }
 
-    packet.position.x = -520.0f;
-    packet.rotation.x = -520.0f;
-    packet.position.y = 72.0f;
-    packet.rotation.y = 72.0f;
-    packet.position.z = 2337.0f;
-    packet.rotation.z = 2220.0f;
+    packet.pos.x = -520.0f;
+    packet.rot.x = -520.0f;
+    packet.pos.y = 72.0f;
+    packet.rot.y = 72.0f;
+    packet.pos.z = 2337.0f;
+    packet.rot.z = 2220.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->unk170, &extra, sizeof(extra));
     }
 
-    packet.position.y = 70.0f;
-    packet.rotation.y = 70.0f;
-    packet.position.z = 926.0f;
-    packet.rotation.z = 926.0f;
-    packet.position.x = -710.0f;
-    packet.rotation.x = -584.0f;
+    packet.pos.y = 70.0f;
+    packet.rot.y = 70.0f;
+    packet.pos.z = 926.0f;
+    packet.rot.z = 926.0f;
+    packet.pos.x = -710.0f;
+    packet.rot.x = -584.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->unk170, &extra, sizeof(extra));
     }
 
-    packet.position.x = 506.0f;
-    packet.rotation.x = 506.0f;
-    packet.position.y = 47.0f;
-    packet.rotation.y = 47.0f;
-    packet.position.z = -339.0f;
-    packet.rotation.z = -208.0f;
+    packet.pos.x = 506.0f;
+    packet.rot.x = 506.0f;
+    packet.pos.y = 47.0f;
+    packet.rot.y = 47.0f;
+    packet.pos.z = -339.0f;
+    packet.rot.z = -208.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
         memcpy(&emitter->unk170, &extra, sizeof(extra));
@@ -226,7 +196,7 @@ void func_1501175C(struct127 *owner, u8 arg1, s32 arg2) {
         // matching: the -g3 scope entry makes IDO load the shared constants at the top of this block
         {
             Motion motion;
-            SpawnPacket packet;
+            ParticleDef packet;
             Header2 header2;
             Header header;
 
@@ -241,41 +211,41 @@ void func_1501175C(struct127 *owner, u8 arg1, s32 arg2) {
             motion.unk24 = 0.0f;
             motion.unk28 = 0.0f;
             motion.unk38 = 0.0f;
-            packet.scale[0] = 0.0f;
-            packet.scale[1] = 0.0f;
+            packet.width = 0.0f;
+            packet.height = 0.0f;
             motion.unk3C = 0.0f;
             motion.unk48 = 1.0f;
             motion.unk40 = 1.0f;
             motion.unk4C = 1.0f;
             motion.unk44 = 1.0f;
             motion.controller = object;
-            packet.field0 = 0x5F;
-            packet.field1 = 9;
-            packet.field2 = 0x2203;
+            packet.texture = 0x5F;
+            packet.type = 9;
+            packet.renderModes = 0x2203;
             packet.lifetime = 300;
-            packet.field8 = 0;
-            packet.fieldC = 0;
-            packet.colour[0] = 255;
-            packet.colour[1] = 255;
-            packet.colour[2] = 255;
-            packet.colour[3] = 255;
+            packet.frame = 0;
+            packet.frameSpeed = 0;
+            packet.rgba[0] = 255;
+            packet.rgba[1] = 255;
+            packet.rgba[2] = 255;
+            packet.rgba[3] = 255;
             motion.unk14 = 0.1042563021f;
             motion.unk20 = 0.5197371244f;
             motion.unk1C = 0.3440458775f;
             motion.unk2C = 160.0f;
             motion.unk30 = 95.0f;
             motion.unk34 = 207.5f;
-            packet.position = *(Vec3f *)&D_800A5480;
-            packet.rotation = *(Vec3f *)&D_800A5480;
-            packet.size[0] = 1.0f;
-            packet.size[1] = 1.0f;
-            packet.size[2] = 1.0f;
-            packet.field40 = 0x40EC0000; // bit pattern of 7.375f
-            packet.field44 = 0;
-            packet.field45 = 255;
-            packet.field46 = 0;
-            packet.field47 = 7;
-            packet.field48 = 0;
+            packet.pos = *(vertex *)&D_800A5480;
+            packet.rot = *(vertex *)&D_800A5480;
+            packet.scale.x = 1.0f;
+            packet.scale.y = 1.0f;
+            packet.scale.z = 1.0f;
+            packet.flags = 0x40EC0000; // bit pattern of 7.375f
+            packet.unk44 = 0;
+            packet.unk45 = 255;
+            packet.unk46 = 0;
+            packet.unk47 = 7;
+            packet.unk48 = 0;
             controller->effect = func_1513D2F0(&packet, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
                                                ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
             if (controller->effect != NULL) {

@@ -6,6 +6,7 @@
 #undef func_1513D4B8
 void *func_1513D4B8(void *desc, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 #include "variables.h"
+#include "effects.h"
 
 
 extern f32 sinf(f32);
@@ -247,34 +248,6 @@ typedef struct {
     SightBeamState *state;
 } SightSoundHandle;
 
-/* Spawn descriptor for func_1513D4B8 / func_151407D0; the spawned object holds a copy at +0x18. */
-typedef struct {
-    u8 kind;
-    u8 mode;
-    s16 flags;
-    s16 lifetime;
-    u8 pad06[2];
-    s32 callback0;
-    s32 callback1;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    f32 unk14;
-    f32 width;
-    vertex start;
-    vertex end;
-    vertex unk34;
-    s32 options;
-    u8 brightness;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    SightZone *zone;
-    u8 unk4C;
-    u8 pad4D[0xB];
-} SightSpawnDesc;
-
 
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
@@ -283,7 +256,7 @@ typedef struct {
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[0xB];
-    SightSpawnDesc spawn;
+    ParticleDef spawn;
     u8 pad70[0x50];
     u8 vtxTemplate[0x40];
     u8 *vtxBuffers[4];
@@ -299,7 +272,7 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
 s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
-    SightSpawnDesc spawn;
+    ParticleDef spawn;
     SightBeamState state;
     s32 pos[3];
     vertex ndir;
@@ -337,14 +310,14 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
         // matching: a block-scope declaration gives IDO a scope boundary here
         extern void func_151C9198(SightEmitter **, vertex *, SightTriangle *, vertex *, SightZone *, u8, u8, u8, s32);
 
-        spawn.unk34.x = end->x - start->x;
-        spawn.unk34.y = end->y - start->y;
-        spawn.unk34.z = end->z - start->z;
-        ndir.x = -spawn.unk34.x;
-        ndir.y = -spawn.unk34.y;
-        ndir.z = -spawn.unk34.z;
+        spawn.scale.x = end->x - start->x;
+        spawn.scale.y = end->y - start->y;
+        spawn.scale.z = end->z - start->z;
+        ndir.x = -spawn.scale.x;
+        ndir.y = -spawn.scale.y;
+        ndir.z = -spawn.scale.z;
         func_151C9198(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
-        func_151C9198(state.emitter1, end, endTri, &spawn.unk34, state.zone1, red < blue, zoneMasked, arg16, 0);
+        func_151C9198(state.emitter1, end, endTri, &spawn.scale, state.zone1, red < blue, zoneMasked, arg16, 0);
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
@@ -374,9 +347,9 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     if (hasMidEffect) {
         Header hdr;
 
-        pos[0] = start->x + spawn.unk34.x * 0.5f;
-        pos[1] = start->y + spawn.unk34.y * 0.5f;
-        pos[2] = start->z + spawn.unk34.z * 0.5f;
+        pos[0] = start->x + spawn.scale.x * 0.5f;
+        pos[1] = start->y + spawn.scale.y * 0.5f;
+        pos[2] = start->z + spawn.scale.z * 0.5f;
         hdr.unk0 = 2;
         hdr.unk1 = 2;
         hdr.unk2 = 300;
@@ -385,22 +358,22 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     } else {
         state.midEffect = NULL;
     }
-    spawn.kind = 0x59;
-    spawn.mode = 6;
-    spawn.flags = 0x5A03;
+    spawn.texture = 0x59;
+    spawn.type = 6;
+    spawn.renderModes = 0x5A03;
     spawn.lifetime = 300;
-    spawn.callback0 = 0;
-    spawn.callback1 = 0;
-    spawn.red = red;
-    spawn.green = green;
-    spawn.blue = blue;
-    spawn.alpha = 0xFF;
-    spawn.unk14 = 0.0f;
-    spawn.width = 20.0f;
-    spawn.start = *start;
-    spawn.end = *end;
-    spawn.options = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
-    spawn.brightness = 0xFF;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = red;
+    spawn.rgba[1] = green;
+    spawn.rgba[2] = blue;
+    spawn.rgba[3] = 0xFF;
+    spawn.width = 0.0f;
+    spawn.height = 20.0f;
+    spawn.pos = *start;
+    spawn.rot = *end;
+    spawn.flags = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
+    spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
@@ -422,7 +395,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             objState = &obj->state;
             memcpy(objState, &state, sizeof(SightBeamState));
         }
-        dir = spawn.unk34;
+        dir = spawn.scale;
         if (func_15145128(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
             p0.x = start->x + dir.x * 20.0f;
             p0.y = start->y + dir.y * 20.0f;
@@ -487,10 +460,10 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
         return NULL;
     }
     camera = func_15144B34(view);
-    dir.x = obj->spawn.end.x - obj->spawn.start.x;
-    dir.y = obj->spawn.end.y - obj->spawn.start.y;
-    dir.z = obj->spawn.end.z - obj->spawn.start.z;
-    func_15145548(&obj->spawn.start, &dir, camera, &closest, 0);
+    dir.x = obj->spawn.rot.x - obj->spawn.pos.x;
+    dir.y = obj->spawn.rot.y - obj->spawn.pos.y;
+    dir.z = obj->spawn.rot.z - obj->spawn.pos.z;
+    func_15145548(&obj->spawn.pos, &dir, camera, &closest, 0);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;
@@ -503,32 +476,32 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = obj->spawn.width / sqrtf(lengthSquared);
+        scale = obj->spawn.height / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->v.ob[0] = obj->spawn.end.x - nx;
-    vertices->v.ob[1] = obj->spawn.end.y - ny;
-    vertices->v.ob[2] = obj->spawn.end.z - nz;
+    vertices->v.ob[0] = obj->spawn.rot.x - nx;
+    vertices->v.ob[1] = obj->spawn.rot.y - ny;
+    vertices->v.ob[2] = obj->spawn.rot.z - nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.start.x - nx;
-    vertices->v.ob[1] = obj->spawn.start.y - ny;
-    vertices->v.ob[2] = obj->spawn.start.z - nz;
+    vertices->v.ob[0] = obj->spawn.pos.x - nx;
+    vertices->v.ob[1] = obj->spawn.pos.y - ny;
+    vertices->v.ob[2] = obj->spawn.pos.z - nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.start.x + nx;
-    vertices->v.ob[1] = obj->spawn.start.y + ny;
-    vertices->v.ob[2] = obj->spawn.start.z + nz;
+    vertices->v.ob[0] = obj->spawn.pos.x + nx;
+    vertices->v.ob[1] = obj->spawn.pos.y + ny;
+    vertices->v.ob[2] = obj->spawn.pos.z + nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.end.x + nx;
-    vertices->v.ob[1] = obj->spawn.end.y + ny;
-    vertices->v.ob[2] = obj->spawn.end.z + nz;
+    vertices->v.ob[0] = obj->spawn.rot.x + nx;
+    vertices->v.ob[1] = obj->spawn.rot.y + ny;
+    vertices->v.ob[2] = obj->spawn.rot.z + nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     return result;
@@ -609,7 +582,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         emitter3->flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        obj->spawn.brightness = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
+        obj->spawn.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
         state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * D_800BE9A4);
     }
     return 1;
@@ -713,12 +686,12 @@ s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
     center.y = actor->y + halfHeight;
     center.z = actor->z;
     scale = radius / halfHeight;
-    start.x = obj->spawn.start.x;
-    start.y = (obj->spawn.start.y - center.y) * scale + center.y;
-    start.z = obj->spawn.start.z;
-    endX = obj->spawn.end.x;
-    endY = (obj->spawn.end.y - center.y) * scale + center.y;
-    endZ = obj->spawn.end.z;
+    start.x = obj->spawn.pos.x;
+    start.y = (obj->spawn.pos.y - center.y) * scale + center.y;
+    start.z = obj->spawn.pos.z;
+    endX = obj->spawn.rot.x;
+    endY = (obj->spawn.rot.y - center.y) * scale + center.y;
+    endZ = obj->spawn.rot.z;
     dir.x = endX - start.x;
     dir.y = endY - start.y;
     dir.z = endZ - start.z;
@@ -790,30 +763,30 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     burst.unk5C = 0.6980000138f;
     burst.unk60 = -0.4450000226f;
     burst.unk64 = 0.4410000145f;
-    burst.pos = obj->spawn.start;
-    burst.dir = obj->spawn.unk34;
+    burst.pos = obj->spawn.pos;
+    burst.dir = obj->spawn.scale;
     burst.triangle = state->triangle0;
     func_1514FBFC(&burst, obj->unkC, obj->unk1);
-    burst.pos = obj->spawn.end;
-    burst.dir.x = -obj->spawn.unk34.x;
-    burst.dir.y = -obj->spawn.unk34.y;
-    burst.dir.z = -obj->spawn.unk34.z;
+    burst.pos = obj->spawn.rot;
+    burst.dir.x = -obj->spawn.scale.x;
+    burst.dir.y = -obj->spawn.scale.y;
+    burst.dir.z = -obj->spawn.scale.z;
     burst.triangle = state->triangle1;
     func_1514FBFC(&burst, obj->unkC, obj->unk1);
-    pos[0] = obj->spawn.start.x;
-    pos[1] = obj->spawn.start.y;
-    pos[2] = obj->spawn.start.z;
+    pos[0] = obj->spawn.pos.x;
+    pos[1] = obj->spawn.pos.y;
+    pos[2] = obj->spawn.pos.z;
     params602C0.a = 3;
     params602C0.b = -1;
     params602C0.c = func_150ADA20() % 9U + 17;
     params602C0.d = 0;
     func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
-    pos[0] = obj->spawn.end.x;
-    pos[1] = obj->spawn.end.y;
-    pos[2] = obj->spawn.end.z;
+    pos[0] = obj->spawn.rot.x;
+    pos[1] = obj->spawn.rot.y;
+    pos[2] = obj->spawn.rot.z;
     func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.start, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.end, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     if (actor != NULL) {
         func_15164F0C(2, actor->player->playerIndex, 0, obj->unkC, obj->unk1);
         params8868.a = 1;
@@ -826,8 +799,8 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     if (actor != NULL) {
         func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.start.x, obj->spawn.start.y, obj->spawn.start.z, 2000, 2200);
-    func_1000FA64(0x2F6, obj->spawn.end.x, obj->spawn.end.y, obj->spawn.end.z, 0x7FFF, 2200, 2000, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
+    func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
     func_1516972C((struct102 *)obj);
 }
 
@@ -878,45 +851,45 @@ typedef struct SightExtension {
 SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;
     SightExtensionParams params;
-    SightSpawnDesc desc;
+    ParticleDef desc;
     SightBeamObject *ownerCopy; // matching: copied to the stack before the memcpy below
 
-    desc.start = *start;
-    desc.end = *end;
+    desc.pos = *start;
+    desc.rot = *end;
     ownerCopy = owner;
     params.unk00 = params.unk04 = 30.10000038f;
     params.unk08 = params.unk0C = 40.0f;
     params.unk18 = 1.0f;
     params.unk10 = 0.0f;
     params.unk14 = 0.0f;
-    desc.kind = 0x15;
-    desc.flags = 0x3403;
+    desc.texture = 0x15;
+    desc.renderModes = 0x3403;
     desc.lifetime = 300;
-    desc.callback0 = 0;
-    desc.callback1 = 0;
-    desc.red = red;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
+    desc.rgba[0] = red;
     params.unk1C = 0.3000000119f;
-    desc.green = green;
-    desc.blue = blue;
-    desc.alpha = 0xFF;
-    desc.unk14 = 0.0f;
+    desc.rgba[1] = green;
+    desc.rgba[2] = blue;
+    desc.rgba[3] = 0xFF;
     desc.width = 0.0f;
-    desc.unk34.x = 1.0f;
-    desc.unk34.y = 1.0f;
-    desc.unk34.z = 1.0f;
-    desc.options = (zoneMasked ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
+    desc.height = 0.0f;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
+    desc.flags = (zoneMasked ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
     desc.unk45 = 0xFF;
-    desc.brightness = 0xFF;
+    desc.unk44 = 0xFF;
     desc.unk46 = 0;
     desc.unk47 = 6;
-    desc.mode = 3;
+    desc.type = 3;
     params.unk54 = 0;
     params.unk55 = 0;
     params.unk56 = 0;
     params.unk57 = 0;
     params.unk48 = 1.0f;
     params.unk58 = 0;
-    desc.zone = zone;
+    desc.unk48 = zone;
     params.unk20 = 9.999999975e-07f;
     effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
     if (effect != NULL) {

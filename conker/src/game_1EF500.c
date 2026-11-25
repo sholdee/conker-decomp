@@ -4,10 +4,7 @@
 #include "functions.h"
 #undef func_10010F30
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
@@ -22,7 +19,7 @@ typedef struct {
 } GameStruct151C2050State;
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
-void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
+void func_151C2050(struct127 *obj, vertex *pos, vertex *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
     Camera *camera;
@@ -62,11 +59,11 @@ void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 dist
 typedef struct Game1F1F60Hit {
     /* 0x00 */ void *actor;
     /* 0x04 */ f32 dist;
-    /* 0x08 */ Vec3f hit;
-    /* 0x14 */ Vec3f normal;
-    /* 0x20 */ Vec3f point;
-    /* 0x2C */ Vec3f start;
-    /* 0x38 */ Vec3f end; /* the ray direction */
+    /* 0x08 */ vertex hit;
+    /* 0x14 */ vertex normal;
+    /* 0x20 */ vertex point;
+    /* 0x2C */ vertex start;
+    /* 0x38 */ vertex end; /* the ray direction */
     /* 0x44 */ s16 surface[9];
     /* 0x56 */ s16 field_56;
     /* 0x58 */ s8 field_58;
@@ -81,9 +78,9 @@ typedef struct Game1F1F60Hit {
 typedef struct Game1EF500TrailExt {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ Vec3f velocity;
-    /* 0x10 */ Vec3f accel; /* eases toward drift each frame; also the length of the drawn tail */
-    /* 0x1C */ Vec3f drift;
+    /* 0x04 */ vertex velocity;
+    /* 0x10 */ vertex accel; /* eases toward drift each frame; also the length of the drawn tail */
+    /* 0x1C */ vertex drift;
     /* 0x28 */ Game1F1F60Hit path;
     /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
     /* 0x90 */ struct127 *owner;
@@ -117,7 +114,7 @@ typedef struct {
     /* 0x00D */ u8 padD[0x1F];
     /* 0x02C */ f32 width;
     /* 0x030 */ u8 pad30[4];
-    /* 0x034 */ Vec3f position;
+    /* 0x034 */ vertex position;
     /* 0x040 */ u8 pad40[0x1C];
     /* 0x05C */ u8 alpha;
     /* 0x05D */ u8 pad5D[0x63];
@@ -129,7 +126,7 @@ typedef struct {
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
 /* Signature of the hook in D_800E0940: (hit position, index of the WorldObject that was hit). */
-typedef void (*TrailHitCallback)(Vec3f *, s32);
+typedef void (*TrailHitCallback)(vertex *, s32);
 
 extern TrailExpireHandler D_8008FBD0[];
 
@@ -153,7 +150,7 @@ typedef struct Game1EF500TrailSpawn {
     /* 0x13 */ u8 field13;
     /* 0x14 */ f32 field14;
     /* 0x18 */ f32 field18;
-    /* 0x1C */ Vec3f position;
+    /* 0x1C */ vertex position;
     /* 0x28 */ f32 field28[6];
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 field44;
@@ -175,9 +172,9 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151D5B6C(Vec3f *, Vec3f *, struct127 *, s8, s32);
-s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
-                  u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
+s32 func_151D5B6C(vertex *, vertex *, struct127 *, s8, s32);
+s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, vertex *arg2, vertex *arg3, f32 *arg4, f32 arg5,
+                  u8 arg6, vertex *arg7, vertex *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
                   u8 arg14, u8 arg15, s32 arg16, u8 arg17);
 
 /*
@@ -185,7 +182,7 @@ s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *
  * sets up its path and runs its first update of dt. Returns NULL if it could not be placed or
  * if that first update already ended it.
  */
-Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+Game1EF500Trail *func_151C229C(vertex *origin, vertex *direction, vertex *altOrigin, vertex *altDirection,
                                u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
                                f32 driftSpeed, f32 arg10, u8 arg11, struct127 *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
@@ -193,13 +190,13 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
     Game1EF500Trail *result;
     Game1EF500TrailSpawn spawn;
     Game1EF500TrailExt ext;
-    Vec3f sourceDir;
+    vertex sourceDir;
     u8 useSource;
-    Vec3f targetDir;
+    vertex targetDir;
     u8 useTarget;
     s32 unused; // matching: unused stack slot in the original frame
-    Vec3f *from;
-    Vec3f *dir;
+    vertex *from;
+    vertex *dir;
 
     useSource = FALSE;
     useTarget = altNormalized && altDirection != NULL;
@@ -379,7 +376,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
 }
 
 void func_151D5D60(u8 **, s16, s32, void **, u8 *);
-Vec3f *func_15144B34(s32);
+vertex *func_15144B34(s32);
 
 /*
  * Builds the projectile's tail for view index: a quad from its position back along accel, widened
@@ -387,18 +384,18 @@ Vec3f *func_15144B34(s32);
  * vertices, or NULL if no vertex buffer was available.
  */
 Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
-    Vec3f start;
-    Vec3f end;
+    vertex start;
+    vertex end;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
-    Vec3f mid;
+    vertex mid;
     f32 unusedX, unusedY; // matching: unused locals that still take stack slots
     Game1EF500TrailExt *ext;
     f32 lengthSq;
     f32 scale;
     Vtx *vertices;
     Vtx *result;
-    Vec3f *eye;
+    vertex *eye;
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
@@ -495,10 +492,10 @@ s32 func_151C2E94(struct127 *obj, struct127 *self) {
     return TRUE;
 }
 
-s32 func_151D4DAC(void *, struct127 *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
+s32 func_151D4DAC(void *, struct127 *, vertex *, vertex *, Game1F1F60Hit *, s32, vertex *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 func_151C2EF0(void *actor, struct127 *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 func_151C2EF0(void *actor, struct127 *owner, Game1EF500Trail *trail, vertex *hitPos, vertex *hitPoint,
                   Game1F1F60Hit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
                          trail->unkC, trail->unk1);
@@ -506,7 +503,7 @@ s32 func_151C2EF0(void *actor, struct127 *owner, Game1EF500Trail *trail, Vec3f *
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
-void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
+void func_15102920(f32, s32, s16 *, vertex *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(void *, u8, s32);
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -521,7 +518,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
+    /* 0x08 */ vertex position;
     /* 0x14 */ f32 sizeBase;
     /* 0x18 */ f32 sizeRange;
     /* 0x1C */ f32 unk1C;
@@ -643,53 +640,10 @@ void func_151C2F48(Game1EF500Trail *trail) {
     }
 }
 
-/* Particle descriptor passed to func_15130280 (0x70 bytes, as ParticleDesc in game_1228D0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleDesc; /* 0x70 */
-
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
-void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
+void func_151C329C(vertex *pos, u8 arg1, s32 arg2) {
     BurstConfig burst;
     ParticleDesc particle;
     Header header;
@@ -748,43 +702,43 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.unk72 = -1;
     burst.unk73 = -1;
     func_15152B38(&burst, arg1, arg2);
-    particle.unk1D = 0x2B;
-    particle.unk8 = 0x4403;
+    particle.texture = 0x2B;
+    particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.lifetime = (func_150ADA20() % 7U) + 6;
-    particle.unkC = 0;
-    particle.unk10 = 0;
-    particle.unk14 = 0xFF;
-    particle.unk15 = 0xFF;
-    particle.unk16 = 0xFF;
-    particle.unk17 = 0xFF;
-    particle.unk18 = 0xFF;
-    particle.unk19 = 0xFF;
-    particle.unk1A = 0xFF;
-    particle.unk1B = 0xFF;
-    particle.unk1C = 0xFF;
-    particle.unk28 = particle.unk2C = func_150ADA68() * 196.0f + 106.0f;
+    particle.timer = (func_150ADA20() % 7U) + 6;
+    particle.frame = 0;
+    particle.frameRate = 0;
+    particle.r = 0xFF;
+    particle.g = 0xFF;
+    particle.b = 0xFF;
+    particle.a = 0xFF;
+    particle.r2 = 0xFF;
+    particle.g2 = 0xFF;
+    particle.b2 = 0xFF;
+    particle.alpha = 0xFF;
+    particle.brightness = 0xFF;
+    particle.width = particle.height = func_150ADA68() * 196.0f + 106.0f;
     particle.pos = *pos;
-    particle.unk1E = 3;
-    particle.unk20 = 0x55;
-    particle.unk22 = 1;
-    particle.unk3C.x = 0.0f;
-    particle.unk3C.y = 0.0f;
-    particle.unk3C.z = 0.0f;
+    particle.fadeStart = 3;
+    particle.fadeRate = 0x55;
+    particle.scaleStart = 1;
+    particle.offset.x = 0.0f;
+    particle.offset.y = 0.0f;
+    particle.offset.z = 0.0f;
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
-    particle.unk54 = 0.0f;
-    particle.unk24 = 1.0f;
+    particle.gravity = 0.0f;
+    particle.scaleRate = 1.0f;
     particle.flags = 1 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
                      0x200;
-    particle.unk60 = 6;
-    particle.unk61 = 6;
-    particle.unk62 = -1;
-    particle.unk63 = -1;
-    particle.unk64 = -1;
-    particle.unk65 = 4;
+    particle.primColorMode = 6;
+    particle.envColorMode = 6;
+    particle.updateFunc = -1;
+    particle.deathFunc = -1;
+    particle.drawFunc = -1;
+    particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
     header.unk0 = 3;
     header.unk1 = -1;
@@ -797,7 +751,7 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 /* Smaller variant of func_151C329C. */
-void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
+void func_151C36D8(vertex *pos, u8 arg1, s32 arg2) {
     BurstConfig burst;
     ParticleDesc particle;
     Header header;
@@ -857,43 +811,43 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.unk73 = -1;
     func_15152B38(&burst, arg1, arg2);
 
-    particle.unk1D = 0x2B;
-    particle.unk8 = 0x4403;
+    particle.texture = 0x2B;
+    particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.lifetime = (func_150ADA20() % 5U) + 4;
-    particle.unkC = 0;
-    particle.unk10 = 0;
-    particle.unk14 = 0xFF;
-    particle.unk15 = 0xFF;
-    particle.unk16 = 0xFF;
-    particle.unk17 = 0xFF;
-    particle.unk18 = 0xFF;
-    particle.unk19 = 0xFF;
-    particle.unk1A = 0xFF;
-    particle.unk1B = 0xFF;
-    particle.unk1C = 0xFF;
-    particle.unk28 = particle.unk2C = (func_150ADA68() * 60.0f) + 80.0f;
+    particle.timer = (func_150ADA20() % 5U) + 4;
+    particle.frame = 0;
+    particle.frameRate = 0;
+    particle.r = 0xFF;
+    particle.g = 0xFF;
+    particle.b = 0xFF;
+    particle.a = 0xFF;
+    particle.r2 = 0xFF;
+    particle.g2 = 0xFF;
+    particle.b2 = 0xFF;
+    particle.alpha = 0xFF;
+    particle.brightness = 0xFF;
+    particle.width = particle.height = (func_150ADA68() * 60.0f) + 80.0f;
     particle.pos = *pos;
-    particle.unk1E = 2;
-    particle.unk20 = 0x7F;
-    particle.unk22 = 1;
-    particle.unk3C.x = 0.0f;
-    particle.unk3C.y = 0.0f;
-    particle.unk3C.z = 0.0f;
+    particle.fadeStart = 2;
+    particle.fadeRate = 0x7F;
+    particle.scaleStart = 1;
+    particle.offset.x = 0.0f;
+    particle.offset.y = 0.0f;
+    particle.offset.z = 0.0f;
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
-    particle.unk54 = 0.0f;
-    particle.unk24 = 1.0f;
+    particle.gravity = 0.0f;
+    particle.scaleRate = 1.0f;
     particle.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | (((func_150ADA20() & 1) ? 0x80 : 0) | 1) | 0x8000 | 0x4000 |
                      0x200;
-    particle.unk60 = 6;
-    particle.unk61 = 6;
-    particle.unk62 = -1;
-    particle.unk63 = -1;
-    particle.unk64 = -1;
-    particle.unk65 = 4;
+    particle.primColorMode = 6;
+    particle.envColorMode = 6;
+    particle.updateFunc = -1;
+    particle.deathFunc = -1;
+    particle.drawFunc = -1;
+    particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
 
     header.unk0 = 3;
@@ -957,7 +911,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f position;
+    /* 0x38 */ vertex position;
     /* 0x44 */ s16 yawBase;
     /* 0x46 */ s16 pitchBase;
     /* 0x48 */ s16 yawRange;
@@ -1180,7 +1134,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             length = ext->scale * dt;
         }
         if (length != 0.0f) {
-            Vec3f *from = &trail->position;
+            vertex *from = &trail->position;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
@@ -1270,7 +1224,7 @@ typedef struct {
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
-    /* 0x2C */ Vec3f position;
+    /* 0x2C */ vertex position;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;

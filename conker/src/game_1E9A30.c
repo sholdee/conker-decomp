@@ -4,6 +4,7 @@
 #define func_1513D2F0 func_1513D2F0_hdr
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #undef func_1513D2F0
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
                     u8 argA, s32 argB);
@@ -601,7 +602,7 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
     return 1;
 }
 
-/* ParticleDesc.flags (see game_15D730.c) */
+/* ParticleDesc68.flags (see game_15D730.c) */
 #define PARTICLE_LIFETIME   0x1
 #define PARTICLE_GRAVITY    0x2
 #define PARTICLE_MOVE       0x4
@@ -614,14 +615,13 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
 #define PARTICLE_HANDLERS   0x4000
 #define PARTICLE_DRAW_FUNC  0x8000
 
-/* Spawn parameters of a particle: the first 0x66 bytes of game_15D730.c's ParticleDesc
-   (the full 0x70-byte struct moves this file's stack slots). */
-typedef struct {
+/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc68 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
     /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
     /* 0x10 */ s32 frameRate;
     /* 0x14 */ u8 r;
     /* 0x15 */ u8 g;
@@ -632,31 +632,33 @@ typedef struct {
     /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
     /* 0x1E */ s16 fadeStart;
     /* 0x20 */ s16 fadeRate;
     /* 0x22 */ s16 scaleStart;
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 offset;
-    /* 0x48 */ struct17 vel;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
     /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
     /* 0x60 */ u8 primColorMode;
     /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-} ParticleDesc;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+} ParticleDesc68;
 
 /* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
 typedef struct {
     u8 pad0[0x4C];
-    struct17 offset;   /* 0x4C: ParticleDesc.offset, the point the particle moves with */
+    struct17 offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
     u8 pad58[0x50];
     f32 drag;          /* 0xA8: read by func_1513170C */
     u8 padAC[4];
@@ -665,14 +667,14 @@ typedef struct {
 
 s32 func_1513170C(BloodDroplet *particle, struct17 *prevPos);
 
-BloodDroplet *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+BloodDroplet *func_15130374(ParticleDesc68 *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 *velB, f32 time,
                    BloodStrip *strip) {
     BloodDroplet *particle;
     struct127 *owner;
-    ParticleDesc desc;
+    ParticleDesc68 desc;
     f32 drag;
     s32 pad;  // matching: stack slot of the original frame
     ActorRef ownerRef;
@@ -712,21 +714,21 @@ void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 
         desc.brightness = 255;
         desc.timer = (func_150ADA20() % 18U) + 25;
         desc.width = desc.height = (func_150ADA68() * 53.0f) + 49.0f;
-        desc.vel.unk0 = (pointB->unk0 - pointA->unk0) * strip->power;
-        desc.vel.unk4 = (pointB->unk4 - pointA->unk4) * strip->power;
-        desc.vel.unk8 = (pointB->unk8 - pointA->unk8) * strip->power;
-        desc.pos.unk0 = pointA->unk0 - strip->owner->x_position;
-        desc.pos.unk4 = pointA->unk4 - strip->owner->y_position;
-        desc.pos.unk8 = pointA->unk8 - strip->owner->z_position;
-        desc.pos.unk0 += desc.vel.unk0 * time;
-        desc.pos.unk4 += desc.vel.unk4 * time;
-        desc.pos.unk8 += desc.vel.unk8 * time;
+        desc.vel.x = (pointB->unk0 - pointA->unk0) * strip->power;
+        desc.vel.y = (pointB->unk4 - pointA->unk4) * strip->power;
+        desc.vel.z = (pointB->unk8 - pointA->unk8) * strip->power;
+        desc.pos.x = pointA->unk0 - strip->owner->x_position;
+        desc.pos.y = pointA->unk4 - strip->owner->y_position;
+        desc.pos.z = pointA->unk8 - strip->owner->z_position;
+        desc.pos.x += desc.vel.x * time;
+        desc.pos.y += desc.vel.y * time;
+        desc.pos.z += desc.vel.z * time;
         ownerRef.actor = strip->owner;
         ownerRef.uniqueId = strip->owner->unique_id;
         desc.updateFunc = 0x13;
-        desc.offset.unk0 = strip->owner->x_position;
-        desc.offset.unk4 = strip->owner->y_position;
-        desc.offset.unk8 = strip->owner->z_position;
+        desc.offset.x = strip->owner->x_position;
+        desc.offset.y = strip->owner->y_position;
+        desc.offset.z = strip->owner->z_position;
         particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
         if (particle != NULL) {
             memcpy(&particle->drag, &drag, sizeof(drag));
@@ -815,33 +817,6 @@ typedef struct {
     u8 pad59[3];
 } BurstSparkData;
 
-/* Spawn parameters func_151BD828 passes to func_1513D2F0 and func_151407D0. */
-typedef struct {
-    u8 kind;
-    u8 mode;
-    s16 flags;
-    s16 lifetime;
-    u8 pad06[2];
-    s32 field08;
-    s32 field0C;
-    u8 color[4];
-    f32 field14;
-    f32 field18;
-    struct17 field1C;
-    struct17 field28;
-    f32 field34;
-    f32 field38;
-    f32 field3C;
-    s32 field40;
-    u8 field44;
-    u8 field45;
-    u8 field46;
-    u8 field47;
-    s32 field48;
-    u8 field4C;
-    u8 pad4D[0xB];
-} BurstObjectDesc;
-
 /* Shape parameters of a glow (copied to glow+0x110 by func_151407D0). */
 typedef struct {
     f32 field00;
@@ -907,7 +882,7 @@ struct BurstGlow {
     BurstGlowData data;    /* 0x170 */
 };
 
-BurstGlow *func_151407D0(BurstGlowShape *shape, u32 shapeSize, BurstObjectDesc *desc, u8, u8, u8, u8, s8, u8, s32);
+BurstGlow *func_151407D0(BurstGlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
 void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
@@ -927,7 +902,7 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
         memcpy(data, &burst, sizeof(burst));
         {
             BurstSparkData spark;
-            BurstObjectDesc sparkEffect;
+            ParticleDef sparkEffect;
 
             spark.flags = 0;
             spark.field54 = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -940,41 +915,41 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
             spark.field24 = 0.0f;
             spark.field28 = 0.0f;
             spark.field38 = 0.0f;
-            sparkEffect.field14 = 0.0f;
-            sparkEffect.field18 = 0.0f;
+            sparkEffect.width = 0.0f;
+            sparkEffect.height = 0.0f;
             spark.field3C = 0.0f;
             spark.field48 = 1.0f;
             spark.field40 = 1.0f;
             spark.field4C = 1.0f;
             spark.field44 = 1.0f;
             spark.burst = effect;
-            sparkEffect.kind = 0x5F;
-            sparkEffect.mode = 8;
-            sparkEffect.flags = 0x2203;
+            sparkEffect.texture = 0x5F;
+            sparkEffect.type = 8;
+            sparkEffect.renderModes = 0x2203;
             sparkEffect.lifetime = 300;
-            sparkEffect.field08 = 0;
-            sparkEffect.field0C = 0;
-            sparkEffect.color[0] = 0xFF;
-            sparkEffect.color[1] = 0xFF;
-            sparkEffect.color[2] = 0xFF;
-            sparkEffect.color[3] = 0xFF;
+            sparkEffect.frame = 0;
+            sparkEffect.frameSpeed = 0;
+            sparkEffect.rgba[0] = 0xFF;
+            sparkEffect.rgba[1] = 0xFF;
+            sparkEffect.rgba[2] = 0xFF;
+            sparkEffect.rgba[3] = 0xFF;
             spark.field14 = 0.1042563f;
             spark.field20 = 0.5197371f;
             spark.field1C = 0.34404588f;
             spark.field2C = 160.0f;
             spark.field30 = 95.0f;
             spark.field34 = 207.5f;
-            sparkEffect.field1C = *(struct17 *)&D_800A5480;
-            sparkEffect.field28 = *(struct17 *)&D_800A5480;
-            sparkEffect.field34 = 1.0f;
-            sparkEffect.field38 = 1.0f;
-            sparkEffect.field3C = 1.0f;
-            sparkEffect.field40 = 0x40EC0000;
-            sparkEffect.field44 = 0;
-            sparkEffect.field45 = 0xFF;
-            sparkEffect.field46 = 0;
-            sparkEffect.field47 = 7;
-            sparkEffect.field48 = 0;
+            sparkEffect.pos = *(vertex *)&D_800A5480;
+            sparkEffect.rot = *(vertex *)&D_800A5480;
+            sparkEffect.scale.x = 1.0f;
+            sparkEffect.scale.y = 1.0f;
+            sparkEffect.scale.z = 1.0f;
+            sparkEffect.flags = 0x40EC0000;
+            sparkEffect.unk44 = 0;
+            sparkEffect.unk45 = 0xFF;
+            sparkEffect.unk46 = 0;
+            sparkEffect.unk47 = 7;
+            sparkEffect.unk48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = func_1513D2F0(&sparkEffect, &D_800A4AA0, 0, 0x25, 0, 0x1D,
                     ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
@@ -985,7 +960,7 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
         }
         {
             BurstGlowShape shape;
-            BurstObjectDesc glowEffect;
+            ParticleDef glowEffect;
             BurstGlowData glow;
 
             glow.field00 = 0;
@@ -1022,30 +997,30 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
             shape.field57 = 0;
             shape.field58 = 0xF;
             shape.field59 = -1;
-            glowEffect.kind = 0x60;
-            glowEffect.mode = 3;
-            glowEffect.flags = 0x2203;
+            glowEffect.texture = 0x60;
+            glowEffect.type = 3;
+            glowEffect.renderModes = 0x2203;
             glowEffect.lifetime = 300;
-            glowEffect.field08 = 0;
-            glowEffect.field0C = 0;
-            glowEffect.color[0] = 0xFF;
-            glowEffect.color[1] = 0xFF;
-            glowEffect.color[2] = 0xFF;
-            glowEffect.color[3] = 0xFF;
-            glowEffect.field14 = 100.0f;
-            glowEffect.field18 = 100.0f;
-            glowEffect.field1C = *(struct17 *)&D_800A5480;
-            glowEffect.field28 = *(struct17 *)&D_800A5480;
-            glowEffect.field34 = 1.0f;
-            glowEffect.field38 = 1.0f;
-            glowEffect.field3C = 1.0f;
-            glowEffect.field40 = 0xCD2002;
-            glowEffect.field44 = 0xFF;
-            glowEffect.field45 = 0xFF;
-            glowEffect.field46 = 0;
-            glowEffect.field47 = 7;
-            glowEffect.field48 = 0;
-            glowEffect.field4C = 0xFF;
+            glowEffect.frame = 0;
+            glowEffect.frameSpeed = 0;
+            glowEffect.rgba[0] = 0xFF;
+            glowEffect.rgba[1] = 0xFF;
+            glowEffect.rgba[2] = 0xFF;
+            glowEffect.rgba[3] = 0xFF;
+            glowEffect.width = 100.0f;
+            glowEffect.height = 100.0f;
+            glowEffect.pos = *(vertex *)&D_800A5480;
+            glowEffect.rot = *(vertex *)&D_800A5480;
+            glowEffect.scale.x = 1.0f;
+            glowEffect.scale.y = 1.0f;
+            glowEffect.scale.z = 1.0f;
+            glowEffect.flags = 0xCD2002;
+            glowEffect.unk44 = 0xFF;
+            glowEffect.unk45 = 0xFF;
+            glowEffect.unk46 = 0;
+            glowEffect.unk47 = 7;
+            glowEffect.unk48 = 0;
+            glowEffect.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
                 data->glows[glow.index] = func_151407D0(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
                 if (data->glows[glow.index] != NULL) {

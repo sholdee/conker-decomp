@@ -15,6 +15,7 @@
 #define D_800D9AA0 D_800D9AA0_header
 #define D_800E0900 D_800E0900_header
 #include "variables.h"
+#include "effects.h"
 #undef D_800D3098
 #undef D_800D9A20
 #undef D_800D9A24
@@ -181,38 +182,6 @@ start:
 }
 
 typedef struct {
-    u8 unk00;
-    u8 unk01;
-    s16 unk02;
-    s16 unk04;
-    u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 posX;
-    f32 posY;
-    f32 posZ;
-    f32 endX;
-    f32 endY;
-    f32 endZ;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 pad4C[0xC];
-} Struct54_150130B4;
-
-typedef struct {
     f32 unk00;
     f32 unk04;
     f32 unk08;
@@ -252,7 +221,7 @@ extern WorldObject *func_151149AC(u8);
 /** Spawns the particle emitter a level object describes; unk1C selects the kind of emitter. */
 s32 func_150130B4(LevelObject *obj) {
     StructAC_150130B4 emit;
-    Struct54_150130B4 spawn;
+    ParticleDef spawn;
     s32 kind;
     s32 index;
     u8 onGround;
@@ -263,14 +232,14 @@ s32 func_150130B4(LevelObject *obj) {
     kind = obj->unk1C;
     // matching: the labels split basic blocks, which as1 schedules separately
 start:
-    spawn.posX = obj->x;
-    spawn.posY = obj->y;
-    spawn.posZ = obj->z;
+    spawn.pos.x = obj->x;
+    spawn.pos.y = obj->y;
+    spawn.pos.z = obj->z;
     func_150A8050(mtx, obj->rotX, obj->rotY, 0.0f);
-    func_150A7960(mtx[0], 0.0f, 0.0f, -500.0f, &spawn.endX, &spawn.endY, &spawn.endZ);
-    spawn.endX += spawn.posX;
-    spawn.endY += spawn.posY;
-    spawn.endZ += spawn.posZ;
+    func_150A7960(mtx[0], 0.0f, 0.0f, -500.0f, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+    spawn.rot.x += spawn.pos.x;
+    spawn.rot.y += spawn.pos.y;
+    spawn.rot.z += spawn.pos.z;
     // matching: the typedef-only block scope changes how as1 schedules these stores
     {
         typedef s32 PadT;
@@ -283,25 +252,25 @@ start:
     }
     emit.unk1C = (obj->unk20 & 0xFF) * 0.003921568859f;
     index = (obj->unk18 >> 24) & 0xFF;
-    spawn.unk00 = D_8009658C[index];
-    spawn.unk02 = D_800965A0[index] + 3;
-    spawn.unk04 = 300;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk10 = obj->unk18 & 0xFF;
-    spawn.unk11 = (obj->unk18 >> 8) & 0xFF;
-    spawn.unk12 = (obj->unk18 >> 16) & 0xFF;
-    spawn.unk13 = 0xFF;
-    spawn.unk14 = 0.0f;
-    spawn.unk18 = 0.0f;
-    spawn.unk34 = 1.0f;
-    spawn.unk38 = 1.0f;
-    spawn.unk3C = 1.0f;
+    spawn.texture = D_8009658C[index];
+    spawn.renderModes = D_800965A0[index] + 3;
+    spawn.lifetime = 300;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = obj->unk18 & 0xFF;
+    spawn.rgba[1] = (obj->unk18 >> 8) & 0xFF;
+    spawn.rgba[2] = (obj->unk18 >> 16) & 0xFF;
+    spawn.rgba[3] = 0xFF;
+    spawn.width = 0.0f;
+    spawn.height = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
     spawn.unk45 = 0xFF;
     spawn.unk44 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
-    spawn.unk01 = 3;
+    spawn.type = 3;
     emit.unk54 = 0;
     emit.unk55 = 0;
     emit.unk56 = 0;
@@ -313,13 +282,13 @@ start:
     if (onGround) {
 ground:
         func_1510F800(0);
-        spawn.unk48 = func_1510FD20((s32)spawn.posX, (s32)spawn.posZ);
+        spawn.unk48 = func_1510FD20((s32)spawn.pos.x, (s32)spawn.pos.z);
     } else {
         spawn.unk48 = 0;
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
     }
     emit.unk58 = 0;
-    spawn.unk40 = 0x2006 | (((obj->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
+    spawn.flags = 0x2006 | (((obj->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
     switch (kind) {
     case 8: {
         f32 extra[4];
@@ -392,7 +361,7 @@ ground:
     }
     case 19:
         emit.unk58 = 0x11;
-        spawn.unk40 &= ~2;
+        spawn.flags &= ~2;
         func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     default:

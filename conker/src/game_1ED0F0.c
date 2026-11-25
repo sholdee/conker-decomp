@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 
@@ -430,49 +431,10 @@ typedef struct {
     /* 0x18 */ Bullet *bullet;
 } SoundEmitter;
 
-/* Object spawn parameters for func_15132A4C. */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[6];
-} SpawnDesc;
-
 f32 func_15144AA8(u8, Camera *);
 void func_15145740(struct127 *, vertex *, void *, s32, f32);
 s32 func_151D5B6C(vertex *, vertex *, struct127 *, s32, IgnoreList *);
-Bullet *func_15132A4C(SpawnDesc *, s32, s32, s32, u8, s32);
+Bullet *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15145974(vertex *, f32 *, f32 *);
 FollowFx *func_151B8908(Bullet *);
 Bullet88 *func_151B8400(Bullet *);
@@ -505,7 +467,7 @@ void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 
     f32 angle;
     u8 scratch[0x14];
     BulletState state;
-    SpawnDesc desc;
+    ParticleSpawn desc;
     void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
     BulletState *bulletState;
     Header header;
@@ -586,22 +548,22 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         state.trail = NULL;
         state.ray = ray;
         state.follow = NULL;
-        desc.unk00 = 1.0f;
-        desc.unk04 = 1.0f;
-        desc.unk08 = 0.04700000212f;
-        desc.unk0C = 0.04700000212f;
-        desc.unk10 = 0.0f;
-        desc.unk14 = 0.0f;
-        desc.unk18 = 0.0f;
-        desc.unk1C = 1.0f;
-        desc.unk20 = 1.0f;
-        desc.unk24 = 1.0f;
+        desc.radius = 1.0f;
+        desc.elasticity = 1.0f;
+        desc.sizeXZ = 0.04700000212f;
+        desc.sizeY = 0.04700000212f;
+        desc.rot.x = 0.0f;
+        desc.rot.y = 0.0f;
+        desc.rot.z = 0.0f;
+        desc.scale.x = 1.0f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         desc.pos = pos;
-        desc.unk4C = 0.0f;
-        desc.unk50 = 0x500920;
-        desc.unk54 = 300;
-        desc.unk56 = 47;
-        desc.unk58 = 1;
+        desc.gravity = 0.0f;
+        desc.flags = 0x500920;
+        desc.lifetime = 300;
+        desc.model = 47;
+        desc.variant = 1;
         state.owner = shooter;
         state.ignore = *ignore;
         state.passTimer = passDist * 0.004999999888f;
@@ -612,28 +574,28 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         desc.vel.x = state.ray.dir.x * state.speed;
         desc.vel.y = state.ray.dir.y * state.speed;
         desc.vel.z = state.ray.dir.z * state.speed;
-        func_15145974(&desc.vel, &desc.unk14, &desc.unk10);
-        desc.unk18 = 0.0f;
-        desc.unk40.x = 0.0f;
-        desc.unk40.y = 0.0f;
-        desc.unk40.z = 0.0f;
+        func_15145974(&desc.vel, &desc.rot.y, &desc.rot.x);
+        desc.rot.z = 0.0f;
+        desc.rotVel.x = 0.0f;
+        desc.rotVel.y = 0.0f;
+        desc.rotVel.z = 0.0f;
         state.lifetime = state.ray.dist * 0.004999999888f;
         state.impactType = impactType;
         desc.unk5C = 0;
-        desc.unk60 = 255;
-        desc.unk61 = 10;
-        desc.unk62 = 0;
-        desc.unk63 = 0;
-        desc.unk64 = 0;
-        desc.unk65 = 0;
-        desc.unk66 = 0;
-        desc.unk67 = 0;
-        desc.unk68 = 2;
+        desc.alpha = 255;
+        desc.updateFn = 10;
+        desc.update2Fn = 0;
+        desc.floorHitFn = 0;
+        desc.floorType3Fn = 0;
+        desc.wallHitFn = 0;
+        desc.destroyFn = 0;
+        desc.squashFn = 0;
+        desc.matrixFn = 2;
         desc.unk6A = 2;
-        desc.unk6C = 0;
-        desc.unk70 = 0;
-        desc.unk72 = 1;
-        desc.unk74 = 255;
+        desc.owner = 0;
+        desc.ownerId = 0;
+        desc.fadeStart = 1;
+        desc.fadeRate = 255;
         obj = func_15132A4C(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
         if (obj != NULL) {
             bulletState = &((Bullet *)obj)->state;

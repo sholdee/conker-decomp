@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Direction spread of a burst: func_15143794 takes a random angle from each range (see game_2062D0.c). */
 typedef struct {
@@ -122,49 +123,6 @@ void func_151DC8BC(struct17 *pos, s32 duration, u8 burst, u8 randomColors, u8 ow
 #define PARTICLE_FLIP_S 0x40
 #define PARTICLE_FLIP_T 0x80
 
-/* Spawn parameters of a particle; func_15130280 copies them to the particle (see game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 offset;
-    /* 0x48 */ struct17 vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ u32 flags;      // matching: u32 here (s32 in game_15D730.c) for the or-order of the flip update
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc; /* size 0x70 */
-
 /* Per-particle data of particles with update function 0x16 (ParticleDesc.updateFunc). */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -218,13 +176,13 @@ void func_151DC97C(Emitter *emitter) {
         desc.scaleStart = 120;
         desc.brightness = 0xFF;
         desc.scaleRate = 1.006579f;
-        desc.pos = data->pos;
-        desc.offset.unk0 = 0.0f;
-        desc.offset.unk4 = 0.0f;
-        desc.offset.unk8 = 0.0f;
-        desc.vel.unk0 = 0.0f;
-        desc.vel.unk4 = 0.0f;
-        desc.vel.unk8 = 0.0f;
+        desc.pos = *(vertex *)&data->pos; // TODO(vectors): struct17/vertex mix
+        desc.offset.x = 0.0f;
+        desc.offset.y = 0.0f;
+        desc.offset.z = 0.0f;
+        desc.vel.x = 0.0f;
+        desc.vel.y = 0.0f;
+        desc.vel.z = 0.0f;
         if (data->randomColors == 0) {
             desc.r = 0xEF;
             desc.g = 0xE0;
