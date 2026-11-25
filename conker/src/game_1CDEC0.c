@@ -123,6 +123,7 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     spark.x = x;
     spark.y = y;
     spark.z = z;
+    /* all three fractions come from x in the original */
     // matching: the u8 conversion into these s8 fields fixes the store schedule
     spark.subX = (u8)(s32)(x * 256.0f);
     spark.subZ = (u8)(s32)(x * 256.0f);
