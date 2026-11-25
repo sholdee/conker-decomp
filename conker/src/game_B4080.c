@@ -2,77 +2,100 @@
 #include "functions.h"
 #include "variables.h"
 
+/* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
+typedef struct PathNode {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
+    /* 0x7 */ u8 unk7;  /* id looked up by func_15086D48 */
+    /* 0x8 */ u8 unk8;
+    /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
+    /* 0xE */ u8 type;
+    /* 0xF */ u8 param;
+} PathNode;
+
+/* Camera request passed to func_1512D560 (mode 7). */
+typedef struct CamParams {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ f32 eyeX;
+    /* 0x18 */ f32 eyeY;
+    /* 0x1C */ f32 eyeZ;
+    /* 0x20 */ f32 atX;
+    /* 0x24 */ f32 atY;
+    /* 0x28 */ f32 atZ;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+} CamParams;
+
+/* Per-racer state of the race mode (D_800872A0[]), 0x84 bytes. */
+typedef struct Racer {
+    /* 0x00 */ f32 lateral;       /* 0..1 across the track, see func_15088F30 */
+    /* 0x04 */ f32 lateralTarget;
+    /* 0x08 */ f32 segmentT;      /* spline parameter between nodes[1] and nodes[2] */
+    /* 0x0C */ f32 dirX;
+    /* 0x10 */ f32 dirZ;
+    /* 0x14 */ f32 speed;
+    /* 0x18 */ s32 lapStartTime;
+    /* 0x1C */ s32 raceTime;
+    /* 0x20 */ s32 lastLapTime;
+    /* 0x24 */ s16 nodesPassed;
+    /* 0x26 */ s8 lapLength;      /* nodes per lap */
+    /* 0x27 */ s8 lap;
+    /* 0x28 */ s8 maxLap;
+    /* 0x29 */ s8 rank;
+    /* 0x2A */ s8 finishOrder;    /* 0x7F while still racing */
+    /* 0x2B */ u8 nodes[4];       /* spline control nodes */
+    /* 0x2F */ s8 route;
+    /* 0x30 */ s8 state;
+    /* 0x31 */ s8 actorIndex;     /* index into D_800CC2D0 */
+    /* 0x32 */ s8 prevTicks;
+    /* 0x33 */ s8 ticks;
+    /* 0x34 */ f32 camT;
+    /* 0x38 */ f32 camX;
+    /* 0x3C */ f32 camY;
+    /* 0x40 */ f32 camZ;
+    /* 0x44 */ u8 camNodes[4];
+    /* 0x48 */ u8 unk48;
+    /* 0x49 */ s8 camState;
+    /* 0x4A */ u8 camNode;
+    /* 0x4B */ u8 camNextNode;
+    /* 0x4C */ CamParams cam;
+} Racer;
+
 extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern s8 *D_800D23B0;
 s32 func_1508802C();
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-} B3020Struct;
-
 extern s16 D_80087290;
-extern s16 D_80087294;
-extern B3020Struct *D_800D2350;
-s16 *func_1502B5C8(s32 *, s32, s32, s32);
-s32 func_15085BE8(void);
-void func_15085B70(s32 arg0);
-
-extern u8 D_800D2358;
-extern f32 D_800D2360[];
-extern u8 D_800D237C[];
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-} B3020Struct2;
-s32 func_15085BE8(void);
-
-extern f32 D_800D2360[];
-extern u8 D_800D237C[];
-extern f32 D_8009D9CC;
-extern u8 D_8008729C;
-extern s32 D_800D2354;
+extern PathNode *D_800D2350;
 extern f32 sqrtf(f32);
-f32 func_15086D94(f32, f32, f32, f32, f32);
 u8 func_15085DA8(f32 arg0);
 s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4);
 
 #pragma intrinsic(sqrtf)
 
-f32 func_15086BD0(s32 arg0, s32 arg1) {
-    f32 temp_fa0;
-    f32 temp_fa1;
-    f32 temp_fv1;
-    s16 (*base)[8];
-    u8 *temp_a2;
-    u8 *temp_v1;
+/* Distance between two path nodes, 0 if either is 0xFF. */
+f32 func_15086BD0(s32 a, s32 b) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    PathNode *nodes;
 
-    if ((arg0 == 0xFF) || (arg1 == 0xFF)) {
+    if (a == 0xFF || b == 0xFF) {
         return 0.0f;
     }
-    base = (s16 (*)[8])D_800D2350;
-    temp_v1 = (u8 *)base[arg0];
-    temp_a2 = (u8 *)base[arg1];
-    temp_fv1 = (f32) (*(s16 *)((u8 *)temp_v1 + 0) - *(s16 *)((u8 *)temp_a2 + 0));
-    temp_fa0 = (f32) (*(s16 *)((u8 *)temp_v1 + 2) - *(s16 *)((u8 *)temp_a2 + 2));
-    temp_fa1 = (f32) (*(s16 *)((u8 *)temp_v1 + 4) - *(s16 *)((u8 *)temp_a2 + 4));
-    return sqrtf((temp_fv1 * temp_fv1) + (temp_fa0 * temp_fa0) + (temp_fa1 * temp_fa1));
+    nodes = D_800D2350;
+    dx = nodes[a].x - nodes[b].x;
+    dy = nodes[a].y - nodes[b].y;
+    dz = nodes[a].z - nodes[b].z;
+    return sqrtf(dx * dx + dy * dy + dz * dz);
 }
 
 void func_15086C68(void) {
@@ -80,64 +103,46 @@ void func_15086C68(void) {
 
 extern void func_150A3194(s32, s32, s32, s32, s32);
 
-extern B3020Struct *D_800D2350;
+void func_15086C70(s32 index) {
+    s16 z = D_800D2350[index].z;
 
-void func_15086C70(s32 arg0) {
-    s16 temp = D_800D2350[arg0].unk4;
-    func_150A3194(3, 0xB, D_800D2350[arg0].unk0, D_800D2350[arg0].unk2, temp);
+    func_150A3194(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
 }
 
-extern s16 D_80087290;
-
-s32 func_15086CBC(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    if (arg0 < 0) {
-        goto fail;
-    }
-
-    if (arg0 >= D_80087290) {
-fail:
+/* Writes the position of path node `index` to *x, *y, *z; returns 0 if out of range. */
+s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z) {
+    if (index < 0 || index >= D_80087290) {
         return 0;
     }
-
-    *arg1 = D_800D2350[arg0].unk0;
-    *arg2 = D_800D2350[arg0].unk2;
-    *arg3 = D_800D2350[arg0].unk4;
+    *x = D_800D2350[index].x;
+    *y = D_800D2350[index].y;
+    *z = D_800D2350[index].z;
     return 1;
 }
 
-s32 func_15086D48(s32 arg0) {
+/* Returns the index of the path node whose unk7 equals `id`, or 0xFF. */
+s32 func_15086D48(s32 id) {
     s32 i;
 
     for (i = 0; i < D_80087290; i++) {
-        if (arg0 == ((u8 *)D_800D2350)[i * 16 + 7]) {
+        if (id == D_800D2350[i].unk7) {
             return i;
         }
     }
     return 0xFF;
 }
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 links[5];
-    u8 unkE;
-    u8 unkF;
-} Node15086D94;
-
-f32 func_15086D94(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
-    s32 p0;
-    s32 p1;
-    s32 p2;
-    s32 p3;
+/*
+ * Casts a ray from (x, z) along (dx, dz) against the wall edges (type 1 node pairs) of the
+ * height band containing y. Returns the distance to the hit, or -1 if no edge is crossed.
+ */
+f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
+    s32 pad[4]; // matching: unused stack space in the original frame
     u8 id;
     s32 i;
     s32 j;
-    Node15086D94 *n1;
-    Node15086D94 *n2;
+    PathNode *n1;
+    PathNode *n2;
     f32 a;
     f32 b;
     f32 c;
@@ -147,21 +152,21 @@ f32 func_15086D94(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
     f32 best;
     u8 link;
 
-    id = func_15085DA8(arg1);
+    id = func_15085DA8(y);
     best = 100.0f;
     for (i = 0; i < D_80087290; i++) {
-        n1 = (Node15086D94 *)&D_800D2350[i];
-        if (n1->unkE == 1 && n1->unk6 == id) {
+        n1 = &D_800D2350[i];
+        if (n1->type == 1 && n1->layer == id) {
             for (j = 0; j < 5; j++) {
                 link = n1->links[j];
                 if (link != 0xFF && i < link) {
-                    n2 = (Node15086D94 *)&D_800D2350[link];
-                    if (n2->unkE == 1) {
+                    n2 = &D_800D2350[link];
+                    if (n2->type == 1) {
                         a = n2->z - n1->z;
                         b = -(f32)(n2->x - n1->x);
                         c = -((f32)n1->x * a + b * (f32)n1->z);
-                        d1 = arg0 * a + arg2 * b + c;
-                        d2 = (arg0 + arg3) * a + (arg2 + arg4) * b + c;
+                        d1 = x * a + z * b + c;
+                        d2 = (x + dx) * a + (z + dz) * b + c;
                         if ((d2 < 0.0f && d1 >= 0.0f) || (d1 < 0.0f && d2 >= 0.0f)) {
                             if (d2 < 0.0f) {
                                 d2 = -d2;
@@ -174,7 +179,7 @@ f32 func_15086D94(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
                             a = -b;
                             b = c;
                             c = -((f32)n1->x * a + b * (f32)n1->z);
-                            d1 = ((t * arg3) + arg0) * a + ((t * arg4) + arg2) * b + c;
+                            d1 = ((t * dx) + x) * a + ((t * dz) + z) * b + c;
                             d2 = (f32)n2->x * a + b * (f32)n2->z + c;
                             if (((d2 > 0.0f && d1 > 0.0f && d1 <= d2) || (d2 < 0.0f && d1 < 0.0f && d2 <= d1)) && t < best) {
                                 best = t;
@@ -186,61 +191,57 @@ f32 func_15086D94(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
         }
     }
     if (best <= 1.0f) {
-        return sqrtf(arg3 * arg3 + arg4 * arg4) * t;
+        return sqrtf(dx * dx + dz * dz) * t;
     }
     return -1.0f;
 }
 
-extern u8 *D_800872A0;
+extern Racer *D_800872A0;
 extern s8 D_800D23A8;
 extern s32 D_800D2394;
 extern void *allocate_memory(s32, s32, s32, s32);
 u8 func_150888A8(u8, u8, s8);
-void func_15088824();
+void func_15088824(Racer *racer);
 
-typedef struct {
-    u8 pad0[9];
-    u8 unk9[5];
-    u8 unkE;
-    u8 unkF;
-} B3020Bytes;
-
-void func_150870D0(s32 arg0, s32 arg1, s32 arg2)
+/*
+ * Allocates the racers (numRacers racing plus numSpare free slots) and places them on the
+ * path at the node with id `startId`, measuring the lap length on the way.
+ */
+void func_150870D0(s32 startId, s32 numRacers, s32 numSpare)
 {
-  u8 *p;
-  s32 count;
+  Racer *racer;
+  s32 lapLength;
   s32 i;
-  B3020Bytes *e;
-  u8 *q;
+  PathNode *node;
+  s32 pad; // matching: unused stack slot in the original frame
   u8 start;
   u8 best;
   u8 fwd;
   u8 back;
   u8 sel;
   u8 path[3];
-  B3020Struct *new_var;
+  PathNode *startNode;
   u8 idx;
-  D_800872A0 = 0;
-  start = func_15086D48(arg0);
+  D_800872A0 = NULL;
+  start = func_15086D48(startId);
   if (start == 0xFF)
   {
     return;
   }
-  new_var = &D_800D2350[start];
+  startNode = &D_800D2350[start];
   best = D_800D23A8 * 0xFF;
   sel = 0xFF;
-  q = (u8 *) new_var;
-  for (i = 0; i < 5; i++, q++)
+  for (i = 0; i < 5; i++)
   {
-    idx = q[9];
+    idx = startNode->links[i];
     if (idx != 0xFF)
     {
-      e = (B3020Bytes *) (&D_800D2350[idx]);
-      if (e->unkE == 0)
+      node = &D_800D2350[idx];
+      if (node->type == 0)
       {
-        if (((D_800D23A8 == 0) && (e->unkF >= best)) || ((D_800D23A8 != 0) && (e->unkF <= best)))
+        if (((D_800D23A8 == 0) && (node->param >= best)) || ((D_800D23A8 != 0) && (node->param <= best)))
         {
-          best = e->unkF;
+          best = node->param;
           sel = idx;
         }
       }
@@ -258,79 +259,56 @@ void func_150870D0(s32 arg0, s32 arg1, s32 arg2)
   }
   path[1] = sel;
   path[2] = fwd;
-  count = 0;
+  lapLength = 0;
   do
   {
     path[0] = path[1];
     path[1] = path[2];
     path[2] = func_150888A8(path[0], path[1], 0);
-    count++;
+    lapLength++;
   }
   while (start != path[0]);
-  D_800D2399 = arg2;
-  D_800D2398 = arg1;
-  arg1 += arg2;
+  D_800D2399 = numSpare;
+  D_800D2398 = numRacers;
+  numRacers += numSpare;
   D_800D2394 = 0;
-  D_800872A0 = allocate_memory(arg1 * 0x84, 1, 0, 0);
-  for (i = 0; i < arg1; i++)
+  D_800872A0 = allocate_memory(numRacers * sizeof(Racer), 1, 0, 0);
+  for (i = 0; i < numRacers; i++)
   {
-    p = &D_800872A0[i * 0x84];
-    func_15088824(p);
-    p[0x2B] = back;
-    p[0x2C] = start;
-    p[0x2D] = sel;
-    p[0x2E] = fwd;
+    racer = &D_800872A0[i];
+    func_15088824(racer);
+    racer->nodes[0] = back;
+    racer->nodes[1] = start;
+    racer->nodes[2] = sel;
+    racer->nodes[3] = fwd;
     if (i < D_800D2398)
     {
-      p[0x31] = i;
+      racer->actorIndex = i;
     }
-    p[0x30] = i >= D_8008FD90;
-    p[0x26] = count;
+    racer->state = i >= D_8008FD90;
+    racer->lapLength = lapLength;
   }
 
   D_800D239A = 1;
 }
 
-typedef struct Entry15087350 {
-    /* 0x00 */ f32 t;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s8 unk26;
-    /* 0x27 */ s8 unk27;
-    /* 0x28 */ s8 unk28;
-    /* 0x29 */ s8 unk29;
-    /* 0x2A */ s8 unk2A;
-    /* 0x2B */ u8 pad2B[5];
-    /* 0x30 */ s8 unk30;
-    /* 0x31 */ s8 unk31;
-    /* 0x32 */ s8 unk32;
-    /* 0x33 */ s8 unk33;
-    /* 0x34 */ u8 pad34[0x14];
-    /* 0x48 */ u8 unk48;
-    /* 0x49 */ u8 pad49[0x3B];
-} Entry15087350;
-typedef struct { s16 pad[4]; s16 unk8; s16 unkA; s16 unkC; } Vec3s15087350;
 f32 sinf(f32);
 f32 cosf(f32);
 extern f32 D_800CC310;
 extern f32 D_800D239C;
 extern f32 D_800D23A0;
 extern f32 D_800D23A4;
-extern u8 D_800D2390;
-void func_15088F30();
+extern s8 D_800D2390;
+void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
 f32 func_150497E0(f32 *, s32, f32);
 f32 func_150498A4(f32 *, s32, f32, f32 *);
-struct Struct15088A08;
-s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1);
+s32 func_15088A08(Racer *racer, f32 step);
 
-void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
+/*
+ * Per-frame update of racer `index`: steers it along the path to follow its actor, tracks its
+ * speed and race time and, for racer 0, recomputes everyone's rank.
+ */
+void func_15087350(s32 index, s32 arg1, f32 arg2) {
     f32 f;
     f32 g;
     f32 posX;
@@ -347,11 +325,11 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
     f32 xs[4];
     f32 ys[4];
     f32 zs[4];
-    Entry15087350 *p;
+    Racer *racer;
     struct127 *obj;
     s8 iter;
     s8 ok;
-    Entry15087350 copy;
+    Racer copy;
     f32 scale;
     s32 off;
     f32 inv;
@@ -364,23 +342,23 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
     f32 vals[16];
 
     iter = 0;
-    if (D_800872A0 != 0) {
-        p = (Entry15087350 *)(arg0 * 0x84 + (s32)D_800872A0);
-        obj = &D_800CC2D0[p->unk31];
+    if (D_800872A0 != NULL) {
+        racer = &D_800872A0[index];
+        obj = &D_800CC2D0[racer->actorIndex];
         posX = obj->x_position;
         posZ = obj->z_position;
         D_800D2390 = 0;
-        if (p->unk30 == 0) {
-            p->t = 0.5f;
+        if (racer->state == 0) {
+            racer->lateral = 0.5f;
         } else {
-            f = (p->unk4 - p->t) * 0.125f;
+            f = (racer->lateralTarget - racer->lateral) * 0.125f;
             if (f > 0.05999999866f) {
                 f = 0.05999999866f;
             }
             if (f < -0.05999999866f) {
                 f = -0.05999999866f;
             }
-            p->t += f;
+            racer->lateral += f;
         }
         prev = 10000.0f;
         scale = 0.75f;
@@ -388,18 +366,18 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
         do {
             again = 0;
             if (ok) {
-                func_15088F30(p, xs, ys, zs);
+                func_15088F30(racer, xs, ys, zs);
                 dx = xs[2] - xs[1];
                 dz = zs[2] - zs[1];
                 len = sqrtf(dx * dx + dz * dz);
             }
-            f = func_150498A4(xs, 0, p->unk8, &dx);
-            g = func_150498A4(zs, 0, p->unk8, &dz);
+            f = func_150498A4(xs, 0, racer->segmentT, &dx);
+            g = func_150498A4(zs, 0, racer->segmentT, &dz);
             inv = -1.0f / sqrtf(dx * dx + dz * dz);
             dx *= inv;
             dz *= inv;
-            p->unkC = dx;
-            p->unk10 = dz;
+            racer->dirX = dx;
+            racer->dirZ = dz;
             d = -(f * dx + g * dz);
             dist = dx * posX + dz * posZ + d;
             r = dist;
@@ -420,7 +398,7 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
                 if (inv > 0.5f) {
                     inv = 0.5f;
                 }
-                ok = func_15088A08((struct Struct15088A08 *)p, -inv);
+                ok = func_15088A08(racer, -inv);
             }
             iter++;
             if (iter >= 11) {
@@ -428,18 +406,18 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
             }
         } while (again);
         func_15042D78(0x80);
-        p->unk32 = p->unk33;
-        p->unk33 = D_800BE9E4;
+        racer->prevTicks = racer->ticks;
+        racer->ticks = D_800BE9E4;
         adist = (obj->old_x_position * dx + dz * obj->old_z_position + d) - dist;
-        p->unk14 = (adist * 4.0f) / p->unk32;
-        if (p->unk30 != 0) {
-            bcopy(p, &copy, 0x84);
-            func_15088A08((struct Struct15088A08 *)&copy, arg2 + arg2);
+        racer->speed = (adist * 4.0f) / racer->prevTicks;
+        if (racer->state != 0) {
+            bcopy(racer, &copy, sizeof(Racer));
+            func_15088A08(&copy, arg2 + arg2);
             func_15088F30(&copy, xs, ys, zs);
-            D_800D239C = func_150497E0(xs, 0, copy.unk8);
-            D_800D23A0 = func_150497E0(ys, 0, copy.unk8);
-            D_800D23A4 = func_150497E0(zs, 0, copy.unk8);
-            if (arg0 < D_800D2398) {
+            D_800D239C = func_150497E0(xs, 0, copy.segmentT);
+            D_800D23A0 = func_150497E0(ys, 0, copy.segmentT);
+            D_800D23A4 = func_150497E0(zs, 0, copy.segmentT);
+            if (index < D_800D2398) {
                 if (arg1 == 0) {
                     f = D_800CC310 * 0.01745;
                     D_800D239C = sinf(f) * 300.0f + obj->x_position;
@@ -450,51 +428,52 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
                 ((s16 **)D_800D2104)[obj->unk13F][5] = D_800D23A0;
                 ((s16 **)D_800D2104)[obj->unk13F][6] = D_800D23A4;
                 obj->unk44 = arg1;
-                if (*(s8 *)&D_800D2390 == 1) {
+                if (D_800D2390 == 1) {
                     obj->y_velocity = 75.0f;
-                } else if (*(s8 *)&D_800D2390 == 2) {
+                } else if (D_800D2390 == 2) {
                     obj->y_velocity = 55.0f;
-                } else if (*(s8 *)&D_800D2390 == 3) {
+                } else if (D_800D2390 == 3) {
                     obj->y_velocity = 65.0f;
                 }
                 obj->unk21E = 0;
             lbl:;
             }
         } else {
-            p->t = 0.0f;
-            func_15088F30(p, xs, ys, zs);
-            f = func_150497E0(xs, 0, p->unk8);
-            g = func_150497E0(zs, 0, p->unk8);
-            p->t = 1.0f;
-            func_15088F30(p, xs, ys, zs);
-            dx = func_150497E0(xs, 0, p->unk8) - f;
-            dz = func_150497E0(zs, 0, p->unk8) - g;
+            racer->lateral = 0.0f;
+            func_15088F30(racer, xs, ys, zs);
+            f = func_150497E0(xs, 0, racer->segmentT);
+            g = func_150497E0(zs, 0, racer->segmentT);
+            racer->lateral = 1.0f;
+            func_15088F30(racer, xs, ys, zs);
+            dx = func_150497E0(xs, 0, racer->segmentT) - f;
+            dz = func_150497E0(zs, 0, racer->segmentT) - g;
             dist = sqrtf(dx * dx + dz * dz);
             if (dist > 1.0f) {
                 dist = 1.0f / dist;
                 dx *= dist;
                 dz *= dist;
-                p->t = ((dx * posX + dz * posZ) - (dx * f + dz * g)) * dist;
+                racer->lateral = ((dx * posX + dz * posZ) - (dx * f + dz * g)) * dist;
             } else {
-                p->t = 0.0f;
+                racer->lateral = 0.0f;
             }
         }
-        p->unk48 = arg1;
+        racer->unk48 = arg1;
         D_800D23A9 = 1;
-        if (p->unk30 == 0 && p->unk48 > 0 && !(D_800D18A0 & (1 << p->unk31))) {
-            p->unk1C += D_800BE9E4;
+        if (racer->state == 0 && racer->unk48 > 0 && !(D_800D18A0 & (1 << racer->actorIndex))) {
+            racer->raceTime += D_800BE9E4;
         }
-        if (p->unk30 >= 2 && obj->unk31C->unk84 == 0) {
-            func_1508802C(p, obj, 0xD);
+        if (racer->state >= 2 && obj->unk31C->unk84 == 0) {
+            func_1508802C(racer, obj, 13);
         }
-        if (arg0 * 0x84 == 0) {
+        if (index == 0) {
             for (i = 0; i < D_800D2398; i++) {
                 order[i] = i;
-                vals[i] = ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk8 + ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk24;
-                if (((Entry15087350 *)(D_800872A0 + i * 0x84))->unk2A != 0x7F) {
-                    vals[i] += 30000.0f - ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk2A * 1000.0f;
+                // matching: (D_800872A0 + i)-> rather than D_800872A0[i] keeps IDO's FP register order
+                vals[i] = (D_800872A0 + i)->segmentT + (D_800872A0 + i)->nodesPassed;
+                if ((D_800872A0 + i)->finishOrder != 0x7F) {
+                    vals[i] += 30000.0f - (D_800872A0 + i)->finishOrder * 1000.0f;
                 }
-                j = ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk31;
+                j = (D_800872A0 + i)->actorIndex;
                 if (D_800D18A0 & (1 << j)) {
                     vals[i] -= 10000.0f;
                 }
@@ -514,323 +493,245 @@ void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
                 }
             } while (!sorted);
             for (i = 0; i < D_800D2398; i++) {
-                ((Entry15087350 *)D_800872A0)[order[i]].unk29 = i + 1;
+                D_800872A0[order[i]].rank = i + 1;
             }
         }
     }
 }
 
-extern u8 *D_800872A0;
-void func_150891E8(s8 *, struct127 *);
-void func_150896EC();
+void func_150891E8(Racer *racer, struct127 *obj);
+void func_150896EC(Racer *racer, struct127 *obj, s32 leave);
 
+/* Runs the race cameras of every racer whose actor has a camera. */
 void func_15087CC0(void) {
-    s8 *p;
+    Racer *racer;
     struct127 *obj;
     s32 i;
 
     D_800D23A9 = 0;
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return;
     }
     for (i = 0; i < D_800D2398; i++) {
-        p = (s8 *)(i * 0x84 + (s32)D_800872A0);
-        obj = &D_800CC2D0[p[0x31]];
+        racer = &D_800872A0[i];
+        obj = &D_800CC2D0[racer->actorIndex];
         if (obj->camera != NULL) {
-            if (p[0x30] >= 2) {
-                func_150891E8(p, obj);
-            } else if (((u8 *)p)[0x48] == 0) {
-                func_150896EC(p, obj, 0);
-            } else if (p[0x49] != 0) {
-                func_150896EC(p, obj, 1);
+            if (racer->state >= 2) {
+                func_150891E8(racer, obj);
+            } else if (racer->unk48 == 0) {
+                func_150896EC(racer, obj, 0);
+            } else if (racer->camState != 0) {
+                func_150896EC(racer, obj, 1);
             }
         }
     }
 }
 
-extern u8 *D_800872A0;
-u8 func_150888A8(u8, u8, s8);
-
-struct Struct15087DCC {
-    char pad0[0x2B];
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    s8 unk2F;
-    char pad30[0x84 - 0x30];
-};
-
-void func_15087DCC(s32 arg0, s32 arg1) {
-    struct Struct15087DCC *p;
-    if (D_800872A0 == 0) {
+/* Sets racer `index`'s route, re-picking the nodes ahead when it is nonzero. */
+void func_15087DCC(s32 index, s32 route) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return;
     }
-    p = (struct Struct15087DCC *)(arg0 * sizeof(struct Struct15087DCC) + (s32)D_800872A0);
-    if (arg1 == p->unk2F) {
+    racer = &D_800872A0[index];
+    if (route == racer->route) {
         return;
     }
-    if (arg1 != 0) {
-        p->unk2D = func_150888A8(p->unk2B, p->unk2C, 1);
-        p->unk2E = func_150888A8(p->unk2C, p->unk2D, 1);
+    if (route != 0) {
+        racer->nodes[2] = func_150888A8(racer->nodes[0], racer->nodes[1], 1);
+        racer->nodes[3] = func_150888A8(racer->nodes[1], racer->nodes[2], 1);
     }
-    p->unk2F = arg1;
+    racer->route = route;
 }
 
-struct Struct15087E54 {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x84 - 0x14];
-};
-
-struct Struct15087E54arg1 {
-    char pad0[0x76];
-    u16 unk76;
-};
-
-void func_15087E54(s32 arg0, struct Struct15087E54arg1 *arg1) {
-    struct Struct15087E54 *p;
+/* Keeps obj's movement angle within 0x2400 of racer `index`'s track direction. */
+void func_15087E54(s32 index, struct127 *obj) {
+    Racer *racer;
     u16 d;
     u16 r;
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return;
     }
-    p = (struct Struct15087E54 *)(arg0 * sizeof(struct Struct15087E54) + (s32)D_800872A0);
-    r = func_1505A630(p->unk10, p->unkC, 0) + 0x4000;
-    d = (u16)(r - arg1->unk76);
+    racer = &D_800872A0[index];
+    r = func_1505A630(racer->dirZ, racer->dirX, 0) + 0x4000;
+    d = (u16)(r - obj->unk76);
     if (d & 0x8000) {
         if (d < 0xDBFF) {
-            arg1->unk76 = r + 0x2400;
+            obj->unk76 = r + 0x2400;
         }
     } else {
         if (d >= 0x2401) {
-            arg1->unk76 = r - 0x2400;
+            obj->unk76 = r - 0x2400;
         }
     }
 }
 
-extern s8 D_800D23A8;
-extern u8 *D_800872A0;
-
-struct Struct15087EF0 {
-    f32 unk0;
-    char pad4[0xC - 4];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x84 - 0x14];
-};
-
-struct Struct15087EF0arg1 {
-    char pad0[0x76];
-    s16 unk76;
-};
-
-void func_15087EF0(s32 arg0, struct Struct15087EF0arg1 *arg1) {
-    struct Struct15087EF0 *p;
+/* Points obj's movement angle along the track, angled toward its centre line. */
+void func_15087EF0(s32 index, struct127 *obj) {
+    Racer *racer;
     u16 r;
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return;
     }
-    p = (struct Struct15087EF0 *)(arg0 * sizeof(struct Struct15087EF0) + (s32)D_800872A0);
-    r = func_1505A630(p->unk10, p->unkC, 0);
+    racer = &D_800872A0[index];
+    r = func_1505A630(racer->dirZ, racer->dirX, 0);
     if (D_800D23A8 == 0) {
-        if (p->unk0 < 0.5f) {
+        if (racer->lateral < 0.5f) {
             r = (u16)(r + 0x4A00);
         } else {
             r = (u16)(r + 0x3600);
         }
     } else {
-        if (0.5f <= p->unk0) {
+        if (0.5f <= racer->lateral) {
             r = (u16)(r + 0x4A00);
         } else {
             r = (u16)(r + 0x3600);
         }
     }
-    arg1->unk76 = r;
+    obj->unk76 = r;
 }
 
-struct Struct15087FC4 {
-    char pad0[0x31];
-    u8 unk31;
-    char pad32[0x84 - 0x32];
-};
-
-void func_15087FC4(s32 arg0, s32 arg1) {
-    struct Struct15087FC4 *p;
-    if (D_800872A0 == 0) {
+void func_15087FC4(s32 index, s32 actorIndex) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return;
     }
-    p = (struct Struct15087FC4 *)(arg0 * sizeof(struct Struct15087FC4) + (s32)D_800872A0);
-    p->unk31 = arg1;
+    racer = &D_800872A0[index];
+    racer->actorIndex = actorIndex;
 }
 
-extern u8 *D_800872A0;
-
-struct Struct15087FEC {
-    char pad0[4];
-    f32 unk4;
-    char pad8[0x84 - 8];
-};
-
-void func_15087FEC(s32 arg0, s32 arg1) {
-    struct Struct15087FEC *p;
-    if (D_800872A0 == 0) {
+/* Sets racer `index`'s lateral target, in 1/256ths of the track width. */
+void func_15087FEC(s32 index, s32 lateral) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return;
     }
-    p = (struct Struct15087FEC *)(arg0 * sizeof(struct Struct15087FEC) + (s32)D_800872A0);
-    p->unk4 = (f32)arg1 * (1.0f / 256.0f);
+    racer = &D_800872A0[index];
+    racer->lateralTarget = (f32)lateral * (1.0f / 256.0f);
 }
 
-s32 func_1508802C(s8 *arg0, struct127 *arg1, s32 arg2) {
+/* Ends the race for `racer` (actor obj); returns 1 if it can't finish now. */
+s32 func_1508802C(Racer *racer, struct127 *obj, s32 arg2) {
     struct126 *temp_v0;
 
-    temp_v0 = arg1->unk31C;
+    temp_v0 = obj->unk31C;
     if (temp_v0->unk120 != 0) {
         return 1;
     }
 
-    if ((D_800D18A0 & (1 << (arg1 - D_800CC2D0))) != 0) {
+    if ((D_800D18A0 & (1 << (obj - D_800CC2D0))) != 0) {
         return 1;
     }
 
     temp_v0->unk84 = 1;
-    arg1->interaction_state = 0xC;
-    arg1->unk232 = arg2;
-    D_800D154C = arg1;
-    D_800C3E78 = arg0[0x31];
-    arg1->unk218 = func_1507BB28(0, arg2);
-    arg1->unk21C = 0;
-    arg1->immune = 0xFF;
-    arg0[0x30] = 2;
+    obj->interaction_state = 12;
+    obj->unk232 = arg2;
+    D_800D154C = obj;
+    D_800C3E78 = racer->actorIndex;
+    obj->unk218 = func_1507BB28(0, arg2);
+    obj->unk21C = 0;
+    obj->immune = 0xFF;
+    racer->state = 2;
     return 0;
 }
 
-s32 func_150880F8(s32 arg0, s32 arg1) {
-    s8 *p;
+/* Racer `index` crosses the finish line: record its finish order. */
+s32 func_150880F8(s32 index, s32 arg1) {
+    Racer *racer;
     struct127 *obj;
     s32 ret;
 
     ret = 0;
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return 0;
     }
 
-    p = (s8 *)(arg0 * 0x84 + (s32)D_800872A0);
-    obj = &D_800CC2D0[p[0x31]];
-    if (p[0x30] == 0) {
-        ret = func_1508802C(p, obj, arg1);
-    } else if (p[0x30] == 1) {
-        p[0x30] = 2;
+    racer = &D_800872A0[index];
+    obj = &D_800CC2D0[racer->actorIndex];
+    if (racer->state == 0) {
+        ret = func_1508802C(racer, obj, arg1);
+    } else if (racer->state == 1) {
+        racer->state = 2;
         obj->immune = 0xFF;
     }
 
-    p[0x2A] = D_800D239A;
+    racer->finishOrder = D_800D239A;
     D_800D239A++;
     return ret;
 }
 
-struct Struct150881CC {
-    f32 unk0;
-    char pad4[0x84 - 4];
-};
-
-s32 func_150881CC(s32 arg0) {
-    struct Struct150881CC *p;
-    if (D_800872A0 == 0) {
+/* Racer `index`'s lateral position in 1/256ths of the track width. */
+s32 func_150881CC(s32 index) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return 0;
     }
-    p = (struct Struct150881CC *)(arg0 * sizeof(struct Struct150881CC) + (s32)D_800872A0);
-    return (s32)(p->unk0 * 256.0f);
+    racer = &D_800872A0[index];
+    return (s32)(racer->lateral * 256.0f);
 }
 
-struct Struct15088218 {
-    char pad0[8];
-    f32 unk8;
-    char padC[0x24 - 0xC];
-    s16 unk24;
-    char pad26[0x84 - 0x26];
-};
-
-s32 func_15088218(s32 arg0) {
-    struct Struct15088218 *p;
+/* Racer `index`'s distance along the path, in 1/16ths of a node. */
+s32 func_15088218(s32 index) {
+    Racer *racer;
     s32 v;
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return 0;
     }
-    p = (struct Struct15088218 *)(arg0 * sizeof(struct Struct15088218) + (s32)D_800872A0);
-    v = p->unk24;
-    return (v << 4) + (s32)(p->unk8 * 16.0f);
+    racer = &D_800872A0[index];
+    v = racer->nodesPassed;
+    return (v << 4) + (s32)(racer->segmentT * 16.0f);
 }
 
-struct Struct15088270 {
-    char pad0[0x14];
-    f32 unk14;
-    char pad18[0x84 - 0x18];
-};
-
-s32 func_15088270(s32 arg0) {
-    struct Struct15088270 *p;
-    if (D_800872A0 == 0) {
+s32 func_15088270(s32 index) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return 0;
     }
-    p = (struct Struct15088270 *)(arg0 * sizeof(struct Struct15088270) + (s32)D_800872A0);
-    return (s32)p->unk14;
+    racer = &D_800872A0[index];
+    return (s32)racer->speed;
 }
 
-struct Struct150882B0 {
-    char pad0[0x27];
-    s8 unk27;
-    char pad28[0x84 - 0x28];
-};
-
-s32 func_150882B0(s32 arg0) {
-    struct Struct150882B0 *p;
-    if (D_800872A0 == 0) {
+s32 func_150882B0(s32 index) {
+    Racer *racer;
+    if (D_800872A0 == NULL) {
         return 0;
     }
-    p = (struct Struct150882B0 *)(arg0 * sizeof(struct Struct150882B0) + (s32)D_800872A0);
-    return p->unk27;
+    racer = &D_800872A0[index];
+    return racer->lap;
 }
 
-struct Struct150882E4 {
-    char pad0[8];
-    f32 unk8;
-    char padC[0x24 - 0xC];
-    s16 unk24;
-    char pad26[3];
-    s8 unk29;
-    char pad2A[0x84 - 0x2A];
-};
-
-s32 func_150882E4(s32 arg0, s32 arg1) {
-    struct Struct150882E4 *p;
-    struct Struct150882E4 *iter;
+/*
+ * Finds the racer ranked `offset` places from racer `index`. Returns
+ * (path distance between them << 8) | that racer's index, or 0x10 if there is none.
+ */
+s32 func_150882E4(s32 index, s32 offset) {
+    Racer *racer;
+    Racer *other;
     s32 i;
     s32 wanted;
 
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return 0x10;
     }
 
-    p = (struct Struct150882E4 *)(arg0 * sizeof(struct Struct150882E4) + (s32)D_800872A0);
-    wanted = p->unk29 + arg1;
+    racer = &D_800872A0[index];
+    wanted = racer->rank + offset;
     i = 0;
     if (D_800D2398 > 0) {
-        iter = (struct Struct150882E4 *)D_800872A0;
+        other = D_800872A0;
         do {
-            if (wanted == iter->unk29) {
-                if (i != arg0) {
-                    arg0 = (p->unk24 << 4) + (s32)(p->unk8 * 16.0f);
-                    arg0 = arg0 - (iter->unk24 << 4) - (s32)(iter->unk8 * 16.0f);
-                    if (arg0 < 0) {
-                        arg0 = -arg0;
+            if (wanted == other->rank) {
+                if (i != index) {
+                    index = (racer->nodesPassed << 4) + (s32)(racer->segmentT * 16.0f);
+                    index = index - (other->nodesPassed << 4) - (s32)(other->segmentT * 16.0f);
+                    if (index < 0) {
+                        index = -index;
                     }
-                    return (arg0 << 8) | i;
+                    return (index << 8) | i;
                 }
             }
             i++;
-            iter++;
+            other++;
         } while (i < D_800D2398);
     }
 
@@ -839,20 +740,12 @@ s32 func_150882E4(s32 arg0, s32 arg1) {
 
 extern f32 D_8009DA00;
 
-struct Struct150883B0 {
-    f32 unk0;
-    char pad4[0xC - 4];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x2F - 0x14];
-    s8 unk2F;
-    char pad30[1];
-    s8 unk31;
-    char pad32[0x84 - 0x32];
-};
-
-struct127 *func_150883B0(s32 arg0, s32 arg1, f32 *arg2, s32 *arg3) {
-    struct Struct150883B0 *p;
+/*
+ * Finds the nearest racer ahead of (dir >= 0) or behind racer `index` on the same route.
+ * Stores its lateral position and route in *lateral and *route.
+ */
+struct127 *func_150883B0(s32 index, s32 dir, f32 *lateral, s32 *route) {
+    Racer *racer;
     struct127 *ret;
     f32 sign;
     f32 dx;
@@ -865,77 +758,72 @@ struct127 *func_150883B0(s32 arg0, s32 arg1, f32 *arg2, s32 *arg3) {
     s32 i;
     s8 self;
 
-    if (D_800872A0 == 0) {
+    if (D_800872A0 == NULL) {
         return NULL;
     }
-    p = (struct Struct150883B0 *)(arg0 * sizeof(struct Struct150883B0) + (s32)D_800872A0);
-    if (arg1 >= 0) {
+    racer = &D_800872A0[index];
+    if (dir >= 0) {
         sign = -1.0f;
     } else {
         sign = 1.0f;
     }
-    arg1 = p->unk2F;
-    x = D_800CC2D0[p->unk31].x_position;
-    z = D_800CC2D0[p->unk31].z_position;
-    dx = p->unkC * sign;
-    dz = p->unk10 * sign;
-    self = D_800CC2D0[p->unk31].unk124 - 1;
+    dir = racer->route;
+    x = D_800CC2D0[racer->actorIndex].x_position;
+    z = D_800CC2D0[racer->actorIndex].z_position;
+    dx = racer->dirX * sign;
+    dz = racer->dirZ * sign;
+    self = D_800CC2D0[racer->actorIndex].unk124 - 1;
     base = -((dx * x) + (dz * z));
     ret = NULL;
     best = D_8009DA00;
     for (i = 0; i < D_800D2398; i++) {
-        p = (struct Struct150883B0 *)(i * sizeof(struct Struct150883B0) + (s32)D_800872A0);
-        if (self != p->unk31 && (arg1 == 0 || arg1 == p->unk2F)) {
-            x = D_800CC2D0[p->unk31].x_position;
-            z = D_800CC2D0[p->unk31].z_position;
+        racer = &D_800872A0[i];
+        if (self != racer->actorIndex && (dir == 0 || dir == racer->route)) {
+            x = D_800CC2D0[racer->actorIndex].x_position;
+            z = D_800CC2D0[racer->actorIndex].z_position;
             d = (dx * x) + (dz * z) + base;
             if (d > 0.0f && d < best) {
                 best = d;
-                *arg2 = p->unk0;
-                *arg3 = p->unk2F;
-                ret = &D_800CC2D0[p->unk31];
+                *lateral = racer->lateral;
+                *route = racer->route;
+                ret = &D_800CC2D0[racer->actorIndex];
             }
         }
     }
     return ret;
 }
 
-struct Struct1508855C {
-    char pad0[0x31];
-    s8 unk31;
-    char pad32[0x84 - 0x32];
-};
-
-s32 func_1508855C(struct127 *arg0) {
-    u8 *base;
-    s32 index;
+/* Returns the index of the racer driven by obj, or -1. */
+s32 func_1508855C(struct127 *obj) {
+    Racer *racers;
+    s32 actorIndex;
     s32 i;
     s32 limit;
-    struct Struct1508855C *p;
+    Racer *racer;
 
-    index = ((s32)arg0 - (s32)D_800CC2D0) / (s32)sizeof(struct127);
-    base = D_800872A0;
-    if (base == 0) {
+    actorIndex = obj - D_800CC2D0;
+    racers = D_800872A0;
+    if (racers == NULL) {
         return -1;
     }
 
-    if (index == 0) {
+    if (actorIndex == 0) {
         return 0;
     }
 
     i = 1;
     limit = D_800D2398 + D_800D2399;
-    p = (struct Struct1508855C *)(base + sizeof(struct Struct1508855C));
+    racer = &racers[1];
     if (limit < 2) {
         goto fail;
     }
 
     do {
-        if (index == p->unk31) {
+        if (actorIndex == racer->actorIndex) {
             return i;
         }
         i++;
-        p++;
+        racer++;
     } while (i < limit);
 
 fail:
@@ -943,168 +831,128 @@ fail:
 }
 
 void bcopy(const void *, void *, int);
-#define D_800872A0_S32 ((s32)D_800872A0)
 
-void func_150885EC(s32 arg0, s32 arg1) {
-    s32 sp24;
-    s32 sp20;
+/* Copies racer `src` over racer `dst`, keeping dst's actor and state. */
+void func_150885EC(s32 src, s32 dst) {
+    s32 actorIndex;
+    s32 state;
 
-    if (D_800872A0_S32 != 0) {
-        sp24 = ((s8 *)D_800872A0_S32 + arg1 * 0x84)[0x31];
-        sp20 = ((s8 *)D_800872A0_S32 + arg1 * 0x84)[0x30];
-        bcopy((void *)((arg0 * 0x84) + D_800872A0_S32),
-              (void *)((arg1 * 0x84) + D_800872A0_S32), 0x84);
-        *(s8 *)(D_800872A0_S32 + arg1 * 0x84 + 0x31) = sp24;
-        *(s8 *)(D_800872A0_S32 + arg1 * 0x84 + 0x30) = sp20;
+    if (D_800872A0 != NULL) {
+        actorIndex = D_800872A0[dst].actorIndex;
+        state = D_800872A0[dst].state;
+        bcopy(&D_800872A0[src], &D_800872A0[dst], sizeof(Racer));
+        D_800872A0[dst].actorIndex = actorIndex;
+        D_800872A0[dst].state = state;
     }
 }
-#undef D_800872A0_S32
 
-extern s32 D_800D2394;
-extern s8 D_800D2398;
-extern s8 D_800D2399;
-typedef struct Struct15088824 Struct15088824;
-void func_15088824();
-
-s32 func_1508868C(s32 arg0) {
+/* Claims a free spare racer slot for actor obj; returns its index or -1. */
+s32 func_1508868C(struct127 *obj) {
     s32 i;
-    s32 offset;
-    s32 base;
+    s32 bit;
+    Racer *racers;
 
-    base = (s32)D_800872A0;
-    if (base == 0) {
+    racers = D_800872A0;
+    if (racers == NULL) {
         return -1;
     }
 
-    offset = 1;
+    bit = 1;
     i = 0;
     if (D_800D2399 > 0) {
         do {
-            if ((D_800D2394 & offset) == 0) {
-                D_800D2394 |= offset;
+            if ((D_800D2394 & bit) == 0) {
+                D_800D2394 |= bit;
                 i += D_800D2398;
-                offset = i * 0x84;
-                func_15088824(offset + base);
-                D_800872A0[offset + 0x30] = 1;
-                D_800872A0[offset + 0x31] = (arg0 - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+                func_15088824(&racers[i]);
+                D_800872A0[i].state = 1;
+                D_800872A0[i].actorIndex = obj - D_800CC2D0;
                 return i;
             }
             i++;
-            offset <<= 1;
+            bit <<= 1;
         } while (i < D_800D2399);
     }
     return -1;
 }
 
+/* Releases the spare racer slot of the calling actor. */
 void func_15088780(void) {
     s32 func_1508855C();
-    s32 temp_v0;
+    s32 index;
 
-    if (D_800872A0 != 0) {
-        temp_v0 = func_1508855C();
-        D_800872A0[temp_v0 * 0x84 + 0x31] = 0;
-        D_800D2394 &= ~(1 << (temp_v0 - D_800D2398));
+    if (D_800872A0 != NULL) {
+        index = func_1508855C();
+        D_800872A0[index].actorIndex = 0;
+        D_800D2394 &= ~(1 << (index - D_800D2398));
     }
 }
-
-extern u8 *D_800872A0;
 
 s32 func_150887F8(void) {
-    u8 *p = D_800872A0;
-    if (p == 0) {
+    Racer *racers = D_800872A0;
+    if (racers == NULL) {
         return 0;
     }
-    return p[0x46] == 0xFF;
+    return racers->camNodes[2] == 0xFF;
 }
 
-struct Struct15088824 {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ u8 unk26;
-    /* 0x27 */ u8 unk27;
-    /* 0x28 */ u8 unk28;
-    /* 0x29 */ u8 unk29;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 pad34[0x15];
-    /* 0x49 */ u8 unk49;
-};
-
-void func_15088824(Struct15088824 *arg0) {
-    arg0->unk2B = 0;
-    arg0->unk2C = 0;
-    arg0->unk2D = 0;
-    arg0->unk2E = 0;
-    arg0->unk28 = 0;
-    arg0->unk1C = 0;
-    arg0->unk18 = 0;
-    arg0->unk20 = -1;
-    arg0->unk2F = 0;
-    arg0->unk8 = 0.0f;
-    arg0->unk0 = 0.5f;
-    arg0->unk4 = 0.5f;
-    arg0->unk24 = 0;
-    arg0->unk26 = 0;
-    arg0->unk27 = 0;
-    arg0->unk31 = 0;
-    arg0->unkC = 0.0f;
-    arg0->unk14 = 0.0f;
-    arg0->unk33 = 2;
-    arg0->unk30 = 0;
-    arg0->unk2A = 0x7F;
-    arg0->unk49 = 0;
-    arg0->unk10 = 1.0f;
+/* Resets a racer to the start of the race. */
+void func_15088824(Racer *racer) {
+    racer->nodes[0] = 0;
+    racer->nodes[1] = 0;
+    racer->nodes[2] = 0;
+    racer->nodes[3] = 0;
+    racer->maxLap = 0;
+    racer->raceTime = 0;
+    racer->lapStartTime = 0;
+    racer->lastLapTime = -1;
+    racer->route = 0;
+    racer->segmentT = 0.0f;
+    racer->lateral = 0.5f;
+    racer->lateralTarget = 0.5f;
+    racer->nodesPassed = 0;
+    racer->lapLength = 0;
+    racer->lap = 0;
+    racer->actorIndex = 0;
+    racer->dirX = 0.0f;
+    racer->speed = 0.0f;
+    racer->ticks = 2;
+    racer->state = 0;
+    racer->finishOrder = 0x7F;
+    racer->camState = 0;
+    racer->dirZ = 1.0f;
 }
 
-typedef struct {
-    u8 pad0[9];
-    u8 links[5];
-    u8 unkE;
-    u8 unkF;
-} Struct150888A8;
-
-u8 func_150888A8(u8 arg0, u8 arg1, s8 arg2) {
+/*
+ * Picks the next node after `cur` coming from `prev`: prefers a type-0 neighbour whose param
+ * differs from the route mode (1 when `route` is set, else 2), else one that matches it.
+ */
+u8 func_150888A8(u8 prev, u8 cur, s8 route) {
     s32 i;
-    Struct150888A8 *rec;
-    Struct150888A8 *e;
+    PathNode *node;
+    PathNode *e;
     u8 best;
     u8 back;
     s32 mode;
 
     best = 0xFF;
     back = 0xFF;
-    if (arg2 != 0) {
+    if (route != 0) {
         mode = 1;
     } else {
         mode = 2;
     }
-    rec = (Struct150888A8 *)&D_800D2350[arg1];
+    node = &D_800D2350[cur];
     for (i = 0; i < 5; i++) {
-        if (rec->links[i] != 0xFF && rec->links[i] != arg0) {
-            e = (Struct150888A8 *)&D_800D2350[rec->links[i]];
-            if (e->unkE == 0) {
-                if (mode != e->unkF) {
-                    if (best == 0xFF || e->unkF != 0) {
-                        best = rec->links[i];
+        if (node->links[i] != 0xFF && node->links[i] != prev) {
+            e = &D_800D2350[node->links[i]];
+            if (e->type == 0) {
+                if (mode != e->param) {
+                    if (best == 0xFF || e->param != 0) {
+                        best = node->links[i];
                     }
                 } else {
-                    back = rec->links[i];
+                    back = node->links[i];
                 }
             }
         }
@@ -1115,35 +963,17 @@ u8 func_150888A8(u8 arg0, u8 arg1, s8 arg2) {
     return best;
 }
 
-struct Struct15088A08 {
-    char pad0[0x8];
-    f32 unk8;
-    char padC[0xC];
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s16 unk24;
-    s8 unk26;
-    s8 unk27;
-    s8 unk28;
-    char pad29[2];
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    s8 unk2F;
-    s8 unk30;
-    s8 unk31;
-};
-
-extern u8 D_800D2390;
 extern s8 D_800E0BE7;
 extern u8 D_800BE616;
 extern s8 D_8008FD90;
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];
 
-s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1) {
+/*
+ * Advances `racer` by `step` along the path, shifting its spline nodes when it crosses one.
+ * Counts laps and records lap times. Returns the node step taken (-1, 0 or 1).
+ */
+s32 func_15088A08(Racer *racer, f32 step) {
     s32 dir;
     s32 idx;
     s32 lim;
@@ -1151,36 +981,36 @@ s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1) {
     s32 v;
 
     dir = 0;
-    arg0->unk8 += arg1;
-    if (arg0->unk8 < 0.0f) {
-        arg0->unk8 += 1.0f;
-        arg0->unk2E = arg0->unk2D;
-        arg0->unk2D = arg0->unk2C;
-        arg0->unk2C = arg0->unk2B;
-        arg0->unk2B = func_150888A8(arg0->unk2D, arg0->unk2C, arg0->unk2F);
+    racer->segmentT += step;
+    if (racer->segmentT < 0.0f) {
+        racer->segmentT += 1.0f;
+        racer->nodes[3] = racer->nodes[2];
+        racer->nodes[2] = racer->nodes[1];
+        racer->nodes[1] = racer->nodes[0];
+        racer->nodes[0] = func_150888A8(racer->nodes[2], racer->nodes[1], racer->route);
         dir = -1;
-    } else if (arg0->unk8 >= 1.0f) {
-        arg0->unk8 -= 1.0f;
-        arg0->unk2B = arg0->unk2C;
-        arg0->unk2C = arg0->unk2D;
-        arg0->unk2D = arg0->unk2E;
-        arg0->unk2E = func_150888A8(arg0->unk2C, arg0->unk2D, arg0->unk2F);
+    } else if (racer->segmentT >= 1.0f) {
+        racer->segmentT -= 1.0f;
+        racer->nodes[0] = racer->nodes[1];
+        racer->nodes[1] = racer->nodes[2];
+        racer->nodes[2] = racer->nodes[3];
+        racer->nodes[3] = func_150888A8(racer->nodes[1], racer->nodes[2], racer->route);
         dir = 1;
         if (D_800D23A8 == 0) {
-            if (((u8 *)D_800D2350)[arg0->unk2C * 16 + 0xF] == 5) {
+            if (D_800D2350[racer->nodes[1]].param == 5) {
                 D_800D2390 = 1;
             }
-            if (((u8 *)D_800D2350)[arg0->unk2C * 16 + 0xF] == 6) {
+            if (D_800D2350[racer->nodes[1]].param == 6) {
                 D_800D2390 = 2;
             }
         } else {
-            if (((u8 *)D_800D2350)[arg0->unk2C * 16 + 0xF] == 7) {
+            if (D_800D2350[racer->nodes[1]].param == 7) {
                 D_800D2390 = 1;
             }
-            if (((u8 *)D_800D2350)[arg0->unk2C * 16 + 0xF] == 8) {
+            if (D_800D2350[racer->nodes[1]].param == 8) {
                 D_800D2390 = 2;
             }
-            if (((u8 *)D_800D2350)[arg0->unk2C * 16 + 0xF] == 9) {
+            if (D_800D2350[racer->nodes[1]].param == 9) {
                 D_800D2390 = 3;
             }
         }
@@ -1188,39 +1018,39 @@ s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1) {
 
     if (dir != 0) {
         lim = D_800E0BE7;
-        idx = arg0->unk31;
-        arg0->unk24 += dir;
-        arg0->unk27 = arg0->unk24 / arg0->unk26;
+        idx = racer->actorIndex;
+        racer->nodesPassed += dir;
+        racer->lap = racer->nodesPassed / racer->lapLength;
         if (D_800BE616 != 0) {
-            if (lim < arg0->unk27) {
-                arg0->unk27 = lim + 1;
+            if (lim < racer->lap) {
+                racer->lap = lim + 1;
             }
         }
-        if (arg0->unk28 < arg0->unk27) {
-            arg0->unk28 = arg0->unk27;
-            if ((idx < D_8008FD90) && (arg0->unk30 == 0) && (arg0->unk1C > 0)) {
-                if (lim >= arg0->unk28) {
-                    t = arg0->unk1C - arg0->unk18;
-                    if (t > 0x7D00) {
-                        t = 0x7D00;
+        if (racer->maxLap < racer->lap) {
+            racer->maxLap = racer->lap;
+            if ((idx < D_8008FD90) && (racer->state == 0) && (racer->raceTime > 0)) {
+                if (lim >= racer->maxLap) {
+                    t = racer->raceTime - racer->lapStartTime;
+                    if (t > 32000) {
+                        t = 32000;
                     }
                     if ((D_800E0C10[idx] <= 0) || (t < D_800E0C10[idx])) {
                         D_800E0C10[idx] = t;
                     }
-                    arg0->unk20 = t;
+                    racer->lastLapTime = t;
                 }
-                if (lim == arg0->unk28) {
-                    v = arg0->unk1C;
-                    if (v > 0x57E40) {
-                        v = 0x57E40;
+                if (lim == racer->maxLap) {
+                    v = racer->raceTime;
+                    if (v > 360000) {
+                        v = 360000;
                     }
                     D_800E0C18[idx] = v;
                 }
             }
-            if (lim == arg0->unk28) {
-                arg0->unk18 = -arg0->unk1C;
-            } else if (arg0->unk28 < lim) {
-                arg0->unk18 = arg0->unk1C;
+            if (lim == racer->maxLap) {
+                racer->lapStartTime = -racer->raceTime;
+            } else if (racer->maxLap < lim) {
+                racer->lapStartTime = racer->raceTime;
             }
         }
     }
@@ -1228,44 +1058,12 @@ s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1) {
     return dir;
 }
 
-typedef struct Entry15088D58 {
-    f32 value0;
-    f32 value4;
-    f32 phase8;
-    f32 directionC;
-    f32 direction10;
-    u8 pad14[0x18];
-    u8 node2C;
-    u8 pad2D[2];
-    s8 group2F;
-    u8 pad30;
-    s8 actor31;
-    u8 pad32[0x52];
-} Entry15088D58;
-
-typedef struct Actor15088D58 {
-    u8 pad0[0x14];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    u8 pad20[0x20];
-    f32 angle40;
-    u8 pad44[0x32];
-    s16 rotation76;
-    s16 rotation78;
-    s16 rotation7A;
-    u8 pad7C[0xA8];
-    u8 field124;
-} Actor15088D58;
-
-void func_15088F30();
-f32 func_150497E0(f32 *, s32, f32);
-f32 func_150498A4(f32 *, s32, f32, f32 *);
 f32 func_15144BC8(f32);
 extern f32 D_8009DA04;
 
-void func_15088D58(Actor15088D58 *arg0) {
-    Entry15088D58 *entry;
+/* Places actor obj at the start of its racer's path, facing along it. */
+void func_15088D58(struct127 *obj) {
+    Racer *racer;
     f32 angle;
     f32 x_derivative;
     f32 z_derivative;
@@ -1277,91 +1075,77 @@ void func_15088D58(Actor15088D58 *arg0) {
     s32 i;
     s32 link;
     s32 again;
-    u8 *target;
+    PathNode *target;
     u8 *cursor;
-    int tmp1;
-    tmp1 = 0xFF;
+    s32 none;
 
-    index = func_1508855C((struct127 *)arg0);
+    none = 0xFF;
+    index = func_1508855C(obj);
     if (index >= 0) {
-        entry = (Entry15088D58 *)(D_800872A0 + index * 0x84);
-        entry->value0 = 0.5f;
-        entry->value4 = 0.5f;
-        entry->phase8 = 0.5f;
+        racer = &D_800872A0[index];
+        racer->lateral = 0.5f;
+        racer->lateralTarget = 0.5f;
+        racer->segmentT = 0.5f;
         do {
+            /* skip forward while the current node's edge partner (type 4) has a nonzero param */
             again = 0;
             i = 0;
-            cursor = entry->node2C * 0x10 + (u8 *)D_800D2350;
+            // matching: a byte cursor over the node (links at +9) and 0xFF in a variable keep the frame size
+            cursor = (u8 *)&D_800D2350[racer->nodes[1]];
             do {
                 link = cursor[9];
                 i++;
-                if (tmp1 != link) {
-                    target = link * 0x10 + (u8 *)D_800D2350;
-                    if (target[0xE] == 4) {
-                        again = target[0xF];
+                if (none != link) {
+                    target = &D_800D2350[link];
+                    if (target->type == 4) {
+                        again = target->param;
                     }
                 }
                 cursor++;
             } while (i != 5);
             if (again != 0) {
-                func_15088A08((struct Struct15088A08 *)entry, 1.0f);
+                func_15088A08(racer, 1.0f);
             }
         } while (again != 0);
-        entry->phase8 = 0.0f;
-        func_15088F30((f32 *)entry, xs, ys, zs);
-        arg0->field14 = func_150498A4(xs, 0, entry->phase8, &x_derivative);
-        arg0->field18 = func_150497E0(ys, 0, entry->phase8);
-        arg0->field1C = func_150498A4(zs, 0, entry->phase8, &z_derivative);
-        angle = func_15144BC8((f32)(func_1505A630(entry->direction10, entry->directionC, 0) + 0x8000) * 0.005493164f);
-        arg0->angle40 = angle;
+        racer->segmentT = 0.0f;
+        func_15088F30(racer, xs, ys, zs);
+        obj->x_position = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
+        obj->y_position = func_150497E0(ys, 0, racer->segmentT);
+        obj->z_position = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
+        angle = func_15144BC8((f32)(func_1505A630(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
+        obj->unk40 = angle;
         rotation = (s32)(short)(s32)(angle * D_8009DA04) - 0x4000;
-        arg0->rotation7A = rotation;
-        arg0->rotation78 = rotation;
-        arg0->rotation76 = rotation;
+        obj->unk7A = rotation;
+        obj->unk78 = rotation;
+        obj->unk76 = rotation;
     }
 }
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[3];
-    u8 links[5];
-    u8 type;
-    u8 padF;
-} Node15088F30;
-
-typedef struct {
-    f32 t;
-    u8 pad4[0x27];
-    u8 ids[4];
-} Obj15088F30;
-
-void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
+void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ) {
     s32 i;
     s32 j;
     u8 id;
-    Node15088F30 *node;
-    Node15088F30 *next;
+    PathNode *node;
+    PathNode *next;
     f32 dx;
     f32 dz;
 
     for (i = 0; i < 4; i++) {
-        if (arg0->ids[i] != 0xFF) {
-            node = &((Node15088F30 *)D_800D2350)[arg0->ids[i]];
+        if (racer->nodes[i] != 0xFF) {
+            node = &(D_800D2350)[racer->nodes[i]];
             next = node;
             for (j = 0; j < 5; j++) {
                 id = node->links[j];
-                if ((id != 0xFF) && (((Node15088F30 *)D_800D2350)[id].type == 4)) {
-                    next = id + (Node15088F30 *)D_800D2350;
+                if ((id != 0xFF) && ((D_800D2350)[id].type == 4)) {
+                    next = id + D_800D2350;
                     j = 5;
                 }
             }
             dx = next->x - node->x;
             dz = next->z - node->z;
-            outX[i] = node->x + (dx * arg0->t);
+            outX[i] = node->x + (dx * racer->lateral);
             outY[i] = node->y;
-            outZ[i] = node->z + (dz * arg0->t);
+            outZ[i] = node->z + (dz * racer->lateral);
         } else {
             outX[i] = i * 64;
             outY[i] = 0.0f;
@@ -1373,19 +1157,19 @@ void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
 u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
     s32 i;
     u8 result;
-    Node15088F30 *n;
-    Node15088F30 *t;
+    PathNode *n;
+    PathNode *t;
 
     result = 0xFF;
     if (node >= D_80087290) {
         return 0xFF;
     }
-    n = node + (Node15088F30 *)D_800D2350;
+    n = node + D_800D2350;
     for (i = 0; i < 5; i++) {
         if (n->links[i] != 0xFF && n->links[i] != exclude) {
-            t = n->links[i] + (Node15088F30 *)D_800D2350;
+            t = n->links[i] + D_800D2350;
             if (t->type == type || type == 0xFF) {
-                if (t->padF == sub) {
+                if (t->param == sub) {
                     return n->links[i];
                 }
                 result = n->links[i];
@@ -1396,49 +1180,9 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
 }
 
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    f32 unkC;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-} CamParams150896EC;
-
-typedef struct {
-    u8 pad0[0x34];
-    f32 t;
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 nodes[4];
-    u8 pad48;
-    s8 state;
-    u8 pad4A[2];
-    CamParams150896EC cam;
-} Obj150896EC;
-
-#define obj ((Obj150891E8 *)arg0)
-typedef struct {
-    u8 pad0[0x30];
-    s8 state;
-    u8 pad31[0x19];
-    u8 cur;
-    u8 next;
-    CamParams150896EC cam;
-} Obj150891E8;
-
 void func_1512D560();
 
-void func_150891E8(s8 *arg0, struct127 *arg1) {
+void func_150891E8(Racer *racer, struct127 *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -1449,16 +1193,16 @@ void func_150891E8(s8 *arg0, struct127 *arg1) {
     u32 j;
     u8 link;
     f32 min;
-    Node15088F30 *entry;
-    Node15088F30 *other;
+    PathNode *entry;
+    PathNode *other;
     u8 a;
     u8 b;
     u8 start;
     u8 sub;
-    CamParams150896EC *p;
+    CamParams *p;
     struct108 *cam;
 
-    if (arg1->camera == NULL) {
+    if (obj->camera == NULL) {
         return;
     }
     if (D_8008FDBC & 0x40) {
@@ -1466,65 +1210,65 @@ void func_150891E8(s8 *arg0, struct127 *arg1) {
     } else {
         sub = 0;
     }
-    cam = arg1->camera;
-    if (obj->state == 2) {
+    cam = obj->camera;
+    if (racer->state == 2) {
         for (i = 0; i < D_80087290; i++) {
-            entry = (Node15088F30 *)&D_800D2350[i];
-            if (entry->type == 5 && entry->padF == 2) {
-                obj->cur = i;
-                obj->next = i;
+            entry = (PathNode *)&D_800D2350[i];
+            if (entry->type == 5 && entry->param == 2) {
+                racer->camNode = i;
+                racer->camNextNode = i;
                 for (j = 0; j < 5; j++) {
                     if (entry->links[j] != 0xFF) {
-                        other = (Node15088F30 *)&D_800D2350[entry->links[j]];
-                        if ((!D_800D23A8 && other->padF == 3) || (D_800D23A8 && other->padF != 3)) {
-                            obj->next = entry->links[j];
+                        other = (PathNode *)&D_800D2350[entry->links[j]];
+                        if ((!D_800D23A8 && other->param == 3) || (D_800D23A8 && other->param != 3)) {
+                            racer->camNextNode = entry->links[j];
                         }
                     }
                 }
                 i = D_80087290;
             }
         }
-        b = obj->next;
+        b = racer->camNextNode;
         min = 1000000000.0f;
-        a = obj->cur;
+        a = racer->camNode;
         start = b;
         do {
-            entry = (Node15088F30 *)&D_800D2350[b];
+            entry = (PathNode *)&D_800D2350[b];
             a2 = func_1508907C(b, 0xFF, a, sub);
             a = b;
             b = a2;
-            dx = arg1->x_position - entry->x;
-            dz = arg1->z_position - entry->z;
+            dx = obj->x_position - entry->x;
+            dz = obj->z_position - entry->z;
             min2 = dx * dx + dz * dz;
             if (min2 < min) {
                 min = min2;
-                obj->cur = a;
-                obj->next = a2;
+                racer->camNode = a;
+                racer->camNextNode = a2;
             }
         } while (b != start);
-        func_1512D560(arg1->camera, 5, 0);
-        obj->state = 3;
+        func_1512D560(obj->camera, 5, 0);
+        racer->state = 3;
     }
-    p = &obj->cam;
-    b2 = obj->next;
-    a2 = obj->cur;
-    entry = (Node15088F30 *)&D_800D2350[a2];
-    other = (Node15088F30 *)&D_800D2350[b2];
-    dx = arg1->x_position - other->x;
-    dz = arg1->z_position - other->z;
+    p = &racer->cam;
+    b2 = racer->camNextNode;
+    a2 = racer->camNode;
+    entry = (PathNode *)&D_800D2350[a2];
+    other = (PathNode *)&D_800D2350[b2];
+    dx = obj->x_position - other->x;
+    dz = obj->z_position - other->z;
     min2 = dx * dx + dz * dz;
-    dx = arg1->x_position - entry->x;
-    dz = arg1->z_position - entry->z;
+    dx = obj->x_position - entry->x;
+    dz = obj->z_position - entry->z;
     min = dx * dx + dz * dz;
     if (min2 < min) {
-        obj->cur = b2;
-        obj->next = func_1508907C(obj->cur, 0xFF, a2, sub);
+        racer->camNode = b2;
+        racer->camNextNode = func_1508907C(racer->camNode, 0xFF, a2, sub);
         entry = other;
-        dx = arg1->x_position - entry->x;
-        dz = arg1->z_position - entry->z;
+        dx = obj->x_position - entry->x;
+        dz = obj->z_position - entry->z;
         min = min2;
     }
-    dy = arg1->y_position - entry->y;
+    dy = obj->y_position - entry->y;
     min = sqrtf(dy * dy + min);
     dx /= min;
     dy /= min;
@@ -1533,36 +1277,35 @@ void func_150891E8(s8 *arg0, struct127 *arg1) {
         min = 1000.0f;
     }
     p->unk0 = 0;
-    p->unk20 = arg1->x_position;
-    p->unk24 = arg1->y_position;
-    p->unk28 = arg1->z_position;
-    p->unk14 = arg1->x_position - dx * min;
-    p->unk18 = arg1->y_position - dy * min;
-    p->unk1C = arg1->z_position - dz * min;
+    p->atX = obj->x_position;
+    p->atY = obj->y_position;
+    p->atZ = obj->z_position;
+    p->eyeX = obj->x_position - dx * min;
+    p->eyeY = obj->y_position - dy * min;
+    p->eyeZ = obj->z_position - dz * min;
     p->unk4 = 0;
     p->unk30 = 30.0f;
     p->unk34 = 30.0f;
     p->unk2C = 0.0f;
-    func_1512D560(arg1->camera, 7, p);
+    func_1512D560(obj->camera, 7, p);
     cam->unk19C = 30.0f;
     cam->unk1A4 = 30.0f;
     cam->unk1A0 = 30.0f;
     cam->unk1A8 = 30.0f;
 }
-#undef obj
 
 
 void func_1512D560();
 extern s32 D_800BE9E4;
 
-void func_150896EC(Obj150896EC *arg0, struct127 *arg1, s32 arg2) {
+void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
     struct108 *cam;
     s32 i;
     s32 active;
     f32 angle;
     u8 next;
-    B3020Struct *entry;
-    CamParams150896EC *p;
+    PathNode *entry;
+    CamParams *p;
     f32 xs[4];
     f32 ys[4];
     f32 zs[4];
@@ -1570,69 +1313,69 @@ void func_150896EC(Obj150896EC *arg0, struct127 *arg1, s32 arg2) {
     f32 lys[4];
     f32 lzs[4];
 
-    if (arg1->camera == NULL) {
+    if (obj->camera == NULL) {
         return;
     }
-    cam = arg1->camera;
-    p = &arg0->cam;
-    if (arg2 != 0) {
+    cam = obj->camera;
+    p = &racer->cam;
+    if (leave != 0) {
         p->unk10 = 0x78;
         p->unkC = 999.0f;
-        func_1512D560(arg1->camera, 0xA, p);
-        func_1512D560(arg1->camera, 6, cam->unk23D);
-        arg0->state = 0;
+        func_1512D560(obj->camera, 0xA, p);
+        func_1512D560(obj->camera, 6, cam->unk23D);
+        racer->camState = 0;
         return;
     }
-    if (arg0->state == 0) {
+    if (racer->camState == 0) {
         next = D_800D23A8 + 1;
         i = 0;
         if (D_80087290 > 0) {
             do {
                 entry = &D_800D2350[i];
-                if (((u8 *)entry)[0xE] == 6 && next == ((u8 *)entry)[0xF]) {
-                    arg0->nodes[0] = i;
+                if (entry->type == 6 && entry->param == next) {
+                    racer->camNodes[0] = i;
                     i = D_80087290;
                 }
                 i++;
             } while (i < D_80087290);
         }
-        arg0->nodes[1] = func_1508907C(arg0->nodes[0], 6, 0xFF, 0);
-        arg0->nodes[2] = func_1508907C(arg0->nodes[1], 6, arg0->nodes[0], 0);
-        arg0->nodes[3] = func_1508907C(arg0->nodes[2], 6, arg0->nodes[1], 0);
-        arg0->x = arg1->x_position;
-        arg0->y = arg1->y_position;
-        arg0->z = arg1->z_position;
-        arg0->t = 0.0f;
-        func_1512D560(arg1->camera, 5, cam->unk23D);
-        arg0->state = 1;
+        racer->camNodes[1] = func_1508907C(racer->camNodes[0], 6, 0xFF, 0);
+        racer->camNodes[2] = func_1508907C(racer->camNodes[1], 6, racer->camNodes[0], 0);
+        racer->camNodes[3] = func_1508907C(racer->camNodes[2], 6, racer->camNodes[1], 0);
+        racer->camX = obj->x_position;
+        racer->camY = obj->y_position;
+        racer->camZ = obj->z_position;
+        racer->camT = 0.0f;
+        func_1512D560(obj->camera, 5, cam->unk23D);
+        racer->camState = 1;
     }
-    arg0->t += 0.01700000092f * D_800BE9E4;
-    if (arg0->t >= 1.0f) {
-        if (arg0->nodes[2] == 0xFF) {
-            arg0->t = 1.0f;
+    racer->camT += 0.01700000092f * D_800BE9E4;
+    if (racer->camT >= 1.0f) {
+        if (racer->camNodes[2] == 0xFF) {
+            racer->camT = 1.0f;
         } else {
-            arg0->t -= 1.0f;
-            arg0->nodes[0] = arg0->nodes[1];
-            arg0->nodes[1] = arg0->nodes[2];
-            arg0->nodes[2] = arg0->nodes[3];
-            arg0->nodes[3] = func_1508907C(arg0->nodes[2], 6, arg0->nodes[1], 0);
+            racer->camT -= 1.0f;
+            racer->camNodes[0] = racer->camNodes[1];
+            racer->camNodes[1] = racer->camNodes[2];
+            racer->camNodes[2] = racer->camNodes[3];
+            racer->camNodes[3] = func_1508907C(racer->camNodes[2], 6, racer->camNodes[1], 0);
         }
     }
     active = 0;
     for (i = 0; i < 4; i++) {
-        if (arg0->nodes[i] != 0xFF) {
-            func_15086CBC(arg0->nodes[i], &xs[i], &ys[i], &zs[i]);
+        if (racer->camNodes[i] != 0xFF) {
+            func_15086CBC(racer->camNodes[i], &xs[i], &ys[i], &zs[i]);
             active = 1;
-            func_15086CBC(func_1508907C(arg0->nodes[i], 4, 0xFF, 0), &lxs[i], &lys[i], &lzs[i]);
+            func_15086CBC(func_1508907C(racer->camNodes[i], 4, 0xFF, 0), &lxs[i], &lys[i], &lzs[i]);
         } else if (active == 1) {
             active = 0;
-            angle = arg1->unk40 * 0.0174500000000000002;
-            xs[i] = arg0->x - sinf(angle) * 500.0f;
-            ys[i] = arg0->y + 180.0f;
-            zs[i] = arg0->z - cosf(angle) * 500.0f;
-            lxs[i] = arg0->x;
-            lys[i] = arg0->y + 120.0f;
-            lzs[i] = arg0->z;
+            angle = obj->unk40 * 0.0174500000000000002;
+            xs[i] = racer->camX - sinf(angle) * 500.0f;
+            ys[i] = racer->camY + 180.0f;
+            zs[i] = racer->camZ - cosf(angle) * 500.0f;
+            lxs[i] = racer->camX;
+            lys[i] = racer->camY + 120.0f;
+            lzs[i] = racer->camZ;
         } else {
             xs[i] = xs[i - 1] + (xs[i - 1] - xs[i - 2]);
             ys[i] = ys[i - 1] + (ys[i - 1] - ys[i - 2]);
@@ -1642,20 +1385,20 @@ void func_150896EC(Obj150896EC *arg0, struct127 *arg1, s32 arg2) {
             lzs[i] = lzs[i - 1] + (lzs[i - 1] - lzs[i - 2]);
         }
     }
-    angle = arg0->t;
-    p = &arg0->cam;
-    p->unk14 = func_150497E0(xs, 0, angle);
-    p->unk18 = func_150497E0(ys, 0, angle);
-    p->unk1C = func_150497E0(zs, 0, angle);
-    p->unk20 = func_150497E0(lxs, 0, angle);
-    p->unk24 = func_150497E0(lys, 0, angle);
-    p->unk28 = func_150497E0(lzs, 0, angle);
+    angle = racer->camT;
+    p = &racer->cam;
+    p->eyeX = func_150497E0(xs, 0, angle);
+    p->eyeY = func_150497E0(ys, 0, angle);
+    p->eyeZ = func_150497E0(zs, 0, angle);
+    p->atX = func_150497E0(lxs, 0, angle);
+    p->atY = func_150497E0(lys, 0, angle);
+    p->atZ = func_150497E0(lzs, 0, angle);
     p->unk0 = 0;
     p->unk4 = 0;
     p->unk30 = 30.0f;
     p->unk34 = 30.0f;
     p->unk2C = 0.0f;
-    func_1512D560(arg1->camera, 7, p);
+    func_1512D560(obj->camera, 7, p);
 }
 
 void func_15089BB0(void) {
@@ -2250,7 +1993,7 @@ typedef struct {
 } Search1508B2A8;
 
 void func_1508B2A8(u8 id, Search1508B2A8 *s) {
-    Node15088F30 *node;
+    PathNode *node;
     f32 dx;
     f32 dist;
     s32 j;
@@ -2258,7 +2001,7 @@ void func_1508B2A8(u8 id, Search1508B2A8 *s) {
 
     /* BUG (original game): the bit index should be id & 7, so ids 8 apart share a visited bit */
     s->visited[id >> 3] |= 1 << (id & 3);
-    node = id + (Node15088F30 *)D_800D2350;
+    node = id + D_800D2350;
     dx = node->x - s->x;
     dist = node->z - s->z;
     dist = (dx * dx) + (dist * dist);
@@ -2317,7 +2060,7 @@ void func_1508B3F8(void) {
     Entry1508B3F8 *e;
     Search1508B3F8 s;
     f32 bestDist;
-    B3020Struct *node;
+    PathNode *node;
 
     zone = (s32 *)(D_800D23B0 + 0x55C);
     e = (Entry1508B3F8 *)(D_800D23B0 + 0x1748);
@@ -2356,8 +2099,8 @@ void func_1508B3F8(void) {
                     }
                     for (k = 0; k < s.count; k++) {
                         node = &D_800D2350[s.ids[k]];
-                        dx = node->unk0 - obj->x_position;
-                        d = node->unk4 - obj->z_position;
+                        dx = node->x - obj->x_position;
+                        d = node->z - obj->z_position;
                         d = dx * dx + d * d;
                         if (d < s.dist[k] && d < bestDist) {
                             best = s.ids[k];
@@ -2369,7 +2112,7 @@ void func_1508B3F8(void) {
                         if (zone[j] != -2) {
                             ((s32 *)(D_800D23B0 + 0x5C))[j] = 1;
                         }
-                        zone[j] = ((u8 *)node)[7];
+                        zone[j] = node->unk7;
                     }
                 }
             }
@@ -3274,6 +3017,7 @@ s32 func_1508DA1C(void) {
 
 extern struct127 D_800CC2D0[26];
 extern s8 *D_800D23B0;
+s32 func_1508802C();
 s32 func_1508DAEC(s32 arg0, s32 arg1)
 {
   s8 *base;
