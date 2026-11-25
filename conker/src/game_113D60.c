@@ -12,10 +12,7 @@ typedef struct {
 extern void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct Game113D60Emission {
-    /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
-    /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
-    /* 0x20 */ f32 time, rate, remaining;
-    /* 0x2C */ Vec3f position;
+    /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 scale;
     /* 0x3C */ s16 duration, durationRange;
     /* 0x40 */ u8 color;
@@ -87,17 +84,17 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
                 if (source->motion != -1) {
                     D_80088A34[source->motion](&start, &end, &delta, &emission);
                 } else {
-                    emission.x = 0.0f;
-                    emission.amplitudeX = 0.0f;
-                    emission.phaseX = 0.0f;
-                    emission.y = 0.0f;
-                    emission.amplitudeY = 0.0f;
-                    emission.phaseY = 0.0f;
+                    emission.stream.angleX = 0.0f;
+                    emission.stream.amplitudeX = 0.0f;
+                    emission.stream.phaseX = 0.0f;
+                    emission.stream.angleY = 0.0f;
+                    emission.stream.amplitudeY = 0.0f;
+                    emission.stream.phaseY = 0.0f;
                 }
-                emission.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
-                emission.remaining = 0.0f;
-                emission.position = start;
-                emission.time = 0.0f;
+                emission.stream.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
+                emission.stream.remaining = 0.0f;
+                emission.stream.position = start;
+                emission.stream.time = 0.0f;
                 emission.scale = (func_150ADA68() * 100.0f + 150.0f) * 0.1000000015f;
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
@@ -140,40 +137,40 @@ void func_150E6B84(Game113D60Effect *effect) {
     u32 randomColor;
 
     emission = &effect->emission;
-    effect->emission.remaining += effect->emission.rate * D_800BE9A4;
-    if (effect->emission.remaining > 1.0f) {
-        inverse = 1.0f / emission->remaining;
+    effect->emission.stream.remaining += effect->emission.stream.rate * D_800BE9A4;
+    if (effect->emission.stream.remaining > 1.0f) {
+        inverse = 1.0f / emission->stream.remaining;
         factor = 0.1f;
-        time = emission->time + D_800BE9A4;
+        time = emission->stream.time + D_800BE9A4;
         timeStep = time * inverse;
-        speedX = emission->speedX * D_800BE9A4;
-        speedY = emission->speedY * D_800BE9A4;
-        phaseX = emission->phaseX;
-        phaseY = emission->phaseY;
+        speedX = emission->stream.speedX * D_800BE9A4;
+        speedY = emission->stream.speedY * D_800BE9A4;
+        phaseX = emission->stream.phaseX;
+        phaseY = emission->stream.phaseY;
         phaseStepX = speedX * inverse;
         phaseStepY = speedY * inverse;
         do {
             sineX = sinf(phaseX);
             sineY = sinf(phaseY);
-            func_151436B4(emission->x + sineX * emission->amplitudeX, emission->y + sineY * emission->amplitudeY, 5.0f,
-                          &direction);
+            func_151436B4(emission->stream.angleX + sineX * emission->stream.amplitudeX,
+                          emission->stream.angleY + sineY * emission->stream.amplitudeY, 5.0f, &direction);
             randomX = func_150ADA68();
             randomY = func_150ADA68();
             randomColor = func_150ADA20();
             randomDuration = func_150ADA20();
-            func_150E5FD0(&emission->position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
+            func_150E5FD0(&emission->stream.position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
                           (randomY * 700.0f + 300.0f) * factor, effect->base.header.owner, effect->base.header.kind,
                           emission->color, randomColor % 86 + 170,
                           randomDuration % (u32)(emission->durationRange + 1) + emission->duration, -1);
             phaseX += phaseStepX;
             phaseY += phaseStepY;
             time -= timeStep;
-            emission->remaining -= 1.0f;
-        } while (emission->remaining > 1.0f);
+            emission->stream.remaining -= 1.0f;
+        } while (emission->stream.remaining > 1.0f);
         period = 6.283185482f;
-        emission->phaseX = func_15144528(phaseX, period, 0.0f);
-        emission->phaseY = func_15144528(phaseY, period, 0.0f);
-        emission->time = time;
+        emission->stream.phaseX = func_15144528(phaseX, period, 0.0f);
+        emission->stream.phaseY = func_15144528(phaseY, period, 0.0f);
+        emission->stream.time = time;
     }
 }
 
@@ -267,28 +264,28 @@ void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     f32 dx;
     f32 dz;
 
-    emission->x = func_150484A0(delta->x, delta->z);
-    emission->amplitudeX = func_150ADA68() * 0.09000000358f;
-    emission->phaseX = func_150ADA68() * 6.283185482f;
-    emission->speedX = func_150ADA68() * 0.5f;
+    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.amplitudeX = func_150ADA68() * 0.09000000358f;
+    emission->stream.phaseX = func_150ADA68() * 6.283185482f;
+    emission->stream.speedX = func_150ADA68() * 0.5f;
     dx = delta->x;
     dz = delta->z;
-    emission->y = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
-    emission->amplitudeY = func_150ADA68() * 0.0700000003f;
-    emission->phaseY = func_150ADA68() * 6.283185482f;
-    emission->speedY = func_150ADA68() * 0.5f;
+    emission->stream.angleY = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
+    emission->stream.amplitudeY = func_150ADA68() * 0.0700000003f;
+    emission->stream.phaseY = func_150ADA68() * 6.283185482f;
+    emission->stream.speedY = func_150ADA68() * 0.5f;
 }
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
-    emission->x = func_150484A0(delta->x, delta->z);
-    emission->amplitudeX = 0.471238941f;
-    emission->phaseX = func_150ADA68() * 6.283185482f;
-    emission->speedX = func_150ADA68() * 0.200000003f;
-    emission->y = -0.5654867291f;
-    emission->amplitudeY = 0.3141592741f;
-    emission->phaseY = func_150ADA68() * 6.283185482f;
-    emission->speedY = func_150ADA68() * 0.150000006f;
+    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.amplitudeX = 0.471238941f;
+    emission->stream.phaseX = func_150ADA68() * 6.283185482f;
+    emission->stream.speedX = func_150ADA68() * 0.200000003f;
+    emission->stream.angleY = -0.5654867291f;
+    emission->stream.amplitudeY = 0.3141592741f;
+    emission->stream.phaseY = func_150ADA68() * 6.283185482f;
+    emission->stream.speedY = func_150ADA68() * 0.150000006f;
 }
 
 typedef struct {
