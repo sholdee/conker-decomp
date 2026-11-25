@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+// matching: these two are declared here with types that differ from the shared headers
 #define func_1506160C func_1506160C_hdr
 #include "functions.h"
 #undef func_1506160C
@@ -11,7 +12,7 @@ extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-extern void func_1507D1D8();
+void func_1507D1D8(struct127 *obj);
 extern void func_1509C3A0(void);
 
 
@@ -322,106 +323,101 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     }
 }
 
-void func_1509BFB0(s32 num, s32, s32, ...);
-extern struct127 D_800CC40F[];
+/* Forwards four arguments to func_1509BFB0(3, ...) keyed by object slot's unk13F | 0x2000. */
+void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 value = D_800CC2D0[slot].unk13F;
 
-void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 temp = *(u8*)&D_800CC40F[arg0];
-    func_1509BFB0(3, temp | 0x2000, arg1, arg2, arg3, arg4);
+    func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-typedef struct GameA9D90Inner {
-    u8 pad0[0x120];
-    u8 field_120;
-    u8 pad121[3];
-    s16 field_124;
-} GameA9D90Inner;
+/* 0x30-byte entries of the D_800D20FC table, one per object slot. */
+typedef struct D20FCEntry {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5[0x2B];
+} D20FCEntry;
 
-typedef struct GameA9D90Object {
-    u8 pad0[0x31C];
-    GameA9D90Inner *field_31C;
-} GameA9D90Object;
-
-void func_150054C4(u8 *, u32, s32, s32);
-void func_15085430(void *, s32, s32);
+void func_150054C4(struct108 *, u32, s32, s32);
+void func_15085430(struct127 *, s32, s32);
 void func_15181DC8(s32);
 void func_15082A44(s32, s32, s32, s32, s32);
-void func_15088D58(GameA9D90Object *);
+void func_15088D58(struct127 *);
 extern s16 D_800BE9F2;
 extern s32 D_800D20FC;
 
-void func_1507D1D8(GameA9D90Object *arg0) {
+/* Respawns obj: re-initialises it through func_15082A44, keeping a few state bytes across the reset. */
+void func_1507D1D8(struct127 *obj) {
     s32 value;
-    s32 saved;
+    s32 saved1AA;
     s8 player;
-    s8 state;
-    s8 actorState;
-    s8 mode;
+    s8 saved1B0;
+    s8 saved328;
+    s8 saved1AF;
     s32 choice;
-    GameA9D90Inner *inner;
+    ObjState *state;
     s32 slot;
-    union { s32 word; s16 halves[2]; } index;
+    union { s32 word; s16 halves[2]; } index; // matching: memory-resident; IDO reloads (s16)slot with lh from its low half
 
-    inner = arg0->field_31C;
-    saved = *(s16 *)((u8 *)inner + 0x1AA);
-    state = *(s8 *)((u8 *)inner + 0x1B0);
-    actorState = *(s8 *)((u8 *)arg0 + 0x328);
-    mode = *(s8 *)((u8 *)inner + 0x1AF);
+    state = STATE(obj);
+    saved1AA = state->unk1AA;
+    saved1B0 = state->unk1B0;
+    saved328 = *(s8 *)&obj->pad320[8]; // signed byte at 0x328 (struct127 types it u8)
+    saved1AF = state->unk1AF;
     if (D_800BE616 != 0) {
-        player = inner->pad0[0x11B];
+        player = state->unk11B;
     } else {
         player = -1;
     }
     if (D_800BE9F0 == 0x2B) {
-        slot = ((u8 *)arg0 - (u8 *)D_800CC2D0) / 812;
+        slot = obj - D_800CC2D0;
         index.word = (s16)slot;
-        value = func_150859AC((s16)slot, 1);
+        value = func_150859AC(slot, 1);
         if (value >= 0x11 && value < 0x21) {
             choice = (func_150ADA20() & 0xF) + 0x11;
             func_15085710(index.halves[1], 0, choice);
             if (choice < 0x1D) {
-                *(u8 *)(D_800D20FC + slot * 0x30 + 4) = 0x9C;
+                ((D20FCEntry *)D_800D20FC)[slot].unk4 = 0x9C;
             } else {
-                *(u8 *)(D_800D20FC + slot * 0x30 + 4) = 0x9D;
+                ((D20FCEntry *)D_800D20FC)[slot].unk4 = 0x9D;
             }
         }
     }
-    slot = ((u8 *)arg0 - (u8 *)D_800CC2D0) / 812;
-    index.word = slot * 0x30;
-    func_15060F28((struct127 *)arg0, 0);
+    slot = obj - D_800CC2D0;
+    index.word = slot * sizeof(D20FCEntry);
+    func_15060F28(obj, 0);
     D_800D18A8 = 1;
     func_15082A44(index.word + D_800D20FC, slot, 0, 0, 0);
-    *(s8 *)((u8 *)arg0->field_31C + 0x1B0) = state;
-    *(s8 *)((u8 *)arg0->field_31C + 0x1AF) = mode;
-    *(s8 *)((u8 *)arg0 + 0x328) = actorState;
+    STATE(obj)->unk1B0 = saved1B0;
+    STATE(obj)->unk1AF = saved1AF;
+    obj->pad320[8] = saved328;
     if (D_80082FA0 >= slot) {
-        func_150054C4(slot * 0x9A0 + (u8 *)D_800DBFF0, slot, D_800BE9F2, (s8)player);
+        func_150054C4(&D_800DBFF0[slot], slot, D_800BE9F2, player);
         func_15181DC8(slot);
         func_1517EE40(0, 0, 0, 0, 1, slot);
-        func_1517EE40(0, 0, 0, 0x1E, 0, slot);
+        func_1517EE40(0, 0, 0, 30, 0, slot);
     } else {
-        func_15085430(arg0, (s8)player, 0);
+        func_15085430(obj, player, 0);
     }
     D_800D18A8 = 0;
-    arg0->field_31C->field_120 = 0;
-    arg0->field_31C->pad121[1] = 0;
-    arg0->field_31C->field_124 = 0;
-    *(s16 *)((u8 *)arg0->field_31C + 0x1AA) = saved;
-    arg0->pad0[0x1CA] = D_8008726C;
-    *(u16 *)((u8 *)arg0 + 0x22C) = *(u16 *)((u8 *)arg0 + 0x22C) | 0x100;
-    arg0->field_31C->pad0[0x75] = 0;
-    arg0->pad0[0x20F] = 0xFF;
-    arg0->pad0[0x210] = 0xFF;
-    arg0->pad0[0x211] = 0xFF;
-    arg0->pad0[0x232] = 1;
-    *(s32 *)((u8 *)arg0 + 0x218) = 0;
-    arg0->field_31C->pad0[0x11B] = (s8)player;
+    STATE(obj)->state = 0;
+    STATE(obj)->finished = FALSE;
+    STATE(obj)->timer = 0;
+    STATE(obj)->unk1AA = saved1AA;
+    obj->health = D_8008726C;
+    obj->unk22C |= 0x100;
+    STATE(obj)->unk75 = 0;
+    obj->unk20F = 0xFF;
+    obj->pad210 = 0xFF;
+    obj->unk211 = 0xFF;
+    obj->unk232 = 1;
+    obj->unk218 = NULL;
+    STATE(obj)->unk11B = player;
     if (D_800BE616 != 0) {
-        arg0->pad0[0x125] = 0x96;
-        *(u8 *)((u8 *)arg0->field_31C + 0x1B1) = arg0->pad0[0x125];
+        obj->immune = 150;
+        STATE(obj)->unk1B1 = obj->immune;
         if (D_800BE9F0 == 0x33) {
-            func_1507D158(slot, 0x78, 0, 0, 0);
-            func_15088D58(arg0);
+            func_1507D158(slot, 120, 0, 0, 0);
+            func_15088D58(obj);
         }
     }
 }
