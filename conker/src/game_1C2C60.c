@@ -515,22 +515,21 @@ typedef struct CharacterFlamethrowerActor {
 /* Spawn header passed to func_15147A80. */
 typedef struct EffectSpawn {
     /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
+    /* 0x0C */ s16 lifetime;
+    /* 0x0E */ u16 kind;
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ u8 mode;
+    /* 0x15 */ u8 id;
+    /* 0x16 */ u8 pad16[6];
 } EffectSpawn;
 
 /* Preset in D_800A87A0 that func_15196438 copies into a CharacterFlamethrowerJet. */
 typedef struct CharacterFlamethrowerJetTemplate {
-    /* 0x00 */ s16 unk0;
+    /* 0x00 */ s16 lifetime;
     /* 0x04 */ f32 gravity;
     /* 0x08 */ f32 emitRate;
     /* 0x0C */ u8 shade;
-    /* 0x10 */ s32 unk10;
+    /* 0x10 */ s32 id;
     /* 0x14 */ u8 bone;
     /* 0x18 */ Vec3f startOffset;
     /* 0x24 */ Vec3f endOffset;
@@ -547,7 +546,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x40 */ s8 soundUpdateFn;
     /* 0x41 */ s8 soundStopFn;
     /* 0x42 */ s8 unk42;
-    /* 0x44 */ u16 unk44;
+    /* 0x44 */ u16 kind;
     /* 0x46 */ u8 childPreset;
     /* 0x47 */ u8 childLife;
     /* 0x48 */ f32 childRate;
@@ -676,11 +675,11 @@ CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2,
     jet.initFn = entry->initFn;
     jet.updateFn = entry->updateFn;
     jet.destroyFn = entry->destroyFn;
-    spawn.unkC = entry->unk0;
+    spawn.lifetime = entry->lifetime;
     jet.gravity = entry->gravity;
     jet.emitRate = entry->emitRate;
     jet.shade = entry->shade;
-    spawn.unk15 = entry->unk10;
+    spawn.id = entry->id;
     jet.bone = entry->bone;
     jet.startOffset = entry->startOffset;
     jet.endOffset = entry->endOffset;
@@ -688,7 +687,7 @@ CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2,
     jet.fadeRate = entry->fadeRate;
     jet.life = entry->life;
     jet.holdTime = entry->holdTime;
-    spawn.unkE = entry->unk44;
+    spawn.kind = entry->kind;
     jet.childLife = entry->childLife;
     jet.scatterPreset = entry->scatterPreset;
     jet.spritePreset = entry->spritePreset;
@@ -714,7 +713,7 @@ CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2,
     matrix = (s32)jet.owner->unk1D4 + (jet.bone << 6);
     func_15143134(&jet.startOffset, &jet.start, matrix);
     func_15143134(&jet.endOffset, &jet.end, matrix);
-    spawn.unk10 = 3;
+    spawn.flags = 3;
     spawn.pos.x = jet.start.x;
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
@@ -2118,95 +2117,182 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
     }
 }
 
-typedef struct { f32 x, y, z; } Vec3f_151994B8;
-typedef struct CharacterFlamethrowerIdentity_151994B8 {
-    char pad0[0x3B];
-    u8 unk3B;
-} CharacterFlamethrowerIdentity_151994B8;
-typedef struct {
-    char pad0[0x130];
-    u16 unk130;
-    char pad132[0x16];
-    void *unk148;
-} CharacterFlamethrowerState_151994B8;
-typedef struct {
-    char pad0[0x98];
-    CharacterFlamethrowerState_151994B8 *state;
-} CharacterFlamethrowerActor_151994B8;
-typedef struct {
-    CharacterFlamethrowerIdentity_151994B8 *owner;
-    u8 generation, joint, flags, pad07;
-    Vec3f_151994B8 first, second;
-    u8 pad20[0x14];
-    s8 initialize, field35, field36, sound;
-    u8 field38, field39, size;
-    u8 pad3B[0x11];
-} CharacterFlamethrowerSeed;
-typedef struct { s32 words[17]; } CharacterFlamethrowerRecord44;
-typedef struct { s32 words[15]; } CharacterFlamethrowerRecord3C;
-typedef struct {
-    s32 kind;
-    CharacterFlamethrowerSeed seed;
-    u8 red, green, blue, alpha, flags;
-    u8 pad55[3];
-    CharacterFlamethrowerRecord44 first, second;
-    CharacterFlamethrowerRecord3C third;
-} CharacterFlamethrowerSetup;
-typedef struct {
-    CharacterFlamethrowerSeed seed;
-    CharacterFlamethrowerRecord44 first, second;
-    CharacterFlamethrowerRecord3C third;
-    Vec3f_151994B8 firstPosition, secondPosition;
-    f32 field128, field12C;
-    u8 pad130[4];
-    f32 field134, field138, field13C, size, minimum;
-    void *light;
-    f32 field14C;
-    u8 flags, field151;
-    s16 field152;
-} CharacterFlamethrowerInitialState;
-typedef struct {
-    union {
-        Vec3f_151994B8 vector;
-        f32 values[3];
-    } position;
-    s16 lifetime;
-    u16 kind;
-    s32 flags;
-    u8 mode, id;
-    u8 pad16[6];
-} CharacterFlamethrowerFullSpawn;
+/* One point of a flame's ring buffer (0x28 bytes). */
+typedef struct FlamePoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
+    /* 0x18 */ f32 size;
+    /* 0x1C */ f32 length; /* distance to the next newer point */
+    /* 0x20 */ u8 alpha;
+    /* 0x21 */ u8 pad21[3];
+    /* 0x24 */ f32 texT;
+} FlamePoint;
 
-void func_15145EA4(s32 *, s32 *, s32, s32);
+/* First 0x4C bytes of a flame's state, also given in its CharacterFlamethrowerSetup. */
+typedef struct FlameSeed {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id */
+    /* 0x05 */ u8 bone;
+    /* 0x06 */ u8 flags;
+    /* 0x07 */ u8 pad07;
+    /* 0x08 */ Vec3f startOffset;
+    /* 0x14 */ Vec3f endOffset;
+    /* 0x20 */ f32 gravity;
+    /* 0x24 */ f32 emitRate;
+    /* 0x28 */ f32 maxLength;
+    /* 0x2C */ f32 size;
+    /* 0x30 */ f32 sizeRate;
+    /* 0x34 */ s8 initFn;      /* D_8008F8A4 index */
+    /* 0x35 */ s8 unk35;       /* D_8008F8A8 index */
+    /* 0x36 */ s8 destroyFn;   /* D_8008F8B4 index */
+    /* 0x37 */ s8 soundFn;     /* D_8008F8B8 index */
+    /* 0x38 */ s8 unk38;       /* D_8008F8BC index */
+    /* 0x39 */ s8 soundStopFn; /* D_8008F8C0 index */
+    /* 0x3A */ u8 alpha;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ f32 fadeStart; /* fraction of the length after which points fade out */
+    /* 0x40 */ f32 texSpeed;
+    /* 0x44 */ f32 texScale;
+    /* 0x48 */ s8 updateFn; /* D_8008F8C4 index */
+    /* 0x49 */ u8 pad49[3];
+} FlameSeed;
+
+/* Parameters of the line particles (func_1513D2F0) a flame sheds near its far end; random values are min + range. */
+typedef struct FlameLineParams {
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
+    /* 0x08 */ s16 lifeMin;
+    /* 0x0A */ s16 lifeRange;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 speedMin;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ f32 position; /* fraction of the length where they spawn */
+    /* 0x3C */ u8 unk3C;
+    /* 0x3D */ u8 unk3D;
+    /* 0x3E */ u8 pad3E[2];
+    /* 0x40 */ f32 unk40;
+} FlameLineParams;
+
+/* Parameters of the particles (func_15147DA0) a flame scatters towards `target`; random values are min + range. */
+typedef struct FlameScatterParams {
+    /* 0x00 */ Vec3f target; /* bone-relative */
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 speedMin;
+    /* 0x2C */ f32 speedRange;
+    /* 0x30 */ f32 spread;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;
+    /* 0x40 */ s16 unk40;
+    /* 0x42 */ s16 unk42;
+} FlameScatterParams;
+
+/* Parameters of the particles (func_15130280) a flame emits towards `target`; random values are min + range. */
+typedef struct FlameEmitParams {
+    /* 0x00 */ Vec3f target; /* bone-relative */
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 speedMin;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ f32 spread;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+} FlameEmitParams;
+
+/* State block of a flame effect (func_151994B8): a ribbon of FlamePoints between two bone-relative points. */
+typedef struct CharacterFlamethrowerFlame {
+    /* 0x000 */ FlameSeed seed;
+    /* 0x04C */ FlameLineParams line;
+    /* 0x090 */ FlameScatterParams scatter;
+    /* 0x0D4 */ FlameEmitParams emit;
+    /* 0x110 */ Vec3f start;
+    /* 0x11C */ Vec3f end;
+    /* 0x128 */ f32 timeCarry;
+    /* 0x12C */ f32 emitAccum;
+    /* 0x130 */ u16 sound;
+    /* 0x132 */ u8 pad132[2];
+    /* 0x134 */ f32 lineAccum;
+    /* 0x138 */ f32 scatterAccum;
+    /* 0x13C */ f32 particleAccum;
+    /* 0x140 */ f32 alpha;
+    /* 0x144 */ f32 texOffset;
+    /* 0x148 */ struct225 *light; /* from func_1519C09C */
+    /* 0x14C */ f32 length;
+    /* 0x150 */ u8 flags;
+    /* 0x151 */ s8 timer151;
+    /* 0x152 */ s16 sparkTimer;
+} CharacterFlamethrowerFlame;
+
+/* Spawn parameters for func_151994B8. */
+typedef struct CharacterFlamethrowerSetup {
+    /* 0x00 */ s32 kind;
+    /* 0x04 */ FlameSeed seed;
+    /* 0x50 */ u8 red;
+    /* 0x51 */ u8 green;
+    /* 0x52 */ u8 blue;
+    /* 0x53 */ u8 alpha;
+    /* 0x54 */ u8 flags;
+    /* 0x55 */ u8 pad55[3];
+    /* 0x58 */ FlameLineParams line;
+    /* 0x9C */ FlameScatterParams scatter;
+    /* 0xE0 */ FlameEmitParams emit;
+} CharacterFlamethrowerSetup;
+
+void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
 struct225 *func_1519C09C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
 extern void (*D_8008F8A4[])(void *);
 extern s16 (*D_8008F8B8[])(void);
 
-void *func_151994B8(s32 arg0, CharacterFlamethrowerSetup *arg1, u8 arg2, s32 arg3) {
-    CharacterFlamethrowerActor_151994B8 *result;
-    CharacterFlamethrowerFullSpawn spawn;
-    CharacterFlamethrowerInitialState initial;
-    CharacterFlamethrowerIdentity_151994B8 *owner;
-    Vec3f_151994B8 *inputs[2];
-    Vec3f_151994B8 *outputs[2];
-    CharacterFlamethrowerState_151994B8 *state;
+/* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
+CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
+    CharacterFlamethrowerActor *result;
+    EffectSpawn spawn;
+    CharacterFlamethrowerFlame initial;
+    struct127 *owner;
+    Vec3f *inputs[2];
+    Vec3f *outputs[2];
+    CharacterFlamethrowerFlame *state;
 
-    owner = arg1->seed.owner;
-    if (*(s32 *)((u8 *)owner + 0x1D4) == 0) {
+    owner = setup->seed.owner;
+    if (owner->unk1D4 == NULL) {
         return NULL;
     }
-    spawn.id = arg1->kind;
-    spawn.lifetime = 0x12C;
+    spawn.id = setup->kind;
+    spawn.lifetime = 300;
     spawn.kind = 0x12;
     spawn.flags = 0xE;
     spawn.mode = 0;
-    initial.seed = arg1->seed;
-    inputs[0] = &initial.seed.first;
-    inputs[1] = &initial.seed.second;
-    outputs[0] = &initial.firstPosition;
-    outputs[1] = &initial.secondPosition;
-    func_15145EA4((s32 *)inputs, (s32 *)outputs,
-                   *(s32 *)((u8 *)owner + 0x1D4) + (initial.seed.joint << 6), 2);
+    initial.seed = setup->seed;
+    inputs[0] = &initial.seed.startOffset;
+    inputs[1] = &initial.seed.endOffset;
+    outputs[0] = &initial.start;
+    outputs[1] = &initial.end;
+    func_15145EA4(inputs, outputs, (s32)owner->unk1D4 + (initial.seed.bone << 6), 2);
     {
         s32 flag8;
         s32 flag4;
@@ -2214,45 +2300,44 @@ void *func_151994B8(s32 arg0, CharacterFlamethrowerSetup *arg1, u8 arg2, s32 arg
         s32 flag32;
         s32 flags;
 
-        spawn.position.vector = initial.firstPosition;
-        initial.field128 = 0.0f;
-        initial.field12C = 0.0f;
-        initial.size = (f32)(u32)initial.seed.size;
-        initial.minimum = -16384.0f;
-        initial.first = arg1->first;
-        initial.field134 = 0.0f;
-        initial.second = arg1->second;
-        initial.field138 = 0.0f;
-        initial.third = arg1->third;
-        initial.field13C = 0.0f;
-        initial.field14C = 0.0f;
-        flags = arg1->flags;
+        spawn.pos = initial.start;
+        initial.timeCarry = 0.0f;
+        initial.emitAccum = 0.0f;
+        initial.alpha = (f32)(u32)initial.seed.alpha;
+        initial.texOffset = -16384.0f;
+        initial.line = setup->line;
+        initial.lineAccum = 0.0f;
+        initial.scatter = setup->scatter;
+        initial.scatterAccum = 0.0f;
+        initial.emit = setup->emit;
+        initial.particleAccum = 0.0f;
+        initial.length = 0.0f;
+        flags = setup->flags;
         flag8 = (flags & 8) ? 8 : 0;
         flag4 = (flags & 4) ? 4 : 0;
         flag2 = (flags & 2) ? 2 : 0;
         flag32 = (flags & 0x10) ? 0x20 : 0;
         initial.flags = flag32 | flag2 | flag4 | flag8;
-        initial.field152 = 0;
-        initial.field151 = 0;
-        result = func_15147A80(&spawn, (s32)(arg0 + 0x158), 0x28,
-                               0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);
+        initial.sparkTimer = 0;
+        initial.timer151 = 0;
+        result = func_15147A80(&spawn, extraSize + 0x158, sizeof(FlamePoint), 0xC,
+                               0xC, 0xC, 0, 0, 0, arg2, arg3);
         if (result != NULL) {
             state = result->state;
-            memcpy(state, &initial, 0x154);
-            if (initial.seed.sound != -1) {
-                state->unk130 = D_8008F8B8[initial.seed.sound]();
+            memcpy(state, &initial, sizeof(CharacterFlamethrowerFlame));
+            if (initial.seed.soundFn != -1) {
+                state->sound = D_8008F8B8[initial.seed.soundFn]();
             } else {
-                state->unk130 = 0;
+                state->sound = 0;
             }
-            if (initial.seed.initialize != -1) {
-                D_8008F8A4[initial.seed.initialize](result);
+            if (initial.seed.initFn != -1) {
+                D_8008F8A4[initial.seed.initFn](result);
             }
-            if (arg1->flags & 1) {
-                state->unk148 = (void *)func_1519C09C((s32)result, spawn.position.values,
-                                   arg1->red, arg1->green, arg1->blue, arg1->alpha,
-                                   arg2, arg3);
+            if (setup->flags & 1) {
+                state->light = func_1519C09C((s32)result, &spawn.pos.x, setup->red, setup->green, setup->blue,
+                                         setup->alpha, arg2, arg3);
             } else {
-                state->unk148 = NULL;
+                state->light = NULL;
             }
         }
     }
@@ -2291,149 +2376,100 @@ void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kin
     }
 }
 
-void func_15199980(void *);
-void func_151478F4(void *);
+void func_15199980(CharacterFlamethrowerActor *actor);
 
-void func_15199928(void *arg0) {
-    func_15199980(arg0);
-    func_151478F4(arg0);
+/* Flame destroy: callbacks, then func_151478F4. */
+void func_15199928(CharacterFlamethrowerActor *actor) {
+    func_15199980(actor);
+    func_151478F4(actor);
 }
 
-void func_15147928(void *);
-
-void func_15199954(void *arg0) {
-    func_15199980(arg0);
-    func_15147928(arg0);
+/* Flame destroy: callbacks, then func_15147928. */
+void func_15199954(CharacterFlamethrowerActor *actor) {
+    func_15199980(actor);
+    func_15147928(actor);
 }
 
 extern void (*D_8008F8C0[])(void *);
 extern void (*D_8008F8B4[])(void *);
 
-void func_15199980(void *arg0) {
-    s8 *temp;
-    struct102 *p;
+/* Runs a flame's destroy callbacks and removes its light. */
+void func_15199980(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    struct225 *light;
 
-    temp = *(s8 **)((u8 *)arg0 + 0x98);
-    if (temp[0x39] != -1) {
-        D_8008F8C0[temp[0x39]](arg0);
+    flame = actor->state;
+    if (flame->seed.soundStopFn != -1) {
+        D_8008F8C0[flame->seed.soundStopFn](actor);
     }
-    if (temp[0x36] != -1) {
-        D_8008F8B4[temp[0x36]](arg0);
+    if (flame->seed.destroyFn != -1) {
+        D_8008F8B4[flame->seed.destroyFn](actor);
     }
-    p = *(struct102 **)(temp + 0x148);
-    if (p != 0) {
-        func_1516972C(p);
+    light = flame->light;
+    if (light != NULL) {
+        func_1516972C((struct102 *)light);
     }
 }
 
 extern s32 (*D_8008F8C4[])(void *);
 extern void (*D_8008F8BC[])(void *);
 
-void func_1519BE1C(struct17 *arg0, struct17 *arg1, f32 arg2, f32 arg3);
+void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt);
 
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    char pad1C[0x28 - 0x1C];
-} Struct15199A10Point;
-
-typedef struct {
-    char pad0[0xE];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-} Struct15199A10Out;
-
-typedef struct {
-    char pad0[0x14];
-    Struct15199A10Out *unk14;
-} Struct15199A10Node;
-
-typedef struct {
-    char pad0[0x20];
-    f32 unk20;
-    char pad24[0x30 - 0x24];
-    f32 unk30;
-    char pad34[0x38 - 0x34];
-    s8 unk38;
-    char pad39[0x48 - 0x39];
-    s8 unk48;
-    char pad49[0x148 - 0x49];
-    Struct15199A10Node *unk148;
-    char pad14C[0x150 - 0x14C];
-    u8 unk150;
-} Struct15199A10Data;
-
-typedef struct {
-    char pad0[0x1E];
-    u16 unk1E;
-    char pad20[0x25 - 0x20];
-    u8 unk25;
-    char pad26[0x2C - 0x26];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    char pad2F[0x54 - 0x2F];
-    struct17 unk54;
-    char pad60[0x94 - 0x60];
-    Struct15199A10Point *unk94;
-    Struct15199A10Data *unk98;
-} Struct15199A10;
-
-s32 func_15199A10(Struct15199A10 *arg0) {
-    Struct15199A10Data *data;
-    Struct15199A10Point *pts;
+/* Per-frame flame update: moves its points under gravity and keeps the light at the oldest point. */
+s32 func_15199A10(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    FlamePoint *points;
     s32 i;
 
-    data = arg0->unk98;
-    pts = arg0->unk94;
-    data->unk150 &= ~0x10;
-    if (arg0->unk2C < 2) {
-        if (arg0->unk1E & 8) {
+    flame = actor->state;
+    points = actor->points;
+    flame->flags &= ~0x10;
+    if (actor->count < 2) {
+        if (actor->flags1E & 8) {
             return 0;
         }
     }
-    if (data->unk48 != -1) {
-        if (D_8008F8C4[data->unk48](arg0) == 0) {
+    if (flame->seed.updateFn != -1) {
+        if (D_8008F8C4[flame->seed.updateFn](actor) == 0) {
             return 0;
         }
     }
-    i = arg0->unk2E;
-    while (i != arg0->unk2D) {
-        Struct15199A10Point *pt;
+    i = actor->head;
+    while (i != actor->tail) {
+        FlamePoint *pt;
 
         i--;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = actor->capacity - 1;
         }
-        pt = &pts[i];
-        func_1519BE1C(&pt->unk0, &pt->unkC, data->unk20, D_800BE9A4);
-        pt->unk18 += data->unk30 * D_800BE9A4;
+        pt = &points[i];
+        func_1519BE1C(&pt->pos, &pt->vel, flame->seed.gravity, D_800BE9A4);
+        pt->size += flame->seed.sizeRate * D_800BE9A4;
     }
     {
-        Struct15199A10Point *head;
+        FlamePoint *oldest;
 
-        if (data->unk148 != 0 && arg0->unk2C >= 2) {
-            Struct15199A10Node *node = data->unk148;
-            Struct15199A10Out *out = node->unk14;
+        if (flame->light != NULL && actor->count >= 2) {
+            struct225 *light = flame->light;
+            struct226 *out = light->unk14;
 
-            head = &pts[arg0->unk2D];
-            out->unkE = head->unk0.unk0;
-            out->unk10 = head->unk0.unk4;
-            out->unk12 = head->unk0.unk8;
+            oldest = &points[actor->tail];
+            out->unkE = oldest->pos.x;
+            out->unk10 = oldest->pos.y;
+            out->unk12 = oldest->pos.z;
         }
     }
-    if (data->unk38 != -1) {
-        D_8008F8BC[data->unk38](arg0);
+    if (flame->seed.unk38 != -1) {
+        D_8008F8BC[flame->seed.unk38](actor);
     }
-    data->unk150 &= ~0x1;
-    if (arg0->unk2C > 0) {
-        arg0->unk54 = pts[arg0->unk2D].unk0;
+    flame->flags &= ~1;
+    if (actor->count > 0) {
+        actor->tailPos = points[actor->tail].pos;
     } else {
-        arg0->unk54.unk0 = 0.0f;
-        arg0->unk54.unk4 = 0.0f;
-        arg0->unk54.unk8 = 0.0f;
+        actor->tailPos.x = 0.0f;
+        actor->tailPos.y = 0.0f;
+        actor->tailPos.z = 0.0f;
     }
     return 1;
 }
@@ -3610,14 +3646,15 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
     return arg1;
 }
 
-void func_1519BE1C(struct17 *arg0, struct17 *arg1, f32 arg2, f32 arg3) {
-    struct17 sp4;
+/* Integrates a point over `dt` under `gravity` (applied to vel.y). */
+void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
+    Vec3f v;
 
-    sp4 = *arg1;
-    arg1->unk4 += arg2 * arg3;
-    arg0->unk0 += sp4.unk0 * arg3;
-    arg0->unk4 += (sp4.unk4 * arg3) + (0.5f * arg2 * arg3 * arg3);
-    arg0->unk8 += sp4.unk8 * arg3;
+    v = *vel;
+    vel->y += gravity * dt;
+    pos->x += v.x * dt;
+    pos->y += (v.y * dt) + (0.5f * gravity * dt * dt);
+    pos->z += v.z * dt;
 }
 
 void func_1519BEB8(u8 *arg0) {
