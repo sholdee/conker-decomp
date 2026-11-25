@@ -15,7 +15,7 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
 s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-void func_151DAB58(u8 arg0, f32 arg1, u8 arg2, struct17 *arg3, volatile u8 arg4, u8 arg5, s32 arg6);
+void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(s32 arg0, s32 arg1);
 struct three;
 struct struct218XXX;
@@ -910,7 +910,6 @@ Splash *func_151DA6F8(struct17 *pos, struct17 *vel, f32 size, s16 lifetime, u8 a
     return splash;
 }
 
-extern void func_151DAB58(u8, f32, u8, struct17 *, volatile u8, u8, s32);
 
 /* Splash impact handler: bursts into a func_151D9B8C emitter or a func_151DAB58 effect at floor height. */
 s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
@@ -1021,85 +1020,103 @@ typedef struct {
     u32 field_0x00;
 } FrameDeltaWord;
 
-void func_151DAB58(u8 arg0, f32 arg1, u8 arg2, struct17 *arg3, volatile u8 arg4, u8 arg5, s32 arg6) {
-    void *ret;
-    Struct151DAB58Local sp54;
-    Struct151DAB58Extra sp48;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_t0;
+/* Data of a func_151DAB58 effect: squashes and stretches it on one phase. */
+typedef struct {
+    u8 phase;
+    s8 step;
+    u8 pad2[2];
+    f32 amplitudeX;
+    f32 amplitudeY;
+} SquashData; /* 0xC */
 
-    sp54.unk0 = D_8008FCD0[arg0]();
+typedef struct {
+    EffectBase base;
+    u8 pad70[0xA0];
+    SquashData squash;
+} SquashEffect;
+
+/* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
+// matching: volatile arg4 (and the non-volatile byte read of it below) make IDO reload it from its stack slot
+void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
+    void *effect;
+    EffectDesc desc;
+    SquashData squash;
+    s32 value;
+    s32 coinFlip;
+    s32 arg7;
+
+    desc.unk0 = D_8008FCD0[kind]();
     if (arg4 != 0) {
-        temp_v0 = 0x3B;
+        value = 0x3B;
     } else {
-        temp_v0 = 0x22;
+        value = 0x22;
     }
-    sp54.unk2 = (temp_v0 << 8) + 3;
-    sp54.unk4 = 0x64;
-    sp54.unk12 = 0;
-    sp54.unk11 = 0;
-    sp54.unk10 = 0;
-    sp54.unk13 = 0xFF;
-    sp54.unk44 = arg2;
-    sp54.unk45 = 0xFF;
-    sp54.unk1C = *arg3;
-    temp_v0 = D_800AB330[arg0] != 0 ? 0x40000000 : 0;
-    sp54.unk40 = temp_v0 | 0x0CDC0009;
-    sp54.unk28 = 0.0f;
-    sp54.unk2C = 0.0f;
-    sp54.unk30 = 0.0f;
-    sp54.unk34 = 1.0f;
-    sp54.unk38 = 1.0f;
-    sp54.unk3C = 1.0f;
-    sp54.unk8 = 0;
-    sp54.unkC = 0;
-    sp54.unk18 = arg1;
-    sp54.unk14 = arg1;
-    sp54.unk46 = 0;
-    sp54.unk47 = 7;
-    sp48.field_0x00 = 0;
-    sp48.field_0x01 = (func_150ADA20() % 3U) + 6;
-    sp48.field_0x04 = (func_150ADA68() * D_800AB4A0) + D_800AB4A4;
-    sp48.field_0x08 = (func_150ADA68() * D_800AB4A8) + D_800AB4AC;
-    sp54.unk1 = 0;
-    sp54.unk48 = 0;
-    sp54.unk4C = 0xFF;
-    sp54.unk50 = 0;
-    sp54.unk54 = 0x20;
-    sp54.unk56 = 7;
+    desc.unk2 = (value << 8) + 3;
+    desc.unk4 = 100;
+    desc.unk12 = 0;
+    desc.unk11 = 0;
+    desc.unk10 = 0;
+    desc.unk13 = 0xFF;
+    desc.unk44 = arg2;
+    desc.unk45 = 0xFF;
+    desc.pos = *pos;
+    value = D_800AB330[kind] != 0 ? 0x40000000 : 0;
+    desc.flags = value | 0x0CDC0009;
+    desc.unk28 = 0.0f;
+    desc.unk2C = 0.0f;
+    desc.unk30 = 0.0f;
+    desc.unk34 = 1.0f;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    desc.unk8 = 0;
+    desc.unkC = 0;
+    desc.scaleY = size;
+    desc.scaleX = size;
+    desc.unk46 = 0;
+    desc.unk47 = 7;
+    squash.phase = 0;
+    squash.step = (func_150ADA20() % 3U) + 6;
+    squash.amplitudeX = (func_150ADA68() * 0.2f) + 0.1f;
+    squash.amplitudeY = (func_150ADA68() * 0.2f) + 0.1f;
+    desc.unk1 = 0;
+    desc.unk48 = 0;
+    desc.unk4C = 0xFF;
+    desc.unk50 = 0;
+    desc.unk54 = 32;
+    desc.unk56 = 7;
     if (func_150ADA20() & 1) {
-        temp_v1 = 1;
+        coinFlip = 1;
     } else {
-        temp_v1 = 0;
+        coinFlip = 0;
     }
-    temp_v0 = *(u8 *)&arg4;
-    if (temp_v0 != 0) {
-        temp_t0 = 3;
+    value = *(u8 *)&arg4;
+    if (value != 0) {
+        arg7 = 3;
     } else {
-        temp_t0 = 0;
+        arg7 = 0;
     }
-    if (temp_v0 != 0) {
-        temp_v0 = 0xFF;
+    if (value != 0) {
+        value = 0xFF;
     } else {
-        temp_v0 = 0;
+        value = 0;
     }
-    ret = func_1513D2F0(&sp54, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, temp_v1 | 2, temp_t0, temp_v0, 0xC, arg5, arg6);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0x110, &sp48, sizeof(sp48));
+    effect = func_1513D2F0(&desc, (s32)&D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
+                           arg6);
+    if (effect != NULL) {
+        memcpy(&((SquashEffect *)effect)->squash, &squash, sizeof(squash));
     }
 }
-extern f32 D_800AB4B0;
 
-s32 func_151DADA0(AxisOscillatorOwner *arg0) {
-    f32 f0;
-    Struct151DAB58Extra *p;
+/* Squash effect update: advances the phase and sets the X/Y scale multipliers. */
+s32 func_151DADA0(SquashEffect *effect) {
+    f32 wave;
+    SquashData *squash;
 
-    p = &arg0->field_0x110;
-    p->field_0x00 = p->field_0x00 + (s8)p->field_0x01 * D_800BE9E4;
-    f0 = func_151423D8((u8)(p->field_0x00 - 0x40));
-    arg0->field_0x4C = p->field_0x04 * f0 + 1.0f;
-    arg0->field_0x50 = D_800AB4B0 - p->field_0x08 * f0;
+    squash = &effect->squash;
+    squash->phase = squash->phase + squash->step * D_800BE9E4;
+    wave = func_151423D8((u8)(squash->phase - 0x40));
+    effect->base.desc.unk34 = squash->amplitudeX * wave + 1.0f;
+    effect->base.desc.unk38 = 1.3f - squash->amplitudeY * wave;
     return 1;
 }
 
