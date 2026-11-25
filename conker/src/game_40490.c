@@ -603,7 +603,7 @@ s32 func_15013D38(LevelObject *obj) {
     pos.unk8 = obj->z;
 
     count = obj->unk18;
-    func_151BE850(&pos, obj->rotY, count ? count : 1, ((u8 *)&obj->unk1C)[3], 1, 0xFF, 1);
+    func_151BE850(&pos, obj->rotY, count ? count : 1, (u8)obj->unk1C, 1, 0xFF, 1);
     return 1;
 }
 
@@ -658,7 +658,7 @@ s32 func_15013F9C(LevelObject *obj) {
 
 /** Runs the object's handler from D_80082F40, chosen by the low byte of unk18. */
 s32 func_15013FC4(LevelObject *obj) {
-    u8 index = ((u8 *)&obj->unk18)[3];
+    u8 index = obj->unk18;
     void (*handler)(void) = D_80082F40[index];
 
     if (handler != NULL) {
@@ -743,7 +743,7 @@ s32 func_15014144(LevelObject *obj) {
     bit1 = (flags & 1) ? 1 : 0;
     bit16 = (flags & 0x10) ? 0x10 : 0;
 
-    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), ((u8 *)&obj->unk1C)[3], obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
+    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), (u8)obj->unk1C, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
     return 1;
 }
 
@@ -771,7 +771,7 @@ s32 func_15014220(LevelObject *obj) {
 s32 func_150142AC(LevelObject *obj) {
     s32 slot;
 
-    slot = ((u8 *)&obj->unk18)[3];
+    slot = (u8)obj->unk18;
     obj->flags |= 4;
     if ((slot < 0) || (slot >= 3)) {
         return 1;
