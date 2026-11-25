@@ -20,18 +20,6 @@ typedef struct {
     /* 0x80 */ Oscillator oscillator;
 } OscillatorObject;
 
-/* Extra data func_151303BC's caller copies into the particle at +0xA8. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8  unk4[4];
-    /* 0x08 */ f32 unk8[2];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8  unk18[4];
-    /* 0x1C */ f32 unk1C[2];
-    /* 0x24 */ f32 unk24;
-} ParticleExtra;
-
 /* The owner whose +0x74 scales the spawned particle's velocity. */
 typedef struct {
     /* 0x00 */ u8  pad0[0x74];
@@ -90,7 +78,7 @@ s32 func_150EA10C(OscillatorObject *obj) {
 void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
-    ParticleExtra extra;
+    RiseMotion extra;
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
@@ -118,12 +106,12 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
     desc.offset.z = 0.0f;
     desc.fadeStart = 20;
     desc.fadeRate = 12;
-    extra.unk4[0] = 0;
-    extra.unk4[1] = 0;
-    extra.unk18[0] = 0;
-    extra.unk18[1] = 0;
-    extra.unk10 = 3.5f;
-    extra.unk14 = 0.2857143f;
+    extra.widthPhase = 0;
+    extra.heightPhase = 0;
+    extra.swayPhaseX = 0;
+    extra.swayPhaseZ = 0;
+    extra.maxRiseSpeed = 3.5f;
+    extra.swayPerSpeed = 0.2857143f;
 
     desc.vel.x = (to->x - from->x) * arg5->unk74;
     desc.vel.y = (to->y - from->y) * arg5->unk74;
@@ -142,15 +130,15 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
 
     desc.timer = func_150ADA20() % 51U + 50;
     desc.alpha = func_150ADA20() % 101U + 100;
-    extra.size = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
-    extra.unk4[2] = func_150ADA20() % 5U + 4;
-    extra.unk4[3] = func_150ADA20() % 5U + 4;
-    extra.unk8[0] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk8[1] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk18[2] = func_150ADA20() % 5U + 4;
-    extra.unk18[3] = func_150ADA20() % 5U + 4;
-    extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
+    extra.baseSize = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
+    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
+    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
+    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
@@ -201,12 +189,12 @@ void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
 void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     ParticleDesc desc;
     u8 *particle;
-    ParticleExtra extra;
+    RiseMotion extra;
 
     desc.pos.z = z;
-    extra.unk24 = 1000.0f;
-    extra.unk10 = 4.0f;
-    extra.unk14 = 0.25f;
+    extra.ceiling = 1000.0f;
+    extra.maxRiseSpeed = 4.0f;
+    extra.swayPerSpeed = 0.25f;
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
     desc.unk0 = 0x200005;
@@ -235,10 +223,10 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     desc.offset.z = 0.0f;
     desc.fadeStart = 30;
     desc.fadeRate = 8;
-    extra.unk4[0] = 0;
-    extra.unk4[1] = 0;
-    extra.unk18[0] = 0;
-    extra.unk18[1] = 0;
+    extra.widthPhase = 0;
+    extra.heightPhase = 0;
+    extra.swayPhaseX = 0;
+    extra.swayPhaseZ = 0;
     desc.vel.x = -vx * 0.2f;
     desc.vel.y = 0.0f;
     desc.vel.z = -vz * 0.2f;
@@ -252,15 +240,15 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
 
     desc.timer = func_150ADA20() % 51U + 106;
     desc.alpha = func_150ADA20() % 101U + 100;
-    extra.size = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
-    extra.unk4[2] = func_150ADA20() % 5U + 4;
-    extra.unk4[3] = func_150ADA20() % 5U + 4;
-    extra.unk8[0] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk8[1] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk18[2] = func_150ADA20() % 5U + 4;
-    extra.unk18[3] = func_150ADA20() % 5U + 4;
-    extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
+    extra.baseSize = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
+    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
+    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
+    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
