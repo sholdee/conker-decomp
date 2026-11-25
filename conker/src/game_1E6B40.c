@@ -1,9 +1,8 @@
 #include <ultra64.h>
+// functions.h declares func_15048A40 as returning void; it returns f32 (declared below)
 #define func_15048A40 func_15048A40_void_unused
-#define func_150ADA20 func_150ADA20_u8_unused
 #include "functions.h"
 #undef func_15048A40
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -47,8 +46,7 @@ typedef struct {
 } ParticleTemplate; /* size 0x38 */
 
 extern void *D_8008CA4C[];
-extern s32 func_150ADA20(void);
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+void *func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* A random offset in [-range / 2, range / 2). */
 #define RAND_SPREAD(range) ((s32)((func_150ADA20() % (u32)(range)) - ((range) >> 1)))
@@ -89,12 +87,13 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     dist += RAND_SPREAD(speedRange);
     outSpeed = dist;
     radiusF = radius;
-    x = x + radiusF * sine;
-    z = z + radiusF * cosine;
-    y += 1;
+    x += radiusF * sine;
+    z += radiusF * cosine;
+    y++;
     // matching: computing the random part first gives the target's addu operand order
     upSpeed = RAND_SPREAD(velYRange);
     upSpeed = velY + upSpeed;
+    // matching: listing cases 0, 1 and 3 gives the target's jump table
     switch (kind) {
     case 2:
         r = 0x68; g = 0x38; b = 0x10;
@@ -191,6 +190,7 @@ void func_151B9964(FallingParticle *particle) {
     kind = particle->kind;
     if (kind == 1) {
         phase = particle->phase;
+        // matching: `* 6` is emitted as a different shift/add sequence
         phase += D_800BE9E4 * 4 + D_800BE9E4 * 2;
         particle->phase = phase;
         particle->size = particle->size * 0.99f;
@@ -214,6 +214,7 @@ void func_151B9964(FallingParticle *particle) {
     if (floorY >= v) {
         particle->life = 0;
         if (kind == 0) {
+            // matching: the target masks the u8 random value again
             if ((func_150ADA20() & 0xFF) < 64) {
                 func_15171D4C(particle->x, floorY, particle->z, 10, 0, 19, 0.0f, 0, 50, 15, 0x100, 0,
                               particle->owner, particle->list);
@@ -318,7 +319,7 @@ void func_151B9CB0(ParticleEmitter *emitter) {
                       emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->owner, emitter->list);
     }
 
-    // matching: two statements give the target's register order for the subtraction
+    // matching: `timer = emitter->timer - D_800BE9E4;` schedules the end differently
     timer = emitter->timer;
     timer -= D_800BE9E4;
     if (timer < 0) {
