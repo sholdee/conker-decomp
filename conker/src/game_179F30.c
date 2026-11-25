@@ -4,12 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
-struct St1514DE94 {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ s32 unk38;
-};
-
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
@@ -912,7 +906,7 @@ void func_1514DE88(Actor *obj) {
 }
 
 void func_1514DE94(Actor *obj) {
-    struct St1514DE94 *part;
+    ModelAttachment *part;
 
     func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);

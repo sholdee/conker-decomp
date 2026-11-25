@@ -1087,7 +1087,7 @@ u8 *func_1506C460(f32, f32, f32, f32, s32, s32, f32, f32, s32, s32, s32);
 Actor *func_15072208(Actor *, s32);
 void func_1507BAD0(void);
 s32  func_15081574(s32, f32, f32, s32, s32, s32);
-Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
+void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 s32  func_15083E0C(u8);
 Actor *func_15083E90(u8 id);
 void func_15085710(s16, s16, s32);

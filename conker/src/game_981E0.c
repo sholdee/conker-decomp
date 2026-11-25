@@ -12,12 +12,6 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 #include "effects.h"
 
-/* The object func_1503195C returns (only the word at 0x3C is read here). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x3C];
-    /* 0x3C */ s32 unk3C;
-} Attached1503195C;
-
 void func_15131D4C(s32 arg0, s32 arg1);
 void func_1506BF5C(void);
 s32 func_1000F568(s32 arg0, s32 arg1);
@@ -3709,10 +3703,10 @@ void func_15073EA4(void) {
 }
 
 void func_15073F1C(void) {
-    ActorCtl *ext = func_1503195C(D_800D154C, 60, 0);
+    ModelAttachment *att = func_1503195C(D_800D154C, 60, 0);
 
-    if (ext != NULL) {
-        ext->unk38 = 2400;
+    if (att != NULL) {
+        att->unk38 = 2400;
     }
 }
 
@@ -3824,12 +3818,12 @@ void func_15073FA0(void) {
                     obj->y_velocity = 50.0f;
                 }
                 if (player->id == 0x75) {
-                    slot = (s32)func_1503195C(player, 0x64, 0);
+                    slot = (s32)func_1503195C(player, 0x64, 0); // matching: slot is reused for the attachment
                 } else {
                     slot = (s32)func_1503195C(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->unk8E = ((Attached1503195C *)slot)->unk3C;
+                    obj->unk8E = ((ModelAttachment *)slot)->unk3C;
                     func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;

@@ -57,7 +57,7 @@ extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern s32 func_1502B020(s32, s32, s32, s32);
 extern void func_150302F0(Actor *obj, s32 setId);
-extern Actor *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
 extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
 extern void func_15036C70(Actor *obj);
 extern s32 func_1503D660(s32 modelId, s32 arg1);
@@ -927,10 +927,11 @@ void func_15083384(Actor *obj, s32 arg1) {
     }
 }
 
-/* Creates every part of part set setId (1-based) on parent; returns the last part created. */
-Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
+/* Creates every part of part set setId (1-based) on parent; returns the last part created (a child
+ * Actor or a ModelAttachment, depending on its type). */
+void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     PartDef *parts;
-    Actor *ret;
+    void *ret;
     s32 i;
 
     setId--;

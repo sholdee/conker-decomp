@@ -686,7 +686,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x4D: {
-        ActorCtl *p;
+        ModelAttachment *p;
         s32 v1;
         s32 v2;
 
@@ -1573,7 +1573,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE9:
         return obj->unk31C->unk51;
     case 0xEA: {
-        ActorCtl *p;
+        ModelAttachment *p;
         s32 a;
         s32 b;
         a = cmd->a[0];
