@@ -6,89 +6,134 @@
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-void *func_1510D970(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 size[2];
-    union { s32 w; f64 d; } flag;
-    s32 i;
-
-    size[0] = 0x128;
-    flag.w = arg3 & 1;
-    if (flag.w != 0) {
-        size[0] = 0x13A;
-    }
-
-    arg3 = (s32)func_15167A68(0x4B, 0, size[0], 1, 0xFF, 1);
-    if (arg3 != 0) {
-        for (i = 0; i < 2; i++) {
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0x96) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0x98) = 0x800;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0x9A) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xA6) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xA8) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xAA) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xB6) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xB8) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xBA) = 0x800;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xC6) = 0;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xC8) = 0x800;
-            *(s16 *)((u8 *)arg3 + (i * 0x40) + 0xCA) = 0x800;
-        }
-
-        *((u8 *)arg3 + 0x120) = arg0;
-        *(s32 *)((u8 *)arg3 + 0x110) = arg1;
-        *((u8 *)arg3 + 0x121) = arg2;
-        *((u8 *)arg3 + 0x124) = arg4;
-
-        if (flag.w != 0) {
-            for (i = 0; i < 9; i++) {
-                *(s16 *)((u8 *)arg3 + 0x128 + (i * 2)) = 0x7FFF;
-            }
-        }
-    }
-
-    return (void *)arg3;
-}
-
 typedef struct {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
 } Point3s; /* size = 0x6 */
 
+/* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x90];
-    /* 0x090 */ Vtx vtx[2][4];
-    /* 0x110 */ u8 *unk110;
-    /* 0x114 */ f32 unk114;
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ f32 unk11C;
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 unk121;
-    /* 0x122 */ u8 unk122;
-    /* 0x123 */ u8 unk123;
-    /* 0x124 */ u8 unk124;
-} Struct_1510DA84;
+    /* 0x000 */ u8 pad0[0x10];
+    /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
+    /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
+    /* 0x110 */ u8 *owner;
+    /* 0x114 */ f32 x;
+    /* 0x118 */ f32 z;
+    /* 0x11C */ f32 floorY;
+    /* 0x120 */ u8 ownerType;      /* 0 or 1: selects how owner is read */
+    /* 0x121 */ u8 texture;        /* index into D_80091770 */
+    /* 0x122 */ u8 alpha;
+    /* 0x123 */ u8 visible;
+    /* 0x124 */ u8 flags;
+    /* 0x125 */ u8 pad125[3];
+    /* 0x128 */ Point3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
+} Shadow; /* size = 0x128 or 0x13A */
 
-extern f32 func_15048A40(u8 arg0);
-extern f32 func_150489B0(u8 arg0);
-extern s32 func_150A3FC4(f32, f32, s32, void *, f32 *);
-s32 func_1510E388(Point3s **pts, Point3s *verts, f32 *outA, f32 *outB);
+/* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
+Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s32 flags) {
+    Shadow *shadow;
+    s32 size;
+    s32 i;
+
+    size = 0x128;
+    if (createFlags & 1) {
+        size = 0x13A;
+    }
+
+    shadow = func_15167A68(0x4B, 0, size, 1, 0xFF, 1);
+    if (shadow != NULL) {
+        for (i = 0; i < 2; i++) {
+            shadow->vtx[i][0].v.flag = 0;
+            shadow->vtx[i][0].v.tc[0] = 0x800;
+            shadow->vtx[i][0].v.tc[1] = 0;
+            shadow->vtx[i][1].v.flag = 0;
+            shadow->vtx[i][1].v.tc[0] = 0;
+            shadow->vtx[i][1].v.tc[1] = 0;
+            shadow->vtx[i][2].v.flag = 0;
+            shadow->vtx[i][2].v.tc[0] = 0;
+            shadow->vtx[i][2].v.tc[1] = 0x800;
+            shadow->vtx[i][3].v.flag = 0;
+            shadow->vtx[i][3].v.tc[0] = 0x800;
+            shadow->vtx[i][3].v.tc[1] = 0x800;
+        }
+
+        shadow->ownerType = ownerType;
+        shadow->owner = owner;
+        shadow->texture = texture;
+        shadow->flags = flags;
+
+        if (createFlags & 1) {
+            for (i = 0; i < 9; i++) {
+                ((s16 *)shadow->floorTri)[i] = 0x7FFF;
+            }
+        }
+    }
+
+    return shadow;
+}
+
+/* This file's view of a struct127 game object (cf. GameObj in game_58F80.c), shadow owner type 0. */
+typedef struct {
+    /* 0x000 */ u8 pad0[4];
+    /* 0x004 */ u8 id;
+    /* 0x005 */ u8 pad5[0xF];
+    /* 0x014 */ f32 x_position;
+    /* 0x018 */ f32 y_position;
+    /* 0x01C */ f32 z_position;
+    /* 0x020 */ u8 pad20[0x5A];
+    /* 0x07A */ u16 unk7A; /* high byte: yaw angle */
+    /* 0x07C */ u8 pad7C[0xD0];
+    /* 0x14C */ f32 xz_scale;
+    /* 0x150 */ u8 pad150[0x10];
+    /* 0x160 */ u16 unk160;
+    /* 0x162 */ u8 pad162[0x1E];
+    /* 0x180 */ f32 floorY;
+    /* 0x184 */ u8 pad184[4];
+    /* 0x188 */ Point3s **floorTriPtrs;
+    /* 0x18C */ Point3s floorTri[3];
+} GameObj;
+
+/* This file's view of the 0xA0-byte objects at D_800DBEF4 (cf. Game13F9D0Obj in game_13F9D0.c), owner type 1. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Point3s pos;
+    /* 0x16 */ u8 pad16[0x16];
+    /* 0x2C */ f32 scaleX;
+    /* 0x30 */ u8 pad30[0x1D];
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ u8 pad4E[0x20];
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 pad6F[2];
+    /* 0x71 */ u8 unk71;
+    /* 0x72 */ u8 pad72[0x18];
+    /* 0x8A */ u8 alpha;
+    /* 0x8B */ u8 viewAlpha[5];
+    /* 0x90 */ u8 pad90[4];
+    /* 0x94 */ Shadow *shadow;
+} Game13F9D0Obj;
+
+extern f32 func_15048A40(u8 angle); /* sin */
+extern f32 func_150489B0(u8 angle); /* cos */
+extern s32 func_150A3FC4(f32, f32, s32, Point3s *, f32 *);
+s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ);
 extern void func_1510E7A4(s32, Point3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
-void func_1510DA84(Struct_1510DA84 *arg0) {
+/* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
+void func_1510DA84(Shadow *shadow) {
     s32 i;
     s32 alpha;
     f32 bx;
     f32 bz;
-    u8 *o2;
+    GameObj *obj;
     s32 pad2;
     s32 pad3;
     f32 v[2][3];
     f32 h;
     s32 pad5;
     f32 ratio;
-    f32 outB;
-    f32 outA;
+    f32 slopeZ;
+    f32 slopeX;
     f32 tmp;
     f32 lenB;
     f32 lenA;
@@ -98,59 +143,56 @@ void func_1510DA84(Struct_1510DA84 *arg0) {
     f32 z;
     f32 y;
     f32 scale;
-    Point3s **pts;
-    Point3s *verts;
+    Point3s **triPtrs;
+    Point3s *tri;
     u8 angle;
     f32 s;
     f32 c;
     s32 pad6;
-    u8 *o;
+    Game13F9D0Obj *prop;
 
-    arg0->unk123 = 0;
-    switch (arg0->unk120) {
+    shadow->visible = FALSE;
+    switch (shadow->ownerType) {
         case 0:
-            o2 = arg0->unk110;
-#define o o2
-            x = *(f32 *)(o + 0x14);
-            top = *(f32 *)(o + 0x18);
-            z = *(f32 *)(o + 0x1C);
-            y = *(f32 *)(o + 0x180);
-            if (o[4] == 0x25) {
+            obj = (GameObj *)shadow->owner;
+            x = obj->x_position;
+            top = obj->y_position;
+            z = obj->z_position;
+            y = obj->floorY;
+            if (obj->id == 0x25) {
                 top = y;
             }
-            pts = *(Point3s ***)(o + 0x188);
-            verts = (Point3s *)(o + 0x18C);
-            scale = *(f32 *)(o + 0x14C) * (f32)(u32)*(u16 *)(o + 0x160);
-            angle = (*(u16 *)(o + 0x7A) >> 8) + 0x20;
+            triPtrs = obj->floorTriPtrs;
+            tri = obj->floorTri;
+            scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
+            angle = (obj->unk7A >> 8) + 0x20;
             break;
-#undef o
         case 1:
-            o = arg0->unk110;
-            if (o[0x6E] == 1) {
+            prop = (Game13F9D0Obj *)shadow->owner;
+            if (prop->unk6E == 1) {
                 return;
             }
-            verts = (Point3s *)(*(u8 **)(o + 0x94) + 0x128);
-            if (func_150A3FC4(((Point3s *)(o + 0x10))->x, ((Point3s *)(o + 0x10))->z, 0, verts, &y) == 0) {
-                func_1510E7A4(0, verts, &y, 0, 0, 0, ((Point3s *)(o + 0x10))->x, ((Point3s *)(o + 0x10))->y,
-                              ((Point3s *)(o + 0x10))->z, ((Point3s *)(o + 0x10))->y, o[0x71] + 1, 0, -10000.0f,
-                              ((Point3s *)(o + 0x10))->y);
+            tri = prop->shadow->floorTri;
+            if (func_150A3FC4(prop->pos.x, prop->pos.z, 0, tri, &y) == 0) {
+                func_1510E7A4(0, tri, &y, 0, 0, 0, prop->pos.x, prop->pos.y, prop->pos.z, prop->pos.y,
+                              prop->unk71 + 1, 0, -10000.0f, prop->pos.y);
             }
-            pts = NULL;
-            x = ((Point3s *)(o + 0x10))->x;
-            top = ((Point3s *)(o + 0x10))->y;
-            z = ((Point3s *)(o + 0x10))->z;
-            scale = *(f32 *)(o + 0x2C) * (f32)(o[0x4D] * 4);
+            triPtrs = NULL;
+            x = prop->pos.x;
+            top = prop->pos.y;
+            z = prop->pos.z;
+            scale = (f32)(prop->unk4D * 4) * prop->scaleX;
             angle = 0;
             break;
     }
-    arg0->unk114 = x;
-    arg0->unk118 = z;
-    arg0->unk11C = y;
+    shadow->x = x;
+    shadow->z = z;
+    shadow->floorY = y;
     if (y > top) {
         return;
     }
 lbl:
-    if (func_1510E388(pts, verts, &outA, &outB)) {
+    if (func_1510E388(triPtrs, tri, &slopeX, &slopeZ)) {
     h = top - y;
     if (scale == 0.0f) {
         scale = 1.0f;
@@ -163,8 +205,8 @@ lbl:
         dist = 800.0f;
     }
     ratio = scale / dist;
-    if (arg0->unk124 & 1) {
-        alpha = arg0->unk122;
+    if (shadow->flags & 1) {
+        alpha = shadow->alpha;
         if (alpha != 0xFF) {
             alpha += D_800BE9E4 * 5;
             if (alpha >= 0x100) {
@@ -177,7 +219,7 @@ lbl:
             alpha = 0xA0;
         }
     }
-    arg0->unk122 = alpha;
+    shadow->alpha = alpha;
 
     v[0][0] = 0.0;
     v[0][2] = -100.0f;
@@ -190,13 +232,13 @@ lbl:
     }
     v[1][0] = -100.0f;
     v[1][2] = 0.0;
-    v[0][1] = outA * v[0][0] + v[0][2] * outB;
+    v[0][1] = slopeX * v[0][0] + v[0][2] * slopeZ;
     if (angle != 0) {
         tmp = v[1][0];
         v[1][0] = v[1][2] * s + v[1][0] * c;
         v[1][2] = v[1][2] * c - tmp * s;
     }
-    v[1][1] = outA * v[1][0] + v[1][2] * outB;
+    v[1][1] = slopeX * v[1][0] + v[1][2] * slopeZ;
 
     lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
     if (lenA > 100000000.0f) {
@@ -218,12 +260,12 @@ lbl:
     for (i = 0; i < 3; i++) {
         v[0][i] = v[0][i] * 100.0f * ratio / lenA;
         v[1][i] = v[1][i] * 100.0f * ratio / lenB;
-        arg0->vtx[D_800BE9C0][0].v.ob[i] = v[0][i];
-        arg0->vtx[D_800BE9C0][1].v.ob[i] = v[1][i];
-        arg0->vtx[D_800BE9C0][2].v.ob[i] = -v[0][i];
-        arg0->vtx[D_800BE9C0][3].v.ob[i] = -v[1][i];
+        shadow->vtx[D_800BE9C0][0].v.ob[i] = v[0][i];
+        shadow->vtx[D_800BE9C0][1].v.ob[i] = v[1][i];
+        shadow->vtx[D_800BE9C0][2].v.ob[i] = -v[0][i];
+        shadow->vtx[D_800BE9C0][3].v.ob[i] = -v[1][i];
     }
-    arg0->unk123 = 1;
+    shadow->visible = TRUE;
     }
 }
 
