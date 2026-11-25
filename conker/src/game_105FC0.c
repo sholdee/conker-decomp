@@ -11,7 +11,7 @@ typedef struct {
     u8 alpha;
     u8 pad1D[3];
     f32 texture;    /* texture s coordinate */
-} TrailPoint;
+} PissTrailPoint;
 
 /* Trail state block (0x50 bytes), copied into trail->data at spawn. */
 typedef struct {
@@ -33,20 +33,20 @@ typedef struct {
     u8 flags;
     s8 timer;
     u8 pad4E[2];
-} TrailData;
+} PissTrailData;
 
-/* Trail object created by func_150D8B88. */
+/* Trail object created by func_150D8B88 (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
 typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
-} Trail;
+    /* 0x94 */ PissTrailPoint *points;
+    /* 0x98 */ PissTrailData *data;
+} PissTrail;
 
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern PissTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131828(void *, f32 *, u8 *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
@@ -71,9 +71,9 @@ void func_150D8B3C(Actor *actor, Vec3f *out) {
 void func_150D8B88(Actor *actor) {
     EffectTemplate spawn;
     s32 pad; // matching: stack slot above data
-    TrailData data;
+    PissTrailData data;
     Vec3f pos;
-    Trail *trail;
+    PissTrail *trail;
     s32 variant;
 
     if (actor->mv != NULL) {
@@ -114,9 +114,9 @@ void func_150D8B88(Actor *actor) {
         spawn.unk14 = 5;
         spawn.unk18 = 0;
 
-        trail = func_15147A80(&spawn, sizeof(TrailData), sizeof(TrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+        trail = func_15147A80(&spawn, sizeof(PissTrailData), sizeof(PissTrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {
-            memcpy(trail->data, &data, sizeof(TrailData));
+            memcpy(trail->data, &data, sizeof(PissTrailData));
         }
     }
 }
@@ -132,7 +132,7 @@ void func_150D8D84(Vec3f *pos, Vec3f *vel, f32 dt) {
     pos->z += v0.z * dt;
 }
 
-void func_150D8E1C(Trail *trail) {
+void func_150D8E1C(PissTrail *trail) {
     trail->head.updateKind2 = 0;
     trail->head.tmpl.flags &= ~2;
     trail->head.tmpl.flags |= 8;
@@ -141,9 +141,9 @@ void func_150D8E1C(Trail *trail) {
 }
 
 /* Moves every live point under gravity and ticks the owner's counter. */
-s32 func_150D8E4C(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_150D8E4C(PissTrail *trail) {
+    PissTrailData *data;
+    PissTrailPoint *points;
 
     data = trail->data;
     points = trail->points;
@@ -181,9 +181,9 @@ s32 func_150D8E4C(Trail *trail) {
 }
 
 /* Follows the owner and emits new trail points, interpolated over the elapsed time. */
-s32 func_150D8FAC(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_150D8FAC(PissTrail *trail) {
+    PissTrailData *data;
+    PissTrailPoint *points;
     Actor *actor;
     Vec3f pos;
     Vec3f vel;
@@ -247,7 +247,7 @@ s32 func_150D8FAC(Trail *trail) {
         dvs.y = dvel.y * inv;
         dvs.z = dvel.z * inv;
         do {
-            TrailPoint *point;
+            PissTrailPoint *point;
 
             point = &points[trail->head.end];
             point->pos = cur;
@@ -294,14 +294,14 @@ extern f32 func_15144528(f32, f32, f32);
 extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
 extern void func_1505D024(Actor *, s32, u16, s32);
-void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir);
+void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /*
  * Walks the trail from newest to oldest point: clamps its total length, ray casts every
  * segment (hits trim the trail and affect the object hit), then scrolls the texture and
  * fades the oldest part.
  */
-s32 func_150D942C(Trail *trail) {
+s32 func_150D942C(PissTrail *trail) {
     s32 count;
     s32 i;
     f32 totalLen;
@@ -314,9 +314,9 @@ s32 func_150D942C(Trail *trail) {
     f32 dir[3];
     s32 pad2; // matching: stack slot (the old local view of RayHit was 0x68 bytes)
     RayHit hit;
-    TrailPoint *points;
-    TrailPoint *prev;
-    TrailData *data;
+    PissTrailPoint *points;
+    PissTrailPoint *prev;
+    PissTrailData *data;
     Actor *owner;
     Actor *target;
     f32 dx;
@@ -335,7 +335,7 @@ s32 func_150D942C(Trail *trail) {
         totalLen = 0.0f;
         i = trail->head.end;
         if (trail->head.tmpl.flags & 2) {
-            prev = (TrailPoint *)&trail->head.tmpl.pos;
+            prev = (PissTrailPoint *)&trail->head.tmpl.pos;
         } else {
             i--;
             if (i < 0) {
@@ -345,7 +345,7 @@ s32 func_150D942C(Trail *trail) {
         }
         maxLen = 1195.0f;
         do {
-            TrailPoint *cur;
+            PissTrailPoint *cur;
 
             invLen = -9999.0f;
             i--;
@@ -459,7 +459,7 @@ s32 func_150D942C(Trail *trail) {
         j = trail->head.end;
         // matching: a do-while or plain break here changes the frame size (-g3)
         for (;;) {
-            TrailPoint *cur2;
+            PissTrailPoint *cur2;
 
             j--;
             if (j < 0) {
@@ -483,7 +483,7 @@ s32 func_150D942C(Trail *trail) {
         fadeLen = totalLen - dx;
         invFadeLen = 1.0f / fadeLen;
         do {
-            TrailPoint *cur3;
+            PissTrailPoint *cur3;
 
             k--;
             if (k < 0) {
@@ -511,14 +511,14 @@ Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
-Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
-    TrailPoint *points;
+Gfx *func_150D9C7C(PissTrail *trail, Gfx *gfx, s16 view) {
+    PissTrailPoint *points;
     Vec3f next;
     Vec3f cur;
     Vec3f toCamera;
     Vec3f delta;
     Vec3f normal;
-    TrailData *data;
+    PissTrailData *data;
     Vec3f *camera;
     s32 index;
     s32 previous;
@@ -679,24 +679,24 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Stops the trail's sound. */
-void func_150DA484(Trail *trail) {
-    TrailData *data = trail->data;
+void func_150DA484(PissTrail *trail) {
+    PissTrailData *data = trail->data;
 
     if (data->sound != 0) {
         func_100111C8(data->sound);
     }
 }
 
-void func_151478F4(Trail *);
+void func_151478F4(PissTrail *);
 
-void func_150DA4B4(Trail *trail) {
+void func_150DA4B4(PissTrail *trail) {
     func_150DA484(trail);
     func_151478F4(trail);
 }
 
-void func_15147928(Trail *);
+void func_15147928(PissTrail *);
 
-void func_150DA4E0(Trail *trail) {
+void func_150DA4E0(PissTrail *trail) {
     func_150DA484(trail);
     func_15147928(trail);
 }
@@ -718,8 +718,8 @@ typedef struct {
 } TrailMessage;
 
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
-void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
-    TrailData *data = trail->data;
+void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type) {
+    PissTrailData *data = trail->data;
     Actor *owner;
 
     if (type == 0x44) {
@@ -782,8 +782,8 @@ extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
 extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
-void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
-    TrailData *data;
+void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir) {
+    PissTrailData *data;
     Actor *target;
 
     data = trail->data;
