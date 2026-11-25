@@ -3,6 +3,7 @@
 #include "n_libaudio.h"
 #include "variables.h"
 #include "n_abi.h"
+#include "libultra/audio/n_synthInternals.h"
 
 /* Conker's variant of the libultra reverb/chorus effect (n_reverb.c): the FX pull,
  * its parameter handler, and the delay-line load/save/filter/modulation helpers.
@@ -19,12 +20,11 @@
  * picks the alternative output buffer when routing is on.
  */
 
-#define FRAME_SAMPLES 184 /* samples produced per pull */
-
 /* ALLowPass as this TU uses it.  synthInternals.h has `POLEF_STATE *fstate` at 0x28
  * and `first` at 0x2C; the ROM has them the other way round, with one filter state
  * per bus (func_1001F978 indexes `lw a0,0x2C(a0+bus*4)`).  Shadowed file-locally
- * because init_1CBF0.c uses the shared header and must not be disturbed. */
+ * because init_1CBF0.c uses the shared header and must not be disturbed; calls into
+ * init_lpfilter cast back to the header's ALLowPass. */
 typedef struct {
     s16          fc;          /* 0x00 */
     s16          fgain;       /* 0x02 */
@@ -76,8 +76,9 @@ typedef struct {
     s16   *input[2];       /* 0x28 */
 } Fx;
 
-/* n_libaudio.h leaves N_ALAuxBus_s opaque; the stride is 0x44 (n_alSynNew allocates
- * it that way) and the effect pointer sits at 0x1C. */
+/* The aux bus as the ROM lays it out: stride 0x44 (n_alSynNew allocates it that way)
+ * with the effect pointer at 0x1C.  n_synthInternals.h's N_ALAuxBus puts `fx` at 0x20,
+ * so this file indexes n_syn->auxBus through this view instead. */
 typedef struct {
     u8  pad0[0x1C];
     Fx *primaryFx;  /* 0x1C */
@@ -90,7 +91,6 @@ Acmd *func_1001F5A4(Fx *fx, s32 bus, s16 *curr, s32 buff, s32 count, Acmd *p);
 Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p);
 Acmd *func_1001F978(LowPass *lp, s32 bus, s32 buff, Acmd *p);
 f32 func_1001FA78(Delay *d, s32 count);
-void init_lpfilter(LowPass *lp);
 
 /* n_alFxPull: pull the sources feeding aux bus `bus`, write the mix into the delay
  * line(s), then run every delay section (feed-forward, feedback, low-pass, chorus) and
@@ -112,21 +112,21 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
     u32    j;
 
     ptr = func_100210C0(outp, p, bus, &cmdCount);
-    input = 0x7C0;
-    output = 0x930;
-    buff1 = 0;
-    buff2 = 0x170;
+    input = N_AL_AUX_L_OUT;
+    output = N_AL_AUX_R_OUT;
+    buff1 = N_AL_TEMP_0;
+    buff2 = N_AL_TEMP_1;
     if (D_800428C4[bus] == 0) {
-        aMix(ptr++, 0, 0xC000, 0x7C0, input);
-        aMix(ptr++, 0, 0x4000, 0x930, input);
+        aMix(ptr++, 0, 0xC000, N_AL_AUX_L_OUT, input);
+        aMix(ptr++, 0, 0x4000, N_AL_AUX_R_OUT, input);
     }
     /* write the mixed input into the delay line at its write head */
     ptr = func_1001F79C(fx, 0, fx->input[0], input, ptr);
     if (D_800428C4[bus] != 0) {
-        ptr = func_1001F79C(fx, 1, fx->input[1], 0x930, ptr);
+        ptr = func_1001F79C(fx, 1, fx->input[1], N_AL_AUX_R_OUT, ptr);
     }
     for (j = 0; j <= D_800428C4[bus]; j++) {
-        aClearBuffer(ptr++, output, FRAME_SAMPLES * 2);
+        aClearBuffer(ptr++, output, SAMPLES * 2);
         for (i = 0; i < fx->section_count; i++) {
             d = &fx->delay[i];
             inPtr = &fx->input[j][-d->input];
@@ -140,7 +140,7 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
                 buff2 = buff1;
                 buff1 = tmp;
             } else {
-                ptr = func_1001F5A4(fx, j, inPtr, buff1, FRAME_SAMPLES, ptr);
+                ptr = func_1001F5A4(fx, j, inPtr, buff1, SAMPLES, ptr);
             }
             ptr = func_1001F28C(fx, d, j, buff2, ptr);
             if (d->ffcoef != 0) {
@@ -174,18 +174,18 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
             prevOutPtr = &fx->input[j][d->output];
         }
         if (D_800428C4[bus] != 0 && j == 0) {
-            ptr = func_1001F5A4(fx, 1, fx->input[1], input, FRAME_SAMPLES, ptr);
+            ptr = func_1001F5A4(fx, 1, fx->input[1], input, SAMPLES, ptr);
             if (D_800428C6[bus]) {
-                aMix(ptr++, 0, 0x5A82, output, 0x650);
+                aMix(ptr++, 0, 0x5A82, output, N_AL_MAIN_R_OUT);
             } else {
-                aMix(ptr++, 0, 0x5A82, output, 0x4E0);
+                aMix(ptr++, 0, 0x5A82, output, N_AL_MAIN_L_OUT);
             }
         } else {
             // matching: IDO -g emits the extra branch at this merge only with an else
         }
-        aDMEMMove(ptr++, output, 0x7C0, FRAME_SAMPLES * 2);
+        aDMEMMove(ptr++, output, N_AL_AUX_L_OUT, SAMPLES * 2);
         /* advance the write head, modulo the line length */
-        fx->input[j] += FRAME_SAMPLES;
+        fx->input[j] += SAMPLES;
         if (fx->input[j] > &fx->base[j][fx->length]) {
             fx->input[j] -= fx->length;
         }
@@ -235,7 +235,7 @@ s32 func_1001ED6C(void *filter, s32 paramID, void *param) {
     case 7: /* low-pass cutoff */
         if (f->delay[s].lp != NULL) {
             f->delay[s].lp->fc = val;
-            init_lpfilter(f->delay[s].lp);
+            init_lpfilter((ALLowPass *)f->delay[s].lp);
         }
         break;
     }
@@ -265,19 +265,19 @@ s32 func_1001ED6C(void *filter, s32 paramID, void *param) {
 
 /* _n_loadOutputBuffer: load a section's output tap into DMEM `buff`.  With a chorus
  * resampler, the tap is modulated by the LFO and resampled: read the (8-byte aligned)
- * source run into DMEM 0x2E0 and A_RESAMPLE it into `buff`. */
+ * source run into DMEM N_AL_TEMP_2 and A_RESAMPLE it into `buff`. */
 Acmd *func_1001F28C(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p) {
     Acmd *ptr = p;
     s32   ratio;
     s32   count;
-    s32   rbuff = 0x2E0;
+    s32   rbuff = N_AL_TEMP_2;
     s16  *outPtr;
     f32   fincount;
     f32   fratio;
     f32   delta;
     s32   ramalign = 0;
     s32   length;
-    s32   incount = FRAME_SAMPLES;
+    s32   incount = SAMPLES;
     s16   seg;
 
     if (d->rs != NULL) {
@@ -301,7 +301,7 @@ Acmd *func_1001F28C(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p) {
         d->rsdelta += count - incount;
     } else {
         outPtr = &fx->input[bus][-d->output];
-        ptr = func_1001F5A4(fx, bus, outPtr, buff, FRAME_SAMPLES, ptr);
+        ptr = func_1001F5A4(fx, bus, outPtr, buff, SAMPLES, ptr);
     }
     return ptr;
 }
@@ -344,7 +344,7 @@ Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p) {
     if (curr < fx->base[bus]) {
         curr += fx->length;
     }
-    end = curr + FRAME_SAMPLES;
+    end = curr + SAMPLES;
     if (end > lineEnd) {
         afterEnd = end - lineEnd;
         beforeEnd = lineEnd - curr;
@@ -352,7 +352,7 @@ Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p) {
         n_aSaveBuffer(ptr++, afterEnd * 2, buff + beforeEnd * 2,
                       osVirtualToPhysical(fx->base[bus]));
     } else {
-        n_aSaveBuffer(ptr++, FRAME_SAMPLES * 2, buff, osVirtualToPhysical(curr));
+        n_aSaveBuffer(ptr++, SAMPLES * 2, buff, osVirtualToPhysical(curr));
     }
     return ptr;
 }
