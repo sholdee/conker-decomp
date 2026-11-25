@@ -110,7 +110,7 @@ Gfx *func_151D6418(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
 }
 
 void func_151D66F0(s32 arg0, s32 arg1) {
-    if (D_800BE9F0 == 6 && D_80038080 == 0) {
+    if (level == 6 && D_80038080 == 0) {
         return;
     }
     if (arg1 == 0) {
@@ -137,7 +137,7 @@ Gfx *func_151D6778(Gfx *gfx) {
     s32 alpha;
     u16 *img;
 
-    if ((D_800BE574 == 0 && D_800BE9F0 != 0x32 && D_800BE9F0 != 0x33) || D_800BEAC0 != 0) {
+    if ((D_800BE574 == 0 && level != 0x32 && level != 0x33) || D_800BEAC0 != 0) {
         return gfx;
     }
     alpha = D_800BE574;

@@ -3412,7 +3412,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
             savedRot = obj->mv->shotsfired;
             func_15062800(&movement_obj[source], obj);
-            if (D_800BE9F0 == 0x3F) {
+            if (level == 0x3F) {
                 if (obj->lifting >= 100) {
                     slot = obj->lifting - 100;
                     res = func_1509B570(D_800D2E48);

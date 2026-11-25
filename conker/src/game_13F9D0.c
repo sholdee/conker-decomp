@@ -831,7 +831,7 @@ extern s32 D_800DBFA0;
 extern s32 D_800DBFA4;
 
 /*
- * On D_800BE9F0 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
+ * On level 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
  * entry), then stores the three arguments in D_800DBF9C..D_800DBFA4.
  */
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
@@ -839,7 +839,7 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     u32 (*list)[3];
 
-    if ((D_800BE9F0 == 0x12) || (D_800BE9F0 == 0x36) || (D_800BE9F0 == 0x13)) {
+    if ((level == 0x12) || (level == 0x36) || (level == 0x13)) {
         for (j = 0; j < 2; j++) {
             list = (u32 (*)[3])D_800DBDD8[j];
             for (i = 0; i < D_800DBE18[j]; i++) {

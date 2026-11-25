@@ -147,7 +147,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     s32 texS2;
     s32 texS3;
 
-    rope = func_15167A68((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
+    rope = func_15167A68((level == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (rope == NULL) {
         return NULL;
     }
@@ -172,7 +172,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     }
     rope->segmentLength = (f32)(topY - bottomY) / (f32)segments;
     rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0);
-    if (D_800BE9F0 == 0xB) {
+    if (level == 0xB) {
         rope->textureId = 0x37;
         shift = 4;
     } else {
@@ -181,7 +181,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     }
     r = 0xFF;
     g = 0xFF;
-    if (D_800BE9F0 == 0x39) {
+    if (level == 0x39) {
         r = 0x58;
         g = 0x4B;
         b = 0x2C;
@@ -346,7 +346,7 @@ void func_151AD174(Rope *rope) {
                 vel[j] += mid[j] * 1.24;
             }
             pos[j] += vel[j];
-            if (D_800BE9F0 == 0x39 && pos[0] > 1150.0f) {
+            if (level == 0x39 && pos[0] > 1150.0f) {
                 pos[0] = 1150.0f;
             }
         }

@@ -83,7 +83,7 @@ void func_151DE8F0(void) {
     }
     if (D_8008FD80) {
         camera_global_Cameras->Mode = 0x80000;
-        func_1501D348(D_800BE9F0, 1, 0, 0, 0);
+        func_1501D348(level, 1, 0, 0, 0);
         D_8008FD80 = 0;
         return;
     }

@@ -249,16 +249,16 @@ void func_1507EFD0(void) {
             category = 10;
         } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
             category = 6;
-        } else if (D_800BE9F0 == 0x31) {
+        } else if (level == 0x31) {
             if (D_800D18C0 & 4) {
                 category = 8;
             } else {
                 category = 7;
             }
-        } else if (D_800D154C->character_type == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
-                   D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
-                   D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
-                   D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
+        } else if (D_800D154C->character_type == 0x96 || level == 0x10 || level == 0x1B ||
+                   level == 0x1E || level == 0x26 || level == 0x2F ||
+                   level == 0xE || level == 0x28 || level == 0x23 ||
+                   level == 0x1C || level == 0x36 || level == 0x3A) {
             category = 2;
         } else if (D_800D18C0 != 0) {
             if (D_800D18C0 & 1) {
@@ -330,7 +330,7 @@ s32 func_1507F4C0(s32 phase) {
     if (phase == 0) {
         base = 180;
         range = 60;
-    } else if (D_800BE9F0 == 0x31) {
+    } else if (level == 0x31) {
         return 0;
     } else if (phase == 1) {
         base = 60;

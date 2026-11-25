@@ -6,7 +6,7 @@
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Sets flag bits in actor->flags: 0x01000000 while in water, and level-specific bits
- * from func_1509BE40 queries for the levels D_800BE9F0 == 0x34, 0x30 and 0x2D. */
+ * from func_1509BE40 queries for the levels level == 0x34, 0x30 and 0x2D. */
 void func_15103430(Camera *actor) {
     s32 queryFlags;
 
@@ -17,20 +17,20 @@ void func_15103430(Camera *actor) {
         actor->AvailableModes &= ~0x01000000;
     }
 
-    if (D_800BE9F0 == 0x34) {
+    if (level == 0x34) {
         if (func_1509BE40(1, 0x406D, 6, queryFlags) != 0) {
             actor->AvailableModes |= 0x200;
         } else {
             actor->AvailableModes &= ~0x200;
         }
-    } else if (D_800BE9F0 == 0x30) {
+    } else if (level == 0x30) {
         if (func_1509BE40(1, 0x403C, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x403D, 6, queryFlags) != 0) {
             actor->AvailableModes |= 0x200;
         } else {
             actor->AvailableModes &= ~0x200;
         }
-    } else if (D_800BE9F0 == 0x2D) {
+    } else if (level == 0x2D) {
         if (func_1509BE40(1, 0x4053, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x4054, 6, queryFlags) != 0 ||
             func_1509BE40(1, 0x4056, 6, queryFlags) != 0 ||
@@ -46,7 +46,7 @@ void func_15103430(Camera *actor) {
         } else {
             actor->AvailableModes &= ~0x80000000;
         }
-    } else if (D_800BE9F0 == 0x34) {
+    } else if (level == 0x34) {
         // Unreachable (0x34 is handled above), but the original code has this check.
         if (func_1509BE40(1, 0x406E, 6, queryFlags) != 0) {
             actor->AvailableModes |= 0x20000000;

@@ -1811,7 +1811,7 @@ void func_1502FD70(Actor *arg0) {
     u8 id = obj->character_type;
     u8 *counter;
 
-    if (D_80038080 == 0 && D_800BE9F0 == 0x1D) {
+    if (D_80038080 == 0 && level == 0x1D) {
         D_800D2040[id] = 2;
         return;
     }

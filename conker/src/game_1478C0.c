@@ -74,7 +74,7 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
     for (i = 0; i < 24; i++) {
         kind = D_80089324[i].kind;
         if (D_80089324[i].world != -1) {
-            if (D_800BE9F0 != D_80089324[i].world) {
+            if (level != D_80089324[i].world) {
                 continue;
             }
             if (kind != 0xFF) {
@@ -113,7 +113,7 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
         }
         value = anim->frames[tick / anim->ticksPerFrame];
         paletteAddr = 0;
-        if (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+        if (level == 6 || level == 0x3B) {
             flags = 3;
         } else {
             flags = 0x3E;

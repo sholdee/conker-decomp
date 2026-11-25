@@ -311,7 +311,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale D_8008FE1C */
 
     start = gfx;
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         return gfx;
     }
     gSPPerspNormalize(gfx++, D_800D2454);
@@ -1064,7 +1064,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         cellShift = -3;
                         break;
                     default:
-                        if (D_800BE9F0 == 0x1A) {
+                        if (level == 0x1A) {
                             icon = 4;
                             cellShift = 4;
                         } else {
@@ -1245,7 +1245,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 rowY = (s32)D_800BE628[i].top + 5;
                 rowY *= 4;
                 // matching: constant-first operands; the swapped form changes the code
-                if (0x1A == D_800BE9F0 || 0x3F == D_800BE9F0) {
+                if (0x1A == level || 0x3F == level) {
                     cellW = 11;
                     cellH = 14;
                     texS = 0x200;

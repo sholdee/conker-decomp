@@ -183,8 +183,8 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
  * background colour D_800DBEA8. */
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     // unk78 is the high byte of Actor's u16 unk78
-    if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
-        (D_800BE9F0 == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
+    if (level == 0x1B || level == 0x1E ||
+        (level == 0x31 && camera_global_Cameras->mv->rt_context_b == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }
@@ -223,12 +223,12 @@ Gfx *func_151106A8(Gfx *gfx) {
 
 
 /* Returns how much of the sky shows for the camera at (x, y, z) looking at (pitch, yaw) on the current map
- * D_800BE9F0: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
+ * level: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
 s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     s32 ret;
     s32 byHeight;
 
-    switch (D_800BE9F0) {
+    switch (level) {
     case 0x6:
     case 0x3B:
         ret = y * 40.0f / 1800.0f + 200.0f;
@@ -692,13 +692,13 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gfx = func_1501A680(func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
-    if (D_800BE9F0 == 0x41) {
+    if (level == 0x41) {
         yaw -= 119.0f;
         if (yaw < 0.0f) {
             yaw += 360.0f;
         }
-    } else if (D_800BE9F0 == 0x3C ||
-               (D_800BE9F0 == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
+    } else if (level == 0x3C ||
+               (level == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
         gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
                             RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }
@@ -736,8 +736,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     if (extent < 0) {
         extent = 0;
     }
-    end = (D_800BE9F0 == 0xC) ? 6 : 5;
-    start = (D_800BE9F0 != 0x19) ? 0 : 4;
+    end = (level == 0xC) ? 6 : 5;
+    start = (level != 0x19) ? 0 : 4;
     for (i = start; i < end; i++) {
         switch (i) {
             case 0:

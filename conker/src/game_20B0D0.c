@@ -62,10 +62,10 @@ void func_151DDC20(void) {
     sfx = 0;
     blocked = 0;
     reducedMenu = D_8008FDB8;
-    if (D_800BE9F0 == 0x22) {
+    if (level == 0x22) {
         reducedMenu = 1;
     }
-    if ((D_800C35EA[0] != 1) || (D_800BE9F0 != 0x18) || (D_800C35E8[0] != 1)) {
+    if ((D_800C35EA[0] != 1) || (level != 0x18) || (D_800C35E8[0] != 1)) {
         if (func_1517EFDC() != 0) {
             blocked = 1;
         }

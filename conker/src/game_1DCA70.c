@@ -80,7 +80,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
- * func_1514C678 puff there. The colour is tinted by func_150CCD90 when D_800BE9F0 is 20.
+ * func_1514C678 puff there. The colour is tinted by func_150CCD90 when level is 20.
  */
 void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
@@ -107,7 +107,7 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     if (func_151AF5C0(pos, actor, &ground, side) == 0) {
         return;
     }
-    if (D_800BE9F0 == 20) {
+    if (level == 20) {
         func_150CCD90(pos[2], &fr, &fg, &fb);
         r = fr;
         g = fg;

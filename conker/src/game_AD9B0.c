@@ -207,7 +207,7 @@ void func_15080BE8(void) {
 void func_15080C64(void) {
     if (D_800D1941 && D_800D1950->state == 0) {
         func_15080BE8();
-        if (D_800BE9F0 != 0x29 && D_800BE9F0 != 0x2E) {
+        if (level != 0x29 && level != 0x2E) {
             D_800D2E60[8] |= 0x10;
         }
         if (D_800D199C != NULL) {

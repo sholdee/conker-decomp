@@ -402,7 +402,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         dir.z *= 0.001000000047f;
     }
 
-    if (D_800BE9F0 == 36) {
+    if (level == 36) {
         mode = 0;
     } else {
         mode = func_151D5B6C(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);

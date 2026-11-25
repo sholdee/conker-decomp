@@ -122,7 +122,7 @@ s32 func_150034B4(void) {
     D_800D9F58 = 0xFFFF;
     D_800D9F5C = -1;
 
-    if (D_800BE9F0 != 1 && D_800BE9F0 != 50) {
+    if (level != 1 && level != 50) {
         D_800D9F60 = 0;
     } else {
         D_800D9F60 = 1;

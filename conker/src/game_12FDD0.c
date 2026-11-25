@@ -38,7 +38,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
     arg.fadeRate = 25;
     material = func_1510F8CC(surfaceFlags);
     arg.texture = 0x5C;
-    switch (D_800BE9F0) {
+    switch (level) {
     case 0x36:
         if (material == 9) {
             return NULL;
@@ -57,7 +57,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
     arg.lifetime = (duration == -1) ? 300 : duration;
     arg.frame = 0;
     arg.frameSpeed = 0;
-    if (D_800BE9F0 == 0x36) {
+    if (level == 0x36) {
         arg.unk10 = arg1 >> 1;
     } else {
         arg.unk10 = arg1;

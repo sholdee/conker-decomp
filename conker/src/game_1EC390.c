@@ -50,7 +50,7 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
         spawn.variant = variants.ids[variant];
         spawn.unk5C = arg6;
         spawn.alpha = 0xFF;
-        if (D_800BE9F0 == 7) {
+        if (level == 7) {
             spawn.updateFn = 0x18;
         } else {
             spawn.updateFn = 0;

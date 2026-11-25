@@ -98,7 +98,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             D_800D20FC[i].unk2 = 0;
             switch (type) {
             case 0:
-                if (D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A || D_800BE9F0 == 0x40) {
+                if (level == 0x36 || level == 0x3A || level == 0x40) {
                     D_800D20FC[i].type = 0x96;
                 } else {
                     D_800D20FC[i].type = 0;
@@ -212,7 +212,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                 D_800D20FC[i].objFlags |= 1;
                 break;
             }
-            if (D_800BE9F0 == 0x33 || D_800BE9F0 == 0x32) {
+            if (level == 0x33 || level == 0x32) {
                 D_800D20FC[i].objFlags |= 0x4000000;
             }
             obj = movement_obj;

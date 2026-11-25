@@ -449,7 +449,7 @@ void func_1506B634(s32 count) {
     index = pick;
     ext = D_800D154C->mv;
     if (ext->pissed_hangover != 0) {
-        if (D_800BE9F0 == 41) {
+        if (level == 41) {
             if ((u8)pick == 7) {
                 index = 0;
             }
@@ -1435,7 +1435,7 @@ void func_1506DDB8(void) {
 }
 
 void func_1506DDC0(void) {
-    if (func_15178E50(D_800BE9F0) != 0) {
+    if (func_15178E50(level) != 0) {
         func_1516EED4(dc_glbl_CharNum, D_800D1580, 0xFF, 0);
     }
 }
@@ -2295,7 +2295,7 @@ void func_15070144(s32 cmd) {
     info.objs[2] = NULL;
     info.objs[0] = D_800D154C;
 
-    if (D_800BE9F0 == 0x2B) {
+    if (level == 0x2B) {
         mode = 3;
     } else {
         mode = 0;
@@ -3128,7 +3128,7 @@ void func_15072420(void) {
             D_800D154C->unk222 = obj - movement_obj;
         }
     }
-    if (D_800BE9F0 == 0x3F && obj->character_type == 0x16) {
+    if (level == 0x3F && obj->character_type == 0x16) {
         obj->unk94 |= 2;
     }
 }

@@ -176,18 +176,18 @@ s32 func_15141C0C(Actor *actor) {
         return 11;
     }
 }
-/* Picks an effect variant from the current world (D_800BE9F0) and the given type. */
+/* Picks an effect variant from the current world (level) and the given type. */
 s32 func_15141CC0(u32 type) {
-    if (D_800BE9F0 == 0x2F) {
+    if (level == 0x2F) {
         return 6;
     }
-    if (D_800BE9F0 == 0x42) {
+    if (level == 0x42) {
         return 7;
     }
-    if (D_800BE9F0 == 0x27) {
+    if (level == 0x27) {
         return 8;
     }
-    if (D_800BE9F0 == 0x19) {
+    if (level == 0x19) {
         return 5;
     }
     switch (type) {
@@ -202,12 +202,12 @@ s32 func_15141CC0(u32 type) {
     case 2:
     case 8:
     case 12:
-        if (D_800BE9F0 == 2) {
+        if (level == 2) {
             return 7;
         }
         return 4;
     case 5:
-        if (D_800BE9F0 == 0x14) {
+        if (level == 0x14) {
             return 5;
         }
         return 9;
@@ -668,8 +668,8 @@ Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
         if (*needSync == 1) {
             *needSync = 0;
         }
-        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) ||
-            (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
+        if ((level == 0x18) || (level == 0x13) || (level == 6) || (level == 0x3B) ||
+            (level == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
         gfx = func_15094FE8(gfx, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
@@ -1912,7 +1912,7 @@ f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
 
 void func_15145A50(Actor *actor) {
     actor->drawtype = 3;
-    if (D_800BE9F0 != 51) {
+    if (level != 51) {
         if ((D_800BE616 != 0) || (actor->type == 5) || (actor->type == 1) ||
             (actor->type == 21)) {
             actor->type = 5;

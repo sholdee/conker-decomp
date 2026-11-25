@@ -534,7 +534,7 @@ void func_1511BEBC(WorldObject *obj) {
     flag8 = obj->task_flag & 8;
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
-    if (D_800BE9F0 == 10) {
+    if (level == 10) {
         radiusSq = (obj->zScale * 100.0f) * (obj->zScale * 100.0f);
         if (WORK(obj)->w1511BEBC.restAndTimer == 0) {
             if (obj->y == 0) {
@@ -729,7 +729,7 @@ void func_1511C638(WorldObject *obj) {
 
     next = &obj[1];
     mode = obj->task_flag & TASK_FLAG_STATE;
-    if (D_800BE9F0 == 4) {
+    if (level == 4) {
         third = &obj[2];
     } else {
         third = NULL;
@@ -875,9 +875,9 @@ void func_1511CB44(WorldObject *obj) {
     s32 uvArg5;
 
     uvRate = 0.0f;
-    if (D_800BE9F0 == 4) {
+    if (level == 4) {
         mode = 0;
-    } else if (D_800BE9F0 == 19) {
+    } else if (level == 19) {
         mode = 1;
         if (obj->unique_id == 0xFE) {
             uvRate = 0.4530000091f;
@@ -931,7 +931,7 @@ void func_1511CB44(WorldObject *obj) {
         }
         wave->pulseAlpha = 0;
         wave->alphaPhase = 0;
-        if (D_800BE9F0 == 4) {
+        if (level == 4) {
             if (obj->unique_id != 0xF2) {
                 if (obj->unique_id == 0xF1) {
                     wave->alphaPhaseOffset = 0;
@@ -1405,7 +1405,7 @@ void func_1511DF6C(WorldObject *obj) {
         break;
     case 0x54:
         anim = 0x17;
-        if (D_800BE9F0 == 45) {
+        if (level == 45) {
             data = func_1509B570(0xBA);
             if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
                 skip = TRUE;

@@ -137,7 +137,7 @@ void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner
 
 /* Plays the scene-specific burst (scenes 2 and 16) at the actor. */
 void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
-    switch (D_800BE9F0) {
+    switch (level) {
     case 2:
         func_15170B90(actor, 1, 1, 1, owner, list);
         break;

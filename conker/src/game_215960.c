@@ -882,7 +882,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
         return gfx;
     }
     if (D_800B0DF0->unk8 == 4 && D_800900B8 == 0) {
-        if (D_800BE9F0 == 0x13) {
+        if (level == 0x13) {
             s32 id;
             id = D_800891BC[D_800B0DF0->unk9][2];
             for (i = 0; i < 0x48; i++, id++) {
@@ -1213,7 +1213,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     s32 alpha;
     s32 temp;
 
-    if (D_800BE9F0 == 0x21) {
+    if (level == 0x21) {
         return gfx;
     }
 

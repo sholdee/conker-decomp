@@ -47,7 +47,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
     s32 j; // spawn loop counter, then the chosen spawn index
 
     remember = TRUE;
-    if (D_800BE9F0 == 0x2B) {
+    if (level == 0x2B) {
         remember = FALSE;
         D_800D18A8 = 0;
     }

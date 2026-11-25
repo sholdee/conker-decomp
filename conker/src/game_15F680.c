@@ -272,8 +272,8 @@ Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *
             node->prev = NULL;
             node->model = spawn->model;
             if (spawn->flags & 0x100000) {
-                if (D_800BE9F0 == 0x3B || D_800BE9F0 == 6 || D_800BE9F0 == 0x13 || D_800BE616 != 0 ||
-                    D_800BE9F0 == 2) {
+                if (level == 0x3B || level == 6 || level == 0x13 || D_800BE616 != 0 ||
+                    level == 2) {
                     node->keepLoaded = FALSE;
                 } else {
                     node->keepLoaded = TRUE;

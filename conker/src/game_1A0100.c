@@ -5,7 +5,7 @@
 /*
  * Per-player pending warps: a warp zone fades the player's view out, and once the fade has run its course
  * the player is respawned at the zone's spawn point (or the zone's level is requested, when it is not the
- * current level D_800BE9F0).
+ * current level level).
  */
 
 extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
@@ -57,7 +57,7 @@ void func_15172D80(s32 player) {
         func_1517EE40(0, 0, 0, 50, 0, player);
     }
     if (func_1517F40C(player)) {
-        if (D_800BE9F0 != D_800DD2B0[player]) {
+        if (level != D_800DD2B0[player]) {
             func_1501C730(1, D_800DD2B0[player], 0, 0, 0);
         } else {
             func_15172CA8(player);
@@ -82,7 +82,7 @@ void func_15172E7C(Actor *actor, s32 levelId, s32 spawnIndex) {
                 D_800DD2B0[player] = levelId;
                 D_800DD2C0[player] = spawnIndex;
             }
-        } else if (levelId == D_800BE9F0) {
+        } else if (levelId == level) {
             func_15172D28(actor, spawnIndex);
         }
     }

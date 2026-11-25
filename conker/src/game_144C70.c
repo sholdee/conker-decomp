@@ -83,15 +83,15 @@ void func_151177C0(WorldObject *prop) {
     step = 3;
     autoReturn = FALSE;
     onArrive = NULL;
-    if (kind == 0x800B && D_800BE9F0 == 12) {
+    if (kind == 0x800B && level == 12) {
         travel = 34;
-    } else if (D_800BE9F0 == 49) {
+    } else if (level == 49) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (D_800BE9F0 == 10) {
+    } else if (level == 10) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (D_800BE9F0 == 52) {
+    } else if (level == 52) {
         travel = 10;
         autoReturn = TRUE;
         step = 6;
@@ -250,7 +250,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 c;
     f32 rotatedX;
 
-    if (prop->modelId == 0x8006 && D_800BE9F0 == 53) {
+    if (prop->modelId == 0x8006 && level == 53) {
         prop = func_151149AC(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
@@ -319,7 +319,7 @@ void func_15117F3C(WorldObject *prop) {
     motion = prop->task_flag & TASK_FLAG_STATE;
     flag4 = prop->task_flag & TASK_FLAG_LOCKED;
     stayOpen = prop->task_flag & 8;
-    switch (D_800BE9F0) {
+    switch (level) {
     case 1:
     case 41:
         anchorX = -13.0f;
@@ -700,7 +700,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
             prop->u = angle;
         }
         index = (prop->moveData.word >> 24) & 0xFF;
-        if (D_800BE9F0 == 2) {
+        if (level == 2) {
             func_1000E75C(255.0f - fabsf(((angle - (f32)openAngle) * 255.0f) / (f32)openAngle));
             return;
         }
@@ -708,7 +708,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
             scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / (f32)openAngle);
             func_1518804C(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
-            if (D_800BE9F0 == 1 && index - 1 == 0) {
+            if (level == 1 && index - 1 == 0) {
                 func_15173C90(scale * 255.0f, 0, 0xF8);
             }
         }

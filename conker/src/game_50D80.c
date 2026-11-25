@@ -661,7 +661,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x1E) {
             D_800C35C2 = event->unk4 + 1;
-            D_800C35C3 = D_800BE9F0;
+            D_800C35C3 = level;
         } else if (event->value == 3) {
             WorldObject *target = func_151149AC((u8) event->unk6);
 
@@ -1015,9 +1015,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (found == NULL) {
                     end = 0;
                 }
-                if (D_800BE9F0 == 0x18) {
+                if (level == 0x18) {
                     func_150F5420(start, total - eventTime - end - start, end, event->unk5);
-                } else if (D_800BE9F0 == 0x21) {
+                } else if (level == 0x21) {
                     func_1510A930(start, total - eventTime - end - start, end);
                 }
             }
@@ -1105,7 +1105,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 FS32(actor, 0x7C) = 0;
             }
         } else if (event->value == 0x7B) {
-            if (D_800BE9F0 == 0x1D) {
+            if (level == 0x1D) {
                 D_800C3680 = 1;
             }
         } else if (event->value == 0x7D) {

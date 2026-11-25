@@ -262,8 +262,8 @@ void func_1504CB98(Actor *actor) {
             actor->mv->unk1B1 = 0;
             func_1502EA50(actor);
         }
-        if (((D_800BE9F0 == 0x2D) || (D_800BE9F0 == 0x30) || (D_800BE9F0 == 0x34) || (D_800BE9F0 == 0x1A) || (D_800BE9F0 == 0x3F)) && (D_800CC288 & 4) && !(D_800CC288 & 0xC000) && ((s32) actor->shad == 0) && (actor->yspd < 0.0f) && (actor->norun == 0) && (actor->lifting == 0) && (actor->mv->GrenadeThrowState == 0) && (actor->mv->rt_context_b == 0) && ((actor->mv->context_b & ~0x80) != 3) && (actor->mv->numGrenades != 0)) {
-            if ((actor->character_type == 0x3B) || (D_800BE9F0 == 0x1A) || (D_800BE9F0 == 0x3F)) {
+        if (((level == 0x2D) || (level == 0x30) || (level == 0x34) || (level == 0x1A) || (level == 0x3F)) && (D_800CC288 & 4) && !(D_800CC288 & 0xC000) && ((s32) actor->shad == 0) && (actor->yspd < 0.0f) && (actor->norun == 0) && (actor->lifting == 0) && (actor->mv->GrenadeThrowState == 0) && (actor->mv->rt_context_b == 0) && ((actor->mv->context_b & ~0x80) != 3) && (actor->mv->numGrenades != 0)) {
+            if ((actor->character_type == 0x3B) || (level == 0x1A) || (level == 0x3F)) {
                 actor->mv->GrenadeThrowState = 5;
             } else {
                 actor->mv->GrenadeThrowState = 1;
@@ -345,7 +345,7 @@ void func_1504CB98(Actor *actor) {
                 centerAngle = 0x6000;
                 angleDelta = D_800CC284->stick_x * D_800CC264;
                 actor->angle -= angleDelta / 8;
-                if (D_800BE9F0 == 6) {
+                if (level == 6) {
                     moveSpeed = 42.0f;
                     centerAngle = func_1505A630(2540.0f - actor->xpos, actor->zpos - -160.0f, 0);
                     maxOffset = 0xF000;
@@ -614,7 +614,7 @@ void func_1504CB98(Actor *actor) {
                     }
                 }
             } else {
-                if ((D_800CC288 & 0x4000) && (D_800BE616 == 0) && (D_800BE9F0 != 0x29)) {
+                if ((D_800CC288 & 0x4000) && (D_800BE616 == 0) && (level != 0x29)) {
                     if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100) && !(actor->mv->water_attribs & 1)) {
                         actor->mv->unk21 = 0;
                         actor->mv->unk22 = 0x76;
@@ -1297,7 +1297,7 @@ void func_1504CB98(Actor *actor) {
                             }
                         }
                         actor->floorMaterial &= ~0x1F;
-                        if (D_800BE9F0 == 0x23) {
+                        if (level == 0x23) {
                             actor->floorMaterial |= 9;
                         } else {
                             actor->floorMaterial |= 3;

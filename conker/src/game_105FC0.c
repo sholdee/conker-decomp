@@ -77,7 +77,7 @@ void func_150D8B88(Actor *actor) {
     s32 variant;
 
     if (actor->mv != NULL) {
-        if (D_800BE9F0 == 10) {
+        if (level == 10) {
             func_1000D96C(10, 55, 0);
         }
 

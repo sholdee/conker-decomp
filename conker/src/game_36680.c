@@ -434,7 +434,7 @@ void func_1500A68C(s32 light, s32 id) {
 extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32);
 
-/** Attaches the light to the level object picked by `id` (and by whether D_800BE9F0 is 6). */
+/** Attaches the light to the level object picked by `id` (and by whether level is 6). */
 void func_1500A6D8(s32 light, s32 id) {
     LightEffectHeader header;
     LightSwing attachment;
@@ -442,7 +442,7 @@ void func_1500A6D8(s32 light, s32 id) {
     u8 objects[2][3] = D_80082BEC;
     LightEffect *effect;
 
-    variant = (D_800BE9F0 == 6) ? 1 : 0;
+    variant = (level == 6) ? 1 : 0;
     if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
         header.flags = 0;
         header.update = 23;
@@ -957,10 +957,10 @@ void func_1500BEC0(void) {
     if (D_800B0DF0->maxParticles == 0) {
         return;
     }
-    if ((D_800BE9F0 == 6) && (D_80038080 == 0)) {
+    if ((level == 6) && (D_80038080 == 0)) {
         return;
     }
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         return;
     }
 

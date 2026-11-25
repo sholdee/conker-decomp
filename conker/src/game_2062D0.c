@@ -41,9 +41,9 @@ typedef struct {
 } SteamEffect;
 
 
-/* Effect kind for the current context: D_800E0A10, or kind 10 when D_800BE9F0 is clear and func_150A29C8(0, 0x1C) fails. */
+/* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
 u8 func_151D8E20(void) {
-    if ((D_800BE9F0 == 0) && (func_150A29C8(0, 0x1C) == 0)) {
+    if ((level == 0) && (func_150A29C8(0, 0x1C) == 0)) {
         return 10;
     }
     return D_800E0A10;

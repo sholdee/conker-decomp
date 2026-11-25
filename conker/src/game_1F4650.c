@@ -317,7 +317,7 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
     spawn.height = 20.0f;
     spawn.pos = *start;
     spawn.rot = *end;
-    spawn.flags = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
+    spawn.flags = (level == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
@@ -335,7 +335,7 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
 
         {
             // matching: a block-scope declaration gives IDO a scope boundary here
-            extern s32 D_800BE9F0; // matching: a declaration here opens a -g3 scope block (scheduling)
+            extern s32 level; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             objState = &obj->state;
             memcpy(objState, &state, sizeof(SightBeamState));
@@ -1145,7 +1145,7 @@ void func_151C9BA0(Camera *player, s32 state) {
             func_151CCE94(player);
             break;
         case 27:
-            if (D_800BE9F0 == 0x27) {
+            if (level == 0x27) {
                 func_151C9DE8(player, 1, -1, 0xFF, 1);
             } else {
                 if (D_80082FA0 == 0) {
@@ -1176,7 +1176,7 @@ void func_151C9BA0(Camera *player, s32 state) {
 
 void func_150BDE90(void *, u8, s32);
 
-/* Effects for state 27 when D_800BE9F0 is 0x27 (see func_151C9BA0). */
+/* Effects for state 27 when level is 0x27 (see func_151C9BA0). */
 void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     func_151C9F38(player, 4, arg1, arg2, arg3);
     func_151CC524(player, 0, 50, 0xFF, arg1, arg3);
@@ -1184,7 +1184,7 @@ void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     func_151CCF08(player, arg1, arg2, arg3);
     func_150BDE90(player, arg3, arg4);
     func_151CB5FC(player, 2, arg1, arg2, arg3);
-    if (D_800BE9F0 == 0x27) {
+    if (level == 0x27) {
         D_8008CD00 = 1;
     }
 }

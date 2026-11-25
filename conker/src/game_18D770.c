@@ -1712,11 +1712,11 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
     effect->light->z = z;
 }
 
-/* Turns the special lighting for the current D_800BE9F0 setting on or off, setting the colours in D_800DCD20 and D_800B0DF0. */
+/* Turns the special lighting for the current level setting on or off, setting the colours in D_800DCD20 and D_800B0DF0. */
 void func_151645C4(u8 enable) {
     D_800DCDD0 = enable;
     if (enable) {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 11:
             func_1511172C(4);
             break;
@@ -1737,7 +1737,7 @@ void func_151645C4(u8 enable) {
             break;
         }
     } else {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 6:
             func_1515F170(10, 0);
             // fallthrough

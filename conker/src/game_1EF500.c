@@ -739,7 +739,7 @@ void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
- * and a flash. Their look depends on the hit surface's material and on the level (D_800BE9F0).
+ * and a flash. Their look depends on the hit surface's material and on the level (level).
  */
 void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg) {
@@ -748,7 +748,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     s32 type;
 
     material = trail->trail.path.material & 0x1F;
-    if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
+    if ((level == 0x2B) || (level == 0x30)) {
         switch (material) {
         case 1:
             type = 3;
@@ -759,13 +759,13 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
             type = 4;
             break;
         }
-    } else if ((material == 0xB) && (D_800BE9F0 == 4)) {
+    } else if ((material == 0xB) && (level == 4)) {
         type = 1;
-    } else if ((material == 1 || material == 0xA) && (D_800BE9F0 == 0xE)) {
+    } else if ((material == 1 || material == 0xA) && (level == 0xE)) {
         type = 2;
-    } else if (D_800BE9F0 == 0x34) {
+    } else if (level == 0x34) {
         type = 3;
-    } else if (D_800BE9F0 == 0x27) {
+    } else if (level == 0x27) {
         type = 5;
     } else {
         type = 0;

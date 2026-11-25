@@ -325,7 +325,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             func_150D728C(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
-            if (D_800BE9F0 == 14) {
+            if (level == 14) {
                 f32 vc;
                 f32 front[3];
                 f32 back[3];
@@ -371,7 +371,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     longShot = 0;
     sound = D_80099AC4[kind];
     if (kind == 7) {
-        if (D_800BE9F0 == 43) {
+        if (level == 43) {
             sound = 0x27;
         }
     }
@@ -572,7 +572,7 @@ void func_150829D8(Actor *obj) {
     obj->noshove &= 0xF7FFFFFD;
     obj->noshove |= 4;
     if ((obj->mv != NULL) && (obj->mv->unk56 == 0)) {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 0:
         case 10:
         case 14:
@@ -759,7 +759,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             obj->unk68[0] = t + 0x10;
         }
     }
-    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->keepTime == 0xFF)) {
+    if ((D_80038080 == 0) && (level != 29) && (spawn->keepTime == 0xFF)) {
         found = obj->modelCount;
         if (found == 0) {
             found = 1;
@@ -768,7 +768,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             D_800D2040[obj->modelIds[i]] = 0xFF;
         }
     }
-    if (D_800BE9F0 == 29) {
+    if (level == 29) {
         obj->unk66 &= ~0x20;
     }
     func_1514D15C(obj);
@@ -1011,7 +1011,7 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
                     obj->cullDistance = override;
                 }
             }
-            if (D_800BE9F0 == 29) {
+            if (level == 29) {
                 obj->cullDistance = 1000;
             }
         } else {

@@ -29,7 +29,7 @@ void func_150120B0(s32 arg0) {
 void func_1501214C(Actor *arg0) {
     ActorLink tmp;
 
-    if (D_800BE9F0 != 24) {
+    if (level != 24) {
         tmp.actor = arg0;
         tmp.actorId = arg0->unique_id;
         tmp.timer = 300;

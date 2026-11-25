@@ -583,7 +583,7 @@ void func_1510FC34(s32 index) {
         *cameraZone = zone;
         func_150A6760(index);
     }
-    if (D_800BE9F0 == 60) {
+    if (level == 60) {
         func_150F33F8(index);
     }
 }

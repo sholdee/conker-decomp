@@ -140,7 +140,7 @@ void func_1511F31C(WorldObject *prop) {
     u16 id;
 
     id = prop->moveData.uhalf.lo;
-    if (prop->modelId == 0x8005 && D_800BE9F0 == 0x35) {
+    if (prop->modelId == 0x8005 && level == 0x35) {
         parent = func_151149AC(id);
         if (parent != NULL) {
             func_1511490C(mtx, parent);

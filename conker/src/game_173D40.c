@@ -48,7 +48,7 @@ s32 func_151420F8(Actor *actor);
 s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
-   fixed id; kind 1 depends on the current world (D_800BE9F0) and, in world 4, on whether
+   fixed id; kind 1 depends on the current world (level) and, in world 4, on whether
    func_151420F8 accepts the actor; kind 6 first has to register a five-entry effect list against
    the actor's index in movement_obj, and reports -1 if that fails.  Anything from 9 up is unmapped. */
 s32 func_15146970(s32 kind, Actor *actor) {
@@ -59,7 +59,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
     case 2: return 2;
     case 0: return 0;
     case 1:
-        if (D_800BE9F0 == 4) {
+        if (level == 4) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }

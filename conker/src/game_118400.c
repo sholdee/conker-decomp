@@ -36,11 +36,11 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
 
-/* Effect id for an actor's effect kind: kind 1 in world 4 (D_800BE9F0) is 6 when func_151420F8
+/* Effect id for an actor's effect kind: kind 1 in world 4 (level) is 6 when func_151420F8
    accepts the actor and 3 otherwise; everything else is unmapped (-1). */
 s32 func_150EB030(s32 kind, Actor *actor) {
     if (kind == 1) {
-        if (D_800BE9F0 == 4) {
+        if (level == 4) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }

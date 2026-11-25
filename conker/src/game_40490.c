@@ -424,7 +424,7 @@ s32 func_15013C38(TriggerZone *obj) {
     obj->flags |= 4;
     index = obj->data1;
 
-    if ((D_800D2E4C[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
         return 1;
     }
 
@@ -656,7 +656,7 @@ s32 func_150142EC(TriggerZone *obj) {
         return 1;
     }
 
-    if ((D_800D2E4C[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C[0x10]
+    if ((D_800D2E4C[0x11] & 4) && (level == 0x13)) { // low byte of D_800D2E4C[0x10]
         return 1;
     }
 
@@ -841,9 +841,9 @@ s32 func_15014B60(TriggerZone *obj) {
         header.update = -1;
         header.lifetime = 300;
         header.lightType = 0;
-        r = (D_800BE9F0 == 0x40) ? 0xFF : D_800A0938[i][0];
-        g = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][1];
-        count = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
+        r = (level == 0x40) ? 0xFF : D_800A0938[i][0];
+        g = (level == 0x40) ? 0 : D_800A0938[i][1];
+        count = (level == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
         packet.effects[i] = func_151602C0(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
     }
     effect = func_15149130(300, -1, 0x2E, -1, 0, 0x29, sizeof(packet), 0xFF, 0);
@@ -1111,15 +1111,15 @@ s32 func_150156F4(TriggerZone *obj) {
     MtxF mtx;
     RopeSpawn payload;
 
-    if (D_800BE9F0 == 0xB) {
+    if (level == 0xB) {
         if (obj->data1 < 6U) {
             return 1;
         }
-    } else if (D_800BE9F0 == 0x2C) {
+    } else if (level == 0x2C) {
         if (obj->data1 < 7U) {
             return 1;
         }
-    } else if (D_800BE9F0 == 0x26) {
+    } else if (level == 0x26) {
         if (obj->data1 < 2U) {
             return 1;
         }

@@ -215,7 +215,7 @@ void func_150C44A4(Effect *effect) {
         data->particle->desc.pos = pos;
     }
     emit = TRUE;
-    if ((D_800BE9F0 == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
+    if ((level == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
         emit = FALSE;
     }
     if (emit) {

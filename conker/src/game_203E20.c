@@ -43,9 +43,9 @@ typedef struct {
 } AmountTextStyle;
 
 /* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
-   while D_800BE9F0 is 0x32 or 0x33. */
+   while level is 0x32 or 0x33. */
 void func_151D6970(Actor *character, void *obj) {
-    if ((D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x33)) {
+    if ((level == 0x32) || (level == 0x33)) {
         func_150D6730(character, 0xFF, 1);
     }
 }

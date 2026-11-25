@@ -50,7 +50,7 @@ s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
     rand0 = func_150ADA68();
     rand1 = func_150ADA68();
     random = func_150ADA20();
-    kind = (D_800BE9F0 == 0x2B) ? 0x27 : 0x1A;
+    kind = (level == 0x2B) ? 0x27 : 0x1A;
 
     return func_151C229C(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
                          rand1 * 201.0f + 601.0f, 50.0f, (random % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1, 0, kind,
@@ -84,7 +84,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             muzzle.z = obj->zpos;
             launch = muzzle;
         }
-        func_151D3E6C(obj, &muzzle, &launch, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
+        func_151D3E6C(obj, &muzzle, &launch, (level == 0x2B) ? 0x28 : 0x1E);
         func_151D3F14(&muzzle, arg1, arg2);
         func_150FE0B8(obj, &muzzle, arg1, arg2);
         func_150FE288(obj);

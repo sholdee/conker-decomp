@@ -2676,7 +2676,7 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     config.spin = 16.10200119f;
     switch (kind) {
     case 19:
-        if (D_800BE9F0 == 60) {
+        if (level == 60) {
             config.floorHitChance = 0.0f;
         }
         break;

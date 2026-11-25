@@ -399,7 +399,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 D_800E0DA8 = D_800E0DAC;
             }
         }
-    } else if ((D_800E0E04 == 3) && (D_800BE9F0 != 0x35)) {
+    } else if ((D_800E0E04 == 3) && (level != 0x35)) {
         if (D_800E0E2C != 0) {
             func_10004074(D_800E0E20);
             func_10004074(D_800E0E24);

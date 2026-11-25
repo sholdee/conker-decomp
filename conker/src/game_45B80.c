@@ -280,12 +280,12 @@ Gfx *func_15018E88(Gfx *gfx, s16 player) {
     }
     gfx = func_151674F8(gfx, 0, player, 0);
     gfx = func_151674F8(gfx, 0, player, 1);
-    return func_15174AA4(gfx, D_800BE9F0, player);
+    return func_15174AA4(gfx, level, player);
 }
 
 /* Counterpart of func_15018E88: func_15174B48, then group 1 of player's display lists. */
 Gfx *func_15018F08(Gfx *gfx, s16 player) {
-    gfx = func_15174B48(gfx, D_800BE9F0, player);
+    gfx = func_15174B48(gfx, level, player);
     gfx = func_151674F8(gfx, 1, player, 0);
     gfx = func_151674F8(gfx, 1, player, 1);
 
@@ -419,7 +419,7 @@ s32 func_15019130(void) {
         func_15094EA0(player);
     }
     func_15112A80(0);
-    func_151749F8(D_800BE9F0, 0);
+    func_151749F8(level, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
     func_15188B74(0);
@@ -433,7 +433,7 @@ s32 func_15019130(void) {
     }
     func_15113218();
     func_15188B74(1);
-    func_151738C4(D_800BE9F0);
+    func_151738C4(level);
     func_1502C1A4();
     func_15113C88();
     if (D_800CC2B0 != 0) {
@@ -480,7 +480,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if (D_80084480 != 0) {
         return gfx;
     }
-    gfx = func_1510FEA0(gfx, D_800BE9F0);
+    gfx = func_1510FEA0(gfx, level);
     if ((func_1517EFAC(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
@@ -573,7 +573,7 @@ Gfx *func_150198FC(Gfx *gfx) {
         D_80082F90 = 0;
     }
     if (func_1517EFAC(0) == 0) {
-        gfx = func_1517E28C(gfx, D_800BE9F0);
+        gfx = func_1517E28C(gfx, level);
         gfx = func_15172F70(gfx);
         gfx = func_15181EE0(gfx);
     }
@@ -614,7 +614,7 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
     gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         gfx = func_1502BAD0(gfx, 6, player);
     }
     gfx = func_151674F8(gfx, 5, 0, 0);

@@ -1987,7 +1987,7 @@ void func_1507A71C(void) {
 void func_1507A774(void) {
     u16 value = (D_800D1891 << 8) | D_800D1892;
 
-    if (D_800BE9F0 == value) {
+    if (level == value) {
         func_15075400(D_800D1890);
     }
 }

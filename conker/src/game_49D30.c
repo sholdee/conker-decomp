@@ -400,7 +400,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
     if (state != 1 && D_800C35C4 == 0) {
         D_800C3C90 = callback;
         D_800C3C94 = callbackArg;
-        if (map != D_800BE9F0) {
+        if (map != level) {
             D_800C35C4 = cutscene + 1;
             func_1501C730(1, map, 0, 0, 0);
             if (D_800C35EA[scene] != 0) {
@@ -412,7 +412,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
         }
         D_800C35E8[scene] = cutscene;
         if (state != 2) {
-            D_800C35A8 = D_800BE9F0;
+            D_800C35A8 = level;
             D_800C3C98 = cutscene;
         }
         func_1501D044(scene);
@@ -653,7 +653,7 @@ s32 func_1501E05C(s32 scene) {
     s32 map;
     s32 skipRequest;
 
-    map = D_800BE9F0;
+    map = level;
     // matching: holding the address as an integer keeps IDO from folding it into the loads
     skipRequest = (s32)D_8008FD84;
 
@@ -865,7 +865,7 @@ void func_1501E81C(s32 skipped, s32 scene) {
         }
         D_800C35B8[scene] = -100;
         D_800C35B0[scene] = D_800C3C8E;
-        func_1501D258(D_800BE9F0, D_800C35E8[scene]);
+        func_1501D258(level, D_800C35E8[scene]);
         D_800C35EA[scene] = 0;
         D_800C3638 = 0;
         func_1501E73C(scene);
@@ -886,14 +886,14 @@ void func_1501E81C(s32 skipped, s32 scene) {
             D_800C35EA[scene] = 2;
             map = D_800C35C3;
             if (0x25 == D_800C35C3) {
-                savedMap = D_800BE9F0;
-                D_800BE9F0 = 0x25;
+                savedMap = level;
+                level = 0x25;
                 map = 0x25;
             }
             D_800C3671 = 0;
             func_1501D348(map, D_800C35C2 - 1, scene, D_800C3C90, D_800C3C94);
             if (0x25 == D_800C35C3) {
-                D_800BE9F0 = savedMap;
+                level = savedMap;
             }
             return;
         }

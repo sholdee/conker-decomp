@@ -38,11 +38,11 @@ void func_15017868(void) {
     for (i = 0; i < D_800D2F3C; i++) {
         node = func_1509B704(D_800D2F40[i]);
         if (node != NULL && (node->TaskID & PURGE_BETWEEN_SECTIONS)) {
-            node->LoadSection = D_800BE9F0;
+            node->LoadSection = level;
         }
     }
     func_1509BA04(0);
-    func_1509B4A0((s16)D_800BE9F0, 1);
+    func_1509B4A0((s16)level, 1);
 }
 
 void func_15017B20(TriggerZone *objects, s32 count);

@@ -300,3 +300,4 @@ math_mtxGetTranslation = 0x15043FF0; // type:func
 aim_removePoint = 0x1503DDD0; // type:func
 aim_loadPoints = 0x15004FE0; // type:func
 light_sendEvent = 0x151616D0; // type:func
+level = 0x800BE9F0;

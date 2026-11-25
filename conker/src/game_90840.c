@@ -563,14 +563,14 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
                     anim = 0x118;
                     speed = 1.0f;
                 }
-                if (D_800BE9F0 == 0x30) {
+                if (level == 0x30) {
                     anim = 0x28D;
                 }
                 arg0->count5 = 0xFF;
                 arg0->norun = 0xFF;
             }
         } else if ((arg0->mv->context_b == 0 && arg0->mv->unk7C == 0) || arg0->mv->transport == 2) {
-            if (D_800BE9F0 != 0x2D && D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
+            if (level != 0x2D && level != 0x2B && level != 0x30 && level != 0x34) {
                 anim = 0x33;
                 if (arg0->mv->pissed_up != 0) {
                     arg0->count5 = 0xFF;
@@ -1286,7 +1286,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x3:
         handled = 1;
         if ((arg4 != 0) || (arg6 != 0)) {
-            if (D_800BE9F0 != 0xA) {
+            if (level != 0xA) {
                 arg0->mv->rt_context_b = 0;
                 arg0->mv->pssd_is_pissing = 0;
                 arg0->count5 = 0;
@@ -1391,7 +1391,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             } else {
                 arg0->mv->gpoint = 0x12;
                 anim = 0x2F;
-                if (D_800BE9F0 == 0x31) {
+                if (level == 0x31) {
                     arg0->mv->swing_xvel = zones[12].x;
                     arg0->mv->swing_zvel = zones[12].z;
                     func_150DBD70(5);
@@ -1603,7 +1603,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                     func_1000FA64(sound, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0);
                                 }
                             }
-                        } else if ((arg0->taskint[2] != 0) && (D_800BE9F0 == 0x36)) {
+                        } else if ((arg0->taskint[2] != 0) && (level == 0x36)) {
                             if ((pressedButtons & B_BUTTON) && (arg0->taskint[2] == 1) && (arg0->shad == 0.0f)) {
                                 blend = 16.0f;
                                 speed = 0.6999999881f;
@@ -1847,7 +1847,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             } else if ((pressedButtons & Z_TRIG) && (arg0->animseq.uh != 0x76) && (arg0->mv->ReloadTimer == 0)) {
                 if (arg0->mv->unk1B2 != 0) {
                     anim = 0x2C7;
-                } else if ((act == 0xC) || (D_800BE9F0 == 0x2B) || (D_800BE616 == 0)) {
+                } else if ((act == 0xC) || (level == 0x2B) || (D_800BE616 == 0)) {
                     anim = 0x207;
                 } else {
                     anim = 0x77;
@@ -2748,7 +2748,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             Actor *obj;
             s32 item;
 
-            if (D_800BE9F0 == 0x3F) {
+            if (level == 0x3F) {
                 item = 0xBA;
             } else {
                 item = 0x89;

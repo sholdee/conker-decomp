@@ -73,7 +73,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
                 arg0->scale_y = 0.75f;
                 obj->ypos = arg0->ypos;
                 state = 1;
-                if (D_800BE9F0 == 6) {
+                if (level == 6) {
                     state = 0x81;
                 }
             }

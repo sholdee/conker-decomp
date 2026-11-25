@@ -916,7 +916,7 @@ extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
 extern s32 D_800BE9AC;
 extern u8 D_800BE9EB;
-extern s32 D_800BE9F0;
+extern s32 level;
 
 
 extern s32  D_800BE2B0[]; // type?

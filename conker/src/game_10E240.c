@@ -34,10 +34,10 @@ extern void func_1510F800(s32);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
- * from func_1509BE40 queries for the levels D_800BE9F0 == 0x1E, 0x1B and 0x2F. */
+ * from func_1509BE40 queries for the levels level == 0x1E, 0x1B and 0x2F. */
 void func_150E0D90(Camera *camera) {
     if (camera->CharContext == 9) {
-        if (D_800BE9F0 == 0x1E) {
+        if (level == 0x1E) {
             func_1509BFB0(0, 0x4044, 1);
         }
         if ((camera->Mode != 0x100) && (camera->cmdRunning == 0)) {
@@ -61,13 +61,13 @@ void func_150E0D90(Camera *camera) {
             camera->height = 110.0f;
             camera->IdealTripodMagnitude = 300.0f;
         }
-        if (D_800BE9F0 == 0x1E) {
+        if (level == 0x1E) {
             func_1509BFB0(0, 0x4044, 0);
         }
     }
-    if (D_800BE9F0 == 0x2F) {
+    if (level == 0x2F) {
         camera->AvailableModes &= 0x7FFFFFFF;
-    } else if (D_800BE9F0 == 0x1E) {
+    } else if (level == 0x1E) {
         if (func_1509BE40(1, 0x4042, 6, 0x9000) != 0) {
             camera->AvailableModes &= 0x7FFFFFFF;
         } else {
@@ -81,7 +81,7 @@ void func_150E0D90(Camera *camera) {
             camera->AvailableModes |= 8;
         }
     }
-    if (D_800BE9F0 == 0x1B) {
+    if (level == 0x1B) {
         if (func_1509BE40(1, 0x406E, 6, 0x9000) != 0) {
             camera->AvailableModes |= 0x200;
         } else {

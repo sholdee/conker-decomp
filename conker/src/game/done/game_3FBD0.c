@@ -5,7 +5,7 @@
 
 
 u8 func_15012720(void) {
-    switch(D_800BE9F0)
+    switch(level)
     {
         case 0:
         case 44:

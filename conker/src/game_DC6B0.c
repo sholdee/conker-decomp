@@ -395,9 +395,9 @@ void func_150AFE64(s32 altBone) {
     }
 }
 
-/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when D_800BE9F0 is 6, else on 0xDF/0xDE. */
+/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when level is 6, else on 0xDF/0xDE. */
 void func_150B003C(s32 arg0) {
-    if (D_800BE9F0 == 6) {
+    if (level == 6) {
         func_15179008(0);
         func_150AF200(0xE2, 0xE1);
         return;

@@ -2546,7 +2546,7 @@ enum TaskEntry {
  * original: Task WorkingSet (rom_debug_struct.c) */
 typedef struct IdRecord {
     /* 0x00 */ u16 TaskID;       // task id and flags (TASK_ID_MASK, TASK_FLAGS)
-    /* 0x02 */ u16 LoadSection;  // the level (D_800BE9F0) the task was loaded in
+    /* 0x02 */ u16 LoadSection;  // the level (level) the task was loaded in
     /* 0x04 */ u16 TaskSize;     // size of the whole allocation
     /* 0x06 */ u16 BSSSize;
     /* 0x08 */ u16 DataOffset;

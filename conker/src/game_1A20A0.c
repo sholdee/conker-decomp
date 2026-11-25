@@ -385,7 +385,7 @@ void func_15175958(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
         if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C(&actor->header);

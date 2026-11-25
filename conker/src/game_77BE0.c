@@ -57,7 +57,7 @@ void func_1504A730(void) {
     D_800CC250 += D_800BE9A0;
     dc_glbl_CharNum = 0;
     D_800CC2BC = 0;
-    func_1508295C(D_800BE9F0, 0, 0);
+    func_1508295C(level, 0, 0);
     D_800CC2B8 ^= 1;
 
     for (i = 0; i != 25; i++) {
@@ -644,7 +644,7 @@ s32 func_1504C078(void) {
 }
 
 s32 func_1504C0B8(void) {
-    if (D_800BE9F0 == 27 || D_800BE9F0 == 30) {
+    if (level == 27 || level == 30) {
         return 395;
     }
     return 27;
@@ -726,7 +726,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                     anim = 0x8B;
                     obj->unkAA = 0x4B;
                 } else if (vel > 14.0f) {
-                    anim = (D_800BE9F0 != 4) ? 2 : 0x1B2;
+                    anim = (level != 4) ? 2 : 0x1B2;
                     speed = vel / 23.0f + 0.8000000119f;
                 } else if (vel > 6.0f || (arg2 < 1.0f && obj->speed > 1.0f)) {
                     anim = 1;
@@ -798,7 +798,7 @@ s32 func_1504C8BC(Actor *obj) {
     if (ext == NULL) {
         return 1;
     }
-    if (obj->ob_matrix_ptr != NULL || D_800BE9F0 == 0x33 || obj->type == 0x25) {
+    if (obj->ob_matrix_ptr != NULL || level == 0x33 || obj->type == 0x25) {
         ext->unk1A8 = 0;
         return 1;
     }

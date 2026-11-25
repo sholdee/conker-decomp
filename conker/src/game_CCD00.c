@@ -232,7 +232,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 27:
         return func_1509B704(id)->LoadSection;
     case 28:
-        return D_800BE9F0;
+        return level;
     case 29:
         mask = 0;
         for (j = 0; j < D_8008FD8C; j++) {

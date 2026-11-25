@@ -164,14 +164,14 @@ void func_1509B810(IdRecord *node) {
 
 void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
-/* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level D_800BE9F0. */
+/* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
 IdRecord *func_1509B8FC(s16 id) {
     IdRecord *node;
     s32 size;
 
     node = func_1502B5C8(&size, 2, 20, id);
     node->TaskID |= id;
-    node->LoadSection = D_800BE9F0;
+    node->LoadSection = level;
     return func_1509B950(node);
 }
 
@@ -225,7 +225,7 @@ void func_1509BA04(s32 unloadAll) {
         if (ID_FLAG(id) && !unloadAll) {
             func_1509B764(node);
             D_800D2E70[id] = 3;
-        } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && D_800BE9F0 != node->LoadSection)) {
+        } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && level != node->LoadSection)) {
             D_8003C8E0 = 0x6000001;
             func_150ADAF0(node, TASK_ENTRY_PURGE);
             D_8003C8E0 = 0;
@@ -251,7 +251,7 @@ void func_1509BBA0(s32 mode) {
 
     node = gTaskWorkingSet.head;
     func_15096D08();
-    if (!D_800BE616 && D_800BE9F0 != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
+    if (!D_800BE616 && level != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
     func_1509C228();
@@ -284,7 +284,7 @@ void func_1509BBA0(s32 mode) {
                 node = node->NextTaskPtr;
                 continue;
             }
-            if (!(key & SUSPEND_BETWEEN_SECTIONS) || D_800BE9F0 == node->LoadSection) {
+            if (!(key & SUSPEND_BETWEEN_SECTIONS) || level == node->LoadSection) {
                 if (mode == TASK_ENTRY_RUN || (mode == TASK_ENTRY_INIT && !(key & RUN_INIT_ONCE_ONLY))) {
                     D_8003C8E0 = 0x6000004;
                     func_150ADAF0(node, mode);
@@ -409,9 +409,9 @@ void func_1509C228(void) {
     func_1509BFB0(2, 0x2000, 0x36, 1, 1);
 }
 
-/* Returns 0 when D_800BE9F0 is one of the listed values or D_800D2E44 is set, else 1. */
+/* Returns 0 when level is one of the listed values or D_800D2E44 is set, else 1. */
 s32 func_1509C2A4(void) {
-    s32 value = D_800BE9F0;
+    s32 value = level;
     if ((value == 3) ||
         (value == 5) ||
         (value == 9) ||

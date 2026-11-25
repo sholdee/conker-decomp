@@ -292,7 +292,7 @@ void func_15073FA0(void);
 
 
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
- * Z fires (only when D_800BE9F0 is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
+ * Z fires (only when level is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
 void func_150F34F4(Actor *actor) {
     u16 angle;
@@ -535,7 +535,7 @@ void func_150F34F4(Actor *actor) {
             }
         } else if ((D_800CC288 & Z_TRIG) && (actor->unk103 == 0)) {
             count = 0;
-            if (D_800BE9F0 == 0x3C) {
+            if (level == 0x3C) {
                 // matching: init on the do's line keeps as1's order for the two address loads
                 obj = &movement_obj[1]; do {
                     if ((obj->type != 0) && (obj->character_type == 0x25)) {

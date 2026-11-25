@@ -18,7 +18,7 @@ void func_15192800(Actor *obj, s32 arg1) {
     if (obj != NULL && func_151928B0(obj, groupPtr)) {
         switch (func_1510F8CC(obj->floorMaterial)) {
         case 5:
-            if (D_800BE9F0 == 20) {
+            if (level == 20) {
                 slot = 2;
             } else {
                 slot = 1;

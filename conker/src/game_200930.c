@@ -994,7 +994,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
         obj = &movement_obj[i];
         if (obj->type == 0) continue;
         if (obj->drawtype == 3) continue;
-        if (D_800BE9F0 != 0x23 && obj->character_type == 0xFF) continue;
+        if (level != 0x23 && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
         if (!(obj->noshove & 0x40)) continue;
         if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) continue;

@@ -92,7 +92,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     gfx = func_151733D8(gfx, 1);
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     if (!skipWorld) {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 0x14:
             gfx = func_150C8600(gfx);
             break;
@@ -118,11 +118,11 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         D_800D9E10[view], D_800D9E20, D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
                         D_800D9E28);
     if (!skipWorld) {
-        if (D_800BE9F0 != 5) {
+        if (level != 5) {
             if (D_800BEAAA) {
                 gDPPipeSync(gfx++);
                 if (D_800DBE62) {
-                    if (D_800BE9F0 != 0x14 && D_800BE9F0 != 0x33 && D_800BE9F0 != 0x32) {
+                    if (level != 0x14 && level != 0x33 && level != 0x32) {
                         gfx = func_150A5378(D_800B0E00[0], gfx, D_800D9C10[view], 0, 0, 1 << view);
                     } else {
                         gSPDisplayList(gfx++, D_800B0E00[0]);
@@ -131,7 +131,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gDPPipeSync(gfx++);
                         gfx = func_1510CDB8(gfx, 0xFF, 0xFF, view);
                         gfx = func_151733D8(gfx, 1);
-                        if (D_800BE9F0 == 0x35) {
+                        if (level == 0x35) {
                             gfx = func_150CF5E8(gfx);
                         }
                         gSPDisplayList(gfx++, D_800B0E04);

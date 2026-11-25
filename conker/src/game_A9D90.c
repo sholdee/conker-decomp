@@ -275,7 +275,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     } else if (mode == 3) {
         func_1507D4F8(slot);
     }
-    if (slot == 0 && D_800BE9F0 == 4) {
+    if (slot == 0 && level == 4) {
         r = func_150ADA20();
         f = func_150ADA68();
         func_150E7994(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
@@ -315,7 +315,7 @@ void func_1507D1D8(Actor *obj) {
     } else {
         player = -1;
     }
-    if (D_800BE9F0 == 0x2B) {
+    if (level == 0x2B) {
         slot = obj - movement_obj;
         value = func_150859AC(slot, 1);
         if (value >= 0x11 && value < 0x21) {
@@ -360,7 +360,7 @@ void func_1507D1D8(Actor *obj) {
     if (D_800BE616 != 0) {
         obj->imune = 150;
         obj->mv->unk1B1 = obj->imune;
-        if (D_800BE9F0 == 0x33) {
+        if (level == 0x33) {
             func_1507D158(slot, 120, 0, 0, 0);
             func_15088D58(obj);
         }
@@ -468,7 +468,7 @@ s32 func_1507D754(Actor *obj) {
         func_151C9740(obj, 0xFF, 1);
         break;
     case 0x25:
-        if (obj->taskint[2] != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+        if (obj->taskint[2] != 0 || level == 6 || level == 0x3B) {
             func_151CFA4C(obj, 0xFF, 1);
         }
         return 0;
@@ -490,7 +490,7 @@ s32 func_1507D754(Actor *obj) {
         }
         break;
     case 0x90:
-        if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
+        if (D_800BE616 != 0 && level == 0x33) {
             func_1507CD64(obj, 8);
             return 2;
         }
@@ -504,7 +504,7 @@ s32 func_1507D754(Actor *obj) {
             func_1507CD64(obj, 6);
             spawned = func_151149AC((u8)(obj->playernumber + 11));
         } else {
-            if (D_800BE9F0 == 0x23) {
+            if (level == 0x23) {
                 spawned = func_151149AC(1);
             }
             handle = func_1507515C(obj);
@@ -704,12 +704,12 @@ void func_1507DFE4(s32 resource, s32 arg1) {
             return;
         }
         func_15022190(pos[0], pos[1], pos[2], yaw);
-        savedMode = D_800BE9F0;
-        D_800BE9F0 = 0x25;
+        savedMode = level;
+        level = 0x25;
         D_800C3671 = 1;
         func_1501D348(0x25, kind, 0, 0, 0);
         D_800C3670 = 1;
-        D_800BE9F0 = savedMode;
+        level = savedMode;
     }
 }
 

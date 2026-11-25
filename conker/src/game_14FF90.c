@@ -173,7 +173,7 @@ void func_15122C5C(Camera *camera) {
         if ((camera->AvailableModes & 0x08000000) && !(camera->AvailableModes & 0x400)) {
             func_1512E8E0(camera);
         }
-        func_15130230(camera, D_800BE9F0);
+        func_15130230(camera, level);
         func_15126138(camera);
         func_15125C40(camera);
         func_15128680(camera);
@@ -800,7 +800,7 @@ void func_15124B18(Camera *camera) {
         camera->IdealTripodMagnitude = 150.0f;
     } else if (mode80) {
         camera->height = camera->eye.y - camera->unk354;
-    } else if (mode80 && (camera->CharPtr->unk102 == 0) && (D_800BE9F0 != 0x17)) {
+    } else if (mode80 && (camera->CharPtr->unk102 == 0) && (level != 0x17)) {
         camera->height = 40.0f;
         camera->unk34C = 40.0f;
         camera->IdealTripodMagnitude = 150.0f;

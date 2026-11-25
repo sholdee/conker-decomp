@@ -236,9 +236,9 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     if (D_80041F04 & 1) {
         if (state == 0) {
             func_100088F0(channel, 0x8000, 1);
-            if (D_800BE9F0 == 1 || D_800BE9F0 == 12) {
+            if (level == 1 || level == 12) {
                 func_10008790(channel, 0x7000, 0, 0);
-            } else if (D_800BE9F0 != 7) {
+            } else if (level != 7) {
                 func_10008790(channel, 0xCA, 0, 0);
             }
             func_100085B8(channel, 15, 1);
@@ -246,16 +246,16 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
         state = 1;
     } else if (state != 0) {
         func_100088F0(channel, 0x8000, 0);
-        if (D_800BE9F0 == 1 || D_800BE9F0 == 12) {
+        if (level == 1 || level == 12) {
             func_10008790(channel, 0x7000, 255, 0);
-        } else if (D_800BE9F0 != 7) {
+        } else if (level != 7) {
             func_10008790(channel, 0xCA, 255, 0);
         }
         func_100085B8(channel, 15, 0);
         state = 0;
     }
 
-    if (D_800BE9F0 == 39) {
+    if (level == 39) {
         func_10011FA0((s32 *)4);
         if (bit1 == 0) {
             bit1 = 2;
@@ -287,7 +287,7 @@ s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
 s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     s32 volume;
 
-    if (D_800BE9F0 == 4) {
+    if (level == 4) {
         if ((state & 1) && D_80041F0C == 0) {
             func_1000E46C(19, 0, 0x1000, 0);
             state &= ~1;
@@ -388,7 +388,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         func_10008790(*&channel, 3, 16, 0);
         func_1000886C(channel, 4, 0);
         state = 1;
-    } else if (D_800BE9F0 == 19) {
+    } else if (level == 19) {
         x -= 24.0f;
         z -= 3015.0f;
         distance = x * x + z * z;
@@ -446,7 +446,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         started = 1;
     }
 
-    if (D_800BE9F0 != 29) {
+    if (level != 29) {
         func_10008F24(channel);
         return state;
     }
@@ -552,7 +552,7 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         }
         return state;
     }
-    if (D_800BE9F0 != 29) {
+    if (level != 29) {
         func_10008F24(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
@@ -649,7 +649,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     f32 volume;
 
-    if (D_800BE9F0 == 49) {
+    if (level == 49) {
         if (state != 2) {
             if (func_1000B1B0(9) == NULL) {
                 func_1000E704(62, 0, 0xFFFF);
@@ -690,7 +690,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     } else {
         maxVolume = 12000;
     }
-    if (D_800BE9F0 == 55 && flag == 0) {
+    if (level == 55 && flag == 0) {
         func_100114D0(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
         volume &= 0xFF00;
         volume = maxVolume - volume;
@@ -706,7 +706,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
 s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
-    if (D_800BE9F0 == 55) {
+    if (level == 55) {
         if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
@@ -730,7 +730,7 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     bit1 = state & 2;
     state &= 1;
-    if (D_800BE9F0 == 66) {
+    if (level == 66) {
         func_10011FA0((s32 *)4);
         if (state == 0) {
             state = 1;

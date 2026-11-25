@@ -71,7 +71,7 @@ void func_1512A390(Camera *arg0) {
                       arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
-    if (D_800BE9F0 == 0x28) {
+    if (level == 0x28) {
         arg0->zoneWaterY = -10000.0f;
         arg0->waterY = -10000.0f;
     }
@@ -205,7 +205,7 @@ void func_1512ABF8(void) {
                 D_800DC200[i][j].halfWidth *= 0.5f;
                 D_800DC200[i][j].unk2 *= 0.5f;
             }
-            if ((D_800BE9F0 == 0x1B) || (D_800BE9F0 == 0x1E)) {
+            if ((level == 0x1B) || (level == 0x1E)) {
                 D_800DC200[i][j].halfWidth *= 0.75f;
                 D_800DC200[i][j].unk2 *= 0.75f;
             }
@@ -559,7 +559,7 @@ void func_1512BB10(Camera *arg0) {
         } else if (arg0->IdealTripodMagnitude > 580.0f) {
             arg0->unk94C = 70.0f;
             arg0->unk950 = 140.0f;
-        } else if ((D_800BE9F0 == 0x31) && (arg0->CharContext == 3)) {
+        } else if ((level == 0x31) && (arg0->CharContext == 3)) {
             flag = 1;
             arg0->unk94C = 20.0f;
             arg0->unk950 = 50.0f;
@@ -602,7 +602,7 @@ void func_1512BB10(Camera *arg0) {
         probe.floorY = arg0->unk354;
         probe.yspd = 0.0f;
         probe.theta = arg0->CameraAngle;
-        if ((arg0->AvailableModes & 0x80000000) || (D_800BE9F0 == 0x37)) {
+        if ((arg0->AvailableModes & 0x80000000) || (level == 0x37)) {
             D_80089120[2] = 0;
         }
         if (arg0->AvailableModes & 0x10000) {
@@ -643,7 +643,7 @@ void func_1512BB10(Camera *arg0) {
             }
         }
         arg0->eye.z = probe.zpos;
-        if ((D_800BE9F0 != 0x1B) && (hit != 0) && (arg0->Mode != 0x100)) {
+        if ((level != 0x1B) && (hit != 0) && (arg0->Mode != 0x100)) {
             func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
                           arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
             if (arg0->eye.y < floorY + 40.0f) {

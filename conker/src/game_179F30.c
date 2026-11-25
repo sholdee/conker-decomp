@@ -68,7 +68,7 @@ void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 /**
  * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
- * one chosen by D_800BE9F0 (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
+ * one chosen by level (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
  * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
  */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
@@ -194,7 +194,7 @@ s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
         break;
     }
 
-    switch (D_800BE9F0) {
+    switch (level) {
     case 43:
         *globalSlot = 21;
         found |= 2;
@@ -795,7 +795,7 @@ void func_1514DB58(Actor *obj) {
 }
 
 void func_1514DB64(Actor *obj) {
-    if (D_800BE9F0 == 20) {
+    if (level == 20) {
         func_151B2060(obj);
     }
 }

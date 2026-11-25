@@ -188,7 +188,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     } else {
         cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
     }
-    if (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) {
+    if (level == 0x34 || level == 0x26) {
         variant = 5;
     } else {
         variant = 4;

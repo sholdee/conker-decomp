@@ -32,7 +32,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     switch (event) {
     case 1:
         if (D_800C35EA[0] == 0) {
-            value = D_800BE9F0;
+            value = level;
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             } else if (D_800D3840 == 3) {
@@ -52,11 +52,11 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             }
-            savedValue = D_800BE9F0;
-            D_800BE9F0 = 0x25;
+            savedValue = level;
+            level = 0x25;
             // matching: passing 0x25 directly reschedules the switch
-            func_1501D348(D_800BE9F0, id, 0, 0, 0);
-            D_800BE9F0 = savedValue;
+            func_1501D348(level, id, 0, 0, 0);
+            level = savedValue;
             return 1;
         }
         return 0;
@@ -64,7 +64,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         if (D_800C35EA[0] == 0) {
             extra0 = params->args[0];
             extra1 = params->args[1];
-            value2 = D_800BE9F0;
+            value2 = level;
             if (D_800D3840 == 8) {
                 func_15022190(params->args[2], params->args[3], params->args[4], params->args[5] * FIX16_TO_F32);
             } else if (D_800D3840 == 5) {
@@ -75,7 +75,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 2: {
-        s32 current = D_800BE9F0;
+        s32 current = level;
 
         D_800C35C2 = id + 1;
         D_800C35C3 = current;

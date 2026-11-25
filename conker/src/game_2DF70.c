@@ -78,7 +78,7 @@ void func_15000AD0(s32 arg0) {
             }
         }
         D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
-        if (D_800BE9F0 == 0x3C) {
+        if (level == 0x3C) {
             D_800DBEAB = 1;
         } else {
             D_800DBEAB = 0;
@@ -86,7 +86,7 @@ void func_15000AD0(s32 arg0) {
     } else if (D_800B0DF0->unk8 == 2) {
         D_800DBE80 = allocate_memory(0x1000, 1, 1, 0);
         buf = D_800DBE80;
-        switch (D_800BE9F0) {
+        switch (level) {
             case 0:
             case 41:
             case 45:
@@ -137,7 +137,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        switch (D_800BE9F0) {
+        switch (level) {
             case 0:
             case 41:
             case 45:
@@ -192,7 +192,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        switch (D_800BE9F0) {
+        switch (level) {
             case 0:
             case 41:
             case 45:
@@ -425,7 +425,7 @@ void func_15001970(void) {
     D_800DBE18[0] = 0;
     D_800DBE1C[0] = 0;
     D_800DBE20 = 0;
-    size = D_80091C04[D_800BE9F0];
+    size = D_80091C04[level];
     D_800DBE24 = 0;
     D_800B0DC0 = allocate_memory(size, 1, 0, 0);
     D_800B0DC8 = size + D_800B0DC0;
@@ -444,7 +444,7 @@ void func_15001A08(void) {
     u32 stat;
     s32 romWord;
 
-    size = D_80091AF0[D_800BE9F0];
+    size = D_80091AF0[level];
 
     __osPiGetAccess();
     stat = IO_READ(PI_STATUS_REG);
@@ -806,8 +806,8 @@ void func_150025FC(void) {
     height = D_800DBE2C;
 
     D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
-    res0 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2);
-    res1 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2 + 1);
+    res0 = func_1502B5C8(NULL, 2, 5, level * 2);
+    res1 = func_1502B5C8(NULL, 2, 5, level * 2 + 1);
     if (res0 == 0) {
         D_800BE5D0 = 0;
     } else {

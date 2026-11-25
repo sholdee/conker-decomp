@@ -487,7 +487,7 @@ void func_151216F8(Camera *camera) {
             camera->aim.distance = 350.0f;
             return;
         }
-        if ((zone == 0x3B) && ((D_800BE9F0 == 0x41) || (D_800BE9F0 == 0x3C))) {
+        if ((zone == 0x3B) && ((level == 0x41) || (level == 0x3C))) {
             camera->YOffsetTget = -12.0f;
             camera->sideOffsetTarget = -28.0f;
             camera->aim.distance = 106.0f;
@@ -500,7 +500,7 @@ void func_151216F8(Camera *camera) {
             camera->sideOffsetTarget = 0.0f;
             return;
         }
-        if ((zone == 0x12) && (D_800BE9F0 == 0x3C)) {
+        if ((zone == 0x12) && (level == 0x3C)) {
             camera->YOffsetTget = 10.0f;
             camera->aim.distance = 180.0f;
             camera->sideOffsetTarget = 0.0f;

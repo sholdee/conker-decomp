@@ -51,7 +51,7 @@ void func_1500E5C0(void) {
     D_80088B40 = 0;
 }
 
-/* Called with D_800BE9F0; id 43 also runs func_15011C70. */
+/* Called with level; id 43 also runs func_15011C70. */
 void func_1500E70C(s32 id) {
     if (id == 43) {
         func_15011C70();
@@ -153,7 +153,7 @@ void func_1500E8C0(void) {
         descriptor.extent.z = 900.0f - descriptor.origin.z;
         func_15189900(&descriptor, 1);
     }
-    func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
+    func_1000FA64(1567, (level == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {

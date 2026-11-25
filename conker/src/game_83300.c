@@ -884,7 +884,7 @@ void func_15056B08(Actor *actor) {
             f32 h;
 
             h = ty + 70.0f;
-            if (D_800BE9F0 == 0x26) {
+            if (level == 0x26) {
                 h -= 45.0f * actor->scale_y;
             }
             ang = func_1505A630(sqrtf(distSqXZ), h, 0);
@@ -1346,7 +1346,7 @@ void func_150593C4(Actor *actor, u16 angle, f32 speed, f32 rate) {
     actor->ob_overslopey += (z - actor->ob_overslopey) * rate;
 }
 
-/* Applies the current map's (D_800BE9F0) water current to a swimming actor. */
+/* Applies the current map's (level) water current to a swimming actor. */
 void func_15059444(Actor *actor) {
     s32 pathIdx;
     s32 id;
@@ -1354,7 +1354,7 @@ void func_15059444(Actor *actor) {
 
     pathIdx = -1;
 
-    switch (D_800BE9F0) {
+    switch (level) {
         case 4:
             func_150593C4(actor, 0x4000, 50.0f, 0.05999999865889549f);
             break;
@@ -1937,7 +1937,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
             }
             actor->unk100 &= 0xFD;
             if ((((u32)actor->floorMaterial >> 12) & 0xF) == 1) {
-                if (D_800BE9F0 == 0x14) {
+                if (level == 0x14) {
                     func_1513783C(actor, 0xFF, 1);
                     func_1507CD64(actor, 8);
                     return;
@@ -1946,7 +1946,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 return;
             }
             hurtFall = 600.0f;
-            if (D_800BE9F0 == 0x43) {
+            if (level == 0x43) {
                 deathFall = 1000.0f;
             } else {
                 deathFall = hurtFall * 3.0f;
@@ -1960,7 +1960,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 flags = 0;
                 hurt = 0;
                 anim = 0x30;
-                if (D_800BE9F0 != 0x29) {
+                if (level != 0x29) {
                     floorType = actor->floorMaterial;
                     if (((((u32)floorType >> 12) & 0xF) == 2) || ((floorType == 0x13) & 0x1F)) {
                         anim = 0xC8;
@@ -3634,7 +3634,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
                 } else if (actor->inwater != 0) {
                     deathKind = 4;
                 } else if ((((actor->floorMaterial & 0x1F) == 0xE) || ((actor->floorMaterial & 0x1F) == 0x13)) &&
-                           (D_800BE9F0 != 0x34)) {
+                           (level != 0x34)) {
                     deathKind = 0xD;
                 } else {
                     switch (type) {
@@ -3923,7 +3923,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         if (actor->inwater == 1) {
             rate = 2.0f;
             anim = 0;
-            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (actor->mv->pissed_up <= 0)) &&
+            if ((D_800CC288 & 0x8000) && ((level != 0x29) || (actor->mv->pissed_up <= 0)) &&
                 (((actor->unk118 - 60.0f) - 30.0f) < actor->ypos)) {
                 func_15052408(actor);
                 actor->mv->prop = 0;
@@ -4025,7 +4025,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     anim = 0;
     if (idx != 0) {
         id = movement_obj[idx - 1].character_type;
-        if (((id == 0x28) && (D_800BE9F0 != 0x23)) || (id == 0x8A) || (id == 0x23)) {
+        if (((id == 0x28) && (level != 0x23)) || (id == 0x8A) || (id == 0x23)) {
             jumpType = id + 1;
             flag = 1;
         }
@@ -4320,7 +4320,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
         state = actor->mv->unk7C;
     }
 
-    if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (actor->mv->rt_context_b == 0) &&
+    if ((level != 0x29) && (level != 0x2E) && (actor->mv->rt_context_b == 0) &&
         (D_800CC284->button & 0x20) && (func_15080738(state) != 0)) {
         state = 0x1A;
     }
@@ -5040,7 +5040,7 @@ void func_15061B4C(void) {
             s32 delta;
             s32 pad;
 
-            if (D_800BE9F0 != 0x30) {
+            if (level != 0x30) {
                 if (movement_obj[i].animseq.uh == 1) {
                     func_15062D10(id, 0x253, 0, 0x10, 0, 0);
                     func_15062D10(id, 0x255, 0, 8, 0, 0);

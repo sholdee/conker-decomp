@@ -350,7 +350,7 @@ void func_150A11C4(Actor *actor) {
                         /* yaw * 65536/360 is a binary angle */
                         if (actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
                             actor->norun == 0 &&
-                            (actor->mv->weapon_status == 0 || D_800BE9F0 == 6) && actor->stickspeed > 8.0f) {
+                            (actor->mv->weapon_status == 0 || level == 6) && actor->stickspeed > 8.0f) {
                             height = zones[i].y + zones[i].ySize;
                             flag = 0;
                             angle = (u32)(zones[i].yaw * 182.0444489f);
@@ -428,7 +428,7 @@ void func_150A11C4(Actor *actor) {
                     __osPiRelAccess();
                     if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
                         func_15172E7C(actor, zones[i].subTypeData, zones[i].data1);
-                        if (D_800BE9F0 != zones[i].subTypeData) {
+                        if (level != zones[i].subTypeData) {
                             actor->imune = 0xFF;
                             actor->unk1CC = actor->ypos;
                         }
@@ -452,7 +452,7 @@ void func_150A11C4(Actor *actor) {
                         if (zones[i].subTypeData == 0) {
                             zones[i].inactive = 1;
                         }
-                        func_1501D348(D_800BE9F0, zones[i].data1, 0, 0, 0);
+                        func_1501D348(level, zones[i].data1, 0, 0, 0);
                         zones[i].data2++;
                     }
                     break;
