@@ -1041,7 +1041,7 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
         if (entry->object_status & 0x60) {
             continue;
         }
-        extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;
+        extent = (entry->cullRadiusY < entry->cullRadiusXZ) ? entry->cullRadiusXZ : entry->cullRadiusY;
         if (D_800DF0EC < entry->x - extent) {
             continue;
         }

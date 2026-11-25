@@ -1541,11 +1541,11 @@ struct WorldObject {
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
     /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 unk4D;
+    /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game_13AE20.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;
-    /* 0x50 */ u16 unk50;            // bounding radius, see func_15004AAC
-    /* 0x52 */ u16 unk52;
+    /* 0x50 */ u16 cullRadiusXZ;     // bounding radius: view culling width and placement scatter, see func_15004AAC
+    /* 0x52 */ u16 cullRadiusY;      // view culling height
     /* 0x54 */ u16 modelId;          // | 0x8000 for objects without a loaded model
     /* 0x56 */ u16 numTris;          // collision triangles, see func_15003668
     /* 0x58 */ u16 firstTri;
@@ -1588,7 +1588,7 @@ struct WorldObject {
     /* 0x8B */ u8 dst_fade_alpha[4]; // per view (the debugger labels them [1]..[4])
     /* 0x8F */ u8 pad8F;
     /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
-    /* 0x92 */ u8 unk92;
+    /* 0x92 */ u8 contactNonPlayers;  // nonzero: onContact also runs for actors that are not players (ObjectBehavior)
     /* 0x93 */ u8 pad93;
     /* 0x94 */ Shadow *shadow;       // created and freed by func_15113C88
     /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
@@ -3126,9 +3126,9 @@ typedef struct PropSounds {
 
 /* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index). */
 typedef struct ObjectBehavior {
-    /* 0x0 */ void (*update)(WorldObject *obj);
+    /* 0x0 */ void (*moveProc)(WorldObject *obj);
     /* 0x4 */ void (*onContact)(WorldObject *obj, Actor *actor);
-    /* 0x8 */ s32 unk8; /* copied to WorldObject.unk92 */
+    /* 0x8 */ s32 contactNonPlayers; /* copied to WorldObject.contactNonPlayers */
 } ObjectBehavior; /* size 0xC */
 
 /* Saved settings of one multiplayer mode (D_80082BBC[mode]); func_151E22BC copies them into D_800E0BE0[]. */

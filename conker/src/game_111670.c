@@ -243,9 +243,9 @@ void func_150E4928(WorldObject *obj) {
         while (tries != 0) {
             x = obj->x;
             z = obj->z;
-            if (obj->unk50 != 0) {
-                x += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
-                z += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
+            if (obj->cullRadiusXZ != 0) {
+                x += (func_151EF610() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
+                z += (func_151EF610() % obj->cullRadiusXZ) * 2 - obj->cullRadiusXZ;
             }
             found = func_150A43E0(x, z, 1, &idx);
             if (found) {

@@ -184,7 +184,7 @@ void func_15112A80(s32 player) {
                             drawDist = obj->drawDistance;
                         }
                         *dp = func_150A6360(recp, mtx, obj->x, obj->y + obj->yOffset, obj->z,
-                                            (f32)(u32)obj->unk50, (f32)(u32)obj->unk52, drawDist);
+                                            (f32)(u32)obj->cullRadiusXZ, (f32)(u32)obj->cullRadiusY, drawDist);
                         if (*dp < 0) {
                             *dp = -*dp;
                         }
@@ -560,7 +560,7 @@ void func_15114188(void) {
             for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
                 if (D_800DBF94[i] & (1 << j)) {
                     D_800DBF94[i] ^= 1 << j;
-                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].unk92 != 0 || movement_obj[j].playernumber != 0xFF)) {
+                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].contactNonPlayers != 0 || movement_obj[j].playernumber != 0xFF)) {
                         db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
                     if ((db_Object_array[i].object_status & 4) == 4 && !(db_Object_array[i].object_status & 8)) {

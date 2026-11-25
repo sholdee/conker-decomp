@@ -141,9 +141,9 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->state |= 4;
                 setStateBit2 = TRUE;
             }
-            obj->moveProc = D_80088C90[base[i].behavior.index].update;
+            obj->moveProc = D_80088C90[base[i].behavior.index].moveProc;
             obj->onContact = D_80088C90[base[i].behavior.index].onContact;
-            obj->unk92 = D_80088C90[base[i].behavior.index].unk8;
+            obj->contactNonPlayers = D_80088C90[base[i].behavior.index].contactNonPlayers;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }
@@ -195,9 +195,9 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             if (i >= D_800DBF00) {
                 obj->unk4C = D_800A26C0[id].unk4C;
-                obj->unk4D = D_800A26C0[id].unk4D;
-                obj->unk50 = D_800A26C0[id].unk50;
-                obj->unk52 = D_800A26C0[id].unk52;
+                obj->shadowSize = D_800A26C0[id].unk4D;
+                obj->cullRadiusXZ = D_800A26C0[id].unk50;
+                obj->cullRadiusY = D_800A26C0[id].unk52;
                 obj->object_status = D_800A26C0[id].flags;
                 obj->state = D_800A26C0[id].state & ~8;
                 obj->effectFlags = D_800A26C0[id].effectFlags;
@@ -207,11 +207,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->drawDistance = D_800A26C0[id].drawDistance;
                 obj->unique_id = base[i].id;
             } else {
-                obj->unk50 = base[i].unk50;
-                obj->unk52 = base[i].unk52;
+                obj->cullRadiusXZ = base[i].unk50;
+                obj->cullRadiusY = base[i].unk52;
                 obj->object_status = base[i].flags;
                 obj->unk4C = base[i].unk4C;
-                obj->unk4D = base[i].unk4D;
+                obj->shadowSize = base[i].unk4D;
                 obj->drawDistance = base[i].drawDistance;
                 if (base[i].id != 0) {
                     obj->unique_id = base[i].id;
@@ -268,11 +268,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->effectFlags = base[i].effectFlags;
                 obj->model = NULL;
             }
-            obj->unk50 = base[i].unk50;
-            obj->unk52 = base[i].unk52;
+            obj->cullRadiusXZ = base[i].unk50;
+            obj->cullRadiusY = base[i].unk52;
             obj->object_status = base[i].flags;
             obj->unk4C = base[i].unk4C;
-            obj->unk4D = base[i].unk4D;
+            obj->shadowSize = base[i].unk4D;
             obj->drawDistance = base[i].drawDistance;
             if (base[i].id != 0) {
                 obj->unique_id = base[i].id;
@@ -503,14 +503,14 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
     if (maxDistSq != 0) {
         f32 root = sqrtf(maxDistSq);
 
-        if (obj->unk50 == 0) {
+        if (obj->cullRadiusXZ == 0) {
             radius = root;
-            obj->unk50 = radius;
-            obj->unk52 = radius;
+            obj->cullRadiusXZ = radius;
+            obj->cullRadiusY = radius;
             D_800BE2A2++;
         } else {
             radius = root;
-            if (obj->unk50 < radius || obj->unk52 < radius) {
+            if (obj->cullRadiusXZ < radius || obj->cullRadiusY < radius) {
                 D_800BE2A0++;
             } else {
                 D_800BE2A4++;

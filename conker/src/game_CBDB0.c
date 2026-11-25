@@ -110,9 +110,9 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         func_150E4928(obj);
         break;
     case 10:
-        obj->moveProc = D_80088C90[cmd[2]].update;
+        obj->moveProc = D_80088C90[cmd[2]].moveProc;
         obj->onContact = D_80088C90[cmd[2]].onContact;
-        obj->unk92 = D_80088C90[cmd[2]].unk8;
+        obj->contactNonPlayers = D_80088C90[cmd[2]].contactNonPlayers;
         break;
     case 11:
         func_15173C90(cmd[2], cmd[3], obj->unique_id);
