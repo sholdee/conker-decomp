@@ -4,22 +4,13 @@
 #include <ultra64.h>
 #include "functions.h"
 /* variables.h declares these as scalar s32; they are motor buffers. */
-#define D_8003BC30 D_8003BC30_vh
-#define D_8003BD30 D_8003BD30_vh
-#define D_8003BE30 D_8003BE30_vh
 #include "variables.h"
-#undef D_8003BC30
-#undef D_8003BD30
-#undef D_8003BE30
 #undef osMotorInit
 
 
 void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command);
 extern s32 __osContRamRead(OSMesgQueue *, s32, u16, u8 *);
 extern s32 __osContRamWrite(OSMesgQueue *, s32, u16, u8 *, s32);
-extern u8 D_8003BC30[][64];
-extern u8 D_8003BD30[][64];
-extern u8 D_8003BE30[32];
 
 s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
     s32 i;

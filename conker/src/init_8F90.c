@@ -16,30 +16,6 @@
 #define func_10009BE4 func_10009BE4_hdr
 #define func_10009CBC func_10009CBC_hdr
 #define func_10009FFC func_10009FFC_hdr
-#define D_8002AE48 D_8002AE48_hdr
-#define D_8002AE54 D_8002AE54_hdr
-#define D_8003E388 D_8003E388_hdr
-#define D_8003E390 D_8003E390_hdr
-#define D_8003E5D0 D_8003E5D0_hdr
-#define D_8003E5E8 D_8003E5E8_hdr
-#define D_8003E608 D_8003E608_hdr
-#define D_8003E620 D_8003E620_hdr
-#define D_800406A0 D_800406A0_hdr
-#define D_800406A4 D_800406A4_hdr
-#define D_800406B0 D_800406B0_hdr
-#define D_800406B8 D_800406B8_hdr
-#define D_80040AC8 D_80040AC8_hdr
-#define D_80040F78 D_80040F78_hdr
-#define D_80040F88 D_80040F88_hdr
-#define D_80040F8C D_80040F8C_hdr
-#define D_80040F90 D_80040F90_hdr
-#define D_80040F98 D_80040F98_hdr
-#define D_80041298 D_80041298_hdr
-#define D_800412B0 D_800412B0_hdr
-#define D_800416F0 D_800416F0_hdr
-#define D_80041708 D_80041708_hdr
-#define D_100290D0 D_100290D0_hdr
-#define D_100291A0 D_100291A0_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_100051C8
@@ -52,30 +28,6 @@
 #undef func_10009BE4
 #undef func_10009CBC
 #undef func_10009FFC
-#undef D_8002AE48
-#undef D_8002AE54
-#undef D_8003E388
-#undef D_8003E390
-#undef D_8003E5D0
-#undef D_8003E5E8
-#undef D_8003E608
-#undef D_8003E620
-#undef D_800406A0
-#undef D_800406A4
-#undef D_800406B0
-#undef D_800406B8
-#undef D_80040AC8
-#undef D_80040F78
-#undef D_80040F88
-#undef D_80040F8C
-#undef D_80040F90
-#undef D_80040F98
-#undef D_80041298
-#undef D_800412B0
-#undef D_800416F0
-#undef D_80041708
-#undef D_100290D0
-#undef D_100291A0
 
 #define QUIT_MSG 10
 
@@ -212,7 +164,6 @@ typedef struct {
     s32 *params[2];
 } SynDriverConfig;
 
-extern u32 D_8002AE48; /* sample DMAs issued this frame */
 extern u32 D_8002AE50; /* bank DMAs in flight */
 extern FxParams D_8002AE54;
 extern u8 D_8002C960[];
@@ -220,10 +171,6 @@ extern void *D_8003E380;
 extern s32 D_8003E384;
 extern AudioMgr D_8003E388;
 extern AudioInfo *D_8003E390[3]; /* D_8003E388.audioInfo */
-extern OSMesgQueue D_8003E5D0;
-extern OSMesg D_8003E5E8[8];
-extern OSMesgQueue D_8003E608;
-extern OSMesg D_8003E620[8];
 extern BankState D_800406A0;
 /* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
 extern BankRecord *D_800406A4; /* D_800406A0.loadedList */
@@ -231,18 +178,8 @@ extern BankRecord *D_800406B0; /* D_800406A0.releaseList */
 extern DMABuffer D_800406B8[NUM_DMA_BUFFERS];
 extern BankRecord D_80040AC8[NUM_BANK_RECORDS];
 extern DMAState D_80040F78;
-extern u32 D_80040F88; /* short frame, in samples */
-extern u32 D_80040F8C; /* frame, in samples */
-extern u32 D_80040F90; /* longest frame, in samples */
 extern u32 D_80040F94;
-extern OSIoMesg D_80040F98[MAX_SAMPLE_DMAS];
-extern OSMesgQueue D_80041298;
-extern OSMesg D_800412B0[MAX_SAMPLE_DMAS];
 extern OSIoMesg D_80041330[MAX_BANK_DMAS];
-extern OSMesgQueue D_800416F0;
-extern OSMesg D_80041708[MAX_BANK_DMAS];
-extern u8 D_100290D0[]; /* rspboot text */
-extern u8 D_100291A0[]; /* end of rspboot text */
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
 void *allocate_memory(s32, s32, s32, s32);

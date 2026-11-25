@@ -6,26 +6,12 @@
 #define func_1000B1FC func_1000B1FC_hdr
 #define func_1000D758 func_1000D758_hdr
 #define func_1000DF68 func_1000DF68_hdr
-#define D_8002B074 D_8002B074_hdr
-#define D_8002B9D4 D_8002B9D4_hdr
-#define D_8002B9F4 D_8002B9F4_hdr
-#define D_800417B0 D_800417B0_hdr
-#define D_800418B0 D_800418B0_hdr
-#define D_800419A8 D_800419A8_hdr
-#define D_800427F4 D_800427F4_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_1000B1B0
 #undef func_1000B1FC
 #undef func_1000D758
 #undef func_1000DF68
-#undef D_8002B074
-#undef D_8002B9D4
-#undef D_8002B9F4
-#undef D_800417B0
-#undef D_800418B0
-#undef D_800419A8
-#undef D_800427F4
 
 /* Per-frame update hook of a music sequence: takes and returns its private state word. */
 typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
@@ -77,17 +63,13 @@ struct MusicTrack {
 }; /* size 0x64 */
 
 extern MusicInfo D_8002B074[];        /* indexed by sequence id (< 150) */
-extern s32 D_8002B9D4[];              /* default eventTypes */
-extern u16 D_8002B9F4[];              /* default eventMasks */
 extern MusicTrack *D_800417B0[3];     /* track playing on each music channel */
 extern s32 D_800417C0[3][16];         /* per-event decay rate */
 extern s32 D_80041880[3];
 extern s32 D_80041890[3];             /* last marker position */
 extern s32 D_800418A0[3];             /* distance between the last two marker positions */
-extern s32 D_800418B0[3][16];         /* per-event level */
 extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack D_800419A8[12];     /* track pool */
-extern u16 D_800427F4;
 extern u8 D_800C35E8;
 
 MusicTrack *func_1000B1B0(s32 id);

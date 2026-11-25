@@ -203,7 +203,6 @@ extern u64 D_800BEBB0[];
 extern u64 D_800C1060[];
 extern u64 D_800CBE10[];
 extern u64 D_8003A5E8[];
-extern s32 D_100291A0;
 extern void func_1501A39C(void);
 void func_1501CC3C(void);
 
@@ -247,8 +246,8 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
 
     D_800BEAD4->list.type = M_GFXTASK;
     D_800BEAD4->list.flags = OS_TASK_LOADABLE;
-    D_800BEAD4->list.ucode_boot = (u64 *)&D_100290D0;
-    D_800BEAD4->list.ucode_boot_size = (s32)&D_100291A0 - (s32)&D_100290D0;
+    D_800BEAD4->list.ucode_boot = (u64 *)D_100290D0;
+    D_800BEAD4->list.ucode_boot_size = D_100291A0 - D_100290D0;
     if (D_800BEBA0 != 0) {
         D_800BEAD4->list.ucode = D_800C1060;
         D_800BEAD4->list.ucode_data = D_800BEB9C;

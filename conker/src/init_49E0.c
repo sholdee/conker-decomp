@@ -1,17 +1,9 @@
 #define D_8003B234 D_8003B234_hdr
-#define D_8003A5C8 D_8003A5C8_hdr
-#define D_8003B240 D_8003B240_hdr
-#define D_8003A588 D_8003A588_hdr
-#define D_8003A580 D_8003A580_hdr
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
 #undef D_8003B234
-#undef D_8003A5C8
-#undef D_8003B240
-#undef D_8003A588
-#undef D_8003A580
 
 /* Messages received on the scheduler's interrupt queue D_8003B218. */
 #define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
@@ -28,10 +20,6 @@ typedef struct SchedulerClient_49E0 {
 } SchedulerClient_49E0;
 
 extern SchedulerClient_49E0 *D_8003B234; /* client list */
-extern OSScMsg D_8003A5C8;               /* pre-NMI message */
-extern OSScMsg D_8003B240;               /* retrace message */
-extern OSTimer D_8003A588;               /* audio start timer */
-extern s8 D_8003A580; // matching: signed (the header's u8 changes how IDO shares the constant 1)
 
 void func_10004DB0(void);
 
