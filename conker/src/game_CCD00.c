@@ -222,12 +222,13 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
     return 0;
 }
 
+/* Argument block of a query; the arguments start at 0x8. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC[1];
-} Arg_1509FE0C;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;     // query 34: number of weights
+    /* 0x0C */ s32 unkC[1];  // query 34: the weights
+} QueryArgs;
 
 extern s8 D_800E0BB1;
 extern u16 D_800BE930[];
@@ -235,23 +236,24 @@ extern u16 D_800BE918[][3];
 extern u8 D_800D2E40;
 s32 func_151E5F64(s32 arg0);
 
-s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
-    s32 pa0;
-    s32 pa1;
-    s32 pa2;
+/* Answers query `query` about record `id` with arguments `args`; unknown queries return 0. */
+s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
+    // matching: three unused locals give the 0x30 frame
+    s32 pad0;
+    s32 pad1;
+    s32 pad2;
     s32 i;
     s32 sum;
-    s32 count;
     s32 j;
-    s32 thresh;
+    s32 threshold;
     s32 mask;
     CCD00Node *node;
 
-    switch (arg1) {
+    switch (query) {
     case 26:
-        return ((u8 *)(arg0 >> 3))[(s32)D_800D2E4C] & (1 << (arg0 & 7));
+        return ID_FLAG_BYTE(id) & ID_FLAG_BIT(id);
     case 27:
-        return func_1509B704(arg0)->unk2;
+        return func_1509B704(id)->unk2;
     case 28:
         return D_800BE9F0;
     case 29:
@@ -264,7 +266,7 @@ s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
         mask &= ~D_800D18A0;
         return mask;
     case 30:
-        return func_151E5F64(arg2->unk8);
+        return func_151E5F64(args->unk8);
     case 31:
         return D_800BE9F8;
     case 32:
@@ -272,19 +274,20 @@ s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
     case 33:
         return D_800BE3E0;
     case 34:
+        /* Weighted pick: index of the first nonzero weight whose running total reaches func_150ADA68() * total. */
         sum = 0;
-        for (i = 0; i < arg2->unk8; i++) {
-            sum += arg2->unkC[i];
+        for (i = 0; i < args->unk8; i++) {
+            sum += args->unkC[i];
         }
-        thresh = func_150ADA68() * sum;
+        threshold = func_150ADA68() * sum;
         sum = 0;
-        for (i = 0; i < arg2->unk8; i++) {
-            sum += arg2->unkC[i];
-            if (sum >= thresh && arg2->unkC[i] != 0) {
+        for (i = 0; i < args->unk8; i++) {
+            sum += args->unkC[i];
+            if (sum >= threshold && args->unkC[i] != 0) {
                 return i;
             }
         }
-        return arg2->unk8 - 1;
+        return args->unk8 - 1;
     case 35:
         return D_8008FD90;
     case 36:
@@ -294,24 +297,23 @@ s32 func_1509FE0C(s32 arg0, s32 arg1, Arg_1509FE0C *arg2) {
     case 38:
         return D_8008FD8C;
     case 39:
-        return D_800BE930[arg2->unk8];
+        return D_800BE930[args->unk8];
     case 40:
-        return D_800BE918[arg2->unk8][0];
+        return D_800BE918[args->unk8][0];
     case 41:
         return D_800E0B94 == 2;
     case 42:
-        return arg2->unk8 & D_800E9D00;
+        return args->unk8 & D_800E9D00;
     case 43:
-        node = func_1509B704(arg0);
+        node = func_1509B704(id);
         if (node != NULL) {
             return (node->key & 0x2000) == 0;
         }
         return 0;
     case 44:
-        return func_1517EFAC(D_800D3840 == 3 ? arg2->unk8 : 0);
+        return func_1517EFAC(D_800D3840 == 3 ? args->unk8 : 0);
     case 45:
         return D_800D2E40;
     }
     return 0;
 }
-
