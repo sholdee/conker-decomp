@@ -985,26 +985,13 @@ void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-typedef struct {
-    s32 id;
-    u16 width;
-    u16 height;
-    u8 unk8;
-    u8 unk9;
-    u8 fmt;
-} TextureSource;
+/* A TextureDesc whose frame table is the single address in front of it. */
+typedef struct OneFrameTextureDesc {
+    /* 0x0 */ u32 frame; // the texture's address
+    /* 0x4 */ TextureDesc desc; // desc.addr points at frame
+} OneFrameTextureDesc; /* size 0x10 */
 
-typedef struct {
-    s32 id;
-    s32 *idp;
-    u8 fmt;
-    u16 width;
-    u16 height;
-    u8 unkE;
-    u8 unkF;
-} TextureDesc;
-
-extern TextureSource D_800915B0;
+extern Texture D_800915B0;
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
@@ -1039,16 +1026,16 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
             points = actor->points;
             flag = 1;
             {
-                TextureDesc tex;
+                OneFrameTextureDesc tex;
 
-                tex.id = D_800915B0.id;
-                tex.idp = &tex.id;
-                tex.fmt = D_800915B0.fmt;
-                tex.width = D_800915B0.width;
-                tex.height = D_800915B0.height;
-                tex.unkE = D_800915B0.unk8;
-                tex.unkF = D_800915B0.unk9;
-                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.idp, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+                tex.frame = D_800915B0.addr;
+                tex.desc.addr = (u32)&tex.frame;
+                tex.desc.frames = D_800915B0.frames;
+                tex.desc.width = D_800915B0.width;
+                tex.desc.height = D_800915B0.height;
+                tex.desc.fmt = D_800915B0.fmt;
+                tex.desc.siz = D_800915B0.siz;
+                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.desc, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
                 gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);

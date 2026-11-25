@@ -5,27 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-/* A texture as the sprite and tile loaders take it (D_800D2C90 is the shared one). */
-typedef struct {
-    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
-    /* 0x4 */ u16 width;
-    /* 0x6 */ u16 height;
-    /* 0x8 */ u8 fmt;    // G_IM_FMT_*; 5 = colour image plus a second 4-bit tile
-    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
-    /* 0xA */ u8 frames; // animation frames (0 = still)
-} Texture;
-
-/* A texture as stored in the asset tables, converted into a Texture by func_15095060. */
-typedef struct {
-    /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses
-    /* 0x4 */ u8 frames;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 fmt;
-    /* 0xB */ u8 siz;
-} TextureDesc;
-
 /* A sprite to draw (see func_15095D34). */
 typedef struct {
     /* 0x00 */ s16 x;
