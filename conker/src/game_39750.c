@@ -22,44 +22,6 @@ void func_1500C2A0(void) {
     D_800DC63C = 0;
 }
 
-/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
-typedef struct ParticleSpawn78 {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ Vec3f rot;
-    /* 0x1C */ Vec3f scale;
-    /* 0x28 */ Vec3f pos;
-    /* 0x34 */ Vec3f vel;
-    /* 0x40 */ Vec3f rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct Actor *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[2];
-} ParticleSpawn78;
-
 void func_15008340(s32 region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_1510F800(s32);
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
@@ -146,46 +108,6 @@ void func_1500C2F0(s32 region, f32 density) {
         } while (count > 1.0f);
     }
 }
-
-/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
-typedef struct ParticleDesc68 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
-    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
-    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
-    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
-    /* 0x67 */ u8 pad67;
-} ParticleDesc68;
 
 /* Extra data copied to offset 0xA8 of the object func_15130280 returns. */
 typedef struct {
@@ -303,29 +225,6 @@ void func_1500C8D0(s32 region, f32 density) {
         } while (count > 1.0f);
     }
 }
-
-/* matching: the first 0x4C bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
-typedef struct ParticleDef4C {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
-    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-} ParticleDef4C;
 
 /* Extra data copied to offset 0x110 of the object func_1513D2F0 returns. */
 typedef struct {

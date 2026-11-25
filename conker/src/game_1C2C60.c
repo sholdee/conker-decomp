@@ -1410,28 +1410,6 @@ typedef struct JetChildPreset {
     /* 0xA */ s16 lifeRange;
 } JetChildPreset;
 
-/* matching: the first 0x48 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
-typedef struct ParticleDef48 {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
-    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-} ParticleDef48;
-
 extern JetChildPreset D_800A8710[];
 
 /*
@@ -2692,29 +2670,6 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     }
     return 1;
 }
-
-/* matching: the first 0x4C bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
-typedef struct ParticleDef4C {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
-    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-} ParticleDef4C;
 
 extern void (*D_8008F8A8[])(void *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);

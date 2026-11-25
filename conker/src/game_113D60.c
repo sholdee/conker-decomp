@@ -324,41 +324,6 @@ typedef struct {
     /* 0x4 */ f32 y;
 } Vec2f;
 
-/* matching: ScreenSpriteInfo plus 0x4 bytes; the stack frame needs the larger size. */
-typedef struct ScreenSpriteInfo5C {
-    /* 0x00 */ f32 x;           /* centre, in viewport units */
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 halfWidth;
-    /* 0x0C */ f32 halfHeight;
-    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
-    /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
-    /* 0x1B */ Color8 color1;
-    /* 0x1F */ Color8 color2;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
-    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is func_1513F4E4's combiner argument */
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
-    /* 0x4C */ f32 scaleY;
-    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
-    /* 0x54 */ f32 offsetT;
-    /* 0x58 */ u8 pad58[0x4];
-} ScreenSpriteInfo5C;
-
 extern Game113D60Ids2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
 extern Game113D60Ids3 D_80088A68;
@@ -1062,42 +1027,6 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     }
 }
 
-/* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
-typedef struct ParticleDesc64 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
-} ParticleDesc64;
-
 /* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
 typedef struct {
     /* 0x00 */ Vec3f position;
@@ -1291,44 +1220,6 @@ typedef struct {
     /* 0x044 */ u8 pad44[0x12C];
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
-
-/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
-typedef struct ParticleSpawn78 {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ Vec3f rot;
-    /* 0x1C */ Vec3f scale;
-    /* 0x28 */ Vec3f pos;
-    /* 0x34 */ Vec3f vel;
-    /* 0x40 */ Vec3f rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct Actor *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[2];
-} ParticleSpawn78;
 
 extern u8 D_800A12F0[];
 extern f32 D_800A12F4[];

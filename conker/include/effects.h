@@ -83,6 +83,124 @@ typedef struct ParticleDesc {
     /* 0x6C */ f32 maxSize;
 } ParticleDesc; /* size 0x70 */
 
+/* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc64 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+} ParticleDesc64;
+
+/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc68 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+} ParticleDesc68;
+
+/* matching: the first 0x6C bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc6C {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+} ParticleDesc6C;
+
 /* Spawn template of a model (debris) particle passed to func_15132A4C (game_15F680.c):
  * the layout of that Particle's bytes 0x10..0x8B. */
 typedef struct ParticleSpawn {
@@ -123,6 +241,84 @@ typedef struct ParticleSpawn {
     /* 0x78 */ s32 sound;
 } ParticleSpawn; /* size 0x7C */
 
+/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+typedef struct ParticleSpawn78 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct Actor *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+} ParticleSpawn78;
+
+/* matching: ParticleSpawn plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ParticleSpawn80 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct Actor *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+    /* 0x7C */ u8 pad7C[0x4];
+} ParticleSpawn80;
+
 /* A particle's width and height, copied as one struct by some callers. */
 typedef struct ParticleSize {
     /* 0x0 */ f32 width;
@@ -157,6 +353,77 @@ typedef struct ParticleDef {
     /* 0x54 */ s16 fadeStart;   /* lifetime below which unk44 / rgba[3] fade */
     /* 0x56 */ s16 fadeRate;
 } ParticleDef; /* size 0x58 */
+
+/* matching: the first 0x48 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef48 {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+} ParticleDef48;
+
+/* matching: the first 0x4C bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef4C {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+} ParticleDef4C;
+
+/* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef54 {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+} ParticleDef54;
 
 /* Debris emitter settings read by func_151A6F00 (game_1D43B0.c). Angles are 0..255 binary angles. */
 typedef struct DebrisEmitter {
@@ -374,6 +641,41 @@ typedef struct ScreenSpriteInfo {
     /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
     /* 0x54 */ f32 offsetT;
 } ScreenSpriteInfo; /* size 0x58 */
+
+/* matching: ScreenSpriteInfo plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ScreenSpriteInfo5C {
+    /* 0x00 */ f32 x;           /* centre, in viewport units */
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 halfWidth;
+    /* 0x0C */ f32 halfHeight;
+    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
+    /* 0x1B */ Color8 color1;
+    /* 0x1F */ Color8 color2;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
+    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is func_1513F4E4's combiner argument */
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ s8 unk40;
+    /* 0x41 */ s8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
+    /* 0x4C */ f32 scaleY;
+    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
+    /* 0x54 */ f32 offsetT;
+    /* 0x58 */ u8 pad58[0x4];
+} ScreenSpriteInfo5C;
 
 /* Sprite animation of a billboard particle (game_1944C0.c): `frames` is one segmented texture address
  * (< 0x10000000) or a table of `frameCount` texture addresses. */

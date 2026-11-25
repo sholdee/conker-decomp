@@ -324,110 +324,69 @@ struct Arg15150400 {
     void *extraData;
 };
 
-/* Spawn descriptor for func_1513264C. */
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    Vec3f rotation; /* degrees */
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    Vec3f position;
-    Vec3f velocity;
-    Vec3f spin;
-    f32 unk4C;
-    s32 flags;
-    s16 unk54;
-    s16 variantId;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    s8 unk69;
-    u8 unk6A;
-    u8 pad6B;
-    s32 unk6C;
-    u8 unk70;
-    u8 pad71;
-    s16 unk72;
-    s16 unk74;
-    u8 pad76[2];
-    s32 unk78;
-} Spawn1513264C;
-
-extern void *func_1513264C(Spawn1513264C *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+extern void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
 void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 arg3) {
     s32 count;
-    Spawn1513264C spawn;
+    ParticleSpawn spawn;
     s16 yaw;
     s16 pitch;
 
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.spin.y = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.rotVel.y = 0.0f;
     spawn.flags = 0x1 | 0x8 | 0x20 | 0x40 | 0x80 | 0x100 | ((config->flags & 1) ? 0x800 : 0) | 0x2000 | 0x10000;
-    spawn.unk58 = 0;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk62 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 2;
-    spawn.unk69 = -1;
+    spawn.alpha = 0xFF;
+    spawn.update2Fn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 2;
+    spawn.drawFn = -1;
     spawn.unk6A = 0;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 12;
-    spawn.unk74 = 21;
-    spawn.unk78 = 0;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 12;
+    spawn.fadeRate = 21;
+    spawn.sound = 0;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase;
         pitch = (func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase;
         if (func_150ADA68() < config->unk38) {
-            spawn.unk61 = 13;
-            spawn.unk63 = config->unk59;
+            spawn.updateFn = 13;
+            spawn.floorHitFn = config->unk59;
         } else {
-            spawn.unk61 = 8;
-            spawn.unk63 = 0;
+            spawn.updateFn = 8;
+            spawn.floorHitFn = 0;
         }
-        spawn.unk04 = (func_150ADA68() * config->unk40) + config->unk3C;
-        spawn.rotation.x = func_150ADA68() * 360.0f;
-        spawn.rotation.y = func_150ADA68() * 360.0f;
-        spawn.rotation.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.velocity.x);
-        spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.unk4C = (func_150ADA68() * config->unk20) + config->unk1C;
-        spawn.unk54 = (func_150ADA20() % (u32)(config->unk26 + 1)) + config->unk24;
-        func_15143794(yaw, pitch, config->radius, &spawn.position.x);
-        spawn.position.x += config->origin.x;
-        spawn.position.y += config->origin.y;
-        spawn.position.z += config->origin.z;
+        spawn.elasticity = (func_150ADA68() * config->unk40) + config->unk3C;
+        spawn.rot.x = func_150ADA68() * 360.0f;
+        spawn.rot.y = func_150ADA68() * 360.0f;
+        spawn.rot.z = func_150ADA68() * 360.0f;
+        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
+        spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.gravity = (func_150ADA68() * config->unk20) + config->unk1C;
+        spawn.lifetime = (func_150ADA20() % (u32)(config->unk26 + 1)) + config->unk24;
+        func_15143794(yaw, pitch, config->radius, &spawn.pos.x);
+        spawn.pos.x += config->origin.x;
+        spawn.pos.y += config->origin.y;
+        spawn.pos.z += config->origin.z;
         {
         u32 variant;
         void *piece;
         variant = func_150ADA20() % config->variantCount;
-        spawn.variantId = config->variantIds[variant];
-        spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * config->variantScales[variant];
-        spawn.unk08 = spawn.unk0C;
-        spawn.unk00 = config->unk44 * spawn.unk08;
+        spawn.model = config->variantIds[variant];
+        spawn.sizeY = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * config->variantScales[variant];
+        spawn.sizeXZ = spawn.sizeY;
+        spawn.radius = config->unk44 * spawn.sizeXZ;
         piece = func_1513264C(&spawn, (config->flags & 1) ? 3 : 0, 0xFF, config->unk34, config->extraSize, arg2, arg3);
         if (config->extraSize > 0 && piece != NULL) {
             memcpy((u8 *)piece + 0x170, config->extraData, config->extraSize);
@@ -458,7 +417,7 @@ struct Arg1515080C {
 /* Like func_15150400, but the variant tables are passed in and each variant is used at most once. */
 void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
     u8 *used;
-    Spawn1513264C spawn;
+    ParticleSpawn spawn;
     s32 remaining;
     s32 count;
     s32 slot;
@@ -475,47 +434,47 @@ void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScal
         }
         }
         remaining = variantCount;
-        spawn.unk00 = 1.0f;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk04 = 0.5610000491f;
-        spawn.spin.y = 0.0f;
+        spawn.radius = 1.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.elasticity = 0.5610000491f;
+        spawn.rotVel.y = 0.0f;
         spawn.flags = 0x8 | 0x20 | 0x40 | (arg7 ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
         if (variantCount < count) {
             count = variantCount;
         }
-        spawn.unk58 = arg6;
+        spawn.variant = arg6;
         spawn.unk5C = 0;
-        spawn.unk60 = 0xFF;
-        spawn.unk62 = 0;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
+        spawn.alpha = 0xFF;
+        spawn.update2Fn = 0;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
         spawn.unk6A = 0;
-        spawn.unk6C = 0;
-        spawn.unk70 = 0;
-        spawn.unk72 = 12;
-        spawn.unk74 = 21;
-        spawn.unk69 = arg8;
+        spawn.owner = 0;
+        spawn.ownerId = 0;
+        spawn.fadeStart = 12;
+        spawn.fadeRate = 21;
+        spawn.drawFn = arg8;
         while (count != 0) {
             yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
             pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
-            func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.velocity.x);
-            func_15143794(yaw, pitch, radius, &spawn.position.x);
-            spawn.position.x += config->origin.x;
-            spawn.position.y += config->origin.y;
-            spawn.position.z += config->origin.z;
-            spawn.rotation.x = func_150ADA68() * 360.0f;
-            spawn.rotation.y = func_150ADA68() * 360.0f;
-            spawn.rotation.z = func_150ADA68() * 360.0f;
-            spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.unk4C = (func_150ADA68() * config->unk28) + config->unk24;
-            spawn.unk54 = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
+            func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
+            func_15143794(yaw, pitch, radius, &spawn.pos.x);
+            spawn.pos.x += config->origin.x;
+            spawn.pos.y += config->origin.y;
+            spawn.pos.z += config->origin.z;
+            spawn.rot.x = func_150ADA68() * 360.0f;
+            spawn.rot.y = func_150ADA68() * 360.0f;
+            spawn.rot.z = func_150ADA68() * 360.0f;
+            spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.gravity = (func_150ADA68() * config->unk28) + config->unk24;
+            spawn.lifetime = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
             {
             /* pick the skip-th unused variant, wrapping around */
             u32 skip;
@@ -537,21 +496,21 @@ void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScal
                 }
             } while (!done);
             }
-            spawn.variantId = variantIds[slot];
-            spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[slot];
+            spawn.model = variantIds[slot];
+            spawn.sizeY = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[slot];
             remaining--;
-            spawn.unk08 = spawn.unk0C;
+            spawn.sizeXZ = spawn.sizeY;
             used[slot] = TRUE;
             {
             void *piece;
             if (func_150ADA68() < config->unk3C) {
                 spawn.flags |= 1;
-                spawn.unk63 = config->unk40;
-                spawn.unk61 = 13;
+                spawn.floorHitFn = config->unk40;
+                spawn.updateFn = 13;
             } else {
                 spawn.flags &= ~1;
-                spawn.unk63 = 0;
-                spawn.unk61 = 8;
+                spawn.floorHitFn = 0;
+                spawn.updateFn = 8;
             }
             piece = func_1513264C(&spawn, 3, 0xFF, arg9, extraSize, argD, argE);
             if (extraData != NULL && piece != NULL) {
@@ -1033,54 +992,14 @@ struct Arg15151D6C {
     f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
 };
 
-/* Spawn descriptor for func_15132A4C: the first 0x78 bytes of Spawn1513264C. */
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    Vec3f rotation; /* degrees */
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    Vec3f position;
-    Vec3f velocity;
-    Vec3f spin;
-    f32 unk4C;
-    s32 flags;
-    s16 unk54;
-    s16 variantId;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69;
-    u8 unk6A;
-    u8 pad6B;
-    s32 unk6C;
-    u8 unk70;
-    u8 pad71;
-    s16 unk72;
-    s16 unk74;
-    s16 pad76;
-} Spawn15132A4C;
-
-extern void *func_15132A4C(Spawn15132A4C *, s32, s32, s32, u8, s32);
+extern void *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
 void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
     s32 count;
     s32 variant;
-    Spawn15132A4C spawn;
+    ParticleSpawn78 spawn;
     Vec3f axis0;
     f32 length0;
     f32 inverse0;
@@ -1107,51 +1026,51 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
-        spawn.unk00 = 1.0f;
-        spawn.unk04 = 1.0f;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.position = config->position;
-        spawn.spin.y = 0.0f;
+        spawn.radius = 1.0f;
+        spawn.elasticity = 1.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.pos = config->position;
+        spawn.rotVel.y = 0.0f;
         spawn.flags = 0x29E8;
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-        spawn.unk58 = 0;
+        spawn.variant = 0;
         spawn.unk5C = 0;
-        spawn.unk60 = 0xFF;
-        spawn.unk61 = 8;
-        spawn.unk62 = 0;
-        spawn.unk63 = 0;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
+        spawn.alpha = 0xFF;
+        spawn.updateFn = 8;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 0;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
         spawn.unk6A = 0;
-        spawn.unk6C = 0;
-        spawn.unk70 = 0;
-        spawn.unk72 = 12;
-        spawn.unk74 = 21;
+        spawn.owner = 0;
+        spawn.ownerId = 0;
+        spawn.fadeStart = 12;
+        spawn.fadeRate = 21;
         while (count != 0) {
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
             func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->spread, &first, &second);
-            spawn.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
-            spawn.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
-            spawn.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
-            spawn.rotation.x = func_150ADA68() * 360.0f;
-            spawn.rotation.y = func_150ADA68() * 360.0f;
-            spawn.rotation.z = func_150ADA68() * 360.0f;
+            spawn.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
+            spawn.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
+            spawn.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
+            spawn.rot.x = func_150ADA68() * 360.0f;
+            spawn.rot.y = func_150ADA68() * 360.0f;
+            spawn.rot.z = func_150ADA68() * 360.0f;
         // matching: the labels end basic blocks, which keeps as1 from filling the calls' delay slots
         pickVariant:
             variant = func_150ADA20() % variantCount;
-            spawn.variantId = variantIds[variant];
-            spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
-            spawn.unk08 = spawn.unk0C;
+            spawn.model = variantIds[variant];
+            spawn.sizeY = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
+            spawn.sizeXZ = spawn.sizeY;
         randomizeSpin:
-            spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.unk4C = (func_150ADA68() * config->unk44) + config->unk40;
-            spawn.unk54 = (func_150ADA20() % (u32)(config->unk4A + 1)) + config->unk48;
+            spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.gravity = (func_150ADA68() * config->unk44) + config->unk40;
+            spawn.lifetime = (func_150ADA20() % (u32)(config->unk4A + 1)) + config->unk48;
             func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
             count--;
         }
@@ -1179,55 +1098,55 @@ struct Arg15152190 {
 void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
     s32 count;
     s32 variant;
-    Spawn15132A4C spawn;
+    ParticleSpawn78 spawn;
     s16 yaw;
     s16 pitch;
 
-    spawn.unk00 = 1.0f;
-    spawn.unk04 = 1.0f;
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.spin.y = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.elasticity = 1.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.rotVel.y = 0.0f;
     spawn.flags = (arg5 ? 0x100000 : 0) | 0x29E8;
-    spawn.unk58 = 0;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 8;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 2;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 8;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 2;
     spawn.unk6A = 0;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 12;
-    spawn.unk74 = 21;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 12;
+    spawn.fadeRate = 21;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
         pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
-        spawn.rotation.x = func_150ADA68() * 360.0f;
-        spawn.rotation.y = func_150ADA68() * 360.0f;
-        spawn.rotation.z = func_150ADA68() * 360.0f;
-        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.velocity.x);
-        spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.unk4C = (func_150ADA68() * config->unk28) + config->unk24;
-        spawn.unk54 = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
-        func_15143794(yaw, pitch, radius, &spawn.position.x);
-        spawn.position.x += config->origin.x;
-        spawn.position.y += config->origin.y;
-        spawn.position.z += config->origin.z;
+        spawn.rot.x = func_150ADA68() * 360.0f;
+        spawn.rot.y = func_150ADA68() * 360.0f;
+        spawn.rot.z = func_150ADA68() * 360.0f;
+        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
+        spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.gravity = (func_150ADA68() * config->unk28) + config->unk24;
+        spawn.lifetime = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
+        func_15143794(yaw, pitch, radius, &spawn.pos.x);
+        spawn.pos.x += config->origin.x;
+        spawn.pos.y += config->origin.y;
+        spawn.pos.z += config->origin.z;
     // matching: the label ends a basic block, which keeps as1 from filling a call's delay slot
     pickVariant:
         variant = func_150ADA20() % variantCount;
-        spawn.variantId = variantIds[variant];
-        spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
-        spawn.unk08 = spawn.unk0C;
+        spawn.model = variantIds[variant];
+        spawn.sizeY = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
+        spawn.sizeXZ = spawn.sizeY;
         {
             void *piece; // matching: storing the unused result changes as1's ordering of the argument stores
             piece = func_15132A4C(&spawn, 3, 0xFF, 0, arg6, arg7);
@@ -1991,7 +1910,7 @@ typedef struct {
 void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
     void *object;
     s32 oneAxis;
-    Spawn15132A4C spawn;
+    ParticleSpawn78 spawn;
     Extra1515452C extra;
     s32 pad[2]; // matching: unused stack slots
 
@@ -2011,63 +1930,63 @@ void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 ar
     }
     extra.growOneAxis = oneAxis;
 
-    spawn.unk08 = 0.0f;
-    spawn.unk0C = arg4;
-    spawn.unk00 = 1.0f;
-    spawn.unk04 = 1.0f;
+    spawn.sizeXZ = 0.0f;
+    spawn.sizeY = arg4;
+    spawn.radius = 1.0f;
+    spawn.elasticity = 1.0f;
     if (arg4 != 0) {
-        spawn.rotation.x = 0.0f;
+        spawn.rot.x = 0.0f;
     } else {
-        spawn.rotation.x = func_150ADA68() * 360.0f;
+        spawn.rot.x = func_150ADA68() * 360.0f;
     }
-    spawn.rotation.y = func_150ADA68() * 360.0f;
+    spawn.rot.y = func_150ADA68() * 360.0f;
     if (arg4 != 0) {
-        spawn.rotation.z = 0.0f;
+        spawn.rot.z = 0.0f;
     } else {
-        spawn.rotation.z = func_150ADA68() * 360.0f;
+        spawn.rot.z = func_150ADA68() * 360.0f;
     }
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.position = *position;
-    spawn.velocity.x = 0.0f;
-    spawn.velocity.y = 0.0f;
-    spawn.velocity.z = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.pos = *position;
+    spawn.vel.x = 0.0f;
+    spawn.vel.y = 0.0f;
+    spawn.vel.z = 0.0f;
     if (arg4 != 0) {
-        spawn.spin.x = 0.0f;
+        spawn.rotVel.x = 0.0f;
     } else {
-        spawn.spin.x = (func_150ADA68() * 8.512000084f) + -4.256000042f;
-    }
-    if (arg4 != 0) {
-        spawn.spin.y = (func_150ADA68() * 8.512000084f) + -4.256000042f;
-    } else {
-        spawn.spin.y = 0.0f;
+        spawn.rotVel.x = (func_150ADA68() * 8.512000084f) + -4.256000042f;
     }
     if (arg4 != 0) {
-        spawn.spin.z = 0.0f;
+        spawn.rotVel.y = (func_150ADA68() * 8.512000084f) + -4.256000042f;
     } else {
-        spawn.spin.z = (func_150ADA68() * 8.512000084f) + -4.256000042f;
+        spawn.rotVel.y = 0.0f;
     }
-    spawn.unk4C = 0.0f;
+    if (arg4 != 0) {
+        spawn.rotVel.z = 0.0f;
+    } else {
+        spawn.rotVel.z = (func_150ADA68() * 8.512000084f) + -4.256000042f;
+    }
+    spawn.gravity = 0.0f;
     spawn.flags = 0x100140;
-    spawn.variantId = 84;
-    spawn.unk58 = 0;
+    spawn.model = 84;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = alpha;
-    spawn.unk61 = 15;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 2;
+    spawn.alpha = alpha;
+    spawn.updateFn = 15;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 2;
     spawn.unk6A = 0;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 1;
-    spawn.unk74 = 0xFF;
-    spawn.unk54 = 300;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.lifetime = 300;
 
     object = func_15132A4C(&spawn, 0, 0, sizeof(extra), arg5, arg6);
     if (object != NULL) {
@@ -2184,7 +2103,7 @@ void func_15154684(struct Local15154684Arg *config, u8 arg1, s32 arg2) {
 void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5) {
     void *object;
     s32 pad; // matching: unused stack slot
-    Spawn15132A4C spawn;
+    ParticleSpawn78 spawn;
     Extra15154A88 extra;
 
     if (duration <= 0.0f) {
@@ -2194,45 +2113,45 @@ void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4,
     extra.remaining = duration;
     extra.size = size;
     extra.phase = 0.0f;
-    spawn.unk08 = 0.0f;
-    spawn.unk0C = 0.0f;
-    spawn.unk00 = 1.0f;
-    spawn.unk04 = 1.0f;
+    spawn.sizeXZ = 0.0f;
+    spawn.sizeY = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.elasticity = 1.0f;
     extra.alpha = alpha;
     extra.phaseRate = 3.141592741f / duration;
-    spawn.rotation.x = func_150ADA68() * 360.0f;
-    spawn.rotation.y = func_150ADA68() * 360.0f;
-    spawn.rotation.z = func_150ADA68() * 360.0f;
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.position = *position;
-    spawn.velocity.x = 0.0f;
-    spawn.velocity.y = 0.0f;
-    spawn.velocity.z = 0.0f;
-    spawn.spin.x = (func_150ADA68() * 26.29600143f) + -13.14800072f;
-    spawn.spin.y = 0.0f;
-    spawn.spin.z = (func_150ADA68() * 26.29600143f) + -13.14800072f;
-    spawn.unk4C = 0.0f;
+    spawn.rot.x = func_150ADA68() * 360.0f;
+    spawn.rot.y = func_150ADA68() * 360.0f;
+    spawn.rot.z = func_150ADA68() * 360.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.pos = *position;
+    spawn.vel.x = 0.0f;
+    spawn.vel.y = 0.0f;
+    spawn.vel.z = 0.0f;
+    spawn.rotVel.x = (func_150ADA68() * 26.29600143f) + -13.14800072f;
+    spawn.rotVel.y = 0.0f;
+    spawn.rotVel.z = (func_150ADA68() * 26.29600143f) + -13.14800072f;
+    spawn.gravity = 0.0f;
     spawn.flags = 0x140;
-    spawn.variantId = 85;
-    spawn.unk58 = 0;
+    spawn.model = 85;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 18;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 2;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 18;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 2;
     spawn.unk6A = 0;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 1;
-    spawn.unk74 = 0xFF;
-    spawn.unk54 = 300;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.lifetime = 300;
 
     object = func_15132A4C(&spawn, 0, 0, sizeof(extra), arg4, arg5);
     if (object != NULL) {

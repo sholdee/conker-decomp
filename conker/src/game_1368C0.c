@@ -66,44 +66,6 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
 
-/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
-typedef struct ParticleSpawn78 {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ Vec3f rot;
-    /* 0x1C */ Vec3f scale;
-    /* 0x28 */ Vec3f pos;
-    /* 0x34 */ Vec3f vel;
-    /* 0x40 */ Vec3f rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct Actor *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[2];
-} ParticleSpawn78;
-
 /* Payload of message 0x2D: two objects trade places. */
 typedef struct {
     /* 0x00 */ Actor *from;

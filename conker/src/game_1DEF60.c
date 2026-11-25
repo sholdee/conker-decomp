@@ -46,42 +46,6 @@ typedef union {
     } remove;
 } Msg151B1FAC;
 
-/* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
-typedef struct ParticleDesc64 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ u32 flags;      /* PARTICLE_* */
-    /* 0x5C */ struct ParticleViewMask *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
-} ParticleDesc64;
-
 /* Live particle returned by func_15130374; its extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];

@@ -112,32 +112,6 @@ typedef struct SparkParticle {
     SparkMotion motion;
 } SparkParticle;
 
-/* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
-typedef struct ParticleDef54 {
-    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
-    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-} ParticleDef54;
-
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
 
