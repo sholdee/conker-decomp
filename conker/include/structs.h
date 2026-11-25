@@ -4030,4 +4030,21 @@ typedef struct SchedulerClient {
     /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
 } SchedulerClient;
 
+/* A vertical cylinder that confines actors (func_15055E50): x/z centre, base y, height h; r is the radius,
+   bit 15 set = keep-out cylinder, clear = the actor must stay inside one of the set's cylinders. */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 z;
+    /* 0x4 */ s16 y;
+    /* 0x6 */ s16 h;
+    /* 0x8 */ u16 r;
+} BoundCylinder; /* size 0xA */
+
+/* One entry of the per-level cylinder-set table D_800D18B0 (terminated by cylinders == NULL). */
+typedef struct {
+    /* 0x0 */ BoundCylinder *cylinders; /* file offset until func_150163D0 relocates it */
+    /* 0x4 */ u16 count;
+    /* 0x6 */ u16 id;
+} BoundCylinderSet; /* size 0x8 */
+
 #endif

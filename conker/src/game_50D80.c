@@ -2493,13 +2493,6 @@ extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(Actor *);
 extern void func_151D66F0(s32, s32);
 
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} SeqColor;
-
-extern SeqColor D_80084110[];
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

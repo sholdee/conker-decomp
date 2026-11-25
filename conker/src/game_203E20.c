@@ -6,8 +6,6 @@
 extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
-extern u32 D_80083740[];
-extern u32 D_800838C0[];
 
 /* Text box data (same layout as TextLines in game_FC5F0.c). */
 typedef struct {

@@ -398,8 +398,6 @@ void func_15132A88(Particle *particle) {
     }
 }
 
-extern u8 D_80083740[];
-extern u8 D_800838C0[];
 extern Gfx *(*D_800899A4[])(Gfx *gfx, Particle *particle, s16 arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state);

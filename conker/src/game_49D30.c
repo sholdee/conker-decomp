@@ -526,15 +526,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
     }
 }
 
-/* A screen fade colour for func_1517EE40 (r, g, b, ticks, direction, layer; see game_1AC2F0.c). */
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} FadeColor;
-
 extern u8 D_800C35A9;
-extern FadeColor D_80084110[];
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the

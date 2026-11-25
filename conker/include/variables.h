@@ -328,6 +328,7 @@ extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40
 
+extern u32 D_80042A4C; // __osContPifRam.pifstatus
 extern OSMesg D_80042A90;
 extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
@@ -355,8 +356,13 @@ extern s32  D_80082FA4;
 extern s16 D_80082FA6;
 extern u8 D_80082FC0[];
 extern u8 D_80083140[];
+extern u8 D_80083740[]; // segment-8 texture data bound by effect pre-draws
+extern u8 D_800838C0[];
+extern u8 D_80083A40[];
+extern u8 D_80083BC0[];
 extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
 extern u8   D_80084064;
+extern Color24 D_80084110[]; // screen fade colours for func_1517EE40, picked by sequence events
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
@@ -1221,6 +1227,7 @@ extern u16 D_800D18A2;
 extern u8  D_800D18A4[4]; // per player: half-size of the square, minus 4 (game_A9D90)
 extern u8  D_800D18A8;
 extern u8 D_800D18A9;
+extern BoundCylinderSet *D_800D18B0; // per-level actor-confining cylinder sets (func_150163D0 loads, func_15055E50 uses)
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;
 

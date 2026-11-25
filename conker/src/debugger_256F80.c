@@ -25,7 +25,6 @@ typedef struct
 extern u8 __osContLastCmd;
 extern u8 __osMaxControllers;
 extern OSPifRam __osContPifRam;
-extern s32 D_80042A4C;
 void func_160018BC(void);
 s32 func_16001700(void)
 {

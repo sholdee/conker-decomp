@@ -59,21 +59,6 @@ typedef struct {
     /* 0x210 */ u8 prevHeader[0x1D0];
 } AnimPlaybackState;
 
-typedef struct {
-    s16 x;
-    s16 z;
-    s16 y;
-    s16 h;
-    u16 r;
-} Seg15055E50;
-
-typedef struct {
-    Seg15055E50 *segs;
-    u16 count;
-    u16 id;
-} Tbl15055E50;
-
-extern Tbl15055E50 *D_800D18B0;
 
 /* Keeps the actor inside its zone set: pushed out of obstacle circles, snapped to the nearest allowed circle. */
 void func_15055E50(Actor *actor, s32 zoneSetId) {
@@ -93,8 +78,8 @@ void func_15055E50(Actor *actor, s32 zoneSetId) {
     s32 haveZone;
     u16 radiusFlags;
     s32 count;
-    Seg15055E50 *seg;
-    Seg15055E50 *segs;
+    BoundCylinder *seg;
+    BoundCylinder *segs;
 
     outsideAll = 1;
     haveZone = 0;
@@ -116,12 +101,12 @@ void func_15055E50(Actor *actor, s32 zoneSetId) {
         bestDist = 1000000000.0f;
         i = 0;
         while (zoneSetId != D_800D18B0[i].id) {
-            if (D_800D18B0[i].segs == NULL) {
+            if (D_800D18B0[i].cylinders == NULL) {
                 return;
             }
             i++;
         }
-        segs = D_800D18B0[i].segs;
+        segs = D_800D18B0[i].cylinders;
         count = D_800D18B0[i].count;
         for (i = 0; i < count; i++) {
             seg = &segs[i];

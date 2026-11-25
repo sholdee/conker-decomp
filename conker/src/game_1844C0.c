@@ -183,10 +183,6 @@ typedef struct {
 extern Gfx *(*D_8008ADBC[])(Gfx *, Effect *, s16, u8 *, u8 *);
 extern Gfx *(*D_8008ADCC[])(Gfx *, Effect *, s16, u8 *);
 extern OtherModeL D_800A4AC8[];
-extern u8 D_80083740[];
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
 
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
