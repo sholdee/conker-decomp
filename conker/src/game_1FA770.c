@@ -12,6 +12,8 @@ typedef struct { f32 x, z; } Vec2f;
 #define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */
 #define STREAM_EVENT_ENDED 0x23 /* the emitter was destroyed */
 
+#define STREAM_KIND 0xB /* Emitter.kind of a stream emitter */
+
 /* Emitter flags (Emitter.flags). */
 #define EMITTER_FLAG_EMITTING 2
 #define EMITTER_FLAG_STOPPED  8
@@ -70,7 +72,7 @@ typedef struct Emitter {
     Vec3f pos;
     u8 pad1C[2];
     u16 flags;
-    s32 kind; /* 0xB for a stream */
+    s32 kind;
     u8 pad24;
     u8 capacity;
     u8 pad26[6];
@@ -207,7 +209,7 @@ Emitter *func_151CD4C0(source, unkC, id, arg3, arg4)
     template.pos.z = source->z;
     template.unkC = 0x12C;
     template.unkE = 0x34;
-    template.kind = 0xB;
+    template.kind = STREAM_KIND;
     data.floorY = source->y;
     data.swayAmpX = size * 0.125f;
     data.swayRateX = 0.03000000119f; // matching: these three ROM constants sit one ulp above 0.03f, 0.04f and 0.055f
@@ -582,99 +584,86 @@ void func_151CE4DC(Emitter *emitter) {
     func_15147928((s32)emitter);
 }
 
-struct Obj151CE634 *func_151CE634(s32);
-void func_1515C1A0(void *, void *, f32 *, f32 *);
-s32 func_1505D024(void *, s32, u16, s32);
+Emitter *func_151CE634(s32 id);
+void func_1515C1A0(void *actor, f32 *pos, f32 *radius, f32 *height);
+s32 func_1505D024(void *actor, s32 arg1, u16 arg2, s32 arg3);
 
-typedef struct {
-    f32 position[3];
-    u8 unkC[0x10];
-} Game1FA770TrailPoint;
-
-void func_151CE51C(void *arg0, void *arg1) {
-    f32 position[3];
+/* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
+void func_151CE51C(void *actor, StreamSource *source) {
+    f32 pos[3];
     f32 radius;
     f32 height;
-    u8 *obj;
+    Emitter *emitter;
 
-    obj = (u8 *)func_151CE634(*(s32 *)((u8 *)arg1 + 0x18));
-    if (obj != 0) {
-        func_1515C1A0(arg0, position, &radius, &height);
-        if (*(u16 *)(obj + 0x1E) & 8) {
+    emitter = func_151CE634(source->id);
+    if (emitter != NULL) {
+        func_1515C1A0(actor, pos, &radius, &height);
+        if (emitter->flags & EMITTER_FLAG_STOPPED) {
+            /* The column has left the emitter: its top is the newest particle. */
             f32 bottom;
-            f32 level;
+            f32 columnTop;
 
-            bottom = position[1] - height;
-            if (*(s8 *)(obj + 0x2C) > 0) {
-                s32 index;
-                Game1FA770TrailPoint *points;
-
-                index = *(s8 *)(obj + 0x2E) - 1;
-                if (index < 0) {
-                    index = obj[0x25] - 1;
-                }
-                points = *(Game1FA770TrailPoint **)(obj + 0x94);
-                level = points[index].position[1];
-            } else {
+            bottom = pos[1] - height;
+            if (emitter->count <= 0) {
                 return;
             }
-            if (bottom <= level) {
-                func_1505D024(arg0, 0x60019, 0, -1);
+            {
+                s32 newest;
+                StreamParticle *particles;
+
+                newest = emitter->head - 1;
+                if (newest < 0) {
+                    newest = emitter->capacity - 1;
+                }
+                particles = emitter->particles;
+                columnTop = particles[newest].pos.y;
+            }
+            if (bottom <= columnTop) {
+                func_1505D024(actor, 0x60019, 0, -1);
             }
         } else {
+            /* Still attached to the emitter: its bottom is the oldest particle. */
             f32 top;
-            f32 level;
+            f32 columnBottom;
 
-            top = position[1] + height;
-            if (*(s8 *)(obj + 0x2C) > 0) {
-                Game1FA770TrailPoint *points;
-
-                points = *(Game1FA770TrailPoint **)(obj + 0x94);
-                level = points[*(s8 *)(obj + 0x2D)].position[1];
-            } else {
+            top = pos[1] + height;
+            if (emitter->count <= 0) {
                 return;
             }
-            if (level <= top) {
-                func_1505D024(arg0, 0x60019, 0, -1);
+            {
+                StreamParticle *particles;
+
+                particles = emitter->particles;
+                columnBottom = particles[emitter->tail].pos.y;
+            }
+            if (columnBottom <= top) {
+                func_1505D024(actor, 0x60019, 0, -1);
             }
         }
     }
 }
 
-typedef struct Obj151CE634Sub {
-    u8 pad0[0x48];
-    s32 unk48;
-} Obj151CE634Sub;
-
-typedef struct Obj151CE634 {
-    u8 pad0[8];
-    struct Obj151CE634 *next;
-    u8 padC[0x20 - 0xC];
-    s32 unk20;
-    u8 pad24[0x98 - 0x24];
-    Obj151CE634Sub *unk98;
-} Obj151CE634;
-
 extern s32 D_800A5760[];
-extern Obj151CE634 *D_800DCE50[][0x68];
+extern Emitter *D_800DCE50[][0x68];
 
-Obj151CE634 *func_151CE634(s32 arg0) {
+/* Finds the stream emitter whose data has the given id, or NULL. */
+Emitter *func_151CE634(s32 id) {
     u8 i;
     s32 j;
-    Obj151CE634 *p;
+    Emitter *emitter;
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            p = D_800DCE50[j][D_800A5760[i]];
-            while (p != NULL) {
-                if (p->unk20 == 0xB) {
-                    Obj151CE634Sub *sub = p->unk98;
+            emitter = D_800DCE50[j][D_800A5760[i]];
+            while (emitter != NULL) {
+                if (emitter->kind == STREAM_KIND) {
+                    StreamData *data = emitter->data;
 
-                    if (sub->unk48 == arg0) {
-                        return p;
+                    if (data->id == id) {
+                        return emitter;
                     }
                 }
-                p = p->next;
+                emitter = emitter->next;
             }
         }
     }
