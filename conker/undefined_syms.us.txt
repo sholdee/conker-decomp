@@ -13,26 +13,20 @@ D_8002C4CC = 0x8002C4CC;
 D_8002C520 = 0x8002C520;
 D_80095A30 = 0x80095A30;
 
-D_80041EA0 = 0x80041EA0;
 
 /* libultra symbols referenced by name from ultralib source (addresses from the asm) */
-__osEnqueueAndYield = 0x100078B4;
-__osPopThread = 0x10007A24;
 osClockRate = 0x8002BD10;
 osTvType = 0x80000300;
 osViModeMpalLan1 = 0x8002BE80;
 osViModeNtscLan1 = 0x8002BED0;
 osViModePalLan1 = 0x8002BE30;
 __OSGlobalIntMask = 0x8002BD1C;
-__osDispatchThread = 0x10007A38;
-__osEnqueueThread = 0x100079D8;
 __osHwIntTable = 0x8002AC70;
 __osPiDevMgr = 0x8002AB50;
 __osPiTable = 0x8002AB6C;
 osDiskExist = 0x8002BD20;
 osRomBase = 0x80000308;
 
-__libm_qnan_f = 0x8002C920;
 
 /* entry points of the game's private libultra copies (their C definitions are weak) */
 
@@ -41,8 +35,6 @@ __libm_qnan_f = 0x8002C920;
 .L150A43D8 = 0x150A43D8;
 .L150AE0AC = 0x150AE0AC;  /* func_150AE280 (inline asm in game_DB730.c) branches into func_150ADAF0 */
 .L150A64C0 = 0x150A64C0;  /* func_150A6568 branches into func_150A6360 */
-func_10026700 = 0x10026700;
-func_10026750 = 0x10026750;
 __osPfsPifRam = 0x800429D0;
 __osDiskHandle = 0x80043B34;
 __osEventStateTab = 0x80042910;

@@ -280,6 +280,11 @@ D_8003A5E8 = 0x8003A5E8;
 D_8003C8E8 = 0x8003C8E8;
 D_800427F0 = 0x800427F0;
 D_80042A58 = 0x80042A58;
+D_80041EA0 = 0x80041EA0;   // message buffers of the D_80041E58 queues (game_2D4B0.c)
+// init data variables referenced only from C (splat labels them in the data section)
+D_8002AC60 = 0x8002AC60;
+D_8002AC64 = 0x8002AC64;
+__libm_qnan_f = 0x8002C920;   // SDK gu/libm_vals.s (.rdata)
 tuneArray = 0x800419A8;
 dynamicSounds = 0x80041FE0;
 zones = 0x800D3098;

@@ -31,7 +31,7 @@ extern f32 D_8002C838;
 extern f64 D_8002C840; // double
 extern f32 D_8002C848;
 
-extern f32 D_8002C920;
+extern f32 __libm_qnan_f; /* SDK gu/libm_vals.s: quiet NaN */
 
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets

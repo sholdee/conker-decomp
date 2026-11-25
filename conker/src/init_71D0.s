@@ -489,6 +489,8 @@ glabel func_100077B8
     /* 78AC 100078AC 1000FFAC */  b          .L10007760
     /* 78B0 100078B0 00000000 */   nop
   glabel func_100078B4
+  .weak __osEnqueueAndYield  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
+  __osEnqueueAndYield:
     /* 78B4 100078B4 3C058003 */  lui        $a1, %hi(__osRunningThread)
     /* 78B8 100078B8 8CA5BE00 */  lw         $a1, %lo(__osRunningThread)($a1)
     /* 78BC 100078BC 40086000 */  mfc0       $t0, $12 /* handwritten instruction */
@@ -568,6 +570,10 @@ glabel func_100077B8
     /* 79D4 100079D4 00000000 */   nop
 
 glabel func_100079D8
+
+.weak __osEnqueueThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
+
+__osEnqueueThread:
     /* 79D8 100079D8 0080C825 */  or         $t9, $a0, $zero
     /* 79DC 100079DC 8C980000 */  lw         $t8, 0x0($a0)
     /* 79E0 100079E0 8CAF0004 */  lw         $t7, 0x4($a1)
@@ -591,6 +597,10 @@ glabel func_100079D8
     /* 7A20 10007A20 00000000 */   nop
 
 glabel func_10007A24
+
+.weak __osPopThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
+
+__osPopThread:
     /* 7A24 10007A24 8C820000 */  lw         $v0, 0x0($a0)
     /* 7A28 10007A28 8C590000 */  lw         $t9, 0x0($v0)
     /* 7A2C 10007A2C AC990000 */  sw         $t9, 0x0($a0)
@@ -599,6 +609,8 @@ glabel func_10007A24
 
 /* Handwritten function */
 glabel func_10007A38
+.weak __osDispatchThread  /* SDK name (exceptasm.s); weak, so the func_ label stays the disassembly label */
+__osDispatchThread:
     /* 7A38 10007A38 3C048003 */  lui        $a0, %hi(D_8002BDF8)
     /* 7A3C 10007A3C 2484BDF8 */  addiu      $a0, $a0, %lo(D_8002BDF8)
     /* 7A40 10007A40 0C001E89 */  jal        func_10007A24
