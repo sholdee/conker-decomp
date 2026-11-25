@@ -30,6 +30,7 @@ typedef struct {
     TrailInfo *info;
 } TrailObject;
 
+/* The object func_151CEA20 integrates: a 1-D position under constant acceleration, and a fade. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
     /* 0x38 */ f32 position;
@@ -39,13 +40,13 @@ typedef struct {
     /* 0x48 */ u8 pad48[4];
     /* 0x4C */ f32 fadeRate;
     /* 0x50 */ f32 fade;
-} Motion;
+} TrailScalarMotion;
 
 extern TrailObject *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_151CEC10(Vec3f *pos, TrailOwner *owner, void *target);
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */
-s32 func_151CEA20(Motion *motion) {
+s32 func_151CEA20(TrailScalarMotion *motion) {
     {
         f32 prevVelocity = motion->velocity;
 

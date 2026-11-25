@@ -158,11 +158,11 @@ typedef struct {
     /* 0x50 */ ControllerEffect *controller;
     /* 0x54 */ f32 size;
     /* 0x58 */ u8 unk58;
-} Motion; /* size 0x5C */
+} ControllerMotion; /* size 0x5C */
 
 typedef struct MotionEffect {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Motion motion;
+    /* 0x110 */ ControllerMotion motion;
 } MotionEffect;
 
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
@@ -184,7 +184,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
         memcpy(controller, &data, sizeof(data));
         // matching: the -g3 scope entry makes IDO load the shared constants at the top of this block
         {
-            Motion motion;
+            ControllerMotion motion;
             ParticleDef packet;
             Vec3i header2;
             LightEffectHeader header;

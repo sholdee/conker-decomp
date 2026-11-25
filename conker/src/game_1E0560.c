@@ -39,11 +39,6 @@ typedef struct {
 #define ROPE_FLAG_NO_START 4 // start position not known
 #define ROPE_FLAG_NO_END   8 // end position not known
 
-/* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created. */
-typedef struct {
-    u8 data[0x38];
-} HoltenRopeDesc;
-
 /* The actor a rope end is attached to. */
 /* Endpoint data at 0x150 for ropes hung from an actor. */
 typedef struct {
