@@ -2,614 +2,512 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Ribbon trails attached to a point of an object (a game object's matrix plus an offset).
+ * A trail keeps its points in a ring buffer, emits new points at the attachment point at a
+ * fixed rate, ages them and draws them as a textured strip. Trails are started either
+ * directly (func_1519D030) or by a task that waits until the owner has its matrices.
+ *
+ * Frame timing globals: D_800BE9A4 is the frame time step, D_800BE9A8 its reciprocal and
+ * D_800BE9E4 the number of frames elapsed.
+ */
 
-extern void func_15147D64(u8 *arg0, s32 arg1);
-extern void func_1519E3BC(void *arg0, s16 arg1, u8 arg2, s32 arg3);
-extern s32 func_1519D030(void *arg0, s32 arg1, s16 arg2, u8 arg3, u8 arg4, s32 arg5);
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+/* Trail parameters, one entry per trail kind (D_800A8B80). */
+typedef struct TrailSpec {
+    /* 0x00 */ f32 gravity;
+    /* 0x04 */ f32 spawnRate;
+    /* 0x08 */ u8 brightness;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 matrixIndex;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ s16 life;
+    /* 0x22 */ s16 delay;
+    /* 0x24 */ s16 lifeDecay;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 widthGrowth;
+    /* 0x30 */ f32 drag;
+    /* 0x34 */ f32 follow;
+    /* 0x38 */ s16 texStep;
+    /* 0x3A */ s16 texStepRange;
+    /* 0x3C */ u8 headFadeLen;
+    /* 0x3D */ u8 headFadeStep;
+    /* 0x3E */ u8 tailFadeLen;
+    /* 0x3F */ u8 tailFadeStep;
+} TrailSpec;
+
+extern TrailSpec D_800A8B80[];
+
+/* A trail's own data (0x60 bytes), at Trail::data. */
+typedef struct TrailData {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;      /* owner's unique_id when the trail started */
+    /* 0x05 */ u8 matrixIndex;  /* which of the owner's matrices the trail follows */
+    /* 0x06 */ u8 flags;        /* bit 0: stopped, bit 1: fade in the head, bit 2: fade out the tail */
+    /* 0x07 */ u8 texS;         /* texture S of the next point */
+    /* 0x08 */ Vec3f offset;    /* attachment point, in the matrix's space */
+    /* 0x14 */ Vec3f lastPos;   /* where the last point was emitted */
+    /* 0x20 */ f32 time;        /* age of the last emitted point */
+    /* 0x24 */ f32 gravity;
+    /* 0x28 */ f32 spawnRate;
+    /* 0x2C */ f32 spawnCount;  /* points owed, accumulated from spawnRate */
+    /* 0x30 */ f32 drag;
+    /* 0x34 */ f32 widthGrowth;
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 follow;      /* how far the emitter moves towards the attachment point per frame */
+    /* 0x40 */ u8 brightness;
+    /* 0x41 */ u8 pad41;
+    /* 0x42 */ s16 life;
+    /* 0x44 */ s16 delay;
+    /* 0x46 */ s16 lifeDecay;
+    /* 0x48 */ s16 texStep;
+    /* 0x4A */ s16 texStepRange;
+    /* 0x4C */ u8 specIndex;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ Vec3f ownerPos;  /* owner position the points were last moved with */
+    /* 0x5C */ u8 headFadeLen;
+    /* 0x5D */ u8 headFadeStep;
+    /* 0x5E */ u8 tailFadeLen;
+    /* 0x5F */ u8 tailFadeStep;
+} TrailData;
+
+/* One point of a trail (0x24 bytes). */
+typedef struct TrailPoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
+    /* 0x18 */ f32 width;
+    /* 0x1C */ s16 life;   /* counts down by lifeDecay once delay ran out; dead below 0 */
+    /* 0x1E */ s16 delay;
+    /* 0x20 */ u8 alpha;
+    /* 0x21 */ u8 texS;
+    /* 0x22 */ u8 pad22[2];
+} TrailPoint;
+
+/* How a trail is created (func_15147A80); it starts the Trail at its offset 0x10. */
+typedef struct TrailSpawn {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 lifetime;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 kind;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} TrailSpawn;
+
+/* A trail object; only the fields used here. */
+typedef struct Trail {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Vec3f pos;          /* emitter position */
+    /* 0x1C */ s16 lifetime;
+    /* 0x1E */ u16 flags;          /* bit 1: attached (strip starts at pos), bit 2: pos is valid */
+    /* 0x20 */ u8 pad20[5];
+    /* 0x25 */ u8 capacity;        /* size of the points ring buffer */
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 head;            /* oldest point */
+    /* 0x2E */ s8 tail;            /* where the next point goes */
+    /* 0x2F */ u8 pad2F;
+    /* 0x30 */ u8 active;
+    /* 0x31 */ u8 pad31[0x23];
+    /* 0x54 */ Vec3f headPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 vtxBuffers[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailData *data;
+} Trail;
+
+/* Data of a trail task (func_151491F4), at TrailTask::data. */
+typedef struct TrailTaskData {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x08 */ s32 unk8;  /* spec index for func_1519E464, a frame timer for func_1519E754 */
+} TrailTaskData;
+
+typedef struct TrailTask {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags;     /* bit 0: done */
+    /* 0x0E */ s16 lifetime;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ TrailTaskData data;
+} TrailTask;
+
+/* Event payloads the handlers below get (see func_15147D64). */
+typedef union TrailEvent {
+    struct {
+        struct127 *obj;
+        u8 id;
+    } object;         /* events 0 and 7: trails of this owner stop */
+    u8 specIndex;     /* event 6: trails of this kind stop (func_1519CF70) */
+    struct {
+        struct127 *a;
+        struct127 *b;
+        u8 idA;
+        u8 idB;
+    } swap;           /* event 0x2D: owners a and b trade places */
+} TrailEvent;
+
+/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
+typedef struct AttachmentOwner {
+    /* 0x000 */ u8 pad0[0x2F4];
+    /* 0x2F4 */ struct Attachment *attachments;
+} AttachmentOwner;
+#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
+
+extern void func_15147D64(void *event, u8 eventId);
+extern void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3);
+extern Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
-extern s32 func_1514ED3C(s32 arg0, s32 arg1, s32 *arg2);
-extern s32 func_1514EC1C(s32 arg0, s32 arg1, s16 arg2);
-extern s32 D_800E0920;
-extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_1519E304(void *, void *, f32, f32, f32, f32);
+extern s32 func_1514ED3C(struct Attachment *list, s32 handle, struct Attachment **out);
+extern struct Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
+extern void func_1514EDF0(s32 handle, struct127 *owner);
+extern TrailTask *D_800E0920;
+extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec1519D030;
+/* Stops every trail of kind specIndex (event 6). */
+void func_1519CF70(u8 specIndex) {
+    u8 event[4];
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8 unk8;
-    u8 pad9[3];
-    s32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    Vec1519D030 unk14;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 pad26[2];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    s16 unk38;
-    s16 unk3A;
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-} D_800A8B80_Entry;
-
-extern D_800A8B80_Entry D_800A8B80[];
-
-typedef struct {
-    Vec1519D030 unk0;
-    s16 unkC;
-    u16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} Header1519D030;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    Vec1519D030 unk8;
-    Vec1519D030 unk14;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    u8 unk4C;
-    u8 pad4D[3];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    u8 unk5C;
-    u8 unk5D;
-    u8 unk5E;
-    u8 unk5F;
-} Payload1519D030;
-
-typedef struct Obj1519E464 {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x48];
-    u16 unk84;
-    u8 pad86[0x14E];
-    s32 unk1D4;
-    u8 pad1D8[0x11C];
-    s32 unk2F4;
-} Obj1519E464;
-
-typedef struct Sub1519E464 {
-    Obj1519E464 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    s32 unk8;
-} Sub1519E464;
-
-typedef struct Arg1519E464 {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 unkD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub1519E464 unk28;
-} Arg1519E464;
-
-void func_1519CF70(u8 arg0) {
-    u8 sp1C[4];
-
-    sp1C[0] = arg0;
-    func_15147D64(sp1C, 6);
+    event[0] = specIndex;
+    func_15147D64(event, 6);
 }
 
-struct s_1519CFA0 {
-    char pad0[0x1E];
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-    char pad31[0x67];
-    u8 *unk98;
-};
+/* Stops a trail: it no longer emits and its tail fades out. */
+void func_1519CFA0(Trail *trail) {
+    TrailData *data;
 
-void func_1519CFA0(struct s_1519CFA0 *arg0) {
-    u8 *temp;
-
-    arg0->unk30 = 0;
-    temp = arg0->unk98;
-    arg0->unk1E &= 0xFFFD;
-    temp[6] |= 1;
-    temp[6] |= 4;
+    trail->active = 0;
+    data = trail->data;
+    trail->flags &= ~2;
+    data->flags |= 1;
+    data->flags |= 4;
 }
 
-extern void func_1514EDF0(struct260 *, s32);
-extern void func_151478F4(struct s_1519CFA0 *);
+extern void func_151478F4(Trail *);
 
-void func_1519CFD0(struct s_1519CFA0 *arg0) {
-    s32 *temp;
+void func_1519CFD0(Trail *trail) {
+    TrailData *data;
 
-    temp = (s32 *)arg0->unk98;
-    func_1514EDF0((struct260 *)arg0, *temp);
-    func_151478F4(arg0);
+    data = trail->data;
+    func_1514EDF0((s32)trail, data->owner);
+    func_151478F4(trail);
 }
 
-extern void func_15147928(struct s_1519CFA0 *);
+extern void func_15147928(Trail *);
 
-void func_1519D000(struct s_1519CFA0 *arg0) {
-    s32 *temp;
+void func_1519D000(Trail *trail) {
+    TrailData *data;
 
-    temp = (s32 *)arg0->unk98;
-    func_1514EDF0((struct260 *)arg0, *temp);
-    func_15147928(arg0);
+    data = trail->data;
+    func_1514EDF0((s32)trail, data->owner);
+    func_15147928(trail);
 }
 
-s32 func_1519D030(void *arg0, s32 arg1, s16 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    Header1519D030 header;
-    Payload1519D030 payload;
-    s32 temp_v0;
-    D_800A8B80_Entry *entry;
+/* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
+Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
+    TrailSpawn spawn;
+    TrailData data;
+    Trail *trail;
+    TrailSpec *spec;
     s32 flag;
 
-    entry = &D_800A8B80[arg1];
+    spec = &D_800A8B80[specIndex];
 
-    if (arg0 == NULL) {
-        return 0;
+    if (owner == NULL) {
+        return NULL;
     }
 
-    payload.unk20 = 0.0f;
-    payload.unk50 = ((struct127 *)arg0)->x_position;
-    payload.unk54 = ((struct127 *)arg0)->y_position;
-    payload.unk58 = ((struct127 *)arg0)->z_position;
-    payload.unk0 = arg0;
-    payload.unk4 = ((struct127 *)arg0)->unique_id;
-    payload.unk6 = 2;
-    payload.unk7 = 0;
-    payload.unk4C = arg1;
-    header.unkC = arg2;
-    payload.unk2C = 0.0f;
+    data.time = 0.0f;
+    data.ownerPos.x = owner->x_position;
+    data.ownerPos.y = owner->y_position;
+    data.ownerPos.z = owner->z_position;
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.flags = 2;
+    data.texS = 0;
+    data.specIndex = specIndex;
+    spawn.lifetime = lifetime;
+    data.spawnCount = 0.0f;
 
     flag = (arg3 != 0) ? 1 : 0;
-    header.unkE = flag | 2;
+    spawn.flags = flag | 2;
 
-    payload.unk24 = entry->unk0;
-    payload.unk28 = entry->unk4;
-    payload.unk40 = entry->unk8;
-    header.unk15 = entry->unkC;
-    payload.unk5 = entry->unk10;
-    payload.unk8 = entry->unk14;
-    payload.unk42 = entry->unk20;
-    payload.unk44 = entry->unk22;
-    payload.unk46 = entry->unk24;
-    payload.unk38 = entry->unk28;
-    payload.unk34 = entry->unk2C;
-    payload.unk30 = entry->unk30;
-    payload.unk3C = entry->unk34;
-    payload.unk48 = entry->unk38;
-    payload.unk4A = entry->unk3A;
-    payload.unk5C = entry->unk3C;
-    payload.unk5D = entry->unk3D;
-    payload.unk5E = entry->unk3E;
-    payload.unk5F = entry->unk3F;
+    data.gravity = spec->gravity;
+    data.spawnRate = spec->spawnRate;
+    data.brightness = spec->brightness;
+    spawn.unk15 = spec->unkC;
+    data.matrixIndex = spec->matrixIndex;
+    data.offset = spec->offset;
+    data.life = spec->life;
+    data.delay = spec->delay;
+    data.lifeDecay = spec->lifeDecay;
+    data.width = spec->width;
+    data.widthGrowth = spec->widthGrowth;
+    data.drag = spec->drag;
+    data.follow = spec->follow;
+    data.texStep = spec->texStep;
+    data.texStepRange = spec->texStepRange;
+    data.headFadeLen = spec->headFadeLen;
+    data.headFadeStep = spec->headFadeStep;
+    data.tailFadeLen = spec->tailFadeLen;
+    data.tailFadeStep = spec->tailFadeStep;
 
-    if (func_1519E304(&payload, &header.unk0, 0.0f, 0.0f, 0.0f, 1.0f) != 0) {
-        payload.unk14 = header.unk0;
-        header.unkE |= 4;
+    if (func_1519E304(&data, &spawn.pos, 0.0f, 0.0f, 0.0f, 1.0f) != 0) {
+        data.lastPos = spawn.pos;
+        spawn.flags |= 4;
     }
 
-    header.unk10 = 4;
-    temp_v0 = func_15147A80(&header, 0x60, 0x24, 3, 3, 3, 0, 0, 0, arg4, arg5);
-    if (temp_v0 != 0) {
-        memcpy((void *)*(s32 *)((u8 *)temp_v0 + 0x98), &payload, 0x60);
+    spawn.kind = 4;
+    trail = func_15147A80(&spawn, sizeof(TrailData), sizeof(TrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
+    if (trail != NULL) {
+        memcpy(trail->data, &data, sizeof(TrailData));
     }
-    return temp_v0;
+    return trail;
 }
 
 extern f32 D_800BE9A4;
 extern s32 D_800BE9E4;
-typedef struct 
-{
-  f32 unk0;
-  f32 unk4;
-  f32 unk8;
-  f32 unkC;
-  f32 unk10;
-  f32 unk14;
-  f32 unk18;
-  s16 unk1C;
-  s16 unk1E;
-  u8 unk20;
-  u8 pad21[3];
-} Trail1519D240;
-typedef struct 
-{
-  f32 unk0;
-  f32 unk4;
-  f32 unk8;
-  f32 unkC;
-  f32 unk10;
-  f32 unk14;
-  f32 unk18;
-  s16 unk1C;
-  s16 unk1E;
-  u8 unk20;
-  u8 pad21[3];
-} Trail1519D240Alt;
-typedef struct 
-{
-  u8 pad0[0x25];
-  u8 unk25;
-  u8 pad26[6];
-  s8 unk2C;
-  s8 unk2D;
-  s8 unk2E;
-  u8 pad2F[0x25];
-  f32 unk54;
-  f32 unk58;
-  f32 unk5C;
-  u8 pad60[0x34];
-  Trail1519D240 *unk94;
-  Payload1519D030 *unk98;
-} Arg1519D240;
-s32 func_1519D240(Arg1519D240 *arg0)
-{
-  Payload1519D030 *payload;
-  Trail1519D240 *entries;
-  s32 index;
-  s32 offset;
-  register s32 mask;
-  s16 temp;
-  Trail1519D240 *entry;
-  Trail1519D240Alt *same_entry;
-  payload = arg0->unk98;
-  entries = arg0->unk94;
-  if ((arg0->unk2C < 2) && (payload->unk6 & 1))
-  {
-    return 0;
-  }
-  index = arg0->unk2E;
-  mask = -3;
-  if (index != arg0->unk2D)
-  {
-    do
-    {
-      index -= 1;
-      if (index < 0)
-      {
-        index = arg0->unk25 - 1;
-      }
-      offset = index * (sizeof(Trail1519D240));
-      entry = &entries[index];
-      entry->unk20 = 0xFF;
-      same_entry = (Trail1519D240Alt *) (((u8 *) entries) + offset);
-      temp = entry->unk1E;
-      entry->unkC *= payload->unk30;
-      entry->unk10 += payload->unk24 * D_800BE9A4;
-      entry->unk14 *= payload->unk30;
-      entry->unk0 += same_entry->unkC * D_800BE9A4;
-      entry->unk4 += same_entry->unk10 * D_800BE9A4;
-      entry->unk8 += same_entry->unk14 * D_800BE9A4;
-      if (temp > 0)
-      {
-        entry->unk1E = temp - D_800BE9E4;
-      }
-      else
-      {
-        entry->unk1C -= D_800BE9E4 * payload->unk46;
-      }
-      entry->unk18 += D_800BE9A4 * payload->unk34;
-      if (entry->unk1C < 0)
-      {
-        payload->unk6 &= mask;
-        if (index != arg0->unk2D)
-        {
-          do
-          {
-            arg0->unk2D++;
-            if (arg0->unk2D == arg0->unk25)
-            {
-              arg0->unk2D = 0;
-            }
-            arg0->unk2C--;
-          }
-          while (index != arg0->unk2D);
-        }
-        entries[arg0->unk2D].unk1C = 0;
-      }
-    }
-    while (index != arg0->unk2D);
-  }
-  if (arg0->unk2C > 0)
-  {
-    entry = entries;
-    mask = arg0->unk2D;
-    entry += mask;
-    *((Vec1519D030 *) (&arg0->unk54)) = *((Vec1519D030 *) (&entry->unk0));
-  }
-  else
-  {
-    arg0->unk54 = 0.0f;
-    arg0->unk58 = 0.0f;
-    arg0->unk5C = 0.0f;
-  }
-  return 1;
-}
 
+typedef struct TrailPointAlias {
+    Vec3f pos;
+    Vec3f vel;
+} TrailPointAlias;
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3fD454;
+/* Ages a trail's points (newest to oldest) and drops the dead ones. Returns 0 once a stopped trail is gone. */
+s32 func_1519D240(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
+    s32 i;
+    s32 offset;
+    register s32 mask;
+    s16 delay;
+    TrailPoint *point;
+    TrailPointAlias *same;
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    Vec3fD454 vel;
-    f32 w;
-    s16 unk1C;
-    s16 unk1E;
-    u8 unk20;
-    u8 unk21;
-    u8 pad22[2];
-} TrailD454;
-
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    Vec3fD454 unk8;
-    Vec3fD454 unk14;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    u8 unk4C;
-    u8 pad4D[3];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-} PayloadD454;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3fD454 unk10;
-    s16 unk1C;
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x65];
-    TrailD454 *unk94;
-    PayloadD454 *unk98;
-} ArgD454;
-
-typedef struct {
-    struct127 *obj;
-    u8 id;
-    s32 type;
-} InfoD454;
-
-s32 func_1519D454(ArgD454 *arg0) {
-    PayloadD454 *payload;
-    TrailD454 *entries;
-    s32 done;
-    f32 prevX;
-    f32 prevZ;
-    InfoD454 info;
-    struct260 *spawned;
-    f32 inv;
-    f32 t;
-    f32 step;
-    f32 dz;
-    f32 dy;
-    f32 dx;
-    f32 dw;
-    Vec3fD454 pos;
-    f32 width;
-    s32 idx;
-    f32 mx;
-    f32 my;
-    f32 mz;
-    Vec3fD454 vel;
-    f32 incY;
-    f32 incZ;
-    f32 incW;
-
-    payload = arg0->unk98;
-    entries = arg0->unk94;
-    if (payload->unk0->interaction_state == 0) {
+    data = trail->data;
+    points = trail->points;
+    if ((trail->count < 2) && (data->flags & 1)) {
         return 0;
     }
-    if (payload->unk0->unique_id != payload->unk4) {
-        return 0;
-    }
-    done = 0;
-    if (!(arg0->unk1E & 4)) {
-        if (func_1519E304(payload, &arg0->unk10, 0.0f, 0.0f, 0.0f, 1.0f) != 0) {
-            done = 1;
-            payload->unk14 = arg0->unk10;
-            arg0->unk1E |= 4;
-        } else {
-            return 1;
-        }
-    }
-    prevX = arg0->unk10.x;
-    prevZ = arg0->unk10.z;
-    if (done == 0 && func_1519E304(payload, &arg0->unk10, arg0->unk10.x, arg0->unk10.y, arg0->unk10.z, payload->unk3C) == 0) {
-        func_1519CFA0((struct s_1519CFA0 *)arg0);
-        info.obj = payload->unk0;
-        info.id = payload->unk0->unique_id;
-        info.type = payload->unk4C;
-        spawned = func_151491F4(arg0->unk1C, -1, 8, (arg0->unk1E & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
-        if (spawned != NULL) {
-            memcpy((u8 *)spawned + 0x28, &info, 0xC);
-            if (func_1514ED3C(*(s32 *)((u8 *)payload->unk0 + 0x2F4), (s32)arg0, NULL) != 0) {
-                func_1514EC1C((s32)spawned, (s32)payload->unk0, 0x11);
-            }
-        }
-        return 1;
-    }
-    payload->unk2C += payload->unk28 * D_800BE9A4;
-    if (payload->unk2C > 1.0f) {
-        t = payload->unk20 + D_800BE9A4;
-        inv = 1.0f / payload->unk2C;
-        pos = payload->unk14;
-        step = t * inv;
-        width = payload->unk38 + payload->unk34 * t;
-        dx = arg0->unk10.x - payload->unk14.x;
-        dy = arg0->unk10.y - payload->unk14.y;
-        dz = arg0->unk10.z - payload->unk14.z;
-        dw = payload->unk38 - width;
-        if (0) {} /* splits uopt basic blocks: needed for the original register allocation */
-        vel.x = (arg0->unk10.x - prevX) * D_800BE9A8;
-        vel.y = 0.0f;
-        vel.z = (arg0->unk10.z - prevZ) * D_800BE9A8;
-        mx = dx * inv;
-        incY = dy * inv;
-        incZ = dz * inv;
-        incW = dw * inv;
-        /* dead expressions: shift IDO's TU-wide state so func_1519D9F4 compiles as in the ROM */
-        dx * t;
-        dy * t;
-        dz * t;
+    i = trail->tail;
+    mask = ~2;
+    if (i != trail->head) {
         do {
-            TrailD454 *entry;
-            entry = &entries[arg0->unk2E];
-            entry->x = pos.x;
-            entry->y = pos.y;
-            entry->z = pos.z;
-            entry->vel = vel;
-            entry->unk21 = payload->unk7;
-            entry->w = width;
-            entry->unk1C = payload->unk42;
-            entry->unk1E = payload->unk44;
-            payload->unk7 += payload->unk48 + ((u32)func_150ADA20() % (payload->unk4A + 1));
-            entry->unk20 = 0xFF;
-            entry->vel.y += payload->unk24 * t;
-            entry->x += entry->vel.x * t;
-            entry->y += entry->vel.y * t;
-            entry->z += entry->vel.z * t;
-            t -= step;
-            arg0->unk2E++;
-            if (arg0->unk2E == arg0->unk25) {
-                arg0->unk2E = 0;
+            i--;
+            if (i < 0) {
+                i = trail->capacity - 1;
             }
-            arg0->unk2C++;
-            if (arg0->unk2E == arg0->unk2D) {
-                arg0->unk2D++;
-                if (arg0->unk2D == arg0->unk25) {
-                    arg0->unk2D = 0;
+            offset = i * sizeof(TrailPoint);
+            point = &points[i];
+            point->alpha = 0xFF;
+            same = (TrailPointAlias *)((u8 *)points + offset);
+            delay = point->delay;
+            point->vel.x *= data->drag;
+            point->vel.y += data->gravity * D_800BE9A4;
+            point->vel.z *= data->drag;
+            point->pos.x += same->vel.x * D_800BE9A4;
+            point->pos.y += same->vel.y * D_800BE9A4;
+            point->pos.z += same->vel.z * D_800BE9A4;
+            if (delay > 0) {
+                point->delay = delay - D_800BE9E4;
+            } else {
+                point->life -= D_800BE9E4 * data->lifeDecay;
+            }
+            point->width += D_800BE9A4 * data->widthGrowth;
+            if (point->life < 0) {
+                /* Everything from the head up to this point is dead too. */
+                data->flags &= mask;
+                if (i != trail->head) {
+                    do {
+                        trail->head++;
+                        if (trail->head == trail->capacity) {
+                            trail->head = 0;
+                        }
+                        trail->count--;
+                    } while (i != trail->head);
                 }
-                arg0->unk2C--;
+                points[trail->head].life = 0;
             }
-            pos.x += mx;
-            pos.y += incY;
-            pos.z += incZ;
-            width += incW;
-            payload->unk2C -= 1.0f;
-        } while (payload->unk2C > 1.0f);
-        payload->unk14 = pos;
-        payload->unk20 = t;
+        } while (i != trail->head);
     }
-    {
-    TrailD454 *entry;
-
-    idx = arg0->unk2E;
-    mx = payload->unk0->x_position - payload->unk50;
-    my = payload->unk0->y_position - payload->unk54;
-    mz = payload->unk0->z_position - payload->unk58;
-    if (idx != arg0->unk2D) {
-        do {
-            idx--;
-            if (idx < 0) {
-                idx = arg0->unk25 - 1;
-            }
-            entry = &entries[idx];
-            entry->x += mx;
-            entry->y += my;
-            entry->z += mz;
-        } while (idx != arg0->unk2D);
-    }
-    payload->unk50 = payload->unk0->x_position;
-    payload->unk54 = payload->unk0->y_position;
-    payload->unk58 = payload->unk0->z_position;
+    if (trail->count > 0) {
+        point = points;
+        mask = trail->head;
+        point += mask;
+        trail->headPos = point->pos;
+    } else {
+        trail->headPos.x = 0.0f;
+        trail->headPos.y = 0.0f;
+        trail->headPos.z = 0.0f;
     }
     return 1;
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_1519D9F4;
-
-typedef struct {
-    Vec3f_1519D9F4 pos;
-    u8 pad0C[0xC];
+/*
+ * Moves a trail's emitter towards its attachment point and emits the points it owes along the
+ * way, then moves all points along with the owner. A trail whose attachment point is lost stops
+ * and hands over to a task (func_1519E464 family). Returns 0 when the owner is gone.
+ */
+s32 func_1519D454(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
+    s32 started;
+    f32 prevX;
+    f32 prevZ;
+    TrailTaskData taskData;
+    TrailTask *task;
+    f32 invCount;
+    f32 time;
+    f32 timeStep;
+    f32 dz;
+    f32 dy;
+    f32 dx;
+    f32 dw;
+    Vec3f pos;
     f32 width;
-    s16 life;
-    u8 pad1E[2];
-    u8 alpha;
-    u8 level;
-    u8 pad22[2];
-} Point1519D9F4;
+    s32 i;
+    f32 moveX;
+    f32 moveY;
+    f32 moveZ;
+    Vec3f vel;
+    f32 stepY;
+    f32 stepZ;
+    f32 stepWidth;
 
-typedef struct {
-    u8 pad0[0x10];
-    Vec3f_1519D9F4 pos;
-    u8 pad1C[2];
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x84 - 0x2F];
-    u8 unk84[0x10];
-    Point1519D9F4 *points;
-    Payload1519D030 *style;
-} Owner1519D9F4;
+    data = trail->data;
+    points = trail->points;
+    if (data->owner->interaction_state == 0) {
+        return 0;
+    }
+    if (data->owner->unique_id != data->ownerId) {
+        return 0;
+    }
+    started = 0;
+    if (!(trail->flags & 4)) {
+        if (func_1519E304(data, &trail->pos, 0.0f, 0.0f, 0.0f, 1.0f) != 0) {
+            started = 1;
+            data->lastPos = trail->pos;
+            trail->flags |= 4;
+        } else {
+            return 1;
+        }
+    }
+    prevX = trail->pos.x;
+    prevZ = trail->pos.z;
+    if (started == 0 && func_1519E304(data, &trail->pos, trail->pos.x, trail->pos.y, trail->pos.z, data->follow) == 0) {
+        func_1519CFA0(trail);
+        taskData.owner = data->owner;
+        taskData.ownerId = data->owner->unique_id;
+        taskData.unk8 = data->specIndex;
+        task = (TrailTask *)func_151491F4(trail->lifetime, -1, 8, (trail->flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        if (task != NULL) {
+            memcpy(&task->data, &taskData, sizeof(TrailTaskData));
+            if (func_1514ED3C(ATTACHMENTS(data->owner), (s32)trail, NULL) != 0) {
+                func_1514EC1C((s32)task, data->owner, 0x11);
+            }
+        }
+        return 1;
+    }
+    data->spawnCount += data->spawnRate * D_800BE9A4;
+    if (data->spawnCount > 1.0f) {
+        /* Emit the owed points evenly between the last point and the emitter, oldest first. */
+        time = data->time + D_800BE9A4;
+        invCount = 1.0f / data->spawnCount;
+        pos = data->lastPos;
+        timeStep = time * invCount;
+        width = data->width + data->widthGrowth * time;
+        dx = trail->pos.x - data->lastPos.x;
+        dy = trail->pos.y - data->lastPos.y;
+        dz = trail->pos.z - data->lastPos.z;
+        dw = data->width - width;
+        if (0) {} // matching: splits uopt basic blocks for the original register allocation
+        vel.x = (trail->pos.x - prevX) * D_800BE9A8;
+        vel.y = 0.0f;
+        vel.z = (trail->pos.z - prevZ) * D_800BE9A8;
+        moveX = dx * invCount;
+        stepY = dy * invCount;
+        stepZ = dz * invCount;
+        stepWidth = dw * invCount;
+        // matching: dead expressions shift IDO's TU-wide state so func_1519D9F4 compiles as in the ROM
+        dx * time;
+        dy * time;
+        dz * time;
+        do {
+            TrailPoint *point;
+
+            point = &points[trail->tail];
+            point->pos.x = pos.x;
+            point->pos.y = pos.y;
+            point->pos.z = pos.z;
+            point->vel = vel;
+            point->texS = data->texS;
+            point->width = width;
+            point->life = data->life;
+            point->delay = data->delay;
+            data->texS += data->texStep + ((u32)func_150ADA20() % (data->texStepRange + 1));
+            point->alpha = 0xFF;
+            point->vel.y += data->gravity * time;
+            point->pos.x += point->vel.x * time;
+            point->pos.y += point->vel.y * time;
+            point->pos.z += point->vel.z * time;
+            time -= timeStep;
+            trail->tail++;
+            if (trail->tail == trail->capacity) {
+                trail->tail = 0;
+            }
+            trail->count++;
+            if (trail->tail == trail->head) {
+                /* Full: drop the oldest point. */
+                trail->head++;
+                if (trail->head == trail->capacity) {
+                    trail->head = 0;
+                }
+                trail->count--;
+            }
+            pos.x += moveX;
+            pos.y += stepY;
+            pos.z += stepZ;
+            width += stepWidth;
+            data->spawnCount -= 1.0f;
+        } while (data->spawnCount > 1.0f);
+        data->lastPos = pos;
+        data->time = time;
+    }
+    {
+    TrailPoint *point;
+
+    i = trail->tail;
+    moveX = data->owner->x_position - data->ownerPos.x;
+    moveY = data->owner->y_position - data->ownerPos.y;
+    moveZ = data->owner->z_position - data->ownerPos.z;
+    if (i != trail->head) {
+        do {
+            i--;
+            if (i < 0) {
+                i = trail->capacity - 1;
+            }
+            point = &points[i];
+            point->pos.x += moveX;
+            point->pos.y += moveY;
+            point->pos.z += moveZ;
+        } while (i != trail->head);
+    }
+    data->ownerPos.x = data->owner->x_position;
+    data->ownerPos.y = data->owner->y_position;
+    data->ownerPos.z = data->owner->z_position;
+    }
+    return 1;
+}
 
 extern u8 D_80090CD4[];
 extern s32 D_800D2C9C;
@@ -620,140 +518,145 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-Gfx *func_1519D9F4(Owner1519D9F4 *arg0, Gfx *gfx, s16 arg2) {
+/*
+ * Draws a trail for view `view` as a strip of quads from the newest point to the oldest, each
+ * point spread sideways by its width. Fades the head in and the tail out first if asked to.
+ */
+Gfx *func_1519D9F4(Trail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
-    Payload1519D030 *style;
-    Point1519D9F4 *points;
-    Vec3f_1519D9F4 b;
-    Vec3f_1519D9F4 a;
+    TrailData *data;
+    TrailPoint *points;
+    Vec3f next;
+    Vec3f cur;
     s32 j;
     s32 i;
-    u8 level;
-    u8 prev;
+    u8 texS;
+    u8 curTexS;
     s16 alpha;
-    s16 prevAlpha;
+    s16 curAlpha;
     u8 update;
-    f32 pdz;
-    f32 pdx;
-    f32 dz;
-    f32 dx;
+    f32 offZ;
+    f32 offX;
+    f32 curOffZ;
+    f32 curOffX;
     s16 count;
     u8 fade;
     s32 k;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    if (trail->count >= 2) {
+        func_151D5D60(trail->vtxBuffers, view, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            style = arg0->style;
-            points = arg0->points;
+            data = trail->data;
+            points = trail->points;
             update = 1;
-            if (style->unk6 & 2) {
-                u8 fade1;
-                s16 count1;
+            if (data->flags & 2) {
+                u8 headFade;
+                s16 headCount;
 
-                fade1 = 0;
-                count1 = style->unk5C;
-                k = arg0->unk2D;
+                headFade = 0;
+                headCount = data->headFadeLen;
+                k = trail->head;
                 do {
-                    points[k].alpha = fade1;
+                    points[k].alpha = headFade;
                     k++;
-                    fade1 += style->unk5D;
-                    if (k == arg0->unk25) {
+                    headFade += data->headFadeStep;
+                    if (k == trail->capacity) {
                         k = 0;
                     }
-                    count1--;
-                } while (count1 != 0 && k != arg0->unk2E);
+                    headCount--;
+                } while (headCount != 0 && k != trail->tail);
             }
-            if (style->unk6 & 4) {
+            if (data->flags & 4) {
                 fade = 0;
-                count = style->unk5E;
-                k = arg0->unk2E - 1;
+                count = data->tailFadeLen;
+                k = trail->tail - 1;
                 if (k < 0) {
-                    k = arg0->unk25 - 1;
+                    k = trail->capacity - 1;
                 }
                 do {
                     points[k].alpha = (points[k].alpha * fade) >> 8;
                     k--;
-                    fade += style->unk5F;
+                    fade += data->tailFadeStep;
                     count--;
                     if (k < 0) {
-                        k = arg0->unk25 - 1;
+                        k = trail->capacity - 1;
                     }
-                } while (count != 0 && k != arg0->unk2E);
+                } while (count != 0 && k != trail->tail);
             }
             gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
-            gfx = func_15142C10(gfx, style->unk40, style->unk40, style->unk40, 0xFF, &update);
+            gfx = func_15142C10(gfx, data->brightness, data->brightness, data->brightness, 0xFF, &update);
             gfx = func_1513F4E4(gfx, 6, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
-            if (arg0->unk1E & 2) {
-                j = arg0->unk2E - 1;
+            if (trail->flags & 2) {
+                /* Attached: the strip starts at the emitter. */
+                j = trail->tail - 1;
                 if (j < 0) {
-                    j = arg0->unk25 - 1;
+                    j = trail->capacity - 1;
                 }
-                a = arg0->pos;
-                prev = points[j].level;
-                dx = points[j].width * D_800DD1E8[arg2];
-                dz = points[j].width * D_800DD1D8[arg2];
-                prevAlpha = (points[j].life * points[j].alpha) >> 8;
+                cur = trail->pos;
+                curTexS = points[j].texS;
+                curOffX = points[j].width * D_800DD1E8[view];
+                curOffZ = points[j].width * D_800DD1D8[view];
+                curAlpha = (points[j].life * points[j].alpha) >> 8;
             } else {
-                i = arg0->unk2E - 1;
+                i = trail->tail - 1;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = trail->capacity - 1;
                 }
                 j = i - 1;
                 if (j < 0) {
-                    j = arg0->unk25 - 1;
+                    j = trail->capacity - 1;
                 }
-                a = points[i].pos;
-                dx = points[i].width * D_800DD1E8[arg2];
-                prev = points[i].level;
-                dz = points[i].width * D_800DD1D8[arg2];
-                prevAlpha = (points[i].life * points[i].alpha) >> 8;
+                cur = points[i].pos;
+                curOffX = points[i].width * D_800DD1E8[view];
+                curTexS = points[i].texS;
+                curOffZ = points[i].width * D_800DD1D8[view];
+                curAlpha = (points[i].life * points[i].alpha) >> 8;
             }
-            b = points[j].pos;
-            pdx = points[j].width * D_800DD1E8[arg2];
-            level = points[j].level;
-            pdz = points[j].width * D_800DD1D8[arg2];
+            next = points[j].pos;
+            offX = points[j].width * D_800DD1E8[view];
+            texS = points[j].texS;
+            offZ = points[j].width * D_800DD1D8[view];
             alpha = (points[j].life * points[j].alpha) >> 8;
-            vtx->v.ob[0] = (s16)(s32)(a.x + dx);
-            vtx->v.ob[1] = (s16)(s32)a.y;
-            vtx->v.ob[2] = (s16)(s32)(a.z - dz);
-            vtx->v.tc[0] = prev << 6;
-            vtx->v.tc[1] = 0x7C0;
+            vtx->v.ob[0] = cur.x + curOffX;
+            vtx->v.ob[1] = cur.y;
+            vtx->v.ob[2] = cur.z - curOffZ;
+            vtx->v.tc[0] = curTexS << 6;
+            vtx->v.tc[1] = 31 << 6;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = prevAlpha;
+            vtx->v.cn[3] = curAlpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = (s16)(s32)(a.x - dx);
-            vtx->v.ob[1] = (s16)(s32)a.y;
-            vtx->v.ob[2] = (s16)(s32)(a.z + dz);
-            vtx->v.tc[0] = prev << 6;
+            vtx->v.ob[0] = cur.x - curOffX;
+            vtx->v.ob[1] = cur.y;
+            vtx->v.ob[2] = cur.z + curOffZ;
+            vtx->v.tc[0] = curTexS << 6;
             vtx->v.tc[1] = 0;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = prevAlpha;
+            vtx->v.cn[3] = curAlpha;
             vtx->v.flag = 0;
             vtx++;
             do {
-                vtx->v.ob[0] = (s16)(s32)(b.x + pdx);
-                vtx->v.ob[1] = (s16)(s32)b.y;
-                vtx->v.ob[2] = (s16)(s32)(b.z - pdz);
-                vtx->v.tc[0] = level << 6;
-                vtx->v.tc[1] = 0x7C0;
+                vtx->v.ob[0] = next.x + offX;
+                vtx->v.ob[1] = next.y;
+                vtx->v.ob[2] = next.z - offZ;
+                vtx->v.tc[0] = texS << 6;
+                vtx->v.tc[1] = 31 << 6;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
                 vtx->v.cn[3] = alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = (s16)(s32)(b.x - pdx);
-                vtx->v.ob[1] = (s16)(s32)b.y;
-                vtx->v.ob[2] = (s16)(s32)(b.z + pdz);
-                vtx->v.tc[0] = level << 6;
+                vtx->v.ob[0] = next.x - offX;
+                vtx->v.ob[1] = next.y;
+                vtx->v.ob[2] = next.z + offZ;
+                vtx->v.tc[0] = texS << 6;
                 vtx->v.tc[1] = 0;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
@@ -764,271 +667,237 @@ Gfx *func_1519D9F4(Owner1519D9F4 *arg0, Gfx *gfx, s16 arg2) {
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
-                if (prev < level) {
-                    memcpy(vtx, vtx - 2, 0x20);
-                    vtx[-2].v.tc[0] -= 0x4000;
+                if (curTexS < texS) {
+                    /* The texture S wrapped: repeat the pair 256 texels back so the next quad continues it. */
+                    memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
+                    vtx[-2].v.tc[0] -= 256 << 6;
                     vtx++;
-                    vtx[-2].v.tc[0] -= 0x4000;
+                    vtx[-2].v.tc[0] -= 256 << 6;
                     vtx++;
                 }
                 i = j;
                 j--;
                 if (j < 0) {
-                    j = arg0->unk25 - 1;
+                    j = trail->capacity - 1;
                 }
-                if (i != arg0->unk2D) {
-                    prev = level;
-                    a = points[i].pos;
-                    b = points[j].pos;
-                    pdx = points[j].width * D_800DD1E8[arg2];
-                    level = points[j].level;
-                    pdz = points[j].width * D_800DD1D8[arg2];
+                if (i != trail->head) {
+                    curTexS = texS;
+                    cur = points[i].pos;
+                    next = points[j].pos;
+                    offX = points[j].width * D_800DD1E8[view];
+                    texS = points[j].texS;
+                    offZ = points[j].width * D_800DD1D8[view];
                     alpha = (points[j].life * points[j].alpha) >> 8;
                 }
-            } while (i != arg0->unk2D);
+            } while (i != trail->head);
         }
     }
     return gfx;
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0x47];
-    u8 unk4C;
-} SubA_1519E1F4;
+/* Trail event handler: stops the trail when its owner or kind is named, follows an owner swap. */
+void func_1519E1F4(Trail *trail, TrailEvent *event, u8 eventId) {
+    TrailData *data = trail->data;
 
-typedef struct {
-    union {
-        s32 w0;
-        u8 b0;
-    } u0;
-    union {
-        s32 w4;
-        u8 b4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_1519E1F4;
-
-void func_1519E1F4(struct s_1519CFA0 *arg0, s32 arg1, u8 arg2) {
-    SubA_1519E1F4 *temp_v0 = (SubA_1519E1F4 *)arg0->unk98;
-    ArgB_1519E1F4 *b = (ArgB_1519E1F4 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->u0.w0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1519CFA0(arg0);
+    if (eventId == 0) {
+        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+            func_1519CFA0(trail);
         }
-    } else if (arg2 == 6) {
-        if (temp_v0->unk4C == b->u0.b0) {
-            func_1519CFA0(arg0);
+    } else if (eventId == 6) {
+        if (data->specIndex == event->specIndex) {
+            func_1519CFA0(trail);
         }
-    } else if (arg2 == 7) {
-        if ((b->u0.w0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1519CFA0(arg0);
+    } else if (eventId == 7) {
+        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+            func_1519CFA0(trail);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->u0.w0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->u0.w0;
-            temp_v0->unk4 = b->unk8;
+    } else if (eventId == 0x2D) {
+        if (data->owner == event->swap.a) {
+            data->owner = event->swap.b;
+            data->ownerId = event->swap.idB;
+        } else if (data->owner == event->swap.b) {
+            data->owner = event->swap.a;
+            data->ownerId = event->swap.idA;
         }
     }
 }
 
-extern void func_15143134(void *, void *, s32);
+extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 
-s32 func_1519E304(void *arg0, void *arg1, f32 x, f32 y, f32 z, f32 t) {
-    f32 pos[3];
+/*
+ * Transforms data->offset by the owner's matrix into out, lerped from (x, y, z) by t.
+ * Returns 0 (out untouched) while the owner has no matrices.
+ */
+s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
+    Vec3f pos;
 
-    if (*(s32 *)((u8 *)((Payload1519D030 *)arg0)->unk0 + 0x1D4) == 0) {
+    if (data->owner->unk1D4 == NULL) {
         return 0;
     }
-    func_15143134(&((Payload1519D030 *)arg0)->unk8, pos,
-                  *(s32 *)((u8 *)((Payload1519D030 *)arg0)->unk0 + 0x1D4) + (((Payload1519D030 *)arg0)->unk5 << 6));
-    ((f32 *)arg1)[0] = (pos[0] - x) * t + x;
-    ((f32 *)arg1)[1] = (pos[1] - y) * t + y;
-    ((f32 *)arg1)[2] = (pos[2] - z) * t + z;
+    /* 64-byte matrices */
+    func_15143134(&data->offset, &pos, (u8 *)data->owner->unk1D4 + (data->matrixIndex << 6));
+    out->x = (pos.x - x) * t + x;
+    out->y = (pos.y - y) * t + y;
+    out->z = (pos.z - z) * t + z;
     return 1;
 }
 
-
-void func_1519E3BC(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
+void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3) {
     func_1519E688();
-    func_1519D030(arg0, 3, 0x12C, 0, arg2, arg3);
-    func_1519D030(arg0, 4, 0x12C, 0, arg2, arg3);
-    func_151491F4(arg1, 6, -1, 1, 3, 0, arg2, arg3);
+    func_1519D030(owner, 3, 300, 0, arg2, arg3);
+    func_1519D030(owner, 4, 300, 0, arg2, arg3);
+    func_151491F4(lifetime, 6, -1, 1, 3, 0, arg2, arg3);
 }
 
-void func_1519E464(Arg1519E464 *arg0) {
-    Sub1519E464 *sub;
-    u8 invalid;
-    s32 temp_v0;
+/* Trail task: once the owner has its matrices, starts the trail and finishes. */
+void func_1519E464(TrailTask *task) {
+    TrailTaskData *data;
+    u8 finished;
+    Trail *trail;
 
-    invalid = 0;
-    sub = &arg0->unk28;
-    if (arg0->unk28.unk0->unk0 == 0) {
-        invalid = 1;
+    finished = FALSE;
+    data = &task->data;
+    if (task->data.owner->interaction_state == 0) {
+        finished = TRUE;
     }
-    if (sub->unk0->unk3B == sub->unk4) {
-    } else {
-        invalid = 1;
+    if (data->owner->unique_id != data->ownerId) {
+        finished = TRUE;
     }
-    if (invalid == 0) {
-        if (sub->unk0->unk1D4 != 0) {
-            invalid = 1;
-            temp_v0 = func_1519D030(sub->unk0, sub->unk8, arg0->unkE, arg0->unkD & 1, arg0->unkC, arg0->unk1);
-            if (temp_v0 != 0) {
-                if (func_1514ED3C(sub->unk0->unk2F4, (s32)arg0, 0) != 0) {
-                    func_1514EC1C(temp_v0, (s32)sub->unk0, 0x10);
+    if (!finished) {
+        if (data->owner->unk1D4 != NULL) {
+            finished = TRUE;
+            trail = func_1519D030(data->owner, data->unk8, task->lifetime, task->flags & 1, task->unkC, task->unk1);
+            if (trail != NULL) {
+                if (func_1514ED3C(ATTACHMENTS(data->owner), (s32)task, NULL) != 0) {
+                    func_1514EC1C((s32)trail, data->owner, 0x10);
                 }
             }
         }
     }
-    if (invalid != 0) {
-        arg0->unkE = -1;
-        arg0->unkD |= 1;
+    if (finished) {
+        task->lifetime = -1;
+        task->flags |= 1;
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_1519E570;
+/* Trail task event handler: ends the task when its owner is named, follows an owner swap. */
+void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId) {
+    TrailTaskData *data = &task->data;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_1519E570;
-
-void func_1519E570(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_1519E570 *temp_v0 = (SubA_1519E570 *)((u8 *)arg0 + 0x28);
-    ArgB_1519E570 *b = (ArgB_1519E570 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (eventId == 0) {
+        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+            func_1516972C((struct102 *)task);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (eventId == 0x2D) {
+        if (data->owner == event->swap.a) {
+            data->owner = event->swap.b;
+            data->ownerId = event->swap.idB;
+        } else if (data->owner == event->swap.b) {
+            data->owner = event->swap.a;
+            data->ownerId = event->swap.idA;
         }
     }
 }
 
-void func_1519E61C(struct102 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0 || arg2 == 9) {
-        func_1516972C(arg0);
+void func_1519E61C(struct102 *task, TrailEvent *event, u8 eventId) {
+    if (eventId == 0 || eventId == 9) {
+        func_1516972C(task);
     }
 }
-
-extern void func_1519CF70(u8);
 
 void func_1519E65C(s32 arg0) {
     func_1519CF70(3);
     func_1519CF70(4);
 }
 
+/* Stops the trails of kinds 3 and 4 and ends the pending trail tasks (event 9). */
 void func_1519E688(void) {
     func_1519CF70(3);
     func_1519CF70(4);
-    func_15147D64(0, 9);
+    func_15147D64(NULL, 9);
 }
 
-void func_1519E6BC(Obj1519E464 *arg0) {
-    Sub1519E464 sub;
+void func_1519E6BC(struct127 *owner) {
+    TrailTaskData taskData;
 
     func_1519E688();
-    if (D_800E0920 == 0) {
-        sub.unk8 = 0;
-        sub.unk0 = arg0;
-        sub.unk4 = arg0->unk3B;
-        D_800E0920 = (s32)func_151491F4(0x12C, -1, 9, 0, 4, 0xC, 0xFF, 0);
-        if (D_800E0920 != 0) {
-            memcpy((u8 *)D_800E0920 + 0x28, &sub, 0xC);
+    if (D_800E0920 == NULL) {
+        taskData.unk8 = 0;
+        taskData.owner = owner;
+        taskData.ownerId = owner->unique_id;
+        D_800E0920 = (TrailTask *)func_151491F4(300, -1, 9, 0, 4, 0xC, 0xFF, 0);
+        if (D_800E0920 != NULL) {
+            memcpy(&D_800E0920->data, &taskData, sizeof(TrailTaskData));
         }
     }
 }
 
-void func_1519E754(Arg1519E464 *arg0) {
-    Sub1519E464 *sub;
-    u8 invalid;
+/* Task of func_1519E6BC: ends when the owner leaves state 0x7C, starting func_1519E3BC if that took over 200 frames. */
+void func_1519E754(TrailTask *task) {
+    TrailTaskData *data;
+    u8 finished;
 
-    invalid = 0;
-    sub = &arg0->unk28;
-    if (arg0->unk28.unk0->unk0 == 0) {
-        invalid = 1;
+    finished = FALSE;
+    data = &task->data;
+    if (task->data.owner->interaction_state == 0) {
+        finished = TRUE;
     }
-    if (sub->unk0->unk3B != sub->unk4) {
-        invalid = 1;
+    if (data->owner->unique_id != data->ownerId) {
+        finished = TRUE;
     }
-    if (invalid == 0) {
-        sub->unk8 += D_800BE9E4;
-        if (sub->unk0->unk84 != 0x7C) {
-            invalid = 1;
-            if (sub->unk8 >= 0xC9) {
-                func_1519E3BC(sub->unk0, 0x12C, arg0->unkC, arg0->unk1);
+    if (!finished) {
+        data->unk8 += D_800BE9E4;
+        if (data->owner->unk84.uh != 0x7C) {
+            finished = TRUE;
+            if (data->unk8 > 200) {
+                func_1519E3BC(data->owner, 300, task->unkC, task->unk1);
             }
         }
     }
-    if (invalid != 0) {
-        D_800E0920 = 0;
-        arg0->unkE = -1;
-        arg0->unkD |= 1;
+    if (finished) {
+        D_800E0920 = NULL;
+        task->lifetime = -1;
+        task->flags |= 1;
     }
 }
 
-void func_1519E818(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_1519E570 *temp_v0 = (SubA_1519E570 *)((u8 *)arg0 + 0x28);
-    ArgB_1519E570 *b = (ArgB_1519E570 *)arg1;
+void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
+    TrailTaskData *data = &task->data;
 
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
-            D_800E0920 = 0;
-    skip:
-            ;
+    if (eventId == 0) {
+        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+            func_1516972C((struct102 *)task);
+            D_800E0920 = NULL;
+        // matching: an unused label ends the basic block here, as in the ROM
+        skip:;
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (eventId == 0x2D) {
+        if (data->owner == event->swap.a) {
+            data->owner = event->swap.b;
+            data->ownerId = event->swap.idB;
+        } else if (data->owner == event->swap.b) {
+            data->owner = event->swap.a;
+            data->ownerId = event->swap.idA;
         }
     }
 }
 
-extern void func_1514EDF0(struct260 *, s32);
-
-void func_1519E8CC(struct260 *arg0) {
-    func_1514EDF0(arg0, *(s32 *)((u8 *)arg0 + 0x28));
-    func_1514933C(arg0);
+void func_1519E8CC(TrailTask *task) {
+    func_1514EDF0((s32)task, task->data.owner);
+    func_1514933C((struct260 *)task);
 }
 
-void func_1519E8F8(struct260 *arg0) {
-    func_1514EDF0(arg0, *(s32 *)((u8 *)arg0 + 0x28));
-    func_15149368(arg0);
+void func_1519E8F8(TrailTask *task) {
+    func_1514EDF0((s32)task, task->data.owner);
+    func_15149368((struct260 *)task);
 }
 
-void func_1519E924(struct260 *arg0) {
-    D_800E0920 = 0;
-    func_1514933C(arg0);
+void func_1519E924(struct260 *task) {
+    D_800E0920 = NULL;
+    func_1514933C(task);
 }
 
-void func_1519E948(struct260 *arg0) {
-    D_800E0920 = 0;
-    func_15149368(arg0);
+void func_1519E948(struct260 *task) {
+    D_800E0920 = NULL;
+    func_15149368(task);
 }
