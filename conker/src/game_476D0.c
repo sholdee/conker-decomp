@@ -45,9 +45,9 @@ typedef struct RenderView {
 /* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
 #define VIEW_WIDTHS (&D_800BE638)
 
-void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3);
-s32 func_1501AE94(s32 arg0);
-void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
+s32 func_1501AE94(s32 viewIndex);
+void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 
 void func_1501A220(s32 arg0, s32 arg1) {
     s32 phi_s0;
@@ -187,44 +187,52 @@ void func_1501A39C(void) {
 //     return tmp;
 // }
 
-typedef union Game476D0DisplayCommand {
-    struct {
-        u32 word0;
-        u32 word1;
-    } words;
-    u64 alignment;
-} Game476D0DisplayCommand;
-
-void func_1501AF44(f32 *, f32 *, f32 *, f32 *);
-
-s32 func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = 0xE7000000; command->words.word1 = 0; }
-    if (arg1 == 0xFF) {
-        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(0) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(D_800BE624) * 4.0f), 0, 12); }
+/* Opens a frame's display list: pipe sync, then a scissor around view (or the whole drawable area for view
+ * 0xFF), with its bottom edge clipped to maxBottom when that is non-zero. Returns the advanced display list. */
+// matching: functions.h types the display list as s32 and IDO's -g3 frame only fits one Gfx * per command,
+// so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
+// on one line: -g3 line numbers steer the scheduler).
+/* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
+ * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
+s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
+    { Gfx *cmd = (Gfx *)gfx; gfx += sizeof(Gfx); cmd->words.w0 = _SHIFTL(G_RDPPIPESYNC, 24, 8); cmd->words.w1 = 0; }
+    if (viewIndex == 0xFF) {
+        Gfx *cmd = (Gfx *)gfx;
+        gfx += sizeof(Gfx);
+        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(2.0f * 4.0f), 12, 12) | _SHIFTL((s32)(0.0f * 4.0f), 0, 12);
+        cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) |
+                        _SHIFTL((s32)((f32)D_800BE624 * 4.0f), 0, 12);
     } else {
-        f32 ulx;
-        f32 lrx;
-        f32 uly;
-        f32 lry;
-        u8 *record;
+        f32 left;
+        f32 right;
+        f32 top;
+        f32 bottom;
+        RenderView *view;
 
-        record = (u8 *)D_800BE628 + arg1 * 0x180;
-        ulx = *(f32 *)(record + 0x2C);
-        lrx = *(f32 *)(record + 0x30);
-        uly = *(f32 *)(record + 0x24);
-        if (arg4 != 0) {
-            if ((f32)arg4 < *(f32 *)(record + 0x28)) {
-                lry = (f32)arg4;
+        view = &RENDER_VIEWS[viewIndex];
+        left = view->left;
+        right = view->right;
+        top = view->top;
+        if (maxBottom != 0) {
+            if ((f32)maxBottom < view->bottom) {
+                bottom = (f32)maxBottom;
             } else {
-                lry = *(f32 *)(record + 0x28);
+                bottom = view->bottom;
             }
         } else {
-            lry = *(f32 *)(record + 0x28);
+            bottom = view->bottom;
         }
-        func_1501AF44(&ulx, &uly, &lrx, &lry);
-        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(ulx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(uly) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(lrx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(lry) * 4.0f), 0, 12); }
+        func_1501AF44(&left, &top, &right, &bottom);
+        {
+            Gfx *cmd = (Gfx *)gfx;
+            gfx += sizeof(Gfx);
+            cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(left * 4.0f), 12, 12) |
+                            _SHIFTL((s32)(top * 4.0f), 0, 12);
+            cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)(right * 4.0f), 12, 12) |
+                            _SHIFTL((s32)(bottom * 4.0f), 0, 12);
+        }
     }
-    return arg0;
+    return gfx;
 }
 
 Gfx *func_1501A680(Gfx *arg0) {
@@ -351,72 +359,67 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     D_800BE630[view] = view;
 }
 
-s32 func_1501AE94(s32 arg0) {
-    f32 a = (f32)D_800BE620 - 2.0f;
-    f32 b = (f32)D_800BE624;
-    struct259 *p = &((struct259 *)D_800BE628)[arg0];
-    if (*(f32 *)((u8 *)p + 0x2C) < 2.0f) {
-        goto block1;
+/* Returns whether view's rectangle lies entirely inside the drawable framebuffer area. */
+s32 func_1501AE94(s32 viewIndex) {
+    f32 maxX = (f32)D_800BE620 - 2.0f;
+    f32 maxY = (f32)D_800BE624;
+    RenderView *view = &RENDER_VIEWS[viewIndex];
+
+    if (view->left < 2.0f || maxX < view->right) {
+        return FALSE;
     }
-    if (a < *(f32 *)((u8 *)p + 0x30)) {
-    block1:
-        return 0;
+    if (view->top < 0.0f || maxY < view->bottom) {
+        return FALSE;
     }
-    if (*(f32 *)((u8 *)p + 0x24) < 0.0f) {
-        goto block2;
-    }
-    if (b < *(f32 *)((u8 *)p + 0x28)) {
-    block2:
-        return 0;
-    }
-    return 1;
+    return TRUE;
 }
 
-void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    f32 t;
+/* Clamps a rectangle to the drawable framebuffer area (x in [2, width - 2], y in [0, height]). */
+void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
+    f32 clamped;
 
-    if (*arg0 < 2.0f) {
-        *arg0 = 2.0f;
+    if (*left < 2.0f) {
+        *left = 2.0f;
     } else {
-        if (((f32)D_800BE620 - 2.0f) < *arg0) {
-            t = (f32)D_800BE620 - 2.0f;
+        if ((f32)D_800BE620 - 2.0f < *left) {
+            clamped = (f32)D_800BE620 - 2.0f;
         } else {
-            t = *arg0;
+            clamped = *left;
         }
-        *arg0 = t;
+        *left = clamped;
     }
 
-    if (*arg2 < 2.0f) {
-        *arg2 = 2.0f;
+    if (*right < 2.0f) {
+        *right = 2.0f;
     } else {
-        if (((f32)D_800BE620 - 2.0f) < *arg2) {
-            t = (f32)D_800BE620 - 2.0f;
+        if ((f32)D_800BE620 - 2.0f < *right) {
+            clamped = (f32)D_800BE620 - 2.0f;
         } else {
-            t = *arg2;
+            clamped = *right;
         }
-        *arg2 = t;
+        *right = clamped;
     }
 
-    if (*arg1 < 0.0f) {
-        *arg1 = 0.0f;
+    if (*top < 0.0f) {
+        *top = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *arg1) {
-            t = (f32)D_800BE624;
+        if ((f32)D_800BE624 < *top) {
+            clamped = (f32)D_800BE624;
         } else {
-            t = *arg1;
+            clamped = *top;
         }
-        *arg1 = t;
+        *top = clamped;
     }
 
-    if (*arg3 < 0.0f) {
-        *arg3 = 0.0f;
+    if (*bottom < 0.0f) {
+        *bottom = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *arg3) {
-            t = (f32)D_800BE624;
+        if ((f32)D_800BE624 < *bottom) {
+            clamped = (f32)D_800BE624;
         } else {
-            t = *arg3;
+            clamped = *bottom;
         }
-        *arg3 = t;
+        *bottom = clamped;
     }
 }
 
