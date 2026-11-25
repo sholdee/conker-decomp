@@ -7,6 +7,7 @@
  * Heap block header. Every block (free or allocated) starts with one; the
  * payload handed out by func_10003C6C starts right after it. The top byte of
  * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
+ * A free block also links into the free list through its first payload words.
  */
 typedef struct AllocatorBlock {
     struct AllocatorBlock *next;
@@ -19,6 +20,15 @@ typedef struct AllocatorFreeBlock {
     struct AllocatorFreeBlock *nextFree;
     struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
+
+/*
+ * Heap globals (declared in variables.h with placeholder types, hence the casts):
+ *   D_800380B4  first block of the heap (all blocks, address order)
+ *   D_800380B8  head of the free list (address order)
+ *   D_800380BC  tail of the free list
+ *   D_800380B0  largest free block, D_8002AC30 its size
+ *   D_800380C0..D_800380D0  arguments of the last func_10003C6C call
+ */
 
 /* Allocates size bytes from the front of the heap; see func_10003C6C. */
 s32 allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
