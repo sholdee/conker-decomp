@@ -2,200 +2,173 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Joint-matrix trails ("afterimages") drawn behind objects. Each trail keeps
+ * numFrames past copies of its owner's joint matrices, double-buffered on
+ * D_800BE9C0, and draws them with increasing transparency.
+ * D_800DF7C8[0] lists type-0 trails (struct127 owners),
+ * D_800DF7C8[1] lists type-1 trails (struct131 owners, one matrix).
+ */
+
+/* Mtx viewed as its s16 integer and fraction halves. */
+typedef struct MtxS16 {
+    s16 intPart[4][4];
+    s16 fracPart[4][4];
+} MtxS16;
+
+typedef struct Trail {
+    /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
+    /* 0x01 */ u8 numFrames; /* history length */
+    /* 0x02 */ u8 numFilled; /* history frames captured so far */
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see func_15189118 */
+    /* 0x06 */ s16 timer;
+    /* 0x08 */ MtxS16 *frames;
+    /* 0x0C */ struct Trail *next;
+    /* 0x10 */ union {
+        struct127 *object;
+        struct131 *s131;
+    } owner;
+    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
+} Trail; // size 0x18 (type 1 trails are allocated without unk14)
+
+#define sTrailLists ((Trail **)D_800DF7C8)
+
 extern void *allocate_memory();
-extern void func_10004074();
-extern void func_15188A58();
-extern s32 func_1502DB20();
+extern void func_10004074(void *);
+extern s32 func_1502DB20(s32);
+void func_15188A58(Trail *trail, Trail **list);
 
-typedef struct Node1518894C {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    char pad5[1];
-    s16 unk6;
-    void *unk8;
-    struct Node1518894C *unkC;
-    s32 unk10;
-} Node1518894C;
+/* Starts (or extends) a type-0 trail behind a game object. */
+void func_15188810(struct127 *object, s32 duration, s32 maxDist) {
+    Trail *trail;
+    s32 numJoints;
+    s32 size;
+    s32 pad; // matching: unused slot, moves size's spill to sp+0x20
+    MtxS16 *frames;
 
-extern Node1518894C *D_800DF7CC;
-
-typedef struct Struct15188810Arg {
-    char pad0[4];
-    u8 unk4;
-} Struct15188810Arg;
-
-typedef struct Node15188810 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    char pad5[1];
-    s16 unk6;
-    void *unk8;
-    struct Node15188810 *unkC;
-    Struct15188810Arg *unk10;
-    s32 unk14;
-} Node15188810;
-
-void func_15188810(Struct15188810Arg *arg0, s32 arg1, s32 arg2) {
-    Node15188810 *node;
-    s32 size[5];
-    void *mem;
-
-    node = (Node15188810 *)D_800DF7C8[0];
-    while (node != 0) {
-        if (arg0 == node->unk10) {
-            if (node->unk6 < arg1) {
-                node->unk6 = arg1;
+    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+        if (object == trail->owner.object) {
+            if (trail->timer < duration) {
+                trail->timer = duration;
             }
-            node->unk4 = arg2;
+            trail->maxDist = maxDist;
             return;
         }
-        node = node->unkC;
     }
 
-    node = allocate_memory(0x18, 1, 0, 0);
-    if (node != 0) {
-        s32 count;
-
-        count = func_1502DB20(arg0->unk4);
-        if (count == 0) {
-            func_10004074(node);
+    trail = allocate_memory(sizeof(Trail), 1, 0, 0);
+    if (trail != NULL) {
+        numJoints = func_1502DB20(object->id);
+        if (numJoints == 0) {
+            func_10004074(trail);
             return;
         }
 
-        size[0] = (count * 3) << 7;
-        mem = allocate_memory(size[0], 1, 1, 1);
-        if (mem == 0) {
-            func_10004074(node);
+        size = numJoints * 3 * 2 * sizeof(Mtx);
+        frames = allocate_memory(size, 1, 1, 1);
+        if (frames == NULL) {
+            func_10004074(trail);
             return;
         }
 
-        node->unk0 = 0;
-        node->unk1 = 3;
-        node->unk2 = 0;
-        node->unk3 = 0x14;
-        node->unk4 = arg2;
-        node->unk6 = arg1;
-        node->unk8 = mem;
-        node->unk10 = arg0;
-        node->unk14 = 0;
-        bzero(mem, size[0]);
-        func_15188A58(node, D_800DF7C8);
+        trail->type = 0;
+        trail->numFrames = 3;
+        trail->numFilled = 0;
+        trail->alpha = 20;
+        trail->maxDist = maxDist;
+        trail->timer = duration;
+        trail->frames = frames;
+        trail->owner.object = object;
+        trail->unk14 = 0;
+        bzero(frames, size);
+        func_15188A58(trail, &sTrailLists[0]);
     }
 }
 
-void func_1518894C(s32 arg0, s32 arg1, s32 arg2) {
-    Node1518894C *node;
-    void *mem;
+/* Starts (or extends) a type-1 trail behind a struct131 object. */
+void func_1518894C(struct131 *owner, s32 duration, s32 maxDist) {
+    Trail *trail;
+    MtxS16 *frames;
 
-    node = D_800DF7CC;
-    while (node != 0) {
-        if (arg0 == node->unk10) {
-            if (node->unk6 < arg1) {
-                node->unk6 = arg1;
+    for (trail = sTrailLists[1]; trail != NULL; trail = trail->next) {
+        if (owner == trail->owner.s131) {
+            if (trail->timer < duration) {
+                trail->timer = duration;
             }
-            node->unk4 = arg2;
+            trail->maxDist = maxDist;
             return;
         }
-        node = node->unkC;
     }
 
-    node = allocate_memory(0x14, 1, 0, 0);
-    if (node != 0) {
-        mem = allocate_memory(0x180, 1, 1, 0);
-        if (mem == 0) {
-            func_10004074(node);
+    trail = allocate_memory(0x14, 1, 0, 0);
+    if (trail != NULL) {
+        frames = allocate_memory(3 * 2 * sizeof(Mtx), 1, 1, 0);
+        if (frames == NULL) {
+            func_10004074(trail);
             return;
         }
 
-        node->unk0 = 1;
-        node->unk1 = 3;
-        node->unk2 = 0;
-        node->unk3 = 0x14;
-        node->unk4 = arg2;
-        node->unk6 = arg1;
-        node->unk8 = mem;
-        node->unk10 = arg0;
-        bzero(mem, 0x180);
-        func_15188A58(node, &D_800DF7CC);
+        trail->type = 1;
+        trail->numFrames = 3;
+        trail->numFilled = 0;
+        trail->alpha = 20;
+        trail->maxDist = maxDist;
+        trail->timer = duration;
+        trail->frames = frames;
+        trail->owner.s131 = owner;
+        bzero(frames, 3 * 2 * sizeof(Mtx));
+        func_15188A58(trail, &sTrailLists[1]);
     }
 }
 
-typedef struct Node15188A58 {
-    char pad0[12];
-    struct Node15188A58 *unkC;
-} Node15188A58;
+/* Appends a trail to the end of a list. */
+void func_15188A58(Trail *trail, Trail **list) {
+    Trail *last;
 
-void func_15188A58(Node15188A58 *arg0, Node15188A58 **arg1) {
-    Node15188A58 *node;
-
-    arg0->unkC = 0;
-    if (*arg1 != 0) {
-        node = *arg1;
-        while (node->unkC != 0) {
-            node = node->unkC;
+    trail->next = NULL;
+    if (*list != NULL) {
+        last = *list;
+        while (last->next != NULL) {
+            last = last->next;
         }
-        node->unkC = arg0;
+        last->next = trail;
     } else {
-        *arg1 = arg0;
+        *list = trail;
     }
 }
 
-typedef struct Node15188A9C {
-    char pad0[6];
-    s16 unk6;
-    char pad8[4];
-    struct Node15188A9C *unkC;
-    s32 unk10;
-} Node15188A9C;
+/* Lets an object's type-0 trail start fading out. */
+void func_15188A9C(struct127 *object) {
+    Trail *trail;
 
-void func_15188A9C(s32 arg0) {
-    Node15188A9C *node;
-
-    node = (Node15188A9C *)D_800DF7C8[0];
-    while (node != 0) {
-        if (arg0 == node->unk10) {
-            node->unk6 = 0;
+    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+        if (object == trail->owner.object) {
+            trail->timer = 0;
         }
-        node = node->unkC;
     }
 }
 
-typedef struct Node15188AD0 {
-    char pad0[8];
-    s32 *unk8;
-    struct Node15188AD0 *unkC;
-    s32 unk10;
-} Node15188AD0;
+/* Removes and frees an object's type-0 trails immediately. */
+void func_15188AD0(struct127 *object) {
+    Trail *trail;
+    Trail *prev;
+    Trail *next;
 
-extern void func_10004074(Node15188AD0 *arg0);
-
-void func_15188AD0(s32 arg0) {
-    Node15188AD0 *node;
-    Node15188AD0 *prev;
-    Node15188AD0 *next;
-
-    prev = 0;
-    node = (Node15188AD0 *)D_800DF7C8[0];
-    while (node != 0) {
-        next = node->unkC;
-        if (arg0 == node->unk10) {
-            if (prev == 0) {
-                D_800DF7C8[0] = (s32)next;
+    prev = NULL;
+    for (trail = sTrailLists[0]; trail != NULL; trail = next) {
+        next = trail->next;
+        if (object == trail->owner.object) {
+            if (prev == NULL) {
+                sTrailLists[0] = next;
             } else {
-                prev->unkC = next;
+                prev->next = next;
             }
-            func_100043B4(node->unk8, 2);
-            func_10004074(node);
+            func_100043B4((s32 *)trail->frames, 2);
+            func_10004074(trail);
         } else {
-            prev = node;
+            prev = trail;
         }
-        node = next;
     }
 }
 
@@ -267,7 +240,7 @@ void func_15188B74(s32 idx) {
                         prev->unkC = next;
                     }
                     funcs1[node->unk0](node);
-                    func_10004074((Node15188AD0 *)node);
+                    func_10004074(node);
                 } else {
                     node->unk3 = fade;
                     prev = node;
