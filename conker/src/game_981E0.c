@@ -209,8 +209,6 @@ extern void func_151A3390(void *arg0, u8 arg1);
 void func_1516F1C0(s32, s32, u8, s32);
 void func_1516F2F8(u8, s32, s32, s32, u8, s32);
 void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
-void func_150AFDB0(void);
-void func_150AFE64(s32);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);

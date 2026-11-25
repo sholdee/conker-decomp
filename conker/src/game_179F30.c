@@ -41,7 +41,6 @@ void func_1514F194(Actor *obj);
 /* Elsewhere. */
 void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
 s32 func_15083FB0(u8 uniqueId);
-void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
 void *func_150C5370(void *desc, s32 payloadSize);
 void *func_15155780(s32 slot, s32 arg1);
 EffectHeader *func_15155FD4(s32 slot);

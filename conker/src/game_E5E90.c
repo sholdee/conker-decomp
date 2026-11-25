@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
@@ -146,13 +145,6 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
     }
     return 1;
 }
-
-/* Wall-collision query of game_15F680.c (only its position is read here). */
-typedef struct {
-    /* 0x00 */ s32 type;
-    /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ Vec3f pos;
-} CollisionProbe;
 
 s32 func_150A3058(s32, s16, s16, s16);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,

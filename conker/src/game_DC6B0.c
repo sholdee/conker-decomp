@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern WorldObject *func_151149AC(u8);
 extern s32 func_1505D024(Actor *, s32, u16, s32);
@@ -40,29 +39,10 @@ void func_150AF200(s32 idA, s32 idB) {
 
 extern void func_151CF898(void *, f32, f32);
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 pad4[2];
-    s16 unk8;
-} Range150AF2E0;
-
 /* Calls func_151CF898(arg0, unk2 + unk8, unk2). */
 void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
-
-/* Per-effect data of the func_150AF328 emitter. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 spawnAccum;
-} SmokeEmitterData;
-
-/* Timed effect of func_150AF328. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ SmokeEmitterData data;
-} SmokeEmitter;
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
@@ -158,16 +138,6 @@ extern void func_150B1DB0(void *, void *);
 void func_150AF790(void *arg0, u8 *arg1) {
     func_150B1DB0(arg1, arg1 + 0x1ECC0);
 }
-
-typedef struct GameDC6B0SmokeTimers {
-    s16 puff;
-    s16 spark;
-} GameDC6B0SmokeTimers;
-
-typedef struct GameDC6B0SmokeSource {
-    TimedEffect base;
-    GameDC6B0SmokeTimers timers;
-} GameDC6B0SmokeSource;
 
 typedef struct GameDC6B0SmokeMotion {
     f32 x, y;
@@ -277,21 +247,6 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
     }
 }
 
-/* A sine oscillator: value = base + amplitude * sin(phase), with phase advancing by rate. */
-typedef struct {
-    /* 0x0 */ f32 base;
-    /* 0x4 */ f32 amplitude;
-    /* 0x8 */ f32 phase;
-    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
-} TimeOscillator;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[0x5C];
-    /* 0x70 */ TimeOscillator osc;
-} Obj150AFBF4;
-
 /* Advances the oscillator at 0x70 (func_15144B68 wraps the phase) and writes its value to unk10. */
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
     TimeOscillator *osc = &obj->osc;
@@ -387,12 +342,6 @@ void func_150B003C(s32 arg0) {
     }
     func_150AF200(0xDF, 0xDE);
 }
-
-/* A projectile created by func_1513264C. */
-typedef struct {
-    u8 pad0[0x170];
-    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
-} GameDC6B0Projectile;
 
 /* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
 typedef struct GameDC6B0TrailArgs {
@@ -565,15 +514,6 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
         func_15152190(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);
     }
 }
-
-struct Obj150B060C {
-    f32 unk0;
-    f32 unk4;
-    WorldObject *object;
-    f32 x; /* the object's position (WorldObject 0x10..0x14) */
-    f32 y;
-    f32 z;
-};
 
 /* Looks up object `id` into out; on success also sets out's two constants and copies the
  * object's position. Returns 0 if there is no such object. */

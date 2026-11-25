@@ -118,16 +118,248 @@ void func_1500D3AC(s32 region, f32 density);
 void func_1500D8C8(s32 region, f32 density);
 void func_1500DE88(s32 region, f32 density);
 
+/* game_DC6B0.c */
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 pad4[2];
+    s16 unk8;
+} Range150AF2E0;
+
+/* Per-effect data of the func_150AF328 emitter. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 spawnAccum;
+} SmokeEmitterData;
+
+/* Timed effect of func_150AF328. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ SmokeEmitterData data;
+} SmokeEmitter;
+
+typedef struct GameDC6B0SmokeTimers {
+    s16 puff;
+    s16 spark;
+} GameDC6B0SmokeTimers;
+
+typedef struct GameDC6B0SmokeSource {
+    TimedEffect base;
+    GameDC6B0SmokeTimers timers;
+} GameDC6B0SmokeSource;
+
+/* A sine oscillator: value = base + amplitude * sin(phase), with phase advancing by rate. */
+typedef struct {
+    /* 0x0 */ f32 base;
+    /* 0x4 */ f32 amplitude;
+    /* 0x8 */ f32 phase;
+    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
+} TimeOscillator;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[0x5C];
+    /* 0x70 */ TimeOscillator osc;
+} Obj150AFBF4;
+
+/* A projectile created by func_1513264C. */
+typedef struct {
+    u8 pad0[0x170];
+    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
+} GameDC6B0Projectile;
+
+struct Obj150B060C {
+    f32 unk0;
+    f32 unk4;
+    WorldObject *object;
+    f32 x; /* the object's position (WorldObject 0x10..0x14) */
+    f32 y;
+    f32 z;
+};
+
+void func_150AF200(s32 idA, s32 idB);
+void func_150AF2E0(void *arg0, Range150AF2E0 *range);
+void func_150AF328(SmokeEmitter *emitter);
+s32 func_150AF6E4(SpriteParticle *particle, s32 arg1);
+void func_150AF738(s16 lifetime, u8 arg1, s32 arg2);
+void func_150AF790(void *arg0, u8 *arg1);
+void func_150AF7C4(GameDC6B0SmokeSource *source);
+s32 func_150AFBF4(Obj150AFBF4 *obj);
+void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5);
+void func_150AFDB0(void);
+void func_150AFE64(s32 altBone);
+void func_150B003C(s32 arg0);
+void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3);
+void func_150B02C0(GameDC6B0Projectile *projectile);
+void func_150B02F0(GameDC6B0Projectile *projectile);
+void func_150B031C(GameDC6B0Projectile *projectile);
+void func_150B0348(Actor *obj, u8 arg1, s32 arg2);
+s32 func_150B060C(u8 id, struct Obj150B060C *out);
+
+/* game_DF2D0.c */
+/* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
+typedef struct {
+    Vec3f pos;
+    f32 accum; /* particles owed; one is spawned per whole unit */
+} PointEmitterData;
+
+/* Timed effect of func_150B1F90. */
+typedef struct {
+    TimedEffect base;
+    PointEmitterData data;
+} PointEmitter;
+
+void func_150B1E20(Camera *camera);
+void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3);
+void func_150B1F90(PointEmitter *effect);
+void func_150B2340(Camera *camera);
+
 /* game_DF930.c */
 s32 func_150B2480(s32 arg0, s32 arg1);
 void func_150B2494(Actor *obj, s32 arg1, s32 arg2);
 s32 func_150B2570(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10,
                   s32 arg11, s32 arg12, s32 arg13, u8 owner);
 
+/* game_E5E90.c */
+/* Wall-collision query of game_15F680.c (only its position is read here). */
+typedef struct {
+    /* 0x00 */ s32 type;
+    /* 0x04 */ u8 pad4[0x10];
+    /* 0x14 */ Vec3f pos;
+} CollisionProbe;
+
+s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, void *surface);
+s32 func_150B8F44(ModelParticle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
+
+/* game_E6A10.c */
+/* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks
+ * of D_80089CB8 / D_80089D60 get one. */
+typedef struct {
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
+} FallGrowParticle;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x83];
+    /* 0x90 */ s32 unk90;
+    /* 0x94 */ u8 pad94[4];
+    /* 0x98 */ s16 unk98;
+    /* 0x9A */ u8 pad9A[2];
+    /* 0x9C */ s16 unk9C;
+    /* 0x9E */ u8 pad9E[2];
+    /* 0xA0 */ s16 unkA0;
+    /* 0xA2 */ s16 unkA2;
+    /* 0xA4 */ u8 padA4[2];
+    /* 0xA6 */ s16 unkA6;
+} Obj150B9D8C;
+
+s32 func_150B9560(FallGrowParticle *particle);
+s32 func_150B95FC(FallGrowParticle *particle);
+s32 func_150B961C(QuadSprite *sprite);
+s32 func_150B963C(ModelParticle *particle);
+s32 func_150B9D14(Mtx *mtx, ModelParticle *particle);
+void func_150B9D8C(Obj150B9D8C *obj);
+
+/* game_E7380.c */
+/* Per-behaviour motion block stored right after a particle. */
+typedef struct {
+    /* 0x00 */ Vec3f vel;
+    /* 0x0C */ f32 rotVelX;
+    /* 0x10 */ f32 rotVelY;
+    /* 0x14 */ f32 minY;           /* the particle expires below this height */
+} FxParticleMotion;
+
+/* A live particle of game_169510.c whose motion block is a velocity and spin (func_150BA37C); the update
+ * callbacks of D_80089CB8 / D_80089D60 get one. */
+typedef struct {
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ FxParticleMotion motion;
+} TumblingParticle;
+
+void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4);
+s32 func_150BA35C(QuadSprite *sprite);
+s32 func_150BA37C(TumblingParticle *particle);
+s32 func_150BA424(TumblingParticle *particle);
+
+/* game_E7970.c */
+/* Per-effect data: the object the effect is attached to and a spawn accumulator. */
+typedef struct {
+    /* 0x0 */ Actor *owner;
+    /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
+    /* 0x8 */ f32 spawnAccum;
+} EffectE7970Data; // size 0xC
+
+/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EffectE7970Data data;
+} EffectE7970;
+
+void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2);
+void func_150BA55C(EffectE7970 *effect);
+void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2);
+
 /* game_E7DE0.c */
 s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3);
 s32 func_150BAA00(s32 arg0, s32 arg1);
 void func_150BAA14(Actor *obj, s32 arg1, s32 arg2);
+
+/* game_EDE60.c */
+/* Live particle spawned by an emitter (see func_15130280). */
+typedef struct PoolParticle PoolParticle;
+
+/* One entry of an emitter's slot pool; slots are chained by index, -1 ends a chain. */
+typedef struct {
+    /* 0x00 */ PoolParticle *particle;
+    /* 0x04 */ s16 next;
+    /* 0x06 */ s16 pad6;
+} PoolEmitterSlot;
+
+/* Describes an emitter; func_150C0AC0 copies it into the emitter. */
+typedef struct {
+    /* 0x00 */ Vec3f *source;     /* followed when flags & 2 */
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ Actor *target;  /* followed otherwise */
+    /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ f32 rate;           /* particles per frame step while the target moves */
+    /* 0x14 */ s16 slotCount;
+    /* 0x16 */ s16 timer;          /* counts down when flags & 1 */
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 pad19[3];
+} PoolEmitterDesc; /* size 0x1C */
+
+/* Emitter object that keeps spawning particles behind a moving object. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ PoolEmitterDesc desc;
+    /* 0x34 */ f32 lastX;
+    /* 0x38 */ f32 lastZ;
+    /* 0x3C */ f32 spawnAccum;
+    /* 0x40 */ PoolEmitterSlot *slots; /* desc.slotCount slots, stored right after the emitter */
+    /* 0x44 */ s16 activeHead;     /* chain of slots holding a live particle */
+    /* 0x46 */ s16 freeHead;       /* chain of unused slots */
+} PoolEmitter; /* size 0x48 */
+
+struct PoolParticle {
+    /* 0x00 */ DescParticleHead head;  /* head.desc.pos: the anchor the emitter moves it to */
+    /* 0xA8 */ PoolEmitter *owner;
+};
+
+void func_150C09B0(PoolEmitter *emitter, s32 arg1, u8 arg2);
+void func_150C09F0(PoolEmitter *emitter);
+void func_150C0A1C(PoolEmitter *emitter);
+void func_150C0A48(PoolEmitter *emitter);
+PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2);
+void func_150C0C38(PoolEmitter *emitter);
+void func_150C1198(PoolParticle *particle);
 
 /* game_EE710.c */
 void func_150C1260(Actor *actor, u8 foot);
@@ -157,6 +389,31 @@ void func_150C3574(Actor *obj);
 void func_150C3994(Actor *obj);
 s32 func_150C3D48(s32 value);
 void func_150C3D5C(Actor *obj);
+
+/* game_F3270.c */
+/* The objects an emitter keeps alive; each clears its own slot when it is destroyed. */
+// matching: volatile makes IDO reload the slot after the NULL test (func_150C5DC0, func_150C5F40)
+typedef struct {
+    /* 0x0 */ FlickerSprite *volatile particle;
+    /* 0x4 */ WatcherEmitter *volatile linked;
+} GameF3270Children;
+
+/* A character watcher with GameF3270Children as extra data. */
+typedef struct GameF3270Emitter {
+    /* 0x00 */ CharacterWatcher watcher;
+    /* 0x58 */ GameF3270Children children;
+} GameF3270Emitter;
+
+void func_150C5DC0(GameF3270Emitter *emitter);
+s8 func_150C5E0C(FlickerSprite *particle);
+s32 func_150C5EFC(FlickerSprite *particle);
+void func_150C5F40(GameF3270Emitter *emitter);
+WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
+void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source);
+s32 func_150C63EC(WatcherEmitter *obj);
+void func_150C6410(WatcherEmitter *obj);
+void func_150C6438(WatcherEmitter *obj);
+FlickerSprite *func_150C6460(GameF3270Emitter *emitter);
 
 /* game_FA240.c */
 void func_150CCD90(f32 z, f32 *r, f32 *g, f32 *b);

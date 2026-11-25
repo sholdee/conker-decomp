@@ -1069,7 +1069,6 @@ s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, Actor *arg11, f32 arg12, f32 arg13, s32 arg14);
 f32 func_1510F648(f32, f32, f32);
 s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
-void func_150B9ED0(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 ObjScriptCmd *func_1507BB28(s32, s32);
 u8 func_1505DADC(Actor *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
 

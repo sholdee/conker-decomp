@@ -1,19 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
-typedef struct {
-    Vec3f pos;
-    f32 accum; /* particles owed; one is spawned per whole unit */
-} PointEmitterData;
-
-/* Timed effect of func_150B1F90. */
-typedef struct {
-    TimedEffect base;
-    PointEmitterData data;
-} PointEmitter;
 
 /* Mirrors game flag 0x4054 into camera->AvailableModes bit 0x10000; when 0x405B is set but 0x405C is not (and
  * camera->Mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */

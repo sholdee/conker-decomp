@@ -1,58 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-/* Live particle spawned by an emitter (see func_15130280). */
-typedef struct PoolParticle PoolParticle;
-
-/* One entry of an emitter's slot pool; slots are chained by index, -1 ends a chain. */
-typedef struct {
-    /* 0x00 */ PoolParticle *particle;
-    /* 0x04 */ s16 next;
-    /* 0x06 */ s16 pad6;
-} PoolEmitterSlot;
-
-/* Describes an emitter; func_150C0AC0 copies it into the emitter. */
-typedef struct {
-    /* 0x00 */ Vec3f *source;     /* followed when flags & 2 */
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Actor *target;  /* followed otherwise */
-    /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ f32 rate;           /* particles per frame step while the target moves */
-    /* 0x14 */ s16 slotCount;
-    /* 0x16 */ s16 timer;          /* counts down when flags & 1 */
-    /* 0x18 */ u8 flags;
-    /* 0x19 */ u8 pad19[3];
-} PoolEmitterDesc; /* size 0x1C */
-
-/* Emitter object that keeps spawning particles behind a moving object. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ PoolEmitterDesc desc;
-    /* 0x34 */ f32 lastX;
-    /* 0x38 */ f32 lastZ;
-    /* 0x3C */ f32 spawnAccum;
-    /* 0x40 */ PoolEmitterSlot *slots; /* desc.slotCount slots, stored right after the emitter */
-    /* 0x44 */ s16 activeHead;     /* chain of slots holding a live particle */
-    /* 0x46 */ s16 freeHead;       /* chain of unused slots */
-} PoolEmitter; /* size 0x48 */
-
-struct PoolParticle {
-    /* 0x00 */ DescParticleHead head;  /* head.desc.pos: the anchor the emitter moves it to */
-    /* 0xA8 */ PoolEmitter *owner;
-};
 
 /* Effect callback: hands func_15169850 the emitter's target reference. */
 void func_150C09B0(PoolEmitter *emitter, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
-
-void func_150C0A48(PoolEmitter *emitter);
 
 /* Emitter destructors: free the live particles, then the emitter. */
 void func_150C09F0(PoolEmitter *emitter) {

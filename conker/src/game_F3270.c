@@ -1,23 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* The objects an emitter keeps alive; each clears its own slot when it is destroyed. */
-// matching: volatile makes IDO reload the slot after the NULL test (func_150C5DC0, func_150C5F40)
-typedef struct {
-    /* 0x0 */ FlickerSprite *volatile particle;
-    /* 0x4 */ WatcherEmitter *volatile linked;
-} GameF3270Children;
-
-/* A character watcher with GameF3270Children as extra data. */
-typedef struct GameF3270Emitter {
-    /* 0x00 */ CharacterWatcher watcher;
-    /* 0x58 */ GameF3270Children children;
-} GameF3270Emitter;
-
-FlickerSprite *func_150C6460(GameF3270Emitter *emitter);
-WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
 s32 func_1513F6C0(void *obj, s32 arg1, s32 arg2);
 void *memcpy(void *, const void *, u32);
 

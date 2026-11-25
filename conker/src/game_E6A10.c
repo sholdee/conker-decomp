@@ -1,20 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
  *   FallGrowParticle, QuadSprite   - the particle/sprite system of game_169510.c
  */
-
-/* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks
- * of D_80089CB8 / D_80089D60 get one. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
-} FallGrowParticle;
 
 void *memcpy(void *, const void *, u32);
 void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
@@ -227,24 +219,6 @@ s32 func_150B9D14(Mtx *mtx, ModelParticle *particle) {
                   particle->pos.z, particle->rot.x, particle->rot.y, particle->rot.z);
     return 1;
 }
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x83];
-    /* 0x90 */ s32 unk90;
-    /* 0x94 */ u8 pad94[4];
-    /* 0x98 */ s16 unk98;
-    /* 0x9A */ u8 pad9A[2];
-    /* 0x9C */ s16 unk9C;
-    /* 0x9E */ u8 pad9E[2];
-    /* 0xA0 */ s16 unkA0;
-    /* 0xA2 */ s16 unkA2;
-    /* 0xA4 */ u8 padA4[2];
-    /* 0xA6 */ s16 unkA6;
-} Obj150B9D8C;
 
 /* When unk98 is -1, spawns a flat sprite (updated by func_150B961C) at (unk9C, unkA6 + 2, unkA0),
  * unkA2 wide and long, with a random angle and flip. */

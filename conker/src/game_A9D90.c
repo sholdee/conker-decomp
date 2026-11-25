@@ -421,7 +421,6 @@ void func_1507D4F8(s32 slot) {
     D_800BE618--;
 }
 
-extern void func_150B0348(Actor *, s32, s32);
 extern void func_150BFFE0(Actor *);
 extern void func_150D85AC(Actor *);
 extern void func_150F1D10(Actor *, s32, s32);

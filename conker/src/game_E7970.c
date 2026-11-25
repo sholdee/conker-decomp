@@ -2,19 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-effect data: the object the effect is attached to and a spawn accumulator. */
-typedef struct {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
-    /* 0x8 */ f32 spawnAccum;
-} EffectE7970Data; // size 0xC
-
-/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EffectE7970Data data;
-} EffectE7970;
-
 /* Spawns an effect attached to `owner`. */
 void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
