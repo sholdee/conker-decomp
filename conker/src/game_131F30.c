@@ -62,8 +62,8 @@ typedef struct {
 } Msg35;
 
 /* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
- * player mask and sends message 0x35 with a 9-entry list chosen by the prop's byte 0x72 (0xF7-0xF9),
- * or message 0x38 for 0xF6. WorldObject has no field at 0x72 yet, hence the byte reads. */
+ * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
+ * or message 0x38 for 0xF6. */
 void func_15104A80(WorldObject *prop) {
     struct127 *player;
 
@@ -84,28 +84,28 @@ void func_15104A80(WorldObject *prop) {
             }
         }
     }
-    if (((u8 *)prop)[0x72] == 0xF9 || ((u8 *)prop)[0x72] == 0xF8 || ((u8 *)prop)[0x72] == 0xF7) {
+    if (prop->id == 0xF9 || prop->id == 0xF8 || prop->id == 0xF7) {
         Msg35 msg;
 
         msg.player = player;
-        if (((u8 *)prop)[0x72] == 0xF9) {
+        if (prop->id == 0xF9) {
             const u8 list[9] = { 0, 1, 2, 3, 4, 5, 15, 16, 17 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (((u8 *)prop)[0x72] == 0xF8) {
+        } else if (prop->id == 0xF8) {
             const u8 list[9] = { 6, 7, 8, 24, 25, 26, 18, 19, 20 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (((u8 *)prop)[0x72] == 0xF7) {
+        } else if (prop->id == 0xF7) {
             const u8 list[9] = { 9, 10, 11, 12, 13, 14, 21, 22, 23 };
 
             msg.count = 9;
             msg.list = list;
         }
         func_151494E0((s32)&msg, 0x35);
-    } else if (((u8 *)prop)[0x72] == 0xF6) {
+    } else if (prop->id == 0xF6) {
         Msg35 msg;
 
         msg.player = player;

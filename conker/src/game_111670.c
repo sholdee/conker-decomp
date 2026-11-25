@@ -231,23 +231,6 @@ typedef struct GroundHit {
 // D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
 #define sGroundHits ((GroundHit *)&D_800D3300)
 
-/* 0xA0-byte entries of the D_800DBEF4 array. */
-typedef struct Struct150E4928 {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0xA];
-    /* 0x20 */ s32 vertexBuffers[8]; // indexed by D_800BE9C0
-    /* 0x40 */ s32 material;         // used when materials is NULL
-    /* 0x44 */ s32 *materials;       // per-surface materials, from surface firstSurface on
-    /* 0x48 */ u8 pad48[8];
-    /* 0x50 */ u16 radius;           // random scatter around (x, z)
-    /* 0x52 */ u8 pad52[6];
-    /* 0x58 */ u16 firstSurface;
-    /* 0x5A */ u8 pad5A[0x46];
-} Struct150E4928;
-
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
@@ -258,7 +241,7 @@ extern void func_1510F800(s32);
  * Probes the ground below `obj` (up to 5 random points within its radius), then spawns the hit
  * surface's impact effects there, passing the hit triangle transformed by obj's matrix.
  */
-void func_150E4928(Struct150E4928 *obj) {
+void func_150E4928(WorldObject *obj) {
     s16 idx;
     s32 i;
     s32 found;
@@ -277,7 +260,7 @@ void func_150E4928(Struct150E4928 *obj) {
     f32 mtx[4][4];
 
     height = -10000.0f;
-    i = obj - (Struct150E4928 *)D_800DBEF4;
+    i = obj - D_800DBEF4;
     tries = 5;
     if (i < D_800DBEF0 && i >= 0) {
         idx = i;
@@ -287,9 +270,9 @@ void func_150E4928(Struct150E4928 *obj) {
         while (tries != 0) {
             x = obj->x;
             z = obj->z;
-            if (obj->radius != 0) {
-                x += (func_151EF610() % obj->radius) * 2 - obj->radius;
-                z += (func_151EF610() % obj->radius) * 2 - obj->radius;
+            if (obj->unk50 != 0) {
+                x += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
+                z += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
             }
             found = func_150A43E0(x, z, 1, &idx);
             if (found) {
@@ -310,7 +293,7 @@ void func_150E4928(Struct150E4928 *obj) {
         if (found) {
             if (obj->materials != NULL) {
                 i = ((s32)tri - D_800DBE3C) / 12;
-                material = obj->materials[i - obj->firstSurface];
+                material = obj->materials[i - obj->firstTri];
             } else {
                 material = obj->material;
             }
@@ -318,13 +301,13 @@ void func_150E4928(Struct150E4928 *obj) {
             if (tri != NULL) {
                 // matching: IDO keeps the sum in one register only when built up in i
                 i = tri[0];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[0] = (s16 *)i;
                 i = tri[1];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[1] = (s16 *)i;
                 i = tri[2];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[2] = (s16 *)i;
                 for (i = 0; i < 3; i++) {
                     func_150A7960(mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);
