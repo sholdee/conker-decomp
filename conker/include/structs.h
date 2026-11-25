@@ -3597,9 +3597,6 @@ typedef struct {
     s32 unk30;
 } struct246;
 
-typedef struct {
-    u8 pad0[0x760];
-} struct247; // maybe naudio?
 
 typedef struct {
     u16 unk0; // is this a pointer?

@@ -113,10 +113,6 @@ extern s32  D_8002B078[][4]; // probably not correct...
 extern s32  D_8002B9D4[]; /* default music eventTypes */
 extern u16  D_8002B9F4[]; /* default music eventMasks */
 
-extern struct31 *D_8002BA20;
-extern struct31 *D_8002BA24;
-extern struct31 *D_8002BA28;
-extern s32  D_8002BA2C;
 extern s16  D_8002BA30;
 
 extern struct07  *D_8002BA40;
@@ -149,19 +145,19 @@ extern s32  D_80033330;
 extern s32  D_800354F8;
 extern s32 *D_800354FC; // contains chunk0 offsets
 extern s16  D_80035500;
-extern OSThread *D_80035910;
+extern OSThread D_80035910;
 
 extern s32 D_800364C4;
 extern OSMesgQueue D_80036B40;
 extern OSMesg      D_80036B58;
-extern struct00 *D_80036B60;
-extern s32  D_80036B70;
-extern s32  D_80036B78;
-extern s32  D_80036B80;
-extern s32  D_80036B88;
-extern s32  D_80036B8C;
-extern s32  D_80036B90;
-extern s32  D_80036B98;
+extern OSTask D_80036B60;
+extern u64 *D_80036B70;
+extern u64 *D_80036B78;
+extern u64 *D_80036B80;
+extern u64 *D_80036B88;
+extern u64 *D_80036B8C;
+extern u64 *D_80036B90;
+extern u64 *D_80036B98;
 
 extern u32  D_80038070;
 extern u16  D_80038074;
@@ -244,13 +240,12 @@ extern s32  D_8003BE94;
 
 extern s32  D_8003C858;
 extern s32  D_8003C8E0;
-extern struct26 *D_8003C900[];
-extern struct14 *D_8003CD40;
-extern struct247  D_8003CD48[];
-extern s16  D_8003C910[];
+extern ALSeqFile *D_8003CD40;          // sequence table
+extern ALCSeqMarker D_8003CD48[][8];
+extern u16  D_8003C910[];              // sequence lengths, rounded up to even
 
-extern s32  D_8003E368;
-extern s32  D_8003E370;
+extern ALBank *D_8003E368;
+extern ALHeap D_8003E370;              // audio heap
 extern OSThread  D_8003E3A0;
 extern s32  D_8003E640;
 
@@ -259,8 +254,8 @@ extern OSMesg      D_8003E620[8];
 extern OSMesgQueue D_8003E5D0;
 extern OSMesg      D_8003E5E8[8];
 
-extern s32  D_8003CA3C[];
-extern u8   D_8003CA48[];
+extern u16  D_8003CA3C[];              // sequence loaded in each player (0xFFFF: none)
+extern u8  *D_8003CA48[];              // each player's sequence data buffer
 extern ALCSeq D_8003CA58[];
 extern s32  D_8003C90C;
 
@@ -320,7 +315,7 @@ extern u16  D_800427F4;
 extern struct120 D_800425E0[];
 extern struct124 *D_80042800;
 extern s32  D_80042804;
-extern u16  D_800428B8[];
+extern u16 *D_800428B8;
 extern u8   D_800428C0;
 extern u8   D_800428C1;
 extern u8   D_800428C2;
@@ -333,7 +328,7 @@ extern s32 *D_800428F8;
 // BSS ENDS AT D_80043B40
 
 extern s32  *D_80043B40; // 4064
-extern s32  D_80044B20; // 253952 bytes, bunch of structs?
+extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 // this space is filled by D_80044B20
 // 0x80044B20 + 253952 = 0x80082B20

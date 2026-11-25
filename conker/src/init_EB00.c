@@ -996,7 +996,7 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
         } else {
             mix |= 0x7F;
         }
-        func_10017438(D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
+        func_10017438((s32)D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
                       &D_800425E0[slot].unk8);
     }
     return newHandle;

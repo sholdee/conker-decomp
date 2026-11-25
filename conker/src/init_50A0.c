@@ -58,7 +58,7 @@ void func_100052A0(s32 arg0) {
         osRecvMesg(&D_8003B9D0, &mesg, 1);
     }
     D_8002AC5C = 1;
-    osStopThread((OSThread *)&D_80035910);
+    osStopThread(&D_80035910);
     osStopThread(&D_80031AE0);
     func_100093CC(); // stop thread D_8003E3A0 if D_8002AE40 not null
     D_8003BC20 = osGetTime();

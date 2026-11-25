@@ -169,6 +169,6 @@ void func_1000480C(u32 romAddr, void *dest, u32 size) {
     }
     *(vu8 *)&D_8003A572 = 0;
     if (*(vu8 *)&D_8003A575) {
-        osStartThread((OSThread *)&D_80035910); // variables.h declares the thread as OSThread *
+        osStartThread(&D_80035910);
     }
 }
