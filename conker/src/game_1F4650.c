@@ -1757,12 +1757,6 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
     }
 }
 
-/* The part of Actor read through Camera.unk3D4 here (Actor does not declare it). */
-typedef struct {
-    u8 pad0[0x19E];
-    u16 unk19E;
-} SightPlayerState;
-
 /* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
  * (and unk3D4->unk19E is clear), and towards 0 otherwise. */
 void func_151CB510(SightSprite *sprite) {
@@ -1772,7 +1766,7 @@ void func_151CB510(SightSprite *sprite) {
 
     player = sprite->payload.player;
     payload = &sprite->payload;
-    if ((player->contPad->button & 0x2000) && ((SightPlayerState *)player->playerExt)->unk19E == 0) {
+    if ((player->contPad->button & 0x2000) && player->playerExt->unk19E == 0) {
         target = payload->unk8;
     } else {
         target = 0.0f;

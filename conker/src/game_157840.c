@@ -33,14 +33,6 @@ extern ZScanParams D_800DC200[4][4];
 
 void func_15123A54(Camera *arg0);
 
-/* Camera.player (a Actor): the members Actor does not declare yet. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x137];
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x44];
-    /* 0x17C */ f32 unk17C;
-} CamObj;
-
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
@@ -88,7 +80,7 @@ void func_1512A390(Camera *arg0) {
     }
     func_151236D0(arg0);
     if (!(arg0->flags & 0x10) && (arg0->player->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
-        (((CamObj *)arg0->player)->unk17C < arg0->unk35C)) {
+        (arg0->player->ceilingY < arg0->unk35C)) {
         func_15128774(arg0, (Actor *)arg0->player);
     }
     if (-10000.0f == arg0->unk35C) {
@@ -106,7 +98,7 @@ void func_1512A390(Camera *arg0) {
     if (-10000.0f != arg0->unk364) {
         arg0->unk360 = arg0->unk364;
     }
-    if (((CamObj *)arg0->player)->unk137 != 0) {
+    if (arg0->player->unk137 != 0) {
         arg0->unk35C = arg0->unk354 = arg0->player->y_position;
     }
     if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
@@ -165,7 +157,7 @@ void func_1512A390(Camera *arg0) {
             arg0->unk354 = arg0->unk360 + 50.0f;
         }
     }
-    if ((arg0->status & 0x40) && (((CamObj *)arg0->player)->unk137 == 0)) {
+    if ((arg0->status & 0x40) && (arg0->player->unk137 == 0)) {
         if (arg0->focus.y - arg0->lastPlayerPos.y < -5.0f) {
             arg0->unk8D0 = 2;
             arg0->unk8C4 += 10.0f;
@@ -192,7 +184,7 @@ void func_1512A390(Camera *arg0) {
         arg0->unk8D0 = 0;
         arg0->unk848 = 0;
     }
-    if ((arg0->mode != 0x100) && (((CamObj *)arg0->player)->unk137 == 0)) {
+    if ((arg0->mode != 0x100) && (arg0->player->unk137 == 0)) {
         if (arg0->eye.y < arg0->unk35C + 40.0f) {
             arg0->eye.y = arg0->unk35C + 40.0f;
         }
@@ -250,9 +242,9 @@ void func_1512AD54(Camera *arg0) {
         return;
     }
     if (!(arg0->flags & 0x10)) {
-        if (arg0->player->floorY < ((CamObj *)arg0->player)->unk17C) {
-            if (((CamObj *)arg0->player)->unk17C - 40.0f <= targetY) {
-                targetY = ((CamObj *)arg0->player)->unk17C - 40.0f;
+        if (arg0->player->floorY < arg0->player->ceilingY) {
+            if (arg0->player->ceilingY - 40.0f <= targetY) {
+                targetY = arg0->player->ceilingY - 40.0f;
             }
         }
     }

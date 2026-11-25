@@ -8,14 +8,6 @@ extern f32 D_800BE6D0[];
 void func_1501B320(s32 arg0);
 void func_1501B640(s32 arg0);
 
-typedef struct Game48B10Actor {
-    u8 pad00[4];
-    u8 type;
-    u8 pad05[0x1C3];
-    u8 buffer;
-    u8 pad1C9[0xC3];
-    struct Game48B10Vertex *vertices[2][2];
-} Game48B10Actor;
 typedef struct Game48B10Vertex {
     s16 position[3];
     u16 flags;
@@ -27,7 +19,7 @@ extern Game48B10Color *D_80084040[];
 extern u8 D_80096920[];
 extern u16 D_800C57A0[];
 
-void func_1501B660(Game48B10Actor *arg0, f32 *arg1, s32 arg2) {
+void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     Game48B10Vertex *vertices;
     Game48B10Color *first;
     Game48B10Color *second;
@@ -42,12 +34,12 @@ void func_1501B660(Game48B10Actor *arg0, f32 *arg1, s32 arg2) {
     s32 i;
     u8 steps;
 
-    vertices = arg0->vertices[arg0->buffer][D_800BE9C0];
+    vertices = (Game48B10Vertex *)arg0->modelData[arg0->lod][D_800BE9C0]; // the model's vertex copy
     if (vertices == NULL) {
         return;
     }
     previous = -1;
-    for (i = 0; i < D_800C57A0[arg0->type]; i++) {
+    for (i = 0; i < D_800C57A0[arg0->id]; i++) {
         if (vertices[i].flags & 0x7F00) {
             group = (vertices[i].flags & 0x7F00) >> 8;
             if (group != previous) {

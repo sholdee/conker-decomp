@@ -94,12 +94,6 @@ extern s32 D_800BE9E4;
 extern s32 D_800BE9E8;
 extern s32 D_800BE9F8;
 extern s8 D_800BEA0C;
-typedef struct Game34F20Actor {
-    s32 field_0;
-    u8 pad4[0x123];
-    u8 field_127;
-    u8 pad128[0x204];
-} Game34F20Actor;
 
 
 extern u8 D_800D2456;
