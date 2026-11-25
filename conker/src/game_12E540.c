@@ -151,8 +151,8 @@ void func_15101090(Beam *beam) {
     BeamData *data = &beam->data;
 
     // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
-    if (*(u16 *)&beam->data.unk90) {
-        func_100111C8(beam->data.unk90);
+    if (*(u16 *)&data->unk90) {
+        func_100111C8(data->unk90);
     }
     if (data->hitFx != NULL) {
         func_1516972C((struct102 *)data->hitFx);
