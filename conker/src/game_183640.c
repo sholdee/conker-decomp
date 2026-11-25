@@ -51,7 +51,7 @@ typedef struct {
 } StreakParticleDesc;
 
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
-StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 arg3, s32 arg4) {
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
@@ -69,7 +69,7 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
             break;
     }
 
-    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, (u8)arg3, 1);
+    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, (u8)owner, 1);
     if (newParticle == NULL) {
         return NULL;
     }
@@ -163,7 +163,7 @@ Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern RenderModeEntry D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_151D5D60(Vtx **buffers, s16 viewIndex, s32 size, Vtx **vtx, u8 *fresh);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
@@ -186,7 +186,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
 
     // matching: the p alias orders IDO's spill slots (expression ids follow first use)
     p = particle;
-    func_151D5D60(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), (void **)&vtx, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), &vtx, &fresh);
     if (fresh) {
         memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
         memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
@@ -449,52 +449,63 @@ void func_151568F8(desc, owner)
 
 void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
 
+/* Common head of effect objects (same layout as Game113D60EffectHeader in game_113D60.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+} EffectHeader;
+
+/* A countdown restarted at base + rand() % (range + 1). */
 typedef struct {
     /* 0x00 */ s16 base;
     /* 0x02 */ s16 range;
-    /* 0x04 */ s16 timer;
-} struct15156B54_sub;
+    /* 0x04 */ s16 value;
+} RandomTimer;
 
+/* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ struct15156B54_sub sub;
-} struct15156B54;
+    /* 0x00 */ EffectHeader header;
+    /* 0x28 */ RandomTimer timer;
+} RandomBurstEffect;
 
 extern f32 D_800DCA30[3][10][4];
 void func_15156D24(f32 *pos, u8 owner);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
-void func_15156B54(struct15156B54 *arg0) {
-    struct15156B54_sub *sub;
+/* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
+ * that has no zero coordinate, then restarts the timer at a random interval. */
+void func_15156B54(RandomBurstEffect *effect) {
+    RandomTimer *timer;
     u32 row;
     u32 col;
     Header header;
-    Header2 header2;
+    Header2 intPos;
 
-    arg0->sub.timer -= D_800BE9E4;
-    if (arg0->sub.timer < 0) {
+    effect->timer.value -= D_800BE9E4;
+    if (effect->timer.value < 0) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
-        if ((D_800DCA30[row][col][0] != 0.0f) && (D_800DCA30[row][col][1] != 0.0f) && (D_800DCA30[row][col][2] != 0.0f)) {
-            func_15156D24(D_800DCA30[row][col], arg0->unkC);
+        if (D_800DCA30[row][col][0] != 0.0f && D_800DCA30[row][col][1] != 0.0f && D_800DCA30[row][col][2] != 0.0f) {
+            func_15156D24(D_800DCA30[row][col], effect->header.owner);
             header.unk0 = 3;
             header.unk1 = -1;
             header.unk2 = (func_150ADA20() % 11U) + 5;
             header.unk4 = 0;
-            header2.unk0 = D_800DCA30[row][col][0];
-            header2.unk4 = D_800DCA30[row][col][1];
-            header2.unk8 = D_800DCA30[row][col][2];
-            func_151602C0(&header, &header2, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+            intPos.unk0 = D_800DCA30[row][col][0];
+            intPos.unk4 = D_800DCA30[row][col][1];
+            intPos.unk8 = D_800DCA30[row][col][2];
+            func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+                          effect->header.owner, effect->header.kind);
         }
-        sub = &arg0->sub;
-        sub->timer = (func_150ADA20() % (u32)(sub->range + 1)) + sub->base;
+        timer = &effect->timer;
+        timer->value = (func_150ADA20() % (u32)(timer->range + 1)) + timer->base;
     }
 }
-
 
 /* Spawns the burst effect used by func_15156B54 at pos (3 floats), with randomised particle size and flags. */
 void func_15156D24(f32 *pos, u8 owner) {
@@ -565,19 +576,19 @@ void func_15156D24(f32 *pos, u8 owner) {
     func_151568F8(&desc, owner);
 }
 
-extern void func_151D5E30(void *);
+extern void func_151D5E30(Vtx **);
 
-void func_15156F94(void *arg0) {
-    func_151D5E30((void *)((u8 *)arg0 + 0x88));
+/* Frees a streak particle's per-view vertex buffers. */
+void func_15156F94(StreakParticle *particle) {
+    func_151D5E30(particle->vtxBuffers);
 }
 
-void func_15156FB8(struct102 *arg0) {
-    func_15156F94(arg0);
-    func_15169804(arg0);
+void func_15156FB8(StreakParticle *particle) {
+    func_15156F94(particle);
+    func_15169804((struct102 *)particle);
 }
 
-void func_15156FE4(struct102 *arg0) {
-    func_15156F94(arg0);
-    func_15169824(arg0);
+void func_15156FE4(StreakParticle *particle) {
+    func_15156F94(particle);
+    func_15169824((struct102 *)particle);
 }
-
