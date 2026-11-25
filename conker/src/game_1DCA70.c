@@ -173,22 +173,14 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
                   0, 0xFF, roll, 16, 0, 0.0f, NULL, 0xFF);
 }
 
-/* Particle updated by func_151AFBD4. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0xA];
-    /* 0x28 */ u8 alpha;
-} FadeParticle;
-
-/* Fades the particle out over the last 32 frames of its timer. */
-s32 func_151AFBD4(FadeParticle *particle) {
+/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+s32 func_151AFBD4(QuadSprite *sprite) {
     s32 fade;
 
-    if (particle->timer < 32) {
-        fade = particle->timer * 8;
-        if (fade < particle->alpha) {
-            particle->alpha = fade;
+    if (sprite->def.lifetime < 32) {
+        fade = sprite->def.lifetime * 8;
+        if (fade < sprite->def.unk10) {
+            sprite->def.unk10 = fade;
         }
     }
     return 1;

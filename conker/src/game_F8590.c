@@ -198,23 +198,14 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-/* Particle updated by func_150CB7CC. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0xA];
-    /* 0x28 */ u8 alpha;
-} FadeParticle;
-
-/* Fades the particle out over the last 32 frames of its timer. */
-s32 func_150CB7CC(FadeParticle *particle) {
+/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+s32 func_150CB7CC(QuadSprite *sprite) {
     s32 fade;
 
-    if (particle->timer < 32) {
-        fade = particle->timer * 8;
-        if (fade < particle->alpha) {
-            particle->alpha = fade;
+    if (sprite->def.lifetime < 32) {
+        fade = sprite->def.lifetime * 8;
+        if (fade < sprite->def.unk10) {
+            sprite->def.unk10 = fade;
         }
     }
     return 1;
