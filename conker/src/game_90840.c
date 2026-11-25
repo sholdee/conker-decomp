@@ -2729,7 +2729,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 sounds[2] = { 0x39, 0x35 };
 
             arg0->unk282 = 0x64;
-            if ((s8)arg0->unk284 == 0) {
+            if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); struct127 declares u8
                 arg0->unk278 = (u16)arg0->unk278 + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->unk278) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
