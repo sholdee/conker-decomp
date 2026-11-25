@@ -1316,32 +1316,21 @@ void func_151D9014(void *position, void *velocity, s32 arg2, f32 arg3, s32 arg4,
                    f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA, s32 argB,
                    s32 argC, s32 argD, s32 argE, s32 argF);
 
-extern f32 D_800A4624; // matching: 0.001f as a literal grows the stack frame by 8
-
 /* Sprays blood from (x, y, z) against the direction (dirX, dirY, dirZ). */
 void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
     f32 position[3];
     f32 velocity[3];
     f32 speed;
-    struct {
-        f32 size;
-        s32 random0;
-        u32 random1;
-        s32 pad;
-    } r; // matching: IDO places these three locals in this order on the stack
 
     position[0] = x;
     position[1] = y;
     position[2] = z;
-    speed = (func_150ADA68() * 112.0f + 247.0f) * D_800A4624;
+    speed = (func_150ADA68() * 112.0f + 247.0f) * 0.001f;
     velocity[0] = -dirX * speed;
     velocity[1] = -dirY * speed;
     velocity[2] = -dirZ * speed;
-    r.size = func_150ADA68();
-    r.random0 = func_150ADA20();
-    r.random1 = func_150ADA20();
-    func_151D9014(position, velocity, 0, r.size * 0.2700000107f + -0.3100000024f,
-                    (r.random0 & 0xF) + 25, (r.random1 % 101) + 155,
+    func_151D9014(position, velocity, 0, func_150ADA68() * 0.2700000107f + -0.3100000024f,
+                    (func_150ADA20() & 0xF) + 25, (func_150ADA20() % 101) + 155,
                     func_150ADA68() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     arg6[0xC], arg6[1]);
 }
