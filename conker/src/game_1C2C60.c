@@ -14,9 +14,11 @@ u32 func_150ADA20(void);
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
 #define D_800BE628 D_800BE628_hdr
+#define D_800DD198 D_800DD198_hdr
 #include "variables.h"
 #undef D_800DBFF0
 #undef D_800BE628
+#undef D_800DD198
 
 void *memcpy(void *, const void *, u32);
 
@@ -467,14 +469,6 @@ typedef struct Vec3f {
     f32 z;
 } Vec3f;
 
-/* The model an effect is attached to (only the fields this file reads). */
-typedef struct EffectOwner {
-    /* 0x000 */ char pad0[0x3B];
-    /* 0x03B */ u8 unk3B;
-    /* 0x03C */ char pad3C[0x1D4 - 0x3C];
-    /* 0x1D4 */ s32 boneMatrices; /* address of the 64-byte bone matrices */
-} EffectOwner;
-
 /* One point of an effect's ring buffer (0x24 bytes). */
 typedef struct Particle {
     /* 0x00 */ Vec3f pos;
@@ -490,7 +484,11 @@ typedef struct Particle {
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct CharacterFlamethrowerActor {
-    /* 0x00 */ char pad0[0x10];
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ char pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ char padD[0x3];
     /* 0x10 */ Vec3f pos;
     /* 0x1C */ char pad1C[0x2];
     /* 0x1E */ u16 flags1E;
@@ -563,8 +561,8 @@ typedef struct CharacterFlamethrowerJetTemplate {
 
 /* State block (0x90 bytes) of a jet effect: emits particles between two bone-relative points. */
 typedef struct CharacterFlamethrowerJet {
-    /* 0x00 */ EffectOwner *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unk3B */
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
     /* 0x07 */ s8 speedFn; /* D_8008F870 index, -1 = none */
@@ -650,7 +648,7 @@ void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
-CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2, s32 arg3) {
     EffectSpawn spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
@@ -661,12 +659,12 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     if (owner == NULL) {
         return NULL;
     }
-    if (owner->boneMatrices == 0) {
+    if (owner->unk1D4 == NULL) {
         return NULL;
     }
     entry = &D_800A87A0[preset];
     jet.owner = owner;
-    jet.ownerId = owner->unk3B;
+    jet.ownerId = owner->unique_id;
     jet.flags = 2;
     jet.texS = 0;
     jet.emitAccum = 0.0f;
@@ -711,7 +709,7 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     } else {
         jet.unk66 = 0;
     }
-    matrix = jet.owner->boneMatrices + (jet.bone << 6);
+    matrix = (s32)jet.owner->unk1D4 + (jet.bone << 6);
     func_15143134(&jet.startOffset, &jet.start, matrix);
     func_15143134(&jet.endOffset, &jet.end, matrix);
     spawn.unk10 = 3;
@@ -734,64 +732,6 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     }
     return actor;
 }
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec15196748;
-
-typedef struct {
-    /* 0x00 */ Vec15196748 pos;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 pad22[0x2];
-} Particle15196748;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x6];
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 pad7[0x40 - 0x7];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ u8 pad44[0x52 - 0x44];
-    /* 0x52 */ u8 unk52;
-    /* 0x53 */ u8 pad53[0x58 - 0x53];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[0x61 - 0x5C];
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 pad62[0x64 - 0x62];
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 pad65[0x68 - 0x65];
-    /* 0x68 */ s8 unk68;
-    /* 0x69 */ u8 pad69[0x6A - 0x69];
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B[0x8C - 0x6B];
-    /* 0x8C */ u8 unk8C;
-    /* 0x8D */ u8 unk8D;
-    /* 0x8E */ u8 unk8E;
-    /* 0x8F */ u8 unk8F;
-} Desc15196748;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x25];
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[0x2C - 0x26];
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ s8 unk2D;
-    /* 0x2E */ s8 unk2E;
-    /* 0x2F */ u8 pad2F[0x54 - 0x2F];
-    /* 0x54 */ Vec15196748 unk54;
-    /* 0x60 */ u8 pad60[0x94 - 0x60];
-    /* 0x94 */ Particle15196748 *unk94;
-    /* 0x98 */ Desc15196748 *unk98;
-} Emitter15196748;
 
 extern void (*D_8008F894[])(void *);
 extern void (*D_8008F89C[])(void *);
@@ -935,13 +875,13 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 
     jet = actor->state;
     points = actor->points;
-    if (jet->owner->boneMatrices == 0) {
+    if (jet->owner->unk1D4 == NULL) {
         return 0;
     }
     if (jet->speedFn != -1) {
         jet->targetSpeed = D_8008F870[jet->speedFn](actor, arg1);
     }
-    matrix = jet->owner->boneMatrices + (jet->bone << 6);
+    matrix = (s32)jet->owner->unk1D4 + (jet->bone << 6);
     func_15143134(&jet->startOffset, &actor->pos, matrix);
     func_15143134(&jet->endOffset, &end, matrix);
     jet->emitAccum += jet->emitRate * D_800BE9A4;
@@ -1262,20 +1202,20 @@ f32 func_15197A68(s32 arg0) {
 }
 
 /* Message payload naming an effect owner (func_15147D64). */
-typedef struct EffectOwnerRef {
-    EffectOwner *owner;
+typedef struct struct127Ref {
+    struct127 *owner;
     u8 ownerId;
-} EffectOwnerRef;
+} struct127Ref;
 
-extern void func_15147D64(EffectOwnerRef *, s32);
+extern void func_15147D64(struct127Ref *, s32);
 
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
-void func_15197A7C(EffectOwner *owner) {
-    EffectOwnerRef ref;
+void func_15197A7C(struct127 *owner) {
+    struct127Ref ref;
 
     if (owner != NULL) {
         ref.owner = owner;
-        ref.ownerId = owner->unk3B;
+        ref.ownerId = owner->unique_id;
         func_15147D64(&ref, 8);
     }
 }
@@ -1463,10 +1403,10 @@ void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
 
 /* Payload of the messages sent to effects through func_15147D64. */
 typedef struct EffectMessage {
-    /* 0x0 */ EffectOwner *owner;
+    /* 0x0 */ struct127 *owner;
     /* 0x4 */ union {
-        u8 id;              /* messages 0, 2, 8 and 0x26: owner's unk3B */
-        EffectOwner *other; /* message 0x2D: owner and other swap */
+        u8 id;              /* messages 0, 2, 8 and 0x26: owner's unique_id */
+        struct127 *other; /* message 0x2D: owner and other swap */
     } u4;
     /* 0x8 */ u8 ownerId; /* message 0x2D */
     /* 0x9 */ u8 otherId; /* message 0x2D */
@@ -1476,7 +1416,7 @@ void func_151993B4();
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
-    EffectOwnerRef *ref = actor->state;
+    struct127Ref *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 8) {
         if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
@@ -1641,15 +1581,15 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
 }
 
 extern void func_1505D024(struct127 *, s32, u16, s32);
-extern s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
-extern s32 D_800A8A84;
+extern s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, const char *);
 
-s32 func_15198570(Emitter15196748 *arg0) {
-    Desc15196748 *desc;
-    Particle15196748 *arr;
+/* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
+s32 func_15198570(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
+    Particle *points;
     struct127 *obj;
     s32 i;
-    Vec15196748 pos;
+    Vec3f pos;
     f32 r;
     f32 h;
     f32 d;
@@ -1658,16 +1598,16 @@ s32 func_15198570(Emitter15196748 *arg0) {
     f32 dy;
     f32 p1;
 
-    desc = arg0->unk98;
-    arr = arg0->unk94;
+    jet = actor->state;
+    points = actor->points;
     obj = &D_800CC2D0[0];
-    i = arg0->unk2E;
-    while (i != arg0->unk2D) {
+    i = actor->head;
+    while (i != actor->tail) {
         i--;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = actor->capacity - 1;
         }
-        pos = arr[i].pos;
+        pos = points[i].pos;
         r = obj->unkE4;
         h = obj->unkE6;
         dx = pos.x - obj->x_position;
@@ -1676,27 +1616,28 @@ s32 func_15198570(Emitter15196748 *arg0) {
         dy *= (1.0f + r / h) * 0.5f;
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
-            func_1505D024(obj, 0x60006, obj->unk7A, ((s32)*(struct127 **)desc - (s32)D_800CC2D0) / 0x32C);
-            func_1518D1C0(obj, 0xB, 0, 1, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1], &D_800A8A84);
-            while (i != arg0->unk2D) {
-                arg0->unk2D = arg0->unk2D + 1;
-                if (arg0->unk2D == arg0->unk25) {
-                    arg0->unk2D = 0;
+            func_1505D024(obj, 0x60006, obj->unk7A, jet->owner - D_800CC2D0);
+            func_1518D1C0(obj, 0xB, 0, 1, actor->unkC, actor->unk1, "Characterflamethrower");
+            while (i != actor->tail) {
+                actor->tail = actor->tail + 1;
+                if (actor->tail == actor->capacity) {
+                    actor->tail = 0;
                 }
-                arg0->unk2C = arg0->unk2C - 1;
+                actor->count = actor->count - 1;
             }
         }
     }
     return 1;
 }
 
-s32 func_151987CC(Emitter15196748 *arg0) {
-    Desc15196748 *desc;
-    Particle15196748 *arr;
+/* Jet update callback: a point near any other active object (of the first 25) retires the older points. */
+s32 func_151987CC(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
+    Particle *points;
     struct127 *obj;
     s32 i;
     s32 j;
-    Vec15196748 pos;
+    Vec3f pos;
     f32 r;
     f32 h;
     f32 d;
@@ -1706,22 +1647,21 @@ s32 func_151987CC(Emitter15196748 *arg0) {
     f32 p1;
     f32 p3;
 
-    desc = arg0->unk98;
-    arr = arg0->unk94;
+    jet = actor->state;
+    points = actor->points;
     for (j = 0; j < 25; j++) {
         obj = &D_800CC2D0[j];
-        if (obj->interaction_state == 0 || obj->unk65 != 0 ||
-            obj->unique_id == (*(struct127 **)desc)->unique_id) {
+        if (obj->interaction_state == 0 || obj->unk65 != 0 || jet->owner->unique_id == obj->unique_id) {
             continue;
         }
         {
-            i = arg0->unk2E;
-            while (i != arg0->unk2D) {
+            i = actor->head;
+            while (i != actor->tail) {
                 i--;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = actor->capacity - 1;
                 }
-                pos = arr[i].pos;
+                pos = points[i].pos;
                 r = obj->unkE4;
                 h = obj->unkE6;
                 dx = pos.x - obj->x_position;
@@ -1729,12 +1669,12 @@ s32 func_151987CC(Emitter15196748 *arg0) {
                 dy = pos.y - (obj->y_position + (s16)obj->unkE8);
                 dy *= (1.0f + r / h) * 0.5f;
                 if (dx * dx + dy * dy + dz * dz < r * r + 2500.0f) {
-                    while (i != arg0->unk2D) {
-                        arg0->unk2D = arg0->unk2D + 1;
-                        if (arg0->unk2D == arg0->unk25) {
-                            arg0->unk2D = 0;
+                    while (i != actor->tail) {
+                        actor->tail = actor->tail + 1;
+                        if (actor->tail == actor->capacity) {
+                            actor->tail = 0;
                         }
-                        arg0->unk2C = arg0->unk2C - 1;
+                        actor->count = actor->count - 1;
                     }
                 }
             }
@@ -1743,16 +1683,15 @@ s32 func_151987CC(Emitter15196748 *arg0) {
     return 1;
 }
 
-typedef struct Node1519897C {
+/* An object in the D_800DCE50 lists (only the fields used here). */
+typedef struct ListedObject {
     /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct Node1519897C *unk8;
+    /* 0x08 */ struct ListedObject *next;
     /* 0x0C */ u8 padC[0x91 - 0xC];
     /* 0x91 */ u8 unk91;
     /* 0x92 */ s16 unk92;
     /* 0x94 */ s32 unk94;
-    /* 0x98 */ f32 unk98;
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
+    /* 0x98 */ Vec3f pos;
     /* 0xA4 */ u8 padA4[0x4];
     /* 0xA8 */ f32 unkA8;
     /* 0xAC */ u8 padAC[0x8];
@@ -1762,19 +1701,25 @@ typedef struct Node1519897C {
     /* 0xC8 */ f32 unkC8;
     /* 0xCC */ u8 padCC[0xED - 0xCC];
     /* 0xED */ u8 unkED;
-} Node1519897C;
+} ListedObject;
 
-extern u8 D_800DCE50[];
+/* Object lists, and the stack of saved `next` pointers (depth D_800DD190) that makes walking them reentrant. */
+extern ListedObject *D_800DCE50[];
+extern ListedObject *D_800DD198[];
 void func_15183ACC(s32);
 s32 func_1510F8D8(s32, s32, s32, s32);
 
-s32 func_1519897C(Emitter15196748 *arg0) {
-    Desc15196748 *desc = arg0->unk98;
-    Particle15196748 *arr = arg0->unk94;
-    struct127 *obj;
-    void *sub;
-    Node1519897C *head;
-    Node1519897C *node;
+/*
+ * Jet update callback, active while the owner's unk31C->unk58 is 1: objects in lists 0x15-0x17 that a
+ * point touches are hit (func_15168B10 message 0x18) and put into state 5.
+ */
+s32 func_1519897C(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet = actor->state;
+    Particle *points = actor->points;
+    struct127 *owner;
+    struct126 *sub;
+    ListedObject *head;
+    ListedObject *node;
     s32 i;
     s32 j;
     f32 nx;
@@ -1784,38 +1729,38 @@ s32 func_1519897C(Emitter15196748 *arg0) {
     f32 dy;
     f32 dz;
     f32 r;
-    u8 list[3] = { 0x15, 0x16, 0x17 };
-    Vec15196748 pos;
+    u8 lists[3] = { 0x15, 0x16, 0x17 };
+    Vec3f pos;
 
-    obj = *(struct127 **)desc;
-    sub = obj->unk31C;
+    owner = jet->owner;
+    sub = owner->unk31C;
     if (sub == NULL) {
         return 0;
     }
-    if (*(u8 *)((u8 *)sub + 0x58) != 1) {
-        obj->unk2F8 &= ~0x100;
+    if (sub->unk58 != 1) {
+        owner->unk2F8 &= ~0x100;
         return 0;
     }
-    if (&arr) {
+    if (&points) { // matching: address-taken points stays in its stack slot
     }
     for (i = 0; i < 3; i++) {
-        head = ((Node1519897C **)D_800DCE50)[list[i]];
+        head = D_800DCE50[lists[i]];
         if (head != NULL) {
             node = head;
-            j = arg0->unk2E;
+            j = actor->head;
             D_800DD190++;
             while (node != NULL) {
-                ((Node1519897C **)D_800DD198)[D_800DD190] = node->unk8;
-                nx = node->unk98;
-                ny = node->unk9C;
-                nz = node->unkA0;
-                while (j != arg0->unk2D) {
+                D_800DD198[D_800DD190] = node->next;
+                nx = node->pos.x;
+                ny = node->pos.y;
+                nz = node->pos.z;
+                while (j != actor->tail) {
                     j--;
                     if (j < 0) {
-                        j = arg0->unk25 - 1;
+                        j = actor->capacity - 1;
                     }
-                    pos = arr[j].pos;
-                    r = arr[j].unk18;
+                    pos = points[j].pos;
+                    r = points[j].size;
                     dx = pos.x - nx;
                     dy = pos.y - ny;
                     dz = pos.z - nz;
@@ -1828,11 +1773,11 @@ s32 func_1519897C(Emitter15196748 *arg0) {
                         node->unkB8 = 40.0f;
                         node->unkA8 = 40.0f;
                         node->unkB4 = 0.0f;
-                        node->unkC8 = func_1510F8D8(node->unk98, node->unk9C, node->unkA0, 0);
+                        node->unkC8 = func_1510F8D8(node->pos.x, node->pos.y, node->pos.z, 0);
                         node->unk91 = 4;
                     }
                 }
-                node = ((Node1519897C **)D_800DD198)[D_800DD190];
+                node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         }
@@ -2375,12 +2320,12 @@ void *func_151994B8(s32 arg0, CharacterFlamethrowerSetup *arg1, u8 arg2, s32 arg
 }
 
 /* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
-void func_15199834(EffectOwner *owner) {
-    EffectOwnerRef ref;
+void func_15199834(struct127 *owner) {
+    struct127Ref ref;
 
     if (owner != NULL) {
         ref.owner = owner;
-        ref.ownerId = owner->unk3B;
+        ref.ownerId = owner->unique_id;
         func_15147D64(&ref, 0x26);
     }
 }
@@ -2389,7 +2334,7 @@ void func_1516972C();
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
 void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
-    EffectOwnerRef *ref = actor->state;
+    struct127Ref *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
