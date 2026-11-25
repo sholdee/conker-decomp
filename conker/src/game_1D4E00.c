@@ -15,7 +15,6 @@ extern f32 D_800A8DE0;
 extern void (*D_8008FA60[])(f32 *, void *, s32, u8, s32);
 
 void func_1514373C(f32, f32, f32 *, f32 *);
-s32 func_15046C80(f32 *, s32, f32, void *);
 
 typedef struct {
     f32 x, y, z;
@@ -76,7 +75,6 @@ typedef struct {
 } Bolt;
 
 Bolt *func_151A7950(BoltDef *, s32, u8, s32);
-s32 func_151A8B20(void *, s16, s32, u8, s32);
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
@@ -587,184 +585,205 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     }
 }
 
-extern f32 D_800A8F50;
-extern f32 D_800A8F54;
+/* A placed level object; the shared headers type it as struct134. */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ u8 pad6[0x10];
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s32 unk18;
+} LevelObject;
+
+/* Result of a ground probe (func_15046C80). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 unk4[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 surfaceType;
+    /* 0x20 */ s32 unk20;
+} GroundHit; /* size 0x24 */
+
+/* Spawn parameters of a particle emitter (func_151A8B20). */
+typedef struct {
+    /* 0x00 */ u8 flags;             /* EMITTER_* */
+    /* 0x04 */ LevelObject *anchor;  /* centre (and area) with EMITTER_ANCHORED */
+    /* 0x08 */ f32 rate;             /* particles per frame and unit area: rate + rand * rateRange */
+    /* 0x0C */ f32 rateRange;
+    /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
+    /* 0x1C */ f32 bottom;           /* lowest height the ground probe searches */
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (func_151A931C) */
+    /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
+    /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
+} EmitterDef; /* size 0x28 */
+
+#define EMITTER_ON       1
+#define EMITTER_ANCHORED 2
+#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
+#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
+
+typedef struct {
+    /* 0x00 */ EmitterDef def;
+    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
+    /* 0x2C */ GroundHit ground;
+    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x54 */ f32 area;
+} EmitterState; /* size 0x58 */
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EmitterState state;
+    /* 0x80 */ u8 data[1];           /* user data */
+} Emitter;
 
 extern void func_1510F800(s32);
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    struct134 *unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8  unk24;
-    u8  unk25;
-    u8  unk26;
-    u8  pad27;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s32 unk44;
-    u8  unk48;
-    u8  unk49;
-    u8  pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    f32 unk54;
-} Header_151A8B20;
+/*
+ * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
+ * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.
+ */
+Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4) {
+    Emitter *emitter;
+    EmitterState init;
+    EmitterState *state;
 
-s32 func_151A8B20(void *arg0, s16 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    s32 effect;
-    Header_151A8B20 header;
-    Header_151A8B20 *ptr;
+    memcpy(&init, def, sizeof(EmitterDef));
 
-    memcpy(&header, arg0, 0x28);
+    init.pending = 0.0f;
+    init.ground.height = 99999.9f;
+    init.ground.unk18 = 0;
+    init.ground.flags = 0;
+    init.ground.surfaceType = 0;
+    init.ground.unk20 = 0;
 
-    header.unk28 = 0.0f;
-    header.unk2C = D_800A8F50;
-    header.unk44 = 0;
-    header.unk48 = 0;
-    header.unk49 = 0;
-    header.unk4C = 0;
+    /* func_15149130 takes the data size (after its 0x28-byte header) in its struct37 * parameter */
+    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (struct37 *)(extraSize + sizeof(EmitterState)), arg3, arg4);
+    if (emitter != NULL) {
+        state = &emitter->state;
+        memcpy(state, &init, sizeof(EmitterState));
 
-    effect = (s32)func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x25, -1, (arg1 == -1) ? 0 : 1, 0x22, (struct37 *)(arg2 + 0x58), arg3, arg4);
-    if (effect != 0) {
-        ptr = (Header_151A8B20 *)(effect + 0x28);
-        memcpy(ptr, &header, 0x58);
+        if (state->def.flags & EMITTER_ZONED) {
+            f32 z;
+            f32 x;
 
-        if (ptr->unk0 & 4) {
-            f32 posZ;
-            f32 posX;
-
-            if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-                posX = (f32)ptr->unk4->unk0;
-                posZ = (f32)ptr->unk4->unk4;
+            if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+                x = state->def.anchor->x;
+                z = state->def.anchor->z;
             } else {
-                posX = ptr->unk10;
-                posZ = ptr->unk18;
+                x = state->def.pos.x;
+                z = state->def.pos.z;
             }
             func_1510F800(0);
-            ptr->unk50 = func_1510FD20((s32)posX, (s32)posZ);
+            state->zone = func_1510FD20(x, z);
         } else {
-            ptr->unk50 = 0;
+            state->zone = 0;
         }
 
-        if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-            ptr->unk54 = func_15144598(ptr->unk4);
+        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+            state->area = func_15144598((struct134 *)state->def.anchor);
         } else {
-            ptr->unk54 = (ptr->unk20 * ptr->unk20) * D_800A8F54;
+            state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }
     }
-    return effect;
+    return emitter;
 }
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    void *unk4;
-    f32 unk8;
-    f32 unkC;
-    u8  pad10[0x15];
-    s8  unk25;
-    s8  unk26;
-    u8  pad27;
-    f32 unk28;
-    f32 unk2C;
-    u8  pad30[0x20];
-    s32 unk50;
-    f32 unk54;
-} Header_151A8CEC;
-
-extern s32 (*D_8008F980[])(void *);
-extern void (*D_8008F970[])(void *, f32 *, f32, u8);
+extern s32 (*D_8008F980[])(Emitter *);
+extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
 s32 func_151464B8(s32);
-void func_151A8F1C(void *, f32 *, f32 *, f32 *);
-void func_151A8F6C(void *, f32 *, f32 *, f32 *);
+s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
+void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
-void func_151A8CEC(u8 *arg0) {
-    Header_151A8CEC *ptr;
-    void (*cb)(void *, f32 *, f32 *, f32 *);
-    f32 pos[3];
-    f32 radius;
-    f32 angle;
-    u8 flag;
+/*
+ * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
+ * is visible) accumulates the spawn rate and calls the spawn hook once per whole particle, at a
+ * random point of the area dropped to the ground.
+ */
+void func_151A8CEC(Emitter *emitter) {
+    EmitterState *state;
+    void (*pick)(Emitter *, Vec3f *, f32 *, f32 *);
+    Vec3f pos;
+    f32 bottom;
+    f32 top;
+    u8 noGround;
 
-    ptr = (Header_151A8CEC *)(arg0 + 0x28);
+    state = &emitter->state;
 
-    if (*(s8 *)(arg0 + 0x4D) != -1) {
-        if (D_8008F980[ptr->unk25](arg0) == 0) {
-            *(s16 *)(arg0 + 0xE) = -1;
+    if (state->def.update != -1) {
+        if (D_8008F980[state->def.update](emitter) == 0) {
+            emitter->unkE = -1;
             return;
         }
     }
 
-    if ((ptr->unk0 & 4) && (ptr->unk50 != 0)) {
-        if (func_151464B8(ptr->unk50) != 0) {
+    if ((state->def.flags & EMITTER_ZONED) && (state->zone != 0)) {
+        if (func_151464B8(state->zone) != 0) {
             return;
         }
     }
-    if (!(ptr->unk0 & 1)) {
+    if (!(state->def.flags & EMITTER_ON)) {
         return;
     }
 
-    ptr->unk28 += (ptr->unk8 + func_150ADA68() * ptr->unkC) * D_800BE9A4 * ptr->unk54;
+    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * D_800BE9A4 * state->area;
 
-    if (ptr->unk28 > 1.0f) {
-        if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-            cb = func_151A8F1C;
+    if (state->pending > 1.0f) {
+        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+            pick = func_151A8F1C;
         } else {
-            cb = func_151A8F6C;
+            pick = func_151A8F6C;
         }
         do {
-            cb(arg0, pos, &angle, &radius);
-            if (ptr->unk0 & 8) {
-                pos[1] = radius;
-                flag = 1;
-            } else if (func_15046C80(pos, 0, radius, &ptr->unk2C) != 0) {
-                pos[1] = ptr->unk2C;
+            pick(emitter, &pos, &top, &bottom);
+            if (state->def.flags & EMITTER_NO_PROBE) {
+                pos.y = bottom;
+                noGround = TRUE;
+            } else if (func_15046C80(&pos, 0, bottom, &state->ground) != 0) {
+                pos.y = state->ground.height;
             } else {
-                pos[1] = radius;
-                flag = 1;
+                pos.y = bottom;
+                noGround = TRUE;
             }
-            if (ptr->unk26 != -1) {
-                D_8008F970[ptr->unk26](arg0, pos, angle, flag);
+            if (state->def.spawn != -1) {
+                D_8008F970[state->def.spawn](emitter, &pos, top, noGround);
             }
-            ptr->unk28 -= 1.0f;
-        } while (ptr->unk28 > 1.0f);
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
     }
 }
 
-extern void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
+extern void func_151432BC(LevelObject *, f32 *, f32 *, f32 *, f32 *);
 
-void func_151A8F1C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    func_151432BC(*(void **)((u8 *)arg0 + 0x2C), arg1, arg1 + 2, arg2, arg3);
-    arg1[1] = arg2[0];
+/* Picks a random point of the anchor object's area; *top is its height. */
+void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
+    func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
+    pos->y = *top;
 }
 
 void func_15143874(s16, f32, f32 *, f32 *);
 
-void func_151A8F6C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    u8 *state;
+/* Picks a random point within def.radius of def.pos; *top is def.pos.y, *bottom def.bottom. */
+void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
+    EmitterDef *def;
 
-    state = (u8 *)arg0 + 0x28;
-    func_15143874((s16)(func_150ADA20() & 0xFF), *(f32 *)(state + 0x20) * func_150ADA68(),
-                  arg1, arg1 + 2);
-    arg1[0] += *(f32 *)(state + 0x10);
-    arg1[2] += *(f32 *)(state + 0x18);
-    arg1[1] = *(f32 *)(state + 0x14);
-    *arg2 = *(f32 *)(state + 0x14);
-    *arg3 = *(f32 *)(state + 0x1C);
+    def = &emitter->state.def;
+    func_15143874((s16)(func_150ADA20() & 0xFF), def->radius * func_150ADA68(), &pos->x, &pos->z);
+    pos->x += def->pos.x;
+    pos->z += def->pos.z;
+    pos->y = def->pos.y;
+    *top = def->pos.y;
+    *bottom = def->bottom;
 }
 
 void func_151A931C(u8 *, s32, u8);
