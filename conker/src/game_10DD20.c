@@ -81,62 +81,60 @@ u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 s32 func_150535F4(struct127 *arg0);
 void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 
-void func_150E0BE0(struct127 *arg0) {
-    s32 temp_v0;
-    u16 *temp_t1;
+/* Per-frame update for obj: steps its unk83 counter while unk87 is set, moves it, then stores its x/z displacement since last frame. */
+void func_150E0BE0(struct127 *obj) {
+    s32 counter;
 
-    arg0->unkB0 = 0xF;
-    arg0->unk80 = 0xA;
+    obj->unkB0 = 15;
+    obj->unk80 = 10;
 
-    if (arg0->unk87 != 0) {
-        temp_v0 = arg0->unk83;
-        if (temp_v0 < 0x64) {
-            temp_v0 = (arg0->unk83 = temp_v0 + (u32)D_800BE9A0);
-            temp_v0 &= 0xFF;
+    if (obj->unk87 != 0) {
+        counter = obj->unk83;
+        if (counter < 100) {
+            counter = obj->unk83 = counter + (u32)D_800BE9A0;
+            counter &= 0xFF; // matching: u32 add + explicit wrap orders the sb before the andi
         }
-        if (temp_v0 < 5) {
-        } else {
-            temp_v0 = arg0->unk251;
-            temp_t1 = &D_800CC346;
-            if (temp_v0 != 3) {
-                arg0->unk78 = *temp_t1;
-                arg0->unk218 = 0;
-                arg0->unk232 = 4;
-                if (temp_v0 == 2) {
-                    arg0->unk232 = 2;
+        if (counter >= 5) {
+            counter = obj->unk251; // matching: reusing counter keeps both in v0
+            if (counter != 3) {
+                obj->unk78 = D_800CC346;
+                obj->unk218 = NULL;
+                obj->unk232 = 4;
+                if (counter == 2) {
+                    obj->unk232 = 2;
                 }
             }
         }
     } else {
-        if (arg0->unk83 >= 0x3D) {
+        if (obj->unk83 > 60) {
             D_800D1580 = 0xFF020133;
             D_800D154C = D_800CC2D0;
             func_1506E8D8();
-            D_800D154C = arg0;
+            D_800D154C = obj;
         }
-        arg0->unk83 = 0;
+        obj->unk83 = 0;
     }
 
-    if (arg0->unk232 == 4) {
-        if (arg0->unk83 == 0) {
-            arg0->unk78 = arg0->unk76;
+    if (obj->unk232 == 4) {
+        if (obj->unk83 == 0) {
+            obj->unk78 = obj->unk76;
         }
-        func_150599C8(arg0, 3, arg0->unk78);
+        func_150599C8(obj, 3, obj->unk78);
     }
 
-    arg0->unk87 = 0;
-    if (arg0->stunned == 0) {
-        func_15056B08(arg0);
+    obj->unk87 = 0;
+    if (!obj->stunned) {
+        func_15056B08(obj);
     } else {
-        func_150585F0(arg0, 0.05000000074505806f);
+        func_150585F0(obj, 0.05f);
     }
 
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(arg0);
-    *(f32 *)((u8 *)arg0 + 0xBC) = arg0->x_position - arg0->old_x_position;
-    arg0->unk148 = arg0->z_position - arg0->old_z_position;
-    if (func_150535F4(arg0) == 0) {
-        func_1502178C(arg0, 0, -1);
+    /* facing angle (0x10000 units per turn) rotated a quarter turn, in degrees */
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * (360.0f / 0x10000);
+    func_15059140(obj);
+    *(f32 *)&obj->padBC = obj->x_position - obj->old_x_position; // 0xBC is an f32 that structs.h still calls padBC
+    obj->unk148 = obj->z_position - obj->old_z_position;
+    if (func_150535F4(obj) == 0) {
+        func_1502178C(obj, 0, -1);
     }
 }
-
