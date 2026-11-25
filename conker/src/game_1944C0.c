@@ -180,19 +180,6 @@ typedef struct {
 } Particle;
 
 
-typedef struct {
-    char pad_0[0x1];
-    u8 field_0x1;
-    char pad_0x2[0xA];
-    u8 field_0xC;
-    char pad_0xD[0x3];
-    u8 field_0x10;
-    char pad_0x11[0x12];
-    u8 field_0x23;
-    char pad_0x24[0x4];
-    char pad_0x28[0x20];
-    u8 field_0x48;
-} GameObjectHeader;
 
 extern SpriteAnim *D_8008CA4C[];
 
@@ -528,20 +515,20 @@ void func_15167B44(SpriteFx *fx) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-} Mode15168118;
-extern Mode15168118 D_800A4AC8[];
+} RenderModeEntry;
+extern RenderModeEntry D_800A4AC8[];
 typedef struct {
     s32 unk0;
     s32 unk4;
     s32 unk8;
-} StructC58b;
+} PaddedFlag;
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 s32 func_15095760(Gfx *arg0, void *arg1);
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     Gfx *gfx;
     SpriteParams params;
-    StructC58b update; // matching: 12-byte stack object; only the first word (the update flag) is used
+    PaddedFlag update; // matching: 12-byte stack object; only the first word (the update flag) is used
     SpriteAnim *anim;
     s32 renderMode;
     s16 frame;
@@ -568,10 +555,10 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
     return (Gfx *)func_15095760(gfx, &params);
 }
-/* Spawns a particle (type 0x42 when `arg1` is set, else 5) from the 0x38-byte template at `src`. */
-Particle *func_15167D84(src, arg1, extra, onDeath, owner, list)
+/* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
+Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
     Particle *src;
-    s32 arg1;
+    s32 altType;
     s32 extra;
     s8 onDeath;
     u8 owner;
@@ -579,7 +566,7 @@ Particle *func_15167D84(src, arg1, extra, onDeath, owner, list)
 {
     Particle *particle;
 
-    particle = func_15167A68((arg1 == 0) ? 5 : 0x42, list, extra + 0x50, 0, owner, 1);
+    particle = func_15167A68((altType == 0) ? 5 : 0x42, list, extra + 0x50, 0, owner, 1);
     if (particle == NULL) {
         return particle;
     }
@@ -696,10 +683,8 @@ extern SpriteAnim D_8009053C;
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern s32 D_800D2C9C;
-s32 func_15095760(Gfx *arg0, void *arg1);
 
 /* Particle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
@@ -966,8 +951,9 @@ void func_15168870(QuadFx *fx) {
         func_1516972C((struct102 *)fx);
     }
 }
-void func_15168A2C(s32 arg0) {
-    func_15168B10(arg0, 0);
+/* Moves an object to type 0. */
+void func_15168A2C(s32 obj) {
+    func_15168B10(obj, 0);
 }
 /* Pushes obj onto the front of list D_800DCE50[obj->list][type] and sets its type. */
 void func_15168A4C(ObjLink *obj, s32 type) {
@@ -1381,6 +1367,7 @@ void func_1516962C(s32 type, struct127 *actor, u8 eventType) {
     func_1516944C(type, (s32)&event, eventType);
 }
 
+/* Sets D_800D2DAB and returns its first argument unchanged. */
 s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     D_800D2DAB = 1;
     return arg0;
