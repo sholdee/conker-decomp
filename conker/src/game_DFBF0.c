@@ -505,136 +505,182 @@ s32 func_150B36AC(PipeChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
-s32 func_150B378C(void *a0) {
-    u8 *p;
-    s32 v1;
-    p = *(u8 **)((u8 *)a0 + 0x98);
-    v1 = *(s16 *)((u8 *)a0 + 0x1C) << 4;
-    if (v1 >= 0x100) {
-        v1 = 0xFF;
-    }
-    if (v1 < p[0x1B]) {
-        p[0x1B] = v1;
-    }
-    return 1;
-}
+/* Per-actor effect state reached through PipeExplodeActor::state. */
+typedef struct PipeExplodeState {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ u8 pad08[4];
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[5];
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 pad1C[4];
+    /* 0x20 */ u8 unk20;
+} PipeExplodeState;
 
-typedef struct {
+typedef struct PipeExplodePoint {
     f32 x;
     f32 y;
     f32 z;
     f32 unk0C;
     f32 unk10;
-} Pt_150B37C8;
+} PipeExplodePoint;
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    u8 pad08[4];
-    f32 unk0C;
-    f32 unk10;
-    u8 pad14[5];
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 pad1C[4];
-    u8 unk20;
-} State_150B37C8;
+typedef struct PipeExplodeActor {
+    /* 0x00 */ u8 pad00[1];
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 pad02[0xA];
+    /* 0x0C */ u8 unk0C;
+    /* 0x0D */ u8 pad0D[0xF];
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 pad1E[7];
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[7];
+    /* 0x2D */ s8 pointIndex;
+    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x94 */ PipeExplodePoint *points;
+    /* 0x98 */ PipeExplodeState *state;
+} PipeExplodeActor;
 
-typedef struct {
-    u8 pad00[1];
-    u8 unk01;
-    u8 pad02[0xA];
-    u8 unk0C;
-    u8 pad0D[0x18];
-    u8 unk25;
-    u8 pad26[7];
-    s8 unk2D;
-    u8 pad2E[0x66];
-    Pt_150B37C8 *unk94;
-    State_150B37C8 *unk98;
-} Src_150B37C8;
+/* Caps the effect's alpha at unk1C * 16 (saturating at 0xFF). */
+s32 func_150B378C(PipeExplodeActor *actor) {
+    PipeExplodeState *state;
+    s32 alpha;
 
-typedef struct {
-    s32 unk00;
-    s16 unk04;
-    s8 unk06;
-    u8 pad07;
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-    u8 pad1C[0xC];
-    Pt_150B37C8 *unk28;
-} Params_150B37C8;
+    state = actor->state;
+    alpha = actor->unk1C << 4;
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
+    }
+    if (alpha < state->alpha) {
+        state->alpha = alpha;
+    }
+    return 1;
+}
 
-typedef struct {
-    s16 v[3];
-} S16x3_150B37C8;
+/* Particle request for func_1513C73C. */
+typedef struct PipeExplodeParticle {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s8 kind;
+    /* 0x07 */ u8 pad07;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 pad1C[0xC];
+    /* 0x28 */ PipeExplodePoint *points;
+} PipeExplodeParticle;
 
-extern S16x3_150B37C8 D_80088700;
+/* First three parameter blocks for func_15147DA0. */
+typedef struct PipeTrailPos {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ s16 unk0C;
+    /* 0x0E */ s16 unk0E;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 unk15;
+    /* 0x18 */ s32 pad18;
+} PipeTrailPos;
 
-s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+typedef struct PipeTrailMotion {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[4];
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ s32 pad1C;
+} PipeTrailMotion;
+
+typedef struct PipeTrailStyle {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+} PipeTrailStyle;
+
+typedef struct PipeKinds {
+    s16 kind[3];
+} PipeKinds;
+
+extern PipeKinds D_80088700;
+
+s32 func_15147DA0(PipeTrailPos *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
 
-s32 func_150B37C8(Src_150B37C8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    State_150B37C8 *state;
-    Params_150B37C8 tmp;
-    f32 scale;
-    S16x3_150B37C8 tbl;
-    struct { f32 x; f32 y; f32 z; s16 unk0C; s16 unk0E; s32 unk10; u8 pad14; u8 unk15; s32 pad18; } pos;
-    struct { f32 unk00; f32 unk04; f32 unk08; f32 unk0C; f32 unk10; u8 pad14[4]; u8 unk18; u8 unk19; u8 unk1A; u8 unk1B; s32 pad1C; } motion;
-    struct { s32 unk00; s32 unk04; s32 unk08; s32 unk0C; s32 unk10; s32 unk14; s32 unk18; u8 unk1C; u8 unk1D; } style;
+/* Spawns a random particle and a trail at the actor's current point, at height `y`. */
+s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+    PipeExplodeState *state;
+    PipeExplodeParticle particle;
+    f32 size;
+    PipeKinds kinds;
+    PipeTrailPos pos;
+    PipeTrailMotion motion;
+    PipeTrailStyle style;
 
     {
-    s32 rand2;
-    s32 rand1;
-    s32 rand0;
-    state = arg0->unk98;
-    tmp.unk28 = arg0->unk94;
-    tbl = D_80088700;
-    state->unk20 = 4;
-    scale = func_150ADA68() * 50.0f + 50.0f;
-    tmp.unk06 = *(tbl.v + func_150ADA20() % 3U);
-    tmp.unk08 = 0;
-    tmp.unk0C = 0;
-    tmp.unk00 = 0x11;
-    tmp.unk04 = 0x96;
-    tmp.unk10 = state->unk1B;
-    tmp.unk11 = state->unk1A;
-    tmp.unk12 = 0;
-    tmp.unk13 = 0;
-    tmp.unk14 = 0;
-    tmp.unk15 = 0xFF;
-    tmp.unk18 = 0x30002;
+        s32 rand2;
+        s32 rand1;
+        s32 rand0;
+        state = actor->state;
+        particle.points = actor->points; // matching: kept in the request, a separate local mismatches
+        kinds = D_80088700;
+        state->unk20 = 4;
+        size = func_150ADA68() * 50.0f + 50.0f;
+        particle.kind = *(kinds.kind + func_150ADA20() % 3U); // matching: kinds.kind[i] grows the frame by 8
+        particle.unk08 = 0;
+        particle.unk0C = 0;
+        particle.unk00 = 0x11;
+        particle.unk04 = 150;
+        particle.unk10 = state->alpha;
+        particle.unk11 = state->unk1A;
+        particle.unk12 = 0;
+        particle.unk13 = 0;
+        particle.unk14 = 0;
+        particle.unk15 = 0xFF;
+        particle.unk18 = 0x30002;
 
-    rand0 = func_150ADA20();
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
+        rand0 = func_150ADA20();
+        rand1 = func_150ADA20();
+        rand2 = func_150ADA20();
 
-    func_1513C73C((s32)&tmp, 1, 0, arg5,
-                  tmp.unk28[arg0->unk2D].x,
-                  arg4,
-                  tmp.unk28[arg0->unk2D].z,
-                  scale, scale,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
-                  arg0->unk0C, arg0->unk01);
+        func_1513C73C((s32)&particle, 1, 0, arg5,
+                      particle.points[actor->pointIndex].x,
+                      y,
+                      particle.points[actor->pointIndex].z,
+                      size, size,
+                      rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
+                      actor->unk0C, actor->unk01);
 
     }
     style.unk00 = 0;
     style.unk04 = 1;
     style.unk08 = 0x160600;
     style.unk0C = 3;
-    style.unk10 = 0x10;
-    style.unk14 = 0x80;
-    style.unk18 = 0x20;
+    style.unk10 = 16;
+    style.unk14 = 128;
+    style.unk18 = 32;
     style.unk1C = 0;
     style.unk1D = 9;
     pos.unk10 = 1;
@@ -642,17 +688,17 @@ s32 func_150B37C8(Src_150B37C8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s3
     motion.unk19 = state->unk19;
     motion.unk1A = state->unk1A;
     motion.unk18 = 8;
-    motion.unk1B = state->unk1B;
-    pos.x = tmp.unk28[arg0->unk2D].x;
-    pos.y = arg4;
-    pos.z = tmp.unk28[arg0->unk2D].z;
-    pos.unk15 = arg0->unk25;
-    pos.unk0C = 0x3C;
+    motion.alpha = state->alpha;
+    pos.x = particle.points[actor->pointIndex].x;
+    pos.y = y;
+    pos.z = particle.points[actor->pointIndex].z;
+    pos.unk15 = actor->unk25;
+    pos.unk0C = 60;
     motion.unk00 = state->unk00 * 0.75f;
     motion.unk10 = state->unk10;
     motion.unk04 = state->unk04;
     motion.unk08 = func_150ADA68() * 15.0f + 15.0f;
     motion.unk0C = state->unk0C;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, (s32 *)&style, 0, arg0->unk0C, arg0->unk01);
+    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, (s32 *)&style, 0, actor->unk0C, actor->unk01);
     return 1;
 }
