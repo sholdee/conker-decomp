@@ -842,12 +842,23 @@ typedef struct {
     u8  unk3B;
 } struct114;
 
-typedef struct {
-    void (*unk0)(struct102 *arg0); // used
-    u8 pad0[0x14];
-    void (*unk18)(struct102 *arg0); // used
-    u8 pad1[0x18];
-} struct115;
+/* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
+typedef struct ObjType {
+    /* 0x00 */ void (*unk0)(struct102 *);
+    /* 0x04 */ void (*unk4)(struct102 *);
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
+    /* 0x0C */ void (*unkC)(struct102 *);
+    /* 0x10 */ Gfx *drawBeginDL;
+    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
+    /* 0x18 */ void (*unk18)(void);
+    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
+    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
+    /* 0x24 */ Gfx *drawEndDL;
+    /* 0x28 */ void (*destroy)(struct102 *);
+    /* 0x2C */ void (*free)(struct102 *);
+    /* 0x30 */ s8 drawMode;
+    /* 0x31 */ u8 pad31[3];
+} ObjType; // size 0x34
 
 typedef struct {
     u8 pad[0x20];

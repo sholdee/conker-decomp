@@ -428,9 +428,7 @@ extern s32 (*D_8008B36C[])(void);
 extern void (*D_8008B370[])(struct225 *effect, s32 arg1, u8 eventId); // light event handlers
 extern void (*D_8008B374[])(struct225 *effect);
 
-extern struct115 D_8008B4A8[];
-extern struct115 D_8008B4D0[];
-extern struct115 D_8008B4D4[];
+extern ObjType D_8008B4A8[104];
 
 
 extern u8   D_8008CEB0;

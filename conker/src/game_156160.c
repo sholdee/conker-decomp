@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "functions.h"
-// variables.h declares these as arrays/ints; the code uses them as pointers.
 #include "variables.h"
 
 struct Entry151298C0 {

@@ -4,29 +4,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/*
- * Object type descriptors: D_8008B4A8[type], 0x34 bytes each (struct115 in structs.h only names unk0/unk18).
- * D_8008B4D0 / D_8008B4D4 in variables.h are this table's +0x28 / +0x2C fields seen as struct115.
- */
-typedef struct {
-    /* 0x00 */ void (*unk0)(struct102 *);
-    /* 0x04 */ void (*unk4)(struct102 *);
-    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
-    /* 0x0C */ void (*unkC)(struct102 *);
-    /* 0x10 */ Gfx *drawBeginDL;
-    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
-    /* 0x18 */ void (*unk18)(void);
-    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
-    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
-    /* 0x24 */ Gfx *drawEndDL;
-    /* 0x28 */ void (*destroy)(struct102 *);
-    /* 0x2C */ void (*free)(struct102 *);
-    /* 0x30 */ s8 drawMode;
-    /* 0x31 */ u8 pad31[3];
-} ObjType;
-
 #define OBJ_TYPE_COUNT 104
-#define OBJ_TYPES ((ObjType *)D_8008B4A8)
 
 /* Object lists: D_800DCE50[list][type] is the head of a doubly linked list of struct102 nodes. */
 extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
@@ -132,13 +110,13 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
-    struct115 *entry;
-    struct115 *end;
+    ObjType *entry;
+    ObjType *end;
     void (*func)(void);
     s32 unused;
 
     entry = D_8008B4A8;
-    end = (struct115 *)((u32)entry + 101 * sizeof(struct115));
+    end = (ObjType *)((u32)entry + 101 * sizeof(ObjType));
     unused = 0;
     // matching: a goto loop plus the dead `unused` (saved s1) give the target's base-relative end
     // and sltu exit; for/while/do forms fold `end` to a constant address
@@ -173,12 +151,12 @@ void func_151670C0(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (OBJ_TYPES[type].unk0 != NULL) {
+            if (D_8008B4A8[type].unk0 != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    OBJ_TYPES[type].unk0(node);
+                    D_8008B4A8[type].unk0(node);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -195,12 +173,12 @@ void func_151671E8(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (OBJ_TYPES[type].unk4 != NULL) {
+            if (D_8008B4A8[type].unk4 != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    OBJ_TYPES[type].unk4(node);
+                    D_8008B4A8[type].unk4(node);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -231,12 +209,12 @@ void func_15167310(void) {
 
         for (type = 0; type != OBJ_TYPE_COUNT; type++) {
             for (list = 0; list != 2; list++) {
-                if (D_800DCE50[list][type] != NULL && OBJ_TYPES[type].unkC != NULL) {
+                if (D_800DCE50[list][type] != NULL && D_8008B4A8[type].unkC != NULL) {
                     node = D_800DCE50[list][type];
                     D_800DD190++;
                     while (node != NULL) {
                         D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                        OBJ_TYPES[type].unkC(node);
+                        D_8008B4A8[type].unkC(node);
                         node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
@@ -293,15 +271,15 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     func_15168F84(group, &first, &last);
     for (type = first; type < last; type++) {
-        if (OBJ_TYPES[type].draw != NULL) {
+        if (D_8008B4A8[type].draw != NULL) {
             head = &D_800DCE50[list][type];
             if (*head != NULL) {
                 D_8003C8E0 = (type & 0xFFFFFF) | 0x7000000;
                 overflowed = FALSE;
-                if (OBJ_TYPES[type].drawMode == 0) {
+                if (D_8008B4A8[type].drawMode == 0) {
                     mode0Start = gfx;
                 }
-                if (OBJ_TYPES[type].drawMode == 1) {
+                if (D_8008B4A8[type].drawMode == 1) {
                     mode1Start = gfx;
                 }
                 D_800D2DAB = 0;
@@ -326,20 +304,20 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 D_800DD214 = 0;
                 D_800DD218 = 0;
                 D_800DD21C = 0;
-                if (OBJ_TYPES[type].drawBeginDL != NULL) {
-                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawBeginDL);
+                if (D_8008B4A8[type].drawBeginDL != NULL) {
+                    gSPDisplayList(gfx++, D_8008B4A8[type].drawBeginDL);
                 }
-                if (OBJ_TYPES[type].drawBegin != NULL) {
-                    gfx = OBJ_TYPES[type].drawBegin(gfx, type, list, arg2);
+                if (D_8008B4A8[type].drawBegin != NULL) {
+                    gfx = D_8008B4A8[type].drawBegin(gfx, type, list, arg2);
                 }
                 gSPClearGeometryMode(gfx++, G_LIGHTING);
                 node = *head;
-                if (OBJ_TYPES[type].drawMode == 1) {
+                if (D_8008B4A8[type].drawMode == 1) {
                     D_800DD190++;
                     while (node != NULL) {
                         prev = gfx;
                         D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
+                        gfx = D_8008B4A8[type].draw(gfx, node, arg2);
                         full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
@@ -352,16 +330,16 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     D_800DD190++;
                     while (node != NULL) {
                         D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
+                        gfx = D_8008B4A8[type].draw(gfx, node, arg2);
                         node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 }
-                if (OBJ_TYPES[type].drawEndDL != NULL) {
-                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawEndDL);
+                if (D_8008B4A8[type].drawEndDL != NULL) {
+                    gSPDisplayList(gfx++, D_8008B4A8[type].drawEndDL);
                 }
-                if (OBJ_TYPES[type].drawEnd != NULL) {
-                    gfx = OBJ_TYPES[type].drawEnd(gfx, type, arg2);
+                if (D_8008B4A8[type].drawEnd != NULL) {
+                    gfx = D_8008B4A8[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
                     full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
@@ -370,7 +348,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         return mode1Start;
                     }
                 }
-                if (OBJ_TYPES[type].drawMode == 0) {
+                if (D_8008B4A8[type].drawMode == 0) {
                     full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
@@ -1190,13 +1168,13 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
     for (type = first; type < last; type++) {
         s32 list;
         for (list = 0; list != 2; list++) {
-            if (OBJ_TYPES[type].handleEvent != NULL) {
+            if (D_8008B4A8[type].handleEvent != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    OBJ_TYPES[type].handleEvent(node, event, eventType);
+                    D_8008B4A8[type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1223,13 +1201,13 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
 
     for (i = 0, type = types; i < count; i++) {
         for (list = 0; list != 2; list++) {
-            if (OBJ_TYPES[*type].handleEvent != NULL) {
+            if (D_8008B4A8[*type].handleEvent != NULL) {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    OBJ_TYPES[*type].handleEvent(node, event, eventType);
+                    D_8008B4A8[*type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1257,13 +1235,13 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
         type = OBJ_TYPE_COUNT - 1;
     }
     for (list = 0; list != 2; list++) {
-        if (OBJ_TYPES[type].handleEvent != NULL) {
+        if (D_8008B4A8[type].handleEvent != NULL) {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                 func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                OBJ_TYPES[type].handleEvent(node, event, eventType);
+                D_8008B4A8[type].handleEvent(node, event, eventType);
                 node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
@@ -1344,7 +1322,7 @@ void func_1516972C(struct102 *obj) {
     func_151696DC(obj);
 
     if (obj->unk0 >= 2) {
-        destroy = OBJ_TYPES[obj->unk0].destroy;
+        destroy = D_8008B4A8[obj->unk0].destroy;
         if (destroy != NULL) {
             destroy(obj);
             return;
@@ -1358,7 +1336,7 @@ void func_1516979C(struct102 *obj) {
     void (*free)(struct102 *obj);
 
     func_151696DC(obj);
-    free = OBJ_TYPES[obj->unk0].free;
+    free = D_8008B4A8[obj->unk0].free;
     if (free != NULL) {
         free(obj);
         return;

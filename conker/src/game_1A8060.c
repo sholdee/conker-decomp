@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "functions.h"
-// variables.h declares these with types that don't fit this file; the real views are below.
 #include "variables.h"
 
 /* One morph group: which model kind it applies to and how its vertices are split into parts. */

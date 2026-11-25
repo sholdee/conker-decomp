@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "effects.h"
-/* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #include "variables.h"
 
 /* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
