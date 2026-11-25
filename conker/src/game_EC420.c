@@ -250,7 +250,6 @@ void func_150BF21C(WorldObject *obj) {
 }
 
 void func_1511B51C(WorldObject *);
-void *func_15195FB0(WorldObject *, s32, s32, s32, s32, s32, s32);
 void func_150825C0(s32, s32);
 
 /* Behaviour scratch state (WorldObject.touch) of the entry after func_150BF760's object. */

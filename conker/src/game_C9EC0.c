@@ -584,7 +584,6 @@ typedef struct Msg1509D8FC {
     /* 0x7 */ u8 unk7;
 } Msg1509D8FC;
 
-extern void func_15197A7C(Actor *);
 extern void func_151645C4(u8);
 extern void func_1515F170(s32 arg0, u8 arg1);
 extern void func_150DEC28(u8, u8);

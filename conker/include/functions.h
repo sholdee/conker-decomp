@@ -1114,10 +1114,6 @@ struct LensFlare *func_1517E080(s32 type, s32 alpha);
 s32  func_1517EFAC(s32 arg0);
 void func_15178E14(u8 tag);
 s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
-typedef struct TexScroll TexScroll; /* game_1C2C60.c */
-TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
-                         s32 speedT);
-void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);

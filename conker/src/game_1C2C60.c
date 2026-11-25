@@ -1,22 +1,19 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
 
-struct CharacterFlamethrowerActor;
-void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
 extern void *allocate_memory(s32, s32, s32, s32);
 
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
-typedef struct ListNode {
+struct ListNode {
     struct ListNode *prev;
     struct ListNode *next;
-} ListNode;
+};
 
 /* Head/tail of the texture-scroll reference list (TexScrollRef) and the texture-scroll list (TexScroll). */
 extern ListNode *D_800E08E0;
@@ -349,10 +346,10 @@ TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
     return scroll;
 }
 
-typedef struct {
+struct ResourceEntry {
     char pad_0x0[0x1C];
     Gfx *dl;
-} ResourceEntry;
+};
 
 TexScroll *func_15195FB0(ResourceEntry *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
                          s32 speedT) {
@@ -463,16 +460,16 @@ typedef struct JetPoint {
 } JetPoint;
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
-typedef struct CharacterFlamethrowerActor {
+struct CharacterFlamethrowerActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
     /* 0x98 */ void *state;
-} CharacterFlamethrowerActor;
+};
 
 /* Preset in D_800A87A0 that func_15196438 copies into a CharacterFlamethrowerJet. */
-typedef struct CharacterFlamethrowerJetTemplate {
+struct CharacterFlamethrowerJetTemplate {
     /* 0x00 */ s16 lifetime;
     /* 0x04 */ f32 gravity;
     /* 0x08 */ f32 emitRate;
@@ -506,7 +503,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x5D */ u8 headFadeStep;
     /* 0x5E */ u8 tailFadeCount;
     /* 0x5F */ u8 tailFadeStep;
-} CharacterFlamethrowerJetTemplate;
+};
 
 /* State block (0x90 bytes) of a jet effect: emits particles between two bone-relative points. */
 typedef struct CharacterFlamethrowerJet {
@@ -556,18 +553,6 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x8F */ u8 tailFadeStep;
 } CharacterFlamethrowerJet;
 
-f32 func_151979F8(CharacterFlamethrowerActor *actor);
-f32 func_15197A0C(CharacterFlamethrowerActor *actor);
-f32 func_15197A68(CharacterFlamethrowerActor *actor);
-void func_151993E4(CharacterFlamethrowerActor *actor);
-s32 func_15198570(CharacterFlamethrowerActor *actor);
-s32 func_1519897C(CharacterFlamethrowerActor *actor);
-s32 func_151987CC(CharacterFlamethrowerActor *actor);
-void func_1519944C(CharacterFlamethrowerActor *actor);
-void func_15198C60(void);
-void func_15198C90(CharacterFlamethrowerActor *actor);
-void func_15198D40(CharacterFlamethrowerActor *actor);
-void func_15198D7C(CharacterFlamethrowerActor *actor);
 
 /* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
 f32 (*D_8008F870[])(void *, s32) = {
@@ -619,15 +604,15 @@ void func_151963B4(CharacterFlamethrowerActor *actor) {
 }
 
 /* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
-typedef struct JetChildPreset {
+struct JetChildPreset {
     /* 0x0 */ f32 sizeScale;
     /* 0x4 */ f32 unk4;
     /* 0x8 */ s16 lifeMin;
     /* 0xA */ s16 lifeRange;
-} JetChildPreset;
+};
 
 /* Sprite preset in D_800A8770 (func_151990AC). */
-typedef struct {
+struct JetSpritePreset {
     f32 radius;
     f32 speed;
     f32 speed_range;
@@ -637,7 +622,7 @@ typedef struct {
     s16 fade_range;
     s16 size;
     s16 size_range;
-} JetSpritePreset;
+};
 
 const JetChildPreset D_800A8710[] = {
     { 1.0f, 1.0f, 9, 12 },
@@ -753,7 +738,6 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     return actor;
 }
 
-void func_15198110(CharacterFlamethrowerActor *actor, s32 index);
 
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
 s32 func_15196748(CharacterFlamethrowerActor *actor) {
@@ -854,8 +838,6 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end);
-void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
 
 /*
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
@@ -1252,13 +1234,13 @@ typedef struct FlameLineData {
  * A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here.
  * The ones in this file are beams: a camera-facing quad from `start` towards `end`.
  */
-typedef struct SceneParticle {
+struct SceneParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ union {
         JetChildData jet;
         FlameLineData line;
     } data;
-} SceneParticle;
+};
 
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
 s32 func_15197AB4(SceneParticle *p) {
@@ -1386,7 +1368,6 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     return result;
 }
 
-void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
@@ -2083,7 +2064,7 @@ typedef struct CharacterFlamethrowerFlame {
 } CharacterFlamethrowerFlame;
 
 /* Spawn parameters for func_151994B8. */
-typedef struct CharacterFlamethrowerSetup {
+struct CharacterFlamethrowerSetup {
     /* 0x00 */ s32 kind;
     /* 0x04 */ FlameSeed seed;
     /* 0x50 */ u8 red;
@@ -2095,20 +2076,9 @@ typedef struct CharacterFlamethrowerSetup {
     /* 0x58 */ FlameLineParams line;
     /* 0x9C */ FlameScatterParams scatter;
     /* 0xE0 */ FlameEmitParams emit;
-} CharacterFlamethrowerSetup;
+};
 
 void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
-LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
-                         s32 arg7);
-void func_1519BEB8(CharacterFlamethrowerActor *actor);
-s32 func_1519C948(CharacterFlamethrowerActor *actor);
-s32 func_1519C970(CharacterFlamethrowerActor *actor);
-s32 func_1519C998(CharacterFlamethrowerActor *actor);
-void func_1519BF20(CharacterFlamethrowerActor *actor);
-void func_1519BF8C(void);
-void func_1519BFBC(CharacterFlamethrowerActor *actor);
-void func_1519C06C(CharacterFlamethrowerActor *actor);
-s32 func_1519C910(CharacterFlamethrowerActor *actor);
 
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
 void (*D_8008F8A4[])(void *) = { (void (*)(void *))func_1519BEB8 };
@@ -2230,7 +2200,6 @@ void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     }
 }
 
-void func_15199980(CharacterFlamethrowerActor *actor);
 
 /* Flame destroy: callbacks, then func_151478F4. */
 void func_15199928(CharacterFlamethrowerActor *actor) {
@@ -2264,7 +2233,6 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt);
 
 /* Per-frame flame update: moves its points under gravity and keeps the light at the oldest point. */
 s32 func_15199A10(CharacterFlamethrowerActor *actor) {
@@ -3254,7 +3222,6 @@ LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red
     return light;
 }
 
-void func_1519C258(LightEffect *light);
 void func_151617C4(LightEffect *light);
 void func_151617E4(LightEffect *light);
 
@@ -3453,13 +3420,13 @@ s32 func_1519C998(CharacterFlamethrowerActor *actor) {
 }
 
 /* An object that carries a character's flamethrower (callbacks func_1519C9C4/func_1519CD64). */
-typedef struct FlamethrowerController {
+struct FlamethrowerController {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *owner;
     /* 0x2C */ u8 ownerId;
     /* 0x2D */ u8 pad2D[3];
     /* 0x30 */ s32 aliveState[2];
-} FlamethrowerController;
+};
 
 /* Spawns the controller owner's flame from a built-in setup. */
 void func_1519C9C4(FlamethrowerController *ctrl) {

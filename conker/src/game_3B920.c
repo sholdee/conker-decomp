@@ -15,7 +15,6 @@ void func_151645C4(u8 enable);
 void func_151732E0(s32 levelId);
 void func_15178EB0(void);
 void func_151872B0(s32 levelId);
-void func_1519582C(void);
 void func_151EF640(u32 arg0);
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */
