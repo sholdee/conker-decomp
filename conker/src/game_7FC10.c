@@ -48,127 +48,139 @@ void func_15052760(struct127 *obj, s16 prevAngle) {
     }
 }
 
+/* One point of a path; D_800D2104[path] points to an array of these. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s32 unk4;
-} Struct150528C8;
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 pad6;
+} PathPoint;
 
+#define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
-void func_150528C8(struct127 *arg0) {
+// struct126 (include/structs.h) has no field at 0x12C yet.
+#define AI_UNK12C(ai) (*(u16 *)((u8 *)(ai) + 0x12C))
+
+/**
+ * Per-frame movement for a path-following object: picks a target height (the next path point, or the
+ * object in unk222), eases y_position toward it, updates the pitch-like unkB8, then moves the object.
+ */
+void func_150528C8(struct127 *obj) {
     f32 targetY;
-    f32 scale;
-    u32 ret;
-    s16 angle;
+    f32 climbSpeed;
+    u32 pitch;
+    s16 prevAngle;
     f32 floorY;
-    s32 flag;
-    s32 mode;
-    f32 limit;
-    f32 diff;
-    f32 t;
+    s32 autoTilt;
+    s32 heightMode; // 0: free, 1: approach targetY, 2: snapped to targetY
+    f32 maxStep;
+    f32 dy;
+    f32 range;
 
-    scale = (s8)arg0->unk22B;
-    angle = arg0->unk76;
-    floorY = ((Struct150528C8 **)D_800D2104)[arg0->unk13F][0].unk2;
-    flag = 1;
-    mode = 0;
-    if ((arg0->id == 0x4F) && ((u32)arg0->unk65 != 0) && (arg0->unk1D4 != NULL)) {
-        arg0->y_position = D_800CC2D0[arg0->unk65].y_position + (D_800CC2D0[arg0->unk65 - 1].y_scale * 284.0f);
+    climbSpeed = (s8)obj->unk22B;
+    prevAngle = obj->unk76;
+    floorY = PATH_POINTS(obj->unk13F)[0].y;
+    autoTilt = 1;
+    heightMode = 0;
+    // matching: the u32 compare (a no-op on a u8) steers IDO's register allocation
+    if ((obj->id == 0x4F) && ((u32)obj->unk65 != 0) && (obj->unk1D4 != NULL)) {
+        obj->y_position = D_800CC2D0[obj->unk65].y_position + (D_800CC2D0[obj->unk65 - 1].y_scale * 284.0f);
     }
-    arg0->unkF8 |= 0x10000;
-    arg0->unk80 = 10;
-    if (arg0->id == 10) {
-        targetY = D_800CC2D0[arg0->unk222].y_position + 80.0f;
+    obj->unkF8 |= 0x10000;
+    obj->unk80 = 10;
+    if (obj->id == 10) {
+        targetY = D_800CC2D0[obj->unk222].y_position + 80.0f;
     } else {
-        targetY = ((Struct150528C8 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].unk2;
+        targetY = PATH_POINTS(obj->unk13F)[obj->unk21E + 1].y;
     }
-    if ((s16)arg0->unk224 != 0) {
-        targetY = (s16)arg0->unk224;
+    if ((s16)obj->unk224 != 0) {
+        targetY = (s16)obj->unk224;
     }
-    if ((arg0->unk223 == 14) || (arg0->unk223 == 3)) {
-        targetY = D_800CC2D0[arg0->unk222].y_position - 40.0f;
+    if ((obj->unk223 == 14) || (obj->unk223 == 3)) {
+        targetY = D_800CC2D0[obj->unk222].y_position - 40.0f;
     }
-    if ((arg0->id == 0x4F) || (arg0->id == 0x83)) {
-        if (arg0->unk251 == 1) {
-            flag = 0;
-            ret = func_1505A630(arg0->xz_velocity, arg0->y_velocity, 0);
-            arg0->unkB8 = ret * -0.005493164f;
+    if ((obj->id == 0x4F) || (obj->id == 0x83)) {
+        if (obj->unk251 == 1) {
+            autoTilt = 0;
+            pitch = func_1505A630(obj->xz_velocity, obj->y_velocity, 0);
+            obj->unkB8 = pitch * -0.005493164f;
         } else {
-            mode = 1;
-            if (D_800CC2D0[arg0->unk124 - 1].unk127 == 0xFF) {
-                arg0->unkB8 *= 0.200000003f;
+            heightMode = 1;
+            if (D_800CC2D0[obj->unk124 - 1].unk127 == 0xFF) {
+                obj->unkB8 *= 0.200000003f;
             }
         }
     }
-    if (arg0->id == 8) {
-        targetY = D_800CC2D0[arg0->unk222].y_position - 40.0f;
-        if ((s16)arg0->unk224 != 0) {
-            targetY = (s16)arg0->unk224;
+    if (obj->id == 8) {
+        targetY = D_800CC2D0[obj->unk222].y_position - 40.0f;
+        if ((s16)obj->unk224 != 0) {
+            targetY = (s16)obj->unk224;
         }
-        if ((floorY < arg0->y_position) && (arg0->y_velocity > 0.0f)) {
-            arg0->y_velocity *= 0.8000000119f;
+        if ((floorY < obj->y_position) && (obj->y_velocity > 0.0f)) {
+            obj->y_velocity *= 0.8000000119f;
         }
-        if (arg0->unk223 != 3) {
-            mode = 1;
+        if (obj->unk223 != 3) {
+            heightMode = 1;
         }
     }
     if (floorY < targetY) {
         targetY = floorY;
     }
-    if (mode != 0) {
-        limit = scale * D_800BE9A4;
-        diff = targetY - arg0->y_position;
-        if ((diff < limit) && (-limit < diff)) {
-            mode = 2;
-            arg0->y_position += diff * 0.150000006f;
-            arg0->y_velocity = 0.0f;
-            arg0->gravity = 0.0f;
+    if (heightMode != 0) {
+        maxStep = climbSpeed * D_800BE9A4;
+        dy = targetY - obj->y_position;
+        if ((dy < maxStep) && (-maxStep < dy)) {
+            heightMode = 2;
+            obj->y_position += dy * 0.150000006f;
+            obj->y_velocity = 0.0f;
+            obj->gravity = 0.0f;
         }
     }
-    if (arg0->unk226 == 0xFF) {
+    if (obj->unk226 == 0xFF) {
         f32 vel;
-        if (arg0->unk31C != NULL) {
-            if (D_800BE9E4 < *(u16 *)((u8 *)arg0->unk31C + 0x12C)) {
-                *(u16 *)((u8 *)arg0->unk31C + 0x12C) -= D_800BE9E4;
-                if (arg0->health > 0) {
-                    arg0->xz_velocity = 254.0f;
+        if (obj->unk31C != NULL) {
+            if (D_800BE9E4 < AI_UNK12C(obj->unk31C)) {
+                AI_UNK12C(obj->unk31C) -= D_800BE9E4;
+                if (obj->health > 0) {
+                    obj->xz_velocity = 254.0f;
                 }
             } else {
-                *(u16 *)((u8 *)arg0->unk31C + 0x12C) = 0;
+                AI_UNK12C(obj->unk31C) = 0;
             }
-            if ((arg0->unk31C->unk8C & 0x2000) && (arg0->health != 0)) {
-                func_150D7790((u8 *)arg0, arg0->unk31C->unk75 & 0x7F);
+            if ((obj->unk31C->unk8C & 0x2000) && (obj->health != 0)) {
+                func_150D7790((u8 *)obj, obj->unk31C->unk75 & 0x7F);
             }
         }
-        func_1504CA60(arg0);
-        vel = -arg0->y_velocity;
+        func_1504CA60(obj);
+        vel = -obj->y_velocity;
         if (vel > 30.0f) {
             vel = 30.0f;
         }
-        arg0->unkB8 += (vel - arg0->unkB8) * 0.400000006f;
+        obj->unkB8 += (vel - obj->unkB8) * 0.400000006f;
     } else {
-        if ((mode != 2) && ((u32)arg0->unk226 != 0)) {
-            t = (u32)arg0->unk226 * 0.1000000015f;
-            func_15058EA4(arg0, targetY, t, targetY, -t, scale, -scale);
+        // matching: as above, the compare needs the u32 cast
+        if ((heightMode != 2) && ((u32)obj->unk226 != 0)) {
+            range = (u32)obj->unk226 * 0.1000000015f;
+            func_15058EA4(obj, targetY, range, targetY, -range, climbSpeed, -climbSpeed);
         }
-        if ((flag != 0) && (arg0->id != 0x49) && !(arg0->unk22C & 8)) {
-            arg0->unkB8 += ((arg0->y_velocity * -2.5f) - arg0->unkB8) * 0.1800000072f;
+        if ((autoTilt != 0) && (obj->id != 0x49) && !(obj->unk22C & 8)) {
+            obj->unkB8 += ((obj->y_velocity * -2.5f) - obj->unkB8) * 0.1800000072f;
         }
     }
-    if (arg0->stunned != 0) {
-        func_150585F0(arg0, 0.05000000074505806f);
+    if (obj->stunned != 0) {
+        func_150585F0(obj, 0.0500000007f);
     } else {
-        func_15056B08(arg0);
+        func_15056B08(obj);
     }
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.005493164f;
-    func_15059140(arg0);
-    if (flag != 0) {
-        func_15052760(arg0, angle);
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(obj);
+    if (autoTilt != 0) {
+        func_15052760(obj, prevAngle);
     }
-    if (arg0->id == 0x9E) {
-        arg0->unk2E4 = 0;
+    if (obj->id == 0x9E) {
+        obj->unk2E4 = 0;
     }
-    if (((D_800BE616 != 0) && (D_800C3E78 < D_8008FD90)) || (func_150535F4(arg0) == 0)) {
-        func_1502178C(arg0, 0, -1);
+    if (((D_800BE616 != 0) && (D_800C3E78 < D_8008FD90)) || (func_150535F4(obj) == 0)) {
+        func_1502178C(obj, 0, -1);
     }
 }
