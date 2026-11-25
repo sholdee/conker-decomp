@@ -2,92 +2,142 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1514C2F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
-                          u8 arg4, s8 arg5, s16 arg6, u8 arg7,
-                          s32 arg8, f32 arg9, s32 arg10, u8 arg11);
+void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
+                   u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
 
-s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
-                  s32 arg12, u8 arg13, s32 arg14);
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3) {
-    func_1514C2F0(arg0, arg1, arg2, 80.0f, 0, 3, 0x19, 2, 0, 0.0f, 0, arg3);
+/* Spawn description passed to func_15147DA0 (first argument). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 lifetime; /* becomes Trail.lifetime */
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 pointCount;
+    /* 0x16 */ u8 pad16[0xA];
+} TrailSpawn; /* size 0x20 */
+
+/* Motion and appearance block that func_15147DA0 copies from its second argument. */
+typedef struct {
+    /* 0x00 */ f32 halfWidth;
+    /* 0x04 */ Vec3f velocity;
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ u8 pad14[4];
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 texture;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B; /* faded by func_150C1978 */
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+} TrailMotion; /* size 0x20 */
+
+/* Render settings that func_15147DA0 copies from its 12th argument. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 renderMode;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s8 unk1C;
+    /* 0x1D */ s8 unk1D;
+} TrailRender; /* size 0x20 */
+
+/* Trail parameters; only the fields used here. */
+typedef struct {
+    /* 0x00 */ TrailMotion motion;
+} TrailParams;
+
+/* A trail object; only the fields used here. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 lifetime;
+    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
+    /* 0x98 */ TrailParams *params;
+} Trail;
+
+Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                     s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                     TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
+
+/* Spawns a ring of 25 kind-2 particles (func_150C16C0) of radius 80 around (x, y, z). */
+void func_150C1660(f32 x, f32 y, f32 z, u8 arg3) {
+    func_1514C2F0(x, y, z, 80.0f, 0, 3, 25, 2, 0, 0.0f, 0, arg3);
 }
 
-s32 func_150C16C0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
-    struct { f32 x; f32 y; f32 z; s16 unk0C; s16 unk0E; s32 unk10; u8 pad14; u8 unk15; s32 pad18; s32 pad1C; } sp108;
-    struct { f32 unk00; f32 unk04; f32 unk08; f32 unk0C; f32 unk10; u8 pad14[4]; u8 unk18; u8 unk19; u8 unk1A; u8 unk1B; s32 pad1C; } spE8;
-    struct { s32 unk00; s32 unk04; s32 unk08; s32 unk0C; s32 unk10; s32 unk14; s32 unk18; u8 unk1C; u8 unk1D; } spC8;
-    s32 i;
-    s16 ang;
-    f32 mag;
-    f32 spA;
-    f32 spB;
-    f32 spC;
-    f32 spD;
+/*
+ * Particle kind 2 spawn callback (D_8008AA00[2]): launches one trail from (x, y, z)
+ * outward along `angle` and upward at a random pitch, faded out by func_150C1978.
+ */
+s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
+                  f32 originZ, s32 angle, s32 baseAngle, f32 radius, s32 arg11, f32 arg12,
+                  s32 arg13, u8 arg14) {
+    TrailSpawn spawn;
+    TrailMotion motion;
+    TrailRender render;
+    s32 count;
+    s16 pitch;
+    f32 speed;
+    f32 pitchSin;
+    f32 pitchCos;
+    f32 angleSin;
+    f32 angleCos;
 
-    i = 1;
-    spC8.unk00 = 0;
-    spC8.unk04 = 1;
-    spC8.unk08 = 0x160600;
-    spC8.unk0C = 3;
-    spC8.unk10 = 0x10;
-    spC8.unk14 = 0x80;
-    spC8.unk18 = 0x20;
-    spC8.unk1C = 0;
-    spC8.unk1D = 9;
-    sp108.unk10 = 1;
-    sp108.unk0E = 1;
-    spE8.unk19 = 0xA;
-    spE8.unk1A = 0xFF;
-    spE8.unk18 = 0x28;
-    spE8.unk1B = 0xFF;
-    sp108.x = arg2;
-    sp108.y = arg3;
-    sp108.z = arg4;
+    count = 1;
+    render.unk0 = 0;
+    render.unk4 = 1;
+    render.unk8 = 0x160600;
+    render.renderMode = 3;
+    render.unk10 = 0x10;
+    render.unk14 = 0x80;
+    render.unk18 = 0x20;
+    render.unk1C = 0;
+    render.unk1D = 9;
+    spawn.unk10 = 1;
+    spawn.unkE = 1;
+    motion.texture = 10;
+    motion.unk1A = 0xFF;
+    motion.flags = 40;
+    motion.unk1B = 0xFF;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.pos.z = z;
 
     do {
-        ang = (func_150ADA20() % 13U) - 0x3F;
-        spA = func_151423D8((u8)ang);
-        spB = func_151423D8((u8)(ang - 0x40));
-        spC = func_151423D8((u8)arg8);
-        spD = func_151423D8((u8)(arg8 - 0x40));
-        mag = (func_150ADA68() * 17.4f) + 25.5f;
-        sp108.unk15 = (func_150ADA20() % 9U) + 5;
-        sp108.unk0C = (func_150ADA20() & 0x3F) + 0x5A;
-        spE8.unk00 = (func_150ADA68() * 20.2f) + 24.7f;
-        spE8.unk10 = (func_150ADA68() * 0.2f) + 0.4f;
-        spE8.unk04 = (mag * spA) * spD;
-        spE8.unk08 = -mag * spB;
-        spE8.unk0C = (mag * spA) * spC;
-        func_15147DA0(&sp108, &spE8, 0, 1, 5, 0, 0, 0, 0, 0, 0, (s32 *)&spC8, 0, arg14, 0);
-        i--;
-    } while (i != 0);
+        pitch = (func_150ADA20() % 13U) - 63;
+        pitchSin = func_151423D8(pitch);
+        pitchCos = func_151423D8(pitch - 64);
+        angleSin = func_151423D8(angle);
+        angleCos = func_151423D8(angle - 64);
+        speed = func_150ADA68() * 17.4f + 25.5f;
+        spawn.pointCount = func_150ADA20() % 9U + 5;
+        spawn.lifetime = (func_150ADA20() & 0x3F) + 90;
+        motion.halfWidth = func_150ADA68() * 20.2f + 24.7f;
+        motion.gravity = func_150ADA68() * 0.2f + 0.4f;
+        motion.velocity.x = speed * pitchSin * angleCos;
+        motion.velocity.y = -speed * pitchCos;
+        motion.velocity.z = speed * pitchSin * angleSin;
+        func_15147DA0(&spawn, &motion, 0, 1, 5, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 0);
+        count--;
+    } while (count != 0);
     return 1;
 }
 
-typedef struct {
-    char pad[0x1B];
-    u8 unk1B;
-} SubStruct_150C1978;
+/* Trail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
+s32 func_150C1978(Trail *trail) {
+    TrailParams *params = trail->params;
+    s32 alpha = trail->lifetime << 3;
 
-typedef struct {
-    char pad[0x1C];
-    s16 unk1C;
-    char pad2[0x98 - 0x1E];
-    SubStruct_150C1978 *unk98;
-} Struct_150C1978;
-
-s32 func_150C1978(Struct_150C1978 *a0) {
-    SubStruct_150C1978 *p = a0->unk98;
-    s32 v1 = a0->unk1C << 3;
-    if (v1 >= 0x100) {
-        v1 = 0xFF;
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
     }
-    p->unk1B = v1;
-    if ((v1 & 0xFF) < 0) {
+    params->motion.unk1B = alpha;
+    // matching: never true, but the original tests the low byte here
+    if ((alpha & 0xFF) < 0) {
         return 0;
     }
     return 1;
