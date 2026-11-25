@@ -13,21 +13,6 @@ typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-/* Parameter block for func_151A6F00. */
-typedef struct Fx151A6F00Args {
-    s16 unk00;
-    s16 pad02;
-    Vec3f pos;
-    s16 unk10;
-    s16 pad12;
-    f32 unk14;
-    s16 angle;
-    s16 unk1A, unk1C, unk1E;
-    f32 unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50;
-    u8 unk54, unk55;
-    s16 unk56, unk58;
-} Fx151A6F00Args;
-
 /* matching: StreakBurst plus 0x4 bytes; the stack frame needs the larger size. */
 typedef struct StreakBurst4C {
     /* 0x00 */ s16 countBase;
@@ -62,7 +47,7 @@ typedef struct StreakBurst4C {
 extern PipeSpot D_8009F920[3];
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
-extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
+extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(StreakBurst4C *, u8);
 extern void func_15152F70(SimplePuffSpray *, u8);
@@ -70,7 +55,7 @@ extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
-    Fx151A6F00Args argsA;
+    DebrisEmitter argsA;
     s16 i;
     StreakBurst4C argsB;
     SimplePuffSpray argsC;
@@ -80,31 +65,31 @@ void func_150B2740(u8 pipe, u8 arg1) {
     TrailStateParams argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-    argsA.unk00 = (func_150ADA20() & 1) + 3;
+    argsA.count = (func_150ADA20() & 1) + 3;
     argsA.pos = D_8009F920[pipe].pos;
-    argsA.unk14 = 170.0f;
-    argsA.unk20 = 16.20000076f;
-    argsA.unk24 = 17.60000038f;
-    argsA.unk28 = 19.30000114f;
-    argsA.unk2C = 21.30000114f;
-    argsA.unk10 = 300;
-    argsA.angle = D_8009F920[pipe].yaw - 0x20;
-    argsA.unk1A = 65;
-    argsA.unk1C = -40;
-    argsA.unk1E = 80;
-    argsA.unk54 = 1;
-    argsA.unk55 = 0;
-    argsA.unk56 = 50;
-    argsA.unk58 = 25;
-    argsA.unk30 = 0.0f;
-    argsA.unk34 = 0.0f;
-    argsA.unk38 = 0.0f;
-    argsA.unk3C = 0.4670000076f;
-    argsA.unk40 = 0.5139999986f;
-    argsA.unk44 = -1.0f;
-    argsA.unk48 = -2.600000143f;
-    argsA.unk4C = -5.0f;
-    argsA.unk50 = 10.0f;
+    argsA.radius = 170.0f;
+    argsA.speedBase = 16.20000076f;
+    argsA.speedRange = 17.60000038f;
+    argsA.velYBase = 19.30000114f;
+    argsA.velYRange = 21.30000114f;
+    argsA.lifetime = 300;
+    argsA.yawBase = D_8009F920[pipe].yaw - 0x20;
+    argsA.yawRange = 65;
+    argsA.pitchBase = -40;
+    argsA.pitchRange = 80;
+    argsA.landPuffs = 1;
+    argsA.landPuffFlag = 0;
+    argsA.landPuffLifeBase = 50;
+    argsA.landPuffLifeRange = 25;
+    argsA.dir.x = 0.0f;
+    argsA.dir.y = 0.0f;
+    argsA.dir.z = 0.0f;
+    argsA.sizeBase = 0.4670000076f;
+    argsA.sizeRange = 0.5139999986f;
+    argsA.gravityBase = -1.0f;
+    argsA.gravityRange = -2.600000143f;
+    argsA.spinBase = -5.0f;
+    argsA.spinRange = 10.0f;
     func_151A6F00(&argsA, 0, arg1, 1);
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
