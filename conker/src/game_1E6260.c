@@ -305,7 +305,7 @@ void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32
 /* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
 s32 func_151B9408(struct225 *effect) {
-    f32 extend;
+    f32 extend; // matching: the 500.0f literal needs its own local (inline changes the frame)
     Particle *lamp;
     vertex point;
     f32 mtx[4][4];
