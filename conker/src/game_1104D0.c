@@ -449,9 +449,9 @@ void func_150E4010(Obj4010 *obj) {
     Obj4010State *state;
 
     state = &obj->state;
-    if (obj->state.unkA4 != 0) {
+    if (state->unkA4 != 0) {
         func_1505D1C4(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
-                      ((u16)(u32)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
+                      ((u16)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
     }
 }
 
