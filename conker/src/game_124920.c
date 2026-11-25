@@ -968,7 +968,7 @@ void func_150F892C(StageObj *obj) {
             spawn.pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
             spawn.pos.unk0 += state->unk40;
             spawn.pos.unk8 += state->unk44;
-            i = angle - 7;
+            i = angle - 7; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; pieces > 0; pieces--) {
                 spawn.unk54 = (func_150ADA20() & 0xF) + 35;
                 spawn.unk08 = spawn.unk0C = func_150ADA68() * 0.012f + 0.005f;
@@ -1030,7 +1030,7 @@ void func_150F892C(StageObj *obj) {
             flare.pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
             flare.pos.unk0 += state->unk40;
             flare.pos.unk8 += state->unk44;
-            i = angle - 4;
+            i = angle - 4; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; flares > 0; flares--) {
                 s32 flip;
 
