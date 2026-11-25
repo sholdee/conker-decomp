@@ -9,7 +9,7 @@ typedef struct {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
     /* 0x4 */ s16 z;
-    /* 0x6 */ u16 unk6;
+    /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
 } PathKey; // size 0x8
 
 /* A channel keyframe: a timed value for one animated property (D_800C3778[slot][track][key]). */
@@ -41,6 +41,31 @@ typedef struct {
     /* 0x3C */ u8 segment;          // PathKey index of the cached segment; 0xFF = none
     /* 0x3D */ u8 pad3D[3];
 } TrackPath; // size 0x40
+
+/* Current animated values of a track (one TrackState array per slot at D_800C3958). Which property
+   each unk field holds depends on the track's TrackInfo type. */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 yOffset;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} TrackState; // size 0x44
+
+/* variables.h declares D_800C3958 as a single struct233 *; it is really TrackState *[2]. */
+#define TRACK_STATE(slot) (((TrackState **)&D_800C3958)[slot])
 
 extern u16 *D_800C35C8[];
 extern u16 *D_800C35D8[];
@@ -516,7 +541,7 @@ void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
                     D_800C3A50[arg2][i].arcLength = allocate_memory(0x194, 1, 0, 0);
                 }
             }
-            ((void **)&D_800C3958)[arg2] = allocate_memory(hdr->n0 * 0x44, 1, 0, 0);
+            TRACK_STATE(arg2) = allocate_memory(hdr->n0 * sizeof(TrackState), 1, 0, 0);
             for (i = 0; i < hdr->n0; i++) {
                 D_800C3960[arg2][i] = allocate_memory(0x10, 1, 0, 0);
             }
@@ -897,8 +922,8 @@ void func_1501E540(s32 arg0) {
         }
         func_10004074((s32)D_800C3A50[arg0]);
         D_800C3A50[arg0] = 0;
-        func_10004074((s32)((u8 **)&D_800C3958)[arg0]);
-        ((u8 **)&D_800C3958)[arg0] = 0;
+        func_10004074((s32)TRACK_STATE(arg0));
+        TRACK_STATE(arg0) = NULL;
         if ((s32)*count > 0) {
             s32 *cursor;
 
@@ -1032,9 +1057,6 @@ typedef struct {
     f32 unk24;
     f32 unk28;
 } Msg1501EA18;
-typedef struct {
-    s16 x, y, z;
-} Vec3s1501EA18;
 extern void func_1512D560(void *, s32, void *);
 void func_150228E4(s32 arg0);
 void func_150227BC(s32 arg0);
@@ -1098,26 +1120,6 @@ void func_1501EA18(s32 arg0) {
     }
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Out1501EC38;
-
 extern f32 func_150497E0(f32 *, s32, f32);
 void func_1501FC8C(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3);
@@ -1151,53 +1153,53 @@ void func_1501EC38(s32 arg0) {
         D_800C3638 = 0;
         for (i = 0; i < D_800C363A[arg0]; i++) {
             if (D_800C35C8[arg0][i] != 0) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = D_800C3868[arg0][i]->x;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = D_800C3868[arg0][i]->y;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = D_800C3868[arg0][i]->z;
+                TRACK_STATE(arg0)[i].x = D_800C3868[arg0][i]->x;
+                TRACK_STATE(arg0)[i].y = D_800C3868[arg0][i]->y;
+                TRACK_STATE(arg0)[i].z = D_800C3868[arg0][i]->z;
             } else {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = 0.0f;
+                TRACK_STATE(arg0)[i].x = 0.0f;
+                TRACK_STATE(arg0)[i].y = 0.0f;
+                TRACK_STATE(arg0)[i].z = 0.0f;
             }
             if (D_800C35F0[arg0][i].type == 4) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = 64.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = 20.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = 255.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = 62.5f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = 50.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 0.0f;
+                TRACK_STATE(arg0)[i].unkC = 64.0f;
+                TRACK_STATE(arg0)[i].unk10 = 0.0f;
+                TRACK_STATE(arg0)[i].unk14 = 20.0f;
+                TRACK_STATE(arg0)[i].unk18 = 255.0f;
+                TRACK_STATE(arg0)[i].unk1C = 62.5f;
+                TRACK_STATE(arg0)[i].unk20 = 50.0f;
+                TRACK_STATE(arg0)[i].unk24 = 0.0f;
+                TRACK_STATE(arg0)[i].unk28 = 0.0f;
+                TRACK_STATE(arg0)[i].unk2C = 0.0f;
+                TRACK_STATE(arg0)[i].unk34 = 0.0f;
             } else {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = D_800C35A4;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = 0.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk3C = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk40 = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk30 = -9999.0f;
+                TRACK_STATE(arg0)[i].unkC = 0.0f;
+                TRACK_STATE(arg0)[i].unk10 = D_800C35A4;
+                TRACK_STATE(arg0)[i].unk14 = 0.0f;
+                TRACK_STATE(arg0)[i].unk18 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk1C = -9999.0f;
+                TRACK_STATE(arg0)[i].unk20 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk24 = 0.0f;
+                TRACK_STATE(arg0)[i].unk28 = 0.0f;
+                TRACK_STATE(arg0)[i].unk2C = 0.0f;
+                TRACK_STATE(arg0)[i].unk3C = -9999.0f;
+                TRACK_STATE(arg0)[i].unk40 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk30 = -9999.0f;
             }
-            ((Out1501EC38 **)&D_800C3958)[arg0][i].unk38 = 0.0f;
+            TRACK_STATE(arg0)[i].yOffset = 0.0f;
             if (D_800C35F0[arg0][i].type == 1) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk34 = -9999.0f;
             } else if (D_800C35F0[arg0][i].type == 2) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
+                TRACK_STATE(arg0)[i].unk34 = 255.0f;
             } else if (D_800C35F0[arg0][i].type == 5) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = 32.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = 32.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 1.0f;
+                TRACK_STATE(arg0)[i].unk18 = 32.0f;
+                TRACK_STATE(arg0)[i].unk1C = 32.0f;
+                TRACK_STATE(arg0)[i].unk34 = 1.0f;
             } else if (D_800C35F0[arg0][i].type == 3) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = -9999.0f;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
+                TRACK_STATE(arg0)[i].unk18 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk1C = -9999.0f;
+                TRACK_STATE(arg0)[i].unk20 = -9999.0f;
+                TRACK_STATE(arg0)[i].unk34 = 255.0f;
             }
             if (D_800C3778[arg0][i] != NULL) {
                 for (j = 0; j < 15; j++) {
@@ -1306,52 +1308,52 @@ void func_1501EC38(s32 arg0) {
                     r[10] = 0.0f;
                 }
                 if (*((u8 *(*)[30])D_800C3960)[arg0][i] != 0xFF) {
-                    func_1501FE68(i, r[10], &((Out1501EC38 **)&D_800C3958)[arg0][i].unk10, arg0);
+                    func_1501FE68(i, r[10], &TRACK_STATE(arg0)[i].unk10, arg0);
                 } else if (r[7] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = r[7];
+                    TRACK_STATE(arg0)[i].unk10 = r[7];
                 }
                 if (r[8] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = r[8];
+                    TRACK_STATE(arg0)[i].unkC = r[8];
                 }
                 if (r[6] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = r[6];
+                    TRACK_STATE(arg0)[i].unk14 = r[6];
                 }
                 if (r[5] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = r[5];
+                    TRACK_STATE(arg0)[i].unk18 = r[5];
                 }
                 if (r[4] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = r[4];
+                    TRACK_STATE(arg0)[i].unk1C = r[4];
                 }
                 if (r[3] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = r[3];
+                    TRACK_STATE(arg0)[i].unk20 = r[3];
                 }
                 if (r[1] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = r[1];
+                    TRACK_STATE(arg0)[i].unk24 = r[1];
                 }
                 if (r[2] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = r[2];
+                    TRACK_STATE(arg0)[i].unk28 = r[2];
                 }
                 if (r[0] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = r[0];
+                    TRACK_STATE(arg0)[i].unk2C = r[0];
                 }
                 if (r[14] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk30 = r[14];
+                    TRACK_STATE(arg0)[i].unk30 = r[14];
                 }
                 if (r[9] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = r[9];
+                    TRACK_STATE(arg0)[i].unk34 = r[9];
                 }
                 if (r[11] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk38 = r[11];
+                    TRACK_STATE(arg0)[i].yOffset = r[11];
                 }
                 if (r[13] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk3C = r[13];
+                    TRACK_STATE(arg0)[i].unk3C = r[13];
                 }
                 if (r[12] != -9999.0f) {
-                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk40 = r[12];
+                    TRACK_STATE(arg0)[i].unk40 = r[12];
                 }
-                func_1501FC8C(i, r[10], &((Out1501EC38 **)&D_800C3958)[arg0][i].unk0,
-                              &((Out1501EC38 **)&D_800C3958)[arg0][i].unk4,
-                              &((Out1501EC38 **)&D_800C3958)[arg0][i].unk8, arg0);
+                func_1501FC8C(i, r[10], &TRACK_STATE(arg0)[i].x,
+                              &TRACK_STATE(arg0)[i].y,
+                              &TRACK_STATE(arg0)[i].z, arg0);
             }
         }
         D_800C3638 = 1;
@@ -1400,7 +1402,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
     if (key != D_800C3A50[slot][track].segment) {
         func_15020878(track, key, slot);
     }
-    linear = D_800C3868[slot][track][key].unk6;
+    linear = D_800C3868[slot][track][key].linear;
     func_1501FFE8((f32 *)points, D_800C3868[slot][track], key, D_800C35C8[slot][track]);
     if (linear == 0) {
         hi = 100;
@@ -1464,7 +1466,7 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 slot) {
         }
         dist = D_800C3A50[slot][track].length * percent * 0.009999999776f;
         sample = func_1501F72C(track, dist, positions, slot, &segment);
-        if (D_800C3868[slot][track][segment].unk6 == 0) {
+        if (D_800C3868[slot][track][segment].linear == 0) {
             arc = D_800C3A50[slot][track].arcLength + sample;
             percent = arc[1] - arc[0];
             covered = dist - arc[0];
@@ -1507,7 +1509,7 @@ void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 slot) {
         dist = D_800C3A50[slot][track].length * percent * D_800969D8;
         func_1501F72C(track, dist, positions, slot, segment);
 
-        if (D_800C3868[slot][track][segment[0]].unk6 == 0) {
+        if (D_800C3868[slot][track][segment[0]].linear == 0) {
             dx = positions[0] - positions[3];
             dz = positions[2] - positions[5];
         } else {
@@ -1564,7 +1566,8 @@ void func_1501FFE8(f32 *out, PathKey *keys, s32 key, s32 numKeys) {
     }
 }
 
-void func_15020388(s32 arg0, s32 arg1) {
+/* Measure track `track`'s path: the distance at each key and the total length. */
+void func_15020388(s32 track, s32 slot) {
     s32 i;
     s32 j;
     f32 pts[4][3];
@@ -1580,17 +1583,17 @@ void func_15020388(s32 arg0, s32 arg1) {
     f32 y;
     f32 dist;
     u8 cur;
-    u16 flag;
+    u16 linear;
 
-    if (D_800C35C8[arg1][arg0] >= 2) {
-        D_800C3A50[arg1][arg0].segment = 0xFF;
+    if (D_800C35C8[slot][track] >= 2) {
+        D_800C3A50[slot][track].segment = 0xFF;
         len = 0.0f;
         cur = 0;
-        for (i = 0; i < D_800C35C8[arg1][arg0] - 1; i++) {
-            flag = D_800C3868[arg1][arg0][i].unk6;
-            func_1501FFE8(&pts[0][0], D_800C3868[arg1][arg0], i, D_800C35C8[arg1][arg0]);
-            D_800C3A50[arg1][arg0].keyDistance[i] = len;
-            if (flag == 0) {
+        for (i = 0; i < D_800C35C8[slot][track] - 1; i++) {
+            linear = D_800C3868[slot][track][i].linear;
+            func_1501FFE8(&pts[0][0], D_800C3868[slot][track], i, D_800C35C8[slot][track]);
+            D_800C3A50[slot][track].keyDistance[i] = len;
+            if (linear == 0) {
                 for (j = 0; j < 3; j++) {
                     a[j] = -0.5f * pts[0][j] + 1.5f * pts[1][j] + -1.5f * pts[2][j] + 0.5f * pts[3][j];
                     b[j] = pts[0][j] + -2.5f * pts[1][j] + 2.0f * pts[2][j] + -0.5f * pts[3][j];
@@ -1607,6 +1610,7 @@ void func_15020388(s32 arg0, s32 arg1) {
                     buf[cur][2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
                     dist = x - buf[!cur][0];
                     z = buf[cur][1] - buf[!cur][1];
+                    // matching: forces a reload of the stored z instead of reusing the register
                     x = *(volatile f32 *)&buf[cur][2] - buf[!cur][2];
                     dist = dist * dist;
                     z = z * z;
@@ -1624,18 +1628,18 @@ void func_15020388(s32 arg0, s32 arg1) {
                 len += sqrtf(dist * dist + (t * t + y * y));
             }
         }
-        D_800C3A50[arg1][arg0].keyDistance[i] = len;
-        D_800C3A50[arg1][arg0].length = len;
-        D_800C3A50[arg1][arg0].segment = 0xFF;
+        D_800C3A50[slot][track].keyDistance[i] = len;
+        D_800C3A50[slot][track].length = len;
+        D_800C3A50[slot][track].segment = 0xFF;
     }
 }
 
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-extern f32 D_800969EC;
 
-void func_15020878(s32 arg0, s32 arg1, s32 arg2) {
+/* Cache the cubic and the 101-sample arc-length table of segment `segment` of track `track`. */
+void func_15020878(s32 track, s32 segment, s32 slot) {
     s32 i;
     s32 k;
     f32 points[12];
@@ -1650,78 +1654,59 @@ void func_15020878(s32 arg0, s32 arg1, s32 arg2) {
     f32 dx;
     f32 dy;
     f32 dz;
-    s32 interp;
+    s32 linear;
 
-    if (arg1 >= D_800C35C8[arg2][arg0] - 1) {
+    if (segment >= D_800C35C8[slot][track] - 1) {
         return;
     }
-    {
-        j = 0;
-        total = D_800C3A50[arg2][arg0].keyDistance[arg1];
-        interp = D_800C3868[arg2][arg0][arg1].unk6;
-        func_1501FFE8(points, D_800C3868[arg2][arg0], arg1, D_800C35C8[arg2][arg0]);
-        if (interp == 0) {
-            for (i = 0; i < 3; i++) {
-                a[i] = -0.5f * points[i] + 1.5f * points[i + 3] + -1.5f * points[i + 6] + points[i + 9] * 0.5f;
-                b[i] = points[i] + -2.5f * points[i + 3] + (points[i + 6] + points[i + 6]) + points[i + 9] * -0.5f;
-                c[i] = -0.5f * points[i] + points[i + 6] * 0.5f;
-                d[i] = points[i + 3];
-                D_800C3A50[arg2][arg0].coef0[i] = d[i];
-                D_800C3A50[arg2][arg0].coef1[i] = c[i];
-                D_800C3A50[arg2][arg0].coef2[i] = b[i];
-                D_800C3A50[arg2][arg0].coef3[i] = a[i];
-            }
-            D_800C3A50[arg2][arg0].arcLength[0] = total;
-            for (i = 0; i != 3; i++) {
-                pos[!j][i] = d[i];
-            }
-            i = 1;
-            t = 0.009999999776f;
-            while (t <= 1.0f) {
-                pos[j][0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
-                pos[j][1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
-                pos[j][2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
-                dx = pos[j][0] - pos[!j][0];
-                dx *= dx;
-                dy = pos[j][1] - pos[!j][1];
-                dy *= dy;
-                t += 0.009999999776f;
-                dz = pos[j][2] - pos[!j][2];
-                dz *= dz;
-                dx += dy + dz;
-                if (dx != 0.0f) {
-                    total += sqrtf(dx);
-                }
-                D_800C3A50[arg2][arg0].arcLength[i] = total;
-                i++;
-                j ^= 1;
-            }
-        } else {
-            total = D_800C3A50[arg2][arg0].keyDistance[arg1 + 1] - total;
-            for (k = 0; k < 101; k++) {
-                D_800C3A50[arg2][arg0].arcLength[k] = (f32)k * total / 101.0f;
-            }
+    j = 0;
+    total = D_800C3A50[slot][track].keyDistance[segment];
+    linear = D_800C3868[slot][track][segment].linear;
+    func_1501FFE8(points, D_800C3868[slot][track], segment, D_800C35C8[slot][track]);
+    if (linear == 0) {
+        for (i = 0; i < 3; i++) {
+            a[i] = -0.5f * points[i] + 1.5f * points[i + 3] + -1.5f * points[i + 6] + points[i + 9] * 0.5f;
+            b[i] = points[i] + -2.5f * points[i + 3] + (points[i + 6] + points[i + 6]) + points[i + 9] * -0.5f;
+            c[i] = -0.5f * points[i] + points[i + 6] * 0.5f;
+            d[i] = points[i + 3];
+            D_800C3A50[slot][track].coef0[i] = d[i];
+            D_800C3A50[slot][track].coef1[i] = c[i];
+            D_800C3A50[slot][track].coef2[i] = b[i];
+            D_800C3A50[slot][track].coef3[i] = a[i];
         }
-        D_800C3A50[arg2][arg0].segment = arg1;
+        D_800C3A50[slot][track].arcLength[0] = total;
+        for (i = 0; i != 3; i++) {
+            pos[!j][i] = d[i];
+        }
+        i = 1;
+        t = 0.009999999776f;
+        while (t <= 1.0f) {
+            pos[j][0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+            pos[j][1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+            pos[j][2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+            dx = pos[j][0] - pos[!j][0];
+            dx *= dx;
+            dy = pos[j][1] - pos[!j][1];
+            dy *= dy;
+            t += 0.009999999776f;
+            dz = pos[j][2] - pos[!j][2];
+            dz *= dz;
+            dx += dy + dz;
+            if (dx != 0.0f) {
+                total += sqrtf(dx);
+            }
+            D_800C3A50[slot][track].arcLength[i] = total;
+            i++;
+            j ^= 1;
+        }
+    } else {
+        total = D_800C3A50[slot][track].keyDistance[segment + 1] - total;
+        for (k = 0; k < 101; k++) {
+            D_800C3A50[slot][track].arcLength[k] = (f32)k * total / 101.0f;
+        }
     }
+    D_800C3A50[slot][track].segment = segment;
 }
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8 pad24[0x10];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Elem15020EC4; // size 0x44
 
 typedef struct {
     s32 unk0;
@@ -1769,13 +1754,13 @@ s32 func_15023264(s32 arg0, s32 arg1);
 #define MSG2 (*(Msg15020EC4 *)&D_800C3600)
 // matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
 #define ENT(a, i) ((TrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
-#define ELEM(a, i) (&((Elem15020EC4 **)&D_800C3958)[a][i])
+#define ELEM(a, i) (&TRACK_STATE(a)[i])
 
 void func_15020EC4(s32 arg0) {
     s32 i;
     s32 j;
     struct108 *player;
-    Elem15020EC4 *e;
+    TrackState *e;
     Obj15020EC4 *o;
     f32 f22;
     f32 f20;
@@ -1837,14 +1822,14 @@ void func_15020EC4(s32 arg0) {
                         f20 = e->unk40;
                         MSG2.unk4 = arg0;
                     }
-                    MSG2.unk14 = e->unk0;
-                    MSG2.unk18 = e->unk4;
-                    MSG2.unk1C = e->unk8;
+                    MSG2.unk14 = e->x;
+                    MSG2.unk18 = e->y;
+                    MSG2.unk1C = e->z;
                                         if (ENT(arg0, i)->unk2 == 1) {
                         MSG2.unk0 = 0;
-                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk0;
-                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk4 + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->unk38;
-                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk8;
+                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->x;
+                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->y + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->yOffset;
+                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->z;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
                         MSG2.unk34 = f20;
@@ -1858,7 +1843,7 @@ void func_15020EC4(s32 arg0) {
                         }
                         MSG2.unk0 = 0;
                         D_800C3620.x = ob->x_position;
-                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->yOffset;
                         D_800C3620.z = ob->z_position;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
@@ -1873,7 +1858,7 @@ void func_15020EC4(s32 arg0) {
                         }
                         MSG2.unk0 = 0;
                         D_800C3620.x = ob3->unk10;
-                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yOffset) + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yOffset) + (e = ELEM(arg0, i))->yOffset;
                         D_800C3620.z = ob3->unk14;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
@@ -1883,7 +1868,7 @@ void func_15020EC4(s32 arg0) {
                         MSG2.unk20 = -e->unk14;
                         MSG2.unk24 = e->unkC;
                         MSG2.unk28 = e->unk10;
-                        MSG2.unk18 = MSG2.unk18 + e->unk38;
+                        MSG2.unk18 = MSG2.unk18 + e->yOffset;
                         MSG2.unk2C = f22;
                         MSG2.unk30 = f20;
                     }
@@ -1898,9 +1883,9 @@ void func_15020EC4(s32 arg0) {
                     o->unk4E = 0;
                     o->unk6F &= ~0x80;
                     o->unk6F = o->unk6F;
-                    o->unk10 = ELEM(arg0, i)->unk0;
-                    o->unk12 = ELEM(arg0, i)->unk4 + ELEM(arg0, i)->unk38;
-                    o->unk14 = ELEM(arg0, i)->unk8;
+                    o->unk10 = ELEM(arg0, i)->x;
+                    o->unk12 = ELEM(arg0, i)->y + ELEM(arg0, i)->yOffset;
+                    o->unk14 = ELEM(arg0, i)->z;
                     o->unk0 = ELEM(arg0, i)->unkC;
                     o->unk4 = ELEM(arg0, i)->unk10;
                     o->unk8 = ELEM(arg0, i)->unk14;
@@ -1934,7 +1919,7 @@ void func_15020EC4(s32 arg0) {
                 } else if (ENT(arg0, i)->type == 5) {
                     e = ELEM(arg0, i);
                     if (e->unk34 >= 1.0f) {
-                        func_1517D5FC(e->unk0, e->unk4, e->unk8, 0, e->unk18, e->unk1C);
+                        func_1517D5FC(e->x, e->y, e->z, 0, e->unk18, e->unk1C);
                     }
                 }
             }
@@ -1942,27 +1927,6 @@ void func_15020EC4(s32 arg0) {
         D_800C3638 = 1;
     }
 }
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x14];
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0x8];
-} Ent1502178C;
-
-typedef struct {
-    u16 kind;
-    u8 actor;
-    u8 pad3[5];
-} Sel1502178C;
 
 extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, struct127 *, f32, f32);
 
@@ -1997,9 +1961,9 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
                         old[0] = obj->x_position;
                         old[1] = obj->y_position;
                         old[2] = obj->z_position;
-                        obj->x_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk0;
-                        obj->y_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk4 + ((Ent1502178C **)&D_800C3958)[arg1][i].unk38;
-                        obj->z_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk8;
+                        obj->x_position = TRACK_STATE(arg1)[i].x;
+                        obj->y_position = TRACK_STATE(arg1)[i].y + TRACK_STATE(arg1)[i].yOffset;
+                        obj->z_position = TRACK_STATE(arg1)[i].z;
                         obj->unk1CC = obj->y_position;
                         if (D_800C3C88 == 0) {
                             obj->xz_velocity = (obj->x_position - old[0]) * (obj->x_position - old[0]) + (obj->z_position - old[2]) * (obj->z_position - old[2]);
@@ -2031,21 +1995,21 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
                                 obj->unkB2 = 0;
                             }
                         }
-                        if (((Ent1502178C **)&D_800C3958)[arg1][i].unk18 != -9999.0f) {
+                        if (TRACK_STATE(arg1)[i].unk18 != -9999.0f) {
                             changed = 1;
-                            obj->xz_scale = ((Ent1502178C **)&D_800C3958)[arg1][i].unk18 * 0.009999999776f;
-                            obj->unk154 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk18 * 0.009999999776f;
+                            obj->xz_scale = TRACK_STATE(arg1)[i].unk18 * 0.009999999776f;
+                            obj->unk154 = TRACK_STATE(arg1)[i].unk18 * 0.009999999776f;
                         }
-                        if (((Ent1502178C **)&D_800C3958)[arg1][i].unk1C != -9999.0f) {
+                        if (TRACK_STATE(arg1)[i].unk1C != -9999.0f) {
                             changed = 1;
-                            obj->y_scale = ((Ent1502178C **)&D_800C3958)[arg1][i].unk1C * 0.009999999776f;
-                            obj->unk158 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk1C * 0.009999999776f;
+                            obj->y_scale = TRACK_STATE(arg1)[i].unk1C * 0.009999999776f;
+                            obj->unk158 = TRACK_STATE(arg1)[i].unk1C * 0.009999999776f;
                         }
                         if (changed) {
                             func_15062BDC(obj, obj->xz_scale, obj->y_scale);
                         }
-                        obj->unkB8 = ((Ent1502178C **)&D_800C3958)[arg1][i].unkC;
-                        angle = ((Ent1502178C **)&D_800C3958)[arg1][i].unk10 + 180.0f;
+                        obj->unkB8 = TRACK_STATE(arg1)[i].unkC;
+                        angle = TRACK_STATE(arg1)[i].unk10 + 180.0f;
                         while (angle >= 360.0f) {
                             angle -= 360.0f;
                         }
@@ -2054,9 +2018,9 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
                         }
                         obj->unk76 = obj->unk7A = obj->unk78 = (s16)((u32)(angle * 182.0444489f) - 0x4000);
                         obj->unk40 = angle;
-                        obj->unkC4 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk14;
-                        ((Ent1502178C **)&D_800C3958)[arg1][i].unk34 = (((Ent1502178C **)&D_800C3958)[arg1][i].unk34 < 0.0f) ? 0.0f : (((Ent1502178C **)&D_800C3958)[arg1][i].unk34 > 255.0f) ? 255.0f : ((Ent1502178C **)&D_800C3958)[arg1][i].unk34;
-                        func_1506160C(obj, 1, ((Ent1502178C **)&D_800C3958)[arg1][i].unk34, 0, 0);
+                        obj->unkC4 = TRACK_STATE(arg1)[i].unk14;
+                        TRACK_STATE(arg1)[i].unk34 = (TRACK_STATE(arg1)[i].unk34 < 0.0f) ? 0.0f : (TRACK_STATE(arg1)[i].unk34 > 255.0f) ? 255.0f : TRACK_STATE(arg1)[i].unk34;
+                        func_1506160C(obj, 1, TRACK_STATE(arg1)[i].unk34, 0, 0);
                         obj->old_x_position = obj->x_position;
                         obj->old_y_position = obj->y_position;
                         obj->old_z_position = obj->z_position;
@@ -2133,18 +2097,6 @@ s32 func_15021DB8(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5
     return 0;
 }
 
-typedef struct {
-    u16 unk0;
-    u8 unk2;
-    u8 pad3[5];
-} Elem15022024;
-
-typedef struct {
-    u8 pad0[0x3C];
-    f32 unk3C;
-    f32 unk40;
-} Ent15022024;
-
 
 s32 func_15022024(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
     s32 i;
@@ -2159,12 +2111,12 @@ s32 func_15022024(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
                 arg1[1] = 0.0f;
                 arg0[0] = 0.0f;
                 arg1[0] = 0.0f;
-                if (((Ent15022024 **)&D_800C3958)[arg3][i].unk3C != -9999.0f) {
-                    arg1[0] = ((Ent15022024 **)&D_800C3958)[arg3][i].unk3C;
+                if (TRACK_STATE(arg3)[i].unk3C != -9999.0f) {
+                    arg1[0] = TRACK_STATE(arg3)[i].unk3C;
                     arg1[1] = arg1[0];
                 }
-                if (((Ent15022024 **)&D_800C3958)[arg3][i].unk40 != -9999.0f) {
-                    arg0[0] = ((Ent15022024 **)&D_800C3958)[arg3][i].unk40;
+                if (TRACK_STATE(arg3)[i].unk40 != -9999.0f) {
+                    arg0[0] = TRACK_STATE(arg3)[i].unk40;
                     arg0[1] = arg0[0];
                 }
                 return 1;
