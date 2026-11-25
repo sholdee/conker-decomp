@@ -65,9 +65,16 @@ typedef struct {
     /* 0x3 */ u8 pad3[5];
 } SeqTrackInfo;
 
-extern SeqQueueEntry *D_800C3D50;
-extern u8 D_800C35E8[];
+/* Cutscene state, indexed by scene (and track). */
+extern SeqEvent *D_800C3688[][30]; /* each track's events */
+extern u16 *D_800C35D8[];          /* each track's event count */
+extern u8 D_800C363A[];            /* track count */
 extern SeqTrackInfo *D_800C35F0[];
+extern s32 D_800C35B0[];           /* current time */
+extern s32 D_800C35B8[];           /* time at the previous update */
+extern s32 D_800C3640[];           /* end time */
+extern u8 D_800C35E8[];            /* changes with each run of the scene */
+extern SeqQueueEntry *D_800C3D50;  /* dispatch queue, D_800C3C9A entries */
 
 extern struct131 *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
@@ -105,8 +112,6 @@ typedef struct {
 
 extern u8 D_800C3C89;
 extern void func_10004074(void *);
-extern s32 D_800C35B0[];
-extern s32 D_800C3640[];
 
 /*
  * Per-frame callback for a cutscene sound: follows its track's position, counts
@@ -171,17 +176,13 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
     return 0;
 }
 
-extern SeqEvent *D_800C3688[][30];
-extern u16 *D_800C35D8[];
-extern s32 D_800C35B0[];
-extern s32 D_800C3640[];
-
 /*
  * Searches `track` of `scene` for the first event after `after` of the given type
  * (optionally also matching value, unk4 and unk5). Stores it in *found and returns
  * its time; on failure stores NULL and returns the scene's end time.
  */
-s32 func_15023BB0(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value, s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene) {
+s32 func_15023BB0(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 matchValue, s32 value,
+                  s32 matchUnk4, s32 unk4, s32 matchUnk5, s32 unk5, s32 scene) {
     SeqEvent *ev;
     s32 time;
 
@@ -232,7 +233,8 @@ s32 func_15023BB0(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 ma
  * first matching event after it (*next, *nextTime) on `track` of `scene`.
  * Events chained at the same time are compared against the scene's current time.
  */
-void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type, s32 matchValue, s32 value, s32 matchUnk4, s32 unk4, s32 time, s32 scene) {
+void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTime, s32 track, s32 type,
+                   s32 matchValue, s32 value, s32 matchUnk4, s32 unk4, s32 time, s32 scene) {
     SeqEvent *ev;
     s32 evTime;
     s32 sceneTime;
@@ -357,10 +359,8 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     (*count)++;
 }
 
-extern s32 D_800C35B8[];
 extern u8 D_800C35C0[];
 extern u8 D_800C3C8C;
-extern u8 D_800C363A[];
 
 /*
  * Queues and dispatches every event of `scene` whose time falls in
@@ -467,7 +467,6 @@ typedef struct {
 extern s8 D_800E0BF4;
 extern u8 **D_800C35E0[];
 extern s32 D_80090214[];
-extern u8 D_800C363A[];
 extern u8 D_800C35F8;
 extern u8 D_800C3656[];
 extern u8 D_800C3658[];
@@ -480,7 +479,6 @@ extern f32 D_800C364C;
 extern f32 D_800C3650;
 extern u8 D_800C3660[];
 extern u8 D_800C3C8B;
-extern u8 D_800C3C8C;
 extern u8 D_800C3C8D;
 extern s16 D_800DDE10;
 extern f32 *D_800DDE44;
