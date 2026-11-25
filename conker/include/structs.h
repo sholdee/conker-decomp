@@ -3718,6 +3718,15 @@ typedef struct EffectModelSlot {
     /* 0x10 */ void *unk10;
 } EffectModelSlot; // size 0x14
 
+/* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
+ * func_1512D560 appends, func_1512D604 takes the next message. */
+typedef struct CamMsgQueue {
+    /* 0x00 */ struct { s32 type; s32 arg; } msgs[20];
+    /* 0xA0 */ u8  padA0[8];
+    /* 0xA8 */ s32 head;   // next message to read
+    /* 0xAC */ s32 tail;   // next free slot
+} CamMsgQueue; // size 0xB0
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

@@ -1211,7 +1211,7 @@ extern u8  D_800DBFF7;
 extern Camera *D_800DC010; // saved cameras (one per view)
 extern s32 D_800DC020;
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
-extern s32 D_800DC2B0;
+extern CamMsgQueue *D_800DC2B0; // one per camera
 extern f32 *D_800DCC10[][4];
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail

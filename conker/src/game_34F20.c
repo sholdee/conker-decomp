@@ -110,8 +110,8 @@ void func_15007B3C(void) {
         D_800BE9B4 = 1;
     }
     func_10004308();
-    func_15002FB4((*(s32 *)&D_800BE9F4));
-    switch ((*(s32 *)&D_800BE9F4)) {
+    func_15002FB4(D_800BE9F4);
+    switch (D_800BE9F4) {
     case 0x1A:
     case 0x24:
     case 0x2B:
@@ -121,16 +121,16 @@ void func_15007B3C(void) {
     case 0x34:
     case 0x3F:
         value = 0x103;
-        if ((*(s32 *)&D_800BE9F4) == 0x24) {
+        if (D_800BE9F4 == 0x24) {
             value = 0xF3;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x33) {
+        if (D_800BE9F4 == 0x33) {
             value -= 8;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x3F) {
+        if (D_800BE9F4 == 0x3F) {
             value -= 8;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x34) {
+        if (D_800BE9F4 == 0x34) {
             value += 8;
         }
         break;
@@ -158,7 +158,7 @@ void func_15007B3C(void) {
         resource = D_800E0BD1;
     }
     D_800BE9F8 = D_800BE9F0;
-    D_800BE9F0 = (*(s32 *)&D_800BE9F4);
+    D_800BE9F0 = D_800BE9F4;
     func_150091D0();
     func_15187F90();
     D_800BE619 = 0;
@@ -282,7 +282,7 @@ void func_15007B3C(void) {
         func_151BF340(0xFF, 1);
     }
     func_1509C3A0();
-    (*(s32 *)&D_800BE9F4) = D_800BE9F0;
+    D_800BE9F4 = D_800BE9F0;
     func_151D8DE8();
 }
 
