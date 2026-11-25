@@ -9,8 +9,8 @@
  */
 typedef struct {
     /* 0x00 */ void *anim;
-    /* 0x04 */ s32 growth;          /* this file: width/height added per frame (SmokeParticle.growth) */
-    /* 0x08 */ s32 fadeRate;        /* this file: alpha removed per frame (SmokeParticle.fadeRate) */
+    /* 0x04 */ s32 growth;          /* this file: width/height added per frame (PuffParticle.growth) */
+    /* 0x08 */ s32 fadeRate;        /* this file: alpha removed per frame (PuffParticle.fadeRate) */
     /* 0x0C */ s16 frame;
     /* 0x0E */ s16 frameStep;
     /* 0x10 */ s16 x;
@@ -53,13 +53,13 @@ typedef struct {
     /* 0x38 */ s16 life;
     /* 0x3A */ u8 pad3A[5];
     /* 0x3F */ u8 primA;
-} SmokeParticle;
+} PuffParticle;
 
 extern void *D_8008CA4C[];
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
- * Spawns a smoke puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
+ * Spawns a white, growing and fading puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
  * `spread` randomises x/z by up to that much; `growth` (+ up to `growthRange` at random) and
  * `fadeRate` drive func_15174920.
  */
@@ -122,7 +122,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
 }
 
 /* Particle callback 5 (D_8008C9C8[5]): fades the puff out while it grows (height 8/7 as fast as width). */
-void func_15174920(SmokeParticle *particle) {
+void func_15174920(PuffParticle *particle) {
     s32 alpha = particle->primA;
 
     if (alpha > 200) {
