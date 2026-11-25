@@ -55,7 +55,7 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     BeamScale scale;
 
     if (owner->unique_id != data->ownerId || owner->interaction_state == 0) {
-        func_1516972C((EffectHeader *)spark);
+        func_1516972C(&spark->head.header);
         return NULL;
     }
     if (!(data->flags & 1)) {

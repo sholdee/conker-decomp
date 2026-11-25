@@ -434,7 +434,7 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
         actorId = link->actorId;
         msgActorId = msg->ref.uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C((EffectHeader *)beam);
+            func_1516972C(&beam->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -458,7 +458,7 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     } else if (type == 0x43) {
         if (link->actor == msg->ref.actor || link->actorId == msg->ref.uniqueId) {
             if (link->slot == msg->ref.slot) {
-                func_1516972C((EffectHeader *)beam);
+                func_1516972C(&beam->head.header);
             }
         }
     }
@@ -888,7 +888,7 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((EffectHeader *)glow);
+            func_1516972C(&glow->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {

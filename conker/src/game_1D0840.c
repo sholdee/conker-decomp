@@ -128,15 +128,13 @@ typedef struct {
 } BoneEmitter;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
 /* A func_151491F4 task that retries creating a trail until its owner can carry it. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
@@ -774,8 +772,8 @@ void func_151A4A38(BoneEmitterTask *task) {
     emitter = &task->emitter;
     if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
-        task->header.state = -1;
-        task->header.flags |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
         return;
     }
 
@@ -841,7 +839,7 @@ void func_151A4A38(BoneEmitterTask *task) {
         spawn.brightness = 0xFF;
         spawn.updateFunc = -1;
         spawn.deathFunc = -1;
-        func_15153634(&spawn, 0xFF, task->header.owner, task->header.kind);
+        func_15153634(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
     }
 }
 
@@ -870,7 +868,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == msg->swap.actorA) {
@@ -928,12 +926,12 @@ void func_151A4ECC(TrailRetryTask *task) {
         done = 1;
     }
     if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
-        func_151A3504(trail, task->header.owner);
+        func_151A3504(trail, task->base.header.owner);
         done = 1;
     }
     if (done) {
-        task->header.state = -1;
-        task->header.flags |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
     }
 }
 
@@ -943,7 +941,7 @@ void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     }
 }

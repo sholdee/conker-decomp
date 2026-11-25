@@ -291,8 +291,7 @@ typedef struct {
 } SparkData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     SparkData data;
 } SparkEffect;
 
@@ -341,7 +340,7 @@ void func_150F5C98(SparkEffect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->head.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL) {
@@ -408,7 +407,7 @@ void func_150F5C98(SparkEffect *effect) {
                 spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                spark = func_15130280(&spawn, 1, 0, 4, effect->head.owner, effect->head.kind);
+                spark = func_15130280(&spawn, 1, 0, 4, effect->base.header.owner, effect->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&spark->unkA8, &scale, sizeof(scale));
                 }
@@ -463,8 +462,7 @@ typedef struct {
 } BeamData;
 
 struct BeamEffect {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     BeamData data;
 };
 
@@ -484,7 +482,7 @@ void func_150F6178(BeamEffect *effect) {
     data = &effect->data;
     owner = data->owner;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->head.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL && !(owner->unk94 & 2)) {
@@ -546,13 +544,13 @@ void func_150F631C(BeamEffect *effect) {
 /* Beam effect destructors: free the beam and flash, then the effect. */
 void func_150F6368(BeamEffect *effect) {
     func_150F631C(effect);
-    func_1514933C((TimedEffect *)effect);
+    func_1514933C(&effect->base);
 }
 
 
 void func_150F6394(BeamEffect *effect) {
     func_150F631C(effect);
-    func_15149368((TimedEffect *)effect);
+    func_15149368(&effect->base);
 }
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
@@ -605,8 +603,7 @@ typedef struct {
 } FlashBurstData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     FlashBurstData data;
 } FlashBurstEffect;
 
@@ -626,7 +623,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
-        effect->head.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if ((owner->unk1D4 != NULL) && !(owner->unk94 & 2)) {
@@ -653,8 +650,8 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 origin.y = pos[1];
                 origin.z = pos[2];
                 rand3 = (func_150ADA20() % 61U) + 60;
-                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.owner,
-                              effect->head.kind);
+                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->base.header.owner,
+                              effect->base.header.kind);
                 do {
                     color[0] = 0xA0;
                     color[1] = 0xA0;
@@ -664,8 +661,8 @@ void func_150F64DC(FlashBurstEffect *effect) {
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
                     func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
-                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.owner,
-                                  effect->head.kind);
+                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->base.header.owner,
+                                  effect->base.header.kind);
                     count--;
                 } while (count > 0);
                 data->timer = (func_150ADA20() % 91U) + 90;

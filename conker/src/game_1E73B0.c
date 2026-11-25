@@ -208,7 +208,7 @@ void func_151BA468(TimedEffect *effect, ActorMsg *msg, u8 msgType) {
 
     if (msgType == 0) {
         if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (msgType == 0x2D) {
         if (ref->actor == msg->swap.actorA) {
@@ -830,7 +830,7 @@ typedef struct {
 } Fx15134908;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorRef ref;
 } Fx15163414;
 

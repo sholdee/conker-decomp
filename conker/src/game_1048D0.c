@@ -5,7 +5,7 @@
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;

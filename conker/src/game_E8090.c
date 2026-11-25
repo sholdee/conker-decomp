@@ -88,7 +88,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         decal = func_1513C73C(&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {
-            func_1516972C((EffectHeader *)decal);
+            func_1516972C(&decal->header);
         }
     }
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,

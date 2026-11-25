@@ -367,8 +367,7 @@ typedef struct {
 
 /* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 
@@ -389,7 +388,7 @@ void func_15156B54(RandomBurstEffect *effect) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
         if (D_800DCA30[row][col].pos.x != 0.0f && D_800DCA30[row][col].pos.y != 0.0f && D_800DCA30[row][col].pos.z != 0.0f) {
-            func_15156D24(&D_800DCA30[row][col].pos.x, effect->header.owner);
+            func_15156D24(&D_800DCA30[row][col].pos.x, effect->base.header.owner);
             header.flags = 3;
             header.update = -1;
             header.lifetime = (func_150ADA20() % 11U) + 5;
@@ -398,7 +397,7 @@ void func_15156B54(RandomBurstEffect *effect) {
             intPos.y = D_800DCA30[row][col].pos.y;
             intPos.z = D_800DCA30[row][col].pos.z;
             func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
-                          effect->header.owner, effect->header.kind);
+                          effect->base.header.owner, effect->base.header.kind);
         }
         timer = &effect->timer;
         timer->value = (func_150ADA20() % (u32)(timer->range + 1)) + timer->base;

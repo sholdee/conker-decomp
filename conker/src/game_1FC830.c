@@ -187,8 +187,7 @@ typedef struct {
 } GroundEffectData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     GroundEffectData data;
 } GroundEffect;
 
@@ -594,8 +593,7 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
 }
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     ActorRef ref;
 } OwnedEffect;
 
@@ -609,7 +607,7 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
         Actor *obj = gone->actor;
 
         if (obj == ref->actor || gone->uniqueId == ref->uniqueId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     } else if (type == 0x2D) {
         ActorSwapMsg *swap = msg;
@@ -812,8 +810,7 @@ typedef struct {
 } TrackerData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     TrackerData data;
 } TrackerEffect;
 
@@ -891,7 +888,7 @@ void func_151D1138(TrackerEffect *effect) {
     owner = data->owner;
 
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->head.state = -1;
+        effect->base.header.state = -1;
         return;
     }
 
@@ -931,12 +928,12 @@ void func_151D1368(TrackerEffect *effect) {
 
 void func_151D1388(TrackerEffect *effect) {
     func_151D1368(effect);
-    func_1514933C((TimedEffect *)effect);
+    func_1514933C(&effect->base);
 }
 
 void func_151D13B4(TrackerEffect *effect) {
     func_151D1368(effect);
-    func_15149368((TimedEffect *)effect);
+    func_15149368(&effect->base);
 }
 
 /* Lets go of the tracker's trail, which then fades out on its own. */
@@ -996,7 +993,7 @@ void func_151D1448(TrackerEffect *effect) {
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
     req.spawn.unk18 = 0;
-    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->head.owner, effect->head.kind);
+    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->data, &req.data, sizeof(FollowerData));
         data->trail = trail;

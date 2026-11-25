@@ -66,8 +66,7 @@ typedef struct DustEmitterData {
 } DustEmitterData; /* 0x68 */
 
 typedef struct DustEmitter {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     DustEmitterData data;
 } DustEmitter;
 
@@ -137,7 +136,7 @@ void func_15191D54(DustEmitter *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->head.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * D_800BE9A4;
@@ -168,7 +167,7 @@ void func_15191D54(DustEmitter *effect) {
                               func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
                               func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
                               func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
-                              &data->floor.data, data->kind, effect->head.owner, effect->head.kind);
+                              &data->floor.data, data->kind, effect->base.header.owner, effect->base.header.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
         } else {

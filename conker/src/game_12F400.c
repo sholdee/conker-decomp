@@ -86,7 +86,7 @@ typedef struct {
 } Sub151022AC_2C;
 
 typedef struct {
-    u8 pad0[0x28];
+    TimedEffect base;
     u8 rgba[4];
 } Sub151022AC_24;
 

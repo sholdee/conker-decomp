@@ -10,8 +10,7 @@ typedef struct {
 } EmitterData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     EmitterData data;
 } EmitterEffect;
 
@@ -120,7 +119,7 @@ void func_150B1F90(EmitterEffect *effect) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 78U + 126;
             spawn.width = spawn.height = func_150ADA68() * 503.0f + 405.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, effect->head.owner, effect->head.kind);
+            particle = func_15130280(&spawn, 1, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

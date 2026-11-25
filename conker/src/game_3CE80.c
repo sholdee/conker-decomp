@@ -18,7 +18,7 @@ extern f32 D_800DCDBC;
 extern f32 D_800DCDC0;
 
 typedef struct {
-    u8  pad0[0x28];
+    TimedEffect base;
     s16 unk28;
     s16 unk2A;
     s16 unk2C;

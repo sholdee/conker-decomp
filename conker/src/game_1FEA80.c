@@ -18,7 +18,7 @@ typedef struct {
 
 /* The object a trail follows. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailOwnerMotion motion;
 } TrailOwner;
 

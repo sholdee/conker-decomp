@@ -86,7 +86,7 @@ void func_15158224(EffectActor *actor) {
         }
     }
     if (expired) {
-        func_1516972C((EffectHeader *)actor);
+        func_1516972C(&actor->header);
     }
 }
 
@@ -246,12 +246,12 @@ void func_15158A20(EffectActor *actor) {
 
 void func_15158AA4(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169804((EffectHeader *)actor);
+    func_15169804(&actor->header);
 }
 
 void func_15158AD0(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169824((EffectHeader *)actor);
+    func_15169824(&actor->header);
 }
 
 /* Update callback: once the lifetime drops below data.fade.duration, fades alpha out with it. */
@@ -943,7 +943,7 @@ typedef struct {
 } DiskEmitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiskEmitter emitter;
 } DiskEmitterObject;
 

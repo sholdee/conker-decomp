@@ -46,7 +46,7 @@ void *func_1500F290(f32 arg0, f32 arg1, f32 arg2) {
 }
 
 typedef struct {
-    u8  pad0[0x28];
+    TimedEffect base;
     s16 unk28;
     s16 unk2A;
     s16 unk2C;

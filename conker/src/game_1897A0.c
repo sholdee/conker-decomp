@@ -377,7 +377,7 @@ typedef struct {
 } LevelEffectData; /* size 0xC */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ LevelEffectData data;
 } LevelEffect;
 

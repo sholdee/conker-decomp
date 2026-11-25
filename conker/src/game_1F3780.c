@@ -201,7 +201,7 @@ typedef struct {
 } ShotHolder;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ShotHolder holder;
     /* 0x9C */ u8 flags;
 } ShotSource;

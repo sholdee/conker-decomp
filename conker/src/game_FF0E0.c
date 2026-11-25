@@ -116,7 +116,7 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
     } else if (msg == 0x4E) {
         obj->state.angularVelocity = D_800A5480;
     } else if (msg == 0x4F) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->base.header);
     }
 }
 

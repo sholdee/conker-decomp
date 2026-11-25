@@ -240,7 +240,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
             failed = TRUE;
         }
         if (failed) {
-            func_1516972C((EffectHeader *)result);
+            func_1516972C(&result->head.header);
             return NULL;
         }
     }

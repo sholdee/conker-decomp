@@ -52,8 +52,7 @@ typedef struct {
 
 /* An object carrying a Link151419D0 at 0x28. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Link151419D0 link;
 } LinkedObject151419D0;
 
@@ -66,7 +65,7 @@ void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
     if (msgType == 0) {
         first = msg->unk0;
         if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
-            func_1516972C(&obj->header);
+            func_1516972C(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
         if (link->unk4 == msg->unk0) {

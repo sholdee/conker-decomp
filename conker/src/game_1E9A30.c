@@ -418,8 +418,7 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
 }
 
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x18];
+    TimedEffect base;
     ActorRef owner;
 } OwnedEffect28;
 

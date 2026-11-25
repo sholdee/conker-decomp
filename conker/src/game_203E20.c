@@ -28,8 +28,7 @@ typedef struct {
 
 /* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
 } TextObj;
 
@@ -257,7 +256,7 @@ s32 func_151D7000(TextObj *obj) {
         return 0;
     }
 
-    timeLeft = obj->header.state;
+    timeLeft = obj->base.header.state;
     if (timeLeft < style->fadeStart) {
         alpha = timeLeft * style->fadeRate;
         if (alpha < 0) {

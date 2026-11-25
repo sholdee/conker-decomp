@@ -89,8 +89,7 @@ typedef struct BoltRainState {
 } BoltRainState;
 
 typedef struct BoltRainObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltRainState state;
 } BoltRainObj;
 
@@ -154,7 +153,7 @@ void func_15104C44(BoltRainObj *obj) {
                         desc.life = func_150ADA20() % 13U + 8;
                         desc.color.alpha = func_150ADA20() % 156U + 100;
                         desc.segments = func_150ADA20() % 3U + 5;
-                        func_15105CE0(&desc, 0, obj->header.owner, obj->header.kind);
+                        func_15105CE0(&desc, 0, obj->base.header.owner, obj->base.header.kind);
                     }
                     state->pending -= 1.0f;
                 } while (state->pending > 1.0f);
@@ -189,8 +188,7 @@ typedef struct BoltArcState {
 } BoltArcState;
 
 struct BoltArcObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltArcState state;
 };
 
@@ -254,7 +252,7 @@ void func_151050B0(BoltArcObj *obj) {
             end.x = state->edgeStart[edgeB].x + state->edgeDelta[edgeB].x * t;
             end.y = state->edgeStart[edgeB].y + state->edgeDelta[edgeB].y * t;
             end.z = state->edgeStart[edgeB].z + state->edgeDelta[edgeB].z * t;
-            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->header.owner, obj->header.kind);
+            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->base.header.owner, obj->base.header.kind);
             state->pending -= 1.0f;
         } while (state->pending > 1.0f);
     }
@@ -289,8 +287,7 @@ typedef struct ImpactHit {
 } ImpactHit;
 
 typedef struct ImpactObj {
-    /* 0x000 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x028 */ u8 pad28[0xE8];
     /* 0x110 */ ImpactHit hit;
 } ImpactObj;
@@ -326,15 +323,15 @@ void func_1510558C(ImpactObj *obj) {
     random = func_150ADA20();
     lifetime = func_150ADA20() % 81U + 50;
     func_15102920(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
-                  lifetime, 1, 1, hit->surfaceFlags, obj->header.owner, obj->header.kind);
+                  lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
         if (func_150ADA68() < 0.400000006f) {
-            func_151C329C(&hit->position, obj->header.owner, obj->header.kind);
+            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
     } else {
         if (func_150ADA68() < 0.1000000015f) {
-            func_151C329C(&hit->position, obj->header.owner, obj->header.kind);
+            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
         if (func_150ADA68() < 0.400000006f) {
             debris.variantIds = D_800A23A4;
@@ -356,8 +353,8 @@ void func_1510558C(ImpactObj *obj) {
             debris.desc.scaleBase = 0.06000000238f;
             debris.desc.scaleRange = 0.1420000046f;
             debris.desc.spin = 25.77700043f;
-            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->header.owner,
-                          obj->header.kind);
+            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
+                          obj->base.header.kind);
         }
     }
 }
@@ -371,8 +368,7 @@ typedef struct SparkState {
 } SparkState;
 
 struct SparkObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ SparkState state;
 };
 
@@ -442,7 +438,7 @@ void func_151058B4(SparkObj *obj) {
                 angle = func_150ADA20();
                 func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel.x);
                 part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
-                func_1515C2F0(&spawn, 0, &part, 0, obj->header.owner, obj->header.kind);
+                func_1515C2F0(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;
             } while (count > 1.0f);
         }

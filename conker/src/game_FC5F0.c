@@ -18,8 +18,7 @@ typedef struct {
 } ActorEmitterState;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorEmitterState state;
 } ActorEmitter;
 
@@ -46,7 +45,7 @@ void func_150CF140(ActorEmitter *emitter) {
     actor = emitter->state.actor;
     state = &emitter->state;
     if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
-        emitter->header.state = -1;
+        emitter->base.header.state = -1;
         return;
     }
     if (actor->unk1D4 != NULL) {
@@ -63,7 +62,7 @@ void func_150CF140(ActorEmitter *emitter) {
             func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
             func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
                           (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
-                          &ground, 1, 0, emitter->header.owner, emitter->header.kind);
+                          &ground, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
             state->spawnCredit -= 1.0f;
         }
     }
@@ -77,7 +76,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     if (type == 0) {
         actorA = msg->ref.actor; // matching: loaded before the state field, via a named local
         if ((actorA == state->actor) || (msg->ref.uniqueId == state->actorId)) {
-            func_1516972C((EffectHeader *)emitter);
+            func_1516972C(&emitter->base.header);
         }
     } else if (type == 0x2D) {
         if (state->actor == msg->swap.actorA) {
@@ -383,8 +382,7 @@ typedef struct {
 } TextLines;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
 } TextObj;
 
@@ -451,7 +449,7 @@ s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
     TextLines *text = &obj->text;
 
     if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
-        obj->header.state = -1;
+        obj->base.header.state = -1;
         return arg0;
     }
     text->flags &= ~1;

@@ -507,7 +507,7 @@ void func_1500A94C(s32 light, s32 id) {
 
 /** Payload (at +0x28) of the func_15149130 effect spawned by func_1500A990. */
 typedef struct Game36680ParticleEffect {
-    u8 pad0[0x28];
+    TimedEffect base;
     f32 params[12];
 } Game36680ParticleEffect;
 
