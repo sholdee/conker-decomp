@@ -294,6 +294,7 @@ typedef struct {
 void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
+    ObjectRemovedMessage *removal = msg;
     struct127 *removed;
 
     if (msgType == 0x2D) {
@@ -307,8 +308,8 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
             dst->objectId = swap->fromId;
         }
     } else if (msgType == 0) {
-        removed = ((ObjectRemovedMessage *)msg)->object;
-        if ((removed == data->object) || (((ObjectRemovedMessage *)msg)->objectId == data->objectId)) {
+        removed = removal->object;
+        if (removed == data->object || removal->objectId == data->objectId) {
             func_1516972C((struct102 *)effect);
         }
     }
@@ -318,6 +319,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
+    ObjectRemovedMessage *removal = msg;
     struct127 *removed;
 
     if (msgType == 0x2D) {
@@ -331,8 +333,8 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
             dst->objectId = swap->fromId;
         }
     } else if (msgType == 0) {
-        removed = ((ObjectRemovedMessage *)msg)->object;
-        if ((removed == data->object) || (((ObjectRemovedMessage *)msg)->objectId == data->objectId)) {
+        removed = removal->object;
+        if (removed == data->object || removal->objectId == data->objectId) {
             func_1516972C((struct102 *)effect);
         }
     }
