@@ -119,158 +119,155 @@ typedef struct {
 extern void func_1504715C(struct_func_151C9AC0_sp20 *, struct_func_151C9AC0_arg0 *);
 extern s32 func_151ABE40(f32 *, struct_func_151C9AC0_sp20 *, s32, u8, s32);
 
+/* Copy of the 9 s16 words that func_150AC9C0 reports for the surface triangle a ray hit. */
+typedef struct {
+    s16 v[9];
+} SightTriangle;
+
+/* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
 typedef struct {
     s16 x;
     s16 y;
     s16 z;
     u8 pad6[2];
-    s16 rot;
+    s16 length;
     u8 padA[2];
-    f32 unkC;
-    f32 unk10;
-    u8 unk14;
+    f32 rotationX;
+    f32 rotationY;
+    u8 disabled;
     u8 pad15[3];
     u32 flags;
-    u32 color;
-    u32 unk20;
+    u32 colors;
+    u32 widths;
 } Game1F4650Beam;
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_151C8FCC;
-extern s32 func_151C756C(Vec3_151C8FCC *arg0, void *arg1, Vec3_151C8FCC *arg2, void *arg3, Game1F4650Beam *arg4, Game1F4650Beam *arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s16 argA, s16 argB, s16 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, f32 arg13, f32 arg14, u8 arg15, u8 arg16, s32 arg17);
+extern s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
-s32 func_151C71A0(Game1F4650Beam *arg0) {
-    f32 z;
-    f32 y;
-    f32 x;
-    f32 ez;
-    f32 ey;
-    f32 ex;
-    f32 dz;
-    f32 dy;
-    f32 dx;
-    f32 nz;
-    f32 ny;
-    f32 nx;
-    f32 mz;
-    f32 my;
-    f32 mx;
-    f32 mtx[4][4];
+/* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
+s32 func_151C71A0(Game1F4650Beam *beam) {
+    f32 originZ;
+    f32 originY;
+    f32 originX;
+    f32 endZ;
+    f32 endY;
+    f32 endX;
+    f32 dirZ;
+    f32 dirY;
+    f32 dirX;
+    f32 revZ;
+    f32 revY;
+    f32 revX;
+    f32 midZ;
+    f32 midY;
+    f32 midX;
+    f32 matrix[4][4];
     s32 hit1;
     s32 hit2;
-    u8 info1[0x14];
-    u8 info2[0x14];
-    f32 hitpos1[3];
-    f32 hitpos2[3];
-    s32 sB8;
-    s32 sB4;
-    s32 sB0;
-    s32 sAC;
-    s32 b27;
-    s32 b29;
-    s32 b30;
-    s32 b31;
+    SightTriangle triangle1;
+    SightTriangle triangle2;
+    f32 point1[3];
+    f32 point2[3];
+    s32 distance1;
+    s32 distance2;
+    s32 object1;
+    s32 object2;
 
-    if (arg0->unk14 == 1) {
+    if (beam->disabled == 1) {
         return 1;
     }
-    x = arg0->x;
-    y = arg0->y;
-    z = arg0->z;
-    func_150A8050(mtx, arg0->unkC, arg0->unk10, 0);
-    func_150A7960(&mtx[0][0], 0.0f, arg0->rot, 0.0f, &ex, &ey, &ez);
-    ex += x;
-    ey += y;
-    ez += z;
-    dx = ex - x;
-    dy = ey - y;
-    dz = ez - z;
-    mx = dx * 0.5f + x;
-    my = dy * 0.5f + y;
-    mz = dz * 0.5f + z;
-    nx = -dx;
-    ny = -dy;
-    nz = -dz;
-    hit1 = func_150AC9C0(mx, my, mz, nx, ny, nz, 0, info1, &hitpos1[0], &hitpos1[1], &hitpos1[2], &sB8, &sB0, 0, 0.0f);
-    hit2 = func_150AC9C0(mx, my, mz, dx, dy, dz, 0, info2, &hitpos2[0], &hitpos2[1], &hitpos2[2], &sB4, &sAC, 0, 0.0f);
+    originX = beam->x;
+    originY = beam->y;
+    originZ = beam->z;
+    func_150A8050(matrix, beam->rotationX, beam->rotationY, 0);
+    func_150A7960(&matrix[0][0], 0.0f, beam->length, 0.0f, &endX, &endY, &endZ);
+    endX += originX;
+    endY += originY;
+    endZ += originZ;
+    dirX = endX - originX;
+    dirY = endY - originY;
+    dirZ = endZ - originZ;
+    midX = dirX * 0.5f + originX;
+    midY = dirY * 0.5f + originY;
+    midZ = dirZ * 0.5f + originZ;
+    revX = -dirX;
+    revY = -dirY;
+    revZ = -dirZ;
+    hit1 = func_150AC9C0(midX, midY, midZ, revX, revY, revZ, 0, &triangle1, &point1[0], &point1[1], &point1[2],
+                         &distance1, &object1, 0, 0.0f);
+    hit2 = func_150AC9C0(midX, midY, midZ, dirX, dirY, dirZ, 0, &triangle2, &point2[0], &point2[1], &point2[2],
+                         &distance2, &object2, 0, 0.0f);
     if (hit1 == 0 || hit2 == 0) {
         return 1;
     }
-    b30 = ((b27 = ((arg0->flags & 0x8000000) >> 27) == 0), (b29 = ((arg0->flags & 0x20000000) >> 29) == 0), ((arg0->flags & 0x40000000) >> 30)) ? 1 : 0;
-    b31 = ((arg0->flags & 0x80000000) >> 31) == 0;
-    func_151C756C(hitpos1, info1, hitpos2, info2, arg0, arg0,
-                  arg0->color & 0xFF, (arg0->color & 0xFF00) >> 8, (arg0->color & 0xFF0000) >> 16,
-                  (arg0->flags & 0x1000000) >> 24,
-                  arg0->flags & 0xFF, (arg0->flags & 0xFF00) >> 8, (arg0->flags & 0xFF0000) >> 16,
-                  (arg0->flags & 0x2000000) >> 25, (arg0->flags & 0x4000000) >> 26,
-                  b27, b29, b30, (arg0->flags & 0x10000000) >> 28,
-                  (f32)(arg0->unk20 & 0xFF) * 0.02463994361f,
-                  (f32)((arg0->unk20 & 0xFF00) >> 8) * 0.003079992952f,
-                  b31, 0xFF, 1);
+    func_151C756C(point1, &triangle1, point2, &triangle2, beam, beam,
+                  beam->colors & 0xFF, (beam->colors & 0xFF00) >> 8, (beam->colors & 0xFF0000) >> 16,
+                  (beam->flags & 0x1000000) >> 24,
+                  beam->flags & 0xFF, (beam->flags & 0xFF00) >> 8, (beam->flags & 0xFF0000) >> 16,
+                  (beam->flags & 0x2000000) >> 25, (beam->flags & 0x4000000) >> 26,
+                  !((beam->flags & 0x8000000) >> 27), !((beam->flags & 0x20000000) >> 29),
+                  ((beam->flags & 0x40000000) >> 30) ? 1 : 0, (beam->flags & 0x10000000) >> 28,
+                  (f32)(beam->widths & 0xFF) * 0.02463994361f,
+                  (f32)((beam->widths & 0xFF00) >> 8) * 0.003079992952f,
+                  !((beam->flags & 0x80000000) >> 31), 255, 1);
     return 1;
 }
 
+/* Sight beam state, stored at +0x110 of the beam object (see func_151C82D0). */
 typedef struct {
-    s16 v[9];
-} Info_151C756C;
-
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
+    f32 texS;
+    f32 texT;
+    f32 centerS;
+    f32 centerT;
+    f32 radiusS;
+    f32 radiusT;
+    f32 angleS;
+    f32 angleT;
+    f32 speedS;
+    f32 speedT;
     Game1F4650Beam *unk28;
-    s32 unk2C;
+    s32 midEffect;
     s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    struct102 *unk3C[3];
-    struct102 *unk48[3];
-    f32 unk54;
-    u8 unk58;
-    Info_151C756C unk5A;
-    Info_151C756C unk6C;
-    s16 unk7E;
-    s16 unk80;
-    s16 unk82;
-    s16 unk84;
-    u8 unk86;
-    Game1F4650Beam *unk88;
-    s32 unk8C;
-    s32 unk90;
+    s32 endEffect0;
+    s32 endEffect1;
+    struct102 *emitter0[3];
+    struct102 *emitter1[3];
+    f32 phase;
+    u8 alternate;
+    SightTriangle triangle0;
+    SightTriangle triangle1;
+    s16 activeTime;
+    s16 inactiveTime;
+    s16 timer;
+    s16 period;
+    u8 flags;
+    Game1F4650Beam *beam;
+    s32 zone0;
+    s32 zone1;
     u8 unk94;
-    f32 unk98;
-    f32 unk9C;
-} Block_151C756C;
+    f32 pulseAngle;
+    f32 pulseSpeed;
+} SightBeamState;
 
+/* Spawn descriptor for the beam object; func_1513D4B8 copies it to +0x18 of the object. */
 typedef struct {
-    u8 unk00;
-    u8 unk01;
-    s16 unk02;
-    s16 unk04;
+    u8 kind;
+    u8 mode;
+    s16 flags;
+    s16 lifetime;
     u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
+    s32 callback0;
+    s32 callback1;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
     f32 unk14;
-    f32 unk18;
-    Vec3_151C8FCC unk1C;
-    Vec3_151C8FCC unk28;
-    Vec3_151C8FCC unk34;
-    s32 unk40;
+    f32 width;
+    vertex start;
+    vertex end;
+    vertex delta;
+    s32 options;
     u8 unk44;
     u8 unk45;
     u8 unk46;
@@ -278,158 +275,162 @@ typedef struct {
     s32 unk48;
     u8 unk4C;
     u8 pad4D[0xB];
-} Cfg_151C756C;
+} SightBeamSpawn;
+
 
 extern void func_1510F800(s32);
-extern s32 func_15145128(Vec3_151C8FCC *, Vec3_151C8FCC *, f32 *, f32 *);
+extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-s32 func_151C8FCC(s32 arg0, Vec3_151C8FCC *arg1, Vec3_151C8FCC *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9);
+s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9);
 s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
-s32 func_151C756C(Vec3_151C8FCC *arg0, void *arg1, Vec3_151C8FCC *arg2, void *arg3, Game1F4650Beam *arg4, Game1F4650Beam *arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s16 argA, s16 argB, s16 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, f32 arg13, f32 arg14, u8 arg15, u8 arg16, s32 arg17) {
+/* Spawns a sight beam object between two surface points, with emitters at both ends. */
+s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     s32 obj;
-    Cfg_151C756C cfg;
-    Block_151C756C blk;
+    SightBeamSpawn spawn;
+    SightBeamState state;
     s32 pos[3];
-    Vec3_151C8FCC ndir;
+    vertex ndir;
 
     func_1510F800(0);
-    blk.unk8C = func_1510FD20(arg0->x, arg0->z);
-    blk.unk90 = func_1510FD20(arg2->x, arg2->z);
-    if (blk.unk8C == 0 || blk.unk90 == 0) {
+    state.zone0 = func_1510FD20(start->x, start->z);
+    state.zone1 = func_1510FD20(end->x, end->z);
+    if (state.zone0 == 0 || state.zone1 == 0) {
         return 0;
     }
-    blk.unk88 = arg4;
-    blk.unk86 = (arg12 ? 8 : 0) | ((argF ? 4 : 0) | ((argE ? 0 : 2) | ((argD ? 1 : 0) | (arg15 ? 0x10 : 0))));
-    if (!arg15) {
-        arg4->unk14 = 1;
+    state.beam = beam;
+    // matching: the right-nested grouping fixes the order IDO evaluates the flag bits in
+    state.flags = (pulses ? 8 : 0) | ((zoneMasked ? 4 : 0) | ((startsOff ? 0 : 2) | ((blinks ? 1 : 0) | (keepEnabled ? 0x10 : 0))));
+    if (!keepEnabled) {
+        beam->disabled = 1;
     }
-    blk.unk98 = arg13;
-    blk.unk9C = arg14;
-    blk.unk94 = arg11;
-    blk.unk5A = *(Info_151C756C *)arg1;
-    blk.unk6C = *(Info_151C756C *)arg3;
-    blk.unk7E = argA;
-    blk.unk80 = argB;
-    blk.unk82 = argC;
-    blk.unk84 = argA + argB;
-    blk.unk00 = blk.unk08 = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
-    blk.unk04 = blk.unk0C = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
-    blk.unk10 = func_150ADA68() * 768.0f + 768.0f;
-    blk.unk14 = func_150ADA68() * 768.0f + 768.0f;
-    blk.unk18 = func_150ADA68() * 6.283185482f;
-    blk.unk1C = func_150ADA68() * 6.283185482f;
-    blk.unk20 = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
-    blk.unk24 = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
+    state.pulseAngle = pulseAngle;
+    state.pulseSpeed = pulseSpeed;
+    state.unk94 = arg11;
+    state.triangle0 = *startTri;
+    state.triangle1 = *endTri;
+    state.activeTime = activeTime;
+    state.inactiveTime = inactiveTime;
+    state.timer = startTime;
+    state.period = activeTime + inactiveTime;
+    state.texS = state.centerS = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
+    state.texT = state.centerT = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
+    state.radiusS = func_150ADA68() * 768.0f + 768.0f;
+    state.radiusT = func_150ADA68() * 768.0f + 768.0f;
+    state.angleS = func_150ADA68() * 6.283185482f;
+    state.angleT = func_150ADA68() * 6.283185482f;
+    state.speedS = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
+    state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
-        extern void func_151C9198(struct102 **, Vec3_151C8FCC *, void *, Vec3_151C8FCC *, s32, u8, u8, u8, s32);
+        extern void func_151C9198(struct102 **, vertex *, void *, vertex *, s32, u8, u8, u8, s32);
 
-        cfg.unk34.x = arg2->x - arg0->x;
-        cfg.unk34.y = arg2->y - arg0->y;
-        cfg.unk34.z = arg2->z - arg0->z;
-        ndir.x = -cfg.unk34.x;
-        ndir.y = -cfg.unk34.y;
-        ndir.z = -cfg.unk34.z;
-        func_151C9198(blk.unk3C, arg0, arg1, &ndir, blk.unk8C, arg6 < arg8, argF, arg16, 0);
-        func_151C9198(blk.unk48, arg2, arg3, &cfg.unk34, blk.unk90, arg6 < arg8, argF, arg16, 0);
-        if (blk.unk3C[0] == NULL || blk.unk3C[1] == NULL || blk.unk3C[2] == NULL ||
-            blk.unk48[0] == NULL || blk.unk48[1] == NULL || blk.unk48[2] == NULL) {
-            if (blk.unk3C[0] != NULL) {
-                func_1516972C(blk.unk3C[0]);
+        spawn.delta.x = end->x - start->x;
+        spawn.delta.y = end->y - start->y;
+        spawn.delta.z = end->z - start->z;
+        ndir.x = -spawn.delta.x;
+        ndir.y = -spawn.delta.y;
+        ndir.z = -spawn.delta.z;
+        func_151C9198(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
+        func_151C9198(state.emitter1, end, endTri, &spawn.delta, state.zone1, red < blue, zoneMasked, arg16, 0);
+        if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
+            state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
+            if (state.emitter0[0] != NULL) {
+                func_1516972C(state.emitter0[0]);
             }
-            if (blk.unk3C[1] != NULL) {
-                func_1516972C(blk.unk3C[1]);
+            if (state.emitter0[1] != NULL) {
+                func_1516972C(state.emitter0[1]);
             }
-            if (blk.unk3C[2] != NULL) {
-                func_1516972C(blk.unk3C[2]);
+            if (state.emitter0[2] != NULL) {
+                func_1516972C(state.emitter0[2]);
             }
-            if (blk.unk48[0] != NULL) {
-                func_1516972C(blk.unk48[0]);
+            if (state.emitter1[0] != NULL) {
+                func_1516972C(state.emitter1[0]);
             }
-            if (blk.unk48[1] != NULL) {
-                func_1516972C(blk.unk48[1]);
+            if (state.emitter1[1] != NULL) {
+                func_1516972C(state.emitter1[1]);
             }
-            if (blk.unk48[2] != NULL) {
-                func_1516972C(blk.unk48[2]);
+            if (state.emitter1[2] != NULL) {
+                func_1516972C(state.emitter1[2]);
             }
             return 0;
         }
     }
-    blk.unk58 = 0;
-    blk.unk54 = 0.0f;
-    blk.unk28 = arg5;
-    if (arg9) {
+    state.alternate = 0;
+    state.phase = 0.0f;
+    state.unk28 = source;
+    if (hasMidEffect) {
         Header hdr;
 
-        pos[0] = arg0->x + cfg.unk34.x * 0.5f;
-        pos[1] = arg0->y + cfg.unk34.y * 0.5f;
-        pos[2] = arg0->z + cfg.unk34.z * 0.5f;
+        pos[0] = start->x + spawn.delta.x * 0.5f;
+        pos[1] = start->y + spawn.delta.y * 0.5f;
+        pos[2] = start->z + spawn.delta.z * 0.5f;
         hdr.unk0 = 2;
         hdr.unk1 = 2;
         hdr.unk2 = 0x12C;
         hdr.unk4 = 0;
-        blk.unk2C = func_1516284C(&hdr, pos, arg6, arg7, arg8, 0xFF, 0, 0, 0x10, arg16, arg17);
+        state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
-        blk.unk2C = 0;
+        state.midEffect = 0;
     }
-    cfg.unk00 = 0x59;
-    cfg.unk01 = 6;
-    cfg.unk02 = 0x5A03;
-    cfg.unk04 = 0x12C;
-    cfg.unk08 = 0;
-    cfg.unk0C = 0;
-    cfg.unk10 = arg6;
-    cfg.unk11 = arg7;
-    cfg.unk12 = arg8;
-    cfg.unk13 = 0xFF;
-    cfg.unk14 = 0.0f;
-    cfg.unk18 = 20.0f;
-    cfg.unk1C = *arg0;
-    cfg.unk28 = *arg2;
-    cfg.unk40 = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
-    cfg.unk44 = 0xFF;
-    cfg.unk45 = 0xFF;
-    cfg.unk46 = 0;
-    cfg.unk47 = 6;
-    obj = func_1513D4B8((s32)&cfg, (s32)&D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
+    spawn.kind = 0x59;
+    spawn.mode = 6;
+    spawn.flags = 0x5A03;
+    spawn.lifetime = 0x12C;
+    spawn.callback0 = 0;
+    spawn.callback1 = 0;
+    spawn.red = red;
+    spawn.green = green;
+    spawn.blue = blue;
+    spawn.alpha = 0xFF;
+    spawn.unk14 = 0.0f;
+    spawn.width = 20.0f;
+    spawn.start = *start;
+    spawn.end = *end;
+    spawn.options = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
+    spawn.unk44 = 0xFF;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 6;
+    obj = func_1513D4B8((s32)&spawn, (s32)&D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
     if (obj != 0) {
-        Block_151C756C *bp;
-        Vec3_151C8FCC dir;
+        SightBeamState *objState;
+        vertex dir;
         f32 len;
         f32 inv;
-        Vec3_151C8FCC p0;
-        Vec3_151C8FCC p1;
-        Vec3_151C8FCC q0;
-        Vec3_151C8FCC q1;
+        vertex p0;
+        vertex p1;
+        vertex q0;
+        vertex q1;
 
         {
+            // matching: a block-scope declaration gives IDO a scope boundary here
             extern s32 D_800BE9F0;
 
-            bp = (Block_151C756C *)(obj + 0x110);
-            memcpy(bp, &blk, sizeof(Block_151C756C));
+            objState = (SightBeamState *)(obj + 0x110);
+            memcpy(objState, &state, sizeof(SightBeamState));
         }
-        dir = cfg.unk34;
-        if (func_15145128(&dir, &dir, &len, &inv) != 0 && arg10) {
-            p0.x = arg0->x + dir.x * 20.0f;
-            p0.y = arg0->y + dir.y * 20.0f;
-            p0.z = arg0->z + dir.z * 20.0f;
+        dir = spawn.delta;
+        if (func_15145128(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
+            p0.x = start->x + dir.x * 20.0f;
+            p0.y = start->y + dir.y * 20.0f;
+            p0.z = start->z + dir.z * 20.0f;
             p1.x = p0.x + dir.x * 500.0f;
             p1.y = p0.y + dir.y * 500.0f;
             p1.z = p0.z + dir.z * 500.0f;
-            q0.x = arg2->x - dir.x * 20.0f;
-            q0.y = arg2->y - dir.y * 20.0f;
-            q0.z = arg2->z - dir.z * 20.0f;
+            q0.x = end->x - dir.x * 20.0f;
+            q0.y = end->y - dir.y * 20.0f;
+            q0.z = end->z - dir.z * 20.0f;
             q1.x = q0.x - dir.x * 500.0f;
             q1.y = q0.y - dir.y * 500.0f;
             q1.z = q0.z - dir.z * 500.0f;
-            bp->unk34 = func_151C8FCC(obj, &p0, &p1, arg6, arg7, arg8, blk.unk8C, argF, arg16, arg17);
-            bp->unk38 = func_151C8FCC(obj, &q0, &q1, arg6, arg7, arg8, blk.unk90, argF, arg16, arg17);
+            objState->endEffect0 = func_151C8FCC(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
+            objState->endEffect1 = func_151C8FCC(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
         } else {
-            bp->unk34 = 0;
-            bp->unk38 = 0;
+            objState->endEffect0 = 0;
+            objState->endEffect1 = 0;
         }
-        if (bp->unk2C != 0) {
-            func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (s32)func_151C87AC, bp, 0, 8, (u8)func_150ADA20());
+        if (objState->midEffect != 0) {
+            func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (s32)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
     return obj;
@@ -711,22 +712,22 @@ s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 }
 
 extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-extern s32 func_151451F0(Vec3_151C8FCC *, Vec3_151C8FCC *, Vec3_151C8FCC *, f32, f32, Vec3_151C8FCC *, Vec3_151C8FCC *, f32 *, f32 *);
+extern s32 func_151451F0(vertex *, vertex *, vertex *, f32, f32, vertex *, vertex *, f32 *, f32 *);
 
 s32 func_151C87E0(s32 arg0, s32 arg1) {
     s32 idx;
     f32 radius;
     f32 scale;
-    Vec3_151C8FCC pos;
+    vertex pos;
     f32 half;
-    Vec3_151C8FCC a;
+    vertex a;
     f32 ex;
     f32 ey;
     f32 ez;
-    Vec3_151C8FCC dir;
+    vertex dir;
     f32 len;
-    Vec3_151C8FCC outA;
-    Vec3_151C8FCC outB;
+    vertex outA;
+    vertex outB;
     f32 outC;
     f32 outD;
     s16 h;
@@ -935,8 +936,8 @@ typedef struct {
     u8 unk13;
     f32 unk14;
     f32 unk18;
-    Vec3_151C8FCC unk1C;
-    Vec3_151C8FCC unk28;
+    vertex unk1C;
+    vertex unk28;
     f32 unk34;
     f32 unk38;
     f32 unk3C;
@@ -952,7 +953,7 @@ typedef struct {
 
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_151C8FCC(s32 arg0, Vec3_151C8FCC *arg1, Vec3_151C8FCC *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9) {
+s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9) {
     void *temp_v0;
     Struct90_151C8FCC sp90;
     Struct38_151C8FCC sp38;
@@ -1058,7 +1059,7 @@ extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_15133760(void *, void *);
 
-void func_151C9198(struct102 **arg0, Vec3_151C8FCC *arg1, void *arg2, Vec3_151C8FCC *arg3, s32 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+void func_151C9198(struct102 **arg0, vertex *arg1, void *arg2, vertex *arg3, s32 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
     struct17 spEC;
     struct17 spE0;
     struct17 spD4;
