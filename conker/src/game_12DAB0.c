@@ -49,7 +49,7 @@ typedef struct {
 
 /* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectState. */
 typedef struct {
-    u8 pad0[0x110];
+    DefParticleHead head;
     EffectState state;
 } EffectParticle;
 

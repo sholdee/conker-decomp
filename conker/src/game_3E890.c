@@ -154,7 +154,7 @@ typedef struct {
 } Motion; /* size 0x5C */
 
 typedef struct MotionEffect {
-    /* 0x000 */ u8 header[0x110];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Motion motion;
 } MotionEffect;
 

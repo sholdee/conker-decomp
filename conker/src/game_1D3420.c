@@ -86,7 +86,7 @@ typedef struct Game1D3420EffectState {
 } Game1D3420EffectState; /* size 0x1C */
 
 typedef struct Game1D3420Effect {
-    /* 0x000 */ u8 pad0[0x110];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 

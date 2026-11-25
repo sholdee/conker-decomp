@@ -29,17 +29,10 @@ typedef struct {
     /* 0x170 */ LampSwing swing;
 } Particle;
 
-/* Beam particle made by func_151407D0 (same layout as Particle in game_100810.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x34];
-    /* 0x34 */ Vec3f pos;
-    /* 0x40 */ Vec3f end;
-} Beam;
-
 /* Data of the swinging-light effect, stored at struct225.unk18 by func_151B8DB0. */
 typedef struct {
     /* 0x0 */ Particle *lamp;
-    /* 0x4 */ Beam *beam;      // NULL if func_151407D0 failed
+    /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
@@ -53,7 +46,7 @@ typedef struct {
     /* 0x5C */ u8 pad5C[4];
 } GlowParams60;
 
-Beam *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+DefParticleHead *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
@@ -279,12 +272,12 @@ s32 func_151B9408(struct225 *effect) {
         dx = -(point.x - lamp->pos.x) * rate;
         dy = -(point.y - lamp->pos.y) * rate;
         dz = -(point.z - lamp->pos.z) * rate;
-        state->beam->pos.x = lamp->pos.x + dx * reach;
-        state->beam->pos.y = lamp->pos.y + dy * reach;
-        state->beam->pos.z = lamp->pos.z + dz * reach;
-        state->beam->end.x = state->beam->pos.x + dx * extend;
-        state->beam->end.y = state->beam->pos.y + dy * extend;
-        state->beam->end.z = state->beam->pos.z + dz * extend;
+        state->beam->def.pos.x = lamp->pos.x + dx * reach;
+        state->beam->def.pos.y = lamp->pos.y + dy * reach;
+        state->beam->def.pos.z = lamp->pos.z + dz * reach;
+        state->beam->def.rot.x = state->beam->def.pos.x + dx * extend;
+        state->beam->def.rot.y = state->beam->def.pos.y + dy * extend;
+        state->beam->def.rot.z = state->beam->def.pos.z + dz * extend;
     }
     return 1;
 }

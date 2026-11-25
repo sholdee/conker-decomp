@@ -1224,18 +1224,7 @@ typedef struct FlameLineData {
  * The ones in this file are beams: a camera-facing quad from `start` towards `end`.
  */
 typedef struct SceneParticle {
-    /* 0x000 */ char pad0[0x1C];
-    /* 0x01C */ s16 life;
-    /* 0x01E */ char pad1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 progress; /* how far from start towards end the beam is drawn */
-    /* 0x034 */ Vec3f start;
-    /* 0x040 */ Vec3f end;
-    /* 0x04C */ char pad4C[0x10];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ char pad5D[0xC0 - 0x5D];
-    /* 0x0C0 */ Vtx vertexTemplate[4];
-    /* 0x100 */ Vtx *buffers[4]; /* per view */
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ union {
         JetChildData jet;
         FlameLineData line;
@@ -1250,12 +1239,12 @@ s32 func_15197AB4(SceneParticle *p) {
     p->data.jet.velB.x *= p->data.jet.dragB;
     p->data.jet.velB.y += p->data.jet.gravity * D_800BE9A4;
     p->data.jet.velB.z *= p->data.jet.dragB;
-    p->start.x += p->data.jet.velA.x * D_800BE9A4;
-    p->start.y += p->data.jet.velA.y * D_800BE9A4;
-    p->start.z += p->data.jet.velA.z * D_800BE9A4;
-    p->end.x += p->data.jet.velB.x * D_800BE9A4;
-    p->end.y += p->data.jet.velB.y * D_800BE9A4;
-    p->end.z += p->data.jet.velB.z * D_800BE9A4;
+    p->head.def.pos.x += p->data.jet.velA.x * D_800BE9A4;
+    p->head.def.pos.y += p->data.jet.velA.y * D_800BE9A4;
+    p->head.def.pos.z += p->data.jet.velA.z * D_800BE9A4;
+    p->head.def.rot.x += p->data.jet.velB.x * D_800BE9A4;
+    p->head.def.rot.y += p->data.jet.velB.y * D_800BE9A4;
+    p->head.def.rot.z += p->data.jet.velB.z * D_800BE9A4;
     return 1;
 }
 
@@ -1263,11 +1252,11 @@ s32 func_15197AB4(SceneParticle *p) {
 s32 func_15197BBC(SceneParticle *p) {
     s16 life;
 
-    life = p->life;
-    p->progress = p->progress - (p->progress * p->data.jet.shrinkRate);
-    p->width = p->width - (p->width * p->data.jet.shrinkRate);
+    life = p->head.def.lifetime;
+    p->head.def.height = p->head.def.height - (p->head.def.height * p->data.jet.shrinkRate);
+    p->head.def.width = p->head.def.width - (p->head.def.width * p->data.jet.shrinkRate);
     if (life < p->data.jet.fadeStart) {
-        p->alpha = life * p->data.jet.alphaPerLife;
+        p->head.def.unk44 = life * p->data.jet.alphaPerLife;
     }
     return 1;
 }
@@ -1288,30 +1277,30 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(beam->buffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->head.vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(beam->buffers[view], beam->vertexTemplate, 0x40);
-            memcpy(beam->buffers[view] + 4, beam->vertexTemplate, 0x40);
+            memcpy(beam->head.vtxBuffers[view], beam->head.vtxTemplate, 0x40);
+            memcpy(beam->head.vtxBuffers[view] + 4, beam->head.vtxTemplate, 0x40);
         }
     } else {
         return NULL;
     }
-    progress = beam->progress;
-    dx = beam->end.x - beam->start.x;
-    dy = beam->end.y - beam->start.y;
-    dz = beam->end.z - beam->start.z;
-    tip.x = beam->start.x + dx * progress;
-    tip.y = beam->start.y + dy * progress;
-    tip.z = beam->start.z + dz * progress;
+    progress = beam->head.def.height;
+    dx = beam->head.def.rot.x - beam->head.def.pos.x;
+    dy = beam->head.def.rot.y - beam->head.def.pos.y;
+    dz = beam->head.def.rot.z - beam->head.def.pos.z;
+    tip.x = beam->head.def.pos.x + dx * progress;
+    tip.y = beam->head.def.pos.y + dy * progress;
+    tip.z = beam->head.def.pos.z + dz * progress;
     eye = &D_800DBFF0[view].eye;
-    dx = tip.x - beam->start.x;
-    dy = tip.y - beam->start.y;
-    dz = tip.z - beam->start.z;
-    vx = beam->start.x - eye->x;
-    vy = beam->start.y - eye->y;
-    vz = beam->start.z - eye->z;
+    dx = tip.x - beam->head.def.pos.x;
+    dy = tip.y - beam->head.def.pos.y;
+    dz = tip.z - beam->head.def.pos.z;
+    vx = beam->head.def.pos.x - eye->x;
+    vy = beam->head.def.pos.y - eye->y;
+    vz = beam->head.def.pos.z - eye->z;
     nx = dy * vz - vy * dz;
     ny = dz * vx - vz * dx;
     nz = dx * vy - vx * dy;
@@ -1321,19 +1310,19 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = beam->width / sqrtf(lengthSquared);
+        scale = beam->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->ob[0] = beam->start.x + nx;
-    vertices->ob[1] = beam->start.y + ny;
-    vertices->ob[2] = beam->start.z + nz;
+    vertices->ob[0] = beam->head.def.pos.x + nx;
+    vertices->ob[1] = beam->head.def.pos.y + ny;
+    vertices->ob[2] = beam->head.def.pos.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->ob[0] = beam->start.x - nx;
-    vertices->ob[1] = beam->start.y - ny;
-    vertices->ob[2] = beam->start.z - nz;
+    vertices->ob[0] = beam->head.def.pos.x - nx;
+    vertices->ob[1] = beam->head.def.pos.y - ny;
+    vertices->ob[2] = beam->head.def.pos.z - nz;
     vertices->flag = 0;
     vertices++;
     dx = -dx;
@@ -1351,7 +1340,7 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = beam->width / sqrtf(lengthSquared);
+        scale = beam->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
@@ -3352,12 +3341,12 @@ s32 func_1519C26C(SceneParticle *beam) {
     accB.x = (p->velB.x - velB.x) * D_800BE9A8;
     accB.y = (p->velB.y - velB.y) * D_800BE9A8;
     accB.z = (p->velB.z - velB.z) * D_800BE9A8;
-    beam->start.x += velA.x * D_800BE9A4 + 0.5f * accA.x * dtSq;
-    beam->start.y += velA.y * D_800BE9A4 + 0.5f * accA.y * dtSq;
-    beam->start.z += velA.z * D_800BE9A4 + 0.5f * accA.z * dtSq;
-    beam->end.x += velB.x * D_800BE9A4 + 0.5f * accB.x * dtSq;
-    beam->end.y += velB.y * D_800BE9A4 + 0.5f * accB.y * dtSq;
-    beam->end.z += velB.z * D_800BE9A4 + 0.5f * accB.z * dtSq;
+    beam->head.def.pos.x += velA.x * D_800BE9A4 + 0.5f * accA.x * dtSq;
+    beam->head.def.pos.y += velA.y * D_800BE9A4 + 0.5f * accA.y * dtSq;
+    beam->head.def.pos.z += velA.z * D_800BE9A4 + 0.5f * accA.z * dtSq;
+    beam->head.def.rot.x += velB.x * D_800BE9A4 + 0.5f * accB.x * dtSq;
+    beam->head.def.rot.y += velB.y * D_800BE9A4 + 0.5f * accB.y * dtSq;
+    beam->head.def.rot.z += velB.z * D_800BE9A4 + 0.5f * accB.z * dtSq;
     return 1;
 }
 
@@ -3367,13 +3356,13 @@ s32 func_1519C4E4(SceneParticle *beam) {
     FlameLineData *p = &beam->data.line;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        beam->width = beam->width - beam->width * p->shrinkRate;
-        beam->progress = beam->progress - beam->progress * p->shrinkRate;
+        beam->head.def.width = beam->head.def.width - beam->head.def.width * p->shrinkRate;
+        beam->head.def.height = beam->head.def.height - beam->head.def.height * p->shrinkRate;
     }
-    if (beam->life < p->fadeStart) {
-        s32 alpha = beam->life * p->alphaPerLife;
-        if (alpha < beam->alpha) {
-            beam->alpha = alpha;
+    if (beam->head.def.lifetime < p->fadeStart) {
+        s32 alpha = beam->head.def.lifetime * p->alphaPerLife;
+        if (alpha < beam->head.def.unk44) {
+            beam->head.def.unk44 = alpha;
         }
     }
     return 1;
@@ -3396,27 +3385,27 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     u8 fresh;
     f32 scale;
 
-    func_151D5D60(beam->buffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->head.vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(beam->buffers[view], beam->vertexTemplate, 0x40);
-            memcpy(beam->buffers[view] + 4, beam->vertexTemplate, 0x40);
+            memcpy(beam->head.vtxBuffers[view], beam->head.vtxTemplate, 0x40);
+            memcpy(beam->head.vtxBuffers[view] + 4, beam->head.vtxTemplate, 0x40);
         }
     } else {
         return NULL;
     }
     pos = (Vec3f *)func_15144B34(view);
-    dir.x = beam->end.x - beam->start.x;
-    dir.y = beam->end.y - beam->start.y;
-    dir.z = beam->end.z - beam->start.z;
-    mid.x = beam->start.x + dir.x * beam->progress;
-    mid.y = beam->start.y + dir.y * beam->progress;
-    mid.z = beam->start.z + dir.z * beam->progress;
-    dir.x = mid.x - beam->start.x;
-    dir.y = mid.y - beam->start.y;
-    dir.z = mid.z - beam->start.z;
-    func_15145548(&beam->start, &dir, pos, &closest, &t);
+    dir.x = beam->head.def.rot.x - beam->head.def.pos.x;
+    dir.y = beam->head.def.rot.y - beam->head.def.pos.y;
+    dir.z = beam->head.def.rot.z - beam->head.def.pos.z;
+    mid.x = beam->head.def.pos.x + dir.x * beam->head.def.height;
+    mid.y = beam->head.def.pos.y + dir.y * beam->head.def.height;
+    mid.z = beam->head.def.pos.z + dir.z * beam->head.def.height;
+    dir.x = mid.x - beam->head.def.pos.x;
+    dir.y = mid.y - beam->head.def.pos.y;
+    dir.z = mid.z - beam->head.def.pos.z;
+    func_15145548(&beam->head.def.pos, &dir, pos, &closest, &t);
     dx = closest.x - pos->x;
     dy = closest.y - pos->y;
     dz = closest.z - pos->z;
@@ -3425,7 +3414,7 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     nz = dir.x * dy - dx * dir.y;
     lengthSquared = nx * nx + ny * ny + nz * nz;
     if (lengthSquared != 0.0f) {
-        scale = beam->width / sqrtf(lengthSquared);
+        scale = beam->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
@@ -3435,14 +3424,14 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     }
-    vertices->ob[0] = beam->start.x + nx;
-    vertices->ob[1] = beam->start.y + ny;
-    vertices->ob[2] = beam->start.z + nz;
+    vertices->ob[0] = beam->head.def.pos.x + nx;
+    vertices->ob[1] = beam->head.def.pos.y + ny;
+    vertices->ob[2] = beam->head.def.pos.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->ob[0] = beam->start.x - nx;
-    vertices->ob[1] = beam->start.y - ny;
-    vertices->ob[2] = beam->start.z - nz;
+    vertices->ob[0] = beam->head.def.pos.x - nx;
+    vertices->ob[1] = beam->head.def.pos.y - ny;
+    vertices->ob[2] = beam->head.def.pos.z - nz;
     vertices->flag = 0;
     vertices++;
     vertices->ob[0] = mid.x - nx;

@@ -176,12 +176,7 @@ typedef struct {
 
 /* An object spawned by func_1513D2F0. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ u8 pad34[0x28];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
 } PuffObj;
 
@@ -321,10 +316,10 @@ s32 func_150F7E20(PuffObj *obj) {
     PuffState *state;
 
     state = &obj->state;
-    obj->unk5C = state->timeLeft * D_800A1BD8;
+    obj->head.def.unk44 = state->timeLeft * D_800A1BD8;
     size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
-    obj->unk30 = size;
-    obj->unk2C = size;
+    obj->head.def.height = size;
+    obj->head.def.width = size;
     state->phase = func_15144B68(state->phase + (state->phaseSpeed * D_800BE9A4));
     state->timeLeft -= D_800BE9A4;
     if (state->timeLeft < 0.0f) {
