@@ -1249,26 +1249,31 @@ typedef struct JetChildData {
 typedef struct FlameLineData {
     /* 0x00 */ Vec3f velA;
     /* 0x0C */ Vec3f velB;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
+    /* 0x18 */ f32 gravity;
+    /* 0x1C */ f32 dragA;
+    /* 0x20 */ f32 dragB;
+    /* 0x24 */ f32 shrinkRate;
+    /* 0x28 */ s16 fadeStart;
+    /* 0x2A */ s16 alphaPerLife;
 } FlameLineData;
 
-/* A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here. */
+/*
+ * A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here.
+ * The ones in this file are beams: a camera-facing quad from `start` towards `end`.
+ */
 typedef struct SceneParticle {
     /* 0x000 */ char pad0[0x1C];
     /* 0x01C */ s16 life;
     /* 0x01E */ char pad1E[0xE];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ Vec3f posA;
-    /* 0x040 */ Vec3f posB;
+    /* 0x02C */ f32 width;
+    /* 0x030 */ f32 progress; /* how far from start towards end the beam is drawn */
+    /* 0x034 */ Vec3f start;
+    /* 0x040 */ Vec3f end;
     /* 0x04C */ char pad4C[0x10];
     /* 0x05C */ u8 alpha;
-    /* 0x05D */ char pad5D[0x110 - 0x5D];
+    /* 0x05D */ char pad5D[0xC0 - 0x5D];
+    /* 0x0C0 */ Vtx vertexTemplate[4];
+    /* 0x100 */ Vtx *buffers[4]; /* per view */
     /* 0x110 */ union {
         JetChildData jet;
         FlameLineData line;
@@ -1283,48 +1288,33 @@ s32 func_15197AB4(SceneParticle *p) {
     p->data.jet.velB.x *= p->data.jet.dragB;
     p->data.jet.velB.y += p->data.jet.gravity * D_800BE9A4;
     p->data.jet.velB.z *= p->data.jet.dragB;
-    p->posA.x += p->data.jet.velA.x * D_800BE9A4;
-    p->posA.y += p->data.jet.velA.y * D_800BE9A4;
-    p->posA.z += p->data.jet.velA.z * D_800BE9A4;
-    p->posB.x += p->data.jet.velB.x * D_800BE9A4;
-    p->posB.y += p->data.jet.velB.y * D_800BE9A4;
-    p->posB.z += p->data.jet.velB.z * D_800BE9A4;
+    p->start.x += p->data.jet.velA.x * D_800BE9A4;
+    p->start.y += p->data.jet.velA.y * D_800BE9A4;
+    p->start.z += p->data.jet.velA.z * D_800BE9A4;
+    p->end.x += p->data.jet.velB.x * D_800BE9A4;
+    p->end.y += p->data.jet.velB.y * D_800BE9A4;
+    p->end.z += p->data.jet.velB.z * D_800BE9A4;
     return 1;
 }
 
-/* Particle callback: shrinks unk2C/unk30 by shrinkRate and fades alpha out over the last fadeStart frames. */
+/* Beam callback: shrinks width and progress by shrinkRate and fades alpha out over the last fadeStart frames. */
 s32 func_15197BBC(SceneParticle *p) {
     s16 life;
 
     life = p->life;
-    p->unk30 = p->unk30 - (p->unk30 * p->data.jet.shrinkRate);
-    p->unk2C = p->unk2C - (p->unk2C * p->data.jet.shrinkRate);
+    p->progress = p->progress - (p->progress * p->data.jet.shrinkRate);
+    p->width = p->width - (p->width * p->data.jet.shrinkRate);
     if (life < p->data.jet.fadeStart) {
         p->alpha = life * p->data.jet.alphaPerLife;
     }
     return 1;
 }
 
-typedef struct CharacterFlamethrowerBeamVertex {
-    s16 x, y, z, flag;
-    u8 other[8];
-} CharacterFlamethrowerBeamVertex;
-
-typedef struct CharacterFlamethrowerBeam {
-    u8 unknown0[0x2C];
-    f32 width;
-    f32 progress;
-    Vec3f start;
-    Vec3f end;
-    u8 unknown4C[0x74];
-    u8 vertexTemplate[0x40];
-    u8 *buffers[1];
-} CharacterFlamethrowerBeam;
 
 
 /* Builds the beam quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
-void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
-    CharacterFlamethrowerBeamVertex *vertices;
+void *func_15197C10(SceneParticle *beam, s16 view) {
+    Vtx_t *vertices;
     void *result;
     f32 progress;
     Vec3f tip;
@@ -1341,7 +1331,7 @@ void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
     if (vertices != NULL) {
         if (fresh != 0) {
             memcpy(beam->buffers[view], beam->vertexTemplate, 0x40);
-            memcpy(beam->buffers[view] + 0x40, beam->vertexTemplate, 0x40);
+            memcpy(beam->buffers[view] + 4, beam->vertexTemplate, 0x40);
         }
     } else {
         return NULL;
@@ -1374,14 +1364,14 @@ void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = beam->start.x + nx;
-    vertices->y = beam->start.y + ny;
-    vertices->z = beam->start.z + nz;
+    vertices->ob[0] = beam->start.x + nx;
+    vertices->ob[1] = beam->start.y + ny;
+    vertices->ob[2] = beam->start.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = beam->start.x - nx;
-    vertices->y = beam->start.y - ny;
-    vertices->z = beam->start.z - nz;
+    vertices->ob[0] = beam->start.x - nx;
+    vertices->ob[1] = beam->start.y - ny;
+    vertices->ob[2] = beam->start.z - nz;
     vertices->flag = 0;
     vertices++;
     dx = -dx;
@@ -1404,14 +1394,14 @@ void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = tip.x + nx;
-    vertices->y = tip.y + ny;
-    vertices->z = tip.z + nz;
+    vertices->ob[0] = tip.x + nx;
+    vertices->ob[1] = tip.y + ny;
+    vertices->ob[2] = tip.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = tip.x - nx;
-    vertices->y = tip.y - ny;
-    vertices->z = tip.z - nz;
+    vertices->ob[0] = tip.x - nx;
+    vertices->ob[1] = tip.y - ny;
+    vertices->ob[2] = tip.z - nz;
     vertices->flag = 0;
     return result;
 }
@@ -1469,8 +1459,8 @@ typedef struct SceneParticleSpawn {
     /* 0x13 */ u8 unk13;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
-    /* 0x1C */ Vec3f posA;
-    /* 0x28 */ Vec3f posB;
+    /* 0x1C */ Vec3f start;
+    /* 0x28 */ Vec3f end;
     /* 0x34 */ f32 unk34;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
@@ -1575,12 +1565,12 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
             dx = rc * sinA;
             dy = -rad * sinB;
             dz = rc * cosA;
-            spawn.posA.x = next->pos.x + dx;
-            spawn.posA.y = next->pos.y + dy;
-            spawn.posA.z = next->pos.z + dz;
-            spawn.posB.x = cur->pos.x + dx;
-            spawn.posB.y = cur->pos.y + dy;
-            spawn.posB.z = cur->pos.z + dz;
+            spawn.start.x = next->pos.x + dx;
+            spawn.start.y = next->pos.y + dy;
+            spawn.start.z = next->pos.z + dz;
+            spawn.end.x = cur->pos.x + dx;
+            spawn.end.y = cur->pos.y + dy;
+            spawn.end.z = cur->pos.z + dz;
             if (func_150ADA20() & 1) {
                 flag = 1;
             } else {
@@ -2185,17 +2175,17 @@ typedef struct FlameLineParams {
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 speedMin;
     /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
+    /* 0x24 */ f32 gravityMin;
+    /* 0x28 */ f32 gravityRange;
+    /* 0x2C */ f32 dragA;
+    /* 0x30 */ f32 dragB;
+    /* 0x34 */ s16 fadeStart;
+    /* 0x36 */ s16 alphaPerLife;
     /* 0x38 */ f32 position; /* fraction of the length where they spawn */
     /* 0x3C */ u8 unk3C;
     /* 0x3D */ u8 unk3D;
     /* 0x3E */ u8 pad3E[2];
-    /* 0x40 */ f32 unk40;
+    /* 0x40 */ f32 shrinkRate;
 } FlameLineParams;
 
 /* Parameters of the particles (func_15147DA0) a flame scatters towards `target`; random values are min + range. */
@@ -2837,8 +2827,8 @@ typedef struct LineParticleSpawn {
     u8 unk13;
     f32 unk14;
     f32 unk18;
-    Vec3f posA;
-    Vec3f posB;
+    Vec3f start;
+    Vec3f end;
     f32 unk34;
     f32 unk38;
     f32 unk3C;
@@ -3071,11 +3061,11 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             } while (i != actor->tail && found == 0);
             spawn.unk8 = 0;
             spawn.unkC = 0;
-            lineData.unk1C = flame->line.unk2C;
-            lineData.unk20 = flame->line.unk30;
-            lineData.unk24 = flame->line.unk40;
-            lineData.unk28 = flame->line.unk34;
-            lineData.unk2A = flame->line.unk36;
+            lineData.dragA = flame->line.dragA;
+            lineData.dragB = flame->line.dragB;
+            lineData.shrinkRate = flame->line.shrinkRate;
+            lineData.fadeStart = flame->line.fadeStart;
+            lineData.alphaPerLife = flame->line.alphaPerLife;
             spawn.unk1 = 0;
             spawn.unk2 = 0x2203;
             spawn.unk10 = 0xFF;
@@ -3110,7 +3100,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 lineData.velB.x = a->vel.x * r3;
                 lineData.velB.y = a->vel.y * r3;
                 lineData.velB.z = a->vel.z * r3;
-                lineData.unk18 = func_150ADA68() * flame->line.unk28 + flame->line.unk24;
+                lineData.gravity = func_150ADA68() * flame->line.gravityRange + flame->line.gravityMin;
                 if (func_150ADA20() & 1) {
                     spawn.texture = 0x13;
                 } else {
@@ -3118,12 +3108,12 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 }
                 spawn.life = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
                 func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.x);
-                spawn.posA.x = pos.x + vel.x;
-                spawn.posA.y = pos.y + vel.y;
-                spawn.posA.z = pos.z + vel.z;
-                spawn.posB.x = spawn.posA.x + dir.x;
-                spawn.posB.y = spawn.posA.y + dir.y;
-                spawn.posB.z = spawn.posA.z + dir.z;
+                spawn.start.x = pos.x + vel.x;
+                spawn.start.y = pos.y + vel.y;
+                spawn.start.z = pos.z + vel.z;
+                spawn.end.x = spawn.start.x + dir.x;
+                spawn.end.y = spawn.start.y + dir.y;
+                spawn.end.z = spawn.start.z + dir.z;
                 spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
                 particle = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->unkC, actor->unk1);
@@ -3550,123 +3540,70 @@ void func_1519C258(FlameLight *light) {
     flame->light = NULL;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f26C;
-
-typedef struct {
-    /* 0x00 */ Vec3f26C vel;
-    /* 0x0C */ Vec3f26C avel;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-} Struct1519C26CSub;
-
-typedef struct {
-    char pad0[0x34];
-    /* 0x34 */ Vec3f26C pos;
-    /* 0x40 */ Vec3f26C rot;
-} Struct1519C26C;
-
-s32 func_1519C26C(Struct1519C26C *arg0) {
+/* Flame line particle callback: gravity, per-frame drag, then moves both beam ends (constant acceleration). */
+s32 func_1519C26C(SceneParticle *beam) {
     f32 dtSq;
-    Vec3f26C vel;
-    Vec3f26C avel;
-    Vec3f26C acc;
-    Vec3f26C aacc;
-    Struct1519C26CSub *p = (Struct1519C26CSub *)((char *)arg0 + 0x110);
+    Vec3f velA;
+    Vec3f velB;
+    Vec3f accA;
+    Vec3f accB;
+    FlameLineData *p = &beam->data.line;
 
     dtSq = D_800BE9A4 * D_800BE9A4;
-    vel = p->vel;
-    avel = p->avel;
-    p->vel.y += p->unk18 * D_800BE9A4;
-    p->avel.y += p->unk18 * D_800BE9A4;
+    velA = p->velA;
+    velB = p->velB;
+    p->velA.y += p->gravity * D_800BE9A4;
+    p->velB.y += p->gravity * D_800BE9A4;
     {
         s32 i;
 
         for (i = D_800BE9E4; i > 0; i--) {
-            p->vel.x *= p->unk1C;
-            p->vel.y *= p->unk1C;
-            p->vel.z *= p->unk1C;
-            p->avel.x *= p->unk20;
-            p->avel.y *= p->unk20;
-            p->avel.z *= p->unk20;
+            p->velA.x *= p->dragA;
+            p->velA.y *= p->dragA;
+            p->velA.z *= p->dragA;
+            p->velB.x *= p->dragB;
+            p->velB.y *= p->dragB;
+            p->velB.z *= p->dragB;
         }
     }
-    acc.x = (p->vel.x - vel.x) * D_800BE9A8;
-    acc.y = (p->vel.y - vel.y) * D_800BE9A8;
-    acc.z = (p->vel.z - vel.z) * D_800BE9A8;
-    aacc.x = (p->avel.x - avel.x) * D_800BE9A8;
-    aacc.y = (p->avel.y - avel.y) * D_800BE9A8;
-    aacc.z = (p->avel.z - avel.z) * D_800BE9A8;
-    arg0->pos.x += vel.x * D_800BE9A4 + 0.5f * acc.x * dtSq;
-    arg0->pos.y += vel.y * D_800BE9A4 + 0.5f * acc.y * dtSq;
-    arg0->pos.z += vel.z * D_800BE9A4 + 0.5f * acc.z * dtSq;
-    arg0->rot.x += avel.x * D_800BE9A4 + 0.5f * aacc.x * dtSq;
-    arg0->rot.y += avel.y * D_800BE9A4 + 0.5f * aacc.y * dtSq;
-    arg0->rot.z += avel.z * D_800BE9A4 + 0.5f * aacc.z * dtSq;
+    accA.x = (p->velA.x - velA.x) * D_800BE9A8;
+    accA.y = (p->velA.y - velA.y) * D_800BE9A8;
+    accA.z = (p->velA.z - velA.z) * D_800BE9A8;
+    accB.x = (p->velB.x - velB.x) * D_800BE9A8;
+    accB.y = (p->velB.y - velB.y) * D_800BE9A8;
+    accB.z = (p->velB.z - velB.z) * D_800BE9A8;
+    beam->start.x += velA.x * D_800BE9A4 + 0.5f * accA.x * dtSq;
+    beam->start.y += velA.y * D_800BE9A4 + 0.5f * accA.y * dtSq;
+    beam->start.z += velA.z * D_800BE9A4 + 0.5f * accA.z * dtSq;
+    beam->end.x += velB.x * D_800BE9A4 + 0.5f * accB.x * dtSq;
+    beam->end.y += velB.y * D_800BE9A4 + 0.5f * accB.y * dtSq;
+    beam->end.z += velB.z * D_800BE9A4 + 0.5f * accB.z * dtSq;
     return 1;
 }
 
-typedef struct {
-    char pad0[0x24];
-    f32 unk24;
-    s16 unk28;
-    s16 unk2A;
-} C4E4Sub;
-
-typedef struct {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x2C - 0x1E];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x5C - 0x34];
-    u8 unk5C;
-} C4E4Struct;
-
-s32 func_1519C4E4(C4E4Struct *arg0) {
+/* Flame line particle callback: per-frame shrink of width and progress, alpha fades over the last frames. */
+s32 func_1519C4E4(SceneParticle *beam) {
     s32 i;
-    C4E4Sub *p = (C4E4Sub *)((char *)arg0 + 0x110);
+    FlameLineData *p = &beam->data.line;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        arg0->unk2C = arg0->unk2C - arg0->unk2C * p->unk24;
-        arg0->unk30 = arg0->unk30 - arg0->unk30 * p->unk24;
+        beam->width = beam->width - beam->width * p->shrinkRate;
+        beam->progress = beam->progress - beam->progress * p->shrinkRate;
     }
-    if (arg0->unk1C < p->unk28) {
-        s32 a1 = arg0->unk1C * p->unk2A;
-        if (a1 < arg0->unk5C) {
-            arg0->unk5C = a1;
+    if (beam->life < p->fadeStart) {
+        s32 alpha = beam->life * p->alphaPerLife;
+        if (alpha < beam->alpha) {
+            beam->alpha = alpha;
         }
     }
     return 1;
 }
-
-typedef struct {
-    u8 pad0[0x2C];
-    f32 width;
-    f32 t;
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    u8 tmpl[0x40];
-    u8 *buffers[4];
-} Obj_1519C56C;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 flag;
-    u8 pad8[8];
-} Vtx_1519C56C;
 
 void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
-void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
-    Vtx_1519C56C *vertices;
+/* Builds a flame line beam's quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
+void *func_1519C56C(SceneParticle *beam, s16 view) {
+    Vtx_t *vertices;
     void *result;
     Vec3f *pos;
     Vec3f dir;
@@ -3679,27 +3616,27 @@ void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
     u8 fresh;
     f32 scale;
 
-    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->buffers, view, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+            memcpy(beam->buffers[view], beam->vertexTemplate, 0x40);
+            memcpy(beam->buffers[view] + 4, beam->vertexTemplate, 0x40);
         }
     } else {
         return NULL;
     }
-    pos = (Vec3f *)func_15144B34(arg1);
-    dir.x = arg0->end.x - arg0->start.x;
-    dir.y = arg0->end.y - arg0->start.y;
-    dir.z = arg0->end.z - arg0->start.z;
-    mid.x = arg0->start.x + dir.x * arg0->t;
-    mid.y = arg0->start.y + dir.y * arg0->t;
-    mid.z = arg0->start.z + dir.z * arg0->t;
-    dir.x = mid.x - arg0->start.x;
-    dir.y = mid.y - arg0->start.y;
-    dir.z = mid.z - arg0->start.z;
-    func_15145548(&arg0->start, &dir, pos, &closest, &t);
+    pos = (Vec3f *)func_15144B34(view);
+    dir.x = beam->end.x - beam->start.x;
+    dir.y = beam->end.y - beam->start.y;
+    dir.z = beam->end.z - beam->start.z;
+    mid.x = beam->start.x + dir.x * beam->progress;
+    mid.y = beam->start.y + dir.y * beam->progress;
+    mid.z = beam->start.z + dir.z * beam->progress;
+    dir.x = mid.x - beam->start.x;
+    dir.y = mid.y - beam->start.y;
+    dir.z = mid.z - beam->start.z;
+    func_15145548(&beam->start, &dir, pos, &closest, &t);
     dx = closest.x - pos->x;
     dy = closest.y - pos->y;
     dz = closest.z - pos->z;
@@ -3708,34 +3645,34 @@ void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
     nz = dir.x * dy - dx * dir.y;
     lengthSquared = nx * nx + ny * ny + nz * nz;
     if (lengthSquared != 0.0f) {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = beam->width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
-    lbl: ;
+    lbl: ; // matching: an unused label ends the block where IDO needs it
     } else {
         nx = 0.0f;
         ny = 0.0f;
         nz = 0.0f;
     }
-    vertices->x = arg0->start.x + nx;
-    vertices->y = arg0->start.y + ny;
-    vertices->z = arg0->start.z + nz;
+    vertices->ob[0] = beam->start.x + nx;
+    vertices->ob[1] = beam->start.y + ny;
+    vertices->ob[2] = beam->start.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = arg0->start.x - nx;
-    vertices->y = arg0->start.y - ny;
-    vertices->z = arg0->start.z - nz;
+    vertices->ob[0] = beam->start.x - nx;
+    vertices->ob[1] = beam->start.y - ny;
+    vertices->ob[2] = beam->start.z - nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = mid.x - nx;
-    vertices->y = mid.y - ny;
-    vertices->z = mid.z - nz;
+    vertices->ob[0] = mid.x - nx;
+    vertices->ob[1] = mid.y - ny;
+    vertices->ob[2] = mid.z - nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = mid.x + nx;
-    vertices->y = mid.y + ny;
-    vertices->z = mid.z + nz;
+    vertices->ob[0] = mid.x + nx;
+    vertices->ob[1] = mid.y + ny;
+    vertices->ob[2] = mid.z + nz;
     vertices->flag = 0;
     return result;
 }
