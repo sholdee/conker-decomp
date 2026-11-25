@@ -409,19 +409,20 @@ typedef struct {
     char pad60[0x10];
     f32 unk70;
 } Obj_1516B6BC;
+/* Sprite texture header (D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
+ * D_8009058C bubble circle). */
 typedef struct {
-    char pad0[6];
-    u16 unk6;
-    u16 unk8;
-} Struct1516CC58_Vp;
+    /* 0x0 */ u8 pad0[6];
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+} TextBoxTexture;
 
-extern Struct1516CC58_Vp D_8009055C;
-extern Struct1516CC58_Vp D_8009057C;
+extern TextBoxTexture D_8009055C;
+extern TextBoxTexture D_8009057C;
 #define WGFX1516B6BC(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
-extern Struct1516CC58_Vp D_8009056C;
-extern Struct1516CC58_Vp D_8009058C;
-extern Struct1516CC58_Vp D_8009059C;
-extern u16 D_80090564;
+extern TextBoxTexture D_8009056C;
+extern TextBoxTexture D_8009058C;
+extern TextBoxTexture D_8009059C;
 extern s32 D_800A4AC8[][2];
 extern s32 D_800A4B90;
 extern s32 D_800A4B94;
@@ -431,7 +432,7 @@ extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8 D_800E0BDC;
-Gfx *func_15094F70(Gfx *, Struct1516CC58_Vp *, s32, Sprite_1516B6BC *, s32, s32, s32, s32, s32);
+Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, Sprite_1516B6BC *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, Sprite_1516B6BC *, f32, f32);
 Gfx *func_1516C934(Gfx *, Obj_1516B6BC *, s32, s32, s32, s32);
 
@@ -465,12 +466,12 @@ Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
     scale = D_800E0BDC + 1;
     sprite.flags = 0;
     sprite.alpha = (64 * scale) >> 8;
-    tw = (f32)D_8009055C.unk6;
-    th = (f32)D_8009055C.unk8;
-    sprite.w = (2.0f * obj->unk38 + 1.0f) / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = (obj->unk3C + 1.0f) / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
-    xoff = obj->unk38 / (f32)D_8009055C.unk6 * (f32)D_8009057C.unk6 * 0.25f * obj->unk28;
-    yoff = obj->unk3C / (f32)D_8009055C.unk8 * (f32)D_8009057C.unk8 * 0.5f * obj->unk28;
+    tw = (f32)D_8009055C.width;
+    th = (f32)D_8009055C.height;
+    sprite.w = (2.0f * obj->unk38 + 1.0f) / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
+    sprite.h = (obj->unk3C + 1.0f) / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
+    xoff = obj->unk38 / (f32)D_8009055C.width * (f32)D_8009057C.width * 0.25f * obj->unk28;
+    yoff = obj->unk3C / (f32)D_8009055C.height * (f32)D_8009057C.height * 0.5f * obj->unk28;
     obj->unk48 = cosf(obj->unk58 + 3.14159274101f) * (obj->unk38 * 0.5f) * 1.14999997616f * obj->unk28 + obj->unk40 - xoff;
     obj->unk4C = sinf(obj->unk58 + 3.14159274101f) * (obj->unk3C * 0.5f) * 1.03999996185f * obj->unk28 + obj->unk44 - yoff;
     WGFX1516B6BC(gfx++, 0xE7000000, 0);
@@ -565,8 +566,8 @@ Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
     } else {
         sprite.flags &= ~1;
     }
-    sprite.w = obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
+    sprite.w = obj->unk38 / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
+    sprite.h = obj->unk3C / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
     if (obj->unk10->unk0 & 2) {
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
         sprite.alpha = obj->unk1C;
@@ -597,8 +598,8 @@ Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
             gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
         }
     }
-    sprite.w = 2.0f * obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
+    sprite.w = 2.0f * obj->unk38 / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
+    sprite.h = obj->unk3C / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
     if (obj->unk10->unk0 & 2) {
         sprite.alpha = obj->unk1B;
         sprite.alpha = (sprite.alpha * scale) >> 8;
@@ -744,163 +745,120 @@ lbl:
 #undef ARG1
 }
 
+/* What D_800BE628 points to. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    char padA[2];
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 *unk18;
-    f32 *unk1C;
-    f32 *unk20;
-} Struct1516CC58_10;
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 width;
+    /* 0x08 */ f32 height;
+    /* 0x0C */ u8 padC[0x18];
+    /* 0x24 */ f32 minY;
+    /* 0x28 */ f32 maxY;
+    /* 0x2C */ f32 minX;
+    /* 0x30 */ f32 maxX;
+} TextBoxView;
 
-typedef struct {
-    char pad0[0x10];
-    Struct1516CC58_10 *unk10;
-    char pad14[0xB];
-    u8 unk1F;
-    char pad20[8];
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    char pad48[8];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-} Struct1516CC58;
+#define VIEW ((TextBoxView *)D_800BE628)
 
-typedef struct {
-    char pad0[4];
-    f32 unk4;
-    f32 unk8;
-} Struct1516CC58_BE628;
-
-typedef struct {
-    f32 unk0;
-    char pad4[0x328];
-} Struct1516CC58_CC310;
-
-extern Struct1516CC58_CC310 D_800CC310[];
 extern f32 cosf(f32);
-extern u16 D_80090562;
-extern u16 D_80090582;
 extern f32 sinf(f32);
 void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
-void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
-void func_1516CC58(Struct1516CC58 *arg0) {
-    f32 sp54;
-    f32 sp50;
-    f32 sp4C;
-    Struct1516CC58_10 *temp_v0;
-    s32 sp44;
-    s32 sp40;
-    f32 temp_f0;
-    f32 temp_f2;
-    f32 var_f0_2;
+/* Places a text box: its anchor comes from screen percentages or from its object's projected position,
+ * and the body is set at an angle derived from the object's heading. */
+void func_1516CC58(TextBox *box) {
+    f32 screenX;
+    f32 screenY;
+    f32 screenZ;
+    TextBoxConfig *config;
+    s32 xoff;
+    s32 yoff;
+    f32 scale;
+    f32 angle;
 
-    temp_v0 = arg0->unk10;
-    if (temp_v0->unk0 & 0x8000) {
-        temp_f2 = *temp_v0->unk18 * 0.00999999977648f;
-        arg0->unk5C = (*(Struct1516CC58_BE628 **)&D_800BE628)->unk4 * temp_f2;
-        temp_f2 = *temp_v0->unk1C * 0.00999999977648f;
-        temp_f2 = 1.0f - temp_f2;
-        arg0->unk60 = (*(Struct1516CC58_BE628 **)&D_800BE628)->unk8 * temp_f2;
-        var_f0_2 = *temp_v0->unk20 * 0.00999999977648f;
-        var_f0_2 = (var_f0_2 < 0.0f) ? 0.0f : ((var_f0_2 > 1.0f) ? 1.0f : var_f0_2);
-        var_f0_2 = (70.0f * var_f0_2) + 55.0f;
-        var_f0_2 = var_f0_2 * 0.0174532923847f;
-        arg0->unk58 = var_f0_2;
-        if (temp_v0->unk0 & 0x10000) {
-            func_1516D0CC(arg0, &arg0->unk5C, &arg0->unk60, &arg0->unk58);
+    config = box->config;
+    if (config->flags & TEXTBOX_SCREEN_POS) {
+        scale = *config->screenXPercent * 0.01f;
+        box->anchorX = VIEW->width * scale;
+        scale = *config->screenYPercent * 0.01f;
+        scale = 1.0f - scale;
+        box->anchorY = VIEW->height * scale;
+        angle = *config->anglePercent * 0.01f;
+        angle = (angle < 0.0f) ? 0.0f : ((angle > 1.0f) ? 1.0f : angle);
+        angle = 70.0f * angle + 55.0f;
+        angle *= 0.017453292f;
+        box->angle = angle;
+        if (config->flags & TEXTBOX_CLAMP) {
+            func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
         }
     } else {
-        func_1501A764(0, temp_v0->unkC, temp_v0->unk10, temp_v0->unk14, &sp54, &sp50, &sp4C);
-        if (arg0->unk1F == 0) {
-            arg0->unk64 = sp54;
-            arg0->unk68 = sp50;
-            arg0->unk6C = (D_800CC310[arg0->unk10->unk9].unk0 - D_800DBFF0->unk37C) - 180.0f;
-            arg0->unk1F = 1;
+        func_1501A764(0, config->worldX, config->worldY, config->worldZ, &screenX, &screenY, &screenZ);
+        if (box->placed == 0) {
+            box->baseX = screenX;
+            box->baseY = screenY;
+            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->unk37C - 180.0f;
+            box->placed = 1;
         }
-        var_f0_2 = arg0->unk6C;
-        arg0->unk5C = arg0->unk64;
-        arg0->unk60 = arg0->unk68;
-        if (var_f0_2 < 0.0f) {
-            var_f0_2 += 360.0f;
+        angle = box->yaw;
+        box->anchorX = box->baseX;
+        box->anchorY = box->baseY;
+        if (angle < 0.0f) {
+            angle += 360.0f;
         }
-        if (var_f0_2 > 180.0f) {
-            var_f0_2 -= 360.0f;
+        if (angle > 180.0f) {
+            angle -= 360.0f;
         }
-        if (var_f0_2 > 90.0f) {
-            var_f0_2 = 180.0f - var_f0_2;
-        } else if (var_f0_2 < -90.0) {
-            var_f0_2 = -180.0f - var_f0_2;
+        if (angle > 90.0f) {
+            angle = 180.0f - angle;
+        } else if (angle < -90.0) {
+            angle = -180.0f - angle;
         }
-        var_f0_2 = (var_f0_2 / -180.0f) + 0.5f;
-        var_f0_2 = (70.0f * var_f0_2) + 55.0f;
-        var_f0_2 = var_f0_2 * 0.0174532923847f;
-        arg0->unk58 = var_f0_2;
-        func_1516D0CC(arg0, &arg0->unk5C, &arg0->unk60, &arg0->unk58);
+        angle = angle / -180.0f + 0.5f;
+        angle = 70.0f * angle + 55.0f;
+        angle *= 0.017453292f;
+        box->angle = angle;
+        func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
     }
-    arg0->unk40 = arg0->unk5C;
-    arg0->unk44 = arg0->unk60;
-    sp44 = (arg0->unk38 / (f32)(u32)D_8009055C.unk6) * (f32)(u32)D_8009057C.unk6 * 0.25f;
-    sp40 = (arg0->unk3C / (f32)(u32)D_8009055C.unk8) * (f32)(u32)D_8009057C.unk8 * 0.5f;
-    arg0->unk50 = (s32)(((cosf(arg0->unk58 + 3.14159274101f) * (arg0->unk38 * 0.5f) * 1.14999997616f) + arg0->unk5C) - (f32)sp44);
-    arg0->unk54 = ((sinf(arg0->unk58 + 3.14159274101f) * (arg0->unk3C * 0.5f) * 1.03999996185f) + arg0->unk60) - (f32)sp40;
+    box->x = box->anchorX;
+    box->y = box->anchorY;
+    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f;
+    yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f;
+    box->centerX = (s32)(cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f + box->anchorX - xoff);
+    box->centerY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f + box->anchorY - yoff;
 }
 
-typedef struct {
-    char pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct1516D0CC_BE628;
-
-void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* Moves a box's anchor so the whole box stays inside the view bounds, then snaps it to whole pixels. */
+void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     f32 top;
-    f32 y;
+    f32 anchorY;
     f32 left;
     f32 right;
     f32 xoff;
     f32 halfW;
     f32 h;
-    f32 x;
+    f32 bodyX;
 
-    xoff = (arg0->unk38 / (f32)(u32)D_80090562) * (f32)(u32)D_80090582 * 0.25f * arg0->unk28;
-    x = (*arg1 + (cosf(arg0->unk58 + 3.14159274101f) * (arg0->unk38 * 0.5f) * 1.14999997616f * arg0->unk28)) - xoff;
-    halfW = arg0->unk38 * 0.5f;
-    h = arg0->unk3C;
-    y = *arg2;
-    top = *arg2 - h;
-    left = x - halfW;
-    right = halfW + x;
-    if (arg0 != NULL) {
-        if (top < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24) {
-            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24 + h;
-        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28 < y) {
-            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28;
+    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
+    bodyX = *x + cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale - xoff;
+    halfW = box->width * 0.5f;
+    h = box->height;
+    anchorY = *y;
+    top = *y - h;
+    left = bodyX - halfW;
+    right = halfW + bodyX;
+    if (box != NULL) {
+        if (top < VIEW->minY) {
+            *y = VIEW->minY + h;
+        } else if (VIEW->maxY < anchorY) {
+            *y = VIEW->maxY;
         }
-        if (left < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C) {
-            *arg1 -= left - (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C;
-        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 < right) {
-            *arg1 += (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 - right;
+        if (left < VIEW->minX) {
+            *x -= left - VIEW->minX;
+        } else if (VIEW->maxX < right) {
+            *x += VIEW->maxX - right;
         }
-        *arg1 = (s32)*arg1;
-        *arg2 = (s32)*arg2;
+        *x = (s32)*x;
+        *y = (s32)*y;
     }
 }
 
