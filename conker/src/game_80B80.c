@@ -730,167 +730,170 @@ void func_15054F74(struct127 *arg0) {
 //     }
 // }
 
-void func_15055260(s32 arg0, s32 arg1, s32 arg2) {
-    func_150335C8(arg0, arg1, 0x4D, arg2, 0, 0);
+void func_15055260(struct127 *obj, struct127 *target, s32 arg2) {
+    func_150335C8(obj, target, 0x4D, arg2, 0, 0);
 }
 
 void func_1514AD9C(f32 *, s32, s32);
 void func_1503192C(struct127 *, s32, s32, s32);
 s32 func_1505C7D8(struct127 *, u8);
 void func_15059C84(struct127 *);
-void func_1505A770(struct127 *);
 void func_151DCDE0(struct17 *, s32, s32);
 
-void func_1505528C(struct127 *arg0) {
-    f32 sp84;
-    f32 sp80;
-    f32 sp7C;
-    s32 phi_a2;
-    s32 sp74;
-    f32 sp70;
-    s32 sp6C;
-    s32 temp_v1;
-    s32 sp64;
+void func_1505528C(struct127 *obj) {
+    f32 prevX;
+    f32 prevY;
+    f32 prevZ;
+    s32 alpha;
+    s32 kind;
+    f32 hoverHeight;
+    s32 hitFlags;
+    s32 timer;
+    struct127 *target;
 
-    sp74 = (u16)arg0->unk278;
-    sp6C = 0;
-    sp70 = 0.0f;
+    kind = (u16)obj->unk278;
+    hitFlags = 0;
+    hoverHeight = 0.0f;
 
-    switch (sp74) {
-        case 0x1F:
-            arg0->unkB8 = (arg0->unkB8 + (arg0->xz_velocity * (f32) D_800BE9E4));
-            if (arg0->unk2E4 == 1) {
-                func_10010344(0x230, arg0, 0x7D00, 0x1F4, 0x9C4);
-                arg0->unk2E4 = 0;
-            }
-            break;
-        case 0x42: {
-            s32 temp_v0;
-
-            sp70 = 25.0f;
-            if ((arg0->gravity != 0.0f) && ((arg0->y_velocity > 0.0f) || (arg0->unk28 > sp70))) {
-                arg0->unkB8 = (-func_150484A0(arg0->y_velocity, arg0->xz_velocity) * D_80099408);
-            }
-            temp_v0 = func_15081574((s32)arg0, 40.0f, 10.0f, (s32)&sp64, 0xF, 0x53);
-            if (temp_v0 != 0) {
-                func_15055260(arg0, sp64, temp_v0 - 1);
-                func_15060F28(arg0, 1);
-                return;
-            }
-            } break;
-        case 0x4E:
-            sp70 = 25.0f;
-            if (arg0->unk28 > sp70) {
-                arg0->unkB8 = (arg0->unkB8 + (f32) (D_800BE9E4 * 3));
-            }
-            break;
-        case 0x35:
-            arg0->unkB8 = (arg0->unkB8 + (f32) (D_800BE9E4 * 0x10));
-            break;
-        case 0x88:
-            arg0->unkB8 = -func_150484A0(arg0->y_velocity, arg0->xz_velocity) * D_8009940C;
-            arg0->unkD0 = 0x10;
-            if (func_1505C7D8(arg0, D_800C3E78) != 0) {
-                func_15060F28(arg0, 1);
-                return;
-            }
-            break;
-    }
-    func_15059C84(arg0);
-    arg0->stunned = 1;
-    func_1505A770(arg0);
-    sp84 = arg0->x_position;
-    sp80 = arg0->y_position;
-    sp7C = arg0->z_position;
-    func_15058898(arg0, arg0->old_y_position);
-    if ((D_80099410 != arg0->unk118) && (arg0->y_position <= arg0->unk118) && (arg0->unk118 <= arg0->old_y_position)) {
-        arg0->xz_velocity *= D_80099414;
-        arg0->unk2E4 = 2;
-        arg0->gravity = 0.0f;
-        arg0->y_velocity = -3.0f;
-    } else if ((sp84 != arg0->x_position) || (sp80 != arg0->y_position) || (sp7C != arg0->z_position)) {
-        sp6C = 1;
-        if ((sp74 == 0x1F) && (arg0->unk2E4 != 2)) {
-            func_10010344(((func_150ADA20() % 5U) + 0x3A4), arg0, 0x7D00, 0x1F4, 0x9C4);
+    switch (kind) {
+    case 0x1F:
+        obj->unkB8 += obj->xz_velocity * D_800BE9E4;
+        if (obj->unk2E4 == 1) {
+            func_10010344(0x230, obj, 0x7D00, 500, 2500);
+            obj->unk2E4 = 0;
         }
-    }
-    func_1505B5F8(arg0, arg0->unk180);
-    if (arg0->unk28 <= sp70) {
-        arg0->unk7F++;
-        sp6C |= 2;
-        if ((arg0->unk184 & 0x1F) == 0xE) {
-            func_1514AD9C(&arg0->x_position, 0xFF, 0);
-            func_15060F28(arg0, 1);
+        break;
+    case 0x42: {
+        s32 hit;
+
+        hoverHeight = 25.0f;
+        if ((obj->gravity != 0.0f) && ((obj->y_velocity > 0.0f) || (obj->unk28 > hoverHeight))) {
+            obj->unkB8 = -func_150484A0(obj->y_velocity, obj->xz_velocity) * 57.29577637f;
+        }
+        hit = func_15081574((s32)obj, 40.0f, 10.0f, (s32)&target, 0xF, 0x53);
+        if (hit != 0) {
+            func_15055260(obj, target, hit - 1);
+            func_15060F28(obj, 1);
             return;
         }
-        if (sp74 == 0x42) {
-            f32 phi_f0;
-            f32 temp_f2;
+        break;
+    }
+    case 0x4E:
+        hoverHeight = 25.0f;
+        if (obj->unk28 > hoverHeight) {
+            obj->unkB8 += D_800BE9E4 * 3;
+        }
+        break;
+    case 0x35:
+        obj->unkB8 += D_800BE9E4 * 16;
+        break;
+    case 0x88:
+        obj->unkB8 = -func_150484A0(obj->y_velocity, obj->xz_velocity) * 57.29577637f;
+        obj->unkD0 = 16;
+        if (func_1505C7D8(obj, D_800C3E78) != 0) {
+            func_15060F28(obj, 1);
+            return;
+        }
+        break;
+    }
+    func_15059C84(obj);
+    obj->stunned = 1;
+    func_1505A770(obj);
+    prevX = obj->x_position;
+    prevY = obj->y_position;
+    prevZ = obj->z_position;
+    func_15058898(obj, obj->old_y_position);
+    if ((obj->unk118 != -10000.0f) && (obj->y_position <= obj->unk118) && (obj->unk118 <= obj->old_y_position)) {
+        obj->xz_velocity *= 0.1000000015f;
+        obj->unk2E4 = 2;
+        obj->gravity = 0.0f;
+        obj->y_velocity = -3.0f;
+    } else if ((prevX != obj->x_position) || (prevY != obj->y_position) || (prevZ != obj->z_position)) {
+        hitFlags = 1;
+        if ((kind == 0x1F) && (obj->unk2E4 != 2)) {
+            func_10010344((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
+        }
+    }
+    func_1505B5F8(obj, obj->unk180);
+    if (obj->unk28 <= hoverHeight) {
+        obj->unk7F++;
+        hitFlags |= 2;
+        if ((obj->unk184 & 0x1F) == 0xE) {
+            func_1514AD9C(&obj->x_position, 0xFF, 0);
+            func_15060F28(obj, 1);
+            return;
+        }
+        if (kind == 0x42) {
+            f32 t;
+            f32 y;
 
             D_800D1580 = 0xFF0100B0;
-            if (arg0->gravity != 0.0f) {
+            if (obj->gravity != 0.0f) {
                 func_1506E5FC();
             }
-            temp_f2 = arg0->y_position;
-            arg0->gravity = 0;
-            phi_f0 = temp_f2 - arg0->old_y_position;
-            arg0->y_velocity = 0;
-            arg0->xz_velocity = 0;
-            arg0->y_position = arg0->unk180 + sp70;
-            if (phi_f0 != 0.0f) {
-                phi_f0 = (arg0->y_position - arg0->old_y_position) / phi_f0;
+            // matching: the int 0 stores below (not 0.0f) steer where IDO materializes its shared FP zero
+            y = obj->y_position;
+            obj->gravity = 0;
+            t = y - obj->old_y_position;
+            obj->y_velocity = 0;
+            obj->xz_velocity = 0;
+            obj->y_position = obj->unk180 + hoverHeight;
+            if (t != 0.0f) {
+                t = (obj->y_position - obj->old_y_position) / t;
             } else {
-                phi_f0 = 0;
+                t = 0;
             }
-            arg0->x_position = arg0->old_x_position + ((arg0->x_position - arg0->old_x_position) * phi_f0);
-            arg0->z_position = arg0->old_z_position + ((arg0->z_position - arg0->old_z_position) * phi_f0);
-        } else if (arg0->y_position < arg0->unk118) {
-            arg0->gravity = 0.0f;
-            arg0->y_velocity = 0.0f;
-            arg0->xz_velocity = 0.0f;
-        } else if ((arg0->y_velocity > 5.0f) && (sp74 == 0x1F) && (arg0->unk2E4 != 2)) {
-            func_10010344(0x39E, arg0, 0x7D00, 0x1F4, 0x9C4);
-            arg0->unk2E4 = 2;
+            obj->x_position = obj->old_x_position + ((obj->x_position - obj->old_x_position) * t);
+            obj->z_position = obj->old_z_position + ((obj->z_position - obj->old_z_position) * t);
+        } else if (obj->y_position < obj->unk118) {
+            obj->gravity = 0.0f;
+            obj->y_velocity = 0.0f;
+            obj->xz_velocity = 0.0f;
+        } else if ((obj->y_velocity > 5.0f) && (kind == 0x1F) && (obj->unk2E4 != 2)) {
+            func_10010344(0x39E, obj, 0x7D00, 500, 2500);
+            obj->unk2E4 = 2;
         }
     }
-    arg0->unk40 = ((arg0->unk76 + 0x4000) * 0.005493164f);
-    if ((sp6C != 0) && (sp74 == 0x35)) {
-        func_10010630(0x360, arg0, 0x4E20, 0x1F4, 0x9C4);
-        if (arg0->unk118 < arg0->y_position) {
-            struct17 tmp0;
+    obj->unk40 = (obj->unk76 + 0x4000) * 0.005493164f;
+    if ((hitFlags != 0) && (kind == 0x35)) {
+        func_10010630(0x360, obj, 0x4E20, 500, 2500);
+        if (obj->unk118 < obj->y_position) {
+            struct17 pos;
 
-            tmp0.unk0 = arg0->x_position;
-            tmp0.unk4 = arg0->y_position + 20.0f;
-            tmp0.unk8 = arg0->z_position;
-            func_151DCDE0(&tmp0, 0xFF, 1);
+            pos.unk0 = obj->x_position;
+            pos.unk4 = obj->y_position + 20.0f;
+            pos.unk8 = obj->z_position;
+            func_151DCDE0(&pos, 0xFF, 1);
         }
-        func_15060F28(arg0, 1);
+        func_15060F28(obj, 1);
         return;
     }
-    temp_v1 = --arg0->unk83;
-    if ((temp_v1 == 0) || (arg0->unk7F >= 0x1F)) {
-        func_15060F28(arg0, 1);
+    timer = --obj->unk83;
+    if ((timer == 0) || (obj->unk7F >= 31)) {
+        func_15060F28(obj, 1);
         return;
     }
-    if (temp_v1 < 0xA) {
-        phi_a2 = (temp_v1 * 0xFF) / 0xA;
-    } else if (arg0->unk7F >= 0x15) {
-        phi_a2 = ((-arg0->unk7F * 0xFF) + 0x1DE2) / 0xA;
+    if (timer < 10) {
+        alpha = (timer * 255) / 10;
+    } else if (obj->unk7F >= 21) {
+        alpha = ((30 - obj->unk7F) * 255) / 10;
     } else {
-        phi_a2 = 0xFF;
+        alpha = 255;
     }
-    func_1503192C(arg0, sp74, phi_a2, 0);
-    if (sp74 == 0x1F) {
-        struct108 *temp_a0;
-        f32 temp_f14;
+    func_1503192C(obj, kind, alpha, 0);
+    if (kind == 0x1F) {
+        struct108 *player;
+        f32 distSq;
 
-        temp_a0 = D_800DBFF0;
-        temp_f14 = ((temp_a0->unk2F8 - arg0->x_position) * (temp_a0->unk2F8 - arg0->x_position)) + ((temp_a0->unk2FC - arg0->y_position) * (temp_a0->unk2FC - arg0->y_position)) + ((temp_a0->unk300 - arg0->z_position) * (temp_a0->unk300 - arg0->z_position));
-        if (temp_f14 < 900.0f) {
-            func_1512D748(temp_a0, 8, 0);
-            func_10010F88(0x2E1, 0x6D60, 0, 0, 0, arg0->x_position, arg0->y_position, arg0->z_position, 0x1F4, 0x3E8);
-            func_10010A3C(arg0);
-            func_15060F28(arg0, 1);
+        player = D_800DBFF0;
+        distSq = ((player->unk2F8 - obj->x_position) * (player->unk2F8 - obj->x_position)) +
+                 ((player->unk2FC - obj->y_position) * (player->unk2FC - obj->y_position)) +
+                 ((player->unk300 - obj->z_position) * (player->unk300 - obj->z_position));
+        if (distSq < 900.0f) {
+            func_1512D748(player, 8, 0);
+            func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 500, 1000);
+            func_10010A3C(obj);
+            func_15060F28(obj, 1);
         }
     }
 }
