@@ -172,7 +172,6 @@ typedef struct {
 } EffectDefList;
 
 extern EffectDefList D_800886E0[];
-void func_15001A08(void);
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
    func_15001A08 up to func_15001B08 and, if it was modified, empties object list 35. */

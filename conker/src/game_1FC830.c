@@ -6,7 +6,6 @@
 #include "effects.h"
 
 extern f32 D_800D9860;
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
 /* One point of a RibbonActor's ring buffer. */
@@ -191,7 +190,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 
 extern Vec3f D_800AAEEC[];
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
-void func_1504715C(CollisionHit *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
@@ -792,7 +790,6 @@ s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
     return TRUE;
 }
 
-extern s32 func_1510F8CC(s32);
 void func_151D13E0(TrackerEffect *effect);
 void func_151D1448(TrackerEffect *effect);
 

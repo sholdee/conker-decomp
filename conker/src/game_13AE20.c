@@ -65,7 +65,6 @@ Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, 
 }
 
 extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
-extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
 void func_1510DA84(Shadow *shadow) {

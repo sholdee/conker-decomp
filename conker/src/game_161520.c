@@ -980,7 +980,6 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-extern s32 func_15046460(Vec3f *, u16, f32, CollisionHit *);
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -1061,8 +1060,6 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     }
 }
 
-void func_1504715C();
-s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 
 /* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {

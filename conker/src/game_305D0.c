@@ -155,10 +155,6 @@ void func_15003570(void) {
     func_10004074(buf);
 }
 
-extern void func_15001460(s32 dl);
-extern void func_15002754(void);
-extern s32 func_15002878(void);
-extern void func_1510F800(s32 type);
 
 /*
  * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1

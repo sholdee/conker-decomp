@@ -624,7 +624,6 @@ void func_150EEC84(Actor *obj) {
     }
 }
 
-extern void func_151045E0(void *, s32, f32);
 
 /* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
 void func_150EEDA8(Actor *obj) {

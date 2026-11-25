@@ -122,7 +122,6 @@ void func_15096D08(void) {
 }
 
 extern s32 D_800DC310[][0x1A];
-s32 func_15084000(s32);
 void func_151254F4(Camera *actor, s32 arg1);
 void func_1512A390(Camera *actor);
 

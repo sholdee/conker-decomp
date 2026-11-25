@@ -530,7 +530,6 @@ s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos) {
     return func_151319C4(p, prevPos, &p->data.bounce);
 }
 
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern s32 (*D_80089874[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *);
 
 /*

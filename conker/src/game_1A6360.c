@@ -24,7 +24,6 @@ extern s32 D_800DD440;
 extern s8 D_800DD446;       /* rain state */
 
 extern f32 sqrtf(f32);
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
 
 /* Resets the rain state. */
 void func_15178EB0(void) {

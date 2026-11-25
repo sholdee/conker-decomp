@@ -79,7 +79,6 @@ typedef struct BoltRainObj {
     /* 0x28 */ BoltRainState state;
 } BoltRainObj;
 
-extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
 extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
 /* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */

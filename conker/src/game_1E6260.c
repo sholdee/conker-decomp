@@ -33,7 +33,6 @@ typedef struct {
 
 extern Vec3f D_800AA4E0[];     // lamp position, by kind
 extern f32 D_800AA528[];        // lamp size, by kind
-void func_1510F800(s32 type);
 /* matching: GlowParams without the animation; it is passed as paramSize, and the frame needs 0x60 bytes. */
 typedef struct {
     /* 0x00 */ GlowShape shape;

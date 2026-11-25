@@ -7,8 +7,6 @@ s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 #include "variables.h"
 #include "effects.h"
 
-void func_1504715C(CollisionHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
 u8 func_151D8E20(void);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD1C)(void);

@@ -59,7 +59,6 @@ void func_150C5F40(GameF3270Emitter *emitter) {
     }
 }
 
-s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, CollisionHit *hit);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
 WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {

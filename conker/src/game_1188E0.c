@@ -7,7 +7,6 @@
 
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
-extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {

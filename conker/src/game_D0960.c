@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
 
 /* Tests the segment p0-p1 against cyl (only an active ZONE_AREA_CYLINDER zone);
    on a hit writes the entry point to hit and returns TRUE. */

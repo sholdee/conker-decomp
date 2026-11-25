@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
-                   f32 zUp);
 void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degrees
 void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
 

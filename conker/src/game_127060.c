@@ -289,7 +289,6 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-extern void func_1504715C(CollisionHit *ground, Actor *actor);
 // matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 // matching: a pointer for argument 3 (the definition has s32)

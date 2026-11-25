@@ -5,7 +5,6 @@
 
 
 extern void func_1518CA80(BillboardSpawn *, u8);
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and

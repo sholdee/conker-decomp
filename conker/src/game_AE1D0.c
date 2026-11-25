@@ -217,7 +217,6 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     return 1;
 }
 
-s32 func_15080D20(Actor *, Actor *, s32, f32, f32, s32);
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */

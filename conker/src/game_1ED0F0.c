@@ -33,8 +33,6 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
     config->eventFunc = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
@@ -467,8 +465,6 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
     return 0;
 }
 
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
-                   IgnoreList *, s32);
 s32 func_151ABE40(Vec3f *, CollisionHit *, s32, s32, s32);
 
 /* Per-frame bullet update: moves it, traces for hits and spawns the impact. Returns FALSE when it is done. */

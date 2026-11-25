@@ -12,8 +12,6 @@ typedef struct {
     /* 0x04 */ f32 growRate;     // size gained per frame
 } SprayGrowth;
 
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor

@@ -10,7 +10,6 @@ typedef struct {
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,

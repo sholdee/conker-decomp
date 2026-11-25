@@ -29,7 +29,6 @@ u8 func_150ADA20(void);
  */
 
 
-void func_1504715C(f32 *arg0, Actor *arg1);
 ObjScriptCmd *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */

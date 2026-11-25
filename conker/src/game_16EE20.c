@@ -83,7 +83,6 @@ typedef struct {
 
 typedef s32 (*EffectSelector)(s32, Actor *);
 
-u32 func_1510F8CC(s32);
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
 void func_15141A7C(Actor *actor, s32 arg1) {

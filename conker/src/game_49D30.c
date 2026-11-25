@@ -40,7 +40,6 @@ s32 func_150229E4(Actor *obj);
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
-extern void func_15082A44(void *, s32, s32, s32, s32);
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
@@ -1716,7 +1715,6 @@ void func_15020EC4(s32 scene) {
     }
 }
 
-extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, Actor *, f32, f32);
 
 // matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
 

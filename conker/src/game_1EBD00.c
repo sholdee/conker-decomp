@@ -10,7 +10,6 @@ typedef struct {
     /* 0x10 */ u8 count;
 } Extra151BE850;
 
-extern void func_1510F800(s32);
 
 /*
  * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,

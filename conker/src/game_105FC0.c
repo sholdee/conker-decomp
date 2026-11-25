@@ -289,7 +289,6 @@ s32 func_150D8FAC(PissTrail *trail) {
 
 f32 sqrtf(f32);
 
-extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /*
@@ -761,7 +760,6 @@ typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-extern void func_150472C0(ImpactOrigin *, RayHit *);
 // matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
 // matching: a pointer for argument 3 (the definition has s32)

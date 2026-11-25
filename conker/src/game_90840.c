@@ -37,7 +37,6 @@ void func_15063404(Actor *arg0) {
     func_1505E650(arg0, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150836CC(Actor *arg0, s32 arg1);
 
 void func_150634E4(Actor *arg0) {
     movement_obj[arg0 - movement_obj].mv->rt_context_b = 0;
@@ -59,7 +58,6 @@ void func_15063570(Actor *arg0) {
     func_1505E650(arg0, 0x221, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, Actor **, f32, s32, s32, s32, s32, s32, s32);
 
 void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
@@ -86,7 +84,6 @@ void func_150636A4(Actor *arg0) {
 }
 
 void func_151D57F8(Actor *, s32);
-s32 func_15081E78(Actor *, Actor **, s32);
 void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */

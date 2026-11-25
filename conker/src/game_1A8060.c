@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_150849A0(void *);
 
 /* Ages the cached morph keyframes and frees the ones that have not been used for a while. */
 void func_1517ABB0(void) {

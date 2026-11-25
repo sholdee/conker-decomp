@@ -1610,7 +1610,6 @@ typedef struct ListedObject {
     /* 0xED */ u8 unkED;
 } ListedObject;
 
-s32 func_1510F8D8(s32, s32, s32, s32);
 
 /*
  * Jet update callback, active while the owner's mv->unk58 is 1: objects in lists 0x15-0x17 that a

@@ -43,8 +43,6 @@ void func_150E41C0(void) {
     D_800D99F0.z = z;
 }
 
-extern s32 func_1510F8CC(s32);
-extern s32 func_1510F8D8(s32, s32, s32, s32 *);
 
 /* Drops `count` random ground hits within 500 units of D_800D99F0 and spawns each surface's effect. */
 void func_150E42F8(s32 count) {

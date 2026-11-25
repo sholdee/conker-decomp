@@ -276,7 +276,6 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 void func_150054C4(Camera *, u32, s32, s32);
-void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {
@@ -591,7 +590,6 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_150836CC(Actor *, s32);
 
 /* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when type is 1). */
 void func_1507DE4C(Actor *obj) {

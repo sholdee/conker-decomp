@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1510F800(s32);
 extern void func_1518CA80(BillboardSpawn *effect, u8 mode);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
 

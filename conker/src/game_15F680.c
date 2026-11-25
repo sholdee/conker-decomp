@@ -7,8 +7,6 @@
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
 
-s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, CollisionHit *floor);
-s32 func_15044380(f32 x, f32 y, f32 z, Actor *probe, s32 arg4, s32 arg5);
 
 /* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
 typedef s32 (*ParticleFloorHitFn)(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,

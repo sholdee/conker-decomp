@@ -120,7 +120,6 @@ void func_150EAB10(struct_EAB10 *actor) {
     }
 }
 
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {

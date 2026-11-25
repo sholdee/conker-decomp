@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_1504715C(CollisionHit *ground, Actor *obj);
 
 extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
@@ -493,7 +492,6 @@ u8 arg2;
     }
 }
 
-extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
 extern void func_150D10E4(Actor *obj, u8 arg1);
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.

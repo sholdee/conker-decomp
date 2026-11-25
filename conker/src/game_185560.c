@@ -744,7 +744,6 @@ struct ParticleUpdateArg {
 };
 
 u8 func_151D8E20(void);
-s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
 u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {

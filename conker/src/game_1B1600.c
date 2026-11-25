@@ -91,7 +91,6 @@ extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
 extern s32 math_distance3D(s32, s32, s32);
-extern void func_15047390(MtxF mf, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
@@ -652,10 +651,8 @@ s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadE
     return count;
 }
 
-extern s32 func_1510F720(s32, s32, s32, u8 **);
 extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
-extern void func_1510F800(s32);
 extern MeshTri *D_800D3690;
 extern s32 D_800DF0E8;
 extern s32 D_800DF0EC;
@@ -739,7 +736,6 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
 extern Vp D_800DF090[];
-extern s32 func_150849CC(Actor *, s32 *);
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)

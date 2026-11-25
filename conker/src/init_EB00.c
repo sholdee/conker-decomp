@@ -49,7 +49,6 @@ extern f32 D_8002C400;
 extern f32 D_8002C404;
 
 u16 func_10010F30(s32, s32, s32, s32, s32); // promoted view of the old-style definition below
-s32 func_1510F8CC(s32 arg0);
 void func_10017780(u8 arg0, u16 arg1);
 SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
 

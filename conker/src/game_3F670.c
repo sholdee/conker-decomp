@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1510F800(s32);
 extern struct {
     f32 unk0;
     f32 unk4;

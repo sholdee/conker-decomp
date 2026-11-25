@@ -8,7 +8,7 @@
 void func_150302F0(Actor *obj, s32 setId);
 #include "variables.h"
 #undef func_1505EEF4
-extern Actor *func_1505EEF4(void); // matching: called without its argument
+extern Actor *func_1505EEF4(s32 id); // matching: called without its argument
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
@@ -37,24 +37,6 @@ extern void *func_1515D440(void);
 extern s32 func_1515D480(s32);
 extern s32 func_151E5F64(s32 arg0);
 
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
-s32 func_150825C0(s32 spawnIdx, s32 arg1);
-s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150829D8(Actor *obj);
-void func_150832AC(Actor *obj);
-void func_15083384(Actor *obj, s32 arg1);
-void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
-Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-void func_150843AC(Actor *obj, s32 model);
-void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(Actor *obj);
-void func_15084C30(Actor *obj);
-s32 func_15084CB0(s32 modelId);
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(Actor *obj, u16 part, u8 skip);
 
 /* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
    disabled (x == 0x7FFF) or still counting down their D_800D2110 delay, and records whose flags
@@ -770,8 +752,8 @@ s32 func_15083FB0(u8 id) {
     return -1;
 }
 
-s32 func_15084000(void) {
-    Actor *obj = func_1505EEF4();
+s32 func_15084000(s32 id) {
+    Actor *obj = func_1505EEF4(id);
 
     if (obj != NULL) {
         return obj - movement_obj;
@@ -1031,7 +1013,7 @@ void func_15084558(Actor *self) {
 }
 
 /* Returns obj's current model id (modelIds[forced_lod - 1], or the first). */
-u8 func_150849A0(Actor *obj) {
+s32 func_150849A0(Actor *obj) {
     s32 current = obj->forced_lod;
 
     if (current != 0) {
@@ -1041,7 +1023,7 @@ u8 func_150849A0(Actor *obj) {
 }
 
 /* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
-u8 func_150849CC(Actor *obj, s32 *outIndex) {
+s32 func_150849CC(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 

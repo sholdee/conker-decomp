@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1504715C(CollisionHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
 void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {

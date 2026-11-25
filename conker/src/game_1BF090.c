@@ -51,7 +51,6 @@ typedef struct DustEmitter {
     DustEmitterData data;
 } DustEmitter;
 
-void func_1504715C(CollisionHit *probe, Actor *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
@@ -95,7 +94,6 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     return effect;
 }
 
-s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *probe);
 DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
                             u8 arg11, s32 arg12);

@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1510E7A4(void *, void *, f32 *, void *, void *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 void func_15123070(Camera *);
 void func_1512D560(Camera *, s32, CamShot *);
 

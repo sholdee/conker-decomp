@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
@@ -867,7 +866,6 @@ void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
     }
 }
 
-void func_15081690(void *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Casts a ray along the projectile's flight over the distance it moves this frame; on a hit,

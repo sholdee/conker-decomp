@@ -302,7 +302,6 @@ void func_1519F48C(SurfaceTrail *trail) {
     config->flags |= 1;
 }
 
-s32 func_15045800(Vec3f *, u16, f32, f32 *);
 /* D_800BE9A4: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */

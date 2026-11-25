@@ -157,7 +157,6 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     return 0;
 }
 
-extern s32 func_15084000(s32);
 
 /* Script "query" handler for the object with id `id`: returns the value that operation `op` asks for. */
 s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {

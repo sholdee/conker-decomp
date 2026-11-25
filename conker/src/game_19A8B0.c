@@ -148,7 +148,6 @@ typedef struct SpriteEmitter {
 
 void func_1516F864(StyleParticle *particle);
 void func_1516F94C(StyleParticle *particle, s32 factor);
-extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
 
 void func_1516D400(void) {

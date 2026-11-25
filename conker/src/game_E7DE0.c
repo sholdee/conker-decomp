@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1504715C(CollisionHit *hit, Actor *obj);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
 s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {

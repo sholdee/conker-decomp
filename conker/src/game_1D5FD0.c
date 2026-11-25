@@ -15,7 +15,6 @@ f32 sqrtf(f32);
 
 void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
 
-extern void func_1510F800(s32);
 
 /*
  * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
@@ -69,7 +68,6 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 

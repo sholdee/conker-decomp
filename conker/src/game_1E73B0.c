@@ -8,7 +8,6 @@
 s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_1504715C(CollisionHit *, Actor *);
 
 
 
@@ -621,7 +620,6 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
 

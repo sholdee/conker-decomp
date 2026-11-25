@@ -8,7 +8,6 @@
 #include "effects.h"
 
 
-extern void func_1504715C(CollisionHit *, Actor *);
 // matching: s32 for argument 4 (the definition has u32); s32 for argument 6 (the definition has u8)
 extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
 // matching: a pointer for argument 3 (the definition has s32)

@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern s32 func_1510F800(s32);
-extern s32 func_1510F8D8(s32, s32, s32, s32);
 void func_151709B4(s32, s32, s32, s32, f32, s32, s32);
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */

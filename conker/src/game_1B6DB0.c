@@ -32,7 +32,6 @@ typedef struct {
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
 
-extern void func_1510F800(s32);
 extern SprayTrail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);

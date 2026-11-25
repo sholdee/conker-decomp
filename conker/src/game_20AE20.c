@@ -4287,8 +4287,6 @@ typedef struct {
 } Pos151E7F60;
 
 extern Pos151E7F60 D_800AB940[];
-extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern void func_15083384(Actor *, u8);
 
 /* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
 void func_151E7F60(s32 slotIdx, s32 charIdx) {

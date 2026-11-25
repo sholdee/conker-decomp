@@ -5,9 +5,6 @@
 void func_151D5148(Actor *obj);
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
 
-void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
-                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);
 
 /* Muzzle points (from, to) of this gun on bone D_80088BB0. */
 const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
@@ -126,7 +123,6 @@ void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, 
     func_151D3E6C(obj, position, position, 0x8003A);
 }
 
-void func_15081E0C(Actor *obj, s32 arg1, s32 arg2);
 
 /* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {

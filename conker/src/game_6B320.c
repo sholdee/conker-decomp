@@ -384,8 +384,6 @@ void func_1503EB78(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong) {
     part->gravity = -0.3f;
 }
 
-void func_1510F800(s32);
-s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
 
 /* Bounce falling free parts off the floor below them; slow ones come to rest. */
 void func_1503ECA0(s32 objIndex) {

@@ -13,7 +13,6 @@ extern f32 D_800DBDD0;
 
 extern s32 func_150A3A70(s32, s32);
 extern void func_150A6760(s32);
-extern s32 func_1510FE30(s32);
 
 extern void func_150AD8B0(f32 *, f32 *, f32 *);
 
@@ -52,9 +51,6 @@ s32 func_1510E670(s32 index) {
     return FALSE;
 }
 
-void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
-                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object,
-                   f32 minY, f32 maxY, s32 noFallback);
 
 /* Floor query (see func_1510E950) with an explicit height window for the prop probe. */
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
@@ -78,7 +74,6 @@ void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outProp
                   -10000.0f, 20000.0f, noFallback);
 }
 
-extern void func_1510F800();
 extern void func_150A64C8(s16, s16, s32 *, s32);
 extern void func_150A44F0(s32, u16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, u16 *);

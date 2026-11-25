@@ -864,7 +864,6 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
 }
 
 void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */

@@ -21,7 +21,6 @@ void func_1500C2A0(void) {
     D_800DC63C = 0;
 }
 
-void func_1510F800(s32);
 void *memcpy(void *, const void *, u32);
 
 /*

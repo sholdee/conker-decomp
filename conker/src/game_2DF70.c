@@ -6,7 +6,7 @@
 #include "macros.h"
 
 // Quadtree node, built into the D_800B0DDC buffer. Links are byte offsets from the node itself.
-typedef struct QuadNode {
+struct QuadNode {
     /* 0x0 */ s16 minY;
     /* 0x2 */ s16 maxY;
     /* 0x4 */ s16 next;     // next sibling (0: none)
@@ -14,7 +14,7 @@ typedef struct QuadNode {
     /* 0x8 */ s16 x;        // centre
     /* 0xA */ s16 z;
     /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
-} QuadNode;
+};
 
 typedef struct YRange {
     s16 min;
@@ -23,9 +23,6 @@ typedef struct YRange {
 
 extern YRange *D_800DBE44;
 
-void func_15002560(QuadNode *node, QuadNode *parentNext);
-void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
-s32 func_150027F8(Gfx *dl);
 
 void func_15000AC0(void) {
     D_800D9E64 = 0;

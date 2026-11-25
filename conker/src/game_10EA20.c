@@ -5,7 +5,6 @@
 #undef func_1505D1C4
 s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32); // matching: the definition returns nothing; this caller uses $v0
 
-void func_15047390(MtxF mf, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ);
 
 /*
  * Casts a ray from (fromX, fromY, fromZ) to (toX, toY, toZ) against the first 25 objects and picks the

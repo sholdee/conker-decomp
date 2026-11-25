@@ -5,7 +5,6 @@
 #include "variables.h"
 
 
-extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -92,7 +91,6 @@ typedef struct {
     u8 command;
 } SightCommandMsg;
 
-extern void func_1510F800(s32);
 extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
@@ -867,7 +865,6 @@ void func_151C970C(s32 command, s32 source) {
     func_151403A8((s32)&msg, 0x3A);
 }
 
-extern s32 func_15046C80(f32 *, u16, f32, void *);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);

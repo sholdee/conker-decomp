@@ -17,7 +17,6 @@ typedef struct Game1DD500Profile {
 
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(CollisionHit *, Actor *);
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -93,8 +92,6 @@ void func_151B01B8(Actor *actor, Actor *other) {
     }
 }
 
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-s32 func_1504697C(f32 *, s32, f32, CollisionHit *);
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */

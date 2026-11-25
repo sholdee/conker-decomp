@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* A TriggerNode with a box volume (func_150448D0). */
-typedef struct TriggerVolume {
+struct TriggerVolume {
     /* 0x00 */ TriggerNode node;
     /* 0x10 */ s16 depth;
     /* 0x12 */ s16 width;
@@ -12,13 +12,12 @@ typedef struct TriggerVolume {
     /* 0x17 */ u8 pad17;
     /* 0x18 */ s16 *position;
     /* 0x1C */ s16 *size;
-} TriggerVolume;
+};
 
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
 extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
-TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
 
 #pragma function sqrtf
 
@@ -27,8 +26,6 @@ void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-void func_1510F800(s32);
-void func_15044660(Actor *, f32, f32, f32);
 s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
 void func_150AC3E4(f32, f32, f32, Actor *, s32);
 
@@ -448,7 +445,6 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
 
 /* Ceiling probe: re-tests the cached triangle first, then searches collision set 0. */
 s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit) {
@@ -570,7 +566,6 @@ void func_15045714(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
     *setA = func_150A6500(pos->x, pos->z, setB, mask);
 }
 
-s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
 
 /* Floor probe against surface set B only. */
 s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
@@ -585,7 +580,6 @@ s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     return func_15045F8C(pos, bottom, &setB, hit);
 }
 
-s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
 
 /* Floor probe: re-tests the cached triangle first, then func_15045780. */
 s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
@@ -1193,7 +1187,7 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
 }
 
 /* Source of func_150472C0 (layout only as far as used). */
-typedef struct Game71820FloorSrc {
+struct Game71820FloorSrc {
     /* 0x00 */ u8 pad0[0xC];
     /* 0x0C */ f32 height;
     /* 0x10 */ u8 pad10[0x34];
@@ -1203,7 +1197,7 @@ typedef struct Game71820FloorSrc {
     /* 0x5A */ u8 pad5A[2];
     /* 0x5C */ WorldObject *surface;
     /* 0x60 */ s32 material;
-} Game71820FloorSrc;
+};
 
 /* Fills a CollisionHit from a Game71820FloorSrc; unk59 == 1 marks it valid (flags 7, source 1). */
 void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {

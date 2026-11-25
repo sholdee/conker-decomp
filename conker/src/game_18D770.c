@@ -382,7 +382,6 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
     return effect;
 }
 
-void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 
 /* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
 s32 func_15160E30(LightEffect *effect) {

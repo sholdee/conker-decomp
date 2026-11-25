@@ -43,7 +43,6 @@ typedef struct {
     /* 0x6C */ s16 *unk6C;
 } RegionEmitterState;
 
-extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*
  * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one

@@ -619,7 +619,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     return 1;
 }
 
-extern void func_150832AC(Actor *);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 

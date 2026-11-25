@@ -28,7 +28,6 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-extern void func_1504715C(CollisionHit *ground, Actor *actor);
 // matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)
 extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 // matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)

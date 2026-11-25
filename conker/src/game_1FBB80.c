@@ -24,7 +24,6 @@ typedef struct Game1FBB80Object {
     Game1FBB80Effect effect;
 } Game1FBB80Object;
 
-s32 func_1504530C(void *, f32, void *);
 
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one
  * 0x6A effect packet at a random point of the shape (only when the owner's mask has one of its

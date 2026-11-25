@@ -34,7 +34,6 @@ extern ZScanParams D_800DC200[4][4];
 void func_15123A54(Camera *arg0);
 
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
-void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14);
 void func_151236D0(void *);
 s32 func_15125490(void *);
 
@@ -525,7 +524,6 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
 }
 
 extern u8 D_800CBDD2;
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 
 /* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
  * from the camera position through the world and applies the corrected position. */

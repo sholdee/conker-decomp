@@ -4,7 +4,6 @@
 #include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-s32 func_1510F8CC(s32);
 
 /* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */
 typedef struct {

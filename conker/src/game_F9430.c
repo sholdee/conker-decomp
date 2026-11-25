@@ -28,8 +28,6 @@ typedef struct {
 } CornerColor;
 
 extern GroundBurstDef D_800A0640[];
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing

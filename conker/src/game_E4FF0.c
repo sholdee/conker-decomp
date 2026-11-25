@@ -9,8 +9,6 @@ extern f32 D_8009FD48[3];
 
 // matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-void func_1504715C(CollisionHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,

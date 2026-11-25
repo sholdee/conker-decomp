@@ -262,7 +262,6 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     }
 }
 
-extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
 void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {

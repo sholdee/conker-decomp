@@ -171,8 +171,6 @@ struct TrailPuff {
     /* 0x110 */ PuffState state;
 };
 
-void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
-                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
 
 /*

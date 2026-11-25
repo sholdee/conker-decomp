@@ -193,9 +193,7 @@ typedef struct {
     /* 0x00 */ CollisionHit ground;
     /* 0x24 */ Vec3f pos;
 } GroundPoint; // size 0x30
-extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
-s32 func_1510F8CC(s32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
@@ -206,7 +204,6 @@ void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 void func_151DC260(f32 *, void *, s32, s32, s32);
-extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 void func_15194408(Actor *arg0, Actor *arg1);
 
@@ -4054,7 +4051,7 @@ void func_15074C00(s32 self, Actor *other, s32 result) {
     GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
-        func_1504715C(&hit.ground);
+        func_1504715C(&hit.ground, other);
         hit.pos.x = D_800CC2C0;
         hit.pos.y = D_800CC2C4;
         hit.pos.z = D_800CC2C8;

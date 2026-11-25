@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_15084000(s32);
 
 s32 func_1509DD10(s32 arg0) {
     return 1;

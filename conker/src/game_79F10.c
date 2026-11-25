@@ -32,7 +32,6 @@ u8 func_150ADA20(void);
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 
-void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
 
 void func_1504CA60(Actor *actor) {
     f32 range;
@@ -74,9 +73,7 @@ extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern f32 D_800CBDFC;
 extern u16 D_800CC27E;
-void func_15044380(f32, f32, f32, Actor *, s32, s32);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
 void func_15121490(Actor *, OSContPad *);
 void func_151279A0(Actor *, OSContPad *);
 

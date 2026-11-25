@@ -7,7 +7,6 @@
 #include "functions.h"
 #undef func_15083E90
 #undef func_15169040
-Actor *func_15083E90();
 void func_15169040();
 #include "variables.h"
 #include "effects.h"

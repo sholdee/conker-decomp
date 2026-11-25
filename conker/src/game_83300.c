@@ -426,7 +426,6 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
 ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507BC14(Actor *);
 s32 func_150229E4(Actor *);
-void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -1048,9 +1047,6 @@ void func_150585F0(Actor *actor, f32 decel) {
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, Actor *arg11, f32 arg12, f32 arg13, s32 arg14);
-f32 func_1510F648(f32, f32, f32);
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 ObjScriptCmd *func_1507BB28(s32, s32);
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
@@ -4489,7 +4485,6 @@ void func_15060D54(Actor *actor) {
         }
     }
 }
-extern void func_15084558(Actor *);
 extern void func_15188AD0(Actor *);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
@@ -5369,7 +5364,6 @@ void func_15063168(Actor *actor) {
     }
 }
 
-void func_15082A44(void *, s32, s32, s32, s32);
 /* Respawns the actor in place: rebuilds its slot from its spawn entry (spawn), keeping position, angles and camera. */
 void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
     SpawnRecord *spawn;

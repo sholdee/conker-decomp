@@ -114,7 +114,6 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(CollisionHit *, Actor *);
 // matching: s32 for argument 5 (the definition has a pointer); s32 for argument 7 (the definition has u8); s32 for argument 8 (the definition has u8); s32 for argument 9 (the definition has s8); a pointer for argument 10 (the definition has s32); s32 for argument 12 (the definition has u8); s32 for argument 13 (the definition has u8)
 void func_1515080C(DebrisSpray *, const s32 *, const f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
 // matching: s32 for argument 4 (the definition has u32); s32 for argument 6 (the definition has u8)

@@ -37,8 +37,6 @@ typedef struct GfxBytes {
 /* Per-model tables, indexed by model id (0..186). */
 extern void *D_800C5048[];
 
-extern s32 func_150028BC(s32 id);
-extern s32 func_15084044(Actor *obj, s32 model);
 
 /*
  * Loads model `id` (unless it is already loaded) and sets up its per-model tables. With

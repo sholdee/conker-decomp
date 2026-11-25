@@ -56,7 +56,6 @@ void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
-void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
 void func_15106610(BoltObj *bolt);

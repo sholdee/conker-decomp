@@ -226,7 +226,6 @@ typedef struct {
     /* 0x60 */ s32 unk60;
 } HomingSpawnDesc;
 
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 
 /*
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles

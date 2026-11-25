@@ -67,7 +67,6 @@ typedef struct ActorTask {
 
 void func_151AA264(Actor *actor, CollisionHit *hit);
 void func_151ABE00(Actor *actor);
-extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
 extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
@@ -564,8 +563,6 @@ s32 func_151AABA0(PulseFx *fx) {
 }
 
 extern u8 D_800A8F70[];
-extern void func_1504715C(CollisionHit *hit, Actor *actor);
-extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
 
 /* Finds point D_800A8F70[index] of the actor's ob_matrix_ptr (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {

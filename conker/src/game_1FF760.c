@@ -12,7 +12,6 @@ extern s32 D_800AB110[];
 extern f32 D_800AB114[];
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(CollisionHit *, Actor *);
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
  * and func_15151A38) at its origin. */

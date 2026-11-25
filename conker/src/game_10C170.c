@@ -133,7 +133,6 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     }
 }
 
-s32 func_1504697C(Vec3f *, s32, f32, CollisionHit *);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s32, u8, s32);
 
 /*

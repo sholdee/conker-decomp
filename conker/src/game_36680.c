@@ -938,7 +938,6 @@ typedef struct Game36680EmitterChoice {
 
 extern Game36680EmitterChoice D_8008CF00[][8];
 extern Game36680Emitter D_8008CEB8[];
-extern void func_1510F800(s32);
 extern void func_1517B89C(s32, s32);
 
 /**

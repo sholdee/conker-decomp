@@ -35,7 +35,6 @@ struct SwarmActor {
 };
 
 
-s32 func_1510F8D8(s32, s32, s32, s32 *);
 extern u8 D_800A7170[];
 
 /* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
@@ -115,7 +114,6 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
 }
 
 s32 func_150A3A70(s32, s32);
-void func_1510F800(s32);
 
 /* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
  * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */

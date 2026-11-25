@@ -62,18 +62,6 @@ f32  alCents2Ratio(s32 arg0);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
-void func_15000AC0(void);
-void func_15001B08(void);
-u16* func_15001B10(void);
-void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2);
-void func_15001970(void);
-void func_150026C4(s32 arg0);
-void func_150026E8(s32 arg0);
-void func_15002724(s32 arg0);
-void func_15002F40(s32 arg0);
-s32  func_15002FA0(s32 arg0);
-void func_15002FB4(s32 arg0);
-void func_1500310C(void);
 s32  func_150034B4(void);
 void func_150038A0(void);
 s32  func_1500390C(s32 arg0);
@@ -352,15 +340,10 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_101A0538
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
 void func_1507BAD0(void);
-s32  func_15081574(s32, f32, f32, s32, s32, s32);
-void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
-s32  func_15083E0C(u8);
-Actor *func_15083E90(u8 id);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
 void func_150A9B0C(MtxF mtx, f32, f32, f32, f32, f32, f32);
@@ -372,7 +355,6 @@ f32  func_150AD930(f32 *arg0);
 u32  func_150ADA20(void);
 f32  func_150ADA68(void);
 void func_150E2EA4(Actor*, s32, s32, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, f32, f32, s32, f32);
-s32  func_1510FD20(s32 arg0, s32 arg1);
 s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot);
 s32  func_151239CC(Camera *camera, CameraMode slot);
 void func_15127EB8(Camera *arg0);

@@ -17,8 +17,6 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
     }
 }
 
-void func_15081690(void *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32,
-                   s32, s32, s32, s32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 
 /*

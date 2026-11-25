@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1504715C(CollisionHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`

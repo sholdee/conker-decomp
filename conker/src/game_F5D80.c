@@ -487,8 +487,6 @@ s32 func_150CA07C(BurstParticle *particle) {
 
 extern s32 func_15193CA0[];
 extern s32 func_151942B0[];
-void func_1504715C(void *, void *);
-s32 func_15046C80(void *, s32, f32, void *);
 
 typedef struct {
     s32 unk0;

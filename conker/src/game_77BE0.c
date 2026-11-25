@@ -26,7 +26,6 @@ const u16 D_8009917C[16] = {
 /* Sound ids (read by game_80B80.c). */
 const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
 
-void func_1508295C(s32, s32, s32);
 
 void func_1504A730(void) {
     Actor *obj;
@@ -249,7 +248,6 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
     }
 }
 
-void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
 
 f32 func_1504B0FC(Actor *obj, f32 arg1) {
     s32 belowLevel;

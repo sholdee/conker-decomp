@@ -344,7 +344,6 @@ s32 func_15148AF4(MotionTrail *trail) {
 typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, void *);
 extern TrailHitFunc D_8008A430[];
 extern TrailHitFunc D_8008A450[];
-s32 func_15046C80(f32 *, u16, f32, CollisionHit *);
 
 /* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
 s32 func_15148BA4(MotionTrail *trail) {
