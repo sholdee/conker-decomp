@@ -29,24 +29,15 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     D_800BE9ED = 0;
 }
 
-void func_15003668(s32);
-void func_15004574(void);
 void func_150091D0(void);
 void func_150092DC(void);
-void func_1500E70C(s32);
-void func_1500E738(void);
-void func_15013000(void);
 void func_1501B640(s32);
 void func_1509BBA0(s32);
 s32 func_1509C2A4(void);
 void func_1509C3A0(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);
-void func_150031EC(s32);
-void func_150039E0(s32, s32);
-void func_150045C4(s32);
 void func_15005290(s32, s32);
-void func_150169A0(s32);
 void func_151E81EC(void);
 
 

@@ -35,8 +35,6 @@ void func_15003120(s32 index, s32 base, s32 list) {
 
 extern s32 D_800B0E20[];
 
-extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
-
 /* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
 void func_150031EC(s32 levelId) {
     LevelModelEntry *models;
@@ -87,10 +85,10 @@ void func_150031EC(s32 levelId) {
                     if (i == 0) {
                         func_150039BC((s32)model->materials);
                     }
-                    func_150049A4(D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
+                    func_150049A4((DlCommand *)D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
                     func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);
                 } else {
-                    func_150049A4(model->displayList, 0, (s32)model);
+                    func_150049A4((DlCommand *)model->displayList, 0, (s32)model);
                 }
             }
         }

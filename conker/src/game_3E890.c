@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Extra data copied to offset 0x170 of each emitter func_150113E0 spawns. */
 typedef struct {

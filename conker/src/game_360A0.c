@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_15189900(SprayDesc *descriptor, u8 style);
 

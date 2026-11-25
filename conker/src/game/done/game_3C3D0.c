@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Timed effect (expire callback 5, func_150C29F0) carrying a DiscEmitter at 0x28. */
 typedef struct {

@@ -26,7 +26,6 @@ void func_1500FF9C(void) {
 
 extern s32 D_800902DC;
 extern u8 *D_80088870;
-void func_1500FE30(void);
 
 void func_1500FFCC(void) {
     f32 sp44;

@@ -19,15 +19,6 @@ typedef struct {
     /* 0xA */ u16 effectFlags;
 } GroupedObjectDefaults;
 
-
-/* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
-typedef struct {
-    /* 0x0 */ s8 opcode;
-    /* 0x1 */ u8 pad1[2];
-    /* 0x3 */ u8 index;
-    /* 0x4 */ u32 addr;
-} DlCommand;
-
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
@@ -35,9 +26,6 @@ extern void *D_800DBEE4;
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;
-void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
-s32 func_15004BF0(s32 fromTop);
-void func_15004CE0(DlCommand *dl, u32 base);
 
 /* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
 void func_150039E0(s32 levelId, s32 arg1) {
@@ -307,7 +295,6 @@ void func_150045BC(void) {
 extern MtxF D_800DBF48;
 void func_150A44F0(s32, u16 *, s32);
 void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-void func_15004A4C(void);
 
 /*
  * Prepares the objects for the level: builds each object's matrices for both frames (or, for objects with

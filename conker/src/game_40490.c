@@ -2,19 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
-s32 func_150130B4(TriggerZone *obj);
-s32 func_1501370C(TriggerZone *obj);
-s32 func_1501396C(TriggerZone *obj);
-s32 func_15014144(TriggerZone *obj);
-s32 func_150142EC(TriggerZone *obj);
-s32 func_150144B8(TriggerZone *obj);
-s32 func_1501474C(TriggerZone *obj);
-s32 func_15014B60(TriggerZone *obj);
-s32 func_15014F6C(TriggerZone *obj);
 /* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
 s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /*  0 */ NULL,
@@ -139,10 +129,6 @@ typedef struct {
     f32 unk10;
     f32 unk14;
 } Payload18_150130B4;
-
-extern const s32 D_8009658C[];
-extern const s32 D_800965A0[];
-extern const s32 D_800965B4[];
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
 s32 func_150130B4(TriggerZone *obj) {

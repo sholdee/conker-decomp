@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* Zone handler D_80082ECC[...]: spawns timed effect 89 for the zone at its x/z. */

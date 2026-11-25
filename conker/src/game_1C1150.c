@@ -483,7 +483,6 @@ u8 arg2;
     }
 }
 
-extern void func_150D10E4(Actor *obj, u8 arg1);
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
 void func_151951E0(Actor *obj) {

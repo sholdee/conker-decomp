@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
+#define func_15000940 func_15000940_header
 #include "functions.h"
+#undef func_15000940
 #include "variables.h"
+
+// matching: this file calls func_15000940 without its (unused) argument
+void func_15000940();
 
 void func_15000000(void) {
     OSMesgQueue *msgQueue;
