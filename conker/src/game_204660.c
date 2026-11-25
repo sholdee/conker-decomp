@@ -173,7 +173,7 @@ void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
         }
     } else {
         link = &(*pEmitter)->link;
-        func_15149514((s32)msg, msgType, (s32)&link->actor, (s32)&link->actorId, (s32)*pEmitter);
+        func_15149514((s32)msg, msgType, &link->actor, &link->actorId, *pEmitter);
     }
 }
 

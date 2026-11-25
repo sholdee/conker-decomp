@@ -294,6 +294,6 @@ void func_150C4B60(Effect *effect, s32 arg1, u8 event) {
     } else if (event == 0x56) {
         data->flags |= 2;
     } else {
-        func_15149514(arg1, event, (s32)data, (s32)&data->ownerId, (s32)effect);
+        func_15149514(arg1, event, &data->owner, &data->ownerId, effect);
     }
 }

@@ -690,7 +690,7 @@ void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
     block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot
         ;
     } else {
-        func_15149514((s32)handle, msg, (s32)emitter, (s32)&emitter->uniqueId, (s32)effect);
+        func_15149514((s32)handle, msg, &emitter->obj, &emitter->uniqueId, effect);
     }
 }
 

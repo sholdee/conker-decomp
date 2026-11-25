@@ -59,7 +59,7 @@ void func_15100230(OwnerEffect *effect, OwnerGoneMsg *msg, u8 msgId) {
             func_1516972C((struct102 *)effect);
         }
     } else {
-        func_15149514((s32)msg, msgId, (s32)&data->owner, (s32)&data->ownerId, (s32)effect);
+        func_15149514((s32)msg, msgId, &data->owner, &data->ownerId, effect);
     }
 }
 

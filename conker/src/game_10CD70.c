@@ -345,7 +345,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
 
 /* Passes the emitter's source record (actor and unique_id) to func_15149514. */
 void func_150E02C0(BoltEmitter *emitter, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)&emitter->src.obj, (s32)&emitter->src.id, (s32)emitter);
+    func_15149514(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
 void func_1513BAE8(void);

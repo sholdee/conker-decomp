@@ -100,7 +100,7 @@ void func_150BA55C(EffectE7970 *effect) {
 }
 
 void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Ground probe result filled by func_15046C80. */

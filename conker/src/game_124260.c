@@ -209,7 +209,7 @@ void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
         }
     } else {
         beam = &(*objp)->beam;
-        func_15149514((s32)msg, msgId, (s32)&beam->owner, (s32)&beam->ownerId, (s32)*objp);
+        func_15149514((s32)msg, msgId, &beam->owner, &beam->ownerId, *objp);
     }
 }
 

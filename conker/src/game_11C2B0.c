@@ -1359,7 +1359,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
         }
     } else {
         link = &(*self)->link;
-        func_15149514(data, type, (s32)&link->actor, (s32)&link->actorId, (s32)*self);
+        func_15149514(data, type, &link->actor, &link->actorId, *self);
     }
 }
 

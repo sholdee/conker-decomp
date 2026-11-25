@@ -431,7 +431,7 @@ void func_150F5C98(SparkEffect *effect) {
 /* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
  * (pointer and id). */
 void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 typedef struct BeamEffect BeamEffect;
