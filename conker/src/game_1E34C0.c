@@ -3,25 +3,16 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Head of a pooled physics particle (full layout in game_15F680.c), carrying a Pulse as its extra data. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ u8 pad20[0x170 - 0x20];
-    /* 0x170 */ Pulse pulse;
-} Particle;
-
-extern Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
+extern PulseParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
 extern f32 sinf(f32);
-extern void func_15133894(Particle *);
+extern void func_15133894(PulseParticle *);
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). */
-Particle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
+PulseParticle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
-    Particle *particle;
+    PulseParticle *particle;
     ParticleSpawn spawn;
     Pulse pulse;
     s32 fadeTime;
@@ -91,7 +82,7 @@ Particle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rot
 
 /* Update of the pulsing particle: advances the phase (wrapping at 2 pi) and wobbles the size by 6.1% of the
  * base size. */
-void func_151B6254(Particle *particle) {
+void func_151B6254(PulseParticle *particle) {
     Pulse *pulse = &particle->pulse;
 
     pulse->phase += 0.5560000539f * D_800BE9A4;
@@ -102,8 +93,8 @@ void func_151B6254(Particle *particle) {
         f32 wave = sinf(pulse->phase);
         f32 size = pulse->baseSize + wave * (0.06100000441f * pulse->baseSize);
 
-        particle->sizeY = size;
-        particle->sizeXZ = size;
+        particle->head.sizeY = size;
+        particle->head.sizeXZ = size;
     }
     func_15133894(particle);
 }

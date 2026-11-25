@@ -3444,4 +3444,11 @@ typedef struct {
     /* 0x4 */ f32 baseSize;
 } Pulse; /* size 0x8 */
 
+/* A pulsing particle (func_151B5BF0 in game_1E30A0.c, func_151B6010 in game_1E34C0.c): a ModelParticle
+ * carrying a Pulse as its data. */
+typedef struct PulseParticle {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ Pulse pulse;
+} PulseParticle;
+
 #endif
