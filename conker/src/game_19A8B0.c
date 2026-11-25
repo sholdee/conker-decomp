@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_15048A40 as void; it returns f32 (declared below). */
 #define func_15048A40 func_15048A40_void_unused
 #include "functions.h"
 #undef func_15048A40
@@ -219,6 +220,7 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     }
 }
 
+/* The int-argument prototype that callers use (game_19E040.c declares the same one). */
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_1516972C(struct102 *arg0);
@@ -427,6 +429,7 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
         emitter->particleLink = particleLink;
     }
 }
+/* The int-argument prototype that callers use. */
 void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
@@ -474,7 +477,7 @@ void func_1516DB90(Emitter *arg0) {
     f32 s;
     f32 c;
     u8 angle;
-    u8 pad2;
+    u8 pad2; // matching: unused stack slot in the original frame
     u8 roll;
     s32 threshold;
     s32 scaleRandom;
