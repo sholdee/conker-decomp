@@ -2,86 +2,86 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A81B0;
-void func_1516865C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(s32 arg0, s32 arg1, s32 arg2);
+void func_1516865C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_15168800(void *spawn, s32 arg1, s32 arg2);
 
-typedef struct {
-    u8 pad_0x00[0x1];
-    u8 field_0x01;
-    u8 pad_0x02[0xA];
-    u8 field_0x0C;
-    u8 pad_0x0D[0x1];
-    s16 field_0x0E;
-    u8 pad_0x10[0x18];
-    s16 field_0x28;
-    s16 field_0x2A;
-    s16 field_0x2C;
-    s16 field_0x2E;
-    u8 field_0x30;
-} EffectSpawnSource;
+/* Object-spawn request for func_1516865C/func_15168800 (Struct150E4550 in game_111670.c). */
+typedef struct ObjectSpawn {
+    /* 0x00 */ u8 pad0[0x86];
+    /* 0x86 */ s16 unk86;
+    /* 0x88 */ u8 pad88[4];
+    /* 0x8C */ s16 x;
+    /* 0x8E */ s16 y;
+    /* 0x90 */ s16 z;
+    /* 0x92 */ s16 unk92;
+    /* 0x94 */ s16 unk94;
+    /* 0x96 */ s16 floorY;
+    /* 0x98 */ s16 unk98;
+    /* 0x9A */ u8 pad9A[6];
+    /* 0xA0 */ u8 objectType;
+    /* 0xA1 */ u8 padA1;
+    /* 0xA2 */ u8 unkA2;
+    /* 0xA3 */ u8 unkA3;
+    /* 0xA4 */ u8 unkA4;
+    /* 0xA5 */ u8 padA5[0xB]; // matching: the frame needs 0xB0 bytes, though only 0xA8 are cleared
+} ObjectSpawn;
 
-typedef struct {
-    s16 field_0x00;
-    s16 field_0x02;
-    s16 field_0x04;
-    u8 pad_0x06[0x2];
-    u8 field_0x08;
-} EffectSpawnSourcePayload;
+typedef struct EmitterPos {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 floorY; // -10000 = no floor
+    /* 0x08 */ u8 unk8;
+} EmitterPos;
 
-typedef struct {
-    u8 pad_0x00[0x86];
-    s16 field_0x86;
-    u8 pad_0x88[0x4];
-    s16 field_0x8C;
-    s16 field_0x8E;
-    s16 field_0x90;
-    s16 field_0x92;
-    s16 field_0x94;
-    s16 field_0x96;
-    s16 field_0x98;
-    u8 pad_0x9A[0x6];
-    u8 field_0xA0;
-    u8 pad_0xA1[0x1];
-    u8 field_0xA2;
-    u8 field_0xA3;
-    u8 field_0xA4;
-    u8 pad_0xA5[0xB];
-} EffectSpawnRequest;
+typedef struct ObjectEmitter {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 cooldown;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EmitterPos pos;
+} ObjectEmitter;
 
-void func_15193390(EffectSpawnSource * volatile arg0) {
-    EffectSpawnRequest sp28;
-    EffectSpawnSourcePayload *temp_v0;
-    s16 temp_v1;
+/*
+ * Spawns object type 0x45 at the emitter's position, resting on its floor height (or 200 units
+ * below it, clearing pos.unk8, when it has none), then rearms the emitter's cooldown to 100..227.
+ */
+// matching: volatile keeps `emitter` in its stack slot (reloaded after each call) instead of $s0
+void func_15193390(ObjectEmitter *volatile emitter) {
+    ObjectSpawn spawn;
+    EmitterPos *pos;
+    s16 floorY;
 
-    bzero(&sp28, 0xA8);
-    temp_v0 = (EffectSpawnSourcePayload *)arg0;
-    temp_v1 = ((EffectSpawnSource *)temp_v0)->field_0x2E;
-    temp_v0 = (EffectSpawnSourcePayload *)&((EffectSpawnSource *)temp_v0)->field_0x28;
-
-    if (D_800A81B0 != (f32)temp_v1) {
-        sp28.field_0x96 = temp_v1;
+    bzero(&spawn, 0xA8);
+    pos = &emitter->pos;
+    floorY = pos->floorY;
+    if (floorY != -10000.0f) {
+        spawn.floorY = floorY;
     } else {
-        sp28.field_0x96 = (s32)((f32)temp_v0->field_0x02 - 200.0f);
-        temp_v0->field_0x08 = 0;
+        spawn.floorY = (f32)pos->y - 200.0f;
+        pos->unk8 = 0;
     }
 
-    sp28.field_0x8C = temp_v0->field_0x00;
-    sp28.field_0x8E = temp_v0->field_0x02;
-    sp28.field_0x90 = temp_v0->field_0x04;
-    sp28.field_0x92 = 0;
-    sp28.field_0x94 = 0;
-    sp28.field_0xA2 = 0xF;
-    sp28.field_0xA0 = 0x45;
-    sp28.field_0x86 = 0xA;
-    sp28.field_0xA3 = temp_v0->field_0x08;
-    sp28.field_0x98 = 0x4880;
-    sp28.field_0xA4 = 0x80;
+    spawn.x = pos->x;
+    spawn.y = pos->y;
+    spawn.z = pos->z;
+    spawn.unk92 = 0;
+    spawn.unk94 = 0;
+    spawn.unkA2 = 15;
+    spawn.objectType = 0x45;
+    spawn.unk86 = 10;
+    spawn.unkA3 = pos->unk8;
+    spawn.unk98 = 0x4880;
+    spawn.unkA4 = 0x80;
 
-    func_1516865C(&sp28, 0xFF, 0xFF, 0xFF, 0x80);
-    temp_v0 = (EffectSpawnSourcePayload *)arg0;
-    func_15168800((s32)&sp28, ((EffectSpawnSource *)temp_v0)->field_0x0C, ((EffectSpawnSource *)temp_v0)->field_0x01);
-    arg0->field_0x0E = (func_150ADA20() & 0x7F) + 0x64;
+    func_1516865C(&spawn, 0xFF, 0xFF, 0xFF, 0x80);
+    // matching: one load of the volatile `emitter` serves both arguments
+    pos = (EmitterPos *)emitter;
+    func_15168800(&spawn, ((ObjectEmitter *)pos)->unkC, ((ObjectEmitter *)pos)->unk1);
+    emitter->cooldown = (func_150ADA20() & 0x7F) + 100;
 }
 
 void func_151934B4(struct42 *arg0) {
