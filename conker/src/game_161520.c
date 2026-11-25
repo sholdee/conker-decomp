@@ -1124,7 +1124,7 @@ typedef struct {
     f32 height;
     u8 unk4[0x14];
     s32 unk18;
-    u8 unk1C;
+    u8 flags;
     u8 surfaceType;
     u8 pad1E[2];
     s32 unk20;
@@ -1154,7 +1154,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
 
     flagsCopy = arg3; // matching: IDO keeps this u32 copy of arg3 live in a saved register for the last call
     hit.unk18 = 0;
-    hit.unk1C = 0;
+    hit.flags = 0;
     hit.surfaceType = 0;
     hit.unk20 = 0;
     hit.height = -10000.0f;
@@ -1481,19 +1481,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
                     arg6[0xC], arg6[1]);
 }
 
-typedef struct Blood36C3CActor {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0x147];
-    f32 unk14C;
-    f32 unk150;
-} Blood36C3CActor;
-
-typedef struct Blood36C3CHit {
-    f32 height;
-    u8 geometry[0x20];
-} Blood36C3CHit;
-
 typedef struct Blood36C3CSpray {
     s32 countBase;
     s32 countRange;
@@ -1512,11 +1499,11 @@ typedef struct Blood36C3CSpray {
 
 s32 func_15134070();
 void func_1504715C();
-void func_1515C244(void *, void *, f32 *, f32 *);
+void func_1515C244(struct127 *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
 void func_15150D1C(Blood36C3CSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, void *, s32, u8, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(void *, u8, s32);
 extern s32 *D_80089A20[];
@@ -1526,48 +1513,52 @@ extern s32 D_800A3F64[];
 extern f32 D_800A4630;
 
 
-void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
+/*
+ * Blood effects for a hit on actor: arg3 runs func_1513A24C (arg5 lowers its count), arg1
+ * a spray, arg2 drops falling to the ground below, arg4 a splat at the actor's position.
+ */
+void func_15136C3C(struct127 *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                    u8 arg5, u8 arg6, s32 arg7) {
     Vec3f position;
     f32 unused0;
     f32 unused1;
-    f32 halfHeight;
-    Blood36C3CHit hit;
+    f32 scale;
+    GroundHit hit;
     s32 kind;
     Blood36C3CSpray spray;
     s8 heavy;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return;
     }
-    halfHeight = (arg0->unk14C + arg0->unk150) * 0.5f;
-    func_1515C244(arg0, &position, &unused0, &unused1);
-    kind = func_15134070(arg0);
-    if (kind == 0x63) {
+    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    func_1515C244(actor, &position, &unused0, &unused1);
+    kind = func_15134070(actor);
+    if (kind == BLOOD_PROFILE_NONE) {
         return;
     }
-    func_1504715C(&hit, arg0);
+    func_1504715C(&hit, actor);
     if (arg3 != 0) {
         func_1513A24C(&position, D_80089A20[kind], &D_800A3C30,
-                      ((arg5 != 0) || ((kind == 4) && (arg0->unk4 != 0x16)))
+                      ((arg5 != 0) || ((kind == 4) && (actor->id != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
                           ? D_800A3F14[kind] - 2
                           : D_800A3F14[kind],
-                      halfHeight, kind, D_800A3F64[kind], (u8 *)arg0, &hit, arg6,
+                      scale, kind, D_800A3F64[kind], (u8 *)actor, &hit, arg6,
                       arg7);
     }
     if (D_800A3FD8[kind].unkE == 2) {
         return;
     }
     if (arg1 != 0) {
-        spray.countBase = 0xC;
+        spray.countBase = 12;
         spray.countRange = 3;
         spray.origin = position;
         spray.angleBase = 0;
-        spray.angleRange = 0xFF;
-        spray.pitchBase = -0x40;
-        spray.pitchRange = 0x45;
-        spray.lifeBase = 0x96;
-        spray.lifeRange = 0x64;
+        spray.angleRange = 255;
+        spray.pitchBase = -64;
+        spray.pitchRange = 69;
+        spray.lifeBase = 150;
+        spray.lifeRange = 100;
         spray.maxDistance = D_800A4630;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;
@@ -1587,7 +1578,7 @@ void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
             heavy = 0;
         }
         func_151A9834(&position, position.y - 300.0f, 300.0f, &hit,
-                      (func_150ADA20() % 6U) + 0x12, 0, &heavy, arg6, arg7);
+                      (func_150ADA20() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
         if ((&D_800A3FF8 == &D_800A3FD8[kind]) || (&D_800A40C8 == &D_800A3FD8[kind])) {
@@ -1813,13 +1804,6 @@ void func_15137610(BloodImpactActor *arg0, void *arg1, void *arg2,
     }
 }
 
-typedef struct Blood3783CHit {
-    f32 height;
-    u8 geometry[0x18];
-    u8 flags;
-    u8 pad1D[7];
-} Blood3783CHit;
-
 typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
@@ -1828,63 +1812,60 @@ void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
 void *func_151B6010(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
-extern f32 D_800A481C;
-extern f32 D_800A4820;
-extern f32 D_800A4824;
-
-void func_1513783C(Blood36C3CActor *arg0, u8 arg1, s32 arg2) {
+/* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
+void func_1513783C(struct127 *actor, u8 arg1, s32 arg2) {
     Vec3f position;
     f32 unused0;
     f32 unused1;
-    f32 halfHeight;
+    f32 scale;
     Vec3f probe;
-    Blood3783CHit hit;
+    GroundHit hit;
     s32 kind;
-    u8 heavy;
+    u8 pool;
     Vec3f origin;
     Vec3f velocity;
     Vec3f rotation;
     Vec3f spin;
     Blood3783CSpawn spawn;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return;
     }
-    kind = func_15134070(arg0);
-    if (kind == 0x63) {
+    kind = func_15134070(actor);
+    if (kind == BLOOD_PROFILE_NONE) {
         return;
     }
-    halfHeight = (arg0->unk14C + arg0->unk150) * 0.5f;
-    func_1515C244(arg0, &position, &unused0, &unused1);
-    func_1504715C(&hit, arg0);
+    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    func_1515C244(actor, &position, &unused0, &unused1);
+    func_1504715C(&hit, actor);
     probe.x = position.x;
     probe.y = position.y + 100.0f;
     probe.z = position.z;
     if (func_1514672C(&probe.x) == 0) {
         return;
     }
-    if (func_15046C80(&probe.x, 0, probe.y - 500.0f, &hit) != 0) {
+    if (func_15046C80(&probe, 0, probe.y - 500.0f, &hit) != 0) {
         if (hit.flags & 1) {
-            heavy = 1;
+            pool = 1;
         } else {
-            heavy = 0;
+            pool = 0;
         }
         probe.y = hit.height;
     } else {
-        heavy = 0;
+        pool = 0;
         probe = position;
     }
     func_1513A24C(&position, D_80089A20[kind] + 2, &D_800A3C30,
-                  D_800A3F14[kind] - 2, halfHeight, kind, D_800A3F64[kind],
-                  (u8 *)arg0, &hit, arg1, arg2);
+                  D_800A3F14[kind] - 2, scale, kind, D_800A3F64[kind],
+                  (u8 *)actor, &hit, arg1, arg2);
     if (D_800A3FD8[kind].unkE != 2) {
         func_1513A48C(&position, arg1, arg2);
-        if (heavy != 0) {
-            func_15136698(((func_150ADA68() * 25.0f) + 75.0f) * D_800A481C,
-                          ((func_150ADA68() * 106.0f) + 75.0f) * D_800A4820,
-                          (func_150ADA20() % 101U) + 0x9B,
-                          (func_150ADA20() % 101U) + 0x64,
-                          (func_150ADA20() % 56U) + 0xCB, (s32)hit.geometry,
+        if (pool != 0) {
+            func_15136698(((func_150ADA68() * 25.0f) + 75.0f) * 0.001000000047f,
+                          ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
+                          (func_150ADA20() % 101U) + 155,
+                          (func_150ADA20() % 101U) + 100,
+                          (func_150ADA20() % 56U) + 203, (s32)hit.unk4,
                           &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;
@@ -1904,11 +1885,11 @@ void func_1513783C(Blood36C3CActor *arg0, u8 arg1, s32 arg2) {
             spin.y = 0.0f;
             spin.z = 0.0f;
             spawn(&origin, &velocity,
-                  ((func_150ADA68() * 101.0f) + 600.0f) * D_800A4824, &rotation,
-                  &spin, 0.0f, 1000, 0xFF, 0xFF, 1.0f, 3, 0, arg1, arg2);
+                  ((func_150ADA68() * 101.0f) + 600.0f) * 0.001000000047f, &rotation,
+                  &spin, 0.0f, 1000, 255, 255, 1.0f, 3, 0, arg1, arg2);
         }
     }
-    func_15145A50((struct127 *)arg0);
+    func_15145A50(actor);
 }
 
 s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3,
