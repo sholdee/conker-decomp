@@ -7,103 +7,100 @@ void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
 
+/* Per-effect data: the object the effect is attached to and a spawn accumulator. */
+typedef struct {
+    /* 0x0 */ struct127 *owner;
+    /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
+    /* 0x8 */ f32 spawnAccum;
+} EffectE7970Data; // size 0xC
 
-void func_150BA4C0(struct127 *arg0, u8 arg1, s32 arg2) {
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        f32 unk8;
-    } sp3C;
-    struct260 *temp_v0;
+/* Effect slot as returned by func_15149130 (a struct260); the effect data lives at 0x28. */
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EffectE7970Data data;
+} EffectE7970;
 
-    sp3C.unk0 = arg0;
-    sp3C.unk4 = arg0->unique_id;
-    sp3C.unk8 = 0.0f;
+/* Spawns an effect attached to `owner`. */
+void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
+    EffectE7970Data data;
+    struct260 *effect;
 
-    temp_v0 = func_15149130((func_150ADA20() % 9U) + 0xF, -1, 0x52, -1, 1, 0x3F, (struct37 *)0xC, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp3C, 0xC);
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.spawnAccum = 0.0f;
+
+    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, (struct37 *)0xC, arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }
 }
-
-struct struct150BA55C_data {
-    struct127 *obj;
-    u8 id;
-    f32 timer;
-};
-
-struct struct150BA55C {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    struct struct150BA55C_data data;
-};
 
 void func_15143794(s16, s16, f32, f32 *);
 void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
 void func_1518A3C0(f32 *arg0, f32 *arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC);
 
-void func_150BA55C(struct struct150BA55C *arg0) {
-    struct127 *obj;
-    struct struct150BA55C_data *data;
-    s32 angle;
-    f32 pos[3];
-    f32 spEC;
-    f32 spE8;
-    f32 scale3[3];
-    f32 scale;
-    f32 dir[3];
-    f32 rot[3];
-    f32 vel[3];
+/* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
+void func_150BA55C(EffectE7970 *effect) {
+    struct127 *owner;
+    EffectE7970Data *data;
+    s32 heading;
+    f32 ownerPos[3];
+    f32 radius;
+    f32 unused;
+    f32 growth[3];
+    f32 size;
+    f32 spawnPos[3];
+    f32 angles[3];
+    f32 velocity[3];
     f32 speed;
-    u32 r;
+    u32 randomYaw;
 
-    obj = arg0->data.obj;
-    data = &arg0->data;
-    if ((obj->interaction_state == 0) || (obj->unique_id != data->id)) {
-        arg0->unkE = -1;
+    owner = effect->data.owner;
+    data = &effect->data;
+    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+        effect->unkE = -1;
         return;
     }
-    if (obj->unk1D4 != NULL) {
-        data->timer += (0.3143000007f + (func_150ADA68() * 0.58100003f)) * D_800BE9A4;
-        if (data->timer > 1.0f) {
-            scale = (obj->xz_scale + obj->y_scale) * 0.5f;
-            angle = (obj->unk76 >> 8) - 0x40;
-            func_1515C244(obj, pos, &spEC, &spE8);
-            scale3[1] = 0.0f;
+    if (owner->unk1D4 != NULL) {
+        data->spawnAccum += (0.3143000007f + (func_150ADA68() * 0.58100003f)) * D_800BE9A4;
+        if (data->spawnAccum > 1.0f) {
+            size = (owner->xz_scale + owner->y_scale) * 0.5f;
+            heading = (owner->unk76 >> 8) - 64;
+            func_1515C244(owner, ownerPos, &radius, &unused);
+            growth[1] = 0.0f;
             do {
-            r = func_150ADA20();
-            func_15143794((r % 127U) + angle - 0x3F, (func_150ADA20() % 31U) - 0x32, spEC, dir);
-            dir[1] *= obj->unkF0;
-            dir[0] += pos[0];
-            dir[1] += pos[1];
-            dir[2] += pos[2];
-            rot[0] = func_150ADA68() * 360.0f;
-            rot[1] = func_150ADA68() * 360.0f;
-            rot[2] = func_150ADA68() * 360.0f;
-            speed = (func_150ADA68() * 0.09400000423f) + 0.05100000277f;
-            vel[0] = (dir[0] - pos[0]) * speed;
-            vel[1] = (dir[1] - pos[1]) * speed;
-            vel[2] = (dir[2] - pos[2]) * speed;
-            scale3[0] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
-            scale3[2] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
-            func_1518A3C0(dir, rot, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * scale, vel, scale3,
-                          (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 0x3C, 0, 0,
-                          arg0->unkC, arg0->unk1);
-            data->timer -= 1.0f;
-            } while (data->timer > 1.0f);
+                randomYaw = func_150ADA20();
+                func_15143794((randomYaw % 127U) + heading - 63, (func_150ADA20() % 31U) - 50, radius, spawnPos);
+                spawnPos[1] *= owner->unkF0;
+                spawnPos[0] += ownerPos[0];
+                spawnPos[1] += ownerPos[1];
+                spawnPos[2] += ownerPos[2];
+                angles[0] = func_150ADA68() * 360.0f;
+                angles[1] = func_150ADA68() * 360.0f;
+                angles[2] = func_150ADA68() * 360.0f;
+                speed = (func_150ADA68() * 0.09400000423f) + 0.05100000277f;
+                velocity[0] = (spawnPos[0] - ownerPos[0]) * speed;
+                velocity[1] = (spawnPos[1] - ownerPos[1]) * speed;
+                velocity[2] = (spawnPos[2] - ownerPos[2]) * speed;
+                growth[0] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
+                growth[2] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
+                func_1518A3C0(spawnPos, angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, velocity, growth,
+                              (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 60, 0, 0,
+                              effect->unkC, effect->unk1);
+                data->spawnAccum -= 1.0f;
+            } while (data->spawnAccum > 1.0f);
         }
     }
 }
 
-void func_15149514(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-void func_150BA8F0(s32 arg0, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
+    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
 
 extern f32 D_8009FE60;
