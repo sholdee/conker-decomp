@@ -41,7 +41,6 @@ typedef struct StripObj {
     /* 0xC8 */ StripTarget target;
 } StripObj;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern f32 func_15143E64(Vec3f *);
 
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */

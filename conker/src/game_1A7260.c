@@ -45,7 +45,6 @@ extern WaveState D_8008D0B0[];
 extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in discarded .rodata */
 extern f32 D_800A7220;
 
-extern Particle *func_15167A68(s32, s32, s32, s32, s32, s32);
 s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 player);

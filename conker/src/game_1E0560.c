@@ -59,7 +59,6 @@ typedef struct {
 extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f *, s32);
 extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
 extern void (*D_8008FB70[])(HoltenRopeEffect *);
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 extern void func_151D5E30(void *);
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */

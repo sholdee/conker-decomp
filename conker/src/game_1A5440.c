@@ -7,7 +7,6 @@ extern s32 func_15168118();
 extern f32 sqrtf(f32);
 
 f32 func_150489B0(u8);
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 D_8008CA64;
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */

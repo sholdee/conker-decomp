@@ -84,7 +84,6 @@ void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
                    u8 a1, u8 level, u8 mode);
 void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
                    u8 a1, u8 level, u8 mode);
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void *memcpy(void *, const void *, u32);
 
 /*

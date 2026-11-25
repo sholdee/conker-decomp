@@ -41,7 +41,6 @@ extern ScreenSprite *D_800DCE50[2][0x68];
 
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
-extern ScreenSprite *func_15167A68(s32, s32, s32, s32, u8, s32);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);

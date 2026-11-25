@@ -147,7 +147,6 @@ typedef struct Emitter {
 
 void func_1516F864(Particle *particle);
 void func_1516F94C(Particle *particle, s32 factor);
-extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
 

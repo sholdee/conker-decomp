@@ -41,7 +41,6 @@ typedef struct {
     /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
 } Effect;
 
-extern Effect *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
 extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
 extern s32 func_1515D480(s32);

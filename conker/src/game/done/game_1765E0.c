@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_151D5E30(void *);
 
 

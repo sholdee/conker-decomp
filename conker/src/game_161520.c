@@ -9,7 +9,6 @@ void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #include "effects.h"
 
 extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* Transforms the point `in` by a 4x4 matrix into `out`. */
 extern void func_15143134(void *in, void *out, void *matrix);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);

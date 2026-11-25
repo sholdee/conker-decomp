@@ -76,7 +76,6 @@ typedef struct {
 } VtxColor;
 
 extern TextureInfo D_80090B60[];
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
 void func_151400D0(Vtx *vtx, VtxColor *colors);
 

@@ -55,7 +55,6 @@ void *func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
 void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void *func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);

@@ -15,7 +15,6 @@ typedef struct {
     f32 scale;
 } PuffObj;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1517E05C(s32, s32, s32);
 
 /* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */

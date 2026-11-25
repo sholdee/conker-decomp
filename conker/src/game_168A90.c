@@ -70,7 +70,6 @@ typedef struct {
 
 extern f32 sinf(f32);
 extern DynModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);

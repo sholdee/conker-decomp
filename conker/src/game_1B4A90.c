@@ -32,7 +32,6 @@ typedef struct {
     s16 duration;        /* 0xAA */
 } BurstEffect; /* size 0xB0 */
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);

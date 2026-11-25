@@ -242,7 +242,6 @@ void func_151325C8(Particle *particle) {
     }
 }
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15168A9C(void *);
 extern void func_10004074(void *);

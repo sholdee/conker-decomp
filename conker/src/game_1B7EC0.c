@@ -27,7 +27,6 @@ typedef struct {
 
 extern void (*D_8008D5C0[])(s32);
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Ticks the queue timer; once it has expired, drops the oldest node each call. */
 void func_1518AA10(Queue *arg) {

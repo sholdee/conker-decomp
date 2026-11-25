@@ -27,7 +27,6 @@ typedef struct {
     } data;
 } EffectActor;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
 

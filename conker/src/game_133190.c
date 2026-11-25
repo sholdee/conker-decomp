@@ -75,7 +75,6 @@ Vec3f *func_151061EC(BoltObj *bolt);
 
 extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 /*

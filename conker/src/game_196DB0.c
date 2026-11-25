@@ -38,7 +38,6 @@ typedef struct {
     /* 0x10 */ Game196DB0SpriteParams params;
 } Game196DB0Sprite; // size 0x4C
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void (*D_8008CA20[])(Game196DB0Sprite *);
 
 /* Allocates a sprite effect and initialises it from `params`. */

@@ -48,7 +48,6 @@ struct ActorFollowerGroup {
     /* 0x2C */ u8 pad2C[4];
 }; // size 0x30
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 
 void func_151D3308(BoneFollower *follower);

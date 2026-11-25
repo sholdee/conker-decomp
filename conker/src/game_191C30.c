@@ -39,7 +39,6 @@ typedef struct {
 extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
 extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the

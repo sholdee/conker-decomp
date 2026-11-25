@@ -23,7 +23,6 @@ typedef struct {
     /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
 } Particle19F150;
 
-extern Particle19F150 *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Allocates a particle and initialises its animation state. */
 Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,

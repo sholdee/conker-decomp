@@ -64,7 +64,6 @@ typedef struct {
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
 
-extern SprayEmitter *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510F800(s32);
 extern s32 func_151464B8(s32);
 extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,

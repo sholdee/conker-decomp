@@ -807,10 +807,11 @@ s32  func_1514ECE0(Attachment *list, s16 type, Attachment **out);
 s32  func_1514ED3C(Attachment *list, void *handle, Attachment **out);
 void func_1514EDF0(void *handle, Actor *owner);
 void func_15165F70(void);
-void func_1516972C(EffectHeader *arg0);
-void func_1516979C(EffectHeader *arg0);
-void func_15169804(EffectHeader *arg0);
-void func_15169824(EffectHeader *arg0);
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+void func_1516972C(EffectHeader *obj);
+void func_1516979C(EffectHeader *obj);
+void func_15169804(EffectHeader *obj);
+void func_15169824(EffectHeader *obj);
 void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
 
 void func_151DB004(struct ParticleDesc *desc);

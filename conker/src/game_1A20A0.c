@@ -35,7 +35,6 @@ typedef struct SwarmActor {
 } SwarmActor;
 
 
-void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                    s32 argA);

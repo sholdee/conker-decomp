@@ -23,7 +23,6 @@ typedef struct {
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 

@@ -26,7 +26,6 @@ typedef struct EvTimer {
     /* 0x29 */ u8 pad29[3];
 } EvTimer; // size 0x2C
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 /* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
 EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,

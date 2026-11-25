@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /*
  * A streak particle: a camera-facing triangle from its tail point to a

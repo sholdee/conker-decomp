@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 struct Shadow {

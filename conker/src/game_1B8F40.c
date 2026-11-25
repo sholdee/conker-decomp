@@ -33,7 +33,6 @@ typedef struct {
     /* 0x3C */ f32 prevZ[2];
 } TrailEmitter; /* size 0x44 */
 
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */

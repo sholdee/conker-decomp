@@ -14,7 +14,6 @@ typedef struct {
     u8         mode;   // 0x1C: 0 = trigger on owner's animation frame, 1 = trigger after timer
 } FadeEffect;
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a fade effect for owner/source; mode picks how it triggers. */
 void func_15104170(s32 mode, Actor *owner, Actor *source) {

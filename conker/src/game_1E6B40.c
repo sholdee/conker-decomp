@@ -214,7 +214,6 @@ typedef struct {
     /* 0x2A */ s16 timer;
 } ParticleEmitter;
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_151B9690(s32, s32, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
 /* Creates a particle emitter (see func_151B9CB0); the parameters are its fields. */

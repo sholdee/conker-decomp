@@ -16,7 +16,6 @@ struct Obj151A4FD0 {
     /* 0x1B */ u8 pad1B[0x5];
 }; /* size 0x20 */
 
-extern struct Obj151A4FD0 *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a tint effect with extraSize bytes after it; returns NULL if the allocation fails. */
 struct Obj151A4FD0 *func_151A4FD0(s32 type, s32 timer, s32 red, s32 green, s32 blue, s32 viewport, u8 unk19,

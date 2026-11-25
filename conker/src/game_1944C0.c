@@ -337,7 +337,6 @@ void *func_15167A68(type, list, size, arg3, owner, arg5)
     }
     return obj;
 }
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 
 /* Spawns a type 3 SpriteFx from the 0x18-byte template at `src` (anim .. fadeStep), fully opaque. */
 void func_15167AD8(SpriteFx *src, u8 owner, s32 list) {

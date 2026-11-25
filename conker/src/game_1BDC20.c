@@ -8,7 +8,6 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 u8 func_151D8E20(void);
 
 typedef struct {

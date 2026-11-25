@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 extern void func_1517E05C(s32, s32, s32);
 extern f32 D_800A6C94; // pi / 180
 

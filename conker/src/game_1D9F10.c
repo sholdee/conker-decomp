@@ -71,7 +71,6 @@ extern s32 D_800A9270[];           // the two object lists ropes are allocated i
 extern Rope *D_800DCE50[][104];    // object lists, [group][list]
 
 extern void *allocate_memory(s32, s32, s32, s32);
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 f32 func_150489B0(u8);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 Gfx *func_15094FE8(Gfx *, TextureInfo *, s32, s32, s32, s32, s32, s32, s32, s32, s32);

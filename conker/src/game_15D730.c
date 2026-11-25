@@ -70,7 +70,6 @@ typedef struct ParticleTypeList {
 
 extern ParticleTypeList D_800A37F0;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
 Particle *func_15130280(ParticleDesc *desc, u8 kind, ParticleAttach *attach, s32 dataSize, u8 arg4, s32 arg5) {

@@ -23,7 +23,6 @@ typedef struct PlayerMarker {
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
 extern PlayerMarker *D_800DCE50[2][104];
 
-extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void func_1518C900(s32);
 PlayerMarker *func_15155FD4(s32 playerId);
 

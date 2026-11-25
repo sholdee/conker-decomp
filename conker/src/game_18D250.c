@@ -27,7 +27,6 @@ typedef struct {
     /* 0x18 */ ColourFrameBufferData data;
 } ColourFrameBufferEffect;
 
-extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32 arg5);
 
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
 extern ScreenEffect *D_800DCE50[2][104];

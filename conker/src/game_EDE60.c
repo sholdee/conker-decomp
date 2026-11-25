@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Live particle spawned by an emitter (see func_15130280). */
 typedef struct Particle Particle;
