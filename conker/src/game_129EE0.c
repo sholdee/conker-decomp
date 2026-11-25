@@ -87,7 +87,7 @@ extern void func_1514FCE8(ParticleBurstDesc *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
-    struct134 *area;
+    TriggerZone *area;
     Vec3f pos;
     const s16 *range;
     ParticleBurstDesc desc;
@@ -103,9 +103,9 @@ void func_150FCBC0(u8 index) {
     if (area == NULL) {
         return;
     }
-    pos.x = area->unk0;
-    pos.y = (s16)area->unk2 + (s16)area->unk8 * 0.5f;
-    pos.z = area->unk4;
+    pos.x = area->x;
+    pos.y = area->y + area->height * 0.5f;
+    pos.z = area->z;
     randFrac = func_150ADA68();
     func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
@@ -139,10 +139,10 @@ void func_150FCBC0(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angle = angle - 40;
-            func_15143874((s16)angle, (s16)area->unk6, &desc.position.x, &desc.position.z);
-            desc.position.x += area->unk0;
-            desc.position.z += area->unk4;
-            desc.position.y = func_150ADA68() * (s16)area->unk8 + (s16)area->unk2;
+            func_15143874((s16)angle, area->radius, &desc.position.x, &desc.position.z);
+            desc.position.x += area->x;
+            desc.position.z += area->z;
+            desc.position.y = func_150ADA68() * area->height + area->y;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
@@ -153,16 +153,16 @@ extern f32 func_15165BB0(void *arg0, Vec3f *pos, f32 arg2, f32 arg3, f32 arg4);
 
 /* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {
-    struct134 *area;
+    TriggerZone *area;
     Vec3f pos;
 
     area = D_800D9AA0[0];
     if (area == NULL) {
         return 1.0f;
     }
-    pos.x = area->unk0;
-    pos.y = (s16)area->unk2;
-    pos.z = area->unk4;
+    pos.x = area->x;
+    pos.y = area->y;
+    pos.z = area->z;
     return func_15165BB0(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 

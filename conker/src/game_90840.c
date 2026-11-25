@@ -1033,18 +1033,6 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     return anim;
 }
 
-/* An entry of the point table MARKERS points to: a position and a facing in degrees. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ u8 pad6[0xA];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[0x18];
-} MarkerPoint;
-
 extern u16 D_800996A0[][4];
 extern u16 D_800996C0[];
 extern u16 D_800996C8[];
@@ -1074,8 +1062,6 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
-/* variables.h types D_800D3098 as a TriggerZone array, but its first word points to the MarkerPoint table. */
-#define MARKERS ((MarkerPoint *)D_800D3098)
 /* Bytes of Actor that structs.h still declares only as padding. */
 #define OBJ_U8(o, off) (((u8 *)(o))[off])
 
@@ -1423,12 +1409,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->unk31C->unk30 = 0x12;
                 anim = 0x2F;
                 if (D_800BE9F0 == 0x31) {
-                    arg0->unk31C->unk28 = MARKERS[12].x;
-                    arg0->unk31C->unk2C = MARKERS[12].z;
+                    arg0->unk31C->unk28 = D_800D3098[12].x;
+                    arg0->unk31C->unk2C = D_800D3098[12].z;
                     func_150DBD70(5);
                 } else {
-                    arg0->unk31C->unk28 = MARKERS[2].x;
-                    arg0->unk31C->unk2C = MARKERS[2].z;
+                    arg0->unk31C->unk28 = D_800D3098[2].x;
+                    arg0->unk31C->unk2C = D_800D3098[2].z;
                     func_150DBD70(0);
                 }
                 arg0->unk76 = 0xC000;
@@ -2539,8 +2525,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             ok = 1;
             if (arg0->unk31C->unk7A != 0) {
-                angle = func_15048A70(MARKERS[arg0->unk31C->unk7A].unk10, arg0->unk40);
-                if ((MARKERS[arg0->unk31C->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+                angle = func_15048A70(D_800D3098[arg0->unk31C->unk7A].yaw, arg0->unk40);
+                if ((D_800D3098[arg0->unk31C->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
@@ -2549,7 +2535,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->unk83 = 0xFF;
                 arg0->unk31C->unk78 = 0x17;
                 anim = 0x8E;
-                arg0->unk76 = (u32)(MARKERS[arg0->unk31C->unk7A].unk10 * 182.0444489f) - 0x4000;
+                arg0->unk76 = (u32)(D_800D3098[arg0->unk31C->unk7A].yaw * 182.0444489f) - 0x4000;
             }
         }
         break;

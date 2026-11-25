@@ -2523,7 +2523,7 @@ typedef struct TriggerZone {
     /* 0x15 */ u8  kind;   // (type << 2) | shape
     /* 0x16 */ u8  flags;  // bit 0: only triggers near the ground
     /* 0x17 */ u8  subtype;
-    /* 0x18 */ s32 unk18;  // per-type parameter (a colour for light points)
+    /* 0x18 */ u32 unk18;  // per-type parameter (a colour for light points)
     /* 0x1C */ u32 unk1C;
     /* 0x20 */ u32 unk20;
     /* 0x24 */ f32 sinPitch;

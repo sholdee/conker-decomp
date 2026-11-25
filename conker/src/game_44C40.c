@@ -5,39 +5,15 @@
 #include "functions.h"
 #undef func_150A7CB0
 /* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_header
 #include "variables.h"
-#undef D_800D3098
 
-/* A level object placement: one 0x34-byte entry of the table D_800D3098 points to
- * (see LevelObject in game_40490.c). */
-typedef struct LevelObject {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 sizeX;
-    /* 0x08 */ s16 sizeY;
-    /* 0x0A */ s16 sizeZ;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15; /* type << 2 | shape */
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 unk18;
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} LevelObject; /* size 0x34 */
+#define OBJ_TYPE(obj) ((obj)->kind >> 2)
+#define OBJ_SHAPE(obj) ((obj)->kind & 3)
 
-#define OBJ_TYPE(obj) ((obj)->unk15 >> 2)
-#define OBJ_SHAPE(obj) ((obj)->unk15 & 3)
-
-extern LevelObject *D_800D3098;
 extern void *allocate_memory(s32, s32, s32, s32);
 extern u8 D_800D30D0[];
 extern u8 D_800D30F0[];
-extern LevelObject **D_800D3270;
+extern TriggerZone **D_800D3270;
 extern s32 D_800D3274;
 
 /* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
@@ -92,7 +68,7 @@ void func_15017868(void) {
     func_1509B4A0((s16)D_800BE9F0, 1);
 }
 
-void func_15017B20(LevelObject *objects, s32 count);
+void func_15017B20(TriggerZone *objects, s32 count);
 
 /* Loads the level's object table and builds the list of type-1 objects in modes 0, 2 and 6. */
 void func_15017930(s32 arg0) {
@@ -101,14 +77,14 @@ void func_15017930(s32 arg0) {
     s32 type;
 
     D_800D3094 = func_1502B7F0((void **)&D_800D3098, 3, 0xC, arg0, 5);
-    count = D_800D3094 / sizeof(LevelObject);
+    count = D_800D3094 / sizeof(TriggerZone);
     D_800D3094 = count;
     func_15017B20(D_800D3098, count);
     D_800D3274 = 0;
     D_800D3270 = NULL;
     for (i = 0; i < D_800D3094; i++) {
         if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-            (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
+            (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
             D_800D3274++;
         }
         type = OBJ_TYPE(&D_800D3098[i]);
@@ -117,13 +93,13 @@ void func_15017930(s32 arg0) {
         }
     }
     if (D_800D3274 != 0) {
-        D_800D3270 = allocate_memory(D_800D3274 * sizeof(LevelObject *), 1, 0, 0);
+        D_800D3270 = allocate_memory(D_800D3274 * sizeof(TriggerZone *), 1, 0, 0);
         if (D_800D3270 != NULL) {
-            LevelObject **out = D_800D3270;
+            TriggerZone **out = D_800D3270;
 
             for (i = 0; i < D_800D3094; i++) {
                 if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-                    (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
+                    (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
                     *out++ = &D_800D3098[i];
                 }
             }
@@ -145,8 +121,8 @@ typedef struct {
     /* 0x24 */ s16 maxZ;
 } ObjectBounds; /* size 0x28 */
 
-extern void func_150A0D14(LevelObject *obj);
-void func_15017FA4(LevelObject *obj, ObjectBounds *bounds);
+extern void func_150A0D14(TriggerZone *obj);
+void func_15017FA4(TriggerZone *obj, ObjectBounds *bounds);
 extern ObjectBounds *D_800D309C;
 extern u64 D_800D30A0[3];
 extern u64 D_800D30B8[3];
@@ -159,7 +135,7 @@ extern u64 D_800D30B8[3];
  * without flag 4) and D_800D30B8 (all others without flag 4). For each object in D_800D30B8 it
  * records which other D_800D30B8 objects its bounds overlap.
  */
-void func_15017B20(LevelObject *objects, s32 count) {
+void func_15017B20(TriggerZone *objects, s32 count) {
     s32 pad[6]; // matching: stack frame size
     u64 bitI;
     u64 bitJ;
@@ -234,7 +210,7 @@ void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
  * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes
  * get zero-size bounds at the position.
  */
-void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
+void func_15017FA4(TriggerZone *obj, ObjectBounds *bounds) {
     s32 i;
     s32 shape;
     s32 invalid;
@@ -252,19 +228,19 @@ void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
         break;
     case 0:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->sizeX, obj->sizeY * 0.5f, obj->sizeX);
+        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->radius);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, obj->rotX, obj->rotY, 0.0f);
+        func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     case 1:
-        func_150A7CB0(transform, obj->sizeX, obj->sizeX, obj->sizeX);
+        func_150A7CB0(transform, obj->radius, obj->radius, obj->radius);
         break;
     case 2:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->sizeX, obj->sizeY * 0.5f, obj->sizeZ);
+        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->depth);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, obj->rotX, obj->rotY, 0.0f);
+        func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     }

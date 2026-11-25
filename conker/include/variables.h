@@ -1141,11 +1141,10 @@ extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 
 extern s32 D_800D99D0[8];
-extern struct134 *D_800D9A20;
-extern struct134 *D_800D9A24;
+extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern s32 D_800D9A40;
 extern Vec3f D_800D9A50;
-extern struct134 *D_800D9AA0[]; // length 3?
+extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
@@ -1343,7 +1342,7 @@ extern s32  D_800DDF78[];
 extern u8   D_800E0B94;
 extern s32  D_800E0C20;
 extern s32  D_800E0E04;
-extern struct134 *D_800E0900[]; // probably not struct134
+extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;
 extern s32  D_800E0934;
 extern void *D_800E0940;

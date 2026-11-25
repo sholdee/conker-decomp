@@ -4,32 +4,19 @@
 #include "functions.h"
 #undef func_150EB430
 /* variables.h types this as TriggerZone[73]; see the declaration below. */
-#define D_800D3098 D_800D3098_header
 #include "variables.h"
 #include "effects.h"
-#undef D_800D3098
 
 /* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h): a collision
    cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ u8 padA[0x18 - 0xA];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[0x34 - 0x1C];
-} GateCylinder; /* size 0x34 */
 
 /* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
-extern GateCylinder *D_800D3098;
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
-extern s32 func_150A34B0(GateCylinder *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
+extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
 extern void func_150A2864(s32, s32);
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
-void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind);
+void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
@@ -270,7 +257,7 @@ void *func_151D8868(CameraEvent *event, s32 arg1, u8 owner, s32 kind);
  * (type 1, 15-35 long), func_15164F0C, and the func_151D3FF4/func_151D5514/func_151541B8 trio at
  * the cylinder's base and again half its height up.
  */
-void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind) {
+void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     Vec3f position;
     f32 random;
     f32 step;

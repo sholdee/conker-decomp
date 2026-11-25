@@ -227,7 +227,7 @@ extern void func_1514470C(struct134 *, void *);
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
 void func_150E6ED8(Vec3f *out) {
     // D_800D9A20 is declared as a single pointer in variables.h but is a two-entry table here.
-    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], out);
+    func_1514470C(D_800D9A20[func_150ADA20() & 1], out);
 }
 
 extern Game113D60Segment *D_80088A44[];
