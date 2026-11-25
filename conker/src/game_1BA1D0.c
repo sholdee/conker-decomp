@@ -78,69 +78,67 @@ void func_1518CD20(void *placement, u8 arg1, s32 arg2) {
         if (ring == NULL || points == NULL) {
             return;
         }
-        {
-            for (i = 0; i < count; i++) {
-                func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].unk0, &ring[i].unk8);
-                ring[i].unk0 += 111.0f;
-                ring[i].unk4 = -90.0f;
-            }
-            i = 0;
-            ring[count].unk0 = 111.0f;
-            ring[count].unk4 = -90.0f;
-            ring[count].unk8 = 0.0f;
-            func_15145DB4(placement, ring, points, count + 1);
-            spawn.texture = 0x6C;
-            spawn.renderMode = 0x5103;
-            spawn.unk0 = 0x200005;
-            spawn.r = 0xE7;
-            spawn.g = 0xE7;
-            spawn.b = 0xB6;
-            spawn.r2 = 0x9E;
-            spawn.g2 = 0x9E;
-            spawn.b2 = 0x62;
-            spawn.unk4 = 0;
-            spawn.frame = 0;
-            spawn.frameRate = 0;
-            spawn.a = 0xFF;
-            spawn.brightness = 0xFF;
-            spawn.offset.unk0 = 0.0f;
-            spawn.offset.unk4 = 0.0f;
-            spawn.offset.unk8 = 0.0f;
-            spawn.fadeStart = 25;
-            spawn.fadeRate = 10;
-            spawn.flags = 0x80CE07;
-            spawn.primColorMode = 8;
-            spawn.envColorMode = 6;
-            spawn.updateFunc = 16;
-            spawn.deathFunc = -1;
-            spawn.drawFunc = -1;
-            spawn.handlerSet = 0;
-            spawn.scaleRate = 1.040568948f;
-            drag = 0.8533809781f;
-            do {
-                f32 speed;
-                s32 flipT;
-                Particle *particle;
-
-                spawn.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
-                flipT = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
-                spawn.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | flipT;
-                speed = (func_150ADA68() * 202.0f + 250.0f) * 0.001000000047f;
-                spawn.scaleStart = spawn.timer = func_150ADA20() % 26U + 25;
-                spawn.width = spawn.height = func_150ADA68() * 105.0f + 150.0f;
-                spawn.pos = points[i];
-                spawn.vel.unk0 = (points[i].unk0 - points[count].unk0) * speed;
-                spawn.vel.unk4 = (points[i].unk4 - points[count].unk4) * speed;
-                spawn.vel.unk8 = (points[i].unk8 - points[count].unk8) * speed;
-                spawn.gravity = (func_150ADA68() * 880.0f + 13.0f) * 0.001000000047f;
-                spawn.alpha = func_150ADA20() % 176U + 80;
-                particle = func_15130280(&spawn, 1, 0, sizeof(particle->drag), arg1, arg2);
-                if (particle != NULL) {
-                    memcpy(&particle->drag, &drag, sizeof(drag));
-                }
-                remaining--;
-                i++;
-            } while (remaining > 0);
+        for (i = 0; i < count; i++) {
+            func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].unk0, &ring[i].unk8);
+            ring[i].unk0 += 111.0f;
+            ring[i].unk4 = -90.0f;
         }
+        i = 0;
+        ring[count].unk0 = 111.0f;
+        ring[count].unk4 = -90.0f;
+        ring[count].unk8 = 0.0f;
+        func_15145DB4(placement, ring, points, count + 1);
+        spawn.texture = 0x6C;
+        spawn.renderMode = 0x5103;
+        spawn.unk0 = 0x200005;
+        spawn.r = 0xE7;
+        spawn.g = 0xE7;
+        spawn.b = 0xB6;
+        spawn.r2 = 0x9E;
+        spawn.g2 = 0x9E;
+        spawn.b2 = 0x62;
+        spawn.unk4 = 0;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.a = 0xFF;
+        spawn.brightness = 0xFF;
+        spawn.offset.unk0 = 0.0f;
+        spawn.offset.unk4 = 0.0f;
+        spawn.offset.unk8 = 0.0f;
+        spawn.fadeStart = 25;
+        spawn.fadeRate = 10;
+        spawn.flags = 0x80CE07;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = 16;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleRate = 1.040568948f;
+        drag = 0.8533809781f;
+        do { // matching: a for loop's entry test changes register allocation; count > 0 already holds
+            f32 speed;
+            s32 flipT;
+            Particle *particle;
+
+            spawn.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
+            flipT = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
+            spawn.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | flipT;
+            speed = (func_150ADA68() * 202.0f + 250.0f) * 0.001000000047f;
+            spawn.scaleStart = spawn.timer = func_150ADA20() % 26U + 25;
+            spawn.width = spawn.height = func_150ADA68() * 105.0f + 150.0f;
+            spawn.pos = points[i];
+            spawn.vel.unk0 = (points[i].unk0 - points[count].unk0) * speed;
+            spawn.vel.unk4 = (points[i].unk4 - points[count].unk4) * speed;
+            spawn.vel.unk8 = (points[i].unk8 - points[count].unk8) * speed;
+            spawn.gravity = (func_150ADA68() * 880.0f + 13.0f) * 0.001000000047f;
+            spawn.alpha = func_150ADA20() % 176U + 80;
+            particle = func_15130280(&spawn, 1, 0, sizeof(particle->drag), arg1, arg2);
+            if (particle != NULL) {
+                memcpy(&particle->drag, &drag, sizeof(drag));
+            }
+            remaining--;
+            i++;
+        } while (remaining > 0);
     }
 }
