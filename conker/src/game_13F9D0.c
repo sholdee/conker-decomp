@@ -3,14 +3,17 @@
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_1511FC2C func_1511FC2C__proto
 #define func_1511FC44 func_1511FC44__proto
+#define func_150A7CB0 func_150A7CB0__proto
 #include "functions.h"
 #undef func_1502B7F0
 #undef func_150ADA20
 #undef func_1511FC2C
 #undef func_1511FC44
+#undef func_150A7CB0
 #include "variables.h"
 
 u32 func_150ADA20(void);
+void func_150A7CB0(f32 mtx[4][4], f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
 
 extern u8 D_800DBEA8[];
 Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
@@ -243,12 +246,12 @@ typedef struct Game13F9D0Obj {
     /* 0x14 */ s16 z;
     /* 0x16 */ u8 pad16[2];
     /* 0x18 */ f32 yOffset;
-    /* 0x1C */ s32 displayList;
+    /* 0x1C */ Gfx *displayList;
     /* 0x20 */ s32 matrices[2]; // segment 6 address, one per frame buffer
     /* 0x28 */ u8 pad28[4];
-    /* 0x2C */ s32 scaleX; // f32 bit patterns, passed straight to func_150A7CB0
-    /* 0x30 */ s32 scaleY;
-    /* 0x34 */ s32 scaleZ;
+    /* 0x2C */ f32 scaleX;
+    /* 0x30 */ f32 scaleY;
+    /* 0x34 */ f32 scaleZ;
     /* 0x38 */ void (*update)(struct Game13F9D0Obj *);
     /* 0x3C */ u8 pad3C[0x10];
     /* 0x4C */ u8 unk4C;
@@ -272,7 +275,7 @@ typedef struct Game13F9D0Obj {
     /* 0x72 */ u8 id;
     /* 0x73 */ u8 pad73[5];
     /* 0x78 */ void (*onContact)(struct Game13F9D0Obj *, struct127 *);
-    /* 0x7C */ s32 effectScale;
+    /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
     /* 0x84 */ u8 pad84[4];
     /* 0x88 */ u16 fadeDistance; // fades out when the camera is closer than this
@@ -410,280 +413,215 @@ void func_15112A80(s32 player) {
         }
     }
 }
+/* Flags every object that is visible in some view (or always-update, state bit 4) and has an update callback. */
 void func_15113180(void) {
     s32 i;
-    s32 offset;
-    struct131 *temp_a0;
 
-    i = 0;
-    offset = 0;
-    if (D_800DBEF0 > 0) {
-        do {
-            temp_a0 = (struct131 *)((u8 *)D_800DBEF4 + offset);
-            temp_a0->unk6F &= ~0x40;
-            temp_a0 = (struct131 *)((u8 *)D_800DBEF4 + offset);
-            if (((temp_a0->unk6F & 0xF) != 0) || ((((u8 *)temp_a0)[0x70] & 4) == 4)) {
-                if (*(s32 *)((u8 *)temp_a0 + 0x38) != 0) {
-                    temp_a0->unk6F |= 0x40;
-                }
-            }
-            i++;
-            offset += 0xA0;
-        } while (i < D_800DBEF0);
+    for (i = 0; i < D_800DBEF0; i++) {
+        OBJECTS[i].viewFlags &= ~0x40;
+        if (((OBJECTS[i].viewFlags & 0xF) != 0 || (OBJECTS[i].state & 4) == 4) && OBJECTS[i].update != NULL) {
+            OBJECTS[i].viewFlags |= 0x40;
+        }
     }
 }
+/* The part of the D_800CC2D0 actor (struct127) this file uses. */
+typedef struct Game13F9D0Actor {
+    /* 0x000 */ u8 pad0[0x14];
+    /* 0x014 */ f32 pos[3];
+    /* 0x020 */ u8 pad20[0x56];
+    /* 0x076 */ u16 movingAngle;
+    /* 0x078 */ u8 pad78[2];
+    /* 0x07A */ s16 facingAngle;
+    /* 0x07C */ u8 pad7C[0x14];
+    /* 0x090 */ s16 unk90;
+    /* 0x092 */ u8 pad92[0xA5];
+    /* 0x137 */ u8 unk137;
+    /* 0x138 */ u8 pad138[0x9C];
+    /* 0x1D4 */ struct { f32 mtx[4][4]; } *unk1D4; // world matrix
+    /* 0x1D8 */ u8 pad1D8[0x154];
+} Game13F9D0Actor; // size 0x32C
 
-typedef struct Game13D350Entry {
-    u16 index;
-    u16 value;
-} Game13D350Entry;
+#define ACTORS ((Game13F9D0Actor *)D_800CC2D0)
 
-typedef struct Struct15113218Obj {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x16];
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    u8 pad38[0x16];
-    u8 unk4E;
-    u8 pad4F[0x21];
-    u8 unk70;
-    u8 pad71[0x2F];
-} Struct15113218Obj;
-
-typedef struct Struct15113218Sub {
-    u8 pad0[0x30];
-    f32 x;
-    f32 y;
-    f32 z;
-} Struct15113218Sub;
-
-typedef struct Struct15113218Actor {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x70];
-    s16 unk90;
-    u8 pad92[0x142];
-    Struct15113218Sub *unk1D4;
-    u8 pad1D8[0x154];
-} Struct15113218Actor;
-
-struct Struct1511490C;
-void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1);
+void func_1511490C(f32 mtx[4][4], Game13F9D0Obj *obj);
 void func_150A7B80(void *);
 extern f32 D_800DBF08[][4][4];
 
+/* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
-    Struct15113218Obj *obj;
-    Struct15113218Actor *actor;
-    Struct15113218Sub *sub;
+    Game13F9D0Obj *obj;
+    Game13F9D0Actor *actor;
+    f32 (*parent)[4];
     f32 mf[4][4];
     s32 j;
-    s32 i;
-    u16 idx;
-    s32 pad1;
+    s32 view;
+    s32 pad1[2]; // matching: unused stack slots
     f32 rot[3];
-    s32 pad2;
-    s32 pad3;
-    s32 pad4;
+    s32 pad2[3];
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (func_150859AC(i, 0) == 0) {
+    for (view = 0; view <= D_80082FA0; view++) {
+        if (func_150859AC(view, 0) == 0) {
             continue;
         }
-        {
-            for (j = 0; j < D_800DBEE8[i]; j++) {
-                obj = (Struct15113218Obj *)&D_800DBEF4[(*D_80089240[i])[j].index];
-                if ((obj->unk70 & 1) == 1) {
-                    func_150A7B80(&(*D_80089250[D_800BE9C0])[(*D_80089240[i])[j].index]);
+        for (j = 0; j < D_800DBEE8[view]; j++) {
+                obj = &OBJECTS[(*D_80089240[view])[j].index];
+                if ((obj->state & 1) == 1) {
+                    func_150A7B80(&(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     continue;
                 }
-                if (obj->unk4E == 3) {
+                if (obj->attach == 3) {
                     continue;
                 }
-                if (obj->unk4E < 3) {
-                    func_1511490C(mf, (struct Struct1511490C *)obj);
-                    guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[i])[j].index]);
-                } else if (obj->unk4E > 100 && obj->unk4E < 125) {
-                    actor = &((Struct15113218Actor *)D_800CC2D0)[obj->unk4E - 100];
+                if (obj->attach < 3) {
+                    func_1511490C(mf, obj);
+                    guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
+                } else if (obj->attach > 100 && obj->attach < 125) {
+                    actor = &ACTORS[obj->attach - 100];
                     if (actor->unk1D4 == NULL) {
-                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
-                        mf[3][0] = actor->x;
-                        mf[3][1] = actor->y;
-                        mf[3][2] = actor->z;
-                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[i])[j].index]);
+                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
+                        mf[3][0] = actor->pos[0];
+                        mf[3][1] = actor->pos[1];
+                        mf[3][2] = actor->pos[2];
+                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
-                        sub = actor->unk1D4;
-                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
-                        mf[3][0] = sub->x;
-                        mf[3][1] = sub->y;
-                        mf[3][2] = sub->z;
+                        parent = actor->unk1D4->mtx;
+                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
+                        mf[3][0] = parent[3][0];
+                        mf[3][1] = parent[3][1];
+                        mf[3][2] = parent[3][2];
                         func_150442C0(mf, rot[0], rot[1], rot[2]);
-                        obj->unk10 = mf[3][0];
-                        obj->unk12 = mf[3][1];
-                        obj->unk14 = mf[3][2];
-                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[i])[j].index]);
+                        obj->x = mf[3][0];
+                        obj->y = mf[3][1];
+                        obj->z = mf[3][2];
+                        guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     }
                 } else {
-                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*D_80089250[D_800BE9C0])[(*D_80089240[i])[j].index]);
+                    guMtxF2L(D_800DBF08[D_800BE9C0], &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 }
             }
-        }
     }
 }
-
-typedef struct Game13D350Cmd {
-    u32 word0;
-    u32 word1;
-} Game13D350Cmd;
-
-typedef struct Game13D350DrawEntry {
-    u16 index;
-    u16 value;
-} Game13D350DrawEntry;
-
-void *func_151733D8(void *, s32);
-struct Game13D350Model;
-s32 func_151137D4(s32, struct Game13D350Model *, s32, s32, s32, s32);
-s32 func_1515E544(s32, s32, s32, s32, void *);
-extern u8 D_80089470;
+Gfx *func_151733D8(Gfx *gfx, s32);
+Gfx *func_151137D4(Gfx *gfx, Game13F9D0Obj *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
+Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
+extern Mtx D_80089470;
 extern u8 D_800D9E21;
 
-Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2) {
+/* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
+Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     s32 viewOffset;
-    s32 flags;
-    s32 index;
-    u8 ***table;
+    s32 pass;
+    s32 i;
+    DrawEntry ***list;
 
-    if (arg1 == 0) {
-        flags = 0;
+    if (translucent == 0) {
+        pass = 0;
     } else {
-        flags = 0x10;
+        pass = 0x10;
     }
-    arg0 = func_151733D8(arg0, 0);
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9A3FFFF; command->word1 = 0; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
-    viewOffset = arg2 * 4;
-    table = (u8 ***)((u8 *)D_80089240 + viewOffset);
-    arg0 = (Game13D350Cmd *)func_1515E544((s32)arg0, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21, (u8 *)D_800D9BD0 + arg2 * 0x10 + D_800BE9C0 * 8);
-    for (index = 0; index < D_800DBEE8[arg2]; index++) {
-        arg0 = (Game13D350Cmd *)func_151137D4((s32)arg0, ((Game13D350DrawEntry *)(**table + index * 4))->index * 0xA0 + (u8 *)D_800DBEF4, (s32)((u8 *)*D_80089250[D_800BE9C0] + (((Game13D350DrawEntry *)(**table + index * 4))->index << 6)), arg2, ((Game13D350DrawEntry *)(**table + index * 4))->value, flags);
+    gfx = func_151733D8(gfx, 0);
+    gSPClearGeometryMode(gfx++, G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | 0x400000);
+    gSPSetGeometryMode(gfx++, G_LIGHTING);
+    viewOffset = view * 4; // matching: indexing both tables by view computes view * 4 twice
+    list = (DrawEntry ***)((u8 *)D_80089240 + viewOffset);
+    gfx = func_1515E544(gfx, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
+                        D_800D9BD0[view][D_800BE9C0]);
+    for (i = 0; i < D_800DBEE8[view]; i++) {
+        gfx = func_151137D4(gfx, &OBJECTS[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
+                            (**list)[i].distance, pass);
     }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xDA380003; command->word1 = (u32)&D_80089470; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9AFFDFF; command->word1 = 0; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
-    return arg0;
+    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPClearGeometryMode(gfx++, G_CULL_FRONT | G_LOD | 0x400000);
+    gSPSetGeometryMode(gfx++, G_LIGHTING);
+    return gfx;
 }
 
-typedef struct Game13D350Model {
-    u8 pad0[4];
-    f32 scale;
-    u8 pad8[8];
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad16[2];
-    f32 yOffset;
-    s32 displayList;
-    s32 matrices[2];
-    u8 pad28[0x27];
-    u8 renderFlags;
-    u8 pad50[0x1C];
-    u16 effectFlags;
-    u8 pad6E[2];
-    u8 displayFlags;
-    u8 pad71[0xB];
-    s32 effectScale;
-    u8 pad80[0xA];
-    u8 alpha;
-    u8 alphas[1];
-} Game13D350Model;
-
-s32 func_1511FC2C(s32, f32, f32, f32, f32, s32);
-s32 func_1511FC44(s32, f32, f32, f32, s32);
-s32 func_1510CDB8(s32, s32, s32, s32);
-s32 func_1510D8C0(s32, Game13D350Model *);
-s32 func_150CF5E8(s32);
-s32 func_150A50C0(s32, s32, u8 *, s32, s32, s32);
+Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32, s32 view);
+Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
+Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
+Gfx *func_1510D8C0(Gfx *gfx, Game13F9D0Obj *obj);
+Gfx *func_150CF5E8(Gfx *gfx);
+Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 mtx[4][4], s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
 extern s32 D_800BE9C8[];
 extern s32 D_800BEBA4;
 
-s32 func_151137D4(s32 arg0, Game13D350Model *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/*
+ * Draws one object in one view, if it belongs to this pass (opaque pass: alpha 255 and no flags bit 0x10).
+ * Returns gfx unchanged if nothing was drawn or the display list would overflow.
+ */
+Gfx *func_151137D4(Gfx *gfx, Game13F9D0Obj *obj, Mtx *mtx, s32 view, s32 distance, s32 pass) {
     s32 alpha;
-    s32 start;
+    Gfx *start;
     s32 overflow;
-    u16 flags;
+    u16 effects;
 
-    start = arg0;
-    if (arg1->alphas[arg3] == 0xFF && arg1->alpha == 0xFF) {
-        alpha = 0xFF;
+    start = gfx;
+    if (obj->viewAlpha[view] == 255 && obj->alpha == 255) {
+        alpha = 255;
     } else {
-        alpha = (arg1->alphas[arg3] * arg1->alpha) / 255;
+        alpha = (obj->viewAlpha[view] * obj->alpha) / 255;
         if (alpha == 0) {
-            return arg0;
+            return gfx;
         }
     }
-    if (alpha == 0xFF) {
-        if (arg5 == (arg1->renderFlags & 0x10)) {
-            return arg0;
+    if (alpha == 255) {
+        if (pass == (obj->flags & 0x10)) {
+            return gfx;
         }
-    } else if (arg5 != 0) {
-        return arg0;
+    } else if (pass != 0) {
+        return gfx;
     }
-    flags = arg1->effectFlags;
-    if (arg1->effectFlags != 0) {
-        if (flags & 1) {
-            arg0 = func_1511FC2C(arg0, arg1->x, arg1->y + arg1->yOffset, arg1->z, arg1->scale, arg3);
-        } else if (flags & 0x10) {
-            arg0 = func_1511FC2C(arg0, arg1->x, arg1->y + arg1->yOffset, arg1->z, arg1->effectScale, arg3);
-        } else if (flags & 0x20) {
-            arg0 = func_1511FC44(arg0, arg1->x, arg1->y + arg1->yOffset, arg1->z, arg3);
+    effects = obj->effectFlags;
+    if (obj->effectFlags != 0) {
+        if (effects & 1) {
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->rotY, view);
+        } else if (effects & 0x10) {
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->unk7C, view);
+        } else if (effects & 0x20) {
+            gfx = func_1511FC44(gfx, obj->x, obj->y + obj->yOffset, obj->z, view);
         }
     }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xE7000000; command->word1 = 0; }
-    if (alpha < 0xFF) {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xDB060020; command->word1 = (u32)D_80083D40; }
+    gDPPipeSync(gfx++);
+    if (alpha < 255) {
+        gSPSegment(gfx++, 8, D_80083D40);
     } else {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xDB060020; command->word1 = (u32)D_80083EC0; }
+        gSPSegment(gfx++, 8, D_80083EC0);
     }
-    if ((arg1->renderFlags & 2) == 2) {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9FFFFFF; command->word1 = 0x400000; }
+    if ((obj->flags & 2) == 2) {
+        gSPSetGeometryMode(gfx++, 0x400000);
     } else {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9BFFFFF; command->word1 = 0; }
+        gSPClearGeometryMode(gfx++, 0x400000);
     }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
-    arg0 = func_1510D8C0(func_1510CDB8(arg0, 0xFF, alpha, arg3), arg1);
-    if (arg5 == 0) {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9FFFFFF; command->word1 = 0x110000; }
+    gSPSetGeometryMode(gfx++, G_LIGHTING);
+    gfx = func_1510D8C0(func_1510CDB8(gfx, 255, alpha, view), obj);
+    if (pass == 0) {
+        gSPSetGeometryMode(gfx++, G_FOG | G_LOD);
     }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xDB060004; command->word1 = arg1->matrices[D_800BE9C0]; }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xDA380003; command->word1 = arg2; }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9F7FFFF; command->word1 = 0; }
-    if (arg1->effectFlags & 0x200) {
-        arg0 = func_150CF5E8(arg0);
+    gSPSegment(gfx++, 1, obj->matrices[D_800BE9C0]);
+    gSPMatrix(gfx++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPClearGeometryMode(gfx++, G_TEXTURE_GEN_LINEAR);
+    if (obj->effectFlags & 0x200) {
+        gfx = func_150CF5E8(gfx);
     }
-    if ((arg1->displayFlags & 2) == 2) {
-        arg0 = func_150A50C0(arg1->displayList, arg0, (u8 *)D_800D9C10 + (arg3 << 6), 0, 0, arg1->matrices[D_800BE9C0] + 0xFF000000);
+    if ((obj->state & 2) == 2) {
+        gfx = func_150A50C0(obj->displayList, gfx, D_800D9C10[view], 0, 0, obj->matrices[D_800BE9C0] + 0xFF000000);
     } else {
-        { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xDE000000; command->word1 = arg1->displayList; }
+        gSPDisplayList(gfx++, obj->displayList);
     }
-    { Game13D350Cmd *command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xD9EEFFFF; command->word1 = 0;
-      command = (Game13D350Cmd *)arg0; arg0 += 8; command->word0 = 0xE7000000; command->word1 = 0; }
-    overflow = (D_800BEBA4 < ((arg0 - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
+    { // matching: hand-written through one pointer; the GBI macros' own _g copy reorders the stores
+        Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
+        cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
+    }
+    overflow = (D_800BEBA4 < gfx - (Gfx *)D_800BE9C8[D_800BE9C0]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
-    return arg0;
+    return gfx;
 }
 
 typedef struct Struct15113C88 {
@@ -997,46 +935,26 @@ void func_1511473C(Game13F9D0MovingActor *arg0, s32 arg1) {
 
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
-struct Struct151148A8 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-};
+/* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
+void func_151148A8(f32 mtx[4][4], Game13F9D0Obj *obj) {
+    f32 pitchRoll[4][4];
 
-void func_151148A8(f32 arg0[4][4], struct Struct151148A8 *arg1) {
-    f32 sp18[4][4];
-
-    func_150A8050(arg0, 0.0f, arg1->unk4, 0.0f);
-    func_150A8050(sp18, arg1->unk0, 0.0f, arg1->unk8);
-    func_150A7A48(sp18, arg0, arg0);
+    func_150A8050(mtx, 0.0f, obj->rotY, 0.0f);
+    func_150A8050(pitchRoll, obj->rotX, 0.0f, obj->rotZ);
+    func_150A7A48(pitchRoll, mtx, mtx);
 }
 
-struct Struct1511490C {
-    char pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    char pad16[2];
-    f32 unk18;
-    char pad1C[0x10];
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-};
+/* Builds an object's model matrix: scale, then rotation, then translation to (x, y + yOffset, z). */
+void func_1511490C(f32 mtx[4][4], Game13F9D0Obj *obj) {
+    f32 scale[4][4];
 
-void func_150A7CB0(f32 mtx[4][4], s32 x, s32 y, s32 z);
-
-void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1) {
-    f32 sp20[4][4];
-
-    func_151148A8(arg0, arg1);
-    arg0[3][0] = arg1->unk10;
-    arg0[3][1] = arg1->unk12 + arg1->unk18;
-    arg0[3][2] = arg1->unk14;
-    func_150A7CB0(sp20, arg1->unk2C, arg1->unk30, arg1->unk34);
-    func_150A7A48(sp20, arg0, arg0);
+    func_151148A8(mtx, obj);
+    mtx[3][0] = obj->x;
+    mtx[3][1] = obj->y + obj->yOffset;
+    mtx[3][2] = obj->z;
+    func_150A7CB0(scale, obj->scaleX, obj->scaleY, obj->scaleZ);
+    func_150A7A48(scale, mtx, mtx);
 }
-
 struct131 *func_151149AC(u8 id) {
     s32 i;
     s32 offset;
