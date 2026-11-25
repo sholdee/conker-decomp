@@ -13,135 +13,104 @@ void func_150D82B0(s32 arg0) {
 }
 
 extern s32 D_80090298[];
-extern f32 D_800A0B10; /* 1/17; stays in asm/data/2455D0.rodata.s (shared with func_150D83D8/func_150D85AC) */
 
-typedef struct Pos150D82BC {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Pos150D82BC;
+/* First byte of a Gfx command: its opcode, read as a signed byte. */
+#define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 
-typedef struct Actor150D82BC {
-    u8 pad0[0x84];
-    u16 unk84;
-    u8 pad86[0x24A];
-    Pos150D82BC *unk2D0;
-} Actor150D82BC;
-
-typedef struct Draw150D82BC {
+/* State passed to the display-list callbacks below (only the fields they use). */
+typedef struct {
     u8 pad0[0x18];
     s16 unk18;
     u8 pad1A[0xA];
-    Gfx **unk24;
-} Draw150D82BC;
+    Gfx **displayList;
+    u8 pad28[0x10];
+    s32 phase;
+    s32 progress; /* percent, 0..100 */
+} DLCallbackState;
 
-
-s32 func_150D82BC(Draw150D82BC *arg0, Actor150D82BC *arg1) {
-    Pos150D82BC *pos = arg1->unk2D0;
+/* While the actor runs action 13 with anim->unk8 in 23..40, scrolls the texture of the first
+ * G_SETTILESIZE command in the display list horizontally. */
+s32 func_150D82BC(DLCallbackState *state, struct127 *actor) {
+    struct197 *anim = actor->unk2D0;
     Gfx *list;
     s32 i;
     s32 uls;
-    s32 w;
+    s32 w0;
     f32 t;
 
-    if (pos == NULL) {
+    if (anim == NULL) {
         return 0;
     }
-    arg0->unk18 = D_80090298[6];
-    if (arg1->unk84 == 0xD) {
-        if (23.0f <= pos->unk8 && pos->unk8 <= 40.0f) {
-            arg0->unk18 = D_80090298[7];
-            t = pos->unk8 - 23.0f;
-            t *= D_800A0B10;
-            list = *arg0->unk24;
-            i = 0;
-            while (((s8 *)&list[i])[0] != (s8)G_SETTILESIZE) {
-                i++;
+    state->unk18 = D_80090298[6];
+    if (actor->unk84.uh == 13) {
+        if (23.0f <= anim->unk8 && anim->unk8 <= 40.0f) {
+            state->unk18 = D_80090298[7];
+            t = anim->unk8 - 23.0f;
+            t *= 1.0f / 17.0f;
+            list = *state->displayList;
+            for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
             }
-            w = list[i].words.w0;
+            w0 = list[i].words.w0;
             uls = 70.0f * t + 2.0f;
             if (uls < 0) {
-                uls += (w >> 12) & 0xFFF;
+                uls += (w0 >> 12) & 0xFFF;
             }
+            /* rewrite only w0 (uls, ult); the tile and lrs/lrt in w1 stay */
             list[i].words.w0 = _SHIFTL(G_SETTILESIZE, 24, 8) | _SHIFTL(uls, 12, 12) | _SHIFTL(2, 0, 12);
         }
     }
     return 0;
 }
 
-typedef struct Draw150D83D8 {
-    u8 pad0[0x18];
-    s16 unk18;
-    u8 pad1A[0xA];
-    Gfx **unk24;
-    u8 pad28[0x10];
-    s32 unk38;
-    s32 unk3C;
-} Draw150D83D8;
-
-extern f32 D_800A0B14; /* 0.01f; asm/data/2455D0.rodata.s */
-
-typedef struct Pos150D83D8 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Pos150D83D8;
-
-typedef struct Actor150D83D8 {
-    u8 pad0[0x84];
-    u16 unk84;
-    u8 pad86[0x24A];
-    Pos150D83D8 *unk2D0;
-} Actor150D83D8;
-
-s32 func_150D83D8(Draw150D83D8 *arg0, Actor150D83D8 *arg1) {
+/* Scrolls the first G_SETTILESIZE command's texture vertically by a progress value that rises
+ * to 100% once action 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
+s32 func_150D83D8(DLCallbackState *state, struct127 *actor) {
     Gfx *list;
     s32 i;
     f32 t;
 
-    switch (arg0->unk38) {
+    switch (state->phase) {
         case 0:
-            arg0->unk3C = 50;
-            arg0->unk18 = D_80090298[27];
-            if (arg1->unk84 == 0x18D && 46.0f <= arg1->unk2D0->unk8) {
-                arg0->unk38 = 1;
-                arg0->unk18 = D_80090298[28];
+            state->progress = 50;
+            state->unk18 = D_80090298[27];
+            if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->unk8) {
+                state->phase = 1;
+                state->unk18 = D_80090298[28];
             }
             break;
         case 1:
-            arg0->unk3C += D_800BE9E4;
-            if (arg0->unk3C >= 100) {
-                arg0->unk3C = 100;
-                arg0->unk38 = 2;
+            state->progress += D_800BE9E4;
+            if (state->progress >= 100) {
+                state->progress = 100;
+                state->phase = 2;
             }
             break;
         case 2:
-            if (arg1->unk84 == 0x18E && 34.0f <= arg1->unk2D0->unk8) {
-                arg0->unk38 = 3;
+            if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->unk8) {
+                state->phase = 3;
             }
             break;
         case 3:
-            arg0->unk3C -= D_800BE9E4 * 4;
-            if (arg0->unk3C <= 0) {
-                arg0->unk3C = 0;
-                arg0->unk38 = 4;
+            state->progress -= D_800BE9E4 * 4;
+            if (state->progress <= 0) {
+                state->progress = 0;
+                state->phase = 4;
             }
             break;
     }
-    t = arg0->unk3C * D_800A0B14;
-    list = *arg0->unk24;
-    i = 0;
-    while (((s8 *)&list[i])[0] != (s8)G_SETTILESIZE) {
-        i++;
+    t = state->progress * 0.01f;
+    list = *state->displayList;
+    for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
     }
     list[i].words.w0 = _SHIFTL(G_SETTILESIZE, 24, 8) | _SHIFTL(2, 12, 12) | _SHIFTL((s32)(120.0f * t + 2.0f), 0, 12);
     return 0;
 }
 
-s16 *func_150D8590(s16 *arg0, s32 arg1) {
-    arg0[0] = 0x42;
-    arg0[1] = 0;
-    return arg0 + 2;
+/* Writes the two-halfword command { 0x42, 0 } and returns the position after it. */
+s16 *func_150D8590(s16 *cmd, s32 arg1) {
+    cmd[0] = 0x42;
+    cmd[1] = 0;
+    return cmd + 2;
 }
 
 typedef struct {
