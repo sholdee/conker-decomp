@@ -110,55 +110,55 @@ void func_151BFC40(ImpactFxConfig *config, f32 *scale) {
     config->unk50 = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
-void func_151C0418(vertex *pos, u8 arg1, s32 arg2);
-void func_151C04F8(vertex *pos, u8 arg1, s32 arg2);
-void func_151C05A4(vertex *pos, u8 arg1, s32 arg2);
-void func_151C05F0(vertex *pos, u8 arg1, s32 arg2);
+void func_151C0418(vertex *pos, u8 fxOwner, s32 fxList);
+void func_151C04F8(vertex *pos, u8 fxOwner, s32 fxList);
+void func_151C05A4(vertex *pos, u8 fxOwner, s32 fxList);
+void func_151C05F0(vertex *pos, u8 fxOwner, s32 fxList);
 void func_1514FB98(ImpactFx *, u8, s32);
 void func_1514FBFC(SurfaceImpactFx *, u8, s32);
 void func_1514FCE8(DebrisFx *, u8, s32);
 void func_1504715C(f32 *, s32);
 s32 func_15046C80(vertex *, s32, f32, f32 *);
-void func_151C0360(void *surface, vertex *pos, u8 arg2, s32 arg3);
-void func_151C0644(vertex *pos, u8 arg1, s32 arg2);
+void func_151C0360(void *surface, vertex *pos, u8 fxOwner, s32 fxList);
+void func_151C0644(vertex *pos, u8 fxOwner, s32 fxList);
 s32 func_15144E80(HitSurface *, vertex *, vertex *, vertex *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
-void func_151BFDA0(vertex *pos, vertex *dir, u8 withParticles, u8 arg3, s32 arg4) {
+void func_151BFDA0(vertex *pos, vertex *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     ImpactFx fx;
 
-    func_151C0418(pos, arg3, arg4);
-    func_151C04F8(pos, arg3, arg4);
-    func_151C05A4(pos, arg3, arg4);
-    func_151C05F0(pos, arg3, arg4);
+    func_151C0418(pos, fxOwner, fxList);
+    func_151C04F8(pos, fxOwner, fxList);
+    func_151C05A4(pos, fxOwner, fxList);
+    func_151C05F0(pos, fxOwner, fxList);
     if (withParticles) {
         fx.vel.x = -dir->x;
         fx.vel.y = -dir->y;
         fx.vel.z = -dir->z;
         func_151BFC40(&fx.config, &fx.scale);
         fx.config.pos = *pos;
-        func_1514FB98(&fx, arg3, arg4);
+        func_1514FB98(&fx, fxOwner, fxList);
     }
 }
 
 /* Bullet hit against a collision surface (or none). */
-void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticles, u8 arg4, s32 arg5) {
+void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     vertex v0;
     vertex v1;
     vertex v2;
 
-    // matching: taking the addresses keeps arg4/arg5 in their stack slots (reloaded at each use)
-    func_151C0418(pos, *(u8 *)&arg4, *(s32 *)&arg5);
-    func_151C04F8(pos, arg4, arg5);
-    func_151C05A4(pos, arg4, arg5);
-    func_151C05F0(pos, arg4, arg5);
+    // matching: taking the addresses keeps fxOwner/fxList in their stack slots (reloaded at each use)
+    func_151C0418(pos, *(u8 *)&fxOwner, *(s32 *)&fxList);
+    func_151C04F8(pos, fxOwner, fxList);
+    func_151C05A4(pos, fxOwner, fxList);
+    func_151C05F0(pos, fxOwner, fxList);
     if (surface != NULL && withParticles) {
         if (func_15144E80(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
-            func_151C0644(pos, arg4, arg5);
+            func_151C0644(pos, fxOwner, fxList);
         }
     }
     if (surface != NULL && withParticles) {
-        func_151C0360(surface, pos, arg4, arg5);
+        func_151C0360(surface, pos, fxOwner, fxList);
     }
     if (withParticles) {
         if (surface != NULL) {
@@ -170,7 +170,7 @@ void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticl
             fx.surface = *surface;
             fx.config.pos = *pos;
             func_151BFC40(&fx.config, &fx.scale);
-            func_1514FBFC(&fx, arg4, arg5);
+            func_1514FBFC(&fx, fxOwner, fxList);
         } else {
             ImpactFx fx;
 
@@ -179,22 +179,22 @@ void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticl
             fx.vel.z = -dir->z;
             func_151BFC40(&fx.config, &fx.scale);
             fx.config.pos = *pos;
-            func_1514FB98(&fx, arg4, arg5);
+            func_1514FB98(&fx, fxOwner, fxList);
         }
     }
 }
 
 /* Bullet hit on an object: sparks and debris at pos, plus a ground mark below it if hitObj is set. */
-void func_151C0098(vertex *pos, s32 hitObj, u8 withParticles, u8 arg3, s32 arg4) {
+void func_151C0098(vertex *pos, s32 hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
     DebrisFx fx;
     vertex probe;
     f32 floor[9];
     vertex markPos;
 
-    func_151C0418(pos, arg3, arg4);
-    func_151C04F8(pos, arg3, arg4);
-    func_151C05A4(pos, arg3, arg4);
-    func_151C05F0(pos, arg3, arg4);
+    func_151C0418(pos, fxOwner, fxList);
+    func_151C04F8(pos, fxOwner, fxList);
+    func_151C05A4(pos, fxOwner, fxList);
+    func_151C05F0(pos, fxOwner, fxList);
 
     // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
     if (*(u8 *)&withParticles) {
@@ -224,7 +224,7 @@ void func_151C0098(vertex *pos, s32 hitObj, u8 withParticles, u8 arg3, s32 arg4)
         fx.unk54 = 12;
         fx.unk56 = 20;
         fx.unk58 = 0;
-        func_1514FCE8(&fx, arg3, arg4);
+        func_1514FCE8(&fx, fxOwner, fxList);
     }
 
     if (withParticles && hitObj != 0) {
@@ -236,8 +236,8 @@ void func_151C0098(vertex *pos, s32 hitObj, u8 withParticles, u8 arg3, s32 arg4)
             markPos.x = probe.x;
             markPos.y = floor[0];
             markPos.z = probe.z;
-            func_151C0360(&floor[1], &markPos, arg3, arg4);
-            func_151C0644(pos, arg3, arg4);
+            func_151C0360(&floor[1], &markPos, fxOwner, fxList);
+            func_151C0644(pos, fxOwner, fxList);
         }
     }
 }
@@ -265,7 +265,7 @@ s32 func_151C02E4(struct127 *obj, struct127 *self, s32 ignoreCount, struct127 **
 
 void func_150E7FEC(f32, s32, void *, vertex *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151C0360(void *surface, vertex *pos, u8 arg2, s32 arg3) {
+void func_151C0360(void *surface, vertex *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
     f32 rand;
@@ -275,12 +275,12 @@ void func_151C0360(void *surface, vertex *pos, u8 arg2, s32 arg3) {
     shade.w = func_150ADA20();
     duration = func_150ADA20();
     func_150E7FEC(rand * 75.0f + 75.0f, (u8)(shade.w % 56 + 200), surface, pos,
-                  duration % 205 + 299, 1, 1, 0, 0, 0, arg2, 0);
+                  duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_151C0418(vertex *pos, u8 arg1, s32 arg2) {
+void func_151C0418(vertex *pos, u8 fxOwner, s32 fxList) {
     Header header;
     Header2 header2;
 
@@ -293,10 +293,10 @@ void func_151C0418(vertex *pos, u8 arg1, s32 arg2) {
     header2.unk4 = pos->y;
     header2.unk8 = pos->z;
 
-    func_151602C0(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
-void func_151C04F8(vertex *pos, u8 arg1, s32 arg2) {
+void func_151C04F8(vertex *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { f32 f; f64 align; } rand;
     u32 shade;
@@ -304,23 +304,23 @@ void func_151C04F8(vertex *pos, u8 arg1, s32 arg2) {
     rand.f = func_150ADA68();
     shade = func_150ADA20();
     // 0x3F974EB9 is 1.18209f, passed in a GPR as its bit pattern
-    func_151541B8(pos, rand.f * 4.0f + 14.0f, 0x3F974EB9, (f32)(shade % 56 + 200), 0.0f, arg1, arg2);
+    func_151541B8(pos, rand.f * 4.0f + 14.0f, 0x3F974EB9, (f32)(shade % 56 + 200), 0.0f, fxOwner, fxList);
 }
 
 void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
 
-void func_151C05A4(vertex *pos, u8 arg1, s32 arg2) {
-    func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, arg1, arg2);
+void func_151C05A4(vertex *pos, u8 fxOwner, s32 fxList) {
+    func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
 
-void func_151C05F0(vertex *pos, u8 arg1, s32 arg2) {
-    func_151D5404((struct17 *)pos, 800.0f, 2000.0f, 0.0005f, 15, 20, arg1, arg2);
+void func_151C05F0(vertex *pos, u8 fxOwner, s32 fxList) {
+    func_151D5404((struct17 *)pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
 void func_150E83AC(vertex *, s16, u8, s32);
 
-void func_151C0644(vertex *pos, u8 arg1, s32 arg2) {
-    func_150E83AC(pos, func_150ADA20() % 62 + 120, arg1, arg2);
+void func_151C0644(vertex *pos, u8 fxOwner, s32 fxList) {
+    func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
 /* A world-space 4x4 float matrix; struct127.unk1D4 points at an array of them (one per bone). */
@@ -415,9 +415,9 @@ typedef struct {
 /* A bullet object, spawned by func_151C0698 and updated by func_151C1180. */
 typedef struct {
     /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
+    /* 0x001 */ u8 fxList;
     /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
+    /* 0x00C */ u8 fxOwner;
     /* 0x00D */ u8 padD[0x2B];
     /* 0x038 */ vertex pos;
     /* 0x044 */ vertex vel;
@@ -477,14 +477,14 @@ void func_15102B38(struct127 *, s32, vertex *, vertex *, f32 *, s32, s32, f32,
                    vertex *, s32, s32, s32, u8, s32);
 void func_15103254(s16, u8, f32, vertex *, s32, u8, s32);
 void func_151C1798(struct127 *obj, vertex *pos);
-void func_151C1860(vertex *pos, u8 arg1, s32 arg2);
+void func_151C1860(vertex *pos, u8 fxOwner, s32 fxList);
 s32 func_151C196C(RayHit *ray, vertex *start, vertex *dir, vertex *aimPos, vertex *aimDir,
                   struct127 *shooter, IgnoreList *ignore, vertex *passPos, f32 *passDist,
                   PassHit *pass, s32 mode);
 s32 func_151C110C();
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
-void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 impactType, u8 arg4, s32 arg5) {
+void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
     RayHit ray;
     f32 passDist;
     vertex passPos;
@@ -520,12 +520,12 @@ void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 
         obj = shooter->camera;
         if (obj != NULL) {
             if (shooter->unk65 != 0) {
-lbl1:
+lbl1: // matching: an unused label splits IDO's basic block here (register choice)
                 pos.x = src->x;
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
             } else if (((AimState *)shooter->unk31C)->aiming != 0) {
-                extern u8 D_800BE616;
+                extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
                 angle = func_15144AA8(((struct108 *)obj)->unk23D, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
@@ -548,7 +548,7 @@ lbl1:
     }
 
     if ((shooter->unk31C != NULL && ((AimState *)shooter->unk31C)->aiming != 0) || aimer != NULL) {
-        extern u8 D_800BE616;
+        extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
         who = (aimer != NULL) ? aimer : shooter;
 
@@ -575,7 +575,7 @@ lbl1:
     if (func_151C196C(&ray, &pos, useAim ? NULL : &dir, useAim ? &aimPos : NULL,
                       useAim ? &aimDir : NULL, shooter, ignore, &passPos, &passDist, &pass,
                       mode) != 0) {
-        extern u8 D_800BE616;
+        extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
         state.mode = mode;
         state.trail = NULL;
@@ -629,7 +629,7 @@ lbl1:
         desc.unk70 = 0;
         desc.unk72 = 1;
         desc.unk74 = 255;
-        obj = func_15132A4C(&desc, 3, 0xFF, sizeof(BulletState), arg4, arg5);
+        obj = func_15132A4C(&desc, 3, 0xFF, sizeof(BulletState), fxOwner, fxList);
         if (obj != NULL) {
             bulletState = &((Bullet *)obj)->state;
             memcpy(bulletState, &state, sizeof(BulletState));
@@ -640,15 +640,15 @@ lbl1:
             header2.unk0 = pos.x;
             header2.unk4 = pos.y;
             header2.unk8 = pos.z;
-            bulletState->trail = (TrailFx *)func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            bulletState->trail = (TrailFx *)func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (s32)func_151C110C, obj, 0, 4, 0);
             bulletState->unk88 = func_151B8400(obj);
             if (D_80082FA0 < 2 && D_8008FD8C < 4) {
-                bulletState->unk8C = func_151B8668(obj, arg4, arg5);
+                bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
             } else {
-                extern u8 D_800BE616;
+                extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
                 bulletState->unk8C = NULL;
             }
@@ -680,10 +680,10 @@ lbl1:
                 func_15145EA4(in, out, &((BoneMtx *)shooter->unk1D4)[9], 2);
                 func_15102B38(shooter, 9, &a, &c, scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
-                              &outA, 0xFF, 0, -1, arg4, arg5);
+                              &outA, 0xFF, 0, -1, fxOwner, fxList);
                 func_15103254(func_150ADA20() % 3 + 8, func_150ADA20() % 56 + 200,
-                              func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, arg4, arg5);
-                func_151C1860(&outB, arg4, arg5);
+                              func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, fxOwner, fxList);
+                func_151C1860(&outB, fxOwner, fxList);
             }
         }
     }
@@ -742,19 +742,19 @@ s32 func_151C1180(Bullet *bullet) {
         if (((s32 (*)(vertex *, vertex *, vertex *))D_800E0930)(&bullet->pos, &delta, &hitPos) != 0) {
             func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
             func_151C1654(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->unkC, bullet->unk1);
+            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
             return FALSE;
         }
     }
     if (step) {
-    fence:
+    fence: // matching: an unused label splits IDO's basic block here
         func_15081690(state->owner, bullet->pos.x, bullet->pos.y, bullet->pos.z, delta.x, delta.y, delta.z,
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
             func_15055A2C(1, hit.hitPos.x, hit.hitPos.y, hit.hitPos.z, 0);
             func_151C1654(&hit.hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151C0098(&hit.hitPos, hit.obj, !(state->flags & 1), bullet->unkC, bullet->unk1);
+            func_151C0098(&hit.hitPos, hit.obj, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
             return FALSE;
         }
     }
@@ -765,7 +765,7 @@ s32 func_151C1180(Bullet *bullet) {
         if (state->passTimer > 0.0f) {
             state->passTimer -= D_800BE9A4;
             if (state->passTimer <= 0.0f) {
-                func_151ABE40(&state->passPos, &state->pass, 2, bullet->unkC, bullet->unk1);
+                func_151ABE40(&state->passPos, &state->pass, 2, bullet->fxOwner, bullet->fxList);
             }
         }
     }
@@ -775,14 +775,14 @@ s32 func_151C1180(Bullet *bullet) {
             func_15055A2C(0, state->ray.hitPos.x, state->ray.hitPos.y, state->ray.hitPos.z, 0);
             func_151C1654(&state->ray.hitPos, &state->ray.dir, state->owner, state->impactType, &state->ray.surface);
             func_151BFE84(&state->ray.surface, &state->ray.hitPos, &bullet->vel, !(state->flags & 1),
-                          bullet->unkC, bullet->unk1);
+                          bullet->fxOwner, bullet->fxList);
         }
         return FALSE;
     }
     trail = state->trail;
     if (trail != NULL) {
         trail->unk14[7] = bullet->pos.x;
-        if ((bullet->unk1 && bullet->unk1) && bullet->unk1) {
+        if ((bullet->fxList && bullet->fxList) && bullet->fxList) { // matching: no-op that steers register choice for trail
         }
         trail->unk14[8] = bullet->pos.y;
         trail->unk14[9] = bullet->pos.z;
@@ -895,7 +895,7 @@ void func_151C1814(Bullet *bullet, struct127 **pair, u8 event) {
     }
 }
 
-void func_151C1860(vertex *pos, u8 arg1, s32 arg2) {
+void func_151C1860(vertex *pos, u8 fxOwner, s32 fxList) {
     Header header;
     Header2 header2;
 
@@ -908,7 +908,7 @@ void func_151C1860(vertex *pos, u8 arg1, s32 arg2) {
     header2.unk4 = pos->y;
     header2.unk8 = pos->z;
 
-    func_151602C0(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
 
 /* Target filter callback: func_151C02E4 with the ignore list packed in a struct. */
