@@ -4,7 +4,6 @@
 #define func_150A7CB0 func_150A7CB0_s32
 #include "functions.h"
 #undef func_150A7CB0
-/* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
 #include "variables.h"
 
 #define OBJ_TYPE(obj) ((obj)->kind >> 2)

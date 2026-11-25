@@ -6,10 +6,7 @@
 #include "functions.h"
 #undef func_150ADA20
 u8 func_150ADA20(void);
-// variables.h's D_800D3098 is renamed away so this file can declare it as Ent34 *.
-#define D_800D3098 D_800D3098_header
 #include "variables.h"
-#undef D_800D3098
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 void func_15056B08(Actor *arg0);
@@ -65,17 +62,6 @@ typedef struct Sub9C {
     /* 0x2C */ f32 unk2C;
 } Sub9C;
 
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ u8 padA[6];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[0x20];
-} Ent34;
-extern Ent34 *D_800D3098;
 
 
 
@@ -173,8 +159,8 @@ void func_1504CB98(Actor *actor) {
     s32 padOverridden;
     f32 probeTop;
     s32 mode;
-    Ent34 *climb;
-    Ent34 *climbSpot;
+    TriggerZone *climb;
+    TriggerZone *climbSpot;
     f32 climbTop;
     u8 pad5; // matching: unused; keeps the original stack layout
     f32 animSpeed;
@@ -1043,8 +1029,8 @@ void func_1504CB98(Actor *actor) {
                 actor->unk31C->unk96 -= 1;
                 climbSpeed = 60.0f;
             }
-            actor->unk31C->unk28 = climbSpot->unk0;
-            actor->unk31C->unk2C = climbSpot->unk4;
+            actor->unk31C->unk28 = climbSpot->x;
+            actor->unk31C->unk2C = climbSpot->z;
             actor->unk31C->unk30 = 0xA;
             actor->unk31C->unk31 = 0;
             actor->xz_velocity = 0.0f;
@@ -1053,7 +1039,7 @@ void func_1504CB98(Actor *actor) {
             actor->gravity = 0.0f;
             actor->unk81 = 1;
             actor->unk80 = 1;
-            actor->unk76 = (s32) (climbSpot->unk10 * 182.04445f) - 0x4000;
+            actor->unk76 = (s32) (climbSpot->yaw * 182.04445f) - 0x4000;
             actor->y_velocity = climbSpeed * 0.14f;
             if (actor->unk31C->unk97 != 0) {
                 actor->y_velocity = 0.0f;
@@ -1313,7 +1299,7 @@ void func_1504CB98(Actor *actor) {
                     if (actor->unk31C->unk96 != 0) {
                         climbInput = 60.0f;
                     }
-                    climbTop = (climb->unk2 + climb->unk8);
+                    climbTop = (climb->y + climb->height);
                     animSpeed = (climbInput * 0.025f);
                     actor->unk1CC = actor->y_position;
                     if (actor->unk31C->unk97 != 0) {
@@ -1352,7 +1338,7 @@ void func_1504CB98(Actor *actor) {
                                 actor->y_velocity = 0.0f;
                                 actor->y_position = climbTop;
                             }
-                        } else if (actor->y_position < climb->unk2) {
+                        } else if (actor->y_position < climb->y) {
                             actor->disable_run = 0;
                             actor->unk31C->unk95 = 0;
                             actor->gravity = 4.0f;

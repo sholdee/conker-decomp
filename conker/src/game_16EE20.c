@@ -5,9 +5,7 @@
 #include "functions.h"
 #undef func_15083E90
 Actor *func_15083E90();
-#define D_800D3098 D_800D3098_struct178_view
 #include "variables.h"
-#undef D_800D3098
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern s16 D_800DD1C0;
@@ -1011,27 +1009,7 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
 
 /* File-local shadow of TriggerZone: the shared header types 0x06..0x33 as one u8 blob,
    which cannot express the s16/f32/u8/s32 members this search compares. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8  unk14;
-    /* 0x15 */ u8  unk15;
-    /* 0x16 */ u8  unk16;
-    /* 0x17 */ u8  unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8  unk24[0x10];
-} ObjRec; /* size 0x34 */
 
-/* variables.h declares D_800D3098 as TriggerZone[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
-extern ObjRec *D_800D3098;
 
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
@@ -1039,9 +1017,9 @@ void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
  * Searches D_800D3098[start..end) for a record equal to `key` in the fields selected by `fields`.
  * With bit 0x1000 every selected field must match, otherwise any one of them; the last hit wins.
  */
-ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
+TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
     s32 i;
-    ObjRec *result;
+    TriggerZone *result;
     u16 checked;
     u16 matched;
 
@@ -1054,7 +1032,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
         checked = 0;
         matched = 0;
         if (fields & 1) {
-            if ((key->unk0 == D_800D3098[i].unk0) && (key->unk2 == D_800D3098[i].unk2) && (key->unk4 == D_800D3098[i].unk4)) {
+            if ((key->x == D_800D3098[i].x) && (key->y == D_800D3098[i].y) && (key->z == D_800D3098[i].z)) {
                 checked |= 1;
                 matched |= 1;
             }
@@ -1062,7 +1040,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 1;
         }
         if (fields & 0x2) {
-            if ((key->unk6 == D_800D3098[i].unk6) && (key->unk8 == D_800D3098[i].unk8) && (key->unkA == D_800D3098[i].unkA)) {
+            if ((key->radius == D_800D3098[i].radius) && (key->height == D_800D3098[i].height) && (key->depth == D_800D3098[i].depth)) {
                 checked |= 0x2;
                 matched |= 0x2;
             }
@@ -1070,7 +1048,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x2;
         }
         if (fields & 0x4) {
-            if (key->unkC == D_800D3098[i].unkC) {
+            if (key->pitch == D_800D3098[i].pitch) {
                 checked |= 0x4;
                 matched |= 0x4;
             }
@@ -1078,7 +1056,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x4;
         }
         if (fields & 0x8) {
-            if (key->unk10 == D_800D3098[i].unk10) {
+            if (key->yaw == D_800D3098[i].yaw) {
                 checked |= 0x8;
                 matched |= 0x8;
             }
@@ -1086,7 +1064,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x8;
         }
         if (fields & 0x10) {
-            if (key->unk14 == D_800D3098[i].unk14) {
+            if (key->disabled == D_800D3098[i].disabled) {
                 checked |= 0x10;
                 matched |= 0x10;
             }
@@ -1094,7 +1072,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x10;
         }
         if (fields & 0x20) {
-            if (key->unk15 == (D_800D3098[i].unk15 >> 2)) {
+            if (key->kind == (D_800D3098[i].kind >> 2)) {
                 checked |= 0x20;
                 matched |= 0x20;
             }
@@ -1102,7 +1080,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x20;
         }
         if (fields & 0x40) {
-            if (key->unk16 == D_800D3098[i].unk16) {
+            if (key->flags == D_800D3098[i].flags) {
                 checked |= 0x40;
                 matched |= 0x40;
             }
@@ -1110,7 +1088,7 @@ ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
             checked |= 0x40;
         }
         if (fields & 0x80) {
-            if (key->unk17 == D_800D3098[i].unk17) {
+            if (key->subtype == D_800D3098[i].subtype) {
                 checked |= 0x80;
                 matched |= 0x80;
             }
