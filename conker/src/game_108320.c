@@ -193,8 +193,9 @@ Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
     f32 offsetZ;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, bufferIndex, 0x40, &vertices, &fresh);
+    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
+    // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
         if (fresh) {
             memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
@@ -288,8 +289,9 @@ Vtx_t *func_150DB714(Effect *effect, s16 bufferIndex) {
     LinkedQuad *linked;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, bufferIndex, 0x40, &vertices, &fresh);
+    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
+    // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
     if (vertices != NULL) {
         if (fresh) {
             memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
