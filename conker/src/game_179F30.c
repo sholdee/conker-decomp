@@ -16,16 +16,6 @@ typedef struct Struct1514F5CCArg {
     /* 0x18 */ u8 unk18;
 } Struct1514F5CCArg;
 
-typedef struct HudSpriteState {
-    /* 0x0 */ u8 pad0[0x9];
-    /* 0x9 */ u8 unk9;
-} HudSpriteState;
-
-typedef struct HudSpriteHandle {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ HudSpriteState *state;
-} HudSpriteHandle;
-
 /* Spawn-callback tables (see func_1514D15C). */
 extern void (*D_8008AA70[])(Actor *);
 extern void (*D_8008AACC[])(Actor *);
@@ -1531,13 +1521,14 @@ void func_1514F110(Actor *obj) {
     func_1514F194(obj);
 }
 
-s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
+/* Attachment message handler for a light effect (e.g. func_15160A58's): 13 turns the light on, 14 off. */
+s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
     switch (msg) {
     case 13:
-        target->state->unk9 = 0;
+        target->light->disabled = 0;
         break;
     case 14:
-        target->state->unk9 = 1;
+        target->light->disabled = 1;
         break;
     default:
         return func_1514E89C((ToggleTarget *)target, msg, arg);
