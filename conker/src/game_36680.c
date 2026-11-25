@@ -9,12 +9,14 @@ void func_1515D4D4();
 #define D_800BE4A0 D_800BE4A0_header
 #define D_800DDA90 D_800DDA90_header
 #define D_800B0DF0 D_800B0DF0_header
+#define D_800DBE5C D_800DBE5C_header
 #include "variables.h"
 #undef D_800D3098
 #undef D_800DCD30
 #undef D_800BE4A0
 #undef D_800DDA90
 #undef D_800B0DF0
+#undef D_800DBE5C
 
 extern u8 D_800DCD30[4][3];
 
@@ -641,7 +643,7 @@ void func_1500AC14(void) {
     s32 size;
     u32 length;
 
-    for (i = 0; i != 15; i++) {
+    for (i = 0; i < 15; i++) {
         D_800DDA90[i].devAddr = 0;
         D_800DDA90[i].buf = 0;
         D_800DDA90[i].size = 0;
@@ -986,6 +988,7 @@ void func_1500BE40(s32 arg0) {
     D_800DDD0C = 110;
 }
 
+/** Resets the particle counters and slot bitmasks. */
 void func_1500BE68(void) {
     D_800DDD1C = 0;
     D_8008CEB0 = 0;
@@ -994,42 +997,41 @@ void func_1500BE68(void) {
     func_1500BE40(0);
 }
 
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-} Struct8008CF00;
-
 typedef s32 (*ParticleEmitFunc)(s16, u8, s32, s32, s32, s16 **);
 
-typedef struct {
-    ParticleEmitFunc unk0;
+typedef struct Game36680Emitter {
+    ParticleEmitFunc emit;
     s32 unk4;
     s32 unk8;
-} Struct8008CEB8;
+} Game36680Emitter;
 
-extern Struct8008CF00 D_8008CF00[][8];
-extern Struct8008CEB8 D_8008CEB8[];
+typedef struct Game36680EmitterChoice {
+    s16 emitter; // index into D_8008CEB8
+    s16 count;   // first argument of the emit function
+} Game36680EmitterChoice;
+
+extern Game36680EmitterChoice D_8008CF00[][8];
+extern Game36680Emitter D_8008CEB8[];
 extern s32 D_8008CEB4;
-extern u16 D_800BE478[];
-extern u8 D_800DDC80[];
+extern u32 *D_800DBE5C;
 extern u8 D_800DDC10[];
-extern s16 D_800DDC90[];
+extern s16 D_800DDC90[60];
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1500AD84(s32, s32, s32);
 extern void func_1510F800(s32);
 extern void func_1517B89C(s32, s32);
 
+/**
+ * Builds the level's particles: sets up the 15 particle slots, then for every level triangle whose
+ * packed word names a slot, runs that slot's emitter for the triangle's kind.
+ */
 void func_1500BEC0(void) {
     s32 i;
-    s32 grp;
-    u32 val;
-    s32 sub;
+    s32 slot;
+    u32 packed;
     s32 kind;
-    u16 *pair;
 
     func_1500BE68();
-    if (*(u16 *)((u8 *)D_800B0DF0 + 0x18) == 0) {
+    if (D_800B0DF0->maxParticles == 0) {
         return;
     }
     if ((D_800BE9F0 == 6) && (D_80038080 == 0)) {
@@ -1039,24 +1041,25 @@ void func_1500BEC0(void) {
         return;
     }
 
-    for (i = 0, pair = (u16 *)&D_800BE4A0; i < 15; i++, pair += 2) {
-        func_1500AD84(i, pair[0], pair[1]);
+    for (i = 0; i < 15; i++) {
+        func_1500AD84(i, D_800BE4A0[i].id, D_800BE4A0[i].flags);
     }
 
-    D_800DDD18 = (struct Struct800DDD18 *)allocate_memory(*(u16 *)((u8 *)D_800B0DF0 + 0x18) * 14, 1, 2, 0);
+    D_800DDD18 = allocate_memory(D_800B0DF0->maxParticles * sizeof(Game36680Particle), 1, 2, 0);
     func_1510F800(0);
 
-    if (*(u32 **)&D_800DBE5C != NULL) {
+    if (D_800DBE5C != NULL) {
         for (i = 0; i < D_800DBE4C; i++) {
-            val = (*(u32 **)&D_800DBE5C)[i];
-            if (val & 0xF0000) {
-                sub = ((val >> 16) & 0xF) - 1;
-                kind = (val >> 20) & 7;
-                D_800DDD20 = D_8008CEB8[D_8008CF00[D_800DDC80[sub]][kind].unk0].unk0(
-                    D_8008CF00[D_800DDC80[sub]][kind].unk2, kind, sub,
-                    ((val >> 5) & 3) ^ 3, D_800DDD20,
-                    (s16 **)(D_800DBE3C + i * 12));
-                D_800BE478[sub]++;
+            packed = D_800DBE5C[i];
+            if (packed & 0xF0000) {
+                slot = ((packed >> 16) & 0xF) - 1;
+                kind = (packed >> 20) & 7;
+                // matching: D_800DBE3C (s32) holds the address of the 12-byte triangles (3 vertex
+                // pointers each); indexing it as a typed array swaps the operands of an addu
+                D_800DDD20 = D_8008CEB8[D_8008CF00[D_800DDC80[slot]][kind].emitter].emit(
+                    D_8008CF00[D_800DDC80[slot]][kind].count, kind, slot,
+                    ((packed >> 5) & 3) ^ 3, D_800DDD20, (s16 **)(D_800DBE3C + i * 12));
+                D_800BE478[slot]++;
             }
         }
     }
@@ -1068,13 +1071,13 @@ void func_1500BEC0(void) {
     D_8008CEB4 = 0;
     func_1517B89C(0, D_800DDD20 - 1);
 
-    for (i = 0; i != 60; i++) {
-        grp = i >> 2;
-        if (D_800DDBD0[grp] != 0) {
-            D_800DDC90[i] = (func_151EF610() % D_800DDBD0[grp]) << 8;
+    for (i = 0; i < 60; i++) {
+        slot = i >> 2;
+        if (D_800DDBD0[slot] != 0) {
+            D_800DDC90[i] = (func_151EF610() % D_800DDBD0[slot]) << 8;
         } else {
             D_800DDC90[i] = 0;
         }
-        D_800DDC10[grp] = func_151EF610();
+        D_800DDC10[slot] = func_151EF610();
     }
 }
