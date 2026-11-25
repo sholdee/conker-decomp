@@ -79,15 +79,12 @@ void func_1518E4F8(Emitter *emitter) {
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
 void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes) {
-    s32 pick;
-
     *flip = 2;
     if (func_150ADA20() & 1) {
         *flip |= 1;
     }
 
-    pick = func_150ADA20() & 1;
-    switch (pick) {
+    switch (func_150ADA20() & 1) {
     case 0:
         *texture = 0x13;
         break;
@@ -105,18 +102,11 @@ void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 
 /* Particle spawn callback: texture 0x16 tinted with palette 3 or 4 at random. */
 void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes) {
-    s32 palette;
-
     if (func_150ADA20() & 1) {
         *flip |= 1;
     }
     *texture = 0x16;
-    if (func_150ADA20() & 1) {
-        palette = 3;
-    } else {
-        palette = 4;
-    }
-    func_151429E0(palette, r, g, b);
+    func_151429E0((func_150ADA20() & 1) ? 3 : 4, r, g, b);
     *alpha = 200;
     *renderModes = 0x401;
 }
@@ -159,6 +149,7 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
 
     func_151D5D60(p->vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
     ret = vtx;
+    // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {
         if (fresh) {
             memcpy(p->vtxBuffers[vp], p->vtxTemplate, sizeof(p->vtxTemplate));
@@ -176,16 +167,16 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
         negative = FALSE;
     }
     angle = sqrtf(speed) * p->stretch;
-    if (1.570796371f < angle) { // matching: IDO keeps the operand order of the float compare
+    if (angle > 1.570796371f) {
         angle = 1.570796371f;
     }
     if (negative) {
         angle = -angle;
     }
     {
-        u16 angle256;
+        u8 angle256;
 
-        angle256 = (u8)(angle * 40.74366379f); // radians to 256ths of a turn
+        angle256 = angle * 40.74366379f; // radians to 256ths of a turn
         sinAngle = func_15048A40(angle256);
         cosAngle = func_150489B0(angle256);
     }
