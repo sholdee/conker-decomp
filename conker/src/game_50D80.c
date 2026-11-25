@@ -507,8 +507,8 @@ extern void func_150836CC(struct127 *, s32);
 extern s32 func_15083FB0(s32);
 extern void func_150B648C(u8);
 extern void func_150B7220(s32, s32, s32, s32);
-extern void func_150C5C74(s32);
-extern void func_150C5C9C(s32);
+extern void func_150C5C74(struct127 *);
+extern void func_150C5C9C(struct127 *);
 extern void func_150C851C(s32);
 extern void func_150E0300(void);
 extern void func_150F5340(void);
@@ -973,9 +973,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x46) {
             if (event->unk4 != 0) {
-                func_150C5C74((s32) obj);
+                func_150C5C74(obj);
             } else {
-                func_150C5C9C((s32) obj);
+                func_150C5C9C(obj);
             }
         } else if (event->value == 0x25) {
             if (event->unk4 != 0) {
@@ -2184,7 +2184,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 sel = c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, (u8 *)obj->unk1D4 + (bones[event->unk5] << 6));
+                        func_15143134(sel, out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
                         func_151C329C(out, sceneTag, 1);
                     }
                     break;
@@ -2271,7 +2271,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[event->unk5], out, (u8 *)obj->unk1D4 + (bones[event->unk5] << 6));
+                        func_15143134(offs[event->unk5], out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
                         func_15131EE4(out, 6.990000248f, sceneTag, 0);
                     }
                     break;
