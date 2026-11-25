@@ -2,144 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-void func_150B6C90(void);
-void func_150B6D34(void);
-void func_150B6D78(void);
-void func_150B7484(void);
-void func_150B7560(void);
-void func_150B765C(void);
-void func_150B77A8(void);
-void func_150B768C(void);
-void func_150B791C(void);
-void func_150B6BC0(s32 arg0);
-
-extern s32 *D_800D9898[];
-extern s32 *D_800D98A4[];
-void func_150B6D34(void);
-
-extern s32 *D_800D9894;
-extern s32 *D_800D98C0[];
-void func_150B6D78(void);
-void func_150B6DFC(void *arg0);
-
-typedef struct {
-    u8 pad0[0x18];
-    s32 unk18;
-    u8 pad1C[0x10];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x11];
-    u8 unk45;
-} Struct150B709C;
-void func_150B709C(Struct150B709C *arg0);
-
-extern s32 D_800BE9E4;
-void func_150B71A8(void *arg0);
-
-
-typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 pad3A[2];
-} Struct150B7220;
-
-extern u8 D_80091924;
-s32 func_15169900(void *arg0, s32 arg1);
-void func_150B7220(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-
-typedef struct {
-    char pad18[0x18];
-    s16 unk18;
-    s16 unk1A;
-    s32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    char pad26[6];
-    f32 unk2C;
-    f32 unk30;
-} Struct73F0;
-void func_150B73F0(Struct73F0 *a0);
-
-typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ void *unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  pad1A[0x2];
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ u8  unk30;
-    /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  unk32;
-    /* 0x33 */ u8  unk33;
-    /* 0x34 */ u8  unk34;
-    /* 0x35 */ u8  unk35;
-    /* 0x36 */ u8  unk36;
-    /* 0x37 */ u8  unk37;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ u8  unk39;
-} struct_7484;
-
-extern u8 D_800918DC;
-extern u8 D_800918E8;
-extern u8 D_800918F4;
-extern u8 D_80091900;
-struct102 *func_15169968(struct_7484 *);
-void func_150B7484(void);
-void func_150B7560(void);
-
-void func_150B76BC(s32, s32);
-void func_150B765C(void);
-void func_150B768C(void);
-void func_150B76BC(s32 arg0, s32 arg1);
-void func_150B77A8(void);
-
-extern u8 D_8009190C;
-void func_150B791C(void);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3_150B85C0;
-
 typedef struct {
     f32 x;
     f32 y;
@@ -250,7 +112,7 @@ void func_15142314(s32, s32, f32 *);
 void func_15143134(f32 *, f32 *, s32);
 void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
 void func_150B82D0(Vec3_150B7B40 *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(Vec3_150B85C0 *, f32 *, f32 *, u8, s32);
+void func_150B85C0(vertex *, f32 *, f32 *, u8, s32);
 void func_1504715C(Floor150B7B40 *, struct127 *);
 s32 func_15046C80(Vec3_150B7B40 *, s32, f32, Floor150B7B40 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
@@ -323,7 +185,7 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             ratio = 1.0f;
         }
         func_150B82D0(&pos, &h, &r, &ratio, arg1, arg2);
-        func_150B85C0((Vec3_150B85C0 *)&pos, &h, &r, arg1, arg2);
+        func_150B85C0((vertex *)&pos, &h, &r, arg1, arg2);
         {
             Floor150B7B40 floor;
             Vec3_150B7B40 ray;
@@ -494,188 +356,142 @@ void func_150B82D0(Vec3_150B7B40 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4
 }
 
 
+/* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_1368C0.c). */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec3_150B85C0 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Fx150B85C0;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex unk3C;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 pad66[0x70 - 0x66];
+} ParticleSpawn; /* size 0x70 */
 
-extern void *func_15130374(void *, u8, s32, u8, s32);
+/* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 extra;
+} SpawnedParticle;
 
-void func_150B85C0(Vec3_150B85C0 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
-    Fx150B85C0 sp28;
+extern SpawnedParticle *func_15130374(ParticleSpawn *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
-    sp28.unk1D = 0x29;
-    sp28.unk08 = 0xE03;
-    sp28.unk00 = 0x200005;
-    sp28.unk04 = 0;
-    sp28.unk0A = (func_150ADA20() % 11U) + 0x23;
-    sp28.unk0C = 0;
-    sp28.unk10 = 0;
-    sp28.unk18 = 0xB0;
-    sp28.unk19 = 0xA0;
-    sp28.unk1A = 0x2A;
-    sp28.unk14 = 0x40;
-    sp28.unk15 = 0xB;
-    sp28.unk16 = 0x6A;
-    sp28.unk17 = 0xFF;
-    sp28.unk1B = (func_150ADA20() % 51U) + 0x64;
-    sp28.unk1C = 0xFF;
-    sp28.unk60 = 3;
-    sp28.unk61 = 3;
-    sp28.unk28 = *arg2 * 20.0f;
-    sp28.unk2C = *arg1 * 20.0f;
-    sp28.unk30 = *arg0;
-    sp28.unk3C = 0.0f;
-    sp28.unk40 = 0.0f;
-    sp28.unk44 = 0.0f;
-    sp28.unk48 = 0.0f;
-    sp28.unk4C = 0.0f;
-    sp28.unk50 = 0.0f;
-    sp28.unk54 = 0.0f;
-    sp28.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE01) | 0x4000 | 0x8000;
-    sp28.unk62 = -1;
-    sp28.unk63 = -1;
-    sp28.unk1E = 0x19;
-    sp28.unk20 = 0xA;
-    sp28.unk22 = 0x28;
-    sp28.unk64 = -1;
-    sp28.unk65 = 0;
-    sp28.unk24 = 1.009518027f;
-    func_15130374(&sp28, 1, 0, arg3, arg4);
+/* Spawns one dust-coloured particle at `center`, sized from `radius` and `height`. */
+void func_150B85C0(vertex *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
+    ParticleSpawn spawn;
+
+    spawn.unk1D = 0x29;
+    spawn.unk8 = 0xE03;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.lifetime = (func_150ADA20() % 11U) + 35;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.color1[0] = 0xB0;
+    spawn.color1[1] = 0xA0;
+    spawn.color1[2] = 0x2A;
+    spawn.color0[0] = 0x40;
+    spawn.color0[1] = 0x0B;
+    spawn.color0[2] = 0x6A;
+    spawn.color0[3] = 0xFF;
+    spawn.color1[3] = (func_150ADA20() % 51U) + 100;
+    spawn.unk1C = 0xFF;
+    spawn.unk60 = 3;
+    spawn.unk61 = 3;
+    spawn.width = *radius * 20.0f;
+    spawn.height = *height * 20.0f;
+    spawn.pos = *center;
+    spawn.unk3C.x = 0.0f;
+    spawn.unk3C.y = 0.0f;
+    spawn.unk3C.z = 0.0f;
+    spawn.vel.x = 0.0f;
+    spawn.vel.y = 0.0f;
+    spawn.vel.z = 0.0f;
+    spawn.unk54 = 0.0f;
+    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE01) | 0x4000 | 0x8000;
+    spawn.unk62 = -1;
+    spawn.unk63 = -1;
+    spawn.fadeStart = 25;
+    spawn.fadeRate = 10;
+    spawn.unk22 = 40;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0;
+    spawn.unk24 = 1.009518027f;
+    func_15130374(&spawn, 1, 0, arg3, arg4);
 }
 
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[0x9];
-} Fx150B879C;
-
-extern void func_15143874(s16, f32, f32 *, f32 *);
+extern void func_15143874(s16 angle, f32 speed, f32 *outX, f32 *outZ);
 void *memcpy(void *, const void *, u32);
 
-s32 func_150B879C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    f32 spA4;
-    void *ret;
-    Fx150B879C sp30;
+/* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */
+s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9,
+                  s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    f32 extra;
+    SpawnedParticle *particle;
+    ParticleSpawn spawn;
 
-    sp30.unk1D = 0x29;
-    sp30.unk08 = 0xE03;
-    sp30.unk00 = 0x200005;
-    sp30.unk04 = 0;
-    spA4 = 0.9172409773f;
-    sp30.unk0A = (func_150ADA20() & 0xF) + 0x19;
-    sp30.unk0C = 0;
-    sp30.unk10 = 0;
-    sp30.unk18 = 0xB0;
-    sp30.unk19 = 0xA0;
-    sp30.unk1A = 0x2A;
-    sp30.unk14 = 0x40;
-    sp30.unk15 = 0xB;
-    sp30.unk16 = 0x6A;
-    sp30.unk17 = 0xFF;
-    sp30.unk1B = (func_150ADA20() % 71U) + 0x3C;
-    sp30.unk1C = 0xFF;
-    sp30.unk60 = 3;
-    sp30.unk61 = 3;
-    sp30.unk28 = sp30.unk2C = ((func_150ADA68() * 15738.0f) + 24699.0f) * 0.01f;
-    sp30.unk30 = arg2;
-    sp30.unk34 = arg3;
-    sp30.unk38 = arg4;
-    sp30.unk3C = 0.0f;
-    sp30.unk40 = 0.0f;
-    sp30.unk44 = 0.0f;
-    func_15143874(arg8, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &sp30.unk48, &sp30.unk50);
-    sp30.unk4C = 0.0f;
-    sp30.unk54 = 0.0f;
-    sp30.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;
-    sp30.unk62 = 0xA;
-    sp30.unk63 = -1;
-    sp30.unk1E = 0x1C;
-    sp30.unk20 = 9;
-    sp30.unk22 = 0x19;
-    sp30.unk64 = -1;
-    sp30.unk65 = 0;
-    sp30.unk24 = 1.033332944f;
-    ret = func_15130374(&sp30, 1, 4, argE, 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, &spA4, 4);
+    spawn.unk1D = 0x29;
+    spawn.unk8 = 0xE03;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    extra = 0.9172409773f;
+    spawn.lifetime = (func_150ADA20() & 0xF) + 25;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.color1[0] = 0xB0;
+    spawn.color1[1] = 0xA0;
+    spawn.color1[2] = 0x2A;
+    spawn.color0[0] = 0x40;
+    spawn.color0[1] = 0x0B;
+    spawn.color0[2] = 0x6A;
+    spawn.color0[3] = 0xFF;
+    spawn.color1[3] = (func_150ADA20() % 71U) + 60;
+    spawn.unk1C = 0xFF;
+    spawn.unk60 = 3;
+    spawn.unk61 = 3;
+    spawn.width = spawn.height = ((func_150ADA68() * 15738.0f) + 24699.0f) * 0.01f;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.pos.z = z;
+    spawn.unk3C.x = 0.0f;
+    spawn.unk3C.y = 0.0f;
+    spawn.unk3C.z = 0.0f;
+    func_15143874(angle, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
+    spawn.vel.y = 0.0f;
+    spawn.unk54 = 0.0f;
+    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;
+    spawn.unk62 = 10;
+    spawn.unk63 = -1;
+    spawn.fadeStart = 28;
+    spawn.fadeRate = 9;
+    spawn.unk22 = 25;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0;
+    spawn.unk24 = 1.033332944f;
+    particle = func_15130374(&spawn, 1, sizeof(extra), argE, 1);
+    if (particle != NULL) {
+        memcpy(&particle->extra, &extra, sizeof(extra));
     }
     return 1;
 }
