@@ -86,7 +86,12 @@ Functions proven hand-written live as committed `conker/src/<name>.s` files, fro
 a function becomes hasm only if (a) a hand-written SDK `.s` reproduces its bytes exactly, or (b) it contains an
 instruction IDO 5.3 -mips2 cannot emit (cop0/TLB/cache ops, 64-bit `d*`/`ld`/`sd`, trapping
 `add`/`addi`/`sub`), or (c) a dataflow check shows it reads a register that is neither an ABI input nor
-written first. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions. The
+written first. Two further rules (2026-11-24) were checked against IDO's own output, 5,746 matched C
+functions, with zero occurrences: (d) an opcode-2 `j`, or a branch that leaves the function
+(IDO uses `b` for local jumps and never tail-calls); (e) a bare `cvt.w.s`/`cvt.w.d` with no `ctc1` in the
+function. GCC output is ruled out because GCC's `move` assembles to `addu rd,rs,zero` (9 in all compiled C,
+0 in these functions). Patterns that do appear in compiled C are not proof: `ra` saved above the frame,
+a second sp allocation, `addiu r,zero,0`. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions, and a second pass converted 17 more (rules d/e) plus func_150ADAF0. The
 unproven ones stay GLOBAL_ASM stubs or plain `asm` segments. They are listed in tools/skip.txt and kept
 out of fleets.
 Layout notes:
