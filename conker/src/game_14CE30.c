@@ -99,6 +99,7 @@ void func_1511F990(Prop *prop, s32 mode) {
                 }
             }
         } else if (motion == PROP_RETURNING || motion == PROP_MOVING) {
+            /* pass the motion on to the rest of the group, skipping props already at the end it heads for */
             for (i = 0; i < D_800DBFC0; i++) {
                 if (i == index || group != D_800DBFC8[i].group) {
                     continue;
