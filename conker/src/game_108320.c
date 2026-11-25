@@ -89,7 +89,6 @@ extern f32 D_8008893C[];
 extern u8 D_80088940[];
 extern f32 D_80088944[];
 extern f32 D_80088948[];
-extern f32 D_800A0BF0; /* 256.0f / 360.0f, degrees to angle units */
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
 void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
@@ -154,34 +153,30 @@ s32 func_150DB114(Effect *effect) {
     BeamMotion *beam;
     f32 damping;
     s16 alpha;
-    f32 max;
-    f32 min;
 
-    max = 1.2f;
-    min = 0.8f;
-    damping = effect->u.beam.damping;
-    alpha = effect->alpha;
     beam = &effect->u.beam;
+    damping = beam->damping;
+    alpha = effect->alpha;
     beam->vel.x *= damping;
     beam->vel.y *= damping;
     beam->vel.z *= damping;
     effect->pos.x += beam->vel.x * D_800BE9A4;
     effect->pos.y += beam->vel.y * D_800BE9A4;
     effect->pos.z += beam->vel.z * D_800BE9A4;
-    effect->u.beam.scaleX += effect->u.beam.scaleXRate * D_800BE9A4;
-    if (effect->u.beam.scaleX > max) {
-        beam->scaleX = max;
+    beam->scaleX += beam->scaleXRate * D_800BE9A4;
+    if (beam->scaleX > 1.2f) {
+        beam->scaleX = 1.2f;
         beam->scaleXRate = -beam->scaleXRate;
-    } else if (beam->scaleX < min) {
-        beam->scaleX = min;
+    } else if (beam->scaleX < 0.8f) {
+        beam->scaleX = 0.8f;
         beam->scaleXRate = -beam->scaleXRate;
     }
     beam->scaleY += beam->scaleYRate * D_800BE9A4;
-    if (beam->scaleY > max) {
-        beam->scaleY = max;
+    if (beam->scaleY > 1.2f) {
+        beam->scaleY = 1.2f;
         beam->scaleYRate = -beam->scaleYRate;
-    } else if (beam->scaleY < min) {
-        beam->scaleY = min;
+    } else if (beam->scaleY < 0.8f) {
+        beam->scaleY = 0.8f;
         beam->scaleYRate = -beam->scaleYRate;
     }
     beam->size += beam->sizeRate * D_800BE9A4;
@@ -309,8 +304,8 @@ Vtx_t *func_150DB714(Effect *effect, s16 bufferIndex) {
     } else {
         return NULL;
     }
-    angle = *effect->u.linked.angle * D_800A0BF0;
     linked = &effect->u.linked;
+    angle = *linked->angle * (256.0f / 360.0f);
     sine = func_151423D8(angle);
     cosine = func_151423D8(angle - 0x40);
     offsetX = *linked->halfWidth * sine;
