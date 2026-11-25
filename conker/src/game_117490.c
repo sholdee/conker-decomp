@@ -12,12 +12,12 @@ typedef struct {
     /* 0x04 */ s32 phaseStep;
     /* 0x08 */ f32 base;
     /* 0x0C */ f32 amplitude;
-} Oscillator;
+} FrameOscillator;
 
-/* An object created by func_15134DAC with an Oscillator in its user data. */
+/* An object created by func_15134DAC with a FrameOscillator in its user data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x80];
-    /* 0x80 */ Oscillator oscillator;
+    /* 0x80 */ FrameOscillator oscillator;
 } OscillatorObject;
 
 /* The owner whose +0x74 scales the spawned particle's velocity. */
@@ -34,7 +34,7 @@ void *func_15134DAC(BloodStripDesc *, s32);
 OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     BloodStripDesc desc;
     OscillatorObject *obj;
-    Oscillator oscillator;
+    FrameOscillator oscillator;
 
     desc.ownerId = owner->unique_id;
     desc.owner = owner;
@@ -149,7 +149,7 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
 
 /* Returns the oscillator's current value and advances its phase by this frame's step. */
 f32 func_150EA490(OscillatorObject *obj) {
-    Oscillator *oscillator = &obj->oscillator;
+    FrameOscillator *oscillator = &obj->oscillator;
     f32 value;
 
     value = func_151423D8((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;

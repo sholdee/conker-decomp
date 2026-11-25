@@ -289,18 +289,18 @@ typedef struct {
     /* 0x4 */ f32 amplitude;
     /* 0x8 */ f32 phase;
     /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
-} Oscillator;
+} TimeOscillator;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ f32 unk10;
     /* 0x14 */ u8 pad14[0x5C];
-    /* 0x70 */ Oscillator osc;
+    /* 0x70 */ TimeOscillator osc;
 } Obj150AFBF4;
 
 /* Advances the oscillator at 0x70 (func_15144B68 wraps the phase) and writes its value to unk10. */
 s32 func_150AFBF4(Obj150AFBF4 *obj) {
-    Oscillator *osc = &obj->osc;
+    TimeOscillator *osc = &obj->osc;
 
     osc->phase = osc->phase + osc->rate * D_800BE9A4;
     osc->phase = func_15144B68(osc->phase);
