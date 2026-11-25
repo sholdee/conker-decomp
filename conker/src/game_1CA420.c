@@ -46,8 +46,8 @@ typedef struct TrailSpec {
 
 extern TrailSpec D_800A8B80[];
 
-/* A trail's own data (0x60 bytes), at Trail::data. */
-typedef struct TrailData {
+/* A trail's own data (0x60 bytes), at MatrixTrail::data. */
+typedef struct MatrixTrailData {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner's unique_id when the trail started */
     /* 0x05 */ u8 matrixIndex;  /* which of the owner's matrices the trail follows */
@@ -77,10 +77,10 @@ typedef struct TrailData {
     /* 0x5D */ u8 headFadeStep;
     /* 0x5E */ u8 tailFadeLen;
     /* 0x5F */ u8 tailFadeStep;
-} TrailData;
+} MatrixTrailData;
 
 /* One point of a trail (0x24 bytes). */
-typedef struct TrailPoint {
+typedef struct MatrixTrailPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 width;
@@ -89,16 +89,16 @@ typedef struct TrailPoint {
     /* 0x20 */ u8 alpha;
     /* 0x21 */ u8 texS;
     /* 0x22 */ u8 pad22[2];
-} TrailPoint;
+} MatrixTrailPoint;
 
-/* A trail object made by func_15147A80. */
-typedef struct Trail {
+/* A trail object made by func_15147A80, following a matrix of its owner. */
+typedef struct MatrixTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 vtxBuffers[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
-} Trail;
+    /* 0x94 */ MatrixTrailPoint *points;
+    /* 0x98 */ MatrixTrailData *data;
+} MatrixTrail;
 
 /* Data of a trail task (func_151491F4), at TrailTask::data. */
 typedef struct TrailTaskData {
@@ -122,10 +122,10 @@ typedef union TrailEvent {
 extern void func_15147D64(void *event, u8 eventId);
 extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
 void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
-extern Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
+extern MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
+extern MatrixTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
 /* Stops every trail of kind specIndex (event 6). */
 void func_1519CF70(u8 specIndex) {
@@ -136,8 +136,8 @@ void func_1519CF70(u8 specIndex) {
 }
 
 /* Stops a trail: it no longer emits and its tail fades out. */
-void func_1519CFA0(Trail *trail) {
-    TrailData *data;
+void func_1519CFA0(MatrixTrail *trail) {
+    MatrixTrailData *data;
 
     trail->head.updateKind2 = 0;
     data = trail->data;
@@ -146,21 +146,21 @@ void func_1519CFA0(Trail *trail) {
     data->flags |= 4;
 }
 
-extern void func_151478F4(Trail *);
+extern void func_151478F4(MatrixTrail *);
 
 /* Trail teardown (two variants): detaches it from its owner's attachments first. */
-void func_1519CFD0(Trail *trail) {
-    TrailData *data;
+void func_1519CFD0(MatrixTrail *trail) {
+    MatrixTrailData *data;
 
     data = trail->data;
     func_1514EDF0(trail, data->owner);
     func_151478F4(trail);
 }
 
-extern void func_15147928(Trail *);
+extern void func_15147928(MatrixTrail *);
 
-void func_1519D000(Trail *trail) {
-    TrailData *data;
+void func_1519D000(MatrixTrail *trail) {
+    MatrixTrailData *data;
 
     data = trail->data;
     func_1514EDF0(trail, data->owner);
@@ -168,10 +168,10 @@ void func_1519D000(Trail *trail) {
 }
 
 /* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
-Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
+MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
     EffectTemplate spawn;
-    TrailData data;
-    Trail *trail;
+    MatrixTrailData data;
+    MatrixTrail *trail;
     TrailSpec *spec;
 
     spec = &D_800A8B80[specIndex];
@@ -220,23 +220,23 @@ Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4
     }
 
     spawn.kind = 4;
-    trail = func_15147A80(&spawn, sizeof(TrailData), sizeof(TrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
+    trail = func_15147A80(&spawn, sizeof(MatrixTrailData), sizeof(MatrixTrailPoint), 3, 3, 3, 0, 0, 0, arg4, arg5);
     if (trail != NULL) {
-        memcpy(trail->data, &data, sizeof(TrailData));
+        memcpy(trail->data, &data, sizeof(MatrixTrailData));
     }
     return trail;
 }
 
 
 /* Ages a trail's points (newest to oldest) and drops the dead ones. Returns 0 once a stopped trail is gone. */
-s32 func_1519D240(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_1519D240(MatrixTrail *trail) {
+    MatrixTrailData *data;
+    MatrixTrailPoint *points;
     s32 i;
     s32 offset;
     s16 delay;
-    TrailPoint *point;
-    TrailPoint *same;
+    MatrixTrailPoint *point;
+    MatrixTrailPoint *same;
 
     data = trail->data;
     points = trail->points;
@@ -249,11 +249,11 @@ s32 func_1519D240(Trail *trail) {
         if (i < 0) {
             i = trail->head.tmpl.itemCount - 1;
         }
-        offset = i * sizeof(TrailPoint);
+        offset = i * sizeof(MatrixTrailPoint);
         point = &points[i];
         point->alpha = 0xFF;
         // matching: a second, commuted address of the same point (points + offset vs offset + points) is not CSE'd
-        same = (TrailPoint *)((u8 *)points + offset);
+        same = (MatrixTrailPoint *)((u8 *)points + offset);
         delay = point->delay;
         point->vel.x *= data->drag;
         point->vel.y += data->gravity * D_800BE9A4;
@@ -295,9 +295,9 @@ s32 func_1519D240(Trail *trail) {
  * way, then moves all points along with the owner. A trail whose attachment point is lost stops
  * and hands over to a task (func_1519E464 family). Returns 0 when the owner is gone.
  */
-s32 func_1519D454(Trail *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_1519D454(MatrixTrail *trail) {
+    MatrixTrailData *data;
+    MatrixTrailPoint *points;
     s32 started;
     f32 prevX;
     f32 prevZ;
@@ -380,7 +380,7 @@ s32 func_1519D454(Trail *trail) {
         dy * time;
         dz * time;
         do {
-            TrailPoint *point;
+            MatrixTrailPoint *point;
 
             point = &points[trail->head.end];
             point->pos.x = pos.x;
@@ -422,7 +422,7 @@ s32 func_1519D454(Trail *trail) {
     }
     /* Move all points along with the owner. */
     {
-        TrailPoint *point;
+        MatrixTrailPoint *point;
 
         i = trail->head.end;
         moveX = data->owner->xpos - data->ownerPos.x;
@@ -456,10 +456,10 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
  * Draws a trail for view `view` as a strip of quads from the newest point to the oldest, each
  * point spread sideways by its width. Fades the head in and the tail out first if asked to.
  */
-Gfx *func_1519D9F4(Trail *trail, Gfx *gfx, s16 view) {
+Gfx *func_1519D9F4(MatrixTrail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
-    TrailData *data;
-    TrailPoint *points;
+    MatrixTrailData *data;
+    MatrixTrailPoint *points;
     Vec3f next;
     Vec3f cur;
     s32 j;
@@ -630,8 +630,8 @@ Gfx *func_1519D9F4(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Trail event handler: stops the trail when its owner or kind is named, follows an owner swap. */
-void func_1519E1F4(Trail *trail, TrailEvent *event, u8 eventId) {
-    TrailData *data = trail->data;
+void func_1519E1F4(MatrixTrail *trail, TrailEvent *event, u8 eventId) {
+    MatrixTrailData *data = trail->data;
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
@@ -662,7 +662,7 @@ extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
  * Transforms data->offset by the owner's matrix into out, lerped from (x, y, z) by t.
  * Returns 0 (out untouched) while the owner has no matrices.
  */
-s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
+s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
     Vec3f pos;
 
     if (data->owner->ob_matrix_ptr == NULL) {
@@ -688,7 +688,7 @@ void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
 void func_1519E464(TrailTask *task) {
     TrailTaskData *data;
     u8 finished;
-    Trail *trail;
+    MatrixTrail *trail;
 
     finished = FALSE;
     data = &task->data;

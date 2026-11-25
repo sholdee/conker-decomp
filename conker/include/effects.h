@@ -1936,7 +1936,7 @@ typedef struct ParticleEmitterDesc {
     /* 0x44 */ f32 growRate;
 } ParticleEmitterDesc; /* size 0x48 */
 
-/* func_150B3F5C (game_E1280.c): settings of a smoke trail; the first 0x40 bytes of its TrailState. */
+/* func_150B3F5C (game_E1280.c): settings of a smoke trail; the first 0x40 bytes of its ScatterTrailState. */
 typedef struct TrailStateParams {
     /* 0x00 */ Vec3f baseVel;
     /* 0x0C */ f32 gravity;
