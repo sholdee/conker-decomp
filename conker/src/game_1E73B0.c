@@ -5,6 +5,20 @@
 s32 func_151BB0E0();
 void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
+/* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
+typedef struct {
+    u8 pad0[0x50];
+    s32 extraOffset;
+} EffectObject;
+
+#define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))
+
+/* Extra data of effects that follow an object: the owner and its unique_id at spawn time. */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+} EffectOwnerRef;
+
 
 typedef struct {
     u8 unk0;
@@ -29,45 +43,36 @@ typedef struct {
     u8 unk39;
 } Spawn151B9F00;
 
-typedef struct {
-    struct127 *owner;
-    u8 ownerId;
-} Extra151B9F00;
-
-typedef struct {
-    u8 pad0[0x50];
-    s32 unk50; /* offset of the spawned object's extra block, from 0xF8 */
-} Obj151B9F00;
-
 extern s8 D_800E0BCE[];
 extern s8 D_8008FD90;
 void *func_1513B5E0(void *, s32, s32, u8, s32);
 
-void *func_151B9F00(struct127 *arg0, u8 arg1, s32 arg2) {
-    void *obj;
+/* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
+void *func_151B9F00(struct127 *owner, u8 arg1, s32 arg2) {
+    void *effect;
     Spawn151B9F00 desc;
-    Extra151B9F00 extra;
+    EffectOwnerRef ref;
 
-    if (arg0 == NULL) {
+    if (owner == NULL) {
         return NULL;
     }
-    extra.owner = arg0;
-    extra.ownerId = ((u8 *)arg0)[0x3B];
+    ref.owner = owner;
+    ref.ownerId = owner->unique_id;
     desc.unk0 = 2;
     desc.unk1 = -1;
     desc.unk2 = 3;
-    desc.unk4 = 0x12C;
+    desc.unk4 = 300;
     desc.unk30 = 9;
     desc.unk34 = 0x1AD;
     desc.unk39 = 0xFF;
     {
-        s32 idx = arg0 - D_800CC2D0;
+        s32 objIndex = owner - D_800CC2D0;
 
-        if ((idx < 2) && (D_800E0BCE[idx] != 0)) {
+        if ((objIndex < 2) && (D_800E0BCE[objIndex] != 0)) {
             if (D_8008FD90 == 2) {
                 desc.unk39 = 0xFD;
             } else if (D_8008FD90 == 4) {
-                if (idx == 0) {
+                if (objIndex == 0) {
                     desc.unk39 = 0xFB;
                 } else {
                     desc.unk39 = 0xF7;
@@ -85,186 +90,151 @@ void *func_151B9F00(struct127 *arg0, u8 arg1, s32 arg2) {
     desc.unk1C = 0x80;
     desc.unk20 = 0x20;
     desc.unk38 = 2;
-    obj = func_1513B5E0(&desc, 1, 8, arg1, arg2);
-    if (obj != NULL) {
-        memcpy((u8 *)obj + ((Obj151B9F00 *)obj)->unk50 + 0xF8, &extra, 8);
+    effect = func_1513B5E0(&desc, 1, 8, arg1, arg2);
+    if (effect != NULL) {
+        memcpy(EFFECT_EXTRA(effect), &ref, sizeof(ref));
     }
-    return obj;
+    return effect;
 }
 
 
 typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad6;
-    s16 unk8;
-    s16 unkA;
-    s32 padC;
-} Pt151BA084;
-
-typedef struct {
-    u8 pad0[0x50];
-    s32 unk50;
-    u8 pad54[4];
-    Pt151BA084 *unk58[1][4];
-    u8 pad68[0x78 - 0x68];
-    Mtx mtx[1];
+    u8 pad0[0x58];
+    Vtx *verts[2][4]; /* [frame][viewport], 20 vertices each */
+    Mtx mtx[2];       /* [frame] */
 } Obj151BA084;
 
 typedef struct {
     u8 pad0[0x197];
     u8 unk197;
-    u8 pad198[0x23D - 0x198];
-    u8 unk23D;
-} Ent151BA084;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x3B - 4];
-    u8 unk3B;
-    u8 pad3C[0x74 - 0x3C];
-    u8 unk74;
-    u8 pad75[0x1D4 - 0x75];
-    u8 *unk1D4;
-    u8 pad1D8[0x318 - 0x1D8];
-    Ent151BA084 *unk318;
-    Ent151BA084 *unk31C;
-} Player151BA084;
-
-typedef struct {
-    Player151BA084 *unk0;
-    u8 unk4;
-} Sub151BA084;
+} Obj31C_151BA084;
 
 extern u8 D_800C3E90;
 void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
-
-s32 func_151BA084(Obj151BA084 *arg0, s16 arg1) {
-    Sub151BA084 *sub;
-    Player151BA084 *pl;
-    u8 *src;
-    f32 mtx[4][4];
-    Player151BA084 *p0;
-    f32 m2[4][4];
+/*
+ * Per-frame update of an effect that follows its owner's model: builds the effect's matrix from the
+ * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
+ * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
+ */
+s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
+    EffectOwnerRef *ref;
+    struct127 *owner;
+    u8 *model;
+    f32 modelMtx[4][4];
+    struct127 *player;
+    f32 viewMtx[4][4];
     s32 i;
-    f32 offx;
-    f32 o[3];
-    f32 b[3];
-    f32 offy;
+    f32 originS;
+    f32 origin[3];
+    f32 originWorld[3];
+    f32 originT;
     f32 x;
     f32 y;
     f32 z;
-    f32 t[3];
-    f32 r[3];
+    f32 world[3];
+    f32 proj[3];
 
-    sub = (Sub151BA084 *)((s32)arg0 + arg0->unk50 + 0xF8);
-    pl = sub->unk0;
-    if (pl->unk0 == 0 || pl->unk3B != sub->unk4) {
-        func_1516972C((struct102 *)arg0);
+    ref = EFFECT_EXTRA(effect);
+    owner = ref->owner;
+    if (owner->interaction_state == 0 || owner->unique_id != ref->ownerId) {
+        func_1516972C((struct102 *)effect);
     }
-    src = pl->unk1D4;
-    if (src == NULL) {
+    model = (u8 *)owner->unk1D4;
+    if (model == NULL) {
         return 0;
     }
-    if ((pl->unk74 & 0xF) == 0xF) {
+    if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
     if (D_800BE616 != 0) {
-        if (pl->unk318 != NULL && pl->unk31C != NULL && pl->unk31C->unk197 != 0 && arg1 == pl->unk318->unk23D) {
+        if (owner->camera != NULL && owner->unk31C != NULL &&
+            ((Obj31C_151BA084 *)owner->unk31C)->unk197 != 0 && viewport == owner->camera->unk23D) {
             return 0;
         }
     } else {
-        p0 = (Player151BA084 *)D_800CC2D0;
-        if (p0->unk318 != NULL && p0->unk31C != NULL && p0->unk31C->unk197 != 0 && arg1 == p0->unk318->unk23D) {
+        player = &D_800CC2D0[0];
+        if (player->camera != NULL && player->unk31C != NULL &&
+            ((Obj31C_151BA084 *)player->unk31C)->unk197 != 0 && viewport == player->camera->unk23D) {
             return 0;
         }
     }
+    // matching: the two unused labels stop IDO from hoisting the shared call arguments out of the branches
     if (D_800C3E90 != 0) {
     lbl2:
-        guMtxL2F(mtx, (Mtx *)(src + 0x40));
+        guMtxL2F(modelMtx, (Mtx *)(model + 0x40));
     } else {
     lbl0:
-        memcpy(mtx, src + 0x40, 0x40);
+        memcpy(modelMtx, model + 0x40, sizeof(modelMtx));
     }
-    mtx[0][3] = 0.0f;
-    mtx[1][3] = 0.0f;
-    mtx[2][3] = 0.0f;
-    mtx[3][3] = 1.0f;
-    guMtxF2L(mtx, &arg0->mtx[D_800BE9C0]);
-    memcpy(m2, &((f32 (*)[4][4])D_800D9D10)[arg1], 0x40);
-    m2[0][3] = 0.0f;
-    m2[1][3] = 0.0f;
-    m2[2][3] = 0.0f;
-    m2[3][3] = 1.0f;
-label:
-    func_150A7960(mtx, 0.0f, 67.0f, 159.0f, &b[0], &b[1], &b[2]);
-    func_150A7960(m2, b[0], b[1], b[2], &o[0], &o[1], &o[2]);
-    o[0] *= 2.002000093f;
-    o[1] *= 2.002000093f;
-    offx = (s32)(o[0] / 1024.0f) * 1024.0f;
-    offy = (s32)(o[1] / 1024.0f) * 1024.0f;
-    { s32 pad2;
-    for (i = 0; i < 20; i++) {
-        Pt151BA084 *q;
-        q = &arg0->unk58[D_800BE9C0][arg1][i];
-        x = q->x;
-        y = q->y;
-        z = q->z;
-        func_150A7960(mtx, x, y, z, &t[0], &t[1], &t[2]);
-        func_150A7960(m2, t[0], t[1], t[2], &r[0], &r[1], &r[2]);
-        r[0] *= 2.002000093f;
-        r[1] *= 2.002000093f;
-        q->unk8 = r[0] - offx;
-        q->unkA = r[1] - offy;
-    }
+    modelMtx[0][3] = 0.0f;
+    modelMtx[1][3] = 0.0f;
+    modelMtx[2][3] = 0.0f;
+    modelMtx[3][3] = 1.0f;
+    guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
+    memcpy(viewMtx, &((f32 (*)[4][4])D_800D9D10)[viewport], sizeof(viewMtx));
+    viewMtx[0][3] = 0.0f;
+    viewMtx[1][3] = 0.0f;
+    viewMtx[2][3] = 0.0f;
+    viewMtx[3][3] = 1.0f;
+label: // matching: unused label keeps the viewMtx stores ahead of the argument setup
+    func_150A7960(modelMtx, 0.0f, 67.0f, 159.0f, &originWorld[0], &originWorld[1], &originWorld[2]);
+    func_150A7960(viewMtx, originWorld[0], originWorld[1], originWorld[2], &origin[0], &origin[1], &origin[2]);
+    origin[0] *= 2.002f;
+    origin[1] *= 2.002f;
+    /* keep texture coordinates near zero by removing whole 1024-unit tiles */
+    originS = (s32)(origin[0] / 1024.0f) * 1024.0f;
+    originT = (s32)(origin[1] / 1024.0f) * 1024.0f;
+    {
+        s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
+
+        for (i = 0; i < 20; i++) {
+            Vtx_t *vtx = &effect->verts[D_800BE9C0][viewport][i].v;
+
+            x = vtx->ob[0];
+            y = vtx->ob[1];
+            z = vtx->ob[2];
+            func_150A7960(modelMtx, x, y, z, &world[0], &world[1], &world[2]);
+            func_150A7960(viewMtx, world[0], world[1], world[2], &proj[0], &proj[1], &proj[2]);
+            proj[0] *= 2.002f;
+            proj[1] *= 2.002f;
+            vtx->tc[0] = proj[0] - originS;
+            vtx->tc[1] = proj[1] - originT;
+        }
     }
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_151BA468;
+/* Messages delivered to effects through their message handler. */
+typedef union {
+    struct {
+        struct127 *obj;
+        u8 objId;
+    } removed; /* type 0 */
+    struct {
+        struct127 *a;
+        struct127 *b;
+        u8 aId;
+        u8 bId;
+    } swap; /* type 0x2D */
+} EffectMsg;
 
-typedef struct {
-    u8  pad[0x3B];
-    u8  unk3B;
-} SomeObj_151BA468;
+/* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
+void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
+    EffectOwnerRef *ref = EFFECT_EXTRA(effect);
+    struct127 *owner = ref->owner;
 
-typedef struct {
-    u8  pad[0x50];
-    s32 unk50;
-} Base_151BA468;
-
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_151BA468;
-
-void func_151BA468(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151BA468 *temp_v0 = (SubA_151BA468 *)((u8 *)arg0 + ((Base_151BA468 *)arg0)->unk50 + 0xF8);
-    ArgB_151BA468 *b = (ArgB_151BA468 *)arg1;
-    s32 b0 = temp_v0->unk0;
-    SomeObj_151BA468 *o = (SomeObj_151BA468 *)b0;
-
-    if (arg2 == 0) {
-        if ((b0 == b->unk0) || (b->u4.b4 == o->unk3B)) {
-            func_1516972C((struct102 *)arg0);
+    if (msgType == 0) {
+        if ((owner == msg->removed.obj) || (msg->removed.objId == owner->unique_id)) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (msgType == 0x2D) {
+        if (ref->owner == msg->swap.a) {
+            ref->owner = msg->swap.b;
+            ref->ownerId = msg->swap.bId;
+        } else if (ref->owner == msg->swap.b) {
+            ref->owner = msg->swap.a;
+            ref->ownerId = msg->swap.aId;
         }
     }
 }
