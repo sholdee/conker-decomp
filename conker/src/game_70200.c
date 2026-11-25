@@ -411,17 +411,17 @@ Gfx *func_15043384(Gfx *gfx) {
 }
 
 /*
- * Ring buffer of length-prefixed messages (struct105):
+ * Ring buffer of length-prefixed messages (MsgRing):
  *   unk0 = buffer, unk4 = capacity, unk8 = read offset, unkC = write offset.
  */
 
 /** Initialise a ring buffer over `buffer` of `capacity` bytes. */
-void func_15043A00(struct105 *ring, s32 buffer, s32 capacity) {
+void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity) {
     if (ring != NULL) {
-        ring->unk0 = buffer;
-        ring->unk4 = capacity;
-        ring->unkC = 0;
-        ring->unk8 = 0;
+        ring->buffer = buffer;
+        ring->capacity = capacity;
+        ring->writeOffset = 0;
+        ring->readOffset = 0;
     }
 }
 
@@ -487,25 +487,25 @@ s32 func_15043B70(u8 *buffer, s32 capacity, s32 offset, s32 size) {
 }
 
 /** Push a `size`-byte message; returns 1 if it does not fit, 0 otherwise. */
-s32 func_15043BB8(struct105 *ring, u8 *message, s32 size) {
+s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size) {
     s32 writeOffset;
     s32 readOffset;
 
     if (size != 0 && message != NULL) {
         size += 4;
         size = (size + 3) & ~3;
-        writeOffset = ring->unkC;
-        readOffset = ring->unk8;
+        writeOffset = ring->writeOffset;
+        readOffset = ring->readOffset;
         if (writeOffset < readOffset) {
             if (writeOffset + size >= readOffset) {
                 return 1;
             }
-        } else if (writeOffset + size - ring->unk4 >= readOffset) {
+        } else if (writeOffset + size - ring->capacity >= readOffset) {
             return 1;
         }
         size -= 4;
-        writeOffset = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, (u8 *)&size, 4);
-        ring->unkC = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, message, size);
+        writeOffset = func_15043A20(ring->buffer, ring->capacity, writeOffset, (u8 *)&size, 4);
+        ring->writeOffset = func_15043A20(ring->buffer, ring->capacity, writeOffset, message, size);
     }
     return 0;
 }
@@ -514,27 +514,27 @@ s32 func_15043BB8(struct105 *ring, u8 *message, s32 size) {
  * Pop the next message into `dst` (at most `dstSize` bytes; a longer message is truncated and
  * NUL-terminated). Returns the message's stored size, or 0 if the ring is empty.
  */
-s32 func_15043CA4(struct105 *ring, u8 *dst, s32 dstSize) {
+s32 func_15043CA4(MsgRing *ring, u8 *dst, s32 dstSize) {
     s32 size; // matching: the length is compared from a register copy, not reloaded
     s32 messageSize;
     s32 readOffset;
     s32 offset;
 
     messageSize = 0;
-    readOffset = ring->unk8;
-    if (readOffset == ring->unkC) {
+    readOffset = ring->readOffset;
+    if (readOffset == ring->writeOffset) {
         return 0;
     }
-    offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, readOffset, (u8 *)&messageSize, 4);
+    offset = func_15043AC8(ring->buffer, ring->capacity, readOffset, (u8 *)&messageSize, 4);
     size = messageSize;
     if (dstSize < size) {
         dstSize -= 1;
-        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, dstSize);
+        offset = func_15043AC8(ring->buffer, ring->capacity, offset, dst, dstSize);
         dst[dstSize] = 0;
-        offset = func_15043B70((u8 *)ring->unk0, ring->unk4, offset, messageSize - dstSize);
+        offset = func_15043B70(ring->buffer, ring->capacity, offset, messageSize - dstSize);
     } else if (size != 0) {
-        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, messageSize);
+        offset = func_15043AC8(ring->buffer, ring->capacity, offset, dst, messageSize);
     }
-    ring->unk8 = offset;
+    ring->readOffset = offset;
     return messageSize;
 }

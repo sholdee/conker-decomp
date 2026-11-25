@@ -310,8 +310,8 @@ extern f32  D_80042788[2]; // per channel: gain last sent
 extern f32  D_80042790;
 extern f32  D_80042794;
 extern f32  D_80042798;
-extern struct105 D_800427A0;
-extern s32  D_800427B0;
+extern MsgRing D_800427A0;
+extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
 extern struct124 *D_80042800;

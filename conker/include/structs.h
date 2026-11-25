@@ -697,12 +697,13 @@ typedef struct LevelHeader {
     /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
 } LevelHeader; // size 0x4C
 
-typedef struct {
-    s32 unk0;  // used
-    s32 unk4;  // used
-    s32 unk8;  // used
-    s32 unkC;  // used
-} struct105;
+/* A ring buffer of length-prefixed messages (game_70200.c: func_15043A00 / func_15043BB8 / func_15043CA4). */
+typedef struct MsgRing {
+    /* 0x0 */ u8 *buffer;
+    /* 0x4 */ s32 capacity;
+    /* 0x8 */ s32 readOffset;
+    /* 0xC */ s32 writeOffset;  /* equal to readOffset when empty */
+} MsgRing;
 
 /* One simulated bone of an object broken into parts (game_6B320; size 0x68). */
 typedef struct ObjPart {
