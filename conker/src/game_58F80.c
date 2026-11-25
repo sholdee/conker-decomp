@@ -1784,13 +1784,14 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
     return gdl;
 }
 
-void func_1502F264(s32 arg0) {
+/* Moves an attached object onto its parent (or the parent's bone) and copies the parent's state. */
+void func_1502F264(s32 index) {
     GameObj *obj;
     GameObj *parent;
     f32 (*bone)[4][4];
     s32 i;
 
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[index];
     if (obj->unk65 == 0) {
         return;
     }
@@ -1798,7 +1799,7 @@ void func_1502F264(s32 arg0) {
     if ((obj->unk101 & 2) == 2) {
         return;
     }
-    bone = (f32 (*)[4][4])parent->bones;
+    bone = parent->bones;
     if (bone == NULL) {
         obj->x_position = parent->x_position;
         obj->y_position = parent->y_position;
@@ -1829,118 +1830,100 @@ void func_1502F264(s32 arg0) {
             obj->unkB[i] = parent->unkB[i];
         }
     }
-
 }
 
-typedef struct {
-    u32 start;
-    s32 count;
-    s32 id;
-} Seg1502F490;
+/* A range of a model's vertices skinned to one bone (D_800C5C08[id] tables). */
+typedef struct VtxRange {
+    /* 0x0 */ Vtx *start;
+    /* 0x4 */ s32 count;
+    /* 0x8 */ s32 bone;
+} VtxRange;
 
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0x1D4 - 5];
-    u8 *unk1D4;
-    u8 *unk1D8;
-} Obj1502F490;
+void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri);
 
-typedef struct {
-    /* 0x000 */ s32 active;
-    /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ f32 field_14;
-    /* 0x018 */ f32 field_18;
-    /* 0x01C */ f32 field_1C;
-    /* 0x020 */ u8 pad20[0x180 - 0x20];
-    /* 0x180 */ f32 field_180;
-    /* 0x184 */ u8 pad184[0x19E - 0x184];
-    /* 0x19E */ u16 field_19E;
-    /* 0x1A0 */ u8 pad1A0[0x274 - 0x1A0];
-    /* 0x274 */ u8 field_274;
-    /* 0x275 */ u8 pad275[0x32C - 0x275];
-} Actor1502F3C8;
-
-#define ACTORS_1502F3C8 (*(Actor1502F3C8 (*)[25])&D_800CC2D0)
-
-void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4);
-
+/* Carries every object standing on another object (unk274) along with that object's surface. */
 void func_1502F3C8(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if (ACTORS_1502F3C8[i].active == 0) {
+        if (D_800CC2D0[i].interaction_state == 0) {
             continue;
         }
-        if (ACTORS_1502F3C8[i].field_274 == 0) {
+        if (D_800CC2D0[i].unk274 == 0) {
             continue;
         }
-        ACTORS_1502F3C8[i].field_18 = ACTORS_1502F3C8[i].field_180;
-        func_1502F490((Obj1502F490 *)&ACTORS_1502F3C8[ACTORS_1502F3C8[i].field_274 - 1], &ACTORS_1502F3C8[i].field_14, &ACTORS_1502F3C8[i].field_18, &ACTORS_1502F3C8[i].field_1C, ACTORS_1502F3C8[i].field_19E);
-        if (ACTORS_1502F3C8[i].field_18 < ACTORS_1502F3C8[i].field_180) {
-            ACTORS_1502F3C8[i].field_18 = ACTORS_1502F3C8[i].field_180;
+        D_800CC2D0[i].y_position = D_800CC2D0[i].unk180;
+        func_1502F490(&D_800CC2D0[D_800CC2D0[i].unk274 - 1], &D_800CC2D0[i].x_position, &D_800CC2D0[i].y_position,
+                      &D_800CC2D0[i].z_position, D_800CC2D0[i].unk19E);
+        if (D_800CC2D0[i].y_position < D_800CC2D0[i].unk180) {
+            D_800CC2D0[i].y_position = D_800CC2D0[i].unk180;
         } else {
-            ACTORS_1502F3C8[i].field_180 = ACTORS_1502F3C8[i].field_18;
+            D_800CC2D0[i].unk180 = D_800CC2D0[i].y_position;
         }
     }
 }
 
 
 extern u16 D_800C5EF8[];
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+void func_150A7960(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 
-void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4) {
+/* Moves the point (x, y, z) with triangle tri of the platform's skinned model: finds the point's
+   barycentric position in last frame's triangle and returns it from this frame's. */
+void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 diff[3];
-    f32 res[3];
-    s32 idx[3];
+    f32 moved[3];
+    s32 bone[3];
     s32 i;
     s32 j;
-    s32 mask;
-    s32 seg;
+    s32 found;
+    s32 range;
     u8 id;
-    u32 p[3];
+    Vtx *vtx[3];
     f32 v[2][3][3];
     f32 e1[2][3];
     f32 e2[2][3];
-    u8 *mtx;
+    f32 (*bones)[4][4];
     f32 s;
     f32 t;
 
-    id = arg0->unk4;
+    id = platform->id;
     if (D_800C6070[id] == 0) {
         return;
     }
     for (i = 0; i < 3; i++) {
-        p[i] = *(s32 *)(D_800C6070[id] + arg4 * 12 + i * 4) + D_800D19A0[id];
+        // matching: D_800C6070[id] is an address (s32); indexing it as s32[][3] changes the loop shape
+        vtx[i] = (Vtx *)(*(s32 *)(D_800C6070[id] + tri * 12 + i * 4) + D_800D19A0[id]);
     }
-    seg = 0;
-    mask = 0;
+    range = 0;
+    found = 0;
     do {
-        if (seg == D_800C5EF8[id]) {
+        if (range == D_800C5EF8[id]) {
             return;
         }
         for (i = 0; i < 3; i++) {
-            if (!(mask & (1 << i))) {
-                if (p[i] >= ((Seg1502F490 *)D_800C5C08[id])[seg].start && p[i] < ((Seg1502F490 *)D_800C5C08[id])[seg].start + ((Seg1502F490 *)D_800C5C08[id])[seg].count * 16) {
-                    mask = (1 << i) | mask;
-                    idx[i] = ((Seg1502F490 *)D_800C5C08[id])[seg].id;
+            if (!(found & (1 << i))) {
+                if (vtx[i] >= ((VtxRange *)D_800C5C08[id])[range].start &&
+                    vtx[i] < ((VtxRange *)D_800C5C08[id])[range].start + ((VtxRange *)D_800C5C08[id])[range].count) {
+                    found = (1 << i) | found;
+                    bone[i] = ((VtxRange *)D_800C5C08[id])[range].bone;
                 }
             }
         }
-        seg++;
-    } while (mask != 7);
+        range++;
+    } while (found != 7);
 
-    if (arg0->unk1D8 == NULL || arg0->unk1D4 == NULL) {
+    if (platform->prevBones == NULL || platform->bones == NULL) {
         return;
     }
-    mtx = arg0->unk1D8;
+    bones = platform->prevBones;
     for (i = 0; i < 2; i++) {
         if (i == 1) {
-            mtx = arg0->unk1D4;
+            bones = platform->bones;
         }
         for (j = 0; j < 3; j++) {
-            func_150A7960((f32 *)(mtx + (idx[j] << 6)), ((s16 *)p[j])[0], ((s16 *)p[j])[1], ((s16 *)p[j])[2],
-                          &v[i][j][0], &v[i][j][1], &v[i][j][2]);
+            // matching: byte-offset form; bones[bone[j]] swaps the addu operands
+            func_150A7960((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1], vtx[j]->v.ob[2], &v[i][j][0], &v[i][j][1],
+                          &v[i][j][2]);
         }
     }
     for (i = 0; i < 2; i++) {
@@ -1949,9 +1932,9 @@ void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4)
             e2[i][j] = v[i][2][j] - v[i][0][j];
         }
     }
-    diff[0] = *arg1 - v[0][0][0];
-    diff[1] = *arg2 - v[0][0][1];
-    diff[2] = *arg3 - v[0][0][2];
+    diff[0] = *x - v[0][0][0];
+    diff[1] = *y - v[0][0][1];
+    diff[2] = *z - v[0][0][2];
     s = e1[0][0] * e2[0][2] - e1[0][2] * e2[0][0];
     if (s != 0.0f) {
         s = (diff[0] * e2[0][2] - diff[2] * e2[0][0]) / s;
@@ -1970,12 +1953,12 @@ void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4)
         return;
     }
     for (i = 0; i < 3; i++) {
-        res[i] = s * e1[1][i] + e2[1][i] * t;
+        moved[i] = s * e1[1][i] + e2[1][i] * t;
     }
     diff[1] = s * e1[0][1] + e2[0][1] * t;
-    *arg1 += res[0] + v[1][0][0] - diff[0] - v[0][0][0];
-    *arg2 += res[1] + v[1][0][1] - diff[1] - v[0][0][1];
-    *arg3 += res[2] + v[1][0][2] - diff[2] - v[0][0][2];
+    *x += moved[0] + v[1][0][0] - diff[0] - v[0][0][0];
+    *y += moved[1] + v[1][0][1] - diff[1] - v[0][0][1];
+    *z += moved[2] + v[1][0][2] - diff[2] - v[0][0][2];
 }
 
 /* Keeps a copy of the object's bone matrices in prevBones (allocated on first use). */
