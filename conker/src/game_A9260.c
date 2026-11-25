@@ -6,185 +6,187 @@
  * 0x3C off the same object (struct127::unk2D0), so a file-local widened view is
  * used here rather than retyping the shared header. */
 typedef struct AnimPlay {
-    /* 0x00 */ void (*unk0)(void);
-    /* 0x04 */ u16 unk4;
+    /* 0x00 */ void (*callback)(void); // called once when playback reaches the last frame
+    /* 0x04 */ u16 flags;             // 0x8000: hold on the last frame instead of looping
     /* 0x06 */ u8  pad6[0x2];
-    /* 0x08 */ f32 unk8;
+    /* 0x08 */ f32 time;
     /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 speed;
     /* 0x14 */ u8  pad14[0x4];
-    /* 0x18 */ f32 unk18;
+    /* 0x18 */ f32 end;
     /* 0x1C */ u8  pad1C[0x4];
-    /* 0x20 */ f32 unk20;
+    /* 0x20 */ f32 start;
     /* 0x24 */ u8  pad24[0x4];
-    /* 0x28 */ s32 unk28;
+    /* 0x28 */ s32 animId;
     /* 0x2C */ u8  pad2C[0xE];
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ s16 unk3C;
+    /* 0x3A */ s16 step;
+    /* 0x3C */ s16 countdown;
 } AnimPlay;
 
 extern u8 D_800BEA0C;
-extern u8 D_800C365E;
+extern u8 D_800C365E[];
 
-f32 func_1506AD30(struct127 *arg0, f32 arg1, s32 arg2);
+f32 func_1506AD30(struct127 *obj, f32 time, s32 arg2);
 
-void func_1507BDB0(AnimPlay *arg0, f32 arg1, struct127 *arg2, s32 arg3) {
-    f32 t;
-    s32 flags;
-    u8 ended;
-    f32 ret;
-    s32 old;
+/* Advances an animation playback by rate, handling looping, hold and end callbacks. */
+void func_1507BDB0(AnimPlay *anim, f32 rate, struct127 *obj, s32 mode) {
+    f32 time;
+    s32 hold;
+    u8 jumped;
+    f32 result;
+    s32 oldAnimId;
 
-    if (arg0->unk28 == 0) {
+    if (anim->animId == 0) {
         return;
     }
 
-    if (arg2 != NULL) {
+    if (obj != NULL) {
         if (D_800C35EA == 0) {
             if (D_800BE9A4 < 2.0f) {
-                arg1 = D_800BE9A4 * arg1;
+                rate = D_800BE9A4 * rate;
             } else {
-                arg1 = arg1 + arg1;
+                rate += rate;
             }
         } else {
-            arg1 = D_800BE9A4;
+            rate = D_800BE9A4;
         }
     }
     if (D_800BEA0C != 0) {
-        arg1 = 0.0f;
+        rate = 0.0f;
     }
 
-    if (arg0->unk18 < (arg0->unk10 * arg1)) {
-        t = arg0->unk18 + arg0->unk8;
+    if (anim->end < (anim->speed * rate)) {
+        time = anim->end + anim->time;
     } else {
-        t = (arg0->unk10 * arg1) + arg0->unk8;
+        time = (anim->speed * rate) + anim->time;
     }
 
-    flags = arg0->unk4 & 0x8000;
-    if (arg2 != NULL) {
-        flags |= arg2->unkF4 & 0xE;
-        arg2->unk1FC &= ~4;
-        D_800C3E78 = arg2 - D_800CC2D0;
-        D_800D154C = arg2;
+    hold = anim->flags & 0x8000;
+    if (obj != NULL) {
+        hold |= obj->unkF4 & 0xE;
+        obj->unk1FC &= ~4;
+        D_800C3E78 = obj - D_800CC2D0;
+        D_800D154C = obj;
     }
 
-    ended = 0;
-    if (arg2 != NULL) {
-        if (((&D_800C35EA)[arg3] != 1) || ((&D_800C365E)[arg3] != 0)) {
-            ret = func_1506AD30(D_800D154C, t, 0);
-            if (ret != 0.0f) {
-                t = ret;
+    jumped = 0;
+    if (obj != NULL) {
+        if (((&D_800C35EA)[mode] != 1) || (D_800C365E[mode] != 0)) {
+            result = func_1506AD30(D_800D154C, time, 0);
+            if (result != 0.0f) {
+                time = result;
             }
         }
     }
 
-    if (arg0->unk10 >= 0.0f) {
-        if (((arg0->unk18 - 1.0f) <= t) && (arg0->unk8 < (arg0->unk18 - 1.0f)) && (arg0->unk0 != NULL)) {
-            old = arg0->unk28;
-            if ((arg2 != NULL) && (arg2->unkF4 & 8)) {
-                arg2->unk10C = 0;
-                arg2->pad1C4 = 0;
-                arg0->unk10 = 0.0f;
+    if (anim->speed >= 0.0f) {
+        if (((anim->end - 1.0f) <= time) && (anim->time < (anim->end - 1.0f)) && (anim->callback != NULL)) {
+            oldAnimId = anim->animId;
+            if ((obj != NULL) && (obj->unkF4 & 8)) {
+                obj->unk10C = 0;
+                obj->pad1C4 = 0;
+                anim->speed = 0.0f;
             }
             if (D_800C35EA == 0) {
-                arg0->unk0();
+                anim->callback();
             }
-            if (old != arg0->unk28) {
-                t = arg0->unk8;
-                ended = 1;
+            if (oldAnimId != anim->animId) {
+                time = anim->time;
+                jumped = 1;
             }
         }
 
-        if ((arg2 != NULL) && (arg2->unk1FD != 0) && ((arg0->unk18 - 1.0f) <= t)) {
-            arg2->unk76 += arg2->unk1FD << 8;
-            arg2->unk7A = arg2->unk76;
-            arg2->unk78 = arg2->unk76;
-            arg0->unk8 = arg0->unk20;
-            if (arg2->unkF4 & 4) {
-                arg2->unk21C = 0;
+        if ((obj != NULL) && (obj->unk1FD != 0) && ((anim->end - 1.0f) <= time)) {
+            obj->unk76 += obj->unk1FD << 8;
+            obj->unk7A = obj->unk76;
+            obj->unk78 = obj->unk76;
+            anim->time = anim->start;
+            if (obj->unkF4 & 4) {
+                obj->unk21C = 0;
             }
-        } else if ((flags == 0) && (arg0->unk18 <= t)) {
-            arg0->unk8 = (t - arg0->unk18) + arg0->unk20;
-            ended = 1;
-            if (arg2 != NULL) {
-                arg2->unk1FC |= 4;
+        } else if ((hold == 0) && (anim->end <= time)) {
+            anim->time = (time - anim->end) + anim->start;
+            jumped = 1;
+            if (obj != NULL) {
+                obj->unk1FC |= 4;
             }
-        } else if ((flags != 0) && ((arg0->unk18 - 1.0f) <= t)) {
-            if (((arg2 != NULL) && (arg2->unkF4 & 0xA)) || (arg0->unk4 & 0x8000)) {
-                arg0->unk8 = arg0->unk18 - 1.0f;
-            } else if (arg0->unk8 < (arg0->unk18 - 1.0f)) {
-                arg0->unk8 = arg0->unk18 - 1.0f;
-                if ((arg2 != NULL) && (arg2->unkF4 & 4)) {
-                    arg2->unk21C = 0;
+        } else if ((hold != 0) && ((anim->end - 1.0f) <= time)) {
+            if (((obj != NULL) && (obj->unkF4 & 0xA)) || (anim->flags & 0x8000)) {
+                anim->time = anim->end - 1.0f;
+            } else if (anim->time < (anim->end - 1.0f)) {
+                anim->time = anim->end - 1.0f;
+                if ((obj != NULL) && (obj->unkF4 & 4)) {
+                    obj->unk21C = 0;
                 }
             } else {
-                arg0->unk8 = arg0->unk20;
-                if (arg2 != NULL) {
-                    arg2->unk138 = 0;
-                    arg2->unk1FC |= 2;
+                anim->time = anim->start;
+                if (obj != NULL) {
+                    obj->unk138 = 0;
+                    obj->unk1FC |= 2;
                 }
             }
-            if ((arg2 != NULL) && (arg2->unkF4 & 8)) {
-                arg2->unk10C = 0;
-                arg2->pad1C4 = 0;
-                arg0->unk10 = 0.0f;
+            if ((obj != NULL) && (obj->unkF4 & 8)) {
+                obj->unk10C = 0;
+                obj->pad1C4 = 0;
+                anim->speed = 0.0f;
             }
-            if (arg0->unk8 < 0.0f) {
-                arg0->unk8 = 0.0f;
+            if (anim->time < 0.0f) {
+                anim->time = 0.0f;
             }
         } else {
-            arg0->unk8 = t;
+            anim->time = time;
         }
-    } else if (t < arg0->unk20) {
-        arg0->unk8 = (t - arg0->unk20) + arg0->unk18;
+    } else if (time < anim->start) {
+        anim->time = (time - anim->start) + anim->end;
     } else {
-        arg0->unk8 = t;
+        anim->time = time;
     }
 
-    if (arg0->unk3C > 0) {
-        arg0->unk3C -= arg0->unk3A * D_800BE9E4;
+    if (anim->countdown > 0) {
+        anim->countdown -= anim->step * D_800BE9E4;
     }
-    if (arg2 != NULL) {
-        if (ended != 0) {
-            func_1506AD30(D_800D154C, arg0->unk8, 0);
+    if (obj != NULL) {
+        if (jumped) {
+            func_1506AD30(D_800D154C, anim->time, 0);
         }
-        *(f32 *)&arg2->padB4 = arg0->unk8;
+        // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
+        *(f32 *)&obj->padB4 = anim->time;
     }
 }
 
-s32 func_150229E4(void *);
+s32 func_150229E4(struct127 *obj);
 
-void func_1507C22C(s32 arg0) {
+/* Steps the animation of every active object; with onlyType4 set, only objects whose unk5 is 4. */
+void func_1507C22C(s32 onlyType4) {
     s32 i;
-    u8 *entry;
-    s32 temp_a0;
+    struct127 *obj;
+    struct197 *anim;
 
     for (i = 0; i < 25; i++) {
-        entry = (u8 *)&D_800CC2D0[i];
-        if (*(s32 *)(entry + 0) == 0) continue;
-        if (*(s32 *)(entry + 0x25C) & 0x200) continue;
-        if ((arg0 != 0) && (entry[5] != 4)) continue;
-        if ((D_800C3638 != 0) && (*(u8 *)&D_800C3654 == 0) && (func_150229E4(entry) == 0)) continue;
-        temp_a0 = *(s32 *)(entry + 0x2D0);
-        if ((temp_a0 != 0) && (entry[0x2FA] != 0)) {
-            func_1507BDB0((AnimPlay *)temp_a0, *(f32 *)(entry + 0x48), (struct127 *)entry, arg0);
+        obj = &D_800CC2D0[i];
+        if (obj->interaction_state == 0) continue;
+        if (obj->unk25C & 0x200) continue;
+        if (onlyType4 && (obj->unk5 != 4)) continue;
+        // matching: the s32 D_800C3654 is tested through its high byte (lbu)
+        if (D_800C3638 && (*(u8 *)&D_800C3654 == 0) && (func_150229E4(obj) == 0)) continue;
+        anim = obj->unk2D0;
+        if ((anim != NULL) && obj->unk2FA) {
+            func_1507BDB0((AnimPlay *)anim, obj->unk48, obj, onlyType4);
         }
     }
 }
 
-void func_1507C324(void *arg0, void *arg1) {
-    s32 *p0 = *(s32 **)((u8 *)arg0 + 0x2D0);
-    s32 *p1 = *(s32 **)((u8 *)arg1 + 0x2D0);
-    f32 temp;
+/* Copies src's animation time onto dst, clamped to dst's last frame. */
+void func_1507C324(struct127 *dst, struct127 *src) {
+    AnimPlay *dstAnim = (AnimPlay *)dst->unk2D0;
+    AnimPlay *srcAnim = (AnimPlay *)src->unk2D0;
+    f32 lastFrame;
 
-    if (p0 != 0 && p1 != 0) {
-        *(f32 *)((u8 *)p0 + 0x8) = *(f32 *)((u8 *)p1 + 0x8);
-        temp = *(f32 *)((u8 *)p0 + 0x18) - 1.0f;
-        if (temp <= *(f32 *)((u8 *)p0 + 0x8)) {
-            *(f32 *)((u8 *)p0 + 0x8) = temp;
+    if (dstAnim != NULL && srcAnim != NULL) {
+        dstAnim->time = srcAnim->time;
+        lastFrame = dstAnim->end - 1.0f;
+        if (lastFrame <= dstAnim->time) {
+            dstAnim->time = lastFrame;
         }
     }
 }
-
-void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
-void func_1507C370(void);
