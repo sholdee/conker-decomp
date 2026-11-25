@@ -36,7 +36,9 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: read
-    environment: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) && 'gate-fork' || 'gate' }}
+    environment:
+      name: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) && 'gate-fork' || 'gate' }}
+      deployment: false  # use the environment's secrets and approval rules without deployment records
     env:
       INNER_SHA1: 842e3d348e3c8ae0039e2ab367ad492f9b5266d8
       OUTER_SHA1: 4cbadd3c4e0729dec46af64ad018050eada4f47a
