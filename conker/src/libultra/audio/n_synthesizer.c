@@ -2,8 +2,6 @@
 
 extern f32 D_8002C750;
 
-typedef struct { u32 w0; u32 w1; } Cmd;
-
 static s32 __n_nextSampleTime(ALPlayer **client);
 s32 _n_timeToSamplesNoRound(s32 micros);
 Cmd *func_1001FB40(s32 arg0, Cmd *arg1);

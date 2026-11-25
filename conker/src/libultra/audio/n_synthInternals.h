@@ -24,6 +24,10 @@
 #include <synthInternals.h>
 #include <n_abi.h>
 
+/* An audio command (Acmd) seen as its two words; init_210C0.c, init_22040.c and
+ * n_synthesizer.c build their command lists through it. */
+typedef struct { u32 w0; u32 w1; } Cmd;
+
 #define SAMPLE_ROUND
 #undef  SAMPLE_ROUND
 

@@ -4,8 +4,6 @@ extern f32 D_8002C830;
 extern f32 D_8002C834;
 extern f32 D_8002C838;
 
-typedef struct { u32 w0; u32 w1; } Cmd;
-
 /*
  * Shadow of N_PVoice covering the low-pass (ALLowPass) block Rare bolted on at
  * 0xA0: fc / fgain / fcvec[16] / state pointer, plus the tap count at 0x99.
