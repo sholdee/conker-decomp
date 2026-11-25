@@ -1,4 +1,6 @@
 #include <ultra64.h>
+// functions.h declares these three with signatures that do not fit how this file calls them
+// (wrong return or parameter types), so its declarations are renamed away and redeclared below.
 #define func_1513EDE4 func_1513EDE4_orig
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_10010F88 func_10010F88_void_decl_in_functions_h
@@ -10,24 +12,6 @@ void func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
-typedef struct {
-    char pad_0x00[0x124];
-    f32 field_0x124;
-    f32 field_0x128;
-} ScaleUpdateState;
-
-typedef struct {
-    char pad_0x00[0x8];
-    s16 field_0x08;
-    char pad_0x0A[0xE];
-    s16 field_0x18;
-    char pad_0x1A[0xE];
-    s16 field_0x28;
-    char pad_0x2A[0xE];
-    s16 field_0x38;
-} ScaleUpdateNode;
-
-extern ScaleUpdateNode *func_1513EDE4(ScaleUpdateState *arg0, s16 arg1);
 extern void func_150FCBC0(u8 arg0);
 extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -267,6 +251,7 @@ struct Actor150FD514 {
     /* 0x110 */ Ext150FCFD4 ext;
 };
 
+extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
 extern void func_1504715C(Floor150FCFD4 *, struct127 *);
 extern s32 func_15046C80(struct17 *, s32, f32, Floor150FCFD4 *);
@@ -486,91 +471,67 @@ s32 func_150FD514(Actor150FD514 *arg0) {
 }
 
 
-void func_150FDB0C(void *arg0, s32 arg1, u8 arg2)
-{
-  u8 *new_var2;
-  s32 *v0;
-  s32 a2;
-  s32 v1;
-  s32 *new_var;
- v0 = (s32 *) (((u8 *) arg0) + 0x110); if (arg2 == 0x2D) { v1 = *((s32 *) arg1); ; if (v1 == (*v0)) {
-      new_var2 = (u8 *) v0;
-      *v0 = *((s32 *) (arg1 + 4));
-      *((u8 *) (new_var2 + 4)) = *((u8 *) (arg1 + 9));
-    }
-    else
-    {
-      if ((*((s32 *) (arg1 + 4))) == (*v0))
-      {
-        *v0 = v1;
-        *((u8 *) (((u8 *) v0) + 4)) = *((u8 *) (arg1 + 8));
-      }
-      dummy_label_150FDB0C:
-      ;
+/* Event handler: retargets (0x2D) or drops (0) the owner link {owner, unique_id} at the start of ext. */
+void func_150FDB0C(Actor150FD514 *actor, struct212 *event, u8 eventId) {
+    struct212 *link = (struct212 *)&actor->ext;
 
-      ;
-      ;
-    }
-  }
-  else
-  {
-    new_var = (s32 *) arg1;
-    v1 = arg2 == 0;
-    if (v1)
-    {
-      v1 = *new_var;
-      if (v1 != (*v0))
-      {
-        if ((*((u8 *) (((u8 *) v0) + 4))) != (*((u8 *) (arg1 + 4))))
-        {
-          return;
+    if (eventId == 0x2D) {
+        if (link->unk0 == event->unk0) {
+            link->unk0 = event->unk4.i.unk0;
+            link->unk4.b.unk0 = event->unk9;
+        } else if (link->unk0 == event->unk4.i.unk0) {
+            struct212 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
+
+            dst->unk0 = event->unk0;
+            dst->unk4.b.unk0 = event->unk8;
         }
-      }
-      *v0 = 0;
-    }
-  }
-}
+    } else if (eventId == 0) {
+        s32 owner = event->unk0;
 
-
-ScaleUpdateNode *func_150FDBA0(ScaleUpdateState *arg0, s16 arg1) {
-    ScaleUpdateNode *node;
-
-    node = func_1513EDE4(arg0, arg1);
-    if (node != NULL) {
-        node->field_0x08 = arg0->field_0x124;
-        node->field_0x18 = arg0->field_0x128;
-        node->field_0x28 = arg0->field_0x128;
-        node->field_0x38 = arg0->field_0x124;
-    }
-    return node;
-}
-
-void func_150FDC2C(struct210 *arg0) {
-    struct102 **p;
-
-    p = (struct102 **)((u8 *)arg0 + 0x110);
-    if (p[9] != 0) {
-        func_1516972C(p[9]);
-    }
-    if (p[10] != 0) {
-        func_1516972C(p[10]);
-    }
-    if (*(u16 *)((u8 *)p + 0x54) != 0) {
-        func_100111C8(*(u16 *)((u8 *)p + 0x54));
-    }
-    if (*(u16 *)((u8 *)p + 0x56) != 0) {
-        func_100111C8(*(u16 *)((u8 *)p + 0x56));
+        if (owner == link->unk0 || event->unk4.b.unk0 == link->unk4.b.unk0) {
+            link->unk0 = 0;
+        }
     }
 }
 
-extern void func_150FDC2C(struct210 *);
+/* Draws the actor's camera-facing quad, then sets the corners' S texture coordinates to its scroll values. */
+Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
+    Vtx *vertices;
 
-void func_150FDCAC(struct210 *arg0) {
-    func_150FDC2C(arg0);
-    func_1513CA6C(arg0);
+    vertices = func_1513EDE4(actor, viewport);
+    if (vertices != NULL) {
+        vertices[0].v.tc[0] = actor->ext.unk14;
+        vertices[1].v.tc[0] = actor->ext.unk18;
+        vertices[2].v.tc[0] = actor->ext.unk18;
+        vertices[3].v.tc[0] = actor->ext.unk14;
+    }
+    return vertices;
 }
 
-void func_150FDCD8(struct210 *arg0) {
-    func_150FDC2C(arg0);
-    func_1513CAA0(arg0);
+/* Releases the effects and sound handles this actor's ext owns. */
+void func_150FDC2C(Actor150FD514 *actor) {
+    Ext150FCFD4 *ext = &actor->ext;
+
+    if (ext->unk24 != 0) {
+        func_1516972C((struct102 *)ext->unk24);
+    }
+    if (ext->unk28 != NULL) {
+        func_1516972C((struct102 *)ext->unk28);
+    }
+    if (ext->unk54 != 0) {
+        func_100111C8(ext->unk54);
+    }
+    if (ext->unk56 != 0) {
+        func_100111C8(ext->unk56);
+    }
+}
+
+void func_150FDCAC(Actor150FD514 *actor) {
+    func_150FDC2C(actor);
+    func_1513CA6C((struct210 *)actor);
+}
+
+void func_150FDCD8(Actor150FD514 *actor) {
+    func_150FDC2C(actor);
+    func_1513CAA0((struct210 *)actor);
 }
