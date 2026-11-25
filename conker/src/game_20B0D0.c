@@ -42,7 +42,7 @@ struct Struct151E5034 {
 };
 
 extern OSContPad D_800BE918[];
-extern u16 D_800BE930[]; /* buttons newly pressed, per controller */
+extern u16 D_800BE930[]; /* button bits per controller, read by the menus */
 extern OSIoMesg D_800388E0;
 extern struct Struct151E5034 *D_8008FDD4;
 extern void (*D_800E0A88)(void);
@@ -344,6 +344,7 @@ void func_151DE6D4(void) {
     }
 }
 
+/* Resets the sequence timer and counters, then enters state 3 via func_151DE85C. */
 void func_151DE7D4(void) {
     D_800E0A90 = 0;
     D_800E0B97 = 0;
@@ -361,6 +362,7 @@ void func_151DE81C(void) {
     }
 }
 
+/* Enters state 3 (D_800E0B94) and puts the path state back on path 0, stop 5. */
 void func_151DE85C(void) {
     D_800D2E40 = 0;
     func_1501C730(6, 0x1D, 0, 0, 1);
