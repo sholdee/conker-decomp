@@ -72,6 +72,22 @@ typedef struct {
 } N_ALSynth;
 
 /*
+ * Conker: ALWaveTable as Rare's bank loader (func_10012CFC, init_128D0.c) and _pullSubFrame
+ * (func_10020ABC, init_20000.c) see it: the ADPCM wave info, then a word the loader clears.
+ */
+typedef struct WaveTable {
+    /* 0x00 */  u8                  *base;
+    /* 0x04 */  s32                 len;
+    /* 0x08 */  u8                  type;       /* AL_ADPCM_WAVE / AL_RAW16_WAVE */
+    /* 0x09 */  u8                  flags;      /* 1 once relocated */
+    /* 0x0A */  u8                  inUse;      /* Rare's "wave is in use" marker, in the byte ALWaveTable's union alignment leaves free */
+    /* 0x0B */  u8                  padB;
+    /* 0x0C */  void                *loop;      /* ALADPCMloop or ALRawLoop */
+    /* 0x10 */  ALADPCMBook         *book;
+    /* 0x14 */  s32                 unk14;
+} WaveTable;
+
+/*
  * Conker: Rare's low-pass (pole) filter, its version of synthInternals.h's ALLowPass. `first` and
  * the filter state are swapped, and there is one A_POLEF state per main-out channel (L at DMEM
  * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init_1FB40.c runs it on
@@ -423,9 +439,18 @@ void     n_alSndpSetSound(ALSndId id);
 /*
  * Conker: Rare's additions to the audio library, defined in src/libultra/audio, in address order.
  */
+struct OscState; /* the sequence players' oscillator state, defined in init_128D0.c */
 void    func_10012934(ALBankFile *file, u8 *table, s32 arg2);           /* init_128D0.c: alBnkfNew */
-void    func_10012C5C(ALSound *sound, s32 offset, s32 table);           /* init_128D0.c */
-void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* init_128D0.c: installs the oscillators */
+void    func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);   /* init_128D0.c: relocates a bank */
+void    func_10012B84(ALInstrument *inst, s32 arg1);
+void    func_10012BD0(ALInstrument *inst, s32 arg1);
+void    func_10012C5C(ALSound *sound, s32 offset, s32 table);
+void    func_10012CFC(WaveTable *wave, s32 offset, s32 table);
+f32     func_10012D80(u8 arg0);
+s32     func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5); /* the oscillators */
+s32     func_10012F94(struct OscState *arg0, f32 *arg1);
+void    func_100131D8(s32 *arg0);
+void    func_100131FC(ALSeqpConfig *config, s32 arg1);                  /* installs the oscillators */
 void    func_10017AA0(N_ALCSPlayer *seqp);                              /* code_17AA0.c: play */
 void    func_10017AF0(N_ALCSPlayer *seqp, struct OSMesgQueue_s *queue); /* init_17AF0.c */
 void    func_10017B04(N_ALCSPlayer *seqp, s32 chan, u8 arg2);

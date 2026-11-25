@@ -243,8 +243,6 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern struct OscState *gFreeOscStates; /* free oscillator states */
-extern s32  D_80042804;
 extern u16 *D_800428B8;
 extern u8   D_800428C0;
 extern u8   D_800428C1;

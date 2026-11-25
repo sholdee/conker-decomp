@@ -2,7 +2,6 @@
 #define STRUCTS_H
 
 typedef struct SndState SndState;
-typedef struct OscState OscState;
 typedef struct Actor Actor;
 typedef struct Camera Camera;
 struct Rope;
@@ -26,20 +25,6 @@ union ActorMsg;
   w  -> (signed) word (s16)
   uw -> unsigned word (u16)
 */
-
-/* ALWaveTable as Conker's bank loader (func_10012CFC) and _pullSubFrame (func_10020ABC) see it: the ADPCM
- * wave info, then a word the loader clears. */
-typedef struct WaveTable {
-    /* 0x00 */ u8 *base;
-    /* 0x04 */ s32 len;
-    /* 0x08 */ u8 type;    // AL_ADPCM_WAVE / AL_RAW16_WAVE
-    /* 0x09 */ u8 flags;   // 1 once relocated
-    /* 0x0A */ u8 inUse;   // Rare's "wave is in use" marker, in the byte ALWaveTable's union alignment leaves free
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ void *loop; // ALADPCMloop or ALRawLoop
-    /* 0x10 */ ALADPCMBook *book;
-    /* 0x14 */ s32 unk14;
-} WaveTable;
 
 /* Three-float vector: positions, directions, velocities, scales. */
 typedef struct Vec3f {
@@ -366,26 +351,6 @@ struct SHORTS {
 struct WORD {
     s32 unk0;
 };
-
-/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
- * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
-struct OscState {
-    /* 0x00 */ struct OscState *next;
-    /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
-    /* 0x05 */ u8  pad5[0x1D];
-    /* 0x22 */ s16 maxCount;  // period in updates
-    /* 0x24 */ s16 curCount;
-    /* 0x26 */ u8  pad26[2];
-    /* 0x28 */ union {
-        struct {
-            u8 halfdepth;
-            u8 baseVol;
-        } tsin;
-        struct {
-            f32 depth;    // cents ratio (func_10012D80)
-        } vsin;
-    } data;
-}; // size 0x2C
 
 /* Per model-type definition, D_800D1C90[id] (loaded by func_1503D774; freed by func_15084558 with its
  * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.

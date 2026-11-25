@@ -109,20 +109,6 @@ void func_10011FA0(s32 *arg0);
 void func_10011FB0(s32 arg0);
 void func_10011FDC(s32 arg0);
 void func_10011FEC(void);
-void func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);
-void func_10012B84(ALInstrument *inst, s32 arg1);
-void func_10012BD0(ALInstrument *inst, s32 arg1);
-void func_10012C5C(ALSound *sound, s32 offset, s32 table);
-void func_10012CFC(WaveTable *wave, s32 offset, s32 table);
-f32  func_10012D80(u8 arg0);
-s32  func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
-s32  func_10012F94(struct OscState *osc, f32 *value);
-void func_100131D8(s32 *arg0);
-void func_100131FC(ALSeqpConfig *config, s32 arg1);
-void func_10016E90(SndState *arg0);
-void func_10016F00(SndState *state);
-SndState *func_10017100(s32 arg0, s16 arg1);
-void func_10017298(SndState *arg0);
 s32  func_100173C4(SndState **arg0);
 void func_10017594(SndState *arg0);
 void func_100176C4(void);
@@ -134,15 +120,7 @@ void func_10017944(s32 arg0, u32 arg1);
 
 void n_alInit(void *globals, void *config);
 void n_alClose(s32 arg0);
-s32  _n_timeToSamplesNoRound(s32 micros);
-s32  _n_timeToSamples(s32 micros);
 f32  alCents2Ratio(s32 arg0);
-void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
-f32  func_1001CEA4(s32 arg0);
-s32  func_1001D9B0(s16 arg0);
-s32  func_1001DA28(s16 arg0);
-void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
-void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
@@ -565,8 +543,6 @@ s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 //func_10011EB8
 //func_10012020
 // void func_10017870(u8 arg0);
-void func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);
-void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
 //func_1001AAE0
 //func_1001ADA4
 //func_1001AFEC
