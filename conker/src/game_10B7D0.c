@@ -20,8 +20,8 @@ void func_150DE320(s32 arg0) {
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     WorldObject *prop;
-    const u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
-    const u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
+    u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
+    u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
     for (i = 0; i < 8; i++) {
         if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
@@ -149,7 +149,8 @@ void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
-extern TexturePair D_800A0D00;
+/* Particle textures: 0xBE, or 0xBF for the slower ones. */
+const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
@@ -252,13 +253,8 @@ s32 func_150DEB58(Particle *particle, s16 arg1) {
 }
 
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
-typedef struct {
-    u8 value;
-    u8 pad1[3];
-} LowByte;
-
-extern LowByte D_800A0D0B[];
-extern LowByte D_800A0D2B[];
+static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
+static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
 extern void func_151616D0(u8, u8, s32);
 extern void func_151417C4(u8, s32);
 void func_150DEC28(u8 index, s32 arg1);
@@ -272,10 +268,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-/* Passes entry `index` of the D_800A0D0B and D_800A0D2B byte tables to func_151616D0 and func_151417C4. */
+/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to func_151616D0 and func_151417C4. */
 void func_150DEC28(u8 index, s32 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
-    func_151616D0(D_800A0D0B[i].value, 0x22, 0);
-    func_151417C4(D_800A0D2B[i].value, 0x22);
+    func_151616D0(D_800A0D08[i], 0x22, 0);
+    func_151417C4(D_800A0D28[i], 0x22);
 }
