@@ -254,10 +254,12 @@ void func_150D596C(FollowEffect *effect, ObjectMessage *msg, u8 type) {
     }
 }
 
+/* FollowEffect callback; forwards to func_1514933C. */
 void func_150D5A2C(struct260 *effect) {
     func_1514933C(effect);
 }
 
+/* FollowEffect callback; forwards to func_15149368. */
 void func_150D5A4C(struct260 *effect) {
     func_15149368(effect);
 }
@@ -303,16 +305,16 @@ extern s32 *D_80089A20[];
 extern s32 D_800A3F14[];
 
 s32 func_15134070(struct127 *);
-s32 func_15145128(void *, void *, void *, void *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, void *, void *, void *, void *, f32 *, s32, s32 *, f32);
-s32 func_15144E80(void *, vertex *, vertex *, vertex *);
+s32 func_15145128(vertex *, vertex *, s32 *, s32 *);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
+s32 func_15144E80(f32 *, vertex *, vertex *, vertex *);
 f32 func_15144A74(vertex *, vertex *);
 void func_15146078(vertex *, vertex *, vertex *);
 void func_15143874(s16, f32, f32 *, f32 *);
 s32 func_15132A4C(PieceSpawn *, s32, s32, s32, u8, s32);
-void func_151C05A4(void *, u8, s32);
-void func_151C05F0(void *, u8, s32);
-void func_151C0360(void *, void *, u8, s32);
+void func_151C05A4(vertex *, u8, s32);
+void func_151C05F0(vertex *, u8, s32);
+void func_151C0360(f32 *, s32 *, u8, s32);
 void func_150D6388(vertex *pos, u8 arg1, s32 arg2);
 void func_150D6434(vertex *pos, u8 arg1, s32 arg2);
 void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
@@ -517,6 +519,7 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
 
 void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 
+/* Spawns a func_151541B8 effect at pos with a random size and a 200-255 fourth argument. */
 void func_150D6388(vertex *pos, u8 arg1, s32 arg2) {
     u32 randInt;
     f32 randFrac;
@@ -526,6 +529,7 @@ void func_150D6388(vertex *pos, u8 arg1, s32 arg2) {
     func_151541B8(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
 }
 
+/* Spawns a func_15154884 effect at pos with randomized parameters. */
 void func_150D6434(vertex *pos, u8 arg1, s32 arg2) {
     f32 rand3;
     f32 rand2;
@@ -562,6 +566,7 @@ typedef struct {
     /* 0x50 */ s8  unk50;
 } Struct150D64E8;
 
+/* Fills in fixed settings; unk50 is -1 when D_80082FA0 >= 2 or D_8008FD8C >= 8, else 0. */
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk00 = 6;
     info->unk04 = 3;
@@ -594,6 +599,7 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
 
 void func_151A5D58(f32, u8, f32 *, s32 *, s32, s32, s32, u8, s32);
 
+/* Impact effect on a type-0xE surface hit at pos (func_151A5D58 with randomized parameters). */
 void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
     u32 rand3;
     u32 rand2;
@@ -605,6 +611,7 @@ void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
     func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, pos, arg1, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
+/* Calls func_15182670 for camera arg0 with 0xFF, 0xFF, 0xFF, a random 200-255 and a random 25-30. */
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     u32 rand2;
     u32 rand1;
