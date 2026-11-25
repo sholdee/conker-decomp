@@ -28,15 +28,10 @@ extern void (*D_8008AB58[])(s32);
 extern s32 (*D_8008AB64[])(s32, s32, s32);
 
 /* Emitter offsets. */
-extern Vec3f D_800A58A0;
-extern Vec3f D_800A58AC;
-extern Vec3f D_800A58B8;
-extern Vec3f D_800A58C4;
-extern Vec3f D_800A5934;
-extern Vec3f D_800A5940;
-extern Vec3f D_800A594C;
-extern Vec3f D_800A5958;
-extern Vec3f D_800A5964;
+const Vec3f D_800A58A0 = { 0.0f, 75.0f, 96.0f };
+const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
+const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
+const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
 /* This file. */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
@@ -1135,6 +1130,13 @@ void func_1514E7C8(Actor *obj) {
 
 /* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
 
+/* Emitter offsets of func_1514EECC and func_1514F194. */
+const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
+const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
+const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
+const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
+const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
+
 void func_1514E824(s32 handle) {
 }
 
@@ -1554,8 +1556,8 @@ void func_1514F194(Actor *obj) {
 }
 
 void func_1514F308(Actor *obj) {
-    Vec3f pointA = { 52.0f, 0.0f, 80.0f };
-    Vec3f pointB = { 52.0f, 0.0f, 353.0f };
+    const Vec3f pointA = { 52.0f, 0.0f, 80.0f };
+    const Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
     func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
