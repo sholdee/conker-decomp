@@ -206,7 +206,6 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
                    s32, s32, u8, s32);
 

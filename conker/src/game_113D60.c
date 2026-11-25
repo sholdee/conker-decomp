@@ -247,7 +247,6 @@ typedef struct {
     /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */

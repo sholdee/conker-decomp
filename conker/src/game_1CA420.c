@@ -143,9 +143,6 @@ extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 o
 void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 extern Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
-extern s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out);
-extern Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
-extern void func_1514EDF0(s32 handle, Actor *owner);
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
@@ -175,7 +172,7 @@ void func_1519CFD0(Trail *trail) {
     TrailData *data;
 
     data = trail->data;
-    func_1514EDF0((s32)trail, data->owner);
+    func_1514EDF0(trail, data->owner);
     func_151478F4(trail);
 }
 
@@ -185,7 +182,7 @@ void func_1519D000(Trail *trail) {
     TrailData *data;
 
     data = trail->data;
-    func_1514EDF0((s32)trail, data->owner);
+    func_1514EDF0(trail, data->owner);
     func_15147928(trail);
 }
 
@@ -371,8 +368,8 @@ s32 func_1519D454(Trail *trail) {
         task = (TrailTask *)func_151491F4(trail->lifetime, -1, 8, (trail->flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (task != NULL) {
             memcpy(&task->data, &taskData, sizeof(TrailTaskData));
-            if (func_1514ED3C(data->owner->attachments, (s32)trail, NULL) != 0) {
-                func_1514EC1C((s32)task, data->owner, 0x11);
+            if (func_1514ED3C(data->owner->attachments, trail, NULL) != 0) {
+                func_1514EC1C(task, data->owner, 0x11);
             }
         }
         return 1;
@@ -725,8 +722,8 @@ void func_1519E464(TrailTask *task) {
             finished = TRUE;
             trail = func_1519D030(data->owner, data->unk8, task->lifetime, task->flags & 1, task->unkC, task->unk1);
             if (trail != NULL) {
-                if (func_1514ED3C(data->owner->attachments, (s32)task, NULL) != 0) {
-                    func_1514EC1C((s32)trail, data->owner, 0x10);
+                if (func_1514ED3C(data->owner->attachments, task, NULL) != 0) {
+                    func_1514EC1C(trail, data->owner, 0x10);
                 }
             }
         }
@@ -843,12 +840,12 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
 
 /* Trail task teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519E8CC(TrailTask *task) {
-    func_1514EDF0((s32)task, task->data.owner);
+    func_1514EDF0(task, task->data.owner);
     func_1514933C((struct260 *)task);
 }
 
 void func_1519E8F8(TrailTask *task) {
-    func_1514EDF0((s32)task, task->data.owner);
+    func_1514EDF0(task, task->data.owner);
     func_15149368((struct260 *)task);
 }
 

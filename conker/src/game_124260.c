@@ -207,7 +207,6 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
     }
 }
 
-void func_1514EDF0(BeamObj *handle, Actor *owner);
 
 /* Destroys the beam's end sprites and detaches the beam from its owner. */
 void func_150F739C(BeamObj *obj) {

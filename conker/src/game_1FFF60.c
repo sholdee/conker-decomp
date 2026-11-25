@@ -50,7 +50,6 @@ struct ActorFollowerGroup {
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-void func_1514EDF0(ActorFollowerGroup *, Actor *);
 
 void func_151D3308(BoneFollower *follower);
 void func_151D3354(BoneFollower *follower);

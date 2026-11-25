@@ -801,6 +801,11 @@ void func_15149434(struct260 *arg0, s32 arg1, u8 arg2);
 s32  func_15149490(s32 arg0, struct260 *arg1, s16 arg2);
 void func_151494E0(s32 arg0, u8 arg1);
 void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
+/* Actor attachment lists (Actor.attachments, game_179F30): `handle` is the attached effect or object. */
+Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type);
+s32  func_1514ECE0(Attachment *list, s16 type, Attachment **out);
+s32  func_1514ED3C(Attachment *list, void *handle, Attachment **out);
+void func_1514EDF0(void *handle, Actor *owner);
 void func_15165F70(void);
 void func_1516972C(struct102 *arg0);
 void func_1516979C(struct102 *arg0);

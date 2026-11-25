@@ -42,7 +42,6 @@ f32 sqrtf(f32);
 
 f32 func_150489B0(u8 angle);
 void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_1514EDF0(Emitter *handle, Actor *owner);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        char *name);

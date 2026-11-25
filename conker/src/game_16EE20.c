@@ -22,7 +22,7 @@ Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32 *, s32, s32, u8);
 
 void func_15141970(struct37 *arg0) {
-    func_1514EDF0(arg0, arg0->unk2C);
+    func_1514EDF0(arg0, (Actor *)arg0->unk2C); // unk2C: the owner (struct37 types it s32)
 }
 
 void func_15141990(void *arg0) {
@@ -96,7 +96,6 @@ s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
 void func_15141E38(Actor *actor, s32 handler);
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
 void func_15141A7C(Actor *actor, s32 arg1) {
@@ -226,7 +225,6 @@ void func_15141DA4(void *actor, s32 selector, s32 handler) {
     }
 }
 
-s32 func_1514EC1C(s32, s32, s16);
 void *memcpy(void *, const void *, u32);
 
 /* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
@@ -257,7 +255,7 @@ void func_15141E38(Actor *actor, s32 handler) {
         effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].unk4, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
-            func_1514EC1C((s32)effect, (s32)actor, ATTACH_TIMED_EFFECT);
+            func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);
         }
     }
 }

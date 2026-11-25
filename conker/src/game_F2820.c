@@ -104,7 +104,6 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-extern void func_1514EDF0(StripObj *handle, Actor *owner);
 
 /** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {

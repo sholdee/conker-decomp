@@ -320,7 +320,6 @@ typedef struct {
 } CharacterWatcher;
 
 s32 func_15159370(Actor *chr, u8 *mode);
-void func_1514EDF0(CharacterWatcher *watcher, Actor *chr);
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
 CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
@@ -614,7 +613,6 @@ s32 func_15159370(Actor *chr, u8 *mode) {
     return ret;
 }
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /*
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
