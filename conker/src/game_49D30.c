@@ -5,11 +5,13 @@
 #define D_800C35EA D_800C35EA_hdr
 #define D_800C3654 D_800C3654_hdr
 #define D_800BEAA8 D_800BEAA8_hdr
+#define D_800C3CA0 D_800C3CA0_hdr
 #include "variables.h"
 #undef D_800C3958
 #undef D_800C35EA
 #undef D_800C3654
 #undef D_800BEAA8
+#undef D_800C3CA0
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
@@ -122,20 +124,35 @@ extern struct127 *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 extern u8 D_800D2100;
 
+/* A subtitle slot (see func_150234A4); same layout as in game_50D80.c. */
 typedef struct {
-    s16 unk0;
-    u8 pad2[0x32];
-    s32 unk34;
-} struct_game49D30_2;
+    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 flags;
+    /* 0x08 */ u8 *text;
+    /* 0x0C */ u8 isOpen;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ f32 *unk1C;
+    /* 0x20 */ f32 *unk20;
+    /* 0x24 */ f32 *unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ u8 r;
+    /* 0x2D */ u8 g;
+    /* 0x2E */ u8 b;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 pad30[4];
+    /* 0x34 */ s32 handle;
+} SeqSubtitle;
+
+extern SeqSubtitle D_800C3CA0[3];
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqPathKey *D_800C3868[][30];
-extern struct_game49D30_2 D_800C3D48;
+extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
 extern s32 func_1501F72C(s32, f32, f32 *, s32, s32 *);
 extern void func_1501FFE8(f32 *, SeqPathKey *, s32, s32);
 extern void func_1516D2E0(s32);
-extern void func_1516D328(s32);
-
 extern void func_1516D328(s32);
 
 typedef struct {
@@ -2276,7 +2293,7 @@ void func_15022398(s32 track, s32 scene) {
                     }
                 } else {
                     if (slot < D_800D2100) {
-                        func_15082A44((struct_game49D30_2 *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0);
+                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // 0x30-byte spawn entries
                         obj = func_1505EEF4(slot);
                         if (obj != NULL) {
                             func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
@@ -2597,138 +2614,124 @@ void func_15022BA4(s32 scene) {
     }
 }
 
-s32 func_15023264(s32 arg0, s32 arg1) {
-    s32 i;
+/* Pick the camera track: the value of the earliest type-3 event in any track, else the first
+   type-1 track, else 0. */
+s32 func_15023264(s32 scene, s32 time) {
+    s32 track;
     s32 best;
     s32 result;
     s32 score;
-    s16 *found;
-    u8 **entry;
-    u8 *ptr;
-    SeqTrackInfo *records;
+    SeqEvent *found;
+    SeqEvent *ptr;
 
     result = -1;
-    best = 0x1869F;
+    best = 99999;
 
-    i = 0;
-    if (D_800C363A[arg0] > 0) {
-        entry = D_800C3688[arg0];
-        do {
-            ptr = *entry;
-            if (ptr != 0) {
-                found = 0;
-                score = func_15023BB0(ptr + 0x18, 3, i, &found, 0, 0, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    if (score < best) {
-                        best = score;
-                        result = found[1];
-                    }
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        ptr = D_800C3688[scene][track];
+        if (ptr != NULL) {
+            found = NULL;
+            score = func_15023BB0(&ptr[3], 3, track, &found, 0, 0, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                if (score < best) {
+                    best = score;
+                    result = found->value;
                 }
             }
-            i++;
-            entry++;
-        } while (i < D_800C363A[arg0]);
+        }
     }
 
     if (result == -1) {
         result = 0;
-        i = 0;
-        if (i < D_800C363A[arg0]) {
-            records = D_800C35F0[arg0];
-            do {
-                if (records->type == 1) {
-                    result = i;
-                    break;
-                }
-                i++;
-                records++;
-            } while (i < D_800C363A[arg0]);
+        for (track = 0; track < D_800C363A[scene]; track++) {
+            if (D_800C35F0[scene][track].type == 1) {
+                result = track;
+                break;
+            }
         }
     }
 
     return result;
 }
 
+/* Free all subtitle slots. */
 void func_150233BC(void) {
-    bzero(D_800C3CA0, 0xA8);
+    bzero(D_800C3CA0, sizeof(D_800C3CA0));
 }
 
+/* Close every open subtitle. */
 void func_150233E4(void) {
     s32 i;
-    int new_var;
-    struct_game49D30_2 *entry;
+    s32 zero;
+    SeqSubtitle *entry;
 
     i = 0;
     do {
-        entry = &((struct_game49D30_2 *) D_800C3CA0)[i];
-        if (entry->unk0 != 0) {
-            func_1516D2E0(entry->unk34);
-            entry->unk34 = 0;
-            new_var = 0;
-            entry->unk0 = new_var;
+        entry = &D_800C3CA0[i];
+        if (entry->active != 0) {
+            func_1516D2E0(entry->handle);
+            entry->handle = 0;
+            // matching: the cleared value goes through a local
+            zero = 0;
+            entry->active = zero;
         }
         i++;
-    } while (&D_800C3D48 != &((struct_game49D30_2 *) D_800C3CA0)[i]);
+    } while (&D_800C3D48 != &D_800C3CA0[i]);
 }
 
-void func_15023440(struct_game49D30_2 *arg0, s32 arg1) {
-    struct_game49D30_2 *entry;
+/* Release subtitle slot `sub`: close it now if `force`, else let an open one finish (func_1516D328). */
+void func_15023440(SeqSubtitle *sub, s32 force) {
+    SeqSubtitle *entry;
 
-    entry = arg0;
-    if (arg1 != 0) {
-        func_1516D2E0(entry->unk34);
-        entry->unk34 = 0;
-    } else if (*(u8 *)((u8 *)entry + 0xC) != 0) {
-        func_1516D328(entry->unk34);
+    entry = sub;
+    if (force != 0) {
+        func_1516D2E0(entry->handle);
+        entry->handle = 0;
+    } else if (entry->isOpen != 0) {
+        func_1516D328(entry->handle);
     } else {
-        entry->unk34 = 0;
+        entry->handle = 0;
     }
-    entry->unk0 = 0;
+    entry->active = 0;
 }
 
-typedef struct Game49D30Record {
-    s16 active;
-    u8 pad2[0xA];
-    u8 flagC;
-    u8 padD[0x27];
-    s32 resource34;
-} Game49D30Record;
 
-Game49D30Record *func_150234A4(s32 arg0, s32 arg1) {
+/* Find the subtitle slot of `track`, or claim a free one (stealing slot 0 when all are busy). */
+SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
     s32 i;
-    Game49D30Record *found;
-    Game49D30Record *slot;
+    SeqSubtitle *found;
+    SeqSubtitle *slot;
 
-    arg0++;
+    track++;
     found = NULL;
     slot = NULL;
     for (i = 0; i < 3; i++) {
-        if ((((Game49D30Record *)&D_800C3CA0) + i)->active == arg0) {
-            if (arg1 != 0 && (((Game49D30Record *)&D_800C3CA0) + i)->flagC != 0) {
-                slot = (Game49D30Record *)&D_800C3CA0;
-                func_15023440((struct_game49D30_2 *)slot, 1);
+        if (D_800C3CA0[i].active == track) {
+            if (replaceOpen != 0 && D_800C3CA0[i].isOpen != 0) {
+                slot = D_800C3CA0;
+                func_15023440(slot, 1);
             } else {
-                found = ((Game49D30Record *)&D_800C3CA0) + i;
+                found = &D_800C3CA0[i];
             }
             break;
         }
-        if ((((Game49D30Record *)&D_800C3CA0) + i)->active == 0) {
-            slot = ((Game49D30Record *)&D_800C3CA0) + i;
-            if (arg1 != 0 && slot->flagC != 0) {
-                func_15023440((struct_game49D30_2 *)slot, 1);
+        if (D_800C3CA0[i].active == 0) {
+            slot = &D_800C3CA0[i];
+            if (replaceOpen != 0 && slot->isOpen != 0) {
+                func_15023440(slot, 1);
             }
             break;
         }
     }
     if (i == 3) {
-        slot = (Game49D30Record *)&D_800C3CA0;
-        func_15023440((struct_game49D30_2 *)slot, 1);
+        slot = D_800C3CA0;
+        func_15023440(slot, 1);
     }
     if (found != NULL) {
         return found;
     }
     if (slot != NULL) {
-        slot->active = arg0;
+        slot->active = track;
     }
     return slot;
 }
