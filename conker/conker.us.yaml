@@ -2086,6 +2086,8 @@ segments:
 
       # BSS ?
       - {start: 0x255880, type: bss, vram: 0x800B0DC0}
+      - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
+      - {start: 0x255880, type: bss, vram: 0x800E0D30, name: bss_800E0D30}
 
   - name:  debugger
     type:  code
