@@ -118,6 +118,7 @@ void func_151177C0(Prop *prop) {
     void (*onArrive)(Prop *);
     s32 flag4;
     s16 lowered;
+    s32 homeY;
 
     motion = prop->state & 3;
     flag4 = prop->state & 4;
@@ -145,9 +146,9 @@ void func_151177C0(Prop *prop) {
     if (prop->work.lift.homeY == 0) {
         prop->work.lift.homeY = prop->y | 0x80000000;
     }
-    kind = (s16)(prop->work.lift.homeY & 0xFFFF); // matching: the home height reuses kind's register
+    homeY = (s16)(prop->work.lift.homeY & 0xFFFF);
     if (motion == PROP_ARRIVED) {
-        lowered = kind - travel;
+        lowered = homeY - travel;
         if (prop->y != lowered) {
             prop->y = lowered;
         }
@@ -155,12 +156,12 @@ void func_151177C0(Prop *prop) {
             motion = PROP_RETURNING;
         }
     } else if (motion == PROP_REST) {
-        lowered = kind - travel;
+        lowered = homeY - travel;
         if (prop->y != lowered) {
-            prop->y = kind;
+            prop->y = homeY;
         }
     } else if (motion == PROP_MOVING) {
-        lowered = kind - travel;
+        lowered = homeY - travel;
         prop->y -= step;
         if (lowered >= prop->y) {
             prop->y = lowered;
@@ -171,8 +172,8 @@ void func_151177C0(Prop *prop) {
         }
     } else if (motion == PROP_RETURNING) {
         prop->y += 3;
-        if (prop->y >= kind) {
-            prop->y = kind;
+        if (prop->y >= homeY) {
+            prop->y = homeY;
             motion = PROP_REST;
         }
     }
@@ -277,14 +278,9 @@ void func_151179BC(Prop *prop) {
 void func_15117D3C(Prop *prop, struct127 *obj) {
     s32 delay = prop->params.word & 0xFFFF;
 
-    if (obj->interaction_state == 1) {
-        if (prop->unk4F & 4) {
-            if (!(prop->state & 3) && !(prop->state & 4)) {
-                if (delay == 0 || obj->unk31C->unk57 == 1) {
-                    PROP_SET_MOTION(prop, PROP_MOVING);
-                }
-            }
-        }
+    if (obj->interaction_state == 1 && (prop->unk4F & 4) && !(prop->state & 3) && !(prop->state & 4) &&
+        (delay == 0 || obj->unk31C->unk57 == 1)) {
+        PROP_SET_MOTION(prop, PROP_MOVING);
     }
 }
 
@@ -296,7 +292,6 @@ void func_15117DA4(Prop *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 angle;
     f32 s;
     f32 c;
-    f32 rotatedZ;
     f32 rotatedX;
 
     if (prop->kind == 0x8006 && D_800BE9F0 == 53) {
@@ -318,13 +313,12 @@ void func_15117DA4(Prop *prop, f32 x, f32 y, f32 z, f32 *out) {
     s = sinf(angle);
     c = cosf(angle);
     rotatedX = out[0];
-    rotatedZ = out[2];
-    out[0] = (rotatedZ * s) + (rotatedX * c);
-    out[2] = (rotatedZ * c) + (-rotatedX * s);
+    out[0] = (out[2] * s) + (rotatedX * c);
+    out[2] = (out[2] * c) + (-rotatedX * s);
 
-    out[0] = *(volatile f32 *)&out[0] + prop->x;
-    out[1] = *(volatile f32 *)&out[1] + prop->y;
-    out[2] = *(volatile f32 *)&out[2] + prop->z;
+    out[0] += prop->x;
+    out[1] += prop->y;
+    out[2] += prop->z;
 }
 
 /* struct126 (struct127.unk31C) with the fields used here that structs.h leaves as padding. */
@@ -351,7 +345,7 @@ extern void func_15114D24(Prop *prop, s32 sound, s32, s32, s32, s32);
  */
 void func_15117F3C(Prop *prop) {
     f32 maxAngle;
-    s32 d1;
+    s32 pad1; // matching: pad1-pad4 are unused stack slots of the original frame
     f32 speed;
     f32 accel;
     struct127 *obj;
@@ -362,14 +356,14 @@ void func_15117F3C(Prop *prop) {
     s32 stayOpen;
     s32 sound;
     f32 rangeSq;
-    s32 d2;
+    s32 pad2;
     struct127 *target;
-    s32 d3;
+    s32 pad3;
     f32 anchorX;
     f32 anchorY;
     f32 anchorZ;
     f32 anchor[3];
-    s32 d4;
+    s32 pad4;
     s32 motion;
     s32 started;
     s32 flag4;
@@ -377,7 +371,7 @@ void func_15117F3C(Prop *prop) {
     f32 dz;
     f32 distSq;
 
-    maxAngle = 40.0;
+    maxAngle = 40.0; // matching: a double literal; 40.0f loads the constant differently
     rangeSq = 40000.0f;
     sound = 0x4B8;
     motion = prop->state & 3;
@@ -425,7 +419,7 @@ void func_15117F3C(Prop *prop) {
         stayOpen = 8;
         break;
     case 60:
-        maxAngle = 30;
+        maxAngle = 30; // matching: an int literal; 30.0f loads the constant differently
         rangeSq = 10000.0f;
         anchorX = 22.0f;
         anchorY = 13.0f;
@@ -467,8 +461,7 @@ void func_15117F3C(Prop *prop) {
     accel = prop->work.hatch.accel;
     speed = prop->work.hatch.speed;
     started = prop->work.hatch.counters & 1;
-    if (started) {
-    }
+    if (started) {} // matching: keeps the early read of started
     func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
     target = NULL;
     if (motion != PROP_ARRIVED && motion != PROP_RETURNING) {
@@ -495,8 +488,7 @@ void func_15117F3C(Prop *prop) {
                 dz = obj->z_position - anchor[2];
                 dx = obj->x_position - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);
-                if (distSq) {
-                }
+                if (distSq) {} // matching: keeps distSq in its own register
                 if (distSq < rangeSq) {
                     target = obj;
                     break;
@@ -608,7 +600,7 @@ void func_15117F3C(Prop *prop) {
                 speed = 30.0f;
             }
             accel += 0.05000000075f;
-            prop->rotX = prop->rotX - speed;
+            prop->rotX -= speed;
             if (prop->rotX <= 0.0f) {
                 prop->rotX = 0.0f;
                 started = 0;
@@ -631,7 +623,7 @@ void func_15117F3C(Prop *prop) {
     if (motion == PROP_MOVING || (motion == PROP_REST && timer != 0)) {
         prop->unk4F |= 0x20;
     } else {
-        prop->unk4F |= 0;
+        prop->unk4F |= 0; // matching: the no-op OR still emits a load/store pair
     }
 }
 
@@ -891,12 +883,8 @@ void func_15118F24(Prop *prop) {
 
 /* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
 void func_151193AC(Prop *prop, struct127 *obj) {
-    if (obj->interaction_state == 1) {
-        if (obj->unk65 == 0) {
-            if (!(prop->state & 3) && !(prop->state & 4)) {
-                PROP_SET_MOTION(prop, PROP_MOVING);
-            }
-        }
+    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->state & 3) && !(prop->state & 4)) {
+        PROP_SET_MOTION(prop, PROP_MOVING);
     }
 }
 
@@ -928,13 +916,13 @@ void func_151193F4(Prop *prop) {
                 if (-diff < speed) {
                     prop->y = targetY;
                 } else {
-                    prop->y = prop->y + speed;
+                    prop->y += speed;
                 }
             } else {
                 if (diff < speed) {
                     prop->y = targetY;
                 } else {
-                    prop->y = prop->y - speed;
+                    prop->y -= speed;
                 }
             }
             prop->state |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
@@ -1008,7 +996,6 @@ void func_151196D4(Prop *prop) {
     PropVtx *vtx;
     f32 sinA;
     f32 cosA;
-    f32 toAngle;
     s32 radiusSq;
     s32 group;
     s32 i;
@@ -1028,7 +1015,7 @@ void func_151196D4(Prop *prop) {
     for (i = 0; i < prop->vertexCount; i++) {
         if (vtx->flag == 0) {
             temp = vtx->x;
-            temp = (vtx->z * vtx->z) + (temp * temp);
+            temp = (vtx->z * vtx->z) + (temp * temp); // matching: x goes through temp first
             if (radiusSq < temp) {
                 group++;
                 vtx->flag = group;
@@ -1038,40 +1025,36 @@ void func_151196D4(Prop *prop) {
         vtx++;
     }
 
-    if (group != 0) {
-        toAngle = 40.74366379f; /* 256 / (2 * pi) */
-        do {
-            vertices = prop->vertices;
+    for (; group != 0; group--) {
+        vertices = prop->vertices;
+        vtx = vertices;
+        sumX = 0;
+        sumZ = 0;
+        for (i = 0; i < prop->vertexCount; i++) {
+            if (group == vtx->flag) {
+                sumX += vtx->x;
+                sumZ += vtx->z;
+            }
+            vtx++;
+        }
+        if (sumX != 0 || sumZ != 0) {
             vtx = vertices;
-            sumX = 0;
-            sumZ = 0;
-            for (i = 0; i < prop->vertexCount; i++) {
-                if (group == vtx->flag) {
-                    sumX += vtx->x;
-                    sumZ += vtx->z;
-                }
-                vtx++;
-            }
-            if (sumX != 0 || sumZ != 0) {
-                vtx = vertices;
-                angle = (u8)(s32)(func_150484A0((f32)sumX, (f32)sumZ) * toAngle);
-                if (group < angle) {
-                    back = -angle;
-                    sinA = func_15048A40(back);
-                    cosA = func_150489B0(back);
-                    for (i = 0; i < prop->vertexCount; i++) {
-                        if (group == vtx->flag) {
-                            temp = vtx->x;
-                            vtx->flag = (((group - 1) & 3) << 8) | angle;
-                            vtx->x = (vtx->z * sinA) + (temp * cosA);
-                            vtx->z = (vtx->z * cosA) - (temp * sinA);
-                        }
-                        vtx++;
+            angle = (u8)(s32)(func_150484A0((f32)sumX, (f32)sumZ) * 40.74366379f); /* radians to 1/256 turns */
+            if (group < angle) {
+                back = -angle;
+                sinA = func_15048A40(back);
+                cosA = func_150489B0(back);
+                for (i = 0; i < prop->vertexCount; i++) {
+                    if (group == vtx->flag) {
+                        temp = vtx->x;
+                        vtx->flag = (((group - 1) & 3) << 8) | angle;
+                        vtx->x = (vtx->z * sinA) + (temp * cosA);
+                        vtx->z = (vtx->z * cosA) - (temp * sinA);
                     }
+                    vtx++;
                 }
             }
-            group--;
-        } while (group != 0);
+        }
     }
 }
 
