@@ -1,11 +1,11 @@
 #include <ultra64.h>
+// functions.h declares these two as returning void / u8; hide those prototypes and redeclare them below.
 #define func_15048A40 func_15048A40_hdr
 #define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
 #undef func_15048A40
 #undef func_150ADA20
 #include "variables.h"
-
 
 /* An 8-byte entry of the list at F4D20Obj.unk1C; the list ends with an entry whose kind is -14. */
 typedef struct {
@@ -187,18 +187,12 @@ void func_150C7C90(F4D20Obj *obj) {
     last->head.word |= angle;
 }
 
-typedef struct {
-    u8 pad00[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-} GameObj150C7D7C;
+/* Places the object at (-30, +50, +30) from the struct127 that func_15083E90(0xC) returns. */
+void func_150C7D7C(F4D20Obj *obj) {
+    struct127 *target;
 
-void func_150C7D7C(GameObj150C7D7C *arg0) {
-    struct127 *temp_v0;
-
-    temp_v0 = func_15083E90(0xC);
-    arg0->unk10 = (s16)(s32)(temp_v0->x_position - 30.0f);
-    arg0->unk12 = (s16)(s32)(temp_v0->y_position + 50.0f);
-    arg0->unk14 = (s16)(s32)(temp_v0->z_position + 30.0f);
+    target = func_15083E90(0xC);
+    obj->x = target->x_position - 30.0f;
+    obj->y = target->y_position + 50.0f;
+    obj->z = target->z_position + 30.0f;
 }
