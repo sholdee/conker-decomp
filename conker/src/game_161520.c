@@ -26,17 +26,6 @@ typedef struct {
     u8 padF;
 } BloodProfile;
 
-extern const BloodProfile D_800A3FD8[20];
-/* Entries of D_800A3FD8 that the code singles out (compared by address). */
-extern const BloodProfile D_800A3FF8; /* [2] */
-extern const BloodProfile D_800A4018; /* [4] */
-extern const BloodProfile D_800A4028; /* [5] */
-extern const BloodProfile D_800A4038; /* [6] */
-extern const BloodProfile D_800A4058; /* [8] */
-extern const BloodProfile D_800A4068; /* [9] */
-extern const BloodProfile D_800A40C8; /* [15] */
-extern const BloodProfile D_800A40F8; /* [18] */
-
 /* Scale factors passed to func_1513A24C (all 1.0f). */
 const f32 D_800A3C30[15] = {
     1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -891,28 +880,50 @@ f32 func_15135670(BloodStrip *strip) {
     return func_151422DC(0, "power", 0, 2000, 1000, "../Effects/Blood/blood.c", 2938) * 0.001f;
 }
 
-/* Blood settings for each profile. */
-const BloodProfile D_800A3FD8[20] = {
-    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x44, 1, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x4B, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x81, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0xBB, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0xBC, 0, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0xBC, 1, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x98, 0, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0xDA, 0, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0x44, 1, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0xE3, 2, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0xD3, 2, 0 },
-    { { 0.0f, 20.0f, 30.0f }, 0xD3, 1, 0 },
-    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
+/*
+ * Blood settings for each profile, read as one table D_800A3FD8[kind] (20 entries; other files declare
+ * it so). The code also compares profiles against entries 2, 4, 5, 6, 8, 9, 15 and 18 by address,
+ * and IDO gives those compares their own %hi/%lo only when the entries are separate objects
+ * (&D_800A3FD8[n] shares the table base and changes the code). So the table is written as
+ * consecutive arrays that start at those entries, and D_800A3FD8[kind] runs on through them.
+ */
+const BloodProfile D_800A3FD8[2] = {
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [0] */
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 }, /* [1] */
+};
+const BloodProfile D_800A3FF8[2] = {
+    { { 0.0f, 30.0f, 8.0f }, 0x44, 1, 0 }, /* [2] */
+    { { 0.0f, 30.0f, 8.0f }, 0x4B, 0, 0 }, /* [3] */
+};
+const BloodProfile D_800A4018[1] = {
+    { { 0.0f, 30.0f, 8.0f }, 0x81, 0, 0 }, /* [4] */
+};
+const BloodProfile D_800A4028[1] = {
+    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 }, /* [5] */
+};
+const BloodProfile D_800A4038[2] = {
+    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 }, /* [6] */
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [7] */
+};
+const BloodProfile D_800A4058[1] = {
+    { { 0.0f, 30.0f, 8.0f }, 0xBB, 0, 0 }, /* [8] */
+};
+const BloodProfile D_800A4068[6] = {
+    { { 0.0f, 30.0f, 8.0f }, 0xBC, 0, 0 }, /* [9] */
+    { { 0.0f, 30.0f, 8.0f }, 0xBC, 1, 0 }, /* [10] */
+    { { 0.0f, 30.0f, 8.0f }, 0x98, 0, 0 }, /* [11] */
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 }, /* [12] */
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 }, /* [13] */
+    { { 0.0f, 20.0f, 30.0f }, 0xDA, 0, 0 }, /* [14] */
+};
+const BloodProfile D_800A40C8[3] = {
+    { { 0.0f, 20.0f, 30.0f }, 0x44, 1, 0 }, /* [15] */
+    { { 0.0f, 20.0f, 30.0f }, 0xE3, 2, 0 }, /* [16] */
+    { { 0.0f, 20.0f, 30.0f }, 0xD3, 2, 0 }, /* [17] */
+};
+const BloodProfile D_800A40F8[2] = {
+    { { 0.0f, 20.0f, 30.0f }, 0xD3, 1, 0 }, /* [18] */
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 }, /* [19] */
 };
 
 void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
@@ -1458,8 +1469,8 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         spray.maxDistance = 998.0f;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;
-        if ((&D_800A3FF8 == &D_800A3FD8[kind]) || (&D_800A40C8 == &D_800A3FD8[kind]) ||
-            (&D_800A40F8 == &D_800A3FD8[kind])) {
+        if ((D_800A3FF8 == &D_800A3FD8[kind]) || (D_800A40C8 == &D_800A3FD8[kind]) ||
+            (D_800A40F8 == &D_800A3FD8[kind])) {
             spray.kind = 1;
         } else {
             spray.kind = 0;
@@ -1467,8 +1478,8 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         func_15150D1C(&spray, arg6, arg7);
     }
     if (arg2 != 0) {
-        if ((&D_800A3FF8 == &D_800A3FD8[kind]) || (&D_800A40C8 == &D_800A3FD8[kind]) ||
-            (&D_800A40F8 == &D_800A3FD8[kind])) {
+        if ((D_800A3FF8 == &D_800A3FD8[kind]) || (D_800A40C8 == &D_800A3FD8[kind]) ||
+            (D_800A40F8 == &D_800A3FD8[kind])) {
             heavy = 1;
         } else {
             heavy = 0;
@@ -1477,7 +1488,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                       (func_150ADA20() % 6U) + 18, 0, &heavy, arg6, arg7);
     }
     if (arg4 != 0) {
-        if ((&D_800A3FF8 == &D_800A3FD8[kind]) || (&D_800A40C8 == &D_800A3FD8[kind])) {
+        if ((D_800A3FF8 == &D_800A3FD8[kind]) || (D_800A40C8 == &D_800A3FD8[kind])) {
             func_151C61A0((s32)&position, (s32)&hit, arg6, arg7);
         } else {
             func_1513A48C(&position, arg6, arg7);
@@ -1899,7 +1910,7 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
         desc.offsetB.x = 0.0f;
         desc.offsetB.z = 0.0f;
         desc.offsetB.y = 20.0f;
-        if ((&D_800A4058 == &D_800A3FD8[kind]) || (&D_800A4068 == &D_800A3FD8[kind])) {
+        if ((D_800A4058 == &D_800A3FD8[kind]) || (D_800A4068 == &D_800A3FD8[kind])) {
             desc.lifetime = (actor->unk94 & 0xE) ? 120 : 240;
         } else {
             desc.lifetime = 600;
@@ -1993,7 +2004,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.rotVel.y = 0.0f;
     spawn.lifetime = func_150ADA20() % 51U + 250;
     spawn.model = D_800A3FD8[kind].unkC;
-    spawn.sizeY = ((&D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
+    spawn.sizeY = ((D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
@@ -2018,7 +2029,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.fadeStart = 12;
     spawn.fadeRate = 21;
     func_1513264C(&spawn, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
-    if (&D_800A4018 == &D_800A3FD8[kind]) {
+    if (D_800A4018 == &D_800A3FD8[kind]) {
         const s32 ids[3] = { 0x76, 0x77, 0x78 };
         u8 i;
         u8 found;
@@ -2038,7 +2049,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
             spawn.model = ids2[i];
             func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
         }
-    } else if (&D_800A4028 == &D_800A3FD8[kind]) {
+    } else if (D_800A4028 == &D_800A3FD8[kind]) {
         const s32 masks[4] = { 2, 8, 0x10, 0x20 };
         u8 i;
         const s32 ids[4] = { 0x87, 0x88, 0x89, 0x8A };
@@ -2049,7 +2060,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
                 func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
             }
         }
-    } else if (&D_800A4038 == &D_800A3FD8[kind]) {
+    } else if (D_800A4038 == &D_800A3FD8[kind]) {
         const s32 masks[2] = { 2, 8 };
         u8 i;
         const s32 ids[2] = { 0x8D, 0x8B };
