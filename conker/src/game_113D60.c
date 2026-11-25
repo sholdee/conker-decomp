@@ -254,25 +254,18 @@ typedef struct {
     /* 0x10 */ Bone150E6FAC *unk10;
 } Node150E6FAC;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ Vec3f position;
-    /* 0x020 */ u8 pad20[0x2D4];
-    /* 0x2F4 */ void *unk2F4;
-} Actor150E6FAC;
-
 s32 func_1514ECE0(void *, s16, void *);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */
-void func_150E6FAC(Vec3f *out, Actor150E6FAC *actor) {
+void func_150E6FAC(Vec3f *out, Actor *actor) {
     Node150E6FAC *node;
     f32 sine;
     f32 radius;
     s16 angle;
     f32 cosine;
 
-    if (func_1514ECE0(actor->unk2F4, 0x16, &node) != 0) {
+    if (func_1514ECE0(actor->attachments, 0x16, &node) != 0) {
         Bone150E6FAC *bone;
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
@@ -280,21 +273,21 @@ void func_150E6FAC(Vec3f *out, Actor150E6FAC *actor) {
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
         bone = node->unk10;
-        out->x = actor->position.x + (bone->unk38.x * -80.0f) + (cosine * radius);
-        out->y = actor->position.y + (bone->unk38.y * -80.0f) + 100.0f;
-        out->z = actor->position.z + (bone->unk38.z * -80.0f) + (sine * radius);
+        out->x = actor->x_position + (bone->unk38.x * -80.0f) + (cosine * radius);
+        out->y = actor->y_position + (bone->unk38.y * -80.0f) + 100.0f;
+        out->z = actor->z_position + (bone->unk38.z * -80.0f) + (sine * radius);
     } else {
-        out->x = actor->position.x;
-        out->y = actor->position.y;
-        out->z = actor->position.z;
+        out->x = actor->x_position;
+        out->y = actor->y_position;
+        out->z = actor->z_position;
     }
 }
 
 /* End callback: the actor's position. */
-void func_150E70CC(Vec3f *out, Actor150E6FAC *actor) {
-    out->x = actor->position.x;
-    out->y = actor->position.y;
-    out->z = actor->position.z;
+void func_150E70CC(Vec3f *out, Actor *actor) {
+    out->x = actor->x_position;
+    out->y = actor->y_position;
+    out->z = actor->z_position;
 }
 
 /* Motion callback: aims the emission along `delta` with a random wobble. */

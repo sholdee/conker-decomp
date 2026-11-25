@@ -1542,30 +1542,19 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* Actor view for func_150F1CB0: the header declares bytes 0x68-0x6B as one u32 pad. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x68];
-    /* 0x068 */ u8 unk68;
-    /* 0x069 */ u8 unk69;
-    /* 0x06A */ u8 pad6A[0x1A];
-    /* 0x084 */ u16 unk84;
-    /* 0x086 */ u8 pad86[0x25E];
-    /* 0x2E4 */ s32 unk2E4;
-} Actor150F1CB0;
-
-/* Picks actor->unk68 by state (0x14 or not) and actor->unk69 by the bit pairs of actor->unk2E4. */
-void func_150F1CB0(Actor150F1CB0 *actor) {
-    if (actor->unk84 == 0x14) {
-        actor->unk68 = 0x1B;
+/* Picks actor->unk68[0] by state (0x14 or not) and actor->unk68[1] by the bit pairs of actor->unk2E4. */
+void func_150F1CB0(Actor *actor) {
+    if (actor->unk84.uh == 0x14) {
+        actor->unk68[0] = 0x1B;
     } else {
-        actor->unk68 = 0xC;
+        actor->unk68[0] = 0xC;
     }
-    actor->unk69 = 0x13;
+    actor->unk68[1] = 0x13;
     if ((actor->unk2E4 & 3) == 3) {
-        actor->unk69 = 0x14;
+        actor->unk68[1] = 0x14;
     }
     if ((actor->unk2E4 & 0xC) == 0xC) {
-        actor->unk69 = 0x17;
+        actor->unk68[1] = 0x17;
     }
 }
 
