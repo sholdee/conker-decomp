@@ -4,40 +4,39 @@
 #include "variables.h"
 
 
-void func_15006010(struct108 *arg0) {
-
-    if (arg0->unk3D0->unk102) {
-        if (func_15123934(arg0, 8, 0, 0, 0)) {
-            arg0->unk84 |= 0x100000;
-            arg0->unk84 &= -5;
-            arg0->unk1B4 = 1;
-            arg0->unk1E0 = 3;
-            func_15124B18(arg0);
+void func_15006010(struct108 *actor) {
+    if (actor->unk3D0->unk102 != 0) {
+        if (func_15123934(actor, 8, 0, 0, 0) != 0) {
+            actor->unk84 |= 0x100000;
+            actor->unk84 &= ~4;
+            actor->unk1B4 = 1;
+            actor->unk1E0 = 3;
+            func_15124B18(actor);
         }
-        arg0->unk348 = 143.0f;
-        arg0->unk34C = 143.0f;
-        arg0->unk374 = 150.0f;
-        arg0->unk190 = -38.0f;
+        actor->unk348 = 143.0f;
+        actor->unk34C = 143.0f;
+        actor->unk374 = 150.0f;
+        actor->unk190 = -38.0f;
         return;
     }
-    if (arg0->unk23E == 0x3B) {
-        if (func_15123934(arg0, 8, 0, 0, 0)) {
-            arg0->unk84 |= 0x100000;
-            arg0->unk84 &= -5;
-            arg0->unk348 = 155.0f;
-            arg0->unk34C = 155.0f;
-            arg0->unk190 = 30.0f;
-            arg0->unk18C = 30.0f;
-            arg0->unk374 = 178.0f;
-            return;
+
+    if (actor->unk23E == 59) {
+        if (func_15123934(actor, 8, 0, 0, 0) != 0) {
+            actor->unk84 |= 0x100000;
+            actor->unk84 &= ~4;
+            actor->unk348 = 155.0f;
+            actor->unk34C = 155.0f;
+            actor->unk190 = 30.0f;
+            actor->unk18C = 30.0f;
+            actor->unk374 = 178.0f;
         }
     } else {
-        func_151239CC(arg0, 0);
+        func_151239CC(actor, 0);
     }
 }
 
-void func_15006140(struct108 *arg0) {
-    arg0->unk1E0 = 5;
-    arg0->unk1B4 = 2;
-    func_15124B18(arg0);
+void func_15006140(struct108 *actor) {
+    actor->unk1E0 = 5;
+    actor->unk1B4 = 2;
+    func_15124B18(actor);
 }
