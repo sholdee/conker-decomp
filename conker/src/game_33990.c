@@ -2,9 +2,7 @@
 
 #include "functions.h"
 /* variables.h declares D_800BE3F8 as a pointer; this file uses it as the array of SaveSlotInfo. */
-#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
-#undef D_800BE3F8
 
 /*
  * EEPROM save data. The EEPROM is addressed in 8-byte blocks:
@@ -16,17 +14,6 @@
  * Under -g3 the line table steers the scheduling of the unrolled loops, so short loop bodies stay on
  * one line.
  */
-
-/* Summary of one of the three save files the player can pick. */
-typedef struct SaveSlotInfo {
-    /* 0x00 */ s32 unk0;       /* D_800BE3E8 */
-    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
-    /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
-    /* 0x0C */ s8 unkC;        /* D_800BE3DF */
-    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
-    /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
-    /* 0x0F */ s8 padF;
-} SaveSlotInfo; /* size = 0x10 */
 
 typedef struct Struct33990 {
     /* 0x00 */ u8 unk0;
@@ -53,7 +40,6 @@ enum EepromRequest {
     EEPROM_REQ_SAVE_SETTINGS  /* func_15007558 */
 };
 
-extern SaveSlotInfo D_800BE3F8[3];
 extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];

@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
-#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
-#undef D_800BE3F8
 
 /* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
 typedef struct {
@@ -1348,14 +1345,6 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     return gfx;
 }
 
-typedef struct {
-    /* 0x00 */ char pad0[8];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ char padD[3];
-} SaveSlot215960; /* size 0x10 */
-
-extern SaveSlot215960 D_800BE3F8[];
 
 extern u8 D_800E0A95;
 extern s8 D_8008FEF8;
@@ -1409,7 +1398,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         }
         if (D_8008FDD4->unk8 >= 0.5f) {
             if (D_8008FDD4->unk2C >= 3) {
-                if (D_800BE3F8[D_8008FDD4->unk2C - 3].unk8 != -1) {
+                if (D_800BE3F8[D_8008FDD4->unk2C - 3].sequence != -1) {
                     gfx = func_151EEBE8(gfx, D_800BE3F8[D_8008FDD4->unk2C - 3].unkC);
                 }
             }

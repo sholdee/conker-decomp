@@ -825,7 +825,7 @@ extern u8   D_800BE3DF;
 extern u8   D_800BE3E0;
 extern s32  D_800BE3E8;
 extern u8   D_800BE3EC;
-extern struct162 *D_800BE3F8;
+extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
 extern u8   D_800BE614;
 extern u8   D_800BE615;

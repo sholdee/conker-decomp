@@ -2400,6 +2400,17 @@ typedef struct {
     /* 0x34 */ s32 handle;
 } SeqSubtitle; // size 0x38
 
+/* Summary of one of the three save files the player can pick. */
+typedef struct SaveSlotInfo {
+    /* 0x00 */ s32 unk0;       /* D_800BE3E8 */
+    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
+    /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
+    /* 0x0C */ u8 unkC;        /* D_800BE3DF */
+    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
+    /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
+    /* 0x0F */ s8 padF;
+} SaveSlotInfo; /* size = 0x10 */
+
 typedef struct {
     f32 unk0;   // used
     f32 unk4;   // used
