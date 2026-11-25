@@ -198,7 +198,7 @@ typedef struct PathPoint {
     s16 x;
     s16 y;
     s16 z;
-    u16 radius;
+    u16 param; /* point 0: radius / 8 of the actor's area; later points: speed */
 } PathPoint;
 
 /* Keeps the actor within unk2E8 * 8 units of its path's second point. */
@@ -432,11 +432,11 @@ s32 func_1505693C(struct127 *actor, s32 targetIdx) {
     f32 dx;
     PathPoint *path = ((PathPoint **)D_800D2104)[actor->unk13F];
 
-    if (path[0].radius == 0) {
+    if (path[0].param == 0) {
         return TRUE;
     }
 
-    radiusSq = path[0].radius * 8;
+    radiusSq = path[0].param * 8;
     radiusSq = radiusSq * radiusSq;
     dx = path[0].x - D_800CC2D0[targetIdx].x_position;
     dz = path[0].z - D_800CC2D0[targetIdx].z_position;
@@ -567,7 +567,7 @@ void func_15056B08(struct127 *actor) {
         rangeSq = actor->unk23D * 8;
         rangeSq *= rangeSq;
     }
-    if (((PathPoint **)D_800D2104)[actor->unk13F]->radius != 0) {
+    if (((PathPoint **)D_800D2104)[actor->unk13F]->param != 0) {
         tx = ((PathPoint **)D_800D2104)[actor->unk13F]->x - actor->x_position;
         tz = ((PathPoint **)D_800D2104)[actor->unk13F]->z - actor->z_position;
     }
@@ -4653,77 +4653,74 @@ extern void func_10004074(void *);
 extern u8 *D_800D210C;
 void func_150626EC(struct127 *arg0, s32 arg1);
 
-void func_15060F28(struct127 *arg0, s32 arg1) {
-    func_1514D310(arg0);
-    func_151695F0(arg0, 0);
-    if ((arg0->unk5 != 2) && (arg0->unk5 != 3)) {
-        func_15084558(arg0);
-        func_150626EC(arg0, arg1);
+/* Removes the actor: releases its resources and attachments, then clears its slot. */
+void func_15060F28(struct127 *actor, s32 mode) {
+    func_1514D310(actor);
+    func_151695F0(actor, 0);
+    if ((actor->unk5 != 2) && (actor->unk5 != 3)) {
+        func_15084558(actor);
+        func_150626EC(actor, mode);
     }
-    if (arg1 == 1) {
-        func_1504AF10(arg0, 1, 0);
-        func_1503E260(arg0 - D_800CC2D0);
+    if (mode == 1) {
+        func_1504AF10(actor, 1, 0);
+        func_1503E260(actor - D_800CC2D0);
     }
-    if (arg0->unk13F != 0xFF) {
-        if (arg1 != 2) {
-            if ((*(s32 *)((u8 *)arg0 + 0x144)) != 0) {
-                if (((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk0 & 0x20) {
-                    ((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk2 = 1;
-                    D_800D210C[arg0->unk13F] = 0;
-                } else if (((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk0 & 1) {
-                    D_800D210C[arg0->unk13F] = 0;
+    if (actor->unk13F != 0xFF) {
+        if (mode != 2) {
+            /* matching: unk144 is read as an s32 at each use; pointer reads let IDO keep it in a register */
+            if ((*(s32 *)&actor->unk144) != 0) {
+                if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 0x20) {
+                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+                    D_800D210C[actor->unk13F] = 0;
+                } else if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 1) {
+                    D_800D210C[actor->unk13F] = 0;
                 } else {
                     s32 pad;
-                    ((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk2 = 1;
-                    D_800D210C[arg0->unk13F] &= 0x80;
+                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+                    D_800D210C[actor->unk13F] &= 0x80;
                 }
             } else {
-                D_800D210C[arg0->unk13F] &= 0x80;
+                D_800D210C[actor->unk13F] &= 0x80;
             }
         } else {
-            D_800D210C[arg0->unk13F] = 0;
+            D_800D210C[actor->unk13F] = 0;
         }
     }
-    if (*(void **)((u8 *)arg0 + 0x260) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x260));
-    if (*(s32 *)((u8 *)arg0 + 0x264) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x264));
-    if (*(s32 *)((u8 *)arg0 + 0x268) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x268));
-    if (*(s32 *)((u8 *)arg0 + 0x26C) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x26C));
-    if (*(void **)((u8 *)arg0 + 0x1D8) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x1D8));
-    if (*(struct102 **)((u8 *)arg0 + 0x2D4) != NULL) func_1516972C(*(struct102 **)((u8 *)arg0 + 0x2D4));
-    if (*(s32 **)((u8 *)arg0 + 0x304) != NULL) {
+    if (*(void **)((u8 *)actor + 0x260) != NULL) func_10004074(*(void **)((u8 *)actor + 0x260));
+    if (*(s32 *)((u8 *)actor + 0x264) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x264));
+    if (*(s32 *)((u8 *)actor + 0x268) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x268));
+    if (*(s32 *)((u8 *)actor + 0x26C) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x26C));
+    if (*(void **)((u8 *)actor + 0x1D8) != NULL) func_10004074(*(void **)((u8 *)actor + 0x1D8));
+    if (*(struct102 **)((u8 *)actor + 0x2D4) != NULL) func_1516972C(*(struct102 **)((u8 *)actor + 0x2D4));
+    if (*(s32 **)((u8 *)actor + 0x304) != NULL) {
         s32 i;
         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
-            func_100043B4(*(s32 **)((u8 *)arg0 + (i * 4) + 0x304), 4);
+            func_100043B4(*(s32 **)((u8 *)actor + (i * 4) + 0x304), 4);
         }
     }
-    if (*(s32 *)((u8 *)arg0 + 0x314) != 0) func_100043B4((s32 *)*(s32 *)((u8 *)arg0 + 0x314), 4);
-    if (arg0->unk2D0 != NULL) func_10004074(arg0->unk2D0);
-    if (*(void **)((u8 *)arg0 + 0x324) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x324));
-    if ((arg0->unk31C != NULL) && (*(void **)((u8 *)arg0->unk31C + 0x11C) != NULL)) {
-        func_10004074(*(void **)((u8 *)arg0->unk31C + 0x11C));
+    if (*(s32 *)((u8 *)actor + 0x314) != 0) func_100043B4((s32 *)*(s32 *)((u8 *)actor + 0x314), 4);
+    if (actor->unk2D0 != NULL) func_10004074(actor->unk2D0);
+    if (*(void **)((u8 *)actor + 0x324) != NULL) func_10004074(*(void **)((u8 *)actor + 0x324));
+    if ((actor->unk31C != NULL) && (*(void **)((u8 *)actor->unk31C + 0x11C) != NULL)) {
+        func_10004074(*(void **)((u8 *)actor->unk31C + 0x11C));
     }
-    func_10010AA8(arg0);
-    func_150303E4(arg0);
-    func_15060D54(arg0);
-    func_15188AD0(arg0);
-    if (arg0->unk31C != NULL) func_10004074((void *)(s32)arg0->unk31C);
-    func_1505F188(arg0);
+    func_10010AA8(actor);
+    func_150303E4(actor);
+    func_15060D54(actor);
+    func_15188AD0(actor);
+    if (actor->unk31C != NULL) func_10004074((void *)(s32)actor->unk31C);
+    func_1505F188(actor);
 }
-typedef struct PathPt150611E8 {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 speed;
-} PathPt150611E8;
 
-void func_150611E8(struct127 *arg0, s32 arg1) {
+/* Drifts the actor along water-current path pathIdx, from the nearest of its points. */
+void func_150611E8(struct127 *actor, s32 pathIdx) {
     s32 count;
     s32 closest;
     s32 i;
     s32 best;
     s16 x;
     s16 z;
-    PathPt150611E8 *pts;
+    PathPoint *pts;
     f32 speed;
     f32 scale;
     s32 dx;
@@ -4731,23 +4728,23 @@ void func_150611E8(struct127 *arg0, s32 arg1) {
     u16 angle;
     s32 dist;
 
-    count = D_800D2108[arg1];
+    count = D_800D2108[pathIdx];
     if (count < 3) {
         return;
     }
-    x = arg0->x_position;
-    z = arg0->z_position;
+    x = actor->x_position;
+    z = actor->z_position;
     best = 0x7FFFFFFF;
     for (i = 0; i < count; i++) {
-        dx = x - ((PathPt150611E8 **)D_800D2104)[arg1][i].x;
-        dz = z - ((PathPt150611E8 **)D_800D2104)[arg1][i].z;
+        dx = x - ((PathPoint **)D_800D2104)[pathIdx][i].x;
+        dz = z - ((PathPoint **)D_800D2104)[pathIdx][i].z;
         if (dx * dx + dz * dz < best) {
             closest = i;
             best = dx * dx + dz * dz;
         }
     }
     if (closest != 0 && closest != count - 1) {
-        pts = ((PathPt150611E8 **)D_800D2104)[arg1];
+        pts = ((PathPoint **)D_800D2104)[pathIdx];
         if (best > 28000) {
             dx = x - pts[closest + 1].x;
             dz = z - pts[closest + 1].z;
@@ -4758,31 +4755,32 @@ void func_150611E8(struct127 *arg0, s32 arg1) {
                 closest--;
             }
         }
-        if (pts[closest + 1].speed == 0) {
+        if (pts[closest + 1].param == 0) {
             speed = 8.0f;
         } else {
-            speed = (u32)pts[closest + 1].speed;
+            speed = (u32)pts[closest + 1].param;
         }
         scale = speed * 0.0025f;
         if (scale > 1.0f) {
             scale = 1.0f;
         }
         angle = func_1505A630(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
-        if (arg0->unk31C != NULL && speed > 20.0f) {
-            *(s16 *)((u8 *)arg0->unk31C + 0x68) = angle | 1;
+        if (actor->unk31C != NULL && speed > 20.0f) {
+            *(s16 *)((u8 *)actor->unk31C + 0x68) = angle | 1;
         }
-        func_150593C4(arg0, angle, speed, scale);
+        func_150593C4(actor, angle, speed, scale);
     }
 }
 
 // TODO: is this really struct127?
-void func_150615DC(struct127 *arg0) {
-    arg0->unk7 = 0xFF;
-    arg0->unk8 = 0xFF;
-    arg0->unk9 = 0;
-    arg0->unkA = 0;
-    arg0->unkE.ub[1] = 0;
-    arg0->unkB = arg0->unkC = arg0->unkD = arg0->unkE.ub[0] = 0xFF;
+/* Resets the actor's bytes 0x7..0xF. */
+void func_150615DC(struct127 *actor) {
+    actor->unk7 = 0xFF;
+    actor->unk8 = 0xFF;
+    actor->unk9 = 0;
+    actor->unkA = 0;
+    actor->unkE.ub[1] = 0;
+    actor->unkB = actor->unkC = actor->unkD = actor->unkE.ub[0] = 0xFF;
 }
 
 void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
