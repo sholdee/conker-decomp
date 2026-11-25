@@ -1885,6 +1885,22 @@ typedef struct Texture {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture; /* size 0xC */
 
+/* A sprite to draw (see func_15095D34, game_C2350.c). func_15095060 points tex at the shared texture;
+ * func_15095B08 scales the texture's size by scaleX and scaleY. */
+typedef struct SpriteParams {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 scaleX;
+    /* 0x08 */ s16 scaleY;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 animSpeed;
+    /* 0x0C */ u8 animTimer; // 8 ticks per frame; bit 7 = playing backwards (ping-pong textures)
+    /* 0x0D */ u8 flip;      // bit 0: flip s, bit 1: flip t
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ Texture *tex;
+} SpriteParams; /* size 0x14 */
+
 /* A texture as stored in the asset tables, converted into a Texture by func_15095060 (game_C2350.c). */
 typedef struct TextureDesc {
     /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses

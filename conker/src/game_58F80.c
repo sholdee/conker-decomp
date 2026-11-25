@@ -30,19 +30,6 @@ typedef struct {
     u8 pad1[0xF];
 } D_800C666FEntry;
 
-typedef struct SpriteParams {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 w;
-    /* 0x8 */ s16 h;
-    /* 0xA */ u8 alpha;
-    /* 0xB */ u8 unkB;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 flip;
-    /* 0xE */ u8 padE[2];
-} SpriteParams;
-
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
 extern D_800C666FEntry D_800C666F[];
@@ -327,12 +314,11 @@ s32 func_1502C3BC(s32 index) {
 
 /* Draws a kind-2 object as a textured sprite. */
 Gfx *func_1502C408(Gfx *gdl, s32 index) {
-    s32 pad; // matching: unused stack slots (pad, pad2) fix the frame layout
     SpriteParams sprite;
     s32 w;
     s32 h;
     s32 tex;
-    s16 pad2;
+    s16 pad2; // matching: an unused stack slot that fixes the frame layout
     s16 scroll;
     s32 alpha;
     u8 size;
@@ -358,8 +344,8 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     gdl = func_15094F70(gdl, D_8008CA4C[tex], scroll, &sprite, 0, 0, 0, 2, 3);
     sprite.flip = 0;
     sprite.alpha = alpha;
-    sprite.w = w;
-    sprite.h = h;
+    sprite.scaleX = w;
+    sprite.scaleY = h;
     sprite.x = movement_obj[index].xpos;
     sprite.y = movement_obj[index].ypos + (f32)(size / 2);
     sprite.z = movement_obj[index].zpos;

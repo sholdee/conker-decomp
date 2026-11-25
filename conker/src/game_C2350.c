@@ -5,21 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-/* A sprite to draw (see func_15095D34). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 scaleX;
-    /* 0x08 */ s16 scaleY;
-    /* 0x0A */ u8 alpha;
-    /* 0x0B */ u8 animSpeed;
-    /* 0x0C */ u8 animTimer; // 8 ticks per frame; bit 7 = playing backwards (ping-pong textures)
-    /* 0x0D */ u8 flip;      // bit 0: flip s, bit 1: flip t
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ Texture *tex;
-} SpriteParams;
-
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 

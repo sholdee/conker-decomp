@@ -60,19 +60,6 @@ struct SpriteFx {
     /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
 };
 
-/* Sprite placement passed to func_15095760. */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ u8 alpha;
-    /* 0xB */ u8 unkB;
-    /* 0xC */ u8 unkC;
-    /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
-} SpriteParams;
-
 extern EffectTexture *D_8008CA4C[];
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
@@ -381,14 +368,13 @@ extern RenderModeEntry D_800A4AC8[];
 typedef struct {
     s32 unk0;
     s32 unk4;
-    s32 unk8;
 } PaddedFlag;
 s32 func_15095760(Gfx *arg0, void *arg1);
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
-    Gfx *gfx;
     SpriteParams params;
-    PaddedFlag update; // matching: 12-byte stack object; only the first word (the update flag) is used
+    Gfx *gfx;
+    PaddedFlag update; // matching: 8-byte stack object; only the first word (the update flag) is used
     EffectTexture *anim;
     s32 renderMode;
     s16 frame;
@@ -402,8 +388,8 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     params.x = fx->x;
     params.y = fx->y;
     params.z = fx->z;
-    params.unk6 = fx->unk1E;
-    params.unk8 = fx->unk20;
+    params.scaleX = fx->unk1E;
+    params.scaleY = fx->unk20;
     params.alpha = fx->alpha;
     params.flip = 0;
     // matching: fadeStep is an s8, so it never equals 0xFF; the target still tests both ways
@@ -543,9 +529,9 @@ extern EffectTexture D_8009053C;
 
 /* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
-    s32 view;
     SpriteParams params;
-    s32 pad1[2]; // matching: stack layout of the target frame
+    s32 view;
+    s32 pad1; // matching: stack layout of the target frame
     u8 update;
     s32 pad2[3]; // matching: stack layout of the target frame
     f32 angle;
@@ -601,13 +587,13 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
             size = 0x400;
         }
     }
-    params.unk6 = size;
+    params.scaleX = size;
     size = p->tmpl.height;
     if (size < 0) {
         view = (p->tmpl.width < 0) ? 0 : p->tmpl.width;
         size = fabsf(camera_global_Cameras[viewIndex].CameraPitch) * (view + size) * 0.01111111138f - size;
     }
-    params.unk8 = size;
+    params.scaleY = size;
     if (p->tmpl.flags & BILLBOARD_CUSTOM_MODE) {
         u8 renderMode;
         u8 combineMode;
