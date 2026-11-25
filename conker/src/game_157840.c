@@ -41,9 +41,6 @@ typedef struct {
     /* 0x17C */ f32 unk17C;
 } CamObj;
 
-/* The camera (Camera) as this file sees it. The shared header lacks many of these fields (0x360, 0x3EC-0x404,
- * 0x5F8, 0x60C, 0x640-0x648, 0x8B8 and up, ...), types unk5FC as u16 although it is read with lh, and splits the
- * vectors at 0x2A4-0x2C4 and 0x2F8 into floats. */
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);

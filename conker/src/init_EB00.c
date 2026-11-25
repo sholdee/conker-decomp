@@ -42,13 +42,13 @@ struct SoundRecord {
 
 // Per-player listener (D_80041F68), refreshed from the cameras by func_10011BB8.
 typedef struct {
-    s32 x0;      // camera +0x2A4 (one listener, flag 0x80000 clear) or +0x2F8; deltas to func_1000A420
+    s32 x0;      // Camera.focus (one listener, flag 0x80000 clear) or Camera.eye; deltas to func_1000A420
     s32 y4;
     s32 z8;
-    s32 xC;      // camera +0x2F8; the nearest listener is chosen by distance to this
+    s32 xC;      // Camera.eye; the nearest listener is chosen by distance to this
     s32 y10;
     s32 z14;
-    f32 field18; // camera +0x380
+    f32 field18; // Camera.unk380
 } SoundSpatialRecord;
 
 // Deferred voice stop, queued by func_100112BC.
