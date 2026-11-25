@@ -9,6 +9,12 @@ void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
 
+/* Animation id lists (D_80099428 goes with the dive sound in func_1505F298). */
+const u16 D_80099420[4] = { 0x215, 0x10E, 0x108, 0x249 };
+const u16 D_80099428[2] = { 0xE9, 0 };
+/* Eye frame for eye codes 0..2 (func_15061B4C). */
+const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
+
 
 void func_15058F24(Actor *arg0, f32, f32);
 void func_1505D6F0(Actor *arg0, s32 arg1);
@@ -1668,16 +1674,16 @@ void func_15059C84(Actor *actor) {
 /* Splits `speed` (halved) along yaw `angle` and pitch `pitch` (degrees) into x/z/y components. */
 void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
     f32 sinYaw;
-    union { f32 f; f64 d; } yaw; // matching: the 8-byte union gives the frame IDO used
+    f32 yaw;
     f32 cosYaw;
 
     speed = speed * 0.5f;
-    pitch = pitch * D_800994B8;
+    pitch = pitch * 0.01745329238f;
     *outY = func_150AD78C(pitch) * -speed;
     speed = func_150AD780(pitch) * speed;
-    yaw.f = (f32)angle * D_800994BC;
-    sinYaw = func_150AD780(yaw.f);
-    cosYaw = func_150AD78C(yaw.f);
+    yaw = (f32)angle * 9.587380191e-05f;
+    sinYaw = func_150AD780(yaw);
+    cosYaw = func_150AD78C(yaw);
     *outX = sinYaw * speed;
     *outZ = -cosYaw * speed;
 }
@@ -2968,7 +2974,6 @@ void func_1505D2B8(Actor *actor, u8 entryIdx) {
 /* Rotates the offset (a, b) by angleDeg - 90 degrees (after scaling); returns x, writes z. */
 f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
     f32 sinA;
-    s32 pad;
     f32 cosA;
     f32 rad;
 
@@ -2976,7 +2981,7 @@ f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
         a = a * scale;
         b = b * scale;
     }
-    rad = (angleDeg - 90.0f) * D_80099520; // matching: the 0.01745329238f literal allocates differently
+    rad = (angleDeg - 90.0f) * 0.01745329238f;
     sinA = func_150AD780(rad);
     cosA = func_150AD78C(rad);
     *outZ = (-a * cosA) + (b * sinA);
@@ -3866,7 +3871,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].y = 0;
     actor->floorTri.v[2].z = 0;
 }
-extern u8 D_80099428[];
 void func_1000EFB4();
 void func_151AE264(Actor *arg0);
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
@@ -4901,7 +4905,6 @@ void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 c
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 f32 func_150489B0(u8 arg0);
 void func_150F1CB0(Actor *arg0);
-extern s32 D_8009942C[];
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
