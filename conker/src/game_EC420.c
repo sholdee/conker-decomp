@@ -317,93 +317,112 @@ void func_150BF21C(Struct150BF21C *obj) {
     }
 }
 
-void func_1511B51C(void *);
-s32 func_15195FB0();
-void func_150825C0(s32, s32);
-extern f32 D_800A0124, D_800A0128, D_800A012C, D_800A0130;
+typedef struct {
+    /* 0x000 */ u8 pad0[0x73];
+    /* 0x073 */ u8 flags; /* bits 0-1: mode */
+    /* 0x074 */ u8 pad74[0x34];
+    /* 0x0A8 */ f32 unkA8;
+    /* 0x0AC */ u8 padAC[0x78];
+    /* 0x124 */ void *unk124;
+} Struct150BF760;
 
-void func_150BF760(u8 *arg0) {
-    u8 *actor;
-    f32 *motion;
+/* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
+typedef struct {
+    /* 0x00 */ u8 pad0[2];
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 pad3[0x2D];
+} SpawnSlot;
+
+void func_1511B51C(Struct150BF760 *);
+void *func_15195FB0(Struct150BF760 *, s32, s32, s32, s32, s32, s32);
+void func_150825C0(s32, s32);
+
+/* Drives object 0x14 according to the mode in obj->flags, spawning it first when a mode needs it,
+ * and sets obj->unkA8 to a sine of the object's animation progress. */
+void func_150BF760(Struct150BF760 *obj) {
+    struct127 *actor;
+    struct197 *anim;
     s32 mode;
-    s32 index;
-    f32 ratio = 0.0f;
+    s32 slot;
+    f32 progress = 0.0f;
 
     if (D_800C35EA != 1 || D_800C35E8 == 1) {
-        func_1511B51C(arg0);
-        if (*(void **)(arg0 + 0x124) == 0) {
-            *(s32 *)(arg0 + 0x124) = func_15195FB0(arg0, D_800902B8, 1, -1, 0, 0, -8);
+        func_1511B51C(obj);
+        if (obj->unk124 == NULL) {
+            obj->unk124 = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
-        actor = (u8 *)func_15083E90(0x14);
-        mode = arg0[0x73] & 3;
-        if (actor != 0) {
-            motion = *(f32 **)(actor + 0x2D0);
-            ratio = motion[2] / (motion[6] - 2.0f);
+        actor = func_15083E90(0x14);
+        mode = obj->flags & 3;
+        if (actor != NULL) {
+            anim = actor->unk2D0;
+            progress = anim->unk8 / (anim->unk18 - 2.0f);
         }
-        *(f32 *)(arg0 + 0xA8) = 0.0f;
+        obj->unkA8 = 0.0f;
         if (mode == 2) {
-            if (ratio <= 0.75f) {
-                *(f32 *)(arg0 + 0xA8) = -sinf(ratio * D_800A0124 * D_800A0128) * 10.0f;
+            if (progress <= 0.75f) {
+                obj->unkA8 = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
-            if (actor == 0) {
-                index = func_15083E0C(0x14);
-                ((u8 *)D_800D20FC)[index * 0x30 + 2] = 0;
-                func_150825C0(index, 0);
-                actor = (u8 *)func_15083E90(0x14);
+            if (actor == NULL) {
+                slot = func_15083E0C(0x14);
+                ((SpawnSlot *)D_800D20FC)[slot].unk2 = 0;
+                func_150825C0(slot, 0);
+                actor = func_15083E90(0x14);
             }
-            if (actor[0x232] != 2) {
-                actor[0x232] = 2;
-                *(s32 *)(actor + 0x218) = 0;
+            if (actor->unk232 != 2) {
+                actor->unk232 = 2;
+                actor->unk218 = NULL;
             }
         } else if (mode == 3) {
-            if (actor != 0 && ratio >= 1.0f) {
-                func_15060F28((struct127 *)actor, 0);
+            if (actor != NULL && progress >= 1.0f) {
+                func_15060F28(actor, 0);
             }
         } else if (mode == 0) {
-            if (ratio >= 0.25f) {
-                *(f32 *)(arg0 + 0xA8) = sinf(ratio * D_800A012C - D_800A012C) * 10.0f;
+            if (progress >= 0.25f) {
+                obj->unkA8 = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
-            if (actor != 0 && ratio >= 1.0f) {
-                func_15060F28((struct127 *)actor, 0);
+            if (actor != NULL && progress >= 1.0f) {
+                func_15060F28(actor, 0);
             }
         } else if (mode == 1) {
-            if (ratio >= 0.25f) {
-                *(f32 *)(arg0 + 0xA8) = sinf(ratio * D_800A0130 - D_800A0130) * 10.0f;
+            if (progress >= 0.25f) {
+                obj->unkA8 = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
-            if (actor == 0) {
-                index = func_15083E0C(0x14);
-                ((u8 *)D_800D20FC)[index * 0x30 + 2] = 0;
-                func_150825C0(index, 0);
-                actor = (u8 *)func_15083E90(0x14);
+            if (actor == NULL) {
+                slot = func_15083E0C(0x14);
+                ((SpawnSlot *)D_800D20FC)[slot].unk2 = 0;
+                func_150825C0(slot, 0);
+                actor = func_15083E90(0x14);
             }
-            if (actor == 0 && actor[0x232] != 3) {
-                actor[0x232] = 3;
-                *(s32 *)(actor + 0x218) = 0;
+            if (actor == NULL && actor->unk232 != 3) { /* sic: the original tests actor == NULL */
+                actor->unk232 = 3;
+                actor->unk218 = NULL;
             }
         }
     }
 }
 
+/* A 0xA0-byte entry of D_800DBEF4 (structs.h types it as struct131): one of a pair of platforms that
+ * shakes and sinks. The partner entry follows it. */
 typedef struct {
-    /* 0x00 */ f32 unk0;
+    /* 0x00 */ f32 shakeX;
     /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
+    /* 0x08 */ f32 shakeZ;
     /* 0x0C */ u8 padC[0x6];
-    /* 0x12 */ s16 unk12;
+    /* 0x12 */ s16 height;
     /* 0x14 */ u8 pad14[0x28];
-    /* 0x3C */ s32 unk3C;
+    /* 0x3C */ s32 unk3C; /* high half: kind */
     /* 0x40 */ u8 pad40[0xF];
     /* 0x4F */ u8 unk4F;
     /* 0x50 */ u8 pad50[0x1E];
     /* 0x6E */ u8 unk6E;
     /* 0x6F */ u8 pad6F[0x4];
-    /* 0x73 */ u8 unk73;
+    /* 0x73 */ u8 flags; /* bits 0-1: state, bit 2: held down */
     /* 0x74 */ u8 pad74[0x8];
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
+    /* 0x7C */ s32 home; /* low half: rest height; bit 31: initialised */
+    /* 0x80 */ s32 unk80; /* sinking timer; on the partner, its offset from the lowered height */
     /* 0x84 */ s32 unk84;
     /* 0x88 */ u8 pad88[0x18];
-} Struct150BFA7C; /* size 0xA0 */
+} Platform150BFA7C; /* size 0xA0 */
 
 typedef struct {
     /* 0x0 */ u8 unk0;
@@ -411,57 +430,59 @@ typedef struct {
     /* 0x4 */ u8 unk4;
     /* 0x5 */ u8 unk5;
     /* 0x6 */ s8 unk6;
-} Struct150BFA7C_Fx;
+} Fx151D8868;
 
 extern u8 D_800BE9EB;
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 extern void func_1518B6B0(f32, f32, f32, s32, s32);
-extern void func_1518CD20(void *, s32, s32);
-extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_1518CD20(Platform150BFA7C *, s32, s32);
+extern void *func_151D8868(Fx151D8868 *, s32, s32, s32);
 extern s32 func_151EF610(void);
 
-void func_150BFA7C(Struct150BFA7C *arg0) {
-    s16 sp5E;
+/* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
+ * and 1 rises back. Kind 1 platforms just follow their partner's offset. */
+void func_150BFA7C(Platform150BFA7C *platform) {
+    s16 lowered;
     s16 top;
-    s16 sp5A;
-    s32 temp;
-    s32 sp50;
+    s16 bottom;
+    s32 pad; // matching: unused stack slot
+    s32 travel;
     s32 step;
     s32 diff;
     s32 state;
-    s32 mode;
-    Struct150BFA7C_Fx fx;
+    s32 kind;
+    Fx151D8868 fx;
 
     step = 0x10;
-    mode = (arg0->unk3C >> 16) & 0xFFFF;
-    state = arg0->unk73 & 3;
-    sp50 = 0;
-    if (mode == 0) {
-        sp50 = 0x82;
-    } else if (mode == 2) {
-        sp50 = 0x622;
+    kind = (platform->unk3C >> 16) & 0xFFFF;
+    state = platform->flags & 3;
+    travel = 0;
+    if (kind == 0) {
+        travel = 0x82;
+    } else if (kind == 2) {
+        travel = 0x622;
         step = 0x30;
     }
-    if (arg0->unk7C == 0) {
-        arg0->unk7C = arg0->unk12 | 0x80000000;
+    if (platform->home == 0) {
+        platform->home = platform->height | 0x80000000;
     }
-    top = (s16)(arg0->unk7C & 0xFFFF);
-    sp5E = top - 0x50;
-    sp5A = sp5E - sp50;
-    if (mode == 1) {
-        diff = top - arg0->unk12;
-        if (diff != arg0->unk80) {
-            arg0->unk12 = top + arg0->unk80;
+    top = (s16)(platform->home & 0xFFFF);
+    lowered = top - 0x50;
+    bottom = lowered - travel;
+    if (kind == 1) {
+        diff = top - platform->height;
+        if (diff != platform->unk80) {
+            platform->height = top + platform->unk80;
         }
         return;
     }
-    if ((arg0->unk4F & 4) && (D_800CC2D0[0].unk31C->unk57 == 1)) {
+    if ((platform->unk4F & 4) && D_800CC2D0[0].unk31C->unk57 == 1) {
         func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
         if (state == 0) {
-            func_15164F0C(3, D_800BE9EB, 0, 0xFF, 0);
+            func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
             fx.unk0 = 1;
-            fx.unk2 = 0x3C;
+            fx.unk2 = 60;
             fx.unk5 = 1;
             fx.unk4 = 8;
             fx.unk6 = -1;
@@ -469,79 +490,78 @@ void func_150BFA7C(Struct150BFA7C *arg0) {
         }
     }
     if (state == 3) {
-        if (sp5E != arg0->unk12) {
-            arg0->unk12 = sp5E;
+        if (lowered != platform->height) {
+            platform->height = lowered;
         }
-        if (!(arg0->unk4F & 4) && !(arg0->unk73 & 4)) {
+        if (!(platform->unk4F & 4) && !(platform->flags & 4)) {
             state = 1;
         }
     } else if (state == 0) {
-        if (top != arg0->unk12) {
-            arg0->unk12 = top;
+        if (top != platform->height) {
+            platform->height = top;
         }
     } else if (state == 2) {
-        arg0->unk80 += D_800BE9E4;
-        if (arg0->unk80 < 0) {
-            arg0->unk0 = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
-            arg0->unk8 = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+        platform->unk80 += D_800BE9E4;
+        if (platform->unk80 < 0) {
+            platform->shakeX = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->shakeZ = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
         } else {
-            if (arg0->unk80 < 0x28) {
-                arg0->unk0 = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
-                arg0->unk8 = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+            if (platform->unk80 < 40) {
+                platform->shakeX = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->shakeZ = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
             } else {
-                arg0->unk8 = 0.0f;
-                arg0->unk0 = 0.0f;
+                platform->shakeZ = 0.0f;
+                platform->shakeX = 0.0f;
             }
-            if (arg0->unk12 < sp5E) {
-                if (mode == 0) {
-                    step = ((arg0->unk12 - sp5A + 0x10) * step) / sp50;
-                    if (arg0->unk84 == 0) {
-                        func_1518CD20(arg0, 0xFF, 0);
-                        arg0->unk84 = 1;
+            if (platform->height < lowered) {
+                if (kind == 0) {
+                    step = ((platform->height - bottom + 0x10) * step) / travel;
+                    if (platform->unk84 == 0) {
+                        func_1518CD20(platform, 0xFF, 0);
+                        platform->unk84 = 1;
                     }
                 }
-                arg0->unk12 -= step;
-                arg0[1].unk80 = arg0->unk12 - sp5E;
+                platform->height -= step;
+                platform[1].unk80 = platform->height - lowered;
             } else {
-                arg0->unk12 -= step;
-                arg0->unk84 = 0;
+                platform->height -= step;
+                platform->unk84 = 0;
             }
-            if (arg0->unk12 <= sp5A || step == 0) {
-                arg0->unk12 = sp5A;
-                diff = sp5A - sp5E;
+            if (platform->height <= bottom || step == 0) {
+                platform->height = bottom;
+                diff = bottom - lowered;
                 top += diff;
-                arg0->unk7C += diff;
-                arg0->unk7C |= 0x80000000;
-                arg0->unk80 = 0;
-                arg0[1].unk7C += diff;
-                arg0[1].unk7C |= 0x80000000;
-                arg0[1].unk80 = 0;
-                if (mode == 4 && state != 3) {
-                    func_1518CD20(arg0, 0xFF, 0);
+                platform->home += diff;
+                platform->home |= 0x80000000;
+                platform->unk80 = 0;
+                platform[1].home += diff;
+                platform[1].home |= 0x80000000;
+                platform[1].unk80 = 0;
+                if (kind == 4 && state != 3) {
+                    func_1518CD20(platform, 0xFF, 0);
                 }
                 state = 3;
-                arg0->unk8 = 0.0f;
-                arg0->unk0 = 0.0f;
-                if (mode == 2) {
-                    arg0->unk6E = 1;
-                    arg0[1].unk6E = 1;
-                    func_1508EE0C(2, (u16)(arg0 - (Struct150BFA7C *)D_800DBEF4));
-                    func_1508EE0C(2, (u16)(&arg0[1] - (Struct150BFA7C *)D_800DBEF4));
+                platform->shakeZ = 0.0f;
+                platform->shakeX = 0.0f;
+                if (kind == 2) {
+                    platform->unk6E = 1;
+                    platform[1].unk6E = 1;
+                    func_1508EE0C(2, (u16)(platform - (Platform150BFA7C *)D_800DBEF4));
+                    func_1508EE0C(2, (u16)(&platform[1] - (Platform150BFA7C *)D_800DBEF4));
                 }
             }
         }
     } else if (state == 1) {
-        state = 1;
-        arg0->unk12 += 3;
-        if (arg0->unk12 >= top) {
-            arg0->unk12 = top;
+        state = 1; // matching: redundant store steers register allocation
+        platform->height += 3;
+        if (platform->height >= top) {
+            platform->height = top;
             state = 0;
         }
     }
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    platform->flags &= ~3;
+    platform->flags |= state;
 }
-
 
 typedef struct {
     f32 x;
