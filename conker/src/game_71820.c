@@ -375,7 +375,7 @@ typedef struct {
     Vec3s_71820 v[3];
 } CollisionTri;
 
-/* Surface record in the D_800DBEF4 array (same 0xA0 layout as struct131, whose header copy lacks 0x40/0x44). */
+/* Surface record in the D_800DBEF4 array (same 0xA0 layout as WorldObject, whose header copy lacks 0x40/0x44). */
 typedef struct Game71820Surface {
     /* 0x00 */ u8 pad0[0x40];
     /* 0x40 */ s32 default_material;

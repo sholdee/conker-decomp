@@ -157,7 +157,7 @@ typedef struct GameObj {
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
-// struct131 (the 0xA0-byte entries of D_800DBEF4) with unk4F read as the unsigned flag byte it is here
+// WorldObject (the 0xA0-byte entries of D_800DBEF4) with unk4F read as the unsigned flag byte it is here
 typedef struct {
     /* 0x00 */ u8 pad0[0x4F];
     /* 0x4F */ u8 unk4F;
@@ -382,20 +382,20 @@ void func_1504AF10(struct127 *obj, s32 force, s32 release) {
         index = obj->unk92 & 0xFFF;
         if (type == 3) {
             if (release) {
-                D_800DBEF4[index].unk4E = 0;
+                D_800DBEF4[index].attach = 0;
                 obj->unk92 = 0;
                 return;
             }
-            D_800DBEF4[index].unk4E = (obj - D_800CC2D0) + 100;
+            D_800DBEF4[index].attach = (obj - D_800CC2D0) + 100;
             if (force) {
-                D_800DBEF4[index].unk4E = 0;
+                D_800DBEF4[index].attach = 0;
                 return;
             }
             ((Struct131u *)D_800DBEF4)[index].unk4F &= ~0x60;
             ((Struct131u *)D_800DBEF4)[index].unk4F |= 0x20;
-            D_800DBEF4[index].unk10 = obj->x_position;
-            D_800DBEF4[index].unk12 = obj->y_position + (s16)obj->unk90;
-            D_800DBEF4[index].unk14 = obj->z_position;
+            D_800DBEF4[index].x = obj->x_position;
+            D_800DBEF4[index].y = obj->y_position + (s16)obj->unk90;
+            D_800DBEF4[index].z = obj->z_position;
         }
     }
 }

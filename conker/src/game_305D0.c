@@ -233,11 +233,10 @@ void func_15003668(s32 unused) {
     func_15001460(D_800B0E00[3]);
     func_150026E8(1);
 
-    // matching: struct131 declares unk4F as s8; the code reads it unsigned (lbu)
     func_150026C4(2);
     for (i = 0; i < D_800DBEF0; i++) {
-        if (((u8)D_800DBEF4[i].unk4F & 0x60) != 0x20) {
-            func_15002724(D_800DBEF4[i].unk1C);
+        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
+            func_15002724(D_800DBEF4[i].displayList);
         }
     }
     func_15002754();
@@ -245,15 +244,15 @@ void func_15003668(s32 unused) {
     D_800D2C68 = 1;
     D_800D2C2C = 0;
     for (i = 0; i < D_800DBEF0; i++) {
-        if (((u8)D_800DBEF4[i].unk4F & 0x60) != 0x20) {
+        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
             firstTri = D_800DBE38;
-            D_800DBEF4[i].unk58 = D_800DBE38;
-            func_15001460(D_800DBEF4[i].unk1C);
-            D_800DBEF4[i].unk56 = D_800DBE38 - firstTri;
+            D_800DBEF4[i].firstTri = D_800DBE38;
+            func_15001460(D_800DBEF4[i].displayList);
+            D_800DBEF4[i].numTris = D_800DBE38 - firstTri;
         } else {
-            D_800DBEF4[i].unk58 = 0;
-            D_800DBEF4[i].unk56 = 0;
+            D_800DBEF4[i].firstTri = 0;
+            D_800DBEF4[i].numTris = 0;
         }
     }
     func_150026E8(2);

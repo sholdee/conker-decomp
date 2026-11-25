@@ -150,7 +150,7 @@ void func_15182C5C(Prop *prop) {
     chain = prop->chain;
     out = prop->vtx[D_800BE9C0];
     func_150A8050(mtx, 0.0f, -D_8008D050[D_800DDE54[chain]].angle, 0.0f);
-    // D_800DBEF4's struct131 does not declare the vertex count at 0x16
+    // D_800DBEF4's WorldObject does not declare the vertex count at 0x16
     for (i = 0; i < ((Prop *)D_800DBEF4)[D_8008D050[D_800DDE54[chain]].objIndex].vtxCount; i++) {
         samplePos = func_15182F58(prop->baseVtx[i].v.ob[2], chain);
         sample = samplePos;
@@ -211,9 +211,9 @@ s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
     }
 
     objIndex = D_8008D050[D_800DDE54[chain]].objIndex;
-    originX = D_800DBEF4[objIndex].unk10;
-    originY = D_800DBEF4[objIndex].unk12;
-    originZ = D_800DBEF4[objIndex].unk14;
+    originX = D_800DBEF4[objIndex].x;
+    originY = D_800DBEF4[objIndex].y;
+    originZ = D_800DBEF4[objIndex].z;
     if (actor->y_position < D_800DDE60[chain][sample].pos * 0.0625f + originY - 300.0f ||
         D_800DDE60[chain][sample].pos * 0.0625f + originY + 300.0f < actor->y_position) {
         return 0;

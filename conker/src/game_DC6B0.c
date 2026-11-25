@@ -3,7 +3,7 @@
 #include "variables.h"
 
 extern s32 *D_800DBF94;
-extern struct131 *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern s32 func_1505D024(struct127 *, s32, u16, s32);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
@@ -17,7 +17,7 @@ extern void func_15179008(s32);
 /* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
  * D_800CC2D0[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {
-    struct131 *obj;
+    WorldObject *obj;
     s32 index;
 
     if (D_800CC3D4[0] != 0) {
@@ -764,8 +764,8 @@ void func_150B0348(struct127 *obj, u8 arg1, s32 arg2) {
 struct Obj150B060C {
     f32 unk0;
     f32 unk4;
-    struct131 *object;
-    f32 x; /* the object's position (struct131 0x10..0x14) */
+    WorldObject *object;
+    f32 x; /* the object's position (WorldObject 0x10..0x14) */
     f32 y;
     f32 z;
 };
@@ -779,8 +779,8 @@ s32 func_150B060C(u8 id, struct Obj150B060C *out) {
     }
     out->unk0 = -150.0f;
     out->unk4 = 4.5f;
-    out->x = out->object->unk10;
-    out->y = out->object->unk12;
-    out->z = out->object->unk14;
+    out->x = out->object->x;
+    out->y = out->object->y;
+    out->z = out->object->z;
     return 1;
 }

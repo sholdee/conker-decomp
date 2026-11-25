@@ -26,7 +26,7 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     return found[0];
 }
 
-/* An object whose display list textures are animated by func_1511A494 (same 0xA0 stride as struct131). */
+/* An object whose display list textures are animated by func_1511A494 (same 0xA0 stride as WorldObject). */
 typedef struct {
     u8 pad0[0x18];
     f32 unk18;
@@ -150,7 +150,7 @@ extern void func_151162D4(TexAnimObject *);
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */
 void func_1511A738(TexAnimObject *obj) {
-    if (D_800C35EA == 1 && func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
+    if (D_800C35EA == 1 && func_15022B08((WorldObject *)obj - D_800DBEF4, 0) != 0) {
         obj->unk7C = 0;
         obj->unk18 = 0.0f;
     }

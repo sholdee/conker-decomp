@@ -241,7 +241,7 @@ typedef struct {
 typedef struct {
     f32 unk0;
     f32 unk4;
-    struct131 *unk8;
+    WorldObject *unk8;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -251,7 +251,7 @@ extern s32 D_8009658C[];
 extern s32 D_800965A0[];
 extern s32 D_800965B0[];
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
-extern struct131 *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 
 /** Spawns the particle emitter a level object describes; unk1C selects the kind of emitter. */
 s32 func_150130B4(LevelObject *obj) {
@@ -384,9 +384,9 @@ ground:
         }
         extra.unk0 = -80.0f;
         extra.unk4 = fabsf(-0.01250000019f);
-        extra.unkC = extra.unk8->unk10;
-        extra.unk10 = extra.unk8->unk12;
-        extra.unk14 = extra.unk8->unk14;
+        extra.unkC = extra.unk8->x;
+        extra.unk10 = extra.unk8->y;
+        extra.unk14 = extra.unk8->z;
         emit.unk58 = 0;
         particle = func_151407D0(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {

@@ -68,8 +68,8 @@ typedef struct {
 
 /* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's byte 0x72 (0xF7-0xF9),
- * or message 0x38 for 0xF6. struct131 has no field at 0x72 yet, hence the byte reads. */
-void func_15104A80(struct131 *prop) {
+ * or message 0x38 for 0xF6. WorldObject has no field at 0x72 yet, hence the byte reads. */
+void func_15104A80(WorldObject *prop) {
     struct127 *player;
 
     player = NULL;

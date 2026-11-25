@@ -54,7 +54,7 @@ typedef struct {
 #define sObjs ((F4D20Obj *)D_800DBEF4)
 
 extern void func_1511650C(F4D20Obj *obj, s32 arg1, s32 soundId, f32 pitchScale);
-extern struct131 *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern void func_151150BC(F4D20Obj *obj);
 extern s32 func_15116110(F4D20Obj *obj);
 
@@ -173,7 +173,7 @@ void func_150C7C90(F4D20Obj *obj) {
         index = count;
     }
     last = &obj->unk1C[index];
-    angle = -669 - func_151149AC(obj->params.word & 0xFF)->unk12;
+    angle = -669 - func_151149AC(obj->params.word & 0xFF)->y;
     if (obj->params.word & 0x8000) {
         angle = 836 - angle;
     }

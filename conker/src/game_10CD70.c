@@ -464,7 +464,7 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-/* The object func_150E05F8 fades (a handler in the 0x80089xxx object table; cf. struct131). */
+/* The object func_150E05F8 fades (a handler in the 0x80089xxx object table; cf. WorldObject). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ s16 x;

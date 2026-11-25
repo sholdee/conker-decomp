@@ -1030,7 +1030,7 @@ void func_151872B0(s32 level) {
 }
 
 
-/* The fields of a D_800DBEF4 entry (struct131) read here. */
+/* The fields of a D_800DBEF4 entry (WorldObject) read here. */
 typedef struct {
     u8  pad0[0x10];
     s16 x;

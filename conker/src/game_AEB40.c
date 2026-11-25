@@ -318,7 +318,7 @@ typedef struct RayHit {
     /* 0x58 */ u8 unk58;
     /* 0x59 */ u8 hitType;      // 0 none, 1 world, 2 object cylinder, 3 object model
     /* 0x5A */ u8 unk5A;
-    /* 0x5C */ struct131 *surface;
+    /* 0x5C */ WorldObject *surface;
     /* 0x60 */ s32 unk60;
 } RayHit;
 

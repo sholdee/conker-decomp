@@ -1357,25 +1357,89 @@ struct struct127 {
     u8  pad320[0xC];
 }; // size 0x32C => 812 bytes game_object
 
-typedef struct {
-    u8  pad[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8  pad16[0x6];
-    s32 unk1C;
-    u8  pad20[0x8];
-    s32 unk28;
-    u8  pad2C[0x22];
-    u8  unk4E;
-    s8  unk4F;
-    u8  pad50[0x6];
-    s16 unk56;
-    s16 unk58;
-    u8  pad5A[0x15];
-    u8  unk6F;
-    u8  pad70[0x30];
-} struct131; // size 0xA0
+/*
+ * A world object: one 0xA0-byte entry of the level's object array D_800DBEF4 (D_800DBEF0 entries),
+ * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
+ */
+typedef struct WorldObject WorldObject;
+struct WorldObject {
+    /* 0x00 */ f32 rotX; // degrees
+    /* 0x04 */ f32 rotY;
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ void *model;          // loaded model asset, if any
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u16 numVertices;
+    /* 0x18 */ f32 yOffset;
+    /* 0x1C */ Gfx *displayList;
+    /* 0x20 */ Vtx *vertices[2];     // per frame buffer (D_800BE9C0); both srcVertices unless state bit 0
+    /* 0x28 */ Vtx *srcVertices;     // the model's own vertices
+    /* 0x2C */ f32 scaleX;
+    /* 0x30 */ f32 scaleY;
+    /* 0x34 */ f32 scaleZ;
+    /* 0x38 */ void (*update)(WorldObject *obj);
+    /* 0x3C */ union {
+        void *data;                  // per-kind data, e.g. a Turret15112520Cfg
+        s32 word;
+        struct {
+            s16 hi;
+            s16 lo;
+        } half;
+        struct {
+            u16 hi;
+            u16 lo;
+        } uhalf;
+        u8 bytes[4];
+    } param;                         // the placement's parameter word
+    /* 0x40 */ s32 material;         // collision material, used when materials is NULL
+    /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
+    /* 0x48 */ u8 pad48[4];
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor D_800CC2D0[attach - 100]
+    /* 0x4F */ u8 flags;
+    /* 0x50 */ u16 unk50;            // bounding radius, see func_15004AAC
+    /* 0x52 */ u16 unk52;
+    /* 0x54 */ u16 modelId;          // | 0x8000 for objects without a loaded model
+    /* 0x56 */ u16 numTris;          // collision triangles, see func_15003668
+    /* 0x58 */ u16 firstTri;
+    /* 0x5A */ s16 moveX;            // translation this frame
+    /* 0x5C */ s16 moveY;
+    /* 0x5E */ s16 moveZ;
+    /* 0x60 */ f32 spinX;            // rotation this frame (degrees)
+    /* 0x64 */ f32 spinY;
+    /* 0x68 */ f32 spinZ;
+    /* 0x6C */ u16 effectFlags;
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
+    /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
+                                     // 8: removed, high nibble: objects following in its group
+    /* 0x71 */ u8 index;             // own index in D_800DBEF4
+    /* 0x72 */ u8 id;                // found by func_151149AC
+    /* 0x73 */ u8 behaviorState;     // per-behaviour state bits
+    /* 0x74 */ u16 sound;            // handle from func_15114D24
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ void (*onContact)(WorldObject *obj, struct127 *actor);
+    /* 0x7C */ union {
+        s32 words[3];
+        struct {
+            /* 0x7C */ s32 unk7C;
+            /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4
+            /* 0x84 */ f32 y;
+        } floor;
+    } work;                          // per-behaviour scratch state
+    /* 0x88 */ u16 fadeDistance;     // fades out when the camera is closer than this
+    /* 0x8A */ u8 alpha;
+    /* 0x8B */ u8 viewAlpha[4];
+    /* 0x8F */ u8 pad8F;
+    /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
+    /* 0x92 */ u8 unk92;
+    /* 0x93 */ u8 pad93;
+    /* 0x94 */ struct102 *shadow;    // created and freed by func_15113C88
+    /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
+    /* 0x9C */ s32 unk9C;
+}; // size 0xA0
 
 typedef struct {
     u8  pad0[0x48];

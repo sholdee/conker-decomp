@@ -120,7 +120,7 @@ extern SeqEvent *D_800C3688[][30];
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
-extern struct131 *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern struct127 *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 extern u8 D_800D2100;
@@ -1778,7 +1778,7 @@ typedef struct {
     u8 unk72;
     u8 pad73[0x17];
     u8 unk8A;
-} SeqActor; // struct131 with the fields this file uses (include/structs.h still pads them)
+} SeqActor; // WorldObject with the fields this file uses (include/structs.h still pads them)
 
 SeqVec3f D_800C3620;
 extern void func_15128CB0(struct108 *);
@@ -2460,7 +2460,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            // matching: byte arithmetic on the actor array (0x72 is padding in struct131; indexing schedules differently)
+            // matching: byte arithmetic on the actor array (0x72 is padding in WorldObject; indexing schedules differently)
             if (D_800C35F0[scene][i].unk2 == ((u8 *)D_800DBEF4 + actorIndex * 0xA0)[0x72]) {
                 return 1;
             }
@@ -2505,16 +2505,16 @@ void func_15022BA4(s32 scene) {
                 y = obj->y_position;
                 z = obj->z_position;
             } else if (D_800C35F0[scene][track].unk2 == 1) {
-                struct131 *obj;
+                WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
-                obj = (struct131 *)(s8)D_800C35F0[scene][track].unk3;
+                obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;
                 obj = func_151149AC((s32)obj);
                 if (obj == NULL) {
                     return;
                 }
-                x = obj->unk10;
-                y = obj->unk12;
-                z = obj->unk14;
+                x = obj->x;
+                y = obj->y;
+                z = obj->z;
             } else {
                 return;
             }

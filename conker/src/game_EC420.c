@@ -471,7 +471,7 @@ void func_150BF760(Struct150BF760 *obj) {
     }
 }
 
-/* A 0xA0-byte entry of D_800DBEF4 (structs.h types it as struct131): one of a pair of platforms that
+/* A 0xA0-byte entry of D_800DBEF4 (structs.h types it as WorldObject): one of a pair of platforms that
  * shakes and sinks. The partner entry follows it. */
 typedef struct {
     /* 0x00 */ f32 shakeX;

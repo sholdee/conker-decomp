@@ -6,7 +6,7 @@
 #include "variables.h"
 
 /*
- * Per-type update routines for 0xA0-byte level objects (the D_800DBEF4 array, struct131).
+ * Per-type update routines for 0xA0-byte level objects (the D_800DBEF4 array, WorldObject).
  * Shared layout: rotation f32[3] at 0x0, position s16[3] at 0x10, vertex count at 0x16,
  * vertex buffers at 0x20 (double-buffered by D_800BE9C0) and 0x28 (source), packed param at
  * 0x3C, mode in the low two bits of 0x73 (0 closed, 1 closing, 2 opening, 3 open), alpha at
@@ -98,7 +98,7 @@ void func_1511B07C(struct Obj1511B07C *obj) {
     moveZ = 0;
     sound = 0;
     if (D_800C35EA == 1) {
-        if (func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
+        if (func_15022B08((WorldObject *)obj - D_800DBEF4, 0) != 0) {
             return;
         }
     }

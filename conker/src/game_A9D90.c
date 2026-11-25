@@ -474,7 +474,7 @@ void func_1507D4F8(s32 slot) {
     D_800BE618--;
 }
 
-/* Object returned by func_151149AC (struct131 in game_11FF10.c is a narrower view of the same 0xA0 bytes). */
+/* Object returned by func_151149AC (WorldObject in game_11FF10.c is a narrower view of the same 0xA0 bytes). */
 typedef struct D754Obj {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;

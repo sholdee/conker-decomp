@@ -35,7 +35,7 @@ typedef struct {
     /* 0x33 */ u8 id;            // 0: assign a free one
     /* 0x34 */ u8 unk6E;
     /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ s32 unk40;
+    /* 0x38 */ s32 material;
     /* 0x3C */ u8 state;
     /* 0x3D */ u8 pad3D;
     /* 0x3E */ u16 effectFlags;
@@ -43,78 +43,13 @@ typedef struct {
     /* 0x42 */ u8 pad42[2];
 } ObjectSpawn; // size 0x44
 
-/* A D_800DBEF4 entry (struct131; cf. Game13F9D0Obj in game_13F9D0.c). */
-typedef struct {
-    /* 0x00 */ f32 rotX;
-    /* 0x04 */ f32 rotY;
-    /* 0x08 */ f32 rotZ;
-    /* 0x0C */ void *model;           // loaded model asset, if any
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u16 numVertices;
-    /* 0x18 */ f32 yOffset;
-    /* 0x1C */ Gfx *displayList;
-    /* 0x20 */ Vtx *vertices[2];      // per frame; both srcVertices unless state bit 0 is set
-    /* 0x28 */ Vtx *srcVertices;      // the model's own vertices
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ f32 scaleY;
-    /* 0x34 */ f32 scaleZ;
-    /* 0x38 */ ObjectFunc update;
-    /* 0x3C */ void *data;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ u8 pad48[4];
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 unk4D;
-    /* 0x4E */ u8 attach;             // 3: none (see Game13F9D0Obj)
-    /* 0x4F */ u8 flags;
-    /* 0x50 */ u16 unk50;             // bounding radius, see func_15004AAC
-    /* 0x52 */ u16 unk52;
-    /* 0x54 */ s16 modelId;           // | 0x8000 for objects without a loaded model
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s16 unk58;
-    /* 0x5A */ s16 moveX;             // translation this frame
-    /* 0x5C */ s16 moveY;
-    /* 0x5E */ s16 moveZ;
-    /* 0x60 */ f32 spinX;             // rotation this frame
-    /* 0x64 */ f32 spinY;
-    /* 0x68 */ f32 spinZ;
-    /* 0x6C */ u16 effectFlags;
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 viewFlags;
-    /* 0x70 */ u8 state;              // bit 0: vertices transformed into per-frame copies
-    /* 0x71 */ u8 index;              // own index in D_800DBEF4
-    /* 0x72 */ u8 id;
-    /* 0x73 */ u8 unk73;
-    /* 0x74 */ s16 sound;
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ ObjectFunc onContact;
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 floorTri;          // floor probe results, see func_150045C4
-    /* 0x84 */ f32 floorY;
-    /* 0x88 */ s16 fadeDistance;
-    /* 0x8A */ u8 alpha;
-    /* 0x8B */ u8 viewAlpha[4];
-    /* 0x8F */ u8 pad8F;
-    /* 0x90 */ u16 drawDistance;
-    /* 0x92 */ s8 unk92;
-    /* 0x93 */ u8 pad93;
-    /* 0x94 */ s32 unk94;
-    /* 0x98 */ s32 unk98;
-    /* 0x9C */ s32 unk9C;
-} LevelObject; // size 0xA0
-
-// variables.h declares D_800DBEF4 as struct131 *, a partial view of LevelObject.
-#define OBJECTS ((LevelObject *)D_800DBEF4)
-
 /* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
 typedef struct {
     /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
+    /* 0x10 */ s32 *materials; // per-triangle collision materials
     /* 0x14 */ u8 pad14[0x14];
     /* 0x28 */ Vtx vertices[1];
 } ModelAsset;
@@ -154,7 +89,7 @@ typedef struct {
 #define HANDLES (*(s32 **)D_800DBEF8)      // per object: handle released with func_10004074
 #define RELEASE_DELAY (*(u8 **)D_800DBEFC) // per object: frames to keep the handle once hidden
 
-extern s32 D_800DBF98; // grouped objects, kept at the end of OBJECTS
+extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 extern LevelModelEntry *D_800B0E50;
 extern ObjectBehavior D_80088C90[];
 extern GroupedObjectDefaults D_800A26C0[];
@@ -169,7 +104,7 @@ void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;
-void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn);
+void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
 s32 func_15004BF0(s32 fromTop);
 void func_15004CE0(DlCommand *dl, u32 base);
 
@@ -185,7 +120,7 @@ void func_150039E0(s32 level, s32 arg1) {
     ModelAsset *model;
     ObjectFunc behavior;
     s32 off; // matching: unused, but IDO reserves its stack slot
-    LevelObject *obj;
+    WorldObject *obj;
     s8 setStateBit2;
     s32 isBehavior22;
     ModelAsset *levelModel;
@@ -201,7 +136,7 @@ void func_150039E0(s32 level, s32 arg1) {
     D_800DBEF0 = D_800DBF00;
     D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, level, 2) / sizeof(ObjectSpawn);
     D_800DBEF0 += D_800DBF98;
-    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(LevelObject), 1, 2, 0);
+    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
     if (D_800DBEF4 == NULL) {
         D_800DBEF0 = 0;
         D_800DBF98 = 0;
@@ -216,7 +151,7 @@ void func_150039E0(s32 level, s32 arg1) {
         }
         found = 0;
         isBehavior22 = FALSE;
-        obj = (LevelObject *)&D_800DBEF4[i];
+        obj = &D_800DBEF4[i];
         obj->x = base[i].x;
         obj->y = base[i].y;
         obj->z = base[i].z;
@@ -230,7 +165,7 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->state = base[i].state & ~8;
         obj->fadeDistance = 0;
         obj->unk6E = base[i].unk6E;
-        obj->data = base[i].data;
+        obj->param.data = base[i].data;
         behavior = base[i].behavior.func;
         if (base[i].behavior.index < 0xFFFF) {
             // matching: the (s32) casts keep the compares on a copy of the loaded word
@@ -248,27 +183,27 @@ void func_150039E0(s32 level, s32 arg1) {
             obj->update = behavior;
             obj->onContact = NULL;
         }
-        obj->unk40 = base[i].unk40;
-        obj->unk7C = 0;
-        obj->floorTri = 0;
-        *(s32 *)&obj->floorY = 0; // matching: an integer zero store, not 0.0f
+        obj->material = base[i].material;
+        obj->work.floor.unk7C = 0;
+        obj->work.floor.tri = 0;
+        *(s32 *)&obj->work.floor.y = 0; // matching: an integer zero store, not 0.0f
         obj->sound = 0;
         obj->attach = 0;
         obj->effectFlags = 0;
-        obj->unk73 = 4;
+        obj->behaviorState = 4;
         obj->spinX = obj->spinY = obj->spinZ = 0.0f;
         obj->moveX = obj->moveY = obj->moveZ = obj->spinZ; // matching: 0 via spinZ, not a literal
         obj->yOffset = 0;
         obj->alpha = 0xFF;
         obj->viewAlpha[0] = obj->viewAlpha[1] = obj->viewAlpha[2] = obj->viewAlpha[3] = 0xFF;
         obj->index = i;
-        obj->unk94 = 0;
+        obj->shadow = NULL;
         obj->unk98 = 0;
         if (obj->displayList == NULL) {
             id = base[i].modelId;
             for (j = D_800DBF00; j < i; j++) {
                 if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                    && OBJECTS[j].displayList != NULL) {
+                    && D_800DBEF4[j].displayList != NULL) {
                     found = j + 1;
                     break;
                 }
@@ -278,17 +213,17 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->model = model;
             }
             if (found) {
-                obj->srcVertices = OBJECTS[found - 1].srcVertices;
-                obj->displayList = OBJECTS[found - 1].displayList;
-                obj->unk9C = OBJECTS[found - 1].unk9C;
-                obj->numVertices = OBJECTS[found - 1].numVertices;
-                obj->unk44 = OBJECTS[found - 1].unk44;
+                obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
+                obj->displayList = D_800DBEF4[found - 1].displayList;
+                obj->unk9C = D_800DBEF4[found - 1].unk9C;
+                obj->numVertices = D_800DBEF4[found - 1].numVertices;
+                obj->materials = D_800DBEF4[found - 1].materials;
             } else {
                 obj->srcVertices = model->vertices;
                 obj->displayList = model->displayList;
                 obj->unk9C = model->unk8;
                 obj->numVertices = (Vtx *)obj->displayList - obj->srcVertices;
-                obj->unk44 = model->unk10;
+                obj->materials = model->materials;
             }
             if (i >= D_800DBF00) {
                 obj->unk4C = D_800A26C0[id].unk4C;
@@ -317,7 +252,7 @@ void func_150039E0(s32 level, s32 arg1) {
                 }
             }
             if (id == 0x71) {
-                obj->unk40 = 0xE;
+                obj->material = 0xE;
             }
             if (obj->update != NULL || isBehavior22) {
                 if (obj->unk6E == 0) {
@@ -334,7 +269,7 @@ void func_150039E0(s32 level, s32 arg1) {
             if ((s32)obj->displayList == 1 || (s32)obj->displayList == 2) {
                 for (j = 0; j < i; j++) {
                     if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                        && OBJECTS[j].displayList != NULL) {
+                        && D_800DBEF4[j].displayList != NULL) {
                         found = j + 1;
                         break;
                     }
@@ -344,13 +279,13 @@ void func_150039E0(s32 level, s32 arg1) {
                     levelModel = D_800B0E50[id].model;
                     obj->numVertices = ((u32)levelModel->displayList - (u32)levelModel->vertices) / sizeof(Vtx);
                     obj->srcVertices = levelModel->vertices;
-                    obj->unk44 = levelModel->unk10;
+                    obj->materials = levelModel->materials;
                     obj->unk9C = levelModel->unk8;
                 } else {
-                    obj->numVertices = OBJECTS[found - 1].numVertices;
-                    obj->srcVertices = OBJECTS[found - 1].srcVertices;
-                    obj->unk44 = OBJECTS[found - 1].unk44;
-                    obj->unk9C = OBJECTS[found - 1].unk9C;
+                    obj->numVertices = D_800DBEF4[found - 1].numVertices;
+                    obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
+                    obj->materials = D_800DBEF4[found - 1].materials;
+                    obj->unk9C = D_800DBEF4[found - 1].unk9C;
                 }
                 if ((s32)obj->displayList == 2) {
                     obj->viewFlags = 0;
@@ -360,7 +295,7 @@ void func_150039E0(s32 level, s32 arg1) {
                 if (!found) {
                     obj->displayList = levelModel->displayList;
                 } else {
-                    obj->displayList = OBJECTS[found - 1].displayList;
+                    obj->displayList = D_800DBEF4[found - 1].displayList;
                 }
                 obj->effectFlags = base[i].effectFlags;
                 obj->model = NULL;
@@ -387,7 +322,7 @@ void func_150039E0(s32 level, s32 arg1) {
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = (LevelObject *)&D_800DBEF4[i];
+        obj = &D_800DBEF4[i];
         if (obj->srcVertices == NULL) {
             continue;
         }
@@ -420,8 +355,8 @@ void func_150039E0(s32 level, s32 arg1) {
         D_800DBF94[i] = 0;
     }
     for (i = D_800DBF00; i < D_800DBEF0; i++) {
-        if (OBJECTS[i].id == 0) {
-            OBJECTS[i].id = func_15004BF0(FALSE);
+        if (D_800DBEF4[i].id == 0) {
+            D_800DBEF4[i].id = func_15004BF0(FALSE);
         }
     }
 }
@@ -429,8 +364,8 @@ void func_150039E0(s32 level, s32 arg1) {
 /* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = (s32)OBJECTS[D_800DBF88].displayList;
-        D_800DBF90 = (s32)OBJECTS[D_800DBF88].srcVertices;
+        D_800DBF8C = (s32)D_800DBEF4[D_800DBF88].displayList;
+        D_800DBF90 = (s32)D_800DBEF4[D_800DBF88].srcVertices;
     }
 }
 
@@ -442,15 +377,15 @@ extern Mtx **D_80089250[];
 extern s16 D_800D37E0;
 extern f32 D_800DBF08[4][4];
 extern f32 D_800DBF48[4][4];
-extern void func_151150B0(void);
-extern void func_15116058(void);
-extern void func_15116110(void);
+extern void func_151150B0(WorldObject *obj);
+extern void func_15116058(WorldObject *obj);
+extern void func_15116110(WorldObject *obj);
 void func_150A44F0(s32, s16 *, s32);
 void func_150A7960(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
 void func_1510F800(s32);
-void func_1511490C(f32 mf[4][4], LevelObject *obj);
+void func_1511490C(f32 mf[4][4], WorldObject *obj);
 void func_15004A4C(void);
 
 /*
@@ -460,7 +395,7 @@ void func_15004A4C(void);
  */
 void func_150045C4(s32 arg0) {
     s32 i;
-    LevelObject *obj;
+    WorldObject *obj;
     f32 mtx[4][4];
     s32 j;
     s32 floorFlags;
@@ -474,7 +409,7 @@ void func_150045C4(s32 arg0) {
     guMtxIdentF(D_800DBF08);
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = (LevelObject *)&D_800DBEF4[i];
+        obj = &D_800DBEF4[i];
         if (obj->update == NULL || obj->update == func_15116058 || obj->update == func_15116110) {
             obj->attach = 3;
         }
@@ -504,15 +439,15 @@ void func_150045C4(s32 arg0) {
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = (LevelObject *)&D_800DBEF4[i];
+        obj = &D_800DBEF4[i];
         if (obj->unk6E == 1) {
             continue;
         }
         if ((obj->viewFlags & 0x20) == 0x20) {
             func_1510E7A4(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
                           i + 1, NULL, -10000.0f, 20000.0f);
-            obj->floorTri = floorTri;
-            obj->floorY = floorY;
+            obj->work.floor.tri = floorTri;
+            obj->work.floor.y = floorY;
         }
     }
 }
@@ -569,7 +504,7 @@ f32 sqrtf(f32);
  * Sets the object's bounding radius (unk50, unk52) from its farthest scaled vertex if it has none,
  * and counts in D_800BE2A0/2/4 whether a preset radius is too small, was computed, or is large enough.
  */
-void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn) {
+void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
     s32 i;
     f32 x;
     f32 y;
@@ -632,7 +567,7 @@ s32 func_15004BF0(s32 fromTop) {
     if (fromTop == 0) {
         id = 1;
         for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
-            if (id == OBJECTS[i].id) {
+            if (id == D_800DBEF4[i].id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
             }
@@ -645,7 +580,7 @@ s32 func_15004BF0(s32 fromTop) {
         fromTop = 0xFF - D_800DBF00;
         id = fromTop;
         for (i = 0; i < D_800DBEF0; i++) {
-            if (id == OBJECTS[i].id) {
+            if (id == D_800DBEF4[i].id) {
                 id--;
                 i = -1; // rescan with the next id
             }

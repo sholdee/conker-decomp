@@ -84,7 +84,7 @@ extern struct {
 extern s32 *D_800DBF94;
 extern u8 D_800CC40C;
 extern u8 D_800CC49A;
-struct131 *func_151149AC(s32);
+WorldObject *func_151149AC(s32);
 void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(struct127 *, s32);
 void func_15196318(s32, s32, s32);
@@ -96,7 +96,7 @@ void func_150F2A60(s32 arg0) {
     s32 i;
     s32 scroll;
     struct127 *obj;
-    struct131 *entry;
+    WorldObject *entry;
     s32 entryIndex;
 
     if (D_800CC2D0->unk31C != NULL) {

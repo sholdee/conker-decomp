@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A spinning, bobbing pickup that the player collects by walking into it (0xA0 bytes, like struct131). */
+/* A spinning, bobbing pickup that the player collects by walking into it (0xA0 bytes, like WorldObject). */
 typedef struct Obj15119FC0 {
     /* 0x00 */ f32 rotX; // tilt in degrees
     /* 0x04 */ f32 rotY; // spin in degrees, 0..360
@@ -73,7 +73,7 @@ void func_15119FC0(Obj15119FC0 *obj) {
                                 obj->flags70 |= 4;
                             } else {
                                 obj->removed = TRUE;
-                                func_1508EE0C(2, (struct131 *)obj - D_800DBEF4);
+                                func_1508EE0C(2, (WorldObject *)obj - D_800DBEF4);
                             }
                             obj->state = 0x20;
                             func_10010344(0x1CF, &D_800CC2D0[i], 0x7D00, 200, 2500);

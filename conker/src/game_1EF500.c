@@ -76,7 +76,7 @@ typedef struct Game1F1F60Hit {
     /* 0x59 */ u8 type;
     /* 0x5A */ s8 field_5A;
     /* 0x5B */ u8 pad5B;
-    /* 0x5C */ struct131 *field_5C;
+    /* 0x5C */ WorldObject *field_5C;
     /* 0x60 */ s32 field_60;
 } Game1F1F60Hit; /* 0x64 */
 
@@ -131,7 +131,7 @@ typedef struct {
 
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
-/* Signature of the hook in D_800E0940: (hit position, index of the struct131 that was hit). */
+/* Signature of the hook in D_800E0940: (hit position, index of the WorldObject that was hit). */
 typedef void (*TrailHitCallback)(Vec3f *, s32);
 
 extern TrailExpireHandler D_8008FBD0[];
@@ -1208,7 +1208,7 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     s32 alive;
     TrailHitCallback callback;
-    struct131 *target;
+    WorldObject *target;
     s8 handler;
 
     ext->remaining -= dt;

@@ -353,7 +353,7 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* A D_800DBEF4 entry (struct131) with the fields used here, which include/structs.h leaves unnamed. */
+/* A D_800DBEF4 entry (WorldObject) with the fields used here, which include/structs.h leaves unnamed. */
 typedef struct {
     /* 0x00 */ Vec3f angle; /* degrees, kept in [0, 360) */
     /* 0x0C */ u8  padC[0x4];
