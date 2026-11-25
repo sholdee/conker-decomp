@@ -140,7 +140,6 @@ extern u8 D_80091750[];
 extern u8 D_80091764[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2CA0;
-extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 f32 cosf(f32);
 Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);

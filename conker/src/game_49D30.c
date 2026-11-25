@@ -193,7 +193,6 @@ typedef struct {
 } GfxSchedMsg;
 
 extern u8 D_800BE9C0;
-extern s32 D_800BE9C8[];
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
 extern u8 D_800BEBA0;
@@ -209,8 +208,7 @@ void func_1501CC3C(void);
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
 {                                               \
-    Gfx *gfx = (Gfx *)D_800BE9D0;               \
-    D_800BE9D0 += sizeof(Gfx);                  \
+    Gfx *gfx = D_800BE9D0++;                    \
     gfx->words.w0 = _SHIFTL(cmd, 24, 8);        \
     gfx->words.w1 = 0;                          \
 }
@@ -218,30 +216,30 @@ void func_1501CC3C(void);
 /* Finish this frame's display list and send it to the scheduler as an RSP graphics task. */
 void func_1501C880(s32 unused, s32 swapBuffers) {
     s32 capacity;
-    s32 *dlBase;
+    Gfx **dlBase;
     s32 used;
 
     dlBase = D_800BE9C8;
-    capacity = (dlBase[1] - dlBase[0]) >> 3;
+    capacity = dlBase[1] - dlBase[0];
     D_800BEAD4 = &D_800BEAD8[D_800BE9C0];
     D_800BEAD4->next = 0;
-    used = (D_800BE9D0 - dlBase[D_800BE9C0]) >> 3;
+    used = D_800BE9D0 - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
         func_1501A39C();
         D_800BE9D0 = D_800BE9D8[D_800BE9C0];
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
-        used = (D_800BE9D0 - dlBase[D_800BE9C0]) >> 3;
+        used = D_800BE9D0 - dlBase[D_800BE9C0];
     }
 
     if ((used < 0) || (used > (capacity - 400))) {
-        D_800BE9D0 = dlBase[D_800BE9C0] + ((capacity - 400) << 3);
+        D_800BE9D0 = dlBase[D_800BE9C0] + (capacity - 400);
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
     D_800BEAD4->list.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.data_size = ((D_800BE9D0 - dlBase[D_800BE9C0]) >> 3) << 3;
+    D_800BEAD4->list.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
     func_1501CC3C();
 
     D_800BEAD4->list.type = M_GFXTASK;

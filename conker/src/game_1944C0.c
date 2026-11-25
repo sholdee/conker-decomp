@@ -302,7 +302,6 @@ void func_15167310(void) {
 }
 
 extern Mtx D_80089470;
-extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern u32 D_800DD1B0;
 extern s32 D_800DD1B4;

@@ -119,7 +119,6 @@ extern s32 D_8003C8E0;
 extern HudModel *D_80090058;
 extern s16 D_800E0C78;
 extern u8 D_800BE9C0;
-extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */

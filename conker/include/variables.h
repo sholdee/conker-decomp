@@ -846,8 +846,9 @@ extern f32  D_800BE6B8;
 extern struct156 D_800BE760[];
 extern OSMesgQueue D_800BE900;
 extern u8   D_800BE938;
-extern s32  D_800BE9D0;
-extern s32  D_800BE9D8[];
+extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
+extern Gfx *D_800BE9D0;    // display-list write head
+extern Gfx *D_800BE9D8[2]; // per framebuffer: end of the prologue built by func_1501A39C
 
 extern u8   D_800BE93C[];
 

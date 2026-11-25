@@ -264,7 +264,6 @@ extern u16 D_800C5EF8[];
 extern D_800C666FEntry D_800C666F[];
 extern u8 D_800C3E98[];
 extern u8 D_C3E98[];
-extern Gfx *D_800BE9C8[]; // display-list buffer per frame buffer
 extern s32 D_800BEBA4;
 extern u8 D_800D9900;
 extern u8 D_800D9C10[][0x40];

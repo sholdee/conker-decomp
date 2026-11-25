@@ -785,7 +785,6 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
 extern s32 D_800C48F0[];
-extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern Vp D_800DF090[];
 extern u8 D_800DF0E0;

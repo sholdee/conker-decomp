@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
 #include "functions.h"
+// matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
+// (pointer-typed loads pick different registers in func_1501878C's command appends)
+#define D_800BE9D0 D_800BE9D0_hdr
 #include "variables.h"
+#undef D_800BE9D0
+extern s32 D_800BE9D0;
 
 
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
@@ -44,7 +49,7 @@ void func_150186D0(void) {
 }
 
 /*
- * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (declared s32).
+ * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (read as s32 here).
  * matching: GBI macros on a post-incremented head, or taking &D_800BE9D0, move the pointer to v0.
  */
 #define DL_APPEND(hi, lo)                       \
@@ -70,7 +75,7 @@ void func_150186D0(void) {
 
 void func_1517E1AC(void);
 void func_151412BC(void);
-void func_10004074(s32);
+void func_10004074(void *);
 void func_151E51EC(void);
 void func_1510B3B0(void);
 void func_1510B51C(void);
@@ -102,8 +107,6 @@ s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
 extern s32 D_800DC9F0;
-extern s32 D_800BE9C8[];
-extern s32 D_800BE9CC;
 extern u8 D_800BEAC2;
 extern u8 D_800BE630[];
 extern u8 D_800BEBA0;
@@ -133,8 +136,8 @@ s32 func_1501878C(void) {
         (*(s16 *)&D_800BEAA8)--; // matching: read signed (lh); variables.h declares it u16
         if (D_800BE615 != 0 && *(s16 *)&D_800BEAA8 == 0) {
             func_10004074(D_800BE9C8[0]);
-            func_10004074(D_800BE9CC);
-            D_800BE9C8[0] = 0;
+            func_10004074(D_800BE9C8[1]);
+            D_800BE9C8[0] = NULL;
             return 0;
         }
         break;
@@ -180,7 +183,7 @@ s32 func_1501878C(void) {
                             D_800BE9D0 = (s32)func_150195A0((Gfx *)D_800BE9D0, D_80082FA4);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
-                            if (((Gfx *)D_800BE9D0 - (Gfx *)D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
+                            if (((Gfx *)D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
                                 D_800BE9D0 = (s32)savedHead;
                             }
                         }
@@ -305,7 +308,7 @@ void func_15018F80(s16 player) {
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
-    D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+    D_800BE9D0 = (s32)D_800BE9D8[D_800BE9C0];
     *D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {

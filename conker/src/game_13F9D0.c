@@ -395,7 +395,6 @@ Gfx *func_150CF5E8(Gfx *gfx);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 mtx[4][4], s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
-extern s32 D_800BE9C8[];
 extern s32 D_800BEBA4;
 
 /*
@@ -465,7 +464,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
         Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
         cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
     }
-    overflow = (D_800BEBA4 < gfx - (Gfx *)D_800BE9C8[D_800BE9C0]) ? 1 : 0;
+    overflow = (D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }

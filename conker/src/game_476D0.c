@@ -63,7 +63,6 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
 }
 
 extern Gfx D_8002C930[];
-extern Gfx *D_800BE9C8[];
 
 /* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
  * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
@@ -78,7 +77,7 @@ void func_1501A39C(void) {
         gSPDisplayList(gfx++, D_8002C930);
         gDPSetDepthImage(gfx++, D_800BE9C4);
         gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
-        D_800BE9D8[i] = (s32)gfx;
+        D_800BE9D8[i] = gfx;
     }
 }
 
