@@ -6,7 +6,6 @@
 extern s32 func_15168118();
 extern f32 sqrtf(f32);
 
-f32 func_150489B0(u8);
 extern s32 D_8008CA64;
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
@@ -157,7 +156,6 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
     }
 }
 
-s32 func_150490A8(f32 *);
 extern s32 D_8008CA4C[];
 
 /* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */

@@ -892,7 +892,6 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     }
 }
 
-extern f32 func_150489B0(u8 angle);
 
 /*
  * Splits the prop's outlying vertices (x*x + z*z beyond a kind-dependent radius) into connected
@@ -966,7 +965,6 @@ void func_151196D4(WorldObject *prop) {
     }
 }
 
-extern s32 func_151EF610(void);
 extern Actor *func_1505EFD0(s32);
 
 /*

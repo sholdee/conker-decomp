@@ -1213,7 +1213,6 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
-extern f32 func_150489B0(u8);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
 

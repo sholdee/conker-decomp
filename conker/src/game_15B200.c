@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
 
 // Builds the camera rail from the current rail command: a segment of length 2 * halfLength
 // centred on the command's point.

@@ -38,7 +38,6 @@ extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
 extern void func_1503E260(s32 objIndex);
 extern void func_1503ECA0(s32 objIndex);
 extern f32 sqrtf(f32);
-extern void func_150499A0(MtxF src, MtxF out);  /* inverse, as used here */
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
 extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);

@@ -8,7 +8,6 @@ void func_15142314(MtxF *bones, u8 bone, Vec3f *out, Actor *actor);
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_151EF610(void);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 

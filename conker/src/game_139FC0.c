@@ -5,7 +5,6 @@
 extern u8 compressed_ROM_START[];
 
 
-extern f32 func_150489B0(u8);
 
 /* Steps slot's tint channels toward their targets and applies a func_150489B0 wave to the prim/env colors. */
 void func_1510CB10(s32 slot) {

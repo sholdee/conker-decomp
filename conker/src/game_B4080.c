@@ -215,8 +215,6 @@ f32 cosf(f32);
 extern f32 D_800CC310;
 extern s8 D_800D2390;
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-f32 func_150497E0(f32 *, s32, f32);
-f32 func_150498A4(f32 *, s32, f32, f32 *);
 s32 func_15088A08(Racer *racer, f32 step);
 
 /*

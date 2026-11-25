@@ -1568,15 +1568,6 @@ u8 func_15059B54(Actor *actor, u16 maxStep) {
     return absDiff >> 8;
 }
 
-typedef struct Game83300Point {
-    f32 values[3];
-} Game83300Point;
-
-typedef struct Game83300Triangle {
-    Game83300Point vertices[3];
-} Game83300Triangle;
-
-void func_15049350(Game83300Triangle);
 
 /* Applies one frame of horizontal movement (speed along unk76, plus push velocities), following the floor slope. */
 void func_15059C84(Actor *actor) {
@@ -1585,7 +1576,7 @@ void func_15059C84(Actor *actor) {
     f32 y;
     f32 vertical;
     u16 angle;
-    Game83300Triangle triangle;
+    Tri3f triangle;
     f32 speed;
     s32 i;
     f32 length;
@@ -1647,9 +1638,9 @@ void func_15059C84(Actor *actor) {
         actor->inwater == 0 && !(actor->unk22C & 8)) {
         /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
-            triangle.vertices[i].values[0] = actor->floorTri.v[i].x;
-            triangle.vertices[i].values[1] = actor->floorTri.v[i].y;
-            triangle.vertices[i].values[2] = actor->floorTri.v[i].z;
+            triangle.pts[i].x = actor->floorTri.v[i].x;
+            triangle.pts[i].y = actor->floorTri.v[i].y;
+            triangle.pts[i].z = actor->floorTri.v[i].z;
         }
         func_15049350(triangle);
         if (D_800CC214 != 0.0f) {
@@ -4894,7 +4885,6 @@ void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
-f32 func_150489B0(u8 arg0);
 void func_150F1CB0(Actor *arg0);
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */

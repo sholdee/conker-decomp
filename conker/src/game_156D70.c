@@ -14,7 +14,6 @@ extern struct Entry151298C0 D_800DC028[];
 
 void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 void func_151236D0(Camera *);
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
 s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
 void func_1512C150(Camera *);
 

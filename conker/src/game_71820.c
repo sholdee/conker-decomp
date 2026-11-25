@@ -242,7 +242,6 @@ void func_15044A28(void) {
     }
 }
 
-extern f32 func_150489B0(u8); // cosine of a 256-step angle
 
 /* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */
 s32 func_15044B78(TriggerVolume *volume) {

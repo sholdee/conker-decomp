@@ -8,7 +8,6 @@ u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_151EF610(void);
 
 extern s32 func_1510F8CC(s32);
 
@@ -274,17 +273,10 @@ void func_150E4CBC(Struct150E4CBC *fx) {
     fx->timer += D_800BE9E4;
 }
 
-typedef struct {
-    Vec3f v[3];
-} Tri150E5810;
-
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
-extern void func_15049350(Tri150E5810);
 
 extern u8 D_800918AC[];
 extern u8 D_80090520[];
-extern void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
-extern f32 func_150489B0(u8);
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
@@ -301,7 +293,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     s32 noSurface;
     s32 big;
     s32 i;
-    Tri150E5810 plane;
+    Tri3f plane;
     f32 dirX;
     f32 dirY;
     f32 dirZ;
@@ -329,9 +321,9 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     }
     if (tri != NULL) {
         for (i = 0; i < 3; i++) {
-            plane.v[i].x = tri[i][0];
-            plane.v[i].y = tri[i][1];
-            plane.v[i].z = tri[i][2];
+            plane.pts[i].x = tri[i][0];
+            plane.pts[i].y = tri[i][1];
+            plane.pts[i].z = tri[i][2];
         }
         func_15049350(plane);
         dirX = -D_800CC210;
@@ -532,7 +524,7 @@ struct Struct150E5810 {
  * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
  */
 s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
-    Tri150E5810 tri;
+    Tri3f tri;
     s32 i;
     f32 len;
     f32 pad; // matching: unused stack slot
@@ -551,9 +543,9 @@ s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY
         if (verts != NULL) {
         lbl: // matching: a block boundary that stops IDO hoisting the loop setup above the NULL test
             for (i = 0; i < 3; i++) {
-                tri.v[i].x = verts[i][0];
-                tri.v[i].y = verts[i][1];
-                tri.v[i].z = verts[i][2];
+                tri.pts[i].x = verts[i][0];
+                tri.pts[i].y = verts[i][1];
+                tri.pts[i].z = verts[i][2];
             }
             func_15049350(tri);
             normal.x = -D_800CC210;

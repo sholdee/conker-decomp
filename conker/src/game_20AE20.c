@@ -2487,7 +2487,6 @@ extern char D_800AB8BC[];
 extern char D_800AB8C4[];
 extern char D_800AB8C8[];
 
-f32 func_150497E0(f32 *, s32, f32);
 /*
  * Draws the option menu (D_800E0BE0 values described by D_800AB64C) for the options in optionMask,
  * either as a list or as a rotating carousel, and handles the d-pad to change the selection and values.

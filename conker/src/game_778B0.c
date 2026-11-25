@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-f32 func_1504A2B0(f32 x); // e^x
-f32 func_1504A620(f32 x); // ln(x)
 
 /**
  * x raised to the power y. Integral exponents use repeated multiplication (or division for negative y);

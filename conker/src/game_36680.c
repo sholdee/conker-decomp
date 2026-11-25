@@ -672,7 +672,6 @@ typedef struct Game36680Particle {
 } Game36680Particle; // size 0xE
 
 extern Game36680Particle *D_800DDD18;
-extern s32 func_151EF610(void);
 
 /** Fills particle `index` for particle slot `slot`; returns the next free index. */
 s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
@@ -752,11 +751,6 @@ s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tr
     return index;
 }
 
-typedef struct {
-    Vec3f points[3];
-} Game36680Triangle;
-
-extern void func_15049350(Game36680Triangle);
 extern f32 *D_80082D80[];
 extern u16 D_800BE430;
 
@@ -772,19 +766,19 @@ s32 func_1500B3B0(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, s16 **
     f32 x;
     f32 y;
     f32 z;
-    Game36680Triangle triangle;
+    Tri3f triangle;
 
     centerX = 0.0f;
     centerY = 0.0f;
     centerZ = 0.0f;
 
     for (i = 0; i < 3; i++) {
-        triangle.points[i].x = tri[i][0];
-        centerX += triangle.points[i].x / 3.0f;
-        triangle.points[i].y = tri[i][1];
-        centerY += triangle.points[i].y / 3.0f;
-        triangle.points[i].z = tri[i][2];
-        centerZ += triangle.points[i].z / 3.0f;
+        triangle.pts[i].x = tri[i][0];
+        centerX += triangle.pts[i].x / 3.0f;
+        triangle.pts[i].y = tri[i][1];
+        centerY += triangle.pts[i].y / 3.0f;
+        triangle.pts[i].z = tri[i][2];
+        centerZ += triangle.pts[i].z / 3.0f;
     }
 
     func_15049350(triangle);

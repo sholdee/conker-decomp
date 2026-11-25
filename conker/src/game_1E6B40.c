@@ -131,7 +131,6 @@ typedef struct {
     /* 0x3F */ u8 primA;
 } FallingParticle;
 
-extern f32 func_150489B0(u8);
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*

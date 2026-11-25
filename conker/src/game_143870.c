@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150490A8(Vec3f *delta);
 
 /* Behaviour scratch state (WorldObject.touch) of the two behaviours below. */
 typedef union {

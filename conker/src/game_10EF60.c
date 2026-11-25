@@ -128,7 +128,6 @@ void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 s32 func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 s32 func_1510F8CC(s32);
-s32 func_151EF610(void);
 
 /* Per-frame update of a tracer: re-fires attached ones from the owner's bone, then moves it. */
 void func_150E1D14(Game10EF60Effect *effect) {

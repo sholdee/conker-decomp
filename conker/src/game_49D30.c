@@ -956,7 +956,6 @@ void func_1501EA18(s32 scene) {
     }
 }
 
-extern f32 func_150497E0(f32 *, s32, f32);
 void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene);
 void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene);
 

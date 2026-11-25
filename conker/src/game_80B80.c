@@ -20,7 +20,6 @@ void func_15087350(s32, s32, f32);
 Actor *func_150883B0(s32, s32, f32 *, s32 *);
 s32 func_15104634(f32, f32, f32, f32 *);
 u8 func_15059B54(Actor *arg0, u16 arg1);
-s32 func_151EF610(void);
 s8 func_1505DDA8(Actor *arg0, s32 arg1, u16 arg2, f32 arg3);
 void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 s32 func_15081E78(Actor *, void *, s32);

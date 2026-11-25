@@ -12,7 +12,6 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 
 s32 func_1000F568(s32 arg0, s32 arg1);
-extern s32 func_151EF610(void);
 extern s32 D_800D187C;
 extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_151942E8();

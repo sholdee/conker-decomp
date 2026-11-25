@@ -56,7 +56,6 @@ extern void func_15087FEC(s32, s32);
 extern void func_15087FC4(s32, s32);
 extern s32 func_150880F8(s32, s32);
 extern void func_1508B1D4(s32);
-extern void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
 s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {

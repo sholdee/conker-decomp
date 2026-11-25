@@ -953,10 +953,6 @@ typedef struct {
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
-void func_15049C40(f32 *arg0, f32 *arg1);
-void func_15049CB8(MtxF m, f32 *q);
-void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
-void func_1504A140(f32 *q, MtxF m);
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
@@ -1678,7 +1674,6 @@ void func_1503A7F0(void) {
     func_1503A678();
 }
 
-f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);
 
 

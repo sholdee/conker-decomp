@@ -28,7 +28,6 @@ extern s32 D_800DDD58;
 extern Gfx D_8008CFA0[];
 Gfx *func_1517D074(Gfx *, s16, s16, s16, f32, s32, s32, u8, u8, s32);
 
-extern s32 func_151EF610(void);
 extern Game1A89B0TexInfo D_80095CE0[];
 
 /*

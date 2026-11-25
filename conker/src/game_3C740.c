@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_151EF610(void);
 
 struct LocalDef1500F290 {
     s32 unk0;

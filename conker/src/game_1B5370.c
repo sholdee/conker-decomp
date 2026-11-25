@@ -39,7 +39,6 @@ extern ColorAnim D_800DF700[COLOR_ANIM_MAX];
 extern s32 D_800DF7B4; /* slots in use */
 extern u8 D_800A7390[8]; /* type 2: frames to wait after each flash */
 
-s32 func_151EF610(void);
 
 /* Allocates a colour animation slot; returns its index, or -1 when all are in use. */
 s32 func_15187EC0(s32 type, f32 rate, u8 fromR, u8 fromG, u8 fromB, u8 toR, u8 toG, u8 toB) {

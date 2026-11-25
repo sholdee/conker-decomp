@@ -10,7 +10,6 @@ extern void func_1507CD64(Actor *, s32);
 
 s32 func_1509BE40(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 
 /* Current values, targets and easing velocities of three channels. */
 extern f32 D_800888C0;

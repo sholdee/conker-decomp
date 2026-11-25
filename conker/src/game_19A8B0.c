@@ -418,7 +418,6 @@ void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
 
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern f32 func_150489B0(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 
@@ -1250,7 +1249,6 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type,
     }
 }
 
-extern s32 func_151EF610(void);
 
 /* Spawns a single particle (isParticle) or an emitter heading off along `angle`, which
  * defaults to object 0's facing angle. */

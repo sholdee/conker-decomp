@@ -415,7 +415,6 @@ void func_1503B9BC(s32 objIndex) {
     func_1503CB98(objIndex, mode, blend, chain);
 }
 
-void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
 /*
  * Rebuilds bone matrices 24-27 so that each one looks from chain joint i to joint i+1, keeping the

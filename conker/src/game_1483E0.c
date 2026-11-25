@@ -8,7 +8,6 @@
  * (Work1483E0, one member per routine).
  */
 
-extern f32 func_150489B0(u8);
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1518804C(s32, f32);

@@ -78,7 +78,7 @@ void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
         out[2] = scale0 * a[2] - b[2] * t;
         out[3] = scale0 * a[3] - b[3] * t;
     } else if (cosom <= 0.99999f) {
-        extern f32 func_15048360(f32);
+        extern f32 func_15048360(f32); // matching: this branch needs the block-scope redeclaration
 
         omega = func_15048360(cosom);
         ang0 = (1.0f - t) * omega;

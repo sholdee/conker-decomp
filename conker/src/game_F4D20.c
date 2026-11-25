@@ -75,7 +75,6 @@ void func_150C7968(WorldObject *obj) {
     }
 }
 
-extern f32 func_150489B0(u8 angle); /* cos */
 extern void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
                           u8 spinRange, u8 dragRange, s32 type);
 extern s32 D_800887F4; /* set while the camera is inside the zone below */

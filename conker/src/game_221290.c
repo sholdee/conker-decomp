@@ -147,7 +147,6 @@ extern Mp3Decoder D_800E1880;
 extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
 extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
 
-f32 func_1504A400(f32, f32);
 s32 func_151F8960(void *, s32 *, s32);
 
 /* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. */

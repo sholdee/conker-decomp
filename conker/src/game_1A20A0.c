@@ -350,7 +350,6 @@ typedef struct SwarmFlight {
 
 extern SwarmFlight D_8008D0B0[];
 #define D_800D35E4 ((&D_800D35E8)[-1])
-s32 func_150490A8(Vec3f *arg0);
 s32 func_150AD960(s32, s32, s32, s32);
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,

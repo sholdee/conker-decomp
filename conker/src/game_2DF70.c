@@ -25,7 +25,6 @@ extern YRange *D_800DBE44;
 
 void func_15002560(QuadNode *node, QuadNode *parentNext);
 void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
-s32 func_15049260(Tri3f tri);
 s32 func_150027F8(Gfx *dl);
 
 void func_15000AC0(void) {

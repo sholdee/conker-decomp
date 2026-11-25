@@ -14,7 +14,6 @@ typedef struct {
 } CamTiltPreset; // size 0x14
 
 extern CamTiltPreset D_800894F0[];
-void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
 
 /*
  * Eases the camera's unk3A8/unk5E8 towards targets derived from its angle and the player's speed,

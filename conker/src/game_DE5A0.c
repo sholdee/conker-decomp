@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-f32 func_150489B0(u8 arg0);
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 void func_15052760(Actor *arg0, s16 arg1);
 s32 func_150535F4(Actor *arg0);

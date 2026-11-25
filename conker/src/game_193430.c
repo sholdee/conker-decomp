@@ -104,7 +104,6 @@ void func_15166204(QuadEffect *effect) {
     effect->life = life;
 }
 
-extern f32 func_150489B0(u8);
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
 Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 func_150489B0(u8 angle);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 typedef struct {
