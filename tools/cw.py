@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+"""cw — cleanup workspaces: edit an already-matching C file into idiomatic C without changing a byte.
+
+    cw.py new  FILE       private workspace ~/conker-ws/clean.<name> for src/FILE (e.g. game_79F10.c)
+    cw.py check NAME      rebuild the workspace; RESULT: MATCH | MISMATCH | BUILD-FAIL, and on MISMATCH
+                          the functions whose ROM bytes changed (with the first differing offset)
+    cw.py land NAME       3-way merge into main, rebuild, whole-bin sha gate, commit "cleanup: FILE [cw]"
+    cw.py list            open cleanup workspaces
+
+NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
+sha gate as mw.py. The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
+"""
+import argparse, fcntl, json, re, subprocess, sys, time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mw  # noqa: E402
+from mw import MAIN, REPO, WS_ROOT, LOCK, BIN, INNER_SHA, run, sha1, git, clone_tree, ensure_build, changed_files, PRAGMA_RE  # noqa
+
+TARGET_BIN = MAIN / "conker.us.bin"          # the original decompressed bin (target_path in the yaml)
+HACK_RE = re.compile(r"#line\b|if \(1\) \{\s*\}|\| 0\b|\* 1\b|\bpad\w*\b|\bunused\w*\b|& 0\)|\bvolatile\b|"
+                     r"\bdo \{\s*\} while \(0\)|^\s*;\s*$|\bgoto\b|\(void\) ?0", re.M)
+
+
+def name_of(rel):
+    return "clean." + rel.removeprefix("src/").removesuffix(".c").replace("/", "__")
+
+
+def ws_of(name):
+    ws = WS_ROOT / name
+    if not (ws / "meta.json").exists():
+        sys.exit(f"{ws}: not a cleanup workspace (cw.py new FILE first)")
+    return ws, json.loads((ws / "meta.json").read_text())
+
+
+def code_segments():
+    import yaml
+    cfg = yaml.safe_load((MAIN / "conker.us.yaml").read_text())
+    segs = [s for s in cfg["segments"] if isinstance(s, dict) and s.get("type") == "code"]
+    out = []
+    for s, nxt in zip(segs, segs[1:] + [None]):
+        out.append((s["vram"], s["start"]))
+    return out  # [(vram, rom_start)]
+
+
+def obj_functions(wc, rel):
+    """[(name, vram, size)] for the .text symbols of this file's object, from the workspace map."""
+    obj = f"build/{rel[:-2]}.c.o"
+    rows, cur = [], False
+    start = end = 0
+    syms = []
+    for line in (wc / "build" / "conker.us.map").read_text(errors="replace").splitlines():
+        m = re.match(r"^ \.text\s+0x([0-9a-f]+)\s+0x([0-9a-f]+)\s+(\S+)", line)
+        if m:
+            cur = m.group(3) == obj
+            if cur:
+                start, end = int(m.group(1), 16), int(m.group(1), 16) + int(m.group(2), 16)
+            continue
+        if cur:
+            m = re.match(r"^\s+0x([0-9a-f]+)\s+([A-Za-z_]\w*)\s*$", line)
+            if m and start <= int(m.group(1), 16) < end:
+                syms.append((int(m.group(1), 16), m.group(2)))
+    syms.sort()
+    for i, (a, n) in enumerate(syms):
+        b = syms[i + 1][0] if i + 1 < len(syms) else end
+        rows.append((n, a, b - a))
+    return rows
+
+
+def vram_to_rom(v, segs):
+    best = None
+    for vram, rom in segs:
+        if vram <= v and (best is None or vram > best[0]):
+            best = (vram, rom)
+    return v - best[0] + best[1]
+
+
+def cmd_new(a):
+    rel = a.file if a.file.startswith("src/") else "src/" + a.file
+    if not rel.endswith(".c"):
+        rel += ".c"
+    if not (MAIN / rel).exists():
+        sys.exit(f"{MAIN / rel}: no such file")
+    name = name_of(rel)
+    ws = WS_ROOT / name
+    if ws.exists():
+        if not a.force:
+            sys.exit(f"{ws} exists (use --force to recreate)")
+        attic = WS_ROOT / ".attic"
+        attic.mkdir(exist_ok=True)
+        ws.rename(attic / f"{name}.{time.strftime('%Y%m%d-%H%M%S')}")
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)
+        if sha1(MAIN / BIN) != INNER_SHA:
+            sys.exit("main is not a matching build right now; retry in a minute")
+        ws.mkdir(parents=True)
+        clone_tree(MAIN, ws / "conker")
+        (ws / "base").mkdir()
+        for d in ("src", "include"):
+            subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        head = git("rev-parse", "HEAD").strip()
+    for n in ("ido", "tools"):
+        (ws / n).symlink_to(REPO / n)
+    (ws / "my").mkdir()
+    (ws / "meta.json").write_text(json.dumps({"mode": "clean", "file": rel, "head": head}, indent=1))
+    src = (ws / "conker" / rel).read_text(errors="replace")
+    hacks = [(src.count("\n", 0, m.start()) + 1, m.group(0).strip()) for m in HACK_RE.finditer(src)]
+    funcs = obj_functions(MAIN, rel)
+    print(f"workspace : {ws}")
+    print(f"edit      : {ws / 'conker' / rel}   ({len(funcs)} functions)")
+    print(f"check     : python3 {REPO}/tools/cw.py check {name}")
+    print(f"land      : python3 {REPO}/tools/cw.py land {name}")
+    print(f"hack-like markers ({len(hacks)}): " + ", ".join(f"L{l}:{t}" for l, t in hacks[:40]))
+
+
+def build(ws):
+    wc = ws / "conker"
+    ensure_build(wc)
+    (wc / BIN).unlink(missing_ok=True)
+    r = run("make -j8 2>&1", wc, timeout=1800)
+    return wc, r
+
+
+def cmd_check(a):
+    ws, m = ws_of(a.name)
+    rel = m["file"]
+    src = (ws / "conker" / rel).read_text(errors="replace")
+    base = (ws / "base" / rel).read_text(errors="replace")
+    if set(PRAGMA_RE.findall(src)) - set(PRAGMA_RE.findall(base)):
+        print("RESULT: BUILD-FAIL (new GLOBAL_ASM pragmas are not allowed in a cleanup)")
+        return 2
+    wc, r = build(ws)
+    if not (wc / BIN).exists():
+        errs = [l for l in r.stdout.splitlines() if "rror" in l or "undefined reference" in l]
+        print("\n".join(errs[-25:]) or r.stdout[-2500:])
+        print("RESULT: BUILD-FAIL")
+        log(ws, "BUILD-FAIL")
+        return 2
+    if sha1(wc / BIN) == INNER_SHA:
+        print("RESULT: MATCH   (whole ROM byte-identical; land with cw.py land)")
+        log(ws, "MATCH")
+        return 0
+    got, want = (wc / BIN).read_bytes(), TARGET_BIN.read_bytes()
+    segs = code_segments()
+    bad = []
+    for n, v, size in obj_functions(wc, rel):
+        rom = vram_to_rom(v, segs)
+        g, w = got[rom:rom + size], want[rom:rom + size]
+        if g != w:
+            first = next(i for i in range(min(len(g), len(w))) if g[i] != w[i]) if g[:len(w)] != w[:len(g)] else min(len(g), len(w))
+            bad.append(f"  {n}: first diff at +0x{first:X}")
+    if len(got) != len(want):
+        print(f"bin size {len(got)} vs target {len(want)} — a function in this file changed size")
+    other = ""
+    if not bad:
+        d = next(i for i in range(min(len(got), len(want))) if got[i] != want[i])
+        other = f" (difference outside this file's functions, first at bin offset 0x{d:X} — data/rodata or another file)"
+    print("functions whose bytes changed:\n" + ("\n".join(bad) if bad else "  none" + other))
+    print("RESULT: MISMATCH")
+    log(ws, "MISMATCH", len(bad))
+    return 1
+
+
+def log(ws, res, n=None):
+    with open(ws / "checks.jsonl", "a") as f:
+        f.write(json.dumps({"t": time.time(), "result": res, "funcs_differ": n}) + "\n")
+
+
+def cmd_land(a):
+    ws, m = ws_of(a.name)
+    files = changed_files(ws)
+    if not files:
+        sys.exit("no changes in workspace")
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        crashed = git("status", "--porcelain", "--", "conker/src", "conker/include").strip()
+        if crashed or not (MAIN / BIN).exists():
+            if crashed:
+                print(f"recovering from an interrupted land: restoring {crashed}")
+                git("checkout", "--", "conker/src", "conker/include")
+                git("clean", "-fdq", "--", "conker/src", "conker/include")
+            run("make -j16 2>&1", MAIN)
+            if sha1(MAIN / BIN) != INNER_SHA:
+                sys.exit("main does not build to the target sha even after recovery - fix main by hand")
+        rels = [str(Path("conker") / f) for f in files]
+        merged = {}
+        for f in files:
+            cur, base, new = MAIN / f, ws / "base" / f, ws / "conker" / f
+            if not base.exists():
+                if cur.exists():
+                    sys.exit(f"{f}: created in workspace but also exists in main")
+                merged[f] = new.read_bytes()
+                continue
+            if set(PRAGMA_RE.findall(new.read_text(errors="replace"))) - set(PRAGMA_RE.findall(base.read_text(errors="replace"))):
+                sys.exit(f"{f}: adds GLOBAL_ASM pragmas — refusing")
+            p = subprocess.run(["git", "merge-file", "-p", str(cur), str(base), str(new)], capture_output=True)
+            if p.returncode != 0:
+                sys.exit(f"{f}: merge conflict with main — rebase: copy main's file into the workspace, "
+                         f"re-apply your edits, update base/{f} from main, check, land again")
+            merged[f] = p.stdout
+        backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
+        for f, data in merged.items():
+            (MAIN / f).write_bytes(data)
+        (MAIN / BIN).unlink(missing_ok=True)
+        r = run("make -j16 2>&1", MAIN)
+        if not (MAIN / BIN).exists() or sha1(MAIN / BIN) != INNER_SHA:
+            for f, data in backup.items():
+                if data is None:
+                    (MAIN / f).unlink(missing_ok=True)
+                else:
+                    (MAIN / f).write_bytes(data)
+            run("make -j16 2>&1", MAIN)
+            print(r.stdout[-2500:])
+            sys.exit("LAND-FAIL: main build does not match after merge; reverted")
+        git("add", *rels)
+        msg = f"cleanup: {m['file']} [cw]"
+        if a.message:
+            msg += "\n\n" + a.message
+        git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+        # the merged files are now main's: make them the new merge base for further edits
+        for f in files:
+            (ws / "base" / f).parent.mkdir(parents=True, exist_ok=True)
+            (ws / "base" / f).write_bytes((MAIN / f).read_bytes())
+            (ws / "conker" / f).write_bytes((MAIN / f).read_bytes())
+        print(f"LANDED: {m['file']} — {git('rev-parse', '--short', 'HEAD').strip()}")
+
+
+def cmd_list(a):
+    for ws in sorted(WS_ROOT.glob("clean.*")):
+        last = ""
+        if (ws / "checks.jsonl").exists():
+            lines = (ws / "checks.jsonl").read_text().splitlines()
+            last = json.loads(lines[-1])["result"] if lines else ""
+        print(f"{ws.name:40s} {last}")
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    q = sub.add_parser("new"); q.add_argument("file"); q.add_argument("--force", action="store_true")
+    q = sub.add_parser("check"); q.add_argument("name")
+    q = sub.add_parser("land"); q.add_argument("name"); q.add_argument("-m", "--message")
+    sub.add_parser("list")
+    a = p.parse_args()
+    return {"new": cmd_new, "check": cmd_check, "land": cmd_land, "list": cmd_list}[a.cmd](a) or 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

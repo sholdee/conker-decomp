@@ -79,7 +79,7 @@ s32 func_150AE2A0(struct Foo150AE280 *arg0) {
 }
 
 s32 func_150AE35C(s32 arg0) {
-    return 0x1;
+    return 1;
 }
 
 s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {

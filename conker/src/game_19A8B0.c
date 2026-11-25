@@ -1,271 +1,282 @@
 #include <ultra64.h>
+/* functions.h declares func_15048A40 as void; it returns f32 (declared below). */
 #define func_15048A40 func_15048A40_void_unused
 #include "functions.h"
 #undef func_15048A40
 #include "variables.h"
 
-extern void func_1516F864(s32);
-extern void func_1516F94C(s32, s32);
 
-struct Table1516F024 {
-    u8 unk0[0xB];
+/* u8 tables indexed by a particle style */
+struct StyleTable {
+    u8 v[11];
 };
 
-extern struct Table1516F024 D_8008CBC4;
-extern struct Table1516F024 D_8008CBD0;
-extern struct Table1516F024 D_8008CBDC;
-extern struct Table1516F024 D_8008CBE8;
+extern struct StyleTable D_8008CBC4;
+extern struct StyleTable D_8008CBD0;
+extern struct StyleTable D_8008CBDC;
+extern struct StyleTable D_8008CBE8;
 
-struct Obj1516D4E8 {
-    char pad0[0xE];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-};
+typedef struct ParticleLink {
+    u8 pad0[4];
+    s16 status;
+} ParticleLink;
 
-struct Obj1516D99C {
-    char pad0[0xE];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u16 unk1E;
-    u16 unk20;
-    u16 unk22;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 unk35;
-    u8 unk36;
-    u8 unk37;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    u8 unk3B;
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-};
+/* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
+ * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
+typedef struct Particle {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x;
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 velocityY;
+    /* 0x1A */ u8 texture; /* index into D_8008CA4C */
+    /* 0x1B */ u8 frame;
+    /* 0x1C */ u8 r;
+    /* 0x1D */ u8 g;
+    /* 0x1E */ u8 b;
+    /* 0x1F */ u8 alpha;
+    /* 0x20 */ u8 envR;
+    /* 0x21 */ u8 envG;
+    /* 0x22 */ u8 envB;
+    /* 0x23 */ u8 kind; /* index into D_8008CBA0 */
+    /* 0x24 */ u8 lifetime; /* fades in while nonzero, out once it runs down */
+    /* 0x25 */ u8 yFraction;
+    union {
+        /* kinds that drift sideways with func_1516F864 */
+        struct {
+            /* 0x26 */ s8 velocityXHigh;
+            /* 0x27 */ u8 velocityXLow;
+            /* 0x28 */ s8 velocityZHigh;
+            /* 0x29 */ u8 velocityZLow;
+            /* 0x2A */ u8 xFraction;
+            /* 0x2B */ u8 zFraction;
+            /* 0x2C */ u8 unk2C;
+            /* 0x2D */ u8 unk2D;
+            /* 0x2E */ u8 unk2E;
+            /* 0x2F */ u8 unk2F;
+        } drift;
+        /* func_1516FBCC: blends its colour from rgb0 to rgb1 while it grows */
+        struct {
+            /* 0x26 */ u8 r0;
+            /* 0x27 */ u8 g0;
+            /* 0x28 */ u8 b0;
+            /* 0x29 */ u8 r1;
+            /* 0x2A */ u8 g1;
+            /* 0x2B */ u8 b1;
+            /* 0x2C */ u8 blend;
+            /* 0x2D */ s8 growX;
+            /* 0x2E */ s8 growY;
+            /* 0x2F */ u8 fadeShift;
+        } tint;
+        /* func_1516ECAC: scaled to size * alpha / 128 */
+        struct {
+            /* 0x26 */ u8 fadeRate;
+            /* 0x27 */ u8 unk27[5];
+            /* 0x2C */ u8 sizeHigh;
+            /* 0x2D */ u8 sizeLow;
+        } pulse;
+        /* func_1516E8CC: colour from an 8-step ramp in D_800A6E0C */
+        struct {
+            /* 0x26 */ u8 start;
+        } ramp;
+    } u;
+    /* 0x30 */ ParticleLink *link;
+} Particle;
 
-typedef struct {
-    char pad_0[0x18];
-    s16 field_0x18;
-} Obj1516F984;
+/* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
+ * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
+typedef struct Emitter {
+    /* 0x00 */ u8 unk0; /* 0x11, or 0x66 for an emitter whose particles are 0x67s */
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x; /* also a pointer's high half (flags 0x30) or a D_800A6E30 row */
+    /* 0x10 */ s16 y; /* also a pointer's low half (flags 0x30) */
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 scaleXRandom;
+    /* 0x1A */ s16 scaleYRandom;
+    /* 0x1C */ s16 velocityY;
+    /* 0x1E */ u16 velocityYRandom;
+    /* 0x20 */ u16 timer; /* frames left; 0xFFFF runs forever */
+    /* 0x22 */ u16 flags;
+    /* 0x24 */ u8 texture;
+    /* 0x25 */ u8 frame;
+    /* 0x26 */ u8 r;
+    /* 0x27 */ u8 g;
+    /* 0x28 */ u8 b;
+    /* 0x29 */ u8 alpha;
+    /* 0x2A */ u8 envR;
+    /* 0x2B */ u8 envG;
+    /* 0x2C */ u8 envB;
+    /* 0x2D */ u8 kind;
+    /* 0x2E */ u8 velocityXHigh;
+    /* 0x2F */ u8 velocityXLow;
+    /* 0x30 */ u8 velocityZHigh;
+    /* 0x31 */ u8 velocityZLow;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 velocityXHighRandom;
+    /* 0x39 */ u8 velocityXLowRandom;
+    /* 0x3A */ u8 velocityZHighRandom;
+    /* 0x3B */ u8 velocityZLowRandom;
+    /* 0x3C */ u8 initialTimer;
+    /* 0x3D */ u8 radiusXZ;
+    /* 0x3E */ u8 radiusY;
+    /* 0x3F */ u8 object; /* D_800CC2D0 index whose bone it follows; 0xFF for none */
+    /* 0x40 */ u8 particleLifetime;
+    /* 0x41 */ u8 interval;
+    /* 0x42 */ u8 countdown;
+    /* 0x43 */ u8 chance; /* out of 256 per particle; 0 always spawns */
+    /* 0x44 */ u8 burst; /* particles per spawn */
+    /* 0x45 */ u8 speed;
+    /* 0x46 */ u8 startOffset;
+    /* 0x47 */ u8 bone;
+    /* 0x48 */ u8 particleLink;
+    /* 0x49 */ u8 pad49[3];
+} Emitter;
 
-typedef struct {
-    char pad_0[0x14];
-    s16 field_0x14;
-    s16 field_0x16;
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x1];
-    u8 field_0x26;
-    char pad_0x27[0x5];
-    u8 field_0x2C;
-    u8 field_0x2D;
-} Obj1516FadeState;
+void func_1516F864(Particle *particle);
+void func_1516F94C(Particle *particle, s32 factor);
+extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
+extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
-typedef struct {
-    char pad_0[0x14];
-    s16 field_0x14;
-    s16 field_0x16;
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x7];
-    s8 field_0x2C;
-} Obj1516FadeStepState;
-
-extern struct Obj1516D99C *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern s32 func_150448D0(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-#define LOW_S16(arg) (*(s16 *)((u8 *)&(arg) + 2))
-#define LOW_U16(arg) (*(u16 *)((u8 *)&(arg) + 2))
-#define LOW_U8(arg) (*(u8 *)((u8 *)&(arg) + 3))
-
+/* variables.h declares D_800DD2A0 as a single u8; it is really a u8[4]. */
+#define D_800DD2A0_ARRAY (*(u8 (*)[4])&D_800DD2A0)
 
 void func_1516D400(void) {
     s32 i;
-    s32 v;
+    s32 level;
 
     for (i = 0; i < 4; i++) {
-        if ((*(u8 (*)[4])&D_800DD2A0)[i] < 0xFF) {
-            v = (*(u8 (*)[4])&D_800DD2A0)[i] + D_800BE9A0;
-            if (v > 0xFF) {
-                v = 0xFF;
+        if (D_800DD2A0_ARRAY[i] < 0xFF) {
+            level = D_800DD2A0_ARRAY[i] + D_800BE9A0;
+            if (level > 0xFF) {
+                level = 0xFF;
             }
-            (*(u8 (*)[4])&D_800DD2A0)[i] = v;
+            D_800DD2A0_ARRAY[i] = level;
         }
     }
 }
 
-void func_1516D4E8(
-    s16 arg0, s16 arg1, s16 arg2, s32 arg3,
-    s32 arg4, s32 arg5, s32 arg6, s32 arg7,
-    s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-    s32 arg12, s32 arg13, s32 arg14, s32 arg15,
-    s32 arg16, s32 arg17, s32 arg18, s32 arg19,
-    s32 arg20, s32 arg21, s32 arg22, s32 arg23,
-    s32 arg24, s32 arg25, s32 arg26, s32 arg27,
-    volatile s32 arg28, u8 arg29, s32 arg30) {
-    struct Obj1516D4E8 *ret;
-    s32 temp_a2;
-
-    ret = (struct Obj1516D4E8 *)func_15167A68(arg27 != 0 ? 0x67 : 0x12, arg30, 0x34, 0, arg29, 1);
-    if (ret != NULL) {
-        ret->unkE = arg0;
-        ret->unk10 = arg1;
-        ret->unk12 = arg2;
-        ret->unk1A = LOW_U8(arg3);
-        ret->unk1B = LOW_U8(arg4);
-        ret->unk1C = LOW_U8(arg5);
-        ret->unk1D = LOW_U8(arg6);
-        ret->unk1E = LOW_U8(arg7);
-        ret->unk1F = LOW_U8(arg8);
-        ret->unk20 = LOW_U8(arg9);
-        ret->unk21 = LOW_U8(arg10);
-        ret->unk22 = LOW_U8(arg11);
-        ret->unk23 = LOW_U8(arg12);
-        ret->unk14 = LOW_S16(arg23);
-        ret->unk16 = LOW_S16(arg24);
-        ret->unk24 = LOW_U8(arg25);
-        ret->unk18 = LOW_S16(arg26);
-        ret->unk25 = 0;
-        ret->unk26 = LOW_U8(arg13);
-        ret->unk27 = LOW_U8(arg14);
-        ret->unk28 = LOW_U8(arg15);
-        temp_a2 = arg28;
-        ret->unk29 = LOW_U8(arg16);
-        ret->unk2A = LOW_U8(arg17);
-        ret->unk2B = LOW_U8(arg18);
-        ret->unk2C = LOW_U8(arg19);
-        ret->unk2D = LOW_U8(arg20);
-        ret->unk2E = LOW_U8(arg21);
-        ret->unk2F = LOW_U8(arg22);
-        if (temp_a2 != 0) {
-            ret->unk30 = func_150448D0(-1, 0, temp_a2, 0x14, 0x14, 0x14, 0, (s32) &ret->unkE, (s32) &ret->unk14);
-        } else {
-            ret->unk30 = 0;
-        }
-    }
-}
-
-void func_1516972C(struct102 *arg0);
-extern s32 D_800BE9E4;
-extern s32 (*D_8008CBA0[])(struct Obj1516D4E8 *);
-void func_1516D678(struct Obj1516D4E8 *arg0)
+// matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
+void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
+    velocityXLow, velocityZHigh, velocityZLow, xFraction, zFraction, unk2C, unk2D, unk2E, unk2F, scaleX, scaleY,
+    lifetime, velocityY, isAlt, linkArg, unkC, unk1)
+    s16 x; s16 y; s16 z; u8 texture; u8 frame; u8 r; u8 g; u8 b; u8 alpha; u8 envR; u8 envG; u8 envB;
+    u8 kind; u8 velocityXHigh; u8 velocityXLow; u8 velocityZHigh; u8 velocityZLow; u8 xFraction; u8 zFraction;
+    u8 unk2C; u8 unk2D; u8 unk2E; u8 unk2F; s16 scaleX; s16 scaleY; u8 lifetime; s16 velocityY;
+    s32 isAlt; s32 linkArg; u8 unkC; s32 unk1;
 {
-  s32 temp;
-  s32 ptr;
-  temp = arg0->unk24;
-  if (temp != 0)
-  {
-    temp -= D_800BE9E4;
-    if (temp < 0)
-    {
-      temp = 0;
+    Particle *particle;
+
+    particle = func_15167A68(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(Particle), 0, unkC, 1);
+    if (particle != NULL) {
+        particle->x = x;
+        particle->y = y;
+        particle->z = z;
+        particle->texture = texture;
+        particle->frame = frame;
+        particle->r = r;
+        particle->g = g;
+        particle->b = b;
+        particle->alpha = alpha;
+        particle->envR = envR;
+        particle->envG = envG;
+        particle->envB = envB;
+        particle->kind = kind;
+        particle->scaleX = scaleX;
+        particle->scaleY = scaleY;
+        particle->lifetime = lifetime;
+        particle->velocityY = velocityY;
+        particle->yFraction = 0;
+        particle->u.drift.velocityXHigh = velocityXHigh;
+        particle->u.drift.velocityXLow = velocityXLow;
+        particle->u.drift.velocityZHigh = velocityZHigh;
+        particle->u.drift.velocityZLow = velocityZLow;
+        particle->u.drift.xFraction = xFraction;
+        particle->u.drift.zFraction = zFraction;
+        particle->u.drift.unk2C = unk2C;
+        particle->u.drift.unk2D = unk2D;
+        particle->u.drift.unk2E = unk2E;
+        particle->u.drift.unk2F = unk2F;
+        if (linkArg != 0) {
+            particle->link = func_150448D0(-1, 0, linkArg, 20, 20, 20, 0, &particle->x, &particle->scaleX);
+        } else {
+            particle->link = NULL;
+        }
     }
-    arg0->unk24 = temp;
-  }
-  if (D_8008CBA0[arg0->unk23](arg0) == 1)
-  {
-    ptr = arg0->unk30;
-    if (ptr != 0)
-    {
-      *((s16 *) (ptr + 4)) = 0;
+}
+
+/* The int-argument prototype that callers use (game_19E040.c declares the same one). */
+void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_1516972C(struct102 *arg0);
+extern s32 (*D_8008CBA0[])(Particle *);
+
+void func_1516D678(Particle *particle) {
+    s32 value;
+    ParticleLink *link;
+
+    value = particle->lifetime;
+    if (value != 0) {
+        value -= D_800BE9E4;
+        if (value < 0) {
+            value = 0;
+        }
+        particle->lifetime = value;
     }
-    func_1516972C((struct102 *) arg0);
-  }
-  else
-  {
-    temp = arg0->unk10;
-    temp = (temp << 8) + arg0->unk25;
-    temp += ((u32) arg0->unk18) * ((u32) D_800BE9E4);
-    arg0->unk10 = temp >> 8;
-    arg0->unk25 = temp & 0xFFFFu;
-  }
+    if (D_8008CBA0[particle->kind](particle) == 1) {
+        link = particle->link;
+        if (link != NULL) {
+            link->status = 0;
+        }
+        func_1516972C((struct102 *)particle);
+    } else {
+        /* y is 8.8 fixed point with its fraction in yFraction */
+        value = particle->y;
+        value = (value << 8) + particle->yFraction;
+        value += particle->velocityY * D_800BE9E4;
+        particle->y = value >> 8;
+        particle->yFraction = value & 0xFF;
+    }
 }
 
 
-#define WGFX1516D738(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
-struct Arg1516D738 {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 unk6;
-    s16 unk8;
-    u8 unkA;
-    u8 unkB;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    s32 unk10;
-};
-struct Ent1516D738 {
-    u8 pad0[0xA];
-    u8 unkA;
-};
-extern struct Ent1516D738 *D_8008CA4C[];
+/* The sprite description func_15142E24 fills in and func_15095760 draws. */
+typedef struct ParticleSprite {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 scaleX;
+    /* 0x08 */ s16 scaleY;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ s32 unk10;
+} ParticleSprite;
+
+typedef struct ParticleTexture {
+    /* 0x00 */ u8 pad0[0xA];
+    /* 0x0A */ u8 format;
+} ParticleTexture;
+
+extern ParticleTexture *D_8008CA4C[];
 extern s32 D_800D2C9C;
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
@@ -274,205 +285,155 @@ extern s16 D_800DD1BC;
 extern s16 D_800DD1C8;
 extern s16 D_800DD1CA;
 extern s16 D_800DD1CC;
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_15095760(Gfx *arg0, struct Arg1516D738 *arg1);
+Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7,
+                   s32 sprite, u8 *synced, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);
+Gfx *func_15095760(Gfx *gfx, ParticleSprite *sprite);
 
-Gfx *func_1516D738(Gfx *gfx, struct Obj1516D4E8 *arg1, s32 arg2) {
-    struct Arg1516D738 pos;
-    s32 pad80;
-    struct Ent1516D738 *entry;
-    s32 update;
+Gfx *func_1516D738(Gfx *gfx, Particle *particle, s32 arg2) {
+    ParticleSprite sprite;
+    s32 pad; // matching: unused stack slot in the original frame
+    ParticleTexture *texture;
+    s32 synced;
     s32 r;
     s32 g;
     s32 b;
-    s32 mode;
-    s32 x;
-    u8 y;
-    s32 othermodeH;
+    s32 cycles;
+    s32 frame;
+    u8 frameIndex;
+    s32 cycleType;
 
-    update = 0;
+    synced = FALSE;
     D_800D2DAB = 0;
-    entry = D_8008CA4C[arg1->unk1A];
-    x = arg1->unk1B;
-    y = x++;
-    gfx = func_15142E24(gfx, (s32)D_8008CA4C[arg1->unk1A], y << 8, 2, 0x100, 0x100, 0, 6, (s32)&pos, (u8 *)&update, 3);
-    if (entry->unkA == 5) {
-        mode = 2;
+    texture = D_8008CA4C[particle->texture];
+    frame = particle->frame;
+    frameIndex = frame++; // matching: the dead increment steers IDO's register choice here
+    gfx = func_15142E24(gfx, (s32)D_8008CA4C[particle->texture], frameIndex << 8, 2, 0x100, 0x100, 0, 6,
+                        (s32)&sprite, (u8 *)&synced, 3);
+    if (texture->format == 5) {
+        cycles = 2;
     } else {
-        mode = 1;
+        cycles = 1;
     }
-    if (mode != D_800DD1BC) {
-        if (!update) {
+    if (cycles != D_800DD1BC) {
+        if (!synced) {
             gDPPipeSync(gfx++);
-            update = 1;
+            synced = TRUE;
         }
-        D_800DD1BC = mode;
-        if (mode == 1) {
-            othermodeH = 0;
-            WGFX1516D738(gfx++, 0xFC30B261, 0x5566FF7F);
+        D_800DD1BC = cycles;
+        if (cycles == 1) {
+            cycleType = G_CYC_1CYCLE;
+            gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0,
+                              PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
         } else {
-            othermodeH = 0x100000;
-            WGFX1516D738(gfx++, 0xFC30B5FF, 0x5FFEFE38);
+            cycleType = G_CYC_2CYCLE;
+            gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL1, 0,
+                              0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
         }
     }
-    gfx = func_15142FBC(gfx, othermodeH | D_800D2C9C | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&update);
-    pos.x = arg1->unkE;
-    pos.y = arg1->unk10;
-    pos.z = arg1->unk12;
-    pos.unk6 = arg1->unk14;
-    pos.unk8 = arg1->unk16;
-    pos.unkA = arg1->unk1F;
-    pos.unkD = 0;
-    D_800D2DA8 = arg1->unk1C;
-    D_800D2DA9 = arg1->unk1D;
-    D_800D2DAA = arg1->unk1E;
-    r = arg1->unk20;
-    g = arg1->unk21;
-    b = arg1->unk22;
+    gfx = func_15142FBC(gfx, cycleType | D_800D2C9C | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&synced);
+    sprite.x = particle->x;
+    sprite.y = particle->y;
+    sprite.z = particle->z;
+    sprite.scaleX = particle->scaleX;
+    sprite.scaleY = particle->scaleY;
+    sprite.alpha = particle->alpha;
+    sprite.unkD = 0;
+    D_800D2DA8 = particle->r;
+    D_800D2DA9 = particle->g;
+    D_800D2DAA = particle->b;
+    r = particle->envR;
+    g = particle->envG;
+    b = particle->envB;
     if (r != D_800DD1C8 || g != D_800DD1CA || b != D_800DD1CC) {
         D_800DD1C8 = r;
         D_800DD1CA = g;
         D_800DD1CC = b;
-        if (!update) {
+        if (!synced) {
             gDPPipeSync(gfx++);
         }
         gDPSetEnvColor(gfx++, r, g, b, 0);
     }
-    return func_15095760(gfx, &pos);
+    return func_15095760(gfx, &sprite);
 }
 
-void func_1516D99C(
-    s16 arg0, s16 arg1, s16 arg2, s32 arg3,
-    s32 arg4, s32 arg5, s32 arg6, s32 arg7,
-    s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-    s32 arg12, s32 arg13, s32 arg14, s32 arg15,
-    s32 arg16, s32 arg17, s32 arg18, s32 arg19,
-    s32 arg20, s32 arg21, s32 arg22, s32 arg23,
-    s32 arg24, s32 arg25, s32 arg26, s32 arg27,
-    s32 arg28, s32 arg29, s32 arg30, s32 arg31,
-    s32 arg32, s32 arg33, s32 arg34, s32 arg35,
-    s32 arg36, s32 arg37, s32 arg38, s32 arg39,
-    s32 arg40, u8 arg41, s32 arg42, s32 arg43,
-    s32 arg44, s32 arg45, s32 arg46, u8 arg47,
-    s32 arg48) {
-    struct Obj1516D99C *ret;
-    s32 temp_v1;
+// matching: only a K&R definition makes IDO narrow the u8/s16 args by reloading them from the stack
+void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, kind, velocityXHigh,
+    velocityXLow, velocityZHigh, velocityZLow, unk32, unk33, unk34, unk35, unk36, unk37,
+    velocityXHighRandom, velocityXLowRandom, velocityZHighRandom, velocityZLowRandom, scaleX, scaleY,
+    scaleXRandom, scaleYRandom, timer, radiusXZ, radiusY, object, particleLifetime, velocityY,
+    velocityYRandom, flags, interval, chance, burst, speed, startOffset, isAlt, bone, particleLink, unkC,
+    unk1)
+    s16 x; s16 y; s16 z; u8 texture; u8 frame; u8 r; u8 g; u8 b; u8 alpha; u8 envR; u8 envG; u8 envB;
+    u8 kind; u8 velocityXHigh; u8 velocityXLow; u8 velocityZHigh; u8 velocityZLow; u8 unk32; u8 unk33;
+    u8 unk34; u8 unk35; u8 unk36; u8 unk37; u8 velocityXHighRandom; u8 velocityXLowRandom;
+    u8 velocityZHighRandom; u8 velocityZLowRandom; s16 scaleX; s16 scaleY; s16 scaleXRandom;
+    s16 scaleYRandom; u16 timer; u8 radiusXZ; u8 radiusY; u8 object; u8 particleLifetime; s16 velocityY;
+    u16 velocityYRandom; u16 flags; u8 interval; u8 chance; u8 burst; u8 speed; u8 startOffset;
+    s32 isAlt; u8 bone; u8 particleLink; u8 unkC; s32 unk1;
+{
+    Emitter *emitter;
 
-    ret = func_15167A68(arg44 != 0 ? 0x66 : 0x11, arg48, 0x4C, 0, arg47, 1);
-    if (ret != NULL) {
-        ret->unkE = arg0;
-        ret->unk10 = arg1;
-        ret->unk12 = arg2;
-        ret->unk14 = LOW_S16(arg27);
-        ret->unk16 = LOW_S16(arg28);
-        ret->unk18 = LOW_S16(arg29);
-        ret->unk1A = LOW_S16(arg30);
-        ret->unk24 = LOW_U8(arg3);
-        ret->unk25 = LOW_U8(arg4);
-        ret->unk26 = LOW_U8(arg5);
-        ret->unk27 = LOW_U8(arg6);
-        ret->unk28 = LOW_U8(arg7);
-        ret->unk2A = LOW_U8(arg9);
-        ret->unk2B = LOW_U8(arg10);
-        ret->unk2C = LOW_U8(arg11);
-        ret->unk29 = LOW_U8(arg8);
-        ret->unk2D = LOW_U8(arg12);
-        ret->unk2E = LOW_U8(arg13);
-        ret->unk2F = LOW_U8(arg14);
-        ret->unk30 = LOW_U8(arg15);
-        ret->unk31 = LOW_U8(arg16);
-        ret->unk32 = LOW_U8(arg17);
-        ret->unk33 = LOW_U8(arg18);
-        ret->unk34 = LOW_U8(arg19);
-        ret->unk35 = LOW_U8(arg20);
-        ret->unk36 = LOW_U8(arg21);
-        ret->unk37 = LOW_U8(arg22);
-        ret->unk38 = LOW_U8(arg23);
-        ret->unk39 = LOW_U8(arg24);
-        ret->unk3A = LOW_U8(arg25);
-        temp_v1 = LOW_U16(arg31);
-        ret->unk3B = LOW_U8(arg26);
-        ret->unk20 = temp_v1;
-        ret->unk3C = temp_v1;
-        ret->unk3D = LOW_U8(arg32);
-        ret->unk3E = LOW_U8(arg33);
-        ret->unk3F = LOW_U8(arg34);
-        ret->unk40 = LOW_U8(arg35);
-        ret->unk1C = LOW_S16(arg36);
-        ret->unk1E = LOW_U16(arg37);
-        ret->unk22 = LOW_U16(arg38);
-        ret->unk41 = LOW_U8(arg39);
-        ret->unk42 = 0;
-        ret->unk43 = LOW_U8(arg40);
-        if (arg44 != 0) {
-            if (arg41 >= 4) {
-                arg41 = 3;
-            }
+    emitter = func_15167A68(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(Emitter), 0, unkC, 1);
+    if (emitter != NULL) {
+        emitter->x = x;
+        emitter->y = y;
+        emitter->z = z;
+        emitter->scaleX = scaleX;
+        emitter->scaleY = scaleY;
+        emitter->scaleXRandom = scaleXRandom;
+        emitter->scaleYRandom = scaleYRandom;
+        emitter->texture = texture;
+        emitter->frame = frame;
+        emitter->r = r;
+        emitter->g = g;
+        emitter->b = b;
+        emitter->envR = envR;
+        emitter->envG = envG;
+        emitter->envB = envB;
+        emitter->alpha = alpha;
+        emitter->kind = kind;
+        emitter->velocityXHigh = velocityXHigh;
+        emitter->velocityXLow = velocityXLow;
+        emitter->velocityZHigh = velocityZHigh;
+        emitter->velocityZLow = velocityZLow;
+        emitter->unk32 = unk32;
+        emitter->unk33 = unk33;
+        emitter->unk34 = unk34;
+        emitter->unk35 = unk35;
+        emitter->unk36 = unk36;
+        emitter->unk37 = unk37;
+        emitter->velocityXHighRandom = velocityXHighRandom;
+        emitter->velocityXLowRandom = velocityXLowRandom;
+        emitter->velocityZHighRandom = velocityZHighRandom;
+        emitter->velocityZLowRandom = velocityZLowRandom;
+        emitter->timer = timer;
+        emitter->initialTimer = timer;
+        emitter->radiusXZ = radiusXZ;
+        emitter->radiusY = radiusY;
+        emitter->object = object;
+        emitter->particleLifetime = particleLifetime;
+        emitter->velocityY = velocityY;
+        emitter->velocityYRandom = velocityYRandom;
+        emitter->flags = flags;
+        emitter->interval = interval;
+        emitter->countdown = 0;
+        emitter->chance = chance;
+        if (isAlt != 0 && burst >= 4) {
+            burst = 3;
         }
-        ret->unk44 = arg41;
-        ret->unk45 = LOW_U8(arg42);
-        ret->unk46 = LOW_U8(arg43);
-        ret->unk47 = LOW_U8(arg45);
-        ret->unk48 = LOW_U8(arg46);
+        emitter->burst = burst;
+        emitter->speed = speed;
+        emitter->startOffset = startOffset;
+        emitter->bone = bone;
+        emitter->particleLink = particleLink;
     }
 }
+/* The int-argument prototype that callers use. */
+void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    char pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u16 unk1E;
-    u16 unk20;
-    u16 unk22;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 unk35;
-    u8 unk36;
-    u8 unk37;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    u8 unk3B;
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-} Emitter1516DB90;
 
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -480,231 +441,240 @@ extern f32 func_150489B0(u8);
 extern f32 func_15048A40(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
-#define HI_U8(arg) (bp[2])
-#define LO_U8(arg) (bp[3])
 
-void func_1516DB90(Emitter1516DB90 *arg0) {
-    Emitter1516DB90 *p;
+void func_1516DB90(Emitter *arg0) {
+    Emitter *emitter; // matching: IDO keeps this copy of the argument in its own register
     s32 i;
-    s16 a14;
-    s16 a16;
-    s32 life;
+    s16 scaleX;
+    s16 scaleY;
+    s32 velocityY;
     s16 x;
     s16 y;
-    s32 tmp;
-    s32 r;
-    s32 g;
-    s32 b;
-    s32 a;
+    union {
+        s32 word;
+        u8 bytes[4];
+    } fixed;
+    s32 velXHigh;
+    s32 velXLow;
+    s32 velZHigh;
+    s32 velZLow;
     s16 z;
-    u8 *bp;
-    s16 c24, c25, c26, c27, c28, c2A, c2B, c2C, c32, c33, c34, c35;
-    f32 x1;
-    f32 y1;
-    f32 z1;
-    f32 x2;
-    f32 y2;
-    f32 z2;
-    f32 vx;
-    f32 vy;
-    f32 vz;
+    s32 pad; // matching: unused stack slot in the original frame
+    s16 pad24, pad25; // matching: unused stack slots in the original frame
+    // matching: the template bytes are copied into s16 locals before the call, in this order
+    s16 r, g, b, envR, envG, envB, unk32, unk33, unk34, unk35;
+    f32 fromX;
+    f32 fromY;
+    f32 fromZ;
+    f32 toX;
+    f32 toY;
+    f32 toZ;
+    f32 velX;
+    f32 velY;
+    f32 velZ;
     f32 speed;
-    f32 spread;
+    f32 offset;
     f32 s;
     f32 c;
-    u8 ang;
-    u8 pad2;
-    u8 rnd;
-    s32 thresh;
-    s32 rr;
-    s32 flag;
-    s32 count;
+    u8 angle;
+    u8 pad2; // matching: unused stack slot in the original frame
+    u8 roll;
+    s32 threshold;
+    s32 scaleRandom;
+    s32 isAlt;
+    s32 countdown;
 
-    p = arg0;
-    bp = (u8 *)&tmp;
-    if (p->unk0 == 0x11) {
-        flag = 0;
+    emitter = arg0;
+    if (emitter->unk0 == 0x11) {
+        isAlt = 0;
     } else {
-        flag = 1;
+        isAlt = 1;
     }
-    count = p->unk42;
-    count -= D_800BE9E4;
-    while (count < 0) {
-        if (p->unk41 != 0) {
-            count += p->unk41;
+    countdown = emitter->countdown;
+    countdown -= D_800BE9E4;
+    while (countdown < 0) {
+        if (emitter->interval != 0) {
+            countdown += emitter->interval;
         } else {
-            count = 0;
+            countdown = 0;
         }
-        for (i = 0; i < p->unk44; i++) {
-            if (p->unk43 != 0) {
-                rnd = func_150ADA20() & 0xFF;
-                if (p->unk22 & 4) {
-                    thresh = p->unk43;
-                    thresh = (p->unk20 * thresh) / p->unk3C;
+        for (i = 0; i < emitter->burst; i++) {
+            if (emitter->chance != 0) {
+                roll = func_150ADA20() & 0xFF;
+                if (emitter->flags & 4) {
+                    threshold = emitter->chance;
+                    threshold = (emitter->timer * threshold) / emitter->initialTimer;
                 } else {
-                    thresh = p->unk43;
+                    threshold = emitter->chance;
                 }
             }
-            if (p->unk43 == 0 || rnd < thresh) {
-                if (p->unk3F == 0xFF) {
-                    if (p->unk22 & 0x10) {
-                        
-                        s16 *sv = (s16 *)((u16)p->unk10 | (p->unkE << 16));
+            if (emitter->chance == 0 || roll < threshold) {
+                if (emitter->object == 0xFF) {
+                    if (emitter->flags & 0x10) {
+                        /* x:y hold a pointer to an s16 position */
+                        s16 *sv = (s16 *)((u16)emitter->y | (emitter->x << 16));
                         x = sv[0];
-                        y = sv[1] + p->unk12;
+                        y = sv[1] + emitter->z;
                         z = sv[2];
-                    } else if (p->unk22 & 0x20) {
-                        
-                        f32 *fv = (f32 *)((u16)p->unk10 | (p->unkE << 16));
+                    } else if (emitter->flags & 0x20) {
+                        /* x:y hold a pointer to an f32 position */
+                        f32 *fv = (f32 *)((u16)emitter->y | (emitter->x << 16));
                         x = fv[0];
-                        y = fv[1] + p->unk12;
+                        y = fv[1] + emitter->z;
                         z = fv[2];
                     } else {
-                        x = p->unkE;
-                        y = p->unk10;
-                        z = p->unk12;
+                        x = emitter->x;
+                        y = emitter->y;
+                        z = emitter->z;
                     }
                 } else {
-                    if (D_800CC2D0[p->unk3F].unk1D4 == NULL) {
+                    if (D_800CC2D0[emitter->object].unk1D4 == NULL) {
                         continue;
                     }
-                    x1 = D_800A6E30[p->unkE][0];
-                    y1 = D_800A6E30[p->unkE][1];
-                    z1 = D_800A6E30[p->unkE][2];
-                    x2 = D_800A6E30[p->unkE][3];
-                    y2 = D_800A6E30[p->unkE][4];
-                    z2 = D_800A6E30[p->unkE][5];
-                    if (D_800A6E30[p->unkE][6] != 0) {
-                        z2 += (u32)(func_150ADA20() & D_800A6E30[p->unkE][6]);
+                    fromX = D_800A6E30[emitter->x][0];
+                    fromY = D_800A6E30[emitter->x][1];
+                    fromZ = D_800A6E30[emitter->x][2];
+                    toX = D_800A6E30[emitter->x][3];
+                    toY = D_800A6E30[emitter->x][4];
+                    toZ = D_800A6E30[emitter->x][5];
+                    if (D_800A6E30[emitter->x][6] != 0) {
+                        toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[p->unk3F].unk1D4 + (p->unk47 << 6)), x1, y1, z1, &x1, &y1, &z1);
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[p->unk3F].unk1D4 + (p->unk47 << 6)), x2, y2, z2, &x2, &y2, &z2);
-                    vx = (x2 - x1) * 8.0f;
-                    vy = (y2 - y1) * 8.0f;
-                    vz = (z2 - z1) * 8.0f;
-                    life = vy;
-                    ang = 0x40 - D_800CC2D0[p->unk3F].unk76;
-                    vx -= D_800CC2D0[p->unk3F].xz_velocity * func_15048A40(ang) * 64.0f;
-                    vz -= *(f32 *)((u8 *)D_800CC30C + p->unk3F * 0x32C) * func_150489B0(ang) * 64.0f;
-                    tmp = vx;
-                    r = HI_U8(tmp);
-                    g = LO_U8(tmp);
-                    tmp = vz;
-                    b = HI_U8(tmp);
-                    a = LO_U8(tmp);
-                    x = x1;
-                    y = y1;
-                    z = z1;
+                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
+                    velX = (toX - fromX) * 8.0f;
+                    velY = (toY - fromY) * 8.0f;
+                    velZ = (toZ - fromZ) * 8.0f;
+                    velocityY = velY;
+                    angle = 0x40 - D_800CC2D0[emitter->object].unk76;
+                    velX -= D_800CC2D0[emitter->object].xz_velocity * func_15048A40(angle) * 64.0f;
+                    velZ -= D_800CC2D0[emitter->object].xz_velocity * func_150489B0(angle) * 64.0f;
+                    fixed.word = velX;
+                    velXHigh = fixed.bytes[2];
+                    velXLow = fixed.bytes[3];
+                    fixed.word = velZ;
+                    velZHigh = fixed.bytes[2];
+                    velZLow = fixed.bytes[3];
+                    x = fromX;
+                    y = fromY;
+                    z = fromZ;
                 }
-                if (p->unk22 & 8) {
-                    func_15170034(p->unk22, &vx, &vy, &vz);
-                    speed = p->unk45 * 16;
-                    spread = (u32)p->unk46;
-                    y += spread * vy;
-                    vy = speed * vy;
-                    life = vy;
+                if (emitter->flags & 8) {
+                    func_15170034(emitter->flags, &velX, &velY, &velZ);
+                    speed = emitter->speed * 16;
+                    offset = (u32)emitter->startOffset;
+                    y += offset * velY;
+                    velY = speed * velY;
+                    velocityY = velY;
                     func_150ADA20();
-                    x += vx * spread;
-                    z += vz * spread;
-                    vx *= speed;
-                    vz *= speed;
-                    tmp = vx;
-                    r = HI_U8(tmp);
-                    g = LO_U8(tmp);
-                    tmp = vz;
-                    b = HI_U8(tmp);
-                    a = LO_U8(tmp);
+                    x += velX * offset;
+                    z += velZ * offset;
+                    velX *= speed;
+                    velZ *= speed;
+                    fixed.word = velX;
+                    velXHigh = fixed.bytes[2];
+                    velXLow = fixed.bytes[3];
+                    fixed.word = velZ;
+                    velZHigh = fixed.bytes[2];
+                    velZLow = fixed.bytes[3];
                 }
-                if (p->unk3D != 0) {
-                    ang = func_150ADA20();
-                    s = func_15048A40(ang);
-                    c = func_150489B0(ang);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * p->unk3D) * (1.0f / 65536.0f);
+                if (emitter->radiusXZ != 0) {
+                    angle = func_150ADA20();
+                    s = func_15048A40(angle);
+                    c = func_150489B0(angle);
+                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusXZ) * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
-                if (p->unk3E != 0) {
+                if (emitter->radiusY != 0) {
                     s = func_15048A40(func_150ADA20() & 0xFF);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * p->unk3E) * (1.0f / 65536.0f);
+                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusY) * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
-                a14 = p->unk14;
-                a16 = p->unk16;
-                if (p->unk18 != 0) {
-                    rr = (u32)func_150ADA20() % (u32)p->unk18;
+                scaleX = emitter->scaleX;
+                scaleY = emitter->scaleY;
+                if (emitter->scaleXRandom != 0) {
+                    scaleRandom = (u32)func_150ADA20() % (u32)emitter->scaleXRandom;
                 } else {
-                    rr = 0;
+                    scaleRandom = 0;
                 }
-                if (p->unk22 & 1) {
-                    a14 += rr;
-                    a16 += rr;
+                if (emitter->flags & 1) {
+                    scaleX += scaleRandom;
+                    scaleY += scaleRandom;
                 } else {
-                    a14 += rr;
-                    if (p->unk1A != 0) {
-                        a16 += (u32)func_150ADA20() % (u32)p->unk1A;
+                    scaleX += scaleRandom;
+                    if (emitter->scaleYRandom != 0) {
+                        scaleY += (u32)func_150ADA20() % (u32)emitter->scaleYRandom;
                     }
                 }
-                if (!(p->unk22 & 8) && !(p->unk22 & 0x80)) {
-                    life = p->unk1C;
-                    if (p->unk1E != 0) {
-                        life += (u32)func_150ADA20() % p->unk1E;
+                if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
+                    velocityY = emitter->velocityY;
+                    if (emitter->velocityYRandom != 0) {
+                        velocityY += (u32)func_150ADA20() % emitter->velocityYRandom;
                     }
-                    r = p->unk2E;
-                    if (p->unk38 != 0) {
-                        r += (u32)func_150ADA20() % p->unk38;
-                        if (r >= 0x100) {
-                            r = 0xFF;
+                    velXHigh = emitter->velocityXHigh;
+                    if (emitter->velocityXHighRandom != 0) {
+                        velXHigh += (u32)func_150ADA20() % emitter->velocityXHighRandom;
+                        if (velXHigh >= 0x100) {
+                            velXHigh = 0xFF;
                         }
                     }
-                    g = p->unk2F;
-                    if (p->unk39 != 0) {
-                        g += (u32)func_150ADA20() % p->unk39;
-                        if (g >= 0x100) {
-                            g = 0xFF;
+                    velXLow = emitter->velocityXLow;
+                    if (emitter->velocityXLowRandom != 0) {
+                        velXLow += (u32)func_150ADA20() % emitter->velocityXLowRandom;
+                        if (velXLow >= 0x100) {
+                            velXLow = 0xFF;
                         }
                     }
-                    b = p->unk30;
-                    if (p->unk3A != 0) {
-                        b += (u32)func_150ADA20() % p->unk3A;
-                        if (b >= 0x100) {
-                            b = 0xFF;
+                    velZHigh = emitter->velocityZHigh;
+                    if (emitter->velocityZHighRandom != 0) {
+                        velZHigh += (u32)func_150ADA20() % emitter->velocityZHighRandom;
+                        if (velZHigh >= 0x100) {
+                            velZHigh = 0xFF;
                         }
                     }
-                    a = p->unk31;
-                    if (p->unk3B != 0) {
-                        a += (u32)func_150ADA20() % p->unk3B;
-                        if (a >= 0x100) {
-                            a = 0xFF;
+                    velZLow = emitter->velocityZLow;
+                    if (emitter->velocityZLowRandom != 0) {
+                        velZLow += (u32)func_150ADA20() % emitter->velocityZLowRandom;
+                        if (velZLow >= 0x100) {
+                            velZLow = 0xFF;
                         }
                     }
                 }
-                {
-                    c32 = p->unk32; c33 = p->unk33; c34 = p->unk34; c35 = p->unk35;
-                    c2A = p->unk2A; c2B = p->unk2B; c2C = p->unk2C;
-                    c26 = p->unk26; c27 = p->unk27; c28 = p->unk28;
-                func_1516D4E8(x, y, z, p->unk24, p->unk25, c26, c27, c28, p->unk29, c2A, c2B,
-                              c2C, p->unk2D, r, g, b, a, c32, c33, c34, c35, p->unk36,
-                              p->unk37, a14, a16, p->unk40, life, flag, p->unk48, p->unkC, p->unk1);
-                }
+                unk32 = emitter->unk32;
+                unk33 = emitter->unk33;
+                unk34 = emitter->unk34;
+                unk35 = emitter->unk35;
+                envR = emitter->envR;
+                envG = emitter->envG;
+                envB = emitter->envB;
+                r = emitter->r;
+                g = emitter->g;
+                b = emitter->b;
+                func_1516D4E8(x, y, z, emitter->texture, emitter->frame, r, g, b, emitter->alpha, envR, envG, envB,
+                              emitter->kind, velXHigh, velXLow, velZHigh, velZLow, unk32, unk33, unk34, unk35,
+                              emitter->unk36, emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY,
+                              isAlt, emitter->particleLink, emitter->unkC, emitter->unk1);
             }
         }
     }
-    p->unk42 = count;
-    i = p->unk20;
+    emitter->countdown = countdown;
+    i = emitter->timer;
     if (i != 0xFFFF) {
         i -= D_800BE9E4;
         if (i > 0) {
-            p->unk20 = i;
+            emitter->timer = i;
         } else {
-            func_1516972C((struct102 *)p);
+            func_1516972C((struct102 *)emitter);
         }
     }
 }
 
-void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    func_1516D99C((s16)(arg0 >> 16), (s16)(arg0 & 0xFFFF), 0, arg2,
+/* Emitter that follows the f32 position vector at `position` (flags 0x20). */
+void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
+    func_1516D99C((s16)((u32)position >> 16), (s16)((u32)position & 0xFFFF), 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
-        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1,
+        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
         0, 0, 0, 0, 0, arg3, arg4);
 }
@@ -712,58 +682,58 @@ void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
 extern u8 D_800A6E00[];
 extern u8 D_800A6E0C[][3];
 
-s32 func_1516E8CC(struct Obj1516D4E8 *arg0) {
-    struct Obj1516D4E8 *vp;
-    s32 temp_v1;
-    s32 idx;
-    s32 temp;
+s32 func_1516E8CC(Particle *particle) {
+    s32 alpha;
+    s32 level;
+    s32 scale;
     s32 i;
-    f32 frac;
-    f32 inv;
+    f32 t;
+    f32 u;
+    Particle *p; // matching: IDO keeps this copy of the argument in its own register
 
-    vp = arg0;
-    temp_v1 = arg0->unk1F;
-    if (arg0->unk24 != 0) {
-        if (temp_v1 != 0xFF) {
-            temp_v1 += D_800BE9E4 << 5;
-            if (temp_v1 >= 0x100) {
-                temp_v1 = 0xFF;
+    p = particle;
+    alpha = particle->alpha;
+    if (particle->lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 5;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            vp->unk1F = temp_v1;
+            p->alpha = alpha;
         }
     } else {
-        if (temp_v1 != 0) {
-            temp_v1 -= D_800BE9E4 << 4;
-            if (temp_v1 < 0) {
-                temp_v1 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 4;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            vp->unk1F = temp_v1;
+            p->alpha = alpha;
         }
     }
 
-    if ((arg0->unk24 == 0) && (temp_v1 == 0)) {
+    if (particle->lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    temp = arg0->unk14;
-    idx = arg0->unk24;
-    temp += D_800BE9E4 * 10;
-    arg0->unk16 = temp;
-    arg0->unk14 = temp;
+    scale = particle->scaleX;
+    level = particle->lifetime;
+    scale += D_800BE9E4 * 10;
+    particle->scaleY = scale;
+    particle->scaleX = scale;
 
-    if (arg0->unk24 == 0) {
-        idx += arg0->unk1F >> 5;
+    if (particle->lifetime == 0) {
+        level += particle->alpha >> 5;
     } else {
-        idx = idx + 8;
+        level = level + 8;
     }
 
-    for (i = vp->unk26; i < vp->unk26 + 8; i++) {
-        if (idx >= D_800A6E00[i]) {
-            frac = (f32)(idx - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
-            inv = 1.0f - frac;
-            arg0->unk1C = D_800A6E0C[i][0] * inv + D_800A6E0C[i - 1][0] * frac;
-            arg0->unk1D = D_800A6E0C[i][1] * inv + D_800A6E0C[i - 1][1] * frac;
-            arg0->unk1E = D_800A6E0C[i][2] * inv + D_800A6E0C[i - 1][2] * frac;
+    for (i = p->u.ramp.start; i < p->u.ramp.start + 8; i++) {
+        if (level >= D_800A6E00[i]) {
+            t = (f32)(level - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
+            u = 1.0f - t;
+            particle->r = D_800A6E0C[i][0] * u + D_800A6E0C[i - 1][0] * t;
+            particle->g = D_800A6E0C[i][1] * u + D_800A6E0C[i - 1][1] * t;
+            particle->b = D_800A6E0C[i][2] * u + D_800A6E0C[i - 1][2] * t;
             break;
         }
     }
@@ -777,554 +747,490 @@ s32 func_1516E8CC(struct Obj1516D4E8 *arg0) {
 static void func_1516ECA4_pad(void) {
 }
 
-s32 func_1516ECAC(Obj1516FadeState *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
-    s32 temp;
+s32 func_1516ECAC(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 size;
+    s32 scale;
 
-    temp_v0 = arg0->field_0x24;
-    temp_v1 = arg0->field_0x1F;
-    if (temp_v0 != 0) {
-        if (temp_v1 != 0xFF) {
-            temp_v1 += D_800BE9E4 << 7;
-            if (temp_v1 >= 0x100) {
-                temp_v1 = 0xFF;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 7;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v1;
-            temp_v0 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v1 != 0) {
-            temp_v1 -= D_800BE9E4 * arg0->field_0x26;
-            if (temp_v1 < 0) {
-                temp_v1 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 * particle->u.pulse.fadeRate;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v1;
-            temp_v0 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
-    if ((temp_v0 == 0) && (temp_v1 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    temp_a1 = (arg0->field_0x2C << 8) | arg0->field_0x2D;
-    temp = (temp_a1 * temp_v1) >> 7;
-    arg0->field_0x16 = temp;
-    arg0->field_0x14 = temp;
+    size = (particle->u.pulse.sizeHigh << 8) | particle->u.pulse.sizeLow;
+    scale = (size * alpha) >> 7;
+    particle->scaleY = scale;
+    particle->scaleX = scale;
     return 0;
 }
 
 
-void func_1516ED68(s32 a0, s32 a1, u8 a2, s32 a3) {
-    u8 v;
-    v = D_800CC2D4[a0 * 812];
-    if (v != 0x3A) {
+void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
+    u8 id;
+
+    id = D_800CC2D0[object].id;
+    if (id != 0x3A) {
         return;
     }
     func_1516D99C(5, 0, 0, 4,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 8,
         0, 0, 0, 0, 0, 0, 0, 0x124,
-        0x124, 0, 0, a1, 0, 0, a0, 0xC,
+        0x124, 0, 0, duration, 0, 0, object, 0xC,
         0, 0, 0x81, 2, 0, 1, 0, 0,
-        0, 5, 0, a2, a3);
+        0, 5, 0, arg2, arg3);
 }
 
-void func_1516EED4(s32 a0, s32 a1, u8 a2, s32 a3) {
-    if (a0 < 4 && (*(u8 (*)[4])&D_800DD2A0)[a0] >= a1) {
-        (*(u8 (*)[4])&D_800DD2A0)[a0] = 0;
+void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
+    if (object < 4 && D_800DD2A0_ARRAY[object] >= threshold) {
+        D_800DD2A0_ARRAY[object] = 0;
         func_1516D99C(0, 0, 0, 4,
             0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
             2, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0x200,
-            0x200, 0, 0, 0x1E, 0, 0, a0, 0x14,
+            0x200, 0, 0, 0x1E, 0, 0, object, 0x14,
             0, 0, 0x81, 8, 0, 1, 0, 0,
-            0, 0xC, 0, a2, a3);
+            0, 0xC, 0, arg2, arg3);
     }
 }
 
-s32 func_1516F024(Obj1516FadeState *arg0) {
-    /* Reserves the 16 bytes at the top of the -g3 stack frame (sp+0x58..0x67)
-     * that the shipped build allocated but never referenced.  Declared first so
-     * the remaining locals land on their original stack homes. */
-    u8 c24, c25, c26, c27, c28, c2A, c2B, c2C, c32, c33, c34, c35;
-    s32 padq;
-    s32 temp_a2;
-    struct Table1516F024 sp48;
-    struct Table1516F024 sp3C;
-    struct Table1516F024 sp30;
-    struct Table1516F024 sp24;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
+/* Per-style tables, indexed by u.drift.unk2C. */
+s32 func_1516F024(Particle *particle) {
+    u8 pad[16]; // matching: the original frame has 16 unused bytes here
+    s32 style;
+    struct StyleTable damping;
+    struct StyleTable growth;
+    struct StyleTable maxAlpha;
+    struct StyleTable fadeRate;
+    s32 alpha;
+    s32 limit;
+    s32 lifetime;
 
-    sp48 = D_8008CBC4;
-    sp3C = D_8008CBD0;
-    sp30 = D_8008CBDC;
-    sp24 = D_8008CBE8;
+    damping = D_8008CBC4;
+    growth = D_8008CBD0;
+    maxAlpha = D_8008CBDC;
+    fadeRate = D_8008CBE8;
 
-    temp_a1 = arg0->field_0x24;
-    temp_a2 = arg0->field_0x2C;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        temp_v1 = sp30.unk0[temp_a2];
-        if (temp_v0 != temp_v1) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v1 < temp_v0) {
-                temp_v0 = temp_v1;
+    lifetime = particle->lifetime;
+    style = particle->u.drift.unk2C;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        limit = maxAlpha.v[style];
+        if (alpha != limit) {
+            alpha += D_800BE9E4 << 4;
+            if (limit < alpha) {
+                alpha = limit;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 * sp24.unk0[temp_a2];
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 * fadeRate.v[style];
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    temp_v0 = arg0->field_0x14;
-    temp_v0 += D_800BE9E4 * sp3C.unk0[temp_a2];
-    arg0->field_0x16 = temp_v0;
-    arg0->field_0x14 = temp_v0;
-    if (temp_a2 == 3) {
-        arg0->field_0x18 = 0x64;
+    func_1516F864(particle);
+    alpha = particle->scaleX;
+    alpha += D_800BE9E4 * growth.v[style];
+    particle->scaleY = alpha;
+    particle->scaleX = alpha;
+    if (style == 3) {
+        particle->velocityY = 100;
     }
-    func_1516F94C((s32)arg0, sp48.unk0[temp_a2]);
+    func_1516F94C(particle, damping.v[style]);
     return 0;
 }
 
 
-void func_1516F1C0(s32 a0, s32 a1, u8 a2, s32 a3) {
+void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3) {
     func_1516D99C(2, 0, 0, 0x2D,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, a1, 0xA, 0xA, a0, 0x3C,
+        0x50, 0, 0, duration, 0xA, 0xA, object, 0x3C,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 4, 2, a2, a3);
+        0, 4, 2, arg2, arg3);
 }
 
-void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+void func_1516F2F8(u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5) {
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, a1, 4, 4, a0, 0x10,
+        0x50, 0, 0, duration, 4, 4, object, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 1, 0, LOW_U8(a4), a5);
+        0, 1, 0, arg4, arg5);
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, 7, 4, 4, a0, a2,
+        0x50, 0, 0, 7, 4, 4, object, particleLifetime,
         0, 0, 0x81, 5, 0, 1, 0, 0,
-        0, 1, a3, LOW_U8(a4), a5);
+        0, 1, speed, arg4, arg5);
 }
 
-/* Spawns two type-0xD particle emitters at (arg0, arg1, arg2) -- identical apart
- * from their spawn table entry (arg10 vs arg11) and the second one's extra mode
- * byte 6 -- then plays 3-D sound 7 at the same spot with arg3 as its user data.
- * The position is latched into posX/posY/posZ while the first emitter is being
- * built so both later calls reuse it. */
+/* Spawns two emitters at (x, y, z) that differ only in their particles' style (style0,
+ * style1) and the second one's spawn interval, then plays sound 7 there with arg3 as
+ * its user data. */
 void func_1516F548(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-    s32 arg4, s32 arg5, s32 arg6, s32 arg7,
-    s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-    s32 arg12, s32 arg13, s32 arg14, s32 arg15,
+    s32 x, s32 y, s32 z, s32 arg3,
+    s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
+    s32 scaleRandom, s32 radius, s32 style0, s32 style1,
+    s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
-
-    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
+    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
-        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg10,
-        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
-        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
-        (s16)arg5, 0xC8, 1, 0, 0, 1, 0, 0,
-        0, 0, 0, LOW_U8(arg15), arg16);
-    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
+        2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
+        0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
+        0, 0, 0, arg15, arg16);
+    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
-        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg11,
-        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
-        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
-        (s16)arg5, 0xC8, 1, 6, 0, 1, 0, 0,
-        0, 0, 0, LOW_U8(arg15), arg16);
-    func_1000FA64(7, (s16)arg0, (s16)arg1, (s16)arg2, 0x36B0, 0x3E8, 0x64,
+        2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
+        0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
+        0, 0, 0, arg15, arg16);
+    func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
         (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
-typedef struct Game19A8B0Motion {
-    u8 pad0[0xE];
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 scaleX;
-    s16 scaleY;
-    s16 velocityY;
-    u8 pad1A[5];
-    u8 alpha;
-    u8 pad20[3];
-    u8 kind;
-    u8 active;
-    u8 yFraction;
-    s8 velocityXHigh;
-    u8 velocityXLow;
-    s8 velocityZHigh;
-    u8 velocityZLow;
-    u8 xFraction;
-    u8 zFraction;
-    u8 sizeHigh;
-    u8 sizeLow;
-    u8 pad2E[2];
-    void *link;
-} Game19A8B0Motion;
-
-#define MOTION ((Game19A8B0Motion *)arg0)
-void func_1516F864(s32 arg0) {
+/* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */
+void func_1516F864(Particle *particle) {
     s32 x;
     s32 velocity;
     s32 z;
 
-    x = MOTION->x;
+    x = particle->x;
     x <<= 8;
-    x += MOTION->xFraction;
-    velocity = MOTION->velocityXHigh;
+    x += particle->u.drift.xFraction;
+    velocity = particle->u.drift.velocityXHigh;
     velocity <<= 8;
-    velocity += MOTION->velocityXLow;
+    velocity += particle->u.drift.velocityXLow;
     x += velocity * D_800BE9E4;
-    MOTION->x = x >> 8;
+    particle->x = x >> 8;
     x = (u8)x;
-    MOTION->xFraction = x;
-    z = MOTION->z;
+    particle->u.drift.xFraction = x;
+    z = particle->z;
     z <<= 8;
-    z += MOTION->zFraction;
-    velocity = MOTION->velocityZHigh;
+    z += particle->u.drift.zFraction;
+    velocity = particle->u.drift.velocityZHigh;
     velocity <<= 8;
-    velocity += MOTION->velocityZLow;
+    velocity += particle->u.drift.velocityZLow;
     z += velocity * D_800BE9E4;
-    MOTION->z = z >> 8;
+    particle->z = z >> 8;
     z = (u8)z;
-    MOTION->zFraction = z;
-}
-#undef MOTION
-
-void func_1516F8EC(s32 arg0, s32 arg1)
-{
-  u8 *ptr;
-  s32 val;
-  ptr = (u8 *) arg0;
-  val = (*((s8 *) (ptr + 0x26))) << 8;
-  val += ptr[0x27];
-  val = (val * arg1) >> 8;
-  ptr[0x26] = val >> 8;
-  ptr[0x27] = val & 0xFFFFu;
+    particle->u.drift.zFraction = z;
 }
 
-extern void func_1516F8EC(s32, s32);
+/* Scales the X velocity by factor / 256. */
+void func_1516F8EC(Particle *particle, s32 factor) {
+    s32 velocity;
 
-
-void func_1516F91C(s32 arg0, s32 arg1)
-{
-  s32 v0;
-  v0 = (*((s8 *) (arg0 + 0x28))) << 8;
-  v0 += *((u8 *) (arg0 + 0x29));
-  v0 = (v0 * arg1) >> 8;
-  *((u8 *) (arg0 + 0x28)) = v0 >> 8;
-  *((u8 *) (arg0 + 0x29)) = v0 & 0xFF;
+    velocity = particle->u.drift.velocityXHigh << 8;
+    velocity += particle->u.drift.velocityXLow;
+    velocity = (velocity * factor) >> 8;
+    particle->u.drift.velocityXHigh = velocity >> 8;
+    particle->u.drift.velocityXLow = velocity & 0xFF;
 }
 
-extern void func_1516F91C(s32, s32);
+/* Scales the Z velocity by factor / 256. */
+void func_1516F91C(Particle *particle, s32 factor) {
+    s32 velocity;
 
-
-extern void func_1516F8EC(s32, s32);
-extern void func_1516F91C(s32, s32);
-
-void func_1516F94C(s32 arg0, s32 arg1) {
-    func_1516F8EC(arg0, arg1);
-    func_1516F91C(arg0, arg1);
+    velocity = particle->u.drift.velocityZHigh << 8;
+    velocity += particle->u.drift.velocityZLow;
+    velocity = (velocity * factor) >> 8;
+    particle->u.drift.velocityZHigh = velocity >> 8;
+    particle->u.drift.velocityZLow = velocity & 0xFF;
 }
 
-void func_1516F984(Obj1516F984 *arg0, s32 arg1) {
-    s32 temp;
-    func_1516F94C((s32)arg0, arg1);
-    temp = arg0->field_0x18;
-    temp = temp * arg1;
-    arg0->field_0x18 = temp >> 8;
+void func_1516F94C(Particle *particle, s32 factor) {
+    func_1516F8EC(particle, factor);
+    func_1516F91C(particle, factor);
 }
 
-s32 func_1516F9C4(Obj1516FadeStepState *arg0) {
-    s32 temp_a1;
-    s32 temp_v0;
-    s32 temp;
+void func_1516F984(Particle *particle, s32 factor) {
+    s32 velocity;
 
-    temp_a1 = arg0->field_0x24;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        if (temp_v0 != 0xFF) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v0 >= 0x100) {
-                temp_v0 = 0xFF;
+    func_1516F94C(particle, factor);
+    velocity = particle->velocityY;
+    velocity = velocity * factor;
+    particle->velocityY = velocity >> 8;
+}
+
+s32 func_1516F9C4(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 scale;
+
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 4;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 << 3;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 3;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
+            particle->alpha = alpha;
         }
-        temp = (temp_v0 << 9) >> 8;
-        arg0->field_0x16 = temp;
-        arg0->field_0x14 = temp;
-        temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+        scale = (alpha << 9) >> 8;
+        particle->scaleY = scale;
+        particle->scaleX = scale;
+        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    func_1516F984((Obj1516F984 *)arg0, 0xF0);
+    func_1516F864(particle);
+    func_1516F984(particle, 0xF0);
     return 0;
 }
 
-void func_1516FA88(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    func_1516D99C(arg0, arg1, arg2, 0x1B,
+void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5) {
+    func_1516D99C(x, y, z, 0x1B,
         0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF,
         3, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0x400,
         0x400, 0, 0, 2, 0, 0, 0xFF, 0xF,
         0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5,
-        arg3, 0, 0, arg4, arg5);
+        isAlt, 0, 0, arg4, arg5);
 }
 
-typedef struct {
-    char pad_0[0x14];
-    s16 sizeX;
-    s16 sizeY;
-    char pad_0x18[0x4];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 alpha;
-    char pad_0x20[0x4];
-    u8 fadingIn;
-    char pad_0x25[0x1];
-    u8 r0;
-    u8 g0;
-    u8 b0;
-    u8 r1;
-    u8 g1;
-    u8 b1;
-    u8 blend;
-    s8 growX;
-    s8 growY;
-    u8 fadeShift;
-} Obj1516FBCC;
-
-s32 func_1516FBCC(Obj1516FBCC *arg0) {
+s32 func_1516FBCC(Particle *particle) {
     s32 v; /* alpha, then growth, then blend */
-    s32 lo;
-    s32 hi;
+    s32 from;
+    s32 to;
 
-    v = arg0->alpha;
-    if (arg0->fadingIn != 0) {
+    v = particle->alpha;
+    if (particle->lifetime != 0) {
         if (v != 0xFF) {
             v += D_800BE9E4 << 4;
             if (v >= 0x100) {
                 v = 0xFF;
             }
-            arg0->alpha = v;
+            particle->alpha = v;
         }
     } else {
         if (v != 0) {
-            v -= D_800BE9E4 << arg0->fadeShift;
+            v -= D_800BE9E4 << particle->u.tint.fadeShift;
             if (v < 0) {
                 v = 0;
             }
-            arg0->alpha = v;
+            particle->alpha = v;
         }
     }
-    if ((arg0->fadingIn == 0) && (v == 0)) {
+    if (particle->lifetime == 0 && v == 0) {
         return 1;
     }
-    v = arg0->growX;
+    v = particle->u.tint.growX;
     v *= D_800BE9E4;
-    arg0->sizeX += v;
-    v = arg0->growY;
+    particle->scaleX += v;
+    v = particle->u.tint.growY;
     v *= D_800BE9E4;
-    arg0->sizeY += v;
-    /* BUG (original game): sizeX is tested twice, sizeY never */
-    if ((arg0->sizeX <= 0) || (arg0->sizeX <= 0)) {
-        arg0->sizeX = arg0->sizeY = 0;
+    particle->scaleY += v;
+    /* BUG (original game): scaleX is tested twice, scaleY never */
+    if (particle->scaleX <= 0 || particle->scaleX <= 0) {
+        particle->scaleX = particle->scaleY = 0;
         return 1;
     }
-    v = arg0->blend;
+    v = particle->u.tint.blend;
     v += D_800BE9E4;
     if (v >= 0x80) {
         v = 0x7F;
     }
-    arg0->blend = v;
+    particle->u.tint.blend = v;
     v *= 2;
-    lo = arg0->r0;
-    hi = arg0->r1;
-    arg0->r = (((hi - lo) * v) >> 8) + lo;
-    lo = arg0->g0;
-    hi = arg0->g1;
-    arg0->g = (((hi - lo) * v) >> 8) + lo;
-    lo = arg0->b0;
-    hi = arg0->b1;
-    arg0->b = (((hi - lo) * v) >> 8) + lo;
+    from = particle->u.tint.r0;
+    to = particle->u.tint.r1;
+    particle->r = (((to - from) * v) >> 8) + from;
+    from = particle->u.tint.g0;
+    to = particle->u.tint.g1;
+    particle->g = (((to - from) * v) >> 8) + from;
+    from = particle->u.tint.b0;
+    to = particle->u.tint.b1;
+    particle->b = (((to - from) * v) >> 8) + from;
     return 0;
 }
 
-s32 func_1516FD50(Obj1516FadeStepState *arg0) {
-    s32 temp_a1;
-    s32 temp_v0;
-    s32 temp;
+s32 func_1516FD50(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 scale;
 
-    temp_a1 = arg0->field_0x24;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        if (temp_v0 != 0xFF) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v0 >= 0x100) {
-                temp_v0 = 0xFF;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 4;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 << 3;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 3;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
+            particle->alpha = alpha;
         }
-        temp = (temp_v0 << 9) >> 8;
-        arg0->field_0x16 = temp;
-        arg0->field_0x14 = temp;
-        temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+        scale = (alpha << 9) >> 8;
+        particle->scaleY = scale;
+        particle->scaleX = scale;
+        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    arg0->field_0x18 = arg0->field_0x18 + arg0->field_0x2C;
+    func_1516F864(particle);
+    particle->velocityY = particle->velocityY + (s8)particle->u.drift.unk2C;
     return 0;
 }
 
-void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
-    s32 sp_s2;
-    s16 posHi;
-    s16 posLo;
-    s32 var_a1;
+void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
+    s32 bone;
+    s16 posHigh;
+    s16 posLow;
+    s32 flags;
     s32 i;
-    s32 var_s1;
-    s32 pos;
+    s32 velocityXHigh;
+    s32 position;
 
-    var_s1 = 0;
-    i = 0;
-    if (D_800CC2D0[arg0].interaction_state == 1) {
-        posHi = 4;
-        posLo = 0;
-        sp_s2 = 0x19;
-        var_a1 = 1;
+    velocityXHigh = 0;
+    if (D_800CC2D0[object].interaction_state == 1) {
+        /* follow the object's bone, D_800A6E30 row 4 */
+        posHigh = 4;
+        posLow = 0;
+        bone = 0x19;
+        flags = 1;
     } else {
-        pos = (s32)&D_800CC2D0[arg0].x_position;
-        posHi = (s16)(pos >> 16);
-        posLo = (s16)(pos & 0xFFFF);
-        arg0 = 0xFF;
-        var_a1 = 0x21;
+        /* follow the object's position vector; bone is left unset (unused without an object) */
+        position = (s32)&D_800CC2D0[object].x_position;
+        posHigh = position >> 16;
+        posLow = position & 0xFFFF;
+        object = 0xFF;
+        flags = 0x21;
     }
-    do {
+    for (i = 0; i < 2; i++) {
         if (i == 1) {
-            sp_s2 = 0x1B;
-            var_s1 = 8;
+            bone = 0x1B;
+            velocityXHigh = 8;
         }
-        func_1516D99C(posHi, posLo, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, var_s1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)arg1, 0x1E, 0, (u8)arg0, 0x1E, 0x168, 0x18, (u16)var_a1, 4, 0, 1, 0, 0, 0, sp_s2, 0, arg2, arg3);
-        i++;
-    } while (i != 2);
+        func_1516D99C(posHigh, posLow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, velocityXHigh, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)duration, 0x1E, 0, (u8)object, 0x1E, 0x168,
+                      0x18, (u16)flags, 4, 0, 1, 0, 0, 0, bone, 0, arg2, arg3);
+    }
 }
 
-extern u8 func_150ADA20(void);
-extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
 
-void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* A random unit direction vector; flags & 0x40 halves the range of its first angle. */
+void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
     s32 mask;
-    f32 r;
-    f32 sp24;
-    f32 sp20;
-    s32 v;
+    f32 yawA;
+    f32 yawB;
+    f32 horizontal;
+    s32 angle;
 
-    mask = (arg0 & 0x40) ? 0x3F : 0x7F;
-    v = func_150ADA20() & mask;
-    *arg2 = func_150489B0((u8)v);
-    sp20 = func_15048A40((u8)v);
-    v = func_150ADA20() & 0xFF;
-    sp24 = func_150489B0((u8)v);
-    r = func_15048A40((u8)v);
-    *arg1 = sp20 * r;
-    *arg3 = sp20 * sp24;
+    mask = (flags & 0x40) ? 0x3F : 0x7F;
+    angle = func_150ADA20() & mask;
+    *outY = func_150489B0((u8)angle);
+    horizontal = func_15048A40((u8)angle);
+    angle = func_150ADA20() & 0xFF;
+    yawB = func_150489B0((u8)angle);
+    yawA = func_15048A40((u8)angle);
+    *outX = horizontal * yawA;
+    *outZ = horizontal * yawB;
 }
 
-struct Vec3f151700D8 { f32 v[3]; };
-struct Col151700D8 { u8 c[3][3]; };
-extern struct Vec3f151700D8 D_8008CBF4;
-extern struct Vec3f151700D8 D_8008CC00;
-extern struct Col151700D8 D_8008CC0C;
+struct Vec3fTable { f32 v[3]; };
+struct RGBTable { u8 c[3][3]; };
+extern struct Vec3fTable D_8008CBF4;
+extern struct Vec3fTable D_8008CC00;
+extern struct RGBTable D_8008CC0C;
 
-void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type, s32 n0, s32 n1, u8 arg8, s32 arg9) {
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8, s32 arg9) {
     s32 i;
     s32 j;
     s32 next;
-    s32 life;
+    s32 lifetime;
     s32 size;
-    u8 *col;
+    u8 *color;
     f32 t;
     f32 px;
     f32 py;
     f32 pz;
-    s32 dx;
-    s32 dz;
+    s32 velocityX;
+    s32 velocityZ;
     f32 *p1;
     s32 sizeMin;
-    s32 sizeVar;
-    s32 sizeRange;
-    s32 lifeMin;
-    s32 life2;
+    s32 sizeRandom;
+    s32 velocityYRandom;
+    s32 velocityYMin;
+    s32 velocityY;
     f32 *p0;
-    s32 a;
-    s32 pad7;
+    s32 particleStyle;
+    s32 pad; // matching: unused stack slot in the original frame
     s32 count;
-    struct Vec3f151700D8 unused;
-    struct Vec3f151700D8 sizes;
-    struct Col151700D8 colors;
+    struct Vec3fTable unused;
+    struct Vec3fTable velocityYRandoms;
+    struct RGBTable colors;
 
-    unused = D_8008CBF4;
-    sizes = D_8008CC00;
+    unused = D_8008CBF4; /* copied but never read, as in the original */
+    velocityYRandoms = D_8008CC00;
     colors = D_8008CC0C;
-    sizeRange = sizes.v[type] * scale;
+    velocityYRandom = velocityYRandoms.v[type] * scale;
     sizeMin = 731.0f * scale;
-    sizeVar = 836.0f * scale;
-    lifeMin = 143.0f * scale;
+    sizeRandom = 836.0f * scale;
+    velocityYMin = 143.0f * scale;
     p0 = verts[0];
     for (i = 0; i < 4; i++) {
         if (i != 3) {
@@ -1333,31 +1239,31 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type,
             next = 0;
         }
         if (i == 0 || i == 2) {
-            count = n0;
+            count = countA;
         } else {
-            count = n1;
+            count = countB;
         }
         p1 = verts[next];
-        dx = (((p0[0] + p1[0]) * 0.5f) - x) * 2.0f;
-        px = (p0[1] + p1[1]) * 0.5f;
-        dz = (((p0[2] + p1[2]) * 0.5f) - z) * 2.0f;
+        velocityX = (((p0[0] + p1[0]) * 0.5f) - x) * 2.0f;
+        px = (p0[1] + p1[1]) * 0.5f; // matching: dead store, overwritten in the loop below
+        velocityZ = (((p0[2] + p1[2]) * 0.5f) - z) * 2.0f;
         for (j = 0; j < count; j++) {
             t = j * (1.0f / (count - 1));
-            col = colors.c[type];
-            a = alpha;
+            color = colors.c[type];
+            particleStyle = style;
             px = p0[0] + (p1[0] - p0[0]) * t;
             py = p0[1] + (p1[1] - p0[1]) * t;
             pz = p0[2] + (p1[2] - p0[2]) * t;
-            if (i) {
+            if (i) { // matching: the empty branch on i steers IDO's register allocation
             }
-            life = (func_150ADA20() & 0x1F) + 0xF;
-            size = (func_150ADA20() % (u32)sizeVar) + sizeMin;
-            life2 = (func_150ADA20() % (u32)sizeRange) + lifeMin;
+            lifetime = (func_150ADA20() & 0x1F) + 0xF;
+            size = (func_150ADA20() % (u32)sizeRandom) + sizeMin;
+            velocityY = (func_150ADA20() % (u32)velocityYRandom) + velocityYMin;
             func_1516D4E8((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0,
-                col[0], col[1], col[2], 0, 0, 0, 0, 2,
-                (u8)((dx >> 8) & 0xFF), (u8)(dx & 0xFF), (u8)((dz >> 8) & 0xFF), (u8)(dz & 0xFF), 0, 0, a, 0, 0, 0,
-                (s16)size, (s16)size, life,
-                life2,
+                color[0], color[1], color[2], 0, 0, 0, 0, 2,
+                (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
+                0, 0, particleStyle, 0, 0, 0,
+                (s16)size, (s16)size, lifetime, velocityY,
                 0, 0, arg8, arg9);
         }
         p0 += 3;
@@ -1366,135 +1272,122 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type,
 
 extern s32 func_151EF610(void);
 
-void func_15170500(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    f32 x;
-    f32 z;
-    f32 y;
-    f32 s;
-    s32 ix;
-    s32 iy;
-    s32 iz;
-    f32 w;
-    s32 p2;
-    s32 r;
+/* Spawns a single particle (isParticle) or an emitter heading off along `angle`, which
+ * defaults to object 0's facing angle. */
+void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6) {
+    f32 dirX;
+    f32 rise;
+    f32 dirZ;
+    f32 spread;
+    s32 velocityX;
+    s32 velocityZ;
+    s32 velocityY;
+    f32 dirY;
+    s32 pad; // matching: unused stack slot in the original frame
+    s32 tilt;
 
-    z = 0.0f;
-    if (arg4 == 0) {
-        arg3 = D_800CC34A[0];
+    rise = 0.0f;
+    if (isParticle == 0) {
+        angle = D_800CC2D0[0].unk7A;
     }
-    r = func_151EF610() % 50;
-    x = func_150489B0((u8)arg3);
-    y = -func_15048A40((u8)arg3);
-    s = func_150489B0((u8)r);
-    x *= s;
-    y *= s;
-    w = z * s;
-    x += x; y += y; w += w;
-    if (arg4 != 0) {
-        ix = x * 256.0f;
-        iy = y * 256.0f;
-        iz = w * 256.0f;
-        func_1516D4E8(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
-            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
-            iz - 0x32, 0, 0, arg5, arg6);
+    tilt = func_151EF610() % 50;
+    dirX = func_150489B0((u8)angle);
+    dirZ = -func_15048A40((u8)angle);
+    spread = func_150489B0((u8)tilt);
+    dirX *= spread;
+    dirZ *= spread;
+    dirY = rise * spread;
+    dirX += dirX; dirZ += dirZ; dirY += dirY;
+    if (isParticle != 0) {
+        velocityX = dirX * 256.0f;
+        velocityZ = dirZ * 256.0f;
+        velocityY = dirY * 256.0f;
+        func_1516D4E8(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
+            velocityY - 50, 0, 0, arg5, arg6);
     } else {
-        ix = x * 256.0f;
-        iy = y * 256.0f;
-        iz = w * 256.0f;
-        func_1516D99C(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
-            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
-            0, 0, 0x14, 0, 0, 0xFF, 0xFF, iz - 0x32, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
+        velocityX = dirX * 256.0f;
+        velocityZ = dirZ * 256.0f;
+        velocityY = dirY * 256.0f;
+        func_1516D99C(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
+            0, 0, 0x14, 0, 0, 0xFF, 0xFF, velocityY - 50, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
             arg5, arg6);
     }
 }
 
-typedef struct {
-    char pad_0[0x18];
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x1];
-    s8 field_0x26;
-    u8 field_0x27;
-    char pad_0x28[0x7];
-    u8 field_0x2F;
-} Obj151707E0;
+s32 func_151707E0(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 velocityX;
 
-extern s32 func_151EF610(void);
-
-s32 func_151707E0(Obj151707E0 *arg0) {
-    s32 active;
-    s32 temp;
-    s32 velX;
-
-    active = arg0->field_0x24;
-    temp = arg0->field_0x1F;
-    if (active != 0) {
-        if (temp == 0) {
-            arg0->field_0x24 = (func_150ADA20() % 0x19U) + 0xC8;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha == 0) {
+            particle->lifetime = (func_150ADA20() % 25U) + 200;
         }
-        if (temp != 0xFE) {
-            temp += D_800BE9E4 << 6;
-            if (temp >= 0xFF) {
-                temp = 0xFE;
+        if (alpha != 0xFE) {
+            alpha += D_800BE9E4 << 6;
+            if (alpha >= 0xFF) {
+                alpha = 0xFE;
             }
-            arg0->field_0x1F = temp;
+            particle->alpha = alpha;
         }
     } else {
-        if (temp != 0) {
-            temp -= D_800BE9E4 << 4;
-            if (temp < 0) {
-                temp = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 4;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp;
+            particle->alpha = alpha;
         }
     }
 
-    if ((arg0->field_0x24 == 0) && (temp == 0)) {
+    if (particle->lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32) arg0);
-    if (arg0->field_0x2F != 0) {
-        func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
-        func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
-        arg0->field_0x18 = 0;
+    func_1516F864(particle);
+    if (particle->u.drift.unk2F != 0) {
+        func_1516F8EC(particle, (func_151EF610() % 32) + 230);
+        func_1516F91C(particle, (func_151EF610() % 32) + 230);
+        particle->velocityY = 0;
     } else {
-        velX = (arg0->field_0x26 << 8) + arg0->field_0x27;
-        temp = arg0->field_0x26 * 0x100;
-        temp += arg0->field_0x27;
-        if (((velX * velX) + (temp * temp)) >= 0x7D1) {
-            func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
-            func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
+        /* BUG (original game): the speed test squares the X velocity twice and ignores Z */
+        velocityX = (particle->u.drift.velocityXHigh << 8) + particle->u.drift.velocityXLow;
+        alpha = particle->u.drift.velocityXHigh * 0x100; // matching: the original reuses alpha's local here
+        alpha += particle->u.drift.velocityXLow;
+        if (velocityX * velocityX + alpha * alpha > 2000) {
+            func_1516F8EC(particle, (func_151EF610() % 32) + 220);
+            func_1516F91C(particle, (func_151EF610() % 32) + 220);
         }
-        arg0->field_0x18 = 0;
+        particle->velocityY = 0;
     }
     return 0;
 }
 
-void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {
+/* Spawns `count` particles flying off at `speed` in random directions from func_15170034. */
+void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6) {
     s32 i;
-    f32 x;
-    f32 y;
-    f32 z;
-    s32 ix;
-    s32 iz;
-    s32 iy;
-    s32 pad;
-    s32 pad2;
+    f32 dirX;
+    f32 dirY;
+    f32 dirZ;
+    s32 velocityX;
+    s32 velocityZ;
+    s32 velocityY;
+    s32 pad[2]; // matching: unused stack slots in the original frame
 
-    for (i = 0; i < arg3; i++) {
-        func_15170034(0x40, &x, &y, &z);
-        x *= arg4;
-        y *= arg4 + arg4;
-        z *= arg4;
-        ix = x;
-        iz = z;
-        iy = y;
-        func_1516D4E8(arg0, arg1, arg2, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
-            ix >> 8, ix & 0xFF, iz >> 8, iz & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
-            iy, 0, 0, arg5, arg6);
+    for (i = 0; i < count; i++) {
+        func_15170034(0x40, &dirX, &dirY, &dirZ);
+        dirX *= speed;
+        dirY *= speed + speed;
+        dirZ *= speed;
+        velocityX = dirX;
+        velocityZ = dirZ;
+        velocityY = dirY;
+        func_1516D4E8(x, y, z, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
+            velocityY, 0, 0, arg5, arg6);
     }
 }
