@@ -3,17 +3,8 @@
 #include "variables.h"
 
 extern f32 D_800A07B4; // matching: 401.0f; as a literal IDO allocates the FP temps in a different order
-extern f32 D_800A07C4;
-extern f32 D_800A07C8;
-extern f32 D_800A07CC;
-extern f32 D_800A07D0;
-extern f32 D_800A07D4;
-extern f32 D_800A07D8;
-extern f32 D_800A07DC;
-extern f32 D_800A07E0;
 
-void func_15143794(s32, s32, f32, f32 *);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
+void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
 /* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
 typedef struct {
@@ -28,9 +19,10 @@ typedef struct {
 
 void func_1504715C(GroundHit *hit, struct127 *actor);
 s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
+                   f32 arg9, s32 argA, u8 argB);
 
-/* Spawns two effects on the ground below the actor (if any is found within 3000 units). */
+/* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
 void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
     vertex pos;
 
@@ -145,7 +137,7 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.height = size;
     random = func_150ADA20();
     speed = func_150ADA68();
-    func_15143794(yaw, (s16)((random % 20U) - 19), ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel.x);
+    func_15143794(yaw, (random % 20U) - 19, ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel.x);
     desc.flags = 0xE05;
     desc.gravity = 0.0f;
     if (func_150ADA20() & 1) {
@@ -168,101 +160,89 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-s32 func_150CDF10(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
-    struct {
-            f32 unk00;
-            f32 unk04;
-            f32 unk08;
-            f32 unk0C;
-            f32 unk10;
-            f32 unk14;
-            f32 unk18;
-            f32 unk1C;
-            f32 unk20;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            f32 unk3C;
-            f32 unk40;
-            f32 unk44;
-            f32 unk48;
-            f32 unk4C;
-            s32 unk50;
-            s16 unk54;
-            s16 unk56;
-            u8 unk58;
-            u8 pad59[3];
-            s32 unk5C;
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            u8 unk63;
-            u8 unk64;
-            u8 unk65;
-            u8 unk66;
-            u8 unk67;
-            u8 unk68;
-            u8 pad69;
-            u8 unk6A;
-            u8 pad6B;
-            s32 unk6C;
-            u8 unk70;
-            u8 pad71;
-            s16 unk72;
-            s16 unk74;
-            u8 pad76[0xA];
-    } sp28;
+/* Spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (as ParticleSpawn in game_1D43B0.c). */
+typedef struct {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[0xA]; // matching: 4 bytes past the 0x7C template; the stack frame needs the larger size
+} ParticleSpawn; // size 0x80
 
-    sp28.unk28 = arg2;
-    sp28.unk2C = arg3;
-    sp28.unk1C = 1.0f;
-    sp28.unk20 = 1.0f;
-    sp28.unk24 = 1.0f;
-    sp28.unk50 = 0x29E8;
-    sp28.unk10 = 0.0f;
-    sp28.unk14 = 0.0f;
-    sp28.unk18 = 0.0f;
-    sp28.unk44 = 0.0f;
-    sp28.unk00 = 1.0f;
-    sp28.unk56 = 0x20;
-    sp28.unk30 = arg4;
-    sp28.unk04 = D_800A07C4;
+s32 func_15132A4C(ParticleSpawn *spawn, s32, s32, s32, u8, s32);
 
-    ((s32 *)&sp28)[-2] = func_150ADA20();
-    func_15143794(arg8, (s16)((((s32 *)&sp28)[-2] % 0x29U) - 0x3D),
-                  (func_150ADA68() * 101.0f + 150.0f) * D_800A07C8,
-                  &sp28.unk34);
+/* Spawns a tumbling model-0x20 particle at (x, y, z), thrown along `yaw` at a random upward pitch. */
+s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
+                  s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+    ParticleSpawn spawn;
+    f32 speed;
+    u32 random;
 
-    sp28.unk40 = (func_150ADA68() * 260.0f + -130.0f) * D_800A07CC;
-    sp28.unk48 = (func_150ADA68() * 260.0f + -130.0f) * D_800A07D0;
-    sp28.unk54 = (func_150ADA20() % 0x15U) + 0x32;
-    sp28.unk4C = (func_150ADA68() * D_800A07D4 + D_800A07D8) * D_800A07DC;
-
-    sp28.unk0C = (func_150ADA68() * 302.0f + 52.0f) * D_800A07E0;
-    sp28.unk08 = sp28.unk0C;
-    sp28.unk58 = 0;
-    sp28.unk5C = 0;
-
-    sp28.unk60 = (func_150ADA20() % 0x4CU) + 0xB4;
-    sp28.unk61 = 8;
-    sp28.unk62 = 0;
-    sp28.unk63 = 0;
-    sp28.unk64 = 0;
-    sp28.unk65 = 0;
-    sp28.unk66 = 0;
-    sp28.unk67 = 0;
-    sp28.unk68 = 0;
-    sp28.unk6A = 2;
-    sp28.unk6C = 0;
-    sp28.unk70 = 0;
-    sp28.unk72 = 0x20;
-    sp28.unk74 = 7;
-
-    func_15132A4C(&sp28, 3, 0xFF, 0, arg14, 0);
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.flags = 0x29E8;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.model = 0x20;
+    spawn.pos.z = z;
+    spawn.elasticity = 0.2f;
+    random = func_150ADA20();
+    speed = func_150ADA68();
+    func_15143794(yaw, (random % 41U) - 61, ((speed * 101.0f) + 150.0f) * 0.1f, &spawn.vel.x);
+    spawn.rotVel.x = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
+    spawn.rotVel.z = ((func_150ADA68() * 260.0f) + -130.0f) * 0.1f;
+    spawn.lifetime = (func_150ADA20() % 21U) + 50;
+    spawn.gravity = ((func_150ADA68() * 311.0f) + -1217.0f) * 0.001f;
+    spawn.sizeY = ((func_150ADA68() * 302.0f) + 52.0f) * 0.001f;
+    spawn.sizeXZ = spawn.sizeY;
+    spawn.variant = 0;
+    spawn.unk5C = NULL;
+    spawn.alpha = (func_150ADA20() % 76U) + 180;
+    spawn.updateFn = 8;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
+    spawn.unk6A = 2;
+    spawn.owner = NULL;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 32;
+    spawn.fadeRate = 7;
+    func_15132A4C(&spawn, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
