@@ -2552,9 +2552,10 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
     }
 }
 
-s16 func_1505C140(struct127 *arg0, struct127 *arg1) {
-    s16 ret = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0);
-    ret -= arg1->unk7A;
+/* How far (binary angle, absolute) the attacker is from the victim's facing direction. */
+s16 func_1505C140(struct127 *attacker, struct127 *victim) {
+    s16 ret = func_1505A630(attacker->x_position - victim->x_position, victim->z_position - attacker->z_position, 0);
+    ret -= victim->unk7A;
 
     if (ret < 0) {
         ret = -ret;
@@ -2562,15 +2563,16 @@ s16 func_1505C140(struct127 *arg0, struct127 *arg1) {
     return ret;
 }
 
-struct252 *func_1505C1A4(struct127 *arg0) {
-    s32 *temp_v1;
-    struct252 *ret;
+/* The actor type's hit-reaction table (stored before its animation table), or the default one. */
+Entry1505C1E4 *func_1505C1A4(struct127 *actor) {
+    Entry1505C1E4 **slot;
+    Entry1505C1E4 *ret;
 
-    if ((arg0->id != 0xFF) && (D_800D1588[arg0->id] != 0)) {
-        temp_v1 = (s32*)D_800D1588[arg0->id] - 3;
-        ret = *temp_v1;
+    if ((actor->id != 0xFF) && (D_800D1588[actor->id] != 0)) {
+        slot = (Entry1505C1E4 **)D_800D1588[actor->id] - 3; // matching: the address is formed before the load
+        ret = *slot;
     } else {
-        ret = &D_8009A9F8;
+        ret = (Entry1505C1E4 *)&D_8009A9F8;
     }
     return ret;
 }
@@ -2591,7 +2593,12 @@ extern Rule1505C1E4 *D_80086AA0[];
 s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
 void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
 
-s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
+ * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
+ * Returns hitMask with the attacker's bit set when the hit landed.
+ */
+s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, s32 index, s32 attackerSlot, s32 hitMask, s32 damageMask) {
     s32 i;
     u8 done;
     u8 kind;
@@ -2604,40 +2611,40 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg
     u8 idx;
 
     done = FALSE;
-    kind = arg2[arg3].unk0 & 0x7F;
-    entry = arg2;
-    if (((u8)arg1->unk239 & 0x7F) != 0) {
-        count = D_8009A6A0[((u8)arg1->unk239 & 0x7F)];
-        rules = D_80086AA0[((u8)arg1->unk239 & 0x7F)];
+    kind = table[index].unk0 & 0x7F;
+    entry = table;
+    if (((u8)victim->unk239 & 0x7F) != 0) {
+        count = D_8009A6A0[((u8)victim->unk239 & 0x7F)];
+        rules = D_80086AA0[((u8)victim->unk239 & 0x7F)];
         for (i = 0; i < count; i++) {
             type = rules[i].unk2;
             if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
                 type &= 0x7F;
                 if (rules[i].unk0 == 1) {
-                    if (func_1505C140(arg0, arg1) > 0x4000) {
+                    if (func_1505C140(attacker, victim) > 0x4000) {
                         type = 0xFF;
                     }
                 }
                 if (rules[i].unk0 == 2) {
-                    if (func_1505C140(arg0, arg1) < 0x4000) {
+                    if (func_1505C140(attacker, victim) < 0x4000) {
                         type = 0xFF;
                     }
                 }
-                if (rules[i].unk0 == 3 && arg1->stunned == 0) {
+                if (rules[i].unk0 == 3 && victim->stunned == 0) {
                     type = 0xFF;
                 }
-                if (rules[i].unk0 == 4 && arg1->stunned != 0) {
+                if (rules[i].unk0 == 4 && victim->stunned != 0) {
                     type = 0xFF;
                 }
                 if (type < 2) {
-                    angle = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0) - arg1->unk7A + 0x4000;
+                    angle = func_1505A630(attacker->x_position - victim->x_position, victim->z_position - attacker->z_position, 0) - victim->unk7A + 0x4000;
                     if ((u16)(angle >> 15) == type) {
-                        arg3 = rules[i].unk3;
+                        index = rules[i].unk3;
                     }
                     break;
                 }
                 if (type == 2) {
-                    arg3 = rules[i].unk3;
+                    index = rules[i].unk3;
                     break;
                 }
                 if (type == 3) {
@@ -2646,52 +2653,52 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg
                 }
                 if (type == 4) {
                     if (rules[i].unk3 != 0xFF) {
-                        arg3 = rules[i].unk3;
+                        index = rules[i].unk3;
                     }
-                    arg6 = 0;
+                    damageMask = 0;
                     break;
                 }
                 if (type == 5) {
                     u8 next;
                     next = rules[i].unk3;
-                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - index];
                     break;
                 }
                 if (type == 6) {
                     u8 next;
                     next = rules[i].unk3;
-                    arg6 = 0;
-                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    damageMask = 0;
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - index];
                     break;
                 }
                 if (type == 7) {
-                    if ((arg2[arg3].unkF & arg6) >= arg1->health) {
+                    if ((table[index].unkF & damageMask) >= victim->health) {
                         idx = rules[i].unk3;
-                        entry = (Entry1505C1E4 *)&D_8009A6D8[idx - arg3];
-                        arg1->health = 0;
+                        entry = (Entry1505C1E4 *)&D_8009A6D8[idx - index];
+                        victim->health = 0;
                         break;
                     }
                 } else if (type == 8) {
                     done = TRUE;
-                    arg1->unkF4 &= ~0x40040;
-                    arg5 |= 1 << (arg4 + 0x1F);
-                    arg0->pad108 = arg4 + 0x7F;
-                    arg0->unk107 = 0x3C;
-                    arg1->pad1C4 = 0;
-                    arg1->unk232 = rules[i].unk3;
-                    arg1->unk218 = NULL;
-                    arg1->disable_run = 1;
-                    arg1->unkD0 = 0;
-                    D_800D1580 = arg2[arg3].unk4;
+                    victim->unkF4 &= ~0x40040;
+                    hitMask |= 1 << (attackerSlot + 0x1F);
+                    attacker->pad108 = attackerSlot + 0x7F;
+                    attacker->unk107 = 0x3C;
+                    victim->pad1C4 = 0;
+                    victim->unk232 = rules[i].unk3;
+                    victim->unk218 = NULL;
+                    victim->disable_run = 1;
+                    victim->unkD0 = 0;
+                    D_800D1580 = table[index].unk4;
                     if (D_800D1580 != 0) {
                         func_1506E5FC();
                     }
-                    if (arg1->interaction_state == 1) {
-                        if ((((u8 *)arg1->unk31C)[0x4E] == 2) && (((u8 *)arg1->unk31C)[0x84] == 0)) {
-                            ((u8 *)arg1->unk31C)[0x50] = 0x1E;
-                            arg1->unk81 = 0;
-                            arg1->y_velocity = 50.0f;
-                            arg1->gravity = 2.0f;
+                    if (victim->interaction_state == 1) {
+                        if ((victim->unk31C->unk4E == 2) && (victim->unk31C->unk84 == 0)) {
+                            victim->unk31C->pad4F[1] = 30;
+                            victim->unk81 = 0;
+                            victim->y_velocity = 50.0f;
+                            victim->gravity = 2.0f;
                             break;
                         }
                     }
@@ -2699,46 +2706,46 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg
                 } else if (type == 9) {
                     break;
                 } else if (type == 0xA) {
-                    if (arg1->unk84.uh == 0x283) {
-                        arg1->unk76 = arg0->unk7A;
-                        arg1->xz_velocity = 25.0f;
+                    if (victim->unk84.uh == 0x283) {
+                        victim->unk76 = attacker->unk7A;
+                        victim->xz_velocity = 25.0f;
                         D_800D1580 = 0xFF0102E2;
                         func_1506E5FC();
-                        arg0->unkD0 = 0;
-                        arg0->unk232 = 0xD;
-                        arg0->unk218 = NULL;
+                        attacker->unkD0 = 0;
+                        attacker->unk232 = 0xD;
+                        attacker->unk218 = NULL;
                         done = TRUE;
                     }
                     break;
                 } else if (type == 0xB) {
-                    if (arg1->unk28 > 8.0f) {
+                    if (victim->unk28 > 8.0f) {
                         done = TRUE;
                     }
                     break;
                 } else if (type == 0xC) {
-                    if (arg1->unk28 == 0.0f) {
-                        arg0->unk2EC = 100;
-                        arg0->unkD0 = 0;
+                    if (victim->unk28 == 0.0f) {
+                        attacker->unk2EC = 100;
+                        attacker->unkD0 = 0;
                     }
                     done = TRUE;
                     break;
                 } else if (type == 0xD) {
-                    s32 buf;
-                    u8 snd2;
-                    s32 obj;
-                    snd2 = arg2[arg3].unk8;
-                    D_800D1580 = arg2[arg3].unk4;
+                    s32 reactionBuf;
+                    u8 handler;
+                    s32 sound;
+                    handler = table[index].unk8;
+                    D_800D1580 = table[index].unk4;
                     if (D_800D1580 != 0) {
                         func_1506E5FC();
                     }
-                    D_80086694[snd2](arg0, arg1, (u8 *)&buf);
-                    if (arg1->unkFC != 0) {
-                        obj = arg1->unkFC;
-                        if (func_1506E46C(arg0, &obj, 1) != 0) {
-                            func_15060B04(obj, arg1, 0x5DC0);
+                    D_80086694[handler](attacker, victim, (u8 *)&reactionBuf);
+                    if (victim->unkFC != 0) {
+                        sound = victim->unkFC;
+                        if (func_1506E46C(attacker, &sound, 1) != 0) {
+                            func_15060B04(sound, victim, 0x5DC0);
                         }
                     }
-                    arg5 |= 1 << (arg4 + 0x1F);
+                    hitMask |= 1 << (attackerSlot + 0x1F);
                     done = TRUE;
                     break;
                 }
@@ -2746,12 +2753,12 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg
         }
     }
     if (done) {
-        return arg5;
+        return hitMask;
     }
-    i = arg4;
-    func_1505B9C4(arg0, arg1, arg2, entry, arg3, i, arg6);
-    arg5 |= 1 << (i + 0x1F);
-    return arg5;
+    i = attackerSlot;
+    func_1505B9C4(attacker, victim, table, entry, index, i, damageMask);
+    hitMask |= 1 << (i + 0x1F);
+    return hitMask;
 }
 s32 func_1505C7D8(struct127 *arg0, s32 arg1);
 typedef struct {
