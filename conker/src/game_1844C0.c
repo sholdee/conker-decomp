@@ -3,829 +3,460 @@
 #include "variables.h"
 
 typedef struct {
-    u8 pad_0x0[0x18];
-    s32 field_0x18;
-    s32 field_0x1C;
-    u8 pad_0x20[0x34];
-    f32 field_0x54;
-    f32 field_0x58;
-    f32 field_0x5C;
-    u8 pad_0x60[0x8];
-    s32 field_0x68;
-    s32 field_0x6C;
-    s32 field_0x70;
-    s32 field_0x74;
-    s32 field_0x78;
-    f32 field_0x7C[2][4][4];
-    s32 field_0xFC;
-    u8 field_0x100;
-    u8 pad_0x101[0x3];
-    s32 field_0x104[4];
-    s32 field_0x114;
-    s32 field_0x118;
-    u8 pad_0x11C[0x4];
-    f32 field_0x120[0xE];
-} struct15157010;
+    f32 x, y, z;
+} Vec3f;
 
-extern struct15157010 *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_1503F62C(s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *);
-extern void func_1503F5B8(s32, s32, s32, f32, f32, s32);
+/* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x3E0];
+    /* 0x3E0 */ f32 (*rootMtx[2])[4]; /* per frame: the owner's float matrix */
+    /* 0x3E8 */ s32 mtxBuf[2];        /* per frame: matrix buffer bound to segment 3 */
+} ModelInstance;
+
+/* Visibility mask: bit n set = draw in view n. */
+typedef struct {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 viewBits;
+} EffectMask;
+
+/* Spawn parameters, copied verbatim into an effect at 0x10. */
+typedef struct {
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ s8 updateFunc;   /* index into D_8008AD90, -1 = none */
+    /* 0x02 */ s8 updateFunc2;  /* index into D_8008ADA0, -1 = none */
+    /* 0x03 */ s8 preDrawFunc;  /* index into D_8008ADBC, -1 = none */
+    /* 0x04 */ s8 postDrawFunc; /* index into D_8008ADCC, -1 = none */
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 lifetime;
+    /* 0x08 */ s32 model;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 otherModeH;
+    /* 0x14 */ s32 geometrySet;
+    /* 0x18 */ s32 geometryClear;
+    /* 0x1C */ s32 renderMode;   /* index into D_800A4AC8 (other-mode L words) */
+    /* 0x20 */ u8 pad20[3];
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeH2;
+    /* 0x28 */ s32 otherModeH3;
+    /* 0x2C */ s8 primMode;
+    /* 0x2D */ s8 envMode;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ u8 color0[4];
+    /* 0x34 */ u8 color1[4];
+    /* 0x38 */ u8 pad38[4];
+    /* 0x3C */ void *owner;   /* actor; see func_15169850 */
+    /* 0x40 */ u8 ownerId;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ Vec3f pos;
+    /* 0x50 */ EffectMask *mask;
+    /* 0x54 */ s16 fadeStart; /* alpha fades once lifetime drops below this */
+    /* 0x56 */ s16 fadeRate;
+} EffectParams; /* size 0x58 */
+
+/* Attachment state handed to func_151462C8. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ s32 unk8[4]; /* func_1515D480 allocations, one per entry up to D_80082FA0 */
+    /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
+} EffectAttach;
+
+/* Extension used by the D_8008AD90/D_8008ADA0 update callbacks below. */
+typedef struct {
+    /* 0x00 */ Vec3f rot;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ Vec3f vel;
+    /* 0x1C */ Vec3f rotVel;
+    /* 0x28 */ f32 gravity;
+    /* 0x2C */ f32 drag;
+    /* 0x30 */ u8 flags; /* 1: move, 2: spin, 4: gravity, 8: drag */
+} EffectMotion;
+
+typedef union {
+    f32 raw[0xE];
+    EffectMotion motion;
+} EffectExtra; /* size 0x38 */
+
+/* Model effect object (types 0x36 / 0x4C / 0x5B). */
+typedef struct {
+    /* 0x000 */ u8 header[0x10]; /* object link header (func_15167A68) */
+    /* 0x010 */ EffectParams params;
+    /* 0x068 */ ModelInstance *model;
+    /* 0x06C */ s32 *displayLists;
+    /* 0x070 */ u8 displayListCount;
+    /* 0x071 */ u8 pad71[3];
+    /* 0x074 */ s32 segment1;
+    /* 0x078 */ s32 unk78;
+    /* 0x07C */ f32 mtx[2][4][4]; /* per frame */
+    /* 0x0FC */ EffectAttach attach;
+    /* 0x118 */ s32 unk118;
+    /* 0x11C */ u8 pad11C[4];
+    /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
+} Effect;
+
+extern Effect *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
+extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
 extern void guMtxIdentF(float mf[4][4]);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
-extern void func_151539B4(void *, u8);
-extern void func_15130374(s32, u8, s32, u8, s32);
-extern s32 (*D_8008AD90[])(void *);
-extern s32 (*D_8008ADA0[])(void *);
-extern void func_1503F4B0(void *, void *, u8);
-
-#define LOW_U8_151568F8(arg) (*(u8 *)((u8 *)&(arg) + 3))
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} struct151568F8_0C;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct151568F8_08;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    s8 unk11;
-    s8 unk12;
-    u8 pad13[0x3];
-    s16 unk16;
-    u8 pad18[0x2B];
-    u8 unk43;
-    u8 pad44[0x20];
-    s16 unk64;
-    s16 unk66;
-    void *unk68;
-} struct151572D0;
-
-typedef struct {
-    struct151568F8_0C unk0;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-    u8 unk47;
-    u16 unk48;
-    u8 pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    u8 pad56[2];
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69[3];
-    struct151568F8_08 unk6C;
-    s16 unk74;
-    s16 unk76;
-    s16 unk78;
-    u8 pad7A[2];
-    f32 unk7C;
-    s32 unk80;
-    u8 unk84;
-    u8 unk85;
-    s8 unk86;
-    s8 unk87;
-    u8 unk88;
-} struct151568F8_src;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    struct151568F8_0C unk4;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-} struct151568F8_first;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    struct151568F8_08 unk28;
-    struct151568F8_0C unk30;
-    u8 pad3C[0xC];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 pad64[0xC];
-} struct151568F8_second;
-
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u8 pad44[0x8];
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-} Struct151563B8;
-
-
-/* prior best attempt (old score 15); may be a good start */
-struct Obj15156190Vec {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Obj15156190Vec4 {
-    struct Obj15156190Vec unk0;
-    s32 padC;
-};
-
-struct Obj15156190Src {
-    struct Obj15156190Vec unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 pad29;
-    s16 unk2A;
-    u16 unk2C;
-    u8 pad2E[2];
-    f32 unk30;
-    u8 unk34;
-    u8 pad35;
-    s16 unk36;
-    s16 unk38;
-};
-
-struct Obj15156190Ret {
-    u8 pad0[0x10];
-    struct Obj15156190Vec unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct Obj15156190Vec unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-    u8 pad52[0xC];
-    s16 unk5E;
-    s16 unk60;
-    s16 unk62;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 pad68[6];
-    s16 unk6E;
-    u8 pad70[4];
-    u8 unk74;
-    u8 unk75;
-    u8 unk76;
-    u8 unk77;
-    u8 pad78[6];
-    s16 unk7E;
-    u8 pad80[4];
-    u8 unk84;
-    u8 unk85;
-    u8 unk86;
-    u8 unk87;
-    u8 unk88[0x10];
-};
-void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-
-extern void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_15156388(void *arg0, u8 arg1, s32 arg2);
-void func_151563B8(void *arg0);
-void func_151568F8(struct151568F8_src *arg0, s32 arg1);
-
-typedef struct {
-    /* 0x00 */ s16 base;
-    /* 0x02 */ s16 range;
-    /* 0x04 */ s16 timer;
-} struct15156B54_sub;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ struct15156B54_sub sub;
-} struct15156B54;
-
-extern f32 D_800DCA30[3][10][4];
-void func_15156D24(void *arg0, u8 arg1);
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-void func_15156B54(struct15156B54 *arg0);
-
-typedef struct {
-    struct151568F8_0C unk0;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-    u8 unk47;
-    u16 unk48;
-    u8 pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    u8 pad56[2];
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69[3];
-    f32 unk6C;
-    f32 unk70;
-    s16 unk74;
-    s16 unk76;
-    s16 unk78;
-    u8 pad7A[2];
-    f32 unk7C;
-    s32 unk80;
-    u8 unk84;
-    u8 unk85;
-    s8 unk86;
-    s8 unk87;
-    u8 unk88;
-    u8 unk89;
-    u8 unk8A;
-    u8 unk8B;
-    u8 unk8C;
-} struct15156D24;
-
-extern f32 D_800A6040;
-extern f32 D_800A6044;
-extern f32 D_800A6048;
-extern f32 D_800A604C;
-extern f32 D_800A6050;
-void func_15156D24(void *arg0, u8 arg1);
-
-extern void func_151D5E30(void *);
-void func_15156F94(void *arg0);
-void func_15156FB8(struct102 *arg0);
-void func_15156FE4(struct102 *arg0);
-
-struct15157010 *func_15157010(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    struct15157010 *temp_v0;
+extern s32 (*D_8008AD90[])(Effect *);
+extern s32 (*D_8008ADA0[])(Effect *);
+extern void func_1503F4B0(ModelInstance *, Effect *, u8);
+/*
+ * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
+ * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
+ */
+Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
+                      u8 owner, s32 list) {
+    Effect *fx;
+    f32 (*mtx0)[4];
     f32 (*mtx1)[4];
-    f32 (*mtx2)[4];
-    s32 id;
+    s32 type;
     s32 i;
 
-    id = 0x36;
-    if (arg0[0] & 0x80) {
-        id = 0x5B;
-    } else if (arg0[0] & 0x10) {
-        id = 0x4C;
+    type = 0x36;
+    if (params->flags & 0x80) {
+        type = 0x5B;
+    } else if (params->flags & 0x10) {
+        type = 0x4C;
     }
-    temp_v0 = func_15167A68(id, arg7, arg5 + 0x120, 1, arg6, 1);
-    if (temp_v0 == 0) {
+    fx = func_15167A68(type, list, extraSize + 0x120, 1, owner, 1);
+    if (fx == NULL) {
         return NULL;
     }
-    memcpy(&temp_v0->pad_0x0[0x10], arg0, 0x58);
-    func_1503F62C(temp_v0->field_0x18, temp_v0->field_0x1C, &temp_v0->field_0x6C, &temp_v0->field_0x70, &temp_v0->field_0x74, &temp_v0->field_0x78, &temp_v0->field_0x68);
-    mtx1 = temp_v0->field_0x7C[0];
+    memcpy(&fx->params, params, sizeof(EffectParams));
+    func_1503F62C(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
+                  &fx->unk78, &fx->model);
+    mtx0 = fx->mtx[0];
+    guMtxIdentF(mtx0);
+    mtx1 = fx->mtx[1];
     guMtxIdentF(mtx1);
-    mtx2 = temp_v0->field_0x7C[1];
-    guMtxIdentF(mtx2);
-    *(f32 (**) [4]) (temp_v0->field_0x68 + 0x3E0) = mtx1;
-    *(f32 (**) [4]) (temp_v0->field_0x68 + 0x3E4) = mtx2;
-    func_1503F5B8(temp_v0->field_0x68, 1, arg1, arg2, 0.0f, 0);
-    temp_v0->field_0xFC = arg3;
-    temp_v0->field_0x118 = arg4;
-    temp_v0->field_0x100 = 0;
+    fx->model->rootMtx[0] = mtx0;
+    fx->model->rootMtx[1] = mtx1;
+    func_1503F5B8(fx->model, 1, arg1, arg2, 0.0f, 0);
+    fx->attach.unk0 = attachArg;
+    fx->unk118 = arg4;
+    fx->attach.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        temp_v0->field_0x104[i] = 0;
+        fx->attach.unk8[i] = 0;
     }
 
-    temp_v0->field_0x114 = 0;
-    if (arg3) {
+    fx->attach.unk18 = 0;
+    if (attachArg) {
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_v0->field_0x104[i] = func_1515D480(arg3);
+            fx->attach.unk8[i] = func_1515D480(attachArg);
         }
-        temp_v0->field_0x114 = func_1515D440();
+        fx->attach.unk18 = func_1515D440();
     }
-    return temp_v0;
+    return fx;
 }
 
-void func_100043B4(s32 *arg0, u32 arg1);
-extern s32 D_80082FA0;
-void func_151571C4(void *arg0)
-{
-  s32 i;
-  s32 *p;
-  for (i = 0, p = (s32 *) arg0; i <= D_80082FA0; i++, p++)
-  {
-    if (p[0x41] != 0)
-    {
-      func_100043B4((s32 *) p[0x41], 4);
-    }
-  }
+/* Frees the attachment allocations made by func_15157010. */
+void func_151571C4(Effect *fx) {
+    s32 i;
 
-  p = (s32 *) ((s32 *) arg0)[0x45];
-  if (((s32 *) arg0)[0x45] != 0)
-  {
-    func_100043B4(p, 4);
-  }
-}
-
-extern void func_151571C4(void *);
-
-
-extern void func_151571C4(void *);
-extern void func_1518CA04(void *);
-extern void func_1503F7B8(void *);
-
-void func_15157248(u8 *arg0) {
-    func_151571C4(arg0);
-    func_1518CA04(*(void **)(arg0 + 0x18));
-    func_1503F7B8(*(void **)(arg0 + 0x68));
-    func_15169804(arg0);
-}
-
-void func_1515728C(u8 *arg0) {
-    func_151571C4(arg0);
-    func_1518CA04(*(void **)(arg0 + 0x18));
-    func_1503F7B8(*(void **)(arg0 + 0x68));
-    func_15169824(arg0);
-}
-
-void func_151572D0(struct151572D0 *ptr) {
-    register s32 temp;
-    register u8 failed;
-    register s16 temp_v1;
-
-    failed = 0;
-    if (ptr->unk10 & 1) {
-        ptr->unk16 -= D_800BE9E4;
-        if (ptr->unk16 < 0) {
-            failed = 1;
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (fx->attach.unk8[i] != 0) {
+            func_100043B4((s32 *)fx->attach.unk8[i], 4);
         }
     }
-    if (failed == 0) {
-        temp = ptr->unk11;
-        if (temp != -1) {
-            if (D_8008AD90[temp](ptr) == 0) {
-                failed = 1;
+    if (fx->attach.unk18 != 0) {
+        func_100043B4((s32 *)fx->attach.unk18, 4);
+    }
+}
+
+extern void func_1518CA04(s32);
+extern void func_1503F7B8(ModelInstance *);
+
+/* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
+void func_15157248(Effect *fx) {
+    func_151571C4(fx);
+    func_1518CA04(fx->params.model);
+    func_1503F7B8(fx->model);
+    func_15169804((struct102 *)fx);
+}
+
+/* As func_15157248, but releases the object through func_15169824. */
+void func_1515728C(Effect *fx) {
+    func_151571C4(fx);
+    func_1518CA04(fx->params.model);
+    func_1503F7B8(fx->model);
+    func_15169824((struct102 *)fx);
+}
+
+/*
+ * Update handler: counts the lifetime down (flag 1), runs both update callbacks and animates the
+ * model. With flag 0x20 the alpha fades out over the last fadeStart ticks. The effect is destroyed
+ * when its lifetime runs out or a callback returns 0.
+ */
+void func_151572D0(Effect *fx) {
+    register s32 value;
+    register u8 dead;
+    register s16 lifetime;
+
+    dead = FALSE;
+    if (fx->params.flags & 1) {
+        fx->params.lifetime -= D_800BE9E4;
+        if (fx->params.lifetime < 0) {
+            dead = TRUE;
+        }
+    }
+    if (!dead) {
+        value = fx->params.updateFunc;
+        if (value != -1) {
+            if (D_8008AD90[value](fx) == 0) {
+                dead = TRUE;
             }
         }
-        temp = ptr->unk12;
-        if (temp != -1) {
-            if (D_8008ADA0[temp](ptr) == 0) {
-                failed = 1;
+        value = fx->params.updateFunc2;
+        if (value != -1) {
+            if (D_8008ADA0[value](fx) == 0) {
+                dead = TRUE;
             }
         }
     }
-    if (failed) {
+    if (dead) {
     } else {
-        func_1503F4B0(ptr->unk68, ptr, failed);
+        func_1503F4B0(fx->model, fx, dead);
     }
-    if (failed) {
-    } else if (ptr->unk10 & 0x20) {
-        temp_v1 = ptr->unk16;
-        if (temp_v1 < ptr->unk64) {
-            temp = temp_v1 * ptr->unk66;
-            if (temp < ptr->unk43) {
-                ptr->unk43 = temp;
+    if (dead) {
+    } else if (fx->params.flags & 0x20) {
+        lifetime = fx->params.lifetime;
+        if (lifetime < fx->params.fadeStart) {
+            value = lifetime * fx->params.fadeRate;
+            if (value < fx->params.color0[3]) {
+                fx->params.color0[3] = value;
             }
         }
     }
-    if (failed) {
-        func_1516972C((struct102 *) ptr);
+    if (dead) {
+        func_1516972C((struct102 *)fx);
     }
 }
 
 typedef struct {
-    u8 pad0[0x2];
-    s16 unk2;
-} Struct15157420_60;
+    s32 w0;
+    s32 w1;
+} OtherModeL;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Struct15157420_mode;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x2];
-    s8 unk13;
-    s8 unk14;
-    u8 pad15[0xB];
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    u8 pad30[0x3];
-    u8 unk33;
-    s32 unk34;
-    s32 unk38;
-    s8 unk3C;
-    s8 unk3D;
-    u8 pad3E[0x2];
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 pad48[0x4];
-    void *unk4C;
-    u8 unk50;
-    u8 unk51;
-    u8 pad52[0x2];
-    u8 unk54[0xC];
-    Struct15157420_60 *unk60;
-    u8 pad64[0x4];
-    s32 *unk68;
-    s32 *unk6C;
-    u8 unk70;
-    u8 pad71[0x3];
-    s32 unk74;
-    u8 pad78[0x84];
-    u8 unkFC[1];
-} Struct15157420;
-
-extern Gfx *(*D_8008ADBC[])(Gfx *, Struct15157420 *, s16, u8 *, u8 *);
-extern Gfx *(*D_8008ADCC[])(Gfx *, Struct15157420 *, s16, u8 *);
-extern Struct15157420_mode D_800A4AC8[];
+extern Gfx *(*D_8008ADBC[])(Gfx *, Effect *, s16, u8 *, u8 *);
+extern Gfx *(*D_8008ADCC[])(Gfx *, Effect *, s16, u8 *);
+extern OtherModeL D_800A4AC8[];
 extern u8 D_80083740[];
 extern u8 D_800838C0[];
 extern u8 D_80083A40[];
 extern u8 D_80083BC0[];
-extern u8 D_800BE9C0;
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
+Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
+Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *needSync);
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
+                   u8 a1, u8 level, u8 mode);
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
+                   u8 a1, u8 level, u8 mode);
+Gfx *func_151462C8(Gfx *gfx, EffectAttach *attach, u8 arg2, void *owner, u8 ownerId, s16 view, Vec3f *pos, u8 arg7,
+                   s32 arg8);
 
-Gfx *func_15157420(Gfx *gfx, Struct15157420 *arg1, s16 arg2) {
+/*
+ * Draw handler for `view`: runs the pre-draw callback (which may cancel the draw), honours the view
+ * mask, sets up geometry mode, prim/env colours and other modes, binds segments 3 (model matrices),
+ * 1 and 8 (opaque or translucent variant), then calls the model's display lists.
+ */
+Gfx *func_15157420(Gfx *gfx, Effect *fx, s16 view) {
     s32 i;
-    u8 update;
+    u8 needSync;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
-    u8 cont;
+    u8 proceed;
 
-    update = 1;
-    if (arg1->unk13 != -1) {
-        gfx = D_8008ADBC[arg1->unk13](gfx, arg1, arg2, &update, &cont);
-        if (cont == 0) {
+    needSync = TRUE;
+    if (fx->params.preDrawFunc != -1) {
+        gfx = D_8008ADBC[fx->params.preDrawFunc](gfx, fx, view, &needSync, &proceed);
+        if (!proceed) {
             return gfx;
         }
     }
-    if ((arg1->unk10 & 8) && (arg1->unk60 != NULL) && !(arg1->unk60->unk2 & (1 << arg2))) {
+    if ((fx->params.flags & 8) && (fx->params.mask != NULL) && !(fx->params.mask->viewBits & (1 << view))) {
         return gfx;
     }
-block:
-    gfx = func_15142B7C(gfx, arg1->unk24, arg1->unk28);
-    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk40, arg1->unk41, arg1->unk42, arg1->unk43,
-                  arg1->unk44, arg1->unk45, arg1->unk46, arg1->unk47, 0xFF, arg1->unk3C);
-    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk40, arg1->unk41, arg1->unk42, arg1->unk43,
-                  arg1->unk44, arg1->unk45, arg1->unk46, arg1->unk47, 0xFF, arg1->unk3D);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, arg1->unk33, &update);
-    gfx = func_15142FBC(gfx, arg1->unk20 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | arg1->unk34 | arg1->unk38,
-                        D_800A4AC8[arg1->unk2C].unk0 | D_800A4AC8[arg1->unk2C].unk4, &update);
-    if (arg1->unk10 & 2) {
-        gfx = func_151462C8(gfx, arg1->unkFC, arg1->unk51, arg1->unk4C, arg1->unk50, arg2, arg1->unk54,
-                            (arg1->unk10 & 4) ? 1 : 0, 0);
+setup: // matching: a label here keeps as1 from filling the branch delay slots with the next load
+    gfx = func_15142B7C(gfx, fx->params.geometrySet, fx->params.geometryClear);
+    func_151441A4(&primR, &primG, &primB, &primA, fx->params.color0[0], fx->params.color0[1], fx->params.color0[2],
+                  fx->params.color0[3], fx->params.color1[0], fx->params.color1[1], fx->params.color1[2],
+                  fx->params.color1[3], 0xFF, fx->params.primMode);
+    func_151442FC(&envR, &envG, &envB, &envA, fx->params.color0[0], fx->params.color0[1], fx->params.color0[2],
+                  fx->params.color0[3], fx->params.color1[0], fx->params.color1[1], fx->params.color1[2],
+                  fx->params.color1[3], 0xFF, fx->params.envMode);
+    gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
+    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+    gfx = func_1513F4E4(gfx, fx->params.unk23, &needSync);
+    gfx = func_15142FBC(gfx,
+                        fx->params.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.otherModeH2 |
+                            fx->params.otherModeH3,
+                        D_800A4AC8[fx->params.renderMode].w0 | D_800A4AC8[fx->params.renderMode].w1, &needSync);
+    if (fx->params.flags & 2) {
+        gfx = func_151462C8(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
+                            &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);
     }
     gDPPipeSync(gfx++);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, arg1->unk68[D_800BE9C0 + 0xFA]);
-    gSPSegment(gfx++, 1, arg1->unk74);
-    if (arg1->unk43 < 0xFF || arg1->unk47 < 0xFF) {
-        gSPSegment(gfx++, 8, (arg1->unk10 & 0x40) ? D_80083A40 : D_80083740);
+    gSPSegment(gfx++, 3, fx->model->mtxBuf[D_800BE9C0]);
+    gSPSegment(gfx++, 1, fx->segment1);
+    if (fx->params.color0[3] < 0xFF || fx->params.color1[3] < 0xFF) {
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : D_80083740);
     } else {
-        gSPSegment(gfx++, 8, (arg1->unk10 & 0x40) ? D_80083BC0 : D_800838C0);
+        gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : D_800838C0);
     }
-    for (i = 0; i < arg1->unk70; i++) {
-        gSPDisplayList(gfx++, arg1->unk6C[i]);
+    for (i = 0; i < fx->displayListCount; i++) {
+        gSPDisplayList(gfx++, fx->displayLists[i]);
     }
-    if (arg1->unk14 != -1) {
-        gfx = D_8008ADCC[arg1->unk14](gfx, arg1, arg2, &update);
+    if (fx->params.postDrawFunc != -1) {
+        gfx = D_8008ADCC[fx->params.postDrawFunc](gfx, fx, view, &needSync);
     }
     return gfx;
 }
 
-extern u8 D_800BE9C0;
-extern void guMtxIdentF(float mf[4][4]);
-
-s32 func_15157860(u8 *arg0) {
-    guMtxIdentF((float (*)[4])(arg0 + 0x7C + (D_800BE9C0 << 6)));
-    return 1;
+/* Update callback (D_8008ADA0[0]): resets this frame's root matrix to identity. */
+s32 func_15157860(Effect *fx) {
+    guMtxIdentF(fx->mtx[D_800BE9C0]);
+    return TRUE;
 }
 
-struct15157010 *func_15157898(u8 *arg0, void *arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    struct15157010 *temp_v0;
-    struct15157010 *sp2C;
+/* func_15157010 plus a 0x38-byte extension copied from `extra`. */
+Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+                      s32 extraSize, u8 owner, s32 list) {
+    Effect *fx;
+    Effect *ret;
 
-    temp_v0 = func_15157010(arg0, arg2, arg3, arg4, arg5, arg6 + 0x38, arg7, arg8);
-    if (temp_v0 == 0) {
+    fx = func_15157010(params, arg2, arg3, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
+    if (fx == NULL) {
         return NULL;
     }
-    sp2C = temp_v0;
-    memcpy(temp_v0->field_0x120, arg1, 0x38);
-    return sp2C;
+    ret = fx;
+    memcpy(&fx->extra, extra, sizeof(EffectExtra));
+    return ret;
 }
 
-s32 func_15157918(struct15157010 *arg0) {
-    f32 *arg1;
+/* Update callback (D_8008ADA0[1]): root matrix = rotation extra.rot, uniform scale, translation pos. */
+s32 func_15157918(Effect *fx) {
+    EffectMotion *motion;
 
-    arg1 = arg0->field_0x120;
-    func_150A8050(arg0->field_0x7C[D_800BE9C0], arg1[0], arg1[1], arg1[2]);
-    arg0->field_0x7C[D_800BE9C0][3][0] = arg0->field_0x54;
-    arg0->field_0x7C[D_800BE9C0][3][1] = arg0->field_0x58;
-    arg0->field_0x7C[D_800BE9C0][3][2] = arg0->field_0x5C;
-    arg0->field_0x7C[D_800BE9C0][0][0] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][0][1] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][0][2] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][1][0] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][1][1] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][1][2] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][2][0] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][2][1] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][2][2] *= arg1[3];
-    return 1;
+    motion = &fx->extra.motion;
+    func_150A8050(fx->mtx[D_800BE9C0], motion->rot.x, motion->rot.y, motion->rot.z);
+    fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
+    fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
+    fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;
+    fx->mtx[D_800BE9C0][0][0] *= motion->scale;
+    fx->mtx[D_800BE9C0][0][1] *= motion->scale;
+    fx->mtx[D_800BE9C0][0][2] *= motion->scale;
+    fx->mtx[D_800BE9C0][1][0] *= motion->scale;
+    fx->mtx[D_800BE9C0][1][1] *= motion->scale;
+    fx->mtx[D_800BE9C0][1][2] *= motion->scale;
+    fx->mtx[D_800BE9C0][2][0] *= motion->scale;
+    fx->mtx[D_800BE9C0][2][1] *= motion->scale;
+    fx->mtx[D_800BE9C0][2][2] *= motion->scale;
+    return TRUE;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} MotionVec;
-
-typedef struct {
-    MotionVec rot;
-    f32 scale;
-    MotionVec vel;
-    MotionVec rotVel;
-    f32 gravity;
-    f32 drag;
-    u8 flags;
-} MotionState;
-
-typedef struct {
-    u8 pad_0x0[0x54];
-    f32 posX;
-    f32 posY;
-    f32 posZ;
-    u8 pad_0x60[0xC0];
-    MotionState motion;
-} struct15157AA8;
-
-s32 func_15157AA8(struct15157AA8 *arg0) {
-    MotionState *p;
-    MotionVec oldVel;
+/*
+ * Update callback (D_8008AD90[0]): integrates extra.motion. Drag is applied once per elapsed tick,
+ * gravity accelerates vel.y, and pos advances by vel*t + a*t^2/2; rot advances by rotVel.
+ */
+s32 func_15157AA8(Effect *fx) {
+    EffectMotion *motion;
+    Vec3f oldVel;
     f32 accelX;
     f32 accelY;
     f32 accelZ;
     s32 i;
 
-    p = &arg0->motion;
-    if (arg0->motion.flags & 1) {
-        oldVel = p->vel;
-        if (p->flags & 8) {
+    motion = &fx->extra.motion;
+    if (motion->flags & 1) {
+        oldVel = motion->vel;
+        if (motion->flags & 8) {
             for (i = D_800BE9E4; i != 0; i--) {
-                p->vel.x *= p->drag;
-                p->vel.z *= p->drag;
+                motion->vel.x *= motion->drag;
+                motion->vel.z *= motion->drag;
             }
         }
-        if (p->flags & 4) {
-            p->vel.y += p->gravity * D_800BE9A4;
-            accelY = p->gravity;
+        if (motion->flags & 4) {
+            motion->vel.y += motion->gravity * D_800BE9A4;
+            accelY = motion->gravity;
         } else {
             accelY = 0.0f;
         }
-        accelX = (p->vel.x - oldVel.x) * D_800BE9A8;
-        accelZ = (p->vel.z - oldVel.z) * D_800BE9A8;
-        arg0->posX += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        arg0->posY += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        arg0->posZ += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelX = (motion->vel.x - oldVel.x) * D_800BE9A8;
+        accelZ = (motion->vel.z - oldVel.z) * D_800BE9A8;
+        fx->params.pos.x += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        fx->params.pos.y += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        fx->params.pos.z += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
     }
-    if (p->flags & 2) {
-        p->rot.x += p->rotVel.x * D_800BE9A4;
-        p->rot.y += p->rotVel.y * D_800BE9A4;
-        p->rot.z += p->rotVel.z * D_800BE9A4;
+    if (motion->flags & 2) {
+        motion->rot.x += motion->rotVel.x * D_800BE9A4;
+        motion->rot.y += motion->rotVel.y * D_800BE9A4;
+        motion->rot.z += motion->rotVel.z * D_800BE9A4;
     }
-    return 1;
+    return TRUE;
 }
 
-void func_15157D88(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x4C, arg0 + 0x50, arg0);
+/* Event handler: lets func_15169850 track or retarget this effect's owner. */
+void func_15157D88(Effect *fx, s32 event, u8 eventType) {
+    func_15169850(event, eventType, (s32)&fx->params.owner, (s32)&fx->params.ownerId, (s32)fx);
 }
 
-extern void func_15157DEC(struct15157010 *, f32 *);
+void func_15157DEC(Effect *fx, f32 *xform);
 
-s32 func_15157DC8(struct15157010 *arg0) {
-    func_15157DEC(arg0, arg0->field_0x120);
-    return 1;
+/* Update callback (D_8008ADA8[3]): root matrix from the extension, see func_15157DEC. */
+s32 func_15157DC8(Effect *fx) {
+    func_15157DEC(fx, fx->extra.raw);
+    return TRUE;
 }
 
-void func_15157DEC(struct15157010 *arg0, f32 *arg1) {
-    func_150A8050(arg0->field_0x7C[D_800BE9C0], arg1[0], arg1[1], arg1[2]);
-    arg0->field_0x7C[D_800BE9C0][3][0] = arg0->field_0x54;
-    arg0->field_0x7C[D_800BE9C0][3][1] = arg0->field_0x58;
-    arg0->field_0x7C[D_800BE9C0][3][2] = arg0->field_0x5C;
-    arg0->field_0x7C[D_800BE9C0][0][0] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][0][1] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][0][2] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][1][0] *= arg1[4];
-    arg0->field_0x7C[D_800BE9C0][1][1] *= arg1[4];
-    arg0->field_0x7C[D_800BE9C0][1][2] *= arg1[4];
-    arg0->field_0x7C[D_800BE9C0][2][0] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][2][1] *= arg1[3];
-    arg0->field_0x7C[D_800BE9C0][2][2] *= arg1[3];
+/*
+ * Sets this frame's root matrix to rotation xform[0..2], translated to pos, with the X and Z
+ * axes scaled by xform[3] and the Y axis by xform[4].
+ */
+void func_15157DEC(Effect *fx, f32 *xform) {
+    func_150A8050(fx->mtx[D_800BE9C0], xform[0], xform[1], xform[2]);
+    fx->mtx[D_800BE9C0][3][0] = fx->params.pos.x;
+    fx->mtx[D_800BE9C0][3][1] = fx->params.pos.y;
+    fx->mtx[D_800BE9C0][3][2] = fx->params.pos.z;
+    fx->mtx[D_800BE9C0][0][0] *= xform[3];
+    fx->mtx[D_800BE9C0][0][1] *= xform[3];
+    fx->mtx[D_800BE9C0][0][2] *= xform[3];
+    fx->mtx[D_800BE9C0][1][0] *= xform[4];
+    fx->mtx[D_800BE9C0][1][1] *= xform[4];
+    fx->mtx[D_800BE9C0][1][2] *= xform[4];
+    fx->mtx[D_800BE9C0][2][0] *= xform[3];
+    fx->mtx[D_800BE9C0][2][1] *= xform[3];
+    fx->mtx[D_800BE9C0][2][2] *= xform[3];
 }
 
 extern Mtx D_80089470;
 
-Gfx *func_15157F80(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
-    gSPMatrix(pkt++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(pkt++, &((Mtx *)D_800DCC10)[arg2], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    *arg4 = 1;
-    return pkt;
+/* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
+Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
+    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &((Mtx *)D_800DCC10)[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    *proceed = TRUE;
+    return gfx;
 }
 
-#define WGFX15157FE8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
+/* Post-draw callback (D_8008ADCC[0]): reloads this view's projection matrices for the current frame. */
+Gfx *func_15157FE8(Gfx *gfx, Effect *fx, s32 view, u8 *needSync) {
+    gSPMatrix(gfx++, (u8 *)((struct259 *)D_800BE628 + view) + (D_800BE9C0 << 6) + 0x100,
+              G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, ((s32 *)&D_800DC2A0)[D_800BE9C0] + (view << 6), G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    return gfx;
 }
 
-Gfx *func_15157FE8(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3) {
-    WGFX15157FE8(pkt++, 0xDA380007, (u8 *)((struct259 *)D_800BE628 + arg2) + (D_800BE9C0 << 6) + 0x100);
-    WGFX15157FE8(pkt++, 0xDA380005, ((s32 *)&D_800DC2A0)[D_800BE9C0] + (arg2 << 6));
-    return pkt;
-}
+extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
 
-extern s32 D_800A6060;
-
-void func_15158078(s32 arg0, u8 arg1) {
-    func_15169260((s32)&D_800A6060, 3, arg0, arg1);
+/* Sends an event to every model effect. */
+void func_15158078(s32 event, u8 eventType) {
+    func_15169260((s32)D_800A6060, 3, event, eventType);
 }
