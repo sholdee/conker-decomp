@@ -4,10 +4,7 @@
 
 extern u8 D_800DBEA8[];
 extern u8 D_800DD2E4[];
-void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
-
-extern struct104 *D_800B0DF0;
-void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
+void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
 extern s8 D_800DD2E0;
 
 /* View of the level header (D_800B0DF0) past the fields struct104 declares. */
@@ -73,104 +70,96 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
     }
 }
 
-extern s16 D_800DD2E8;
-extern s16 D_800DD2EA;
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EA;
 extern u16 D_800DD2EC;
 extern u16 D_800DD2EE;
 extern s16 D_800DD2F0;
 extern s16 D_800DD2F2;
 extern s16 D_800DD2F4;
 s8 func_15173994(s32 arg0);
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    s16 unkC;
-    s16 unkE;
-} struct151733E4_state;
+#define sFogPresets (&D_8008CC70)
 
-#define st ((struct151733E4_state *)&D_8008CC70)
-void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4) {
+/*
+ * Blends fog presets `from` and `to` by `blend`/4096 into preset `dest`, or into the active fog
+ * globals (D_800DD2E4...) when `dest` is -1. Indices 0x7C-0x7F are aliases resolved first.
+ */
+void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     s32 i;
-    s32 *p;
-    s32 c;
-    s32 d;
-    s16 a;
-    s16 b;
-    u8 *out;
-    u16 *p4;
-    u16 *p6;
-    u16 *p8;
-    u16 *pA;
-    s16 *pC;
-    s16 *pE;
+    s32 *index;
+    s32 fromByte;
+    s32 toByte;
+    s16 fromValue;
+    s16 toValue;
+    u8 *outColour;
+    u16 *out4;
+    u16 *out6;
+    u16 *out8;
+    u16 *outA;
+    s16 *outC;
+    s16 *outE;
+    FogPreset *preset;
 
-    D_800DD2F0 = arg3;
-    i = 0;
-    if (arg4 == -1) {
-        out = D_800DD2E4;
-        p4 = &D_800DD2EC;
-        p6 = &D_800DD2EE;
-        p8 = &D_800DD2E8;
-        pA = &D_800DD2EA;
-        pC = &D_800DD2F2;
-        pE = &D_800DD2F4;
+    D_800DD2F0 = blend;
+    if (dest == -1) {
+        outColour = D_800DD2E4;
+        out4 = &D_800DD2EC;
+        out6 = &D_800DD2EE;
+        out8 = &D_800DD2E8;
+        outA = &D_800DD2EA;
+        outC = &D_800DD2F2;
+        outE = &D_800DD2F4;
     } else {
-        out = (u8 *)&st[arg4];
-        p4 = (u16 *)(out + 4);
-        p6 = (u16 *)(out + 6);
-        p8 = (u16 *)(out + 8);
-        pA = (u16 *)(out + 0xA);
-        pC = (s16 *)(out + 0xC);
-        pE = (s16 *)(out + 0xE);
+        preset = &sFogPresets[dest];
+        outColour = preset->colour;
+        out4 = &preset->unk4;
+        out6 = &preset->unk6;
+        out8 = &preset->unk8;
+        outA = &preset->unkA;
+        outC = &preset->unkC;
+        outE = &preset->unkE;
     }
-    do {
+    for (i = 0; i < 2; i++) {
         if (i == 0) {
-            p = &arg0;
+            index = &from;
         } else {
-            p = &arg1;
+            index = &to;
         }
-        switch (*p) {
+        switch (*index) {
         case 0x7C:
-            *p = 1;
+            *index = 1;
             break;
         case 0x7D:
-            *p = 2;
+            *index = 2;
             break;
         case 0x7E:
-            *p = func_15173994(arg2);
+            *index = func_15173994(arg2);
             break;
         case 0x7F:
-            *p = 2;
+            *index = 2;
             break;
         }
-        i++;
-    } while (i < 2);
-    for (i = 0; i < 4; i++) {
-        c = ((u8 *)&st[arg0])[i];
-        d = ((u8 *)&st[arg1])[i];
-        out[i] = (s32)((d - c) * arg3) / 4096 + c;
     }
-    *p4 = (s32)((st[arg1].unk4 - st[arg0].unk4) * arg3) / 4096 + st[arg0].unk4;
-    *p6 = (s32)((st[arg1].unk6 - st[arg0].unk6) * arg3) / 4096 + st[arg0].unk6;
-    *p8 = (s32)((st[arg1].unk8 - st[arg0].unk8) * arg3) / 4096 + st[arg0].unk8;
-    *pA = (s32)((st[arg1].unkA - st[arg0].unkA) * arg3) / 4096 + st[arg0].unkA;
-    a = (st[arg0].unkC == -1) ? (s16)D_800B0DF0->unk2 : st[arg0].unkC;
-    b = (st[arg1].unkC == -1) ? (s16)D_800B0DF0->unk2 : st[arg1].unkC;
-    *pC = (s32)((b - a) * arg3) / 4096 + a;
-    a = (st[arg0].unkE == -1) ? (s16)D_800B0DF0->unk0 : st[arg0].unkE;
-    b = (st[arg1].unkE == -1) ? (s16)D_800B0DF0->unk0 : st[arg1].unkE;
-    *pE = (s32)((b - a) * arg3) / 4096 + a;
+    for (i = 0; i < 4; i++) {
+        fromByte = sFogPresets[from].colour[i];
+        toByte = sFogPresets[to].colour[i];
+        outColour[i] = (toByte - fromByte) * blend / 4096 + fromByte;
+    }
+    *out4 = (sFogPresets[to].unk4 - sFogPresets[from].unk4) * blend / 4096 + sFogPresets[from].unk4;
+    *out6 = (sFogPresets[to].unk6 - sFogPresets[from].unk6) * blend / 4096 + sFogPresets[from].unk6;
+    *out8 = (sFogPresets[to].unk8 - sFogPresets[from].unk8) * blend / 4096 + sFogPresets[from].unk8;
+    *outA = (sFogPresets[to].unkA - sFogPresets[from].unkA) * blend / 4096 + sFogPresets[from].unkA;
+    fromValue = (sFogPresets[from].unkC == -1) ? (s16)sLevelFog->unk2 : sFogPresets[from].unkC;
+    toValue = (sFogPresets[to].unkC == -1) ? (s16)sLevelFog->unk2 : sFogPresets[to].unkC;
+    *outC = (toValue - fromValue) * blend / 4096 + fromValue;
+    fromValue = (sFogPresets[from].unkE == -1) ? (s16)sLevelFog->unk0 : sFogPresets[from].unkE;
+    toValue = (sFogPresets[to].unkE == -1) ? (s16)sLevelFog->unk0 : sFogPresets[to].unkE;
+    *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
-
+/* With no level fog preset, re-applies preset 6 (if D_800DBFF0->unk5F0 bit 0 is set) or preset 0. */
 void func_151738C4(s32 arg0) {
-    if (*((s8 *)D_800B0DF0 + 0x46) == -1) {
+    if (sLevelFog->fogPreset == -1) {
         if (D_800DBFF0->unk5F0 & 1) {
             func_151733E4(6, 6, arg0, 0, -1);
             D_800DBEA8[0] = D_800DD2E4[0];
@@ -185,6 +174,7 @@ void func_151738C4(s32 arg0) {
     }
 }
 
+/* Returns the level's fog preset index (-1 for none). */
 s8 func_15173994(s32 arg0) {
-    return *((s8*)D_800B0DF0 + 0x46);
+    return sLevelFog->fogPreset;
 }
