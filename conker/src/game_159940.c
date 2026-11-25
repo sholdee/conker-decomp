@@ -20,18 +20,6 @@ typedef struct {
     /* 0x0C */ vertex rot;
 } CamOffset;
 
-/* Camera.playerExt (ActorCtl): the aim fields ActorCtl does not declare yet; see game_14FF90.c. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x120];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0xF];
-    /* 0x130 */ vertex aimDir;
-    /* 0x13C */ vertex aimEye;
-    /* 0x148 */ vertex aimTarget;
-    /* 0x154 */ u8 pad154[0x43];
-    /* 0x197 */ u8 aimState;
-} CamPlayerExt;
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x54];
     /* 0x54 */ vertex unk54;
@@ -108,7 +96,7 @@ void func_1512C490(Camera *camera) {
     if ((camera->mode & 0x40000) || (camera->mode & 0x20)) {
         eye = camera->eye;
         at = camera->focus;
-    } else if (((CamPlayerExt *)camera->playerExt)->aimState != 0) {
+    } else if (camera->playerExt->aimState != 0) {
         eye = camera->eye;
         at = camera->target;
         func_1512523C(camera);
@@ -135,9 +123,9 @@ void func_1512C490(Camera *camera) {
         func_15125594(camera);
     }
     func_150491EC((struct17 *)&eye, (struct17 *)&at, (struct17 *)&dir);
-    ((CamPlayerExt *)camera->playerExt)->aimTarget = at;
-    ((CamPlayerExt *)camera->playerExt)->aimEye = eye;
-    ((CamPlayerExt *)camera->playerExt)->aimDir = dir;
+    camera->playerExt->aimTarget = at;
+    camera->playerExt->aimEye = eye;
+    camera->playerExt->aimDir = dir;
     {
         f32 swayTarget;
 
@@ -154,7 +142,7 @@ void func_1512C490(Camera *camera) {
             func_1512D070(camera);
             return;
         }
-        if (((CamPlayerExt *)camera->playerExt)->aimState != 0) {
+        if (camera->playerExt->aimState != 0) {
             if (camera->shakeState == 2) {
                 CamOffset *tbl;
 
@@ -187,20 +175,20 @@ void func_1512C490(Camera *camera) {
         func_150A7DF0(&rotMtx, -camera->shakeRot.y * shakeScale, camera->shakeRot.z * shakeScale, camera->shakeRot.x * shakeScale);
         guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
         if (camera->playerExt != NULL) {
-            yaw = func_15048FC8((struct17 *)&((CamPlayerExt *)camera->playerExt)->aimDir) - 180.0f;
+            yaw = func_15048FC8((struct17 *)&camera->playerExt->aimDir) - 180.0f;
             func_150A8050(dirMtx,
-                          -func_150484A0(((CamPlayerExt *)camera->playerExt)->aimDir.y,
-                                         sqrtf(((CamPlayerExt *)camera->playerExt)->aimDir.x * ((CamPlayerExt *)camera->playerExt)->aimDir.x +
-                                               ((CamPlayerExt *)camera->playerExt)->aimDir.z * ((CamPlayerExt *)camera->playerExt)->aimDir.z)) *
+                          -func_150484A0(camera->playerExt->aimDir.y,
+                                         sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x +
+                                               camera->playerExt->aimDir.z * camera->playerExt->aimDir.z)) *
                                   57.2957764f - // 180/pi
                               camera->shakeRot.y * shakeScale,
                           yaw - camera->shakeRot.z * shakeScale, 0.0f);
             guMtxXFMF(dirMtx, 0.0f, 0.0f, 1.0f, &dirX, &dirY, &dirZ);
-            ((CamPlayerExt *)camera->playerExt)->aimDir.x = dirX;
-            ((CamPlayerExt *)camera->playerExt)->aimDir.y = dirY;
-            ((CamPlayerExt *)camera->playerExt)->aimDir.z = dirZ;
+            camera->playerExt->aimDir.x = dirX;
+            camera->playerExt->aimDir.y = dirY;
+            camera->playerExt->aimDir.z = dirZ;
         }
-        if (((CamPlayerExt *)camera->playerExt)->aimState != 0) {
+        if (camera->playerExt->aimState != 0) {
             func_150A7DF0(&rotMtx, D_800DCDE0[camera->playerIndex].rot.x, D_800DCDE0[camera->playerIndex].rot.y,
                           D_800DCDE0[camera->playerIndex].rot.z);
             func_150A7D00(&transMtx, D_800DCDE0[camera->playerIndex].pos.x, D_800DCDE0[camera->playerIndex].pos.y,

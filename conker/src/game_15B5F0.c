@@ -25,15 +25,6 @@ typedef struct CamPlayer {
     /* 0x180 */ f32 unk180;
 } CamPlayer;
 
-/* Camera.playerExt (ActorCtl): 0x9C, which ActorCtl does not declare yet, and 0x95, read unsigned
-   here (ActorCtl declares it s8). */
-typedef struct CamPlayerExt {
-    /* 0x000 */ u8 pad0[0x95];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x6];
-    /* 0x09C */ s32 unk9C;
-} CamPlayerExt;
-
 /*
  * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset
  * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
@@ -87,7 +78,7 @@ void func_1512E140(Camera *camera) {
             targetHeight = 0; // matching: int 0 again (see above)
         } else if (camera->player->y_position - camera->player->unk180 > 600.0f && !(camera->status & 0x400) &&
                    camera->player->in_water == 0 && camera->player->unk102 == 0 &&
-                   ((CamPlayerExt *)camera->playerExt)->unk9C == 0 && ((CamPlayerExt *)camera->playerExt)->unk95 == 0 &&
+                   camera->playerExt->rope == NULL && camera->playerExt->unk95 == 0 &&
                    ((CamPlayer *)camera->player)->unk137 == 0 && ((CamPlayer *)camera->player)->unk84 != 0x194 && !(camera->status & 0x80)) {
             return;
         }

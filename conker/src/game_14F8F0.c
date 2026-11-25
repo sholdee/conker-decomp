@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "macros.h"
 
-/* File-local view of Camera (the per-player camera, layout and names as in game_14FF90.c's Camera):
-   only the members used here. include/structs.h has pads over several of them. */
 extern f32 D_800894C0;
 extern vertex D_800894C8;
 

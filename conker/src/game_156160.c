@@ -76,10 +76,6 @@ typedef struct {
     } arg;
 } Msg15128CB0;
 
-/*
- * Camera state: the same 0x9A0-byte object as Camera (include/structs.h), which is why it is
- * cast to Camera * for the functions.h prototypes. Fields here follow this file's usage.
- */
 s32 func_1509BE40(s32, s32, s32, s32);
 void func_1512D560(Camera *, s32, struct178 *);
 Msg15128CB0 *func_1512D604(Camera *);
@@ -126,7 +122,7 @@ void func_15128CB0(Camera *cam) {
     }
     if (func_1512D6B0(cam)) {
         if (cam->mode & 1) {
-            func_151239CC((Camera *)cam, 12);
+            func_151239CC(cam, 12);
         }
         return;
     }
@@ -136,14 +132,14 @@ void func_15128CB0(Camera *cam) {
         case 5:
             cam->zone = cam->playerExt->unk78;
             if (cam->zone == 0) {
-                func_151239CC((Camera *)cam, 1);
+                func_151239CC(cam, 1);
                 cam->playerExt->unk198 = 0;
                 cam->playerExt->aimState = 0;
                 cam->unk5F8 = 1;
                 cam->unk5FC = 2;
                 cam->playerExt->unk198 = 0;
                 cam->aimState = 0;
-                func_15127EB8((Camera *)cam);
+                func_15127EB8(cam);
                 D_80089524[cam->playerIndex] = 0;
                 D_80089534[cam->playerIndex] = 0;
             } else {
@@ -156,7 +152,7 @@ void func_15128CB0(Camera *cam) {
                 cam->zoneHookActive = 0;
             }
             D_800DC010[msg->arg.index] = D_800DBFF0[cam->playerIndex];
-            func_15123934((Camera *)cam, 0x40000, 0, 0, 10);
+            func_15123934(cam, 0x40000, 0, 0, 10);
             cam->status |= 4;
             cam->unk3A4 = -1.0f;
             break;
@@ -173,7 +169,7 @@ void func_15128CB0(Camera *cam) {
                     angle = D_800D2DB0;
                     D_800D2DB0 = 999.0f;
                 }
-                func_151239CC((Camera *)cam, 10);
+                func_151239CC(cam, 10);
                 if (D_800C3672) {
                     cam->transition.endYaw = 999.0f;
                     cam->transition.duration = 0;
@@ -202,14 +198,14 @@ void func_15128CB0(Camera *cam) {
                             cam->aimState = 0;
                             D_80089524[cam->playerIndex] = 0;
                             D_80089534[cam->playerIndex] = 0;
-                            func_15127EB8((Camera *)cam);
+                            func_15127EB8(cam);
                         }
                     } else {
                         cam->playerExt->unk198 = 0;
                         cam->aimState = 0;
-                        func_15127EB8((Camera *)cam);
+                        func_15127EB8(cam);
                     }
-                    func_15126138((Camera *)cam);
+                    func_15126138(cam);
                     if (cam->status & 2) {
                         angle = cam->player->unk40 - 180.0f;
                     }
@@ -224,7 +220,7 @@ void func_15128CB0(Camera *cam) {
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);
-                    func_15126138((Camera *)cam);
+                    func_15126138(cam);
                     cam->status |= 4;
                     cam->followRate = 0.0f;
                     cam->followRateVel = 0.0f;
@@ -234,7 +230,7 @@ void func_15128CB0(Camera *cam) {
                 } else {
                     cam->contPad = D_800BE728[cam->playerIndex];
                     cam->buttonsPressed = D_800BE710[cam->playerIndex];
-                    func_15127FEC((Camera *)cam, D_800C367C, D_800C3678);
+                    func_15127FEC(cam, D_800C367C, D_800C3678);
                     cam->snap = 0;
                 }
             }

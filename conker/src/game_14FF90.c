@@ -4,62 +4,6 @@
 #include "variables.h"
 
 
-/* Player extension block (Actor.unk31C, cached in Camera.playerExt). File-local view: Camera
-   declares this pointer as Actor *, and ActorCtl in include/ lacks these fields. */
-typedef struct CamPlayerExt {
-    /* 0x000 */ u8 pad0[0x8];
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8 padA[0xC];
-    /* 0x016 */ u8 unk16;
-    /* 0x017 */ u8 pad17[0x5];
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ u8 pad20[0x7];
-    /* 0x027 */ u8 unk27;
-    /* 0x028 */ u8 pad28[0x26];
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 pad4F[0x29];
-    /* 0x078 */ u8 cameraZone;
-    /* 0x079 */ u8 pad79[0x4];
-    /* 0x07D */ u8 unk7D;
-    /* 0x07E */ u8 pad7E[0x17];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x6];
-    /* 0x09C */ s32 unk9C;
-    /* 0x0A0 */ u8 padA0[0x74];
-    /* 0x114 */ s16 unk114;
-    /* 0x116 */ u8 pad116[0x4];
-    /* 0x11A */ u8 unk11A;
-    /* 0x11B */ u8 pad11B[0x5];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0xF];
-    /* 0x130 */ vertex aimDir;
-    /* 0x13C */ vertex aimEye;
-    /* 0x148 */ vertex aimTarget;
-    /* 0x154 */ u8 pad154[0xC];
-    /* 0x160 */ vertex unk160;
-    /* 0x16C */ f32 aimYaw;
-    /* 0x170 */ f32 aimPitch;
-    /* 0x174 */ f32 aimYawTarget;
-    /* 0x178 */ f32 aimPitchTarget;
-    /* 0x17C */ f32 aimYawVel;
-    /* 0x180 */ f32 aimPitchVel;
-    /* 0x184 */ f32 aimZoom;
-    /* 0x188 */ f32 aimZoomY;
-    /* 0x18C */ f32 unk18C;
-    /* 0x190 */ s32 aimZone;
-    /* 0x194 */ u8 aimReset;
-    /* 0x195 */ u8 pad195[0x2];
-    /* 0x197 */ u8 aimState;
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 pad199[0x13];
-    /* 0x1AC */ u8 unk1AC;
-    /* 0x1AD */ u8 pad1AD[0x6];
-    /* 0x1B3 */ u8 unk1B3;
-} CamPlayerExt;
-
-/* Full file-local view of Camera (one per player camera, 0x9A0 bytes). include/structs.h declares
-   only part of it and mistypes several members (0x2AC, 0x5FC, 0x7B8, 0x3D4); a central pass should fold
-   this into Camera.  Mode state 0x0..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
 #define CAM_C_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
 
 /* variables.h declares D_800C3600 as struct168 *; it is the struct itself (a scripted camera shot). */
@@ -210,7 +154,7 @@ void func_15122C5C(Camera *camera) {
     target = &camera->target;
     eye = &camera->eye;
     if ((camera->playerExt != NULL) && (camera->aimState != 3) && ((camera->mode != 0x100) || (camera->aimState != 0))) {
-        camera->zone = ((CamPlayerExt *)camera->playerExt)->cameraZone;
+        camera->zone = camera->playerExt->unk78;
     }
     if (D_800DBFF4[camera->playerIndex] != 4) {
         camera->status &= ~4;
@@ -243,7 +187,7 @@ void func_15122C5C(Camera *camera) {
     func_15125A6C(camera);
     func_15128CB0(camera);
     func_15125DB4(camera);
-    if ((((CamPlayerExt *)camera->playerExt)->unk120 != 0) && (((CamPlayerExt *)camera->playerExt)->aimState != 0)) {
+    if ((camera->playerExt->unk120 != 0) && (camera->playerExt->aimState != 0)) {
         func_15127EB8(camera);
     }
     if (func_15128540(camera) == 0) {
@@ -270,7 +214,7 @@ void func_15122C5C(Camera *camera) {
             func_151283B8(camera);
         }
         func_15123508(camera);
-        if ((camera->flags & 2) && (((CamPlayerExt *)camera->playerExt)->unk120 == 0)) {
+        if ((camera->flags & 2) && (camera->playerExt->unk120 == 0)) {
             func_1512D390(camera);
         }
         func_15125594(camera);
@@ -336,14 +280,14 @@ void func_1512317C(Camera *camera) {
     blocked = ((camera->mode & 0x80) != 0) ||
               ((camera->flags & 0x1000000) != 0) ||
               ((camera->player->unk28 != 0.0f) && (camera->player->in_water == 0) &&
-               (((CamPlayerExt *)camera->playerExt)->unk9C == 0) && (status100 == 0) && (status200 == 0) &&
+               (camera->playerExt->rope == NULL) && (status100 == 0) && (status200 == 0) &&
                (camera->zone != 3)) ||
               ((camera->player->unk65 != 0) && (status100 == 0) && (status200 == 0)) ||
               (stunned != 0) ||
               (func_15125490(camera) != 0) ||
               (camera->player->health == 0) ||
-              (((((CamPlayerExt *)camera->playerExt)->unk4E & 0xF) == 1) && (camera->player->xz_velocity > 15.0f)) ||
-              (((CamPlayerExt *)camera->playerExt)->unk1AC != 0);
+              (((camera->playerExt->unk4E & 0xF) == 1) && (camera->player->xz_velocity > 15.0f)) ||
+              (camera->playerExt->unk1AC != 0);
 
     if ((camera->contPad->button & R_TRIG) && !blocked) {
         if (!(camera->buttonsPressed & R_TRIG)) {
@@ -357,8 +301,8 @@ void func_1512317C(Camera *camera) {
 
     if ((camera->mode == 0x100) && (camera->aimState == 0)) {
         func_151239CC(camera, 1);
-        ((CamPlayerExt *)camera->playerExt)->unk198 = 0;
-        ((CamPlayerExt *)camera->playerExt)->aimState = 0;
+        camera->playerExt->unk198 = 0;
+        camera->playerExt->aimState = 0;
         camera->unk5F8 = 1;
         camera->unk5FC = 2;
         camera->buttonsPressed &= ~R_TRIG;
@@ -369,7 +313,7 @@ void func_1512317C(Camera *camera) {
         camera->buttonsPressed &= ~R_TRIG;
         camera->contPad->button &= ~R_TRIG;
     }
-    ((CamPlayerExt *)camera->playerExt)->unk198 = camera->aimState;
+    camera->playerExt->unk198 = camera->aimState;
 
     if ((camera->aimState != 0) || (camera->aimState == 3)) {
         func_150495B0(&camera->aim.offset.x, 0.0f, &camera->aim.offsetXVel, 4.0f, 9.0f, camera->dt);
@@ -397,7 +341,7 @@ void func_15123508(Camera *camera) {
 void func_15123568(Camera *camera) {
     s32 cycle;
 
-    if ((((CamPlayerExt *)camera->playerExt)->unk120 == 4) && (camera->mode != 0x40) && (camera->unk92C == 0)) {
+    if ((camera->playerExt->unk120 == 4) && (camera->mode != 0x40) && (camera->unk92C == 0)) {
         camera->unk7C0 = 999.0f;
         camera->preset = 1;
         func_15124B18(camera);
@@ -437,8 +381,8 @@ void func_151236D0(Camera *camera) {
 
     wasBelow = camera->status & 1;
     if (camera->playerExt != NULL) {
-        if ((((CamPlayerExt *)camera->playerExt)->unk9C != 0) ||
-            ((((CamPlayerExt *)camera->playerExt)->unk95 != 0) && (PLAYER_UNK137(camera->player) == 0))) {
+        if ((camera->playerExt->rope != NULL) ||
+            ((camera->playerExt->unk95 != 0) && (PLAYER_UNK137(camera->player) == 0))) {
             camera->status |= 0x40;
         } else {
             camera->status &= ~0x40;
@@ -446,12 +390,12 @@ void func_151236D0(Camera *camera) {
         if (camera->player->unk28 == 0.0f) {
             camera->status &= ~0x400;
         }
-        if ((((CamPlayerExt *)camera->playerExt)->unk8 != 0) && (((CamPlayerExt *)camera->playerExt)->unk16 == 0)) {
+        if ((camera->playerExt->unk8 != 0) && (camera->playerExt->unk16 == 0)) {
             camera->status |= 8;
         } else {
             camera->status &= ~8;
         }
-        if (((CamPlayerExt *)camera->playerExt)->unk4E == 2) {
+        if (camera->playerExt->unk4E == 2) {
             camera->status |= 0x80;
         } else {
             camera->status &= ~0x80;
@@ -603,7 +547,7 @@ void func_15123A54(Camera *camera) {
         } else {
             camera->spinDir = 1.0f;
         }
-        if ((((CamPlayerExt *)camera->playerExt)->unk95 != 0) && (camera->status & 0x40)) {
+        if ((camera->playerExt->unk95 != 0) && (camera->status & 0x40)) {
             angle = camera->player->unk40 + 180.0f;
             func_15049688(&camera->yaw, angle, &camera->yawVel, 2.0f, 4.0f, camera->dt);
             camera->yawRad = camera->yaw * DEG2RAD;
@@ -791,13 +735,13 @@ void func_151247C0(Camera *camera) {
     f32 sideX;
     Actor *obj;
     Actor *pair;
-    CamPlayerExt *ext;
+    ActorCtl *ext;
     u8 slow;
     f32 sideZ;
 
     if (camera->transition.state == 0) {
-        ext = (CamPlayerExt *)camera->playerExt;
-        slow = (ext != NULL) ? (ext->unk9C | ext->unk95) : 0;
+        ext = camera->playerExt;
+        slow = (ext != NULL) ? ((s32)ext->rope | ext->unk95) : 0;
         if (slow) {
             camera->followRateTarget = 0.25f;
         } else {
@@ -902,26 +846,26 @@ void func_15124C38(Camera *camera, f32 *outY) {
 
     if ((camera->transition.state == 0) || (outY != 0)) {
         if (camera->playerExt != NULL) {
-            if ((((CamPlayerExt *)camera->playerExt)->unk4E & 0xF) == 1) {
+            if ((camera->playerExt->unk4E & 0xF) == 1) {
                 if (camera->mode & 0x100) {
-                    height = ((CamPlayerExt *)camera->playerExt)->unk114 * 0.65f;
+                    height = camera->playerExt->unk114 * 0.65f;
                 } else {
-                    height = ((CamPlayerExt *)camera->playerExt)->unk114 * 0.55f;
+                    height = camera->playerExt->unk114 * 0.55f;
                 }
             } else if (camera->mode & 0x100) {
                 if (camera->zone == 0) {
                     if (camera->aim.pitch < -15.0f) {
-                        height = camera->player->unkCC + ((CamPlayerExt *)camera->playerExt)->unk114 * 0.9f;
+                        height = camera->player->unkCC + camera->playerExt->unk114 * 0.9f;
                     } else {
-                        height = camera->player->unkCC + ((CamPlayerExt *)camera->playerExt)->unk114 * 0.75f;
+                        height = camera->player->unkCC + camera->playerExt->unk114 * 0.75f;
                     }
                 } else {
-                    height = camera->player->unkCC + ((CamPlayerExt *)camera->playerExt)->unk114 * 0.85f;
+                    height = camera->player->unkCC + camera->playerExt->unk114 * 0.85f;
                 }
             } else if ((camera->snap == 0) && (camera->blocked != 0)) {
-                height = camera->player->unkCC + (f32)((CamPlayerExt *)camera->playerExt)->unk114;
+                height = camera->player->unkCC + (f32)camera->playerExt->unk114;
             } else {
-                height = camera->player->unkCC + ((CamPlayerExt *)camera->playerExt)->unk114 * 0.75f;
+                height = camera->player->unkCC + camera->playerExt->unk114 * 0.75f;
             }
             if (camera->status & 0x100) {
                 height += 50.0f;
@@ -938,7 +882,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
             func_1507C3E0(camera->player, &top, &discard1, &discard2);
             height = top;
         }
-        if (((CamPlayerExt *)camera->playerExt)->unk120 != 0) {
+        if (camera->playerExt->unk120 != 0) {
             f32 z;
             f32 y;
             f32 x;
@@ -1075,7 +1019,7 @@ s32 func_151253CC(Camera *camera) {
         camera->unk3A0 = camera->yaw * DEG2RAD;
         camera->pitchRad = camera->pitch * DEG2RAD;
         func_15124AB4(camera);
-        if (((CamPlayerExt *)camera->playerExt)->aimState != 0) {
+        if (camera->playerExt->aimState != 0) {
             func_15127EB8(camera);
         }
         func_1512C490(camera);
@@ -1109,7 +1053,7 @@ void func_151254F4(Camera *camera, s32 index) {
     camera->pitchRad = camera->pitch * DEG2RAD;
     func_15124AB4(camera);
     func_151239CC(camera, 1);
-    ((CamPlayerExt *)camera->playerExt)->unk198 = 0;
+    camera->playerExt->unk198 = 0;
     camera->aimState = 0;
     camera->player = &D_800CC2D0[index];
     camera->followRate = 0.0f;
@@ -1213,8 +1157,8 @@ void func_15125924(Camera *camera) {
     s32 extUnk1C;
 
     if (camera->playerExt != NULL) {
-        extUnk1C = ((CamPlayerExt *)camera->playerExt)->unk1C;
-        extUnk4E = ((CamPlayerExt *)camera->playerExt)->unk4E;
+        extUnk1C = camera->playerExt->unk1C;
+        extUnk4E = camera->playerExt->unk4E;
     } else {
         extUnk1C = 0;
         extUnk4E = 0;
@@ -1334,7 +1278,7 @@ void func_15125DB4(Camera *camera) {
     s32 zone;
 
     zone = camera->zone;
-    if ((((CamPlayerExt *)camera->playerExt)->unk120 != 0) || (D_80084480 != 0)) {
+    if ((camera->playerExt->unk120 != 0) || (D_80084480 != 0)) {
         camera->buttonsPressed = 0;
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
         return;
@@ -1381,12 +1325,12 @@ void func_15125DB4(Camera *camera) {
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
 
-    if ((((CamPlayerExt *)camera->playerExt)->unk7D != 0) || (((CamPlayerExt *)camera->playerExt)->unk1AC != 0) || (((CamPlayerExt *)camera->playerExt)->unk27 != 0)) {
+    if ((camera->playerExt->matrix_physics != 0) || (camera->playerExt->unk1AC != 0) || (camera->playerExt->unk27 != 0)) {
         camera->buttonsPressed &= ~R_TRIG;
         camera->contPad->button &= ~R_TRIG;
     }
 
-    if ((((CamPlayerExt *)camera->playerExt)->unk95 != 0) || ((camera->unk5FC != 0) && (((CamPlayerExt *)camera->playerExt)->unk1B3 != 0))) {
+    if ((camera->playerExt->unk95 != 0) || ((camera->unk5FC != 0) && (camera->playerExt->unk1B3 != 0))) {
         camera->buttonsPressed &= ~(R_TRIG | CAM_C_BUTTONS);
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
@@ -1441,7 +1385,7 @@ void func_15126138(Camera *camera) {
 
 /* Aim eye position for `obj`: a point fixed to one of its bone matrices for the zones that have one,
    else the object position raised to 3/4 of its height. */
-void func_1512623C(Actor *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
+void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
     f32 localPos[3];
     f32 worldPos[3];
@@ -1488,7 +1432,7 @@ void func_1512623C(Actor *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *outY
 /* First-person aiming camera (R trigger in the aim zones): sets it up on the first frame, then steers
    yaw/pitch with the stick and zoom with C-up/C-down. Returns 1 while aiming. */
 s32 func_15126378(Camera *camera) {
-    CamPlayerExt *ext;
+    ActorCtl *ext;
     Actor *viewer;
     f32 zoomRatio;
     f32 aspect;
@@ -1511,7 +1455,7 @@ s32 func_15126378(Camera *camera) {
     s32 state;
 
     scale = 0.02f;
-    ext = (CamPlayerExt *)camera->playerExt;
+    ext = camera->playerExt;
     aspect = D_800BE628[camera->playerIndex].fovY / D_800BE628[camera->playerIndex].fovX;
     maxZoom = -(D_800BE628[camera->playerIndex].fovX - 5.0f);
     zoomStep = D_800BE628[camera->playerIndex].fovX * scale;
@@ -1532,7 +1476,7 @@ s32 func_15126378(Camera *camera) {
         (camera->contPad->button & R_TRIG) && valid &&
         (((s32)camera->player->unk28 == 0) || ((s32)viewer->unk28 == 0)) &&
         (camera->player->stunned == 0) && (ext->aimState == 0)) {
-        ((CamPlayerExt *)camera->playerExt)->unk198 = 0;
+        camera->playerExt->unk198 = 0;
         camera->aimState = 0;
         if (((zone == 0x1F) || (zone == 0x29)) && !(camera->status & 4)) {
             t = *(s16 *)&viewer->unk2E4 * scale;
@@ -1546,9 +1490,9 @@ s32 func_15126378(Camera *camera) {
         func_151239CC(camera, 1);
         ext->aimState = 2;
         func_151C9BA0(camera, zone);
-        func_1512623C(viewer, (CamPlayerExt *)camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
+        func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
-        camera->target.y = camera->player->y_position + (((CamPlayerExt *)camera->playerExt)->unk114 * 0.75f);
+        camera->target.y = camera->player->y_position + (camera->playerExt->unk114 * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
         ext->aimEye = camera->eye;
         ext->unk18C = camera->yaw;
@@ -1605,7 +1549,7 @@ s32 func_15126378(Camera *camera) {
     }
     if (state == 2) {
         buttons = camera->contPad->button;
-        func_1512623C(viewer, (CamPlayerExt *)camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
+        func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         zoomRatio = camera->unk19C / maxZoom;
         zoomRatio = (zoomRatio < 0.0f) ? 0.0f : ((zoomRatio > 1.0f) ? 1.0f : zoomRatio);
         if (!(buttons & R_TRIG) || (zone == 0) || (ext->unk1AC != 0) ||
@@ -1735,7 +1679,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->y = camera->player->y_position;
     sound->z = camera->player->z_position;
 
-    if (((CamPlayerExt *)camera->playerExt)->aimState == 2) {
+    if (camera->playerExt->aimState == 2) {
         newZoom = (u32)zoom;
         if (oldZoom != newZoom) {
             changed = 1;
@@ -1783,7 +1727,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     camera = sound->camera;
     oldKey = sound->data & 0xFFFFFF;
     count = sound->data >> 24;
-    key = ((CamPlayerExt *)camera->playerExt)->aimYawTarget * ((CamPlayerExt *)camera->playerExt)->aimPitchTarget;
+    key = camera->playerExt->aimYawTarget * camera->playerExt->aimPitchTarget;
     newKey = *(u32 *)&key & 0xFFFFFF;
     changed = 0;
 
@@ -1795,7 +1739,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->y = camera->player->y_position;
     sound->z = camera->player->z_position;
 
-    if (((CamPlayerExt *)camera->playerExt)->aimState == 2) {
+    if (camera->playerExt->aimState == 2) {
         if (oldKey != newKey) {
             if (count < 10) {
                 if ((((oldKey - newKey) < 0) ? -(oldKey - newKey) : (oldKey - newKey)) > 100) {
@@ -1839,7 +1783,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 /* Aiming view for an object without a player camera (stick-steered yaw/pitch around its head).
    Returns 1 while aiming. */
 s32 func_151279A0(Actor *obj, OSContPad *contPad) {
-    CamPlayerExt *ext;
+    ActorCtl *ext;
     s32 zone;
     vertex pos;
     vertex base;
@@ -1850,8 +1794,8 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     s32 buttons;
     f32 angle;
 
-    ext = (CamPlayerExt *)obj->unk31C;
-    zone = ext->cameraZone;
+    ext = (ActorCtl *)obj->unk31C;
+    zone = ext->unk78;
     dt = D_800BE9E4 * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
         contPad->button |= R_TRIG;
@@ -1925,7 +1869,7 @@ void func_15127EB8(Camera *camera) {
     u8 linked;
 
     func_151239CC(camera, 1);
-    ((CamPlayerExt *)camera->playerExt)->aimState = 0;
+    camera->playerExt->aimState = 0;
     func_151C9ED4(camera);
     camera->unk19C = 0.0f;
     camera->unk1A0 = 0.0f;
@@ -2169,13 +2113,13 @@ void func_1512868C(Camera *camera) {
     index = camera->playerIndex;
     camera->player = player = &D_800CC2D0[index];
     camera->controller = camera->unk3CC = index;
-    camera->playerExt = (CamPlayerExt *)player->unk31C;
+    camera->playerExt = (ActorCtl *)player->unk31C;
     camera->liftTarget = 0.0f;
     camera->sideTarget = 0.0f;
     camera->lift = 0.0f;
     camera->side = 0.0f;
     camera->followRateTarget = 1.0f;
-    ((CamPlayerExt *)camera->playerExt)->unk198 = 0;
+    camera->playerExt->unk198 = 0;
     camera->aimState = 0;
 }
 
@@ -2186,6 +2130,6 @@ void func_15128774(Camera *camera, Actor *obj) {
     camera->prevEye.y = camera->eye.y = obj->y_position;
     camera->prevEye.z = camera->eye.z = obj->z_position;
     camera->yaw = camera->player->unk40 - 180.0f;
-    ((CamPlayerExt *)camera->playerExt)->unk18C = 999.0f;
+    camera->playerExt->unk18C = 999.0f;
     camera->snap = 1;
 }

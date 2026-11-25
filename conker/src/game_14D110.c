@@ -125,7 +125,7 @@ void func_1511FC60(Camera *camera) {
     camera->unk354 = camera->target.y;
     aim->distance = 110.0f;
     camera->height = 30.0f;
-    ((CamPlayerExt *)camera->playerExt)->aimYaw = aim->targetYaw;
+    camera->playerExt->aimYaw = aim->targetYaw;
     if ((zone == 0) || (zone == 0xC) || IS_FACING_ZONE(zone)) {
         camera->height += 30.0f;
     }
@@ -167,7 +167,7 @@ void func_15120158(Camera *camera) {
     inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
     func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
-    ((CamPlayerExt *)camera->playerExt)->aimActive = camera->aimState;
+    camera->playerExt->unk198 = camera->aimState;
     camera->distance = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
                              (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
     if (camera->snap) {
@@ -210,7 +210,7 @@ void func_15120158(Camera *camera) {
         if (camera->aimTimer != 0) {
             camera->aimTimer -= D_800BE9E4;
             if (camera->aimTimer <= 0) {
-                ((CamPlayerExt *)camera->playerExt)->aimActive = 1;
+                camera->playerExt->unk198 = 1;
                 camera->aimState = 2;
                 aim->targetYaw = camera->yaw;
                 return;
@@ -239,7 +239,7 @@ void func_15120158(Camera *camera) {
                 if (fabsf(func_15048A70(camera->yaw, aim->targetYaw)) < 0.009999999776f) {
                 }
             } else {
-                ((CamPlayerExt *)camera->playerExt)->aimActive = 1;
+                camera->playerExt->unk198 = 1;
                 camera->aimState = 2;
                 break;
             }
@@ -369,15 +369,15 @@ void func_15120158(Camera *camera) {
                 func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 4.3f, 7.300000191f, camera->dt);
             }
         }
-        ((CamPlayerExt *)camera->playerExt)->aimYaw = camera->yaw;
-        ((CamPlayerExt *)camera->playerExt)->aimPitch = aim->pitch;
-        ((CamPlayerExt *)camera->playerExt)->aimTarget = camera->target;
-        ((CamPlayerExt *)camera->playerExt)->aimEye = camera->eye;
-        while (((CamPlayerExt *)camera->playerExt)->aimPitch > 180.0f) {
-            ((CamPlayerExt *)camera->playerExt)->aimPitch -= 360.0f;
+        camera->playerExt->aimYaw = camera->yaw;
+        camera->playerExt->aimPitch = aim->pitch;
+        camera->playerExt->aimTarget = camera->target;
+        camera->playerExt->aimEye = camera->eye;
+        while (camera->playerExt->aimPitch > 180.0f) {
+            camera->playerExt->aimPitch -= 360.0f;
         }
-        while (((CamPlayerExt *)camera->playerExt)->aimPitch < -180.0f) {
-            ((CamPlayerExt *)camera->playerExt)->aimPitch += 360.0f;
+        while (camera->playerExt->aimPitch < -180.0f) {
+            camera->playerExt->aimPitch += 360.0f;
         }
         horizontal = cosf(aim->pitch * DEG2RAD) * dist;
         sinPitch = sinf(aim->pitch * DEG2RAD);
@@ -398,7 +398,7 @@ void func_15120158(Camera *camera) {
         if (camera->aimTimer != 0) {
             camera->aimTimer -= D_800BE9E4;
             if (camera->aimTimer <= 0) {
-                ((CamPlayerExt *)camera->playerExt)->aimActive = 0;
+                camera->playerExt->unk198 = 0;
                 camera->aimState = 0;
                 return;
             }
@@ -418,7 +418,7 @@ void func_15120158(Camera *camera) {
             }
         }
         if (!aim->unk4D || (yawDelta < 0.05000000075f)) {
-            ((CamPlayerExt *)camera->playerExt)->aimActive = 0;
+            camera->playerExt->unk198 = 0;
             camera->aimState = 0;
         } else {
             func_15049688(&camera->yaw, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->dt);
@@ -450,15 +450,15 @@ void func_15120158(Camera *camera) {
         func_150495B0(&aim->offset.x, 0.0f, &aim->offsetXVel, 4.0f, 9.0f, camera->dt);
         func_150495B0(&aim->offset.z, 0.0f, &aim->offsetZVel, 4.0f, 9.0f, camera->dt);
     }
-    ((CamPlayerExt *)camera->playerExt)->aimTarget.x += aim->offset.x;
-    ((CamPlayerExt *)camera->playerExt)->aimTarget.z += aim->offset.z;
-    ((CamPlayerExt *)camera->playerExt)->aimEye.x += aim->offset.x;
-    ((CamPlayerExt *)camera->playerExt)->aimEye.z += aim->offset.z;
-    func_150491EC((struct17 *)&((CamPlayerExt *)camera->playerExt)->aimEye, (struct17 *)&((CamPlayerExt *)camera->playerExt)->aimTarget,
-                  (struct17 *)&((CamPlayerExt *)camera->playerExt)->aimDir);
+    camera->playerExt->aimTarget.x += aim->offset.x;
+    camera->playerExt->aimTarget.z += aim->offset.z;
+    camera->playerExt->aimEye.x += aim->offset.x;
+    camera->playerExt->aimEye.z += aim->offset.z;
+    func_150491EC((struct17 *)&camera->playerExt->aimEye, (struct17 *)&camera->playerExt->aimTarget,
+                  (struct17 *)&camera->playerExt->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
-    func_15125594((Camera *)camera);
+    func_15125594(camera);
 }
 
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
@@ -572,7 +572,7 @@ void func_151218C4(Camera *camera) {
             camera->rail.eyeEaseA = 0.0f;
             camera->rail.eyeEaseB = 0.0f;
         }
-        ((CamPlayerExt *)camera->playerExt)->aimActive = 0;
+        camera->playerExt->unk198 = 0;
         camera->aimState = 0;
         camera->aimTimer = 60;
     } else {

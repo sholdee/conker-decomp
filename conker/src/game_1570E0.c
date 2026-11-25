@@ -3,11 +3,7 @@
 #include "variables.h"
 
 
-/*
- * Camera state: the same 0x9A0-byte object as Camera (include/structs.h). Only the fields this
- * file uses are named.
- */
-/* Per-camera accumulated speeds for the free camera, indexed by Camera.index. */
+/* Per-camera accumulated speeds for the free camera, indexed by Camera.playerIndex. */
 extern f32 D_80089560[]; /* vertical (C-up / C-down) */
 extern f32 D_80089570[]; /* strafe or roll (C-left / C-right) */
 extern f32 D_80089580[]; /* pitch (A / B) */

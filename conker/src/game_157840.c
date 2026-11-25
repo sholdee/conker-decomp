@@ -33,44 +33,19 @@ extern ZScanParams D_800DC200[4][4];
 
 void func_15123A54(Camera *arg0);
 
-/* An object the camera tracks (Camera's unk3D0 / unk3D4); a Actor game object at least for unk3D0. */
+/* Camera.player (a Actor): the members Actor does not declare yet. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ u8 pad20[8];
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ u8 pad2C[0x22];
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 pad4F[0x32];
-    /* 0x081 */ u8 unk81;
-    /* 0x082 */ u8 pad82[0x13];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x17];
-    /* 0x0AD */ u8 unkAD;
-    /* 0x0AE */ u8 padAE[0x54];
-    /* 0x102 */ u8 unk102;
-    /* 0x103 */ u8 pad103[0x11];
-    /* 0x114 */ s16 unk114;
-    /* 0x116 */ u8 pad116[2];
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0x16];
+    /* 0x000 */ u8 pad0[0x137];
     /* 0x137 */ u8 unk137;
     /* 0x138 */ u8 pad138[0x44];
     /* 0x17C */ f32 unk17C;
-    /* 0x180 */ f32 unk180;
-    /* 0x184 */ u8 pad184[0x2F];
-    /* 0x1B3 */ u8 unk1B3;
 } CamObj;
 
 /* The camera (Camera) as this file sees it. The shared header lacks many of these fields (0x360, 0x3EC-0x404,
  * 0x5F8, 0x60C, 0x640-0x648, 0x8B8 and up, ...), types unk5FC as u16 although it is read with lh, and splits the
  * vectors at 0x2A4-0x2C4 and 0x2F8 into floats. */
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
-void func_1507C3E0(CamObj *obj, s16 *height, s16 *width, s16 *depth);
+void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
 void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14);
 void func_151236D0(void *);
@@ -117,7 +92,7 @@ void func_1512A390(Camera *arg0) {
     func_151236D0(arg0);
     if (!(arg0->flags & 0x10) && (arg0->player->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
         (((CamObj *)arg0->player)->unk17C < arg0->unk35C)) {
-        func_15128774((Camera *)arg0, (Actor *)arg0->player);
+        func_15128774(arg0, (Actor *)arg0->player);
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {
@@ -176,7 +151,7 @@ void func_1512A390(Camera *arg0) {
             if (arg0->eye.y < arg0->unk354 + 30.0f) {
                 arg0->eye.y = arg0->unk354 + 30.0f;
             }
-            func_1512523C((Camera *)arg0);
+            func_1512523C(arg0);
             return;
         }
         if ((arg0->cmdRunning != 0) && (arg0->cmd.unk34 != 0)) {
@@ -588,7 +563,7 @@ void func_1512BB10(Camera *arg0) {
     s32 saved1;
     s32 savedDD4;
     f32 floorY;
-    CamObj *sub;
+    ActorCtl *sub;
 
     flag = 0;
     // matching: sub is loaded inside the condition, after the first flag test
@@ -635,7 +610,7 @@ void func_1512BB10(Camera *arg0) {
             func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->dt);
         }
         probe.interaction_state = 0x2D;
-        probe.camera = (Camera *)arg0;
+        probe.camera = arg0;
         probe.x_position = arg0->eye.x;
         if (arg0->status & 0x800) {
             probe.y_position = arg0->eye.y + arg0->lift;
@@ -725,7 +700,7 @@ void func_1512C068(Camera *arg0) {
         if (dist < 42.0f) {
             arg0->unk384 = arg0->yaw - (45.0f * side);
             arg0->unk5CC = 0.0f;
-            func_15123A54((Camera *)arg0);
+            func_15123A54(arg0);
             arg0->unk240 |= 2;
         }
     }
