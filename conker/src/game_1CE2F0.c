@@ -3,13 +3,6 @@
 #include "variables.h"
 
 void func_15143794(s32, s32, f32, f32 *);
-void func_15152B38(void *, u8, s32);
-s32 func_1513170C(s32 *, s32);
-struct Obj151A2960;
-extern void (*D_8008F8E0[])(struct Obj151A2960 *, s32);
-extern f32 D_800A8D30;
-extern f32 D_800A8D34;
-extern f32 D_800A8D38;
 void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
                    s32, s32, f32, s32, s32, s32, s32, s32,
                    s32, f32, s32, s32, s32, s32, s32, s32,
@@ -787,29 +780,43 @@ typedef struct {
     /* 0x6C */ f32 maxSize;
 } ParticleDesc;
 
+/* Fade-out and one-shot event of func_151A26EC's particles, run by func_151A2960. */
+typedef struct {
+    /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */
+    /* 0x2 */ s16 fadeOutStep;
+    /* 0x4 */ s16 eventTime;     /* desc.timer value, -1 for none */
+    /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
+} FadeEvent;
+
 /* The particle func_15130374 returns (layout as Particle in game_15D730.c). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[3];
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ u8 unk80[0x28];
-    /* 0xA8 */ u8 data[0x10];  /* caller-sized per-particle data */
+    /* 0xA8 */ f32 drag;         /* read by func_1513170C */
+    /* 0xAC */ u8 padAC[4];
+    /* 0xB0 */ FadeEvent fade;
 } DescParticle;
 
-/* Per-particle data of func_151A26EC's particles (only partly copied, see there). */
+/* func_151A26EC's per-particle data, before it is copied into the particle. */
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ s16 unk4;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s8 unkA;
+    /* 0x0 */ f32 drag;
+    /* 0x4 */ FadeEvent fade;
 } ParticleData151A26EC;
+
+s32 func_1513170C(DescParticle *, struct17 *);
+extern void (*D_8008F8E0[])(DescParticle *, s32);
 
 extern DescParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
-s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 arg3, f32 gravity, f32 size,
-                  s16 timer, u8 alpha, s16 fadeStart, s16 arg9, s16 argA, s8 argB, u8 r, u8 g, u8 b,
-                  u8 argF, s32 arg10) {
+s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 drag, f32 gravity, f32 size,
+                  s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
+                  u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
     DescParticle *particle;
     ParticleDesc desc;
@@ -817,16 +824,16 @@ s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 arg3, f32 
     if (fadeStart <= 0) {
         fadeStart = 1;
     }
-    if (arg9 <= 0) {
-        arg9 = 1;
+    if (fadeOutStart <= 0) {
+        fadeOutStart = 1;
     }
-    data.unk0 = arg3;
-    data.unk4 = arg9;
-    data.unk6 = 255 / arg9;
+    data.drag = drag;
+    data.fade.fadeOutStart = fadeOutStart;
+    data.fade.fadeOutStep = 255 / fadeOutStart;
     desc.fadeStart = fadeStart;
     desc.fadeRate = 255 / fadeStart;
-    data.unk8 = argA;
-    data.unkA = argB;
+    data.fade.eventTime = eventTime;
+    data.fade.eventFunc = eventFunc;
     desc.texture = 39;
     desc.renderMode = 0x5203;
     desc.unk0 = 0x200005;
@@ -862,258 +869,247 @@ s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 arg3, f32 
     desc.handlerSet = 2;
     particle = func_15130374(&desc, 1, 0x10, argF, arg10);
     if (particle != NULL) {
-        memcpy(&particle->data[0], &data.unk0, 8);
-        memcpy(&particle->data[8], &data.unk4, 8);
+        // matching: the target copies 8 bytes from data.drag, overlapping the second copy
+        memcpy(&particle->drag, &data.drag, 8);
+        memcpy(&particle->fade, &data.fade, sizeof(data.fade));
     }
     return 0;
 }
 
-struct Sub151A2960 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s8 unk6;
-};
+/* Update func 0x11 (func_151A26EC's particles): dim out, run the one-shot event, then apply drag. */
+s32 func_151A2960(DescParticle *particle, struct17 *prevPos) {
+    FadeEvent *fade;
 
-struct Obj151A2960 {
-    u8 pad0[0x1A];
-    s16 unk1A;
-    u8 pad1C[0x2C - 0x1C];
-    u8 unk2C;
-    u8 pad2D[0xB0 - 0x2D];
-    struct Sub151A2960 unkB0;
-};
-
-void func_151A2960(struct Obj151A2960 *arg0, s32 arg1) {
-    struct Sub151A2960 *temp_v0;
-
-    temp_v0 = &arg0->unkB0;
-    if (arg0->unk1A < temp_v0->unk0) {
-        arg0->unk2C = arg0->unk1A * temp_v0->unk2;
+    fade = &particle->fade;
+    if (particle->desc.timer < fade->fadeOutStart) {
+        particle->desc.brightness = particle->desc.timer * fade->fadeOutStep;
     }
-    if (D_800BE616 == 0) {
-        if (-1 != temp_v0->unk4) {
-            if ((-1 != temp_v0->unk6) && (temp_v0->unk4 >= arg0->unk1A)) {
-                D_8008F8E0[temp_v0->unk6](arg0, temp_v0->unk4);
-                temp_v0->unk4 = -1;
-            }
-        }
+    if (D_800BE616 == 0 && fade->eventTime != -1 && fade->eventFunc != -1 &&
+        fade->eventTime >= particle->desc.timer) {
+        D_8008F8E0[fade->eventFunc](particle, fade->eventTime);
+        fade->eventTime = -1;
     }
-    func_1513170C((s32 *)arg0, arg1);
+    return func_1513170C(particle, prevPos);
 }
 
-void func_151A2C24(s32, s32, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32, s32);
+void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+                   s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
+                   s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
+                   s8 eventFunc, u8 arg13, s32 arg14, s32 useAngles);
 
-void func_151A2A14(s32 a0, s16 a1, s16 a2, f32 a3, f32 p4, f32 p5, s32 p6, f32 p7, f32 p8, f32 p9, f32 p10, s16 p11, s16 p12, s16 p13, s16 p14, s16 p15, s16 p16, s8 p17, u8 p18, s32 p19) {
-    func_151A2C24(a0, 0, a1, a2, a3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, 1);
+/* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
+void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
+                   f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
+                   s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18,
+                   s32 arg19) {
+    func_151A2C24(pos, NULL, yaw, pitch, speed, sizeBase, sizeSlope, count, spread, drag, gravityBase,
+                  gravityRange, delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc,
+                  arg18, arg19, 1);
 }
 
-void func_151A2AD4(s32 a0, s32 a1, f32 a2, f32 a3, s32 p4, f32 p5, f32 p6, f32 p7, f32 p8, s16 p9, s16 p10, s16 p11, s16 p12, s16 p13, s16 p14, s8 p15, u8 p16, s32 p17) {
-    func_151A2C24(a0, a1, 0, 0, 0.0f, a2, a3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, 0);
+/* Bursts `count` particles from pos moving along dir, scaled down over the burst. */
+void func_151A2AD4(struct17 *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
+                   f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
+                   s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17) {
+    func_151A2C24(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
+                  delayBase, delayRange, alphaBase, alphaRange, fadeStart, fadeOutStart, eventFunc, arg16, arg17,
+                  0);
 }
 
-void func_151A2B84(f32 *in, s32 a1, s32 a2, s32 a3, f32 t, f32 *out) {
-    f32 s = 1.0f - t;
-    out[0] = in[0] * s;
-    out[1] = in[1] * s;
-    out[2] = in[2] * s;
+/* Velocity of a burst particle at fraction t of the burst. */
+typedef void (*BurstVelocityFunc)(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out);
+
+/* BurstVelocityFunc: dir scaled by 1 - t. */
+void func_151A2B84(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out) {
+    f32 scale = 1.0f - t;
+
+    out[0] = dir[0] * scale;
+    out[1] = dir[1] * scale;
+    out[2] = dir[2] * scale;
 }
 
-void func_151A2BD0(f32 *in, s32 a1, s32 a2, f32 a3, f32 t, f32 *out) {
-    func_15143794((s16) a1, (s16) a2, (1.0f - t) * a3, out);
+/* BurstVelocityFunc: the yaw/pitch direction at speed * (1 - t). */
+void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out) {
+    func_15143794((s16)yaw, (s16)pitch, (1.0f - t) * speed, out);
 }
 
+/* Particle colours picked at random by func_151A2C24 (a local initializer's rodata). */
 typedef struct {
-    u8 c[4][3];
-} Col151A2C24;
-extern Col151A2C24 D_8008F8E8;
+    u8 rgb[4][3];
+} BurstColors;
+extern BurstColors D_8008F8E8;
 
-void func_151A2C24(s32 arg0, s32 arg1, s16 arg2, s16 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, s16 argC, s16 argD, s16 argE, s16 argF, s16 arg10, s16 arg11, s8 arg12, u8 arg13, s32 arg14, s32 arg15) {
-    s16 minLife;
+/* Spawns `count` func_151A26EC particles around pos; size and speed change linearly over the burst. */
+void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+                   s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
+                   s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
+                   s8 eventFunc, u8 arg13, s32 arg14, s32 useAngles) {
+    s16 minFade;
     s16 delay;
     f32 t;
     f32 step;
-    void (*fn)(s32, s32, s32, f32, f32, f32 *);
-    f32 pos[3];
+    BurstVelocityFunc velocityFunc;
+    f32 offset[3];
     f32 vel[3];
-    s32 c;
-    Col151A2C24 colors;
+    s32 color;
+    BurstColors colors;
 
-    if ((u8) arg15 == 0) {
-        fn = (void (*)(s32, s32, s32, f32, f32, f32 *)) func_151A2B84;
+    if ((u8)useAngles == 0) {
+        velocityFunc = func_151A2B84;
     } else {
-        fn = (void (*)(s32, s32, s32, f32, f32, f32 *)) func_151A2BD0;
+        velocityFunc = func_151A2BD0;
     }
-    if (arg10 < arg11) {
-        minLife = arg10;
+    if (fadeStart < fadeOutStart) {
+        minFade = fadeStart;
     } else {
-        minLife = arg11;
+        minFade = fadeOutStart;
     }
     t = 0.0f;
-    step = 1.0f / (f32) arg7;
-    while (arg7 != 0) {
-        f32 r;
+    step = 1.0f / (f32)count;
+    while (count != 0) {
+        f32 rand;
         s32 a;
         s32 b;
 
-        delay = (func_150ADA20() % (u32) (argD + 1)) + argC;
+        delay = func_150ADA20() % (u32)(delayRange + 1) + delayBase;
         a = func_150ADA20();
         b = func_150ADA20();
-        func_15143794((s16) (a & 0xFF), (s16) (b & 0xFF), func_150ADA68() * arg8, pos);
-        fn(arg1, arg2, arg3, arg4, t, vel);
+        func_15143794((s16)(a & 0xFF), (s16)(b & 0xFF), func_150ADA68() * spread, offset);
+        velocityFunc(dir, yaw, pitch, speed, t, vel);
         colors = D_8008F8E8;
-        c = func_150ADA20() & 3;
-        r = func_150ADA68();
+        color = func_150ADA20() & 3;
+        rand = func_150ADA68();
         a = func_150ADA20();
         if (func_150ADA68() < 0.0802000016f) {
-            b = 0x19;
+            b = 25;
         } else {
             b = -1;
         }
-        func_151A26EC((struct17 *) arg0, (struct17 *) pos, (struct17 *) vel, arg9, (r * argB) + argA, (arg6 * t) + arg5, delay + minLife, (a % (u32) (argF + 1)) + argE, arg10, arg11, b, arg12, colors.c[c][0], colors.c[c][1], colors.c[c][2], arg13, arg14);
+        func_151A26EC(pos, (struct17 *)offset, (struct17 *)vel, drag, rand * gravityRange + gravityBase,
+                      sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
+                      fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
+                      colors.rgb[color][2], arg13, arg14);
         t += step;
-        arg7--;
+        count--;
     }
 }
 
-void func_151A2F0C(void *arg0) {
-    struct Vec151A2F0C {
-        f32 a;
-        f32 b;
-        f32 c;
-    };
-    struct Obj151A2F0C {
-        u8 pad0[0x1];
-        u8 unk1;
-        u8 pad2[0xC - 0x2];
-        u8 unkC;
-        u8 padD[0x38 - 0xD];
-        f32 unk38;
-        f32 unk3C;
-        struct Vec151A2F0C unk40;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-        u8 pad58[0x68 - 0x58];
-        s32 unk68;
-    };
-    struct Arg151A2F0C {
-        s32 unk00;
-        s32 unk04;
-        struct Vec151A2F0C unk08;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-        s16 unk2C;
-        s16 unk2E;
-        s16 unk30;
-        s16 unk32;
-        s32 unk34;
-        s32 unk38;
-        s16 unk3C;
-        s16 unk3E;
-        s16 unk40;
-        u8 unk42;
-        u8 unk43;
-        u8 unk44;
-        u8 unk45;
-        u8 unk46;
-        u8 unk47;
-        u8 unk48;
-        u8 unk49;
-        u8 unk4A;
-        u8 unk4B;
-        u8 unk4C;
-        u8 unk4D;
-        u8 unk4E;
-        u8 unk4F;
-        u8 unk50;
-        u8 unk51;
-        u8 unk52;
-        u8 unk53;
-        u8 unk54;
-        u8 unk55;
-        u8 unk56;
-        u8 unk57;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        s32 unk60;
-        s16 unk64;
-        s16 unk66;
-        s16 unk68;
-        u8 unk6A;
-        u8 pad6B;
-        f32 unk6C;
-        s8 unk70;
-        s8 unk71;
-        s8 unk72;
-        s8 unk73;
-    };
-    struct Arg151A2F0C sp1C;
-    struct Obj151A2F0C *obj;
+/* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
+typedef struct {
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} Color8;
 
-    obj = arg0;
-    sp1C.unk00 = 8;
-    sp1C.unk04 = 6;
-    sp1C.unk08 = obj->unk40;
-    if (obj->unk68 & 0x1000) {
-        sp1C.unk08.a += obj->unk4C;
-        sp1C.unk08.b += obj->unk50;
-        sp1C.unk08.c += obj->unk54;
+typedef struct {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ struct17 position;
+    /* 0x14 */ f32 sizeBase;
+    /* 0x18 */ f32 sizeRange;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 speedBase;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ s16 yawBase;
+    /* 0x2E */ s16 yawRange;
+    /* 0x30 */ s16 pitchBase;
+    /* 0x32 */ s16 pitchRange;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s16 lifeBase;
+    /* 0x3E */ s16 lifeRange;
+    /* 0x40 */ u16 kind;
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 unk43;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ Color8 colorBase;
+    /* 0x49 */ Color8 colorRange;
+    /* 0x4D */ Color8 color2Base;
+    /* 0x51 */ Color8 color2Range;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ u8 unk56;
+    /* 0x57 */ u8 unk57;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+    /* 0x64 */ s16 unk64;
+    /* 0x66 */ s16 unk66;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ s8 unk70;
+    /* 0x71 */ s8 unk71;
+    /* 0x72 */ s8 unk72;
+    /* 0x73 */ s8 unk73;
+} BurstConfig;
+
+void func_15152B38(BurstConfig *, u8, s32);
+
+/* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
+void func_151A2F0C(DescParticle *particle) {
+    BurstConfig config;
+
+    config.countBase = 8;
+    config.countRange = 6;
+    config.position = particle->desc.pos;
+    if (particle->desc.flags & 0x1000) {
+        config.position.unk0 += particle->desc.offset.unk0;
+        config.position.unk4 += particle->desc.offset.unk4;
+        config.position.unk8 += particle->desc.offset.unk8;
     }
-    sp1C.unk14 = ((obj->unk38 + obj->unk3C) * 0.5f) * D_800A8D30;
-    sp1C.unk18 = ((obj->unk38 + obj->unk3C) * 0.5f) * D_800A8D34;
-    sp1C.unk1C = D_800A8D38;
-    sp1C.unk20 = 0.0f;
-    sp1C.unk24 = 8.0f;
-    sp1C.unk28 = 10.0f;
-    sp1C.unk2C = 0;
-    sp1C.unk2E = 0xFF;
-    sp1C.unk30 = -0x40;
-    sp1C.unk32 = 0x56;
-    sp1C.unk34 = 3;
-    sp1C.unk38 = 1;
-    sp1C.unk3C = 0x11;
-    sp1C.unk3E = 0x12;
-    sp1C.unk40 = 1;
-    sp1C.unk42 = 4;
-    sp1C.unk43 = 2;
-    sp1C.unk44 = 3;
-    sp1C.unk45 = 0xFF;
-    sp1C.unk46 = 0xC8;
-    sp1C.unk47 = 0xC8;
-    sp1C.unk48 = 0xFF;
-    sp1C.unk49 = 0;
-    sp1C.unk4A = 0x37;
-    sp1C.unk4B = 0x37;
-    sp1C.unk4C = 0;
-    sp1C.unk4D = 0xFF;
-    sp1C.unk4E = 0xFF;
-    sp1C.unk4F = 0xFF;
-    sp1C.unk50 = 0xFF;
-    sp1C.unk51 = 0;
-    sp1C.unk52 = 0;
-    sp1C.unk53 = 0;
-    sp1C.unk54 = 0;
-    sp1C.unk55 = 0xFF;
-    sp1C.unk56 = 0;
-    sp1C.unk57 = 1;
-    sp1C.unk58 = 0x24;
-    sp1C.unk5C = 0x200005;
-    sp1C.unk60 = 0x60600;
-    sp1C.unk64 = 7;
-    sp1C.unk66 = 0x24;
-    sp1C.unk68 = 1;
-    sp1C.unk6A = 0;
-    sp1C.unk6C = 1.0f;
-    sp1C.unk70 = -1;
-    sp1C.unk71 = 0;
-    sp1C.unk72 = -1;
-    sp1C.unk73 = -1;
+    config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.01999999955f;
+    config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.03529999778f;
+    config.unk1C = -0.2680000067f;
+    config.unk20 = 0.0f;
+    config.speedBase = 8.0f;
+    config.speedRange = 10.0f;
+    config.yawBase = 0;
+    config.yawRange = 255;
+    config.pitchBase = -64;
+    config.pitchRange = 86;
+    config.unk34 = 3;
+    config.unk38 = 1;
+    config.lifeBase = 17;
+    config.lifeRange = 18;
+    config.kind = 1;
+    config.unk42 = 4;
+    config.unk43 = 2;
+    config.unk44 = 3;
+    config.colorBase.red = 255;
+    config.colorBase.green = 200;
+    config.colorBase.blue = 200;
+    config.colorBase.alpha = 255;
+    config.colorRange.red = 0;
+    config.colorRange.green = 55;
+    config.colorRange.blue = 55;
+    config.colorRange.alpha = 0;
+    config.color2Base.red = 255;
+    config.color2Base.green = 255;
+    config.color2Base.blue = 255;
+    config.color2Base.alpha = 255;
+    config.color2Range.red = 0;
+    config.color2Range.green = 0;
+    config.color2Range.blue = 0;
+    config.color2Range.alpha = 0;
+    config.unk55 = 255;
+    config.unk56 = 0;
+    config.unk57 = 1;
+    config.unk58 = 0x24;
+    config.unk5C = 0x200005;
+    config.unk60 = 0x60600;
+    config.unk64 = 7;
+    config.unk66 = 0x24;
+    config.unk68 = 1;
+    config.unk6A = 0;
+    config.unk6C = 1.0f;
+    config.unk70 = -1;
+    config.unk71 = 0;
+    config.unk72 = -1;
+    config.unk73 = -1;
 
-    func_15152B38(&sp1C, obj->unkC, obj->unk1);
+    func_15152B38(&config, particle->unkC, particle->unk1);
 }
