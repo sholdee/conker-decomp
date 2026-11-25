@@ -99,108 +99,117 @@ void func_150D0E90(s32 arg0) {
 }
 
 typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ void *unk4;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_10E4;
+    f32 x, y, z;
+} Vec3f;
 
-extern f32 D_800A0890;
-void func_15134DAC(struct_10E4 *, s32);
+/* Spawn parameters of a blood strip (see func_15134DAC in game_161520.c). */
+typedef struct {
+    /* 0x00 */ u8 ownerId;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ struct127 *owner;
+    /* 0x08 */ u8 bone;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ Vec3f offsetA;
+    /* 0x18 */ Vec3f offsetB;
+    /* 0x24 */ u8 flags;
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ s16 duration;
+    /* 0x28 */ s16 pause;
+    /* 0x2A */ s16 lifetime;
+    /* 0x2C */ u16 sound;
+    /* 0x2E */ s8 sampleCallback;
+    /* 0x2F */ s8 emitCallback;
+    /* 0x30 */ s8 rateCallback;
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ f32 rate;
+    /* 0x38 */ u8 mode;
+    /* 0x39 */ s8 updateCallback;
+    /* 0x3A */ u8 pad3A[2];
+} BloodStripDesc;
 
-void func_150D10E4(void *arg0, u8 arg1) {
-    struct_10E4 sp1C;
+/* A live blood strip (see game_161520.c); only the fields used here are named. */
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x74 - 0xD];
+    /* 0x74 */ f32 power; /* set by the sample callback */
+    /* 0x78 */ f32 time;
+} BloodStrip;
 
-    sp1C.unk0 = *((u8 *)arg0 + 0x3B);
-    sp1C.unk4 = arg0;
-    sp1C.unk8 = 0;
-    sp1C.unkC = 0.0f;
-    sp1C.unk10 = 0.0f;
-    sp1C.unk14 = 0.0f;
-    sp1C.unk18 = 0.0f;
-    if (arg1 != 0) {
-        sp1C.unk1C = -30.0f;
+BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
+
+/* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
+ * mirrored selects which way it is offset. */
+void func_150D10E4(struct127 *obj, u8 mirrored) {
+    BloodStripDesc desc;
+
+    desc.ownerId = obj->unique_id;
+    desc.owner = obj;
+    desc.bone = 0;
+    desc.offsetA.x = 0.0f;
+    desc.offsetA.y = 0.0f;
+    desc.offsetA.z = 0.0f;
+    desc.offsetB.x = 0.0f;
+    if (mirrored) {
+        desc.offsetB.y = -30.0f;
     } else {
-        sp1C.unk1C = 30.0f;
+        desc.offsetB.y = 30.0f;
     }
-    sp1C.unk20 = 0.0f;
-    sp1C.unk24 = 2;
-    sp1C.unk26 = 0x32;
-    sp1C.unk28 = 0x16;
-    sp1C.unk2A = 0x7D0;
-    sp1C.unk2C = 0;
-    sp1C.unk2E = 6;
-    sp1C.unk2F = 7;
-    sp1C.unk30 = -1;
-    sp1C.unk34 = D_800A0890;
-    sp1C.unk38 = 0;
-    sp1C.unk39 = -1;
-    func_15134DAC(&sp1C, 0);
+    desc.offsetB.z = 0.0f;
+    desc.flags = 2;
+    desc.duration = 50;
+    desc.pause = 22;
+    desc.lifetime = 2000;
+    desc.sound = 0;
+    desc.sampleCallback = 6;
+    desc.emitCallback = 7;
+    desc.rateCallback = -1;
+    desc.rate = 0.3508499861f;
+    desc.mode = 0;
+    desc.updateCallback = -1;
+    func_15134DAC(&desc, 0);
 }
 
-extern f32 D_800A0894;
-
-s32 func_150D11B4(void *arg0) {
-    *(f32 *)((char *)arg0 + 0x74) = (func_150ADA68() * 150.0f + 350.0f) * D_800A0894;
+/* BloodStrip sample callback 6: random power in [0.35, 0.5). */
+s32 func_150D11B4(BloodStrip *strip) {
+    strip->power = (func_150ADA68() * 150.0f + 350.0f) * 0.001f;
     return 1;
 }
 
-extern f32 D_800A0898;
-extern f32 D_800A089C;
-extern f32 D_800A08A0;
-extern f32 D_800A08A4;
+void func_151DB5D0(s32, Vec3f *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151DB5D0(s32, f32 *, f32 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
+/* BloodStrip emit callback 7: moves both strip points `time` along their velocities and emits one
+ * func_151DB5D0 particle at A, heading from A to B scaled by the strip's power. */
+void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {
+    Vec3f start;
+    f32 endX;
+    f32 endY;
+    f32 endZ;
+    Vec3f velocity;
+    s32 pad; // matching: unused stack slot
+    s32 randomInt;
+    f32 random1;
+    f32 random0;
 
-void func_150D1204(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, void *arg5) {
-    f32 sp6C[3];
-    f32 t0;
-    f32 t1;
-    f32 t2;
-    f32 sp54[3];
-    s32 pad50;
-    s32 r1;
-    f32 f2;
-    f32 f1;
+    start.x = pointA->x + velocityA->x * time;
+    start.y = pointA->y + velocityA->y * time;
+    start.z = pointA->z + velocityA->z * time;
 
-    sp6C[0] = arg2[0] * arg4 + arg0[0];
-    sp6C[1] = arg2[1] * arg4 + arg0[1];
-    sp6C[2] = arg2[2] * arg4 + arg0[2];
+    endX = pointB->x + velocityB->x * time;
+    endY = pointB->y + velocityB->y * time;
+    endZ = pointB->z + velocityB->z * time;
 
-    t0 = arg3[0] * arg4 + arg1[0];
-    t1 = arg3[1] * arg4 + arg1[1];
-    t2 = arg3[2] * arg4 + arg1[2];
+    velocity.x = (endX - start.x) * strip->power;
+    velocity.y = (endY - start.y) * strip->power;
+    velocity.z = (endZ - start.z) * strip->power;
 
-    sp54[0] = *(f32 *)((u8 *)arg5 + 0x74) * (t0 - sp6C[0]);
-    sp54[1] = *(f32 *)((u8 *)arg5 + 0x74) * (t1 - sp6C[1]);
-    sp54[2] = *(f32 *)((u8 *)arg5 + 0x74) * (t2 - sp6C[2]);
+    random0 = func_150ADA68();
+    random1 = func_150ADA68();
+    randomInt = func_150ADA20();
 
-    f1 = func_150ADA68();
-    f2 = func_150ADA68();
-    r1 = func_150ADA20();
-
-    func_151DB5D0(0, sp6C, sp54, f1 * 61.0f + 60.0f, D_800A0898, D_800A089C,
-                  f2 * D_800A08A0 + D_800A08A4, (r1 & 0xF) + 0x23,
-                  (s32)((u32)func_150ADA20() % 0x9CU) + 0x64, 0x1E, 8, 0,
-                  *((u8 *)arg5 + 0xC), *((u8 *)arg5 + 1));
+    func_151DB5D0(0, &start, &velocity, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
+                  random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
+                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->unkC, strip->unk1);
 }
