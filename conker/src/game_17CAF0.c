@@ -40,55 +40,6 @@ struct Local1515572CData {
 extern struct Local1515572CData D_800A6038;
 extern void func_15169260(struct Local1515572CData *, s32, s32, u8);
 
-struct Local15152874Header {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Local15152874Arg {
-    s32 unk0;
-    s32 unk4;
-    struct Local15152874Header unk8;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u8 pad36[2];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-};
-
-struct Local15152874Spawn {
-    struct Local15152874Header unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    s32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    s32 pad34;
-};
-
 struct AngleRange {
     s16 yawBase;
     s16 yawRange;
@@ -203,8 +154,6 @@ struct Local15153CCCArg {
 
 extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
-extern void func_150CCEB0(struct Local15152874Spawn *, u8, u8);
-extern void (*D_8008AC60[])(u8 *);
 extern s32 (*D_8008ACC8[])(void *);
 extern void func_15156190(void *, u8, s32, u8, s32);
 extern f32 D_800A5FFC;
@@ -212,127 +161,8 @@ extern f32 D_800A6000;
 extern void func_1514F808(struct ConeBasis *, f32, struct Vec3F *);
 extern void func_151DA6F8(struct Local15153CCCArg *, struct Vec3F *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
-struct Local15152520Bytes {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-};
-
-struct Local15152520Arg {
-    s32 unk0;
-    s32 unk4;
-    struct Local15152874Header unk8;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    struct Local15152520Bytes unk68;
-    struct Local15152520Bytes unk6C;
-    u8 unk70;
-    u8 unk71;
-    s16 unk72;
-    s16 unk74;
-};
-
-struct Local15152520Motion {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 pad31[3];
-};
-
-struct Local15152520Params {
-    u8 unk00;
-    u8 unk01;
-    u8 unk02;
-    s8 unk03;
-    s8 unk04;
-    u8 pad05;
-    s16 unk06;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    struct Local15152520Bytes unk30;
-    struct Local15152520Bytes unk34;
-    u8 unk38;
-    u8 pad39[3];
-    s32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    u8 pad42[2];
-    struct Local15152874Header unk44;
-    u8 pad50[4];
-    s16 unk54;
-    s16 unk56;
-};
-
-struct Local15152520ParamBlock {
-    struct Local15152520Params params;
-    s32 pad58;
-};
-
-extern void func_15157898(struct Local15152520Params *, struct Local15152520Motion *, s32, f32, s32, s32, s32, u8, s32);
 extern void func_1515C2F0(void *, s32, void *, s32, u8, s32);
 
-struct Local15152ABCOut {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-};
-
-struct Local15152ABCColor {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-};
-
-struct Local15152ABCStack {
-    struct Local15152ABCColor *color;
-    s32 pad;
-};
-
-extern struct Local15152ABCColor D_800A5FE0[];
 extern s32 func_15147DA0(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32, u8, s32);
 
 struct Local15152B38Header {
@@ -1762,113 +1592,226 @@ void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScal
         count--;
     }
 }
-void func_15152520(struct Local15152520Arg *arg0, u8 arg1, s32 arg2) {
-    struct Local15152520ParamBlock paramBlock;
+typedef struct {
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} Color8;
+
+struct Local15152520Arg {
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
+    struct AngleRange angles;
+    f32 speedBase;
+    f32 speedRange;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    s16 unk30;
+    s16 unk32;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    struct Vec3F unk50; /* base of motion.unk1C */
+    struct Vec3F unk5C; /* range of motion.unk1C */
+    Color8 unk68;
+    Color8 unk6C;
+    u8 unk70;
+    u8 unk71;
+    s16 unk72;
+    s16 unk74;
+};
+
+/* Second argument of func_15157898. */
+struct Local15152520Motion {
+    struct Vec3F rotation; /* degrees */
+    f32 unk0C;
+    struct Vec3F velocity;
+    struct Vec3F unk1C;
+    f32 unk28;
+    f32 unk2C;
+    u8 unk30;
+    u8 pad31[3];
+};
+
+/* First argument of func_15157898. */
+struct Local15152520Params {
+    u8 flags;
+    u8 unk01;
+    u8 unk02;
+    s8 unk03;
+    s8 unk04;
+    u8 pad05;
+    s16 unk06;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    u8 unk2C;
+    u8 unk2D;
+    u8 pad2E[2];
+    Color8 unk30;
+    Color8 unk34;
+    u8 unk38;
+    u8 pad39[3];
+    s32 unk3C;
+    u8 unk40;
+    u8 unk41;
+    u8 pad42[2];
+    struct Vec3F position;
+    u8 pad50[4];
+    s16 unk54;
+    s16 unk56;
+};
+
+extern void func_15157898(struct Local15152520Params *, struct Local15152520Motion *, s32, f32, s32, s32, s32, u8, s32);
+
+void func_15152520(struct Local15152520Arg *config, u8 arg1, s32 arg2) {
+    s32 pad; // matching: unused stack slot
+    struct Local15152520Params params;
     struct Local15152520Motion motion;
     s32 count;
-    s32 rand0;
-    s32 rand1;
 
-    paramBlock.params.unk38 = 0;
-    paramBlock.params.unk00 = arg0->unk70 | 2;
-    paramBlock.params.unk01 = 0;
-    paramBlock.params.unk02 = 1;
-    paramBlock.params.unk03 = -1;
-    paramBlock.params.unk04 = -1;
-    paramBlock.params.unk08 = arg0->unk34;
-    paramBlock.params.unk0C = arg0->unk38;
-    paramBlock.params.unk24 = 0x80;
-    paramBlock.params.unk28 = 0x20;
-    paramBlock.params.unk10 = 0;
-    paramBlock.params.unk14 = 0x220405;
-    paramBlock.params.unk18 = 0x40200;
-    paramBlock.params.unk2C = 0;
-    paramBlock.params.unk2D = 8;
-    paramBlock.params.unk1C = 1;
-    paramBlock.params.unk20 = 0x38;
-    paramBlock.params.unk3C = 0;
-    paramBlock.params.unk40 = 0;
-    paramBlock.params.unk41 = 2;
-    paramBlock.params.unk44 = arg0->unk8;
-    motion.unk2C = arg0->unk24;
-    paramBlock.params.unk30 = arg0->unk68;
-    paramBlock.params.unk34 = arg0->unk6C;
-    paramBlock.params.unk54 = arg0->unk72;
-    paramBlock.params.unk56 = arg0->unk74;
-    motion.unk30 = arg0->unk71;
-    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-
-    if (count != 0) {
-        do {
-            paramBlock.params.unk06 = (func_150ADA20() % (u32)(arg0->unk32 + 1)) + arg0->unk30;
-            motion.unk00 = func_150ADA68() * 360.0f;
-            motion.unk04 = func_150ADA68() * 360.0f;
-            motion.unk08 = func_150ADA68() * 360.0f;
-            motion.unk0C = (func_150ADA68() * arg0->unk4C) + arg0->unk48;
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            func_15143794((s16)((rand0 % (u32)(arg0->unk16 + 1)) + arg0->unk14),
-                          (s16)((rand1 % (u32)(arg0->unk1A + 1)) + arg0->unk18),
-                          (func_150ADA68() * arg0->unk20) + arg0->unk1C,
-                          &motion.unk10);
-            motion.unk1C = (func_150ADA68() * arg0->unk5C) + arg0->unk50;
-            motion.unk20 = (func_150ADA68() * arg0->unk60) + arg0->unk54;
-            motion.unk24 = (func_150ADA68() * arg0->unk64) + arg0->unk58;
-            motion.unk28 = (func_150ADA68() * arg0->unk2C) + arg0->unk28;
-            func_15157898(&paramBlock.params, &motion, arg0->unk3C, (func_150ADA68() * arg0->unk44) + arg0->unk40, 0, 0, 0, arg1, arg2);
-            count--;
-        } while (count != 0);
+    params.unk38 = 0;
+    params.flags = config->unk70 | 2;
+    params.unk01 = 0;
+    params.unk02 = 1;
+    params.unk03 = -1;
+    params.unk04 = -1;
+    params.unk08 = config->unk34;
+    params.unk0C = config->unk38;
+    params.unk24 = 0x80;
+    params.unk28 = 0x20;
+    params.unk10 = 0;
+    params.unk14 = 0x220405;
+    params.unk18 = 0x40200;
+    params.unk2C = 0;
+    params.unk2D = 8;
+    params.unk1C = 1;
+    params.unk20 = 0x38;
+    params.unk3C = 0;
+    params.unk40 = 0;
+    params.unk41 = 2;
+    params.position = config->position;
+    motion.unk2C = config->unk24;
+    params.unk30 = config->unk68;
+    params.unk34 = config->unk6C;
+    params.unk54 = config->unk72;
+    params.unk56 = config->unk74;
+    motion.unk30 = config->unk71;
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        params.unk06 = (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30;
+        motion.rotation.x = func_150ADA68() * 360.0f;
+        motion.rotation.y = func_150ADA68() * 360.0f;
+        motion.rotation.z = func_150ADA68() * 360.0f;
+        motion.unk0C = (func_150ADA68() * config->unk4C) + config->unk48;
+        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
+                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+                      (func_150ADA68() * config->speedRange) + config->speedBase,
+                      &motion.velocity.x);
+        motion.unk1C.x = (func_150ADA68() * config->unk5C.x) + config->unk50.x;
+        motion.unk1C.y = (func_150ADA68() * config->unk5C.y) + config->unk50.y;
+        motion.unk1C.z = (func_150ADA68() * config->unk5C.z) + config->unk50.z;
+        motion.unk28 = (func_150ADA68() * config->unk2C) + config->unk28;
+        func_15157898(&params, &motion, config->unk3C, (func_150ADA68() * config->unk44) + config->unk40, 0, 0, 0, arg1, arg2);
+        count--;
     }
 }
 
-void func_15152874(struct Local15152874Arg *arg0, u8 arg1, s32 arg2) {
-    struct Local15152874Spawn sp58;
+struct Local15152874Arg {
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
+    struct AngleRange angles;
+    f32 speedBase;
+    f32 speedRange;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    s8 colorFunc; /* index into D_8008AC60, or -1 for opaque white */
+    u8 pad31;
+    s16 unk32;
+    s16 unk34;
+    u8 pad36[2];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+};
+
+/* First argument of func_150CCEB0. */
+struct Local15152874Spawn {
+    struct Vec3F position;
+    struct Vec3F velocity;
+    f32 unk18;
+    f32 unk1C;
+    Color8 color;
+    s32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    s32 pad34;
+};
+
+extern void func_150CCEB0(struct Local15152874Spawn *, u8, u8);
+extern void (*D_8008AC60[])(Color8 *);
+
+void func_15152874(struct Local15152874Arg *config, u8 arg1, s32 arg2) {
+    struct Local15152874Spawn spawn;
     s32 count;
-    s32 rand0;
-    s32 rand1;
 
-    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-    sp58.unk0 = arg0->unk8;
-    sp58.unk18 = arg0->unk24;
-    sp58.unk30 = arg0->unk48;
-
-    if (count != 0) {
-        do {
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            func_15143794((s16)((rand0 % (u32)(arg0->unk16 + 1)) + arg0->unk14),
-                          (s16)((rand1 % (u32)(arg0->unk1A + 1)) + arg0->unk18),
-                          (func_150ADA68() * arg0->unk20) + arg0->unk1C,
-                          &sp58.unkC);
-
-            sp58.unk1C = (func_150ADA68() * arg0->unk2C) + arg0->unk28;
-            sp58.unk24 = (func_150ADA20() % (u32)(arg0->unk34 + 1)) + arg0->unk32;
-            sp58.unk28 = (func_150ADA68() * arg0->unk40) + arg0->unk38;
-            sp58.unk2C = (func_150ADA68() * arg0->unk44) + arg0->unk3C;
-
-            if (arg0->unk30 != -1) {
-                D_8008AC60[arg0->unk30]((u8 *)&sp58 + 0x20);
-            } else {
-                sp58.unk20 = 0xFF;
-                sp58.unk21 = 0xFF;
-                sp58.unk22 = 0xFF;
-                sp58.unk23 = 0xFF;
-            }
-
-            func_150CCEB0(&sp58, arg1, arg2);
-            count--;
-        } while (count != 0);
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    spawn.position = config->position;
+    spawn.unk18 = config->unk24;
+    spawn.unk30 = config->unk48;
+    while (count != 0) {
+        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
+                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+                      (func_150ADA68() * config->speedRange) + config->speedBase,
+                      &spawn.velocity.x);
+        spawn.unk1C = (func_150ADA68() * config->unk2C) + config->unk28;
+        spawn.unk24 = (func_150ADA20() % (u32)(config->unk34 + 1)) + config->unk32;
+        spawn.unk28 = (func_150ADA68() * config->unk40) + config->unk38;
+        spawn.unk2C = (func_150ADA68() * config->unk44) + config->unk3C;
+        if (config->colorFunc != -1) {
+            D_8008AC60[config->colorFunc](&spawn.color);
+        } else {
+            spawn.color.red = 0xFF;
+            spawn.color.green = 0xFF;
+            spawn.color.blue = 0xFF;
+            spawn.color.alpha = 0xFF;
+        }
+        func_150CCEB0(&spawn, arg1, arg2);
+        count--;
     }
 }
 
-void func_15152ABC(struct Local15152ABCOut *arg0) {
-    struct Local15152ABCStack stack;
+/* Five RGB colors. */
+extern u8 D_800A5FE0[][3];
 
-    stack.color = &D_800A5FE0[(u8)((u32)func_150ADA20() % 5U)];
-    arg0->unk3 = (func_150ADA20() % 101U) + 0x9B;
-    arg0->unk0 = stack.color->unk0;
-    arg0->unk1 = stack.color->unk1;
-    arg0->unk2 = stack.color->unk2;
+/* A D_8008AC60 color function: a random color of D_800A5FE0 with a random alpha in [155, 255]. */
+void func_15152ABC(Color8 *out) {
+    u8 *pad; // matching: unused stack slot above rgb
+    u8 *rgb;
+
+    rgb = D_800A5FE0[(u8)(func_150ADA20() % 5U)];
+    out->alpha = (func_150ADA20() % 101U) + 155;
+    out->red = rgb[0];
+    out->green = rgb[1];
+    out->blue = rgb[2];
 }
 
 void func_15152B38(struct Local15152B38Arg *arg0, u8 arg1, s32 arg2) {
