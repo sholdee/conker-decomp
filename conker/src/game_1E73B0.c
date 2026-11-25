@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_151BB0E0();
+s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
     s32 unk34;
     u8 unk38;
     u8 unk39;
-} Spawn151B9F00;
+} Desc1513B5E0;
 
 extern s8 D_800E0BCE[];
 extern s8 D_8008FD90;
@@ -68,7 +68,7 @@ void *func_1513B5E0(void *, s32, s32, u8, s32);
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(struct127 *owner, u8 arg1, s32 arg2) {
     void *effect;
-    Spawn151B9F00 desc;
+    Desc1513B5E0 desc;
     EffectOwnerRef ref;
 
     if (owner == NULL) {
@@ -957,9 +957,9 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     header.unk2 = (func_150ADA20() & 0xF) + 5;
     header.unk4 = 0;
 
-    header2.unk0 = (s32) pos->x;
-    header2.unk4 = (s32) pos->y;
-    header2.unk8 = (s32) pos->z;
+    header2.unk0 = pos->x;
+    header2.unk4 = pos->y;
+    header2.unk8 = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
@@ -984,6 +984,7 @@ extern u8 D_800AA760;
 extern u8 D_800AA76C;
 void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
+/* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(struct127 *obj) {
     if (obj != NULL) {
         func_15160CDC(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
