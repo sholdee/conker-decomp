@@ -277,7 +277,141 @@ s32 func_151A361C(TimedObject151A361C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D0840/func_151A37C0.s")
+void func_151A4E9C(void *arg0);
+
+s32 func_151A37C0(TimedObject151A361C *arg0) {
+    TimedState151A361C *state = arg0->state98;
+    TimedEntry151A361C *entries = arg0->entries94;
+    u8 *owner;
+    TimedVec151A361C delta;
+    s32 found;
+    u8 buf[0x30];
+
+    owner = state->owner;
+    if (*(s32 *)owner == 0) {
+        return 0;
+    }
+    if (state->identity != owner[0x3B]) {
+        return 0;
+    }
+    found = 0;
+    if (!(arg0->flags1E & 4)) {
+        if (func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) != 0) {
+            found = 1;
+            state->previous34 = arg0->position10;
+            arg0->flags1E |= 4;
+        } else {
+            return 1;
+        }
+    }
+    if (!found && func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) == 0) {
+        func_151A4E9C(arg0);
+        memcpy(buf, state, 0x30);
+        {
+            struct260 *ret = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, arg0->fieldC, 0);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x28, buf, 0x30);
+            }
+        }
+        return 1;
+    }
+    delta.x = arg0->position10.x - state->previous34.x;
+    delta.y = arg0->position10.y - state->previous34.y;
+    delta.z = arg0->position10.z - state->previous34.z;
+    if (fabsf(delta.x) > 0.0001f || fabsf(delta.y) > 0.0001f || fabsf(delta.z) > 0.0001f) {
+        state->field40 += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->field14;
+    }
+    if (state->field40 > 1.0f) {
+        f32 inv;
+        f32 val48;
+        f32 step48;
+        f32 path;
+        TimedVec151A361C cur;
+        f32 sx;
+        f32 sy;
+        f32 diff;
+        f32 sz;
+        f32 pathStep;
+
+        inv = 1.0f / state->field40;
+        val48 = state->field48 + D_800BE9A4;
+        cur = state->previous34;
+        step48 = val48 * inv;
+        path = state->field20 + state->field24 * val48;
+        sx = delta.x * inv;
+        sy = delta.y * inv;
+        sz = delta.z * inv;
+        diff = state->field20 - path;
+        pathStep = diff * inv;
+        do {
+            TimedEntry151A361C *entry = &entries[arg0->field2E];
+            entry->value0 = cur;
+            entry->fieldC = path;
+            entry->field10 = state->field18;
+            entry->field12 = state->field1A;
+            entry->field15 = state->field44;
+            found = func_150ADA20(); state->field44 += state->field28 + (u32)found % (u32)(state->field29 + 1);
+            entry->field14 = 0xFF;
+            arg0->field2E++;
+            if (arg0->field2E == arg0->field25) {
+                arg0->field2E = 0;
+            }
+            arg0->field2C++;
+            if (arg0->field2E == arg0->field2D) {
+                arg0->field2D++;
+                if (arg0->field2D == arg0->field25) {
+                    arg0->field2D = 0;
+                }
+                arg0->field2C--;
+            }
+            path += pathStep;
+            cur.x += sx;
+            cur.y += sy;
+            cur.z += sz;
+            val48 -= step48;
+            state->field40 -= 1.0f;
+        } while (state->field40 > 1.0f);
+        state->previous34 = cur;
+        state->field48 = val48;
+    }
+    {
+        typedef s32 T0;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x40); state = state;
+    }
+    {
+        typedef s32 T1;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x44); state = state;
+    }
+    {
+        typedef s32 T2;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x48); state = state;
+    }
+    {
+        typedef s32 T3;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x4C); state = state;
+    }
+    {
+        typedef s32 T4;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x50); state = state;
+    }
+    {
+        typedef s32 T5;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x54); state = state;
+    }
+    {
+        typedef s32 T6;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x58); state = state;
+    }
+    {
+        typedef s32 T7;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x5C); state = state;
+    }
+    {
+        typedef s32 T8;
+        state = *(TimedState151A361C **)((u8 *)arg0 + 0x60); state = state;
+    }
+    return 1;
+}
 
 typedef struct {
     f32 x, y, z;

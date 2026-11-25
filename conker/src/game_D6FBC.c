@@ -3,4 +3,4 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_D8248/func_150AAD98.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/game_D6FBC/func_150A9B0C.s")

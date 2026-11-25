@@ -117,3 +117,5 @@ func_151EF9C0 = 0x151EF9C0; /* osSetTimer, game copy */
 /* local labels referenced across the hasm/C split boundaries */
 .L10007760 = 0x10007760;
 .L150A43D8 = 0x150A43D8;
+.L150AE0AC = 0x150AE0AC;  /* func_150AE280 (inline asm in game_DB730.c) branches into func_150ADAF0 */
+.L150A64C0 = 0x150A64C0;  /* func_150A6568 branches into func_150A6360 */
