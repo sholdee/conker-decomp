@@ -14,7 +14,7 @@ typedef struct {
 /* Rope effect: a 10-point chain hung between two endpoints and drawn as a textured strip. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x10];
-    /* 0x010 */ u8 flags;           // 1: timed, 2: points need reset, 4: start lost, 8: end lost
+    /* 0x010 */ u8 flags;           // ROPE_FLAG_*
     /* 0x011 */ u8 pad11;
     /* 0x012 */ s16 timer;
     /* 0x014 */ Vec3f_1E0560 start; // written by startCallback
@@ -38,6 +38,11 @@ typedef struct {
     /* 0x150 */                     // type-specific data follows
 } HoltenRopeEffect;
 
+#define ROPE_FLAG_TIMED    1 // removed when `timer` runs out
+#define ROPE_FLAG_RESET    2 // points are re-laid at rest by the next update callback
+#define ROPE_FLAG_NO_START 4 // start position not known
+#define ROPE_FLAG_NO_END   8 // end position not known
+
 /* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created. */
 typedef struct {
     u8 data[0x38];
@@ -55,7 +60,6 @@ typedef struct {
 } HoltenRopeTarget;
 
 /* Endpoint data at 0x150 for ropes hung from an actor. */
-
 typedef struct {
     /* 0x00 */ HoltenRopeTarget *target;
     /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
@@ -75,7 +79,6 @@ extern void func_151D5E30(void *);
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
     HoltenRopeEffect *effect;
-    HoltenRopeEffect *result;
     f32 length;
     f32 halfAxesSq;
 
@@ -84,15 +87,14 @@ HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSiz
         return NULL;
     }
 
-    result = effect;
     memcpy(&effect->flags, desc, sizeof(HoltenRopeDesc));
     length = effect->length;
-    effect->flags |= 0xE;
-    halfAxesSq = (length * length) / 9.869605064f;
+    effect->flags |= ROPE_FLAG_RESET | ROPE_FLAG_NO_START | ROPE_FLAG_NO_END;
+    halfAxesSq = (length * length) / 9.869605064f; // pi^2
     effect->axesSq = halfAxesSq + halfAxesSq;
     effect->texStep = length * texScale * 4096.0f;
     bzero(effect->vtxBuffer, sizeof(effect->vtxBuffer));
-    return result;
+    return effect;
 }
 
 /* Per-frame update: counts down the lifetime, refreshes both endpoints and moves the points. */
@@ -101,7 +103,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
     u8 finished;
 
     finished = FALSE;
-    if (effect->flags & 1) {
+    if (effect->flags & ROPE_FLAG_TIMED) {
         effect->timer -= D_800BE9E4;
         if (effect->timer < 0) {
             finished = TRUE;
@@ -120,8 +122,8 @@ void func_151B3184(HoltenRopeEffect *effect) {
                 finished = TRUE;
             }
         }
-        if ((effect->flags & 4) || (effect->flags & 8)) {
-            effect->flags |= 2;
+        if ((effect->flags & ROPE_FLAG_NO_START) || (effect->flags & ROPE_FLAG_NO_END)) {
+            effect->flags |= ROPE_FLAG_RESET;
         } else {
             callback = effect->updateCallback;
             if (callback != -1) {
@@ -180,13 +182,13 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     f32 lenSq;
     f32 pad[2]; // matching: stack slots
 
-    if (effect->flags & 4) {
+    if (effect->flags & ROPE_FLAG_NO_START) {
         return gfx;
     }
-    if (effect->flags & 8) {
+    if (effect->flags & ROPE_FLAG_NO_END) {
         return gfx;
     }
-    if (effect->flags & 2) {
+    if (effect->flags & ROPE_FLAG_RESET) {
         return gfx;
     }
     func_151D5D60(effect->vtxBuffer, view, 25 * sizeof(Vtx), (void **)&vtx, NULL);
@@ -356,7 +358,7 @@ s32 func_151B3A7C(HoltenRopeEffect *effect) {
         pos.y += dy * (1.0f / 9.0f);
         pos.z += dz * (1.0f / 9.0f);
     }
-    effect->flags &= ~2;
+    effect->flags &= ~ROPE_FLAG_RESET;
     return TRUE;
 }
 
@@ -428,16 +430,16 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f_1E0560 *pos, u8 isStart) {
             pos->x = anchor->target->pos.x;
             pos->y = anchor->target->pos.y;
             pos->z = anchor->target->pos.z;
-            rope->effect.flags &= ~4;
+            rope->effect.flags &= ~ROPE_FLAG_NO_START;
         } else {
             ret = FALSE;
-            rope->effect.flags |= 0xC;
+            rope->effect.flags |= ROPE_FLAG_NO_START | ROPE_FLAG_NO_END;
         }
     } else {
         pos->x = 0.0f;
         pos->y = 3000.0f;
         pos->z = 0.0f;
-        rope->effect.flags &= ~8;
+        rope->effect.flags &= ~ROPE_FLAG_NO_END;
     }
     return ret;
 }
@@ -622,7 +624,7 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
                 target.x = (acrossOffset * dirX) + mid.x;
                 target.y = ((ellipseX * chordY) - (ellipseY * chordX)) + mid.y;
                 target.z = (acrossOffset * dirZ) + mid.z;
-                if (effect->flags & 2) {
+                if (effect->flags & ROPE_FLAG_RESET) {
                     point->pos = target;
                     point->vel.x = 0.0f;
                     point->vel.y = 0.0f;
@@ -650,7 +652,7 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
             }
         }
     }
-    effect->flags &= ~2;
+    effect->flags &= ~ROPE_FLAG_RESET;
     return ret;
 }
 
@@ -679,13 +681,13 @@ s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3
     HoltenRopeTarget *endTarget = anchors->end.target;
 
     if (startTarget->boneMtx == NULL || endTarget->boneMtx == NULL) {
-        effect->flags |= 0xC;
+        effect->flags |= ROPE_FLAG_NO_START | ROPE_FLAG_NO_END;
         return TRUE;
     }
     if (startTarget->unk0 == 0 || startTarget->unk3B != anchors->start.targetId || endTarget->unk0 == 0 || endTarget->unk3B != anchors->end.targetId) {
         return FALSE;
     }
-    effect->flags &= ~(isStart ? 4 : 8);
+    effect->flags &= ~(isStart ? ROPE_FLAG_NO_START : ROPE_FLAG_NO_END);
     func_15143134(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
                   isStart ? &startTarget->boneMtx[anchors->start.bone] : &endTarget->boneMtx[anchors->end.bone]);
     return TRUE;
@@ -710,7 +712,7 @@ s32 func_151B48DC(HoltenRopeEffect *effect) {
         point->pos.y = 0.0f;
         point->pos.z = 0.0f;
     }
-    effect->flags &= ~2;
+    effect->flags &= ~ROPE_FLAG_RESET;
     return TRUE;
 }
 
@@ -748,7 +750,7 @@ typedef struct {
 
 extern void func_1502EC34(HoltenRopeColorSource *, u32 *, u32 *, u32 *, u32 *);
 
-/* Draw style 1: two-cycle, tinted with the color source's color while its bit 0 of unkA4 is set; style 0 otherwise. */
+/* Draw style 1: two-cycle, tinted with the color source's color while bit 0 of its unkA4 is set; style 0 otherwise. */
 u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
                  s32 *primR, s32 *primG, s32 *primB, s32 *primA,
                  s32 *envR, s32 *envG, s32 *envB, s32 *envA,
@@ -798,7 +800,7 @@ s32 func_151B4B78(HoltenRopeEffect *effect) {
         point->pos.y = 0.0f;
         point->pos.z = 0.0f;
     }
-    effect->flags &= ~2;
+    effect->flags &= ~ROPE_FLAG_RESET;
     return TRUE;
 }
 
