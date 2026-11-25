@@ -1196,56 +1196,45 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     }
 }
 
-typedef struct {
-    f32 height;
-    u8 geometry[0x19];
-    u8 type;
-    u8 pad1E[6];
-} Hit36404;
-
 extern void func_15143874(s16, f32, f32 *, f32 *);
 void func_1504715C();
-s32 func_15046C80(f32 *, u16, f32, void *);
+s32 func_15046C80(Vec3f *, u16, f32, GroundHit *);
 
-void func_15136404(void *arg0, f32 arg1, u8 arg2, s32 arg3) {
-    f32 scale;
+/* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
+void func_15136404(struct127 *actor, f32 radius, u8 arg2, s32 arg3) {
+    f32 area;
     f32 count;
-    Hit36404 hit;
+    GroundHit hit;
     Vec3f probe;
     Vec3f pos;
 
-    if (arg0 != NULL) {
-        scale = 3.141592741f * arg1 * arg1;
-        count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * scale;
-        func_1504715C(&hit, arg0);
+    if (actor != NULL) {
+        area = 3.141592741f * radius * radius;
+        count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * area;
+        func_1504715C(&hit, actor);
         while (count > 1.0f) {
-            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * arg1, &probe.x, &probe.z);
-            probe.x += *(f32 *)((u8 *)arg0 + 0x14);
-            probe.z += *(f32 *)((u8 *)arg0 + 0x1C);
-            probe.y = *(f32 *)((u8 *)arg0 + 0x18) + 500.0f;
-            if (func_15046C80(&probe.x, 0, *(f32 *)((u8 *)arg0 + 0x18) - 5000.0f, &hit) != 0 && hit.type != 3) {
+            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * radius, &probe.x, &probe.z);
+            probe.x += actor->x_position;
+            probe.z += actor->z_position;
+            probe.y = actor->y_position + 500.0f;
+            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.surfaceType != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
-                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 0x64, hit.geometry, (struct17 *)&pos,
-                              func_150ADA20() % 201U + 0x190, 1, 1, 0, arg2, arg3);
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, hit.unk4, (struct17 *)&pos,
+                              func_150ADA20() % 201U + 400, 1, 1, 0, arg2, arg3);
             }
             count -= 1.0f;
         }
     }
 }
 
+/* Spawn parameters passed to func_1513D594 by func_15136698. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Struct15136698Vec;
-
-typedef struct {
-    u8 unk0;
+    u8 texture;
     u8 pad1;
-    s16 unk2;
-    s16 unk4;
+    s16 flags;
+    s16 lifetime;
     u8 pad6[2];
     s32 unk8;
     s32 unkC;
@@ -1253,81 +1242,82 @@ typedef struct {
     u8 unk11;
     u8 unk12;
     u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    Struct15136698Vec unk1C;
+    f32 width;
+    f32 height;
+    Vec3f unk1C;
     f32 unk28;
     f32 unk2C;
     f32 unk30;
     f32 unk34;
     f32 unk38;
     f32 unk3C;
-    s32 unk40;
+    s32 hasLifetime;
     u8 unk44;
     u8 unk45;
     u8 pad46[0x12];
 } Struct15136698Local;
 
-s32 func_15136698(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, Struct15136698Vec *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
-    s32 ret;
-    Struct15136698Local sp7C;
-    f32 sp78;
-    Struct15136698Table sp68;
+/* Spawns a blood particle of the given size with one of the four D_80089BAC textures. */
+s32 func_15136698(f32 size, f32 arg1, u8 arg2, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
+    s32 particle;
+    Struct15136698Local desc;
+    f32 extra;
+    Struct15136698Table textures;
     s32 sp64;
     s32 sp60;
-    s32 temp_v0;
-    s32 sp54;
-    s32 sp50;
+    s32 value;
+    s32 random1;
+    s32 random0;
 
-    sp68 = D_80089BAC;
-    sp78 = arg1;
-    sp7C.unk0 = sp68.unk0[func_150ADA20() & 3];
+    textures = D_80089BAC;
+    extra = arg1;
+    desc.texture = textures.unk0[func_150ADA20() & 3];
     if (arg7 != 0) {
-        temp_v0 = 2;
+        value = 2;
     } else {
-        temp_v0 = 1;
+        value = 1;
     }
-    sp7C.unk2 = temp_v0 + 0x300;
-    sp7C.unk8 = 0;
-    sp7C.unkC = 0;
-    sp7C.unk10 = 0;
-    sp7C.unk11 = 0;
-    sp7C.unk12 = 0;
-    sp7C.unk13 = 0xFF;
-    sp7C.unk18 = arg0;
-    sp7C.unk14 = arg0;
-    sp7C.unk1C = *arg6;
-    sp7C.unk40 = 0;
-    sp7C.unk28 = 0.0f;
-    sp7C.unk2C = 0.0f;
-    sp7C.unk30 = 0.0f;
-    sp7C.unk34 = 1.0f;
-    sp7C.unk38 = 1.0f;
-    sp7C.unk3C = 1.0f;
-    if (arg4 == -1) {
-        sp7C.unk4 = 0x12C;
+    desc.flags = value + 0x300;
+    desc.unk8 = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    desc.unk11 = 0;
+    desc.unk12 = 0;
+    desc.unk13 = 255;
+    desc.height = size;
+    desc.width = size;
+    desc.unk1C = *arg6;
+    desc.hasLifetime = 0;
+    desc.unk28 = 0.0f;
+    desc.unk2C = 0.0f;
+    desc.unk30 = 0.0f;
+    desc.unk34 = 1.0f;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    if (lifetime == -1) {
+        desc.lifetime = 300;
     } else {
-        sp7C.unk4 = arg4 + 0x20;
-        sp7C.unk40 = 1;
+        desc.lifetime = lifetime + 32;
+        desc.hasLifetime = 1;
     }
-    sp7C.unk44 = arg2;
-    sp7C.unk45 = arg3;
+    desc.unk44 = arg2;
+    desc.unk45 = arg3;
     if (arg8 != 0) {
         sp64 = 3;
-        sp60 = 0xFF;
+        sp60 = 255;
     } else {
         sp64 = 0;
         sp60 = 0;
     }
 
-    sp50 = func_150ADA20();
-    sp54 = func_150ADA20();
-    temp_v0 = func_150ADA20();
-    ret = func_1513D594((s32)&sp7C, 0, 0, 0x1A, 0, (sp54 & 1) + (sp50 & 1), temp_v0 & 0xFF, 500.0f, 500.0f, 0, arg5, sp64, sp60, 0, 4, arg9, arg10);
-    if (ret != 0) {
-        memcpy(ret + 0x128, &sp78, sizeof(sp78));
+    random0 = func_150ADA20();
+    random1 = func_150ADA20();
+    value = func_150ADA20();
+    particle = func_1513D594((s32)&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, sp64, sp60, 0, 4, arg9, arg10);
+    if (particle != 0) {
+        memcpy(particle + 0x128, &extra, sizeof(extra));
     }
-    return ret;
+    return particle;
 }
 
 extern f32 D_800BE9A4;
@@ -1805,7 +1795,6 @@ typedef struct Blood3783CHit {
 typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
-s32 func_15046C80(f32 *, u16, f32, void *);
 s32 func_1514672C(f32 *);
 void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
@@ -1868,7 +1857,7 @@ void func_1513783C(Blood36C3CActor *arg0, u8 arg1, s32 arg2) {
                           (func_150ADA20() % 101U) + 0x9B,
                           (func_150ADA20() % 101U) + 0x64,
                           (func_150ADA20() % 56U) + 0xCB, (s32)hit.geometry,
-                          (Struct15136698Vec *)&probe, 1, 1, arg1, arg2);
+                          &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;
             } else {
