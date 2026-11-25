@@ -7,10 +7,8 @@
 void func_1500AC14(void);
 void func_1500BEC0(void);
 void func_1500E5C0(void);
-void func_150127B0(void);
 void func_15012FE0(void);
 void func_151645C4(u8 enable);
-void func_151732E0(s32 levelId);
 void func_15178EB0(void);
 
 /* Resets game globals, then runs the subsystem init routines for the given level. */

@@ -270,7 +270,6 @@ typedef struct {
 
 #define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
 
-void func_15110360(s32 player, MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /*

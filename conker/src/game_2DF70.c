@@ -32,8 +32,6 @@ void func_15000AC0(void) {
     D_800D9E64 = 0;
 }
 
-void func_15111858(void);
-
 /**
  * Sets up the current map's background according to D_800B0DF0->unk8:
  * mode 4 allocates two vertex buffers per view (D_80082FA0 + 1 views), mode 2 builds a

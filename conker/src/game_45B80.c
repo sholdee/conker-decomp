@@ -339,7 +339,6 @@ void func_15094EA0(s32);
 void func_151749F8(s32, s32);
 void func_15188B74(s32);
 void func_1502BEE4(void);
-void func_151738C4(s32);
 void func_1502C1A4(void);
 void func_150636F0(void);
 void func_151670C0(void);
@@ -449,8 +448,6 @@ void func_15019414(void) {
         func_1508F0A4();
     }
 }
-
-Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 
 /* Sets up player's viewport and draws the first pass of their scene. */
 Gfx *func_15019464(Gfx *gfx, s16 player) {

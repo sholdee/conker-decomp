@@ -298,7 +298,6 @@ void func_15113218(void) {
     }
 }
 
-Gfx *func_151733D8(Gfx *gfx, s32);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */

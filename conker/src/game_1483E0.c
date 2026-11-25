@@ -12,7 +12,6 @@ extern f32 func_150489B0(u8);
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1518804C(s32, f32);
-extern void func_15173C60(s32, s32);
 extern void func_15060A30(s32, void *);
 
 struct Wave1511CB44;

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
 extern s8 D_800DD2E0;
 
 /* One entry of the fog preset table D_8008CC70. */
@@ -53,7 +52,6 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
 extern u16 D_800DD2EA;
 extern u16 D_800DD2EE;
 extern s16 D_800DD2F0;
-s8 func_15173994(s32 arg0);
 #define sFogPresets (&D_8008CC70)
 
 /*

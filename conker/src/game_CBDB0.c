@@ -16,7 +16,6 @@ typedef union {
 
 extern s32 func_15086D48(s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern void func_15173C90(s32, s32, s32);
 
 /* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
 s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
