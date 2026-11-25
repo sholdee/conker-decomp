@@ -91,8 +91,8 @@ typedef struct {
     /* 0x76 */ u8 pad76[2];
     /* 0x78 */ ObjectFunc onContact;
     /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;             // ground probe results, see func_150045C4
-    /* 0x84 */ s32 unk84;
+    /* 0x80 */ s32 floorTri;          // floor probe results, see func_150045C4
+    /* 0x84 */ f32 floorY;
     /* 0x88 */ s16 fadeDistance;
     /* 0x8A */ u8 alpha;
     /* 0x8B */ u8 viewAlpha[4];
@@ -105,6 +105,7 @@ typedef struct {
     /* 0x9C */ s32 unk9C;
 } LevelObject; // size 0xA0
 
+// variables.h declares D_800DBEF4 as struct131 *, a partial view of LevelObject.
 #define OBJECTS ((LevelObject *)D_800DBEF4)
 
 /* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
@@ -175,7 +176,7 @@ void func_150039E0(s32 level, s32 arg1) {
     ObjectSpawn *groupedSpawns;
     ModelAsset *model;
     ObjectFunc behavior;
-    s32 off;
+    s32 off; // matching: unused, but IDO reserves its stack slot
     LevelObject *obj;
     s8 setStateBit2;
     s32 isBehavior22;
@@ -203,11 +204,11 @@ void func_150039E0(s32 level, s32 arg1) {
     base = spawns;
     for (i = 0; i < D_800DBEF0; i++) {
         if (i == D_800DBF00) {
-            base = &groupedSpawns[-i];
+            base = &groupedSpawns[-i]; // so that base[i] is groupedSpawns[0]
         }
         found = 0;
         isBehavior22 = FALSE;
-        obj = i + OBJECTS;
+        obj = (LevelObject *)&D_800DBEF4[i];
         obj->x = base[i].x;
         obj->y = base[i].y;
         obj->z = base[i].z;
@@ -241,8 +242,8 @@ void func_150039E0(s32 level, s32 arg1) {
         }
         obj->unk40 = base[i].unk40;
         obj->unk7C = 0;
-        obj->unk80 = 0;
-        obj->unk84 = 0;
+        obj->floorTri = 0;
+        *(s32 *)&obj->floorY = 0; // matching: an integer zero store, not 0.0f
         obj->sound = 0;
         obj->attach = 0;
         obj->effectFlags = 0;
@@ -264,11 +265,11 @@ void func_150039E0(s32 level, s32 arg1) {
                     break;
                 }
             }
-            if (found == 0) {
+            if (!found) {
                 model = func_1502B6BC(&loaded, 0, 0, 2, 3, id);
                 obj->model = model;
             }
-            if (found != 0) {
+            if (found) {
                 obj->srcVertices = OBJECTS[found - 1].srcVertices;
                 obj->displayList = OBJECTS[found - 1].displayList;
                 obj->unk9C = OBJECTS[found - 1].unk9C;
@@ -330,10 +331,10 @@ void func_150039E0(s32 level, s32 arg1) {
                         break;
                     }
                 }
-                if (found == 0) {
+                if (!found) {
                     id = base[i].modelId;
                     levelModel = D_800B0E50[id].model;
-                    obj->numVertices = ((u32)levelModel->displayList - (u32)levelModel->vertices) >> 4;
+                    obj->numVertices = ((u32)levelModel->displayList - (u32)levelModel->vertices) / sizeof(Vtx);
                     obj->srcVertices = levelModel->vertices;
                     obj->unk44 = levelModel->unk10;
                     obj->unk9C = levelModel->unk8;
@@ -348,7 +349,7 @@ void func_150039E0(s32 level, s32 arg1) {
                 } else {
                     obj->viewFlags = 0x80;
                 }
-                if (found == 0) {
+                if (!found) {
                     obj->displayList = levelModel->displayList;
                 } else {
                     obj->displayList = OBJECTS[found - 1].displayList;
@@ -372,13 +373,13 @@ void func_150039E0(s32 level, s32 arg1) {
         if (obj->update == NULL && !isBehavior22) {
             obj->viewFlags |= 0x20;
         }
-        if (found == 0) {
+        if (!found) {
             func_1510CE60(obj->displayList, 0, 1, 0x3F, 0);
             func_15004CE0(obj->displayList, model);
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = i + OBJECTS;
+        obj = (LevelObject *)&D_800DBEF4[i];
         if (obj->srcVertices == NULL) {
             continue;
         }
@@ -417,48 +418,16 @@ void func_150039E0(s32 level, s32 arg1) {
     }
 }
 
-// FIXME: matches but something isnt right
+/* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = D_800DBEF4[D_800DBF88].unk1C;
-        D_800DBF90 = D_800DBEF4[D_800DBF88].unk28;
+        D_800DBF8C = (s32)OBJECTS[D_800DBF88].displayList;
+        D_800DBF90 = (s32)OBJECTS[D_800DBF88].srcVertices;
     }
 }
 
 void func_150045BC(void) {
 }
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[0xA];
-} Vec16_150045C4;
-
-typedef struct {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
-    u8 pad18[0x8];
-    Vec16_150045C4 *unk20;
-    Vec16_150045C4 *unk24;
-    Vec16_150045C4 *unk28;
-    u8 pad2C[0xC];
-    void *unk38;
-    u8 pad3C[0x12];
-    u8 unk4E;
-    u8 unk4F;
-    u8 pad50[0x1E];
-    u8 unk6E;
-    u8 unk6F;
-    u8 unk70;
-    u8 pad71[0xF];
-    s32 unk80;
-    f32 unk84;
-    u8 pad88[0x18];
-} Obj_150045C4;
 
 extern Mtx **D_80089250[];
 extern s16 D_800D37E0;
@@ -468,20 +437,26 @@ extern void func_151150B0(void);
 extern void func_15116058(void);
 extern void func_15116110(void);
 void func_150A44F0(s32, s16 *, s32);
-void func_150A7960(f32 mf[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
-void func_1510E7A4(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32, f32, f32);
+void func_150A7960(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
 void func_1510F800(s32);
-void func_1511490C(f32 mf[4][4], Obj_150045C4 *);
+void func_1511490C(f32 mf[4][4], LevelObject *obj);
 void func_15004A4C(void);
 
+/*
+ * Prepares the objects for the level: builds each object's matrices for both frames (or, for objects with
+ * state bit 0, transforms its vertices into its per-frame copies), then probes the floor under objects
+ * with view flag 0x20.
+ */
 void func_150045C4(s32 arg0) {
     s32 i;
-    Obj_150045C4 *p;
+    LevelObject *obj;
     f32 mtx[4][4];
     s32 j;
-    s32 sp90;
-    f32 sp8C;
-    s32 sp88;
+    s32 floorFlags;
+    f32 floorY;
+    s32 floorTri;
     f32 x;
     f32 y;
     f32 z;
@@ -490,43 +465,45 @@ void func_150045C4(s32 arg0) {
     guMtxIdentF(D_800DBF08);
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
-        p = (Obj_150045C4 *)&D_800DBEF4[i];
-        if (p->unk38 == NULL || p->unk38 == (void *)func_15116058 || p->unk38 == (void *)func_15116110) {
-            p->unk4E = 3;
+        obj = (LevelObject *)&D_800DBEF4[i];
+        if (obj->update == NULL || obj->update == func_15116058 || obj->update == func_15116110) {
+            obj->attach = 3;
         }
-        if (!(p->unk70 & 1)) {
-            func_1511490C(mtx, p);
+        if (!(obj->state & 1)) {
+            func_1511490C(mtx, obj);
             guMtxF2L(mtx, &(*D_80089250[D_800BE9C0])[i]);
             bcopy(&(*D_80089250[D_800BE9C0])[i], &(*D_80089250[!D_800BE9C0])[i], sizeof(Mtx));
         }
-        if (p->unk38 == (void *)func_151150B0) {
-            p->unk38 = NULL;
+        if (obj->update == func_151150B0) {
+            obj->update = NULL;
         }
-        if ((p->unk70 & 1) == 1) {
-            func_1511490C(mtx, p);
-            for (j = 0; j < p->unk16; j++) {
-                func_150A7960(mtx, p->unk28[j].x, p->unk28[j].y, p->unk28[j].z, &x, &y, &z);
-                p->unk20[j].x = x;
-                p->unk20[j].y = y;
-                p->unk20[j].z = z;
+        if ((obj->state & 1) == 1) {
+            func_1511490C(mtx, obj);
+            for (j = 0; j < obj->numVertices; j++) {
+                func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->srcVertices[j].v.ob[1],
+                              obj->srcVertices[j].v.ob[2], &x, &y, &z);
+                obj->vertices[0][j].v.ob[0] = x;
+                obj->vertices[0][j].v.ob[1] = y;
+                obj->vertices[0][j].v.ob[2] = z;
             }
-            bcopy(p->unk20, p->unk24, p->unk16 * sizeof(Vec16_150045C4));
+            bcopy(obj->vertices[0], obj->vertices[1], obj->numVertices * sizeof(Vtx));
         }
         func_1510F800(2);
-        if ((p->unk6F & 0x80) == 0x80 && (p->unk4F & 0x60) != 0x20) {
+        if ((obj->viewFlags & 0x80) == 0x80 && (obj->flags & 0x60) != 0x20) {
             D_800D37E0 = i;
             func_150A44F0(1, &D_800D37E0, 1);
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        p = (Obj_150045C4 *)&D_800DBEF4[i];
-        if (p->unk6E == 1) {
+        obj = (LevelObject *)&D_800DBEF4[i];
+        if (obj->unk6E == 1) {
             continue;
         }
-        if ((p->unk6F & 0x20) == 0x20) {
-            func_1510E7A4(&sp88, 0, &sp8C, 0, &sp90, 0, p->unk10, p->unk12, p->unk14, p->unk12, i + 1, 0, -10000.0f, 20000.0f);
-            p->unk80 = sp88;
-            p->unk84 = sp8C;
+        if ((obj->viewFlags & 0x20) == 0x20) {
+            func_1510E7A4(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
+                          i + 1, NULL, -10000.0f, 20000.0f);
+            obj->floorTri = floorTri;
+            obj->floorY = floorY;
         }
     }
 }
