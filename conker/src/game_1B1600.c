@@ -90,17 +90,6 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
 }
 
 /* A light node in the list at D_800DCD78. */
-typedef struct Node15184368 {
-    struct Node15184368 *next;
-    u8 unk4;
-    u8 pad5[4];
-    u8 unk9;
-    u8 padA[4];
-    s16 x;
-    s16 y;
-    s16 z;
-} Node15184368;
-
 extern Vec3f D_800DE010; /* default light offset from the object */
 extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
 extern f32 D_800DF6F8; /* light-to-object distance */
@@ -145,7 +134,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     s32 i;
     s32 done;
     s32 found;
-    Node15184368 *node;
+    PointLight *node;
     f32 nodePos[3];
     f32 perspScale;
     f32 v;
@@ -161,9 +150,9 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     found = 0;
     objPos.z = obj->z_position;
     if (D_800DE034 == 0) {
-        node = (Node15184368 *)D_800DCD78;
+        node = D_800DCD78;
         while (node != NULL) {
-            if (node->unk4 == 0 && node->unk9 == 0) {
+            if (node->unk4 == 0 && node->disabled == 0) {
                 nodePos[0] = node->x;
                 nodePos[1] = node->y;
                 nodePos[2] = node->z;

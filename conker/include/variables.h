@@ -1240,11 +1240,11 @@ extern u8  D_800DCD3A;
 extern u8  D_800DCD3B;
 extern u8  D_800DCD3C;
 extern u8  D_800DCD3D;
-extern s32 D_800DCD40;
-extern s32 D_800DCD78;
+extern PointLightGfx D_800DCD40; // padding light for odd light counts
+extern PointLight *D_800DCD78; // list of all point lights
 extern s32 D_800DCD7C;
-extern s32 D_800DCD80;
-extern s32 D_800DCD84;
+extern ZoneLink *D_800DCD80; // ambient colour zones
+extern ZoneLink *D_800DCD84; // tint zones
 extern f32 D_800DCD90;
 extern f32 D_800DCD94;
 extern f32 D_800DCD98;

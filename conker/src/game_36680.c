@@ -1,26 +1,14 @@
 #include <ultra64.h>
 
 #include "functions.h"
-#define D_800DCD80 D_800DCD80_header
-#define D_800DCD84 D_800DCD84_header
 #define D_800BE4A0 D_800BE4A0_header
 #define D_800DDA90 D_800DDA90_header
 #define D_800B0DF0 D_800B0DF0_header
 #include "variables.h"
-#undef D_800DCD80
-#undef D_800DCD84
 #undef D_800BE4A0
 #undef D_800DDA90
 #undef D_800B0DF0
 
-
-typedef struct Game36680PointLink {
-    struct Game36680PointLink *next;
-    TriggerZone *point;
-} Game36680PointLink;
-
-extern Game36680PointLink *D_800DCD80;
-extern Game36680PointLink *D_800DCD84;
 
 extern u8 D_800DDBD0[15];
 
@@ -30,7 +18,7 @@ void func_15009334(s32 index);
 void func_150091D0(void) {
     s32 i;
 
-    D_800DCD78 = 0;
+    D_800DCD78 = NULL;
     D_800DCD7C = 1;
     D_800DCD80 = NULL;
     D_800DCD84 = NULL;
@@ -85,7 +73,7 @@ void func_15009334(s32 index) {
     s32 duration;
     s32 light;
     s32 callback;
-    Game36680PointLink *link;
+    ZoneLink *link;
     s32 type;
 
     type = D_800D3098[index].kind >> 2;
@@ -131,15 +119,15 @@ void func_15009334(s32 index) {
             }
             break;
         case 15:
-            link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
-            link->point = &D_800D3098[index];
+            link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
+            link->zone = &D_800D3098[index];
             link->next = D_800DCD80;
             D_800DCD80 = link;
         unused_label: // matching: an unused label keeps IDO from threading this break to the epilogue
             break;
         case 24:
-            link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
-            link->point = &D_800D3098[index];
+            link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
+            link->zone = &D_800D3098[index];
             link->next = D_800DCD84;
             D_800DCD84 = link;
             break;

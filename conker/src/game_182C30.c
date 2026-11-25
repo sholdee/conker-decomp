@@ -66,7 +66,7 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     }
 }
 
-/* Creates a point light (struct226 is a partial view of game_18A8F0.c's PointLight); func_1515F10C frees it. */
+/* Creates a point light (struct226 is a partial view of PointLight in structs.h); func_1515F10C frees it. */
 struct226 *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
 void func_1515F10C();
 

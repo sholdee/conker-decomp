@@ -2613,6 +2613,51 @@ typedef struct TriggerZone {
     /* 0x30 */ f32 cosYaw;
 } TriggerZone; // size 0x34
 
+/*
+ * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
+ * linked list D_800DCD78. struct226 is a partial view of this.
+ */
+typedef struct PointLight {
+    /* 0x00 */ struct PointLight *next;
+    /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
+    /* 0x05 */ u8 color[3];
+    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
+    /* 0x09 */ u8 disabled;
+    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
+    /* 0x0B */ u8 group;             // id used by func_1515F170
+    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by func_1515D69C
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 viewPos[4][3];    // position transformed by player i's view matrix
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 radius;
+    /* 0x30 */ u8 viewPosValid;      // per-player bit: viewPos[i] is up to date
+} PointLight;
+
+/* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
+typedef struct {
+    /* 0x00 */ u8 col[3];
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ u8 colc[3];
+    /* 0x07 */ u8 pad7;
+    /* 0x08 */ s8 dir[3];
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x13];
+    /* 0x20 */ s16 pos[4];
+    /* 0x28 */ s16 pos2[4];
+} PointLightGfx;
+
+/* A node of the zone lists D_800DCD80 (ambient colour zones) and D_800DCD84 (tint zones), built by func_15009334. */
+typedef struct ZoneLink {
+    /* 0x0 */ struct ZoneLink *next;
+    /* 0x4 */ TriggerZone *zone;
+} ZoneLink;
+
 typedef struct {
     s32 unk0;
     f32 unk4;
