@@ -6,27 +6,6 @@
 
 /* defined */
 
-// 0x0002C200
-extern f32 D_8002C200;
-extern f32 D_8002C204;
-extern f64 D_8002C208;
-
-// 0x0002C210
-extern f32 D_8002C210;
-extern f32 D_8002C214;
-extern f64 D_8002C218;
-
-// 0x0002C220
-extern f32 D_8002C220;
-extern f32 D_8002C224;
-extern f32 D_8002C228;
-extern f32 D_8002C22C;
-// 0x0002C230
-extern f32 D_8002C230;
-extern f32 D_8002C234;
-extern f32 D_8002C238;
-
-
 extern f32 D_8002C3F8;
 extern f32 D_8002C3FC;
 
@@ -42,8 +21,6 @@ extern f32 D_8002C77C;
 extern f32 D_8002C780;
 extern f32 D_8002C784;
 
-// 0x0002C810
-extern f32 D_8002C814;
 // 0x0002C820
 extern f32 D_8002C820;
 // 0x0002C830
@@ -59,8 +36,6 @@ extern f32 D_8002C920;
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
 
-extern char D_8002C6B0[];
-extern char D_8002C6DC[];
 
 /* undefined */
 
@@ -121,7 +96,6 @@ extern s32  D_8002BD14; // low word of osClockRate (D_8002BD10)
 extern s32  D_8002BD18;
 extern s32  D_8002BD20; // init ok?
 extern s32  D_8002BD60;
-extern u8   D_8002BF70[];
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
 
@@ -553,36 +527,35 @@ extern u16 D_80091D20[]; // per texture: compressed size
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern f32 D_80095B10;
-extern f32 D_80095B14;
-extern f32 D_80095B18;
-extern f32 D_80095B1C;
-extern f32 D_80095B20;
-extern f32 D_80095B24;
 extern u8  D_80095B27[];
-extern f32 D_80095B28;
-extern f32 D_80095B2C;
-extern f32 D_80095B30;
-extern f32 D_80095B40;
-extern f32 D_80095B44;
 // func_15009990 suggests they are u8, but they look like floats!
 extern u8 D_80095B48[]; // 0.002188183832913637
 extern u8 D_80095B4C[]; // 20.100000381469727
 extern u8 D_80095B50[]; // 0.4000000059604645
 
-extern f32 D_80095B54;
 extern u8  D_80095B70[4];
 extern u8  D_80095B74[2];
-extern f32 D_80095BB8;
-extern f32 D_80095BBC;
-extern f32 D_80095BC0;
-extern f32 D_80095BC4;
-extern f32 D_80095BC8;
-extern f32 D_80095BCC;
-extern f32 D_80095BD0;
-extern f32 D_80095BD4;
-extern f32 D_80095BD8;
 
+extern f32 D_8009616C;
+extern f32 D_80096170;
+extern f32 D_80096174;
+extern f32 D_80096178;
+extern f32 D_8009617C;
+extern f32 D_80096180;
+extern f32 D_80096184;
+
+extern f32 D_800961A8;
+extern f32 D_800961AC;
+extern f32 D_800961B0;
+extern f32 D_800961B4;
+extern f32 D_800961B8;
+extern f32 D_800961BC;
+extern f32 D_800961C0;
+
+extern s32 D_80096210;
+extern f32 D_80096214;
+extern f32 D_80096218;
+extern f32 D_8009621C;
 extern f32 D_80096220;
 extern f32 D_80096224;
 extern f32 D_80096228;
@@ -603,12 +576,25 @@ extern f32 D_80096534;
 extern f32 D_80096540;
 
 extern f32 D_80096560;
+extern f32 D_80096570;
+extern u32 D_8009667C;
 extern f32 D_800968B0;
+extern f32 D_800968C0;
 extern s32 D_800968E0;
+extern f32 D_80096900;
+extern f32 D_80096904;
 
 extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
+extern f32 D_80098DB0; // 0.008726646192371845
+extern f32 D_80098DB4; // 0.008726646192371845
 
+extern f32 D_800990B0; // 0.6931471824645996f
+extern f32 D_800990B4; // 0.6931471824645996f
 extern const u16 D_8009919C[6];
+extern f32 D_800991A8;
+extern f32 D_800991AC;
+extern f32 D_800991B0;
+extern f32 D_800991D4; // 0.10000000149011612f
 extern f32 D_80099408;
 extern f32 D_8009940C;
 extern f32 D_80099410;
