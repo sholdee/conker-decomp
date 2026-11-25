@@ -335,11 +335,12 @@ void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
     }
 }
 
+/* Particle descriptor passed to func_1513D2F0 and func_1513D668. */
 typedef struct {
     u8 unk0;
     u8 unk1;
     s16 unk2;
-    s16 unk4;
+    s16 life;
     u8 pad6[2];
     s32 unk8;
     s32 unkC;
@@ -356,7 +357,7 @@ typedef struct {
     f32 unk34;
     f32 unk38;
     f32 unk3C;
-    s32 unk40;
+    s32 flags;
     u8 unk44;
     u8 unk45;
     u8 unk46;
@@ -588,7 +589,7 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
 
         desc.unk0 = 56;
         desc.unk2 = 1;
-        desc.unk4 = 50;
+        desc.life = 50;
         desc.unk8 = 0;
         desc.unkC = 0x6666;
         desc.unk13 = 0xFF;
@@ -603,7 +604,7 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
         desc.unk34 = 0.2f;
         desc.unk38 = 1.0f;
         desc.unk3C = 1.0f;
-        desc.unk40 = 0x400C0001;
+        desc.flags = 0x400C0001;
         desc.unk44 = func_150ADA20() % 101U + 100;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
@@ -652,108 +653,9 @@ typedef struct {
     f32 unk4;
 } Struct1514B8E4Size;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    struct17 unk38;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-} Struct1514B8E4Extra;
 
 
-/*
- * Spawns a particle at `pos` through func_1513D2F0 and copies its extra state to offset 0x110.
- * A `life` of -1 means 300 frames without the timed-life flag.
- */
-void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
-                    f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
-                    s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
-    void *particle;
-    Struct1514B8E4Desc desc;
-    Struct1514B8E4Extra extra;
-    s32 flag;
-
-    if (arg4 != NULL) {
-        extra.unk38 = *arg4;
-    } else {
-        extra.unk38.unk0 = 0.0f;
-        extra.unk38.unk4 = 0.0f;
-        extra.unk38.unk8 = 0.0f;
-    }
-    extra.unk44 = arg5;
-    extra.unk1C = 0.0f;
-    extra.unk20 = 0.0f;
-    extra.unk30 = 0.0f;
-    desc.unkC = 0x3E3F;
-    extra.unk34 = 15935.0f;
-    extra.unk2C = 15935.0f;
-    extra.unk48 = arg6;
-    extra.unk4C = arg7;
-    extra.unk24 = 6733.0f;
-    extra.unk28 = 18404.0f;
-    extra.unk0 = scale->unk0 * 15.045272f;
-    extra.unk8 = scale->unk0 * 5.8676558f;
-    extra.unk10 = scale->unk0 * 12.111444f;
-    desc.unk14 = 0.0f;
-    extra.unk4 = scale->unk4 * 0.396174f;
-    extra.unkC = scale->unk4 * 0.1042563f;
-    extra.unk18 = scale->unk4 * 0.5197371f;
-    extra.unk14 = scale->unk4 * 0.34404588f;
-    desc.unk18 = 0.0f;
-    desc.unk0 = argB;
-    desc.unk1 = 0;
-    desc.unk2 = 0x2203;
-    if (life == -1) {
-        desc.unk4 = 300;
-    } else {
-        desc.unk4 = life;
-    }
-    desc.unk8 = 0;
-    desc.unk10 = 0xFF;
-    desc.unk11 = 0xFF;
-    desc.unk12 = 0xFF;
-    desc.unk13 = 0xFF;
-    desc.unk1C = *pos;
-    desc.unk28 = pos->unk0;
-    desc.unk2C = pos->unk4 + 100.0f;
-    desc.unk30 = pos->unk8;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
-    desc.unk40 = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
-    desc.unk44 = arg3;
-    desc.unk45 = 0xFF;
-    desc.unk46 = 0;
-    desc.unk47 = 7;
-    desc.unk48 = 0;
-    desc.unk54 = argD;
-    desc.unk56 = argE;
-    if (func_150ADA20() & 1) {
-        flag = 1;
-    } else {
-        flag = 0;
-    }
-    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
-    if (particle != NULL) {
-        memcpy((u8 *)particle + 0x110, &extra, sizeof(extra));
-    }
-    return particle;
-}
-
-/* Per-particle state for func_1514BC08, stored at offset 0x110 of the particle. */
+/* Particle state at offset 0x110 written by func_1514B8E4 and animated by func_1514BC08. */
 typedef struct {
     /* 0x00 */ f32 base2C;
     /* 0x04 */ f32 base30;
@@ -769,7 +671,90 @@ typedef struct {
     /* 0x2C */ f32 target24;
     /* 0x30 */ f32 timer24;
     /* 0x34 */ f32 value24;
+    /* 0x38 */ struct17 unk38;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
 } Wobble1514BC08;
+
+/*
+ * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
+ * A `life` of -1 means 300 frames without the timed-life flag.
+ */
+void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
+                    f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
+                    s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
+    void *particle;
+    Struct1514B8E4Desc desc;
+    Wobble1514BC08 state;
+    s32 flag;
+
+    if (arg4 != NULL) {
+        state.unk38 = *arg4;
+    } else {
+        state.unk38.unk0 = 0.0f;
+        state.unk38.unk4 = 0.0f;
+        state.unk38.unk8 = 0.0f;
+    }
+    state.unk44 = arg5;
+    state.timer2C = 0.0f;
+    state.timer30 = 0.0f;
+    state.timer24 = 0.0f;
+    desc.unkC = 15935;
+    state.value24 = 15935.0f;
+    state.target24 = 15935.0f;
+    state.unk48 = arg6;
+    state.unk4C = arg7;
+    state.base24 = 6733.0f;
+    state.range24 = 18404.0f;
+    state.base2C = scale->unk0 * 15.045272f;
+    state.range2C = scale->unk0 * 5.8676558f;
+    state.target2C = scale->unk0 * 12.111444f;
+    desc.unk14 = 0.0f;
+    state.base30 = scale->unk4 * 0.396174f;
+    state.range30A = scale->unk4 * 0.1042563f;
+    state.range30B = scale->unk4 * 0.5197371f;
+    state.target30 = scale->unk4 * 0.34404588f;
+    desc.unk18 = 0.0f;
+    desc.unk0 = argB;
+    desc.unk1 = 0;
+    desc.unk2 = 0x2203;
+    if (life == -1) {
+        desc.life = 300;
+    } else {
+        desc.life = life;
+    }
+    desc.unk8 = 0;
+    desc.unk10 = 0xFF;
+    desc.unk11 = 0xFF;
+    desc.unk12 = 0xFF;
+    desc.unk13 = 0xFF;
+    desc.unk1C = *pos;
+    desc.unk28 = pos->unk0;
+    desc.unk2C = pos->unk4 + 100.0f;
+    desc.unk30 = pos->unk8;
+    desc.unk34 = 1.0f;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    desc.flags = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
+    desc.unk44 = arg3;
+    desc.unk45 = 0xFF;
+    desc.unk46 = 0;
+    desc.unk47 = 7;
+    desc.unk48 = 0;
+    desc.unk54 = argD;
+    desc.unk56 = argE;
+    if (func_150ADA20() & 1) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
+    if (particle != NULL) {
+        memcpy((u8 *)particle + 0x110, &state, sizeof(state));
+    }
+    return particle;
+}
 
 /*
  * Eases unk2C, unk30 and unk24 toward random targets, picking a new target for each when its
