@@ -1028,21 +1028,6 @@ void func_151872B0(s32 level) {
 }
 
 
-/* The fields of a D_800DBEF4 entry (WorldObject) read here. */
-typedef struct {
-    u8  pad0[0x10];
-    s16 x;
-    u8  pad12[0x2];
-    s16 z;
-    u8  pad16[0x39];
-    u8  unk4F;
-    u16 unk50;
-    u16 unk52;
-    u8  pad54[0x1A];
-    u8  unk6E;
-    u8  pad6F[0x31];
-} unkfunc_151873E4; /* size 0xA0 */
-
 extern void func_150A44F0(s32, s16 *, s32);
 extern ShadowVtx *func_150A5E44(s16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
@@ -1054,7 +1039,7 @@ extern s32 D_800DF0E4;
  * the square of half-size `range` around (x, z). Returns the new vertex count.
  */
 s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count) {
-    unkfunc_151873E4 *entry;
+    WorldObject *entry;
     s32 found;
     s32 i;
     s32 extent;
@@ -1073,11 +1058,11 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 
     found = 0;
     for (i = 0; i < D_800DBEF0; i++) {
-        entry = (unkfunc_151873E4 *)&D_800DBEF4[i];
-        if (entry->unk6E != 0) {
+        entry = &D_800DBEF4[i];
+        if (entry->inactive != 0) {
             continue;
         }
-        if (entry->unk4F & 0x60) {
+        if (entry->flags & 0x60) {
             continue;
         }
         extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;
