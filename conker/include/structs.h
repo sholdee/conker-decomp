@@ -1114,22 +1114,39 @@ typedef struct {
     /* 0x1BC */ f32 unk1BC;
 } ActorCtl; // size 0x1C0
 
-typedef struct {
-    u16 unk0;
-    u8  unk2;
-    u8  unk3;
-    u8  unk4;
-    u8  pad5[0x9];
-    u8  unkE;
-    u8  unkF;
-    u8  pad10[0x8];
-    s32 unk18;
-    u8  unk1C[0x4];
-    f32 unk20;
-    f32 unk24;
-    u8  pad28[0x6];
-    /* 0x2E */ u8 keepTime; // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
-} struct129;
+/* One 0x30-byte entry of the level's spawn table D_800D20FC; Actor.spawn points at the one it came from. */
+typedef struct SpawnRecord {
+    /* 0x00 */ u16 flags;
+    /* 0x02 */ u8  unk2;
+    /* 0x03 */ u8  interaction_state;
+    /* 0x04 */ u8  type;         // model id, 0xFF for none
+    /* 0x05 */ u8  unk5;
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8  angle;        // high byte of the facing angle
+    /* 0x0D */ u8  unkD;
+    /* 0x0E */ u8  unkE;
+    /* 0x0F */ u8  unkF;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  unk11;
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  unk13;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8  pad16[0x2];
+    /* 0x18 */ s32 objFlags;     // copied to the object's unkF8
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  pad1E[0x2];
+    /* 0x20 */ f32 xz_scale;
+    /* 0x24 */ f32 y_scale;
+    /* 0x28 */ u8  unique_id;
+    /* 0x29 */ u8  partSet;      // 1-based index into D_80086CC4, 0 for none
+    /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (func_150623F4)
+    /* 0x2C */ u16 unk2C;
+    /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
+    /* 0x2F */ u8  unk2F;
+} SpawnRecord; // size 0x30
 
 typedef struct {
     u8  pad0[0x4];
@@ -1156,6 +1173,15 @@ typedef struct ActorAimPoints {
     /* 0x08 */ s16 side[2][3]; // points pushed out to either side (trails are emitted from them)
     /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
 } ActorAimPoints; // size 0x18
+
+/* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
+typedef struct VtxMorphState {
+    /* 0x0 */ f32 blend; // 0.0f (prev) .. 1.0f (cur)
+    /* 0x4 */ f32 rate;  // blend increase per tick
+    /* 0x8 */ u8  prev;
+    /* 0x9 */ u8  cur;
+    /* 0xA */ u8  hold;  // counts down once the blend has reached 1.0f
+} VtxMorphState; // size 0xC
 
 /* The game actor: the 0x32C-byte entries of D_800CC2D0. */
 struct Actor {
@@ -1323,9 +1349,10 @@ struct Actor {
     u8  unk13C; // used
     u8  unk13D;
     u8  unk13E;
-    u8  unk13F; // used
-    s32 unk140;
-    struct129 *unk144; // used
+    /* 0x13F */ u8  unk13F; // index of its spawn record in D_800D20FC, 0xFF = none
+    /* 0x140 */ u8  unk140;
+    u8  pad141[0x3];
+    /* 0x144 */ SpawnRecord *spawn; // the spawn record this actor came from
     f32 unk148;
     /* 0x14C */ f32 xz_scale;
     /* 0x150 */ f32 y_scale;
@@ -1459,7 +1486,7 @@ struct Actor {
     u8  unk258;
     u8  pad259[0x3];
     s32 unk25C;
-    /* 0x260 */ void *unk260;
+    /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
     /* 0x264 */ s32 unk264;
     u8  pad268[0x8];
     /* 0x270 */ f32 unk270;

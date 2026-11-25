@@ -451,7 +451,7 @@ void func_15076394(void) {
 
 void func_150763B0(void) {
     if (D_800D1890 == 128) {
-        D_800D154C->unk1E5 = D_800D154C->unk144->unkF;
+        D_800D154C->unk1E5 = D_800D154C->spawn->unkF;
     } else {
         D_800D154C->unk1E5 = D_800D1890;
     }

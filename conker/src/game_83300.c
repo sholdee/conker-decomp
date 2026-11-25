@@ -2253,7 +2253,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
     s32 health;
     s32 step;
     s32 sound;
-    struct129 *owner;
+    SpawnRecord *owner;
 
     prevHeight = actor->unk28;
     if (!(actor->unkF8 & 0x8000)) {
@@ -2286,7 +2286,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
                     if (actor->unk1CC - actor->y_position > 450.0f) {
                         health = actor->health;
                         if (health > 0) {
-                            owner = actor->unk144;
+                            owner = actor->spawn;
                             if (owner != NULL && !(owner->unkE & 0x80)) {
                                 actor->health = health - 1;
                             }
@@ -4653,16 +4653,16 @@ void func_15060F28(Actor *actor, s32 mode) {
     }
     if (actor->unk13F != 0xFF) {
         if (mode != 2) {
-            /* matching: unk144 is read as an s32 at each use; pointer reads let IDO keep it in a register */
-            if ((*(s32 *)&actor->unk144) != 0) {
-                if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 0x20) {
-                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+            /* matching: spawn is read as an s32 at each use; pointer reads let IDO keep it in a register */
+            if ((*(s32 *)&actor->spawn) != 0) {
+                if (((SpawnRecord *)*(s32 *)&actor->spawn)->flags & 0x20) {
+                    ((SpawnRecord *)*(s32 *)&actor->spawn)->unk2 = 1;
                     D_800D210C[actor->unk13F] = 0;
-                } else if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 1) {
+                } else if (((SpawnRecord *)*(s32 *)&actor->spawn)->flags & 1) {
                     D_800D210C[actor->unk13F] = 0;
                 } else {
                     s32 pad;
-                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->spawn)->unk2 = 1;
                     D_800D210C[actor->unk13F] &= 0x80;
                 }
             } else {
@@ -5172,7 +5172,7 @@ s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_800D9C10[];
 
 /*
- * Whether the actor should be drawn: TRUE when it has no cull radius (unk144 +0x2A) or is a player, when
+ * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
  * a player is inside its path area, or when it is inside some player's view; FALSE if fully faded.
  */
 s32 func_150623F4(Actor *actor) {
@@ -5187,7 +5187,7 @@ s32 func_150623F4(Actor *actor) {
     s32 id;
     u8 *p;
 
-    scale = (actor->unk144 != NULL) ? (f32)*(u16 *)((u8 *)actor->unk144 + 0x2A) : 0.0f;
+    scale = (actor->spawn != NULL) ? (f32)actor->spawn->unk2A : 0.0f;
     if (scale == 0.0f) {
         return 1;
     }
@@ -5270,7 +5270,7 @@ void func_15062800(Actor *a, Actor *b) {
     s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
     s32 cam;
     Actor swap;
-    struct129 *pad;
+    SpawnRecord *pad;
     s32 i;
     s32 u;
 
@@ -5288,9 +5288,9 @@ void func_15062800(Actor *a, Actor *b) {
     a->unique_id = OBJ_INDEX(a) + 1;
     a->unk13F = OBJ_INDEX(a);
     a->camera = NULL;
-    u = (s32)a->unk144;
-    a->unk144 = b->unk144;
-    b->unk144 = (struct129 *)u;
+    u = (s32)a->spawn;
+    a->spawn = b->spawn;
+    b->spawn = (SpawnRecord *)u;
     D_800DBFF0[OBJ_INDEX(b)].playerExt = b->unk31C;
     b->unk31C->aimState = 0;
     func_15033EC4(b->unique_id, a->unique_id);
@@ -5540,9 +5540,9 @@ void func_15063168(Actor *actor) {
 }
 
 void func_15082A44(void *, s32, s32, s32, s32);
-/* Respawns the actor in place: rebuilds its slot from its spawn entry (unk144), keeping position, angles and camera. */
-void func_15063254(Actor *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
-    struct129 *spawn;
+/* Respawns the actor in place: rebuilds its slot from its spawn entry (spawn), keeping position, angles and camera. */
+void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
+    SpawnRecord *spawn;
     s32 pathIdx;
     s32 index;
     Camera *camera;
@@ -5555,11 +5555,11 @@ void func_15063254(Actor *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
     s32 angle;
 
     pathIdx = actor->unk13F;
-    spawn = actor->unk144;
-    spawn->unk4 = unk4Value;
-    spawn->unk3 = unk3Value;
-    spawn->unk20 = scale;
-    spawn->unk24 = scale;
+    spawn = actor->spawn;
+    spawn->type = type;
+    spawn->interaction_state = interaction_state;
+    spawn->xz_scale = scale;
+    spawn->y_scale = scale;
     spawn->unk2 = 0;
     camera = actor->camera;
     x = actor->x_position;

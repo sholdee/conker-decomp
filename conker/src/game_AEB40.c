@@ -1,25 +1,10 @@
 #include <ultra64.h>
 
-// functions.h and variables.h declare several of the symbols below with types that do not fit how
-// this file uses them (Actor lacks or mistypes many object fields, model tables are declared as
-// plain s32, ...). Their header declarations are renamed out of the way and redeclared further down.
-#define func_15083E90 func_15083E90_hdr
-#define func_15083568 func_15083568_hdr
-#define func_1505E650 func_1505E650_hdr
-#define func_1505F0AC func_1505F0AC_hdr
-#define func_15060F28 func_15060F28_hdr
-#define func_150615DC func_150615DC_hdr
-#define func_15062BDC func_15062BDC_hdr
+// variables.h declares several of the symbols below with types that do not fit how this file uses
+// them (model tables are declared as plain s32, ...). Their header declarations are renamed out of
+// the way and redeclared further down.
 #include "functions.h"
-#undef func_15083E90
-#undef func_15083568
-#undef func_1505E650
-#undef func_1505F0AC
-#undef func_15060F28
-#undef func_150615DC
-#undef func_15062BDC
 
-#define D_800CC2D0 D_800CC2D0_hdr
 #define D_800C5A90 D_800C5A90_hdr
 #define D_800D19A0 D_800D19A0_hdr
 #define D_800D1C90 D_800D1C90_hdr
@@ -30,7 +15,6 @@
 #define D_800D2138 D_800D2138_hdr
 #define D_800D2132 D_800D2132_hdr
 #include "variables.h"
-#undef D_800CC2D0
 #undef D_800C5A90
 #undef D_800D19A0
 #undef D_800D1C90
@@ -40,199 +24,6 @@
 #undef D_800D2110
 #undef D_800D2138
 #undef D_800D2132
-
-// One 0x30-byte entry of the level's spawn table D_800D20FC.
-typedef struct SpawnRecord {
-    /* 0x00 */ u16 flags;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 interaction_state;
-    /* 0x04 */ u8 type;         // model id, 0xFF for none
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 angle;        // high byte of the facing angle
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x2];
-    /* 0x18 */ s32 objFlags;    // copied to the object's unkF8
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[0x2];
-    /* 0x20 */ f32 xz_scale;
-    /* 0x24 */ f32 y_scale;
-    /* 0x28 */ u8 unique_id;
-    /* 0x29 */ u8 partSet;      // 1-based index into D_80086CC4, 0 for none
-    /* 0x2A */ u8 pad2A[0x2];
-    /* 0x2C */ u16 unk2C;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-} SpawnRecord; // size 0x30
-
-// The 0xC-byte block a game object keeps at 0x260 for some models.
-typedef struct ObjAlloc260 {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ u8 unk8;
-    /* 0x9 */ u8 unk9;
-} ObjAlloc260;
-
-// File-local view of a game object (Actor, the 0x32C-byte entries of D_800CC2D0).
-// include/structs.h lacks or mistypes several fields used here (0x10 is a u16, 0x38 an s16, 0x140 a
-// u8, 0x2C4 a pointer, ...); fold them in during the central pass.
-typedef struct GameObj {
-    /* 0x000 */ s32 interaction_state;
-    /* 0x004 */ u8 id;
-    /* 0x005 */ u8 unk5;
-    /* 0x006 */ u8 unk6;
-    /* 0x007 */ u8 pad7[0x9];
-    /* 0x010 */ u16 unk10;
-    /* 0x012 */ u8 pad12[0x2];
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ f32 y_velocity;
-    /* 0x024 */ f32 gravity;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 old_x_position;
-    /* 0x030 */ f32 old_y_position;
-    /* 0x034 */ f32 old_z_position;
-    /* 0x038 */ s16 unk38;
-    /* 0x03A */ u8 pad3A;
-    /* 0x03B */ u8 unique_id;
-    /* 0x03C */ f32 xz_velocity;
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ u8 pad44[0x14];
-    /* 0x058 */ s32 unk58;
-    /* 0x05C */ s32 unk5C;
-    /* 0x060 */ u8 pad60[0x5];
-    /* 0x065 */ u8 unk65;       // 1-based index of the owning object, 0 for none
-    /* 0x066 */ u8 unk66;
-    /* 0x067 */ u8 pad67;
-    /* 0x068 */ u8 unk68;
-    /* 0x069 */ u8 unk69;
-    /* 0x06A */ u8 pad6A[0xC];
-    /* 0x076 */ u16 unk76;
-    /* 0x078 */ u16 unk78;
-    /* 0x07A */ u16 unk7A;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ u16 unk90;
-    /* 0x092 */ u16 unk92;
-    /* 0x094 */ s32 unk94;
-    /* 0x098 */ u8 pad98[0x13];
-    /* 0x0AB */ u8 unkAB;
-    /* 0x0AC */ u8 unkAC;
-    /* 0x0AD */ u8 padAD[0x5];
-    /* 0x0B2 */ u16 unkB2;
-    /* 0x0B4 */ u8 padB4[0x4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ u8 padBC[0x8];
-    /* 0x0C4 */ f32 unkC4;
-    /* 0x0C8 */ f32 unkC8;
-    /* 0x0CC */ u8 padCC[0x6];
-    /* 0x0D2 */ s16 unkD2;
-    /* 0x0D4 */ s16 unkD4;
-    /* 0x0D6 */ s16 unkD6;
-    /* 0x0D8 */ u8 padD8[0x4];
-    /* 0x0DC */ f32 unkDC;
-    /* 0x0E0 */ f32 unkE0;
-    /* 0x0E4 */ s16 unkE4;
-    /* 0x0E6 */ s16 unkE6;
-    /* 0x0E8 */ u16 unkE8;
-    /* 0x0EA */ u8 padEA[0xE];
-    /* 0x0F8 */ s32 unkF8;
-    /* 0x0FC */ u8 padFC[0x5];
-    /* 0x101 */ u8 unk101;
-    /* 0x102 */ u8 pad102[0x2];
-    /* 0x104 */ u8 stunned;
-    /* 0x105 */ u8 pad105[0x1E];
-    /* 0x123 */ u8 unk123;
-    /* 0x124 */ u8 unk124;
-    /* 0x125 */ u8 immune;
-    /* 0x126 */ u8 pad126;
-    /* 0x127 */ u8 unk127;
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ u8 pad129[0x12];
-    /* 0x13B */ u8 unk13B;
-    /* 0x13C */ u8 pad13C[0x3];
-    /* 0x13F */ u8 unk13F;      // index of the spawn record this object came from
-    /* 0x140 */ u8 unk140;
-    /* 0x141 */ u8 pad141[0x3];
-    /* 0x144 */ SpawnRecord *spawn;
-    /* 0x148 */ u8 pad148[0x4];
-    /* 0x14C */ f32 xz_scale;
-    /* 0x150 */ f32 y_scale;
-    /* 0x154 */ f32 unk154;
-    /* 0x158 */ f32 unk158;
-    /* 0x15C */ u8 pad15C[0x4];
-    /* 0x160 */ s16 unk160;
-    /* 0x162 */ u8 pad162[0x67];
-    /* 0x1C9 */ u8 lodRequest;
-    /* 0x1CA */ u8 health;
-    /* 0x1CB */ u8 pad1CB;
-    /* 0x1CC */ f32 unk1CC;
-    /* 0x1D0 */ s8 unk1D0;
-    /* 0x1D1 */ u8 pad1D1[0xC];
-    /* 0x1DD */ u8 unk1DD[3];
-    /* 0x1E0 */ u8 unk1E0[3];
-    /* 0x1E3 */ u8 pad1E3;
-    /* 0x1E4 */ u8 unk1E4;
-    /* 0x1E5 */ u8 unk1E5;
-    /* 0x1E6 */ u8 unk1E6;
-    /* 0x1E7 */ u8 pad1E7[0x15];
-    /* 0x1FC */ u8 unk1FC;
-    /* 0x1FD */ u8 pad1FD[0x12];
-    /* 0x20F */ u8 unk20F;
-    /* 0x210 */ u8 unk210;
-    /* 0x211 */ u8 unk211;
-    /* 0x212 */ u8 unk212;
-    /* 0x213 */ u8 pad213[0xE];
-    /* 0x221 */ s8 unk221;
-    /* 0x222 */ u8 pad222[0x2];
-    /* 0x224 */ s16 unk224;
-    /* 0x226 */ u8 pad226[0xC];
-    /* 0x232 */ u8 unk232;
-    /* 0x233 */ u8 pad233[0x9];
-    /* 0x23C */ u8 unk23C;
-    /* 0x23D */ u8 unk23D;
-    /* 0x23E */ u8 unk23E;
-    /* 0x23F */ u8 pad23F[0x7];
-    /* 0x246 */ u8 unk246;
-    /* 0x247 */ u8 unk247;
-    /* 0x248 */ u8 unk248;
-    /* 0x249 */ u8 pad249[0x17];
-    /* 0x260 */ ObjAlloc260 *unk260;
-    /* 0x264 */ u8 pad264[0xC];
-    /* 0x270 */ f32 unk270;
-    /* 0x274 */ u8 pad274[0x14];
-    /* 0x288 */ u8 unk288;
-    /* 0x289 */ u8 pad289[0x3];
-    /* 0x28C */ u8 *modelData[7][2];  // per model in modelIds: shared or private copies of D_800D19A0[id]
-    /* 0x2C4 */ u8 *modelIds;
-    /* 0x2C8 */ u8 lodCount;
-    /* 0x2C9 */ u8 modelCount;
-    /* 0x2CA */ u8 pad2CA;
-    /* 0x2CB */ s8 unk2CB;
-    /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ struct197 *unk2D0;
-    /* 0x2D4 */ u8 pad2D4[0x18];
-    /* 0x2EC */ s32 unk2EC;
-    /* 0x2F0 */ u8 pad2F0[0x10];
-    /* 0x300 */ u8 unk300;
-    /* 0x301 */ u8 unk301;
-    /* 0x302 */ u8 pad302[0x2];
-    /* 0x304 */ s32 unk304[4];      // one per player
-    /* 0x314 */ s32 *unk314;
-    /* 0x318 */ Camera *camera;
-    /* 0x31C */ ActorCtl *unk31C;
-    /* 0x320 */ u8 pad320[0xC];
-} GameObj; // size 0x32C
 
 // One entry of a model's definition table D_800D1C90 (header struct124).
 typedef struct ModelDef {
@@ -280,7 +71,7 @@ typedef struct PartSet {
 
 // Result of a ray cast (func_15081690), consumed by func_15081E78.
 typedef struct RayHit {
-    /* 0x00 */ GameObj *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ f32 dist;
     /* 0x08 */ Vec3f hit;
     /* 0x14 */ Vec3f centre;
@@ -307,7 +98,6 @@ typedef struct {
     /* 0x208 */ u16 unk208;     // bit per player
 } Struct800D2138;
 
-extern GameObj D_800CC2D0[26];
 extern u16 D_800C5A90[187];
 extern u8 *D_800D19A0[187];
 extern ModelDef *D_800D1C90[187];
@@ -324,7 +114,7 @@ extern u8 D_800D2101;
 extern s8 D_800D2130;
 extern u8 *D_80086CAC[];
 extern PartSet D_80086CC4[];
-extern s32 (*D_80086C90[])(GameObj *, GameObj *, s32);
+extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 extern s8 D_8008FE44[];
 extern u8 D_80099AC4[];
 extern u8 D_800A7230[][8];
@@ -335,33 +125,28 @@ extern u16 D_800C5628[];
 extern u16 D_800C57A0[];
 extern MtxF D_800D9C10[];
 
-extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
-extern GameObj *func_1505F0AC(s32);
-extern void func_15060F28(GameObj *obj, s32 arg1);
-extern void func_150615DC(GameObj *obj);
-extern void func_15062BDC(GameObj *obj, f32 arg1, f32 arg2);
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern void func_100043B4(s32 *arg0, u32 arg1);
 extern s32 func_1502B020(s32, s32, s32, s32);
-extern void func_150302F0(GameObj *obj, s32 setId);
-extern GameObj *func_15030AF4(GameObj *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-extern void func_150335C8(GameObj *, GameObj *, s32, s32, s32, s32);
-extern void func_15036C70(GameObj *obj);
+extern void func_150302F0(Actor *obj, s32 setId);
+extern Actor *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
+extern void func_15036C70(Actor *obj);
 extern s32 func_1503D660(s32 modelId, s32 arg1);
 extern s32 func_1503D774(s32 modelId, s32 arg1);
-extern s32 func_1503DA9C(GameObj *, s32, s32, s32);
-extern s32 func_1505D024(GameObj *, s32, u16, s32);
-extern GameObj *func_1505ED34(void);
-extern GameObj *func_1505EEF4(void);
-extern void func_1505F188(GameObj *obj);
-extern void func_15060A30(s32, GameObj *);
-extern void func_15060A9C(s32, GameObj *);
-extern void func_1506AC8C(GameObj *, s32, s32);
-extern void func_1507DE4C(GameObj *);
-extern void func_1507DF10(GameObj *obj, s32 arg1);
-extern s32 func_1508114C(GameObj *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-extern s32 func_15084D00(GameObj *);
+extern s32 func_1503DA9C(Actor *, s32, s32, s32);
+extern s32 func_1505D024(Actor *, s32, u16, s32);
+extern Actor *func_1505ED34(void);
+extern Actor *func_1505EEF4(void);
+extern void func_1505F188(Actor *obj);
+extern void func_15060A30(s32, Actor *);
+extern void func_15060A9C(s32, Actor *);
+extern void func_1506AC8C(Actor *, s32, s32);
+extern void func_1507DE4C(Actor *);
+extern void func_1507DF10(Actor *obj, s32 arg1);
+extern s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
+extern s32 func_15084D00(Actor *);
 extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern void func_150B5C38(void *, u8, s32);
@@ -371,40 +156,40 @@ extern void func_150D728C(void *, void *, void *, u8, s32);
 extern void func_150EB484(f32 *, f32 *, f32 *);
 extern void func_15104608(f32, f32, f32, s32);
 extern void func_1510D720(s32 arg0);
-extern void func_15137610(GameObj *, void *, void *, void *, u8, s32);
-extern void func_15138C80(GameObj *, s32, s32);
+extern void func_15137610(Actor *, void *, void *, void *, u8, s32);
+extern void func_15138C80(Actor *, s32, s32);
 extern f32 func_15143E64(Vec3f *);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern void func_15145974(void *, f32 *, f32 *);
-extern s32 func_1514D15C(GameObj *obj);
-extern s32 *func_1515D440(void);
+extern s32 func_1514D15C(Actor *obj);
+extern void *func_1515D440(void);
 extern s32 func_1515D480(s32);
 extern s32 func_151D3480(void *, void *, void *, u8, u8, s32);
 extern s32 func_151E5F64(s32 arg0);
 
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, GameObj *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(GameObj *obj, u16 part, u8 skip);
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
+void func_15081E0C(Actor *obj, u16 part, u8 skip);
 s32 func_150825C0(s32 spawnIdx, s32 arg1);
 s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150829D8(GameObj *obj);
-void func_150832AC(GameObj *obj);
-void func_15083384(GameObj *obj, s32 arg1);
-GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3);
+void func_150829D8(Actor *obj);
+void func_150832AC(Actor *obj);
+void func_15083384(Actor *obj, s32 arg1);
+Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn);
-GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-GameObj *func_15083E90(u8 id);
-void func_150843AC(GameObj *obj, s32 model);
+s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
+void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
+Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
+Actor *func_15083E90(u8 id);
+void func_150843AC(Actor *obj, s32 model);
 void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(GameObj *obj);
-void func_15084C30(GameObj *obj);
+u8 func_150849A0(Actor *obj);
+void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
-void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
+void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
     s32 surf;
     f32 hitX;
     f32 hitY;
@@ -415,7 +200,7 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
     s32 bone;
     s16 offset[4];
     s32 i;
-    GameObj *obj;
+    Actor *obj;
     s32 best;
     s32 skip;
     s32 ret;
@@ -532,7 +317,7 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
 
 /* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
    unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
-s32 func_15081C20(Vec3f *origin, Vec3f *dir, GameObj *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
     Vec3f pos;
 
     pos.x = obj->x_position;
@@ -580,7 +365,7 @@ s32 func_15081C20(Vec3f *origin, Vec3f *dir, GameObj *obj, Vec3f *outNear, Vec3f
     return 1;
 }
 
-void func_15081E0C(GameObj *obj, u16 part, u8 skip) {
+void func_15081E0C(Actor *obj, u16 part, u8 skip) {
     if (D_800BE616 == 0) {
         if (obj->health != 0) {
             obj->health = 7;
@@ -594,12 +379,12 @@ void func_15081E0C(GameObj *obj, u16 part, u8 skip) {
 /* Applies the effects of a ray hit of the given kind fired by self: world impact effects for a world
    hit, otherwise hit reactions, sounds and effects on the object that was hit. Returns 0 for no hit,
    1 for a world hit and 2 for an object hit. */
-s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
+s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     s32 sound;
     f32 yaw;
     f32 pitch;
     u8 playImpact;
-    GameObj *obj;
+    Actor *obj;
     ActorCtl *ext;
     // matching: volatile keeps IDO from hoisting the li/lw of noHealth out of the if/else
     volatile s32 noHealth;
@@ -751,7 +536,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
             break;
         }
         if (spawnEffect != 0 && obj->health < 2) {
-            GameObj source;
+            Actor source;
 
             source.x_position = hit->hit.x;
             source.y_position = hit->hit.y;
@@ -884,7 +669,7 @@ void func_1508295C(s32 arg0, s32 arg1, s32 firstRange) {
     }
 }
 
-void func_150829D8(GameObj *obj) {
+void func_150829D8(Actor *obj) {
     obj->unkF8 &= 0xF7FFFFFD;
     obj->unkF8 |= 4;
     if ((obj->unk31C != NULL) && (obj->unk31C->unk56 == 0)) {
@@ -914,14 +699,14 @@ void func_150829D8(GameObj *obj) {
    reuse, 0 for the default). Returns the 1-based slot, or 0 on failure. */
 s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot) {
     s32 type;
-    GameObj *obj;
+    Actor *obj;
     s32 idx;
     s32 ret;
     s32 t;
     s32 i;
     s32 found;
     u32 model;
-    ObjAlloc260 *mem;
+    VtxMorphState *mem;
     u16 angle;
 
     if (D_800D210C[spawnIdx] & ~0x80) {
@@ -972,11 +757,11 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     obj->x_position = spawn->x;
     obj->y_position = spawn->y;
     obj->z_position = spawn->z;
-    obj->unk212 = 0xFF;
+    obj->unk212[0] = 0xFF;
     obj->unk20F = 0xFF;
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
-    obj->unk128 = 0xFF;
+    obj->team = 0xFF;
     obj->old_x_position = obj->x_position;
     obj->old_y_position = obj->y_position;
     obj->unk1CC = obj->y_position;
@@ -994,7 +779,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         u8 pad;
 
         if (obj->unk127 != 0xFF) {
-            obj->unk128 = func_151E5F64(obj->unk127);
+            obj->team = func_151E5F64(obj->unk127);
             obj->unk31C->grenade_count = D_800D2130;
             obj->unk31C->unk1AF = 0x40;
             obj->unk31C->lastSpawnIndex = -1;
@@ -1070,12 +855,12 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             t = 3;
         }
         if (type == 0x3B) {
-            obj->unk68 = t + 1;
+            obj->unk68[0] = t + 1;
         } else if (type == 0x77) {
-            obj->unk68 = t + 0x10;
+            obj->unk68[0] = t + 0x10;
         }
     }
-    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->unk2E == 0xFF)) {
+    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->keepTime == 0xFF)) {
         found = obj->modelCount;
         if (found == 0) {
             found = 1;
@@ -1097,20 +882,20 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         }
     }
     if (found) {
-        mem = allocate_memory(sizeof(ObjAlloc260), 1, 0, 2);
-        obj->unk260 = mem;
+        mem = allocate_memory(sizeof(VtxMorphState), 1, 0, 2);
+        obj->morph = mem;
         if (mem != NULL) {
-            mem->unk8 = 0;
-            mem->unk9 = 0xFF;
-            mem->unk0 = 0.0f;
-            mem->unk4 = 1.0f;
+            mem->prev = 0;
+            mem->cur = 0xFF;
+            mem->blend = 0.0f;
+            mem->rate = 1.0f;
         }
     }
     func_15084C30(obj);
     return ret;
 }
 
-void func_150832AC(GameObj *obj) {
+void func_150832AC(Actor *obj) {
     SpawnRecord *spawn;
     u8 n;
     s32 i;
@@ -1138,7 +923,7 @@ void func_150832AC(GameObj *obj) {
     }
 }
 
-void func_15083384(GameObj *obj, s32 arg1) {
+void func_15083384(Actor *obj, s32 arg1) {
     s32 partSet;
     s32 group;
     ActorCtl *ext;
@@ -1218,9 +1003,9 @@ void func_15083384(GameObj *obj, s32 arg1) {
 }
 
 /* Creates every part of part set setId (1-based) on parent; returns the last part created. */
-GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3) {
+Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     PartDef *parts;
-    GameObj *ret;
+    Actor *ret;
     s32 i;
 
     setId--;
@@ -1238,7 +1023,7 @@ GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3) {
 }
 
 /* Removes the child objects of part set setId (1-based) that belong to parent. */
-void func_150836CC(GameObj *parent, s32 setId) {
+void func_150836CC(Actor *parent, s32 setId) {
     PartSet *set;
     s32 i;
     PartDef *parts;
@@ -1248,7 +1033,7 @@ void func_150836CC(GameObj *parent, s32 setId) {
     set = &D_80086CC4[setId];
     parts = set->parts;
     for (i = 0; i < set->count; i++) {
-        GameObj *child;
+        Actor *child;
 
         if (parts[i].type == 0) {
             child = func_1505F0AC(parts[i].unk0);
@@ -1263,7 +1048,7 @@ void func_150836CC(GameObj *parent, s32 setId) {
 
 /* Sets object objIdx's model to modelId (0xFF for none) and loads its per-model state. */
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
-    GameObj *obj = &D_800CC2D0[objIdx];
+    Actor *obj = &D_800CC2D0[objIdx];
     ModelDef *def;
 
     obj->id = modelId;
@@ -1289,7 +1074,7 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
 }
 
 /* Allocates the animation state block of obj's model. Returns 1 only if the allocation fails. */
-s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3) {
+s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
     modelId = obj->id;
@@ -1309,7 +1094,7 @@ s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3) {
 }
 
 /* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides unk10. */
-void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
+void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     ModelDef *def;
     u16 override;
 
@@ -1336,8 +1121,8 @@ void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk2CB = def->unk33;
         obj->unk2CC = def->unk34;
         obj->unk5 = def->unk12;
-        obj->unk68 = def->unk3B;
-        obj->unk69 = def->unk3C;
+        obj->unk68[0] = def->unk3B;
+        obj->unk68[1] = def->unk3C;
         obj->unk160 = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = D_80086CAC[def->subModelList];
@@ -1351,8 +1136,8 @@ void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
 }
 
 /* Creates a child object of parent with model modelId (a part from func_15083568). */
-GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
-    GameObj *obj;
+Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
+    Actor *obj;
     // matching: unused stack slot
     s32 pad;
     s32 animFlag;
@@ -1463,8 +1248,8 @@ s32 func_15083E0C(u8 id) {
 }
 
 /* Returns the active object with unique id id, or NULL. */
-GameObj *func_15083E90(u8 id) {
-    GameObj *obj;
+Actor *func_15083E90(u8 id) {
+    Actor *obj;
     s32 i;
 
     if (id == 0) {
@@ -1483,7 +1268,7 @@ GameObj *func_15083E90(u8 id) {
 
 /* Returns the slot of the active object with unique id id, or -1. */
 s32 func_15083FB0(u8 id) {
-    GameObj *obj;
+    Actor *obj;
 
     obj = func_15083E90(id);
     if (obj != NULL) {
@@ -1493,7 +1278,7 @@ s32 func_15083FB0(u8 id) {
 }
 
 s32 func_15084000(void) {
-    GameObj *obj = func_1505EEF4();
+    Actor *obj = func_1505EEF4();
 
     if (obj != NULL) {
         return obj - D_800CC2D0;
@@ -1503,7 +1288,7 @@ s32 func_15084000(void) {
 
 /* Sets up obj's two data pointers for its model'th model: shared with D_800D19A0[id] or private
    copies, depending on the owning spawn record's mode (unk10 & 3). Returns 1 if an allocation failed. */
-s32 func_15084044(GameObj *obj, s32 model) {
+s32 func_15084044(Actor *obj, s32 model) {
     u8 *slot;
     SpawnRecord *spawn;
     s32 mode;
@@ -1592,7 +1377,7 @@ s32 func_15084044(GameObj *obj, s32 model) {
 }
 
 /* Releases the data pointers of all of obj's models. */
-void func_1508434C(GameObj *obj) {
+void func_1508434C(Actor *obj) {
     s32 count;
     s32 i;
 
@@ -1607,7 +1392,7 @@ void func_1508434C(GameObj *obj) {
 
 /* Releases the data pointers of obj's model'th model: frees private copies, drops the
    reference count of shared ones. */
-void func_150843AC(GameObj *obj, s32 model) {
+void func_150843AC(Actor *obj, s32 model) {
     // matching: a named trip count takes its saved register before the D_800D19A0 base
     u8 limit;
     u8 *data;
@@ -1661,7 +1446,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
 
 /* Releases obj's model data, and frees each of its models (and their tables) that no other
    active object still uses. */
-void func_15084558(GameObj *self) {
+void func_15084558(Actor *self) {
     s32 id;
     u8 *list;
     s32 i;
@@ -1671,7 +1456,7 @@ void func_15084558(GameObj *self) {
     s32 unique;
     s32 freeData;
     s32 freeDef;
-    GameObj *obj;
+    Actor *obj;
     u8 otherCount;
     u8 *otherList;
     // matching: unused stack slot
@@ -1753,7 +1538,7 @@ void func_15084558(GameObj *self) {
 }
 
 /* Returns obj's current model id (modelIds[lodRequest - 1], or the first). */
-u8 func_150849A0(GameObj *obj) {
+u8 func_150849A0(Actor *obj) {
     s32 current = obj->lodRequest;
 
     if (current != 0) {
@@ -1763,7 +1548,7 @@ u8 func_150849A0(GameObj *obj) {
 }
 
 /* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
-u8 func_150849CC(GameObj *obj, s32 *outIndex) {
+u8 func_150849CC(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 
@@ -1789,7 +1574,7 @@ u8 func_150849CC(GameObj *obj, s32 *outIndex) {
 void func_15084A18(void) {
     s32 i;
     s32 m;
-    GameObj *obj;
+    Actor *obj;
     s32 j;
     s32 k;
     ModelReloc *relocs;
@@ -1832,7 +1617,7 @@ void func_15084A18(void) {
     }
 }
 
-void func_15084C30(GameObj *obj) {
+void func_15084C30(Actor *obj) {
     struct197 *anim;
     f32 phase;
 

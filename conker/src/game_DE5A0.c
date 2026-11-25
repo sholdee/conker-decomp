@@ -117,13 +117,6 @@ void func_150B12FC(Actor *obj) {
     }
 }
 
-/* D_800D20FC is a table of 0x30-byte spawn records. */
-typedef struct {
-    u8 pad0[0x8];
-    s16 y;
-    u8 padA[0x26];
-} SpawnRecord;
-
 /*
  * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (unk223 == 14)
  * straight at its target object D_800CC2D0[unk222]. A nonzero unk224 overrides the height: 10000 means its

@@ -99,7 +99,7 @@ void func_1503DD1C(s32 id);
  * OR of error bits (1 out of memory, 2/4 a missing data block, 8 no memory for the vertex runs,
  * 0x10 a missing texture), in which case everything loaded so far is freed again.
  */
-s32 func_1503CF20(s32 id, s32 arg1, struct129 *def, s32 loadTextures, s32 flags) {
+s32 func_1503CF20(s32 id, s32 arg1, SpawnRecord *def, s32 loadTextures, s32 flags) {
     s32 ret;
     ModelHeader *hdr;
     u32 size;
@@ -159,7 +159,7 @@ s32 func_1503CF20(s32 id, s32 arg1, struct129 *def, s32 loadTextures, s32 flags)
         func_1503D984(id);
         ret |= func_1503D804(id);
     }
-    if (ret == 0 && ((def != NULL && (def->unk18 & 0x4000)) || (flags & 1))) {
+    if (ret == 0 && ((def != NULL && (def->objFlags & 0x4000)) || (flags & 1))) {
         if (func_150028BC(id) != 0) {
             ret |= 8;
         }
@@ -458,17 +458,17 @@ s32 func_1503DA3C(s32 id, s32 index) {
  * model'th model with func_15084044. Returns 0, or the error bits of the step that failed.
  */
 s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
-    struct129 *def;
+    SpawnRecord *def;
     Gfx *dl;
     s32 ret;
     s32 i;
 
-    def = obj->unk144;
+    def = obj->spawn;
     if (D_800D19A0[id] == NULL) {
         ret = func_1503CF20(id, 0, def, loadTextures, obj->unkAC);
     } else {
         ret = 0;
-        if ((def != NULL && (def->unk18 & 0x4000)) || (obj->unkAC & 1)) {
+        if ((def != NULL && (def->objFlags & 0x4000)) || (obj->unkAC & 1)) {
             if (D_800C5C08[id] == 0) {
                 func_150028BC(id);
             }

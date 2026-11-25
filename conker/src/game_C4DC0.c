@@ -962,7 +962,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk31C->unk7C = cmd->a[0];
         break;
     case 0x7F:
-        obj->unk144->unk0 = cmd->a[0];
+        obj->spawn->flags = cmd->a[0];
         break;
     case 0x80:
         {

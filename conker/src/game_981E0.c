@@ -1442,10 +1442,10 @@ void func_1506DCDC(void) {
 void func_1506DCF8(void) {
 }
 
-/* Sets bits D_800D1580 in unkF8, or resets it to the unk144 default when 0. */
+/* Sets bits D_800D1580 in unkF8, or resets it to the spawn record default when 0. */
 void func_1506DD00(void) {
     if (D_800D1580 == 0) {
-        D_800D154C->unkF8 = D_800D154C->unk144->unk18;
+        D_800D154C->unkF8 = D_800D154C->spawn->objFlags;
     } else {
         D_800D154C->unkF8 |= D_800D1580;
     }

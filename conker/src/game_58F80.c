@@ -309,7 +309,7 @@ void func_1502BD84(Actor *obj, s32 index) {
         if (obj->unkF8 & 0x4000) {
             func_150A4B04(obj);
         }
-        if (obj->unk260 != 0) {
+        if (obj->morph != NULL) {
             func_1517AD00(obj->unk134, obj->unk135, index);
         }
     }
@@ -999,13 +999,13 @@ void func_1502DB84(MtxF mtx, s32 index) {
     s32 moved;
     u8 frameBuf[0x320];
     u8 remapBuf[0x44];
-    struct129 *unk144;
+    SpawnRecord *unk144;
 
     obj = &D_800CC2D0[index];
     id = obj->id;
     remap = NULL;
     if (D_800D19A0[id] == 0) {
-        unk144 = obj->unk144;
+        unk144 = obj->spawn;
         if (func_1503CF20(id, 0, unk144, 1, obj->unkAC) != 0) {
             obj->unk1D4 = NULL;
             return;
@@ -1898,11 +1898,11 @@ void func_1502FD70(Actor *arg0) {
     counter = &D_800D2040[id];
     if (*counter != 0xFF) {
         // matching: the shared default store needs the goto (an || condition reorders the tests)
-        if (obj->unk144 != NULL) {
-            if (obj->unk144->keepTime != 0xFF) {
-                if (obj->unk144->keepTime != 0) {
-                    if (*counter < obj->unk144->keepTime * 30) {
-                        *counter = obj->unk144->keepTime * 30;
+        if (obj->spawn != NULL) {
+            if (obj->spawn->keepTime != 0xFF) {
+                if (obj->spawn->keepTime != 0) {
+                    if (*counter < obj->spawn->keepTime * 30) {
+                        *counter = obj->spawn->keepTime * 30;
                     }
                 } else {
                     goto useDefault;

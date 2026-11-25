@@ -8,40 +8,6 @@
 #undef D_800D2104
 #undef D_800D2110
 
-// One 0x30-byte entry of the level's spawn table D_800D20FC (same layout as game_AEB40.c's SpawnRecord).
-typedef struct SpawnRecord {
-    /* 0x00 */ u16 flags;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 interaction_state;
-    /* 0x04 */ u8 type;         // model id
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 angle;        // high byte of the facing angle
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x2];
-    /* 0x18 */ s32 objFlags;    // copied to the object's unkF8
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[0x2];
-    /* 0x20 */ f32 xz_scale;
-    /* 0x24 */ f32 y_scale;
-    /* 0x28 */ u8 unique_id;
-    /* 0x29 */ u8 partSet;
-    /* 0x2A */ u8 pad2A[0x2];
-    /* 0x2C */ u16 unk2C;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-} SpawnRecord; // size 0x30
-
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 D_800BE5A8[];
