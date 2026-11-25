@@ -47,9 +47,9 @@ void func_150AEEB0(Actor *obj, u8 owner) {
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 8;
-        motion.unk1A = 0xFF - (((u32)obj->unk184 >> 5) & 3) * 64;
+        motion.shade = 0xFF - (((u32)obj->unk184 >> 5) & 3) * 64;
         motion.flags = 0x28;
-        motion.unk1B = 0xFF;
+        motion.alpha = 0xFF;
         do {
             yaw = func_150ADA20() & 0xFF; // matching: the redundant mask changes the schedule
             pitch = -(func_150ADA20() % 21U + 40);
@@ -83,7 +83,7 @@ s32 func_150AF1C0(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     if ((u8)alpha < 0) { // matching: never true, but the original emits the andi/bgez test
         return 0;
     }

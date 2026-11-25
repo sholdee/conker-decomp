@@ -53,7 +53,7 @@ typedef struct {
     /* 0x2C */ f32 rateRange;
     /* 0x30 */ f32 halfWidth;
     /* 0x34 */ f32 halfWidthRange;
-    /* 0x38 */ s16 unk1B; /* TrailMotion.unk1B */
+    /* 0x38 */ s16 unk1B; /* TrailMotion.alpha */
     /* 0x3A */ s16 unk1BRange;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 gravityRange;
@@ -160,7 +160,7 @@ void func_15189A00(SprayEmitter *emitter) {
         motion.unk14 = -10000.0f;
         motion.flags = 0x48;
         motion.texture = 3;
-        motion.unk1A = 0xFF;
+        motion.shade = 0xFF;
         render.unk0 = 0;
         render.setGeometryMode = 1;
         render.clearGeometryMode = 0x160600;
@@ -201,7 +201,7 @@ void func_15189A00(SprayEmitter *emitter) {
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
             motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.unk1B = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
+            motion.alpha = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
             spawn.life = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.list);
@@ -227,7 +227,7 @@ s32 func_15189EBC(Trail *trail) {
             splashPos.x = points[trail->start].pos.x;
             splashPos.y = params->floorY;
             splashPos.z = points[trail->start].pos.z;
-            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.unk1B, 0,
+            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
                           &splashPos, trail->link.owner, trail->link.list);
         }
         params->base.state = 4;

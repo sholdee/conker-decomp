@@ -113,22 +113,10 @@ typedef struct {
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 vel[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 flags;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 pad1C[4];
-} FxSprayPart;
-
 extern FxSprayParams D_800A9068[];
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-s32 func_15147DA0(EffectTemplate18 *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
+s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
                   FxSurfaceHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
@@ -137,7 +125,7 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
     FxSprayParams *params;
     EffectTemplate18 spawn;
-    FxSprayPart part;
+    TrailMotion part;
     f32 roll;
     TrailRender style;
     f32 sinYaw;
@@ -173,8 +161,8 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         part.unk14 = y;
         spawn.pos.x = x;
         spawn.pos.z = z;
-        part.unk19 = D_800AB3F4[payload->kind];
-        part.unk1A = 255;
+        part.texture = D_800AB3F4[payload->kind];
+        part.shade = 255;
         colorFlag = D_800AB404[payload->kind] ? 0x20 : 0;
         part.flags = colorFlag | 8;
     }
@@ -189,23 +177,23 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         part.flags &= ~3;
     }
     random = func_150ADA20();
-    part.unk1B = random % (params->unk1 + 1) + params->unk0;
+    part.alpha = random % (params->unk1 + 1) + params->unk0;
     random = func_150ADA20();
     pitch = random % (params->pitchRange + 1) + params->pitchBase;
     sinPitch = func_151423D8(pitch);
     cosPitch = func_151423D8(pitch - 0x40);
     speed = func_150ADA68() * params->speedRange + params->speedBase;
     horizontal = speed * sinPitch;
-    part.vel[0] = horizontal * cosYaw;
+    part.velocity.x = horizontal * cosYaw;
     vertical = -speed * cosPitch;
-    part.vel[1] = vertical;
-    part.vel[2] = horizontal * sinYaw;
+    part.velocity.y = vertical;
+    part.velocity.z = horizontal * sinYaw;
     random = func_150ADA20();
     spawn.itemCount = random % (params->unk14 + 1) + params->unk10;
     random = func_150ADA20();
     spawn.life = random % (params->unk1A + 1) + params->unk18;
-    part.unk0 = func_150ADA68() * params->unk20 + params->unk1C;
-    part.unk10 = func_150ADA68() * params->unk28 + params->unk24;
+    part.halfWidth = func_150ADA68() * params->unk20 + params->unk1C;
+    part.gravity = func_150ADA68() * params->unk28 + params->unk24;
     func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
     return 1;
 }

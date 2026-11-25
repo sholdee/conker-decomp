@@ -1649,11 +1649,24 @@ typedef struct TrailMotion {
     /* 0x14 */ f32 unk14;
     /* 0x18 */ u8 flags;
     /* 0x19 */ u8 texture;          /* index into D_80091564 */
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;            /* alpha; faded by func_150C1978 */
+    /* 0x1A */ u8 shade;            /* passed with alpha to func_151441A4 / func_151442FC */
+    /* 0x1B */ u8 alpha;            /* faded by func_150C1978 */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
 } TrailMotion; /* size 0x20 */
+
+/* matching: the first 0x1C bytes of TrailMotion (callers that never set unk1C/unk1E; func_15147DA0 copies
+ * past its end); a full TrailMotion on the stack changes the frame. */
+typedef struct TrailMotion1C {
+    /* 0x00 */ f32 halfWidth;
+    /* 0x04 */ Vec3f velocity;
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 texture;
+    /* 0x1A */ u8 shade;
+    /* 0x1B */ u8 alpha;
+} TrailMotion1C;
 
 /* User data of a func_15147DA0 trail (Trail.params). */
 typedef struct TrailParams {

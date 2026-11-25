@@ -659,19 +659,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     return 1;
 }
 
-typedef struct {
-    f32 scale;
-    Vec3f vel;
-    f32 size;
-    f32 unk14;
-    u8 flags;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} SplashMotion; /* 0x20 */
-
 /* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
 typedef struct {
     f32 burstScale;
@@ -680,9 +667,9 @@ typedef struct {
     u8 pad9[3];
 } SplashBurst; /* 0xC */
 
-/* The block a live splash points to at +0x98: its SplashMotion copy, state, and SplashBurst. */
+/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
 typedef struct {
-    SplashMotion motion;
+    TrailMotion motion;
     u8 unk20;
     u8 pad21[0x27];
     SplashBurst burst;
@@ -708,7 +695,7 @@ typedef struct {
 
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-extern Splash *func_15147DA0(EffectTemplate *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                              TrailRender *, s32, s32, s32);
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
@@ -717,7 +704,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
                       u8 arg10, s32 arg11) {
     Splash *splash;
     EffectTemplate spawn;
-    SplashMotion motion;
+    TrailMotion motion;
     SplashBurst burst;
     s32 a;
     s32 b;
@@ -734,16 +721,16 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
     spawn.kind = 1;
     spawn.unk14 = -1;
     spawn.unk18 = argF;
-    motion.scale = scale;
-    motion.vel = *vel;
-    motion.size = size;
+    motion.halfWidth = scale;
+    motion.velocity = *vel;
+    motion.gravity = size;
     motion.unk14 = -10000.0f;
     flag20 = D_800AB404[kind] ? 0x20 : 0;
     flag80 = D_800AB330[kind] ? 0x80 : 0;
     motion.flags = flag80 | 8 | flag20 | 0x40;
-    motion.unk19 = D_800AB3F4[kind];
-    motion.unk1A = 0xFF;
-    motion.unk1B = arg4;
+    motion.texture = D_800AB3F4[kind];
+    motion.shade = 0xFF;
+    motion.alpha = arg4;
     motion.unk1C = argD;
     motion.unk1E = argE;
     if (arg7 != 0) {
@@ -796,10 +783,10 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     point.y = floorY + 2.0f;
     point.z = nodes[splash->node].pos.z;
     if (func_150ADA20() & 1) {
-        func_151D9B8C(burst->kind, (state->motion.scale * 3.0f) * burst->burstScale, state->motion.unk1B, arg5,
+        func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, arg5,
                       &point, 100, 0, 1, 0, splash->unkC, splash->unk1);
     } else {
-        func_151DAB58(burst->kind, (state->motion.scale * 1.1f) * burst->burstScale, state->motion.unk1B, &point, 1,
+        func_151DAB58(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
                       splash->unkC, splash->unk1);
     }
     state->unk20 = 4;
@@ -815,7 +802,7 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     point.x = nodes[splash->node].pos.x;
     point.y = floorY;
     point.z = nodes[splash->node].pos.z;
-    func_151D9FC0(state->burst.kind, state->motion.scale * 11.0f * state->burst.altBurstScale, state->motion.unk1B,
+    func_151D9FC0(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
                   arg5, &point, splash->unkC, splash->unk1);
     state->unk20 = 4;
     return 1;

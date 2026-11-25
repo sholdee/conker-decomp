@@ -232,8 +232,8 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.velocity.x = speed * cosA;
                 motion.velocity.z = speed * sinA;
                 motion.flags = emitter->params.flags | 8;
-                motion.unk1A = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
-                motion.unk1B = 0xFF;
+                motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
+                motion.alpha = 0xFF;
                 trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.list);
                 if (trail != NULL) {
@@ -356,7 +356,7 @@ s32 func_1518C0B8(Trail *trail) {
     return 1;
 }
 
-/* Trail fade: alpha (motion.unk1B) follows 8 * unk1C, capped at 0xFF. */
+/* Trail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
 s32 func_1518C540(Trail *trail) {
     s32 alpha;
     TrailParams *params;
@@ -366,7 +366,7 @@ s32 func_1518C540(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     if ((alpha & 0xFF) < 0) { /* never true */
         return 0;
     }

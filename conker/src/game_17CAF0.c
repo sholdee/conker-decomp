@@ -547,26 +547,13 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    f32 size;
-    Vec3f velocity;
-    f32 growth;
-    u8 pad14[4];
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    s16 unk1C;
-    s16 unk1E;
-} Motion15147DA0;
-
 extern s32 func_15147DA0(EffectTemplate *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
 
 /* Spawns a random number of particles off a surface triangle, each moving in a random direction
  * inside the cone around the triangle's normal. */
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
-    Motion15147DA0 motion;
+    TrailMotion motion;
     u8 kind;
     Vec3f axis0;
     f32 length0, inverse0;
@@ -595,9 +582,9 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
         normal.z *= 1000.0f;
         spawn.kind = 1;
         spawn.flags = config->headerFlags;
-        motion.green = config->green;
-        motion.blue = config->blue;
-        motion.red = config->red;
+        motion.texture = config->green;
+        motion.shade = config->blue;
+        motion.flags = config->red;
         motion.unk1C = config->unk9C;
         motion.unk1E = config->unk9E;
         spawn.pos = config->pos;
@@ -610,8 +597,8 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
             motion.alpha = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
             spawn.itemCount = func_150ADA20() % (u32)(config->itemCountRange + 1) + config->itemCountBase;
             spawn.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
-            motion.size = func_150ADA68() * config->sizeRange + config->sizeBase;
-            motion.growth = func_150ADA68() * config->growthRange + config->growthBase;
+            motion.halfWidth = func_150ADA68() * config->sizeRange + config->sizeBase;
+            motion.gravity = func_150ADA68() * config->growthRange + config->growthBase;
             motion.velocity.x = (axis0.x * first + axis1.x * second + normal.x) * speed;
             motion.velocity.y = (axis0.y * first + axis1.y * second + normal.y) * speed;
             motion.velocity.z = (axis0.z * first + axis1.z * second + normal.z) * speed;
@@ -628,7 +615,7 @@ void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
  * and pitch; func_151423D8 is the cosine of a 256-step angle. */
 void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
-    Motion15147DA0 motion;
+    TrailMotion motion;
     s32 count;
     s16 yaw;
     s16 pitch;
@@ -641,9 +628,9 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
 
     spawn.kind = 1;
     spawn.flags = config->headerFlags;
-    motion.green = config->green;
-    motion.blue = config->blue;
-    motion.red = config->red;
+    motion.texture = config->green;
+    motion.shade = config->blue;
+    motion.flags = config->red;
     spawn.pos = config->pos;
     motion.unk1C = config->unk80;
     motion.unk1E = config->unk82;
@@ -660,8 +647,8 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
         motion.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
         spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
-        motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
-        motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;
+        motion.halfWidth = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        motion.gravity = (func_150ADA68() * config->growthRange) + config->growthBase;
         horizontal = speed * cosPitch;
         motion.velocity.x = horizontal * sinYaw;
         motion.velocity.y = -speed * sinPitch;
@@ -971,23 +958,11 @@ void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-/* Motion15147DA0 without the trailing unk1C/unk1E, which this caller never sets. */
-typedef struct {
-    f32 size;
-    Vec3f velocity;
-    f32 growth;
-    u8 pad14[4];
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} MotionShort15147DA0;
-
 /* Like func_15151A38, with a fixed color and fixed func_15147DA0 parameters. */
 void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     EffectTemplate spawn;
     s32 count;
-    MotionShort15147DA0 motion;
+    TrailMotion1C motion;
     s16 yaw;
     TrailRender params;
     s16 pitch;
@@ -999,9 +974,9 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
 
     spawn.kind = 1;
     spawn.flags = 1;
-    motion.green = config->green;
-    motion.blue = config->blue;
-    motion.red = config->red;
+    motion.texture = config->green;
+    motion.shade = config->blue;
+    motion.flags = config->red;
     motion.alpha = config->alpha;
     spawn.pos = config->pos;
     params.unk0 = 0;
@@ -1024,8 +999,8 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
         spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
-        motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
-        motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;
+        motion.halfWidth = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        motion.gravity = (func_150ADA68() * config->growthRange) + config->growthBase;
         motion.velocity.x = (speed * cosPitch) * sinYaw;
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = (speed * cosPitch) * cosYaw;

@@ -54,9 +54,9 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     spawn.kind = 1;
     spawn.flags = 1;
     motion.texture = 10;
-    motion.unk1A = 0xFF;
+    motion.shade = 0xFF;
     motion.flags = 40;
-    motion.unk1B = 0xFF;
+    motion.alpha = 0xFF;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
@@ -89,7 +89,7 @@ s32 func_150C1978(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     // matching: never true, but the original tests the low byte here
     if ((alpha & 0xFF) < 0) {
         return 0;

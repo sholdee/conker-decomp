@@ -520,27 +520,15 @@ typedef struct {
     /* 0x22 */ s16 capacityRange;
 } TrailBurstPreset; // size = 0x24
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ Vec3f vel;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 shade;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 pad1C[4];
-} BurstParticle; // size = 0x20
-
 extern TrailBurstPreset D_8009FBF0[];
-extern s32 func_15147DA0(EffectTemplate *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(Trail *trail) {
     TrailRender style;
     TrailState *state;
     EffectTemplate spawn;
-    BurstParticle particle;
+    TrailMotion particle;
     f32 x;
     f32 y;
     f32 z;
@@ -566,9 +554,9 @@ void func_150B5088(Trail *trail) {
     style.primMode = 0;
     style.envMode = 9;
     spawn.flags = 1;
-    particle.unk19 = 6;
+    particle.texture = 6;
     particle.shade = state->shade;
-    particle.unk18 = 8;
+    particle.flags = 8;
     particle.alpha = state->alpha;
     spawn.pos = trail->pos;
 
@@ -585,11 +573,11 @@ void func_150B5088(Trail *trail) {
         z = state->baseVel.z + preset->radius * sinB * sinA;
         spawn.itemCount = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
         spawn.life = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
-        particle.unk0 = func_150ADA68() * preset->unk10 + preset->unkC;
-        particle.unk10 = func_150ADA68() * preset->unk18 + preset->unk14;
-        particle.vel.x = speed * x;
-        particle.vel.y = speed * y;
-        particle.vel.z = speed * z;
+        particle.halfWidth = func_150ADA68() * preset->unk10 + preset->unkC;
+        particle.gravity = func_150ADA68() * preset->unk18 + preset->unk14;
+        particle.velocity.x = speed * x;
+        particle.velocity.y = speed * y;
+        particle.velocity.z = speed * z;
         func_15147DA0(&spawn, &particle, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, trail->unkC, trail->unk1);
         state->burstAccum -= 1.0f;
     } while (state->burstAccum > 1.0f);

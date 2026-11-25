@@ -508,27 +508,13 @@ typedef struct PipeExplodeParticle {
     /* 0x28 */ PipeExplodePoint *points;
 } PipeExplodeParticle;
 
-typedef struct PipeTrailMotion {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ s32 pad1C;
-} PipeTrailMotion;
-
 typedef struct PipeKinds {
     s16 kind[3];
 } PipeKinds;
 
 extern PipeKinds D_80088700;
 
-s32 func_15147DA0(EffectTemplate *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+s32 func_15147DA0(EffectTemplate *pos, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
 
@@ -539,7 +525,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     f32 size;
     PipeKinds kinds;
     EffectTemplate pos;
-    PipeTrailMotion motion;
+    TrailMotion motion;
     TrailRender style;
 
     {
@@ -588,20 +574,20 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     style.envMode = 9;
     pos.kind = 1;
     pos.flags = 1;
-    motion.unk19 = state->unk19;
-    motion.unk1A = state->unk1A;
-    motion.unk18 = 8;
+    motion.texture = state->unk19;
+    motion.shade = state->unk1A;
+    motion.flags = 8;
     motion.alpha = state->alpha;
     pos.pos.x = particle.points[actor->pointIndex].x;
     pos.pos.y = y;
     pos.pos.z = particle.points[actor->pointIndex].z;
     pos.itemCount = actor->unk25;
     pos.life = 60;
-    motion.unk00 = state->unk00 * 0.75f;
-    motion.unk10 = state->unk10;
-    motion.unk04 = state->unk04;
-    motion.unk08 = func_150ADA68() * 15.0f + 15.0f;
-    motion.unk0C = state->unk0C;
+    motion.halfWidth = state->unk00 * 0.75f;
+    motion.gravity = state->unk10;
+    motion.velocity.x = state->unk04;
+    motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
+    motion.velocity.z = state->unk0C;
     func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->unk0C, actor->unk01);
     return 1;
 }

@@ -844,7 +844,7 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.y = y;
     motion.unk14 = y;
     motion.texture = 9;
-    motion.unk1A = 0xFF;
+    motion.shade = 0xFF;
     motion.flags = 8;
     spawn.pos.z = z;
 
@@ -852,7 +852,7 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     motion.velocity.x = dir[0] * speed;
     motion.velocity.y = dir[1] * speed;
     motion.velocity.z = dir[2] * speed;
-    motion.unk1B = func_150ADA20() % 86U + 180;
+    motion.alpha = func_150ADA20() % 86U + 180;
     spawn.itemCount = (func_150ADA20() & 3) + 3;
     spawn.life = func_150ADA20() % 31U + 39;
     motion.halfWidth = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;

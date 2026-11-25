@@ -95,8 +95,8 @@ s8 func_15147EB8(Trail *trail) {
         unk1C = trail->unk1C;
         if (unk1C < params->motion.unk1C) {
             fade = unk1C * params->motion.unk1E;
-            if (fade < params->motion.unk1B) {
-                params->motion.unk1B = fade;
+            if (fade < params->motion.alpha) {
+                params->motion.alpha = fade;
             }
         }
     }
@@ -187,8 +187,8 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.primMode);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.envMode);
+            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
+            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
             gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
@@ -499,16 +499,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     f32 yawWaveQ;
     EffectTemplate18 spawn;
     f32 horizontal;
-    struct {
-        f32 halfWidth;
-        Vec3f velocity;
-        f32 gravity;
-        u8 pad14[4];
-        u8 flags;
-        u8 texture;
-        u8 unk1A;
-        u8 unk1B;
-    } motion; /* TrailMotion without unk1C/unk1E (func_15147DA0 copies past its end) */
+    TrailMotion1C motion;
     f32 pitchWave;
     f32 pitchWaveQ;
     f32 yawWave;
@@ -523,7 +514,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
 
     spawn.kind = 1;
     spawn.flags = 1;
-    motion.unk1A = 0xFF;
+    motion.shade = 0xFF;
     motion.flags = 8;
     tex = texture; // matching: the u8 copy owns the stack slot above render
     motion.texture = tex;
@@ -540,7 +531,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     motion.velocity.x = horizontal * yawWaveQ;
     motion.velocity.y = -speed * pitchWaveQ;
     motion.velocity.z = horizontal * yawWave;
-    motion.unk1B = 0xFF;
+    motion.alpha = 0xFF;
     spawn.itemCount = arg4 + 3;
     spawn.life = arg8;
 
@@ -564,7 +555,7 @@ s32 func_151490C8(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     if ((u8)alpha < 0) { // matching: never true, but IDO still emits the test
         return 0;
     }

@@ -1782,21 +1782,8 @@ typedef struct JetScatterPreset {
     s16 unk22;
 } JetScatterPreset;
 
-typedef struct {
-    f32 unk0;
-    Vec3f vel;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} ScatterMotion;
-
 extern JetScatterPreset D_800A8728[];
-extern s32 func_15147DA0(EffectTemplate18 *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
@@ -1804,7 +1791,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     CharacterFlamethrowerJet *jet;
     JetScatterPreset *preset;
     EffectTemplate18 spawn;
-    ScatterMotion motion;
+    TrailMotion motion;
     f32 px;
     f32 py;
     f32 pz;
@@ -1820,10 +1807,10 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     jet = actor->state;
     preset = &D_800A8728[jet->scatterPreset];
     spawn.flags = 1;
-    motion.unk19 = 0xA;
-    motion.unk1A = 0xFF;
-    motion.unk18 = 0x28;
-    motion.unk1B = 0x82;
+    motion.texture = 0xA;
+    motion.shade = 0xFF;
+    motion.flags = 0x28;
+    motion.alpha = 0x82;
     spawn.pos = actor->pos;
     style.unk0 = 0;
     style.setGeometryMode = 1;
@@ -1848,11 +1835,11 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         pz = end->z + (rad * cosB * cosA);
         spawn.itemCount = (func_150ADA20() % (u32)(preset->unk22 + 1)) + preset->unk20;
         spawn.life = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
-        motion.unk0 = (func_150ADA68() * preset->unk10) + preset->unkC;
-        motion.unk10 = (func_150ADA68() * preset->unk18) + preset->unk14;
-        motion.vel.x = (px - actor->pos.x) * speed;
-        motion.vel.y = (py - actor->pos.y) * speed;
-        motion.vel.z = (pz - actor->pos.z) * speed;
+        motion.halfWidth = (func_150ADA68() * preset->unk10) + preset->unkC;
+        motion.gravity = (func_150ADA68() * preset->unk18) + preset->unk14;
+        motion.velocity.x = (px - actor->pos.x) * speed;
+        motion.velocity.y = (py - actor->pos.y) * speed;
+        motion.velocity.z = (pz - actor->pos.z) * speed;
         func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
@@ -2501,7 +2488,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         if (flame->scatterAccum > 1.0f) {
             s32 pad; // matching: unused stack slot (also pad2 below)
             EffectTemplate18 spawn;
-            ScatterMotion motion;
+            TrailMotion motion;
             TrailRender style;
             Vec3f delta;
             Vec3f axisA;
@@ -2522,9 +2509,9 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             spawn.flags = 0x15;
             spawn.kind = 1;
             spawn.unk14 = -1;
-            motion.unk18 = 0x68;
-            motion.unk19 = 0xA;
-            motion.unk1A = 0xFF;
+            motion.flags = 0x68;
+            motion.texture = 0xA;
+            motion.shade = 0xFF;
             motion.unk14 = -10000.0f;
             motion.unk1C = flame->scatter.unk40;
             motion.unk1E = flame->scatter.unk42;
@@ -2534,7 +2521,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
 
                     spawn.itemCount = (func_150ADA20() % (u32)(flame->scatter.unk18 + 1)) + flame->scatter.unk14;
                     spawn.life = (func_150ADA20() % (u32)(flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
-                    motion.unk0 = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
+                    motion.halfWidth = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
                 }
                 spawn.pos = pos0;
                 delta = pos2;
@@ -2544,11 +2531,11 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                 if (func_15146078(&delta, &axisA, &axisB) != 0) {
                     speed = func_150ADA68() * flame->scatter.speedRange + flame->scatter.speedMin;
                     func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
-                    motion.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
-                    motion.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
-                    motion.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
-                    motion.unk10 = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
-                    motion.unk1B = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
+                    motion.velocity.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                    motion.velocity.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                    motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                    motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
+                    motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
                     func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
                 }
                 flame->scatterAccum -= 1.0f;
