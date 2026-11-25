@@ -72,8 +72,8 @@ s32 func_1517EF00(s32 view);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
- * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has a rumble pak, or when
- * any of those players' views is irised or fading. */
+ * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has
+ * a rumble pak, or when any of those players' views is irised or fading. */
 RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) {
     RumbleObj *obj;
     u8 player;
@@ -113,7 +113,7 @@ RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) 
 }
 
 /* Per-frame update: counts the duration down, runs the update handler, re-applies a changed
- * strength, and destroys the object once the duration has run out. */
+ * strength, and releases the object once the duration has run out. */
 void func_151D8A24(RumbleObj *obj) {
     u8 pad[4]; // matching: unused stack slot in the original frame
     u8 expired;
@@ -148,42 +148,32 @@ void func_151D8A24(RumbleObj *obj) {
     }
 }
 
-void func_1501C17C(u8);
-void func_151D8B24(struct102 *arg0)
-{
-  s32 i;
-  s32 j;
-  i = 0;
-  j = 0;
-  do
-  {
-    if (arg0->unk13 & (1 << j))
-    {
-      func_1501C17C((u8) i);
+/* Stops the rumble of every player in the object's mask. */
+void func_151D8B24(RumbleObj *obj) {
+    u8 player;
+
+    for (player = 0; player < 4; player++) {
+        if (obj->params.playerMask & (1 << player)) {
+            func_1501C17C(player);
+        }
     }
-    i++;
-    j = (i = (u8) i);
-  }
-  while (j < 4);
 }
 
-void func_151D8B24(struct102 *);
-
-
-void func_151D8B24(struct102 *);
-
-void func_151D8B88(struct102 *arg0) {
-    func_151D8B24(arg0);
-    func_15169804(arg0);
+/* Destroy hook: stops the rumble, then the default destroy (func_15169804). */
+void func_151D8B88(RumbleObj *obj) {
+    func_151D8B24(obj);
+    func_15169804((struct102 *)obj);
 }
 
-void func_151D8BB4(struct102 *arg0) {
-    func_151D8B24(arg0);
-    func_15169824(arg0);
+/* Free hook: stops the rumble, then the default free (func_15169824). */
+void func_151D8BB4(RumbleObj *obj) {
+    func_151D8B24(obj);
+    func_15169824((struct102 *)obj);
 }
 
 void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff);
 
+/* Sets a RumbleFalloffObj's strength from its own falloff data. */
 void func_151D8BE0(RumbleFalloffObj *obj) {
     func_151D8C00(&obj->base, &obj->falloff);
 }
@@ -212,22 +202,25 @@ void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
     obj->params.strength = scale * 8.0f;
 }
 
-void func_151D8D5C(struct102 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x58) {
-        func_1516972C(arg0);
-    } else if (arg2 == 0x47) {
-        func_1516972C(arg0);
+/* Message handler: messages 0x58 and 0x47 release the object. */
+void func_151D8D5C(RumbleObj *obj, s32 data, u8 message) {
+    if (message == 0x58) {
+        func_1516972C((struct102 *)obj);
+    } else if (message == 0x47) {
+        func_1516972C((struct102 *)obj);
     }
 }
 
-extern f32 D_800AB300;
+extern s32 D_800AB300[]; /* object kinds to message: { 0x3F } (rumble objects) */
 
-void func_151D8DB4(s32 arg0, u8 arg1) {
-    func_15169260(&D_800AB300, 1, arg0, arg1);
+/* Sends `message` with `data` to every rumble object. */
+void func_151D8DB4(s32 data, u8 message) {
+    func_15169260((s32)D_800AB300, 1, data, message);
 }
 
 extern u8 D_800E0A00;
 
+/* Sets D_800E0A00 and releases every rumble object (message 0x58). */
 void func_151D8DE8(void) {
     D_800E0A00 = 1;
     func_151D8DB4(0, 0x58);
