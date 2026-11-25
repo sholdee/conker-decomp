@@ -42,11 +42,6 @@ typedef struct {
     } u;
 } Effect;
 
-typedef struct {
-    u8  pad0[0x1D4];
-    MtxF *bones;
-} BeamOwner;
-
 extern void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
 
@@ -63,7 +58,7 @@ extern f32 D_80088944[];
 extern f32 D_80088948[];
 
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
-void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
+void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     MtxF *mtx;
     Vec3f from;
     Vec3f to;
@@ -73,8 +68,8 @@ void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
     f32 invDist;
     Effect *effect;
 
-    if (owner != NULL && owner->bones != NULL) {
-        mtx = &owner->bones[D_80088928[type]];
+    if (owner != NULL && owner->unk1D4 != NULL) {
+        mtx = &owner->unk1D4[D_80088928[type]];
         func_15143134(&D_80088910[type], &from, mtx);
         func_15143134(&D_8008891C[type], &to, mtx);
         vel.x = D_8008892C[type] * (to.x - from.x);

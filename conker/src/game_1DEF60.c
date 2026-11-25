@@ -4,21 +4,12 @@
 #include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-void func_15143134(Vec3f *in, Vec3f *out, s32 angle);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
-
-typedef struct {
-    u8 pad0[0x3B];
-    u8 unk3B;
-    u8 pad3C[0x7A - 0x3C];
-    u16 unk7A;
-    u8 pad7C[0x1D4 - 0x7C];
-    s32 unk1D4;
-} Owner151B1AB0;
 
 /* Per-task data kept at offset 0x28 of the task created by func_151B1AB0. */
 typedef struct {
-    Owner151B1AB0 *owner;
+    Actor *owner;
     u8 ownerUnk3B;
     f32 timer;
 } Data151B1AB0;
@@ -35,13 +26,13 @@ typedef struct {
 /* Message passed to func_151B1FAC: kind 0x2D swaps two owners, kind 0 names an owner to drop. */
 typedef union {
     struct {
-        Owner151B1AB0 *a;
-        Owner151B1AB0 *b;
+        Actor *a;
+        Actor *b;
         u8 aUnk3B;
         u8 bUnk3B;
     } swap;
     struct {
-        Owner151B1AB0 *owner;
+        Actor *owner;
         u8 ownerUnk3B;
     } remove;
 } Msg151B1FAC;
@@ -56,14 +47,14 @@ Particle1DEF60 *func_15130374(ParticleDesc64 *spawn, u8 kind, s32 dataSize, u8 a
 
 
 /* Spawns the task that func_151B1B34 updates for this owner. */
-void func_151B1AB0(Owner151B1AB0 *owner) {
+void func_151B1AB0(Actor *owner) {
     Task151B1AB0 *task;
     Data151B1AB0 data;
 
     // matching: an integer test (not != NULL) makes IDO reload owner from its arg slot for each use
     if ((s32)owner != 0) {
         data.owner = owner;
-        data.ownerUnk3B = owner->unk3B;
+        data.ownerUnk3B = owner->unique_id;
         data.timer = 0.0f;
 
         task = (Task151B1AB0 *)func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 0xFF, 1);
@@ -88,14 +79,14 @@ void func_151B1B34(Task151B1AB0 *task) {
     data = &task->data;
     data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
     if (data->timer > 1.0f) {
-        if (data->owner->unk1D4 != 0) {
+        if (data->owner->unk1D4 != NULL) {
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointA, data->owner->unk1D4 + 0x800);
+                func_15143134(&offset, &emitPointA, &data->owner->unk1D4[32]);
             }
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointB, data->owner->unk1D4 + 0x640);
+                func_15143134(&offset, &emitPointB, &data->owner->unk1D4[25]);
             }
             zero = 0.0f;
             spawn.texture = 0x29;
@@ -181,7 +172,7 @@ void func_151B1FAC(Task151B1AB0 *task, Msg151B1FAC *msg, u8 kind) {
             dst->ownerUnk3B = msg->swap.aUnk3B;
         }
     } else if (kind == 0) {
-        Owner151B1AB0 *owner = msg->remove.owner;
+        Actor *owner = msg->remove.owner;
 
         if (owner == data->owner || msg->remove.ownerUnk3B == data->ownerUnk3B) {
             func_1516972C((struct102 *)task);

@@ -45,20 +45,10 @@ typedef struct {
 } HoltenRopeDesc;
 
 /* The actor a rope end is attached to. */
-typedef struct {
-    /* 0x000 */ s32 unk0;
-    /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ Vec3f pos;
-    /* 0x020 */ u8 pad20[0x1B];
-    /* 0x03B */ u8 unk3B;
-    /* 0x03C */ u8 pad3C[0x198];
-    /* 0x1D4 */ Mtx *boneMtx;
-} HoltenRopeTarget;
-
 /* Endpoint data at 0x150 for ropes hung from an actor. */
 typedef struct {
-    /* 0x00 */ HoltenRopeTarget *target;
-    /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
+    /* 0x00 */ Actor *target;
+    /* 0x04 */ u8 targetId; // target->unique_id when the rope was attached
 } HoltenRopeAnchor;
 
 typedef struct {
@@ -422,10 +412,10 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
     if (isStart) {
         HoltenRopeAnchor *anchor = &rope->anchor;
 
-        if (anchor->target->unk0 != 0 && anchor->target->unk3B == anchor->targetId) {
-            pos->x = anchor->target->pos.x;
-            pos->y = anchor->target->pos.y;
-            pos->z = anchor->target->pos.z;
+        if (anchor->target->interaction_state != 0 && anchor->target->unique_id == anchor->targetId) {
+            pos->x = anchor->target->x_position;
+            pos->y = anchor->target->y_position;
+            pos->z = anchor->target->z_position;
             rope->effect.flags &= ~ROPE_FLAG_NO_START;
         } else {
             ret = FALSE;
@@ -654,8 +644,8 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
 
 /* Endpoint data at 0x150 for ropes tied between two actors' bones. */
 typedef struct {
-    /* 0x00 */ HoltenRopeTarget *target;
-    /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
+    /* 0x00 */ Actor *target;
+    /* 0x04 */ u8 targetId; // target->unique_id when the rope was attached
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ Vec3f offset; // in the bone's space
@@ -666,26 +656,26 @@ typedef struct {
     HoltenRopeBoneAnchor end;
 } HoltenRopeBoneAnchors;
 
-void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 
 /*
  * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
  * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
  */
 s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f *pos, u8 isStart) {
-    HoltenRopeTarget *startTarget = anchors->start.target;
-    HoltenRopeTarget *endTarget = anchors->end.target;
+    Actor *startTarget = anchors->start.target;
+    Actor *endTarget = anchors->end.target;
 
-    if (startTarget->boneMtx == NULL || endTarget->boneMtx == NULL) {
+    if (startTarget->unk1D4 == NULL || endTarget->unk1D4 == NULL) {
         effect->flags |= ROPE_FLAG_NO_START | ROPE_FLAG_NO_END;
         return TRUE;
     }
-    if (startTarget->unk0 == 0 || startTarget->unk3B != anchors->start.targetId || endTarget->unk0 == 0 || endTarget->unk3B != anchors->end.targetId) {
+    if (startTarget->interaction_state == 0 || startTarget->unique_id != anchors->start.targetId || endTarget->interaction_state == 0 || endTarget->unique_id != anchors->end.targetId) {
         return FALSE;
     }
     effect->flags &= ~(isStart ? ROPE_FLAG_NO_START : ROPE_FLAG_NO_END);
     func_15143134(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
-                  isStart ? &startTarget->boneMtx[anchors->start.bone] : &endTarget->boneMtx[anchors->end.bone]);
+                  isStart ? &startTarget->unk1D4[anchors->start.bone] : &endTarget->unk1D4[anchors->end.bone]);
     return TRUE;
 }
 

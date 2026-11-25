@@ -3413,7 +3413,6 @@ typedef struct {
     u8  pad20[0x8];
 } struct253; // size 0x28
 
-
 struct struct256 {
     u8 pad0[0x80];
     struct256 *unk80;

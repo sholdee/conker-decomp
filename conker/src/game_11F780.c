@@ -5,18 +5,13 @@
 void func_150F2994(Camera *actor, s32 flag);
 s32 func_1509BE40(s32, s32, s32, s32);
 
-typedef struct {
-    u8 pad0[0x1D4];
-    MtxF *bones;
-} BoneOwner;
-
 static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
 
 void func_15143134(const f32 *in, f32 *out, MtxF *mtx);
 extern void func_151C329C(f32 *pos, s32, s32);
 
 /* Transforms the fixed point D_800A1920 by the bone selected by `slot` (3-8); returns 0 for other slots. */
-s32 func_150F22D0(f32 *out, BoneOwner *owner, u8 slot) {
+s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
     s32 bone;
 
     switch (slot) {
@@ -41,7 +36,7 @@ s32 func_150F22D0(f32 *out, BoneOwner *owner, u8 slot) {
     default:
         return 0;
     }
-    func_15143134(D_800A1920, out, &owner->bones[bone]);
+    func_15143134(D_800A1920, out, &owner->unk1D4[bone]);
     return 1;
 }
 
@@ -50,10 +45,10 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
 }
 
 /* Spawns a func_151C329C effect at the bone point of `slot`, if the owner has a skeleton. */
-void func_150F2390(BoneOwner *owner, s32 slot, s32 arg2) {
+void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
     f32 pos[3];
 
-    if (owner->bones != NULL) {
+    if (owner->unk1D4 != NULL) {
         func_150F22D0(pos, owner, slot);
         func_151C329C(pos, 0xFF, 0);
     }

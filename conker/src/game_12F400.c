@@ -282,14 +282,10 @@ void func_151027E8(Actor *actor) {
     func_151403A8((s32)&msg, 0x1A);
 }
 
-typedef struct {
-    u8 pad0[0x31C];
-    ActorCtl *unk31C;
-} LinkedObj1510281C;
 
 /* State block at +0x110 of the objects referenced by Owner1510281C. */
 typedef struct {
-    LinkedObj1510281C *linked;
+    Actor *linked;
     u8 pad4[0x1E];
     u8 unk22;
 } Block1510281C;
@@ -311,7 +307,7 @@ typedef struct {
 /* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
 s32 func_1510281C(Owner1510281C *owner, s16 key) {
     Block1510281C *block = &owner->unkD0->block;
-    LinkedObj1510281C *linked;
+    Actor *linked;
 
     if (key == block->unk22) {
         linked = block->linked;
@@ -341,7 +337,7 @@ s32 func_15102884(Obj15102884 *obj, s32 arg1) {
 /* Same test as func_1510281C, on unk170 and unk174. */
 s32 func_151028AC(Owner1510281C *owner, s16 key) {
     Block1510281C *block = &owner->unk170->block;
-    LinkedObj1510281C *linked;
+    Actor *linked;
 
     if (key == block->unk22) {
         linked = block->linked;
