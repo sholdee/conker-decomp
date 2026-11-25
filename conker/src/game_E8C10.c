@@ -5,9 +5,6 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
-s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
-                  s32 arg12, u8 arg13, s32 arg14);
 
 /* Particle description passed to the particle spawners (func_15132A4C, func_1513264C). */
 typedef struct GameE8C10Particle {
@@ -655,36 +652,35 @@ s32 func_150BCBBC(struct127 *actor) {
 
 
 struct Obj150BCFB8 {
-    u8 pad0[0x10];
-    f32 x10;
-    f32 x14;
-    u8 pad18[0x3C - 0x18];
-    f32 x3C;
-    u8 pad40[0x44 - 0x40];
-    f32 x44;
-    f32 x48;
-    f32 x4C;
-    f32 x50;
-    f32 x54;
-    f32 x58;
-    u8 pad5C[0x60 - 0x5C];
-    s32 x60;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 bounce;
+    /* 0x18 */ u8 pad18[0x3C - 0x18];
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u8 pad40[0x44 - 0x40];
+    /* 0x44 */ vertex vel;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
+    /* 0x60 */ s32 flags;
 };
 
-s32 func_150BCFB8(struct Obj150BCFB8 *arg0, s32 a1, s32 a2, s32 a3, f32 arg5) {
-    arg0->x3C = (arg0->x10 * 1.1f) + arg5;
-    if (-2.0f < arg0->x48) {
-        arg0->x44 = 0.0f;
-        arg0->x60 &= ~0x6F;
-        arg0->x48 = 0.0f;
-        arg0->x4C = 0.0f;
+/* Ground-hit callback: comes to rest when falling slowly, otherwise bounces, scaling all motion by obj->bounce. */
+s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 floorY) {
+    obj->unk3C = obj->unk10 * 1.1f + floorY;
+    if (-2.0f < obj->vel.y) {
+        obj->vel.x = 0.0f;
+        obj->flags &= ~0x6F;
+        obj->vel.y = 0.0f;
+        obj->vel.z = 0.0f;
     } else {
-        arg0->x44 = arg0->x44 * arg0->x14;
-        arg0->x48 = -arg0->x48 * arg0->x14;
-        arg0->x4C = arg0->x4C * arg0->x14;
-        arg0->x50 = arg0->x50 * arg0->x14;
-        arg0->x54 = arg0->x54 * arg0->x14;
-        arg0->x58 = arg0->x58 * arg0->x14;
+        obj->vel.x *= obj->bounce;
+        obj->vel.y = -obj->vel.y * obj->bounce;
+        obj->vel.z *= obj->bounce;
+        obj->unk50 *= obj->bounce;
+        obj->unk54 *= obj->bounce;
+        obj->unk58 *= obj->bounce;
     }
     return 1;
 }
@@ -857,100 +853,141 @@ void func_150BD070(u8 arg0, s32 arg1) {
     }
 }
 
-typedef struct { f32 x, y, z; } Vec3f_BD740;
-extern Vec3f_BD740 D_8009FF40[4];
-extern Vec3f_BD740 D_8009FF70[4];
-extern Vec3f_BD740 D_8009FFA0[4];
-void func_15143134(Vec3f_BD740 *src, Vec3f_BD740 *dst, s32 arg2);
+extern vertex D_8009FF40[4];
+extern vertex D_8009FF70[4];
+extern vertex D_8009FFA0[4];
+void func_15143134(vertex *src, vertex *dst, struct255 *frame);
 void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
-                   s32 arg8, f32 arg9, Vec3f_BD740 *arg10, u8 arg11);
+                   s32 arg8, f32 arg9, vertex *dir, u8 arg11);
 
-void func_150BD740(void *arg0, u8 arg1, s32 arg2) {
-    Vec3f_BD740 pts[4];
-    Vec3f_BD740 a[4];
-    Vec3f_BD740 b[4];
+/* Transforms three 4-point tables by the actor's unk1D4 and emits two segments (point 2->3 and 3->0). */
+void func_150BD740(struct127 *actor, u8 arg1, s32 arg2) {
+    vertex points[4];
+    vertex dirFrom[4];
+    vertex dirTo[4];
     s32 i;
-    Vec3f_BD740 d[4];
+    vertex dir[4];
 
-    if (arg0 != NULL) {
-        if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
+    if (actor != NULL) {
+        if (actor->unk1D4 != NULL) {
             for (i = 0; i < 4; i++) {
-                func_15143134(&D_8009FF40[i], &pts[i], *(s32 *)((u8 *)arg0 + 0x1D4));
-                func_15143134(&D_8009FF70[i], &a[i], *(s32 *)((u8 *)arg0 + 0x1D4));
-                func_15143134(&D_8009FFA0[i], &b[i], *(s32 *)((u8 *)arg0 + 0x1D4));
+                func_15143134(&D_8009FF40[i], &points[i], actor->unk1D4);
+                func_15143134(&D_8009FF70[i], &dirFrom[i], actor->unk1D4);
+                func_15143134(&D_8009FFA0[i], &dirTo[i], actor->unk1D4);
             }
-            d[2].x = b[2].x - a[2].x;
-            d[2].y = b[2].y - a[2].y;
-            d[2].z = b[2].z - a[2].z;
-            func_1514C470(pts[2].x, pts[2].y, pts[2].z, pts[3].x, pts[3].y, pts[3].z,
-                          func_150ADA68() * 6.0f + 14.0f, 0xD, 0, 0.0f, &d[2], arg1);
-            d[3].x = b[3].x - a[3].x;
-            d[3].y = b[3].y - a[3].y;
-            d[3].z = b[3].z - a[3].z;
-            func_1514C470(pts[3].x, pts[3].y, pts[3].z, pts[0].x, pts[0].y, pts[0].z,
-                          func_150ADA68() * 6.0f + 14.0f, 0xD, 0, 0.0f, &d[3], arg1);
+            dir[2].x = dirTo[2].x - dirFrom[2].x;
+            dir[2].y = dirTo[2].y - dirFrom[2].y;
+            dir[2].z = dirTo[2].z - dirFrom[2].z;
+            func_1514C470(points[2].x, points[2].y, points[2].z, points[3].x, points[3].y, points[3].z,
+                          func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[2], arg1);
+            dir[3].x = dirTo[3].x - dirFrom[3].x;
+            dir[3].y = dirTo[3].y - dirFrom[3].y;
+            dir[3].z = dirTo[3].z - dirFrom[3].z;
+            func_1514C470(points[3].x, points[3].y, points[3].z, points[0].x, points[0].y, points[0].z,
+                          func_150ADA68() * 6.0f + 14.0f, 13, 0, 0.0f, &dir[3], arg1);
         }
     }
 }
 
-s32 func_150BD954(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
+/* Trail spawn structs; same layout as the ones in game_175250.c. */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[0xA];
+} TrailSpawn;
+
+typedef struct {
+    /* 0x00 */ f32 halfWidth;
+    /* 0x04 */ vertex velocity;
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 texture;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 pad1C[4];
+} TrailMotion; /* size 0x20 */
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 renderMode;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+} TrailRender; /* size 0x20 */
+
+s32 func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
+                  s32 arg12, u8 arg13, s32 arg14);
+
+/* Spawns one trail at (x, y, z) moving along dir. */
+s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, f32 *arg13, u8 arg14) {
-    struct { f32 x; f32 y; f32 z; s16 unk0C; s16 unk0E; s32 unk10; u8 pad14; u8 unk15; s32 pad18; s32 pad1C; } sp90;
-    struct { f32 unk00; f32 unk04; f32 unk08; f32 unk0C; f32 unk10; f32 unk14; u8 unk18; u8 unk19; u8 unk1A; u8 unk1B; s32 pad1C; } sp70;
-    f32 r;
-    struct { s32 unk00; s32 unk04; s32 unk08; s32 unk0C; s32 unk10; s32 unk14; s32 unk18; u8 unk1C; u8 unk1D; } sp4C;
+                  s32 arg12, f32 *dir, u8 arg14) {
+    TrailSpawn spawn;
+    TrailMotion motion;
+    f32 speed;
+    TrailRender render;
 
-    sp4C.unk00 = 0;
-    sp4C.unk04 = 1;
-    sp4C.unk08 = 0x160600;
-    sp4C.unk0C = 3;
-    sp4C.unk10 = 0x10;
-    sp4C.unk14 = 0x80;
-    sp4C.unk18 = 0x20;
-    sp4C.unk1C = 0;
-    sp4C.unk1D = 9;
-    sp90.unk10 = 1;
-    sp90.unk0E = 1;
-    sp90.x = arg2;
-    sp90.y = arg3;
-    sp70.unk14 = arg3;
-    sp70.unk19 = 9;
-    sp70.unk1A = 0xFF;
-    sp70.unk18 = 8;
-    sp90.z = arg4;
+    render.unk0 = 0;
+    render.unk4 = 1;
+    render.unk8 = 0x160600;
+    render.renderMode = 3;
+    render.unk10 = 0x10;
+    render.unk14 = 0x80;
+    render.unk18 = 0x20;
+    render.unk1C = 0;
+    render.unk1D = 9;
+    spawn.unk10 = 1;
+    spawn.unkE = 1;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    motion.unk14 = y;
+    motion.texture = 9;
+    motion.unk1A = 0xFF;
+    motion.flags = 8;
+    spawn.pos.z = z;
 
-    r = (func_150ADA68() * 127.0f + 85.0f) * 0.001f;
-    sp70.unk04 = arg13[0] * r;
-    sp70.unk08 = arg13[1] * r;
-    sp70.unk0C = arg13[2] * r;
-    sp70.unk1B = ((u32) func_150ADA20() % 86) + 180;
-    sp90.unk15 = (func_150ADA20() & 3) + 3;
-    sp90.unk0C = ((u32) func_150ADA20() % 31) + 39;
-    sp70.unk00 = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
-    sp70.unk10 = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
-    func_15147DA0(&sp90, &sp70, 0, 1, 0xB, 0, 0, 0, 0, 0, 0, (s32 *)&sp4C, 0, arg14, 1);
+    speed = (func_150ADA68() * 127.0f + 85.0f) * 0.001f;
+    motion.velocity.x = dir[0] * speed;
+    motion.velocity.y = dir[1] * speed;
+    motion.velocity.z = dir[2] * speed;
+    motion.unk1B = func_150ADA20() % 86U + 180;
+    spawn.unk15 = (func_150ADA20() & 3) + 3;
+    spawn.unkC = func_150ADA20() % 31U + 39;
+    motion.halfWidth = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
+    motion.gravity = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
+    func_15147DA0(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);
     return 1;
 }
 
 struct Sub150BDB3C {
-    u8 pad1B[0x1B];
-    u8 unk1B;
+    /* 0x00 */ u8 pad0[0x1B];
+    /* 0x1B */ u8 unk1B;
 };
 
 struct Obj150BDB3C {
-    u8 pad98[0x1C];
-    s16 unk1C;
-    u8 pad1E[0x98 - 0x1E];
-    struct Sub150BDB3C *unk98;
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
+    /* 0x98 */ struct Sub150BDB3C *unk98;
 };
 
-s32 func_150BDB3C(struct Obj150BDB3C *arg0) {
-    struct Sub150BDB3C *sp = arg0->unk98;
-    s32 val = arg0->unk1C << 3;
+/* Caps obj->unk98->unk1B at obj->unk1C * 8. */
+s32 func_150BDB3C(struct Obj150BDB3C *obj) {
+    struct Sub150BDB3C *sub = obj->unk98;
+    s32 limit = obj->unk1C * 8;
 
-    if (val < sp->unk1B) {
-        sp->unk1B = val;
+    if (limit < sub->unk1B) {
+        sub->unk1B = limit;
     }
     return 1;
 }
