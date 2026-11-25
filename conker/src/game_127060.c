@@ -674,7 +674,7 @@ typedef struct {
 } TaggedSprite;
 
 extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
-extern TaggedSprite *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
+extern TaggedSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 typedef struct {
     /* 0x00 */ u8 unk00;

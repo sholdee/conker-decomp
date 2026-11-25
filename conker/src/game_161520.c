@@ -913,26 +913,10 @@ f32 func_15135670(BloodStrip *strip) {
     return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * 0.001f;
 }
 
-void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
+void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 typedef struct {
     f32 x, y;
 } Vec2f;
-
-typedef struct {
-    Vec2f position;
-    f32 width, height;
-    u8 texture;
-    u8 pad11;
-    s16 lifetime;
-    u16 flags;
-    s16 duration, period;
-    u8 mode, red, green, blue, alpha, maximum;
-    u8 endRed, endGreen, endBlue, endAlpha;
-    s32 zero24, zero28, zero2C;
-    s32 field30, field34, field38, field3C;
-    u8 field40, field41;
-    u8 pad42[0x16];
-} Blood356D4Particle;
 
 /* Motion state of a blood splat particle, kept at BloodSplat::motion. */
 typedef struct {
@@ -964,13 +948,13 @@ extern Blood356D4Kinds D_80089BA8;
 /* Spawns a blood splat particle at *position plus a ring of smaller spark particles around it. */
 void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 arg10, s32 arg11) {
     void *result;
-    Blood356D4Particle particle;
+    ScreenSpriteInfo particle;
     Blood356D4Motion motion;
     Blood356D4Kinds kinds;
     s32 data;
     f32 scale;
     f32 count;
-    Blood356D4Particle spark;
+    ScreenSpriteInfo spark;
     Blood356D4Kinds sparkKinds;
     s32 flip;
 
@@ -982,64 +966,65 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     motion.velocity.y = func_150ADA68() * 6.0f * position->y * 0.001f;
     motion.gravity = gravity;
     motion.spread = spread;
-    particle.position = *position;
-    particle.width = size;
-    particle.height = size;
+    // matching: x and y are copied as one Vec2f
+    *(Vec2f *)&particle.x = *position;
+    particle.halfWidth = size;
+    particle.halfHeight = size;
     particle.texture = kinds.value[func_150ADA20() & 1];
-    particle.lifetime = lifetime;
+    particle.timer = lifetime;
     flip = (func_150ADA20() & 1) ? 2 : 0;
     particle.flags = ((particle.texture == 58) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
-    particle.duration = duration;
-    particle.period = period;
-    particle.mode = 2;
-    particle.red = 0xFF;
-    particle.green = 0xFF;
-    particle.blue = 0xFF;
-    particle.maximum = 0xFF;
-    particle.endRed = 0xFF;
-    particle.endGreen = 0xFF;
-    particle.endBlue = 0xFF;
-    particle.zero24 = 0;
-    particle.zero28 = 0;
-    particle.zero2C = 0;
-    particle.field40 = 0;
-    particle.field41 = 9;
-    particle.field30 = 7;
-    particle.field34 = 60;
-    particle.field38 = 128;
-    particle.field3C = 32;
-    particle.alpha = alpha;
-    particle.endAlpha = endAlpha;
+    particle.fadeStart = duration;
+    particle.fadeRate = period;
+    particle.kind = 2;
+    particle.color1.red = 0xFF;
+    particle.color1.green = 0xFF;
+    particle.color1.blue = 0xFF;
+    particle.color2.red = 0xFF;
+    particle.color2.green = 0xFF;
+    particle.color2.blue = 0xFF;
+    particle.color2.alpha = 0xFF;
+    particle.otherModeH = 0;
+    particle.unk28 = 0;
+    particle.unk2C = 0;
+    particle.unk40 = 0;
+    particle.unk41 = 9;
+    particle.combineMode = 7;
+    particle.unk34 = 60;
+    particle.unk38 = 128;
+    particle.unk3C = 32;
+    particle.color1.alpha = alpha;
+    particle.unk23 = endAlpha;
     result = func_1515548C(&particle, 3, (s32)&data, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
         memcpy(&((BloodSplat *)result)->motion, &motion, sizeof(motion));
-        scale = (particle.width + particle.height) * 0.5f;
+        scale = (particle.halfWidth + particle.halfHeight) * 0.5f;
         count = (func_150ADA68() * 300.0f + 100.0f) * size * 0.001f;
-        spark.lifetime = 50;
+        spark.timer = 50;
         spark.flags = 9;
-        spark.duration = 16;
-        spark.period = 15;
-        spark.mode = 3;
-        spark.red = 0xFF;
-        spark.green = 0xFF;
-        spark.blue = 0xFF;
-        spark.alpha = alpha;
-        spark.maximum = 0xFF;
-        spark.endRed = 0xFF;
-        spark.endGreen = 0xFF;
-        spark.endBlue = 0xFF;
-        spark.endAlpha = endAlpha;
-        spark.zero24 = 0;
-        spark.zero28 = 0;
-        spark.zero2C = 0;
-        spark.field40 = 0;
-        spark.field41 = 9;
-        spark.field30 = 7;
-        spark.field34 = 60;
-        spark.field38 = 64;
-        spark.field3C = 0;
-        spark.width = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
-        spark.height = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
+        spark.fadeStart = 16;
+        spark.fadeRate = 15;
+        spark.kind = 3;
+        spark.color1.red = 0xFF;
+        spark.color1.green = 0xFF;
+        spark.color1.blue = 0xFF;
+        spark.color1.alpha = alpha;
+        spark.color2.red = 0xFF;
+        spark.color2.green = 0xFF;
+        spark.color2.blue = 0xFF;
+        spark.color2.alpha = 0xFF;
+        spark.unk23 = endAlpha;
+        spark.otherModeH = 0;
+        spark.unk28 = 0;
+        spark.unk2C = 0;
+        spark.unk40 = 0;
+        spark.unk41 = 9;
+        spark.combineMode = 7;
+        spark.unk34 = 60;
+        spark.unk38 = 64;
+        spark.unk3C = 0;
+        spark.halfWidth = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
+        spark.halfHeight = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
         while (count > 1.0f) {
             sparkKinds = D_80089BA8;
             {
@@ -1052,8 +1037,8 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
                 cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);
                 distance = (func_150ADA68() * 300.0f + 1300.0f) * scale * 0.001f;
-                spark.position.x = position->x + distance * sine;
-                spark.position.y = position->y + distance * cosine;
+                spark.x = position->x + distance * sine;
+                spark.y = position->y + distance * cosine;
             }
             spark.texture = sparkKinds.value[func_150ADA20() & 1];
             spark.flags &= ~6;
