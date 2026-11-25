@@ -182,14 +182,15 @@ typedef struct Vec3w_15070D24 {
     s32 unk8;
 } Vec3w_15070D24;
 
+/* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct Stack_15070D24 {
     Header2 header2;
     Header header;
     u8 pad16[2];
-    f32 sp64[3];
-    f32 sp70[2];
-    Vec3w_15070D24 sp78;
-    Vec3w_15070D24 sp84;
+    f32 worldPos[3];
+    f32 randoms[2];
+    Vec3w_15070D24 vec78;
+    Vec3w_15070D24 localPos;
 } Stack_15070D24;
 
 extern Vec3w_15070D24 D_80099B88;
@@ -2048,30 +2049,30 @@ void func_1506F1A8(s32 cmd) {
     descriptor.unkD0 = 0.44000003f;
     descriptor.unkD4 = 0.45100003f;
     descriptor.unkEC = 0.30900002f;
-    descriptor.joint = 0xC;
-    descriptor.unk3E = 0xC8;
+    descriptor.joint = 12;
+    descriptor.unk3E = 200;
     descriptor.unkF0 = 0.312f;
     descriptor.unk38 = -1;
     descriptor.unk39 = 2;
     descriptor.unk3A = -1;
     descriptor.unk4C = -1;
-    descriptor.kind = 0xF;
+    descriptor.kind = 15;
     descriptor.unk54 = 1;
-    descriptor.red = 0x3C;
-    descriptor.green = 0xFF;
-    descriptor.blue = 0xEB;
-    descriptor.alpha = 0x52;
+    descriptor.red = 60;
+    descriptor.green = 255;
+    descriptor.blue = 235;
+    descriptor.alpha = 82;
     descriptor.unkFC = 402.0f;
-    descriptor.unk60 = 0x1E;
-    descriptor.unk62 = 0xF;
-    descriptor.unk8C = 0xC;
-    descriptor.unk8E = 0x15;
-    descriptor.unk94 = 0x50;
-    descriptor.unk95 = 0x78;
+    descriptor.unk60 = 30;
+    descriptor.unk62 = 15;
+    descriptor.unk8C = 12;
+    descriptor.unk8E = 21;
+    descriptor.unk94 = 80;
+    descriptor.unk95 = 120;
     descriptor.unkB0 = 4;
     descriptor.unkB4 = 2;
-    descriptor.unkB8 = 0x1E;
-    descriptor.unkBA = 0x11;
+    descriptor.unkB8 = 30;
+    descriptor.unkBA = 17;
     descriptor.unk0C = 0.0f;
     descriptor.unk10 = 0.0f;
     descriptor.unk18 = 0.0f;
@@ -2084,19 +2085,19 @@ void func_1506F1A8(s32 cmd) {
     descriptor.unkA4 = 100.0f;
     descriptor.unkC4 = 0.5f;
     descriptor.unkC8 = 0.5f;
-    descriptor.unkD8 = 0x50;
-    descriptor.unkDA = 0x78;
-    descriptor.unkDC = 0x10;
-    descriptor.unkDE = 0xF;
+    descriptor.unkD8 = 80;
+    descriptor.unkDA = 120;
+    descriptor.unkDC = 16;
+    descriptor.unkDE = 15;
     descriptor.unkE0 = 0.0f;
     descriptor.unkE4 = 5.0f;
     descriptor.unkE8 = 100.0f;
-    descriptor.unkF4 = 0x28;
-    descriptor.unkF6 = 0xF;
-    descriptor.unkF8 = 0x50;
-    descriptor.unkFA = 0x50;
-    descriptor.unk118 = 0x14;
-    descriptor.unk11A = 0xC;
+    descriptor.unkF4 = 40;
+    descriptor.unkF6 = 15;
+    descriptor.unkF8 = 80;
+    descriptor.unkFA = 80;
+    descriptor.unk118 = 20;
+    descriptor.unk11A = 12;
     descriptor.unk100 = 303.0f;
     descriptor.unk104 = 0.101f;
     descriptor.unk108 = 0.19800001f;
@@ -2538,7 +2539,7 @@ void func_15070898(s32 cmd) {
     descriptor.unk40 = 0.325f;
     descriptor.unk30 = 7.1f;
     descriptor.unk34 = 5.0f;
-    descriptor.unk3E = 0xB4;
+    descriptor.unk3E = 180;
     descriptor.unk38 = -1;
     descriptor.unk39 = 1;
     descriptor.unk3A = -1;
@@ -2548,16 +2549,16 @@ void func_15070898(s32 cmd) {
     descriptor.unk44 = -232.0f;
     descriptor.unk48 = 9.07f;
     descriptor.unk4C = -1;
-    descriptor.kind = 0xF;
-    descriptor.unk54 = 0x11;
-    descriptor.red = 0x3C;
-    descriptor.green = 0xFF;
-    descriptor.blue = 0xEB;
-    descriptor.alpha = 0x52;
+    descriptor.kind = 15;
+    descriptor.unk54 = 17;
+    descriptor.red = 60;
+    descriptor.green = 255;
+    descriptor.blue = 235;
+    descriptor.alpha = 82;
     descriptor.unk58 = 0.00689f;
     descriptor.unk5C = 0.01038f;
-    descriptor.unk60 = 0x19;
-    descriptor.unk62 = 0xA;
+    descriptor.unk60 = 25;
+    descriptor.unk62 = 10;
     descriptor.unk64 = 0.367f;
     descriptor.unk6C = 0.256f;
     descriptor.unk68 = 0.35000002f;
@@ -2568,11 +2569,11 @@ void func_15070898(s32 cmd) {
     descriptor.unk80 = 1.3110001f;
     descriptor.unk84 = 0.935119f;
     descriptor.unk88 = 0.943452f;
-    descriptor.unk8C = 0xC;
-    descriptor.unk8E = 0x15;
+    descriptor.unk8C = 12;
+    descriptor.unk8E = 21;
     descriptor.unk90 = 0.307f;
-    descriptor.unk94 = 0x50;
-    descriptor.unk95 = 0x50;
+    descriptor.unk94 = 80;
+    descriptor.unk95 = 80;
     descriptor.unk98 = 0.002f;
     descriptor.unk9C = -8.837997f;
     descriptor.unkA0 = -159.75f;
@@ -2581,8 +2582,8 @@ void func_15070898(s32 cmd) {
     descriptor.unkAC = 0.40100002f;
     descriptor.unkB0 = 4;
     descriptor.unkB4 = 2;
-    descriptor.unkB8 = 0x1A;
-    descriptor.unkBA = 0x10;
+    descriptor.unkB8 = 26;
+    descriptor.unkBA = 16;
     descriptor.unkBC = 6.0f;
     descriptor.unkC0 = 5;
     descriptor.unkC4 = 0.3f;
@@ -2590,19 +2591,19 @@ void func_15070898(s32 cmd) {
     descriptor.unkCC = 50.0f;
     descriptor.unkD0 = 0.0f;
     descriptor.unkD4 = 0.712f;
-    descriptor.unkD8 = 0x50;
-    descriptor.unkDA = 0x78;
-    descriptor.unkDC = 0xF;
-    descriptor.unkDE = 0x11;
+    descriptor.unkD8 = 80;
+    descriptor.unkDA = 120;
+    descriptor.unkDC = 15;
+    descriptor.unkDE = 17;
     descriptor.unkE0 = -8.837997f;
     descriptor.unkE4 = -159.75f;
     descriptor.unkE8 = 33.473396f;
     descriptor.unkEC = 0.20400001f;
     descriptor.unkF0 = 0.504f;
-    descriptor.unkF4 = 0x1E;
-    descriptor.unkF6 = 0xF;
-    descriptor.unkF8 = 0x50;
-    descriptor.unkFA = 0x50;
+    descriptor.unkF4 = 30;
+    descriptor.unkF6 = 15;
+    descriptor.unkF8 = 80;
+    descriptor.unkFA = 80;
     descriptor.unkFC = 140.0f;
     descriptor.unk100 = 182.0f;
     descriptor.unk104 = 0.16000001f;
@@ -2610,8 +2611,8 @@ void func_15070898(s32 cmd) {
     descriptor.unk10C = 42.0f;
     descriptor.unk110 = -0.518f;
     descriptor.unk114 = 0.37600002f;
-    descriptor.unk118 = 0xA;
-    descriptor.unk11A = 0x19;
+    descriptor.unk118 = 10;
+    descriptor.unk11A = 25;
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
@@ -2620,18 +2621,18 @@ void func_15070C18(s32 cmd) {
 }
 
 void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
-void func_15070C40(u8 arg0) {
-    struct17 tmp;
-    struct127 *temp_a1;
+void func_15070C40(u8 variant) {
+    struct17 pos;
+    struct127 *obj;
     struct127 *owner;
 
-    temp_a1 = D_800D154C;
-    tmp.unk0 = temp_a1->x_position;
-    tmp.unk4 = temp_a1->y_position;
-    tmp.unk8 = temp_a1->z_position;
+    obj = D_800D154C;
+    pos.unk0 = obj->x_position;
+    pos.unk4 = obj->y_position;
+    pos.unk8 = obj->z_position;
 
-    owner = temp_a1->unk124 ? &D_800CC2D0[temp_a1->unk124 - 1] : temp_a1;
-    func_15103E40(owner, temp_a1, &tmp, arg0, 0, 0xFF, 0);
+    owner = obj->unk124 ? &D_800CC2D0[obj->unk124 - 1] : obj;
+    func_15103E40(owner, obj, &pos, variant, 0, 0xFF, 0);
 }
 
 void func_15070CDC(s32 cmd) {
@@ -2643,12 +2644,12 @@ void func_15070D00(s32 cmd) {
 }
 
 void func_15070D24(s32 cmd) {
-    Stack_15070D24 sp4C;
+    Stack_15070D24 fx;
 
-    sp4C.sp84 = D_80099B88;
-    sp4C.sp78 = D_80099B94;
+    fx.localPos = D_80099B88;
+    fx.vec78 = D_80099B94;
 
-    if (D_800D154C->unk1D4 == 0) {
+    if (D_800D154C->unk1D4 == NULL) {
         return;
     }
 
@@ -2656,37 +2657,39 @@ void func_15070D24(s32 cmd) {
         return;
     }
 
-    sp4C.sp70[0] = (func_150ADA68() * 101.0f) + 151.0f;
-    sp4C.sp70[1] = (func_150ADA68() * 4.0f) + 4.0f;
+    fx.randoms[0] = (func_150ADA68() * 101.0f) + 151.0f;
+    fx.randoms[1] = (func_150ADA68() * 4.0f) + 4.0f;
 
-    func_15143134(&sp4C.sp84, sp4C.sp64, (s32)D_800D154C->unk1D4 + 0x40);
+    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->unk1D4 + 1));
 
-    func_15102B38((s32)D_800D154C, 1, (s32)&sp4C.sp84, (s32)&sp4C.sp78, sp4C.sp70,
-                  ((func_150ADA20() + 0U) % 6U) + 5, ((func_150ADA20() + 0U) % 0x9CU) + 0x64,
+    func_15102B38((s32)D_800D154C, 1, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+                  (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 2496.0f) + 3496.0f,
-                  (s32)sp4C.sp64, 0xFF, 0, -1, 0xFF, 0);
+                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    sp4C.header.unk0 = 3;
-    sp4C.header.unk1 = -1;
-    sp4C.header.unk2 = (func_150ADA20() % 6U) + 0xA;
-    sp4C.header.unk4 = 0;
+    fx.header.unk0 = 3;
+    fx.header.unk1 = -1;
+    fx.header.unk2 = (func_150ADA20() % 6U) + 0xA;
+    fx.header.unk4 = 0;
 
-    sp4C.header2.unk0 = (s32)sp4C.sp64[0];
-    sp4C.header2.unk4 = (s32)sp4C.sp64[1];
-    sp4C.header2.unk8 = (s32)sp4C.sp64[2];
+    fx.header2.unk0 = fx.worldPos[0];
+    fx.header2.unk4 = fx.worldPos[1];
+    fx.header2.unk8 = fx.worldPos[2];
 
-    func_151602C0(&sp4C.header, &sp4C.header2, (func_150ADA20() % 0xC9U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
 extern Vec3w_15070D24 D_80099BA0;
 extern Vec3w_15070D24 D_80099BAC;
 extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
-void func_15070F60(s32 cmd) {
-    Stack_15070D24 sp58;
+void func_15070F60(cmd)
+    u8 cmd;
+{
+    Stack_15070D24 fx;
 
-    sp58.sp84 = D_80099BA0;
-    sp58.sp78 = D_80099BAC;
+    fx.localPos = D_80099BA0;
+    fx.vec78 = D_80099BAC;
 
-    if (D_800D154C->unk1D4 == 0) {
+    if (D_800D154C->unk1D4 == NULL) {
         return;
     }
 
@@ -2694,28 +2697,28 @@ void func_15070F60(s32 cmd) {
         return;
     }
 
-    sp58.sp70[0] = (func_150ADA68() * 180.0f) + 150.0f;
-    sp58.sp70[1] = func_150ADA68() * 2.0f + 2.5f;
+    fx.randoms[0] = (func_150ADA68() * 180.0f) + 150.0f;
+    fx.randoms[1] = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&sp58.sp84, sp58.sp64, ((u8)cmd ? 1 : 2) * 0x40 + (s32)D_800D154C->unk1D4);
+    func_15143134(&fx.localPos, fx.worldPos, (s32)((Mtx *)D_800D154C->unk1D4 + (cmd ? 1 : 2)));
 
-    func_15102B38((s32)D_800D154C, (*((u8 *)&cmd + 3)) ? 1 : 2, (s32)&sp58.sp84, (s32)&sp58.sp78, sp58.sp70,
-                  ((func_150ADA20() + 0U) % 5U) + 5, ((func_150ADA20() + 0U) % 0x9CU) + 0x64,
+    func_15102B38((s32)D_800D154C, cmd ? 1 : 2, (s32)&fx.localPos, (s32)&fx.vec78, fx.randoms,
+                  (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 100,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
-                  (s32)sp58.sp64, 0xFF, 0, -1, 0xFF, 0);
+                  (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    sp58.header.unk0 = 3;
-    sp58.header.unk1 = -1;
-    sp58.header.unk2 = (func_150ADA20() % 5U) + 3;
-    sp58.header.unk4 = 0;
+    fx.header.unk0 = 3;
+    fx.header.unk1 = -1;
+    fx.header.unk2 = (func_150ADA20() % 5U) + 3;
+    fx.header.unk4 = 0;
 
-    sp58.header2.unk0 = (s32)sp58.sp64[0];
-    sp58.header2.unk4 = (s32)sp58.sp64[1];
-    sp58.header2.unk8 = (s32)sp58.sp64[2];
+    fx.header2.unk0 = fx.worldPos[0];
+    fx.header2.unk4 = fx.worldPos[1];
+    fx.header2.unk8 = fx.worldPos[2];
 
-    func_151602C0(&sp58.header, &sp58.header2, (func_150ADA20() % 0xC9U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    func_151D5404((struct17 *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334((struct17 *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2732,7 +2735,8 @@ void func_15071278(s32 cmd) {
 extern void func_150FE860(struct127 *arg0, s32 arg1, s32 arg2);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-struct sp18_150712AC {
+/* Argument block for func_151D8868. */
+typedef struct Struct151D8868Args {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
     /* 0x2 */ s16 unk2;
@@ -2740,19 +2744,19 @@ struct sp18_150712AC {
     /* 0x5 */ u8 unk5;
     /* 0x6 */ s8 unk6;
     /* 0x7 */ u8 unk7;
-};
+} Struct151D8868Args;
 
 void func_150712AC(s32 cmd) {
-    struct sp18_150712AC sp18;
+    Struct151D8868Args args;
 
     func_150FE860(D_800D154C, 0xFF, 1);
-    if (D_800D154C->camera != 0) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (func_150ADA20() % 7U) + 0xA;
-        sp18.unk5 = 1 << D_800D154C->camera->unk23D;
-        sp18.unk4 = (func_150ADA20() % 7U) + 2;
-        sp18.unk6 = -1;
-        func_151D8868(&sp18, 0, 0xFF, 1);
+    if (D_800D154C->camera != NULL) {
+        args.unk0 = 1;
+        args.unk2 = (func_150ADA20() % 7U) + 10;
+        args.unk5 = 1 << D_800D154C->camera->unk23D;
+        args.unk4 = (func_150ADA20() % 7U) + 2;
+        args.unk6 = -1;
+        func_151D8868(&args, 0, 0xFF, 1);
     }
 }
 
@@ -2760,20 +2764,20 @@ extern void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2);
 
 void func_15071360(s32 cmd) {
-    struct sp18_150712AC sp18;
+    Struct151D8868Args args;
 
     if (func_151044F4() != 0) {
         func_150FF084(D_800D154C, 0xFF, 1);
     } else {
         func_150FED30(D_800D154C, 0xFF, 1);
     }
-    if (D_800D154C->camera != 0) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (func_150ADA20() % 5U) + 0xF;
-        sp18.unk5 = 1 << D_800D154C->camera->unk23D;
-        sp18.unk4 = (func_150ADA20() % 4U) + 3;
-        sp18.unk6 = -1;
-        func_151D8868(&sp18, 0, 0xFF, 1);
+    if (D_800D154C->camera != NULL) {
+        args.unk0 = 1;
+        args.unk2 = (func_150ADA20() % 5U) + 15;
+        args.unk5 = 1 << D_800D154C->camera->unk23D;
+        args.unk4 = (func_150ADA20() % 4U) + 3;
+        args.unk6 = -1;
+        func_151D8868(&args, 0, 0xFF, 1);
     }
 }
 
@@ -2821,34 +2825,34 @@ void func_15071668(s32 cmd) {
 }
 
 void func_15071690(s32 cmd) {
-    struct127 *temp_a0;
-    s32 pad0;
-    s32 sp1C;
+    struct127 *obj;
+    s32 pad0; // matching: unused stack slot
+    s32 buf;
 
-    temp_a0 = D_800D154C;
-    if ((temp_a0->unk1D4 != 0) && ((temp_a0->unk74 & 0xF) != 0xF)) {
-        func_150B60E0(temp_a0, &sp1C);
-        func_150B5C38(&sp1C, 0xFF, 1);
+    obj = D_800D154C;
+    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+        func_150B60E0(obj, &buf);
+        func_150B5C38(&buf, 0xFF, 1);
     }
 }
 
 void func_150716EC(s32 cmd) {
-    struct17 tmp;
-    struct127 *temp_v0;
+    struct17 pos;
+    struct127 *obj;
 
-    temp_v0 = D_800D154C;
-    tmp.unk0 = temp_v0->x_position;
-    tmp.unk4 = temp_v0->y_position;
-    tmp.unk8 = temp_v0->z_position;
-    func_151D5404(&tmp, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
+    obj = D_800D154C;
+    pos.unk0 = obj->x_position;
+    pos.unk4 = obj->y_position;
+    pos.unk8 = obj->z_position;
+    func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
 }
 
 void func_15071764(s32 cmd) {
-    struct127 *sp34 = func_15083E90(18);
-    if (sp34 != NULL) {
-        func_150F0BEC(sp34);
-        func_150F10D4(sp34);
-        func_15161E24(sp34, 1, 2, 300, 70, 255, 130, 0, 255, 1);
+    struct127 *obj = func_15083E90(18);
+    if (obj != NULL) {
+        func_150F0BEC(obj);
+        func_150F10D4(obj);
+        func_15161E24(obj, 1, 2, 300, 70, 255, 130, 0, 255, 1);
     }
 }
 
@@ -2856,15 +2860,15 @@ void func_150717E0(s32 cmd) {
     struct {
         struct127 *unk0;
         u8 unk4;
-    } sp20;
-    struct127 *temp_v0;
+    } ref;
+    struct127 *obj;
 
-    temp_v0 = func_15083E90(0x12);
-    if (temp_v0 != 0) {
-        sp20.unk0 = temp_v0;
-        sp20.unk4 = temp_v0->unique_id;
-        func_15131D4C((s32)&sp20, 0x43);
-        func_151494E0((s32)&sp20, 0x43);
+    obj = func_15083E90(18);
+    if (obj != NULL) {
+        ref.unk0 = obj;
+        ref.unk4 = obj->unique_id;
+        func_15131D4C((s32)&ref, 0x43);
+        func_151494E0((s32)&ref, 0x43);
     }
 }
 
