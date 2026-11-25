@@ -52,20 +52,6 @@ extern u16 D_800D2340;          /* bit n: actor n's occupancy bits in D_800D30F0
 extern u32 D_800D3094;          /* number of trigger zones */
 extern TriggerZone *D_800D3098; /* trigger-zone table */
 
-/* Partial view of Camera (the camera record) covering the fields this file writes. */
-typedef struct {
-    /* 0x000 */ u8  pad0[0x700];
-    /* 0x700 */ s16 unk700;
-    /* 0x702 */ u8  pad702[0x236];
-    /* 0x938 */ f32 unk938;
-    /* 0x93C */ f32 unk93C;
-    /* 0x940 */ f32 unk940;
-    /* 0x944 */ f32 unk944;
-    /* 0x948 */ u8  unk948;
-    /* 0x949 */ u8  unk949;
-    /* 0x94A */ u8  pad94A[0x56];
-} CameraZoneView; /* size 0x9A0, as Camera */
-
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
 s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin);
 void func_150A23E4(TriggerZone *zone);
@@ -135,11 +121,11 @@ void func_150A09D0(s32 ticks) {
                     s32 j;
 
                     for (j = 0; j <= D_80082FA0; j++) {
-                        CameraZoneView *cam = (CameraZoneView *)&D_800DBFF0[j];
+                        Camera *cam = &D_800DBFF0[j];
 
-                        cam->unk93C = D_800D3098[i].x;
-                        cam->unk940 = D_800D3098[i].y;
-                        cam->unk944 = D_800D3098[i].z;
+                        cam->unk93C.x = D_800D3098[i].x;
+                        cam->unk93C.y = D_800D3098[i].y;
+                        cam->unk93C.z = D_800D3098[i].z;
                         cam->unk938 = D_800D3098[i].radius;
                         cam->unk949 = D_800D3098[i].unk18;
                         cam->unk948 = 1;
@@ -407,7 +393,7 @@ void func_150A11C4(Actor *actor) {
                 case 0:
                     if (cam != NULL && D_800D3098[i].subtype != 12) {
                         func_1512D560(cam, 1, &D_800D3098[i]);
-                        ((CameraZoneView *)cam)->unk700 = i;
+                        cam->cmd.id = i;
                     }
                     break;
                 case 1:

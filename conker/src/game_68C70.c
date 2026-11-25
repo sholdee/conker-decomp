@@ -67,22 +67,6 @@ s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
     return 1;
 }
 
-/* The fields of the camera (Actor.camera) read here; see the Camera struct in game_14FF90.c. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ s32 mode;       /* one-hot mode bit; 0x100 is the R-trigger camera */
-    /* 0x030 */ u8 pad30[0x2F8 - 0x30];
-    /* 0x2F8 */ f32 eyeX;
-    /* 0x2FC */ f32 eyeY;
-    /* 0x300 */ f32 eyeZ;
-    /* 0x304 */ u8 pad304[0x388 - 0x304];
-    /* 0x388 */ f32 pitch;      /* degrees */
-    /* 0x38C */ u8 pad38C[0x74C - 0x38C];
-    /* 0x74C */ f32 unk74C;
-    /* 0x750 */ f32 unk750;
-    /* 0x754 */ f32 unk754;
-} ChainCamera;
-
 extern f32 D_800986F0[4]; /* link lengths */
 extern f32 D_80098700[4]; /* link lengths for objects 0x80 and 0xB0 */
 extern f32 D_80098710[4]; /* per-link x/z follow factors */
@@ -138,7 +122,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 mode;
     s32 reset;
     f32 bob;
-    ChainCamera *cam;
+    Camera *cam;
     f32 *linkLen;
     BoneChain *chain;
     s32 anim;
@@ -234,15 +218,15 @@ void func_1503B9BC(s32 objIndex) {
     tipBob = sinf((chain->bobPhase + 180.0f) * 0.01745329238f) * speed;
     offsets[0][1] += bob;
     offsets[4][1] += tipBob;
-    cam = (ChainCamera *)obj->camera;
+    cam = obj->camera;
     if (cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
         s32 clamped = 0;
         f32 turn;
         f32 toCamX;
         f32 toCamZ;
 
-        toCamX = (cam->eyeX + cam->unk74C) - obj->x_position;
-        toCamZ = (cam->eyeZ + cam->unk754) - obj->z_position;
+        toCamX = (cam->eye.x + cam->aim.offset.x) - obj->x_position;
+        toCamZ = (cam->eye.z + cam->aim.offset.z) - obj->z_position;
         angle = func_150484A0(toCamX, toCamZ) * 57.29577637f + 90.0f;
         if (angle >= 360.0f) {
             angle -= 360.0f;

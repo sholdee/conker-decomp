@@ -2,13 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Camera (Camera) fields past the shared header's declared range. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x95C];
-    /* 0x95C */ f32 unk95C;
-    /* 0x960 */ f32 unk960;
-} CameraSizeView;
-
 void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 
 /* Refreshes the cached height/width/depth (ActorCtl unk114-unk118) of every object that has one. */
@@ -58,8 +51,8 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
         width = depth = 60.0f;
         height = 180.0f;
     } else if (obj->interaction_state == 45) {
-        height = ((CameraSizeView *)obj->camera)->unk960;
-        width = depth = ((CameraSizeView *)obj->camera)->unk95C;
+        height = obj->camera->unk960;
+        width = depth = obj->camera->unk95C;
     } else if (obj->interaction_state == 4) {
         height = obj->unkE6 * 6.0f;
         width = depth = obj->unkE4 * 3.0f;
