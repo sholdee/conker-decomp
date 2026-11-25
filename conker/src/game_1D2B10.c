@@ -156,24 +156,39 @@ void func_151A5660(u8 *arg0)
   }
 }
 
-void func_151A5D2C(u16 arg0);
+void func_151A5D2C(u16 soundHandle);
 
+/* Effect state embedded at offset 0x58 of the struct260 passed to the two functions below. */
+typedef struct {
+    u8 pad0[0x14];
+    /* 0x14 */ u16 soundHandle;
+} EffectSoundState;
+
+/* Releases the effect's sound (if any), then hands the effect to func_1514933C. */
 void func_151A5CAC(struct260 *arg0) {
-    if (*(u16 volatile *)((u8*)arg0 + 0x6C) != 0) {
-        func_151A5D2C(*(u16*)((u8*)arg0 + 0x6C));
+    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+
+    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+        func_151A5D2C(state->soundHandle);
     }
     func_1514933C(arg0);
 }
 
+/* Releases the effect's sound (if any), then hands the effect to func_15149368. */
 void func_151A5CEC(struct260 *arg0) {
-    if (*(u16 volatile *)((u8*)arg0 + 0x6C) != 0) {
-        func_151A5D2C(*(u16*)((u8*)arg0 + 0x6C));
+    EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
+
+    // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
+    if (*(u16 *)((u8 *)arg0 + 0x6C) != 0) {
+        func_151A5D2C(state->soundHandle);
     }
     func_15149368(arg0);
 }
 
-void func_151A5D2C(u16 arg0) {
-    func_100111C8(arg0);
+/* Releases a sound handle. */
+void func_151A5D2C(u16 soundHandle) {
+    func_100111C8(soundHandle);
 }
 
 typedef struct {
