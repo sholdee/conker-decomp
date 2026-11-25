@@ -3761,9 +3761,9 @@ func_1511D9E4	0x1511D9E4	480	game	c		build/src/game_1483E0.c.o
 func_1511DBC4	0x1511DBC4	468	game	c		build/src/game_1483E0.c.o
 func_1511DD98	0x1511DD98	468	game	c		build/src/game_1483E0.c.o
 func_1511DF6C	0x1511DF6C	2068	game	c		build/src/game_1483E0.c.o
-func_1511E780	0x1511E780	1232	game	c		build/src/game_14BC30.c.o
-func_1511EC50	0x1511EC50	308	game	c		build/src/game_14BC30.c.o
-func_1511ED84	0x1511ED84	444	game	c		build/src/game_14BC30.c.o
+func_1511E780	0x1511E780	1232	game	c		build/src/game_1483E0.c.o
+func_1511EC50	0x1511EC50	308	game	c		build/src/game_1483E0.c.o
+func_1511ED84	0x1511ED84	444	game	c		build/src/game_1483E0.c.o
 func_1511EF40	0x1511EF40	988	game	c		build/src/game_14C3F0.c.o
 func_1511F31C	0x1511F31C	204	game	c		build/src/game_14C3F0.c.o
 func_1511F3E8	0x1511F3E8	232	game	c		build/src/game_14C3F0.c.o
