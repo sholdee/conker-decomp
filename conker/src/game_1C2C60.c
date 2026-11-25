@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_151422C0 func_151422C0_header
-#define func_15195AA8 func_15195AA8_hdr
 #include "functions.h"
-#undef func_151422C0
-#undef func_15195AA8
 #define D_800DD198 D_800DD198_hdr
 #include "variables.h"
 #include "effects.h"
@@ -15,7 +11,6 @@ struct CharacterFlamethrowerActor;
 void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
 extern void *allocate_memory(s32, s32, s32, s32);
 
-s32 func_151422C0(s32, const char *, s32, s32, const char *, s32);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 
@@ -47,7 +42,7 @@ typedef struct TexScrollRef {
 } TexScrollRef;
 
 /* A scrolling texture: patches the G_SETTILESIZE commands that follow its G_SETTIMG. */
-typedef struct TexScroll {
+struct TexScroll {
     /* 0x00 */ struct TexScroll *prev;
     /* 0x04 */ struct TexScroll *next;
     /* 0x08 */ s16 id;
@@ -62,7 +57,7 @@ typedef struct TexScroll {
     /* 0x18 */ TexScrollRef *refs;
     /* 0x1C */ s16 cmdIndex[2][5]; /* per main display list (D_800B0E00[0] / [1]), -1 = unused */
     /* 0x30 */ u8 cmdCount[2][5];
-} TexScroll;
+};
 
 /* Allocates a `size`-byte list node and appends it to the list (*head, *tail). */
 void *func_151957B0(s32 size, ListNode **head, ListNode **tail) {

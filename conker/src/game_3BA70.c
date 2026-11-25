@@ -129,8 +129,8 @@ void func_1500E890(void) {
 
 /* Starts two func_15195AA8 entries, spawns one func_15189900 emitter and calls func_1000FA64. */
 void func_1500E8C0(void) {
-    func_15195AA8(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
-    func_15195AA8(D_800B0E04, D_800902E8, 0, -1, 0, 1, 0, -6);
+    func_15195AA8((Gfx *)D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
+    func_15195AA8((Gfx *)D_800B0E04, D_800902E8, 0, -1, 0, 1, 0, -6);
     {
         struct145 descriptor;
 
@@ -165,6 +165,6 @@ void func_1500E8C0(void) {
 }
 
 void func_1500EAA0(void) {
-    func_15195AA8(D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
-    func_15195AA8(D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
+    func_15195AA8((Gfx *)D_800B0E00[0], D_80090320, 0, -1, 0, 0, 0, -8);
+    func_15195AA8((Gfx *)D_800B0E00[1], D_80090320, 0, -1, 0, 1, 0, -8);
 }

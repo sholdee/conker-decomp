@@ -11,7 +11,7 @@ typedef union {
         /* 0x7C */ s32 phase; // drives the push of func_15048A40; plays sound 0xF each time it wraps 256
     } pendulum;
     struct {
-        /* 0x7C */ struct TexScroll *state; // allocated on first use
+        /* 0x7C */ struct ScrollState *state; // allocated on first use
     } scroll;
 } WorkF21D0;
 
@@ -65,13 +65,13 @@ extern u8 D_2C1;
 extern u8 D_1C0;
 
 /* Per-object state of func_150C4E9C, allocated on first use. */
-typedef struct TexScroll {
+typedef struct ScrollState {
     /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from func_1511A410
     /* 0x04 */ s16 startT;        // vertex 0's initial t texture coordinate
     /* 0x06 */ u8  pad6[2];
     /* 0x08 */ f32 speed;         // t units scrolled per frame
     /* 0x0C */ f32 unkC;
-} TexScroll;
+} ScrollState;
 
 /*
  * Scrolls the t texture coordinate of the object's vertices. Scroll mode (behaviorState & 3): 0 and 3 stand still,
@@ -84,13 +84,13 @@ void func_150C4E9C(WorldObject *obj) {
     s32 size;
     s32 addr;
     s32 tailAddr;
-    TexScroll *scroll;
+    ScrollState *scroll;
     s32 mode;
     s32 i;
 
     mode = obj->behaviorState & 3;
     if (WORK(obj)->scroll.state == NULL) {
-        scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(TexScroll), 1, 0, 0);
+        scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
         func_1511A410(obj->displayList, &scroll->secondSetTImg);
         scroll->startT = obj->srcVertices->v.tc[1];
         scroll->speed = 0.0f;

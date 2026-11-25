@@ -434,15 +434,17 @@ void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     func_15153F18(&params, &params.pos, 0, 0xFF, 1);
 }
 
-/* Interpolation callbacks: the midpoint of arg2/arg3, or arg4 unchanged. */
-s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return (arg3 + arg2) >> 1;
+/* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
+s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
+    return (max + min) >> 1;
 }
 
-s32 func_151422DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    return arg4;
+/* Debug tunable stub: returns the default value unchanged. */
+s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line) {
+    return value;
 }
 
+/* Returns arg4 unchanged. */
 s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }

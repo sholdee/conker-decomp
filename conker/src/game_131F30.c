@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_15105548 func_15105548_decl_in_functions_h
-#define func_15105848 func_15105848_decl_in_functions_h
 #include "functions.h"
-#undef func_15105548
-#undef func_15105848
 #include "variables.h"
 #include "effects.h"
 
@@ -249,11 +245,11 @@ typedef struct BoltArcState {
     /* 0x70 */ s32 unk70;
 } BoltArcState;
 
-typedef struct BoltArcObj {
+struct BoltArcObj {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ BoltArcState state;
-} BoltArcObj;
+};
 
 void *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8, s32);
 
@@ -455,11 +451,11 @@ typedef struct SparkState {
     /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
 } SparkState;
 
-typedef struct SparkObj {
+struct SparkObj {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ SparkState state;
-} SparkObj;
+};
 
 typedef struct SparkSpawn {
     /* 0x00 */ f32 x;

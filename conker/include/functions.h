@@ -741,8 +741,10 @@ void func_15100330(s32 arg0);
 void func_15103800(void);
 void func_15103828(void);
 void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2);
-void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2);
-void func_15105848(struct207 *arg0, s32 arg1, u8 arg2);
+typedef struct BoltArcObj BoltArcObj; /* game_131F30.c */
+typedef struct SparkObj SparkObj;     /* game_131F30.c */
+void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg);
+void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
 void func_1511FC20(s32 arg0);
 Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
 Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
@@ -802,8 +804,8 @@ void func_15141970(struct37 *arg0);
 void func_15141990(void *arg0);
 void func_151419B0(void *arg0);
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2);
-s32  func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_151422DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32  func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
+s32  func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
 s32  func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32  func_15143E08(Actor *arg0);
 s32  func_15144C2C(s16 arg0);
@@ -1132,7 +1134,9 @@ void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16
 s32  func_1517EFAC(s32 arg0);
 void func_15178E14(u8 tag);
 s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
-void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+typedef struct TexScroll TexScroll; /* game_1C2C60.c */
+TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
+                         s32 speedT);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
