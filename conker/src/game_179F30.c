@@ -86,10 +86,10 @@ extern s32 D_800A590C;
 extern s32 D_800A5920;
 s32 func_15189FF0(void *, void *, void *, s32, s32, s32, s32);
 extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
-void func_151BB044(s32);
-void func_151BC074(s32);
-void func_151BD2F8(void *, s32, s32);
-void func_151B9F00(void *, s32, s32);
+void func_151BB044(struct127 *);
+void func_151BC074(struct127 *);
+void func_151BD2F8(struct127 *, s32, s32);
+void func_151B9F00(struct127 *, s32, s32);
 void func_150C0AC0(Struct1514F5CCArg *, s32, s32);
 s32 func_150C5370(void *, s32);
 extern struct102 *func_15155FD4(s32);
@@ -800,12 +800,13 @@ void func_1514D64C(struct127 *obj) {
     func_15160A58(obj, 5, &attach, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514D96C(s32 arg0) {
+void func_1514D96C(struct127 *obj) {
 }
 
-s32 func_15158BD0(s32, s32, s32);
+s32 func_15158BD0(struct127 *obj, s32 arg1, s32 payloadSize);
+s32 func_151ACA60(struct127 *obj, f32 arg1, s32 arg2);
 
-void func_1514D978(s32 arg0) {
+void func_1514D978(struct127 *obj) {
     struct {
         s32 unk0;
         s32 unk4;
@@ -815,36 +816,35 @@ void func_1514D978(s32 arg0) {
         s32 unk14;
         s32 unk18;
         s32 unk1C;
-    } sp20;
-    s32 v0;
+    } payload;
+    s32 handle;
 
-    sp20.unk0 = 0;
-    sp20.unk4 = 0;
-    sp20.unk8 = 0;
-    sp20.unkC = 0;
-    sp20.unk14 = 0;
-    sp20.unk18 = 0;
-    sp20.unk1C = 0;
-    sp20.unk10 = 12.0f;
+    payload.unk0 = 0;
+    payload.unk4 = 0;
+    payload.unk8 = 0;
+    payload.unkC = 0;
+    payload.unk14 = 0;
+    payload.unk18 = 0;
+    payload.unk1C = 0;
+    payload.unk10 = 12.0f;
 
-    v0 = func_15158BD0(arg0, 1, 0x20);
-    if (v0 != 0) {
-        memcpy((void *)(v0 + 0x58), &sp20, 0x20);
-        func_1514EC1C(v0, arg0, 0x13);
+    handle = func_15158BD0(obj, 1, sizeof(payload));
+    if (handle != 0) {
+        memcpy((void *)(handle + 0x58), &payload, sizeof(payload));
+        func_1514EC1C(handle, obj, 0x13);
     }
 }
 
-s32 func_151ACA60(s32, f32, s32);
+void func_1514D9F4(struct127 *obj) {
+    s32 handle;
 
-void func_1514D9F4(s32 arg0) {
-    s32 v0;
-    func_1514D978(arg0);
-    v0 = func_151ACA60(arg0, 20.0f, 0);
-    func_1514EC1C(v0, arg0, 0x14);
+    func_1514D978(obj);
+    handle = func_151ACA60(obj, 20.0f, 0);
+    func_1514EC1C(handle, obj, 0x14);
 }
 
-void func_1514DA38(s32 arg0) {
-    s32 temp_v0;
+void func_1514DA38(struct127 *obj) {
+    s32 handle;
     struct {
         s32 unk0;
         s32 unk4;
@@ -853,165 +853,146 @@ void func_1514DA38(s32 arg0) {
         s32 unk10;
         s32 unk14;
         s32 unk18;
-    } sp18;
+    } payload;
 
-    sp18.unk14 = 0;
-    sp18.unk18 = 0;
-    sp18.unk0 = 0;
-    sp18.unk4 = 0;
-    sp18.unk8 = 0;
-    sp18.unkC = 0;
-    temp_v0 = func_15158BD0(arg0, 1, 0x1C);
-    if (temp_v0 != 0) {
-        memcpy((void *)(temp_v0 + 0x58), &sp18, 0x1C);
-        func_1514EC1C(temp_v0, arg0, 0x13);
+    payload.unk14 = 0;
+    payload.unk18 = 0;
+    payload.unk0 = 0;
+    payload.unk4 = 0;
+    payload.unk8 = 0;
+    payload.unkC = 0;
+    handle = func_15158BD0(obj, 1, sizeof(payload));
+    if (handle != 0) {
+        memcpy((void *)(handle + 0x58), &payload, sizeof(payload));
+        func_1514EC1C(handle, obj, 0x13);
     }
 }
 
-void func_1514DAA4(struct127 *arg0) {
-    s32 v0;
-    s32 sp1C[2];
+void func_1514DAA4(struct127 *obj) {
+    s32 handle;
+    s32 payload[2];
 
-    arg0->unk94 |= 0x2;
-    sp1C[0] = 0;
-    sp1C[1] = 0;
+    obj->unk94 |= 2;
+    payload[0] = 0;
+    payload[1] = 0;
     {
+        // matching: an unprototyped call here changes how as1 schedules the argument setup
         extern s32 func_15158BD0();
 
-        if ((v0 = func_15158BD0((s32) arg0, 1, 8)) != 0) {
-            memcpy((void *)(v0 + 0x58), sp1C, 8);
-            func_1514EC1C(v0, (s32) arg0, 0x13);
+        if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != 0) {
+            memcpy((void *)(handle + 0x58), payload, sizeof(payload));
+            func_1514EC1C(handle, obj, 0x13);
         }
     }
 }
 
-s32 func_15158BD0(s32, s32, s32);
+void func_1514DB18(struct127 *obj) {
+    s32 handle = func_15158BD0(obj, 1, 0);
 
-void func_1514DB18(s32 arg0) {
-    s32 v0 = func_15158BD0(arg0, 1, 0);
-    if (v0 != 0) {
-        func_1514EC1C(v0, arg0, 0x13);
+    if (handle != 0) {
+        func_1514EC1C(handle, obj, 0x13);
     }
 }
 
-void func_1514DB58(s32 arg0) {
+void func_1514DB58(struct127 *obj) {
 }
 
-extern s32 D_800BE9F0;
-void func_151B2060(void);
+void func_151B2060(struct127 *obj);
+void func_1514F194(struct127 *obj);
 
-void func_1514DB64(void) {
-    if (D_800BE9F0 == 0x14) {
-        func_151B2060();
+void func_1514DB64(struct127 *obj) {
+    if (D_800BE9F0 == 20) {
+        func_151B2060(obj);
     }
 }
 
-void func_1514F194();
-
-void func_1514DB98(void) {
-    func_1514F194();
+void func_1514DB98(struct127 *obj) {
+    func_1514F194(obj);
 }
 
-void func_1514DBB8(s32 arg0) {
-    func_15160A58(arg0, 2, &D_800A58A0, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+void func_1514DBB8(struct127 *obj) {
+    func_15160A58(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-void func_1514DC38(struct127 *arg0) {
-    func_1500EE18(arg0, 0xFF, 1);
+void func_1514DC38(struct127 *obj) {
+    func_1500EE18(obj, 0xFF, 1);
 }
 
-void func_151D0F60(void *, s32, s32, s32);
+void func_151D0F60(struct127 *obj, s32, s32, s32);
 
-void func_1514DC5C(void *arg0) {
-    func_151D0F60(arg0, 0, 0xFF, 1);
+void func_1514DC5C(struct127 *obj) {
+    func_151D0F60(obj, 0, 0xFF, 1);
 }
 
-typedef struct {
-    u8 pad0[0x94];
-    /* 0x94 */ s32 unk94;
-} S1514DC84;
-
-void func_1514DC84(S1514DC84 *arg0) {
-    arg0->unk94 |= 0x2;
+void func_1514DC84(struct127 *obj) {
+    obj->unk94 |= 2;
 }
 
-typedef struct {
-    u8 pad0[0x94];
-    /* 0x94 */ s32 unk94;
-} S1514DC98;
-
-void func_1514DC98(S1514DC98 *arg0) {
-    arg0->unk94 |= 0x710;
+void func_1514DC98(struct127 *obj) {
+    obj->unk94 |= 0x710;
 }
 
-void func_1514DCAC(arg0)
-struct127 *arg0;
-{
-    *(s32 *)((u8 *)arg0 + 0x9C) = 0x6000;
-    func_15083568(arg0, 0x23, 1.0f, 0);
-    func_15083568(arg0, 0x44, 1.0f, 0);
+void func_1514DCAC(struct127 *obj) {
+    obj->unk9C = 0x6000;
+    func_15083568(obj, 0x23, 1.0f, 0);
+    func_15083568(obj, 0x44, 1.0f, 0);
 }
 
-struct struct1514DCF4 {
-    u8 pad[0x31C];
-    struct127 *unk31C;
-};
-
-void func_1514DCF4(struct struct1514DCF4 *arg0) {
-    if (arg0->unk31C != NULL) {
-        *(u8 *)((u8 *)arg0->unk31C + 0x94) = 1;
+void func_1514DCF4(struct127 *obj) {
+    if (obj->unk31C != NULL) {
+        obj->unk31C->unk94 = 1;
     }
-    func_15083568((struct127 *)arg0, 0x17, 1.0f, 0);
+    func_15083568(obj, 0x17, 1.0f, 0);
 }
 
-void func_1514DD2C(void) {
-    func_1514DCAC();
+void func_1514DD2C(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DD4C(void) {
-    func_1514DCAC();
+void func_1514DD4C(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DD6C(void) {
-    func_1514DCAC();
+void func_1514DD6C(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DD8C(void) {
-    func_1514DCAC();
+void func_1514DD8C(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DDAC(void) {
-    func_1514DCAC();
+void func_1514DDAC(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DDCC(void) {
-    func_1514DCAC();
+void func_1514DDCC(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DDEC(void) {
-    func_1514DCAC();
+void func_1514DDEC(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DE0C(void) {
-    func_1514DCAC();
+void func_1514DE0C(struct127 *obj) {
+    func_1514DCAC(obj);
 }
 
-void func_1514DE2C(s32 arg0) {
+void func_1514DE2C(struct127 *obj) {
 }
 
-void func_1514DE38(s32 arg0) {
+void func_1514DE38(struct127 *obj) {
 }
 
-void func_1514DE44(s32 arg0) {
+void func_1514DE44(struct127 *obj) {
 }
 
-void func_1514DE50(void) {
-    if (((u8 *)D_800D2E4C)[0x11] & 8) {
-        func_1514DCAC();
+void func_1514DE50(struct127 *obj) {
+    if (((u8 *)D_800D2E4C)[0x11] & 8) { // low byte of D_800D2E4C->unk10
+        func_1514DCAC(obj);
     }
 }
 
-void func_1514DE88(s32 arg0) {
+void func_1514DE88(struct127 *obj) {
 }
 
 void func_15160CDC(s32, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1690,8 +1671,8 @@ void func_1514EECC(s32 arg0) {
     }
 }
 
-void func_1514F110(void) {
-    func_1514F194();
+void func_1514F110(struct127 *obj) {
+    func_1514F194(obj);
 }
 
 s32 func_1514F130(HudSpriteHandle *arg0, s32 arg1, s32 arg2) {
@@ -1708,21 +1689,21 @@ s32 func_1514F130(HudSpriteHandle *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-void func_1514F194(s32 arg0) {
-    s32 v0;
+void func_1514F194(struct127 *obj) {
+    s32 handle;
 
-    func_151D0F60((void *)arg0, 1, 0xFF, 1);
-    func_151D0F60((void *)arg0, 2, 0xFF, 1);
-    func_151BB044(arg0);
+    func_151D0F60(obj, 1, 0xFF, 1);
+    func_151D0F60(obj, 2, 0xFF, 1);
+    func_151BB044(obj);
     if (D_800BE616 == 0) {
-        func_151BC074(arg0);
+        func_151BC074(obj);
     }
-    func_151BD2F8((void *)arg0, 0xFF, 1);
-    func_151B9F00((void *)arg0, 0xFF, 1);
-    func_15160A58(arg0, 1, &D_800A5958, 2, 0x12C, 0xC, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
-    v0 = func_15160A58(arg0, 1, &D_800A5964, 2, 0x12C, 0xF, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
-    if (v0 != 0) {
-        func_1514EC1C(v0, arg0, 0x19);
+    func_151BD2F8(obj, 0xFF, 1);
+    func_151B9F00(obj, 0xFF, 1);
+    func_15160A58(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
+    handle = func_15160A58(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
+    if (handle != 0) {
+        func_1514EC1C(handle, obj, 0x19);
     }
 }
 
