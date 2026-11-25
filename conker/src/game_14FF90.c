@@ -312,7 +312,7 @@ typedef struct Camera {
     /* 0x7C0 */ f32 unk7C0;
     /* 0x7C4 */ u8 pad7C4[0x4];
     /* 0x7C8 */ s32 unk7C8;
-    /* 0x7CC */ s32 shakeTimer;
+    /* 0x7CC */ s32 unk7CC;
     /* 0x7D0 */ u8 pad7D0[0x10];
     /* 0x7E0 */ f32 spinDir;
     /* 0x7E4 */ u8 unk7E4;
@@ -368,7 +368,12 @@ typedef struct CamView {
     /* 0x088 */ u8 pad88[0xF8];
 } CamView; // size 0x180
 
+#define CAM_C_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
+
 #define CAM_VIEWS ((CamView *)D_800BE628)
+
+/* variables.h declares D_800C3600 as struct168 *; it is the struct itself (a scripted camera shot). */
+#define SCRIPT_CAM (*(struct168 *)&D_800C3600)
 
 /* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
 #define CONT_PADS (*(OSContPad ***)&D_800BE728)
@@ -1656,31 +1661,16 @@ s32 func_15125490(struct108 *camera) {
     // matching: no return for 100..300 (callers see the leftover v0), as in the original
 }
 
-// PERMUTER CANDIDATE (best 558): logic + operand/store order all match; only two IDO
-// scheduling diffs remain (D_800A352C load placed after `sw ra`; a1-reload vs 0x670 store).
-// void func_151254F4(struct108 *arg0, s32 arg1) {
-//     f32 tmp = D_800A352C;
-//     arg0->unk3A0 = arg0->unk380 * tmp;
-//     arg0->unk398 = arg0->unk388 * tmp;
-//     func_15124AB4(arg0);
-//     func_151239CC(arg0, 1);
-//     arg0->unk3D4->unk198 = 0;
-//     arg0->unk73C = 0;
-//     arg0->unk670 = 0.0f;
-//     arg0->unk3D0 = &D_800CC2D0[arg1];
-// }
-void func_151254F4(void *arg0, s32 arg1) {
-    f32 scale;
-
-    scale = 0.01745329238474369f;
-    *(f32 *)((u8 *)arg0 + 0x3A0) = *(f32 *)((u8 *)arg0 + 0x380) * scale;
-    *(f32 *)((u8 *)arg0 + 0x398) = *(f32 *)((u8 *)arg0 + 0x388) * scale;
-    func_15124AB4(arg0);
-    func_151239CC(arg0, 1);
-    *((u8 *)*(void **)((u8 *)arg0 + 0x3D4) + 0x198) = 0;
-    *(s16 *)((u8 *)arg0 + 0x73C) = 0;
-    *(void **)((u8 *)arg0 + 0x3D0) = (void *)((u32)D_800CC2D0 + (u32)arg1 * 0x32CU);
-    *(f32 *)((u8 *)arg0 + 0x670) = 0.0f;
+/* Attaches the camera to object `index` and leaves the aim state. */
+void func_151254F4(struct108 *camera, s32 index) {
+    CAM->unk3A0 = CAM->unk380 * DEG2RAD;
+    CAM->pitchRad = CAM->pitch * DEG2RAD;
+    func_15124AB4(camera);
+    func_151239CC(camera, 1);
+    CAM->playerExt->unk198 = 0;
+    CAM->unk73C = 0;
+    CAM->player = &D_800CC2D0[index];
+    CAM->followRate = 0.0f;
 }
 // NON-MATCHING: first statements in wrong order
 // void func_151254F4(struct108 *arg0, s32 arg1) {
@@ -1755,78 +1745,73 @@ void func_15125690(struct108 *camera, s32 frames) {
  * the phase advances by a random 0/2/4 degrees per frame and wraps at 2*PI;
  * otherwise the phase decays away. The resulting amount is fed to the camera
  * eye/target orbit routine. */
-void func_151256BC(struct108 *arg0) {
+void func_151256BC(struct108 *camera) {
     f32 twoPi;
-    f32 speed;
-    f32 scale;
-    f32 mult;
+    f32 amount;
+    f32 eyeScale;
+    f32 targetScale;
 
-    if (((arg0->unk2C & 0x80000) != 0) ||
-        (((arg0->unk5F0 & 8) != 0) && ((arg0->unk2C & 0x40000) == 0))) {
-        speed = (f32) ((u32) func_150ADA20() % 3);
-        twoPi = D_800A3534;
-        *(f32 *) ((u8 *) arg0 + 0x29C) += ((speed + speed) * D_800A3538) * D_800BE9A4;
-        while (twoPi < *(f32 *) ((u8 *) arg0 + 0x29C)) {
-            *(f32 *) ((u8 *) arg0 + 0x29C) -= twoPi;
+    if ((CAM->mode & 0x80000) || ((CAM->status & 8) && !(CAM->mode & 0x40000))) {
+        amount = (f32)((u32)func_150ADA20() % 3);
+        twoPi = 6.2831854820251465f;
+        CAM->swayPhase += ((amount + amount) * DEG2RAD) * D_800BE9A4;
+        while (twoPi < CAM->swayPhase) {
+            CAM->swayPhase -= twoPi;
         }
-        *(f32 *) ((u8 *) arg0 + 0x5EC) += ((sinf(*(f32 *) ((u8 *) arg0 + 0x29C)) * 4.0f) -
-                                           *(f32 *) ((u8 *) arg0 + 0x5EC)) * D_800A353C;
-        speed = *(f32 *) ((u8 *) arg0 + 0x5EC) * D_800A3540;
-        if ((arg0->unk2C & 0x80000) != 0) {
-            scale = 4.0f;
-            mult = 4.0f;
+        CAM->swayAmount += ((sinf(CAM->swayPhase) * 4.0f) - CAM->swayAmount) * 0.04f;
+        amount = CAM->swayAmount * 0.05f;
+        if (CAM->mode & 0x80000) {
+            eyeScale = 4.0f;
+            targetScale = 4.0f;
         } else {
-            scale = 1.0f;
-            mult = 20.0f;
+            eyeScale = 1.0f;
+            targetScale = 20.0f;
         }
-        func_1508EF80((struct17 *) &arg0->unk2F8, (struct17 *) &arg0->unk2BC, speed * scale,
-                      (struct17 *) &arg0->unk2F8);
-        func_1508EF80((struct17 *) &arg0->unk2BC, (struct17 *) &arg0->unk2F8, speed * mult,
-                      (struct17 *) &arg0->unk2BC);
-    } else if (*(f32 *) ((u8 *) arg0 + 0x29C) != 0.0f) {
-        *(f32 *) ((u8 *) arg0 + 0x29C) -= *(f32 *) ((u8 *) arg0 + 0x29C) * D_800A3544;
-        *(f32 *) ((u8 *) arg0 + 0x5EC) += ((sinf(*(f32 *) ((u8 *) arg0 + 0x29C)) * 4.0f) -
-                                           *(f32 *) ((u8 *) arg0 + 0x5EC)) * D_800A3548;
-        speed = *(f32 *) ((u8 *) arg0 + 0x5EC) * D_800A354C;
-        func_1508EF80((struct17 *) &arg0->unk2F8, (struct17 *) &arg0->unk2BC, speed,
-                      (struct17 *) &arg0->unk2F8);
-        func_1508EF80((struct17 *) &arg0->unk2BC, (struct17 *) &arg0->unk2F8, speed * 20.0f,
-                      (struct17 *) &arg0->unk2BC);
+        func_1508EF80((struct17 *)&CAM->eye, (struct17 *)&CAM->target, amount * eyeScale, (struct17 *)&CAM->eye);
+        func_1508EF80((struct17 *)&CAM->target, (struct17 *)&CAM->eye, amount * targetScale,
+                      (struct17 *)&CAM->target);
+    } else if (CAM->swayPhase != 0.0f) {
+        CAM->swayPhase -= CAM->swayPhase * 0.08f;
+        CAM->swayAmount += ((sinf(CAM->swayPhase) * 4.0f) - CAM->swayAmount) * 0.04f;
+        amount = CAM->swayAmount * 0.05f;
+        func_1508EF80((struct17 *)&CAM->eye, (struct17 *)&CAM->target, amount, (struct17 *)&CAM->eye);
+        func_1508EF80((struct17 *)&CAM->target, (struct17 *)&CAM->eye, amount * 20.0f, (struct17 *)&CAM->target);
     }
 }
 
-void func_15125924(struct108 *arg0) {
-    s32 temp_v1;
-    s32 temp_a1;
+/* Pushes the deep-water mode 0x80 (slot 13) while func_15125490 says so, and pops it otherwise. */
+void func_15125924(struct108 *camera) {
+    s32 extUnk4E;
+    s32 extUnk1C;
 
-    if (arg0->unk3D4 != NULL) {
-        temp_a1 = (s32) arg0->unk3D4->z_position;
-        temp_v1 = *(u8 *)((u8 *)arg0->unk3D4 + 0x4E);
+    if (CAM->playerExt != NULL) {
+        extUnk1C = CAM->playerExt->unk1C;
+        extUnk4E = CAM->playerExt->unk4E;
     } else {
-        temp_a1 = 0;
-        temp_v1 = 0;
+        extUnk1C = 0;
+        extUnk4E = 0;
     }
 
-    if ((arg0->unk2C & 0x40) == 0) {
-        if (((arg0->unk84 & 0x4000) != 0) || (arg0->unk3D0->unk102 != 0)) {
-            if (func_15125490(arg0) != 0) {
-                if ((temp_v1 == 0) && (temp_a1 == 0)) {
-                    if (func_15123934(arg0, 0x80, 1, 1, 0xD) != 0) {
-                        if (arg0->unk6C8 == 0) {
-                            func_15124B18(arg0);
-                            arg0->unk5F0 |= 0x1000;
+    if (!(CAM->mode & 0x40)) {
+        if ((CAM->unk84 & 0x4000) || (CAM->player->unk102 != 0)) {
+            if (func_15125490(camera) != 0) {
+                if ((extUnk4E == 0) && (extUnk1C == 0)) {
+                    if (func_15123934(camera, 0x80, 1, 1, 13) != 0) {
+                        if (CAM->unk6C8 == 0) {
+                            func_15124B18(camera);
+                            CAM->status |= 0x1000;
                         }
                     }
                     return;
                 }
             }
-            if ((arg0->unk2C & 0x80) != 0) {
-                func_151239CC(arg0, 0xD);
-                arg0->unk190 = 0.0f;
+            if (CAM->mode & 0x80) {
+                func_151239CC(camera, 13);
+                CAM->unk190 = 0.0f;
             }
-            if ((arg0->unk5F0 & 0x1000) != 0) {
-                arg0->unk5F0 &= ~0x1000;
-                arg0->unk348 = (*(f32 *)((u8 *)arg0 + 0x344) = arg0->unk2FC - arg0->unk354);
+            if (CAM->status & 0x1000) {
+                CAM->status &= ~0x1000;
+                CAM->height = CAM->unk344 = CAM->eye.y - CAM->unk354;
             }
         }
     }
@@ -1838,51 +1823,53 @@ extern f32 D_800C361C;
 extern f32 D_800C3624;
 extern s8 D_800C365C;
 
-void func_15125A6C(struct108 *arg0) {
-    f32 offsetCos;
-    f32 offsetSin;
+/* Zone 0x2A: hands the camera to a scripted shot (D_800C3600) behind and beside the player. */
+void func_15125A6C(struct108 *camera) {
+    f32 sideCos;
+    f32 sideSin;
     f32 radius;
     f32 yaw;
-    f32 offsetRadius;
+    f32 sideRadius;
     f32 height;
     f32 trig;
     f32 angle;
-    f32 offsetAngle;
-    u8 mode;
+    f32 sideAngle;
+    u8 zone;
 
-    mode = arg0->unk23E;
-    if (mode == 0x2A) {
-        yaw = arg0->unk3D0->unk40;
-        if (arg0->unk2C != 0x40000) {
-            func_1512D560(arg0, 5, 0);
-            arg0->unk7E4 = 1U;
+    zone = CAM->zone;
+    if (zone == 0x2A) {
+        yaw = CAM->player->unk40;
+        if (CAM->mode != 0x40000) {
+            func_1512D560(camera, 5, 0);
+            CAM->unk7E4 = 1;
         }
-        *D_800DBFF4 = 3;
-        ((struct168 *)&D_800C3600)->unk0 = 1;
-        ((struct168 *)&D_800C3600)->unk4 = 0;
+        D_800DBFF4[0] = 3;
+        SCRIPT_CAM.unk0 = 1;
+        SCRIPT_CAM.unk4 = 0;
         radius = 138.0f;
-        offsetRadius = 46.0f;
+        sideRadius = 46.0f;
         height = 96.0f;
+        // matching: DEG2RAD via the rodata externs; literals change the frame size
         angle = yaw * D_800A3550;
         trig = sinf(angle);
-        offsetAngle = (yaw - 90.0f) * D_800A3554;
-        offsetSin = sinf(offsetAngle);
-        D_800C3614 = (offsetSin * offsetRadius) + (arg0->unk3D0->x_position + (radius * trig));
-        D_800C3618 = arg0->unk3D0->y_position + height;
+        sideAngle = (yaw - 90.0f) * D_800A3554;
+        sideSin = sinf(sideAngle);
+        D_800C3614 = (sideSin * sideRadius) + (CAM->player->x_position + (radius * trig));
+        D_800C3618 = CAM->player->y_position + height;
         trig = cosf(angle);
-        offsetCos = cosf(offsetAngle);
-        D_800C361C = (offsetCos * offsetRadius) + (arg0->unk3D0->z_position + (radius * trig));
-        ((struct168 *)&D_800C3600)->unk20 = 0.0f;
+        sideCos = cosf(sideAngle);
+        D_800C361C = (sideCos * sideRadius) + (CAM->player->z_position + (radius * trig));
+        SCRIPT_CAM.unk20 = 0.0f;
         D_800C3624 = -180.0f;
-        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
-        ((struct168 *)&D_800C3600)->unk28 = yaw - 180.0f;
+        SCRIPT_CAM.unk8 = 0.0f;
+        SCRIPT_CAM.unk28 = yaw - 180.0f;
         D_800C365C = 0;
-        func_1512D560(arg0, 7, (s32)&D_800C3600);
+        func_1512D560(camera, 7, (s32)&SCRIPT_CAM);
         return;
     }
-    if (arg0->unk7E4 != 0) {
-        func_1512D560(arg0, 6, 0);
-        arg0->unk7E4 = 0U;
+    if (CAM->unk7E4 != 0) {
+        func_1512D560(camera, 6, 0);
+        CAM->unk7E4 = 0;
     }
 }
 // NON-MATCHING: miles away
@@ -1933,183 +1920,146 @@ void func_15125A6C(struct108 *arg0) {
 
 void func_1509BFB0(s32 num, s32, s32, ...);
 extern u8 D_800D1940;
-void func_15125C40(struct108 *arg0)
-{
-  s32 temp_v0;
-  s32 temp_a0;
-  s32 temp_a1;
-  s32 temp_a2;
-  u16 *temp_v0_2;
-  temp_v0 = D_800D1940 == 0x42;
-  temp_a1 = arg0->unk23E;
-  temp_a2 = 0x1A;
-  if (temp_v0 != 0)
-  {
-    temp_v0 = temp_a1 == temp_a2;
-  }
-  temp_a0 = temp_v0;
-  temp_v0 = temp_a1 == 3;
-  if (temp_v0 == 0)
-  {
-    temp_a2 = 0x1A;
-    temp_v0 = temp_a1 == temp_a2;
-    if (temp_v0 == 0)
-    {
-      temp_v0 = temp_a0 != 0;
+void func_15125C40(struct108 *camera) {
+    s32 level42;
+    s32 active;
+    s32 zone;
+
+    zone = CAM->zone;
+    level42 = (D_800D1940 == 0x42) && (zone == 0x1A);
+    active = (zone == 3) || (zone == 0x1A) || level42;
+    CAM->unk7CC--;
+    if (active) {
+        if (CAM->unk7CC == 0) {
+            if (level42) {
+                func_1509BFB0(3, 0x9000, 0x18, (s32)CAM->player->unk40, 0, 250);
+            } else if (zone == 0x1A) {
+                func_1509BFB0(3, 0x9000, 0x18, 0, 0, 250);
+            }
+            CAM->status |= 2;
+            CAM->contPad->button |= R_TRIG;
+            CAM->buttonsPressed |= R_TRIG;
+            CAM->unk7CC = 1;
+        }
+    } else {
+        if ((CAM->status & 2) && !active) {
+            func_1509BFB0(1, 0x9000, 0x10, 0);
+            func_1509BFB0(1, 0x9000, 0xF, 0);
+            CAM->status &= ~2;
+        }
+        CAM->unk7CC = 2;
     }
-  }
-  arg0->unk7CC = arg0->unk7CC - 1;
-  if (temp_v0 != 0)
-  {
-    if (arg0->unk7CC == 0)
-    {
-      if (temp_a0 != 0)
-      {
-        func_1509BFB0(3, 0x9000, 0x18, (s32) arg0->unk3D0->unk40, 0, 0xFA);
-      }
-      else
-        if (temp_a1 == temp_a2)
-      {
-        func_1509BFB0(3, 0x9000, 0x18, 0, 0, 0xFA);
-      }
-      temp_v0_2 = arg0->unk36C;
-      arg0->unk5F0 = arg0->unk5F0 | 2;
-      *temp_v0_2 |= 0x10;
-      arg0->unk36A = arg0->unk36A | 0x10;
-      arg0->unk7CC = 1;
-    }
-  }
-  else
-  {
-    if ((arg0->unk5F0 & 2) && (temp_v0 == 0))
-    {
-      func_1509BFB0(1, 0x9000, 0x10, 0);
-      func_1509BFB0(1, 0x9000, 0xF, 0);
-      arg0->unk5F0 = arg0->unk5F0 & (~2);
-    }
-    arg0->unk7CC = 2;
-  }
 }
 
-/* structs.h declares unk5FC as u16 (golden loads it signed) and has no member at
-   0x84A at all -- it falls inside pad814[0x68].  Shadow both here rather than
-   touching structs.h, which 106 other translation units include. */
-typedef struct {
-    /* 0x000 */ u8  pad0[0x5FC];
-    /* 0x5FC */ s16 unk5FC;
-    /* 0x5FE */ u8  pad5FE[0x24C];
-    /* 0x84A */ s16 unk84A;
-} struct108_shadow;
 
-void func_15125DB4(struct108 *arg0) {
-    s32 state;
+/* Filters this frame's camera buttons by zone and player state (C buttons, R trigger). */
+void func_15125DB4(struct108 *camera) {
+    s32 zone;
 
-    state = arg0->unk23E;
-    if ((arg0->unk3D4->unk120 != 0) || (D_80084480 != 0)) {
-        arg0->unk36A = 0;
-        *arg0->unk36C &= ~0x1F;
+    zone = CAM->zone;
+    if ((CAM->playerExt->unk120 != 0) || (D_80084480 != 0)) {
+        CAM->buttonsPressed = 0;
+        CAM->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
         return;
     }
 
-    if (state != 0) {
-        if ((state == 2) || (state == 0x12) || (state == 0x13) || (state == 0xA) ||
-            (state == 0x34) || (state == 0x10) || (state == 0xF)) {
-            if (state == 0xF) {
-                func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 0x1E0);
+    if (zone != 0) {
+        if ((zone == 2) || (zone == 0x12) || (zone == 0x13) || (zone == 0xA) ||
+            (zone == 0x34) || (zone == 0x10) || (zone == 0xF)) {
+            if (zone == 0xF) {
+                func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 480);
             }
-            *arg0->unk36C |= 0x10;
-            arg0->unk36A |= 0x10;
-            *arg0->unk36C &= ~0xF;
+            CAM->contPad->button |= R_TRIG;
+            CAM->buttonsPressed |= R_TRIG;
+            CAM->contPad->button &= ~CAM_C_BUTTONS;
         } else {
-            arg0->unk36A = D_800BE710[arg0->unk368];
+            CAM->buttonsPressed = D_800BE710[CAM->controller];
         }
-        if ((state == 3) || (state == 0xD) || (state == 0x1A) || (state == 0x2A)) {
-            arg0->unk36A &= ~0xF;
-            *arg0->unk36C &= ~0xF;
+        if ((zone == 3) || (zone == 0xD) || (zone == 0x1A) || (zone == 0x2A)) {
+            CAM->buttonsPressed &= ~CAM_C_BUTTONS;
+            CAM->contPad->button &= ~CAM_C_BUTTONS;
         }
-        if (state == 0x29) {
-            *arg0->unk36C |= 0x10;
-            arg0->unk36A |= 0x10;
+        if (zone == 0x29) {
+            CAM->contPad->button |= R_TRIG;
+            CAM->buttonsPressed |= R_TRIG;
         }
     } else {
-        if (arg0->unk2C & 0x100) {
-            arg0->unk36A &= ~0xF;
-            *arg0->unk36C &= ~0xF;
+        if (CAM->mode & 0x100) {
+            CAM->buttonsPressed &= ~CAM_C_BUTTONS;
+            CAM->contPad->button &= ~CAM_C_BUTTONS;
         }
     }
 
-    if ((arg0->unk3D0->in_water == 1) && (arg0->unk2C & 0x80)) {
-        arg0->unk36A &= ~0x1C;
-        *arg0->unk36C &= ~0xC;
+    if ((CAM->player->in_water == 1) && (CAM->mode & 0x80)) {
+        CAM->buttonsPressed &= ~(R_TRIG | U_CBUTTONS | D_CBUTTONS);
+        CAM->contPad->button &= ~(U_CBUTTONS | D_CBUTTONS);
     }
 
-    if (arg0->unk84 & 0x200000) {
-        arg0->unk36A &= ~0xF;
+    if (CAM->unk84 & 0x200000) {
+        CAM->buttonsPressed &= ~CAM_C_BUTTONS;
     }
 
-    if ((D_800C3671 != 0) || (arg0->unk5F0 & 0x80)) {
-        arg0->unk36A &= ~0x1F;
-        *arg0->unk36C &= ~0x1F;
+    if ((D_800C3671 != 0) || (CAM->status & 0x80)) {
+        CAM->buttonsPressed &= ~(R_TRIG | CAM_C_BUTTONS);
+        CAM->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
 
-    if ((((u8 *) arg0->unk3D4)[0x7D] != 0) || (((u8 *) arg0->unk3D4)[0x1AC] != 0) ||
-        (((u8 *) arg0->unk3D4)[0x27] != 0)) {
-        arg0->unk36A &= ~0x10;
-        *arg0->unk36C &= ~0x10;
+    if ((CAM->playerExt->unk7D != 0) || (CAM->playerExt->unk1AC != 0) || (CAM->playerExt->unk27 != 0)) {
+        CAM->buttonsPressed &= ~R_TRIG;
+        CAM->contPad->button &= ~R_TRIG;
     }
 
-    if ((((u8 *) arg0->unk3D4)[0x95] != 0) ||
-        ((((struct108_shadow *) arg0)->unk5FC != 0) && (((u8 *) arg0->unk3D4)[0x1B3] != 0))) {
-        arg0->unk36A &= ~0x1F;
-        *arg0->unk36C &= ~0x1F;
+    if ((CAM->playerExt->unk95 != 0) || ((CAM->unk5FC != 0) && (CAM->playerExt->unk1B3 != 0))) {
+        CAM->buttonsPressed &= ~(R_TRIG | CAM_C_BUTTONS);
+        CAM->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
 
-    if (((arg0->unk2C & 0x100) && (arg0->unk73C == 0)) || (arg0->unk73C == 3)) {
-        arg0->unk36A &= ~0x10;
-        *arg0->unk36C &= ~0x10;
+    if (((CAM->mode & 0x100) && (CAM->unk73C == 0)) || (CAM->unk73C == 3)) {
+        CAM->buttonsPressed &= ~R_TRIG;
+        CAM->contPad->button &= ~R_TRIG;
     }
 
-    if ((arg0->unk2C & 0x40) && (((struct108_shadow *) arg0)->unk84A != 0)) {
-        ((struct108_shadow *) arg0)->unk84A -= D_800BE9E4;
-        arg0->unk36A &= ~0x10;
-        *arg0->unk36C &= ~0x10;
-        if (((struct108_shadow *) arg0)->unk84A <= 0) {
-            ((struct108_shadow *) arg0)->unk84A = 0;
+    if ((CAM->mode & 0x40) && (CAM->unk84A != 0)) {
+        CAM->unk84A -= D_800BE9E4;
+        CAM->buttonsPressed &= ~R_TRIG;
+        CAM->contPad->button &= ~R_TRIG;
+        if (CAM->unk84A <= 0) {
+            CAM->unk84A = 0;
         }
     }
 }
 
-void func_15126138(struct108 *arg0) {
-    struct127 *temp_v0_2;
-    struct108 *unused;
+/* Moves focus and target height, and flags whether the player moved since the last frame. */
+void func_15126138(struct108 *camera) {
+    struct127 *player;
 
-    func_151247C0(arg0);
+    func_151247C0(camera);
 
-    temp_v0_2 = arg0->unk3D0;
+    player = CAM->player;
 
-    if (((temp_v0_2->x_position != arg0->unk2B0) ||
-         (temp_v0_2->y_position != arg0->unk2B4) ||
-         (temp_v0_2->z_position != arg0->unk2B8)) && ((arg0->unk2C & ~0x100) != 0)) {
-        arg0->unk298 = 1;
-        arg0->unk7E6 = 60;
-        arg0->unk8ED = 0;
+    if (((player->x_position != CAM->lastPlayerPos.x) ||
+         (player->y_position != CAM->lastPlayerPos.y) ||
+         (player->z_position != CAM->lastPlayerPos.z)) && ((CAM->mode & ~0x100) != 0)) {
+        CAM->playerMoved = 1;
+        CAM->unk7E6 = 60;
+        CAM->unk8ED = 0;
     } else {
-        arg0->unk298 = 0;
+        CAM->playerMoved = 0;
     }
 
-    if (arg0->unk84 & 0x200000) {
-        temp_v0_2 = arg0->unk3D0; // again?!
-        if (temp_v0_2->interaction_state != 0x1E) {
-            if (temp_v0_2->unk102 == 0) {
-                if ((*(arg0->unk36C) & 0xF) != 0) {
-                    if ((arg0->unk2C & 0x40) == 0) {
-                        func_151220D0(arg0);
+    if (CAM->unk84 & 0x200000) {
+        player = CAM->player;
+        if (player->interaction_state != 0x1E) {
+            if (player->unk102 == 0) {
+                if (CAM->contPad->button & CAM_C_BUTTONS) {
+                    if (!(CAM->mode & 0x40)) {
+                        func_151220D0(camera);
                     }
                 }
             }
         }
     }
-    func_15124C38(arg0, 0);
+    func_15124C38(camera, NULL);
 }
 
 typedef struct {
