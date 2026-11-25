@@ -365,7 +365,7 @@ u8   func_15012720(void);
 void func_15012770(void);
 void func_15012780(void);
 s32  func_150150A4(void);
-s32  func_15015300(struct134 *arg0);
+s32  func_15015300(TriggerZone *obj);
 void func_15016370(void);
 void func_15016500(void);
 void func_15017300(s16 arg0, s16 arg1);
@@ -1120,7 +1120,7 @@ s32  func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 
 void  func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
 s32  func_1513E2AC(s32, s32, s32, f32, f32, f32, f32, f32, u8);
 f32  func_151423D8(u8);
-f32  func_15144598(struct134 *arg0);
+f32  func_15144598(TriggerZone *zone);
 f32  func_1514462C(s32 arg0);
 f32  func_15144B68(f32 arg0);
 s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg);

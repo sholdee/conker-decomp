@@ -1457,8 +1457,8 @@ f32 func_15144528(f32 value, f32 hi, f32 lo) {
 }
 
 /* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
-f32 func_15144598(struct134 *arg0) {
-    SpawnRegion *region = (SpawnRegion *)arg0;
+f32 func_15144598(TriggerZone *zone) {
+    SpawnRegion *region = (SpawnRegion *)zone;
     f32 area;
     s16 radius;
 

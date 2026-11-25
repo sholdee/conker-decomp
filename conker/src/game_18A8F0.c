@@ -744,13 +744,13 @@ void func_1515F170(s32 group, u8 disabled) {
 
 /* A node of a list of spawn regions with their cached volume and area. */
 typedef struct RegionNode {
-    /* 0x00 */ struct134 *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 volume;
     /* 0x08 */ f32 area;
     /* 0x0C */ struct RegionNode *next;
 } RegionNode;
 
-RegionNode *func_1515F1B0(struct134 *region) {
+RegionNode *func_1515F1B0(TriggerZone *region) {
     RegionNode *node;
 
     node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);

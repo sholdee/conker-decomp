@@ -667,7 +667,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
         }
 
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            state->area = func_15144598((struct134 *)state->def.anchor);
+            state->area = func_15144598((TriggerZone *)state->def.anchor);
         } else {
             state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }

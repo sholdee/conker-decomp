@@ -1,16 +1,9 @@
 #include <ultra64.h>
 
-/* functions.h declarations renamed out of the way and redeclared below: the level-object functions take a
- * TriggerZone (the header types them as struct134). */
-#define func_15144598 func_15144598_header
-#define func_15015300 func_15015300_header
 #include "functions.h"
-#undef func_15144598
-#undef func_15015300
 #include "variables.h"
 #include "effects.h"
 
-f32 func_15144598(TriggerZone *obj);
 
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
 extern s32 (*D_80082E30[])(TriggerZone *);
