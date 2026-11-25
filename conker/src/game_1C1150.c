@@ -5,10 +5,9 @@
 #undef func_151DC260
 #undef func_151DC484
 #include "variables.h"
-// matching: a pointer where the definition has s32 (arg 2); s32 where the definition has u8 (arg 3)
-
 extern u8 D_800A8244[];
 
+// matching: a pointer where the definition has s32 (arg 2); s32 where the definition has u8 (arg 3)
 extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
 // matching: a pointer where the definition has s32 (arg 2); s32 where the definition has u8 (arg 3)
 extern void func_151DC484(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);

@@ -169,7 +169,6 @@ s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness,
 s32  func_151239CC(Camera *camera, CameraMode slot);
 void func_15127EB8(Camera *arg0);
 void func_1512D748(Camera*, s32, s32);
-void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);

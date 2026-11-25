@@ -109,7 +109,8 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
     return cmd + 2;
 }
 
-
+// matching: s32 where the definition has a pointer (arg 5), u8 (args 7-8, 12-13), s8 (arg 9); a pointer where the definition
+// has s32 (arg 10)
 void func_1515080C(DebrisSpray *, const s32 *, const f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
 // matching: s32 where the definition has u32 (arg 4), u8 (arg 6)
 void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
