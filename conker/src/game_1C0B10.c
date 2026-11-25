@@ -105,8 +105,6 @@ s32 func_151938E4(Emitter *emitter) {
     return TRUE;
 }
 
-extern f32 D_800A81F0;
-
 s32 func_1515C0F8(Actor *actor, Vec3f **motion);
 void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
@@ -176,8 +174,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
     motion.rot.x = func_150ADA68() * 360.0f;
     motion.rot.y = func_150ADA68() * 360.0f;
     motion.rot.z = func_150ADA68() * 360.0f;
-    func_150ADA68();
-    motion.scale = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
+    motion.scale = ((func_150ADA68() * 0.0f) + 340.0f) * 0.001000000047f;
     motion.rotVel.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
     motion.rotVel.y = 0.0f;
     motion.rotVel.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
