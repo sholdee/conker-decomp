@@ -1984,4 +1984,29 @@ typedef struct BurstGlow {
     /* 0x170 */ BurstGlowData data;
 } BurstGlow;
 
+/* A sprite particle made by func_15130280 / func_15130374 / func_151303BC (game_15D730.c's Particle), as seen by
+ * callers that keep their own data at 0xA8 (func_15130280's data size). */
+typedef struct DescParticleHead {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ ParticleDesc desc;
+    /* 0x80 */ u8 unk80[0x24];      /* attach data / floor height of the particle types that use them */
+    /* 0xA4 */ u8 padA4[4];
+} DescParticleHead; /* size 0xA8 */
+
+/* Fade-out and one-shot event of func_151A26EC's particles (game_1CE2F0.c), run by func_151A2960. */
+typedef struct FadeEvent {
+    /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */
+    /* 0x2 */ s16 fadeOutStep;
+    /* 0x4 */ s16 eventTime;     /* desc.timer value, -1 for none */
+    /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
+} FadeEvent;
+
+/* The particle func_151A26EC spawns with func_15130374. */
+typedef struct FadeEventParticle {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ f32 drag;         /* read by func_1513170C */
+    /* 0xAC */ u8 padAC[4];
+    /* 0xB0 */ FadeEvent fade;
+} FadeEventParticle; /* size 0xB8 */
+
 #endif

@@ -3,44 +3,22 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Fade-out and one-shot event of func_151A26EC's particles, run by func_151A2960. */
-typedef struct {
-    /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */
-    /* 0x2 */ s16 fadeOutStep;
-    /* 0x4 */ s16 eventTime;     /* desc.timer value, -1 for none */
-    /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
-} FadeEvent;
-
-/* The particle func_15130374 returns (layout as DescParticle in game_1CE2F0.c). */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 unk80[0x28];
-    /* 0xA8 */ f32 drag;
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ FadeEvent fade;
-} DescParticle;
-
 void func_15152B38(TrailBurst *, u8, s32);
 
 /* D_8008F8E0[1]: a func_15152B38 burst at the particle's position, sized by the particle. */
-void func_151A3150(DescParticle *particle) {
+void func_151A3150(FadeEventParticle *particle) {
     TrailBurst config;
 
     config.countBase = 10;
     config.countRange = 15;
-    config.pos = particle->desc.pos;
-    if (particle->desc.flags & 0x1000) {
-        config.pos.x += particle->desc.offset.x;
-        config.pos.y += particle->desc.offset.y;
-        config.pos.z += particle->desc.offset.z;
+    config.pos = particle->head.desc.pos;
+    if (particle->head.desc.flags & 0x1000) {
+        config.pos.x += particle->head.desc.offset.x;
+        config.pos.y += particle->head.desc.offset.y;
+        config.pos.z += particle->head.desc.offset.z;
     }
-    config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.02119999938f;
-    config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.05319999903f;
+    config.sizeBase = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.02119999938f;
+    config.sizeRange = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.05319999903f;
     config.gravityBase = -1.031000018f;
     config.gravityRange = 0.0f;
     config.speedBase = 8.0f;
@@ -89,5 +67,5 @@ void func_151A3150(DescParticle *particle) {
     config.unk72 = -1;
     config.unk73 = -1;
 
-    func_15152B38(&config, particle->unkC, particle->unk1);
+    func_15152B38(&config, particle->head.header.owner, particle->head.header.kind);
 }
