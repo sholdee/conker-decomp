@@ -79,6 +79,7 @@ void func_15094EA0(s32 view) {
 extern Gfx D_800873D0[];
 extern u8 *D_800D2CA0;
 
+/* Emits the texture-drawing setup display list and forgets the loaded texture address. */
 Gfx *func_15094F40(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800873D0);
     D_800D2CA0 = NULL;
@@ -86,18 +87,19 @@ Gfx *func_15094F40(Gfx *gfx) {
 }
 
 void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite);
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg9);
+Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 extern Texture D_800D2C90;
 
 /* Loads `desc` (frame frame >> 8) into tile `tile` at tmem 0, origin (256, 256). */
-Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 arg8) {
+Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
     func_15095060(desc, frame, sprite);
-    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, 0x100, 0x100, arg8);
+    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, 0x100, 0x100, assetArg);
 }
 
-void func_15094FE8(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg10) {
+/* As func_15094F70, with the tile origin (s, t) given. */
+Gfx *func_15094FE8(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
     func_15095060(desc, frame, sprite);
-    func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, s, t, arg10);
+    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, s, t, assetArg);
 }
 
 /* Fills the shared texture D_800D2C90 from `desc`, and points `sprite` (if any) at it. */
@@ -131,7 +133,7 @@ extern u8 D_8009DEBC[];
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
-Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg9) {
+Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
     s32 width;
     s32 size;
     s32 masks;
@@ -149,9 +151,9 @@ Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sf
     size >>= D_8009DEB4[tex->siz];
     D_800D2CA0 = (u8 *)tex->addr;
     if ((u32)D_800D2CA0 < 0x10000000) {
-        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, arg9, 0);
+        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, assetArg, 0);
     }
-    if (D_800D2CA0 != (u8 *)0x80000000) {
+    if (D_800D2CA0 != (u8 *)0x80000000) { // the loader's "no asset" value
         D_800D2CA0 += (size + size) * frame;
     }
     if (tex->siz == G_IM_SIZ_4b) {
@@ -242,7 +244,7 @@ Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {
     f32 clipZ;
     f32 clipW;
 
-    if (func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f) == FALSE) {
+    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
         return gfx;
     }
     gDPPipeSync(gfx++);
@@ -259,7 +261,7 @@ Gfx *func_150958B0(Gfx *gfx, SpriteParams *sprite, s32 *visible) {
     f32 clipZ;
     f32 clipW;
 
-    if (func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f) == FALSE) {
+    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
         *visible = FALSE;
         return gfx;
     }
@@ -276,6 +278,7 @@ Gfx *func_15095A48(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y) {
     return func_15095A90(gfx, sprite, x, y, 4096.0f, FALSE, 0, 0, 0);
 }
 
+/* Places `sprite` centred on screen position (x, y) at depth z and draws it if it is on screen. */
 Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth) {
     s32 visible;
 
@@ -304,47 +307,45 @@ void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32
     f32 invZ;
     f32 width;
     f32 height;
-    s16 a;
-    s16 b;
 
     *visible = FALSE;
-    if (sprite->scaleX != 0) {
-        if (sprite->scaleY != 0) {
-            scaleX = sprite->scaleX;
-            scaleY = sprite->scaleY;
-            scaleX *= D_800380A0;
-            scaleY *= D_800380A4;
-            if (projected) {
-                view = &gViews[D_80082FA4];
-                scaleX *= view->unk1C;
-                scaleY *= view->unk20;
-            } else {
-                view = &gViews[D_80082FA4];
-                scaleX *= view->unk14;
-                scaleY *= view->unk18;
-            }
-            tex = sprite->tex;
-            invZ = 1.0f / z;
-            width = (f32)(u32)tex->width * scaleX * invZ;
-            height = (f32)(u32)tex->height * scaleY * invZ;
-            x = x - width * 0.5f;
-            y = y - height * 0.5f;
-            if (view->left <= x + width && x < view->right && view->top <= y + height && y < view->bottom) {
-                *visible = TRUE;
-            }
-            D_800D2C70 = scaleX;
-            D_800D2C74 = scaleY;
-            D_800D2C78 = x;
-            D_800D2C7C = y;
-            D_800D2C80 = z;
-            D_800D2C84 = width;
-            D_800D2C88 = height;
-        }
+    if (sprite->scaleX == 0 || sprite->scaleY == 0) {
+        return;
     }
+    scaleX = sprite->scaleX;
+    scaleY = sprite->scaleY;
+    scaleX *= D_800380A0;
+    scaleY *= D_800380A4;
+    if (projected) { // matching: the view address is computed in each branch
+        view = &gViews[D_80082FA4];
+        scaleX *= view->unk1C;
+        scaleY *= view->unk20;
+    } else {
+        view = &gViews[D_80082FA4];
+        scaleX *= view->unk14;
+        scaleY *= view->unk18;
+    }
+    tex = sprite->tex;
+    invZ = 1.0f / z;
+    width = (u32)tex->width * scaleX * invZ;
+    height = (u32)tex->height * scaleY * invZ;
+    x -= width * 0.5f;
+    y -= height * 0.5f;
+    if (view->left <= x + width && x < view->right && view->top <= y + height && y < view->bottom) {
+        *visible = TRUE;
+    }
+    D_800D2C70 = scaleX;
+    D_800D2C74 = scaleY;
+    D_800D2C78 = x;
+    D_800D2C7C = y;
+    D_800D2C80 = z;
+    D_800D2C84 = width;
+    D_800D2C88 = height;
 }
 
-void func_15095D0C(Gfx *gfx, SpriteParams *sprite) {
-    func_15095D34(gfx, sprite, 0, 0, 0);
+/* Draws `sprite` at the placement from func_15095B08, without offsets. */
+Gfx *func_15095D0C(Gfx *gfx, SpriteParams *sprite) {
+    return func_15095D34(gfx, sprite, 0, 0, 0);
 }
 
 extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
@@ -369,7 +370,7 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
     s32 flip;
     s32 step;
     s32 iz;
-    s32 unused;
+    s32 unused; // matching: see the dead division below
 
     scaleX = D_800D2C70;
     scaleY = D_800D2C74;
@@ -391,7 +392,7 @@ Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32
     }
     dsdx = (iz << 10) / scaleX;
     dtdy = (iz << 10) / scaleY;
-    unused = ((s32)z << 10) / scaleX;
+    unused = ((s32)z << 10) / scaleX; // matching: dead early division sets uopt's spill-slot colouring
     if (D_800D2DAB == 0) {
         gDPSetPrimColor(gfx++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, sprite->alpha);
     }
@@ -465,12 +466,10 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
     s32 ulx;
     s32 unused;
     f32 right;
-    s32 yl;
-    s32 yh;
+    s32 pad[2]; // matching: frame size
     s32 dy;
     TextureDesc tile;
 
-    dtdy = 0;
     tileW = desc->width;
     tileH = desc->height;
     if (flags & 1) {
@@ -506,7 +505,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
     lastTileH = height - (rows - 1) * tileH;
     left = x;
     for (i = 0; i < cols; i++) {
-        unused = i + 1;
+        unused = i + 1; // matching: dead store orders uopt's spill slots
         // the top row of each column takes the leftover height; the rows below it are full tiles
         tileH = lastTileH;
         tileHf = (tileH * scaleY) / 4096;
@@ -529,7 +528,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
         if (flags & 1) {
             tile.height += 2;
         }
-    lbl_unused:;
+    lbl_unused:; // matching: extra basic block flips two register colourings
         for (j = 0; j < rows; j++) {
             bottom = top + tileHf;
             t = tBase;
@@ -558,6 +557,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
 
 extern Gfx D_80087408[];
 
+/* Emits the closing display list and clears D_800D2DAB. */
 Gfx *func_15096934(Gfx *gfx) {
     gSPDisplayList(gfx++, D_80087408);
     D_800D2DAB = 0;
