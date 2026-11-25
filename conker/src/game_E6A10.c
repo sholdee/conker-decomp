@@ -6,15 +6,16 @@
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
- *   FxParticle, QuadSprite                         - the particle/sprite system of game_169510.c
- *   PhysicsParticle, CollisionHit               - the pooled physics particles of game_15F680.c
+ *   FallGrowParticle, QuadSprite   - the particle/sprite system of game_169510.c
+ *   PhysicsParticle, CollisionHit  - the pooled physics particles of game_15F680.c
  */
 
-/* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
+/* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks
+ * of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
-} FxParticle;
+} FallGrowParticle;
 
 /* A pooled physics particle of game_15F680.c (the D_80089914 / D_8008998C callbacks get one). */
 typedef struct {
@@ -61,7 +62,7 @@ void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f3
 
 /* Falls (speed growing by 0.3 per frame-time) until lifetime 80; from 115 on grows by 1.35x a frame,
  * below 65 the height grows instead. */
-s32 func_150B9560(FxParticle *particle) {
+s32 func_150B9560(FallGrowParticle *particle) {
     f32 *speed = &particle->fallSpeed;
     f32 scale;
 
@@ -82,7 +83,7 @@ s32 func_150B9560(FxParticle *particle) {
 }
 
 /* Sets def.unk44 to 8x the lifetime once it drops below 32. */
-s32 func_150B95FC(FxParticle *particle) {
+s32 func_150B95FC(FallGrowParticle *particle) {
     s16 lifetime = particle->head.def.lifetime;
 
     if (lifetime < 32) {

@@ -11,11 +11,12 @@ typedef struct {
     /* 0x14 */ f32 minY;           /* the particle expires below this height */
 } FxParticleMotion;
 
-/* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
+/* A live particle of game_169510.c whose motion block is a velocity and spin (func_150BA37C); the update
+ * callbacks of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ FxParticleMotion motion;
-} FxParticle;
+} TumblingParticle;
 
 /* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
 extern s32 func_151E7EF8[];
@@ -135,7 +136,7 @@ s32 func_150BA35C(QuadSprite *sprite) {
 }
 
 /* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
-s32 func_150BA37C(FxParticle *particle) {
+s32 func_150BA37C(TumblingParticle *particle) {
     particle->motion.vel.y += -0.6f * D_800BE9A4;
     particle->head.def.pos.x += particle->motion.vel.x * D_800BE9A4;
     particle->head.def.pos.y += particle->motion.vel.y * D_800BE9A4;
@@ -149,7 +150,7 @@ s32 func_150BA37C(FxParticle *particle) {
  * Fades the particle with whichever is smaller of 16 * lifetime and 4 * its height above
  * motion.minY (capped at 255). Returns 0 (expire) once it falls below minY.
  */
-s32 func_150BA424(FxParticle *particle) {
+s32 func_150BA424(TumblingParticle *particle) {
     f32 height = particle->head.def.pos.y - particle->motion.minY;
     s32 lifeAlpha;
     s32 heightAlpha;
