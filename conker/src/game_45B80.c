@@ -11,6 +11,14 @@ void func_1000D758(f32 x, f32 y, s32 zBits);
 s32 func_1515D6D0(s32 gfx, s32 player);
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
+// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
+// it first sees each name.
+f32 D_800BE5E8[11]; // the last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder
+u8 D_800BE614;
+u8 D_800BE615;
+u8 D_800BE616;
+u8 D_800BE617;
+
 #define D_800BE9D0 D_800BE9D0_hdr
 #include "variables.h"
 #undef D_800BE9D0
@@ -545,7 +553,7 @@ Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
 Gfx *func_150198FC(Gfx *gfx) {
-    static s8 D_80082F90; // frames drawn since D_800BEAC0 was set, counting up to 5
+    static s8 D_80082F90 = 0; // frames drawn since D_800BEAC0 was set, counting up to 5
 
     if (D_800BE575 == 1) {
         gfx = func_151D6778(gfx);
@@ -641,9 +649,6 @@ extern u32 D_800BE610;
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
-// The last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder.
-// (Defined with 11 entries so tools/rodata_extern.py keeps the [10] access on this symbol.)
-f32 D_800BE5E8[11];
 void func_150A019C(void);
 
 /*
