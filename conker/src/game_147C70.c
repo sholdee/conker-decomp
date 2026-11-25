@@ -4,7 +4,7 @@
 
 extern f32 func_150489B0(u8 angle);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511490C(MtxF mtx, void *obj);
+extern void func_1511490C(MtxF mtx, WorldObject *obj);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1511A494(void *obj, s32 *arg1, s32 *arg2);
 
@@ -23,34 +23,28 @@ typedef struct {
     s32 unk24;
 } Game147C70Ripple;
 
+/* Behaviour scratch state (WorldObject.work) of the rippling mesh. param bits 0-7: wobble size, 16-31: ripple radius. */
 typedef struct {
-    u8 pad0[0x16];
-    u16 vertexCount;
-    u8 pad18[8];
-    Vtx_t *outVertices[2];
-    Vtx_t *baseVertices;
-    u8 pad2C[0x10];
-    s32 params; /* bits 0-7: wobble size, bits 16-31: ripple radius */
-    u8 pad40[0x33];
-    u8 flags73;
-    u8 pad74[0xC];
-    Game147C70Ripple *ripple;
-    s32 wobblePhases; /* four packed u8 phases */
-} Game147C70State;
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ Game147C70Ripple *ripple;
+    /* 0x84 */ s32 wobblePhases; /* four packed u8 phases */
+} Game147C70Work;
+
+#define WORK(obj) ((Game147C70Work *)&(obj)->work)
 
 /* Starts a ripple: full amplitude, phase reset and all vertex heights cleared. */
-void func_1511A7C0(Game147C70State *mesh) {
+void func_1511A7C0(WorldObject *mesh) {
     Game147C70Ripple *ripple;
     s32 i;
 
-    ripple = mesh->ripple;
+    ripple = WORK(mesh)->ripple;
     ripple->active = 1;
     ripple->wave = 0.0f;
     ripple->phase = 0;
     ripple->phaseStep = 7;
     ripple->amplitude = 260.0f;
     ripple->decayThreshold = 100.0f;
-    for (i = 0; i < mesh->vertexCount; i++) {
+    for (i = 0; i < mesh->numVertices; i++) {
         ripple->heights[i] = 0.0f;
     }
 }
@@ -63,7 +57,7 @@ f32 sqrtf(f32);
  * ripple wave, then writes each base vertex (wobbled by its lane phase and lifted by its ripple
  * height) through the object's transform into this frame's output vertex buffer.
  */
-void func_1511A838(Game147C70State *mesh) {
+void func_1511A838(WorldObject *mesh) {
     s32 i;
     s32 j;
     MtxF matrix;
@@ -92,23 +86,23 @@ void func_1511A838(Game147C70State *mesh) {
     f32 dx;
     f32 dz;
 
-    base = mesh->baseVertices;
-    wobbleSize = mesh->params & 0xFF;
-    if (mesh->ripple == NULL) {
-        mesh->ripple = allocate_memory(sizeof(Game147C70Ripple), 1, 0, 0);
-        ripple = mesh->ripple;
-        ripple->phaseOffsets = phaseOffsets = allocate_memory(mesh->vertexCount, 1, 0, 0);
-        ripple->heights = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
+    base = &mesh->srcVertices->v;
+    wobbleSize = mesh->param.word & 0xFF;
+    if (WORK(mesh)->ripple == NULL) {
+        WORK(mesh)->ripple = allocate_memory(sizeof(Game147C70Ripple), 1, 0, 0);
+        ripple = WORK(mesh)->ripple;
+        ripple->phaseOffsets = phaseOffsets = allocate_memory(mesh->numVertices, 1, 0, 0);
+        ripple->heights = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);
         heights = ripple->heights; // matching: IDO reloads heights from the struct only with this split form
-        ripple->followRates = followRates = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
-        ripple->falloffs = falloffs = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
-        radius = (mesh->params >> 16) & 0xFFFF;
+        ripple->followRates = followRates = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);
+        ripple->falloffs = falloffs = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);
+        radius = (mesh->param.word >> 16) & 0xFFFF;
         if (radius == 0.0f) {
             invRadius = 1.0f;
         } else {
             invRadius = 1.0f / radius;
         }
-        for (i = 0; i < mesh->vertexCount; i++) {
+        for (i = 0; i < mesh->numVertices; i++) {
             phaseOffsets[i] = func_150ADA20() % 255;
             dx = base[i].ob[0];
             dz = base[i].ob[2];
@@ -121,10 +115,10 @@ void func_1511A838(Game147C70State *mesh) {
                 followRates[i] = 0.0f;
             }
         }
-        for (i = 0; i < mesh->vertexCount; i++) {
+        for (i = 0; i < mesh->numVertices; i++) {
             /* vertices at the same position get the same offset, so they move together */
             phaseOffsets[i] = func_150ADA20();
-            for (j = 0; j < mesh->vertexCount; j++) {
+            for (j = 0; j < mesh->numVertices; j++) {
                 if (base[i].ob[0] == base[j].ob[0] && base[i].ob[1] == base[j].ob[1] && base[i].ob[2] == base[j].ob[2]) {
                     phaseOffsets[j] = phaseOffsets[i];
                 }
@@ -132,20 +126,20 @@ void func_1511A838(Game147C70State *mesh) {
         }
         ripple->wave = 0.0f;
         ripple->active = 0;
-        for (i = 0; i < mesh->vertexCount; i++) {
+        for (i = 0; i < mesh->numVertices; i++) {
             heights[i] = 0.0f;
         }
         ripple->unk20 = 0;
         ripple->unk24 = 0;
     }
-    ripple = mesh->ripple;
+    ripple = WORK(mesh)->ripple;
     phaseOffsets = ripple->phaseOffsets;
     heights = ripple->heights;
     followRates = ripple->followRates;
     falloffs = ripple->falloffs;
-    if ((mesh->flags73 & 3) == 3) {
+    if ((mesh->behaviorState & 3) == 3) {
         func_1511A7C0(mesh);
-        mesh->flags73 &= ~3;
+        mesh->behaviorState &= ~3;
     }
     if (ripple->active) {
         prevPhase = ripple->phase;
@@ -164,20 +158,20 @@ void func_1511A838(Game147C70State *mesh) {
             ripple->wave = 0.0f;
             ripple->active = 0;
         }
-        for (i = 0; i < mesh->vertexCount; i++) {
+        for (i = 0; i < mesh->numVertices; i++) {
             f32 delta = ripple->wave - heights[i];
 
             heights[i] += delta * followRates[i];
         }
     }
     func_1511490C(matrix, mesh);
-    out = mesh->outVertices[D_800BE9C0]; /* this frame's buffer */
-    lanePhases[0] = mesh->wobblePhases & 0xFF;
-    lanePhases[1] = (mesh->wobblePhases >> 8) & 0xFF;
-    lanePhases[2] = (mesh->wobblePhases >> 16) & 0xFF;
-    lanePhases[3] = (mesh->wobblePhases >> 24) & 0xFF;
+    out = &mesh->vertices[D_800BE9C0]->v; /* this frame's buffer */
+    lanePhases[0] = WORK(mesh)->wobblePhases & 0xFF;
+    lanePhases[1] = (WORK(mesh)->wobblePhases >> 8) & 0xFF;
+    lanePhases[2] = (WORK(mesh)->wobblePhases >> 16) & 0xFF;
+    lanePhases[3] = (WORK(mesh)->wobblePhases >> 24) & 0xFF;
     offsetY = 0;
-    for (i = 0; i < mesh->vertexCount; i++, out++, base++) {
+    for (i = 0; i < mesh->numVertices; i++, out++, base++) {
         if (!(out->flag & 0x4000)) {
             lane = phaseOffsets[i] & 3;
             angle = phaseOffsets[i] + lanePhases[lane];
@@ -202,6 +196,6 @@ void func_1511A838(Game147C70State *mesh) {
     lanePhases[1] += 2;
     lanePhases[2] += 3;
     lanePhases[3] += 4;
-    mesh->wobblePhases = lanePhases[0] | (lanePhases[1] << 8) | (lanePhases[2] << 16) | (lanePhases[3] << 24);
+    WORK(mesh)->wobblePhases = lanePhases[0] | (lanePhases[1] << 8) | (lanePhases[2] << 16) | (lanePhases[3] << 24);
     func_1511A494(mesh, &ripple->unk20, &ripple->unk24);
 }

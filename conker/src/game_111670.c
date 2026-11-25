@@ -217,7 +217,7 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_1511490C(MtxF arg0, void *arg1);
+extern void func_1511490C(MtxF mtx, WorldObject *obj);
 extern void func_1510F800(s32);
 
 /*
