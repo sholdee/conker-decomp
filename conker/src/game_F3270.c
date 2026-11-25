@@ -56,6 +56,7 @@ typedef struct {
 } GameF3270LinkedObject;
 
 /* The objects an emitter keeps alive; each clears its own slot when it is destroyed. */
+// matching: volatile makes IDO reload the slot after the NULL test (func_150C5DC0, func_150C5F40)
 typedef struct {
     /* 0x0 */ GameF3270Particle *volatile particle;
     /* 0x4 */ GameF3270LinkedObject *volatile linked;
@@ -91,13 +92,13 @@ void func_150C5DC0(GameF3270Emitter *emitter) {
 }
 
 /* Particle update: eases unk24 toward a target re-rolled at random intervals. Returns whether it stays alive. */
-s32 func_150C5E0C(GameF3270Particle *particle) {
+s8 func_150C5E0C(GameF3270Particle *particle) {
     s8 alive;
     GameF3270Wobble *wobble;
 
     alive = TRUE;
     wobble = &particle->wobble;
-    if (wobble->alive == FALSE) {
+    if (!wobble->alive) {
         alive = FALSE;
     }
     wobble->alive = FALSE;
@@ -199,103 +200,142 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
     return obj;
 }
 
-typedef struct GameF3270Burst {
-    s32 flags, zero4;
-    s16 texture, lifetime;
-    s32 zeroC, zero10;
-    u8 zero14, zero15, zero16, zero17, zero18, zero19, zero1A;
-    u8 alpha, maximum, kind;
-    s16 duration, period, zero22;
-    f32 zero24, width, height;
-    f32 x, y, z;
-    f32 zero3C, zero40, zero44;
-    f32 vx, vy, vz, rotation;
-    s32 mode, unused5C;
-    s8 field60, field61, field62, field63;
-    u8 pad64[0xC];
+typedef struct {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ u8 pad64[0xC];
 } GameF3270Burst; // size 0x70
 
-typedef struct GameF3270BurstMotion {
-    f32 size;
-    u8 mode0, mode1, count0, count1;
-    f32 amount0, amount1, speed, damping;
-    u8 mode2, mode3, count2, count3;
-    f32 amount2, amount3, sourceScale;
+/* Copied to 0xA8 of the spawned burst. */
+typedef struct {
+    /* 0x00 */ f32 size;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
 } GameF3270BurstMotion; // size 0x28
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ GameF3270BurstMotion motion;
+} GameF3270BurstObject;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x60];
     /* 0x60 */ f32 unk60;
 } GameF3270BurstSource;
 
-void *func_151303BC(GameF3270Burst *burst, u8 arg1, s32 arg2);
+GameF3270BurstObject *func_151303BC(GameF3270Burst *burst, u8 arg1, s32 arg2);
 
-/* Spawns one randomised puff at (x, y, z) drifting against (vx, vz). */
+/* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSource *source) {
     GameF3270Burst burst;
-    void *spawned;
+    GameF3270BurstObject *spawned;
     GameF3270BurstMotion motion;
 
-    burst.kind = 47;
-    burst.texture = 0xC01;
+    burst.unk1D = 47;
+    burst.unk8 = 0xC01;
     burst.flags = 0x200005;
-    burst.zero4 = 0;
-    burst.zero1A = 0;
-    burst.zero19 = 0;
-    burst.zero18 = 0;
-    burst.zero17 = 0;
-    burst.zero16 = 0;
-    burst.zero15 = 0;
-    burst.zero14 = 0;
-    burst.zero10 = 0;
-    burst.zeroC = 0;
-    burst.maximum = 0xFF;
-    burst.zero22 = 0;
-    burst.zero24 = 0.0f;
-    burst.mode = 0x3207;
-    burst.field60 = 5;
-    burst.field61 = 5;
-    burst.field62 = 4;
-    burst.field63 = -1;
-    burst.x = x;
-    burst.y = y;
-    burst.zero3C = 0.0f;
-    burst.zero40 = 0.0f;
-    burst.zero44 = 0.0f;
-    burst.duration = 30;
-    burst.period = 8;
-    burst.z = z;
-    motion.sourceScale = source->unk60;
-    motion.speed = 4.0f;
-    motion.damping = 0.25f;
-    motion.mode0 = 0;
-    motion.mode1 = 0;
-    motion.mode2 = 0;
-    motion.mode3 = 0;
-    burst.vx = -vx * 0.2f;
-    burst.vy = 0.0f;
-    burst.vz = -vz * 0.2f;
+    burst.unk4 = 0;
+    burst.unk1A = 0;
+    burst.unk19 = 0;
+    burst.unk18 = 0;
+    burst.unk17 = 0;
+    burst.unk16 = 0;
+    burst.unk15 = 0;
+    burst.unk14 = 0;
+    burst.unk10 = 0;
+    burst.unkC = 0;
+    burst.unk1C = 0xFF;
+    burst.unk22 = 0;
+    burst.unk24 = 0.0f;
+    burst.unk58 = 0x3207;
+    burst.unk60 = 5;
+    burst.unk61 = 5;
+    burst.unk62 = 4;
+    burst.unk63 = -1;
+    burst.pos.x = x;
+    burst.pos.y = y;
+    burst.unk3C = 0.0f;
+    burst.unk40 = 0.0f;
+    burst.unk44 = 0.0f;
+    burst.unk1E = 30;
+    burst.unk20 = 8;
+    burst.pos.z = z;
+    motion.unk24 = source->unk60;
+    motion.unk10 = 4.0f;
+    motion.unk14 = 0.25f;
+    motion.unk4 = 0;
+    motion.unk5 = 0;
+    motion.unk18 = 0;
+    motion.unk19 = 0;
+    burst.vel.x = -vx * 0.2f;
+    burst.vel.y = 0.0f;
+    burst.vel.z = -vz * 0.2f;
     if (func_150ADA20() & 1) {
-        burst.mode |= 0x40;
+        burst.unk58 |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.mode |= 0x80;
+        burst.unk58 |= 0x80;
     }
-    burst.lifetime = func_150ADA20() % 51U + 106;
-    burst.alpha = func_150ADA20() % 101U + 100;
+    burst.unkA = func_150ADA20() % 51U + 106;
+    burst.unk1B = func_150ADA20() % 101U + 100;
     motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
-    motion.count0 = func_150ADA20() % 5U + 4;
-    motion.count1 = func_150ADA20() % 5U + 4;
-    motion.amount0 = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
-    motion.amount1 = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
-    motion.count2 = func_150ADA20() % 5U + 4;
-    motion.count3 = func_150ADA20() % 5U + 4;
-    motion.amount2 = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
-    motion.amount3 = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
-    burst.rotation = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    motion.unk6 = func_150ADA20() % 5U + 4;
+    motion.unk7 = func_150ADA20() % 5U + 4;
+    motion.unk8 = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
+    motion.unkC = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
+    motion.unk1A = func_150ADA20() % 5U + 4;
+    motion.unk1B = func_150ADA20() % 5U + 4;
+    motion.unk1C = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
+    motion.unk20 = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
+    burst.unk54 = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
     spawned = func_151303BC(&burst, 2, 40);
     if (spawned != NULL) {
-        memcpy((u8 *)spawned + 0xA8, &motion, sizeof(motion));
+        memcpy(&spawned->motion, &motion, sizeof(motion));
     }
 }
 
@@ -303,7 +343,7 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
 s32 func_150C63EC(GameF3270LinkedObject *obj) {
     s32 alive = TRUE;
 
-    if (obj->link.alive == FALSE) {
+    if (!obj->link.alive) {
         alive = FALSE;
     }
     obj->link.alive = FALSE;
@@ -414,6 +454,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             rand0 = func_150ADA20();
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
+            // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
             particle = (GameF3270Particle *)func_1513C73C(
                 (s32)&desc, 8, 2, (s32)emitter->unk38, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                 (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->unkC, emitter->unk1);
