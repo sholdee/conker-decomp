@@ -1372,29 +1372,32 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return ret;
     }
     case 0xCF: {
-        s32 t;
-        u8 r;
+        s32 found;
+        u8 foundNode;
         s32 i;
         s32 ret;
-        s8 n;
+        s8 count;
         s8 n2;
-        s8 arr[18];
+        s8 nodes[18];
+
+        /* Resolve the cmd->a[0] node ids in cmd->a[1..] (dropping unknown ones), then pick one from the
+         * object position with func_15086098 / func_15086364. */
         n2 = 0;
         ret = cmd->a[0];
-        n = 0;
+        count = 0;
         for (i = 0; i < ret; i++) {
-            arr[n] = func_15086D48(cmd->a[1 + i]);
-            if ((u8)arr[n] != 0xFF) {
-                n++;
+            nodes[count] = func_15086D48(cmd->a[1 + i]);
+            if ((u8)nodes[count] != 0xFF) {
+                count++;
             }
         }
         ret = -1;
-        if (n != 0) {
-            t = func_15086098(obj->x_position, obj->y_position, obj->z_position, n, n2, arr, &n2);
-            r = t;
+        if (count != 0) {
+            found = func_15086098(obj->x_position, obj->y_position, obj->z_position, count, n2, nodes, &n2);
+            foundNode = found;
             D_80087298 = 0xFF;
-            if ((u8)t != 0xFF) {
-                func_15086364(r, n, n2, arr, &n2);
+            if ((u8)found != 0xFF) {
+                func_15086364(foundNode, count, n2, nodes, &n2);
             }
             if (D_80087298 != 0xFF) {
                 ret = D_800D2350[D_80087298].unk7;
@@ -1665,14 +1668,16 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xED:
         return D_800BE710[objId];
     case 0xEE: {
-        s16 t;
+        s16 px;
         f32 x;
         f32 y;
         f32 z;
+
+        /* Offset cmd->a[0] along the reverse of facing angle unk7A, packed as (x << 16) | (z & 0xFFFF). */
         func_1505A184(obj->unk7A + 0x8000, cmd->a[0], 0.0f, &x, &z, &y);
-        t = (s16)(s32)obj->x_position + x;
-        iz = ((s16)((s16)(s32)obj->z_position + z));
-        return (t << 16) | (iz & 0xFFFF);
+        px = (s16)(s32)obj->x_position + x;
+        iz = (s16)((s16)(s32)obj->z_position + z);
+        return (px << 16) | (iz & 0xFFFF);
     }
     case 0xEF:
         return obj->interaction_state;
