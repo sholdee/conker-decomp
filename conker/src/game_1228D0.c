@@ -516,12 +516,15 @@ void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
 
+typedef struct BeamEffect BeamEffect;
+
 typedef struct {
-    u8 pad0[0x48];
-    f32 unk48;
-    f32 unk4C;
-    u8 pad50[0x58 - 0x50];
-    u8 flags; /* bit 0 = shown */
+    /* 0x00 */ u8 pad0[0x48];
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ BeamEffect *effect; /* the beam effect that drives this beam */
+    /* 0x54 */ u8 pad54[0x58 - 0x54];
+    /* 0x58 */ u8 flags; /* bit 0 = shown */
 } BeamPart;
 
 /* Something drawn between two points (a beam or streak). */
@@ -554,10 +557,10 @@ typedef struct {
     Flash *flash;
 } BeamData;
 
-typedef struct {
+struct BeamEffect {
     EffectHead head;
     BeamData data;
-} BeamEffect;
+};
 
 extern f32 D_800A1B18[3];
 extern f32 D_800A1B24[3];
@@ -622,73 +625,60 @@ void func_150F6178(BeamEffect *effect) {
     }
 }
 
-void func_150F631C(struct260 *arg0) {
-    struct260 *temp_a1;
-    struct102 *temp_a0;
+/* Frees the beam effect's beam and flash. */
+void func_150F631C(BeamEffect *effect) {
+    BeamData *data = &effect->data;
 
-    temp_a1 = arg0;
-    if (*(struct102 *volatile *)((u8 *)temp_a1 + 0x30) != NULL) {
-        func_1516972C(*(struct102 **)((u8 *)temp_a1 + 0x30));
+    if (data->beam != NULL) {
+        func_1516972C((struct102 *)data->beam);
     }
-
-    temp_a0 = *(struct102 **)((u8 *)temp_a1 + 0x34);
-    if (temp_a0 != NULL) {
-        func_1516972C(temp_a0);
+    if (data->flash != NULL) {
+        func_1516972C((struct102 *)data->flash);
     }
 }
 
-void func_150F631C(struct260 *arg0);
-
-void func_150F6368(struct260 *arg0) {
-    func_150F631C(arg0);
-    func_1514933C(arg0);
+/* Beam effect destructors: free the beam and flash, then the effect. */
+void func_150F6368(BeamEffect *effect) {
+    func_150F631C(effect);
+    func_1514933C((struct260 *)effect);
 }
 
-void func_15149368(struct260 *arg0);
+void func_15149368(struct260 *);
 
-void func_150F6394(struct260 *arg0) {
-    func_150F631C(arg0);
-    func_15149368(arg0);
+void func_150F6394(BeamEffect *effect) {
+    func_150F631C(effect);
+    func_15149368((struct260 *)effect);
 }
 
-void func_150F63C0(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+/* Effect callback for the beam effect: hands func_15169850 the owner reference. */
+void func_150F63C0(BeamEffect *effect, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
 
-typedef struct {
-    char pad_0[0x8];
-    s32 field_0x08;
-} Field160ChildBlock;
+/* Clears the beam effect's reference to this beam. */
+void func_150F6400(Beam *beam) {
+    BeamPart *part = &beam->part;
 
-typedef struct {
-    char pad_0[0x160];
-    u8 * volatile field_0x160;
-} Field160Owner;
+    if (part->effect != NULL) {
+        BeamData *data = &part->effect->data;
 
-void func_150F6400(Field160Owner *arg0) {
-    Field160ChildBlock *p;
-
-    if (arg0->field_0x160 != 0) {
-        p = (Field160ChildBlock *)(arg0->field_0x160 + 0x28);
-        p->field_0x08 = 0;
+        data->beam = NULL;
     }
 }
 
-void func_150F6420(u8 *arg0) {
-    func_150F6400(arg0);
-    func_1513CA6C((struct210 *)arg0);
+/* Beam destructors: unlink the beam from its effect, then free it. */
+void func_150F6420(Beam *beam) {
+    func_150F6400(beam);
+    func_1513CA6C((struct210 *)beam);
 }
 
-void func_150F644C(u8 *arg0) {
-    func_150F6400(arg0);
-    func_1513CAA0((struct210 *)arg0);
+void func_150F644C(Beam *beam) {
+    func_150F6400(beam);
+    func_1513CAA0((struct210 *)beam);
 }
 
 void func_150F6478(struct210 *arg0) {
-
 }
-
-void func_150F6478(struct210 *);
 
 void func_150F6484(struct210 *arg0) {
     func_150F6478(arg0);
