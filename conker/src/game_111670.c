@@ -691,69 +691,73 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
 typedef struct Struct150E5810 {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x14 */ f32 bounce; // restitution applied on each ground hit
     /* 0x18 */ u8 pad18[0x24];
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
+    /* 0x44 */ f32 velX;
+    /* 0x48 */ f32 velY;
+    /* 0x4C */ f32 velZ;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ f32 unk58;
     /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
+    /* 0x60 */ s32 flags;
 } Struct150E5810;
 
-s32 func_150E5810(Struct150E5810 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s16 (*arg5)[3]) {
+/*
+ * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is
+ * reflected off the hit triangle `verts` (or just flipped vertically without one) and damped by bounce.
+ */
+s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s16 (*verts)[3]) {
     Tri150E5810 tri;
     s32 i;
     f32 len;
-    f32 s;
+    f32 pad; // matching: unused stack slot
     f32 dot;
-    struct17 v;
-    struct17 n;
-    struct17 r;
+    struct17 vel;
+    struct17 normal;
+    struct17 unit;
 
-    arg0->unk3C = arg0->unk10 * 1.100000024f + arg4;
-    if (arg0->unk48 > -2.0f) {
-        arg0->unk44 = 0.0f;
-        arg0->unk60 &= ~0x6F;
-        arg0->unk48 = 0.0f;
-        arg0->unk4C = 0.0f;
+    obj->unk3C = obj->unk10 * 1.100000024f + groundY;
+    if (obj->velY > -2.0f) {
+        obj->velX = 0.0f;
+        obj->flags &= ~0x6F;
+        obj->velY = 0.0f;
+        obj->velZ = 0.0f;
     } else {
-        if (arg5 != NULL) {
-        lbl:
+        if (verts != NULL) {
+        lbl: // matching: a block boundary that stops IDO hoisting the loop setup above the NULL test
             for (i = 0; i < 3; i++) {
-                tri.v[i].x = arg5[i][0];
-                tri.v[i].y = arg5[i][1];
-                tri.v[i].z = arg5[i][2];
+                tri.v[i].x = verts[i][0];
+                tri.v[i].y = verts[i][1];
+                tri.v[i].z = verts[i][2];
             }
             func_15049350(tri);
-            n.unk0 = -D_800CC210;
-            n.unk4 = -D_800CC214;
-            n.unk8 = -D_800CC218;
-            len = func_150AD930(&n.unk0);
+            normal.unk0 = -D_800CC210;
+            normal.unk4 = -D_800CC214;
+            normal.unk8 = -D_800CC218;
+            len = func_150AD930(&normal.unk0);
             if (len > 9.999999747e-06f) {
-                func_15049148(&n, 1.0f / len, &r);
-                v.unk0 = arg0->unk44;
-                v.unk4 = arg0->unk48;
-                v.unk8 = arg0->unk4C;
-                dot = func_150AD900(&r.unk0, &v.unk0);
-                func_15049148(&r, 2.0f * dot, &n);
-                func_15048F58(&v, &n, &n);
-                arg0->unk44 = arg0->unk14 * n.unk0 * 0.8000000119f;
-                arg0->unk48 = arg0->unk14 * n.unk4;
-                arg0->unk4C = arg0->unk14 * n.unk8 * 0.8000000119f;
+                func_15049148(&normal, 1.0f / len, &unit);
+                vel.unk0 = obj->velX;
+                vel.unk4 = obj->velY;
+                vel.unk8 = obj->velZ;
+                dot = func_150AD900(&unit.unk0, &vel.unk0);
+                func_15049148(&unit, 2.0f * dot, &normal);
+                func_15048F58(&vel, &normal, &normal);
+                obj->velX = obj->bounce * normal.unk0 * 0.8000000119f;
+                obj->velY = obj->bounce * normal.unk4;
+                obj->velZ = obj->bounce * normal.unk8 * 0.8000000119f;
             }
         } else {
-            arg0->unk44 = arg0->unk44 * arg0->unk14;
-            arg0->unk48 = -arg0->unk48 * arg0->unk14;
-            arg0->unk4C = arg0->unk4C * arg0->unk14;
+            obj->velX *= obj->bounce;
+            obj->velY = -obj->velY * obj->bounce;
+            obj->velZ *= obj->bounce;
         }
-        arg0->unk50 = arg0->unk50 * arg0->unk14;
-        arg0->unk54 = arg0->unk54 * arg0->unk14;
-        arg0->unk58 = arg0->unk58 * arg0->unk14;
+        obj->unk50 *= obj->bounce;
+        obj->unk54 *= obj->bounce;
+        obj->unk58 *= obj->bounce;
     }
     return 1;
 }
