@@ -2171,6 +2171,14 @@ typedef struct DescParticleHead {
     /* 0xA4 */ u8 padA4[4];
 } DescParticleHead; /* size 0xA8 */
 
+/* A spark particle (func_15130374) that slows down: its update (func_150CBCE0 in game_F8590.c,
+ * func_151AFEA4 in game_1DCA70.c) multiplies desc.vel.x and desc.vel.z by damping once per frame
+ * step. */
+typedef struct SparkParticle {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ f32 damping;
+} SparkParticle; /* size 0xAC */
+
 /* Fade-out and one-shot event of func_151A26EC's particles (game_1CE2F0.c), run by func_151A2960. */
 typedef struct FadeEvent {
     /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */

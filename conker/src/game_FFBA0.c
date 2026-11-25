@@ -20,7 +20,7 @@ typedef struct EmitterTrigger {
 } EmitterTrigger;
 
 /* Object data (at +0x28) of a spark emitter: created by func_150D278C, updated by func_150D2924. */
-typedef struct SparkEmitter {
+typedef struct RingSparkEmitter {
     s16 *record;
     f32 angle;
     f32 rate;
@@ -30,7 +30,7 @@ typedef struct SparkEmitter {
     f32 elapsed;
     f32 matrix[16];
     u8 color[3];
-} SparkEmitter; // size 0x60
+} RingSparkEmitter; // size 0x60
 
 typedef struct EffectObject {
     u8 pad0;
@@ -40,7 +40,7 @@ typedef struct EffectObject {
     u8 padD[0x1B];
     union {
         EmitterTrigger trigger;
-        SparkEmitter emitter;
+        RingSparkEmitter emitter;
     } data;
 } EffectObject;
 
@@ -61,7 +61,7 @@ void func_150D26F0(EffectObject *obj) {
 
 /* Spawns a spark emitter object with a random spin, rate and color. */
 void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
-    SparkEmitter emitter;
+    RingSparkEmitter emitter;
     TimedEffect *object;
 
     emitter.record = record;
@@ -105,12 +105,12 @@ typedef struct SparkMotion {
     f32 fadeScale;
 } SparkMotion;
 
-typedef struct SparkParticle {
+typedef struct RingSparkParticle {
     u8 pad0[0x5C];
     u8 unk5C; // fades out with the remaining life
     u8 pad5D[0xB3];
     SparkMotion motion;
-} SparkParticle;
+} RingSparkParticle;
 
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
@@ -120,7 +120,7 @@ extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
  * the emitter's record (rotating by angleStep) with a random sway; sparks fade out 22 time units in.
  */
 void func_150D2924(EffectObject *obj) {
-    SparkEmitter *emitter;
+    RingSparkEmitter *emitter;
     s16 *record;
 
     emitter = &obj->data.emitter;
@@ -177,7 +177,7 @@ void func_150D2924(EffectObject *obj) {
                 spawn.unk44 = motion.fadeScale * motion.life;
                 spark = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->unkC, obj->unk1);
                 if (spark != NULL) {
-                    memcpy(&((SparkParticle *)spark)->motion, &motion, sizeof(motion));
+                    memcpy(&((RingSparkParticle *)spark)->motion, &motion, sizeof(motion));
                 }
             }
             emitter->angle += emitter->angleStep;
@@ -279,7 +279,7 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
 }
 
 /* Sways a spark around its base position and fades it out; returns 0 once its life runs out. */
-s32 func_150D317C(SparkParticle *particle) {
+s32 func_150D317C(RingSparkParticle *particle) {
     SparkMotion *motion = &particle->motion;
 
     motion->phaseX += motion->phaseSpeedX * D_800BE9A4;

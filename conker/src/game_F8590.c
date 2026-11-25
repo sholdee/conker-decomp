@@ -286,12 +286,6 @@ s32 func_150CBA30(DustParticle *dust) {
     return 1;
 }
 
-/* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
-} SparkParticle;
-
 SparkParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /*
@@ -361,7 +355,7 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-/* Multiplies unk58 and unk60 by the particle's damping once per frame step. */
+/* Multiplies desc.vel.x and desc.vel.z by the particle's damping once per frame step. */
 s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
     s32 i;
     f32 *damping;

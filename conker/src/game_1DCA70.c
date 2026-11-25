@@ -216,20 +216,14 @@ s32 func_151AFC08(SprayParticle *spray) {
     return 1;
 }
 
-/* The spark func_151AFC88 spawns; updated by func_151AFEA4. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 damping; // per-frame factor applied to unk58 and unk60
-} SpraySpark;
-
-SpraySpark *func_15130374(ParticleDesc *desc, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
+SparkParticle *func_15130374(ParticleDesc *desc, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *vel);
 
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */
 s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    SpraySpark *spark;
+    SparkParticle *spark;
     ParticleDesc desc;
     s32 pad1; // matching: unused stack slot
     f32 damping;
@@ -288,8 +282,8 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     return 1;
 }
 
-/* Damps the spark's unk58 and unk60 by its damping factor once per elapsed frame. */
-s32 func_151AFEA4(SpraySpark *spark, s32 arg1) {
+/* Damps the spark's desc.vel.x and desc.vel.z by its damping factor once per elapsed frame. */
+s32 func_151AFEA4(SparkParticle *spark, s32 arg1) {
     f32 *damping;
     s32 frames;
 
