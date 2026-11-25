@@ -1,11 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-extern MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                                  TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
 
 /* Sprays up to 30 trails from a ring around obj; stops early when a trail can't be created. */
 void func_150AEEB0(Actor *obj, u8 owner) {

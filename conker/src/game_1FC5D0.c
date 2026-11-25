@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Updates a ring buffer of trail points: trims the oldest points so the summed segment

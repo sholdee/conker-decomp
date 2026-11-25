@@ -740,6 +740,3 @@ void func_150BD070(u8 arg0, s32 arg1) {
     }
 }
 
-s32 func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                  s32 arg12, u8 arg13, s32 arg14);

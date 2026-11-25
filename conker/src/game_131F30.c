@@ -349,7 +349,6 @@ struct SparkObj {
     /* 0x28 */ SparkState state;
 };
 
-extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 void func_151058B4(SparkObj *obj);
 
 /* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */

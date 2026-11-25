@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* One point of a trail. */
 typedef struct FallingTrailPoint {
@@ -355,7 +354,7 @@ typedef struct {
     /* 0x8 */ s8 kind;
 } LevelEffectData; /* size 0xC */
 
-typedef struct {
+typedef struct LevelEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ LevelEffectData data;
 } LevelEffect;
@@ -395,7 +394,7 @@ typedef struct {
 } TrailBurstState;
 
 /* Timed effect of func_1515D130. */
-typedef struct {
+typedef struct TrailBurstEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailBurstState emitter;
 } TrailBurstEmitter;

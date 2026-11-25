@@ -401,7 +401,6 @@ void func_1507D4F8(s32 slot) {
 }
 
 extern void func_150F1D10(Actor *, s32, s32);
-extern void func_151CFA4C(Actor *, s32, s32);
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */

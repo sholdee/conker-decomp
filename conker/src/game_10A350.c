@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* One point of the trail ring buffer. */
 typedef struct Game10A350Record {

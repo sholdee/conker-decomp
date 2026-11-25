@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Bone trails: an emitter object (a TimedEffect made by func_151D71B0) follows a point on an actor's
@@ -22,14 +21,14 @@ typedef struct {
 } TrailAnchor;
 
 /* Emitter data at 0x40 for anchor type 0: a point on an actor's bone. */
-typedef struct {
+typedef struct TrailBoneLink {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
     /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
 } TrailBoneLink;
 
-typedef struct {
+typedef struct AnchoredTrailEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailAnchor anchor;
     /* 0x40 */ TrailBoneLink link;
@@ -40,9 +39,6 @@ extern void (*D_8008FCA4[])(AnchoredTrailEmitter *, TrailBoneLink *, u8);
 extern s32 (*D_8008FCA8[])(AnchoredTrailEmitter *);
 extern Vec3f D_800AB280[];
 extern u8 D_800AB2D4[];
-
-void func_151D77C8(AnchoredTrailEmitter *emitter);
-void func_151D7830(AnchoredTrailEmitter *emitter);
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
 TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
@@ -307,8 +303,6 @@ void func_151D7830(AnchoredTrailEmitter *emitter) {
     }
 }
 
-
-void func_151D8718(Vec3f *pos, f32 *velY, f32 dt);
 
 /* Detached trail update: the points keep falling and the tail position follows the oldest point. */
 s32 func_151D792C(AnchoredTrail *trail) {

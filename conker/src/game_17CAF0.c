@@ -528,8 +528,6 @@ void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern s32 func_15147DA0(EffectTemplate *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
-
 /* Spawns a random number of particles off a surface triangle, each moving in a random direction
  * inside the cone around the triangle's normal. */
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
@@ -885,8 +883,6 @@ void func_15152ABC(Color8 *out) {
     out->green = rgb[1];
     out->blue = rgb[2];
 }
-
-extern void func_1515C2F0(EffectTemplate *, s32, TrailBurstParams *, s32, u8, s32);
 
 void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
     EffectTemplate param;

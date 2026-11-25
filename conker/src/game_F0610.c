@@ -209,8 +209,6 @@ void func_150C3574(Actor *obj) {
         func_100109D0(obj);
     }
 }
-void func_15188810(Actor *arg0, s32 arg1, s32 arg2);
-void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
 
 void func_150C3994(Actor *obj) {
     if (obj->type == 0x14) {

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * A trail effect attached to a character (Actor): a ring buffer of points that is drawn as a
@@ -15,7 +14,7 @@ typedef struct {
 } TrailGlowData;
 
 /* A glow returned by func_151407D0. */
-typedef struct {
+typedef struct TrailGlow {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ GlowShape shape;          /* shape.scale eases toward tail.targetScale (func_150D4CC4) */
     /* 0x16C */ u8 pad16C[4];
@@ -41,7 +40,7 @@ typedef struct {
 } CharacterTrailPoint;
 
 /* The actor returned by func_15147A80. */
-typedef struct {
+typedef struct CharacterTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ Vtx *vtxBufs[4];
@@ -50,7 +49,7 @@ typedef struct {
 } CharacterTrail;
 
 /* Sound slot passed to func_150D5124 by the sound system. */
-typedef struct {
+typedef struct TrailSound {
     s16 sound;
     s16 x;
     s16 y;
@@ -65,11 +64,7 @@ typedef struct {
     u16 unk24;
 } TrailSound;
 
-s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
-                  s32 arg5, u16 *playing);
-
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
@@ -243,8 +238,6 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         }
     }
 }
-
-void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
 
 /*
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
@@ -756,8 +749,6 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
     end->z = owner->zpos;
     return 2;
 }
-
-void func_150D4C2C(CharacterTrail *actor);
 
 void func_150D4BD4(CharacterTrail *actor) {
     func_150D4C2C(actor);

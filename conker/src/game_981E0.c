@@ -201,7 +201,6 @@ typedef struct {
 } GroundPoint; // size 0x30
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_151A3390(void *arg0, u8 arg1);
 s32 func_151F2CDC(void);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 
@@ -1866,7 +1865,7 @@ void func_1506EE60(void) {
         func_15188810(D_800D154C, low, D_800D1580 >> 16);
         return;
     }
-    func_15188A9C(D_800D154C, low);
+    func_15188A9C(D_800D154C);
 }
 
 void func_1506EEAC(void) {
@@ -2721,7 +2720,7 @@ void func_1507161C(s32 cmd) {
 }
 
 void func_15071628(s32 cmd) {
-    func_151D0058(D_800D154C, (cmd - 0x55) & 0xFF, 0xFF, 1);
+    func_151D0058(D_800D154C, cmd - 0x55, 0xFF, 1);
 }
 
 void func_15071668(s32 cmd) {

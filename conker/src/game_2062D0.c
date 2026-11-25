@@ -559,9 +559,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     return 1;
 }
 
-extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                             TrailRender *, s32, s32, s32);
-
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,

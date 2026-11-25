@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Trails left behind an actor, following the surface below it. A SurfaceTrailOwner keeps one trail per
@@ -256,9 +255,6 @@ void func_1519F3B8(SurfaceTrailOwner *owner) {
     sides[1].trail = func_1519F1C8(owner, TRAIL_SIDE_7);
     sides[1].spawner = NULL;
 }
-
-void func_1519F48C(SurfaceTrail *trail);
-void func_151A0928(TrailSpawner *spawner);
 
 /* Lets go of both trails and deletes any pending spawners. */
 void func_1519F400(SurfaceTrailOwner *owner) {

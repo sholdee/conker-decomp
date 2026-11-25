@@ -464,8 +464,6 @@ void func_15158D2C(CharacterWatcher *watcher) {
     }
 }
 
-void func_1519F400(void *);
-
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
 void func_15158FA4(void *self, ActorMsg *msg, u8 msgId) {
     CharacterWatcher *watcher = self;

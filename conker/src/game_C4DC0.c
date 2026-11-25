@@ -63,8 +63,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 #define OBJ_INDEX(o) ((o) - movement_obj)
 
 
-extern void func_1518BA90(Actor *, s32, s32);
-extern void func_1518BBF4(Actor *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.

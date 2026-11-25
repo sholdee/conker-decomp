@@ -374,14 +374,12 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
     }
 }
 
-void func_150AEEB0(Actor *);
-
 /* Effect hook for objects, by object id. */
 void func_15171BF4(Actor *obj, u8 owner) {
     switch (obj->character_type) {
     case 0x13:
     case 0x23:
-        func_150AEEB0(obj);
+        func_150AEEB0(obj, owner);
         func_10010154(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:

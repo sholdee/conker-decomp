@@ -34,8 +34,6 @@ void func_150AF200(s32 idA, s32 idB) {
     }
 }
 
-extern void func_151CF898(void *, f32, f32);
-
 /* Calls func_151CF898(arg0, unk2 + unk8, unk2). */
 void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
@@ -338,8 +336,6 @@ typedef struct GameDC6B0TrailArgs {
     GameDC6B0Projectile *source;
     s32 unk4;
 } GameDC6B0TrailArgs;
-
-EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */

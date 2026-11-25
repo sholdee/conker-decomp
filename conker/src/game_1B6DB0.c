@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Trail types (see game_175250.c). */
 
@@ -12,7 +11,7 @@ typedef struct {
 } SprayTrailParams;
 
 /* A MotionTrail (func_15147DA0) whose params carry SprayTrailParams. */
-typedef struct {
+typedef struct SprayTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
@@ -20,7 +19,7 @@ typedef struct {
     /* 0x98 */ SprayTrailParams *params;
 } SprayTrail;
 
-typedef struct {
+typedef struct SprayEmitter {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ SprayDesc desc;
     /* 0x60 */ s16 idleTimer; /* frames until the next check for a nearby player */
@@ -31,10 +30,6 @@ typedef struct {
     /* 0x70 */ u8 flags;
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
-
-extern SprayTrail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                            s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                            TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
 void func_15189900(SprayDesc *desc, u8 arg1) {

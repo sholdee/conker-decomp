@@ -10,8 +10,6 @@
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
-void func_15188A58(BoneTrail *trail, BoneTrail **list);
-
 /* Starts (or extends) a type-0 trail behind a game object. */
 void func_15188810(Actor *object, s32 duration, s32 maxDist) {
     BoneTrail *trail;

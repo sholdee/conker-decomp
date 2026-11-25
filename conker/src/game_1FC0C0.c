@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 #define TRAIL_HAS_POS 4 /* WaveTrail.head.tmpl.flags: pos holds a valid previous position */
 

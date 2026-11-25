@@ -3,10 +3,8 @@
 #include "functions.h"
 #undef func_1514FF44
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_800D9860;
-TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
 /* One point of a RibbonActor's ring buffer. */
 typedef struct {
@@ -23,7 +21,7 @@ typedef struct {
 } RibbonInfo;
 
 /* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
-typedef struct {
+typedef struct RibbonActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 vtxBuffer[0x10];
@@ -349,7 +347,7 @@ typedef struct {
     /* 0xE */ u8 padE[2];
 } StripEffectData;
 
-typedef struct {
+typedef struct StripEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ StripEffectData data;
 } StripEffect;
@@ -535,7 +533,7 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     return gfx;
 }
 
-typedef struct {
+typedef struct OwnedEffect {
     TimedEffect base;
     ActorRef ref;
 } OwnedEffect;
@@ -570,7 +568,7 @@ extern f32 D_800AAF90[3];
 // matching: a CollisionHit * third argument (the definition takes s32)
 extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
 /* Partial view of the particle func_15130280 creates. */
-typedef struct {
+typedef struct CarrierParticle {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
 } CarrierParticle;
@@ -763,8 +761,6 @@ s32 func_151D1074(Actor *obj, Vec3f *out) {
     return TRUE;
 }
 
-s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which);
-
 /* Point function: the object's model point 0. */
 s32 func_151D10A4(Actor *obj, Vec3f *out) {
     return func_151D10E4(obj, out, 0);
@@ -788,9 +784,6 @@ s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
     func_15143134(&D_800AAF9C[which], out, (Mtx *)(joints | 0));
     return TRUE;
 }
-
-void func_151D13E0(TrackerEffect *effect);
-void func_151D1448(TrackerEffect *effect);
 
 /* Tracker update: follows the owner's point, and drops the trail when the point is lost, jumps more
  * than 300 units, stops, or the owner is airborne, in water or in state 5, 6, 9, 13 or 14. */

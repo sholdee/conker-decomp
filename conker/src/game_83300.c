@@ -4483,7 +4483,6 @@ void func_15060D54(Actor *actor) {
         }
     }
 }
-extern void func_15188AD0(Actor *);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
 void func_15060F28(Actor *actor, s32 mode) {

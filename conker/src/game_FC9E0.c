@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151CF898(Actor *, f32, f32);
-
 void func_150CF530(s32 arg0) {
     func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }

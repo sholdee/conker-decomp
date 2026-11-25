@@ -1119,8 +1119,6 @@ s32 func_1508CA88(void) {
     return temp;
 }
 
-void func_150DA5EC(Actor *, f32);
-
 /*
  * Steers bot `player` toward player `target`: eases the smoothed aim point (aimX/aimY/aimZ)
  * toward the target (its position, or its 0x1A4 point if aimAtPoint), offset sideways by

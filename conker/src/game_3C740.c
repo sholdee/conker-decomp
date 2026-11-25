@@ -66,8 +66,6 @@ s32 func_1500F378(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 }
 
-void func_15189900(void *, u8);
-
 void func_1500F40C(void) {
     SprayDesc descriptor;
 

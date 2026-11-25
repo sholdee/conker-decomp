@@ -8,7 +8,6 @@ typedef struct PipeIds {
 
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
-extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
@@ -412,10 +411,6 @@ typedef struct PipeKinds {
 } PipeKinds;
 
 extern PipeKinds D_80088700;
-
-s32 func_15147DA0(EffectTemplate *pos, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *arg11,
-                  s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns a random particle and a trail at the actor's current point, at height `y`. */
 s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {

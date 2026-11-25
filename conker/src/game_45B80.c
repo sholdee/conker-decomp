@@ -27,8 +27,6 @@ extern s32 D_800BE9D0;
 
 
 
-Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
-
 /* Game main loop: runs frames until func_1501878C says to stop. */
 void func_150186D0(void) {
     func_10001444();
@@ -77,7 +75,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-void func_15189118(s32);
 void func_15125628(void);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
@@ -295,7 +292,6 @@ void func_1501905C(void) {
     func_10012020();
 }
 
-void func_15188B74(s32);
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.

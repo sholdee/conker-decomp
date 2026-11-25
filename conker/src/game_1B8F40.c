@@ -1,14 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
 
 /* Emitter settings, copied into the object from a template by func_1518BCD0. */
-typedef struct {
+typedef struct TrailEmitterParams {
     /* 0x00 */ f32 speedMin;
     /* 0x04 */ f32 speedRange;
     /* 0x08 */ f32 halfWidthMin;
@@ -22,15 +21,13 @@ typedef struct {
 } TrailEmitterParams; /* size 0x1C */
 
 /* Type 0x1F object: emits trails from two points of its owner actor. */
-typedef struct {
+typedef struct TrailEmitter {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ TrailEmitterParams params;
     /* 0x2C */ s32 timers[2]; /* time until the next trail from each point */
     /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
     /* 0x3C */ f32 prevZ[2];
 } TrailEmitter; /* size 0x44 */
-
-TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
 TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
@@ -139,10 +136,6 @@ typedef struct {
     /* 0x48 */ TrailEmitterLink link;
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
-
-extern MotionTrail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                                  TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
 /* MotionTrail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
 void func_1518BD60(TrailEmitter *emitter) {

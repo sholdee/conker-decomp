@@ -344,7 +344,6 @@ extern s32 D_80090214[];
 extern void func_150C5C74(Actor *);
 extern void func_150C5C9C(Actor *);
 extern void func_150F5420(s32, s32, s32, s32);
-extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 
 /*
@@ -1102,7 +1101,6 @@ extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s
 extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
 // matching: s16 where the definition has s32 (arg 2); s32 where the definition has u8 (args 3-5)
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
-extern void func_151A3390(Actor *, u8);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_150F5C08(Actor *, s16, u8, s32);
@@ -1110,12 +1108,10 @@ extern void func_150F6890(Actor *, s16, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
-extern void func_151CFA4C(Actor *, u8, s32);
 extern void func_15107B78(Actor *, s16, s16, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);
-extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
 
 /*
  * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and
@@ -2274,10 +2270,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     }
     return 1;
 }
-
-extern void func_15188810(Actor *, s32, s32);
-extern void func_1518894C(WorldObject *, s32, s32);
-extern void func_15188AD0(Actor *);
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

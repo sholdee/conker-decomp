@@ -824,8 +824,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
     return NULL;
 }
 
-void func_150D3360(void *, u8, s32);
-void func_151D74B0(void *, u8, s8, u8, s32);
 extern s32 D_80090228;
 extern s32 D_8009022C;
 
@@ -880,7 +878,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-void func_151D747C(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
 void func_15031C14(ModelAttachment *att) {

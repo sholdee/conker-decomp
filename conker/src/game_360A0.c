@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_15189900(SprayDesc *descriptor, u8 style);
-
 /* Zone handler D_80082ECC[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;
    data1 selects the spray style. */
 s32 func_15008BF0(TriggerZone *zone) {

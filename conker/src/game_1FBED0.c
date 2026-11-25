@@ -1,11 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
 
 /* The object func_151CEA20 integrates: a 1-D position under constant acceleration, and a fade. */
-typedef struct {
+typedef struct TrailScalarMotion {
     /* 0x00 */ u8 pad0[0x38];
     /* 0x38 */ f32 position;
     /* 0x3C */ u8 pad3C[4];
@@ -15,8 +14,6 @@ typedef struct {
     /* 0x4C */ f32 fadeRate;
     /* 0x50 */ f32 fade;
 } TrailScalarMotion;
-
-s32 func_151CEC10(Vec3f *pos, Actor *owner, DescParticleHead *anchor);
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */
 s32 func_151CEA20(TrailScalarMotion *motion) {

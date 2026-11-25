@@ -47,10 +47,6 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-void func_151B7144(Actor *, s32, s32);
-void func_151B6320(Actor *, s32, s32);
-void func_151B7328(ActorRef *, s32, s32, s32, s32);
-void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
     func_150E0348(obj, 0xFF, 1);

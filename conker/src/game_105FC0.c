@@ -7,7 +7,6 @@
 #undef func_15153C84
 #undef func_15153CCC
 #include "variables.h"
-#include "effects.h"
 
 /* One point of a trail's ring buffer (0x24 bytes). */
 typedef struct {
@@ -42,7 +41,7 @@ typedef struct {
 } PissTrailData;
 
 /* Trail object created by func_150D8B88 (game_90840.c calls it when the actor starts pissing, mv->pssd_is_pissing). */
-typedef struct {
+typedef struct PissTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
@@ -288,8 +287,6 @@ s32 func_150D8FAC(PissTrail *trail) {
 }
 
 f32 sqrtf(f32);
-
-void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /*
  * Walks the trail from newest to oldest point: clamps its total length, ray casts every
@@ -687,7 +684,7 @@ void func_150DA4E0(PissTrail *trail) {
 }
 
 /* Message broadcast to trails by func_15147D64. */
-typedef struct {
+typedef struct TrailMessage {
     Actor *owner;
     union {
         u8 ownerId;             /* types 0, 0x44 */
@@ -740,7 +737,7 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     func_15147D64(&msg, 0x44);
 }
 
-typedef struct {
+typedef struct TrailSpark {
     u8 pad0[0x58];
     u8 unk58[0x50];
     WobbleData spark;

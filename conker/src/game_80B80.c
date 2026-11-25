@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15188810(void *, s32, s32);
-
 
 void func_150536D0(Actor *obj) {
     obj->type = 13;

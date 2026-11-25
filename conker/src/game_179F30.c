@@ -34,8 +34,6 @@ const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
 /* Elsewhere. */
 void *func_150C5370(void *desc, s32 payloadSize);
-void func_151D0F60(Actor *obj, s32, s32, s32);
-void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 
 

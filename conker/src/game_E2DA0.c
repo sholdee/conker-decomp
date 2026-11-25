@@ -325,8 +325,6 @@ void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
     }
 }
 
-extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
-
 /* Per-variant trail settings used by func_150B648C. */
 extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */
 extern f32 D_8009FC60[];      /* gravity */

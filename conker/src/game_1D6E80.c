@@ -3,9 +3,13 @@
 // matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
 #define func_15142314 func_15142314_functions_h
 #define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
+#define func_1519F400 func_1519F400_header
 #include "functions.h"
 #undef func_15142314
 #undef func_151D9014
+#undef func_1519F400
+// matching: func_151AA1D0 and func_151AA1F0 call it with no argument (the owner is still in a0)
+void func_1519F400();
 #include "variables.h"
 
 struct ActorTask;
@@ -267,9 +271,6 @@ typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ u8 unk4;
 } Msg151AA17C;
-
-extern void func_1519F3B8(Task151AA17C *);
-extern void func_1519F400(void);
 
 /* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
 void func_151AA17C(Task151AA17C *task) {

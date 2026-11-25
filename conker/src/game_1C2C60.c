@@ -1723,8 +1723,6 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
-extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
-
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     TrailRender style;

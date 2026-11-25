@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15189900(SprayDesc *, u8);
-
 extern u8 *D_80088870;
 
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */

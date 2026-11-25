@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Particle trails: a ring buffer of points emitted from a moving source and drawn as a ribbon. */
 
@@ -60,7 +59,7 @@ typedef struct {
 } ScatterTrailState; // size = 0x58
 
 /* A trail that throws out ScatterPreset particle bursts (D_8009FBF0) from its emitter as it goes. */
-typedef struct {
+typedef struct ScatterTrail {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
@@ -182,8 +181,6 @@ s32 func_150B40E8(ScatterTrail *trail) {
 
     return 1;
 }
-
-void func_150B5088(ScatterTrail *trail);
 
 /* Emits new trail points for this frame, interpolating speed across the frame's step. */
 s32 func_150B4294(ScatterTrail *trail) {
@@ -473,7 +470,6 @@ void func_150B5060(ScatterTrail *trail) {
 }
 
 extern ScatterPreset D_8009FBF0[];
-extern s32 func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(ScatterTrail *trail) {

@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Ribbon trails attached to a point of an object (a game object's matrix plus an offset).
@@ -118,12 +117,6 @@ typedef union TrailEvent {
     u8 specIndex;       /* event 6: trails of this kind stop (func_1519CF70) */
     ActorSwapMsg swap;  /* event 0x2D: owners actorA and actorB trade places */
 } TrailEvent;
-
-extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
-void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
-extern MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
-extern void func_1519E688(void);
-extern s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
 /* Stops every trail of kind specIndex (event 6). */
 void func_1519CF70(u8 specIndex) {

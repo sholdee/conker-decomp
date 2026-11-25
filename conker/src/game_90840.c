@@ -1007,7 +1007,6 @@ extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
-void func_150D8B88(Actor *);
 s32 func_151F2CDC(void);
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends

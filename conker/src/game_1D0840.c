@@ -1,13 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Creation parameters of a trail (a ribbon of points that follows a point
  * on one of an actor's bones). The same 0x30 bytes start BoneTrailState.
  */
-typedef struct {
+typedef struct BoneTrailParams {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 bone;
@@ -63,7 +62,7 @@ typedef struct {
 #define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
 
 /* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
-typedef struct {
+typedef struct BoneTrailEffect {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
@@ -83,23 +82,18 @@ typedef struct {
     /* 0x14 */ Vec3f offset;        /* emission point in bone space */
 } BoneEmitter;
 
-typedef struct {
+typedef struct BoneEmitterTask {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
 /* A func_151491F4 task that retries creating a trail until its owner can carry it. */
-typedef struct {
+typedef struct TrailRetryTask {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
 
-BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
-void func_151A4590(Actor *owner, u8 arg1);
-void func_151A499C(Actor *owner, u8 arg1);
-s32 func_151A4E34(BoneTrailParams *params, Vec3f *out);
-void func_151A4E9C(BoneTrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {

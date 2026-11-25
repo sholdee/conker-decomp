@@ -500,8 +500,6 @@ s32 func_150EFA4C(BeamSpark *spark) {
     return 1;
 }
 
-extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
-
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
 void func_150EFB80(BeamEmitter *emitter) {
     EmitterLink *link;
