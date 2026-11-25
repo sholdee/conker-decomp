@@ -191,49 +191,51 @@ void func_150B1484(struct127 *obj) {
     }
 }
 
-extern f32 D_8009F8C4;
-extern f32 D_8009F8C8;
-
-struct127 *func_1505EEB0(s32 state, s32 *arg1);
+struct127 *func_1505EEB0(s32 state, s32 *outIdx);
 void func_15056B08(struct127 *arg0);
 void func_1505A770(struct127 *arg0);
 
-void func_150B17DC(struct127 *arg0) {
-    s32 sp3C;
-    f32 angle;
-    f32 sp34;
-    f32 sp30;
-    f32 sp2C;
+/*
+ * Pairs the object with the first actor in state 10 (`other`). With unk1E5 == 2 the object sits on top of
+ * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
+ * with the frame step D_800BE9A0. Either way the object then faces the player.
+ */
+void func_150B17DC(struct127 *obj) {
+    s32 otherIdx;
+    f32 phase;
+    f32 offsetX;
+    f32 offsetZ;
+    f32 unusedOut;
     struct127 *other;
 
-    other = func_1505EEB0(0xA, &sp3C);
-    func_15056B08(arg0);
-    if (arg0->unk1E5 == 2) {
-        arg0->x_position = other->x_position;
-        arg0->z_position = other->z_position;
-        arg0->y_position = other->y_position + ((f32)(arg0->unk21C / 5) + 160.0f);
-        arg0->y_velocity = 0.0f;
-        arg0->gravity = D_8009F8C4;
-        arg0->unk7E = 0;
+    other = func_1505EEB0(10, &otherIdx);
+    func_15056B08(obj);
+    if (obj->unk1E5 == 2) {
+        obj->x_position = other->x_position;
+        obj->z_position = other->z_position;
+        obj->y_position = other->y_position + (obj->unk21C / 5 + 160.0f);
+        obj->y_velocity = 0.0f;
+        obj->gravity = -0.35f;
+        obj->unk7E = 0;
     } else {
-        angle = (f32)(u32)arg0->unk7E;
-        angle *= D_8009F8C8;
-        other->unkB8 = func_150AD78C(angle) * 6.0f;
-        func_1505A770(arg0);
-        other->y_position = arg0->y_position - 170.0f;
+        phase = obj->unk7E;
+        phase *= 0.2f;
+        other->unkB8 = func_150AD78C(phase) * 6.0f;
+        func_1505A770(obj);
+        other->y_position = obj->y_position - 170.0f;
         other->unk13C = D_800C3E78 + 100;
-        func_1505A184(other->unk7A, other->unkB8 * -7.0f, 0.0f, &sp34, &sp30, &sp2C);
-        other->x_position = arg0->x_position + sp34;
-        other->z_position = arg0->z_position + sp30;
-        other->unk7A = other->unk7A + (D_800BE9A0 << 8);
-        arg0->unk7E = arg0->unk7E + D_800BE9A0;
+        func_1505A184(other->unk7A, other->unkB8 * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
+        other->x_position = obj->x_position + offsetX;
+        other->z_position = obj->z_position + offsetZ;
+        other->unk7A += D_800BE9A0 << 8;
+        obj->unk7E += D_800BE9A0;
         other->in_water = 0;
         other->xz_velocity = 0.0f;
         other->unk16C = 0.0f;
         other->unk170 = 0.0f;
     }
-    arg0->unk7A = func_1505A630(D_800CC2D0[0].x_position - arg0->x_position, arg0->z_position - D_800CC2D0[0].z_position, 0);
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
+    obj->unk7A = func_1505A630(D_800CC2D0[0].x_position - obj->x_position, obj->z_position - D_800CC2D0[0].z_position, 0);
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
 }
 
 typedef struct {
