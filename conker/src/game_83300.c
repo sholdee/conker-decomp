@@ -3963,94 +3963,96 @@ void func_151AE264(struct127 *arg0);
 void func_151C6EA0(struct127 *arg0, s32 arg1, s32 arg2);
 void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
-#define F298_P(off, T) (*(T *)((u8 *)arg0->unk31C + (off)))
-#define F298_A(off, T) (*(T *)((u8 *)arg0 + (off)))
-void func_1505F298(struct127 *arg0, OSContPad *arg1) {
+/* struct126/struct127 bytes that the shared headers leave as padding */
+#define MOVEMENT_FIELD(off, T) (*(T *)((u8 *)actor->unk31C + (off)))
+#define ACTOR_FIELD(off, T) (*(T *)((u8 *)actor + (off)))
+/* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
+void func_1505F298(struct127 *actor, OSContPad *pad) {
     s32 anim;
-    s32 sp88;
+    s32 sound;
     f32 speed;
-    f32 sp80;
+    f32 animArg4;
     f32 rate;
     s32 id;
-    u8 sp77;
+    u8 prevJumpState;
     f32 height;
-    s32 pad6C;
+    s32 neverSet;
     s32 buttons;
     s32 flag;
     s32 jumpType;
     s32 idx;
     u8 jumped;
-    u8 v;
-    f32 xz;
+    u8 jumpState;
+    f32 savedSpeed;
 
-    sp77 = F298_P(0x31, u8);
-    sp88 = 0;
+    prevJumpState = actor->unk31C->unk31;
+    sound = 0;
     speed = 1.0f;
     rate = 0.0f;
-    pad6C = 0;
-    if ((arg0->stunned != 0) || (arg0->health == 0)) {
-        arg0->target_speed = 0.0f;
+    neverSet = 0;
+    if ((actor->stunned != 0) || (actor->health == 0)) {
+        actor->target_speed = 0.0f;
         return;
     }
-    if ((F298_P(0x46, s16) > 0) || (F298_P(0x36, u8) >= 0x64) || (F298_P(0x6B, u8) != 0)) {
+    if ((MOVEMENT_FIELD(0x46, s16) > 0) || (actor->unk31C->unk36 >= 0x64) || (actor->unk31C->unk6B != 0)) {
         return;
     }
-    height = arg0->unk28;
-    if (F298_P(0x4E, u8) == 2) {
-        height = arg0->unk28 - 150.0f;
-    } else if (F298_P(0x4F, u8) == 2) {
+    height = actor->unk28;
+    if (actor->unk31C->unk4E == 2) {
+        height = actor->unk28 - 150.0f;
+    } else if (MOVEMENT_FIELD(0x4F, u8) == 2) {
         height = 0.0f;
-    } else if (arg0->y_velocity > 0.0f) {
+    } else if (actor->y_velocity > 0.0f) {
         height += 50.0f;
     }
-    if (F298_A(0x110, u8) != 0) {
-        buttons = arg1->button & ~0x2000;
+    if (ACTOR_FIELD(0x110, u8) != 0) {
+        buttons = pad->button & ~0x2000;
     } else {
-        buttons = arg1->button;
+        buttons = pad->button;
     }
-    if ((arg0->in_water != 0) && (F298_P(0x95, u8) == 0) && (arg0->unk84.uh != 0x262)) {
-        if (arg0->in_water == 1) {
+    if ((actor->in_water != 0) && (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk84.uh != 0x262)) {
+        if (actor->in_water == 1) {
             rate = 2.0f;
             anim = 0;
-            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (F298_P(0x8, s16) <= 0)) &&
-                (((arg0->unk118 - 60.0f) - 30.0f) < arg0->y_position)) {
-                func_15052408(arg0);
-                F298_P(0x31, u8) = 0;
+            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (MOVEMENT_FIELD(0x8, s16) <= 0)) &&
+                (((actor->unk118 - 60.0f) - 30.0f) < actor->y_position)) {
+                func_15052408(actor);
+                actor->unk31C->unk31 = 0;
                 rate = 0.0f;
-                if ((F298_P(0x7B, u8) != 7) && (F298_P(0x7B, u8) != 8)) {
-                    F298_P(0x31, u8) = 1;
+                if ((MOVEMENT_FIELD(0x7B, u8) != 7) && (MOVEMENT_FIELD(0x7B, u8) != 8)) {
+                    actor->unk31C->unk31 = 1;
                 }
-                arg0->unk76 = arg0->unk7A = arg0->unk78 = F298_P(0x4C, u16);
-                if ((F298_P(0x68, u16) != 0) && ((arg0->unk76 - F298_P(0x68, u16) + 0x4000) & 0x8000)) {
-                    arg0->xz_velocity = 0.0f;
-                    arg0->disable_run = 0xFF;
+                actor->unk76 = actor->unk7A = actor->unk78 = actor->unk31C->unk4C;
+                if ((MOVEMENT_FIELD(0x68, u16) != 0) && ((actor->unk76 - MOVEMENT_FIELD(0x68, u16) + 0x4000) & 0x8000)) {
+                    actor->xz_velocity = 0.0f;
+                    actor->disable_run = 0xFF;
                 }
-                arg0->unkAE = 0xC;
-                arg0->y_velocity = 46.0f;
-                arg0->gravity = 3.299999952f;
-                arg0->unk81 = 2;
-                arg0->unk83 = 0;
+                actor->unkAE = 0xC;
+                actor->y_velocity = 46.0f;
+                actor->gravity = 3.299999952f;
+                actor->unk81 = 2;
+                actor->unk83 = 0;
                 anim = 0x32;
             }
-            arg0->target_speed = 0.0f;
-            if ((D_800CC288 & 0x4000) && !(arg1->button & 0x10)) {
-                if (F298_P(0x22, s8) < 0x69) {
-                    F298_P(0x22, s8) = 0xF;
+            actor->target_speed = 0.0f;
+            if ((D_800CC288 & 0x4000) && !(pad->button & 0x10)) {
+                if (MOVEMENT_FIELD(0x22, s8) < 0x69) {
+                    MOVEMENT_FIELD(0x22, s8) = 0xF;
                 }
             }
-            if (((arg0->xz_velocity > 2.0f) && (F298_P(0x21, u8) != 0)) ||
-                ((F298_P(0x21, u8) == 0) && ((F298_P(0x22, s8) > 0) || (!(arg1->button & 0x10) && (arg1->button & 0x4000))))) {
+            if (((actor->xz_velocity > 2.0f) && (MOVEMENT_FIELD(0x21, u8) != 0)) ||
+                ((MOVEMENT_FIELD(0x21, u8) == 0) && ((MOVEMENT_FIELD(0x22, s8) > 0) || (!(pad->button & 0x10) && (pad->button & 0x4000))))) {
                 if (anim != 0x32) {
                     rate = 9.0f;
-                    arg0->unk83 = 0;
-                    if ((arg0->unk118 - 60.0f) < arg0->y_position) {
+                    actor->unk83 = 0;
+                    if ((actor->unk118 - 60.0f) < actor->y_position) {
                         speed = 1.200000048f;
                         anim = 0x22;
-                        arg0->target_speed = 15.0f;
+                        actor->target_speed = 15.0f;
                     } else {
                         speed = 1.200000048f;
                         anim = 0xCE;
-                        arg0->target_speed = 23.0f;
+                        actor->target_speed = 23.0f;
                     }
                 }
             }
@@ -4059,56 +4061,56 @@ void func_1505F298(struct127 *arg0, OSContPad *arg1) {
             rate = 10.0f;
             speed = 1.200000048f;
             anim = 0xD1;
-            if ((arg0->unk118 - arg0->y_position) < 70.0f) {
+            if ((actor->unk118 - actor->y_position) < 70.0f) {
                 anim = 0xCC;
                 speed = 0.8999999762f;
             }
-            arg0->target_speed -= 0.200000003f;
-            if (arg0->target_speed < 0.0f) {
-                arg0->target_speed = 0.0f;
+            actor->target_speed -= 0.200000003f;
+            if (actor->target_speed < 0.0f) {
+                actor->target_speed = 0.0f;
             }
         }
-        if ((arg0->in_water != 0) && (arg0->unk13C != 0)) {
+        if ((actor->in_water != 0) && (actor->unk13C != 0)) {
             rate = 7.0f;
             anim = 0xCB;
         }
-        if ((F298_P(0x11A, u8) != 0) || ((F298_P(0x78, u8) != 0) && (F298_P(0x78, u8) != 0x27))) {
-            func_1506045C(arg0, 0, 0, height, 1);
+        if ((actor->unk31C->unk11A != 0) || ((actor->unk31C->unk78 != 0) && (actor->unk31C->unk78 != 0x27))) {
+            func_1506045C(actor, 0, 0, height, 1);
         }
         if (anim != 0) {
-            func_1505E650(arg0, anim, speed, rate, 0.0f, 0.0f, 0);
+            func_1505E650(actor, anim, speed, rate, 0.0f, 0.0f, 0);
         }
         return;
     }
-    if (F298_A(0x137, u8) == 1) {
+    if (ACTOR_FIELD(0x137, u8) == 1) {
         anim = 0;
-        if (F298_P(0x53, u8) == 0) {
-            if (arg1->stick_y >= 0x33) {
+        if (MOVEMENT_FIELD(0x53, u8) == 0) {
+            if (pad->stick_y >= 0x33) {
                 speed = 2.200000048f;
-                F298_P(0x54, u8) = 0xC;
+                actor->unk31C->unk54 = 0xC;
                 anim = 0xEA;
-                F298_A(0x137, u8) = 0;
-                arg0->disable_run = 0x10;
-                arg0->unk81 = 1;
-                arg0->gravity = 5.0f;
-                arg0->y_velocity = 48.0f;
-            } else if (arg1->stick_y < -0x32) {
+                ACTOR_FIELD(0x137, u8) = 0;
+                actor->disable_run = 0x10;
+                actor->unk81 = 1;
+                actor->gravity = 5.0f;
+                actor->y_velocity = 48.0f;
+            } else if (pad->stick_y < -0x32) {
                 anim = 0x38;
-                F298_A(0x137, u8) = 0;
-                arg0->gravity = 3.5f;
+                ACTOR_FIELD(0x137, u8) = 0;
+                actor->gravity = 3.5f;
             }
         }
-        if ((D_800CC288 & 0x8000) || (F298_P(0x84, u8) != 0)) {
-            F298_A(0x137, u8) = 2;
+        if ((D_800CC288 & 0x8000) || (actor->unk31C->unk84 != 0)) {
+            ACTOR_FIELD(0x137, u8) = 2;
             anim = 0x40;
             speed = 3.0f;
         }
         if (anim != 0) {
-            func_1505E650(arg0, anim, speed, 4.0f, 0.0f, 0.0f, 0);
+            func_1505E650(actor, anim, speed, 4.0f, 0.0f, 0.0f, 0);
             return;
         }
     }
-    idx = arg0->unk65;
+    idx = actor->unk65;
     jumpType = 0;
     flag = 0;
     anim = 0;
@@ -4119,264 +4121,266 @@ void func_1505F298(struct127 *arg0, OSContPad *arg1) {
             flag = 1;
         }
     }
-    if ((jumpType != 0) || (height <= 0.0f) || (F298_P(0x55, s8) != 0)) {
-        F298_A(0x137, u8) = 0;
+    if ((jumpType != 0) || (height <= 0.0f) || (actor->unk31C->unk55 != 0)) {
+        ACTOR_FIELD(0x137, u8) = 0;
         jumped = 0;
-        sp80 = 0.0f;
+        animArg4 = 0.0f;
         if (D_800CC288 & 0x8000) {
-            if ((F298_P(0x11A, u8) != 1) && (F298_P(0x11A, u8) != 3) &&
-                ((jumpType != 0) || ((arg0->unk13C < 0x64) && (arg0->disable_jump == 0) && (arg0->disable_run != 0xFF)))) {
+            if ((actor->unk31C->unk11A != 1) && (actor->unk31C->unk11A != 3) &&
+                ((jumpType != 0) || ((actor->unk13C < 0x64) && (actor->disable_jump == 0) && (actor->disable_run != 0xFF)))) {
                 jumped = 1;
-                sp80 = 15.0f;
-                arg0->unk100 &= 0xFE;
+                animArg4 = 15.0f;
+                actor->unk100 &= 0xFE;
                 if (flag != 0) {
-                    func_1506160C(arg0, 1, 0xFF, 0, 0);
+                    func_1506160C(actor, 1, 0xFF, 0, 0);
                 }
-                if (F298_P(0x17, u8) != 0) {
-                    sp80 = 0.0f;
+                if (MOVEMENT_FIELD(0x17, u8) != 0) {
+                    animArg4 = 0.0f;
                     anim = 0x279;
                     speed = 1.25f;
-                    arg0->unk84.uh = 0;
-                    arg0->disable_jump = 0xA;
-                    arg0->disable_run = 0xFF;
-                    arg0->unk83 = 0xFF;
-                } else if (F298_P(0x8, s16) != 0) {
-                    arg0->unk83 = 0xFF;
-                    arg0->disable_run = 0xFF;
+                    actor->unk84.uh = 0;
+                    actor->disable_jump = 0xA;
+                    actor->disable_run = 0xFF;
+                    actor->unk83 = 0xFF;
+                } else if (MOVEMENT_FIELD(0x8, s16) != 0) {
+                    actor->unk83 = 0xFF;
+                    actor->disable_run = 0xFF;
                     jumped = 0;
-                    func_1505E650(arg0, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
+                    func_1505E650(actor, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
                 } else {
-                    if (F298_P(0x1A, u8) != 0) {
+                    if (MOVEMENT_FIELD(0x1A, u8) != 0) {
                         anim = 0x32;
-                        sp80 = 0.0f;
-                        arg0->disable_run = 0xFF;
-                        arg0->unk81 = 1;
-                        arg0->y_velocity = 47.0f;
-                        arg0->gravity = 6.0f;
-                    } else if (!(buttons & 0x2000) || (F298_P(0x7B, u8) == 7) || (F298_P(0x7B, u8) == 8)) {
-                        if (arg0->disable_run != 0) {
-                            arg0->disable_run = 0;
-                            arg0->unk7A = arg0->unk76 = F298_P(0x4C, u16);
+                        animArg4 = 0.0f;
+                        actor->disable_run = 0xFF;
+                        actor->unk81 = 1;
+                        actor->y_velocity = 47.0f;
+                        actor->gravity = 6.0f;
+                    } else if (!(buttons & 0x2000) || (MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                        if (actor->disable_run != 0) {
+                            actor->disable_run = 0;
+                            actor->unk7A = actor->unk76 = actor->unk31C->unk4C;
                         }
                         anim = 0x32;
-                        if (arg0->xz_velocity < 9.0f) {
-                            sp80 = 0.0f;
-                            F298_P(0x31, u8) = 1;
+                        if (actor->xz_velocity < 9.0f) {
+                            animArg4 = 0.0f;
+                            actor->unk31C->unk31 = 1;
                         } else {
                             speed = 0.8000000119f;
-                            F298_P(0x31, u8) = 2;
+                            actor->unk31C->unk31 = 2;
                             anim = 0x37;
-                            if (F298_P(0x78, u8) == 0x21) {
+                            if (actor->unk31C->unk78 == 0x21) {
                                 anim = 0x19E;
                                 speed = 1.399999976f;
                             }
                         }
-                        if ((F298_P(0x7B, u8) == 7) || (F298_P(0x7B, u8) == 8)) {
-                            F298_P(0x31, u8) = 0;
+                        if ((MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                            actor->unk31C->unk31 = 0;
                         }
-                        if (F298_P(0x4E, u8) == 1) {
-                            arg0->y_velocity = 40.0f;
+                        if (actor->unk31C->unk4E == 1) {
+                            actor->y_velocity = 40.0f;
                         } else {
-                            arg0->y_velocity = 59.0f;
+                            actor->y_velocity = 59.0f;
                         }
-                        if (F298_P(0x4E, u8) == 2) {
-                            arg0->y_velocity = 80.0f;
-                            sp88 = 0x7E2;
+                        if (actor->unk31C->unk4E == 2) {
+                            actor->y_velocity = 80.0f;
+                            sound = 0x7E2;
                         }
-                        arg0->gravity = 4.0f;
-                        if ((arg0->unk184 & 0x1F) == 0xC) {
-                            arg0->y_velocity *= 0.6999999881f;
+                        actor->gravity = 4.0f;
+                        if ((actor->unk184 & 0x1F) == 0xC) {
+                            actor->y_velocity *= 0.6999999881f;
                         }
-                        if ((arg0->unk184 & 0x1F) == 0x13) {
+                        if ((actor->unk184 & 0x1F) == 0x13) {
                             anim = 0x32;
-                            arg0->y_velocity *= 0.5500000119f;
+                            actor->y_velocity *= 0.5500000119f;
                         }
                         if (D_800CC27C) {
-                            arg0->unk81 = 0x82;
-                            /* never taken: pad6C is always 0 (the compiler folds this away) */
-                            if (pad6C) {
-                                arg0->unk83 = 0x82;
+                            actor->unk81 = 0x82;
+                            /* never taken: neverSet is always 0 (the compiler folds this away) */
+                            if (neverSet) {
+                                actor->unk83 = 0x82;
                             }
                         } else {
-                            arg0->unk81 = 2;
+                            actor->unk81 = 2;
                         }
                     } else {
-                        xz = arg0->xz_velocity;
+                        savedSpeed = actor->xz_velocity;
                         if (D_800CC27C == 0) {
-                            arg0->unk81 = 1;
+                            actor->unk81 = 1;
                         } else {
-                            arg0->unk81 = 0x81;
+                            actor->unk81 = 0x81;
                         }
-                        sp80 = 0.0f;
+                        animArg4 = 0.0f;
                         speed = 1.080000043f;
-                        arg0->disable_run = 0x17;
-                        arg0->unk83 = 0x64;
+                        actor->disable_run = 0x17;
+                        actor->unk83 = 0x64;
                         anim = 0xEB;
                         if (D_800CC27C != 0) {
-                            arg0->xz_velocity = xz;
-                            arg0->y_velocity *= 1.399999976f;
-                            arg0->gravity = 3.799999952f;
+                            actor->xz_velocity = savedSpeed;
+                            actor->y_velocity *= 1.399999976f;
+                            actor->gravity = 3.799999952f;
                         }
                     }
                 }
             }
         }
         if (jumped != 0) {
-            if (sp88 != 0) {
-                if (func_1506E46C(arg0, &sp88, 1) != 0) {
-                    func_15060A30(sp88, arg0);
+            if (sound != 0) {
+                if (func_1506E46C(actor, &sound, 1) != 0) {
+                    func_15060A30(sound, actor);
                 }
             }
-            sp77 = 0;
+            prevJumpState = 0;
             if (jumpType != 0) {
-                arg0->xz_velocity = 20.0f;
+                actor->xz_velocity = 20.0f;
                 if (jumpType == 0x29) {
-                    func_15052F58(arg0->unk65 - 1, 0xE);
+                    func_15052F58(actor->unk65 - 1, 0xE);
                 } else if (jumpType == 0x8B) {
-                    func_15052F58(arg0->unk65 - 1, 5);
-                    arg0->xz_velocity = 30.0f;
+                    func_15052F58(actor->unk65 - 1, 5);
+                    actor->xz_velocity = 30.0f;
                     if (D_800BE616 != 0) {
-                        arg0->unk7A = 0x3000;
-                        if (arg0->z_position > 0.0f) {
-                            arg0->unk7A = 0xB000;
+                        actor->unk7A = 0x3000;
+                        if (actor->z_position > 0.0f) {
+                            actor->unk7A = 0xB000;
                         }
                     }
                 } else if (jumpType == 0x24) {
-                    func_15052F58(arg0->unk65 - 1, 0xE);
-                    arg0->xz_velocity = 27.0f;
+                    func_15052F58(actor->unk65 - 1, 0xE);
+                    actor->xz_velocity = 27.0f;
                 }
-                F298_P(0x30, u8) = 0;
-                arg0->immune = 0x14;
-                arg0->unk76 = arg0->unk7A + 0x1200;
-                arg0->unk65 = 0;
-                arg0->disable_run = 0xFF;
-                arg0->y_velocity = 30.0f;
-                F298_P(0x31, u8) = 0;
+                actor->unk31C->unk30 = 0;
+                actor->immune = 0x14;
+                actor->unk76 = actor->unk7A + 0x1200;
+                actor->unk65 = 0;
+                actor->disable_run = 0xFF;
+                actor->y_velocity = 30.0f;
+                actor->unk31C->unk31 = 0;
             }
-            sp88 = 0;
-            F298_P(0x55, s8) = 0;
-            if (F298_P(0x4E, u8) != 0) {
-                arg0->unkA9 = 5;
+            sound = 0;
+            actor->unk31C->unk55 = 0;
+            if (actor->unk31C->unk4E != 0) {
+                actor->unkA9 = 5;
             }
             if ((anim != 0xEB) && (anim != 0x279)) {
-                arg0->unk83 = 0;
-                arg0->unk28 = 80.0f;
+                actor->unk83 = 0;
+                actor->unk28 = 80.0f;
             }
-            if (F298_P(0x4E, u8) != 2) {
-                func_1505E650(arg0, anim, speed, 2.0f, sp80, 0.0f, 0);
+            if (actor->unk31C->unk4E != 2) {
+                func_1505E650(actor, anim, speed, 2.0f, animArg4, 0.0f, 0);
             }
             height = 25.0f;
-            arg0->unkB8 = 0.0f;
-            F298_A(0x110, u8) = 0;
-            arg0->unk100 &= 0x53;
+            actor->unkB8 = 0.0f;
+            ACTOR_FIELD(0x110, u8) = 0;
+            actor->unk100 &= 0x53;
         }
         anim = 0;
     }
-    func_1506045C(arg0, buttons, D_800CC288, height, 0);
+    func_1506045C(actor, buttons, D_800CC288, height, 0);
     {
     s32 pad;
     rate = 2.0f;
-    if (((F298_P(0x98, u8) != 0) || (F298_P(0x95, u8) != 0)) && (arg0->disable_jump == 0) && (D_800CC288 & 0x8000)) {
-        arg0->unk76 = arg0->unk7A = F298_P(0x4C, u16);
-        F298_P(0x31, u8) = 1;
-        arg0->unk80 = 0xA;
-        arg0->unk83 = 0;
-        arg0->unk100 |= 8;
-        arg0->disable_run = 0;
-        arg0->unk100 &= 0xDE;
+    if (((MOVEMENT_FIELD(0x98, u8) != 0) || (MOVEMENT_FIELD(0x95, u8) != 0)) && (actor->disable_jump == 0) && (D_800CC288 & 0x8000)) {
+        actor->unk76 = actor->unk7A = actor->unk31C->unk4C;
+        actor->unk31C->unk31 = 1;
+        actor->unk80 = 0xA;
+        actor->unk83 = 0;
+        actor->unk100 |= 8;
+        actor->disable_run = 0;
+        actor->unk100 &= 0xDE;
         anim = 0x37;
         speed = 1.299999952f;
-        if (arg0->in_water == 0) {
-            arg0->y_velocity = 40.0f;
-            arg0->gravity = 3.200000048f;
+        if (actor->in_water == 0) {
+            actor->y_velocity = 40.0f;
+            actor->gravity = 3.200000048f;
         }
-        arg0->xz_velocity = (arg0->unk44 * 0.6000000238f) + 15.0f;
-        if (arg0->unk44 < 4.0f) {
-            arg0->unk76 = arg0->unk7A = arg0->unk76 + 0x8000;
+        actor->xz_velocity = (actor->unk44 * 0.6000000238f) + 15.0f;
+        if (actor->unk44 < 4.0f) {
+            actor->unk76 = actor->unk7A = actor->unk76 + 0x8000;
         }
-        F298_P(0x95, u8) = 0;
-        F298_P(0x97, u8) = 0;
-        if (F298_P(0x98, u8) != 0) {
-            func_151AE264(arg0);
+        MOVEMENT_FIELD(0x95, u8) = 0;
+        actor->unk31C->unk97 = 0;
+        if (MOVEMENT_FIELD(0x98, u8) != 0) {
+            func_151AE264(actor);
         }
-        F298_P(0x54, u8) = 0;
-    } else if ((D_800CC288 & 0x8000) && (F298_P(0x4E, u8) == 0)) {
-        if ((arg0->unk84.uh != 0x3B) && (arg0->unk84.uh != 0x3C) && (F298_A(0x137, u8) == 0) && (arg0->unk13C == 0) &&
-            (F298_P(0x95, u8) == 0) && (F298_P(0x31, u8) == 0) && (height > 55.0f)) {
-            if ((arg0->unk118 != -10000.0f) && ((arg0->unk118 - arg0->unk180) > 100.0f)) {
-                arg0->gravity = 6.0f;
-                arg0->unk81 = 1;
-                arg0->disable_run = 0x78;
-                F298_A(0x137, u8) = 0;
+        actor->unk31C->unk54 = 0;
+    } else if ((D_800CC288 & 0x8000) && (actor->unk31C->unk4E == 0)) {
+        if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (ACTOR_FIELD(0x137, u8) == 0) && (actor->unk13C == 0) &&
+            (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
+            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->unk180) > 100.0f)) {
+                actor->gravity = 6.0f;
+                actor->unk81 = 1;
+                actor->disable_run = 0x78;
+                ACTOR_FIELD(0x137, u8) = 0;
                 anim = 0x3B;
-                arg0->unk1CC = arg0->y_position;
+                actor->unk1CC = actor->y_position;
             }
         }
     }
     }
-    if ((D_800BE616 == 0) && (sp77 != 0) && (arg0->in_water == 0) && (arg0->unk13C < 0x65) && (arg0->id != 0x96)) {
-        v = F298_P(0x31, u8);
-        if ((v != 0) && (F298_P(0x4E, u8) == 0)) {
-            if (F298_P(0x31, u8) < 3) {
-                if ((D_800CC288 & 0x8000) && (arg0->unk28 > 1.0f)) {
-                    arg0->xz_velocity *= 0.3000000119f;
-                    F298_P(0x31, u8) = 3;
+    if ((D_800BE616 == 0) && (prevJumpState != 0) && (actor->in_water == 0) && (actor->unk13C < 0x65) && (actor->id != 0x96)) {
+        jumpState = actor->unk31C->unk31;
+        if ((jumpState != 0) && (actor->unk31C->unk4E == 0)) {
+            if (actor->unk31C->unk31 < 3) {
+                if ((D_800CC288 & 0x8000) && (actor->unk28 > 1.0f)) {
+                    actor->xz_velocity *= 0.3000000119f;
+                    actor->unk31C->unk31 = 3;
                     rate = 6.0f;
                     anim = 0xE9;
-                    arg0->y_velocity = 0.0f;
-                    arg0->unk81 = 1;
-                    arg0->unk1CC = arg0->y_position;
-                    arg0->gravity = 1.0f;
-                    if (arg0->unk84.uh != 0xE9) {
-                        func_100109D0(arg0);
-                        func_1000FA64(0x61E, (s16)(s32)arg0->x_position, (s16)(s32)arg0->y_position, (s16)(s32)arg0->z_position,
-                                      0x7FFF, 0x1F4, 0xC8, (s32)func_1000EFB4, arg0, (s32)D_80099428, 0, 0);
-                        func_151C6EA0(arg0, 0xFF, 1);
+                    actor->y_velocity = 0.0f;
+                    actor->unk81 = 1;
+                    actor->unk1CC = actor->y_position;
+                    actor->gravity = 1.0f;
+                    if (actor->unk84.uh != 0xE9) {
+                        func_100109D0(actor);
+                        func_1000FA64(0x61E, (s16)(s32)actor->x_position, (s16)(s32)actor->y_position, (s16)(s32)actor->z_position,
+                                      0x7FFF, 0x1F4, 0xC8, (s32)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
+                        func_151C6EA0(actor, 0xFF, 1);
                     }
                 }
             } else {
-                F298_P(0x31, u8) += D_800BE9A0;
-                if (F298_P(0x31, u8) < 0xD) {
-                    arg0->y_velocity = 8.0f;
+                actor->unk31C->unk31 += D_800BE9A0;
+                if (actor->unk31C->unk31 < 0xD) {
+                    actor->y_velocity = 8.0f;
                 }
-                if (F298_P(0x31, u8) < 0x11) {
-                    arg0->animation_speed += 0.25f;
+                if (actor->unk31C->unk31 < 0x11) {
+                    actor->animation_speed += 0.25f;
                 } else {
-                    arg0->animation_speed += (0.6000000238f - arg0->animation_speed) * 0.1000000015f;
+                    actor->animation_speed += (0.6000000238f - actor->animation_speed) * 0.1000000015f;
                 }
                 anim = 0xE9;
-                speed = arg0->animation_speed;
-                F298_P(0x3C, u8) = 6;
-                if ((!(arg1->button & 0x8000) && (F298_P(0x31, u8) >= 0x13)) || (F298_P(0x31, u8) >= 0x3E)) {
-                    arg0->disable_run = 0xFF;
-                    arg0->unk100 = 0x55;
-                    F298_P(0x31, u8) = 0;
-                    arg0->gravity = 4.5f;
+                speed = actor->animation_speed;
+                MOVEMENT_FIELD(0x3C, u8) = 6;
+                if ((!(pad->button & 0x8000) && (actor->unk31C->unk31 >= 0x13)) || (actor->unk31C->unk31 >= 0x3E)) {
+                    actor->disable_run = 0xFF;
+                    actor->unk100 = 0x55;
+                    actor->unk31C->unk31 = 0;
+                    actor->gravity = 4.5f;
                     func_1506AF74();
                     anim = 0;
                 } else {
-                    arg0->unk80 = 1;
-                    arg0->unkAA = 0x4B;
-                    arg0->unk83 = 1;
-                    if (arg0->y_velocity < -8.0f) {
-                        arg0->y_velocity = -8.0f;
+                    actor->unk80 = 1;
+                    actor->unkAA = 0x4B;
+                    actor->unk83 = 1;
+                    if (actor->y_velocity < -8.0f) {
+                        actor->y_velocity = -8.0f;
                     }
                 }
             }
         }
     }
     if (anim != 0) {
-        func_1505E650(arg0, anim, speed, rate, 0.0f, 0.0f, 0);
+        func_1505E650(actor, anim, speed, rate, 0.0f, 0.0f, 0);
     }
-    if (sp88 != 0) {
-        func_15060A30(sp88, arg0);
+    if (sound != 0) {
+        func_15060A30(sound, actor);
     }
-    id = arg0->unk81;
-    if (((id & 7) == 2) && !(arg1->button & 0x8000)) {
-        arg0->unk81 = id - 1;
-        arg0->gravity = 6.199999809f;
+    id = actor->unk81;
+    if (((id & 7) == 2) && !(pad->button & 0x8000)) {
+        actor->unk81 = id - 1;
+        actor->gravity = 6.199999809f;
     }
 }
+#undef MOVEMENT_FIELD
+#undef ACTOR_FIELD
 void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
     s32 stunned;
     s32 state;
