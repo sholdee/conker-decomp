@@ -632,8 +632,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         scale = cmd->a[0] * 1.52587890625e-05f;
         func_15062BDC(obj, scale, scale);
-    }
         break;
+    }
     case 0x3B:
         FLD(obj->unk31C, 0x32, u16) |= cmd->a[0];
         if (D_800D3840 == 4) {
@@ -721,16 +721,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         v = cmd->a[0];
         func_15083568(obj, v, 0.0f, 0);
-    }
         break;
+    }
     case 0x4C:
     {
         s32 v;
 
         v = cmd->a[0];
         func_150836CC(obj, v);
-    }
         break;
+    }
     case 0x4D: {
         struct126 *p;
         s32 v1;
@@ -756,8 +756,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             obj->unk65 = OBJ_INDEX(other) + 1;
             obj->unk5C = cmd->a[1];
         }
-    }
         break;
+    }
     case 0x4F:
         obj->unique_id = cmd->a[0];
         break;
@@ -781,8 +781,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             b = cmd->a[1];
         }
         func_1506160C(obj, (u8)a, c, b, 0);
-    }
         break;
+    }
     case 0x57:
         obj->unk21C = cmd->a[0];
         break;
