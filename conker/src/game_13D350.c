@@ -1,20 +1,22 @@
 #include <ultra64.h>
+// functions.h declares these two with the wrong signatures; this file declares them below.
 #define func_1502B7F0 func_1502B7F0__proto
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
-#define func_1511FC2C func_1511FC2C__proto
-#define func_1511FC44 func_1511FC44__proto
 #include "functions.h"
 #undef func_1502B7F0
 #undef func_150ADA20
-#undef func_1511FC2C
-#undef func_1511FC44
 #include "variables.h"
 
 u32 func_150ADA20(void);
+void func_1502B7F0(void **dest, s32 arg1, s32 arg2, s32 arg3);
+void func_10004074(void *data);
+void func_1510D694(s32 arg0);
+Gfx *func_1501A680(Gfx *gfx);
+Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
+Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
 extern u8 D_800DBEA8[];
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
+extern void *D_800DBE80; // the current sky's data: the star field (sky 1) or a textured sky's tile formats
 
 /* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
  * Same layout as game_476D0.c's RenderView, with the projection fields this file uses. */
@@ -393,7 +395,6 @@ extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
-extern s32 *D_800DBE80;
 
 /* Draws sky face `mode`: a width x height grid of tileW x tileH textured quads in the plane `axis` ('x', 'y' or
  * 'z') through (x, y, z). Quads outside the view (func_150A6210) and rows past the sky extent `limit` are
@@ -605,9 +606,6 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
 }
 
 extern s32 *D_800891BC[];
-s32 func_1502B7F0();
-void func_10004074();
-void func_1510D694(s32);
 void func_15111858(void);
 
 /* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky
@@ -618,7 +616,7 @@ void func_1511172C(s32 sky) {
     if (sky == 1) {
         D_800B0DF0->unk8 = 1;
         if (D_800DBE80 != NULL) {
-            s32 *data = D_800DBE80; // matching: the copy loads the pointer into v0 before the call
+            void *data = D_800DBE80; // matching: the copy loads the pointer into v0 before the call
 
             func_10004074(data);
         }
@@ -657,7 +655,7 @@ void func_15111858(void) {
     s32 i;
 
     D_800DBE80 = allocate_memory(NUM_STARS * sizeof(Star), 1, 0, 0);
-    stars = (Star *)D_800DBE80;
+    stars = D_800DBE80;
     for (i = 0; i != NUM_STARS; i++) {
         f32 ringRadius;
         f32 longitude;
