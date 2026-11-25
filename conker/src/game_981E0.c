@@ -189,7 +189,6 @@ typedef struct {
     /* 0x00 */ CollisionHit ground;
     /* 0x24 */ Vec3f pos;
 } GroundPoint; // size 0x30
-extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
 extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
 u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
@@ -213,7 +212,6 @@ void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 extern void func_151C1860(void *, s32, s32);
-void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);

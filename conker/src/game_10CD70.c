@@ -153,14 +153,14 @@ Gfx *func_150DFBD0(Gfx *gdl) {
 }
 
 /* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
-typedef struct {
+struct SwingObject {
     /* 0x00 */ u8 pad0[0x4];
     /* 0x04 */ f32 pos;
     /* 0x08 */ u8 pad8[0x5C];
     /* 0x64 */ f32 speed;
     /* 0x68 */ u8 pad68[0x14];
     /* 0x7C */ f32 targetSpeed;
-} SwingObject;
+};
 
 /* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
  * the speed eases towards it by 0.05 per call. */
@@ -243,10 +243,10 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
 }
 
 
-typedef struct {
+struct BoltEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltSource src;
-} BoltEmitter;
+};
 
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
@@ -415,8 +415,6 @@ extern u8 D_80088988;
 static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
-                          s32);
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */

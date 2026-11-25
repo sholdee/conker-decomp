@@ -3,7 +3,6 @@
 #include "variables.h"
 
 extern void func_150F1A00(Actor *);
-extern void func_150DFDA4(Actor *);
 extern s32 func_1502DB20(u8);
 
 /*

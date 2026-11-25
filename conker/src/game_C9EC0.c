@@ -277,29 +277,17 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
 }
 
 extern Actor *func_1505EEF4(s32);
-extern void func_150FAD28(void);
-extern void func_150FAA40(s32, s32);
-extern void func_15108120(Actor *, s32, s32);
-extern void func_150FAD78(void);
-extern void func_150FCFD4(Actor *, s32, s32);
-extern void func_150E0300(void);
 extern void func_151557FC(s32, s32, f32);
 extern void *func_150F6DE4(Actor *);
 extern s32 func_15046C80(f32 *, s32, f32, void *);
 extern void func_151BFE84(void *, void *, void *, s32, s32, s32);
 extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151C0098(f32 *, Actor *, s32, s32, s32);
-extern void func_150FCA30(void);
 extern s32 func_1518F51C(Actor *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
-extern void func_150E1060(s32, s32, s32);
 extern void func_151CD35C(s32);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_150BEF7C(s32);
 extern void func_15178EFC(s32);
-extern s32 func_150E3208(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_150E32D0(s32, s32, s32, Actor *, s32, f32);
-extern s32 func_150E3414(s32, s32, s32, s32, s32, s32, void *, s32, f32);
-extern void func_150DECC0(f32 *, s32, s32);
 extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
 extern u8 D_8009F0D0;
@@ -498,10 +486,8 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
 
 extern void func_150EB8C4(void);
-extern void func_150F9720(u8);
 extern void func_150F6DB0(Actor *);
 extern void func_151CD394(s32);
-extern void func_150E35DC(s32);
 extern void func_150B3DD0(void);
 extern void func_150C5C9C(Actor *);
 extern void func_150C522C(void);
@@ -577,7 +563,6 @@ typedef struct Msg1509D8FC {
 
 extern void func_151645C4(u8);
 extern void func_1515F170(s32 arg0, u8 arg1);
-extern void func_150DEC28(u8, u8);
 extern u8 D_800A0960[][16];
 
 /* Advances script command `cmdId` to `phase`. */
@@ -684,8 +669,6 @@ typedef struct Node1509DBBC {
     /* 0x0C */ u8 padC[0x3C];
     /* 0x48 */ u8 type;
 } Node1509DBBC;
-
-void func_150E36BC(s32 handle, s32 *hi, s32 *result, s32 *lo);
 
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
 s32 func_1509DBBC(s32 cmdId, s32 phase, s32 arg2) {

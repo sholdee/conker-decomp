@@ -278,8 +278,6 @@ typedef struct ImpactObj {
     /* 0x110 */ ImpactHit hit;
 } ImpactObj;
 
-void *func_15102920(f32 size, u8 alpha, CollisionTri *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
-                   s32, s32);
 void func_151C329C(Vec3f *pos, u8, s32);
 
 /* One-entry variant lists for func_15151D6C, copied from rodata. */

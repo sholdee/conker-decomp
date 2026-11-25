@@ -419,10 +419,10 @@ typedef struct {
 } LineEmitterData;
 
 /* Timed effect of func_150FAAEC. */
-typedef struct {
+struct LineEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ LineEmitterData data;
-} LineEmitter;
+};
 
 /* Starts the (single) emitter effect between zones records 35 and 34. */
 void func_150FAA40(u8 owner, s32 kind) {
@@ -496,10 +496,10 @@ void func_150FAD78(void) {
     func_151494E0(0, 0x4C);
 }
 
-typedef struct {
+struct Obj150FADC8 {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ s32 flags;
-} Obj150FADC8;
+};
 
 /* Event handler: event 0x53 sets flag 2 of the object, event 0x54 clears it. */
 void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
@@ -621,12 +621,12 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
     }
 }
 
-typedef struct Func150FB188State {
+struct Func150FB188State {
     u8 pad0[0x54];
     f32 field54;
     f32 field58;
     f32 field5C;
-} Func150FB188State;
+};
 
 typedef struct Func150FB188Transform {
     f32 field0;
@@ -663,7 +663,7 @@ void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 /* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
-typedef struct {
+struct FadeInEffect {
     /* 0x000 */ u8 pad0[0x16];
     /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */
     /* 0x018 */ u8 pad18[0x2B];
@@ -673,7 +673,7 @@ typedef struct {
     /* 0x066 */ s16 fadeRate;  /* EffectParams.fadeRate */
     /* 0x068 */ u8 pad68[0xB8];
     /* 0x120 */ s16 duration;  /* Effect.extra: the lifetime's starting value */
-} FadeInEffect;
+};
 
 /*
  * Fades `alpha` in: while `timer` (counting down from `duration`) is within its first `fadeLength`
@@ -694,7 +694,7 @@ s32 func_150FB29C(FadeInEffect *effect) {
 }
 
 /* Layout of ScreenSprite (game_182140.c), as far as func_150FB2E0 uses it. */
-typedef struct {
+struct FadeInSprite {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */
     /* 0x24 */ u8 pad24[2];
@@ -704,7 +704,7 @@ typedef struct {
     /* 0x2E */ u8 alpha;      /* ScreenSpriteInfo.color1.alpha */
     /* 0x2F */ u8 pad2F[0x41];
     /* 0x70 */ s16 duration;  /* the timer's starting value */
-} FadeInSprite;
+};
 
 void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
 void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);

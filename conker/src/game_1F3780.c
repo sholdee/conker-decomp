@@ -194,9 +194,6 @@ typedef struct {
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
-                   s32, s32, u8, s32);
-
 /* Emits this side's effects (func_151D3F14, func_151D4408, func_151C6D70) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
 void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
@@ -271,9 +268,6 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
         }
     }
 }
-
-void *func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s16, u8, f32, Vec3f *, u8, s32, s16, u8,
-                    s32);
 
 /* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */

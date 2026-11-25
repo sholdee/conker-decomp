@@ -1530,7 +1530,6 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
 
 void func_151C329C(Vec3f *, u8, s32);
 void func_151C577C(Vec3f *, Vec3f *, Vec3f *, u8, u8, u8, u8, s32);
-void func_151036B4(void *, u8, s32);
 
 /* Picks the impact effect for a hit on actor (NULL: plain blood) from its model and state. */
 void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
@@ -2088,7 +2087,6 @@ void func_1513A6E0(Actor *, f32 *, void *, u8, s32);
 void func_1513ABB8(Actor *, f32 *, u8, void *, u8, s32);
 void func_1513B0F8(Actor *, f32 *, void *, u8, s32);
 void func_1513A594(Actor *, Vec3f *, CollisionHit *, u8, s32);
-void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
 void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
@@ -3035,7 +3033,6 @@ void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
     }
 }
 
-void func_151036B4(void *, u8, s32);
 const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
 const s32 D_800A4328[2] = { 0xE3, 0xE5 };
 const s32 D_800A4330[2] = { 0xE4, 0xE6 };

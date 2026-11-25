@@ -38,7 +38,7 @@ typedef struct {
 } FollowState;
 
 /* An object spawned by func_1513264C. */
-typedef struct {
+struct ProjectileParticle {
     /* 0x000 */ u8 pad0;
     /* 0x001 */ u8 unk1;
     /* 0x002 */ u8 pad2[0xA];
@@ -59,7 +59,7 @@ typedef struct {
         ProjectileState projectile;
         FollowState follow;
     } state;
-} ProjectileParticle;
+};
 
 extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
                          f32, Actor *, s32, u8, u8, s32, u8);
@@ -173,15 +173,14 @@ typedef struct {
 } PuffState;
 
 /* A puff a projectile leaves along its path (spawned by func_1513D2F0). */
-typedef struct {
+struct TrailPuff {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
-} TrailPuff;
+};
 
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
-void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2);
 
 /*
  * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a

@@ -38,7 +38,6 @@ void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f 
 void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D5148(Actor *obj);
 s32 func_151C229C(Vec3f *arg0, Vec3f *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_150F7470(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, Vec3f *arg7);

@@ -9,7 +9,6 @@ void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 void func_1505A770(Actor *arg0);
 void func_15055B0C(Actor *arg0, s32 arg1);
-void func_151026BC(void *, s32, s32, s32, s32, s32);
 void func_15188810(void *, s32, s32);
 void func_150836CC(Actor *, s32);
 void func_1514AD9C(f32 *, s32, s32);

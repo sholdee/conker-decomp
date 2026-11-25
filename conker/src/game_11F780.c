@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_150F2994(Camera *actor, s32 flag);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
@@ -65,7 +64,7 @@ typedef struct {
     f32 amplitudeZ;
 } Sway; // size 0x18
 
-typedef struct {
+struct SwayObject {
     u8 pad0[0x20];
     f32 rotX;
     f32 unk24;
@@ -76,7 +75,7 @@ typedef struct {
     f32 z;
     u8 pad44[0x12C];
     Sway sway;
-} SwayObject;
+};
 
 typedef struct {
     Sway sway;

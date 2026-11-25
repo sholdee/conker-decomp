@@ -23,10 +23,10 @@ typedef struct {
 } PropEmitter;
 
 /* Timed effect of func_150E114C. */
-typedef struct {
+struct PropEmitterEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ PropEmitter emitter;
-} PropEmitterEffect;
+};
 
 extern u8 D_800A0FE0[];
 extern void func_1510F800(s32);

@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800A1C00[][8];
-
 typedef struct {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ s16 unk2;

@@ -16,7 +16,7 @@ typedef struct {
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
  * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
  */
-typedef struct HomingEffect {
+struct HomingEffect {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec3f pos;
     /* 0x1C */ Vec3f target;
@@ -41,7 +41,7 @@ typedef struct HomingEffect {
     /* 0x74 */ s32 unk74;
     /* 0x78 */ f32 *follow;
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
-} HomingEffect;
+};
 
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
@@ -232,7 +232,6 @@ extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
 extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, HomingSpawnDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
 
 /*
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
@@ -418,10 +417,10 @@ typedef struct {
     /* 0xA4 */ s32 unkA4;
 } Obj4010State;
 
-typedef struct {
+struct Obj4010 {
     /* 0x000 */ u8 pad0[0x110];
     /* 0x110 */ Obj4010State state;
-} Obj4010;
+};
 
 /* If unkA4 is set, calls func_1505D1C4 at the state position with the heading of (unk60, unk64) as a binary angle. */
 void func_150E4010(Obj4010 *obj) {
@@ -438,7 +437,7 @@ void func_150E411C(s32 arg0) {
     func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
 
-typedef struct {
+struct Obj4174 {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
@@ -446,7 +445,7 @@ typedef struct {
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ u8 pad50[4];
     /* 0x54 */ f32 unk54;
-} Obj4174;
+};
 
 /* Advances unk2C and unk30 by their per-frame rates unk4C and unk54. */
 s32 func_150E4174(Obj4174 *obj) {

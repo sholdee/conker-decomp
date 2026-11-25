@@ -13,14 +13,14 @@ extern s32 func_151EF610(void);
 extern s32 func_1510F8CC(s32);
 
 /* Per-material impact effects, indexed by the material id from func_1510F8CC. */
-typedef struct Struct800A1070 {
+struct Struct800A1070 {
     /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
     /* 0x02 */ u16 particleType; // particle burst type (0 = none)
     /* 0x04 */ u8 chance;        // percent chance of the func_151C329C effect
     /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
     /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
     /* 0x07 */ u8 countRange;
-} Struct800A1070;
+};
 
 typedef struct Struct150E4550 {
     /* 0x00 */ u8 pad0[0x84];
@@ -71,7 +71,6 @@ const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
 const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
-void func_150E4E04(f32, f32, f32, s32, s32, s16 **, s32);
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151C329C(f32 *, s32, s32);
@@ -240,7 +239,7 @@ void func_150E4928(WorldObject *obj) {
     }
 }
 
-typedef struct Struct150E4CBC {
+struct Struct150E4CBC {
     /* 0x00 */ u8 pad0[0x90];
     /* 0x90 */ s32 timer;
     /* 0x94 */ s16 unk94;
@@ -251,7 +250,7 @@ typedef struct Struct150E4CBC {
     /* 0xA4 */ s16 unkA4;
     /* 0xA6 */ u8 padA6[0xE];
     /* 0xB4 */ u8 alpha;
-} Struct150E4CBC;
+};
 
 /*
  * Per-frame update (from a handler table): unkA4 ramps up to 90/256 of unk96 over the first 9 ticks
@@ -287,7 +286,6 @@ extern u8 D_80090520[];
 extern void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 extern f32 func_150489B0(u8);
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
-void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
 
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the
@@ -512,7 +510,7 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
     func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
-typedef struct Struct150E5810 {
+struct Struct150E5810 {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 bounce; // restitution applied on each ground hit
@@ -527,7 +525,7 @@ typedef struct Struct150E5810 {
     /* 0x58 */ f32 unk58;
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 flags;
-} Struct150E5810;
+};
 
 /*
  * Ground-collision callback (from a handler table). A slow fall comes to rest; otherwise the velocity is

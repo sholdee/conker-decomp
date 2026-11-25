@@ -107,10 +107,10 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
 }
 
 /* A message passed to func_151494E0 and received by func_150F887C. */
-typedef struct {
+struct StageMsg {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ u8 unk4;
-} StageMsg;
+};
 
 /* Broadcasts message 0x3F, which runs func_150F892C on the StageObj whose stage.unk0 is `arg1`. */
 void func_150F884C(s32 arg0, s32 arg1) {
@@ -140,16 +140,14 @@ typedef struct {
     /* 0x48 */ f32 unk48;
 } StageState;
 
-typedef struct {
+struct StageObj {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ StageState stage;
-} StageObj;
-
-void func_150F892C(StageObj *obj);
+};
 
 /* Message handler: 0x42 jumps to the last stage, 0x3F runs func_150F892C. */
 void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
@@ -410,8 +408,6 @@ void func_150F9720(u8 index) {
 void func_150F9788(TimedEffect *arg0) {
 }
 
-void func_150F9788(TimedEffect *);
-
 void func_150F9794(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_1514933C(arg0);
@@ -424,8 +420,6 @@ void func_150F97C0(TimedEffect *arg0) {
 
 extern u8 D_80088B50;
 extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
-extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
 void func_150F97EC(obj, arg1, arg2)

@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_150FCBC0(u8 arg0);
 extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 
@@ -125,7 +124,6 @@ void func_150FCFB0(s32 arg0) {
     func_15103828();
 }
 
-typedef struct Actor150FD514 Actor150FD514;
 
 /* State that follows the particle (its DefParticleMotion slot at 0x110). */
 typedef struct {

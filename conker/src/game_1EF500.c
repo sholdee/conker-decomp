@@ -430,7 +430,6 @@ s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitP
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-void func_15102920(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(TrailBurst *, u8, s32);
 s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 

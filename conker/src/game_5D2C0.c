@@ -841,7 +841,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
 }
 
 void func_150D3360(void *, u8, s32);
-void func_151001B4();
 void func_15163BE8(void *, u8, s32);
 void func_151BD828(void *, u8, s32);
 void func_151D74B0(void *, u8, s8, u8, s32);
@@ -899,13 +898,11 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-void func_15100180(Actor *);
 void light_sendEvent(u8, u8, ActorRef *);
 void func_15147D64(ActorRef *, s32);
 void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
 void func_151D747C(Actor *);
-void func_151027E8(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
 void func_15031C14(ModelAttachment *att) {
@@ -2526,12 +2523,10 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-void func_151026BC(Actor *, s32, s32, s32, s32, s32);
-
 /* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
  * mv allows it), and stops it with func_151027E8 when that no longer holds. */
 s32 func_15033838(ModelAttachment *att, Actor *owner) {
-    s32 kind;
+    u8 kind;
     s32 triggered;
     ActorCtl *unk;
 

@@ -17,12 +17,10 @@ typedef struct {
 } BoneBeamData; /* size 0x30 */
 
 /* A particle spawned by func_1513D2F0 (a DefParticleHead followed by its data). */
-typedef struct {
+struct BoneBeamParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ BoneBeamData beam;
-} BoneBeamParticle;
-
-void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
+};
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */

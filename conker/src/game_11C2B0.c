@@ -787,8 +787,6 @@ void func_150F03E8(LightEffect *flash) {
 }
 
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
-                          s32);
 s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
                   s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 

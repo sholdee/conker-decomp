@@ -13,8 +13,6 @@ extern Gfx *D_800B0E08;
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_1501B22C(s32 view);
 Gfx *func_151733D8(Gfx *gfx, s32 arg1);
-Gfx *func_15100464(Gfx *gfx);
-Gfx *func_150DFBD0(Gfx *gfx);
 void func_1510F800(s32 arg0);
 Gfx *func_1515D914(Gfx *gfx, s16 view, s32 x, s32 y, s32 z, s32 arg5, s32 arg6, s32 arg7, void *arg8, void *arg9,
                    s32 argA, s32 argB, s32 argC, void *argD);

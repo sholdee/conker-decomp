@@ -6,10 +6,10 @@
 
 
 /* Effect object header from func_15149130; effect-specific data starts at 0x28. */
-typedef struct {
+struct PointEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Vec3f pos;
-} PointEffect;
+};
 
 extern Vec3f D_800A0D60[15];
 extern f32 D_800A0E14[15];

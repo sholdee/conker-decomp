@@ -19,7 +19,6 @@ extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D
 extern void func_15145EA4(f32 **, f32 **, s32, s32);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 

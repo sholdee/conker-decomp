@@ -1027,7 +1027,6 @@ extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
 extern void func_1000EC24();
 extern void func_1000EFB4();
-extern void func_151037DC();
 s32 func_1000F568(s32 arg0, s32 arg1);
 void func_1000FD38(void *, void *, s32);
 ObjScriptCmd *func_1507BB28(s32, s32);

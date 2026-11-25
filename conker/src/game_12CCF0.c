@@ -11,8 +11,6 @@ void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, 
 void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
 void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
 void func_150FFC3C(Actor *obj);
-void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
-                   Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);

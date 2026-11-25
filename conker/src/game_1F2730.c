@@ -85,8 +85,6 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15102B38(Actor *, u8, const Vec3f *, const Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
     f32 scale[2];

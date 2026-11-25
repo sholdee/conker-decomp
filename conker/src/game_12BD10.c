@@ -90,9 +90,6 @@ void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
     func_15145EA4(&src, &dst, mtx, 1);
 }
 
-extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-
 /* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
 void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6) {
     f32 motion[2];

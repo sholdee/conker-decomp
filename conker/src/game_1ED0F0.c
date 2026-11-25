@@ -269,9 +269,6 @@ FollowFx *func_151B8908(Bullet *);
 Bullet88 *func_151B8400(Bullet *);
 void *func_151B8668(Bullet *, u8, s32);
 void func_15145EA4(Vec3f **, Vec3f **, MtxF *, s32);
-void func_15102B38(Actor *, s32, Vec3f *, Vec3f *, f32 *, s32, s32, f32,
-                   Vec3f *, s32, s32, s32, u8, s32);
-void func_15103254(s16, u8, f32, Vec3f *, s32, u8, s32);
 void func_151C1798(Actor *obj, Vec3f *pos);
 void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
 s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,

@@ -3,11 +3,11 @@
 #include "variables.h"
 
 /* An effect that holds a EffectHeader at 0x38 (see func_150FC974). */
-typedef struct {
+struct Effect_129DE0 {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 pad28[0x10];
     /* 0x38 */ EffectHeader *unk38;
-} Effect_129DE0;
+};
 
 /* D_80086C90 object filter: rejects objects with id 0x12, 0x23, 0x73 or 0x8A. */
 s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2) {

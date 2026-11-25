@@ -20,7 +20,6 @@ s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
 void func_15152B38(TrailBurst *, u8, s32);
 void func_15145974(void *, f32 *, f32 *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-void func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, u32);
 
 /* Bobbing motion stored in a debris particle's user data (object + 0x170). */

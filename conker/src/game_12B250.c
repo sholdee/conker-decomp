@@ -9,8 +9,6 @@ extern Vec3f D_800A1F7C;
 extern Vec3f D_800A1F88; // launch point, in bone space
 
 extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, Vec3f *position, s32 cameraMask, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 extern void func_15145740(Actor *obj, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
 extern s32 func_151C229C(Vec3f *origin, Vec3f *dir, Vec3f *hitPoint, Vec3f *lineDir, s32 useTarget,
                          s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *owner,

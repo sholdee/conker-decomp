@@ -50,7 +50,6 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-void func_150E0348(Actor *, s32, s32);
 void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
 void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
 void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
@@ -59,7 +58,6 @@ LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
-void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 void func_151B7328(ActorRef *, s32, s32, s32, s32);
 void func_151CEAAC(Actor *, s32, s32, s32, s32);
 

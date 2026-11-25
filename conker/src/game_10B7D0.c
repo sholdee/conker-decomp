@@ -123,21 +123,21 @@ typedef struct {
 } ParticleTravel;
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
-typedef struct {
+struct TravelParticle {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
-} TravelParticle;
+};
 
-typedef struct {
+struct TexturePair {
     s32 ids[2];
-} TexturePair;
+};
 
 
 /* Timed effect of func_150DE7C0: particles that travel between two zones. */
-typedef struct {
+struct ZonePairEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ZonePairEmitter link;
-} ZonePairEffect;
+};
 
 void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
@@ -250,7 +250,6 @@ static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1
 static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151417C4(u8, s32);
-void func_150DEC28(u8 index, s32 arg1);
 
 /* Runs func_150DEC28 on entries 0-3. */
 void func_150DEBE0(s32 arg0) {
@@ -262,7 +261,7 @@ void func_150DEBE0(s32 arg0) {
 }
 
 /* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
-void func_150DEC28(u8 index, s32 arg1) {
+void func_150DEC28(u8 index, u8 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
     light_sendEvent(D_800A0D08[i], 0x22, 0);

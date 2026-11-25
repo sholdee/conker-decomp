@@ -30,22 +30,22 @@ typedef struct {
     /* 0x3C */ u8  colour[4];
 } FlashSpawner;
 
-typedef struct {
+struct struct_EAB10 {
     /* 0x00 */ u8  pad0;
     /* 0x01 */ u8  unk1;
     /* 0x02 */ u8  pad2[0xA];
     /* 0x0C */ u8  unkC;
     /* 0x0D */ u8  padD[0x1B];
     /* 0x28 */ FlashSpawner spawner;
-} struct_EAB10;
+};
 
 /* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
  * func_150EAE24 is its per-frame update. */
-typedef struct {
+struct FlashObject {
     /* 0x00 */ u8  pad0[0x14];
     /* 0x14 */ PointLight *light;
     /* 0x18 */ GroundFlash flash;
-} FlashObject;
+};
 
 FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 

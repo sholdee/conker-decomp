@@ -4,8 +4,6 @@
 #include "effects.h"
 #include "libc/math.h"
 
-void func_150E5AE0(void);
-
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */
 typedef struct {
     /* 0x00 */ u32 phase;
@@ -15,21 +13,21 @@ typedef struct {
 } FrameOscillator;
 
 /* An object created by func_15134DAC with a FrameOscillator in its user data. */
-typedef struct {
+struct OscillatorObject {
     /* 0x00 */ u8 pad0[0x80];
     /* 0x80 */ FrameOscillator oscillator;
-} OscillatorObject;
+};
 
 /* The owner whose +0x74 scales the spawned particle's velocity. */
-typedef struct {
+struct struct_EA11C_arg5 {
     /* 0x00 */ u8  pad0[0x74];
     /* 0x74 */ f32 unk74;
-} struct_EA11C_arg5;
+};
 
 void *func_15134DAC(BloodStripDesc *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     BloodStripDesc desc;
     OscillatorObject *obj;
     FrameOscillator oscillator;
@@ -158,7 +156,7 @@ f32 func_150EA490(OscillatorObject *obj) {
 void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
+void *func_150EA500(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;
