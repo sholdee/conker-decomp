@@ -8,19 +8,43 @@ extern f32 D_800A1984;
 extern f32 D_800A1950[];
 
 s32 func_1509BE40();
-void func_15143134(void *, f32 *, s32);
+void func_15143134(f32 *, f32 *, Mtx *);
 
+/* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
 typedef struct {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-} Struct150F3214_110;
+    /* 0x00 */ struct127 *target;
+    /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
+    /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
+    /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
+    /* 0x0C */ s8 count;      // particles left in the current burst
+} EmitterState;
 
+/* The emitter object spawned by func_150F2C8C. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE; // -1 when the target is gone
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EmitterState state;
+} Emitter;
+
+/* State each emitted particle keeps at +0x110 (copied in by func_150F2D14, updated by func_150F3214). */
+typedef struct {
+    /* 0x00 */ struct127 *target;
+    /* 0x04 */ u8 targetId;
+    /* 0x08 */ f32 age;
+    /* 0x0C */ f32 lifetime;
+    /* 0x10 */ f32 growth;   // particle size = growth * sqrtf(age)
+    /* 0x14 */ f32 fadeStart; // particle->unk5C = fadeStart - fadeRate * age * age
+    /* 0x18 */ f32 fadeRate;  // fadeStart / (lifetime * lifetime): unk5C reaches 0 at lifetime
+    /* 0x1C */ struct17 unk1C;
+    /* 0x28 */ struct17 unk28;
+} ParticleState;
+
+/* A particle spawned by func_1513D2F0. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ f32 unk2C;
@@ -29,8 +53,8 @@ typedef struct {
     /* 0x040 */ u8 pad40[0x1C];
     /* 0x05C */ u8 unk5C;
     /* 0x05D */ u8 pad5D[0xB3];
-    /* 0x110 */ Struct150F3214_110 unk110;
-} Struct150F3214;
+    /* 0x110 */ ParticleState state;
+} Particle;
 
 extern struct {
     u8 pad0[0x120];
@@ -44,25 +68,28 @@ void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(struct127 *, s32);
 void func_15196318(s32, s32, s32);
 
+/* While the player has unk31C, polls entries 0xFA and 0xF9 and resets the player when one has bit 0 set,
+ * then scrolls the four D_800BE4F0 layers by object 0xE's unk2E4. */
 void func_150F2A60(s32 arg0) {
     s32 i;
-    s32 v;
+    s32 scroll;
     struct127 *obj;
-    struct131 *p;
-    s32 idx;
+    struct131 *entry;
+    s32 entryIndex;
 
     if (D_800CC2D0->unk31C != NULL) {
         if (D_800CC5EC->unk120 == 0) {
+            // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
-                p = func_151149AC((0xFA - i) & 0xFF);
-                idx = p - D_800DBEF4;
-                if (D_800DBF94[idx] & 1) {
+                entry = func_151149AC((0xFA - i) & 0xFF);
+                entryIndex = entry - D_800DBEF4;
+                if (D_800DBF94[entryIndex] & 1) {
                     if (D_800CC40C != 0) {
                         func_15060F28(&D_800CC2D0[D_800CC40C - 100], 0);
                     }
                     D_800CC49A = 0;
                     func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
-                    func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
+                    func_10010630(0x627, D_800CC2D0, 0x6D60, 500, 1000);
                     func_15145A50(D_800CC2D0);
                     func_1507CD64(D_800CC2D0, 6);
                     break;
@@ -70,71 +97,34 @@ void func_150F2A60(s32 arg0) {
             }
             obj = func_15083E90(0xE);
             if (obj != NULL) {
-                v = *(s32 *)((u8 *)obj + 0x2E4);
+                scroll = obj->unk2E4;
             } else {
-                v = 0;
+                scroll = 0;
             }
-            func_15196318(D_800BE4F0->unk0, v, 0);
-            func_15196318(D_800BE4F0->unk4, 0, -v);
-            func_15196318(D_800BE4F0->unk8, v, 0);
-            func_15196318(D_800BE4F0->unkC, -v, 0);
+            func_15196318(D_800BE4F0->unk0, scroll, 0);
+            func_15196318(D_800BE4F0->unk4, 0, -scroll);
+            func_15196318(D_800BE4F0->unk8, scroll, 0);
+            func_15196318(D_800BE4F0->unkC, -scroll, 0);
         }
     }
 }
 
-void func_150F2C8C(struct127 *arg0) {
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 unk5;
-        f32 unk8;
-        u8 unkC;
-    } sp38;
-    struct260 *temp_v0;
+/* Spawns an emitter object that follows `target` (see func_150F2D14). */
+void func_150F2C8C(struct127 *target) {
+    EmitterState state;
+    Emitter *emitter;
 
-    sp38.unk0 = arg0;
-    sp38.unk4 = arg0->unique_id;
-    sp38.unk5 = 0;
-    sp38.unk8 = 0.0f;
-    sp38.unkC = 0;
+    state.target = target;
+    state.targetId = target->unique_id;
+    state.prevUnk222 = 0;
+    state.timer = 0.0f;
+    state.count = 0;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x5C, -1, 0, 0x44, (struct37 *)0x10, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0x10);
+    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, (struct37 *)0x10, 0xFF, 1);
+    if (emitter != NULL) {
+        memcpy(&emitter->state, &state, sizeof(state));
     }
 }
-
-typedef struct {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ s8 unkC;
-} Struct150F2D14_28;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ Struct150F2D14_28 unk28;
-} Struct150F2D14;
-
-typedef struct {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 unk28;
-} Struct150F2D14Extra;
 
 typedef struct {
     u8 unk0;
@@ -161,72 +151,73 @@ typedef struct {
     u8 unk47;
     s32 unk48;
     u8 unk4C;
-    u8 pad4D[3];
     s32 unk50;
     s16 unk54;
     s16 unk56;
-} Struct150F2D14Spawn;
+} ParticleSpawn;
 
 extern f32 D_800A195C[];
 void func_1502EA98(struct127 *, s32, s32, s32, s32, s32, s32);
-void func_15145EA4(f32 **, f32 **, s32, s32);
+void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 
-void func_150F2D14(Struct150F2D14 *arg0) {
-    Struct150F2D14_28 *p;
-    struct127 *obj;
-    Struct150F2D14Spawn spawn;
-    Struct150F2D14Extra extra;
-    void *ret;
+/* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
+ * changes to a nonzero value. */
+void func_150F2D14(Emitter *emitter) {
+    EmitterState *state;
+    struct127 *target;
+    ParticleSpawn spawn;
+    ParticleState particle;
+    Particle *spawned;
 
-    p = &arg0->unk28;
+    state = &emitter->state;
     if (D_800C35EA == 1) {
         return;
     }
-    obj = p->unk0;
-    if (obj->interaction_state == 0 || obj->unique_id != p->unk4) {
-        arg0->unkE = -1;
+    target = state->target;
+    if (target->interaction_state == 0 || target->unique_id != state->targetId) {
+        emitter->unkE = -1;
         return;
     }
-    if (p->unk5 != obj->unk222 && obj->unk222 != 0) {
-        p->unkC = 3;
-        p->unk8 = 0.0f;
+    if (state->prevUnk222 != target->unk222 && target->unk222 != 0) {
+        state->count = 3;
+        state->timer = 0.0f;
     }
-    p->unk5 = obj->unk222;
-    if (obj->unk222 != 0) {
-        func_1502EA98(&D_800CC2D0[obj->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
+    state->prevUnk222 = target->unk222;
+    if (target->unk222 != 0) {
+        func_1502EA98(&D_800CC2D0[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
-    if (obj->unk1D4 != NULL && p->unkC > 0) {
-        p->unk8 += 0.1480000019f * D_800BE9A4;
-        if (p->unk8 > 1.0f) do {
-            extra.unk0 = obj;
-            extra.unk4 = obj->unique_id;
-            extra.unk8 = 0.0f;
-            extra.unkC = func_150ADA68() * 6.0f + 13.0f;
-            extra.unk10 = 58.13999939f;
-            extra.unk14 = func_150ADA68() * 40.0f + 60.0f;
-            extra.unk18 = extra.unk14 / (extra.unkC * extra.unkC);
+    if (target->unk1D4 != NULL && state->count > 0) {
+        state->timer += 0.148f * D_800BE9A4;
+        if (state->timer > 1.0f) do {
+            particle.target = target;
+            particle.targetId = target->unique_id;
+            particle.age = 0.0f;
+            particle.lifetime = func_150ADA68() * 6.0f + 13.0f;
+            particle.growth = 58.14f;
+            particle.fadeStart = func_150ADA68() * 40.0f + 60.0f;
+            particle.fadeRate = particle.fadeStart / (particle.lifetime * particle.lifetime);
             {
                 f32 *src[2];
                 f32 *dst[2];
-                struct17 pos;
+                struct17 dir;
 
                 src[0] = D_800A1950;
                 src[1] = D_800A195C;
                 dst[0] = &spawn.unk1C.unk0;
-                dst[1] = &pos.unk0;
-                func_15145EA4(src, dst, (s32)obj->unk1D4 + 0x3C0, 2);
-            pos.unk0 -= spawn.unk1C.unk0;
-            pos.unk4 -= spawn.unk1C.unk4;
-            pos.unk8 -= spawn.unk1C.unk8;
-            if (!func_15146078(&pos, &extra.unk1C, &extra.unk28)) {
+                dst[1] = &dir.unk0;
+                func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
+            dir.unk0 -= spawn.unk1C.unk0;
+            dir.unk4 -= spawn.unk1C.unk4;
+            dir.unk8 -= spawn.unk1C.unk8;
+            if (!func_15146078(&dir, &particle.unk1C, &particle.unk28)) {
                 return;
             }
-            spawn.unk44 = extra.unk14;
+            spawn.unk44 = particle.fadeStart;
             spawn.unk0 = 0x79;
             spawn.unk1 = 0xC;
             spawn.unk2 = 0x4405;
-            spawn.unk4 = 0x12C;
+            spawn.unk4 = 300;
             spawn.unk8 = 0;
             spawn.unkC = 0;
             spawn.unk10 = 0xD5;
@@ -248,14 +239,14 @@ void func_150F2D14(Struct150F2D14 *arg0) {
             spawn.unk50 = 0;
             spawn.unk54 = 1;
             spawn.unk56 = 0xFF;
-            ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+            spawned = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
+            if (spawned != NULL) {
+                memcpy(&spawned->state, &particle, sizeof(particle));
             }
-            p->unkC--;
-            p->unk8 -= 1.0f;
+            state->count--;
+            state->timer -= 1.0f;
             }
-        } while (p->unk8 > 1.0f && p->unkC > 0);
+        } while (state->timer > 1.0f && state->count > 0);
     }
 }
 
@@ -267,40 +258,41 @@ void func_150F31D4(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
-s32 func_150F3214(Struct150F3214 *arg0) {
-    Struct150F3214_110 *temp_v0;
-    struct127 *temp_v1;
-    f32 temp_f2;
+/* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
+s32 func_150F3214(Particle *particle) {
+    ParticleState *state;
+    struct127 *target;
+    f32 size;
 
-    temp_v0 = &arg0->unk110;
-    temp_v1 = temp_v0->unk0;
+    state = &particle->state;
+    target = state->target;
 
-    if (temp_v1->interaction_state == 0) {
+    if (target->interaction_state == 0) {
         goto return_zero;
     }
 
     do {
-        if (temp_v1->unique_id != temp_v0->unk4) {
+        if (target->unique_id != state->targetId) {
             goto return_zero;
         }
 
-        if (temp_v1->unk1D4 != NULL) {
+        if (target->unk1D4 != NULL) {
             break;
         }
 return_zero:
         return 0;
     } while (0);
 
-    func_15143134(D_800A1950, arg0->unk34, (s32)temp_v1->unk1D4 + 0x3C0);
+    func_15143134(D_800A1950, particle->unk34, (Mtx *)target->unk1D4 + 15);
 
-    temp_f2 = sqrtf(temp_v0->unk8) * temp_v0->unk10;
-    arg0->unk30 = temp_f2;
-    arg0->unk2C = temp_f2;
+    size = sqrtf(state->age) * state->growth;
+    particle->unk30 = size;
+    particle->unk2C = size;
 
-    arg0->unk5C = (u32)(temp_v0->unk14 - ((temp_v0->unk18 * temp_v0->unk8) * temp_v0->unk8));
-    temp_v0->unk8 = temp_v0->unk8 + D_800BE9A4;
+    particle->unk5C = (u32)(state->fadeStart - ((state->fadeRate * state->age) * state->age));
+    state->age = state->age + D_800BE9A4;
 
-    if (temp_v0->unkC < temp_v0->unk8) {
+    if (state->lifetime < state->age) {
         return 0;
     }
     return 1;
