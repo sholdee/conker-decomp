@@ -5,33 +5,6 @@
 
 
 
-/* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x04 */ struct17 pos;
-    /* 0x10 */ s16 lifetime;
-    /* 0x14 */ f32 radius; /* spawn points lie within this distance of pos */
-    /* 0x18 */ s16 yawBase;
-    /* 0x1A */ s16 yawRange;
-    /* 0x1C */ s16 pitchBase;
-    /* 0x1E */ s16 pitchRange;
-    /* 0x20 */ f32 speedBase;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 velYBase;
-    /* 0x2C */ f32 velYRange;
-    /* 0x30 */ struct17 dir;
-    /* 0x3C */ f32 sizeBase;
-    /* 0x40 */ f32 sizeRange;
-    /* 0x44 */ f32 gravityBase;
-    /* 0x48 */ f32 gravityRange;
-    /* 0x4C */ f32 spinBase;
-    /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;
-    /* 0x55 */ u8 landPuffFlag;
-    /* 0x56 */ s16 landPuffLifeBase;
-    /* 0x58 */ s16 landPuffLifeRange;
-} DebrisEmitter;
-
 /* Effect object header from func_15149130; effect-specific data starts at 0x28. */
 typedef struct {
     /* 0x00 */ u8 pad0;
@@ -63,7 +36,7 @@ void func_151A6F00(DebrisEmitter *, u8, u8, s32);
  * func_151D5404/5334/5514/3FF4 and func_151541B8 effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
-void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
+void func_150DECC0(vertex *pos, u8 owner, s32 kind) {
     s32 yaw;
     s32 i;
     ParticleSpawn spawn;
@@ -106,9 +79,9 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
         spawn.vel.z = 0.0f;
         for (i = 0; i < 15; i++) {
             idx = D_800A0EC8[i];
-            spawn.pos.x = D_800A0D60[i].unk0 + pos->unk0;
-            spawn.pos.y = D_800A0D60[i].unk4 + pos->unk4;
-            spawn.pos.z = D_800A0D60[i].unk8 + pos->unk8;
+            spawn.pos.x = D_800A0D60[i].unk0 + pos->x;
+            spawn.pos.y = D_800A0D60[i].unk4 + pos->y;
+            spawn.pos.z = D_800A0D60[i].unk8 + pos->z;
             spawn.vel.y = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
             spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
             spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
@@ -123,7 +96,7 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
             func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
         }
     }
-    func_15165F80(-1, (s32)pos->unk0, (s32)pos->unk4, (s32)pos->unk8, 30, 50, 0, *(u8 *)&owner, kind);
+    func_15165F80(-1, (s32)pos->x, (s32)pos->y, (s32)pos->z, 30, 50, 0, *(u8 *)&owner, kind);
     func_151D5404(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
     func_151D5334(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
     func_151D5514(pos, *(u8 *)&owner, kind);
@@ -141,15 +114,15 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     debris.speedBase = 5.0f;
     debris.velYBase = 15.0f;
     debris.velYRange = 15.0f;
-    debris.dir.unk0 = 0.0f;
-    debris.dir.unk4 = 0.0f;
+    debris.dir.x = 0.0f;
+    debris.dir.y = 0.0f;
     debris.landPuffs = 1;
     debris.landPuffFlag = 1;
     debris.landPuffLifeBase = 100;
     debris.landPuffLifeRange = 50;
     debris.speedRange = 10.0f;
     debris.spinRange = 10.0f;
-    debris.dir.unk8 = 0.0f;
+    debris.dir.z = 0.0f;
     debris.sizeBase = 0.25f;
     debris.sizeRange = 0.5f;
     debris.gravityBase = -0.6999999881f;
@@ -160,7 +133,7 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
         struct260 *effect;
         struct17 effectPos;
 
-        effectPos = *pos;
+        effectPos = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
         effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));

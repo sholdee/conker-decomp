@@ -3,33 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x04 */ vertex pos;
-    /* 0x10 */ s16 lifetime;
-    /* 0x14 */ f32 radius;     /* spawn points lie within this distance of pos */
-    /* 0x18 */ s16 yawBase;
-    /* 0x1A */ s16 yawRange;
-    /* 0x1C */ s16 pitchBase;
-    /* 0x1E */ s16 pitchRange;
-    /* 0x20 */ f32 speedBase;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 velYBase;   /* mode 0 only */
-    /* 0x2C */ f32 velYRange;
-    /* 0x30 */ vertex dir;     /* modes 2 and 3 */
-    /* 0x3C */ f32 sizeBase;
-    /* 0x40 */ f32 sizeRange;
-    /* 0x44 */ f32 gravityBase;
-    /* 0x48 */ f32 gravityRange;
-    /* 0x4C */ f32 spinBase;
-    /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;   /* see DebrisData */
-    /* 0x55 */ u8 landPuffFlag;
-    /* 0x56 */ s16 landPuffLifeBase;
-    /* 0x58 */ s16 landPuffLifeRange;
-} DebrisEmitter;
-
 /* Spawn parameters of a BloodTrail effect (see game_161520.c). */
 typedef struct {
     /* 0x00 */ f32 *x;
