@@ -12,12 +12,19 @@
 #undef D_800DC460
 #undef D_800DC464
 #undef D_800DC468
-struct Node15132444;
-extern struct Node15132444 *D_800DC460;
-extern struct Node15132444 *D_800DC464;
+/* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
+typedef struct ParticleNode {
+    /* 0x0 */ s32 *resource;
+    /* 0x4 */ struct ParticleNode *next;
+    /* 0x8 */ struct ParticleNode *prev;
+    /* 0xC */ u16 model;
+    /* 0xE */ u8 keepLoaded;
+} ParticleNode;
+
+extern ParticleNode *D_800DC460;
+extern ParticleNode *D_800DC464;
 extern s16 D_800DC468[];
 
-void func_15132444(struct102 *arg0);
 s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 s32 func_151464B8(s16 *arg0);
 extern u8 D_800C3E90;
@@ -34,6 +41,75 @@ typedef struct {
     u8 bytes[0x10];
     u16 tail;
 } Bytes18_15132DDC;
+
+/* Ground contact written by func_15046C80 (copied whole from the spawner's optional template). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ Bytes18_15132DDC surface;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 type;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ u8 *unk20;
+} ParticleFloor; // size 0x24
+
+/* A pooled physics particle (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are copied from the
+ * spawn template passed to func_1513264C; the u8 callback fields index the D_8008xxxx handler tables. */
+typedef struct Particle {
+    /* 0x000 */ u8 pad0[0x10];
+    /* 0x010 */ f32 radius;
+    /* 0x014 */ f32 elasticity;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ f32 rot[3];
+    /* 0x02C */ f32 scale[3];
+    /* 0x038 */ f32 pos[3];
+    /* 0x044 */ f32 vel[3];
+    /* 0x050 */ f32 rotVel[3];
+    /* 0x05C */ f32 gravity;
+    /* 0x060 */ u32 flags;
+    /* 0x064 */ s16 lifetime;
+    /* 0x066 */ u16 model;
+    /* 0x068 */ u8 variant;
+    /* 0x069 */ u8 pad69[3];
+    /* 0x06C */ s16 *unk6C;
+    /* 0x070 */ u8 alpha;
+    /* 0x071 */ u8 updateFn;
+    /* 0x072 */ u8 update2Fn;
+    /* 0x073 */ u8 floorHitFn;
+    /* 0x074 */ u8 floorType3Fn;
+    /* 0x075 */ u8 wallHitFn;
+    /* 0x076 */ u8 destroyFn;
+    /* 0x077 */ u8 squashFn;
+    /* 0x078 */ u8 matrixFn;
+    /* 0x079 */ s8 drawFn;
+    /* 0x07A */ u8 unk7A;
+    /* 0x07B */ u8 pad7B;
+    /* 0x07C */ struct127 *owner;
+    /* 0x080 */ u8 ownerId;
+    /* 0x081 */ u8 pad81;
+    /* 0x082 */ s16 fadeStart;
+    /* 0x084 */ s16 fadeRate;
+    /* 0x086 */ u8 pad86[6];
+    /* 0x08C */ struct ParticleNode *node;
+    /* 0x090 */ Mtx mtx[2];
+    /* 0x110 */ ParticleFloor floor;
+    /* 0x134 */ f32 squashOrigin[3];
+    /* 0x140 */ f32 speed;
+    /* 0x144 */ f32 invSpeed;
+    /* 0x148 */ u8 hitFlags;
+    /* 0x149 */ u8 squashPhase;
+    /* 0x14A */ s8 squashAngle;
+    /* 0x14B */ u8 pad14B;
+    /* 0x14C */ s32 unk14C;
+    /* 0x150 */ u8 unk150;
+    /* 0x151 */ u8 pad151[3];
+    /* 0x154 */ s32 unk154[4];
+    /* 0x164 */ s32 unk164;
+    /* 0x168 */ s32 unk168;
+    /* 0x16C */ u8 pad16C[4];
+    /* 0x170 */ u8 extra[1]; // per-kind data, size passed to func_1513264C
+} Particle;
 
 typedef struct {
     u8 pad_0[0x10];
@@ -110,13 +186,6 @@ extern Func15132DDCCallback70 D_80089970[];
 extern Func15132DDCCallback74 D_80089974[];
 extern f32 D_800A386C;
 extern f32 D_800A3870;
-
-typedef struct {
-    u8 pad_0[0x60];
-    s32 field_0x60;
-    u8 pad_1[0x4];
-    u8 field_0x68;
-} Func151323ACArg0;
 
 typedef struct {
     u8 pad0[0x60];
@@ -196,176 +265,150 @@ typedef struct {
 extern Data15133E3C D_800A3860;
 void func_15169260(Data15133E3C *, s32, s32, u8);
 
-typedef struct {
-    u8 pad_0[0x38];
-    struct17 field_0x38;
-    u8 pad_44[0x1C];
-    u32 field_0x60;
-    s16 field_0x64;
-    u8 pad_66[0xA];
-    u8 field_0x70;
-    u8 field_0x71;
-    u8 field_0x72;
-    u8 pad_73[0x3];
-    u8 field_0x76;
-    u8 field_0x77;
-    u8 pad_78[0xA];
-    s16 field_0x82;
-    s16 field_0x84;
-    u8 pad_86[0xC2];
-    u8 field_0x148;
-} Func151321D0Arg0;
+typedef s32 (*ParticleUpdateFn)(Particle *);
+typedef void (*ParticleDestroyFn)(Particle *);
 
-typedef s32 (*Func151321D0Callback)(Func151321D0Arg0 *);
+extern ParticleUpdateFn D_800898B0[];
+extern ParticleUpdateFn D_80089914[];
+extern ParticleDestroyFn D_8008997C[];
+extern ParticleUpdateFn D_80089988[];
+s32 func_1514672C(f32 *pos);
 
-extern Func151321D0Callback D_800898B0[];
-extern Func151321D0Callback D_80089914[];
-extern Func151321D0Callback D_8008997C[];
-extern Func151321D0Callback D_80089988[];
-s32 func_1514672C(struct17 *arg0);
+/* Per-frame update: run the particle's update callbacks, age and fade it, and destroy it when any step says so. */
+void func_151321D0(Particle *particle) {
+    s32 result;
+    u8 dead;
 
-void func_151321D0(Func151321D0Arg0 *arg0) {
-    s32 temp;
-    u8 stopped;
-
-    stopped = 0;
-    arg0->field_0x60 &= 0xFFDFFFFF;
-    if ((arg0->field_0x60 & 0x10) && (arg0->field_0x148 & 0x18)) {
-        temp = D_80089988[arg0->field_0x77](arg0);
-        if (temp == 0) {
-            stopped = 1;
+    dead = FALSE;
+    particle->flags &= ~0x200000;
+    if ((particle->flags & 0x10) && (particle->hitFlags & 0x18)) {
+        result = D_80089988[particle->squashFn](particle);
+        if (result == 0) {
+            dead = TRUE;
         }
-    } else if (arg0->field_0x71 != 0) {
-        temp = D_800898B0[arg0->field_0x71](arg0);
-        if (temp == 0) {
-            stopped = 1;
+    } else if (particle->updateFn != 0) {
+        result = D_800898B0[particle->updateFn](particle);
+        if (result == 0) {
+            dead = TRUE;
         }
     }
 
-    if ((arg0->field_0x72 != 0) && !stopped) {
-        temp = D_80089914[arg0->field_0x72](arg0);
-        if (temp == 0) {
-            stopped = 1;
+    if (particle->update2Fn != 0 && !dead) {
+        result = D_80089914[particle->update2Fn](particle);
+        if (result == 0) {
+            dead = TRUE;
         }
     }
 
-    if ((arg0->field_0x60 & 0x80) && !stopped) {
-        arg0->field_0x64 -= D_800BE9E4;
-        if (arg0->field_0x64 < 0) {
-            stopped = 1;
+    if ((particle->flags & 0x80) && !dead) {
+        particle->lifetime -= D_800BE9E4;
+        if (particle->lifetime < 0) {
+            dead = TRUE;
         }
     }
 
-    if ((arg0->field_0x60 & 0x2000) && !stopped) {
-        if (arg0->field_0x64 < arg0->field_0x82) {
-            temp = arg0->field_0x64 * arg0->field_0x84;
-            if (temp < arg0->field_0x70) {
-                arg0->field_0x70 = temp;
+    if ((particle->flags & 0x2000) && !dead) {
+        if (particle->lifetime < particle->fadeStart) {
+            result = particle->lifetime * particle->fadeRate;
+            if (result < particle->alpha) {
+                particle->alpha = result;
             }
         }
     }
 
-    if (!stopped && !(arg0->field_0x60 & 0x80000)) {
-        stopped = func_1514672C(&arg0->field_0x38) == 0;
+    if (!dead && !(particle->flags & 0x80000)) {
+        dead = func_1514672C(particle->pos) == 0;
     }
 
-    if (stopped) {
-        if (arg0->field_0x76 != 0) {
-            D_8008997C[arg0->field_0x76](arg0);
+    if (dead) {
+        if (particle->destroyFn != 0) {
+            D_8008997C[particle->destroyFn](particle);
         }
-        func_1516972C((struct102 *)arg0);
+        func_1516972C((struct102 *)particle);
     }
 }
 
-extern void (*D_800899B0[])(s32);
+extern ParticleDestroyFn D_800899B0[];
 
-void func_151323AC(Func151323ACArg0 *arg0) {
-    s32 idx;
+/* Dispatch to the variant's handler in D_800899B0 (variant 0 unless flag 0x100 is set). */
+void func_151323AC(Particle *particle) {
+    s32 variant;
 
-    idx = (arg0->field_0x60 & 0x100) ? arg0->field_0x68 : 0;
-    D_800899B0[idx]((s32)arg0);
+    variant = (particle->flags & 0x100) ? particle->variant : 0;
+    D_800899B0[variant](particle);
 }
 
-extern void (*D_800899D4[])(s32);
+extern ParticleDestroyFn D_800899D4[];
 
-void func_151323F8(Func151323ACArg0 *arg0) {
-    s32 idx;
+/* Dispatch to the variant's handler in D_800899D4 (variant 0 unless flag 0x100 is set). */
+void func_151323F8(Particle *particle) {
+    s32 variant;
 
-    idx = (arg0->field_0x60 & 0x100) ? arg0->field_0x68 : 0;
-    D_800899D4[idx]((s32)arg0);
+    variant = (particle->flags & 0x100) ? particle->variant : 0;
+    D_800899D4[variant](particle);
 }
-
-typedef struct Node15132444 {
-    s32 *unk0;
-    struct Node15132444 *next;
-    struct Node15132444 *prev;
-    u8 padC[2];
-    u8 unkE;
-} Node15132444;
-
-typedef struct {
-    u8 pad0[0x66];
-    u16 unk66;
-    u8 pad68[0x24];
-    Node15132444 *unk8C;
-} Obj15132444;
 
 void func_1510D630(s32);
-void func_151325C8(void *arg0);
+void func_151325C8(Particle *particle);
 
-void func_15132444(struct102 *arg0) {
+/* Release a particle's model reference: drop the per-model count, and once no particle uses the model
+ * (and it is not marked to stay resident) unlink its node and free the model. */
+void func_15132444(Particle *particle) {
+    ParticleNode *node;
+
     D_800DC63C--;
-    D_800DC468[((Obj15132444 *)arg0)->unk66]--;
-    if (D_800DC468[((Obj15132444 *)arg0)->unk66] == 0) {
-        if (((Obj15132444 *)arg0)->unk8C->unkE != 0) {
-            D_800DC468[((Obj15132444 *)arg0)->unk66] = 1;
+    D_800DC468[particle->model]--;
+    if (D_800DC468[particle->model] == 0) {
+        if (particle->node->keepLoaded) {
+            D_800DC468[particle->model] = 1;
         } else {
-            func_1510D630(D_800DC640[((Obj15132444 *)arg0)->unk66]);
-            if (((Obj15132444 *)arg0)->unk8C->prev == NULL) {
-                D_800DC460 = ((Obj15132444 *)arg0)->unk8C->next;
+            func_1510D630(D_800DC640[particle->model]);
+            node = particle->node;
+            if (node->prev == NULL) {
+                D_800DC460 = node->next;
                 if (D_800DC460 != NULL) {
                     D_800DC460->prev = NULL;
                 } else {
                     D_800DC464 = NULL;
                 }
             } else {
-                ((Obj15132444 *)arg0)->unk8C->prev->next = ((Obj15132444 *)arg0)->unk8C->next;
-                if (((Obj15132444 *)arg0)->unk8C->next != NULL) {
-                    ((Obj15132444 *)arg0)->unk8C->next->prev = ((Obj15132444 *)arg0)->unk8C->prev;
+                node->prev->next = node->next;
+                node = particle->node;
+                if (node->next != NULL) {
+                    node->next->prev = node->prev;
                 } else {
-                    D_800DC464 = ((Obj15132444 *)arg0)->unk8C->prev;
+                    D_800DC464 = node->prev;
                 }
             }
-            func_100043B4(((Obj15132444 *)arg0)->unk8C->unk0, 4);
-            func_100043B4((s32 *)((Obj15132444 *)arg0)->unk8C, 4);
+            func_100043B4(particle->node->resource, 4);
+            func_100043B4((s32 *)particle->node, 4);
         }
     }
-    func_151325C8(arg0);
+    func_151325C8(particle);
 }
 
-void func_15132570(struct102 *arg0) {
-    func_15132444(arg0);
-    func_15169804(arg0);
+void func_15132570(Particle *particle) {
+    func_15132444(particle);
+    func_15169804((struct102 *)particle);
 }
 
-void func_1513259C(struct102 *arg0) {
-    func_15132444(arg0);
-    func_15169824(arg0);
+void func_1513259C(Particle *particle) {
+    func_15132444(particle);
+    func_15169824((struct102 *)particle);
 }
 
-void func_151325C8(void *arg0) {
+/* Free the buffers func_1513264C allocated into unk154[0..D_80082FA0] and unk164. */
+void func_151325C8(Particle *particle) {
     s32 i;
-    s32 *p;
 
-    for (i = 0, p = (s32 *)arg0; i <= D_80082FA0; i++, p++) {
-        if (p[0x55] != 0) {
-            func_100043B4((s32 *)p[0x55], 4);
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (particle->unk154[i] != 0) {
+            func_100043B4((s32 *)particle->unk154[i], 4);
         }
     }
 
-    p = (s32 *)((s32 *)arg0)[0x59];
-    if (((s32 *)arg0)[0x59] != 0) {
-        func_100043B4(p, 4);
+    if (particle->unk164 != 0) {
+        func_100043B4((s32 *)particle->unk164, 4);
     }
 }
 
