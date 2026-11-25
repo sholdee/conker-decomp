@@ -541,9 +541,9 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x3C */ s8 initFn;
     /* 0x3D */ s8 updateFn;
     /* 0x3E */ s8 destroyFn;
-    /* 0x3F */ s8 unk3F;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
+    /* 0x3F */ s8 soundFn;
+    /* 0x40 */ s8 soundUpdateFn;
+    /* 0x41 */ s8 soundStopFn;
     /* 0x42 */ s8 unk42;
     /* 0x44 */ u16 unk44;
     /* 0x46 */ u8 childPreset;
@@ -586,10 +586,10 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x60 */ s8 initFn;    /* D_8008F87C index */
     /* 0x61 */ s8 updateFn;  /* D_8008F880 index */
     /* 0x62 */ s8 destroyFn; /* D_8008F88C index */
-    /* 0x63 */ s8 unk63;     /* D_8008F890 index */
-    /* 0x64 */ s8 unk64;     /* D_8008F894 index */
-    /* 0x65 */ s8 unk65;     /* D_8008F898 index */
-    /* 0x66 */ s16 unk66;
+    /* 0x63 */ s8 soundFn;   /* D_8008F890 index: starts the sound */
+    /* 0x64 */ s8 soundUpdateFn; /* D_8008F894 index */
+    /* 0x65 */ s8 soundStopFn;   /* D_8008F898 index */
+    /* 0x66 */ u16 sound;
     /* 0x68 */ s8 unk68;     /* D_8008F89C index */
     /* 0x69 */ u8 childPreset; /* D_800A8710 index */
     /* 0x6A */ u8 childLife; /* points whose life drops below this spawn a child (func_15198110) */
@@ -617,8 +617,8 @@ void func_15196330(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
-    if (jet->unk65 != -1) {
-        D_8008F898[jet->unk65](actor);
+    if (jet->soundStopFn != -1) {
+        D_8008F898[jet->soundStopFn](actor);
     }
     if (jet->destroyFn != -1) {
         D_8008F88C[jet->destroyFn](actor);
@@ -631,8 +631,8 @@ void func_151963B4(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
-    if (jet->unk65 != -1) {
-        D_8008F898[jet->unk65](actor);
+    if (jet->soundStopFn != -1) {
+        D_8008F898[jet->soundStopFn](actor);
     }
     if (jet->destroyFn != -1) {
         D_8008F88C[jet->destroyFn](actor);
@@ -690,24 +690,24 @@ CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2,
     jet.childLife = entry->childLife;
     jet.scatterPreset = entry->scatterPreset;
     jet.spritePreset = entry->spritePreset;
-    jet.unk63 = entry->unk3F;
+    jet.soundFn = entry->soundFn;
     jet.sizeRate = entry->sizeRate;
     jet.size = entry->size;
     jet.childRate = entry->childRate;
     jet.scatterRate = entry->scatterRate;
     jet.spriteRate = entry->spriteRate;
-    jet.unk64 = entry->unk40;
-    jet.unk65 = entry->unk41;
+    jet.soundUpdateFn = entry->soundUpdateFn;
+    jet.soundStopFn = entry->soundStopFn;
     jet.unk68 = entry->unk42;
     jet.childPreset = entry->childPreset;
     jet.headFadeCount = entry->headFadeCount;
     jet.headFadeStep = entry->headFadeStep;
     jet.tailFadeCount = entry->tailFadeCount;
     jet.tailFadeStep = entry->tailFadeStep;
-    if (jet.unk63 != -1) {
-        jet.unk66 = D_8008F890[jet.unk63]();
+    if (jet.soundFn != -1) {
+        jet.sound = D_8008F890[jet.soundFn]();
     } else {
-        jet.unk66 = 0;
+        jet.sound = 0;
     }
     matrix = (s32)jet.owner->unk1D4 + (jet.bone << 6);
     func_15143134(&jet.startOffset, &jet.start, matrix);
@@ -815,8 +815,8 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
             points[i].alpha = (points[i].alpha * scale) >> 8; i--; scale += jet->tailFadeStep; if (i < 0) { i = actor->capacity - 1; } n--;
         } while (n != 0 && i != actor->head);
     }
-    if (jet->unk64 != -1) {
-        D_8008F894[jet->unk64](actor);
+    if (jet->soundUpdateFn != -1) {
+        D_8008F894[jet->soundUpdateFn](actor);
     }
     if (jet->unk68 != -1) {
         D_8008F89C[jet->unk68](actor);
@@ -837,8 +837,8 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_15198D88();
-void func_151990AC();
+void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end);
+void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
 
 /*
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
@@ -1785,64 +1785,38 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
+/* Jet sound-start callback (D_8008F890): starts the looping flame sound; its handle is left in v0. */
 void func_15198C60(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    char padC[0x24 - 0xC];
-} Struct15198C90Vec;
+/* Jet callback (D_8008F894): moves the jet's sound to its oldest point. */
+void func_15198C90(CharacterFlamethrowerActor *actor) {
+    Particle *points;
+    CharacterFlamethrowerJet *jet;
+    u16 sound;
 
-typedef struct {
-    char pad_0x0[0x66];
-    u16 field_0x66;
-} Struct15198C90Sound;
-
-typedef struct {
-    char pad_0x0[0x2C];
-    s8 field_0x2C;
-    s8 field_0x2D;
-    char pad_0x2E[0x94 - 0x2E];
-    Struct15198C90Vec *field_0x94;
-    Struct15198C90Sound *field_0x98;
-} Struct15198C90;
-
-void func_15198C90(Struct15198C90 *arg0) {
-    Struct15198C90Vec *temp_v1;
-    Struct15198C90Sound *temp_v2;
-    u16 temp_a0;
-    s32 temp_t6;
-    s32 temp_t7;
-
-    temp_v2 = arg0->field_0x98;
-    temp_v1 = arg0->field_0x94;
-
-    if (arg0->field_0x2C != 0) {
-        temp_a0 = temp_v2->field_0x66;
-        if (temp_a0 != 0) {
-            temp_t6 = 0x1388;
-            temp_t7 = 0x1F4;
-            func_1000F91C(temp_a0, 0x7FFF, 0, 0, 0,
-                          ((Struct15198C90Vec *)((u8 *)temp_v1 + (arg0->field_0x2D * 0x24)))->unk0,
-                          ((Struct15198C90Vec *)((u8 *)temp_v1 + (arg0->field_0x2D * 0x24)))->unk4,
-                          ((Struct15198C90Vec *)((u8 *)temp_v1 + (arg0->field_0x2D * 0x24)))->unk8,
-                          temp_t7, temp_t6);
+    jet = actor->state;
+    points = actor->points;
+    if (actor->count != 0) {
+        sound = jet->sound;
+        if (sound != 0) {
+            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->tail].pos.x, points[actor->tail].pos.y,
+                          points[actor->tail].pos.z, 500, 5000);
         }
     }
 }
 
-void func_15198D40(Struct15198C90 *arg0) {
-    Struct15198C90Sound *temp;
-    u16 val;
+/* Jet destroy callback (D_8008F898): stops the jet's sound. */
+void func_15198D40(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
+    u16 sound;
 
-    temp = arg0->field_0x98;
-    if (arg0->field_0x2C != 0) {
-        val = temp->field_0x66;
-        if (val != 0) {
-            func_100111C8(val);
+    jet = actor->state;
+    if (actor->count != 0) {
+        sound = jet->sound;
+        if (sound != 0) {
+            func_100111C8(sound);
         }
     }
 }
@@ -1850,11 +1824,8 @@ void func_15198D40(Struct15198C90 *arg0) {
 void func_15198D7C(s32 arg0) {
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_15198D88;
-
-typedef struct {
+/* Preset in D_800A8728 for the particles func_15198D88 scatters around a jet's end point. */
+typedef struct JetScatterPreset {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -1866,28 +1837,10 @@ typedef struct {
     s16 unk1E;
     s16 unk20;
     s16 unk22;
-} Entry15198D88;
+} JetScatterPreset;
 
 typedef struct {
-    u8 pad0[0x74];
-    u8 unk74;
-    u8 pad75[0x7];
-    f32 unk7C;
-} State15198D88;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    Vec3f_15198D88 pos;
-    u8 pad1C[0x7C];
-    State15198D88 *unk98;
-} Obj15198D88;
-
-typedef struct {
-    Vec3f_15198D88 pos;
+    Vec3f pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
@@ -1923,13 +1876,14 @@ typedef struct {
     u8 pad1E[2];
 } Style15198D88;
 
-extern Entry15198D88 D_800A8728[];
+extern JetScatterPreset D_800A8728[];
 extern s32 func_15147DA0(Spawn15198D88 *, Motion15198D88 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style15198D88 *, s32, s32, s32);
 
-void func_15198D88(Obj15198D88 *arg0, Vec3f_15198D88 *arg1) {
+/* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
+void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     Style15198D88 style;
-    State15198D88 *state;
-    Entry15198D88 *entry;
+    CharacterFlamethrowerJet *jet;
+    JetScatterPreset *preset;
     Spawn15198D88 spawn;
     Motion15198D88 motion;
     f32 px;
@@ -1944,14 +1898,14 @@ void func_15198D88(Obj15198D88 *arg0, Vec3f_15198D88 *arg1) {
     f32 cosB;
     f32 rad;
 
-    state = arg0->unk98;
-    entry = &D_800A8728[state->unk74];
+    jet = actor->state;
+    preset = &D_800A8728[jet->scatterPreset];
     spawn.unkE = 1;
     motion.unk19 = 0xA;
     motion.unk1A = 0xFF;
     motion.unk18 = 0x28;
     motion.unk1B = 0x82;
-    spawn.pos = arg0->pos;
+    spawn.pos = actor->pos;
     style.unk0 = 0;
     style.unk4 = 1;
     style.unk8 = 0x160600;
@@ -1962,48 +1916,28 @@ void func_15198D88(Obj15198D88 *arg0, Vec3f_15198D88 *arg1) {
     style.unk1C = 0;
     style.unk1D = 9;
     do {
-        speed = (func_150ADA68() * entry->unk8) + entry->unk4;
+        speed = (func_150ADA68() * preset->unk8) + preset->unk4;
         a = func_150ADA20() & 0xFF;
         b = func_150ADA20() & 0xFF;
         sinA = func_151423D8((u8)(a - 0x40));
         cosA = func_151423D8(a);
         sinB = func_151423D8((u8)(b - 0x40));
         cosB = func_151423D8(b);
-        rad = entry->unk0;
-        px = arg1->x + (rad * cosB * sinA);
-        py = arg1->y - (rad * sinB);
-        pz = arg1->z + (rad * cosB * cosA);
-        spawn.unk15 = (func_150ADA20() % (u32)(entry->unk22 + 1)) + entry->unk20;
-        spawn.unkC = (func_150ADA20() % (u32)(entry->unk1E + 1)) + entry->unk1C;
-        motion.unk0 = (func_150ADA68() * entry->unk10) + entry->unkC;
-        motion.unk10 = (func_150ADA68() * entry->unk18) + entry->unk14;
-        motion.unk4 = (px - arg0->pos.x) * speed;
-        motion.unk8 = (py - arg0->pos.y) * speed;
-        motion.unkC = (pz - arg0->pos.z) * speed;
-        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
-        state->unk7C -= 1.0f;
-    } while (state->unk7C > 1.0f);
+        rad = preset->unk0;
+        px = end->x + (rad * cosB * sinA);
+        py = end->y - (rad * sinB);
+        pz = end->z + (rad * cosB * cosA);
+        spawn.unk15 = (func_150ADA20() % (u32)(preset->unk22 + 1)) + preset->unk20;
+        spawn.unkC = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
+        motion.unk0 = (func_150ADA68() * preset->unk10) + preset->unkC;
+        motion.unk10 = (func_150ADA68() * preset->unk18) + preset->unk14;
+        motion.unk4 = (px - actor->pos.x) * speed;
+        motion.unk8 = (py - actor->pos.y) * speed;
+        motion.unkC = (pz - actor->pos.z) * speed;
+        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
+        jet->scatterAccum -= 1.0f;
+    } while (jet->scatterAccum > 1.0f);
 }
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151990AC;
-
-typedef struct {
-    char pad0[0x10];
-    f32 position[3];
-    char pad1C[0x98 - 0x1C];
-    void *state;
-} Actor151990AC;
-
-typedef struct {
-    char pad0[0x80];
-    u8 unk80;
-    f32 unk84;
-    f32 unk88;
-} Jet151990AC;
 
 typedef struct {
     f32 radius;
@@ -2051,7 +1985,8 @@ void *func_15167D84(void *, s32, s32, s8, u8, s32);
 extern u8 D_80090514[];
 extern EmissionPreset151990AC D_800A8770[];
 
-void func_151990AC(Actor151990AC *arg0, Vec3f_151990AC *arg1) {
+/* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
+void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
     Emission151990AC packet;
     f32 cosine1;
@@ -2065,13 +2000,13 @@ void func_151990AC(Actor151990AC *arg0, Vec3f_151990AC *arg1) {
     u8 angle2;
     u32 rnd;
     EmissionPreset151990AC *preset;
-    Jet151990AC *state;
+    CharacterFlamethrowerJet *jet;
 
-    state = (Jet151990AC *)arg0->state;
-    preset = &D_800A8770[state->unk80];
-    packet.position[0] = arg0->position[0];
-    packet.position[1] = arg0->position[1];
-    packet.position[2] = arg0->position[2];
+    jet = actor->state;
+    preset = &D_800A8770[jet->spritePreset];
+    packet.position[0] = actor->pos.x;
+    packet.position[1] = actor->pos.y;
+    packet.position[2] = actor->pos.z;
     packet.fraction_x = 0;
     packet.fraction_z = 0;
     packet.fraction_y = 0;
@@ -2098,18 +2033,18 @@ void func_151990AC(Actor151990AC *arg0, Vec3f_151990AC *arg1) {
         sine1 = func_151423D8(angle1);
         cosine2 = func_151423D8(angle2 - 64);
         sine2 = func_151423D8(angle2);
-        x = arg1->x + preset->radius * sine2 * cosine1;
-        y = arg1->y - preset->radius * cosine2;
-        z = arg1->z + preset->radius * sine2 * sine1;
-        packet.velocity_x = (x - arg0->position[0]) * speed;
-        packet.velocity_y = (y - arg0->position[1]) * speed;
-        packet.velocity_z = (z - arg0->position[2]) * speed;
+        x = end->x + preset->radius * sine2 * cosine1;
+        y = end->y - preset->radius * cosine2;
+        z = end->z + preset->radius * sine2 * sine1;
+        packet.velocity_x = (x - actor->pos.x) * speed;
+        packet.velocity_y = (y - actor->pos.y) * speed;
+        packet.velocity_z = (z - actor->pos.z) * speed;
         packet.acceleration = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
         packet.fade = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
         packet.width = packet.height = func_150ADA20() % (u32)(preset->size_range + 1) + preset->size;
-        func_15167D84(&packet, 0, 0, -1, *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
-        state->unk88 -= 1.0f;
-    } while (state->unk88 > 1.0f);
+        func_15167D84(&packet, 0, 0, -1, actor->unkC, actor->unk1);
+        jet->spriteAccum -= 1.0f;
+    } while (jet->spriteAccum > 1.0f);
 }
 
 struct ConkerStruct151993B4 {
