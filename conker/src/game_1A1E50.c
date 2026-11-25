@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Mtx D_80089470;
 extern Gfx *(*D_8008CD74[])(Gfx *, s32);
 extern Gfx *(*D_8008CD7C[])(Gfx *, s32);
 

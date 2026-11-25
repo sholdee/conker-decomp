@@ -6,7 +6,6 @@
 #define gRenderViews ((RenderView *)D_800BE628)
 
 extern Gfx *D_800B0E08;
-extern Mtx D_80089470;
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&D_800D35E8)[-1])

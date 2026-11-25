@@ -13,7 +13,6 @@ typedef struct {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture;
 
-extern Mtx D_80089470;
 Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 void func_150A7A48(MtxF a, MtxF b, MtxF out);

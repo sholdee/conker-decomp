@@ -23,7 +23,6 @@ extern u8 D_800DDDC0[];        // fixed alpha that overrides the timer when nonz
 /* Colour flash (func_1517F488) */
 extern FadeColor D_800DDD90[];
 extern u8 D_800DDD9C[];  // alpha
-extern u16 D_800DDE10[]; // frames left
 
 /* Pulsing full-screen tint (func_1517F720), view 0 only */
 extern u8 D_800DDD88;  // pulse speed (angle step per frame)

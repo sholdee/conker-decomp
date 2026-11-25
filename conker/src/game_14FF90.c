@@ -28,7 +28,6 @@ extern f32 D_800C3614;
 extern f32 D_800C3618;
 extern f32 D_800C361C;
 extern f32 D_800C3624;
-extern s8 D_800C365C;
 extern f32 D_800A34B0[4][2];
 extern f32 D_800A3550;
 extern f32 D_800A3554;
@@ -1210,7 +1209,7 @@ void func_15125A6C(Camera *camera) {
         D_800C3624 = -180.0f;
         D_800C3600.unk8 = 0.0f;
         D_800C3600.unk28 = yaw - 180.0f;
-        D_800C365C = 0;
+        D_800C365C[0] = 0;
         func_1512D560(camera, 7, (s32)&D_800C3600);
         return;
     }

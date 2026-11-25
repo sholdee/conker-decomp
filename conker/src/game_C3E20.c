@@ -122,7 +122,6 @@ void func_15096D08(void) {
 }
 
 extern s32 D_800DC310[][0x1A];
-extern s8 D_800C365C;
 s32 func_15084000(s32);
 void func_151254F4(Camera *actor, s32 arg1);
 void func_1512A390(Camera *actor);
@@ -202,7 +201,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         D_800C3600.unk24 = pose->unkC;
         D_800C3600.unk28 = pose->unk10;
         D_800C3600.unk8 = 0.0f;
-        D_800C365C = 0;
+        D_800C365C[0] = 0;
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &D_800C3600);
         D_800CC2D0[0].unk25C |= 0x200;

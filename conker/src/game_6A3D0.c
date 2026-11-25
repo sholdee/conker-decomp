@@ -43,7 +43,6 @@ typedef struct GfxBytes {
 extern Gfx **D_800C4488[];
 extern ObjTexture *D_800C5338[];
 extern void *D_800C5048[];
-extern s16 D_800C5918[];      // triangle weight, see func_1503D984
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern void func_10004074(void *ptr); // frees an allocate_memory() buffer

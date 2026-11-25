@@ -400,11 +400,6 @@ typedef struct {
 extern s8 D_800E0BF4;
 extern u8 **D_800C35E0[];
 extern s32 D_80090214[];
-extern u8 D_800C3656[];
-extern u8 D_800C365C[];
-extern u8 D_800C365E[];
-extern u8 D_800C3660[];
-extern s16 D_800DDE10;
 extern f32 D_800C3678;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
@@ -1020,7 +1015,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 v = event->unk6 != 0 ? event->unk6 : 0x7F;
                 func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
             } else {
-                D_800DDE10 = 0;
+                D_800DDE10[0] = 0;
             }
         } else if (event->value == 0x38) {
             s32 duration;

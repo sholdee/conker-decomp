@@ -1828,7 +1828,6 @@ void func_151EDB58(HudModel *model) {
     }
 }
 
-extern Mtx D_80089470;
 extern Gfx D_80090110;
 extern Gfx D_80090128;
 extern u8 D_507;

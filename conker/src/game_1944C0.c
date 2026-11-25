@@ -201,7 +201,6 @@ void func_15167310(void) {
     }
 }
 
-extern Mtx D_80089470;
 extern s16 D_800DD1F8;
 void func_15168F84(s32 group, s32 *first, s32 *last);
 

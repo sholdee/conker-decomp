@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DF7D0;
 extern u8 D_800DF7D1;
 extern u8 D_800DF7D2;
 extern u8 D_800DF7D3[];
@@ -137,7 +136,7 @@ void func_15012ED8(u32 *arg0) {
 void func_15012F90(void) {
     s32 i;
 
-    D_800DF7D0 = 0;
+    D_800DF7D0[0] = 0;
     D_800DF7D1 = 0;
     for (D_800DF7D2 = 0, i = 0;;) {
         i += 4;

@@ -324,7 +324,6 @@ void func_15113218(void) {
 Gfx *func_151733D8(Gfx *gfx, s32);
 Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
-extern Mtx D_80089470;
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
 Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {

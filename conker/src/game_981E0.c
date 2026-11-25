@@ -228,7 +228,6 @@ typedef struct TimedEvent {
 typedef void EventHandler(void);
 extern EventHandler *D_800863FC[];
 extern u8 D_80099A30[];
-extern u8 D_800C365E;
 
 /*
  * Runs every event of the object's event list whose time is <= `time`. Each event stores its
@@ -254,7 +253,7 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
             D_800D1580 = obj->events[obj->unk138].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
             token = obj->unk2D0->animId;
-            if (D_800C35EA[0] == 0 || D_800C365E != 0) {
+            if (D_800C35EA[0] == 0 || D_800C365E[0] != 0) {
                 id = obj->events[obj->unk138].id;
                 if (filtered) {
                     s32 i;

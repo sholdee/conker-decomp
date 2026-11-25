@@ -125,7 +125,6 @@ typedef struct {
     u8 pad8[8];
 } NodeInfo;
 extern NodeInfo *D_800D2350;
-extern u8 D_800E0BB8[];
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.

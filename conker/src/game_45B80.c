@@ -31,7 +31,6 @@ Gfx *func_151D6778(Gfx *gfx);
 Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
 Gfx *func_15035FE8(Gfx *gfx, s32 player);
 Gfx *func_15043384(Gfx *gfx);
-extern Mtx D_80089470;
 s32 func_1501878C(void);
 void func_15019F20(void);
 
@@ -468,7 +467,6 @@ void func_15019414(void) {
     }
 }
 
-extern Mtx D_80089470;
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 
 /* Sets up player's viewport and draws the first pass of their scene. */

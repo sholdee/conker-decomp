@@ -41,7 +41,6 @@ typedef struct EffectObj {
     /* 0x9C */ u8 pad9C[4];
 } EffectObj; /* size 0xA0 */
 
-extern f32 D_800A5760;
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
@@ -259,5 +258,5 @@ void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2) {
 }
 
 void func_15147D64(s32 arg0, u8 arg1) {
-    func_15169260(&D_800A5760, 2, arg0, arg1);
+    func_15169260(D_800A5760, 2, arg0, arg1);
 }

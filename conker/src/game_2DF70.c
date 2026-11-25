@@ -896,7 +896,6 @@ s32 func_15002878(void) {
     return highest;
 }
 
-extern u16 D_800C5918[];
 extern s8 **D_800C4488[];
 
 // matching: these stay macros; naming them as locals changes the frame and register allocation

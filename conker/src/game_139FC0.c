@@ -4,7 +4,6 @@
 
 extern u8 D_1A37E0[];
 
-extern u16 D_800D9E70[4][3];
 
 extern f32 func_150489B0(u8);
 

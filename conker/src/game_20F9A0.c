@@ -64,7 +64,6 @@ extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 s32 func_1517EFDC(void);
-extern s8 D_8008FE28;
 extern void (*D_800E0A88)(void);
 extern void (*D_8008FDEC[])(void);
 void func_1501C730(s32, s32, s32, s32, s32);
@@ -93,7 +92,6 @@ void func_151DDBA0(void);
 
 void func_151DE7D4(void);
 
-extern u8 D_8008FD74;
 
 extern struct Struct151E5034 *D_8008FDD4;
 
@@ -206,7 +204,6 @@ extern s8 D_800E0AB0[];
 extern u8 D_800E0AA8;
 extern s8 D_800E0AA9;
 extern s8 D_800E0AAA;
-extern s8 D_800E0BB8[];
 
 /* Sets up a match from the current mode's table entry: roster, teams, rules flags and per-player kinds. */
 void func_151E2834(void) {
@@ -2384,7 +2381,6 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
     }
 }
 
-extern s8 D_8008FD84[];
 /* Clears the spawned character slots. */
 void func_151E81EC(void) {
     s32 i;

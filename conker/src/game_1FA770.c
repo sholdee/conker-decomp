@@ -631,7 +631,6 @@ void func_151CE51C(void *actor, StreamSource *source) {
     }
 }
 
-extern s32 D_800A5760[];
 extern Emitter *D_800DCE50[][0x68];
 
 /* Finds the stream emitter whose data has the given id, or NULL. */

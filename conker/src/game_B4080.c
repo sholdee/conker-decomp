@@ -1744,7 +1744,6 @@ s32 func_1508A1BC(void) {
     return 0;
 }
 
-extern u8 D_800E0BB8[];
 extern s8 D_800872D0[];
 extern s16 D_800872C4[];
 extern s8 D_800872E0[];

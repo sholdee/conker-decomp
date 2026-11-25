@@ -420,6 +420,7 @@ extern u8  D_80088BB0;
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
+extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
 extern s32 D_80089520;
 extern s32 D_80089524[]; // struct arrays?
@@ -465,9 +466,11 @@ extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FL
 extern Vec3f * D_8008FC8C[];
 extern u8 * D_8008FC94[];
 extern s8 D_8008FD70;
+extern u8 D_8008FD74;
 extern s32 D_8008FD78;
 extern s8 D_8008FD7C;
 extern u8 D_8008FD80;
+extern s8 D_8008FD84[];
 extern s8   D_8008FD8C;
 extern s8   D_8008FD90;
 extern s8   D_8008FD94;
@@ -485,7 +488,9 @@ extern s8 D_8008FDE4;
 extern f32 D_8008FDE8;
 extern f32 D_8008FE1C;
 extern f32 D_8008FE20;
+extern s8 D_8008FE28;
 extern s8 D_8008FE2C;
+extern s8 D_8008FE30;
 extern u8 D_8008FE34;
 extern f32 D_8008FE38;
 extern f32 D_8008FE3C;
@@ -749,6 +754,7 @@ extern f32 D_800A56BC; // 57.2957763671875
 extern f32 D_800A56C0;
 extern f32 D_800A56C4;
 extern f32 D_800A56C8;
+extern s32 D_800A5760[]; // event types passed to func_15169260
 extern s32 D_800A5770[];
 
 // in game_18D770.c
@@ -1007,8 +1013,12 @@ extern f32 D_800C3648; // added to both FOVs of every view
 extern f32 D_800C364C; // near-plane override when non-zero
 extern f32 D_800C3650; // far-plane override when non-zero
 extern u8 D_800C3654[];
+extern u8 D_800C3656[2];
 extern u8 D_800C3658[];
 extern u8 D_800C365A[];
+extern u8 D_800C365C[2];
+extern u8 D_800C365E[2];
+extern u8 D_800C3660[2];
 extern u8 D_800C3662;
 extern u8  D_800C3663;
 extern u8  D_800C3670;
@@ -1064,6 +1074,7 @@ extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
 extern u16 D_800C4ED0[]; // bone count per model id
 extern u16 D_800C5628[]; // textures count
 extern u16 D_800C57A0[]; // vertex count
+extern u16 D_800C5918[]; // triangle weight, see func_1503D984
 extern u16 D_800C5A90[187]; // per model: animation count
 extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
 extern u16 D_800C5EF8[];
@@ -1082,6 +1093,7 @@ extern u8  D_800C68A1;
 extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 extern u16 D_800CBDA0[];
 extern u8 D_800CBDD3;
+extern u8 D_800CBDD4;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
@@ -1374,6 +1386,7 @@ extern MtxF D_800D9C10[]; // per view: view matrix
 extern MtxF D_800D9D10[]; // per view: view matrix * projection
 extern u8 D_800D9E21; // light count byte func_1515D914 stored for player 0
 extern u8  D_800D9E64;
+extern u16 D_800D9E70[4][3];
 extern u8 D_800D9E88[4][3];
 extern u8 D_800D9E98[4][3];
 extern u8 D_800D9EA8[4][3];
@@ -1568,6 +1581,7 @@ extern f32  D_800DDDDC;
 extern f32  D_800DDDE0;
 extern f32  D_800DDDE4;
 extern u16  D_800DDE08; // frames left
+extern u16 D_800DDE10[]; // frames left
 extern f32  *D_800DDE18;  // letterbox amount in percent, or NULL when off
 extern u8   D_800DDE1C[]; // per view: iris style
 extern u8   D_800DDE1D;
@@ -1605,6 +1619,7 @@ extern s8   D_800DDF68[];
 extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display list
 
 /* 800E0000 */
+extern u8 D_800DF7D0[]; // per-model load reference counts
 extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
 extern struct TrailTask *D_800E0920; // type in 1CA420
 extern u8 D_800E0A00;
@@ -1631,6 +1646,7 @@ extern s16 D_800E0B9A;
 extern Actor * D_800E0BA0[];
 extern s8 D_800E0BB0;
 extern s8 D_800E0BB1;
+extern u8 D_800E0BB8[];
 extern s8 D_800E0BC8[];
 extern u16 D_800E0BCC;
 extern s8 D_800E0BCE[];

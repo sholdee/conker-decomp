@@ -373,7 +373,6 @@ void func_15157DEC(Effect *fx, f32 *xform) {
     fx->mtx[D_800BE9C0][2][2] *= xform[3];
 }
 
-extern Mtx D_80089470;
 
 /* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
 Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {

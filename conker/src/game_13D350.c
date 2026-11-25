@@ -654,7 +654,6 @@ extern struct Game13D350S16x2 D_800891F4;
 extern struct Game13D350U8x2 D_800891F8;
 extern struct Game13D350U8x2 D_800891FC;
 extern SkyFace D_800A2DA0[];
-extern Mtx D_80089470;
 
 
 Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);

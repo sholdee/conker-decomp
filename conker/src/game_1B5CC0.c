@@ -204,7 +204,6 @@ void func_15188B74(s32 listIndex) {
     }
 }
 
-extern Mtx D_80089470;
 extern Gfx *(*D_8008D590[])(Gfx *, BoneTrail *, s16); /* per-type draw */
 
 /* Draws every trail in list `listIndex`. */

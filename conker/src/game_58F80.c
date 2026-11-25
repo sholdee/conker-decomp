@@ -53,8 +53,6 @@ typedef struct ObjTexture {
 
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
-extern u8 D_800C3656;
-extern u8 D_800C3660;
 extern Gfx **D_800C4488[];
 extern ObjTexture *D_800C5338[];
 extern D_800C666FEntry D_800C666F[];
@@ -336,7 +334,7 @@ void func_1502C1A4(void) {
             visible = FALSE;
             if (obj->unk5 != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
                 obj->unk160 != 0 && obj->unk65 == 0 &&
-                (D_800C3638 == 0 || D_800C3656 != 0 || func_150229E4(obj) != 0) &&
+                (D_800C3638 == 0 || D_800C3656[0] != 0 || func_150229E4(obj) != 0) &&
                 (obj->unk88 == 0 || obj->unkCC >= -150)) {
                 for (i = 0; i <= D_80082FA0; i++) {
                     if (func_1506196C(obj, i) != 0) {
@@ -542,7 +540,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     Actor *obj;
 
     start = gdl;
-    if (D_800C3638 != 0 && D_800C3656 == 0 && func_150229E4(&D_800CC2D0[index]) == 0) {
+    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(&D_800CC2D0[index]) == 0) {
         return gdl;
     }
     obj = &D_800CC2D0[index];
@@ -1196,7 +1194,7 @@ void func_1502E4C4(s32 index) {
     }
     oldMask = obj->unk74;
     obj->unk74 |= 0xF;
-    if (D_800C3638 != 0 && D_800C3656 == 0 && func_150229E4(obj) == 0) {
+    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
     if (obj->unk127 != 0xFF && !((u16)D_800D2340 & (1 << obj->unk127))) {
@@ -1217,7 +1215,7 @@ void func_1502E4C4(s32 index) {
     yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->y_scale;
     obj->unk270 = width;
     range = obj->unk10;
-    if (D_800C35EA[0] == 1 && D_800C3660 == 0) {
+    if (D_800C35EA[0] == 1 && D_800C3660[0] == 0) {
         range = 0;
     }
     maxDist = 0;

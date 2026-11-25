@@ -73,8 +73,6 @@ s32 func_1509D08C(s32, s32, s32 *, s32 *);
 void func_151DD9E4(void);
 
 
-extern s8 D_8008FE30;
-extern s8 D_8008FD74;
 
 extern struct Struct151E5034 *D_8008FDD4;
 
@@ -83,7 +81,6 @@ extern struct Struct151E5034 *D_8008FDD4;
 extern s8 D_8008FDDC;
 
 extern s32 D_8008FE24;
-extern s8 D_8008FD84;
 extern u8 D_8008FF08[];
 void func_151EDF4C(void);
 void func_15007778(void);
@@ -209,7 +206,7 @@ void func_151DE8F0(void) {
     if (D_800C35EA[0] == 1) {
         D_8008FE24 = 0;
         if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
-            D_8008FD84 = 1;
+            D_8008FD84[0] = 1;
         }
         return;
     }

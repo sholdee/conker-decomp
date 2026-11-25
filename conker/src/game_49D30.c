@@ -59,7 +59,6 @@ typedef struct {
 extern u16 *D_800C35C8[];
 extern SeqTrackInfo *D_800C35F0[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
-extern s8 D_8008FD84[];
 extern s32 D_800C35B0[];
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
@@ -313,10 +312,6 @@ s32 func_1501CFF8(s32 scene) {
     return sum;
 }
 
-extern u8 D_800C3656[];
-extern u8 D_800C365C[];
-extern u8 D_800C365E[];
-extern u8 D_800C3660[];
 extern f32 D_800C35A4;
 extern f32 D_800C3678;
 void func_150233BC(void);

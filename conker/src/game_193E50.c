@@ -142,7 +142,6 @@ Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     return func_15094F70(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
 }
 
-extern Mtx D_80089470;
 
 /* Loads D_80089470 as the modelview matrix. */
 Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2) {

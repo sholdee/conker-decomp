@@ -65,7 +65,6 @@ extern u16 D_8009917C[];
 extern f32 D_800CBD90;
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
-extern s8 D_800CBDD4;
 extern f32 D_800CBDFC;
 extern f32 D_800CC270;
 extern f32 D_800CC274;

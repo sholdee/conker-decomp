@@ -41,12 +41,9 @@ extern OSIoMesg D_800388E0;
 extern struct Struct151E5034 *D_8008FDD4;
 extern void (*D_800E0A88)(void);
 
-extern s8 D_8008FD74;
 extern s8 D_8008FD98;
 extern u8 D_8008FDB8;
 extern u8 D_8008FDCD;
-extern u8 D_8008FE28;
-extern s8 D_8008FE30;
 extern s8 D_8008FEEC;
 extern s8 D_800E0A85;
 extern u8 D_800E0A98;

@@ -365,7 +365,6 @@ s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
     return 1;
 }
 
-extern Mtx D_80089470;
 
 /* Loads the fixed matrix D_80089470 as the modelview matrix (arg1 and arg2 are unused). */
 Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2) {

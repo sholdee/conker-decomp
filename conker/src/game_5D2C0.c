@@ -22,7 +22,6 @@ typedef struct ModelHeader {
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
 } ModelHeader;
 
-extern u8 D_800DF7D0[];            // per-model load reference counts
 extern ModelHeader *D_800E0148[];  // per-model loaded headers
 ModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
