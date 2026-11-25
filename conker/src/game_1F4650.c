@@ -10,7 +10,6 @@ u32 func_150ADA20(void);
 
 extern f32 D_800AAED4;
 extern f32 D_800AAED8;
-extern f32 D_800AAEA8;
 extern f32 D_800AAEAC;
 extern f32 D_800AAEB0;
 extern f32 D_800AAEB4;
@@ -1308,7 +1307,7 @@ void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151CC524(void *, u8, u8, u8, u8, u8);
 void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCD1C(void *arg0, u8 arg1, u8 arg2, u8 arg3);
-void func_151CB5FC(void *, u8, u8, s8, u8);
+void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
 void func_151C9BA0(struct108 *player, s32 state) {
@@ -1371,7 +1370,7 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
 void func_151CC524(void *, u8, u8, u8, u8, u8);
 void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCF08(void *, u8, s8, u8);
-void func_151CB5FC(void *, u8, u8, s8, u8);
+void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
 
 /* Effects for state 27 when D_800BE9F0 is 0x27 (see func_151C9BA0). */
 void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
@@ -1452,7 +1451,10 @@ typedef struct {
     /* 0x08 */ f32 unk8;
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 kind;
-    /* 0x0E */ u8 padE[0xA];
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 padF;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
@@ -1467,7 +1469,9 @@ typedef struct {
 } SightSpritePayload;
 
 typedef struct {
-    u8 pad0[0x70];
+    u8 pad0[0x2E];
+    u8 alpha;
+    u8 pad2F[0x41];
     SightSpritePayload payload;
 } SightSprite;
 
@@ -1945,170 +1949,121 @@ void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
     }
 }
 
-void func_151CB49C(struct102 *arg0, void **arg1, u8 arg2) {
-    void *temp_v0;
-    s32 temp_a2;
+/* Message handler of the lens: removed like the sight sprites (see func_151CAACC). */
+void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
+    SightActor *actor;
 
-    temp_a2 = arg2;
-    if (temp_a2 == 0x21) {
-        if (*(s32 *)((s32)arg0 + 0x18) == *(s32 *)arg1) {
-            func_1516972C(arg0);
+    if (msgId == 0x21) {
+        if (obj->lens.player == *(struct108 **)msg) {
+            func_1516972C((struct102 *)obj);
         }
-    } else if (temp_a2 == 0) {
-        temp_v0 = *arg1;
-        if (*(s32 *)((s32)arg0 + 0x18) == *(s32 *)((s32)temp_v0 + 0x318)) {
-            func_1516972C(arg0);
+    } else if (msgId == 0) {
+        actor = *msg;
+        if (actor->player == obj->lens.player) {
+            func_1516972C((struct102 *)obj);
         }
     }
 }
 
-void func_151CB510(void *arg0) {
-    void *temp_v0;
-    s32 base;
+/* The part of struct127 read through struct108.unk3D4 here (struct127 does not declare it). */
+typedef struct {
+    u8 pad0[0x19E];
+    u16 unk19E;
+} SightPlayerState;
+
+/* Fades the sprite towards payload.unk8 while the player's 0x2000 input flag is held
+ * (and unk3D4->unk19E is clear), and towards 0 otherwise. */
+void func_151CB510(SightSprite *sprite) {
+    struct108 *player;
+    SightSpritePayload *payload;
     f32 target;
 
-    temp_v0 = *(void **)((s32)arg0 + 0x70);
-    if ((*(u16 *)*(s32 *)((s32)temp_v0 + 0x36C) & 0x2000) && (base = (s32)arg0 + 0x70, *(u16 *)(*(s32 *)((s32)temp_v0 + 0x3D4) + 0x19E) == 0)) {
-        target = *(f32 *)(base + 8);
+    player = sprite->payload.player;
+    payload = &sprite->payload;
+    if ((*player->unk36C & 0x2000) && ((SightPlayerState *)player->unk3D4)->unk19E == 0) {
+        target = payload->unk8;
     } else {
         target = 0.0f;
-        base = (s32)arg0 + 0x70;
     }
-    *(f32 *)(base + 4) += (target - *(f32 *)(base + 4)) * D_800AAEA8;
-    *(u8 *)((s32)arg0 + 0x2E) = (u32)*(f32 *)(base + 4);
+    payload->unk4 += (target - payload->unk4) * 0.400000006f;
+    sprite->alpha = payload->unk4;
 }
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-} Emitter151CB5FC;
-
-typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 padF;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x30];
-    /* 0x54 */ s8 unk54;
-    /* 0x55 */ u8 pad55[3];
-} Payload151CB5FC;
 
 extern f32 D_800AAD84[];
 extern f32 D_800AADAC[];
 
-void func_151CB5FC(void *arg0, u8 arg1, u8 arg2, s8 arg3, u8 arg4) {
-    Emitter151CB5FC sp90;
-    void *temp;
-    Payload151CB5FC sp34;
+/* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
+void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
+    SightSpriteDesc desc;
+    SightSprite *sprite;
+    SightSpritePayload payload;
 
-    sp34.unk4 = 255.0f;
-    sp34.unk8 = 255.0f;
-    sp34.unkD = arg1;
-    sp34.unk0 = arg0;
-    sp34.unkC = (s32)((arg3 == -1) ? 0 : 4);
-    sp34.unk54 = arg3;
-    sp34.unk14 = 255.0f;
-    sp90.unk12 = 0x12C;
-    sp90.unk8 = 49.0f;
-    sp34.unk10 = 0.0f;
-    sp90.unkC = 18.0f;
-    sp90.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | ((arg2 ? 0x40 : 0) | 0x32);
-    sp90.unk16 = 1;
-    sp90.unk18 = 0xFF;
-    sp90.unk1A = 7;
-    sp90.unk1B = 0xFF;
-    sp90.unk1C = 0xFF;
-    sp90.unk1D = 0xFF;
-    sp90.unk1F = 0xFF;
-    sp90.unk20 = 0xFF;
-    sp90.unk21 = 0xFF;
-    sp90.unk22 = 0xFF;
-    sp90.unk23 = 0xFF;
-    sp90.unk24 = 0;
-    sp90.unk28 = 0x200004;
-    sp90.unk2C = 0x1F0601;
-    sp90.unk30 = 7;
-    sp90.unk34 = 0x22;
-    sp90.unk38 = 0x80;
-    sp90.unk3C = 0x20;
-    sp90.unk40 = 0;
-    sp90.unk41 = 7;
-    sp90.unk44 = *(u8 *)((s32)arg0 + 0x23D);
-    sp34.unkE = 0;
-    sp90.unk1E = 0xFF;
-    sp90.unk10 = 0x7B;
-    sp34.unk1C = 0.0f;
-    sp90.unk0 = 88.0f;
-    sp90.unk4 = 91.0f;
-    sp34.unk18 = D_800AAD84[D_80082FA0 == 1];
-    sp34.unk20 = D_800AADAC[D_80082FA0 == 1];
-    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
-    if (temp != NULL) {
-        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    payload.unk4 = 255.0f;
+    payload.unk8 = 255.0f;
+    payload.kind = kind;
+    payload.player = player;
+    payload.unkC = (s32)((arg3 == -1) ? 0 : 4); // matching: see func_151C9F38
+    payload.unk54 = arg3;
+    payload.unk14 = 255.0f;
+    desc.lifetime = 300;
+    desc.width = 49.0f;
+    payload.unk10 = 0.0f;
+    desc.height = 18.0f;
+    desc.flags = (1 << (player->unk23D + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
+    desc.unk16 = 1;
+    desc.unk18 = 0xFF;
+    desc.unk1A = 7;
+    desc.red = 0xFF;
+    desc.green = 0xFF;
+    desc.blue = 0xFF;
+    desc.unk1F = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk21 = 0xFF;
+    desc.unk22 = 0xFF;
+    desc.unk23 = 0xFF;
+    desc.unk24 = 0;
+    desc.unk28 = 0x200004;
+    desc.unk2C = 0x1F0601;
+    desc.unk30 = 7;
+    desc.unk34 = 0x22;
+    desc.unk38 = 0x80;
+    desc.unk3C = 0x20;
+    desc.unk40 = 0;
+    desc.unk41 = 7;
+    desc.playerNum = player->unk23D;
+    payload.unkE = 0;
+    desc.alpha = 0xFF;
+    desc.texture = 0x7B;
+    payload.unk1C = 0.0f;
+    desc.x = 88.0f;
+    desc.y = 91.0f;
+    payload.unk18 = D_800AAD84[D_80082FA0 == 1];
+    payload.unk20 = D_800AADAC[D_80082FA0 == 1];
+    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    sp90.unk1E = 0;
-    sp90.unk10 = 0x7C;
-    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
-    if (temp != NULL) {
-        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    desc.alpha = 0;
+    desc.texture = 0x7C;
+    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    sp90.unk14 &= 0xFFFD;
-    sp90.unk1E = 0xFF;
-    sp90.unk10 = 0x7B;
-    sp34.unkE = 1;
-    sp90.unk0 = -88.0f;
-    sp90.unk4 = 91.0f;
-    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
-    if (temp != NULL) {
-        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    desc.flags &= ~2;
+    desc.alpha = 0xFF;
+    desc.texture = 0x7B;
+    payload.unkE = 1;
+    desc.x = -88.0f;
+    desc.y = 91.0f;
+    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    sp90.unk1E = 0;
-    sp90.unk10 = 0x7C;
-    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
-    if (temp != NULL) {
-        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    desc.alpha = 0;
+    desc.texture = 0x7C;
+    sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 }
 
