@@ -8,7 +8,6 @@ void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A482C;
 extern f32 D_800A4830;
 extern f32 D_800A4834;
 extern f32 D_800A4838;
@@ -600,7 +599,7 @@ typedef struct {
     s16 duration;
     s16 pause;
     s16 lifetime;
-    u8 pad2C[2];
+    u16 sound;
     s8 sampleCallback;
     s8 emitCallback;
     s8 rateCallback;
@@ -631,7 +630,7 @@ typedef struct {
     s16 duration;           /* frames of emission after each sample */
     s16 pause;              /* frames to wait (below 0) before the next sample */
     s16 lifetime;
-    u8 pad44[2];
+    u16 sound;              /* playing sound, stopped when the strip is freed */
     s8 sampleCallback;
     s8 emitCallback;
     s8 rateCallback;
@@ -788,51 +787,44 @@ void func_1513530C(struct102 *effect) {
     func_15169824(effect);
 }
 
-extern void (*D_80089B70[])(void *);
+extern void (*D_80089B70[])(BloodStrip *);
 
-typedef struct {
-    u8 pad0[0x44];
-    u16 unk44;
-    u8 pad46[0xA];
-    u8 unk50;
-} struct1513532C;
+/* Stops the strip's sound, then calls the D_80089B70 handler for its mode. */
+void func_1513532C(BloodStrip *arg0) {
+    BloodStrip *strip = arg0; // matching: the parameter copy keeps strip in a saved register
+    s32 mode;
 
-/* Releases unk44 (func_100111C8), then calls the D_80089B70 handler selected by unk50. */
-void func_1513532C(struct1513532C *arg0) {
-    struct1513532C *effect = arg0; // matching: the parameter copy keeps effect in a saved register
-    s32 index;
-
-    index = effect->unk50;
-    if (index < 0) {
-        index = 0;
-    } else if (index >= 6) {
-        index = 0;
+    mode = strip->mode;
+    if (mode < 0) {
+        mode = 0;
+    } else if (mode >= 6) {
+        mode = 0;
     }
-    if (effect->unk44 != 0) {
-        func_100111C8(effect->unk44);
-        effect->unk44 = 0;
+    if (strip->sound != 0) {
+        func_100111C8(strip->sound);
+        strip->sound = 0;
     }
-    D_80089B70[index](effect);
+    D_80089B70[mode](strip);
 }
 
-extern void (*D_80089B88[])(void *);
+extern void (*D_80089B88[])(BloodStrip *);
 
-/* Releases unk44 (func_100111C8), then calls the D_80089B88 handler selected by unk50. */
-void func_151353A8(struct1513532C *arg0) {
-    struct1513532C *effect = arg0; // matching: the parameter copy keeps effect in a saved register
-    s32 index;
+/* Stops the strip's sound, then calls the D_80089B88 handler for its mode. */
+void func_151353A8(BloodStrip *arg0) {
+    BloodStrip *strip = arg0; // matching: the parameter copy keeps strip in a saved register
+    s32 mode;
 
-    index = effect->unk50;
-    if (index < 0) {
-        index = 0;
-    } else if (index >= 6) {
-        index = 0;
+    mode = strip->mode;
+    if (mode < 0) {
+        mode = 0;
+    } else if (mode >= 6) {
+        mode = 0;
     }
-    if (effect->unk44 != 0) {
-        func_100111C8(effect->unk44);
-        effect->unk44 = 0;
+    if (strip->sound != 0) {
+        func_100111C8(strip->sound);
+        strip->sound = 0;
     }
-    D_80089B88[index](effect);
+    D_80089B88[mode](strip);
 }
 
 extern s32 func_15145EA4(Vec3f **in, Vec3f **out, void *matrix, s32 count);
@@ -1912,139 +1904,113 @@ s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3
     return 1;
 }
 
-extern f32 D_800A4828;
+/* BloodStrip sample callback 5: random power. */
+s32 func_15137E10(BloodStrip *strip) {
+    f32 random = func_150ADA68();
 
-s32 func_15137E10(s32 *arg0) {
-    f32 temp = func_150ADA68();
-    *(f32 *)((u8 *)arg0 + 0x74) = (temp * 50.0f + 580.0f) * D_800A4828;
+    strip->power = (random * 50.0f + 580.0f) * 0.001000000047f;
     return 1;
 }
 
-typedef struct { f32 x, y, z; } Vec15137;
-typedef struct { u8 pad0[0x74]; f32 unk74; } Struct15137F30Scale;
+void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB,
+                   f32 time, BloodStrip *strip, Vec3f *start, Vec3f *end,
+                   Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
 
-extern void func_15137F30(Vec15137 *a0, Vec15137 *a1, Vec15137 *a2, Vec15137 *a3,
-                          f32 sp10, Struct15137F30Scale *sp14, Vec15137 *out6C,
-                          Vec15137 *out60, Vec15137 *out54, f32 *out50,
-                          s16 *out4E, u8 *out4D, f32 *out48);
-void func_15137E60(Vec15137 *arg0, Vec15137 *arg1, Vec15137 *arg2,
-                   Vec15137 *arg3, f32 arg88, s32 *arg8C) {
-    Vec15137 sp6C;
-    Vec15137 sp60;
-    Vec15137 sp54;
-    f32 sp50;
-    s16 sp4E;
-    u8 sp4D;
-    f32 sp48;
+/* BloodStrip emit callback 5: one func_151D9014 blood particle. */
+void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA,
+                   Vec3f *velocityB, f32 time, BloodStrip *strip) {
+    Vec3f start;
+    Vec3f end;
+    Vec3f velocity;
+    f32 arg3;
+    s16 arg4;
+    u8 arg5;
+    f32 arg6;
 
-    func_15137F30(arg0, arg1, arg2, arg3, arg88, (Struct15137F30Scale *)arg8C,
-                  &sp6C, &sp60, &sp54, &sp50, &sp4E, &sp4D, &sp48);
-    func_151D9014(&sp6C, &sp54, 0, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f,
-                  1, 0, 1, 0, *((u8 *)arg8C + 0xC), *((u8 *)arg8C + 1));
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip,
+                  &start, &end, &velocity, &arg3, &arg4, &arg5, &arg6);
+    func_151D9014(&start, &velocity, 0, arg3, arg4, arg5, arg6, 0, 1.0f, 1.0f,
+                  1, 0, 1, 0, ((u8 *)strip)[0xC], ((u8 *)strip)[1]);
 }
 
-void func_15137F30(Vec15137 *a0, Vec15137 *a1, Vec15137 *a2, Vec15137 *a3,
-                   f32 sp10, Struct15137F30Scale *sp14, Vec15137 *out6C, Vec15137 *out60,
-                   Vec15137 *out54, f32 *out50, s16 *out4E, u8 *out4D,
-                   f32 *out48) {
-    out6C->x = a0->x + a2->x * sp10;
-    out6C->y = a0->y + a2->y * sp10;
-    out6C->z = a0->z + a2->z * sp10;
-    out60->x = a1->x + a3->x * sp10;
-    out60->y = a1->y + a3->y * sp10;
-    out60->z = a1->z + a3->z * sp10;
-    out54->x = (out60->x - out6C->x) * sp14->unk74;
-    out54->y = (out60->y - out6C->y) * sp14->unk74;
-    out54->z = (out60->z - out6C->z) * sp14->unk74;
-    *out50 = (func_150ADA68() * 217.0f + -456.0f) * D_800A482C;
-    *out4E = func_150ADA20() % 31U + 30;
-    *out4D = func_150ADA20() % 156U + 100;
-    *out48 = func_150ADA68() * 35.0f + 40.0f;
+/*
+ * Moves both strip points `time` along their velocities and returns the particle parameters for
+ * func_151D9014: start at A, velocity from A to B scaled by the strip's power, random extras.
+ */
+void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB,
+                   f32 time, BloodStrip *strip, Vec3f *start, Vec3f *end,
+                   Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6) {
+    start->x = pointA->x + velocityA->x * time;
+    start->y = pointA->y + velocityA->y * time;
+    start->z = pointA->z + velocityA->z * time;
+    end->x = pointB->x + velocityB->x * time;
+    end->y = pointB->y + velocityB->y * time;
+    end->z = pointB->z + velocityB->z * time;
+    velocity->x = (end->x - start->x) * strip->power;
+    velocity->y = (end->y - start->y) * strip->power;
+    velocity->z = (end->z - start->z) * strip->power;
+    *arg3 = (func_150ADA68() * 217.0f + -456.0f) * 0.001000000047f;
+    *arg4 = func_150ADA20() % 31U + 30;
+    *arg5 = func_150ADA20() % 156U + 100;
+    *arg6 = func_150ADA68() * 35.0f + 40.0f;
 }
 
-void func_15143134(void *, s32, s32);
+/* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
+s32 func_151380B4(struct127 *actor, s32 kind, f32 *out) {
+    s32 bones = (s32)actor->unk1D4;
 
-s32 func_151380B4(s32 *arg0, s32 arg1, f32 *arg2) {
-    s32 temp_v0 = *(s32 *)((u8 *)arg0 + 0x1D4);
-    if (temp_v0 == 0) {
+    if (bones == 0) {
         return 0;
     }
-    if ((*(u8 *)((u8 *)arg0 + 0x74) & 0xF) == 0xF) {
+    if ((actor->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[arg1].offset, (s32)arg2, temp_v0 + 0x300);
+    func_15143134(&D_800A3FD8[kind].offset, (s32)out, bones + 12 * 0x40);
     return 1;
 }
 
-typedef struct {
-    u8 unk00;
-    u8 pad01[3];
-    struct127 *unk04;
-    u8 unk08;
-    u8 pad09[3];
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    u8 pad25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    u8 unk2E;
-    u8 unk2F;
-    s8 unk30;
-    u8 pad31[3];
-    f32 unk34;
-    u8 unk38;
-    s8 unk39;
-    u8 pad3A[2];
-} Local15138120;
+/* Starts a bleeding BloodStrip on the actor's bone 12 (or 1) playing sound 0x4FE. */
+void func_15138120(struct127 *actor, s32 kind, u8 arg2) {
+    BloodStripDesc desc;
 
-void func_15138120(struct127 *arg0, s32 arg1, u8 arg2) {
-    Local15138120 tmp;
-
-    if (D_800A3FD8[arg1].unkE != 2) {
-        tmp.unk00 = arg0->unique_id;
-        tmp.unk04 = arg0;
+    if (D_800A3FD8[kind].unkE != 2) {
+        desc.ownerId = actor->unique_id;
+        desc.owner = actor;
         if (arg2) {
-            tmp.unk08 = 0xC;
+            desc.bone = 12;
         } else {
-            tmp.unk08 = 1;
+            desc.bone = 1;
         }
-        tmp.unk24 = 2;
-        tmp.unk26 = 0x28;
-        tmp.unk28 = 0x10;
-        tmp.unk0C = 0.0f;
-        tmp.unk10 = 0.0f;
-        tmp.unk14 = 0.0f;
-        tmp.unk18 = 0.0f;
-        tmp.unk20 = 0.0f;
-        tmp.unk1C = 20.0f;
-        if ((&D_800A4058 == &D_800A3FD8[arg1]) || (&D_800A4068 == &D_800A3FD8[arg1])) {
-            tmp.unk2A = (arg0->unk94 & 0xE) ? 0x78 : 0xF0;
+        desc.flags = BLOOD_STRIP_LIFETIME;
+        desc.duration = 40;
+        desc.pause = 16;
+        desc.offsetA.x = 0.0f;
+        desc.offsetA.y = 0.0f;
+        desc.offsetA.z = 0.0f;
+        desc.offsetB.x = 0.0f;
+        desc.offsetB.z = 0.0f;
+        desc.offsetB.y = 20.0f;
+        if ((&D_800A4058 == &D_800A3FD8[kind]) || (&D_800A4068 == &D_800A3FD8[kind])) {
+            desc.lifetime = (actor->unk94 & 0xE) ? 120 : 240;
         } else {
-            tmp.unk2A = 0x258;
+            desc.lifetime = 600;
         }
-        tmp.unk2E = 5;
-        if (D_800A3FD8[arg1].unkE == 0) {
-            tmp.unk2F = 5;
+        desc.sampleCallback = 5;
+        if (D_800A3FD8[kind].unkE == 0) {
+            desc.emitCallback = 5;
         } else {
-            tmp.unk2F = 6;
+            desc.emitCallback = 6;
         }
-        tmp.unk30 = -1;
-        tmp.unk38 = 0;
-        tmp.unk39 = -1;
-        tmp.unk34 = 1.0f;
-        tmp.unk2C = func_1000FA64(0x4FE, (s16)(s32)arg0->x_position,
-                                  (s16)(s32)arg0->y_position,
-                                  (s16)(s32)arg0->z_position, 0x5DC0,
-                                  0x258, 0x12C, (s32)func_1000EBC4,
-                                  (void *)0x78, 0, 0, 0);
-        func_15134DAC(&tmp, 0);
+        desc.rateCallback = -1;
+        desc.mode = 0;
+        desc.updateCallback = -1;
+        desc.rate = 1.0f;
+        desc.sound = func_1000FA64(0x4FE, (s16)(s32)actor->x_position,
+                                   (s16)(s32)actor->y_position,
+                                   (s16)(s32)actor->z_position, 0x5DC0,
+                                   600, 300, (s32)func_1000EBC4,
+                                   (void *)120, 0, 0, 0);
+        func_15134DAC(&desc, 0);
     }
 }
 
