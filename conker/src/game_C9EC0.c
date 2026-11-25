@@ -3,178 +3,145 @@
 #include "variables.h"
 
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-} GameC9EC0Struct;
+/* One 0x14-byte record per resource/task; D_80087430 holds RESOURCE_COUNT of them. */
+typedef struct ResourceDescriptor {
+    /* 0x00 */ const char *name;            // NULL for unused slots
+    /* 0x04 */ s32 packedId;                // low 29 bits: id - 1
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 unkA;                    // low 12 bits used
+    /* 0x0C */ u16 *dependencies;           // 0xFFFF-terminated resource indices
+    /* 0x10 */ u16 *relatedDependencies;    // 0xFFFF-terminated resource indices
+} ResourceDescriptor; // size = 0x14
 
-extern GameC9EC0Struct D_80087430[];
-extern GameC9EC0Struct D_80088420[];
-s32 func_1509CA10(s32 arg0) {
-    return D_80087430[arg0].unk0;
+#define RESOURCE_COUNT 204
+#define RESOURCE_LIST_END 0xFFFF
+#define RESOURCE_STATE_LOADED 3
+
+extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
+
+/* Per-resource "loaded" bitset and per-resource state bytes. */
+#define gResourceLoadedBits ((u8 *)D_800D2E4C)
+#define gResourceStates (*(u8 (*)[0xF0])&D_800D2E70)
+#define RESOURCE_IS_LOADED(idx) (gResourceLoadedBits[(idx) >> 3] & (1 << ((idx) & 7)))
+
+/* Returns the name of resource `index`, or NULL for an empty slot. */
+const char *func_1509CA10(s32 index) {
+    return D_80087430[index].name;
 }
 
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-} GameC9EC0StructB;
-
-extern GameC9EC0StructB D_80087438[];
-
-s32 func_1509CA30(s32 arg0) {
-    return D_80087438[arg0].unk0;
+u16 func_1509CA30(s32 index) {
+    return D_80087430[index].unk8;
 }
 
-extern GameC9EC0StructB D_8008743A[];
-
-s32 func_1509CA50(s32 arg0) {
-    return D_8008743A[arg0].unk0 & 0xFFF;
+s32 func_1509CA50(s32 index) {
+    return D_80087430[index].unkA & 0xFFF;
 }
 
-extern GameC9EC0Struct D_80087434[];
-
-s32 func_1509CA78(s32 arg0) {
-    return D_80087434[arg0].unk0;
+s32 func_1509CA78(s32 index) {
+    return D_80087430[index].packedId;
 }
 
-s32 func_1509CA98(s32 arg0) {
-    s32 i;
+/* Finds the resource whose id is `id`; returns RESOURCE_COUNT if none. */
+s32 func_1509CA98(s32 id) {
+    s32 i = 0;
 
-    i = 0;
-loop:
-    if (D_80087430[i].unk0 && arg0 == ((D_80087430[i].unk4 & 0x1FFFFFFF) + 1)) {
-        return i;
+    for (; i < RESOURCE_COUNT; i++) {
+        if (D_80087430[i].name != NULL && id == (D_80087430[i].packedId & 0x1FFFFFFF) + 1) {
+            return i;
+        }
     }
-    if (D_80087430[i + 1].unk0 && arg0 == ((D_80087430[i + 1].unk4 & 0x1FFFFFFF) + 1)) {
-        return i + 1;
-    }
-    if (D_80087430[i + 2].unk0 && arg0 == ((D_80087430[i + 2].unk4 & 0x1FFFFFFF) + 1)) {
-        return i + 2;
-    }
-    if (D_80087430[i + 3].unk0 && arg0 == ((D_80087430[i + 3].unk4 & 0x1FFFFFFF) + 1)) {
-        return i + 3;
-    }
-    i += 4;
-    if (i != 0xCC) {
-        goto loop;
-    }
-
-    return 0xCC;
+    return RESOURCE_COUNT;
 }
 
+/* Counts the descriptor slots that are in use. */
 s32 func_1509CB68(void) {
     s32 count;
     s32 i;
 
     count = 0;
-    i = 0;
-    do {
-        if (D_80087430[i].unk0 != 0) {
+    for (i = 0; i < RESOURCE_COUNT; i++) {
+        if (D_80087430[i].name != NULL) {
             count++;
         }
-        if (D_80087430[i + 1].unk0 != 0) {
-            count++;
-        }
-        if (D_80087430[i + 2].unk0 != 0) {
-            count++;
-        }
-        if (D_80087430[i + 3].unk0 != 0) {
-            count++;
-        }
-        i += 4;
-    } while (D_80088420 != &D_80087430[i]);
+    }
     return count;
 }
 
-extern GameC9EC0Struct D_8008743C[];
-
-s32 func_1509CBD4(s32 arg0) {
-    u16 *p;
-    s32 ret;
+/* Returns 1 if every dependency of `index` is loaded, recursively. */
+s32 func_1509CBD4(s32 index) {
+    u16 *deps;
+    s32 depsLoaded;
     s32 i;
 
-    p = (u16 *)D_8008743C[arg0].unk0;
-    for (i = 0; p[i] != 0xFFFF; i++) {
-        ret = func_1509CBD4(p[i]);
-        if (!(((u8 *)D_800D2E4C)[p[i] >> 3] & (1 << (p[i] & 7))) || ret == 0) {
+    deps = D_80087430[index].dependencies;
+    for (i = 0; deps[i] != RESOURCE_LIST_END; i++) {
+        depsLoaded = func_1509CBD4(deps[i]);
+        if (!RESOURCE_IS_LOADED(deps[i]) || depsLoaded == 0) {
             return 0;
         }
     }
     return 1;
 }
 
+void func_1509CCB4(s32 index);
+void func_1509CE64(u16 *list, void (*callback)(s32));
 
-extern void func_1509CE64(void *, void *);
-extern GameC9EC0Struct D_8008743C[];
-void func_1509CCB4();
-
-void func_1509CC94(void) {
-    func_1509CCB4();
+void func_1509CC94(s32 index) {
+    func_1509CCB4(index);
 }
 
-void func_1509CCB4(s32 arg0) {
-    func_1509CE64((void *)D_8008743C[arg0].unk0, func_1509CCB4);
+/* Marks every dependency of `index` loaded, depth first. */
+void func_1509CCB4(s32 index) {
+    func_1509CE64(D_80087430[index].dependencies, func_1509CCB4);
 }
 
-extern s32 D_800D2E70;
-extern struct102 *D_800D2E4C;
-extern GameC9EC0Struct D_80087440[];
-void func_1509CCB4();
-void func_1509CCB4(s32 arg0);
-s32 func_1509CCF4(s32 arg0)
-{
-  u16 *p;
-  s32 count;
-  count = 0;
-  p = (u16 *) D_80087440[arg0].unk0;
-  while ((*p) != 0xFFFF)
-  {
-    ((u8 *) D_800D2E4C)[(*p) >> 3] |= 1 << ((*p) & 7);
-    if ((((u8 *) (&D_800D2E70))[*p] != 3) != ((0, 0U)))
-    {
-      ((u8 *) (&D_800D2E70))[*p] = 3;
-      func_1509CCB4(*p);
-      count++;
+/*
+ * Marks each related dependency of `index` loaded; the ones not yet in the loaded state
+ * also get their own dependencies marked. Returns how many changed state.
+ */
+s32 func_1509CCF4(s32 index) {
+    u16 *p;
+    s32 count;
+
+    count = 0;
+    p = D_80087430[index].relatedDependencies;
+    while (*p != RESOURCE_LIST_END) {
+        gResourceLoadedBits[*p >> 3] |= 1 << (*p & 7);
+        if (gResourceStates[*p] != RESOURCE_STATE_LOADED) {
+            gResourceStates[*p] = RESOURCE_STATE_LOADED;
+            func_1509CCB4(*p);
+            count++;
+        }
+        p++;
     }
-    p++;
-  }
-
-  return count;
+    return count;
 }
 
-
-void func_1509CDDC(s32 arg0) {
+/* Marks `index` and, until nothing changes, everything reachable from loaded resources. */
+void func_1509CDDC(s32 index) {
     s32 i;
-    s32 total;
+    s32 changed;
 
-    func_1509CCF4(arg0);
+    func_1509CCF4(index);
     do {
-        total = 0;
-        for (i = 0; i != 0xCC; i++) {
-            if ((*(u8 (*)[0xF0])&D_800D2E70)[i] == 3) {
-                total += func_1509CCF4(i);
+        changed = 0;
+        for (i = 0; i < RESOURCE_COUNT; i++) {
+            if (gResourceStates[i] == RESOURCE_STATE_LOADED) {
+                changed += func_1509CCF4(i);
             }
         }
-    } while (total != 0);
+    } while (changed != 0);
 }
 
-void func_1509CE64(void *arg0, void *arg1) {
+/* Calls `callback` on each index in `list`, then marks that index loaded. */
+void func_1509CE64(u16 *list, void (*callback)(s32)) {
     u16 *p;
-    void (*cb)(s32);
 
-    p = (u16 *)arg0;
-    cb = (void (*)(s32))arg1;
-    while (*p != 0xFFFF) {
-        cb(*p);
-        ((u8 *)&D_800D2E70)[*p] = 3;
-        ((u8 *)D_800D2E4C)[*p >> 3] |= (1 << (*p & 7));
+    p = list;
+    while (*p != RESOURCE_LIST_END) {
+        callback(*p);
+        gResourceStates[*p] = RESOURCE_STATE_LOADED;
+        gResourceLoadedBits[*p >> 3] |= 1 << (*p & 7);
         p++;
     }
 }
