@@ -798,12 +798,37 @@ void func_151D4D58(struct127 *obj) {
 }
 
 
+/* The parts of an object's unk31C block used in this file (struct126 leaves them as padding). */
 typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-    u8 pad8[0x50];
-    u8 unk58;
-    u8 unk59;
+    /* 0x000 */ u8 pad0[0x24];
+    /* 0x024 */ s16 unk24;
+    /* 0x026 */ u8 pad26[0x84 - 0x26];
+    /* 0x084 */ u8 unk84;
+    /* 0x085 */ u8 pad85[0xB0 - 0x85];
+    /* 0x0B0 */ u8 unkB0[8];
+    /* 0x0B8 */ f32 unkB8;
+    /* 0x0BC */ f32 unkBC;
+    /* 0x0C0 */ f32 unkC0;
+    /* 0x0C4 */ u8 padC4[0x109 - 0xC4];
+    /* 0x109 */ u8 unk109;
+    /* 0x10A */ u8 pad10A[0x130 - 0x10A];
+    /* 0x130 */ struct17 unk130;
+    /* 0x13C */ struct17 unk13C;
+    /* 0x148 */ u8 pad148[0x198 - 0x148];
+    /* 0x198 */ u8 unk198;
+    /* 0x199 */ u8 pad199[0x1AA - 0x199];
+    /* 0x1AA */ s16 unk1AA;
+} ObjExt;
+
+#define EXT(obj) ((ObjExt *)(obj)->unk31C)
+
+/* Hit description passed to func_151D4DAC. */
+typedef struct {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ u8 pad8[0x50];
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 unk59;
 } S151D4DAC;
 
 void func_151C2050(struct127 *, f32 *, f32 *, s32, f32);
@@ -812,129 +837,110 @@ void func_15138C80(struct127 *, s32, s32);
 void func_15137610(struct127 *, f32 *, f32 *, f32 *, u8, s32);
 s32 func_1505D024(struct127 *, s32, u16, s32);
 
-void func_151D4DAC(struct127 *arg0, struct127 *arg1, f32 *arg2, f32 *arg3, S151D4DAC *arg4, s32 arg5, f32 *arg6, u8 arg7, s32 arg8) {
+/* Applies a hit from attacker to victim travelling along dir. */
+void func_151D4DAC(struct127 *victim, struct127 *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
     s32 alreadyDead;
     s32 health;
     s32 hp;
     u16 angle;
 
-    if ((arg0->id == 0x9) || (arg0->id == 0xF) || (arg0->id == 0x10) || (arg0->id == 0x12) ||
-        (arg0->id == 0x17) || (arg0->id == 0x1B) || (arg0->id == 0x1E) || (arg0->id == 0x28) ||
-        (arg0->id == 0x29) || (arg0->id == 0x2A) || (arg0->id == 0x2B) || (arg0->id == 0x2C) ||
-        (arg0->id == 0x2E) || (arg0->id == 0x38) || (arg0->id == 0x41) || (arg0->id == 0x42) ||
-        (arg0->id == 0x4B) || (arg0->id == 0x46) || (arg0->id == 0x47) || (arg0->id == 0x49) ||
-        (arg0->id == 0x4A) || (arg0->id == 0x4C) || (arg0->id == 0x4D) || (arg0->id == 0x4E) ||
-        (arg0->id == 0x4F) || (arg0->id == 0x52) || (arg0->id == 0x5D) || (arg0->id == 0x60) ||
-        (arg0->id == 0x61) || (arg0->id == 0x66) || (arg0->id == 0x67) || (arg0->id == 0x70) ||
-        (arg0->id == 0x73) || (arg0->id == 0x77) || (arg0->id == 0x7B) || (arg0->id == 0x89) ||
-        (arg0->id == 0x8C) || (arg0->id == 0x8E) || (arg0->id == 0x8F) || (arg0->id == 0x91) ||
-        (arg0->id == 0x9E) || (arg0->id == 0xA6) || (arg0->id == 0xAB) || (arg0->id == 0xAC) ||
-        (arg0->id == 0xB2) || (arg0->id == 0xB4) || (arg0->id == 0x5B)) {
-        func_151C2050(arg1, arg2, arg6, 9, (arg4 != NULL) ? arg4->unk4 : 0.0f);
+    if ((victim->id == 0x9) || (victim->id == 0xF) || (victim->id == 0x10) || (victim->id == 0x12) ||
+        (victim->id == 0x17) || (victim->id == 0x1B) || (victim->id == 0x1E) || (victim->id == 0x28) ||
+        (victim->id == 0x29) || (victim->id == 0x2A) || (victim->id == 0x2B) || (victim->id == 0x2C) ||
+        (victim->id == 0x2E) || (victim->id == 0x38) || (victim->id == 0x41) || (victim->id == 0x42) ||
+        (victim->id == 0x4B) || (victim->id == 0x46) || (victim->id == 0x47) || (victim->id == 0x49) ||
+        (victim->id == 0x4A) || (victim->id == 0x4C) || (victim->id == 0x4D) || (victim->id == 0x4E) ||
+        (victim->id == 0x4F) || (victim->id == 0x52) || (victim->id == 0x5D) || (victim->id == 0x60) ||
+        (victim->id == 0x61) || (victim->id == 0x66) || (victim->id == 0x67) || (victim->id == 0x70) ||
+        (victim->id == 0x73) || (victim->id == 0x77) || (victim->id == 0x7B) || (victim->id == 0x89) ||
+        (victim->id == 0x8C) || (victim->id == 0x8E) || (victim->id == 0x8F) || (victim->id == 0x91) ||
+        (victim->id == 0x9E) || (victim->id == 0xA6) || (victim->id == 0xAB) || (victim->id == 0xAC) ||
+        (victim->id == 0xB2) || (victim->id == 0xB4) || (victim->id == 0x5B)) {
+        func_151C2050(attacker, arg2, dir, 9, (hit != NULL) ? hit->unk4 : 0.0f);
     }
 
-    health = arg0->health;
+    health = victim->health;
     if (health == 0) {
         alreadyDead = 1;
     } else {
         alreadyDead = 0;
     }
 
-    arg5 |= 0x60000;
-    hp = arg0->health;
-    if ((arg4 != NULL) && (arg4->unk59 == 3) && (arg4->unk58 == 0xA)) {
+    flags |= 0x60000;
+    hp = victim->health;
+    if ((hit != NULL) && (hit->unk59 == 3) && (hit->unk58 == 10)) {
         if (health >= 3) {
-            arg0->health = hp - 1;
+            victim->health = hp - 1;
         } else {
-            arg0->health = 0;
-            func_1507DE4C(arg0);
-            func_15138C80(arg0, 0xFF, 1);
-            arg5 = 0x100020;
+            victim->health = 0;
+            func_1507DE4C(victim);
+            func_15138C80(victim, 0xFF, 1);
+            flags = 0x100020;
         }
     }
 
-    func_15137610(arg0, arg2, arg3, arg6, arg7, arg8);
+    func_15137610(victim, arg2, arg3, dir, arg7, arg8);
 
-    if (alreadyDead == 0) {
-        angle = func_150484A0(arg6[0], arg6[2]) * 10430.37793f;
-        func_1505D024(arg0, arg5 | 0x80000, (angle - 0x4000) | 1,
-                      (arg1 != NULL) ? (arg1 - D_800CC2D0) : -1);
+    if (!alreadyDead) {
+        angle = func_150484A0(dir[0], dir[2]) * 10430.37793f;
+        func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
+                      (attacker != NULL) ? (attacker - D_800CC2D0) : -1);
     }
 }
 
-void func_151D5148(void *arg0) {
-    s16 *p = *(s16 **)((u8 *)arg0 + 0x31C);
-    if (p[0x24 / 2] > 0) {
-        p[0x24 / 2]--;
-        p = *(s16 **)((u8 *)arg0 + 0x31C);
+/* Counts down unk31C->unk24 and counts up unk31C->unk1AA. */
+void func_151D5148(struct127 *obj) {
+    if (EXT(obj)->unk24 > 0) {
+        EXT(obj)->unk24--;
     }
-    p[0x1AA / 2]++;
+    EXT(obj)->unk1AA++;
 }
 
-struct Obj151D57F8;
-
-struct Sub151D5174 {
-    u8 pad0[0x84];
-    u8 unk84;
-    u8 pad85[0x130 - 0x85];
-    struct17 unk130;
-    struct17 unk13C;
-    u8 pad148[0x198 - 0x148];
-    u8 unk198;
-};
-
-struct Obj151D5174 {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-    u8 pad1D8[0x31C - 0x1D8];
-    struct Sub151D5174 *unk31C;
-};
-
-#define OBJ ((struct Obj151D5174 *)arg0)
-
-void func_151D5174(struct Obj151D57F8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 **arg7, struct17 **arg8, struct17 *arg9) {
-    struct17 *pos;
-    struct17 sp48;
-    struct17 sp3C;
+/* If obj's unk31C is in state 2 (or unk84 is set): intersects the line through unk31C->unk13C along
+   unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
+   from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
+   them; otherwise both are NULL. */
+void func_151D5174(struct127 *obj, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *pointBuf, struct17 *dirBuf, struct17 **outPoint, struct17 **outDir, struct17 *arg9) {
+    struct17 *origin;
+    struct17 temp;
+    struct17 normal;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 t;
 
-    if (OBJ->unk1D4 != 0) {
-        if (OBJ->unk31C != NULL && (OBJ->unk31C->unk198 == 2 || OBJ->unk31C->unk84 != 0)) {
-            pos = &OBJ->unk31C->unk13C;
-            func_151450B4(arg2, arg3, &sp48);
-            func_151450B4(&sp48, arg4, &sp3C);
+    if (obj->unk1D4 != NULL) {
+        if (EXT(obj) != NULL && (EXT(obj)->unk198 == 2 || EXT(obj)->unk84 != 0)) {
+            origin = &EXT(obj)->unk13C;
+            func_151450B4(arg2, arg3, &temp);
+            func_151450B4(&temp, arg4, &normal);
             if (arg9 != NULL) {
-                dx = arg9->unk0 - pos->unk0;
-                dy = arg9->unk4 - pos->unk4;
-                dz = arg9->unk8 - pos->unk8;
+                dx = arg9->unk0 - origin->unk0;
+                dy = arg9->unk4 - origin->unk4;
+                dz = arg9->unk8 - origin->unk8;
             } else {
-                dx = arg1->unk0 - pos->unk0;
-                dy = arg1->unk4 - pos->unk4;
-                dz = arg1->unk8 - pos->unk8;
+                dx = arg1->unk0 - origin->unk0;
+                dy = arg1->unk4 - origin->unk4;
+                dz = arg1->unk8 - origin->unk8;
             }
-            t = sp3C.unk0 * dx + sp3C.unk4 * dy + sp3C.unk8 * dz;
-            t /= sp3C.unk0 * OBJ->unk31C->unk130.unk0 + sp3C.unk4 * OBJ->unk31C->unk130.unk4 +
-                 sp3C.unk8 * OBJ->unk31C->unk130.unk8;
-            arg5->unk0 = pos->unk0 + t * OBJ->unk31C->unk130.unk0;
-            arg5->unk4 = pos->unk4 + t * OBJ->unk31C->unk130.unk4;
-            arg5->unk8 = pos->unk8 + t * OBJ->unk31C->unk130.unk8;
-            arg6->unk0 = OBJ->unk31C->unk130.unk0;
-            arg6->unk4 = OBJ->unk31C->unk130.unk4;
-            arg6->unk8 = OBJ->unk31C->unk130.unk8;
-            *arg7 = arg5;
-            *arg8 = arg6;
-        end:
+            t = normal.unk0 * dx + normal.unk4 * dy + normal.unk8 * dz;
+            t /= normal.unk0 * EXT(obj)->unk130.unk0 + normal.unk4 * EXT(obj)->unk130.unk4 +
+                 normal.unk8 * EXT(obj)->unk130.unk8;
+            pointBuf->unk0 = origin->unk0 + t * EXT(obj)->unk130.unk0;
+            pointBuf->unk4 = origin->unk4 + t * EXT(obj)->unk130.unk4;
+            pointBuf->unk8 = origin->unk8 + t * EXT(obj)->unk130.unk8;
+            dirBuf->unk0 = EXT(obj)->unk130.unk0;
+            dirBuf->unk4 = EXT(obj)->unk130.unk4;
+            dirBuf->unk8 = EXT(obj)->unk130.unk8;
+            *outPoint = pointBuf;
+            *outDir = dirBuf;
+        end: // matching: the unused label changes IDO's block layout and register allocation
             return;
         }
     }
-    *arg7 = NULL;
-    *arg8 = NULL;
+    *outPoint = NULL;
+    *outDir = NULL;
 }
-
-#undef OBJ
 
 struct S151D5334_3C {
     struct17 unk0;
@@ -1110,105 +1116,84 @@ void func_151D5714(struct127 *arg0, f32 *arg1, f32 *arg2, u8 arg3, f32 arg4, u8 
     }
 }
 
-struct Sub151D57F8 {
-    u8 pad0[0xB0];
-    u8 unkB0[0x8];
-    f32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    u8 padC4[0x109 - 0xC4];
-    u8 unk109;
-};
-
-struct Obj151D57F8 {
-    u8 pad0[0x31C];
-    struct Sub151D57F8 *unk31C;
-};
-
-extern s32 D_8008FC8C[];
+extern struct17 *D_8008FC8C[];
 extern u8 *D_8008FC94[];
-void func_151D5A18(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, struct17 *, s32, u8);
-void func_151D5174(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **, struct17 **, struct17 *);
+void func_151D5A18(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, u8);
 s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-void func_15081690(struct Obj151D57F8 *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(struct Obj151D57F8 *);
+void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
+void func_150636A4(struct127 *);
 
-void func_151D57F8(struct Obj151D57F8 *arg0, u8 arg1) {
+/* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
+   unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */
+void func_151D57F8(struct127 *obj, u8 slot) {
     struct17 pos;
-    struct17 vA0;
-    struct17 v94;
-    struct17 v88;
-    struct17 v7C;
-    struct17 v70;
-    struct17 *base;
-    struct17 *ofs;
+    struct17 forward;
+    struct17 axis1;
+    struct17 axis2;
+    struct17 pointBuf;
+    struct17 dirBuf;
+    struct17 *origin;
+    struct17 *dir;
 
-    func_151D5A18(arg0, &pos, &vA0, &v94, &v88, D_8008FC8C[arg1], *D_8008FC94[arg1]);
-    func_151D5174(arg0, &pos, &vA0, &v94, &v88, &v7C, &v70, &base, &ofs, NULL);
-    arg0->unk31C->unk109 = 1;
-    if (base == NULL) {
-        base = &pos;
+    func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
+    func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
+    EXT(obj)->unk109 = 1;
+    if (origin == NULL) {
+        origin = &pos;
     }
-    if (ofs == NULL) {
-        ofs = &vA0;
+    if (dir == NULL) {
+        dir = &forward;
     }
-    arg0->unk31C->unkB8 = base->unk0 + ofs->unk0 * 9999.0f;
-    arg0->unk31C->unkBC = base->unk4 + ofs->unk4 * 9999.0f;
-    arg0->unk31C->unkC0 = base->unk8 + ofs->unk8 * 9999.0f;
-    if (arg0->unk31C->unk109) {
-        struct17 dir;
+    EXT(obj)->unkB8 = origin->unk0 + dir->unk0 * 9999.0f;
+    EXT(obj)->unkBC = origin->unk4 + dir->unk4 * 9999.0f;
+    EXT(obj)->unkC0 = origin->unk8 + dir->unk8 * 9999.0f;
+    if (EXT(obj)->unk109) {
+        struct17 delta;
         f32 len;
 
-        dir.unk0 = arg0->unk31C->unkB8 - pos.unk0;
-        dir.unk4 = arg0->unk31C->unkBC - pos.unk4;
-        dir.unk8 = arg0->unk31C->unkC0 - pos.unk8;
-        if (func_15145128(&dir, &dir, &len, NULL) != 0) {
-            func_15081690(arg0, pos.unk0, pos.unk4, pos.unk8, dir.unk0, dir.unk4, dir.unk8,
-                          arg0->unk31C->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+        delta.unk0 = EXT(obj)->unkB8 - pos.unk0;
+        delta.unk4 = EXT(obj)->unkBC - pos.unk4;
+        delta.unk8 = EXT(obj)->unkC0 - pos.unk8;
+        if (func_15145128(&delta, &delta, &len, NULL) != 0) {
+            func_15081690(obj, pos.unk0, pos.unk4, pos.unk8, delta.unk0, delta.unk4, delta.unk8,
+                          EXT(obj)->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
-    func_150636A4(arg0);
+    func_150636A4(obj);
 }
 
-struct Obj151D5A18 {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1D4 - 0x20];
-    s32 unk1D4;
-};
+void func_15145740(struct127 *, struct17 *, struct17 *, struct17 *, f32);
 
-void func_15145740(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, f32);
-
-void func_151D5A18(struct Obj151D57F8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, s32 arg5, u8 arg6) {
+/* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
+   objects without bone matrices use a point 34 units out and 49 up from their origin. */
+void func_151D5A18(struct127 *obj, struct17 *out, struct17 *forward, struct17 *axis1, struct17 *axis2, struct17 *localPos, u8 bone) {
     s32 src;
     s32 dst;
 
-    func_15145740(arg0, arg2, arg3, arg4, 0.8110000491f);
-    if (((struct Obj151D5A18 *)arg0)->unk1D4 != 0) {
-        dst = (s32)arg1;
-        src = arg5;
-        func_15145EA4(&src, &dst, ((struct Obj151D5A18 *)arg0)->unk1D4 + (arg6 << 6), 1);
+    func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
+    if (obj->unk1D4 != NULL) {
+        dst = (s32)out;
+        src = (s32)localPos;
+        func_15145EA4(&src, &dst, (s32)obj->unk1D4 + (bone << 6), 1);
     } else {
         f32 dz;
         f32 dx;
 
-        if ((9.999999747e-05f < fabsf(arg2->unk0)) || (9.999999747e-05f < fabsf(arg2->unk8))) {
+        if ((9.999999747e-05f < fabsf(forward->unk0)) || (9.999999747e-05f < fabsf(forward->unk8))) {
             f32 inv;
             f32 z;
 
-            z = arg2->unk8;
-            inv = 1.0f / sqrtf((arg2->unk0 * arg2->unk0) + (z * z));
+            z = forward->unk8;
+            inv = 1.0f / sqrtf((forward->unk0 * forward->unk0) + (z * z));
             dz = z * inv;
-            dx = -arg2->unk0 * inv;
+            dx = -forward->unk0 * inv;
         } else {
             dz = 1.0f;
             dx = 0.0f;
         }
-        arg1->unk0 = ((struct Obj151D5A18 *)arg0)->unk14 + (34.0f * dx);
-        arg1->unk4 = ((struct Obj151D5A18 *)arg0)->unk18 + 49.0f;
-        arg1->unk8 = ((struct Obj151D5A18 *)arg0)->unk1C + (34.0f * dz);
+        out->unk0 = obj->x_position + (34.0f * dx);
+        out->unk4 = obj->y_position + 49.0f;
+        out->unk8 = obj->z_position + (34.0f * dz);
     }
 }
 
