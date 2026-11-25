@@ -769,7 +769,7 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
     Gfx *start;
     s32 v;
     s32 lit;
-    s32 i;
+    s32 i; // matching: also the "func_150832AC just ran" flag; a separate local mismatches
 
     start = gdl;
     if (!att->updated) {
