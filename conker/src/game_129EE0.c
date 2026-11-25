@@ -1,14 +1,11 @@
 #include <ultra64.h>
-// functions.h declares these three with signatures that do not fit how this file calls them
-// (wrong return or parameter types), so its declarations are renamed away and redeclared below.
+// functions.h declares these two with the wrong return types (func_1513EDE4 returns its Vtx *, and
+// func_150ADA20's result is used as a full u32), so its declarations are renamed away and redeclared below.
 #define func_1513EDE4 func_1513EDE4_orig
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
-#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
 #undef func_1513EDE4
 #undef func_150ADA20
-#undef func_10010F88
-void func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -535,11 +532,13 @@ void func_150FDC2C(Actor150FD514 *actor) {
     }
 }
 
+/* Releases the ext resources, then hands the particle to func_1513CA6C. */
 void func_150FDCAC(Actor150FD514 *actor) {
     func_150FDC2C(actor);
     func_1513CA6C((struct210 *)actor);
 }
 
+/* Releases the ext resources, then hands the particle to func_1513CAA0. */
 void func_150FDCD8(Actor150FD514 *actor) {
     func_150FDC2C(actor);
     func_1513CAA0((struct210 *)actor);
