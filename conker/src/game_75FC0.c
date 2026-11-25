@@ -3,23 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
-#if 0
-f32 D_80099020[] = { 0.0, 3.619550943374634, -6.466859817504883, 3.5107080936431885, -0.5643919706344604, 0.005872000008821487 };
-f32 D_80099038[] = { 21.717304229736328, -48.572906494140625, 37.104923248291016, -11.031848907470703, 1.0 };
-f32 D_8009904C[] = { 0.0, -3.1845738887786865, 3.210297107696533, -0.6077240109443665 };
-f32 D_8009905C[] = { -19.107446670532227, 27.860130310058594, -11.065337181091309, 1.0, 0.0 };
-
-f32 D_80099070 = 57.2957763671875;
-f32 D_80099074 = 57.2957763671875;
-#endif
-
-extern f32 D_80099020[];
-extern f32 D_80099038[];
-extern f32 D_8009904C[];
-extern f32 D_8009905C[];
-extern f32 D_80099070;
-extern f32 D_80099074;
-
+/* asinf rational approximation coefficients: numerator P[1..5], denominator Q[0..4] (Q[4] = 1) */
+static const f32 D_80099020[] = { 0.0f, 3.619550943f, -6.466859818f, 3.510708094f, -0.5643919706f, 0.005872000009f };
+static const f32 D_80099038[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11.03184891f, 1.0f };
+/* asinf coefficients for the sqrt-reduced range: P[1..3], Q[0..3] */
+static const f32 D_8009904C[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
+static const f32 D_8009905C[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
 
 void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ);
@@ -85,7 +74,7 @@ f32 func_15048C30(f32 x) {
     if (exponent < 127) {
         /* 0.5 <= |x| < 1 */
         absX = fabsf(x);
-        if (absX < D_80085FE8) {
+        if (absX < 0.866024971f) {
             /* asin(x) = +-pi/4 + asin(2x^2 - 1) / 2 */
             sq = x * x;
             reduced = (sq + sq) - D_80085FD0;
@@ -94,10 +83,10 @@ f32 func_15048C30(f32 x) {
             den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
             if (bits > 0) {
                 result = ((sq * num * reduced) / den) + reduced;
-                return (0.5f * result) + D_80085FD8;
+                return (0.5f * result) + 0.785398006f;
             } else {
                 result = ((sq * num * reduced) / den) + reduced;
-                return D_80085FE0 - (0.5f * result);
+                return -0.785398006f - (0.5f * result);
             }
         }
         /* asin(x) = +-(pi/2 - 2 asin(sqrt((1 - |x|) / 2))) */
@@ -107,9 +96,9 @@ f32 func_15048C30(f32 x) {
         den = ((((reduced + D_8009905C[2]) * reduced) + D_8009905C[1]) * reduced) + D_8009905C[0];
         result = ((reduced * num * root) / den) + root;
         if (bits > 0) {
-            return D_80085FDC - (result + result);
+            return 1.57079601f - (result + result);
         } else {
-            return result + result + D_80085FE4;
+            return result + result + -1.57079601f;
         }
     }
     if (x != x) {
@@ -117,10 +106,10 @@ f32 func_15048C30(f32 x) {
         return 0.0f;
     }
     if (x == D_80085FD0) {
-        return D_80085FDC;
+        return 1.57079601f;
     }
     if (x == D_80085FD4) {
-        return D_80085FE4;
+        return -1.57079601f;
     }
     return 0.0f;
 }
@@ -157,9 +146,9 @@ f32 func_15048FC8(struct17 *arg0) {
     tmp2 = func_15048C30(tmp2);
 
     if (arg0->unk8 > 0.0f) {
-        tmp2 = 270.0f - (tmp2 * D_80099070);
+        tmp2 = 270.0f - (tmp2 * 57.29577637f);
     } else {
-        tmp2 = 90.0f + (tmp2 * D_80099074);
+        tmp2 = 90.0f + (tmp2 * 57.29577637f);
     }
 
     tmp2 -= 90.0f;
