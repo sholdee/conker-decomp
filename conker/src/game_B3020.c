@@ -162,75 +162,77 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
     return found;
 }
 
-s32 func_15086C70(s32 arg0);
-s32 func_150A32B4(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
+struct178 *func_15086C70(s32 index);
+s32 func_150A32B4(struct178 *zone, s32 x, s32 y, s32 z);
+s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid);
 
-s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, s32 arg5, s32 arg6) {
-    s32 idx;
-    s32 ptr;
-    PathNode *entry;
+/*
+ * Returns the path node to head for from (x, y, z): the nearest node, or the next node of the
+ * route from it towards `goals` (func_15086364) when the point is inside the node's zone, the
+ * node is large, or the point lies along the link to that next node.
+ */
+s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
+    s32 nearest;
+    struct178 *zone;
+    PathNode *node;
     s32 result;
     s32 i;
     s32 best;
     PathNode *other;
     s32 n;
     u8 *links;
-    f32 bestDist;
-    f32 rad;
+    f32 bestDistSq;
+    f32 size;
     f32 dx;
     f32 dz;
-    f32 ex;
-    f32 ez;
-    f32 inv;
+    f32 invLen;
     f32 t;
     f32 d;
-    f32 px;
-    f32 pz;
-    f32 dist;
+    f32 distSq;
 
     result = 0xFF;
-    idx = func_15085DF8(x, y, z, 0, func_15085DA8(y));
-    if (arg3 > 0 && idx != 0xFF) {
-        ptr = func_15086C70(idx);
-        if (ptr != 0 && func_150A32B4((void *)ptr, (s32)x, (s32)y, (s32)z) != 0) {
-            result = func_15086364(idx, arg3, arg4, arg5, arg6);
+    nearest = func_15085DF8(x, y, z, 0, func_15085DA8(y));
+    if (nGoals > 0 && nearest != 0xFF) {
+        zone = func_15086C70(nearest);
+        if (zone != NULL && func_150A32B4(zone, x, y, z)) {
+            result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
         } else {
-            entry = &D_800D2350[idx];
-            rad = (u32)((u8 *)entry)[8] * 2.0f;
-            if (100000000.0f < rad * rad) {
-                result = func_15086364(idx, arg3, arg4, arg5, arg6);
+            node = &D_800D2350[nearest];
+            size = node->unk8 * 2.0f;
+            if (100000000.0f < size * size) {
+                result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
             } else {
-                bestDist = 100000000.0f;
+                /* Find the link whose line (in xz) passes closest to the point, ahead of the node. */
+                bestDistSq = 100000000.0f;
                 best = 0xFF;
                 i = 0;
-                links = (u8 *)entry;
+                links = (u8 *)node; // matching: cursor from the node base (links[9]), not node->links
                 do {
                     n = links[9];
-                    i = (i + 1) | 0;
+                    i = (i + 1) | 0; // matching: the no-op | keeps IDO's slti loop test
                     if (n != 0xFF) {
-                        other = (PathNode *)((u8 *)D_800D2350 + n * 16);
-                        dx = other->x - entry->x;
-                        dz = other->z - entry->z;
-                        inv = 1.0f / sqrtf(dx * dx + dz * dz);
-                        dx *= inv;
-                        dz *= inv;
-                        d = -(entry->x * dx + entry->z * dz);
+                        other = (PathNode *)((u8 *)D_800D2350 + n * sizeof(PathNode)); // matching: byte offset, not &D_800D2350[n]
+                        dx = other->x - node->x;
+                        dz = other->z - node->z;
+                        invLen = 1.0f / sqrtf(dx * dx + dz * dz);
+                        dx *= invLen;
+                        dz *= invLen;
+                        d = -(node->x * dx + node->z * dz);
                         t = x * dx + z * dz + d;
                         if (t > 0.0f) {
-                            dx = x - (entry->x + dx * t);
-                            dz = z - (entry->z + dz * t);
-                            dist = dx * dx + dz * dz;
-                            if (dist < bestDist) {
+                            dx = x - (node->x + dx * t);
+                            dz = z - (node->z + dz * t);
+                            distSq = dx * dx + dz * dz;
+                            if (distSq < bestDistSq) {
                                 best = n;
-                                bestDist = dist;
+                                bestDistSq = distSq;
                             }
                         }
                     }
                     links++;
                 } while (i < 5);
                 if (best != 0xFF) {
-                    n = func_15086364(idx, arg3, arg4, arg5, arg6);
+                    n = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
                     if (n == best) {
                         result = n;
                     }
@@ -239,9 +241,9 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, s32 arg5, s32 arg6) {
         }
     }
     if (result != 0xFF) {
-        idx = result;
+        nearest = result;
     }
-    return idx;
+    return nearest;
 }
 
 extern u8 D_80087298;
