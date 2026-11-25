@@ -20,7 +20,7 @@ extern Mtx D_80089470;
 s32 func_1501878C(void);
 void func_15019F20(void);
 
-
+/* Game main loop: runs frames until func_1501878C says to stop. */
 void func_150186D0(void) {
     func_10001444();
     func_1501A39C();
@@ -60,11 +60,11 @@ void func_150186D0(void) {
     {                                           \
         Gfx *cmd = (Gfx *)D_800BE9D0;           \
         D_800BE9D0 += sizeof(Gfx);              \
-        cmd->words.w0 = 0xE1000000;             \
+        cmd->words.w0 = _SHIFTL(G_RDPHALF_1, 24, 8); \
         cmd->words.w1 = (u32)(dataStart);       \
         cmd = (Gfx *)D_800BE9D0;                \
         D_800BE9D0 += sizeof(Gfx);              \
-        cmd->words.w0 = 0xDD0007FF;             \
+        cmd->words.w0 = _SHIFTL(G_LOAD_UCODE, 24, 8) | (SP_UCODE_DATA_SIZE - 1); \
         cmd->words.w1 = (u32)(textStart);       \
     }
 
@@ -112,6 +112,10 @@ extern s32 D_800BEBA4;
 extern u8 D_800C1060[];
 extern LookAt D_800D9B90[];
 
+/*
+ * Waits for the next message on D_800BEA10 and handles it; type 1 runs and draws one game frame.
+ * Returns 0 when the main loop should end.
+ */
 s32 func_1501878C(void) {
     s16 *message;
     s16 i;
@@ -206,8 +210,8 @@ s32 func_1501878C(void) {
                     func_15189118(0);
                     func_15084A18();
                     func_15125628();
-                    DL_APPEND(0xE9000000, 0); // gDPFullSync
-                    DL_APPEND(0xDF000000, 0); // gSPEndDisplayList
+                    DL_APPEND(_SHIFTL(G_RDPFULLSYNC, 24, 8), 0); // gDPFullSync
+                    DL_APPEND(_SHIFTL(G_ENDDL, 24, 8), 0); // gSPEndDisplayList
                     func_10004674();
                     func_1510D404();
                     func_15114A1C();
@@ -248,6 +252,7 @@ s32 func_1501878C(void) {
     return 1;
 }
 
+/* Per-frame updates called from func_15019130, most of them only outside D_800BEAC0 mode. */
 void func_15018DFC(void) {
     func_150A09D0(D_800BE9E4);
     func_150619A8();
@@ -264,7 +269,7 @@ void func_15018DFC(void) {
     func_1507C8FC();
 }
 
-/* Draws group 0 of player's display lists, then the per-level overlay func_15174AA4. */
+/* Draws group 0 of player's display lists (func_151674F8), then func_15174AA4 for the level. */
 Gfx *func_15018E88(Gfx *gfx, s16 player) {
     if (D_800BE616 == 0) {
         func_1517D7B0(&gfx, 1);
@@ -285,6 +290,7 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     return gfx;
 }
 
+/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->unk388). */
 void func_15018F80(s16 player) {
     struct108 *camera = &D_800DBFF0[player];
     D_8003C8E0 = 0xA000000;
@@ -297,6 +303,7 @@ void func_15018F80(s16 player) {
     D_8003C8E0 = 0;
 }
 
+/* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
     D_800BE9D0 = D_800BE9D8[D_800BE9C0];
     *D_800BE728 = func_1501BBB8();
