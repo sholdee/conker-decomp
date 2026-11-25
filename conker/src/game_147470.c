@@ -28,7 +28,7 @@ typedef struct Obj15119FC0 {
 
 extern s32 func_15060BA4(struct127 *, s32);
 extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_1508EE0C(s32, s32);
+extern void func_1508EE0C(u16, u16);
 extern void func_151D69B4(Obj15119FC0 *, struct127 *);
 
 /* Animates the pickup and lets any nearby player collect it; afterwards it fades back in or is removed. */
@@ -69,11 +69,11 @@ void func_15119FC0(Obj15119FC0 *obj) {
                         D_800CC2D0[i].health > 0) {
                         if (func_15060BA4(&D_800CC2D0[i], 1)) {
                             if (obj->flags != 0) {
-                                obj->respawnTimer = ((obj->flags >> 16) & 0xFFFF) * 60;
+                                obj->respawnTimer = (u16)(obj->flags >> 16) * 60;
                                 obj->flags70 |= 4;
                             } else {
                                 obj->removed = TRUE;
-                                func_1508EE0C(2, ((struct131 *)obj - D_800DBEF4) & 0xFFFF);
+                                func_1508EE0C(2, (struct131 *)obj - D_800DBEF4);
                             }
                             obj->state = 0x20;
                             func_10010344(0x1CF, &D_800CC2D0[i], 0x7D00, 200, 2500);
