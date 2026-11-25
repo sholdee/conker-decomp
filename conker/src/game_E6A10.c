@@ -7,7 +7,6 @@
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
  *   FallGrowParticle, QuadSprite   - the particle/sprite system of game_169510.c
- *   PhysicsParticle, CollisionHit  - the pooled physics particles of game_15F680.c
  */
 
 /* A live particle of game_169510.c whose motion block is a fall speed (func_150B9560); the update callbacks
@@ -16,42 +15,6 @@ typedef struct {
     /* 0x00 */ DefParticleHead head;
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
 } FallGrowParticle;
-
-/* A pooled physics particle of game_15F680.c (the D_80089914 / D_8008998C callbacks get one). */
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ f32 radius;
-    /* 0x014 */ f32 elasticity;
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ Vec3f rot;        /* the look-at point of func_150B9D14's matrix */
-    /* 0x02C */ Vec3f scale;
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f rotVel;
-    /* 0x05C */ f32 gravity;
-    /* 0x060 */ u32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0xB];
-    /* 0x071 */ u8 updateFn;
-    /* 0x072 */ u8 update2Fn;
-    /* 0x073 */ u8 floorHitFn;
-    /* 0x074 */ u8 floorType3Fn;
-    /* 0x075 */ u8 wallHitFn;
-    /* 0x076 */ u8 destroyFn;
-    /* 0x077 */ u8 squashFn;
-    /* 0x078 */ u8 matrixFn;
-    /* 0x079 */ u8 pad79[0x97];
-    /* 0x110 */ CollisionHit floor;
-    /* 0x134 */ u8 pad134[0x18];
-    /* 0x14C */ s32 unk14C;
-    /* 0x150 */ u8 pad150[0x18];
-    /* 0x168 */ s32 unk168;
-} PhysicsParticle;
 
 void *memcpy(void *, const void *, u32);
 void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
@@ -108,7 +71,7 @@ s32 func_150B961C(QuadSprite *sprite) {
  * the floor below and a burst, plays a sound and ends (returns 0). Else its rot (look-at) point
  * eases toward 50 above object 1 (D_80088720 / D_80088724).
  */
-s32 func_150B963C(PhysicsParticle *particle) {
+s32 func_150B963C(ModelParticle *particle) {
     f32 distSq;
     Vec3f playerPos;
     f32 dirX;
@@ -185,7 +148,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
                     spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
                                             500.0f, 500.0f, 0, (s32)&particle->floor.tri, particle->unk14C,
-                                            particle->unk168, 0, 8, particle->unkC, particle->unk1);
+                                            particle->unk168, 0, 8, particle->header.owner, particle->header.kind);
                     if (spawned != 0) {
                         /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */
                         memcpy((u8 *)spawned + 0x128, &extra, 8);
@@ -237,7 +200,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.material;
-                func_15151A38(&burst, particle->unkC, particle->unk1);
+                func_15151A38(&burst, particle->header.owner, particle->header.kind);
             }
             func_10010F88(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
             return 0;
@@ -258,7 +221,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
 }
 
 /* Matrix callback: scale by size and scale, place at pos, and face the particle's rot point. */
-s32 func_150B9D14(Mtx *mtx, PhysicsParticle *particle) {
+s32 func_150B9D14(Mtx *mtx, ModelParticle *particle) {
     func_15142600(mtx, particle->sizeXZ, particle->sizeY, particle->scale.x,
                   particle->scale.y, particle->scale.z, particle->pos.x, particle->pos.y,
                   particle->pos.z, particle->rot.x, particle->rot.y, particle->rot.z);
