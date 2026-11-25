@@ -601,7 +601,6 @@ Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
     return NULL;
 }
 
-extern MtxF D_800D9C10[];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 /*

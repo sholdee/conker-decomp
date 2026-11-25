@@ -362,7 +362,6 @@ typedef struct SwarmFlight {
 extern SwarmFlight D_8008D0B0[];
 extern s32 D_800C35B0;
 extern u8 D_800C35E8;
-extern MtxF D_800D9C10[]; /* one view matrix per camera */
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])

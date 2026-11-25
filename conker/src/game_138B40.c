@@ -9,7 +9,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
 
-extern MtxF D_800D9C10[];    // per view: view matrix (float copy of D_800DC2A0)
 extern Gfx *D_800B0E00;
 extern Gfx *D_800B0E04;
 extern Gfx *D_800B0E08;

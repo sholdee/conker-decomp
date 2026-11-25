@@ -1172,6 +1172,7 @@ extern u8  D_800D9E20;
 // extern u8 D_800A2CE8[][3];
 // extern u8 D_800A2CEC[][3];
 
+extern MtxF D_800D9C10[]; // per view: view matrix
 extern MtxF D_800D9D10[]; // per view: view matrix * projection
 extern u8  D_800D9E64;
 extern s32 D_800D9F58;

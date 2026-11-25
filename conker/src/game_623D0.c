@@ -157,7 +157,6 @@ typedef struct ModelBounds {
 } ModelBounds;
 
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800D9C10; // view matrices
 
 /*
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
@@ -189,7 +188,7 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     } else {
         y = obj->y_position + height;
     }
-    if (func_150A6360(recp, &D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
+    if (func_150A6360(recp, D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;

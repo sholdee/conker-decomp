@@ -5169,7 +5169,6 @@ void func_15061B4C(void) {
 }
 s32 func_150229E4(Actor *);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800D9C10[];
 
 /*
  * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
@@ -5230,7 +5229,7 @@ s32 func_150623F4(Actor *actor) {
     height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * actor->y_scale;
     for (i = 0; i <= D_80082FA0; i++) {
         hidden = 1;
-        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, &D_800D9C10[i * 0x40], actor->x_position,
+        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, D_800D9C10[i], actor->x_position,
                           actor->y_position + height, actor->z_position, scale, scale, 20000.0f) != 0) {
             hidden = 0;
             break;

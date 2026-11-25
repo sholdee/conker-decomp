@@ -113,7 +113,6 @@ extern u8 D_800C3E98[];
 extern u8 D_C3E98[];
 extern s32 D_800BEBA4;
 extern u8 D_800D9900;
-extern u8 D_800D9C10[][0x40];
 extern u8 D_800D9E28[];
 extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800DD2E4[];
@@ -1237,7 +1236,7 @@ void func_1502E474(void) {
 void func_1502E4C4(s32 index) {
     Actor *obj;
     u8 id;
-    u8 *tbl;
+    MtxF *tbl;
     s32 view;
     f32 width;
     f32 height;
@@ -1301,7 +1300,7 @@ void func_1502E4C4(s32 index) {
         s32 dist;
 
         view = (s32)&D_800BE628[i];
-        tbl = D_800D9C10[i];
+        tbl = &D_800D9C10[i];
         inside = FALSE;
         if (D_800DBFF0[i].playerExt->aimState != 0) {
             playerRange = 100000;

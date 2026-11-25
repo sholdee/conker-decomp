@@ -3063,7 +3063,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 
 s32 func_15144B34(s32);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800D9C10[];
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
 
@@ -3116,7 +3115,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
         dx = first->pos.x - last->pos.x;
         dy = first->pos.y - last->pos.y;
         dz = first->pos.z - last->pos.z;
-        if (func_150A6360(&D_800BE628[view], D_800D9C10 + view * 0x40,
+        if (func_150A6360(&D_800BE628[view], D_800D9C10[view],
                           (last->pos.x + first->pos.x) * 0.5f,
                           (last->pos.y + first->pos.y) * 0.5f,
                           (last->pos.z + first->pos.z) * 0.5f,

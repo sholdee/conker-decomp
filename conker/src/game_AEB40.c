@@ -123,7 +123,6 @@ extern u16 D_800BE598[];
 extern ModelReloc *D_800C5338[];
 extern u16 D_800C5628[];
 extern u16 D_800C57A0[];
-extern MtxF D_800D9C10[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
