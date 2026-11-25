@@ -69,6 +69,7 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     f32 sign;
     f32 speed;
     f32 target;
+    f32 foldedAngle;
     s32 snap;
 
     savedPresetIndex = camera->presetIndex;
@@ -109,8 +110,8 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     } else {
         sign = 1.0f;
     }
-    angle = angle - 90.0f * sign;
-    target = angle * 0.01111111138f * unk3A8Scale - angle * speed * 0.0003703703696f * unk3A8SpeedScale + unk3A8Bias;
+    angle -= 90.0f * sign;
+    target = angle * (1.0f / 90.0f) * unk3A8Scale - angle * speed * (1.0f / 2700.0f) * unk3A8SpeedScale + unk3A8Bias;
     if (camera->mode & 0x100) {
         target = 0.0f;
     }
@@ -122,24 +123,25 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     } else {
         func_150495B0(&camera->unk3A8, target, &camera->unk3A8Vel, 1.5f, 2.5f, camera->dt);
     }
-    target = camera->angle;
-    while (target > 180.0f) {
-        target -= 360.0f;
+    foldedAngle = camera->angle;
+    while (foldedAngle > 180.0f) {
+        foldedAngle -= 360.0f;
     }
-    if (target > 90.0f) {
-        target = 180.0f - target;
-    } else if (target < -90.0f) {
-        target = -180.0f - target;
+    if (foldedAngle > 90.0f) {
+        foldedAngle = 180.0f - foldedAngle;
+    } else if (foldedAngle < -90.0f) {
+        foldedAngle = -180.0f - foldedAngle;
     }
+    target = -(foldedAngle * (1.0f / 90.0f) * unk5E8Scale) - foldedAngle * speed * (1.0f / 2700.0f) * unk5E8SpeedScale;
     if (outUnk5E8 != NULL) {
-        *outUnk5E8 = -(target * 0.01111111138f * unk5E8Scale) - target * speed * 0.0003703703696f * unk5E8SpeedScale;
-    } else if (camera->snap != 0) {
-        camera->unk5E8 = -(target * 0.01111111138f * unk5E8Scale) - target * speed * 0.0003703703696f * unk5E8SpeedScale;
+        *outUnk5E8 = target;
+    } else if (camera->snap != 0) { // matching: reload, not the snap local
+        camera->unk5E8 = target;
         camera->unk5E8Vel = 0.0f;
     } else if (camera->mode & 0x100) {
-        func_150495B0(&camera->unk5E8, -(target * 0.01111111138f * unk5E8Scale) - target * speed * 0.0003703703696f * unk5E8SpeedScale, &camera->unk5E8Vel, 6.0f, 9.0f, camera->dt);
+        func_150495B0(&camera->unk5E8, target, &camera->unk5E8Vel, 6.0f, 9.0f, camera->dt);
     } else {
-        func_150495B0(&camera->unk5E8, -(target * 0.01111111138f * unk5E8Scale) - target * speed * 0.0003703703696f * unk5E8SpeedScale, &camera->unk5E8Vel, 1.5f, 2.5f, camera->dt);
+        func_150495B0(&camera->unk5E8, target, &camera->unk5E8Vel, 1.5f, 2.5f, camera->dt);
     }
     camera->presetIndex = savedPresetIndex;
 }
