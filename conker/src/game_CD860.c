@@ -9,8 +9,6 @@ typedef struct {
     /* 0x08 */ s32 params[5];
 } Msg_CD860;
 
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-
 void func_150A3444(s32, s16, s16, s16);
 void func_151C970C(s32, void *);
 void func_150A2864(s32, s32);

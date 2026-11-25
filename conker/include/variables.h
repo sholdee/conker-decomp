@@ -192,10 +192,10 @@ extern OSIoMesg D_80038950[];
 
 extern u8  D_8003A570;
 extern u8  D_8003A571;
-extern u8  D_8003A572;
-extern u8  D_8003A573;
+extern vu8 D_8003A572; // PI interlock flags shared with the PI manager thread (init_2E50)
+extern vu8 D_8003A573;
 extern u8  D_8003A574;
-extern u8  D_8003A575;
+extern vu8 D_8003A575;
 extern s8   D_8003A580;
 extern u8  D_8003A581;
 extern u8  D_8003A582;

@@ -2496,7 +2496,7 @@ typedef struct {
 
 /* Summary of one of the three save files the player can pick. */
 typedef struct SaveSlotInfo {
-    /* 0x00 */ s32 unk0;       /* D_800BE3E8 */
+    /* 0x00 */ s32 playTime;   /* D_800BE3E8, in seconds */
     /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
     /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
     /* 0x0C */ u8 unkC;        /* D_800BE3DF */

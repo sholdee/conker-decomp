@@ -1,7 +1,6 @@
 #include <ultra64.h>
 
 #include "functions.h"
-/* variables.h declares D_800BE3F8 as a pointer; this file uses it as the array of SaveSlotInfo. */
 #include "variables.h"
 
 /*
@@ -170,7 +169,7 @@ void func_15006590(s32 eepromSlot) {
                         bits >>= 1;
                     }
                 }
-                D_800BE3F8[saveSlot].unk0 = D_800BE3E8;
+                D_800BE3F8[saveSlot].playTime = D_800BE3E8;
                 D_800BE3F8[saveSlot].flagCount = flagCount;
                 D_800BE3F8[saveSlot].unkC = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
                 D_800BE3F8[saveSlot].unk4 = D_800BE3E4;

@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h types this as TriggerZone[73]; see the declaration below. */
 #include "variables.h"
 #include "effects.h"
 
 /* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h): a collision
    cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
 
-/* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
 extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);

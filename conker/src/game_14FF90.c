@@ -6,9 +6,6 @@
 
 #define CAM_C_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
 
-/* variables.h declares D_800C3600 as struct168 *; it is the struct itself (a scripted camera shot). */
-#define SCRIPT_CAM (*(struct168 *)&D_800C3600)
-
 #define DEG2RAD 0.01745329238474369f
 
 /* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
@@ -1197,8 +1194,8 @@ void func_15125A6C(Camera *camera) {
             camera->unk7E4 = 1;
         }
         D_800DBFF4[0] = 3;
-        SCRIPT_CAM.unk0 = 1;
-        SCRIPT_CAM.unk4 = 0;
+        D_800C3600.unk0 = 1;
+        D_800C3600.unk4 = 0;
         radius = 138.0f;
         sideRadius = 46.0f;
         height = 96.0f;
@@ -1207,18 +1204,18 @@ void func_15125A6C(Camera *camera) {
         trig = sinf(angle);
         sideAngle = (yaw - 90.0f) * D_800A3554;
         sideSin = sinf(sideAngle);
-        // matching: the position fields go through their own symbols (SCRIPT_CAM.unk14.. moves code)
+        // matching: the position fields go through their own symbols (D_800C3600.unk14.. moves code)
         D_800C3614 = (sideSin * sideRadius) + (camera->player->x_position + (radius * trig));
         D_800C3618 = camera->player->y_position + height;
         trig = cosf(angle);
         sideCos = cosf(sideAngle);
         D_800C361C = (sideCos * sideRadius) + (camera->player->z_position + (radius * trig));
-        SCRIPT_CAM.unk20 = 0.0f;
+        D_800C3600.unk20 = 0.0f;
         D_800C3624 = -180.0f;
-        SCRIPT_CAM.unk8 = 0.0f;
-        SCRIPT_CAM.unk28 = yaw - 180.0f;
+        D_800C3600.unk8 = 0.0f;
+        D_800C3600.unk28 = yaw - 180.0f;
         D_800C365C = 0;
-        func_1512D560(camera, 7, (s32)&SCRIPT_CAM);
+        func_1512D560(camera, 7, (s32)&D_800C3600);
         return;
     }
     if (camera->unk7E4 != 0) {

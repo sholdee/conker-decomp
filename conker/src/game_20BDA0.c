@@ -741,16 +741,6 @@ draw_rows: // matching: unused label splits the basic block for as1
 }
 
 /* Saved-record slot (D_800BE3F8[]); see game_33990.c */
-typedef struct {
-    /* 0x0 */ u32 time;  /* in seconds */
-    /* 0x4 */ s32 score;
-    /* 0x8 */ s32 id;    /* -1: empty slot */
-    /* 0xC */ s8 unkC;
-    /* 0xD */ s8 padD;
-    /* 0xE */ s8 unkE;
-    /* 0xF */ s8 padF;
-} RecordSlot;
-
 extern char D_800AB814[];
 extern char D_800AB818[];
 extern char D_800AB828[];
@@ -769,7 +759,7 @@ void func_151DFF38(void) {
     u8 alpha;
     s32 sfx;
     s32 score;
-    RecordSlot *entry;
+    SaveSlotInfo *entry;
     s32 y;
 
     alpha = D_800E0A94;
@@ -785,9 +775,8 @@ void func_151DFF38(void) {
         sfx = 0x62D;
     }
     func_150432FC(0x94, 0x46);
-    // variables.h declares D_800BE3F8 as a pointer; it is the slot array itself
-    entry = &((RecordSlot *)&D_800BE3F8)[slot];
-    if (entry->id == -1) {
+    entry = &D_800BE3F8[slot];
+    if (entry->sequence == -1) {
         D_8008FE2C = 0;
     }
     if (slot == 2) {
@@ -797,8 +786,8 @@ void func_151DFF38(void) {
     } else {
         func_1504332C(0x20, 0x55, 0xFF, alpha);
     }
-    if (entry->id != -1) {
-        score = entry->score;
+    if (entry->sequence != -1) {
+        score = entry->unk4;
         y = 0;
         if (score == 32000) {
             score = 1000000;
@@ -811,14 +800,14 @@ void func_151DFF38(void) {
             u32 time;
             u32 seconds;
 
-            time = entry->time;
+            time = entry->playTime;
             seconds = time % 60;
             time /= 60;
             func_15042D94(0xA4, 0x33, 0, D_800AB818, time / 60, time % 60, seconds);
         }
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    if (entry->id >= 0) {
+    if (entry->sequence >= 0) {
         func_15042D94(0x94, 0xAF, 1, D_800AB828, 0x1A);
         func_150432FC(0x58, 0xAF);
         if (D_8008FE2C < 2) {
@@ -831,7 +820,7 @@ void func_151DFF38(void) {
     }
     func_150432FC(0xD0, 0xAF);
     if (D_8008FE2C < 2) {
-        if (entry->id >= 0) {
+        if (entry->sequence >= 0) {
             func_15042E3C(D_800AB838, (D_8008FE2C != 0) + 0x18);
         }
         if (D_8008FE2C == 0) {
@@ -844,7 +833,7 @@ void func_151DFF38(void) {
                 D_8008FDA8 = slot;
                 D_800BE3DC = -1;
                 D_80082BC0 = 0;
-                func_150076BC(entry->unkE);
+                func_150076BC(entry->eepromSlot);
                 sfx = 0x500;
             }
         } else if (D_8008FDD4->input & MENU_ACCEPT) {
@@ -863,8 +852,8 @@ void func_151DFF38(void) {
                 D_800BE3E4 = 0;
                 func_15017790();
                 entry->unkC = 0x18;
-                entry->score = 0;
-                entry->id = -1;
+                entry->unk4 = 0;
+                entry->sequence = -1;
                 D_8008FDA4 = 0;
             } else {
                 D_8008FE2C = 1;
