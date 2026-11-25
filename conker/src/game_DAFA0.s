@@ -243,95 +243,147 @@ glabel func_150ADAF0
     /* DB2C8 150ADE18 96240000 */  lhu        $a0, 0x0($s1)
     /* DB2CC 150ADE1C 00600008 */  jr         $v1
     /* DB2D0 150ADE20 00000000 */   nop
+  .globl .L150ADE24  /* a data table (jump table of the interpreter) points here */
+  .L150ADE24:
     /* DB2D4 150ADE24 016C5820 */  add        $t3, $t3, $t4 /* handwritten instruction */
     /* DB2D8 150ADE28 1000FF66 */  b          .L150ADBC4
     /* DB2DC 150ADE2C ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE30  /* a data table (jump table of the interpreter) points here */
+  .L150ADE30:
     /* DB2E0 150ADE30 016C5822 */  sub        $t3, $t3, $t4 /* handwritten instruction */
     /* DB2E4 150ADE34 1000FF63 */  b          .L150ADBC4
     /* DB2E8 150ADE38 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE3C  /* a data table (jump table of the interpreter) points here */
+  .L150ADE3C:
     /* DB2EC 150ADE3C 016C0018 */  mult       $t3, $t4
     /* DB2F0 150ADE40 00005812 */  mflo       $t3
     /* DB2F4 150ADE44 1000FF5F */  b          .L150ADBC4
     /* DB2F8 150ADE48 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE4C  /* a data table (jump table of the interpreter) points here */
+  .L150ADE4C:
     /* DB2FC 150ADE4C 016C001A */  div        $zero, $t3, $t4
     /* DB300 150ADE50 00005812 */  mflo       $t3
     /* DB304 150ADE54 1000FF5B */  b          .L150ADBC4
     /* DB308 150ADE58 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE5C  /* a data table (jump table of the interpreter) points here */
+  .L150ADE5C:
     /* DB30C 150ADE5C 016C001A */  div        $zero, $t3, $t4
     /* DB310 150ADE60 00005810 */  mfhi       $t3
     /* DB314 150ADE64 1000FF57 */  b          .L150ADBC4
     /* DB318 150ADE68 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE6C  /* a data table (jump table of the interpreter) points here */
+  .L150ADE6C:
     /* DB31C 150ADE6C 000B5822 */  neg        $t3, $t3 /* handwritten instruction */
     /* DB320 150ADE70 1000FF54 */  b          .L150ADBC4
     /* DB324 150ADE74 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE78  /* a data table (jump table of the interpreter) points here */
+  .L150ADE78:
     /* DB328 150ADE78 01605826 */  xor        $t3, $t3, $zero
     /* DB32C 150ADE7C 2D6B0001 */  sltiu      $t3, $t3, 0x1
     /* DB330 150ADE80 1000FF50 */  b          .L150ADBC4
     /* DB334 150ADE84 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE88  /* a data table (jump table of the interpreter) points here */
+  .L150ADE88:
     /* DB338 150ADE88 01605827 */  not        $t3, $t3
     /* DB33C 150ADE8C 1000FF4D */  b          .L150ADBC4
     /* DB340 150ADE90 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADE94  /* a data table (jump table of the interpreter) points here */
+  .L150ADE94:
     /* DB344 150ADE94 016C5824 */  and        $t3, $t3, $t4
     /* DB348 150ADE98 1000FF4A */  b          .L150ADBC4
     /* DB34C 150ADE9C ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADEA0  /* a data table (jump table of the interpreter) points here */
+  .L150ADEA0:
     /* DB350 150ADEA0 016C5825 */  or         $t3, $t3, $t4
     /* DB354 150ADEA4 1000FF47 */  b          .L150ADBC4
     /* DB358 150ADEA8 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADEAC  /* a data table (jump table of the interpreter) points here */
+  .L150ADEAC:
     /* DB35C 150ADEAC 016C5826 */  xor        $t3, $t3, $t4
     /* DB360 150ADEB0 1000FF44 */  b          .L150ADBC4
     /* DB364 150ADEB4 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADEB8  /* a data table (jump table of the interpreter) points here */
+  .L150ADEB8:
     /* DB368 150ADEB8 018B5804 */  sllv       $t3, $t3, $t4
     /* DB36C 150ADEBC 1000FF41 */  b          .L150ADBC4
     /* DB370 150ADEC0 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADEC4  /* a data table (jump table of the interpreter) points here */
+  .L150ADEC4:
     /* DB374 150ADEC4 018B5807 */  srav       $t3, $t3, $t4
     /* DB378 150ADEC8 1000FF3E */  b          .L150ADBC4
     /* DB37C 150ADECC ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADED0  /* a data table (jump table of the interpreter) points here */
+  .L150ADED0:
     /* DB380 150ADED0 000C6080 */  sll        $t4, $t4, 2
     /* DB384 150ADED4 00EC3821 */  addu       $a3, $a3, $t4
     /* DB388 150ADED8 8CEA0000 */  lw         $t2, 0x0($a3)
     /* DB38C 150ADEDC 1000FF39 */  b          .L150ADBC4
     /* DB390 150ADEE0 ACCA0000 */   sw        $t2, 0x0($a2)
+  .globl .L150ADEE4  /* a data table (jump table of the interpreter) points here */
+  .L150ADEE4:
     /* DB394 150ADEE4 000C6080 */  sll        $t4, $t4, 2
     /* DB398 150ADEE8 00EC3821 */  addu       $a3, $a3, $t4
     /* DB39C 150ADEEC 1000FF35 */  b          .L150ADBC4
     /* DB3A0 150ADEF0 ACEA0000 */   sw        $t2, 0x0($a3)
+  .globl .L150ADEF4  /* a data table (jump table of the interpreter) points here */
+  .L150ADEF4:
     /* DB3A4 150ADEF4 1000FF33 */  b          .L150ADBC4
     /* DB3A8 150ADEF8 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADEFC  /* a data table (jump table of the interpreter) points here */
+  .L150ADEFC:
     /* DB3AC 150ADEFC 01408825 */  or         $s1, $t2, $zero
     /* DB3B0 150ADF00 1000FF30 */  b          .L150ADBC4
     /* DB3B4 150ADF04 02308821 */   addu      $s1, $s1, $s0
+  .globl .L150ADF08  /* a data table (jump table of the interpreter) points here */
+  .L150ADF08:
     /* DB3B8 150ADF08 1540FF2E */  bnez       $t2, .L150ADBC4
     /* DB3BC 150ADF0C 00000000 */   nop
     /* DB3C0 150ADF10 01608825 */  or         $s1, $t3, $zero
     /* DB3C4 150ADF14 1000FF2B */  b          .L150ADBC4
     /* DB3C8 150ADF18 02308821 */   addu      $s1, $s1, $s0
+  .globl .L150ADF1C  /* a data table (jump table of the interpreter) points here */
+  .L150ADF1C:
     /* DB3CC 150ADF1C 1140FF29 */  beqz       $t2, .L150ADBC4
     /* DB3D0 150ADF20 00000000 */   nop
     /* DB3D4 150ADF24 01608825 */  or         $s1, $t3, $zero
     /* DB3D8 150ADF28 1000FF26 */  b          .L150ADBC4
     /* DB3DC 150ADF2C 02308821 */   addu      $s1, $s1, $s0
+  .globl .L150ADF30  /* a data table (jump table of the interpreter) points here */
+  .L150ADF30:
     /* DB3E0 150ADF30 016C582A */  slt        $t3, $t3, $t4
     /* DB3E4 150ADF34 1000FF23 */  b          .L150ADBC4
     /* DB3E8 150ADF38 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF3C  /* a data table (jump table of the interpreter) points here */
+  .L150ADF3C:
     /* DB3EC 150ADF3C 018B582A */  slt        $t3, $t4, $t3
     /* DB3F0 150ADF40 1000FF20 */  b          .L150ADBC4
     /* DB3F4 150ADF44 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF48  /* a data table (jump table of the interpreter) points here */
+  .L150ADF48:
     /* DB3F8 150ADF48 018B582A */  slt        $t3, $t4, $t3
     /* DB3FC 150ADF4C 396B0001 */  xori       $t3, $t3, 0x1
     /* DB400 150ADF50 1000FF1C */  b          .L150ADBC4
     /* DB404 150ADF54 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF58  /* a data table (jump table of the interpreter) points here */
+  .L150ADF58:
     /* DB408 150ADF58 016C582A */  slt        $t3, $t3, $t4
     /* DB40C 150ADF5C 396B0001 */  xori       $t3, $t3, 0x1
     /* DB410 150ADF60 1000FF18 */  b          .L150ADBC4
     /* DB414 150ADF64 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF68  /* a data table (jump table of the interpreter) points here */
+  .L150ADF68:
     /* DB418 150ADF68 016C5826 */  xor        $t3, $t3, $t4
     /* DB41C 150ADF6C 2D6B0001 */  sltiu      $t3, $t3, 0x1
     /* DB420 150ADF70 1000FF14 */  b          .L150ADBC4
     /* DB424 150ADF74 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF78  /* a data table (jump table of the interpreter) points here */
+  .L150ADF78:
     /* DB428 150ADF78 016C5826 */  xor        $t3, $t3, $t4
     /* DB42C 150ADF7C 000B582B */  sltu       $t3, $zero, $t3
     /* DB430 150ADF80 1000FF10 */  b          .L150ADBC4
     /* DB434 150ADF84 ACCB0000 */   sw        $t3, 0x0($a2)
+  .globl .L150ADF88  /* a data table (jump table of the interpreter) points here */
+  .L150ADF88:
     /* DB438 150ADF88 22B5FFFC */  addi       $s5, $s5, -0x4 /* handwritten instruction */
     /* DB43C 150ADF8C 3C0B800D */  lui        $t3, %hi(D_800D3844)
     /* DB440 150ADF90 8D6B3844 */  lw         $t3, %lo(D_800D3844)($t3)
@@ -346,6 +398,8 @@ glabel func_150ADAF0
   .L150ADFB4:
     /* DB464 150ADFB4 1000FF03 */  b          .L150ADBC4
     /* DB468 150ADFB8 AEAA0000 */   sw        $t2, 0x0($s5)
+  .globl .L150ADFBC  /* a data table (jump table of the interpreter) points here */
+  .L150ADFBC:
     /* DB46C 150ADFBC 3C0B800D */  lui        $t3, %hi(D_800D3844)
     /* DB470 150ADFC0 8D6B3844 */  lw         $t3, %lo(D_800D3844)($t3)
     /* DB474 150ADFC4 3C01800D */  lui        $at, %hi(D_800D3840)
@@ -380,11 +434,15 @@ glabel func_150ADAF0
     /* DB4E4 150AE034 01408825 */  or         $s1, $t2, $zero
     /* DB4E8 150AE038 1000FEE2 */  b          .L150ADBC4
     /* DB4EC 150AE03C 02308821 */   addu      $s1, $s1, $s0
+  .globl .L150AE040  /* a data table (jump table of the interpreter) points here */
+  .L150AE040:
     /* DB4F0 150AE040 22B5FFFC */  addi       $s5, $s5, -0x4 /* handwritten instruction */
     /* DB4F4 150AE044 AEB40000 */  sw         $s4, 0x0($s5)
     /* DB4F8 150AE048 02A0A025 */  or         $s4, $s5, $zero
     /* DB4FC 150AE04C 1000FEDD */  b          .L150ADBC4
     /* DB500 150AE050 02AAA822 */   sub       $s5, $s5, $t2 /* handwritten instruction */
+  .globl .L150AE054  /* a data table (jump table of the interpreter) points here */
+  .L150AE054:
     /* DB504 150AE054 01401025 */  or         $v0, $t2, $zero
     /* DB508 150AE058 3C0D800D */  lui        $t5, %hi(D_800D3848)
     /* DB50C 150AE05C 25AD3848 */  addiu      $t5, $t5, %lo(D_800D3848)
@@ -392,6 +450,8 @@ glabel func_150ADAF0
     /* DB514 150AE064 AC223848 */  sw         $v0, %lo(D_800D3848)($at)
     /* DB518 150AE068 3C01800D */  lui        $at, %hi(D_800D384C)
     /* DB51C 150AE06C AC2D384C */  sw         $t5, %lo(D_800D384C)($at)
+  .globl .L150AE070  /* a data table (jump table of the interpreter) points here */
+  .L150AE070:
     /* DB520 150AE070 0280A825 */  or         $s5, $s4, $zero
     /* DB524 150AE074 8EB40000 */  lw         $s4, 0x0($s5)
     /* DB528 150AE078 22B50004 */  addi       $s5, $s5, 0x4 /* handwritten instruction */
@@ -434,15 +494,21 @@ glabel func_150AE0F8
     /* DB5AC 150AE0FC 24638420 */  addiu      $v1, $v1, %lo(D_80088420)
     /* DB5B0 150AE100 1000000F */  b          .L150AE140
     /* DB5B4 150AE104 00802825 */   or        $a1, $a0, $zero
+  .globl .L150AE108  /* a data table (jump table of the interpreter) points here */
+  .L150AE108:
     /* DB5B8 150AE108 3C038009 */  lui        $v1, %hi(D_8008845C)
     /* DB5BC 150AE10C 2463845C */  addiu      $v1, $v1, %lo(D_8008845C)
     /* DB5C0 150AE110 1000000B */  b          .L150AE140
     /* DB5C4 150AE114 00802825 */   or        $a1, $a0, $zero
+  .globl .L150AE118  /* a data table (jump table of the interpreter) points here */
+  .L150AE118:
     /* DB5C8 150AE118 8C850004 */  lw         $a1, 0x4($a0)
     /* DB5CC 150AE11C 3C038009 */  lui        $v1, %hi(D_80088498)
     /* DB5D0 150AE120 24638498 */  addiu      $v1, $v1, %lo(D_80088498)
     /* DB5D4 150AE124 10000006 */  b          .L150AE140
     /* DB5D8 150AE128 00803025 */   or        $a2, $a0, $zero
+  .globl .L150AE12C  /* a data table (jump table of the interpreter) points here */
+  .L150AE12C:
     /* DB5DC 150AE12C 8C850004 */  lw         $a1, 0x4($a0)
     /* DB5E0 150AE130 3C038009 */  lui        $v1, %hi(D_800884D4)
     /* DB5E4 150AE134 246384D4 */  addiu      $v1, $v1, %lo(D_800884D4)

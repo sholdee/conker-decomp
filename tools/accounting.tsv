@@ -4773,7 +4773,8 @@ func_15177410	0x15177410	1668	game	c		build/src/game_1A48C0.c.o
 func_15177A94	0x15177A94	1276	game	c		build/src/game_1A48C0.c.o
 func_15177F90	0x15177F90	728	game	c		build/src/game_1A5440.c.o
 func_15178268	0x15178268	1256	game	c		build/src/game_1A5440.c.o
-func_15178750	0x15178750	92	game	c		build/src/game_1A5440.c.o
+func_15178750	0x15178750	84	game	c		build/src/game_1A5440.c.o
+func_151787A4	0x151787A4	8	game	c		build/src/game_1A5440.c.o
 func_151787AC	0x151787AC	1004	game	c		build/src/game_1A5440.c.o
 func_15178B98	0x15178B98	76	game	c		build/src/game_1A5440.c.o
 func_15178BE4	0x15178BE4	80	game	c		build/src/game_1A5440.c.o

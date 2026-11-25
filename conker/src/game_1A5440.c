@@ -306,7 +306,8 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 }
 
 /* The empty function at 0x151787A4. */
-static void func_15178750_pad(void) {
+/* An empty callback: the function table D_8008CB64 points here. */
+void func_151787A4(void) {
 }
 
 extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4,
