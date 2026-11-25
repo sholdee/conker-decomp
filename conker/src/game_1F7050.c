@@ -13,100 +13,7 @@ extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 
-/* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad6[2];
-    s16 length;
-    u8 padA[2];
-    f32 rotationX;
-    f32 rotationY;
-    u8 disabled;
-    u8 pad15[3];
-    u32 flags;
-    u32 colors;
-    u32 widths;
-} SightBeamParams;
-
 extern s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
-
-/* Animation parameters copied into an emitter part by func_151C9198. */
-typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8  unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u8  unkE;
-    /* 0x10 */ s32 unk10;
-} SightEmitterAnim;
-
-/* Emitter object created by func_151C9198; flag 0x20000 toggles its flash. */
-typedef struct {
-    u8 pad0[0x60];
-    u32 flags;
-    u8 pad64[0x2C];
-    u8 parts[2][0x40];
-    u8 pad110[0x60];
-    SightEmitterAnim anim;
-} SightEmitter;
-
-/* Visibility record returned by func_1510FD20 for a map position. */
-typedef struct {
-    u8 pad0[2];
-    s16 viewMask;
-} SightZone;
-
-/* Sight beam state, stored at +0x110 of the beam object (see func_151C82D0). */
-typedef struct {
-    f32 texS;
-    f32 texT;
-    f32 centerS;
-    f32 centerT;
-    f32 radiusS;
-    f32 radiusT;
-    f32 angleS;
-    f32 angleT;
-    f32 speedS;
-    f32 speedT;
-    SightBeamParams *source;
-    LightEffect *midEffect;
-    s32 unk30;
-    struct SightExtension *endEffect0;
-    struct SightExtension *endEffect1;
-    SightEmitter *emitter0[3];
-    SightEmitter *emitter1[3];
-    f32 phase;
-    u8 alternate;
-    CollisionTri triangle0;
-    CollisionTri triangle1;
-    s16 activeTime;
-    s16 inactiveTime;
-    s16 timer;
-    s16 period;
-    u8 flags;
-    SightBeamParams *beam;
-    SightZone *zone0;
-    SightZone *zone1;
-    u8 unk94;
-    f32 pulseAngle;
-    f32 pulseSpeed;
-} SightBeamState;
-
-/* Sound handle from func_1000FA64; `state` is the user pointer passed to it. */
-typedef struct {
-    u8 pad0[0x18];
-    SightBeamState *state;
-} SightSoundHandle;
-
-/* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ SightBeamState state;
-} SightBeamObject;
 
 struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
@@ -121,12 +28,6 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
 
 void func_151C899C(Actor *actor, SightBeamObject *obj);
 
-/* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
-typedef struct SightExtension {
-    EffectHeader header;
-    u8 pad10[0x160];
-    SightBeamObject *owner;
-} SightExtension;
 SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
@@ -229,45 +130,6 @@ void func_151C9ED4(Camera *player) {
     func_151494E0((s32)&msg, 0x21);
     D_8008CD00 = 0;
 }
-
-typedef struct {
-    f32 r;
-    f32 g;
-    f32 b;
-    f32 a;
-} SightColor;
-
-/* Per-sprite state copied to +0x70 of each spawned sight sprite. */
-typedef struct {
-    /* 0x00 */ Camera *player;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 flags; /* 1: bouncing, 2: colour flash, 4: value from D_800C3958[sourceIndex] */
-    /* 0x0D */ u8 kind;  /* index into the D_8008FC10 message handlers */
-    /* 0x0E */ u8 side;
-    /* 0x0F */ u8 padF;
-    /* 0x10 */ f32 bouncePhase;
-    /* 0x14 */ f32 fade;
-    /* 0x18 */ f32 rangeMin;
-    /* 0x1C */ f32 rangeMax;
-    /* 0x20 */ f32 rangeScale;
-    /* 0x24 */ f32 angle;
-    /* 0x28 */ f32 lastValue;
-    /* 0x2C */ SightColor flashColor;
-    /* 0x3C */ SightColor color;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 flashTimer;
-    /* 0x54 */ s8 sourceIndex;
-    /* 0x55 */ u8 pad55[3];
-} SightSpritePayload;
-
-/* A spawned sight sprite: the spawn descriptor lives on at +0x10, the payload at +0x70. */
-typedef struct {
-    EffectHeader header;
-    ScreenSpriteInfo desc;
-    u8 pad68[8];
-    SightSpritePayload payload;
-} SightSprite;
 
 /* Message 0x37 (see func_151CB918). */
 typedef struct {
