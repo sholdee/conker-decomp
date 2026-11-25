@@ -217,6 +217,7 @@ segments:
     type:  code
     start: 0x000290D0
     vram:  0x800290D0 # rom is at 0x1000000
+    subalign: 4
     bss_size: 0x16690
     subsegments:
       - [0x290D0, data] # could be larger/smaller
@@ -931,6 +932,7 @@ segments:
     type:  code
     start: 0x002275E0
     vram:  0x80082B20
+    subalign: 4
     subsegments:
       - [0x2275E0, data]
       - [0x22A980, rodata]
@@ -1127,16 +1129,29 @@ segments:
       - [0x234C10, rodata]
       - [0x234CB0, rodata]
       - [0x236430, rodata]
+      - [0x2364F0, .rodata, game_2D4B0]
+      - [0x236504, rodata]
+      - [0x236510, .rodata, game_2DF70]
+      - [0x2365AC, rodata]
       - [0x2365B0, rodata]
       - [0x2367E0, rodata]
-      - [0x23A490, rodata]
-      - [0x23A4A0, rodata]
-      - [0x23A4C0, rodata]
-      - [0x23A4F0, rodata] # , game/entrypoint] # jumptable 0x80095A30
-      - [0x23A510, rodata]
-      - [0x23A5D0, rodata]
-      - [0x23A600, rodata]
+      - [0x23A490, .rodata, game_30E90]
+      - [0x23A498, rodata]
+      - [0x23A4A0, .rodata, game_32740]
+      - [0x23A4B4, rodata]
+      - [0x23A4C0, .rodata, game_33990]
+      - [0x23A4E8, rodata]
+      - [0x23A4F0, .rodata, game/entrypoint]
+      - [0x23A504, rodata]
+      - [0x23A510, .rodata, game_34F20]
+      - [0x23A5C4, rodata]
+      - [0x23A5D0, .rodata, game_357F0]
+      - [0x23A5F4, rodata]
+      - [0x23A600, .rodata, game_360A0]
+      - [0x23A618, rodata]
       - [0x23A630, rodata]
+      - [0x23A638, .rodata, game_36680]
+      - [0x23A69C, rodata]
       - [0x23A6A0, rodata]
       - [0x23A7A0, rodata]
       - [0x23AA60, rodata]
