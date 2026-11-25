@@ -3,48 +3,77 @@
 #include "variables.h"
 
 
+/*
+ * Spawn template of a billboard particle: func_15167D84 copies these 0x38 bytes to Particle.anim
+ * onwards (layout as ParticleTemplate in game_1E6B40.c).
+ */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s16 unk0C;
-    s16 unk0E;
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    u8 pad1C[3];
-    s8 unk1F;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s8 unk2A;
-    s8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 pad30[4];
-    s16 unk34;
-} Packet15174690;
+    /* 0x00 */ void *anim;
+    /* 0x04 */ s32 growth;          /* this file: width/height added per frame (SmokeParticle.growth) */
+    /* 0x08 */ s32 fadeRate;        /* this file: alpha removed per frame (SmokeParticle.fadeRate) */
+    /* 0x0C */ s16 frame;
+    /* 0x0E */ s16 frameStep;
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ s16 velX;
+    /* 0x18 */ s16 velZ;
+    /* 0x1A */ s16 size;
+    /* 0x1C */ u8 subX;
+    /* 0x1D */ u8 subZ;
+    /* 0x1E */ u8 subY;
+    /* 0x1F */ s8 callback;         /* index into D_8008C9C8, -1 = none */
+    /* 0x20 */ s16 velY;
+    /* 0x22 */ s16 accelY;
+    /* 0x24 */ s16 width;
+    /* 0x26 */ s16 height;
+    /* 0x28 */ s16 life;
+    /* 0x2A */ s8 fadeStep;
+    /* 0x2B */ u8 onExpire;
+    /* 0x2C */ u8 primR;
+    /* 0x2D */ u8 primG;
+    /* 0x2E */ u8 primB;
+    /* 0x2F */ u8 primA;
+    /* 0x30 */ u8 envR;
+    /* 0x31 */ u8 envG;
+    /* 0x32 */ u8 envB;
+    /* 0x33 */ u8 pad33;
+    /* 0x34 */ u16 flags;
+    /* 0x36 */ u8 pad36[2];
+} ParticleTemplate; /* size 0x38 */
 
-extern s32 D_8008CA4C;
+/* The parts of a spawned particle that func_15174920 uses (layout as Particle in game_1944C0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ s32 growth;          /* copied from ParticleTemplate.growth */
+    /* 0x18 */ s32 fadeRate;        /* copied from ParticleTemplate.fadeRate */
+    /* 0x1C */ u8 pad1C[0x18];
+    /* 0x34 */ s16 width;
+    /* 0x36 */ s16 height;
+    /* 0x38 */ s16 life;
+    /* 0x3A */ u8 pad3A[5];
+    /* 0x3F */ u8 primA;
+} SmokeParticle;
+
+extern void *D_8008CA4C[];
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
-void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+/*
+ * Spawns a smoke puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
+ * `spread` randomises x/z by up to that much; `growth` (+ up to `growthRange` at random) and
+ * `fadeRate` drive func_15174920.
+ */
+void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY,
+                   s32 owner, s32 list) {
     f32 angle;
     f32 x;
     f32 y;
     f32 z;
     s32 rand;
     struct127 *obj;
-    Packet15174690 packet;
+    ParticleTemplate template;
 
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[objIndex];
     if ((obj->in_water == 0) && (-10000.0f == obj->unk118)) {
         y = obj->y_position + 5.0f;
         angle = obj->unk40 * 0.01745329238f;
@@ -52,56 +81,57 @@ void func_15174690(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
         z = obj->z_position;
         x -= 10.0f * sinf(angle);
         z -= 10.0f * cosf(angle);
-        if (arg1 != 0) {
+        if (spread != 0) {
             rand = func_150ADA20();
-            x += (f32)(rand % arg1);
+            x += (f32)(rand % spread);
             rand = func_150ADA20() + rand * 0;
-            z += (f32)(rand % arg1);
+            z += (f32)(rand % spread);
         }
         if (rand) {}
-        if (arg3 != 0) {
-            arg2 += func_150ADA20() % (u32)arg3;
+        if (growthRange != 0) {
+            growth += func_150ADA20() % (u32)growthRange;
         }
-        packet.unk00 = D_8008CA4C;
-        packet.unk04 = arg2;
-        packet.unk08 = arg5;
-        packet.unk0C = 0;
-        packet.unk0E = 0x100;
-        packet.x = (s32)x;
-        packet.y = (s32)y;
-        packet.z = (s32)z;
-        packet.unk16 = 0;
-        packet.unk18 = 0;
-        packet.unk1A = 0;
-        packet.unk1F = 5;
-        packet.unk20 = arg6;
-        packet.unk22 = 0;
-        packet.unk24 = arg4;
-        packet.unk26 = arg4;
-        packet.unk28 = 0x200;
-        packet.unk2A = 0;
-        packet.unk2B = 0;
-        packet.unk2C = 0xFF;
-        packet.unk2D = 0xFF;
-        packet.unk2E = 0xFF;
-        packet.unk2F = 0xFF;
-        packet.unk34 = 0;
-        func_15167D84(&packet, 0, 0, -1, (u8)arg7, arg8);
+        template.anim = D_8008CA4C[0];
+        template.growth = growth;
+        template.fadeRate = fadeRate;
+        template.frame = 0;
+        template.frameStep = 0x100;
+        template.x = (s32)x;
+        template.y = (s32)y;
+        template.z = (s32)z;
+        template.velX = 0;
+        template.velZ = 0;
+        template.size = 0;
+        template.callback = 5;
+        template.velY = velY;
+        template.accelY = 0;
+        template.width = size;
+        template.height = size;
+        template.life = 0x200;
+        template.fadeStep = 0;
+        template.onExpire = 0;
+        template.primR = 0xFF;
+        template.primG = 0xFF;
+        template.primB = 0xFF;
+        template.primA = 0xFF;
+        template.flags = 0;
+        func_15167D84(&template, 0, 0, -1, (u8)owner, list);
     }
 }
 
-void func_15174920(void *arg0) {
-    s32 v0 = *(u8 *)((u8 *)arg0 + 0x3F);
+/* Particle callback 5 (D_8008C9C8[5]): fades the puff out while it grows (height 8/7 as fast as width). */
+void func_15174920(SmokeParticle *particle) {
+    s32 alpha = particle->primA;
 
-    if (v0 >= 0xC9) {
-        v0 = 0xC8;
+    if (alpha > 200) {
+        alpha = 200;
     }
-    v0 -= D_800BE9E4 * *(s32 *)((u8 *)arg0 + 0x18);
-    if (v0 < 0) {
-        *(s16 *)((u8 *)arg0 + 0x38) = 0;
+    alpha -= D_800BE9E4 * particle->fadeRate;
+    if (alpha < 0) {
+        particle->life = 0;
         return;
     }
-    *(u8 *)((u8 *)arg0 + 0x3F) = v0;
-    *(s16 *)((u8 *)arg0 + 0x34) += *(s32 *)((u8 *)arg0 + 0x14);
-    *(s16 *)((u8 *)arg0 + 0x36) += (*(s32 *)((u8 *)arg0 + 0x14) << 3) / 7;
+    particle->primA = alpha;
+    particle->width += particle->growth;
+    particle->height += (particle->growth * 8) / 7;
 }
