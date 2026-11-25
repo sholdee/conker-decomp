@@ -777,224 +777,207 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
     return index + 1;
 }
 
-s32 func_1500B1F4(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
+/** Linear interpolation from a to b by t, with the difference computed in the integer type of a and b. */
+#define LERP_INT(a, b, t) ((f32)(a) + (f32)((b) - (a)) * (t))
+/** Linear interpolation from a to b by t. */
+#define LERP(a, b, t) ((a) + ((b) - (a)) * (t))
+
+/** Scatters `count` particles over the triangle `tri` at the barycentric weights of D_80095C64. */
+s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
     s32 i;
-    s32 count;
-    s32 ret;
+    s32 n;
+    s32 next;
     f32 *weights;
-    s16 *p0;
-    s16 *p1;
-    s16 *p2;
     f32 w0;
     f32 w1;
-    f32 base;
 
+    // matching: a guarded do-while; the equivalent for loop allocates registers differently
     i = 0;
-    count = arg0;
-    if (arg0 != 0) {
+    n = count;
+    if (count != 0) {
         weights = D_80095C64;
         do {
-            p2 = arg5[2];
-            p1 = arg5[1];
-            p0 = arg5[0];
             w0 = weights[0];
             w1 = weights[1];
-            base = (f32)p0[0] + (f32)(p1[0] - p0[0]) * w0;
-            ret = func_1500AF08(arg4, arg2, arg3,
-                                 (s16)(s32)(((f32)p2[0] - base) * w1 + base),
-                                 (s32)(((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0) + ((f32)p2[1] - ((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0)) * w1),
-                                 (s32)(((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0) + ((f32)p2[2] - ((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0)) * w1),
-                                 0x80, arg1, arg4);
+            next = func_1500AF08(index, slot, subtype,
+                                 (s16)(s32)LERP(LERP_INT(tri[0][0], tri[1][0], w0), (f32)tri[2][0], w1),
+                                 (s32)LERP(LERP_INT(tri[0][1], tri[1][1], w0), (f32)tri[2][1], w1),
+                                 (s32)LERP(LERP_INT(tri[0][2], tri[1][2], w0), (f32)tri[2][2], w1),
+                                 0x80, kind, index);
             i++;
             weights += 2;
-            arg4 = ret;
-        } while (i != count);
+            index = next;
+        } while (i != n);
     }
-    return arg4;
+    return index;
 }
+
 typedef struct {
     f32 x;
     f32 y;
     f32 z;
-} Vtx1500B3B0;
+} Game36680Vec3f;
 
 typedef struct {
-    Vtx1500B3B0 unk0[3];
-} Tri1500B3B0;
+    Game36680Vec3f points[3];
+} Game36680Triangle;
 
-extern void func_15049350(Tri1500B3B0);
+extern void func_15049350(Game36680Triangle);
 extern f32 *D_80082D80[];
 extern u16 D_800BE430;
 
-s32 func_1500B3B0(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
+/**
+ * Places the particles of pattern `pattern` (D_80082D80: a pair count, then x/z offsets) around the
+ * centre of triangle `tri`, projecting each onto the triangle's plane (computed by func_15049350).
+ */
+s32 func_1500B3B0(s16 pattern, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
     u32 i;
-    f32 sumX;
-    f32 sumY;
-    f32 sumZ;
+    f32 centerX;
+    f32 centerY;
+    f32 centerZ;
     f32 x;
     f32 y;
     f32 z;
-    Tri1500B3B0 tri;
+    Game36680Triangle triangle;
 
-    sumX = 0.0f;
-    sumY = 0.0f;
-    sumZ = 0.0f;
+    centerX = 0.0f;
+    centerY = 0.0f;
+    centerZ = 0.0f;
 
     for (i = 0; i < 3; i++) {
-        tri.unk0[i].x = (f32)arg5[i][0];
-        sumX += tri.unk0[i].x / 3.0f;
-        tri.unk0[i].y = (f32)arg5[i][1];
-        sumY += tri.unk0[i].y / 3.0f;
-        tri.unk0[i].z = (f32)arg5[i][2];
-        sumZ += tri.unk0[i].z / 3.0f;
+        triangle.points[i].x = tri[i][0];
+        centerX += triangle.points[i].x / 3.0f;
+        triangle.points[i].y = tri[i][1];
+        centerY += triangle.points[i].y / 3.0f;
+        triangle.points[i].z = tri[i][2];
+        centerZ += triangle.points[i].z / 3.0f;
     }
 
-    func_15049350(tri);
+    func_15049350(triangle);
 
-    for (i = 1; (f32)i <= D_80082D80[arg0][0] * 2;) {
-        x = D_80082D80[arg0][i] + sumX;
-        i++;
-        z = D_80082D80[arg0][i] + sumZ;
-        i++;
+    for (i = 1; i <= D_80082D80[pattern][0] * 2;) {
+        x = D_80082D80[pattern][i++] + centerX;
+        z = D_80082D80[pattern][i++] + centerZ;
         if (D_800CC214 != 0.0f) {
             y = ((D_800CC21C - D_800CC210 * x) - D_800CC218 * z) / D_800CC214;
         } else {
-            y = sumY;
+            y = centerY;
         }
-        arg4 = func_1500AF08(arg4, arg2, arg3, (s16)(s32)x, (s32)y, (s32)z, 0x80, arg1, D_800BE430 >> arg2);
+        index = func_1500AF08(index, slot, subtype, (s16)(s32)x, (s32)y, (s32)z, 0x80, kind, D_800BE430 >> slot);
     }
 
-    D_800BE430 ^= 1 << arg2;
-    return arg4;
+    D_800BE430 ^= 1 << slot;
+    return index;
 }
 
-s32 func_1500B714(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
-    u16 angle;
+/** Places one particle at the centre of triangle `tri` and starts positional sound 0x4D there. */
+s32 func_1500B714(s16 amount, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
+    u16 clamped;
     s32 x;
     s32 y;
     s32 z;
-    s32 angle_f;
 
-    angle_f = *(s16 *)&arg0;
-    angle = angle_f;
+    clamped = amount;
 
-    x = (arg5[0][0] + arg5[1][0] + arg5[2][0]) / 3;
-    y = (arg5[0][1] + arg5[1][1] + arg5[2][1]) / 3;
-    z = (arg5[0][2] + arg5[1][2] + arg5[2][2]) / 3;
+    x = (tri[0][0] + tri[1][0] + tri[2][0]) / 3;
+    y = (tri[0][1] + tri[1][1] + tri[2][1]) / 3;
+    z = (tri[0][2] + tri[1][2] + tri[2][2]) / 3;
 
-    arg4 = func_1500AF08(arg4, arg2, arg3, (s16)x, (s16)y, (s16)z, 0x80, arg1, arg4);
+    index = func_1500AF08(index, slot, subtype, (s16)x, (s16)y, (s16)z, 0x80, kind, index);
 
-    if ((f32)(u16)angle_f > 62.5f) {
-        angle = 0x3E;
+    if ((f32)(u16)amount > 62.5f) {
+        clamped = 62;
     }
 
-    func_1000FA64(0x4D, (s16)x, (s16)y, (s16)z, 0x8000, angle, angle >> 3, 0, 0, 0, 0, 0);
-    return arg4;
+    func_1000FA64(0x4D, (s16)x, (s16)y, (s16)z, 0x8000, clamped, clamped >> 3, 0, 0, 0, 0, 0);
+    return index;
 }
-void func_1500B8F4(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
+/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 87. */
+void func_1500B8F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
     s32 i;
-    s32 count;
-    s32 ret;
+    s32 n;
+    s32 next;
     f32 *weights;
-    s16 *p0;
-    s16 *p1;
-    s16 *p2;
     f32 w0;
     f32 w1;
-    f32 base;
 
+    // matching: a guarded do-while; the equivalent for loop allocates registers differently
     i = 0;
-    count = arg0;
-    if (arg0 != 0) {
+    n = count;
+    if (count != 0) {
         weights = D_80095C64;
         do {
-            p2 = arg5[2];
-            p1 = arg5[1];
-            p0 = arg5[0];
             w0 = weights[0];
             w1 = weights[1];
-            base = (f32)p0[0] + (f32)(p1[0] - p0[0]) * w0;
-            ret = func_1500AF08(arg4, arg2, arg3,
-                                 (s16)(s32)(((f32)p2[0] - base) * w1 + base),
-                                 (s32)(((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0) + ((f32)p2[1] - ((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0)) * w1),
-                                 (s32)(((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0) + ((f32)p2[2] - ((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0)) * w1),
-                                 0, arg1, arg4);
+            next = func_1500AF08(index, slot, subtype,
+                                 (s16)(s32)LERP(LERP_INT(tri[0][0], tri[1][0], w0), (f32)tri[2][0], w1),
+                                 (s32)LERP(LERP_INT(tri[0][1], tri[1][1], w0), (f32)tri[2][1], w1),
+                                 (s32)LERP(LERP_INT(tri[0][2], tri[1][2], w0), (f32)tri[2][2], w1),
+                                 0, kind, index);
             i++;
             weights += 2;
-            arg4 = ret;
-        } while (i != count);
+            index = next;
+        } while (i != n);
     }
-    D_800DDBD0[arg2] = 0x57;
+    D_800DDBD0[slot] = 87;
 }
-void func_1500BAB8(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
+/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 8. */
+void func_1500BAB8(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
     s32 i;
-    s32 count;
-    s32 ret;
+    s32 n;
+    s32 next;
     f32 *weights;
-    s16 *p0;
-    s16 *p1;
-    s16 *p2;
     f32 w0;
     f32 w1;
-    f32 base;
 
+    // matching: a guarded do-while; the equivalent for loop allocates registers differently
     i = 0;
-    count = arg0;
-    if (arg0 != 0) {
+    n = count;
+    if (count != 0) {
         weights = D_80095C64;
         do {
-            p2 = arg5[2];
-            p1 = arg5[1];
-            p0 = arg5[0];
             w0 = weights[0];
             w1 = weights[1];
-            base = (f32)p0[0] + (f32)(p1[0] - p0[0]) * w0;
-            ret = func_1500AF08(arg4, arg2, arg3,
-                                 (s16)(s32)(((f32)p2[0] - base) * w1 + base),
-                                 (s32)(((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0) + ((f32)p2[1] - ((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0)) * w1),
-                                 (s32)(((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0) + ((f32)p2[2] - ((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0)) * w1),
-                                 0, arg1, arg4);
+            next = func_1500AF08(index, slot, subtype,
+                                 (s16)(s32)LERP(LERP_INT(tri[0][0], tri[1][0], w0), (f32)tri[2][0], w1),
+                                 (s32)LERP(LERP_INT(tri[0][1], tri[1][1], w0), (f32)tri[2][1], w1),
+                                 (s32)LERP(LERP_INT(tri[0][2], tri[1][2], w0), (f32)tri[2][2], w1),
+                                 0, kind, index);
             i++;
             weights += 2;
-            arg4 = ret;
-        } while (i != count);
+            index = next;
+        } while (i != n);
     }
-    D_800DDBD0[arg2] = 0x8;
+    D_800DDBD0[slot] = 8;
 }
-void func_1500BC7C(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
+/** Like func_1500B1F4 without scale jitter, then sets the slot's frame count to 33. */
+void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tri) {
     s32 i;
-    s32 count;
-    s32 ret;
+    s32 n;
+    s32 next;
     f32 *weights;
-    s16 *p0;
-    s16 *p1;
-    s16 *p2;
     f32 w0;
     f32 w1;
-    f32 base;
 
+    // matching: a guarded do-while; the equivalent for loop allocates registers differently
     i = 0;
-    count = arg0;
-    if (arg0 != 0) {
+    n = count;
+    if (count != 0) {
         weights = D_80095C64;
         do {
-            p2 = arg5[2];
-            p1 = arg5[1];
-            p0 = arg5[0];
             w0 = weights[0];
             w1 = weights[1];
-            base = (f32)p0[0] + (f32)(p1[0] - p0[0]) * w0;
-            ret = func_1500AF08(arg4, arg2, arg3,
-                                 (s16)(s32)(((f32)p2[0] - base) * w1 + base),
-                                 (s32)(((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0) + ((f32)p2[1] - ((f32)p0[1] + (f32)(p1[1] - p0[1]) * w0)) * w1),
-                                 (s32)(((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0) + ((f32)p2[2] - ((f32)p0[2] + (f32)(p1[2] - p0[2]) * w0)) * w1),
-                                 0, arg1, arg4);
+            next = func_1500AF08(index, slot, subtype,
+                                 (s16)(s32)LERP(LERP_INT(tri[0][0], tri[1][0], w0), (f32)tri[2][0], w1),
+                                 (s32)LERP(LERP_INT(tri[0][1], tri[1][1], w0), (f32)tri[2][1], w1),
+                                 (s32)LERP(LERP_INT(tri[0][2], tri[1][2], w0), (f32)tri[2][2], w1),
+                                 0, kind, index);
             i++;
             weights += 2;
-            arg4 = ret;
-        } while (i != count);
+            index = next;
+        } while (i != n);
     }
-    D_800DDBD0[arg2] = 0x21;
+    D_800DDBD0[slot] = 33;
 }
 
 void func_1500BE40(s32 arg0) {
