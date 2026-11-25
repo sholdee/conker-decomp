@@ -69,10 +69,10 @@ struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
 struct225 *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
-void func_15162EF8(struct239 *arg0);
-void func_15162F50(struct239 *arg0);
-struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
-struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
+void func_15162EF8(struct239 *effect);
+void func_15162F50(struct239 *effect);
+struct225 *func_15162FAC(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
+struct225 *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_15163704(struct225 *arg0);
 void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
@@ -1200,172 +1200,187 @@ s32 func_15162B28(struct225 *effect) {
     return 1;
 }
 
-void func_15162EF8(struct239 *arg0) {
-    s8 sp1C[9]; // FIXME: what size should this be?
-    struct240 *temp_v0;
+/* Cycle callback: sets bit 0 of unk7C on object unk48 and sends event 36. */
+void func_15162EF8(struct239 *effect) {
+    s8 message[9];
+    struct240 *object;
 
-    temp_v0 = func_151149AC(arg0->unk48);
-    if (temp_v0 != NULL) {
-        temp_v0->unk7C |= 1;
+    object = func_151149AC(effect->unk48);
+    if (object != NULL) {
+        object->unk7C |= 1;
     }
-    sp1C[0] = arg0->unk12 - 21;
-    func_151403A8(&sp1C, 36);
+    message[0] = effect->unk12 - 21;
+    func_151403A8(&message, 36);
 }
 
-void func_15162F50(struct239 *arg0) {
-    s8 sp1C[9]; // FIXME: what size should this be?
-    struct240 *temp_v0;
+/* Cycle callback: clears bit 0 of unk7C on object unk48 and sends event 37. */
+void func_15162F50(struct239 *effect) {
+    s8 message[9];
+    struct240 *object;
 
-    temp_v0 = func_151149AC(arg0->unk48);
-    if (temp_v0 != NULL) {
-        temp_v0->unk7C &= ~1;
+    object = func_151149AC(effect->unk48);
+    if (object != NULL) {
+        object->unk7C &= ~1;
     }
-    sp1C[0] = arg0->unk12 - 21;
-    func_151403A8(&sp1C, 37);
+    message[0] = effect->unk12 - 21;
+    func_151403A8(&message, 37);
 }
 
-struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
-    struct225 *temp_v0;
+/* Payload of func_151630F4: lightning. Idle for a random wait, then a burst of decaying flashes with thunder. */
+typedef struct {
+    f32 level;         // current intensity
+    f32 decay;         // fraction of the level lost per frame
+    f32 waitTimer;     // frames until the next burst
+    f32 waitMin;
+    f32 waitRange;
+    s32 flashes;       // flashes left in the current burst
+    s32 flashesMin;
+    s32 flashesRange;
+    f32 flashTimer;    // frames until the next flash
+    f32 flashGapMin;
+    f32 flashGapRange;
+    f32 flashMin;      // intensity of a flash
+    f32 flashRange;
+} LightStorm;
+
+/* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */
+struct225 *func_15162FAC(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
+    struct225 *effect;
     Header header;
-    struct241 src;
+    LightStorm storm;
 
-    if (arg1 >= 3) {
+    if (kind >= 3) {
         return NULL;
     }
 
-    src.unk0 = 0.0f;
-    src.unk4 = D_800A68F8[arg1];
-    src.unk8 = 0.0f;
-    src.unk14 = 0;
-    src.unk20 = 0.0f;
-    src.unkC = D_800A6904[arg1];
-    src.unk10 = D_800A6910[arg1];
-    src.unk24 = D_800A6934[arg1];
-    src.unk28 = D_800A6940[arg1];
-    src.unk2C = D_800A694C[arg1];
-    src.unk18 = D_800A691C[arg1];
-    src.unk1C = D_800A6928[arg1];
-    src.unk30 = D_800A6958[arg1];
+    storm.level = 0.0f;
+    storm.decay = D_800A68F8[kind];
+    storm.waitTimer = 0.0f;
+    storm.flashes = 0;
+    storm.flashTimer = 0.0f;
+    storm.waitMin = D_800A6904[kind];
+    storm.waitRange = D_800A6910[kind];
+    storm.flashGapMin = D_800A6934[kind];
+    storm.flashGapRange = D_800A6940[kind];
+    storm.flashMin = D_800A694C[kind];
+    storm.flashesMin = D_800A691C[kind];
+    storm.flashesRange = D_800A6928[kind];
+    storm.flashRange = D_800A6958[kind];
 
     header.unk0 = arg3;
-    header.unk1 = arg5;
-    header.unk2 = arg4;
-    header.unk4 = arg2;
+    header.unk1 = update;
+    header.unk2 = lifetime;
+    header.unk4 = type;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
+    effect = func_1516037C(&header, light, sizeof(storm), arg6, arg7);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &storm, sizeof(storm));
     }
-    return temp_v0;
+    return effect;
 }
 
-// big one
 extern s32 func_151EF610(void);
 s32 func_1000E770();
 
-s32 func_151630F4(struct225 *arg0) {
-    struct241 *s;
-    s32 r;
-    s32 sp20[2];
-    s32 n;
+/* Lightning update: decays the flash, fires the next flash and thunder sound of a burst, or waits for the next burst. */
+s32 func_151630F4(struct225 *effect) {
+    LightStorm *storm;
+    s32 pan;
+    s32 sound[2];
+    s32 volume;
 
-    s = (struct241 *)&arg0->unk18;
-    if (arg0->unk14->unk9 == 1) {
+    storm = (LightStorm *)&effect->unk18;
+    if (effect->unk14->unk9 == 1) {
         return 1;
     }
-    arg0->unk14->unk2F = s->unk0;
+    effect->unk14->unk2F = storm->level;
     {
         s32 i;
         for (i = D_800BE9E4; i != 0; i--) {
-            s->unk0 -= s->unk0 * s->unk4;
+            storm->level -= storm->level * storm->decay;
         }
     }
-    if (s->unk14 > 0) {
-        s->unk20 -= D_800BE9A4;
-        if (s->unk20 < 0.0f) {
-            s->unk0 = func_150ADA68() * s->unk30 + s->unk2C;
-            s->unk20 = func_150ADA68() * s->unk28 + s->unk24;
-lab2:
-            r = func_151EF610() % 1200 + s->unk14 * 800 - 2400;
-            n = 60 - s->unk14 * 10;
-            sp20[0] = n;
-            sp20[1] = r;
-            func_1000E770(NULL, NULL, n, r);
-            s->unk14--;
+    if (storm->flashes > 0) {
+        storm->flashTimer -= D_800BE9A4;
+        if (storm->flashTimer < 0.0f) {
+            storm->level = func_150ADA68() * storm->flashRange + storm->flashMin;
+            storm->flashTimer = func_150ADA68() * storm->flashGapRange + storm->flashGapMin;
+        // matching: this label keeps IDO from moving the flashTimer store into the jal delay slot
+        thunder:
+            pan = func_151EF610() % 1200 + storm->flashes * 800 - 2400;
+            volume = 60 - storm->flashes * 10;
+            sound[0] = volume; // matching: dead stores; the original schedule needs them
+            sound[1] = pan;
+            func_1000E770(NULL, NULL, volume, pan);
+            storm->flashes--;
         }
     } else {
-        s->unk8 -= D_800BE9A4;
-        if (s->unk8 < 0.0f) {
-            s->unk14 = func_150ADA20() % (u32)(s->unk1C + 1) + s->unk18;
-            s->unk20 = 0.0f;
-            s->unk8 = func_150ADA68() * s->unk10 + s->unkC;
+        storm->waitTimer -= D_800BE9A4;
+        if (storm->waitTimer < 0.0f) {
+            storm->flashes = func_150ADA20() % (u32)(storm->flashesRange + 1) + storm->flashesMin;
+            storm->flashTimer = 0.0f;
+            storm->waitTimer = func_150ADA68() * storm->waitRange + storm->waitMin;
         }
     }
     return 1;
 }
 
-struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
-    struct225 *temp_v0;
-    struct245 data;
-    Header2 header2;
+/* Payload of func_15163504: a light that tracks three externally owned coordinates. */
+typedef struct {
+    f32 *x;
+    f32 *y;
+    f32 *z;
+    s8 callback;  // D_8008B36C update callback, or -1
+    u8 handler;   // D_8008B370 event handler index
+} LightTrack;
 
-    data.unk0 = arg1;
-    data.unk4 = arg2;
-    data.unk8 = arg3;
-    data.unkC = arg4;
-    data.unkD = arg5;
+/* Creates a light at (*x, *y, *z) that follows those coordinates. */
+struct225 *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE) {
+    struct225 *effect;
+    LightTrack track;
+    Header2 position;
 
-    header2.unk0 = *arg1;
-    header2.unk4 = *arg2;
-    header2.unk8 = *arg3;
+    track.x = x;
+    track.y = y;
+    track.z = z;
+    track.callback = callback;
+    track.handler = handler;
 
-    temp_v0 = func_151602C0(header, &header2, arg6, arg7, arg8, arg9, argA, argB, argC + sizeof(data), argD, argE);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &data, sizeof(data));
+    position.unk0 = *x;
+    position.unk4 = *y;
+    position.unk8 = *z;
+
+    effect = func_151602C0(header, &position, arg6, arg7, arg8, arg9, argA, argB, extraSize + sizeof(track), argD, argE);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &track, sizeof(track));
     }
-    return temp_v0;
+    return effect;
 }
 
-s32 func_15163504(struct225 *arg0) {
-    s32 ret;
+/* Keeps the light at the tracked coordinates and runs the optional update callback. */
+s32 func_15163504(struct225 *effect) {
+    s32 result;
+    LightTrack *track;
 
-    ret = 1;
-    arg0->unk14->unkE = *(f32 *)*(s32 *)((s32)arg0 + 0x18);
-    arg0->unk14->unk10 = *(f32 *)*(s32 *)((s32)arg0 + 0x1C);
-    arg0->unk14->unk12 = *(f32 *)*(s32 *)((s32)arg0 + 0x20);
-    if (*(volatile s8 *)((s32)arg0 + 0x24) != -1) {
-        return D_8008B36C[*(volatile s8 *)((s32)arg0 + 0x24)]();
+    result = 1;
+    track = (LightTrack *)&effect->unk18;
+    effect->unk14->unkE = *track->x;
+    effect->unk14->unk10 = *track->y;
+    effect->unk14->unk12 = *track->z;
+    if (track->callback != -1) {
+        return D_8008B36C[track->callback]();
     }
-    return ret;
+    return result;
 }
-// NON-MATCHING: something is missing..
-// s32 func_15163504(struct225 *arg0) {
-//     s32 ret = 1;
-//     arg0->unk14->unkE = arg0->unk18->unk0;
-//     arg0->unk14->unk10 = arg0->unk18->unk4;
-//     arg0->unk14->unk12 = arg0->unk18->unk8;
-//     if (arg0->unk24 != -1) {
-//         ret = D_8008B36C[arg0->unk24]();
-//     }
-//
-//     return ret;
-// }
 
-void func_151635A8(struct225 *arg0, s32 arg1, u8 arg2) {
-    void (**temp_v0)(struct225 *, s32, u8);
+/* Event handler: forwards every event to the tracked light's D_8008B370 handler. */
+void func_151635A8(struct225 *effect, s32 arg1, u8 eventId) {
+    LightTrack *track = (LightTrack *)&effect->unk18;
 
-    temp_v0 = (void (**)(struct225 *, s32, u8))D_8008B370;
-    if (temp_v0[*(volatile u8 *)((s32)arg0 + 0x25)] != NULL) {
-        temp_v0[*(volatile u8 *)((s32)arg0 + 0x25)](arg0, arg1, arg2);
+    if (D_8008B370[track->handler] != NULL) {
+        ((void (*)(struct225 *, s32, u8))D_8008B370[track->handler])(effect, arg1, eventId);
     }
 }
-// NON-MATCHING: similar issue to func_15163504
-// void func_151635A8(struct225 *arg0, s32 arg1, u8 arg2) {
-//     s32 (*func)(s32) = D_8008B370[arg0->unk25];
-//     if (func != NULL) {
-//         func(arg2);
-//     }
-// }
 
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
     struct225 *temp_v0;
