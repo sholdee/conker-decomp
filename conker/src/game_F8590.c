@@ -426,7 +426,7 @@ SparkParticle *func_15130374(SparkDesc *, u8, s32, u8, s32);
 
 /*
  * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from
- * `angle`; func_150CBCE0 then damps it.
+ * `angle`. It stores the damping factor that func_150CBCE0 applies each frame step.
  */
 s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
