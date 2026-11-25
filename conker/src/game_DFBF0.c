@@ -59,23 +59,6 @@ typedef struct StreakBurst4C {
     /* 0x48 */ u8 pad48[0x4];
 } StreakBurst4C;
 
-/* Parameter block for func_150B3F5C. */
-typedef struct Fx150B3F5CArgs {
-    Vec3f vel;
-    f32 unk0C;
-    u8 unk10;
-    f32 unk14, unk18;
-    u8 unk1C;
-    f32 unk20;
-    u8 unk24;
-    s16 unk26;
-    f32 unk28, unk2C;
-    u8 unk30, unk31, unk32, unk33, unk34, unk35;
-    s16 unk36;
-    u8 unk38;
-    f32 unk3C;
-} Fx150B3F5CArgs;
-
 extern PipeSpot D_8009F920[3];
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
@@ -83,7 +66,7 @@ extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(StreakBurst4C *, u8);
 extern void func_15152F70(SimplePuffSpray *, u8);
-extern void func_150B3F5C(Fx150B3F5CArgs *, Vec3f *, s32);
+extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
@@ -94,7 +77,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
     Vec3f origin;
-    Fx150B3F5CArgs argsD;
+    TrailStateParams argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
     argsA.unk00 = (func_150ADA20() & 1) + 3;
@@ -204,28 +187,28 @@ void func_150B2740(u8 pipe, u8 arg1) {
     origin.x = D_8009F920[pipe].pos.x - 150.0f * yawCos;
     origin.y = D_8009F920[pipe].pos.y;
     origin.z = D_8009F920[pipe].pos.z - 150.0f * yawSin;
-    argsD.unk24 = 0x80;
-    argsD.vel.x = 10.0f * yawCos;
-    argsD.vel.y = 3.0f;
-    argsD.vel.z = 10.0f * yawSin;
-    argsD.unk0C = -3.710000038f;
-    argsD.unk26 = 0xFF;
-    argsD.unk30 = 2;
-    argsD.unk31 = 5;
-    argsD.unk10 = 4;
-    argsD.unk38 = 0;
-    argsD.unk36 = 30;
-    argsD.unk1C = 6;
-    argsD.unk32 = 5;
-    argsD.unk33 = 0x33;
-    argsD.unk34 = 3;
-    argsD.unk35 = 0x55;
-    argsD.unk20 = 0.400000006f;
-    argsD.unk2C = 47.0f;
-    argsD.unk28 = 1.840000033f;
-    argsD.unk14 = 3.299999952f;
-    argsD.unk18 = 0.6999999881f;
-    argsD.unk3C = 0.3000000119f;
+    argsD.shade = 0x80;
+    argsD.baseVel.x = 10.0f * yawCos;
+    argsD.baseVel.y = 3.0f;
+    argsD.baseVel.z = 10.0f * yawSin;
+    argsD.gravity = -3.710000038f;
+    argsD.alpha = 0xFF;
+    argsD.texStep = 2;
+    argsD.texStepJitter = 5;
+    argsD.phaseJitter = 4;
+    argsD.burstPreset = 0;
+    argsD.life = 30;
+    argsD.flags = 6;
+    argsD.fadeTailCount = 5;
+    argsD.fadeTailStep = 0x33;
+    argsD.fadeHeadCount = 3;
+    argsD.fadeHeadStep = 0x55;
+    argsD.emitRate = 0.400000006f;
+    argsD.width = 47.0f;
+    argsD.widthGrowth = 1.840000033f;
+    argsD.speedBase = 3.299999952f;
+    argsD.speedSwing = 0.6999999881f;
+    argsD.burstRate = 0.3000000119f;
     {
         u8 idBuf[4];
         PipeIds idsA;

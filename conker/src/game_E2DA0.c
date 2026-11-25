@@ -366,37 +366,6 @@ void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
     }
 }
 
-/*
- * Trail settings passed to func_150B3F5C: the first 0x40 bytes of TrailState (game_E1280.c),
- * whose remaining fields are emitter state that the spawner fills in.
- */
-typedef struct {
-    /* 0x00 */ Vec3f baseVel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ u8 phaseJitter;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedSwing;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ f32 emitRate;
-    /* 0x24 */ u8 shade;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 alpha;
-    /* 0x28 */ f32 widthGrowth;
-    /* 0x2C */ f32 width;
-    /* 0x30 */ u8 texStep;
-    /* 0x31 */ u8 texStepJitter;
-    /* 0x32 */ u8 fadeTailCount;
-    /* 0x33 */ u8 fadeTailStep;
-    /* 0x34 */ u8 fadeHeadCount;
-    /* 0x35 */ u8 fadeHeadStep;
-    /* 0x36 */ s16 life;
-    /* 0x38 */ u8 burstPreset;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ f32 burstRate;
-} TrailStateParams; /* size 0x40 */
-
 extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 

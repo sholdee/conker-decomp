@@ -122,12 +122,12 @@ void func_150B3EE8(Trail *trail) {
 extern void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
-Trail *func_150B3F5C(TrailState *params, Vec3f *pos, s16 capacity) {
+Trail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
     EffectTemplate spawn;
     TrailState state;
     Trail *trail;
 
-    memcpy(&state, params, 0x40); /* the settings, up to state.speed */
+    memcpy(&state, params, sizeof(TrailStateParams)); /* the settings, up to state.speed */
     state.emitAccum = 0.0f;
     spawn.itemCount = capacity;
     state.texS = 0;

@@ -1762,6 +1762,34 @@ typedef struct ParticleEmitterDesc {
     /* 0x44 */ f32 growRate;
 } ParticleEmitterDesc; /* size 0x48 */
 
+/* func_150B3F5C (game_E1280.c): settings of a smoke trail; the first 0x40 bytes of its TrailState. */
+typedef struct TrailStateParams {
+    /* 0x00 */ Vec3f baseVel;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ u8 phaseJitter;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedSwing;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 pad1D[3];
+    /* 0x20 */ f32 emitRate;
+    /* 0x24 */ u8 shade;
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ s16 alpha;
+    /* 0x28 */ f32 widthGrowth;
+    /* 0x2C */ f32 width;
+    /* 0x30 */ u8 texStep;
+    /* 0x31 */ u8 texStepJitter;
+    /* 0x32 */ u8 fadeTailCount;
+    /* 0x33 */ u8 fadeTailStep;
+    /* 0x34 */ u8 fadeHeadCount;
+    /* 0x35 */ u8 fadeHeadStep;
+    /* 0x36 */ s16 life;
+    /* 0x38 */ u8 burstPreset;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ f32 burstRate;
+} TrailStateParams; /* size 0x40 */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {
