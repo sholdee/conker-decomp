@@ -186,16 +186,16 @@ typedef struct {
     /* 0x18 */ OSTask_t list;
     /* 0x58 */ OSMesgQueue *msgQ;
     /* 0x5C */ void *msg;
-} SchedTask1501C880; /* 0x60 */
+} GfxSchedTask; /* 0x60 */
 
 typedef struct {
     u8 unk0[0x20];
-} SchedMsg1501C880;
+} GfxSchedMsg;
 
 extern u8 D_800BE9C0;
 extern s32 D_800BE9C8[];
-extern SchedTask1501C880 *D_800BEAD4;
-extern SchedTask1501C880 D_800BEAD8[];
+extern GfxSchedTask *D_800BEAD4;
+extern GfxSchedTask D_800BEAD8[];
 extern u8 D_800BEBA0;
 extern u64 *D_800BEB9C;
 extern u64 *D_800BEAD0;
@@ -272,7 +272,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BE617 = 0;
     }
     D_800BEAD4->msgQ = &D_800BEA10;
-    D_800BEAD4->msg = &((SchedMsg1501C880 *)&D_800BEA68)[D_800BE9C0];
+    D_800BEAD4->msg = &((GfxSchedMsg *)&D_800BEA68)[D_800BE9C0];
     D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
@@ -1010,18 +1010,18 @@ typedef struct {
     u8 unk6B;
     u8 unk6C;
     u8 unk6D;
-} Obj1501E73C;
+} ObjAnimBytes;
 
 void func_1507EABC(void *);
 
 /* For each object bound to a track: wrap its 0x6C/0x6D counters at 10 and call func_1507EABC. */
 void func_1501E73C(s32 scene) {
     s32 i;
-    Obj1501E73C *obj;
+    ObjAnimBytes *obj;
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[scene][i].unk2);
+            obj = (ObjAnimBytes *)func_15083E90(D_800C35F0[scene][i].unk2);
             if (obj == NULL) {
                 continue;
             }
@@ -2229,10 +2229,10 @@ void func_150222E0(s32 track, s32 scene) {
         if (info->type == 2) {
             obj = func_15083E90(info->unk2);
             if (obj != NULL) {
-                ((Obj1501E73C *)obj)->unk6C = 0;
-                ((Obj1501E73C *)obj)->unk6D = 0;
-                ((Obj1501E73C *)obj)->unk6A = 0;
-                ((Obj1501E73C *)obj)->unk6B = 0;
+                ((ObjAnimBytes *)obj)->unk6C = 0;
+                ((ObjAnimBytes *)obj)->unk6D = 0;
+                ((ObjAnimBytes *)obj)->unk6A = 0;
+                ((ObjAnimBytes *)obj)->unk6B = 0;
                 obj->unk282 = 0;
                 *(u16 *)&obj->unk27A[0] = 0;
                 *(u16 *)&obj->unk27A[2] = 0;
