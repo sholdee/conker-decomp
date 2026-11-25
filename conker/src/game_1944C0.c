@@ -676,27 +676,6 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
     return func_15095760(gfx, &params);
 }
-/* Template / payload of a type 0xE object: a textured quad pair animated through a EffectTexture. */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ u8 pad80[8];
-    /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
-    /* 0x8A */ s16 frameStep;
-    /* 0x8C */ u8 pad8C[0xC];
-    /* 0x98 */ u16 flags;       /* 0x4: finish at either end, 0x40: ping-pong, 0x80/0x100: flip s/t */
-    /* 0x9A */ u8 pad9A[2];
-    /* 0x9C */ s16 unk9C;
-    /* 0x9E */ s16 unk9E;
-    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
-    /* 0xA1 */ u8 padA1;
-    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-} QuadFxData;
-
-/* Type 0xE object. */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ QuadFxData data;
-} QuadFx;
 
 /* Fills a QuadFxData template's vertex colours and texture coordinates from its animation. */
 void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
@@ -746,7 +725,7 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     q->vtx[0].v.tc[1] = q->vtx[4].v.tc[1] = q->vtx[1].v.tc[1] = q->vtx[5].v.tc[1] = tB;
     q->frame = 0;
     q->unk9C = 0;
-    q->unk9E = 0;
+    q->heading = 0;
 }
 
 /* Spawns a type 0xE QuadFx from a template prepared with func_1516865C. */

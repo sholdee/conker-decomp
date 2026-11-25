@@ -11,37 +11,6 @@ u8 func_150ADA20(void);
 
 #define RAIN_MAX_DROPS 300
 
-/* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 dropFlags;   /* 1: hidden until it first wraps, 2: remove when it next wraps */
-    /* 0x84 */ s16 slot;        /* index in D_800DD440 */
-    /* 0x86 */ u8 pad86[2];
-    /* 0x88 */ s16 frame;
-    /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
-    /* 0x8C */ s16 x;
-    /* 0x8E */ s16 y;
-    /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ u16 flags;
-    /* 0x9A */ u8 pad9A[2];
-    /* 0x9C */ s16 unk9C;
-    /* 0x9E */ u16 heading;     /* binary angle, high byte indexes the sin/cos tables */
-    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
-    /* 0xA1 */ u8 speed;
-    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0xA3 */ u8 padA3;
-    /* 0xA4 */ u8 unkA4;
-} QuadFxData;
-
-/* Type 0xE object. */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ QuadFxData data;
-} QuadFx;
-
 extern u16 D_800DD430;      /* sound handle */
 extern u8 D_800DD432;       /* wind gust timer */
 extern u8 D_800DD433;       /* wind strength */
@@ -425,7 +394,7 @@ void func_15179B14(s32 count) {
             packet.z = z;
             packet.unk94 = 25;
             packet.unk92 = 25;
-            packet.unk96 = 0;
+            packet.floorY = 0;
             packet.callback = 0xE;
             packet.animIndex = 0x12;
             packet.flags = 0x9804;

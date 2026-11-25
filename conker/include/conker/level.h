@@ -56,4 +56,42 @@
  *   game/done/game_1A6300.c
  */
 
+/* game_30E90.c */
+typedef void (*ObjectFunc)();
+
+/* A level object placement as stored in the level's object lists (0x44 bytes each). */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 rotX;
+    /* 0x08 */ s16 rotY;
+    /* 0x0A */ s16 rotZ;
+    /* 0x0C */ Gfx *displayList; // NULL: load model `modelId`; 1 or 2: use level model `modelId`
+    /* 0x10 */ s32 modelId;
+    /* 0x14 */ union {
+        u32 index;         // into D_80088C90 when below 0xFFFF
+        ObjectFunc func;   // otherwise the update function itself
+    } behavior;
+    /* 0x18 */ void *data;
+    /* 0x1C */ u8 pad1C[4];
+    /* 0x20 */ f32 scaleX;
+    /* 0x24 */ f32 scaleY;
+    /* 0x28 */ f32 scaleZ;
+    /* 0x2C */ u8 unk4C;
+    /* 0x2D */ u8 shadowSize;
+    /* 0x2E */ u16 cullRadiusXZ;
+    /* 0x30 */ u16 cullRadiusY;
+    /* 0x32 */ u8 flags;
+    /* 0x33 */ u8 id;            // 0: assign a free one
+    /* 0x34 */ u8 inactive;
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ s32 material;
+    /* 0x3C */ u8 state;
+    /* 0x3D */ u8 pad3D;
+    /* 0x3E */ u16 effectFlags;
+    /* 0x40 */ u16 drawDistance;
+    /* 0x42 */ u8 pad42[2];
+} ObjectSpawn; // size 0x44
+
 #endif

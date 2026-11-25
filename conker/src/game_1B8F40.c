@@ -334,26 +334,6 @@ s32 func_1518C540(MotionTrail *trail) {
     return 1;
 }
 
-/* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ Vtx vtx[8];
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ u8 pad84[4];
-    /* 0x88 */ s16 frame;
-    /* 0x8A */ s16 frameStep; /* 8.8 fixed point */
-    /* 0x8C */ s16 x;
-    /* 0x8E */ s16 y;
-    /* 0x90 */ s16 z;
-    /* 0x92 */ s16 unk92;
-    /* 0x94 */ s16 unk94;
-    /* 0x96 */ s16 unk96;
-    /* 0x98 */ u16 flags;
-    /* 0x9A */ u8 pad9A[6];
-    /* 0xA0 */ u8 animIndex;  /* index into D_8008CA4C */
-    /* 0xA1 */ u8 unkA1;
-    /* 0xA2 */ s8 callback;   /* -1 = none */
-} QuadFxData;
-
 void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
 void *func_15168800(QuadFxData *src, s32 owner, s32 list);
 u8 func_151D8E20(void);
@@ -366,7 +346,7 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
 
     params = trail->params;
     points = trail->points;
-    fx.unk80 = 0;
+    fx.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
@@ -376,8 +356,8 @@ s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
-    fx.unkA1 = 0;
-    fx.unk96 = hitY;
+    fx.speed = 0;
+    fx.floorY = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
     func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
@@ -392,7 +372,7 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
 
     params = trail->params;
     points = trail->points;
-    fx.unk80 = 0;
+    fx.dropFlags = 0;
     fx.frameStep = 0x100;
     fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
@@ -402,8 +382,8 @@ s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s3
     fx.callback = -1;
     fx.animIndex = 0x12;
     fx.flags = 0xC;
-    fx.unkA1 = 0;
-    fx.unk96 = hitY;
+    fx.speed = 0;
+    fx.floorY = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
     func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;

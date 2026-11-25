@@ -3015,4 +3015,40 @@ typedef struct {
     SightSpritePayload payload;
 } SightSprite;
 
+/*
+ * Template / payload of a type 0xE QuadFx object (game_1944C0.c): a textured quad pair animated through an
+ * EffectTexture. func_1516865C fills a template's vertices, func_15168800 copies it into a new object.
+ * The fields between the animation fields belong to the callback (D_8008C9C8); their names come from the
+ * rain drops of game_1A6360.c.
+ */
+typedef struct QuadFxData {
+    /* 0x00 */ Vtx vtx[8];
+    /* 0x80 */ s32 dropFlags;   /* rain: 1: hidden until it first wraps, 2: remove when it next wraps */
+    /* 0x84 */ s16 slot;        /* rain: index in D_800DD440 */
+    /* 0x86 */ s16 unk86;
+    /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
+    /* 0x8A */ s16 frameStep;   /* 8.8 fixed point */
+    /* 0x8C */ s16 x;
+    /* 0x8E */ s16 y;
+    /* 0x90 */ s16 z;
+    /* 0x92 */ s16 unk92;
+    /* 0x94 */ s16 unk94;
+    /* 0x96 */ s16 floorY;      /* floor height under the spawn point */
+    /* 0x98 */ u16 flags;       /* 0x4: finish at either end, 0x40: ping-pong, 0x80/0x100: flip s/t */
+    /* 0x9A */ u8 pad9A[2];
+    /* 0x9C */ s16 unk9C;
+    /* 0x9E */ u16 heading;     /* rain: binary angle, high byte indexes the sin/cos tables */
+    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
+    /* 0xA1 */ u8 speed;        /* rain: fall speed */
+    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
+    /* 0xA3 */ u8 unkA3;
+    /* 0xA4 */ u8 unkA4;        /* rain: alpha */
+} QuadFxData; /* size 0xA8 */
+
+/* Type 0xE object. */
+typedef struct QuadFx {
+    /* 0x00 */ EffectHeader link;
+    /* 0x10 */ QuadFxData data;
+} QuadFx; /* size 0xB8 */
+
 #endif

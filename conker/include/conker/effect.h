@@ -175,4 +175,25 @@ typedef struct {
     /* 0x02 */ s16 value;
 } EB340Command;
 
+/* game_193430.c */
+/* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Vtx quads[2][4];
+    /* 0x90 */ s8 dirX;       // -cos(direction) * 127, mode 1 only
+    /* 0x91 */ s8 dirZ;       //  sin(direction) * 127, mode 1 only
+    /* 0x92 */ u8 life;       // frames left; fades out over the last 3/4 of lifeMax
+    /* 0x93 */ u8 lifeMax;
+    /* 0x94 */ u8 unk94;
+    /* 0x95 */ u8 mode;       // 0: flat in XZ, 1: upright facing dirX/dirZ, 2: rotated by angleA/angleB
+    /* 0x96 */ s16 growthRate;
+    /* 0x98 */ s16 x;
+    /* 0x9A */ s16 y;
+    /* 0x9C */ s16 z;
+    /* 0x9E */ s16 size;      // half the quad's edge length
+    /* 0xA0 */ u8 angleA;
+    /* 0xA1 */ u8 angleB;
+    /* 0xA2 */ u8 padA2[0x6];
+} QuadEffect;
+
 #endif

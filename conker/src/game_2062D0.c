@@ -880,16 +880,11 @@ s32 func_151DADA0(SquashEffect *effect) {
     return 1;
 }
 
-/* An effect drawn as a camera-facing quad, with a double-buffered vertex block per view. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-} QuadEffect;
-
 void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
 
-/* Builds this frame's quad vertices
- for view `view`; returns them, or NULL when no buffer is free. */
-Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
+/* Vertex function (D_80089E1C) of a particle drawn as a camera-facing quad, double-buffered per view.
+ * Builds this frame's quad vertices for view `view`; returns them, or NULL when no buffer is free. */
+Vtx *func_151DAE28(DefParticleHead *effect, s16 view) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidth;
@@ -898,19 +893,19 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     f32 dx;
     u8 fresh;
 
-    func_151D5D60(effect->head.vtxBuffers, view, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
+    func_151D5D60(effect->vtxBuffers, view, sizeof(effect->vtxTemplate), &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
-            memcpy(effect->head.vtxBuffers[view], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
-            memcpy(effect->head.vtxBuffers[view] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->vtxBuffers[view], effect->vtxTemplate, sizeof(effect->vtxTemplate));
+            memcpy(effect->vtxBuffers[view] + 4, effect->vtxTemplate, sizeof(effect->vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    halfWidth = effect->head.def.width * effect->head.def.scale.x;
-    height = effect->head.def.height * effect->head.def.scale.y;
+    halfWidth = effect->def.width * effect->def.scale.x;
+    height = effect->def.height * effect->def.scale.y;
     dz = D_800DD1D8[view] * halfWidth;
     dx = D_800DD1E8[view] * halfWidth;
 
@@ -918,12 +913,12 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->head.def.pos.x + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->head.def.pos.y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->head.def.pos.z - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->head.def.pos.x - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->head.def.pos.y + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->head.def.pos.z + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->def.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->def.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->def.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->def.pos.z + dz;
 
     return ret;
 }
