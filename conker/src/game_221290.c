@@ -275,7 +275,7 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
     f32 *gains;
 
     bandTable = dec->sampleRateIndex + dec->id * 3;
-    if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+    if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2) {
         if (dec->mixedBlock[gr][ch] != 0) {
             bandEnd = D_800AE998[bandTable].l[1];
         } else {
@@ -313,12 +313,12 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
         if (bandEnd > lineCount) {
             bandEnd = lineCount;
         }
-        if (windowSwitching && (pureShort || (mixedShort && (line >= 36)))) {
+        if (windowSwitching && (pureShort || (mixedShort && line >= 36))) {
             window = (line - windowStart) / windowWidth;
             windowEnd = windowStart + windowWidth;
         }
         while (line < bandEnd) {
-            if (windowSwitching && (pureShort || (mixedShort && (line >= 36)))) {
+            if (windowSwitching && (pureShort || (mixedShort && line >= 36))) {
                 if (line >= windowEnd) {
                     windowEnd += windowWidth;
                     window++;
@@ -338,7 +338,7 @@ s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
             }
             line++;
         }
-        if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+        if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2) {
             if (dec->mixedBlock[gr][ch] != 0) {
                 if (D_800AE998[bandTable].l[8] == line) {
                     bandEnd = D_800AE998[bandTable].s[4] * 3;
@@ -377,7 +377,7 @@ s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 sfb;
     s32 window;
 
-    if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+    if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2) {
         if (dec->mixedBlock[gr][ch] != 0) {
             for (sfb = 0; sfb < 8; sfb++) {
                 dec->scalefac[gr][ch].l[sfb] =
@@ -410,7 +410,7 @@ s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
         }
     } else {
         for (part = 0; part < 4; part++) {
-            if ((dec->scfsi[ch][part] == 0) || (gr == 0)) {
+            if (dec->scfsi[ch][part] == 0 || gr == 0) {
                 for (sfb = D_800AEB54[part]; sfb < D_800AEB54[part + 1]; sfb++) {
                     dec->scalefac[gr][ch].l[sfb] = GET_MAIN_BITS(
                         dec, D_800AEB5C[(part < 2) ? 0 : 1][dec->scalefacCompress[gr][ch]]);
@@ -449,7 +449,7 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 nbits;
     s32 maxPos;
 
-    if (((dec->modeExtension != 1) && (dec->modeExtension != 3)) || (ch != 1)) {
+    if ((dec->modeExtension != 1 && dec->modeExtension != 3) || ch != 1) {
         isRight = 0;
         if (sfCompress < 400) {
             slen[0] = (sfCompress >> 4) / 5;
@@ -458,14 +458,14 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
             slen[3] = sfCompress % 4;
             *preflag = 0;
             slenClass = 0;
-        } else if ((sfCompress >= 400) && (sfCompress < 500)) {
+        } else if (sfCompress >= 400 && sfCompress < 500) {
             slen[0] = ((sfCompress - 400) >> 2) / 5;
             slen[1] = ((sfCompress - 400) >> 2) % 5;
             slen[2] = (sfCompress - 400) % 4;
             slen[3] = 0;
             *preflag = 0;
             slenClass = 1;
-        } else if ((sfCompress >= 500) && (sfCompress < 512)) {
+        } else if (sfCompress >= 500 && sfCompress < 512) {
             slen[0] = (sfCompress - 500) / 3;
             slen[1] = (sfCompress - 500) % 3;
             slen[2] = 0;
@@ -474,7 +474,7 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
             slenClass = 2;
         }
     }
-    if (((dec->modeExtension == 1) || (dec->modeExtension == 3)) && (ch == 1)) {
+    if ((dec->modeExtension == 1 || dec->modeExtension == 3) && ch == 1) {
         dec->intensityScale = sfCompress % 2;
         isCompress = sfCompress >> 1;
         isRight = 1;
@@ -485,14 +485,14 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
             slen[3] = 0;
             *preflag = 0;
             slenClass = 0;
-        } else if ((isCompress >= 180) && (isCompress < 244)) {
+        } else if (isCompress >= 180 && isCompress < 244) {
             slen[0] = ((isCompress - 180) % 64) >> 4;
             slen[1] = ((isCompress - 180) % 16) >> 2;
             slen[2] = (isCompress - 180) % 4;
             slen[3] = 0;
             *preflag = 0;
             slenClass = 1;
-        } else if ((isCompress >= 244) && (isCompress < 255)) {
+        } else if (isCompress >= 244 && isCompress < 255) {
             slen[0] = (isCompress - 244) / 3;
             slen[1] = (isCompress - 244) % 3;
             slen[2] = 0;
@@ -501,13 +501,13 @@ s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
             slenClass = 2;
         }
     }
-    if ((windowSwitching != 0) && (blockType == 2)) {
+    if (windowSwitching != 0 && blockType == 2) {
         bcopy(counts.nrSfb[isRight][slenClass][mixedBlock + 1], nrSfb, sizeof(nrSfb));
     } else {
         bcopy(counts.nrSfb[isRight][slenClass][0], nrSfb, sizeof(nrSfb));
     }
     sfb = 0;
-    if ((windowSwitching == 0) || ((windowSwitching != 0) && (blockType != 2))) {
+    if (windowSwitching == 0 || (windowSwitching != 0 && blockType != 2)) {
         for (part = 0; part < 4; part++) {
             nbits = slen[part];
             maxPos = (1 << nbits) - 1;
@@ -592,7 +592,7 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
     bigValueEnd = dec->bigValues[gr][ch] * 2;
     longBands = D_800AE840[dec->id][dec->sampleRateIndex];
     shortBands = D_800AE948[dec->id][dec->sampleRateIndex];
-    if ((dec->windowSwitching[gr][ch] == 0) && (dec->blockType[gr][ch] == 0)) {
+    if (dec->windowSwitching[gr][ch] == 0 && dec->blockType[gr][ch] == 0) {
         regionEnd[0] = longBands[dec->region0Count[gr][ch]] + 1;
         if (regionEnd[0] > bigValueEnd) {
             regionEnd[0] = regionEnd[1] = bigValueEnd;
@@ -603,7 +603,7 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
             }
         }
     } else {
-        if ((dec->blockType[gr][ch] == 2) && (dec->mixedBlock[gr][ch] == 0)) {
+        if (dec->blockType[gr][ch] == 2 && dec->mixedBlock[gr][ch] == 0) {
             regionEnd[0] = shortBands[2] * 3 + 3;
         } else {
             regionEnd[0] = longBands[7] + 1;
@@ -662,7 +662,7 @@ s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
     dst = dec->xrSb[0][0];
     src = dec->xr[0];
     i = 0;
-    if ((dec->windowSwitching[gr][0] != 0) && (dec->blockType[gr][0] == 2)) {
+    if (dec->windowSwitching[gr][0] != 0 && dec->blockType[gr][0] == 2) {
         if (dec->mixedBlock[gr][0] != 0) {
             while (i++ < 36) {
                 *dst++ = *src++;
@@ -864,7 +864,7 @@ s32 func_151F78B4(Mp3Decoder *dec) {
         func_151F42E8(dec, gr, ch);
     }
     func_151F6970(dec, gr);
-    if ((dec->windowSwitching[gr][0] != 0) && (dec->blockType[gr][0] == 2)) {
+    if (dec->windowSwitching[gr][0] != 0 && dec->blockType[gr][0] == 2) {
         sbLimit = 32;
     } else {
         sbUsed = (dec->nonZero[0] - 1) / 18 + 1;
@@ -872,8 +872,8 @@ s32 func_151F78B4(Mp3Decoder *dec) {
     }
     for (ch = 0; ch < dec->nch; ch++) {
         func_151F6B28(dec, gr, ch);
-        if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2) &&
-            (dec->mixedBlock[gr][ch] != 0)) {
+        if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2 &&
+            dec->mixedBlock[gr][ch] != 0) {
             blockType = 0;
         } else if (dec->windowSwitching[gr][ch] == 0) {
             blockType = 0;
@@ -890,8 +890,8 @@ s32 func_151F78B4(Mp3Decoder *dec) {
                               dec->overlap[ch][sb], D_800E0E38[blockType]);
             }
         }
-        if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2) &&
-            (dec->mixedBlock[gr][ch] != 0)) {
+        if (dec->windowSwitching[gr][ch] != 0 && dec->blockType[gr][ch] == 2 &&
+            dec->mixedBlock[gr][ch] != 0) {
             blockType = 2;
         }
         if (blockType == 2) {
@@ -974,7 +974,7 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
         }
         pos = -1;
         dec->streamPos++;
-        if ((dec->headerBuf[syncLen] != 0xFF) && (dec->headerBuf[syncLen] != 0xF3)) {
+        if (dec->headerBuf[syncLen] != 0xFF && dec->headerBuf[syncLen] != 0xF3) {
             return 0;
         }
         if ((dec->headerBuf[syncLen] & mask) != mask) {
@@ -1006,7 +1006,7 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
     dec->copyright = GET_HEADER_BITS(dec, 1);
     dec->original = GET_HEADER_BITS(dec, 1);
     dec->emphasis = GET_HEADER_BITS(dec, 2);
-    if ((dec->bitrateIndex == 15) || (dec->sampleRateIndex == 3)) {
+    if (dec->bitrateIndex == 15 || dec->sampleRateIndex == 3) {
         return func_151F8088(dec, -1);
     }
     if (dec->haveFirstHeader == 0) {
@@ -1018,10 +1018,10 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
         dec->firstMode = dec->mode;
         dec->firstCopyright = dec->copyright;
         dec->firstOriginal = dec->original;
-    } else if ((dec->id != dec->firstId) || (dec->layer != dec->firstLayer) ||
-               (dec->protectionBit != dec->firstProtectionBit) ||
-               (dec->sampleRateIndex != dec->firstSampleRateIndex) ||
-               (dec->mode != dec->firstMode) || (dec->original != dec->firstOriginal)) {
+    } else if (dec->id != dec->firstId || dec->layer != dec->firstLayer ||
+               dec->protectionBit != dec->firstProtectionBit ||
+               dec->sampleRateIndex != dec->firstSampleRateIndex ||
+               dec->mode != dec->firstMode || dec->original != dec->firstOriginal) {
         return func_151F8088(dec, -1);
     }
     dec->headerLen = 4;
