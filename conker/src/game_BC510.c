@@ -371,7 +371,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     s32 i;
     s32 step;
     s32 overflow;
-    s16 rows[33];
+    s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale D_8008FE1C */
 
     start = gfx;
     if (D_800BE9F0 == 0x1D) {
@@ -399,13 +399,13 @@ Gfx *func_1508FD38(register Gfx *gfx) {
         if (D_8008FE1C != 1.0f) {
             step = (s32)((f32)step / D_8008FE1C);
             for (i = 0; i < 33; i++) {
-                rows[i] = (s32)((f32)i * D_8008FE1C);
+                scaled[i] = (s32)((f32)i * D_8008FE1C);
             }
         } else {
             // matching: one line; the loop body's line number steers as1's unrolled store order
-            for (i = 0; i < 33; i++) rows[i] = i;
+            for (i = 0; i < 33; i++) scaled[i] = i;
         }
-        gfx = func_15093B58(gfx, step, rows, 0x2C30, 1);
+        gfx = func_15093B58(gfx, step, scaled, 0x2C30, 1);
     }
     if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
         gfx = func_150900F0(gfx, 0);
@@ -425,7 +425,6 @@ Gfx *func_1508FD38(register Gfx *gfx) {
 }
 extern s16 D_8008FDCC;
 extern s16 D_8009DC90[][3];
-extern u8 D_800CC49A;
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
@@ -508,6 +507,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         gSPDisplayList(gfx++, dl);
     }
     if (fixed == 0) {
+        /* struct256 starts with the particle's two (double-buffered) matrices */
         for (node = D_800D245C; node != NULL; node = node->unk80) {
             func_15043E68((Mtx *)node->pad0 + D_800BE9C0, node->unk9C, node->unkA0, node->unkA4, node->unk84,
                           node->unk88, node->unk8C);
@@ -1014,7 +1014,6 @@ extern u8 D_CF1[];
 extern u8 D_CF2[];
 extern u8 D_D13[];
 extern u8 D_D14[];
-void func_150916B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
  * 0x002 an icon picked by func_150859AC(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
@@ -1249,7 +1248,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     }
 
     if (D_8008FDC0 & 4) {
-        u8 pad3a;
+        u8 pad3a; // matching: unused stack slots in the original frame
         s32 cellOffset;
         s32 pad3b;
         texLoaded = 0;
@@ -1373,6 +1372,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 x *= 4;
                 rowY = (s32)D_800BE628[i].top + 5;
                 rowY *= 4;
+                // matching: constant-first operands; the swapped form changes the code
                 if (0x1A == D_800BE9F0 || 0x3F == D_800BE9F0) {
                     cellW = 11;
                     cellH = 14;
@@ -1540,7 +1540,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800D2448);
     return gfx;
 }
-extern u8 D_CF2[];
 extern u8 D_800AB62C[][3];
 extern u16 D_800E0BCC;
 u8 func_15085DA8(f32 arg0);
@@ -1637,7 +1636,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             sinv = sinf(angle);
             cosv = cosf(angle);
             if (obj->interaction_state != 0x25) {
-                /* as1 (-g3) orders equally ranked instructions of a block by source line, lowest
+                /* matching: as1 (-g3) orders equally ranked instructions of a block by source line, lowest
                  * first. The target schedule (li; lwc1; lwc1; sw) needs the px/pz loads emitted
                  * before `skip = -1` while that statement carries the lower line number. The
                  * numbers only have to exceed every real line of this file with
