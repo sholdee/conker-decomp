@@ -175,8 +175,9 @@ void func_150FCFB0(s32 arg0) {
     func_15103828();
 }
 
+/* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
-    /* 0x00 */ f32 unk00;
+    /* 0x00 */ f32 height;
     /* 0x04 */ f32 unk04;
     /* 0x08 */ f32 unk08;
     /* 0x0C */ f32 unk0C;
@@ -185,207 +186,205 @@ typedef struct {
     /* 0x18 */ f32 unk18;
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 pad1D[0x7];
-} Floor150FCFD4; /* 0x24 */
+} GroundHit; /* 0x24 */
 
+/* Particle spawn template (the layout of ParticleDef in game_169510.c). */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
+    /* 0x00 */ u8 texture;
+    /* 0x01 */ u8 type;
+    /* 0x02 */ s16 renderModes;
+    /* 0x04 */ s16 lifetime;
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ struct17 rot;
+    /* 0x34 */ struct17 scale;
+    /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
     /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
+    /* 0x4C */ u8 viewportMask;
     /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} Spawn150FCFD4; /* 0x58 */
+    /* 0x54 */ s16 fadeStart;
+    /* 0x56 */ s16 fadeRate;
+} ParticleDef; /* 0x58 */
 
 typedef struct Actor150FD514 Actor150FD514;
 
+/* State that follows the particle (its ParticleMotion slot at 0x110). */
 typedef struct {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ Actor150FD514 *unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Floor150FCFD4 unk30;
-    /* 0x54 */ u16 unk54;
-    /* 0x56 */ u16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
+    /* 0x08 */ f32 maxWidth;
+    /* 0x0C */ f32 timer;       /* counts down by D_800BE9A4; the particle dies below 0 */
+    /* 0x10 */ f32 pulsePhase;
+    /* 0x14 */ f32 texS0;       /* S texture coordinate of corners 0 and 3 */
+    /* 0x18 */ f32 texS1;       /* S texture coordinate of corners 1 and 2 */
+    /* 0x1C */ f32 texPhase0;
+    /* 0x20 */ f32 texPhase1;
+    /* 0x24 */ s32 unk24;       /* from func_1516284C, released with func_1516972C */
+    /* 0x28 */ Actor150FD514 *groundParticle;
+    /* 0x2C */ f32 emitCounter;
+    /* 0x30 */ GroundHit ground;
+    /* 0x54 */ u16 soundHandle;
+    /* 0x56 */ u16 soundHandle2;
+    /* 0x58 */ u8 burstDone;
+    /* 0x59 */ u8 onGround;
 } Ext150FCFD4; /* 0x5C */
 
+/* A particle (Particle in game_169510.c) with Ext150FCFD4 as its motion state. */
 struct Actor150FD514 {
     /* 0x000 */ u8 unk0;
     /* 0x001 */ u8 unk1;
     /* 0x002 */ u8 pad2[0xA];
     /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x1F];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ f32 unk34;
-    /* 0x038 */ f32 unk38;
-    /* 0x03C */ f32 unk3C;
-    /* 0x040 */ u8 pad40[0x1C];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x00D */ u8 padD[0xB];
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ Ext150FCFD4 ext;
 };
 
 extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
-extern void func_1504715C(Floor150FCFD4 *, struct127 *);
-extern s32 func_15046C80(struct17 *, s32, f32, Floor150FCFD4 *);
+extern void func_1504715C(GroundHit *, struct127 *);
+extern s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
 extern void func_1505D024(struct127 *, s32, u16, s32);
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
-void func_150FCFD4(struct127 *arg0, u8 arg1, s32 arg2) {
-    Floor150FCFD4 floor;
+/*
+ * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
+ * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
+ */
+void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
+    GroundHit ground;
     struct17 pos;
-    u8 hit;
+    u8 onGround;
     struct17 probe;
-    Spawn150FCFD4 spawn;
+    ParticleDef def;
     Ext150FCFD4 ext;
-    void *ret;
+    Actor150FD514 *particle;
     Ext150FCFD4 *dst;
-    Header sfx;
-    s32 ipos[3];
-    Spawn150FCFD4 shadow;
+    Header header;
+    s32 posInt[3];
+    ParticleDef groundDef;
     s32 flag;
 
-    if (arg0->unk7 < 0xFF) {
+    if (obj->unk7 < 0xFF) {
         return;
     }
-    pos.unk0 = arg0->x_position;
+    pos.unk0 = obj->x_position;
     probe.unk0 = pos.unk0;
-    probe.unk4 = arg0->y_position + 100.0f;
-    pos.unk8 = arg0->z_position;
+    probe.unk4 = obj->y_position + 100.0f;
+    pos.unk8 = obj->z_position;
     probe.unk8 = pos.unk8;
-    func_1504715C(&floor, arg0);
-    if (func_15046C80(&probe, 0, -10000.0f, &floor)) {
-        pos.unk4 = floor.unk00;
-        hit = 1;
+    func_1504715C(&ground, obj);
+    if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
+        pos.unk4 = ground.height;
+        onGround = 1;
     } else {
-        pos.unk4 = arg0->y_position;
-        hit = 0;
+        pos.unk4 = obj->y_position;
+        onGround = 0;
     }
-    func_1505D024(arg0, 0x39, arg0->unk7A, -1);
-    ext.unk0 = arg0;
-    ext.unk4 = arg0->unique_id;
-    ext.unk8 = 60.0f;
-    ext.unkC = 50.0f;
-    ext.unk10 = func_150ADA68() * 6.2831855f;
-    ext.unk58 = 0;
-    ext.unk14 = -2048.0f;
-    ext.unk18 = -2048.0f;
-    ext.unk1C = func_150ADA68() * 6.2831855f;
-    ext.unk20 = func_150ADA68() * 6.2831855f;
+    func_1505D024(obj, 0x39, obj->unk7A, -1);
+    ext.owner = obj;
+    ext.ownerId = obj->unique_id;
+    ext.maxWidth = 60.0f;
+    ext.timer = 50.0f;
+    ext.pulsePhase = func_150ADA68() * 6.2831855f;
+    ext.burstDone = 0;
+    ext.texS0 = -2048.0f;
+    ext.texS1 = -2048.0f;
+    ext.texPhase0 = func_150ADA68() * 6.2831855f;
+    ext.texPhase1 = func_150ADA68() * 6.2831855f;
     ext.unk24 = 0;
-    ext.unk28 = 0;
-    ext.unk2C = 0.0f;
-    ext.unk30 = floor;
-    ext.unk54 = func_1000FA64(0x69E, pos.unk0, pos.unk4, pos.unk8, 0x7D00, 0xBB8, 0x1F4, 0, 0, 0, 0, 0);
-    flag = hit ? 1 : 0;
-    ext.unk59 = flag;
-    spawn.unk0 = 0x59;
-    spawn.unk1 = 0xB;
-    spawn.unk2 = 0x5B1A;
-    spawn.unk4 = 300;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk44 = 0xFF;
-    spawn.unk14 = 0.0f;
-    spawn.unk18 = 1500.0f;
-    spawn.unk1C = pos;
-    spawn.unk28 = *(struct17 *)&D_800A5480;
-    spawn.unk34 = 1.0f;
-    spawn.unk38 = 0.0f;
-    spawn.unk3C = 1.0f;
-    spawn.unk40 = 0x24EC0008;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 6;
-    spawn.unk48 = 0;
-    spawn.unk4C = 0xFF;
-    spawn.unk50 = 0;
-    spawn.unk54 = 1;
-    spawn.unk56 = 0xFF;
-    ret = func_1513D2F0(&spawn, (s32)D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
-    if (ret != NULL) {
-        dst = (Ext150FCFD4 *)((u8 *)ret + 0x110);
+    ext.groundParticle = NULL;
+    ext.emitCounter = 0.0f;
+    ext.ground = ground;
+    ext.soundHandle = func_1000FA64(0x69E, pos.unk0, pos.unk4, pos.unk8, 32000, 3000, 500, 0, 0, 0, 0, 0);
+    flag = onGround ? 1 : 0; // matching: the s32 temp keeps IDO's branchy 0/1 select
+    ext.onGround = flag;
+    def.texture = 0x59;
+    def.type = 0xB;
+    def.renderModes = 0x5B1A;
+    def.lifetime = 300;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.rgba[0] = 0xFF;
+    def.rgba[1] = 0;
+    def.rgba[2] = 0;
+    def.rgba[3] = 0xFF;
+    def.unk44 = 0xFF;
+    def.width = 0.0f;
+    def.height = 1500.0f;
+    def.pos = pos;
+    def.rot = *(struct17 *)&D_800A5480;
+    def.scale.unk0 = 1.0f;
+    def.scale.unk4 = 0.0f;
+    def.scale.unk8 = 1.0f;
+    def.flags = 0x24EC0008;
+    def.unk45 = 0xFF;
+    def.unk46 = 0;
+    def.unk47 = 6;
+    def.unk48 = 0;
+    def.viewportMask = 0xFF;
+    def.unk50 = 0;
+    def.fadeStart = 1;
+    def.fadeRate = 0xFF;
+    particle = func_1513D2F0(&def, (s32)D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
+    if (particle != NULL) {
+        dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
-        sfx.unk0 = 2;
-        sfx.unk1 = 2;
-        sfx.unk2 = 300;
-        sfx.unk4 = 6;
-        ipos[0] = pos.unk0;
-        ipos[1] = pos.unk4;
-        ipos[2] = pos.unk8;
-        dst->unk24 = func_1516284C(&sfx, ipos, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
+        header.unk0 = 2;
+        header.unk1 = 2;
+        header.unk2 = 300;
+        header.unk4 = 6;
+        posInt[0] = pos.unk0;
+        posInt[1] = pos.unk4;
+        posInt[2] = pos.unk8;
+        dst->unk24 = func_1516284C(&header, posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
+        // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
+        // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
             extern s32 D_800A4AA0;
 
-            if (hit) {
+            if (onGround) {
                 extern f32 D_800A5480;
 
-                shadow.unk0 = 3;
-                shadow.unk1 = 0;
-                shadow.unk2 = 0x3103;
-                shadow.unk4 = 300;
-                shadow.unk8 = 0;
-                shadow.unkC = 0;
-                shadow.unk10 = 0xFF;
-                shadow.unk11 = 0;
-                shadow.unk12 = 0;
-                shadow.unk13 = 0xFF;
-                shadow.unk44 = 0xFF;
-                shadow.unk14 = 1.0f;
-                shadow.unk18 = 1.0f;
-                shadow.unk1C.unk0 = pos.unk0;
-                shadow.unk1C.unk4 = pos.unk4 + 5.0f;
-                shadow.unk1C.unk8 = pos.unk8;
-                shadow.unk28 = *(struct17 *)&D_800A5480;
-                shadow.unk34 = 1.0f;
-                shadow.unk38 = 1.0f;
-                shadow.unk3C = 1.0f;
-                shadow.unk40 = 0x04EC0008;
-                shadow.unk45 = 0xFF;
-                shadow.unk46 = 0;
-                shadow.unk47 = 6;
-                shadow.unk48 = 0;
-                shadow.unk4C = 0xFF;
-                shadow.unk50 = 0;
-                shadow.unk54 = 1;
-                shadow.unk56 = 0xFF;
-                dst->unk28 = (Actor150FD514 *)func_1513D594((s32)&shadow, (s32)&D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&floor.unk04, 0, 0, 0, 0, arg1, arg2);
+                groundDef.texture = 3;
+                groundDef.type = 0;
+                groundDef.renderModes = 0x3103;
+                groundDef.lifetime = 300;
+                groundDef.frame = 0;
+                groundDef.frameSpeed = 0;
+                groundDef.rgba[0] = 0xFF;
+                groundDef.rgba[1] = 0;
+                groundDef.rgba[2] = 0;
+                groundDef.rgba[3] = 0xFF;
+                groundDef.unk44 = 0xFF;
+                groundDef.width = 1.0f;
+                groundDef.height = 1.0f;
+                groundDef.pos.unk0 = pos.unk0;
+                groundDef.pos.unk4 = pos.unk4 + 5.0f;
+                groundDef.pos.unk8 = pos.unk8;
+                groundDef.rot = *(struct17 *)&D_800A5480;
+                groundDef.scale.unk0 = 1.0f;
+                groundDef.scale.unk4 = 1.0f;
+                groundDef.scale.unk8 = 1.0f;
+                groundDef.flags = 0x04EC0008;
+                groundDef.unk45 = 0xFF;
+                groundDef.unk46 = 0;
+                groundDef.unk47 = 6;
+                groundDef.unk48 = 0;
+                groundDef.viewportMask = 0xFF;
+                groundDef.unk50 = 0;
+                groundDef.fadeStart = 1;
+                groundDef.fadeRate = 0xFF;
+                dst->groundParticle = (Actor150FD514 *)func_1513D594((s32)&groundDef, (s32)&D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
@@ -398,78 +397,83 @@ extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32
 extern void func_150E83AC(struct17 *, s16, u8, s32);
 extern f32 sinf(f32);
 
-s32 func_150FD514(Actor150FD514 *arg0) {
+/*
+ * Per-frame update of the func_150FCFD4 particle: follows its owner (calling func_15107B78 on it at a random
+ * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a
+ * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
+ */
+s32 func_150FD514(Actor150FD514 *particle) {
     struct127 *owner;
     Ext150FCFD4 *ext;
     f32 z;
     f32 x;
-    struct17 pos;
+    struct17 groundPos;
 
-    ext = &arg0->ext;
-    owner = ext->unk0;
+    ext = &particle->ext;
+    owner = ext->owner;
     if (owner != NULL) {
-        if (owner->interaction_state == 0 || owner->unique_id != ext->unk4) {
-            ext->unk0 = NULL;
+        if (owner->interaction_state == 0 || owner->unique_id != ext->ownerId) {
+            ext->owner = NULL;
             owner = NULL;
         }
         /* BUG (original game): owner may have just been set to NULL above, and is dereferenced anyway */
         x = owner->x_position;
         z = owner->z_position;
     } else {
-        x = arg0->unk34;
-        z = arg0->unk3C;
+        x = particle->def.pos.unk0;
+        z = particle->def.pos.unk8;
     }
     if (owner != NULL) {
         func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
-        ext->unk2C += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
-        while (ext->unk2C > 1.0f) {
-            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), arg0->unkC, arg0->unk1);
-            ext->unk2C -= 1.0f;
+        ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
+        while (ext->emitCounter > 1.0f) {
+            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->unkC, particle->unk1);
+            ext->emitCounter -= 1.0f;
         }
     }
-    if (ext->unkC > 20.0f) {
-        arg0->unk2C = (50.0f - ext->unkC) * 0.033333335f * ext->unk8;
-    } else if (ext->unkC > 10.0f) {
-        arg0->unk2C = ext->unk8;
+    if (ext->timer > 20.0f) {
+        particle->def.width = (50.0f - ext->timer) * 0.033333335f * ext->maxWidth;
+    } else if (ext->timer > 10.0f) {
+        particle->def.width = ext->maxWidth;
     } else {
-        arg0->unk2C = ext->unkC * 0.1f * ext->unk8;
-        if (ext->unk58 == 0) {
+        particle->def.width = ext->timer * 0.1f * ext->maxWidth;
+        if (ext->burstDone == 0) {
             if (owner != NULL) {
                 func_1505D024(owner, 0x16, owner->unk7A, -1);
-                func_10010F88(0x69D, 0x7D00, 0, 0, 0, arg0->unk34, arg0->unk38, arg0->unk3C, 0x1F4, 0xBB8);
+                func_10010F88(0x69D, 32000, 0, 0, 0, particle->def.pos.unk0, particle->def.pos.unk4, particle->def.pos.unk8, 500, 3000);
             }
-            ext->unk58 = 1;
-            func_151D5404((struct17 *)&arg0->unk34, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0->unkC, arg0->unk1);
-            func_151D5334((struct17 *)&arg0->unk34, 506.0f, 1013.0f, 0.0009871669f, 5, arg0->unkC, arg0->unk1);
-            if (ext->unk59 & 1) {
-                pos.unk0 = arg0->unk34;
-                pos.unk4 = ext->unk30.unk00;
-                pos.unk8 = arg0->unk3C;
-                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->unk30.unk04, &pos,
-                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, arg0->unkC, 0);
-                func_150E83AC(&pos, (func_150ADA20() % 80) + 243, arg0->unkC, arg0->unk1);
+            ext->burstDone = 1;
+            func_151D5404(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->unkC, particle->unk1);
+            func_151D5334(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->unkC, particle->unk1);
+            if (ext->onGround & 1) {
+                groundPos.unk0 = particle->def.pos.unk0;
+                groundPos.unk4 = ext->ground.height;
+                groundPos.unk8 = particle->def.pos.unk8;
+                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
+                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->unkC, 0);
+                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->unkC, particle->unk1);
             }
         }
     }
-    arg0->unk5C = sinf(ext->unk10) * 57.0f + 198.0f;
-    ext->unk10 += 0.28500003f * D_800BE9A4;
-    ext->unk10 = func_15144B68(ext->unk10);
-    ext->unk1C += 0.10700001f * D_800BE9A4;
-    ext->unk20 += -0.086f * D_800BE9A4;
-    ext->unk1C = func_15144B68(ext->unk1C);
-    ext->unk20 = func_15144B68(ext->unk20);
-    ext->unk14 = func_150AD78C(ext->unk1C) * 1666.0f + -4633.0f;
-    ext->unk18 = func_150AD78C(ext->unk20) * 1192.0f + 1242.0f;
-    if (ext->unk28 != NULL) {
-        ext->unk28->unk2C = ext->unk28->unk30 = arg0->unk2C * 0.02f;
-        ext->unk28->unk5C = arg0->unk5C;
-        ext->unk28->unk34 = x;
-        ext->unk28->unk3C = z;
+    particle->def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
+    ext->pulsePhase += 0.28500003f * D_800BE9A4;
+    ext->pulsePhase = func_15144B68(ext->pulsePhase);
+    ext->texPhase0 += 0.10700001f * D_800BE9A4;
+    ext->texPhase1 += -0.086f * D_800BE9A4;
+    ext->texPhase0 = func_15144B68(ext->texPhase0);
+    ext->texPhase1 = func_15144B68(ext->texPhase1);
+    ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
+    ext->texS1 = func_150AD78C(ext->texPhase1) * 1192.0f + 1242.0f;
+    if (ext->groundParticle != NULL) {
+        ext->groundParticle->def.width = ext->groundParticle->def.height = particle->def.width * 0.02f;
+        ext->groundParticle->def.unk44 = particle->def.unk44;
+        ext->groundParticle->def.pos.unk0 = x;
+        ext->groundParticle->def.pos.unk8 = z;
     }
-    arg0->unk34 = x;
-    arg0->unk3C = z;
-    ext->unkC -= D_800BE9A4;
-    if (ext->unkC < 0.0f) {
+    particle->def.pos.unk0 = x;
+    particle->def.pos.unk8 = z;
+    ext->timer -= D_800BE9A4;
+    if (ext->timer < 0.0f) {
         return 0;
     }
     return 1;
@@ -505,10 +509,10 @@ Vtx *func_150FDBA0(Actor150FD514 *actor, s16 viewport) {
 
     vertices = func_1513EDE4(actor, viewport);
     if (vertices != NULL) {
-        vertices[0].v.tc[0] = actor->ext.unk14;
-        vertices[1].v.tc[0] = actor->ext.unk18;
-        vertices[2].v.tc[0] = actor->ext.unk18;
-        vertices[3].v.tc[0] = actor->ext.unk14;
+        vertices[0].v.tc[0] = actor->ext.texS0;
+        vertices[1].v.tc[0] = actor->ext.texS1;
+        vertices[2].v.tc[0] = actor->ext.texS1;
+        vertices[3].v.tc[0] = actor->ext.texS0;
     }
     return vertices;
 }
@@ -520,14 +524,14 @@ void func_150FDC2C(Actor150FD514 *actor) {
     if (ext->unk24 != 0) {
         func_1516972C((struct102 *)ext->unk24);
     }
-    if (ext->unk28 != NULL) {
-        func_1516972C((struct102 *)ext->unk28);
+    if (ext->groundParticle != NULL) {
+        func_1516972C((struct102 *)ext->groundParticle);
     }
-    if (ext->unk54 != 0) {
-        func_100111C8(ext->unk54);
+    if (ext->soundHandle != 0) {
+        func_100111C8(ext->soundHandle);
     }
-    if (ext->unk56 != 0) {
-        func_100111C8(ext->unk56);
+    if (ext->soundHandle2 != 0) {
+        func_100111C8(ext->soundHandle2);
     }
 }
 
