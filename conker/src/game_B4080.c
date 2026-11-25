@@ -68,10 +68,98 @@ typedef struct Racer {
     /* 0x4C */ CamParams cam;
 } Racer;
 
+/* A circular area registered with func_1508B20C. */
+typedef struct MpZone {
+    /* 0x0 */ f32 radiusSq;
+    /* 0x4 */ s16 x;
+    /* 0x6 */ s16 y;
+    /* 0x8 */ s16 z;
+    /* 0xA */ s16 padA;
+} MpZone;
+
+/* Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or per slot. */
+typedef struct MpGame {
+    /* 0x0000 */ s32 unk0;
+    /* 0x0004 */ s32 unk4;
+    /* 0x0008 */ s32 unk8;
+    /* 0x000C */ s32 unkC;
+    /* 0x0010 */ s32 numPlayers;
+    /* 0x0014 */ s32 activeMask;
+    /* 0x0018 */ s32 seenMask;
+    /* 0x001C */ s32 unk1C[16];
+    /* 0x005C */ s32 unk5C[16];
+    /* 0x009C */ s32 layer[16]; /* height band, func_15085DA8 */
+    /* 0x00DC */ s32 unkDC[16];
+    /* 0x011C */ s32 unk11C[16];
+    /* 0x015C */ s32 unk15C[16];
+    /* 0x019C */ s32 unk19C[16];
+    /* 0x01DC */ s32 unk1DC[16];
+    /* 0x021C */ s32 unk21C[16];
+    /* 0x025C */ s32 unk25C[16];
+    /* 0x029C */ s32 unk29C[16];
+    /* 0x02DC */ s32 unk2DC[16];
+    /* 0x031C */ s32 unk31C[16];
+    /* 0x035C */ s32 unk35C[16];
+    /* 0x039C */ s32 unk39C[16];
+    /* 0x03DC */ s32 unk3DC[16];
+    /* 0x041C */ s32 unk41C[16];
+    /* 0x045C */ s32 unk45C[16];
+    /* 0x049C */ s32 unk49C[16];
+    /* 0x04DC */ s32 grenades[16];
+    /* 0x051C */ s32 nearestEnemyDist[16];
+    /* 0x055C */ s32 unk55C[16];
+    /* 0x059C */ s32 unk59C[16];
+    /* 0x05DC */ s32 targets[16][16];     /* per player: other players sorted by targetDists, -1 ends */
+    /* 0x09DC */ s32 targetDists[16][16];
+    /* 0x0DDC */ s32 unkDDC[16];
+    /* 0x0E1C */ u8 padE1C[0x48];
+    /* 0x0E64 */ s32 team[16];
+    /* 0x0EA4 */ s32 numSlots;
+    /* 0x0EA8 */ s32 unkEA8;
+    /* 0x0EAC */ s32 unkEAC;
+    /* 0x0EB0 */ s32 slot[16];      /* slot held by each player, -1 = none */
+    /* 0x0EF0 */ s32 unkEF0[32];
+    /* 0x0F70 */ s32 slotOwner[32]; /* player holding each slot, -1 = none */
+    /* 0x0FF0 */ s32 unkFF0[32];
+    /* 0x1070 */ s32 unk1070[32];
+    /* 0x10F0 */ s32 unk10F0[32];
+    /* 0x1170 */ s32 unk1170;
+    /* 0x1174 */ s32 unk1174[32];
+    /* 0x11F4 */ s32 unk11F4[32];
+    /* 0x1274 */ s32 unk1274[32];
+    /* 0x12F4 */ s32 unk12F4[32];
+    /* 0x1374 */ s32 unk1374[32];
+    /* 0x13F4 */ s32 unk13F4[32];
+    /* 0x1474 */ s32 unk1474[32];
+    /* 0x14F4 */ s32 unk14F4[32];
+    /* 0x1574 */ s32 unk1574[16];
+    /* 0x15B4 */ u8 weights[16][16];
+    /* 0x16B4 */ f32 ticks;
+    /* 0x16B8 */ f32 unk16B8;
+    /* 0x16BC */ s16 gameType; /* resource id */
+    /* 0x16BE */ s16 pad16BE;
+    /* 0x16C0 */ s32 unk16C0[16];
+    /* 0x1700 */ s8 unk1700;
+    /* 0x1701 */ s8 unk1701;
+    /* 0x1702 */ s8 unk1702;
+    /* 0x1703 */ s8 unk1703;
+    /* 0x1704 */ s8 unk1704;
+    /* 0x1705 */ s8 unk1705[16];
+    /* 0x1715 */ s8 unk1715[16];
+    /* 0x1725 */ s8 unk1725[16];
+    /* 0x1735 */ s8 unk1735[16];
+    /* 0x1745 */ s8 numZones;
+    /* 0x1748 */ MpZone zones[8];
+    /* 0x17A8 */ f32 unk17A8[16];
+    /* 0x17E8 */ f32 unk17E8[16];
+    /* 0x1828 */ f32 unk1828[16];
+    /* 0x1868 */ f32 unk1868[16];
+} MpGame;
+
 extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
-extern s8 *D_800D23B0;
+extern MpGame *D_800D23B0;
 s32 func_1508802C();
 extern s16 D_80087290;
 extern PathNode *D_800D2350;
@@ -1446,23 +1534,23 @@ s32 func_15089BC0(void) {
         return 0;
     }
     func_1508BC20();
-    *(s8 *)((u8 *)D_800D23B0 + 0x1700) = 0;
-    *(s8 *)((u8 *)D_800D23B0 + 0x1701) = 0;
-    *(s8 *)((u8 *)D_800D23B0 + 0x1703) = 0;
-    *(s8 *)((u8 *)D_800D23B0 + 0x1702) = 0;
-    *(s8 *)((u8 *)D_800D23B0 + 0x1704) = 0;
-    *(s16 *)((u8 *)D_800D23B0 + 0x16BC) = id;
-    *(f32 *)((u8 *)D_800D23B0 + 0x16B8) = D_800872B0[D_800E0BD0];
-    *(s8 *)((u8 *)D_800D23B0 + 0x1745) = 0;
+    D_800D23B0->unk1700 = 0;
+    D_800D23B0->unk1701 = 0;
+    D_800D23B0->unk1703 = 0;
+    D_800D23B0->unk1702 = 0;
+    D_800D23B0->unk1704 = 0;
+    D_800D23B0->gameType = id;
+    D_800D23B0->unk16B8 = D_800872B0[D_800E0BD0];
+    D_800D23B0->numZones = 0;
     scales = D_800872F8;
     for (i = 0; i < 16; i++) {
-        *(s32 *)((u8 *)D_800D23B0 + i * 4 + 0x16C0) = 0;
-        *(f32 *)((u8 *)D_800D23B0 + i * 4 + 0x1868) = scales[D_800E0BD0];
-        *(f32 *)((u8 *)D_800D23B0 + i * 4 + 0x17A8) = 0.0f;
-        *(f32 *)((u8 *)D_800D23B0 + i * 4 + 0x17E8) = 0.0f;
-        *(f32 *)((u8 *)D_800D23B0 + i * 4 + 0x1828) = 0.0f;
+        D_800D23B0->unk16C0[i] = 0;
+        D_800D23B0->unk1868[i] = scales[D_800E0BD0];
+        D_800D23B0->unk17A8[i] = 0.0f;
+        D_800D23B0->unk17E8[i] = 0.0f;
+        D_800D23B0->unk1828[i] = 0.0f;
     }
-    *(s32 *)((u8 *)D_800D23B0 + 0xC) = D_800872F0[D_800E0BD0];
+    D_800D23B0->unkC = D_800872F0[D_800E0BD0];
     return 0;
 }
 
@@ -1484,12 +1572,12 @@ s32 func_15089F9C(s32 arg0) {
     s32 *states;
     s32 off;
 
-    states = (s32 *)(D_800D23B0 + 0xE64);
-    mask = *(s32 *)(D_800D23B0 + 0x14);
-    count = *(s32 *)(D_800D23B0 + 0x10);
+    states = D_800D23B0->team;
+    mask = D_800D23B0->activeMask;
+    count = D_800D23B0->numPlayers;
     off = arg0 * 4;
     bestIdx = -1;
-    if (*(s32 *)(D_800D23B0 + off + 0x15C) == 0) {
+    if (D_800D23B0->unk15C[arg0] == 0) {
         minDist = 750.0f;
         maxDist = 3500.0f;
     } else {
@@ -1500,7 +1588,7 @@ s32 func_15089F9C(s32 arg0) {
     for (i = 0; i < count; i++) {
         bit = 1 << i;
         if ((states[i] != 3) && (mask & bit) &&
-            (*(s32 *)(D_800D23B0 + off + 0x16C0) & (bit << 16))) {
+            (D_800D23B0->unk16C0[arg0] & (bit << 16))) {
             other = &D_800CC2D0[i];
             if (other != NULL) {
                 self = &D_800CC2D0[arg0];
@@ -1550,19 +1638,19 @@ s32 func_1508A1BC(void) {
     struct127 *other;
     struct127 *self;
 
-    states = (s32 *)(D_800D23B0 + 0xE64);
-    mask = *(s32 *)(D_800D23B0 + 0x14);
-    count = *(s32 *)(D_800D23B0 + 0x10);
-    kinds = (s32 *)(D_800D23B0 + 0x15C);
-    active = (s32 *)(D_800D23B0 + 0x39C);
-    teams = (s32 *)(D_800D23B0 + 0x9C);
-    ids = (s32 *)(D_800D23B0 + 0x5DC);
-    dists = (s32 *)(D_800D23B0 + 0x9DC);
-    D_800D23B0[0x1704]++;
-    if (*(s32 *)(D_800D23B0 + 0x10) == D_800D23B0[0x1704]) {
-        D_800D23B0[0x1704] = 0;
+    states = D_800D23B0->team;
+    mask = D_800D23B0->activeMask;
+    count = D_800D23B0->numPlayers;
+    kinds = D_800D23B0->unk15C;
+    active = D_800D23B0->unk39C;
+    teams = D_800D23B0->layer;
+    ids = D_800D23B0->targets;
+    dists = D_800D23B0->targetDists;
+    D_800D23B0->unk1704++;
+    if (D_800D23B0->unk1704 == D_800D23B0->numPlayers) {
+        D_800D23B0->unk1704 = 0;
     }
-    cur = D_800D23B0[0x1704];
+    cur = D_800D23B0->unk1704;
     row = cur * 16;
     if (!((1 << cur) & mask)) {
         for (i = 0; i < 16; i++) ids[row + i] = -1;
@@ -1571,7 +1659,7 @@ s32 func_1508A1BC(void) {
     n = 0;
     minDist = 32000;
     myTeam = states[cur];
-    myMask = ((s32 *)(D_800D23B0 + 0x16C0))[cur];
+    myMask = D_800D23B0->unk16C0[cur];
     for (i = 0; i < count; i++) {
         if (active[i] > 0 && myTeam != states[i]) {
             other = &D_800CC2D0[i];
@@ -1594,11 +1682,11 @@ s32 func_1508A1BC(void) {
                 if (i >= D_8008FD90) {
                     dist *= 2;
                 }
-                if (*(s16 *)(D_800D23B0 + 0x16BC) != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
+                if (D_800D23B0->gameType != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
                     dist = -1;
                 }
             }
-            if (*(s16 *)(D_800D23B0 + 0x16BC) == 0xB7) {
+            if (D_800D23B0->gameType == 0xB7) {
                 if (dist == -1) {
                     dist = rawDist;
                 }
@@ -1610,7 +1698,7 @@ s32 func_1508A1BC(void) {
                 }
             }
             if (i < D_8008FD90 && dist != -1) {
-                dist *= *(f32 *)(D_800D23B0 + 0x16B8);
+                dist *= D_800D23B0->unk16B8;
             }
             if (dist >= 0) {
                 j = 0;
@@ -1631,8 +1719,8 @@ s32 func_1508A1BC(void) {
         }
     }
     for (i = n; i < 16; i++) ids[row + i] = -1;
-    if (D_800D23B0 + 0x51C) {
-        ((s32 *)(D_800D23B0 + 0x51C))[cur] = minDist;
+    if (D_800D23B0->nearestEnemyDist) {
+        D_800D23B0->nearestEnemyDist[cur] = minDist;
     }
     return 0;
 }
@@ -1650,10 +1738,6 @@ void func_1508EC5C(s32, s32);
 void func_1508EBF8(s32, s32);
 s32 func_1508DAEC(s32, s32);
 void func_1508B3F8(void);
-
-#define MGR_W(off) ((s32 *)(D_800D23B0 + (off)))
-#define MGR_B(off) ((s8 *)(D_800D23B0 + (off)))
-#define MGR_F(off) ((f32 *)(D_800D23B0 + (off)))
 
 s32 func_1508A6FC(void)
 {
@@ -1694,23 +1778,23 @@ s32 func_1508A6FC(void)
   u8 *vp;
   result = 0;
   i = 0;
-  mask14 = ((s32 *) (D_800D23B0 + 0x14))[0];
-  mask18 = ((s32 *) (D_800D23B0 + 0x18))[0];
-  count = ((s32 *) (D_800D23B0 + 0x10))[0];
-  teams = (s32 *) (D_800D23B0 + 0xE64);
-  arr35C = (s32 *) (D_800D23B0 + 0x35C);
-  arr31C = (s32 *) (D_800D23B0 + 0x31C);
-  arr19C = (s32 *) (D_800D23B0 + 0x19C);
-  arr21C = (s32 *) (D_800D23B0 + 0x21C);
-  arr29C = (s32 *) (D_800D23B0 + 0x29C);
-  arr25C = (s32 *) (D_800D23B0 + 0x25C);
-  arr41C = (s32 *) (D_800D23B0 + 0x41C);
-  arr3DC = (s32 *) (D_800D23B0 + 0x3DC);
-  arrDDC = (s32 *) (D_800D23B0 + 0xDDC);
-  arr1574 = (s32 *) (D_800D23B0 + 0x1574);
-  arr1C = (s32 *) (D_800D23B0 + 0x1C);
-  arr39C = (s32 *) (D_800D23B0 + 0x39C);
-  arr9C = (s32 *) (D_800D23B0 + 0x9C);
+  mask14 = D_800D23B0->activeMask;
+  mask18 = D_800D23B0->seenMask;
+  count = D_800D23B0->numPlayers;
+  teams = D_800D23B0->team;
+  arr35C = D_800D23B0->unk35C;
+  arr31C = D_800D23B0->unk31C;
+  arr19C = D_800D23B0->unk19C;
+  arr21C = D_800D23B0->unk21C;
+  arr29C = D_800D23B0->unk29C;
+  arr25C = D_800D23B0->unk25C;
+  arr41C = D_800D23B0->unk41C;
+  arr3DC = D_800D23B0->unk3DC;
+  arrDDC = D_800D23B0->unkDDC;
+  arr1574 = D_800D23B0->unk1574;
+  arr1C = D_800D23B0->unk1C;
+  arr39C = D_800D23B0->unk39C;
+  arr9C = D_800D23B0->layer;
   for (i = 0; i < count; i++)
   {
     bit = 1 << i;
@@ -1728,7 +1812,7 @@ s32 func_1508A6FC(void)
     {
       obj = &D_800CC2D0[i];
       team = teams[i];
-      if ((team != 0) && ((*((s16 *) (D_800D23B0 + 0x16BC))) == 0xB9))
+      if ((team != 0) && ((D_800D23B0->gameType) == 0xB9))
       {
         obj->unk1E4 = 1;
       }
@@ -1756,9 +1840,9 @@ s32 func_1508A6FC(void)
       }
       arr3DC[i] = D_800E0BB8[i];
       D_800E0BB8[i] &= 0x7F;
-      if (((s32 *) (D_800D23B0 + 0x4DC)) != 0)
+      if ((D_800D23B0->grenades) != 0)
       {
-        ((s32 *) (D_800D23B0 + 0x4DC))[i] = obj->unk31C->grenade_count;
+        D_800D23B0->grenades[i] = obj->unk31C->grenade_count;
       }
       arr39C[i] = func_150859AC(i, 4);
       arr9C[i] = func_15085DA8(obj->y_position);
@@ -1768,11 +1852,11 @@ s32 func_1508A6FC(void)
         {
           if (obj->unk20F != 0xFF)
           {
-            ((s32 *) (D_800D23B0 + 0x59C))[i] = obj->unk20F;
+            D_800D23B0->unk59C[i] = obj->unk20F;
           }
           else
           {
-            ((s32 *) (D_800D23B0 + 0x59C))[i] = -1;
+            D_800D23B0->unk59C[i] = -1;
             if (!arr3DC)
             {
             }
@@ -1780,8 +1864,8 @@ s32 func_1508A6FC(void)
           arr35C[i] = 1;
           arr25C[i] = 0;
           arr19C[i] = 0;
-          ((s32 *) (D_800D23B0 + 0x5C))[i] = 1;
-          ((s32 *) (D_800D23B0 + 0x11C))[i] = -1;
+          D_800D23B0->unk5C[i] = 1;
+          D_800D23B0->unk11C[i] = -1;
           arrDDC[team]--;
           if ((arr3DC[i] & 0x7F) < count)
           {
@@ -1791,9 +1875,9 @@ s32 func_1508A6FC(void)
               arrDDC[other]++;
             }
           }
-          if ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB9)
+          if ((D_800D23B0->gameType) != 0xB9)
           {
-            ((s32 *) (D_800D23B0 + 0xFF0))[i] = 0;
+            D_800D23B0->unkFF0[i] = 0;
             func_1508DAEC(i, 1);
           }
           result |= bit;
@@ -1804,7 +1888,7 @@ s32 func_1508A6FC(void)
         arr35C[i] = 0;
       }
       flag = 1;
-      if ((arr31C[i] != 0) && ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB8))
+      if ((arr31C[i] != 0) && ((D_800D23B0->gameType) != 0xB8))
       {
         reset = 0;
         if ((arr19C[i] != 1) && (arr21C[i] < 30))
@@ -1822,15 +1906,15 @@ s32 func_1508A6FC(void)
           if (type == 5)
           {
             arr21C[i] = 30;
-            ((f32 *) (D_800D23B0 + 0x1868))[i] = D_800872F8[D_800E0BD0];
-            ((f32 *) (D_800D23B0 + 0x17A8))[i] = (func_150ADA68() * 50.0f) + obj->x_position;
-            ((f32 *) (D_800D23B0 + 0x17E8))[i] = obj->y_position + 40.0f;
-            ((f32 *) (D_800D23B0 + 0x1828))[i] = (func_150ADA68() * 50.0f) + obj->z_position;
+            D_800D23B0->unk1868[i] = D_800872F8[D_800E0BD0];
+            D_800D23B0->unk17A8[i] = (func_150ADA68() * 50.0f) + obj->x_position;
+            D_800D23B0->unk17E8[i] = obj->y_position + 40.0f;
+            D_800D23B0->unk1828[i] = (func_150ADA68() * 50.0f) + obj->z_position;
             if ((arr31C[i] - 2) >= 2)
             {
               tgt = &D_800CC2D0[arr31C[i] - 2];
-              ((f32 *) (D_800D23B0 + 0x17A8))[i] += (tgt->x_position - obj->x_position) * 0.5f;
-              ((f32 *) (D_800D23B0 + 0x1828))[i] += (tgt->z_position - obj->z_position) * 0.5f;
+              D_800D23B0->unk17A8[i] += (tgt->x_position - obj->x_position) * 0.5f;
+              D_800D23B0->unk1828[i] += (tgt->z_position - obj->z_position) * 0.5f;
             }
           }
         }
@@ -1849,38 +1933,38 @@ s32 func_1508A6FC(void)
         {
           reset = 1;
         }
-        ((s8 *) (D_800D23B0 + 0x1725))[i] += (((s8 *) (D_800D23B0 + 0x1705))[i] - ((s8 *) (D_800D23B0 + 0x1725))[i]) >> 2;
-        ((s8 *) (D_800D23B0 + 0x1735))[i] += (((s8 *) (D_800D23B0 + 0x1715))[i] - ((s8 *) (D_800D23B0 + 0x1735))[i]) >> 2;
-        if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, ((s8 *) (D_800D23B0 + 0x1725))[i], ((s8 *) (D_800D23B0 + 0x1735))[i]) && (arr19C[i] != 1))
+        D_800D23B0->unk1725[i] += (D_800D23B0->unk1705[i] - D_800D23B0->unk1725[i]) >> 2;
+        D_800D23B0->unk1735[i] += (D_800D23B0->unk1715[i] - D_800D23B0->unk1735[i]) >> 2;
+        if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->unk1725[i], D_800D23B0->unk1735[i]) && (arr19C[i] != 1))
         {
           arr21C[i] = 0;
         }
         if (arr29C[i] == 0)
         {
-          ((s8 *) (D_800D23B0 + 0x1705))[i] = 0;
-          ((s8 *) (D_800D23B0 + 0x1715))[i] = 0;
+          D_800D23B0->unk1705[i] = 0;
+          D_800D23B0->unk1715[i] = 0;
           if (D_800872E8[D_800E0BD0] < ((s32) (func_150ADA68() * 100.0f)))
           {
             if (func_150ADA68() > 0.5f)
             {
-              ((s8 *) (D_800D23B0 + 0x1705))[i] = -50;
+              D_800D23B0->unk1705[i] = -50;
             }
             else
             {
-              ((s8 *) (D_800D23B0 + 0x1705))[i] = 50;
+              D_800D23B0->unk1705[i] = 50;
             }
             if (func_150ADA68() > 0.5f)
             {
-              ((s8 *) (D_800D23B0 + 0x1715))[i] = 50;
+              D_800D23B0->unk1715[i] = 50;
             }
             else
             {
-              ((s8 *) (D_800D23B0 + 0x1715))[i] = 0;
+              D_800D23B0->unk1715[i] = 0;
             }
           }
         }
       }
-      if (flag && ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB8))
+      if (flag && ((D_800D23B0->gameType) != 0xB8))
       {
         arr29C[i] = -D_800872E0[D_800E0BD0];
       }
@@ -1903,20 +1987,20 @@ s32 func_1508A6FC(void)
     }
   }
 
-  ((s32 *) (D_800D23B0 + 0x18))[0] = mask18;
+  D_800D23B0->seenMask = mask18;
   if (D_800BE9E4 != 0)
   {
-    ((f32 *) (D_800D23B0 + 0x16B4))[0] = D_800BE9E4;
+    D_800D23B0->ticks = D_800BE9E4;
   }
   else
   {
-    ((f32 *) (D_800D23B0 + 0x16B4))[0] = 1.0f;
+    D_800D23B0->ticks = 1.0f;
   }
-  if (((s32 *) (D_800D23B0 + 0x55C)) != 0)
+  if ((D_800D23B0->unk55C) != 0)
   {
     func_1508B3F8();
   }
-  if ((*((s16 *) (D_800D23B0 + 0x16BC))) == 0xB9)
+  if ((D_800D23B0->gameType) == 0xB9)
   {
     half = ((s32) (((f32 *) D_800BE628)[0x30 / 4] - ((f32 *) D_800BE628)[0x2C / 4])) >> 1;
     func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
@@ -2061,14 +2145,14 @@ void func_1508B3F8(void) {
     f32 bestDist;
     PathNode *node;
 
-    zone = (s32 *)(D_800D23B0 + 0x55C);
-    e = (Entry1508B3F8 *)(D_800D23B0 + 0x1748);
+    zone = D_800D23B0->unk55C;
+    e = D_800D23B0->zones;
     for (i = 0; i < D_8008FD8C; i++) {
         if (zone[i] != -1) {
             zone[i] = -2;
         }
     }
-    for (i = 0; i < *(s8 *)(D_800D23B0 + 0x1745); i++) {
+    for (i = 0; i < D_800D23B0->numZones; i++) {
         found = 0;
         s.radiusSq = e[i].radiusSq;
         x = e[i].x;
@@ -2109,7 +2193,7 @@ void func_1508B3F8(void) {
                     if (best != 0xFF) {
                         node = &D_800D2350[best];
                         if (zone[j] != -2) {
-                            ((s32 *)(D_800D23B0 + 0x5C))[j] = 1;
+                            D_800D23B0->unk5C[j] = 1;
                         }
                         zone[j] = node->unk7;
                     }
@@ -2122,7 +2206,7 @@ void func_1508B3F8(void) {
             zone[i] = -1;
         }
     }
-    *(s8 *)(D_800D23B0 + 0x1745) = 0;
+    D_800D23B0->numZones = 0;
 }
 
 s32 func_1508C5B8(s32, s32);
@@ -2154,18 +2238,18 @@ s32 func_1508B9BC(void) {
     f32 value;
 
     mode = 1;
-    count = *(s32 *)((u8 *)D_800D23B0 + 0x10);
-    current = *(s32 *)((u8 *)D_800D23B0 + 4);
-    active = (s32 *)((u8 *)D_800D23B0 + 0x39C);
-    neighbors = (s32 *)((u8 *)D_800D23B0 + 0x5DC);
-    costs = (s32 *)((u8 *)D_800D23B0 + 0x9DC);
-    targets = (s32 *)((u8 *)D_800D23B0 + 0x11C);
+    count = D_800D23B0->numPlayers;
+    current = D_800D23B0->unk4;
+    active = D_800D23B0->unk39C;
+    neighbors = D_800D23B0->targets;
+    costs = D_800D23B0->targetDists;
+    targets = D_800D23B0->unk11C;
     if (count >= 9) {
         mode = 4;
     }
     func_1508C5B8(0, mode);
     func_1508A1BC();
-    weights = (u8 *)D_800D23B0 + current * 16 + 0x15B4;
+    weights = D_800D23B0->weights[current];
     winner = -1;
     minimum = 10000000;
     index = 0;
@@ -2200,7 +2284,7 @@ s32 func_1508B9BC(void) {
             index++;
         } while (index != count);
     }
-    *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x49C) = winner;
+    D_800D23B0->unk49C[current] = winner;
     if (winner != -1) {
         f32 dx;
         f32 dz;
@@ -2212,9 +2296,9 @@ s32 func_1508B9BC(void) {
         dx = actor->field14 - other->field14;
         dz = actor->field1C - other->field1C;
         distance = sqrtf(dx * dx + dz * dz);
-        *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x45C) = (s32)distance;
+        D_800D23B0->unk45C[current] = (s32)distance;
     } else {
-        *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x45C) = minimum;
+        D_800D23B0->unk45C[current] = minimum;
     }
     return 0;
 }
@@ -2299,15 +2383,15 @@ s32 func_1508BF14(void) {
     s32 bestSlot;
     s32 n;
 
-    myIdx = ((s32 *)D_800D23B0)[1];
-    numSlots = ((s32 *)D_800D23B0)[4];
-    statuses = (s32 *)(D_800D23B0 + 0x15C);
-    weights = (s32 *)(D_800D23B0 + 0x39C);
-    owners = (s32 *)(D_800D23B0 + 0xE64);
-    bestCosts = (s32 *)(D_800D23B0 + 0x45C);
-    bestSlots = (s32 *)(D_800D23B0 + 0x49C);
-    links = (s32 *)(D_800D23B0 + 0x5DC);
-    costs = (s32 *)(D_800D23B0 + 0x9DC);
+    myIdx = D_800D23B0->unk4;
+    numSlots = D_800D23B0->numPlayers;
+    statuses = D_800D23B0->unk15C;
+    weights = D_800D23B0->unk39C;
+    owners = D_800D23B0->team;
+    bestCosts = D_800D23B0->unk45C;
+    bestSlots = D_800D23B0->unk49C;
+    links = D_800D23B0->targets;
+    costs = D_800D23B0->targetDists;
     owner = owners[myIdx];
 
     for (i = 0; i < numSlots; i++) counts[i] = 0;
@@ -2463,12 +2547,12 @@ void func_1508C1A4(s32 arg0, s32 arg1) {
         }
     }
     if (blocked) {
-        *(s32 *)((u8 *)D_800D23B0 + arg0 * 4 + 0x16C0) |= 1 << arg1;
-        *(s32 *)((u8 *)D_800D23B0 + arg1 * 4 + 0x16C0) |= 1 << arg0;
+        D_800D23B0->unk16C0[arg0] |= 1 << arg1;
+        D_800D23B0->unk16C0[arg1] |= 1 << arg0;
     }
     if (seen) {
-        *(s32 *)((u8 *)D_800D23B0 + arg0 * 4 + 0x16C0) |= 0x10000 << arg1;
-        *(s32 *)((u8 *)D_800D23B0 + arg1 * 4 + 0x16C0) |= 0x10000 << arg0;
+        D_800D23B0->unk16C0[arg0] |= 0x10000 << arg1;
+        D_800D23B0->unk16C0[arg1] |= 0x10000 << arg0;
     }
 }
 
@@ -2490,9 +2574,9 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
     s32 *list;
     s32 mask;
 
-    cur = D_800D23B0[0x1700];
-    other = D_800D23B0[0x1701];
-    list = (s32 *)(D_800D23B0 + 0xE64);
+    cur = D_800D23B0->unk1700;
+    other = D_800D23B0->unk1701;
+    list = D_800D23B0->team;
     if (arg1 != 0) {
         for (i = 0; i < D_8008FD90; i++) {
             x0 = D_800CC2D0[i].x_position;
@@ -2503,10 +2587,10 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
             }
             for (k = D_8008FD90; k < D_8008FD8C; k++) {
                 if (list[i] != list[k] &&
-                    !(((s32 *)(D_800D23B0 + 0x16C0))[i] & (0x10001 << k))) {
+                    !(D_800D23B0->unk16C0[i] & (0x10001 << k))) {
                     dx = x0 - D_800CC2D0[i].x_position;
                     dz = x1 - D_800CC2D0[i].z_position;
-                    if (i == ((s32 *)(D_800D23B0 + 0x11C))[k]) {
+                    if (i == D_800D23B0->unk11C[k]) {
                         dx *= 0.5f;
                         dz *= 0.5f;
                     }
@@ -2524,8 +2608,8 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
             for (k = 0; k < 3; k++) {
                 if (idx[k] != -1) {
                     j = idx[k];
-                    ((s32 *)(D_800D23B0 + 0x16C0))[i] &= ~(0x10001 << j);
-                    ((s32 *)(D_800D23B0 + 0x16C0))[j] &= ~(0x10001 << i);
+                    D_800D23B0->unk16C0[i] &= ~(0x10001 << j);
+                    D_800D23B0->unk16C0[j] &= ~(0x10001 << i);
                     func_1508C1A4(i, j);
                 }
             }
@@ -2547,8 +2631,8 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
                     team = *(u8 *)&obj->pad128;
                     other = cur + 1;
                 }
-                ((s32 *)(D_800D23B0 + 0x16C0))[cur] &= ~(0x10001 << other);
-                ((s32 *)(D_800D23B0 + 0x16C0))[other] &= ~(0x10001 << cur);
+                D_800D23B0->unk16C0[cur] &= ~(0x10001 << other);
+                D_800D23B0->unk16C0[other] &= ~(0x10001 << cur);
                 mask = (1 << cur) | (1 << other);
                 m++;
             } while (m < 64 && ((D_800D18A0 & mask) ||
@@ -2556,9 +2640,9 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
             func_1508C1A4(cur, other);
         } while (--arg1 != 0);
     }
-    D_800D23B0[0x1700] = cur;
-    D_800D23B0[0x1701] = other;
-    return ((s32 *)(D_800D23B0 + 0x16C0))[arg0];
+    D_800D23B0->unk1700 = cur;
+    D_800D23B0->unk1701 = other;
+    return D_800D23B0->unk16C0[arg0];
 }
 
 s32 func_1508C9CC(void) {
@@ -2570,7 +2654,7 @@ s32 func_1508C9CC(void) {
 
     count = 0;
     ret = -1;
-    cur = D_800D23B0[0x1702];
+    cur = D_800D23B0->unk1702;
     do {
         cur = (s8)(cur + 1);
         if (cur >= D_8008FD8C) {
@@ -2588,7 +2672,7 @@ s32 func_1508C9CC(void) {
         count++;
     } while (count < D_8008FD8C);
 
-    D_800D23B0[0x1702] = cur;
+    D_800D23B0->unk1702 = cur;
     return ret;
 }
 
@@ -2597,10 +2681,10 @@ s32 func_1508CA88(void) {
     s8 temp;
 
     p2 = &D_800D23B0;
-    D_800D23B0[0x1703]++;
-    temp = D_800D23B0[0x1703];
+    D_800D23B0->unk1703++;
+    temp = D_800D23B0->unk1703;
     if (temp >= D_8008FD90) {
-        D_800D23B0[0x1703] = 0;
+        D_800D23B0->unk1703 = 0;
         temp = (*p2)[0x1703];
     }
     return temp;
@@ -2724,7 +2808,7 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         }
         dx = 0.0f;
         dz = 0.0f;
-        if ((*(s16 *)(D_800D23B0 + 0x16BC) == 0xB9) || (D_800E0BD0 >= 3)) {
+        if ((D_800D23B0->gameType == 0xB9) || (D_800E0BD0 >= 3)) {
             switch (INNER(OBJ)->unk78) {
                 case 0x18:
                 case 0x41:
@@ -2749,19 +2833,19 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
                 dz = def->z - OBJ->z_position;
                 dy = def->y - OBJ->y_position;
                 dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
-                V = (dy * V) / *(f32 *)(D_800D23B0 + 0x16B4);
+                V = (dy * V) / D_800D23B0->ticks;
                 dx = (def->x - def->oldX) * V;
                 dz = (def->z - def->oldZ) * V;
             }
         }
         if (arg3 == 0) {
-            dx = (def->x + dx) - ((f32 *)(D_800D23B0 + 0x17A8))[arg0];
-            dz = (def->z + dz) - ((f32 *)(D_800D23B0 + 0x1828))[arg0];
+            dx = (def->x + dx) - D_800D23B0->unk17A8[arg0];
+            dz = (def->z + dz) - D_800D23B0->unk1828[arg0];
         } else {
-            dx = ((f32)def->unk1A4 + dx) - ((f32 *)(D_800D23B0 + 0x17A8))[arg0];
-            dz = ((f32)def->unk1A8 + dz) - ((f32 *)(D_800D23B0 + 0x1828))[arg0];
+            dx = ((f32)def->unk1A4 + dx) - D_800D23B0->unk17A8[arg0];
+            dz = ((f32)def->unk1A8 + dz) - D_800D23B0->unk1828[arg0];
         }
-        scale = ((f32 *)(D_800D23B0 + 0x1868))[arg0] * (f32)D_800BE9E4;
+        scale = D_800D23B0->unk1868[arg0] * (f32)D_800BE9E4;
         if (type == 3) {
             scale = 1.0f;
             arg5 = 0;
@@ -2770,10 +2854,10 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         if (scale > 1.0f) {
             scale = 1.0f;
         }
-        ((f32 *)(D_800D23B0 + 0x17A8))[arg0] += dx * scale;
-        ((f32 *)(D_800D23B0 + 0x1828))[arg0] += dz * scale;
-        dx = ((f32 *)(D_800D23B0 + 0x17A8))[arg0] - OBJ->x_position;
-        dz = ((f32 *)(D_800D23B0 + 0x1828))[arg0] - OBJ->z_position;
+        D_800D23B0->unk17A8[arg0] += dx * scale;
+        D_800D23B0->unk1828[arg0] += dz * scale;
+        dx = D_800D23B0->unk17A8[arg0] - OBJ->x_position;
+        dz = D_800D23B0->unk1828[arg0] - OBJ->z_position;
         dist = sqrtf((dx * dx) + (dz * dz));
         if (dist < 1.0f) {
             dist = 1.0f;
@@ -2811,12 +2895,12 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
             result = 1;
         }
         if (arg3 == 0) {
-            cur = ((def->y + height) - (f32)arg5) - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+            cur = ((def->y + height) - (f32)arg5) - D_800D23B0->unk17E8[arg0];
         } else {
-            cur = ((f32)def->unk1A6 - (f32)arg5) - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+            cur = ((f32)def->unk1A6 - (f32)arg5) - D_800D23B0->unk17E8[arg0];
         }
-        ((f32 *)(D_800D23B0 + 0x17E8))[arg0] += cur * scale;
-        cur = INNER(OBJ)->unk140 - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+        D_800D23B0->unk17E8[arg0] += cur * scale;
+        cur = INNER(OBJ)->unk140 - D_800D23B0->unk17E8[arg0];
         ang = (f32)func_1505A630(dist, cur, 0) * 0.005493164f;
         curYaw = INNER(OBJ)->unk170;
         while (ang > 180.0f) {
@@ -2873,7 +2957,7 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         }
         if (mode != 0) {
             if (type == 0x1B) {
-                if ((h < -50.0f) && (((s32 *)(D_800D23B0 + 0x16C0))[arg0] & (0x10001 << arg1))) {
+                if ((h < -50.0f) && (D_800D23B0->unk16C0[arg0] & (0x10001 << arg1))) {
                     INNER(OBJ)->unk8A |= 0x2000;
                     INNER(OBJ)->unk8E = 2;
                 }
@@ -2895,11 +2979,11 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
                 OBJ->unk7A = OBJ->unk76;
                 OBJ->unk40 = (f32)(s16)(OBJ->unk7A + 0x4000) * 0.005493164f;
                 func_150DA5EC(OBJ, f);
-            } else if (((s32 *)(D_800D23B0 + 0x29C))[arg0] >= 0) {
+            } else if (D_800D23B0->unk29C[arg0] >= 0) {
                 INNER(OBJ)->unk8A = 0x2000;
                 if (mode == 1) {
                     INNER(OBJ)->unk8E = 2;
-                    if (D_800872D8[D_800E0BD0] < ((s32 *)(D_800D23B0 + 0x29C))[arg0]) {
+                    if (D_800872D8[D_800E0BD0] < D_800D23B0->unk29C[arg0]) {
                         INNER(OBJ)->unk8A &= 0xDFFF;
                         INNER(OBJ)->unk8E = 0;
                     }
@@ -2947,7 +3031,7 @@ extern s16 D_80087320[][3];
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
 extern f32 D_8009DA8C;
 
-s32 func_1508D850(s32 arg0) {
+s32 func_1508D850(s32 player) {
     s8 *timers;
     s8 *targets;
     s32 *target;
@@ -2959,10 +3043,11 @@ s32 func_1508D850(s32 arg0) {
     s32 limit;
     s32 off;
 
-    targets = (s8 *)(D_800D23B0 + 0x11C);
-    timers = (s8 *)(D_800D23B0 + 0x29C);
-    obj = &D_800CC2D0[arg0];
-    off = arg0 * 4;
+    // matching: byte pointers plus a shared byte offset, as IDO keeps player * 4 in one register
+    targets = (s8 *)D_800D23B0->unk11C;
+    timers = (s8 *)D_800D23B0->unk29C;
+    obj = &D_800CC2D0[player];
+    off = player * 4;
     target = (s32 *)(targets + off);
     obj->unk31C->pad129[0] = *target;
     if (*target < 0) {
@@ -2981,8 +3066,8 @@ s32 func_1508D850(s32 arg0) {
     limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range];
     if (limit < *(s32 *)(timers + off)) {
         *(s32 *)(timers + off) = 0;
-        if (*(s32 *)(D_800D23B0 + off + 0x16C0) & (0x10000 << *target)) {
-            func_1508EB90(arg0, 0x61, 0x2000);
+        if (*(s32 *)((s8 *)D_800D23B0->unk16C0 + off) & (0x10000 << *target)) {
+            func_1508EB90(player, 0x61, 0x2000);
         }
     }
     if (*(s32 *)(timers + off) == 0) {
@@ -2995,17 +3080,17 @@ s32 func_1508D850(s32 arg0) {
 
 s32 func_1508DA1C(void) {
     s32 i;
-    s32 *a = (s32 *)((u8 *)D_800D23B0 + 0xEB0);
-    s32 *b = (s32 *)((u8 *)D_800D23B0 + 0xF70);
-    s32 *c = (s32 *)((u8 *)D_800D23B0 + 0xFF0);
-    s32 *d = (s32 *)((u8 *)D_800D23B0 + 0x1070);
-    s32 *e = (s32 *)((u8 *)D_800D23B0 + 0x10F0);
-    s32 *f = (s32 *)((u8 *)D_800D23B0 + 0x12F4);
+    s32 *a = D_800D23B0->slot;
+    s32 *b = D_800D23B0->slotOwner;
+    s32 *c = D_800D23B0->unkFF0;
+    s32 *d = D_800D23B0->unk1070;
+    s32 *e = D_800D23B0->unk10F0;
+    s32 *f = D_800D23B0->unk12F4;
 
-    for (i = 0; i < *(s32 *)((u8 *)D_800D23B0 + 0x10); i++) {
+    for (i = 0; i < D_800D23B0->numPlayers; i++) {
         a[i] = -1;
     }
-    for (i = 0; i < *(s32 *)((u8 *)D_800D23B0 + 0xEA4); i++) {
+    for (i = 0; i < D_800D23B0->numSlots; i++) {
         b[i] = -1;
         c[i] = 0;
         e[i] = -1;
@@ -3015,53 +3100,45 @@ s32 func_1508DA1C(void) {
 }
 
 extern struct127 D_800CC2D0[26];
-extern s8 *D_800D23B0;
+extern MpGame *D_800D23B0;
 s32 func_1508802C();
-s32 func_1508DAEC(s32 arg0, s32 arg1)
-{
-  s8 *base;
-  s32 value;
-  s32 *entry;
-  s8 *slot;
-  s32 slotOffset;
-  int mode;
-  struct127 *obj;
-  base = D_800D23B0;
-  value = arg0 * 4;
-  entry = (s32 *) (((s32) base) + value);
-  if (base == 0)
-  {
+/*
+ * Releases the slot held by `player` (returns 1 without doing so if `mode` < 0). Unless the
+ * slot is flagged 2, it is reset; mode 1 also drops it at the player's position.
+ */
+s32 func_1508DAEC(s32 player, s32 mode) {
+    MpGame *game;
+    s32 slot;
+    s32 next;
+    struct127 *obj;
+
+    game = D_800D23B0;
+    if (game == NULL) {
+        return 0;
+    }
+    slot = game->slot[player];
+    if (slot >= 0) {
+        if (mode < 0) {
+            return 1;
+        }
+        game->slot[player] = -1;
+        obj = &D_800CC2D0[player];
+        if ((D_800D23B0->unk11F4[slot] & 2) == 0) {
+            D_800D23B0->slotOwner[slot] = -1;
+            D_800D23B0->unk10F0[slot] = -1;
+            next = D_800D23B0->unkEAC;
+            if (mode == 1) {
+                D_800D23B0->unk12F4[slot] = 300;
+                obj = &D_800CC2D0[player];
+                next = 4;
+                D_800D23B0->unk1374[slot] = obj->x_position;
+                D_800D23B0->unk13F4[slot] = obj->y_position + 50.0f;
+                D_800D23B0->unk1474[slot] = obj->z_position;
+            }
+            D_800D23B0->unk1070[slot] = next;
+        }
+    }
     return 0;
-  }
-  value = entry[0x3AC];
-  if (value >= 0)
-  {
-    if (arg1 < 0)
-    {
-      return 1;
-    }
-    entry[0x3AC] = -1;
-    slotOffset = value * 4;
-    obj = &D_800CC2D0[arg0];
-    slot = D_800D23B0 + slotOffset;
-    if (((*((s32 *) (slot + 0x11F4))) & 2) == 0)
-    {
-      *((s32 *) (slot + 0xF70)) = -1;
-      *((s32 *) ((D_800D23B0 + slotOffset) + 0x10F0)) = -1;
-      mode = *((s32 *) (D_800D23B0 + 0xEAC));
-      if (arg1 == 1)
-      {
-        *((s32 *) ((D_800D23B0 + slotOffset) + 0x12F4)) = 0x12C;
-        obj = &D_800CC2D0[arg0];
-        mode = 4;
-        *((s32 *) ((D_800D23B0 + slotOffset) + 0x1374)) = (s32) obj->x_position;
-        *((s32 *) ((D_800D23B0 + slotOffset) + 0x13F4)) = (s32) (obj->y_position + 50.0f);
-        *((s32 *) ((D_800D23B0 + slotOffset) + 0x1474)) = (s32) obj->z_position;
-      }
-      *((s32 *) ((D_800D23B0 + slotOffset) + 0x1070)) = mode;
-    }
-  }
-  return 0;
 }
 
 
@@ -3078,7 +3155,7 @@ u8 *func_151149AC(u8);
 extern s32 D_800D121C;
 
 void func_1508DC24(void) {
-    static s8 D_80087340; s8 *base;
+    static s8 D_80087340; MpGame *base;
     s32 i;
     struct127 *obj;
     s32 count;
@@ -3115,22 +3192,22 @@ void func_1508DC24(void) {
 
     base = D_800D23B0;
     i = 0;
-    arrEB0 = (s32 *)(base + 0xEB0);
-    arrEF0 = (s32 *)(base + 0xEF0);
-    arrF70 = (s32 *)(base + 0xF70);
-    arrFF0 = (s32 *)(base + 0xFF0);
-    arr1070 = (s32 *)(base + 0x1070);
-    arr10F0 = (s32 *)(base + 0x10F0);
-    arr1174 = (s32 *)(base + 0x1174);
-    arr11F4 = (s32 *)(base + 0x11F4);
-    arr1274 = (s32 *)(base + 0x1274);
-    arr12F4 = (s32 *)(base + 0x12F4);
-    arr1374 = (s32 *)(base + 0x1374);
-    arr13F4 = (s32 *)(base + 0x13F4);
-    arr1474 = (s32 *)(base + 0x1474);
-    count = *(s32 *)(base + 0x10);
+    arrEB0 = base->slot;
+    arrEF0 = base->unkEF0;
+    arrF70 = base->slotOwner;
+    arrFF0 = base->unkFF0;
+    arr1070 = base->unk1070;
+    arr10F0 = base->unk10F0;
+    arr1174 = base->unk1174;
+    arr11F4 = base->unk11F4;
+    arr1274 = base->unk1274;
+    arr12F4 = base->unk12F4;
+    arr1374 = base->unk1374;
+    arr13F4 = base->unk13F4;
+    arr1474 = base->unk1474;
+    count = base->numPlayers;
     for (; i < count; i++) {
-        kind = *(s16 *)(base + 0x16BC);
+        kind = base->gameType;
         if ((kind == 0xB9)) {
             if ((*(u8 *)((u8 *)&D_800CC2D0[i] + 0x128) == 0)) {
             } else {
@@ -3149,7 +3226,7 @@ void func_1508DC24(void) {
                 if (arrEB0[i] != -1) {
                     cur = arr1174[arrEB0[i]];
                 } else {
-                    cur = *(s32 *)(base + 0x1170);
+                    cur = base->unk1170;
                 }
             } else if (cur == 0x457) {
                 cur = 0;
@@ -3173,7 +3250,7 @@ void func_1508DC24(void) {
                     func_1508EB90(i, 0x4B, anim);
                 }
 
-                if (*(s16 *)(D_800D23B0 + 0x16BC) == 0xB8) {
+                if (D_800D23B0->gameType == 0xB8) {
                     if (prev == 0x80) {
                         func_1502EA50(&D_800CC2D0[i]);
                         D_800CC2D0[i].immune = 0;
@@ -3201,7 +3278,7 @@ void func_1508DC24(void) {
                 }
             }
             base = D_800D23B0;
-            if ((D_80087340 == i) && (*(s16 *)(base + 0x16BC) != 0xB8)) {
+            if ((D_80087340 == i) && (base->gameType != 0xB8)) {
                 anim = func_1508E780(cur);
                 found = 0;
                 n = func_15033E28(&D_800CC2D0[i], (void **)buf);
@@ -3243,7 +3320,7 @@ void func_1508DC24(void) {
                 }
                 if (anim != 0x55) {
                     s32 m;
-                    for (m = *(s32 *)(D_800D23B0 + 0x10); m < 25; m++) {
+                    for (m = D_800D23B0->numPlayers; m < 25; m++) {
                         other = &D_800CC2D0[m];
                         if (other->interaction_state == 0) continue;
                         if (other->unk65 != i + 1) continue;
@@ -3261,14 +3338,14 @@ void func_1508DC24(void) {
                 }
                 base = D_800D23B0;
             }
-            count = *(s32 *)(base + 0x10);
+            count = base->numPlayers;
         }
     }
     D_80087340++;
     if (D_80087340 >= count) {
         D_80087340 = 0;
     }
-    for (i = 0; i < *(s32 *)(base + 0xEA4); i++) {
+    for (i = 0; i < base->numSlots; i++) {
         ent = func_151149AC(arrEF0[i]);
         if (ent == NULL) {
             base = D_800D23B0;
@@ -3292,10 +3369,10 @@ void func_1508DC24(void) {
                     *(s16 *)(ent + 0x14) = arr1474[i];
                 } else if (!(arr11F4[i] & 4)) {
                     if (arr11F4[i] & 1) {
-                        x = *(s32 *)(D_800D23B0 + 0xEA8);
+                        x = D_800D23B0->unkEA8;
                         do {
                             r = func_150ADA68() * 0.9999899864f * x;
-                            for (k = 0; k < *(s32 *)(D_800D23B0 + 0xEA8); k++) {
+                            for (k = 0; k < D_800D23B0->unkEA8; k++) {
                                 if (r == arr10F0[k]) {
                                     r = -1;
                                     k = 1000;
@@ -3306,7 +3383,7 @@ void func_1508DC24(void) {
                         r = arr1274[i];
                     }
                     arr10F0[i] = r;
-                    idx = func_15086D48(*(s32 *)(D_800D23B0 + 0x14F4 + r * 4));
+                    idx = func_15086D48(D_800D23B0->unk14F4[r]);
                     if (idx != -1) {
                         func_15086CBC(idx, &x, &y, &z);
                         *(s16 *)(ent + 0x10) = x;
@@ -3325,11 +3402,11 @@ void func_1508DC24(void) {
                         D_800CC2D0[j].unk31C->grenade_count = 6;
 
                     }
-                    arr1070[i] = *(s32 *)(D_800D23B0 + 0xEAC);
+                    arr1070[i] = D_800D23B0->unkEAC;
                 } else {
                     func_1508DAEC(j, 0);
                     if (arr11F4[i] & 2) {
-                        arr1070[i] = *(s32 *)(D_800D23B0 + 0xEAC);
+                        arr1070[i] = D_800D23B0->unkEAC;
                     } else {
                         arr1070[i] = -1;
                         arrF70[i] = j | 0x2000;
@@ -3337,12 +3414,12 @@ void func_1508DC24(void) {
                     }
                     arr12F4[i] = 0;
                     arrEB0[j] = i;
-                    *(s32 *)(D_800D23B0 + j * 4 + 0x5C) = 1;
+                    D_800D23B0->unk5C[j] = 1;
                 }
-                if ((kind = *(s16 *)(D_800D23B0 + 0x16BC)) == 0xB9) {
+                if ((kind = D_800D23B0->gameType) == 0xB9) {
                     *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 0x258;
                 }
-                if ((kind = *(s16 *)(D_800D23B0 + 0x16BC)) == 0xB8) {
+                if ((kind = D_800D23B0->gameType) == 0xB8) {
                     if (arr1174[i] == (pp = *(u8 *)((u8 *)D_800CC2D0[j].unk31C + 0x128))) {
                         if (arr1174[i] == 1) {
                             *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 0x258;
@@ -3400,7 +3477,7 @@ s32 func_1508E6D0(s32 arg0) {
 }
 
 s32 func_1508E780(s32 arg0) {
-    if (*(s16 *)((u8 *)D_800D23B0 + 0x16BC) != 0xB8) {
+    if (D_800D23B0->gameType != 0xB8) {
         switch (arg0) {                             /* switch 1 */
         case 0x14:                                  /* switch 1 */
             return 0x28;
@@ -3475,26 +3552,26 @@ s32 func_1508E89C(s32 arg0, s32 arg1) {
             tmp = func_150859AC(arg1, 3);
             func_15085710(arg0, 2, tmp);
             func_15085710(arg1, 2, 0);
-            if (*(s32 *)(D_800D23B0 + 0x18) != 0) {
-                *(s32 *)(D_800D23B0 + 0x18) &= ~bit0;
-                *(s32 *)(D_800D23B0 + 0x18) |= (1 << arg1);
+            if (D_800D23B0->seenMask != 0) {
+                D_800D23B0->seenMask &= ~bit0;
+                D_800D23B0->seenMask |= (1 << arg1);
             }
-            if (D_800D23B0 + 0x9C) {
-                ((s32 *)(D_800D23B0 + 0x9C))[arg0] = ((s32 *)(D_800D23B0 + 0x9C))[arg1];
+            if (D_800D23B0->layer) {
+                D_800D23B0->layer[arg0] = D_800D23B0->layer[arg1];
             }
-            if (D_800D23B0 + 0x39C) {
-                ((s32 *)(D_800D23B0 + 0x39C))[arg0] = ((s32 *)(D_800D23B0 + 0x39C))[arg1];
+            if (D_800D23B0->unk39C) {
+                D_800D23B0->unk39C[arg0] = D_800D23B0->unk39C[arg1];
             }
-            if (D_800D23B0 + 0x3DC) {
-                ((s32 *)(D_800D23B0 + 0x3DC))[arg0] = ((s32 *)(D_800D23B0 + 0x3DC))[arg1];
+            if (D_800D23B0->unk3DC) {
+                D_800D23B0->unk3DC[arg0] = D_800D23B0->unk3DC[arg1];
             }
-            if (D_800D23B0 + 0xEB0) {
-                ((s32 *)(D_800D23B0 + 0xEB0))[arg0] = ((s32 *)(D_800D23B0 + 0xEB0))[arg1];
-                if (((s32 *)(D_800D23B0 + 0xEB0))[arg0] >= 0) {
-                    ((s32 *)(D_800D23B0 + 0xF70))[((s32 *)(D_800D23B0 + 0xEB0))[arg0]] = arg0;
+            if (D_800D23B0->slot) {
+                D_800D23B0->slot[arg0] = D_800D23B0->slot[arg1];
+                if (D_800D23B0->slot[arg0] >= 0) {
+                    D_800D23B0->slotOwner[(D_800D23B0->slot)[arg0]] = arg0;
                 }
             }
-            ((s32 *)(D_800D23B0 + 0x16C0))[arg0] = ((s32 *)(D_800D23B0 + 0x16C0))[arg1];
+            D_800D23B0->unk16C0[arg0] = D_800D23B0->unk16C0[arg1];
             savedRot = obj->unk31C->unk1AA;
             func_15062800(&D_800CC2D0[arg1], obj);
             if (D_800BE9F0 == 0x3F) {
