@@ -1253,164 +1253,167 @@ void func_15058898(struct127 *actor, f32 arg1) {
     actor->unk180 = groundY;
 }
 
-void func_15058EA4(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
-    if (arg1 < arg0->y_position) {
-        arg0->gravity = arg2;
-    } else if (arg0->y_position < arg3) {
-        arg0->gravity = arg4;
+/* Picks gravity by height band and clamps the vertical velocity. */
+void func_15058EA4(struct127 *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravityBelow, f32 maxVelY, f32 minVelY) {
+    if (maxY < actor->y_position) {
+        actor->gravity = gravityAbove;
+    } else if (actor->y_position < minY) {
+        actor->gravity = gravityBelow;
     }
-    if (arg5 < arg0->y_velocity) {
-        arg0->y_velocity = arg5;
-    } else if (arg0->y_velocity < arg6) {
-        arg0->y_velocity = arg6;
+    if (maxVelY < actor->y_velocity) {
+        actor->y_velocity = maxVelY;
+    } else if (actor->y_velocity < minVelY) {
+        actor->y_velocity = minVelY;
     }
 }
 
-void func_15058F24(struct127 *arg0, f32 arg1, f32 arg2) {
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f16;
+/* Floats the actor on the water surface (unk118 + 9); `depth` in [0, 1) sets how low it sits. */
+void func_15058F24(struct127 *actor, f32 depth, f32 arg2) {
+    f32 tmp; // matching: one variable for the damping, offset and sink limit (IDO allocates it as one)
+    f32 surfaceY;
+    f32 lift;
 
-    temp_f12 = arg1;
-    temp_f16 = 0.5f - arg1;
-    if (arg1 >= 0.5f) {
-        arg1 -= 0.5f;
+    tmp = depth;
+    lift = 0.5f - depth;
+    if (depth >= 0.5f) {
+        depth -= 0.5f;
     }
-    if (arg2) {}
-    temp_f14 = arg0->unk118 + 9.0f;
-    if ((arg0->y_position < (arg0->unk118 + 9.0f)) || (arg0->in_water >= 0x64)) {
-        if (arg0->in_water == 0) {
-            arg0->y_position = temp_f14;
-            arg0->in_water = 0x64;
-            arg0->gravity = temp_f16 * -6.0f;
-            arg0->y_velocity *= temp_f12;
+    if (arg2) {} // matching: a use of the unused arg2 keeps it out of its stack slot
+    surfaceY = actor->unk118 + 9.0f;
+    if ((actor->y_position < (actor->unk118 + 9.0f)) || (actor->in_water >= 100)) {
+        if (actor->in_water == 0) {
+            actor->y_position = surfaceY;
+            actor->in_water = 100;
+            actor->gravity = lift * -6.0f;
+            actor->y_velocity *= tmp;
         } else {
-            if ((temp_f14 + 100.0f) < arg0->y_position) {
-                arg0->in_water = 0;
+            if ((surfaceY + 100.0f) < actor->y_position) {
+                actor->in_water = 0;
             }
-            if (temp_f16 < 0.0f) {
-                arg0->gravity = temp_f16 * -6.0f;
+            if (lift < 0.0f) {
+                actor->gravity = lift * -6.0f;
             } else {
-                temp_f12 = arg0->y_position - ((temp_f14 + 10.0f) - (120.0f * arg1));
-                if ((fabsf(temp_f12) < 2.0f) && (fabsf(arg0->y_velocity) < 2.0f)) {
-                    arg0->y_position -= temp_f12 * 0.6000000238f;
-                    arg0->y_velocity = 0.0f;
-                    arg0->gravity = 1.0f;
-                } else {
-                    if (temp_f12 > 0.0f) {
-                        if (arg0->y_velocity > 0.0f) {
-                            arg0->gravity = temp_f16 * 6.0f;
-                            arg0->y_velocity /= 2.0f;
-                        }
-                    } else {
-                        temp_f12 = temp_f16 * 80.0f;
-                        if (temp_f12 < arg0->y_velocity) {
-                            arg0->y_velocity = temp_f12;
-                        }
-                        arg0->gravity = temp_f16 * -6.0f;
+                tmp = actor->y_position - ((surfaceY + 10.0f) - (120.0f * depth));
+                if ((fabsf(tmp) < 2.0f) && (fabsf(actor->y_velocity) < 2.0f)) {
+                    actor->y_position -= tmp * 0.6000000238f;
+                    actor->y_velocity = 0.0f;
+                    actor->gravity = 1.0f;
+                } else if (tmp > 0.0f) {
+                    if (actor->y_velocity > 0.0f) {
+                        actor->gravity = lift * 6.0f;
+                        actor->y_velocity /= 2.0f;
                     }
+                } else {
+                    tmp = lift * 80.0f;
+                    if (tmp < actor->y_velocity) {
+                        actor->y_velocity = tmp;
+                    }
+                    actor->gravity = lift * -6.0f;
                 }
             }
         }
-        temp_f12 = -100.0f * arg1;
-        if (arg0->y_velocity < temp_f12) {
-            arg0->y_velocity = temp_f12;
+        tmp = -100.0f * depth;
+        if (actor->y_velocity < tmp) {
+            actor->y_velocity = tmp;
         }
     }
 }
 
-void func_15059140(struct127 *arg0) {
-    f32 sp2C;
+/* Per-frame movement/physics step for a non-player actor. */
+void func_15059140(struct127 *actor) {
+    f32 stepRate;
 
-    sp2C = 0.5f;
+    stepRate = 0.5f;
     D_800CC268 = 0;
-    if ((arg0->unk13D == 0) || ((s32) arg0->unk21C < 0x10)) {
-        if (arg0->unk223 != 8) {
-            func_15059C84(arg0);
-            func_1505A770(arg0);
+    if ((actor->unk13D == 0) || (actor->unk21C < 16)) {
+        if (actor->unk223 != 8) {
+            func_15059C84(actor);
+            func_1505A770(actor);
         }
     }
-    func_1505D6F0(arg0, D_800C3E78);
-    func_15055E50(arg0, arg0->unk1E4);
-    if (arg0->id == 8) {
-        func_15056150(arg0);
+    func_1505D6F0(actor, D_800C3E78);
+    func_15055E50(actor, actor->unk1E4);
+    if (actor->id == 8) {
+        func_15056150(actor);
     }
-    if (arg0->unk13D < 0x64) {
-        func_15058898(arg0, arg0->old_y_position);
+    if (actor->unk13D < 100) {
+        func_15058898(actor, actor->old_y_position);
     }
-    if (arg0->unkF4 & 0x40000) {
-        if (((arg0->unkF4 & 0x12000) != 0) || (D_800CC268 != 0)) {
-            arg0->unk21C = 0U;
+    if (actor->unkF4 & 0x40000) {
+        if (((actor->unkF4 & 0x12000) != 0) || (D_800CC268 != 0)) {
+            actor->unk21C = 0;
         }
     }
-    if (arg0->unkB0 != 0) {
-        func_15058F24(arg0, arg0->unkB0 * 0.009999999776f, 1.0f);
+    if (actor->unkB0 != 0) {
+        func_15058F24(actor, actor->unkB0 * 0.009999999776f, 1.0f);
     }
-    if (arg0->unkF8 & 0x20000) {
-        func_15056258(arg0);
+    if (actor->unkF8 & 0x20000) {
+        func_15056258(actor);
     }
-    if (arg0->in_water != 0) {
-        func_15059444(arg0);
+    if (actor->in_water != 0) {
+        func_15059444(actor);
     }
-    if (arg0->id == 0xA) {
-        arg0->unk180 = -5000.0f;
+    if (actor->id == 0xA) {
+        actor->unk180 = -5000.0f;
     }
-    if ((arg0->unkF8 & 0x180000) != 0) {
-        func_150511E8(arg0);
+    if ((actor->unkF8 & 0x180000) != 0) {
+        func_150511E8(actor);
     }
-    func_1505B5F8(arg0, arg0->unk180);
-    if (((arg0->unkF4 & 0x1000) != 0) && (arg0->unk28 < 0.200000003f)) {
-        func_15056B08(arg0);
+    func_1505B5F8(actor, actor->unk180);
+    if (((actor->unkF4 & 0x1000) != 0) && (actor->unk28 < 0.200000003f)) {
+        func_15056B08(actor);
     }
-    if (arg0->unkF8 & 0x80000) {
-        sp2C = 0.150000006f;
+    if (actor->unkF8 & 0x80000) {
+        stepRate = 0.150000006f;
     }
-    func_1505A250(0, 0, sp2C, &arg0->unk164, &arg0->unk168);
-    if (arg0->unkD0 != 0) {
-        func_1505C7D8(arg0, D_800C3E78);
+    func_1505A250(0.0f, 0.0f, stepRate, &actor->unk164, &actor->unk168);
+    if (actor->unkD0 != 0) {
+        func_1505C7D8(actor, D_800C3E78);
     }
-    if (arg0->unk13D == 0) {
-        if (D_800BE9A0 >= arg0->unk10F) {
-            arg0->unk10F = 0U;
+    if (actor->unk13D == 0) {
+        if (D_800BE9A0 >= actor->unk10F) {
+            actor->unk10F = 0;
         } else {
-            arg0->unk10F -= D_800BE9A0;
+            actor->unk10F -= D_800BE9A0;
         }
     }
-    if (arg0->unk107 != 0) {
-        arg0->unk107 -= 1;
+    if (actor->unk107 != 0) {
+        actor->unk107 -= 1;
     }
-    if (arg0->immune != 0xFF) {
-        if (D_800BE9A0 >= arg0->immune) {
-            arg0->immune = 0U;
+    if (actor->immune != 0xFF) {
+        if (D_800BE9A0 >= actor->immune) {
+            actor->immune = 0;
         } else {
-            arg0->immune -= D_800BE9A0;
+            actor->immune -= D_800BE9A0;
         }
     }
 }
 
-void func_150593C4(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3) {
-    f32 sp2C;
-    f32 sp28;
-    f32 sp24;
+/* Eases the actor's push velocity (unk16C, unk170) toward `speed` along `angle`. */
+void func_150593C4(struct127 *actor, u16 angle, f32 speed, f32 rate) {
+    f32 x;
+    f32 z;
+    f32 y;
 
-    func_1505A184(arg1, arg2, 0, &sp2C, &sp28, &sp24);
-    arg0->unk16C += (sp2C - arg0->unk16C) * arg3;
-    arg0->unk170 += (sp28 - arg0->unk170) * arg3;
+    func_1505A184(angle, speed, 0.0f, &x, &z, &y);
+    actor->unk16C += (x - actor->unk16C) * rate;
+    actor->unk170 += (z - actor->unk170) * rate;
 }
 
-void func_15059444(struct127 *arg0) {
-    s32 sp1C;
+/* Applies the current map's (D_800BE9F0) water current to a swimming actor. */
+void func_15059444(struct127 *actor) {
+    s32 pathIdx;
     s32 id;
     s32 tmp;
 
-    sp1C = -1;
+    pathIdx = -1;
 
     switch (D_800BE9F0) {
         case 4:
-            func_150593C4(arg0, 0x4000, 50.0f, 0.05999999865889549f);
+            func_150593C4(actor, 0x4000, 50.0f, 0.05999999865889549f);
             break;
         case 6:
-            sp1C = func_15083E0C(28);
+            pathIdx = func_15083E0C(28);
             break;
         case 41:
             if (func_150A29C8(D_800C3E78, 0x4028) == 0) {
@@ -1422,12 +1425,11 @@ void func_15059444(struct127 *arg0) {
             } else {
                 id = 6;
             }
-            sp1C = func_15083E0C(id);
-            // FIXME: fakematch to force regalloc
-            dummy_label_858530:;
+            pathIdx = func_15083E0C(id);
+        split: // matching: label steers IDO register allocation for id
             break;
         case 43:
-            sp1C = func_15083E0C(18);
+            pathIdx = func_15083E0C(18);
             break;
         case 65:
             if (func_150A29C8(D_800C3E78, 0x401F) == 0) {
@@ -1435,12 +1437,12 @@ void func_15059444(struct127 *arg0) {
             } else {
                 id = 26;
             }
-            sp1C = func_15083E0C(id);
+            pathIdx = func_15083E0C(id);
             break;
     }
 
-    if (sp1C != -1) {
-        func_150611E8(arg0, sp1C);
+    if (pathIdx != -1) {
+        func_150611E8(actor, pathIdx);
     }
 }
 
