@@ -3,31 +3,29 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_10004074(void *ptr);
+void func_10005BE0(void);
+void func_100061F8(s32 arg0, s32 arg1);
 
+/* Zeroes the 0xFE0-byte block at D_80043B40, one word at a time. */
 void func_10001420(void) {
-    s32 a = 0;
-    s32 b = 0;
-    s32 cnt = 4064;
-    s32 occ;
-    s32 occ2;
-    s32 *tmp = (s32 *)&D_80043B40;
+    // matching: the four zero terms and the if (1) block steer IDO's allocator to a1/a0
+    // (plain loop is byte-identical but uses v0/v1); no idiomatic form found
+    s32 zero0 = 0;
+    s32 zero1 = 0;
+    s32 size = 0xFE0;
+    s32 zero2;
+    s32 zero3;
+    s32 *p = (s32 *)&D_80043B40;
+
     if (1) {
-        occ = 0;
-        occ2 = 0;
+        zero2 = 0;
+        zero3 = 0;
         do {
-            *tmp++ = 0;
-        } while ((u32)tmp < ((u32)&D_80043B40 + cnt + a + b + occ + occ2));
+            *p++ = 0;
+        } while ((u32)p < (u32)&D_80043B40 + size + zero0 + zero1 + zero2 + zero3);
     }
 }
-// JUSTREG (verified 2026-06-18): the body below is structurally byte-perfect
-// vs the target — every instruction/immediate/branch matches — but IDO -O2
-// allocates v0/v1 where the target uses a1/a0. Imported into decomp-permuter.
-// void func_10001420(void) {
-//     s32 *p = (s32 *)&D_80043B40;
-//     do {
-//         *p++ = 0;
-//     } while ((u32)p < (u32)&D_80043B40 + 0xFE0);
-// }
 
 void func_10001444(void) {
     u32 saveMask = __osDisableInt();
@@ -46,13 +44,11 @@ void func_100014C4(s32 arg0) {
     u32 saveMask = __osDisableInt();
     func_100061F8(2, 31);
 
-    if (0) {};
-
     if (D_8003BE74) {
-        func_10004074(D_8003BE74 | 0x80000000);
+        func_10004074((void *)(D_8003BE74 | 0x80000000));
     }
     if (D_8003BE70) {
-        func_10004074(D_8003BE70 | 0x80000000);
+        func_10004074((void *)(D_8003BE70 | 0x80000000));
     }
     func_10005B04(arg0);
     func_10001420();
