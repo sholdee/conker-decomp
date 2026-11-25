@@ -91,7 +91,7 @@ void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     func_15152190(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
 }
 
-/* An object spawned by func_1513264C (EffectObj in game_124920.c), here following a cutscene track. */
+/* An object spawned by func_1513264C (ProjectileParticle in game_124920.c), here following a cutscene track. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
     /* 0x018 */ f32 unk18;
@@ -103,9 +103,9 @@ typedef struct {
     /* 0x038 */ Vec3f pos;
     /* 0x044 */ u8 pad44[0x12C];
     /* 0x170 */ SeqTrackState *track;
-} EffectObj;
+} TrackPhysicsParticle;
 
-EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+TrackPhysicsParticle *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a func_1513264C effect that follows a cutscene track (updated by func_1519ED24). */
 void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
@@ -113,7 +113,7 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
         SeqTrackState *track;
         ParticleSpawn spawn;
     } packet;
-    EffectObj *obj;
+    TrackPhysicsParticle *obj;
 
     packet.track = track;
     packet.spawn.radius = 1.0f;
@@ -159,7 +159,7 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
 }
 
 /* Per-frame update of a func_1519EB8C effect: copies its track's current values into it. */
-s32 func_1519ED24(EffectObj *obj) {
+s32 func_1519ED24(TrackPhysicsParticle *obj) {
     SeqTrackState *track = obj->track;
 
     obj->unk18 = track->unk18 * 0.1f;

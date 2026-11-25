@@ -59,12 +59,12 @@ typedef struct {
         ProjectileState projectile;
         FollowState follow;
     } state;
-} EffectObj;
+} ProjectileParticle;
 
 extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
                          f32, Actor *, s32, u8, u8, s32, u8);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
-EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+ProjectileParticle *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,
@@ -72,7 +72,7 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsD
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
     ParticleSpawn spawn;
-    EffectObj *obj;
+    ProjectileParticle *obj;
     Vec3f aimDir;
     u8 hasAimDir;
     Vec3f targetDir;
@@ -188,7 +188,7 @@ void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2);
  * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a
  * trail of puffs every 70 units travelled. Returns 0 once it hit something or expired.
  */
-s8 func_150F78B4(EffectObj *obj) {
+s8 func_150F78B4(ProjectileParticle *obj) {
     ProjectileState *state;
     Actor *owner;
     s8 alive;
@@ -337,7 +337,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
         ParticleSpawn spawn;
         FollowState follow;
     } packet;
-    EffectObj *obj;
+    ProjectileParticle *obj;
 
     packet.follow.target = target;
     packet.follow.trailPos.x = target[0];
@@ -389,7 +389,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
 }
 
 /* Per-frame update of a func_150F802C effect: snaps to its target and drops a puff every 20 units it moved. */
-s32 func_150F81BC(EffectObj *obj) {
+s32 func_150F81BC(ProjectileParticle *obj) {
     FollowState *follow;
 
     follow = &obj->state.follow;

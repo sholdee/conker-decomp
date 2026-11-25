@@ -49,10 +49,10 @@ typedef struct {
     /* 0x088 */ u32 sound; /* sound id in the low half, playing handle in the high half */
     /* 0x08C */ u8 pad8C[0xE4];
     /* 0x170 */ SpiralState spiral;
-} EffectObj;
+} SpiralParticle;
 
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern EffectObj *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
+extern SpiralParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
@@ -64,7 +64,7 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
     f32 length;
     f32 invLength;
     SpiralState spiral;
-    EffectObj *obj;
+    SpiralParticle *obj;
 
     delta.x = to->x - from->x;
     delta.y = to->y - from->y;
@@ -133,7 +133,7 @@ extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 
 /* Update: moves the spiral centre along the object's velocity and puts the object on the
  * circle around it; returns 0 once the travel time is up. */
-s32 func_150F48D0(EffectObj *obj) {
+s32 func_150F48D0(SpiralParticle *obj) {
     SpiralState *spiral;
 
     spiral = &obj->spiral;
@@ -164,7 +164,7 @@ extern f32 func_15143E64(Vec3f *);
 
 /* Fades the object out near the camera and keeps its positional sound playing (started
  * within 200 units of the camera), as its SPIRAL_* flags ask; always returns 1. */
-s32 func_150F4A38(EffectObj *obj) {
+s32 func_150F4A38(SpiralParticle *obj) {
     SpiralState *spiral;
     f32 dist;
 
@@ -201,7 +201,7 @@ s32 func_150F4A38(EffectObj *obj) {
 
 /* Event handler: event 0x4E clears unk71 and sets SPIRAL_FADE_NEAR | SPIRAL_MUTED, 0x4F calls
  * func_1516972C. */
-void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
+void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
     SpiralState *spiral;
     spiral = &obj->spiral;
     if (event == 0x4E) {
