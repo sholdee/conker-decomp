@@ -28,7 +28,6 @@ extern void func_10004074(void *arg0);
 void func_15031C14(void *arg0);
 void func_1503F7B8(void *arg0);
 void func_1518CA04(s32 arg0);
-s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6);
 s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
 
 typedef struct Game5D2C0EffectState {
@@ -91,81 +90,132 @@ typedef struct Game5D2C0AnimationOwner {
     struct197 *field_0x48;
 } Game5D2C0AnimationOwner;
 
-typedef struct {
-    s32 unk0;
-    u32 unk4;
-    s32 unk8;
-    u32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-} struct_func_1502FE10;
+/* File header of an attachment model, as returned by func_1502B6BC. */
+typedef struct ModelHeader {
+    /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)
+    /* 0x04 */ u32 dlistsSize;  // size of the table in bytes
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ u32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
+} ModelHeader;
 
-extern u8 D_800DF7D0[];
+extern u8 D_800DF7D0[];            // per-model load reference counts
 extern s32 D_800DF9B8[];
-extern struct_func_1502FE10 *D_800E0148[];
-struct_func_1502FE10 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(s32, s32, s32, s32, s32 *);
-void func_15168E54(s32, s32);
+extern ModelHeader *D_800E0148[];  // per-model loaded headers
+ModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+void func_1510CE60(Gfx *, s32, s32, s32, s32 *);
+void func_15168E54(Gfx *, ModelHeader *);
 
-s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6) {
-    struct_func_1502FE10 *temp_s3;
+/* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
+s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
+    ModelHeader *header;
     s32 i;
 
-    if (D_800DF7D0[arg0] == 0) {
-        temp_s3 = func_1502B6BC(0, 0, 0, 2, 9, arg0);
-        if (temp_s3 == 0) {
+    if (D_800DF7D0[model] == 0) {
+        header = func_1502B6BC(0, 0, 0, 2, 9, model);
+        if (header == NULL) {
             return 1;
         }
-        *arg1 = temp_s3->unk0;
-        *arg2 = temp_s3->unk4 >> 2;
-        if ((s32)*arg2 > 0) {
-            i = 0;
-            do {
-                ((s32 *)*arg1)[i] += (s32)temp_s3;
-                func_1510CE60(((s32 *)*arg1)[i], 0, 1, 0x3E, &D_800DF9B8[arg0]);
-                func_15168E54(((s32 *)*arg1)[i], (s32)temp_s3);
-                i++;
-            } while (i < (s32)*arg2);
+        *dlists = header->dlists;
+        *numDLists = header->dlistsSize >> 2;
+        for (i = 0; i < *numDLists; i++) {
+            (*dlists)[i] = (Gfx *)((u8 *)(*dlists)[i] + (s32)header);
+            func_1510CE60((*dlists)[i], 0, 1, 0x3E, &D_800DF9B8[model]);
+            func_15168E54((*dlists)[i], header);
         }
-        D_800E0148[arg0] = temp_s3;
+        D_800E0148[model] = header;
     } else {
-        temp_s3 = D_800E0148[arg0];
-        *arg1 = temp_s3->unk0;
-        *arg2 = temp_s3->unk4 >> 2;
+        header = D_800E0148[model];
+        *dlists = header->dlists;
+        *numDLists = header->dlistsSize >> 2;
     }
-    D_800DF7D0[arg0]++;
-    *arg3 = (s32)&temp_s3->unk18;
-    if (arg4 != 0) {
-        *arg4 = temp_s3->unk10;
+    D_800DF7D0[model]++;
+    *data = header->data;
+    if (arg4 != NULL) {
+        *arg4 = header->unk10;
     }
-    if (arg5 != 0) {
-        *arg5 = temp_s3->unk8;
-        if (arg6 != 0) {
-            *arg6 = temp_s3->unkC >> 4;
+    if (arg5 != NULL) {
+        *arg5 = header->unk8;
+        if (arg6 != NULL) {
+            *arg6 = header->unkC >> 4;
         }
     }
     return 0;
 }
 
-typedef struct Func1502FFD8Arg0 {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[2];
-    u8 unk4;
-    u8 pad5[3];
-    u8 unk8;
-    u8 unk9;
-    u8 padA[0xD];
-    s8 unk17;
-    u8 pad18[0xC];
-    s32 unk24;
-    void *unk28;
-    void *unk2C;
-    s32 unk30;
-    u8 pad34[0x14];
-    void *unk48;
-} Func1502FFD8Arg0;
+/* Position and rotation offset from the attachment's bone (func_15030D54). */
+typedef struct AttachmentOffset {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ f32 rotZ;
+} AttachmentOffset;
+
+/* Animated-model instance driven by func_1503F5B8 (struct197 is a prefix of it). */
+typedef struct AnimInstance {
+    /* 0x000 */ u8 pad0[0x4];
+    /* 0x004 */ u16 anim;        // current animation; bit 15 is a flag
+    /* 0x006 */ u8 pad6[0x2];
+    /* 0x008 */ f32 frame;
+    /* 0x00C */ u8 padC[0xC];
+    /* 0x018 */ f32 numFrames;
+    /* 0x01C */ u8 pad1C[0x1D];
+    /* 0x039 */ s8 unk39;
+    /* 0x03A */ s16 unk3A;
+    /* 0x03C */ s16 unk3C;
+    /* 0x03E */ u8 pad3E[0x215 - 0x3E];
+    /* 0x215 */ u8 unk215;
+    /* 0x216 */ u8 pad216[0x3E0 - 0x216];
+    /* 0x3E0 */ u8 *unk3E0[2];   // per-frame matrices (indexed by D_800BE9C0)
+    /* 0x3E8 */ u8 *unk3E8[2];
+    /* 0x3F0 */ u8 pad3F0[6];
+    /* 0x3F6 */ u8 unk3F6;
+} AnimInstance;
+
+/* A model attached to a bone of a game object. Allocated by func_15030AF4 and kept in the
+ * doubly linked list headed by D_800C3EE0. */
+typedef struct Attachment {
+    /* 0x00 */ u8 ownerId;            // unique_id of the owning struct127
+    /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
+    /* 0x02 */ u8 bone;               // owner joint matrix the model follows
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 flags;
+    /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
+    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
+    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
+    /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
+    /* 0x09 */ u8 loaded;
+    /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
+    /* 0x10 */ u8 pad10[3];
+    /* 0x13 */ u8 hiddenDLists;       // bit i set: display list i is not drawn
+    /* 0x14 */ u8 numDLists;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
+    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
+    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
+    /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
+    /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
+    /* 0x20 */ u16 parentMtx;
+    /* 0x22 */ s16 rotZ;
+    /* 0x24 */ Gfx **dlists;
+    /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
+    /* 0x38 */ s32 unk38;             // per-model hook state
+    /* 0x3C */ s32 unk3C;             // per-model hook state
+    /* 0x40 */ f32 scale;
+    /* 0x44 */ AttachmentOffset *offset;
+    /* 0x48 */ AnimInstance *anim;
+    /* 0x4C */ void *unk4C;
+    /* 0x50 */ void *unk50;
+    /* 0x54 */ struct Attachment *next;
+    /* 0x58 */ struct Attachment *prev;
+} Attachment; // size 0x5C
 
 typedef struct Func15030158Arg0 {
     u8 unk0;
@@ -188,188 +238,168 @@ typedef struct Func15030158Arg0 {
     struct Func15030158Arg0 *unk58;
 } Func15030158Arg0;
 
-s32 func_1502FFD8(Func1502FFD8Arg0 *arg0, u8 *arg1) {
-    s32 sp3C;
-    s32 flags;
-    s32 sp34;
+/* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
+s32 func_1502FFD8(Attachment *att, struct127 *owner) {
+    u8 *data;
+    s32 mode;
+    s32 size;
 
-    if (arg0->unk24 == 0) {
-        if (arg0->unk17 == -1) {
-            if (func_1502FE10(arg0->unk1, &arg0->unk24, (u8 *)arg0 + 0x14, &sp3C, &arg0->unk30, 0, 0) != 0) {
+    if (att->dlists == NULL) {
+        if (att->unk17 == -1) {
+            if (func_1502FE10(att->model, &att->dlists, &att->numDLists, &data, &att->unk30, NULL, NULL) != 0) {
                 return 1;
             }
         } else {
-            if (func_1503F62C(arg0->unk1, arg0->unk17, &arg0->unk24, (u8 *)arg0 + 0x14, &sp3C, &arg0->unk30, &arg0->unk48) != 0) {
+            if (func_1503F62C(att->model, att->unk17, &att->dlists, &att->numDLists, &data, &att->unk30, &att->anim) != 0) {
                 return 1;
             }
         }
 
-        flags = arg1[0x66] & 0xC;
-        sp34 = arg0->unk24 - sp3C;
-        if (((arg0->unk4 & 0x10) == 0) && (flags == 8) && (arg0->unk30 != 0)) {
-            arg0->unk28 = allocate_memory(sp34, 1, 2, 2);
-            if (arg0->unk28 == 0) {
+        mode = owner->pad66 & 0xC;
+        size = (u8 *)att->dlists - data;
+        if (!(att->flags & 0x10) && (mode == 8) && (att->unk30 != 0)) {
+            att->vtx[0] = allocate_memory(size, 1, 2, 2);
+            if (att->vtx[0] == NULL) {
                 return 1;
             }
 
-            arg0->unk2C = allocate_memory(sp34, 1, 2, 2);
-            if (arg0->unk2C == 0) {
-                func_10004074(arg0->unk28);
-                arg0->unk28 = 0;
+            att->vtx[1] = allocate_memory(size, 1, 2, 2);
+            if (att->vtx[1] == NULL) {
+                func_10004074(att->vtx[0]);
+                att->vtx[0] = NULL;
                 return 1;
             }
 
-            bcopy((void *)sp3C, arg0->unk28, sp34);
-            bcopy((void *)sp3C, arg0->unk2C, sp34);
-            arg0->unk8 = 1;
+            bcopy(data, att->vtx[0], size);
+            bcopy(data, att->vtx[1], size);
+            att->ownsVtx = 1;
         } else {
-            arg0->unk28 = (void *)sp3C;
-            arg0->unk2C = (void *)sp3C;
+            att->vtx[0] = data;
+            att->vtx[1] = data;
         }
-        arg0->unk9 = 1;
+        att->loaded = 1;
     }
     return 0;
 }
 
-void func_15030158(Func15030158Arg0 *arg0, s32 arg1) {
-    void *temp_a0;
-    s32 *head;
-
-    if (arg1 == 0) {
-        func_15031C14(arg0);
+/* Unlinks and frees an attachment; `immediate` frees its buffers now instead of deferring it. */
+void func_15030158(Attachment *att, s32 immediate) {
+    if (!immediate) {
+        func_15031C14(att);
     }
-    if (arg0->unk9 != 0) {
-        if (arg0->unk8 != 0) {
-            if (arg1 != 0) {
-                func_10004074(arg0->unk28);
-                func_10004074(arg0->unk2C);
+    if (att->loaded) {
+        if (att->ownsVtx) {
+            if (immediate) {
+                func_10004074(att->vtx[0]);
+                func_10004074(att->vtx[1]);
             } else {
-                func_100043B4(arg0->unk28, 4);
-                func_100043B4(arg0->unk2C, 4);
+                func_100043B4(att->vtx[0], 4);
+                func_100043B4(att->vtx[1], 4);
             }
         }
-        temp_a0 = arg0->unk48;
-        if (temp_a0 != 0) {
-            func_1503F7B8(temp_a0);
+        if (att->anim != NULL) {
+            func_1503F7B8(att->anim);
         }
-        func_1518CA04(arg0->unk1);
+        func_1518CA04(att->model);
     }
-    temp_a0 = arg0->unk34;
-    if (temp_a0 != 0) {
-        if (arg1 != 0) {
-            func_10004074(temp_a0);
+    if (att->mtx != NULL) {
+        if (immediate) {
+            func_10004074(att->mtx);
         } else {
-            func_100043B4(temp_a0, 4);
+            func_100043B4((s32 *)att->mtx, 4);
         }
     }
-    if (arg0->unk44 != 0) {
-        void *temp_v0;
+    if (att->offset != NULL) {
+        AttachmentOffset *offset = att->offset; // matching: IDO loads it into v0 only via a local
 
-        temp_v0 = arg0->unk44;
-        func_10004074(temp_v0);
+        func_10004074(offset);
     }
-    temp_a0 = arg0->unk4C;
-    if (temp_a0 != 0) {
-        if (arg1 != 0) {
-            func_10004074(temp_a0);
+    if (att->unk4C != NULL) {
+        if (immediate) {
+            func_10004074(att->unk4C);
         } else {
-            func_100043B4(temp_a0, 4);
+            func_100043B4(att->unk4C, 4);
         }
     }
-    temp_a0 = arg0->unk50;
-    if (temp_a0 != 0) {
-        if (arg1 != 0) {
-            func_10004074(temp_a0);
+    if (att->unk50 != NULL) {
+        if (immediate) {
+            func_10004074(att->unk50);
         } else {
-            func_100043B4(temp_a0, 4);
+            func_100043B4(att->unk50, 4);
         }
     }
 
-    head = (s32 *)(s32)&D_800C3EE0;
-    if ((s32)arg0 == *head) {
-        *head = (s32)arg0->unk54;
+    if (att == (Attachment *)D_800C3EE0) {
+        D_800C3EE0 = (s32)att->next;
     }
-    if (arg0->unk58 != 0) {
-        arg0->unk58->unk54 = arg0->unk54;
+    if (att->prev != NULL) {
+        att->prev->next = att->next;
     }
-    if (arg0->unk54 != 0) {
-        arg0->unk54->unk58 = arg0->unk58;
+    if (att->next != NULL) {
+        att->next->prev = att->prev;
     }
-    func_10004074(arg0);
+    func_10004074(att);
 }
 
-s32 func_15030310(struct127 *arg0, s32 arg1, s32 arg2);
+s32 func_15030310(struct127 *owner, s32 setId, s32 index);
 
-s32 func_150302F0(void *arg0, s32 arg1) {
-    return func_15030310(arg0, arg1, 0xFF);
+/* Removes every attachment of set `setId` from `owner`. */
+s32 func_150302F0(struct127 *owner, s32 setId) {
+    return func_15030310(owner, setId, 0xFF);
 }
 
-struct S15030310 {
-    u8 unk0;
-    u8 pad1[5];
-    u8 unk6;
-    u8 pad7[0x4D];
-    struct S15030310 *unk54;
-};
+/* Removes attachment number `index` of set `setId` from `owner` (all of them when index is 0xFF). */
+s32 func_15030310(struct127 *owner, s32 setId, s32 index) {
+    Attachment *att;
+    s32 removed;
 
-s32 func_15030310(struct127 *arg0, s32 arg1, s32 arg2) {
-    struct S15030310 *var;
-    s32 ret;
-
-    if (arg0->unique_id == 0) {
+    if (owner->unique_id == 0) {
         return 0;
     }
-    ret = 0;
-    var = (struct S15030310 *)D_800C3EE0;
-    while (var != 0) {
-        struct S15030310 *next = var->unk54;
+    removed = 0;
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        Attachment *next = att->next;
 
-        if ((var->unk0 == arg0->unique_id) && (var->unk6 == arg1)) {
-            if ((arg2 != 0xFF) && (arg2 != 0)) {
-                arg2--;
-                var = next;
+        if ((att->ownerId == owner->unique_id) && (att->setId == setId)) {
+            if ((index != 0xFF) && (index != 0)) {
+                index--;
+                att = next;
                 continue;
             } else {
-                ret = 1;
-                func_15030158(var, 0);
-                if (arg2 == 0) {
+                removed = 1;
+                func_15030158(att, 0);
+                if (index == 0) {
                     break;
                 }
             }
         }
-        var = next;
+        att = next;
     }
-    return ret;
+    return removed;
 }
 
-struct S150303E4 {
-    u8 unk0;
-    u8 pad1[0x53];
-    struct S150303E4 *unk54;
-};
+/* Removes every attachment of `owner`. */
+s32 func_150303E4(struct127 *owner) {
+    Attachment *att;
+    Attachment *next;
+    s32 removed;
 
-s32 func_150303E4(struct127 *arg0) {
-    struct S150303E4 *var;
-    struct S150303E4 *next;
-    s32 ret;
-
-    if (arg0->unique_id == 0) {
+    if (owner->unique_id == 0) {
         return 0;
     }
 
-    var = (struct S150303E4 *)D_800C3EE0;
-    ret = 0;
-    if (var != 0) {
-        do {
-            next = var->unk54;
-            if (var->unk0 == arg0->unique_id) {
-                ret = 1;
-                func_15030158(var, 0);
-            }
-            var = next;
-        } while (next != 0);
+    att = (Attachment *)D_800C3EE0;
+    removed = 0;
+    while (att != NULL) {
+        next = att->next;
+        if (att->ownerId == owner->unique_id) {
+            removed = 1;
+            func_15030158(att, 0);
+        }
+        att = next;
     }
-    return ret;
+    return removed;
 }
 
 typedef struct S15031070Sub {
@@ -746,7 +776,7 @@ S15030AF4 *func_15030AF4(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
         var->unk1C = arg6;
     }
     if (!err) {
-        err |= func_1502FFD8((Func1502FFD8Arg0 *)var, (u8 *)arg0);
+        err |= func_1502FFD8((Attachment *)var, arg0);
     }
     if (err) {
         func_15030158((Func15030158Arg0 *)var, 1);
@@ -1044,88 +1074,72 @@ Gfx *func_150311C4(Gfx *gdl, struct S15030F94 *arg1, struct127 *arg2, s32 arg3, 
     return gdl;
 }
 
-void func_1503192C(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct126 *temp;
-    temp = func_1503195C(arg0, arg1, arg3);
-    if (temp != 0) {
-        *((u8 *)temp + 3) = arg2;
+/* Sets the alpha of attachment number `index` of set `setId` on `owner`. */
+void func_1503192C(struct127 *owner, s32 setId, s32 alpha, s32 index) {
+    Attachment *att;
+
+    att = (Attachment *)func_1503195C(owner, setId, index);
+    if (att != NULL) {
+        att->alpha = alpha;
     }
 }
 
-struct S1503195C {
-    u8 unk0;
-    u8 pad1[5];
-    u8 unk6;
-    u8 pad7[0x4D];
-    struct S1503195C *unk54;
-};
+/* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
+struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
+    s32 ownerId;
+    Attachment *att;
+    Attachment *next;
 
-struct126 *func_1503195C(struct127 *arg0, s32 arg1, s32 arg2) {
-    s32 key;
-    struct S1503195C *var;
-    struct S1503195C *next;
-
-    key = arg0->unique_id;
-    if (key == 0) {
-        return 0;
+    ownerId = owner->unique_id;
+    if (ownerId == 0) {
+        return NULL;
     }
 
-    var = (struct S1503195C *)D_800C3EE0;
-    if (var != 0) {
-        do {
-            next = var->unk54;
-            if ((key == var->unk0) && (arg1 == var->unk6)) {
-                if (arg2 != 0) {
-                    arg2 -= 1;
-                    var = next;
-                } else {
-                    arg2 -= 1;
-                    return (struct126 *)var;
-                }
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        if ((ownerId == att->ownerId) && (setId == att->setId)) {
+            if (index != 0) {
+                index--;
+                att = next;
             } else {
-                var = next;
+                return (struct126 *)att;
             }
-        } while (var != 0);
-    }
-    return 0;
-}
-
-struct S150319CC {
-    u8 unk0;
-    u8 pad1[5];
-    u8 unk6;
-    u8 pad7[0x4D];
-    struct S150319CC *unk54;
-};
-struct S150319CC *func_150319CC(s32 arg0, u8 *arg1) {
-    struct S150319CC *var;
-    struct S150319CC *next;
-    u8 key;
-
-    if (arg1 != 0) {
-        var = (struct S150319CC *)D_800C3EE0;
-        if (var != 0) {
-            key = arg1[0x3B];
-            do {
-                next = var->unk54;
-                if ((var->unk0 == key) && (var->unk6 == arg0)) {
-                    return var;
-                }
-                var = next;
-            } while (next != 0);
+        } else {
+            att = next;
         }
     }
-    var = (struct S150319CC *)D_800C3EE0;
-    if (var != 0) {
-        do {
-            next = var->unk54;
-            if (var->unk6 == arg0) {
-                return var;
-            }
-            var = next;
-        } while (next != 0);
+    return NULL;
+}
+
+/* Returns the first attachment of set `setId`, preferring one owned by `owner`. */
+Attachment *func_150319CC(s32 setId, struct127 *owner) {
+    Attachment *att;
+    Attachment *next;
+    u8 ownerId;
+
+    if (owner != NULL) {
+        att = (Attachment *)D_800C3EE0;
+        if (att != NULL) {
+            ownerId = owner->unique_id;
+            do {
+                next = att->next;
+                if ((att->ownerId == ownerId) && (att->setId == setId)) {
+                    return att;
+                }
+                att = next;
+            } while (att != NULL);
+        }
     }
-    return 0;
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        if (att->setId == setId) {
+            return att;
+        }
+        att = next;
+    }
+    return NULL;
 }
 
 void func_150D5440(void *, u8, s32);
@@ -3038,74 +3052,68 @@ s32 func_15033E00(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-s32 func_15033E28(u8 *arg0, u8 **arg1) {
-    u8 *var;
-    u8 *cur;
-    u8 *next;
+/* Stores every attachment of `owner` into `out` and returns how many there are. */
+s32 func_15033E28(struct127 *owner, Attachment **out) {
+    Attachment *head;
+    Attachment *att;
+    Attachment *next;
     s32 count;
 
-    var = (u8 *)D_800C3EE0;
+    head = (Attachment *)D_800C3EE0;
     count = 0;
-    if (var == 0) {
+    if (head == NULL) {
         return 0;
     }
-    cur = var;
-    if (cur != 0) {
-        do {
-            next = *(u8 **)(cur + 0x54);
-            if (arg0[0x3B] == cur[0]) {
-                arg1[count] = cur;
-                count += 1;
-            }
-            cur = next;
-        } while (next != 0);
+    att = head; // matching: the second pointer moves the walk from v0 into a0
+    while (att != NULL) {
+        next = att->next;
+        if (att->ownerId == owner->unique_id) {
+            out[count] = att;
+            count++;
+        }
+        att = next;
     }
     return count;
 }
 
-struct S15033E84 {
-    u8 unk0;
-    u8 pad[0x53];
-    struct S15033E84 *unk54;
-};
-struct S15033E84 *func_15033E84(u8 *arg0) {
-    struct S15033E84 *var;
-    struct S15033E84 *next;
-    u8 key;
+/* Returns the first attachment of `owner`, or NULL. */
+Attachment *func_15033E84(struct127 *owner) {
+    Attachment *att;
+    Attachment *next;
+    u8 ownerId;
 
-    var = (struct S15033E84 *)D_800C3EE0;
-    if (var != 0) {
-        key = arg0[0x3B];
+    att = (Attachment *)D_800C3EE0;
+    if (att != NULL) {
+        ownerId = owner->unique_id;
         do {
-            next = var->unk54;
-            if (var->unk0 == key) {
-                return var;
+            next = att->next;
+            if (att->ownerId == ownerId) {
+                return att;
             }
-            var = next;
-        } while (next != 0);
+            att = next;
+        } while (att != NULL);
     }
-    return 0;
+    return NULL;
 }
 
-void func_15033EC4(s32 arg0, s32 arg1) {
-    struct S15033E84 *var;
-    struct S15033E84 *next;
-    s32 b;
-    s32 key;
+/* Swaps the owners of all attachments of owner ids `a` and `b`. */
+void func_15033EC4(s32 a, s32 b) {
+    Attachment *att;
+    Attachment *next;
+    s32 idA;
+    s32 ownerId;
 
-    b = arg0;
-    var = (struct S15033E84 *)D_800C3EE0;
-    if (var != 0) {
-        do {
-            next = var->unk54;
-            key = var->unk0;
-            if (b == key) {
-                var->unk0 = arg1;
-            } else if (arg1 == key) {
-                var->unk0 = b;
-            }
-            var = next;
-        } while (next != 0);
+    idA = a; // matching: IDO keeps the copy in a2
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        ownerId = att->ownerId;
+        if (idA == ownerId) {
+            att->ownerId = b;
+        } else if (b == ownerId) {
+            att->ownerId = idA;
+        }
+        att = next;
     }
 }
 
