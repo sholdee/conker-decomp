@@ -283,11 +283,11 @@ void func_1519F400(TrailOwner *owner) {
     }
     if (sides[0].spawner != NULL) {
         func_151A0928(sides[0].spawner);
-        func_1516972C((EffectHeader *)sides[0].spawner);
+        func_1516972C(&sides[0].spawner->base.header);
     }
     if (sides[1].spawner != NULL) {
         func_151A0928(sides[1].spawner);
-        func_1516972C((EffectHeader *)sides[1].spawner);
+        func_1516972C(&sides[1].spawner->base.header);
     }
 }
 

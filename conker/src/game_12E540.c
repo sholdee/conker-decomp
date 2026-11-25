@@ -52,7 +52,8 @@ typedef struct {
 
 /* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
 typedef struct {
-    u8 pad0[0x38];
+    EffectHeader header;
+    u8 pad10[0x28];
     f32 sizeX;
     f32 sizeY;
     Vec3f pos;
@@ -72,7 +73,8 @@ typedef struct {
 
 /* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
 typedef struct {
-    u8 pad0[0x34];
+    EffectHeader header;
+    u8 pad10[0x24];
     Vec3f pos;
     u8 pad40[0xD0];
     BeamHitFxData data;
@@ -81,7 +83,8 @@ typedef struct {
 
 /* beam->data.line: spans the beam from start to end. */
 typedef struct {
-    u8 pad0[0x34];
+    EffectHeader header;
+    u8 pad10[0x24];
     Vec3f start;
     Vec3f end;
     u8 pad4C[0xC];
@@ -92,7 +95,8 @@ typedef struct {
 
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
 typedef struct {
-    u8 pad0[0x40];
+    EffectHeader header;
+    u8 pad10[0x30];
     Vec3f pos;
     u8 pad4C[0x5C];
     BeamLink link;
@@ -126,7 +130,8 @@ typedef struct {
 } BeamData;
 
 struct Beam {
-    u8 pad0[0x34];
+    EffectHeader header;
+    u8 pad10[0x24];
     Vec3f start;
     Vec3f end;
     u8 pad4C[0x74];
@@ -144,19 +149,19 @@ void func_15101090(Beam *beam) {
         func_100111C8(data->unk90);
     }
     if (data->hitFx != NULL) {
-        func_1516972C((EffectHeader *)data->hitFx);
+        func_1516972C(&data->hitFx->header);
     }
     if (data->endPoint != NULL) {
         func_1516972C((EffectHeader *)data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516972C((EffectHeader *)data->startFx);
+        func_1516972C(&data->startFx->header);
     }
     if (data->line != NULL) {
-        func_1516972C((EffectHeader *)data->line);
+        func_1516972C(&data->line->header);
     }
     if (data->endFx != NULL) {
-        func_1516972C((EffectHeader *)data->endFx);
+        func_1516972C(&data->endFx->header);
     }
     func_1513CA6C((struct DefParticleHead *)beam);
 }
@@ -166,19 +171,19 @@ void func_15101148(Beam *beam) {
     BeamData *data = &beam->data;
 
     if (data->hitFx != NULL) {
-        func_1516979C((EffectHeader *)data->hitFx);
+        func_1516979C(&data->hitFx->header);
     }
     if (data->endPoint != NULL) {
         func_1516979C((EffectHeader *)data->endPoint);
     }
     if (data->startFx != NULL) {
-        func_1516979C((EffectHeader *)data->startFx);
+        func_1516979C(&data->startFx->header);
     }
     if (data->line != NULL) {
-        func_1516979C((EffectHeader *)data->line);
+        func_1516979C(&data->line->header);
     }
     if (data->endFx != NULL) {
-        func_1516979C((EffectHeader *)data->endFx);
+        func_1516979C(&data->endFx->header);
     }
     func_1513CAA0((struct DefParticleHead *)beam);
 }

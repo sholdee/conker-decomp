@@ -284,7 +284,8 @@ typedef struct {
 } IgnoreList;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
 } FollowFx;
 
@@ -531,7 +532,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 func_1516972C((EffectHeader *)state.trail);
             }
             if (state.follow != NULL) {
-                func_1516972C((EffectHeader *)state.follow);
+                func_1516972C(&state.follow->header);
             }
         }
         if (shooter->unk1D4 != NULL && (shooter->unk74 & 0xF) != 0xF) {
@@ -669,7 +670,7 @@ void func_151C1570(Bullet *bullet) {
         func_1516972C((EffectHeader *)state->trail);
     }
     if (state->follow != NULL) {
-        func_1516972C((EffectHeader *)state->follow);
+        func_1516972C(&state->follow->header);
     }
     if (state->unk88 != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs

@@ -14,7 +14,8 @@ void func_150F6DB0(Actor *owner) {
 
 /* A sprite spawned by func_15130280 that marks one end of the beam. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
     /* 0x4C */ u8 pad4C[0x74 - 0x4C];
     /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
@@ -209,7 +210,7 @@ void func_150F739C(BeamObj *obj) {
     beam = &obj->beam;
     for (i = 0; i < 2; i++) {
         if (beam->ends[i] != NULL) {
-            func_1516972C((EffectHeader *)beam->ends[i]);
+            func_1516972C(&beam->ends[i]->header);
         }
     }
     func_1514EDF0(obj, beam->owner);

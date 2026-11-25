@@ -159,7 +159,8 @@ typedef struct {
 
 /* The object func_15157010 returns: the counter's background panel. */
 typedef struct {
-    /* 0x000 */ u8  pad0[0x54];
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 pad10[0x44];
     /* 0x054 */ f32 x;
     /* 0x058 */ f32 y;
     /* 0x05C */ u8  pad5C[0x120 - 0x5C];
@@ -168,7 +169,7 @@ typedef struct {
 
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 x;
     /* 0x14 */ f32 y;
 } CounterDigit;
@@ -397,11 +398,11 @@ void func_151BFB2C(CounterEffect *effect) {
     CounterDisplay *display = &effect->display;
 
     if (display->panel != NULL) {
-        func_1516972C((EffectHeader *)display->panel);
+        func_1516972C(&display->panel->header);
     }
     for (i = 0; i < 2; i++) {
         if (display->digits[i] != NULL) {
-            func_1516972C((EffectHeader *)display->digits[i]);
+            func_1516972C(&display->digits[i]->header);
         }
     }
 }
