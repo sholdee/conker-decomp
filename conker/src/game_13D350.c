@@ -16,13 +16,46 @@ extern u8 D_800DBEA8[];
 Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
 Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
 
-typedef struct {
-    u8  pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct151103C8;
+/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
+ * Same layout as game_476D0.c's RenderView, with the projection fields this file uses. */
+typedef struct RenderView {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 onScreen;
+    /* 0x002 */ u8 pad2[2];
+    /* 0x004 */ f32 width;
+    /* 0x008 */ f32 height;
+    /* 0x00C */ f32 halfWidth;
+    /* 0x010 */ f32 halfHeight;
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ u8 pad1C[8];
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ f32 centerX;
+    /* 0x038 */ f32 centerY;
+    /* 0x03C */ u8 pad3C[4];
+    /* 0x040 */ Vp viewports[2];
+    /* 0x060 */ f32 aspect;
+    /* 0x064 */ f32 unk64;
+    /* 0x068 */ f32 unk68;
+    /* 0x06C */ f32 fovX;
+    /* 0x070 */ f32 fovY;
+    /* 0x074 */ f32 frustumFovX;
+    /* 0x078 */ f32 frustumFovY;
+    /* 0x07C */ f32 pixelTanX;
+    /* 0x080 */ f32 pixelTanY;
+    /* 0x084 */ f32 unk84;
+    /* 0x088 */ f32 frustumPlanes[4][3];
+    /* 0x0B8 */ u16 perspNorm;
+    /* 0x0BA */ u8 padBA[2];
+    /* 0x0BC */ f32 projection[4][4];
+    /* 0x0FC */ u8 padFC[0x84];
+} RenderView; // size 0x180
+
+/* variables.h types D_800BE628 as s32. */
+#define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];
@@ -61,8 +94,10 @@ extern u8 D_800D9B83;
 extern Game13D350ViewAngles D_800DCDE0[];
 extern Game13D350ViewDraw D_800891D8[];
 
-Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
-    u8 *record;
+/* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
+ * camera angles into range and calls the current sky's draw routine if func_151108C4 says the sky shows. */
+Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
+    RenderView *view;
     f32 pitch;
     f32 yaw;
     f32 roll;
@@ -71,6 +106,7 @@ Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
     f32 y;
     f32 z;
 
+    // matching: each byte is its own symbol (a lui per store), not an index into D_800D9B68/D_800D9B78
     D_800D9B68[0][0] = 0;
     D_800D9B69 = 0;
     D_800D9B6A = 0;
@@ -95,15 +131,17 @@ Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
     D_800D9B81 = 0;
     D_800D9B82 = 0;
     D_800D9B83 = 0;
-    { Gfx *command = arg0++; command->words.w0 = 0xD9FFF9FF; command->words.w1 = 0; }
-    arg0 = func_151106A8(arg0);
-    { Gfx *command = arg0++; command->words.w0 = 0xE7000000; command->words.w1 = 0; }
+    gSPClearGeometryMode(gfx++, G_CULL_BOTH);
+    gfx = func_151106A8(gfx);
+    gDPPipeSync(gfx++);
     if (D_800BE635 != 0) {
-        arg0 = func_15110544(arg0, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
+        gfx = func_15110544(gfx, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
     }
     if (D_800C35EA == 1 && D_800C3681 != 0) {
-        return arg0;
+        return gfx;
     }
+    // matching: byte offsets into D_800DBFF0[D_80082FA4] (struct108 unk388/unk380/unk2F8..unk300); IDO
+    // schedules the struct-member loads differently
     pitch = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x388) + D_800DCDE0[D_80082FA4].pitch);
     while (pitch < -180.0f) {
         pitch += 360.0f;
@@ -118,7 +156,8 @@ Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    roll = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x5EC) + D_800DCDE0[D_80082FA4].roll;
+    // struct108 (structs.h) has no f32 field at 0x5EC yet
+    roll = *(f32 *)&D_800DBFF0[D_80082FA4].pad5EC + D_800DCDE0[D_80082FA4].roll;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
@@ -129,83 +168,78 @@ Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
     y = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2FC);
     z = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x300);
     if (D_800C3682 != 0) {
-        record = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
-        return func_15110544(arg0,
-                             (s32)*(f32 *)(record + 0x2C), (s32)*(f32 *)(record + 0x24),
-                             (s32)(*(f32 *)(record + 0x30) - 1.0f),
-                             (s32)*(f32 *)(record + 0x28), 0x16, 0x1C, 0x1B);
+        view = &RENDER_VIEWS[D_80082FA4];
+        return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
     }
     visible = func_151108C4(x, y, z, pitch, yaw);
     if (visible != 0) {
-        arg0 = D_800891D8[((u8 *)D_800B0DF0)[8]](arg0, x, y, z, pitch, yaw, roll, visible);
+        gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
-    arg0 = (Gfx *)func_1501A490((s32)arg0, D_80082FA6, 0, 0, 0, 0);
-    { Gfx *command = arg0++; command->words.w0 = 0xD9FFFFFF; command->words.w1 = 0x400; }
-    return arg0;
+    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0);
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    return gfx;
 }
 
-extern s32 D_800BE628;
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_151102CC(f32 a0[4][4], f32 a1, f32 a2, f32 a3);
 
-void func_151102CC(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3) {
-    f32 sp28[4][4];
+/* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
+ * three angles, func_150A7A48 multiplies). */
+void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
+    f32 rotation[4][4];
 
-    func_150A8050(arg0, 0.0f, arg2, 0.0f);
-    func_150A8050(sp28, arg1, 0.0f, 0.0f);
-    func_150A7A48(arg0, sp28, arg0);
-    func_150A8050(sp28, 0.0f, 0.0f, arg3);
-    func_150A7A48(arg0, sp28, arg0);
+    func_150A8050(mtx, 0.0f, yaw, 0.0f);
+    func_150A8050(rotation, pitch, 0.0f, 0.0f);
+    func_150A7A48(mtx, rotation, mtx);
+    func_150A8050(rotation, 0.0f, 0.0f, roll);
+    func_150A7A48(mtx, rotation, mtx);
 }
 
-void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4) {
-    func_151102CC(arg1, arg2, arg3, arg4);
-    func_150A7A48(arg1, (f32 (*)[4])((u8 *)((struct259 *)D_800BE628 + arg0) + 0xBC), arg1);
+/* Builds view viewIndex's view-projection matrix in mtx from the camera angles. */
+void func_15110360(s32 viewIndex, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
+    func_151102CC(mtx, pitch, yaw, roll);
+    func_150A7A48(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
 }
 
+/* Fills the current view with the background colour D_800DBEA8 and, on view 0 in split screen, draws the
+ * black divider bars (only the horizontal one when D_80082FA0 is 1). */
 Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    Struct151103C8 *temp;
+    RenderView *view;
 
-    temp = (Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4);
-    gfx = func_15110544(gfx, (s32)temp->unk2C, (s32)temp->unk24,
-                        (s32)(temp->unk30 - 1.0f), (s32)temp->unk28,
+    view = &RENDER_VIEWS[D_80082FA4];
+    gfx = func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom,
                         D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     if (D_80082FA0 != 0) {
         if (D_80082FA4 == 0) {
             gDPPipeSync(gfx++);
             gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
-            gDPSetFillColor(gfx++, 0x10001);
-            gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620,
-                                (D_800BE624 >> 1) + 6);
+            gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
+            gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
-                gfx = func_1501A6CC(gfx, (D_800BE620 >> 1) - 1, 0,
-                                    (D_800BE620 >> 1) + 1, D_800BE624);
+                gfx = func_1501A6CC(gfx, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
             }
         }
     }
     return gfx;
 }
 
-Gfx *func_1501A680(Gfx *arg0);
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
-
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl) {
+/* Fills the rectangle (ulx, uly)-(lrx, lry) of the framebuffer with colour (r, g, b) in fill mode. */
+Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b) {
     s32 color;
 
     gDPPipeSync(gfx++);
     gDPSetOtherMode(gfx++, 0x302C0F, 4);
     gfx = func_1501A680(gfx);
-    color = GPACK_RGBA5551(r, g, bl, 1);
+    color = GPACK_RGBA5551(r, g, b, 1);
     gDPSetFillColor(gfx++, (color << 16) | color);
-    gfx = func_1501A6CC(gfx, a, b, c, d);
+    return func_1501A6CC(gfx, ulx, uly, lrx, lry);
 }
 
+/* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
+ * background colour D_800DBEA8. */
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    s32 temp_v0;
-
-    temp_v0 = D_800BE9F0;
-    if ((temp_v0 == 0x1B) || (temp_v0 == 0x1E) ||
-        ((temp_v0 == 0x31) && (*(u8 *)&D_800DBFF0->unk3D4->unk78 == 3))) {
+    // unk78 is the high byte of struct127's u16 unk78
+    if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
+        (D_800BE9F0 == 0x31 && *(u8 *)&D_800DBFF0->unk3D4->unk78 == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }
@@ -733,10 +767,8 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
         }
     } else if (D_800BE9F0 == 0x3C ||
                (D_800BE9F0 == 0x13 && D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
-        gfx = func_15110544(gfx, (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk2C,
-                            (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk24,
-                            (s32)(((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk30 - 1.0f),
-                            (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk28, 0, 0, 0);
+        gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
+                            RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }
     color[0] = ((u8 *)D_800B0DF0)[5];
     color[1] = ((u8 *)D_800B0DF0)[6];
@@ -756,11 +788,11 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
     { Gfx *command = gfx++; command->words.w0 = 0xF2000000; command->words.w1 = 0x010F407C; }
     { Gfx *command = gfx++; command->words.w0 = 0xF5000100; command->words.w1 = 0x06000000; }
     func_151102CC(mtx, pitch, yaw, roll);
-    func_150A7A48(mtx, (f32 (*)[4])((u8 *)((struct259 *)D_800BE628 + D_80082FA4) + 0xBC), mtx2);
+    func_150A7A48(mtx, RENDER_VIEWS[D_80082FA4].projection, mtx2);
     guMtxF2L(mtx2, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
     { Gfx *command = gfx++; command->words.w0 = 0xDA380007; command->words.w1 = (u32)&D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]; }
     { Gfx *command = gfx++; command->words.w0 = 0xDA380003; command->words.w1 = (u32)&D_80089470; }
-    { Gfx *command = gfx++; command->words.w0 = 0xDB0E0000; command->words.w1 = *(u16 *)((u8 *)((struct259 *)D_800BE628 + D_80082FA4) + 0xB8); }
+    { Gfx *command = gfx++; command->words.w0 = 0xDB0E0000; command->words.w1 = RENDER_VIEWS[D_80082FA4].perspNorm; }
     texList = D_800891BC[D_800B0DF0->unk9];
     count = 0;
     vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
