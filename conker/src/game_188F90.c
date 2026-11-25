@@ -79,13 +79,6 @@ typedef struct Attachment {
     /* 0x10 */ ActorTracker *handle;
 } Attachment;
 
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in Actor). */
-typedef struct AttachmentOwner {
-    /* 0x000 */ u8 pad0[0x2F4];
-    /* 0x2F4 */ Attachment *attachments;
-} AttachmentOwner;
-#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
-
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern TextureInfo D_80090B60[];
@@ -268,7 +261,7 @@ s32 func_1515C0F8(Actor *actor, Vec3f **motion) {
     if (actor == NULL) {
         return FALSE;
     }
-    if (func_1514ECE0(ATTACHMENTS(actor), 0x16, &node)) {
+    if (func_1514ECE0(actor->attachments, 0x16, &node)) {
         tracker = node->handle;
         *motion = &tracker->motion;
         return TRUE;

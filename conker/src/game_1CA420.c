@@ -161,13 +161,6 @@ typedef union TrailEvent {
     } swap;           /* event 0x2D: owners a and b trade places */
 } TrailEvent;
 
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in Actor). */
-typedef struct AttachmentOwner {
-    /* 0x000 */ u8 pad0[0x2F4];
-    /* 0x2F4 */ struct Attachment *attachments;
-} AttachmentOwner;
-#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
-
 extern void func_15147D64(void *event, u8 eventId);
 extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
 void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
@@ -404,7 +397,7 @@ s32 func_1519D454(Trail *trail) {
         task = (TrailTask *)func_151491F4(trail->lifetime, -1, 8, (trail->flags & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
         if (task != NULL) {
             memcpy(&task->data, &taskData, sizeof(TrailTaskData));
-            if (func_1514ED3C(ATTACHMENTS(data->owner), (s32)trail, NULL) != 0) {
+            if (func_1514ED3C(data->owner->attachments, (s32)trail, NULL) != 0) {
                 func_1514EC1C((s32)task, data->owner, 0x11);
             }
         }
@@ -760,7 +753,7 @@ void func_1519E464(TrailTask *task) {
             finished = TRUE;
             trail = func_1519D030(data->owner, data->unk8, task->lifetime, task->flags & 1, task->unkC, task->unk1);
             if (trail != NULL) {
-                if (func_1514ED3C(ATTACHMENTS(data->owner), (s32)task, NULL) != 0) {
+                if (func_1514ED3C(data->owner->attachments, (s32)task, NULL) != 0) {
                     func_1514EC1C((s32)trail, data->owner, 0x10);
                 }
             }

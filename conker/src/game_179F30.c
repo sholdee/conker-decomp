@@ -18,13 +18,6 @@ typedef struct Attachment {
     /* 0x1C */ s16 type;                    // index into D_8008ABE8
 } Attachment;
 
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in Actor). */
-typedef struct AttachmentOwner {
-    /* 0x000 */ u8 pad0[0x2F4];
-    /* 0x2F4 */ Attachment *attachments;
-} AttachmentOwner;
-#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
-
 /* Attachment types form a tree (first child / next sibling), so a message sent to a type
  * also reaches attachments of its subtypes. */
 typedef struct AttachmentType {
@@ -531,7 +524,7 @@ s32 func_1514D15C(Actor *obj) {
     globalSlot = -1;
     idSlot = -1;
     slot = obj - D_800CC2D0;
-    if (ATTACHMENTS(obj) != NULL) {
+    if (obj->attachments != NULL) {
         return 0;
     }
 
@@ -581,7 +574,7 @@ s32 func_1514D310(Actor *owner) {
     Attachment *node;
     Attachment *next;
 
-    node = ATTACHMENTS(owner);
+    node = owner->attachments;
     while (node != NULL) {
         next = node->next;
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
@@ -602,7 +595,7 @@ s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
     s32 result;
 
     result = 0;
-    for (node = ATTACHMENTS(owner); node != NULL; node = node->next) {
+    for (node = owner->attachments; node != NULL; node = node->next) {
         if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
             if (D_8008ABE8[node->type]->messageHandler != -1) {
                 if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
@@ -1409,8 +1402,8 @@ Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type) {
         node = func_1514EBA4(handle, type, 0);
         result = node;
         if (node != NULL) {
-            node->next = ATTACHMENTS(owner);
-            ATTACHMENTS(owner) = node;
+            node->next = owner->attachments;
+            owner->attachments = node;
             node->prev = NULL;
             if (node->next != NULL) {
                 node->next->prev = node;
@@ -1475,8 +1468,8 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
 s32 func_1514ED8C(Attachment *node, Actor *owner) {
     s32 handle;
 
-    if (node == ATTACHMENTS(owner)) {
-        ATTACHMENTS(owner) = node->next;
+    if (node == owner->attachments) {
+        owner->attachments = node->next;
     }
     if (node->next != NULL) {
         node->next->prev = node->prev;
@@ -1496,7 +1489,7 @@ void func_1514EDF0(s32 handle, Actor *owner) {
     Attachment *match;
     u8 found;
 
-    node = ATTACHMENTS(owner);
+    node = owner->attachments;
     match = NULL;
     do {
         // matching: test the s32 result, loop on the u8 copy
