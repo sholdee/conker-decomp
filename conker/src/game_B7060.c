@@ -8,8 +8,6 @@
 extern MpGame *D_800D23B0;
 s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 extern f32 sqrtf(f32);
-u8 func_15085DA8(f32 arg0);
-s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4);
 
 #pragma intrinsic(sqrtf)
 

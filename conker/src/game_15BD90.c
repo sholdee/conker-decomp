@@ -5,7 +5,6 @@
 
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 Actor *func_1505EEF4(s32 arg0);
-s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void func_15124C38(Camera *arg0, s32 arg1);
 void func_151254F4(Camera *arg0, s32 arg1);
 void func_151287E0(Camera *arg0, f32 *arg1, f32 *arg2);

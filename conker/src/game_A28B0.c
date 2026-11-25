@@ -818,8 +818,6 @@ void func_150774B4(void) {
     }
 }
 
-s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
-s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 
 /* the s16 at 0x216 overlaps Actor's s32 unk214 */

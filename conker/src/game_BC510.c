@@ -1411,7 +1411,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800D2448);
     return gfx;
 }
-u8 func_15085DA8(f32 arg0);
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
  * visible other character, rotated by the camera heading; a dot gets a bar above or below it when
