@@ -4,154 +4,139 @@
 #include "variables.h"
 
 
-// what is this loop doing?
-extern s32 D_800B0E30[];
-extern u8 D_800B0E34[];
-typedef struct 
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-} Struct15003120;
-void func_15003120(s32 arg0, s32 arg1, s32 arg2)
-{
-  s32 i;
-  s32 count;
-  s32 head;
-  ((s32 *) D_800B0E30[0])[arg0] = arg2;
-  ((u8 *) ((s32 *) D_800B0E34)[0])[arg0] = 0;
-  if (arg2 == 0)
-  {
-    return;
-  }
-  ((s32 *) D_800B0E30[0])[arg0] += arg1;
-  count = 0;
-  i = 0;
-  head = ((s32 *) D_800B0E30[0])[arg0];
-  if (((Struct15003120 *) head)->unk0 != 0)
-  {
-    do
-    {
-      ((Struct15003120 *) ((s32 *) D_800B0E30[0])[arg0])[i].unk0 += arg1;
-      ((Struct15003120 *) ((s32 *) D_800B0E30[0])[arg0])[i].unk4 += arg1;
-      count++;
-      i++;
+typedef struct {
+    s32 start;
+    s32 end;
+    s32 unk8;
+} RelocRange;
+
+/* variables.h declares these pointer variables as arrays; view them as what they hold. */
+#define sRangeLists (*(RelocRange ***)D_800B0E30)
+#define sRangeCounts (*(u8 **)D_800B0E34)
+
+/* Rebases entry `index`'s zero-terminated range list (at offset `list` in `base`) and stores its length. */
+void func_15003120(s32 index, s32 base, s32 list) {
+    s32 i;
+
+    sRangeLists[index] = (RelocRange *)list;
+    sRangeCounts[index] = 0;
+    if (list == 0) {
+        return;
     }
-    while (((Struct15003120 *) ((s32 *) D_800B0E30[0])[arg0])[i].unk0 != 0);
-  }
-  ((u8 *) ((s32 *) D_800B0E34)[0])[arg0] = count;
+    sRangeLists[index] = (RelocRange *)((u8 *)sRangeLists[index] + base);
+    for (i = 0; sRangeLists[index][i].start != 0; i++) {
+        sRangeLists[index][i].start += base;
+        sRangeLists[index][i].end += base;
+    }
+    sRangeCounts[index] = i;
 }
 
 
-typedef struct
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-  s32 unkC;
-  s32 unk10;
-  s32 unk14;
-  s32 unk18;
-  s32 unk1C;
-  s32 unk20;
-} AssetHeader;
+/* A level model asset. Its pointer fields hold offsets from the asset's start until rebased. */
+typedef struct {
+    /* 0x00 */ s32 displayList; // also marks the end of the vertices
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 rangeList;   // offset of a RelocRange list, rebased by func_15003120
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ Vtx vertices[1];
+} LevelModel;
 
-typedef struct
-{
-  AssetHeader *unk0;
-  s32 unk4;
-} AssetEntry;
+typedef struct {
+    LevelModel *model;
+    s32 loaded;
+} LevelModelEntry;
+
+/* The byte past the end of struct104 (variables.h's type for D_800B0DF0). */
+typedef struct {
+    u8 pad0[0x4B];
+    u8 assetList; // index into D_80082B20, 0 = none
+} LevelInfo;
+
+/* Zero-terminated lists of asset ids loaded with each level (variables.h declares D_80082B20 as s32). */
+#define sLevelAssetLists ((s32 **)&D_80082B20)
 
 extern s32 D_800B0E10[];
 extern s32 D_800B0E20[];
 extern u8  D_800B0E38;
 extern s32 D_800B0E40[];
-extern AssetEntry *D_800B0E50;
+extern LevelModelEntry *D_800B0E50;
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern AssetEntry *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
-extern s32 func_150049A4(s32 arg0, s32 arg1, s32 arg2);
-extern s32 func_1510CE60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4);
-extern s32 func_1510D0EC(s32 arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+extern LevelModelEntry *func_1502B6BC(s32 *loaded, s32 arg1, s32 *count, s32 arg3, s32 arg4, s32 arg5);
+extern s32 func_150049A4(s32 dl, s32 arg1, s32 arg2);
+extern s32 func_1510CE60(s32 dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
+extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
 
-void func_150031EC(s32 arg0)
-{
-  AssetEntry *table;
-  AssetHeader *asset;
-  s32 count;
-  s32 loaded;
-  u32 i;
-  s32 j;
-  s32 k;
-  s32 sp50;
-  s32 tex;
+/* Loads level `level`'s models, rebases them and sets up the first four as the level's display lists. */
+void func_150031EC(s32 level) {
+    LevelModelEntry *models;
+    LevelModel *model;
+    s32 count;
+    s32 loaded;
+    u32 i;
+    s32 j;
+    s32 k;
+    s32 size;
+    s32 id;
 
-  if (arg0 >= 0x45)
-  {
-    arg0 = 0;
-  }
-  table = func_1502B6BC(&loaded, 0, &count, 2, 4, arg0);
-  D_800B0E50 = table;
-  for (k = 1; k < 4; k++)
-  {
-    D_800B0E00[k] = 0;
-    D_800B0E10[k] = 0;
-    D_800B0E40[k] = 0;
-  }
-  func_150034B4();
-  if (loaded != 0)
-  {
-    D_800B0E30[0] = (s32) allocate_memory(count * 4, 1, 0, 0);
-    ((s32 *) D_800B0E34)[0] = (s32) allocate_memory(count, 1, 0, 0);
-    bzero((void *) ((s32 *) D_800B0E34)[0], count);
-    bzero((void *) D_800B0E30[0], count);
-    D_800B0E38 = count;
-    for (i = 0; i < count; i++)
-    {
-      asset = table[i].unk0;
-      if ((asset != 0) && (table[i].unk4 != 0))
-      {
-        if (asset->unk0 != 0)
-        {
-          asset->unk0 += (s32) asset;
-        }
-        if (asset->unk8 != 0)
-        {
-          asset->unk8 += (s32) asset;
-        }
-        if (asset->unk10 != 0)
-        {
-          asset->unk10 += (s32) asset;
-        }
-        func_15003120(i, (s32) asset, asset->unk20);
-        if (i < 4)
-        {
-          D_800B0E00[i] = asset->unk0;
-          D_800B0E10[i] = (s32) asset + 0x28;
-          D_800B0E40[i] = (u32) (D_800B0E00[i] - D_800B0E10[i]) >> 4;
-          D_800B0E20[i] = asset->unk8;
-          if (i == 0)
-          {
-            func_150039BC(asset->unk10);
-          }
-          func_150049A4(D_800B0E00[i], D_800B0E10[i] + 0xFF000000, (s32) asset);
-          func_1510CE60(D_800B0E00[i], 0, 1, 0x3F, 0);
-        }
-        else
-        {
-          func_150049A4(asset->unk0, 0, (s32) asset);
-        }
-      }
+    if (level >= 69) {
+        level = 0;
     }
-  }
-  if (((u8 *) D_800B0DF0)[0x4B] != 0)
-  {
-    j = 0;
-    while ((tex = ((s32 **) &D_80082B20)[((u8 *) D_800B0DF0)[0x4B]][j++]) != 0)
-    {
-      func_1510D0EC(tex, &sp50, 0x3E, 0);
+    models = func_1502B6BC(&loaded, 0, &count, 2, 4, level);
+    D_800B0E50 = models;
+    for (k = 1; k < 4; k++) {
+        D_800B0E00[k] = 0;
+        D_800B0E10[k] = 0;
+        D_800B0E40[k] = 0;
     }
-  }
+    func_150034B4();
+    if (loaded) {
+        sRangeLists = allocate_memory(count * 4, 1, 0, 0);
+        sRangeCounts = allocate_memory(count, 1, 0, 0);
+        bzero(sRangeCounts, count);
+        bzero(sRangeLists, count);
+        D_800B0E38 = count;
+        for (i = 0; i < count; i++) {
+            model = models[i].model;
+            if (model != NULL && models[i].loaded) {
+                if (model->displayList != 0) {
+                    model->displayList += (s32)model;
+                }
+                if (model->unk8 != 0) {
+                    model->unk8 += (s32)model;
+                }
+                if (model->unk10 != 0) {
+                    model->unk10 += (s32)model;
+                }
+                func_15003120(i, (s32)model, model->rangeList);
+                if (i < 4) {
+                    D_800B0E00[i] = model->displayList;
+                    D_800B0E10[i] = (s32)model->vertices;
+                    D_800B0E40[i] = (u32)(D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx);
+                    D_800B0E20[i] = model->unk8;
+                    if (i == 0) {
+                        func_150039BC(model->unk10);
+                    }
+                    func_150049A4(D_800B0E00[i], D_800B0E10[i] + 0xFF000000, (s32)model);
+                    func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);
+                } else {
+                    func_150049A4(model->displayList, 0, (s32)model);
+                }
+            }
+        }
+    }
+    if (((LevelInfo *)D_800B0DF0)->assetList != 0) {
+        j = 0;
+        while ((id = sLevelAssetLists[((LevelInfo *)D_800B0DF0)->assetList][j++]) != 0) {
+            func_1510D0EC(id, &size, 62, 0);
+        }
+    }
 }
 
 s32 func_150034B4(void) {
