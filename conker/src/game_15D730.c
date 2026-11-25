@@ -44,7 +44,7 @@ typedef struct ParticleFlash {
 } ParticleFlash;
 
 typedef struct Particle {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ union {
         ParticleAttach attach;
@@ -228,7 +228,7 @@ void func_151303EC(Particle *p) {
         if (p->desc.deathFunc != -1) {
             D_80089800[p->desc.deathFunc](p);
         }
-        func_1516972C((EffectHeader *)p);
+        func_1516972C(&p->header);
     }
 }
 
@@ -530,11 +530,11 @@ s32 func_1513170C(Particle *p, Vec3f *prevPos) {
 }
 
 void func_1513173C(Particle *p) {
-    func_15169804((EffectHeader *)p);
+    func_15169804(&p->header);
 }
 
 void func_1513175C(Particle *p) {
-    func_15169824((EffectHeader *)p);
+    func_15169824(&p->header);
 }
 
 extern void (*D_80089814[])(Particle *);
