@@ -880,188 +880,167 @@ end: // matching: an unused label keeps the final return 1 in its own basic bloc
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    s32 unk10;
-    u8 pad14[0x4];
-    u8 unk18;
-    u8 pad19;
-    u16 unk1A;
-    u8 pad1C[0x4];
-    s32 unk20;
-    u8 pad24[0x4];
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 pad2C[0x8];
-    u8 unk34[0x24];
-    s32 unk58;
-    u8 unk5C;
-    u8 unk5D;
-    u8 unk5E;
-    u8 unk5F;
-    s16 *unk60;
-    u8 unk64;
-    u8 pad65[0x3];
-    s32 unk68;
-    u8 pad6C[0x7];
-    u8 unk73;
-    u8 pad74[0x28];
-    u8 unk9C[0x64];
-    s32 unk100[4];
-} Obj1513DB00;
+extern Vtx *(*D_80089E1C[])(Particle *, s16);
 
+/* Draws a particle's quad (and attached model) for one viewport. */
+Gfx *func_1513DB00(Gfx *gfx, Particle *particle, s16 viewport) {
+    s32 pad; // matching: unused stack slot
+    u8 needSync;
+    s16 primR;
+    s16 primG;
+    s16 primB;
+    s16 primA;
+    s16 envR;
+    s16 envG;
+    s16 envB;
+    s16 envA;
+    u8 blendMode;
+    u8 combiner;
+    s16 cullFlags;
+    s32 geometry;
+    Vtx *vtx;
 
-extern s32 (*D_80089E1C[])(Obj1513DB00 *, s16);
-
-Gfx *func_1513DB00(Gfx *arg0, Obj1513DB00 *arg1, s16 arg2) {
-    s32 pad8C;
-    u8 flag;
-    s16 r1;
-    s16 g1;
-    s16 b1;
-    s16 a1;
-    s16 r2;
-    s16 g2;
-    s16 b2;
-    s16 a2;
-    u8 mode;
-    u8 hi;
-    s16 bits;
-    s32 cyc;
-    s32 vtx;
-
-    if (arg1->unk10 & 1) {
-        flag = 1;
-        if ((arg1->unk58 & 8) && !(arg1->unk64 & (1 << arg2))) {
-            if (arg1->unk100[arg2]) {
-                func_100043B4((s32 *)arg1->unk100[arg2], 2);
-                arg1->unk100[arg2] = 0;
+    // matching: the (s32) round-trips below make IDO copy the buffer pointer through an int temp
+    if (particle->active & 1) {
+        needSync = TRUE;
+        if ((particle->def.flags & 8) && !(particle->def.viewportMask & (1 << viewport))) {
+            if (particle->vtxBuffers[viewport]) {
+                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                particle->vtxBuffers[viewport] = NULL;
             }
-            return arg0;
+            return gfx;
         }
-        mode = arg1->unk1A & 0xFF;
-        hi = (arg1->unk1A & 0xFF00) >> 8;
-        bits = arg1->unk58 & 0xC000;
-        if ((arg1->unk58 & 0x01000000) && arg1->unk60 != NULL && !(arg1->unk60[1] & (1 << arg2))) {
-            if (arg1->unk100[arg2]) {
-                func_100043B4((s32 *)arg1->unk100[arg2], 2);
-                arg1->unk100[arg2] = 0;
+        blendMode = particle->def.renderModes & 0xFF;
+        combiner = (particle->def.renderModes & 0xFF00) >> 8;
+        cullFlags = particle->def.flags & 0xC000;
+        if ((particle->def.flags & 0x1000000) && particle->def.unk48 != NULL &&
+            !(particle->def.unk48[1] & (1 << viewport))) {
+            if (particle->vtxBuffers[viewport]) {
+                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                particle->vtxBuffers[viewport] = NULL;
             }
-            return arg0;
+            return gfx;
         }
-        vtx = D_80089E1C[arg1->unk73](arg1, arg2);
-        if (vtx == 0) {
-            if (arg1->unk100[arg2]) {
-                func_100043B4((s32 *)arg1->unk100[arg2], 2);
-                arg1->unk100[arg2] = 0;
+        vtx = D_80089E1C[particle->vertexFn](particle, viewport);
+        if (vtx == NULL) {
+            if (particle->vtxBuffers[viewport]) {
+                func_100043B4((s32 *)(s32)particle->vtxBuffers[viewport], 2);
+                particle->vtxBuffers[viewport] = NULL;
             }
-            return arg0;
+            return gfx;
         }
-        arg0 = func_151462C8(arg0, arg1->unk9C, 0, 0, 0, arg2, arg1->unk34, 2, (arg1->unk58 & 0x04000000) ? arg1->unk68 : 0);
-        func_151441A4(&r1, &g1, &b1, &a1, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x40000) ? arg1->unk5E : 4);
-        func_151442FC(&r2, &g2, &b2, &a2, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x80000) ? arg1->unk5F : 5);
-        cyc = 0;
-        if (bits & 0x4000) {
-            cyc = 0x200;
+        gfx = func_151462C8(gfx, &particle->link, 0, 0, 0, viewport, &particle->def.pos, 2,
+                            (particle->def.flags & 0x4000000) ? particle->def.unk50 : 0);
+        func_151441A4(&primR, &primG, &primB, &primA, particle->def.rgba[0], particle->def.rgba[1],
+                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
+                      particle->def.unk45, (particle->def.flags & 0x40000) ? particle->def.unk46 : 4);
+        func_151442FC(&envR, &envG, &envB, &envA, particle->def.rgba[0], particle->def.rgba[1],
+                      particle->def.rgba[2], particle->def.rgba[3], 0xFF, 0xFF, 0xFF, particle->def.unk44,
+                      particle->def.unk45, (particle->def.flags & 0x80000) ? particle->def.unk47 : 5);
+        geometry = 0;
+        if (cullFlags & 0x4000) {
+            geometry = G_CULL_FRONT;
         }
-        if (bits & 0x8000) {
-            cyc |= 0x400;
+        if (cullFlags & 0x8000) {
+            geometry |= G_CULL_BACK;
         }
-        if (arg1->unk58 & 0x100000) {
-            cyc |= 0x20000;
+        if (particle->def.flags & 0x100000) {
+            geometry |= G_LIGHTING;
         }
-        arg0 = func_15142B7C(arg0, cyc | 1, 0x600);
-        if (arg1->unk18 != 0xFF) {
-            s32 wrap;
-            wrap = (arg1->unk58 & 0x200000) ? 0 : 2;
-            arg0 = func_15142E24(arg0, (s32)&D_80090B60[arg1->unk18], arg1->unk20, wrap, 0, 0, arg1->unk18, 0, 0, &flag, (arg1->unk58 & 0x40000000) ? 0x3E : 3);
+        gfx = func_15142B7C(gfx, geometry | G_ZBUFFER, G_CULL_BOTH);
+        if (particle->def.texture != 0xFF) {
+            s32 clamp;
+
+            clamp = (particle->def.flags & 0x200000) ? 0 : 2;
+            gfx = func_15142E24(gfx, &D_80090B60[particle->def.texture], particle->def.frame, clamp, 0, 0,
+                                particle->def.texture, 0, 0, &needSync,
+                                (particle->def.flags & 0x40000000) ? 0x3E : 3);
         }
-        arg0 = func_15142C10(arg0, r2, g2, b2, a2, &flag);
-        arg0 = func_15142CF0(arg0, 0xF2, 0, r1, g1, b1, a1, &flag);
-        arg0 = func_1513F4E4(arg0, hi, &flag);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | ((arg1->unk58 & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk18 == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &flag);
-        gSPVertex(arg0++, vtx, 4, 0);
-        gSP2Triangles(arg0++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
+        gfx = func_15142CF0(gfx, 0xF2, 0, primR, primG, primB, primA, &needSync);
+        gfx = func_1513F4E4(gfx, combiner, &needSync);
+        gfx = func_15142FBC(gfx,
+                            G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
+                                G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
+                                ((particle->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                            D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
+        gSPVertex(gfx++, vtx, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     }
-    return arg0;
+    return gfx;
 }
 
-// jump table
-extern void (*D_80089F64[])(void *, s32, u8);
+extern void (*D_80089F64[])(Particle *, s32, u8);
 
-void func_1513DF9C(void *arg0, s32 arg1, u8 arg2) {
+/* Dispatches to the D_80089F64 handler for the particle's type. */
+void func_1513DF9C(Particle *particle, s32 arg1, u8 arg2) {
     s32 index;
 
-    if (!(*(s32 *)((u8 *)arg0 + 0x58) & 0x400000)) {
+    if (!(particle->def.flags & 0x400000)) {
         index = 0;
-        goto dispatch;
+    } else {
+        switch (particle->def.type) {
+            case 12:
+                index = 10;
+                break;
+            case 11:
+                index = 9;
+                break;
+            case 0:
+            case 2:
+                index = 0;
+                break;
+            case 1:
+                index = 1;
+                break;
+            case 5:
+                index = 2;
+                break;
+            case 6:
+                index = 3;
+                break;
+            case 3:
+                index = 4;
+                break;
+            case 7:
+                index = 5;
+                break;
+            case 8:
+                index = 6;
+                break;
+            case 9:
+                index = 7;
+                break;
+            case 4:
+                index = 8;
+                break;
+            default:
+                index = 0;
+                break;
+        }
     }
-    switch (*(u8 *)((u8 *)arg0 + 0x19)) {
-    case 12:
-        index = 10;
-        break;
-    case 11:
-        index = 9;
-        break;
-    case 0:
-    case 2:
-        index = 0;
-        break;
-    case 1:
-        index = 1;
-        break;
-    case 5:
-        index = 2;
-        break;
-    case 6:
-        index = 3;
-        break;
-    case 3:
-        index = 4;
-        break;
-    case 7:
-        index = 5;
-        break;
-    case 8:
-        index = 6;
-        break;
-    case 9:
-        index = 7;
-        break;
-    case 4:
-        index = 8;
-        break;
-    default:
-        goto unknown_type;
-    }
-    goto dispatch;
-unknown_type:
-    index = 0;
-dispatch:
-    D_80089F64[index](arg0, arg1, arg2);
+    D_80089F64[index](particle, arg1, arg2);
 }
 
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
-    struct212 *temp_v0 = &arg0->unk110;
-    if (arg2 == 0x1A) {
-        if ((temp_v0->unk0 == arg1->unk0) || (temp_v0->unk4.b.unk0 == arg1->unk4.b.unk0)) {
-            func_1516972C(arg0);
+/* Event handler: drops (0x1A) or retargets (0x2D) the particle's link stored at unk110. */
+void func_1513E084(struct210 *particle, struct212 *event, u8 eventId) {
+    struct212 *link = (struct212 *)&particle->unk110;
+
+    if (eventId == 0x1A) {
+        if ((link->unk0 == event->unk0) || (link->unk4.b.unk0 == event->unk4.b.unk0)) {
+            func_1516972C(particle);
         }
-    } else {
-        temp_v0 = &arg0->unk110;
-        if (arg2 == 0x2D) {
-            if (temp_v0->unk0 == arg1->unk0) {
-                temp_v0->unk0 = arg1->unk4.i.unk0;
-                temp_v0->unk4.b.unk0 = arg1->unk9;
-            } else if (temp_v0->unk0 == arg1->unk4.i.unk0) {
-                temp_v0->unk0 = arg1->unk0;
-                temp_v0->unk4.b.unk0 = arg1->unk8;
-            }
+    } else if (eventId == 0x2D) {
+        if (link->unk0 == event->unk0) {
+            link->unk0 = event->unk4.i.unk0;
+            link->unk4.b.unk0 = event->unk9;
+        } else if (link->unk0 == event->unk4.i.unk0) {
+            link->unk0 = event->unk0;
+            link->unk4.b.unk0 = event->unk8;
         }
     }
 }
