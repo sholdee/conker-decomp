@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_150A7CB0 with s32 arguments; it takes floats. */
 #define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
 #undef func_150A7CB0
@@ -25,7 +26,7 @@ extern s32 D_800DE01C;  /* vertex budget cap */
 extern s32 D_800DE020;  /* below this budget D_800DE028 eases back up */
 extern s32 D_800DE024;  /* vertex budget floor */
 extern s32 D_800DE030;  /* shadow viewport depth scale, in 1/1024 */
-extern s32 D_800DE034;  /* nonzero: skip the light nodes and always use the default light direction */
+extern s32 D_800DE034;  /* nonzero: skip the light nodes and always use the default light offset */
 extern s32 D_800DE038;  /* max lights (shadows) per object */
 extern f32 D_800DE03C;  /* light distance scale */
 extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the object */
@@ -92,6 +93,7 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
 }
 
+/* A light node in the list at D_800DCD78. */
 typedef struct Node15184368 {
     struct Node15184368 *next;
     u8 unk4;
@@ -103,9 +105,9 @@ typedef struct Node15184368 {
     s16 z;
 } Node15184368;
 
-extern struct17 D_800DE010;
-extern struct17 D_800DDFB0[];
-extern f32 D_800DF6F8;
+extern struct17 D_800DE010; /* default light offset from the object */
+extern struct17 D_800DDFB0[]; /* light position per shadow slot */
+extern f32 D_800DF6F8; /* light-to-object distance */
 extern f32 D_800DE028;
 extern f32 D_800DE02C;
 extern u8 D_800DF0E1;
@@ -125,7 +127,7 @@ extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
- * beyond minDist (or a default direction), eases the light toward it, builds the light's view/projection
+ * beyond minDist (or a default offset), eases the light toward it, builds the light's view/projection
  * matrices and the shadow alpha. Returns the chosen light's distance (1 for the default light), or 0 when no
  * shadow should be drawn.
  */
@@ -322,6 +324,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
         D_800D368C = D_800D3688;
         return 0.0f;
     }
+    /* The shadow texture lives in D_800DE048, 64-byte aligned. */
     D_800DF088 = ((s32)D_800DE048 + 0x3F) & ~0x3F;
     D_800DE02C = 0xFF - (((u8 *)&D_800CC2D0[objIndex].pad1DC)[1] >> 1);
     if (D_800DE02C > 185.0f) {
@@ -779,7 +782,8 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
 
 s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count);
 
-extern s32 D_8008D3E0;
+extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
+/* A 0x180-byte entry of the table at D_800BE628, holding per-frame viewports from 0x40. */
 typedef struct { u8 pad0[0x40]; Vp vp[20]; } S180_15186794;
 extern Gfx D_8008D410[];
 extern s32 D_800C48F0[];
