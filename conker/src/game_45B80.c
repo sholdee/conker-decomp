@@ -32,8 +32,6 @@ Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
 Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
 void func_1517D7B0(Gfx **gfx, s32 arg1);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
-s32 func_1501878C(void);
-void func_15019F20(void);
 
 /* Game main loop: runs frames until func_1501878C says to stop. */
 void func_150186D0(void) {
@@ -84,18 +82,8 @@ void func_150186D0(void) {
     }
 
 void func_151E51EC(void);
-void func_1501905C(void);
-s32 func_15019130(void);
 void func_1515D69C(void);
 void func_15167310(void);
-void func_15018F80(s16);
-Gfx *func_15019464(Gfx *, s16);
-Gfx *func_150195A0(Gfx *, s16);
-void func_15019414(void);
-Gfx *func_150198FC(Gfx *);
-Gfx *func_15019BB8(Gfx *, s32);
-Gfx *func_15019E60(Gfx *);
-Gfx *func_15019CC8(Gfx *, s32);
 void func_15189118(s32);
 void func_15084A18(void);
 void func_15125628(void);

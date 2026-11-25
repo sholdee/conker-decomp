@@ -362,7 +362,6 @@ typedef struct {
     u32 size;
 } SeqFileEntry;
 
-extern void func_1501C730(s32, s32, s32, s32, s32);
 void func_15020388(s32 track, s32 scene);
 void func_15022BA4(s32 scene);
 extern void func_150238D0(void);

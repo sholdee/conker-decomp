@@ -625,10 +625,6 @@ extern s32  D_800BE3E8;
 extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
-extern u8   D_800BE614;
-extern u8   D_800BE615;
-extern u8   D_800BE616;
-extern u8   D_800BE617;
 extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;

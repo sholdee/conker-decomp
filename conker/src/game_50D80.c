@@ -375,7 +375,6 @@ void func_150242F8(s32 mode, s32 scene) {
 extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
-extern void func_1501C730(s32, s32, s32, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
 extern SeqSubtitle *func_150234A4(s32, s32);
 extern void func_150836CC(Actor *, s32);

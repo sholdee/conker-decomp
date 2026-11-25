@@ -139,7 +139,6 @@ s32 func_151DDB94(s32 value) {
 
 /* ---- formerly game_20B050.c ---- */
 
-void func_1501C730(s32, s32, s32, s32, s32);
 void func_151E557C(void);
 
 /* Requests a switch to map 0x1D (func_1501C730 mode 6) and resets this mode's state flags. */

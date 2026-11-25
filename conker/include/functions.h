@@ -115,12 +115,6 @@ void func_150076A0(); /* defined with no parameters, but game_20BDA0.c passes on
 void func_150076BC(s32 arg0);
 void func_15007718(s32 arg0);
 void func_15007750(s32 arg0);
-void func_15007A20(void);
-void func_15007A70(s16 arg0, s16 arg1, s16 arg2);
-void func_150081E4(void);
-void func_15008230(void);
-void func_15008248(s32 arg0);
-void func_150082CC(void);
 void func_150095D8(s32 arg0, s32 arg1);
 void func_15009600(s32 arg0, s32 arg1);
 void func_1500969C(s32 arg0, s32 arg1);
@@ -218,8 +212,6 @@ void func_15012770(void);
 void func_15012780(void);
 s32  func_150150A4(void);
 s32  func_15015300(TriggerZone *obj);
-void func_1501C860(void);
-void func_1501C870(void);
 
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);

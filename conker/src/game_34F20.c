@@ -33,7 +33,6 @@ void func_15003668(s32);
 void func_15004574(void);
 void func_150091D0(void);
 void func_150092DC(void);
-void func_1500E470(s32);
 void func_1500E70C(s32);
 void func_1500E738(void);
 void func_15013000(void);
