@@ -100,7 +100,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     struct127 *actorA;
 
     if (type == 0) {
-        actorA = msg->actorA;
+        actorA = msg->actorA; // matching: loaded before the state field, via a named local
         if ((actorA == state->actor) || (msg->u4.id == state->actorId)) {
             func_1516972C((struct102 *)emitter);
         }
@@ -121,7 +121,7 @@ void func_150CF530(s32 arg0) {
     func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);
 }
 
-/* Texture scroll offsets (10.2 fixed point, in units of 1/32 texel). */
+/* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
 extern s32 D_80088890;
 extern s32 D_80088894;
 extern s32 D_80088898;
@@ -140,6 +140,7 @@ Gfx *func_150CF5E8(Gfx *gfx) {
     gDPSetTileSize(gfx++, 1, D_80088898 >> 7, D_8008889C >> 7, 0x47E, 0x47E);
     return gfx;
 }
+
 typedef struct {
     f32 x;
     f32 y;
@@ -475,7 +476,7 @@ void func_150CFE98(TextObj *obj) {
 }
 
 /* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
-TextObj *func_150CFF10(u8 id, u8 *str, s16 arg2, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
+TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
     TextBox init;
     TextObj *obj;
     s32 lineSize;
@@ -495,7 +496,7 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 arg2, s32 styleSize, s8 updateFn, u8 
 
     lineSize = func_150CFDB8(str) + 1;
 
-    obj = (TextObj *)func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(sizeof(TextBox) + styleSize + lineSize * 2), arg6, arg7);
+    obj = (TextObj *)func_15149130(duration, -1, -1, 5, 3, 0x47, (struct37 *)(sizeof(TextBox) + styleSize + lineSize * 2), arg6, arg7);
     if (obj != NULL) {
         text = &obj->text;
         memcpy(text, &init, sizeof(TextBox));
@@ -549,12 +550,12 @@ typedef struct {
 } CrossfadeStyle;
 
 /* Creates a text box that crossfades between lines (style 0). */
-void func_150D0134(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+void func_150D0134(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = func_150CFF10(id, str, arg2, 8, 0, 0, arg3, arg4);
+    obj = func_150CFF10(id, str, duration, 8, 0, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
@@ -601,13 +602,13 @@ typedef struct {
 } TypewriterStyle;
 
 /* Creates a text box that types out each line behind a "C:> " prompt (style 1). */
-void func_150D02B4(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+void func_150D02B4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     TextObj *obj;
     TypewriterStyle style;
 
     style.shown = 0;
     style.progress = 0.0f;
-    obj = func_150CFF10(id, str, arg2, 8, 1, 0, arg3, arg4);
+    obj = func_150CFF10(id, str, duration, 8, 1, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style, sizeof(style));
     }
@@ -650,12 +651,12 @@ s32 func_150D032C(TextObj *obj) {
 }
 
 /* Creates a text box that crossfades between lines more slowly, in white (style 2). */
-void func_150D04C4(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+void func_150D04C4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     CrossfadeStyle style;
     TextObj *obj;
 
     style.fadeTimer = 0;
-    obj = func_150CFF10(id, str, arg2, 8, 2, 0, arg3, arg4);
+    obj = func_150CFF10(id, str, duration, 8, 2, 0, arg3, arg4);
     if (obj != NULL) {
         memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
