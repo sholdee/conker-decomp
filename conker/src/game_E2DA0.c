@@ -7,23 +7,23 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
-void func_150B5A3C(vertex *pos, u8 arg1, s32 arg2);
-void func_150B5E34(vertex *pos, u8 arg1, s32 arg2);
-void func_150B6000(vertex *pos, u8 arg1, s32 arg2);
+void func_150B5A3C(vertex *pos, u8 owner, s32 kind);
+void func_150B5E34(vertex *pos, u8 owner, s32 kind);
+void func_150B6000(vertex *pos, u8 owner, s32 kind);
 void func_150B60E0(struct127 *obj, vertex *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
-typedef struct Arg150B5950 {
+typedef struct ObjBurstEffect {
     /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
+    /* 0x01 */ u8 kind;
     /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
+    /* 0x0E */ s16 timer; /* frames left (as in FlashEffect, game_1AC2F0.c) */
     /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ struct127 *obj;
     /* 0x2C */ u8 objUniqueId;
-} Arg150B5950;
+} ObjBurstEffect;
 
 /* Effect template passed to func_15152B38. */
 typedef struct {
@@ -83,7 +83,7 @@ typedef struct {
     /* 0x73 */ s8 unk73;
 } EffectSpawn; /* size 0x74 */
 
-void func_15152B38(EffectSpawn *spawn, u8 arg1, s32 arg2);
+void func_15152B38(EffectSpawn *spawn, u8 owner, s32 kind);
 
 
 typedef struct GameCommand {
@@ -101,16 +101,16 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
     return cmd + 1;
 }
 
-/** Randomly spawns particle bursts at the tracked object; ends the effect (unkE = -1) once it is gone. */
-void func_150B5950(Arg150B5950 *arg0) {
+/** Randomly spawns particle bursts at the tracked object; ends the effect once that object is gone. */
+void func_150B5950(ObjBurstEffect *effect) {
     vertex *posp;
     vertex pos;
     struct127 *obj;
 
-    obj = arg0->obj;
+    obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
-    if ((obj->interaction_state == 0) || (obj->unique_id != arg0->objUniqueId)) {
-        arg0->unkE = -1;
+    if ((obj->interaction_state == 0) || (obj->unique_id != effect->objUniqueId)) {
+        effect->timer = -1;
         return;
     }
 
@@ -119,18 +119,18 @@ void func_150B5950(Arg150B5950 *arg0) {
             pos.x = obj->x_position;
             pos.y = obj->y_position;
             pos.z = obj->z_position;
-            func_150B5A3C(posp, arg0->unkC, arg0->unk1);
+            func_150B5A3C(posp, effect->owner, effect->kind);
         }
 
         if (func_150ADA68() < 0.10824f) {
             func_150B60E0(obj, posp);
-            func_150B5A3C(posp, arg0->unkC, arg0->unk1);
+            func_150B5A3C(posp, effect->owner, effect->kind);
         }
     }
 }
 
 /** Spawns a func_15152B38 effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
-void func_150B5A3C(vertex *pos, u8 arg1, s32 arg2) {
+void func_150B5A3C(vertex *pos, u8 owner, s32 kind) {
     EffectSpawn spawn;
 
     spawn.unk00 = 5;
@@ -186,13 +186,13 @@ void func_150B5A3C(vertex *pos, u8 arg1, s32 arg2) {
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
-    func_15152B38(&spawn, arg1, arg2);
-    func_150B5E34(pos, arg1, arg2);
-    func_150B6000(pos, arg1, arg2);
+    func_15152B38(&spawn, owner, kind);
+    func_150B5E34(pos, owner, kind);
+    func_150B6000(pos, owner, kind);
 }
 
 /** Larger variant of func_150B5A3C (different template values). */
-void func_150B5C38(vertex *pos, u8 arg1, s32 arg2) {
+void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
     EffectSpawn spawn;
 
     spawn.unk00 = 13;
@@ -248,9 +248,9 @@ void func_150B5C38(vertex *pos, u8 arg1, s32 arg2) {
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
-    func_15152B38(&spawn, arg1, arg2);
-    func_150B5E34(pos, arg1, arg2);
-    func_150B6000(pos, arg1, arg2);
+    func_15152B38(&spawn, owner, kind);
+    func_150B5E34(pos, owner, kind);
+    func_150B6000(pos, owner, kind);
 }
 
 /* Particle spawn template passed to func_15130280 (same layout as in game_1028F0.c). */
@@ -299,7 +299,7 @@ typedef struct {
 extern void *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
 
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
-void func_150B5E34(vertex *pos, u8 arg1, s32 arg2) {
+void func_150B5E34(vertex *pos, u8 owner, s32 kind) {
     ParticleSpawn spawn;
     s32 flag80;
     s32 flag40;
@@ -342,13 +342,13 @@ void func_150B5E34(vertex *pos, u8 arg1, s32 arg2) {
     spawn.unk63 = -1;
     spawn.unk64 = -1;
     spawn.unk65 = 4;
-    func_15130280(&spawn, 1, 0, 0, arg1, arg2);
+    func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
-void func_150B6000(vertex *pos, u8 arg1, s32 arg2) {
+void func_150B6000(vertex *pos, u8 owner, s32 kind) {
     Header header;
     Header2 ipos;
 
@@ -361,7 +361,7 @@ void func_150B6000(vertex *pos, u8 arg1, s32 arg2) {
     ipos.unk4 = pos->y;
     ipos.unk8 = pos->z;
 
-    func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
 extern void func_15143134(vertex *in, vertex *out, void *mtx);
@@ -372,7 +372,7 @@ void func_150B60E0(struct127 *obj, vertex *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 
-/* Owner of the bolt-ring effect: cylinder centre (x, y, z), radius and height, and its state. */
+/* Emitter of the bolt-ring effect: cylinder centre (x, y, z), radius and height, and its state. */
 typedef struct {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -381,20 +381,20 @@ typedef struct {
     /* 0x08 */ s16 height;
     /* 0x0A */ u8 padA[0xA];
     /* 0x14 */ u8 state;
-} BoltOwner;
+} BoltEmitter;
 
 typedef struct {
-    /* 0x00 */ BoltOwner *owner;
+    /* 0x00 */ BoltEmitter *emitter;
     /* 0x04 */ f32 spawnAccum;
-    /* 0x08 */ u8 ownerState;
+    /* 0x08 */ u8 emitterState;
 } BoltRingData;
 
 /* Effect instance whose per-type data (from 0x28) is a BoltRingData. */
 typedef struct {
     /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
+    /* 0x01 */ u8 kind;
     /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ BoltRingData data;
 } BoltRingEffect;
@@ -422,23 +422,23 @@ typedef struct BoltChainConfig {
 } BoltChainConfig; /* size 0x30 */
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConfig *config, f32 spread, s32 kind, s32, s32);
+extern void func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
 
 /**
- * While the owner is not in state 1, spawns bolts between random points on the rim of its
+ * While the emitter is not in state 1, spawns bolts between random points on the rim of its
  * cylinder at a randomized rate; sends message 0x4A (see func_150B6450) when it enters state 1.
  */
 void func_150B6110(BoltRingEffect *effect) {
     BoltRingData *data;
-    BoltOwner *owner;
+    BoltEmitter *emitter;
     u8 prevState;
     u8 angle;
 
-    owner = effect->data.owner;
-    prevState = effect->data.ownerState;
-    effect->data.ownerState = owner->state;
-    if (owner->state == 1) {
-        if (effect->data.ownerState != prevState) {
+    emitter = effect->data.emitter;
+    prevState = effect->data.emitterState;
+    effect->data.emitterState = emitter->state;
+    if (emitter->state == 1) {
+        if (effect->data.emitterState != prevState) {
             func_151494E0(0, 0x4A);
         }
         return;
@@ -469,18 +469,18 @@ void func_150B6110(BoltRingEffect *effect) {
         config.alphaBase = 0x7F;
         config.alphaRange = 0x80;
         spread = 0.4350000322f;
-        start.y = owner->y + owner->height;
-        end.y = owner->y + owner->height;
+        start.y = emitter->y + emitter->height;
+        end.y = emitter->y + emitter->height;
         do {
             angle = func_150ADA20();
-            func_1514373C((u32)angle, owner->radius, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
-            start.x += owner->x;
-            start.z += owner->z;
+            func_1514373C((u32)angle, emitter->radius, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
+            start.x += emitter->x;
+            start.z += emitter->z;
             angle += func_150ADA20() % 129 + 64;
-            func_1514373C((u32)angle, owner->radius, &end.x, &end.z);
-            end.x += owner->x;
-            end.z += owner->z;
-            func_15106F98(&start, &end, 4, &config, spread, 1, effect->unkC, effect->unk1);
+            func_1514373C((u32)angle, emitter->radius, &end.x, &end.z);
+            end.x += emitter->x;
+            end.z += emitter->z;
+            func_15106F98(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
     }
@@ -596,21 +596,21 @@ typedef struct {
 } Arg150B66DC;
 
 /** Sets out->unk9 for mode 15; otherwise clears it and sets out->unk2F (20 for mode 16, else 40). */
-s32 func_150B66DC(Arg150B66DC *arg0) {
-    Input150B66DC *in = arg0->in;
+s32 func_150B66DC(Arg150B66DC *ctx) {
+    Input150B66DC *in = ctx->in;
 
     switch (in->mode - 15) { // matching: `switch (in->mode)` with case 15-17 labels mismatches
     case 0: /* mode 15 */
-        arg0->out->unk9 = 1;
+        ctx->out->unk9 = 1;
         break;
     case 1: /* mode 16 */
-        arg0->out->unk9 = 0;
-        arg0->out->unk2F = 20;
+        ctx->out->unk9 = 0;
+        ctx->out->unk2F = 20;
         break;
     case 2: /* mode 17 */
     default:
-        arg0->out->unk9 = 0;
-        arg0->out->unk2F = 40;
+        ctx->out->unk9 = 0;
+        ctx->out->unk2F = 40;
         break;
     }
     return 1;
