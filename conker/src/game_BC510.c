@@ -219,7 +219,7 @@ void func_1508F9C4(void) {
 
 extern f32 func_15048A40(u8 arg0);
 
-/* Spawns and animates the bubbles while player 1 has been underwater for a while. */
+/* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
 void func_1508F9F4(void) {
     s32 i;
     s32 v;
@@ -500,20 +500,8 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     }
     return gfx;
 }
-typedef struct BC510Entry {
-    s16 x;
-    s16 y;
-    s16 unk4;
-    s16 scale;
-    s16 unk8;
-    s16 timer;
-    u8 unkC;
-    u8 state;
-    u8 unkE;
-    u8 sound;
-} BC510Entry;
-
-typedef struct BC510Sprite {
+/* Sprite parameters passed to func_15094F70 / func_15095A48. */
+typedef struct TexSprite {
     s32 unk0;
     s16 unk4;
     s16 w;
@@ -521,89 +509,87 @@ typedef struct BC510Sprite {
     u8 alpha;
     u8 unkB;
     u8 unkC;
-    u8 flip;
+    u8 flags; /* SPRITE_FLIP_* */
     u8 padE[2];
-} BC510Sprite;
+} TexSprite;
 
-typedef struct BC510Tex {
+#define SPRITE_FLIP_X 1
+#define SPRITE_FLIP_Y 2
+
+typedef struct SpriteTexture {
     s32 id;
     s32 unk4;
     s32 unk8;
-} BC510Tex;
+} SpriteTexture;
 
-extern f32 func_15048A40(u8 arg0);
-extern BC510Tex D_800903D4;
-extern BC510Tex D_80091840;
-Gfx *func_15094F70(Gfx *, BC510Tex *, s32, BC510Sprite *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, BC510Sprite *, f32, f32);
+extern SpriteTexture D_800903D4;
+extern SpriteTexture D_80091840;
+Gfx *func_15094F70(Gfx *, SpriteTexture *, s32, TexSprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, TexSprite *, f32, f32);
 
-#define ENT ((BC510Entry *)D_800D2460)
+/* Draws the bubbles: rising ones (states 1 and 2) wobble, popping ones (state 3) flip randomly. */
 Gfx *func_15090630(Gfx *gfx) {
     s32 i;
-    BC510Sprite sprite;
+    TexSprite sprite;
     s32 first;
     s32 x;
     s32 y;
-    s32 bits;
-    f32 f;
-    s32 scale;
-    s32 t;
+    s32 flags;
+    f32 wobble;
+    s32 size;
+    s32 timer;
     s32 tex;
 
-    sprite.alpha = 0xFF;
-    sprite.flip = 0;
-    { Gfx *c = gfx++; c->words.w0 = 0xE7000000; c->words.w1 = 0; }
-    { Gfx *c = gfx++; c->words.w0 = 0xFCFFB5FF; c->words.w1 = 0xFFFCFE38; }
-    { Gfx *c = gfx++; c->words.w0 = 0xEF102C0F; c->words.w1 = 0x0C184244; }
-    first = 1;
-    i = 0;
-    do {
-        if (ENT[i].state == 1 || ENT[i].state == 2) {
+    sprite.alpha = 255;
+    sprite.flags = 0;
+    gDPPipeSync(gfx++);
+    gDPSetCombine(gfx++, 0xFFB5FF, 0xFFFCFE38);
+    gDPSetOtherMode(gfx++, 0x102C0F, 0x0C184244);
+    first = TRUE;
+    for (i = 0; i < 6; i++) {
+        if (D_800D2460[i].state == 1 || D_800D2460[i].state == 2) {
             if (first) {
                 func_1510D0EC(D_80091840.id, (s32)&tex, 3, 0);
-                first = 0;
+                first = FALSE;
                 gfx = func_15094F70(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
             }
-            f = func_15048A40(ENT[i].sound);
-            x = ENT[i].x;
-            y = ENT[i].y;
-            sprite.w = ENT[i].scale * (0.200000003f * f + 1.0f);
-            sprite.h = ENT[i].scale * (-0.200000003f * f + 1.0f);
+            wobble = func_15048A40(D_800D2460[i].phase);
+            x = D_800D2460[i].x;
+            y = D_800D2460[i].y;
+            sprite.w = D_800D2460[i].size * (0.2f * wobble + 1.0f);
+            sprite.h = D_800D2460[i].size * (-0.2f * wobble + 1.0f);
             gfx = func_15095A48(gfx, &sprite, x, y);
         }
-        i++;
-    } while (i < 6);
-    first = 1;
-    i = 0;
-    do {
-        bits = 0;
-        if (ENT[i].state == 3) {
-            scale = ENT[i].scale;
-            x = ENT[i].x;
-            y = ENT[i].y;
-            sprite.w = scale;
-            sprite.h = scale;
+    }
+    first = TRUE;
+    for (i = 0; i != 6; i++) {
+        flags = 0;
+        if (D_800D2460[i].state == 3) {
+            size = D_800D2460[i].size;
+            x = D_800D2460[i].x;
+            y = D_800D2460[i].y;
+            sprite.w = size;
+            sprite.h = size;
             if ((u8)func_150ADA20() < 0x80U) {
-                bits = 1;
+                flags = SPRITE_FLIP_X;
             }
             if ((u8)func_150ADA20() < 0x80U) {
-                bits |= 2;
+                flags |= SPRITE_FLIP_Y;
             }
-            sprite.flip = bits;
+            sprite.flags = flags;
             if (first) {
-                first = 0;
+                first = FALSE;
                 gfx = func_15094F70(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
             }
             gfx = func_15095A48(gfx, &sprite, x, y);
-            t = ENT[i].timer;
-            t -= D_800BE9E4;
-            if (t < 0) {
-                t = 0;
+            timer = D_800D2460[i].timer;
+            timer -= D_800BE9E4;
+            if (timer < 0) {
+                timer = 0;
             }
-            ENT[i].timer = t;
+            D_800D2460[i].timer = timer;
         }
-        i++;
-    } while (i != 6);
+    }
     return gfx;
 }
 typedef struct WaterVtx {
@@ -638,10 +624,9 @@ typedef struct WaterStage {
 } WaterStage;
 
 extern WaterStage D_800D24C8;
-#define WATER D_800D24C8
-extern s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6);
-extern s32 func_1502B7F0(s32 *, s32, s32, s32);
 extern s32 D_800D2558[];
+extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
+extern s32 func_1502B7F0(s32 *, s32, s32, s32);
 extern u16 D_800CC382;
 extern u16 D_8009025A;
 extern u16 D_80090262;
@@ -649,280 +634,266 @@ extern u16 D_80090266;
 extern u16 D_8009026E;
 extern u16 D_80090272;
 
+/* Animates the water surface mesh while player 1 is in water: blends its vertex positions,
+ * tints its vertex colours and picks its textures by player 1's unkB2 counter. */
 void func_1509093C(void) {
     WaterVtx *dst;
     WaterBase *base;
     WaterBase *target;
     s32 i;
-    f32 t;
-    s32 from;
+    f32 blend;
+    s32 tmp;
     s32 level;
     f32 lo;
     f32 hi;
-    s32 v;
-    s32 *end;
-    u8 sp73;
-    WaterVtx *start;
-    s32 sp68;
-    s32 sp64;
-    s32 sp60;
-    s32 a;
+    s32 fadeRaw;
+    s32 *vtxEnd;
+    u8 unkFlags;
+    WaterVtx *vtxStart;
+    s32 unkOut1;
+    s32 unkOut2;
+    s32 unkOut3;
+    s32 fade;
     s32 r;
     s32 g;
-    u16 b;
+    u16 tex;
     f32 dt;
     s32 r2;
     s32 g2;
     s32 b2;
-    s32 cb;
+    s32 b;
 
     if (D_800CC2D0->in_water) {
         level = D_800CC2D0->unkB2;
     } else {
         level = 0;
     }
-    if (level > 0x5A) {
-        if (WATER.alpha == 0) {
-            WATER.alpha = 0xFF;
-            WATER.unk94 = 0.0f;
-            WATER.unk98 = 0.01999999955f;
-            WATER.unkA0 = 0;
-            WATER.unkA4 = 3.200000048f;
-            WATER.unkA8 = 0;
-            WATER.unkAC = 0;
-            WATER.timer = (func_150ADA20() & 0x3F) + 0x3C;
+    if (level > 90) {
+        if (D_800D24C8.alpha == 0) {
+            D_800D24C8.alpha = 255;
+            D_800D24C8.unk94 = 0.0f;
+            D_800D24C8.unk98 = 0.02f;
+            D_800D24C8.unkA0 = 0;
+            D_800D24C8.unkA4 = 3.2f;
+            D_800D24C8.unkA8 = 0;
+            D_800D24C8.unkAC = 0;
+            D_800D24C8.timer = (func_150ADA20() & 63) + 60;
         }
-        from = D_800CC382;
+        tmp = D_800CC382;
     } else {
-        WATER.alpha = 0;
+        D_800D24C8.alpha = 0;
         return;
     }
     {
-        WATER.unk9C = (f32)(u32)from / 720.0f;
-        if (WATER.unk9C > 1.0f) {
-            WATER.unk9C = 1.0f;
+        D_800D24C8.unk9C = (f32)(u32)tmp / 720.0f;
+        if (D_800D24C8.unk9C > 1.0f) {
+            D_800D24C8.unk9C = 1.0f;
         }
-        if (level < 0x5A1) {
-            WATER.unk94 += WATER.unk98 * D_800BE9E4;
-            lo = WATER.unk9C - 0.200000003f;
+        if (level < 1441) {
+            D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
+            lo = D_800D24C8.unk9C - 0.2f;
             if (lo < 0.0f) {
                 lo = 0.0f;
             }
-            if (WATER.unk94 <= lo) {
-                WATER.unk94 = (lo + lo) - WATER.unk94;
-                WATER.unk98 = -WATER.unk98;
+            if (D_800D24C8.unk94 <= lo) {
+                D_800D24C8.unk94 = (lo + lo) - D_800D24C8.unk94;
+                D_800D24C8.unk98 = -D_800D24C8.unk98;
             } else {
-                hi = WATER.unk9C + 0.200000003f;
+                hi = D_800D24C8.unk9C + 0.2f;
                 if (hi > 1.0f) {
                     hi = 1.0f;
                 }
-                if (hi <= WATER.unk94) {
-                    WATER.unk94 = (hi + hi) - WATER.unk94;
-                    WATER.unk98 = -WATER.unk98;
+                if (hi <= D_800D24C8.unk94) {
+                    D_800D24C8.unk94 = (hi + hi) - D_800D24C8.unk94;
+                    D_800D24C8.unk98 = -D_800D24C8.unk98;
                 }
             }
         }
-        if (WATER.dl == 0) {
-            func_1502FE10(0xB9, (s32 *)&end, &sp73, (s32 *)&start, &sp68, &sp64, &sp60);
-            WATER.dl = *end;
-            WATER.count = ((u32)end - (u32)start) >> 4;
-            WATER.vtx[0] = start;
-            WATER.vtx[1] = (WaterVtx *)allocate_memory(WATER.count * 16, 1, 2, 0);
-            bcopy(start, WATER.vtx[1], WATER.count * 16);
-            WATER.base = (WaterBase *)allocate_memory(WATER.count * sizeof(WaterBase), 1, 0, 0);
-            target = WATER.base;
-            for (i = 0; i < WATER.count; i++) {
-                target[i].ob[0] = start[i].ob[0];
-                target[i].ob[1] = start[i].ob[1];
-                target[i].ob[2] = start[i].ob[2];
-                target[i].cn[0] = start[i].cn[0];
-                target[i].cn[1] = start[i].cn[1];
-                target[i].cn[2] = start[i].cn[2];
-                target[i].cn[3] = start[i].cn[3];
+        if (D_800D24C8.dl == 0) {
+            func_1502FE10(0xB9, &vtxEnd, &unkFlags, &vtxStart, &unkOut1, &unkOut2, &unkOut3);
+            D_800D24C8.dl = *vtxEnd;
+            D_800D24C8.count = ((u32)vtxEnd - (u32)vtxStart) >> 4;
+            D_800D24C8.vtx[0] = vtxStart;
+            D_800D24C8.vtx[1] = allocate_memory(D_800D24C8.count * sizeof(WaterVtx), 1, 2, 0);
+            bcopy(vtxStart, D_800D24C8.vtx[1], D_800D24C8.count * sizeof(WaterVtx));
+            D_800D24C8.base = allocate_memory(D_800D24C8.count * sizeof(WaterBase), 1, 0, 0);
+            target = D_800D24C8.base;
+            for (i = 0; i < D_800D24C8.count; i++) {
+                target[i].ob[0] = vtxStart[i].ob[0];
+                target[i].ob[1] = vtxStart[i].ob[1];
+                target[i].ob[2] = vtxStart[i].ob[2];
+                target[i].cn[0] = vtxStart[i].cn[0];
+                target[i].cn[1] = vtxStart[i].cn[1];
+                target[i].cn[2] = vtxStart[i].cn[2];
+                target[i].cn[3] = vtxStart[i].cn[3];
             }
+            /* D_800D2558 aliases D_800D24C8.target; the original addresses it by its own symbol */
             for (i = 1; i < 2; i++) {
                 func_1502B7F0(&D_800D2558[i - 1], 2, 0x18, i - 1);
             }
         }
-        base = WATER.base;
-        dst = WATER.vtx[D_800BE9C0];
-        target = WATER.target;
-        t = WATER.unk94;
-        for (i = 0; i < WATER.count; i++) {
-            dst[i].ob[0] = (f32)base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * t;
-            dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * t;
-            dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * t;
+        base = D_800D24C8.base;
+        dst = D_800D24C8.vtx[D_800BE9C0];
+        target = D_800D24C8.target;
+        blend = D_800D24C8.unk94;
+        for (i = 0; i < D_800D24C8.count; i++) {
+            dst[i].ob[0] = (f32)base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * blend;
+            dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
+            dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
         }
         if (level < 480) {
-            b = D_8009026E;
-            WATER.tex[3] = b;
-            WATER.tex[2] = b;
-            b = D_8009025A;
-            WATER.tex[1] = b;
-            WATER.tex[0] = b;
+            tex = D_8009026E;
+            D_800D24C8.tex[3] = tex;
+            D_800D24C8.tex[2] = tex;
+            tex = D_8009025A;
+            D_800D24C8.tex[1] = tex;
+            D_800D24C8.tex[0] = tex;
         } else if (level < 960) {
-            b = D_80090272;
-            WATER.tex[3] = b;
-            WATER.tex[2] = b;
-            b = D_8009025A;
-            WATER.tex[1] = b;
-            WATER.tex[0] = b;
+            tex = D_80090272;
+            D_800D24C8.tex[3] = tex;
+            D_800D24C8.tex[2] = tex;
+            tex = D_8009025A;
+            D_800D24C8.tex[1] = tex;
+            D_800D24C8.tex[0] = tex;
         } else if (level < 1200) {
-            b = D_80090272;
-            WATER.tex[3] = b;
-            WATER.tex[2] = b;
-            b = D_80090266;
-            WATER.tex[1] = b;
-            WATER.tex[0] = b;
+            tex = D_80090272;
+            D_800D24C8.tex[3] = tex;
+            D_800D24C8.tex[2] = tex;
+            tex = D_80090266;
+            D_800D24C8.tex[1] = tex;
+            D_800D24C8.tex[0] = tex;
         } else {
-            b = D_80090272;
-            WATER.tex[3] = b;
-            WATER.tex[2] = b;
-            b = D_80090262;
-            WATER.tex[1] = b;
-            WATER.tex[0] = b;
+            tex = D_80090272;
+            D_800D24C8.tex[3] = tex;
+            D_800D24C8.tex[2] = tex;
+            tex = D_80090262;
+            D_800D24C8.tex[1] = tex;
+            D_800D24C8.tex[0] = tex;
         }
-        v = (level - 720) * 255;
-        a = v / 480;
-        if (a < 0) {
-            a = 0;
-        } else if (a >= 256) {
-            a = 255;
+        fadeRaw = (level - 720) * 255;
+        fade = fadeRaw / 480;
+        if (fade < 0) {
+            fade = 0;
+        } else if (fade >= 256) {
+            fade = 255;
         }
-        r = ((a * -151) >> 8) + 255;
-        g = ((a * -164) >> 8) + 255;
-        cb = 255;
-        r2 = ((a * -97) >> 8) + 255;
-        g2 = ((a * -94) >> 8) + 255;
-        b2 = ((a * -91) >> 8) + 255;
-        a = 0;
+        r = ((fade * -151) >> 8) + 255;
+        g = ((fade * -164) >> 8) + 255;
+        b = 255;
+        r2 = ((fade * -97) >> 8) + 255;
+        g2 = ((fade * -94) >> 8) + 255;
+        b2 = ((fade * -91) >> 8) + 255;
+        // matching: the dead store, the do-while shape and the |= 0 no-ops steer uopt's register choice
+        fade = 0;
         i = 0;
-        if (i < WATER.count) {
+        if (i < D_800D24C8.count) {
             r |= 0;
             g |= 0;
-            cb |= 0;
+            b |= 0;
             do {
-                if (i < 0xD0) {
+                if (i < 208) {
                     dst[i].cn[0] = (base[i].cn[0] * r) >> 8;
                     dst[i].cn[1] = (base[i].cn[1] * g) >> 8;
-                    dst[i].cn[2] = (base[i].cn[2] * cb) >> 8;
-                } else if (i >= 0xDC) {
+                    dst[i].cn[2] = (base[i].cn[2] * b) >> 8;
+                } else if (i >= 220) {
                     dst[i].cn[0] = r;
                     dst[i].cn[1] = g;
-                    dst[i].cn[2] = cb;
+                    dst[i].cn[2] = b;
                 } else {
                     dst[i].cn[0] = r2;
                     dst[i].cn[1] = g2;
                     dst[i].cn[2] = b2;
                 }
                 i++;
-            } while (i < WATER.count);
+            } while (i < D_800D24C8.count);
         }
         dt = D_800BE9E4;
-        if (v > 0x2CE2E) {
-            WATER.unkAC = 0.0f;
-        } else if (v > 0x1DF1E) {
-            if (fabsf(WATER.unkAC) < 0.6000000238f) {
-                WATER.unkAC = 0.6000000238f;
+        if (fadeRaw > 0x2CE2E) {
+            D_800D24C8.unkAC = 0.0f;
+        } else if (fadeRaw > 0x1DF1E) {
+            if (fabsf(D_800D24C8.unkAC) < 0.6f) {
+                D_800D24C8.unkAC = 0.6f;
             }
-        } else if (WATER.timer != 0) {
-            from = WATER.timer - D_800BE9E4;
-            if (from <= 0) {
-                from = 0;
-                WATER.unkAC = 0.200000003f;
-                WATER.unkA8 = dt * WATER.unkAC;
+        } else if (D_800D24C8.timer != 0) {
+            tmp = D_800D24C8.timer - D_800BE9E4;
+            if (tmp <= 0) {
+                tmp = 0;
+                D_800D24C8.unkAC = 0.2f;
+                D_800D24C8.unkA8 = dt * D_800D24C8.unkAC;
             }
-            WATER.timer = from;
+            D_800D24C8.timer = tmp;
         }
-        WATER.unkA8 += WATER.unkAC * dt;
-        if (WATER.unkA8 > 2.0f) {
-            WATER.unkA8 = 4.0f - WATER.unkA8;
-            WATER.unkAC = -WATER.unkAC;
-        } else if (WATER.unkA8 < -2.0f) {
-            WATER.unkA8 = -4.0f - WATER.unkA8;
-            WATER.unkAC = -WATER.unkAC;
-        } else if (WATER.timer == 0 && v < 0x1DE20 && WATER.unkA8 >= 0 && WATER.unkA8 < WATER.unkAC * dt) {
-            WATER.timer = (func_150ADA20() & 0x3F) + 0x3C;
-            WATER.unkA8 = 0.0f;
-            WATER.unkAC = 0.0f;
+        D_800D24C8.unkA8 += D_800D24C8.unkAC * dt;
+        if (D_800D24C8.unkA8 > 2.0f) {
+            D_800D24C8.unkA8 = 4.0f - D_800D24C8.unkA8;
+            D_800D24C8.unkAC = -D_800D24C8.unkAC;
+        } else if (D_800D24C8.unkA8 < -2.0f) {
+            D_800D24C8.unkA8 = -4.0f - D_800D24C8.unkA8;
+            D_800D24C8.unkAC = -D_800D24C8.unkAC;
+        } else if (D_800D24C8.timer == 0 && fadeRaw < 480 * 255 && D_800D24C8.unkA8 >= 0 && D_800D24C8.unkA8 < D_800D24C8.unkAC * dt) {
+            D_800D24C8.timer = (func_150ADA20() & 63) + 60;
+            D_800D24C8.unkA8 = 0.0f;
+            D_800D24C8.unkAC = 0.0f;
         }
-        if (v >= 0x2CD30 && WATER.unkA0 > -22.0f) {
-            WATER.unkA4 -= 0.25f * D_800BE9E4;
-            WATER.unkA0 += WATER.unkA4;
+        if (fadeRaw >= 720 * 255 && D_800D24C8.unkA0 > -22.0f) {
+            D_800D24C8.unkA4 -= 0.25f * D_800BE9E4;
+            D_800D24C8.unkA0 += D_800D24C8.unkA4;
         }
     }
 }
 
-typedef struct BC510Stage {
-    Mtx mtx[2];
-    u32 dl;
-    u32 seg1[2];
-    u8 pad8C[0xA0 - 0x8C];
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    u8 padAC[4];
-    u16 tex[4];
-    u8 padB8[2];
-    u8 alpha;
-    u8 padBB[5];
-} BC510Stage;
 extern u8 D_80083440[];
 extern u8 D_800835C0[];
 extern u8 D_80084160[];
 extern u8 D_80084190[];
-#define STAGE (*(BC510Stage *)&D_800D24C8)
 
+/* Draws the water surface mesh animated by func_1509093C. */
 Gfx *func_150911F4(Gfx *gfx) {
-    s32 sp90[6];
+    s32 texBuf[6];
     f32 y;
     f32 x;
-    s32 t;
+    s32 tex;
 
-    if (STAGE.alpha == 0) {
+    if (D_800D24C8.alpha == 0) {
         return gfx;
     }
-    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = (u32)D_80084160; }
-    { Gfx *c = gfx++; c->words.w0 = 0xD9FFFFFF; c->words.w1 = 0x400; }
-    { Gfx *c = gfx++; c->words.w0 = 0xD9F1FDFE; c->words.w1 = 0; }
-    { Gfx *c = gfx++; c->words.w0 = 0xD9BDFFFF; c->words.w1 = 0; }
-    if (STAGE.alpha < 0xFF) {
-        Gfx *c = gfx++; c->words.w0 = 0xDB060020; c->words.w1 = (u32)D_80083440;
+    gSPDisplayList(gfx++, D_80084160);
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
+    gSPClearGeometryMode(gfx++, G_LIGHTING | 0x400000);
+    if (D_800D24C8.alpha < 255) {
+        gSPSegment(gfx++, 8, D_80083440);
     } else {
-        Gfx *c = gfx++; c->words.w0 = 0xDB060020; c->words.w1 = (u32)D_800835C0;
+        gSPSegment(gfx++, 8, D_800835C0);
     }
-    y = -11.0f; y += STAGE.unkA8;
-    x = -1.0f - STAGE.unkA0;
-    func_15043D90(&STAGE.mtx[D_800BE9C0], x, y, 0.0f,
-                  4.050000191f, 4.050000191f, 4.050000191f, 667.0f, 152.0f, -1668.0f);
-    { Gfx *c = gfx++; c->words.w0 = 0xDA380003; c->words.w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
-    { Gfx *c = gfx++; c->words.w0 = 0xF8000000; c->words.w1 = 0xFF; }
-    { Gfx *c = gfx++; c->words.w0 = 0xFA00F200; c->words.w1 = 0; }
-    { Gfx *c = gfx++; c->words.w0 = 0xFB000000; c->words.w1 = (STAGE.alpha & 0xFF); }
-    { Gfx *c = gfx++; c->words.w0 = 0xDB06000C; c->words.w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
-    { Gfx *c = gfx++; c->words.w0 = 0xDB060004; c->words.w1 = STAGE.seg1[D_800BE9C0]; }
-    if (STAGE.tex[0]) {
-        Gfx *c;
-        t = func_1510D0EC(STAGE.tex[0], (s32)sp90, 3, 0);
-        c = gfx++; c->words.w0 = 0xDB060018; c->words.w1 = t;
+    y = -11.0f + D_800D24C8.unkA8;
+    x = -1.0f - D_800D24C8.unkA0;
+    func_15043D90(&D_800D24C8.mtx[D_800BE9C0], x, y, 0.0f,
+                  4.05f, 4.05f, 4.05f, 667.0f, 152.0f, -1668.0f);
+    gSPMatrix(gfx++, &D_800D24C8.mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPSetFogColor(gfx++, 0, 0, 0, 255);
+    gDPSetPrimColor(gfx++, 0xF2, 0, 0, 0, 0, 0);
+    gDPSetEnvColor(gfx++, 0, 0, 0, D_800D24C8.alpha);
+    gSPSegment(gfx++, 3, &D_800D24C8.mtx[D_800BE9C0]);
+    gSPSegment(gfx++, 1, D_800D24C8.vtx[D_800BE9C0]);
+    if (D_800D24C8.tex[0]) {
+        tex = func_1510D0EC(D_800D24C8.tex[0], (s32)texBuf, 3, 0);
+        gSPSegment(gfx++, 6, tex);
     }
-    if (STAGE.tex[1]) {
-        Gfx *c;
-        t = func_1510D0EC(STAGE.tex[1], (s32)sp90, 3, 0);
-        c = gfx++; c->words.w0 = 0xDB06001C; c->words.w1 = t;
+    if (D_800D24C8.tex[1]) {
+        tex = func_1510D0EC(D_800D24C8.tex[1], (s32)texBuf, 3, 0);
+        gSPSegment(gfx++, 7, tex);
     }
-    if (STAGE.tex[2]) {
-        Gfx *c;
-        t = func_1510D0EC(STAGE.tex[2], (s32)sp90, 3, 0);
-        c = gfx++; c->words.w0 = 0xDB060028; c->words.w1 = t;
+    if (D_800D24C8.tex[2]) {
+        tex = func_1510D0EC(D_800D24C8.tex[2], (s32)texBuf, 3, 0);
+        gSPSegment(gfx++, 10, tex);
     }
-    if (STAGE.tex[3]) {
-        Gfx *c;
-        t = func_1510D0EC(STAGE.tex[3], (s32)sp90, 3, 0);
-        c = gfx++; c->words.w0 = 0xDB06002C; c->words.w1 = t;
+    if (D_800D24C8.tex[3]) {
+        tex = func_1510D0EC(D_800D24C8.tex[3], (s32)texBuf, 3, 0);
+        gSPSegment(gfx++, 11, tex);
     }
-    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = STAGE.dl; }
-    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = (u32)D_80084190; }
+    gSPDisplayList(gfx++, D_800D24C8.dl);
+    gSPDisplayList(gfx++, D_80084190);
     return gfx;
 }
 
