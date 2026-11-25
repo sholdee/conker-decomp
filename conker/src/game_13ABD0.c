@@ -4,7 +4,6 @@
 
 /* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
 
-extern s32 func_10004074(s16 *);
 
 /*
  * Drops one use of texture `index`. When the last use goes, the texture is queued for

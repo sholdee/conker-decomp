@@ -207,7 +207,6 @@ extern s32 math_distance3D(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
 
 extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
-extern void func_10004074(s32);
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26

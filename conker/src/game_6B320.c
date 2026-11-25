@@ -144,7 +144,6 @@ s32 func_1503E1F4(s32 partIndex, s32 objIndex) {
 }
 
 extern u8 *D_80084460[];
-void func_10004074(s32); // matching: s32 param; declaring it void * changes func_1503E260
 
 /* Stop an object's parts effect: apply the per-part flag bits, free the parts and clear the busy flag. */
 void func_1503E260(s32 objIndex) {

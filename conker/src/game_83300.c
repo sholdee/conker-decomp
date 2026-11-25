@@ -4547,7 +4547,6 @@ extern void func_1504AF10(Actor *, s32, s32);
 extern void func_1503E260(s32);
 extern s32 func_150303E4(Actor *);
 extern void func_15188AD0(Actor *);
-extern void func_10004074(void *);
 void func_150626EC(Actor *arg0, s32 arg1);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */

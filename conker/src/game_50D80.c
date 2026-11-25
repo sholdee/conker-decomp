@@ -50,7 +50,6 @@ typedef struct {
     /* 0x18 */ SeqSound *userData;
 } SeqVoice;
 
-extern void func_10004074(void *);
 
 /*
  * Per-frame callback for a cutscene sound: follows its track's position, counts

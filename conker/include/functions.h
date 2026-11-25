@@ -59,10 +59,6 @@ typedef struct MusicTrack MusicTrack;
 
 /* matching */
 void func_1000349C(s32 arg0);
-void func_10003930(void);
-void func_10004250(void);
-void func_10004308(void);
-void func_1000440C(void);
 void func_100084D8(u8 arg0);
 s32  func_1000853C(u8 arg0);
 void func_10008570(u8 player, OSMesgQueue *queue);
@@ -587,11 +583,7 @@ void func_151F00E0(MtxF arg0, MtxF arg1, MtxF arg2);
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
 //func_100034E0
 //func_10003658
-void func_10003920(void);
 // void func_10003BD0(void);
-s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-//func_10004074
-void func_100043B4(s32 *arg0, u32 arg1);
 //func_10005570
 //func_100056A0
 //func_100057E0

@@ -773,7 +773,6 @@ void func_1501E400(s32 scene) {
     }
 }
 
-void func_10004074(s32);
 
 /* Free everything func_1501D348 allocated for the scene, and the cutscene file itself. */
 void func_1501E540(s32 scene) {

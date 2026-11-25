@@ -3,7 +3,6 @@
 #include "variables.h"
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *ptr);
 
 /*
  * Lens flares. Each flare has a world position that is projected to the screen every frame; the z-buffer

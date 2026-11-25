@@ -11,7 +11,6 @@
  */
 
 extern void *allocate_memory();
-extern void func_10004074(void *);
 extern s32 func_1502DB20(s32);
 void func_15188A58(BoneTrail *trail, BoneTrail **list);
 

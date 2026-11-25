@@ -24,7 +24,6 @@ extern s32 D_800DD440;
 extern s8 D_800DD446;       /* rain state */
 
 extern f32 sqrtf(f32);
-extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern f32 func_150489B0(u8);
 void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);

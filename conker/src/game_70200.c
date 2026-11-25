@@ -260,7 +260,6 @@ typedef struct Game70200Glyph {
 
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-void func_10004074(void *);
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);

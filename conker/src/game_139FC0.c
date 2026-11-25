@@ -187,7 +187,6 @@ extern s32 D_800DBDBC;
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
 
 extern void func_10006240(u8 *, Entry1510D404 *, u32);
-extern s32 func_10004074(s16 *);
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
@@ -317,7 +316,8 @@ void func_1510D404(void) {
                 if (D_800BC448[i] == 0) {
                     D_800DBDBC = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
-                    if (func_10004074((s16 *)D_800B0E58[i]) == -1) {
+                    func_10004074((s16 *)D_800B0E58[i]);
+                    if (i == -1) {
                     }
                     D_800B0E58[i] = -1;
                     continue; // matching: the extra loop block lowers the loop-limit temp's register priority

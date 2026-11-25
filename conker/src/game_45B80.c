@@ -92,7 +92,6 @@ void func_150186D0(void) {
 
 void func_1517E1AC(void);
 void func_151412BC(void);
-void func_10004074(void *);
 void func_151E51EC(void);
 void func_1510B3B0(void);
 void func_1510B51C(void);

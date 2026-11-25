@@ -3,7 +3,6 @@
 #include "variables.h"
 
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
-void func_10004074();
 
 /* Turret settings (WorldObject.moveData.data); angles in degrees. */
 typedef struct Turret15112520Cfg {

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void func_10004074(void *);
 
 /* Releases every id in the list, then frees the list. */
 void func_1510D630(IdList *list) {

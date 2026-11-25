@@ -747,7 +747,6 @@ extern Gfx D_8008D410[];
 extern Vp D_800DF090[];
 extern s32 func_150849CC(Actor *, s32 *);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_10004074(void *);
 extern void func_1503DA9C(Actor *, s32, s32, s32);
 
 /*

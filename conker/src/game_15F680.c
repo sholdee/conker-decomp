@@ -169,7 +169,6 @@ void func_151325C8(ModelParticle *particle) {
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15168A9C(void *);
-extern void func_10004074(void *);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 

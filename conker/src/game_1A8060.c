@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void func_10004074(void *);
 s32 func_150849A0(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 

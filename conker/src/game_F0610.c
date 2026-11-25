@@ -24,7 +24,6 @@ void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);
-extern s32 func_10004074[];
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {
@@ -306,8 +305,8 @@ void func_150C3D5C(Actor *obj) {
     ((void (*)(s32, s32 *))func_151EF040)(func_150C3D48(locals.checksum), &locals.checksum);
     if (locals.checksum != 0x0330C820) {
         // tamper check failed: overwrite func_10004074 with "jr $ra; nop"
-        func_10004074[0] = 0x03E00008;
-        func_10004074[1] = 0;
+        ((s32 *)&func_10004074)[0] = 0x03E00008;
+        ((s32 *)&func_10004074)[1] = 0;
     }
 
     func_15171200(3, 0xCB, obj->xpos, obj->ypos, obj->zpos, 10.0f, 1.0f,

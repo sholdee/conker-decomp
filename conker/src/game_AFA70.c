@@ -26,7 +26,6 @@ typedef struct PartSet {
 extern PartSet D_80086CC4[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
-extern s32 func_10004074(void *);
 extern void func_150302F0(Actor *obj, s32 setId);
 extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
 extern void func_15036C70(Actor *obj);

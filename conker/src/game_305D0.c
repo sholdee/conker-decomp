@@ -126,7 +126,6 @@ s32 func_150034B4(void) {
     }
 }
 
-extern void func_10004074(void *);
 extern u8 compressed_ROM_START[];
 
 /* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */

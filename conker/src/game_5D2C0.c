@@ -9,7 +9,6 @@ s32 func_15033BDC();
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *ptr);
 void func_1518CA04(s32 model);
 
 

@@ -7,7 +7,6 @@
 #include "libc/stdarg.h"
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *ptr);                     /* frees an allocate_memory() buffer */
 extern s32 func_10006240(void *src, void *dst, u32 arg2); /* decompresses; returns the size written */
 
 void func_1502AAF0(void) {

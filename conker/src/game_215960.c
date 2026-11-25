@@ -70,7 +70,6 @@ extern HudSprite D_8009013C;
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-extern void func_10004074(void *);
 Gfx *func_151ED1E0(Gfx *);
 void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
 Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);

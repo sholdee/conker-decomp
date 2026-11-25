@@ -3758,7 +3758,6 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
     }
 }
 
-extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 
 /*

@@ -5,7 +5,6 @@
 #include "libc/stdlib.h"
 #include "libc/string.h"
 
-void func_10004074(void *ptr);
 void func_10005BE0(void);
 void func_100061F8(s32 arg0, s32 arg1);
 

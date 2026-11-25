@@ -6,7 +6,6 @@ void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
 void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
-extern void func_10004074(void *);
 
 /* Allocates a zeroed 0x10-byte block. */
 void *func_1515D440(void) {
