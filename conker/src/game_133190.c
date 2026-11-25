@@ -57,6 +57,47 @@ typedef struct BoltObj {
     /* 0x84 */ s32 vtxBufSize;
 } BoltObj; /* size 0x88 */
 
+/* Spawn parameters for each bolt of a chain; "base + rand % (range + 1)" or "base + randf * range". */
+typedef struct BoltChainConfig {
+    /* 0x00 */ f32 widthBase;
+    /* 0x04 */ f32 widthRange;
+    /* 0x08 */ f32 jitter;
+    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
+    /* 0x10 */ f32 bendRange;
+    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
+    /* 0x16 */ s16 rejitterBase;
+    /* 0x18 */ s16 rejitterRange;
+    /* 0x1A */ s16 lifeBase;
+    /* 0x1C */ s16 lifeRange;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 segmentsBase;
+    /* 0x24 */ s32 segmentsRange;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 alphaBase;
+    /* 0x2C */ u8 alphaRange;
+} BoltChainConfig; /* size 0x30 */
+
+/* A chain of bolts along a randomly spaced line of points, one bolt (link) at a time. */
+typedef struct BoltChain {
+    /* 0x00 */ s32 count;          /* number of points */
+    /* 0x04 */ s32 index;          /* point where the next link starts */
+    /* 0x08 */ BoltObj *link;      /* the live link, NULL once it is gone */
+    /* 0x0C */ Vec3f *points;
+    /* 0x10 */ BoltChainConfig config;
+    /* 0x40 */ u8 kind;            /* index into D_80088C38 */
+    /* 0x41 */ u8 pad41[3];
+} BoltChain; /* size 0x44 */
+
+typedef struct BoltChainObj {
+    /* 0x00 */ struct260 base;
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ BoltChain chain;
+    /* 0x6C */ u8 pad6C[4];
+    /* 0x70 */ Vec3f points[1];    /* chain.count points */
+} BoltChainObj;
+
 /* Spawn descriptor for func_15130280 (an end flare). */
 typedef struct FlareSpawn {
     /* 0x00 */ s32 unk0;
@@ -163,7 +204,7 @@ struct S15107C1CCreated {
     void *unk60;
 };
 
-void func_151070F8(struct260 *arg0, s16 arg1, s16 arg2, f32 arg3);
+void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
 void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4);
 void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3);
 void func_15107F54(s32 *arg0, u8 arg1, void *arg2, s32 arg3);
@@ -429,17 +470,11 @@ void func_15106610(BoltObj *bolt) {
     }
 }
 
-struct Vec151067B8 { f32 x; f32 y; f32 z; };
-struct Curve151067B8 {
-    u8 pad0[0x48];
-    s32 count;
-    f32 scale;
-};
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-s32 func_15144B34(s32);
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Vec3f *func_15144B34(s32 view);
+Gfx *func_15142E24(Gfx *, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
@@ -448,30 +483,29 @@ extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 
-Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
-    struct Vec151067B8 *camera;
-    struct Curve151067B8 *curve = (struct Curve151067B8 *)arg1;
+Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
+    Vec3f *camera;
+    BoltObj *curve = bolt; // matching: a second copy of the bolt pointer steers IDO's register choice
     Vtx_t *vtx;
-    struct Vec151067B8 delta;
-    struct Vec151067B8 toCamera;
-    struct Vec151067B8 normal;
+    Vec3f delta;
+    Vec3f toCamera;
+    Vec3f normal;
     f32 lengthSquared;
     u8 flag;
-    struct Vec151067B8 *points;
+    Vec3f *points;
     s32 i;
-    struct Vec151067B8 previous;
+    Vec3f previous;
 
-    /* dead IR: uopt alias state carried over from func_15105CE0 otherwise drops the vtx reloads in the first strip */
-    if (0) { gdl = gdl; }
-    func_151D5D60(arg1 + 0x74, arg2, *(s32 *)(arg1 + 0x84), (void **)&vtx, NULL);
+    if (0) { gdl = gdl; } // matching: dead IR resets uopt alias state so the first strip reloads vtx
+    func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gdl;
     }
-    camera = (struct Vec151067B8 *)func_15144B34(arg2);
+    camera = func_15144B34(view);
     flag = 1;
-    points = (struct Vec151067B8 *)func_151061EC((BoltObj *)arg1);
-    gdl = (Gfx *)func_15142E24((s32)gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
-    gdl = func_15142C10(gdl, arg1[0x58], arg1[0x59], arg1[0x5A], arg1[0x5B], &flag);
+    points = func_151061EC(bolt);
+    gdl = func_15142E24(gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gdl = func_15142C10(gdl, bolt->desc.color.r, bolt->desc.color.g, bolt->desc.color.b, bolt->desc.color.a, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);
     gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
@@ -486,7 +520,7 @@ Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
     normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
     lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
     if (lengthSquared > 0.0001f) {
-        f32 scale = *(f32 *)(arg1 + 0x50) / sqrtf(lengthSquared);
+        f32 scale = bolt->desc.width / sqrtf(lengthSquared);
 
         normal.x *= scale;
         normal.y *= scale;
@@ -515,8 +549,8 @@ Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
     vtx->tc[1] = 0;
     vtx++;
     previous = points[0];
-    for (i = 1; i < curve->count + 2; i++) {
-        struct Vec151067B8 *point = &points[i];
+    for (i = 1; i < curve->desc.segments + 2; i++) {
+        Vec3f *point = &points[i];
 
         delta.x = previous.x - point->x;
         delta.y = previous.y - point->y;
@@ -529,7 +563,7 @@ Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
         normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
         lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
         if (lengthSquared > 0.0001f) {
-            f32 scale = *(f32 *)(arg1 + 0x50) / sqrtf(lengthSquared);
+            f32 scale = bolt->desc.width / sqrtf(lengthSquared);
 
             normal.x *= scale;
             normal.y *= scale;
@@ -567,223 +601,187 @@ Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
     return gdl;
 }
 
-extern void (*D_80088C18[])(struct102 *);
+extern void (*D_80088C18[])(BoltObj *bolt);
 void func_151D5E30(void *arg0);
 
-void func_15106E78(struct102 *arg0) {
-    void (*fn)(struct102 *);
-    struct102 *p6C;
+/* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
+void func_15106E78(BoltObj *bolt) {
+    void (*cleanup)(BoltObj *);
+    BoltFlare *flare;
 
-    fn = D_80088C18[*(u8 *)((u8 *)arg0 + 0x5C)];
-    if (fn != NULL) {
-        fn(arg0);
+    cleanup = D_80088C18[bolt->desc.kind];
+    if (cleanup != NULL) {
+        cleanup(bolt);
     }
-    p6C = *(struct102 **)((u8 *)arg0 + 0x6C);
-    if (p6C != NULL) {
-        func_1516972C(p6C);
+    flare = bolt->flares[0];
+    if (flare != NULL) {
+        func_1516972C((struct102 *)flare);
     }
-    p6C = *(struct102 **)((u8 *)arg0 + 0x70);
-    if (p6C != NULL) {
-        func_1516972C(p6C);
+    flare = bolt->flares[1];
+    if (flare != NULL) {
+        func_1516972C((struct102 *)flare);
     }
-    func_151D5E30((u8 *)arg0 + 0x74);
+    func_151D5E30(bolt->vtxBuf);
 }
 
-void func_15106EF8(struct102 *arg0) {
-    func_15106E78(arg0);
-    func_15169804(arg0);
+void func_15106EF8(BoltObj *bolt) {
+    func_15106E78(bolt);
+    func_15169804((struct102 *)bolt);
 }
 
 void func_15169824(struct102 *arg0);
 
-void func_15106F24(struct102 *arg0) {
-    func_15106E78(arg0);
-    func_15169824(arg0);
+void func_15106F24(BoltObj *bolt) {
+    func_15106E78(bolt);
+    func_15169824((struct102 *)bolt);
 }
 
-extern void (*D_80088C28[])(void *, s32, u8);
-extern void (*D_80088C38[])(struct102 *, s32, u8);
+extern void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2);
+extern void (*D_80088C38[])(BoltChainObj *obj, s32 arg1, u8 arg2);
 
-void func_15106F50(struct102 *arg0, s32 arg1, u8 arg2) {
-    void (*fn)(void *, s32, u8) = D_80088C28[*(u8 *)((u8 *)arg0 + 0x5C)];
+/* Dispatches to the bolt kind's handler in D_80088C28. */
+void func_15106F50(BoltObj *bolt, s32 arg1, u8 arg2) {
+    void (*fn)(BoltObj *, s32, u8) = D_80088C28[bolt->desc.kind];
     if (fn != NULL) {
-        fn(arg0, arg1, arg2);
+        fn(bolt, arg1, arg2);
     }
 }
 
-struct260 *func_15106F98(struct Vec15106F98 *arg0, struct Vec15106F98 *arg1, s32 arg2, struct S15106F98Points *arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
-    struct260 *temp_v0;
-    struct S15106F98Payload sp40;
-    struct S15106F98Payload *data;
+/* Creates a bolt chain from start to end with (1 << depth) + 1 randomly spaced points. */
+BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
+    BoltChainObj *obj;
+    BoltChain chain;
+    BoltChain *data;
 
-    sp40.unk0 = (1 << arg2) + 1;
-    sp40.unk8 = 0;
-    sp40.unk4 = 0;
-    sp40.unk10 = *arg3;
-    sp40.unk40 = arg5;
+    chain.count = (1 << depth) + 1;
+    chain.link = NULL;
+    chain.index = 0;
+    chain.config = *config;
+    chain.kind = kind;
 
-    temp_v0 = func_15149130(0, -1, 0x3E, -1, 0, 0x30, (struct37 *)(sp40.unk0 * 12 + 0x48), arg6, arg7);
-    if (temp_v0 != NULL) {
-        data = (struct S15106F98Payload *)((u8 *)temp_v0 + 0x28);
-        memcpy(data, &sp40, 0x44);
-        data->unkC = (struct Vec15106F98 *)((u8 *)data + 0x48);
-        data->unkC[0] = *arg0;
-        data->unkC[sp40.unk0 - 1] = *arg1;
-        func_151070F8(temp_v0, 0, (s16)(sp40.unk0 - 1), arg4);
+    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (struct37 *)(chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
+    if (obj != NULL) {
+        data = &obj->chain;
+        memcpy(data, &chain, sizeof(BoltChain));
+        data->points = (Vec3f *)((u8 *)data + 0x48); // matching: = obj->points, but computed from data
+        data->points[0] = *start;
+        data->points[chain.count - 1] = *end;
+        func_151070F8(obj, 0, (s16)(chain.count - 1), spread);
     }
-    return temp_v0;
+    return obj;
 }
 
-void func_151070F8(struct260 *arg0, s16 arg1, s16 arg2, f32 arg3) {
-    struct S15106F98Payload *data = (struct S15106F98Payload *)((u8 *)arg0 + 0x28);
-    struct Vec15106F98 *a;
+/* Recursively places the points between lo and hi on the line, each midpoint randomly within +-spread of halfway. */
+void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
+    BoltChain *chain = &obj->chain;
+    Vec3f *a;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 t;
     s16 mid;
 
-    if (arg2 - arg1 < 2) {
+    if (hi - lo < 2) {
         return;
     }
-    mid = arg1 + ((arg2 - arg1) >> 1);
-    a = &data->unkC[arg1];
-    dx = data->unkC[arg2].x - data->unkC[arg1].x;
-    dy = data->unkC[arg2].y - data->unkC[arg1].y;
-    dz = data->unkC[arg2].z - data->unkC[arg1].z;
-    t = func_150ADA68() * (arg3 + arg3) + (0.5f - arg3);
-    data->unkC[mid].x = a->x + dx * t;
-    data->unkC[mid].y = a->y + dy * t;
-    data->unkC[mid].z = a->z + dz * t;
-    func_151070F8(arg0, arg1, mid, arg3);
-    func_151070F8(arg0, mid, arg2, arg3);
+    mid = lo + ((hi - lo) >> 1);
+    a = &chain->points[lo];
+    dx = chain->points[hi].x - chain->points[lo].x;
+    dy = chain->points[hi].y - chain->points[lo].y;
+    dz = chain->points[hi].z - chain->points[lo].z;
+    t = func_150ADA68() * (spread + spread) + (0.5f - spread);
+    chain->points[mid].x = a->x + dx * t;
+    chain->points[mid].y = a->y + dy * t;
+    chain->points[mid].z = a->z + dz * t;
+    func_151070F8(obj, lo, mid, spread);
+    func_151070F8(obj, mid, hi, spread);
 }
 
 void func_15143794(s32, s32, f32, f32 *);
 
-typedef struct S151072BCColor {
-    u8 bytes[4];
-} S151072BCColor;
+/* Chain update: once the current link is gone, spawns a bolt from points[index] to points[index + 1]; ends the chain after the last. */
+void func_151072BC(BoltChainObj *obj) {
+    BoltChain *chain;
+    BoltDesc desc;
+    BoltChainObj *owner;
+    Vec3f offset;
+    BoltChainConfig *config;
 
-typedef struct S151072BCBeam {
-    s16 life;
-    s8 enabled;
-    u8 pad3;
-    struct Vec15107A20 position;
-    struct Vec15107A20 axis0;
-    struct Vec15107A20 axis1;
-    struct Vec15107A20 contact;
-    s8 flag;
-    u8 pad35[3];
-    s32 count;
-    f32 width;
-    f32 scale;
-    s16 lower;
-    s16 upper;
-    S151072BCColor color;
-    s8 mode;
-    u8 pad4D[3];
-} S151072BCBeam;
-
-typedef struct S151072BCConfig {
-    f32 scaleBase, scaleRange, width, speedBase, speedRange;
-    s16 spread, lower, upper, lifeBase, lifeRange;
-    u8 pad1E[2];
-    s32 countBase, countRange;
-    u8 red, green, blue, alphaBase, alphaRange;
-} S151072BCConfig;
-
-typedef struct S151072BCChain {
-    s32 count, index;
-    struct S15107C1CCreated *child;
-    struct Vec15107A20 *points;
-    S151072BCConfig config;
-} S151072BCChain;
-
-void func_151072BC(u8 *arg0) {
-    S151072BCChain *chain;
-    S151072BCBeam beam;
-    u8 *owner;
-    struct Vec15107A20 direction;
-    S151072BCConfig *config;
-
-    chain = (S151072BCChain *)(arg0 + 0x28);
-    if (*(s32 *)(arg0 + 0x30) == 0) {
+    chain = &obj->chain;
+    if (chain->link == NULL) {
         if (chain->index >= chain->count - 1) {
-            *(s16 *)(arg0 + 0xE) = -1;
-            arg0[0xD] |= 1;
+            obj->base.unkE = -1;
+            obj->base.unkD |= 1;
             return;
         }
-        owner = arg0;
-        beam.enabled = 1;
-        beam.flag = -1;
+        owner = obj;
+        desc.flags = 1;
+        desc.updateKind = -1;
         config = &chain->config;
-        beam.scale = func_150ADA68() * config->scaleRange + config->scaleBase;
-        beam.width = config->width;
-        beam.lower = config->lower;
-        beam.upper = config->upper;
-        beam.position = chain->points[chain->index];
-        beam.contact = chain->points[chain->index + 1];
+        desc.width = func_150ADA68() * config->widthRange + config->widthBase;
+        desc.jitter = config->jitter;
+        desc.rejitterBase = config->rejitterBase;
+        desc.rejitterRange = config->rejitterRange;
+        desc.ctrl[0] = chain->points[chain->index];
+        desc.ctrl[3] = chain->points[chain->index + 1];
         func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (u32)(config->spread + 1) - (config->spread >> 1) - 0x40),
-            func_150ADA68() * config->speedRange + config->speedBase, &direction.x);
-        beam.axis0.x = beam.position.x + direction.x;
-        beam.axis0.y = beam.position.y + direction.y;
-        beam.axis0.z = beam.position.z + direction.z;
+            (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+            func_150ADA68() * config->bendRange + config->bendBase, &offset.x);
+        desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
+        desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
+        desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
         func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (u32)(config->spread + 1) - (config->spread >> 1) - 0x40),
-            func_150ADA68() * config->speedRange + config->speedBase, &direction.x);
-        beam.axis1.x = beam.contact.x + direction.x;
-        beam.axis1.y = beam.contact.y + direction.y;
-        beam.axis1.z = beam.contact.z + direction.z;
-        beam.color.bytes[0] = config->red;
-        beam.color.bytes[1] = config->green;
-        beam.color.bytes[2] = config->blue;
-        beam.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
-        beam.color.bytes[3] = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
-        beam.mode = 1;
-        beam.count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
-        chain->child = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&beam, 4, arg0[0xC], arg0[1]);
-        if (chain->child != NULL) {
-            memcpy(chain->child->unk60, &owner, 4U);
+            (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+            func_150ADA68() * config->bendRange + config->bendBase, &offset.x);
+        desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
+        desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
+        desc.ctrl[2].z = desc.ctrl[3].z + offset.z;
+        desc.color.r = config->r;
+        desc.color.g = config->g;
+        desc.color.b = config->b;
+        desc.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
+        desc.color.a = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
+        desc.kind = 1;
+        desc.segments = func_150ADA20() % (u32)(config->segmentsRange + 1) + config->segmentsBase;
+        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
+        if (chain->link != NULL) {
+            memcpy(chain->link->userData, &owner, sizeof(owner));
         }
         chain->index++;
     }
 }
 
-struct S15107604 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-void func_15107604(s32 **arg0) {
-    s32 **q = (s32 **)arg0[0x18];
-    struct S15107604 *p = (struct S15107604 *)((u8 *)q[0] + 0x28);
-    p->unk8 = 0;
+/* Kind-1 (chain link) cleanup: tells the owning chain that its link is gone. */
+void func_15107604(BoltObj *bolt) {
+    BoltChainObj **owner = bolt->userData;
+    BoltChain *chain = &(*owner)->chain;
+    chain->link = NULL;
 }
 
-void func_1510761C(struct260 *arg0) {
-    if (*(struct102 *volatile *)((u8 *)arg0 + 0x30) != 0) {
-        func_1516972C(*(struct102 *volatile *)((u8 *)arg0 + 0x30));
+/* Kills the chain's live link, if any. */
+void func_1510761C(BoltChainObj *obj) {
+    // matching: volatile makes IDO load the link twice, as the original does
+    if (*(BoltObj *volatile *)&obj->chain.link != NULL) {
+        func_1516972C(*(struct102 *volatile *)&obj->chain.link);
     }
 }
 
-void func_1510764C(struct260 *arg0) {
-    func_1510761C(arg0);
-    func_1514933C(arg0);
+void func_1510764C(BoltChainObj *obj) {
+    func_1510761C(obj);
+    func_1514933C(&obj->base);
 }
 
 void func_15149368(struct260 *arg0);
 
-void func_15107678(struct260 *arg0) {
-    func_1510761C(arg0);
-    func_15149368(arg0);
+void func_15107678(BoltChainObj *obj) {
+    func_1510761C(obj);
+    func_15149368(&obj->base);
 }
 
-void func_151076A4(struct102 *arg0, s32 arg1, u8 arg2) {
-    if (D_80088C38[*(u8 *)((s32)arg0 + 0x68)] != 0) {
-        D_80088C38[*(volatile u8 *)((s32)arg0 + 0x68)](arg0, arg1, arg2);
+/* Dispatches to the chain kind's handler in D_80088C38. */
+void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
+    if (D_80088C38[obj->chain.kind] != NULL) {
+        D_80088C38[*(volatile u8 *)&obj->chain.kind](obj, arg1, arg2); // matching: the original reloads the kind
     }
 }
 
