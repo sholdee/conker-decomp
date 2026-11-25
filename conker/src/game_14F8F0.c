@@ -59,7 +59,6 @@ typedef struct Camera {
     /* 0x8DC */ f32 yawFollow;              /* how fast yaw turns toward the target */
 } Camera;
 
-extern f32 D_800A34A0;
 extern f32 D_800894C0;
 extern vertex D_800894C8;
 
