@@ -125,16 +125,12 @@ void func_151A7A90(Bolt *bolt) {
         }
     }
     update1 = bolt->def.update1;
-    if (update1 != -1) {
-        if (!done) {
-            done = (D_8008F940[update1](bolt) == 0);
-        }
+    if (update1 != -1 && !done) {
+        done = (D_8008F940[update1](bolt) == 0);
     }
     update2 = bolt->def.update2;
-    if (update2 != -1) {
-        if (!done) {
-            done = (D_8008F948[update2](bolt) == 0);
-        }
+    if (update2 != -1 && !done) {
+        done = (D_8008F948[update2](bolt) == 0);
     }
 
     if (!done) {
@@ -741,7 +737,7 @@ void func_151A8CEC(Emitter *emitter) {
                 pos.y = bottom;
                 noGround = TRUE;
             } else if (func_15046C80(&pos, 0, bottom, &state->ground) != 0) {
-                pos.y = state->ground.height;
+                pos.y = state->ground.height; /* noGround keeps its previous (at first unset) value */
             } else {
                 pos.y = bottom;
                 noGround = TRUE;
@@ -1041,13 +1037,13 @@ void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
     }
 }
 
-/* Extra data stored at 0x160 of each particle. */
+/* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
 typedef struct {
     f32 unk0;
     s16 unk4;
 } ParticleExtra;
 
-s32 func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
+u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
@@ -1057,7 +1053,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     ParticleExtra extra;
     s32 kind;
     s32 flags;
-    s32 particle;
+    u8 *particle;
     ParticleSettings *settings;
     u32 rand2;
     u32 rand1;
@@ -1085,8 +1081,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
         (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
         settings->unk1C, settings->unk1E, 8, emitter->unkC, emitter->unk1);
-    if (particle != 0) {
-        memcpy((u8 *)particle + 0x160, &extra, sizeof(extra));
+    if (particle != NULL) {
+        memcpy(particle + 0x160, &extra, sizeof(extra));
     }
 }
 
