@@ -624,151 +624,106 @@ Gfx *func_151137D4(Gfx *gfx, Game13F9D0Obj *obj, Mtx *mtx, s32 view, s32 distanc
     return gfx;
 }
 
-typedef struct Struct15113C88 {
-    u8 pad0[0x4C];
-    u8 unk4C;
-    u8 pad4D[2];
-    u8 unk4F;
-    u8 pad50[0x20];
-    u8 unk70;
-    u8 pad71[0x1A];
-    u8 unk8B[9];
-    struct102 *unk94;
-    u8 pad98[8];
-} Struct15113C88;
-
-extern s32 func_15022B08(s32, s32);
 extern struct102 *func_1510D970(s32, void *, s32, s32, s32);
 
+/* Creates or frees each object's unk94 handle depending on whether the object is shown (in every active view). */
 void func_15113C88(void) {
     s32 i;
-    s32 offset;
     s32 j;
-    s32 found;
+    s32 hidden;
     s32 show;
-    Struct15113C88 *obj;
+    Game13F9D0Obj *obj;
 
-    i = 0;
-    offset = 0;
-    if (D_800DBEF0 > 0) {
-        do {
-            found = 0;
-            obj = (Struct15113C88 *)((u8 *)offset + (s32)D_800DBEF4);
-            for (j = 0; j < D_80082FA0; j++) {
-                if (func_150859AC(j, 0) != 0 && obj->unk8B[j] == 0) {
-                    found = 1;
-                    break;
-                }
+    for (i = 0; i < D_800DBEF0; i++) {
+        hidden = FALSE;
+        obj = i + OBJECTS; // matching: &OBJECTS[i] swaps the addu operands
+        for (j = 0; j < D_80082FA0; j++) {
+            if (func_150859AC(j, 0) != 0 && obj->viewAlpha[j] == 0) {
+                hidden = TRUE;
+                break;
             }
-            do {
-                if ((obj->unk70 & 8) || obj->unk4C == 0 || (obj->unk4F & 0x10) == 0x10 || found ||
-                    (D_800C3658[0] == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->unk4F & 1)) {
-                    show = 0;
-                } else {
-                    show = 1;
-                }
-            } while (0);
-            if (show) {
-                if (obj->unk94 == NULL) {
-                    obj->unk94 = func_1510D970(1, obj, 0, 1, 0);
-                }
-            } else if (obj->unk94 != NULL) {
-                func_1516972C(obj->unk94);
-                obj->unk94 = NULL;
+        }
+        do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
+            if ((obj->state & 8) || obj->unk4C == 0 || (obj->flags & 0x10) == 0x10 || hidden ||
+                (D_800C3658[0] == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
+                show = FALSE;
+            } else {
+                show = TRUE;
             }
-            i++;
-            offset += 0xA0;
-        } while (i < D_800DBEF0);
+        } while (0);
+        if (show) {
+            if (obj->unk94 == NULL) {
+                obj->unk94 = func_1510D970(1, obj, 0, 1, 0);
+            }
+        } else if (obj->unk94 != NULL) {
+            func_1516972C(obj->unk94);
+            obj->unk94 = NULL;
+        }
     }
 }
+extern s32 D_800DBF98; // grouped objects, kept at the end of OBJECTS
 
-
-extern s32 D_800DBF98;
-
-/* struct131 with the fields this file needs spelled out (the shared header
-   stops at unk6F). */
-typedef struct Struct15113E54 {
-    u8  pad0[0x38];
-    /* 0x38 */ void (*unk38)(struct Struct15113E54 *);
-    u8  pad3C[0x1E];
-    /* 0x5A */ s16 unk5A;
-    /* 0x5C */ s16 unk5C;
-    /* 0x5E */ s16 unk5E;
-    u8  pad60[0xE];
-    /* 0x6E */ u8  unk6E;
-    /* 0x6F */ u8  unk6F;
-    u8  pad70[0x10];
-    /* 0x80 */ s32 unk80;
-    u8  pad84[0x1C];
-} Struct15113E54; /* size 0xA0 */
-
-typedef struct {
+/* A group of objects that move together; the first member leads. */
+typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;
-    /* 0x02 */ u16 unk2;
+    /* 0x02 */ u16 count;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 unk8[8];
-} Struct150174C0; /* size 0x18 */
+    /* 0x08 */ u16 members[8]; // high nibble: kind (2 = object), low 12 bits: index into OBJECTS
+} ObjGroup; // size 0x18
 
-#define RECORDS (*(Struct150174C0 **)&D_800D23C0)
+#define GROUPS (*(ObjGroup **)&D_800D23C0) // D_80087380 entries
 
+/* Runs the update callback of every flagged object: first the ungrouped ones, then each group's members,
+   where followers take the leader's move delta and unk80. */
 void func_15113E54(s32 arg0) {
-    s16 x;
-    s16 y;
-    s16 z;
-    s32 flags;
+    s16 moveX;
+    s16 moveY;
+    s16 moveZ;
+    s32 leaderUnk80;
     s32 i;
     s32 j;
     s32 count;
-    s32 offset;
-    s32 entry;
-    Struct15113E54 *obj;
+    s32 member;
+    Game13F9D0Obj *obj;
 
-    arg0 = arg0;
-    x = 0;
-    y = 0;
-    z = 0;
-    flags = 0;
-    i = 0;
+    moveX = 0;
+    moveY = 0;
+    moveZ = 0;
+    leaderUnk80 = 0;
     count = D_800DBEF0 - D_800DBF98;
-    if (count > 0) {
-        offset = 0;
-        do {
-            obj = (Struct15113E54 *)((u8 *)offset + (s32)D_800DBEF4);
-            if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
-                obj->unk38(obj);
-            }
-            i++;
-            offset += 0xA0;
-        } while (i != count);
+    for (i = 0; i < count; i++) {
+        obj = i + OBJECTS; // matching: operand order of the addu
+        if ((obj->viewFlags & 0x40) == 0x40 && obj->unk6E == 0) {
+            obj->update(obj);
+        }
     }
 
     for (i = 0; i < (s32)D_80087380; i++) {
-        if ((RECORDS[i].unk8[0] >> 12) == 2) {
-            for (j = 0; j < RECORDS[i].unk2; j++) {
-                entry = RECORDS[i].unk8[j];
-                if ((entry >> 12) == 2) {
-                    obj = (Struct15113E54 *)(((entry & 0xFFF) * 0xA0) + (s32)D_800DBEF4);
-                    if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
+        if ((GROUPS[i].members[0] >> 12) == 2) {
+            for (j = 0; j < GROUPS[i].count; j++) {
+                member = GROUPS[i].members[j];
+                if ((member >> 12) == 2) {
+                    obj = (member & 0xFFF) + OBJECTS; // matching: operand order of the addu
+                    if ((obj->viewFlags & 0x40) == 0x40 && obj->unk6E == 0) {
                         if (j != 0) {
-                            obj->unk5A = x;
-                            obj->unk5C = y;
-                            obj->unk5E = z;
-                            obj->unk80 = flags;
+                            obj->moveX = moveX;
+                            obj->moveY = moveY;
+                            obj->moveZ = moveZ;
+                            obj->unk80 = leaderUnk80;
                         }
-                        obj->unk38(obj);
+                        obj->update(obj);
                     }
                     if (j == 0) {
-                        x = obj->unk5A;
-                        y = obj->unk5C;
-                        z = obj->unk5E;
-                        flags = obj->unk80;
+                        moveX = obj->moveX;
+                        moveY = obj->moveY;
+                        moveZ = obj->moveZ;
+                        leaderUnk80 = obj->unk80;
                     }
                 }
             }
         }
     }
 }
-
 extern s32 *D_800DBF94;
 
 s32 func_15114050(struct131 *arg0, s32 arg1) {
