@@ -2,6 +2,84 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Per-update-routine parameters (sprite +0x18, descriptor +0x08). */
+typedef union {
+    struct {
+        s32 frame; /* frame (8.8) to stop scrolling at */
+        s32 y;     /* y to stop scrolling at */
+        s32 stage;
+    } scroll; /* func_150B6E3C */
+    struct {
+        s32 elapsed;
+    } slide; /* func_150B709C */
+    struct {
+        s16 endX;
+        s16 endY;
+        s32 duration;
+        s16 startX;
+        s16 startY;
+    } move; /* func_150B73F0: from start to end as the timer runs down */
+} SpriteParams;
+
+/* SpriteObj descriptor passed to func_15169968/func_15169900, which copy it to the new sprite at +0x10. */
+typedef struct {
+    /* 0x00 */ void *texture;
+    /* 0x04 */ void *unk4;
+    /* 0x08 */ SpriteParams params;
+    /* 0x14 */ s16 timer;
+    /* 0x16 */ s16 frame;      /* 8.8 animation frame */
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 x;
+    /* 0x20 */ f32 y;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 scaleX;     /* 0x1000 = 1.0 */
+    /* 0x2A */ s16 scaleY;
+    /* 0x2C */ s16 width;
+    /* 0x2E */ s16 height;
+    /* 0x30 */ u8 update;      /* index into the D_8008CA20 update routines */
+    /* 0x31 */ u8 frameCount;
+    /* 0x32 */ u8 red;
+    /* 0x33 */ u8 green;
+    /* 0x34 */ u8 blue;
+    /* 0x35 */ u8 alpha;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 unk39;
+} SpriteDesc;
+
+/* A sprite object: a 0x10-byte header followed by its SpriteDesc fields. */
+typedef struct {
+    /* 0x00 */ u8 header[0x10];
+    /* 0x10 */ void *texture;
+    /* 0x14 */ void *unk14;
+    /* 0x18 */ SpriteParams params;
+    /* 0x24 */ s16 timer;
+    /* 0x26 */ s16 frame;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 x;
+    /* 0x30 */ f32 y;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 scaleX;
+    /* 0x3A */ s16 scaleY;
+    /* 0x3C */ s16 width;
+    /* 0x3E */ s16 height;
+    /* 0x40 */ u8 update;
+    /* 0x41 */ u8 frameCount;
+    /* 0x42 */ u8 red;
+    /* 0x43 */ u8 green;
+    /* 0x44 */ u8 blue;
+    /* 0x45 */ u8 alpha;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ u8 unk48;
+    /* 0x49 */ u8 unk49;
+} SpriteObj;
+
 
 void func_150B6C90(void);
 void func_150B6D34(void);
@@ -13,8 +91,9 @@ void func_150B77A8(void);
 void func_150B768C(void);
 void func_150B791C(void);
 
-void func_150B6BC0(s32 arg0) {
-    switch ((u8)D_800D9890) {
+/* Runs the command queued in D_800D9890 (each handler resets it to 3). */
+void func_150B6BC0(s32 unused) {
+    switch (D_800D9890) {
     case 1:
         func_150B6C90();
         return;
@@ -46,176 +125,145 @@ void func_150B6BC0(s32 arg0) {
     }
 }
 
-extern s32 *D_800D9894;
-static s32 *D_800D9898[10];
+extern struct102 *D_800D9894;
+// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
+static struct102 *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
 
+/* Recreates the func_151A4FD0 effect and forgets all sprites. */
 void func_150B6C90(void) {
     s32 i;
 
-    if (D_800D9894 != 0) {
-        func_1516972C((struct102 *)D_800D9894);
+    if (D_800D9894 != NULL) {
+        func_1516972C(D_800D9894);
     }
-    D_800D9894 = (s32 *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    D_800D9894 = (struct102 *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     D_800D9890 = 3;
     for (i = 0; i < 10; i++) {
-        D_800D9898[i] = 0;
+        D_800D9898[i] = NULL;
     }
 }
 
-extern s32 *D_800D9898[];
-extern s32 *D_800D98A4[];
-
+/* Starts the three scrolling sprites (slots 5-7) moving on to their next stage. */
 void func_150B6D34(void) {
     s32 i;
-    s32 *e;
+    SpriteObj *sprite;
 
-    i = 0;
-    do {
-        e = D_800D9898[i + 5];
-        if (e != 0) {
-            e[8] = 1;
+    for (i = 0; i < 3; i++) {
+        sprite = (SpriteObj *)D_800D9898[i + 5];
+        if (sprite != NULL) {
+            sprite->params.scroll.stage = 1;
         }
-        i++;
-    } while (&D_800D98A4[0] != &D_800D9898[i]);
+    }
     D_800D9890 = 3;
 }
 
-extern s32 *D_800D9894;
-extern s32 *D_800D98C0[];
-
+/* Frees the func_151A4FD0 effect and every sprite. */
 void func_150B6D78(void) {
     s32 i;
 
-    if (D_800D9894 != 0) {
-        func_1516972C((struct102 *)D_800D9894);
-        D_800D9894 = 0;
+    if (D_800D9894 != NULL) {
+        func_1516972C(D_800D9894);
+        D_800D9894 = NULL;
     }
-    i = 0;
-    do {
-        if (D_800D9898[i] != 0) {
-            func_1516972C((struct102 *)D_800D9898[i]);
-            D_800D9898[i] = 0;
+    for (i = 0; i < 10; i++) {
+        if (D_800D9898[i] != NULL) {
+            func_1516972C(D_800D9898[i]);
+            D_800D9898[i] = NULL;
         }
-        i++;
-    } while (&D_800D98C0[0] != &D_800D9898[i]);
+    }
     D_800D9890 = 3;
 }
 
-void func_150B6DFC(void *arg0) {
-    *(s16 *)((u8 *)arg0 + 0x34) += D_800BE9E4 * 0x30;
-    if (*(s16 *)((u8 *)arg0 + 0x34) >= 0x801) {
-        *(s16 *)((u8 *)arg0 + 0x34) = -0xC00;
+/* Update routine 4: advances unk34 by 0x30 per frame, wrapping from above 0x800 back to -0xC00. */
+void func_150B6DFC(SpriteObj *sprite) {
+    sprite->unk34 += D_800BE9E4 * 0x30;
+    if (sprite->unk34 > 0x800) {
+        sprite->unk34 = -0xC00;
     }
 }
-
-typedef struct {
-    u8 pad0[0x10];
-    void *unk10;
-    u8 pad14[4];
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 pad24[2];
-    s16 unk26;
-    u8 pad28[8];
-    f32 unk30;
-    u8 pad34[8];
-    s16 unk3C;
-    s16 unk3E;
-    u8 unk40;
-    u8 unk41;
-    u8 pad42[3];
-    u8 unk45;
-} Struct150B6E3C;
 
 extern u8 D_80091918[];
 
-void func_150B6E3C(Struct150B6E3C *arg0) {
+/* Update routine 5: scrolls the sprite up through its animation frames, fading it with its distance
+ * from y = 170, until it reaches its target frame and y. Once stopped at y = 170 it blinks, and after
+ * the third blink it turns into the D_80091918 sprite run by update routine 8 (func_150B709C). */
+void func_150B6E3C(SpriteObj *sprite) {
     u32 three;
-    f32 d;
-    s32 v;
+    f32 dist;
+    s32 alpha;
 
-    d = 0.0f;
-    three = 3;
-    if (arg0->unk20 == 0 || arg0->unk26 != arg0->unk18 ||
-        (d = (arg0->unk30 < (f32)arg0->unk1C) ? -(arg0->unk30 - (f32)arg0->unk1C) : (arg0->unk30 - (f32)arg0->unk1C),
-         (f32)(s32)(D_800BE9E4 * three) < d)) {
-        arg0->unk30 -= (f32)(s32)(D_800BE9E4 * three);
-        if (arg0->unk30 <= 140.0f) {
-            arg0->unk26 += 0x100;
-            if (arg0->unk26 >= (arg0->unk41 << 8)) {
-                arg0->unk26 = 0;
+    dist = 0.0f; // matching: a dead first def makes IDO give dist the first FP register
+    three = 3;   // matching: one register for the multu step and the stage compare
+    if (sprite->params.scroll.stage == 0 || sprite->frame != sprite->params.scroll.frame ||
+        (dist = (sprite->y < (f32)sprite->params.scroll.y) ? -(sprite->y - (f32)sprite->params.scroll.y)
+                                                          : (sprite->y - (f32)sprite->params.scroll.y),
+         (f32)(s32)(D_800BE9E4 * three) < dist)) {
+        sprite->y -= (f32)(s32)(D_800BE9E4 * three);
+        if (sprite->y <= 140.0f) {
+            sprite->frame += 0x100;
+            if (sprite->frame >= (sprite->frameCount << 8)) {
+                sprite->frame = 0;
             }
-            arg0->unk30 = 200.0f - (140.0f - arg0->unk30);
+            sprite->y = 200.0f - (140.0f - sprite->y);
         }
-        v = 0xFF - (((arg0->unk30 < 170.0f) ? (s32)-(arg0->unk30 - 170.0f) : (s32)(arg0->unk30 - 170.0f)) * 8);
-        if (v < 0) {
-            v = 0;
+        alpha = 0xFF - ((sprite->y < 170.0f) ? (s32)-(sprite->y - 170.0f) : (s32)(sprite->y - 170.0f)) * 8;
+        if (alpha < 0) {
+            alpha = 0;
         }
-        arg0->unk45 = v;
+        sprite->alpha = alpha;
         return;
     }
-    arg0->unk30 = arg0->unk1C;
-    if (arg0->unk1C == 0xAA) {
-        v = arg0->unk45;
-        v += D_800BE9E4 * 8;
-        if (v >= 0x100) {
-            arg0->unk20++;
-            if (arg0->unk20 == three) {
-                arg0->unk10 = D_80091918;
-                arg0->unk40 = 8;
-                arg0->unk45 = 0xFF;
-                arg0->unk3C = 0x80;
-                arg0->unk3E = 0x10;
-                arg0->unk26 = 0;
-                arg0->unk18 = 0;
+
+    sprite->y = sprite->params.scroll.y;
+    if (sprite->params.scroll.y == 170) {
+        alpha = sprite->alpha;
+        alpha += D_800BE9E4 * 8;
+        if (alpha >= 0x100) {
+            sprite->params.scroll.stage++;
+            if (sprite->params.scroll.stage == three) {
+                sprite->texture = D_80091918;
+                sprite->update = 8;
+                sprite->alpha = 0xFF;
+                sprite->width = 128;
+                sprite->height = 16;
+                sprite->frame = 0;
+                sprite->params.slide.elapsed = 0;
                 return;
             }
-            v = 0;
+            alpha = 0;
         }
-        arg0->unk45 = v;
+        sprite->alpha = alpha;
         return;
     }
-    v = 0xFF - (((arg0->unk30 < 170.0f) ? (s32)-(arg0->unk30 - 170.0f) : (s32)(arg0->unk30 - 170.0f)) * 9);
-    if (v < 0) {
-        v = 0;
+    alpha = 0xFF - ((sprite->y < 170.0f) ? (s32)-(sprite->y - 170.0f) : (s32)(sprite->y - 170.0f)) * 9;
+    if (alpha < 0) {
+        alpha = 0;
     }
-    arg0->unk45 = v;
+    sprite->alpha = alpha;
 }
 
-typedef struct {
-    u8 pad0[0x18];
-    s32 unk18;
-    u8 pad1C[0x10];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x11];
-    u8 unk45;
-} Struct150B709C;
+/* Update routine 8: slides the sprite from (230, 170) to (146, 120) over 30 steps, then blinks it. */
+void func_150B709C(SpriteObj *sprite) {
+    s32 elapsed;
+    s32 alpha;
 
-void func_150B709C(Struct150B709C *arg0) {
-    s32 div;
-    s32 var_v0;
-    s32 var_v1;
-
-    div = 0x1E;
-    var_v0 = arg0->unk18;
-    if (var_v0 == div) {
-        var_v1 = arg0->unk45;
-        var_v1 += D_800BE9E4 * 8;
-        if (var_v1 >= 0x100) {
-            var_v1 = 0;
+    elapsed = sprite->params.slide.elapsed;
+    if (elapsed == 30) {
+        alpha = sprite->alpha;
+        alpha += D_800BE9E4 * 8;
+        if (alpha >= 0x100) {
+            alpha = 0;
         }
-        arg0->unk45 = var_v1;
+        sprite->alpha = alpha;
     }
-    var_v0 += D_800BE9E4 * 2;
-    if (var_v0 >= 0x1F) {
-        var_v0 = div;
+    elapsed += D_800BE9E4 * 2;
+    if (elapsed > 30) {
+        elapsed = 30;
     }
-    arg0->unk18 = var_v0;
-    arg0->unk2C = (f32)(((var_v0 * -0x54) / div) + 0xE6);
-    arg0->unk30 = (f32)(((var_v0 * -0x32) / div) + 0xAA);
+    sprite->params.slide.elapsed = elapsed;
+    sprite->x = elapsed * -84 / 30 + 230;
+    sprite->y = elapsed * -50 / 30 + 170;
 }
 
 extern s32 D_800BE9E4;
@@ -467,10 +515,10 @@ void func_150B7560(void) {
     sp1C.unk2A = 0x1000;
     sp1C.unk1C = 60.0f;
     sp1C.unk20 = 60.0f;
-    if (D_800D98A4[0] != 0) {
-        func_1516972C((struct102 *)D_800D98A4[0]);
+    if (D_800D9898[3] != 0) {
+        func_1516972C((struct102 *)D_800D9898[3]);
     }
-    D_800D98A4[0] = (s32 *)func_15169968(&sp1C);
+    D_800D9898[3] = (s32 *)func_15169968(&sp1C);
     D_800D9890 = 3;
 }
 
