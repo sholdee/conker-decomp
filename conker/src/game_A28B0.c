@@ -379,7 +379,7 @@ void func_1507602C(void) {
     dz = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].z - D_800D154C->z_position;
     time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->unk44);
     if (time < 12.0f) {
-        D_800D154C->unk44 *= time * D_8009A140;
+        D_800D154C->unk44 *= time * 0.08333300054f;
         time = 12.0f;
     }
     D_800D154C->unk21C = (u32)(time * 100.0f);
@@ -964,79 +964,46 @@ void func_15077508(void) {
     }
 }
 
-extern struct127 *D_800D154C;
-extern u8 *D_800D2108;
-void func_150778F0(void)
-{
-  u8 temp_t9;
-  temp_t9 = (*((u8 **) (&D_800D2108)))[(*D_800D154C).unk13F] - 1;
-  if (D_800D154C->unk21F != 0)
-  {
-    temp_t9 = D_800D154C->unk21F;
-  }
-  D_800D154C->unk21E += D_800D154C->unk221;
-  D_800D154C->unk21E += temp_t9;
-  D_800D154C->unk21E %= temp_t9;
-  if (D_800D154C->unk21E < D_800D154C->unk220)
-  {
-    D_800D154C->unk21E = D_800D154C->unk220;
-  }
-}
+/* Advances the waypoint index by unk221, wrapping around the path (or the first unk21F waypoints). */
+void func_150778F0(void) {
+    u8 count;
 
-// NON-MATCHING: close but not there yet
-// void func_150778F0(void) {
-//     u8 temp_t9;
-//
-//     temp_t9 = (u8)(D_800D2108 + D_800D154C->unk13F) - 1;
-//     if (D_800D154C->unk21F != 0) {
-//         temp_t9 = D_800D154C->unk21F;
-//     }
-//     D_800D154C->unk21E += D_800D154C->unk221;
-//     D_800D154C->unk21E += temp_t9;
-//     D_800D154C->unk21E %= temp_t9;
-//     if (D_800D154C->unk21E < D_800D154C->unk220) {
-//         D_800D154C->unk21E = D_800D154C->unk220;
-//     }
-// }
+    count = D_800D2108[D_800D154C->unk13F] - 1;
+    if (D_800D154C->unk21F != 0) {
+        count = D_800D154C->unk21F;
+    }
+    D_800D154C->unk21E += D_800D154C->unk221;
+    D_800D154C->unk21E += count;
+    D_800D154C->unk21E %= count;
+    if (D_800D154C->unk21E < D_800D154C->unk220) {
+        D_800D154C->unk21E = D_800D154C->unk220;
+    }
+}
 
 void func_150779A8(void) {
     func_15075650();
-    D_800D154C->unk223 = 0xB;
+    D_800D154C->unk223 = 11;
 }
 
+/* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
 void func_150779D4(void) {
-    struct127 *tmp;
-    u8 idx;
-    f32 temp_f2;
+    struct127 *obj;
+    u8 index;
+    f32 range;
 
-    idx = 0;
+    index = 0;
     if (D_800D1892 != 0) {
-        idx = D_800D154C->unk222;
+        index = D_800D154C->unk222;
     }
-    if (D_800C3E78 != idx) {
-        tmp = &D_800CC2D0[idx];
-        if ((tmp->interaction_state != 1) || (tmp->unk65 == 0)) {
-            if (func_1505A6F8(D_800D154C, tmp) < (temp_f2 = D_800D1893 << 3)) {
+    if (D_800C3E78 != index) {
+        obj = &D_800CC2D0[index];
+        if ((obj->interaction_state != 1) || (obj->unk65 == 0)) {
+            if (func_1505A6F8(D_800D154C, obj) < (range = D_800D1893 << 3)) {
                 func_15075400(D_800D1890);
             }
         }
     }
 }
-// NON-MATCHING: JUSTREG! using $f6 not $f2
-// void func_150779D4(void) {
-//     struct127 *tmp;
-//     u8 idx = 0;
-//
-//     if (D_800D1892 != 0) {
-//         idx = D_800D154C->unk222;
-//     }
-//     tmp = &D_800CC2D0[idx];
-//     if ((D_800C3E78 != idx) && ((tmp->unk0 != 1) || (tmp->unk65 == 0))) {
-//         if (func_1505A6F8(D_800D154C, tmp) < (D_800D1893 * 8)) {
-//              func_15075400(D_800D1890);
-//         }
-//     }
-// }
 
 void func_15077AA0(void) {
     D_800D154C->unk239 = D_800D1890;
@@ -1045,7 +1012,7 @@ void func_15077AA0(void) {
 void func_15077ABC(void) {
     D_800D154C->unk258 = D_800D1890;
     D_800D154C->unk257 = D_800D1891;
-    D_800D154C->unk86 = func_150ADA20() % 0xFFU;
+    D_800D154C->unk86 = func_150ADA20() % 255U;
 }
 
 void func_15077B14(void) {
@@ -1058,49 +1025,56 @@ void func_15077B44(void) {
 }
 
 void func_15077B80(void) {
-    s32 tmp = (D_800D1890 << 8) + D_800D1891;
-    D_800D154C->unk25C |= tmp;
+    s32 flags = (D_800D1890 << 8) + D_800D1891;
+
+    D_800D154C->unk25C |= flags;
 }
 
+/* Restarts the object returned by func_1505F0AC(arg1) on script arg0. */
 void func_15077BB4(void) {
-    struct127 *tmp = func_1505F0AC(D_800D1891);
-    tmp->unk218 = 0;
-    tmp->unk232 = D_800D1890;
+    struct127 *obj = func_1505F0AC(D_800D1891);
+
+    obj->unk218 = NULL;
+    obj->unk232 = D_800D1890;
 }
 
 void func_15077BE4(void) {
-    s32 tmp = ~((D_800D1890 << 8) + D_800D1891);
-    D_800D154C->unk25C &= tmp;
+    s32 mask = ~((D_800D1890 << 8) + D_800D1891);
+
+    D_800D154C->unk25C &= mask;
 }
 
 void func_15077C1C(void) {
     D_800D154C->unk23D = D_800D1890;
 }
 
+/*
+ * Targets an object that is alive, not immune (or 0xFF), not riding (unless arg2) and either of
+ * type arg0 or in state arg1 and not stunned: the first one found if arg3 == 0, else the nearest.
+ */
 void func_15077C38(void) {
-    struct127 *actor;
-    f32 tmp0;
-    f32 distance;
+    struct127 *obj;
+    f32 nearest;
+    f32 dist;
     s32 i;
 
-    tmp0 = D_8009A148;
-    D_800D154C->unk222 = (u8)0;
+    nearest = 9999999.0f;
+    D_800D154C->unk222 = 0;
 
     for (i = 0; i < 25; i++) {
-        actor = &D_800CC2D0[i];
-        if (((actor->interaction_state != 0) && (actor->health != 0)) &&
-            ((actor->immune == 0) || (actor->immune == 0xFF)) &&
-            ((actor->unk65 == 0) || (D_800D1892 != 0)) &&
-            ((actor->id == D_800D1890) || ((actor->interaction_state == D_800D1891) &&
-            (actor->stunned == 0)))) {
+        obj = &D_800CC2D0[i];
+        if (((obj->interaction_state != 0) && (obj->health != 0)) &&
+            ((obj->immune == 0) || (obj->immune == 0xFF)) &&
+            ((obj->unk65 == 0) || (D_800D1892 != 0)) &&
+            ((obj->id == D_800D1890) || ((obj->interaction_state == D_800D1891) && (obj->stunned == 0)))) {
             if (D_800D1893 == 0) {
                 D_800D154C->unk222 = i;
                 return;
             }
-            distance = func_1505A72C(D_800D154C, actor);
-            if (tmp0 > distance) {
+            dist = func_1505A72C(D_800D154C, obj);
+            if (nearest > dist) {
                 D_800D154C->unk222 = i;
-                tmp0 = distance;
+                nearest = dist;
             }
         }
     }
@@ -1110,19 +1084,20 @@ void func_15077DA0(void) {
     D_800D154C->unk21E = D_800D1890;
 }
 
-struct func_15077DBC_pt { s16 unk0; s16 unk2; s16 unk4; s16 unk6; };
+/* Moves the object onto waypoint arg0 (0xFA: the current waypoint). */
 void func_15077DBC(void) {
     if (D_800D1890 != 0xFA) {
         D_800D154C->unk21E = D_800D1890;
     }
-    D_800D154C->x_position = (((struct func_15077DBC_pt **)D_800D2104)[D_800D154C->unk13F] + D_800D154C->unk21E)[1].unk0;
-    D_800D154C->y_position = (((struct func_15077DBC_pt **)D_800D2104)[D_800D154C->unk13F] + D_800D154C->unk21E)[1].unk2;
-    D_800D154C->z_position = (((struct func_15077DBC_pt **)D_800D2104)[D_800D154C->unk13F] + D_800D154C->unk21E)[1].unk4;
+    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x;
+    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].y;
+    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
 }
 
 void func_15077E9C(void) {
-    s32 tmp = ((D_800D1890 << 8) + D_800D1891);
-    func_10012718(tmp, D_800D154C, 0x5DC0, 0x1F4, 0x9C4);
+    s32 id = (D_800D1890 << 8) + D_800D1891;
+
+    func_10012718(id, D_800D154C, 24000, 500, 2500);
 }
 
 void func_15077EEC(void) {
@@ -1138,6 +1113,7 @@ void func_15077F34(void) {
     D_800D154C->unk250 = D_800D1891;
 }
 
+/* Turns the object towards the current waypoint, starting turn animation arg0 - 1 for large turns. */
 void func_15077F64(void) {
     f32 dx;
     f32 dz;
@@ -1158,17 +1134,18 @@ void func_15077F64(void) {
     }
 }
 
+/* Jumps to arg0 when any other active object is within arg3 * 8 units. */
 void func_15078074(void) {
-    f32 temp_f20;
-    struct127 *tmp;
+    f32 range;
+    struct127 *obj;
     s32 i;
 
-    temp_f20 = 8 * D_800D1893;
+    range = 8 * D_800D1893;
 
     for (i = 0; i < 25; i++) {
-        tmp = &D_800CC2D0[i];
-        if ((tmp->interaction_state != 0) && (D_800C3E78 != i)) {
-            if (func_1505A6F8(D_800D154C, tmp) < temp_f20) {
+        obj = &D_800CC2D0[i];
+        if ((obj->interaction_state != 0) && (D_800C3E78 != i)) {
+            if (func_1505A6F8(D_800D154C, obj) < range) {
                 func_15075400(D_800D1890);
                 return;
             }
@@ -1176,9 +1153,11 @@ void func_15078074(void) {
     }
 }
 
+/* Jumps to arg0 when the target is inactive. */
 void func_1507813C(void) {
-    s32 idx = D_800D154C->unk222;
-    if (D_800CC2D0[idx].interaction_state == 0) {
+    s32 index = D_800D154C->unk222;
+
+    if (D_800CC2D0[index].interaction_state == 0) {
         func_15075400(D_800D1890);
     }
 }
@@ -1190,18 +1169,18 @@ void func_150781A4(void) {
     D_800D154C->unk242 = D_800D1893;
 }
 
-struct func_150781F4_pt { s16 unk0; s16 unk2; s16 unk4; s16 unk6; };
+/* Jumps to arg0 when the object is closer (arg2 == 0) or farther (arg2 != 0) than arg3 * 8 from waypoint arg1. */
 void func_150781F4(void) {
-    struct func_150781F4_pt *temp_v0;
+    PathPoint *point;
     f32 dx;
     f32 dz;
     f32 dist;
-    s32 idx;
+    s32 index;
 
-    idx = D_800D1891 + 1;
-    temp_v0 = &((struct func_150781F4_pt **)D_800D2104)[D_800D154C->unk13F][idx];
-    dx = temp_v0->unk0 - D_800D154C->x_position;
-    dz = temp_v0->unk4 - D_800D154C->z_position;
+    index = D_800D1891 + 1;
+    point = &(&D_800D2104[D_800D154C->unk13F]->center)[index];
+    dx = point->x - D_800D154C->x_position;
+    dz = point->z - D_800D154C->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(D_800D1893 << 3);
     if (((D_800D1892 == 0) && (dist < dx)) ||
@@ -1214,6 +1193,7 @@ void func_150782CC(void) {
     D_800D154C->unk23E = D_800D1890;
 }
 
+/* Jumps to arg0 when the object's unique id is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_150782E8(void) {
     if (((D_800D1892 == 0) && (D_800D154C->unique_id == D_800D1891)) ||
         ((D_800D1892 == 1) && (D_800D154C->unique_id != D_800D1891))) {
@@ -1221,63 +1201,44 @@ void func_150782E8(void) {
     }
 }
 
+/* Targets the object with unique id arg0 (object 0 if there is none). */
 void func_15078358(void) {
-    s32 tmp = func_15083FB0(D_800D1890);
-    D_800D154C->unk222 = tmp;
-    if (tmp == -1) {
+    s32 index = func_15083FB0(D_800D1890);
+
+    D_800D154C->unk222 = index;
+    if (index == -1) {
         D_800D154C->unk222 = 0;
     }
 }
 
+/*
+ * Jumps to arg0 when the distance to the target (arg2: 0 func_1505A6F8, 1 func_1505A72C, else the
+ * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: unk23D * 8).
+ */
 void func_1507839C(void) {
-    struct127 *tmp;
-    f32 distance;
+    struct127 *target;
+    f32 dist;
     f32 threshold;
 
     if (D_800D1892 == 0) {
-        tmp = &D_800CC2D0[D_800D154C->unk222];
-        distance = func_1505A6F8(D_800D154C, tmp);
+        target = &D_800CC2D0[D_800D154C->unk222];
+        dist = func_1505A6F8(D_800D154C, target);
     } else if (D_800D1892 == 1) {
-        tmp = &D_800CC2D0[D_800D154C->unk222];
-        distance = func_1505A72C(D_800D154C, tmp);
+        target = &D_800CC2D0[D_800D154C->unk222];
+        dist = func_1505A72C(D_800D154C, target);
     } else {
-        distance = fabsf(D_800D154C->y_position - *(f32 *)((s32)D_800CC2E8 + (D_800D154C->unk222 * 812)));
+        dist = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
     }
 
     threshold = D_800D1893 * 8;
     if (D_800D1893 == 0xFF) {
         threshold = D_800D154C->unk23D * 8;
     }
-    if (((D_800D1891 == 0) && (distance < threshold)) ||
-        ((D_800D1891 == 1) && (threshold < distance))) {
+    if (((D_800D1891 == 0) && (dist < threshold)) ||
+        ((D_800D1891 == 1) && (threshold < dist))) {
         func_15075400(D_800D1890);
     }
 }
-// NON-MATCHING: JUSTREG
-// void func_1507839C(void) {
-//     struct127 *tmp;
-//     f32 distance;
-//     f32 threshold;
-//
-//     if (D_800D1892 == 0) {
-//         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         distance = func_1505A6F8(D_800D154C, tmp);
-//     } else if (D_800D1892 == 1) {
-//         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         distance = func_1505A72C(D_800D154C, tmp);
-//     } else {
-//         distance = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
-//     }
-//
-//     threshold = D_800D1893 * 8;
-//     if (D_800D1893 == 0xFF) {
-//         threshold = D_800D154C->unk23D * 8;
-//     }
-//     if (((D_800D1891 == 0) && (distance > threshold)) ||
-//         ((D_800D1891 == 1) && (distance > threshold))) {
-//         func_15075400(D_800D1890);
-//     }
-// }
 
 void func_15078520(void) {
     func_15075400(D_800D1890);
@@ -2538,7 +2499,7 @@ typedef struct {
 } ScriptEntry;
 
 extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
-extern struct216 D_8009A120[];    // empty script
+extern struct216 D_8009A120[];    // fallback script
 
 /* Returns script `arg1` of the current object's type, falling back to the default table. */
 struct216 *func_1507BB28(s32 arg0, s32 arg1) {
