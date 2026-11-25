@@ -422,36 +422,34 @@ void func_1507D1D8(struct127 *obj) {
     }
 }
 
-void func_1507D4F8(s32 arg0) {
-    s32 sp24;
-    struct127 *temp_a0;
+/* Handles object slot losing a life: respawns it, or takes it out of the game when none are left. */
+void func_1507D4F8(s32 slot) {
+    struct127 *obj;
+    ObjState *state;
 
-    if ((D_8008FDBC & 1) == 0) {
-        func_15085710((s16)arg0, 4, 1);
+    if (!(D_8008FDBC & 1)) {
+        func_15085710(slot, 4, 1);
     }
 
-    sp24 = (s16)arg0;
-    if (func_150859AC(sp24, 3) != 0) {
-        func_15085710(sp24, 5, D_8008726C);
-        temp_a0 = &D_800CC2D0[arg0];
-        temp_a0->unkB2 = 0;
+    if (func_150859AC(slot, 3) != 0) {
+        func_15085710(slot, 5, D_8008726C);
+        obj = &D_800CC2D0[slot];
+        obj->unkB2 = 0;
 
         if (D_800BE616 != 0) {
             if (*(s8 *)&D_800E0C20 == 0) {
-                func_1507D1D8(temp_a0);
+                func_1507D1D8(obj);
                 return;
             }
-
-            temp_a0->unk31C->unk120 = 0xA;
+            STATE(obj)->state = 10;
             return;
         }
 
         D_800D18A8 = 1;
-        if (((D_800D2E4C->unk19 & 4) == 0) && (D_8008FDA8 >= 0)) {
+        if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
             func_1501C730(1, 0x22, 0, 0, 0);
             return;
         }
-
         func_1501C730(2, *(s8 *)&D_800BE3DF, D_800BE3E0, 0, 0);
         return;
     }
@@ -460,69 +458,23 @@ void func_1507D4F8(s32 arg0) {
         D_800D2E43 = 1;
         func_1509C3A0();
         D_800D18A8 = 1;
-        func_15085710(sp24, 5, D_8008726C);
-        func_15085710(sp24, 2, D_80087260);
+        func_15085710(slot, 5, D_8008726C);
+        func_15085710(slot, 2, D_80087260);
         func_1501C730(1, 0x18, 0, 0, 0);
     } else {
-        D_800D18A0 = D_800D18A0 | (1 << arg0);
+        D_800D18A0 |= 1 << slot;
     }
 
-    temp_a0 = &D_800CC2D0[arg0];
-    sp24 = (s32)temp_a0->unk31C;
-    if (((struct126 *)sp24)->unk84 == 0) {
+    obj = &D_800CC2D0[slot];
+    state = STATE(obj);
+    if (state->team == 0) {
+        // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
         *(volatile s8 *)&D_8008FD94 = *(s8 *)&D_8008FD94 - 1;
-        sp24 = (s32)*(struct126 * volatile *)&temp_a0->unk31C;
+        state = *(ObjState *volatile *)&obj->unk31C;
     }
-    ((struct126 *)sp24)->unk120 = 0xA;
+    state->state = 10;
     D_800BE618--;
 }
-// NON-MATCHING: pretty far away!
-// void func_1507D4F8(s16 arg0) { // struct126 *
-//     // ?32 sp24;
-//     struct127 *temp_a0;
-//
-//     if ((D_8008FDBC & 1) == 0) {
-//         func_15085710(arg0, 4, 1);
-//     }
-//     // sp24 = (?32) arg0;
-//     if (func_150859AC(arg0, 3) != 0) {
-//         func_15085710(arg0, 5, D_8008726C); //temp_ret =
-//         temp_a0 = &D_800CC2D0[arg0];
-//         temp_a0->unkB2 = (u16)0;
-//         if (D_800BE616 == 0) {
-//             D_800D18A8 = (u8)1;
-//             if (((D_800D2E4C->unk19 & 4) != 0) || (D_8008FDA8 < 0)) {
-//                 func_1501C730(2, D_800BE3DF, D_800BE3E0, 0, 0);
-//                 return;
-//             }
-//             func_1501C730(1, 0x22, 0, 0, 0);
-//             return;
-//         }
-//         if (D_800E0C20 != 0) {
-//             temp_a0->unk31C->unk120 = (u8)0xA;
-//             return; // temp_ret;
-//         }
-//         func_1507D1D8(temp_a0);
-//         return;
-//     }
-//     if (D_800BE616 == 0) {
-//         D_800D2E43 = (u8)1;
-//         func_1509C3A0();
-//         D_800D18A8 = (u8)1;
-//         func_15085710(arg0, 5, D_8008726C);
-//         func_15085710(arg0, 2, D_80087260);
-//         func_1501C730(1, 0x18, 0, 0, 0);
-//     } else {
-//         D_800D18A0 = (u16) (D_800D18A0 | (1 << (s32) arg0));
-//     }
-//     // temp_a0 = &D_800CC2D0[arg0];
-//     if (temp_a0->unk31C->unk84 == 0) {
-//         D_8008FD94 -= 1; //(s8) (D_8008FD94 - 1);
-//     }
-//     temp_a0->unk31C->unk120 = (u8)0xA;
-//     D_800BE618 -= 1; //(s8) (D_800BE618 - 1);
-//     //return temp_a0_2->unk31C;
-// }
 
 typedef struct D754Obj {
     /* 0x00 */ f32 unk0;
