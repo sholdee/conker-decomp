@@ -77,7 +77,6 @@ extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800DD2E4[];
 extern u16 D_800DD2E8;
 extern u16 D_800DD2EC;
-extern void *D_800DF7C0;
 extern u8 D_800DF7C4;
 extern u8 D_80082FC0[];
 extern u8 D_80083140[];
@@ -598,7 +597,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     if (mode == 4) {
         alpha = (D_800DF7C4 * alpha) >> 8;
-        model = D_800DF7C0;
+        model = (s32)D_800DF7C0;
     } else {
         model = obj->unk1D4;
     }

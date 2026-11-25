@@ -10,10 +10,8 @@ extern s16  D_800E0E14;
 extern s16  D_800E0E16;
 extern u8   D_800E0E18;
 extern u8   D_800E0E2C;
-extern s32  D_800E0E20;
 extern s32  D_800E0E24;
 extern s32  D_800E0E28;
-extern s32  *D_800E0E30; // 0x8000
 extern s16  D_800E0DB0;
 extern s16  D_800E0DB2;
 extern s32  D_800E0DD8;
@@ -82,7 +80,7 @@ void func_151F2960(s32 arg0, s32 arg1) {
             D_800E0E2C = 0;
             return;
         }
-        D_800E0E20 = func_1502B5C8(0, 2, 0x17, 4);
+        D_800E0E20 = (s32 *)func_1502B5C8(0, 2, 0x17, 4);
         if (D_800E0E20 != 0) {
             func_100043B4(D_800E0E20, 0xFF);
         }
@@ -105,7 +103,7 @@ void func_151F2960(s32 arg0, s32 arg1) {
                 func_10004074(D_800E0E28);
             }
             func_10004074(D_800E0E30);
-            D_800E0E30 = 0;
+            D_800E0E30 = NULL;
             D_800E0E2C = 0;
             return;
         }
@@ -418,7 +416,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
         }
         if (D_800E0E30 != 0) {
             func_10004074(D_800E0E30);
-            D_800E0E30 = 0;
+            D_800E0E30 = NULL;
         }
         D_800E0E04 = 0;
         return 0;

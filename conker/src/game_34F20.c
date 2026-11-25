@@ -92,7 +92,6 @@ extern s8 D_800BEA0C;
 
 
 extern s32 D_800DC9F0;
-extern s32 D_800E0920;
 extern s8 D_800E0A00;
 extern u8 D_800E0B99;
 extern u8 D_800E0BD1;
@@ -149,7 +148,7 @@ void func_15007B3C(void) {
     func_1500E738();
     func_1500C2A0();
     D_800DC9F0 = 0;
-    D_800E0920 = 0;
+    D_800E0920 = NULL;
     func_15008840();
     D_8003E384 = 1;
     resource = D_800DD2C0[0];

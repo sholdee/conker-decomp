@@ -353,7 +353,6 @@ extern u8 D_800C3680;
 extern u8 D_800C3672;
 extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
-extern s32 D_800C3D50;
 void func_150233BC(void);
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
@@ -364,7 +363,7 @@ void func_1501D044(s32 scene) {
     D_800C3C8E = 0;
     D_800C363A[scene] = 0;
     D_800C35EA[scene] = 0;
-    D_800C3D50 = 0;
+    D_800C3D50 = NULL;
     D_800C35F8 = 0xFF;
     D_800C3648 = 0.0f;
     D_800C364C = 0.0f;
@@ -560,7 +559,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
                 D_800840FC[callback](map, cutscene, scene, callbackArg);
             }
             D_800C3C9A = func_1501CFF8(scene);
-            D_800C3D50 = (s32)allocate_memory(D_800C3C9A * 12, 1, 0, 0);
+            D_800C3D50 = allocate_memory(D_800C3C9A * 12, 1, 0, 0);
             D_800C35B0[scene] = 0;
             func_1501CDC0(scene);
             func_1501CE54(scene);
@@ -899,7 +898,7 @@ void func_1501E540(s32 scene) {
         D_800C35D8[scene] = NULL;
         D_800C35E0[scene] = NULL;
         func_10004074(D_800C3D50);
-        D_800C3D50 = 0;
+        D_800C3D50 = NULL;
         func_10004074(D_800C3668[scene]);
         D_800C3668[scene] = 0;
     }

@@ -901,6 +901,7 @@ extern u8  D_800C3C88;
 extern u8  D_800C3C90;
 extern s32 D_800C3C94;
 extern SeqSubtitle D_800C3CA0[3];
+extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern u8  D_800C3E78;
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
@@ -1048,6 +1049,7 @@ extern SpawnRecord *D_800D20FC;
 
 extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
+extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
 extern s32 D_800D2120;
@@ -1256,6 +1258,7 @@ extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 
+extern void *D_800DD228;
 extern u8   D_800DD2C0[16]; // per player: spawn point
 extern u8   D_800DD2D0;
 extern u8   D_800DD2A0[4];
@@ -1319,6 +1322,7 @@ extern u8   D_800DDE40; // nonzero: iris driven by the cutscene tracks
 extern u8   D_800DDE50;
 extern EffectModelSlot D_800DDE80[11];
 
+extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
 extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
 extern u8   D_800DDF5C[];
 extern u8   D_800DDF60[];
@@ -1326,6 +1330,7 @@ extern s8   D_800DDF68[];
 extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display list
 
 /* 800E0000 */
+extern struct TrailTask *D_800E0920; // type in 1CA420
 extern u8   D_800E0B94;
 extern s8   D_800E0C20;
 extern s32  D_800E0E04;
@@ -1342,6 +1347,8 @@ extern StreamVoice D_800E0D80; // the streaming music player's voice
 
 // end of zero'd out section
 
+extern s32 *D_800E0E20; // Huffman table pointers, relocated by D_800E0E28
+extern f32 *D_800E0E30; // pow43 table storage (0x8000 bytes)
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 

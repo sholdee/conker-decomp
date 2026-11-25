@@ -242,7 +242,6 @@ extern s32 D_800D2C9C;
 extern s16 D_800DCE40;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
-extern void *D_800DD228;
 extern s32 D_800DD230;
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */

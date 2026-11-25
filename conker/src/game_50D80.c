@@ -14,7 +14,7 @@ typedef struct {
 } SeqEvent;
 
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
-typedef struct {
+typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
     /* 0x4 */ s32 time;
     /* 0x8 */ u8 track;
@@ -38,7 +38,6 @@ extern s32 D_800C35B0[];           /* current time */
 extern s32 D_800C35B8[];           /* time at the previous update */
 extern s32 D_800C3640[];           /* end time */
 extern u8 D_800C35E8[];            /* changes with each run of the scene */
-extern SeqQueueEntry *D_800C3D50;  /* dispatch queue, D_800C3C9A entries */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);

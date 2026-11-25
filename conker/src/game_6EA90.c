@@ -139,7 +139,6 @@ extern u8 D_80091740[];
 extern u8 D_80091750[];
 extern u8 D_80091764[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2CA0;
 extern s32 D_800BEBA4;
 f32 cosf(f32);
 Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
@@ -408,7 +407,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 }
                 // matching: IDO allocates differently without the dead store in "frame <<= 8"
                 gfx = func_15094F70(gfx, tex, frame <<= 8, &sprite, 0, 0, 0, 2, 3);
-                if (D_800D2CA0 != 0x80000000) {
+                if (D_800D2CA0 != (u8 *)0x80000000) {
                     gfx = func_15095A48(gfx, &sprite, x, y - yOff);
                 }
                 gSPDisplayList(gfx++, D_80087408);

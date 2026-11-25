@@ -154,7 +154,6 @@ extern void func_1519E688(void);
 extern s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out);
 extern Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
 extern void func_1514EDF0(s32 handle, Actor *owner);
-extern TrailTask *D_800E0920;
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 

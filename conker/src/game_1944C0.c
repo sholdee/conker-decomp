@@ -229,7 +229,6 @@ extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
-extern s32 D_800DD228;
 void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*
@@ -264,7 +263,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     mode1Start = gfx;
                 }
                 D_800D2DAB = 0;
-                D_800DD228 = 0;
+                D_800DD228 = NULL;
                 D_800DD220 = 0;
                 D_800DD224 = 2;
                 D_800DD1B0 = -1;

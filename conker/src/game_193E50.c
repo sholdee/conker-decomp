@@ -137,7 +137,6 @@ Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s
 extern s32 D_8009054C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
-extern void *D_800DD228;
 extern s32 D_800DD230;
 
 /* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */

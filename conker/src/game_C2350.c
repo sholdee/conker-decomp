@@ -57,7 +57,6 @@ void func_15094EA0(s32 view) {
 }
 
 extern Gfx D_800873D0[];
-extern u8 *D_800D2CA0;
 
 /* Emits display list D_800873D0 and forgets the last loaded texture address. */
 Gfx *func_15094F40(Gfx *gfx) {
