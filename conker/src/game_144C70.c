@@ -9,19 +9,6 @@ typedef struct PropGfx {
     /* 0x4 */ u32 w1;
 } PropGfx;
 
-/*
- * Vtx_t with named coordinates. matching: Vtx_t's ob[] subscripts make IDO schedule the coordinate
- * loads in a different order.
- */
-typedef struct PropVtx {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u16 flag;
-    /* 0x8 */ s16 tc[2];
-    /* 0xC */ u8 cn[4];
-} PropVtx;
-
 /* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     struct {
@@ -239,8 +226,6 @@ void func_15117D3C(WorldObject *prop, Actor *obj) {
         PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
 }
-
-extern void func_1511F31C(WorldObject *prop);
 
 /* Rotates the local point (x, y, z) by the prop's X then Y rotation and adds its position. */
 void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
@@ -567,8 +552,6 @@ void func_15117F3C(WorldObject *prop) {
     }
 }
 
-void func_151189AC(WorldObject *prop, s32 arg1);
-
 /* Door behaviours: func_151189AC with func_1511F990 mode 0 or 3. */
 void func_1511896C(WorldObject *prop) {
     func_151189AC(prop, 0);
@@ -582,7 +565,6 @@ void func_1511898C(WorldObject *prop) {
 extern void func_15173C60(s32, s32);
 extern void func_15173C90(s32, s32, s32);
 extern void func_1518804C(s32, f32);
-extern void func_1511F990(WorldObject *prop, s32);
 extern s32 func_15022B08(s32, s32);
 
 /*

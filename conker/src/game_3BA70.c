@@ -6,7 +6,6 @@
 
 extern void bzero(void *, int);
 void func_15012470(void);
-void func_15008E10(s32);
 void func_15189900(SprayDesc *, u8);
 
 extern u8 *D_80088870;

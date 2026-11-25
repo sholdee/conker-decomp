@@ -13,7 +13,6 @@ extern void func_1507DE4C(Actor *);
 extern void func_1507DF10(Actor *obj, s32 arg1);
 extern s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-extern void func_150EB484(f32 *, f32 *, f32 *);
 extern void func_15104608(f32, f32, f32, s32);
 extern void func_15137610(Actor *, void *, void *, void *, u8, s32);
 extern void func_15138C80(Actor *, s32, s32);
@@ -290,7 +289,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                 back[0] = hit->pos.x - hit->dir.x * 5.0f;
                 back[1] = hit->pos.y - hit->dir.y * 5.0f;
                 back[2] = hit->pos.z - hit->dir.z * 5.0f;
-                func_150EB484(front, back, &vc);
+                func_150EB484((Vec3f *)front, (Vec3f *)back, (Vec3f *)&vc);
             }
             // fallthrough
         case 9:

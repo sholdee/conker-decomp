@@ -24,8 +24,6 @@ typedef struct RomFile {
 extern VertexAnim D_80089320[];
 extern RomFile D_8002AAD0[];
 
-void func_151169B4(WorldObject *obj);
-void func_15116BAC(WorldObject *obj);
 
 /*
  * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)

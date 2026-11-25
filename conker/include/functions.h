@@ -211,7 +211,6 @@ void func_15008230(void);
 void func_15008248(s32 arg0);
 void func_150082CC(void);
 void func_15008A10(void);
-void func_15008E00(void);
 void func_150095D8(s32 arg0, s32 arg1);
 void func_15009600(s32 arg0, s32 arg1);
 void func_1500969C(s32 arg0, s32 arg1);
@@ -402,7 +401,6 @@ void func_1509B4A0(s32 arg0, s32 arg1);
 void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150CEF10(Camera *arg0);
 
-void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit);
 void func_150EC4B0(Camera *arg0);
 void func_150FCA00(Camera *arg0);
 
@@ -413,9 +411,6 @@ typedef struct BoltArcObj BoltArcObj; /* game_131F30.c */
 typedef struct SparkObj SparkObj;     /* game_131F30.c */
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg);
 void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
-void func_1511FC20(s32 arg0);
-Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
-Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 void func_15122AE0(void);
 void func_15124B18(Camera *arg0);
 void func_15123508(Camera *arg0);
@@ -676,7 +671,6 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32, s32, u8);
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 s32  func_1517EFAC(s32 arg0);
 s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);

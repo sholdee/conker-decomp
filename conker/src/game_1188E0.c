@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
    func_150A34B0 in game_D0960.c). */
@@ -9,8 +8,6 @@
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
 extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
-s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
-void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
@@ -59,8 +56,6 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
 }
 
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
-
-void func_15117770(WorldObject *obj);
 
 /*
  * Mover handler. In states 0-1 it swings rotX on a damped spring toward an angle set by the

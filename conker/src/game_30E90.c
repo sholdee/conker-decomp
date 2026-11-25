@@ -305,9 +305,6 @@ void func_150045BC(void) {
 }
 
 extern MtxF D_800DBF48;
-extern void func_151150B0(WorldObject *obj);
-extern void func_15116058(WorldObject *obj);
-extern void func_15116110(WorldObject *obj);
 void func_150A44F0(s32, u16 *, s32);
 void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,

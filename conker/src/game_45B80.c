@@ -348,7 +348,6 @@ void func_151738C4(s32);
 void func_1502C1A4(void);
 void func_150636F0(void);
 void func_151670C0(void);
-void func_15177A94(void);
 void func_151814FC(void);
 void func_1517F75C(void);
 void func_1517F7B4(void);

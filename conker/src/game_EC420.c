@@ -3,49 +3,10 @@
 #include "functions.h"
 #undef func_15133B98
 #include "variables.h"
-#include "effects.h"
-
-/* A piece spawned by func_15150400, as the handlers below see it. */
-typedef struct {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[0x1C];
-    /* 0x038 */ Vec3f position;
-    /* 0x044 */ u8 pad44[0x1C];
-    /* 0x060 */ s32 unk60;
-    /* 0x064 */ u8 pad64[0x2];
-    /* 0x066 */ u16 unk66;
-    /* 0x068 */ u8 pad68[0xA8];
-    /* 0x110 */ u8 unk110[0x60];
-    /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
-} Piece;
 
 extern void func_15150400(DebrisScatter *, AngleRange *, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
 extern void func_15153634(SpriteBurst *, u8, u8, s32);
-
-/* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ u8 pad18[0x7];
-    /* 0x1F */ u8 level;
-    /* 0x20 */ u8 pad20[0x4];
-    /* 0x24 */ u8 rising;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ u8 maxLevel;
-    /* 0x27 */ u8 riseRate;
-    /* 0x28 */ u8 pad28[0x4];
-    /* 0x2C */ u8 age;
-    /* 0x2D */ s8 unk14Rate;
-    /* 0x2E */ s8 unk16Rate;
-    /* 0x2F */ u8 fallRate;
-} Struct150BF0F4;
 
 void func_150BEF70(s32 arg0) {
 }
@@ -249,7 +210,6 @@ void func_150BF21C(WorldObject *obj) {
     }
 }
 
-void func_1511B51C(WorldObject *);
 void func_150825C0(s32, s32);
 
 /* Behaviour scratch state (WorldObject.touch) of the entry after func_150BF760's object. */

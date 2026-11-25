@@ -26,10 +26,6 @@ typedef union {
 
 #define WORK(obj) ((F4D20Work *)&(obj)->touch)
 
-extern void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale);
-extern void func_151150BC(WorldObject *obj);
-extern s32 func_15116110(WorldObject *obj);
-
 /* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {

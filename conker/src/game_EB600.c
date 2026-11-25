@@ -30,8 +30,6 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     return 1;
 }
 
-extern void func_1511650C(WorldObject *obj, s32, s32, f32);
-
 /* Until finished (task_flag state TASK_FLAG_ON): calls func_1511650C(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */

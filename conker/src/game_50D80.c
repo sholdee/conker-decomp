@@ -1171,7 +1171,6 @@ extern void func_15167AD8(Ev15167AD8 *, u8, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32);
-extern void func_150BEF7C(s32);
 extern f32 func_150489B0(u8);
 extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);

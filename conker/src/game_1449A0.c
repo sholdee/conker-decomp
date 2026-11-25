@@ -9,9 +9,6 @@
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 
-f32 func_151172D8(WorldObject *obj, f32 angle);
-f32 func_15117518(WorldObject *obj, f32 angle);
-
 /* Swings rotX toward the target angle with func_151172D8's damped spring. */
 void func_151174F0(WorldObject *obj) {
     obj->t = func_151172D8(obj, obj->t);
