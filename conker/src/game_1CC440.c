@@ -17,6 +17,11 @@ typedef struct TrailVec3 {
     f32 z;
 } TrailVec3;
 
+typedef struct TrailVec2 {
+    f32 x;
+    f32 z;
+} TrailVec2;
+
 struct Trail;
 struct TrailSpawner;
 
@@ -83,8 +88,7 @@ typedef struct TrailPoint {
     /* 0x16 */ s16 texS;
     /* 0x18 */ s16 life;
     /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ f32 velX;
-    /* 0x20 */ f32 velZ;
+    /* 0x1C */ TrailVec2 vel; /* drift velocity */
 } TrailPoint; /* size 0x24 */
 
 typedef struct Trail {
@@ -342,373 +346,258 @@ void func_1519F48C(Trail *trail) {
     config->flags |= 1;
 }
 
-typedef struct Vec3f_1519F4F0 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_1519F4F0;
+s32 func_15045800(TrailVec3 *, u16, f32, f32 *);
+extern f32 D_800BE9A4; /* frame time */
+extern s32 D_800BE9E4; /* frames elapsed */
 
-typedef struct Config_1519F4F0 {
-    void *owner;
-    u8 type;
-    u8 pad5[3];
-    f32 field8;
-    f32 fieldC;
-    Vec3f_1519F4F0 position;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    s16 field28;
-    u8 color[3];
-    u8 pad2D;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    u8 pad36[2];
-    f32 field38;
-    f32 field3C;
-    u8 field40;
-    u8 field41;
-    u8 field42;
-    u8 field43;
-    u8 field44;
-    u8 field45;
-    s16 field46;
-    s16 field48;
-    s16 field4A;
-    f32 field4C;
-} Config_1519F4F0;
-
-typedef struct TrailPoint_1519F4F0 {
-    f32 x, z, y, fieldC;
-    s16 size, delay, alpha;
-    u8 pad16[2];
-    s16 life;
-    u8 pad1A[2];
-    f32 velocityX, velocityZ;
-} TrailPoint_1519F4F0;
-
-s32 func_15045800(Vec3f_1519F4F0 *, u16, f32, void *);
-extern f32 D_800BE9A4;
-extern s32 D_800BE9E4;
-
-s32 func_1519F4F0(u8 *arg0) {
-    TrailPoint_1519F4F0 *base;
-    TrailPoint_1519F4F0 *point;
-    Config_1519F4F0 *config;
+/* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
+s32 func_1519F4F0(Trail *trail) {
+    TrailPoint *points;
+    TrailPoint *point;
+    TrailConfig *config;
     s32 index, expired;
 
-    config = *(Config_1519F4F0 **)(arg0 + 0x98);
-    base = *(TrailPoint_1519F4F0 **)(arg0 + 0x94);
-    if (*(s8 *)(arg0 + 0x2C) < 2 && (config->type & 1)) return 0;
-    index = *(s8 *)(arg0 + 0x2E);
-    if (index != *(s8 *)(arg0 + 0x2D)) {
-        do {
-            index--;
-            expired = 0;
-            if (index < 0) index = arg0[0x25] - 1;
-            point = base + index;
-            point->life = (u32)point->life - (u32)D_800BE9E4;
-            if (point->life < 0) expired = 1;
-            point->alpha = 255;
-            if (point->delay > 0) point->delay = (u32)point->delay - (u32)D_800BE9E4;
-            else point->size = (u32)point->size - (u32)config->field34 * (u32)D_800BE9E4;
-            point->fieldC += config->field3C * D_800BE9A4;
-            point->x += point->velocityX * D_800BE9A4;
-            point->z += point->velocityZ * D_800BE9A4;
-            {
-                Vec3f_1519F4F0 probe;
-                probe.x = point->x;
-                probe.y = point->y + 30.0f;
-                probe.z = point->z;
-                if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) expired = 1;
-                else if (func_15045800(&probe, 0, point->y - 30.0f, arg0 + 0x60) != 0) {
-                    point->y = *(f32 *)(arg0 + 0x60);
-                } else expired = 1;
-            }
-            if (point->size < 0) expired = 1;
-            if (expired != 0) {
-                if (index != *(s8 *)(arg0 + 0x2D)) {
-                    do {
-                        *(s8 *)(arg0 + 0x2D) += 1;
-                        if (arg0[0x25] == *(s8 *)(arg0 + 0x2D)) *(s8 *)(arg0 + 0x2D) = 0;
-                        *(s8 *)(arg0 + 0x2C) -= 1;
-                    } while (index != *(s8 *)(arg0 + 0x2D));
-                }
-                base[*(s8 *)(arg0 + 0x2D)].size = 0;
-            }
-        } while (index != *(s8 *)(arg0 + 0x2D));
+    config = trail->config;
+    points = trail->points;
+    if (trail->count < 2 && (config->flags & 1)) {
+        return 0;
     }
-    config->field46 = (u32)config->field46 + (u32)config->field48 * (u32)D_800BE9E4;
-    if (*(s8 *)(arg0 + 0x2C) > 0) {
-        *(f32 *)(arg0 + 0x54) = base[*(s8 *)(arg0 + 0x2D)].x;
-        *(f32 *)(arg0 + 0x58) = base[*(s8 *)(arg0 + 0x2D)].y;
-        *(f32 *)(arg0 + 0x5C) = base[*(s8 *)(arg0 + 0x2D)].z;
+    index = trail->head;
+    while (index != trail->tail) {
+        index--;
+        expired = 0;
+        if (index < 0) {
+            index = trail->capacity - 1;
+        }
+        point = &points[index];
+        point->life -= D_800BE9E4;
+        if (point->life < 0) {
+            expired = 1;
+        }
+        point->fade = 255;
+        if (point->fadeDelay > 0) {
+            point->fadeDelay -= D_800BE9E4;
+        } else {
+            point->alpha -= config->alphaDecay * D_800BE9E4;
+        }
+        point->width += config->widthGrowth * D_800BE9A4;
+        point->x += point->vel.x * D_800BE9A4;
+        point->z += point->vel.z * D_800BE9A4;
+        {
+            TrailVec3 probe;
+
+            probe.x = point->x;
+            probe.y = point->y + 30.0f;
+            probe.z = point->z;
+            if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) {
+                expired = 1;
+            } else if (func_15045800(&probe, 0, point->y - 30.0f, &trail->groundY) != 0) {
+                point->y = trail->groundY;
+            } else {
+                expired = 1;
+            }
+        }
+        if (point->alpha < 0) {
+            expired = 1;
+        }
+        if (expired) {
+            /* drop this point and every older one */
+            while (index != trail->tail) {
+                trail->tail++;
+                if (trail->tail == trail->capacity) {
+                    trail->tail = 0;
+                }
+                trail->count--;
+            }
+            points[trail->tail].alpha = 0;
+        }
+    }
+    config->texT += config->texTSpeed * D_800BE9E4;
+    if (trail->count > 0) {
+        trail->tailPos.x = points[trail->tail].x;
+        trail->tailPos.y = points[trail->tail].y;
+        trail->tailPos.z = points[trail->tail].z;
     } else {
-        *(f32 *)(arg0 + 0x54) = 0.0f;
-        *(f32 *)(arg0 + 0x58) = 0.0f;
-        *(f32 *)(arg0 + 0x5C) = 0.0f;
+        trail->tailPos.x = 0.0f;
+        trail->tailPos.y = 0.0f;
+        trail->tailPos.z = 0.0f;
     }
     return 1;
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3_1519F7F0;
-
-typedef struct {
-    f32 x, z;
-} Vec2_1519F7F0;
-
-struct Big1519F7F0 {
-    s32 unk0;
-    u8 pad4[0x10];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1B];
-    u8 unk3B;
-    u8 pad3C[0xDC];
-    f32 unk118;
-    u8 pad11C[0xB8];
-    s32 unk1D4;
-};
-
-struct Sub1519F7F0 {
-    u8 pad0[0x18];
-    struct Big1519F7F0 *unk18;
-    u8 unk1C;
-    u8 pad1D[0x3B];
-    s32 unk58[4];
-};
-
-struct Ref1519F7F0 {
-    struct Sub1519F7F0 *unk0;
-    u8 unk4;
-    f32 unk8;
-    f32 unkC;
-    Vec3_1519F7F0 unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    s16 pad2A[2];
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 pad34[4];
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[4];
-    u8 unk44;
-    u8 unk45;
-    u8 pad46[6];
-    f32 unk4C;
-};
-
-struct Elem1519F7F0 {
-    f32 x;
-    f32 z;
-    f32 unk8;
-    f32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    Vec2_1519F7F0 vel;
-};
-
-struct Obj1519F7F0 {
-    u8 pad0[0x10];
-    Vec3_1519F7F0 unk10;
-    u8 pad1C[2];
-    u16 unk1E;
-    s32 unk20;
-    u8 pad24;
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x31];
-    f32 unk60;
-    u8 pad64[0x30];
-    struct Elem1519F7F0 *unk94;
-    struct Ref1519F7F0 *unk98;
-};
-
-typedef struct {
-    struct Sub1519F7F0 *sub;
-    s8 type;
-} FxData1519F7F0;
-
-s32 func_1519F7F0(struct Obj1519F7F0 *arg0) {
-    struct Ref1519F7F0 *ref;
-    struct Elem1519F7F0 *elems;
-    struct Big1519F7F0 *big;
-    s32 padE;
+/*
+ * Trail update while attached: follows the owner's actor and lays new points along the path it moved.
+ * If the attach point is lost, detaches the trail and leaves a spawner to start a new one.
+ */
+s32 func_1519F7F0(Trail *trail) {
+    TrailConfig *config;
+    TrailPoint *points;
+    struct127 *actor;
+    s32 pad; // matching: unused stack slot in the original frame
     s32 found;
-    f32 stepH;
+    f32 widthStep;
     s32 i;
     s32 j;
     f32 invDist;
-    FxData1519F7F0 data;
+    TrailLink link;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 dist;
-    f32 speedStep;
+    f32 ageStep;
     f32 inv;
-    Vec3_1519F7F0 cur;
-    f32 speed;
-    f32 y;
-    f32 dyy;
-    s32 *slots;
-    struct260 *fx;
+    TrailVec3 cur;
+    f32 age;
+    f32 width;
+    f32 widthDelta;
+    TrailSide *sides;
+    TrailSpawner *spawner;
     f32 stepX;
-    Vec2_1519F7F0 vel;
+    TrailVec2 vel;
     f32 stepY;
     f32 stepZ;
 
-    ref = arg0->unk98;
-    elems = arg0->unk94;
-    big = ref->unk0->unk18;
-    if (big->unk0 == 0) {
+    config = trail->config;
+    points = trail->points;
+    actor = config->owner->actor;
+    if (actor->interaction_state == 0) {
         return 0;
     }
-    if (big->unk1D4 == 0) {
+    if (actor->unk1D4 == NULL) {
         return 0;
     }
-    if (big->unk3B != ref->unk0->unk1C) {
+    if (actor->unique_id != config->owner->actorId) {
         return 0;
     }
     found = 0;
-    if (!(arg0->unk1E & 4)) {
-        if (func_1519EF90(ref, (u8)arg0->unk20, &arg0->unk10, elems) != 0) {
+    if (!(trail->flags & 4)) {
+        if (func_1519EF90(config, (u8)trail->side, &trail->pos) != 0) {
             found = 1;
-            ref->unk10 = arg0->unk10;
-            arg0->unk1E |= 4;
+            config->emitPos = trail->pos;
+            trail->flags |= 4;
         } else {
             return 1;
         }
     }
-    if (!found && func_1519EF90(ref, (u8)arg0->unk20, &arg0->unk10, elems) == 0) {
-        func_1519F48C(arg0);
-        slots = ref->unk0->unk58;
-        data.sub = ref->unk0;
-        data.type = arg0->unk20;
-        fx = func_151491F4(0x12C, -1, 0xB, 0, 6, 8, 0xFF, 0);
-        if (fx != NULL) {
-            memcpy((u8 *)fx + 0x28, &data, 8);
+    if (!found && func_1519EF90(config, (u8)trail->side, &trail->pos) == 0) {
+        func_1519F48C(trail);
+        sides = config->owner->trails.sides;
+        link.owner = config->owner;
+        link.side = trail->side;
+        spawner = (TrailSpawner *)func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
+        if (spawner != NULL) {
+            memcpy(&spawner->link, &link, sizeof(TrailLink));
         }
-        if (arg0->unk20 == 6) {
-            slots[1] = (s32)fx;
+        if (trail->side == TRAIL_SIDE_6) {
+            sides[0].spawner = spawner;
         } else {
-            slots[3] = (s32)fx;
+            sides[1].spawner = spawner;
         }
         return 1;
     }
-    ref->unk20 = big->unk14;
-    ref->unk24 = big->unk1C;
-    dx = arg0->unk10.x - ref->unk10.x;
-    dy = arg0->unk10.y - ref->unk10.y;
-    dz = arg0->unk10.z - ref->unk10.z;
-    if (9.999999747e-05f < fabsf(dx) || 9.999999747e-05f < fabsf(dy) || 9.999999747e-05f < fabsf(dz)) {
+    config->actorX = actor->x_position;
+    config->actorZ = actor->z_position;
+    dx = trail->pos.x - config->emitPos.x;
+    dy = trail->pos.y - config->emitPos.y;
+    dz = trail->pos.z - config->emitPos.z;
+    if (0.0001f < fabsf(dx) || 0.0001f < fabsf(dy) || 0.0001f < fabsf(dz)) {
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        ref->unkC += dist * ref->unk8;
+        config->pendingPoints += dist * config->pointsPerUnit;
         invDist = 1.0f / dist;
     }
-    if (ref->unkC > 1.0f) {
-        inv = 1.0f / ref->unkC;
-        speed = ref->unk1C + D_800BE9A4;
-        speedStep = speed * inv;
-        cur = ref->unk10;
-        y = ref->unk38 + ref->unk3C * speed;
-        dyy = ref->unk38 - y;
-        if (arg0->unk20 == 7) {
-            vel.x = -dz * invDist * ref->unk4C;
-            vel.z = dx * invDist * ref->unk4C;
+    if (config->pendingPoints > 1.0f) {
+        inv = 1.0f / config->pendingPoints;
+        age = config->emitTime + D_800BE9A4;
+        ageStep = age * inv;
+        cur = config->emitPos;
+        width = config->startWidth + config->widthGrowth * age;
+        widthDelta = config->startWidth - width;
+        /* points drift outwards, away from the actor */
+        if (trail->side == TRAIL_SIDE_7) {
+            vel.x = -dz * invDist * config->driftSpeed;
+            vel.z = dx * invDist * config->driftSpeed;
         } else {
-            vel.x = dz * invDist * ref->unk4C;
-            vel.z = -dx * invDist * ref->unk4C;
+            vel.x = dz * invDist * config->driftSpeed;
+            vel.z = -dx * invDist * config->driftSpeed;
         }
-        i = arg0->unk2E - 1;
+        i = trail->head - 1;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = trail->capacity - 1;
         }
         stepX = dx * inv;
         stepY = dy * inv;
         stepZ = dz * inv;
-        stepH = dyy * inv;
-        if (i != arg0->unk2D && arg0->unk2C != 0) {
+        widthStep = widthDelta * inv;
+        if (i != trail->tail && trail->count != 0) {
+            /* blend the previous point's drift towards the new direction */
             j = i - 1;
             if (j < 0) {
-                j = arg0->unk25 - 1;
+                j = trail->capacity - 1;
             }
-            (elems + j)->vel.x = ((elems + j)->vel.x + vel.x) * 0.5f;
-            (elems + j)->vel.z = ((elems + j)->vel.z + vel.z) * 0.5f;
+            // matching: `points + j` rather than points[j] keeps IDO's addu operand order
+            (points + j)->vel.x = ((points + j)->vel.x + vel.x) * 0.5f;
+            (points + j)->vel.z = ((points + j)->vel.z + vel.z) * 0.5f;
         }
         do {
             s32 ok;
-            struct Elem1519F7F0 *e;
+            TrailPoint *point;
 
             ok = 1;
-            e = &elems[arg0->unk2E];
-            e->vel = vel;
-            e->x = cur.x;
-            e->z = cur.z;
-            e->unk18 = ref->unk2E;
-            e->unkC = y;
-            e->unk10 = ref->unk30;
-            e->unk12 = ref->unk32;
-            e->unk14 = 0xFF;
-            e->unk16 = ref->unk28;
-            ref->unk28 += ref->unk44 + (u32)func_150ADA20() % (ref->unk45 + 1);
-            e->x += e->vel.x * speed;
-            e->z += e->vel.z * speed;
+            point = &points[trail->head];
+            point->vel = vel;
+            point->x = cur.x;
+            point->z = cur.z;
+            point->life = config->pointLife;
+            point->width = width;
+            point->alpha = config->pointAlpha;
+            point->fadeDelay = config->pointFadeDelay;
+            point->fade = 255;
+            point->texS = config->texS;
+            config->texS += config->texSStep + (u32)func_150ADA20() % (config->texSStepRandom + 1);
+            point->x += point->vel.x * age;
+            point->z += point->vel.z * age;
             {
-            f32 probe[3];
+                TrailVec3 probe;
 
-            probe[0] = e->x;
-            if (big->unk118 < -9500.0f) {
-                probe[1] = big->unk18 + 100.0f;
-            } else {
-                probe[1] = big->unk118 + 100.0f;
-            }
-            probe[2] = e->z;
-            if (fabsf(probe[0]) > 20000.0f || fabsf(probe[2]) > 20000.0f) {
-                ok = 0;
-            } else if (func_15045800(probe, 0, probe[1] - 200.0f, &arg0->unk60) != 0) {
-                e->unk8 = arg0->unk60;
-            } else {
-                ok = 0;
-            }
+                probe.x = point->x;
+                if (actor->unk118 < -9500.0f) {
+                    probe.y = actor->y_position + 100.0f;
+                } else {
+                    probe.y = actor->unk118 + 100.0f;
+                }
+                probe.z = point->z;
+                if (fabsf(probe.x) > 20000.0f || fabsf(probe.z) > 20000.0f) {
+                    ok = 0;
+                } else if (func_15045800(&probe, 0, probe.y - 200.0f, &trail->groundY) != 0) {
+                    point->y = trail->groundY;
+                } else {
+                    ok = 0;
+                }
             }
             if (ok) {
-                arg0->unk2E++;
-                if (arg0->unk2E == arg0->unk25) {
-                    arg0->unk2E = 0;
+                trail->head++;
+                if (trail->head == trail->capacity) {
+                    trail->head = 0;
                 }
-                arg0->unk2C++;
-                if (arg0->unk2E == arg0->unk2D) {
-                    arg0->unk2D++;
-                    if (arg0->unk2D == arg0->unk25) {
-                        arg0->unk2D = 0;
+                trail->count++;
+                if (trail->head == trail->tail) {
+                    /* full: drop the oldest point */
+                    trail->tail++;
+                    if (trail->tail == trail->capacity) {
+                        trail->tail = 0;
                     }
-                    arg0->unk2C--;
+                    trail->count--;
                 }
             }
             cur.x += stepX;
             cur.y += stepY;
             cur.z += stepZ;
-            y += stepH;
-            speed -= speedStep;
-            ref->unkC -= 1.0f;
-        } while (ref->unkC > 1.0f);
-        ref->unk10 = cur;
-        ref->unk1C = speed;
+            width += widthStep;
+            age -= ageStep;
+            config->pendingPoints -= 1.0f;
+        } while (config->pendingPoints > 1.0f);
+        config->emitPos = cur;
+        config->emitTime = age;
     }
     return 1;
 }
