@@ -1,8 +1,35 @@
 #include <ultra64.h>
 #include "functions.h"
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
+#include "variables.h"
+#undef D_800D3098
 
+/* struct178 (the D_800D3098 record) with the fields this file reads named. */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 pad8[0x8];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 pad15[2];
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} Record_CD860; /* size 0x34 */
 
-extern s32 D_800D3098;
+/* A command/query message: an 8-byte header followed by word parameters. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 params[5];
+} Msg_CD860;
+
+/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
+extern Record_CD860 *D_800D3098;
 
 void func_150A3444(s32, s16, s16, s16);
 void func_151C970C(s32, void *);
@@ -10,123 +37,66 @@ void func_150A2864(s32, s32);
 void func_150A2940(s32, s32, s32);
 void func_150A3398(s32, u16, s32, s32, s32, s32);
 
-s32 func_150A03B0(s32 arg0, u32 arg1, void *arg2) {
-    s32 temp_v0;
-    s32 var_a0;
-    s32 var_v0;
+/* Applies command `command` with the parameters in `msg` to record `slot`.
+ * Returns 1 for the commands that complete immediately (0-2), else 0. */
+s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
+    s32 mode;
 
-    switch (arg1) {
+    switch (command) {
     case 0:
-        func_150A2864(arg0, 0);
+        func_150A2864(slot, 0);
         return 1;
     case 1:
-        func_150A2864(arg0, 1);
+        func_150A2864(slot, 1);
         return 1;
     case 2:
-        func_150A2940(arg0, *(s32 *)((u8 *)arg2 + 8), *(s32 *)((u8 *)arg2 + 0xC));
+        func_150A2940(slot, msg->params[0], msg->params[1]);
         return 1;
     case 3:
-        func_150A3444(arg0, *(s16 *)((u8 *)arg2 + 0xA),
-                        *(s16 *)((u8 *)arg2 + 0xE),
-                        *(s16 *)((u8 *)arg2 + 0x12));
+        func_150A3444(slot, msg->params[0], msg->params[1], msg->params[2]);
         break;
     case 4:
-        func_150A3398(arg0, *(u16 *)((u8 *)arg2 + 0xA),
-                        *(s32 *)((u8 *)arg2 + 0xC),
-                        *(s32 *)((u8 *)arg2 + 0x10),
-                        *(s32 *)((u8 *)arg2 + 0x14),
-                        *(s32 *)((u8 *)arg2 + 0x18));
+        func_150A3398(slot, msg->params[0], msg->params[1], msg->params[2], msg->params[3], msg->params[4]);
         break;
     case 5:
-        temp_v0 = *(s32 *)((u8 *)arg2 + 8);
-        if (temp_v0 == 0x3E7) {
-            var_a0 = 2;
-        } else {
-            if (temp_v0 != 0) {
-                var_v0 = 0;
-            } else {
-                var_v0 = 1;
-            }
-            var_a0 = var_v0;
-        }
-        func_151C970C(var_a0, (void *)(D_800D3098 + (arg0 * 0x34)));
+        mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
+        func_151C970C(mode, &D_800D3098[slot]);
         break;
     }
     return 0;
 }
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 pad6;
-    u8 pad8[0x8];
-    f32 unk10;
-    u8 unk14;
-    u8 pad15[2];
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 pad24[0x10];
-} PlayerStat_CD860; /* 0x34 */
-
-typedef struct {
-    u8 pad0[0x78];
-    u8 unk78;
-} Sub31C_CD860;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x103];
-    u8 unk13F;
-    u8 pad140[0x1DC];
-    Sub31C_CD860 *unk31C;
-    u8 pad320[0xC];
-} Obj_CD860; /* 0x32C */
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-} Msg_CD860;
-
-extern Obj_CD860 D_800CC2D0[];
-extern s8 D_8008FD90;
-extern u8 D_800C35EA;
 extern s32 D_800D3840;
-extern Obj_CD860 *func_1505EEF4(s32);
+struct127 *func_1505EEF4(s32);
 s32 func_150A2D84(s32, s32);
 s32 func_150A2EE4(s32, s32);
 s32 func_150A2FA4(s32, s32);
 s32 func_150A2CA4(s32);
 void func_150A3330(s32, s32 *, s32 *, s32 *, s32 *);
 
-s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
-    switch (arg1) {
+/* Answers query `query` about record `slot`; `msg` carries the query's parameters. */
+s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
+    switch (query) {
     case 6:
         {
             s32 v;
             s32 id;
             s32 result;
-            Obj_CD860 *obj;
+            struct127 *obj;
             s32 ret;
 
-            id = arg2->unk8 & 0xFFFF0FFF;
-            switch (arg2->unk8 & 0xF000) {
+            id = msg->params[0] & 0xFFFF0FFF;
+            switch (msg->params[0] & 0xF000) {
             case 0x2000:
                 obj = func_1505EEF4(id);
                 if (obj == NULL) {
                     return 0;
                 }
-                result = func_150A29C8(obj - D_800CC2D0, arg0);
+                result = func_150A29C8(obj - D_800CC2D0, slot);
             lbl1:
                 break;
             case 0x9000:
-                result = func_150A2D84(id, arg0);
+                result = func_150A2D84(id, slot);
                 break;
             }
             ret = 0;
@@ -139,7 +109,7 @@ s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
             s32 c;
             s32 d;
 
-            func_150A3330(arg0, &a, &b, &c, &d);
+            func_150A3330(slot, &a, &b, &c, &d);
             if (c == 0) {
                 break;
             }
@@ -155,7 +125,7 @@ s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
             s32 c;
             s32 d;
 
-            func_150A3330(arg0, &a, &b, &c, &d);
+            func_150A3330(slot, &a, &b, &c, &d);
             if (c == 0) {
                 break;
             }
@@ -166,13 +136,14 @@ s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
         }
     case 10:
         {
-            PlayerStat_CD860 *ps;
+            Record_CD860 *rec;
             s32 hi;
             s32 lo;
 
-            ps = &((PlayerStat_CD860 *)D_800D3098)[arg0];
-            hi = ps->unk0;
-            lo = ps->unk4;
+            // matching: the no-op cast changes IDO's register numbering
+            rec = (Record_CD860 *)D_800D3098 + slot;
+            hi = rec->unk0;
+            lo = rec->unk4;
             return (hi << 16) | (lo & 0xFFFF);
         }
     case 11:
@@ -181,57 +152,57 @@ s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (D_800CC2D0[i].unk0 == (*arg2).unk8) {
-                    if (func_150A29C8(i, arg0) == 0) {
-                        if (arg1 == 11) {
+                if (D_800CC2D0[i].interaction_state == msg->params[0]) {
+                    if (func_150A29C8(i, slot) == 0) {
+                        if (query == 11) {
                             return D_800CC2D0[i].unk13F | 0x2000;
                         }
-                        return D_800CC2D0[i].unk3B;
+                        return D_800CC2D0[i].unique_id;
                     }
                 }
             }
             return 0;
         }
     case 7:
-        return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk14;
+        return D_800D3098[slot].unk14;
     case 13:
         {
             s32 v;
             s32 id;
             s32 result;
-            Obj_CD860 *obj;
+            struct127 *obj;
 
-            id = arg2->unk8 & 0xFFFF0FFF;
-            switch (arg2->unk8 & 0xF000) {
+            id = msg->params[0] & 0xFFFF0FFF;
+            switch (msg->params[0] & 0xF000) {
             case 0x2000:
                 obj = func_1505EEF4(id);
-                result = func_150A2EE4(obj - D_800CC2D0, arg0);
+                result = func_150A2EE4(obj - D_800CC2D0, slot);
                 break;
             case 0x9000:
-                result = func_150A2FA4(id, arg0);
+                result = func_150A2FA4(id, slot);
                 break;
             }
             return result;
         }
     case 14:
-        return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk2;
+        return D_800D3098[slot].unk2;
     case 15:
-        if (func_150A2CA4(arg0) == -1) {
+        if (func_150A2CA4(slot) == -1) {
             return 0;
         }
         return 1;
     case 16:
-        if (func_150A2CA4(arg0) == -1) {
+        if (func_150A2CA4(slot) == -1) {
             s32 i;
 
             for (i = 0; i < D_8008FD90; i++) {
-                if (func_150A2D84(i, arg0) == 0) {
+                if (func_150A2D84(i, slot) == 0) {
                     if (D_800D3840 == 2) {
                         return 1;
                     }
-                    if (arg2->unkC != 0) {
+                    if (msg->params[1] != 0) {
                         if (D_800CC2D0[i].unk31C->unk78 != 3) {
-                            if (func_150A2D84(i, arg2->unk8 & 0xFFFF0FFF) == 0) {
+                            if (func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
                                 return 1;
                             }
                         }
@@ -247,20 +218,20 @@ s32 func_150A04D8(s32 arg0, s32 arg1, Msg_CD860 *arg2) {
         {
             s32 v;
 
-            v = arg2->unk8;
+            v = msg->params[0];
             if (v == 0) {
-                return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk17;
+                return D_800D3098[slot].unk17;
             } else if (v == 1) {
-                return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk18;
+                return D_800D3098[slot].unk18;
             } else if (v == 2) {
-                return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk1C;
+                return D_800D3098[slot].unk1C;
             } else if (v == 3) {
-                return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk20;
+                return D_800D3098[slot].unk20;
             }
             break;
         }
     case 18:
-        return ((PlayerStat_CD860 *)D_800D3098)[arg0].unk10;
+        return D_800D3098[slot].unk10;
     }
     return 0;
 }
