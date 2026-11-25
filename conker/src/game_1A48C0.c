@@ -24,7 +24,7 @@ typedef struct {
     /* 0x0A */ s16 center[3]; // relative to the object's position
     /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
     /* 0x12 */ s8 speed;
-    /* 0x13 */ s8 phaseStep;  // phase offset per 1/100 unit of distance from the center
+    /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
     /* 0x14 */ u8 unk14[6];   // only used by mode 1
     /* 0x1A */ u8 pad1A[2];
 } WaveParams;
@@ -52,7 +52,7 @@ typedef struct {
 extern WaveObject *func_151149AC(u8);
 void *allocate_memory(s32, s32, s32, s32);
 extern void func_1511490C(f32 mtx[4][4], WaveObject *obj);
-extern void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150A6FA0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
 extern void func_150A70C0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
 extern void func_150A71C8(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, Vtx *src);
@@ -74,13 +74,13 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
     f32 dy;
     f32 dz;
     f32 center[3];
-    f32 scale;
+    f32 toUnits;
     s32 absDist;
     s32 dist;
-    f32 distSq;
+    f32 distance;
     f32 cosH;
     f32 sinH;
-    f32 angle;
+    f32 radians;
 
     deformer = allocate_memory(sizeof(WaveDeformer), 1, 0, 0);
     if (deformer != NULL) {
@@ -110,12 +110,11 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
         deformer->params.phase = 0;
         deformer->params.speed = speed;
         deformer->params.phaseStep = phaseStep;
+        toUnits = 0.01f; // distances are measured in hundreds of model units
         if (radius != 0) {
-            scale = 0.01f;
-            deformer->params.falloff = 1.0f / ((radius * scale) * (radius * scale));
+            deformer->params.falloff = 1.0f / ((radius * toUnits) * (radius * toUnits));
         } else {
             deformer->params.falloff = 0.0f;
-            scale = 0.01f;
         }
         if ((flags & WAVE_MODE_MASK) == 1) {
             deformer->params.unk14[0] = argA;
@@ -133,9 +132,9 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
             deformer->vertexWeight = allocate_memory(obj->vertexCount * sizeof(f32), 1, 0, 0);
         }
         if ((flags & WAVE_DIRECTIONAL) == WAVE_DIRECTIONAL) {
-            angle = -heading * 0.0174532924f; // degrees to radians
-            sinH = sinf(angle);
-            cosH = cosf(angle);
+            radians = -heading * 0.0174532924f; // degrees to radians
+            sinH = sinf(radians);
+            cosH = cosf(radians);
             headingAngle = heading * 0.7111111283f; // degrees to 256 per turn
         }
         for (i = 0; i < obj->vertexCount; i++) {
@@ -146,17 +145,17 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
                 dz = obj->baseVerts[i].v.ob[2] - center[2];
                 dy = dy * dy;
                 dz = dz * dz;
-                distSq = dx + dy + dz;
-                if (distSq != 0) {
-                    distSq = sqrtf(distSq);
+                distance = dx + dy + dz;
+                if (distance != 0) {
+                    distance = sqrtf(distance);
                 }
-                absDist = distSq * scale;
+                absDist = distance * toUnits;
                 dist = absDist;
             } else if ((flags & WAVE_DIRECTIONAL) == WAVE_DIRECTIONAL) {
                 dx = obj->baseVerts[i].v.ob[0] - center[0];
                 dz = obj->baseVerts[i].v.ob[2] - center[2];
                 dz = -dx * sinH + dz * cosH;
-                absDist = dz * scale;
+                absDist = dz * toUnits;
                 dist = absDist;
                 if (absDist < 0) {
                     absDist = -absDist;
@@ -164,7 +163,7 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
             }
             deformer->vertexPhase[i] = phaseStep * dist;
             if ((flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                absDist = absDist - radius * scale;
+                absDist = absDist - radius * toUnits;
                 if (absDist >= 0) {
                     deformer->vertexWeight[i] = 0.0f;
                 } else {
@@ -175,7 +174,7 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
                 if ((flags & WAVE_DIRECTIONAL) == WAVE_DIRECTIONAL) {
                     deformer->vertexAngle[i] = headingAngle;
                 } else {
-                    u8 vertexAngle;
+                    u8 vertexAngle; // matching: storing through a u8 local, not directly
                     vertexAngle = func_150484A0(dx, dz) * 40.7436637878f; // radians to 256 per turn
                     deformer->vertexAngle[i] = vertexAngle;
                 }
@@ -236,7 +235,6 @@ void func_15177A94(void) {
     for (i = 0; i < D_800DD418; i++) {
         deformer = gWaveDeformers[i];
         if (func_151149AC(deformer->objectId)->unk6F & 0xF) {
-            j = 0;
             if (!deformer->sharesObject) {
                 obj = func_151149AC(deformer->objectId);
                 if (obj->rotation[0] == 0.0f && obj->rotation[1] == 0.0f && obj->rotation[2] == 0.0f &&
@@ -249,9 +247,9 @@ void func_15177A94(void) {
                     }
                 } else {
                     func_1511490C(mtx, obj);
-                    if (i) {}
+                    if (i) {} // matching: an extra use of i makes IDO keep it in a register and spill the list cursor
                     for (j = 0; j < obj->vertexCount; j++) {
-                        func_150A7960((f32 *)mtx, obj->baseVerts[j].v.ob[0], obj->frameVerts[D_800BE9C0][j].v.ob[1],
+                        func_150A7960(mtx, obj->baseVerts[j].v.ob[0], obj->frameVerts[D_800BE9C0][j].v.ob[1],
                                       obj->baseVerts[j].v.ob[2], &x, &y, &z);
                         obj->frameVerts[D_800BE9C0][j].v.ob[0] = x;
                         obj->frameVerts[D_800BE9C0][j].v.ob[1] = y;
