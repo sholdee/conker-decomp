@@ -5,7 +5,10 @@
 #include "functions.h"
 #undef func_151D9B8C
 void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
+// variables.h declares D_800A3F14 without const; this file defines it as const data (.rodata)
+#define D_800A3F14 D_800A3F14_hdr
 #include "variables.h"
+#undef D_800A3F14
 #include "effects.h"
 
 extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
@@ -23,16 +26,54 @@ typedef struct {
     u8 padF;
 } BloodProfile;
 
-extern BloodProfile D_800A3FD8[20];
+extern const BloodProfile D_800A3FD8[20];
 /* Entries of D_800A3FD8 that the code singles out (compared by address). */
-extern BloodProfile D_800A3FF8; /* [2] */
-extern BloodProfile D_800A4018; /* [4] */
-extern BloodProfile D_800A4028; /* [5] */
-extern BloodProfile D_800A4038; /* [6] */
-extern BloodProfile D_800A4058; /* [8] */
-extern BloodProfile D_800A4068; /* [9] */
-extern BloodProfile D_800A40C8; /* [15] */
-extern BloodProfile D_800A40F8; /* [18] */
+extern const BloodProfile D_800A3FF8; /* [2] */
+extern const BloodProfile D_800A4018; /* [4] */
+extern const BloodProfile D_800A4028; /* [5] */
+extern const BloodProfile D_800A4038; /* [6] */
+extern const BloodProfile D_800A4058; /* [8] */
+extern const BloodProfile D_800A4068; /* [9] */
+extern const BloodProfile D_800A40C8; /* [15] */
+extern const BloodProfile D_800A40F8; /* [18] */
+
+/* Scale factors passed to func_1513A24C (all 1.0f). */
+const f32 D_800A3C30[15] = {
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+};
+
+/* Per-profile blood model lists; the .data table D_80089A20[profile] points at one of them. */
+const s32 D_800A3C6C[10] = { 2, 3, 0x3A, 0x3B, 0x3B, 0x3D, 0x3D, 0x3E, 0x3C, 0x3C };
+const s32 D_800A3C94[8] = { 2, 3, 0x30, 0x92, 0x92, 0x91, 0x31, 0x31 };
+const s32 D_800A3CB4[8] = { 2, 3, 0x44, 0x46, 0x46, 0x47, 0x45, 0x45 };
+const s32 D_800A3CD4[8] = { 2, 3, 0x49, 0x49, 0x4B, 0x4C, 0x4A, 0x4A };
+const s32 D_800A3CF4[8] = { 2, 3, 0x81, 0x80, 0x7F, 0x7F, 0x7E, 0x7E };
+const s32 D_800A3D14[8] = { 2, 3, 0xB2, 0xA0, 0xA0, 0xA1, 0x9F, 0x9F };
+const s32 D_800A3D34[8] = { 2, 3, 0xB2, 0x9D, 0x9D, 0x9E, 0x9C, 0x9C };
+const s32 D_800A3D54[10] = { 2, 3, 0x3A, 0x8E, 0x8E, 0x3D, 0x3D, 0x8F, 0x90, 0x90 };
+const s32 D_800A3D7C[8] = { 2, 3, 0xBB, 0xAC, 0xAC, 0xAE, 0xAD, 0xAD };
+const s32 D_800A3D9C[8] = { 2, 3, 0xBC, 0xAF, 0xAF, 0xB1, 0xB0, 0xB0 };
+const s32 D_800A3DBC[12] = { 0x95, 0x95, 0x96, 0x97, 0x95, 0x95, 0x2D, 0x2E, 0x2D, 0x2E, 0x95, 0x95 };
+const s32 D_800A3DEC[8] = { 2, 3, 0x98, 0x99, 0x99, 0x9B, 0x9A, 0x9A };
+const s32 D_800A3E0C[8] = { 2, 3, 0xC0, 0xC0, 0xC2, 0xC3, 0xC1, 0xC1 };
+const s32 D_800A3E2C[7] = { 0xE7, 0xE7, 0xD8, 0xD8, 0xE7, 0xD7, 0xD7 };
+const s32 D_800A3E48[10] = { 2, 3, 0xDC, 0xDC, 0xDB, 0xDB, 0xDB, 0xDA, 0xD9, 0xD9 };
+const s32 D_800A3E70[8] = { 2, 3, 0xDE, 0xDE, 0xE8, 0x44, 0xDD, 0xDD };
+const s32 D_800A3E90[9] = { 0xE2, 0xE2, 0xE1, 0xE1, 0xDF, 0xE3, 0xE5, 0xE0, 0xE0 };
+const s32 D_800A3EB4[8] = { 0xE2, 0xE2, 0xD5, 0xD5, 0xD3, 0xD6, 0xD4, 0xD4 };
+const s32 D_800A3ED4[7] = { 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE };
+const s32 D_800A3EF0[9] = { 2, 3, 0x32, 0x17, 0x17, 0x33, 0x33, 0x1A, 0x1A };
+
+/* Per-profile counts for func_1513A24C: entries of the D_80089A20[profile] list, and its last argument. */
+const s32 D_800A3F14[20] = {
+    10, 8, 8, 8, 8, 8, 8, 10, 8, 8,
+    12, 8, 8, 7, 10, 8, 9, 8, 7, 9,
+};
+const s32 D_800A3F64[20] = {
+    11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+    12, 11, 11, 13, 11, 11, 11, 11, 10, 11,
+};
+
 
 typedef struct {
     s32 unk0[4];
@@ -847,8 +888,32 @@ s32 func_15135658(BloodStrip *strip) {
 
 /* BloodStrip rate callback 0: the tunable "power" (../Effects/Blood/blood.c), in thousandths. */
 f32 func_15135670(BloodStrip *strip) {
-    return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * 0.001f;
+    return func_151422DC(0, "power", 0, 2000, 1000, "../Effects/Blood/blood.c", 2938) * 0.001f;
 }
+
+/* Blood settings for each profile. */
+const BloodProfile D_800A3FD8[20] = {
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x44, 1, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x4B, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x81, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0xB2, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0xBB, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0xBC, 0, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0xBC, 1, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x98, 0, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0x30, 0, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0xDA, 0, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0x44, 1, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0xE3, 2, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0xD3, 2, 0 },
+    { { 0.0f, 20.0f, 30.0f }, 0xD3, 1, 0 },
+    { { 0.0f, 30.0f, 8.0f }, 0x3A, 0, 0 },
+};
 
 void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 typedef struct {
@@ -1342,8 +1407,6 @@ void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
-extern f32 D_800A3C30;
-extern s32 D_800A3F64[];
 
 
 /*
@@ -1372,7 +1435,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
     func_1504715C(&hit, actor);
     if (arg3 != 0) {
-        func_1513A24C(&position, D_80089A20[kind], &D_800A3C30,
+        func_1513A24C(&position, D_80089A20[kind], D_800A3C30,
                       ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
                           ? D_800A3F14[kind] - 2
                           : D_800A3F14[kind],
@@ -1673,7 +1736,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
         pool = 0;
         probe = position;
     }
-    func_1513A24C(&position, D_80089A20[kind] + 2, &D_800A3C30,
+    func_1513A24C(&position, D_80089A20[kind] + 2, D_800A3C30,
                   D_800A3F14[kind] - 2, scale, kind, D_800A3F64[kind],
                   (u8 *)actor, &hit, arg1, arg2);
     if (D_800A3FD8[kind].unkE != 2) {
@@ -2159,11 +2222,16 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-extern u8 D_800A4160[];
-extern s32 D_800A4168[];
-extern s32 D_800A4178[];
-extern Vec3f D_800A4188[];
-extern Vec3f D_800A41B8;
+const u8 D_800A4160[6] = { 0x08, 0x0C, 0x0A, 0x0E, 0x0D, 0x00 };
+const s32 D_800A4168[4] = { 0x59, 0x5A, 0x5B, 0x5C };
+const s32 D_800A4178[4] = { 0x4E, 0x4F, 0x50, 0x51 };
+const Vec3f D_800A4188[4] = {
+    { -7.2473803f, 40.4506f, 6.7134f },
+    { 10.305f, 37.725998f, 5.6588f },
+    { -18.678f, 15.5406f, 0.3136f },
+    { 4.6474f, 13.705f, 17.1138f },
+};
+const Vec3f D_800A41B8 = { -0.2532f, 47.663998f, -2.545f };
 void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2);
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
@@ -2374,10 +2442,15 @@ s32 func_15139578(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, 
     return 1;
 }
 
-extern u8 D_800A41C4[];
-extern s32 D_800A41C8[];
-extern s32 D_800A41D8[];
-extern Vec3f D_800A41E8[];
+const u8 D_800A41C4[4] = { 0x08, 0x0C, 0x0A, 0x00 };
+const s32 D_800A41C8[4] = { 0x61, 0x62, 0x63, 0x64 };
+const s32 D_800A41D8[4] = { 0x5D, 0x5E, 0x5F, 0x60 };
+const Vec3f D_800A41E8[4] = {
+    { -15.082999f, 50.3348f, 3.2628f },
+    { 14.2554f, 52.1254f, 4.4064f },
+    { -14.681799f, 17.8482f, -1.3326f },
+    { 9.2282f, 23.578999f, 8.4736f },
+};
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
@@ -2498,10 +2571,14 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
     }
 }
 
-extern u8 D_800A4218[];
-extern s32 D_800A421C[];
-extern s32 D_800A4228[];
-extern Vec3f D_800A4234[];
+const u8 D_800A4218[3] = { 0x00, 0x04, 0x00 };
+const s32 D_800A421C[3] = { 0x69, 0x6A, 0x6B };
+const s32 D_800A4228[3] = { 0x66, 0x67, 0x68 };
+const Vec3f D_800A4234[3] = {
+    { 0.06725f, 14.119f, 66.579254f },
+    { 4.36975f, 22.8435f, 17.31975f },
+    { -2.76875f, 8.011f, 10.78625f },
+};
 
 /* Default gore (profiles 1, 12, 13 and others): a random chunk set from bone 12. */
 void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
@@ -2697,8 +2774,8 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
 }
 
 void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
-extern u8 D_800A4260[];
-extern u8 D_800A4264[];
+const s32 D_800A4260[1] = { 0x39 };
+const f32 D_800A4264[1] = { 1.0f };
 
 /* Small blood splash at position (func_15152190 with D_800A4260). */
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
@@ -2733,8 +2810,8 @@ void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 
     }
 }
 
-extern u8 D_800A4268[];
-extern u8 D_800A4270[];
+const s32 D_800A4268[2] = { 0x39, 0x65 };
+const f32 D_800A4270[2] = { 1.0f, 4.0f };
 
 /* Blood splash at position (func_15152190 with D_800A4268). */
 void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
@@ -2760,10 +2837,15 @@ void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
                   (u8)arg1, arg2);
 }
 
-extern u8 D_800A4278[];
-extern s32 D_800A4280[];
-extern s32 D_800A4290[];
-extern Vec3f D_800A42A0[];
+const u8 D_800A4278[6] = { 0x04, 0x0C, 0x06, 0x07, 0x0D, 0x00 };
+const s32 D_800A4280[4] = { 0x7A, 0x7B, 0x7C, 0x7D };
+const s32 D_800A4290[4] = { 0x76, 0x77, 0x78, 0x79 };
+const Vec3f D_800A42A0[4] = {
+    { 14.159599f, 51.866f, 11.1582f },
+    { -16.682f, 45.5596f, 13.6838f },
+    { -8.215199f, 13.5648f, 26.177399f },
+    { 16.7724f, 15.549001f, 19.3364f },
+};
 extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
@@ -2883,10 +2965,13 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     }
 }
 
-extern u8 D_800A42D0[];
-extern s32 D_800A42D4[][2];
-extern s32 D_800A42E4[][2];
-extern Vec3f D_800A42F4[][2];
+const u8 D_800A42D0[3] = { 0x00, 0x01, 0x02 };
+const s32 D_800A42D4[2][2] = { { 0xB3, 0xB4 }, { 0xB7, 0xB8 } };
+const s32 D_800A42E4[2][2] = { { 0xB5, 0xB6 }, { 0xB9, 0xBA } };
+const Vec3f D_800A42F4[2][2] = {
+    { { 12.4256f, 18.9344f, 17.148f }, { -17.1182f, 32.8964f, 4.2846003f } },
+    { { 11.5694f, 18.168f, 18.0524f }, { -13.6272f, 34.7778f, 7.015f } },
+};
 
 /* Gore for profile 8/9 actors (variant 1 for profile 9). */
 void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s32 arg5) {
@@ -3024,10 +3109,13 @@ void func_1513B0B8(BloodChunk *chunk, s32 arg1, u8 message) {
 }
 
 void func_151036B4(void *, u8, s32);
-extern u8 D_800A4324[];
-extern s32 D_800A4328[];
-extern s32 D_800A4330[];
-extern f32 D_800A4338[][3];
+const u8 D_800A4324[3] = { 0x00, 0x01, 0x02 };
+const s32 D_800A4328[2] = { 0xE3, 0xE5 };
+const s32 D_800A4330[2] = { 0xE4, 0xE6 };
+const f32 D_800A4338[2][3] = {
+    { -15.369999f, 15.095f, 13.3182f },
+    { -0.0834f, -19.5498f, 23.541f },
+};
 /* Gore for profile 16 actors. */
 void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     u8 index;
