@@ -75,6 +75,8 @@ typedef struct {
     /* 0x110 */ ParticleState state;
 } Particle;
 
+// matching: D_800CC5EC is D_800CC2D0[0].unk31C; func_150F2A60 tests it through the array and reads through
+// this alias so IDO reloads it (as the original does) instead of reusing the first load
 extern struct {
     u8 pad0[0x120];
     u8 unk120;
@@ -87,8 +89,9 @@ void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(struct127 *, s32);
 void func_15196318(s32, s32, s32);
 
-/* While the player has unk31C, polls entries 0xFA and 0xF9 and resets the player when one has bit 0 set,
- * then scrolls the four D_800BE4F0 layers by object 0xE's unk2E4. */
+/* While D_800CC2D0[0] has unk31C: if entry 0xFA or 0xF9 of D_800DBEF4 has its D_800DBF94 bit 0 set, runs
+ * D_800CC2D0[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
+ * by object 0xE's unk2E4. */
 void func_150F2A60(s32 arg0) {
     s32 i;
     s32 scroll;
@@ -353,7 +356,7 @@ void func_150F34F4(struct127 *actor) {
     s32 anim;
     s32 count;
     f32 floorLevel;
-    s32 buttons;
+    s32 rHeld;
     s32 i;
     f32 dist;
     f32 minDist;
@@ -438,12 +441,12 @@ void func_150F34F4(struct127 *actor) {
         speed = 60.0f;
     }
     pitch = PAD->stick_y * 1.25f;
-    buttons = PAD->buttons & R_TRIG;
-    if (buttons) {
+    rHeld = PAD->buttons & R_TRIG;
+    if (rHeld) {
         pitch = 0.0f;
     }
     if (actor->unk13C != 0) {
-        if (!buttons) {
+        if (!rHeld) {
             actor->y_position -= 16.0f * D_800D1550[0];
         }
     } else {
