@@ -7,8 +7,8 @@ struct DescParticleHead;
 
 void func_1513173C(struct DescParticleHead *particle);
 void func_1513175C(struct DescParticleHead *particle);
-void func_151617C4(struct225 *effect);
-void func_151617E4(struct225 *effect);
+void func_151617C4(LightEffect *effect);
+void func_151617E4(LightEffect *effect);
 
 typedef struct Beam Beam;
 
@@ -216,14 +216,14 @@ void func_15101238(BeamEndPoint *endPoint) {
     BeamData *data = &endPoint->beam->data;
 
     data->endPoint = NULL;
-    func_151617C4((struct225 *)endPoint);
+    func_151617C4((LightEffect *)endPoint);
 }
 
 void func_15101260(BeamEndPoint *endPoint) {
     BeamData *data = &endPoint->beam->data;
 
     data->endPoint = NULL;
-    func_151617E4((struct225 *)endPoint);
+    func_151617E4((LightEffect *)endPoint);
 }
 
 void func_15101288(BeamStartFx *fx) {

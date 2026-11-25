@@ -18,7 +18,7 @@ typedef struct {
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
-    /* 0x2C */ struct225 *flash;    /* func_151602C0 */
+    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
     /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
     /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
     /* 0x38 */ f32 unk38;
@@ -85,7 +85,7 @@ typedef struct {
 
 extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns an effect on owner: a main particle carrying an EffectState plus five children (a particle,
@@ -227,7 +227,7 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
                 flashHeader.unk4 = 7;
                 if ((state->flash = func_151602C0(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
                                                   argD, argE)) != NULL) {
-                    memcpy(&state->flash->unk18, &flashData, sizeof(flashData));
+                    memcpy(&state->flash->data, &flashData, sizeof(flashData));
                 }
                 particleAData.unk2C = 0;
                 particleAData.unk0 = 0.0f;

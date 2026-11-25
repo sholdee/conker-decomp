@@ -373,7 +373,7 @@ typedef struct {
 } RandomBurstEffect;
 
 void func_15156D24(f32 *pos, u8 owner);
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 /* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */

@@ -127,8 +127,8 @@ void func_15009334(s32 index) {
     }
 }
 
-struct225 *func_1516037C();
-struct225 *func_1516387C();
+LightEffect *func_1516037C();
+LightEffect *func_1516387C();
 
 /*
  * Light callbacks, the D_80082BFC table run by func_1500A94C: each attaches an effect to `light`.
@@ -144,7 +144,7 @@ void func_15009600(s32 light, s32 id) {
 }
 
 void func_15009628(s32 light, s32 id) {
-    struct220 header;
+    Header header;
     u8 kinds[4] = D_80082BE0;
 
     header.unk0 = 0;
@@ -160,7 +160,7 @@ void func_1500969C(s32 light, s32 id) {
 }
 
 void func_150096C4(s32 light, s32 id) {
-    struct220 header;
+    Header header;
     u8 kinds[5] = D_80082BE4;
 
     header.unk0 = 0;
@@ -220,18 +220,18 @@ void func_15009944(s32 light, s32 id) {
 }
 
 void func_15009990(s32 light, s32 id) {
-    struct132 *effect;
+    LightEffect *effect;
     u8 extra[1];
 
     extra[0] = D_80095B50[id];
     effect = func_1516295C(light, D_80095B48[id], D_80095B4C[id], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1);
     if (effect != NULL) {
-        memcpy(&effect->unk48, extra, 1);
+        memcpy(&effect->data.objectCycle.objectId, extra, 1);
     }
 }
 
 void func_15009A38(s32 light, s32 id) {
-    struct220 header;
+    Header header;
 
     header.unk0 = 2;
     header.unk1 = -1;
@@ -257,28 +257,28 @@ void func_15009B84(s32 light, s32 id) {
 }
 
 void func_15009BD0(s32 light, s32 id) {
-    struct225 *effect;
-    struct221 params;
+    LightEffect *effect;
+    LightFollow params;
 
-    params.unk4 = 0.0f;
-    params.unk8 = 90.0f;
-    params.unk0 = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    params.base = 0.0f;
+    params.scale = 90.0f;
+    params.source = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
-        memcpy(&effect->unk18, &params, sizeof(params));
+        memcpy(&effect->data.follow, &params, sizeof(params));
     }
 }
 
 void func_15009C7C(s32 light, s32 id) {
-    struct225 *effect;
-    struct221 params;
+    LightEffect *effect;
+    LightFollow params;
 
-    params.unk4 = 0.0f;
-    params.unk8 = 50.0f;
-    params.unk0 = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
+    params.base = 0.0f;
+    params.scale = 50.0f;
+    params.source = func_15187EC0(0, 0.0f, 0, 0, 0, 220, 220, 255);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
-        memcpy(&effect->unk18, &params, sizeof(params));
+        memcpy(&effect->data.follow, &params, sizeof(params));
     }
 }
 
@@ -319,15 +319,15 @@ void func_15009F30(s32 light, s32 id) {
 }
 
 void func_15009F74(s32 light, s32 id) {
-    struct225 *effect;
-    struct221 params;
+    LightEffect *effect;
+    LightFollow params;
 
-    params.unk4 = 0.0f;
-    params.unk8 = 60.0f;
-    params.unk0 = func_15187EC0(1, 0.1f, 100, 100, 100, 255, 100, 100);
+    params.base = 0.0f;
+    params.scale = 60.0f;
+    params.source = func_15187EC0(1, 0.1f, 100, 100, 100, 255, 100, 100);
     effect = func_1516387C(light, 2, 16, 300, 0, 12, 255, 1);
     if (effect != NULL) {
-        memcpy(&effect->unk18, &params, sizeof(params));
+        memcpy(&effect->data.follow, &params, sizeof(params));
     }
 }
 
@@ -434,23 +434,13 @@ void func_1500A68C(s32 light, s32 id) {
 extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32);
 
-/** Payload of an effect that attaches a light to a level object. */
-typedef struct Game36680LightAttachment {
-    f32 offset;
-    f32 scale;
-    WorldObject *object;
-    f32 x;
-    f32 y;
-    f32 z;
-} Game36680LightAttachment;
-
 /** Attaches the light to the level object picked by `id` (and by whether D_800BE9F0 is 6). */
 void func_1500A6D8(s32 light, s32 id) {
-    struct220 header;
-    Game36680LightAttachment attachment;
+    Header header;
+    LightSwing attachment;
     s32 variant;
     u8 objects[2][3] = D_80082BEC;
-    struct225 *effect;
+    LightEffect *effect;
 
     variant = (D_800BE9F0 == 6) ? 1 : 0;
     if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
@@ -460,7 +450,7 @@ void func_1500A6D8(s32 light, s32 id) {
         header.unk4 = 0;
         effect = func_1516037C(&header, light, sizeof(attachment), 255, 1);
         if (effect != NULL) {
-            memcpy(&effect->unk18, &attachment, sizeof(attachment));
+            memcpy(&effect->data.swing, &attachment, sizeof(attachment));
         }
     }
 }
@@ -475,25 +465,25 @@ extern WorldObject *func_151149AC(u8);
 
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
-    struct220 header;
-    Game36680LightAttachment attachment;
-    struct225 *effect;
+    Header header;
+    LightSwing attachment;
+    LightEffect *effect;
     u8 objects[6] = D_80082BF4;
 
     attachment.object = func_151149AC(objects[id - 80]);
     if (attachment.object != NULL) {
         attachment.offset = -400.0f;
         attachment.scale = 4.0f;
-        attachment.x = attachment.object->x;
-        attachment.y = attachment.object->y;
-        attachment.z = attachment.object->z;
+        attachment.pivot.x = attachment.object->x;
+        attachment.pivot.y = attachment.object->y;
+        attachment.pivot.z = attachment.object->z;
         header.unk0 = 0;
         header.unk1 = 23;
         header.unk2 = 300;
         header.unk4 = 0;
         effect = func_1516037C(&header, light, sizeof(attachment), 255, 1);
         if (effect != NULL) {
-            memcpy(&effect->unk18, &attachment, sizeof(attachment));
+            memcpy(&effect->data.swing, &attachment, sizeof(attachment));
         }
     }
 }

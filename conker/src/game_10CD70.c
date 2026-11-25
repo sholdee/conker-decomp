@@ -268,7 +268,7 @@ typedef struct {
     /* 0x28 */ BoltSource src;
 } BoltEmitter;
 
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 

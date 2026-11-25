@@ -55,7 +55,7 @@ void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
 void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
 void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
 void func_151BC104(Actor *, s32, s32);
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
@@ -94,7 +94,7 @@ void func_1506A83C(Actor *obj, s32 arg1) {
 
 /* Spawns a flash 50 units above the object. */
 void func_1506A864(Actor *obj, s32 arg1) {
-    struct225 *flash;
+    LightEffect *flash;
     Header header;
     f32 params[4];
     Header2 pos;
@@ -113,7 +113,7 @@ void func_1506A864(Actor *obj, s32 arg1) {
 
     flash = func_151602C0(&header, &pos, 0, 0xFF, 0xFF, 90, 0xFF, 0, 0x10, 0xFF, 1);
     if (flash != NULL) {
-        memcpy(&flash->unk18, params, sizeof(params));
+        memcpy(&flash->data, params, sizeof(params));
     }
 }
 

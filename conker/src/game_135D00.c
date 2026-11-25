@@ -59,13 +59,13 @@ typedef struct {
 #define LAMP_DATA(model) ((LampData *)((s32)(model) + (model)->buffersSize + 0xF8))
 
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
-struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_1516037C(Header *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
  * `light` with it; the second is drawn by func_15109120 while the light is on.
  */
-void func_15108850(struct226 *light) {
+void func_15108850(PointLight *light) {
     DynModel *model;
 
     {
@@ -104,7 +104,7 @@ void func_15108850(struct226 *light) {
             {
                 Header header;
                 DynModel *owner;
-                struct225 *effect;
+                LightEffect *effect;
 
                 owner = model;
                 header.unk0 = 2;
@@ -113,7 +113,7 @@ void func_15108850(struct226 *light) {
                 header.unk4 = 0x13;
                 effect = func_1516037C(&header, light, 4, 0xFF, 1);
                 if (effect != NULL) {
-                    memcpy(&effect->unk18, &owner, sizeof(owner));
+                    memcpy(&effect->data.object, &owner, sizeof(owner));
                 }
             }
         }
@@ -248,10 +248,10 @@ void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /*
- * Update for the lamp's light effect (owner model stored at effect->unk18): moves the light to where a
+ * Update for the lamp's light effect (owner model stored at effect->data.object): moves the light to where a
  * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.
  */
-s32 func_15108E10(struct225 *effect) {
+s32 func_15108E10(LightEffect *effect) {
     s32 pad; // matching: unused stack slot
     DynModel *model;
     LampData *lamp;
@@ -260,7 +260,7 @@ s32 func_15108E10(struct225 *effect) {
     Vec3f pad2; // matching: unused stack slots
     Vec3f hit;
 
-    model = (DynModel *)effect->unk18;
+    model = effect->data.object;
     lamp = LAMP_DATA(model);
     func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
     mtx[3][1] = lamp->height;
@@ -282,13 +282,13 @@ s32 func_15108E10(struct225 *effect) {
             hit = end;
         }
     }
-    effect->unk14->unkE = hit.x;
-    effect->unk14->unk10 = hit.y;
-    effect->unk14->unk12 = hit.z;
+    effect->light->x = hit.x;
+    effect->light->y = hit.y;
+    effect->light->z = hit.z;
     if (lamp->lightOn) {
-        effect->unk14->unk9 = 0;
+        effect->light->disabled = 0;
     } else {
-        effect->unk14->unk9 = 1;
+        effect->light->disabled = 1;
     }
     return 1;
 }

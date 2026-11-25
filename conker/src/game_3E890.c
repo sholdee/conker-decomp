@@ -118,7 +118,7 @@ typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 id;
     /* 0x08 */ struct MotionEffect *effect;
-    /* 0x0C */ struct225 *light;
+    /* 0x0C */ LightEffect *light;
 } Controller; /* size 0x10 */
 
 typedef struct {
@@ -158,7 +158,7 @@ typedef struct MotionEffect {
     /* 0x110 */ Motion motion;
 } MotionEffect;
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
+LightEffect *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
                          s32 offset, u8 arg9, s32 argA);
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */

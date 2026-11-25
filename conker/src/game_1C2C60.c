@@ -9,7 +9,7 @@ struct CharacterFlamethrowerActor;
 void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
 extern void *allocate_memory(s32, s32, s32, s32);
 
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
@@ -2079,7 +2079,7 @@ typedef struct CharacterFlamethrowerFlame {
     /* 0x13C */ f32 particleAccum;
     /* 0x140 */ f32 alpha;
     /* 0x144 */ f32 texOffset;
-    /* 0x148 */ struct225 *light; /* from func_1519C09C */
+    /* 0x148 */ LightEffect *light; /* from func_1519C09C */
     /* 0x14C */ f32 length;
     /* 0x150 */ u8 flags;
     /* 0x151 */ s8 timer151;
@@ -2102,7 +2102,7 @@ typedef struct CharacterFlamethrowerSetup {
 } CharacterFlamethrowerSetup;
 
 void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
-struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7);
 extern void (*D_8008F8A4[])(void *);
 extern s16 (*D_8008F8B8[])(void);
@@ -2234,7 +2234,7 @@ extern void (*D_8008F8B4[])(void *);
 /* Runs a flame's destroy callbacks and removes its light. */
 void func_15199980(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
-    struct225 *light;
+    LightEffect *light;
 
     flame = actor->state;
     if (flame->seed.soundStopFn != -1) {
@@ -2289,13 +2289,13 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
         FlamePoint *oldest;
 
         if (flame->light != NULL && actor->count >= 2) {
-            struct225 *light = flame->light;
-            struct226 *out = light->unk14;
+            LightEffect *light = flame->light;
+            PointLight *out = light->light;
 
             oldest = &points[actor->tail];
-            out->unkE = oldest->pos.x;
-            out->unk10 = oldest->pos.y;
-            out->unk12 = oldest->pos.z;
+            out->x = oldest->pos.x;
+            out->y = oldest->pos.y;
+            out->z = oldest->pos.z;
         }
     }
     if (flame->seed.soundUpdateFn != -1) {
@@ -3214,78 +3214,65 @@ void func_1519C06C(CharacterFlamethrowerActor *actor) {
     }
 }
 
-/* Light parameters func_1519C09C stores at offset 0x18 of a flame's light. */
-typedef struct FlameLightParams {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-} FlameLightParams;
-
-/* How a flame's light (a struct225 from func_151602C0) lays out the data func_1519C09C gives it. */
-typedef struct FlameLight {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ FlameLightParams params;
-    /* 0x38 */ CharacterFlamethrowerActor *flame;
-} FlameLight;
+/* Payload of a flame's light (jitter update): the jitter state, then the flame the light follows. */
+typedef struct FlameLightData {
+    /* 0x00 */ LightJitter jitter;
+    /* 0x20 */ CharacterFlamethrowerActor *flame;
+} FlameLightData;
 
 /* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
-struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7) {
-    struct225 *light;
+    LightEffect *light;
     Header header;
     Header2 header2;
     CharacterFlamethrowerActor *owner;
-    FlameLightParams params;
+    LightJitter params;
 
-    params.unk0 = 35.0f;
-    params.unk4 = 5.0f;
+    params.mid = 35.0f;
+    params.low = 5.0f;
     owner = flame;
     header.unk0 = 2;
     header.unk1 = 2;
     header.unk2 = 300;
     header.unk4 = 0x22;
-    params.unk8 = 110.0f;
-    params.unkC = 1.0f;
-    params.unk10 = 0.0f;
-    params.unk14 = 7.0f;
-    params.unk18 = 0.2488999963f;
-    params.unk1C = 127.0f;
+    params.high = 110.0f;
+    params.target = 1.0f;
+    params.timer = 0.0f;
+    params.interval = 7.0f;
+    params.smoothing = 0.2488999963f;
+    params.level = 127.0f;
     header2.unk0 = pos->x;
     header2.unk4 = pos->y;
     header2.unk8 = pos->z;
 
     light = func_151602C0(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
     if (light != NULL) {
-        memcpy(&((FlameLight *)light)->params, &params, sizeof(params));
-        memcpy(&((FlameLight *)light)->flame, &owner, sizeof(owner));
+        memcpy(&light->data.jitter, &params, sizeof(params));
+        memcpy(&((FlameLightData *)&light->data)->flame, &owner, sizeof(owner));
     }
     return light;
 }
 
-void func_1519C258(FlameLight *light);
-void func_151617C4(FlameLight *light);
-void func_151617E4(FlameLight *light);
+void func_1519C258(LightEffect *light);
+void func_151617C4(LightEffect *light);
+void func_151617E4(LightEffect *light);
 
 /* Light destroy: detaches it from its flame, then func_151617C4. */
-void func_1519C200(FlameLight *light) {
+void func_1519C200(LightEffect *light) {
     func_1519C258(light);
     func_151617C4(light);
 }
 
 /* Light destroy: detaches it from its flame, then func_151617E4. */
-void func_1519C22C(FlameLight *light) {
+void func_1519C22C(LightEffect *light) {
     func_1519C258(light);
     func_151617E4(light);
 }
 
 /* Clears the flame's pointer to this light. */
-void func_1519C258(FlameLight *light) {
-    CharacterFlamethrowerFlame *flame = light->flame->state;
+void func_1519C258(LightEffect *light) {
+    CharacterFlamethrowerFlame *flame = ((FlameLightData *)&light->data)->flame->state;
 
     flame->light = NULL;
 }

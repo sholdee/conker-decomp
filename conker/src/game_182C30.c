@@ -16,7 +16,7 @@ typedef struct PlayerMarker {
     /* 0x11 */ u8 state;
     /* 0x12 */ u8 bobPhase;
     /* 0x13 */ u8 pad13;
-    /* 0x14 */ struct226 *light;
+    /* 0x14 */ PointLight *light;
     /* 0x18 */ Mtx mtx[2];
     /* 0x98 */ f32 heightOffset;
 } PlayerMarker;
@@ -66,8 +66,8 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     }
 }
 
-/* Creates a point light (struct226 is a partial view of PointLight in structs.h); func_1515F10C frees it. */
-struct226 *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
+/* Creates a point light; func_1515F10C frees it. */
+PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
 void func_1515F10C();
 
 /*
@@ -117,10 +117,10 @@ void func_1515589C(PlayerMarker *marker) {
             } else {
                 extraHeight = 0.0f;
             }
-            marker->light->unkE = player->x_position;
-            marker->light->unk10 = func_15048A40(marker->bobPhase) * 15.0f +
+            marker->light->x = player->x_position;
+            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f +
                                    (player->y_position + 160.0f + marker->heightOffset + extraHeight);
-            marker->light->unk12 = player->z_position;
+            marker->light->z = player->z_position;
         } else {
             marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
@@ -145,9 +145,9 @@ void func_1515589C(PlayerMarker *marker) {
         marker->timer = timer;
         marker->bobPhase += D_800BE9E4 * 2;
         if (marker->light != NULL) {
-            marker->light->unkE = player->x_position;
-            marker->light->unk10 = func_15048A40(marker->bobPhase) * 15.0f + (player->y_position + 160.0f);
-            marker->light->unk12 = player->z_position;
+            marker->light->x = player->x_position;
+            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f + (player->y_position + 160.0f);
+            marker->light->z = player->z_position;
         } else {
             marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }

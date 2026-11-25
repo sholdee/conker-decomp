@@ -125,7 +125,7 @@ void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, 
                     s16, s32, u8, s32);
 void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
 AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
@@ -134,7 +134,7 @@ s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
 AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
 void func_1518F8E0(AnchorEmitter *emitter);
-struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 extern AnchorEmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(AnchorEmitter *);
@@ -667,10 +667,10 @@ u8 *func_1519003C(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Header2 pos;
-    struct225 *child;
+    LightEffect *child;
 
     if (kind >= 24) {
         return NULL;

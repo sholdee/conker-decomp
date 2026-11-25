@@ -131,23 +131,23 @@ s32 func_150F2518(SwayModel *model, s32 arg1) {
     return 1;
 }
 
-/* Places the point (0, -495, 0) of the linked object's exaggerated sway frame into arg0->unk14. */
-s32 func_150F25A0(struct242 *arg0) {
+/* Places the point (0, -495, 0) of the linked object's exaggerated sway frame into the effect's light. */
+s32 func_150F25A0(LightEffect *effect) {
     SwayObject **link;
     f32 outZ;
     f32 outY;
     f32 outX;
     MtxF mtx;
 
-    link = (SwayObject **)&arg0->unk18;
+    link = (SwayObject **)&effect->data;
     func_150A8050(mtx, (*link)->rotX * 3.0f, 0.0f, (*link)->rotZ * 3.0f);
     mtx[3][0] = (*link)->x;
     mtx[3][1] = (*link)->y;
     mtx[3][2] = (*link)->z;
     func_150A7960(mtx, 0.0f, -495.0f, 0.0f, &outX, &outY, &outZ);
-    arg0->unk14->unkE = outX;
-    arg0->unk14->unk10 = outY;
-    arg0->unk14->unk12 = outZ;
+    effect->light->x = outX;
+    effect->light->y = outY;
+    effect->light->z = outZ;
     return 1;
 }
 

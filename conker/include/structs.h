@@ -2842,7 +2842,7 @@ typedef struct TriggerZone {
 
 /*
  * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
- * linked list D_800DCD78. struct226 is a partial view of this.
+ * linked list D_800DCD78. A LightEffect (below) drives one through LightEffect.light.
  */
 typedef struct PointLight {
     /* 0x00 */ struct PointLight *next;
@@ -3414,63 +3414,215 @@ struct struct224 {
     struct224 *unk44;
 };
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    s16 unk10;
-    u8  pad12[0x12];
-    u8  unk24;
-} struct227;
+/*
+ * Light effect payloads (game_18D770.c, "../Effects/Light/light.c"). Each is stored inline at
+ * LightEffect.data; the effect's update callback (LightEffect.update) selects which one.
+ */
 
-typedef struct {
-    u8  pad0[0x5];
-    u8  unk5;
-    u8  unk6;
-    u8  unk7;
-    u8  pad8;
-    u8  unk9;
-    u8  padA[0x4];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8  unk16[0x19];
-    u8  unk2F;
-} struct226;
+/* Pulse (func_15163CF8): radius = base + amplitude * sin(phase). */
+typedef struct LightPulse {
+    /* 0x0 */ f32 base;
+    /* 0x4 */ f32 amplitude;
+    /* 0x8 */ f32 phase;
+    /* 0xC */ f32 speed; // phase advance per frame
+} LightPulse; // size 0x10
 
-typedef struct {
-    Actor *unk0; // Actor pointer?
-    u8  unk4;
-    u8  pad5[0x9];
-    u8  unkE; // 6 bytes?
-    s8  unkF;
-    s16 unk10;
-    u8  unk12;
-    u8  pad13;
-    struct226 *unk14;
-    struct227 *unk18; // struct227 pointer?
-    f32 unk1C;
-    s32 unk20; // Vec3f pointer?
-    s8  unk24;
-    u8  unk25;
-    u8  pad26[0x2];
-    s16 unk28;
-    u8  unk2A;
-    u8  pad2B[0x2];
-    u8  unk2D;
-    u8  pad2E[0x2];
-    s32 unk30;
-} struct225;
+/* Jitter (func_15163DEC): radius eases towards random targets, mostly between low and mid. */
+typedef struct LightJitter {
+    /* 0x00 */ f32 mid;
+    /* 0x04 */ f32 low;
+    /* 0x08 */ f32 high;
+    /* 0x0C */ f32 target;
+    /* 0x10 */ f32 timer;     // frames until the next target
+    /* 0x14 */ f32 interval;  // longest time between targets
+    /* 0x18 */ f32 smoothing; // fraction of the distance to the target covered per frame
+    /* 0x1C */ f32 level;     // current radius
+} LightJitter; // size 0x20
 
-// only used by func_15163B98 ?
-typedef struct {
-    u8 pad0[0x28];
-    WorldObject *unk28;
-    u8  pad2C[0x14];
-    f32 unk40;
-} struct230;
+/* Flicker (func_151607A4): bursts of flickers that ramp the light up from dark. */
+typedef struct LightFlicker {
+    /* 0x00 */ f32 peak;  // radius a flicker ramps up to
+    /* 0x04 */ f32 level; // current radius
+    /* 0x08 */ f32 rate;  // radius gained per frame
+    /* 0x0C */ f32 delay; // frames before the current flicker starts ramping
+    /* 0x10 */ s16 count; // flickers left in this burst
+    /* 0x12 */ u8  sound; // play a sound on each flicker
+} LightFlicker; // size 0x14
+
+/* An effect tied to an actor without following a bone. */
+typedef struct LightActorRef {
+    /* 0x0 */ Actor *actor;
+    /* 0x4 */ u8 actorId; // actor->unique_id when attached
+    /* 0x5 */ u8 unk5;    // index into D_8008B358 (actor event handler)
+} LightActorRef; // size 0x8
+
+/* The light follows an actor, or a point on one of its bones (func_15160B74). */
+typedef struct LightAttach {
+    /* 0x00 */ Actor *actor;
+    /* 0x04 */ u8 actorId;   // actor->unique_id when attached; a change means the actor slot was reused
+    /* 0x05 */ u8 bone;      // index of the bone matrix in actor->unk1D4
+    /* 0x06 */ u8 pad6[0x2];
+    /* 0x08 */ Vec3f offset; // position in the bone's frame
+    /* 0x14 */ s8 callback;  // index into D_8008B1F8, or -1
+    /* 0x15 */ u8 unk15;
+} LightAttach; // size 0x18
+
+/* A light cast along a beam from an actor's bone, stopping at the first hit (func_15160E30). */
+typedef struct LightBeam {
+    /* 0x00 */ Actor *actor;
+    /* 0x04 */ u8 actorId;  // actor->unique_id when attached
+    /* 0x05 */ u8 bone;     // index of the bone matrix in actor->unk1D4
+    /* 0x06 */ u8 pad6[0x2];
+    /* 0x08 */ Vec3f start; // beam start in the bone's frame
+    /* 0x14 */ Vec3f end;   // beam end in the bone's frame
+    /* 0x20 */ f32 scale;   // hit distance to radius
+    /* 0x24 */ u8 flags;    // 1: cast from the bone, 2: flag the hit actor
+    /* 0x25 */ u8 unk25;
+} LightBeam; // size 0x28
+
+/* Colour pulse: colour = base + amplitude * sin(phase). */
+typedef struct LightColourPulse {
+    /* 0x00 */ Vec3f base;
+    /* 0x0C */ Vec3f amplitude;
+    /* 0x18 */ f32 phase;
+    /* 0x1C */ f32 speed; // phase advance per frame
+} LightColourPulse; // size 0x20
+
+/* Cycle (func_15162B28): low, rising, high, falling, with a callback on entering each state. */
+typedef struct LightCycle {
+    /* 0x00 */ f32 high;
+    /* 0x04 */ f32 low;
+    /* 0x08 */ f32 range;     // high - low
+    /* 0x0C */ f32 time;      // position in the cycle
+    /* 0x10 */ f32 riseStart;
+    /* 0x14 */ f32 riseEnd;
+    /* 0x18 */ f32 fallStart;
+    /* 0x1C */ f32 period;    // also the end of the fall
+    /* 0x20 */ f32 invRamp;   // 1 / rise (and fall) duration
+    /* 0x24 */ u8  state;     // 0 low, 1 rising, 2 high, 3 falling
+    /* 0x25 */ s8  onLow;     // D_8008B364 callback run on entering each state, or -1
+    /* 0x26 */ s8  onRise;
+    /* 0x27 */ s8  onHigh;
+    /* 0x28 */ s8  onFall;
+} LightCycle; // size 0x2C; the effect reserves 0x30 bytes for it
+
+/* Lightning (func_151630F4): idle for a random wait, then a burst of decaying flashes with thunder. */
+typedef struct LightStorm {
+    /* 0x00 */ f32 level;         // current radius
+    /* 0x04 */ f32 decay;         // fraction of the level lost per frame
+    /* 0x08 */ f32 waitTimer;     // frames until the next burst
+    /* 0x0C */ f32 waitMin;
+    /* 0x10 */ f32 waitRange;
+    /* 0x14 */ s32 flashes;       // flashes left in the current burst
+    /* 0x18 */ s32 flashesMin;
+    /* 0x1C */ s32 flashesRange;
+    /* 0x20 */ f32 flashTimer;    // frames until the next flash
+    /* 0x24 */ f32 flashGapMin;
+    /* 0x28 */ f32 flashGapRange;
+    /* 0x2C */ f32 flashMin;      // radius of a flash
+    /* 0x30 */ f32 flashRange;
+} LightStorm; // size 0x34
+
+/* The light tracks three f32s owned by someone else (func_15163414). */
+typedef struct LightTrack {
+    /* 0x0 */ f32 *x;
+    /* 0x4 */ f32 *y;
+    /* 0x8 */ f32 *z;
+    /* 0xC */ s8 callback; // D_8008B36C update callback, or -1
+    /* 0xD */ u8 handler;  // D_8008B370 event handler index
+} LightTrack; // size 0x10
+
+/* Radius follows the value read by func_15188010 (func_151638E0). */
+typedef struct LightFollow {
+    /* 0x0 */ s32 source;
+    /* 0x4 */ f32 base;
+    /* 0x8 */ f32 scale;
+} LightFollow; // size 0xC
+
+/* Flash (func_1516429C): decays each frame; event 0x33 relights it. */
+typedef struct LightFlash {
+    /* 0x0 */ f32 level;
+    /* 0x4 */ u8 id;
+} LightFlash; // size 0x8
+
+/* A fixed point transformed by a matrix each frame (func_151643F8). */
+typedef struct LightTransformed {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ s32 mtx; // passed to func_15145CD0
+} LightTransformed; // size 0x10
+
+/* A light swinging about a pivot with an object's rotation (func_151644A8). */
+typedef struct LightSwing {
+    /* 0x00 */ f32 offset;          // passed as y to func_150A7960
+    /* 0x04 */ f32 scale;           // applied to the object's rotX / rotZ
+    /* 0x08 */ WorldObject *object;
+    /* 0x0C */ Vec3f pivot;
+} LightSwing; // size 0x18
+
+/* LightEffect.data: one payload per kind of light effect. */
+typedef union LightEffectData {
+    s32 index;            // func_15161A68: entry of D_800C3958[0]
+    void *object;         // a plain pointer payload (e.g. the lamp DynModel of game_135D00.c)
+    WorldObject *mount;   // func_151606A8: the light hangs below this object
+    LightPulse pulse;
+    LightJitter jitter;
+    LightFlicker flicker;
+    LightActorRef actorRef;
+    LightAttach attach;
+    LightBeam beam;
+    LightColourPulse colourPulse;
+    LightCycle cycle;
+    LightStorm storm;
+    LightTrack track;
+    LightFollow follow;
+    LightFlash flash;
+    LightTransformed transformed;
+    LightSwing swing;
+    struct {
+        /* 0x00 */ LightPulse pulse;
+        /* 0x10 */ WorldObject *object; // the effect ends once this object is inactive
+    } objectPulse;    // func_15163A60
+    struct {
+        /* 0x00 */ LightAttach attach;
+        /* 0x18 */ LightPulse pulse;
+    } attachPulse;    // func_15163BE8
+    struct {
+        /* 0x00 */ LightActorRef ref;
+        /* 0x08 */ LightJitter jitter;
+    } actorJitter;    // func_151903D0
+    struct {
+        /* 0x00 */ LightCycle cycle;
+        /* 0x2C */ u8 pad2C[4];
+        /* 0x30 */ u8 objectId; // WorldObject id (func_151149AC) flagged by the cycle callbacks
+    } objectCycle;    // func_15009990
+} LightEffectData;
+
+/* LightEffect.flags */
+#define LIGHT_EFFECT_TIMED      1 // lifetime counts down; the effect ends below 0
+#define LIGHT_EFFECT_OWNS_LIGHT 2 // the light is freed with the effect (func_151602C0)
+
+/*
+ * A light effect instance (object type 53, allocated by func_1516037C with func_15167A68): a 0x18-byte
+ * header, then a payload of the requested size. The first 0xE bytes are the object-list link of
+ * EffectHeader (effects.h). The allocation is 0x18 + payload size, so sizeof(LightEffect) is not used.
+ */
+typedef struct LightEffect {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ struct EffectHeader *prev;
+    /* 0x08 */ struct EffectHeader *next;
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 flags;       // LIGHT_EFFECT_* (Header.unk0)
+    /* 0x0F */ s8 update;      // index into D_8008B0F0, or -1 (Header.unk1)
+    /* 0x10 */ s16 lifetime;   // frames left when LIGHT_EFFECT_TIMED (Header.unk2)
+    /* 0x12 */ u8 lightType;   // index into the handler tables D_8008B150 / D_8008B208 / D_8008B2B0;
+                               // also the id events 0x17-0x22 are addressed to (Header.unk4)
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ PointLight *light;
+    /* 0x18 */ LightEffectData data;
+} LightEffect;
 
 typedef struct {
     s8  unk0;
@@ -3479,16 +3631,6 @@ typedef struct {
     s8  unk4;
     u8  pad5;
 } Header; // size 0x6
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    s16 unk10;
-    u8  unk12;
-    u8  pad13;
-} struct232; // size 0x14
 
 /* Per-track state of a running cutscene; D_800C3958[scene] points at one per track. */
 typedef struct SeqTrackState {
@@ -3534,12 +3676,6 @@ typedef struct {
 } struct236;
 
 typedef struct {
-    f32 unk0[5];
-    struct226 *unk14;
-    struct235 unk18; // is this just 8 f32s ?
-} struct237;
-
-typedef struct {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -3558,13 +3694,6 @@ typedef struct {
 } struct238;
 
 typedef struct {
-    u8 pad0[0x12];
-    u8 unk12;
-    u8 pad13[0x35];
-    u8 unk48;
-} struct239;
-
-typedef struct {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -3579,15 +3708,6 @@ typedef struct {
     f32 unk2C;
     f32 unk30;
 } struct241; // size 0x34
-
-typedef struct {
-    u8  pad0[0x14];
-    struct226 *unk14;
-    s32 *unk18; // struct ptr?
-    f32 unk1C;
-    s32 unk20;
-    s32 *unk24; // Vec3f pointer?
-} struct242;
 
 typedef struct {
     f32 unk0;

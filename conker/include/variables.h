@@ -458,12 +458,12 @@ extern void (*D_8008A7B0[])(struct260*);
 extern void (*D_8008A8D8[74])(struct260*, s32, u8);
 extern s32 (*D_8008A670[])(s32, struct260*, s16);
 extern s32  (*D_8008B0F0[])(void);
-extern u8   (*D_8008B1F8[])(struct225*);
-extern void (*D_8008B208[])(struct225*);
-extern void (*D_8008B2B0[])(struct225*);
+extern u8   (*D_8008B1F8[])(LightEffect *);
+extern void (*D_8008B208[])(LightEffect *);
+extern void (*D_8008B2B0[])(LightEffect *);
 extern s32 (*D_8008B36C[])(void);
-extern void (*D_8008B370[])(struct225 *effect, s32 arg1, u8 eventId); // light event handlers
-extern void (*D_8008B374[])(struct225 *effect);
+extern void (*D_8008B370[])(LightEffect *effect, s32 arg1, u8 eventId); // light event handlers
+extern void (*D_8008B374[])(LightEffect *effect);
 
 extern AttachmentType * D_8008ABE8[];
 extern ObjType D_8008B4A8[104];

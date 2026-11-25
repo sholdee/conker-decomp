@@ -26,7 +26,7 @@ void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                    s32 arg37, s32 arg38, s32 arg39, s32 arg40, s32 arg41,
                    s32 arg42, s32 arg43, s32 arg44, s32 arg45, s32 arg46,
                    s32 arg47, s32 arg48);
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3,
+LightEffect *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);
 extern s32 func_10004074[];

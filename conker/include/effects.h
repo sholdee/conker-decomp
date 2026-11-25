@@ -1715,7 +1715,7 @@ typedef struct AnchorEmitterTemplate {
 typedef struct AnchorEmitterParams {
     /* 0x00 */ f32 accum;
     /* 0x04 */ AnchorEmitterTemplate tmpl;
-    /* 0x54 */ struct225 *child;
+    /* 0x54 */ LightEffect *child;
     /* 0x58 */ s8 updateFunc;
     /* 0x59 */ s8 unk59Func;
     /* 0x5A */ u8 unk5A;

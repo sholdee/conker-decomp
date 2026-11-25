@@ -29,7 +29,7 @@ typedef struct {
     /* 0x170 */ LampSwing swing;
 } Particle;
 
-/* Data of the swinging-light effect, stored at struct225.unk18 by func_151B8DB0. */
+/* Data of the swinging-light effect, stored at LightEffect.data by func_151B8DB0. */
 typedef struct {
     /* 0x0 */ Particle *lamp;
     /* 0x4 */ DefParticleHead *beam;      // NULL if func_151407D0 failed
@@ -47,7 +47,7 @@ typedef struct {
 } GlowParams60;
 
 DefParticleHead *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_1516037C(Header *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */
@@ -117,9 +117,9 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
             header.unk1 = 7;
             header.unk2 = 300;
             header.unk4 = 0x12;
-            obj = func_1516037C(&header, (struct226 *)light, sizeof(data), arg2, arg3);
+            obj = func_1516037C(&header, (PointLight *)light, sizeof(data), arg2, arg3);
             if (obj != NULL) {
-                state = (SwingingLight *)&((struct225 *)obj)->unk18;
+                state = (SwingingLight *)&((LightEffect *)obj)->data;
                 memcpy(state, &data, sizeof(data));
                 {
                     GlowParams60 params;
@@ -236,7 +236,7 @@ void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 
 /* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
-s32 func_151B9408(struct225 *effect) {
+s32 func_151B9408(LightEffect *effect) {
     f32 extend; // matching: the 500.0f literal needs its own local (inline changes the frame)
     Particle *lamp;
     Vec3f point;
@@ -246,7 +246,7 @@ s32 func_151B9408(struct225 *effect) {
     f32 dx, dy, dz; // unit direction from the lamp down to the light point
     SwingingLight *state;
 
-    state = (SwingingLight *)&effect->unk18;
+    state = (SwingingLight *)&effect->data;
     lamp = state->lamp;
     func_150A8050(mtx, 0.0f, 0.0f, lamp->swing.out);
     mtx[3][0] = lamp->pos.x;
@@ -262,9 +262,9 @@ s32 func_151B9408(struct225 *effect) {
     mtx[2][1] *= lamp->sizeXZ;
     mtx[2][2] *= lamp->sizeXZ;
     func_150A7960(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
-    effect->unk14->unkE = point.x;
-    effect->unk14->unk10 = point.y;
-    effect->unk14->unk12 = point.z;
+    effect->light->x = point.x;
+    effect->light->y = point.y;
+    effect->light->z = point.z;
     if (state->beam != NULL) {
         extend = 500.0f;
         reach = lamp->sizeY * 65.0f;
