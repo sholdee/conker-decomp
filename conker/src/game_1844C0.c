@@ -98,12 +98,12 @@ typedef struct {
 extern Effect *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
 extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
-extern void guMtxIdentF(float mf[4][4]);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 extern s32 (*D_8008AD90[])(Effect *);
 extern s32 (*D_8008ADA0[])(Effect *);
 extern void func_1503F4B0(ModelInstance *);
+
 /*
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
  * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
@@ -111,8 +111,6 @@ extern void func_1503F4B0(ModelInstance *);
 Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
                       u8 owner, s32 list) {
     Effect *fx;
-    f32 (*mtx0)[4];
-    f32 (*mtx1)[4];
     s32 type;
     s32 i;
 
@@ -129,12 +127,10 @@ Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s
     memcpy(&fx->params, params, sizeof(EffectParams));
     func_1503F62C(fx->params.model, fx->params.unkC, &fx->displayLists, &fx->displayListCount, &fx->segment1,
                   &fx->unk78, &fx->model);
-    mtx0 = fx->mtx[0];
-    guMtxIdentF(mtx0);
-    mtx1 = fx->mtx[1];
-    guMtxIdentF(mtx1);
-    fx->model->rootMtx[0] = mtx0;
-    fx->model->rootMtx[1] = mtx1;
+    guMtxIdentF(fx->mtx[0]);
+    guMtxIdentF(fx->mtx[1]);
+    fx->model->rootMtx[0] = fx->mtx[0];
+    fx->model->rootMtx[1] = fx->mtx[1];
     func_1503F5B8(fx->model, 1, arg1, arg2, 0.0f, 0);
     fx->attach.unk0 = attachArg;
     fx->unk118 = arg4;
@@ -142,7 +138,6 @@ Effect *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s
     for (i = 0; i < 4; i++) {
         fx->attach.unk8[i] = 0;
     }
-
     fx->attach.unk18 = 0;
     if (attachArg) {
         for (i = 0; i <= D_80082FA0; i++) {
@@ -444,9 +439,9 @@ Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
 
 /* Post-draw callback (D_8008ADCC[0]): reloads this view's projection matrices for the current frame. */
 Gfx *func_15157FE8(Gfx *gfx, Effect *fx, s32 view, u8 *needSync) {
-    gSPMatrix(gfx++, (u8 *)((struct259 *)D_800BE628 + view) + (D_800BE9C0 << 6) + 0x100,
+    gSPMatrix(gfx++, (Mtx *)((u8 *)&((struct259 *)D_800BE628)[view] + 0x100) + D_800BE9C0,
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, ((s32 *)&D_800DC2A0)[D_800BE9C0] + (view << 6), G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, ((Mtx **)&D_800DC2A0)[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;
 }
 
