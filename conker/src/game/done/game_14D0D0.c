@@ -7,10 +7,11 @@
 void func_1511FC20(s32 arg0) {
 }
 
-s32 func_1511FC2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return arg0;
+/* Draw hooks left empty in this build: they return the display list unchanged. */
+Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view) {
+    return gfx;
 }
 
-s32 func_1511FC44(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return arg0;
+Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view) {
+    return gfx;
 }

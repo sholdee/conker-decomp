@@ -1,7 +1,5 @@
 #include <ultra64.h>
 
-// matching: functions.h declares these with the wrong parameter types (u16 param, s32 callback);
-// hide those prototypes and declare the real ones below.
 #include "functions.h"
 #include "variables.h"
 

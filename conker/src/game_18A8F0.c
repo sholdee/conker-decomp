@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #define func_1515D4D4 func_1515D4D4_prototype
-#define func_1515D6D0 func_1515D6D0_prototype
 #include "functions.h"
 #undef func_1515D4D4
-#undef func_1515D6D0
 #define D_800DCD20 D_800DCD20_hdr
 #define D_800DCD24 D_800DCD24_hdr
 #define D_800DCD30 D_800DCD30_hdr

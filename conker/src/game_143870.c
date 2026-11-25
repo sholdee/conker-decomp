@@ -1,5 +1,4 @@
 #include <ultra64.h>
-// functions.h declares these two as returning void; hide those prototypes and redeclare them below.
 #include "functions.h"
 #include "variables.h"
 

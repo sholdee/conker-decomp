@@ -1,10 +1,6 @@
 #include <ultra64.h>
-#define func_1511FC2C func_1511FC2C__proto
-#define func_1511FC44 func_1511FC44__proto
 #define func_150A7CB0 func_150A7CB0__proto
 #include "functions.h"
-#undef func_1511FC2C
-#undef func_1511FC44
 #undef func_150A7CB0
 #include "variables.h"
 
@@ -387,8 +383,6 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32, s32 view);
-Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
 Gfx *func_1510D8C0(Gfx *gfx, WorldObject *obj);
 Gfx *func_150CF5E8(Gfx *gfx);

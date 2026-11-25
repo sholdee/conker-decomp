@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1510B9D0 func_1510B9D0_hdr
 #include "functions.h"
-#undef func_1510B9D0
 #define D_800D9D10 D_800D9D10_hdr
 #define D_800DC2A0 D_800DC2A0_hdr
 #define D_800B0E00 D_800B0E00_hdr

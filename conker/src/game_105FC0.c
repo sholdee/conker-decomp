@@ -1,5 +1,4 @@
 #include <ultra64.h>
-// matching: functions.h declares these with other return types; the file needs the s32 forms
 #include "functions.h"
 #include "variables.h"
 #include "effects.h"

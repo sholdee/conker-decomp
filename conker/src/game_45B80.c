@@ -1,6 +1,10 @@
 #include <ultra64.h>
 
+// matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
+#define func_1515D6D0 func_1515D6D0_functions_h
 #include "functions.h"
+#undef func_1515D6D0
+s32 func_1515D6D0(s32 gfx, s32 player);
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
 #define D_800BE9D0 D_800BE9D0_hdr
@@ -489,7 +493,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
         return gfx;
     }
     gfx = (Gfx *)func_1515D6D0((s32)gfx, player);
-    return (Gfx *)func_1510B9D0((s32)gfx, player);
+    return func_1510B9D0(gfx, player);
 }
 
 /* Draws the main pass of player's scene. */

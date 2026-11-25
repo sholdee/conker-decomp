@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares these two with other return types; they are redeclared below. */
 #include "functions.h"
-// matching: the full 32-bit random value is used here; the header's u8 return adds a mask
-/* Returns the playing sound's handle. */
 #include "variables.h"
 #include "effects.h"
 
