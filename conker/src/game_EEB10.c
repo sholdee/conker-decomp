@@ -87,7 +87,7 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     f32 angleSin;
     f32 angleCos;
 
-    count = 1;
+    count = 1; // matching: a do/while spawn loop; the for form schedules differently
     render.unk0 = 0;
     render.unk4 = 1;
     render.unk8 = 0x160600;
