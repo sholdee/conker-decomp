@@ -2,261 +2,251 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_80099A28;
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+/* Debris emitter settings read by func_151A6F00 (same layout as in game_1D43B0.c). */
+typedef struct {
+    /* 0x00 */ s16 count;
+    /* 0x04 */ vertex pos;
+    /* 0x10 */ s16 lifetime;
+    /* 0x14 */ f32 radius;
+    /* 0x18 */ s16 yawBase;
+    /* 0x1A */ s16 yawRange;
+    /* 0x1C */ s16 pitchBase;
+    /* 0x1E */ s16 pitchRange;
+    /* 0x20 */ f32 speedBase;
+    /* 0x24 */ f32 speedRange;
+    /* 0x28 */ f32 velYBase;
+    /* 0x2C */ f32 velYRange;
+    /* 0x30 */ vertex dir;
+    /* 0x3C */ f32 sizeBase;
+    /* 0x40 */ f32 sizeRange;
+    /* 0x44 */ f32 gravityBase;
+    /* 0x48 */ f32 gravityRange;
+    /* 0x4C */ f32 spinBase;
+    /* 0x50 */ f32 spinRange;
+    /* 0x54 */ u8 landPuffs;
+    /* 0x55 */ u8 landPuffFlag;
+    /* 0x56 */ s16 landPuffLifeBase;
+    /* 0x58 */ s16 landPuffLifeRange;
+} DebrisEmitter;
 
-extern f32 D_80099A10;
-extern f32 D_80099A14;
-extern f32 D_80099A18;
-extern f32 D_80099A1C;
-extern f32 D_80099A20;
-extern f32 D_80099A24;
-extern void func_151A6F00(void *, s32, u8, s32);
-struct struct1506A5F0
-{
-  s16 unk00;
-  u8 pad02[2];
-  struct17 unk04;
-  s16 unk10;
-  u8 pad12[2];
-  f32 unk14;
-  s16 unk18;
-  s16 unk1A;
-  s16 unk1C;
-  s16 unk1E;
-  f32 unk20;
-  f32 unk24;
-  f32 unk28;
-  f32 unk2C;
-  f32 unk30;
-  f32 unk34;
-  f32 unk38;
-  f32 unk3C;
-  f32 unk40;
-  f32 unk44;
-  f32 unk48;
-  f32 unk4C;
-  f32 unk50;
-  s8 unk54;
-  s8 unk55;
-  s16 unk56;
-  s16 unk58;
-};
-void func_1506A5F0(struct127 *arg0, s32 arg1)
-{
-  struct struct1506A5F0 sp1C;
-  sp1C.unk00 = 3;
-  sp1C.unk04.unk0 = arg0->x_position;
-  sp1C.unk04.unk4 = arg0->y_position;
-  sp1C.unk04.unk8 = arg0->z_position;
-  sp1C.unk14 = D_80099A10;
-  sp1C.unk20 = D_80099A14;
-  sp1C.unk24 = D_80099A18;
-  sp1C.unk10 = 0x5A;
-  sp1C.unk18 = 0;
-  sp1C.unk1A = 0xFF;
-  sp1C.unk1C = -0x40;
-  sp1C.unk1E = 0x28;
-  sp1C.unk30 = 0.0f;
-  sp1C.unk34 = 0.0f;
-  sp1C.unk38 = 0.0f;
-  sp1C.unk54 = 0;
-  sp1C.unk55 = 0;
-  sp1C.unk56 = 0x32;
-  sp1C.unk58 = 0x19;
-  sp1C.unk3C = D_80099A1C;
-  sp1C.unk40 = D_80099A20;
-  sp1C.unk44 = D_80099A24;
-  sp1C.unk48 = (f32) ((s16) 0);
-  sp1C.unk4C = -4.0f;
-  sp1C.unk50 = 8.0f;
-  func_151A6F00(&sp1C, 1, 0xFF, 1);
+extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
+
+/* Bursts three debris pieces from the object's position. */
+void func_1506A5F0(struct127 *obj, s32 arg1) {
+    DebrisEmitter emitter;
+
+    emitter.count = 3;
+    emitter.pos.x = obj->x_position;
+    emitter.pos.y = obj->y_position;
+    emitter.pos.z = obj->z_position;
+    emitter.radius = 151.5f;
+    emitter.speedBase = 15.10000038f;
+    emitter.speedRange = 25.20000076f;
+    emitter.lifetime = 90;
+    emitter.yawBase = 0;
+    emitter.yawRange = 255;
+    emitter.pitchBase = -64;
+    emitter.pitchRange = 40;
+    emitter.dir.x = 0.0f;
+    emitter.dir.y = 0.0f;
+    emitter.dir.z = 0.0f;
+    emitter.landPuffs = 0;
+    emitter.landPuffFlag = 0;
+    emitter.landPuffLifeBase = 50;
+    emitter.landPuffLifeRange = 25;
+    emitter.sizeBase = 0.3880000114f;
+    emitter.sizeRange = 0.2430000156f;
+    emitter.gravityBase = -1.0200001f;
+    emitter.gravityRange = 0; // matching: an int 0 gets its own mtc1 zero; 0.0f would share the 0.0f register
+    emitter.spinBase = -4.0f;
+    emitter.spinRange = 8.0f;
+    func_151A6F00(&emitter, 1, 0xFF, 1);
 }
 
 
-s32 func_150E0348(s32, s32, s32);
-
-s32 func_1506A6FC(s32 arg0, s32 arg1) {
-    return func_150E0348(arg0, 0xFF, 1);
-}
-
+/*
+ * Per-object movement-hit handlers, dispatched through D_80086110 by func_1506AC8C. Before a call,
+ * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
+ */
 extern f32 D_800D1560[3];
 extern f32 D_800D1570[3];
-s32 func_151BB61C(s32, s32, s32, s32, s32);
 
-s32 func_1506A724(s32 arg0, s32 arg1) {
-    return func_151BB61C(arg0, (s32)&D_800D1560, (s32)&D_800D1570, 0xFF, 1);
-}
-
-s32 func_151BBA9C(s32, s32, s32, s32, s32);
-
-s32 func_1506A760(s32 arg0, s32 arg1) {
-    return func_151BBA9C(arg0, (s32)&D_800D1560, (s32)&D_800D1570, 0xFF, 1);
-}
-
-void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
-
-void func_1506A79C(struct127 *arg0, s32 arg1) {
-    f32 sp2C[3];
-    f32 sp20[3];
-
-    sp2C[0] = arg0->x_position;
-    sp2C[1] = arg0->y_position;
-    sp2C[2] = arg0->z_position;
-    sp20[0] = D_800D1570[0] - D_800D1560[0];
-    sp20[1] = D_800D1570[1] - D_800D1560[1];
-    sp20[2] = D_800D1570[2] - D_800D1560[2];
-    func_151D3480(sp2C, sp20, 0, 0, 0xFF, 1);
-}
-
-s32 func_151BC104(s32, s32, s32);
-
-s32 func_1506A83C(s32 arg0, s32 arg1) {
-    return func_151BC104(arg0, 0xFF, 1);
-}
-
-void func_1506A864(struct127 *arg0, s32 arg1) {
-    struct225 *temp_v0;
-    Header header;
-    struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-    } sp44;
-    Header2 header2;
-
-    header2.unk0 = (s32)arg0->x_position;
-    header2.unk4 = (s32)(arg0->y_position + 50.0f);
-    header2.unk8 = (s32)arg0->z_position;
-    sp44.unk0 = 0.0f;
-    sp44.unk8 = 0.0f;
-    header.unk0 = 2;
-    header.unk1 = 0xF;
-    header.unk2 = 0x12C;
-    header.unk4 = 5;
-    sp44.unk4 = 80.0f;
-    sp44.unkC = D_80099A28;
-
-    temp_v0 = func_151602C0(&header, &header2, 0, 0xFF, 0xFF, 0x5A, 0xFF, 0, 0x10, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &sp44, 0x10);
-    }
-}
-
-void func_1506A968(struct127 *arg0, s32 arg1) {
-    f32 sp2C[3];
-    f32 sp20[3];
-
-    sp2C[0] = arg0->x_position;
-    sp2C[1] = arg0->y_position;
-    sp2C[2] = arg0->z_position;
-    sp20[0] = D_800D1570[0] - D_800D1560[0];
-    sp20[1] = D_800D1570[1] - D_800D1560[1];
-    sp20[2] = D_800D1570[2] - D_800D1560[2];
-    func_151D3480(sp2C, sp20, 0, 1, 0xFF, 1);
-}
-
-s32 func_151B7144(s32, s32, s32);
-s32 func_151B6320(s32, s32, s32);
-
-s32 func_1506AA08(s32 arg0, s32 arg1) {
-    func_151B7144(arg0, 0xFF, 1);
-    return func_151B6320(arg0, 0xFF, 1);
-}
-
-struct s1506AA48 {
-    s32 unk0;
-    s32 unk4;
-};
-
-void func_1506AA48(struct127 *arg0, struct s1506AA48 *arg1) {
-    struct260 *temp_v0;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        struct s1506AA48 unk8;
-    } sp34;
-
-    sp34.unk0 = arg0;
-    sp34.unk4 = arg0->unique_id;
-    sp34.unk8 = *arg1;
-
-    temp_v0 = func_15149130(0xA, 0x7, 0x23, -1, 1, 0x21, (struct37 *)0x10, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x10);
-    }
-}
-
+/* Bitmask of the objects (D_800CC2D0 indices) hit in the last collision check. */
 extern s32 D_800CC260;
-void func_15137610(struct127 *, s32, s32, s32, s32, s32);
 
-void func_1506AAE0(s32 arg0, s32 arg1) {
-    s32 mask;
-    struct127 *ptr;
-
-    mask = D_800CC260;
-    ptr = &D_800CC2D0[0];
-    while (mask != 0) {
-        if (mask & 1) {
-            func_15137610(ptr, (s32)&D_800D1560, (s32)&D_800D1570, 0, 0xFF, 1);
-        }
-        mask >>= 1;
-        ptr++;
-    }
-}
-
-void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
-
-struct struct1506AB7C {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ struct17 unk4;
-    /* 0x10 */ s32 unk10;
-};
-
-void func_1506AB7C(s32 arg0, struct struct1506AB7C *arg1) {
-    func_15103E40(arg0, arg1->unk0, &arg1->unk4, 1, arg1->unk10, 0xFF, 1);
-}
-
-void func_1506ABC4(s32 arg0, struct struct1506AB7C *arg1) {
-    func_15103E40(arg0, arg1->unk0, &arg1->unk4, 2, arg1->unk10, 0xFF, 1);
-}
-
-s32 func_151B7328(void *, s32, s32, s32, s32);
-
-struct struct1506AC0C {
-    /* 0x00 */ s32 *unk0;
-    /* 0x04 */ u8 unk4;
-};
-
-void func_1506AC0C(s32 *arg0, s32 arg1) {
-    struct struct1506AC0C sp20;
-    sp20.unk0 = arg0;
-    sp20.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-    func_151B7328(&sp20, 0, 8, 0xFF, 1);
-}
-
-s32 func_151CEAAC(s32, s32, s32, s32, s32);
-
-s32 func_1506AC58(s32 arg0, s32 arg1) {
-    return func_151CEAAC(arg0, 0, 1, 0xFF, 1);
-}
-
+/* Object position saved before the collision move. */
 extern f32 D_800CC254;
 extern f32 D_800CC258;
 extern f32 D_800CC25C;
+
 extern void (*D_80086110[])(struct127 *, s32);
 
-void func_1506AC8C(struct127 *arg0, s32 arg1, s32 arg2) {
-    if (arg1 >= 0 && arg1 < 0xF) {
-        D_800D1560[0] = *(f32 *)((s32)arg0 + 0x2C);
-        D_800D1560[1] = *(f32 *)((s32)arg0 + 0x30);
-        D_800D1560[2] = *(f32 *)((s32)arg0 + 0x34);
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
+} ObjectRef;
+
+void func_150E0348(struct127 *, s32, s32);
+void func_151BB61C(struct127 *, f32 *, f32 *, s32, s32);
+void func_151BBA9C(struct127 *, f32 *, f32 *, s32, s32);
+void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
+void func_151BC104(struct127 *, s32, s32);
+struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151B7144(struct127 *, s32, s32);
+void func_151B6320(struct127 *, s32, s32);
+void func_15137610(struct127 *, f32 *, f32 *, s32, s32, s32);
+void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
+void func_151B7328(ObjectRef *, s32, s32, s32, s32);
+void func_151CEAAC(struct127 *, s32, s32, s32, s32);
+
+void func_1506A6FC(struct127 *obj, s32 arg1) {
+    func_150E0348(obj, 0xFF, 1);
+}
+
+void func_1506A724(struct127 *obj, s32 arg1) {
+    func_151BB61C(obj, D_800D1560, D_800D1570, 0xFF, 1);
+}
+
+void func_1506A760(struct127 *obj, s32 arg1) {
+    func_151BBA9C(obj, D_800D1560, D_800D1570, 0xFF, 1);
+}
+
+void func_1506A79C(struct127 *obj, s32 arg1) {
+    f32 pos[3];
+    f32 delta[3];
+
+    pos[0] = obj->x_position;
+    pos[1] = obj->y_position;
+    pos[2] = obj->z_position;
+    delta[0] = D_800D1570[0] - D_800D1560[0];
+    delta[1] = D_800D1570[1] - D_800D1560[1];
+    delta[2] = D_800D1570[2] - D_800D1560[2];
+    func_151D3480(pos, delta, 0, 0, 0xFF, 1);
+}
+
+void func_1506A83C(struct127 *obj, s32 arg1) {
+    func_151BC104(obj, 0xFF, 1);
+}
+
+/* Spawns a flash 50 units above the object. */
+void func_1506A864(struct127 *obj, s32 arg1) {
+    struct225 *flash;
+    Header header;
+    f32 params[4];
+    Header2 pos;
+
+    pos.unk0 = obj->x_position;
+    pos.unk4 = obj->y_position + 50.0f;
+    pos.unk8 = obj->z_position;
+    params[0] = 0.0f;
+    params[2] = 0.0f;
+    header.unk0 = 2;
+    header.unk1 = 15;
+    header.unk2 = 300;
+    header.unk4 = 5;
+    params[1] = 80.0f;
+    params[3] = 0.1020999998f;
+
+    flash = func_151602C0(&header, &pos, 0, 0xFF, 0xFF, 90, 0xFF, 0, 0x10, 0xFF, 1);
+    if (flash != NULL) {
+        memcpy(&flash->unk18, params, sizeof(params));
+    }
+}
+
+void func_1506A968(struct127 *obj, s32 arg1) {
+    f32 pos[3];
+    f32 delta[3];
+
+    pos[0] = obj->x_position;
+    pos[1] = obj->y_position;
+    pos[2] = obj->z_position;
+    delta[0] = D_800D1570[0] - D_800D1560[0];
+    delta[1] = D_800D1570[1] - D_800D1560[1];
+    delta[2] = D_800D1570[2] - D_800D1560[2];
+    func_151D3480(pos, delta, 0, 1, 0xFF, 1);
+}
+
+void func_1506AA08(struct127 *obj, s32 arg1) {
+    func_151B7144(obj, 0xFF, 1);
+    func_151B6320(obj, 0xFF, 1);
+}
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Pair1506AA48;
+
+/* Spawns an effect that carries the object and the two words at arg as its data. */
+void func_1506AA48(struct127 *obj, Pair1506AA48 *arg) {
+    struct260 *effect;
+    struct {
+        ObjectRef ref;
+        Pair1506AA48 value;
+    } data;
+
+    data.ref.owner = obj;
+    data.ref.ownerId = obj->unique_id;
+    data.value = *arg;
+
+    effect = func_15149130(10, 7, 35, -1, 1, 33, (struct37 *)sizeof(data), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
+    }
+}
+
+/* Calls func_15137610 for every object in the hit mask D_800CC260. */
+void func_1506AAE0(struct127 *obj, s32 arg1) {
+    s32 mask;
+    struct127 *hit;
+
+    mask = D_800CC260;
+    hit = D_800CC2D0;
+    while (mask != 0) {
+        if (mask & 1) {
+            func_15137610(hit, D_800D1560, D_800D1570, 0, 0xFF, 1);
+        }
+        mask >>= 1;
+        hit++;
+    }
+}
+
+typedef struct {
+    /* 0x00 */ struct127 *unk0;
+    /* 0x04 */ struct17 unk4;
+    /* 0x10 */ s32 unk10;
+} Arg1506AB7C;
+
+void func_1506AB7C(struct127 *obj, Arg1506AB7C *arg) {
+    func_15103E40(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);
+}
+
+void func_1506ABC4(struct127 *obj, Arg1506AB7C *arg) {
+    func_15103E40(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
+}
+
+void func_1506AC0C(struct127 *obj, s32 arg1) {
+    ObjectRef ref;
+
+    ref.owner = obj;
+    ref.ownerId = obj->unique_id;
+    func_151B7328(&ref, 0, 8, 0xFF, 1);
+}
+
+void func_1506AC58(struct127 *obj, s32 arg1) {
+    func_151CEAAC(obj, 0, 1, 0xFF, 1);
+}
+
+/* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
+void func_1506AC8C(struct127 *obj, s32 type, s32 arg) {
+    if (type >= 0 && type < 15) {
+        D_800D1560[0] = obj->old_x_position;
+        D_800D1560[1] = obj->old_y_position;
+        D_800D1560[2] = obj->old_z_position;
         D_800D1570[0] = D_800CC254;
         D_800D1570[1] = D_800CC258;
         D_800D1570[2] = D_800CC25C;
-        if (D_80086110[arg1] != NULL) {
-            D_80086110[arg1](arg0, arg2);
+        if (D_80086110[type] != NULL) {
+            D_80086110[type](obj, arg);
         }
     }
 }
