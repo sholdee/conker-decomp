@@ -42,6 +42,12 @@ typedef struct {
     BeamOwnerAim *aim;
 } BeamOwner;
 
+/* How a child object refers back to its beam. */
+typedef struct {
+    Beam *beam;
+    u8 flags; // 1 = visible
+} BeamLink;
+
 /* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
 typedef struct {
     u8 pad0[0x38];
@@ -52,19 +58,22 @@ typedef struct {
     f32 baseSizeX;
     f32 baseSizeY;
     u8 padB0[0x20];
-    Beam *beam;
-    u8 flags; // 1 = visible
+    BeamLink link;
 } BeamStartFx;
+
+typedef struct {
+    u8 flags; // 1 = visible
+    u8 pad1;
+    HitInfo hit;
+    Beam *beam;
+} BeamHitFxData;
 
 /* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
 typedef struct {
     u8 pad0[0x34];
     struct17 pos;
     u8 pad40[0xD0];
-    u8 flags; // 1 = visible
-    u8 pad111;
-    HitInfo hit;
-    Beam *beam;
+    BeamHitFxData data;
 } BeamHitFx;
 
 typedef struct {
@@ -89,8 +98,7 @@ typedef struct {
     u8 pad4C[0xC];
     s32 unk58;
     u8 pad5C[0x114];
-    Beam *beam;
-    u8 flags; // 1 = visible
+    BeamLink link;
 } BeamLine;
 
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
@@ -98,9 +106,7 @@ typedef struct {
     u8 pad0[0x40];
     struct17 pos;
     u8 pad4C[0x5C];
-    Beam *beam;
-    u8 pad[4];
-    u8 flags; // 1 = visible
+    BeamLink link;
 } BeamEndFx;
 
 typedef struct {
@@ -191,14 +197,14 @@ void func_15101148(Beam *beam) {
 /* The functions below detach a child object from its beam before handing it on. */
 
 void func_151011E8(BeamHitFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
     func_1513CA6C((struct210 *)fx);
 }
 
 void func_15101210(BeamHitFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
     func_1513CAA0((struct210 *)fx);
@@ -219,42 +225,42 @@ void func_15101260(BeamEndPoint *endPoint) {
 }
 
 void func_15101288(BeamStartFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
     func_1513173C((struct210 *)fx);
 }
 
 void func_151012B0(BeamStartFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
     func_1513175C((struct210 *)fx);
 }
 
 void func_151012D8(BeamLine *line) {
-    BeamData *data = &line->beam->data;
+    BeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411A4((struct210 *)line);
 }
 
 void func_15101300(BeamLine *line) {
-    BeamData *data = &line->beam->data;
+    BeamData *data = &line->link.beam->data;
 
     data->line = NULL;
     func_151411C4((struct210 *)line);
 }
 
 void func_15101328(BeamEndFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
     func_1513173C((struct210 *)fx);
 }
 
 void func_15101350(BeamEndFx *fx) {
-    BeamData *data = &fx->beam->data;
+    BeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
     func_1513175C((struct210 *)fx);
@@ -271,260 +277,187 @@ typedef struct {
     char pad_0[0x31C];
     ObjectState197 *field_0x31C;
 } ObjectWithState197;
-typedef struct { f32 x, y, z; } F3_15101378;
-#pragma pack(1)
-typedef struct { s32 a, b, c, d; } Pq_15101378;
-#pragma pack()
-typedef struct { Pq_15101378 q; u16 h; } Pk_15101378;
-#pragma pack()
-typedef struct { u8 flag; u8 pad1; Pk_15101378 data; } XS_15101378;
-typedef struct { u8 pad0[0x34]; F3_15101378 p34; u8 pad1[0x110 - 0x40]; XS_15101378 s; } X_15101378;
-typedef struct { u8 pad0[0x9]; u8 f9; u8 pad1[4]; s16 sE; s16 s10; s16 s12; } P_15101378;
-typedef struct { u8 pad0[0x14]; P_15101378 *p14; } Y_15101378;
-typedef struct { u8 pad[4]; u8 flag; } VS_15101378;
-typedef struct { u8 pad0[0x40]; F3_15101378 p40; u8 pad1[0xA8 - 0x4C]; VS_15101378 s; } V_15101378;
-typedef struct { u8 pad0[0x38]; f32 f38; f32 f3C; F3_15101378 p40; u8 pad1[0xA8 - 0x4C]; f32 fA8; f32 fAC; u8 pad2[0xD4 - 0xB0]; u8 flagD4; } Z_15101378;
-typedef struct { u8 pad0[0x34]; F3_15101378 p34; F3_15101378 p40; u8 pad1[0x58 - 0x4C]; s32 s58; u8 pad2[0x174 - 0x5C]; u8 flag174; } W_15101378;
-typedef struct { u8 pad0[0xB4]; f32 fB4; F3_15101378 pB8; u8 padC4[0xE8 - 0xC4]; F3_15101378 pE8; Pk_15101378 pF4; u8 pad2[3]; u8 u109; } C_15101378;
-typedef struct { s32 s0; u8 pad4[0x3B - 4]; u8 u3B; u8 pad3C[0x74 - 0x3C]; u8 u74; u8 pad75[0x1D4 - 0x75]; u8 *p1D4; u8 pad1D8[0x31C - 0x1D8]; C_15101378 *c; } O_15101378;
-typedef struct {
-    O_15101378 *owner;
-    u8 u4;
-    u8 pad5[3];
-    f32 at8[3];
-    f32 at14[3];
-    u8 u20; u8 pad21[2]; u8 u23;
-    Z_15101378 *z24;
-    X_15101378 *x28;
-    Y_15101378 *y2C;
-    W_15101378 *w30;
-    V_15101378 *v34;
-    f32 f38;
-    u8 pad3C[8];
-    f32 f44;
-} B_15101378;
-typedef struct {
-    u8 pad0[0x34];
-    F3_15101378 p34;
-    F3_15101378 p40;
-    u8 pad4C[0x110 - 0x4C];
-    B_15101378 b;
-} A_15101378;
-extern void func_15143134(void *, void *, void *);
-extern f32 func_15143E64(void *);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, s32, s32, s32, f32);
+extern void func_15143134(struct17 *src, struct17 *dst, f32 (*mtx)[4]);
+extern f32 func_15143E64(struct17 *);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, HitInfo *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 
-s8 func_15101378(A_15101378 *arg0)
-{
-  s8 ret;
-  C_15101378 *c;
-  O_15101378 *owner;
-  u8 hit;
-  Pk_15101378 pk;
-  F3_15101378 d;
-  u8 ok;
-  u8 *a2;
-  F3_15101378 e;
-  s32 tmp;
-  s32 mode;
-  s32 pad2;
-  B_15101378 *b;
-  u8 *ptr;
-  ret = 1;
-  owner = arg0->b.owner;
-  b = &arg0->b;
-  if ((owner->s0 == 0) || (owner->u3B != b->u4))
-  {
-    ret = 0;
-  }
-  else
-  {
-    ok = 1;
-    ptr = owner->p1D4;
-    if ((ptr != 0) && ((D_800C35EA != 1) || ((owner->u74 & 0xF) != 0xF)))
-    {
-      a2 = ((u8 (*)[0x40]) ptr)[b->u20];
-      func_15143134(b->at8, &arg0->p34, a2);
-      if (b->u23 & 2)
-      {
-        c = owner->c;
-        mode = c->u109;
-        if (mode != 0)
-        {
-          arg0->p40 = owner->c->pB8;
-          b->f44 = owner->c->fB4;
-          pk = owner->c->pF4;
-          d.x = arg0->p40.x - arg0->p34.x;
-          d.y = arg0->p40.y - arg0->p34.y;
-          d.z = arg0->p40.z - arg0->p34.z;
-        }
-        else
-        {
-          ok = 0;
-          mode = 2;
-          b->f44 = 2000.0f;
-          d.x = owner->c->pE8.x * 2000.0f;
-          d.y = owner->c->pE8.y * 2000.0f;
-          d.z = owner->c->pE8.z * 2000.0f;
-          arg0->p40.x = arg0->p34.x + d.x;
-          arg0->p40.y = arg0->p34.y + d.y;
-          arg0->p40.z = arg0->p34.z + d.z;
-        }
-      }
-      else
-      {
-        func_15143134(b->at14, &e, a2);
-        e.x = e.x - arg0->p34.x;
-        e.y = e.y - arg0->p34.y;
-        e.z = e.z - arg0->p34.z;
-        if (func_150AC9C0(arg0->p34.x, arg0->p34.y, arg0->p34.z, e.x, e.y, e.z, &tmp, &pk, &arg0->p40.x, &arg0->p40.y, &arg0->p40.z, 0, 0, 0, 0.0f) != (hit * 0))
-        {
-          d.x = arg0->p40.x - arg0->p34.x;
-          d.y = arg0->p40.y - arg0->p34.y;
-          d.z = arg0->p40.z - arg0->p34.z;
-          hit = 1;
-          b->f44 = func_15143E64(&d);
-        }
-        else
-        {
-          hit = 0;
-        }
-        mode = hit;
-        lbl1:
-        ;
+/*
+ * Places the beam: start at the owner's bone, end at the owner's aim target or at the first
+ * collision along the beam, then moves or hides the child objects to match.
+ * Returns 0 when the owner is gone.
+ */
+s8 func_15101378(Beam *beam) {
+    s8 result;
+    BeamOwnerAim *aim;
+    BeamOwner *owner;
+    u8 hit;
+    HitInfo hitInfo;
+    struct17 dir;
+    u8 endIsHit;
+    f32 (*boneMtx)[4];
+    struct17 target;
+    s32 unkOut;
+    s32 hitType;
+    s32 pad; // matching: stack slot needed for the frame size
+    BeamData *data;
+    f32 (*bones)[4][4];
 
-        ;
-      }
-    }
-    else
-    {
-      mode = 0;
-    }
-    if (mode != 0)
-    {
-      X_15101378 *x;
-      XS_15101378 *xs;
-      VS_15101378 *vs;
-      V_15101378 *v;
-      Y_15101378 *y;
-      Z_15101378 *z;
-      W_15101378 *w;
-      b->u23 |= 1;
-      if (b->x28 != 0)
-      {
-        x = b->x28;
-        xs = &x->s;
-        if ((mode == 1) && (ok != 0))
-        {
-          if (b->f44 > 40.0f)
-          {
-            f32 inv = 1.0f / b->f44;
-            x->p34.x = arg0->p40.x - ((d.x * inv) * 20.0f);
-            x->p34.y = arg0->p40.y - ((d.y * inv) * 20.0f);
-            x->p34.z = arg0->p40.z - ((d.z * inv) * 20.0f);
-          }
-          else
-          {
-            x->p34 = arg0->p40;
-          }
-          xs->data = pk;
-          xs->flag |= 1;
+    result = 1;
+    owner = beam->data.owner;
+    data = &beam->data;
+    if (owner->unk0 == 0 || owner->unk3B != data->unk4) {
+        result = 0;
+    } else {
+        endIsHit = 1;
+        bones = owner->boneMtx;
+        if (bones != NULL && (D_800C35EA != 1 || (owner->unk74 & 0xF) != 0xF)) {
+            boneMtx = bones[data->bone];
+            func_15143134(&data->localStart, &beam->start, boneMtx);
+            if (data->flags & 2) {
+                aim = owner->aim;
+                hitType = aim->targetType;
+                if (hitType != 0) {
+                    beam->end = owner->aim->targetPos;
+                    data->length = owner->aim->targetDist;
+                    hitInfo = owner->aim->targetHit;
+                    dir.unk0 = beam->end.unk0 - beam->start.unk0;
+                    dir.unk4 = beam->end.unk4 - beam->start.unk4;
+                    dir.unk8 = beam->end.unk8 - beam->start.unk8;
+                } else {
+                    endIsHit = 0;
+                    hitType = 2;
+                    data->length = 2000.0f;
+                    dir.unk0 = owner->aim->targetDir.unk0 * 2000.0f;
+                    dir.unk4 = owner->aim->targetDir.unk4 * 2000.0f;
+                    dir.unk8 = owner->aim->targetDir.unk8 * 2000.0f;
+                    beam->end.unk0 = beam->start.unk0 + dir.unk0;
+                    beam->end.unk4 = beam->start.unk4 + dir.unk4;
+                    beam->end.unk8 = beam->start.unk8 + dir.unk8;
+                }
+            } else {
+                func_15143134(&data->localTarget, &target, boneMtx);
+                target.unk0 = target.unk0 - beam->start.unk0;
+                target.unk4 = target.unk4 - beam->start.unk4;
+                target.unk8 = target.unk8 - beam->start.unk8;
+                if (func_150AC9C0(beam->start.unk0, beam->start.unk4, beam->start.unk8, target.unk0, target.unk4,
+                                  target.unk8, &unkOut, &hitInfo, &beam->end.unk0, &beam->end.unk4, &beam->end.unk8, 0,
+                                  0, 0, 0.0f) != hit * 0) { // matching: reading hit here makes IDO keep it in v1
+                    dir.unk0 = beam->end.unk0 - beam->start.unk0;
+                    dir.unk4 = beam->end.unk4 - beam->start.unk4;
+                    dir.unk8 = beam->end.unk8 - beam->start.unk8;
+                    hit = 1;
+                    data->length = func_15143E64(&dir);
+                } else {
+                    hit = 0;
+                }
+                hitType = hit;
+            lbl1:; // matching: unused labels split the basic blocks the way IDO needs
+            }
+        } else {
+            hitType = 0;
         }
-        else
-        {
-          xs->flag &= ~1;
-        }
-      }
-      if (b->v34 != 0)
-      {
-        v = b->v34;
-        vs = &v->s;
-        if (((mode == 2) || (mode == 3)) && (ok != 0))
-        {
-          v->p40 = arg0->p40;
-          vs->flag |= 1;
-        }
-        else
-        {
-          vs->flag &= ~1;
-        }
-      }
-      if (b->y2C != 0)
-      {
-        y = b->y2C;
-        do {} while (0);
-        y->p14->sE = (s32) arg0->p40.x;
-        y->p14->s10 = (s32) arg0->p40.y;
-        y->p14->s12 = (s32) arg0->p40.z;
-        if (ok != 0)
-        {
-          y->p14->f9 = 0;
-        }
-        else
-        {
-          y->p14->f9 = 1;
-        }
-      }
-      if (b->z24 != 0)
-      {
-        z = b->z24;
-        z->p40 = arg0->p34;
-        z->f38 = z->fA8 * b->f38;
-        z->f3C = z->fAC * b->f38;
-        z->flagD4 |= 1;
-      }
-      if (b->w30 != 0)
-      {
-        w = b->w30;
-        w->p34 = arg0->p34;
-        w->p40 = arg0->p40;
-        w->s58 &= ~4;
-        w->flag174 |= 1;
-      }
-    }
-    else
-    {
-      X_15101378 *x;
-      XS_15101378 *xs;
-      VS_15101378 *vs;
-      V_15101378 *v;
-      Y_15101378 *y;
-      Z_15101378 *z;
-      W_15101378 *w;
-      lbl2:
-      ;
+        if (hitType != 0) {
+            BeamHitFx *hitFx;
+            BeamHitFxData *hitFxData;
+            BeamLink *endFxLink;
+            BeamEndFx *endFx;
+            BeamEndPoint *endPoint;
+            BeamStartFx *startFx;
+            BeamLine *line;
 
-      ;
-      b->u23 &= ~1;
-      if (b->x28 != 0)
-      {
-        x = b->x28;
-        x->s.flag &= ~1;
-      }
-      if (b->y2C != 0)
-      {
-        y = b->y2C;
-        y->p14->f9 = 1;
-      }
-      if (b->z24 != 0)
-      {
-        z = b->z24;
-        z->flagD4 &= ~1;
-      }
-      if (b->w30 != 0)
-      {
-        w = b->w30;
-        w->flag174 &= ~1;
-      }
-      if (b->v34 != 0)
-      {
-        v = b->v34;
-        v->s.flag &= ~1;
-      }
+            data->flags |= 1;
+            if (data->hitFx != NULL) {
+                hitFx = data->hitFx;
+                hitFxData = &hitFx->data;
+                if (hitType == 1 && endIsHit != 0) {
+                    if (data->length > 40.0f) {
+                        f32 invLength = 1.0f / data->length;
+
+                        hitFx->pos.unk0 = beam->end.unk0 - dir.unk0 * invLength * 20.0f;
+                        hitFx->pos.unk4 = beam->end.unk4 - dir.unk4 * invLength * 20.0f;
+                        hitFx->pos.unk8 = beam->end.unk8 - dir.unk8 * invLength * 20.0f;
+                    } else {
+                        hitFx->pos = beam->end;
+                    }
+                    hitFxData->hit = hitInfo;
+                    hitFxData->flags |= 1;
+                } else {
+                    hitFxData->flags &= ~1;
+                }
+            }
+            if (data->endFx != NULL) {
+                endFx = data->endFx;
+                endFxLink = &endFx->link;
+                if ((hitType == 2 || hitType == 3) && endIsHit != 0) {
+                    endFx->pos = beam->end;
+                    endFxLink->flags |= 1;
+                } else {
+                    endFxLink->flags &= ~1;
+                }
+            }
+            if (data->endPoint != NULL) {
+                endPoint = data->endPoint;
+                do {} while (0); // matching: adds the uopt temp that puts the t0 spill at 0x5C
+                endPoint->data->pos[0] = beam->end.unk0;
+                endPoint->data->pos[1] = beam->end.unk4;
+                endPoint->data->pos[2] = beam->end.unk8;
+                if (endIsHit != 0) {
+                    endPoint->data->disabled = 0;
+                } else {
+                    endPoint->data->disabled = 1;
+                }
+            }
+            if (data->startFx != NULL) {
+                startFx = data->startFx;
+                startFx->pos = beam->start;
+                startFx->sizeX = startFx->baseSizeX * data->width;
+                startFx->sizeY = startFx->baseSizeY * data->width;
+                startFx->link.flags |= 1;
+            }
+            if (data->line != NULL) {
+                line = data->line;
+                line->start = beam->start;
+                line->end = beam->end;
+                line->unk58 &= ~4;
+                line->link.flags |= 1;
+            }
+        } else {
+            BeamHitFx *hitFx;
+            BeamHitFxData *hitFxData;
+            BeamLink *endFxLink;
+            BeamEndFx *endFx;
+            BeamEndPoint *endPoint;
+            BeamStartFx *startFx;
+            BeamLine *line;
+
+        lbl2:;
+            data->flags &= ~1;
+            if (data->hitFx != NULL) {
+                hitFx = data->hitFx;
+                hitFx->data.flags &= ~1;
+            }
+            if (data->endPoint != NULL) {
+                endPoint = data->endPoint;
+                endPoint->data->disabled = 1;
+            }
+            if (data->startFx != NULL) {
+                startFx = data->startFx;
+                startFx->link.flags &= ~1;
+            }
+            if (data->line != NULL) {
+                line = data->line;
+                line->link.flags &= ~1;
+            }
+            if (data->endFx != NULL) {
+                endFx = data->endFx;
+                endFx->link.flags &= ~1;
+            }
+        }
     }
-  }
-  return ret;
+    return result;
 }
+
+
 
 typedef struct {
     ObjectWithState197 *unk0;
