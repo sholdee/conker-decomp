@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_151DD3A0 func_151DD3A0_header
 #include "functions.h"
+#undef func_151DD3A0
 
 /* This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
  * it first sees each name. */
@@ -41,7 +43,8 @@ extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
-extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32), so conker/os.h does not declare it */
+// matching: func_151DD3A0 returns s32, but this file must see it return void
+extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read */
 extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
 extern void func_151DD9E4(void);
 extern void func_151E7EF8(void);

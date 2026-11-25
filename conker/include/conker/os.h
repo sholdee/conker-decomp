@@ -26,8 +26,7 @@ s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer); /* osEepromRead */
 void func_151DD304(u8 address);                              /* __osPackEepReadData */
 
 /* game_20A850.c */
-/* func_151DD3A0 (osEepromLongRead) returns s32, but its only caller, game_33990.c, must see a void
- * return to match. IDO rejects two different declarations, so game_33990.c declares it. */
+s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3); /* osEepromLongRead */
 
 /* game_20A910.c */
 s32 func_151DD460(OSMesgQueue *mq); /* osEepromProbe */
