@@ -34,7 +34,7 @@ typedef struct {
     u8 kind;
     u8 pad19[0x34 - 0x19];
     struct17 pos;
-    struct17 dir;
+    struct17 end;
     u8 pad4C[0xC];
     s32 flags;
     u8 pad5C[0x158 - 0x5C];
@@ -101,7 +101,7 @@ typedef struct {
     f32 unk14;
     f32 unk18;
     struct17 pos;
-    struct17 dir;
+    struct17 end;
     f32 scale[3];
     s32 flags;
     u8 unk44, unk45, unk46, unk47;
@@ -114,7 +114,7 @@ typedef struct {
 } ParticleDesc;
 
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(struct17 *pos, struct17 *dir, struct127 *owner, struct126 *arg3);
+s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3);
 s32 func_150D5124();
 Particle *func_151407D0(ParticleParams *, s32, ParticleDesc *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
@@ -124,7 +124,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     TrailSpawn spawn;
     TrailState init;
     struct126 *s126;
-    struct17 dir;
+    struct17 end;
     TrailState *state;
 
     spawn.maxPoints = 25;
@@ -142,15 +142,15 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     s126 = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
     if (s126 != NULL) {
         // matching: the store to init.unk8 must be scheduled inside the call's argument setup
-        if (func_150D4AE0(&spawn.pos, &dir, owner, (init.unk8 = s126)) != 0) {
+        if (func_150D4AE0(&spawn.pos, &end, owner, (init.unk8 = s126)) != 0) {
             spawn.flags |= 4;
         } else {
             spawn.pos.unk0 = 0.0f;
             spawn.pos.unk4 = 0.0f;
             spawn.pos.unk8 = 0.0f;
-            dir.unk0 = 0.0f;
-            dir.unk8 = 0.0f;
-            dir.unk4 = 500.0f;
+            end.unk0 = 0.0f;
+            end.unk8 = 0.0f;
+            end.unk4 = 500.0f;
         }
         // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
         state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
@@ -210,7 +210,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
                 desc.unk14 = 100.0f;
                 desc.unk18 = 100.0f;
                 desc.pos = spawn.pos;
-                desc.dir = dir;
+                desc.end = end;
                 desc.scale[0] = 1.0f;
                 desc.scale[1] = 1.0f;
                 desc.scale[2] = 1.0f;
@@ -270,7 +270,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
                 desc.unk14 = 100.0f;
                 desc.unk18 = 100.0f;
                 desc.pos = spawn.pos;
-                desc.dir = dir;
+                desc.end = end;
                 desc.flags = 0xCD2006;
                 desc.unk44 = 0xFF;
                 desc.unk45 = 0xFF;
@@ -306,7 +306,7 @@ s32 func_150D3A68(TrailActor *actor) {
     struct17 prevPos;
     struct17 delta;
     f32 dist;
-    struct17 dir;
+    struct17 end;
     ParticleTail *tail;
     u8 prevMode;
     s32 player;
@@ -320,7 +320,7 @@ s32 func_150D3A68(TrailActor *actor) {
     }
     if (D_800BE9E4 > 0) {
         prevPos = actor->spawn.pos;
-        switch (func_150D4AE0(&actor->spawn.pos, &dir, owner, s126)) {
+        switch (func_150D4AE0(&actor->spawn.pos, &end, owner, s126)) {
         case 0:
             if (state->effects[0] != NULL) {
                 state->effects[0]->flags &= ~2;
@@ -337,13 +337,13 @@ s32 func_150D3A68(TrailActor *actor) {
             actor->spawn.flags |= 4;
             if (state->effects[0] != NULL) {
                 state->effects[0]->pos = actor->spawn.pos;
-                state->effects[0]->dir = dir;
+                state->effects[0]->end = end;
                 state->effects[0]->flags &= ~4;
                 state->effects[0]->flags |= 2;
             }
             if (state->effects[1] != NULL) {
                 state->effects[1]->pos = actor->spawn.pos;
-                state->effects[1]->dir = dir;
+                state->effects[1]->end = end;
                 state->effects[1]->flags &= ~4;
                 state->effects[1]->flags |= 2;
             }
@@ -756,71 +756,72 @@ loop:
     return gfx;
 }
 
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct126 *unk8;
-} SubA_150D49C0;
+/* Message data for func_150D49C0. */
+typedef union {
+    struct {
+        struct127 *obj;
+        u8 uniqueId;
+    } gone;             // messages 0, 3 and 0x2E
+    struct {
+        struct127 *objA;
+        struct127 *objB;
+        u8 uniqueIdA;
+        u8 uniqueIdB;
+    } swap;             // message 0x2D: objA and objB trade places
+} TrailMsg;
 
-typedef struct {
-    struct127 *unk0;
-    union {
-        struct127 *w4;
-        u8 b4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_150D49C0;
+/* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
+void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
+    TrailState *state = actor->state;
+    struct127 *obj;
 
-void func_150D49C0(void *arg0, s32 arg1, u8 arg2) {
-    SubA_150D49C0 *temp_v1 = *(SubA_150D49C0 **)((u8 *)arg0 + 0x98);
-    ArgB_150D49C0 *b = (ArgB_150D49C0 *)arg1;
-    struct127 *temp;
-
-    if (arg2 == 0 || arg2 == 0x2E || arg2 == 3) {
-        temp = b->unk0;
-        if ((temp == temp_v1->unk0) || (b->u4.b4 == temp_v1->unk4)) {
-            func_1516972C(arg0);
+    if (id == 0 || id == 0x2E || id == 3) {
+        obj = msg->gone.obj;
+        if (obj == state->owner || msg->gone.uniqueId == state->ownerId) {
+            func_1516972C((struct102 *)actor);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v1->unk0 == b->unk0) {
-            temp_v1->unk0 = b->u4.w4;
-            temp_v1->unk4 = b->unk9;
-            temp_v1->unk8 = func_1503195C(temp_v1->unk0, (temp_v1->unk0->id == 0x48) ? 0x7A : 0x79, 0);
-        } else if (temp_v1->unk0 == b->u4.w4) {
-            temp_v1->unk0 = b->unk0;
-            temp_v1->unk4 = b->unk8;
-            temp_v1->unk8 = func_1503195C(temp_v1->unk0, (temp_v1->unk0->id == 0x48) ? 0x7A : 0x79, 0);
+    } else if (id == 0x2D) {
+        if (state->owner == msg->swap.objA) {
+            state->owner = msg->swap.objB;
+            state->ownerId = msg->swap.uniqueIdB;
+            state->unk8 = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
+        } else if (state->owner == msg->swap.objB) {
+            state->owner = msg->swap.objA;
+            state->ownerId = msg->swap.uniqueIdA;
+            state->unk8 = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
         }
     }
 }
 
-extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
-extern f32 D_800A09D0;
-extern f32 D_800A09DC;
+extern s32 func_1514654C(struct127 *, struct126 *, s32, struct17 **, struct17 **, s32);
+extern struct17 D_800A09D0;
+extern struct17 D_800A09DC;
 
-s32 func_150D4AE0(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct126 *arg3) {
-    void *sp30[2];
-    void *sp28[2];
+/*
+ * Computes the trail's start and end points: the owner's model points D_800A09D0 / D_800A09DC
+ * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
+ */
+s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3) {
+    struct17 *modelPoints[2];
+    struct17 *out[2];
 
-    if (arg2->unk1D4 != 0) {
-        sp30[0] = &D_800A09D0;
-        sp30[1] = &D_800A09DC;
-        sp28[0] = arg0;
-        sp28[1] = (void *)arg1;
-        if (func_1514654C(arg2, arg3, 0, sp30, sp28, 2) != 0) {
+    if (owner->unk1D4 != NULL) {
+        modelPoints[0] = &D_800A09D0;
+        modelPoints[1] = &D_800A09DC;
+        out[0] = start;
+        out[1] = end;
+        if (func_1514654C(owner, arg3, 0, modelPoints, out, 2) != 0) {
             return 1;
         }
         return 0;
     }
 
-    arg0->unk0 = arg2->x_position;
-    arg0->unk4 = arg2->y_position + 100.0f;
-    arg0->unk8 = arg2->z_position;
-    arg1->unk0 = arg2->x_position;
-    arg1->unk4 = arg2->y_position + 100.0f + 500.0f;
-    arg1->unk8 = arg2->z_position;
+    start->unk0 = owner->x_position;
+    start->unk4 = owner->y_position + 100.0f;
+    start->unk8 = owner->z_position;
+    end->unk0 = owner->x_position;
+    end->unk4 = owner->y_position + 100.0f + 500.0f;
+    end->unk8 = owner->z_position;
     return 2;
 }
 
