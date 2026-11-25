@@ -429,168 +429,145 @@ s32 func_1518C0B8(Trail *trail) {
     return 1;
 }
 
-s32 func_1518C540(void* arg0) {
-    s32 v1;
-    void* p;
+/* Trail fade: alpha (motion.unk1B) follows 8 * unk1C, capped at 0xFF. */
+s32 func_1518C540(Trail *trail) {
+    s32 alpha;
+    TrailParams *params;
 
-    p = *(void**)((u8*)arg0 + 0x98);
-    v1 = *(s16*)((u8*)arg0 + 0x1C) << 3;
-    if (v1 >= 0x100) {
-        v1 = 0xFF;
+    params = trail->params;
+    alpha = trail->unk1C << 3;
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
     }
-    *(s8*)((u8*)p + 0x1B) = v1;
-    if ((v1 & 0xFF) < 0) {
+    params->motion.unk1B = alpha;
+    if ((alpha & 0xFF) < 0) {
         return 0;
     }
     return 1;
 }
 
-void func_1516865C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(s32 arg0, s32 arg1, s32 arg2);
-
+/* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
 typedef struct {
-    f32 field_0x0;
-    f32 field_0x4;
-    f32 field_0x8;
-    s32 field_0xC;
-    s32 field_0x10;
-} EffectPoint;
+    /* 0x00 */ Vtx vtx[8];
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ u8 pad84[4];
+    /* 0x88 */ s16 frame;
+    /* 0x8A */ s16 frameStep; /* 8.8 fixed point */
+    /* 0x8C */ s16 x;
+    /* 0x8E */ s16 y;
+    /* 0x90 */ s16 z;
+    /* 0x92 */ s16 unk92;
+    /* 0x94 */ s16 unk94;
+    /* 0x96 */ s16 unk96;
+    /* 0x98 */ u16 flags;
+    /* 0x9A */ u8 pad9A[6];
+    /* 0xA0 */ u8 animIndex;  /* index into D_8008CA4C */
+    /* 0xA1 */ u8 unkA1;
+    /* 0xA2 */ s8 callback;   /* -1 = none */
+} QuadFxData;
 
-typedef struct {
-    u8 pad_0x0[0x20];
-    s8 field_0x20;
-} EffectState;
+void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
+void *func_15168800(QuadFxData *src, s32 owner, s32 list);
+u8 func_151D8E20(void);
 
-typedef struct {
-    u8 pad_0x0[0x1];
-    u8 field_0x1;
-    u8 pad_0x2[0xA];
-    u8 field_0xC;
-    u8 pad_0xD[0x20];
-    s8 field_0x2D;
-    u8 pad_0x2E[0x66];
-    EffectPoint *field_0x94;
-    EffectState *field_0x98;
-} EffectEmitter;
+/* Trail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
+s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+    QuadFxData fx;
+    TrailParams *params;
+    TrailPoint *points;
 
-typedef struct {
-    u8 pad_0x0[0x80];
-    s32 field_0x80;
-    u8 pad_0x84[0x6];
-    s16 field_0x8A;
-    s16 field_0x8C;
-    s16 field_0x8E;
-    s16 field_0x90;
-    s16 field_0x92;
-    s16 field_0x94;
-    s16 field_0x96;
-    s16 field_0x98;
-    u8 pad_0x9A[0x6];
-    s8 field_0xA0;
-    s8 field_0xA1;
-    s8 field_0xA2;
-    u8 pad_0xA3[0x5];
-} EffectSpawnPacket;
-
-s32 func_1518C57C(EffectEmitter *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    EffectSpawnPacket sp38;
-    EffectState *temp;
-    EffectPoint *base;
-
-    temp = arg0->field_0x98;
-    base = arg0->field_0x94;
-    sp38.field_0x80 = 0;
-    sp38.field_0x8A = 0x100;
-    sp38.field_0x8C = (s32)base[arg0->field_0x2D].field_0x0;
-    sp38.field_0x8E = (s32)arg4;
-    sp38.field_0x90 = (s32)base[arg0->field_0x2D].field_0x8;
-    sp38.field_0x94 = (func_150ADA20() % 0x15U) + 0x23;
-    sp38.field_0x92 = sp38.field_0x94;
-    sp38.field_0xA2 = -1;
-    sp38.field_0xA0 = 0x12;
-    sp38.field_0x98 = 0xC;
-    sp38.field_0xA1 = 0;
-    sp38.field_0x96 = (s32)arg4;
-    func_1516865C(&sp38, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800((s32)&sp38, arg0->field_0xC, arg0->field_0x1);
-    temp->field_0x20 = 4;
+    params = trail->params;
+    points = trail->points;
+    fx.unk80 = 0;
+    fx.frameStep = 0x100;
+    fx.x = points[trail->start].pos.x;
+    fx.y = hitY;
+    fx.z = points[trail->start].pos.z;
+    fx.unk94 = func_150ADA20() % 21U + 35;
+    fx.unk92 = fx.unk94;
+    fx.callback = -1;
+    fx.animIndex = 0x12;
+    fx.flags = 0xC;
+    fx.unkA1 = 0;
+    fx.unk96 = hitY;
+    func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
+    func_15168800(&fx, trail->link.owner, trail->link.list);
+    params->state = 4;
     return 1;
 }
 
-u8 func_151D8E20(void);
+/* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
+s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
+    QuadFxData fx;
+    TrailParams *params;
+    TrailPoint *points;
 
-s32 func_1518C69C(EffectEmitter *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    EffectSpawnPacket sp50;
-    EffectState *temp;
-    EffectPoint *base;
-
-    temp = arg0->field_0x98;
-    base = arg0->field_0x94;
-    sp50.field_0x80 = 0;
-    sp50.field_0x8A = 0x100;
-    sp50.field_0x8C = (s32)base[arg0->field_0x2D].field_0x0;
-    sp50.field_0x8E = (s32)arg4;
-    sp50.field_0x90 = (s32)base[arg0->field_0x2D].field_0x8;
-    sp50.field_0x94 = (func_150ADA20() % 0x15U) + 0x23;
-    sp50.field_0x92 = sp50.field_0x94;
-    sp50.field_0xA2 = -1;
-    sp50.field_0xA0 = 0x12;
-    sp50.field_0x98 = 0xC;
-    sp50.field_0xA1 = 0;
-    sp50.field_0x96 = (s32)arg4;
-    func_1516865C(&sp50, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800((s32)&sp50, arg0->field_0xC, arg0->field_0x1);
-    temp->field_0x20 = 4;
+    params = trail->params;
+    points = trail->points;
+    fx.unk80 = 0;
+    fx.frameStep = 0x100;
+    fx.x = points[trail->start].pos.x;
+    fx.y = hitY;
+    fx.z = points[trail->start].pos.z;
+    fx.unk94 = func_150ADA20() % 21U + 35;
+    fx.unk92 = fx.unk94;
+    fx.callback = -1;
+    fx.animIndex = 0x12;
+    fx.flags = 0xC;
+    fx.unkA1 = 0;
+    fx.unk96 = hitY;
+    func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
+    func_15168800(&fx, trail->link.owner, trail->link.list);
+    params->state = 4;
     {
-    u8 id;
-    f32 pos[3];
-    pos[0] = base[arg0->field_0x2D].field_0x0;
-    pos[1] = arg4;
-    pos[2] = base[arg0->field_0x2D].field_0x8;
-    id = func_151D8E20();
-    func_151DBCBC(id, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, arg0->field_0xC, arg0->field_0x1);
+        u8 kind;
+        f32 pos[3];
+
+        pos[0] = points[trail->start].pos.x;
+        pos[1] = hitY;
+        pos[2] = points[trail->start].pos.z;
+        kind = func_151D8E20();
+        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->link.owner, trail->link.list);
     }
     return 1;
 }
 
+/* Message sent to objects about an actor (see game_105FC0.c's TrailMessage). */
 typedef struct {
-    u8 pad0[0x24];
-    s32 unk24;
-    u8 unk28;
-} SubA1518C850;
-
-typedef struct {
-    s32 unk0;
+    struct127 *actor;
     union {
-        s32 w4;
-        u8 b4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB1518C850;
+        u8 actorId;        /* type 0 */
+        struct127 *other;  /* type 0x2D */
+    } x4;
+    u8 actorId;  /* type 0x2D */
+    u8 otherId;  /* type 0x2D */
+} ActorMessage;
 
-void func_1518C850(struct102 *arg0, s32 arg1, u8 arg2) {
-    SubA1518C850 *dst = (SubA1518C850 *)arg0;
-    ArgB1518C850 *b = (ArgB1518C850 *)arg1;
-    s32 b0;
+/*
+ * Trail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
+ * destroyed when the owner goes away (type 0).
+ */
+void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
+    ActorMessage *msg = (ActorMessage *)data;
+    struct127 *actor;
 
-    if (arg2 == 0x2D) {
-        b0 = b->unk0;
-        if (b0 == dst->unk24) {
-            dst->unk24 = b->u4.w4;
-            dst->unk28 = b->unk9;
+    if (type == 0x2D) {
+        actor = msg->actor;
+        if (actor == emitter->params.owner) {
+            emitter->params.owner = msg->x4.other;
+            emitter->params.ownerId = msg->otherId;
         } else {
-            if (dst->unk24 == b->u4.w4) {
-                dst->unk24 = b0;
-                dst->unk28 = b->unk8;
+            if (emitter->params.owner == msg->x4.other) {
+                emitter->params.owner = actor;
+                emitter->params.ownerId = msg->actorId;
             }
-trailing_label_1518C850:
-            ;
+        // matching: the label ends the block, so IDO emits the else path's own branch to the epilogue
+        swapped:;
         }
-    } else if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == dst->unk24) || (b->u4.b4 == dst->unk28)) {
-            func_1516972C(arg0);
+    } else if (type == 0) {
+        actor = msg->actor;
+        if (actor == emitter->params.owner || msg->x4.actorId == emitter->params.ownerId) {
+            func_1516972C((struct102 *)emitter);
         }
     }
 }
