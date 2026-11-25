@@ -11,7 +11,7 @@ typedef struct EffectHeader {
     /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
+    /* 0x18 */ void *unk18;
 } EffectHeader; /* size 0x1C */
 
 typedef struct EffectObjUnk60 {
@@ -21,7 +21,7 @@ typedef struct EffectObjUnk60 {
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
+    /* 0x18 */ void *unk18;
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 pad1D[3];
     /* 0x20 */ s32 unk20;
@@ -119,12 +119,14 @@ void func_151478D0(EffectObj *obj) {
 
 extern void func_1514795C(EffectObj *);
 
+/* Frees the object's buffers, then hands it to func_15169804. */
 void func_151478F4(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
     func_15169804((struct102 *)obj);
 }
 
+/* Frees the object's buffers, then hands it to func_15169824. */
 void func_15147928(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
@@ -148,6 +150,7 @@ void func_1514795C(EffectObj *obj) {
 
 extern void (*D_8008A2F0[])(EffectObj *);
 
+/* Runs the D_8008A2F0 handler for header.kind (out-of-range kinds use handler 0). */
 void func_151479E0(EffectObj *obj) {
     s32 kind = obj->header.kind;
 
@@ -161,6 +164,7 @@ void func_151479E0(EffectObj *obj) {
 
 extern void (*D_8008A340[])(EffectObj *);
 
+/* Runs the D_8008A340 handler for header.kind (out-of-range kinds use handler 0). */
 void func_15147A30(EffectObj *obj) {
     s32 kind = obj->header.kind;
 
@@ -174,7 +178,7 @@ void func_15147A30(EffectObj *obj) {
 
 /* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes. */
 EffectObj *func_15147A80(EffectHeader *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
-                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, s32 arg9, s32 argA) {
+                         s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
     EffectObj *obj;
     u8 type;
     s32 itemsSize;
@@ -187,7 +191,7 @@ EffectObj *func_15147A80(EffectHeader *header, s32 dataSize, s32 itemSize, s32 u
         type = 0x22;
     }
 
-    obj = func_15167A68(type, argA, dataSize + itemsSize + sizeof(EffectObj), 1, (u8)arg9, 1);
+    obj = func_15167A68(type, argA, dataSize + itemsSize + sizeof(EffectObj), 1, arg9, 1);
     if (obj == NULL) {
         return NULL;
     }
@@ -236,14 +240,14 @@ extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 
 /* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
-    s32 unk18;
+    void *unk18;
 
     if (obj->header.flags & 0x20) {
         unk18 = obj->header.unk18;
     } else {
-        unk18 = 0;
+        unk18 = NULL;
     }
-    gfx = func_151462C8(gfx, &obj->unk34, 0, NULL, 0, arg2, obj->unk54, 2, (void *)unk18);
+    gfx = func_151462C8(gfx, &obj->unk34, 0, NULL, 0, arg2, obj->unk54, 2, unk18);
     if (obj->drawKind >= 19) {
         func_1516972C((struct102 *)obj);
         return gfx;
@@ -256,6 +260,7 @@ void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
 
 extern void (*D_8008A390[])(EffectObj *, s32, u8);
 
+/* Runs the optional D_8008A390 handler for header.kind. */
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2) {
     void (*handler)(EffectObj *, s32, u8) = D_8008A390[obj->header.kind];
 
