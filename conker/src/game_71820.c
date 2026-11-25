@@ -69,7 +69,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
     D_800CBDF4 = -32768.0f;
     D_800CBDF8 = -32768.0f;
     total = 0;
-    obj->pad275 = 0;
+    obj->unk275 = 0;
     func_15044660(obj, x, y, z);
     saved_mode = D_800CBDD3;
     for (i = 3; i >= 0; i--) {

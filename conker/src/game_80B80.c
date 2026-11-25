@@ -228,10 +228,10 @@ void func_150538CC(Actor *obj) {
         if (obj->unk102 != 0) {
             obj->unk82 = 40;
         }
-        obj->unk78 = func_1505A630(D_800CC2D0[obj->pad126].x_position - obj->x_position, obj->z_position - D_800CC2D0[obj->pad126].z_position, 0);
+        obj->unk78 = func_1505A630(D_800CC2D0[obj->unk126].x_position - obj->x_position, obj->z_position - D_800CC2D0[obj->unk126].z_position, 0);
         if ((u8)(((s32)(obj->unk78 - obj->unk76) >> 8) + obj->unk82) < (obj->unk82 * 2)) {
-            climb = ((D_800CC2D0[obj->pad126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
-            ownerDist = func_1505A72C(&D_800CC2D0[obj->pad126], obj);
+            climb = ((D_800CC2D0[obj->unk126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
+            ownerDist = func_1505A72C(&D_800CC2D0[obj->unk126], obj);
             func_15059B54(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->xz_velocity * 16.0f))) {
                 if (climb > 90.0f) {
@@ -376,7 +376,7 @@ void func_150538CC(Actor *obj) {
                 } else {
                     s32 attacker;
 
-                    attacker = obj->pad108 & 0x7F;
+                    attacker = obj->unk108 & 0x7F;
                     if (attacker < 25) {
                         obj->unk76 = func_1505A630(obj->old_x_position - D_800CC2D0[attacker].x_position, D_800CC2D0[attacker].z_position - obj->old_z_position, 0);
                     }

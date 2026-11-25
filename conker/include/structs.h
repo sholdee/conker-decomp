@@ -1400,9 +1400,9 @@ struct Actor {
     u8  unk105;
     u8  unk106;
     u8  unk107;
-    u8  pad108;
+    /* 0x108 */ u8  unk108;  // attacker slot | 0x80
     u8  unk109;
-    u8  pad10A;
+    /* 0x10A */ u8  unk10A;  // victim/attacker slot | 0x80
     u8  unk10B;
     s16 unk10C;
     u8  unk10E;
@@ -1418,7 +1418,7 @@ struct Actor {
     u8  unk123;
     u8  unk124;
     /* 0x125 */ u8  immune; // used
-    u8  pad126;
+    /* 0x126 */ u8  unk126;  // owner index into D_800CC2D0
     u8  unk127;
     /* 0x128 */ u8  team;
     /* 0x129 */ u8  unk129;
@@ -1466,8 +1466,8 @@ struct Actor {
     /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none
     /* 0x1A2 */ s16 floorType;
     /* 0x1A4 */ ActorAimPoints aim;
-    u32 pad1BC;
-    u32 pad1C0;
+    /* 0x1BC */ s16 unk1BC[3];   // a bone position (game_83300)
+    u8  pad1C2[0x2];
     /* 0x1C4 */ struct TimedEvent *events; // timed event list
     /* 0x1C8 */ u8  lod;       // current level of detail
     /* 0x1C9 */ u8  lodRequest; // requested LOD + 1, 0xFF = reset to 0
@@ -1479,7 +1479,7 @@ struct Actor {
     u16 pad1D2;
     /* 0x1D4 */ MtxF *unk1D4;   // this frame's bone matrices
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
-    u8  pad1DC;
+    /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
     /* 0x1E0 */ u8  unk1E0[3];
     /* 0x1E3 */ u8  unk1E3;
@@ -1529,7 +1529,7 @@ struct Actor {
     u8  pad227;
     u8  unk228;
     u8  unk229;
-    u8  pad22A;
+    /* 0x22A */ u8  unk22A;
     u8  unk22B;
     u16 unk22C;
     s16 unk22E;
@@ -1573,14 +1573,14 @@ struct Actor {
     u8  unk256;
     u8  unk257;
     u8  unk258;
-    u8  pad259[0x3];
+    /* 0x259 */ u8  unk259[3];
     s32 unk25C;
     /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
     /* 0x264 */ s32 unk264;
     u8  pad268[0x8];
     /* 0x270 */ f32 unk270;
     /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
-    u8  pad275;
+    /* 0x275 */ u8  unk275;  // D_800CC2D0 index + 1
     /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
     u8  pad277;
     /* 0x278 */ u16 unk278;      // effect state

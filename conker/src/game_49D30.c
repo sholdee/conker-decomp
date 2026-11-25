@@ -728,7 +728,6 @@ void func_1501DE18(s32 scene) {
 
 extern u8 D_800C35C4;
 extern u8 D_800C3663;
-extern Actor D_800CC2D0[26];
 extern s32 D_800D121C;
 extern u8 D_800DBFF4[];
 extern void func_1000E17C(void);

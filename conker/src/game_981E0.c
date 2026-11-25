@@ -1022,7 +1022,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     obj->unk7F = 0;
     obj->unk80 = 0xFF;
     if (flags & 0x20) {
-        obj->pad126 = obj->unk80 = D_800D154C->unk222;
+        obj->unk126 = obj->unk80 = D_800D154C->unk222;
     }
     obj->unk82 = 0x26;
     if (arg10 == 0) {

@@ -322,7 +322,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     }
     /* The shadow texture lives in D_800DE048, 64-byte aligned. */
     D_800DF088 = ((s32)D_800DE048 + 0x3F) & ~0x3F;
-    D_800DE02C = 0xFF - (((u8 *)&D_800CC2D0[objIndex].pad1DC)[1] >> 1);
+    D_800DE02C = 0xFF - (D_800CC2D0[objIndex].unk1DD[0] >> 1);
     if (D_800DE02C > 185.0f) {
         D_800DE02C = 185.0f;
     }

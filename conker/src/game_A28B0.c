@@ -1766,7 +1766,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         D_800D154C->unk236 = D_800D154C->unk23D + (s8)D_800D1890;
         return;
     case 11:
-        D_800D154C->pad22A = D_800D1890;
+        D_800D154C->unk22A = D_800D1890;
         return;
     }
     switch (D_800D1893) {

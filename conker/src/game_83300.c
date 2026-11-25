@@ -559,15 +559,15 @@ void func_15056B08(Actor *actor) {
         actor->unk21C = 0;
     }
     if ((actor->unk25C & 1) && ((state == 0) || (state == 5))) {
-        if (func_1505693C(actor, actor->pad259[2]) != 0) {
+        if (func_1505693C(actor, actor->unk259[2]) != 0) {
             actor->unk218 = func_1507BB28(1, actor->unk233);
             actor->unk21C = 0;
-            actor->unkA8 = actor->pad259[2] | 0x80;
-            actor->unk222 = actor->pad259[2];
+            actor->unkA8 = actor->unk259[2] | 0x80;
+            actor->unk222 = actor->unk259[2];
         }
     }
-    if (actor->pad259[1] != 0) {
-        actor->unk44 = actor->pad259[1];
+    if (actor->unk259[1] != 0) {
+        actor->unk44 = actor->unk259[1];
     }
     if ((state == 1) || (state == 0xC) || (state == 2) || (state == 3) || (state == 9) || (state == 0xA) ||
         ((state == 6) && !(actor->unk22C & 1))) {
@@ -635,8 +635,8 @@ void func_15056B08(Actor *actor) {
                 if ((actor->id == 8) && (range < fabsf(actor->y_position - target->y_position))) {
                     ok = 0;
                 }
-                if (actor->pad22A != 0) {
-                    range = actor->pad22A * 8.0f;
+                if (actor->unk22A != 0) {
+                    range = actor->unk22A * 8.0f;
                     if ((D_800C3E78 != 0) && (fabsf(actor->y_position - D_800CC2E8[0]) < range)) {
                         ok = 0;
                     }
@@ -2495,11 +2495,11 @@ void func_1505B9C4(Actor *attacker, Actor *victim, Entry1505C1E4 *base, Entry150
     victim->unkD0 = 0;
     v = attacker->unk124;
     if (v) {
-        victim->pad10A = v + 0x7F;
+        victim->unk10A = v + 0x7F;
     } else {
-        victim->pad10A = D_800C3E78 | 0x80;
+        victim->unk10A = D_800C3E78 | 0x80;
     }
-    attacker->pad108 = slot | 0x80;
+    attacker->unk108 = slot | 0x80;
     if (reaction != 0x27) {
         if ((base[index].unk24 & 0x40) && (victim->interaction_state == 1)) {
             D_800CC2D0[slot].unk31C->unk46 = 8000;
@@ -2668,7 +2668,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, Entry1505C1E4 *table, s32 inde
                     done = TRUE;
                     victim->unkF4 &= ~0x40040;
                     hitMask |= 1 << (victimSlot + 0x1F);
-                    attacker->pad108 = victimSlot + 0x7F;
+                    attacker->unk108 = victimSlot + 0x7F;
                     attacker->unk107 = 0x3C;
                     victim->events = NULL;
                     victim->unk232 = rules[i].unk3;
@@ -2940,7 +2940,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     if (ret != 0) {
         hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
         /* pad108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
-        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->pad108][0] == 1) {
+        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
             if (attacker->unk254 != 0) {
                 attacker->unk232 = attacker->unk254;
                 attacker->unk218 = NULL;
@@ -3918,7 +3918,7 @@ void func_1505F188(Actor *actor) {
     actor->unk118 = initial;
     actor->floorY = initial;
     actor->gravity = 3.3f;
-    ((u8 *)&actor->pad1DC)[0] = 0xFF;
+    actor->unk1DC = 0xFF;
     actor->unk127 = 0xFF;
     actor->unk84.uh = 0xFFFF;
     actor->unk13F = 0xFF;
@@ -3930,9 +3930,9 @@ void func_1505F188(Actor *actor) {
     actor->unk48 = one;
     actor->blinkTimer = (func_150ADA20() % 50U) + 50;
     func_150615DC(actor);
-    ((u8 *)&actor->pad1DC)[1] = 0xFF;
-    ((u8 *)&actor->pad1DC)[2] = 0xFF;
-    ((u8 *)&actor->pad1DC)[3] = 0xFF;
+    actor->unk1DD[0] = 0xFF;
+    actor->unk1DD[1] = 0xFF;
+    actor->unk1DD[2] = 0xFF;
     actor->floorVerts[0][0] = 0;
     actor->floorVerts[0][1] = 0;
     actor->floorVerts[0][2] = 0;
@@ -4597,15 +4597,15 @@ void func_15060BE0(Actor *actor) {
                 offX = offY;
             }
             done = TRUE;
-            ((s16 *)&actor->pad1BC)[0] = (s16)(s32)(bone[3][0] + offX);
-            ((s16 *)&actor->pad1BC)[1] = (s16)(s32)(bone[3][1] + offY);
-            ((s16 *)&actor->pad1BC)[2] = (s16)(s32)(bone[3][2] + offZ);
+            actor->unk1BC[0] = (s16)(s32)(bone[3][0] + offX);
+            actor->unk1BC[1] = (s16)(s32)(bone[3][1] + offY);
+            actor->unk1BC[2] = (s16)(s32)(bone[3][2] + offZ);
         }
     }
     if (done == FALSE) {
-        ((s16 *)&actor->pad1BC)[0] = (s16)(s32)actor->x_position;
-        ((s16 *)&actor->pad1BC)[1] = (s16)(s32)actor->y_position;
-        ((s16 *)&actor->pad1BC)[2] = (s16)(s32)actor->z_position;
+        actor->unk1BC[0] = (s16)(s32)actor->x_position;
+        actor->unk1BC[1] = (s16)(s32)actor->y_position;
+        actor->unk1BC[2] = (s16)(s32)actor->z_position;
     }
 }
 /* Detaches every actor carried by (unk65 pointing at) this one. */

@@ -624,9 +624,9 @@ void func_150EEC84(Actor *obj) {
         D_800BE748[index].button &= ~R_TRIG;
         player = &D_800CC2D0[index];
         player->unk2FC |= 1 << camera->playerIndex;
-        if (player->pad10A != 0) {
+        if (player->unk10A != 0) {
             func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
-            player->pad10A = 0;
+            player->unk10A = 0;
         }
     }
 }

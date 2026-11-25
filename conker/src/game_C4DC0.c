@@ -535,7 +535,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk239 = cmd->a[0];
         break;
     case 0x32:
-        obj->pad10A = cmd->a[0];
+        obj->unk10A = cmd->a[0];
         break;
     case 0x33:
         D_800D1898[cmd->a[0]] = cmd->a[1] * 1.52587890625e-05f;
@@ -948,7 +948,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x81:
-        obj->pad275 = cmd->a[0];
+        obj->unk275 = cmd->a[0];
         break;
     case 0x82: {
         u16 saved;
@@ -1175,10 +1175,10 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB2:
         return (&obj->unk2E4)[cmd->a[0]];
     case 0xB4:
-        return obj->pad10A;
+        return obj->unk10A;
     case 0xB5: {
         u8 v;
-        v = obj->pad10A;
+        v = obj->unk10A;
         if (v & 0x80) {
             return D_800CC2D0[v & ~0x80].interaction_state;
         }
@@ -1521,13 +1521,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE4:
         return D_800D18A8;
     case 0xE5:
-        return obj->pad275;
+        return obj->unk275;
     case 0xE6: {
         u8 v;
         Actor *p;
-        if (obj->pad275 != 0) {
-            p = &D_800CC2D0[obj->pad275 - 1];
-            obj->pad275 = 0;
+        if (obj->unk275 != 0) {
+            p = &D_800CC2D0[obj->unk275 - 1];
+            obj->unk275 = 0;
             if (p->id == cmd->a[0]) {
                 return 1;
             }
