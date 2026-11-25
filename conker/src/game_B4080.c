@@ -3074,19 +3074,7 @@ typedef struct Attachment {
     /* 0x06 */ u8 setId; /* attachment set id (see func_15083568) */
 } Attachment;
 
-/* Partial view of a level prop (Prop in game_144C70.c), used here for the pickups. */
-typedef struct Prop {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x6E - 0x16];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[0x80 - 0x6F];
-    /* 0x80 */ s32 touchedBy; /* player + 1 that touched the pickup, 0 = none */
-} Prop;
-
-Prop *func_151149AC(u8);
+WorldObject *func_151149AC(u8);
 void func_15030158(Attachment *, s32);
 s32 func_15033E28(Actor *, Attachment **);
 
@@ -3129,7 +3117,7 @@ void func_1508DC24(void) {
     s32 *dropZ;
     Attachment *attached[10];
     Actor *other;
-    Prop *pickup;
+    WorldObject *pickup;
     s32 idx;
     s32 r;
     s32 k;
@@ -3309,7 +3297,7 @@ void func_1508DC24(void) {
             timers[i] -= D_800BE9E4;
             if (timers[i] <= 0) {
                 timers[i] = 0;
-                pickup->unk6E = 0;
+                pickup->inactive = 0;
                 if (dropTimers[i] != 0) {
                     pickup->x = dropX[i];
                     pickup->y = dropY[i];
@@ -3340,9 +3328,9 @@ void func_1508DC24(void) {
                 }
             }
         } else if (timers[i] == 0) {
-            j = pickup->touchedBy - 1;
+            j = pickup->work.words[1] - 1; // work word 1: player + 1 that touched the pickup, 0 = none
             if (j != -1) {
-                pickup->touchedBy = 0;
+                pickup->work.words[1] = 0;
                 if (items[i] == 0x8AE) {
                     D_800CC2D0[j].unk31C->grenade_count += 3;
                     if (D_800CC2D0[j].unk31C->grenade_count >= 7) {
