@@ -3,9 +3,9 @@
 #include "variables.h"
 
 /*
- * Ground trails (skid marks / tracks) left behind an actor. A TrailOwner keeps one trail per side
- * (side 6 and side 7). Each Trail is a ring buffer of TrailPoints that age, drift outwards and fade;
- * while the actor's slot has no trail, a TrailSpawner waits to create a new one.
+ * Trails left behind an actor, following the surface below it. A TrailOwner keeps one trail per side
+ * (side 6 and side 7). Each Trail is a ring buffer of TrailPoints that age, drift outwards and fade.
+ * When a trail loses its attach point it is detached, and a TrailSpawner waits to start a new one.
  */
 
 #define TRAIL_SIDE_6 6
@@ -47,7 +47,7 @@ typedef struct TrailOwner {
 /* Per-trail parameters, copied into the trail object when it is created (0x50 bytes). */
 typedef struct TrailConfig {
     /* 0x00 */ TrailOwner *owner;
-    /* 0x04 */ u8 flags;           /* 1: hidden below 2 points, 2: fade in at the tail, 4: fade out at the head */
+    /* 0x04 */ u8 flags;           /* 1: detached (ends below 2 points), 2: fade in at the tail, 4: fade out at the head */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 pointsPerUnit;   /* new points emitted per unit of distance moved */
     /* 0x0C */ f32 pendingPoints;
@@ -95,7 +95,7 @@ typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ TrailVec3 pos;
     /* 0x1C */ u8 pad1C[2];
-    /* 0x1E */ u16 flags;
+    /* 0x1E */ u16 flags; /* 2: attached (strip starts at pos), 4: pos has been found */
     /* 0x20 */ s32 side;
     /* 0x24 */ u8 pad24;
     /* 0x25 */ u8 capacity;
@@ -127,8 +127,6 @@ typedef struct TrailSpawner {
     /* 0x28 */ TrailLink link;
 } TrailSpawner;
 
-extern f32 D_800A8CE0;
-extern f32 D_800A8CE4;
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
@@ -156,7 +154,7 @@ s32 func_1519EF90(config, side, out)
     }
     dx = actor->x_position - config->actorX;
     dz = actor->z_position - config->actorZ;
-    if ((D_800A8CE0 < fabsf(dx)) || (D_800A8CE0 < fabsf(dz))) {
+    if ((0.0001f < fabsf(dx)) || (0.0001f < fabsf(dz))) {
         f32 inv;
 
         inv = 1.0f / sqrtf((dx * dx) + (dz * dz));
@@ -176,7 +174,7 @@ s32 func_1519EF90(config, side, out)
     }
     out->x = actor->x_position + (dist * dirX);
     out->z = actor->z_position - (dist * dirZ);
-    if (actor->unk118 < D_800A8CE4) {
+    if (actor->unk118 < -9500.0f) {
         out->y = actor->y_position;
     } else {
         out->y = actor->unk118;
@@ -186,6 +184,7 @@ s32 func_1519EF90(config, side, out)
 
 void func_151478F4(Trail *);
 
+/* Clears the owner's reference to this trail, then hands it to func_151478F4. */
 void func_1519F108(Trail *trail) {
     TrailConfig *config = trail->config;
     TrailSide *sides;
@@ -204,6 +203,7 @@ void func_1519F108(Trail *trail) {
 
 void func_15147928(Trail *);
 
+/* Clears the owner's reference to this trail, then hands it to func_15147928. */
 void func_1519F168(Trail *trail) {
     TrailConfig *config = trail->config;
     TrailSide *sides;
@@ -347,8 +347,7 @@ void func_1519F48C(Trail *trail) {
 }
 
 s32 func_15045800(TrailVec3 *, u16, f32, f32 *);
-extern f32 D_800BE9A4; /* frame time */
-extern s32 D_800BE9E4; /* frames elapsed */
+/* D_800BE9A4: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
 s32 func_1519F4F0(Trail *trail) {
