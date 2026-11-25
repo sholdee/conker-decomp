@@ -92,7 +92,7 @@ extern EmitterConfig D_800A9180[];
 s32 func_151AC61C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY,
                   f32 originZ, s32 yaw, s32 baseYaw, f32 radius, s32 kind, f32 arg12,
                   EmitterOwner *owner, u8 arg14) {
-    EmitterOwner *emitter;
+    EmitterOwner *emitter; // matching: the owner copy, scale and entry each reserve the frame slots IDO used
     f32 scale;
     s8 *entry;
     f32 position[3];
@@ -193,10 +193,10 @@ s32 func_151AC9EC(QuadParticle *particle) {
 
 /* Caps unk5C at unk1C * 16 once unk1C drops below 16. */
 s32 func_151ACA20(QuadParticle *particle) {
-    s32 limit = 255;
+    s16 limit = 255;
 
     if (particle->unk1C < 16) {
-        limit = (s16)(particle->unk1C << 4);
+        limit = particle->unk1C * 16;
     }
     if (limit < particle->unk5C) {
         particle->unk5C = limit;
