@@ -207,89 +207,78 @@ void func_15088824(Racer *racer);
  * Allocates the racers (numRacers racing plus numSpare free slots) and places them on the
  * path at the node with id `startId`, measuring the lap length on the way.
  */
-void func_150870D0(s32 startId, s32 numRacers, s32 numSpare)
-{
-  Racer *racer;
-  s32 lapLength;
-  s32 i;
-  PathNode *node;
-  s32 pad; // matching: unused stack slot in the original frame
-  u8 start;
-  u8 best;
-  u8 fwd;
-  u8 back;
-  u8 sel;
-  u8 path[3];
-  PathNode *startNode;
-  u8 idx;
-  D_800872A0 = NULL;
-  start = func_15086D48(startId);
-  if (start == 0xFF)
-  {
-    return;
-  }
-  startNode = &D_800D2350[start];
-  best = D_800D23A8 * 0xFF;
-  sel = 0xFF;
-  for (i = 0; i < 5; i++)
-  {
-    idx = startNode->links[i];
-    if (idx != 0xFF)
-    {
-      node = &D_800D2350[idx];
-      if (node->type == 0)
-      {
-        if (((D_800D23A8 == 0) && (node->param >= best)) || ((D_800D23A8 != 0) && (node->param <= best)))
-        {
-          best = node->param;
-          sel = idx;
+void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
+    Racer *racer;
+    s32 lapLength;
+    s32 i;
+    PathNode *node;
+    s32 pad; // matching: unused stack slot in the original frame
+    u8 start;
+    u8 best;
+    u8 fwd;
+    u8 back;
+    u8 sel;
+    u8 path[3];
+    PathNode *startNode;
+    u8 idx;
+
+    D_800872A0 = NULL;
+    start = func_15086D48(startId);
+    if (start == 0xFF) {
+        return;
+    }
+    startNode = &D_800D2350[start];
+    best = D_800D23A8 * 0xFF;
+    sel = 0xFF;
+    for (i = 0; i < 5; i++) {
+        idx = startNode->links[i];
+        if (idx != 0xFF) {
+            node = &D_800D2350[idx];
+            if (node->type == 0) {
+                if ((D_800D23A8 == 0 && node->param >= best) || (D_800D23A8 != 0 && node->param <= best)) {
+                    best = node->param;
+                    sel = idx;
+                }
+            }
         }
-      }
     }
-  }
 
-  if (sel != 0xFF)
-  {
-    fwd = func_150888A8(start, sel, 0);
-    back = func_150888A8(sel, start, 0);
-  }
-  if (((sel == 0xFF) || (back == 0xFF)) || (fwd == 0xFF))
-  {
-    return;
-  }
-  path[1] = sel;
-  path[2] = fwd;
-  lapLength = 0;
-  do
-  {
-    path[0] = path[1];
-    path[1] = path[2];
-    path[2] = func_150888A8(path[0], path[1], 0);
-    lapLength++;
-  }
-  while (start != path[0]);
-  D_800D2399 = numSpare;
-  D_800D2398 = numRacers;
-  numRacers += numSpare;
-  D_800D2394 = 0;
-  D_800872A0 = allocate_memory(numRacers * sizeof(Racer), 1, 0, 0);
-  for (i = 0; i < numRacers; i++)
-  {
-    racer = &D_800872A0[i];
-    func_15088824(racer);
-    racer->nodes[0] = back;
-    racer->nodes[1] = start;
-    racer->nodes[2] = sel;
-    racer->nodes[3] = fwd;
-    if (i < D_800D2398)
-    {
-      racer->actorIndex = i;
+    if (sel != 0xFF) {
+        fwd = func_150888A8(start, sel, 0);
+        back = func_150888A8(sel, start, 0);
     }
-    racer->state = i >= D_8008FD90;
-    racer->lapLength = lapLength;
-  }
+    if (sel == 0xFF || back == 0xFF || fwd == 0xFF) {
+        return;
+    }
+    path[1] = sel;
+    path[2] = fwd;
+    lapLength = 0;
+    do {
+        path[0] = path[1];
+        path[1] = path[2];
+        path[2] = func_150888A8(path[0], path[1], 0);
+        lapLength++;
+    } while (start != path[0]);
+    D_800D2399 = numSpare;
+    D_800D2398 = numRacers;
+    numRacers += numSpare;
+    D_800D2394 = 0;
+    D_800872A0 = allocate_memory(numRacers * sizeof(Racer), 1, 0, 0);
+    for (i = 0; i < numRacers; i++) {
+        racer = &D_800872A0[i];
+        func_15088824(racer);
+        racer->nodes[0] = back;
+        racer->nodes[1] = start;
+        racer->nodes[2] = sel;
+        racer->nodes[3] = fwd;
+        if (i < D_800D2398) {
+            racer->actorIndex = i;
+        }
+        racer->state = i >= D_8008FD90;
+        racer->lapLength = lapLength;
+    }
 
-  D_800D239A = 1;
+    D_800D239A = 1;
 }
 
 f32 sinf(f32);
@@ -308,7 +297,7 @@ s32 func_15088A08(Racer *racer, f32 step);
  * Per-frame update of racer `index`: steers it along the path to follow its actor, tracks its
  * speed and race time and, for racer 0, recomputes everyone's rank.
  */
-void func_15087350(s32 index, s32 arg1, f32 arg2) {
+void func_15087350(s32 index, s32 arg1, f32 lookahead) {
     f32 f;
     f32 g;
     f32 posX;
@@ -331,7 +320,7 @@ void func_15087350(s32 index, s32 arg1, f32 arg2) {
     s8 ok;
     Racer copy;
     f32 scale;
-    s32 off;
+    s32 pad; // matching: unused stack slot in the original frame
     f32 inv;
     s32 again;
     s32 i;
@@ -412,7 +401,7 @@ void func_15087350(s32 index, s32 arg1, f32 arg2) {
         racer->speed = (adist * 4.0f) / racer->prevTicks;
         if (racer->state != 0) {
             bcopy(racer, &copy, sizeof(Racer));
-            func_15088A08(&copy, arg2 + arg2);
+            func_15088A08(&copy, lookahead + lookahead);
             func_15088F30(&copy, xs, ys, zs);
             D_800D239C = func_150497E0(xs, 0, copy.segmentT);
             D_800D23A0 = func_150497E0(ys, 0, copy.segmentT);
@@ -436,7 +425,7 @@ void func_15087350(s32 index, s32 arg1, f32 arg2) {
                     obj->y_velocity = 65.0f;
                 }
                 obj->unk21E = 0;
-            lbl:;
+            lbl:; // matching: the empty labelled statement splits the block for IDO's scheduler
             }
         } else {
             racer->lateral = 0.0f;
@@ -814,6 +803,7 @@ s32 func_1508855C(struct127 *obj) {
     i = 1;
     limit = D_800D2398 + D_800D2399;
     racer = &racers[1];
+    // matching: the goto keeps IDO from unrolling this loop
     if (limit < 2) {
         goto fail;
     }
@@ -878,7 +868,7 @@ s32 func_1508868C(struct127 *obj) {
 
 /* Releases the spare racer slot of the calling actor. */
 void func_15088780(void) {
-    s32 func_1508855C();
+    s32 func_1508855C(); /* called without its actor argument: a0 passes through */
     s32 index;
 
     if (D_800872A0 != NULL) {
@@ -1121,6 +1111,10 @@ void func_15088D58(struct127 *obj) {
     }
 }
 
+/*
+ * Fills the four spline control points of `racer`: each node moved toward its edge partner
+ * (a type-4 neighbour) by the racer's lateral position.
+ */
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ) {
     s32 i;
     s32 j;
@@ -1132,12 +1126,12 @@ void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ) {
 
     for (i = 0; i < 4; i++) {
         if (racer->nodes[i] != 0xFF) {
-            node = &(D_800D2350)[racer->nodes[i]];
+            node = &D_800D2350[racer->nodes[i]];
             next = node;
             for (j = 0; j < 5; j++) {
                 id = node->links[j];
-                if ((id != 0xFF) && ((D_800D2350)[id].type == 4)) {
-                    next = id + D_800D2350;
+                if (id != 0xFF && D_800D2350[id].type == 4) {
+                    next = &D_800D2350[id];
                     j = 5;
                 }
             }
@@ -1154,7 +1148,11 @@ void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ) {
     }
 }
 
-u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
+/*
+ * Returns a neighbour of `node` (other than `exclude`) of the given type (0xFF = any),
+ * preferring one whose param equals `param`; 0xFF if none.
+ */
+u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 param) {
     s32 i;
     u8 result;
     PathNode *n;
@@ -1164,12 +1162,12 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
     if (node >= D_80087290) {
         return 0xFF;
     }
-    n = node + D_800D2350;
+    n = &D_800D2350[node];
     for (i = 0; i < 5; i++) {
         if (n->links[i] != 0xFF && n->links[i] != exclude) {
-            t = n->links[i] + D_800D2350;
+            t = &D_800D2350[n->links[i]];
             if (t->type == type || type == 0xFF) {
-                if (t->param == sub) {
+                if (t->param == param) {
                     return n->links[i];
                 }
                 result = n->links[i];
@@ -1182,23 +1180,24 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
 
 void func_1512D560();
 
+/* Race-over camera: follows the actor along the type-5 camera nodes, looking at it. */
 void func_150891E8(Racer *racer, struct127 *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
-    s32 a2;
-    s32 b2;
+    s32 nextNode;
+    s32 camNext;
     s32 i;
-    f32 min2;
+    f32 distSq;
     u32 j;
-    u8 link;
-    f32 min;
+    u8 pad; // matching: unused stack slot in the original frame
+    f32 best;
     PathNode *entry;
     PathNode *other;
-    u8 a;
-    u8 b;
+    u8 prevNode;
+    u8 curNode;
     u8 start;
-    u8 sub;
+    u8 param;
     CamParams *p;
     struct108 *cam;
 
@@ -1206,20 +1205,20 @@ void func_150891E8(Racer *racer, struct127 *obj) {
         return;
     }
     if (D_8008FDBC & 0x40) {
-        sub = 1;
+        param = 1;
     } else {
-        sub = 0;
+        param = 0;
     }
     cam = obj->camera;
     if (racer->state == 2) {
         for (i = 0; i < D_80087290; i++) {
-            entry = (PathNode *)&D_800D2350[i];
+            entry = &D_800D2350[i];
             if (entry->type == 5 && entry->param == 2) {
                 racer->camNode = i;
                 racer->camNextNode = i;
                 for (j = 0; j < 5; j++) {
                     if (entry->links[j] != 0xFF) {
-                        other = (PathNode *)&D_800D2350[entry->links[j]];
+                        other = &D_800D2350[entry->links[j]];
                         if ((!D_800D23A8 && other->param == 3) || (D_800D23A8 && other->param != 3)) {
                             racer->camNextNode = entry->links[j];
                         }
@@ -1228,61 +1227,61 @@ void func_150891E8(Racer *racer, struct127 *obj) {
                 i = D_80087290;
             }
         }
-        b = racer->camNextNode;
-        min = 1000000000.0f;
-        a = racer->camNode;
-        start = b;
+        curNode = racer->camNextNode;
+        best = 1000000000.0f;
+        prevNode = racer->camNode;
+        start = curNode;
         do {
-            entry = (PathNode *)&D_800D2350[b];
-            a2 = func_1508907C(b, 0xFF, a, sub);
-            a = b;
-            b = a2;
+            entry = &D_800D2350[curNode];
+            nextNode = func_1508907C(curNode, 0xFF, prevNode, param);
+            prevNode = curNode;
+            curNode = nextNode;
             dx = obj->x_position - entry->x;
             dz = obj->z_position - entry->z;
-            min2 = dx * dx + dz * dz;
-            if (min2 < min) {
-                min = min2;
-                racer->camNode = a;
-                racer->camNextNode = a2;
+            distSq = dx * dx + dz * dz;
+            if (distSq < best) {
+                best = distSq;
+                racer->camNode = prevNode;
+                racer->camNextNode = nextNode;
             }
-        } while (b != start);
+        } while (curNode != start);
         func_1512D560(obj->camera, 5, 0);
         racer->state = 3;
     }
     p = &racer->cam;
-    b2 = racer->camNextNode;
-    a2 = racer->camNode;
-    entry = (PathNode *)&D_800D2350[a2];
-    other = (PathNode *)&D_800D2350[b2];
+    camNext = racer->camNextNode;
+    nextNode = racer->camNode;
+    entry = &D_800D2350[nextNode];
+    other = &D_800D2350[camNext];
     dx = obj->x_position - other->x;
     dz = obj->z_position - other->z;
-    min2 = dx * dx + dz * dz;
+    distSq = dx * dx + dz * dz;
     dx = obj->x_position - entry->x;
     dz = obj->z_position - entry->z;
-    min = dx * dx + dz * dz;
-    if (min2 < min) {
-        racer->camNode = b2;
-        racer->camNextNode = func_1508907C(racer->camNode, 0xFF, a2, sub);
+    best = dx * dx + dz * dz;
+    if (distSq < best) {
+        racer->camNode = camNext;
+        racer->camNextNode = func_1508907C(racer->camNode, 0xFF, nextNode, param);
         entry = other;
         dx = obj->x_position - entry->x;
         dz = obj->z_position - entry->z;
-        min = min2;
+        best = distSq;
     }
     dy = obj->y_position - entry->y;
-    min = sqrtf(dy * dy + min);
-    dx /= min;
-    dy /= min;
-    dz /= min;
-    if (min > 1000.0f) {
-        min = 1000.0f;
+    best = sqrtf(dy * dy + best);
+    dx /= best;
+    dy /= best;
+    dz /= best;
+    if (best > 1000.0f) {
+        best = 1000.0f;
     }
     p->unk0 = 0;
     p->atX = obj->x_position;
     p->atY = obj->y_position;
     p->atZ = obj->z_position;
-    p->eyeX = obj->x_position - dx * min;
-    p->eyeY = obj->y_position - dy * min;
-    p->eyeZ = obj->z_position - dz * min;
+    p->eyeX = obj->x_position - dx * best;
+    p->eyeY = obj->y_position - dy * best;
+    p->eyeZ = obj->z_position - dz * best;
     p->unk4 = 0;
     p->unk30 = 30.0f;
     p->unk34 = 30.0f;
@@ -1298,6 +1297,10 @@ void func_150891E8(Racer *racer, struct127 *obj) {
 void func_1512D560();
 extern s32 D_800BE9E4;
 
+/*
+ * Pre-race fly-through camera along the type-6 camera nodes; `leave` hands the camera back
+ * to the actor.
+ */
 void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
     struct108 *cam;
     s32 i;
@@ -1319,25 +1322,21 @@ void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
     cam = obj->camera;
     p = &racer->cam;
     if (leave != 0) {
-        p->unk10 = 0x78;
+        p->unk10 = 120;
         p->unkC = 999.0f;
-        func_1512D560(obj->camera, 0xA, p);
+        func_1512D560(obj->camera, 10, p);
         func_1512D560(obj->camera, 6, cam->unk23D);
         racer->camState = 0;
         return;
     }
     if (racer->camState == 0) {
         next = D_800D23A8 + 1;
-        i = 0;
-        if (D_80087290 > 0) {
-            do {
-                entry = &D_800D2350[i];
-                if (entry->type == 6 && entry->param == next) {
-                    racer->camNodes[0] = i;
-                    i = D_80087290;
-                }
-                i++;
-            } while (i < D_80087290);
+        for (i = 0; i < D_80087290; i++) {
+            entry = &D_800D2350[i];
+            if (entry->type == 6 && entry->param == next) {
+                racer->camNodes[0] = i;
+                i = D_80087290;
+            }
         }
         racer->camNodes[1] = func_1508907C(racer->camNodes[0], 6, 0xFF, 0);
         racer->camNodes[2] = func_1508907C(racer->camNodes[1], 6, racer->camNodes[0], 0);
