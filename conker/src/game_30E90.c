@@ -40,16 +40,6 @@ typedef struct {
     /* 0x42 */ u8 pad42[2];
 } ObjectSpawn; // size 0x44
 
-/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
-typedef struct {
-    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 *materials; // per-triangle collision materials
-    /* 0x14 */ u8 pad14[0x14];
-    /* 0x28 */ Vtx vertices[1];
-} ModelAsset;
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
@@ -63,10 +53,6 @@ typedef struct {
     /* 0xA */ u16 effectFlags;
 } GroupedObjectDefaults;
 
-typedef struct {
-    ModelAsset *model;
-    s32 loaded;
-} LevelModelEntry;
 
 /* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
 typedef struct {
@@ -76,7 +62,6 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-extern LevelModelEntry *D_800B0E50;
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;

@@ -32,39 +32,19 @@ void func_15003120(s32 index, s32 base, s32 list) {
 }
 
 
-/* A level model asset. Its pointer fields hold offsets from the asset's start until rebased. */
-typedef struct {
-    /* 0x00 */ s32 displayList; // also marks the end of the vertices
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 rangeList;   // offset of a RelocRange list, rebased by func_15003120
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ Vtx vertices[1];
-} LevelModel;
-
-typedef struct {
-    LevelModel *model;
-    s32 loaded;
-} LevelModelEntry;
 
 extern s32 D_800B0E20[];
-extern LevelModelEntry *D_800B0E50;
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern LevelModelEntry *func_1502B6BC(s32 *loaded, s32 arg1, s32 *count, s32 arg3, s32 arg4, s32 arg5);
-extern s32 func_150049A4(s32 dl, s32 arg1, s32 arg2);
-extern s32 func_1510CE60(s32 dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
+extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
+extern s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
 extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
 
 /* Loads level `level`'s models, rebases them and sets up the first four as the level's display lists. */
 void func_150031EC(s32 level) {
     LevelModelEntry *models;
-    LevelModel *model;
+    ModelAsset *model;
     s32 count;
     s32 loaded;
     u32 i;
@@ -93,14 +73,14 @@ void func_150031EC(s32 level) {
         for (i = 0; i < count; i++) {
             model = models[i].model;
             if (model != NULL && models[i].loaded) {
-                if (model->displayList != 0) {
-                    model->displayList += (s32)model;
+                if (model->displayList != NULL) {
+                    model->displayList = (Gfx *)((u8 *)model->displayList + (s32)model);
                 }
                 if (model->unk8 != 0) {
                     model->unk8 += (s32)model;
                 }
-                if (model->unk10 != 0) {
-                    model->unk10 += (s32)model;
+                if (model->materials != NULL) {
+                    model->materials = (s32 *)((u8 *)model->materials + (s32)model);
                 }
                 func_15003120(i, (s32)model, model->rangeList);
                 if (i < 4) {
@@ -109,7 +89,7 @@ void func_150031EC(s32 level) {
                     D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - (s32)D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
                     D_800B0E20[i] = model->unk8;
                     if (i == 0) {
-                        func_150039BC(model->unk10);
+                        func_150039BC((s32)model->materials);
                     }
                     func_150049A4(D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
                     func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);

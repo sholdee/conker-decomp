@@ -4349,4 +4349,27 @@ typedef struct AttachModelHeader {
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
 } AttachModelHeader;
 
+/* A model asset as returned by func_1502B6BC (level models: table 4, D_800B0E50; object models: table 3; dynamic
+ * models in game_168A90): a header, the vertices, then the display list. A level model's pointer fields hold
+ * offsets from the asset's start until func_150031EC rebases them. */
+typedef struct ModelAsset {
+    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;         // rebased
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 *materials;   // per-triangle collision materials (rebased)
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 rangeList;    // offset of a RelocRange list, rebased by func_15003120
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ Vtx vertices[1];
+} ModelAsset;
+
+/* One loaded level model (D_800B0E50[id]). */
+typedef struct LevelModelEntry {
+    /* 0x0 */ ModelAsset *model;
+    /* 0x4 */ s32 loaded;
+} LevelModelEntry;
+
 #endif

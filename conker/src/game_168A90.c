@@ -32,13 +32,6 @@ typedef struct {
 #define DYNMODEL_FLAG_LIFETIME      1
 #define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
-/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
-typedef struct {
-    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
-    /* 0x04 */ u8 pad4[0x24];
-    /* 0x28 */ Vtx vertices[1];
-} DynModelAsset;
-
 /*
  * A model whose vertices are copied into per-frame, per-viewport buffers so they can be
  * modified each frame. The buffers follow the header, then `userDataSize` bytes of user data.
@@ -46,7 +39,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ DynModelDesc desc;
-    /* 0x4C */ DynModelAsset *asset;
+    /* 0x4C */ ModelAsset *asset;
     /* 0x50 */ s32 buffersSize;  // size of all vertex buffers, i.e. the offset of the user data
     /* 0x54 */ Gfx *displayList;
     /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
@@ -69,7 +62,7 @@ typedef struct {
 } VtxRange;
 
 extern f32 sinf(f32);
-extern DynModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
+extern ModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
 extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);
@@ -83,7 +76,7 @@ extern VtxRange D_800A4A2C[9];
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
     DynModel *obj;
-    DynModelAsset *asset;
+    ModelAsset *asset;
     s32 buffersSize;
     s32 vtxSize;
     u8 *buffer;

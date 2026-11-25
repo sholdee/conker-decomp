@@ -899,6 +899,7 @@ extern u8 *D_800B0E34; // group count of each vertex color set
 
 extern u8 D_800B0E38;
 extern s32 D_800B0E40[];
+extern LevelModelEntry *D_800B0E50; // the current level's models
 extern s32 D_800B0E58[7762];
 
 extern u16 D_800B87A0[]; // per texture: size
