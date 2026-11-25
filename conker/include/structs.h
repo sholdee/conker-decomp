@@ -747,13 +747,30 @@ typedef struct {
     s32 unkC;  // used
 } struct105;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s8  pad[0x3];
-    u8  unkF;
-} struct106;
+/* One simulated bone of an object broken into parts (game_6B320; size 0x68). */
+typedef struct ObjPart {
+    /* 0x00 */ f32 initPos[3];
+    /* 0x0C */ f32 initRot[3];   /* degrees */
+    /* 0x18 */ f32 initScale[3];
+    /* 0x24 */ f32 pos[3];
+    /* 0x30 */ f32 rot[3];
+    /* 0x3C */ f32 scale[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 rotVel[3];
+    /* 0x60 */ f32 gravity;
+    /* 0x64 */ u8 active;
+    /* 0x65 */ u8 pad65[3];
+} ObjPart;
+
+/* Per-object parts state (D_800C6660[objIndex]; game_6B320). */
+typedef struct ObjPartsState {
+    /* 0x00 */ ObjPart *parts;
+    /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
+    /* 0x08 */ s32 partMaskHi;   /* parts 32..63 (shift count taken mod 32) */
+    /* 0x0C */ s16 timer;
+    /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
+    /* 0x0F */ u8 state;         /* PARTS_STATE_* */
+} ObjPartsState;
 
 
 typedef struct {

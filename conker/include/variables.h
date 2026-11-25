@@ -303,9 +303,9 @@ extern s32  D_80042770;
 extern s32  D_80042774;
 extern s32  D_80042778;
 extern s32  D_8004277C;
-extern f32  D_80042780;
+extern f32  D_80042780[2]; // per channel: frequency last sent
 extern f32  D_80042784;
-extern f32  D_80042788;
+extern f32  D_80042788[2]; // per channel: gain last sent
 extern f32  D_80042790;
 extern f32  D_80042794;
 extern f32  D_80042798;
@@ -919,7 +919,7 @@ extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (fu
 
 extern struct160 *D_800C6650; // aim points (D_800C6654 of them)
 extern s32 D_800C6654;
-extern struct106 D_800C6660[];
+extern ObjPartsState D_800C6660[];
 extern u8  D_800C67F0;
 extern u8  D_800C67F1;
 extern s32 D_800C6860[];
@@ -1197,8 +1197,8 @@ extern u8  D_800DBE63;
 extern f32 D_800DBE64;
 extern s32 D_800DBEF0;
 extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
-extern s32 D_800DBEF8[];
-extern s8  D_800DBEFC[];
+extern s32 *D_800DBEF8; // per object: handle released with func_10004074
+extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
@@ -1269,7 +1269,7 @@ extern WaveDeformer *D_800DD410[2]; // D_800DD418 of them in use
 extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer
 extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
-extern s32  D_800DD478; // struct/array of size 0x618 (1560)
+extern s32  D_800DD478[15 * 26]; // per texture type: 26 frame addresses (game_1A89B0)
 
 extern ParticleTexFile D_800DDA90[15];
 extern s32  D_800DDC00;

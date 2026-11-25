@@ -219,7 +219,6 @@ extern void func_10004074(s32);
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
 #define FRAMES_PER_TYPE 26
-#define sFrames ((s32 *)&D_800DD478) /* [15][FRAMES_PER_TYPE], indexed by a vertex's texture id */
 
 /* This frame's sprite vertex buffer, four vertices per sprite. */
 #define VTX(n) (((Vtx *) D_800DDD10[D_800BE9C0])[n])
@@ -355,18 +354,18 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                 if (fadeDist < 240) {
                     dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
                 }
-                if (sFrames[type * FRAMES_PER_TYPE] == 0) {
+                if (D_800DD478[type * FRAMES_PER_TYPE] == 0) {
                     if (D_800DDA90[type].devAddr != 0) {
                         hi = D_80095CE0[D_800DDBC0[type]].frameSize * D_80095CE0[D_800DDBC0[type]].frameCount;
                         D_800DDA90[type].buf = func_10003C6C(D_800DDA90[type].size, 1, 2, 1, 0);
                         if (D_800DDA90[type].buf != 0) {
-                            sFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
-                            if (sFrames[type * FRAMES_PER_TYPE] != 0) {
+                            D_800DD478[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
+                            if (D_800DD478[type * FRAMES_PER_TYPE] != 0) {
                                 func_10004514(D_800DDA90[type].devAddr, (void *) D_800DDA90[type].buf, D_800DDA90[type].size, 1);
                                 D_800DDA90[type].used = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
-                                    sFrames[type * FRAMES_PER_TYPE + frame] = sFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
+                                    D_800DD478[type * FRAMES_PER_TYPE + frame] = D_800DD478[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
                                 func_10004074(D_800DDA90[type].buf);
@@ -377,7 +376,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                 } else {
                     if (D_800DDA90[type].used == 0) {
                         D_800DDA90[type].used = 1;
-                        func_100043B4((s32 *) sFrames[type * FRAMES_PER_TYPE], 4);
+                        func_100043B4((s32 *) D_800DD478[type * FRAMES_PER_TYPE], 4);
                     }
                 }
                 vtx = &VTX(j << 2);
@@ -536,8 +535,8 @@ void func_1517CFC4(void) {
 
     for (i = 0; i < 15; i++) {
         if (D_800DDA90[i].buf != 0) {
-            if (sFrames[i * FRAMES_PER_TYPE] != 0) {
-                func_10006240(D_800DDA90[i].buf, sFrames[i * FRAMES_PER_TYPE], D_8003809C);
+            if (D_800DD478[i * FRAMES_PER_TYPE] != 0) {
+                func_10006240(D_800DDA90[i].buf, D_800DD478[i * FRAMES_PER_TYPE], D_8003809C);
                 func_10004074(D_800DDA90[i].buf);
             }
             D_800DDA90[i].buf = 0;
@@ -712,7 +711,7 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
                         tex = v[quad].v.flag;
                         width = (v[quad + 2].v.tc[0] + 1) >> 5;
                         height = (v[quad + 2].v.tc[1] + 1) >> 5;
-                        gDPLoadTextureBlock((*gfx)++, sFrames[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
+                        gDPLoadTextureBlock((*gfx)++, D_800DD478[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
                                             (height * 5 + 3) >> 2, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
                                             G_TX_NOLOD, G_TX_NOLOD);
                         gDPSetTile((*gfx)++, G_IM_FMT_I, G_IM_SIZ_4b, ((width >> 1) + 7) >> 3, (width * height) >> 2, 1, 0,
@@ -750,8 +749,8 @@ void func_1517DE5C(void) {
         func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
                       D_800DBFF0->unk380, D_800DBFF0->eye.x, D_800DBFF0->eye.y, D_800DBFF0->eye.z);
         for (i = 0; i < 15; i++) {
-            if (sFrames[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
-                sFrames[i * FRAMES_PER_TYPE] = 0;
+            if (D_800DD478[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
+                D_800DD478[i * FRAMES_PER_TYPE] = 0;
                 D_800DDA90[i].buf = 0;
             }
         }

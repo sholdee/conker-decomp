@@ -9,10 +9,10 @@ void func_15004E00(void) {
 
     for (i = 0; i < 25; i++)
     {
-        D_800C6660[i].unk0 = 0;
-        D_800C6660[i].unk4 = 0;
-        D_800C6660[i].unk8 = 0;
-        D_800C6660[i].unkF = 0;
+        D_800C6660[i].parts = NULL;
+        D_800C6660[i].partMaskLo = 0;
+        D_800C6660[i].partMaskHi = 0;
+        D_800C6660[i].state = 0;
     }
 }
 

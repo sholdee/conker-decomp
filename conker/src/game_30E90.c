@@ -83,9 +83,6 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-#define HANDLES (*(s32 **)D_800DBEF8)      // per object: handle released with func_10004074
-#define RELEASE_DELAY (*(u8 **)D_800DBEFC) // per object: frames to keep the handle once hidden
-
 extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 extern LevelModelEntry *D_800B0E50;
 extern ObjectBehavior D_80088C90[];
@@ -341,8 +338,8 @@ void func_150039E0(s32 level, s32 arg1) {
     }
     D_800DBEE0 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
     D_800DBEE4 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    HANDLES = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    RELEASE_DELAY = allocate_memory(D_800DBEF0, 1, 0, 0);
+    D_800DBEF8 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
+    D_800DBEFC = allocate_memory(D_800DBEF0, 1, 0, 0);
     for (i = 0; i < 4; i++) {
         D_800DBED0[i] = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
     }
@@ -482,14 +479,13 @@ void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
     }
 }
 
-
 /* Clears every object's handle and release delay. */
 void func_15004A4C(void) {
     s32 i;
 
     for (i = 0; i < D_800DBEF0; i++) {
-        HANDLES[i] = 0;
-        RELEASE_DELAY[i] = 0;
+        D_800DBEF8[i] = 0;
+        D_800DBEFC[i] = 0;
     }
 }
 

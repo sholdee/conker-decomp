@@ -586,7 +586,7 @@ void func_1500ABA0(s32 arg0) {
     bzero(D_800BE4A0, sizeof(D_800BE4A0));
     func_1502B8E0(D_800BE4A0, sizeof(D_800BE4A0), 3, 12, arg0, 10);
     bzero(D_800DDA90, sizeof(D_800DDA90));
-    bzero(&D_800DD478, 1560);
+    bzero(D_800DD478, sizeof(D_800DD478));
 }
 
 /** Looks up the texture file of every used particle slot and computes its texture extents. */

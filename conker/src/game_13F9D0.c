@@ -702,9 +702,6 @@ WorldObject *func_151149AC(u8 id) {
     return NULL;
 }
 
-#define HANDLES (*(s32 **)&D_800DBEF8)      // per object: handle released with func_10004074
-#define RELEASE_DELAY (*(u8 **)&D_800DBEFC) // per object: frames to keep the handle once hidden
-
 /* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
 void func_15114A1C(void) {
     s32 i;
@@ -713,30 +710,30 @@ void func_15114A1C(void) {
     for (i = 0; i < D_800DBEF0; i++) {
         if ((D_800DBEF4[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
-            handle = HANDLES[i];
+            handle = D_800DBEF8[i];
             if (&D_800DBEF8) {}
-            if (HANDLES[i] != 0) {
+            if (D_800DBEF8[i] != 0) {
                 if (D_800DBEF4[i].attach != 3 && !(D_800DBEF4[i].viewFlags & 0x80)) {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(HANDLES[j]);
+                    func_10004074(D_800DBEF8[j]);
                     if (handle) {}
-                    HANDLES[j] = 0;
-                } else if (RELEASE_DELAY[i] != 0) {
-                    RELEASE_DELAY[i]--;
+                    D_800DBEF8[j] = 0;
+                } else if (D_800DBEFC[i] != 0) {
+                    D_800DBEFC[i]--;
                 } else {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(HANDLES[j]);
-                    HANDLES[j] = 0;
+                    func_10004074(D_800DBEF8[j]);
+                    D_800DBEF8[j] = 0;
                 }
             }
         } else if (!(D_800DBEF4[i].viewFlags & 0x80)) {
-            HANDLES[i] = 0;
+            D_800DBEF8[i] = 0;
         }
     }
 }
