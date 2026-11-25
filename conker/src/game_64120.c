@@ -9,10 +9,20 @@
 void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
 #undef func_150ADA20
 u8 func_150ADA20(void);
+
+// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
+// it first sees each name.
+f32 D_800C3FD0[3];
+u8 D_800C3FDC;
+f32 D_800C3FE0;
+f32 D_800C3FE4;
+static f32 D_800C3FE8[3]; /* current aim target */
+s16 D_800C3FF4[3];
+u8 D_800C3FFA; /* aim pass / slot counter */
+
 #include "variables.h"
 
 s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
-extern f32 D_800C3FD0[];
 
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
@@ -63,7 +73,6 @@ void func_15036C70(Actor *obj) {
     }
 }
 
-static f32 D_800C3FE8[3];     /* current aim target */
 void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
 void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -612,8 +621,7 @@ typedef struct AimNode {
     /* 0xA0 */ f32 unkA0;
 } AimNode;
 
-extern AimNodeTypes D_800843E0;
-extern u8 D_80084404[];
+static AimNodeTypes D_800843E0 = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
 ModelAttachment *func_150319CC(s32, Actor *);
 void func_1507E9E8(Actor *, s32);
 
@@ -638,7 +646,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     f32 bestDist;
     f32 pz;
     f32 distSq;
-    static u32 D_80084400; /* aim point the next scan starts from */
+    static u32 D_80084400 = 0; /* aim point the next scan starts from */
 
     out[0] = -99999.0f;
     out[1] = -99999.0f;
@@ -955,9 +963,6 @@ typedef struct {
 void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
                    f32 fallbackPitch, s32 objIndex, s32 slot);
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
-extern u8 D_800C3FDC;
-extern f32 D_800C3FE0;
-extern f32 D_800C3FE4;
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
 void func_15049C40(f32 *arg0, f32 *arg1);
@@ -1621,6 +1626,8 @@ void func_1503A60C(void) {
     mtx[3][1] = movement_obj[dc_glbl_CharNum].ypos;
     mtx[3][2] = movement_obj[dc_glbl_CharNum].unk178;
 }
+
+static u8 D_80084404[] = { 1, 4, 14, 18, 22 }; /* per aim pass: the bone func_1503A678 scales */
 
 /*
  * For object type 0x22: scales bone D_80084404[D_800C3FFA] by 1 + unk20A / 64 in x and z (the inverse for
