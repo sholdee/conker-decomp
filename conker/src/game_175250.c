@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 typedef struct {
     f32 x, y, z;
 } Vec3f;
@@ -550,10 +549,10 @@ s32 func_15148EF8(Trail *trail, s32 arg1, s32 arg2, s32 arg3) {
     return 1;
 }
 
-/* Spawns a trail at (x, y, z) launched at the given angles and speed. */
+/* Spawns a trail at (x, y, z), launched at speed along the direction given by the yaw and pitch angles. */
 void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
                    f32 halfWidth, f32 gravity, u8 arg11) {
-    f32 cosYaw;
+    f32 yawWaveQ;
     TrailSpawn spawn;
     f32 horizontal;
     struct {
@@ -566,16 +565,17 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
         u8 unk1A;
         u8 unk1B;
     } motion; /* TrailMotion without unk1C/unk1E (func_15147DA0 copies past its end) */
-    f32 sinPitch;
-    f32 cosPitch;
-    f32 sinYaw;
+    f32 pitchWave;
+    f32 pitchWaveQ;
+    f32 yawWave;
     u8 tex;
     TrailRender render;
 
-    sinPitch = func_151423D8((u8)pitch);
-    cosPitch = func_151423D8((u8)(pitch - 0x40));
-    sinYaw = func_151423D8((u8)yaw);
-    cosYaw = func_151423D8((u8)(yaw - 0x40));
+    /* func_151423D8 is a 256-step periodic lookup; "Q" values are a quarter turn (0x40) back. */
+    pitchWave = func_151423D8((u8)pitch);
+    pitchWaveQ = func_151423D8((u8)(pitch - 0x40));
+    yawWave = func_151423D8((u8)yaw);
+    yawWaveQ = func_151423D8((u8)(yaw - 0x40));
 
     spawn.unk10 = 1;
     spawn.unkE = 1;
@@ -587,15 +587,15 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
         motion.flags = 0x28;
     }
 
-    horizontal = speed * sinPitch;
+    horizontal = speed * pitchWave;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
     motion.halfWidth = halfWidth;
     motion.gravity = gravity;
-    motion.velocity.x = horizontal * cosYaw;
-    motion.velocity.y = -speed * cosPitch;
-    motion.velocity.z = horizontal * sinYaw;
+    motion.velocity.x = horizontal * yawWaveQ;
+    motion.velocity.y = -speed * pitchWaveQ;
+    motion.velocity.z = horizontal * yawWave;
     motion.unk1B = 0xFF;
     spawn.unk15 = arg4 + 3;
     spawn.unkC = arg8;
@@ -621,8 +621,7 @@ s32 func_151490C8(Trail *trail) {
         alpha = 0xFF;
     }
     params->motion.unk1B = alpha;
-    // matching: an always-false test of the stored byte (andi 0xFF; bgez)
-    if ((alpha & 0xFF) < 0) {
+    if ((u8)alpha < 0) { // matching: never true, but IDO still emits the test
         return 0;
     }
     return 1;
