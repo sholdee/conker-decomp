@@ -49,47 +49,43 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
 s32 func_1501AE94(s32 viewIndex);
 void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 
-void func_1501A220(s32 arg0, s32 arg1) {
-    s32 phi_s0;
+/* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
+ * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
+void func_1501A220(s32 numPlayers, s32 arg1) {
+    s32 numViews;
     s32 i;
-    s32 var_s1;
-    f32 temp_f0;
-    f32 temp_f2;
-    s32 temp_f16;
+    s32 layout;
+    f32 width;
+    f32 scaled;
+    s32 scaledWidth;
 
-    D_80082FA0 = arg0;
-    var_s1 = D_80082FA0;
+    D_80082FA0 = numPlayers;
+    layout = D_80082FA0;
 
-    if (var_s1 == 0) {
-        phi_s0 = 1;
+    if (layout == 0) {
+        numViews = 1;
     } else {
-        phi_s0 = var_s1 + 2;
+        numViews = layout + 2;
     }
 
-    D_800BE628 = allocate_memory(phi_s0 * 0x180, 1, 1, 0);
-    D_800BE62C = allocate_memory(phi_s0 * 16, 1, 1, 0);
+    D_800BE628 = allocate_memory(numViews * sizeof(RenderView), 1, 1, 0);
+    D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
     if (D_80082FA0 == 1) {
-        temp_f0 = (f32)D_800BE63C[0] - 2.0f;
-        temp_f2 = temp_f0;
-        temp_f2 *= *(f32 *)&D_800968E0;
-        temp_f16 = temp_f2;
-        D_800BE6B8 = (f32)(temp_f16 - (temp_f16 % 4)) / temp_f0;
+        width = (f32)VIEW_WIDTHS[1] - 2.0f;
+        scaled = width;
+        scaled *= *(f32 *)&D_800968E0; // matching: 0.8f; the rodata load and in-place multiply pick IDO's FP regs
+        scaledWidth = scaled;
+        D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
     }
 
     func_150006E0(D_800BE9F0);
 
-    var_s1 = D_80082FA0;
-    i = 0;
-    if (var_s1 >= 0) {
-        do {
-            func_1501A8C0(i, var_s1, 1023, 0);
-            var_s1 = D_80082FA0;
-            i++;
-        } while (i <= var_s1);
+    for (i = 0; i <= (layout = D_80082FA0); i++) {
+        func_1501A8C0(i, layout, 1023, 0);
     }
 
-    if (var_s1 != 0) {
+    if (layout != 0) {
         func_1501A8C0(i, 0, 1023, 0);
     }
 
@@ -98,108 +94,38 @@ void func_1501A220(s32 arg0, s32 arg1) {
     D_800BE635 = 0;
     func_1510B070(arg1);
 }
-// NON-MATCHING: 80% there
-// void func_1501A220(s32 arg0, s32 arg1) {
-//     s32 phi_s0;
-//     s32 i;
-//
-//     f32 temp_f0;
-//     s32 temp_f16;
-//
-//     D_80082FA0 = arg0;
-//
-//     if (arg0 == 0) {
-//         phi_s0 = 1;
-//     } else {
-//         phi_s0 = arg0 + 2;
-//     }
-//     D_800BE628 = allocate_memory((phi_s0 * 3) << 7, 1, 1, 0);
-//     D_800BE62C = allocate_memory(phi_s0 * 16, 1, 1, 0);
-//     if (D_80082FA0 == 1) {
-//         temp_f0 = D_800BE63C - 2.0f;
-//         temp_f16 = temp_f0 * D_800968E0;
-//         phi_s0 = temp_f16 & 3;
-//         if ((temp_f16 < 0) && ((temp_f16 & 3) != 0)) {
-//             phi_s0 -= 4;
-//         }
-//         D_800BE6B8 = (temp_f16 - phi_s0) / temp_f0;
-//     }
-//
-//     func_150006E0(D_800BE9F0);
-//
-//     for(i = 0; i <= D_80082FA0; i++) {
-//         func_1501A8C0(i, D_80082FA0, 1023, 0);
-//     }
-//     if (D_80082FA0 != 0) {
-//         func_1501A8C0(i, 0, 1023, 0);
-//     }
-//
-//     D_800BE617 = 1;
-//     D_800BE614 = 1;
-//     D_800BE635 = 0;
-//     func_1510B070(arg1);
-// }
 
-typedef union Game476D0DisplayCommandA {
-    struct {
-        u32 word0;
-        u32 word1;
-    } words;
-    u64 alignment;
-} Game476D0DisplayCommandA;
+extern Gfx D_8002C930[];
+extern Gfx *D_800BE9C8[];
 
-typedef struct Game476D0RenderView {
-    u8 unknown00[0x40];
-    Vp viewports[2];
-    u8 unknown60[0x120];
-} Game476D0RenderView;
-
-extern u8 D_8002C930;
-extern Game476D0DisplayCommandA *D_800BE9C8[];
-
+/* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
+ * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
 void func_1501A39C(void) {
     s32 i;
-    Game476D0DisplayCommandA *gdl;
+    Gfx *gfx;
 
     for (i = 0; i < 2; i++) {
-        gdl = D_800BE9C8[i];
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDE000000; command->words.word1 = (u32)&D_8002C930; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xFE000000; command->words.word1 = D_800BE9C4; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDC080008; command->words.word1 = (u32)&((Game476D0RenderView *)D_800BE628)[0].viewports[i]; }
-        D_800BE9D8[i] = (s32)gdl;
+        gfx = D_800BE9C8[i];
+        gSPSegment(gfx++, 0, 0);
+        gSPSegment(gfx++, 0, 0);
+        gSPDisplayList(gfx++, D_8002C930);
+        gDPSetDepthImage(gfx++, D_800BE9C4);
+        gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
+        D_800BE9D8[i] = (s32)gfx;
     }
 }
-// NON-MATCHING: something along these lines
-// extern Gfx* D_800BE9C8;
-// extern s32 D_8002C930;
-// Gfx *func_1501A39C(void) {
-//     s32 i;
-//     Gfx *tmp = D_800BE9C8;
-//     for (i = 0; i < 3; i++) {
-//         gSPSegment(tmp++, 0x00, 0x00000000);
-//         gSPSegment(tmp++, 0x00, 0x00000000);
-//         gSPDisplayList(tmp++, D_8002C930);
-//         gDPSetDepthImage(tmp++, D_800BE9C4);
-//         gSPViewport(tmp++, D_800BE628 + i + 0x40);
-//     }
-//     return tmp;
-// }
 
-/* Opens a frame's display list: pipe sync, then a scissor around view (or the whole drawable area for view
- * 0xFF), with its bottom edge clipped to maxBottom when that is non-zero. Returns the advanced display list. */
+/* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
+ * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
 // matching: functions.h types the display list as s32 and IDO's -g3 frame only fits one Gfx * per command,
 // so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
 // on one line: -g3 line numbers steer the scheduler).
-/* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
- * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
 s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
     { Gfx *cmd = (Gfx *)gfx; gfx += sizeof(Gfx); cmd->words.w0 = _SHIFTL(G_RDPPIPESYNC, 24, 8); cmd->words.w1 = 0; }
     if (viewIndex == 0xFF) {
         Gfx *cmd = (Gfx *)gfx;
         gfx += sizeof(Gfx);
-        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(2.0f * 4.0f), 12, 12) | _SHIFTL((s32)(0.0f * 4.0f), 0, 12);
+        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL(2 * 4, 12, 12) | _SHIFTL(0 * 4, 0, 12);
         cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) |
                         _SHIFTL((s32)((f32)D_800BE624 * 4.0f), 0, 12);
     } else {
@@ -235,27 +161,29 @@ s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32
     return gfx;
 }
 
-Gfx *func_1501A680(Gfx *arg0) {
-    gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
-    return arg0;
+/* Sets the color image to the current framebuffer. */
+Gfx *func_1501A680(Gfx *gfx) {
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
+    return gfx;
 }
 
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d) {
-    if (a < 3) {
-        a = 2;
+/* Fills a rectangle clamped to the drawable framebuffer area. */
+Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
+    if (ulx < 3) {
+        ulx = 2;
     }
-    if (b <= 0) {
-        b = 0;
+    if (uly <= 0) {
+        uly = 0;
     }
-    if (c >= (D_800BE620 - 2)) {
-        c = D_800BE620 - 2;
+    if (lrx >= D_800BE620 - 2) {
+        lrx = D_800BE620 - 2;
     }
-    if (d >= D_800BE624) {
-        d = D_800BE624;
+    if (lry >= D_800BE624) {
+        lry = D_800BE624;
     }
 
-    gDPFillRectangle(arg0++, a, b, c, d);
-    return arg0;
+    gDPFillRectangle(gfx++, ulx, uly, lrx, lry);
+    return gfx;
 }
 
 void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
@@ -278,7 +206,7 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
 extern f32 D_80082FA8[];
 extern s16 D_800BE668[][5][2];
 extern u8 D_800BE630[];
-void func_1501B0A0(s32 arg0, s32 arg1);
+void func_1501B0A0(s32 view, s32 layout);
 
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
  * projection and viewport, with depth range zRange. */
