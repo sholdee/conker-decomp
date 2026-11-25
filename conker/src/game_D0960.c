@@ -23,9 +23,10 @@ typedef struct {
     /* 0x30 */ f32 cosRotY;
 } CollisionCylinder; /* size 0x34 */
 
-
 s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit);
 
+/* Tests the segment p0-p1 against cyl (skipped when unk14 == 1 or unk15 & 3 is set);
+   on a hit writes the entry point to hit and returns TRUE. */
 s32 func_150A34B0(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
     if (cyl->unk14 == 1) {
         return FALSE;
@@ -36,12 +37,16 @@ s32 func_150A34B0(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
     return FALSE;
 }
 
-s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *out) {
+/* Segment p0-p1 vs. cylinder: moves both points into the cylinder's local space, clips the
+   segment to the height slab [0, height] and to the radius, and on overlap writes the first
+   contact point (back in world space) to hit and returns TRUE.
+   func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
+s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
     s32 i;
-    f32 inv;
-    f32 tmin;
-    f32 tmax;
-    f32 pts[2][3];
+    f32 scale;
+    f32 tSlabMin;
+    f32 tSlabMax;
+    f32 local[2][3];
     f32 s;
     f32 c;
     f32 ang;
@@ -53,99 +58,103 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *out) {
     f32 disc;
     f32 a;
     f32 sq;
-    f32 lo;
-    f32 hi;
+    f32 tCylMin;
+    f32 tCylMax;
     f32 b;
-    f32 t1;
+    f32 t1; // matching: the roots go through their own stack slots before lo/hi
     f32 t2;
 
+    /* Rotate p0, then p1, into cylinder space (rotate by rotY, then rotX). */
     dx = p0[0] - cyl->x;
     dy = p0[1] - cyl->y;
     dz = p0[2] - cyl->z;
     for (i = 0; i < 2; i++) {
         c = cyl->cosRotY;
         s = cyl->sinRotY;
-        pts[i][0] = dx * c - dz * s;
+        local[i][0] = dx * c - dz * s;
         dz = dz * c + dx * s;
         c = cyl->cosRotX;
         s = cyl->sinRotX;
-        pts[i][2] = dz * c - dy * s;
-        pts[i][1] = dy * c + dz * s;
+        local[i][2] = dz * c - dy * s;
+        local[i][1] = dy * c + dz * s;
         if (i == 0) {
             dx = p1[0] - cyl->x;
             dy = p1[1] - cyl->y;
             dz = p1[2] - cyl->z;
         }
     }
-    org[0] = pts[0][0];
-    org[2] = pts[0][2];
-    dir[0] = pts[1][0] - pts[0][0];
-    dir[1] = pts[1][1] - pts[0][1];
-    org[1] = pts[0][1];
-    dir[2] = pts[1][2] - pts[0][2];
+    org[0] = local[0][0];
+    org[2] = local[0][2];
+    dir[0] = local[1][0] - local[0][0];
+    dir[1] = local[1][1] - local[0][1];
+    org[1] = local[0][1];
+    dir[2] = local[1][2] - local[0][2];
+    /* Range of t in [0, 1] where the segment lies within the height slab. */
     if (dir[1] != 0.0f) {
         f32 tmp;
 
-        inv = 1.0f / dir[1];
-        tmin = -org[1] * inv;
-        tmax = (cyl->height - pts[0][1]) * inv;
-        if (tmax < tmin) {
-            tmp = tmin;
-            tmin = tmax;
-            tmax = tmp;
+        scale = 1.0f / dir[1];
+        tSlabMin = -org[1] * scale;
+        tSlabMax = (cyl->height - local[0][1]) * scale;
+        if (tSlabMax < tSlabMin) {
+            tmp = tSlabMin;
+            tSlabMin = tSlabMax;
+            tSlabMax = tmp;
         }
-        if (tmax < 0.0f || tmin > 1.0f) {
-            return 0;
+        if (tSlabMax < 0.0f || tSlabMin > 1.0f) {
+            return FALSE;
         }
-        if (tmin < 0.0f) {
-            tmin = 0.0f;
+        if (tSlabMin < 0.0f) {
+            tSlabMin = 0.0f;
         }
-        if (tmax > 1.0f) {
-            tmax = 1.0f;
+        if (tSlabMax > 1.0f) {
+            tSlabMax = 1.0f;
         }
     } else {
-        if (org[1] < 0.0f || cyl->height < pts[0][1]) {
-            return 0;
+        if (org[1] < 0.0f || cyl->height < local[0][1]) {
+            return FALSE;
         }
-        tmin = 0.0f;
-        tmax = 1.0f;
+        tSlabMin = 0.0f;
+        tSlabMax = 1.0f;
     }
+    /* Range of t in [0, 1] where the segment lies within the radius (quadratic in t). */
     a = dir[0] * dir[0] + dir[2] * dir[2];
     if (a == 0.0f) {
-        return 0;
+        return FALSE;
     }
     b = 2.0f * (dir[0] * org[0] + dir[2] * org[2]);
     disc = b * b - 4.0f * a * ((org[0] * org[0] + org[2] * org[2]) - cyl->radius * cyl->radius);
     if (disc < 0.0f) {
-        return 0;
+        return FALSE;
     }
     sq = sqrtf(disc);
-    inv = 0.5f / a;
-    t1 = (-b + sq) * inv;
-    t2 = (-b - sq) * inv;
-    lo = t1;
-    hi = t2;
-    if (hi < lo) {
-        sq = lo;
-        lo = hi;
-        hi = sq;
+    scale = 0.5f / a;
+    t1 = (-b + sq) * scale;
+    t2 = (-b - sq) * scale;
+    tCylMin = t1;
+    tCylMax = t2;
+    if (tCylMax < tCylMin) {
+        sq = tCylMin; // matching: the swap reuses sq rather than a fresh temp
+        tCylMin = tCylMax;
+        tCylMax = sq;
     }
-    if (hi < 0.0f || lo > 1.0f) {
-        return 0;
+    if (tCylMax < 0.0f || tCylMin > 1.0f) {
+        return FALSE;
     }
-    if (lo < 0.0f) {
-        lo = 0.0f;
+    if (tCylMin < 0.0f) {
+        tCylMin = 0.0f;
     }
-    if (hi > 1.0f) {
-        hi = 1.0f;
+    if (tCylMax > 1.0f) {
+        tCylMax = 1.0f;
     }
-    if (hi < tmin || tmax < lo) {
-        return 0;
+    if (tCylMax < tSlabMin || tSlabMax < tCylMin) {
+        return FALSE;
     }
-    if (lo < tmin) {
-        a = tmin;
+    /* First t inside both ranges. */
+    if (tCylMin < tSlabMin) {
+        a = tSlabMin; // matching: reuses a for t; a separate local grows the frame
     } else {
-        a = lo;
+        a = tCylMin;
     }
     {
         f32 hz;
@@ -155,19 +164,20 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *out) {
         hx = org[0] + dir[0] * a;
         hy = org[1] + dir[1] * a;
         hz = org[2] + dir[2] * a;
+        /* Rotate the contact point back to world space (by -rotX, then -rotY). */
         ang = -(cyl->rotX * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
-        out[2] = hz * c - hy * s;
-        out[1] = hy * c + hz * s;
+        hit[2] = hz * c - hy * s;
+        hit[1] = hy * c + hz * s;
         ang = -(cyl->rotY * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
-        out[0] = hx * c - out[2] * s;
-        out[2] = out[2] * c + hx * s;
-        out[0] += cyl->x;
-        out[1] += cyl->y;
-        out[2] += cyl->z;
+        hit[0] = hx * c - hit[2] * s;
+        hit[2] = hit[2] * c + hx * s;
+        hit[0] += cyl->x;
+        hit[1] += cyl->y;
+        hit[2] += cyl->z;
     }
-    return 1;
+    return TRUE;
 }
