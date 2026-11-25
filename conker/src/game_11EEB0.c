@@ -15,7 +15,6 @@ typedef struct {
 } Rates150F1A00;
 
 extern Rates150F1A00 D_80088B00;
-f32 cosf(f32);
 
 /* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
 void func_150F1A00(Actor *actor) {

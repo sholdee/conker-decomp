@@ -8,7 +8,6 @@ typedef struct Game1F1CD0Actor {
     /* 0x28 */ ProjectileStream emission;
 } Game1F1CD0Actor;
 
-extern f32 sinf(f32);
 extern void *func_151C229C(Vec3f *, Vec3f *, s32, Vec3f *, u8, s32, f32, f32, f32, f32, f32, u8, u8 *, u8, u8,
                            u8, u8, u8, u8, s8, s32, f32, u8, s8, s32, u8, s32);
 

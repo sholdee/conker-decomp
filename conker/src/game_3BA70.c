@@ -4,7 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void bzero(void *, int);
 void func_15189900(SprayDesc *, u8);
 
 extern u8 *D_80088870;

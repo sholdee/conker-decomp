@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern f32 sinf(f32);
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {

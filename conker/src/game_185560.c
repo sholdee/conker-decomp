@@ -930,8 +930,6 @@ typedef struct {
     /* 0x28 */ DiskEmitter emitter;
 } DiskEmitterObject;
 
-extern float sinf(float);
-extern float cosf(float);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */

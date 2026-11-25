@@ -1301,8 +1301,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     return gfx;
 }
 
-extern f32 sinf(f32);
-extern f32 cosf(f32);
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;

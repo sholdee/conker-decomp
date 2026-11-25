@@ -101,7 +101,6 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     }
 }
 
-extern f32 sinf(f32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
 void func_150E6B84(Game113D60Effect *effect) {

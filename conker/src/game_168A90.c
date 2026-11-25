@@ -19,7 +19,6 @@ typedef struct {
     s32 count;
 } VtxRange;
 
-extern f32 sinf(f32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);
 

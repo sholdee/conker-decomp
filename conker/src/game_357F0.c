@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-f32 sinf(f32);
-f32 cosf(f32);
 
 /* Uniform random value in [0, 1], from the CPU counter times the RNG byte. */
 #define RAND_UNIT() ((f32)((osGetCount() * func_150ADA20()) & 0xFFFF) * (1.0f / 65535.0f))

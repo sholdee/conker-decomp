@@ -1213,8 +1213,6 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
-extern f32 sinf(f32);
-extern f32 cosf(f32);
 
 /*
  * Places waypoint (arg0 & 0x3F) at a 12-bit signed offset (arg1:arg3 high nibble, arg2:arg3 low

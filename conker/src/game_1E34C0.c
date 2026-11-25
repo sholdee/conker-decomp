@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 sinf(f32);
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). */

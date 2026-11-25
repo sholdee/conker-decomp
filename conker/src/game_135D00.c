@@ -120,7 +120,6 @@ void func_15108850(PointLight *light) {
     }
 }
 
-f32 sinf(f32);
 void func_15108B80(DynModel *model);
 void func_15108BC0(DynModel *model);
 

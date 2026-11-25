@@ -4,8 +4,6 @@
 
 extern Mtx D_800D9B28;
 
-f32 cosf(f32);
-f32 sinf(f32);
 
 /* Loads the default near/far planes from D_800DD2F2/D_800DD2F4 and builds the matrix D_800D9B28 spanning
  * view 0 (+-halfWidth by +-halfHeight, depth 1..10000). */

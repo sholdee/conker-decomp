@@ -81,7 +81,6 @@ void func_1502FBE8(Actor *obj);
 void func_1502FD70(Actor *obj);
 
 /* Other files */
-void bzero(void *, int);
 s32 func_150229E4(Actor *);
 Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
 s32 func_1503CF20(s32, s32, void *, s32, s32);

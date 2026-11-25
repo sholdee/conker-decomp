@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern f32 cosf(f32);
-extern f32 sinf(f32);
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
 extern EffectTexture *D_8008CA4C[];

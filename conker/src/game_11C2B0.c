@@ -45,7 +45,6 @@ static const f32 D_800A174C[2][4][2][3] = {
 static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
 extern s32 (*D_8008FD00)(s32, u8);
-extern f32 sinf(f32);
 
 void func_151C329C(void *, s32, s32);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);

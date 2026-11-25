@@ -18,8 +18,6 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 u8 func_150888A8(u8, u8, s8);
 void func_15088824(Racer *racer);
 
-f32 sinf(f32);
-f32 cosf(f32);
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
 s32 func_15088A08(Racer *racer, f32 step);
 
@@ -28,7 +26,6 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave);
 s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 
 
-void bcopy(const void *, void *, int);
 void func_15088824(Racer *racer);
 u8 func_150888A8(u8 prev, u8 cur, s8 route);
 s32 func_15088A08(Racer *racer, f32 step);

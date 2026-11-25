@@ -210,8 +210,6 @@ void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
     D_800D239A = 1;
 }
 
-f32 sinf(f32);
-f32 cosf(f32);
 extern f32 D_800CC310;
 extern s8 D_800D2390;
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
@@ -747,7 +745,6 @@ fail:
     return -1;
 }
 
-void bcopy(const void *, void *, int);
 
 /* Copies racer `src` over racer `dst`, keeping dst's actor and state. */
 void func_150885EC(s32 src, s32 dst) {

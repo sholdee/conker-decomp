@@ -6,7 +6,6 @@
 void func_15160274(s32, s32, s32);
 #include "variables.h"
 
-extern f32 sinf(f32);
 
 extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 extern void func_1515572C(s32, s32);
