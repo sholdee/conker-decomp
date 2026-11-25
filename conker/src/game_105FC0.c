@@ -93,13 +93,14 @@ void func_150D8B10(struct127 *actor, struct17 *out) {
 }
 
 extern u8 D_800BE616;
-void func_15145740(void *, void *, void *, void *, f32);
+void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
 
+/* Trail launch vector from the actor (func_15145740's offset direction). */
 void func_150D8B3C(struct127 *actor, struct17 *out) {
-    f32 unused1[3];
-    f32 unused2[3];
+    struct17 target;
+    struct17 dir;
 
-    func_15145740(actor, unused1, unused2, out, D_800BE616 ? 0.8400000334f : 1.15200007f);
+    func_15145740(actor, &target, &dir, out, D_800BE616 ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
@@ -149,7 +150,7 @@ void func_150D8B88(struct127 *actor) {
         spawn.unk14 = 5;
         spawn.unk18 = 0;
 
-        trail = func_15147A80(&spawn, 0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+        trail = func_15147A80(&spawn, sizeof(TrailData), sizeof(TrailPoint), 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
         if (trail != NULL) {
             memcpy(trail->data, &data, sizeof(TrailData));
         }
@@ -390,7 +391,7 @@ s32 func_150D942C(Trail *trail) {
         if (trail->flags & 2) {
             prev = (TrailPoint *)&trail->pos;
         } else {
-            i -= 1;
+            i--;
             if (i < 0) {
                 i = trail->capacity - 1;
             }
@@ -401,7 +402,7 @@ s32 func_150D942C(Trail *trail) {
             TrailPoint *cur;
 
             invLen = -9999.0f;
-            i -= 1;
+            i--;
             if (i < 0) {
                 i = trail->capacity - 1;
             }
@@ -414,24 +415,25 @@ s32 func_150D942C(Trail *trail) {
             cur->len = len;
             if (maxLen < totalLen) {
                 /* too long: cut this segment and drop everything older */
+                // matching: integer 0 here; 0.0f hoists the zero constant and grows the frame
                 if (cur->len != 0) {
                     invLen = 1.0f / cur->len;
                     dir[0] = delta[0] * invLen;
                     dir[1] = delta[1] * invLen;
                     excess = (totalLen - maxLen) * invLen;
                     dir[2] = delta[2] * invLen;
-                    cur->pos.unk0 = cur->pos.unk0 - delta[0] * excess;
-                    cur->pos.unk4 = cur->pos.unk4 - delta[1] * excess;
-                    cur->pos.unk8 = cur->pos.unk8 - delta[2] * excess;
-                    cur->len = cur->len * (1.0f - excess);
+                    cur->pos.unk0 -= delta[0] * excess;
+                    cur->pos.unk4 -= delta[1] * excess;
+                    cur->pos.unk8 -= delta[2] * excess;
+                    cur->len *= 1.0f - excess;
                 }
                 totalLen = maxLen;
                 while (i != trail->tail) {
-                    trail->tail += 1;
+                    trail->tail++;
                     if (trail->tail == trail->capacity) {
                         trail->tail = 0;
                     }
-                    trail->count -= 1;
+                    trail->count--;
                 }
             }
 
@@ -463,7 +465,7 @@ s32 func_150D942C(Trail *trail) {
                             dx = cur->pos.unk0 - owner->x_position;
                             dz = cur->pos.unk8 - owner->z_position;
                             if (target->unk232 == 16) {
-                                target->xz_velocity = target->xz_velocity * 0.7200000286f;
+                                target->xz_velocity *= 0.7200000286f;
                                 excess = 1.0f / (sqrtf(dx * dx + dz * dz) * -0.07000000030f);
                                 func_1505A250(dx * excess, dz * excess, 0.7f, &target->unk164, &target->unk168);
                             }
@@ -485,15 +487,15 @@ s32 func_150D942C(Trail *trail) {
                     }
                     /* the hit ends the trail here */
                     cur->pos = hit.pos;
-                    totalLen = totalLen - cur->len;
+                    totalLen -= cur->len;
                     cur->len = hit.dist;
                     totalLen += cur->len;
                     while (i != trail->tail) {
-                        trail->tail += 1;
+                        trail->tail++;
                         if (trail->tail == trail->capacity) {
                             trail->tail = 0;
                         }
-                        trail->count -= 1;
+                        trail->count--;
                     }
                     if (data->sound != 0) {
                         func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.unk0, (s32)cur->pos.unk4, (s32)cur->pos.unk8, 500, 5000);
@@ -505,7 +507,7 @@ s32 func_150D942C(Trail *trail) {
         count = trail->count;
     }
     if (count >= 2) {
-        data->texScroll = data->texScroll + -395.0f * D_800BE9A4;
+        data->texScroll += -395.0f * D_800BE9A4;
         data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
         j = trail->head;
@@ -513,7 +515,7 @@ s32 func_150D942C(Trail *trail) {
         for (;;) {
             TrailPoint *cur2;
 
-            j -= 1;
+            j--;
             if (j < 0) {
                 j = trail->capacity - 1;
             }
@@ -537,7 +539,7 @@ s32 func_150D942C(Trail *trail) {
         do {
             TrailPoint *cur3;
 
-            k -= 1;
+            k--;
             if (k < 0) {
                 k = trail->capacity - 1;
             }
@@ -974,7 +976,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 spawn.vel = *(struct17 *)&D_800A5480;
                 do {
                     sub.unk0 = func_150ADA20();
-                    sub.unk1 = (s16)func_150ADA20();
+                    sub.unk1 = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
                     sub.unk2 = (func_150ADA20() % 5U) + 4;
                     sub.unk3 = (func_150ADA20() % 5U) + 4;
                     sub.unk4 = func_150ADA68() * 10.0f;
