@@ -7,6 +7,15 @@
 #include "variables.h"
 
 
+/* An 8-byte entry of the list at F4D20Obj.unk1C; the list ends with an entry whose kind is -14. */
+typedef struct {
+    union {
+        s8  kind;
+        s32 word;
+    } head;
+    s32 unk4;
+} F4D20Entry;
+
 /* Whatever an object's unk7C points to in func_150C7968. */
 typedef struct {
     /* 0x00 */ u8 pad00[0x13];
@@ -23,7 +32,7 @@ typedef struct {
     /* 0x12 */ s16 y;
     /* 0x14 */ s16 z;
     /* 0x16 */ u8  pad16[0x6];
-    /* 0x1C */ s32 *unk1C; // func_150C7C90: list of words, ended by one whose top byte is -14
+    /* 0x1C */ F4D20Entry *unk1C;
     /* 0x20 */ u8  pad20[0x1C];
     /* 0x3C */ union {
         s32 word;
@@ -98,26 +107,30 @@ void func_150C7968(F4D20Obj *obj) {
     }
 }
 
-extern f32 func_15048A40(u8 arg0);
-extern u32 func_150ADA20(void);
-extern void func_1000D96C(s32, s32, s32);
+extern f32 func_15048A40(u8 angle); /* sin */
+extern u32 func_150ADA20(void); /* random */
+extern void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 extern void func_1000DE1C(s32, s32);
-extern f32 func_150489B0(u8);
-extern void func_15179FE0(u8, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_800887F4;
+extern f32 func_150489B0(u8 angle); /* cos */
+extern void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
+                          u8 spinRange, u8 dragRange, s32 type);
+extern s32 D_800887F4; /* set while the camera is inside the zone below */
 
-void func_150C79BC(s32 arg0) {
-    s32 y;
+/* For camera `view`: switches func_1000D96C ids 0xF <-> 0x5F as the camera enters or leaves a cylinder of
+ * radius 1200 around (-2418, 1775) above y 2300, and while it is below y 1583 within 900 of that axis,
+ * sometimes spawns a particle at a random point within 900 of it at y 1583. */
+void func_150C79BC(s32 view) {
+    s32 texture;
     s32 dy;
     s32 dx;
     s32 dz;
-    s32 r;
+    s32 radius;
     u8 angle;
 
-    dx = (s32)D_800DBFF0[arg0].unk2F8 + 2418;
-    dy = (s32)D_800DBFF0[arg0].unk2FC - 2500;
-    dz = (s32)D_800DBFF0[arg0].unk300 - 1775;
-    if ((dy >= -199) && (dx * dx + dz * dz < 1440000)) {
+    dx = (s32)D_800DBFF0[view].unk2F8 + 2418;
+    dy = (s32)D_800DBFF0[view].unk2FC - 2500;
+    dz = (s32)D_800DBFF0[view].unk300 - 1775;
+    if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
         if (D_800887F4 == 0) {
             func_1000D96C(0x5F, 0xF, 6);
             func_1000DE1C(0x10, 4);
@@ -128,56 +141,41 @@ void func_150C79BC(s32 arg0) {
         func_1000D96C(0x10, 0, 3);
         D_800887F4 = 0;
     }
-    dy = (s32)D_800DBFF0[arg0].unk2FC - 1583;
-    if ((dy < 0) && (dx * dx + dz * dz < 810000) && ((func_150ADA20() & 0xFFFF) < 0x2000)) {
-        r = func_150ADA20() % 900U;
+    dy = (s32)D_800DBFF0[view].unk2FC - 1583;
+    if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (func_150ADA20() & 0xFFFF) < 0x2000) {
+        radius = func_150ADA20() % 900U;
         angle = func_150ADA20();
-        dx = func_150489B0(angle) * r + -2418.0f;
-        dz = func_15048A40(angle) * r + 1775.0f;
-        r = (f32)((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
-        func_15179FE0(r, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
+        // dx and dz now hold the spawn point itself
+        dx = func_150489B0(angle) * radius + -2418.0f; // matching: "- 2418.0f" emits sub.s instead of add.s
+        dz = func_15048A40(angle) * radius + 1775.0f;
+        texture = (f32)((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
+        func_15179FE0(texture, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Entry150C7C90;
-
-typedef struct {
-    u8 pad00[0x1C];
-    Entry150C7C90 *unk1C;
-    u8 pad20[0x1C];
-    s32 unk3C;
-    u8 pad40[0x3C];
-    s32 unk7C;
-} GameObj150C7C90;
-
-void func_150C7C90(GameObj150C7C90 *arg0) {
-    Entry150C7C90 *entry;
-    Entry150C7C90 *selected;
-    s32 idx;
+/* Stores an angle (0x400 per turn) in the low 12 bits of the list's terminating entry (its index is found once
+ * and cached in unk7C). The angle comes from the unk12 of object (params & 0xFF), mirrored when params bit 15
+ * is set. */
+void func_150C7C90(F4D20Obj *obj) {
+    F4D20Entry *pad; // matching: unused, but -g3 gives it the stack slot that puts last at sp+0x18
+    F4D20Entry *last;
+    s32 index;
     s32 count;
     s32 angle;
-    s32 word;
-    s32 newWord;
 
-    idx = arg0->unk7C;
-    if (idx == 0) {
-        selected = arg0->unk1C;
-        count = 0;
-        if (*(s8 *)&selected->unk0 != -0xE) {
-            do {
-                count++;
-            } while (*(s8 *)&selected[count].unk0 != -0xE);
+    index = obj->unk7C.count;
+    if (index == 0) {
+        last = obj->unk1C;
+        // matching: reading kind through a cast keeps IDO from strength-reducing last[count] to a cursor
+        for (count = 0; *(s8 *)&last[count] != -14; count++) {
         }
-        arg0->unk7C = count;
-        idx = count;
+        obj->unk7C.count = count;
+        index = count;
     }
-    selected = &arg0->unk1C[idx];
-    angle = -0x29D - func_151149AC(arg0->unk3C & 0xFF)->unk12;
-    if (arg0->unk3C & 0x8000) {
-        angle = 0x344 - angle;
+    last = &obj->unk1C[index];
+    angle = -669 - func_151149AC(obj->params.word & 0xFF)->unk12;
+    if (obj->params.word & 0x8000) {
+        angle = 836 - angle;
     }
     while (angle < 0) {
         angle += 0x400;
@@ -185,8 +183,8 @@ void func_150C7C90(GameObj150C7C90 *arg0) {
     while (angle >= 0x400) {
         angle -= 0x400;
     }
-    selected->unk0 &= ~0xFFF;
-    selected->unk0 |= angle;
+    last->head.word &= ~0xFFF;
+    last->head.word |= angle;
 }
 
 typedef struct {
