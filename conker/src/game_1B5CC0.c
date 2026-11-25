@@ -172,242 +172,177 @@ void func_15188AD0(struct127 *object) {
     }
 }
 
-typedef struct Node15188B74 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[2];
-    s16 unk6;
-    char pad8[4];
-    struct Node15188B74 *unkC;
-} Node15188B74;
+extern void (*D_8008D580[])(Trail *); /* per-type update: capture a history frame */
+extern void (*D_8008D588[])(Trail *); /* per-type free */
 
-extern void (*D_8008D580[])(Node15188B74 *);
-extern void (*D_8008D588[])(Node15188B74 *);
+/* Advances every trail in list `listIndex`: counts down timers, captures history,
+ * fades alpha in while the timer runs and out after it expires, freeing the
+ * trail once fully faded. */
+void func_15188B74(s32 listIndex) {
+    Trail **head;
+    Trail *trail;
+    Trail *prev;
+    Trail *next;
+    s32 alpha;
 
-void func_15188B74(s32 idx) {
-    Node15188B74 *node;
-    Node15188B74 *prev;
-    Node15188B74 *next;
-    volatile s32 *delta;
-    s32 *head;
-    void (**funcs0)(Node15188B74 *);
-    void (**funcs1)(Node15188B74 *);
-    s32 countdown;
-    s32 fade;
-    s32 maxFade;
+    head = &sTrailLists[listIndex];
+    prev = NULL;
+    for (trail = *head; trail != NULL; trail = next) {
+        next = trail->next;
+        if (trail->timer != 0) {
+            trail->timer -= D_800BE9E4;
+        }
+        if (trail->timer < 0) {
+            trail->timer = 0;
+        }
+        D_8008D580[trail->type](trail);
 
-    head = &D_800DF7C8[idx];
-    node = (Node15188B74 *)*head;
-    funcs1 = D_8008D588;
-    prev = 0;
-    if (node != 0) {
-        funcs0 = D_8008D580;
-        delta = &D_800BE9E4;
-        maxFade = 0xFF;
-        do {
-            countdown = node->unk6;
-            next = node->unkC;
-            if (countdown != 0) {
-                node->unk6 = countdown - *delta;
-                countdown = node->unk6;
-            }
-            if (countdown < 0) {
-                node->unk6 = 0;
-            }
-            funcs0[node->unk0](node);
-
-            fade = node->unk3;
-            if (node->unk6 != 0) {
-                if (fade != maxFade) {
-                    fade += *delta << 4;
-                    if (fade >= 0x100) {
-                        fade = maxFade;
-                    }
-                    node->unk3 = fade;
+        alpha = trail->alpha;
+        if (trail->timer != 0) {
+            if (alpha != 255) {
+                alpha += D_800BE9E4 * 16;
+                if (alpha >= 256) {
+                    alpha = 255;
                 }
-                prev = node;
-            } else if (fade != 0) {
-                fade -= *delta << 3;
-                if (fade < 0) {
-                    fade = 0;
-                }
-                if (fade == 0) {
-                    if (prev == 0) {
-                        *head = (s32)next;
-                    } else {
-                        prev->unkC = next;
-                    }
-                    funcs1[node->unk0](node);
-                    func_10004074(node);
+                trail->alpha = alpha;
+            }
+            prev = trail;
+        } else if (alpha != 0) {
+            alpha -= D_800BE9E4 * 8;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha == 0) {
+                if (prev == NULL) {
+                    *head = next;
                 } else {
-                    node->unk3 = fade;
-                    prev = node;
+                    prev->next = next;
                 }
+                D_8008D588[trail->type](trail);
+                func_10004074(trail);
+            } else {
+                trail->alpha = alpha;
+                prev = trail;
             }
-            node = next;
-        } while (node != 0);
+        }
     }
 }
 
-typedef struct Node15188D00 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[4];
-    s32 unk8;
-    struct Node15188D00 *unkC;
-    s32 unk10;
-    s32 unk14;
-} Node15188D00;
-
 extern Mtx D_80089470;
-extern Gfx *(*D_8008D590[])(Gfx *, Node15188D00 *, s16);
+extern Gfx *(*D_8008D590[])(Gfx *, Trail *, s16); /* per-type draw */
 
-#define WGFX15188D00(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
+/* Draws every trail in list `listIndex`. */
+Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player) {
+    Trail *trail;
 
-Gfx *func_15188D00(Gfx *gfx, s32 idx, s16 arg2) {
-    Node15188D00 *node;
-    Gfx *(**callbacks)(Gfx *, Node15188D00 *, s16);
-    s16 tmp;
-
-    tmp = arg2;
-    node = (Node15188D00 *)D_800DF7C8[idx];
-    if (node == 0) {
+    trail = sTrailLists[listIndex];
+    if (trail == NULL) {
         return gfx;
     }
 
-    WGFX15188D00(gfx++, 0xDA380003, &D_80089470);
-    WGFX15188D00(gfx++, 0xD9FFFFFF, 0x00200004);
-    WGFX15188D00(gfx++, 0xD9EEFFFF, 0x00000000);
-    WGFX15188D00(gfx++, 0xE7000000, 0x00000000);
-    WGFX15188D00(gfx++, 0xE2001E01, 0x00000000);
-    WGFX15188D00(gfx++, 0xEC000000, 0x000000FF);
-    callbacks = D_8008D590;
-    while (node != 0) {
-        gfx = callbacks[node->unk0](gfx, node, tmp);
-        node = node->unkC;
+    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetConvert(gfx++, 0, 0, 0, 0, 0, 255);
+    for (; trail != NULL; trail = trail->next) {
+        gfx = D_8008D590[trail->type](gfx, trail, player);
     }
     return gfx;
 }
 
-typedef struct Sub15188E48 {
-    char pad0[4];
-    u8 unk4;
-    char pad5[0x1D4 - 5];
-    u8 *unk1D4;
-} Sub15188E48;
-
-typedef struct Node15188E48 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[4];
-    u8 *unk8;
-    struct Node15188E48 *unkC;
-    Sub15188E48 *unk10;
-} Node15188E48;
-
-void func_15188E48(Node15188E48 *arg0) {
+/*
+ * Type-0 update: shifts the history one frame. Frame i of the current half
+ * (D_800BE9C0) takes frame i + 1 of the other half, and the last frame takes
+ * the owner's current joint matrices.
+ */
+void func_15188E48(Trail *trail) {
     s32 i;
-    s32 count;
-    s32 m;
-    s32 dst;
-    s32 off;
-    u8 *from;
-    u8 *q;
-    s32 len;
+    s32 numFrames;
+    s32 numJoints;
+    s32 curBase;
+    s32 prevBase;
+    MtxS16 *src;
+    MtxS16 *dst;
+    s32 size;
 
-    count = arg0->unk1;
-    m = func_1502DB20(arg0->unk10->unk4);
-    dst = D_800BE9C0 * (m * count);
-    off = (D_800BE9C0 ^ 1) * (m * count);
-    for (i = 0; i < count; i++) {
-        len = m << 6;
-        if (i == count - 1) {
-            q = arg0->unk10->unk1D4;
-            if (q == NULL) {
-                arg0->unk2 = 0;
+    numFrames = trail->numFrames;
+    numJoints = func_1502DB20(trail->owner.object->id);
+    curBase = D_800BE9C0 * (numJoints * numFrames);
+    prevBase = (D_800BE9C0 ^ 1) * (numJoints * numFrames);
+    for (i = 0; i < numFrames; i++) {
+        size = numJoints * sizeof(Mtx);
+        if (i == numFrames - 1) {
+            dst = (MtxS16 *)trail->owner.object->unk1D4;
+            if (dst == NULL) {
+                trail->numFilled = 0;
                 return;
             }
-            from = q;
+            src = dst; // matching: sharing dst with the NULL-checked pointer steers regalloc
         } else {
-            from = arg0->unk8 + ((((i + 1) * m) + off) << 6);
+            src = &trail->frames[(i + 1) * numJoints + prevBase];
         }
-        q = arg0->unk8 + ((i * m + dst) << 6);
-        bcopy(from, q, len);
+        dst = &trail->frames[i * numJoints + curBase];
+        bcopy(src, dst, size);
     }
-    if (arg0->unk2 != arg0->unk1) {
-        arg0->unk2++;
+    if (trail->numFilled != trail->numFrames) {
+        trail->numFilled++;
     }
 }
 
-typedef struct Entry15188F84 {
-    u16 index;
-    u16 value;
-} Entry15188F84;
+/* Per-view list of the objects to draw this frame (see game_13F9D0.c). */
+typedef struct DrawEntry {
+    u16 index; // into D_800DBEF4
+    u16 distance;
+} DrawEntry;
 
-typedef struct Node15188F84 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[4];
-    u8 *unk8;
-    struct Node15188F84 *unkC;
-    u8 *unk10;
-} Node15188F84;
+extern DrawEntry **D_80089240[]; // per view
+extern Mtx **D_80089250[];       // per frame buffer: one Mtx per object
+extern u16 D_800DBEE8[];         // per view: entries in D_80089240
 
-extern Entry15188F84 **D_80089240;
-extern u8 **D_80089250[];
-extern u16 D_800DBEE8[];
-
-void func_15188F84(Node15188F84 *node) {
+/*
+ * Type-1 update: the one-matrix version of func_15188E48. The newest frame is
+ * the owner's matrix from view 0's draw list; an owner that is not in the list
+ * clears the history.
+ */
+void func_15188F84(Trail *arg) {
+    Trail *trail;
     s32 i;
-    s32 count;
-    s32 dst;
-    s32 off;
     s32 view;
-    u8 *src;
-    u8 *from;
-    s32 next;
-    u8 *p;
-    Node15188F84 *arg0;
+    s32 numFrames;
+    s32 curBase;
+    s32 prevBase;
+    MtxS16 *ownerMtx;
+    MtxS16 *src;
+    struct131 *objects;
 
-    arg0 = node;
+    trail = arg; // matching: the copy puts trail in s2 and numFrames in s3
     view = 0;
-    count = arg0->unk1;
-    dst = D_800BE9C0 * count;
-    off = (D_800BE9C0 ^ 1) * count;
+    numFrames = trail->numFrames;
+    curBase = D_800BE9C0 * numFrames;
+    prevBase = (D_800BE9C0 ^ 1) * numFrames;
     for (i = 0; i < D_800DBEE8[view]; i++) {
-        p = (u8 *)D_800DBEF4;
-        if (arg0->unk10 == p + (*D_80089240)[i].index * 0xA0) {
+        objects = D_800DBEF4;
+        if (trail->owner.s131 == &objects[(*D_80089240[0])[i].index]) {
             break;
         }
     }
     if (i == D_800DBEE8[view]) {
-        arg0->unk2 = 0;
+        trail->numFilled = 0;
         return;
     }
-    src = *D_80089250[D_800BE9C0] + ((*D_80089240)[i].index << 6);
-    for (i = 0; i < count; i++) {
-        if (i == count - 1) {
-            from = src;
+    ownerMtx = (MtxS16 *)&(*D_80089250[D_800BE9C0])[(*D_80089240[0])[i].index];
+    for (i = 0; i < numFrames; i++) {
+        if (i == numFrames - 1) {
+            src = ownerMtx;
         } else {
-            from = arg0->unk8 + ((i + off + 1) << 6);
+            src = &trail->frames[i + prevBase + 1];
         }
-        bcopy(from, arg0->unk8 + ((dst + i) << 6), 0x40);
+        bcopy(src, &trail->frames[curBase + i], sizeof(Mtx));
     }
-    if (arg0->unk2 != arg0->unk1) {
-        arg0->unk2++;
+    if (trail->numFilled != trail->numFrames) {
+        trail->numFilled++;
     }
 }
 
