@@ -8,7 +8,12 @@
 #include "functions.h"
 #undef func_150ADA20
 s32 func_150ADA20(void);
+/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the
+ * table (func_150DF8C0 dereferences the symbol's first word), so it gets a local declaration. */
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#undef D_800D3098
+extern struct178 *D_800D3098;
 
 
 extern f32 D_800A0FB4;
@@ -74,28 +79,41 @@ typedef struct {
     u8 unk2D;
 } Struct150E0348;
 
-typedef struct { u8 c[3]; } Outer;
-extern Outer D_80088984;
+typedef struct {
+    u8 values[3];
+} Game10CD70Indices;
 
-s32 func_150DF8C0(s32 a0) {
-    Outer sp4;
-    sp4 = D_80088984;
-    if (((struct178 *)*(s32 *)&D_800D3098)[((u8 *)&sp4)[a0]].unk6[0xE] != 0) {
+extern Game10CD70Indices D_80088984;
+
+/* Returns whether the D_800D3098 record selected by D_80088984[index] is active. */
+s32 func_150DF8C0(s32 index) {
+    Game10CD70Indices indices = D_80088984;
+
+    if (D_800D3098[indices.values[index]].unk6[0xE] != 0) {
         return 1;
     }
     return 0;
 }
 
+/* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
-    DisplayListWord0 field_0x0;
-    s32 field_0x4;
-} DisplayListCmd;
+    union {
+        s8 opcode;
+        u32 word;
+    } w0;
+    u32 w1;
+} GfxCmd;
+
+/* matching: the scan loops address dl by (j << 3) bytes; dl[j] would be strength-reduced */
+#define GFX_CMD(dl, j) ((GfxCmd *)(((j) << 3) + (u8 *)(dl)))
 
 extern u8 D_800D9950[];
 extern void func_150A2864(s32, s32);
 extern void func_150A3444(s32, s16, s16, s16);
 extern void func_151749A0(s32, s32);
 
+/* Places markers 3 and 4 above actors 6 and 7, then scrolls the texture of each of the three
+ * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
     struct127 *obj;
     s32 i;
@@ -106,8 +124,8 @@ void func_150DF920(s32 arg0) {
     f32 y;
     f32 z;
     s32 active;
-    DisplayListCmd *dl;
-    s32 c;
+    GfxCmd *dl;
+    s32 opcode;
     s32 uls;
     s32 ult;
 
@@ -120,21 +138,21 @@ void func_150DF920(s32 arg0) {
     id = 6;
     slot = 3;
     for (i = 0; i < 2; i++) {
-        obj = func_15083E90((u8)id);
+        obj = func_15083E90((u8)id) /* takes a u8; functions.h says s32 */;
         id = 7;
         if (obj != NULL) {
             func_150A2864(slot, 0);
             x = obj->x_position;
             y = obj->y_position + 200.0f;
             z = obj->z_position;
-            func_150A3444(slot, (s16)x, (s16)y, (s16)z);
+            func_150A3444(slot, x, y, z);
         } else {
             func_150A2864(slot, 1);
         }
         slot = 4;
     }
 
-    dl = (DisplayListCmd *)D_800B0E00[0];
+    dl = (GfxCmd *)D_800B0E00[0];
 
     for (i = 0; i < 3; i++) {
         active = func_150DF8C0(i);
@@ -149,35 +167,36 @@ void func_150DF920(s32 arg0) {
             D_800D9950[i] = 0;
         }
 
+        /* Find the G_SETTIMG whose image address is segment 2 + i. */
         j = -1;
         do {
             j++;
-            while ((((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -3) &&
-                   (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -0x21)) {
+            while (GFX_CMD(dl, j)->w0.opcode != (s8)G_SETTIMG &&
+                   GFX_CMD(dl, j)->w0.opcode != (s8)G_ENDDL) {
                 j++;
             }
-            if (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 == -0x21) {
+            if (GFX_CMD(dl, j)->w0.opcode == (s8)G_ENDDL) {
                 j = -1;
                 break;
             }
-        } while (((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x4 != ((i << 24) + 0x02000000));
+        } while (dl[j].w1 != (i << 24) + 0x02000000);
 
         if (j != -1) {
-            while ((c = ((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8) != -0xE) {
+            /* Then the G_SETTILESIZE after it. */
+            while ((opcode = GFX_CMD(dl, j)->w0.opcode) != (s8)G_SETTILESIZE) {
                 j++;
             }
 
             if (j != -1) {
                 if (active) {
-                    uls = ((u32)((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 >> 12) & 0xFFF;
-                    ult = ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 & 0xFFF;
+                    uls = (dl[j].w0.word >> 12) & 0xFFF;
+                    ult = dl[j].w0.word & 0xFFF;
                     ult += (D_800D9950[i] / 16) * D_800BE9E4;
                 } else {
                     ult = 2;
                     uls = 2;
                 }
-                ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 =
-                    0xF2000000 | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
+                dl[j].w0.word = (G_SETTILESIZE << 24) | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
             }
         }
     }
@@ -186,59 +205,70 @@ void func_150DF920(s32 arg0) {
 extern s32 D_80090324[];
 extern u8 D_800DD405;
 
+/* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
+ * active material gets entry 9 + D_800DD405 of D_80090324, an inactive one entry 8. */
 Gfx *func_150DFBD0(Gfx *gdl) {
     s32 i;
-    s32 seg;
+    s32 segment;
     s32 addr;
-    s32 out;
-    s32 tex;
-    u8 idx;
+    s32 unused;
+    s32 asset;
+    u8 variant;
 
     for (i = 0; i < 3; i++) {
         if (func_150DF8C0(i) != 0) {
-            idx = D_800DD405;
-            tex = D_80090324[idx + 9];
+            variant = D_800DD405;
+            asset = D_80090324[variant + 9];
         } else {
-            tex = D_80090324[8];
+            asset = D_80090324[8];
         }
-        addr = func_1510D0EC(tex, &out, 3, 0);
-        seg = i + 2;
-        gSPSegment(gdl++, seg, addr);
+        addr = func_1510D0EC(asset, &unused, 3, 0);
+        segment = i + 2;
+        gSPSegment(gdl++, segment, addr);
     }
     return gdl;
 }
 
-extern f32 D_800A0FA0;
+/* matching: 0.55f, kept in rodata; a literal folds the negation into a -0.55f constant */
 extern f32 D_800A0FA4;
-extern f32 D_800A0FA8;
-extern f32 D_800A0FAC;
 
-void func_150DFCA8(void *arg0) {
-    f32 temp_fa0;
-    f32 var_fv0;
+/* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x4];
+    /* 0x04 */ f32 pos;
+    /* 0x08 */ u8 pad8[0x5C];
+    /* 0x64 */ f32 speed;
+    /* 0x68 */ u8 pad68[0x14];
+    /* 0x7C */ f32 targetSpeed;
+} SwingObject;
 
-    var_fv0 = *(f32 *)((u8 *)arg0 + 0x64) * (f32)D_800BE9E4;
-    *(f32 *)((u8 *)arg0 + 4) += var_fv0;
-    temp_fa0 = *(f32 *)((u8 *)arg0 + 4);
-    if (temp_fa0 < 11.0f) {
-        var_fv0 = D_800A0FA0;
-        *(f32 *)((u8 *)arg0 + 0x7C) = var_fv0;
-    } else if (*(f32 *)((u8 *)arg0 + 4) > 55.0f) {
-        temp_fa0 = D_800A0FA4;
-        var_fv0 = -temp_fa0;
-        *(f32 *)((u8 *)arg0 + 0x7C) = var_fv0;
+/* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
+ * the speed eases towards it by 0.05 per call. */
+void func_150DFCA8(SwingObject *arg0) {
+    f32 pos;
+    f32 target;
+
+    // matching: the step shares target's register
+    target = arg0->speed * D_800BE9E4;
+    arg0->pos += target;
+    pos = arg0->pos;
+    if (pos < 11.0f) {
+        arg0->targetSpeed = target = 0.55f;
+    } else if (arg0->pos > 55.0f) {
+        pos = D_800A0FA4; // matching: the negated constant goes through pos's register
+        arg0->targetSpeed = target = -pos;
     } else {
-        var_fv0 = *(f32 *)((u8 *)arg0 + 0x7C);
+        target = arg0->targetSpeed;
     }
-    if (*(f32 *)((u8 *)arg0 + 0x64) < var_fv0) {
-        *(f32 *)((u8 *)arg0 + 0x64) = (f32) (*(f32 *)((u8 *)arg0 + 0x64) + D_800A0FA8);
-        if (var_fv0 < *(f32 *)((u8 *)arg0 + 0x64)) {
-            *(f32 *)((u8 *)arg0 + 0x64) = var_fv0;
+    if (arg0->speed < target) {
+        arg0->speed += 0.05f;
+        if (target < arg0->speed) {
+            arg0->speed = target;
         }
-    } else if (var_fv0 < *(f32 *)((u8 *)arg0 + 0x64)) {
-        *(f32 *)((u8 *)arg0 + 0x64) = (f32) (*(f32 *)((u8 *)arg0 + 0x64) - D_800A0FAC);
-        if (*(f32 *)((u8 *)arg0 + 0x64) < var_fv0) {
-            *(f32 *)((u8 *)arg0 + 0x64) = var_fv0;
+    } else if (target < arg0->speed) {
+        arg0->speed -= 0.05f;
+        if (arg0->speed < target) {
+            arg0->speed = target;
         }
     }
 }
