@@ -973,6 +973,7 @@ void func_1501E540(s32 scene) {
     }
 }
 
+/* struct127 bytes 0x6A..0x6D, which include/structs.h still declares as padding. */
 typedef struct {
     u8 pad0[0x6A];
     u8 unk6A;
@@ -983,13 +984,14 @@ typedef struct {
 
 void func_1507EABC(void *);
 
-void func_1501E73C(s32 arg0) {
+/* For each object bound to a track: wrap its 0x6C/0x6D counters at 10 and call func_1507EABC. */
+void func_1501E73C(s32 scene) {
     s32 i;
     Obj1501E73C *obj;
 
-    for (i = 0; i < D_800C363A[arg0]; i++) {
-        if (D_800C35F0[arg0][i].type == 2) {
-            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[arg0][i].unk2);
+    for (i = 0; i < D_800C363A[scene]; i++) {
+        if (D_800C35F0[scene][i].type == 2) {
+            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[scene][i].unk2);
             if (obj == NULL) {
                 continue;
             }
@@ -1012,49 +1014,52 @@ void func_1501EA18(s32 arg0);
 void func_150233E4(void);
 s32 func_150235DC(s32 arg0);
 
-void func_1501E81C(s32 arg0, s32 arg1) {
-    struct108 *sp44;
+/* End the scene's cutscene: report it (func_15169040), flag it played, release its data and restore
+   the camera. If another cutscene is chained (D_800C35C2), start it instead. */
+void func_1501E81C(s32 skipped, s32 scene) {
+    struct108 *player;
 
-    sp44 = D_800DBFF0;
-    if (D_800C35EA[arg1] != 0) {
+    player = D_800DBFF0;
+    if (D_800C35EA[scene] != 0) {
         {
-            struct { u8 unk0; } sp40;
-            s32 var_v0;
+            u8 cutscene[1];
+            s32 reason;
 
-            sp40.unk0 = D_800C35E8[arg1];
-            var_v0 = arg0 ? 0xF : 0x10;
-            func_15169040((u8 *)&sp40, var_v0);
+            cutscene[0] = D_800C35E8[scene];
+            reason = skipped ? 0xF : 0x10;
+            func_15169040(cutscene, reason);
         }
-        D_800C35B8[arg1] = -100;
-        D_800C35B0[arg1] = D_800C3C8E;
-        func_1501D258(D_800BE9F0, D_800C35E8[arg1]);
-        D_800C35EA[arg1] = 0;
+        D_800C35B8[scene] = -100;
+        D_800C35B0[scene] = D_800C3C8E;
+        func_1501D258(D_800BE9F0, D_800C35E8[scene]);
+        D_800C35EA[scene] = 0;
         D_800C3638 = 0;
-        func_1501E73C(arg1);
+        func_1501E73C(scene);
         func_150233E4();
         D_800C3662 = 0;
         D_800C3683 = 0;
-        func_150235DC(arg1);
-        func_1501EA18(arg1);
-        func_1501E540(arg1);
+        func_150235DC(scene);
+        func_1501EA18(scene);
+        func_1501E540(scene);
         D_800C3648 = 0.0f;
         D_800C364C = 0.0f;
         D_800C3650 = 0.0f;
-        func_1510B32C(0, sp44->unk19C, sp44->unk1A0, 1.0f);
+        func_1510B32C(0, player->unk19C, player->unk1A0, 1.0f);
         if (D_800C35C2 != 0) {
-            s32 sp38;
-            s32 var_a0;
+            s32 savedMap;
+            s32 map;
 
-            D_800C35EA[arg1] = 2;
-            var_a0 = D_800C35C3;
+            D_800C35EA[scene] = 2;
+            map = D_800C35C3;
             if (0x25 == D_800C35C3) {
-            sp38 = D_800BE9F0;
-            D_800BE9F0 = 0x25;
-            var_a0 = 0x25;
+                savedMap = D_800BE9F0;
+                D_800BE9F0 = 0x25;
+                map = 0x25;
             }
-            D_800C3671 = 0; func_1501D348(var_a0, D_800C35C2 - 1, arg1, D_800C3C90, D_800C3C94);
+            D_800C3671 = 0;
+            func_1501D348(map, D_800C35C2 - 1, scene, D_800C3C90, D_800C3C94);
             if (0x25 == D_800C35C3) {
-                D_800BE9F0 = sp38;
+                D_800BE9F0 = savedMap;
             }
             return;
         }
@@ -1089,14 +1094,15 @@ extern f32 D_800C3594;
 extern f32 D_800C35A0;
 
 #define MSG (*(Msg1501EA18 *)&D_800C3600)
-void func_1501EA18(s32 arg0) {
+/* Hand control back after the scene's cutscene: restore the player camera and object state. */
+void func_1501EA18(s32 scene) {
     struct108 *player;
     struct127 *obj;
     s32 i;
 
     player = D_800DBFF0;
     MSG.unk0 = 1;
-    MSG.unk4 = arg0;
+    MSG.unk4 = scene;
     MSG.unk14 = player->unk2F8;
     MSG.unk18 = player->unk2FC;
     MSG.unk1C = player->unk300;
@@ -1117,15 +1123,15 @@ void func_1501EA18(s32 arg0) {
     }
     if (D_800C35C2 == 0 && D_800C3671 == 0) {
         if (D_800C3680 == 0) {
-            func_1512D560(player, 6, (void *)arg0);
+            func_1512D560(player, 6, (void *)scene);
         } else {
             D_800C3680 = 0;
         }
     }
-    if (D_800C365A[arg0] == 0) {
-        func_150228E4(arg0);
+    if (D_800C365A[scene] == 0) {
+        func_150228E4(scene);
     }
-    func_150227BC(arg0);
+    func_150227BC(scene);
     for (i = 0; i != 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0 && func_150229E4(&D_800CC2D0[i]) != 0) {
             *(u8 *)&D_800CC2D0[i].padA4 = 0;
