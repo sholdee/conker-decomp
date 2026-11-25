@@ -283,14 +283,14 @@ typedef struct {
     /* 0x09 */ u8 toId;
 } ObjectSwapMessage;
 
-/* Payload of message 0: an object going away. */
+/* Payload of message 0: names an object by pointer or by unique id. */
 typedef struct {
     /* 0x00 */ struct127 *object;
     /* 0x04 */ u8 objectId;
 } ObjectRemovedMessage;
 
 /* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
- * effect when its object goes away. */
+ * effect when it names the effect's object. */
 void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
