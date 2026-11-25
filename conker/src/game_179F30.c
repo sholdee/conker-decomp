@@ -1185,13 +1185,13 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.attach. */
+/** Like func_1514E89C, but clearing bit 0 also hides the glow's attached lens flare. */
 s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
     GlowShape *emitter;
     s32 flags;
-    u8 *ptr;
+    LensFlare *flare;
 
     emitter = &target->emitter;
     switch (msg) {
@@ -1199,9 +1199,9 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         flags = target->flags;
         if (flags & 1) {
             target->flags = flags & ~1;
-            ptr = emitter->attach;
-            if (ptr != NULL) {
-                ptr[0x30] = 0;
+            flare = emitter->attach;
+            if (flare != NULL) {
+                flare->alpha = 0;
             }
         } else {
             target->flags = flags | 1;
@@ -1209,9 +1209,9 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         break;
     case 2:
         target->flags &= ~1;
-        ptr = emitter->attach;
-        if (ptr != NULL) {
-            ptr[0x30] = 0;
+        flare = emitter->attach;
+        if (flare != NULL) {
+            flare->alpha = 0;
         }
         break;
     case 1:

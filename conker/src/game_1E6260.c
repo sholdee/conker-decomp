@@ -40,7 +40,6 @@ typedef struct {
     /* 0x5C */ u8 pad5C[4];
 } GlowParams60;
 
-DefParticleHead *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 LightEffect *func_1516037C(LightEffectHeader *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that

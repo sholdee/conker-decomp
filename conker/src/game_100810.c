@@ -70,7 +70,6 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
-TrailGlow *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 CharacterTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */

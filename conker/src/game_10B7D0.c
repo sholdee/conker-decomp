@@ -247,7 +247,6 @@ s32 func_150DEB58(TravelParticle *particle, s16 arg1) {
 static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
 static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
 extern void light_sendEvent(u8, u8, s32);
-extern void func_151417C4(u8, s32);
 
 /* Runs func_150DEC28 on entries 0-3. */
 void func_150DEBE0(s32 arg0) {

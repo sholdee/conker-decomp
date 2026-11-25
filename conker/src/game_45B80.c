@@ -88,8 +88,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-void func_1517E1AC(void);
-void func_151412BC(void);
 void func_151E51EC(void);
 void func_1510B3B0(void);
 void func_1510B51C(void);
@@ -527,8 +525,6 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
 
 Gfx *func_151D5E90(Gfx *gfx, s32 image, s32 arg2, s32 arg3);
 void func_151D61B0(s32 image);
-Gfx *func_1517E28C(Gfx *gfx, s32 arg1);
-Gfx *func_15172F70(Gfx *gfx);
 Gfx *func_15181EE0(Gfx *gfx);
 Gfx *func_1517F564(Gfx *gfx);
 Gfx *func_15096934(Gfx *gfx);

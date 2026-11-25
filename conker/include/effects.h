@@ -639,13 +639,6 @@ typedef struct BloodDrip {
 #define BLOOD_DRIP_NO_PREVIOUS   0x08
 #define BLOOD_DRIP_STATIC        0x10
 
-/* Object attached to a glow (freed with func_1517E134): follows the glow's position and takes its alpha. */
-typedef struct GlowAttach {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ u8 padC[0x24];
-    /* 0x30 */ u8 alpha;
-} GlowAttach;
-
 /* Glow animations (GlowParams.anim); GlowParams.type selects the handler (game_16DC80.c). */
 
 /* func_15141478: random flicker */
@@ -701,7 +694,7 @@ typedef struct GlowShape {
     /* 0x20 */ f32 fadeRate; /* intensity lost per unit of distance */
     /* 0x24 */ s32 screenX[4]; /* per view, -1 when off screen */
     /* 0x34 */ s32 screenY[4];
-    /* 0x44 */ GlowAttach *attach;
+    /* 0x44 */ LensFlare *attach; /* follows the glow's position and takes its alpha; freed with func_1517E134 */
     /* 0x48 */ f32 scale;
     /* 0x4C */ u16 zbufSample[4]; /* z-buffer value at the glow's screen position, per view */
     /* 0x54 */ u8 visibility[4];  /* per view, eases towards 0xFF (visible) or 0 */

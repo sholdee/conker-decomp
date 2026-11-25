@@ -29,7 +29,7 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
 }
 
 /* Caller data copied into a probe and handed back to its callback. */
-typedef struct {
+typedef struct ProbeData {
     s32 unk0[9];
 } ProbeData;
 

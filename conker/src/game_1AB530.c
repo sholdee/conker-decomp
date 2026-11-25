@@ -90,11 +90,6 @@ extern FlareTypeBytes D_8008D008; /* number of sprites */
 extern FlareTypeBytes D_8008D00C; /* distance falloff */
 extern u8 D_800DDD60;             /* flare render state has been set up this frame */
 
-extern s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
-extern s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth);
-extern Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff, s32 strength,
-                          u8 *flash);
-
 /*
  * Projects every flare, tests it against the z-buffer and draws the visible ones.
  * A strength of -1 fades the flare out.
@@ -159,7 +154,6 @@ extern u8 D_800903AC;          /* flare sprite texture */
 extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
 extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Gfx *func_15095A48(Gfx *, FlareSprite *, f32, f32);
-extern Gfx *func_1517EA4C(Gfx *gfx);
 
 #ifndef ABS
 #define ABS(x) ((x) < 0 ? -(x) : (x))

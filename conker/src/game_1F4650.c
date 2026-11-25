@@ -614,8 +614,6 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     func_1516972C(&obj->head.header);
 }
 
-void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
 SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;

@@ -597,8 +597,6 @@ void func_151BD7F4(Actor *actor) {
     func_151494E0((s32)&ref, 0x3B);
 }
 
-BurstGlow *func_151407D0(GlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
-
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
 void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     BurstEffect *effect;

@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
@@ -46,7 +45,6 @@ extern GlowMsgFn D_8008A02C[];
 extern Vec3f *func_15144B34(s32);
 extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_151D5D60(void **, s16, s32, void **, u8 *);
-void func_1517E134(void *);
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
@@ -55,8 +53,8 @@ f32 sqrtf(f32);
  * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.
  * Returns the new glow, or NULL.
  */
-GlowObj *func_151407D0(GlowParams *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6,
-                       s8 handler, u8 arg8, s32 arg9) {
+void *func_151407D0(void *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 handler,
+                    u8 arg8, s32 arg9) {
     GlowObj *obj;
 
     spawn->type = 3;
@@ -270,7 +268,7 @@ void func_151411C4(DefParticleHead *arg0) {
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089F9C handler. */
 void func_151411E4(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
+    LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);
@@ -281,7 +279,7 @@ void func_151411E4(GlowObj *obj) {
 
 /* Destroys a glow: frees its attachment and runs its type's D_80089FE4 handler. */
 void func_15141250(GlowObj *obj) {
-    GlowAttach **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
+    LensFlare **attach = &obj->params.shape.attach; // matching: the NULL test and the call load it separately
 
     if (*attach != NULL) {
         func_1517E134(*attach);

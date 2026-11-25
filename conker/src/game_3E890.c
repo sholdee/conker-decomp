@@ -22,8 +22,6 @@ typedef struct {
     /* 0x170 */ EmitterExtra extra;
 } GlowEmitter;
 
-GlowEmitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void func_150113E0(void) {
     GlowShape params;

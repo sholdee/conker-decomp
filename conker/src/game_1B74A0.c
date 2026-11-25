@@ -12,7 +12,6 @@ typedef struct BoneGlow {
     /* 0x170 */ EmitterAttach attach;
 } BoneGlow;
 
-BoneGlow *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s32, s32, s32);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
