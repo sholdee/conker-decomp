@@ -25,16 +25,10 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
+/* Camera.player (struct127): 0x84 read as a plain u16 (struct127 declares a union there). */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x40];
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ u8 pad44[0x34];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0xB];
+    /* 0x000 */ u8 pad0[0x84];
     /* 0x084 */ u16 unk84;
-    /* 0x086 */ u8 pad86[0x111];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 unk198;
 } Obj15128CB0;
 
 typedef struct {
