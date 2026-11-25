@@ -61,7 +61,7 @@ void *func_1518C900(s32);
 void func_15168BE4(ModelFxTemplate *, u8, s32);
 void func_15170B90(EffectActor *, s32, s32, s32, u8, s32);
 void func_151717FC(EffectActor *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
-void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
+void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, u8, s32);
 void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -155,7 +155,7 @@ void func_15170F4C(EffectActor *actor, u8 owner, s32 list) {
     s32 count;
     void *displayList;
 
-    count = 6;
+    count = 6; // matching: IDO emits the target's loop only with the bound in a variable
     piece = D_800A6ED8;
     fx.renderMode = 2;
     fx.combineMode = 1;
@@ -323,7 +323,7 @@ void func_151717FC(EffectActor *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 of
  * outward at 200 units (8.8 fixed point) with a random size of baseSize + rand * sizeScale.
  */
 void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale, s32 color, s32 count,
-                   s32 owner, s32 list) {
+                   u8 owner, s32 list) {
     s32 i;
     s32 angle;
     u8 a;
@@ -371,7 +371,7 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
             velXLow = velX;
             func_1516D4E8(px, y, pz, 0xD, 0, colors[color][0], colors[color][1], colors[color][2], 0, 0, 0, 0,
                           2, velXHigh, velXLow, velZHigh, velZLow, 0, 0, 5, 0, 0, 0, (s16)size, (s16)size,
-                          (r & 0xF) + 10, velY, 0, 0, (u8)owner, list);
+                          (r & 0xF) + 10, velY, 0, 0, owner, list);
             angle += step;
         }
     }
