@@ -244,7 +244,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
             }
             ix = (s32)x;
             iz = (s32)z;
-            i = 0;
+            i = 0; // matching: dead store, but IDO schedules the loop differently without it
             func_1510F800(type);
             found = FALSE;
             if (type == PROBE_PROP) {
@@ -301,7 +301,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
 
                 height = sGroundHits[i].height / 256.0f;
                 if (noFallback == 0 && allowFallback != 0 && *outFloorY == noFloor
-                    && (noFloor == noFloor || height < noFloor)) {
+                    && (noFloor == noFloor || height < noFloor)) { // matching: tautology IDO still compiles
                     s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
                     if (func_1510E670(i)) {
                         haveFallback = TRUE;
@@ -310,7 +310,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     }
                 }
                 curReach = reach;
-                if ((u32)i < 0U) {
+                if ((u32)i < 0U) { // matching: never true; the dead test steers IDO's scheduling
                     if (height < refY) {
                         continue;
                     }
@@ -403,45 +403,39 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                 }
             }
             if (count >= 2) {
-                i = 0;
                 if (*outFloorY < y) {
                     ceilingFrom = y;
                 } else {
                     ceilingFrom = *outFloorY;
                 }
-                hit = sGroundHits;
-                if (count > 0) {
-                    do {
-                        height = hit->height / 256.0f;
-                        if (ceilingFrom < height && height < ceilingY) {
-                            if (!func_1510E670(i)) {
-                                s32 ceilingTri;
+                for (i = 0; i < count; i++) {
+                    height = sGroundHits[i].height / 256.0f;
+                    if (ceilingFrom < height && height < ceilingY) {
+                        if (!func_1510E670(i)) {
+                            s32 ceilingTri;
 
-                                ceilingY = height;
-                                ceilingTri = (s32)hit->tri;
-                                triIndex = WORLD_TRI_INDEX(ceilingTri);
-                                if (type == PROBE_WORLD) {
-                                    if (sWorldMaterials != NULL) {
-                                        ceilingFlags = sWorldMaterials[triIndex];
-                                    } else {
-                                        ceilingFlags = 0;
-                                    }
-                                } else if (type == PROBE_PROP) {
-                                    s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                                    propNum = hit->unkC + 1;
-                                    if (sProps[propNum - 1].materials != NULL) {
-                                        ceilingFlags = sProps[propNum - 1].materials[triIndex - sProps[propNum - 1].firstSurface];
-                                    } else {
-                                        ceilingFlags = sProps[propNum - 1].material;
-                                    }
+                            ceilingY = height;
+                            ceilingTri = (s32)sGroundHits[i].tri;
+                            triIndex = WORLD_TRI_INDEX(ceilingTri);
+                            if (type == PROBE_WORLD) {
+                                if (sWorldMaterials != NULL) {
+                                    ceilingFlags = sWorldMaterials[triIndex];
                                 } else {
                                     ceilingFlags = 0;
                                 }
+                            } else if (type == PROBE_PROP) {
+                                s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
+                                propNum = sGroundHits[i].unkC + 1;
+                                if (sProps[propNum - 1].materials != NULL) {
+                                    ceilingFlags = sProps[propNum - 1].materials[triIndex - sProps[propNum - 1].firstSurface];
+                                } else {
+                                    ceilingFlags = sProps[propNum - 1].material;
+                                }
+                            } else {
+                                ceilingFlags = 0;
                             }
                         }
-                        i++;
-                        hit++;
-                    } while (i != count);
+                    }
                 }
             }
         }
