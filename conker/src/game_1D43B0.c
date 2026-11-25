@@ -355,7 +355,8 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     rand.gravity = func_150ADA68();
     rand.size = func_150ADA68();
     rand.timer = func_150ADA20();
-    func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) /* matching: add.s of -600, not sub.s */ * 0.001000000047f,
+    // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
+    func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
                   (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
                   15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
 }
