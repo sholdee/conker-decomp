@@ -2,378 +2,307 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008AE00[])(void *);
-
 typedef struct {
-    f32 m[4][4];
-} MtxF15158920;
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
 
-extern MtxF15158920 D_8008AE18;
-extern f32 D_800A6070;
-
+/* Orientation, scale and simple ballistic motion stored after an effect actor's header. */
 typedef struct {
-    struct WORD words[10];
-} Struct1515A974PayloadWords;
+    /* 0x00 */ Vec3f angle;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ Vec3f velocity;
+    /* 0x1C */ Vec3f angularVelocity;
+    /* 0x28 */ f32 gravity;
+    /* 0x2C */ f32 damping;
+} EffectMotion;
 
+/*
+ * Effect actor allocated by func_15167A68. Bytes 0x10..0x53 are copied from a 0x44-byte
+ * template; type-specific data follows the 0xF8-byte header.
+ */
 typedef struct {
-    struct UBYTES4 first;
-    Struct1515A974PayloadWords rest;
-} Struct1515A974Payload;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ u8 flags; /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s8 updateCallback; /* index into D_8008AE00, -1 for none */
+    /* 0x13 */ s8 drawCallback;   /* index into D_8008AE0C, -1 for none */
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 displayList;    /* index into D_8008AFB8 */
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s32 otherModeH;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 renderPreset;  /* index into D_800A4AC8 */
+    /* 0x28 */ u8 pad28[3];
+    /* 0x2B */ u8 combineMode;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s8 primColorMode;
+    /* 0x35 */ s8 envColorMode;
+    /* 0x36 */ u8 pad36[2];
+    /* 0x38 */ u8 color0[4]; /* [3] is alpha */
+    /* 0x3C */ u8 color1[4];
+    /* 0x40 */ void *owner;
+    /* 0x44 */ u8 ownerId;
+    /* 0x45 */ u8 attachMode;
+    /* 0x46 */ u8 pad46[2];
+    /* 0x48 */ Vec3f position;
+    /* 0x54 */ u8 pad54[4];
+    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
+    /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
+    /* 0xDC */ u8 unkDC;
+    /* 0xDD */ u8 padDD[3];
+    /* 0xE0 */ s32 *handles[4]; /* one per D_80082FA0 + 1 */
+    /* 0xF0 */ s32 *sharedHandle;
+    /* 0xF4 */ s32 unkF4;
+    /* 0xF8 */ union {
+        EffectMotion motion;
+        f32 size;
+        struct {
+            s16 duration;
+            s32 alphaPerTick;
+        } fade;
+    } data;
+} EffectActor;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    Struct1515A974Payload payload;
-} Struct1515A974Row;
-
-extern Struct1515A974Row D_800A636C[];
-
-typedef struct {
-    Struct1515A974Payload payload;
-    s32 pad2C[2];
-    struct183 tmp;
-} Struct1515A974Locals;
-
-typedef struct {
-    u8 pad0[0xD8];
-    s32 unkD8;
-    u8 unkDC;
-    u8 padDD[3];
-    s32 unkE0[4];
-    s32 unkF0;
-    s32 unkF4;
-} Struct151580B0;
-
-extern Struct151580B0 *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern s32 *func_1515D480(s32);
+extern s32 *func_1515D440(void);
 s32 func_15159370();
 
-s32 func_151580B0(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    Struct151580B0 *temp_v0;
+/* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
+EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
+                           s32 arg6) {
+    EffectActor *actor;
     s32 i;
 
-    temp_v0 = func_15167A68(arg3 ? 0x55 : 0x37, arg6, arg4 + 0xF8, 1, arg5, 1);
-    if (temp_v0 == 0) {
-        return 0;
+    actor = func_15167A68(large ? 0x55 : 0x37, arg6, extraSize + 0xF8, 1, arg5, 1);
+    if (actor == NULL) {
+        return NULL;
     }
-    memcpy(&temp_v0->pad0[0x10], arg0, 0x44);
-    temp_v0->unkD8 = arg1;
-    temp_v0->unkF4 = arg2;
-    temp_v0->unkDC = 0;
+    memcpy(&actor->flags, template, 0x44);
+    actor->attachment = attachment;
+    actor->unkF4 = arg2;
+    actor->unkDC = 0;
     for (i = 0; i < 4; i++) {
-        temp_v0->unkE0[i] = 0;
+        actor->handles[i] = NULL;
     }
 
-    temp_v0->unkF0 = 0;
-    if (arg1) {
+    actor->sharedHandle = NULL;
+    if (attachment) {
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_v0->unkE0[i] = func_1515D480(arg1);
+            actor->handles[i] = func_1515D480(attachment);
         }
-        temp_v0->unkF0 = func_1515D440();
+        actor->sharedHandle = func_1515D440();
     }
-    return (s32) temp_v0;
+    return actor;
 }
 
-s32 func_151580B0(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
-
-s32 func_151581D8(void *arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    return func_151580B0(arg0, 0, 0, arg1, arg2, arg3, arg4);
+EffectActor *func_151581D8(void *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
+    return func_151580B0(template, 0, 0, large, extraSize, arg3, arg4);
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11;
-    s8 unk12;
-    u8 pad13;
-    s16 unk14;
-} Struct15158224;
+extern s32 (*D_8008AE00[])(EffectActor *);
 
-void func_15158224(Struct15158224 *arg0) {
-    s32 temp;
-    u8 failed;
+/* Per-frame update: counts down the lifetime, runs the update callback, frees the actor when done. */
+void func_15158224(EffectActor *actor) {
+    s32 callback;
+    u8 expired;
 
-    failed = 0;
-    if (arg0->unk10 & 1) {
-        arg0->unk14 -= D_800BE9E4;
-        if (arg0->unk14 < 0) {
-            failed = 1;
+    expired = 0;
+    if (actor->flags & 1) {
+        actor->lifetime -= D_800BE9E4;
+        if (actor->lifetime < 0) {
+            expired = 1;
         }
     }
-    if (failed == 0) {
-        temp = arg0->unk12;
-        if (temp != -1) {
-            if (D_8008AE00[temp](arg0) == 0) {
-                failed = 1;
+    if (expired == 0) {
+        callback = actor->updateCallback;
+        if (callback != -1) {
+            if (D_8008AE00[callback](actor) == 0) {
+                expired = 1;
             }
         }
     }
-    if (failed) {
-        func_1516972C((struct102 *) arg0);
+    if (expired) {
+        func_1516972C((struct102 *)actor);
     }
 }
 
 typedef struct {
     s32 unk0;
     s32 unk4;
-} Struct151582C8_mode;
+} RenderPreset;
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x2];
-    s8 unk13;
-    u8 pad14[0x2];
-    u8 unk16;
-    u8 pad17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    u8 pad28[0x3];
-    u8 unk2B;
-    s32 unk2C;
-    s32 unk30;
-    s8 unk34;
-    s8 unk35;
-    u8 pad36[0x2];
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    u8 unk3B;
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-    void *unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 pad46[0x2];
-    u8 unk48[0x10];
-    Mtx unk58[2];
-    u8 unkD8[1];
-} Struct151582C8;
-
-extern s32 (*D_8008AE0C[])(Mtx *, Struct151582C8 *);
+extern s32 (*D_8008AE0C[])(Mtx *, EffectActor *);
 extern Gfx *D_8008AFB8[];
-extern Struct151582C8_mode D_800A4AC8[];
+extern RenderPreset D_800A4AC8[];
 
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *update);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *update);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *update);
+void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9,
+                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
+                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, Vec3f *arg6, u8 arg7, s32 arg8);
 
-Gfx *func_151582C8(Gfx *gfx, Struct151582C8 *arg1, s16 arg2) {
+/* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
+Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
     s32 pad;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
     u8 update;
 
     update = 1;
-    if (arg1->unk13 != -1) {
-        if (D_8008AE0C[arg1->unk13](&arg1->unk58[D_800BE9C0], arg1) == 0) {
+    if (actor->drawCallback != -1) {
+        if (D_8008AE0C[actor->drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
             return gfx;
         }
     }
-    gfx = func_15142B7C(gfx, arg1->unk1C, arg1->unk20);
-    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk3C, arg1->unk3D, arg1->unk3E, arg1->unk3F,
-                  arg1->unk38, arg1->unk39, arg1->unk3A, arg1->unk3B, 0xFF, arg1->unk34);
-    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk3C, arg1->unk3D, arg1->unk3E, arg1->unk3F,
-                  arg1->unk38, arg1->unk39, arg1->unk3A, arg1->unk3B, 0xFF, arg1->unk35);
+    gfx = func_15142B7C(gfx, actor->unk1C, actor->unk20);
+    func_151441A4(&primR, &primG, &primB, &primA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
+                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->primColorMode);
+    func_151442FC(&envR, &envG, &envB, &envA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
+                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->envColorMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, arg1->unk2B, &update);
-    gfx = func_15142FBC(gfx, arg1->unk18 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | arg1->unk2C | arg1->unk30,
-                        D_800A4AC8[arg1->unk24].unk0 | D_800A4AC8[arg1->unk24].unk4, &update);
-    if (arg1->unk10 & 2) {
-        gfx = func_151462C8(gfx, arg1->unkD8, arg1->unk45, arg1->unk40, arg1->unk44, arg2, arg1->unk48,
-                            (arg1->unk10 & 4) ? 1 : 0, 0);
+    gfx = func_1513F4E4(gfx, actor->combineMode, &update);
+    gfx = func_15142FBC(gfx, actor->otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->unk2C | actor->unk30,
+                        D_800A4AC8[actor->renderPreset].unk0 | D_800A4AC8[actor->renderPreset].unk4, &update);
+    if (actor->flags & 2) {
+        gfx = func_151462C8(gfx, &actor->attachment, actor->attachMode, actor->owner, actor->ownerId, arg2,
+                            &actor->position, (actor->flags & 4) ? 1 : 0, 0);
     }
-    gSPMatrix(gfx++, &arg1->unk58[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
-    gSPDisplayList(gfx++, D_8008AFB8[arg1->unk16]);
+    gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(gfx++, D_8008AFB8[actor->displayList]);
     return gfx;
 }
 
-extern void guMtxF2L(f32 mf[4][4], Mtx *m);
+/* Draw callback: rotates by data.motion.angle, scales uniformly and translates to the actor's position. */
+s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
+    EffectMotion *motion = &actor->data.motion;
+    f32 mf[4][4];
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} SubF8;
-
-typedef struct {
-    u8 pad0[0x48];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    u8 pad54[0xF8 - 0x54];
-    SubF8 subF8;
-} Obj1515;
-
-s32 func_1515858C(Mtx *arg0, Obj1515 *arg1) {
-    SubF8 *p = &arg1->subF8;
-    f32 sp24[4][4];
-
-    func_150A8050(&sp24, p->unk0, p->unk4, p->unk8);
-    sp24[3][0] = arg1->unk48;
-    sp24[3][1] = arg1->unk4C;
-    sp24[3][2] = arg1->unk50;
-    sp24[0][0] *= p->unkC;
-    sp24[0][1] *= p->unkC;
-    sp24[0][2] *= p->unkC;
-    sp24[1][0] *= p->unkC;
-    sp24[1][1] *= p->unkC;
-    sp24[1][2] *= p->unkC;
-    sp24[2][0] *= p->unkC;
-    sp24[2][1] *= p->unkC;
-    sp24[2][2] *= p->unkC;
-    guMtxF2L(&sp24, arg0);
+    func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
+    mf[3][0] = actor->position.x;
+    mf[3][1] = actor->position.y;
+    mf[3][2] = actor->position.z;
+    mf[0][0] *= motion->scale;
+    mf[0][1] *= motion->scale;
+    mf[0][2] *= motion->scale;
+    mf[1][0] *= motion->scale;
+    mf[1][1] *= motion->scale;
+    mf[1][2] *= motion->scale;
+    mf[2][0] *= motion->scale;
+    mf[2][1] *= motion->scale;
+    mf[2][2] *= motion->scale;
+    guMtxF2L(mf, mtx);
     return 1;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f15158684;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    Vec3f15158684 vel;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-} Phys15158684;
-
-typedef struct {
-    u8 pad0[0x48];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    u8 pad54[0xF8 - 0x54];
-    Phys15158684 phys;
-} Obj15158684;
-
-s32 func_15158684(Obj15158684 *arg0) {
-    Phys15158684 *p;
-    Vec3f15158684 prev;
+/* Update callback: damps horizontal velocity, applies gravity and integrates position and angle. */
+s32 func_15158684(EffectActor *actor) {
+    EffectMotion *motion;
+    Vec3f prevVelocity;
     s32 i;
 
-    p = &arg0->phys;
-    prev = p->vel;
+    motion = &actor->data.motion;
+    prevVelocity = motion->velocity;
     for (i = D_800BE9E4; i != 0; i--) {
-        p->vel.x *= p->unk2C;
-        p->vel.z *= p->unk2C;
+        motion->velocity.x *= motion->damping;
+        motion->velocity.z *= motion->damping;
     }
     {
-        f32 changeX;
-        f32 changeZ;
-        f32 accel;
+        f32 accelX;
+        f32 accelZ;
+        f32 accelY;
 
-        p->vel.y += p->unk28 * D_800BE9A4;
-        changeX = (p->vel.x - prev.x) * D_800BE9A8;
-        accel = p->unk28;
-        changeZ = (p->vel.z - prev.z) * D_800BE9A8;
-        arg0->unk48 += (prev.x + 0.5f * changeX * D_800BE9A4) * D_800BE9A4;
-        arg0->unk4C += (prev.y + .5f * accel * D_800BE9A4) * D_800BE9A4;
-        arg0->unk50 += (prev.z + 0.50f * changeZ * D_800BE9A4) * D_800BE9A4;
+        motion->velocity.y += motion->gravity * D_800BE9A4;
+        accelX = (motion->velocity.x - prevVelocity.x) * D_800BE9A8;
+        accelY = motion->gravity;
+        accelZ = (motion->velocity.z - prevVelocity.z) * D_800BE9A8;
+        actor->position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        actor->position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        actor->position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
     }
-    p->unk0 += p->unk1C * D_800BE9A4;
-    p->unk4 += p->unk20 * D_800BE9A4;
-    p->unk8 += p->unk24 * D_800BE9A4;
+    motion->angle.x += motion->angularVelocity.x * D_800BE9A4;
+    motion->angle.y += motion->angularVelocity.y * D_800BE9A4;
+    motion->angle.z += motion->angularVelocity.z * D_800BE9A4;
     return 1;
-}
-
-s32 func_15158920(Mtx *arg0, Obj1515 *arg1) {
-    f32 scale;
-    f32 (*unused)[4];
-    f32 sp18[4][4];
-
-    *(MtxF15158920 *)sp18 = D_8008AE18;
-    scale = arg1->subF8.unk0 * D_800A6070;
-    sp18[3][0] = arg1->unk48;
-    sp18[3][1] = arg1->unk4C;
-    sp18[3][2] = arg1->unk50;
-    sp18[0][0] *= scale;
-    sp18[0][1] *= scale;
-    sp18[0][2] *= scale;
-    sp18[1][0] *= scale;
-    sp18[1][1] *= scale;
-    sp18[1][2] *= scale;
-    sp18[2][0] *= scale;
-    sp18[2][1] *= scale;
-    sp18[2][2] *= scale;
-    guMtxF2L(sp18, arg0);
-    return 1;
-}
-
-void func_15158A20(struct102 *arg0) {
-    s32 i;
-    u8 *p;
-    s32 *temp;
-
-    i = 0;
-    if (D_80082FA0 >= 0) {
-        p = (u8 *)arg0;
-        do {
-            if (*(s32 **)(p + 0xE0)) {
-                temp = *(s32 **)(p + 0xE0);
-                func_100043B4(temp, 4);
-            }
-            i++;
-            p += 4;
-        } while (i <= D_80082FA0);
-    }
-    if (*(s32 **)((u8 *)arg0 + 0xF0)) {
-        temp = *(s32 **)((u8 *)arg0 + 0xF0);
-        func_100043B4(temp, 4);
-    }
-}
-
-void func_15158A20(struct102 *);
-
-void func_15158AA4(struct102 *arg0) {
-    func_15158A20(arg0);
-    func_15169804(arg0);
-}
-
-void func_15169824(struct102 *);
-
-void func_15158AD0(struct102 *arg0) {
-    func_15158A20(arg0);
-    func_15169824(arg0);
 }
 
 typedef struct {
-    u8 pad0[0x14];
-    s16 unk14;
-    u8 pad16[0x25];
-    u8 unk3B;
-    u8 pad3C[0xBC];
-    s16 unkF8;
-    u8 padFA[0x2];
-    s32 unkFC;
-} Struct15158AFC;
+    f32 m[4][4];
+} MtxF;
 
-s32 func_15158AFC(Struct15158AFC *arg0) {
-    s32 temp;
+extern MtxF D_8008AE18;
+extern f32 D_800A6070;
 
-    if (arg0->unk14 < arg0->unkF8) {
-        temp = arg0->unk14 * arg0->unkFC;
-        if (temp < arg0->unk3B) {
-            arg0->unk3B = temp;
+/* Draw callback: scales the fixed matrix D_8008AE18 by data.size and translates to the actor's position. */
+s32 func_15158920(Mtx *mtx, EffectActor *actor) {
+    f32 scale;
+    s32 pad; // matching: IDO's frame has an unused slot here
+    MtxF mf;
+
+    mf = D_8008AE18;
+    scale = actor->data.size * D_800A6070;
+    mf.m[3][0] = actor->position.x;
+    mf.m[3][1] = actor->position.y;
+    mf.m[3][2] = actor->position.z;
+    mf.m[0][0] *= scale;
+    mf.m[0][1] *= scale;
+    mf.m[0][2] *= scale;
+    mf.m[1][0] *= scale;
+    mf.m[1][1] *= scale;
+    mf.m[1][2] *= scale;
+    mf.m[2][0] *= scale;
+    mf.m[2][1] *= scale;
+    mf.m[2][2] *= scale;
+    guMtxF2L(mf.m, mtx);
+    return 1;
+}
+
+/* Releases the attachment handles allocated by func_151580B0. */
+void func_15158A20(EffectActor *actor) {
+    s32 i;
+
+    s32 *handle; // matching: copied after each NULL test so IDO keeps the load in v0
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (actor->handles[i] != NULL) {
+            handle = actor->handles[i];
+            func_100043B4(handle, 4);
+        }
+    }
+    if (actor->sharedHandle != NULL) {
+        handle = actor->sharedHandle;
+        func_100043B4(handle, 4);
+    }
+}
+
+void func_15158AA4(EffectActor *actor) {
+    func_15158A20(actor);
+    func_15169804((struct102 *)actor);
+}
+
+void func_15158AD0(EffectActor *actor) {
+    func_15158A20(actor);
+    func_15169824((struct102 *)actor);
+}
+
+/* Update callback: once the lifetime drops below data.fade.duration, fades alpha out with it. */
+s32 func_15158AFC(EffectActor *actor) {
+    s32 alpha;
+
+    if (actor->lifetime < actor->data.fade.duration) {
+        alpha = actor->lifetime * actor->data.fade.alphaPerTick;
+        if (alpha < actor->color0[3]) {
+            actor->color0[3] = alpha;
         }
     }
     return 1;
@@ -1586,6 +1515,30 @@ s32 func_1515A920(struct102 *arg0, s32 *arg1) {
     *arg1 = v + 0x34;
     return 1;
 }
+
+typedef struct {
+    struct WORD words[10];
+} Struct1515A974PayloadWords;
+
+typedef struct {
+    struct UBYTES4 first;
+    Struct1515A974PayloadWords rest;
+} Struct1515A974Payload;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    Struct1515A974Payload payload;
+} Struct1515A974Row;
+
+extern Struct1515A974Row D_800A636C[];
+
+typedef struct {
+    Struct1515A974Payload payload;
+    s32 pad2C[2];
+    struct183 tmp;
+} Struct1515A974Locals;
+
 
 void func_1515A974(struct102 *volatile arg0, s32 arg1) {
     Struct1515A974Locals local;
