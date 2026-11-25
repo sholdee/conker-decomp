@@ -333,11 +333,13 @@ $(TARGET).game.data.rzip.bin: $(TARGET).game.data.bin
 	$(RZIP) $< $@
 
 # create padding
-$(TARGET).game.code.padding.bin:
-	cp ../assets/game/code_padding.bin $@
+# The game segment has a fixed size (offsets + code = TEXT_SECTION_LENGTH, data = DATA_SECTION_LENGTH),
+# so everything after it keeps its ROM address. pad_to.py fails if a part outgrows its reservation.
+$(TARGET).game.code.padding.bin: $(SPLIT_DIR)/offsets.bin $(TARGET).game.code.rzip.bin
+	$(PYTHON) ../tools/pad_to.py ../assets/game/code_padding.bin $$(($(TEXT_SECTION_LENGTH)-$$(wc -c <$(SPLIT_DIR)/offsets.bin)-$$(wc -c <$(TARGET).game.code.rzip.bin))) $@
 
 $(TARGET).game.data.padding.bin: $(TARGET).game.data.rzip.bin
-	dd if=/dev/zero of=$@ bs=1 count=$$(($(DATA_SECTION_LENGTH)-$$(wc -c <$<)))
+	$(PYTHON) ../tools/pad_to.py /dev/null $$(($(DATA_SECTION_LENGTH)-$$(wc -c <$<))) $@
 
 $(TARGET).game.rzip.bin: $(SPLIT_DIR)/offsets.bin $(TARGET).game.code.rzip.bin $(TARGET).game.code.padding.bin $(TARGET).game.data.rzip.bin $(TARGET).game.data.padding.bin
 	cat $^ > $@
