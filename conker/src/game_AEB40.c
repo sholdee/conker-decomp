@@ -97,7 +97,6 @@ extern u16 D_800C57A0[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern void func_100043B4(s32 *arg0, u32 arg1);
 extern s32 func_1502B020(s32, s32, s32, s32);
 extern void func_150302F0(Actor *obj, s32 setId);
 extern Actor *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
@@ -145,12 +144,10 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
 void func_150829D8(Actor *obj);
 void func_150832AC(Actor *obj);
 void func_15083384(Actor *obj, s32 arg1);
-Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
 s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
 void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
 Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-Actor *func_15083E90(u8 id);
 void func_150843AC(Actor *obj, s32 model);
 void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
 u8 func_150849A0(Actor *obj);
