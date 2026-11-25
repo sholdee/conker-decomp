@@ -1541,6 +1541,7 @@ void func_1514EDF0(s32 handle, struct127 *owner) {
     node = ATTACHMENTS(owner);
     match = NULL;
     do {
+        // matching: test the s32 result, loop on the u8 copy
         ret = func_1514ED3C(node, handle, &match);
         found = ret;
         if (ret) {
