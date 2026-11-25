@@ -16,164 +16,182 @@ extern void (*D_8008FA60[])(f32 *, void *, s32, u8, s32);
 
 void func_1514373C(f32, f32, f32 *, f32 *);
 s32 func_15046C80(f32 *, s32, f32, void *);
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-} Point_151A7A90;
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-} Src151A7950;
+    f32 x, y, z;
+} Vec3f;
 
-void *func_151A7950(Src151A7950 *, s32, u8, s32);
+typedef struct {
+    u8 r, g, b, a;
+} BoltColor;
+
+/* Spawn parameters of a lightning bolt; func_151A7950 copies them into Bolt.def. */
+typedef struct {
+    /* 0x00 */ s16 lifetime;         /* frames, counted down while BOLT_TIMED */
+    /* 0x02 */ s16 numPoints;
+    /* 0x04 */ f32 jitterDelay;      /* re-jitter after jitterDelay + rand * jitterDelayRange */
+    /* 0x08 */ f32 jitterDelayRange;
+    /* 0x0C */ u8 flags;             /* BOLT_TIMED | BOLT_ACTIVE */
+    /* 0x10 */ f32 jitter;           /* largest sideways displacement of a midpoint */
+    /* 0x14 */ BoltColor color;
+    /* 0x18 */ f32 width;
+    /* 0x1C */ s8 update1;           /* index into D_8008F940, -1 for none */
+    /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
+    /* 0x20 */ Vec3f start;
+    /* 0x2C */ Vec3f end;
+    /* 0x38 */ Vec3f up;
+    /* 0x44 */ f32 length;
+    /* 0x48 */ f32 invLength;
+    /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
+} BoltDef; /* size 0x50 */
+
+#define BOLT_TIMED  1
+#define BOLT_ACTIVE 2
+
+typedef struct {
+    Vec3f local; /* x: sideways, y: along up, z: fraction of the way from start to end */
+    Vec3f world;
+} BoltPoint;
+
+/* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
+    /* 0x08 */ Vec3f boneOffset;
+    /* 0x14 */ u8 bone;
+    /* 0x18 */ Vec3f targetOffset;   /* end point, relative to the owner's position */
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 linkFlags;         /* 1: the end point has been ray-cast */
+} BoltLink; /* size 0x28 */
+
+typedef struct {
+    /* 0x00 */ u8 unk0[0x10];        /* object header */
+    /* 0x10 */ BoltDef def;
+    /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
+    /* 0x64 */ BoltPoint *points;
+    /* 0x68 */ f32 jitterTimer;
+    /* 0x6C */ u8 vtxBuf[0x10];
+    /* 0x7C */ s32 vtxBufSize;
+    /* 0x80 */ BoltPoint pointData[1];
+} Bolt;
+
+void *func_151A7950(BoltDef *, s32, u8, s32);
 s32 func_151A8B20(void *, s16, s32, u8, s32);
-
-
-typedef struct {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x60 - 0x14];
-    Point_151A7A90 *unk60;
-    Point_151A7A90 *unk64;
-    f32 unk68;
-    u8 unk6C[0x10];
-    s32 unk7C;
-    Point_151A7A90 unk80[1];
-} Obj151A7950;
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-void *func_151A7950(Src151A7950 *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Obj151A7950 *obj;
+/*
+ * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
+ * from (0, 0, 0) to (0, 0, 1); func_151A8340 fills in the ones between.
+ */
+void *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    Bolt *bolt;
 
-    obj = func_15167A68(0x2D, arg3, arg0->unk2 * sizeof(Point_151A7A90) + arg1 + 0x80, 1, arg2, 1);
-    if (obj == NULL) {
+    bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
+    if (bolt == NULL) {
         return NULL;
     }
-    memcpy((u8 *)obj + 0x10, arg0, 0x50);
-    obj->unk64 = obj->unk80;
-    obj->unk60 = obj->unk64 + arg0->unk2;
-    obj->unk68 = 0.0f;
-    obj->unk64[0].unk0.unk0 = 0.0f;
-    obj->unk64[0].unk0.unk4 = 0.0f;
-    obj->unk64[0].unk0.unk8 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk0 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk4 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk8 = 1.0f;
-    bzero(obj->unk6C, 0x10);
-    obj->unk7C = (obj->unk12 << 6) + 0x140;
-    return obj;
+    memcpy(&bolt->def, def, sizeof(BoltDef));
+    bolt->points = bolt->pointData;
+    bolt->link = (BoltLink *)(bolt->points + def->numPoints);
+    bolt->jitterTimer = 0.0f;
+    bolt->points[0].local.x = 0.0f;
+    bolt->points[0].local.y = 0.0f;
+    bolt->points[0].local.z = 0.0f;
+    bolt->points[def->numPoints - 1].local.x = 0.0f;
+    bolt->points[def->numPoints - 1].local.y = 0.0f;
+    bolt->points[def->numPoints - 1].local.z = 1.0f;
+    bzero(bolt->vtxBuf, sizeof(bolt->vtxBuf));
+    /* four vertices per point, plus slack */
+    bolt->vtxBufSize = bolt->def.numPoints * 4 * (s32)sizeof(Vtx) + 0x140;
+    return bolt;
 }
 
+extern s32 (*D_8008F940[])(Bolt *);
+extern s32 (*D_8008F948[])(Bolt *);
 
-typedef struct {
-    u8  pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    f32 unk14;
-    f32 unk18;
-    u8  unk1C;
-    u8  pad1D[3];
-    f32 unk20;
-    u8  pad24[8];
-    s8  unk2C;
-    s8  unk2D;
-    u8  pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    struct17 unk48;
-    u8  pad54[4];
-    f32 unk58;
-    u8  pad5C[8];
-    Point_151A7A90 *unk64;
-    f32 unk68;
-} Header_151A7A90;
+void func_151A8340(Bolt *, s16, s16, f32, s16);
 
-extern s32 (*D_8008F940[])(void *);
-extern s32 (*D_8008F948[])(void *);
+/*
+ * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
+ * timer runs out and places them in the world along start->end. The bolt is destroyed once a hook
+ * returns 0 or its lifetime runs out.
+ */
+void func_151A7A90(Bolt *bolt) {
+    Bolt *self; // matching: the loop bound is read through a second copy of bolt
+    u8 done;
+    Vec3f side;
+    Vec3f up;
+    Vec3f dir;
+    s32 update1;
+    s32 update2;
 
-void func_151A8340(void *, s16, s16, f32, s16);
-
-void func_151A7A90(Header_151A7A90 *arg0) {
-    Header_151A7A90 *hdr;
-    u8 flag;
-    struct17 scale;
-    struct17 up;
-    struct17 dir;
-    s32 idx1;
-    s32 idx2;
-
-    hdr = arg0;
-    flag = 0;
-    if (arg0->unk1C & 1) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            flag = 1;
+    self = bolt;
+    done = FALSE;
+    if (bolt->def.flags & BOLT_TIMED) {
+        bolt->def.lifetime -= D_800BE9E4;
+        if (bolt->def.lifetime < 0) {
+            done = TRUE;
         }
     }
-    idx1 = arg0->unk2C;
-    if (idx1 != -1) {
-        if (!flag) {
-            flag = (D_8008F940[idx1](arg0) == 0);
+    update1 = bolt->def.update1;
+    if (update1 != -1) {
+        if (!done) {
+            done = (D_8008F940[update1](bolt) == 0);
         }
     }
-    idx2 = arg0->unk2D;
-    if (idx2 != -1) {
-        if (!flag) {
-            flag = (D_8008F948[idx2](arg0) == 0);
+    update2 = bolt->def.update2;
+    if (update2 != -1) {
+        if (!done) {
+            done = (D_8008F948[update2](bolt) == 0);
         }
     }
 
-    if (!flag) {
-        arg0->unk68 -= D_800BE9A4;
-        if (arg0->unk68 < 0.0f) {
-            func_151A8340(arg0, 0, arg0->unk12 - 1, arg0->unk20, 100);
-            arg0->unk68 = func_150ADA68() * arg0->unk18 + arg0->unk14;
+    if (!done) {
+        bolt->jitterTimer -= D_800BE9A4;
+        if (bolt->jitterTimer < 0.0f) {
+            func_151A8340(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
+            bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
         }
-        if (arg0->unk1C & 2) {
-            Point_151A7A90 *pt;
+        if (bolt->def.flags & BOLT_ACTIVE) {
+            BoltPoint *pt;
 
-            dir.unk0 = arg0->unk3C - arg0->unk30;
-            dir.unk4 = arg0->unk40 - arg0->unk34;
-            dir.unk8 = arg0->unk44 - arg0->unk38;
-            up = arg0->unk48;
-            func_151450B4(&dir, &up, &scale);
+            dir.x = bolt->def.end.x - bolt->def.start.x;
+            dir.y = bolt->def.end.y - bolt->def.start.y;
+            dir.z = bolt->def.end.z - bolt->def.start.z;
+            up = bolt->def.up;
+            func_151450B4((struct17 *)&dir, (struct17 *)&up, (struct17 *)&side);
             {
                 s32 i;
 
-                scale.unk0 *= arg0->unk58;
-                scale.unk4 *= arg0->unk58;
-                scale.unk8 *= arg0->unk58;
+                side.x *= bolt->def.invLength;
+                side.y *= bolt->def.invLength;
+                side.z *= bolt->def.invLength;
 
-                pt = arg0->unk64;
-                for (i = 0; i < hdr->unk12; i++) {
-                    pt->unkC.unk0 = arg0->unk30 + pt->unk0.unk0 * scale.unk0 +
-                                    pt->unk0.unk4 * up.unk0 + pt->unk0.unk8 * dir.unk0;
-                    pt->unkC.unk4 = arg0->unk34 + pt->unk0.unk0 * scale.unk4 +
-                                    pt->unk0.unk4 * up.unk4 + pt->unk0.unk8 * dir.unk4;
-                    pt->unkC.unk8 = arg0->unk38 + pt->unk0.unk0 * scale.unk8 +
-                                    pt->unk0.unk4 * up.unk8 + pt->unk0.unk8 * dir.unk8;
+                pt = bolt->points;
+                for (i = 0; i < self->def.numPoints; i++) {
+                    pt->world.x = bolt->def.start.x + pt->local.x * side.x +
+                                  pt->local.y * up.x + pt->local.z * dir.x;
+                    pt->world.y = bolt->def.start.y + pt->local.x * side.y +
+                                  pt->local.y * up.y + pt->local.z * dir.y;
+                    pt->world.z = bolt->def.start.z + pt->local.x * side.z +
+                                  pt->local.y * up.z + pt->local.z * dir.z;
                     pt++;
                 }
             }
         }
     }
 
-    if (flag) {
-        func_1516972C((struct102 *)arg0);
+    if (done) {
+        func_1516972C((struct102 *)bolt);
     }
 }
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-s32 func_15144B34(s32);
-void func_15145548(void *, void *, void *, void *, f32 *);
+Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Vec3f *func_15144B34(s32);
+void func_15145548(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32 *);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
@@ -183,45 +201,22 @@ extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_151A7D6C;
-
-typedef struct {
-    u8 pad0[0xC];
-    Vec3f_151A7D6C pos;
-} Game1D4E00Point;
-
-typedef struct {
-    u8 pad0[0x12];
-    s16 count;
-    u8 pad14[8];
-    u8 flags;
-    u8 pad1D[7];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a;
-    f32 width;
-    u8 pad2C[0x38];
-    Game1D4E00Point *points;
-    u8 pad68[4];
-    u8 buffers[0x10];
-    s32 size;
-} Game1D4E00Bolt;
-
-Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
-    Game1D4E00Bolt *self = arg1;
+/*
+ * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
+ * vertices from the bolt's vertex buffer for this view.
+ */
+Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
+    Bolt *self = bolt; // matching: the loop bound is read through a second copy of bolt
     Vtx_t *vtx;
-    Vec3f_151A7D6C dir;
-    Vec3f_151A7D6C closest;
+    Vec3f dir;
+    Vec3f closest;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 nx;
     f32 ny;
     f32 nz;
-    f32 *camera;
+    Vec3f *camera;
     f32 lenSq;
     u8 changed;
     s16 last;
@@ -229,29 +224,29 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
     s16 i;
     f32 parameter;
     s16 j;
-    Vec3f_151A7D6C *a;
-    Vec3f_151A7D6C *b;
+    Vec3f *a;
+    Vec3f *b;
 
-    if (arg1->flags & 2) {
-        func_151D5D60(arg1->buffers, arg2, arg1->size, (void **)&vtx, NULL);
+    if (bolt->def.flags & BOLT_ACTIVE) {
+        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
         if (vtx != NULL) {
-            camera = (f32 *)func_15144B34(arg2);
+            camera = func_15144B34(view);
             changed = 1;
-            last = arg1->count - 1;
+            last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = (Gfx *)func_15142E24((s32)gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142E24(gdl, D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
-            gdl = func_15142C10(gdl, arg1->r, arg1->g, arg1->b, arg1->a, &changed);
+            gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = func_1513F4E4(gdl, 0x19, &changed);
             gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
-            dir.x = arg1->points[0].pos.x - arg1->points[last].pos.x;
-            dir.y = arg1->points[0].pos.y - arg1->points[last].pos.y;
-            dir.z = arg1->points[0].pos.z - arg1->points[last].pos.z;
-            func_15145548(&arg1->points[last].pos, &dir, camera, &closest, &parameter);
-            dx = camera[0] - closest.x;
-            dy = camera[1] - closest.y;
-            dz = camera[2] - closest.z;
+            dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
+            dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
+            dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
+            func_15145548(&bolt->points[last].world, &dir, camera, &closest, &parameter);
+            dx = camera->x - closest.x;
+            dy = camera->y - closest.y;
+            dz = camera->z - closest.z;
             nx = dir.y * dz - dy * dir.z;
             ny = dir.z * dx - dz * dir.x;
             nz = dir.x * dy - dx * dir.y;
@@ -261,14 +256,14 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
                 ny = 0.0f;
                 nz = 0.0f;
             } else {
-                scale = arg1->width / sqrtf(lenSq);
+                scale = bolt->def.width / sqrtf(lenSq);
                 nx *= scale;
                 ny *= scale;
                 nz *= scale;
             }
-            for (; i < self->count; i++, j++) {
-                b = &arg1->points[i].pos;
-                a = &arg1->points[j].pos;
+            for (; i < self->def.numPoints; i++, j++) {
+                b = &bolt->points[i].world;
+                a = &bolt->points[j].world;
                 vtx->ob[0] = a->x + nx;
                 vtx->ob[1] = a->y + ny;
                 vtx->ob[2] = a->z + nz;
@@ -323,12 +318,11 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
 }
 
 
-typedef struct {
-    u8 pad0[0x64];
-    f32 (*points)[6];
-} Curve8340;
-
-void func_151A8340(void *arg0, s16 first, s16 last, f32 amp, s16 depth) {
+/*
+ * Midpoint displacement: sets the point halfway between first and last to their average, moved up
+ * to amp sideways and along up, then recurses into both halves until depth runs out.
+ */
+void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
     s16 middle;
 
     if (last - first < 2) {
@@ -341,64 +335,57 @@ void func_151A8340(void *arg0, s16 first, s16 last, f32 amp, s16 depth) {
         f32 dx;
         f32 dy;
         f32 dz;
-        f32 *a;
+        Vec3f *a;
 
         {
-            f32 *b;
+            Vec3f *b;
 
-            a = &((Curve8340 *)arg0)->points[first][0];
+            a = &bolt->points[first].local;
             middle = first + ((last - first) >> 1);
-            b = ((Curve8340 *)arg0)->points[last];
-            dx = b[0] - ((Curve8340 *)arg0)->points[first][0];
-            dy = b[1] - ((Curve8340 *)arg0)->points[first][1];
-            dz = b[2] - ((Curve8340 *)arg0)->points[first][2];
+            b = &bolt->points[last].local;
+            dx = b->x - bolt->points[first].local.x;
+            dy = b->y - bolt->points[first].local.y;
+            dz = b->z - bolt->points[first].local.z;
         }
-        ((Curve8340 *)arg0)->points[middle][0] = (a[0] + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        ((Curve8340 *)arg0)->points[middle][1] = (a[1] + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        ((Curve8340 *)arg0)->points[middle][2] = a[2] + dz * 0.5f;
+        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.z = a->z + dz * 0.5f;
     }
-    func_151A8340(arg0, first, middle, amp, depth - 1);
-    func_151A8340(arg0, middle, last, amp, depth - 1);
+    func_151A8340(bolt, first, middle, amp, depth - 1);
+    func_151A8340(bolt, middle, last, amp, depth - 1);
 }
 
 extern void func_151D5E30(void *);
 
-void func_151A8560(void *arg0) {
-    func_151D5E30((void *)((u8 *)arg0 + 0x6C));
+/* Frees the bolt's vertex buffers. */
+void func_151A8560(Bolt *bolt) {
+    func_151D5E30(bolt->vtxBuf);
 }
 
-typedef struct {
-    u8 pad_0[0x5C];
-    u8 field_5C;
-} Game1D4E00State;
+extern void (*D_8008F94C[])(Bolt *);
 
-extern void (*D_8008F94C[])(s32);
+/* Destroy handler: runs the type's hook, then frees the vertex buffers and the object. */
+void func_151A8584(Bolt *bolt) {
+    Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-void func_151A8584(s32 arg0) {
-    Game1D4E00State *state = (Game1D4E00State *)arg0;
-
-    if (D_8008F94C[state->field_5C] != NULL) {
-        D_8008F94C[state->field_5C](arg0);
+    if (D_8008F94C[self->def.type] != NULL) {
+        D_8008F94C[self->def.type](bolt);
     }
-    func_151A8560((void *)arg0);
-    func_15169804((struct102 *)arg0);
+    func_151A8560(bolt);
+    func_15169804((struct102 *)bolt);
 }
 
-typedef struct {
-    u8 pad_0[0x5C];
-    u8 field_5C;
-} Game1D4E00State_151A85D4;
+extern void (*D_8008F958[])(Bolt *);
 
-extern void (*D_8008F958[])(s32);
+/* Like func_151A8584, through the D_8008F958 hooks and func_15169824. */
+void func_151A85D4(Bolt *bolt) {
+    Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-void func_151A85D4(s32 arg0) {
-    Game1D4E00State_151A85D4 *state = (Game1D4E00State_151A85D4 *)arg0;
-
-    if (D_8008F958[state->field_5C] != NULL) {
-        D_8008F958[state->field_5C](arg0);
+    if (D_8008F958[self->def.type] != NULL) {
+        D_8008F958[self->def.type](bolt);
     }
-    func_151A8560((void *)arg0);
-    func_15169824((struct102 *)arg0);
+    func_151A8560(bolt);
+    func_15169824((struct102 *)bolt);
 }
 
 typedef struct {
