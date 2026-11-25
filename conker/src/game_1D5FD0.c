@@ -349,8 +349,6 @@ const ParticleSettings D_800A8ECC = { 1.322f, 1.7500001f, 1.238f, 1.108f, { 4, 9
 const ParticleSettings D_800A8EF8 = { 1.141f, 1.087f, 1.5400001f, 0.688f, { 46, 74 }, { 35, 25 }, { 100, 100 }, 30, 8, 0.037f, 0.09900001f, 0 };
 const ParticleSettings D_800A8F24 = { 0.41700003f, 0.48900002f, 0.38000003f, 0.344f, { 30, 120 }, { 49, 25 }, { 100, 100 }, 15, 17, 0.09f, 0.05f, 0 };
 
-void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
  * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings

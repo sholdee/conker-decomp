@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-f32 func_1515F008(s16 *, s32);
-void func_1515F040(f32, s32);
-void func_1515F0AC(f32, s32);
-
 /* Allocates a zeroed 0x10-byte block. */
 void *func_1515D440(void) {
     void *block;
@@ -60,8 +56,6 @@ PointLight *func_1515D520(void) {
     return light;
 }
 
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
-
 /* Wrapper for func_1515D5F8. */
 PointLight *func_1515D5AC(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
     return func_1515D5F8(x, y, z, radius, r, g, b, arg7, disabled, group);
@@ -105,7 +99,6 @@ void func_1515D6C8(void) {
 }
 
 extern s32 D_800DCD10[];
-void func_1515EF74(s16 *mtx);
 
 /* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
 #define G_MW_LIGHTSCALE 0x10
@@ -130,10 +123,6 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
     gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x2C, D_800DCD10[3] << 16);
     return gfx;
 }
-
-void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
-void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
-void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
 
 /* Loads the 0x30-byte light at `l` into the microcode light table at byte offset `ofs` (point lights start at 0x60). */
 #define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
@@ -315,8 +304,6 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
     }
     return gfx;
 }
-
-TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
 
 /*
  * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the

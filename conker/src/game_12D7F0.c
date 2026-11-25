@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void light_sendEvent(u8, u8, s32);
-
 typedef struct {
     u8 unk0[5];
 } Struct15100340;

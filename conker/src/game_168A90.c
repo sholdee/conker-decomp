@@ -18,8 +18,6 @@ typedef struct {
     s32 count;
 } VtxRange;
 
-extern void func_15109064(DynModel *, s32, u8);
-
 extern s32 (*D_80089C18[])(DynModel *);
 extern s32 (*D_80089C28[])(DynModel *, s16);
 extern Vec3f D_800A49C0[9];

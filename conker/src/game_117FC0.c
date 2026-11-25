@@ -46,8 +46,6 @@ struct FlashObject {
     /* 0x18 */ GroundFlash flash;
 };
 
-FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
 void func_150EAB10(struct_EAB10 *actor) {
     s32 pad; // matching: unused stack slots that keep the frame layout

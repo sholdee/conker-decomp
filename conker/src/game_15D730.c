@@ -172,7 +172,6 @@ typedef struct ParticleRenderMode {
 
 extern s32 (*D_80089804[])(SpriteParticle *, s16);
 extern ParticleRenderMode D_800A4AC8[];
-void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
 Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {

@@ -344,9 +344,6 @@ extern s32 D_80090214[];
 extern void func_150C5C74(Actor *);
 extern void func_150C5C9C(Actor *);
 extern void func_150F5420(s32, s32, s32, s32);
-extern void func_1515F170(s32, u8);
-extern void light_sendEvent(u8, u8, s32);
-extern void func_151645C4(u8);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 
@@ -1108,14 +1105,11 @@ extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_151A3390(Actor *, u8);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
-extern void func_151619A0(s32, s16, u8, s32);
-extern void func_15108FFC(s32, s32, u8);
 extern void func_150F5C08(Actor *, s16, u8, s32);
 extern void func_150F6890(Actor *, s16, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
-extern void func_151090DC(void);
 extern void func_151CFA4C(Actor *, u8, s32);
 extern void func_15107B78(Actor *, s16, s16, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);

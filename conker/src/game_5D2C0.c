@@ -1,9 +1,13 @@
 #include <ultra64.h>
 #define func_1502D630 func_1502D630_header // matching: this file keeps its own declaration of func_1502D630
+#define func_1515E544 func_1515E544_header
 #include "functions.h"
 #include "variables.h"
 #undef func_1502D630
+#undef func_1515E544
 extern void func_1502D630(Actor *, s32 *, s32, s32); // matching: called with an extra argument
+// matching: func_1515E544 takes u8 counts; this file passes them as s32
+extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 
 extern s32 D_800902BC[];
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
@@ -619,9 +623,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     return 1;
 }
 
-extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
-extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
-
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
  * `arg4` nonzero draws it through func_15035D6C instead of its own display lists. Returns the
@@ -824,7 +825,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
 }
 
 void func_150D3360(void *, u8, s32);
-void func_15163BE8(void *, u8, s32);
 void func_151D74B0(void *, u8, s8, u8, s32);
 extern s32 D_80090228;
 extern s32 D_8009022C;
@@ -880,7 +880,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-void light_sendEvent(u8, u8, ActorRef *);
 void func_151D747C(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */

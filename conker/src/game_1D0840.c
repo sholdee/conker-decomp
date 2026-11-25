@@ -95,7 +95,6 @@ typedef struct {
 } TrailRetryTask;
 
 
-s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);
 void func_151A499C(Actor *owner, u8 arg1);

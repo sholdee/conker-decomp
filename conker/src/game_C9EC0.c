@@ -275,8 +275,6 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
 }
 
 extern void *func_150F6DE4(Actor *);
-extern void light_sendEvent(u8, u8, s32);
-extern void func_15163A60(s32, s32, s32);
 extern u8 D_8009F0D0;
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
@@ -544,8 +542,6 @@ typedef struct Msg1509D8FC {
     /* 0x7 */ u8 unk7;
 } Msg1509D8FC;
 
-extern void func_151645C4(u8);
-extern void func_1515F170(s32 arg0, u8 arg1);
 extern u8 D_800A0960[][16];
 
 /* Advances script command `cmdId` to `phase`. */

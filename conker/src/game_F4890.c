@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern void light_sendEvent(u8, u8, s32);
-
 /*
  * Model attachment hook 8 (D_800841C0[8]): per-frame update for a flashing light. Flickers
  * randomly for the last 60 frames, ramps brightness over frames 60..300, pulses until 330 and

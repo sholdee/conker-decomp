@@ -18,8 +18,6 @@ struct Game1BD8B0Object {
     Game1BD8B0Inner *inner;
 };
 
-void func_151617C4(Game1BD8B0Object *arg0);
-
 /* Message handler: type 0 removes the effect when the message names its actor. */
 void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type) {
     Actor *actor;

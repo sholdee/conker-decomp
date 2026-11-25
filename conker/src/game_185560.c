@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 *func_1515D480(s32);
-extern s32 *func_1515D440(void);
-
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
 EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
                            s32 arg6) {

@@ -260,8 +260,6 @@ void func_151568F8(desc, owner)
     func_15130374(&particle, desc->particleKind, 0, owner, 0);
 }
 
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-
 /* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */
 void func_15156B54(RandomBurstEffect *effect) {

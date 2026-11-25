@@ -7,8 +7,6 @@
 
 
 
-void func_15009334(s32 index);
-
 /** Resets the light state: the global light colour, the colour tables and the point lists. */
 void func_150091D0(void) {
     s32 i;
@@ -47,8 +45,6 @@ void func_150092DC(void) {
     }
 }
 
-s32 func_1515D5AC(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /**
  * Applies level point `index` by type: 10 sets the global light colour, 9 spawns a light (and runs its
  * callback), 16 sets the colour tables, 15 and 24 link the point into the D_800DCD80 / D_800DCD84 lists.
@@ -65,7 +61,7 @@ void func_15009334(s32 index) {
     s32 strength;
     s32 enabled;
     s32 duration;
-    s32 light;
+    PointLight *light;
     s32 callback;
     ZoneLink *link;
     s32 type;
@@ -128,23 +124,20 @@ void func_15009334(s32 index) {
     }
 }
 
-LightEffect *func_1516037C();
-LightEffect *func_1516387C();
-
 /*
  * Light callbacks, the D_80082BFC table run by func_1500A94C: each attaches an effect to `light`.
  * `id` is the callback's own index in the table; some use it to pick an entry of a small local table.
  */
 
-void func_150095D8(s32 light, s32 id) {
+void func_150095D8(PointLight *light, s32 id) {
     func_1516127C(light, 255, 1);
 }
 
-void func_15009600(s32 light, s32 id) {
+void func_15009600(PointLight *light, s32 id) {
     func_15161334(light, 255, 1);
 }
 
-void func_15009628(s32 light, s32 id) {
+void func_15009628(PointLight *light, s32 id) {
     LightEffectHeader header;
     u8 kinds[4] = D_80082BE0;
 
@@ -156,11 +149,11 @@ void func_15009628(s32 light, s32 id) {
     func_1516037C(&header, light, 0, 255, 1);
 }
 
-void func_1500969C(s32 light, s32 id) {
+void func_1500969C(PointLight *light, s32 id) {
     func_15161408(light, 255, 1);
 }
 
-void func_150096C4(s32 light, s32 id) {
+void func_150096C4(PointLight *light, s32 id) {
     LightEffectHeader header;
     u8 kinds[5] = D_80082BE4;
 
@@ -172,51 +165,51 @@ void func_150096C4(s32 light, s32 id) {
     func_1516037C(&header, light, 0, 255, 1);
 }
 
-void func_15009740(s32 light, s32 id) {
+void func_15009740(PointLight *light, s32 id) {
     func_15161494(light, 255, 1);
 }
 
-void func_15009768(s32 light, s32 id) {
+void func_15009768(PointLight *light, s32 id) {
     func_151615F8(light, 0, 0, 14, 255, 1);
 }
 
-void func_150097A4(s32 light, s32 id) {
+void func_150097A4(PointLight *light, s32 id) {
     func_15161540(light, 255, 1);
 }
 
-void func_150097CC(s32 light, s32 id) {
-    s32 effect = func_151615F8(light, 0, 2, 14, 255, 1);
+void func_150097CC(PointLight *light, s32 id) {
+    s32 effect = (s32)func_151615F8(light, 0, 2, 14, 255, 1);
 
     if (effect != 0) {
         func_150121C0(effect);
     }
 }
 
-void func_15009818(s32 light, s32 id) {
+void func_15009818(PointLight *light, s32 id) {
     func_151B8DB0(light, 0, 255, 1);
 }
 
-void func_15009844(s32 light, s32 id) {
+void func_15009844(PointLight *light, s32 id) {
     func_151B8DB0(light, 1, 255, 1);
 }
 
-void func_15009870(s32 light, s32 id) {
+void func_15009870(PointLight *light, s32 id) {
     func_15108850(light);
 }
 
-void func_15009894(s32 light, s32 id) {
+void func_15009894(PointLight *light, s32 id) {
     func_151615F8(light, 1, 0, 14, 255, 1);
 }
 
-void func_150098D0(s32 light, s32 id) {
+void func_150098D0(PointLight *light, s32 id) {
     func_15162034(light, 255, 1);
 }
 
-void func_150098F8(s32 light, s32 id) {
+void func_150098F8(PointLight *light, s32 id) {
     func_151623F4(light, 1, 22, 0, -1, 300, 255, 1);
 }
 
-void func_15009944(s32 light, s32 id) {
+void func_15009944(PointLight *light, s32 id) {
     func_15162740(light, 1, 6, 0, 300, 2, 255, 1);
 }
 
@@ -226,7 +219,7 @@ static const u8 sCycleArg2[4] = { 23, 24, 25, 26 };
 static const u8 sCycleObjectIds[4] = { 0xF6, 0xF3, 0xED, 0xF0 };
 static const u8 sLightTypes[4] = { 27, 28, 29, 30 };
 
-void func_15009990(s32 light, s32 id) {
+void func_15009990(PointLight *light, s32 id) {
     LightEffect *effect;
     u8 extra[1];
 
@@ -237,7 +230,7 @@ void func_15009990(s32 light, s32 id) {
     }
 }
 
-void func_15009A38(s32 light, s32 id) {
+void func_15009A38(PointLight *light, s32 id) {
     LightEffectHeader header;
 
     header.flags = 2;
@@ -247,23 +240,23 @@ void func_15009A38(s32 light, s32 id) {
     func_1516037C(&header, light, 0, 255, 1);
 }
 
-void func_15009AA0(s32 light, s32 id) {
+void func_15009AA0(PointLight *light, s32 id) {
     func_15162FAC(light, 1, 0, 2, 300, 13, 255, 1);
 }
 
-void func_15009AEC(s32 light, s32 id) {
+void func_15009AEC(PointLight *light, s32 id) {
     func_15162740(light, 2, 6, 0, 300, 2, 255, 1);
 }
 
-void func_15009B38(s32 light, s32 id) {
+void func_15009B38(PointLight *light, s32 id) {
     func_15162740(light, 20, 6, 0, 300, 2, 255, 1);
 }
 
-void func_15009B84(s32 light, s32 id) {
+void func_15009B84(PointLight *light, s32 id) {
     func_15162740(light, 3, 6, 0, 300, 2, 255, 1);
 }
 
-void func_15009BD0(s32 light, s32 id) {
+void func_15009BD0(PointLight *light, s32 id) {
     LightEffect *effect;
     LightFollow params;
 
@@ -276,7 +269,7 @@ void func_15009BD0(s32 light, s32 id) {
     }
 }
 
-void func_15009C7C(s32 light, s32 id) {
+void func_15009C7C(PointLight *light, s32 id) {
     LightEffect *effect;
     LightFollow params;
 
@@ -289,43 +282,43 @@ void func_15009C7C(s32 light, s32 id) {
     }
 }
 
-void func_15009D28(s32 light, s32 id) {
+void func_15009D28(PointLight *light, s32 id) {
     func_15163604(light, 1, 5, 300, 0, 0, 255, 1);
 }
 
-void func_15009D6C(s32 light, s32 id) {
+void func_15009D6C(PointLight *light, s32 id) {
     func_15163604(light, 2, 5, 300, 0, 0, 255, 1);
 }
 
-void func_15009DB0(s32 light, s32 id) {
+void func_15009DB0(PointLight *light, s32 id) {
     func_15162740(light, 4, 6, 0, 300, 2, 255, 1);
 }
 
-void func_15009DFC(s32 light, s32 id) {
+void func_15009DFC(PointLight *light, s32 id) {
     func_15162740(light, 5, 6, 0, 300, 2, 255, 1);
 }
 
-void func_15009E48(s32 light, s32 id) {
+void func_15009E48(PointLight *light, s32 id) {
     func_151615F8(light, 1, 1, 14, 255, 1);
 }
 
-void func_15009E84(s32 light, s32 id) {
+void func_15009E84(PointLight *light, s32 id) {
     func_15163604(light, 3, 5, 300, 0, 0, 255, 1);
 }
 
-void func_15009EC8(s32 light, s32 id) {
+void func_15009EC8(PointLight *light, s32 id) {
     func_1516381C(light, 32, 255, 1);
 }
 
-void func_15009EF4(s32 light, s32 id) {
+void func_15009EF4(PointLight *light, s32 id) {
     func_151615F8(light, 1, 3, 35, 255, 1);
 }
 
-void func_15009F30(s32 light, s32 id) {
+void func_15009F30(PointLight *light, s32 id) {
     func_15163604(light, 4, 36, 300, 0, 0, 255, 1);
 }
 
-void func_15009F74(s32 light, s32 id) {
+void func_15009F74(PointLight *light, s32 id) {
     LightEffect *effect;
     LightFollow params;
 
@@ -338,103 +331,103 @@ void func_15009F74(s32 light, s32 id) {
     }
 }
 
-void func_1500A028(s32 light, s32 id) {
+void func_1500A028(PointLight *light, s32 id) {
     func_15163604(light, 5, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A06C(s32 light, s32 id) {
+void func_1500A06C(PointLight *light, s32 id) {
     func_15163604(light, 6, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A0B0(s32 light, s32 id) {
+void func_1500A0B0(PointLight *light, s32 id) {
     func_15162740(light, 7, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A0FC(s32 light, s32 id) {
+void func_1500A0FC(PointLight *light, s32 id) {
     func_15162740(light, 9, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A148(s32 light, s32 id) {
+void func_1500A148(PointLight *light, s32 id) {
     func_15162740(light, 10, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A194(s32 light, s32 id) {
+void func_1500A194(PointLight *light, s32 id) {
     func_15162740(light, 11, 38, 0, 300, 2, 255, 1);
 }
 
-void func_1500A1E0(s32 light, s32 id) {
+void func_1500A1E0(PointLight *light, s32 id) {
     func_151615F8(light, 1, 4, 14, 255, 1);
 }
 
-void func_1500A21C(s32 light, s32 id) {
+void func_1500A21C(PointLight *light, s32 id) {
     func_15163604(light, 7, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A260(s32 light, s32 id) {
+void func_1500A260(PointLight *light, s32 id) {
     func_15162FAC(light, 2, 0, 2, 300, 13, 255, 1);
 }
 
-void func_1500A2AC(s32 light, s32 id) {
+void func_1500A2AC(PointLight *light, s32 id) {
     const u8 kinds[4] = { 2, 3, 4, 5 };
 
     func_151B8DB0(light, kinds[id - 51], 255, 1);
 }
 
-void func_1500A2F4(s32 light, s32 id) {
+void func_1500A2F4(PointLight *light, s32 id) {
     const u8 kinds[2] = { 0, 1 };
 
     func_15164208(light, kinds[id - 56], 255, 1);
 }
 
-void func_1500A33C(s32 light, s32 id) {
+void func_1500A33C(PointLight *light, s32 id) {
     func_15163604(light, 8, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A380(s32 light, s32 id) {
+void func_1500A380(PointLight *light, s32 id) {
     func_15163604(light, 9, 40, 300, 0, 0, 255, 1);
 }
 
-void func_1500A3C4(s32 light, s32 id) {
+void func_1500A3C4(PointLight *light, s32 id) {
     func_15162740(light, 15, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A410(s32 light, s32 id) {
+void func_1500A410(PointLight *light, s32 id) {
     func_15163604(light, 10, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A454(s32 light, s32 id) {
+void func_1500A454(PointLight *light, s32 id) {
     func_151615F8(light, 0, 5, 14, 255, 1);
 }
 
-void func_1500A490(s32 light, s32 id) {
+void func_1500A490(PointLight *light, s32 id) {
     func_15163604(light, 11, 5, 300, 0, 0, 255, 1);
 }
 
-void func_1500A4D4(s32 light, s32 id) {
+void func_1500A4D4(PointLight *light, s32 id) {
     func_15163604(light, 12, 41, 300, 0, 0, 255, 1);
 }
 
-void func_1500A518(s32 light, s32 id) {
+void func_1500A518(PointLight *light, s32 id) {
     func_15163604(light, 13, 41, 300, 0, 0, 255, 1);
 }
 
-void func_1500A55C(s32 light, s32 id) {
+void func_1500A55C(PointLight *light, s32 id) {
     func_151623F4(light, 1, 22, 0, -1, 300, 255, 1);
 }
 
-void func_1500A5A8(s32 light, s32 id) {
+void func_1500A5A8(PointLight *light, s32 id) {
     func_15162740(light, 17, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A5F4(s32 light, s32 id) {
+void func_1500A5F4(PointLight *light, s32 id) {
     func_15162740(light, 18, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A640(s32 light, s32 id) {
+void func_1500A640(PointLight *light, s32 id) {
     func_15162740(light, 19, 6, 0, 300, 2, 255, 1);
 }
 
-void func_1500A68C(s32 light, s32 id) {
+void func_1500A68C(PointLight *light, s32 id) {
     func_15162740(light, 21, 6, 0, 300, 2, 255, 1);
 }
 
@@ -442,7 +435,7 @@ extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32); // matching: called with a third argument (the definition takes two)
 
 /** Attaches the light to the level object picked by `id` (and by whether level is 6). */
-void func_1500A6D8(s32 light, s32 id) {
+void func_1500A6D8(PointLight *light, s32 id) {
     LightEffectHeader header;
     LightSwing attachment;
     s32 variant;
@@ -462,14 +455,14 @@ void func_1500A6D8(s32 light, s32 id) {
     }
 }
 
-void func_1500A79C(s32 light, s32 id) {
+void func_1500A79C(PointLight *light, s32 id) {
     func_15162740(light, 22, 6, 0, 300, 2, 255, 1);
 }
 
 extern u8 D_80082BF4[6];
 
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
-void func_1500A7E8(s32 light, s32 id) {
+void func_1500A7E8(PointLight *light, s32 id) {
     LightEffectHeader header;
     LightSwing attachment;
     LightEffect *effect;
@@ -493,16 +486,16 @@ void func_1500A7E8(s32 light, s32 id) {
     }
 }
 
-void func_1500A8C8(s32 light, s32 id) {
+void func_1500A8C8(PointLight *light, s32 id) {
     func_151615F8(light, 0, 6, 14, 255, 1);
 }
 
-void func_1500A904(s32 light, s32 id) {
+void func_1500A904(PointLight *light, s32 id) {
     func_151615F8(light, 1, (u8)(id - 80), 14, 255, 1);
 }
 
 /** Runs light callback `id` (1..88) from the D_80082BFC table on a freshly placed light. */
-void func_1500A94C(s32 light, s32 id) {
+void func_1500A94C(PointLight *light, s32 id) {
     if (id > 0 && id < 89) {
         if (D_80082BFC[id] != NULL) {
             D_80082BFC[id](light);

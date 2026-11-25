@@ -9,7 +9,6 @@ struct ZoneLinkObj {
 };
 
 struct ZoneLinkObj *func_15105C24(s32 owner);
-void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
 
 /* A node of a list of spawn regions with their cached volume and area. */
 RegionNode *func_1515F1B0(TriggerZone *region) {

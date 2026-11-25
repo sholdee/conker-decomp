@@ -87,8 +87,6 @@ typedef struct Game1D3420Effect {
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 
-extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-
 /* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
 void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {

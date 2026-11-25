@@ -34,8 +34,6 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
-
 /*
  * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means

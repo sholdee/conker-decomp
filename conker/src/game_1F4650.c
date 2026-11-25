@@ -89,8 +89,6 @@ typedef struct {
     u8 command;
 } SightCommandMsg;
 
-extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
 s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
@@ -520,7 +518,6 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
 }
 
 const s32 D_800AAC30[] = { 0x17, 0x18 };
-extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 // matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);

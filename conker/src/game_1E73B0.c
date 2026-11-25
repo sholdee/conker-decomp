@@ -4,8 +4,6 @@
 #undef func_150E7FEC
 #include "variables.h"
 
-void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
@@ -746,7 +744,6 @@ void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
 
 extern u8 D_800AA760;
 extern u8 D_800AA76C;
-void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
 void func_151BC074(Actor *obj) {
@@ -778,8 +775,6 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x98];
     /* 0x98 */ Data15147A80 *data;
 } Fx15147A80;
-
-LightEffect *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),

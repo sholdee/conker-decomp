@@ -5,9 +5,6 @@
 
 struct DescParticleHead;
 
-void func_151617C4(LightEffect *effect);
-void func_151617E4(LightEffect *effect);
-
 typedef struct RayBeam RayBeam;
 
 /* Aim state of the beam's owner (owner->aim). */

@@ -47,7 +47,6 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_151B7328(ActorRef *, s32, s32, s32, s32);

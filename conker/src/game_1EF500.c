@@ -385,8 +385,6 @@ s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitP
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 /* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
 void func_151C2F48(Game1EF500Trail *trail) {
     Game1EF500TrailExt *ext;

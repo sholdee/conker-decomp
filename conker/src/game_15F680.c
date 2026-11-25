@@ -162,9 +162,6 @@ void func_151325C8(ModelParticle *particle) {
     }
 }
 
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
-
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
 ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
@@ -534,7 +531,6 @@ s32 func_15133510(Mtx *mtx, ModelParticle *particle) {
 
 typedef void (*ParticleEventFn)(ModelParticle *particle, void *data, u8 event);
 extern ParticleEventFn D_800899F8[];
-void func_151B9660(ModelParticle *particle);
 
 /* Event handler: follow an owner swap (0x2D), forget a removed owner (0), then pass the event on to the
  * variant's handler in D_800899F8. */

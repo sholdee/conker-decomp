@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
  * 5-12 func_15132A4C pieces flung in random directions, and a func_151602C0 flash. */
 void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {

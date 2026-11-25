@@ -46,8 +46,6 @@ static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 
 extern s32 (*D_8008FD00)(s32, u8);
 
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
 struct AimedBeam *func_150EEF80(Actor *, u8, u8, s32);
@@ -757,14 +755,11 @@ void func_150F0380(Glow *glow) {
 }
 
 void func_150F03E8(LightEffect *flash);
-void func_151617C4(LightEffect *flash);
 
 void func_150F0390(LightEffect *flash) {
     func_150F03E8(flash);
     func_151617C4(flash);
 }
-
-void func_151617E4(LightEffect *flash);
 
 void func_150F03BC(LightEffect *flash) {
     func_150F03E8(flash);

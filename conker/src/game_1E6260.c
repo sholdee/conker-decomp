@@ -1,28 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-
-/* Extra data of the swinging lamp particle: a sine swing whose amplitude and speed ramp at their rates
- * while `timer` runs (started by func_151B9660), then ease back toward their targets. */
-typedef struct {
-    /* 0x00 */ f32 out;         // current swing angle, used as the particle's roll
-    /* 0x04 */ f32 amp;
-    /* 0x08 */ f32 phase;
-    /* 0x0C */ f32 speed;
-    /* 0x10 */ f32 targetAmp;
-    /* 0x14 */ f32 targetSpeed;
-    /* 0x18 */ f32 timer;
-    /* 0x1C */ f32 ampRate;
-    /* 0x20 */ f32 speedRate;
-} LampSwing; // size 0x24
-
-/* The swinging lamp: a ModelParticle carrying a LampSwing as its data. */
-typedef struct {
-    /* 0x000 */ ModelParticle head;
-    /* 0x170 */ LampSwing swing;
-} LampParticle;
 
 /* Data of the swinging-light effect, stored at LightEffect.data by func_151B8DB0. */
 typedef struct {
@@ -38,8 +16,6 @@ typedef struct {
     /* 0x00 */ GlowShape shape;
     /* 0x5C */ u8 pad5C[4];
 } GlowParams60;
-
-LightEffect *func_1516037C(LightEffectHeader *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */

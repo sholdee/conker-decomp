@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 #define TRACK_NONE 999
 
@@ -21,8 +20,6 @@ typedef struct {
 } LampData; // size 0x24
 
 #define LAMP_DATA(model) ((LampData *)DYNMODEL_USERDATA(model))
-
-LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
@@ -119,9 +116,6 @@ void func_15108850(PointLight *light) {
         }
     }
 }
-
-void func_15108B80(DynModel *model);
-void func_15108BC0(DynModel *model);
 
 /* Update function 0 (first lamp model): advances the sway phases, then the track timer and height. */
 s32 func_15108AB4(DynModel *model) {
@@ -254,14 +248,6 @@ s32 func_15108E10(LightEffect *effect) {
     }
     return 1;
 }
-
-/* Payload of message 0x1D: follow a sequence track for a while. */
-typedef struct {
-    s32 track;
-    s32 duration;
-    u8 sceneTag;
-} LampTrackMsg;
-
 
 extern IdList2 D_80088C50;
 extern IdList2 D_80088C58;

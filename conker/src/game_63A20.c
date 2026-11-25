@@ -65,7 +65,6 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx[0].v.ob[2] = z;
 }
 
-Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
 extern Gfx D_80084350[];
 extern u8 D_800903BC[];
 

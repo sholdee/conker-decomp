@@ -2,15 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-
 extern f32 D_800A08E0;
-
-typedef struct {
-    TimedEffect base;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-} Obj150D1B40;
 
 void func_150D1B40(Obj150D1B40 *arg0) {
     f32 *p = &arg0->unk28;

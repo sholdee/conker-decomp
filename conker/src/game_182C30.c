@@ -56,10 +56,6 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     }
 }
 
-/* Creates a point light; func_1515F10C frees it. */
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
-void func_1515F10C();
-
 /*
  * Per-frame update. State 0 waits until the player's mv->context_b allows a marker and the player is out of
  * water, then plays sound 0x1EB and shows it for 120 frames (state 1). State 2 (finished) waits for unk75 to

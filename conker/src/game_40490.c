@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
+#define func_1515F1B0 func_1515F1B0_header
 #include "functions.h"
+#undef func_1515F1B0
 #include "variables.h"
+
+// matching: func_150150A4 calls func_1515F1B0 without its region argument
+RegionNode *func_1515F1B0();
 
 
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -812,7 +817,6 @@ s32 func_1501474C(TriggerZone *obj) {
     return 1;
 }
 extern u8 D_800A0938[][3];
-EffectHeader *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];

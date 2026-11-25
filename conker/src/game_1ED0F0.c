@@ -187,8 +187,6 @@ void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
     Vec3i header2;

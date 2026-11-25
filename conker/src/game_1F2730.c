@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
-
 /* Model-space points: func_151C5280 transforms D_800AAA90 and D_800AAAA8 through model part 0x46 into
  * world space; func_151C5588 passes D_800AAA90 and D_800AAA9C to func_15102B38. */
 const Vec3f D_800AAA90 = { -113.8288f, -14.082394f, 14.5422f };

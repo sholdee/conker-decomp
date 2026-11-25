@@ -2,9 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
-                         s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
-                         s32 arg9, s32 argA);
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {

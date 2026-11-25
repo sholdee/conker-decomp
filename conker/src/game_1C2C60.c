@@ -5,8 +5,6 @@
 void *memcpy(void *, const void *, u32);
 
 
-LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
 struct ListNode {
@@ -3188,9 +3186,6 @@ LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red
     }
     return light;
 }
-
-void func_151617C4(LightEffect *light);
-void func_151617E4(LightEffect *light);
 
 /* Light destroy: detaches it from its flame, then func_151617C4. */
 void func_1519C200(LightEffect *light) {

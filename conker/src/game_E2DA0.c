@@ -219,8 +219,6 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
-extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
 void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     LightEffectHeader header;

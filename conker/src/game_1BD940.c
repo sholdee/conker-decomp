@@ -5,8 +5,6 @@
 /* Object handled by func_15190454 (game_1BD8B0.c). */
 typedef struct Game1BD8B0Object Game1BD8B0Object;
 
-void func_151617E4(Game1BD8B0Object *obj);
-
 void func_15190490(Game1BD8B0Object *obj) {
     func_15190454(obj);
     func_151617E4(obj);

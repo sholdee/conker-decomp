@@ -18,7 +18,6 @@ u8 D_800BE617;
 #undef func_1000D758
 void func_1000D758(f32 x, f32 y, s32 zBits);
 #undef func_1515D6D0
-s32 func_1515D6D0(s32 gfx, s32 player);
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
 #define D_800BE9D0 D_800BE9D0_hdr
@@ -78,7 +77,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-void func_1515D69C(void);
 void func_15189118(s32);
 void func_15125628(void);
 s32 func_151F2CDC(void);
@@ -298,7 +296,6 @@ void func_1501905C(void) {
 }
 
 void func_15188B74(s32);
-void func_1515D6C8(void);
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.

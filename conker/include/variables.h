@@ -255,7 +255,7 @@ extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer m
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
 extern u8   D_80082BE4[5];
-extern void (*D_80082BFC[])(s32 arg0);
+extern void (*D_80082BFC[])(PointLight *light);
 extern void (*D_80082D60[])(void);
 extern void (*D_80082D90[])(void);
 extern void (*D_80082EA0[])(void);
@@ -487,9 +487,6 @@ extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
-extern const f32 D_800A6760[24];
-extern const f32 D_800A67C0[24];
-extern const f32 D_800A6820[24];
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
 extern s32 (*D_8008A200[])(EffectObj *, s8);
 extern s32 (*D_8008A23C[])(EffectObj *, s8);
 extern s32 (*D_8008A284[])(EffectObj *, s8);

@@ -11,9 +11,6 @@ extern Gfx *D_800B0E08;
 #define D_800D35E4 ((&D_800D35E8)[-1])
 
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
-Gfx *func_1515D914(Gfx *gfx, s16 view, s32 x, s32 y, s32 z, s32 arg5, s32 arg6, s32 arg7, void *arg8, void *arg9,
-                   s32 argA, s32 argB, s32 argC, void *argD);
-Gfx *func_1515E544(Gfx *gfx, s32 arg1, u8 arg2, u8 arg3, void *arg4);
 Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
 Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);

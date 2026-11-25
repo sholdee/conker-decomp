@@ -17,8 +17,6 @@ static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
-s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
 void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     BurstEffect *effect;
@@ -478,8 +476,6 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
         func_1516972C(obj);
     }
 }
-
-extern void func_1515F170(s32 arg0, u8 arg1);
 
 /* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {

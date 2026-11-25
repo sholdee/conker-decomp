@@ -1838,8 +1838,6 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     func_15145128(v, v, &len, &invLen);
     return 1;
 }
-void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
-void *func_1515E544(void *, s32, u8, u8, void *);
 /*
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
