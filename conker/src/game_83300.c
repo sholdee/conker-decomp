@@ -48,7 +48,8 @@ s32 func_15080738(s32 arg0);
 void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
 s32 func_15065A5C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
-void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
+struct Entry1505C1E4;
+void func_1505B9C4(struct127 *attacker, struct127 *victim, struct Entry1505C1E4 *base, struct Entry1505C1E4 *hit, u8 index, s32 attackerSlot, u8 damageMask);
 extern void (*D_80086694[])(void *, struct127 *, u8 *);
 s32 func_1506E46C(struct127 *, s32 *, s32);
 struct Entry1505C1E4;
@@ -2329,6 +2330,27 @@ void func_1505B5F8(struct127 *actor, f32 floorY) {
         }
     }
 }
+/* One hit-reaction entry (0x28 bytes): what happens to an actor hit by an attack. */
+typedef struct Entry1505C1E4 {
+    /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ s32 unk4; /* sound to play */
+    /* 0x08 */ u8 unk8;  /* handler index into D_80086694 */
+    /* 0x09 */ u8 pad9[6];
+    /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
+    /* 0x10 */ u8 unk10; /* added to the attacker's heading (high byte) */
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ f32 xzVelocity;
+    /* 0x18 */ f32 yVelocity;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ u8 unk22; /* 0x80: sets immune to & 0x3F */
+    /* 0x23 */ u8 pad23;
+    /* 0x24 */ u16 unk24; /* flags */
+    /* 0x26 */ u8 pad26[2];
+} Entry1505C1E4;
+
 extern f32 D_800CC270, D_800CC274, D_800CC278;
 extern u8 D_800BE616;
 extern s16 D_800D1582;
@@ -2336,197 +2358,198 @@ f32 func_1506AD30(struct127 *, f32, s32, s32);
 void func_151AE264(struct127 *);
 void func_151E5FF4(void *, struct127 *, u8);
 void func_15169070(s32, s32, void *, s32);
-#define B(p, o) (*(u8 *)((u8 *)(p) + (o)))
-#define H(p, o) (*(u16 *)((u8 *)(p) + (o)))
-#define ENT3 ((u8 *)arg3 + arg4 * 0x28)
-#define ENT2 ((u8 *)arg2 + arg4 * 0x28)
-#define W(p, o) (*(s32 *)((u8 *)(p) + (o)))
-#define F(p, o) (*(f32 *)((u8 *)(p) + (o)))
 
-void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6) {
-    u8 sp67;
-    s32 temp_a2;
-    struct127 *temp_v1_3;
-    s32 temp_a3;
+/*
+ * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
+ * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
+ */
+void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, Entry1505C1E4 *hit, u8 index,
+                   s32 attackerSlot, u8 damageMask) {
+    u8 reaction;
+    s32 slot;
+    struct127 *savedActor;
+    s32 savedIdx;
     s16 id;
     u8 tu;
     s32 v;
-    u8 *pv;
-    u8 *a1;
-    struct S { void *a; u8 b; } sp40;
+    struct126 *movement;
+    struct127 *other;
+    struct S { void *a; u8 b; } msg;
 
-    if (B(ENT3, 0) & 0x80) {
-        sp67 = B(ENT3, 0) & 0x7F;
+    if (hit[index].unk0 & 0x80) {
+        reaction = hit[index].unk0 & 0x7F;
     } else {
-        sp67 = B(ENT2, 0) & 0x7F;
+        reaction = base[index].unk0 & 0x7F;
     }
-    arg1->unk10B = 0;
-    if ((H(ENT2, 0x24) & 1) && (arg1->stunned != 0)) {
-        arg6 = 0;
+    victim->unk10B = 0;
+    if ((base[index].unk24 & 1) && (victim->stunned != 0)) {
+        damageMask = 0;
     }
-    if (!(B(ENT3, 0xF) & 0x40)) {
-        arg1->unk76 = H(arg0, 0x76) + (B(ENT3, 0x10) << 8);
-        if (H(ENT2, 0x24) & 0x10) {
-            arg1->unk76 = func_1505A630(arg1->x_position - F(arg0, 0x14), F(arg0, 0x1C) - arg1->z_position, 0);
+    if (!(hit[index].unkF & 0x40)) {
+        victim->unk76 = attacker->unk76 + (hit[index].unk10 << 8);
+        if (base[index].unk24 & 0x10) {
+            victim->unk76 = func_1505A630(victim->x_position - attacker->x_position,
+                                          attacker->z_position - victim->z_position, 0);
         }
-        if (B(arg0, 4) == 0x44) {
-            arg1->unk76 = 0;
+        if (attacker->id == 0x44) {
+            victim->unk76 = 0;
         }
     }
-    if ((B(ENT2, 0xF) | B(ENT3, 0xF)) & 0x20) {
-        arg1->unk10B |= 2;
+    if ((base[index].unkF | hit[index].unkF) & 0x20) {
+        victim->unk10B |= 2;
     }
-    arg1->unk3A = 0;
-    arg1->unk109 = B(ENT3, 0x20);
-    arg1->y_velocity = F(ENT3, 0x18);
-    arg1->xz_velocity = F(ENT3, 0x14);
-    arg1->gravity = F(ENT3, 0x1C);
-    arg1->unk100 &= 0xD6;
-    v = B(ENT3, 0xF) & arg6;
-    if (v < arg1->health) {
-        arg1->health -= v;
+    victim->unk3A = 0;
+    victim->unk109 = hit[index].unk20;
+    victim->y_velocity = hit[index].yVelocity;
+    victim->xz_velocity = hit[index].xzVelocity;
+    victim->gravity = hit[index].gravity;
+    victim->unk100 &= 0xD6;
+    v = hit[index].unkF & damageMask;
+    if (v < victim->health) {
+        victim->health -= v;
     } else {
-        arg1->health = 0;
+        victim->health = 0;
     }
-    if (arg1->interaction_state == 1) {
+    if (victim->interaction_state == 1) {
         {
-            extern s32 D_800ZZZZ;
-            temp_v1_3 = D_800D154C;
-            temp_a3 = D_800C3E78;
-            D_800D154C = arg1;
-            D_800C3E78 = (arg1 - D_800CC2D0);
-            pv = (u8 *)D_800CC2D0[D_800C3E78].unk31C;
-            if (B(pv, 0x4E) != 2) {
-                B(pv, 0x4E) = 0;
+            extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
+            savedActor = D_800D154C;
+            savedIdx = D_800C3E78;
+            D_800D154C = victim;
+            D_800C3E78 = (victim - D_800CC2D0);
+            movement = D_800CC2D0[D_800C3E78].unk31C;
+            if (movement->unk4E != 2) {
+                movement->unk4E = 0;
             }
         }
-        func_1506AD30(arg1, 800.0f, 1, temp_a3);
-        D_800D154C = temp_v1_3;
-        D_800C3E78 = temp_a3;
-        arg1->unkF8 &= 0xFEFF7FFF;
-        B(arg1->unk31C, 0x95) = 0;
-        B(arg1->unk31C, 0x6B) = 0;
-        if (B(arg1->unk31C, 0x98) != 0) {
-            func_151AE264(arg1);
+        func_1506AD30(victim, 800.0f, 1, savedIdx);
+        D_800D154C = savedActor;
+        D_800C3E78 = savedIdx;
+        victim->unkF8 &= 0xFEFF7FFF;
+        victim->unk31C->unk95 = 0;
+        victim->unk31C->unk6B = 0;
+        if (victim->unk31C->pad98[0] != 0) {
+            func_151AE264(victim);
         }
-        B(arg1->unk31C, 0x54) = 0;
-        tu = arg1->unk65;
-        B(arg1, 0x137) = 0;
+        victim->unk31C->unk54 = 0;
+        tu = victim->unk65;
+        ((u8 *)&victim->pad134)[3] = 0;
         if (tu != 0) {
-            extern s32 D_800ZZZZ;
+            extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
             v = tu - 1;
-            a1 = (u8 *)&D_800CC2D0[(u8)v];
+            other = &D_800CC2D0[(u8)v];
 
-            if (((0x8A != B(a1, 4)) && (0x23 != B(a1, 4))) || (arg1->health == 0) || ((D_800BE616 != 0) && (arg1->y_velocity > 30.0f))) {
-                if (v) {}
+            if (((0x8A != other->id) && (0x23 != other->id)) || (victim->health == 0) ||
+                ((D_800BE616 != 0) && (victim->y_velocity > 30.0f))) {
+                if (v) {} // matching: extra use of v before it is reused
                 v = 0;
-                if (0x8A == B(a1, 4)) {
+                if (0x8A == other->id) {
                     v = 1;
                 }
-                if (B(a1, 4) == 0x23) {
+                if (other->id == 0x23) {
                     v = 0xA;
                 }
-                if (B(a1, 4) == 0xC) {
+                if (other->id == 0xC) {
                     v = 0xF;
                 }
                 if (v != 0) {
-                    B(a1, 0x232) = v;
-                    W(a1, 0x218) = 0;
+                    other->unk232 = v;
+                    other->unk218 = NULL;
                 }
-                B(a1, 0x2FC) = 0;
-                B(a1, 0x13C) = 0;
-                arg1->unk239 = 0;
-                arg1->unk65 = 0;
+                other->pad2FC[0] = 0;
+                other->unk13C = 0;
+                victim->unk239 = 0;
+                victim->unk65 = 0;
             }
         }
     }
-    v = B(ENT3, 8);
+    v = hit[index].unk8;
     if (v == 0) {
-        v = B(ENT2, 8);
+        v = base[index].unk8;
     }
-    if (sp67 != 0x27) {
-        D_80086694[v](arg0, arg1, &sp67);
+    if (reaction != 0x27) {
+        D_80086694[v](attacker, victim, &reaction);
     }
     if (D_800BE616 != 0) {
-        tu = sp67;
-        v = B(arg0, 0x124);
-        a1 = v != 0 ? (u8 *)&D_800CC2D0[v - 1] : arg0;
-        func_151E5FF4(a1, arg1, tu);
+        tu = reaction;
+        v = attacker->unk124;
+        other = v != 0 ? &D_800CC2D0[v - 1] : attacker;
+        func_151E5FF4(other, victim, tu);
     }
     {
-        extern s32 D_800ZZZZ;
-        sp40.a = arg0;
-        sp40.b = B(arg0, 0x3B);
-        func_15169070(0, 0x68, (void *)(s32)&sp40, 2);
-        sp40.a = arg1;
-        sp40.b = arg1->unique_id;
-        func_15169070(0, 0x68, (void *)(s32)&sp40, 2);
+        extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
+        msg.a = attacker;
+        msg.b = attacker->unique_id;
+        func_15169070(0, 0x68, (void *)(s32)&msg, 2);
+        msg.a = victim;
+        msg.b = victim->unique_id;
+        func_15169070(0, 0x68, (void *)(s32)&msg, 2);
     }
-    if (W(ENT2, 4) != 0) {
-        D_800D1580 = W(ENT2, 4);
-        if (func_1506E46C(arg1, &D_800D1580, 0) != 0) {
-            func_10010630(D_800D1582, arg1, 0x6D60, 0x12C, 0x708);
+    if (base[index].unk4 != 0) {
+        D_800D1580 = base[index].unk4;
+        if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
+            func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
         }
     } else {
-        if (W(ENT3, 4) != 0) {
-            D_800D1580 = W(ENT3, 4);
-            if (func_1506E46C(arg1, &D_800D1580, 0) != 0) {
-                func_10010630(D_800D1582, arg1, 0x6D60, 0x12C, 0x708);
+        if (hit[index].unk4 != 0) {
+            D_800D1580 = hit[index].unk4;
+            if (func_1506E46C(victim, &D_800D1580, 0) != 0) {
+                func_10010630(D_800D1582, victim, 0x6D60, 0x12C, 0x708);
             }
         }
     }
-    B(arg0, 0x107) = 0x3C;
-    if ((D_800BE616 == 0) || (arg1->interaction_state != 1)) {
-        arg1->unk21C = 0;
-        if (H(ENT2, 0x24) & 0x100) {
-            arg1->unk218 = NULL;
+    attacker->unk107 = 60;
+    if ((D_800BE616 == 0) || (victim->interaction_state != 1)) {
+        victim->unk21C = 0;
+        if (base[index].unk24 & 0x100) {
+            victim->unk218 = NULL;
         }
     }
-    temp_a2 = arg5 - 1;
-    arg1->unkD0 = 0;
-    v = B(arg0, 0x124);
+    slot = attackerSlot - 1;
+    victim->unkD0 = 0;
+    v = attacker->unk124;
     if (v) {
-        arg1->pad10A = v + 0x7F;
+        victim->pad10A = v + 0x7F;
     } else {
-        arg1->pad10A = D_800C3E78 | 0x80;
+        victim->pad10A = D_800C3E78 | 0x80;
     }
-    B(arg0, 0x108) = temp_a2 | 0x80;
-    if (sp67 != 0x27) {
-        if ((H(ENT2, 0x24) & 0x40) && (arg1->interaction_state == 1)) {
-            *(s16 *)((u8 *)D_800CC2D0[temp_a2].unk31C + 0x46) = 0x1F40;
+    attacker->pad108 = slot | 0x80;
+    if (reaction != 0x27) {
+        if ((base[index].unk24 & 0x40) && (victim->interaction_state == 1)) {
+            *(s16 *)((u8 *)D_800CC2D0[slot].unk31C + 0x46) = 8000;
         } else {
-            v = arg1->unk23B;
+            v = victim->unk23B;
             if (v != 0) {
-                sp67 = v;
+                reaction = v;
             }
-            arg1->stunned = 0xFE;
-            arg1->unk105 = 0;
-            arg1->unk106 = func_1505E7CC(sp67, arg1);
-            arg1->unk84.uh = 0xFFFF;
-            func_1505E874(temp_a2, arg1);
-            if (H(ENT2, 0x24) & 0x200) {
-                arg1->unk10B |= 0x20;
+            victim->stunned = 0xFE;
+            victim->unk105 = 0;
+            victim->unk106 = func_1505E7CC(reaction, victim);
+            victim->unk84.uh = 0xFFFF;
+            func_1505E874(slot, victim);
+            if (base[index].unk24 & 0x200) {
+                victim->unk10B |= 0x20;
             }
-            if (arg1->y_velocity > 0.0f) {
-                arg1->unk28 += 0.1000000015f;
+            if (victim->y_velocity > 0.0f) {
+                victim->unk28 += 0.1000000015f;
             }
-            if (H(ENT2, 0x24) & 8) {
-                arg1->unk10B |= 0x40;
-                D_800CC270 = F(arg0, 0x14);
-                D_800CC274 = F(arg0, 0x1C);
-                D_800CC278 = F(arg0, 0x18);
+            if (base[index].unk24 & 8) {
+                victim->unk10B |= 0x40;
+                D_800CC270 = attacker->x_position;
+                D_800CC274 = attacker->z_position;
+                D_800CC278 = attacker->y_position;
             }
         }
-        if (H(ENT2, 0x24) & 2) {
-            arg1->unk10B |= 0x80;
+        if (base[index].unk24 & 2) {
+            victim->unk10B |= 0x80;
         }
     }
-    if ((H(ENT2, 0x24) & 0x400) || (H(ENT3, 0x24) & 0x400)) {
-        arg1->unk10B |= 4;
+    if ((base[index].unk24 & 0x400) || (hit[index].unk24 & 0x400)) {
+        victim->unk10B |= 4;
     }
-    v = B(ENT2, 0x22);
+    v = base[index].unk22;
     if (v & 0x80) {
-        arg1->immune = v & 0x3F;
+        victim->immune = v & 0x3F;
     }
 }
 
@@ -2563,15 +2586,6 @@ typedef struct {
     u8 unk3;
 } Rule1505C1E4;
 
-typedef struct Entry1505C1E4 {
-    u8 unk0;
-    u8 pad1[3];
-    s32 unk4;
-    u8 unk8;
-    u8 pad9[6];
-    u8 unkF;
-    u8 pad10[0x18];
-} Entry1505C1E4; /* size 0x28 */
 
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
@@ -2736,7 +2750,7 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg
         return arg5;
     }
     i = arg4;
-    func_1505B9C4(arg0, arg1, (s32)arg2, (s32)entry, arg3, i, arg6);
+    func_1505B9C4(arg0, arg1, arg2, entry, arg3, i, arg6);
     arg5 |= 1 << (i + 0x1F);
     return arg5;
 }
@@ -2999,7 +3013,7 @@ s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
     if (arg1 & 0x80000) {
         ret = func_1505C1E4(&D_800D121C, arg0, sp30, arg1 & 0xFF, temp_lo + 1, 0, 7);
     } else {
-        func_1505B9C4(&D_800D121C, arg0, (s32)sp30, (s32)sp30, arg1 & 0xFF, temp_lo + 1, 7);
+        func_1505B9C4(&D_800D121C, arg0, sp30, sp30, arg1 & 0xFF, temp_lo + 1, 7);
     }
     return ret;
 }
