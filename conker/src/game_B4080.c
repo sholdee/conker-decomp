@@ -2298,9 +2298,13 @@ void func_1508BC20(void) {
     }
 }
 
+/*
+ * For every player on unk4's team, picks the reachable opponent with the lowest target
+ * distance, doubling the cost per teammate already on it (kinds 2/3 choose first).
+ */
 s32 func_1508BF14(void) {
-    s32 numSlots;
-    s32 owner;
+    s32 numPlayers;
+    s32 myTeam;
     s32 pass;
     s32 myIdx;
     s32 i;
@@ -2309,42 +2313,42 @@ s32 func_1508BF14(void) {
     s32 cost;
     s32 bestCost;
     s8 counts[16];
-    s32 *owners;
+    s32 *teams;
     s32 *links;
     s32 *costs;
-    s32 *statuses;
-    s32 *weights;
+    s32 *kinds;
+    s32 *active;
     s32 *bestCosts;
     s32 *bestSlots;
     s32 bestSlot;
     s32 n;
 
     myIdx = D_800D23B0->unk4;
-    numSlots = D_800D23B0->numPlayers;
-    statuses = D_800D23B0->unk15C;
-    weights = D_800D23B0->unk39C;
-    owners = D_800D23B0->team;
+    numPlayers = D_800D23B0->numPlayers;
+    kinds = D_800D23B0->unk15C;
+    active = D_800D23B0->unk39C;
+    teams = D_800D23B0->team;
     bestCosts = D_800D23B0->unk45C;
     bestSlots = D_800D23B0->unk49C;
     links = D_800D23B0->targets[0];
     costs = D_800D23B0->targetDists[0];
-    owner = owners[myIdx];
+    myTeam = teams[myIdx];
 
-    for (i = 0; i < numSlots; i++) counts[i] = 0;
+    for (i = 0; i < numPlayers; i++) counts[i] = 0;
 
     for (pass = 0; pass != 2; pass++) {
-        for (i = 0; i < numSlots; i++) {
+        for (i = 0; i < numPlayers; i++) {
             n = 0;
-            if ((statuses[i] == 2) || (statuses[i] == 3)) {
+            if ((kinds[i] == 2) || (kinds[i] == 3)) {
                 n = 1;
             }
             if ((n && (pass == 0)) || (!n && (pass != 0))) {
-                if (owners[i] == owner) {
+                if (teams[i] == myTeam) {
                     bestSlot = -1;
                     bestCost = 10000000;
-                    for (j = 0; j < numSlots; j++) {
-                        if (weights[j] > 0) {
-                            if (owners[j] != owner) {
+                    for (j = 0; j < numPlayers; j++) {
+                        if (active[j] > 0) {
+                            if (teams[j] != myTeam) {
                                 cost = -1;
                                 n = j * 16;
                                 end = n + 16;
@@ -2409,7 +2413,8 @@ s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
 extern s16 D_800872C4[];
 extern s8 D_800E0BD0;
 
-void func_1508C1A4(s32 arg0, s32 arg1) {
+/* Line-of-sight test between players a and b; sets their visibility bits in unk16C0. */
+void func_1508C1A4(s32 a, s32 b) {
     s32 blocked;
     s32 seen;
     GameB4080SightActor *from;
@@ -2431,8 +2436,8 @@ void func_1508C1A4(s32 arg0, s32 arg1) {
 
     seen = 0;
     blocked = 0;
-    from = func_1505EEF4(arg0 & 0xFFFF0FFF);
-    to = func_1505EEF4(arg1 & 0xFFFF0FFF);
+    from = func_1505EEF4(a & 0xFFFF0FFF);
+    to = func_1505EEF4(b & 0xFFFF0FFF);
     if (from != NULL && to != NULL) {
         x0 = from->x;
         z0 = from->z;
@@ -2483,16 +2488,21 @@ void func_1508C1A4(s32 arg0, s32 arg1) {
         }
     }
     if (blocked) {
-        D_800D23B0->unk16C0[arg0] |= 1 << arg1;
-        D_800D23B0->unk16C0[arg1] |= 1 << arg0;
+        D_800D23B0->unk16C0[a] |= 1 << b;
+        D_800D23B0->unk16C0[b] |= 1 << a;
     }
     if (seen) {
-        D_800D23B0->unk16C0[arg0] |= 0x10000 << arg1;
-        D_800D23B0->unk16C0[arg1] |= 0x10000 << arg0;
+        D_800D23B0->unk16C0[a] |= 0x10000 << b;
+        D_800D23B0->unk16C0[b] |= 0x10000 << a;
     }
 }
 
-s32 func_1508C5B8(s32 arg0, s32 arg1) {
+/*
+ * Refreshes the line-of-sight bits (unk16C0) between players: if `checks` is nonzero,
+ * each human against its three nearest opponents, then `checks` round-robin pairs.
+ * Returns player's bits.
+ */
+s32 func_1508C5B8(s32 player, s32 checks) {
     u8 cur;
     u8 other;
     s32 i;
@@ -2513,17 +2523,18 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
     cur = D_800D23B0->unk1700;
     other = D_800D23B0->unk1701;
     list = D_800D23B0->team;
-    if (arg1 != 0) {
+    if (checks != 0) {
         for (i = 0; i < D_8008FD90; i++) {
             x0 = D_800CC2D0[i].x_position;
             x1 = D_800CC2D0[i].x_position;
-            for (k = 0; &dist[k] < &dist[3]; k++) {
+            for (k = 0; k < 3; k++) {
                 idx[k] = -1;
                 dist[k] = 900000000.0f;
             }
             for (k = D_8008FD90; k < D_8008FD8C; k++) {
                 if (list[i] != list[k] &&
                     !(D_800D23B0->unk16C0[i] & (0x10001 << k))) {
+                    /* BUG (original game): measures player i against itself, not k */
                     dx = x0 - D_800CC2D0[i].x_position;
                     dz = x1 - D_800CC2D0[i].z_position;
                     if (i == D_800D23B0->unk11C[k]) {
@@ -2551,7 +2562,7 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
             }
         }
     }
-    if (arg1 != 0) {
+    if (checks != 0) {
         obj = &D_800CC2D0[cur];
         do {
             team = *(u8 *)&obj->pad128;
@@ -2574,11 +2585,11 @@ s32 func_1508C5B8(s32 arg0, s32 arg1) {
             } while (m < 64 && ((D_800D18A0 & mask) ||
                                     team == *(u8 *)&D_800CC2D0[other].pad128));
             func_1508C1A4(cur, other);
-        } while (--arg1 != 0);
+        } while (--checks != 0);
     }
     D_800D23B0->unk1700 = cur;
     D_800D23B0->unk1701 = other;
-    return D_800D23B0->unk16C0[arg0];
+    return D_800D23B0->unk16C0[player];
 }
 
 s32 func_1508C9CC(void) {
@@ -2612,8 +2623,9 @@ s32 func_1508C9CC(void) {
     return ret;
 }
 
+/* Advances unk1703 to the next human player and returns it. */
 s32 func_1508CA88(void) {
-    s8 **p2;
+    MpGame **p2; // matching: reading back through a pointer to D_800D23B0
     s8 temp;
 
     p2 = &D_800D23B0;
@@ -2621,7 +2633,7 @@ s32 func_1508CA88(void) {
     temp = D_800D23B0->unk1703;
     if (temp >= D_8008FD90) {
         D_800D23B0->unk1703 = 0;
-        temp = (*p2)[0x1703];
+        temp = (*p2)->unk1703;
     }
     return temp;
 }
