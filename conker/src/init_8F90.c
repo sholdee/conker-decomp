@@ -90,6 +90,10 @@
 #define FRAME_SAMPLE_ALIGN 184
 #define EXTRA_SAMPLES      84
 
+/* libaudio's alLink() and alUnlink(), inlined for any node type with next/prev links. */
+#define LIST_LINK(type, element, after) { type *ln = (element); type *to = (after); ln->next = to->next; ln->prev = to; if (to->next != NULL) { to->next->prev = ln; } to->next = ln; }
+#define LIST_UNLINK(type, element) { type *ln = (element); if (ln->next != NULL) { ln->next->prev = ln->prev; } if (ln->prev != NULL) { ln->prev->next = ln->next; } }
+
 typedef struct AudioInfo_s AudioInfo;
 
 typedef union {
@@ -221,6 +225,8 @@ extern OSMesg D_8003E5E8[8];
 extern OSMesgQueue D_8003E608;
 extern OSMesg D_8003E620[8];
 extern BankState D_800406A0;
+/* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
+/* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
 extern BankRecord *D_800406A4; /* D_800406A0.loadedList */
 extern BankRecord *D_800406B0; /* D_800406A0.releaseList */
 extern DMABuffer D_800406B8[NUM_DMA_BUFFERS];
@@ -292,16 +298,7 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     D_800406B8[0].prev = NULL;
     D_800406B8[0].next = NULL;
     for (i = 0; i < NUM_DMA_BUFFERS - 1; i++) {
-        {
-            DMABuffer *ln = &D_800406B8[i + 1];
-            DMABuffer *to = &D_800406B8[i];
-            ln->next = to->next;
-            ln->prev = to;
-            if (to->next != NULL) {
-                to->next->prev = ln;
-            }
-            to->next = ln;
-        }
+        LIST_LINK(DMABuffer, &D_800406B8[i + 1], &D_800406B8[i]);
         D_800406B8[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
     }
     D_800406B8[i].ptr = alHeapAlloc(config->heap, 1, DMA_BUFFER_LENGTH);
@@ -310,16 +307,7 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     D_80040AC8[0].prev = NULL;
     D_80040AC8[0].next = NULL;
     for (i = 0; i < NUM_BANK_RECORDS - 1; i++) {
-        {
-            BankRecord *ln = &D_80040AC8[i + 1];
-            BankRecord *to = &D_80040AC8[i];
-            ln->next = to->next;
-            ln->prev = to;
-            if (to->next != NULL) {
-                to->next->prev = ln;
-            }
-            to->next = ln;
-        }
+        LIST_LINK(BankRecord, &D_80040AC8[i + 1], &D_80040AC8[i]);
         D_80040AC8[i].buffer = NULL;
     }
     D_80040AC8[i].buffer = NULL;
@@ -494,23 +482,9 @@ s32 func_100097CC(s32 addr, s32 len, void *state) {
         return 0;
     }
     D_80040F78.firstFree = dmaPtr->next;
-    if (dmaPtr->next != NULL) {
-        dmaPtr->next->prev = dmaPtr->prev;
-    }
-    if (dmaPtr->prev != NULL) {
-        dmaPtr->prev->next = dmaPtr->next;
-    }
+    LIST_UNLINK(DMABuffer, dmaPtr);
     if (lastDmaPtr != NULL) {
-        {
-            DMABuffer *ln = dmaPtr;
-            DMABuffer *to = lastDmaPtr;
-            ln->next = to->next;
-            ln->prev = to;
-            if (to->next != NULL) {
-                to->next->prev = ln;
-            }
-            to->next = ln;
-        }
+        LIST_LINK(DMABuffer, dmaPtr, lastDmaPtr);
     } else {
         firstUsed = D_80040F78.firstUsed;
         if (firstUsed != NULL) {
@@ -565,26 +539,9 @@ void func_100099BC(void) {
             if (D_80040F78.firstUsed == dmaPtr) {
                 D_80040F78.firstUsed = nextPtr;
             }
-            {
-                DMABuffer *ln = dmaPtr;
-
-                if (ln->next != NULL) {
-                    ln->next->prev = ln->prev;
-                }
-                if (ln->prev != NULL) {
-                    ln->prev->next = ln->next;
-                }
-            }
+            LIST_UNLINK(DMABuffer, dmaPtr);
             if (D_80040F78.firstFree != NULL) {
-                DMABuffer *ln = dmaPtr;
-                DMABuffer *to = D_80040F78.firstFree;
-
-                ln->next = to->next;
-                ln->prev = to;
-                if (to->next != NULL) {
-                    to->next->prev = ln;
-                }
-                to->next = ln;
+                LIST_LINK(DMABuffer, dmaPtr, D_80040F78.firstFree);
             } else {
                 D_80040F78.firstFree = dmaPtr;
                 dmaPtr->next = NULL;
@@ -640,21 +597,9 @@ void func_10009BE4(BankRecord *record) {
         if (record == D_800406A0.loadedList) {
             D_800406A4 = record->next;
         }
-        if (record->next != NULL) {
-            record->next->prev = record->prev;
-        }
-        if (record->prev != NULL) {
-            record->prev->next = record->next;
-        }
+        LIST_UNLINK(BankRecord, record);
         if (D_800406A0.releaseList != NULL) {
-            BankRecord *to = D_800406A0.releaseList;
-
-            record->next = to->next;
-            record->prev = to;
-            if (to->next != NULL) {
-                to->next->prev = record;
-            }
-            to->next = record;
+            LIST_LINK(BankRecord, record, D_800406A0.releaseList);
         } else {
             D_800406B0 = record;
             record->next = NULL;
@@ -704,43 +649,17 @@ void *func_10009CBC(u32 *slot, s32 mode) {
                 if (reuse == D_800406A0.loadedList) {
                     D_800406A4 = reuse->next;
                 }
-                {
-                    BankRecord *ln = reuse;
-
-                    if (ln->next != NULL) {
-                        ln->next->prev = ln->prev;
-                    }
-                    if (ln->prev != NULL) {
-                        ln->prev->next = ln->next;
-                    }
-                }
+                LIST_UNLINK(BankRecord, reuse);
             }
         } else {
             D_800406A0.freeList = record->next;
-            {
-                BankRecord *ln = record;
-
-                if (ln->next != NULL) {
-                    ln->next->prev = ln->prev;
-                }
-                if (ln->prev != NULL) {
-                    ln->prev->next = ln->next;
-                }
-            }
+            LIST_UNLINK(BankRecord, record);
         }
         if (record != NULL) {
             record->next = NULL;
             record->prev = NULL;
             if (D_800406A0.pendingList != NULL) {
-                BankRecord *ln = record;
-                BankRecord *to = D_800406A0.pendingList;
-
-                ln->next = to->next;
-                ln->prev = to;
-                if (to->next != NULL) {
-                    to->next->prev = ln;
-                }
-                to->next = ln;
+                LIST_LINK(BankRecord, record, D_800406A0.pendingList);
             } else {
                 D_800406A0.pendingList = record;
                 record->next = NULL;
@@ -823,28 +742,11 @@ void func_1000A03C(void) {
                     if (record == D_800406A0.pendingList) {
                         D_800406A0.pendingList = record->next;
                     }
-                    {
-                        BankRecord *ln = record;
-
-                        if (ln->next != NULL) {
-                            ln->next->prev = ln->prev;
-                        }
-                        if (ln->prev != NULL) {
-                            ln->prev->next = ln->next;
-                        }
-                    }
+                    LIST_UNLINK(BankRecord, record);
                     record->next = NULL;
                     record->prev = NULL;
                     if (D_800406A0.loadedList != NULL) {
-                        BankRecord *ln = record;
-                        BankRecord *to = D_800406A0.loadedList;
-
-                        ln->next = to->next;
-                        ln->prev = to;
-                        if (to->next != NULL) {
-                            to->next->prev = ln;
-                        }
-                        to->next = ln;
+                        LIST_LINK(BankRecord, record, D_800406A0.loadedList);
                     } else {
                         D_800406A0.loadedList = record;
                         record->next = NULL;
@@ -892,16 +794,7 @@ void func_1000A03C(void) {
                 if (record == D_800406A0.releaseList) {
                     D_800406A0.releaseList = next;
                 }
-                {
-                    BankRecord *ln = record;
-
-                    if (ln->next != NULL) {
-                        ln->next->prev = ln->prev;
-                    }
-                    if (ln->prev != NULL) {
-                        ln->prev->next = ln->next;
-                    }
-                }
+                LIST_UNLINK(BankRecord, record);
                 if (D_800406A0.freeList != NULL) {
                     BankRecord *ln = record;
                     BankRecord *to = D_800406A0.freeList;
@@ -933,7 +826,6 @@ void func_1000A03C(void) {
 void func_1000A348(void) {
     BankRecord *record;
     BankRecord *next;
-    BankRecord *to;
     u32 *ownerSlot;
 
     record = D_800406A0.loadedList;
@@ -947,25 +839,9 @@ void func_1000A348(void) {
                 if (record == D_800406A0.loadedList) {
                     D_800406A0.loadedList = next;
                 }
-                if (record->next != NULL) {
-                    record->next->prev = record->prev;
-                }
-                if (record->prev != NULL) {
-                    record->prev->next = record->next;
-                }
-                to = D_800406A0.releaseList;
-                if (to != NULL) {
-                    BankRecord *ln = record;
-                    BankRecord *after;
-
-                    ln->next = to->next;
-                    ln->prev = to;
-                    after = to;
-                    to = after->next; // matching: dead store; IDO then keeps `after` in its own register
-                    if (after->next != NULL) {
-                        after->next->prev = ln;
-                    }
-                    after->next = ln;
+                LIST_UNLINK(BankRecord, record);
+                if (D_800406A0.releaseList != NULL) {
+                    LIST_LINK(BankRecord, record, D_800406A0.releaseList);
                 } else {
                     D_800406A0.releaseList = record;
                     record->next = NULL;
