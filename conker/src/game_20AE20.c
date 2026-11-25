@@ -179,7 +179,6 @@ extern char D_800AB7FC[];
 
 void func_15042D94(s32, s32, u8, char *, ...);
 void func_15042E3C(char *, ...);
-s32 func_1517EFDC(void);
 s32 func_151DDB94(s32 arg0);
 void func_151DDBA0(void);
 void func_151DE85C(void);

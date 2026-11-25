@@ -14,8 +14,6 @@ extern void func_1509C3A0(void);
 void func_1507CD0C(Actor *obj);
 void func_1507D4F8(s32);
 void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
-void func_1517EE40(s32, s32, s32, s32, s8, s32);
-void func_1517F814(s32, f32, f32, f32, s32);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
@@ -290,7 +288,6 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 
 void func_150054C4(Camera *, u32, s32, s32);
 void func_15085430(Actor *, s32, s32);
-void func_15181DC8(s32);
 void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 void func_15088D58(Actor *);
 

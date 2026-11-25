@@ -55,8 +55,6 @@ void func_150B6BC0(s32 unused) {
     }
 }
 
-struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
-
 /* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */
 void func_150B6C90(void) {
     s32 i;

@@ -900,22 +900,6 @@ Gfx *func_15181EE0(Gfx *gfx) {
     return gfx;
 }
 
-/* Effect data of a colour flash spawned by func_15182670. */
-typedef struct {
-    /* 0x0 */ u8 r;
-    /* 0x1 */ u8 g;
-    /* 0x2 */ u8 b;
-    /* 0x3 */ u8 alpha;
-    /* 0x4 */ u8 view;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ s16 alphaStep; // alpha per remaining frame
-} FlashData;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FlashData data;
-} FlashEffect;
-
 void *memcpy(void *, const void *, u32);
 
 /* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over

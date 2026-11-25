@@ -4,7 +4,6 @@
 
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
-extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
 
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
 void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {

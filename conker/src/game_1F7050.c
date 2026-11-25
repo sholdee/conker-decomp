@@ -12,7 +12,6 @@ extern void func_15145974(Vec3f *, f32 *, f32 *);
 
 extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 extern void func_1515572C(s32, s32);
-extern void func_151A561C(s32, s32);
 
 extern u8 D_800CBFA8[][0x32C];
 
@@ -1116,7 +1115,7 @@ void func_151CCE94(Camera *player) {
 
     if (D_800BE616 != 0) {
         owner = player;
-        effect = func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
+        effect = (SightOwnedEffect *)func_151A4FD0(0, 0, 0, 0xFF, 0, player->CNumber, 1, 4);
         if (effect != NULL) {
             memcpy(&effect->player, &owner, sizeof(owner));
         }

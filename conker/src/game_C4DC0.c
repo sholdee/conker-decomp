@@ -88,7 +88,6 @@ extern s32 func_15086D48(s32);
 extern void func_1510E7A4(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 extern void func_1514DE94(Actor *);
 extern void func_15172D28(Actor *, s32);
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 extern void func_1518BA90(Actor *, s32, s32);
 extern void func_1518BBF4(Actor *);
 extern void func_15193660(Actor *, s32, s32);

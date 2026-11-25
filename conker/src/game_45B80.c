@@ -32,7 +32,6 @@ Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
 Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
 void func_1517D7B0(Gfx **gfx, s32 arg1);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
-Gfx *func_151D6778(Gfx *gfx);
 Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
 Gfx *func_15035FE8(Gfx *gfx, s32 player);
 Gfx *func_15043384(Gfx *gfx);
@@ -342,9 +341,6 @@ void func_1502BEE4(void);
 void func_1502C1A4(void);
 void func_150636F0(void);
 void func_151670C0(void);
-void func_151814FC(void);
-void func_1517F75C(void);
-void func_1517F7B4(void);
 void func_15036148(void);
 void func_1515D6C8(void);
 void func_1516706C(void);
@@ -514,10 +510,6 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     return func_151674F8(gfx, 2, player, 1);
 }
 
-Gfx *func_151D5E90(Gfx *gfx, s32 image, s32 arg2, s32 arg3);
-void func_151D61B0(s32 image);
-Gfx *func_15181EE0(Gfx *gfx);
-Gfx *func_1517F564(Gfx *gfx);
 Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
@@ -563,9 +555,6 @@ Gfx *func_150198FC(Gfx *gfx) {
     return func_15096934(gfx);
 }
 
-Gfx *func_1517F4D8(Gfx *gfx, s32 player);
-Gfx *func_1517F3A0(Gfx *gfx, s32 player);
-Gfx *func_15180580(Gfx *gfx, s32 player);
 Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 
 /* Draws player's late pass (group 4 display lists) into their viewport. */

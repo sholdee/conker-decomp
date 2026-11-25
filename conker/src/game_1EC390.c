@@ -276,9 +276,6 @@ void func_151BF340(u8 owner, s32 kind) {
     }
 }
 
-s32 func_1517EF00(s32);
-s32 func_15181CC8(s32);
-
 /* Update of func_151BF340's counter. It waits until D_800C35EA != 1, func_15181CC8(0) != 0, func_1517EF00(0) == 0
  * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by D_800BE9A4, it slides in over the first 20.57
  * units, holds, slides out over the last 20.57 and ends the effect. */

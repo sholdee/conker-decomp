@@ -4,7 +4,6 @@
 #include "variables.h"
 
 extern void func_151254F4(Camera *camera, s32 index);
-extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
 

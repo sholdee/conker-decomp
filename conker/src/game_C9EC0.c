@@ -287,7 +287,6 @@ extern s32 func_1518F51C(Actor *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
 extern void func_151CD35C(s32);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_15178EFC(s32);
-extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
 extern u8 D_8009F0D0;
 
@@ -488,7 +487,6 @@ extern void func_150F6DB0(Actor *);
 extern void func_151CD394(s32);
 extern void func_150B3DD0(void);
 extern void func_150C5C9C(Actor *);
-extern void func_151D2718(s16);
 
 /* Ends script command `cmdId` started by func_1509D180. */
 s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {

@@ -422,8 +422,6 @@ s32 func_150B66DC(Arg150B66DC *ctx) {
     return 1;
 }
 
-extern void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 owner, s32 kind);
-
 /** Flashes view 0 light blue (0xCC, 0xCC, 0xFF) at a random alpha 200-255 for 15-25 frames. */
 void func_150B6754(u8 owner, s32 kind) {
     u32 rand2;

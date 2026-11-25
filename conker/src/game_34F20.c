@@ -32,7 +32,6 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 void func_15003668(s32);
 void func_15004574(void);
 void func_15004D50(void);
-void func_15008A60(void);
 void func_150091D0(void);
 void func_150092DC(void);
 void func_1500E470(s32);
@@ -54,7 +53,6 @@ s32 func_1507E114(s32);
 void func_1509BBA0(s32);
 s32 func_1509C2A4(void);
 void func_1509C3A0(void);
-void func_15181E18(s32);
 void func_15187F90(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);

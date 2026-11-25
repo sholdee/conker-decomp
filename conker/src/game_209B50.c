@@ -4,7 +4,6 @@
 #include "effects.h"
 
 void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
-void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 
 /* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
  * flash at `pos`. */

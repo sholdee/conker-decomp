@@ -3544,7 +3544,6 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
 void func_15060A30(s32 arg0, Actor *arg1);
 void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 void func_1507CD64(Actor *arg0, s32 arg1);
-void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 /*
  * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation

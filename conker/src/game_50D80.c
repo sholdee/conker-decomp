@@ -396,8 +396,6 @@ extern s32 func_1516A7B0(s32, s32, s32, s32, void *, s32);
 extern void func_1516D2E0(s32);
 extern s32 func_1516D378(s32);
 extern s32 func_1516D3C4(s32);
-extern void func_1517F488(s32, s32, s32, s32, s32, s32);
-extern void func_1517F720(s32, s32, s32, s32, s32);
 extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
 extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
@@ -406,7 +404,6 @@ extern void func_15190518(void *);
 extern void func_15191B8C(ActorRef *, u8);
 extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
-extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
 extern void func_151CD35C(s32);
@@ -1175,7 +1172,6 @@ extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_151A3390(Actor *, u8);
 extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
-extern void func_150CE150(Actor *, s16, u8, s32);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
@@ -2393,11 +2389,9 @@ extern void func_1503DE70(Actor *, s32, s32);
 extern void func_151557FC(s32, s32, f32);
 extern void func_15155F90(void);
 extern void func_15178EFC(s32);
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(Actor *);
-extern void func_151D66F0(s32, s32);
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

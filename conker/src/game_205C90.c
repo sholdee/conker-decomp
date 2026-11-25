@@ -28,9 +28,6 @@ s32 func_151D87E0(u8 playerMask) {
     return FALSE;
 }
 
-s32 func_15181CC8(s32 view);
-s32 func_1517EF00(s32 view);
-
 /* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
  * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has
  * a rumble pak, or when any of those players' views is irised or fading. */

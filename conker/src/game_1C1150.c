@@ -291,7 +291,6 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-extern void func_15104170(s32 arg0, Actor *self, Actor *other);
 extern void func_1507DE4C(Actor *obj);
 extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
 
@@ -432,8 +431,6 @@ void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
         func_150B06B0(other, self, 0xFF, 1);
     }
 }
-
-extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
 void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     u8 result;

@@ -1,34 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-
-/*
- * Mosaic (pixelate) effect: a screen rectangle around one of the owner's bones is redrawn in
- * blocks of 0x10000 / step pixels.
- */
-typedef struct {
-    /* 0x000 */ Actor *owner;
-    /* 0x004 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x008 */ f32 halfWidth;
-    /* 0x00C */ f32 halfHeight;
-    /* 0x010 */ s32 step;  /* 16.16 source advance per pixel */
-    /* 0x014 */ u8 flags;  /* 1: the rectangle is on screen */
-    /* 0x018 */ s32 left;
-    /* 0x01C */ s32 top;
-    /* 0x020 */ s32 right;
-    /* 0x024 */ s32 bottom;
-    /* 0x028 */ f32 center[2];
-    /* 0x030 */ s16 srcColumn[640];
-    /* 0x530 */ s16 srcRow[480];
-} MosaicData; /* size 0x8F0 */
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ MosaicData data;
-} MosaicEffect;
 
 /* Starts a mosaic effect over owner for lifetime frames. */
 MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
