@@ -1005,6 +1005,7 @@ void func_150779D4(void) {
     if (D_800C3E78 != index) {
         obj = &D_800CC2D0[index];
         if ((obj->interaction_state != 1) || (obj->unk65 == 0)) {
+            // matching: the assignment inside the test makes IDO keep the bound in $f2
             if (func_1505A6F8(D_800D154C, obj) < (range = D_800D1893 << 3)) {
                 func_15075400(D_800D1890);
             }
