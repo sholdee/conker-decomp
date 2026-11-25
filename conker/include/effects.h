@@ -3188,6 +3188,19 @@ typedef struct ShapeEmitter {
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
+/* A timed effect (object type 35 or 95, D_800A5770) in the object lists D_800DCE50 (game_1944C0.c) whose data starts with
+ * an owner id, as func_15105C24 (game_131F30.c) and func_151A6BD8 (game_1D3FC0.c) search them. */
+typedef struct ListObj {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct ListObj *next;
+    /* 0x0C */ u8 padC[7];
+    /* 0x13 */ u8 callbackSet; // as in TimedEffect: 0x2E or 0x2C for these searches
+    /* 0x14 */ u8 pad14[0x14];
+    /* 0x28 */ s32 owner;
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ struct Actor *actor; // set 0x2C (func_151A6B68)
+} ListObj;
+
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 (game_DDF10.c) fills it, func_150B0D20 updates it each frame.
  * (Effect-subsystem only, but here rather than conker/effect.h: one more type in a header that init_50A0.c sees
  * moves func_100052A0's static D_8003BC20 to the start of that file's .bss.) */

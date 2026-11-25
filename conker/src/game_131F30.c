@@ -3,18 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
-typedef struct ListObj {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ListObj *next;
-    /* 0x0C */ u8 padC[7];
-    /* 0x13 */ u8 type;
-    /* 0x14 */ u8 pad14[0x14];
-    /* 0x28 */ s32 owner;
-} ListObj;
-
-
-
 typedef struct {
     s32 count;
     const u8 *list;
@@ -460,7 +448,7 @@ ListObj *func_15105C24(s32 owner) {
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
             for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
-                if (obj->type == 0x2E && owner == obj->owner) {
+                if (obj->callbackSet == 0x2E && owner == obj->owner) {
                     return obj;
                 }
             }
