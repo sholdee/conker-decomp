@@ -564,30 +564,6 @@ s32 func_15134CEC(Struct15134CEC *particle) {
     return 1;
 }
 
-/* Spawn parameters of a BloodStrip (copied to BloodStrip::ownerId). */
-typedef struct {
-    u8 ownerId;
-    u8 pad1[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad9[3];
-    Vec3f offsetA;
-    Vec3f offsetB;
-    u8 flags;
-    u8 pad25;
-    s16 duration;
-    s16 pause;
-    s16 lifetime;
-    u16 sound;
-    s8 sampleCallback;
-    s8 emitCallback;
-    s8 rateCallback;
-    u8 pad31[3];
-    f32 rate;
-    u8 mode;
-    s8 updateCallback;
-    u8 pad3A[2];
-} BloodStripDesc;
 
 /*
  * Blood swept between two points (offsetA, offsetB) on an actor's bone: every frame the

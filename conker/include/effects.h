@@ -1272,4 +1272,142 @@ typedef struct EffectParams {
     /* 0x56 */ s16 fadeRate;
 } EffectParams; /* size 0x58 */
 
+/* func_15153298 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) billboards (func_15167D84) at
+ * position, each moving at a random yaw/pitch and speed. Each *Base/*Range pair is one BillboardTemplate field. */
+typedef struct BillboardBurst {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ s16 countBase;
+    /* 0x0E */ s16 countRange;
+    /* 0x10 */ AngleRange angles;
+    /* 0x18 */ f32 speedBase;
+    /* 0x1C */ f32 speedRange;
+    /* 0x20 */ s16 lifeBase;
+    /* 0x22 */ s16 lifeRange;
+    /* 0x24 */ s16 accelYBase;
+    /* 0x26 */ s16 accelYRange;
+    /* 0x28 */ s8 callback;        /* BillboardTemplate.callback */
+    /* 0x29 */ u8 flags;           /* BILLBOARD_* */
+    /* 0x2A */ s16 fadeBase;
+    /* 0x2C */ s16 fadeRange;
+    /* 0x2E */ s16 frameStep;
+    /* 0x30 */ s16 widthBase;
+    /* 0x32 */ s16 widthRange;
+    /* 0x34 */ s16 heightBase;
+    /* 0x36 */ s16 heightRange;
+    /* 0x38 */ SpriteAnim *anim;
+    /* 0x3C */ u8 color;           /* prim r = g = b */
+    /* 0x3D */ u8 alpha;
+    /* 0x3E */ u8 pad3E[2];
+} BillboardBurst; /* size 0x40 */
+
+/* Motion extension of a model effect: func_15157898 (game_1844C0.c) copies it to Effect.extra, and the
+ * D_8008AD90 / D_8008ADA0 update callbacks integrate it. */
+typedef struct EffectMotion {
+    /* 0x00 */ Vec3f rot;          /* degrees */
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ Vec3f vel;
+    /* 0x1C */ Vec3f rotVel;
+    /* 0x28 */ f32 gravity;
+    /* 0x2C */ f32 drag;
+    /* 0x30 */ u8 flags;           /* EFFECT_MOTION_* */
+} EffectMotion; /* size 0x34 */
+
+#define EFFECT_MOTION_MOVE      0x1
+#define EFFECT_MOTION_SPIN      0x2
+#define EFFECT_MOTION_GRAVITY   0x4
+#define EFFECT_MOTION_DRAG      0x8
+
+typedef union EffectExtra {
+    f32 raw[0xE];
+    EffectMotion motion;
+} EffectExtra; /* size 0x38 */
+
+/* func_15134DAC (game_161520.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
+ * at +0x10. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */
+typedef struct BloodStripDesc {
+    /* 0x00 */ u8 ownerId;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ struct Actor *owner;
+    /* 0x08 */ u8 bone;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ Vec3f offsetA;
+    /* 0x18 */ Vec3f offsetB;
+    /* 0x24 */ u8 flags;
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ s16 duration;
+    /* 0x28 */ s16 pause;
+    /* 0x2A */ s16 lifetime;
+    /* 0x2C */ u16 sound;
+    /* 0x2E */ s8 sampleCallback;   /* index into D_80089B1C, -1 = none */
+    /* 0x2F */ s8 emitCallback;     /* index into D_80089B38 */
+    /* 0x30 */ s8 rateCallback;     /* index into D_80089B5C, -1 = none */
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ f32 rate;
+    /* 0x38 */ u8 mode;
+    /* 0x39 */ s8 updateCallback;   /* index into D_80089B6C, -1 = none */
+    /* 0x3A */ u8 pad3A[2];
+} BloodStripDesc; /* size 0x3C */
+
+/* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
+ * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
+typedef struct EffectActorTemplate {
+    /* 0x00 */ u8 flags;            /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ s8 updateCallback;   /* index into D_8008AE00, -1 = none */
+    /* 0x03 */ s8 drawCallback;     /* index into D_8008AE0C, -1 = none */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 displayList;      /* index into D_8008AFB8 */
+    /* 0x07 */ u8 pad07;
+    /* 0x08 */ TrailRender render;
+    /* 0x28 */ Color8 color0;
+    /* 0x2C */ Color8 color1;
+    /* 0x30 */ void *owner;
+    /* 0x34 */ u8 ownerId;
+    /* 0x35 */ u8 attachMode;
+    /* 0x36 */ u8 pad36[2];
+    /* 0x38 */ Vec3f position;
+} EffectActorTemplate; /* size 0x44 */
+
+/* EffectMotion without the flags: the motion block of the effect actors of func_151580B0 (game_185560.c),
+ * always integrated. */
+typedef struct TumbleMotion {
+    /* 0x00 */ Vec3f rot;          /* degrees */
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ Vec3f vel;
+    /* 0x1C */ Vec3f rotVel;
+    /* 0x28 */ f32 gravity;
+    /* 0x2C */ f32 drag;
+} TumbleMotion; /* size 0x30 */
+
+/* func_15152520 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) tumbling model effects
+ * (func_15157898) at position, each launched at a random yaw/pitch and speed with a random spin. */
+typedef struct ModelBurst {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f position;
+    /* 0x14 */ AngleRange angles;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 drag;            /* EffectMotion.drag */
+    /* 0x28 */ f32 gravityBase;
+    /* 0x2C */ f32 gravityRange;
+    /* 0x30 */ s16 lifetimeBase;    /* EffectParams.lifetime */
+    /* 0x32 */ s16 lifetimeRange;
+    /* 0x34 */ s32 model;           /* EffectParams.model */
+    /* 0x38 */ s32 unk38;           /* EffectParams.unkC */
+    /* 0x3C */ s32 unk3C;           /* func_15157898's 3rd argument (func_1503F5B8's 3rd) */
+    /* 0x40 */ f32 unk40;           /* base and range of func_15157898's 4th argument */
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 scaleBase;
+    /* 0x4C */ f32 scaleRange;
+    /* 0x50 */ Vec3f rotVelBase;
+    /* 0x5C */ Vec3f rotVelRange;
+    /* 0x68 */ Color8 color0;
+    /* 0x6C */ Color8 color1;
+    /* 0x70 */ u8 flags;            /* EffectParams.flags (2 is always added) */
+    /* 0x71 */ u8 motionFlags;      /* EFFECT_MOTION_* */
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+} ModelBurst; /* size 0x78 */
+
 #endif

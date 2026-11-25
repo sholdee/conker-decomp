@@ -24,22 +24,6 @@ typedef struct {
     /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
 } EffectAttach;
 
-/* Extension used by the D_8008AD90/D_8008ADA0 update callbacks below. */
-typedef struct {
-    /* 0x00 */ Vec3f rot;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ Vec3f vel;
-    /* 0x1C */ Vec3f rotVel;
-    /* 0x28 */ f32 gravity;
-    /* 0x2C */ f32 drag;
-    /* 0x30 */ u8 flags; /* 1: move, 2: spin, 4: gravity, 8: drag */
-} EffectMotion;
-
-typedef union {
-    f32 raw[0xE];
-    EffectMotion motion;
-} EffectExtra; /* size 0x38 */
-
 /* Model effect object (types 0x36 / 0x4C / 0x5B). */
 typedef struct {
     /* 0x000 */ u8 header[0x10]; /* object link header (func_15167A68) */
@@ -282,7 +266,7 @@ s32 func_15157860(Effect *fx) {
 }
 
 /* func_15157010 plus a 0x38-byte extension copied from `extra`. */
-Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+Effect *func_15157898(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
     Effect *fx;
 
@@ -290,7 +274,7 @@ Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 ar
     if (fx == NULL) {
         return NULL;
     }
-    memcpy(&fx->extra, extra, sizeof(EffectExtra));
+    memcpy(&fx->extra, motion, sizeof(EffectExtra)); /* 4 bytes past an EffectMotion */
     return fx;
 }
 

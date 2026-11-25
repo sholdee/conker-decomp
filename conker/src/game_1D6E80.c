@@ -422,39 +422,11 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
                   1, task->unkC, task->unk1);
 }
 
-/* Spawn descriptor for func_15134DAC. */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ Actor *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} SpawnDesc15134DAC;
-
-extern void *func_15134DAC(SpawnDesc15134DAC *desc, s32 payloadSize);
+extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);
 
 /* Spawns the pulse effect owned by `task`. */
 PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
-    SpawnDesc15134DAC desc;
+    BloodStripDesc desc;
     PulseFx *fx;
     PulseFxPayload payload;
 
@@ -463,23 +435,23 @@ PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
     desc.ownerId = actor->unique_id;
 
     desc.owner = actor;
-    desc.unk8 = 15;
-    desc.unkC = -11.0f;
-    desc.unk10 = -2.0f;
-    desc.unk14 = 8.0f;
-    desc.unk18 = -11.0f;
-    desc.unk1C = -2.0f;
-    desc.unk20 = 20.0f;
-    desc.unk24 = 0;
-    desc.unk26 = 60;
-    desc.unk28 = 60;
-    desc.unk2A = 300;
-    desc.unk2E = 1;
-    desc.unk2F = 0;
-    desc.unk30 = 1;
-    desc.unk34 = 0.5f;
-    desc.unk38 = 1;
-    desc.unk39 = 0;
+    desc.bone = 15;
+    desc.offsetA.x = -11.0f;
+    desc.offsetA.y = -2.0f;
+    desc.offsetA.z = 8.0f;
+    desc.offsetB.x = -11.0f;
+    desc.offsetB.y = -2.0f;
+    desc.offsetB.z = 20.0f;
+    desc.flags = 0;
+    desc.duration = 60;
+    desc.pause = 60;
+    desc.lifetime = 300;
+    desc.sampleCallback = 1;
+    desc.emitCallback = 0;
+    desc.rateCallback = 1;
+    desc.rate = 0.5f;
+    desc.mode = 1;
+    desc.updateCallback = 0;
 
     payload.phase = 0;
     payload.phaseStep = 0x11111;

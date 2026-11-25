@@ -2,55 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 #include "libc/math.h"
+#include "effects.h"
 
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
-/*
- * Particle-burst config read by func_15152520 (same layout as game_17CAF0.c's struct Local15152520Arg).
- * Integer pairs are random ranges, (rand % (range + 1)) + base; float pairs are rand01 * range + base.
- */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ s16 yawBase;
-    /* 0x16 */ s16 yawRange;
-    /* 0x18 */ s16 pitchBase;
-    /* 0x1A */ s16 pitchRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ Vec3f unk50;
-    /* 0x5C */ Vec3f unk5C;
-    /* 0x68 */ Color8 unk68;
-    /* 0x6C */ Color8 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} ParticleBurst;
-
-void func_15152520(ParticleBurst *burst, u8 arg1, s32 arg2);
+void func_15152520(ModelBurst *burst, u8 arg1, s32 arg2);
 
 /* Spawns a particle burst at bone 10 of `actor`. */
 void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
-    ParticleBurst burst;
+    ModelBurst burst;
     MtxF *bones;
 
     if ((actor != NULL) && (actor->interaction_state != 0)) {
@@ -61,98 +19,70 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
         func_15142314(bones, 10, &burst.position);
         burst.countBase = 8;
         burst.countRange = 7;
-        burst.yawBase = 0;
-        burst.yawRange = 255;
-        burst.pitchBase = -33;
-        burst.pitchRange = 24;
+        burst.angles.yawBase = 0;
+        burst.angles.yawRange = 255;
+        burst.angles.pitchBase = -33;
+        burst.angles.pitchRange = 24;
         burst.speedBase = 12.40300083f;
         burst.speedRange = 5.039000034f;
-        burst.unk24 = 0.908870995f;
-        burst.unk28 = -0.7070000172f;
-        burst.unk2C = 0.2610000074f;
-        burst.unk30 = 40;
-        burst.unk32 = 35;
-        burst.unk34 = 0xA0;
+        burst.drag = 0.908870995f;
+        burst.gravityBase = -0.7070000172f;
+        burst.gravityRange = 0.2610000074f;
+        burst.lifetimeBase = 40;
+        burst.lifetimeRange = 35;
+        burst.model = 0xA0;
         burst.unk38 = 0x13;
         burst.unk3C = 0;
         burst.unk40 = 0.0f;
         burst.unk44 = 1.960000038f;
-        burst.unk48 = 0.3070000112f;
-        burst.unk4C = 0.0f;
-        burst.unk50.x = burst.unk50.z = -12.85999966f;
-        burst.unk50.y = 0; // matching: integer 0 (sw zero); 0.0f emits an FP-register store
-        burst.unk5C.x = burst.unk5C.z = 25.37999916f;
-        burst.unk5C.y = 0;
-        burst.unk70 = 0x21;
-        burst.unk68.red = 255;
-        burst.unk68.green = 255;
-        burst.unk68.blue = 255;
-        burst.unk68.alpha = 255;
-        burst.unk6C.red = 255;
-        burst.unk6C.green = 255;
-        burst.unk6C.blue = 255;
-        burst.unk6C.alpha = 255;
-        burst.unk71 = 0xF;
-        burst.unk72 = 25;
-        burst.unk74 = 10;
+        burst.scaleBase = 0.3070000112f;
+        burst.scaleRange = 0.0f;
+        burst.rotVelBase.x = burst.rotVelBase.z = -12.85999966f;
+        burst.rotVelBase.y = 0; // matching: integer 0 (sw zero); 0.0f emits an FP-register store
+        burst.rotVelRange.x = burst.rotVelRange.z = 25.37999916f;
+        burst.rotVelRange.y = 0;
+        burst.flags = 0x21;
+        burst.color0.red = 255;
+        burst.color0.green = 255;
+        burst.color0.blue = 255;
+        burst.color0.alpha = 255;
+        burst.color1.red = 255;
+        burst.color1.green = 255;
+        burst.color1.blue = 255;
+        burst.color1.alpha = 255;
+        burst.motionFlags = 0xF;
+        burst.fadeStart = 25;
+        burst.fadeRate = 10;
         func_15152520(&burst, arg1, arg2);
     }
 }
 
-/* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ Actor *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} EffectDesc;
-
-void *func_15134DAC(EffectDesc *desc, s32 arg1);
+void *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 
 /* Creates a func_15134DAC object attached to `owner`. */
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
-    EffectDesc desc;
+    BloodStripDesc desc;
 
     if ((owner != NULL) && (owner->interaction_state != 0)) {
         desc.ownerId = owner->unique_id;
         desc.owner = owner;
-        desc.unk8 = 0;
-        desc.unkC = -28.0f;
-        desc.unk10 = 6.0f;
-        desc.unk14 = 1.0f;
-        desc.unk18 = -58.0f;
-        desc.unk1C = -3.0f;
-        desc.unk20 = -31.0f;
-        desc.unk24 = 2;
-        desc.unk26 = 30;
-        desc.unk28 = 25;
-        desc.unk2A = 750;
-        desc.unk2E = 3;
-        desc.unk2F = 3;
-        desc.unk30 = -1;
-        desc.unk34 = 0.3115699887f;
-        desc.unk38 = 4;
-        desc.unk39 = -1;
+        desc.bone = 0;
+        desc.offsetA.x = -28.0f;
+        desc.offsetA.y = 6.0f;
+        desc.offsetA.z = 1.0f;
+        desc.offsetB.x = -58.0f;
+        desc.offsetB.y = -3.0f;
+        desc.offsetB.z = -31.0f;
+        desc.flags = 2;
+        desc.duration = 30;
+        desc.pause = 25;
+        desc.lifetime = 750;
+        desc.sampleCallback = 3;
+        desc.emitCallback = 3;
+        desc.rateCallback = -1;
+        desc.rate = 0.3115699887f;
+        desc.mode = 4;
+        desc.updateCallback = -1;
         func_15134DAC(&desc, 0);
     }
 }
@@ -175,65 +105,18 @@ s32 func_151938E4(Emitter *emitter) {
     return TRUE;
 }
 
-/* Second argument of func_15157898 (game_17CAF0.c's struct Local15152520Motion). */
-typedef struct {
-    /* 0x00 */ Vec3f rotation; /* degrees */
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ Vec3f velocity;
-    /* 0x1C */ Vec3f unk1C;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 pad31[3];
-} ParticleMotion;
-
-/* First argument of func_15157898 (game_17CAF0.c's struct Local15152520Params). */
-typedef struct {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 unk02;
-    /* 0x03 */ s8 unk03;
-    /* 0x04 */ s8 unk04;
-    /* 0x05 */ u8 pad05;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ Color8 unk30;
-    /* 0x34 */ Color8 unk34;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ Actor *owner;
-    /* 0x40 */ u8 ownerId;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ Vec3f position;
-    /* 0x50 */ u8 pad50[4];
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} ParticleParams;
-
 extern f32 D_800A81F0;
 
 s32 func_1515C0F8(Actor *actor, Vec3f **motion);
-void func_15157898(ParticleParams *params, ParticleMotion *motion, s32, f32, s32, s32, s32, u8, s32);
+void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
  */
 void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *emitter) {
-    ParticleParams params;
-    ParticleMotion motion;
+    EffectParams params;
+    EffectMotion motion;
     Vec3f *ownerMotion;
     s32 pad[2]; // matching: unused stack slots
     f32 x;
@@ -256,52 +139,52 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
 
     params.unk38 = 0;
     params.flags = 0x27;
-    params.unk01 = 0;
-    params.unk02 = 1;
-    params.unk03 = -1;
-    params.unk04 = -1;
-    params.unk06 = (func_150ADA20() % 41U) + 90;
-    params.unk08 = 0xA0;
-    params.unk0C = 0x13;
-    params.unk14 = 0x220405;
-    params.unk18 = 0x40200;
-    params.unk2D = 8;
-    params.unk1C = 1;
-    params.unk20 = 0x38;
-    params.unk10 = 0;
-    params.unk2C = 0;
-    params.unk24 = 0x80;
-    params.unk28 = 0x20;
-    params.unk30.red = 255;
-    params.unk30.green = 255;
-    params.unk30.blue = 255;
-    params.unk30.alpha = 255;
-    params.unk34.red = 255;
-    params.unk34.green = 255;
-    params.unk34.blue = 255;
-    params.unk34.alpha = 255;
+    params.updateFunc = 0;
+    params.updateFunc2 = 1;
+    params.preDrawFunc = -1;
+    params.postDrawFunc = -1;
+    params.lifetime = (func_150ADA20() % 41U) + 90;
+    params.model = 0xA0;
+    params.unkC = 0x13;
+    params.render.setGeometryMode = 0x220405;
+    params.render.clearGeometryMode = 0x40200;
+    params.render.envMode = 8;
+    params.render.renderMode = 1;
+    params.render.unk10 = 0x38;
+    params.render.unk0 = 0;
+    params.render.primMode = 0;
+    params.render.unk14 = 0x80;
+    params.render.unk18 = 0x20;
+    params.color0.red = 255;
+    params.color0.green = 255;
+    params.color0.blue = 255;
+    params.color0.alpha = 255;
+    params.color1.red = 255;
+    params.color1.green = 255;
+    params.color1.blue = 255;
+    params.color1.alpha = 255;
     params.owner = emitter->owner;
     params.ownerId = emitter->owner->unique_id;
     params.unk41 = 1;
-    params.position = *from;
-    motion.velocity.x = (to->x - from->x) * emitter->scale;
-    motion.velocity.y = (to->y - from->y) * emitter->scale;
-    motion.velocity.z = (to->z - from->z) * emitter->scale;
-    params.position.x += motion.velocity.x * t;
-    params.position.y += motion.velocity.y * t;
-    params.position.z += motion.velocity.z * t;
-    motion.rotation.x = func_150ADA68() * 360.0f;
-    motion.rotation.y = func_150ADA68() * 360.0f;
-    motion.rotation.z = func_150ADA68() * 360.0f;
+    params.pos = *from;
+    motion.vel.x = (to->x - from->x) * emitter->scale;
+    motion.vel.y = (to->y - from->y) * emitter->scale;
+    motion.vel.z = (to->z - from->z) * emitter->scale;
+    params.pos.x += motion.vel.x * t;
+    params.pos.y += motion.vel.y * t;
+    params.pos.z += motion.vel.z * t;
+    motion.rot.x = func_150ADA68() * 360.0f;
+    motion.rot.y = func_150ADA68() * 360.0f;
+    motion.rot.z = func_150ADA68() * 360.0f;
     func_150ADA68();
-    motion.unkC = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
-    motion.unk1C.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
-    motion.unk1C.y = 0.0f;
-    motion.unk1C.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
-    motion.unk28 = ((func_150ADA68() * 121.0f) + -135.0f) * 0.001000000047f;
-    motion.unk2C = 0.9828829765f;
-    params.unk54 = 25;
-    params.unk56 = 10;
-    motion.unk30 = 0xF;
+    motion.scale = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
+    motion.rotVel.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.rotVel.y = 0.0f;
+    motion.rotVel.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
+    motion.gravity = ((func_150ADA68() * 121.0f) + -135.0f) * 0.001000000047f;
+    motion.drag = 0.9828829765f;
+    params.fadeStart = 25;
+    params.fadeRate = 10;
+    motion.flags = 0xF;
     func_15157898(&params, &motion, 0, (func_150ADA68() * 1814.0f) * 0.001000000047f, 0, 0, 0, emitter->unkC, emitter->unk1);
 }

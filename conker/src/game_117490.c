@@ -6,34 +6,6 @@
 
 void func_150E5AE0(void);
 
-/* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ Actor *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_E9FE0;
-
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */
 typedef struct {
     /* 0x00 */ u32 phase;
@@ -68,33 +40,33 @@ typedef struct {
 
 void *func_151303BC(ParticleDesc *, s32, s32);
 
-void *func_15134DAC(struct_E9FE0 *, s32);
+void *func_15134DAC(BloodStripDesc *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
 OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
-    struct_E9FE0 desc;
+    BloodStripDesc desc;
     OscillatorObject *obj;
     Oscillator oscillator;
 
     desc.ownerId = owner->unique_id;
     desc.owner = owner;
-    desc.unk8 = 8;
-    desc.unkC = -9.0f;
-    desc.unk10 = -14.0f;
-    desc.unk14 = 27.0f;
-    desc.unk18 = -21.0f;
-    desc.unk1C = -14.0f;
-    desc.unk20 = 41.0f;
-    desc.unk24 = 2;
-    desc.unk26 = 60;
-    desc.unk28 = 60;
-    desc.unk2A = arg1;
-    desc.unk2E = 2;
-    desc.unk2F = 2;
-    desc.unk30 = 2;
-    desc.unk34 = 0.5f;
-    desc.unk38 = 3;
-    desc.unk39 = -1;
+    desc.bone = 8;
+    desc.offsetA.x = -9.0f;
+    desc.offsetA.y = -14.0f;
+    desc.offsetA.z = 27.0f;
+    desc.offsetB.x = -21.0f;
+    desc.offsetB.y = -14.0f;
+    desc.offsetB.z = 41.0f;
+    desc.flags = 2;
+    desc.duration = 60;
+    desc.pause = 60;
+    desc.lifetime = arg1;
+    desc.sampleCallback = 2;
+    desc.emitCallback = 2;
+    desc.rateCallback = 2;
+    desc.rate = 0.5f;
+    desc.mode = 3;
+    desc.updateCallback = -1;
 
     oscillator.phase = 0;
     oscillator.phaseStep = 0x11111;

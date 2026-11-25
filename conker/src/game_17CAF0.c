@@ -915,132 +915,56 @@ void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32
     }
 }
 
-struct Local15152520Arg {
-    s32 countBase;
-    s32 countRange;
-    Vec3f position;
-    AngleRange angles;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    Vec3f unk50; /* base of motion.unk1C */
-    Vec3f unk5C; /* range of motion.unk1C */
-    Color8 unk68;
-    Color8 unk6C;
-    u8 unk70;
-    u8 unk71;
-    s16 unk72;
-    s16 unk74;
-};
+extern void func_15157898(EffectParams *, EffectMotion *, s32, f32, s32, s32, s32, u8, s32);
 
-/* Second argument of func_15157898. */
-struct Local15152520Motion {
-    Vec3f rotation; /* degrees */
-    f32 unk0C;
-    Vec3f velocity;
-    Vec3f unk1C;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 pad31[3];
-};
-
-/* First argument of func_15157898. */
-struct Local15152520Params {
-    u8 flags;
-    u8 unk01;
-    u8 unk02;
-    s8 unk03;
-    s8 unk04;
-    u8 pad05;
-    s16 unk06;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    Color8 unk30;
-    Color8 unk34;
-    u8 unk38;
-    u8 pad39[3];
-    s32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    u8 pad42[2];
-    Vec3f position;
-    u8 pad50[4];
-    s16 unk54;
-    s16 unk56;
-};
-
-extern void func_15157898(struct Local15152520Params *, struct Local15152520Motion *, s32, f32, s32, s32, s32, u8, s32);
-
-void func_15152520(struct Local15152520Arg *config, u8 arg1, s32 arg2) {
+void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
-    struct Local15152520Params params;
-    struct Local15152520Motion motion;
+    EffectParams params;
+    EffectMotion motion;
     s32 count;
 
     params.unk38 = 0;
-    params.flags = config->unk70 | 2;
-    params.unk01 = 0;
-    params.unk02 = 1;
-    params.unk03 = -1;
-    params.unk04 = -1;
-    params.unk08 = config->unk34;
-    params.unk0C = config->unk38;
-    params.unk24 = 0x80;
-    params.unk28 = 0x20;
-    params.unk10 = 0;
-    params.unk14 = 0x220405;
-    params.unk18 = 0x40200;
-    params.unk2C = 0;
-    params.unk2D = 8;
-    params.unk1C = 1;
-    params.unk20 = 0x38;
-    params.unk3C = 0;
-    params.unk40 = 0;
+    params.flags = config->flags | 2;
+    params.updateFunc = 0;
+    params.updateFunc2 = 1;
+    params.preDrawFunc = -1;
+    params.postDrawFunc = -1;
+    params.model = config->model;
+    params.unkC = config->unk38;
+    params.render.unk14 = 0x80;
+    params.render.unk18 = 0x20;
+    params.render.unk0 = 0;
+    params.render.setGeometryMode = 0x220405;
+    params.render.clearGeometryMode = 0x40200;
+    params.render.primMode = 0;
+    params.render.envMode = 8;
+    params.render.renderMode = 1;
+    params.render.unk10 = 0x38;
+    params.owner = 0;
+    params.ownerId = 0;
     params.unk41 = 2;
-    params.position = config->position;
-    motion.unk2C = config->unk24;
-    params.unk30 = config->unk68;
-    params.unk34 = config->unk6C;
-    params.unk54 = config->unk72;
-    params.unk56 = config->unk74;
-    motion.unk30 = config->unk71;
+    params.pos = config->position;
+    motion.drag = config->drag;
+    params.color0 = config->color0;
+    params.color1 = config->color1;
+    params.fadeStart = config->fadeStart;
+    params.fadeRate = config->fadeRate;
+    motion.flags = config->motionFlags;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        params.unk06 = (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30;
-        motion.rotation.x = func_150ADA68() * 360.0f;
-        motion.rotation.y = func_150ADA68() * 360.0f;
-        motion.rotation.z = func_150ADA68() * 360.0f;
-        motion.unk0C = (func_150ADA68() * config->unk4C) + config->unk48;
+        params.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        motion.rot.x = func_150ADA68() * 360.0f;
+        motion.rot.y = func_150ADA68() * 360.0f;
+        motion.rot.z = func_150ADA68() * 360.0f;
+        motion.scale = (func_150ADA68() * config->scaleRange) + config->scaleBase;
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &motion.velocity.x);
-        motion.unk1C.x = (func_150ADA68() * config->unk5C.x) + config->unk50.x;
-        motion.unk1C.y = (func_150ADA68() * config->unk5C.y) + config->unk50.y;
-        motion.unk1C.z = (func_150ADA68() * config->unk5C.z) + config->unk50.z;
-        motion.unk28 = (func_150ADA68() * config->unk2C) + config->unk28;
+                      &motion.vel.x);
+        motion.rotVel.x = (func_150ADA68() * config->rotVelRange.x) + config->rotVelBase.x;
+        motion.rotVel.y = (func_150ADA68() * config->rotVelRange.y) + config->rotVelBase.y;
+        motion.rotVel.z = (func_150ADA68() * config->rotVelRange.z) + config->rotVelBase.z;
+        motion.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         func_15157898(&params, &motion, config->unk3C, (func_150ADA68() * config->unk44) + config->unk40, 0, 0, 0, arg1, arg2);
         count--;
     }
@@ -1242,24 +1166,12 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     }
 }
 
-typedef struct {
-    Vec3f position;
-    s16 countBase, countRange, yawBase, yawRange, pitchBase, pitchRange;
-    f32 speedBase, speedRange;
-    s16 lifeBase, lifeRange, sizeBase, sizeRange;
-    s8 mode;
-    u8 kind;
-    s16 fadeBase, fadeRange, unk2E;
-    s16 unk30, unk32, unk34, unk36;
-    s32 flags;
-    u8 color, alpha;
-} Game153298Config;
 
 extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Spawns a random number of particles (func_15167D84) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */
-void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
+void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
     BillboardTemplate packet;
     f32 speed;
     f32 sinPitch;
@@ -1284,15 +1196,15 @@ void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
     packet.envG = 0;
     packet.envB = 0;
     packet.primA = config->alpha;
-    packet.callback = config->mode;
-    packet.flags = config->kind;
+    packet.callback = config->callback;
+    packet.flags = config->flags;
     packet.frame = 0;
-    packet.frameStep = config->unk2E;
-    packet.anim = config->flags;
+    packet.frameStep = config->frameStep;
+    packet.anim = config->anim;
     count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
     while (count != 0) {
-        yaw = func_150ADA20() % (u32)(config->yawRange + 1) + config->yawBase;
-        pitch = func_150ADA20() % (u32)(config->pitchRange + 1) + config->pitchBase;
+        yaw = func_150ADA20() % (u32)(config->angles.yawRange + 1) + config->angles.yawBase;
+        pitch = func_150ADA20() % (u32)(config->angles.pitchRange + 1) + config->angles.pitchBase;
         cosPitch = func_151423D8(pitch);
         sinPitch = func_151423D8(pitch - 64);
         cosYaw = func_151423D8(yaw);
@@ -1303,10 +1215,10 @@ void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
         packet.velX = (s32)(horizontal * sinYaw);
         packet.velY = (s32)(-speed * sinPitch);
         packet.velZ = (s32)(horizontal * cosYaw);
-        packet.accelY = func_150ADA20() % (u32)(config->sizeRange + 1) + config->sizeBase;
+        packet.accelY = func_150ADA20() % (u32)(config->accelYRange + 1) + config->accelYBase;
         packet.fadeStep = func_150ADA20() % (u32)(config->fadeRange + 1) + config->fadeBase;
-        packet.width = func_150ADA20() % (u32)(config->unk32 + 1) + config->unk30;
-        packet.height = func_150ADA20() % (u32)(config->unk36 + 1) + config->unk34;
+        packet.width = func_150ADA20() % (u32)(config->widthRange + 1) + config->widthBase;
+        packet.height = func_150ADA20() % (u32)(config->heightRange + 1) + config->heightBase;
         func_15167D84(&packet, 0, 0, -1, arg1, arg2);
         count--;
     }

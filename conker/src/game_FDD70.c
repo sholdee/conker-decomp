@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern s32 D_80088890;
 extern s32 D_80088894;
@@ -101,31 +102,6 @@ void func_150D0E90(s32 arg0) {
         }
     }
 }
-
-/* Spawn parameters of a blood strip (see func_15134DAC in game_161520.c). */
-typedef struct {
-    /* 0x00 */ u8 ownerId;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ Actor *owner;
-    /* 0x08 */ u8 bone;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ Vec3f offsetA;
-    /* 0x18 */ Vec3f offsetB;
-    /* 0x24 */ u8 flags;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 duration;
-    /* 0x28 */ s16 pause;
-    /* 0x2A */ s16 lifetime;
-    /* 0x2C */ u16 sound;
-    /* 0x2E */ s8 sampleCallback;
-    /* 0x2F */ s8 emitCallback;
-    /* 0x30 */ s8 rateCallback;
-    /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ f32 rate;
-    /* 0x38 */ u8 mode;
-    /* 0x39 */ s8 updateCallback;
-    /* 0x3A */ u8 pad3A[2];
-} BloodStripDesc;
 
 /* A live blood strip (see game_161520.c); only the fields used here are named. */
 typedef struct {

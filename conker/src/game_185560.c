@@ -3,48 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Orientation, scale and simple ballistic motion stored after an effect actor's header. */
-typedef struct {
-    /* 0x00 */ Vec3f angle;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ Vec3f velocity;
-    /* 0x1C */ Vec3f angularVelocity;
-    /* 0x28 */ f32 gravity;
-    /* 0x2C */ f32 damping;
-} EffectMotion;
-
 /*
  * Effect actor allocated by func_15167A68. Bytes 0x10..0x53 are copied from a 0x44-byte
  * template; type-specific data follows the 0xF8-byte header.
  */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ u8 flags; /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s8 updateCallback; /* index into D_8008AE00, -1 for none */
-    /* 0x13 */ s8 drawCallback;   /* index into D_8008AE0C, -1 for none */
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 displayList;    /* index into D_8008AFB8 */
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ s32 otherModeH;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 renderPreset;  /* index into D_800A4AC8 */
-    /* 0x28 */ u8 pad28[3];
-    /* 0x2B */ u8 combineMode;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s8 primColorMode;
-    /* 0x35 */ s8 envColorMode;
-    /* 0x36 */ u8 pad36[2];
-    /* 0x38 */ u8 color0[4]; /* [3] is alpha */
-    /* 0x3C */ u8 color1[4];
-    /* 0x40 */ void *owner;
-    /* 0x44 */ u8 ownerId;
-    /* 0x45 */ u8 attachMode;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ Vec3f position;
-    /* 0x54 */ u8 pad54[4];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ EffectActorTemplate tmpl;
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
     /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
     /* 0xDC */ u8 unkDC;
@@ -53,7 +18,7 @@ typedef struct {
     /* 0xF0 */ s32 *sharedHandle;
     /* 0xF4 */ s32 unkF4;
     /* 0xF8 */ union {
-        EffectMotion motion;
+        TumbleMotion motion;
         f32 size;
         struct {
             s16 duration;
@@ -67,7 +32,7 @@ extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
-EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
+EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
                            s32 arg6) {
     EffectActor *actor;
     s32 i;
@@ -76,7 +41,7 @@ EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s
     if (actor == NULL) {
         return NULL;
     }
-    memcpy(&actor->flags, template, 0x44);
+    memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
     actor->attachment = attachment;
     actor->unkF4 = arg2;
     actor->unkDC = 0;
@@ -94,7 +59,7 @@ EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s
     return actor;
 }
 
-EffectActor *func_151581D8(void *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
+EffectActor *func_151581D8(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
     return func_151580B0(template, 0, 0, large, extraSize, arg3, arg4);
 }
 
@@ -106,14 +71,14 @@ void func_15158224(EffectActor *actor) {
     u8 expired;
 
     expired = 0;
-    if (actor->flags & 1) {
-        actor->lifetime -= D_800BE9E4;
-        if (actor->lifetime < 0) {
+    if (actor->tmpl.flags & 1) {
+        actor->tmpl.lifetime -= D_800BE9E4;
+        if (actor->tmpl.lifetime < 0) {
             expired = 1;
         }
     }
     if (expired == 0) {
-        callback = actor->updateCallback;
+        callback = actor->tmpl.updateCallback;
         if (callback != -1) {
             if (D_8008AE00[callback](actor) == 0) {
                 expired = 1;
@@ -153,39 +118,39 @@ Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
     u8 update;
 
     update = 1;
-    if (actor->drawCallback != -1) {
-        if (D_8008AE0C[actor->drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
+    if (actor->tmpl.drawCallback != -1) {
+        if (D_8008AE0C[actor->tmpl.drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
             return gfx;
         }
     }
-    gfx = func_15142B7C(gfx, actor->unk1C, actor->unk20);
-    func_151441A4(&primR, &primG, &primB, &primA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
-                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->primColorMode);
-    func_151442FC(&envR, &envG, &envB, &envA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
-                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->envColorMode);
+    gfx = func_15142B7C(gfx, actor->tmpl.render.setGeometryMode, actor->tmpl.render.clearGeometryMode);
+    func_151441A4(&primR, &primG, &primB, &primA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+                  actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.primMode);
+    func_151442FC(&envR, &envG, &envB, &envA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+                  actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, actor->combineMode, &update);
-    gfx = func_15142FBC(gfx, actor->otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->unk2C | actor->unk30,
-                        D_800A4AC8[actor->renderPreset].unk0 | D_800A4AC8[actor->renderPreset].unk4, &update);
-    if (actor->flags & 2) {
-        gfx = func_151462C8(gfx, &actor->attachment, actor->attachMode, actor->owner, actor->ownerId, arg2,
-                            &actor->position, (actor->flags & 4) ? 1 : 0, 0);
+    gfx = func_1513F4E4(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
+    gfx = func_15142FBC(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
+                        D_800A4AC8[actor->tmpl.render.renderMode].unk0 | D_800A4AC8[actor->tmpl.render.renderMode].unk4, &update);
+    if (actor->tmpl.flags & 2) {
+        gfx = func_151462C8(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
+                            &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
     gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
-    gSPDisplayList(gfx++, D_8008AFB8[actor->displayList]);
+    gSPDisplayList(gfx++, D_8008AFB8[actor->tmpl.displayList]);
     return gfx;
 }
 
-/* Draw callback: rotates by data.motion.angle, scales uniformly and translates to the actor's position. */
+/* Draw callback: rotates by data.motion.rot, scales uniformly and translates to the actor's position. */
 s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
-    EffectMotion *motion = &actor->data.motion;
+    TumbleMotion *motion = &actor->data.motion;
     MtxF mf;
 
-    func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
-    mf[3][0] = actor->position.x;
-    mf[3][1] = actor->position.y;
-    mf[3][2] = actor->position.z;
+    func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
+    mf[3][0] = actor->tmpl.position.x;
+    mf[3][1] = actor->tmpl.position.y;
+    mf[3][2] = actor->tmpl.position.z;
     mf[0][0] *= motion->scale;
     mf[0][1] *= motion->scale;
     mf[0][2] *= motion->scale;
@@ -201,32 +166,32 @@ s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
 
 /* Update callback: damps horizontal velocity, applies gravity and integrates position and angle. */
 s32 func_15158684(EffectActor *actor) {
-    EffectMotion *motion;
+    TumbleMotion *motion;
     Vec3f prevVelocity;
     s32 i;
 
     motion = &actor->data.motion;
-    prevVelocity = motion->velocity;
+    prevVelocity = motion->vel;
     for (i = D_800BE9E4; i != 0; i--) {
-        motion->velocity.x *= motion->damping;
-        motion->velocity.z *= motion->damping;
+        motion->vel.x *= motion->drag;
+        motion->vel.z *= motion->drag;
     }
     {
         f32 accelX;
         f32 accelZ;
         f32 accelY;
 
-        motion->velocity.y += motion->gravity * D_800BE9A4;
-        accelX = (motion->velocity.x - prevVelocity.x) * D_800BE9A8;
+        motion->vel.y += motion->gravity * D_800BE9A4;
+        accelX = (motion->vel.x - prevVelocity.x) * D_800BE9A8;
         accelY = motion->gravity;
-        accelZ = (motion->velocity.z - prevVelocity.z) * D_800BE9A8;
-        actor->position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        actor->position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        actor->position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelZ = (motion->vel.z - prevVelocity.z) * D_800BE9A8;
+        actor->tmpl.position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        actor->tmpl.position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        actor->tmpl.position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
     }
-    motion->angle.x += motion->angularVelocity.x * D_800BE9A4;
-    motion->angle.y += motion->angularVelocity.y * D_800BE9A4;
-    motion->angle.z += motion->angularVelocity.z * D_800BE9A4;
+    motion->rot.x += motion->rotVel.x * D_800BE9A4;
+    motion->rot.y += motion->rotVel.y * D_800BE9A4;
+    motion->rot.z += motion->rotVel.z * D_800BE9A4;
     return 1;
 }
 
@@ -245,9 +210,9 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
 
     mf = D_8008AE18;
     scale = actor->data.size * 0.003921568859f;
-    mf.m[3][0] = actor->position.x;
-    mf.m[3][1] = actor->position.y;
-    mf.m[3][2] = actor->position.z;
+    mf.m[3][0] = actor->tmpl.position.x;
+    mf.m[3][1] = actor->tmpl.position.y;
+    mf.m[3][2] = actor->tmpl.position.z;
     mf.m[0][0] *= scale;
     mf.m[0][1] *= scale;
     mf.m[0][2] *= scale;
@@ -293,10 +258,10 @@ void func_15158AD0(EffectActor *actor) {
 s32 func_15158AFC(EffectActor *actor) {
     s32 alpha;
 
-    if (actor->lifetime < actor->data.fade.duration) {
-        alpha = actor->lifetime * actor->data.fade.alphaPerTick;
-        if (alpha < actor->color0[3]) {
-            actor->color0[3] = alpha;
+    if (actor->tmpl.lifetime < actor->data.fade.duration) {
+        alpha = actor->tmpl.lifetime * actor->data.fade.alphaPerTick;
+        if (alpha < actor->tmpl.color0.alpha) {
+            actor->tmpl.color0.alpha = alpha;
         }
     }
     return 1;
@@ -319,25 +284,25 @@ void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
 
     if (msgId == 0x2D) {
         first = msg->first;
-        if (actor->owner == first) {
-            actor->owner = msg->second.ptr;
-            actor->ownerId = msg->secondId;
+        if (actor->tmpl.owner == first) {
+            actor->tmpl.owner = msg->second.ptr;
+            actor->tmpl.ownerId = msg->secondId;
         } else {
-            if (actor->owner == msg->second.ptr) {
-                actor->owner = first;
-                actor->ownerId = msg->firstId;
+            if (actor->tmpl.owner == msg->second.ptr) {
+                actor->tmpl.owner = first;
+                actor->tmpl.ownerId = msg->firstId;
             }
         dummy_label_356969: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 0) {
         first = msg->first;
-        if (actor->owner != first) {
-            if (msg->second.uniqueId != actor->ownerId) {
+        if (actor->tmpl.owner != first) {
+            if (msg->second.uniqueId != actor->tmpl.ownerId) {
                 return;
             }
         }
-        actor->owner = NULL;
-        actor->ownerId = 0;
+        actor->tmpl.owner = NULL;
+        actor->tmpl.ownerId = 0;
     }
 }
 

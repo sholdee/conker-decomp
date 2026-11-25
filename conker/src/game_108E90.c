@@ -4,36 +4,6 @@
 #include "effects.h"
 
 
-/* Parameter block for func_15153298 (Game153298Config in game_17CAF0.c). */
-typedef struct {
-    Vec3f position;
-    s16 countBase;
-    s16 countRange;
-    s16 yawBase;
-    s16 yawRange;
-    s16 pitchBase;
-    s16 pitchRange;
-    f32 speedBase;
-    f32 speedRange;
-    s16 lifeBase;
-    s16 lifeRange;
-    s16 sizeBase;
-    s16 sizeRange;
-    s8 mode;
-    s8 kind;
-    s16 fadeBase;
-    s16 fadeRange;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    void *texture;
-    u8 color;
-    u8 alpha;
-    u8 pad3E[2];
-} BurstConfig;
-
 /* The timer task func_151491F4 creates; func_150DBC60 is its tick callback. */
 typedef struct {
     u8 pad0[0xC];
@@ -43,14 +13,14 @@ typedef struct {
 extern u8 D_80090514[];
 
 void func_15152F70(SimplePuffSpray *config, u8 sceneTag);
-void func_15153298(BurstConfig *config, u8 sceneTag, s32 arg2);
+void func_15153298(BillboardBurst *config, u8 sceneTag, s32 arg2);
 void *func_15196438(Actor *owner, s32 preset, u8 sceneTag, s32 arg3);
 
 /* Sequence event 0x35 on `owner`: type 0 starts jet preset 1 with a puff, a 30-frame timer that keeps
  * puffing (func_150DBC60) and a particle burst, all at a fixed world position; type 1 starts preset 2. */
 void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
     SimplePuffSpray puff;
-    BurstConfig burst;
+    BillboardBurst burst;
 
     if (owner != NULL) {
         switch (type) {
@@ -96,25 +66,25 @@ void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
             burst.countBase = 6;
             burst.speedBase = 1285.0f;
             burst.countRange = 3;
-            burst.yawBase = -74;
-            burst.pitchBase = -38;
-            burst.yawRange = 21;
-            burst.pitchRange = 35;
+            burst.angles.yawBase = -74;
+            burst.angles.pitchBase = -38;
+            burst.angles.yawRange = 21;
+            burst.angles.pitchRange = 35;
             burst.speedRange = 1149.0f;
             burst.lifeBase = 14;
             burst.lifeRange = 14;
-            burst.sizeBase = -61;
-            burst.sizeRange = 28;
-            burst.mode = -1;
-            burst.kind = 18;
+            burst.accelYBase = -61;
+            burst.accelYRange = 28;
+            burst.callback = -1;
+            burst.flags = 18;
             burst.fadeBase = 6;
             burst.fadeRange = 6;
-            burst.unk2E = 0;
-            burst.unk30 = 174;
-            burst.unk32 = 115;
-            burst.unk34 = 115;
-            burst.unk36 = 135;
-            burst.texture = D_80090514;
+            burst.frameStep = 0;
+            burst.widthBase = 174;
+            burst.widthRange = 115;
+            burst.heightBase = 115;
+            burst.heightRange = 135;
+            burst.anim = (SpriteAnim *)D_80090514;
             burst.color = 255;
             burst.alpha = 255;
             func_15153298(&burst, sceneTag, 1);
