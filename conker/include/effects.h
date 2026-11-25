@@ -1348,6 +1348,69 @@ typedef struct BloodStripDesc {
     /* 0x3A */ u8 pad3A[2];
 } BloodStripDesc; /* size 0x3C */
 
+/* func_15154684 (game_17CAF0.c): countBase + rand % (countRange + 1) func_151C5F44 particles (game_1F2730.c)
+ * from pos, each at a random yaw (the yaw fields are unused) and a pitch/speed from the ranges below. */
+typedef struct ParticleBurst {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ Vec3f *pos;
+    /* 0x08 */ s16 yawBase;         /* unused */
+    /* 0x0A */ s16 pitchBase;
+    /* 0x0C */ s16 yawRange;        /* unused */
+    /* 0x0E */ s16 pitchRange;
+    /* 0x10 */ f32 speedBase;
+    /* 0x14 */ f32 speedRange;
+    /* 0x18 */ f32 gravityBase;     /* ParticleDesc.gravity */
+    /* 0x1C */ f32 gravityRange;
+    /* 0x20 */ f32 unk20;           /* copied to the particle's data */
+    /* 0x24 */ u8 alphaBase;        /* ParticleDesc.alpha */
+    /* 0x25 */ u8 alphaRange;
+    /* 0x26 */ s16 timerBase;       /* ParticleDesc.timer; -1 = 300 */
+    /* 0x28 */ s16 timerRange;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ f32 sizeBase;
+    /* 0x30 */ f32 sizeRange;
+    /* 0x34 */ f32 altChance;       /* probability of the alternative update function */
+    /* 0x38 */ void *ground;        /* func_15130280's ground argument */
+} ParticleBurst; /* size 0x3C */
+
+/* func_151511FC (game_17CAF0.c): countBase + rand % (countRange + 1) func_1513D2F0 particles at position,
+ * each launched inside a cone of half-width `spread` around the normal of `triangle` (flipped to face
+ * `normal`). */
+typedef struct SurfaceBurst {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ Vec3f position;
+    /* 0x10 */ Vec3f normal;
+    /* 0x1C */ SurfaceTriangle triangle;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ f32 spread;
+    /* 0x34 */ u8 texture;          /* ParticleDef.texture */
+    /* 0x35 */ u8 type;             /* ParticleDef.type */
+    /* 0x36 */ u16 renderModes;     /* ParticleDef.renderModes */
+    /* 0x38 */ s16 lifetimeBase;
+    /* 0x3A */ s16 lifetimeRange;
+    /* 0x3C */ f32 scaleBase;       /* ParticleDef.width = height */
+    /* 0x40 */ f32 scaleRange;
+    /* 0x44 */ s32 flags;           /* ParticleDef.flags (0x08000000 is always added) */
+    /* 0x48 */ u8 unk44Base;        /* ParticleDef.unk44 */
+    /* 0x49 */ u8 unk44Range;
+    /* 0x4A */ u8 pad4A[2];
+    /* 0x4C */ f32 unk4C;           /* base and range of the particle's motion word at +0x11C */
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 speedBase;
+    /* 0x58 */ f32 speedRange;
+    /* 0x5C */ u8 unk46;            /* ParticleDef.unk46 */
+    /* 0x5D */ u8 unk47;            /* ParticleDef.unk47 */
+    /* 0x5E */ u8 pad5E[2];
+    /* 0x60 */ s32 unk60;           /* func_1513D2F0's model argument */
+    /* 0x64 */ s32 unk64;           /* func_1513D2F0's arg8 */
+    /* 0x68 */ s16 fadeStart;
+    /* 0x6A */ s16 fadeRate;
+    /* 0x6C */ f32 unk6C;           /* the particle's motion word at +0x120 */
+    /* 0x70 */ f32 spin;            /* spin.x / spin.z are random in [-spin, spin] */
+} SurfaceBurst; /* size 0x74 */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

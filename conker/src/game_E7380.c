@@ -3,38 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Argument of func_151511FC (layout from game_17CAF0.c): a burst of particles off a surface triangle. */
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ Vec3f position;
-    /* 0x10 */ Vec3f normal;
-    /* 0x1C */ SurfaceTriangle triangle;
-    /* 0x30 */ f32 spread;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ f32 scaleBase;
-    /* 0x40 */ f32 scaleRange;
-    /* 0x44 */ s32 flags;
-    /* 0x48 */ u8 unk48;
-    /* 0x49 */ u8 unk49;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 speedBase;
-    /* 0x58 */ f32 speedRange;
-    /* 0x5C */ u8 unk5C;
-    /* 0x5D */ u8 unk5D;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 spin;
-} SurfaceBurstConfig;
-
 /* Spawn template of a sprite (layout from game_169510.c), copied to SpriteFx.def. */
 typedef struct {
     /* 0x00 */ s32 flags;
@@ -85,7 +53,7 @@ extern s32 func_151E7F60[];
 extern s32 func_150A3058(s32, s16, s16, s16);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, SurfaceTriangle *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern s32 func_15145C90(s32);
-extern void func_151511FC(SurfaceBurstConfig *, u8, s32);
+extern void func_151511FC(SurfaceBurst *, u8, s32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
@@ -120,7 +88,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         SurfaceTriangle triangle;
         s32 hitObject;
         SpriteDef sprite;
-        SurfaceBurstConfig burst;
+        SurfaceBurst burst;
 
         /* Ray back along the move, i.e. minus the displacement since (prevX, prevZ). */
         dx = -(actor->x_position - prevX);
@@ -164,20 +132,20 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         burst.scaleRange = 10.0f;
         burst.unk4C = -1.022000074f;
         burst.unk50 = 0.5420000553f;
-        burst.unk34 = 7;
-        burst.unk36 = 0x3B01;
-        burst.unk35 = 0;
-        burst.unk38 = 26;
-        burst.unk3A = 20;
+        burst.texture = 7;
+        burst.renderModes = 0x3B01;
+        burst.type = 0;
+        burst.lifetimeBase = 26;
+        burst.lifetimeRange = 20;
         burst.flags = 0x5C0001;
-        burst.unk48 = 100;
-        burst.unk49 = 155;
-        burst.unk5C = 0;
-        burst.unk5D = 7;
+        burst.unk44Base = 100;
+        burst.unk44Range = 155;
+        burst.unk46 = 0;
+        burst.unk47 = 7;
         burst.unk60 = 3;
         burst.unk64 = 0xFF;
-        burst.unk68 = 10;
-        burst.unk6A = 25;
+        burst.fadeStart = 10;
+        burst.fadeRate = 25;
         burst.speedBase = 0.0374f;
         burst.speedRange = 0.0235f;
         burst.unk6C = 0.940404f;

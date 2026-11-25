@@ -488,72 +488,6 @@ void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-typedef struct {
-    s16 countBase;
-    s16 countRange;
-    Vec3f position;
-    Vec3f normal;
-    s16 triangle[9];
-    u8 pad2E[2];
-    f32 spread;
-    u8 unk34;
-    u8 unk35;
-    u16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    f32 scaleBase;
-    f32 scaleRange;
-    s32 flags;
-    u8 unk48;
-    u8 unk49;
-    u8 pad4A[2];
-    f32 unk4C;
-    f32 unk50;
-    f32 speedBase;
-    f32 speedRange;
-    u8 unk5C;
-    u8 unk5D;
-    u8 pad5E[2];
-    s32 unk60;
-    s32 unk64;
-    s16 unk68;
-    s16 unk6A;
-    f32 unk6C;
-    f32 spin; /* extra.spin.x/z are random in [-spin, spin] */
-} Local151511FCArg;
-
-/* Spawn descriptor for func_1513D2F0. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    Vec3f position;
-    Vec3f rotation; /* degrees */
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 flags;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    s32 pad4C;
-    s32 pad50;
-    s16 unk54;
-    s16 unk56;
-} Local151511FCDesc;
-
 /* Copied into the spawned object at +0x110. */
 typedef struct {
     Vec3f velocity;
@@ -564,7 +498,7 @@ typedef struct {
 
 /* Spawns a random number of objects off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal. */
-void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
+void func_151511FC(SurfaceBurst *config, u8 arg1, s32 arg2) {
     s32 count;
     Vec3f axis0;
     f32 length0;
@@ -575,34 +509,34 @@ void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
     Vec3f normal;
     f32 normalLength;
     f32 normalInverse;
-    Local151511FCDesc desc;
+    ParticleDef desc;
     Local151511FCExtra extra;
     f32 speed;
     f32 second;
     f32 first;
     void *object;
 
-    desc.unk54 = config->unk68;
-    desc.unk56 = config->unk6A;
-    desc.unk0 = config->unk34;
-    desc.unk1 = config->unk35;
-    desc.unk2 = config->unk36;
-    desc.unk8 = 0;
-    desc.unkC = 0;
-    desc.unk10 = 0xFF;
-    desc.unk11 = 0xFF;
-    desc.unk12 = 0xFF;
-    desc.unk13 = 0xFF;
-    desc.position = config->position;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
+    desc.fadeStart = config->fadeStart;
+    desc.fadeRate = config->fadeRate;
+    desc.texture = config->texture;
+    desc.type = config->type;
+    desc.renderModes = config->renderModes;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
+    desc.rgba[0] = 0xFF;
+    desc.rgba[1] = 0xFF;
+    desc.rgba[2] = 0xFF;
+    desc.rgba[3] = 0xFF;
+    desc.pos = config->position;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
     desc.flags = config->flags | 0x08000000;
     desc.unk45 = 0xFF;
-    desc.unk46 = config->unk5C;
-    desc.unk47 = config->unk5D;
+    desc.unk46 = config->unk46;
+    desc.unk47 = config->unk47;
     extra.unk10 = config->unk6C;
-    if (func_15144E80(config->triangle, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(config->triangle.v, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -619,12 +553,12 @@ void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
         while (count != 0) {
             func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->spread, &first, &second);
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-            desc.unk4 = (func_150ADA68() * config->unk3A) + config->unk38;
-            desc.unk14 = desc.unk18 = (func_150ADA68() * config->scaleRange) + config->scaleBase;
-            desc.rotation.x = func_150ADA68() * 360.0f;
-            desc.rotation.y = func_150ADA68() * 360.0f;
-            desc.rotation.z = func_150ADA68() * 360.0f;
-            desc.unk44 = (func_150ADA20() % (u32)(config->unk49 + 1)) + config->unk48;
+            desc.lifetime = (func_150ADA68() * config->lifetimeRange) + config->lifetimeBase;
+            desc.width = desc.height = (func_150ADA68() * config->scaleRange) + config->scaleBase;
+            desc.rot.x = func_150ADA68() * 360.0f;
+            desc.rot.y = func_150ADA68() * 360.0f;
+            desc.rot.z = func_150ADA68() * 360.0f;
+            desc.unk44 = (func_150ADA20() % (u32)(config->unk44Range + 1)) + config->unk44Base;
             extra.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             extra.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             extra.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -1573,34 +1507,11 @@ s32 func_1515452C(Object15132A4C *object) {
     }
 }
 
-struct Local15154684Arg {
-    s16 countBase;
-    s16 countRange;
-    s32 unk04;
-    s16 unk08;
-    s16 pitchBase;
-    s16 unk0C;
-    s16 pitchRange;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34; /* probability */
-    s32 unk38;
-};
-
-extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
+extern void func_151C5F44(Vec3f *, f32 *, f32, f32, s32, s32, f32, s32, void *, u8, s32);
 
 /* Spawns a random number of particles (func_151C5F44), each moving at a random yaw and a pitch from
  * config's range. */
-void func_15154684(struct Local15154684Arg *config, u8 arg1, s32 arg2) {
+void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {
     f32 pad; // matching: unused stack slot above velocity
     Vec3f velocity;
     s32 count;
@@ -1611,14 +1522,14 @@ void func_15154684(struct Local15154684Arg *config, u8 arg1, s32 arg2) {
                       (s16)((func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity.x);
-        func_151C5F44(config->unk04, &velocity.x,
-                      (func_150ADA68() * config->unk1C) + config->unk18,
+        func_151C5F44(config->pos, &velocity.x,
+                      (func_150ADA68() * config->gravityRange) + config->gravityBase,
                       config->unk20,
-                      (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
-                      (func_150ADA20() % (u32)(config->unk28 + 1)) + config->unk26,
-                      (func_150ADA68() * config->unk30) + config->unk2C,
-                      func_150ADA68() < config->unk34,
-                      config->unk38, arg1, arg2);
+                      (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase,
+                      (func_150ADA20() % (u32)(config->timerRange + 1)) + config->timerBase,
+                      (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                      func_150ADA68() < config->altChance,
+                      config->ground, arg1, arg2);
         count--;
     }
 }

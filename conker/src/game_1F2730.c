@@ -354,56 +354,32 @@ Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 un
     return particle;
 }
 
-/* Effect descriptor passed to func_15154684. */
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ Vec3f *unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ s8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f *unk38;
-} Effect15154684;
-
-void func_15154684(Effect15154684 *desc, u8 arg1, s32 arg2);
+void func_15154684(ParticleBurst *desc, u8 arg1, s32 arg2);
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
 void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
-    Effect15154684 desc;
+    ParticleBurst desc;
 
-    desc.unk00 = 10;
-    desc.unk02 = 4;
-    desc.unk04 = arg0;
-    desc.unk08 = 0;
-    desc.unk0C = 255;
-    desc.unk0A = -24;
-    desc.unk0E = 25;
-    desc.unk10 = 5.0f;
-    desc.unk14 = 7.0f;
-    desc.unk18 = -0.2080000043f;
-    desc.unk1C = 0.08500000089f;
+    desc.countBase = 10;
+    desc.countRange = 4;
+    desc.pos = arg0;
+    desc.yawBase = 0;
+    desc.yawRange = 255;
+    desc.pitchBase = -24;
+    desc.pitchRange = 25;
+    desc.speedBase = 5.0f;
+    desc.speedRange = 7.0f;
+    desc.gravityBase = -0.2080000043f;
+    desc.gravityRange = 0.08500000089f;
     desc.unk20 = 0.9706320167f;
-    desc.unk24 = 190;
-    desc.unk25 = 65;
-    desc.unk26 = 200;
-    desc.unk28 = 150;
-    desc.unk2C = 96.0f;
-    desc.unk30 = 109.0f;
-    desc.unk34 = 1.0f;
-    desc.unk38 = arg1;
+    desc.alphaBase = 190;
+    desc.alphaRange = 65;
+    desc.timerBase = 200;
+    desc.timerRange = 150;
+    desc.sizeBase = 96.0f;
+    desc.sizeRange = 109.0f;
+    desc.altChance = 1.0f;
+    desc.ground = arg1;
     func_15154684(&desc, arg2, arg3);
 }
 
