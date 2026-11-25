@@ -182,6 +182,7 @@ TexScroll *func_15195984(s32 id, s32 size, s32 pos, s32 doubled) {
     return scroll;
 }
 
+/* Returns `cmdIndex` unchanged. */
 s16 func_15195A84(s16 cmdIndex, s32 arg1, s32 arg2, s32 arg3) {
     return cmdIndex;
 }
@@ -1195,6 +1196,7 @@ f32 func_151979F8(CharacterFlamethrowerActor *actor) {
     return 1.32f;
 }
 
+/* Returns the "power" tunable (func_151422C0) scaled by 0.01. */
 f32 func_15197A0C(CharacterFlamethrowerActor *actor) {
     return func_151422C0(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
@@ -1828,7 +1830,8 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
     }
 }
 
-void func_15198D7C(s32 arg0) {
+/* Jet callback (D_8008F89C): does nothing. */
+void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
 /* Preset in D_800A8728 for the particles func_15198D88 scatters around a jet's end point. */
@@ -1956,7 +1959,7 @@ typedef struct {
     s16 fade_range;
     s16 size;
     s16 size_range;
-} EmissionPreset151990AC;
+} JetSpritePreset;
 
 typedef struct {
     void *texture;
@@ -1986,16 +1989,16 @@ typedef struct {
     char pad33;
     u16 flags;
     char pad36[2];
-} Emission151990AC;
+} SpriteEmission;
 
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
 extern u8 D_80090514[];
-extern EmissionPreset151990AC D_800A8770[];
+extern JetSpritePreset D_800A8770[];
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
-    Emission151990AC packet;
+    SpriteEmission packet;
     f32 cosine1;
     f32 sine1;
     f32 cosine2;
@@ -2006,7 +2009,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     u8 angle1;
     u8 angle2;
     u32 rnd;
-    EmissionPreset151990AC *preset;
+    JetSpritePreset *preset;
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
