@@ -3,8 +3,8 @@
 /* Round a sample count up to a whole number of FIXED_SAMPLE frames. */
 #define ROUND_UP_FRAME(n) ((((n) + FIXED_SAMPLE - 1) / FIXED_SAMPLE) * FIXED_SAMPLE)
 
+/* Equal-power pan/fx-mix curve (libultra eqpower[128]). */
 extern s16 D_8002BC10[];
-extern s16 D_8002BD0E[];
 
 /* Output-mode flags set by init_17870.c: C0 = stereo/headphone, C1 = mono, C2 = headphone. */
 extern u8 D_800428C0;
@@ -18,7 +18,7 @@ s32  func_10021C40(N_PVoice *f, s32 paramID, void *param);
 /* n_alEnvmixerPull: drain the voice's parameter list, emitting one RSP sub-frame per
    parameter delta, then emit the remainder of the 184-sample frame. */
 Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
-    Acmd      *ptr = p;
+    Acmd     *ptr = p;
     N_PVoice *e = f;
     s16       outp;
     u32       lastDelta;
@@ -55,25 +55,25 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 e->em_first = 1;
                 e->em_delta = 0;
                 e->em_segEnd = ROUND_UP_FRAME(startParam->samples);
-                startVol = (startParam->volume + startParam->volume) / 2;
+                startVol = (startParam->volume + startParam->volume) / 2; // matching: -g keeps the temp store
                 e->em_volume = startVol;
                 e->em_pan = startParam->pan;
                 e->em_dryamt = D_8002BC10[startParam->fxMix & 0x7F] & 0xFFFC;
                 if (D_800428C0 != 0) {
                     e->em_dryamt |= startParam->fxMix >> 7;
                 }
-                e->em_wetamt = D_8002BD0E[-(startParam->fxMix & 0x7F)] & 0xFFFC;
+                e->em_wetamt = D_8002BC10[127 - (startParam->fxMix & 0x7F)] & 0xFFFC;
                 if (D_800428C2 != 0) {
-                    e->em_pan = (e->em_pan >> 1) + 0x20;
+                    e->em_pan = (e->em_pan >> 1) + 32;
                 } else if (D_800428C1 != 0) {
-                    e->em_pan = 0x40;
+                    e->em_pan = AL_PAN_CENTER;
                 }
                 if (startParam->samples != 0) {
                     e->em_cvolL = 1;
                     e->em_cvolR = 1;
                 } else {
                     e->em_cvolL = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
-                    e->em_cvolR = (D_8002BD0E[-e->em_pan] * e->em_volume) >> 15;
+                    e->em_cvolR = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
                 }
                 e->rs_ratio = startParam->pitch;
                 e->unkA2 = startParam->unk15;
@@ -89,7 +89,7 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 ptr = func_10020ABC(e, &outp, &inp, deltaSamples, ptr);
                 if (e->em_delta >= e->em_segEnd) {
                     e->em_ltgt = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
-                    e->em_rtgt = (D_8002BD0E[-e->em_pan] * e->em_volume) >> 15;
+                    e->em_rtgt = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
                     e->em_delta = e->em_segEnd;
                     e->em_cvolL = e->em_ltgt;
                     e->em_cvolR = e->em_rtgt;
@@ -105,9 +105,9 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 }
                 if (e->em_ctrlList->type == AL_FILTER_SET_PAN) {
                     if (D_800428C2 != 0) {
-                        e->em_pan = ((s16)e->em_ctrlList->data.i >> 1) + 0x20;
+                        e->em_pan = ((s16)e->em_ctrlList->data.i >> 1) + 32;
                     } else if (D_800428C1 != 0) {
-                        e->em_pan = 0x40;
+                        e->em_pan = AL_PAN_CENTER;
                     } else {
                         e->em_pan = e->em_ctrlList->data.i;
                     }
@@ -115,7 +115,7 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                 if (e->em_ctrlList->type == AL_FILTER_SET_VOLUME) {
                     e->em_delta = 0;
                     vol = e->em_ctrlList->data.i;
-                    vol = (vol + vol) / 2;
+                    vol = (vol + vol) / 2; // matching: -g keeps this as its own store to vol
                     e->em_volume = vol;
                     e->em_segEnd = ROUND_UP_FRAME(e->em_ctrlList->moredata.i);
                 }
@@ -123,14 +123,14 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                     if (((e->em_dryamt & 1) ^ (e->em_wetamt & 1) ^
                          ((e->em_ctrlList->data.i + 1) >> 7)) != 0) {
                         if (D_800428C0 != 0) {
-                            if (e->em_pan > 0x40) {
+                            if (e->em_pan > AL_PAN_CENTER) {
                                 e->em_dryamt ^= 1;
-                                if (e->em_pan < 0x6F) {
+                                if (e->em_pan < 111) {
                                     e->em_dryamt |= 2;
                                 }
                             } else {
                                 e->em_wetamt ^= 1;
-                                if (e->em_pan > 0x10) {
+                                if (e->em_pan > 16) {
                                     e->em_wetamt |= 2;
                                 }
                             }
@@ -139,7 +139,7 @@ Acmd *func_10020000(N_PVoice *f, s32 sampleOffset, Acmd *p) {
                     e->em_dryamt =
                         (D_8002BC10[e->em_ctrlList->data.i & 0x7F] & 0xFFFC) | (e->em_dryamt & 3);
                     e->em_wetamt =
-                        (D_8002BD0E[-(e->em_ctrlList->data.i & 0x7F)] & 0xFFFC) | (e->em_wetamt & 3);
+                        (D_8002BC10[127 - (e->em_ctrlList->data.i & 0x7F)] & 0xFFFC) | (e->em_wetamt & 3);
                 }
                 e->em_first = 1;
                 break;
@@ -278,7 +278,7 @@ Acmd *func_10020ABC(N_PVoice *filter, s16 *outp, s16 *inp, s32 sampleOffset, Acm
 
         e->em_ltgt = (D_8002BC10[e->em_pan] * e->em_volume) >> 15;
         e->em_lratm = _getRate(e->em_cvolL, e->em_ltgt, e->em_segEnd, &e->em_lratl);
-        e->em_rtgt = (D_8002BD0E[-e->em_pan] * e->em_volume) >> 15;
+        e->em_rtgt = (D_8002BC10[127 - e->em_pan] * e->em_volume) >> 15;
         e->em_rratm = _getRate(e->em_cvolR, e->em_rtgt, e->em_segEnd, &e->em_rratl);
 
         n_aSetVolume(ptr++, A_VOL | A_LEFT, e->em_cvolL, e->em_dryamt, e->em_wetamt);
