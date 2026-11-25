@@ -59,7 +59,7 @@ typedef struct Prop {
         struct {
             s32 home; /* (y << 16) | x, saved on the first update */
             s32 unk80;
-            s32 extent; /* (height << 16) | width, each 0..13 */
+            s32 open; /* (x opening << 16) | y opening, each 0..13 */
         } door;
         struct {
             s32 phase;
@@ -188,143 +188,117 @@ void func_1511F31C(Prop *prop) {
     }
 }
 
-struct Obj1511F3E8 {
-    u8 pad0[0x3C];
-    s32 unk3C;
-    u8 pad40[0x2E];
-    u8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-    u8 pad88[2];
-    u8 unk8A;
-};
+/*
+ * Waits params.hi seconds, then fades the prop out over params.lo seconds (alpha 255 -> 0) and
+ * marks it finished.
+ */
+void func_1511F3E8(Prop *prop) {
+    s32 fadeTime;
 
-void func_1511F3E8(struct Obj1511F3E8 *arg0) {
-    s32 ticks;
-
-    if (arg0->unk7C == 0) {
-        ticks = arg0->unk3C;
-        arg0->unk80 = ((ticks >> 16) & 0xFFFF) * 60;
-        arg0->unk7C = 1;
+    if (!prop->work.fade.started) {
+        fadeTime = prop->params.word;
+        prop->work.fade.delay = ((fadeTime >> 16) & 0xFFFF) * 60;
+        prop->work.fade.started = TRUE;
     }
-    ticks = arg0->unk3C;
-    ticks = (ticks & 0xFFFF) * 60;
-    if (arg0->unk80 != 0) {
-        if (D_800BE9E4 < arg0->unk80) {
-            arg0->unk80 -= D_800BE9E4;
+    fadeTime = (prop->params.word & 0xFFFF) * 60;
+    if (prop->work.fade.delay != 0) {
+        if (D_800BE9E4 < prop->work.fade.delay) {
+            prop->work.fade.delay -= D_800BE9E4;
         } else {
-            arg0->unk80 = 0;
-            arg0->unk84 = ticks;
+            prop->work.fade.delay = 0;
+            prop->work.fade.timer = fadeTime;
         }
-    } else if (D_800BE9E4 < arg0->unk84) {
-        arg0->unk84 -= D_800BE9E4;
-        arg0->unk8A = (arg0->unk84 * 255) / ticks;
+    } else if (D_800BE9E4 < prop->work.fade.timer) {
+        prop->work.fade.timer -= D_800BE9E4;
+        prop->alpha = (prop->work.fade.timer * 255) / fadeTime;
     } else {
-        arg0->unk6E = 1;
+        prop->finished = TRUE;
     }
 }
 
+/*
+ * Opens and closes a group of four consecutive props around the first one's saved home position:
+ * prop[0] and prop[1] part along y, then prop[2] and prop[3] part along x, each opening by up to
+ * params * scaleY in 13 steps. MOVING opens the group (ending ARRIVED), RETURNING closes it again
+ * (ending REST); state bit 2 swaps the two.
+ */
+void func_1511F4D0(Prop *prop) {
+    s32 motion;
+    s32 openY;
+    s32 openX;
+    s32 pad; // matching: unused stack slot of the original frame
+    s32 span;
+    s32 next;
+    s32 home[4]; // matching: home x/y live in a stack array ([1] and [2]) in the original
 
-struct Obj1511F4D0 {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    u8 pad14[0x1C];
-    f32 unk30;
-    u8 pad34[0x8];
-    s32 unk3C;
-    u8 pad40[0x33];
-    u8 unk73;
-    u8 pad74[0x8];
-    s32 unk7C;
-    u8 pad80[0x4];
-    s32 unk84;
-    u8 pad88[0x2A];
-    s16 unkB2;
-    u8 padB4[0x9C];
-    s16 unk150;
-    u8 pad152[0x9E];
-    s16 unk1F0;
-};
-
-void func_1511F4D0(struct Obj1511F4D0 *arg0) {
-    s32 state;
-    s32 width;
-    s32 height;
-    s32 unused;
-    s32 scale;
-    s32 tmp;
-    s32 origin[4];
-
-    state = arg0->unk73 & 3;
-    width = arg0->unk73 & 4;
-    if (width == 4) {
-        if (state == 2) {
-            state = 0;
-        } else if (state == 1) {
-            state = 3;
+    motion = prop->state & 3;
+    openY = prop->state & 4; // matching: the flag test reuses openY's register
+    if (openY == 4) {
+        if (motion == PROP_MOVING) {
+            motion = PROP_REST;
+        } else if (motion == PROP_RETURNING) {
+            motion = PROP_ARRIVED;
         }
     }
-    scale = arg0->unk3C;
-    scale = (s32)((f32)scale * arg0->unk30);
-    tmp = arg0->unk84;
-    height = (tmp >> 16) & 0xFFFF;
-    width = tmp & 0xFFFF;
-    if (arg0->unk7C == 0) {
-        arg0->unk7C = (arg0->unk10 & 0xFFFF) | ((arg0->unk12 & 0xFFFF) << 16);
-        if (state == 3) {
-            width = 13;
-            height = 13;
+    span = prop->params.word; // matching: loaded into span before the conversion
+    span = span * prop->scaleY;
+    next = prop->work.door.open;
+    openX = (next >> 16) & 0xFFFF;
+    openY = next & 0xFFFF;
+    if (prop->work.door.home == 0) {
+        prop->work.door.home = (prop->x & 0xFFFF) | ((prop->y & 0xFFFF) << 16);
+        if (motion == PROP_ARRIVED) {
+            openY = 13;
+            openX = 13;
         } else {
-            height = 0;
-            width = 0;
+            openX = 0;
+            openY = 0;
         }
     }
-    origin[1] = (s16)(arg0->unk7C & 0xFFFF);
-    origin[2] = (s16)((arg0->unk7C >> 16) & 0xFFFF);
-    if (state == 2) {
-        tmp = width + D_800BE9E4;
-        if (tmp < 13) {
-            width = tmp;
+    home[1] = (s16)(prop->work.door.home & 0xFFFF);
+    home[2] = (s16)((prop->work.door.home >> 16) & 0xFFFF);
+    if (motion == PROP_MOVING) {
+        next = openY + D_800BE9E4;
+        if (next < 13) {
+            openY = next;
         } else {
-            width = 13;
+            openY = 13;
         }
-        if (width >= 9) {
-            tmp = height + D_800BE9E4;
-            if (tmp < 13) {
-                height = tmp;
+        if (openY >= 9) {
+            next = openX + D_800BE9E4;
+            if (next < 13) {
+                openX = next;
             } else {
-                height = 13;
-                state = 3;
+                openX = 13;
+                motion = PROP_ARRIVED;
             }
         }
-    } else if (state == 1) {
-        tmp = height - D_800BE9E4;
-        if (tmp > 0) {
-            height = tmp;
+    } else if (motion == PROP_RETURNING) {
+        next = openX - D_800BE9E4;
+        if (next > 0) {
+            openX = next;
         } else {
-            height = 0;
+            openX = 0;
         }
-        if (height < 4) {
-            tmp = width - D_800BE9E4;
-            if (tmp > 0) {
-                width = tmp;
+        if (openX < 4) {
+            next = openY - D_800BE9E4;
+            if (next > 0) {
+                openY = next;
             } else {
-                width = 0;
-                state = 0;
+                openY = 0;
+                motion = PROP_REST;
             }
         }
     }
-    arg0->unk12 = origin[2] + (s32)((u32)width * scale) / 13;
-    arg0->unkB2 = origin[2] - (s32)((u32)(scale + 1) * width) / 13;
-    tmp = (s32)((u32)height * scale) / 13;
-    arg0->unk150 = origin[1] - tmp;
-    arg0->unk1F0 = origin[1] + tmp;
-    arg0->unk84 = (width & 0xFFFF) | ((height & 0xFFFF) << 16);
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    /* the products are unsigned (multu), the divisions signed */
+    prop[0].y = home[2] + (s32)((u32)openY * span) / 13;
+    prop[1].y = home[2] - (s32)((u32)(span + 1) * openY) / 13;
+    next = (s32)((u32)openX * span) / 13;
+    prop[2].x = home[1] - next;
+    prop[3].x = home[1] + next;
+    prop->work.door.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
+    prop->state &= ~3;
+    prop->state |= motion;
 }
 
 /* Starts the prop's behaviour: moves it from state 0 to state 1. */
