@@ -192,7 +192,11 @@ s32 func_15023BB0(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 ma
             if ((ev->delta == 0) && (ev->type == 0)) {
                 time = ev->value;
             } else {
-                if ((after < ev) && (type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) && ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
+                if ((after < ev) &&
+                    (type == ev->type) &&
+                    ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) &&
+                    ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
                     *found = ev;
                     return time;
                 }
@@ -205,7 +209,11 @@ s32 func_15023BB0(SeqEvent *after, s32 type, s32 track, SeqEvent **found, s32 ma
                     if ((u32) (ev - D_800C3688[scene][track]) >= D_800C35D8[scene][track]) {
                         break;
                     }
-                    if ((after < ev) && (type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) && ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
+                    if ((after < ev) &&
+                        (type == ev->type) &&
+                        ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4))) &&
+                        ((matchUnk5 == 0) || ((matchUnk5 == 1) && (unk5 == ev->unk5)))) {
                         *found = ev;
                         return time;
                     }
@@ -249,7 +257,9 @@ void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTim
             evTime = ev->value;
         } else {
             if (evTime <= time) {
-                if ((type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                if ((type == ev->type) &&
+                    ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
                     if (prev != NULL) {
                         *prev = ev;
                     }
@@ -259,7 +269,9 @@ void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTim
                 }
             }
             if (evTime > time) {
-                if ((type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                if ((type == ev->type) &&
+                    ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                    ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
                     *next = ev;
                     *nextTime = evTime;
                     return;
@@ -276,7 +288,9 @@ void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTim
                 }
                 sceneTime = D_800C35B0[scene];
                 if (evTime <= sceneTime) {
-                    if ((type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                    if ((type == ev->type) &&
+                        ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
                         if (prev != NULL) {
                             *prev = ev;
                         }
@@ -287,7 +301,9 @@ void func_15023DE0(SeqEvent **prev, SeqEvent **next, s32 *prevTime, s32 *nextTim
                     }
                 }
                 if (evTime > sceneTime) {
-                    if ((type == ev->type) && ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) && ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
+                    if ((type == ev->type) &&
+                        ((matchValue == 0) || ((matchValue == 1) && (value == ev->value))) &&
+                        ((matchUnk4 == 0) || ((matchUnk4 == 1) && (unk4 == ev->unk4)))) {
                         *next = ev;
                         *nextTime = evTime;
                         return;
@@ -1569,7 +1585,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_15177F90(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->unk6);
             }
         } else if (event->value == 0x1A) {
-            if (event->unk4 != 0 && event->unk4 == 1) {
+            if (event->unk4 != 0 && event->unk4 == 1) { // matching: redundant test kept for codegen
                 f32 from[3];
                 f32 to[3];
 
@@ -1581,7 +1597,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 to[2] = D_800C3958[scene][track].z;
                 func_150B0094(from, to, sceneTag, 1);
             } else {
-                func_150E1AB0(0, D_800C3868[scene][track][0], D_800C3868[scene][track][1], D_800C3868[scene][track][2], D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].unk38, D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                func_150E1AB0(0, D_800C3868[scene][track][0], D_800C3868[scene][track][1], D_800C3868[scene][track][2],
+                              D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].unk38,
+                              D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             }
         } else if (event->value == 0x1C) {
             s32 anim;
@@ -1630,8 +1649,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         angle = obj->unk7A >> 8;
                         s = func_15048A40(angle);
                         c = func_150489B0(angle);
-                        func_1516F548(x + 20.0f, y + 475.0f, z, duration, 14.0f * s, 0xB00, 14.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
-                        func_1516F548(x - 24.0f, y + 476.0f, z, duration, -23.0f * s, 0x800, -23.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
+                        func_1516F548(x + 20.0f, y + 475.0f, z, duration, 14.0f * s, 0xB00, 14.0f * c, 0xC8,
+                                      0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
+                        func_1516F548(x - 24.0f, y + 476.0f, z, duration, -23.0f * s, 0x800, -23.0f * c, 0xC8,
+                                      0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
                         break;
                     }
                     case 3:
@@ -1844,7 +1865,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             hit = 0;
                         }
                         if (hit) {
-                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f, (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f, (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.unk4, point, !event->unk6, 1, sceneTag, 1);
+                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
+                                          (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
+                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.unk4, point,
+                                          !event->unk6, 1, sceneTag, 1);
                         }
                         break;
                     }
@@ -1963,7 +1987,11 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
                 offset[0] = (func_150ADA68() * 200.0f) + -100.0f;
                 offset[1] = (func_150ADA68() * 300.0f) + -150.0f;
-                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f, ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f, ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f, (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4, 0x40, sceneTag, 1);
+                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f,
+                              ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f,
+                              ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f,
+                              (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4,
+                              0x40, sceneTag, 1);
             }
         } else if (event->value == 0xF) {
             s32 duration;
@@ -1980,7 +2008,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150DB518(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18, &D_800C3958[scene][track].unk1C, &D_800C3958[scene][track].unk20, duration, sceneTag, 0);
+                func_150DB518(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18,
+                              &D_800C3958[scene][track].unk1C, &D_800C3958[scene][track].unk20, duration,
+                              sceneTag, 0);
             }
         } else if (event->value == 0x34) {
             s32 duration;
@@ -1998,7 +2028,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = FPTR(obj, 0x2F4);
                 while (node != NULL) {
                     if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
-                        node->unk10->unk30 = func_1519E970(duration, node->unk10, 0, &D_800C3958[scene][track].unk30, &D_800C3958[scene][track].unk20, sceneTag, 0);
+                        node->unk10->unk30 = func_1519E970(duration, node->unk10, 0,
+                                                           &D_800C3958[scene][track].unk30,
+                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
                     node = node->unk14;
                 }
@@ -2206,7 +2238,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     if (event->unk5 != 0) {
                         size *= 0.349999994f;
                     }
-                    func_15107700(obj, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F, (func_150ADA20() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, sceneTag, 1);
+                    func_15107700(obj, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F,
+                                  (func_150ADA20() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, sceneTag, 1);
                     break;
                 }
                 case 16:
@@ -2708,7 +2741,8 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 snd->fadeOut = fadeOut;
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
-                func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
+                func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918,
+                              (s32)func_150238D8, snd, 0, sflags, fade);
             }
         }
     } else if (event->type == 8) {
