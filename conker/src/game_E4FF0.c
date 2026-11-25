@@ -2,122 +2,108 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Particle spawn template passed to func_15132A4C (game_15F680.c's ParticleSpawn, up to 0x78). */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_150B7B40;
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ Vec3_150B7B40 pos;
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+} ModelParticleSpawn;
+
+/* Burst config read by func_15151A38 (game_17CAF0.c's struct Local15151A38Arg). */
+typedef struct {
+    /* 0x00 */ vertex position;
+    /* 0x0C */ f32 sizeBase;
+    /* 0x10 */ f32 sizeRange;
+    /* 0x14 */ f32 growthBase;
+    /* 0x18 */ f32 growthRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ s16 yawBase;
+    /* 0x2A */ s16 yawRange;
+    /* 0x2C */ s16 pitchBase;
+    /* 0x2E */ s16 pitchRange;
+    /* 0x30 */ s16 fadeBase;
+    /* 0x32 */ s16 fadeRange;
+    /* 0x34 */ s16 lifeBase;
+    /* 0x36 */ s16 lifeRange;
+    /* 0x38 */ u8 green;
+    /* 0x39 */ u8 enabled;
+    /* 0x3A */ u8 red;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ u8 blue;
+    /* 0x55 */ u8 alphaBase;
+    /* 0x56 */ u8 alphaRange;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60; /* 0x60..0x7D: params block for func_15147DA0 */
+    /* 0x64 */ s32 unk64;
+    /* 0x68 */ s32 unk68;
     /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} Particle150B7B40;
+    /* 0x70 */ s32 unk70;
+    /* 0x74 */ s32 unk74;
+    /* 0x78 */ s32 unk78;
+    /* 0x7C */ u8 unk7C;
+    /* 0x7D */ u8 unk7D;
+    /* 0x7E */ u8 pad7E[2];
+    /* 0x80 */ s16 unk80;
+    /* 0x82 */ s16 unk82;
+    /* 0x84 */ s32 unk84;
+} BurstConfig;
 
+/* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
-    Vec3_150B7B40 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    s32 unk58;
-    s32 unk5C;
-    s32 unk60;
-    s32 unk64;
-    s32 unk68;
-    s32 unk6C;
-    s32 unk70;
-    s32 unk74;
-    s32 unk78;
-    u8 unk7C;
-    u8 unk7D;
-    u8 pad7E[2];
-    s16 unk80;
-    s16 unk82;
-    s32 unk84;
-} Burst150B7B40;
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  pad1D[0x7];
-} Floor150B7B40;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 pad4[0x24 - 0x4];
+} Ground;
 
 extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
-void func_15142314(s32, s32, f32 *);
-void func_15143134(f32 *, f32 *, s32);
+void func_15142314(s32 model, s32 joint, f32 *out);
+void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_150B82D0(Vec3_150B7B40 *, f32 *, f32 *, f32 *, u8, s32);
+void func_150B82D0(vertex *, f32 *, f32 *, f32 *, u8, s32);
 void func_150B85C0(vertex *, f32 *, f32 *, u8, s32);
-void func_1504715C(Floor150B7B40 *, struct127 *);
-s32 func_15046C80(Vec3_150B7B40 *, s32, f32, Floor150B7B40 *);
+void func_1504715C(Ground *, struct127 *);
+s32 func_15046C80(vertex *, s32, f32, Ground *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15151A38(Burst150B7B40 *, u8, s32);
+s32 func_15132A4C(ModelParticleSpawn *, s32, s32, s32, u8, s32);
+void func_15151A38(BurstConfig *, u8, s32);
 
 void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
     f32 pts[2][3];
@@ -128,12 +114,12 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
     f32 ss;
     f32 cc;
     s32 pad5;
-    Particle150B7B40 p;
+    ModelParticleSpawn p;
     s32 pad2[3];
     s8 i;
     f32 offX;
     f32 offZ;
-    Vec3_150B7B40 pos;
+    vertex pos;
     f32 h;
     f32 r;
     f32 ratio;
@@ -185,49 +171,49 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             ratio = 1.0f;
         }
         func_150B82D0(&pos, &h, &r, &ratio, arg1, arg2);
-        func_150B85C0((vertex *)&pos, &h, &r, arg1, arg2);
+        func_150B85C0(&pos, &h, &r, arg1, arg2);
         {
-            Floor150B7B40 floor;
-            Vec3_150B7B40 ray;
+            Ground floor;
+            vertex ray;
 
             ray.x = pos.x;
             ray.y = pos.y + 100.0f;
             ray.z = pos.z;
             func_1504715C(&floor, arg0);
             if (func_15046C80(&ray, 0, pos.y - 2000.0f, &floor) != 0) {
-                ray.y = floor.unk00;
+                ray.y = floor.height;
                 func_1514C678(ray.x, ray.y + 31.0f, ray.z, r, 0, 0xFF,
                               (func_150ADA20() % 11U) + 0x1E, 0x19, 0, 0, 0, arg1);
             }
         }
-        p.unk56 = 0;
-        p.unk54 = 0x12C;
-        p.unk4 = 0.6000000238f;
-        p.unk10 = arg0->unkB8;
-        p.unk14 = arg0->unk40;
-        p.unk18 = arg0->unkC4;
-        p.unk1C[0] = 1.0f;
-        p.unk1C[1] = 1.0f;
-        p.unk1C[2] = 1.0f;
-        p.unk50 = 0x197D;
-        p.unk58 = 0;
+        p.model = 0;
+        p.lifetime = 0x12C;
+        p.elasticity = 0.6000000238f;
+        p.rot.x = arg0->unkB8;
+        p.rot.y = arg0->unk40;
+        p.rot.z = arg0->unkC4;
+        p.scale.x = 1.0f;
+        p.scale.y = 1.0f;
+        p.scale.z = 1.0f;
+        p.flags = 0x197D;
+        p.variant = 0;
         p.unk5C = 0;
-        p.unk60 = 0xFF;
-        p.unk61 = 1;
-        p.unk62 = 0;
-        p.unk63 = 1;
-        p.unk64 = 0;
-        p.unk65 = 1;
-        p.unk66 = 0;
-        p.unk67 = 0;
-        p.unk68 = 0;
+        p.alpha = 0xFF;
+        p.updateFn = 1;
+        p.update2Fn = 0;
+        p.floorHitFn = 1;
+        p.floorType3Fn = 0;
+        p.wallHitFn = 1;
+        p.destroyFn = 0;
+        p.squashFn = 0;
+        p.matrixFn = 0;
         p.unk6A = 0;
-        p.unk6C = 0;
-        p.unk70 = 0;
-        p.unk72 = 1;
-        p.unk74 = 0xFF;
-        p.unk48 = 0;
-        p.unk4C = -1.600000024f;
+        p.owner = 0;
+        p.ownerId = 0;
+        p.fadeStart = 1;
+        p.fadeRate = 0xFF;
+        p.rotVel.z = 0;
+        p.gravity = -1.600000024f;
         sx = arg0->xz_scale;
         if (sx > 1.0f) {
             sx = 1.0f;
@@ -242,9 +228,9 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
         if (sy < 0.5f) {
             sy = 0.5f;
         }
-        p.unk0 = ((28.0f * sy) + (28.0f * sx)) * 0.5f;
-        p.unk8 = 3.0f * sx;
-        p.unkC = 3.0f * sy;
+        p.radius = ((28.0f * sy) + (28.0f * sx)) * 0.5f;
+        p.sizeXZ = 3.0f * sx;
+        p.sizeY = 3.0f * sy;
         for (i = 0; i < 2; i++) {
             f32 speed;
             s16 ang1;
@@ -254,7 +240,7 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             f32 s2;
             f32 c2;
             f32 hv;
-            Burst150B7B40 burst;
+            BurstConfig burst;
 
             speed = (func_150ADA68() * 30.0f * arg0->y_scale) + 10.0f;
             ang1 = func_150ADA20() & 0x7F;
@@ -264,43 +250,43 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             s2 = func_151423D8(ang2);
             c2 = func_151423D8(ang2 - 0x40);
             hv = speed * s2;
-            p.pos = *(Vec3_150B7B40 *)pts[i];
-            p.vel[0] = (hv * c1) + offX;
-            p.vel[1] = -speed * c2;
-            p.vel[2] = (hv * s1) + offZ;
-            p.unk40 = 30.0f - (func_150ADA68() * 60.0f);
-            p.unk44 = 30.0f - (func_150ADA68() * 60.0f);
+            p.pos = *(vertex *)pts[i];
+            p.vel.x = (hv * c1) + offX;
+            p.vel.y = -speed * c2;
+            p.vel.z = (hv * s1) + offZ;
+            p.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
+            p.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
             func_15132A4C(&p, 3, 2, 0, arg1, 0);
             scale = ((arg0->xz_scale + arg0->y_scale) * 0.5f) / 0.9599999785f;
-            burst.unk0 = *(Vec3_150B7B40 *)pts[i];
-            burst.unk24 = 4;
-            burst.unk26 = 4;
-            burst.unk2A = 0xFF;
-            burst.unk2C = -0x3F;
-            burst.unk2E = 0x4B;
-            burst.unkC = 3.0f * scale;
-            burst.unk10 = 3.0f * scale;
-            burst.unk14 = 0.6000000238f;
-            burst.unk18 = 0.2310000062f;
-            burst.unk1C = 15.0f * scale;
-            burst.unk20 = 10.0f * scale;
-            burst.unk28 = 0;
-            burst.unk30 = 3;
-            burst.unk32 = 3;
-            burst.unk34 = 0x32;
-            burst.unk36 = 0x14;
-            burst.unk38 = 1;
-            burst.unk39 = 0x21;
-            burst.unk3A = 0x48;
+            burst.position = *(vertex *)pts[i];
+            burst.countBase = 4;
+            burst.countRange = 4;
+            burst.yawRange = 0xFF;
+            burst.pitchBase = -0x3F;
+            burst.pitchRange = 0x4B;
+            burst.sizeBase = 3.0f * scale;
+            burst.sizeRange = 3.0f * scale;
+            burst.growthBase = 0.6000000238f;
+            burst.growthRange = 0.2310000062f;
+            burst.speedBase = 15.0f * scale;
+            burst.speedRange = 10.0f * scale;
+            burst.yawBase = 0;
+            burst.fadeBase = 3;
+            burst.fadeRange = 3;
+            burst.lifeBase = 0x32;
+            burst.lifeRange = 0x14;
+            burst.green = 1;
+            burst.enabled = 0x21;
+            burst.red = 0x48;
             burst.unk3C = 1;
             burst.unk40 = 0;
             burst.unk44 = 0;
             burst.unk48 = 0;
             burst.unk4C = 0;
             burst.unk50 = 0;
-            burst.unk54 = 0;
-            burst.unk55 = 0x9B;
-            burst.unk56 = 0x64;
+            burst.blue = 0;
+            burst.alphaBase = 0x9B;
+            burst.alphaRange = 0x64;
             burst.unk58 = 3;
             burst.unk5C = 0xFF;
             burst.unk60 = 0;
@@ -323,7 +309,7 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
 void func_15143794(s16, s16, f32, f32 *);
 void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
 
-void func_150B82D0(Vec3_150B7B40 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4, s32 arg5) {
+void func_150B82D0(vertex *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4, s32 arg5) {
     s32 n;
     f32 pos[3];
     f32 rot[3];
