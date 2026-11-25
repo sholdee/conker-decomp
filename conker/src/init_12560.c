@@ -3,71 +3,94 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Streamed-audio front end: a 64-byte message ring (D_800427A0 over D_800427B0) that the stream
+ * player logs into, and helpers that start, stop and query the stream (stream state as returned
+ * by func_151F2CDC: 0 = idle, 1 = running, 2 = paused, 5 = opening, 6 = paused while opening,
+ * 7 = resuming).
+ */
 
-void func_10012560(s32 arg0) {
+/*
+ * Message callback registered with the stream player, called as (0, message, size).
+ * Pushes the message onto the ring.
+ */
+void func_10012560(s32 unused) {
+    // matching: the header declares one parameter; message and size pass through in a1/a2
     func_15043BB8(&D_800427A0);
 }
 
-void func_10012588(s32 arg0) {
-    func_15016170(arg0);
+/* Initialise the stream player from `heap` and hook its messages into the ring. */
+void func_10012588(s32 heap) {
+    func_15016170(heap);
     func_15043A00(&D_800427A0, &D_800427B0, 64);
     func_151F3C1C(func_10012560);
 }
 
-void func_100125CC(s32 arg0) {
-    s32 res = func_151F2CDC();
-    if ((arg0 != 30) || (D_800BE9F8 != 27)) {
-        if (res == 1) {
+/* When entering `level`, fade a running stream to silence and stop any other active one,
+ * except when entering level 30 with D_800BE9F8 == 27. */
+void func_100125CC(s32 level) {
+    s32 state = func_151F2CDC();
+
+    if (level != 30 || D_800BE9F8 != 27) {
+        if (state == 1) {
             func_151F2D6C(0, 11010);
             return;
         }
-        if (res != 0) {
+        if (state != 0) {
             func_151F2BA8();
         }
     }
 }
 
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp_v0;
-    s32 sp18;
+/* Start streaming track `id` at `volume` and `pan` (64 = centre). */
+void func_1001263C(s32 id, s32 volume, s32 pan) {
+    s32 data;
+    s32 size;
 
-    sp18 = 0;
-    temp_v0 = func_1502B020(&sp18, 2, 22, arg0);
-    D_800427F4 = (s16) arg0;
-    if ((temp_v0 != 0) && (sp18 != 0)) {
-        func_151F2D6C(arg1, 0);
-        func_151F2DFC(arg2, 1);
-        if (arg0 != 0xD2) {
+    size = 0;
+    data = func_1502B020(&size, 2, 22, id);
+    D_800427F4 = id;
+    if (data != 0 && size != 0) {
+        func_151F2D6C(volume, 0);
+        func_151F2DFC(pan, 1);
+        if (id != 210) {
             func_151F2E4C(10, 11000);
         } else {
             func_151F2E4C(0, 0);
         }
-        func_151F2960(temp_v0, sp18);
+        func_151F2960(data, size);
     }
 }
 
-void func_100126E8(s32 arg0, s32 arg1) {
-    func_15043CA4(&D_800427A0, arg0, arg1);
+/* Pop the next logged message into `dst` (at most `dstSize` bytes). */
+void func_100126E8(s32 dst, s32 dstSize) {
+    func_15043CA4(&D_800427A0, dst, dstSize);
 }
 
-s32 func_10012718(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
-    s32 sp3C;
-    s32 sp38;
-    s32 sp34;
+/*
+ * Start track `id` as if played from `obj`'s position: full `volume` and centred when `obj` is
+ * a camera, otherwise attenuated between `nearDistance` and `farDistance` and panned.
+ */
+s32 func_10012718(u16 id, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+    s32 pan;
+    s32 attenuatedVolume;
+    s32 unused;
 
-    if (arg1->camera != 0) {
-        func_1001263C(arg0, arg2, 64);
+    if (obj->camera != 0) {
+        func_1001263C(id, volume, 64);
     } else {
-        func_100114D0(arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, &sp3C, &sp38, &sp34);
-        func_1001263C(arg0, sp38, sp3C);
+        func_100114D0(obj->x_position, obj->y_position, obj->z_position, volume, farDistance, nearDistance,
+                      &pan, &attenuatedVolume, &unused);
+        func_1001263C(id, attenuatedVolume, pan);
     }
     return 1;
 }
 
+/* Returns 1 while the stream is running, paused or opening. */
 s32 func_100127D0(void) {
-    s32 tmp = func_151F2CDC();
+    s32 state = func_151F2CDC();
 
-    if (tmp == 1 || tmp == 2 || tmp == 5) {
+    if (state == 1 || state == 2 || state == 5) {
         return 1;
     }
     return 0;
