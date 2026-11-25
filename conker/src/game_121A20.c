@@ -1,11 +1,15 @@
 #include <ultra64.h>
+/* functions.h declares these two with other return types; they are redeclared below. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 #undef func_10010F88
+// matching: the full 32-bit random value is used here; the header's u8 return adds a mask
 u32 func_150ADA20(void);
-s32 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+/* Returns the playing sound's handle. */
+s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
+                  s16 farDistance);
 #include "variables.h"
 
 
@@ -85,12 +89,12 @@ typedef struct {
 } EffectObj;
 
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern EffectObj *func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 arg5, s32 arg6);
+extern EffectObj *func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
 void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
-                   u8 arg8, s32 arg9) {
+                   u8 owner, s32 kind) {
     EffectSpawn spawn;
     struct17 dir;
     struct17 delta;
@@ -155,7 +159,7 @@ void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 speed, f32 invSpeed,
         spawn.unk72 = 1;
         spawn.unk74 = 255;
         spawn.sound = sound;
-        obj = func_1513264C(&spawn, 3, 0xFF, 0, sizeof(spiral), arg8, arg9);
+        obj = func_1513264C(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, kind);
         if (obj != NULL) {
             memcpy(&obj->spiral, &spiral, sizeof(spiral));
         }
@@ -245,109 +249,99 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
     }
 }
 
-void func_150F4D5C(void *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    struct {
-        void *unk0;
-        f32 unk4;
-        u8 unk8;
-        u8 unk9;
-        u8 padA;
-        u8 padB;
-    } sp34;
-    struct260 *temp_v0;
+/* Per-object state of the emitter started by func_150F4D5C (updated by func_150F4DEC). */
+typedef struct {
+    /* 0x00 */ struct108 *camera;
+    /* 0x04 */ f32 pending; /* spirals owed; one is spawned per whole unit */
+    /* 0x08 */ s8 condition; /* index into D_80088B38, or -1 for none */
+    /* 0x09 */ u8 variants; /* index into D_80088B20 */
+    /* 0x0A */ u8 padA[2];
+} CameraEmitterData;
 
-    sp34.unk0 = arg0;
-    sp34.unk4 = 0.0f;
-    sp34.unk8 = arg1;
-    sp34.unk9 = arg2;
+/* The emitter effect object created by func_15149130. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x28 */ CameraEmitterData data;
+} CameraEmitter;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x56, -1, 0, 0, (struct37 *)0xC, arg3, arg4);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0xC);
+/* Starts an emitter that spawns spirals around `camera` (see func_150F4DEC). */
+void func_150F4D5C(struct108 *camera, s8 condition, u8 variants, u8 owner, s32 kind) {
+    CameraEmitterData data;
+    CameraEmitter *emitter;
+
+    data.camera = camera;
+    data.pending = 0.0f;
+    data.condition = condition;
+    data.variants = variants;
+
+    emitter = (CameraEmitter *)func_15149130(300, -1, 0x56, -1, 0, 0, (struct37 *)sizeof(data), owner, kind);
+    if (emitter != NULL) {
+        memcpy(&emitter->data, &data, sizeof(data));
     }
 }
 
-extern struct17 *func_15144B34(s32);
-void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-
+/* A list of spawn variants: an id and a scale for each. */
 typedef struct {
-    u8 count;
-    s16 *ids;
-    f32 *scales;
-} Rec150F4;
+    /* 0x00 */ u8 count;
+    /* 0x04 */ s16 *ids;
+    /* 0x08 */ f32 *scales;
+} VariantList;
 
-typedef struct {
-    u8 pad0[0x23D];
-    u8 unk23D;
-    u8 pad23E[0x142];
-    f32 unk380;
-} Obj150F4;
-
-typedef struct {
-    Obj150F4 *unk0;
-    f32 unk4;
-    s8 unk8;
-    u8 unk9;
-} Emit150F4;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Emit150F4 unk28;
-} Emitter150F4;
-
-extern Rec150F4 D_80088B20[];
+extern VariantList D_80088B20[];
 extern s32 (*D_80088B38[])();
-extern void func_15143874(s16, f32, f32 *, f32 *);
+extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
-void func_150F4DEC(Emitter150F4 *arg0) {
-    Emit150F4 *e;
-    struct17 *pos;
-    s32 angle;
-    struct17 a;
-    struct17 b;
-    Rec150F4 *rec;
+/* Emitter update: while its condition callback (if any) holds, spawns 0.05-0.20 spirals per frame
+ * (times D_800BE9A4) around the camera, each between two random points on either side of
+ * its view direction. */
+void func_150F4DEC(CameraEmitter *emitter) {
+    CameraEmitterData *data;
+    struct17 *eye;
+    s32 yaw;
+    struct17 from;
+    struct17 to;
+    VariantList *variants;
     u8 i;
     f32 speed;
 
-    e = &arg0->unk28;
-    if (e->unk8 != -1) {
-        if (!D_80088B38[e->unk8]()) {
-            return;
-        }
+    data = &emitter->data;
+    if (data->condition != -1 && !D_80088B38[data->condition]()) {
+        return;
     }
-    e->unk4 += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
-    if (1.0f < e->unk4) {
-        pos = func_15144B34(e->unk0->unk23D);
-        angle = (e->unk0->unk380 + 180.0f) * 0.7111111283f;
+    data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
+    if (data->pending > 1.0f) {
+        eye = func_15144B34(data->camera->unk23D);
+        /* degrees to 256-step binary angle */
+        yaw = (data->camera->unk380 + 180.0f) * 0.7111111283f;
         do {
-            func_15143874(angle + 0x15, func_150ADA68() * 381.0f + 254.0f, &a.unk0, &a.unk8);
-            a.unk4 = func_150ADA68() * 212.0f + -133.0f;
-            a.unk0 += pos->unk0;
-            a.unk4 += pos->unk4;
-            a.unk8 += pos->unk8;
-            func_15143874(angle - 0x15, func_150ADA68() * 381.0f + 254.0f, &b.unk0, &b.unk8);
-            b.unk4 = func_150ADA68() * 212.0f + -133.0f;
-            b.unk0 += pos->unk0;
-            b.unk4 += pos->unk4;
-            b.unk8 += pos->unk8;
+            func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.unk0, &from.unk8);
+            from.unk4 = func_150ADA68() * 212.0f + -133.0f;
+            from.unk0 += eye->unk0;
+            from.unk4 += eye->unk4;
+            from.unk8 += eye->unk8;
+            func_15143874(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.unk0, &to.unk8);
+            to.unk4 = func_150ADA68() * 212.0f + -133.0f;
+            to.unk0 += eye->unk0;
+            to.unk4 += eye->unk4;
+            to.unk8 += eye->unk8;
             if (func_150ADA20() & 1) {
                 struct17 tmp;
 
-                tmp = a;
-                a = b;
-                b = tmp;
+                tmp = from;
+                from = to;
+                to = tmp;
             }
-            rec = &D_80088B20[e->unk9];
-            i = func_150ADA20() % rec->count;
+            variants = &D_80088B20[data->variants];
+            i = func_150ADA20() % variants->count;
             speed = func_150ADA68() * 10.0f + 5.0f;
-            func_150F4570(&a, &b, rec->ids[i], speed, 1.0f / speed,
-                          rec->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), 0, 0, arg0->unkC,
-                          arg0->unk1);
-            e->unk4 -= 1.0f;
-        } while (1.0f < e->unk4);
+            func_150F4570(&from, &to, variants->ids[i], speed, 1.0f / speed,
+                          variants->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), FALSE, 0,
+                          emitter->unkC, emitter->unk1);
+            data->pending -= 1.0f;
+        } while (data->pending > 1.0f);
     }
 }
