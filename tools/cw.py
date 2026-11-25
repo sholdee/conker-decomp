@@ -254,7 +254,10 @@ def log(ws, res, n=None):
 def cmd_land(a):
     ws, m = ws_of(a.name)
     files = changed_files(ws)
-    if not files and not splat_changes(ws):
+    # files the workspace deleted (present in base, gone from the workspace), e.g. after merging files
+    deleted = [p.relative_to(ws / "base") for d in ("src", "include") for p in (ws / "base" / d).rglob("*")
+               if p.is_file() and p.suffix in (".c", ".h", ".s") and not (ws / "conker" / p.relative_to(ws / "base")).exists()]
+    if not files and not splat_changes(ws) and not deleted:
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
@@ -297,6 +300,9 @@ def cmd_land(a):
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
+        for f in deleted:
+            backup.setdefault(f, (MAIN / f).read_bytes() if (MAIN / f).exists() else None)
+            (MAIN / f).unlink(missing_ok=True)
         if ychanged:
             run(SPLAT, MAIN, timeout=1800)
         (MAIN / BIN).unlink(missing_ok=True)
@@ -315,6 +321,8 @@ def cmd_land(a):
             print(r.stdout[-2500:])
             sys.exit("LAND-FAIL: main build does not match after merge; reverted")
         git("add", *rels)
+        for f in deleted:
+            git("rm", "-q", "--cached", "--ignore-unmatch", str(Path("conker") / f))
         msg = f"cleanup: {m['file'] or m.get('tree')} [cw]"
         if a.message:
             msg += "\n\n" + a.message
