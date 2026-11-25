@@ -681,16 +681,6 @@ void func_150F884C(s32 arg0, s32 arg1) {
     func_151494E0((s32)&msg, 0x3F);
 }
 
-/* One of a StageState's eight parts. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x58];
-    /* 0x6E */ u8 unk6E;
-} StagePart;
-
 /* Something that steps through eight parts (one shown at a time) while emitting effects around (unk40, unk44). */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -699,7 +689,7 @@ typedef struct {
     /* 0x06 */ s16 stageTimer;
     /* 0x08 */ u8 stage;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ StagePart *parts[8];
+    /* 0x0C */ WorldObject *parts[8]; /* the inactive ones are hidden */
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
@@ -742,9 +732,9 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
             u8 i;
 
             for (i = 0; i < 7; i++) {
-                state->parts[i]->unk6E = 1;
+                state->parts[i]->inactive = 1;
             }
-            state->parts[7]->unk6E = 0;
+            state->parts[7]->inactive = 0;
             state->stage = 7;
         }
     } else if (type == 0x3F) {
@@ -792,9 +782,9 @@ void func_150F892C(StageObj *obj) {
             CameraEvent event;
             func_10010F88(func_150ADA20() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
                           state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
-            state->parts[state->stage]->unk6E = 1;
+            state->parts[state->stage]->inactive = 1;
             state->stage++;
-            state->parts[state->stage]->unk6E = 0;
+            state->parts[state->stage]->inactive = 0;
             func_15164F0C(7, 0, 0, obj->unkC, obj->unk1);
             event.unk0 = 1;
             event.unk2 = 25;
