@@ -7,24 +7,16 @@ extern BloodProfile D_800A3FD8[];
 
 #define BLOOD_PROFILE_NONE 99
 
-/* The effect func_1513418C returns (BloodDrip in game_161520.c), followed by its payload. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x4B];
-    /* 0x58 */ u8 payload[1];
-} Emitter;
-
 s32 func_15134070(Actor *);
 void func_1516962C(s32, Actor *, s32);
-Emitter *func_1513418C(BloodDripDesc *, s32, u8, s32);
+BloodDrip *func_1513418C(BloodDripDesc *, s32, u8, s32);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
                    s32);
 
 /* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor` for 40-60 frames, unless its blood profile
  * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
-Emitter *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
-    Emitter *emitter;
+BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
+    BloodDrip *emitter;
     BloodDripDesc desc;
     u8 payload[1];
     s32 profile;
@@ -76,13 +68,13 @@ Emitter *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
 void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5);
 
 /* Emitter 8 callback (D_80089A70): spawns one particle at (x, y, z). */
-void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Emitter *emitter) {
+void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
     f32 position[3];
 
     position[0] = x;
     position[1] = y;
     position[2] = z;
-    func_151B4EA4(position, dirX, dirY, dirZ, emitter->payload[0], emitter->unkC);
+    func_151B4EA4(position, dirX, dirY, dirZ, emitter->payload[0], emitter->header.owner);
 }
 
 /* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */
@@ -110,8 +102,8 @@ void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5
 }
 
 /* Attaches emitter 9 (func_151B50A4) to bone 2 of `actor`. */
-Emitter *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
-    Emitter *emitter;
+BloodDrip *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
+    BloodDrip *emitter;
     BloodDripDesc desc;
 
     if (actor == NULL) {
@@ -139,13 +131,13 @@ Emitter *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
 void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4);
 
 /* Emitter 9 callback (D_80089A70): spawns one particle at (x, y, z). */
-void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Emitter *emitter) {
+void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, BloodDrip *emitter) {
     f32 position[3];
 
     position[0] = x;
     position[1] = y;
     position[2] = z;
-    func_151B50F4(position, dirX, dirY, dirZ, emitter->unkC);
+    func_151B50F4(position, dirX, dirY, dirZ, emitter->header.owner);
 }
 
 /* Spawns a randomized func_151D9014 particle at `position`, moving against (dirX, dirY, dirZ). */

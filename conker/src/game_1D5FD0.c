@@ -15,25 +15,6 @@ f32 sqrtf(f32);
 
 void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
 
-#define EMITTER_ON       1
-#define EMITTER_ANCHORED 2
-#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
-#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
-
-typedef struct {
-    /* 0x00 */ EmitterDef def;
-    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
-    /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
-    /* 0x54 */ f32 area;
-} EmitterState; /* size 0x58 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-    /* 0x80 */ u8 data[1];           /* user data */
-} Emitter;
-
 extern void func_1510F800(s32);
 
 /*

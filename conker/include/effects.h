@@ -512,6 +512,18 @@ typedef struct BloodDripDesc {
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
+/* Blood dripping from a point, optionally attached to an actor or one of its bones (func_1513418C,
+ * game_161520.c). The caller's payload follows it; game_1E2180.c's emitters keep one byte there. */
+typedef struct BloodDrip {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
+    /* 0x40 */ Vec3f previous;
+    /* 0x4C */ f32 inverseDiameter;
+    /* 0x50 */ f32 accumulator;
+    /* 0x54 */ u8 pad54[4];
+    /* 0x58 */ u8 payload[1];
+} BloodDrip;
+
 /* BloodDripDesc.flags */
 #define BLOOD_DRIP_FOLLOW_OWNER  0x01
 #define BLOOD_DRIP_ON_BONE       0x02   /* offset is in the space of owner's bone `bone` */
@@ -2689,6 +2701,39 @@ typedef struct ActorEmitterParticle {
     /* 0x110 */ ActorEmitterParticleData data;
 } ActorEmitterParticle;
 
+/* Where an actor emitter process reads its scale. */
+typedef struct EmitterScaleSource {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ f32 *unk18; // emitter scale in percent
+} EmitterScaleSource;
+
+/* One particle of an ActorEmitterProcess. */
+typedef struct ActorEmitterSlot {
+    /* 0x00 */ ActorEmitterParticle *particle;
+    /* 0x04 */ s32 timer;
+    /* 0x08 */ Vec3f offset;
+    /* 0x14 */ struct ActorEmitterSlot *next; // ring of free slots while emitting
+} ActorEmitterSlot; /* 0x18 */
+
+/* Process of type 0x21: emits particles around (or from the bones of) its owner (game_1BA670.c; its particle
+ * callbacks are in game_1BB950.c). */
+typedef struct ActorEmitterProcess {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ ActorEmitterParams params;
+    /* 0x24 */ f32 accum; // fractional particles owed
+    /* 0x28 */ s32 count; // live particles
+    /* 0x2C */ u8 state;  // 1: hidden, 2: world mode, 4: attached mode, 8: new
+    /* 0x2D */ u8 infoMode;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ EmitterScaleSource *scaleSrc;
+    /* 0x34 */ f32 scale;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ u8 pad44[4];
+    /* 0x48 */ ActorEmitterSlot slots[100];
+} ActorEmitterProcess;
+
 /*
  * Character watcher (object type 0x2E, func_15158BD0 in game_185560.c; attached to the character as
  * attachment 0x13): tracks a character's state (five small fields packed by game_185560.c's STATE_BITS)
@@ -2834,6 +2879,28 @@ typedef struct EmitterDef {
     /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
     /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
 } EmitterDef; /* size 0x28 */
+
+/* EmitterDef.flags */
+#define EMITTER_ON       1
+#define EMITTER_ANCHORED 2
+#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
+#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
+
+/* State of a particle emitter, at 0x28 of its Emitter. */
+typedef struct EmitterState {
+    /* 0x00 */ EmitterDef def;
+    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
+    /* 0x2C */ CollisionHit ground;
+    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x54 */ f32 area;
+} EmitterState; /* size 0x58 */
+
+/* Particle emitter: the timed effect that func_151A8B20 (game_1D5FD0.c) spawns from an EmitterDef. */
+typedef struct Emitter {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EmitterState state;
+    /* 0x80 */ u8 data[1];           /* user data */
+} Emitter;
 
 /* A drip emitter's attachment to its actor (func_15190770, game_1BDC20.c). */
 typedef struct ActorLink {

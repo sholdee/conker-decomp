@@ -186,15 +186,6 @@ s32 func_1513416C(DefParticleHead *particle) {
 }
 
 
-/* Blood dripping from a point, optionally attached to an actor or one of its bones. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
-    /* 0x40 */ Vec3f previous;
-    /* 0x4C */ f32 inverseDiameter;
-    /* 0x50 */ f32 accumulator;
-} BloodDrip;
-
 /* Spawns a BloodDrip effect from a template. */
 BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     BloodDrip *drip;

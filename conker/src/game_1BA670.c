@@ -73,54 +73,24 @@ typedef struct {
     /* 0x8 */ EmitterIdList *idLists;
 } EmitterTable;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ f32 *unk18; // emitter scale in percent
-} EmitterScaleSource;
-
-typedef struct EmitterSlot {
-    /* 0x00 */ ActorEmitterParticle *particle;
-    /* 0x04 */ s32 timer;
-    /* 0x08 */ Vec3f offset;
-    /* 0x14 */ struct EmitterSlot *next; // ring of free slots while emitting
-} EmitterSlot; /* 0x18 */
-
-/* Process of type 0x21: emits particles around (or from the bones of) its owner. */
-typedef struct Emitter {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ ActorEmitterParams params;
-    /* 0x24 */ f32 accum; // fractional particles owed
-    /* 0x28 */ s32 count; // live particles
-    /* 0x2C */ u8 state;  // 1: hidden, 2: world mode, 4: attached mode, 8: new
-    /* 0x2D */ u8 infoMode;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ EmitterScaleSource *scaleSrc;
-    /* 0x34 */ f32 scale;
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ u8 pad44[4];
-    /* 0x48 */ EmitterSlot slots[100];
-} Emitter;
-
 /* Process lists, by priority and process type. */
 extern EmitterTable *D_8008D5E0[];
 extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
-extern s32 (*D_8008D628[])(Emitter *);
+extern s32 (*D_8008D628[])(ActorEmitterProcess *);
 
 void *memcpy(void *, const void *, u32);
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_1518E308(Emitter *emitter);
-Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
+void func_1518E308(ActorEmitterProcess *emitter);
+ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
     ActorEmitterParams params;
     s32 i;
-    Emitter *emitter;
+    ActorEmitterProcess *emitter;
 
     if (owner == NULL) {
         return NULL;
@@ -128,7 +98,7 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
     if (killExisting) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
-            emitter = (Emitter *)D_800DCE50[i][0x21];
+            emitter = (ActorEmitterProcess *)D_800DCE50[i][0x21];
             while (emitter != NULL) {
                 D_800DD198[D_800DD190] = emitter->header.next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
@@ -263,8 +233,8 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
  * Per-frame emitter update: follows the owner (or its bones), releases particles whose slot timer ran out
  * and spawns new ones at the info's rate. Dies with its owner or when its lifetime callback says so.
  */
-void func_1518D6E0(Emitter *emitter) {
-    Emitter *self;
+void func_1518D6E0(ActorEmitterProcess *emitter) {
+    ActorEmitterProcess *self;
     s8 done;
 
     self = emitter; // matching: IDO allocates the param copy differently
@@ -286,11 +256,11 @@ void func_1518D6E0(Emitter *emitter) {
         EmitterInfo *info;
         s32 found;
         u8 reset;
-        EmitterSlot *slot;
+        ActorEmitterSlot *slot;
         s32 k;
         s32 numFree;
-        EmitterSlot *prevFree;
-        EmitterSlot *freeSlot;
+        ActorEmitterSlot *prevFree;
+        ActorEmitterSlot *freeSlot;
 
         if (self->scaleSrc != NULL) {
             self->scale = *self->scaleSrc->unk18 * 0.009999999776f;
@@ -557,8 +527,8 @@ s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 /* Frees every particle the emitter holds and clears its slots. */
-void func_1518E308(Emitter *emitter) {
-    EmitterSlot *slot;
+void func_1518E308(ActorEmitterProcess *emitter) {
+    ActorEmitterSlot *slot;
     s32 i;
 
     slot = emitter->slots;
@@ -573,7 +543,7 @@ void func_1518E308(Emitter *emitter) {
 }
 
 /* Switches the emitter to another EmitterTable, dropping its particles. */
-void func_1518E37C(Emitter *emitter, u8 table) {
+void func_1518E37C(ActorEmitterProcess *emitter, u8 table) {
     if (emitter->params.table != table) {
         func_1518E308(emitter);
         emitter->params.table = table;
@@ -581,8 +551,8 @@ void func_1518E37C(Emitter *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
-    Emitter *emitter;
+ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
+    ActorEmitterProcess *emitter;
 
     if (params->owner->character_type == 150) {
         return NULL;
