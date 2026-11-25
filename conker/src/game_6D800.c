@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 /**
  * Display-list checker state:
  *   D_800C6860[16]  segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
@@ -31,13 +30,13 @@ void func_10007DA0(void);
 s32 func_15040754(Gfx *gfx);
 void func_15040CC8(Gfx *gfx);
 
-/** Posts debug code 0xC00005B and calls the debug hook. */
+/** Posts error code 0xC00005B to D_8003C8E0 and calls func_150AD770. */
 #define DL_ERROR()                          \
     D_8003C8E0 = 0xC00005B;                 \
     func_150AD770();
 
-/** DL_ERROR(), then runs func_10007DA0 with D_800BE9C0 flipped. */
-#define DL_ERROR_REDRAW()                   \
+/** DL_ERROR(), then calls func_10007DA0 with D_800BE9C0 toggled for the call. */
+#define DL_ERROR_FLIP()                   \
     DL_ERROR();                             \
     D_800BE9C0 = 1 - D_800BE9C0;            \
     func_10007DA0();                        \
@@ -78,12 +77,12 @@ void func_150403C8(void *dl, u32 end, s32 parent) {
                     func_150403C8((void *)addr, 0, (s32)gfx);
                 } else {
                     func_15040CC8(gfx);
-                    DL_ERROR_REDRAW();
+                    DL_ERROR_FLIP();
                 }
                 if (D_800C68A1 > 0) {
                     D_800C68A1--;
                 } else {
-                    DL_ERROR_REDRAW();
+                    DL_ERROR_FLIP();
                 }
                 break;
             case (s8)G_RDPPIPESYNC:
@@ -148,12 +147,12 @@ void func_150403C8(void *dl, u32 end, s32 parent) {
         if (needsPipeSync && D_800C68A0) {
             func_15040CC8(gfx);
             D_800C68A0 = 0;
-            DL_ERROR_REDRAW();
+            DL_ERROR_FLIP();
         }
         if (isBad) {
             isBad = 0;
             func_15040CC8(gfx);
-            DL_ERROR_REDRAW();
+            DL_ERROR_FLIP();
         }
         gfx++;
     }
