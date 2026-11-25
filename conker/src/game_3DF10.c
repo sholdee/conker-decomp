@@ -36,7 +36,7 @@ typedef struct {
 extern void func_150E8854(void);
 extern void func_1510F800(s32);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern Obj3DF10 *func_1513B5E0(void *, s32, s32, s32, s32);
+extern Obj3DF10 *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 
@@ -47,7 +47,7 @@ void func_15010A60(void) {
     void *result;
     ParticleSpawn78 part;
     s32 i;
-    u8 desc[0x3C];
+    DynModelDesc desc;
     Struct3DF10Tail tail;
     f32 sp[6];
     f32 rnd;
@@ -60,13 +60,13 @@ void func_15010A60(void) {
 
     func_150E8854();
 
-    desc[1] = 3;
-    desc[2] = 6;
-    *(s16 *)&desc[4] = 0x12C;
-    *(s32 *)&desc[0x30] = 9;
-    desc[0] = 0;
-    *(s32 *)&desc[0x34] = 0x1AF;
-    desc[0x38] = 0;
+    desc.updateFunc = 3;
+    desc.drawFunc = 6;
+    desc.lifetime = 0x12C;
+    desc.unk30 = 9;
+    desc.flags = 0;
+    desc.unk34 = 0x1AF;
+    desc.kind = 0;
 
     part.flags = 0xD00;
     part.lifetime = 0x12C;
@@ -151,7 +151,7 @@ void func_15010A60(void) {
         }
 
         if (D_80096498[i] != 0) {
-            ent = func_1513B5E0(desc, 0, 0x2C, 0xFF, 1);
+            ent = func_1513B5E0(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
                 memcpy((u8 *)ent + ent->unk50 + 0xF8, &tail, 0x2C);
             }

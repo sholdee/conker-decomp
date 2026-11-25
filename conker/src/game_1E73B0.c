@@ -17,35 +17,12 @@ typedef struct {
 #define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))  // matching: s32 arithmetic; a u8 * sum schedules func_151BA084 differently
 
 
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    u8 unk2;
-    u8 pad3;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[0xA];
-    s32 unk30;
-    s32 unk34;
-    u8 unk38;
-    u8 unk39;
-} Desc1513B5E0;
-
-void *func_1513B5E0(void *, s32, s32, u8, s32);
+void *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     void *effect;
-    Desc1513B5E0 desc;
+    DynModelDesc desc;
     ActorRef ref;
 
     if (owner == NULL) {
@@ -53,24 +30,24 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     }
     ref.actor = owner;
     ref.uniqueId = owner->unique_id;
-    desc.unk0 = 2;
-    desc.unk1 = -1;
-    desc.unk2 = 3;
-    desc.unk4 = 300;
+    desc.flags = 2;
+    desc.updateFunc = -1;
+    desc.drawFunc = 3;
+    desc.lifetime = 300;
     desc.unk30 = 9;
     desc.unk34 = 0x1AD;
-    desc.unk39 = 0xFF;
+    desc.viewportMask = 0xFF;
     {
         s32 objIndex = owner - D_800CC2D0;
 
         if ((objIndex < 2) && (D_800E0BCE[objIndex] != 0)) {
             if (D_8008FD90 == 2) {
-                desc.unk39 = 0xFD;
+                desc.viewportMask = 0xFD;
             } else if (D_8008FD90 == 4) {
                 if (objIndex == 0) {
-                    desc.unk39 = 0xFB;
+                    desc.viewportMask = 0xFB;
                 } else {
-                    desc.unk39 = 0xF7;
+                    desc.viewportMask = 0xF7;
                 }
             }
         }
@@ -84,7 +61,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     desc.unk18 = 0x36;
     desc.unk1C = 0x80;
     desc.unk20 = 0x20;
-    desc.unk38 = 2;
+    desc.kind = 2;
     effect = func_1513B5E0(&desc, 1, 8, arg1, arg2);
     if (effect != NULL) {
         memcpy(EFFECT_EXTRA(effect), &ref, sizeof(ref));

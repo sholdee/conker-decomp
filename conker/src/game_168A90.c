@@ -2,35 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #include <libc/stddef.h>
-
-/* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc. */
-typedef struct {
-    /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
-    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
-    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 lifetime;   // counts down while DYNMODEL_FLAG_LIFETIME is set
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[0xA];
-    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
-    /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
-    /* 0x3A */ u8 pad3A[2];
-} DynModelDesc; // size 0x3C
-
-#define DYNMODEL_FLAG_LIFETIME      1
-#define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
 /*
  * A model whose vertices are copied into per-frame, per-viewport buffers so they can be
