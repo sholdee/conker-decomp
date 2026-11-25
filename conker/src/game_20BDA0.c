@@ -1353,10 +1353,24 @@ void func_151E1214(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
+/* Per-team x jitter for stacked names; a struct so the initial copy is one word */
 typedef struct { s8 v[4]; } Offs4;
 extern Offs4 D_8008FF34;
 extern u8 D_800AB62C[];
-extern s8 D_800AB710[][12];
+/* Team layout of a mode (D_800AB710[MenuEntry.unk5]) */
+typedef struct {
+    /* 0x0 */ s8 teamCount;
+    /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */
+    /* 0x2 */ s8 maxSlots;
+    /* 0x3 */ s8 teamMax;     /* players allowed per team */
+    /* 0x4 */ s8 minSlots3;   /* the same, with 3 or more players */
+    /* 0x5 */ s8 maxSlots3;
+    /* 0x6 */ s8 teamMax3;
+    /* 0x7 */ s8 unk7;        /* if nonzero: team 1's size, and the cap of teams 1-3 */
+    /* 0x8 */ s8 teamColor[4];
+} TeamSetup;
+
+extern TeamSetup D_800AB710[];
 extern char D_800AB864[];
 extern char D_800AB868[];
 extern char D_800AB86C[];
@@ -1374,35 +1388,39 @@ extern s8 D_800E0BB0;
 extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *arg0);
 
+/*
+ * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
+ * slots D_8008FDA0, and the team size D_800E0BB1 is kept within the mode's TeamSetup bounds.
+ */
 void func_151E1744(void) {
     s32 alpha;
-    s8 *entry;
+    TeamSetup *setup;
     s32 i;
     s8 special;
-    s8 min;
-    s8 max;
-    s8 def;
-    s8 team;
-    s8 lim;
+    s8 minSlots;
+    s8 maxSlots;
+    s8 teamMax;
+    s8 unused; // matching: unused stack slot sets IDO's frame layout
+    s8 bound;
     s8 cap;
     s32 extra[3];
-    s8 counts[8];
-    s32 more;
+    s8 teamPlayers[8];
+    s32 hasExtra;
     s16 step;
     s16 x;
     s16 y;
-    s16 k;
-    s16 xs[4];
-    s16 ys[4];
-    Offs4 offs;
-    s8 maxs[4];
-    s8 sizes[4];
+    s16 slots;
+    s16 teamX[4];
+    s16 teamY[4];
+    Offs4 jitter;
+    s8 teamCap[4];
+    s8 teamSize[4];
     s32 sfx;
     s32 v;
-    s32 old;
+    s32 old; // matching: one local for the old team, the colour index and the text base
 
     sfx = 0;
-    offs = D_8008FF34;
+    jitter = D_8008FF34;
     if (D_800E0A96 != -1) {
         D_8008FDD4->input &= ~MENU_BACK;
         alpha = D_800E0A95 - (D_800BE9E4 << 5);
@@ -1421,35 +1439,35 @@ void func_151E1744(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    entry = D_800AB710[D_800AB68C[D_8008FDD4->selection].unk5];
-    special = entry[7];
-    D_800E0BB0 = entry[0];
-    D_800E0BC8[0] = entry[8];
-    D_800E0BC8[1] = entry[9];
-    D_800E0BC8[2] = entry[10];
-    D_800E0BC8[3] = entry[11];
+    setup = &D_800AB710[D_800AB68C[D_8008FDD4->selection].unk5];
+    special = setup->unk7;
+    D_800E0BB0 = setup->teamCount;
+    D_800E0BC8[0] = setup->teamColor[0];
+    D_800E0BC8[1] = setup->teamColor[1];
+    D_800E0BC8[2] = setup->teamColor[2];
+    D_800E0BC8[3] = setup->teamColor[3];
     if (D_8008FE40 < 3) {
-        min = entry[1];
-        max = entry[2];
-        def = entry[3];
+        minSlots = setup->minSlots;
+        maxSlots = setup->maxSlots;
+        teamMax = setup->teamMax;
     } else {
-        min = entry[4];
-        max = entry[5];
-        def = entry[6];
+        minSlots = setup->minSlots3;
+        maxSlots = setup->maxSlots3;
+        teamMax = setup->teamMax3;
     }
     for (i = 0; i < 4; i++) {
-        maxs[i] = def;
+        teamCap[i] = teamMax;
         if (special != 0 && i >= 1) {
-            maxs[i] = special;
+            teamCap[i] = special;
         }
     }
-    i = 0;
+    i = 0; // matching: while with i++ in the store; a for loop schedules differently
     while (i < D_800E0BB0) {
-        counts[i] = 0;
-        ys[i++] = 0x6E;
+        teamPlayers[i] = 0;
+        teamY[i++] = 0x6E;
     }
     for (i = 0; i < D_8008FE40; i++) {
-        counts[D_800E0C00[i]]++;
+        teamPlayers[D_800E0C00[i]]++;
     }
     for (i = D_8008FE40; i < 16; i++) {
         D_8008FE44[i] = -1;
@@ -1477,25 +1495,25 @@ void func_151E1744(void) {
                 sfx = 0;
             }
             D_800E0C00[i] &= D_800E0BB0 - 1;
-            if (counts[D_800E0C00[i]] >= maxs[D_800E0C00[i]]) {
+            if (teamPlayers[D_800E0C00[i]] >= teamCap[D_800E0C00[i]]) {
                 D_800E0C00[i] = old;
             }
-            counts[D_800E0C00[i]]++;
-            counts[old]--;
+            teamPlayers[D_800E0C00[i]]++;
+            teamPlayers[old]--;
         }
     }
     D_800E0BB1 = 1;
     for (i = 0; i < D_800E0BB0; i++) {
-        if (D_800E0BB1 < counts[i]) {
-            D_800E0BB1 = counts[i];
+        if (D_800E0BB1 < teamPlayers[i]) {
+            D_800E0BB1 = teamPlayers[i];
         }
     }
     D_800E0BB1 += D_8008FDA0;
-    while (D_800E0BB1 * D_800E0BB0 < min) {
+    while (D_800E0BB1 * D_800E0BB0 < minSlots) {
         D_800E0BB1++;
         D_8008FDA0++;
     }
-    while (max < D_800E0BB1 * D_800E0BB0) {
+    while (maxSlots < D_800E0BB1 * D_800E0BB0) {
         D_800E0BB1--;
         D_8008FDA0--;
         if (D_8008FDA0 < 0) {
@@ -1510,7 +1528,7 @@ void func_151E1744(void) {
         if (i == 1 && special != 0) {
             v = special;
         }
-        sizes[i] = v;
+        teamSize[i] = v;
     }
     if (D_800E0BB0 == 2) {
         if (D_8008FDD4->input & MENU_CLEFT) {
@@ -1521,38 +1539,38 @@ void func_151E1744(void) {
         if (D_8008FE40 >= 3) {
             D_8008FDC4 = 0;
         }
-        lim = D_800E0BB1;
-        if (D_8008FDC4 < -lim) {
-            D_8008FDC4 = -lim;
-        } else if (lim < D_8008FDC4) {
-            D_8008FDC4 = lim;
+        bound = D_800E0BB1;
+        if (D_8008FDC4 < -bound) {
+            D_8008FDC4 = -bound;
+        } else if (bound < D_8008FDC4) {
+            D_8008FDC4 = bound;
         } else if (D_8008FDD4->input & (MENU_CLEFT | MENU_CRIGHT)) {
             sfx = 0x4FF;
         }
-        sizes[0] += D_8008FDC4;
-        sizes[1] -= D_8008FDC4;
+        teamSize[0] += D_8008FDC4;
+        teamSize[1] -= D_8008FDC4;
         for (i = 0; i < 2; i++) {
             cap = (i == 1 && special != 0) ? special : 8;
-            if (sizes[i] <= 0) {
-                sizes[i] = 1;
+            if (teamSize[i] <= 0) {
+                teamSize[i] = 1;
             }
-            if (cap < sizes[i]) {
-                sizes[i] = cap;
+            if (cap < teamSize[i]) {
+                teamSize[i] = cap;
             }
         }
     }
     step = 0x128 / D_800E0BB0;
     x = step >> 1;
-    k = D_8008FE40;
+    slots = D_8008FE40;
     for (i = 0; i < D_800E0BB0; i++) {
-        xs[i] = x;
+        teamX[i] = x;
         x += step;
-        v = sizes[i];
-        while (counts[i] < v) {
-            D_8008FE44[k] = -2;
-            D_800E0C00[k] = i;
-            counts[i]++;
-            k++;
+        v = teamSize[i];
+        while (teamPlayers[i] < v) {
+            D_8008FE44[slots] = -2;
+            D_800E0C00[slots] = i;
+            teamPlayers[i]++;
+            slots++;
         }
     }
     if (alpha == 0xFF) {
@@ -1570,7 +1588,7 @@ void func_151E1744(void) {
     func_150432FC(0x94, ((D_800E0BB0 == 4) << 5) + 0x78);
     func_15042E3C(D_800AB864, 0x1A);
     for (i = 0; i < D_800E0BB0; i++) {
-        x = xs[i];
+        x = teamX[i];
         old = D_800E0BC8[i] * 3;
         func_1504332C(D_800AB62C[old], D_800AB62C[old + 1], D_800AB62C[old + 2], alpha);
         func_150432FC(x, 0x50);
@@ -1589,23 +1607,23 @@ void func_151E1744(void) {
             func_15042E3C(D_800AB87C, D_800E0BC8[i] + old);
         }
     }
-    more = func_151E24F0(extra);
+    hasExtra = func_151E24F0(extra);
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    for (i = 0; i < k; i++) {
+    for (i = 0; i < slots; i++) {
         old = D_800E0C00[i];
-        if (k == D_800E0BB0) {
-            offs.v[old] = 0;
+        if (slots == D_800E0BB0) {
+            jitter.v[old] = 0;
         }
-        x = xs[old] + offs.v[old];
-        y = ys[old];
-        offs.v[old] = -offs.v[old];
-        if (offs.v[old] < 0) {
-            ys[old] += 0x18;
+        x = teamX[old] + jitter.v[old];
+        y = teamY[old];
+        jitter.v[old] = -jitter.v[old];
+        if (jitter.v[old] < 0) {
+            teamY[old] += 0x18;
         }
         func_150432FC(x, y);
         if (D_8008FE44[i] >= 0) {
             func_15042E3C(D_800AB880, D_8008FE44[i] + 1);
-            if (more != 0) {
+            if (hasExtra != 0) {
                 func_15042E3C(D_800AB884, extra[i] + 1);
             }
         } else {
