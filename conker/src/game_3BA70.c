@@ -36,17 +36,17 @@ void func_1500E5C0(void) {
     }
     {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
-        s32 **p = D_800D98D0;
+        s32 **entries = D_800D98D0;
 
         D_800D9890 = 0;
         D_800D9894 = NULL;
-        p[0] = NULL;
-        p[1] = NULL;
-        p[2] = NULL;
-        p[3] = NULL;
+        entries[0] = NULL;
+        entries[1] = NULL;
+        entries[2] = NULL;
+        entries[3] = NULL;
     }
     D_80088870 = NULL;
-    bzero(&D_800BE500, 5);
+    bzero(D_800BE500, sizeof(D_800BE500));
     D_800D9950[0] = D_800D9950[1] = D_800D9950[2] = 0;
     D_80088980 = 0;
     D_800D9AA0[0] = NULL;
