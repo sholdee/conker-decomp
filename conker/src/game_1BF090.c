@@ -105,7 +105,7 @@ typedef struct DustEmitterData {
     /* 0x00 */ struct127 *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ struct17 offset;    /* emitter position in the bone's space */
+    /* 0x08 */ vertex offset;      /* emitter position in the bone's space */
     /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->unk1D4 */
     /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
     /* 0x1C */ f32 rateBase;
@@ -130,89 +130,48 @@ typedef struct DustEmitter {
     DustEmitterData data;
 } DustEmitter;
 
-struct Struct15191BE0Arg0 {
-    u8 pad0[0x3B];
-    u8 unk3B;
-};
+void func_1504715C(FloorProbe *probe, struct127 *obj);
 
-struct Struct15191BE0Local {
-    struct Struct15191BE0Arg0 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Header2 unk8;
-    s32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s32 unk24[9];
-    f32 unk48;
-    f32 unk4C;
-    s16 unk50;
-    s16 unk52;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    u8 unk64;
-    u8 pad65[3];
-};
+/* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
+ * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
+struct260 *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
+                         s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
+                         s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
+                         f32 unk60, u8 kind, u8 arg16, s32 arg17) {
+    struct260 *effect;
+    DustEmitterData data;
 
-struct Struct15191BE0Stack {
-    s32 pad0;
-    struct Struct15191BE0Local local;
-};
-
-void func_1504715C(s32, s32);
-
-struct260 *func_15191BE0(struct Struct15191BE0Arg0 *arg0, Header2 *arg1, u8 arg2, f32 arg3, f32 arg4, s16 arg5, f32 arg6, f32 arg7, s16 arg8, s16 arg9, u8 argA, u8 argB, f32 argC, f32 argD, f32 argE, u8 argF, u8 arg10, s32 arg11) {
-    struct260 *temp_v0;
-    struct Struct15191BE0Stack sp3C;
-    s32 temp_a0;
-    u8 temp_arg4;
-
-    if (arg0 == 0) {
-        return 0;
+    if (owner == NULL) {
+        return NULL;
     }
 
-    sp3C.local.unk0 = arg0;
-    sp3C.local.unk4 = arg0->unk3B;
-    sp3C.local.unk8 = *arg1;
-    sp3C.local.unk14 = arg2 << 6;
-    sp3C.local.unk1C = arg3;
-    sp3C.local.unk18 = 0.0f;
-    sp3C.local.unk20 = arg4;
-    func_1504715C((s32) sp3C.local.unk24, (s32) arg0);
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.offset = *offset;
+    data.matrixOffset = bone << 6;
+    data.rateBase = rateBase;
+    data.accum = 0.0f;
+    data.rateRandom = rateRandom;
+    func_1504715C(&data.floor, owner);
 
-    sp3C.local.unk48 = arg6;
-    sp3C.local.unk4C = arg7;
-    sp3C.local.unk50 = arg8;
-    sp3C.local.unk52 = arg9;
-    sp3C.local.unk54 = argA;
-    sp3C.local.unk55 = argB;
-    sp3C.local.unk58 = argC;
-    sp3C.local.unk5C = argD;
-    sp3C.local.unk60 = argE;
-    sp3C.local.unk64 = argF;
+    data.gravityBase = gravityBase;
+    data.gravityRandom = gravityRandom;
+    data.lifetimeBase = lifetimeBase;
+    data.lifetimeRandom = lifetimeRandom;
+    data.alphaBase = alphaBase;
+    data.alphaRandom = alphaRandom;
+    data.sizeBase = sizeBase;
+    data.sizeRandom = sizeRandom;
+    data.unk60 = unk60;
+    data.kind = kind;
 
-    if (arg5 == -1) {
-        temp_a0 = 0x12C;
-    } else {
-        temp_a0 = arg5;
+    // the header's struct37 * parameter is really the size of the effect's data
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1, (duration == -1) ? 0 : 1, 0x1D,
+                           (struct37 *)sizeof(data), arg16, arg17);
+    if (effect != NULL) {
+        memcpy(&((DustEmitter *)effect)->data, &data, sizeof(data));
     }
-
-    if (arg5 == -1) {
-        temp_arg4 = 0;
-    } else {
-        temp_arg4 = 1;
-    }
-
-    temp_v0 = func_15149130(temp_a0, -1, 0x1D, -1, temp_arg4, 0x1D, (struct37 *)0x68, arg10, arg11);
-    if (temp_v0 != 0) {
-        memcpy((s32) temp_v0 + 0x28, &sp3C.local, sizeof(sp3C.local));
-    }
-    return temp_v0;
+    return effect;
 }
 
 struct Struct15191D54Owner {
@@ -262,7 +221,9 @@ struct Struct15191D54Arg0 {
 void func_15143134(void *, f32 *, s32);
 s32 func_1514672C(f32 *);
 s32 func_15046F84(f32 *, s32, f32, f32 *);
-void *func_1519203C(f32 *, f32 *, f32, s32, s32, s32, f32, s32, f32, s32 *, s32, s32, s32);
+DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s32 lifetime, u8 alpha,
+                            u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
+                            u8 arg11, s32 arg12);
 extern f32 D_800A80E8;
 extern f32 D_800A80EC;
 extern f32 D_800A80F0;
@@ -311,11 +272,11 @@ void func_15191D54(struct Struct15191D54Arg0 *arg0) {
                 rand = func_150ADA68();
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
-                func_1519203C(spB4, spA4, ((f32)rand * local->unk4C) + local->unk48,
+                func_1519203C((vertex *)spB4, (vertex *)spA4, ((f32)rand * local->unk4C) + local->unk48,
                               (s16)((r1 % (u32)(local->unk52 + 1)) + local->unk50),
                               (r2 % (u32)(local->unk55 + 1)) + local->unk54, 0xFF,
                               (func_150ADA68() * local->unk5C) + local->unk58, flag, scale,
-                              local->unk28, local->unk64, arg0->unkC, arg0->unk1);
+                              (FloorData *)local->unk28, local->unk64, arg0->unkC, arg0->unk1);
                 local->unk18 -= 1.0f;
             } while (local->unk18 > 1.0f);
         } else {
@@ -326,120 +287,81 @@ void func_15191D54(struct Struct15191D54Arg0 *arg0) {
     }
 }
 
-typedef struct Vec1519203C {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec1519203C;
+DustParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+extern u8 (*D_8008FCD0[])(void);
 
-typedef struct Game1BF090Spawn {
-    s32 header;
-    s32 owner;
-    s16 type, lifetime;
-    s32 fieldC, field10;
-    u8 color[4];
-    u8 field18, field19, field1A, mode, group, kind;
-    s16 field1E, field20, count;
-    f32 scale, scaleX, scaleY;
-    Vec1519203C position;
-    f32 rotation[3];
-    Vec1519203C direction;
-    f32 speed;
-    s32 flags;
-    u8 pad5C[4];
-    u8 channel0, channel1, channel2;
-    s8 channel3, channel4;
-    u8 channel5;
-    u8 pad66[0xA];
-} Game1BF090Spawn;
+/* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
+ * (update func 0xF, func_1519257C). */
+DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s32 lifetime, u8 alpha,
+                            u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
+                            u8 arg11, s32 arg12) {
+    DustParticle *particle;
+    ParticleDesc desc;
+    DustData dust;
+    s32 flipT;
+    s32 flipS;
 
-typedef struct Game1BF090Packed {
-    u8 bytes[16];
-    u16 last;
-} Game1BF090Packed;
-
-typedef struct Game1BF090Fragment {
-    f32 scale;
-    u8 random[4];
-    f32 scaleX, scaleY, height;
-    Game1BF090Packed body;
-    u8 kind;
-} Game1BF090Fragment;
-
-void *func_15130374(s32, u8, s32, u8, s32);
-extern s32 (*D_8008FCD0[])(void);
-extern f32 D_800A80F4, D_800A80F8;
-
-void *func_1519203C(f32 *position, f32 *direction,
-                    f32 speed, s32 lifetime, s32 mode, s32 group,
-                    f32 scale, s32 unused, f32 height, s32 *body,
-                    s32 kind, s32 priority, s32 owner) {
-    void *effect;
-    Game1BF090Spawn spawn;
-    Game1BF090Fragment fragment;
-    s32 second;
-    s32 first;
-
-    spawn.type = 0x4401;
-    spawn.header = 0x200005;
-    spawn.owner = 0;
-    spawn.fieldC = 0;
-    spawn.field10 = 0;
-    spawn.color[0] = 0;
-    spawn.color[1] = 0;
-    spawn.color[2] = 0;
-    spawn.color[3] = 0xFF;
-    spawn.field18 = 0;
-    spawn.field19 = 0;
-    spawn.field1A = 0;
-    spawn.mode = ((u8 *)&mode)[3];
-    spawn.group = ((u8 *)&group)[3];
-    spawn.position = *(Vec1519203C *)position;
-    spawn.rotation[0] = 0.0f;
-    spawn.rotation[1] = 0.0f;
-    spawn.rotation[2] = 0.0f;
-    spawn.direction = *(Vec1519203C *)direction;
-    spawn.speed = speed;
-    spawn.count = 1;
-    spawn.scale = 1.0f;
+    desc.renderMode = 0x4401;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r = 0;
+    desc.g = 0;
+    desc.b = 0;
+    desc.a = 0xFF;
+    desc.r2 = 0;
+    desc.g2 = 0;
+    desc.b2 = 0;
+    desc.alpha = alpha;
+    desc.brightness = brightness;
+    desc.pos = *position;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.vel = *velocity;
+    desc.gravity = gravity;
+    desc.scaleStart = 1;
+    desc.scaleRate = 1.0f;
     if (func_150ADA20() & 1) {
-        first = 0x40;
+        flipS = PARTICLE_FLIP_S;
     } else {
-        first = 0;
+        flipS = 0;
     }
     if (func_150ADA20() & 1) {
-        second = 0x80;
+        flipT = PARTICLE_FLIP_T;
     } else {
-        second = 0;
+        flipT = 0;
     }
-    spawn.flags = second | 0xC207 | first | 0x10000;
-    spawn.lifetime = (s16)lifetime + 0x12;
-    spawn.field1E = 0x12;
-    spawn.field20 = 0xE;
-    spawn.channel0 = 6;
-    spawn.channel1 = 8;
-    spawn.channel2 = 0xF;
-    spawn.channel3 = -1;
-    spawn.channel4 = -1;
-    spawn.channel5 = 3;
-    fragment.random[0] = func_150ADA20() & 0xFF;
-    fragment.random[1] = func_150ADA20() & 0xFF;
-    spawn.kind = D_8008FCD0[((u8 *)&kind)[3]]();
-    spawn.scaleY = scale;
-    spawn.scaleX = scale;
-    fragment.scale = scale;
-    fragment.random[2] = func_150ADA20() % 6U + 5;
-    fragment.random[3] = func_150ADA20() % 6U + 5;
-    fragment.scaleX = (func_150ADA68() * 0.25f + D_800A80F4) * fragment.scale;
-    fragment.scaleY = (func_150ADA68() * 0.25f + D_800A80F8) * fragment.scale;
-    fragment.height = height;
-    fragment.body = *(Game1BF090Packed *)body;
-    fragment.kind = ((u8 *)&kind)[3];
-    effect = func_15130374((s32)&spawn, 1, 0x28, ((u8 *)&priority)[3], owner);
-    if (effect != 0) {
-        memcpy((u8 *)effect + 0xA8, &fragment, 0x28U);
+    desc.flags = flipT | (PARTICLE_LIFETIME | PARTICLE_GRAVITY | PARTICLE_MOVE | PARTICLE_FADE |
+                          PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC) | flipS | PARTICLE_LIT;
+    desc.timer = (s16)lifetime + 18;
+    desc.fadeStart = 18;
+    desc.fadeRate = 14;
+    desc.primColorMode = 6;
+    desc.envColorMode = 8;
+    desc.updateFunc = 0xF;
+    desc.deathFunc = -1;
+    desc.drawFunc = -1;
+    desc.handlerSet = 3;
+    dust.phase[0] = func_150ADA20() & 0xFF;
+    dust.phase[1] = func_150ADA20() & 0xFF;
+    desc.texture = D_8008FCD0[kind]();
+    desc.height = size;
+    desc.width = size;
+    dust.baseSize = size;
+    dust.phaseStep[0] = func_150ADA20() % 6U + 5;
+    dust.phaseStep[1] = func_150ADA20() % 6U + 5;
+    dust.amplitude[0] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
+    dust.amplitude[1] = (func_150ADA68() * 0.25f + 0.2f) * dust.baseSize;
+    dust.floorY = floorY;
+    dust.floor = *floor;
+    dust.kind = kind;
+    particle = func_15130374(&desc, 1, sizeof(DustData), arg11, arg12);
+    if (particle != NULL) {
+        memcpy(&particle->dust, &dust, sizeof(DustData));
     }
-    return effect;
+    return particle;
 }
 
 void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY);
