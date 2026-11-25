@@ -9,12 +9,16 @@
 #define D_800DCD30 D_800DCD30_hdr
 #define D_800DCD40 D_800DCD40_hdr
 #define D_800DCD78 D_800DCD78_hdr
+#define D_800DCD80 D_800DCD80_hdr
+#define D_800DCD84 D_800DCD84_hdr
 #include "variables.h"
 #undef D_800DCD20
 #undef D_800DCD24
 #undef D_800DCD30
 #undef D_800DCD40
 #undef D_800DCD78
+#undef D_800DCD80
+#undef D_800DCD84
 
 /*
  * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
@@ -61,9 +65,10 @@ extern u8 D_800DCD27;               // priority of the current ambient colour
 extern s8 D_800DCD30[4][3];         // per-player directional light direction
 extern PointLightGfx D_800DCD40;    // padding light for odd light counts
 extern PointLight *D_800DCD78;      // list of all point lights
+extern struct LightZoneNode *D_800DCD80; // ambient colour zones
+extern struct LightZoneNode *D_800DCD84; // tint zones
 
 void *allocate_memory(s32 size, s32, s32, s32);
-s32 func_150A1DA0(u8 *, struct178 *, s32);
 f32 func_1515F008(s16 *, s32);
 void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
@@ -389,110 +394,127 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
 }
 
 
-struct Node1515E43C {
-    char pad0[0x18];
-    u32 unk18;
-    u32 unk1C;
-};
+/* struct178 with the fields this file reads named (structs.h has them as a blob). */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 pad6[0xE];
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;     // >> 2 is the zone type
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u32 unk18;    // colour in the low 24 bits; top byte doubles as a mask
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u8 pad20[0x14];
+} LightZone;
 
-struct Node1515EB84 {
-    struct Node1515EB84 *next;
-    struct178 *unk4;
-};
+typedef struct LightZoneNode {
+    struct LightZoneNode *next;
+    LightZone *zone;
+} LightZoneNode;
 
-struct Node1515E43C *func_1515EB84(s32, s32, s32, s32, struct Node1515EB84 *);
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+LightZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, LightZoneNode *node);
 
-void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u32 arg5, s32 arg6) {
-    struct Node1515E43C *node;
+/*
+ * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the
+ * point, else the global ambient colour dimmed by bits 5-6 of arg5. With flags & 0x10 the
+ * D_800DCD84 tint is applied on top.
+ */
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
+    LightZone *zone;
     s32 i;
-    s32 t;
-    u8 sp50[3];
-    u8 sp4C[3];
-    u8 sp48[3];
-    u8 sp47;
-    u8 sp46;
-    s32 s;
-    u8 *dst;
-    s32 v;
+    s32 sum;
+    u8 tint[3];
+    u8 colorA[3];
+    u8 colorB[3];
+    u8 amountA;
+    u8 amountB;
+    s32 level;
+    u8 *out;
+    s32 scale;
 
-    node = func_1515EB84(arg0, arg1, arg2, arg3, (struct Node1515EB84 *)D_800DCD80);
-    if (node != NULL) {
-        arg4[0] = node->unk18 & 0xFF;
-        arg4[1] = (node->unk18 >> 8) & 0xFF;
-        arg4[2] = (node->unk18 >> 16) & 0xFF;
+    zone = func_1515EB84(x, y, z, mask, D_800DCD80);
+    if (zone != NULL) {
+        color[0] = zone->unk18 & 0xFF;
+        color[1] = (zone->unk18 >> 8) & 0xFF;
+        color[2] = (zone->unk18 >> 16) & 0xFF;
     } else {
-        v = (0x100 - (s32)(((arg5 >> 5) & 3) << 6));
-        dst = arg4;
+        scale = 0x100 - ((arg5 >> 5) & 3) * 0x40;
+        out = color;
         for (i = 0; i < 3; i++) {
-            *dst++ = ((*(u8 (*)[3])&D_800DCD20)[i] * v) >> 8;
+            *out++ = (D_800DCD20[i] * scale) >> 8;
         }
     }
-    if (arg6 & 0x10) {
-        func_1515E43C(arg0, arg1, arg2, arg3, sp4C, sp48, &sp47, &sp46);
-        dst = arg4;
+    if (flags & 0x10) {
+        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
+        out = color;
         for (i = 0; i < 3; i++) {
-            s = (u8)((((0xFF - *dst) * sp47) >> 8) + *dst);
-            sp50[i] = (sp4C[i] * s) >> 8;
-            s = (u8)((((0xFF - *dst) * sp46) >> 8) + *dst);
-            *dst = (sp48[i] * s) >> 8;
-            t = *dst + ((sp50[i] * 7) >> 3);
-            if (t > 0xFF) {
-                t = 0xFF;
+            level = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
+            tint[i] = (colorA[i] * level) >> 8;
+            level = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
+            *out = (colorB[i] * level) >> 8;
+            sum = *out + ((tint[i] * 7) >> 3);
+            if (sum > 0xFF) {
+                sum = 255;
             }
-            *dst = t;
-            dst++;
+            *out = sum;
+            out++;
         }
     }
 }
 
 
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
-    struct Node1515E43C *node;
+/* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
+    LightZone *zone;
 
-    node = func_1515EB84(arg0, arg1, arg2, 0, D_800DCD84);
-    if (node != NULL) {
-        arg4[0] = node->unk18 & 0xFF;
-        arg4[1] = (node->unk18 >> 8) & 0xFF;
-        arg4[2] = (node->unk18 >> 16) & 0xFF;
-        arg5[0] = node->unk1C & 0xFF;
-        arg5[1] = (node->unk1C >> 8) & 0xFF;
-        arg5[2] = (node->unk1C >> 16) & 0xFF;
-        arg6[0] = (node->unk1C >> 24) & 0xFF;
-        arg7[0] = (node->unk18 >> 24) & 0xFF;
+    zone = func_1515EB84(x, y, z, 0, D_800DCD84);
+    if (zone != NULL) {
+        colorA[0] = zone->unk18 & 0xFF;
+        colorA[1] = (zone->unk18 >> 8) & 0xFF;
+        colorA[2] = (zone->unk18 >> 16) & 0xFF;
+        colorB[0] = zone->unk1C & 0xFF;
+        colorB[1] = (zone->unk1C >> 8) & 0xFF;
+        colorB[2] = (zone->unk1C >> 16) & 0xFF;
+        *amountA = (zone->unk1C >> 24) & 0xFF;
+        *amountB = (zone->unk18 >> 24) & 0xFF;
     } else {
-        arg4[0] = ((u8 *)D_800DCD24)[0];
-        arg4[1] = ((u8 *)D_800DCD24)[1];
-        arg4[2] = ((u8 *)D_800DCD24)[2];
-        arg5[0] = D_800DCD28[0];
-        arg5[1] = D_800DCD28[1];
-        arg5[2] = D_800DCD28[2];
-        arg6[0] = D_800DCD3C;
-        arg7[0] = D_800DCD3D;
+        colorA[0] = D_800DCD24[0];
+        colorA[1] = D_800DCD24[1];
+        colorA[2] = D_800DCD24[2];
+        colorB[0] = D_800DCD28[0];
+        colorB[1] = D_800DCD28[1];
+        colorB[2] = D_800DCD28[2];
+        *amountA = D_800DCD3C;
+        *amountB = D_800DCD3D;
     }
 }
 
-u32 *func_1515E544(u32 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/*
+ * Re-emits the light commands func_1515D914 built for this frame, from its light slice
+ * `lightBuf` and the count byte it stored (bit 7 = padded with the dummy light).
+ */
+Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient) {
     s32 count;
-    s32 special;
-    s32 index;
+    s32 padLight;
+    s32 i;
 
-    count = arg3 & 0x7F;
-    if (count != arg3) {
-        special = 1;
+    count = countByte & 0x7F;
+    if (count != countByte) {
+        padLight = 1;
     } else {
-        special = 0;
+        padLight = 0;
     }
-    { u32 *command = arg0; arg0 += 2; command[0] = 0xDB020000; command[1] = count * 0x30; }
-    for (index = 0; index < count - special - 1; index++) {
-        u32 *command = arg0; arg0 += 2; command[0] = ((((u32)(index * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = ((D_800BE9C0 * arg2 + index) * 0x30) + arg1;
+    gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
+    for (i = 0; i < count - padLight - 1; i++) {
+        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + 2) * 0x30U);
     }
-    if (special != 0) {
-        u32 *command = arg0; arg0 += 2; command[0] = ((((u32)(index * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = (u32)&D_800DCD40;
+    if (padLight) {
+        gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
     }
-    { u32 *command = arg0; arg0 += 2; command[0] = ((((u32)((index + special + 1) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = ((D_800BE9C0 * arg2 + index) * 0x30) + arg1; }
-    { u32 *command = arg0; arg0 += 2; command[0] = ((((u32)((index + special + 2) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = arg4; }
-    return arg0;
+    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
+    gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
+    return gfx;
 }
 
 struct Light1515E888 {
@@ -581,32 +603,29 @@ void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u
   arg5[2] = v;
 }
 
-struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struct Node1515EB84 *node) {
-    u8 sp34[0x32C];
-    struct178 *entry;
+s32 func_150A1DA0(struct127 *obj, LightZone *zone, s32);
 
-    *(f32 *)&sp34[0x14] = (f32)arg0;
-    *(f32 *)&sp34[0x18] = (f32)arg1;
-    *(f32 *)&sp34[0x180] = (f32)arg1;
-    *(f32 *)&sp34[0x2C] = (f32)arg0;
-    *(f32 *)&sp34[0x30] = (f32)arg1;
-    *(f32 *)&sp34[0x1C] = (f32)arg2;
-    *(f32 *)&sp34[0x34] = (f32)arg2;
+/* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
+LightZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, LightZoneNode *node) {
+    struct127 probe;
+    LightZone *zone;
 
-    while (node != 0) {
-        entry = node->unk4;
-        if (entry->unk6[0xE] == 0) {
-            if ((arg3 == 0) || (((*(u32 *)&entry->unk6[0x12] >> 24) & arg3) != 0)) {
-                if ((0x18 == ((s32)entry->unk6[0xF] >> 2)) || ((*(u32 *)&entry->unk6[0x12] >> 31) == 0)) {
-                    if (func_150A1DA0(sp34, entry, 0) == 0) {
-                        return (struct Node1515E43C *)node->unk4;
-                    }
-                }
-            }
+    probe.x_position = x;
+    probe.y_position = y;
+    probe.unk180 = y;
+    probe.old_x_position = x;
+    probe.old_y_position = y;
+    probe.z_position = z;
+    probe.old_z_position = z;
+
+    for (; node != NULL; node = node->next) {
+        zone = node->zone;
+        if (zone->unk14 == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
+            ((zone->unk15 >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+            return node->zone;
         }
-        node = node->next;
     }
-    return 0;
+    return NULL;
 }
 
 extern f32 D_800D9C10[][4][4];
