@@ -63,7 +63,6 @@ void func_1506A5F0(struct127 *obj, s32 arg1) {
     func_151A6F00(&emitter, 1, 0xFF, 1);
 }
 
-
 /*
  * Per-object movement-hit handlers, dispatched through D_80086110 by func_1506AC8C. Before a call,
  * D_800D1560 holds the object's old position and D_800D1570 its position before the collision move.
@@ -188,6 +187,7 @@ void func_1506AA48(struct127 *obj, Pair1506AA48 *arg) {
     data.ref.ownerId = obj->unique_id;
     data.value = *arg;
 
+    /* functions.h types the data-size parameter as struct37 * */
     effect = func_15149130(10, 7, 35, -1, 1, 33, (struct37 *)sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
@@ -199,14 +199,10 @@ void func_1506AAE0(struct127 *obj, s32 arg1) {
     s32 mask;
     struct127 *hit;
 
-    mask = D_800CC260;
-    hit = D_800CC2D0;
-    while (mask != 0) {
+    for (mask = D_800CC260, hit = D_800CC2D0; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
             func_15137610(hit, D_800D1560, D_800D1570, 0, 0xFF, 1);
         }
-        mask >>= 1;
-        hit++;
     }
 }
 
