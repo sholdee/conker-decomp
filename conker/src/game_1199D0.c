@@ -7,13 +7,6 @@ void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
 u8 func_151464B8(s16 *);
 
-/* Data of the emitter effect (func_150EC520): spawns points on a shape at a random rate. */
-typedef struct {
-    /* 0x00 */ void *shape;
-    /* 0x04 */ f32 rate;
-    /* 0x08 */ s16 *owner;
-    /* 0x0C */ f32 accumulator;
-} EmitterData;
 
 /* Data of each effect the emitter spawns. */
 typedef struct {
@@ -44,7 +37,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
-        EmitterData emitter;
+        ShapeEmitter emitter;
         EmittedPoint point;
         ParticleSourceData source;
         FogFlashData fog;
@@ -53,7 +46,7 @@ typedef struct {
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
 void func_150EC520(Effect *effect) {
-    EmitterData *emitter;
+    ShapeEmitter *emitter;
     EmittedPoint point;
     f32 upper;
 

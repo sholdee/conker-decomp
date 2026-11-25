@@ -945,25 +945,25 @@ void func_151AB828(ActorTask *task) {
     func_15141DA4(task->watcher.character, 0, 4);
 }
 
-extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_15190770(ActorLink *desc, s32 arg1, s32 arg2, s32 arg3);
 
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
 void func_151AB854(ActorTask *task) {
     Actor *actor;
-    struct185 desc;
+    ActorLink desc;
 
     actor = task->watcher.character;
     if ((actor->character_type == 0) || (actor->character_type == 1) || (actor->character_type == 2) || (actor->character_type == 3) || (actor->character_type == 4) ||
         (actor->character_type == 150)) {
-        desc.unk0 = actor;
-        desc.unk4 = actor->unique_id;
-        desc.unk6 = 300;
-        desc.unk8 = 0;
+        desc.actor = actor;
+        desc.actorId = actor->unique_id;
+        desc.timer = 300;
+        desc.flags = 0;
         desc.unk9 = 0;
         if (actor->character_type == 150) {
-            desc.unkA = 3;
+            desc.kind = 3;
         } else {
-            desc.unkA = 0;
+            desc.kind = 0;
         }
         if (actor->playernumber != 0xFF) {
             actor->mv->idle.delay = 500;

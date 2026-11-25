@@ -551,19 +551,6 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     }
 }
 
-/* Spawn parameters of a particle emitter (func_151A8B20). */
-typedef struct {
-    /* 0x00 */ u8 flags;             /* EMITTER_* */
-    /* 0x04 */ TriggerZone *anchor;  /* zone giving the centre (and area) with EMITTER_ANCHORED */
-    /* 0x08 */ f32 rate;             /* particles per frame and unit area: rate + rand * rateRange */
-    /* 0x0C */ f32 rateRange;
-    /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
-    /* 0x1C */ f32 bottom;           /* lowest height the ground probe searches */
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (func_151A931C) */
-    /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
-    /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
-} EmitterDef; /* size 0x28 */
 
 #define EMITTER_ON       1
 #define EMITTER_ANCHORED 2

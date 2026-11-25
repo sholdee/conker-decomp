@@ -1036,7 +1036,7 @@ extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern SeqTrackInfo *D_800C35F0[]; // per scene: what each track drives
 extern u8 D_800C35F8;
-extern struct168 D_800C3600; // scripted camera shot
+extern CamShot D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 D_800C363A[]; /* track count */
 extern s32 D_800C3640[]; /* end time */

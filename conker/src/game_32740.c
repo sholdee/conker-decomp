@@ -5,7 +5,7 @@
 
 void func_1510E7A4(void *, void *, f32 *, void *, void *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 void func_15123070(Camera *);
-void func_1512D560(Camera *, s32, struct168 *);
+void func_1512D560(Camera *, s32, CamShot *);
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1502B5C8(u32 *, s32, s32, s32, s32);
@@ -177,8 +177,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->SpecialFlags |= 4;
     if (D_800BE9F0 != 0x21 && D_800C35EA[0] != 1) {
         func_1512D560(view, 5, NULL);
-        // the header declares D_800C3600 as a struct168 pointer, but it is the struct itself
-        D_800C3600.unkC = view->CameraAngle;
+        D_800C3600.yaw = view->CameraAngle;
         func_1512D560(view, 8, &D_800C3600);
         func_1512D560(view, 6, NULL);
     }

@@ -2616,4 +2616,82 @@ typedef struct MotionTrail {
     /* 0x98 */ TrailParams *params;
 } MotionTrail; /* size 0x9C */
 
+/* Timed-effect payloads, shared by the spawning code and the effect callbacks. */
+
+/* Spawn parameters of a particle emitter (func_151A8B20). */
+typedef struct EmitterDef {
+    /* 0x00 */ u8 flags;             /* EMITTER_* */
+    /* 0x04 */ struct TriggerZone *anchor; /* zone giving the centre (and area) with EMITTER_ANCHORED */
+    /* 0x08 */ f32 rate;             /* particles per frame and unit area: rate + rand * rateRange */
+    /* 0x0C */ f32 rateRange;
+    /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
+    /* 0x1C */ f32 bottom;           /* lowest height the ground probe searches */
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (func_151A931C) */
+    /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
+    /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
+} EmitterDef; /* size 0x28 */
+
+/* A drip emitter's attachment to its actor (func_15190770, game_1BDC20.c). */
+typedef struct ActorLink {
+    /* 0x0 */ struct Actor *actor;
+    /* 0x4 */ u8 actorId;           /* actor->unique_id when attached */
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ s16 timer;
+    /* 0x8 */ u8 flags;             /* bit 0: the timer counts down */
+    /* 0x9 */ u8 unk9;
+    /* 0xA */ u8 kind;              /* D_8008FA70 index */
+} ActorLink; /* size 0xC */
+
+/* Tick data of timed effect 0x46 (func_150B6110, game_E2DA0.c): bolts around a trigger zone. */
+typedef struct BoltRingData {
+    /* 0x00 */ struct TriggerZone *emitter;
+    /* 0x04 */ f32 spawnAccum;
+    /* 0x08 */ u8 emitterState;
+} BoltRingData;
+
+/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
+ * (arg0 + 0x28, arg0 + 0x2C): the source actor (with its unique_id, to detect a reused slot)
+ * plus three independent countdowns. */
+typedef struct BoltSource {
+    /* 0x00 */ struct Actor *obj;
+    /* 0x04 */ u8  id;
+    /* 0x05 */ u8  pad5;
+    /* 0x06 */ s16 flashTimer;
+    /* 0x08 */ s16 boltTimer;
+    /* 0x0A */ s16 timer2;
+} BoltSource; /* size 0xC */
+
+/* Data of the effect run by func_150F64DC. */
+typedef struct FlashBurstData {
+    /* 0x00 */ struct Actor *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 timer; /* frames until the next burst */
+} FlashBurstData;
+
+/* Data of the emitter effect (func_150EC520): spawns points on a shape at a random rate. */
+typedef struct ShapeEmitter {
+    /* 0x00 */ void *shape;
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ s16 *owner;
+    /* 0x0C */ f32 accumulator;
+} ShapeEmitter;
+
+/* Emitter state at +0x28 of func_150DE7C0's object. */
+typedef struct ZonePairEmitter {
+    /* 0x00 */ s16 timer; // frames until the next particle
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 source;
+    /* 0x08 */ s32 target;
+} ZonePairEmitter;
+
+/* Data of timed effect expire callback 5 (func_150C29F0, game_EF410.c): particles at a random point of a disc. */
+typedef struct DiscEmitter {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 z;
+    /* 0x08 */ f32 radius;
+    /* 0x0C */ f32 y;
+} DiscEmitter; /* size 0x10 */
+
 #endif

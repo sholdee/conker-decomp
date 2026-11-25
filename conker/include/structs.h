@@ -1903,67 +1903,27 @@ typedef struct ParticleTexFile {
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4; // scene
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 unk14; // eye x, y, z
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24; // pitch
-    /* 0x28 */ f32 unk28; // yaw
+/* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
+ * D_800C3600 is the shared one that cutscenes and zones fill in. */
+typedef struct CamShot {
+    /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
+    /* 0x04 */ s32 unk4;     /* index into D_800C35EA (cutscene scene) */
+    /* 0x08 */ f32 unk8;     /* copied to D_800C3648, the FOV offset, when that scene is active */
+    /* 0x0C */ f32 yaw;      /* types 8 and 10: the end yaw; 999.0f = behind the player */
+    /* 0x10 */ s32 duration; /* type 10: transition length */
+    /* 0x14 */ Vec3f eye;
+    /* 0x20 */ union {
+        Vec3f focus;
+        struct {
+            f32 sway;
+            f32 pitch;
+            f32 yaw;
+        } angles;            /* degrees */
+    } at;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  pad38[0x24];
-    /* 0x5C */ f32 unk5C;
-} struct168; // a scripted camera shot (func_1512D560 message), D_800C3600
-
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-    u8  pad5[0x3];
-} struct172; // 0x8 bytes?
-
-typedef struct {
-    s32 unk0;
-    f32 unk4;
-    u8  unk8;
-    u8  pad9[0x3];
-} struct173;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} struct174; // size 0x10
-
-typedef struct {
-    Actor* unk0;
-    u8  unk4;
-    u8  pad5;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-} struct175;
-
-typedef struct {
-    struct TriggerZone *unk0;
-    f32 unk4;
-    s32 unk8;
-    f32 unkC;
-} struct176;
-
-typedef struct {
-    s16 unk0;
-    s16 pad2;
-    s32 unk4;
-    s32 unk8;
-} struct177;
+} CamShot; // size 0x38 (D_800C3638 follows)
 
 /* Zone types: TriggerZone.kind >> 2. Original names (Oct 2000 debugger table); the US spawn table
  * D_80082E30 has the same 26 entries, and the users agree (0 camera, 2 sound, 7 music channel, 8 warp,
@@ -2211,22 +2171,6 @@ typedef struct {
 } struct182;
 
 typedef struct {
-    s8  unk0;
-    u8  pad1[0x3];
-    s32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s8  unk24;
-    s8  unk25;
-    s8  unk26;
-} struct183; // size 0x27
-
-typedef struct {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -2236,16 +2180,6 @@ typedef struct {
     f32 unk18;
     f32 unk1C;
 } struct184; // size 0x20, 32 bytes
-
-typedef struct {
-    Actor* unk0;
-    u8  unk4;
-    u8  pad5;
-    s16 unk6;
-    s8  unk8;
-    s8  unk9;
-    s8  unkA;
-} struct185;
 
 /* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
  * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block

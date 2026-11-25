@@ -245,17 +245,6 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
- * (arg0 + 0x28, arg0 + 0x2C): the source actor (with its unique_id, to detect a reused slot)
- * plus three independent countdowns. */
-typedef struct {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ u8  id;
-    /* 0x05 */ u8  pad5;
-    /* 0x06 */ s16 flashTimer;
-    /* 0x08 */ s16 boltTimer;
-    /* 0x0A */ s16 timer2;
-} BoltSource; /* size 0xC */
 
 typedef struct {
     /* 0x00 */ TimedEffect base;

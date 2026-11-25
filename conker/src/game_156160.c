@@ -12,22 +12,6 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} Data15128CB0;
 
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -52,7 +36,7 @@ typedef struct {
     union {
         s32 index;          /* types 5, 6 */
         Cfg15128CB0 *cfg;   /* type 1 */
-        Data15128CB0 *data; /* types 7, 8, 10 */
+        CamShot *data; /* types 7, 8, 10 */
         f32 *value;         /* type 9 */
     } arg;
 } Msg15128CB0;
@@ -215,8 +199,8 @@ void func_15128CB0(Camera *cam) {
             break;
         case 8:
         {
-            Data15128CB0 *data = msg->arg.data;
-            cam->CutbackAngle = data->unkC;
+            CamShot *data = msg->arg.data;
+            cam->CutbackAngle = data->yaw;
         }
             break;
         case 9:
@@ -224,20 +208,20 @@ void func_15128CB0(Camera *cam) {
             break;
         case 10:
         {
-            Data15128CB0 *data;
+            CamShot *data;
 
             data = msg->arg.data;
-            cam->transition.duration = data->unk10;
-            if (data->unkC == 999.0f) {
+            cam->transition.duration = data->duration;
+            if (data->yaw == 999.0f) {
                 cam->transition.endYaw = cam->CharPtr->theta - 180.0f;
             } else {
-                cam->transition.endYaw = data->unkC;
+                cam->transition.endYaw = data->yaw;
             }
         }
             break;
         case 7:
         {
-            Data15128CB0 *data;
+            CamShot *data;
             f32 surface;
             Vec3f pos;
             f32 angle;
@@ -245,13 +229,13 @@ void func_15128CB0(Camera *cam) {
             f32 y;
 
             data = msg->arg.data;
-            cam->eye.x = data->unk14;
-            cam->eye.y = data->unk18;
-            cam->eye.z = data->unk1C;
-            if (data->unk0 == 0 || data->unk0 == 2) {
-                cam->focus.x = data->unk20;
-                cam->focus.y = data->unk24;
-                cam->focus.z = data->unk28;
+            cam->eye.x = data->eye.x;
+            cam->eye.y = data->eye.y;
+            cam->eye.z = data->eye.z;
+            if (data->mode == 0 || data->mode == 2) {
+                cam->focus.x = data->at.focus.x;
+                cam->focus.y = data->at.focus.y;
+                cam->focus.z = data->at.focus.z;
                 cam->FOVX = data->unk30;
                 cam->FOVY = data->unk34;
                 cam->TgetFOVX = data->unk30;
@@ -263,35 +247,35 @@ void func_15128CB0(Camera *cam) {
                 cam->AddOnPitch = 0.0f;
             } else {
                 pos = D_80089544;
-                while (data->unk20 > 180.0f) {
-                    data->unk20 -= 360.0f;
+                while (data->at.angles.sway > 180.0f) {
+                    data->at.angles.sway -= 360.0f;
                 }
-                while (data->unk24 > 180.0f) {
-                    data->unk24 -= 360.0f;
+                while (data->at.angles.pitch > 180.0f) {
+                    data->at.angles.pitch -= 360.0f;
                 }
-                while (data->unk28 > 180.0f) {
-                    data->unk28 -= 360.0f;
+                while (data->at.angles.yaw > 180.0f) {
+                    data->at.angles.yaw -= 360.0f;
                 }
-                cam->Roll = data->unk20;
-                angle = data->unk24 * 0.01745329238f;
+                cam->Roll = data->at.angles.sway;
+                angle = data->at.angles.pitch * 0.01745329238f;
                 pos.y = sinf(angle) * -pos.z;
                 pos.z = cosf(angle) * pos.z;
                 if (D_800DBFF4[0]) {
-                    cam->CameraAngle = data->unk28;
-                    cam->TrueCameraAngle = data->unk28;
+                    cam->CameraAngle = data->at.angles.yaw;
+                    cam->TrueCameraAngle = data->at.angles.yaw;
                     cam->CameraAngleRad = cam->CameraAngle * 0.01745329238f;
                     cam->TrueCameraAngleRad = cam->TrueCameraAngle * 0.01745329238f;
                 } else {
                     x = cam->CameraAngle; // matching: dead store steers register allocation
                 }
                 angle = cam->CameraAngle;
-                angle += func_15048A70(cam->CameraAngle, data->unk28) / 1.0f;
+                angle += func_15048A70(cam->CameraAngle, data->at.angles.yaw) / 1.0f;
                 angle *= 0.01745329238f;
                 pos.x = sinf(angle) * pos.z;
                 pos.z = cosf(angle) * pos.z;
-                pos.x += data->unk14;
-                pos.y += data->unk18;
-                pos.z += data->unk1C;
+                pos.x += data->eye.x;
+                pos.y += data->eye.y;
+                pos.z += data->eye.z;
                 cam->FOVX = data->unk2C;
                 cam->FOVY = data->unk30;
                 cam->TgetFOVX = data->unk2C;

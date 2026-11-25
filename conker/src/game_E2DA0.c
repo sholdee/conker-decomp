@@ -261,11 +261,6 @@ void func_150B60E0(Actor *obj, Vec3f *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->ob_matrix_ptr + 0x140);
 }
 
-typedef struct {
-    /* 0x00 */ TriggerZone *emitter;
-    /* 0x04 */ f32 spawnAccum;
-    /* 0x08 */ u8 emitterState;
-} BoltRingData;
 
 /* Effect instance whose per-type data (from 0x28) is a BoltRingData. */
 typedef struct {

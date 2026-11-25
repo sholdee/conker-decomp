@@ -20,7 +20,7 @@ extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
 extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
 
-void func_1512D560(Camera *, s32, struct168 *);
+void func_1512D560(Camera *, s32, CamShot *);
 
 /* Clears all command slots. */
 void func_15096970(void) {
@@ -60,14 +60,14 @@ s32 func_15096A68(s32 slot) {
         D_800D2DB8 = actor->target.y;
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        D_800C3600.unk0 = 1;
+        D_800C3600.mode = 1;
         D_800C3600.unk4 = 0;
-        D_800C3600.unk14 = pose->x;
-        D_800C3600.unk18 = pose->y;
-        D_800C3600.unk1C = pose->z;
-        D_800C3600.unk20 = pose->unk14;
-        D_800C3600.unk24 = pose->unkC;
-        D_800C3600.unk28 = pose->unk10;
+        D_800C3600.eye.x = pose->x;
+        D_800C3600.eye.y = pose->y;
+        D_800C3600.eye.z = pose->z;
+        D_800C3600.at.angles.sway = pose->unk14;
+        D_800C3600.at.angles.pitch = pose->unkC;
+        D_800C3600.at.angles.yaw = pose->unk10;
         D_800C3600.unk8 = 0.0f;
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &D_800C3600);
@@ -192,14 +192,14 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         pose = &pose[args[2] & 0xFFF];
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        D_800C3600.unk0 = 1;
+        D_800C3600.mode = 1;
         D_800C3600.unk4 = 0;
-        D_800C3600.unk14 = pose->x;
-        D_800C3600.unk18 = pose->y;
-        D_800C3600.unk1C = pose->z;
-        D_800C3600.unk20 = pose->unk14;
-        D_800C3600.unk24 = pose->unkC;
-        D_800C3600.unk28 = pose->unk10;
+        D_800C3600.eye.x = pose->x;
+        D_800C3600.eye.y = pose->y;
+        D_800C3600.eye.z = pose->z;
+        D_800C3600.at.angles.sway = pose->unk14;
+        D_800C3600.at.angles.pitch = pose->unkC;
+        D_800C3600.at.angles.yaw = pose->unk10;
         D_800C3600.unk8 = 0.0f;
         D_800C365C[0] = 0;
         func_1512D560(actor, 5, NULL);

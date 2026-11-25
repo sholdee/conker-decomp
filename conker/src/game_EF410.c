@@ -318,15 +318,8 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     func_15134908(&params, 0, arg4, arg5);
 }
 typedef struct {
-    f32 x;
-    f32 z;
-    f32 scale;
-    f32 y;
-} PosSub;
-
-typedef struct {
     TimedEffect base;
-    PosSub unk28;
+    DiscEmitter unk28;
 } Struct150C29F0;
 
 void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
@@ -358,7 +351,7 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
 Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 void func_150C29F0(Struct150C29F0 *emitter) {
-    PosSub *pos;
+    DiscEmitter *pos;
     ParticleEmitterDesc particle;
     f32 scaleA;
     f32 scaleB;
@@ -371,7 +364,7 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     cosine = func_151423D8(angle - 0x40);
     sine = func_151423D8(angle);
     pos = &emitter->unk28;
-    radius = func_150ADA68() * pos->scale;
+    radius = func_150ADA68() * pos->radius;
     particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
     particle.color[0] = 0;
     particle.color[1] = 0;

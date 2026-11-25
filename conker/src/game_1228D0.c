@@ -548,13 +548,6 @@ void func_150F64B0(DefParticleHead *obj) {
     func_151411C4(obj);
 }
 
-/* Data of the effect run by func_150F64DC. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 timer; /* frames until the next burst */
-} FlashBurstData;
 
 typedef struct {
     TimedEffect base;

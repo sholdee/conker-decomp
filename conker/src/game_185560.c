@@ -1229,12 +1229,12 @@ typedef struct {
     /* 0x1F */ u8 variant; /* index into D_800A636C */
 } SpawnerSource;
 
-Spawner *func_151A8B20(struct183 *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
+Spawner *func_151A8B20(EmitterDef *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
 void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
-    struct183 info;
+    EmitterDef info;
     s32 pad[2]; // matching: 8 unused frame bytes between data and info
     SpawnerData data;
     Spawner *spawner;
@@ -1242,18 +1242,18 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
 
     variant = src->variant;
     if (variant <= 0) {
-        info.unk0 = 0xF;
-        info.unk4 = (s32)src;
-        info.unk8 = D_800A636C[variant].unk0;
-        info.unkC = D_800A636C[variant].unk4;
-        info.unk10 = 0.0f;
-        info.unk14 = 0.0f;
-        info.unk18 = 0.0f;
-        info.unk1C = 0.0f;
-        info.unk20 = 0.0f;
-        info.unk24 = 0;
-        info.unk25 = -1;
-        info.unk26 = 2;
+        info.flags = 0xF;
+        info.anchor = (TriggerZone *)src;
+        info.rate = D_800A636C[variant].unk0;
+        info.rateRange = D_800A636C[variant].unk4;
+        info.pos.x = 0.0f;
+        info.pos.y = 0.0f;
+        info.pos.z = 0.0f;
+        info.bottom = 0.0f;
+        info.radius = 0.0f;
+        info.type = 0;
+        info.update = -1;
+        info.spawn = 2;
         data.types = D_800A636C[variant].data.types;
         data.settings = D_800A636C[variant].data.settings;
         spawner = func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0);

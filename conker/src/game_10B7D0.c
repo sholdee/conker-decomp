@@ -135,13 +135,6 @@ typedef struct {
     s32 ids[2];
 } TexturePair;
 
-/* Emitter state at +0x28 of func_150DE7C0's object. */
-typedef struct {
-    /* 0x00 */ s16 timer; // frames until the next particle
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 source;
-    /* 0x08 */ s32 target;
-} EmitterLink;
 
 typedef struct {
     /* 0x00 */ u8 pad0;
@@ -149,7 +142,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterLink link;
+    /* 0x28 */ ZonePairEmitter link;
 } Emitter;
 
 void *memcpy(void *, const void *, u32);
@@ -161,7 +154,7 @@ extern TexturePair D_800A0D00;
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
 void func_150DE7C0(Emitter *emitter) {
-    EmitterLink *link;
+    ZonePairEmitter *link;
     Vec3f target;
     Vec3f delta;
     f32 length;

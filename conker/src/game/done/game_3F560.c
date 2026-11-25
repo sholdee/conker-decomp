@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 void func_150120B0(s32 arg0) {
@@ -23,16 +24,17 @@ void func_150120B0(s32 arg0) {
     }
 }
 
+/* Attaches a drip emitter (func_15190770) to the actor, except in level 24. */
 void func_1501214C(Actor *arg0) {
-    struct185 tmp;
+    ActorLink tmp;
 
     if (D_800BE9F0 != 24) {
-        tmp.unk0 = arg0;
-        tmp.unk4 = arg0->unique_id;
-        tmp.unk6 = 300;
-        tmp.unk8 = 0;
+        tmp.actor = arg0;
+        tmp.actorId = arg0->unique_id;
+        tmp.timer = 300;
+        tmp.flags = 0;
         tmp.unk9 = 0;
-        tmp.unkA = 2;
+        tmp.kind = 2;
         func_15190770(&tmp, 0, 255, 1);
     }
 }

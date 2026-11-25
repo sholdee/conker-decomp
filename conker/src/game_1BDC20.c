@@ -48,16 +48,6 @@ typedef struct {
 
 extern DropKind D_800A9D40[];
 
-/* An emitter's attachment to its actor. */
-typedef struct {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 actorId;           /* actor->unique_id when attached */
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ s16 timer;
-    /* 0x8 */ u8 flags;             /* bit 0: the timer counts down */
-    /* 0x9 */ u8 pad9;
-    /* 0xA */ u8 kind;              /* D_8008FA70 index */
-} ActorLink; /* size 0xC */
 
 typedef struct DripSlot {
     /* 0x0 */ Particle *drop;

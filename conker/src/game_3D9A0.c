@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 extern u8 D_800D9946[];
@@ -17,21 +18,21 @@ void func_150104F0(void) {
 }
 
 void func_15010538(Actor *arg0) {
-    struct175 tmp;
+    BoltSource tmp;
     TimedEffect *effect;
 
     func_15161E24(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
 // FAKEMATCH but works...
 dummy_label_927029:
-    tmp.unk0 = arg0;
-    tmp.unk4 = arg0->unique_id;
-    tmp.unk6 = 0;
-    tmp.unk8 = 0;
-    tmp.unkA = 0;
+    tmp.obj = arg0;
+    tmp.id = arg0->unique_id;
+    tmp.flashTimer = 0;
+    tmp.boltTimer = 0;
+    tmp.timer2 = 0;
 
     effect = func_15149130(300, -1, 80, -1, 0, 61, 12, 255, 1);
     if (effect != NULL) {
-        memcpy(effect + 1, &tmp, 12);
+        memcpy(effect + 1, &tmp, sizeof(tmp));
     }
 }
 

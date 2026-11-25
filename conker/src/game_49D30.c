@@ -921,23 +921,23 @@ void func_1501EA18(s32 scene) {
     s32 i;
 
     player = camera_global_Cameras;
-    D_800C3600.unk0 = 1;
+    D_800C3600.mode = 1;
     D_800C3600.unk4 = scene;
-    D_800C3600.unk14 = player->eye.x;
-    D_800C3600.unk18 = player->eye.y;
-    D_800C3600.unk1C = player->eye.z;
-    D_800C3600.unk20 = 0.0f;
-    D_800C3600.unk24 = player->CameraPitch;
-    D_800C3600.unk28 = player->CameraAngle;
+    D_800C3600.eye.x = player->eye.x;
+    D_800C3600.eye.y = player->eye.y;
+    D_800C3600.eye.z = player->eye.z;
+    D_800C3600.at.angles.sway = 0.0f;
+    D_800C3600.at.angles.pitch = player->CameraPitch;
+    D_800C3600.at.angles.yaw = player->CameraAngle;
     if (D_800C3671 == 0) {
         func_1512D560(player, 7, &D_800C3600);
         if (D_800C3674 != 999.0f) {
-            D_800C3600.unkC = D_800C3674;
+            D_800C3600.yaw = D_800C3674;
             func_1512D560(player, 8, &D_800C3600);
         }
         if (D_800C3678 != 999.0f) {
-            D_800C3600.unkC = D_800C3678;
-            D_800C3600.unk10 = D_800C367C;
+            D_800C3600.yaw = D_800C3678;
+            D_800C3600.duration = D_800C367C;
             func_1512D560(player, 10, &D_800C3600);
         }
     }
@@ -1557,7 +1557,7 @@ extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
 
 // matching: going through a cast of &D_800C3600 changes IDO's address CSE in func_15020EC4
-#define MSG (*(struct168 *)&D_800C3600)
+#define MSG (*(CamShot *)&D_800C3600)
 // matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
 #define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&D_800C3958[a][i])
@@ -1632,14 +1632,14 @@ void func_15020EC4(s32 scene) {
                         tilt40 = state->unk40;
                         MSG.unk4 = scene;
                     }
-                    MSG.unk14 = state->x;
-                    MSG.unk18 = state->y;
-                    MSG.unk1C = state->z;
+                    MSG.eye.x = state->x;
+                    MSG.eye.y = state->y;
+                    MSG.eye.z = state->z;
                     if (ENT(scene, track)->targetId == 1) {
-                        MSG.unk0 = 0;
-                        MSG.unk20 = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
-                        MSG.unk24 = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        MSG.unk28 = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
+                        MSG.mode = 0;
+                        MSG.at.focus.x = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
+                        MSG.at.focus.y = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        MSG.at.focus.z = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
@@ -1650,7 +1650,7 @@ void func_15020EC4(s32 scene) {
                         if (obj == NULL) {
                             continue;
                         }
-                        MSG.unk0 = 0;
+                        MSG.mode = 0;
                         D_800C3620.x = obj->xpos;
                         D_800C3620.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
                         D_800C3620.z = obj->zpos;
@@ -1664,7 +1664,7 @@ void func_15020EC4(s32 scene) {
                         if (actor3 == NULL) {
                             continue;
                         }
-                        MSG.unk0 = 0;
+                        MSG.mode = 0;
                         D_800C3620.x = actor3->x;
                         D_800C3620.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
                         D_800C3620.z = actor3->z;
@@ -1672,11 +1672,11 @@ void func_15020EC4(s32 scene) {
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
                     } else if (ENT(scene, track)->targetId == 0) {
-                        MSG.unk0 = 1;
-                        MSG.unk20 = -state->unk14;
-                        MSG.unk24 = state->unkC;
-                        MSG.unk28 = state->unk10;
-                        MSG.unk18 = MSG.unk18 + state->yOffset;
+                        MSG.mode = 1;
+                        MSG.at.angles.sway = -state->unk14;
+                        MSG.at.angles.pitch = state->unkC;
+                        MSG.at.angles.yaw = state->unk10;
+                        MSG.eye.y = MSG.eye.y + state->yOffset;
                         MSG.unk2C = tilt3C;
                         MSG.unk30 = tilt40;
                     }
