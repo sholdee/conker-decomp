@@ -24,25 +24,31 @@ struct127 *func_15052F58(s32 index, s32 arg1) {
     return obj;
 }
 
-void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
+/*
+ * When the object linked by arg0->unk124 is falling below arg0's top (y + height * y_scale), or always if
+ * `force` is set: records it on arg0 (unk13C), copies arg0's facing angle to it and resets its state; with
+ * arg0 in interaction_state 0x20 it is also stopped and turned to face arg0's way.
+ */
+void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+                   s32 force, s32 arg9) {
     struct127 *obj;
     s32 anim;
-    s32 flag;
-    u8 *temp;
-    u16 rot;
+    s32 callF28;
+    u8 *info;
+    u16 pad; // matching: unused stack slot
     s32 state;
 
-    flag = 0;
+    callF28 = FALSE;
     anim = -1;
     if (arg0->id == 0x48) {
-        temp = func_15033E84(arg0);
-        if (temp != NULL) {
-            anim = temp[6];
+        info = func_15033E84(arg0);
+        if (info != NULL) {
+            anim = info[6];
         }
     }
     obj = &D_800CC2D0[arg0->unk124];
-    if ((arg8 != 0) || ((obj->y_position < (arg0->y_position + (arg1 * arg0->y_scale))) && (obj->y_velocity < 0.0f))) {
-        arg0->unk13C = arg0->unk124 + 0x64;
+    if (force || ((obj->y_position < arg0->y_position + height * arg0->y_scale) && (obj->y_velocity < 0.0f))) {
+        arg0->unk13C = arg0->unk124 + 100;
         if (arg9 != 0) {
             D_800D1580 = arg9;
             func_1506E5FC();
@@ -61,7 +67,7 @@ void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
                     arg0->unk101 |= arg3;
                     func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
                     func_15083568(obj, 0x79, 1.0f, 0);
-                    flag = 1;
+                    callF28 = TRUE;
                 }
             } else {
                 arg0->y_scale = 0.75f;
@@ -74,28 +80,29 @@ void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
             obj->unk76 = arg0->unk7A;
             obj->unk78 = obj->unk76;
             obj->unk7A = obj->unk76;
-            obj->unk40 = (s16)(obj->unk76 + 0x4000) * 0.005493164f;
+            obj->unk40 = (s16)(obj->unk76 + 0x4000) * 0.005493164f; // binary angle to degrees
             obj->unk31C->unk4E = state;
             obj->unk83 = 0;
             obj->disable_run = 0;
-        lbl:;
+        // matching: an empty label here makes IDO fill the branch delay slot as the original
+        end_hold:;
         } else {
             obj->unk65 = D_800C3E78 + 1;
             obj->unk5C = arg2;
             obj->unk101 |= arg3;
             obj->disable_run = 0;
         }
-        obj->immune = arg6;
+        obj->immune = immune;
         obj->unk239 = arg7;
         obj->unk31C->unk27 = 0;
         arg0->unk232 = arg5;
-        arg0->unk218 = 0;
+        arg0->unk218 = NULL;
         if (arg4 != 0) {
             func_1506160C(obj, 1, 0, 0, 0);
             obj->unk101 |= 0x40;
         }
     }
-    if (flag != 0) {
+    if (callF28) {
         func_15060F28(arg0, 0);
     }
 }
