@@ -1,11 +1,5 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
 #include "controller.h"
-
-
-s32 corrupted_init(OSPfs *pfs, __OSInodeCache *cache);
-s32 corrupted(OSPfs *pfs, __OSInodeUnit fpage, __OSInodeCache *cache);
 
 s32 osPfsChecker2(OSPfs *pfs) {
     int j;
@@ -155,8 +149,6 @@ typedef struct {
     /* 0x100 */ u8 bank;
     /* 0x101 */ u8 map[1];
 } __OSInodeCache2;
-
-s32 __osPfsRWInode(OSPfs *pfs, __OSInode *inode, u8 flag, u8 bank);
 
 s32 corrupted2(OSPfs *pfs, __OSInodeUnit fpage, __OSInodeCache2 *cache) {
     int j;

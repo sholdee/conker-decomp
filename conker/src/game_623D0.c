@@ -22,7 +22,6 @@ void func_15034F20(void) {
 }
 
 void func_150A7A48(void *, void *, void *);
-void guMtxF2L2(void *, void *);
 void func_15034728(Actor *);
 s32 func_150AD960(s32, s32, s32, s32);
 

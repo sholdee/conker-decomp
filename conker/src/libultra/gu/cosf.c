@@ -1,7 +1,6 @@
 #include <ultra64.h>
-#include "functions.h"
-#include "variables.h"
 
+/* This file's constants (file-statics in the SDK source), not defined here. */
 extern f32 D_80085EA0; /* 1 / (pi/2) */
 extern f32 D_80085EA4; /* pi/2, high part */
 extern f32 D_80085EA8; /* pi/2, low part */

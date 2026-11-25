@@ -2,12 +2,6 @@
 #include "controller.h"
 #include "siint.h"
 
-
-extern OSPifRam __osPfsPifRam;
-
-extern void __osPfsRequestData(u8);
-extern void __osPfsGetInitData(u8 *, OSContStatus *);
-
 s32 osPfsIsPlug2(OSMesgQueue *queue, u8 *pattern)
 {
     s32 ret;

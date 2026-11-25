@@ -1,9 +1,10 @@
 #include <PR/ultratypes.h>
+#include <math.h>
 
 // NOTE: <ultra64.h> is deliberately not included here. It pulls in <PR/gu.h>,
 // which contains "#pragma intrinsic(sqrtf)"; that makes IDO expand sqrtf inline
 // as sqrt.s instead of emitting the "jal sqrtf" the original code uses.
-extern f32 sqrtf(f32);
+// <math.h> declares sqrtf without the pragma.
 
 // NOTE: built with OPT_FLAGS := -O2 (no -g), see the Makefile override. The
 // original libultra was compiled without debug info; at -g3 IDO schedules the

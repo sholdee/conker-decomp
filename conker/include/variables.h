@@ -31,7 +31,6 @@ extern f32 D_8002C838;
 extern f64 D_8002C840; // double
 extern f32 D_8002C848;
 
-extern f32 __libm_qnan_f; /* SDK gu/libm_vals.s: quiet NaN */
 
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
@@ -308,10 +307,6 @@ extern f32 D_80085FE0;
 extern f32 D_80085FE4;
 extern f32 D_80085FE8;
 
-extern f32 D_80085EB0; /* 1 / (pi/2) (sinf) */
-extern f32 D_80085EB4; /* pi/2, high part */
-extern f32 D_80085EB8; /* pi/2, low part */
-extern f32 D_80085EBC;
 extern u16 D_80085EC0[];
 extern u16 D_80085F3C[];
 extern u16 D_80085FBC[];
@@ -507,8 +502,6 @@ extern f32 D_80096540;
 extern f32 D_80096560;
 extern f32 D_800968B0;
 extern s32 D_800968E0;
-
-extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
 
 extern const u16 D_8009919C[6];
 

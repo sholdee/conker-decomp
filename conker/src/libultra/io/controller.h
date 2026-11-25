@@ -167,6 +167,8 @@ void __osPfsGetInitData(u8* pattern, OSContStatus* data);
 u8 __osContAddressCrc(u16 addr);
 u8 __osContDataCrc(u8 *data);
 s32 __osPfsGetStatus(OSMesgQueue *queue, int channel);
+s32 corrupted_init(OSPfs *pfs, __OSInodeCache *cache);
+s32 corrupted(OSPfs *pfs, __OSInodeUnit fpage, __OSInodeCache *cache);
 
 extern u8 __osContLastCmd;
 extern OSTimer __osEepromTimer;

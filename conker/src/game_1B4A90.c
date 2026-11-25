@@ -36,7 +36,6 @@ extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
-extern void guMtxF2L2(MtxF mf, Mtx *m);
 extern void func_151EFE00(MtxF mtx); /* identity matrix */
 extern Vtx D_8008D538[];
 void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz);

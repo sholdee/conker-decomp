@@ -161,6 +161,8 @@ extern void guPosition(Mtx *m, float r, float p, float h, float s,
 extern void guPositionF(float mf[4][4], float r, float p, float h, float s,
 			float x, float y, float z);
 extern void guMtxF2L(float mf[4][4], Mtx *m);
+/* Conker: the game segment's copy of guMtxF2L (gu/mtxutil.c built under this name), used by gu/mtxcatl.c. */
+extern void guMtxF2L2(float mf[4][4], Mtx *m);
 extern void guMtxL2F(float mf[4][4], Mtx *m);
 extern void guMtxCatF(float m[4][4], float n[4][4], float r[4][4]);
 extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
@@ -192,6 +194,8 @@ extern float cosf(float angle);
 extern signed short sins (unsigned short angle);
 extern signed short coss (unsigned short angle);
 extern float sqrtf(float value);
+/* Conker: the quiet NaN of gu/libm_vals.s, for gu/cosf.c and gu/sinf.c (the SDK declares it in gu/guint.h). */
+extern float __libm_qnan_f;
 #ifdef __sgi
 #pragma intrinsic(sqrtf);
 #endif
