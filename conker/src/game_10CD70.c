@@ -16,9 +16,6 @@ s32 func_150ADA20(void);
 extern struct178 *D_800D3098;
 
 
-extern f32 D_800A0FB4;
-extern f32 D_800A0FB8;
-extern void *func_1513418C(void *, s32, u8, s32);
 
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
@@ -31,24 +28,6 @@ typedef struct {
 
 /* matching: the scan loops address dl by (j << 3) bytes; dl[j] would be strength-reduced */
 #define GFX_CMD(dl, j) ((GfxCmd *)(((j) << 3) + (u8 *)(dl)))
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 pad9[3];
-    void *unkC;
-    u8 unk10;
-    u8 pad11[3];
-    struct17 unk14;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    s8 unk2C;
-    u8 unk2D;
-} Struct150E0348;
 
 typedef struct {
     u8 values[3];
@@ -396,31 +375,63 @@ void func_150E0300(void) {
     }
 }
 
-void func_150E0348(void *arg0, u8 arg1, s32 arg2) {
-    Struct150E0348 sp18;
+/* Template for func_1513418C's blood-drip effect: copied to the effect's +0x10 (BloodDrip in
+ * game_161520.c). */
+typedef struct {
+    /* 0x00 */ s32 target[2];
+    /* 0x08 */ u8 ownerId;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ struct17 offset;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ f32 rate;
+    /* 0x28 */ s16 lifetime;
+    /* 0x2A */ u8 flags;
+    /* 0x2B */ u8 emitter;
+    /* 0x2C */ s8 callback;
+    /* 0x2D */ u8 unk2D;
+} BloodDripDesc;
 
-    sp18.unk0 = 0;
-    sp18.unk4 = 0;
-    sp18.unk8 = *((u8 *)arg0 + 0x3B);
-    sp18.unk10 = 0;
-    sp18.unkC = arg0;
-    sp18.unk14 = *(struct17 *)&D_800A5480;
-    sp18.unk28 = 0x12C;
-    sp18.unk2A = 0x1B;
-    sp18.unk2B = 0xB;
-    sp18.unk2C = -1;
-    sp18.unk2D = 0;
-    sp18.unk20 = D_800A0FB4;
-    sp18.unk24 = D_800A0FB8;
-    func_1513418C(&sp18, 0, arg1, arg2);
+extern void *func_1513418C(BloodDripDesc *, s32, u8, s32);
+
+/* Attaches a blood drip to the actor's bone 0. */
+void func_150E0348(struct127 *actor, u8 arg1, s32 arg2) {
+    BloodDripDesc desc;
+
+    desc.target[0] = 0;
+    desc.target[1] = 0;
+    desc.ownerId = actor->unique_id;
+    desc.bone = 0;
+    desc.owner = actor;
+    desc.offset = *(struct17 *)&D_800A5480;
+    desc.lifetime = 300;
+    desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
+    desc.emitter = 11;
+    desc.callback = -1;
+    desc.unk2D = 0;
+    desc.radius = 10.90000057f;
+    desc.rate = 0.2312099934f;
+    func_1513418C(&desc, 0, arg1, arg2);
 }
 
 void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_150E03F8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, void *arg6) {
+/* The leading bytes of an effect (cf. struct102); only unk1 and unkC are read here. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+} EffectHeader;
+
+/* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
+ * direction and pushed against the drip's movement (dx, dy, dz). */
+void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
     f32 position[3];
-    f32 direction[3];
+    f32 velocity[3];
     f32 acceleration[3];
     f32 scale;
     f32 size_random;
@@ -428,49 +439,66 @@ void func_150E03F8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, v
     u32 random_a;
     f32 alpha_random;
 
-    position[0] = arg0;
-    position[1] = arg1;
-    position[2] = arg2;
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
     random_a = func_150ADA20();
     random_b = func_150ADA20();
     alpha_random = func_150ADA68();
-    func_15143794((s16) (random_a & 0xFF), (s16) ((random_b % 65U) - 0x20), alpha_random * 5.87f, &direction[0]);
-    scale = (func_150ADA68() * 0.16900001f) + 0.186f;
+    func_15143794(random_a & 0xFF, random_b % 65U - 32, alpha_random * 5.87f, velocity);
+    scale = func_150ADA68() * 0.16900001f + 0.186f;
     acceleration[0] = 0.0f;
     acceleration[1] = 0.0f;
     acceleration[2] = 0.0f;
-    direction[0] += -arg3 * D_800BE9A8 * scale;
-    direction[1] += -arg4 * D_800BE9A8 * scale;
-    direction[2] += -arg5 * D_800BE9A8 * scale;
+    velocity[0] += -dx * D_800BE9A8 * scale;
+    velocity[1] += -dy * D_800BE9A8 * scale;
+    velocity[2] += -dz * D_800BE9A8 * scale;
     alpha_random = func_150ADA68();
     size_random = func_150ADA68();
     random_a = func_150ADA20();
     random_b = func_150ADA20();
-    func_151A26EC(&position[0], &acceleration[0], &direction[0], 0.986891f, (alpha_random * 0.23f) + -0.337f, (size_random * 200.0f) + 150.0f, (random_a % 26U) + 0x28, (random_b % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) *((u8 *)arg6 + 0xC), (s32) *((u8 *)arg6 + 1));
+    func_151A26EC(position, acceleration, velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
+                  size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
+                  52, 53, 52, effect->unkC, effect->unk1);
 }
 
-extern f32 D_800A0FD4;
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_150E05F8(void *arg0) {
-    f32 temp_fa0;
-    f32 temp_fa1;
-    f32 temp_fv0;
-    f32 temp_fv1;
-    s32 var_v0;
-    temp_fv1 = *(f32 *)((u8 *)D_800DBFF0 + 0x300) - (f32) *(s16 *)((u8 *)arg0 + 0x14);
-    temp_fa0 = *(f32 *)((u8 *)D_800DBFF0 + 0x2F8) - (f32) *(s16 *)((u8 *)arg0 + 0x10);
-    temp_fa1 = *(f32 *)((u8 *)D_800DBFF0 + 0x2FC) - (f32) *(s16 *)((u8 *)arg0 + 0x12);
-    temp_fv0 = sqrtf((temp_fv1 * temp_fv1) + ((temp_fa0 * temp_fa0) + (temp_fa1 * temp_fa1)));
-    if (temp_fv0 <= 2570.0f) {
-        var_v0 = 0xFF;
-    } else if (temp_fv0 >= D_800A0FD4) {
-        var_v0 = 0;
+/* The object func_150E05F8 fades (a handler in the 0x80089xxx object table; cf. struct131). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x74];
+    /* 0x8A */ u8 alpha;
+} DistanceFadeObject;
+
+/* matching: 3850.0f; as a literal IDO folds 1 / (3850 - 2570) to a constant */
+extern f32 D_800A0FD4;
+
+/* Sets alpha from the distance to D_800DBFF0's unk2F8 point: opaque within 2570, fading out
+ * linearly to transparent at 3850 (D_800A0FD4). */
+void func_150E05F8(DistanceFadeObject *obj) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+    s32 alpha;
+
+    dz = D_800DBFF0->unk300 - obj->z;
+    dx = D_800DBFF0->unk2F8 - obj->x;
+    dy = D_800DBFF0->unk2FC - obj->y;
+    dist = sqrtf(dz * dz + (dx * dx + dy * dy));
+    if (dist <= 2570.0f) {
+        alpha = 255;
+    } else if (dist >= D_800A0FD4) {
+        alpha = 0;
     } else {
-        var_v0 = 255 - (temp_fv0 - 2570.0f) * (1 / (D_800A0FD4 - 2570.0f)) * 255.0f;
+        alpha = 255 - (dist - 2570.0f) * (1 / (D_800A0FD4 - 2570.0f)) * 255.0f;
     }
-    *(s8 *)((u8 *)arg0 + 0x8A) = var_v0;
+    obj->alpha = alpha;
 }
 
 extern u8 D_80088988;
