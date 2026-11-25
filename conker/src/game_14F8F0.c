@@ -3,77 +3,23 @@
 #include "variables.h"
 #include "macros.h"
 
-/* File-local view of Camera (the per-player camera, layout and names as in game_14FF90.c's CameraL):
+/* File-local view of Camera (the per-player camera, layout and names as in game_14FF90.c's Camera):
    only the members used here. include/structs.h has pads over several of them. */
-typedef struct CameraL {
-    /* 0x000 */ u8 pad0[0x84];
-    /* 0x084 */ s32 unk84;
-    /* 0x088 */ u8 pad88[0x54];
-    /* 0x0DC */ s32 unkDC;
-    /* 0x0E0 */ u8 padE0[0x15C];
-    /* 0x23C */ u8 snap;                    /* nonzero: jump to targets instead of easing */
-    /* 0x23D */ u8 pad23D[0x5B];
-    /* 0x298 */ s16 playerMoved;
-    /* 0x29A */ u8 pad29A[0x22];
-    /* 0x2BC */ vertex target;              /* look-at point */
-    /* 0x2C8 */ vertex prevTarget;
-    /* 0x2D4 */ u8 pad2D4[0x24];
-    /* 0x2F8 */ vertex eye;                 /* camera position */
-    /* 0x304 */ u8 pad304[0x40];
-    /* 0x344 */ f32 unk344;
-    /* 0x348 */ f32 height;
-    /* 0x34C */ u8 pad34C[0x8];
-    /* 0x354 */ f32 unk354;
-    /* 0x358 */ u8 pad358[0x4];
-    /* 0x35C */ f32 unk35C;
-    /* 0x360 */ u8 pad360[0xA];
-    /* 0x36A */ u16 buttonsPressed;
-    /* 0x36C */ OSContPad *contPad;
-    /* 0x370 */ f32 distance;
-    /* 0x374 */ f32 targetDistance;
-    /* 0x378 */ u8 pad378[0x4];
-    /* 0x37C */ f32 yaw;                    /* degrees */
-    /* 0x380 */ u8 pad380[0x10];
-    /* 0x390 */ f32 unk390;
-    /* 0x394 */ u8 pad394[0x8];
-    /* 0x39C */ f32 yawRad;
-    /* 0x3A0 */ u8 pad3A0[0x20];
-    /* 0x3C0 */ vertex eyeVel;              /* easing velocity of eye */
-    /* 0x3CC */ u8 pad3CC[0x4];
-    /* 0x3D0 */ struct127 *player;
-    /* 0x3D4 */ u8 pad3D4[0x8];
-    /* 0x3DC */ f32 unk3DC;                 /* orbit yaw of the eye, radians */
-    /* 0x3E0 */ u8 pad3E0[0x8];
-    /* 0x3E8 */ u8 unk3E8;
-    /* 0x3E9 */ u8 pad3E9[0x1FF];
-    /* 0x5E8 */ f32 unk5E8;
-    /* 0x5EC */ f32 swayAmount;
-    /* 0x5F0 */ s32 status;
-    /* 0x5F4 */ u8 pad5F4[0x1C0];
-    /* 0x7B4 */ f32 dt;                     /* frame time scale */
-    /* 0x7B8 */ u8 pad7B8[0xB4];
-    /* 0x86C */ f32 pitchOverride;          /* degrees, 999.0f = none */
-    /* 0x870 */ u8 pad870[0x64];
-    /* 0x8D4 */ f32 yawFollowTarget;
-    /* 0x8D8 */ f32 yawFollowVel;
-    /* 0x8DC */ f32 yawFollow;              /* how fast yaw turns toward the target */
-} CameraL;
-
 extern f32 D_800894C0;
 extern vertex D_800894C8;
 
 void func_150495B0(f32 *value, f32 target, f32 *vel, f32 accel, f32 maxSpeed, f32 dt);
-void func_15123070(CameraL *camera);
-void func_15123A54(CameraL *camera);
-void func_1512E140(CameraL *camera);
-void func_1512A390(CameraL *camera);
+void func_15123070(Camera *camera);
+void func_15123A54(Camera *camera);
+void func_1512E140(Camera *camera);
+void func_1512A390(Camera *camera);
 
 #define SQ(x) ((x) * (x))
 #define DEG2RAD 0.01745329238f
 
 /* Places the eye on an orbit around the target: yaw from the player's facing (or the camera yaw),
    pitch from the player or pitchOverride, then eases it there and keeps it out of the target. */
-void func_15122440(CameraL *camera) {
+void func_15122440(Camera *camera) {
     vertex offset = D_800894C8;
     f32 horiz;
     f32 yaw;
@@ -178,7 +124,7 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
 
 /* Eases yawFollow toward a gain picked from the camera state and turns yaw by it toward the target's
    motion, then runs the per-frame camera updates. */
-void func_15122980(CameraL *camera) {
+void func_15122980(Camera *camera) {
     vertex toPrevTarget;
     vertex toTarget;
     f32 prevAngle;
@@ -191,7 +137,7 @@ void func_15122980(CameraL *camera) {
         angle = func_15048FC8((struct17 *)&toTarget);
         if (camera->playerMoved == 0) {
             camera->yawFollowTarget = 0.0f;
-        } else if ((camera->unk84 & 0x100000) || ((camera->unk390 > 180.0f) && (camera->unk390 < 270.0f))) {
+        } else if ((camera->flags & 0x100000) || ((camera->unk390 > 180.0f) && (camera->unk390 < 270.0f))) {
             camera->yawFollowTarget = 0.75f;
         } else {
             camera->yawFollowTarget = 0.5f;

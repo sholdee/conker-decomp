@@ -13,12 +13,6 @@ typedef struct {
     /* 0x10 */ f32 unk3A8Bias;
 } CamTiltPreset; // size 0x14
 
-/* Player extension block (struct127.unk31C, cached in Camera.playerExt); see game_14FF90.c. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x120];
-    /* 0x120 */ u8 unk120;
-} CamPlayerExt;
-
 extern CamTiltPreset D_800894F0[];
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
 
