@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-f32 func_1506AD30(Actor *obj, f32 time, s32 arg2);
-
 /* Advances an animation playback by rate, handling looping, hold and end callbacks. */
 void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     f32 time;

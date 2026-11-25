@@ -10,10 +10,8 @@ s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDis
 // matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
-#include "effects.h"
 
 void func_15131D4C(s32 arg0, s32 arg1);
-void func_1506BF5C(void);
 s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 func_151EF610(void);
 extern s32 D_800D187C;
@@ -129,12 +127,6 @@ struct SoundChoices {
     s32 sound3;
 };
 
-typedef struct Vec3w {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3w;
-
 /* Zero-terminated list of the event ids that run when func_1506AD30 is filtered. */
 const u8 D_80099A30[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
 
@@ -221,12 +213,9 @@ void func_1516F2F8(u8, s32, s32, s32, u8, s32);
 void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
 void func_150AFDB0(void);
 void func_150AFE64(s32);
-void func_1506E0EC(void);
-void func_1506E2CC(void);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-extern Actor *func_1507515C(Actor *);
 extern void func_151C1860(void *, s32, s32);
 void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
@@ -240,7 +229,6 @@ void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
-Actor *func_15073118(Actor *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 s32 func_1505D024(void *, s32, u16, s32);
 extern s32 func_15033BDC();
 extern void func_100100E0(void *, void *, void *, void *, void *, s32);

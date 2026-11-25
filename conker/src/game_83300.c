@@ -3,9 +3,12 @@
 // matching: the shared headers declare these with parameter types that would change the code here
 // (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
 #define func_1000F91C func_1000F91C_hdr
+#define func_1506AD30 func_1506AD30_hdr
 #include "functions.h"
 #undef func_1000F91C
+#undef func_1506AD30
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
+f32 func_1506AD30(Actor *, f32, s32, s32); /* one call passes a fourth argument */
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
 
@@ -32,7 +35,6 @@ s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
 struct HitReaction;
 void func_1505B9C4(Actor *attacker, Actor *victim, struct HitReaction *base, struct HitReaction *hit, u8 index, s32 victimSlot, u8 damageMask);
 extern void (*D_80086694[])(void *, Actor *, u8 *);
-s32 func_1506E46C(Actor *, s32 *, s32);
 struct HitReaction;
 s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct HitReaction *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern MtxF *D_800CC4A4;
@@ -2273,7 +2275,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
     }
 }
 
-f32 func_1506AD30(Actor *, f32, s32, s32);
 void func_151AE264(Actor *);
 void func_151E5FF4(void *, Actor *, u8);
 void func_15169070(s32, s32, void *, s32);
@@ -2508,7 +2509,6 @@ typedef struct {
 
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
-s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
 void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 
 /*
@@ -3552,7 +3552,6 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
     return 0;
 }
 
-s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
 void func_15060A30(s32 arg0, Actor *arg1);
 void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 void func_1507CD64(Actor *arg0, s32 arg1);

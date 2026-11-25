@@ -178,7 +178,6 @@ u8 func_15085420(Actor *obj) {
     return obj->mv->spawnIndex;
 }
 
-extern f32  func_1506AD30(Actor *, f32, s32);
 extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 extern void func_1505D6F0(Actor *, s32);
 extern void func_15005818(Camera *, Actor *, f32 *);

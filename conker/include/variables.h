@@ -505,8 +505,6 @@ extern s32 D_800968E0;
 
 extern const u16 D_8009919C[6];
 
-extern const u8 D_80099A3C[][10]; // turn-angle thresholds per row (defined in game_981E0.c)
-extern const u8 D_80099AC4[];
 // code_75400.c
 
 extern f32 D_8009A220[];

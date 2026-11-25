@@ -401,7 +401,6 @@ typedef struct MtxParts {
     s16 whole[4][4];
     u16 frac[4][4];
 } MtxParts;
-void func_15074664(void);
 void func_15060A30(s32 arg0, Actor *arg1);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
@@ -1031,7 +1030,6 @@ extern void func_1000EFB4();
 extern void func_151037DC();
 s32 func_1000F568(s32 arg0, s32 arg1);
 void func_1000FD38(void *, void *, s32);
-void func_15073FA0(void);
 ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507E7E4(void *, u8, u8, u16, s32);
 void func_1507EABC(void *);
