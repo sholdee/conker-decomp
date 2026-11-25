@@ -949,6 +949,16 @@ typedef struct {
     u8 value[2];
 } Blood356D4Kinds;
 
+/* A 2D blood splat particle spawned by func_151356D4. */
+typedef struct {
+    u8 pad0[0x10];
+    Vec2f position;
+    f32 width;
+    f32 height;
+    u8 pad20[0x50];
+    Blood356D4Motion motion;
+} BloodSplat;
+
 extern Blood356D4Kinds D_80089BA0;
 extern s32 D_80089BA4;
 extern Blood356D4Kinds D_80089BA8;
@@ -1004,7 +1014,7 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     particle.endAlpha = endAlpha;
     result = func_1515548C(&particle, 3, (s32)&data, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
-        memcpy((u8 *)result + 0x70, &motion, sizeof(motion));
+        memcpy(&((BloodSplat *)result)->motion, &motion, sizeof(motion));
         scale = (particle.width + particle.height) * 0.5f;
         count = (func_150ADA68() * 300.0f + 100.0f) * size * 0.001f;
         spark.lifetime = 50;
@@ -1062,16 +1072,6 @@ void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha
     return result;
 }
 
-
-/* A 2D blood splat particle spawned by func_151356D4. */
-typedef struct {
-    u8 pad0[0x10];
-    Vec2f position;
-    f32 width;
-    f32 height;
-    u8 pad20[0x50];
-    Blood356D4Motion motion;
-} BloodSplat;
 
 /* BloodSplat callback: grows the splat, then lets it fall; returns 0 once it leaves the area. */
 s32 func_15135BF8(BloodSplat *splat) {
@@ -1270,8 +1270,8 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     Struct15136698Local desc;
     f32 extra;
     Struct15136698Table textures;
-    s32 sp64;
-    s32 sp60;
+    s32 argB;
+    s32 argC;
     s32 value;
     s32 random1;
     s32 random0;
@@ -1310,17 +1310,17 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     desc.alpha = alpha;
     desc.unk45 = arg3;
     if (arg8 != 0) {
-        sp64 = 3;
-        sp60 = 255;
+        argB = 3;
+        argC = 255;
     } else {
-        sp64 = 0;
-        sp60 = 0;
+        argB = 0;
+        argC = 0;
     }
 
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     value = func_150ADA20();
-    particle = func_1513D594((s32)&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, sp64, sp60, 0, 4, arg9, arg10);
+    particle = func_1513D594((s32)&desc, 0, 0, 0x1A, 0, (random1 & 1) + (random0 & 1), value & 0xFF, 500.0f, 500.0f, 0, arg5, argB, argC, 0, 4, arg9, arg10);
     if (particle != 0) {
         memcpy(particle + 0x128, &extra, sizeof(extra));
     }
@@ -1438,9 +1438,9 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
     func_15134908(&desc, 0, arg4, arg5);
 }
 
-void func_151D9014(void *a0, void *a1, s32 a2, f32 a3, s32 sp10, s32 sp14,
-                     f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C,
-                     s32 sp30, s32 sp34, s32 sp38, s32 sp3C);
+void func_151D9014(void *position, void *velocity, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
+                   f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA, s32 argB,
+                   s32 argC, s32 argD, s32 argE, s32 argF);
 
 extern f32 D_800A4624; // matching: 0.001f as a literal grows the stack frame by 8
 
@@ -2448,7 +2448,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
             burst.model = D_800A4168[i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
             if (result != 0) {
-                memcpy((u8 *)result + 0x170, tag, 1);
+                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
             }
         }
     }
@@ -2659,7 +2659,7 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
                 spawn.model = D_800A41C8[i];
                 ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg4, arg5);
                 if (ret != 0) {
-                    memcpy((void *)(ret + 0x170), tag, 1);
+                    memcpy(&((BloodChunk *)ret)->unk170, tag, 1);
                 }
             }
         }
@@ -2785,7 +2785,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
             burst.model = D_800A421C[i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg3, arg4);
             if (result != 0) {
-                memcpy((u8 *)result + 0x170, tag, 1);
+                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
             }
         }
     }
@@ -3213,7 +3213,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
             burst.model = D_800A42D4[variant][i];
             result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
             if (result != 0) {
-                memcpy((u8 *)result + 0x170, tag, 1);
+                memcpy(&((BloodChunk *)result)->unk170, tag, 1);
             }
         }
     }
@@ -3361,7 +3361,7 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
             spawn.model = D_800A4328[i];
             particle = (void *)func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
             if (particle != NULL) {
-                memcpy((u8 *)particle + 0x170, &tag, 1);
+                memcpy(&((BloodChunk *)particle)->unk170, &tag, 1);
             }
         }
     }
