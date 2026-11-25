@@ -80,8 +80,9 @@ void func_150C5450(StripObj *strip) {
     func_15169824((struct102 *)strip);
 }
 
-extern void (*D_800887B8[])(void);
+extern void (*D_800887B8[])(StripObj *);
 
+/** Calls the D_800887B8 handler for unk38, or the first one when unk38 is out of range. */
 void func_150C5470(StripObj *strip) {
     s32 idx = strip->unk38;
 
@@ -90,11 +91,12 @@ void func_150C5470(StripObj *strip) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_800887B8[idx]();
+    D_800887B8[idx](strip);
 }
 
-extern void (*D_800887C0[])(void);
+extern void (*D_800887C0[])(StripObj *);
 
+/** Calls the D_800887C0 handler for unk38, or the first one when unk38 is out of range. */
 void func_150C54C0(StripObj *strip) {
     s32 idx = strip->unk38;
 
@@ -103,7 +105,7 @@ void func_150C54C0(StripObj *strip) {
     } else if (idx >= 2) {
         idx = 0;
     }
-    D_800887C0[idx]();
+    D_800887C0[idx](strip);
 }
 
 extern void func_1514EDF0(StripObj *strip, struct127 *obj);
@@ -296,54 +298,59 @@ s32 func_150C5BD4(StripObj *strip) {
     return 1;
 }
 
-void func_150C5C74(s32 arg0) {
-    func_1514D3B0(arg0, 0x15, 1, 0);
+/** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
+void func_150C5C74(struct127 *obj) {
+    func_1514D3B0((s32)obj, 0x15, 1, 0);
 }
 
-void func_150C5C9C(s32 arg0) {
-    func_1514D3B0(arg0, 0x15, 2, 0);
+/** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
+void func_150C5C9C(struct127 *obj) {
+    func_1514D3B0((s32)obj, 0x15, 2, 0);
 }
 
-extern void (*D_800887C8[])(struct102 *, s32, u8);
+/* func_150C5D0C's data; which member applies depends on the message. */
+typedef union StripMsgData {
+    struct {
+        struct127 *obj;
+        u8 uniqueId;
+    } m0; // message 0
+    struct {
+        struct127 *objA;
+        struct127 *objB;
+        u8 uniqueIdA;
+        u8 uniqueIdB;
+    } m2D; // message 0x2D
+} StripMsgData;
 
-void func_150C5CC4(struct102 *arg0, s32 arg1, u8 arg2) {
-    void (*temp)(struct102 *, s32, u8) = D_800887C8[*(u8 *)((u8 *)arg0 + 0x38)];
+extern void (*D_800887C8[])(StripObj *, StripMsgData *, u8);
 
-    if (temp != NULL) {
-        temp(arg0, arg1, arg2);
+/** Forwards a message to the D_800887C8 handler for unk38, if there is one. */
+void func_150C5CC4(StripObj *strip, StripMsgData *data, u8 msg) {
+    void (*handler)(StripObj *, StripMsgData *, u8) = D_800887C8[strip->unk38];
+
+    if (handler != NULL) {
+        handler(strip, data, msg);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA150C5D0C;
+/**
+ * Message 0: removes the strip if it targets data's character (same pointer or same unique id).
+ * Message 0x2D: retargets the strip from either of data's two characters (A, B) to the other.
+ */
+void func_150C5D0C(StripObj *strip, StripMsgData *data, u8 msg) {
+    StripTarget *target = &strip->target;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8 b4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB150C5D0C;
-
-void func_150C5D0C(struct102 *arg0, s32 arg1, u8 arg2) {
-    SubA150C5D0C *temp_v0 = (SubA150C5D0C *)((u8 *)arg0 + 0xC8);
-    ArgB150C5D0C *b = (ArgB150C5D0C *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C(arg0);
+    if (msg == 0) {
+        if (data->m0.obj == target->obj || data->m0.uniqueId == target->uniqueId) {
+            func_1516972C((struct102 *)strip);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (msg == 0x2D) {
+        if (target->obj == data->m2D.objA) {
+            target->obj = data->m2D.objB;
+            target->uniqueId = data->m2D.uniqueIdB;
+        } else if (target->obj == data->m2D.objB) {
+            target->obj = data->m2D.objA;
+            target->uniqueId = data->m2D.uniqueIdA;
         }
     }
 }
