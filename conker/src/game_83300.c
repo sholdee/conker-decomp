@@ -1446,81 +1446,89 @@ void func_15059444(struct127 *actor) {
     }
 }
 
-void func_1505959C(struct127 *arg0, s32 arg1) {
-    struct252 *temp_v0;
-    s32 *temp_v1;
+/* Attaches the actor to D_800CC2D0[hostIdx] (grabbed/carried) and starts both actors' animations. */
+void func_1505959C(struct127 *actor, s32 hostIdx) {
+    struct252 *anims;
+    s32 *animTable;
     s32 variant;
 
-    arg0->unkF8 &= 0xFF7FFFFF;
-    arg0->unk13D = arg1 + 100;
-    arg0->unk21C = 0;
-    arg0->gravity = 4.0f;
-    arg0->unk25C &= ~8;
+    actor->unkF8 &= ~0x800000;
+    actor->unk13D = hostIdx + 100;
+    actor->unk21C = 0;
+    actor->gravity = 4.0f;
+    actor->unk25C &= ~8;
 
-    D_800CC2D0[arg1].unk83 = 0xFF;
-    D_800CC2D0[arg1].disable_run = 0xFF;
+    D_800CC2D0[hostIdx].unk83 = 0xFF;
+    D_800CC2D0[hostIdx].disable_run = 0xFF;
     variant = 0;
-    if (arg0->id == 0x57) {
+    if (actor->id == 0x57) {
         variant = 1;
     }
-    if (D_800CC2D0[arg1].id == 0x9B) {
+    if (D_800CC2D0[hostIdx].id == 0x9B) {
         variant = 2;
     }
-    if (arg0->id == 0x5E) {
+    if (actor->id == 0x5E) {
         variant = 3;
     }
-    if (arg0->id == 0x3C) {
+    if (actor->id == 0x3C) {
         variant = 4;
-        D_800CC2D0[arg1].unk13C = (u8)0;
-        D_800CC2D0[arg1].unk76 = func_1505A630(arg0->x_position - D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].z_position - arg0->z_position, 0);
+        D_800CC2D0[hostIdx].unk13C = 0;
+        D_800CC2D0[hostIdx].unk76 = func_1505A630(actor->x_position - D_800CC2D0[hostIdx].x_position, D_800CC2D0[hostIdx].z_position - actor->z_position, 0);
     }
-    if (arg0->id == 0x89) {
+    if (actor->id == 0x89) {
         variant = 5;
     }
-    func_1505E650(&D_800CC2D0[arg1], D_800860C0[variant], D_800860CC[variant], 0.0f, 0.0f, 0.0f, 0);
-    arg0->stunned = 0xFE;
-    arg0->unk105 = 0;
-    arg0->unk106 = func_1505E7CC(D_800860E4[variant], arg0);
-    arg0->unk84.uh = 0xFFFF;
-    func_1505E874(D_800C3E78, arg0);
-    temp_v1 = (s32*)D_800D1588[arg0->id];
-    if (temp_v1 != 0) {
-        temp_v0 = (struct252 *)*(temp_v1 - 2);
-        if ((temp_v0 != 0) && ((temp_v0[arg0->unk106].unk15 & 2) != 0)) {
-            arg0->unk7A = D_800CC2D0[arg1].unk7A;
+    func_1505E650(&D_800CC2D0[hostIdx], D_800860C0[variant], D_800860CC[variant], 0.0f, 0.0f, 0.0f, 0);
+    actor->stunned = 0xFE;
+    actor->unk105 = 0;
+    actor->unk106 = func_1505E7CC(D_800860E4[variant], actor);
+    actor->unk84.uh = 0xFFFF;
+    func_1505E874(D_800C3E78, actor);
+    animTable = (s32 *)D_800D1588[actor->id];
+    if (animTable != NULL) {
+        anims = (struct252 *)animTable[-2];
+        if ((anims != NULL) && (anims[actor->unk106].unk15 & 2)) {
+            actor->unk7A = D_800CC2D0[hostIdx].unk7A;
         }
-        if ((temp_v0 == 0) || ((temp_v0[arg0->unk106].unk15 & 1) == 0)) {
-            arg0->unk13E = (arg0->unk7A - D_800CC2D0[arg1].unk7A) >> 8;
+        if ((anims == NULL) || !(anims[actor->unk106].unk15 & 1)) {
+            actor->unk13E = (actor->unk7A - D_800CC2D0[hostIdx].unk7A) >> 8;
         } else {
-            arg0->unk13E = 0;
+            actor->unk13E = 0;
         }
     } else {
-        arg0->unk13E = (arg0->unk7A - D_800CC2D0[arg1].unk7A) >> 8;
+        actor->unk13E = (actor->unk7A - D_800CC2D0[hostIdx].unk7A) >> 8;
     }
 }
 
-void func_150597FC(struct127 *arg0) {
-    s32 var_a1;
+/* Lets a free player in D_800CC268's mask grab the actor (see func_1505959C). */
+void func_150597FC(struct127 *actor) {
+    s32 i;
     s32 mask;
-    struct126 *temp_a2;
-    struct127 *temp_v0;
-    s32 temp_v1;
+    struct126 *movement;
+    struct127 *player;
 
     mask = D_800CC268;
-    for (var_a1 = 0; var_a1 < D_8008FD8C; var_a1++) {
-        if (((1 << var_a1) & mask) && (temp_v0 = &D_800CC2D0[var_a1], (temp_v0->unk13C == 0)) && (temp_v0->disable_run == 0) && (temp_v0->interaction_state == 1) && (temp_v0->stunned == 0) && (temp_v0->unk127 != 0xFF)) {
+    for (i = 0; i < D_8008FD8C; i++) {
+        player = &D_800CC2D0[i];
+        if (((1 << i) & mask) && (player->unk13C == 0) && (player->disable_run == 0) &&
+            (player->interaction_state == 1) && (player->stunned == 0) && (player->unk127 != 0xFF)) {
             break;
         }
     }
-    if (var_a1 != D_8008FD8C) {
-        temp_v0 = &D_800CC2D0[var_a1];
-        if (temp_v0->unk13C == 0) {
-            temp_a2 = temp_v0->unk31C;
-            if ((temp_a2->unk27 == 0) && (temp_v0->health != 0) && (arg0->unk13D == 0) && ((arg0->stunned != 0) || (arg0->unk25C & 0x1000) || (arg0->id == 0x57)) && (arg0->unk28 == 0.0f) && (temp_v0->unk28 == 0.0f) && (arg0->unk25C & 8) && (temp_a2->unk19B == 0) && ((temp_v1 = arg0->id, (temp_v1 != 0xA9)) || (*(u8 *)((u8 *)temp_v0 + 0x128) == 0)) && ((temp_v1 != 0xA8) || (*(u8 *)((u8 *)temp_v0 + 0x128) != 0))) {
-                temp_v0->unk13C = D_800C3E78 + 0x64;
-                temp_v0->xz_velocity = 0.0f;
-                *(s16 *)((u8 *)temp_a2 + 0x18) = 0;
-                func_1505959C(arg0, var_a1);
+    if (i != D_8008FD8C) {
+        player = &D_800CC2D0[i];
+        if (player->unk13C == 0) {
+            movement = player->unk31C;
+            if ((movement->unk27 == 0) && (player->health != 0) && (actor->unk13D == 0) &&
+                ((actor->stunned != 0) || (actor->unk25C & 0x1000) || (actor->id == 0x57)) &&
+                (actor->unk28 == 0.0f) && (player->unk28 == 0.0f) && (actor->unk25C & 8) &&
+                (movement->unk19B == 0) &&
+                ((actor->id != 0xA9) || (*(u8 *)&player->pad128 == 0)) &&
+                ((actor->id != 0xA8) || (*(u8 *)&player->pad128 != 0))) {
+                player->unk13C = D_800C3E78 + 100;
+                player->xz_velocity = 0.0f;
+                *(s16 *)((u8 *)movement + 0x18) = 0; /* inside struct126.pad17 */
+                func_1505959C(actor, i);
             }
         }
     }
