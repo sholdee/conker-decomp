@@ -360,102 +360,94 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
                   15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
 }
 
-typedef struct Obj151A77C0 {
-    char pad0[0x14];
-    /* 0x14 */ s32 unk14;
-    char pad18[0x2F - 0x18];
-    /* 0x2F */ u8 unk2F;
-    char pad30[0x34 - 0x30];
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    char pad3A[0x3F - 0x3A];
-    /* 0x3F */ u8 unk3F;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 unk42;
-    char pad43;
-    /* 0x44 */ u16 unk44;
-    char pad46[0x50 - 0x46];
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s16 unk58;
-    /* 0x5A */ s16 unk5A;
-} Obj151A77C0;
+/* Billboard particle created by func_15167D84 (layout as Particle in game_1944C0.c). */
+typedef struct {
+    /* 0x00 */ u8 link[0x10];
+    /* 0x10 */ void *anim;
+    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s16 frame;
+    /* 0x1E */ s16 frameStep;
+    /* 0x20 */ s16 x;
+    /* 0x22 */ s16 y;
+    /* 0x24 */ s16 z;
+    /* 0x26 */ s16 velX;
+    /* 0x28 */ s16 velZ;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ u8 subX;
+    /* 0x2D */ u8 subZ;
+    /* 0x2E */ u8 subY;
+    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
+    /* 0x30 */ s16 velY;
+    /* 0x32 */ s16 accelY;
+    /* 0x34 */ s16 width;
+    /* 0x36 */ s16 height;
+    /* 0x38 */ s16 life;        /* counts down */
+    /* 0x3A */ s8 fadeStep;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ u8 primR;
+    /* 0x3D */ u8 primG;
+    /* 0x3E */ u8 primB;
+    /* 0x3F */ u8 primA;
+    /* 0x40 */ u8 envR;
+    /* 0x41 */ u8 envG;
+    /* 0x42 */ u8 envB;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ u16 flags;
+    /* 0x46 */ u8 pad46[2];
+    /* 0x48 */ s8 onDeath;
+    /* 0x49 */ u8 pad49[7];
+} SpriteParticle; // the spawner's extra data follows at 0x50
 
-typedef struct Sub151A77C0 {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 unk4;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s16 unkA;
-} Sub151A77C0;
+#define PARTICLE_ENV_COLOR   0x1
+#define PARTICLE_CUSTOM_MODE 0x100
+#define PARTICLE_2CYCLE      0x200
 
-void func_151A77C0(Obj151A77C0 *arg0) {
-    Sub151A77C0 *s;
+/* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
+typedef struct {
+    /* 0x0 */ s16 tintStart;    /* from here the env colour follows life (callback 0x15) */
+    /* 0x2 */ s16 tintStep;
+    /* 0x4 */ s16 fadeOutStart;
+    /* 0x6 */ s16 fadeOutStep;
+    /* 0x8 */ s16 swellStart;   /* from here the size grows by swellRate per frame */
+    /* 0xA */ s16 swellRate;
+} SwellParticleData;
 
-    s = (Sub151A77C0 *)&arg0->unk50;
-    if (arg0->unk38 < arg0->unk54) {
-        arg0->unk3F = arg0->unk38 * arg0->unk56;
+/* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
+void func_151A77C0(SpriteParticle *particle) {
+    SwellParticleData *data = (SwellParticleData *)(particle + 1);
+
+    if (particle->life < data->fadeOutStart) {
+        particle->primA = particle->life * data->fadeOutStep;
     }
-    if (arg0->unk38 < s->unk8) {
-        s16 d = s->unkA * D_800BE9E4;
-        arg0->unk34 += d;
-        arg0->unk36 += d;
+    if (particle->life < data->swellStart) {
+        s16 growth = data->swellRate * D_800BE9E4;
+
+        particle->width += growth;
+        particle->height += growth;
     }
-    if (arg0->unk38 < s->unk0) {
-        arg0->unk2F = 0x15;
-        arg0->unk44 |= 0x201;
-        arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unk2;
-        arg0->unk14 = 0xC000F;
+    if (particle->life < data->tintStart) {
+        particle->callback = 0x15;
+        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_2CYCLE;
+        particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
+        particle->unk14 = 0xC000F;
     }
 }
 
+/* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
+void func_151A787C(SpriteParticle *particle) {
+    SwellParticleData *data = (SwellParticleData *)(particle + 1);
 
-typedef struct Obj151A787C {
-    char pad0[0x34];
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    char pad3A[0x3F - 0x3A];
-    /* 0x3F */ u8 unk3F;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 unk42;
-    char pad43[0x50 - 0x43];
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s16 unk58;
-    /* 0x5A */ s16 unk5A;
-} Obj151A787C;
-
-typedef struct Sub151A787C {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 unk4;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s16 unkA;
-} Sub151A787C;
-
-void func_151A787C(Obj151A787C *arg0) {
-    Sub151A787C *s;
-
-    s = (Sub151A787C *)&arg0->unk50;
-    if (arg0->unk38 < arg0->unk54) {
-        arg0->unk3F = arg0->unk38 * arg0->unk56;
+    if (particle->life < data->fadeOutStart) {
+        particle->primA = particle->life * data->fadeOutStep;
     }
-    if (arg0->unk38 < s->unk8) {
-        s16 d = s->unkA * D_800BE9E4;
-        arg0->unk34 += d;
-        arg0->unk36 += d;
+    if (particle->life < data->swellStart) {
+        s16 growth = data->swellRate * D_800BE9E4;
+
+        particle->width += growth;
+        particle->height += growth;
     }
-    arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unk2;
+    particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */
