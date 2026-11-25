@@ -77,7 +77,7 @@ typedef struct ActorEffectDef {
     /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
 } ActorEffectDef;
 
-/* A sound player voice record: init_15550.c's SndState (the audio library's sound state), as seen by game code
+/* A sound player voice record: the SndState of src/libultra/audio/init_15550.c (the audio library's sound state), as seen by game code
  * that cannot include n_libaudio.h; the sound slots of init_EB00.c (D_800425E0) point at one. */
 struct SndState {
     /* 0x00 */ struct SndState *next;

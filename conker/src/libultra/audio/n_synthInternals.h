@@ -155,6 +155,7 @@ void alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp);
 ALParam         *__n_allocParam(void);
 void            _n_freeParam(ALParam *param);
 void            _n_freePVoice(N_PVoice *pvoice);
+s32             _allocatePVoice(N_PVoice **pvoice, s16 priority);
 void            _n_collectPVoices(void);
 s32             _n_timeToSamples(s32 micros);
 s32             _n_timeToSamplesNoRound(s32 micros);
