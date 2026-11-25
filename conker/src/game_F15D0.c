@@ -117,10 +117,19 @@ extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_151C36D8(Vec3f *, s32, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
-extern Vec3f D_800A0350[];
-extern u8 D_800A0374[];
-extern Vec3f D_800A0378[];
-extern u8 D_800A03A8[];
+const Vec3f D_800A0350[3] = {
+    { 0.0f, 16.0f, 0.0f },
+    { 0.0f, 16.0f, 0.0f },
+    { 0.0f, 13.0f, 0.0f },
+};
+const u8 D_800A0374[4] = { 1, 2, 3, 0 };
+const Vec3f D_800A0378[4] = {
+    { 0.0f, 37.44779587f, 32.76682281f },
+    { 0.0f, 31.68659782f, 29.16607285f },
+    { 0.0f, 34.56719589f, 30.96644783f },
+    { 0.0f, 29.10982704f, 25.31375504f },
+};
+const u8 D_800A03A8[4] = { 1, 2, 3, 4 };
 
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
