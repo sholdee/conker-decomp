@@ -74,7 +74,9 @@ typedef struct CamPlayerExt {
     /* 0x008 */ s16 unk8;
     /* 0x00A */ u8 padA[0xC];
     /* 0x016 */ u8 unk16;
-    /* 0x017 */ u8 pad17[0x10];
+    /* 0x017 */ u8 pad17[0x5];
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8 pad20[0x7];
     /* 0x027 */ u8 unk27;
     /* 0x028 */ u8 pad28[0x26];
     /* 0x04E */ u8 unk4E;
@@ -406,6 +408,7 @@ CAMERA_CHECK(off_slotUsed, (u32)&((Camera *)0)->slotUsed == 0x20C);
 CAMERA_CHECK(off_snap, (u32)&((Camera *)0)->snap == 0x23C);
 CAMERA_CHECK(off_distanceAccel, (u32)&((Camera *)0)->distanceAccel == 0x3B4);
 CAMERA_CHECK(off_unk5FC, (u32)&((Camera *)0)->unk5FC == 0x5FC);
+CAMERA_CHECK(ext_unk1C, (u32)&((CamPlayerExt *)0)->unk1C == 0x1C);
 CAMERA_CHECK(ext_cameraZone, (u32)&((CamPlayerExt *)0)->cameraZone == 0x78);
 CAMERA_CHECK(ext_unk95, (u32)&((CamPlayerExt *)0)->unk95 == 0x95);
 CAMERA_CHECK(ext_unk9C, (u32)&((CamPlayerExt *)0)->unk9C == 0x9C);
@@ -1334,72 +1337,71 @@ void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5)
 
 #define F(p, off) (*(f32 *)((u8 *)(p) + (off)))
 
-void func_151247C0(struct108 *arg0) {
-    f32 padA;
-    f32 padB;
-    f32 padC;
-    f32 sp28;
+void func_151247C0(struct108 *camera) {
+    f32 pad[3]; // matching: three unused stack words in the frame
+    f32 sideX;
     struct127 *obj;
-    struct127 *other;
-    u8 flag;
-    f32 t;
-    f32 t2;
+    struct127 *pair;
+    CamPlayerExt *ext;
+    u8 slow;
+    f32 sideZ;
 
-    if (arg0->unk7F4 == 0) {
-        obj = arg0->unk3D4;
-        flag = (obj != NULL) ? (*((u8 *)obj + 0x95) | *(s32 *)((u8 *)obj + 0x9C)) : 0;
-        if (flag) {
-            arg0->unk674 = 0.25f;
+    if (CAM->transition.state == 0) {
+        ext = CAM->playerExt;
+        slow = (ext != NULL) ? (ext->unk9C | ext->unk95) : 0;
+        if (slow) {
+            CAM->followRateTarget = 0.25f;
         } else {
-            arg0->unk674 = 1.0f;
+            CAM->followRateTarget = 1.0f;
         }
-        if (arg0->unk23C) {
-            arg0->unk670 = arg0->unk674;
-            F(arg0, 0x678) = 0;
+        if (CAM->snap) {
+            CAM->followRate = CAM->followRateTarget;
+            CAM->followRateVel = 0;
         } else {
-            func_150495B0(&arg0->unk670, arg0->unk674, &F(arg0, 0x678), F(arg0, 0x3B4) * 0.25f, F(arg0, 0x3B8) * 0.25f, arg0->unk7B4);
+            func_150495B0(&CAM->followRate, CAM->followRateTarget, &CAM->followRateVel,
+                          CAM->distanceAccel * 0.25f, CAM->distanceMaxSpeed * 0.25f, CAM->dt);
         }
-        if (arg0->unk244) {
-            if (arg0->unk23C) {
-                obj = arg0->unk3D0;
-                other = (struct127 *)arg0->unk248;
-                arg0->unk2A4 = (obj->x_position + other->x_position) * 0.5f;
-                arg0->unk2A8 = (obj->y_position + other->y_position) * 0.5f;
-                F(arg0, 0x2AC) = (obj->z_position + other->z_position) * 0.5f;
+        if (CAM->pairIndex) {
+            if (CAM->snap) {
+                obj = CAM->player;
+                pair = CAM->pairObj;
+                CAM->focus.x = (obj->x_position + pair->x_position) * 0.5f;
+                CAM->focus.y = (obj->y_position + pair->y_position) * 0.5f;
+                CAM->focus.z = (obj->z_position + pair->z_position) * 0.5f;
             } else {
-                obj = arg0->unk3D0;
-                other = (struct127 *)arg0->unk248;
-                arg0->unk2A4 += (((obj->x_position + other->x_position) * 0.5f) - arg0->unk2A4) * arg0->unk670;
-                arg0->unk2A8 = (obj->y_position + other->y_position) * 0.5f;
-                F(arg0, 0x2AC) += (((obj->z_position + other->z_position) * 0.5f) - F(arg0, 0x2AC)) * arg0->unk670;
+                obj = CAM->player;
+                pair = CAM->pairObj;
+                CAM->focus.x += (((obj->x_position + pair->x_position) * 0.5f) - CAM->focus.x) * CAM->followRate;
+                CAM->focus.y = (obj->y_position + pair->y_position) * 0.5f;
+                CAM->focus.z += (((obj->z_position + pair->z_position) * 0.5f) - CAM->focus.z) * CAM->followRate;
             }
         } else {
-            if (arg0->unk23C) {
-                obj = arg0->unk3D0;
-                arg0->unk2A4 = obj->x_position;
-                F(arg0, 0x2AC) = obj->z_position;
+            if (CAM->snap) {
+                obj = CAM->player;
+                CAM->focus.x = obj->x_position;
+                CAM->focus.z = obj->z_position;
             } else {
-                obj = arg0->unk3D0;
-                arg0->unk2A4 += (obj->x_position - arg0->unk2A4) * arg0->unk670;
-                F(arg0, 0x2AC) += (obj->z_position - F(arg0, 0x2AC)) * arg0->unk670;
+                obj = CAM->player;
+                CAM->focus.x += (obj->x_position - CAM->focus.x) * CAM->followRate;
+                CAM->focus.z += (obj->z_position - CAM->focus.z) * CAM->followRate;
             }
-            arg0->unk2A8 = obj->y_position;
+            CAM->focus.y = obj->y_position;
         }
-        if (F(arg0, 0x994) != 0.0f || F(arg0, 0x99C) != 0.0f) {
-            if (arg0->unk23C) {
-                F(arg0, 0x994) = F(arg0, 0x99C);
-                F(arg0, 0x998) = 0;
+        if (CAM->sideOffset != 0.0f || CAM->sideOffsetTarget != 0.0f) {
+            if (CAM->snap) {
+                CAM->sideOffset = CAM->sideOffsetTarget;
+                CAM->sideOffsetVel = 0;
             } else {
-                func_150495B0(&F(arg0, 0x994), F(arg0, 0x99C), &F(arg0, 0x998), 4.0f, 6.0f, arg0->unk7B4);
+                func_150495B0(&CAM->sideOffset, CAM->sideOffsetTarget, &CAM->sideOffsetVel, 4.0f, 6.0f, CAM->dt);
             }
-            sp28 = F(arg0, 0x994) * sinf(arg0->unk39C - D_800A34FC);
-            t = F(arg0, 0x994) * cosf(arg0->unk39C - D_800A3500);
-            arg0->unk2A4 += sp28;
-            F(arg0, 0x2AC) += t;
+            sideX = CAM->sideOffset * sinf(CAM->yawRad - 1.5707963705062866f);
+            sideZ = CAM->sideOffset * cosf(CAM->yawRad - 1.5707963705062866f);
+            CAM->focus.x += sideX;
+            CAM->focus.z += sideZ;
         }
-        arg0->unk2BC = arg0->unk2A4;
-        arg0->unk2C4 = F(arg0, 0x2AC);
-        func_15125594(arg0);
+        CAM->target.x = CAM->focus.x;
+        CAM->target.z = CAM->focus.z;
+        func_15125594(camera);
     }
 }
 
@@ -1442,131 +1444,124 @@ void func_15124B18(struct108 *camera) {
     }
 }
 
-void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-void func_1507E1D0(void *, f32 *, f32 *, f32 *);
+void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
 
-void func_15124C38(void *arg0, f32 *arg1) {
-    f32 target;
+void func_15124C38(struct108 *camera, f32 *outY) {
+    f32 goalY;
     f32 factor;
     f32 height;
 
-    if ((*(u16 *)((u8 *)arg0 + 0x7F4) == 0) || (arg1 != 0)) {
-        if ((*(u8 **)((u8 *)arg0 + 0x3D4)) != NULL) {
-            if (((*(u8 **)((u8 *)arg0 + 0x3D4))[0x4E] & 0xF) == 1) {
-                if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
-                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3504;
+    if ((CAM->transition.state == 0) || (outY != 0)) {
+        if (CAM->playerExt != NULL) {
+            if ((CAM->playerExt->unk4E & 0xF) == 1) {
+                if (CAM->mode & 0x100) {
+                    height = CAM->playerExt->unk114 * 0.65f;
                 } else {
-                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3508;
+                    height = CAM->playerExt->unk114 * 0.55f;
                 }
-            } else if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
-                if (*((u8 *)arg0 + 0x23E) == 0) {
-                    if (*(f32 *)((u8 *)arg0 + 0x77C) < -15.0f) {
-                        height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A350C + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+            } else if (CAM->mode & 0x100) {
+                if (CAM->zone == 0) {
+                    if (CAM->unk77C < -15.0f) {
+                        height = CAM->player->unkCC + CAM->playerExt->unk114 * 0.9f;
                     } else {
-                        height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * 0.75f + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                        height = CAM->player->unkCC + CAM->playerExt->unk114 * 0.75f;
                     }
                 } else {
-                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3510 + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                    height = CAM->player->unkCC + CAM->playerExt->unk114 * 0.85f;
                 }
-            } else if ((*((u8 *)arg0 + 0x23C) == 0) && (*((u8 *)arg0 + 0x600) != 0)) {
-                height = (f32)*(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+            } else if ((CAM->snap == 0) && (CAM->blocked != 0)) {
+                height = CAM->player->unkCC + (f32)CAM->playerExt->unk114;
             } else {
-                height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * 0.75f + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                height = CAM->player->unkCC + CAM->playerExt->unk114 * 0.75f;
             }
-            if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x100) {
+            if (CAM->status & 0x100) {
                 height += 50.0f;
-            } else if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x200) {
+            } else if (CAM->status & 0x200) {
                 height += 150.0f;
-            } else if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x800) {
+            } else if (CAM->status & 0x800) {
                 height = 135.0f;
             }
         } else {
-            s16 sp52;
-            s16 sp50;
-            s16 sp4E;
+            s16 top;
+            s16 unused1;
+            s16 unused2;
 
-            func_1507C3E0(*(void **)((u8 *)arg0 + 0x3D0), &sp52, &sp50, &sp4E);
-            height = sp52;
+            func_1507C3E0(CAM->player, &top, &unused1, &unused2);
+            height = top;
         }
-        if ((*(u8 **)((u8 *)arg0 + 0x3D4))[0x120] != 0) {
-            f32 sp48;
-            f32 sp44;
-            f32 sp40;
+        if (CAM->playerExt->unk120 != 0) {
+            f32 z;
+            f32 y;
+            f32 x;
 
-            func_1507E1D0(*(void **)((u8 *)arg0 + 0x3D0), &sp40, &sp44, &sp48);
-            func_150495B0((f32 *)((u8 *)arg0 + 0x2C0), sp44, (f32 *)((u8 *)arg0 + 0x2A0), 4.0f, 8.0f,
-                          *(f32 *)((u8 *)arg0 + 0x7B4));
+            func_1507E1D0(CAM->player, &x, &y, &z);
+            func_150495B0(&CAM->target.y, y, &CAM->targetYVel, 4.0f, 8.0f, CAM->dt);
             return;
         }
         {
-            f32 speed;
-            f32 limit;
+            f32 accel;
+            f32 maxSpeed;
 
-            if (((*((u8 *)arg0 + 0x23E) == 0xC) || (*((u8 *)arg0 + 0x23E) == 9) || (*((u8 *)arg0 + 0x23E) == 0x38) ||
-                 (*((u8 *)arg0 + 0x23E) == 0x39) || (*((u8 *)arg0 + 0x23E) == 0x37) || (*((u8 *)arg0 + 0x23E) == 0x3B) ||
-                 (*((u8 *)arg0 + 0x23E) == 0x12) || (*((u8 *)arg0 + 0x23E) == 0x15) || (*((u8 *)arg0 + 0x23E) == 0x26) ||
-                 (*((u8 *)arg0 + 0x23E) == 0x3A)) &&
-                (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100)) {
+            if (((CAM->zone == 0xC) || (CAM->zone == 9) || (CAM->zone == 0x38) || (CAM->zone == 0x39) ||
+                 (CAM->zone == 0x37) || (CAM->zone == 0x3B) || (CAM->zone == 0x12) || (CAM->zone == 0x15) ||
+                 (CAM->zone == 0x26) || (CAM->zone == 0x3A)) &&
+                (CAM->mode & 0x100)) {
                 height += 30.0f;
             }
-            if ((*(s32 *)((u8 *)arg0 + 0x2C) & 0x80) || (func_15125490(arg0) != 0)) {
-                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + height * 0.25f;
-            } else if (*(s32 *)((u8 *)arg0 + 0x84) & 0x20000000) {
-                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
-            } else if ((D_800C3671 != 0) || ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x137] != 0) ||
-                       (*(u16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x84) == 0x194) ||
-                       ((*(u8 **)((u8 *)arg0 + 0x3D0))[0xAD] == 1)) {
-                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + height;
-            } else if ((D_800A3514 == *(f32 *)((u8 *)arg0 + 0x360)) && !(*(s32 *)((u8 *)arg0 + 0x84) & 0x20000000) &&
-                       !(*(s32 *)((u8 *)arg0 + 0x84) & 0x200000) &&
-                       (*(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) < 170.0f) &&
-                       (300.0f < *(f32 *)((u8 *)arg0 + 0x370))) {
-                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
+            if ((CAM->mode & 0x80) || (func_15125490(camera) != 0)) {
+                goalY = CAM->player->y_position + height * 0.25f;
+            } else if (CAM->unk84 & 0x20000000) {
+                goalY = CAM->player->unk180 + height;
+            } else if ((D_800C3671 != 0) || (PLAYER_UNK137(CAM->player) != 0) ||
+                       (CAM->player->unk84.uh == 0x194) || (CAM->player->in_water == 1)) {
+                goalY = CAM->player->y_position + height;
+            } else if ((-10000.0f == CAM->unk360) && !(CAM->unk84 & 0x20000000) && !(CAM->unk84 & 0x200000) &&
+                       (CAM->player->unk28 < 170.0f) && (300.0f < CAM->distance)) {
+                goalY = CAM->player->unk180 + height;
             } else {
-                factor = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) * D_800A3518;
+                factor = CAM->player->unk28 * (1.0f / 300.0f);
                 factor = (factor < 0.0f) ? 0.0f : ((1.0f < factor) ? 1.0f : factor);
-                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) * factor +
-                         *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
+                goalY = CAM->player->unk180 + CAM->player->unk28 * factor + height;
             }
-            if ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x102] != 0) {
-                if (*(f32 *)((u8 *)arg0 + 0x370) < 100.0f) {
-                    if (*(f32 *)((u8 *)arg0 + 0x2FC) < *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18)) {
-                        target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) - 10.0f;
+            if (CAM->player->unk102 != 0) {
+                if (CAM->distance < 100.0f) {
+                    if (CAM->eye.y < CAM->player->y_position) {
+                        goalY = CAM->player->y_position - 10.0f;
                     } else {
-                        target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + 10.0f;
+                        goalY = CAM->player->y_position + 10.0f;
                     }
                 } else {
-                    target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18);
+                    goalY = CAM->player->y_position;
                 }
             }
-            if (arg1 != 0) {
-                *arg1 = target;
+            if (outY != 0) {
+                *outY = goalY;
                 return;
             }
-            if (*((u8 *)arg0 + 0x23C) != 0) {
-                *(f32 *)((u8 *)arg0 + 0x2C0) = target;
-                *(f32 *)((u8 *)arg0 + 0x2A0) = 0.0f;
+            if (CAM->snap != 0) {
+                CAM->target.y = goalY;
+                CAM->targetYVel = 0.0f;
                 return;
             }
-            if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x80) {
-                speed = 5.0f;
-                limit = 8.0f;
-            } else if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
-                speed = 5.0f;
-                limit = 9.0f;
-            } else if ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x102] != 0) {
-                speed = 7.0f;
-                limit = 9.0f;
+            if (CAM->status & 0x80) {
+                accel = 5.0f;
+                maxSpeed = 8.0f;
+            } else if (CAM->mode & 0x100) {
+                accel = 5.0f;
+                maxSpeed = 9.0f;
+            } else if (CAM->player->unk102 != 0) {
+                accel = 7.0f;
+                maxSpeed = 9.0f;
             } else {
-                speed = 4.0f;
-                limit = 8.0f;
+                accel = 4.0f;
+                maxSpeed = 8.0f;
             }
-            if ((*(s32 *)((u8 *)arg0 + 0x84) & 0x200000) && (target < *(f32 *)((u8 *)arg0 + 0x2CC))) {
-                speed += speed;
-                limit += limit;
+            if ((CAM->unk84 & 0x200000) && (goalY < CAM->prevTarget.y)) {
+                accel += accel;
+                maxSpeed += maxSpeed;
             }
-            func_150495B0((f32 *)((u8 *)arg0 + 0x2C0), target, (f32 *)((u8 *)arg0 + 0x2A0), speed, limit,
-                          *(f32 *)((u8 *)arg0 + 0x7B4));
+            func_150495B0(&CAM->target.y, goalY, &CAM->targetYVel, accel, maxSpeed, CAM->dt);
         }
     }
 }
