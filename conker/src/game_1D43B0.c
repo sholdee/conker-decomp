@@ -19,26 +19,13 @@ typedef struct {
     /* 0xC */ s16 landPuffLifeRange;
 } DebrisData;
 
-/* A live func_15132A4C particle (layout as Particle in game_15F680.c). */
+/* A debris piece: a ModelParticle with DebrisData. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x10];
-    /* 0x010 */ f32 radius;
-    /* 0x014 */ f32 elasticity;
-    /* 0x018 */ f32 sizeXZ;
-    /* 0x01C */ f32 sizeY;
-    /* 0x020 */ Vec3f rot;
-    /* 0x02C */ Vec3f scale;
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f rotVel;
-    /* 0x05C */ f32 gravity;
-    /* 0x060 */ u32 flags;
-    /* 0x064 */ s16 lifetime;
-    /* 0x066 */ u8 pad66[0x170 - 0x66];
+    /* 0x000 */ ModelParticle head;
     /* 0x170 */ DebrisData debris;
-} Particle;
+} BloodDebrisParticle;
 
-extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
+extern BloodDebrisParticle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*
@@ -59,7 +46,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     f32 sinPitch;
     f32 cosPitch;
     f32 dist;
-    Particle *particle;
+    BloodDebrisParticle *particle;
 
     count = emitter->count;
     spawn.scale.x = 1.0f;
@@ -149,9 +136,9 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             DebrisBloodTrail *trail;
             data = &particle->debris;
             memcpy(data, &debris, sizeof(DebrisData));
-            trailDesc.x = &particle->pos.x;
-            trailDesc.y = &particle->pos.y;
-            trailDesc.z = &particle->pos.z;
+            trailDesc.x = &particle->head.pos.x;
+            trailDesc.y = &particle->head.pos.y;
+            trailDesc.z = &particle->head.pos.z;
             trailDesc.radius = 15.0f * spawn.sizeY;
             trailDesc.lifetime = 300;
             trailDesc.flags = 0;
@@ -168,10 +155,10 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
 }
 
 /* Particle update2Fn of the debris pieces: drops the blood trail once the piece starts fading out. */
-s32 func_151A73EC(Particle *particle) {
+s32 func_151A73EC(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
-    if (particle->lifetime < 32) {
+    if (particle->head.lifetime < 32) {
         if (data->trail != NULL) {
             func_1516972C(&data->trail->trail.header);
             data->trail = NULL;
@@ -187,44 +174,44 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
  * Particle floorHitFn of the debris pieces. A slow landing stops the piece (and starts its fade-out),
  * optionally with a puff of func_1514AB5C particles; a fast one bounces it.
  */
-s32 func_151A743C(Particle *particle, f32 x, f32 y, f32 z, f32 floorY) {
+s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     DebrisData *data;
     u8 puffFlag;
 
     data = &particle->debris;
-    particle->pos.y = particle->radius + floorY;
+    particle->head.pos.y = particle->head.radius + floorY;
     if (data->trail != NULL) {
         func_1516972C(&data->trail->trail.header);
         data->trail = NULL;
     }
-    if (data->stopSpeed < particle->vel.y) {
-        particle->flags &= ~7;
-        particle->flags &= ~8;
-        particle->flags &= ~0x40;
-        particle->flags &= ~0x20;
-        particle->vel.x = 0.0f;
-        particle->vel.y = 0.0f;
-        particle->vel.z = 0.0f;
-        if (particle->lifetime > 32) {
-            particle->lifetime = 32;
+    if (data->stopSpeed < particle->head.vel.y) {
+        particle->head.flags &= ~7;
+        particle->head.flags &= ~8;
+        particle->head.flags &= ~0x40;
+        particle->head.flags &= ~0x20;
+        particle->head.vel.x = 0.0f;
+        particle->head.vel.y = 0.0f;
+        particle->head.vel.z = 0.0f;
+        if (particle->head.lifetime > 32) {
+            particle->head.lifetime = 32;
         }
         if (data->landPuffs) {
             puffFlag = FALSE;
             if (data->landPuffFlag) {
                 puffFlag = TRUE;
             }
-            func_1514AB5C(x, floorY, z, particle->sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
-                          particle->sizeXZ, particle->sizeXZ * 0.5f,
-                          particle->sizeXZ, particle->sizeXZ * 0.5f,
+            func_1514AB5C(x, floorY, z, particle->head.sizeXZ * 35.0f, func_150ADA20() % 3 + 2,
+                          particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
+                          particle->head.sizeXZ, particle->head.sizeXZ * 0.5f,
                           data->landPuffLifeBase, data->landPuffLifeRange, puffFlag);
         }
     } else {
-        particle->vel.x *= particle->elasticity;
-        particle->vel.y = -particle->vel.y * particle->elasticity;
-        particle->vel.z *= particle->elasticity;
-        particle->rotVel.x *= particle->elasticity;
-        particle->rotVel.y *= particle->elasticity;
-        particle->rotVel.z *= particle->elasticity;
+        particle->head.vel.x *= particle->head.elasticity;
+        particle->head.vel.y = -particle->head.vel.y * particle->head.elasticity;
+        particle->head.vel.z *= particle->head.elasticity;
+        particle->head.rotVel.x *= particle->head.elasticity;
+        particle->head.rotVel.y *= particle->head.elasticity;
+        particle->head.rotVel.z *= particle->head.elasticity;
     }
     return 1;
 }
@@ -318,7 +305,7 @@ void func_151A787C(BillboardParticle *particle) {
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */
-void func_151A7908(Particle *particle) {
+void func_151A7908(BloodDebrisParticle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {

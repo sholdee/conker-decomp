@@ -30,13 +30,8 @@ s32 func_150C1A2C(s32 arg0, s32 arg1) {
     return 7;
 }
 
-/* A live func_15132A4C particle; this file's particles keep 4 bytes of extra data at 0x170. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x170];
-    /* 0x170 */ f32 unk170;
-} Particle;
 
-Particle *func_15132A4C(ParticleSpawn *spawn, s32, s32, s32 extraSize, u8, s32);
+FloorParticle *func_15132A4C(ParticleSpawn *spawn, s32, s32, s32 extraSize, u8, s32);
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, s32 arg7, s32 arg8);
@@ -54,7 +49,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     f32 speed;
     f32 cosine;
     f32 sine;
-    Particle *particle;
+    FloorParticle *particle;
     u32 count;
     u8 startAngle;
 
@@ -115,7 +110,7 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
         spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
         particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
-            particle->unk170 = actor->floorY;
+            particle->floorY = actor->floorY;
         }
     }
 }

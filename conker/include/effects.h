@@ -221,7 +221,7 @@ typedef struct ParticleDesc6C {
 } ParticleDesc6C;
 
 /* Spawn template of a model (debris) particle passed to func_15132A4C (game_15F680.c):
- * the layout of that Particle's bytes 0x10..0x8B. */
+ * the layout of a ModelParticle's bytes 0x10..0x8B. */
 typedef struct ParticleSpawn {
     /* 0x00 */ f32 radius;
     /* 0x04 */ f32 elasticity;
@@ -337,6 +337,76 @@ typedef struct ParticleSpawn80 {
     /* 0x78 */ s32 sound;
     /* 0x7C */ u8 pad7C[0x4];
 } ParticleSpawn80;
+
+/* A pooled model (physics) particle of game_15F680.c (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are
+ * copied from the spawn template (ParticleSpawn) passed to func_1513264C; the u8 callback fields index the
+ * D_8008xxxx handler tables. Its kind's data, of the size passed to func_1513264C, follows it at 0x170
+ * (MODEL_PARTICLE_DATA); a kind's own type is a ModelParticle followed by that data. */
+typedef struct ModelParticle {
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ f32 radius;
+    /* 0x014 */ f32 elasticity;
+    /* 0x018 */ f32 sizeXZ;
+    /* 0x01C */ f32 sizeY;
+    /* 0x020 */ Vec3f rot;
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
+    /* 0x05C */ f32 gravity;
+    /* 0x060 */ u32 flags;
+    /* 0x064 */ s16 lifetime;
+    /* 0x066 */ u16 model;
+    /* 0x068 */ u8 variant;
+    /* 0x069 */ u8 pad69[3];
+    /* 0x06C */ s16 *unk6C;
+    /* 0x070 */ u8 alpha;
+    /* 0x071 */ u8 updateFn;
+    /* 0x072 */ u8 update2Fn;
+    /* 0x073 */ u8 floorHitFn;
+    /* 0x074 */ u8 floorType3Fn;
+    /* 0x075 */ u8 wallHitFn;
+    /* 0x076 */ u8 destroyFn;
+    /* 0x077 */ u8 squashFn;
+    /* 0x078 */ u8 matrixFn;
+    /* 0x079 */ s8 drawFn;
+    /* 0x07A */ u8 unk7A;
+    /* 0x07B */ u8 pad7B;
+    /* 0x07C */ struct Actor *owner;
+    /* 0x080 */ u8 ownerId;
+    /* 0x081 */ u8 pad81;
+    /* 0x082 */ s16 fadeStart;
+    /* 0x084 */ s16 fadeRate;
+    /* 0x086 */ u8 pad86[6];
+    /* 0x08C */ struct ParticleNode *node;
+    /* 0x090 */ Mtx mtx[2];
+    /* 0x110 */ CollisionHit floor;
+    /* 0x134 */ Vec3f squashOrigin;
+    /* 0x140 */ f32 speed;
+    /* 0x144 */ f32 invSpeed;
+    /* 0x148 */ u8 hitFlags;
+    /* 0x149 */ u8 squashPhase;
+    /* 0x14A */ s8 squashAngle;
+    /* 0x14B */ u8 pad14B;
+    /* 0x14C */ s32 unk14C;
+    /* 0x150 */ u8 unk150;
+    /* 0x151 */ u8 pad151[3];
+    /* 0x154 */ s32 unk154[4]; // allocations held as s32 (a pointer type changes func_151325C8's code)
+    /* 0x164 */ s32 unk164;
+    /* 0x168 */ s32 unk168;
+    /* 0x16C */ u8 pad16C[4];
+} ModelParticle; /* size 0x170 */
+
+/* The kind's data that follows a ModelParticle. */
+#define MODEL_PARTICLE_DATA(particle) ((u8 *)((particle) + 1))
+
+/* A ModelParticle whose data is the height of the floor below it when it was spawned (the droplets of
+ * game_1B81D0.c, the dust of game_EE710.c and game_EEE70.c). */
+typedef struct FloorParticle {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ f32 floorY;
+} FloorParticle;
+
 
 /* A particle's width and height, copied as one struct by some callers. */
 typedef struct ParticleSize {
