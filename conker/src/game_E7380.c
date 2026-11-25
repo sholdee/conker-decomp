@@ -7,8 +7,6 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
-
-
 /* A collision triangle as func_150AC9C0 reports it: three s16 xyz vertices. */
 typedef struct {
     s16 coords[9];
@@ -18,8 +16,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s16 countBase;
     /* 0x02 */ s16 countRange;
-    /* 0x04 */ struct17 position;
-    /* 0x10 */ struct17 normal;
+    /* 0x04 */ vertex position;
+    /* 0x10 */ vertex normal;
     /* 0x1C */ SurfaceTriangle triangle;
     /* 0x30 */ f32 spread;
     /* 0x34 */ u8 unk34;
@@ -112,9 +110,9 @@ extern void func_151511FC(SurfaceBurstConfig *, u8, s32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
- * the previous position and, on a wall hit, spawns a burst of particles off the hit triangle (plus a
+ * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
- * at func_151E7EF8.
+ * at func_151E7EF8. Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
 void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
@@ -139,7 +137,7 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         f32 dz;
         f32 dy;
         f32 dx;
-        struct17 hit;
+        vertex hit;
         SurfaceTriangle triangle;
         s32 hitObject;
         SpriteDef sprite;
@@ -149,8 +147,8 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         dx = -(actor->x_position - prevX);
         dy = 0.0f;
         dz = -(actor->z_position - prevZ);
-        if (func_150AC9C0(actor->x_position, rayY, actor->z_position, dx, dy, dz, NULL, &triangle, &hit.unk0,
-                          &hit.unk4, &hit.unk8, NULL, &hitObject, NULL, 0.0f) == 0) {
+        if (func_150AC9C0(actor->x_position, rayY, actor->z_position, dx, dy, dz, NULL, &triangle, &hit.x,
+                          &hit.y, &hit.z, NULL, &hitObject, NULL, 0.0f) == 0) {
             return;
         }
         if (func_15145C90(hitObject) != 0) {
@@ -171,16 +169,16 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
             sprite.unk17 = 7;
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
-            func_1513C650((s32)&sprite, 0, 0, (s32)&triangle, hit.unk0, hit.unk4, hit.unk8,
+            func_1513C650((s32)&sprite, 0, 0, (s32)&triangle, hit.x, hit.y, hit.z,
                           (func_150ADA68() * 20.0f) + 40.0f, (func_150ADA68() * 20.0f) + 40.0f, func_150ADA20() & 0xFF,
                           ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1), 3, 0xFF, 0, arg3, arg4);
         }
         burst.countBase = 15;
         burst.countRange = 10;
         burst.position = hit;
-        burst.normal.unk0 = -dx;
-        burst.normal.unk4 = -dy;
-        burst.normal.unk8 = -dz;
+        burst.normal.x = -dx;
+        burst.normal.y = -dy;
+        burst.normal.z = -dz;
         burst.triangle = triangle;
         burst.spread = 675.0f;
         burst.scaleBase = 7.0f;
