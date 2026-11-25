@@ -78,9 +78,9 @@ typedef struct {
 extern void *func_15130374(void *, u8, s32, u8, s32);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void *func_151602C0(void *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15143794(s16, s16, f32, f32 *);
+void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
 
-void func_150E9890(f32 *arg0, f32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
+void func_150E9890(vertex *arg0, vertex *arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Spawn150E9890 spawn;
     s32 r0;
@@ -160,7 +160,7 @@ void func_150E9890(f32 *arg0, f32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
         p.unk60 = (func_150ADA20() % 76U) + 0xB4;
         r0 = func_150ADA20();
         r1 = func_150ADA20();
-        func_15143794((s16)(r0 & 0xFF), (s16)-(r1 % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.009999999776f, p.vel);
+        func_15143794((s16)(r0 & 0xFF), (s16)-(r1 % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.009999999776f, (vertex *)p.vel);
         p.scaleXZ = p.scaleY = ((func_150ADA68() * 3047.0f) + 1016.0f) * 9.999999747e-05f * arg2;
         p.unk4C = ((func_150ADA68() * 99.0f) + -206.0f) * 0.009999999776f;
         p.unk40 = (func_150ADA68() * 101.0f) + -49.0f;
@@ -172,58 +172,53 @@ void func_150E9890(f32 *arg0, f32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
     hdr.unk1 = -1;
     hdr.unk2 = (func_150ADA20() % 13U) + 8;
     hdr.unk4 = 0;
-    hdr2.unk0 = arg0[0];
-    hdr2.unk4 = arg0[1];
-    hdr2.unk8 = arg0[2];
+    hdr2.unk0 = arg0->x;
+    hdr2.unk4 = arg0->y;
+    hdr2.unk8 = arg0->z;
     func_151602C0(&hdr, &hdr2, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
 
-void func_1514470C(void *, f32 *);
-void func_15143794(s16, s16, f32, f32 *);
-void func_150E9890(f32 *, f32 *, f32, u8, s32);
+void func_1514470C(s32, vertex *);
+
+/* Spawner state at +0x28 of a burst emitter. */
+typedef struct {
+    /* 0x00 */ s32 source;      // where func_1514470C places each burst
+    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
+    /* 0x08 */ f32 rateRange;
+    /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
+    /* 0x10 */ f32 scaleRange;
+    /* 0x14 */ f32 spawnAccum;
+} BurstSpawner;
 
 typedef struct {
-    void *unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} GameStruct150E9E34Sub;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ BurstSpawner spawner;
+} BurstEmitter;
 
-typedef struct {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    GameStruct150E9E34Sub unk28;
-} GameStruct150E9E34;
+/* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
+ * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */
+void func_150E9E34(BurstEmitter *emitter) {
+    BurstSpawner *spawner;
+    vertex pos;
+    vertex dir;
+    f32 scale;
+    s32 yaw;
+    s32 pitch;
 
-void func_150E9E34(GameStruct150E9E34 *arg0) {
-    GameStruct150E9E34Sub *sub;
-
-    f32 sp80[3];
-    f32 sp74[3];
-    f32 temp_f20;
-    s32 temp_s1;
-    s32 temp_s2;
-
-    sub = &arg0->unk28;
-    sub->unk14 += (sub->unk4 + (func_150ADA68() * sub->unk8)) * D_800BE9A4;
-    if (sub->unk14 > 1.0f) {
-        
-        do {
-            temp_f20 = func_150ADA68() * sub->unk10 + sub->unkC;
-            func_1514470C(sub->unk0, sp80);
-            temp_s1 = func_150ADA20();
-            temp_s2 = func_150ADA20();
-            func_15143794((s16)(temp_s1 & 0xFF), (s16)(0x40 - (temp_s2 % 129U)),
-                          func_150ADA68() * 600.0f * 0.009999999776f, sp74);
-            func_150E9890(sp80, sp74, temp_f20, arg0->unkC, arg0->unk1);
-            sub->unk14 -= 1.0f;
-        } while (sub->unk14 > 1.0f);
+    spawner = &emitter->spawner;
+    spawner->spawnAccum += (spawner->rateBase + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    while (spawner->spawnAccum > 1.0f) {
+        scale = func_150ADA68() * spawner->scaleRange + spawner->scaleBase;
+        func_1514470C(spawner->source, &pos);
+        yaw = func_150ADA20();
+        pitch = func_150ADA20();
+        func_15143794(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
+        func_150E9890(&pos, &dir, scale, emitter->unkC, emitter->unk1);
+        spawner->spawnAccum -= 1.0f;
     }
 }
-
