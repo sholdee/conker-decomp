@@ -4,8 +4,9 @@
 #undef func_15048A40
 #include "variables.h"
 
-extern void func_1516F864(s32);
-extern void func_1516F94C(s32, s32);
+struct Particle;
+void func_1516F864(struct Particle *particle);
+void func_1516F94C(struct Particle *particle, s32 factor);
 
 struct Table1516F024 {
     u8 unk0[0xB];
@@ -74,6 +75,17 @@ typedef struct Particle {
             /* 0x2E */ s8 growY;
             /* 0x2F */ u8 fadeShift;
         } tint;
+        /* func_1516ECAC: scaled to size * alpha / 128 */
+        struct {
+            /* 0x26 */ u8 fadeRate;
+            /* 0x27 */ u8 unk27[5];
+            /* 0x2C */ u8 sizeHigh;
+            /* 0x2D */ u8 sizeLow;
+        } pulse;
+        /* func_1516E8CC: colour from an 8-step ramp in D_800A6E0C */
+        struct {
+            /* 0x26 */ u8 start;
+        } ramp;
     } u;
     /* 0x30 */ ParticleLink *link;
 } Particle;
@@ -140,80 +152,8 @@ typedef struct Emitter {
 extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
-/* OLDTYPES */
-struct Obj1516D4E8 {
-    char pad0[0xE];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-};
-
-typedef struct {
-    char pad_0[0x18];
-    s16 field_0x18;
-} Obj1516F984;
-
-typedef struct {
-    char pad_0[0x14];
-    s16 field_0x14;
-    s16 field_0x16;
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x1];
-    u8 field_0x26;
-    char pad_0x27[0x5];
-    u8 field_0x2C;
-    u8 field_0x2D;
-} Obj1516FadeState;
-
-typedef struct {
-    char pad_0[0x14];
-    s16 field_0x14;
-    s16 field_0x16;
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x7];
-    s8 field_0x2C;
-} Obj1516FadeStepState;
-
-
-#define LOW_U8(arg) (*(u8 *)((u8 *)&(arg) + 3))
-
-
 /* variables.h declares D_800DD2A0 as a single u8; it is really a u8[4]. */
-#define D_800DD2A0_ARRAY ((u8 *)&D_800DD2A0)
+#define D_800DD2A0_ARRAY (*(u8 (*)[4])&D_800DD2A0)
 
 void func_1516D400(void) {
     s32 i;
@@ -785,58 +725,58 @@ void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
 extern u8 D_800A6E00[];
 extern u8 D_800A6E0C[][3];
 
-s32 func_1516E8CC(struct Obj1516D4E8 *arg0) {
-    struct Obj1516D4E8 *vp;
-    s32 temp_v1;
-    s32 idx;
-    s32 temp;
+s32 func_1516E8CC(Particle *particle) {
+    s32 alpha;
+    s32 level;
+    s32 scale;
     s32 i;
-    f32 frac;
-    f32 inv;
+    f32 t;
+    f32 u;
+    Particle *p; // matching: IDO keeps this copy of the argument in its own register
 
-    vp = arg0;
-    temp_v1 = arg0->unk1F;
-    if (arg0->unk24 != 0) {
-        if (temp_v1 != 0xFF) {
-            temp_v1 += D_800BE9E4 << 5;
-            if (temp_v1 >= 0x100) {
-                temp_v1 = 0xFF;
+    p = particle;
+    alpha = particle->alpha;
+    if (particle->lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 5;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            vp->unk1F = temp_v1;
+            p->alpha = alpha;
         }
     } else {
-        if (temp_v1 != 0) {
-            temp_v1 -= D_800BE9E4 << 4;
-            if (temp_v1 < 0) {
-                temp_v1 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 4;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            vp->unk1F = temp_v1;
+            p->alpha = alpha;
         }
     }
 
-    if ((arg0->unk24 == 0) && (temp_v1 == 0)) {
+    if (particle->lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    temp = arg0->unk14;
-    idx = arg0->unk24;
-    temp += D_800BE9E4 * 10;
-    arg0->unk16 = temp;
-    arg0->unk14 = temp;
+    scale = particle->scaleX;
+    level = particle->lifetime;
+    scale += D_800BE9E4 * 10;
+    particle->scaleY = scale;
+    particle->scaleX = scale;
 
-    if (arg0->unk24 == 0) {
-        idx += arg0->unk1F >> 5;
+    if (particle->lifetime == 0) {
+        level += particle->alpha >> 5;
     } else {
-        idx = idx + 8;
+        level = level + 8;
     }
 
-    for (i = vp->unk26; i < vp->unk26 + 8; i++) {
-        if (idx >= D_800A6E00[i]) {
-            frac = (f32)(idx - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
-            inv = 1.0f - frac;
-            arg0->unk1C = D_800A6E0C[i][0] * inv + D_800A6E0C[i - 1][0] * frac;
-            arg0->unk1D = D_800A6E0C[i][1] * inv + D_800A6E0C[i - 1][1] * frac;
-            arg0->unk1E = D_800A6E0C[i][2] * inv + D_800A6E0C[i - 1][2] * frac;
+    for (i = p->u.ramp.start; i < p->u.ramp.start + 8; i++) {
+        if (level >= D_800A6E00[i]) {
+            t = (f32)(level - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
+            u = 1.0f - t;
+            particle->r = D_800A6E0C[i][0] * u + D_800A6E0C[i - 1][0] * t;
+            particle->g = D_800A6E0C[i][1] * u + D_800A6E0C[i - 1][1] * t;
+            particle->b = D_800A6E0C[i][2] * u + D_800A6E0C[i - 1][2] * t;
             break;
         }
     }
@@ -850,131 +790,129 @@ s32 func_1516E8CC(struct Obj1516D4E8 *arg0) {
 static void func_1516ECA4_pad(void) {
 }
 
-s32 func_1516ECAC(Obj1516FadeState *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
-    s32 temp;
+s32 func_1516ECAC(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 size;
+    s32 scale;
 
-    temp_v0 = arg0->field_0x24;
-    temp_v1 = arg0->field_0x1F;
-    if (temp_v0 != 0) {
-        if (temp_v1 != 0xFF) {
-            temp_v1 += D_800BE9E4 << 7;
-            if (temp_v1 >= 0x100) {
-                temp_v1 = 0xFF;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 7;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v1;
-            temp_v0 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v1 != 0) {
-            temp_v1 -= D_800BE9E4 * arg0->field_0x26;
-            if (temp_v1 < 0) {
-                temp_v1 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 * particle->u.pulse.fadeRate;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v1;
-            temp_v0 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
-    if ((temp_v0 == 0) && (temp_v1 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    temp_a1 = (arg0->field_0x2C << 8) | arg0->field_0x2D;
-    temp = (temp_a1 * temp_v1) >> 7;
-    arg0->field_0x16 = temp;
-    arg0->field_0x14 = temp;
+    size = (particle->u.pulse.sizeHigh << 8) | particle->u.pulse.sizeLow;
+    scale = (size * alpha) >> 7;
+    particle->scaleY = scale;
+    particle->scaleX = scale;
     return 0;
 }
 
 
-void func_1516ED68(s32 a0, s32 a1, u8 a2, s32 a3) {
-    u8 v;
-    v = D_800CC2D4[a0 * 812];
-    if (v != 0x3A) {
+void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
+    u8 id;
+
+    id = D_800CC2D0[object].id;
+    if (id != 0x3A) {
         return;
     }
     func_1516D99C(5, 0, 0, 4,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 8,
         0, 0, 0, 0, 0, 0, 0, 0x124,
-        0x124, 0, 0, a1, 0, 0, a0, 0xC,
+        0x124, 0, 0, duration, 0, 0, object, 0xC,
         0, 0, 0x81, 2, 0, 1, 0, 0,
-        0, 5, 0, a2, a3);
+        0, 5, 0, arg2, arg3);
 }
 
-void func_1516EED4(s32 a0, s32 a1, u8 a2, s32 a3) {
-    if (a0 < 4 && (*(u8 (*)[4])&D_800DD2A0)[a0] >= a1) {
-        (*(u8 (*)[4])&D_800DD2A0)[a0] = 0;
+void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
+    if (object < 4 && D_800DD2A0_ARRAY[object] >= threshold) {
+        D_800DD2A0_ARRAY[object] = 0;
         func_1516D99C(0, 0, 0, 4,
             0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
             2, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0x200,
-            0x200, 0, 0, 0x1E, 0, 0, a0, 0x14,
+            0x200, 0, 0, 0x1E, 0, 0, object, 0x14,
             0, 0, 0x81, 8, 0, 1, 0, 0,
-            0, 0xC, 0, a2, a3);
+            0, 0xC, 0, arg2, arg3);
     }
 }
 
-s32 func_1516F024(Obj1516FadeState *arg0) {
-    /* Reserves the 16 bytes at the top of the -g3 stack frame (sp+0x58..0x67)
-     * that the shipped build allocated but never referenced.  Declared first so
-     * the remaining locals land on their original stack homes. */
-    u8 c24, c25, c26, c27, c28, c2A, c2B, c2C, c32, c33, c34, c35;
-    s32 padq;
-    s32 temp_a2;
-    struct Table1516F024 sp48;
-    struct Table1516F024 sp3C;
-    struct Table1516F024 sp30;
-    struct Table1516F024 sp24;
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
+/* Per-style tables, indexed by u.drift.unk2C. */
+s32 func_1516F024(Particle *particle) {
+    u8 pad[16]; // matching: the original frame has 16 unused bytes here
+    s32 style;
+    struct Table1516F024 damping;
+    struct Table1516F024 growth;
+    struct Table1516F024 maxAlpha;
+    struct Table1516F024 fadeRate;
+    s32 alpha;
+    s32 limit;
+    s32 lifetime;
 
-    sp48 = D_8008CBC4;
-    sp3C = D_8008CBD0;
-    sp30 = D_8008CBDC;
-    sp24 = D_8008CBE8;
+    damping = D_8008CBC4;
+    growth = D_8008CBD0;
+    maxAlpha = D_8008CBDC;
+    fadeRate = D_8008CBE8;
 
-    temp_a1 = arg0->field_0x24;
-    temp_a2 = arg0->field_0x2C;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        temp_v1 = sp30.unk0[temp_a2];
-        if (temp_v0 != temp_v1) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v1 < temp_v0) {
-                temp_v0 = temp_v1;
+    lifetime = particle->lifetime;
+    style = particle->u.drift.unk2C;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        limit = maxAlpha.unk0[style];
+        if (alpha != limit) {
+            alpha += D_800BE9E4 << 4;
+            if (limit < alpha) {
+                alpha = limit;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 * sp24.unk0[temp_a2];
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 * fadeRate.unk0[style];
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    temp_v0 = arg0->field_0x14;
-    temp_v0 += D_800BE9E4 * sp3C.unk0[temp_a2];
-    arg0->field_0x16 = temp_v0;
-    arg0->field_0x14 = temp_v0;
-    if (temp_a2 == 3) {
-        arg0->field_0x18 = 0x64;
+    func_1516F864(particle);
+    alpha = particle->scaleX;
+    alpha += D_800BE9E4 * growth.unk0[style];
+    particle->scaleY = alpha;
+    particle->scaleX = alpha;
+    if (style == 3) {
+        particle->velocityY = 100;
     }
-    func_1516F94C((s32)arg0, sp48.unk0[temp_a2]);
+    func_1516F94C(particle, damping.unk0[style]);
     return 0;
 }
 
@@ -989,21 +927,21 @@ void func_1516F1C0(s32 a0, s32 a1, u8 a2, s32 a3) {
         0, 4, 2, a2, a3);
 }
 
-void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, u8 a4, s32 a5) {
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, a1, 4, 4, a0, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 1, 0, LOW_U8(a4), a5);
+        0, 1, 0, a4, a5);
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, 7, 4, 4, a0, a2,
         0, 0, 0x81, 5, 0, 1, 0, 0,
-        0, 1, a3, LOW_U8(a4), a5);
+        0, 1, a3, a4, a5);
 }
 
 /* Spawns two type-0xD particle emitters at (arg0, arg1, arg2) -- identical apart
@@ -1015,7 +953,7 @@ void func_1516F548(
     s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     s32 arg4, s32 arg5, s32 arg6, s32 arg7,
     s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-    s32 arg12, s32 arg13, s32 arg14, s32 arg15,
+    s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
 
     func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
@@ -1024,153 +962,118 @@ void func_1516F548(
         0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
         (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
         (s16)arg5, 0xC8, 1, 0, 0, 1, 0, 0,
-        0, 0, 0, LOW_U8(arg15), arg16);
+        0, 0, 0, arg15, arg16);
     func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg11,
         0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
         (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
         (s16)arg5, 0xC8, 1, 6, 0, 1, 0, 0,
-        0, 0, 0, LOW_U8(arg15), arg16);
+        0, 0, 0, arg15, arg16);
     func_1000FA64(7, (s16)arg0, (s16)arg1, (s16)arg2, 0x36B0, 0x3E8, 0x64,
         (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
-typedef struct Game19A8B0Motion {
-    u8 pad0[0xE];
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 scaleX;
-    s16 scaleY;
-    s16 velocityY;
-    u8 pad1A[5];
-    u8 alpha;
-    u8 pad20[3];
-    u8 kind;
-    u8 active;
-    u8 yFraction;
-    s8 velocityXHigh;
-    u8 velocityXLow;
-    s8 velocityZHigh;
-    u8 velocityZLow;
-    u8 xFraction;
-    u8 zFraction;
-    u8 sizeHigh;
-    u8 sizeLow;
-    u8 pad2E[2];
-    void *link;
-} Game19A8B0Motion;
-
-#define MOTION ((Game19A8B0Motion *)arg0)
-void func_1516F864(s32 arg0) {
+/* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */
+void func_1516F864(Particle *particle) {
     s32 x;
     s32 velocity;
     s32 z;
 
-    x = MOTION->x;
+    x = particle->x;
     x <<= 8;
-    x += MOTION->xFraction;
-    velocity = MOTION->velocityXHigh;
+    x += particle->u.drift.xFraction;
+    velocity = particle->u.drift.velocityXHigh;
     velocity <<= 8;
-    velocity += MOTION->velocityXLow;
+    velocity += particle->u.drift.velocityXLow;
     x += velocity * D_800BE9E4;
-    MOTION->x = x >> 8;
+    particle->x = x >> 8;
     x = (u8)x;
-    MOTION->xFraction = x;
-    z = MOTION->z;
+    particle->u.drift.xFraction = x;
+    z = particle->z;
     z <<= 8;
-    z += MOTION->zFraction;
-    velocity = MOTION->velocityZHigh;
+    z += particle->u.drift.zFraction;
+    velocity = particle->u.drift.velocityZHigh;
     velocity <<= 8;
-    velocity += MOTION->velocityZLow;
+    velocity += particle->u.drift.velocityZLow;
     z += velocity * D_800BE9E4;
-    MOTION->z = z >> 8;
+    particle->z = z >> 8;
     z = (u8)z;
-    MOTION->zFraction = z;
-}
-#undef MOTION
-
-void func_1516F8EC(s32 arg0, s32 arg1)
-{
-  u8 *ptr;
-  s32 val;
-  ptr = (u8 *) arg0;
-  val = (*((s8 *) (ptr + 0x26))) << 8;
-  val += ptr[0x27];
-  val = (val * arg1) >> 8;
-  ptr[0x26] = val >> 8;
-  ptr[0x27] = val & 0xFFFFu;
+    particle->u.drift.zFraction = z;
 }
 
-extern void func_1516F8EC(s32, s32);
+/* Scales the X velocity by factor / 256. */
+void func_1516F8EC(Particle *particle, s32 factor) {
+    s32 velocity;
 
-
-void func_1516F91C(s32 arg0, s32 arg1)
-{
-  s32 v0;
-  v0 = (*((s8 *) (arg0 + 0x28))) << 8;
-  v0 += *((u8 *) (arg0 + 0x29));
-  v0 = (v0 * arg1) >> 8;
-  *((u8 *) (arg0 + 0x28)) = v0 >> 8;
-  *((u8 *) (arg0 + 0x29)) = v0 & 0xFF;
+    velocity = particle->u.drift.velocityXHigh << 8;
+    velocity += particle->u.drift.velocityXLow;
+    velocity = (velocity * factor) >> 8;
+    particle->u.drift.velocityXHigh = velocity >> 8;
+    particle->u.drift.velocityXLow = velocity & 0xFF;
 }
 
-extern void func_1516F91C(s32, s32);
+/* Scales the Z velocity by factor / 256. */
+void func_1516F91C(Particle *particle, s32 factor) {
+    s32 velocity;
 
-
-extern void func_1516F8EC(s32, s32);
-extern void func_1516F91C(s32, s32);
-
-void func_1516F94C(s32 arg0, s32 arg1) {
-    func_1516F8EC(arg0, arg1);
-    func_1516F91C(arg0, arg1);
+    velocity = particle->u.drift.velocityZHigh << 8;
+    velocity += particle->u.drift.velocityZLow;
+    velocity = (velocity * factor) >> 8;
+    particle->u.drift.velocityZHigh = velocity >> 8;
+    particle->u.drift.velocityZLow = velocity & 0xFF;
 }
 
-void func_1516F984(Obj1516F984 *arg0, s32 arg1) {
-    s32 temp;
-    func_1516F94C((s32)arg0, arg1);
-    temp = arg0->field_0x18;
-    temp = temp * arg1;
-    arg0->field_0x18 = temp >> 8;
+void func_1516F94C(Particle *particle, s32 factor) {
+    func_1516F8EC(particle, factor);
+    func_1516F91C(particle, factor);
 }
 
-s32 func_1516F9C4(Obj1516FadeStepState *arg0) {
-    s32 temp_a1;
-    s32 temp_v0;
-    s32 temp;
+void func_1516F984(Particle *particle, s32 factor) {
+    s32 velocity;
 
-    temp_a1 = arg0->field_0x24;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        if (temp_v0 != 0xFF) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v0 >= 0x100) {
-                temp_v0 = 0xFF;
+    func_1516F94C(particle, factor);
+    velocity = particle->velocityY;
+    velocity = velocity * factor;
+    particle->velocityY = velocity >> 8;
+}
+
+s32 func_1516F9C4(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 scale;
+
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 4;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 << 3;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 3;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
+            particle->alpha = alpha;
         }
-        temp = (temp_v0 << 9) >> 8;
-        arg0->field_0x16 = temp;
-        arg0->field_0x14 = temp;
-        temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+        scale = (alpha << 9) >> 8;
+        particle->scaleY = scale;
+        particle->scaleX = scale;
+        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    func_1516F984((Obj1516F984 *)arg0, 0xF0);
+    func_1516F864(particle);
+    func_1516F984(particle, 0xF0);
     return 0;
 }
 
@@ -1184,122 +1087,98 @@ void func_1516FA88(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
         arg3, 0, 0, arg4, arg5);
 }
 
-typedef struct {
-    char pad_0[0x14];
-    s16 sizeX;
-    s16 sizeY;
-    char pad_0x18[0x4];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 alpha;
-    char pad_0x20[0x4];
-    u8 fadingIn;
-    char pad_0x25[0x1];
-    u8 r0;
-    u8 g0;
-    u8 b0;
-    u8 r1;
-    u8 g1;
-    u8 b1;
-    u8 blend;
-    s8 growX;
-    s8 growY;
-    u8 fadeShift;
-} Obj1516FBCC;
-
-s32 func_1516FBCC(Obj1516FBCC *arg0) {
+s32 func_1516FBCC(Particle *particle) {
     s32 v; /* alpha, then growth, then blend */
-    s32 lo;
-    s32 hi;
+    s32 from;
+    s32 to;
 
-    v = arg0->alpha;
-    if (arg0->fadingIn != 0) {
+    v = particle->alpha;
+    if (particle->lifetime != 0) {
         if (v != 0xFF) {
             v += D_800BE9E4 << 4;
             if (v >= 0x100) {
                 v = 0xFF;
             }
-            arg0->alpha = v;
+            particle->alpha = v;
         }
     } else {
         if (v != 0) {
-            v -= D_800BE9E4 << arg0->fadeShift;
+            v -= D_800BE9E4 << particle->u.tint.fadeShift;
             if (v < 0) {
                 v = 0;
             }
-            arg0->alpha = v;
+            particle->alpha = v;
         }
     }
-    if ((arg0->fadingIn == 0) && (v == 0)) {
+    if (particle->lifetime == 0 && v == 0) {
         return 1;
     }
-    v = arg0->growX;
+    v = particle->u.tint.growX;
     v *= D_800BE9E4;
-    arg0->sizeX += v;
-    v = arg0->growY;
+    particle->scaleX += v;
+    v = particle->u.tint.growY;
     v *= D_800BE9E4;
-    arg0->sizeY += v;
-    /* BUG (original game): sizeX is tested twice, sizeY never */
-    if ((arg0->sizeX <= 0) || (arg0->sizeX <= 0)) {
-        arg0->sizeX = arg0->sizeY = 0;
+    particle->scaleY += v;
+    /* BUG (original game): scaleX is tested twice, scaleY never */
+    if (particle->scaleX <= 0 || particle->scaleX <= 0) {
+        particle->scaleX = particle->scaleY = 0;
         return 1;
     }
-    v = arg0->blend;
+    v = particle->u.tint.blend;
     v += D_800BE9E4;
     if (v >= 0x80) {
         v = 0x7F;
     }
-    arg0->blend = v;
+    particle->u.tint.blend = v;
     v *= 2;
-    lo = arg0->r0;
-    hi = arg0->r1;
-    arg0->r = (((hi - lo) * v) >> 8) + lo;
-    lo = arg0->g0;
-    hi = arg0->g1;
-    arg0->g = (((hi - lo) * v) >> 8) + lo;
-    lo = arg0->b0;
-    hi = arg0->b1;
-    arg0->b = (((hi - lo) * v) >> 8) + lo;
+    from = particle->u.tint.r0;
+    to = particle->u.tint.r1;
+    particle->r = (((to - from) * v) >> 8) + from;
+    from = particle->u.tint.g0;
+    to = particle->u.tint.g1;
+    particle->g = (((to - from) * v) >> 8) + from;
+    from = particle->u.tint.b0;
+    to = particle->u.tint.b1;
+    particle->b = (((to - from) * v) >> 8) + from;
     return 0;
 }
 
-s32 func_1516FD50(Obj1516FadeStepState *arg0) {
-    s32 temp_a1;
-    s32 temp_v0;
-    s32 temp;
+s32 func_1516FD50(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 scale;
 
-    temp_a1 = arg0->field_0x24;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        if (temp_v0 != 0xFF) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v0 >= 0x100) {
-                temp_v0 = 0xFF;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha != 0xFF) {
+            alpha += D_800BE9E4 << 4;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+            particle->alpha = alpha;
+            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 << 3;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 3;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp_v0;
+            particle->alpha = alpha;
         }
-        temp = (temp_v0 << 9) >> 8;
-        arg0->field_0x16 = temp;
-        arg0->field_0x14 = temp;
-        temp_a1 = ((volatile Obj1516FadeStepState *)arg0)->field_0x24;
+        scale = (alpha << 9) >> 8;
+        particle->scaleY = scale;
+        particle->scaleX = scale;
+        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32)arg0);
-    arg0->field_0x18 = arg0->field_0x18 + arg0->field_0x2C;
+    func_1516F864(particle);
+    particle->velocityY = particle->velocityY + (s8)particle->u.drift.unk2C;
     return 0;
 }
 
@@ -1481,68 +1360,53 @@ void func_15170500(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, u8 arg5, s3
     }
 }
 
-typedef struct {
-    char pad_0[0x18];
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x1];
-    s8 field_0x26;
-    u8 field_0x27;
-    char pad_0x28[0x7];
-    u8 field_0x2F;
-} Obj151707E0;
+s32 func_151707E0(Particle *particle) {
+    s32 lifetime;
+    s32 alpha;
+    s32 velocityX;
 
-extern s32 func_151EF610(void);
-
-s32 func_151707E0(Obj151707E0 *arg0) {
-    s32 active;
-    s32 temp;
-    s32 velX;
-
-    active = arg0->field_0x24;
-    temp = arg0->field_0x1F;
-    if (active != 0) {
-        if (temp == 0) {
-            arg0->field_0x24 = (func_150ADA20() % 0x19U) + 0xC8;
+    lifetime = particle->lifetime;
+    alpha = particle->alpha;
+    if (lifetime != 0) {
+        if (alpha == 0) {
+            particle->lifetime = (func_150ADA20() % 25U) + 200;
         }
-        if (temp != 0xFE) {
-            temp += D_800BE9E4 << 6;
-            if (temp >= 0xFF) {
-                temp = 0xFE;
+        if (alpha != 0xFE) {
+            alpha += D_800BE9E4 << 6;
+            if (alpha >= 0xFF) {
+                alpha = 0xFE;
             }
-            arg0->field_0x1F = temp;
+            particle->alpha = alpha;
         }
     } else {
-        if (temp != 0) {
-            temp -= D_800BE9E4 << 4;
-            if (temp < 0) {
-                temp = 0;
+        if (alpha != 0) {
+            alpha -= D_800BE9E4 << 4;
+            if (alpha < 0) {
+                alpha = 0;
             }
-            arg0->field_0x1F = temp;
+            particle->alpha = alpha;
         }
     }
 
-    if ((arg0->field_0x24 == 0) && (temp == 0)) {
+    if (particle->lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    func_1516F864((s32) arg0);
-    if (arg0->field_0x2F != 0) {
-        func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
-        func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
-        arg0->field_0x18 = 0;
+    func_1516F864(particle);
+    if (particle->u.drift.unk2F != 0) {
+        func_1516F8EC(particle, (func_151EF610() % 32) + 230);
+        func_1516F91C(particle, (func_151EF610() % 32) + 230);
+        particle->velocityY = 0;
     } else {
-        velX = (arg0->field_0x26 << 8) + arg0->field_0x27;
-        temp = arg0->field_0x26 * 0x100;
-        temp += arg0->field_0x27;
-        if (((velX * velX) + (temp * temp)) >= 0x7D1) {
-            func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
-            func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
+        /* BUG (original game): the speed test squares the X velocity twice and ignores Z */
+        velocityX = (particle->u.drift.velocityXHigh << 8) + particle->u.drift.velocityXLow;
+        alpha = particle->u.drift.velocityXHigh * 0x100; // matching: the original reuses alpha's local here
+        alpha += particle->u.drift.velocityXLow;
+        if (velocityX * velocityX + alpha * alpha > 2000) {
+            func_1516F8EC(particle, (func_151EF610() % 32) + 220);
+            func_1516F91C(particle, (func_151EF610() % 32) + 220);
         }
-        arg0->field_0x18 = 0;
+        particle->velocityY = 0;
     }
     return 0;
 }
