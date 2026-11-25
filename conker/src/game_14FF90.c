@@ -132,8 +132,8 @@ typedef struct CamTransition {
     /* 0x28 */ f32 endDistance;
     /* 0x2C */ f32 endYaw;
     /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
+    /* 0x34 */ f32 endUnk5E8;
+    /* 0x38 */ f32 endUnk3A8;
     /* 0x3C */ f32 progress;
     /* 0x40 */ u16 duration;
     /* 0x42 */ u16 pad42;
@@ -579,7 +579,7 @@ void func_1512BB10(struct108 *arg0);
 void func_1512C150(struct108 *arg0);
 void func_151284C4(struct108 *arg0);
 s32 func_15128540(struct108 *arg0);
-void func_151287E0(struct108 *arg0, f32 *arg1, f32 *arg2);
+void func_151287E0(struct108 *camera, f32 *outUnk5E8, f32 *outUnk3A8);
 
 void func_15122C5C(struct108 *camera) {
     CamVec3f *target;
@@ -2373,106 +2373,107 @@ s32 func_15126378(struct108 *arg0) {
         return 1;
     }
 }
-typedef struct {
+/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
+typedef struct CamSound {
     /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8  pad8[0x8];
-    /* 0x10 */ s32 unk10;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x8];
+    /* 0x10 */ s32 flags;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ struct108 *unk18;
-    /* 0x1C */ u32 unk1C;
+    /* 0x18 */ struct108 *camera;
+    /* 0x1C */ u32 data;
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ u16 unk24;
-} struct_15127520_arg0;
+    /* 0x24 */ u16 voice;
+} CamSound;
 
 extern u16 D_800894E0[2][3];
 
-s32 func_15127520(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
-    struct108 *obj;
+s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+    struct108 *camera;
     u32 index;
-    u32 oldTime;
-    u32 newTime;
-    f32 time;
+    u32 oldZoom;
+    u32 newZoom;
+    f32 zoom;
     s32 changed;
 
-    obj = arg0->unk18;
-    index = arg0->unk1C >> 31;
-    oldTime = arg0->unk1C & 0xFFFFFF;
-    time = obj->unk1A4 * D_800A3580;
+    camera = sound->camera;
+    index = sound->data >> 31;
+    oldZoom = sound->data & 0xFFFFFF;
+    zoom = CAM->unk1A4 * -10000.0f;
     changed = 0;
 
-    if (*arg6 == D_800894E0[index][2]) {
-        *arg6 = 0;
+    if (*soundId == D_800894E0[index][2]) {
+        *soundId = 0;
     }
 
-    arg0->unk2 = obj->unk3D0->x_position;
-    arg0->unk4 = obj->unk3D0->y_position;
-    arg0->unk6 = obj->unk3D0->z_position;
+    sound->x = CAM->player->x_position;
+    sound->y = CAM->player->y_position;
+    sound->z = CAM->player->z_position;
 
-    if (obj->unk3D4->unk197 == 2) {
-        newTime = (u32)time;
-        if (oldTime != newTime) {
+    if (CAM->playerExt->aimState == 2) {
+        newZoom = (u32)zoom;
+        if (oldZoom != newZoom) {
             changed = 1;
-            arg0->unk1C = (index << 31) | newTime;
+            sound->data = (index << 31) | newZoom;
         }
 
         if (changed) {
-            if (*arg6 != D_800894E0[index][0]) {
-                if (arg0->unk24 != 0) {
-                    func_100111C8(arg0->unk24);
+            if (*soundId != D_800894E0[index][0]) {
+                if (sound->voice != 0) {
+                    func_100111C8(sound->voice);
                 }
-                arg0->unk24 = 0;
-                arg0->unk10 &= ~0x80;
-                *arg6 = D_800894E0[index][0];
+                sound->voice = 0;
+                sound->flags &= ~0x80;
+                *soundId = D_800894E0[index][0];
             }
-        } else if (*arg6 == D_800894E0[index][0]) {
-            if (arg0->unk24 != 0) {
-                func_100111C8(arg0->unk24);
+        } else if (*soundId == D_800894E0[index][0]) {
+            if (sound->voice != 0) {
+                func_100111C8(sound->voice);
             }
-            arg0->unk24 = 0;
-            *arg6 = D_800894E0[index][1];
-            func_10010F30(D_800894E0[index][1], 0x4E20, 0x40, 0, 0);
-            arg0->unk10 &= ~0x80;
-        } else if (arg0->unk10 & 0x80) {
-            func_151CC290((s32)obj);
-            func_10010F30(D_800894E0[index][2], 0x4E20, 0x40, 0, 0);
+            sound->voice = 0;
+            *soundId = D_800894E0[index][1];
+            func_10010F30(D_800894E0[index][1], 20000, 0x40, 0, 0);
+            sound->flags &= ~0x80;
+        } else if (sound->flags & 0x80) {
+            func_151CC290((s32)camera);
+            func_10010F30(D_800894E0[index][2], 20000, 0x40, 0, 0);
         }
     } else {
         return 1;
     }
 
-    arg0->unk10 &= ~0x80;
+    sound->flags &= ~0x80;
     return 0;
 }
-s32 func_151277B0(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
-    struct108 *obj;
+s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId) {
+    struct108 *camera;
     u32 count;
-    u32 oldTime;
-    u32 newTime;
+    u32 oldKey;
+    u32 newKey;
     s32 changed;
-    f32 time;
+    f32 key;
 
-    obj = arg0->unk18;
-    oldTime = arg0->unk1C & 0xFFFFFF;
-    count = arg0->unk1C >> 24;
-    time = *(f32 *)((u8 *)obj->unk3D4 + 0x178) * *(f32 *)((u8 *)obj->unk3D4 + 0x174);
-    newTime = *(u32 *)&time & 0xFFFFFF;
+    camera = sound->camera;
+    oldKey = sound->data & 0xFFFFFF;
+    count = sound->data >> 24;
+    key = CAM->playerExt->aimYawTarget * CAM->playerExt->aimPitchTarget;
+    newKey = *(u32 *)&key & 0xFFFFFF;
     changed = 0;
 
-    if (*arg6 == 0x622) {
-        *arg6 = 0;
+    if (*soundId == 0x622) {
+        *soundId = 0;
     }
 
-    arg0->unk2 = obj->unk3D0->x_position;
-    arg0->unk4 = obj->unk3D0->y_position;
-    arg0->unk6 = obj->unk3D0->z_position;
+    sound->x = CAM->player->x_position;
+    sound->y = CAM->player->y_position;
+    sound->z = CAM->player->z_position;
 
-    if (obj->unk3D4->unk197 == 2) {
-        if (oldTime != newTime) {
+    if (CAM->playerExt->aimState == 2) {
+        if (oldKey != newKey) {
             if (count < 10) {
-                if ((((oldTime - newTime) < 0) ? -(oldTime - newTime) : (oldTime - newTime)) > 100) {
+                if ((((oldKey - newKey) < 0) ? -(oldKey - newKey) : (oldKey - newKey)) > 100) {
                     count += D_800BE9E4;
                 }
             } else {
@@ -2481,31 +2482,31 @@ s32 func_151277B0(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 
         } else {
             count = 0;
         }
-        arg0->unk1C = (count << 24) | newTime;
+        sound->data = (count << 24) | newKey;
 
         if (changed) {
-            if (*arg6 != 0x61C) {
-                if (arg0->unk24 != 0) {
-                    func_100111C8(arg0->unk24);
+            if (*soundId != 0x61C) {
+                if (sound->voice != 0) {
+                    func_100111C8(sound->voice);
                 }
-                arg0->unk24 = 0;
-                arg0->unk10 &= ~0x80;
-                *arg6 = 0x61C;
+                sound->voice = 0;
+                sound->flags &= ~0x80;
+                *soundId = 0x61C;
             }
-        } else if (*arg6 == 0x61C) {
-            if (arg0->unk24 != 0) {
-                func_100111C8(arg0->unk24);
+        } else if (*soundId == 0x61C) {
+            if (sound->voice != 0) {
+                func_100111C8(sound->voice);
             }
-            arg0->unk24 = 0;
-            *arg6 = 0x61D;
-            arg0->unk10 &= ~0x80;
+            sound->voice = 0;
+            *soundId = 0x61D;
+            sound->flags &= ~0x80;
         }
     } else {
         return 1;
     }
 
-    if (arg0->unk24 == 0 && *arg6 == 0) {
-        arg0->unk10 &= ~0x80;
+    if (sound->voice == 0 && *soundId == 0) {
+        sound->flags &= ~0x80;
     }
     return 0;
 }
@@ -2677,121 +2678,91 @@ void func_15127FEC(struct108 *camera, s32 arg1, s32 arg2) {
 
 extern f32 D_800DC004;
 
-typedef struct {
-    /* 0x00 */ u16 state;
-    /* 0x02 */ u16 pad2;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u16 unk40;
-    /* 0x42 */ u16 pad42;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-} struct108_7F4;
 
-typedef struct {
-    /* 0x000 */ u8  pad0[0x65C];
-    /* 0x65C */ f32 unk65C;
-    /* 0x660 */ f32 unk660;
-    /* 0x664 */ u8  pad664[0x190];
-    /* 0x7F4 */ struct108_7F4 c;
-} struct108_ext;
+s32 func_15128030(struct108 *camera) {
+    CamTransition *tr;
 
-#define EXT(a) (((struct108_ext *)(a))->c)
-
-s32 func_15128030(struct108 *arg0) {
-    struct108_7F4 *ctrl;
-
-    ctrl = &EXT(arg0);
-    if (arg0->unk23C != 0) {
-        EXT(arg0).unk2C = D_800A35A0;
-        EXT(arg0).unk40 = 0;
-        EXT(arg0).state = 0;
+    tr = &CAM->transition;
+    if (CAM->snap != 0) {
+        CAM->transition.endYaw = 999.0f;
+        CAM->transition.duration = 0;
+        CAM->transition.state = 0;
         return 0;
     }
-    switch (ctrl->state) {
+    switch (tr->state) {
     case 0:
         return 0;
     case 1:
-        ctrl->unk1C = sqrtf((arg0->unk2F8 - arg0->unk3D0->x_position) * (arg0->unk2F8 - arg0->unk3D0->x_position) +
-                            (arg0->unk300 - arg0->unk3D0->z_position) * (arg0->unk300 - arg0->unk3D0->z_position));
-        arg0->unk5E8 = 0.0f;
-        ((struct108_ext *)arg0)->unk660 = 0.0f;
-        arg0->unk3A8 = 0.0f;
-        ((struct108_ext *)arg0)->unk65C = 0.0f;
-        EXT(arg0).unk48 = arg0->unk2FC - arg0->unk35C;
-        func_15125594(arg0);
-        ctrl->unk20 = arg0->unk37C;
-        func_151287E0(arg0, &ctrl->unk34, &ctrl->unk38);
-        EXT(arg0).unk4C = ctrl->unk40;
-        ctrl->unk3C = 0.0f;
-        ctrl->state = 2;
+        tr->startDistance = sqrtf((CAM->eye.x - CAM->player->x_position) * (CAM->eye.x - CAM->player->x_position) +
+                                  (CAM->eye.z - CAM->player->z_position) * (CAM->eye.z - CAM->player->z_position));
+        CAM->unk5E8 = 0.0f;
+        CAM->unk660 = 0.0f;
+        CAM->unk3A8 = 0.0f;
+        CAM->unk65C = 0.0f;
+        CAM->transition.startHeight = CAM->eye.y - CAM->unk35C;
+        func_15125594(camera);
+        tr->startYaw = CAM->yaw;
+        func_151287E0(camera, &tr->endUnk5E8, &tr->endUnk3A8);
+        CAM->transition.timer = tr->duration;
+        tr->progress = 0.0f;
+        tr->state = 2;
+        // fallthrough
     case 2: {
         s32 done;
         f32 angle;
-        done = EXT(arg0).unk4C == 0;
-        if (arg0->unk23C != 0) {
+
+        done = CAM->transition.timer == 0;
+        if (CAM->snap != 0) {
             done = 1;
-            ctrl->unk3C = 1.0f;
-            EXT(arg0).unk4C = 0;
+            tr->progress = 1.0f;
+            CAM->transition.timer = 0;
         } else {
-            ctrl->unk3C = 1.0f - (f32)EXT(arg0).unk4C / (f32)ctrl->unk40;
+            tr->progress = 1.0f - (f32)CAM->transition.timer / (f32)tr->duration;
         }
-        func_15123568(arg0);
-        ctrl->unk28 = arg0->unk374;
-        EXT(arg0).unk44 = arg0->unk348;
-        ctrl->unk10 = arg0->unk3D0->x_position;
-        func_15124C38(arg0, &ctrl->unk14);
-        angle = ctrl->unk2C;
-        ctrl->unk18 = arg0->unk3D0->z_position;
+        func_15123568(camera);
+        tr->endDistance = CAM->targetDistance;
+        CAM->transition.endHeight = CAM->height;
+        tr->endTarget.x = CAM->player->x_position;
+        func_15124C38(camera, &tr->endTarget.y);
+        angle = tr->endYaw;
+        tr->endTarget.z = CAM->player->z_position;
         while (angle < 0.0f) {
             angle += 360.0f;
         }
-        arg0->unk2A4 = arg0->unk3D0->x_position;
-        arg0->unk2A8 = arg0->unk3D0->y_position;
-        *(f32 *)&arg0->unk2AC = arg0->unk3D0->z_position;
-        arg0->unk390 = angle;
-        while (arg0->unk390 < -360.0f) {
-            arg0->unk390 += 360.0f;
+        CAM->focus.x = CAM->player->x_position;
+        CAM->focus.y = CAM->player->y_position;
+        CAM->focus.z = CAM->player->z_position;
+        CAM->unk390 = angle;
+        while (CAM->unk390 < -360.0f) {
+            CAM->unk390 += 360.0f;
         }
-        arg0->unk2BC = ctrl->unk4 + (ctrl->unk10 - ctrl->unk4) * ctrl->unk3C;
-        arg0->unk2C0 = ctrl->unk8 + (ctrl->unk14 - ctrl->unk8) * ctrl->unk3C;
-        arg0->unk2C4 = ctrl->unkC + (ctrl->unk18 - ctrl->unkC) * ctrl->unk3C;
-        if (arg0->unk2C != 0x40) {
-            arg0->unk37C = func_15048720(ctrl->unk3C, ctrl->unk20, ctrl->unk2C);
-            arg0->unk39C = arg0->unk37C * D_800A35A4;
+        CAM->target.x = tr->startTarget.x + (tr->endTarget.x - tr->startTarget.x) * tr->progress;
+        CAM->target.y = tr->startTarget.y + (tr->endTarget.y - tr->startTarget.y) * tr->progress;
+        CAM->target.z = tr->startTarget.z + (tr->endTarget.z - tr->startTarget.z) * tr->progress;
+        if (CAM->mode != 0x40) {
+            CAM->yaw = func_15048720(tr->progress, tr->startYaw, tr->endYaw);
+            CAM->yawRad = CAM->yaw * DEG2RAD;
         }
-        D_800DC000 = ctrl->unk1C + (ctrl->unk28 - ctrl->unk1C) * ctrl->unk3C;
-        D_800DC004 = EXT(arg0).unk48 + (EXT(arg0).unk44 - EXT(arg0).unk48) * ctrl->unk3C;
-        arg0->unk5E8 = func_15048720(ctrl->unk3C, 0.0f, ctrl->unk34);
-        arg0->unk3A8 = func_15048720(ctrl->unk3C, 0.0f, ctrl->unk38);
+        D_800DC000 = tr->startDistance + (tr->endDistance - tr->startDistance) * tr->progress;
+        D_800DC004 = CAM->transition.startHeight +
+                     (CAM->transition.endHeight - CAM->transition.startHeight) * tr->progress;
+        CAM->unk5E8 = func_15048720(tr->progress, 0.0f, tr->endUnk5E8);
+        CAM->unk3A8 = func_15048720(tr->progress, 0.0f, tr->endUnk3A8);
         if (done) {
-            EXT(arg0).unk2C = D_800A35A8;
-            EXT(arg0).unk40 = 0;
-            EXT(arg0).state = 0;
-            arg0->unk84 |= 8;
+            CAM->transition.endYaw = 999.0f;
+            CAM->transition.duration = 0;
+            CAM->transition.state = 0;
+            CAM->unk84 |= 8;
             break;
         }
-        EXT(arg0).unk4C -= D_800BE9E4;
-        if (EXT(arg0).unk4C < 0) {
-            EXT(arg0).unk4C = 0;
+        CAM->transition.timer -= D_800BE9E4;
+        if (CAM->transition.timer < 0) {
+            CAM->transition.timer = 0;
         }
         return 1;
     }
     }
+    // matching: no return after the transition ends (callers see the leftover v0), as in the original
 }
 /* Runs the handler of the current mode. */
 void func_151283B8(struct108 *camera) {
