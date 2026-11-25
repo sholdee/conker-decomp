@@ -164,7 +164,8 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
     }
 }
 
-/* Spray emitter update: while a player is within 1581 units, spawns desc.rate particles per frame. */
+/* Spray emitter update: every 50 ticks checks for a player within 1581 units (sqrt 2500000) and, while one
+   was found, spawns about desc.rate trail particles per frame along the spawn segment. */
 void func_15189A00(SprayEmitter *emitter) {
     s32 i;
     s32 found;
