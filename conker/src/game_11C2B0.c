@@ -8,43 +8,9 @@ extern f32 D_800A15F0[][3];
 extern s32 (*D_8008FD00)(s32, u8);
 extern f32 D_800A1830;
 extern f32 D_800A1834;
-extern f32 D_800A1870;
-extern f32 D_800A1874;
 extern u8 D_800A1674;
 extern u8 D_800A1680;
 extern f32 sinf(f32);
-
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1B];
-    u8 unk3B;
-} Struct150F0E48Src;
-
-typedef struct {
-    Struct150F0E48Src *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct150F0E48Sub;
-
-typedef struct {
-    u8 pad0[0x2B];
-    u8 unk2B;
-    u8 pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 pad4C[0x5C];
-    Struct150F0E48Src *unkA8;
-    u8 unkAC;
-} Struct150F0E48Obj;
 
 typedef struct {
     u8 pad_0[0x68];
@@ -64,9 +30,9 @@ struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32,
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
-/* Fires gun slot `slot` of `actor`: spawns the shot, a spark burst and a flash at the muzzle. */
 struct Beam *func_150EEF80(struct127 *, u8, u8, s32);
 
+/* Fires gun slot `slot` of `actor`: spawns its beam, a spark burst and an effect at the muzzle. */
 void func_150EEE00(struct127 *actor, u8 slot) {
     f32 muzzle[3];
     Header header;
@@ -1236,20 +1202,49 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Struct150F0BECParticle; /* 0x70 */
+} ParticleSpawn; /* 0x70 */
+
+/* State an actor-following particle (created by func_15130280) carries at +0xA8. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId;
+    /* 0x08 */ f32 phase[3];
+} ActorParticleLink;
+
+/* State a trail particle (see func_150F1170) carries at +0xA8. */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s8 unk2;
+    s8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} TrailParticleLink;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x2B];
+    /* 0x2B */ u8 alpha;
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 height;
+    /* 0x40 */ Vec3f pos;
+    /* 0x4C */ u8 pad4C[0x5C];
+    /* 0xA8 */ union {
+        ActorParticleLink actor;
+        TrailParticleLink trail;
+    } link;
+} Particle;
 
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern f32 D_800A1860;
-extern f32 D_800A1864;
-extern f32 D_800A1868;
-extern f32 D_800A186C;
 
-void func_150F0BEC(Struct150F0E48Src *arg0) {
-    Struct150F0BECParticle spawn;
-    Struct150F0E48Sub sub;
-    void *ret;
-    s32 temp_v0;
-    s32 temp_v1;
+/* Spawns a particle that follows `actor` (see func_150F0E48). */
+void func_150F0BEC(struct127 *actor) {
+    ParticleSpawn spawn;
+    ActorParticleLink link;
+    Particle *particle;
+    s32 flipY;
+    s32 flipX;
 
     spawn.unk1D = 0x2B;
     spawn.unk8 = 0x4403;
@@ -1269,9 +1264,9 @@ void func_150F0BEC(Struct150F0E48Src *arg0) {
     spawn.unk1C = 0xFF;
     spawn.unk2C = 250.0f;
     spawn.unk28 = 250.0f;
-    spawn.pos.unk0 = arg0->unk14;
-    spawn.pos.unk4 = arg0->unk18;
-    spawn.pos.unk8 = arg0->unk1C;
+    spawn.pos.unk0 = actor->x_position;
+    spawn.pos.unk4 = actor->y_position;
+    spawn.pos.unk8 = actor->z_position;
     spawn.unk3C = *(struct17 *)&D_800A5480;
     spawn.vel = *(struct17 *)&D_800A5480;
     spawn.unk1E = 1;
@@ -1280,16 +1275,16 @@ void func_150F0BEC(Struct150F0E48Src *arg0) {
     spawn.unk54 = 0.0f;
     spawn.unk24 = 1.0f;
     if (func_150ADA20() & 1) {
-        temp_v1 = 0x40;
+        flipX = 0x40;
     } else {
-        temp_v1 = 0;
+        flipX = 0;
     }
     if (func_150ADA20() & 1) {
-        temp_v0 = 0x80;
+        flipY = 0x80;
     } else {
-        temp_v0 = 0;
+        flipY = 0;
     }
-    spawn.unk58 = (temp_v0 | temp_v1) | 0x8000 | 0x4000 | 0x40000;
+    spawn.unk58 = (flipY | flipX) | 0x8000 | 0x4000 | 0x40000;
     spawn.unk60 = 6;
     spawn.unk61 = 6;
     spawn.unk62 = 0x25;
@@ -1299,160 +1294,139 @@ void func_150F0BEC(Struct150F0E48Src *arg0) {
     spawn.unk5C = 0;
     spawn.unk66 = 0xFF;
     spawn.unk68 = 0;
-    sub.unk0 = arg0;
-    spawn.unk6C = D_800A1860;
-    sub.unk4 = arg0->unk3B;
-    sub.unk8 = func_150ADA68() * 2.0f * D_800A1864;
-    sub.unkC = func_150ADA68() * 2.0f * D_800A1868;
-    sub.unk10 = func_150ADA68() * 2.0f * D_800A186C;
-    ret = func_15130280(&spawn, 1, 0, 0x14, 0xFF, 1);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0xA8, &sub, sizeof(sub));
+    link.actor = actor;
+    spawn.unk6C = 10000.0f;
+    link.actorId = actor->unique_id;
+    link.phase[0] = func_150ADA68() * 2.0f * 3.141592741f;
+    link.phase[1] = func_150ADA68() * 2.0f * 3.141592741f;
+    link.phase[2] = func_150ADA68() * 2.0f * 3.141592741f;
+    particle = func_15130280(&spawn, 1, 0, 0x14, 0xFF, 1);
+    if (particle != NULL) {
+        memcpy(&particle->link.actor, &link, sizeof(link));
     }
 }
 
-s32 func_150F0E48(Struct150F0E48Obj *arg0, s32 arg1) {
-    Struct150F0E48Sub *sub;
-    Struct150F0E48Src *src;
+/* Per-frame update of an actor-following particle: tracks the actor and pulses its size and alpha. */
+s32 func_150F0E48(Particle *particle, s32 arg1) {
+    ActorParticleLink *link;
+    struct127 *actor;
 
-    sub = (Struct150F0E48Sub *)((u8 *)arg0 + 0xA8);
-    src = sub->unk0;
-    if (src->unk3B != sub->unk4) {
+    link = &particle->link.actor;
+    actor = link->actor;
+    if (actor->unique_id != link->actorId) {
         return 0;
     }
 
-    arg0->unk40 = src->unk14;
-    arg0->unk44 = src->unk18;
-    arg0->unk48 = src->unk1C;
-    sub->unk8 += D_800A1870 * D_800BE9A4;
-    sub->unkC += D_800A1874 * D_800BE9A4;
-    sub->unk10 += 0.25f * D_800BE9A4;
-    sub->unk8 = func_15144B68(sub->unk8);
-    sub->unkC = func_15144B68(sub->unkC);
-    sub->unk10 = func_15144B68(sub->unk10);
-    arg0->unk38 = (sinf(sub->unk8) * 243.0f) + 780.0f;
-    arg0->unk3C = (sinf(sub->unkC) * 243.0f) + 780.0f;
-    arg0->unk2B = (sinf(sub->unk10) * 50.0f) + 200.0f;
+    particle->pos.x = actor->x_position;
+    particle->pos.y = actor->y_position;
+    particle->pos.z = actor->z_position;
+    link->phase[0] += 0.2630000114f * D_800BE9A4;
+    link->phase[1] += 0.3030000031f * D_800BE9A4;
+    link->phase[2] += 0.25f * D_800BE9A4;
+    link->phase[0] = func_15144B68(link->phase[0]);
+    link->phase[1] = func_15144B68(link->phase[1]);
+    link->phase[2] = func_15144B68(link->phase[2]);
+    particle->width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
+    particle->height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
+    particle->alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA150F1020;
+/* Message handler of an actor-following particle: follows its actor through an identity
+ * swap (type 0x2D) and is released when the actor goes away (types 0 and 0x43). */
+void func_150F1020(Particle *particle, s32 data, u8 type) {
+    ActorParticleLink *link = &particle->link.actor;
+    ActorMsg *msg = (ActorMsg *)data;
+    struct127 *msgActor;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB150F1020;
-
-void func_150F1020(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA150F1020 *temp_v0 = (SubA150F1020 *)((u8 *)arg0 + 0xA8);
-    ArgB150F1020 *b = (ArgB150F1020 *)arg1;
-    s32 b0;
-
-    if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
+    if (type == 0x2D) {
+        if (link->actor == msg->swap.actorA) {
+            link->actor = msg->swap.actorB;
+            link->actorId = msg->swap.idB;
         } else {
-            if (temp_v0->unk0 == b->u4.w4) {
-                temp_v0->unk0 = b->unk0;
-                temp_v0->unk4 = b->unk8;
+            if (link->actor == msg->swap.actorB) {
+                link->actor = msg->swap.actorA;
+                link->actorId = msg->swap.idA;
             }
-        block_150F1020: ;
+        // matching: the label ends a block, so IDO emits the else path's own branch to the epilogue
+        swapped:;
         }
-    } else if (arg2 == 0 || arg2 == 0x43) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    } else if (type == 0 || type == 0x43) {
+        msgActor = msg->ref.actor;
+        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+            func_1516972C((struct102 *)particle);
         }
     }
 }
 
-void func_150F10D4(struct210 *arg0) {
-    s8 sp40[0x18];
-    struct260 *temp_v0;
+/* State an actor's trail emitter (created by func_15149130) carries at +0x28. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId;
+    /* 0x08 */ f32 accum;              /* particles owed, spawned one per 1.0 */
+    /* 0x0C */ Vec3f lastPos;          /* actor position on the previous frame */
+} TrailLink; /* 0x18 */
 
-    *(struct210 **)&sp40[0] = arg0;
-    sp40[4] = *(u8 *)((s32)arg0 + 0x3B);
-    *(f32 *)&sp40[8] = 0.0f;
-    *(f32 *)&sp40[0xC] = *(f32 *)((s32)arg0 + 0x14);
-    *(f32 *)&sp40[0x10] = *(f32 *)((s32)arg0 + 0x18);
-    *(f32 *)&sp40[0x14] = *(f32 *)((s32)arg0 + 0x1C);
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ TrailLink link;
+} TrailEmitter;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x4C, -1, 0, 0x3A, (struct37 *)0x18, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp40, 0x18);
+/* Attaches a trail emitter (func_150F1170) to `actor`. */
+void func_150F10D4(struct127 *actor) {
+    TrailLink link;
+    TrailEmitter *emitter;
+
+    link.actor = actor;
+    link.actorId = actor->unique_id;
+    link.accum = 0.0f;
+    link.lastPos.x = actor->x_position;
+    link.lastPos.y = actor->y_position;
+    link.lastPos.z = actor->z_position;
+
+    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, (struct37 *)sizeof(TrailLink), 0xFF, 1);
+    if (emitter != NULL) {
+        memcpy(&emitter->link, &link, sizeof(link));
     }
 }
 
-typedef struct {
-    Struct150F0E48Src *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} Link150F1170;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Link150F1170 unk28;
-} Obj150F1170;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s8 unk2;
-    s8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} Sub150F1170;
-
-void func_150F1170(Obj150F1170 *arg0) {
-    Link150F1170 *sub;
-    Struct150F0E48Src *src;
-    struct17 pos;
+/* Per-frame update of an actor's trail emitter: scatters particles along the path the actor moved
+ * this frame; the emitter ends when the actor goes away. */
+void func_150F1170(TrailEmitter *emitter) {
+    TrailLink *link;
+    struct127 *actor;
+    Vec3f last;
     f32 dx;
     f32 dy;
     f32 dz;
-    Struct150F0BECParticle spawn;
-    Sub150F1170 ext;
-    void *ret;
-    s32 a;
+    ParticleSpawn spawn;
+    TrailParticleLink ext;
+    Particle *particle;
+    s32 flipY;
 
-    src = arg0->unk28.unk0;
-    pos = *(struct17 *)&arg0->unk28.unkC;
-    sub = &arg0->unk28;
-    if ((*(s32 *)src == 0) || (src->unk3B != sub->unk4)) {
-        arg0->unkE = -1;
+    actor = emitter->link.actor;
+    last = emitter->link.lastPos;
+    link = &emitter->link;
+    if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
+        emitter->unkE = -1;
         return;
     }
-    sub->unkC = src->unk14;
-    sub->unk10 = src->unk18;
-    sub->unk14 = src->unk1C;
-    dx = sub->unkC - pos.unk0;
-    dy = sub->unk10 - pos.unk4;
-    dz = sub->unk14 - pos.unk8;
-    sub->unk8 += (0.1090000048f + func_150ADA68() * 0.2840000093f) * D_800BE9A4;
-    if (sub->unk8 > 1.0f) {
-        {
-        s32 pad;
-        }
+    link->lastPos.x = actor->x_position;
+    link->lastPos.y = actor->y_position;
+    link->lastPos.z = actor->z_position;
+    dx = link->lastPos.x - last.x;
+    dy = link->lastPos.y - last.y;
+    dz = link->lastPos.z - last.z;
+    link->accum += (0.1090000048f + func_150ADA68() * 0.2840000093f) * D_800BE9A4;
+    if (link->accum > 1.0f) {
+        s32 pad; // matching: unused stack slot
+
         ext.unkC = 0.986371994f;
         spawn.unk1D = 0x6C;
         spawn.unk8 = 0x5103;
@@ -1486,32 +1460,32 @@ void func_150F1170(Obj150F1170 *arg0) {
             {
             f32 r;
             r = func_150ADA68();
-            spawn.pos.unk0 = dx * r + pos.unk0;
-            spawn.pos.unk4 = dy * r + pos.unk4;
-            spawn.pos.unk8 = dz * r + pos.unk8;
+            spawn.pos.unk0 = dx * r + last.x;
+            spawn.pos.unk4 = dy * r + last.y;
+            spawn.pos.unk8 = dz * r + last.z;
             }
             spawn.vel.unk0 = dx * D_800BE9A8 * 0.3330000043f;
             spawn.vel.unk4 = dy * D_800BE9A8 * 0.3330000043f;
             spawn.vel.unk8 = dz * D_800BE9A8 * 0.3330000043f;
             ext.unk0 = func_150ADA20();
-            ext.unk1 = (s16)func_150ADA20();
+            ext.unk1 = (s16)func_150ADA20(); // matching: the s16 cast keeps the value in its own temp
             ext.unk2 = (func_150ADA20() % 5U) + 4;
             ext.unk3 = (func_150ADA20() % 5U) + 4;
             ext.unk4 = func_150ADA68() * 39.0f;
             ext.unk8 = func_150ADA68() * 39.0f;
             spawn.unk54 = func_150ADA68() * 0.5139999986f + 0.6560000181f;
             spawn.unk58 &= ~0xC0;
-            a = (func_150ADA20() & 1) ? 0x80 : 0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | a;
-            spawn.unk1B = (func_150ADA20() % 71U) + 0x50;
-            spawn.unkA = (func_150ADA20() % 31U) + 0x3C;
+            flipY = (func_150ADA20() & 1) ? 0x80 : 0;
+            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipY;
+            spawn.unk1B = (func_150ADA20() % 71U) + 80;
+            spawn.unkA = (func_150ADA20() % 31U) + 60;
             spawn.unk28 = spawn.unk2C = func_150ADA68() * 514.0f + 404.0f;
-            ret = func_15130280(&spawn, 1, 0, 0x10, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &ext, sizeof(ext));
+            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->unkC, emitter->unk1);
+            if (particle != NULL) {
+                memcpy(&particle->link.trail, &ext, sizeof(ext));
             }
-            sub->unk8 -= 1.0f;
-        } while (sub->unk8 > 1.0f);
+            link->accum -= 1.0f;
+        } while (link->accum > 1.0f);
     }
 }
 
