@@ -121,17 +121,12 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     return obj;
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ RiseMotion motion;
-} GameF3270BurstObject;
-
-GameF3270BurstObject *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
+RiseParticle *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
 
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
     ParticleDesc burst;
-    GameF3270BurstObject *spawned;
+    RiseParticle *spawned;
     RiseMotion motion;
 
     burst.texture = 47;

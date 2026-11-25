@@ -2260,6 +2260,12 @@ typedef struct RiseMotion {
     /* 0x24 */ f32 ceiling;
 } RiseMotion; /* size 0x28 */
 
+/* A particle (DescParticleHead) with RiseMotion data. */
+typedef struct RiseParticle {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ RiseMotion motion;
+} RiseParticle; /* size 0xD0 */
+
 /* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
  * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */
 typedef struct ActorEmitterParams {

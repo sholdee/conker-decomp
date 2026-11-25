@@ -265,7 +265,7 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
 
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 extra;
 } SpawnedParticle;
 

@@ -24,11 +24,6 @@ typedef struct {
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ RiseMotion motion;
-} RiseParticle;
-
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);

@@ -80,7 +80,7 @@ void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner
 
 /* Particle created by func_15130280 (only the fields used here). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ WobbleData data;
 } Particle;
 

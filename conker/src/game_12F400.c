@@ -197,7 +197,7 @@ typedef struct {
 } Wobble151025F4;
 
 typedef struct {
-    u8 pad0[0xA8];
+    DescParticleHead head;
     Wobble151025F4 wobble;
 } Owner151025F4;
 
