@@ -37,7 +37,7 @@ typedef struct Game1DD500Impact {
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ f32 position[3];
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -64,10 +64,13 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(Game1DD500Ground *, struct127 *);
 s32 func_15134070(struct127 *);
-void func_15143134(Vec3f *, f32 *, Mtx *);
-void func_15153F18(Game1DD500Impact *, f32 *, Game1DD500Ground *, s32, s32);
+void func_15143134(Vec3f *, Vec3f *, Mtx *);
+void func_15153F18(Game1DD500Impact *, Vec3f *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
+
+/* Joint matrix of an actor; include/ types the array as struct255 *. */
+#define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->unk1D4)[joint])
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
 #define EFFECT_PROFILE(actor) \
@@ -105,7 +108,7 @@ void func_151B01B8(struct127 *actor, struct127 *other) {
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
                 shade = (actor->unk7A >> 8) + 0x40;
-                func_15143134(&D_800AA120, impact.position, &((Mtx *)actor->unk1D4)[6]);
+                func_15143134(&D_800AA120, &impact.position, JOINT_MTX(actor, 6));
                 impact.unk2C = 10;
                 impact.unk2E = 20;
                 impact.unk00 = shade - 0x68;
@@ -133,7 +136,7 @@ void func_151B01B8(struct127 *actor, struct127 *other) {
                 impact.unk44 = 16;
                 impact.unk46 = 15;
                 impact.unk48 = 0;
-                func_15153F18(&impact, impact.position, &ground, 0xFF, 1);
+                func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
             }
         }
     }
@@ -158,9 +161,7 @@ typedef struct {
     u8 pad_0x34[0xDC];
     CompactOscillatorMotionState field_0x110;
 } CompactOscillatorObject;
-void func_151B1918(struct260 *arg0);
 void func_15149368(struct260 *arg0);
-typedef Game1DD500Ground Game1DD500Hit;
 void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
 s32 func_15046C80(f32 *, s32, f32, Game1DD500Ground *);
 s32 func_1504697C(f32 *, s32, f32, Game1DD500Ground *);
@@ -180,9 +181,9 @@ void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
 
     if (actor != NULL) {
         func_1504715C(&ground, actor);
-        impact.position[0] = actor->x_position;
-        impact.position[1] = actor->y_position;
-        impact.position[2] = actor->z_position;
+        impact.position.x = actor->x_position;
+        impact.position.y = actor->y_position;
+        impact.position.z = actor->z_position;
         impact.unk14 = 5.08f;
         impact.unk2C = 10;
         impact.unk02 = 0xFF;
@@ -206,7 +207,7 @@ void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
         impact.unk24 = 18.0f;
         impact.unk28 = 11.8f;
         impact.unk40 = 0.5f;
-        func_15153F18(&impact, impact.position, &ground, 0xFF, 1);
+        func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
 
         count = func_150ADA20() % 6 + 12;
         scatterGround.unk18 = 0;
@@ -268,302 +269,309 @@ void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    void *obj;
-    u8 kind;
-} Msg151B09BC;
+/* Per-particle motion block at 0x110 of a particle object. */
+typedef struct Game1DD500Motion {
+    /* 0x00 */ Vec3f velocity;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ u8 phase[2];      /* oscillator angles for width, height */
+    /* 0x12 */ s8 phaseSpeed[2];
+    /* 0x14 */ f32 baseWidth;
+    /* 0x18 */ f32 baseHeight;
+    /* 0x1C */ f32 swingWidth;
+    /* 0x20 */ f32 swingHeight;
+    /* 0x24 */ u8 checkGround;   /* splat when it reaches the ground */
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[2];
+} Game1DD500Motion; // size 0x28
 
-typedef struct {
-    s32 a;
-    s32 b;
-    s32 c;
-} Triple151B09BC;
-
-typedef struct {
-    void *obj;
-    u8 kind;
-    s32 unk08;
-    Triple151B09BC slots[11];
-    f32 unk90;
-    u8 flag;
-} Data151B09BC;
-
-extern u8 D_800A3FE6[];
-void *memcpy(void *, const void *, u32);
-
-struct260 *func_151B09BC(void *arg0, void *arg1, s16 arg2, u8 arg3, s32 arg4) {
-    struct260 *obj;
-    Data151B09BC data;
-    s32 index;
-    s16 lifetime;
-    u8 hasLifetime;
-    Msg151B09BC msg;
-
-    if (arg0 == NULL) {
-        return NULL;
-    }
-    index = arg1 != 0 ?
-        ((*(u8 *)((u8 *)arg1 + 4) == 0x53 || *(u8 *)((u8 *)arg1 + 4) == 0xA5) ?
-            4 : func_15134070(arg1)) : 4;
-    if (index == 0x63) {
-        return NULL;
-    }
-    if (D_800A3FE6[index * 0x10] == 2) {
-        return NULL;
-    }
-    if (D_800A3FE6[index * 0x10] == 1) {
-        data.flag = 1;
-    } else {
-        data.flag = 0;
-    }
-    msg.obj = arg0;
-    msg.kind = *((u8 *)arg0 + 0x3B);
-    func_151494E0((s32)&msg, 0x13);
-    hasLifetime = 0;
-    if (arg2 == -1) {
-        lifetime = 0x12C;
-    } else {
-        lifetime = arg2;
-        hasLifetime = 1;
-    }
-    data.obj = arg0;
-    data.kind = *((u8 *)arg0 + 0x3B);
-    data.unk08 = 0;
-    data.unk90 = 0.0f;
-    {
-        s32 i;
-    for (i = 0; i < 11; i++) {
-        data.slots[i].a = 0;
-        data.slots[i].b = 0;
-        data.slots[i].c = 0;
-    }
-    }
-    obj = func_151491F4(lifetime, -1, 0x13, hasLifetime, 0xF, 0x98, arg3, arg4);
-    if (obj != NULL) {
-        memcpy((void *)((s32)obj + 0x28), &data, 0x98);
-    }
-    return obj;
-}
-
-typedef struct { f32 x, y, z; } Vec3f_151B0B88;
-
-typedef struct Game1DD500Owner {
-    s32 active;
-    u8 kind;
-    u8 pad5[0x36];
-    u8 id;
-    u8 pad3C[0x38];
-    u8 flags74;
-    u8 pad75[0x15F];
-    s32 transform;
-} Game1DD500Owner;
-
+/* Particle object created by func_1513D524. */
 typedef struct Game1DD500Particle {
-    u8 pad0[0x34];
-    Vec3f_151B0B88 position;
-    Vec3f_151B0B88 previous;
-    u8 pad4C[0xC];
-    s32 flags;
-    u8 pad5C[0xB4];
-    Vec3f_151B0B88 velocity;
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0xF];
+    /* 0x01C */ s16 life;
+    /* 0x01E */ u8 pad1E[0xE];
+    /* 0x02C */ f32 width;
+    /* 0x030 */ f32 height;
+    /* 0x034 */ Vec3f position;
+    /* 0x040 */ Vec3f previous;
+    /* 0x04C */ u8 pad4C[0xC];
+    /* 0x058 */ s32 flags;
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0x1B];
+    /* 0x078 */ Game1DD500Ground ground;
+    /* 0x09C */ u8 pad9C[0x24];
+    /* 0x0C0 */ Vtx quadTemplate[4];
+    /* 0x100 */ Vtx *quads[4];
+    /* 0x110 */ Game1DD500Motion motion;
 } Game1DD500Particle;
 
-typedef struct Game1DD500Node {
-    Game1DD500Particle *object;
-    s32 state;
-    struct Game1DD500Node *next;
-} Game1DD500Node;
+/* Spawn description passed to func_1513D524; laid out like the particle from 0x18 on. */
+typedef struct Game1DD500ParticleDesc {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 life;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f position;
+    /* 0x28 */ Vec3f previous;
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 alpha;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 pad46[0x12];
+} Game1DD500ParticleDesc; // size 0x58
 
-typedef struct Game1DD500Packet {
-    Game1DD500Owner *owner;
-    u8 id;
-    s32 count;
-    Game1DD500Node nodes[11];
-    f32 time;
-    u8 kind;
-} Game1DD500Packet;
+/* A particle held at one of the owner's joints until its timer runs out. */
+typedef struct Game1DD500Slot {
+    /* 0x0 */ Game1DD500Particle *particle;
+    /* 0x4 */ s32 timer;
+    /* 0x8 */ struct Game1DD500Slot *next; /* ring of free slots while spawning */
+} Game1DD500Slot;
 
+/* Effect that keeps particles stuck to an actor's joints and drops them over time. */
+typedef struct Game1DD500Emitter {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;   /* owner->unique_id at creation */
+    /* 0x08 */ s32 count;    /* attached particles */
+    /* 0x0C */ Game1DD500Slot slots[11];
+    /* 0x90 */ f32 spawnTime;
+    /* 0x94 */ u8 profileFlag;
+} Game1DD500Emitter; // size 0x98
+
+/* Effect task: a struct260 header followed by the effect's data. */
+typedef struct Game1DD500Task {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;   /* -1 ends the task */
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Game1DD500Emitter emitter;
+} Game1DD500Task;
+
+/* Message 0x13 (and 0): this actor's effects should end. */
+typedef struct Game1DD500ActorMsg {
+    /* 0x0 */ struct127 *actor;
+    /* 0x4 */ u8 uniqueId;
+} Game1DD500ActorMsg;
+
+/* Message 0x2D: two actors swapped identities. */
+typedef struct Game1DD500SwapMsg {
+    /* 0x0 */ struct127 *a;
+    /* 0x4 */ struct127 *b;
+    /* 0x8 */ u8 uniqueIdA;
+    /* 0x9 */ u8 uniqueIdB;
+} Game1DD500SwapMsg;
+
+void func_151B1918(Game1DD500Task *task);
+
+void *memcpy(void *, const void *, u32);
+
+/* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
+Game1DD500Task *func_151B09BC(struct127 *actor, struct127 *other, s16 lifetime, u8 arg3, s32 arg4) {
+    Game1DD500Task *task;
+    Game1DD500Emitter emitter;
+    s32 profile;
+    s16 life;
+    u8 timed;
+    Game1DD500ActorMsg msg;
+
+    if (actor == NULL) {
+        return NULL;
+    }
+    profile = EFFECT_PROFILE(other);
+    if (profile == 99) {
+        return NULL;
+    }
+    if (D_800A3FD8[profile].unkE == 2) {
+        return NULL;
+    }
+    if (D_800A3FD8[profile].unkE == 1) {
+        emitter.profileFlag = 1;
+    } else {
+        emitter.profileFlag = 0;
+    }
+    msg.actor = actor;
+    msg.uniqueId = actor->unique_id;
+    func_151494E0((s32)&msg, 0x13);
+    timed = FALSE;
+    if (lifetime == -1) {
+        life = 300;
+    } else {
+        life = lifetime;
+        timed = TRUE;
+    }
+    emitter.owner = actor;
+    emitter.ownerId = actor->unique_id;
+    emitter.count = 0;
+    emitter.spawnTime = 0.0f;
+    {
+        s32 i;
+
+        for (i = 0; i < 11; i++) {
+            emitter.slots[i].particle = NULL;
+            emitter.slots[i].timer = 0;
+            emitter.slots[i].next = NULL;
+        }
+    }
+    task = (Game1DD500Task *)func_151491F4(life, -1, 0x13, timed, 0xF, sizeof(emitter), arg3, arg4);
+    if (task != NULL) {
+        memcpy(&task->emitter, &emitter, sizeof(emitter));
+    }
+    return task;
+}
+
+/* A joint and an offset in that joint's space where an emitter particle sits. */
 typedef struct Game1DD500Mount {
-    u8 joint;
-    u8 pad1[3];
-    Vec3f_151B0B88 offset;
+    /* 0x0 */ u8 joint;
+    /* 0x1 */ u8 pad1[3];
+    /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-typedef struct Game1DD500SparkPacket {
-    u8 kind;
-    u8 pad1;
-    s16 flags;
-    s16 life;
-    u8 pad6[2];
-    s32 field8;
-    s32 fieldC;
-    u8 color[4];
-    f32 range[2];
-    Vec3f_151B0B88 position;
-    Vec3f_151B0B88 direction;
-    Vec3f_151B0B88 scale;
-    s32 mode;
-    u8 field44;
-    u8 field45;
-    u8 pad46[0x12];
-} Game1DD500SparkPacket;
-
-typedef struct Game1DD500SparkMotion {
-    u8 pad0[0xC];
-    f32 fieldC;
-    u8 field10;
-    u8 field11;
-    u8 field12;
-    u8 field13;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    u8 field24;
-    u8 field25;
-    u8 pad26[2];
-} Game1DD500SparkMotion;
-
 void func_1513F680(void *, u8, u8, u8, u8);
-extern Game1DD500Mount D_800AA12C[];
-extern Game1DD500Mount D_800AA1DC[];
-extern f32 D_800AA2E0;
-extern f32 D_800AA2E4;
-extern f32 D_800AA2E8;
-extern f32 D_800AA2EC;
+extern Game1DD500Mount D_800AA12C[11];
+extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
 extern u8 D_800AB310[];
 
-void func_151B0B88(u8 *arg0) {
-    Game1DD500Packet *list = (Game1DD500Packet *)(arg0 + 0x28);
-    u8 failed;
+/* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
+void func_151B0B88(Game1DD500Task *task) {
+    Game1DD500Emitter *emitter = &task->emitter;
+    u8 failed; // matching: ending the task directly in the check reorders the whole function
 
-    failed = 0;
-    if (list->owner->active == 0 || list->owner->id != list->id) {
-        failed = 1;
+    failed = FALSE;
+    if (emitter->owner->interaction_state == 0 || emitter->owner->unique_id != emitter->ownerId) {
+        failed = TRUE;
     }
     if (!failed) {
-        Game1DD500Node *head;
-        Game1DD500Node *last;
+        Game1DD500Slot *head;
+        Game1DD500Slot *last;
         s32 i;
-        u32 count;
+        u32 freeCount;
 
-        if (list->owner->transform == 0) {
-            goto clear;
-        }
-        head = NULL;
-        last = NULL;
-        if ((list->owner->flags74 & 0xF) != 0xF) {
-            count = 0;
+        if (emitter->owner->unk1D4 != NULL && (emitter->owner->unk74 & 0xF) != 0xF) {
+            head = NULL;
+            last = NULL;
+            freeCount = 0;
             for (i = 0; i < 11; i++) {
-                Game1DD500Node *node = &list->nodes[i];
-                s32 keep;
+                Game1DD500Slot *slot = &emitter->slots[i];
+                s32 isFree;
 
-                if (node->object != NULL) {
-                    node->object->previous = node->object->position;
-                    func_15143134(list->owner->kind == 0x36 ? &D_800AA1DC[i].offset.x : &D_800AA12C[i].offset.x,
-                                  &node->object->position.x,
-                                  list->owner->kind == 0x36 ? (D_800AA1DC[i].joint << 6) + list->owner->transform : (D_800AA12C[i].joint << 6) + list->owner->transform);
-                    node->state -= D_800BE9E4;
-                    if (node->state < 0) {
-                        Vec3f_151B0B88 *velocity = &node->object->velocity;
+                if (slot->particle != NULL) {
+                    slot->particle->previous = slot->particle->position;
+                    func_15143134(emitter->owner->id == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
+                                  &slot->particle->position,
+                                  emitter->owner->id == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
+                                                             : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
+                    slot->timer -= D_800BE9E4;
+                    if (slot->timer < 0) {
+                        Vec3f *velocity = &slot->particle->motion.velocity;
 
-                        velocity->x = (node->object->position.x - node->object->previous.x) * D_800BE9A8;
+                        velocity->x = (slot->particle->position.x - slot->particle->previous.x) * D_800BE9A8;
                         velocity->y = 0.0f;
-                        velocity->z = (node->object->position.z - node->object->previous.z) * D_800BE9A8;
-                        func_1513F680(node->object, 0x10, 0x1B, 0, 0x10);
-                        node->object->flags |= 1;
-                        node->object = NULL;
-                        list->count--;
-                        keep = 1;
+                        velocity->z = (slot->particle->position.z - slot->particle->previous.z) * D_800BE9A8;
+                        func_1513F680(slot->particle, 0x10, 0x1B, 0, 0x10);
+                        slot->particle->flags |= 1;
+                        slot->particle = NULL;
+                        emitter->count--;
+                        isFree = TRUE;
                     } else {
-                        keep = 0;
+                        isFree = FALSE;
                     }
                 } else {
-                    keep = 1;
+                    isFree = TRUE;
                 }
-                if (keep) {
+                if (isFree) {
                     if (last == NULL) {
-                        last = node;
+                        last = slot;
                     }
-                    node->next = head;
-                    head = node;
-                    count++;
+                    slot->next = head;
+                    head = slot;
+                    freeCount++;
                 }
             }
-            if (count != 0) {
-                list->time += func_150ADA68() * D_800AA2E0 * D_800AA2E4 * D_800BE9A4;
-                if (list->time > 1.0f) {
-                    Game1DD500SparkPacket packet;
-                    Game1DD500SparkMotion motion;
+            if (freeCount != 0) {
+                emitter->spawnTime += func_150ADA68() * 307.0f * 0.001f * D_800BE9A4;
+                if (emitter->spawnTime > 1.0f) {
+                    Game1DD500ParticleDesc desc;
+                    Game1DD500Motion motion;
 
                     last->next = head;
-                    packet.kind = D_800AB310[list->kind];
-                    packet.flags = 0x1001;
-                    packet.life = func_150ADA20() % 51 + 0x34;
-                    packet.field8 = 0;
-                    packet.fieldC = 0;
-                    packet.color[0] = 0;
-                    packet.color[1] = 0;
-                    packet.color[2] = 0;
-                    packet.color[3] = 0xFF;
-                    packet.mode = 0;
-                    packet.scale.x = 1.0f;
-                    packet.scale.y = 1.0f;
-                    packet.scale.z = 1.0f;
-                    motion.field10 = 0;
-                    motion.field11 = 0;
-                    packet.direction.x = 0.0f;
-                    packet.direction.y = 0.0f;
-                    packet.direction.z = 0.0f;
-                    motion.field25 = list->kind;
-                    motion.field24 = func_150ADA20() & 1;
-                    packet.range[0] = 0.0f;
-                    packet.range[1] = 0.0f;
-                    motion.field14 = 5.0f;
-                    motion.field18 = 25.0f;
-                    motion.field1C = 2.0f;
-                    motion.field20 = 8.0f;
+                    desc.unk0 = D_800AB310[emitter->profileFlag];
+                    desc.flags = 0x1001;
+                    desc.life = func_150ADA20() % 51 + 52;
+                    desc.unk8 = 0;
+                    desc.unkC = 0;
+                    desc.color[0] = 0;
+                    desc.color[1] = 0;
+                    desc.color[2] = 0;
+                    desc.color[3] = 0xFF;
+                    desc.unk40 = 0;
+                    desc.scale.x = 1.0f;
+                    desc.scale.y = 1.0f;
+                    desc.scale.z = 1.0f;
+                    motion.phase[0] = 0;
+                    motion.phase[1] = 0;
+                    desc.previous.x = 0.0f;
+                    desc.previous.y = 0.0f;
+                    desc.previous.z = 0.0f;
+                    motion.unk25 = emitter->profileFlag;
+                    motion.checkGround = func_150ADA20() & 1;
+                    desc.width = 0.0f;
+                    desc.height = 0.0f;
+                    motion.baseWidth = 5.0f;
+                    motion.baseHeight = 25.0f;
+                    motion.swingWidth = 2.0f;
+                    motion.swingHeight = 8.0f;
                     do {
                         u32 skip;
                         s32 index;
-                        void *result;
+                        Game1DD500Particle *particle;
 
-                        skip = func_150ADA20() % count;
+                        skip = func_150ADA20() % freeCount;
                         while (skip--) {
                             last = head;
                             head = head->next;
                         }
-                        index = head - list->nodes;
-                        packet.field45 = func_150ADA20() % 101 + 100;
-                        packet.field44 = func_150ADA20() % 101 + 0x9B;
-                        motion.field12 = func_150ADA20() % 5 + 4;
-                        motion.field13 = func_150ADA20() % 5 + 4;
-                        motion.fieldC = (func_150ADA68() * 506.0f + D_800AA2E8) * D_800AA2EC;
-                        func_15143134(&D_800AA12C[index].offset.x, &packet.position.x, (D_800AA12C[index].joint << 6) + list->owner->transform);
-                        packet.direction = packet.position;
-                        result = func_1513D524(&packet, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28, arg0[0xC], arg0[1]);
-                        head->object = result;
-                        if (result != NULL) {
-                            memcpy((u8 *)result + 0x110, &motion, sizeof(motion));
-                            head->state = func_150ADA20() % 31 + 20;
+                        index = head - emitter->slots;
+                        desc.unk45 = func_150ADA20() % 101 + 100;
+                        desc.alpha = func_150ADA20() % 101 + 155;
+                        motion.phaseSpeed[0] = func_150ADA20() % 5 + 4;
+                        motion.phaseSpeed[1] = func_150ADA20() % 5 + 4;
+                        // matching: "- 703.0f" emits sub.s; the original adds a negative constant
+                        motion.gravity = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
+                        func_15143134(&D_800AA12C[index].offset, &desc.position,
+                                      JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
+                        desc.previous = desc.position;
+                        particle = func_1513D524(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
+                                                 task->unkC, task->unk1);
+                        head->particle = particle;
+                        if (particle != NULL) {
+                            memcpy(&particle->motion, &motion, sizeof(motion));
+                            head->timer = func_150ADA20() % 31 + 20;
                             head = head->next;
-                            count--;
+                            freeCount--;
                             last->next = head;
-                            list->count++;
+                            emitter->count++;
                         }
-                        list->time -= 1.0f;
-                    } while (list->time > 1.0f && count != 0);
+                        emitter->spawnTime -= 1.0f;
+                    } while (emitter->spawnTime > 1.0f && freeCount != 0);
                 }
             }
-        } else {
-        clear:
-            if (list->count != 0) {
-                func_151B1918((struct260 *)arg0);
-            }
+        } else if (emitter->count != 0) {
+            func_151B1918(task);
         }
     }
     if (failed) {
-        *(s16 *)(arg0 + 0xE) = -1;
+        task->unkE = -1;
     }
 }
 
@@ -766,26 +774,23 @@ s32 func_151B1828(CompactOscillatorObject *arg0) {
     return 1;
 }
 
-void func_151B1918(struct260 *arg0) {
-    struct {
-        s32 head[2];
-        s32 count;
-        s32 entries[11][3];
-    } *list;
+/* Frees every attached particle and resets the emitter. */
+void func_151B1918(Game1DD500Task *task) {
+    Game1DD500Emitter *emitter;
     s32 i;
 
-    list = (void *)((u8 *)arg0 + 0x28);
-    list->count = 0;
-    *(f32 *)((u8 *)arg0 + 0xB8) = 0.0f;
+    emitter = &task->emitter;
+    emitter->count = 0;
+    emitter->spawnTime = 0.0f;
     for (i = 0; i < 11; i++) {
-        s32 *entry = list->entries[i];
+        Game1DD500Slot *slot = &emitter->slots[i];
 
-        if (list->entries[i][0] != 0) {
-            func_1516972C((struct102 *)entry[0]);
+        if (slot->particle != NULL) {
+            func_1516972C((struct102 *)slot->particle);
         }
-        entry[0] = 0;
-        entry[1] = 0;
-        entry[2] = 0;
+        slot->particle = NULL;
+        slot->timer = 0;
+        slot->next = NULL;
     }
 }
 
