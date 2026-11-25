@@ -22,6 +22,8 @@ typedef struct {
     /* 0x11C */ BoneChain *chain;
 } ChainObjExt;
 
+typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
+
 #define CHAIN_EXT(obj) ((ChainObjExt *)(obj)->unk31C)
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
@@ -101,7 +103,6 @@ extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern u8 D_800BEA0C;
 extern u8 D_800C3C9D;
 extern f32 D_800C4008[3]; /* chain anchor position */
-typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
 
 void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
 extern f32 sqrtf(f32);
