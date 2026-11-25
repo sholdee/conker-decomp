@@ -16,13 +16,7 @@ typedef struct {
 
 /* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectE7970Data data;
 } EffectE7970;
 
@@ -64,7 +58,7 @@ void func_150BA55C(EffectE7970 *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
-        effect->unkE = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL) {
@@ -92,7 +86,7 @@ void func_150BA55C(EffectE7970 *effect) {
                 growth[2] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
                 func_1518A3C0(spawnPos, angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, velocity, growth,
                               (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 60, 0, 0,
-                              effect->unkC, effect->unk1);
+                              effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
         }

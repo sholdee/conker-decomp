@@ -44,7 +44,7 @@ typedef struct {
  * modified each frame. The buffers follow the header, then `userDataSize` bytes of user data.
  */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ DynModelDesc desc;
     /* 0x4C */ DynModelAsset *asset;
     /* 0x50 */ s32 buffersSize;  // size of all vertex buffers, i.e. the offset of the user data
@@ -144,7 +144,7 @@ void func_1513B798(DynModel *obj) {
         }
     }
     if (done) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->header);
     }
 }
 
@@ -177,12 +177,12 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
 
 void func_1513B9A8(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169804((EffectHeader *)obj);
+    func_15169804(&obj->header);
 }
 
 void func_1513B9DC(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169824((EffectHeader *)obj);
+    func_15169824(&obj->header);
 }
 
 void func_1513BA10(DynModel *obj) {
@@ -239,7 +239,7 @@ DynModel *func_1513BAE8(void) {
     obj = func_1513B5E0(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
     if (obj != NULL) {
         if (obj->buffersSize != 0x1180) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->header);
         } else {
             memcpy(obj->buffers + obj->buffersSize, &state, sizeof(TexWarpState));
         }

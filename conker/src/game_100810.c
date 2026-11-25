@@ -723,7 +723,7 @@ void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
     if (id == 0 || id == 0x2E || id == 3) {
         obj = msg->ref.actor;
         if (obj == state->owner || msg->ref.uniqueId == state->ownerId) {
-            func_1516972C((EffectHeader *)actor);
+            func_1516972C(&actor->head.header);
         }
     } else if (id == 0x2D) {
         if (state->owner == msg->swap.actorA) {

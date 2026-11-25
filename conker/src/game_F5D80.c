@@ -13,11 +13,7 @@ typedef struct {
 } RadialDir;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
+    EffectHeader header;
     RadialEffectDef def; /* 0x10 */
     f32 size;            /* 0x40 */
     f32 radius;          /* 0x44 */
@@ -128,7 +124,7 @@ void func_150C8A68(RadialEffect *effect) {
     }
     if (expired) {
 
-        func_1516972C((EffectHeader *)effect);
+        func_1516972C(&effect->header);
     }
 }
 
@@ -390,7 +386,7 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
     func_15143794(heading, pitch, speed, &packet.vel.x);
-    func_15130374(&packet, 1, 0, effect->unkC, effect->unk1);
+    func_15130374(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
 extern s32 func_1505D024(Actor *, s32, u16, s32);
@@ -489,7 +485,7 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     packet.ownerId = 0;
     packet.fadeStart = 0x20;
     packet.fadeRate = 7;
-    func_15132A4C(&packet, 3, 0xFF, 0, effect->unkC, effect->unk1);
+    func_15132A4C(&packet, 3, 0xFF, 0, effect->header.owner, effect->header.kind);
 }
 
 

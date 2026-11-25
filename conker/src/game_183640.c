@@ -10,7 +10,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
  * width-wide edge at its head. Head and tail move with separate velocities.
  */
 typedef struct {
-    /* 0x00 */ u8 header[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec3f headPos;
     /* 0x1C */ Vec3f headVel;
     /* 0x28 */ Vec3f tailPos;
@@ -126,7 +126,7 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (expired) {
-        func_1516972C((EffectHeader *)particle);
+        func_1516972C(&particle->header);
     }
 }
 
@@ -482,10 +482,10 @@ void func_15156F94(StreakParticle *particle) {
 
 void func_15156FB8(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169804((EffectHeader *)particle);
+    func_15169804(&particle->header);
 }
 
 void func_15156FE4(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169824((EffectHeader *)particle);
+    func_15169824(&particle->header);
 }

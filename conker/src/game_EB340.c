@@ -12,9 +12,7 @@ typedef struct {
 
 /* The object func_150BDE90 creates; func_150BDF0C is its per-frame update. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0xC];
-    /* 0x0C */ u8  unkC;
-    /* 0x0D */ u8  padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EB340Spawn spawn;
 } EB340Obj;
 
@@ -93,7 +91,7 @@ void func_150BDF0C(EB340Obj *obj) {
         payload.unkD = 0;
         payload.unkC = 0;
         payload.unk10 = (func_150ADA68() * 4.06400013f) + 2.513000011f;
-        effect = func_1515548C(&emitter, 10, 0, 0, sizeof(emitter), obj->unkC, 0);
+        effect = func_1515548C(&emitter, 10, 0, 0, sizeof(emitter), obj->base.header.owner, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x70, &payload, sizeof(payload));
         }
@@ -106,13 +104,13 @@ void func_150BDF0C(EB340Obj *obj) {
 void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->base.header);
         }
     } else if (event == 0) {
         Actor *sender = msg[0];
 
         if (sender->camera == obj->spawn.owner) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->base.header);
         }
     }
 }

@@ -13,7 +13,7 @@ extern SpriteAnim *D_8008CA4C[];
 
 /* A textured sprite particle: one quad, drawn by func_151720C4. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vtx vtx[4];
     /* 0x50 */ s16 lifetime;  // drawn while >= 2; 0 starts the -3 -> -1 removal countdown
     /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
@@ -60,7 +60,7 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
     if (particle != NULL) {
         if (!(flags & 2)) {
             if (func_15172B20(particle->vtx, x, y, z, angle, dist, size, D_8008CA4C[particle->animIndex]->width) == 0) {
-                func_1516972C((EffectHeader *)particle);
+                func_1516972C(&particle->header);
             }
         } else {
             particle->vtx[0].v.ob[0] = particle->vtx[3].v.ob[0] = x - (f32)size;
@@ -86,7 +86,7 @@ void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 ani
     particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
     if (particle != NULL) {
         if (func_151725FC(particle->vtx, tri, x, y, z, 0.0f, size, D_8008CA4C[particle->animIndex]->width) == 0) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }
@@ -100,7 +100,7 @@ void func_15171FC0(Particle19F150 *particle) {
     if (lifetime < -1) {
         particle->lifetime = lifetime + 1;
         if (particle->lifetime == -1) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
         return;
     }

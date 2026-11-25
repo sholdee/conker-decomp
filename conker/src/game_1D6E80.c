@@ -100,12 +100,7 @@ typedef struct {
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
 typedef struct ActorTask {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
@@ -134,7 +129,7 @@ void func_151A99D0(ActorTask *task) {
         pos[2] = actor->z_position;
         if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 3, task->unkC, task->unk1);
+            func_151ABE40(pos, &task->hit, 3, task->header.owner, task->header.kind);
         }
     }
 }
@@ -157,7 +152,7 @@ void func_151A9AA4(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 3, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -182,7 +177,7 @@ void func_151A9BA0(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 1, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 1, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -207,7 +202,7 @@ void func_151A9CA0(ActorTask *task) {
     pos[2] = actor->z_position;
     if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
         pos[1] = task->hit.height;
-        func_151ABE40(pos, &task->hit, 1, task->unkC, task->unk1);
+        func_151ABE40(pos, &task->hit, 1, task->header.owner, task->header.kind);
         func_10010FFC(0, 8, 0x6978, 0, 0, actor);
     }
     func_151AA264(actor, &task->hit);
@@ -232,7 +227,7 @@ void func_151A9DC0(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 2, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -256,7 +251,7 @@ void func_151A9EC0(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 2, task->header.owner, task->header.kind);
             func_10010FFC(0, 8, 0x6978, 0, 0, actor);
         }
     }
@@ -280,7 +275,7 @@ void func_151A9FC8(ActorTask *task) {
         pos[2] = actor->z_position;
         if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+            func_151ABE40(pos, &task->hit, 4, task->header.owner, task->header.kind);
         }
     }
 }
@@ -301,7 +296,7 @@ void func_151AA09C(ActorTask *task) {
         pos[2] = actor->z_position;
         if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+            func_151ABE40(pos, &task->hit, 4, task->header.owner, task->header.kind);
         }
     }
 }
@@ -849,7 +844,7 @@ void func_151AB1C4(ActorTask *task) {
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            func_151ABE40(pos, hit, 3, task->header.owner, task->header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -1035,7 +1030,7 @@ void func_151AB854(ActorTask *task) {
         if (actor->unk127 != 0xFF) {
             actor->unk31C->idle.delay = 500;
         }
-        func_15190770(&desc, 0, task->unkC, task->unk1);
+        func_15190770(&desc, 0, task->header.owner, task->header.kind);
     }
 }
 
@@ -1056,13 +1051,7 @@ typedef struct {
 } EmitterPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterPayload payload;
 } EmitterTask;
 
@@ -1137,14 +1126,14 @@ void func_151AB9C8(EmitterTask *task) {
                     randB = func_150ADA20();
                     func_151D9014(pos, vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
                                   (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
-                                  0, task->unkC, task->unk1);
+                                  0, task->base.header.owner, task->base.header.kind);
                 }
                 emitter->accum -= 1.0f;
             } while (emitter->accum > 1.0f);
         }
     }
     if (dead) {
-        task->unkE = -1;
+        task->base.header.state = -1;
     }
 }
 
@@ -1157,7 +1146,7 @@ void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if ((msg->ref.actor == payload->actor) || (msg->ref.uniqueId == payload->actorId)) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (msgId == 0x2D) {
         if (payload->actor == msg->swap.actorA) {

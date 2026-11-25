@@ -275,13 +275,7 @@ typedef struct Game1DD500Emitter {
 
 /* Effect task: a TimedEffect header followed by the effect's data. */
 typedef struct Game1DD500Task {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;   /* -1 ends the task */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1DD500Emitter emitter;
 } Game1DD500Task;
 
@@ -464,7 +458,7 @@ void func_151B0B88(Game1DD500Task *task) {
                                       JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
                         desc.rot = desc.pos;
                         particle = func_1513D524(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
-                                                 task->unkC, task->unk1);
+                                                 task->base.header.owner, task->base.header.kind);
                         head->particle = particle;
                         if (particle != NULL) {
                             memcpy(&particle->motion, &motion, sizeof(motion));
@@ -483,7 +477,7 @@ void func_151B0B88(Game1DD500Task *task) {
         }
     }
     if (failed) {
-        task->unkE = -1;
+        task->base.header.state = -1;
     }
 }
 
@@ -678,7 +672,7 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == swap->actorA) {
@@ -694,11 +688,11 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 /* Task handler: frees the attached particles, then passes the task on to func_1514933C. */
 void func_151B1A58(Game1DD500Task *task) {
     func_151B1918(task);
-    func_1514933C((TimedEffect *)task);
+    func_1514933C(&task->base);
 }
 
 /* Task handler: frees the attached particles, then passes the task on to func_15149368. */
 void func_151B1A84(Game1DD500Task *task) {
     func_151B1918(task);
-    func_15149368((TimedEffect *)task);
+    func_15149368(&task->base);
 }

@@ -101,10 +101,7 @@ typedef struct TrailLink {
 } TrailLink;
 
 typedef struct TrailSpawner {
-    /* 0x00 */ u8 pad0[0xD];
-    /* 0x0D */ u8 flags;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailLink link;
 } TrailSpawner;
 
@@ -852,8 +849,8 @@ void func_151A084C(TrailSpawner *spawner) {
     }
     if (done) {
         func_151A0928(spawner);
-        spawner->unkE = -1;
-        spawner->flags |= 1;
+        spawner->base.header.state = -1;
+        spawner->base.header.flags |= 1;
     }
 }
 
@@ -892,7 +889,7 @@ void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {
             func_151A0928(spawner);
-            func_1516972C((EffectHeader *)spawner);
+            func_1516972C(&spawner->base.header);
         }
     }
 }

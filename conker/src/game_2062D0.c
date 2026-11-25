@@ -417,11 +417,7 @@ typedef struct {
 } DripData; /* 0x18 */
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
+    TimedEffect base;
     DripData drip;
 } DripEffect;
 
@@ -503,7 +499,7 @@ void func_151D9EB0(DripEffect *effect) {
         rand = func_150ADA68();
         lifeRand = func_150ADA20();
         func_151D9014(&drip->pos, &D_800A5480, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
-                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->unkC, effect->unk1);
+                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
         drip->timer = (func_150ADA20() % 111U) + 30;
     }
 }

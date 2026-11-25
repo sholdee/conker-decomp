@@ -9,7 +9,7 @@ typedef struct {
 
 /* Rope effect: a 10-point chain hung between two endpoints and drawn as a textured strip. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x010 */ u8 flags;           // ROPE_FLAG_*
     /* 0x011 */ u8 pad11;
     /* 0x012 */ s16 timer;
@@ -120,7 +120,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C((EffectHeader *)effect);
+        func_1516972C(&effect->header);
     }
 }
 
@@ -801,10 +801,10 @@ void func_151B4C1C(HoltenRopeEffect *effect) {
 
 void func_151B4C6C(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824((EffectHeader *)effect);
+    func_15169824(&effect->header);
 }
 
 void func_151B4C98(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824((EffectHeader *)effect);
+    func_15169824(&effect->header);
 }

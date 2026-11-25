@@ -18,9 +18,7 @@ typedef struct {
 } SparkEmitter; // size 0x14
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ SparkEmitter emitter;
 } SparkEmitterEffect;
 
@@ -63,7 +61,7 @@ void func_151A0AF8(SparkEmitterEffect *effect) {
     emitter = &effect->emitter;
     while (emitter->accum > 1.0f) {
         func_1514C678(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,
-                      0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->owner);
+                      0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->base.header.owner);
         emitter->accum -= 1.0f;
     }
 }

@@ -49,7 +49,7 @@ typedef struct {
 } BoltLink; /* size 0x28 */
 
 typedef struct {
-    /* 0x00 */ u8 unk0[0x10];        /* object header */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDef def;
     /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
     /* 0x64 */ BoltPoint *points;
@@ -162,7 +162,7 @@ void func_151A7A90(Bolt *bolt) {
     }
 
     if (done) {
-        func_1516972C((EffectHeader *)bolt);
+        func_1516972C(&bolt->header);
     }
 }
 
@@ -348,7 +348,7 @@ void func_151A8584(Bolt *bolt) {
         D_8008F94C[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169804((EffectHeader *)bolt);
+    func_15169804(&bolt->header);
 }
 
 extern void (*D_8008F958[])(Bolt *);
@@ -361,7 +361,7 @@ void func_151A85D4(Bolt *bolt) {
         D_8008F958[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169824((EffectHeader *)bolt);
+    func_15169824(&bolt->header);
 }
 
 /*
@@ -539,7 +539,7 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     if (msgType == 0) {
         actor = msg->ref.actor;
         if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
-            func_1516972C((EffectHeader *)bolt);
+            func_1516972C(&bolt->header);
         }
     } else if (msgType == 0x2D) {
         if (link->owner == msg->swap.actorA) {
@@ -601,13 +601,7 @@ typedef struct {
 } EmitterState; /* size 0x58 */
 
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
     /* 0x80 */ u8 data[1];           /* user data */
 } Emitter;
@@ -688,7 +682,7 @@ void func_151A8CEC(Emitter *emitter) {
 
     if (state->def.update != -1) {
         if (D_8008F980[state->def.update](emitter) == 0) {
-            emitter->unkE = -1;
+            emitter->base.header.state = -1;
             return;
         }
     }
@@ -884,7 +878,7 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     func_1513C650(&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
-                  emitter->unkC, emitter->unk1);
+                  emitter->base.header.owner, emitter->base.header.kind);
 }
 
 /* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
@@ -1059,7 +1053,7 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
         (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
         (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        settings->unk1C, settings->unk1E, 8, emitter->unkC, emitter->unk1);
+        settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {
         memcpy(particle + 0x160, &extra, sizeof(extra));
     }

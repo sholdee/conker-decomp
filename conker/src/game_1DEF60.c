@@ -15,11 +15,7 @@ typedef struct {
 } Data151B1AB0;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
+    TimedEffect base;
     Data151B1AB0 data;
 } Task151B1AB0;
 
@@ -128,7 +124,7 @@ void func_151B1B34(Task151B1AB0 *task) {
                 if (func_150ADA20() & 1) {
                     spawn.flags |= 0x80;
                 }
-                particle = func_15130374(&spawn, 1, sizeof(extra), task->unkC, task->unk1);
+                particle = func_15130374(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->unkA8, &extra, sizeof(extra));
                 }
@@ -161,7 +157,7 @@ void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
         Actor *owner = msg->ref.actor;
 
         if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     }
 }

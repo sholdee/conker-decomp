@@ -2166,7 +2166,7 @@ void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
-            func_1516972C((EffectHeader *)actor);
+            func_1516972C(&actor->head.header);
         }
     } else if (kind == 0x2D) {
         if (ref->actor == msg->swap.actorA) {

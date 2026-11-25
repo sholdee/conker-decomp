@@ -19,7 +19,7 @@ typedef struct OtherModeL {
 
 /* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
 typedef struct TexturedQuad {
-    /* 0x00 */ u8 pad0[0x10];       // object link header
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 texture;          // index into D_80090B60
     /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
     /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
@@ -119,10 +119,10 @@ void func_1515BAE0(TexturedQuad *quad) {
         func = quad->destroyFunc;
         if (func != -1) {
             if (D_8008B07C[func](quad) != 0) {
-                func_1516972C((EffectHeader *)quad);
+                func_1516972C(&quad->header);
             }
         } else {
-            func_1516972C((EffectHeader *)quad);
+            func_1516972C(&quad->header);
         }
     }
 }

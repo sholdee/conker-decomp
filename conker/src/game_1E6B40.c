@@ -197,11 +197,7 @@ void func_151B9964(FallingParticle *particle) {
 
 /* Type 7 object (0x2C bytes): emits func_151B9690 particles every frame until its timer runs out. */
 typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];   /* object link */
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[3];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 *followPos; /* when set, emit from this position instead of x/y/z */
     /* 0x14 */ u8 animIndex;
     /* 0x15 */ u8 kind;
@@ -274,19 +270,19 @@ void func_151B9CB0(ParticleEmitter *emitter) {
     for (i = 0; i < self->count; i++) {
         func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360, emitter->velY,
                       emitter->velYRange, emitter->speed, emitter->speedRange, 15, emitter->minSize,
-                      emitter->size, emitter->owner, emitter->list);
+                      emitter->size, emitter->header.owner, emitter->header.kind);
     }
     for (i = 0; i < 4; i++) {
         func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360,
                       (emitter->velY * 3) / 2, emitter->velYRange * 2, emitter->speed,
-                      emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->owner, emitter->list);
+                      emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->header.owner, emitter->header.kind);
     }
 
     // matching: `timer = emitter->timer - D_800BE9E4;` schedules the end differently
     timer = emitter->timer;
     timer -= D_800BE9E4;
     if (timer < 0) {
-        func_1516972C((EffectHeader *)emitter);
+        func_1516972C(&emitter->header);
     } else {
         emitter->timer = timer;
     }

@@ -24,13 +24,7 @@ typedef struct {
 
 /* The object spawned by func_150FC438. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
 } EmitterObj;
 
@@ -373,17 +367,17 @@ void func_150FC614(EmitterObj *obj) {
     state = &obj->state;
     owner = state->owner;
     if ((owner->interaction_state == 0) || (owner->id == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
     if (owner->unk84.uh != state->unk1D) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
 
     state->spawnTimer -= D_800BE9A4;
     while (state->spawnTimer < 0.0f) {
-        func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->unkC, obj->unk1);
+        func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->unk31C != NULL) {
@@ -404,7 +398,7 @@ void func_150FC614(EmitterObj *obj) {
         spark.unk5 = 1 << state->unk16;
         spark.unk4 = (func_150ADA20() % 6U) + 3;
         spark.unk6 = -1;
-        func_151D8868(&spark, 0, obj->unkC, obj->unk1);
+        func_151D8868(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         func_150ADA20();
         state->unk14 = 250;
     }
@@ -422,10 +416,10 @@ void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
         msgObj = msg->ref.actor;
         owner = state->owner;
         if ((owner == msgObj) || (state->ownerUniqueId == msg->ref.uniqueId)) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->base.header);
         } else if (state->other != NULL) {
             if ((msgObj == state->other) || (state->otherUniqueId == msg->ref.uniqueId)) {
-                func_1516972C((EffectHeader *)obj);
+                func_1516972C(&obj->base.header);
             }
         }
     } else if (msgType == 0x2D) {

@@ -22,7 +22,7 @@ typedef struct BoltFlare {
  * desc.segments + 2 jittered joint points (func_151061EC) and the per-kind user data.
  */
 typedef struct BoltObj {
-    /* 0x00 */ u8 pad0[0x10];      /* object header */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDesc desc;
     /* 0x60 */ void *userData;
     /* 0x64 */ f32 step;           /* Bezier parameter step, 1 / (segments + 1) */
@@ -161,14 +161,14 @@ void func_1510608C(BoltObj *bolt) {
     if (bolt->desc.updateKind != -1) {
         update = D_80088C10[bolt->desc.updateKind];
         if (update != NULL && !update(bolt, &moved)) {
-            func_1516972C((EffectHeader *)bolt);
+            func_1516972C(&bolt->header);
         }
     }
 
     if (bolt->desc.flags & 1) {
         bolt->desc.life -= D_800BE9E4;
         if (bolt->desc.life < 0) {
-            func_1516972C((EffectHeader *)bolt);
+            func_1516972C(&bolt->header);
         }
     }
 
@@ -486,14 +486,14 @@ void func_15106E78(BoltObj *bolt) {
 /* Destroys the bolt's resources, then hands it to func_15169804. */
 void func_15106EF8(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169804((EffectHeader *)bolt);
+    func_15169804(&bolt->header);
 }
 
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169824((EffectHeader *)bolt);
+    func_15169824(&bolt->header);
 }
 
 extern void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2);

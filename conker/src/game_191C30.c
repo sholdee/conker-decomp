@@ -28,7 +28,7 @@ typedef struct {
 } CamWobbleDef; // size 0x38
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ CamWobbleDef def;
     /* 0x48 */ f32 phase[6];
     /* 0x60 */ CamWobbleHalves posHalf;
@@ -134,7 +134,7 @@ void func_1516489C(CamWobble *wobble) {
         finished = 1;
     }
     if (finished) {
-        func_1516972C((EffectHeader *)wobble);
+        func_1516972C(&wobble->header);
     }
 }
 

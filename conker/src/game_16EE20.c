@@ -86,9 +86,7 @@ typedef struct {
 } EffectInfo;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 duration;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectInfo info;
 } AttachedEffect;
 
@@ -131,7 +129,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
                 effect = node->handle;
                 if (D_8008A0B4[effect->info.handler].unk0 != 0) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
-                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->duration);
+                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->base.header.state);
                 }
                 node = node->next;
             } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
@@ -247,7 +245,7 @@ void func_15141E38(Actor *actor, s32 handler) {
             effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
-                effect->duration = D_8008A0B4[handler].unk4;
+                effect->base.header.state = D_8008A0B4[handler].unk4;
             }
             node = node->next;
         } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);

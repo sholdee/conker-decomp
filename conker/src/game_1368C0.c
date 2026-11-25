@@ -37,15 +37,7 @@ typedef struct {
 } PairEmitterData; /* size 0x14 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* -1 ends the effect */
-    /* 0x10 */ u8 pad10[0x13 - 0x10];
-    /* 0x13 */ u8 unk13; /* compared with 0x1A, probably the effect's type */
-    /* 0x14 */ u8 pad14[0x28 - 0x14];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
         ActorRef tracked;
         ObjectEmitterData object;
@@ -122,7 +114,7 @@ TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (TimedEffect *)effect;
+    return &effect->base;
 }
 
 /*
@@ -147,7 +139,7 @@ void func_151094FC(Effect1368C0 *effect) {
     data = &effect->data.object;
     object = data->object;
     if (object->interaction_state == 0 || object->unique_id != data->objectId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
@@ -233,7 +225,7 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     spawn.deathFunc = -1;
     spawn.drawFunc = -1;
     spawn.handlerSet = 4;
-    func_15130374(&spawn, 1, 0, effect->owner, effect->kind);
+    func_15130374(&spawn, 1, 0, effect->base.header.owner, effect->base.header.kind);
 
     emitter.countBase = 1;
     emitter.countRange = 4;
@@ -287,7 +279,7 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     emitter.unk39 = 0;
     emitter.unk72 = -1;
     emitter.unk73 = -1;
-    func_15152B38(&emitter, effect->owner, effect->kind);
+    func_15152B38(&emitter, effect->base.header.owner, effect->base.header.kind);
 }
 
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
@@ -337,7 +329,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.destroyFn = 0;
     debris.squashFn = 0;
     debris.matrixFn = 2;
-    if (effect->unk13 == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
+    if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
         debris.unk6A = 1;
     } else {
         debris.unk6A = 2;
@@ -347,7 +339,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.fadeStart = 10;
     debris.fadeRate = 25;
 
-    func_15132A4C(&debris, 3, 0xFF, 0, effect->owner, effect->kind);
+    func_15132A4C(&debris, 3, 0xFF, 0, effect->base.header.owner, effect->base.header.kind);
 }
 
 /*
@@ -384,7 +376,7 @@ TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (TimedEffect *)effect;
+    return &effect->base;
 }
 
 /*
@@ -463,7 +455,7 @@ TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (TimedEffect *)effect;
+    return &effect->base;
 }
 
 /*
@@ -485,7 +477,7 @@ void func_1510A40C(Effect1368C0 *effect) {
     data = &effect->data.pair;
     object = data->object;
     if (object->interaction_state == 0 || object->unique_id != data->objectId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
@@ -551,7 +543,7 @@ void func_1510A40C(Effect1368C0 *effect) {
             spawn.vel.x = dirs[side].x * speed;
             spawn.vel.y = dirs[side].y * speed;
             spawn.vel.z = dirs[side].z * speed;
-            particle = func_15130374(&spawn, 1, sizeof(extra), effect->owner, effect->kind);
+            particle = func_15130374(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->unkA8, &extra, sizeof(extra));
             }

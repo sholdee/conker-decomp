@@ -1249,7 +1249,7 @@ typedef struct {
 
 /* A spawned sight sprite: the spawn descriptor lives on at +0x10, the payload at +0x70. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     ScreenSpriteInfo desc;
     u8 pad68[8];
     SightSpritePayload payload;
@@ -1466,7 +1466,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (sprite->payload.player == *(Camera **)msg) {
-            func_1516972C((EffectHeader *)sprite);
+            func_1516972C(&sprite->header);
         // matching: an empty labelled statement keeps IDO from merging this branch's exit
         label:
             ;
@@ -1474,7 +1474,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == sprite->payload.player) {
-            func_1516972C((EffectHeader *)sprite);
+            func_1516972C(&sprite->header);
         }
     }
     handler = D_8008FC10[sprite->payload.kind];

@@ -21,9 +21,7 @@ typedef struct {
 } BeamData; // size 0x5A8
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 state;               // -1 kills the effect
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamData data;
 } BeamEffect;
 
@@ -203,7 +201,7 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         }
     }
     if (failed) {
-        effect->state = -1;
+        effect->base.header.state = -1;
     }
     return gdl;
 }
@@ -235,7 +233,7 @@ void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
         Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->uniqueId == data->firstId || gone->uniqueId == data->secondId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     }
 }

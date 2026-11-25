@@ -12,9 +12,7 @@ typedef struct {
 } OwnerEffectData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerEffectData data;
 } OwnerEffect;
 
@@ -51,7 +49,7 @@ void func_15100230(OwnerEffect *effect, ActorRef *msg, u8 msgId) {
     if (msgId == 0x48) {
         // matching: the punned read of msg makes IDO load it a second time for the id compare
         if (msg->actor == data->owner || data->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     } else {
         func_15149514((s32)msg, msgId, &data->owner, &data->ownerId, effect);
@@ -65,7 +63,7 @@ void func_151002BC(OwnerEffect *effect) {
     Actor *owner = data->owner;
 
     if (owner->interaction_state == 0 || owner->id == 0xFF || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->camera != NULL) {

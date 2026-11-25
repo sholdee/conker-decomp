@@ -8,7 +8,7 @@ typedef struct ActorFollowerGroup ActorFollowerGroup;
 
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15[3];
@@ -29,7 +29,7 @@ struct BoneFollower {
 
 /* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
 struct ActorFollowerGroup {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15;
@@ -107,7 +107,7 @@ void func_151D2C40(BoneFollower *follower) {
     actor = follower->actor;
     if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != follower->actorUid ||
         actor->unk1D4 == NULL || (actor->unk74 & 0xF) == 0xF) {
-        func_1516972C((EffectHeader *)follower);
+        func_1516972C(&follower->header);
         return;
     }
 
@@ -120,13 +120,13 @@ void func_151D2C40(BoneFollower *follower) {
                 D_8008FC48[follower->expireFn](follower, &position);
             }
             follower->attached = 0;
-            func_1516972C((EffectHeader *)follower);
+            func_1516972C(&follower->header);
             return;
         }
     }
 
     if (follower->updateFn != -1 && D_8008FC40[follower->updateFn](follower, &position) == 0) {
-        func_1516972C((EffectHeader *)follower);
+        func_1516972C(&follower->header);
         return;
     }
 
@@ -144,7 +144,7 @@ void func_151D2DCC(BoneFollower *arg0) {
     if (follower->attached != 0) {
         func_1516972C((EffectHeader *)follower->attached);
     }
-    func_15169804((EffectHeader *)follower);
+    func_15169804(&follower->header);
 }
 
 void func_151D2E14(BoneFollower *arg0) {
@@ -154,7 +154,7 @@ void func_151D2E14(BoneFollower *arg0) {
     if (follower->attached != 0) {
         func_1516979C((EffectHeader *)follower->attached);
     }
-    func_15169824((EffectHeader *)follower);
+    func_15169824(&follower->header);
 }
 
 /* Message handler: 0 destroys followers of the given actor; 0x2D swaps two actors. */
@@ -170,7 +170,7 @@ void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
         actorUid = follower->actorUid;
         msgUid = msg->unk4.ub;
         if (actor == otherActor || msgUid == actorUid) {
-            func_1516972C((EffectHeader *)follower);
+            func_1516972C(&follower->header);
         }
     } else if (type == 0x2D) {
         actor = msg->unk0;
@@ -208,7 +208,7 @@ void func_151D2F90(ActorFollowerGroup *group) {
     actor = group->actor;
     wasTrackable = group->flags & 2;
     if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != group->actorUid) {
-        func_1516972C((EffectHeader *)group);
+        func_1516972C(&group->header);
         return;
     }
     if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
@@ -222,7 +222,7 @@ void func_151D2F90(ActorFollowerGroup *group) {
             if (group->expireFn != -1) {
                 D_8008FC58[group->expireFn](group);
             }
-            func_1516972C((EffectHeader *)group);
+            func_1516972C(&group->header);
             return;
         }
     }
@@ -235,7 +235,7 @@ void func_151D2F90(ActorFollowerGroup *group) {
         }
     }
     if (group->updateFn != -1 && D_8008FC4C[group->updateFn](group) == 0) {
-        func_1516972C((EffectHeader *)group);
+        func_1516972C(&group->header);
     }
 }
 
@@ -257,7 +257,7 @@ void func_151D3130(ActorFollowerGroup *group) {
                 D_8008FC48[follower->expireFn](follower, &follower->position);
             }
             follower->attached = 0;
-            func_1516972C((EffectHeader *)follower);
+            func_1516972C(&follower->header);
             follower = next;
         latch: // matching: the label ends the block so as1 fills the branch delay slot from the loop top
             ;
@@ -268,12 +268,12 @@ void func_151D3130(ActorFollowerGroup *group) {
 
 void func_151D31F4(ActorFollowerGroup *group) {
     func_151D3130(group);
-    func_15169804((EffectHeader *)group);
+    func_15169804(&group->header);
 }
 
 void func_151D3220(ActorFollowerGroup *group) {
     func_151D3130(group);
-    func_15169824((EffectHeader *)group);
+    func_15169824(&group->header);
 }
 
 /* Message handler: like func_151D2E5C, then forwards the message to the group kind's handler. */
@@ -362,7 +362,7 @@ void func_151D33FC(ActorFollowerGroup *group, struct223 *msg) {
     msgUid = msg->unk4.ub;
     otherActor = msg->unk0;
     if (actor == otherActor || msgUid == actorUid) {
-        func_1516972C((EffectHeader *)group);
+        func_1516972C(&group->header);
     }
 }
 

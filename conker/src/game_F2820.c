@@ -25,7 +25,7 @@ typedef struct StripTarget {
 
 /* A camera-facing textured strip drawn from p0 to p1 (object type 0x46). */
 typedef struct StripObj {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Vec3f p0;
@@ -68,12 +68,12 @@ StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
 
 /** Destroy handler: hands the strip to func_15169804. */
 void func_150C5430(StripObj *strip) {
-    func_15169804((EffectHeader *)strip);
+    func_15169804(&strip->header);
 }
 
 /** Free handler: hands the strip to func_15169824. */
 void func_150C5450(StripObj *strip) {
-    func_15169824((EffectHeader *)strip);
+    func_15169824(&strip->header);
 }
 
 extern void (*D_800887B8[])(StripObj *);
@@ -149,7 +149,7 @@ void func_150C5568(StripObj *strip) {
             }
         }
         if (remove) {
-            func_1516972C((EffectHeader *)strip);
+            func_1516972C(&strip->header);
         }
     }
 }
@@ -323,7 +323,7 @@ void func_150C5D0C(StripObj *strip, ActorMsg *data, u8 msg) {
 
     if (msg == 0) {
         if (data->ref.actor == target->obj || data->ref.uniqueId == target->uniqueId) {
-            func_1516972C((EffectHeader *)strip);
+            func_1516972C(&strip->header);
         }
     } else if (msg == 0x2D) {
         if (target->obj == data->swap.actorA) {

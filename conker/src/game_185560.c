@@ -300,7 +300,7 @@ void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
  * actions of D_8008B02C[mode] when it changes as described by D_800A6200.
  */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Actor *character;
@@ -349,7 +349,7 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     watcher->unk10 = 1;
     watcher->unk14 = 0;
     if (func_15159370(chr, &watcher->mode) == 0) {
-        func_1516979C((EffectHeader *)watcher);
+        func_1516979C(&watcher->header);
         return NULL;
     }
     watcher->unk50 = 0;
@@ -358,12 +358,12 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
 
 void func_15158CD4(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169804((EffectHeader *)watcher);
+    func_15169804(&watcher->header);
 }
 
 void func_15158D00(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169824((EffectHeader *)watcher);
+    func_15169824(&watcher->header);
 }
 
 s32 func_15159084(Actor *chr, u8 mode);
@@ -1342,11 +1342,7 @@ typedef struct {
 } RiseEmitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1];
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RiseEmitter emitter;
 } RiseEmitterObject;
 
@@ -1438,7 +1434,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
             flipX = (func_150ADA20() & 1) ? 0x40 : 0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;
-            particle = func_15130280(&spawn, 2, NULL, sizeof(RiseMotion), obj->unkC, obj->unk1);
+            particle = func_15130280(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->motion, &rise, sizeof(RiseMotion));
             }

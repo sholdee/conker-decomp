@@ -41,13 +41,7 @@ typedef struct {
 
 /* A beam object allocated by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; /* -1: destroy */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamState beam;
 } BeamObj;
 
@@ -111,12 +105,12 @@ BeamObj *func_150F6DE4(Actor *owner) {
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
             spawn.maxSize = 20.0f;
-            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
+            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
             spawn.r2 = 0xFF;
             spawn.g2 = 0;
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
-            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
+            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
         }
     }
     return obj;
@@ -139,7 +133,7 @@ void func_150F706C(BeamObj *obj) {
     owner = beam->owner;
 
     if (owner->interaction_state == 0 || owner->unique_id != beam->ownerId) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
 
@@ -225,11 +219,11 @@ void func_150F739C(BeamObj *obj) {
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_1514933C. */
 void func_150F740C(BeamObj *obj) {
     func_150F739C(obj);
-    func_1514933C((TimedEffect *)obj);
+    func_1514933C(&obj->base);
 }
 
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_15149368. */
 void func_150F7438(BeamObj *obj) {
     func_150F739C(obj);
-    func_15149368((TimedEffect *)obj);
+    func_15149368(&obj->base);
 }

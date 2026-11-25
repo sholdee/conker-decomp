@@ -42,13 +42,7 @@ typedef struct {
 
 /* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* -1 ends the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
         EmitterData emitter;
         EmittedPoint point;
@@ -73,7 +67,7 @@ void func_150EC520(Effect *effect) {
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
                 spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
-                                                  sizeof(point), effect->owner, effect->kind);
+                                                  sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
                 }
@@ -159,7 +153,7 @@ void func_150EC6B0(Effect *effect) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, effect->owner, effect->kind);
+            particle = func_15130280(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data, &data, sizeof(data));
             }
@@ -202,7 +196,7 @@ void func_150ECB8C(Effect *effect) {
     Actor *owner = fog->owner;
 
     if ((owner->interaction_state == 0) || (owner->unique_id != fog->ownerId)) {
-        effect->state = -1;
+        effect->base.header.state = -1;
     } else {
         func_1502EA98(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
     }

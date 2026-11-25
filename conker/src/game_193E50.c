@@ -5,11 +5,7 @@
 
 /* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
+    EffectHeader header;
     Mtx mtx[3];
     u8 timer; // counts down from 10; particles spawn at 5, freed at 0
     u8 padD1;
@@ -100,10 +96,10 @@ void func_15166B50(void *self) {
             spawn.x = x;
             spawn.y = y;
             spawn.z = z;
-            func_15167D84(&spawn, 0, 0, -1, obj->unkC, obj->unk1);
+            func_15167D84(&spawn, 0, 0, -1, obj->header.owner, obj->header.kind);
         }
     } else if (obj->timer == 0) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->header);
     }
 }
 

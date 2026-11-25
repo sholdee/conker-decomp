@@ -6,7 +6,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 struct Shadow {
-    /* 0x000 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
     /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
     /* 0x110 */ u8 *owner;

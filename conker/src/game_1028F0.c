@@ -12,13 +12,7 @@ typedef struct {
 } FollowEffectData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state;
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ FollowEffectData data;
 } FollowEffect;
 
@@ -103,7 +97,7 @@ void func_150D54C8(FollowEffect *effect) {
     data = &effect->data;
     if (owner) {} // matching: raises owner's register priority over data
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk28 < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
@@ -170,7 +164,7 @@ void func_150D54C8(FollowEffect *effect) {
                 spawn.flags &= ~0xC0;
                 right = (func_150ADA20() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | right;
-                func_15130280(&spawn, 1, 0, 0, effect->unkC, effect->unk1);
+                func_15130280(&spawn, 1, 0, 0, effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
         }
@@ -185,7 +179,7 @@ void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     if (type == 0 || type == 0x2F || type == 3) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->swap.actorA) {

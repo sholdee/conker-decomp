@@ -430,11 +430,7 @@ typedef struct {
 } EmitterData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterData data;
 } EmitterEffect;
 
@@ -490,7 +486,7 @@ void func_150FAAEC(EmitterEffect *effect) {
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
         func_150F4570(&from, &to, variants->ids[i], duration, 1.0f / duration,
                       variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
-                      effect->unkC, effect->unk1);
+                      effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
     }
 }

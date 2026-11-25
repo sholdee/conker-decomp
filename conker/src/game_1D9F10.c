@@ -46,7 +46,7 @@ typedef struct Rope {
 
 /* The 0x30-byte link object that moves an owner along its rope (func_151ACA60). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ u8 unk18;
@@ -97,7 +97,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
         return NULL;
     }
     if (func_151ACB38(obj, &rider->unk18) == 0) {
-        func_1516979C((EffectHeader *)rider);
+        func_1516979C(&rider->header);
         return NULL;
     }
     rider->owner = obj;

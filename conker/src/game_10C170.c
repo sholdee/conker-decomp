@@ -7,11 +7,7 @@
 
 /* Effect object header from func_15149130; effect-specific data starts at 0x28. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Vec3f pos;
 } PointEffect;
 
@@ -174,12 +170,12 @@ void func_150DF334(PointEffect *effect) {
         groundPos.z = pos->z;
         onGround = 1;
     }
-    func_150E83AC(onGround ? &groundPos : pos, (s16)(func_150ADA20() % 62U + 120), effect->owner, effect->kind);
+    func_150E83AC(onGround ? &groundPos : pos, (s16)(func_150ADA20() % 62U + 120), effect->base.header.owner, effect->base.header.kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
     center.y += 500.0f;
-    func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->owner,
-                  effect->kind);
+    func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->base.header.owner,
+                  effect->base.header.kind);
 }
 
 void *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);

@@ -26,7 +26,7 @@ typedef struct {
 
 /* Model effect object (types 0x36 / 0x4C / 0x5B). */
 typedef struct {
-    /* 0x000 */ u8 header[0x10]; /* object link header (func_15167A68) */
+    /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
     /* 0x068 */ ModelInstance *model;
     /* 0x06C */ s32 *displayLists;
@@ -116,7 +116,7 @@ void func_15157248(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169804((EffectHeader *)fx);
+    func_15169804(&fx->header);
 }
 
 /* As func_15157248, but releases the object through func_15169824. */
@@ -124,7 +124,7 @@ void func_1515728C(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169824((EffectHeader *)fx);
+    func_15169824(&fx->header);
 }
 
 /*
@@ -171,7 +171,7 @@ void func_151572D0(Effect *fx) {
         }
     }
     if (dead) {
-        func_1516972C((EffectHeader *)fx);
+        func_1516972C(&fx->header);
     }
 }
 

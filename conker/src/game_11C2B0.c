@@ -145,11 +145,7 @@ typedef struct {
 
 /* A beam's emitter (created by func_15149130), carrying its EmitterLink at +0x28. */
 typedef struct BeamEmitter {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterLink link;
 } BeamEmitter;
 
@@ -553,7 +549,7 @@ void func_150EFB80(BeamEmitter *emitter) {
                 func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel.x);
                 part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
                 part.color.alpha = func_150ADA20() % 101U + 155;
-                func_1515C2F0(&spawn, 0, &part, 0, emitter->unkC, emitter->unk1);
+                func_1515C2F0(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
                 link->accum -= 1.0f;
             } while (link->accum > 1.0f);
         } else {
@@ -721,12 +717,12 @@ void func_150F0318(BeamEmitter *emitter);
 
 void func_150F02C0(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_1514933C((TimedEffect *)emitter);
+    func_1514933C(&emitter->base);
 }
 
 void func_150F02EC(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_15149368((TimedEffect *)emitter);
+    func_15149368(&emitter->base);
 }
 
 /* Clears the beam's reference to this emitter. */
@@ -1131,13 +1127,7 @@ typedef struct {
 } TrailLink; /* 0x18 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailLink link;
 } TrailEmitter;
 
@@ -1178,7 +1168,7 @@ void func_150F1170(TrailEmitter *emitter) {
     last = emitter->link.lastPos;
     link = &emitter->link;
     if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
-        emitter->unkE = -1;
+        emitter->base.header.state = -1;
         return;
     }
     link->lastPos.x = actor->x_position;
@@ -1244,7 +1234,7 @@ void func_150F1170(TrailEmitter *emitter) {
             spawn.alpha = (func_150ADA20() % 71U) + 80;
             spawn.timer = (func_150ADA20() % 31U) + 60;
             spawn.width = spawn.height = func_150ADA68() * 514.0f + 404.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->unkC, emitter->unk1);
+            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->link.trail, &ext, sizeof(ext));
             }

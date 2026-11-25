@@ -17,11 +17,7 @@ typedef struct {
 } ObjectEmitterData; /* size 0xC */
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjectEmitterData data;
 } Effect1BFDD0;
 
@@ -112,7 +108,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             desc.vel.x = dir->x * speed;
             desc.vel.y = dir->y * speed;
             desc.vel.z = dir->z * speed;
-            particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+            particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->drag, &drag, sizeof(drag));
             }
@@ -214,7 +210,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 if (func_150ADA20() & 1) {
                     desc.flags |= PARTICLE_FLIP_T;
                 }
-                particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+                particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->drag, &drag, sizeof(drag));
                 }
@@ -245,7 +241,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     } else if (msgType == 0) {
         removed = removal->actor;
         if (removed == data->object || removal->uniqueId == data->objectId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     }
 }
@@ -270,7 +266,7 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     } else if (msgType == 0) {
         removed = removal->actor;
         if (removed == data->object || removal->uniqueId == data->objectId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     }
 }

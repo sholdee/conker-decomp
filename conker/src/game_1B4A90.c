@@ -20,7 +20,7 @@ typedef struct {
 
 /* Burst effect object: 12 pieces flying outwards from a point and fading. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     Mtx mtx[2];          /* 0x10 */
     f32 x;               /* 0x90 */
     f32 y;               /* 0x94 */
@@ -51,7 +51,7 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
     if (burst != NULL) {
         burst->pieces = allocate_memory(BURST_NUM_PIECES * sizeof(BurstPiece), 1, 2, 1);
         if (burst->pieces == NULL) {
-            func_1516972C((EffectHeader *)burst);
+            func_1516972C(&burst->header);
             return;
         }
         burst->x = x;
@@ -96,7 +96,7 @@ void func_15187978(BurstEffect *burst) {
 
     if (burst->timer < 0) {
         func_10004074(burst->pieces);
-        func_1516972C((EffectHeader *)burst);
+        func_1516972C(&burst->header);
         return;
     }
     burst->timer += D_800BE9E4;

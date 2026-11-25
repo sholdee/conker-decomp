@@ -5,7 +5,7 @@
 
 // Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
 typedef struct {
-    u8         pad0[0x10];
+    EffectHeader header;
     Actor *owner;  // 0x10
     Actor *source; // 0x14
     u16        timer;  // 0x18
@@ -112,7 +112,7 @@ void func_151041E4(FadeEffect *effect) {
         alpha = effect->alpha;
         alpha -= D_800BEA08 * 10;
         if (alpha <= 0) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
             func_151D66F0(0, 0);
         } else {
             func_151D66F0((alpha * 210) >> 8, 2);

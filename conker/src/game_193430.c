@@ -8,7 +8,7 @@ extern f32 D_800A6C94; // pi / 180
 
 /* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
 typedef struct {
-    /* 0x00 */ u8 unk00[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vtx quads[2][4];
     /* 0x90 */ s8 dirX;       // -cos(direction) * 127, mode 1 only
     /* 0x91 */ s8 dirZ;       //  sin(direction) * 127, mode 1 only
@@ -119,7 +119,7 @@ void func_15166204(QuadEffect *effect) {
     effect->size = effect->size + effect->growthRate * D_800BE9E4;
     life -= D_800BE9E4;
     if (life <= 0) {
-        func_1516972C((EffectHeader *)effect);
+        func_1516972C(&effect->header);
         return;
     }
     effect->life = life;

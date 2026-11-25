@@ -108,7 +108,7 @@ typedef struct {
 
 /* Object type 0x20: hangs drops on the bones of an actor. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ActorLink link;
     /* 0x1C */ f32 spawnAccum;
     /* 0x20 */ s32 dropCount;
@@ -147,13 +147,13 @@ void func_15191400(DripEmitter *emitter);
 /* Type 0x20 handler: releases the drops, then func_15169804. */
 void func_15190840(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169804((EffectHeader *)emitter);
+    func_15169804(&emitter->header);
 }
 
 /* Type 0x20 handler: releases the drops, then func_15169824. */
 void func_1519086C(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169824((EffectHeader *)emitter);
+    func_15169824(&emitter->header);
 }
 
 /* A point on an actor's bone where a drop hangs. */
@@ -348,7 +348,7 @@ void func_15190898(DripEmitter *emitter) {
         }
     }
     if (done) {
-        func_1516972C((EffectHeader *)emitter);
+        func_1516972C(&emitter->header);
     }
 }
 
@@ -598,10 +598,10 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == emitter->link.actorId) {
         hit:
-            func_1516972C((EffectHeader *)emitter);
+            func_1516972C(&emitter->header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((EffectHeader *)emitter);
+        func_1516972C(&emitter->header);
     } else {
         func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }

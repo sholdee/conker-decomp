@@ -48,7 +48,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (obj->head.updateKind >= 15) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->head.header);
         return;
     }
     if (obj->head.updateKind != 0 && !dead) {
@@ -58,7 +58,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (obj->head.updateKind2 >= 18) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->head.header);
         return;
     }
     if (obj->head.updateKind2 != 0 && !dead) {
@@ -70,7 +70,7 @@ void func_15147740(EffectObj *obj) {
     if (obj->head.tmpl.flags & 0x10) {
         kind = obj->head.tmpl.unk14;
         if (kind < -1 || kind >= 8) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->head.header);
             return;
         }
         if (kind != -1 && !dead) {
@@ -81,7 +81,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (dead) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->head.header);
     }
 }
 
@@ -97,14 +97,14 @@ extern void func_1514795C(EffectObj *);
 void func_151478F4(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169804((EffectHeader *)obj);
+    func_15169804(&obj->head.header);
 }
 
 /* Frees the object's buffers, then hands it to func_15169824. */
 void func_15147928(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169824((EffectHeader *)obj);
+    func_15169824(&obj->head.header);
 }
 
 /* Frees the buffers func_15147A80 allocated. */
@@ -223,7 +223,7 @@ void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
     }
     gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, unk18);
     if (obj->head.drawKind >= 19) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->head.header);
         return gfx;
     }
     if (obj->head.drawKind != 0) {

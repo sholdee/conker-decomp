@@ -221,7 +221,7 @@ typedef struct {
 } SlidingSpriteData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ScreenSpriteInfo info;
     /* 0x68 */ u8 pad68[8];
     /* 0x70 */ SlidingSpriteData data;
@@ -243,7 +243,7 @@ void func_1515B5F4(s16 player) {
 void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     if (type == MSG_REMOVE_PLAYER_SPRITES) {
         if (sprite->data.player == payload[0]) {
-            func_1516972C((EffectHeader *)sprite);
+            func_1516972C(&sprite->header);
         }
     }
 }

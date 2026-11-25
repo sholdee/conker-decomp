@@ -31,11 +31,7 @@ typedef struct {
 
 /* Emitter object that keeps spawning particles behind a moving object. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ EmitterDesc desc;
@@ -64,13 +60,13 @@ void func_150C0A48(Emitter *emitter);
 /* Emitter destructors: free the live particles, then the emitter. */
 void func_150C09F0(Emitter *emitter) {
     func_150C0A48(emitter);
-    func_15169804((EffectHeader *)emitter);
+    func_15169804(&emitter->header);
 }
 
 
 void func_150C0A1C(Emitter *emitter) {
     func_150C0A48(emitter);
-    func_15169824((EffectHeader *)emitter);
+    func_15169824(&emitter->header);
 }
 
 /* Frees every live particle of the emitter. */
@@ -223,7 +219,7 @@ void func_150C0C38(Emitter *emitter) {
                     spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | bit;
                     spawn.timer = spawn.scaleStart = func_150ADA20() % 22U + 70;
                     spawn.scaleRate = 1.035226941f;
-                    emitter->slots[slot].particle = func_15130280(&spawn, 1, 0, 4, emitter->unkC, emitter->unk1);
+                    emitter->slots[slot].particle = func_15130280(&spawn, 1, 0, 4, emitter->header.owner, emitter->header.kind);
                     if (emitter->slots[slot].particle != NULL) {
                         memcpy(&emitter->slots[slot].particle->owner, &owner, sizeof(owner));
                         emitter->freeHead = emitter->slots[slot].next;
@@ -247,7 +243,7 @@ void func_150C0C38(Emitter *emitter) {
         }
     }
     if (kill) {
-        func_1516972C((EffectHeader *)emitter);
+        func_1516972C(&emitter->header);
     }
 }
 

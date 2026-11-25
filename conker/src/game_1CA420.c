@@ -108,13 +108,7 @@ typedef struct TrailTaskData {
 } TrailTaskData;
 
 typedef struct TrailTask {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 flags;     /* bit 0: done */
-    /* 0x0E */ s16 lifetime;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailTaskData data;
 } TrailTask;
 
@@ -707,7 +701,7 @@ void func_1519E464(TrailTask *task) {
     if (!finished) {
         if (data->owner->unk1D4 != NULL) {
             finished = TRUE;
-            trail = func_1519D030(data->owner, data->unk8, task->lifetime, task->flags & 1, task->unkC, task->unk1);
+            trail = func_1519D030(data->owner, data->unk8, task->base.header.state, task->base.header.flags & 1, task->base.header.owner, task->base.header.kind);
             if (trail != NULL) {
                 if (func_1514ED3C(data->owner->attachments, task, NULL) != 0) {
                     func_1514EC1C(trail, data->owner, 0x10);
@@ -716,8 +710,8 @@ void func_1519E464(TrailTask *task) {
         }
     }
     if (finished) {
-        task->lifetime = -1;
-        task->flags |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
     }
 }
 
@@ -727,7 +721,7 @@ void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId) {
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (eventId == 0x2D) {
         if (data->owner == event->swap.actorA) {
@@ -792,14 +786,14 @@ void func_1519E754(TrailTask *task) {
         if (data->owner->unk84.uh != 0x7C) {
             finished = TRUE;
             if (data->unk8 > 200) {
-                func_1519E3BC(data->owner, 300, task->unkC, task->unk1);
+                func_1519E3BC(data->owner, 300, task->base.header.owner, task->base.header.kind);
             }
         }
     }
     if (finished) {
         D_800E0920 = NULL;
-        task->lifetime = -1;
-        task->flags |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
     }
 }
 
@@ -809,7 +803,7 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
             D_800E0920 = NULL;
         // matching: an unused label ends the basic block here, as in the ROM
         skip:;
@@ -828,12 +822,12 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
 /* Trail task teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519E8CC(TrailTask *task) {
     func_1514EDF0(task, task->data.owner);
-    func_1514933C((TimedEffect *)task);
+    func_1514933C(&task->base);
 }
 
 void func_1519E8F8(TrailTask *task) {
     func_1514EDF0(task, task->data.owner);
-    func_15149368((TimedEffect *)task);
+    func_15149368(&task->base);
 }
 
 void func_1519E924(TimedEffect *task) {

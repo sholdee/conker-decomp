@@ -212,11 +212,7 @@ typedef struct {
 
 /* The emitter effect object created by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ CameraEmitterData data;
 } CameraEmitter;
 
@@ -292,7 +288,7 @@ void func_150F4DEC(CameraEmitter *emitter) {
             speed = func_150ADA68() * 10.0f + 5.0f;
             func_150F4570(&from, &to, variants->ids[i], speed, 1.0f / speed,
                           variants->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), FALSE, 0,
-                          emitter->unkC, emitter->unk1);
+                          emitter->base.header.owner, emitter->base.header.kind);
             data->pending -= 1.0f;
         } while (data->pending > 1.0f);
     }

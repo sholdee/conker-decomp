@@ -34,7 +34,7 @@ typedef struct {
 } Game196DB0SpriteParams;
 
 typedef struct {
-    /* 0x00 */ u8 header[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Game196DB0SpriteParams params;
 } Game196DB0Sprite; // size 0x4C
 
@@ -82,7 +82,7 @@ void func_15169988(Game196DB0Sprite *sprite) {
     if (lifetime != 0) {
         lifetime -= D_800BE9E4;
         if (lifetime <= 0) {
-            func_1516972C((EffectHeader *)sprite);
+            func_1516972C(&sprite->header);
             return;
         }
         sprite->params.lifetime = lifetime;

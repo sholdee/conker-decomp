@@ -390,7 +390,7 @@ void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 
 /* Blood trailing behind a moving point given by three coordinate pointers. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     f32 *x;
     f32 *y;
     f32 *z;
@@ -447,7 +447,7 @@ void func_151349D0(BloodTrail *trail) {
     position[2] = *trail->z;
     if (trail->flags & BLOOD_TRAIL_CALLBACK) {
         if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
-            func_1516972C((EffectHeader *)trail);
+            func_1516972C(&trail->header);
             return;
         }
     }
@@ -489,7 +489,7 @@ void func_151349D0(BloodTrail *trail) {
     if (trail->flags & BLOOD_TRAIL_LIFETIME) {
         trail->lifetime -= D_800BE9E4;
         if (trail->lifetime < 0) {
-            func_1516972C((EffectHeader *)trail);
+            func_1516972C(&trail->header);
         }
     }
 }

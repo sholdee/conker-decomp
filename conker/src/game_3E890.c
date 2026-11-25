@@ -122,7 +122,7 @@ typedef struct {
 } Controller; /* size 0x10 */
 
 typedef struct {
-    /* 0x00 */ u8 header[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Controller controller;
 } ControllerEffect;
 

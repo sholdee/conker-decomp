@@ -34,13 +34,7 @@ typedef struct {
 
 /* Effect object (TimedEffect is a shorter view of its head). */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectData data;
 } Effect;
 
@@ -172,7 +166,7 @@ void func_150C44A4(Effect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if ((owner->unk1D4 == NULL) || (data->flags & 2)) {
@@ -237,7 +231,7 @@ void func_150C44A4(Effect *effect) {
     if (emit) {
         data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * D_800BE9A4;
         while (data->unk8 > 1.0f) {
-            func_151C36D8(&pos, effect->unkC, effect->unk1);
+            func_151C36D8(&pos, effect->base.header.owner, effect->base.header.kind);
             data->unk8 -= 1.0f;
         }
     }
@@ -258,7 +252,7 @@ void func_150C44A4(Effect *effect) {
             randF1 = func_150ADA68();
             func_151D9014(&pos, &vel, 0xC, randF0 * 0.2580000162f + -0.6080000401f, (rand1 % 41U) + 60, (rand0 % 56U) + 200,
                           randF1 * 160.0f + 121.0f, func_150ADA68() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
-                          effect->unkC, effect->unk1);
+                          effect->base.header.owner, effect->base.header.kind);
             data->unk10 -= 1.0f;
         } while (data->unk10 > 1.0f);
     }
@@ -275,13 +269,13 @@ void func_150C4AD8(Effect *effect) {
 /* Frees the effect's particle, then calls func_1514933C on the effect. */
 void func_150C4B08(Effect *effect) {
     func_150C4AD8(effect);
-    func_1514933C((TimedEffect *)effect);
+    func_1514933C(&effect->base);
 }
 
 /* Frees the effect's particle, then calls func_15149368 on the effect. */
 void func_150C4B34(Effect *effect) {
     func_150C4AD8(effect);
-    func_15149368((TimedEffect *)effect);
+    func_15149368(&effect->base);
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */

@@ -30,13 +30,7 @@ typedef struct {
 } TrailBoneLink;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD; /* bit 0: remove */
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailAnchor anchor;
     /* 0x40 */ TrailBoneLink link;
 } TrailEmitter;
@@ -86,8 +80,8 @@ void func_151D7264(TrailEmitter *emitter) {
     prevPos = anchor->pos;
     wasValid = anchor->flags & 1;
     if (D_8008FCA0[anchor->anchorType](emitter) == 0) {
-        emitter->unkE = -1;
-        emitter->unkD |= 1;
+        emitter->base.header.state = -1;
+        emitter->base.header.flags |= 1;
         return;
     }
     if (anchor->flags & 1) {
@@ -310,7 +304,7 @@ void func_151D7830(TrailEmitter *emitter) {
     header.unk14 = 4;
     header.unk18 = 0;
 
-    trail = func_15147A80(&header, 0x20, sizeof(TrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->unkC, emitter->unk1);
+    trail = func_15147A80(&header, 0x20, sizeof(TrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->base.header.owner, emitter->base.header.kind);
     if (trail != NULL) {
         memcpy(trail->data, &data, sizeof(TrailData));
         emitter->anchor.trail = trail;

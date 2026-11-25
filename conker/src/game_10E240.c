@@ -23,11 +23,7 @@ typedef struct {
 } Emitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Emitter emitter;
 } EmitterEffect;
 
@@ -218,7 +214,7 @@ void func_150E114C(EmitterEffect *effect) {
             args.vel.x = dir[0] * speed;
             args.vel.y = dir[1] * speed;
             args.vel.z = dir[2] * speed;
-            particle = func_15130374(&args, 1, sizeof(extra), effect->owner, effect->kind);
+            particle = func_15130374(&args, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

@@ -4,7 +4,7 @@
 
 /* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
 struct Obj151A4FD0 {
-    /* 0x00 */ u8 header[0x10]; /* object link header (func_15167A68) */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 timer;       /* frames left; 0 = unlimited */
     /* 0x14 */ u8 type;         /* index into D_8008F900 */
     /* 0x15 */ u8 red;
@@ -47,7 +47,7 @@ void func_151A5070(struct Obj151A4FD0 *effect) {
     if (timer != 0) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
             return;
         }
         effect->timer = timer;
