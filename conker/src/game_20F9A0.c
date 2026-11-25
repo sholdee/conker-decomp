@@ -2,38 +2,39 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Menu/match state (D_8008FDD4 points at the static instance D_800E0AF0). */
 struct Struct151E5034 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+    f32 unk0;  /* progress of a step between path stops (func_151E6C1C) */
+    f32 unk4;  /* its speed */
+    f32 unk8;  /* progress along the current stop's path */
+    f32 unkC;  /* its speed */
     f32 unk10;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
-    u16 unk20;
+    u16 unk20; /* input bits read by the menus (1/2/4/8 directions, 0x10/0x20 buttons) */
     char pad22[8];
     s8 unk2A;
-    s8 unk2B;
-    s8 unk2C;
+    s8 unk2B; /* current path stop */
+    s8 unk2C; /* displayed stop */
     s8 unk2D;
     char pad2E[0x10];
-    s8 unk3E;
+    s8 unk3E; /* which of the two paths is in use */
     s8 unk3F;
     char pad40;
     s8 unk41;
-    s8 unk42;
+    s8 unk42; /* row of the mode table D_800AB68C */
     s8 unk43;
     s8 unk44;
     char pad45;
-    s16 unk46[16];
+    s16 unk46[16]; /* per-player score (checked against the limit D_800E0BE0[6], capped at 9999) */
     struct {
-        s16 unk0;
+        s16 unk0; /* hits on opponents */
         s16 unk2;
-        s16 unk4;
-        s16 unk6;
-        s16 unk8;
-        s16 unkA;
+        s16 unk4; /* hits on opponents with cause 0x2E */
+        s16 unk6; /* the player's unk1AA at the end of the match */
+        s16 unk8; /* hits taken */
+        s16 unkA; /* kills of teammates */
     } unk66[4];
 };
 
@@ -47,8 +48,9 @@ typedef struct {
     s8 unk7;
     s8 unk8;
     s8 unk9;
-} ModeEntry; /* row of the per-mode table D_800AB68C, indexed by D_8008FDD4->unk42 */
+} ModeEntry; /* row of the mode table D_800AB68C, indexed by D_8008FDD4->unk42 */
 
+/* Cue table row: func_1501D348(unk0, unk2 or unk3). */
 struct Struct151E4314 {
     s16 unk0;
     s8 unk2;
@@ -56,6 +58,7 @@ struct Struct151E4314 {
 };
 
 extern ModeEntry D_800AB68C[];
+/* D_8008FD94 and D_800E0C20 are s8 and D_800BE3DF is signed, but variables.h declares them otherwise: hence casts. */
 extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
@@ -76,17 +79,11 @@ extern u8 D_800E0B95;
 extern u8 D_800E0BDC;
 extern u16 D_800BE930;
 extern s32 D_800AB754[];
-extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
-extern u8 D_800E0A95;
-extern s8 D_800E0A96;
 extern s8 D_8008FDE0;
 extern void (*D_8008FDEC[])(void);
-void func_1000E934(void);
-void func_1000F1A8(void);
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, char *, ...);
-void func_151E2404(void);
 void func_151E3344(s32, s32, s32, u8, s8);
 void func_151E6964(s32);
 void func_151E530C(void);
@@ -117,126 +114,42 @@ static s8 D_800E0BE0[0x17];
 extern s8 D_8008FE54[];
 extern s8 D_8008FE6C[];
 extern s8 D_8008FE84[];
-void func_151DD9E4(void);
-s32 func_151DDB94(s32 arg0);
 void func_151DDBA0(void);
-void func_151DE6D4(void);
 
-extern s32 D_800E0A90;
 extern u8 D_800E0B97;
 extern u8 D_800E0B98;
 extern u8 D_800E0A8C;
-void func_151DE85C(void);
 void func_151DE7D4(void);
 
-extern s8 D_8008FE30;
 extern u8 D_8008FD74;
-void func_151DE81C(void);
 
-extern u8 D_800D2E40;
-extern u8 D_800E0B94;
 extern u8 D_8008FD80;
-extern u8 D_8008FDA4;
 extern struct Struct151E5034 *D_8008FDD4;
-void func_1501C730(s32, s32, s32, s32, s32);
-void func_151DE85C(void);
-void func_151DE8E8(void);
 
-extern u8 D_800E0A94;
 extern s8 D_800E0BE9;
-extern s8 D_8008FEF8;
 extern u8 D_8008FE34;
 extern f32 D_8008FDE8;
 extern u8 D_800E0A97;
-extern char D_800AB800[];
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
-struct216 *func_1507BB28(s32, s32);
-void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
-void func_151DF1BC(void);
-
-struct Struct151DFF38 {
-    u32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s8 unkC;
-    s8 padD;
-    s8 unkE;
-    s8 padF;
-};
 
 extern s8 D_8008FE2C;
-extern u8 D_800E0A94;
-extern char D_800AB814[];
-extern char D_800AB818[];
-extern char D_800AB828[];
-extern char D_800AB82C[];
-extern char D_800AB830[];
-extern char D_800AB834[];
-extern char D_800AB838[];
-extern char D_800AB83C[];
-extern char D_800AB840[];
 void func_15042E3C(char *, ...);
 void func_151E327C(void);
-void func_151DFF38(void);
-void func_151E09DC(void);
 
-extern s8 D_8008FE40;
 extern s8 D_8008FE44[];
 extern u8 D_800E0B8C;
 extern s8 D_800E0B90[];
 extern struct127 *D_800E0BA0[];
-extern u32 D_8008FEA4[];
-extern s8 D_8008FEC4[];
-extern char D_800AB854[];
-extern s8 D_8008FE2C;
 void func_151E7F60(s32 arg0, s32 arg1);
-void func_151E0B70(void);
 
 void func_151E4314(void);
-void func_15042E3C(char *, ...);
-extern s8 D_8008FDA0;
-extern s8 D_8008FE40;
-extern s8 D_8008FE44[];
-extern s8 D_8008FEE3[];
-extern s8 D_800AB74C[][4];
-extern char D_800AB858[];
-extern char D_800AB85C[];
-extern char D_800AB860[];
-void func_151E1214(void);
 
-extern s8 D_8008FDC4;
-typedef struct { s8 v[4]; } Offs4;
-extern Offs4 D_8008FF34;
-extern u8 D_800AB62C[];
-extern s8 D_800AB710[][12];
-extern char D_800AB864[];
-extern char D_800AB868[];
-extern char D_800AB86C[];
-extern char D_800AB870[];
-extern char D_800AB874[];
-extern char D_800AB878[];
-extern char D_800AB87C[];
-extern char D_800AB880[];
-extern char D_800AB884[];
-extern char D_800AB88C[];
-extern char D_800AB890[];
-extern char D_800AB894[];
-extern char D_800AB898[];
 extern s8 D_800E0BB0;
 extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *arg0);
-void func_151E1744(void);
 
-extern u8 D_8008FD80;
-void func_151E530C(void);
 void func_151E43DC(void);
-void func_151E2284(void);
 
-extern s8 *D_80082BBC;
-void func_151E2404(void);
-
-extern s8 D_8008FE44[];
 extern s8 D_800E0BCE[];
 extern s8 D_800E0BEE;
 extern u8 D_800BE740;
@@ -341,8 +254,6 @@ extern u8 D_800E0AA8;
 extern s8 D_800E0AA9;
 extern s8 D_800E0AAA;
 extern s16 D_800E0AA0[];
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
 extern s8 D_800E0BB8[];
 extern s8 D_800E0BD0;
 extern s16 D_800E0C10[];
@@ -620,7 +531,6 @@ void func_151E327C(void) {
     D_800E0BB1 = 1;
     func_151E7EF8();
 }
-
 
 extern s8 D_800AB64C[];
 extern s16 D_800E0A82;
@@ -1191,14 +1101,7 @@ void func_151E43DC(void) {
     }
 }
 
-extern s8 D_8008FE2C;
-extern u16 D_8008FDC0;
-extern struct Struct151E4314 D_800AB7BC[];
 extern s8 D_800E0A86;
-extern s8 D_800E0AC0[];
-extern s8 D_800E0AC1;
-extern s8 D_800E0AC2;
-extern s8 D_800E0AC3;
 
 /* End of round: picks the results screen state and cue from the mode entry (unk7) and the ranks. */
 void func_151E4BD8(void) {
@@ -1248,14 +1151,10 @@ void func_151E4BD8(void) {
     D_8008FD90 = 1;
 }
 
-extern u8 D_800E0B94;
-
 /* Switches the menu to state 10. */
 void func_151E4DC4(void) {
     D_800E0B94 = 0xA;
 }
-
-extern s16 D_800E0B9A;
 
 /* Switches to state 4 when input bits 0x8020 are set. */
 void func_151E4DD8(void) {
@@ -1326,8 +1225,6 @@ void func_151E4EE8(void) {
     D_8008FDD0 = 1.0f;
     D_800E0A88();
 }
-
-extern struct Struct151E5034 *D_8008FDD4;
 
 /* Resets the path/selection state in D_8008FDD4. */
 void func_151E5034(void) {
@@ -1435,7 +1332,6 @@ void func_151E530C(void) {
     }
 }
 
-
 /* End of a match: if D_800BE616 is set, records each player's unk1AA and schedules the results transition; else state 4. */
 void func_151E53E8(s32 arg0) {
     s32 i;
@@ -1471,8 +1367,6 @@ void func_151E53E8(s32 arg0) {
     }
 }
 
-extern u8 D_80084060[];
-
 /* Resets the player-to-controller map D_80084060 to identity. */
 void func_151E557C(void) {
     D_80084060[0] = 0;
@@ -1505,16 +1399,12 @@ void func_151E55A8(void) {
     D_800E0B97 = level;
 }
 
-extern u8 D_800E0A8C;
-
 /* Clears D_800E0A8C. */
 void func_151E562C(void) {
     if (D_800E0A8C != 0) {
         D_800E0A8C = 0;
     }
 }
-
-extern s8 D_8008FDC8;
 
 /* Returns D_8008FDC8: set when the mode entry's unk5 is negative (every player then gets a team of their own). */
 s8 func_151E564C(void) {
@@ -1715,8 +1605,6 @@ s32 func_151E565C(void) {
 }
 
 extern u8 D_800BE616;
-extern u8 D_800E0B94;
-extern s8 D_800E0C00[];
 
 /* Returns the team of player arg0 during a match (0 if none), else arg0 itself. */
 s32 func_151E5F64(s32 arg0) {
@@ -2079,13 +1967,10 @@ extern f32 D_8008FF90[];
 extern u8 D_8008FFB0[2][6];
 extern Snd151E6C1C D_800AB908[];
 extern Snd151E6C1C D_800AB920[];
-extern u8 D_800AB570[];
 extern Node151E6C1C *D_800D2350;
-extern f32 D_8008FDD0;
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1000D96C(s32, s32, s32);
-f32 func_150497E0(f32 *, s32, f32);
 struct Struct151149AC *func_151149AC(s32);
 extern f32 sinf(f32);
 
@@ -2458,10 +2343,6 @@ void func_151E6C1C(s32 index) {
     }
 }
 
-extern struct Struct151E5034 *D_8008FDD4;
-extern u8 D_8008FFB0[2][6];
-struct Struct151149AC *func_151149AC(s32);
-
 /* Sets unk80 = 2 on both objects of the current stop once the transition is far enough along. */
 void func_151E7DC0(void) {
     struct Struct151E5034 *state;
@@ -2486,8 +2367,6 @@ void func_151E7DC0(void) {
         }
     }
 }
-
-extern s8 D_800E0BE9;
 
 /* Calls func_10017870 with 1, 2 or 4 depending on D_800E0BE9. */
 void func_151E7E9C(void) {
@@ -2532,7 +2411,6 @@ typedef struct {
     u8 padE[0x22];
 } Spawn151E7F60;
 
-
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -2541,8 +2419,6 @@ typedef struct {
     u8 pad7;
 } Pos151E7F60;
 
-extern struct127 *D_800E0BA0[];
-extern Entry151E7F60 D_800AB57C[];
 extern Pos151E7F60 D_800AB940[];
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
 extern void func_15083384(struct127 *, u8);
