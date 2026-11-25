@@ -86,99 +86,105 @@ struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 s32  func_1516429C(struct237 *arg0);
 void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2);
 s32  func_151643F8(struct225 *arg0);
-void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4);
-s32  func_151644A8(struct242 *arg0);
+void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ);
+s32  func_151644A8(struct225 *effect);
 
+/* Creates a light at header2's position and an effect instance that owns it. */
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA) {
-    struct225 *ret;
-    struct226 *sp30;
+    struct225 *effect;
+    struct226 *light;
 
-    ret = NULL;
-    sp30 = func_1515D5F8(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
-    if (sp30 != 0) {
-        ret = func_1516037C(header, sp30, offset, arg9, argA);
-        if (ret != 0) {
-            ret->unkE |= 2;
+    effect = NULL;
+    light = func_1515D5F8(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
+    if (light != NULL) {
+        effect = func_1516037C(header, light, offset, arg9, argA);
+        if (effect != NULL) {
+            effect->unkE |= 2;
         } else {
-            func_1515F10C(sp30);
+            func_1515F10C(light);
         }
     }
-    return ret;
+    return effect;
 }
 
-struct225 *func_1516037C(Header *header, struct226 *arg1, s32 offset, u8 arg3, s32 arg4) {
-    struct225 *ret = func_15167A68(53, arg4, offset + 24, 1, arg3, 1);
-    if (ret == 0) {
+/* Allocates an effect instance (0x18-byte header plus `size` bytes of payload) for a light. */
+struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4) {
+    struct225 *effect = func_15167A68(53, arg4, size + 0x18, 1, arg3, 1);
+
+    if (effect == NULL) {
         return NULL;
     }
-    memcpy(&ret->unkE, header, 6);
-    ret->unk14 = arg1;
-    return ret;
+    memcpy(&effect->unkE, header, sizeof(Header));
+    effect->unk14 = light;
+    return effect;
 }
 
-void func_151603FC(struct225 *arg0) {
-    s32 pad;
-    u8 ret = 0;
+/* Per-frame update: counts down the lifetime and runs the update callback; removes the effect when either ends. */
+void func_151603FC(struct225 *effect) {
+    s32 pad; // matching: unused stack slot keeps the original frame size
+    u8 done = FALSE;
 
-    if ((arg0->unkE & 1) != 0) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            ret = 1;
+    if (effect->unkE & 1) {
+        effect->unk10 -= D_800BE9E4;
+        if (effect->unk10 < 0) {
+            done = TRUE;
         }
     }
-    if ((ret == 0) && (arg0->unkF != -1) && (D_8008B0F0[arg0->unkF]() == 0)) {
-        ret = 1;
+    if (!done && effect->unkF != -1 && D_8008B0F0[effect->unkF]() == 0) {
+        done = TRUE;
     }
-    if (ret) {
-        func_1516972C(arg0);
+    if (done) {
+        func_1516972C(effect);
     }
 }
 
 // requires jump table
 extern void (*D_8008B150[])(void *);
 
-void func_151604A0(void *arg0, u8 *arg1, u8 arg2) {
-    u8 *object = arg0;
-    void (*callback)(void *);
+/* Event handler: events 0x17-0x22 addressed to this effect's type toggle or remove it; others go to the type's handler. */
+void func_151604A0(void *arg0, u8 *message, u8 event) {
+    struct225 *effect = arg0;
+    void (*handler)(void *);
     struct17 position;
 
-    switch (arg2) {
+    switch (event) {
     case 0x17:
     case 0x18:
     case 0x1C:
     case 0x1F:
     case 0x22:
-        if (*arg1 != object[0x12]) {
+        // matching: a byte-array read of unk12 makes IDO load *message first
+        if (*message != ((u8 *)effect)[0x12]) {
             return;
         }
-        switch (arg2) {
+        switch (event) {
         case 0:
             break;
         case 0x17:
-            (*(u8 **)(object + 0x14))[9] = 0;
+            effect->unk14->unk9 = 0;
             break;
         case 0x18:
-            (*(u8 **)(object + 0x14))[9] = 1;
+            effect->unk14->unk9 = 1;
             break;
         case 0x1C:
-            position.unk0 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0xE);
-            position.unk4 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x10);
-            position.unk8 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x12);
-            func_151618BC(0x3E80, 0, 0, 0, &position, 0x1F4, 0x3E8);
+            position.unk0 = effect->unk14->unkE;
+            position.unk4 = effect->unk14->unk10;
+            position.unk8 = effect->unk14->unk12;
+            func_151618BC(16000, 0, 0, 0, &position, 500, 1000);
             return;
         case 0x1F:
-            object[0xF] = 0xB;
-            (*(u8 **)(object + 0x14))[9] = 0;
+            effect->unkF = 11;
+            effect->unk14->unk9 = 0;
             break;
         case 0x22:
-            func_1516972C((struct102 *)arg0);
+            func_1516972C(effect);
             return;
         }
         break;
     default:
-        callback = D_8008B150[object[0x12]];
-        if (callback != 0) {
-            callback(arg0);
+        handler = D_8008B150[effect->unk12];
+        if (handler != NULL) {
+            handler(effect);
         }
         break;
     }
@@ -199,56 +205,41 @@ s32 func_15160684(struct225 *arg0) {
     return 1;
 }
 
-void func_150A7960(f32 *arg0, f32 arg1, s32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
+void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-s32 func_151606A8(struct225 *arg0) {
-    struct227 **p;
-    union { f32 m[16]; f64 _a; } u;
-    f32 sp3C;
-    f32 sp38;
-    f32 sp34;
+/* Payload of func_151606A8: the object the light hangs from. */
+typedef struct {
+    f32 unk0; // rotation passed to func_150A8050
+    f32 unk4;
+    f32 unk8;
+    u8  padC[0x4];
+    s16 unk10; // position
+    s16 unk12;
+    s16 unk14;
+} LightMount;
 
-    p = &arg0->unk18;
-    func_150A8050((f32 (*)[4])&u.m[0], (*p)->unk0, (*p)->unk4, (*p)->unk8);
+/* Places the light at the point (0, -415, 0) in the mount's rotated and translated frame. */
+s32 func_151606A8(struct225 *effect) {
+    LightMount **mount;
+    union {
+        f32 mf[4][4];
+        s64 align;
+    } mtx;
+    f32 z;
+    f32 y;
+    f32 x;
 
-    u.m[12] = ((struct240 *)*p)->unk10;
-    u.m[13] = ((struct240 *)*p)->unk12;
-    u.m[14] = ((struct240 *)*p)->unk14;
-
-    func_150A7960(&u.m[0], D_800A66B4[0], *(s32 *)&D_800A66B4[1], D_800A66B4[2], &sp34, &sp38, &sp3C);
-    arg0->unk14->unkE = (s16)sp34;
-    arg0->unk14->unk10 = (s16)sp38;
-    arg0->unk14->unk12 = (s16)sp3C;
+    mount = (LightMount **)&effect->unk18;
+    func_150A8050(mtx.mf, (*mount)->unk0, (*mount)->unk4, (*mount)->unk8);
+    mtx.mf[3][0] = (*mount)->unk10;
+    mtx.mf[3][1] = (*mount)->unk12;
+    mtx.mf[3][2] = (*mount)->unk14;
+    func_150A7960(mtx.mf[0], D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
+    effect->unk14->unkE = x;
+    effect->unk14->unk10 = y;
+    effect->unk14->unk12 = z;
     return 1;
 }
-
-#pragma GLOBAL_ASM_DISABLED("asm/nonmatchings/game_18D770/func_151606A8.s")
-// NON-MATCHING: something along these lines...
-// void func_150A7960(s32, f32, f32, f32, f32*, f32*, f32*);
-// s32 func_151606A8(struct225 *arg0) {
-//     struct227 *temp_v0;
-//     struct226 *temp_v0_2;
-//
-//     f32 tmp[16];
-//
-//     f32 sp3C;
-//     f32 sp38;
-//     f32 sp34;
-//
-//     temp_v0 = arg0->unk18;
-//     func_150A8050(&tmp[1], temp_v0->unk0, temp_v0->unk4, temp_v0->unk8);
-//
-//     temp_v0_2 = arg0->unk18;
-//     tmp[13] = temp_v0_2->unk10;
-//     tmp[14] = temp_v0_2->unk12;
-//     tmp[15] = temp_v0_2->unk14;
-//
-//     func_150A7960(&tmp, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &sp34, &sp38, &sp3C);
-//     arg0->unk14->unkE = sp34;
-//     arg0->unk14->unk10 = sp38;
-//     arg0->unk14->unk12 = sp3C;
-//     return 1;
-// }
 
 s32 func_151607A4(struct225 *arg0) {
     struct227 *temp_a1 = &arg0->unk18;
@@ -1923,53 +1914,41 @@ void func_1516441C(struct225 *arg0, struct227 *arg1) {
     arg0->unk14->unk12 = (s32)out[2];
 }
 
-s32 func_151644A8(struct242 *arg0) {
-    f32 temp_f0;
-    struct17 *temp_v0;
+/* Payload of func_151644A8: a light swinging below a pivot. */
+typedef struct {
+    f32 unk0;         // offset below the pivot
+    f32 unk4;         // scale applied to the swing angles
+    struct17 *unk8;   // swing angles (x and z are used)
+    struct17 unkC;    // pivot position
+} LightSwing;
 
-    temp_v0 = arg0->unk20;
-    temp_f0 = arg0->unk1C;
-    func_151644F4(arg0, &arg0->unk24, arg0->unk18, temp_v0->unk0 * temp_f0, temp_v0->unk8 * temp_f0);
+s32 func_151644A8(struct225 *effect) {
+    LightSwing *swing = (LightSwing *)&effect->unk18;
+    f32 scale;
+    struct17 *angles;
+
+    angles = swing->unk8;
+    scale = swing->unk4;
+    func_151644F4(effect, &swing->unkC, swing->unk0, angles->unk0 * scale, angles->unk8 * scale);
     return 1;
 }
 
-void func_150A7960(f32 *arg0, f32 arg1, s32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
+/* Moves the light to `offset` in the frame rotated by (angleX, 0, angleZ) about `pivot`. */
+void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ) {
+    f32 z;
+    f32 y;
+    f32 x;
+    f32 mtx[4][4];
 
-void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
-    f32 tmp3;
-    f32 tmp2;
-    f32 tmp1;
-    f32 tmp[16];
-
-    func_150A8050((f32 (*)[4])&tmp, arg3, 0.0f, arg4);
-    tmp[12] = arg1->unk0;
-    tmp[13] = arg1->unk4;
-    tmp[14] = arg1->unk8;
-    func_150A7960(&tmp[0], 0.0f, arg2, 0.0f, &tmp1, &tmp2, &tmp3);
-    arg0->unk14->unkE = (s16)tmp1;
-    arg0->unk14->unk10 = (s16)tmp2;
-    arg0->unk14->unk12 = (s16)tmp3;
+    func_150A8050(mtx, angleX, 0.0f, angleZ);
+    mtx[3][0] = pivot->unk0;
+    mtx[3][1] = pivot->unk4;
+    mtx[3][2] = pivot->unk8;
+    func_150A7960(mtx[0], 0.0f, offset, 0.0f, &x, &y, &z);
+    effect->unk14->unkE = x;
+    effect->unk14->unk10 = y;
+    effect->unk14->unk12 = z;
 }
-
-// NON-MATCHING: close...
-// void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
-//     f32 tmp1;
-//     f32 tmp2;
-//     f32 tmp3;
-//
-//     f32 tmp[16];
-//
-//     func_150A8050(&tmp, arg3, 0.0f, arg4);
-//
-//     tmp[13] = arg1->unk0;
-//     tmp[14] = arg1->unk4;
-//     tmp[15] = arg1->unk8;
-//     func_150A7960(&tmp, NULL, arg0, NULL, &tmp1, &tmp2, &tmp3);
-//
-//     arg0->unk14->unkE =  tmp1;
-//     arg0->unk14->unk10 = tmp2;
-//     arg0->unk14->unk12 = tmp3;
-// }
 
 void func_151645C4(u8 arg0) {
     D_800DCDD0 = arg0;
