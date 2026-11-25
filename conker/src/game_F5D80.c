@@ -2,88 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A05AC;
-extern f32 D_800A05B0;
-extern f32 D_800A05B4;
-extern f32 D_800A05B8;
-extern f32 D_800A05BC;
-extern f32 D_800A05C0;
-extern f32 D_800A05C4;
-extern f32 D_800A05C8;
-extern f32 D_800A05CC;
-extern f32 D_800A05D0;
-extern f32 D_800A05D4;
-extern f32 D_800A05D8;
-extern f32 D_800A0570;
-extern f32 D_800A0574;
-extern f32 D_800A0578;
-extern f32 D_800A057C;
-extern f32 D_800A04F0;
-extern f32 D_800A04F4;
-extern f32 D_800A04F8;
-extern f32 D_800A04FC;
-
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_1503E5F8(f32 (*)[4], f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern struct260 *func_15073118(struct108 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
-
-typedef struct {
-    u8 pad0[2];
-    s8 unk2;
-    u8 pad3;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} Struct150C8350;
-void func_150C8350(void);
-
-extern void func_150C8350(void);
-void func_150C84F4(s32 arg0);
-
-void func_150CDB6C(s32);
-void func_150C851C(s32 arg0);
-
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[3];
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} Struct150C8600;
-
-extern s32 D_80090230[5];
-extern s32 D_80090244[5];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-
 s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern s32 *D_80088810[2];
-
-typedef struct GameF5800Command {
-    u32 w0;
-    u32 w1;
-} GameF5800Command;
-GameF5800Command *func_150C8600(GameF5800Command *arg0);
-
-typedef struct {
-    u8 pad0[0x34];
-    Mtx *unk34;
-} Struct150C8730Arg0;
-
-typedef struct {
-    f32 sp48;
-    f32 sp4C;
-    f32 sp50;
-    f32 sp54;
-    f32 sp58;
-    f32 sp5C;
-    f32 sp60;
-    f32 sp64[4][4];
-    u8 padA4[0x14];
-} Struct150C8730Stack;
-s32 func_150C8730(Struct150C8730Arg0 *arg0, struct108 *arg1);
-
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 typedef struct {
@@ -225,9 +146,9 @@ void func_150C8A68(RadialEffect *effect) {
         if (effect->def.checkCallback != -1 && D_80088860[effect->def.checkCallback](effect) == 0) {
             expired = 1;
         }
-
     }
     if (expired) {
+
         func_1516972C((struct102 *)effect);
     }
 }
@@ -235,15 +156,15 @@ void func_150C8A68(RadialEffect *effect) {
 typedef struct {
     f32 r;
     f32 y;
-} Pt150C8DB8;
+} RingPoint;
 
 typedef struct {
     s32 count;
-    Pt150C8DB8 *pts;
-} Ring150C8DB8;
+    RingPoint *pts;
+} RingProfile;
 
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
-extern Ring150C8DB8 D_80088820;
+extern RingProfile D_80088820;
 extern s32 *D_80090E84;
 extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
@@ -675,32 +596,12 @@ s32 func_150CA07C(BurstParticle *particle) {
 
 extern void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16, s16, s16, u8, s32, f32, void *, u8);
 
-extern f32 D_800A05A0;
-extern f32 D_800A05A4;
-extern f32 D_800A05A8;
 extern s32 func_15193CA0[];
 extern s32 func_151942B0[];
 void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
 
 void func_150CA930(Vec3f *pos);
-
-typedef struct {
-    Vec3f pos;
-    u8 unkF0;
-    s8 unkF1;
-    f32 unkF4;
-    s32 unkF8;
-    s16 unkFC;
-    s16 unkFE;
-    f32 unk100;
-    s16 unk104;
-    f32 unk108;
-    f32 unk10C;
-    u8 unk110;
-    u8 unk111;
-} Def_150CA150;
 
 typedef struct {
     s32 unk0;
@@ -714,46 +615,51 @@ typedef struct {
     s32 unk18;
 } Fx_150CA150;
 
-void func_150CA150(u8 *arg0) {
+/*
+ * Impact effect at the actor: finds the floor below it, spawns an expanding ring there and,
+ * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
+ */
+void func_150CA150(struct127 *actor) {
     Vec3f pos;
     f32 r, g, b;
-    u8 cr, cg, cb;
-    f32 floor[9];
-    u8 hit;
+    u8 red, green, blue;
+    f32 floorInfo[9];
+    u8 onGround;
     u32 end;
-    u32 p;
+    u32 addr;
     s32 sum;
-    u8 padA[4];
+    u8 padA[4]; // matching: frame padding
 
-    hit = 0;
-    if (arg0 != NULL) {
-        func_1504715C(floor, arg0);
+    onGround = 0;
+    if (actor != NULL) {
+        func_1504715C(floorInfo, actor);
         func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-        pos.x = *(f32 *)(arg0 + 0x14);
-        pos.y = *(f32 *)(arg0 + 0x18) + 100.0f;
-        pos.z = *(f32 *)(arg0 + 0x1C);
-        if (func_15046C80(&pos, 0, *(f32 *)(arg0 + 0x18) - 300.0f, floor) != 0) {
-            hit = 1;
-            pos.y = floor[0];
+        pos.x = actor->x_position;
+        pos.y = actor->y_position + 100.0f;
+        pos.z = actor->z_position;
+        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, floorInfo) != 0) {
+            onGround = 1;
+            pos.y = floorInfo[0];
         } else {
-            pos.y = *(f32 *)(arg0 + 0x180);
+            pos.y = actor->unk180;
         }
+        /* Anti-tamper check: checksum the code from func_15193CA0 to func_151942B0. */
         sum = 0;
         end = (u32)func_151942B0;
-        for (p = (u32)func_15193CA0; p < end; p += 4) {
-            sum ^= ~*(s32 *)p;
+        for (addr = (u32)func_15193CA0; addr < end; addr += 4) {
+            sum ^= ~*(s32 *)addr;
         }
         if (sum != 0x79844C6B) {
             D_800C3E7C = 0;
         }
         func_150CCD90(pos.z, &r, &g, &b);
-        cr = r;
-        cg = g;
-        cb = b;
+        red = r;
+        green = g;
+        blue = b;
         func_151D5404((struct17 *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
             RadialEffectDef def;
-            u8 padB[0x14];
+            u8 padB[0x14]; // matching: frame padding
 
             def.pos = pos;
             def.speed = 43.20000076f;
@@ -769,24 +675,23 @@ void func_150CA150(u8 *arg0) {
             def.updateCallback = 0;
             def.emitRate = 7.999999798e-05f;
             func_150C88D0(&def, 0, 0xFF, 1);
-
         }
-        if (hit != 0) {
+        if (onGround) {
             Fx_150CA150 fx;
-            f32 d0;
-            f32 r2;
-            f32 sc;
-            u8 ang;
-            f32 sinv, cosv;
-            u8 padC[8];
-            s16 col[4][5];
+            f32 pad; // matching: unused stack slot
+            f32 size;
+            f32 extent;
+            u8 heading;
+            f32 sinH, cosH;
+            u8 padC[8]; // matching: frame padding
+            s16 colors[4][5];
             s16 randomArg;
             u8 spark[3];
 
-            ang = -0x40 - (*(u16 *)(arg0 + 0x7A) >> 8);
-            cosv = func_151423D8(ang);
-            sinv = func_151423D8(ang - 0x40);
-            r2 = sc = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
+            heading = -0x40 - (actor->unk7A >> 8);
+            cosH = func_151423D8(heading);
+            sinH = func_151423D8(heading - 0x40);
+            size = extent = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
             fx.unk0 = 0x701;
             func_150ADA20();
             fx.unk4 = 0x408;
@@ -801,39 +706,40 @@ void func_150CA150(u8 *arg0) {
             fx.unk15 = 0xFF;
             fx.unk18 = 0x260001;
             fx.unk17 = 6;
-            col[0][3] = 0xFF;
-            col[0][4] = 0;
-            col[1][3] = 0xFF;
-            col[1][4] = 0;
-            col[2][3] = 0xFF;
-            col[2][4] = 0;
-            col[3][3] = 0xFF;
-            col[3][4] = 0;
+            colors[0][3] = 0xFF;
+            colors[0][4] = 0;
+            colors[1][3] = 0xFF;
+            colors[1][4] = 0;
+            colors[2][3] = 0xFF;
+            colors[2][4] = 0;
+            colors[3][3] = 0xFF;
+            colors[3][4] = 0;
             fx.unk6 = 0x51;
-            col[0][0] = cr;
-            col[1][0] = cr;
-            col[2][0] = cr;
-            col[3][0] = cr;
-            col[0][1] = cg;
-            col[1][1] = cg;
-            col[2][1] = cg;
-            col[3][1] = cg;
-            col[0][2] = cb;
-            col[1][2] = cb;
-            col[2][2] = cb;
-            col[3][2] = cb;
-            func_1513C5B0(&fx, col, 0xC, 0, sc * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + sc * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            colors[0][0] = red;
+            colors[1][0] = red;
+            colors[2][0] = red;
+            colors[3][0] = red;
+            colors[0][1] = green;
+            colors[1][1] = green;
+            colors[2][1] = green;
+            colors[3][1] = green;
+            colors[0][2] = blue;
+            colors[1][2] = blue;
+            colors[2][2] = blue;
+            colors[3][2] = blue;
+            // matching: the corner offsets are written as (+/-1.0f * extent)
+            func_1513C5B0(&fx, colors, 0xC, 0, extent * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x52;
-            func_1513C5B0(&fx, col, 0xC, 0, sc * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + sc * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            func_1513C5B0(&fx, colors, 0xC, 0, extent * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + extent * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x53;
-            func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            func_1513C5B0(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - extent * sinH, pos.y + 10.0f, extent * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             fx.unk6 = 0x54;
-            func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            func_1513C5B0(&fx, colors, 0xC, 0, (-1.0f * extent) * cosH + pos.x - (-1.0f * extent) * sinH, pos.y + 10.0f, (-1.0f * extent) * cosH + pos.z + (-1.0f * extent) * sinH, size, size, heading, 0, 0, 0xFF, 0);
             func_150CA930(&pos);
             randomArg = func_150ADA20() % 21U + 10;
-            spark[0] = cr;
-            spark[1] = cg;
-            spark[2] = cb;
+            spark[0] = red;
+            spark[1] = green;
+            spark[2] = blue;
             func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, randomArg, 0x14, 0, 0.0f, spark, 0xFF);
         }
     }
