@@ -24,7 +24,7 @@ void func_1504BE2C(struct127 *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
 extern u8 D_800CC2B1;
 extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
-void func_1504C0E8(u8 *arg0, s32 arg1, f32 arg2);
+void func_1504C0E8(struct127 *arg0, s32 arg1, f32 arg2);
 void func_1504C854(struct127 *arg0);
 void func_1504C9E4(struct127 *arg0, s8 arg1, u8 arg2);
 
@@ -110,11 +110,11 @@ typedef struct {
     /* 0x07D */ u8 matrix_physics;
     /* 0x07E */ u8 pad7E[6];
     /* 0x084 */ u8 unk84;
-    /* 0x085 */ s8 unk85;
-    /* 0x086 */ s8 unk86;
+    /* 0x085 */ s8 stick_x;  // controller input of this frame (recorded, or replayed while unk84 != 0)
+    /* 0x086 */ s8 stick_y;
     /* 0x087 */ u8 pad87;
     /* 0x088 */ s16 unk88;
-    /* 0x08A */ u16 unk8A;
+    /* 0x08A */ u16 buttons;
     /* 0x08C */ u16 unk8C;
     /* 0x08E */ u8 pad8E[7];
     /* 0x095 */ u8 unk95;
@@ -312,9 +312,9 @@ typedef struct Actor {
 
 typedef struct {
     /* 0x0 */ u16 buttons;
-    /* 2 */ s8 stick_x;
-    /* 3 */ s8 stick_y;
-    /* 4 */ u16 unk4;
+    /* 0x2 */ s8 stick_x;
+    /* 0x3 */ s8 stick_y;
+    /* 0x4 */ u16 unk4;
 } ContPad;
 
 // variables.h declares D_800CC284 as s32; it points at the current player's controller input.
@@ -493,20 +493,20 @@ void func_1504CB98(Actor *actor) {
             func_15056B08((struct127 *) actor);
         }
         savedPad = *D_800CC284;
-        D_800CC284->stick_x = actor->unk31C->unk85;
-        D_800CC284->stick_y = actor->unk31C->unk86;
-        D_800CC284->buttons = actor->unk31C->unk8A;
+        D_800CC284->stick_x = actor->unk31C->stick_x;
+        D_800CC284->stick_y = actor->unk31C->stick_y;
+        D_800CC284->buttons = actor->unk31C->buttons;
         D_800CC288 = actor->unk31C->unk8C;
-        buttons = actor->unk31C->unk8A;
+        buttons = actor->unk31C->buttons;
         if (actor->camera == NULL) {
             func_151279A0(actor, D_800CC284);
             func_15121490(actor, D_800CC284);
         }
         func_1504C854((struct127 *) actor);
     } else {
-        actor->unk31C->unk8A = D_800CC284->buttons;
+        actor->unk31C->buttons = D_800CC284->buttons;
         D_800CC288 = D_800BE710[D_800C3E78];
-        buttons = actor->unk31C->unk8A;
+        buttons = actor->unk31C->buttons;
     }
     if ((D_80082FA0 >= D_800C3E78) && ((&D_800DDE3C)[D_800C3E78] != 0) && ((&D_800DDDC8)[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
@@ -818,7 +818,7 @@ void func_1504CB98(Actor *actor) {
     }
     actor->unk11C = actor->unk118;
     if (actor->unk31C->unk84 == 0) {
-        actor->unk31C->unk8A = D_800CC284->buttons;
+        actor->unk31C->buttons = D_800CC284->buttons;
         actor->unk31C->unk8C = D_800CC288;
     }
     if ((actor->unk84 == 0) && (actor->animation_speed == 0.0f)) {
@@ -1768,7 +1768,7 @@ void func_1504CB98(Actor *actor) {
         }
     }
     actor->unk31C->unk4 = 0;
-    func_1504C0E8((u8 *) actor, pushAnim, moveSpeed);
+    func_1504C0E8((struct127 *) actor, pushAnim, moveSpeed);
     actor->unk31C->unk0 = 2.0f * sqrtf(((actor->x_position - actor->old_x_position) * (actor->x_position - actor->old_x_position)) + ((actor->z_position - actor->old_z_position) * (actor->z_position - actor->old_z_position)));
     actor->unk31C->unk32 = 0;
     if ((actor->unk31C->unk84 != 0) || (padOverridden != 0)) {
