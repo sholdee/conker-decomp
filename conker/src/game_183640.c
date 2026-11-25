@@ -21,9 +21,9 @@ typedef struct {
     /* 0x1C */ vertex headVel;
     /* 0x28 */ vertex tailPos;
     /* 0x34 */ vertex tailVel;
-    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2/4: render flags, 8: fades out
+    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
     /* 0x42 */ s16 lifetime;
-    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg
+    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
     /* 0x48 */ f32 width;
     /* 0x4C */ u8 alpha;
     /* 0x4E */ s16 fadeStart;       // fade begins when lifetime drops below this
@@ -112,6 +112,7 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
     return particle;
 }
 
+/* func_15156190 with owner 0xFF and arg4 0. */
 void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
     func_15156190(desc, kind, extraSize, 0xFF, 0);
 }
@@ -155,14 +156,14 @@ void func_151563B8(StreakParticle *arg0) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-} RenderModeEntry;
+} RenderModePair;
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern RenderModeEntry D_800A4AC8[];
+Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
+extern RenderModePair D_800A4AC8[];
 void func_151D5D60(Vtx **buffers, s16 viewIndex, s32 size, Vtx **vtx, u8 *fresh);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
@@ -175,12 +176,12 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     vertex side;
     vertex *eye;
     f32 lengthSquared;
-    u8 update;
-    s16 renderFlags;
+    u8 needSync;
+    s16 cullFlags;
     s32 geometryFlags;
     Vtx *vtx;
     u8 mode;
-    u8 cycle;
+    u8 combiner;
     u8 fresh;
     f32 scale;
 
@@ -192,22 +193,23 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
         memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
     }
     eye = (vertex *)&D_800DBFF0[viewIndex].unk2F8;
-    update = TRUE;
-    renderFlags = particle->flags & 6;
+    needSync = TRUE;
+    cullFlags = particle->flags & 6;
     mode = particle->renderMode & 0xFF;
-    cycle = (particle->renderMode & 0xFF00) >> 8;
+    combiner = (particle->renderMode & 0xFF00) >> 8;
     geometryFlags = 0;
-    if (renderFlags & 2) {
-        geometryFlags = 0x200;
+    if (cullFlags & 2) {
+        geometryFlags = G_CULL_FRONT;
     }
-    if (renderFlags & 4) {
-        geometryFlags |= 0x400;
+    if (cullFlags & 4) {
+        geometryFlags |= G_CULL_BACK;
     }
-    gfx = func_15142B7C(gfx, geometryFlags | 1 | 4 | 0x200000, 0x1F0600);
-    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &update);
-    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-    gfx = func_1513F4E4(gfx, cycle, &update);
-    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
+    gfx = func_15142B7C(gfx, geometryFlags | G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+                        G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
+    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &needSync);
+    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &needSync);
+    gfx = func_1513F4E4(gfx, combiner, &needSync);
+    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &needSync);
     axis.x = p->headPos.x - p->tailPos.x;
     axis.y = p->headPos.y - p->tailPos.y;
     axis.z = p->headPos.z - p->tailPos.z;
