@@ -77,41 +77,31 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     return FALSE;
 }
 
-/* A scenery object that swings one rotation axis; same layout as MoverObj in game_1449A0.c. */
-typedef struct MoverObj {
-    /* 0x00 */ f32 rot[3]; /* degrees */
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 pos[3];
-    /* 0x16 */ u8 pad16[0x26];
-    /* 0x3C */ s32 params; /* low 10 bits: func_15117770's target angle */
-    /* 0x40 */ u8 pad40[0xF];
-    /* 0x4F */ u8 flags;
-    /* 0x50 */ u8 pad50[0x23];
-    /* 0x73 */ u8 state;
-    /* 0x74 */ u8 pad74[8];
-    /* 0x7C */ union {
-        struct {
-            f32 damping;
-            f32 acceleration;
-            f32 velocity;
-        } swing;
-        struct {
-            f32 rebound;
-            f32 acceleration;
-            f32 velocity;
-        } bounce;
-    } work;
-} MoverObj;
+/* Behaviour scratch state (WorldObject.work): a damped swing or a bounce. */
+typedef union MoverWork {
+    struct {
+        /* 0x7C */ f32 damping;
+        /* 0x80 */ f32 acceleration;
+        /* 0x84 */ f32 velocity;
+    } swing;
+    struct {
+        /* 0x7C */ f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
+        /* 0x80 */ f32 acceleration; /* per tick */
+        /* 0x84 */ f32 velocity;
+    } bounce;
+} MoverWork;
 
-void func_15117770(MoverObj *obj);
+#define WORK(obj) ((MoverWork *)&(obj)->work)
+
+void func_15117770(WorldObject *obj);
 
 /*
- * Mover handler. In states 0-1 it swings rot[0] on a damped spring toward an angle set by the
+ * Mover handler. In states 0-1 it swings rotX on a damped spring toward an angle set by the
  * player's distance (with flags & 4: -40 degrees at the player rising to -32 at 740 units;
  * otherwise -40). Once the player's unk31C->unk57 is set it switches to state 2, which bounces
- * rot[0] back to 0 with func_15117770 until it stops; then state 3 keeps it at 0.
+ * rotX back to 0 with func_15117770 until it stops; then state 3 keeps it at 0.
  */
-void func_150EB614(MoverObj *obj) {
+void func_150EB614(WorldObject *obj) {
     f32 velocity;
     f32 dz;
     f32 target;
@@ -125,22 +115,22 @@ void func_150EB614(MoverObj *obj) {
     f32 delta;
     f32 magnitude;
 
-    if ((obj->state & 3) == 3) {
+    if ((obj->behaviorState & 3) == 3) {
         return;
     }
-    if ((obj->state & 3) != 2) {
+    if ((obj->behaviorState & 3) != 2) {
         if (obj->flags & 4) {
             if (D_800CC2D0->unk31C->unk57 != 0) {
-                obj->state &= ~3;
-                obj->state |= 2;
-                obj->params = 0;
-                obj->work.bounce.rebound = 0.5f;
-                obj->work.bounce.acceleration = 0.3000000119f;
-                obj->work.bounce.velocity = 0.0f;
+                obj->behaviorState &= ~3;
+                obj->behaviorState |= 2;
+                obj->param.word = 0;
+                WORK(obj)->bounce.rebound = 0.5f;
+                WORK(obj)->bounce.acceleration = 0.3000000119f;
+                WORK(obj)->bounce.velocity = 0.0f;
             }
-            dz = obj->pos[2] - D_800CC2D0->z_position;
-            dx = obj->pos[0] - D_800CC2D0->x_position;
-            dy = obj->pos[1] - D_800CC2D0->y_position;
+            dz = obj->z - D_800CC2D0->z_position;
+            dx = obj->x - D_800CC2D0->x_position;
+            dy = obj->y - D_800CC2D0->y_position;
             distance = sqrtf(dz * dz + (dx * dx + dy * dy));
             if (distance > 740.0f) {
                 distance = 740.0f;
@@ -149,10 +139,10 @@ void func_150EB614(MoverObj *obj) {
         } else {
             target = -40.0f;
         }
-        angle = obj->rot[0];
-        damping = obj->work.swing.damping;
-        acceleration = obj->work.swing.acceleration;
-        velocity = obj->work.swing.velocity;
+        angle = obj->rotX;
+        damping = WORK(obj)->swing.damping;
+        acceleration = WORK(obj)->swing.acceleration;
+        velocity = WORK(obj)->swing.velocity;
         if (angle != target || velocity != 0.0f) {
             angle += velocity * D_800BE9E4;
             delta = func_15048A70(angle, target);
@@ -171,16 +161,16 @@ void func_150EB614(MoverObj *obj) {
             } else if (angle >= 360.0f) {
                 angle -= 360.0f;
             }
-            obj->work.swing.velocity = velocity;
+            WORK(obj)->swing.velocity = velocity;
         }
-        obj->rot[0] = angle;
+        obj->rotX = angle;
     } else {
-        before = obj->rot[0];
+        before = obj->rotX;
         func_15117770(obj);
-        if (before == obj->rot[0]) {
-            obj->state &= ~3;
-            obj->state |= 3;
-            obj->rot[0] = 0.0f;
+        if (before == obj->rotX) {
+            obj->behaviorState &= ~3;
+            obj->behaviorState |= 3;
+            obj->rotX = 0.0f;
         }
     }
 }

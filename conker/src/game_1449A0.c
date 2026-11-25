@@ -3,41 +3,25 @@
 #include "variables.h"
 
 /*
- * Behaviour handlers for scenery objects that swing one rotation axis toward a target angle.
- * Same object layout as MoverObj in game_143DE0.c.
+ * Behaviour handlers for scenery objects (WorldObject) that swing one rotation axis toward a target angle.
  */
-typedef struct MoverObj {
-    /* 0x00 */ f32 rot[3]; /* degrees */
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 pos[3];
-    /* 0x16 */ u8 pad16[0xA];
-    /* 0x20 */ Vtx *vertices[2]; /* one per frame buffer */
-    /* 0x28 */ u8 pad28[0x14];
-    /* 0x3C */ s32 params;
-    /* 0x40 */ u8 pad40[0xF];
-    /* 0x4F */ u8 flags;
-    /* 0x50 */ u8 pad50[0xA];
-    /* 0x5A */ s16 move[3]; /* translation this frame */
-    /* 0x60 */ f32 spin[3]; /* rotation speed, degrees per tick */
-    /* 0x6C */ u8 pad6C[7];
-    /* 0x73 */ u8 state;
-    /* 0x74 */ u16 sound; /* handle from func_15114D24 */
-    /* 0x76 */ u8 pad76[6];
-    /* 0x7C */ union {
-        struct {
-            f32 damping;
-            f32 acceleration;
-            f32 velocity;
-        } swing;
-        struct {
-            f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
-            f32 acceleration; /* per tick */
-            f32 velocity;
-        } bounce;
-    } work;
-} MoverObj;
+/* Behaviour scratch state (WorldObject.work): a damped swing or a bounce. */
+typedef union MoverWork {
+    struct {
+        /* 0x7C */ f32 damping;
+        /* 0x80 */ f32 acceleration;
+        /* 0x84 */ f32 velocity;
+    } swing;
+    struct {
+        /* 0x7C */ f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
+        /* 0x80 */ f32 acceleration; /* per tick */
+        /* 0x84 */ f32 velocity;
+    } bounce;
+} MoverWork;
 
-/* One row of D_80089260, selected by params >> 10. */
+#define WORK(obj) ((MoverWork *)&(obj)->work)
+
+/* One row of D_80089260, selected by param >> 10. */
 typedef struct MoverSounds {
     /* 0x0 */ s16 start; /* played when the object starts moving */
     /* 0x2 */ s16 unk2;
@@ -49,21 +33,21 @@ typedef struct MoverSounds {
 
 extern MoverSounds D_80089260[];
 
-extern void func_15114D24(MoverObj *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
-f32 func_151172D8(MoverObj *obj, f32 angle);
-f32 func_15117518(MoverObj *obj, f32 angle);
+extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
+f32 func_151172D8(WorldObject *obj, f32 angle);
+f32 func_15117518(WorldObject *obj, f32 angle);
 
-/* Swings rot[0] toward the target angle with func_151172D8's damped spring. */
-void func_151174F0(MoverObj *obj) {
-    obj->rot[0] = func_151172D8(obj, obj->rot[0]);
+/* Swings rotX toward the target angle with func_151172D8's damped spring. */
+void func_151174F0(WorldObject *obj) {
+    obj->rotX = func_151172D8(obj, obj->rotX);
 }
 
 /*
- * Accelerates angle toward the target in the low 10 bits of params (signed degrees). When it crosses the
+ * Accelerates angle toward the target in the low 10 bits of param (signed degrees). When it crosses the
  * target it snaps there and bounces back with -rebound times its velocity; it comes to rest once close and
- * slow. Starts the params >> 10 start sound when it begins moving. Returns the new angle.
+ * slow. Starts the param >> 10 start sound when it begins moving. Returns the new angle.
  */
-f32 func_15117518(MoverObj *obj, f32 angle) {
+f32 func_15117518(WorldObject *obj, f32 angle) {
     f32 velocity;
     s32 soundIndex;
     f32 target;
@@ -72,12 +56,12 @@ f32 func_15117518(MoverObj *obj, f32 angle) {
     f32 rebound;
     f32 acceleration;
 
-    rebound = obj->work.bounce.rebound;
-    acceleration = obj->work.bounce.acceleration * D_800BE9E4;
-    velocity = obj->work.bounce.velocity;
-    target = (obj->params << 22) >> 22;
+    rebound = WORK(obj)->bounce.rebound;
+    acceleration = WORK(obj)->bounce.acceleration * D_800BE9E4;
+    velocity = WORK(obj)->bounce.velocity;
+    target = (obj->param.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        soundIndex = obj->params >> 10;
+        soundIndex = obj->param.word >> 10;
         if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].start != 0) {
             func_15114D24(obj, D_80089260[soundIndex].start, 24000, 200, 2500, 0);
         }
@@ -101,17 +85,17 @@ f32 func_15117518(MoverObj *obj, f32 angle) {
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        obj->work.bounce.velocity = velocity;
+        WORK(obj)->bounce.velocity = velocity;
     }
     return angle;
 }
 
-/* Bounces rot[0] toward the target angle (func_15117518). */
-void func_15117770(MoverObj *obj) {
-    obj->rot[0] = func_15117518(obj, obj->rot[0]);
+/* Bounces rotX toward the target angle (func_15117518). */
+void func_15117770(WorldObject *obj) {
+    obj->rotX = func_15117518(obj, obj->rotX);
 }
 
-/* Bounces rot[2] toward the target angle (func_15117518). */
-void func_15117798(MoverObj *obj) {
-    obj->rot[2] = func_15117518(obj, obj->rot[2]);
+/* Bounces rotZ toward the target angle (func_15117518). */
+void func_15117798(WorldObject *obj) {
+    obj->rotZ = func_15117518(obj, obj->rotZ);
 }
