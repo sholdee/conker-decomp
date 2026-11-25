@@ -3,25 +3,16 @@
 #include "variables.h"
 #include "effects.h"
 
-struct Vec3F { f32 x; f32 y; f32 z; };
-
 /*
  * Most configs below store random ranges as base/range pairs: an integer field is
  * (func_150ADA20() % (range + 1)) + base and a float field is func_150ADA68() * range + base
  * (a random float). Angles are 256-step binary angles; func_151423D8 is their cosine.
  */
-struct AngleRange {
-    s16 yawBase;
-    s16 yawRange;
-    s16 pitchBase;
-    s16 pitchRange;
-};
-
 /* Vector helpers (game_16EE20.c). */
-extern s32 func_15144E80(s16 *, struct Vec3F *, struct Vec3F *, struct Vec3F *); /* triangle edges + normal */
-extern s32 func_15145128(struct Vec3F *, struct Vec3F *, f32 *, f32 *);          /* normalize */
-extern f32 func_15144A74(struct Vec3F *, struct Vec3F *);                        /* dot product */
-extern s32 func_15146078(struct Vec3F *, struct Vec3F *, struct Vec3F *);       /* two axes perpendicular to a direction */
+extern s32 func_15144E80(s16 *, Vec3f *, Vec3f *, Vec3f *); /* triangle edges + normal */
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);          /* normalize */
+extern f32 func_15144A74(Vec3f *, Vec3f *);                        /* dot product */
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);       /* two axes perpendicular to a direction */
 extern void func_15143794(s16, s16, f32, f32 *); /* (yaw, pitch, length) -> vector */
 extern void func_15143874(s32, f32, f32 *, f32 *);
 
@@ -29,15 +20,15 @@ extern void func_15143874(s32, f32, f32 *, f32 *);
 struct ConeBasis {
     u8 flags; /* 1: direction normalized and scaled, 2: axes built, 4: axes normalized */
     u8 pad1[3];
-    struct Vec3F direction;
-    struct Vec3F axis0;
-    struct Vec3F axis1;
+    Vec3f direction;
+    Vec3f axis0;
+    Vec3f axis1;
     f32 spread;
 };
 
 /* A cone emitter described by a surface triangle (three s16 vertices) and the side its normal faces. */
 struct TriangleSource {
-    struct Vec3F normal;
+    Vec3f normal;
     s16 triangle[9];
     f32 spread;
 };
@@ -86,7 +77,7 @@ s32 func_1514F6E8(struct ConeBasis *cone) {
 }
 
 /* Picks a random direction inside the cone and scales it by `speed`. */
-void func_1514F808(struct ConeBasis *cone, f32 speed, struct Vec3F *out) {
+void func_1514F808(struct ConeBasis *cone, f32 speed, Vec3f *out) {
     f32 second;
     f32 first;
 
@@ -99,7 +90,7 @@ void func_1514F808(struct ConeBasis *cone, f32 speed, struct Vec3F *out) {
 struct ConeSprayConfig {
     s32 countBase;
     s32 countRange;
-    struct Vec3F position;
+    Vec3f position;
     f32 speedBase;
     f32 speedRange;
     f32 unk1C;
@@ -123,7 +114,7 @@ struct ConeSprayConfig {
 
 /* An emitter aimed along a direction (func_1514FB98). */
 struct DirectionEmitter {
-    struct Vec3F direction;
+    Vec3f direction;
     f32 spread;
     struct ConeSprayConfig config;
 };
@@ -134,13 +125,13 @@ struct TriangleEmitter {
     struct ConeSprayConfig config;
 };
 
-extern void func_151A2AD4(struct Vec3F *, struct Vec3F *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+extern void func_151A2AD4(Vec3f *, Vec3f *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
 /* Spawns a random number of particles from config->position, each moving in a random direction inside
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
-void func_1514F8F8(struct ConeSprayConfig *config, struct Vec3F *direction, struct Vec3F *axis0, struct Vec3F *axis1, f32 spread, u8 arg5, s32 arg6) {
+void func_1514F8F8(struct ConeSprayConfig *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
     s32 count;
-    struct Vec3F velocity;
+    Vec3f velocity;
     f32 second;
     f32 first;
     f32 speed;
@@ -168,8 +159,8 @@ void func_1514F8F8(struct ConeSprayConfig *config, struct Vec3F *direction, stru
 }
 
 void func_1514FB98(struct DirectionEmitter *emitter, u8 arg1, s32 arg2) {
-    struct Vec3F axis0;
-    struct Vec3F axis1;
+    Vec3f axis0;
+    Vec3f axis1;
 
     if (func_15146078(&emitter->direction, &axis0, &axis1) != 0) {
         func_1514F8F8(&emitter->config, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
@@ -177,13 +168,13 @@ void func_1514FB98(struct DirectionEmitter *emitter, u8 arg1, s32 arg2) {
 }
 
 void func_1514FBFC(struct TriangleEmitter *emitter, u8 arg1, s32 arg2) {
-    struct Vec3F axis0;
+    Vec3f axis0;
     f32 length0;
     f32 inverse0;
-    struct Vec3F axis1;
+    Vec3f axis1;
     f32 length1;
     f32 inverse1;
-    struct Vec3F normal;
+    Vec3f normal;
     f32 normalLength;
     f32 normalInverse;
 
@@ -207,7 +198,7 @@ struct Local1514FCE8 {
     s16 unk6;
     s32 countBase;
     s32 countRange;
-    struct Vec3F position;
+    Vec3f position;
     f32 unk1C;
     f32 unk20;
     f32 unk24;
@@ -229,7 +220,7 @@ struct Local1514FCE8 {
     s8 unk58;
 };
 
-extern void func_151A2A14(struct Vec3F *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+extern void func_151A2A14(Vec3f *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
 void func_1514FCE8(struct Local1514FCE8 *config, u8 arg1, s32 arg2) {
     s32 count;
@@ -252,7 +243,7 @@ void func_1514FCE8(struct Local1514FCE8 *config, u8 arg1, s32 arg2) {
 }
 
 struct Local1514FF44Arg {
-    struct Vec3F position;
+    Vec3f position;
     s16 countBase;
     s16 countRange;
     f32 speedBase;
@@ -276,7 +267,7 @@ struct Local1514FF44Arg {
 };
 
 extern void func_1514FF44(struct ConeBasis *, struct Local1514FF44Arg *, s32, u8, s32);
-extern void func_151D9014(struct Vec3F *, struct Vec3F *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
+extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
 
 void func_1514FEFC(struct TriangleSource *source, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
     struct ConeBasis cone;
@@ -288,7 +279,7 @@ void func_1514FEFC(struct TriangleSource *source, struct Local1514FF44Arg *confi
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
 void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    struct Vec3F velocity;
+    Vec3f velocity;
 
     if (func_1514F6E8(cone) != 0) {
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
@@ -307,9 +298,9 @@ void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 
 }
 
 /* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
-void func_15150178(struct AngleRange *angles, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15150178(AngleRange *angles, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    struct Vec3F velocity;
+    Vec3f velocity;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
@@ -331,7 +322,7 @@ void func_15150178(struct AngleRange *angles, struct Local1514FF44Arg *config, s
 struct Arg15150400 {
     s32 countBase;
     s32 countRange;
-    struct Vec3F origin;
+    Vec3f origin;
     f32 speedBase;
     f32 speedRange;
     f32 unk1C;
@@ -363,13 +354,13 @@ typedef struct {
     f32 unk04;
     f32 unk08;
     f32 unk0C;
-    struct Vec3F rotation; /* degrees */
+    Vec3f rotation; /* degrees */
     f32 unk1C;
     f32 unk20;
     f32 unk24;
-    struct Vec3F position;
-    struct Vec3F velocity;
-    struct Vec3F spin;
+    Vec3f position;
+    Vec3f velocity;
+    Vec3f spin;
     f32 unk4C;
     s32 flags;
     s16 unk54;
@@ -402,7 +393,7 @@ extern void *func_1513264C(Spawn1513264C *spawn, s32 arg1, s32 arg2, s32 arg3, s
 
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
-void func_15150400(struct Arg15150400 *config, struct AngleRange *angles, u8 arg2, s32 arg3) {
+void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 arg3) {
     s32 count;
     Spawn1513264C spawn;
     s16 yaw;
@@ -473,8 +464,8 @@ void func_15150400(struct Arg15150400 *config, struct AngleRange *angles, u8 arg
 struct Arg1515080C {
     s32 countBase;
     s32 countRange;
-    struct Vec3F origin;
-    struct AngleRange angles;
+    Vec3f origin;
+    AngleRange angles;
     f32 speedBase;
     f32 speedRange;
     f32 unk24;
@@ -599,8 +590,8 @@ void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScal
 struct Local15150D1CArg {
     s32 countBase;
     s32 countRange;
-    struct Vec3F origin;
-    struct AngleRange angles;
+    Vec3f origin;
+    AngleRange angles;
     f32 maxDistance;
     f32 unk20;
     f32 unk24;
@@ -616,7 +607,7 @@ extern s32 func_15145C90(s32);
  * suitable surface hit closer than config->maxDistance. */
 void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
     s16 *hitTriangle;
-    struct Vec3F direction;
+    Vec3f direction;
     s16 triangle[9];
     Vec3f hit;
     f32 distance;
@@ -644,24 +635,24 @@ void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
 
 typedef struct {
     s32 countBase, countRange;
-    struct Vec3F position;
+    Vec3f position;
     f32 speedBase, speedRange;
-    struct AngleRange angles;
+    AngleRange angles;
     f32 directionBase, directionRange, jitter;
     f32 sizeBase, sizeRange, scale;
     u8 kind, pad3D;
     s16 lifeBase, lifeRange;
 } Game150F90Config;
 
-void *func_1518A3C0(struct Vec3F *, struct Vec3F *, f32, struct Vec3F *, struct Vec3F *, f32, f32, u8, s16, u8, s32, u8, s32);
+void *func_1518A3C0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, f32, u8, s16, u8, s32, u8, s32);
 
 /* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->position. */
 void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3) {
-    struct Vec3F jitter;
+    Vec3f jitter;
     f32 width;
     s32 count;
-    struct Vec3F rotation;
-    struct Vec3F direction;
+    Vec3f rotation;
+    Vec3f direction;
 
     width = config->jitter + config->jitter;
     jitter.y = 0.0f;
@@ -690,8 +681,8 @@ void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3) {
 typedef struct {
     s16 countBase;
     s16 countRange;
-    struct Vec3F position;
-    struct Vec3F normal;
+    Vec3f position;
+    Vec3f normal;
     s16 triangle[9];
     u8 pad2E[2];
     f32 spread;
@@ -736,8 +727,8 @@ typedef struct {
     u8 unk13;
     f32 unk14;
     f32 unk18;
-    struct Vec3F position;
-    struct Vec3F rotation; /* degrees */
+    Vec3f position;
+    Vec3f rotation; /* degrees */
     f32 unk34;
     f32 unk38;
     f32 unk3C;
@@ -755,23 +746,23 @@ typedef struct {
 
 /* Copied into the spawned object at +0x110. */
 typedef struct {
-    struct Vec3F velocity;
+    Vec3f velocity;
     f32 unkC;
     f32 unk10;
-    struct Vec3F spin;
+    Vec3f spin;
 } Local151511FCExtra;
 
 /* Spawns a random number of objects off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal. */
 void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
     s32 count;
-    struct Vec3F axis0;
+    Vec3f axis0;
     f32 length0;
     f32 inverse0;
-    struct Vec3F axis1;
+    Vec3f axis1;
     f32 length1;
     f32 inverse1;
-    struct Vec3F normal;
+    Vec3f normal;
     f32 normalLength;
     f32 normalInverse;
     Local151511FCDesc desc;
@@ -843,7 +834,7 @@ void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
 
 /* First two arguments of func_15147DA0. */
 typedef struct {
-    struct Vec3F position;
+    Vec3f position;
     s16 life;
     s16 enabled;
     s32 active;
@@ -855,7 +846,7 @@ typedef struct {
 
 typedef struct {
     f32 size;
-    struct Vec3F velocity;
+    Vec3f velocity;
     f32 growth;
     u8 pad14[4];
     u8 red;
@@ -882,8 +873,8 @@ typedef struct {
 extern s32 func_15147DA0(Spawn15147DA0 *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32, u8, s32);
 
 typedef struct {
-    struct Vec3F position;
-    struct Vec3F normal;
+    Vec3f position;
+    Vec3f normal;
     s16 triangle[9];
     u8 pad2A[2];
     f32 spread;
@@ -904,11 +895,11 @@ void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
     Spawn15147DA0 spawn;
     Motion15147DA0 motion;
     u8 kind;
-    struct Vec3F axis0;
+    Vec3f axis0;
     f32 length0, inverse0;
-    struct Vec3F axis1;
+    Vec3f axis1;
     f32 length1, inverse1;
-    struct Vec3F normal;
+    Vec3f normal;
     f32 normalLength, normalInverse;
     f32 speed;
     f32 second;
@@ -961,7 +952,7 @@ void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
 }
 
 struct Local15151A38Arg {
-    struct Vec3F position;
+    Vec3f position;
     f32 sizeBase;
     f32 sizeRange;
     f32 growthBase;
@@ -1051,8 +1042,8 @@ void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
 struct Arg15151D6C {
     s32 countBase;
     s32 countRange;
-    struct Vec3F position;
-    struct Vec3F normal;
+    Vec3f position;
+    Vec3f normal;
     s16 triangle[9];
     f32 spread;
     f32 speedBase;
@@ -1072,13 +1063,13 @@ typedef struct {
     f32 unk04;
     f32 unk08;
     f32 unk0C;
-    struct Vec3F rotation; /* degrees */
+    Vec3f rotation; /* degrees */
     f32 unk1C;
     f32 unk20;
     f32 unk24;
-    struct Vec3F position;
-    struct Vec3F velocity;
-    struct Vec3F spin;
+    Vec3f position;
+    Vec3f velocity;
+    Vec3f spin;
     f32 unk4C;
     s32 flags;
     s16 unk54;
@@ -1114,13 +1105,13 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
     s32 count;
     s32 variant;
     Spawn15132A4C spawn;
-    struct Vec3F axis0;
+    Vec3f axis0;
     f32 length0;
     f32 inverse0;
-    struct Vec3F axis1;
+    Vec3f axis1;
     f32 length1;
     f32 inverse1;
-    struct Vec3F normal;
+    Vec3f normal;
     f32 normalLength;
     f32 normalInverse;
     f32 second;
@@ -1194,8 +1185,8 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
 struct Arg15152190 {
     s32 countBase;
     s32 countRange;
-    struct Vec3F origin;
-    struct AngleRange angles;
+    Vec3f origin;
+    AngleRange angles;
     f32 speedBase;
     f32 speedRange;
     f32 unk24;
@@ -1273,8 +1264,8 @@ void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScal
 struct Local15152520Arg {
     s32 countBase;
     s32 countRange;
-    struct Vec3F position;
-    struct AngleRange angles;
+    Vec3f position;
+    AngleRange angles;
     f32 speedBase;
     f32 speedRange;
     f32 unk24;
@@ -1289,8 +1280,8 @@ struct Local15152520Arg {
     f32 unk44;
     f32 unk48;
     f32 unk4C;
-    struct Vec3F unk50; /* base of motion.unk1C */
-    struct Vec3F unk5C; /* range of motion.unk1C */
+    Vec3f unk50; /* base of motion.unk1C */
+    Vec3f unk5C; /* range of motion.unk1C */
     Color8 unk68;
     Color8 unk6C;
     u8 unk70;
@@ -1301,10 +1292,10 @@ struct Local15152520Arg {
 
 /* Second argument of func_15157898. */
 struct Local15152520Motion {
-    struct Vec3F rotation; /* degrees */
+    Vec3f rotation; /* degrees */
     f32 unk0C;
-    struct Vec3F velocity;
-    struct Vec3F unk1C;
+    Vec3f velocity;
+    Vec3f unk1C;
     f32 unk28;
     f32 unk2C;
     u8 unk30;
@@ -1340,7 +1331,7 @@ struct Local15152520Params {
     u8 unk40;
     u8 unk41;
     u8 pad42[2];
-    struct Vec3F position;
+    Vec3f position;
     u8 pad50[4];
     s16 unk54;
     s16 unk56;
@@ -1404,8 +1395,8 @@ void func_15152520(struct Local15152520Arg *config, u8 arg1, s32 arg2) {
 struct Local15152874Arg {
     s32 countBase;
     s32 countRange;
-    struct Vec3F position;
-    struct AngleRange angles;
+    Vec3f position;
+    AngleRange angles;
     f32 speedBase;
     f32 speedRange;
     f32 unk24;
@@ -1425,8 +1416,8 @@ struct Local15152874Arg {
 
 /* First argument of func_150CCEB0. */
 struct Local15152874Spawn {
-    struct Vec3F position;
-    struct Vec3F velocity;
+    Vec3f position;
+    Vec3f velocity;
     f32 unk18;
     f32 unk1C;
     Color8 color;
@@ -1485,119 +1476,40 @@ void func_15152ABC(Color8 *out) {
     out->blue = rgb[2];
 }
 
-struct Local15152B38Arg {
-    s32 countBase;
-    s32 countRange;
-    struct Vec3F position;
-    f32 sizeBase;
-    f32 sizeRange;
-    f32 unk1C;
-    f32 unk20;
-    f32 speedBase;
-    f32 speedRange;
-    struct AngleRange angles;
-    s32 unk34;
-    s32 unk38;
-    s16 lifeBase;
-    s16 lifeRange;
-    u16 kind;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    Color8 colorBase;
-    Color8 colorRange;
-    Color8 color2Base;
-    Color8 color2Range;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    s32 unk60;
-    s16 unk64;
-    s16 unk66;
-    s16 unk68;
-    u8 unk6A;
-    u8 pad6B;
-    f32 unk6C;
-    s8 unk70;
-    s8 unk71;
-};
+extern void func_1515C2F0(EffectTemplate *, s32, TrailBurstParams *, s32, u8, s32);
 
-/* First argument of func_1515C2F0. */
-struct Local15152B38Param {
-    struct Vec3F position;
-    s16 life;
-    u16 kind;
-    s32 unk10;
-    u8 pad14;
-    s8 unk15;
-    u8 pad16[2];
-    u8 pad18[4];
-};
-
-/* Third argument of func_1515C2F0. */
-struct Local15152B38Spawn {
-    f32 size;
-    struct Vec3F velocity;
-    f32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    Color8 color;
-    Color8 color2;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 pad22[2];
-    s32 unk24;
-    s32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    u8 unk32;
-    u8 pad33;
-    f32 unk34;
-    s8 unk38;
-    s8 unk39;
-    u8 pad3A[2];
-};
-
-extern void func_1515C2F0(struct Local15152B38Param *, s32, struct Local15152B38Spawn *, s32, u8, s32);
-
-void func_15152B38(struct Local15152B38Arg *config, u8 arg1, s32 arg2) {
-    struct Local15152B38Param param;
-    struct Local15152B38Spawn spawn;
+void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
+    EffectTemplate param;
+    TrailBurstParams spawn;
     s32 count;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-    param.position = config->position;
-    param.kind = config->kind;
-    param.unk10 = 10;
-    spawn.unk14 = config->unk42;
-    spawn.unk15 = config->unk43;
-    spawn.unk16 = config->unk44;
-    spawn.unk20 = config->unk57;
-    spawn.unk21 = config->unk58;
-    spawn.unk24 = config->unk5C;
-    spawn.unk28 = config->unk60;
-    spawn.unk2C = config->unk64;
-    spawn.unk2E = config->unk66;
-    spawn.unk38 = config->unk70;
-    spawn.unk39 = config->unk71;
-    spawn.unk30 = config->unk68;
-    spawn.unk32 = config->unk6A;
-    spawn.unk34 = config->unk6C;
+    param.pos = config->pos;
+    param.flags = config->headerFlags;
+    param.kind = 10;
+    spawn.flags = config->flags;
+    spawn.primMode = config->primMode;
+    spawn.envMode = config->envMode;
+    spawn.renderMode = config->renderMode;
+    spawn.unk21 = config->unk21;
+    spawn.setGeometryMode = config->setGeometryMode;
+    spawn.clearGeometryMode = config->clearGeometryMode;
+    spawn.fadeStart = config->fadeStart;
+    spawn.fadeRate = config->fadeRate;
+    spawn.unk38 = config->unk38;
+    spawn.unk39 = config->unk39;
+    spawn.shrinkStart = config->shrinkStart;
+    spawn.shrinkPaused = config->shrinkPaused;
+    spawn.shrinkFactor = config->shrinkFactor;
     while (count != 0) {
-        param.unk15 = (func_150ADA20() % (u32)(config->unk38 + 1)) + config->unk34;
+        param.itemCount = (func_150ADA20() % (u32)(config->capacityRange + 1)) + config->capacityBase;
         param.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
-        spawn.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
-        spawn.unk10 = (func_150ADA68() * config->unk20) + config->unk1C;
+        spawn.width = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &spawn.velocity.x);
+                      &spawn.vel.x);
         spawn.color.red = (func_150ADA20() % (u32)(config->colorRange.red + 1)) + config->colorBase.red;
         spawn.color.green = (func_150ADA20() % (u32)(config->colorRange.green + 1)) + config->colorBase.green;
         spawn.color.blue = (func_150ADA20() % (u32)(config->colorRange.blue + 1)) + config->colorBase.blue;
@@ -1606,14 +1518,14 @@ void func_15152B38(struct Local15152B38Arg *config, u8 arg1, s32 arg2) {
         spawn.color2.green = (func_150ADA20() % (u32)(config->color2Range.green + 1)) + config->color2Base.green;
         spawn.color2.blue = (func_150ADA20() % (u32)(config->color2Range.blue + 1)) + config->color2Base.blue;
         spawn.color2.alpha = (func_150ADA20() % (u32)(config->color2Range.alpha + 1)) + config->color2Base.alpha;
-        spawn.unk1F = (func_150ADA20() % (u32)(config->unk56 + 1)) + config->unk55;
+        spawn.colorLevel = (func_150ADA20() % (u32)(config->colorLevelRange + 1)) + config->colorLevelBase;
         func_1515C2F0(&param, 0, &spawn, 0, arg1, arg2);
         count--;
     }
 }
 
 struct Local15152F70Arg {
-    struct Vec3F position;
+    Vec3f position;
     f32 sizeBase;
     f32 sizeRange;
     f32 growthBase;
@@ -1647,7 +1559,7 @@ struct Local15152F70Arg {
 /* Motion15147DA0 without the trailing unk1C/unk1E, which this caller never sets. */
 typedef struct {
     f32 size;
-    struct Vec3F velocity;
+    Vec3f velocity;
     f32 growth;
     u8 pad14[4];
     u8 red;
@@ -1709,7 +1621,7 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
 }
 
 typedef struct {
-    struct Vec3F position;
+    Vec3f position;
     s16 countBase, countRange, yawBase, yawRange, pitchBase, pitchRange;
     f32 speedBase, speedRange;
     s16 lifeBase, lifeRange, sizeBase, sizeRange;
@@ -1806,7 +1718,7 @@ struct Local15153634Arg {
     f32 unk2C;
     f32 unk30;
     f32 unk34;
-    struct Vec3F position;
+    Vec3f position;
     s16 yawBase;
     s16 pitchBase;
     s16 yawRange;
@@ -1849,9 +1761,9 @@ struct Local15153634Spawn {
     f32 unk24;
     f32 unk28;
     f32 unk2C;
-    struct Vec3F position;
+    Vec3f position;
     u8 pad3C[0xC];
-    struct Vec3F velocity;
+    Vec3f velocity;
     f32 unk54;
     s32 unk58;
     u8 pad5C[4];
@@ -1936,7 +1848,7 @@ void func_15153634(struct Local15153634Arg *config, u8 arg1, u8 arg2, s32 arg3) 
 struct Local151539B4Arg {
     s16 countBase;
     s16 countRange;
-    struct Vec3F position;
+    Vec3f position;
     s16 yawBase;
     s16 pitchBase;
     s16 yawRange;
@@ -1963,8 +1875,8 @@ struct Local151539B4Arg {
 
 /* First argument of func_15156190. */
 struct Local151539B4Spawn {
-    struct Vec3F position;
-    struct Vec3F direction;
+    Vec3f position;
+    Vec3f direction;
     f32 unk18;
     f32 unk1C;
     Color8 color0;
@@ -2033,7 +1945,7 @@ void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
 }
 
 struct Local15153CCCArg {
-    struct Vec3F position;
+    Vec3f position;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -2056,7 +1968,7 @@ struct Local15153CCCArg {
     s32 unk40;
 };
 
-extern void func_151DA6F8(struct Vec3F *, struct Vec3F *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
+extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 extern void func_15153CCC(struct ConeBasis *, struct Local15153CCCArg *, s32, u8, s32);
 
 void func_15153C84(struct TriangleSource *source, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
@@ -2070,7 +1982,7 @@ void func_15153C84(struct TriangleSource *source, struct Local15153CCCArg *confi
  * cone. */
 void func_15153CCC(struct ConeBasis *cone, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    struct Vec3F velocity;
+    Vec3f velocity;
 
     if (func_1514F6E8(cone) != 0) {
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
@@ -2090,9 +2002,9 @@ void func_15153CCC(struct ConeBasis *cone, struct Local15153CCCArg *config, s32 
 }
 
 /* Like func_15153CCC, but each direction is a random yaw/pitch from `angles`. */
-void func_15153F18(struct AngleRange *angles, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153F18(AngleRange *angles, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    struct Vec3F velocity;
+    Vec3f velocity;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
@@ -2124,7 +2036,7 @@ typedef struct {
 
 /* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
  * it gets no random x/z rotation, spins only around y and grows along one axis. */
-void *func_151541B8(struct Vec3F *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
+void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
     void *object;
     s32 oneAxis;
     Spawn15132A4C spawn;
@@ -2228,9 +2140,9 @@ typedef struct {
     u8 pad0[0x18];
     f32 unk18;
     f32 unk1C;
-    struct Vec3F position;
+    Vec3f position;
     u8 pad2C[0x24];
-    struct Vec3F velocity;
+    Vec3f velocity;
     u8 pad5C[0x14];
     u8 alpha;
     u8 pad71[0xFF];
@@ -2294,7 +2206,7 @@ extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32
  * config's range. */
 void func_15154684(struct Local15154684Arg *config, u8 arg1, s32 arg2) {
     f32 pad; // matching: unused stack slot above velocity
-    struct Vec3F velocity;
+    Vec3f velocity;
     s32 count;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
@@ -2317,7 +2229,7 @@ void func_15154684(struct Local15154684Arg *config, u8 arg1, s32 arg2) {
 
 /* Spawns a single object at `position` whose size and alpha swell and shrink along half a sine wave
  * over `duration`. */
-void *func_15154884(struct Vec3F *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5) {
+void *func_15154884(Vec3f *position, f32 duration, f32 size, f32 alpha, u8 arg4, s32 arg5) {
     void *object;
     s32 pad; // matching: unused stack slot
     Spawn15132A4C spawn;

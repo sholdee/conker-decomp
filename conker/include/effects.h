@@ -435,4 +435,89 @@ typedef struct BillboardTemplate {
     /* 0x36 */ u8 pad36[2];
 } BillboardTemplate; /* size 0x38 */
 
+/* Random spawn angles: yaw = yawBase + rand % (yawRange + 1), likewise pitch (256-step binary angles).
+ * Most spawn configs of game_17CAF0.c store random ranges as base/range pairs like this. */
+typedef struct AngleRange {
+    /* 0x0 */ s16 yawBase;
+    /* 0x2 */ s16 yawRange;
+    /* 0x4 */ s16 pitchBase;
+    /* 0x6 */ s16 pitchRange;
+} AngleRange; /* size 0x8 */
+
+/* TrailBurstParams.flags */
+#define TRAIL_BURST_TWO_CYCLE 0x1
+#define TRAIL_BURST_FADE      0x4   /* alpha fades once life < fadeStart */
+#define TRAIL_BURST_SHRINK    0x8   /* width shrinks once life < shrinkStart */
+
+/* Per-trail settings, copied into the trail (Trail.data) by func_1515C2F0 (game_1897A0.c). */
+typedef struct TrailBurstParams {
+    /* 0x00 */ f32 width;     /* half-width of the ribbon */
+    /* 0x04 */ Vec3f vel;     /* initial point velocity; only vel.y is kept per point */
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ u8 flags;      /* TRAIL_BURST_* */
+    /* 0x15 */ u8 primMode;
+    /* 0x16 */ u8 envMode;
+    /* 0x17 */ Color8 color;
+    /* 0x1B */ Color8 color2;
+    /* 0x1F */ u8 colorLevel;
+    /* 0x20 */ u8 renderMode; /* index into D_800A4AC8 */
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ s32 setGeometryMode;
+    /* 0x28 */ s32 clearGeometryMode;
+    /* 0x2C */ s16 fadeStart;  /* life below which the alpha fades */
+    /* 0x2E */ s16 fadeRate;   /* alpha per unit of life */
+    /* 0x30 */ s16 shrinkStart; /* life below which the width shrinks */
+    /* 0x32 */ u8 shrinkPaused;
+    /* 0x33 */ u8 pad33;
+    /* 0x34 */ f32 shrinkFactor; /* width multiplier per frame */
+    /* 0x38 */ s8 unk38;      /* index into D_8008B080, -1: none */
+    /* 0x39 */ s8 unk39;      /* index into D_8008B084, -1: none */
+    /* 0x3A */ u8 pad3A[2];
+} TrailBurstParams; /* size 0x3C */
+
+/* func_15152B38 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) trails (func_1515C2F0) at pos,
+ * each with random size, gravity, speed, direction, item count, life and colors from these base/range pairs. */
+typedef struct TrailBurst {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ f32 sizeBase;
+    /* 0x18 */ f32 sizeRange;
+    /* 0x1C */ f32 gravityBase;
+    /* 0x20 */ f32 gravityRange;
+    /* 0x24 */ f32 speedBase;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ AngleRange angles;
+    /* 0x34 */ s32 capacityBase;   /* EffectTemplate.itemCount */
+    /* 0x38 */ s32 capacityRange;
+    /* 0x3C */ s16 lifeBase;
+    /* 0x3E */ s16 lifeRange;
+    /* 0x40 */ u16 headerFlags;    /* EffectTemplate.flags */
+    /* 0x42 */ u8 flags;           /* TrailBurstParams.flags */
+    /* 0x43 */ u8 primMode;
+    /* 0x44 */ u8 envMode;
+    /* 0x45 */ Color8 colorBase;
+    /* 0x49 */ Color8 colorRange;
+    /* 0x4D */ Color8 color2Base;
+    /* 0x51 */ Color8 color2Range;
+    /* 0x55 */ u8 colorLevelBase;
+    /* 0x56 */ u8 colorLevelRange;
+    /* 0x57 */ u8 renderMode;
+    /* 0x58 */ u8 unk21;           /* TrailBurstParams.unk21 */
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 setGeometryMode;
+    /* 0x60 */ s32 clearGeometryMode;
+    /* 0x64 */ s16 fadeStart;
+    /* 0x66 */ s16 fadeRate;
+    /* 0x68 */ s16 shrinkStart;
+    /* 0x6A */ u8 shrinkPaused;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ f32 shrinkFactor;
+    /* 0x70 */ s8 unk38;           /* TrailBurstParams.unk38 */
+    /* 0x71 */ s8 unk39;           /* TrailBurstParams.unk39 */
+    /* 0x72 */ s8 unk72;           /* not read by func_15152B38; callers store -1 */
+    /* 0x73 */ s8 unk73;
+} TrailBurst; /* size 0x74 */
+
 #endif

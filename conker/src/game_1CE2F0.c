@@ -902,84 +902,38 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
     }
 }
 
-/* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 sizeBase;
-    /* 0x18 */ f32 sizeRange;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 speedBase;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 yawBase;
-    /* 0x2E */ s16 yawRange;
-    /* 0x30 */ s16 pitchBase;
-    /* 0x32 */ s16 pitchRange;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s16 lifeBase;
-    /* 0x3E */ s16 lifeRange;
-    /* 0x40 */ u16 kind;
-    /* 0x42 */ u8 unk42;
-    /* 0x43 */ u8 unk43;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ Color8 colorBase;
-    /* 0x49 */ Color8 colorRange;
-    /* 0x4D */ Color8 color2Base;
-    /* 0x51 */ Color8 color2Range;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s16 unk64;
-    /* 0x66 */ s16 unk66;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ s8 unk70;
-    /* 0x71 */ s8 unk71;
-    /* 0x72 */ s8 unk72;
-    /* 0x73 */ s8 unk73;
-} BurstConfig;
-
-void func_15152B38(BurstConfig *, u8, s32);
+void func_15152B38(TrailBurst *, u8, s32);
 
 /* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
 void func_151A2F0C(DescParticle *particle) {
-    BurstConfig config;
+    TrailBurst config;
 
     config.countBase = 8;
     config.countRange = 6;
-    config.position = particle->desc.pos;
+    config.pos = particle->desc.pos;
     if (particle->desc.flags & 0x1000) {
-        config.position.x += particle->desc.offset.x;
-        config.position.y += particle->desc.offset.y;
-        config.position.z += particle->desc.offset.z;
+        config.pos.x += particle->desc.offset.x;
+        config.pos.y += particle->desc.offset.y;
+        config.pos.z += particle->desc.offset.z;
     }
     config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.01999999955f;
     config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.03529999778f;
-    config.unk1C = -0.2680000067f;
-    config.unk20 = 0.0f;
+    config.gravityBase = -0.2680000067f;
+    config.gravityRange = 0.0f;
     config.speedBase = 8.0f;
     config.speedRange = 10.0f;
-    config.yawBase = 0;
-    config.yawRange = 255;
-    config.pitchBase = -64;
-    config.pitchRange = 86;
-    config.unk34 = 3;
-    config.unk38 = 1;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.angles.pitchBase = -64;
+    config.angles.pitchRange = 86;
+    config.capacityBase = 3;
+    config.capacityRange = 1;
     config.lifeBase = 17;
     config.lifeRange = 18;
-    config.kind = 1;
-    config.unk42 = 4;
-    config.unk43 = 2;
-    config.unk44 = 3;
+    config.headerFlags = 1;
+    config.flags = 4;
+    config.primMode = 2;
+    config.envMode = 3;
     config.colorBase.red = 255;
     config.colorBase.green = 200;
     config.colorBase.blue = 200;
@@ -996,19 +950,19 @@ void func_151A2F0C(DescParticle *particle) {
     config.color2Range.green = 0;
     config.color2Range.blue = 0;
     config.color2Range.alpha = 0;
-    config.unk55 = 255;
-    config.unk56 = 0;
-    config.unk57 = 1;
-    config.unk58 = 0x24;
-    config.unk5C = 0x200005;
-    config.unk60 = 0x60600;
-    config.unk64 = 7;
-    config.unk66 = 0x24;
-    config.unk68 = 1;
-    config.unk6A = 0;
-    config.unk6C = 1.0f;
-    config.unk70 = -1;
-    config.unk71 = 0;
+    config.colorLevelBase = 255;
+    config.colorLevelRange = 0;
+    config.renderMode = 1;
+    config.unk21 = 0x24;
+    config.setGeometryMode = 0x200005;
+    config.clearGeometryMode = 0x60600;
+    config.fadeStart = 7;
+    config.fadeRate = 0x24;
+    config.shrinkStart = 1;
+    config.shrinkPaused = 0;
+    config.shrinkFactor = 1.0f;
+    config.unk38 = -1;
+    config.unk39 = 0;
     config.unk72 = -1;
     config.unk73 = -1;
 

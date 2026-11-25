@@ -10,33 +10,6 @@ typedef struct TrailPoint {
     /* 0x0C */ f32 velY;
 } TrailPoint; /* size 0x10 */
 
-/* Per-trail settings, copied from the spawner by func_1515C2F0. */
-typedef struct TrailData {
-    /* 0x00 */ f32 width;     /* half-width of the ribbon */
-    /* 0x04 */ Vec3f vel;    /* initial point velocity; only vel.y is kept per point */
-    /* 0x10 */ f32 gravity;
-    /* 0x14 */ u8 flags;      /* 1: two-cycle mode; 4: fade out; 8: shrink */
-    /* 0x15 */ u8 primMode;
-    /* 0x16 */ u8 envMode;
-    /* 0x17 */ u8 color[4];
-    /* 0x1B */ u8 color2[4];
-    /* 0x1F */ u8 colorLevel;
-    /* 0x20 */ u8 renderMode; /* index into D_800A4AC8 */
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 pad22[2];
-    /* 0x24 */ s32 setGeometryMode;
-    /* 0x28 */ s32 clearGeometryMode;
-    /* 0x2C */ s16 fadeStart;  /* life below which the alpha fades */
-    /* 0x2E */ s16 fadeRate;   /* alpha per unit of life */
-    /* 0x30 */ s16 shrinkStart; /* life below which the width shrinks */
-    /* 0x32 */ u8 shrinkPaused;
-    /* 0x33 */ u8 pad33;
-    /* 0x34 */ f32 shrinkFactor; /* width multiplier per frame */
-    /* 0x38 */ s8 unk38;      /* index into D_8008B080, -1: none */
-    /* 0x39 */ s8 unk39;      /* index into D_8008B084, -1: none */
-    /* 0x3A */ u8 pad3A[2];
-} TrailData; /* size 0x3C */
-
 /* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
@@ -49,13 +22,13 @@ typedef struct Trail {
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
+    /* 0x98 */ TrailBurstParams *data;
 } Trail;
 
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailData *data, void *arg3, u8 arg4, s32 arg5) {
+Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
     Trail *trail;
 
     header->kind = 10;
@@ -63,17 +36,17 @@ Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailData *data, voi
     if (trail == NULL) {
         return NULL;
     }
-    memcpy(trail->data, data, sizeof(TrailData));
+    memcpy(trail->data, data, sizeof(TrailBurstParams));
     return trail;
 }
 
-typedef s32 (*TrailHandler)(Trail *, TrailData *);
+typedef s32 (*TrailHandler)(Trail *, TrailBurstParams *);
 extern TrailHandler D_8008B080[];
 extern TrailHandler D_8008B084[];
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
 s32 func_1515C388(Trail *trail) {
-    TrailData *data;
+    TrailBurstParams *data;
     u8 failed;
     TrailPoint *points;
     Vec3f oldest; // matching: copied but never read (the target keeps the copy)
@@ -115,7 +88,7 @@ s32 func_1515C388(Trail *trail) {
 
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
 s32 func_1515C534(Trail *trail) {
-    TrailData *data;
+    TrailBurstParams *data;
     u8 failed;
     u32 frames;
 
@@ -125,14 +98,14 @@ s32 func_1515C534(Trail *trail) {
         failed = D_8008B084[data->unk39](trail, data) == 0;
     }
     if (!failed) {
-        if ((data->flags & 4) && trail->header.life < data->fadeStart) {
+        if ((data->flags & TRAIL_BURST_FADE) && trail->header.life < data->fadeStart) {
             s32 alpha = trail->header.life * data->fadeRate;
 
-            if (alpha < data->color[3]) {
-                data->color[3] = alpha;
+            if (alpha < data->color.alpha) {
+                data->color.alpha = alpha;
             }
         }
-        if ((data->flags & 8) && trail->header.life < data->shrinkStart && !data->shrinkPaused) {
+        if ((data->flags & TRAIL_BURST_SHRINK) && trail->header.life < data->shrinkStart && !data->shrinkPaused) {
             for (frames = D_800BE9E4; frames != 0; frames--) {
                 data->width *= data->shrinkFactor;
             }
@@ -174,7 +147,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     u8 update;
     Vec3f next;
     Vec3f cur;
-    TrailData *data;
+    TrailBurstParams *data;
     TrailPoint *points;
     f32 *camPos;
     s32 j;
@@ -208,16 +181,16 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
             update = 1;
             camPos = &D_800DBFF0[view].eye.x;
             points = trail->points;
-            func_151441A4(&primR, &primG, &primB, &primA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
-                          data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->primMode);
-            func_151442FC(&envR, &envG, &envB, &envA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
-                          data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->envMode);
+            func_151441A4(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+                          data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);
+            func_151442FC(&envR, &envG, &envB, &envA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
+                          data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->envMode);
             gfx = func_15142E24(gfx, D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = func_1513F4E4(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-            if (data->flags & 1) {
+            if (data->flags & TRAIL_BURST_TWO_CYCLE) {
                 cycleMode = G_CYC_2CYCLE;
             } else {
                 cycleMode = G_CYC_1CYCLE;
@@ -299,7 +272,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                     sideY *= scale;
                     sideZ *= scale;
                 }
-                alpha = (data->color[3] * alphaScale) >> 8;
+                alpha = (data->color.alpha * alphaScale) >> 8;
                 alphaScale += alphaStep;
                 vtx->v.ob[0] = next.x + sideX;
                 vtx->v.ob[1] = next.y + sideY;
@@ -340,7 +313,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
-s32 func_1515CF9C(Trail *trail, TrailData *data) {
+s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
     if (trail->count < trail->header.itemCount - 1) {
         TrailPoint *points;
 
@@ -359,7 +332,7 @@ s32 func_1515CF9C(Trail *trail, TrailData *data) {
 }
 
 /* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
-s32 func_1515D030(Trail *trail, TrailData *data) {
+s32 func_1515D030(Trail *trail, TrailBurstParams *data) {
     s8 count;
     s32 result;
 
@@ -476,48 +449,6 @@ typedef struct {
 } EmitterPreset; /* size 0x40 */
 
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 sizeBase;
-    /* 0x18 */ f32 sizeRange;
-    /* 0x1C */ f32 gravityBase;
-    /* 0x20 */ f32 gravityRange;
-    /* 0x24 */ f32 speedBase;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 yawBase;
-    /* 0x2E */ s16 yawRange;
-    /* 0x30 */ s16 pitchBase;
-    /* 0x32 */ s16 pitchRange;
-    /* 0x34 */ s32 capacityBase;
-    /* 0x38 */ s32 capacityRange;
-    /* 0x3C */ s16 lifeBase;
-    /* 0x3E */ s16 lifeRange;
-    /* 0x40 */ u16 headerFlags;
-    /* 0x42 */ u8 flags;
-    /* 0x43 */ u8 primMode;
-    /* 0x44 */ u8 envMode;
-    /* 0x45 */ u8 colorBase[4];
-    /* 0x49 */ u8 colorRange[4];
-    /* 0x4D */ u8 color2Base[4];
-    /* 0x51 */ u8 color2Range[4];
-    /* 0x55 */ u8 colorLevelBase;
-    /* 0x56 */ u8 colorLevelRange;
-    /* 0x57 */ u8 renderMode;
-    /* 0x58 */ u8 unk21;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 setGeometryMode;
-    /* 0x60 */ s32 clearGeometryMode;
-    /* 0x64 */ s16 fadeStart;
-    /* 0x66 */ s16 fadeRate;
-    /* 0x68 */ s16 shrinkStart;
-    /* 0x6A */ u8 shrinkPaused;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ f32 shrinkFactor;
-    /* 0x70 */ s8 unk38;
-    /* 0x71 */ s8 unk39;
-} TrailBurst;
 
 extern EmitterPreset D_800A64A0[];
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
@@ -544,34 +475,34 @@ void func_1515D130(Emitter *owner) {
         burst.gravityRange = preset->gravityRange;
         burst.speedBase = preset->speedBase;
         burst.speedRange = preset->speedRange;
-        burst.yawBase = 0;
-        burst.yawRange = 255;
-        burst.pitchBase = -63;
-        burst.pitchRange = 80;
+        burst.angles.yawBase = 0;
+        burst.angles.yawRange = 255;
+        burst.angles.pitchBase = -63;
+        burst.angles.pitchRange = 80;
         burst.capacityBase = preset->capacityBase;
         burst.capacityRange = preset->capacityRange;
         burst.lifeBase = preset->lifeBase;
         burst.lifeRange = preset->lifeRange;
         burst.headerFlags = 1;
-        burst.flags = 4 | 8;
+        burst.flags = TRAIL_BURST_FADE | TRAIL_BURST_SHRINK;
         burst.primMode = 2;
         burst.envMode = 3;
-        burst.colorBase[0] = 180;
-        burst.colorBase[1] = 0;
-        burst.colorBase[2] = 0;
-        burst.colorBase[3] = 155;
-        burst.colorRange[0] = 50;
-        burst.colorRange[1] = 100;
-        burst.colorRange[2] = 0;
-        burst.colorRange[3] = 100;
-        burst.color2Base[0] = 255;
-        burst.color2Base[1] = 255;
-        burst.color2Base[2] = 255;
-        burst.color2Base[3] = 255;
-        burst.color2Range[0] = 0;
-        burst.color2Range[1] = 0;
-        burst.color2Range[2] = 0;
-        burst.color2Range[3] = 0;
+        burst.colorBase.red = 180;
+        burst.colorBase.green = 0;
+        burst.colorBase.blue = 0;
+        burst.colorBase.alpha = 155;
+        burst.colorRange.red = 50;
+        burst.colorRange.green = 100;
+        burst.colorRange.blue = 0;
+        burst.colorRange.alpha = 100;
+        burst.color2Base.red = 255;
+        burst.color2Base.green = 255;
+        burst.color2Base.blue = 255;
+        burst.color2Base.alpha = 255;
+        burst.color2Range.red = 0;
+        burst.color2Range.green = 0;
+        burst.color2Range.blue = 0;
+        burst.color2Range.alpha = 0;
         burst.colorLevelBase = 255;
         burst.colorLevelRange = 0;
         burst.renderMode = 1;
