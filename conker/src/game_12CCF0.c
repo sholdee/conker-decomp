@@ -17,10 +17,6 @@ void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);
 
-typedef struct {
-    s32 id[4];
-} Unk1DChoices;
-
 /* Muzzle points (from, to) of this gun on bone D_80088BB0. */
 const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
 const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
@@ -28,7 +24,7 @@ const Vec3f D_800A213C = { 10.0f, -155.0f, 99.0f };
 const Vec3f D_800A2148 = { -1.0f, -38.0f, 38.0f };
 const Vec3f D_800A2154 = { -26.0f, -23.0f, 51.0f };
 /* Particle textures that func_150FFD84 picks from at random. */
-const Unk1DChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
+const TextureChoices D_800A2160 = { { 0x60, 0x61, 0x62, 0x63 } };
 
 /*
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
@@ -205,11 +201,11 @@ void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
     basePitch >>= 8;
     basePitch -= 138;
     do {
-        Unk1DChoices ids;
+        TextureChoices ids;
         s32 random1;
 
         ids = D_800A2160;
-        spawn.texture = ids.id[func_150ADA20() & 3];
+        spawn.texture = ids.texture[func_150ADA20() & 3];
         spawn.timer = func_150ADA20() % 13U + 10;
         spawn.alpha = func_150ADA20() % 101U + 155;
         spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;

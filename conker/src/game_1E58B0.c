@@ -146,22 +146,17 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
                   effect->owner, effect->kind);
 }
 
-/* The four values (0x60-0x63) func_151B8908 picks unk1D from. */
-typedef struct {
-    s32 values[4];
-} Unk1DChoices;
-
-extern Unk1DChoices D_800AA4B8;
+extern TextureChoices D_800AA4B8;
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
-/* Spawns a particle at the bullet's position, with a random unk1D choice and random flag bits 0x40 / 0x80. */
+/* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
 void func_151B8908(Bullet *bullet) {
     s32 pad; // matching: unused frame slot above spawn
     ParticleDesc spawn;
-    Unk1DChoices choices;
+    TextureChoices choices;
 
     choices = D_800AA4B8;
-    spawn.texture = choices.values[func_150ADA20() & 3];
+    spawn.texture = choices.texture[func_150ADA20() & 3];
     spawn.renderMode = 0x1303;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;

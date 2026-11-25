@@ -96,6 +96,12 @@ typedef struct ParticleDesc {
     /* 0x6C */ f32 maxSize;
 } ParticleDesc; /* size 0x70 */
 
+/* Four particle textures to pick one from at random (ParticleDesc.texture): D_800A2160 (game_12CCF0.c) and
+ * D_800AA4B8 (func_151B8908), both 0x60-0x63. A struct, so the callers copy it to the stack in one go. */
+typedef struct TextureChoices {
+    /* 0x0 */ s32 texture[4];
+} TextureChoices; /* size 0x10 */
+
 /* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
 typedef struct ParticleDesc64 {
     /* 0x00 */ s32 unk0;
