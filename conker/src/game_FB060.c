@@ -2,11 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+extern f32 D_800A07B4; // matching: 401.0f; as a literal IDO allocates the FP temps in a different order
 extern f32 D_800A07C4;
-extern f32 D_800A07B4;
-extern f32 D_800A07B8;
-extern f32 D_800A07BC;
-extern f32 D_800A07C0;
 extern f32 D_800A07C8;
 extern f32 D_800A07CC;
 extern f32 D_800A07D0;
@@ -56,110 +53,118 @@ void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
     func_1514C678(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
 
-s32 func_150CDCF4(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
-    struct260 *ret;
-    struct {
-        s32 temp;
-        u8 pad28[4];
-        f32 sp2C;
-        u8 pad30[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            u8 pad3C[0xC];
-            f32 unk48;
-            f32 unk4C;
-            f32 unk50;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            s8 unk63;
-        } sp34;
-        u8 pad98[0xC];
-    } stack;
+/* Spawn parameters of a func_15130374 particle (same layout as ParticleDesc in game_15D730.c). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;
+    /* 0x63 */ s8 deathFunc;
+    /* 0x64 */ s8 drawFunc;
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc; /* size 0x70 */
 
-    stack.sp34.unk1D = 0x29;
-    stack.sp34.unk08 = 0xE03;
-    stack.sp34.unk00 = 0x200005;
-    stack.sp34.unk04 = 0;
-    stack.sp34.unk0A = (func_150ADA20() % 0x29U) + 0x32;
-    stack.sp34.unk0C = 0;
-    stack.sp34.unk10 = 0;
-    stack.sp34.unk18 = 0xB0;
-    stack.sp34.unk19 = 0xA0;
-    stack.sp34.unk1A = 0x2A;
-    stack.sp34.unk14 = 0x40;
-    stack.sp34.unk15 = 0xB;
-    stack.sp34.unk16 = 0x6A;
-    stack.sp34.unk17 = 0xFF;
+/* A particle object (same layout as Particle in game_15D730.c); its kind's own data follows at +0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ParticleDesc desc;
+    /* 0x80 */ u8 pad80[0x28];
+    /* 0xA8 */ f32 unkA8;
+} Particle;
 
-    stack.sp34.unk1B = (func_150ADA20() % 0x65U) + 0x64;
-    stack.sp34.unk1C = 0xFF;
-    stack.sp34.unk60 = 3;
-    stack.sp34.unk61 = 3;
+#define PARTICLE_FLIP_S 0x40
+#define PARTICLE_FLIP_T 0x80
 
-    stack.sp34.unk28 = stack.sp34.unk2C = (func_150ADA68() * D_800A07B4) + 404.0f;
-    stack.sp34.unk30 = arg2;
-    stack.sp34.unk34 = arg3;
-    stack.sp34.unk38 = arg4;
+Particle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
-    stack.temp = func_150ADA20();
-    func_15143794(arg8, (s16)((stack.temp % 0x14U) - 0x13),
-                  (func_150ADA68() * 150.0f + 150.0f) * D_800A07B8,
-                  &stack.sp34.unk48);
+/* Spawns a random purple-to-yellow puff particle at (x, y, z), flying off at a random pitch along `yaw`. */
+s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
+                  s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+    Particle *particle;
+    ParticleDesc desc;
+    f32 size;
+    f32 unkA8;
+    f32 speed;
+    u32 random;
 
-    stack.sp34.unk54 = 0.0f;
-    stack.sp34.unk58 = 0xE05;
-
+    desc.texture = 41;
+    desc.renderMode = 0xE03;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.timer = (func_150ADA20() % 41U) + 50;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r2 = 176;
+    desc.g2 = 160;
+    desc.b2 = 42;
+    desc.r = 64;
+    desc.g = 11;
+    desc.b = 106;
+    desc.a = 255;
+    desc.alpha = (func_150ADA20() % 101U) + 100;
+    desc.brightness = 255;
+    desc.primColorMode = 3;
+    desc.envColorMode = 3;
+    size = (func_150ADA68() * D_800A07B4) + 404.0f;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.pos.z = z;
+    desc.width = size;
+    desc.height = size;
+    random = func_150ADA20();
+    speed = func_150ADA68();
+    func_15143794(yaw, (s16)((random % 20U) - 19), ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel.x);
+    desc.flags = 0xE05;
+    desc.gravity = 0.0f;
     if (func_150ADA20() & 1) {
-        stack.sp34.unk58 |= 0x40;
+        desc.flags |= PARTICLE_FLIP_S;
     }
-
     if (func_150ADA20() & 1) {
-        stack.sp34.unk58 |= 0x80;
+        desc.flags |= PARTICLE_FLIP_T;
     }
-
-    stack.sp34.unk62 = 0xA;
-    stack.sp34.unk24 = D_800A07BC;
-    stack.sp2C = D_800A07C0;
-    stack.sp34.unk63 = -1;
-    stack.sp34.unk1E = 0x1E;
-    stack.sp34.unk20 = 8;
-    stack.sp34.unk22 = 0x46;
-
-    ret = func_15130374(&stack.sp34, 1, 4, arg14, 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, &stack.sp2C, 4);
+    desc.updateFunc = 10;
+    desc.deathFunc = -1;
+    desc.fadeStart = 30;
+    desc.fadeRate = 8;
+    desc.scaleStart = 70;
+    desc.scaleRate = 1.0196f;
+    unkA8 = 0.95091f;
+    particle = func_15130374(&desc, 1, sizeof(f32), arg14, 1);
+    if (particle != NULL) {
+        memcpy(&particle->unkA8, &unkA8, sizeof(f32));
     }
-
     return 1;
 }
 
