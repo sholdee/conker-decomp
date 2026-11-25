@@ -1222,30 +1222,24 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
 
 /* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
 typedef struct {
-    u8 pad0[0x1C];
-    s16 timer;
-    u8 pad1E[0xE];
-    f32 width;
-    f32 height;
-    u8 pad34[0x28];
-    u8 alpha;
-    u8 pad5D[0xCB];
-    f32 growth;
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
+    /* 0x128 */ f32 growth;
 } GrowingBloodParticle;
 
 /* GrowingBloodParticle callback: fades out over the last 32 frames and grows by `growth`. */
 s32 func_151368A8(GrowingBloodParticle *particle) {
-    s32 timer = particle->timer;
+    s32 timer = particle->head.def.lifetime;
     f32 *growth = &particle->growth; // matching: IDO forms this address before the fade test
 
     if (timer < 32) {
         s32 alpha = timer << 3;
-        if (alpha < particle->alpha) {
-            particle->alpha = alpha;
+        if (alpha < particle->head.def.unk44) {
+            particle->head.def.unk44 = alpha;
         }
     }
-    particle->width += *growth * D_800BE9A4;
-    particle->height += *growth * D_800BE9A4;
+    particle->head.def.width += *growth * D_800BE9A4;
+    particle->head.def.height += *growth * D_800BE9A4;
     return 1;
 }
 

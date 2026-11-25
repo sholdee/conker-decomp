@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Settings an emitter is created with (see game_1BA670.c). */
 typedef struct EmitterParams {
@@ -21,14 +22,7 @@ typedef struct Emitter {
 
 /* An emitter's particle (see game_1BA670.c and game_1BDC20.c). */
 typedef struct Particle {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 height;
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f prevPos;
-    /* 0x04C */ u8 pad4C[0x74];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuffers[4];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x50];
     /* 0x160 */ f32 stretch; // tilt per sqrt of sideways speed
 } Particle;
@@ -135,13 +129,13 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
     s32 negative;
     u8 fresh;
 
-    func_151D5D60(p->vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
+    func_151D5D60(p->head.vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
     ret = vtx;
     // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(p->vtxBuffers[vp], p->vtxTemplate, sizeof(p->vtxTemplate));
-            memcpy(p->vtxBuffers[vp] + 4, p->vtxTemplate, sizeof(p->vtxTemplate));
+            memcpy(p->head.vtxBuffers[vp], p->head.vtxTemplate, sizeof(p->head.vtxTemplate));
+            memcpy(p->head.vtxBuffers[vp] + 4, p->head.vtxTemplate, sizeof(p->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -149,7 +143,7 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
     viewZ = D_800DD1D8[vp];
     viewX = D_800DD1E8[vp];
     negative = -1; // matching: the target loads -1, not 1, as the true value
-    speed = (((p->prevPos.x - p->pos.x) * viewX) - (viewZ * (p->prevPos.z - p->pos.z))) * D_800BE9A8;
+    speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * D_800BE9A8;
     if (speed < 0.0f) {
         speed = -speed;
         negative = FALSE;
@@ -168,24 +162,24 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
         sinAngle = func_15048A40(angle256);
         cosAngle = func_150489B0(angle256);
     }
-    halfWidthCos = p->width * cosAngle;
-    halfWidthSin = p->width * sinAngle;
-    heightSin = p->height * sinAngle;
-    heightCos = p->height * cosAngle;
-    vtx[0].v.ob[0] = p->pos.x + halfWidthCos * viewX;
-    vtx[0].v.ob[1] = p->pos.y + halfWidthSin;
-    vtx[0].v.ob[2] = p->pos.z - halfWidthCos * viewZ;
+    halfWidthCos = p->head.def.width * cosAngle;
+    halfWidthSin = p->head.def.width * sinAngle;
+    heightSin = p->head.def.height * sinAngle;
+    heightCos = p->head.def.height * cosAngle;
+    vtx[0].v.ob[0] = p->head.def.pos.x + halfWidthCos * viewX;
+    vtx[0].v.ob[1] = p->head.def.pos.y + halfWidthSin;
+    vtx[0].v.ob[2] = p->head.def.pos.z - halfWidthCos * viewZ;
     t = -halfWidthCos;
-    vtx[1].v.ob[0] = p->pos.x + t * viewX;
-    vtx[1].v.ob[1] = p->pos.y - halfWidthSin;
-    vtx[1].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[1].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[1].v.ob[1] = p->head.def.pos.y - halfWidthSin;
+    vtx[1].v.ob[2] = p->head.def.pos.z - t * viewZ;
     t = -(halfWidthCos + heightSin);
-    vtx[2].v.ob[0] = p->pos.x + t * viewX;
-    vtx[2].v.ob[1] = (p->pos.y + heightCos) - halfWidthSin;
-    vtx[2].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[2].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[2].v.ob[1] = (p->head.def.pos.y + heightCos) - halfWidthSin;
+    vtx[2].v.ob[2] = p->head.def.pos.z - t * viewZ;
     t = halfWidthCos - heightSin;
-    vtx[3].v.ob[0] = p->pos.x + t * viewX;
-    vtx[3].v.ob[1] = p->pos.y + heightCos + halfWidthSin;
-    vtx[3].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[3].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[3].v.ob[1] = p->head.def.pos.y + heightCos + halfWidthSin;
+    vtx[3].v.ob[2] = p->head.def.pos.z - t * viewZ;
     return ret;
 }

@@ -192,15 +192,8 @@ Vec3f *func_15144B34(s32 viewport);
 void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 typedef struct GameFFBA0Beam {
-    u8 pad0[0x2C];
-    f32 width;
-    u8 pad30[4];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    Vtx vertexTemplate[4];
-    Vtx *buffers[4];
-    f32 texture[2];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ f32 texture[2];
 } GameFFBA0Beam;
 
 /*
@@ -220,35 +213,35 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
     f32 *texture;
     u8 fresh;
 
-    func_151D5D60(beam->buffers, index, sizeof(beam->vertexTemplate), &vertices, &fresh);
+    func_151D5D60(beam->head.vtxBuffers, index, sizeof(beam->head.vtxTemplate), &vertices, &fresh);
     result = vertices;
     // matching: an early `if (vertices == NULL) return NULL;` lays the blocks out differently
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(beam->buffers[index], beam->vertexTemplate, sizeof(beam->vertexTemplate));
-            memcpy(beam->buffers[index] + 4, beam->vertexTemplate, sizeof(beam->vertexTemplate));
+            memcpy(beam->head.vtxBuffers[index], beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
+            memcpy(beam->head.vtxBuffers[index] + 4, beam->head.vtxTemplate, sizeof(beam->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
     texture = beam->texture;
     camera = func_15144B34(index);
-    delta.x = beam->end.x - beam->start.x;
-    delta.y = beam->end.y - beam->start.y;
-    delta.z = beam->end.z - beam->start.z;
-    end.x = beam->start.x + delta.x;
-    end.y = beam->start.y + delta.y;
-    end.z = beam->start.z + delta.z;
-    middle.x = beam->start.x + delta.x * 0.5f;
-    middle.y = beam->start.y + delta.y * 0.5f;
-    middle.z = beam->start.z + delta.z * 0.5f;
+    delta.x = beam->head.def.rot.x - beam->head.def.pos.x;
+    delta.y = beam->head.def.rot.y - beam->head.def.pos.y;
+    delta.z = beam->head.def.rot.z - beam->head.def.pos.z;
+    end.x = beam->head.def.pos.x + delta.x;
+    end.y = beam->head.def.pos.y + delta.y;
+    end.z = beam->head.def.pos.z + delta.z;
+    middle.x = beam->head.def.pos.x + delta.x * 0.5f;
+    middle.y = beam->head.def.pos.y + delta.y * 0.5f;
+    middle.z = beam->head.def.pos.z + delta.z * 0.5f;
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
     func_150AD8B0(&delta.x, &view.x, &side.x);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
-        f32 scale = beam->width / sqrtf(lengthSquared);
+        f32 scale = beam->head.def.width / sqrtf(lengthSquared);
 
         side.x = side.x * scale;
         side.y = side.y * scale;
@@ -259,9 +252,9 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
         side.y = 0;
         side.z = 0;
     }
-    vertices->v.ob[0] = beam->start.x - side.x;
-    vertices->v.ob[1] = beam->start.y - side.y;
-    vertices->v.ob[2] = beam->start.z - side.z;
+    vertices->v.ob[0] = beam->head.def.pos.x - side.x;
+    vertices->v.ob[1] = beam->head.def.pos.y - side.y;
+    vertices->v.ob[2] = beam->head.def.pos.z - side.z;
     vertices->v.tc[0] = texture[1];
     vertices->v.flag = 0;
     vertices++;
@@ -277,9 +270,9 @@ Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
     vertices->v.tc[0] = texture[0];
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = beam->start.x + side.x;
-    vertices->v.ob[1] = beam->start.y + side.y;
-    vertices->v.ob[2] = beam->start.z + side.z;
+    vertices->v.ob[0] = beam->head.def.pos.x + side.x;
+    vertices->v.ob[1] = beam->head.def.pos.y + side.y;
+    vertices->v.ob[2] = beam->head.def.pos.z + side.z;
     vertices->v.tc[0] = texture[1];
     vertices->v.flag = 0;
     return result;

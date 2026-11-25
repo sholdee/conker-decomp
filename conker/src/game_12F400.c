@@ -9,16 +9,10 @@ extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
-    char pad0[0x2C];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    char pad40[0x80];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
-    u8 flags;
-    u8 unk111;
-    u8 unk112[0xC];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 flags;
+    /* 0x111 */ u8 unk111;
+    /* 0x112 */ u8 unk112[0xC];
 } Struct15101F50;
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
@@ -30,13 +24,13 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     Vec3f axisV;
     u8 isNew;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
+    func_151D5D60(particle->head.vtxBuffers, viewport, sizeof(particle->head.vtxTemplate), &vtx, &isNew);
     ret = vtx; // matching: the result is returned from its own stack copy, not by reloading vtx
     // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
     if (vtx != NULL) {
         if (isNew) {
-            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
-            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport] + 4, particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -53,28 +47,28 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     func_15145128(&axisU, &axisU, NULL, NULL);
     func_15145128(&axisV, &axisV, NULL, NULL);
 
-    axisU.x *= particle->width;
-    axisU.y *= particle->width;
-    axisU.z *= particle->width;
-    axisV.x *= particle->height;
-    axisV.y *= particle->height;
-    axisV.z *= particle->height;
+    axisU.x *= particle->head.def.width;
+    axisU.y *= particle->head.def.width;
+    axisU.z *= particle->head.def.width;
+    axisV.x *= particle->head.def.height;
+    axisV.y *= particle->head.def.height;
+    axisV.z *= particle->head.def.height;
 
-    vtx[0].v.ob[0] = (particle->pos.x - axisU.x) + axisV.x;
-    vtx[0].v.ob[1] = (particle->pos.y - axisU.y) + axisV.y;
-    vtx[0].v.ob[2] = (particle->pos.z - axisU.z) + axisV.z;
+    vtx[0].v.ob[0] = (particle->head.def.pos.x - axisU.x) + axisV.x;
+    vtx[0].v.ob[1] = (particle->head.def.pos.y - axisU.y) + axisV.y;
+    vtx[0].v.ob[2] = (particle->head.def.pos.z - axisU.z) + axisV.z;
     vtx[0].v.flag = 0;
-    vtx[1].v.ob[0] = (particle->pos.x + axisU.x) + axisV.x;
-    vtx[1].v.ob[1] = (particle->pos.y + axisU.y) + axisV.y;
-    vtx[1].v.ob[2] = (particle->pos.z + axisU.z) + axisV.z;
+    vtx[1].v.ob[0] = (particle->head.def.pos.x + axisU.x) + axisV.x;
+    vtx[1].v.ob[1] = (particle->head.def.pos.y + axisU.y) + axisV.y;
+    vtx[1].v.ob[2] = (particle->head.def.pos.z + axisU.z) + axisV.z;
     vtx[1].v.flag = 0;
-    vtx[2].v.ob[0] = (particle->pos.x + axisU.x) - axisV.x;
-    vtx[2].v.ob[1] = (particle->pos.y + axisU.y) - axisV.y;
-    vtx[2].v.ob[2] = (particle->pos.z + axisU.z) - axisV.z;
+    vtx[2].v.ob[0] = (particle->head.def.pos.x + axisU.x) - axisV.x;
+    vtx[2].v.ob[1] = (particle->head.def.pos.y + axisU.y) - axisV.y;
+    vtx[2].v.ob[2] = (particle->head.def.pos.z + axisU.z) - axisV.z;
     vtx[2].v.flag = 0;
-    vtx[3].v.ob[0] = (particle->pos.x - axisU.x) - axisV.x;
-    vtx[3].v.ob[1] = (particle->pos.y - axisU.y) - axisV.y;
-    vtx[3].v.ob[2] = (particle->pos.z - axisU.z) - axisV.z;
+    vtx[3].v.ob[0] = (particle->head.def.pos.x - axisU.x) - axisV.x;
+    vtx[3].v.ob[1] = (particle->head.def.pos.y - axisU.y) - axisV.y;
+    vtx[3].v.ob[2] = (particle->head.def.pos.z - axisU.z) - axisV.z;
     vtx[3].v.flag = 0;
 
     return ret;
