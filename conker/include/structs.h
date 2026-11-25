@@ -2,12 +2,7 @@
 #define STRUCTS_H
 
 typedef struct struct12 struct12;
-typedef struct struct25 struct25;
-typedef struct struct27 struct27;
 typedef struct SndState SndState;
-typedef struct struct54 struct54;
-typedef struct struct56 struct56;
-typedef struct struct119 struct119;
 typedef struct struct124 struct124;
 typedef struct Actor Actor;
 typedef struct Camera Camera;
@@ -78,13 +73,6 @@ typedef struct {
     u8  unk65;
 } struct04;
 
-typedef struct {
-    u16 unk0;   // used
-    u16 unk2;   // used
-    u16 unk4;   // used
-    u16 unk6;   // used
-} struct05;
-
 struct struct12 {
     s32 unk0;
     s32 unk4;
@@ -152,17 +140,6 @@ typedef struct {
     s32 unk64;
     s32 unk68;
 } struct07;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct10;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    struct10 unk4[8];
-} struct8;
 
 typedef struct {
     s32 unk0;
@@ -276,14 +253,6 @@ typedef struct Vec3i {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-} struct23;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
     s32 unk8;
     s32 unkC;
     s32 unk10;
@@ -299,92 +268,7 @@ typedef struct {
     s8  unk36;
 } struct24;
 
-struct struct27 {
-    s32 unk0;
-    struct27 *unk4;
-    s32 unk8;
-};
-
-struct struct25 {
-    struct25 *unk0; // ALInstrument
-    u16 unk4;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    u8 unkB;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    f32 unk10;
-    u8  unk14;
-    s8  unk15;
-    u8  unk16;
-    u8  unk17;
-    f32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    struct27 *unk24;
-    u32 unk28;
-    u32 unk2C;
-    u32 unk30;
-    u8 unk34;
-    u8 unk35;
-    u8 unk36;
-    u8 unk37;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    u8 unk3B;
-}; // 0x3C
-
-typedef struct {
-    s32 *unk0;
-    u16 unk4;
-    u8  unk6;
-    u8  unk7;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  unkB;
-    u8  unkC;
-    u8  unkD;
-    u8  unkE;
-    u8  unkF;
-    f32 unk10;
-    u32 unk14;
-    f32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    struct27 *unk24;
-    u32 unk28;
-    u32 unk2C;
-    u32 unk30;
-    u8  unk34;
-    u8  unk35;
-    u8  unk36;
-    u8  unk37;
-    u8  unk38;
-    u8  unk39;
-    u8  unk3A;
-    u8  unk3B;
-} struct29;
-
 // size 0x44
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8  unk8;
-    u8  unk9;
-    u16 unkA;
-    struct15 *unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8  pad[0x28];
-} struct30;
 
 typedef struct {
     s32 unk0;
@@ -442,7 +326,7 @@ typedef struct {
     s32 unk1C;
     s32 unk20;
     s32 unk24;
-    struct25 *unk28; // probably not this struct
+    void *unk28;
     s32 unk2C;
     s32 unk30; // used
     s32 unk34; // used
@@ -497,121 +381,6 @@ typedef struct {
     s32 unkC8; // used
     s32 unkCC; // used
 } struct42;
-
-typedef struct {
-    s16 unk0;   // used
-    s16 unk2;   // used
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;   // used
-    s16 unkA;   // used
-    u16 unkC;   // used
-    s16 unkE;
-    s32 unk10;
-    s16 unk14;
-    u8  unk16;
-    u8  unk17;
-    s32 unk18;  // used
-    s16 pad1C;
-    s8  unk1E;
-    u8  unk1F;
-} struct47;
-
-typedef struct {
-    s32 unk0;   // used
-    s32 unk4;   // used
-    s16 unk8;   // used
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;  // used
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;  // used
-    s32 unk20;  // used
-    s32 unk24;
-    s32 unk28;  // used
-    s32 unk2C;  // used
-    s32 unk30;  // used
-    s32 unk34;  // used
-    s32 unk38;  // used
-    s32 unk3C;
-    s32 unk40;  // used
-    s32 unk44;  // used
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    s32 unk54;
-    s32 unk58;  // used
-    s32 unk5C;  // used
-    s32 unk60;  // used
-    s32 unk64;  // used
-    s32 unk68;  // used
-    s32 unk6C;  // used
-    s32 unk70;  // used
-} struct50;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-} struct51;
-
-typedef struct {
-    s32 unk0;
-    f32 unk4;
-} struct52;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s32 unk4;
-} struct53; // used as OSMesg
-
-struct struct54 {
-    struct54 *unk0;   // used
-    struct54 *unk4;
-    u32 unk8;   // used
-    s32 unkC;   // used
-    s32 unk10;
-    s8 unk14;   // used
-    u8 unk15;   // used
-    u8 unk16;   // used
-};
-
-typedef struct {
-    s16 unk0;
-    s16 unk2; // used
-    s32 unk4;
-    s32 unk8;
-    u8 pad[0x1C];
-    s32 unk28; // used
-    s32 *unk2C; // used
-} struct55;
-
-struct struct56 {
-    s32 unk0;
-    s32 unk4;
-    struct56 *unk8;
-};
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;  // used
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u16 unk24;  // used
-} struct57;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-} struct100;
 
 #define OBJ_TYPE_COUNT 104 /* object types: D_8008B4A8 entries, lists per D_800DCE50 row */
 
@@ -735,39 +504,6 @@ typedef struct ObjPartsState {
 } ObjPartsState;
 
 typedef struct {
-    u8 pad[0xEC];
-} struct150; // size 0xEC
-
-typedef struct {
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54; //?
-    f32 unk58;
-    f32 unk5C;
-    u16 unk60;
-    u16 unk62;
-    f32 unk64;
-    f32 unk68;
-    u16 unk6C;
-    u16 unk6E;
-    s32 unk70;
-    s32 unk74;
-} struct109;
-
-typedef struct {
     u8  unk0;
     u8  pad1;
     u8  unk2;
@@ -842,12 +578,6 @@ typedef struct {
     u8 pad[0x20];
 } struct117; // used as OSMesg
 
-struct struct119 {
-    s16 unk0;
-    u8  pad2[0x16E];
-    struct119 *unk170;
-};
-
 /* A positional sound slot of init_EB00.c (D_800425E0[16]); a handle's low 4 bits are its slot. */
 typedef struct {
     /* 0x0 */ u16 handle;
@@ -865,10 +595,6 @@ typedef struct {
     s32 unk8;
     s32 unkC[8];
 } struct121;
-
-typedef struct {
-    s32 unk0;
-} struct123;
 
 struct FLOAT {
     f32 unk0;
@@ -1929,15 +1655,6 @@ struct WorldObject {
 }; // size 0xA0
 
 typedef struct {
-    u8  pad0[0x48];
-    u8  unk48;  // used
-    u8  pad49;
-    u8  pad4A;
-    u8  pad4B;
-    s32 unk4C; // used
-} struct132;
-
-typedef struct {
     u8 pad[0x1b];
     u8 unk1B;
 } struct133;
@@ -1960,66 +1677,6 @@ typedef struct {
     s32 unk24;
 } struct134;
 
-typedef struct {
-    struct134 *unk0;
-    struct134 *unk4;
-    s32 unk8;
-    struct134 *unkC;
-    f32 unk10;
-    f32 unk14;
-    s32 unk18;
-    s8  unk1C;
-    s8  pad1D;
-    s8  pad1E;
-    s8  pad1F;
-} struct135; // size 0x34 (memcpy) ?
-
-typedef struct struct137 struct137;
-
-struct struct137 {
-    s32 unk0; // used
-    s32 unk4; // used
-    s32 unk8; // used
-    s32 unkC; // used
-    struct137 *unk10; // used
-    s32 pad14;
-    s32 pad18;
-    s32 pad1C;
-    s32 pad20;
-    s32 pad24;
-    s32 pad28;
-    s32 unk2C; // used
-    u32 unk30; // used
-    s32 pad34;
-    s32 pad38;
-    s32 pad3C;
-    s32 pad40;
-    s32 pad44;
-    s32 pad48;
-    u16 unk4C; // used
-    u16 unk4E; // used
-    u16 pad50;
-    u16 unk52; // used
-    u16 unk54; // used
-    u16 pad56;
-    u16 unk58; // used
-    u16 unk5A; // used
-    u16 pad5C;
-    u16 pad5E;
-    u16 pad60;
-    u16 pad62;
-}; // 0x64 (100) bytes
-
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    u16 unkC;
-    u16 unkE;
-} struct138;
 
 typedef struct {
     s16 unk0;
@@ -2027,45 +1684,6 @@ typedef struct {
     s32 unk4;
     s16 unk8[16];
 } struct139;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    u8  pad3C[0x8];
-    s32 unk44;
-    s32 unk4C;
-    struct14 unk50[3]; // 3 * 0x10 structs
-    u8  pad80[0x4];
-    s32 unk84;
-    u8  pad88[0xf4];
-} struct140; // 0x180
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-} struct146; // dummy 0x18 length
-
-typedef struct {
-    u8 unk0;  // used
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    s32 unk4; // used but might be u8
-    s32 unk8; // used
-    struct54 *unkC;
-    struct54 *unk10;
-    s32 unk14;
-} struct147;
 
 typedef struct {
     u32 unk0;

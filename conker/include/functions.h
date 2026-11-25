@@ -163,7 +163,6 @@ s32  func_1001D9B0(s16 arg0);
 s32  func_1001DA28(s16 arg0);
 void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
 void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
-// void func_1001E170(struct22 *arg0, s32 *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 arg9);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
@@ -858,7 +857,6 @@ void func_10001194(s32 arg0);
 void func_10001420(void);
 void func_100014C4(s32 arg0);
 void func_10001550(void *arg0, u8 arg1);
-// s16  func_100019F0(s16 *arg0, struct05 *arg1);
 //func_10001AA8
 // s32  func_100020D0(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3);
 //func_10002718

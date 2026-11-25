@@ -1547,8 +1547,6 @@ extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
 
 extern u8 D_800DCD20[3]; // ambient light colour
-// extern struct100 *D_800DCD24;
-// extern struct100 *D_800DCD28;
 
 extern u8 D_800DCD24[3]; // tint colour
 extern u8 D_800DCD28[3];
