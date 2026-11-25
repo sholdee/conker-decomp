@@ -85,8 +85,8 @@ extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern s32 func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15131828(void *, void *, void *, void *);
-extern void func_15131958(void *, s32, void *);
+extern void func_15131828(void *, f32 *, void *, u8 *);
+extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
 void func_150D8B10(struct127 *actor, struct17 *out) {
@@ -514,6 +514,7 @@ s32 func_150D942C(Trail *trail) {
         data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
         j = trail->head;
+        // matching: a do-while or plain break here changes the frame size (-g3)
         for (;;) {
             TrailPoint *cur2;
 
@@ -558,22 +559,9 @@ s32 func_150D942C(Trail *trail) {
     return 1;
 }
 
-typedef struct Game105FC0Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game105FC0Vec3f;
-typedef struct Game105FC0TrailRecord {
-    Game105FC0Vec3f position;
-    u8 pad0C[0x10];
-    u8 alpha;
-    u8 pad1D[3];
-    f32 texture;
-} Game105FC0TrailRecord;
-
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-s32 func_15144B34(s32);
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+struct17 *func_15144B34(s32);
+Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
@@ -581,15 +569,16 @@ extern u8 D_80091238[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 
-Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
-    Game105FC0TrailRecord *records;
-    Game105FC0Vec3f next;
-    Game105FC0Vec3f cur;
-    Game105FC0Vec3f toCamera;
-    Game105FC0Vec3f delta;
-    Game105FC0Vec3f normal;
-    u8 *state;
-    Game105FC0Vec3f *camera;
+/* Draws the trail as a camera-facing ribbon, one quad per segment. */
+Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
+    TrailPoint *points;
+    struct17 next;
+    struct17 cur;
+    struct17 toCamera;
+    struct17 delta;
+    struct17 normal;
+    TrailData *data;
+    struct17 *camera;
     s32 index;
     s32 previous;
     f32 lengthSquared;
@@ -599,67 +588,67 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
     f32 curTexture;
     Vtx_t *vtx;
 
-    if (*(s8 *)(arg0 + 0x2C) < 2) {
-        return arg1;
+    if (trail->count < 2) {
+        return gfx;
     }
-    state = *(u8 **)(arg0 + 0x98);
-    records = *(Game105FC0TrailRecord **)(arg0 + 0x94);
-    func_151D5D60(arg0 + 0x84, arg2, (arg0[0x25] * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    data = trail->data;
+    points = trail->points;
+    func_151D5D60(trail->unk84, view, (trail->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
-        return arg1;
+        return gfx;
     }
-    camera = (Game105FC0Vec3f *)func_15144B34(arg2);
+    camera = func_15144B34(view);
     flag = 1;
-    arg1 = (Gfx *)func_15142E24((s32)arg1, (s32)D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
-    arg1 = func_15142B7C(arg1, 0x220005, 0x1D0600);
-    arg1 = func_1513F4E4(arg1, 0x4E, &flag);
-    arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
-    if (*(u16 *)(arg0 + 0x1E) & 2) {
-        index = *(s8 *)(arg0 + 0x2E) - 1;
+    gfx = func_15142E24(gfx, D_80091238, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
+    gfx = func_1513F4E4(gfx, 0x4E, &flag);
+    gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    if (trail->flags & 2) {
+        index = trail->head - 1;
         if (index < 0) {
-            index = arg0[0x25] - 1;
+            index = trail->capacity - 1;
         }
-        cur = *(Game105FC0Vec3f *)(arg0 + 0x10);
-        curTexture = *(f32 *)(state + 0x38);
+        cur = trail->pos;
+        curTexture = data->texScroll;
     } else {
-        previous = *(s8 *)(arg0 + 0x2E) - 1;
+        previous = trail->head - 1;
         if (previous < 0) {
-            previous = arg0[0x25] - 1;
+            previous = trail->capacity - 1;
         }
         index = previous - 1;
         if (index < 0) {
-            index = arg0[0x25] - 1;
+            index = trail->capacity - 1;
         }
-        cur = records[previous].position;
-        curTexture = records[previous].texture;
+        cur = points[previous].pos;
+        curTexture = points[previous].texture;
     }
-    next = records[index].position;
-    alpha = records[index].alpha;
-    nextTexture = records[index].texture;
-    delta.x = cur.x - next.x;
-    delta.y = cur.y - next.y;
-    delta.z = cur.z - next.z;
-    toCamera.x = cur.x - camera->x;
-    toCamera.y = cur.y - camera->y;
-    toCamera.z = cur.z - camera->z;
-    normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
-    normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
-    normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
-    lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+    next = points[index].pos;
+    alpha = points[index].alpha;
+    nextTexture = points[index].texture;
+    delta.unk0 = cur.unk0 - next.unk0;
+    delta.unk4 = cur.unk4 - next.unk4;
+    delta.unk8 = cur.unk8 - next.unk8;
+    toCamera.unk0 = cur.unk0 - camera->unk0;
+    toCamera.unk4 = cur.unk4 - camera->unk4;
+    toCamera.unk8 = cur.unk8 - camera->unk8;
+    normal.unk0 = delta.unk4 * toCamera.unk8 - toCamera.unk4 * delta.unk8;
+    normal.unk4 = delta.unk8 * toCamera.unk0 - toCamera.unk8 * delta.unk0;
+    normal.unk8 = delta.unk0 * toCamera.unk4 - toCamera.unk0 * delta.unk4;
+    lengthSquared = normal.unk0 * normal.unk0 + normal.unk4 * normal.unk4 + normal.unk8 * normal.unk8;
     if (lengthSquared != 0.0f) {
         f32 scale = 4.0f / sqrtf(lengthSquared);
 
-        normal.x *= scale;
-        normal.y *= scale;
-        normal.z *= scale;
+        normal.unk0 *= scale;
+        normal.unk4 *= scale;
+        normal.unk8 *= scale;
     } else {
-        normal.x = 0.0f;
-        normal.y = 0.0f;
-        normal.z = 0.0f;
+        normal.unk0 = 0.0f;
+        normal.unk4 = 0.0f;
+        normal.unk8 = 0.0f;
     }
-    vtx->ob[0] = cur.x + normal.x;
-    vtx->ob[1] = cur.y + normal.y;
-    vtx->ob[2] = cur.z + normal.z;
+    vtx->ob[0] = cur.unk0 + normal.unk0;
+    vtx->ob[1] = cur.unk4 + normal.unk4;
+    vtx->ob[2] = cur.unk8 + normal.unk8;
     vtx->tc[0] = curTexture;
     vtx->tc[1] = 0x400;
     vtx->cn[0] = 0xFF;
@@ -668,9 +657,9 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
     vtx->cn[3] = alpha;
     vtx->flag = 0;
     vtx++;
-    vtx->ob[0] = cur.x - normal.x;
-    vtx->ob[1] = cur.y - normal.y;
-    vtx->ob[2] = cur.z - normal.z;
+    vtx->ob[0] = cur.unk0 - normal.unk0;
+    vtx->ob[1] = cur.unk4 - normal.unk4;
+    vtx->ob[2] = cur.unk8 - normal.unk8;
     vtx->tc[0] = curTexture;
     vtx->tc[1] = 0;
     vtx->cn[0] = 0xFF;
@@ -680,30 +669,30 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
     vtx->flag = 0;
     vtx++;
     do {
-        delta.x = cur.x - next.x;
-        delta.y = cur.y - next.y;
-        delta.z = cur.z - next.z;
-        toCamera.x = next.x - camera->x;
-        toCamera.y = next.y - camera->y;
-        toCamera.z = next.z - camera->z;
-        normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
-        normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
-        normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
-        lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+        delta.unk0 = cur.unk0 - next.unk0;
+        delta.unk4 = cur.unk4 - next.unk4;
+        delta.unk8 = cur.unk8 - next.unk8;
+        toCamera.unk0 = next.unk0 - camera->unk0;
+        toCamera.unk4 = next.unk4 - camera->unk4;
+        toCamera.unk8 = next.unk8 - camera->unk8;
+        normal.unk0 = delta.unk4 * toCamera.unk8 - toCamera.unk4 * delta.unk8;
+        normal.unk4 = delta.unk8 * toCamera.unk0 - toCamera.unk8 * delta.unk0;
+        normal.unk8 = delta.unk0 * toCamera.unk4 - toCamera.unk0 * delta.unk4;
+        lengthSquared = normal.unk0 * normal.unk0 + normal.unk4 * normal.unk4 + normal.unk8 * normal.unk8;
         if (lengthSquared != 0.0f) {
             f32 scale = 4.0f / sqrtf(lengthSquared);
 
-            normal.x *= scale;
-            normal.y *= scale;
-            normal.z *= scale;
+            normal.unk0 *= scale;
+            normal.unk4 *= scale;
+            normal.unk8 *= scale;
         } else {
-            normal.x = 0.0f;
-            normal.y = 0.0f;
-            normal.z = 0.0f;
+            normal.unk0 = 0.0f;
+            normal.unk4 = 0.0f;
+            normal.unk8 = 0.0f;
         }
-        vtx->ob[0] = next.x + normal.x;
-        vtx->ob[1] = next.y + normal.y;
-        vtx->ob[2] = next.z + normal.z;
+        vtx->ob[0] = next.unk0 + normal.unk0;
+        vtx->ob[1] = next.unk4 + normal.unk4;
+        vtx->ob[2] = next.unk8 + normal.unk8;
         vtx->tc[0] = nextTexture;
         vtx->tc[1] = 0x400;
         vtx->cn[0] = 0xFF;
@@ -712,9 +701,9 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
         vtx->cn[3] = alpha;
         vtx->flag = 0;
         vtx++;
-        vtx->ob[0] = next.x - normal.x;
-        vtx->ob[1] = next.y - normal.y;
-        vtx->ob[2] = next.z - normal.z;
+        vtx->ob[0] = next.unk0 - normal.unk0;
+        vtx->ob[1] = next.unk4 - normal.unk4;
+        vtx->ob[2] = next.unk8 - normal.unk8;
         vtx->tc[0] = nextTexture;
         vtx->tc[1] = 0;
         vtx->cn[0] = 0xFF;
@@ -723,11 +712,12 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
         vtx->cn[3] = alpha;
         vtx->flag = 0;
         vtx++;
-        gSPVertex(arg1++, vtx - 4, 4, 0);
-        gSP1Triangle(arg1++, 0, 1, 2, 0);
-        gSP1Triangle(arg1++, 1, 3, 2, 0);
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 1, 3, 2, 0);
         if (nextTexture < curTexture) {
-            memcpy(vtx, vtx - 2, 0x20);
+            /* texture wrapped: repeat the last pair shifted back one period */
+            memcpy(vtx, vtx - 2, 2 * sizeof(Vtx_t));
             vtx[-2].tc[0] -= 0x8000;
             vtx++;
             vtx[-2].tc[0] -= 0x8000;
@@ -736,116 +726,119 @@ Gfx *func_150D9C7C(u8 *arg0, Gfx *arg1, s16 arg2) {
         previous = index;
         index--;
         if (index < 0) {
-            index = arg0[0x25] - 1;
+            index = trail->capacity - 1;
         }
-        cur = records[previous].position;
-        next = records[index].position;
-        alpha = records[index].alpha;
-        curTexture = records[previous].texture;
-        nextTexture = records[index].texture;
-    } while (previous != *(s8 *)(arg0 + 0x2D));
-    return arg1;
+        cur = points[previous].pos;
+        next = points[index].pos;
+        alpha = points[index].alpha;
+        curTexture = points[previous].texture;
+        nextTexture = points[index].texture;
+    } while (previous != trail->tail);
+    return gfx;
 }
 
-void func_150DA484(void *arg0) {
-    u16 *temp = (u16 *)*(u32 *)((u8 *)arg0 + 0x98);
-    if (temp[0x18] != 0) {
-        func_100111C8(temp[0x18]);
+/* Stops the trail's sound. */
+void func_150DA484(Trail *trail) {
+    TrailData *data = trail->data;
+
+    if (data->sound != 0) {
+        func_100111C8(data->sound);
     }
 }
 
-void func_150DA484(void *);
-void func_151478F4(void *);
+void func_151478F4(Trail *);
 
-void func_150DA4B4(void *arg0) {
-    func_150DA484(arg0);
-    func_151478F4(arg0);
+void func_150DA4B4(Trail *trail) {
+    func_150DA484(trail);
+    func_151478F4(trail);
 }
 
-void func_15147928(void *);
+void func_15147928(Trail *);
 
-void func_150DA4E0(void *arg0) {
-    func_150DA484(arg0);
-    func_15147928(arg0);
+void func_150DA4E0(Trail *trail) {
+    func_150DA484(trail);
+    func_15147928(trail);
 }
 
+/* Message broadcast to trails by func_15147D64. */
 typedef struct {
-    s32 unk0;
-    u8 unk4;
-    char pad5[0x3C - 0x5];
-    f32 unk3C;
-} SubA_150DA50C;
-
-typedef struct {
-    s32 unk0;
+    struct127 *owner;
     union {
-        u8 b4;
-        s32 w4;
-    } u4;
+        u8 ownerId;             /* types 0, 0x44 */
+        struct127 *other;       /* type 0x2D */
+    } x4;
     union {
-        f32 f8;
+        f32 speedScale;         /* type 0x44 */
         struct {
-            u8 b8;
-            u8 b9;
-        } s;
-    } u8;
-} ArgB_150DA50C;
+            u8 ownerId;
+            u8 otherId;
+        } ids;                  /* type 0x2D */
+    } x8;
+} TrailMessage;
 
-void func_150DA50C(void *arg0, s32 arg1, u8 arg2) {
-    SubA_150DA50C *temp_v1 = *(SubA_150DA50C **)((u8 *)arg0 + 0x98);
-    ArgB_150DA50C *b = (ArgB_150DA50C *)arg1;
-    s32 temp;
+/* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
+void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
+    TrailData *data = trail->data;
+    struct127 *owner;
 
-    if (arg2 == 0x44) {
-        if ((b->unk0 == temp_v1->unk0) || (b->u4.b4 == temp_v1->unk4)) {
-            temp_v1->unk3C = b->u8.f8;
+    if (type == 0x44) {
+        if ((msg->owner == data->owner) || (msg->x4.ownerId == data->ownerId)) {
+            data->speedScale = msg->x8.speedScale;
         }
-trailing_label_150DA50C:
+    // matching: the label keeps a branch-to-epilogue after the store
+    done:
         ;
-    } else if (arg2 == 0) {
-        temp = b->unk0;
-        if ((temp == temp_v1->unk0) || (temp_v1->unk4 == b->u4.b4)) {
-            func_1516972C(arg0);
+    } else if (type == 0) {
+        owner = msg->owner;
+        if ((owner == data->owner) || (data->ownerId == msg->x4.ownerId)) {
+            func_1516972C((struct102 *)trail);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v1->unk0 == b->unk0) {
-            temp_v1->unk0 = b->u4.w4;
-            temp_v1->unk4 = b->u8.s.b9;
-        } else if (temp_v1->unk0 == b->u4.w4) {
-            temp_v1->unk0 = b->unk0;
-            temp_v1->unk4 = b->u8.s.b8;
+    } else if (type == 0x2D) {
+        if (data->owner == msg->owner) {
+            data->owner = msg->x4.other;
+            data->ownerId = msg->x8.ids.otherId;
+        } else if (data->owner == msg->x4.other) {
+            data->owner = msg->owner;
+            data->ownerId = msg->x8.ids.ownerId;
         }
     }
 }
 
-struct s_150DA5EC {
-    s32 unk0;
-    u8 unk4;
-    f32 unk8;
-};
+extern void func_15147D64(TrailMessage *, s32);
 
-extern void func_15147D64(struct s_150DA5EC *, s32);
+/* Sets the speed scale of every trail owned by the actor. */
+void func_150DA5EC(struct127 *actor, f32 speedScale) {
+    TrailMessage msg;
 
-void func_150DA5EC(u8 *arg0, f32 arg1) {
-    struct s_150DA5EC sp1C;
-
-    sp1C.unk0 = (s32) arg0;
-    sp1C.unk4 = arg0[0x3B];
-    sp1C.unk8 = arg1;
-    func_15147D64(&sp1C, 0x44);
+    msg.owner = actor;
+    msg.x4.ownerId = actor->unique_id;
+    msg.x8.speedScale = speedScale;
+    func_15147D64(&msg, 0x44);
 }
 
+/* Per-particle data stored in the sparks spawned by func_150DA67C. */
 typedef struct {
-    char pad_0x00[0xC];
-    s32 field_0x0C;
-} ActorA8State;
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} SparkData;
 
-s32 func_150DA628(u8 *arg0, s32 arg1) {
-    ActorA8State *temp_a2;
+typedef struct {
+    u8 pad0[0x58];
+    u8 unk58[0x50];
+    SparkData spark;
+} Spark;
 
-    temp_a2 = (ActorA8State *)(arg0 + 0xA8);
-    func_15131828(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
-    func_15131958(arg0 + 0x58, temp_a2->field_0x0C, temp_a2);
+s32 func_150DA628(Spark *particle, s32 arg1) {
+    SparkData *spark;
+
+    spark = &particle->spark;
+    func_15131828(particle, &spark->unk4, spark, &spark->unk2);
+    func_15131958(particle->unk58, spark->unkC, spark);
     return 1;
 }
 
