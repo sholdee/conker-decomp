@@ -3,6 +3,10 @@
 Goal: every asm function → byte-identical C (IDO 5.3 `-O2 -g3`). The gate is the ROM sha1
 (inner `conker/build/conker.us.bin` = `842e3d34…`, outer `build/conker.us.z64` = `4cbadd3c…`).
 
+Paths: `~/conker` is the repository and `~/conker-ws` the workspace root on the maintainer's host.
+The tools take the repo root from their own location and honour `CONKER_REPO`, `CONKER_WS` and
+`CONKER_CONTAINER` (default `conker-tc`).
+
 ## Toolchain
 Builds run in the podman container `conker-tc` (ubuntu 24.04 + binutils-mips-linux-gnu +
 python reqs; `tools/toolchain/Containerfile`). It must be running:
@@ -34,13 +38,13 @@ writer and re-gates every merge. There is no other invariant to remember.
 - `conker/jtbl_labels.us.txt`: PROVIDEs the case labels the asm jump tables reference.
 
 ## History
-The v1 Codex orchestrator / permuter daemon (stalled at ~10 matches/day, July 2026) is
-documented in `tools/AGENTS_v1_orchestrator.md`; its tools remain in tools/ but are unused.
+The v1 Codex orchestrator / permuter daemon (stalled at ~10 matches/day, July 2026) was
+removed from the tree in 2026-11 (its runbook, `tools/AGENTS_v1_orchestrator.md`, is in git history).
 
 ## Fresh host
 ```
 git submodule update --init
-sed -n '/\[4\/5\]/,/^fi$/p' setup.sh | sed 1d | bash     # splat marker-label patch (spimdisasm 1.42)
+python3 tools/toolchain/patch_splat.py                  # splat marker-label patch (spimdisasm 1.42)
 git config core.hooksPath tools/git-hooks
 tools/toolchain/run.sh                                   # image + conker-tc container
 cp <rom> baserom.us.z64                                  # sha1 4cbadd3c…

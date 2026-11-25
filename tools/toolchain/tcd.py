@@ -5,7 +5,7 @@
 waited 20-40 s just to start a process. tcd listens on a Unix socket in a bind-mounted
 directory and runs each request as a subprocess inside the container, concurrently.
 
-  podman exec -d conker-tc python3 ~/conker/tools/toolchain/tcd.py ~/conker-ws/.tcd.sock
+  podman exec -d conker-tc python3 REPO/tools/toolchain/tcd.py WS/.tcd.sock   (see run.sh)
 
 Protocol: one JSON line {"cmd": str, "cwd": str, "timeout": s} → one JSON line
 {"rc": int, "out": str}. The socket is created mode 0600 (owner only).
