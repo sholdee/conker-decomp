@@ -3696,7 +3696,7 @@ void func_15073A50(void) {
     }
 }
 
-/* Unpacks D_800D1580 into unk31C's unkA8 (low half, as f32), unkAC and unkAD (top bytes). */
+/* Unpacks D_800D1580 into unk31C->ropeSwingForce (low half, as f32), ropeSwingAngle and ropeSwingTimer (top bytes). */
 void func_15073B38(void) {
     s32 *param;
     Actor **objp;
