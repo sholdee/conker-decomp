@@ -46,7 +46,9 @@ s32 func_16001700(void)
     *(ptr++) = 0xFF;
   }
   while (((u32) ptr) < ((u32) ptrEnd));
-  D_80042A4C = 0;
+  /* __osContPifRam.pifstatus, spelled through the next symbol of controller.c's .bss (__osContLastCmd
+   * follows it): with __osContPifRam itself IDO keeps its address in a register across the call */
+  ((u32 *)&__osContLastCmd)[-1] = 0;
   ret = func_160019A8(0, &__osContPifRam);
   __osContLastCmd = 1;
   count2 = 0;

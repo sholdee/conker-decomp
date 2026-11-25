@@ -287,12 +287,10 @@ extern u8   D_800428C2;
 extern u8   D_800428C4[];
 extern u8   D_800428C6[];
 extern u8   D_800428C8[];
-extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40
 
-extern u32 D_80042A4C; // __osContPifRam.pifstatus
-extern OSMesg D_80042A90;
+extern OSMesg __osEepromTimerMsg;
 extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 

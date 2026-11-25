@@ -3,8 +3,7 @@
 #include "siint.h"
 
 
-extern u32 D_800429D0[];   /* __osPfsPifRam ramarray words */
-extern u32 D_80042A0C;     /* __osPfsPifRam.pifstatus */
+extern OSPifRam __osPfsPifRam;
 
 extern void __osPfsRequestData(u8);
 extern void __osPfsGetInitData(u8 *, OSContStatus *);
@@ -26,9 +25,9 @@ s32 osPfsIsPlug2(OSMesgQueue *queue, u8 *pattern)
     while (TRUE)
     {
         __osPfsRequestData(CONT_CMD_REQUEST_STATUS);
-        ret = __osSiRawStartDma(OS_WRITE, D_800429D0);
+        ret = __osSiRawStartDma(OS_WRITE, __osPfsPifRam.ramarray);
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
-        ret = __osSiRawStartDma(OS_READ, D_800429D0);
+        ret = __osSiRawStartDma(OS_READ, __osPfsPifRam.ramarray);
         osRecvMesg(queue, &dummy, OS_MESG_BLOCK);
         __osPfsGetInitData(&bitpattern, data);
         for (channel = 0; channel < __osMaxControllers; channel++)
@@ -63,10 +62,10 @@ void __osPfsRequestData2(u8 cmd)
 
     __osContLastCmd = cmd;
     for (i = 0; i < 16; i++) {
-        D_800429D0[i] = 0;
+        __osPfsPifRam.ramarray[i] = 0;
     }
-    D_80042A0C = 1;
-    ptr = (u8 *) D_800429D0;
+    __osPfsPifRam.pifstatus = 1;
+    ptr = (u8 *) __osPfsPifRam.ramarray;
     requestformat.dummy = 0xFF;
     requestformat.txsize = 1;
     requestformat.rxsize = 3;
@@ -91,7 +90,7 @@ void __osPfsGetInitData2(u8 *pattern, OSContStatus *data)
     u8 bits;
 
     bits = 0;
-    ptr = (u8 *) D_800429D0;
+    ptr = (u8 *) __osPfsPifRam.ramarray;
     for (i = 0; i < __osMaxControllers; i++, ptr += sizeof(__OSContRequesFormat))
     {
         requestformat = *(__OSContRequesFormat *) ptr;

@@ -36,7 +36,12 @@ typedef struct {
 extern s32 __osContinitialized;
 extern u8 __osMaxControllers;
 extern u8 __osContLastCmd;
-extern u32 __osContPifRam[16];
+typedef struct {
+    /* 0x00 */ u32 ramarray[15];
+    /* 0x3C */ u32 pifstatus;
+} OSPifRam;
+
+extern OSPifRam __osContPifRam;
 extern OSMesgQueue __osEepromTimerQ;
 
 void __osPackRequestData(u8 cmd);
@@ -70,17 +75,17 @@ s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     __osMaxControllers = 4;
 
     __osPackRequestData(0);
-    ret = __osSiRawStartDma(OS_WRITE, __osContPifRam);
+    ret = __osSiRawStartDma(OS_WRITE, &__osContPifRam);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
 
-    ret = __osSiRawStartDma(OS_READ, __osContPifRam);
+    ret = __osSiRawStartDma(OS_READ, &__osContPifRam);
     osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
 
     __osContGetInitData(bitpattern, data);
 
     __osContLastCmd = 0;
     __osSiCreateAccessQueue();
-    osCreateMesgQueue(&__osEepromTimerQ, &D_80042A90, 1);
+    osCreateMesgQueue(&__osEepromTimerQ, &__osEepromTimerMsg, 1);
 
     return ret;
 }
@@ -92,7 +97,7 @@ void func_151EF288(u8 *pattern, OSContStatus *data) {
     u8 bits;
 
     bits = 0;
-    ptr = (u8 *) __osContPifRam;
+    ptr = (u8 *) __osContPifRam.ramarray;
     for (i = 0; i < __osMaxControllers; i++, ptr += sizeof(__OSContRequesFormat)) {
         requestformat = *(__OSContRequesFormat *) ptr;
         data->errno = (requestformat.rxsize & 0xC0) >> 4;
@@ -112,10 +117,10 @@ void func_151EF358(u8 cmd) {
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        __osContPifRam[i] = 0;
+        __osContPifRam.ramarray[i] = 0;
     }
-    D_80042A4C = 1;
-    ptr = (u8 *) __osContPifRam;
+    __osContPifRam.pifstatus = 1;
+    ptr = (u8 *) __osContPifRam.ramarray;
     requestformat.dummy = 0xFF;
     requestformat.txsize = 1;
     requestformat.rxsize = 3;

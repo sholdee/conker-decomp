@@ -422,8 +422,8 @@ glabel func_1000777C
 /* Handwritten function */
 glabel func_100077B8
     /* 77B8 100077B8 03E09025 */  or         $s2, $ra, $zero
-    /* 77BC 100077BC 3C0A8004 */  lui        $t2, %hi(D_80042910)
-    /* 77C0 100077C0 254A2910 */  addiu      $t2, $t2, %lo(D_80042910)
+    /* 77BC 100077BC 3C0A8004 */  lui        $t2, %hi(__osEventStateTab)
+    /* 77C0 100077C0 254A2910 */  addiu      $t2, $t2, %lo(__osEventStateTab)
     /* 77C4 100077C4 01445021 */  addu       $t2, $t2, $a0
     /* 77C8 100077C8 8D490000 */  lw         $t1, 0x0($t2)
     /* 77CC 100077CC 11200029 */  beqz       $t1, .L10007874
