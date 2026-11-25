@@ -786,6 +786,7 @@ void func_15002560(QuadNode *node, QuadNode *parentNext) {
     QuadNode *next;
     QuadNode *child;
 
+    // matching: for (;;) keeps the null test at the loop top; IDO rotates a plain while
     for (;;) {
         if (node == NULL) {
             return;
@@ -918,170 +919,183 @@ s32 func_15002878(void) {
     return highest;
 }
 
-// 12 loops!
-typedef struct F28BC_Ent {
+// A run of consecutive vertices loaded under one matrix.
+typedef struct VtxRun {
     u32 addr;
     s32 count;
-    u32 extra;
-} F28BC_Ent;
+    u32 mtxIndex;
+} VtxRun;
 
-typedef struct F28BC_Tri {
+// A triangle as the offsets of its three vertices in the map's vertex data.
+typedef struct VtxTri {
     s32 v[3];
-} F28BC_Tri;
+} VtxTri;
 
 extern u16 D_800C5918[];
 extern u16 D_800C5EF8[];
 extern s8 **D_800C4488[];
 
-#define CMD (ncmd + (j << 3))
+// matching: these stay macros; naming them as locals changes the frame and register allocation
+#define CMD (dl + (j << 3)) // command j of the display list, as bytes
+#define W0 (*(s32 *)CMD)
+#define W1 (*(s32 *)(CMD + 4))
+#define RUNS ((VtxRun **)&D_800C5C08[map])
+#define TRIS ((VtxTri **)&D_800C6070[map])
 
-#define PE ((F28BC_Ent **)&D_800C5C08[arg0])
-#define PT ((F28BC_Tri **)&D_800C6070[arg0])
-s32 func_150028BC(s32 arg0) {
-    F28BC_Ent *e;
+/**
+ * Builds map `map`'s vertex runs (D_800C5C08[map], D_800C5EF8[map] of them, sorted by address)
+ * and triangle list (D_800C6070[map]) by walking its display list. Returns 1 when out of memory.
+ */
+s32 func_150028BC(s32 map) {
+    VtxRun *run;
     s32 vaddr;
-    s32 n;
-    u32 c;
+    s32 numLists;
+    u32 vtxIndex;
     s32 i;
     s32 j;
     s32 k;
     s32 m;
-    s32 cnt;
-    s32 nent;
-    s32 nout;
-    u32 attr;
-    s8 *ncmd;
+    s32 count;
+    s32 numRuns;
+    s32 numTris;
+    u32 mtxIndex;
+    s8 *dl;
     s32 base;
     s32 verts[32];
-    s8 *cmd;
-    s32 x;
-    s32 start;
-    s32 idx[3];
-    F28BC_Ent tmp;
+    s8 *list;
+    s32 opcode;
+    s32 first;
+    s32 tri[3];
+    VtxRun swap;
 
-    attr = 0;
-    if (*PE != NULL) {
+    mtxIndex = 0;
+    if (*RUNS != NULL) {
         return 0;
     }
-    n = 1;
-    cnt = 0;
-    for (i = 0; i < n; i++) {
-        cmd = D_800C4488[arg0][i];
+    numLists = 1;
+    count = 0;
+    for (i = 0; i < numLists; i++) {
+        list = D_800C4488[map][i];
         j = 0;
-        while (cmd[j << 3] != -0x21) {
-            if (cmd[j << 3] == 1) {
-                cnt++;
+        while (list[j << 3] != (s8)G_ENDDL) {
+            if (list[j << 3] == G_VTX) {
+                count++;
             }
             j++;
         }
     }
-    *PE = (F28BC_Ent *)allocate_memory(cnt * sizeof(F28BC_Ent), 1, 0, 2);
-    if (*PE == NULL) {
+    *RUNS = (VtxRun *)allocate_memory(count * sizeof(VtxRun), 1, 0, 2);
+    if (*RUNS == NULL) {
         return 1;
     }
-    *PT = (F28BC_Tri *)allocate_memory(D_800C5918[arg0] * sizeof(F28BC_Tri), 1, 0, 2);
-    if (*PT == NULL) {
-        func_10004074((s32)*PE);
-        *PE = NULL;
+    *TRIS = (VtxTri *)allocate_memory(D_800C5918[map] * sizeof(VtxTri), 1, 0, 2);
+    if (*TRIS == NULL) {
+        func_10004074(*RUNS);
+        *RUNS = NULL;
         return 1;
     }
-    nent = 0;
-    nout = 0;
-    base = (&D_800D19A0)[arg0];
-    for (i = 0; i < n; i++) {
-        ncmd = D_800C4488[arg0][i];
+    numRuns = 0;
+    numTris = 0;
+    base = (&D_800D19A0)[map];
+    for (i = 0; i < numLists; i++) {
+        dl = D_800C4488[map][i];
         j = 0;
-        while (*CMD != -0x21) {
-            x = *(u8 *)CMD;
+        while (*CMD != (s8)G_ENDDL) {
+            opcode = *(u8 *)CMD;
             k = 0;
-            if (x == 1) {
-                {
+            if (opcode == G_VTX) {
+                { // matching: this block (its extern takes no stack slot) steers IDO's frame layout
                     extern u16 D_800C5918[];
 
-                    cnt = (*(s32 *)CMD >> 12) & 0xFF;
-                    start = (*(s32 *)CMD >> 1) & 0x7F;
-                    start -= cnt;
-                    vaddr = (*(s32 *)(CMD + 4) & 0xFFFFFF) - 0x38;
-                    c = (u32)((*(s32 *)(CMD + 4) - 0x38) & 0xFFFFFF) >> 4;
-                    for (k = 0; k < cnt; k++) {
-                        verts[k + start] = (k << 4) + vaddr;
+                    count = (W0 >> 12) & 0xFF;
+                    first = (W0 >> 1) & 0x7F;
+                    first -= count;
+                    vaddr = (W1 & 0xFFFFFF) - 0x38;
+                    vtxIndex = (u32)((W1 - 0x38) & 0xFFFFFF) >> 4;
+                    for (k = 0; k < count; k++) {
+                        verts[k + first] = (k << 4) + vaddr;
                     }
-                    if (nent != 0 && base + c * 16 == (*PE)[nent - 1].addr + (*PE)[nent - 1].count * 16 &&
-                        attr == (*PE)[nent - 1].extra) {
-                        (*PE)[nent - 1].count += cnt;
+                    if (numRuns != 0 && base + vtxIndex * 16 == (*RUNS)[numRuns - 1].addr + (*RUNS)[numRuns - 1].count * 16 &&
+                        mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
+                        (*RUNS)[numRuns - 1].count += count;
                     } else {
-                        (*PE)[nent].addr = c * 16 + base;
-                        (*PE)[nent].extra = attr;
-                        (*PE)[nent].count = cnt;
-                        nent++;
+                        (*RUNS)[numRuns].addr = vtxIndex * 16 + base;
+                        (*RUNS)[numRuns].mtxIndex = mtxIndex;
+                        (*RUNS)[numRuns].count = count;
+                        numRuns++;
                     }
                 }
-            } else if (x == 0xDA) {
-                attr = *(u32 *)(CMD + 4) & 0xFFFFFF;
-                attr >>= 6;
-            } else if (x == 5) {
+            } else if (opcode == G_MTX) {
+                mtxIndex = (u32)W1 & 0xFFFFFF;
+                mtxIndex >>= 6;
+            } else if (opcode == G_TRI1) {
                 for (k = 0; k < 3; k++) {
-                    vaddr = *(u8 *)(CMD + k + 1);
-                    (*PT)[nout].v[k] = verts[vaddr >> 1];
+                    vaddr = *(u8 *)(CMD + k + 1); // matching: vertex index byte reuses vaddr
+                    (*TRIS)[numTris].v[k] = verts[vaddr >> 1];
                 }
-                nout++;
-            } else if (x == 6) {
+                numTris++;
+            } else if (opcode == G_TRI2) {
                 for (m = 0; m < 2; m++) {
                     for (k = 0; k < 3; k++) {
                         vaddr = *(u8 *)(CMD + m * 4 + k + 1);
-                        (*PT)[nout].v[k] = verts[vaddr >> 1];
+                        (*TRIS)[numTris].v[k] = verts[vaddr >> 1];
                     }
-                    nout++;
+                    numTris++;
                 }
-            } else if ((x >> 4) == 1) {
+            } else if ((opcode >> 4) == 1) {
                 for (m = 0; m < 4; m++) {
                     if (m == 0) {
-                        idx[0] = (*(s32 *)(CMD + 4) >> 25) & 0x1F;
-                        idx[1] = (*(s32 *)(CMD + 4) >> 20) & 0x1F;
-                        idx[2] = (*(s32 *)(CMD + 4) >> 15) & 0x1F;
+                        tri[0] = (W1 >> 25) & 0x1F;
+                        tri[1] = (W1 >> 20) & 0x1F;
+                        tri[2] = (W1 >> 15) & 0x1F;
                     } else if (m == 1) {
-                        idx[0] = (*(s32 *)(CMD + 4) >> 10) & 0x1F;
-                        idx[1] = (*(s32 *)(CMD + 4) >> 5) & 0x1F;
-                        idx[2] = *(s32 *)(CMD + 4) & 0x1F;
+                        tri[0] = (W1 >> 10) & 0x1F;
+                        tri[1] = (W1 >> 5) & 0x1F;
+                        tri[2] = W1 & 0x1F;
                     } else if (m == 2) {
-                        idx[0] = (*(s32 *)CMD >> 10) & 0x1F;
-                        idx[1] = (*(s32 *)CMD >> 5) & 0x1F;
-                        idx[2] = *(s32 *)CMD & 0x1F;
+                        tri[0] = (W0 >> 10) & 0x1F;
+                        tri[1] = (W0 >> 5) & 0x1F;
+                        tri[2] = W0 & 0x1F;
                     } else {
-                        idx[0] = (*(s32 *)CMD >> 23) & 0x1F;
-                        idx[1] = (*(s32 *)CMD >> 18) & 0x1F;
-                        idx[2] = ((*(s32 *)CMD >> 13) & 0x1C) | ((*(s32 *)(CMD + 4) >> 30) & 3);
+                        tri[0] = (W0 >> 23) & 0x1F;
+                        tri[1] = (W0 >> 18) & 0x1F;
+                        tri[2] = ((W0 >> 13) & 0x1C) | ((W1 >> 30) & 3);
                     }
                     for (k = 0; k < 3; k++) {
-                        (*PT)[nout].v[k] = verts[idx[k]];
+                        (*TRIS)[numTris].v[k] = verts[tri[k]];
                     }
-                    nout++;
+                    numTris++;
                 }
             }
             j++;
         }
     }
-    D_800C5EF8[arg0] = nent;
+    D_800C5EF8[map] = numRuns;
+    // gnome sort of the runs by address
+    // matching: for (;;) + break keeps the test at the loop top; IDO rotates a plain while
     j = 1;
-loop:
-    if (j < D_800C5EF8[arg0]) {
-        e = &(*PE)[j];
-        if (e->addr < e[-1].addr) {
-            tmp = *e;
-            *e = e[-1];
-            (*PE)[j - 1] = tmp;
+    for (;;) {
+        if (j >= D_800C5EF8[map]) {
+            break;
+        }
+        run = &(*RUNS)[j];
+        if (run->addr < run[-1].addr) {
+            swap = *run;
+            *run = run[-1];
+            (*RUNS)[j - 1] = swap;
             if (j >= 2) {
                 j--;
             }
         } else {
             j++;
         }
-        goto loop;
     }
     return 0;
 }
-#undef PE
-#undef PT
+#undef RUNS
+#undef TRIS
+#undef W1
+#undef W0
 #undef CMD
 
 void func_15002F40(s32 arg0) {
