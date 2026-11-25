@@ -61,8 +61,6 @@ extern s32 D_800418A0[3];             /* distance between the last two marker po
 extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack tuneArray[12];     /* track pool */
 
-void func_10008C04(u8, u8, s32);
-s32 func_10008CE8(u8, s32);
 s32 func_151F2CDC(void);
 
 /* Returns the track playing sequence `id` on a channel, or NULL. */

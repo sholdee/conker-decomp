@@ -8,45 +8,8 @@
 extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
-/* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
- * once loading has started) and returns the bank's data, loading it on demand. */
-typedef struct BankRecord BankRecord;
-typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
-
 /* matching */
 void func_1000349C(s32 arg0);
-void func_100084D8(u8 arg0);
-s32  func_1000853C(u8 arg0);
-void func_10008570(u8 player, OSMesgQueue *queue);
-void func_100085A4(s32 arg0, s32 arg1, s32 arg2);
-void func_100085B8(u8 arg0, s32 arg1, u8 arg2);
-void func_100085F8(u8 arg0, s32 arg1);
-void func_1000862C(u8 arg0, s32 arg1);
-void func_10008660(u8 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_100086FC(u8 arg0, u8 arg1, u8 arg2);
-void func_10008744(u8 arg0, u8 arg1, u8 arg2);
-void func_10008790(u8 arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_10008824(u8 arg0, u8 arg1, u8 arg2);
-void func_1000886C(u8 arg0, s32 arg1, u8 arg2);
-void func_100088F0(u8 arg0, s32 arg1, s32 arg2);
-void func_10008988(u8 idx, s32 mask, s32 enable);
-u8   func_10008A4C(u8 idx, u8 chan);
-void func_10008A94(u8 arg0, s32 arg1, s32 arg2);
-void func_10008B2C(u8 arg0);
-void func_10008B60(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_10008BC0(u8 arg0, f32 arg1, f32 arg2);
-void func_10008EE0(u8 arg0, s32 arg1);
-void func_10008F24(u8 arg0);
-void func_10008F58(u8 arg0);
-void func_100093CC(void);
-ALDMAproc func_10009980(void *state);
-void func_10009B2C(BankRecord *record);
-void func_10009B4C(BankRecord *record);
-void func_10009B90(BankRecord *record);
-void func_10011FA0(s32 *arg0);
-void func_10011FB0(s32 arg0);
-void func_10011FDC(s32 arg0);
-void func_10011FEC(void);
 s32  func_100173C4(SndState **arg0);
 void func_10017594(SndState *arg0);
 void func_100176C4(void);
@@ -59,8 +22,6 @@ void func_10017944(s32 arg0, u32 arg1);
 void n_alInit(void *globals, void *config);
 void n_alClose(s32 arg0);
 f32  alCents2Ratio(s32 arg0);
-s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
-f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
 void func_15005A60(Camera *arg0, s32 arg1);
 void func_15005AB0(Camera *arg0);
@@ -149,23 +110,6 @@ void func_1000709C(void);
 //func_10007DA0
 //func_10007DAC
 //func_10008120
-//func_10008180
-//func_10008B60
-//func_10008BC0
-//func_10008C04
-void func_10008C6C(u8 arg0, u8 arg1);
-//func_10008CE8
-//func_10008F90
-void func_10009400(void *arg);
-//func_100095A0
-s32 func_100097CC(s32 addr, s32 len, void *state);
-//func_100099BC
-void func_10009BE4(BankRecord *record);
-void *func_10009CBC(u32 *slot, s32 mode);
-BankFetchProc func_10009FFC(void);
-//func_1000A03C
-//func_1000A348
-//func_10012020
 // void func_10017870(u8 arg0);
 //func_1001AAE0
 //func_1001ADA4
@@ -174,7 +118,6 @@ BankFetchProc func_10009FFC(void);
 //func_1001B200
 // s32  func_1001B310(void *arg0, void *arg1);
 // u8   func_1001B450(void *arg0, void *arg1);
-Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_1019EA88
 //func_1019EAB0
 //func_1019EAE0
