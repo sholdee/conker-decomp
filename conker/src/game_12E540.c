@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60();
+extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
 void func_1513173C(struct210 *);
 void func_1513175C(struct210 *);
 void func_151617C4(struct210 *arg0);
@@ -266,17 +266,6 @@ void func_15101350(BeamEndFx *fx) {
     func_1513175C((struct210 *)fx);
 }
 
-extern void func_151D5D60();
-
-typedef struct {
-    char pad_0[0x197];
-    u8 field_0x197;
-} ObjectState197;
-
-typedef struct {
-    char pad_0[0x31C];
-    ObjectState197 *field_0x31C;
-} ObjectWithState197;
 extern void func_15143134(struct17 *src, struct17 *dst, f32 (*mtx)[4]);
 extern f32 func_15143E64(struct17 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, HitInfo *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
@@ -459,161 +448,134 @@ s8 func_15101378(Beam *beam) {
 
 
 
-typedef struct {
-    ObjectWithState197 *unk0;
-    char pad4[0x1E];
-    u8 unk22;
-    u8 unk23;
-    char pad24[0x14];
-    f32 unk38;
-    char pad3C[0x8];
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    char pad54[0x4];
-    f32 unk58;
-} Sub151019C4;
-
-typedef struct {
-    char pad0[0x34];
-    struct17 unk34;
-    struct17 unk40;
-    char pad4C[0x74];
-    char unkC0[0x40];
-    char unk100[0x10];
-    Sub151019C4 unk110;
-} Obj151019C4;
-
-typedef struct {
-    s16 x, y, z;
-    u16 flag;
-    s16 tc0, tc1;
-    u8 color[4];
-} Vtx151019C4;
-
-extern f32 D_800A2288;
 extern f32 *func_15144B34(s32);
 extern void func_15145548(struct17 *, struct17 *, f32 *, struct17 *, s32);
 
-void *func_151019C4(Obj151019C4 *arg0, s16 arg1) {
-    Sub151019C4 *sub = &arg0->unk110;
-    Vtx151019C4 *vtx;
-    void *result;
-    f32 *pos;
+/*
+ * Builds this frame's quad for the beam as seen from viewport `viewport`: four vertices from start to
+ * end, offset sideways by the beam's width (facing the eye point), with a scrolling texture.
+ * Returns the vertices, or NULL when the beam is not drawn.
+ */
+Vtx *func_151019C4(Beam *beam, s16 viewport) {
+    BeamData *data = &beam->data;
+    Vtx *vtx;
+    Vtx *result;
+    f32 *eye;
     struct17 dir;
-    struct17 out;
+    struct17 closest;
     f32 dx, dy, dz;
-    f32 pz, py, px;
-    f32 lenSq;
+    f32 sideZ, sideY, sideX;
+    f32 sideLenSq;
     f32 scale;
-    f32 sn;
+    f32 scrollSpeed;
     struct17 start;
     struct17 end;
-    f32 len;
-    u8 fresh;
-    s32 t0, t1, diff;
+    f32 drawLen;
+    u8 isNew;
+    s32 texStart, texEnd, texSpan;
     f32 maxLen;
 
-    if (arg1 == sub->unk22 && (sub->unk0 == NULL || sub->unk0->field_0x31C->field_0x197 != 0)) {
-        return 0;
+    if (viewport == data->unk22 && (data->owner == NULL || data->owner->aim->unk197 != 0)) {
+        return NULL;
     }
-    if (sub->unk23 & 1) {
-        func_151D5D60(arg0->unk100, arg1, 0x40, (void **)&vtx, &fresh);
+    if (data->flags & 1) {
+        func_151D5D60(beam->vtxBuf, viewport, sizeof(beam->vtxTemplate), &vtx, &isNew);
         result = vtx;
-        if (vtx != 0) {
-            if (fresh != 0) {
-                memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), arg0->unkC0, 0x40);
-                memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, arg0->unkC0, 0x40);
+        if (vtx != NULL) {
+            if (isNew) {
+                memcpy(beam->vtxBuf[viewport], beam->vtxTemplate, sizeof(beam->vtxTemplate));
+                memcpy(beam->vtxBuf[viewport] + 4, beam->vtxTemplate, sizeof(beam->vtxTemplate));
             }
         } else {
-            return 0;
+            return NULL;
         }
-        pos = func_15144B34(arg1);
-        maxLen = D_800A2288;
-        start = arg0->unk34;
-        scale = sub->unk44;
+        eye = func_15144B34(viewport);
+        maxLen = 3508.0f;
+        start = beam->start;
+        scale = data->length;
         if (maxLen < scale) {
-            f32 s = maxLen / scale;
+            f32 ratio = maxLen / scale;
 
-            dir.unk0 = (arg0->unk40.unk0 - start.unk0) * s;
-            dir.unk4 = (arg0->unk40.unk4 - start.unk4) * s;
-            dir.unk8 = (arg0->unk40.unk8 - start.unk8) * s;
+            dir.unk0 = (beam->end.unk0 - start.unk0) * ratio;
+            dir.unk4 = (beam->end.unk4 - start.unk4) * ratio;
+            dir.unk8 = (beam->end.unk8 - start.unk8) * ratio;
             end.unk0 = start.unk0 + dir.unk0;
             end.unk4 = start.unk4 + dir.unk4;
             end.unk8 = start.unk8 + dir.unk8;
-            len = maxLen;
+            drawLen = maxLen;
         } else {
-            end = arg0->unk40;
+            end = beam->end;
             dir.unk0 = end.unk0 - start.unk0;
             dir.unk4 = end.unk4 - start.unk4;
             dir.unk8 = end.unk8 - start.unk8;
-            len = sub->unk44;
+            drawLen = data->length;
         }
-        func_15145548(&start, &dir, pos, &out, 0);
-        dx = out.unk0 - pos[0];
-        dy = out.unk4 - pos[1];
-        dz = out.unk8 - pos[2];
-        px = dir.unk4 * dz - dy * dir.unk8;
-        py = dir.unk8 * dx - dz * dir.unk0;
-        pz = dir.unk0 * dy - dx * dir.unk4;
-        lenSq = px * px + py * py + pz * pz;
-        if (lenSq == 0.0f) {
-            pz = py = px = 0.0f;
+        func_15145548(&start, &dir, eye, &closest, 0);
+        dx = closest.unk0 - eye[0];
+        dy = closest.unk4 - eye[1];
+        dz = closest.unk8 - eye[2];
+        sideX = dir.unk4 * dz - dy * dir.unk8;
+        sideY = dir.unk8 * dx - dz * dir.unk0;
+        sideZ = dir.unk0 * dy - dx * dir.unk4;
+        sideLenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+        if (sideLenSq == 0.0f) {
+            sideZ = sideY = sideX = 0.0f;
         } else {
-            scale = sub->unk38 / sqrtf(lenSq);
-            px *= scale;
-            py *= scale;
-            pz *= scale;
+            scale = data->width / sqrtf(sideLenSq);
+            sideX *= scale;
+            sideY *= scale;
+            sideZ *= scale;
         }
-        sn = sinf(sub->unk50);
-        sn = sub->unk48 + sub->unk4C * sn;
-        t0 = sub->unk58;
-        t1 = sub->unk58 + len * sn;
-        diff = t1 - t0;
+        scrollSpeed = sinf(data->scrollPhase);
+        scrollSpeed = data->scrollBase + data->scrollRange * scrollSpeed;
+        texStart = data->texOffset;
+        texEnd = data->texOffset + drawLen * scrollSpeed;
+        texSpan = texEnd - texStart;
         {
-        s32 t;
-        if (t1 >= 0x8000 || t0 < -0x8000) {
-            t = t0;
-            while (t > 0x2000) {
-                t -= 0x2000;
+            s32 wrapped;
+
+            // keep the texture coordinates within s16 range
+            if (texEnd >= 0x8000 || texStart < -0x8000) {
+                wrapped = texStart;
+                while (wrapped > 0x2000) {
+                    wrapped -= 0x2000;
+                }
+                while (wrapped < 0) {
+                    wrapped += 0x2000;
+                }
+                texStart = wrapped - 0x8000;
+                texEnd = texStart + texSpan;
             }
-            while (t < 0) {
-                t += 0x2000;
-            }
-            t0 = t - 0x8000;
-            t1 = t0 + diff;
         }
-        }
-        vtx->x = end.unk0 + px;
-        vtx->y = end.unk4 + py;
-        vtx->z = end.unk8 + pz;
-        vtx->tc1 = 0;
-        vtx->tc0 = t1;
-        vtx->flag = 0;
+        vtx->v.ob[0] = end.unk0 + sideX;
+        vtx->v.ob[1] = end.unk4 + sideY;
+        vtx->v.ob[2] = end.unk8 + sideZ;
+        vtx->v.tc[1] = 0;
+        vtx->v.tc[0] = texEnd;
+        vtx->v.flag = 0;
         vtx++;
-        vtx->x = end.unk0 - px;
-        vtx->y = end.unk4 - py;
-        vtx->z = end.unk8 - pz;
-        vtx->tc1 = 0x7C0;
-        vtx->tc0 = t1;
-        vtx->flag = 0;
+        vtx->v.ob[0] = end.unk0 - sideX;
+        vtx->v.ob[1] = end.unk4 - sideY;
+        vtx->v.ob[2] = end.unk8 - sideZ;
+        vtx->v.tc[1] = 0x7C0;
+        vtx->v.tc[0] = texEnd;
+        vtx->v.flag = 0;
         vtx++;
-        vtx->x = start.unk0 - px;
-        vtx->y = start.unk4 - py;
-        vtx->z = start.unk8 - pz;
-        vtx->tc1 = 0x7C0;
-        vtx->tc0 = t0;
-        vtx->flag = 0;
+        vtx->v.ob[0] = start.unk0 - sideX;
+        vtx->v.ob[1] = start.unk4 - sideY;
+        vtx->v.ob[2] = start.unk8 - sideZ;
+        vtx->v.tc[1] = 0x7C0;
+        vtx->v.tc[0] = texStart;
+        vtx->v.flag = 0;
         vtx++;
-        vtx->x = start.unk0 + px;
-        vtx->y = start.unk4 + py;
-        vtx->z = start.unk8 + pz;
-        vtx->tc1 = 0;
-        vtx->tc0 = t0;
-        vtx->flag = 0;
+        vtx->v.ob[0] = start.unk0 + sideX;
+        vtx->v.ob[1] = start.unk4 + sideY;
+        vtx->v.ob[2] = start.unk8 + sideZ;
+        vtx->v.tc[1] = 0;
+        vtx->v.tc[0] = texStart;
+        vtx->v.flag = 0;
         return result;
     }
-end:
-    return 0;
+end: // matching: an unused label here keeps IDO's block layout
+    return NULL;
 }
