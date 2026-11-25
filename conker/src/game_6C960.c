@@ -31,34 +31,29 @@ void func_150A81D0(Mtx **mtx, f32 (*transform)[4], AnimModel *anim, s32 arg3, s3
                    s32 scale);
 void func_150A9984(Mtx *mtx, u8 count);
 
-/* Locals of func_1503F4B0 that live on the stack at fixed offsets. */
-struct func_1503F4B0_sp38 {
-    Mtx *mtx;
-    s32 pad4;
-    s16 unk8;
-    s16 padA;
-    u8 *frameBuf;
-};
-
 /* Builds this frame buffer's part matrices from the current animation frame, then advances the animation. */
 void func_1503F4B0(AnimModel *anim) {
-    struct func_1503F4B0_sp38 sp38;
+    u8 *frameBuf;
+    s16 pad42; // matching: unused, keeps unk8 at sp+0x40
+    s16 unk8;
+    s32 pad3C; // matching: unused, keeps mtx at sp+0x38
+    Mtx *mtx;
     f32 (*transform)[4];
 
-    sp38.frameBuf = NULL;
+    frameBuf = NULL;
     if (anim->matrices[D_800BE9C0] != NULL) {
-        sp38.frameBuf = allocate_memory(0x320, 1, 2, 2);
-        func_1502D824(anim, NULL, sp38.frameBuf);
-        sp38.unk8 = 0x1000;
+        frameBuf = allocate_memory(0x320, 1, 2, 2);
+        func_1502D824(anim, NULL, frameBuf);
+        unk8 = 0x1000;
         transform = anim->matrices[D_800BE9C0];
-        sp38.mtx = anim->partMtx[D_800BE9C0];
-        func_150A81D0(&sp38.mtx, transform, anim, anim->unk3F0, anim->numParts, &sp38.unk8, NULL, 0);
+        mtx = anim->partMtx[D_800BE9C0];
+        func_150A81D0(&mtx, transform, anim, anim->unk3F0, anim->numParts, &unk8, NULL, 0);
         func_150A9984(anim->partMtx[D_800BE9C0], anim->numParts);
         anim->unk3F6 = TRUE;
     }
     func_1507BDB0(anim, D_800BE9A4, NULL, 0);
-    if (sp38.frameBuf != NULL) {
-        func_10004074(sp38.frameBuf);
+    if (frameBuf != NULL) {
+        func_10004074(frameBuf);
     }
 }
 
@@ -74,7 +69,7 @@ void func_1503F5B8(AnimModel *model, s32 restart, s32 anim, f32 speed, f32 blend
 s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimModel **out) {
     s32 numParts;
     Mtx *mtx;
-    s32 pad;
+    s32 pad; // matching: unused stack slot
 
     *out = allocate_memory(sizeof(AnimModel), 1, 2, 2);
     if (*out == NULL) {
@@ -89,9 +84,11 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
     (*out)->unk3F6 = FALSE;
     (*out)->partMtx[0] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
     (*out)->partMtx[1] = allocate_memory(numParts * sizeof(Mtx), 1, 2, 2);
+    // matching: model's variable is reused for *out; a separate AnimModel * local makes IDO spill model
     model = (s32) *out;
     mtx = ((AnimModel *) model)->partMtx[0];
     if (mtx == NULL || ((AnimModel *) model)->partMtx[1] == NULL) {
+        // Frees only the buffers that failed to allocate (NULL), leaking the other one.
         if (mtx == NULL) {
             func_10004074(mtx);
             model = (s32) *out;
@@ -99,6 +96,7 @@ s32 func_1503F62C(s32 model, s32 bank, Gfx ***dlists, u8 *numDLists, u8 **data, 
         mtx = ((AnimModel *) model)->partMtx[1];
         if (mtx == NULL) {
             func_10004074(mtx);
+            // matching: dead uses of dlists; without them IDO swaps s0/s1 for model and out
             if (!dlists && !dlists && !dlists) {
             }
             model = (s32) *out;
