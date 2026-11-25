@@ -169,8 +169,8 @@ extern u8 D_8009006C[];
 extern u8 D_80090070[];
 extern s32 func_15086D48(s32, s32);
 extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
-Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4);
-Gfx *func_151E9D18(Gfx *, s32, s32);
+Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh);
+Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh);
 
 /* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
 Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
@@ -279,8 +279,8 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             done = 0;
             gDPPipeSync(gfx++);
             {
-                u8 *col = (u8 *)D_800ABA90 + (i << 2);
-                gDPSetEnvColor(gfx++, col[0], col[1], col[2], alpha);
+                u8 *color = (u8 *)D_800ABA90 + (i << 2);
+                gDPSetEnvColor(gfx++, color[0], color[1], color[2], alpha);
             }
             gfx = func_151E86E4(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
             digitX = (x + 10) << 2;
@@ -394,18 +394,19 @@ extern s16 D_800E0AA0[];
 extern s8 D_800E0C00[];
 
 
-Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4) {
-    s8 mask;
+/* Draws each team's row of score pips; teams with no active player get a separate icon. */
+Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh) {
+    s8 inactiveTeams;
     s32 image;
     s32 i;
     s32 j;
-    s32 v;
-    s32 x0;
+    s32 filled;
+    s32 pipX;
     s32 x;
-    s32 step;
+    s32 spacing;
 
-    mask = 0;
-    if (arg3 != 0) {
+    inactiveTeams = 0;
+    if (loadTexture != 0) {
         image = func_1510D0EC(&D_D14, 0, 3, 0);
         if (image == (s32)0x80000000) {
             return gfx;
@@ -421,48 +422,48 @@ Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
         gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
     }
-    step = 0x124;
+    spacing = 0x124;
     if (D_800E0BB0 > 0) {
-        step = 0x124 / D_800E0BB0;
+        spacing = 0x124 / D_800E0BB0;
     }
-    if (arg4) {
-        mask = 0xF;
+    if (refresh) {
+        inactiveTeams = 0xF;
         for (i = 0; i < D_8008FD8C; i++) {
             if (func_150859AC(i, 3)) {
-                mask &= ~(1 << D_800E0C00[i]);
+                inactiveTeams &= ~(1 << D_800E0C00[i]);
             }
         }
     }
-    x = step >> 1;
+    x = spacing >> 1;
     for (i = 0; i < D_800E0BB0; i++) {
-        if (arg4) {
-            v = func_150859AC(i, 6);
-            D_800E0AA0[i] = v;
+        if (refresh) {
+            filled = func_150859AC(i, 6);
+            D_800E0AA0[i] = filled;
         } else {
-            v = D_800E0AA0[i];
+            filled = D_800E0AA0[i];
         }
-        if (!(mask & (1 << i))) {
-            if (i == arg2) {
-                v++;
+        if (!(inactiveTeams & (1 << i))) {
+            if (i == extraPipTeam) {
+                filled++;
             }
             gDPPipeSync(gfx++);
             {
-                u8 *col = (u8 *)D_800ABA90 + (i << 2);
-                gDPSetEnvColor(gfx++, col[0], col[1], col[2], 0xFF);
+                u8 *color = (u8 *)D_800ABA90 + (i << 2); // matching: shift form, not D_800ABA90[i]
+                gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
             }
-            x0 = x - (D_80087268 * 4);
+            pipX = x - (D_80087268 * 4);
             for (j = 0; j < D_80087268; j++) {
-                if (j == v) {
+                if (j == filled) {
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, 0x40, 0x40, 0x40, 0x40);
                 }
-                gfx = func_151E86E4(gfx, x0 << 2, arg1, (x0 + 7) << 2, arg1 + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
-                x0 += 8;
+                gfx = func_151E86E4(gfx, pipX << 2, y, (pipX + 7) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+                pipX += 8;
             }
         }
-        x += step;
+        x += spacing;
     }
-    if (mask) {
+    if (inactiveTeams) {
         image = func_1510D0EC((s32)&D_D16 + 1, 0, 3, 0);
         if (image == (s32)0x80000000) {
             return gfx;
@@ -479,17 +480,17 @@ Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4) {
         gDPLoadSync(gfx++);
         gDPLoadTLUTCmd(gfx++, 6, 15);
         gDPSetOtherMode(gfx++, 0x00AC3F, 0x504244);
-        x = step >> 1;
+        x = spacing >> 1;
         for (i = 0; i < D_800E0BB0; i++) {
-            if (mask & (1 << i)) {
+            if (inactiveTeams & (1 << i)) {
                 gDPPipeSync(gfx++);
                 {
-                    u8 *col = (u8 *)D_800ABA90 + (i << 2);
-                    gDPSetEnvColor(gfx++, col[0], col[1], col[2], 0xFF);
+                    u8 *color = (u8 *)D_800ABA90 + (i << 2);
+                    gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
                 }
-                gfx = func_151E86E4(gfx, (x - 8) << 2, arg1 - 0x18, (x + 8) << 2, arg1 + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
+                gfx = func_151E86E4(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
             }
-            x += step;
+            x += spacing;
         }
     }
     gDPPipeSync(gfx++);
@@ -550,37 +551,37 @@ extern u8 D_800ABAC0;
 extern u8 D_800ABAC4;
 extern u8 D_843;
 extern u8 D_888;
-Gfx *func_151E9D18(Gfx *, s32, s32);
 
 
 extern u8 D_D10;
 extern u8 D_800ABAA0;
 extern u8 D_800ABAA4;
 
-Gfx *func_151E9D18(Gfx *gfx, s32 arg1, s32 arg2) {
+/* Draws the two team icons with each team's total score beside them. */
+Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
     u8 *tex;
-    s32 tOffset;
+    s32 iconT;
     s32 image;
     s32 width;
     s32 amount;
-    s32 total0;
-    s32 total1;
+    s32 team0Total;
+    s32 team1Total;
     s32 y;
-    s32 sOffset0;
-    s32 sOffset1;
+    s32 leftIconS;
+    s32 rightIconT;
     s32 i;
 
-    y = arg1 - 0x10;
+    y = rowY - 0x10;
     if ((D_8008FDC0 & 0x4000) || (D_8008FDD4->unk42 == 8)) {
         tex = (D_8008FDD4->unk42 == 8) ? &D_D10 + 2 : &D_D10 + 1;
         width = 0x10;
-        sOffset0 = 0;
-        sOffset1 = 0x200;
+        leftIconS = 0;
+        rightIconT = 0x200;
     } else {
         tex = &D_D10;
         width = 0x20;
-        sOffset0 = 0x200;
-        sOffset1 = 0;
+        leftIconS = 0x200;
+        rightIconT = 0;
     }
 
     image = func_1510D0EC(tex, 0, 3, 0);
@@ -599,13 +600,13 @@ Gfx *func_151E9D18(Gfx *gfx, s32 arg1, s32 arg2) {
     gDPSetOtherMode(gfx++, 0x000C3F, 0x504244);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    tOffset = 0;
-    total0 = 0;
-    total1 = 0;
-    if (arg2 != 0) {
+    iconT = 0;
+    team0Total = 0;
+    team1Total = 0;
+    if (refresh != 0) {
         if (D_8008FDC0 & 0x6040) {
-            total0 = func_150859AC(0, 6);
-            total1 = func_150859AC(1, 6);
+            team0Total = func_150859AC(0, 6);
+            team1Total = func_150859AC(1, 6);
         } else if (D_8008FDC0 & 0x100) {
             for (i = 0; i < D_8008FD8C; i++) {
                 amount = func_150859AC(i, 3);
@@ -613,37 +614,37 @@ Gfx *func_151E9D18(Gfx *gfx, s32 arg1, s32 arg2) {
                     amount = 0;
                 }
                 if (D_800CC2D0[i].unk128 == 0) {
-                    total0 += amount;
+                    team0Total += amount;
                 } else {
-                    total1 += amount;
+                    team1Total += amount;
                 }
             }
         } else {
-            tOffset = 0x200;
+            iconT = 0x200;
             for (i = 0; i < D_8008FD8C; i++) {
                 amount = D_8008FDD4->unk46[i];
                 if (amount < 0) {
                     amount = 0;
                 }
                 if (D_800E0C00[i] == 0) {
-                    total0 += amount;
+                    team0Total += amount;
                 } else {
-                    total1 += amount;
+                    team1Total += amount;
                 }
             }
         }
-        D_800E0AA0[0] = total0;
-        D_800E0AA0[1] = total1;
+        D_800E0AA0[0] = team0Total;
+        D_800E0AA0[1] = team1Total;
     } else {
-        total0 = D_800E0AA0[0];
-        total1 = D_800E0AA0[1];
+        team0Total = D_800E0AA0[0];
+        team1Total = D_800E0AA0[1];
     }
 
-    gfx = func_151E86E4(gfx, 0x108, y, 0x148, y + 0x40, 0, sOffset0, tOffset, 0x400, 0x400);
-    gfx = func_151E86E4(gfx, 0x318, y, 0x358, y + 0x40, 0, 0, tOffset + sOffset1, 0x400, 0x400);
+    gfx = func_151E86E4(gfx, 0x108, y, 0x148, y + 0x40, 0, leftIconS, iconT, 0x400, 0x400);
+    gfx = func_151E86E4(gfx, 0x318, y, 0x358, y + 0x40, 0, 0, iconT + rightIconT, 0x400, 0x400);
     func_1504332C(0xC0, 0xC0, 0xC0, 0xFF);
-    func_15042D94(0x4F, (y >> 2) + 1, 0x80, &D_800ABAA0, total1);
-    func_15042D94(0xD3, (y >> 2) + 1, 0x80, &D_800ABAA4, total0);
+    func_15042D94(0x4F, (y >> 2) + 1, 0x80, &D_800ABAA0, team1Total);
+    func_15042D94(0xD3, (y >> 2) + 1, 0x80, &D_800ABAA4, team0Total);
     return gfx;
 }
 
