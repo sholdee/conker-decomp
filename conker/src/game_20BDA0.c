@@ -1642,6 +1642,7 @@ void func_151E1744(void) {
 
 void func_151E43DC(void);
 
+/* Menu page 3: runs func_151E530C and func_151E43DC with D_8008FD80 = 3. */
 void func_151E2284(void) {
     D_8008FD80 = 3;
     func_151E530C();
@@ -1660,92 +1661,94 @@ typedef struct {
     u8 unk7;
     u8 unk8;
     u8 unk9;
-} Struct151E22BC;
+} ModeSettings;
 
-extern s8 *D_80082BBC;
+extern ModeSettings *D_80082BBC; /* saved settings, one record per mode */
 
+/* Loads the selected mode's saved settings (D_80082BBC[mode]) into the live settings D_800E0BE0[]. */
 void func_151E22BC(void) {
-    s32 idx;
-    Struct151E22BC *p;
+    s32 mode;
+    ModeSettings *settings;
 
-    idx = D_800AB68C[D_8008FDD4->selection].mode;
-    p = (Struct151E22BC *)(D_80082BBC + idx * 10);
-    if (p->unk3 >= 5) {
-        p->unk3 = 4;
+    mode = D_800AB68C[D_8008FDD4->selection].mode;
+    settings = &D_80082BBC[mode];
+    if (settings->unk3 >= 5) {
+        settings->unk3 = 4;
     }
-    if (p->unk3 < 0) {
-        p->unk3 = 0;
+    if (settings->unk3 < 0) { // matching: never true for a u8, but IDO still emits the test
+        settings->unk3 = 0;
     }
-    if (p->unk1 <= 0) {
-        p->unk1 = 1;
+    if (settings->unk1 <= 0) {
+        settings->unk1 = 1;
     }
-    D_800E0BE0[2] = p->unk1;
-    D_800E0BE0[3] = p->unk2;
+    D_800E0BE0[2] = settings->unk1;
+    D_800E0BE0[3] = settings->unk2;
     D_800E0BE0[11] = 0;
-    D_800E0BE0[16] = p->unk3;
-    D_800E0BE0[17] = p->unk4;
-    switch (idx) {
+    D_800E0BE0[16] = settings->unk3;
+    D_800E0BE0[17] = settings->unk4;
+    switch (mode) {
         case 0:
-            D_800E0BE0[4] = p->unk5;
+            D_800E0BE0[4] = settings->unk5;
             break;
         case 1:
         case 2:
-            D_800E0BE0[13] = p->unk5;
-            D_800E0BE0[14] = p->unk6;
+            D_800E0BE0[13] = settings->unk5;
+            D_800E0BE0[14] = settings->unk6;
             break;
         case 7:
-            D_800E0BE0[18] = p->unk5;
+            D_800E0BE0[18] = settings->unk5;
             break;
         case 5:
             D_800E0BE0[17] = 0;
-            D_800E0BE0[18] = p->unk5;
+            D_800E0BE0[18] = settings->unk5;
             break;
         case 8:
         case 9:
-            D_800E0BE0[7] = p->unk5;
-            D_800E0BE0[19] = p->unk6;
+            D_800E0BE0[7] = settings->unk5;
+            D_800E0BE0[19] = settings->unk6;
             D_800E0BE0[17] = 1;
             D_800E0BE0[3] = 2;
             break;
         default:
             break;
     }
-    D_800E0BE0[22] = p->unk8;
-    D_800E0BE0[6] = p->unk9;
+    D_800E0BE0[22] = settings->unk8;
+    D_800E0BE0[6] = settings->unk9;
     func_151DD9E4();
 }
 
+/* Stores the live settings D_800E0BE0[] back into the selected mode's record; the inverse of func_151E22BC. */
 void func_151E2404(void) {
-    s8 *record;
-    s32 index;
+    ModeSettings *settings;
+    s32 mode;
 
-    index = D_800AB68C[D_8008FDD4->selection].mode;
-    record = D_80082BBC + (index * 10);
-    record[0] = 0;
-    record[1] = D_800E0BE0[2];
-    record[2] = D_800E0BE0[3];
-    record[3] = D_800E0BE0[0x10];
-    record[4] = D_800E0BE0[0x11];
-    switch (index) {
+    mode = D_800AB68C[D_8008FDD4->selection].mode;
+    settings = &D_80082BBC[mode];
+    settings->unk0 = 0;
+    settings->unk1 = D_800E0BE0[2];
+    settings->unk2 = D_800E0BE0[3];
+    settings->unk3 = D_800E0BE0[16];
+    settings->unk4 = D_800E0BE0[17];
+    switch (mode) {
         case 0:
-            record[5] = D_800E0BE0[4];
+            settings->unk5 = D_800E0BE0[4];
             break;
         case 1:
         case 2:
-            record[5] = D_800E0BE0[0xD];
-            record[6] = D_800E0BE0[0xE];
+            settings->unk5 = D_800E0BE0[13];
+            settings->unk6 = D_800E0BE0[14];
             break;
         case 5:
         case 7:
-            record[5] = D_800E0BE0[0x12];
+            settings->unk5 = D_800E0BE0[18];
             break;
         case 8:
         case 9:
-            record[5] = D_800E0BE0[7];
-            record[6] = D_800E0BE0[0x13];
+            settings->unk5 = D_800E0BE0[7];
+            settings->unk6 = D_800E0BE0[19];
             break;
     }
-    record[8] = D_800E0BE0[0x16];
-    record[9] = D_800E0BE0[6];
+    settings->unk8 = D_800E0BE0[22];
+    settings->unk9 = D_800E0BE0[6];
     func_150076A0(D_800E0BE0);
 }
