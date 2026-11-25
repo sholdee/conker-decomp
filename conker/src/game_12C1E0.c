@@ -72,7 +72,7 @@ void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
             directionSign = -1;
         }
 
-        // matching: arg1 is read with lbu from its arg slot (a u8 param or cast caches it)
+        // matching: lbu of arg1 from its arg slot at each use (a u8 param gets spilled to a new slot)
         func_151C229C(&endpoint, &direction, value0, value1, 1, 0, 300.0f, 0.003333333414f,
                       (random0 * 10.0f) + 25.0f, (random1 * 200.0f) + 600.0f,
                       50.0f, (randomWord % 156U) + 100, obj, 99, 1, 1, 1,
@@ -114,7 +114,7 @@ void func_150FEFD0(struct127 *obj, s16 setId, struct17 *out) {
 }
 
 /* Like func_150FED30, but spawns its shot through func_150F7470. */
-void func_150FF084(struct127 *obj, s32 arg1, s32 arg2) {
+void func_150FF084(struct127 *obj, u8 arg1, s32 arg2) {
     struct17 position;
     struct17 endpoint;
     struct17 direction;
@@ -153,15 +153,14 @@ void func_150FF084(struct127 *obj, s32 arg1, s32 arg2) {
         }
 
         randomWord = func_150ADA20();
-        // matching: arg1 is read with lbu from its arg slot (a u8 param or cast caches it)
         func_150F7470(&position, &direction, value0, value1, hasValue1, 0, 54.00000381f, 0.01851851679f, 300.0f,
-                      obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, ((u8 *)&arg1)[3], arg2);
+                      obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, arg1, arg2);
 
         if (valid) {
-            func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
+            func_151D3F14(&position, arg1, arg2);
             func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
-                          ((u8 *)&arg1)[3], arg2);
-            func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
+                          arg1, arg2);
+            func_150FF474(&position, points, arg1, arg2);
         }
     }
 }
@@ -461,60 +460,59 @@ void func_150FFD2C(struct127 *obj, struct127 *other, s32 arg2) {
     }
 }
 
+/* Spawn parameters for func_15130280 (same layout as ParticleSpawn in game_185560.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Func150FFD84Spawn;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4]; /* [3] is the alpha */
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 fadeDuration;
+    /* 0x20 */ s16 fadeStep;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ struct17 position;
+    /* 0x3C */ struct17 unk3C;
+    /* 0x48 */ struct17 velocity;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags; /* 0x40, 0x80: random flips */
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 unk6C;
+} ParticleSpawn;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_15145974(struct17 *, f32 *, f32 *);
-typedef struct { s32 v[4]; } Func150FFD84Colors;
-extern Func150FFD84Colors D_800A2160;
+typedef struct {
+    s32 id[4];
+} Unk1DChoices;
 
-void func_150FFD84(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
-    Func150FFD84Spawn spawn;
+void *func_15130280(ParticleSpawn *spawn, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void func_15143794(s16 yaw, s16 pitch, f32 length, struct17 *out);
+void func_15145974(struct17 *direction, f32 *yaw, f32 *pitch);
+extern Unk1DChoices D_800A2160;
+
+/* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
+void func_150FFD84(struct17 *position, struct17 *direction, u8 arg2, s32 arg3) {
+    ParticleSpawn spawn;
     s32 count;
-    s16 angle1;
-    s16 angle2;
-    s32 r1;
+    s16 baseYaw;
+    s16 basePitch;
+    s32 random0;
     f32 yaw;
     f32 pitch;
 
@@ -524,20 +522,20 @@ void func_150FFD84(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
     spawn.unk4 = 0;
     spawn.unkC = 0;
     spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0xFF;
-    spawn.unk19 = 0xFF;
-    spawn.unk1A = 0xFF;
+    spawn.color0[0] = 0xFF;
+    spawn.color0[1] = 0xFF;
+    spawn.color0[2] = 0xFF;
+    spawn.color0[3] = 0xFF;
+    spawn.color1[0] = 0xFF;
+    spawn.color1[1] = 0xFF;
+    spawn.color1[2] = 0xFF;
     spawn.unk1C = 0xFF;
-    spawn.unk30 = *arg0;
+    spawn.position = *position;
     spawn.unk3C = *(struct17 *)&D_800A5480;
-    spawn.unk1E = 7;
-    spawn.unk20 = 0x24;
+    spawn.fadeDuration = 7;
+    spawn.fadeStep = 36;
     spawn.unk22 = 1;
-    spawn.unk58 = 0x4C207;
+    spawn.flags = 0x4C207;
     spawn.unk60 = 0;
     spawn.unk61 = 7;
     spawn.unk62 = -1;
@@ -547,31 +545,33 @@ void func_150FFD84(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
     spawn.unk5C = 0;
     spawn.unk66 = 0xFF;
     spawn.unk24 = 1.0f;
-    func_15145974(arg1, &yaw, &pitch);
+    func_15145974(direction, &yaw, &pitch);
     pitch = 0.0f;
-    angle1 = (s16)(yaw * 182.0444489f);
-    angle1 >>= 8;
-    angle1 -= 0x8A;
-    angle2 = (s16)(pitch * 182.0444489f);
-    angle2 >>= 8;
-    angle2 -= 0x8A;
+    /* degrees to a 16-bit binary angle, then to 1/256 turns */
+    baseYaw = yaw * 182.0444489f;
+    baseYaw >>= 8;
+    baseYaw -= 138;
+    basePitch = pitch * 182.0444489f;
+    basePitch >>= 8;
+    basePitch -= 138;
     do {
-        Func150FFD84Colors colors;
-        s32 r2;
+        Unk1DChoices ids;
+        s32 random1;
 
-        colors = D_800A2160;
-        spawn.unk1D = colors.v[func_150ADA20() & 3];
-        spawn.unkA = func_150ADA20() % 13U + 10;
-        spawn.unk1B = func_150ADA20() % 101U + 155;
-        spawn.unk28 = spawn.unk2C = func_150ADA68() * 155.0f + 75.0f;
-        r1 = func_150ADA20();
-        r2 = func_150ADA20();
-        func_15143794(r1 % 21U + angle1, r2 % 21U + angle2, func_150ADA68() * 20.0f + 20.0f, &spawn.unk48.unk0);
+        ids = D_800A2160;
+        spawn.unk1D = ids.id[func_150ADA20() & 3];
+        spawn.lifetime = func_150ADA20() % 13U + 10;
+        spawn.color1[3] = func_150ADA20() % 101U + 155;
+        spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;
+        random0 = func_150ADA20();
+        random1 = func_150ADA20();
+        func_15143794(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
+                      &spawn.velocity);
         spawn.unk54 = func_150ADA68() * 0.6210000515f + -0.6570000052f;
-        spawn.unk58 &= ~0xC0;
-        r1 = (func_150ADA20() & 1) ? 0x80 : 0;
-        r2 = (func_150ADA20() & 1) ? 0x40 : 0;
-        spawn.unk58 |= r2 | r1;
+        spawn.flags &= ~0xC0;
+        random0 = (func_150ADA20() & 1) ? 0x80 : 0;
+        random1 = (func_150ADA20() & 1) ? 0x40 : 0;
+        spawn.flags |= random1 | random0;
         func_15130280(&spawn, 1, 0, 0, arg2, arg3);
         count--;
     } while (count > 0);
