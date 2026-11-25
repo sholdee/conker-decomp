@@ -90,13 +90,96 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 #define WGSPMATRIX15168C4C(pkt, mtx)        WGFX15168C4C(pkt, 0xDA380003, mtx)
 #define WGSPDISPLAYLIST15168C4C(pkt, dl)    WGFX15168C4C(pkt, 0xDE000000, dl)
 
-struct Some15171F04 {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    u16 unk8;
-};
+/*
+ * Sprite animation: `frames` is a single (segmented, < 0x10000000) texture address or a pointer to a table of
+ * `frameCount` texture addresses.
+ */
+typedef struct {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 unk6;
+    /* 0x8 */ u16 unk8;
+    /* 0xA */ u8 unkA;
+} SpriteAnim;
+
+/* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
+typedef struct {
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ SpriteAnim *anim;
+    /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
+    /* 0x16 */ s16 frameStep;
+    /* 0x18 */ s16 x;
+    /* 0x1A */ s16 y;
+    /* 0x1C */ s16 z;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s8 fadeStep;     /* > 0: fade out by this per frame; < 0: fade on the last frame */
+    /* 0x23 */ u8 alpha;
+    /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
+} SpriteFx;
+
+/* Sprite placement passed to func_15095760. */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 unk8;
+    /* 0xA */ u8 alpha;
+    /* 0xB */ u8 unkB;
+    /* 0xC */ u8 unkC;
+    /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
+} SpriteParams;
+
+/* Particle flags (Particle.flags). */
+#define PARTICLE_ENV_COLOR      0x1    /* use envR/G/B instead of the per-texture default */
+#define PARTICLE_PINGPONG       0x2    /* reverse the animation at either end instead of wrapping */
+#define PARTICLE_FLIP_S         0x4
+#define PARTICLE_FLIP_T         0x8
+#define PARTICLE_DIE_AT_END     0x20
+#define PARTICLE_DIE_AT_START   0x40
+#define PARTICLE_LOOPED         0x80   /* set once the animation has passed its last frame */
+#define PARTICLE_CUSTOM_MODE    0x100  /* render/combine modes come from unk14 */
+#define PARTICLE_2CYCLE         0x200
+
+/* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84). */
+typedef struct {
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ SpriteAnim *anim;
+    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
+    /* 0x18 */ s32 unk18;       /* low byte: angle offset in 1/256ths of a turn */
+    /* 0x1C */ s16 frame;       /* 8.8 fixed point index into anim->frames */
+    /* 0x1E */ s16 frameStep;
+    /* 0x20 */ s16 x;
+    /* 0x22 */ s16 y;
+    /* 0x24 */ s16 z;
+    /* 0x26 */ s16 velX;
+    /* 0x28 */ s16 velZ;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ u8 subX;         /* fractional (1/256) parts of x, z, y */
+    /* 0x2D */ u8 subZ;
+    /* 0x2E */ u8 subY;
+    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
+    /* 0x30 */ s16 velY;
+    /* 0x32 */ s16 accelY;
+    /* 0x34 */ s16 width;       /* < 0: scaled by the viewing angle */
+    /* 0x36 */ s16 height;      /* < 0: scaled by the viewing angle */
+    /* 0x38 */ s16 life;        /* 0x7FFF = forever */
+    /* 0x3A */ s8 fadeStep;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ u8 primR;
+    /* 0x3D */ u8 primG;
+    /* 0x3E */ u8 primB;
+    /* 0x3F */ u8 primA;
+    /* 0x40 */ u8 envR;
+    /* 0x41 */ u8 envG;
+    /* 0x42 */ u8 envB;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ u16 flags;
+    /* 0x46 */ u8 pad46[2];
+    /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
+} Particle;
 
 typedef struct {
     char pad_0[0x98];
@@ -124,7 +207,7 @@ typedef struct {
     u8 field_0x48;
 } GameObjectHeader;
 
-extern struct Some15171F04 *D_8008CA4C[];
+extern SpriteAnim *D_8008CA4C[];
 
 void func_15169070(s32, s32, s32, u8);
 
@@ -386,112 +469,80 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
 
 void func_15168A4C(ObjLink *obj, s32 type);
 
-s32 func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    GameObjectHeader *temp;
+/* Allocates a `size`-byte object (func_10003C6C) and links it into D_800DCE50[list][type]. */
+void *func_15167A68(type, list, size, arg3, owner, arg5)
+    s32 type;
+    s32 list;
+    s32 size;
+    s32 arg3;
+    u8 owner;
+    u8 arg5;
+{
+    ObjLink *obj;
 
-    temp = (GameObjectHeader *)func_10003C6C(arg2, 1, arg3, 0, (u8)arg5);
-    if (temp != 0) {
-        temp->field_0x1 = arg1;
-        func_15168A4C((s32 *)temp, arg0);
-        temp->field_0xC = *((u8 *)&arg4 + 3);
+    obj = (ObjLink *)func_10003C6C(size, 1, arg3, 0, arg5);
+    if (obj != NULL) {
+        obj->list = list;
+        func_15168A4C(obj, type);
+        obj->owner = owner;
     }
-    return (s32)temp;
+    return obj;
+}
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+
+/* Spawns a type 3 SpriteFx from the 0x18-byte template at `src` (anim .. fadeStep), fully opaque. */
+void func_15167AD8(SpriteFx *src, u8 owner, s32 list) {
+    SpriteFx *fx;
+
+    fx = func_15167A68(3, list, sizeof(SpriteFx), 0, owner, 1);
+    if (fx != NULL) {
+        bcopy(src, &fx->anim, 0x18);
+        fx->alpha = 0xFF;
+    }
 }
 
-void func_15167AD8(s32 arg0, s32 arg1, s32 arg2) {
-    GameObjectHeader *temp;
+/* Type 3 update: advances the animation and fade; destroys the sprite after its last frame. */
+void func_15167B44(SpriteFx *fx) {
+    s32 index;
+    s32 fade;
+    s32 rise;
+    s32 frame;
 
-    temp = (GameObjectHeader *)func_15167A68(3, arg2, 0x28, 0, (u8)arg1, 1);
-    if (temp != 0) {
-        bcopy(arg0, &temp->field_0x10, 0x18);
-        temp->field_0x23 = 0xFF;
-    }
-}
-void func_15167B44(struct102 *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
-    s32 temp_a2;
-
-    temp_v0 = *(u8 *)((u8 *)arg0 + 0x24);
-    if (temp_v0 != 0) {
-        D_8008CA20[temp_v0](arg0);
+    index = fx->callback;
+    if (index != 0) {
+        D_8008CA20[index]((struct102 *)fx);
     }
 
-    temp_v1 = *(s8 *)((u8 *)arg0 + 0x22);
-    if (temp_v1 > 0) {
-        temp_v0 = *(u8 *)((u8 *)arg0 + 0x23);
-        if (temp_v1 < temp_v0) {
-            *(u8 *)((u8 *)arg0 + 0x23) = temp_v0 - temp_v1;
+    fade = fx->fadeStep;
+    if (fade > 0) {
+        index = fx->alpha;
+        if (fade < index) {
+            fx->alpha = index - fade;
         } else {
-            *(s16 *)((u8 *)arg0 + 0x14) = *(u8 *)(*(s32 *)((u8 *)arg0 + 0x10) + 4) << 8;
+            fx->frame = fx->anim->frameCount << 8;
         }
-    } else if (temp_v1 < 0) {
-        temp_a1 = -temp_v1;
-        temp_a2 = *(s16 *)((u8 *)arg0 + 0x14);
-        if ((temp_a2 / 0x100) >= (*(u8 *)(*(s32 *)((u8 *)arg0 + 0x10) + 4) - 1)) {
-            temp_v0 = *(u8 *)((u8 *)arg0 + 0x23);
-            if (temp_a1 < temp_v0) {
-                *(u8 *)((u8 *)arg0 + 0x23) = temp_v0 - temp_a1;
-                *(s16 *)((u8 *)arg0 + 0x14) = temp_a2 - *(s16 *)((u8 *)arg0 + 0x16);
+    } else if (fade < 0) {
+        rise = -fade;
+        frame = fx->frame;
+        if (frame / 256 >= fx->anim->frameCount - 1) {
+            index = fx->alpha;
+            if (rise < index) {
+                fx->alpha = index - rise;
+                fx->frame = frame - fx->frameStep;
             }
         }
     }
 
-    *(s16 *)((u8 *)arg0 + 0x14) += *(s16 *)((u8 *)arg0 + 0x16);
-    if ((*(s16 *)((u8 *)arg0 + 0x14) / 0x100) >= *(u8 *)(*(s32 *)((u8 *)arg0 + 0x10) + 4)) {
-        func_1516972C(arg0);
+    fx->frame += fx->frameStep;
+    if (fx->frame / 256 >= fx->anim->frameCount) {
+        func_1516972C((struct102 *)fx);
     }
 }
-// PERMUTER CANDIDATE / near-miss (best ~1090): full reconstruction below; stack frame (0x70)
-// and locals sp50@0x50, sp5C@0x5C match. Blocker: the `mode` value (3/9) is MEMORY-resident at
-// 0x48 in the target (spilled, double beq+bne, sw/lw 0x48(sp)); a clean `s32 mode` stays in a
-// register (single branch). Forcing memory via the func_15168C4C idiom `*(s32*)((u8*)&mode - 4)`
-// gets memory-residence but lands the anchor at 0x6C (slot 0x68, CSE'd base) not 0x4C/0x48 absolute;
-// register renames cascade from the misaligned mode block. Needs the permuter (or exact anchor
-// placement). ObjC58: unk10=s32** (arg1 of E24 + arg6=(*unk10)[unk14>>8]); unk14 s16; unk18/1A/1C/
-// 1E/20 s16; unk22 s8; unk23 u8. sp5C is {s16 x,y,z,unk6,unk8; u8 unkA; u8 unkD} copied from those.
-// Gfx *func_15167C58(Gfx *arg0, ObjC58 *arg1, s32 arg2) {
-//     s32 mode; StructC58a sp5C; StructC58b sp50; Gfx *gfx; s32 **p = arg1->unk10;
-//     sp50.unk0 = 1;
-//     gfx = func_15142E24(arg0, (s32)p, arg1->unk14 << 8, 2, 0x100, 0x100,
-//                         (*p)[arg1->unk14 >> 8], 5, (s32)&sp5C, (u8 *)&sp50, 3);
-//     sp5C.unk0 = arg1->unk18; sp5C.unk2 = arg1->unk1A; sp5C.unk4 = arg1->unk1C;
-//     sp5C.unk6 = arg1->unk1E; sp5C.unk8 = arg1->unk20; sp5C.unkA = arg1->unk23; sp5C.unkD = 0;
-//     if (0xFF != arg1->unk22) { *(s32*)((u8*)&mode - 4) = 3; } else { *(s32*)((u8*)&mode - 4) = 9; }
-//     gfx = func_15142FBC(gfx, 0x2C00,
-//         (D_800A4AC8[*(s32*)((u8*)&mode-4)].unk4 | D_800A4AC8[*(s32*)((u8*)&mode-4)].unk0) | 4, (u8*)&sp50);
-//     return (Gfx *)func_15095760(gfx, &sp5C);
-// }
 typedef struct {
     s32 unk0;
     s32 unk4;
 } Mode15168118;
 extern Mode15168118 D_800A4AC8[];
-typedef struct {
-    u8 pad0[0x10];
-    s32 **unk10;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s8 unk22;
-    u8 unk23;
-} ObjC58;
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    u8 unkA;
-    u8 unkB;
-    u8 unkC;
-    u8 unkD;
-} StructC58a;
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -499,296 +550,146 @@ typedef struct {
 } StructC58b;
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 s32 func_15095760(Gfx *arg0, void *arg1);
-Gfx *func_15167C58(Gfx *arg0, ObjC58 *arg1, u8 arg2) {
+/* Type 3 draw: the current animation frame as a billboard. */
+Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     Gfx *gfx;
-    StructC58a sp5C;
-    StructC58b sp50;
-    s32 **tbl;
-    s32 mode;
-    s16 idx;
+    SpriteParams params;
+    StructC58b update; // matching: 12-byte stack object; only the first word (the update flag) is used
+    SpriteAnim *anim;
+    s32 renderMode;
+    s16 frame;
 
-    if (arg2) {}
-    sp50.unk0 = 1;
-    idx = arg1->unk14;
-    tbl = arg1->unk10;
-    gfx = func_15142E24(arg0, (s32)tbl, idx << 8, 2, 0x100, 0x100,
-                        (*tbl)[idx >> 8], 5, (s32)&sp5C, (u8 *)&sp50, 3);
-    sp5C.unk0 = arg1->unk18;
-    sp5C.unk2 = arg1->unk1A;
-    sp5C.unk4 = arg1->unk1C;
-    sp5C.unk6 = arg1->unk1E;
-    sp5C.unk8 = arg1->unk20;
-    sp5C.unkA = arg1->unk23;
-    sp5C.unkD = 0;
-    if (arg1->unk22 != 0xFF) {
-        mode = 3;
-    } else if (arg1->unk22 == 0xFF) {
-        mode = 9;
+    if (arg2) {} // matching: references the otherwise unused arg2
+    update.unk0 = 1;
+    frame = fx->frame;
+    anim = fx->anim;
+    gfx = func_15142E24(gdl, (s32)anim, frame << 8, 2, 0x100, 0x100,
+                        anim->frames[frame >> 8], 5, (s32)&params, (u8 *)&update, 3);
+    params.x = fx->x;
+    params.y = fx->y;
+    params.z = fx->z;
+    params.unk6 = fx->unk1E;
+    params.unk8 = fx->unk20;
+    params.alpha = fx->alpha;
+    params.flip = 0;
+    // matching: fadeStep is an s8, so it never equals 0xFF; the target still tests both ways
+    if (fx->fadeStep != 0xFF) {
+        renderMode = 3;
+    } else if (fx->fadeStep == 0xFF) {
+        renderMode = 9;
     }
-    gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, (u8 *)&sp50);
-    return (Gfx *)func_15095760(gfx, &sp5C);
+    gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, (u8 *)&update);
+    return (Gfx *)func_15095760(gfx, &params);
 }
-s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    GameObjectHeader *temp;
+/* Spawns a particle (type 0x42 when `arg1` is set, else 5) from the 0x38-byte template at `src`. */
+Particle *func_15167D84(src, arg1, extra, onDeath, owner, list)
+    Particle *src;
+    s32 arg1;
+    s32 extra;
+    s8 onDeath;
+    u8 owner;
+    s32 list;
+{
+    Particle *particle;
 
-    temp = (GameObjectHeader *)func_15167A68((arg1 == 0) ? 5 : 0x42, arg5, arg2 + 0x50, 0, *((u8 *)&arg4 + 3), 1);
-    if (temp == 0) {
-        return (s32)temp;
+    particle = func_15167A68((arg1 == 0) ? 5 : 0x42, list, extra + 0x50, 0, owner, 1);
+    if (particle == NULL) {
+        return particle;
     }
-    bcopy(arg0, &temp->field_0x10, 0x38);
-    temp->field_0x48 = *((s8 *)&arg3 + 3);
-    return (s32)temp;
+    bcopy(src, &particle->anim, 0x38);
+    particle->onDeath = onDeath;
+    return particle;
 }
-// PERMUTER CANDIDATE / JUSTREG (best 885): structure is byte-exact -- same instruction
-// count, same addresses, same branch forms (beql/bgezl/blezl/bnel/bltzl), frame 0x20 and
-// the `finished` spill at 0x1b(sp) all match. Residual = 73 register-only renames plus one
-// displaced `lbu 0x2d` load. Cause: the three 24.8 accumulate steps need a named local for
-// the sum (it is used twice: >>8 into the s16 and truncated into the u8), and a named local
-// takes v0/v1/a1 out of IDO's round-robin temp pool; the target keeps that sum in the pool
-// (t2/t8/t5) with v0/v1/a1 holding the packed value and the mflo. Dropping the local (writing
-// the expression twice and letting CSE fold it) fails: the `sh 0x22` store invalidates the
-// `arg0->unk30` load and IDO emits a second multu (2825). Splitting packed/product/sum into
-// separate locals just moves which value owns v0/v1 (1095/1285/1495). The tail t3..t9 diff is
-// a single +4 rotation of the temp counter cascading from that one choice.
-// Best reconstruction (score 885):
-// typedef struct {
-//     char pad_0[0x10];
-//     struct Some15171F04 *unk10;
-//     char pad_14[0x8];
-//     s16 unk1C;
-//     s16 unk1E;
-//     s16 unk20;
-//     s16 unk22;
-//     s16 unk24;
-//     s16 unk26;
-//     s16 unk28;
-//     char pad_2A[0x2];
-//     u8 unk2C;
-//     u8 unk2D;
-//     u8 unk2E;
-//     s8 unk2F;
-//     s16 unk30;
-//     s16 unk32;
-//     char pad_34[0x4];
-//     s16 unk38;
-//     s8 unk3A;
-//     char pad_3B[0x4];
-//     u8 unk3F;
-//     char pad_40[0x4];
-//     u16 unk44;
-//     char pad_46[0x2];
-//     s8 unk48;
-// } GameSpriteObject;
-//
-// void func_15167E0C(GameSpriteObject *arg0) {
-//     void (*func)(struct102 *);
-//     u8 finished;
-//     s32 limit;
-//
-//     finished = 0;
-//     if (arg0->unk38 != 0x7FFF) {
-//         arg0->unk38 -= D_800BE9E4;
-//         if (arg0->unk38 < 0) {
-//             arg0->unk38 = 0;
-//             finished = 1;
-//         }
-//     }
-//
-//     if (arg0->unk3A > 0) {
-//         if (arg0->unk3A < arg0->unk3F) {
-//             arg0->unk3F -= arg0->unk3A;
-//         } else {
-//             arg0->unk38 = 0;
-//             finished = 1;
-//         }
-//     }
-//
-//     if (arg0->unk2F != -1) {
-//         func = D_8008C9C8[arg0->unk2F];
-//         if (func != NULL) {
-//             func((struct102 *)arg0);
-//         }
-//     }
-//
-//     if (arg0->unk38 != 0) {
-//         s32 subY;
-//         s32 subX;
-//         s32 subZ;
-//
-//         arg0->unk30 += arg0->unk32;
-//
-//         subY = ((arg0->unk22 << 8) | arg0->unk2E) + arg0->unk30 * D_800BE9E4;
-//         arg0->unk22 = subY >> 8;
-//         arg0->unk2E = subY;
-//
-//         subX = ((arg0->unk20 << 8) | arg0->unk2C) + arg0->unk26 * D_800BE9E4;
-//         arg0->unk20 = subX >> 8;
-//         arg0->unk2C = subX;
-//
-//         subZ = ((arg0->unk24 << 8) | arg0->unk2D) + arg0->unk28 * D_800BE9E4;
-//         arg0->unk24 = subZ >> 8;
-//         arg0->unk2D = subZ;
-//
-//         if (arg0->unk1E != 0) {
-//             limit = (arg0->unk10->unk4 << 8) - 1;
-//             arg0->unk1C += arg0->unk1E * D_800BE9E4;
-//             if (limit < arg0->unk1C) {
-//                 if (arg0->unk44 & 0x20) {
-//                     arg0->unk38 = 0;
-//                     finished = 1;
-//                 } else {
-//                     arg0->unk44 |= 0x80;
-//                     if (arg0->unk44 & 2) {
-//                         arg0->unk1C = limit - (arg0->unk1C % limit);
-//                         arg0->unk1E = -arg0->unk1E;
-//                     } else {
-//                         do {
-//                             arg0->unk1C -= limit;
-//                         } while (limit < arg0->unk1C);
-//                     }
-//                 }
-//             } else if (arg0->unk1C < 0) {
-//                 if (arg0->unk44 & 0x40) {
-//                     arg0->unk38 = 0;
-//                     finished = 1;
-//                 } else if (arg0->unk44 & 2) {
-//                     arg0->unk1C = -arg0->unk1C % limit;
-//                     arg0->unk1E = -arg0->unk1E;
-//                 } else {
-//                     do {
-//                         arg0->unk1C += limit;
-//                     } while (arg0->unk1C < 0);
-//                 }
-//             }
-//         }
-//     } else {
-//         finished = 1;
-//     }
-//
-//     if (finished != 0) {
-//         if (arg0->unk48 != -1) {
-//             D_8008CA20[arg0->unk48]((struct102 *)arg0);
-//         }
-//         func_1516972C((struct102 *)arg0);
-//     }
-// }
-typedef struct {
-    char pad_0[0x10];
-    struct Some15171F04 *unk10;
-    char pad_14[0x8];
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    char pad_2A[0x2];
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    s8 unk2F;
-    s16 unk30;
-    s16 unk32;
-    char pad_34[0x4];
-    s16 unk38;
-    s8 unk3A;
-    char pad_3B[0x4];
-    u8 unk3F;
-    char pad_40[0x4];
-    u16 unk44;
-    char pad_46[0x2];
-    s8 unk48;
-} GameSpriteObject;
-
-void func_15167E0C(GameSpriteObject *arg0) {
+/* Particle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
+void func_15167E0C(Particle *p) {
     void (*func)(struct102 *);
     u8 finished;
     s32 limit;
 
     finished = 0;
-    if (arg0->unk38 != 0x7FFF) {
-        arg0->unk38 -= D_800BE9E4;
-        if (arg0->unk38 < 0) {
-            arg0->unk38 = 0;
+    if (p->life != 0x7FFF) {
+        p->life -= D_800BE9E4;
+        if (p->life < 0) {
+            p->life = 0;
             finished = 1;
         }
     }
 
-    if (arg0->unk3A > 0) {
-        if (arg0->unk3A < arg0->unk3F) {
-            arg0->unk3F -= arg0->unk3A;
+    if (p->fadeStep > 0) {
+        if (p->fadeStep < p->primA) {
+            p->primA -= p->fadeStep;
         } else {
-            arg0->unk38 = 0;
+            p->life = 0;
             finished = 1;
         }
     }
 
-    if (arg0->unk2F != -1) {
-        func = D_8008C9C8[arg0->unk2F];
+    if (p->callback != -1) {
+        func = D_8008C9C8[p->callback];
         if (func != NULL) {
-            func((struct102 *)arg0);
+            func((struct102 *)p);
         }
     }
 
-    if (arg0->unk38 != 0) {
-        s32 p1;
-        s32 p2;
-        s32 p3;
-        s32 prod;
+    if (p->life != 0) {
+        s32 posY;
+        s32 posX;
+        s32 posZ;
+        s32 delta;
 
-        arg0->unk30 += arg0->unk32;
+        p->velY += p->accelY;
 
-        p1 = arg0->unk22;
-        p1 = (p1 << 8) | arg0->unk2E;
-        prod = arg0->unk30 * D_800BE9E4;
-        p1 += prod;
-        arg0->unk22 = p1 >> 8;
-        p1 = (u8)p1;
-        arg0->unk2E = p1;
-        p2 = arg0->unk20;
-        p2 = (p2 << 8) | arg0->unk2C;
-        prod = arg0->unk26 * D_800BE9E4;
-        p2 += prod;
-        arg0->unk20 = p2 >> 8;
-        p2 = (u8)p2;
-        arg0->unk2C = p2;
-        p3 = arg0->unk24;
-        p3 = (p3 << 8) | arg0->unk2D;
-        prod = arg0->unk28 * D_800BE9E4;
-        p3 += prod;
-        arg0->unk24 = p3 >> 8;
-        p3 = (u8)p3;
-        arg0->unk2D = p3;
-        if (arg0->unk1E != 0) {
-            limit = (arg0->unk10->unk4 << 8) - 1;
-            arg0->unk1C += arg0->unk1E * D_800BE9E4;
-            if (limit < arg0->unk1C) {
-                if (arg0->unk44 & 0x20) {
-                    arg0->unk38 = 0;
+        // matching: 24.8 fixed point moves written step by step (incl. the redundant (u8)) for IDO's temp registers
+        posY = p->y;
+        posY = (posY << 8) | p->subY;
+        delta = p->velY * D_800BE9E4;
+        posY += delta;
+        p->y = posY >> 8;
+        posY = (u8)posY;
+        p->subY = posY;
+        posX = p->x;
+        posX = (posX << 8) | p->subX;
+        delta = p->velX * D_800BE9E4;
+        posX += delta;
+        p->x = posX >> 8;
+        posX = (u8)posX;
+        p->subX = posX;
+        posZ = p->z;
+        posZ = (posZ << 8) | p->subZ;
+        delta = p->velZ * D_800BE9E4;
+        posZ += delta;
+        p->z = posZ >> 8;
+        posZ = (u8)posZ;
+        p->subZ = posZ;
+        if (p->frameStep != 0) {
+            limit = (p->anim->frameCount << 8) - 1;
+            p->frame += p->frameStep * D_800BE9E4;
+            if (limit < p->frame) {
+                if (p->flags & PARTICLE_DIE_AT_END) {
+                    p->life = 0;
                     finished = 1;
                 } else {
-                    arg0->unk44 |= 0x80;
-                    if (arg0->unk44 & 2) {
-                        arg0->unk1C = limit - (arg0->unk1C % limit);
-                        arg0->unk1E = -arg0->unk1E;
+                    p->flags |= PARTICLE_LOOPED;
+                    if (p->flags & PARTICLE_PINGPONG) {
+                        p->frame = limit - (p->frame % limit);
+                        p->frameStep = -p->frameStep;
                     } else {
                         do {
-                            arg0->unk1C -= limit;
-                        } while (limit < arg0->unk1C);
+                            p->frame -= limit;
+                        } while (limit < p->frame);
                     }
                 }
-            } else if (arg0->unk1C < 0) {
-                if (arg0->unk44 & 0x40) {
-                    arg0->unk38 = 0;
+            } else if (p->frame < 0) {
+                if (p->flags & PARTICLE_DIE_AT_START) {
+                    p->life = 0;
                     finished = 1;
-                } else if (arg0->unk44 & 2) {
-                    arg0->unk1C = -arg0->unk1C % limit;
-                    arg0->unk1E = -arg0->unk1E;
+                } else if (p->flags & PARTICLE_PINGPONG) {
+                    p->frame = -p->frame % limit;
+                    p->frameStep = -p->frameStep;
                 } else {
                     do {
-                        arg0->unk1C += limit;
-                    } while (arg0->unk1C < 0);
+                        p->frame += limit;
+                    } while (p->frame < 0);
                 }
             }
         }
@@ -797,10 +698,10 @@ void func_15167E0C(GameSpriteObject *arg0) {
     }
 
     if (finished != 0) {
-        if (arg0->unk48 != -1) {
-            D_8008CA20[arg0->unk48]((struct102 *)arg0);
+        if (p->onDeath != -1) {
+            D_8008CA20[p->onDeath]((struct102 *)p);
         }
-        func_1516972C((struct102 *)arg0);
+        func_1516972C((struct102 *)p);
     }
 }
 typedef struct {
@@ -1056,7 +957,7 @@ void func_1516865C(Struct1516865C *arg0, u8 r, u8 g, u8 b, u8 a) {
 s32 func_15168800(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp;
 
-    temp = func_15167A68(0xE, arg2, 0xB8, 1, *((u8 *)&arg1 + 3), 1);
+    temp = (s32)func_15167A68(0xE, arg2, 0xB8, 1, *((u8 *)&arg1 + 3), 1);
     if (temp == 0) {
         return 0;
     }
@@ -1072,7 +973,7 @@ void func_15168870(GameAnimObject *arg0) {
 
     temp_a2 = arg0->field_0x9A;
     if (temp_a2 != 0) {
-        temp_a1 = D_8008CA4C[arg0->field_0xB0]->unk4;
+        temp_a1 = D_8008CA4C[arg0->field_0xB0]->frameCount;
         temp_v1 = temp_a1;
         temp_v1 <<= 8;
         arg0->field_0x98 += temp_a2 * D_800BE9E4;
@@ -1263,13 +1164,12 @@ void func_15168BAC(struct102 *arg0) {
         D_8008CA20[temp_v0](arg0);
     }
 }
-s32 func_15167A68(s32, s32, s32, s32, s32, s32);
 
 void func_15168BE4(s32 *arg0, s32 arg1, s32 arg2) {
     s32 temp;
 
     if (arg0[0x10] != 0) {
-        temp = func_15167A68(0x10, arg2, 0xF0, 1, (u8)arg1, 1);
+        temp = (s32)func_15167A68(0x10, arg2, 0xF0, 1, (u8)arg1, 1);
         if (temp != 0) {
             bcopy(arg0, (void *)(temp + 0x90), 0x60);
         }
