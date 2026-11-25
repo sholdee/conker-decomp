@@ -2076,7 +2076,8 @@ segments:
       - [0x259070, rodata]
       - [0x259370, rodata]
       - [0x2593B0, rodata]
-      - [0x25A0F0, rodata]
+      - [0x25A080, .rodata, debugger_257350]
+      - [0x25A1E0, rodata]
 
       # BSS ?
 
