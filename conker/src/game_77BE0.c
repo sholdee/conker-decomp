@@ -653,7 +653,7 @@ void func_1504BB88(struct127 *obj) {
 }
 
 void func_1504BC38(struct127 *obj) {
-    if ((obj->disable_run != 0) && (obj->disable_run < 0xFA)) {
+    if (obj->disable_run != 0 && obj->disable_run < 250) {
         if (obj->disable_run <= D_800BE9A0) {
             obj->disable_run = 0;
         } else {
@@ -725,14 +725,14 @@ void func_1504BC38(struct127 *obj) {
 }
 
 void func_1507EB2C(void *arg0);
-extern u16 D_800CC2B2;
+extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 
 void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
-    angle = obj->unk31C->unkB * 0.024543693f /* pi / 128 */;
+    angle = obj->unk31C->unkB * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
     D_800CC2B4 = 16.0f;
     if (obj->unk31C->unk16 != 0 && obj->unk31C->unk16 == 0) { // never true, but compiled in
         func_1507EB2C(obj);
@@ -768,7 +768,7 @@ void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
         }
         D_800CC2B2 = obj->unk31C->unk14;
         if (obj->unk31C->unk16 != 0) {
-            D_800CC2B2 = (s16)D_800CC2B2 / 3;
+            D_800CC2B2 /= 3;
         }
     }
     if (D_800C35EA == 0 && obj->unk31C->unk16 == 0) {
@@ -816,12 +816,12 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     GameObjExt *ext;
     f32 diff;
 
-    if ((s16)D_800CC2B2 == 0 && (ext = obj->unk31C)->unk12 >= -29 && ext->unk12 < 30) {
+    if (D_800CC2B2 == 0 && (ext = obj->unk31C)->unk12 >= -29 && ext->unk12 < 30) {
         ext->unk12 = 0;
     } else {
         ext = obj->unk31C;
         // matching: computed in two statements to keep the target's float register order
-        diff = (s16)D_800CC2B2 - ext->unk12;
+        diff = D_800CC2B2 - ext->unk12;
         diff = (D_800D1550[0] / D_800CC2B4) * diff;
         ext->unk12 += (s16)diff;
     }
