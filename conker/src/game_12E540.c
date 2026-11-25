@@ -1,16 +1,266 @@
 #include <ultra64.h>
-#define func_10010F30 func_10010F30_void
-#define func_1513D4B8 func_1513D4B8_void
 #include "functions.h"
-#undef func_10010F30
-#undef func_1513D4B8
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
 #include "variables.h"
 
 extern void func_151D5D60();
-extern s32 func_15144E80(struct17 *, struct17 *, struct17 *, struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+void func_1513173C(struct210 *);
+void func_1513175C(struct210 *);
+void func_151617C4(struct210 *arg0);
+void func_151617E4(struct210 *arg0);
+
+typedef struct Beam Beam;
+
+/* Collision record filled in by func_150AC9C0 (0x12 bytes, halfword aligned). */
+typedef struct {
+    s16 unk0[9];
+} HitInfo;
+
+/* Aim state of the beam's owner (owner->aim). */
+typedef struct {
+    u8 pad0[0xB4];
+    f32 targetDist;
+    struct17 targetPos;
+    u8 padC4[0x24];
+    struct17 targetDir;
+    HitInfo targetHit;
+    u8 pad106[3];
+    u8 targetType; // 0 = no target
+    u8 pad10A[0x8D];
+    u8 unk197;
+} BeamOwnerAim;
+
+/* The actor the beam is attached to. */
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x38];
+    u8 unk74;
+    u8 pad75[0x15F];
+    f32 (*boneMtx)[4][4];
+    u8 pad1D8[0x144];
+    BeamOwnerAim *aim;
+} BeamOwner;
+
+/* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
+typedef struct {
+    u8 pad0[0x38];
+    f32 sizeX;
+    f32 sizeY;
+    struct17 pos;
+    u8 pad4C[0x5C];
+    f32 baseSizeX;
+    f32 baseSizeY;
+    u8 padB0[0x20];
+    Beam *beam;
+    u8 flags; // 1 = visible
+} BeamStartFx;
+
+/* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
+typedef struct {
+    u8 pad0[0x34];
+    struct17 pos;
+    u8 pad40[0xD0];
+    u8 flags; // 1 = visible
+    u8 pad111;
+    HitInfo hit;
+    Beam *beam;
+} BeamHitFx;
+
+typedef struct {
+    u8 pad0[0x9];
+    u8 disabled;
+    u8 padA[4];
+    s16 pos[3];
+} BeamEndPointData;
+
+/* beam->data.endPoint: tracks the beam's end in s16 coordinates. */
+typedef struct {
+    u8 pad0[0x14];
+    BeamEndPointData *data;
+    Beam *beam;
+} BeamEndPoint;
+
+/* beam->data.line: spans the beam from start to end. */
+typedef struct {
+    u8 pad0[0x34];
+    struct17 start;
+    struct17 end;
+    u8 pad4C[0xC];
+    s32 unk58;
+    u8 pad5C[0x114];
+    Beam *beam;
+    u8 flags; // 1 = visible
+} BeamLine;
+
+/* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
+typedef struct {
+    u8 pad0[0x40];
+    struct17 pos;
+    u8 pad4C[0x5C];
+    Beam *beam;
+    u8 pad[4];
+    u8 flags; // 1 = visible
+} BeamEndFx;
+
+typedef struct {
+    BeamOwner *owner;
+    u8 unk4; // must match owner->unk3B
+    u8 pad5[3];
+    struct17 localStart;  // in bone space
+    struct17 localTarget; // in bone space
+    u8 bone;
+    u8 pad21;
+    u8 unk22;
+    u8 flags; // 1 = drawn, 2 = aimed by the owner
+    BeamStartFx *startFx;
+    BeamHitFx *hitFx;
+    BeamEndPoint *endPoint;
+    BeamLine *line;
+    BeamEndFx *endFx;
+    f32 width;
+    u8 pad3C[8];
+    f32 length;
+    f32 scrollBase;  // texture scroll speed = scrollBase + scrollRange * sin(scrollPhase)
+    f32 scrollRange;
+    f32 scrollPhase;
+    u8 pad54[4];
+    f32 texOffset;
+    u8 pad5C[0x34];
+    s16 unk90;
+} BeamData;
+
+struct Beam {
+    u8 pad0[0x34];
+    struct17 start;
+    struct17 end;
+    u8 pad4C[0x74];
+    Vtx vtxTemplate[4];
+    Vtx *vtxBuf[4];
+    BeamData data;
+};
+
+/* Releases the beam's child objects, then destroys it. */
+void func_15101090(Beam *beam) {
+    BeamData *data = &beam->data;
+
+    // matching: tested as u16 but passed as s16, so IDO reuses the lhu without an andi
+    if (*(u16 *)&beam->data.unk90) {
+        func_100111C8(beam->data.unk90);
+    }
+    if (data->hitFx != NULL) {
+        func_1516972C((struct102 *)data->hitFx);
+    }
+    if (data->endPoint != NULL) {
+        func_1516972C((struct102 *)data->endPoint);
+    }
+    if (data->startFx != NULL) {
+        func_1516972C((struct102 *)data->startFx);
+    }
+    if (data->line != NULL) {
+        func_1516972C((struct102 *)data->line);
+    }
+    if (data->endFx != NULL) {
+        func_1516972C((struct102 *)data->endFx);
+    }
+    func_1513CA6C((struct210 *)beam);
+}
+
+/* Counterpart of func_15101090 for the beam's child objects and func_1513CAA0. */
+void func_15101148(Beam *beam) {
+    BeamData *data = &beam->data;
+
+    if (data->hitFx != NULL) {
+        func_1516979C((struct102 *)data->hitFx);
+    }
+    if (data->endPoint != NULL) {
+        func_1516979C((struct102 *)data->endPoint);
+    }
+    if (data->startFx != NULL) {
+        func_1516979C((struct102 *)data->startFx);
+    }
+    if (data->line != NULL) {
+        func_1516979C((struct102 *)data->line);
+    }
+    if (data->endFx != NULL) {
+        func_1516979C((struct102 *)data->endFx);
+    }
+    func_1513CAA0((struct210 *)beam);
+}
+
+/* The functions below detach a child object from its beam before handing it on. */
+
+void func_151011E8(BeamHitFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->hitFx = NULL;
+    func_1513CA6C((struct210 *)fx);
+}
+
+void func_15101210(BeamHitFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->hitFx = NULL;
+    func_1513CAA0((struct210 *)fx);
+}
+
+void func_15101238(BeamEndPoint *endPoint) {
+    BeamData *data = &endPoint->beam->data;
+
+    data->endPoint = NULL;
+    func_151617C4((struct210 *)endPoint);
+}
+
+void func_15101260(BeamEndPoint *endPoint) {
+    BeamData *data = &endPoint->beam->data;
+
+    data->endPoint = NULL;
+    func_151617E4((struct210 *)endPoint);
+}
+
+void func_15101288(BeamStartFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->startFx = NULL;
+    func_1513173C((struct210 *)fx);
+}
+
+void func_151012B0(BeamStartFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->startFx = NULL;
+    func_1513175C((struct210 *)fx);
+}
+
+void func_151012D8(BeamLine *line) {
+    BeamData *data = &line->beam->data;
+
+    data->line = NULL;
+    func_151411A4((struct210 *)line);
+}
+
+void func_15101300(BeamLine *line) {
+    BeamData *data = &line->beam->data;
+
+    data->line = NULL;
+    func_151411C4((struct210 *)line);
+}
+
+void func_15101328(BeamEndFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->endFx = NULL;
+    func_1513173C((struct210 *)fx);
+}
+
+void func_15101350(BeamEndFx *fx) {
+    BeamData *data = &fx->beam->data;
+
+    data->endFx = NULL;
+    func_1513175C((struct210 *)fx);
+}
+
+extern void func_151D5D60();
 
 typedef struct {
     char pad_0[0x197];
@@ -21,332 +271,6 @@ typedef struct {
     char pad_0[0x31C];
     ObjectState197 *field_0x31C;
 } ObjectWithState197;
-
-typedef struct {
-    ObjectWithState197 *field_0x0;
-    char pad_0[0x1E];
-    u8 field_0x22;
-    char pad_1[0x1];
-    s32 field_0x24;
-    s32 field_0x28;
-    s32 field_0x2C;
-    s32 field_0x30;
-    s32 field_0x34;
-} Field124ChildBlock;
-
-typedef struct {
-    char pad_0[0x18];
-    s32 field_0x18;
-    char pad_1[0x8C];
-    s32 field_0xA8;
-    char pad_2[0x24];
-    s32 field_0xD0;
-    u8 field_0xD4;
-    char pad_3[0x4F];
-    s32 field_0x124;
-    char pad_4[0x48];
-    s32 field_0x170;
-    u8 field_0x174;
-} Field124Owner;
-
-typedef struct {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[4];
-    u8 unk110;
-    u8 unk111;
-    u8 unk112[0xC];
-} Struct15101F50;
-
-
-typedef struct {
-    u8 *obj;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    struct17 unk14;
-    u8 unk20;
-    s8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 pad24[0x14];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    s16 unk90;
-    u8 pad92[2];
-} Data15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44, unk45, unk46, unk47;
-    u8 pad48[0x10];
-} Spawn15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x13];
-    void *unk14;
-} Data2_15100600;
-
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5[3];
-} Hdr15100600;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Hdr2_15100600;
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14, unk15, unk16, unk17;
-    u8 unk18, unk19, unk1A, unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect15100600;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    void *unk28;
-    u8 unk2C;
-    u8 pad2D[3];
-} Data3_15100600;
-
-typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    u8 pad59[3];
-} Emit15100600;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-} Data4_15100600;
-
-extern void *func_15130374(void *, u8, s32, u8, s32);
-extern void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-extern void *func_151602C0(void *, void *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
-s32 func_15100600(u8 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
-
-typedef struct {
-    u8 pad0[0x24];
-    struct102 *unk24;
-    struct102 *unk28;
-    struct102 *unk2C;
-    struct102 *unk30;
-    struct102 *unk34;
-} Block15101148;
-
-void func_15101090(u8 *arg0) {
-    Block15101148 *temp = (Block15101148 *)(arg0 + 0x110);
-
-    if (*(u16 *)(arg0 + 0x1A0)) {
-        func_100111C8(*(s16 *)(arg0 + 0x1A0));
-    }
-    if (temp->unk28 != NULL) {
-        func_1516972C(temp->unk28);
-    }
-    if (temp->unk2C != NULL) {
-        func_1516972C(temp->unk2C);
-    }
-    if (temp->unk24 != NULL) {
-        func_1516972C(temp->unk24);
-    }
-    if (temp->unk30 != NULL) {
-        func_1516972C(temp->unk30);
-    }
-    if (temp->unk34 != NULL) {
-        func_1516972C(temp->unk34);
-    }
-    func_1513CA6C((struct210 *)arg0);
-}
-
-
-
-void func_15101148(u8 *arg0) {
-    Block15101148 *temp = (Block15101148 *)(arg0 + 0x110);
-
-    if (temp->unk28 != NULL) {
-        func_1516979C(temp->unk28);
-    }
-    if (temp->unk2C != NULL) {
-        func_1516979C(temp->unk2C);
-    }
-    if (temp->unk24 != NULL) {
-        func_1516979C(temp->unk24);
-    }
-    if (temp->unk30 != NULL) {
-        func_1516979C(temp->unk30);
-    }
-    if (temp->unk34 != NULL) {
-        func_1516979C(temp->unk34);
-    }
-    func_1513CAA0((struct210 *)arg0);
-}
-
-void func_151011E8(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x124 + 0x110);
-    temp->field_0x28 = 0;
-    func_1513CA6C((struct210 *)arg0);
-}
-
-void func_15101210(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x124 + 0x110);
-    temp->field_0x28 = 0;
-    func_1513CAA0((struct210 *)arg0);
-}
-
-void func_151617C4(struct210 *arg0);
-
-void func_15101238(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x18 + 0x110);
-
-    temp->field_0x2C = 0;
-    func_151617C4((struct210 *)arg0);
-}
-
-void func_151617E4(struct210 *arg0);
-
-void func_15101260(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x18 + 0x110);
-
-    temp->field_0x2C = 0;
-    func_151617E4((struct210 *)arg0);
-}
-
-void func_1513173C(struct210 *);
-
-void func_15101288(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0xD0 + 0x110);
-    temp->field_0x24 = 0;
-    func_1513173C((struct210 *)arg0);
-}
-
-void func_1513175C(struct210 *);
-
-void func_151012B0(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0xD0 + 0x110);
-    temp->field_0x24 = 0;
-    func_1513175C((struct210 *)arg0);
-}
-
-void func_151012D8(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x170 + 0x110);
-    temp->field_0x30 = 0;
-    func_151411A4((struct210 *)arg0);
-}
-
-void func_15101300(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0x170 + 0x110);
-    temp->field_0x30 = 0;
-    func_151411C4((struct210 *)arg0);
-}
-
-void func_15101328(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0xA8 + 0x110);
-    temp->field_0x34 = 0;
-    func_1513173C((struct210 *)arg0);
-}
-
-void func_15101350(Field124Owner *arg0) {
-    Field124ChildBlock *temp = (Field124ChildBlock *)(arg0->field_0xA8 + 0x110);
-    temp->field_0x34 = 0;
-    func_1513175C((struct210 *)arg0);
-}
-
 typedef struct { f32 x, y, z; } F3_15101378;
 #pragma pack(1)
 typedef struct { s32 a, b, c, d; } Pq_15101378;
@@ -760,66 +684,3 @@ void *func_151019C4(Obj151019C4 *arg0, s16 arg1) {
 end:
     return 0;
 }
-s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1);
-
-extern f32 D_800BE9A4;
-
-typedef struct {
-    u8 pad0[0x14];
-    u8 *unk14;
-} Sub151022AC_2C;
-
-typedef struct {
-    u8 pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x28];
-    u8 unk5C;
-} Sub151022AC_28;
-
-typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-} Sub151022AC_34;
-
-typedef struct {
-    u8 pad0[0x24];
-    u8 *unk24;
-    Sub151022AC_28 *unk28;
-    Sub151022AC_2C *unk2C;
-    u8 pad30[4];
-    Sub151022AC_34 *unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[0xC];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-} Block151022AC;
-s32 func_151022AC(u8 *arg0);
-s32 func_151025F4(u8 *arg0, s32 arg1);
-
-extern f32 D_800A21A0[][3];
-extern f32 D_800A21F4[][3];
-extern u8 D_800A2248[];
-s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
-s32 func_151026BC(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-void func_151027E8(struct210 *arg0);
-s32 func_1510281C(Field124Owner *arg0, s16 arg1);
-s32 func_15102884(struct210 *arg0, s32 arg1);
-s32 func_151028AC(Field124Owner *arg0, s16 arg1);
