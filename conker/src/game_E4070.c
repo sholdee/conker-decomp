@@ -316,9 +316,9 @@ void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     desc.alpha = 0xFF;
     desc.unk36 = 7;
     desc.unk37 = 0x11;
-    if (x < (D_800BE638 >> 1)) {
+    if (x < (D_800BE638[0] >> 1)) {
         do { // matching: the loop's -g3 markers steer IDO's register choice for r
-            r = D_800BE638 - x;
+            r = D_800BE638[0] - x;
         } while (0);
     } else {
         r = x;

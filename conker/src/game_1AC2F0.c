@@ -9,7 +9,6 @@
 #define D_800DDE20 D_800DDE20_hdr
 #define D_800DDE28 D_800DDE28_hdr
 #define D_800DDE3C D_800DDE3C_hdr
-#define D_800D9D10 D_800D9D10_hdr
 #define D_800CC2D0 D_800CC2D0_hdr
 #include "variables.h"
 #undef D_800DDDAC
@@ -21,7 +20,6 @@
 #undef D_800DDE20
 #undef D_800DDE28
 #undef D_800DDE3C
-#undef D_800D9D10
 #undef D_800CC2D0
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -36,7 +34,6 @@ typedef struct {
     u8 b;
 } FadeColor;
 
-extern MtxF D_800D9D10[]; // per-view projection matrices
 
 
 /* Colour fade (func_1517EE40) */

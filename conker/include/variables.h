@@ -836,12 +836,10 @@ extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;
 extern RenderView *D_800BE628; // one per player view
-extern s32  D_800BE62C;
+extern Vp  *D_800BE62C; // one viewport per view
 extern u8   D_800BE635;
-extern s32  D_800BE638;
-extern s32  D_800BE63C[];
-extern s32  D_800BE650[];
-extern s32  D_800BE654[];
+extern s32  D_800BE638[6]; // per-layout view widths
+extern s32  D_800BE650[6]; // per-layout view heights
 extern f32  D_800BE6B8;
 extern struct156 D_800BE760[];
 extern OSMesgQueue D_800BE900;
@@ -1174,7 +1172,7 @@ extern u8  D_800D9E20;
 // extern u8 D_800A2CE8[][3];
 // extern u8 D_800A2CEC[][3];
 
-extern s32 D_800D9D10[];
+extern MtxF D_800D9D10[]; // per view: view matrix * projection
 extern u8  D_800D9E64;
 extern s32 D_800D9F58;
 extern s32 D_800D9F5C;

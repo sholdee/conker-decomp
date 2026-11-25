@@ -29,9 +29,6 @@ void func_15015F40(s16 count, s32 map) {
     }
 }
 
-/* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
-#define VIEW_WIDTHS (&D_800BE638)
-
 /* Centre (x, y) of each of up to 5 views, for screen layouts 0-3 (1 to 4 views). */
 extern s16 D_800BE668[4][5][2];
 
@@ -41,11 +38,11 @@ void func_15015FBC(s32 width, s32 height) {
     s32 halfW, halfH, quarterH, quarterW;
 
     for (i = 0; i < 5; i++) {
-        VIEW_WIDTHS[i] = width;
+        D_800BE638[i] = width;
         D_800BE650[i] = height;
         if (i < 4) {
             if (i >= 2) {
-                VIEW_WIDTHS[i] >>= 1;
+                D_800BE638[i] >>= 1;
             }
             if (i >= 1) {
                 D_800BE650[i] >>= 1;

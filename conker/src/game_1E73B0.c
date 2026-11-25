@@ -182,7 +182,7 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     modelMtx[2][3] = 0.0f;
     modelMtx[3][3] = 1.0f;
     guMtxF2L(modelMtx, &effect->mtx[D_800BE9C0]);
-    memcpy(viewMtx, &((MtxF *)D_800D9D10)[viewport], sizeof(viewMtx));
+    memcpy(viewMtx, &D_800D9D10[viewport], sizeof(viewMtx));
     viewMtx[0][3] = 0.0f;
     viewMtx[1][3] = 0.0f;
     viewMtx[2][3] = 0.0f;
