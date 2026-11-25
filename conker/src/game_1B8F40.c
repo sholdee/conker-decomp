@@ -46,7 +46,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ ObjLink link;
     /* 0x10 */ TrailEmitterParams params;
-    /* 0x2C */ s32 timers[2]; /* frames until the next trail from each point */
+    /* 0x2C */ s32 timers[2]; /* time until the next trail from each point */
     /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
     /* 0x3C */ f32 prevZ[2];
 } TrailEmitter; /* size 0x44 */
@@ -109,7 +109,7 @@ TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
     return func_1518BCD0(&params, owner, list);
 }
 
-/* Detaches every trail emitter onto `actor` and destroys it. */
+/* Destroys every trail emitter (after pointing each at `actor`). */
 void func_1518BBF4(struct127 *actor) {
     s32 i;
     TrailEmitter *emitter;
@@ -117,14 +117,14 @@ void func_1518BBF4(struct127 *actor) {
     if (actor != NULL) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
-            emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER];
-            while (emitter != NULL) {
+            for (emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
+                 emitter = (TrailEmitter *)OBJ_ITER_NEXT[D_800DD190]) {
                 OBJ_ITER_NEXT[D_800DD190] = emitter->link.next;
                 emitter->params.owner = actor;
+                // the owner test always passes: every emitter is destroyed
                 if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
                     func_1516972C((struct102 *)emitter);
                 }
-                emitter = (TrailEmitter *)OBJ_ITER_NEXT[D_800DD190];
             }
             {
                 // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
@@ -440,7 +440,7 @@ s32 func_1518C540(Trail *trail) {
         alpha = 0xFF;
     }
     params->motion.unk1B = alpha;
-    if ((alpha & 0xFF) < 0) {
+    if ((alpha & 0xFF) < 0) { /* never true */
         return 0;
     }
     return 1;
