@@ -135,9 +135,6 @@ void func_150031EC(s32 level) {
 
 #define NUM_TEXTURES 7762
 
-/* Per-texture u16 tables (variables.h declares them as s32 arrays). */
-#define sTexCompressedSizes ((u16 *)D_80091D20)
-#define sTexSizes ((u16 *)D_800B87A0)
 
 /* Marks every texture unloaded and resets the requested texture id range. */
 s32 func_150034B4(void) {
@@ -177,13 +174,13 @@ void func_15003570(void) {
             romAddr--;
             odd = 1;
         } else {
-            odd = sTexCompressedSizes[i] * 0; // matching: a use here ranks the size-table IV above the store IV
+            odd = D_80091D20[i] * 0; // matching: a use here ranks the size-table IV above the store IV
         }
         func_10004514(romAddr, buf, 16, 1);
         header = odd + buf; // matching: operand order fixes the addu operand order
         size = (header[0] << 24) + (header[1] << 16) + (header[2] << 8) + header[3];
-        sTexSizes[i] = size;
-        romAddr += sTexCompressedSizes[i] + odd;
+        D_800B87A0[i] = size;
+        romAddr += D_80091D20[i] + odd;
     }
 
     func_10004074(buf);

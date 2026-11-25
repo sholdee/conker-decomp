@@ -220,7 +220,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
     if (index >= 0x1E52 || index < 0) {
         return 0x80000000;
     }
-    packedSize = ((u16 *)D_80091D20)[index];
+    packedSize = D_80091D20[index];
     if (packedSize == 0) {
         D_800B0E58[index] = 0x80000000;
     } else if (D_800B0E58[index] == -1) {
@@ -245,7 +245,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
             return 0x80000000;
         }
         func_10004514(romAddr, (void *)packed, (len + odd + 0xF) & ~0xF, 1);
-        len = ((u16 *)D_800B87A0)[index];
+        len = D_800B87A0[index];
         texture = func_10003C6C(len, 1, 1, 0, 2);
         if (texture == 0) {
             func_10004074((s16 *)packed);
@@ -257,7 +257,7 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         D_800D9F68[index] = 0;
     }
     if (sizeOut != NULL) {
-        len = ((u16 *)D_800B87A0)[index];
+        len = D_800B87A0[index];
         *sizeOut = len;
     }
     len = D_800B0E58[index];
@@ -281,7 +281,7 @@ s32 func_1510D374(s32 index) {
 
     romAddr = (s32)D_1A37E0;
     for (i = 0; i < index; i++) {
-        romAddr += ((u16 *)D_80091D20)[i];
+        romAddr += D_80091D20[i];
     }
 
     return romAddr;

@@ -336,7 +336,7 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 /* 80080000 */
 extern s32  D_80082B20;
 extern void (*D_80082B40[])(Camera *);
-extern u8   D_80082BB4;
+extern s8   D_80082BB4; // pending EEPROM request (game_33990)
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
 extern u8   D_80082BE4[5];
@@ -458,7 +458,7 @@ extern s32 jtbl_80091A30[];
 
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
-extern s32 D_80091D20[];
+extern u16 D_80091D20[]; // per texture: compressed size
 
 // chunk0 data starts at rom 0x80082B20
 // this chunk0 data
@@ -789,7 +789,7 @@ extern u8 *D_800B0E34; // group count of each vertex color set
 
 extern s32 D_800B0E58[7762];
 
-extern s32 D_800B87A0[];
+extern u16 D_800B87A0[]; // per texture: size
 
 extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
@@ -819,7 +819,7 @@ extern u8   D_800BE3DE;
 extern s8   D_800BE3DF;
 extern u8   D_800BE3E0;
 extern s32  D_800BE3E8;
-extern u8   D_800BE3EC;
+extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
 
 extern u8   D_800BE614;

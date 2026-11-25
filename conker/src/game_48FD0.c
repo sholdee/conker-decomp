@@ -266,10 +266,6 @@ void func_15007440(void);
 void func_15007558(void);
 void func_10004074(void *);
 
-/* Pending EEPROM request (enum EepromRequest in game_33990.c) and its save-slot argument;
-   variables.h declares both u8, but they are signed bytes. */
-#define EEPROM_REQUEST (*(s8 *)&D_80082BB4)
-#define EEPROM_REQUEST_SLOT (*(s8 *)&D_800BE3EC)
 
 /* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load
    requests fall back to defaults and the others are dropped. */
@@ -277,13 +273,13 @@ void func_1501C57C(void) {
     s32 i;
 
     func_151DCFD8(0);
-    if (EEPROM_REQUEST != 0) {
+    if (D_80082BB4 != 0) {
         if (D_80084068 != 2) {
             D_80084068 = func_151DD460(&D_800BE900);
         }
         if (D_80084068 != 2) {
             // matching: empty switch emits the original's 7-entry jump table
-            switch (EEPROM_REQUEST) {
+            switch (D_80082BB4) {
                 case 1:
                 case 2:
                 case 3:
@@ -300,24 +296,24 @@ void func_1501C57C(void) {
                 i--;
                 goto delay;
             }
-            if (EEPROM_REQUEST == 1) {
+            if (D_80082BB4 == 1) {
                 func_150064E0();
-            } else if (EEPROM_REQUEST == 4) {
+            } else if (D_80082BB4 == 4) {
                 func_15007168();
             }
             D_80082BB4 = 0;
         // matching: an unused label ends the block, so as1 keeps the store out of the branch delay slot
         end:;
         } else {
-            switch (EEPROM_REQUEST) {
+            switch (D_80082BB4) {
                 case 1:
-                    func_15006590(EEPROM_REQUEST_SLOT);
+                    func_15006590(D_800BE3EC);
                     break;
                 case 2:
-                    func_15006BEC(EEPROM_REQUEST_SLOT);
+                    func_15006BEC(D_800BE3EC);
                     break;
                 case 3:
-                    func_1500707C(EEPROM_REQUEST_SLOT);
+                    func_1500707C(D_800BE3EC);
                     break;
                 case 4:
                     func_1500727C();
