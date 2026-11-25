@@ -800,41 +800,8 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
 }
 
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    f32 unk48;
-    s16 unk4C;
-    s16 unk4E;
-    s16 unk50;
-    s16 unk52;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    s8 unk59;
-    u8 pad5A[2];
-} SightExtensionParams;
 
-
-void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
+void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
 typedef struct SightExtension {
@@ -845,25 +812,25 @@ typedef struct SightExtension {
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
 SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;
-    SightExtensionParams params;
+    GlowShape params;
     ParticleDef desc;
     SightBeamObject *ownerCopy; // matching: copied to the stack before the memcpy below
 
     desc.pos = *start;
     desc.rot = *end;
     ownerCopy = owner;
-    params.unk00 = params.unk04 = 30.10000038f;
-    params.unk08 = params.unk0C = 40.0f;
-    params.unk18 = 1.0f;
-    params.unk10 = 0.0f;
-    params.unk14 = 0.0f;
+    params.width1 = params.height1 = 30.10000038f;
+    params.width0 = params.height0 = 40.0f;
+    params.alpha1 = 1.0f;
+    params.offset1 = 0.0f;
+    params.offset0 = 0.0f;
     desc.texture = 0x15;
     desc.renderModes = 0x3403;
     desc.lifetime = 300;
     desc.frame = 0;
     desc.frameSpeed = 0;
     desc.rgba[0] = red;
-    params.unk1C = 0.3000000119f;
+    params.alpha0 = 0.3000000119f;
     desc.rgba[1] = green;
     desc.rgba[2] = blue;
     desc.rgba[3] = 0xFF;
@@ -878,14 +845,14 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
     desc.unk46 = 0;
     desc.unk47 = 6;
     desc.type = 3;
-    params.unk54 = 0;
-    params.unk55 = 0;
-    params.unk56 = 0;
-    params.unk57 = 0;
-    params.unk48 = 1.0f;
-    params.unk58 = 0;
+    params.visibility[0] = 0;
+    params.visibility[1] = 0;
+    params.visibility[2] = 0;
+    params.visibility[3] = 0;
+    params.scale = 1.0f;
+    params.type = 0;
     desc.unk48 = zone;
-    params.unk20 = 9.999999975e-07f;
+    params.fadeRate = 9.999999975e-07f;
     effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
     if (effect != NULL) {
         memcpy(&effect->owner, &ownerCopy, sizeof(ownerCopy));

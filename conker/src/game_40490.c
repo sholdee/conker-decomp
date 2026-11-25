@@ -142,27 +142,6 @@ start:
     }
 }
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8 pad24[0x24];
-    f32 unk48;
-    u8 pad4C[0x8];
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    u8 pad59[3];
-} StructAC_150130B4;
-
 
 typedef struct {
     f32 unk0;
@@ -176,12 +155,12 @@ typedef struct {
 extern s32 D_8009658C[];
 extern s32 D_800965A0[];
 extern s32 D_800965B0[];
-void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
+void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);
 
 /** Spawns the particle emitter a level object describes; unk1C selects the kind of emitter. */
 s32 func_150130B4(TriggerZone *obj) {
-    StructAC_150130B4 emit;
+    GlowShape emit;
     ParticleDef spawn;
     s32 kind;
     s32 index;
@@ -205,13 +184,13 @@ start:
     {
         typedef s32 PadT;
 
-        emit.unk04 = obj->radius;
-        emit.unk00 = emit.unk04;
-        emit.unk0C = obj->height;
-        emit.unk08 = emit.unk0C;
-        emit.unk18 = ((obj->unk20 >> 8) & 0xFF) * 0.003921568859f;
+        emit.height1 = obj->radius;
+        emit.width1 = emit.height1;
+        emit.height0 = obj->height;
+        emit.width0 = emit.height0;
+        emit.alpha1 = ((obj->unk20 >> 8) & 0xFF) * 0.003921568859f;
     }
-    emit.unk1C = (obj->unk20 & 0xFF) * 0.003921568859f;
+    emit.alpha0 = (obj->unk20 & 0xFF) * 0.003921568859f;
     index = (obj->unk18 >> 24) & 0xFF;
     spawn.texture = D_8009658C[index];
     spawn.renderModes = D_800965A0[index] + 3;
@@ -232,14 +211,14 @@ start:
     spawn.unk46 = 0;
     spawn.unk47 = 6;
     spawn.type = 3;
-    emit.unk54 = 0;
-    emit.unk55 = 0;
-    emit.unk56 = 0;
-    emit.unk57 = 0;
-    emit.unk48 = 1.0f;
-    emit.unk10 = 0.4099999964f;
-    emit.unk14 = 0.200000003f;
-    emit.unk20 = 9.999999975e-07f;
+    emit.visibility[0] = 0;
+    emit.visibility[1] = 0;
+    emit.visibility[2] = 0;
+    emit.visibility[3] = 0;
+    emit.scale = 1.0f;
+    emit.offset1 = 0.4099999964f;
+    emit.offset0 = 0.200000003f;
+    emit.fadeRate = 9.999999975e-07f;
     if (onGround) {
 ground:
         func_1510F800(0);
@@ -248,7 +227,7 @@ ground:
         spawn.unk48 = 0;
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
     }
-    emit.unk58 = 0;
+    emit.type = 0;
     spawn.flags = 0x2006 | (((obj->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
     switch (kind) {
     case 8: {
@@ -271,7 +250,7 @@ ground:
     case 4: {
         void *unused; // matching: the dead store of the result steers as1's scheduling
 
-        emit.unk58 = D_800965B0[kind];
+        emit.type = D_800965B0[kind];
         unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
@@ -281,7 +260,7 @@ ground:
     case 12: {
         void *unused; // matching: as above
 
-        emit.unk58 = D_800965A0[kind];
+        emit.type = D_800965A0[kind];
         unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
@@ -290,7 +269,7 @@ ground:
     case 7: {
         s32 ids[3] = { 12, 13, 14 };
 
-        emit.unk58 = ids[kind - 5];
+        emit.type = ids[kind - 5];
         func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
@@ -313,7 +292,7 @@ ground:
         extra.unkC = extra.unk8->x;
         extra.unk10 = extra.unk8->y;
         extra.unk14 = extra.unk8->z;
-        emit.unk58 = 0;
+        emit.type = 0;
         particle = func_151407D0(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
         if (particle != NULL) {
             memcpy((u8 *)particle + 0x170, &extra, sizeof(extra));
@@ -321,7 +300,7 @@ ground:
         break;
     }
     case 19:
-        emit.unk58 = 0x11;
+        emit.type = 0x11;
         spawn.flags &= ~2;
         func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
