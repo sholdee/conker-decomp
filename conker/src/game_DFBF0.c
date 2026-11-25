@@ -3,17 +3,10 @@
 #include "variables.h"
 #include "effects.h"
 
-/* One of the three exploding pipes: where it is and which way it faces. */
-typedef struct PipeSpot {
-    Vec3f pos;
-    u8 yaw;
-} PipeSpot;
-
 typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-extern PipeSpot D_8009F920[3];
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
 extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);

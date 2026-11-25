@@ -725,6 +725,7 @@ extern u8 D_8009DEBC[];
 extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
+extern PipeSpot D_8009F920[3]; // the three exploding pipes
 extern f32 D_800A028C;
 extern f32 D_800A0288;
 extern f32 D_800A0290;
@@ -1478,6 +1479,7 @@ extern CamMsgQueue *D_800DC2B0; // one per camera
 extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)
 extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
+extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
 extern f32 *D_800DCC10[][4];
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail

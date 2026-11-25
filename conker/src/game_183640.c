@@ -372,7 +372,6 @@ typedef struct {
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 
-extern f32 D_800DCA30[3][10][4];
 void func_15156D24(f32 *pos, u8 owner);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
@@ -389,15 +388,15 @@ void func_15156B54(RandomBurstEffect *effect) {
     if (effect->timer.value < 0) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
-        if (D_800DCA30[row][col][0] != 0.0f && D_800DCA30[row][col][1] != 0.0f && D_800DCA30[row][col][2] != 0.0f) {
-            func_15156D24(D_800DCA30[row][col], effect->header.owner);
+        if (D_800DCA30[row][col].pos.x != 0.0f && D_800DCA30[row][col].pos.y != 0.0f && D_800DCA30[row][col].pos.z != 0.0f) {
+            func_15156D24(&D_800DCA30[row][col].pos.x, effect->header.owner);
             header.unk0 = 3;
             header.unk1 = -1;
             header.unk2 = (func_150ADA20() % 11U) + 5;
             header.unk4 = 0;
-            intPos.unk0 = D_800DCA30[row][col][0];
-            intPos.unk4 = D_800DCA30[row][col][1];
-            intPos.unk8 = D_800DCA30[row][col][2];
+            intPos.unk0 = D_800DCA30[row][col].pos.x;
+            intPos.unk4 = D_800DCA30[row][col].pos.y;
+            intPos.unk8 = D_800DCA30[row][col].pos.z;
             func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                           effect->header.owner, effect->header.kind);
         }

@@ -4038,4 +4038,16 @@ typedef struct {
     /* 0x0C */ Vec3f rot;
 } CamOffset;
 
+/* One of the three exploding pipes (D_8009F920): where it is and which way it faces. */
+typedef struct PipeSpot {
+    /* 0x0 */ Vec3f pos;
+    /* 0xC */ u8 yaw;
+} PipeSpot; /* size 0x10 */
+
+/* A random burst point (D_800DCA30): a wall hit traced out from a pipe; all zero when the trace missed. */
+typedef struct BurstPoint {
+    /* 0x0 */ Vec3f pos;
+    /* 0xC */ s32 unkC;
+} BurstPoint; /* size 0x10 */
+
 #endif
