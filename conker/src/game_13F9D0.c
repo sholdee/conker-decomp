@@ -25,6 +25,11 @@ typedef struct Turret15112520Cfg {
 
 extern f32 D_800DBEC0; // turret's squared distance to the player
 
+/* Turret settings in the data (no code reads this name; a turret object's moveData can point here). */
+Turret15112520Cfg D_80089200 = {
+    0.1f, 0.05f, 15.0f, 90.0f, -90.0f, 30.0f, 40.0f, -20.0f, 20.0f, 145.0f, -10.0f, 1000.0f, 27, 0,
+};
+
 /* Turns a turret toward the player (within its yaw/pitch limits and range) and plays its motor sound. */
 void func_15112520(WorldObject *turret) {
     f32 dx;
@@ -37,7 +42,7 @@ void func_15112520(WorldObject *turret) {
     f32 speed;
     Turret15112520Cfg *cfg;
     s32 pad; // matching: unused stack slot
-    static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
+    static s16 D_80089234 = 0; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
     cfg = turret->moveData.data;
     dx = movement_obj[0].xpos - turret->x;

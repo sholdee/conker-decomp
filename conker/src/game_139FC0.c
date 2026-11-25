@@ -181,6 +181,9 @@ typedef struct {
 } Entry1510D404;
 
 extern u8 D_800DBDBA;
+// Last texture id freed by func_1510D404. A common (not a static): it sits in the bss right after
+// D_800DBDBA, which no 16-byte aligned object .bss can start at.
+extern s32 D_800DBDBC;
 
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
 
@@ -285,7 +288,6 @@ s32 func_1510D374(s32 index) {
  * runs out and re-decompressing those flagged 0x40, and narrows the range to the ones still pending.
  */
 void func_1510D404(void) {
-    static s32 D_800DBDBC;
     s32 start;
     s32 end;
     s32 i;
