@@ -482,13 +482,13 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
     return dl;
 }
 
-/** obj touched rope msg->unk1B: grab it, or let go of the current rope and grab this one. */
-void func_151AE06C(Actor *obj, struct133 *msg) {
+/** obj touched the rope zone `zone` (rope id: data1): grab it, or let go of the current rope and grab this one. */
+void func_151AE06C(Actor *obj, TriggerZone *zone) {
     u8 canRide;
     u8 ropeId;
 
     if (func_151ACB38(obj, &canRide) != 0) {
-        ropeId = msg->unk1B;
+        ropeId = zone->data1;
         if (obj->mv->rope == 0) {
             func_151AE0E4(obj, ropeId);
         } else if (obj->mv->rope != ropeId) {
