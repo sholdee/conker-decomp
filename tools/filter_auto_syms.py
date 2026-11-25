@@ -10,7 +10,8 @@ this after every splat run so that every checkout links the same symbol set.
 import re
 from pathlib import Path
 
-M = Path(__file__).resolve().parent.parent / "conker"
+import sys
+M = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "conker"
 defs = set()
 for p in (M / "src").rglob("*.s"):
     defs |= set(re.findall(r"^\s*glabel (\w+)", p.read_text(errors="replace"), re.M))

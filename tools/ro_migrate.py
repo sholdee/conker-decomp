@@ -8,6 +8,10 @@ and rodata_extern then leaves the object alone (it also trims IDO's 16-byte padd
 
     ro_migrate.py plan [--json OUT]          find every C object's slice in the ROM (needs a build)
     ro_migrate.py apply PLAN.json [FILE...]  rewrite conker.us.yaml for those files (default: all `ok`)
+    ro_migrate.py check FILE                 word-by-word: the object's .rodata vs its ROM window (between
+                                             the neighbouring files' slices)
+    ro_migrate.py carve FILE START END       give FILE the slice [START, END) in the yaml
+  --root DIR   work on a workspace (e.g. ~/conker-ws/clean.game_X/conker) instead of the main tree
 
 `plan` compares each object's .rodata (relocated words masked, trailing padding stripped) with the
 original rodata regions of the yaml, at 4-byte alignment, and picks the hit that keeps slices in text
@@ -19,6 +23,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 M = REPO / "conker"
+if "--root" in sys.argv:  # operate on a workspace's conker/ instead of the main tree
+    M = Path(sys.argv[sys.argv.index("--root") + 1]).resolve()
+    del sys.argv[sys.argv.index("--root"):sys.argv.index("--root") + 2]
 YAML = M / "conker.us.yaml"
 sys.path.insert(0, str(REPO / "tools" / "asm-processor"))
 from asm_processor import ElfFile  # noqa: E402
@@ -206,7 +213,54 @@ def apply(plan_rows, only):
     print(f"applied {len(todo)} slices")
 
 
+def check(name):
+    rom = (M / "conker.us.bin").read_bytes()
+    ents = entries()
+    segs = segments()
+    seg_of = lambda off: max((s for s in segs if s[1] <= off), key=lambda s: s[1])
+    text = next((off for _, off, typ, nm in ents if typ == "c" and nm == name), None)
+    if text is None:
+        sys.exit(f"{name}: no c entry in the yaml")
+    seg = seg_of(text)
+    data, rel = own_rodata(M / "build" / "src" / f"{name}.c.o", seg[2] + text - seg[1])
+    if data is None:
+        sys.exit(f"{name}: the object has no .rodata")
+    n = len(data) // 4
+    while n and data[4 * n - 4:4 * n] == b"\0\0\0\0" and (n - 1) not in rel:
+        n -= 1
+    # window: from the end of the previous C file's owned slice to the start of the next one
+    owned = [(off, nm) for _, off, typ, nm in ents if typ == ".rodata"]
+    texts = {nm: off for _, off, typ, nm in ents if typ == "c"}
+    prev = [o for o, nm in owned if texts.get(nm, -1) < text and seg_of(texts.get(nm, 0))[0] == seg[0]]
+    nxt = [o for o, nm in owned if texts.get(nm, 1 << 40) > text and seg_of(texts.get(nm, 0))[0] == seg[0]]
+    starts = sorted(o for _, o, _, _ in ents)
+    lo = max(prev) if prev else None
+    if lo is not None:
+        lo = next(o for o in starts if o > lo)  # the entry after the previous owned slice
+    hi = min(nxt) if nxt else None
+    print(f"{name}: own .rodata {4 * n} bytes ({len(rel)} relocated words marked ????)")
+    if lo is None or hi is None:
+        print("no owned neighbour on one side; window unknown")
+        return
+    win = rom[lo:hi]
+    print(f"ROM window 0x{lo:X}-0x{hi:X} ({hi - lo} bytes). own | rom")
+    for k in range(max(n, len(win) // 4)):
+        o = "????????" if k in rel else (data[4 * k:4 * k + 4].hex() if k < n else "")
+        r = win[4 * k:4 * k + 4].hex() if 4 * k < len(win) else ""
+        mark = "" if o == r or o == "????????" else "  <--"
+        print(f"  +0x{4 * k:03X} 0x{lo + 4 * k:X}  {o:8s} | {r:8s}{mark}")
+
+
+def carve(name, start, end):
+    row = {"file": name, "status": "ok", "start": hex(start), "end": hex(end)}
+    apply([row], {name})
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 3 and sys.argv[1] == "check":
+        check(sys.argv[2]); sys.exit(0)
+    if len(sys.argv) == 5 and sys.argv[1] == "carve":
+        carve(sys.argv[2], int(sys.argv[3], 16), int(sys.argv[4], 16)); sys.exit(0)
     if len(sys.argv) >= 2 and sys.argv[1] == "plan":
         rows = plan()
         out = sys.argv[sys.argv.index("--json") + 1] if "--json" in sys.argv else None

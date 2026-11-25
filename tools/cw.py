@@ -10,7 +10,7 @@
 NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
 sha gate as mw.py. The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
 """
-import argparse, fcntl, json, re, subprocess, sys, time
+import argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -101,6 +101,7 @@ def cmd_new(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        shutil.copy(MAIN / YAML, ws / "base" / YAML)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -135,6 +136,7 @@ def new_tree(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        shutil.copy(MAIN / YAML, ws / "base" / YAML)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -145,10 +147,27 @@ def new_tree(a):
     print(f"land      : python3 {REPO}/tools/cw.py land {name}")
 
 
+YAML = "conker.us.yaml"
+SPLAT = "python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1 && python3 ../tools/filter_auto_syms.py . >/dev/null"
+
+
+def yaml_changed(ws):
+    """True if the workspace edits the splat yaml (e.g. to link a file's own .rodata)."""
+    b = ws / "base" / YAML
+    return b.exists() and not filecmp.cmp(b, ws / "conker" / YAML, shallow=False)
+
+
 def build(ws):
     wc = ws / "conker"
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
+    stamp = ws / ".splat_yaml"
+    if yaml_changed(ws) or stamp.exists():
+        cur = (wc / YAML).read_bytes()
+        if not stamp.exists() or stamp.read_bytes() != cur:
+            run(SPLAT, wc, timeout=1800)  # the yaml changed: regenerate asm/ and the linker script
+            stamp.write_bytes(cur)
+            return wc, run("make -B -j8 2>&1", wc, timeout=1800)
     # The Makefile has no header dependencies: after any include/ change, rebuild everything (~15 s),
     # or stale objects would hide breakage in files that use the changed header.
     # Workspaces created from a Makefile with generated header deps (cpp -MM) rebuild exactly the users.
@@ -237,9 +256,21 @@ def cmd_land(a):
                 sys.exit(f"{f}: merge conflict with main — rebase: copy main's file into the workspace, "
                          f"re-apply your edits, update base/{f} from main, check, land again")
             merged[f] = p.stdout
+        ychanged = yaml_changed(ws)
+        if ychanged:
+            p = subprocess.run(["git", "merge-file", "-p", str(MAIN / YAML), str(ws / "base" / YAML), str(ws / "conker" / YAML)],
+                               capture_output=True)
+            if p.returncode != 0:
+                sys.exit(f"{YAML}: merge conflict with main — copy main's yaml into the workspace and base/, re-apply, check, land")
+            merged[Path(YAML)] = p.stdout
+            files = files + [Path(YAML)]
+            rels.append(str(Path("conker") / YAML))
+            autos = {n: (MAIN / n).read_bytes() for n in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")}
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
+        if ychanged:
+            run(SPLAT, MAIN, timeout=1800)
         (MAIN / BIN).unlink(missing_ok=True)
         r = run("make -B -j16 2>&1", MAIN)  # full rebuild: no header deps in the Makefile
         if not (MAIN / BIN).exists() or sha1(MAIN / BIN) != INNER_SHA:
@@ -248,7 +279,11 @@ def cmd_land(a):
                     (MAIN / f).unlink(missing_ok=True)
                 else:
                     (MAIN / f).write_bytes(data)
-            run("make -j16 2>&1", MAIN)
+            if ychanged:
+                run(SPLAT, MAIN, timeout=1800)
+                for n, data in autos.items():
+                    (MAIN / n).write_bytes(data)
+            run("make -B -j16 2>&1", MAIN)
             print(r.stdout[-2500:])
             sys.exit("LAND-FAIL: main build does not match after merge; reverted")
         git("add", *rels)
