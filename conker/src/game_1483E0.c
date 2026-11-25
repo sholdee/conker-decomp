@@ -1102,34 +1102,35 @@ void func_1511CB44(struct Obj1511CB44 *obj) {
 }
 
 struct Entry1511D394 {
-    f32 unk0;
-    f32 unk4;
-    u16 unk8;
-    u16 unkA;
-    u8 unkC;
+    f32 followRate;
+    f32 accel;
+    u16 baseS;
+    u16 rangeS;
+    u8 phaseOffset;
     u8 padD;
-    u16 unkE;
-    u8 unk10;
-    u8 unk11;
+    u16 amplitudeT;
+    u8 alphaPhaseOffset;
+    u8 alphaPhase;
     u8 pad12[2];
 };
 
+/* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
 extern struct Entry1511D394 D_80089444[];
 
 struct Obj1511D394 {
     u8 pad0[0x16];
-    u16 unk16;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x3C];
-    s16 *unk7C;
-    f32 unk80;
-    f32 unk84;
+    s16 *baseS;
+    f32 velocity;
+    f32 level;
     u8 pad88[2];
-    u8 unk8A;
+    u8 alpha;
 };
 
 struct Owner1511D394 {
@@ -1137,89 +1138,92 @@ struct Owner1511D394 {
     u16 *unk7C;
 };
 
-void func_1511D394(struct Obj1511D394 *arg0) {
-    u16 *src;
+/*
+ * Scrolls the mesh texture with the wave phase of the owner object (numbered by the low param
+ * byte): S eases toward the wave level, T drifts by a cosine amount, and the alpha pulses.
+ */
+void func_1511D394(struct Obj1511D394 *obj) {
+    u16 *ownerWave;
     struct Owner1511D394 *owner;
-    s32 dx;
-    u8 phase;
-    s32 dy;
-    f32 s;
-    f32 c;
+    s32 pad; // matching: unused stack slot keeps the original frame layout
+    u8 phaseOffset;
+    s32 offsetS;
+    f32 sine;
+    f32 cosine;
     f32 diff;
-    s32 offY;
-    s32 baseY;
-    s32 amp;
+    s32 rangeS;
+    s32 baseS;
+    s32 offsetT;
     s32 i;
-    s16 *buf;
-    struct Entry1511D394 *e;
-    f32 rate;
+    s16 *savedS;
+    struct Entry1511D394 *entry;
+    f32 followRate;
     s32 init;
     s32 id;
-    f32 step;
-    s32 idx;
+    f32 accel;
+    s32 wavePhase;
 
-    id = arg0->unk3C & 0xFF;
-    owner = (struct Owner1511D394 *)func_151149AC((u8)id);
+    id = obj->param & 0xFF;
+    owner = func_151149AC((u8)id);
     if (owner == NULL) {
         return;
     }
-    src = owner->unk7C;
-    if (src == NULL) {
+    ownerWave = owner->unk7C;
+    if (ownerWave == NULL) {
         return;
     }
-    e = &D_80089444[(arg0->unk3C >> 8) & 0xFF];
-    offY = e->unkA;
-    baseY = e->unk8;
-    phase = e->unkC;
-    rate = e->unk0;
-    step = e->unk4;
-    amp = e->unkE;
-    if (arg0->unk7C == NULL) {
-        arg0->unk7C = allocate_memory(arg0->unk16 * 2, 1, 0, 0);
-        buf = arg0->unk7C;
-        for (i = 0; i < arg0->unk16; i++) {
-            buf[i] = arg0->unk28[i].v.tc[0];
+    entry = &D_80089444[(obj->param >> 8) & 0xFF];
+    rangeS = entry->rangeS;
+    baseS = entry->baseS;
+    phaseOffset = entry->phaseOffset;
+    followRate = entry->followRate;
+    accel = entry->accel;
+    offsetT = entry->amplitudeT;
+    if (obj->baseS == NULL) {
+        obj->baseS = allocate_memory(obj->count * sizeof(s16), 1, 0, 0);
+        savedS = obj->baseS;
+        for (i = 0; i < obj->count; i++) {
+            savedS[i] = obj->source[i].v.tc[0];
         }
-        e->unk11 = 0;
-        init = 1;
+        entry->alphaPhase = 0;
+        init = TRUE;
     } else {
-        init = 0;
-        buf = arg0->unk7C;
+        init = FALSE;
+        savedS = obj->baseS;
     }
-    i = 0;
-    idx = src[2];
-    s = (func_150489B0(((idx >> 8) & 0xFF) + phase) + 1.0f) * 0.5f;
-    c = (func_15048A40(((idx >> 8) & 0xFF) + phase) + 0.5f) * 0.5f;
+    wavePhase = ownerWave[2];
+    sine = (func_150489B0(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
+    cosine = (func_15048A40(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
     if (init) {
-        arg0->unk84 = s;
-        arg0->unk80 = 0.0f;
+        obj->level = sine;
+        obj->velocity = 0.0f;
     } else {
-        diff = (s - arg0->unk84) * rate;
+        diff = (sine - obj->level) * followRate;
         if (diff > 0.0f) {
-            arg0->unk80 += step;
-            if (diff < arg0->unk80) {
-                arg0->unk80 = diff;
+            obj->velocity += accel;
+            if (diff < obj->velocity) {
+                obj->velocity = diff;
             }
         } else {
-            arg0->unk80 -= step;
-            if (arg0->unk80 < diff) {
-                arg0->unk80 = diff;
+            obj->velocity -= accel;
+            if (obj->velocity < diff) {
+                obj->velocity = diff;
             }
         }
-        arg0->unk84 += arg0->unk80;
+        obj->level += obj->velocity;
     }
-    dy = arg0->unk84 * offY;
-    dy += baseY;
-    amp = amp * c;
-    if (arg0->unk20[D_800BE9C0][0].v.tc[1] > 0x800) {
-        amp -= 0x800;
+    offsetS = obj->level * rangeS;
+    offsetS += baseS;
+    offsetT = offsetT * cosine;
+    if (obj->buffers[D_800BE9C0][0].v.tc[1] > 0x800) {
+        offsetT -= 0x800;
     }
-    for (i = 0; i < arg0->unk16; i++) {
-        arg0->unk20[D_800BE9C0][i].v.tc[0] = buf[i] - dy;
-        arg0->unk20[D_800BE9C0][i].v.tc[1] = arg0->unk20[!D_800BE9C0][i].v.tc[1] + amp;
+    for (i = 0; i < obj->count; i++) {
+        obj->buffers[D_800BE9C0][i].v.tc[0] = savedS[i] - offsetS;
+        obj->buffers[D_800BE9C0][i].v.tc[1] = obj->buffers[!D_800BE9C0][i].v.tc[1] + offsetT;
     }
-    e->unk11 += D_800BE9E4 * 2;
-    arg0->unk8A = (func_150489B0(e->unk11 + e->unk10) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    entry->alphaPhase += D_800BE9E4 * 2;
+    obj->alpha = (func_150489B0(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
 typedef struct Game1483E0WaveState {
@@ -1235,13 +1239,14 @@ typedef struct Game1483E0WaveMesh {
     Game1483E0UvVertex *buffers[2];
     Game1483E0UvVertex *source;
     u8 pad2C[0x10];
-    s32 flags;
+    s32 flags; /* bits 0-11: S amplitude, 12-23: T amplitude, 24-31: speed */
     u8 pad40[0x3C];
     Game1483E0WaveState *wave;
     s32 phase;
 } Game1483E0WaveMesh;
 
-void func_1511D7BC(Game1483E0WaveMesh *arg0) {
+/* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
+void func_1511D7BC(Game1483E0WaveMesh *mesh) {
     f32 sine;
     s32 index;
     Game1483E0UvPair *coords;
@@ -1249,42 +1254,42 @@ void func_1511D7BC(Game1483E0WaveMesh *arg0) {
         s32 speed;
         s32 amplitude_t;
         s32 amplitude_s;
-    } parameters;
+    } parameters; // matching: grouped in a struct for the original stack layout
     s16 s_delta;
     s16 t_delta;
     f32 cosine;
     u8 angle;
     Game1483E0WaveState *state;
 
-    state = arg0->wave;
+    state = mesh->wave;
     if (state == NULL) {
-        state = allocate_memory(0xC, 1, 0, 0);
-        arg0->wave = state;
+        state = allocate_memory(sizeof(Game1483E0WaveState), 1, 0, 0);
+        mesh->wave = state;
         state->field4 = 0;
         state->field8 = 0;
-        coords = allocate_memory(arg0->count * 4, 1, 0, 0);
+        coords = allocate_memory(mesh->count * sizeof(Game1483E0UvPair), 1, 0, 0);
         state->coords = coords;
-        for (index = 0; index < arg0->count; index++) {
-            coords[index].s = arg0->source[index].s;
-            coords[index].t = arg0->source[index].t;
+        for (index = 0; index < mesh->count; index++) {
+            coords[index].s = mesh->source[index].s;
+            coords[index].t = mesh->source[index].t;
         }
     } else {
-        coords = arg0->wave->coords;
+        coords = mesh->wave->coords;
     }
-    parameters.amplitude_s = arg0->flags & 0xFFF;
-    parameters.amplitude_t = (arg0->flags >> 12) & 0xFFF;
-    parameters.speed = (arg0->flags >> 24) & 0xFF;
-    angle = arg0->phase >> 4;
+    parameters.amplitude_s = mesh->flags & 0xFFF;
+    parameters.amplitude_t = (mesh->flags >> 12) & 0xFFF;
+    parameters.speed = (mesh->flags >> 24) & 0xFF;
+    angle = mesh->phase >> 4;
     cosine = func_15048A40(angle);
     sine = func_150489B0(angle);
-    arg0->phase += parameters.speed * D_800BE9E4;
+    mesh->phase += parameters.speed * D_800BE9E4;
     s_delta = (f32)parameters.amplitude_s * sine;
     t_delta = (f32)parameters.amplitude_t * cosine;
-    for (index = 0; index < arg0->count; index++) {
-        arg0->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
-        arg0->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
+    for (index = 0; index < mesh->count; index++) {
+        mesh->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
+        mesh->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
     }
-    func_1511A494(arg0, &state->field4, &state->field8);
+    func_1511A494(mesh, &state->field4, &state->field8);
 }
 
 struct Obj1511D9E4 {
