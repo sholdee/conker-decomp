@@ -1052,7 +1052,7 @@ void func_15077C1C(void) {
 }
 
 /*
- * Targets an object that is alive, not immune (or 0xFF), not riding (unless arg2) and either of
+ * Targets an object that is alive, not immune (or 0xFF), unlinked (unless arg2) and either of
  * type arg0 or in state arg1 and not stunned: the first one found if arg3 == 0, else the nearest.
  */
 void func_15077C38(void) {
@@ -1808,44 +1808,37 @@ void func_15079F50(void) {
 }
 
 void func_15079F6C(void) {
-    u16 tmp0;
-    u16 tmp1;
-    tmp0 = D_800D1890 << 8;
-    tmp1 = D_800D1891;
-    D_800D154C->unk224 = (tmp0 | (((((((((tmp1 & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF)) & 0xFFFFu;
-    if (1) {
-        D_800D154C->unk22B = D_800D1892;
-    }
-    D_800D154C->unk226 = D_800D1893;
-    tmp0 += 0;
-}
-// NON-MATCHING: JUSTREG
-// void func_15079F6C(void) {
-//     u16 tmp0;
-//     u16 tmp1;
-//     tmp0 = D_800D1890 << 8;
-//     tmp1 = D_800D1891;
-//     D_800D154C->unk224 = tmp0 | tmp1;
-//     D_800D154C->unk22B = D_800D1892;
-//     D_800D154C->unk226 = D_800D1893;
-// }
+    u16 high;
+    u16 low;
 
+    high = D_800D1890 << 8;
+    low = D_800D1891;
+    // matching: the stacked no-op masks raise the expression weight so IDO keeps `low` out of v1
+    D_800D154C->unk224 = (high | (((((((((low & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF) & 0xFF)) & 0xFFFFu;
+    D_800D154C->unk22B = D_800D1892;
+    D_800D154C->unk226 = D_800D1893;
+}
+
+/*
+ * Follows object 0: when it is unlinked (unk65 == 0) or slower than 5, switches to script arg1;
+ * otherwise starts a mode-3 move in its unk4C direction at its speed (times 0.7 unless chased).
+ */
 void func_15079FBC(void) {
     s16 speed;
 
-    if ((D_800CC2D0->unk65 == 0) || (D_800CC2D0->unk44 < 5.0f)) {
+    if ((D_800CC2D0[0].unk65 == 0) || (D_800CC2D0[0].unk44 < 5.0f)) {
         D_800D154C->unk232 = D_800D1891;
         D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
-        D_800D154C->unk218 -= 1;
+        D_800D154C->unk218--;
         return;
     }
 
-    D_800D154C->unk78 = D_800CC2D0->unk31C->unk4C;
+    D_800D154C->unk78 = D_800CC2D0[0].unk31C->unk4C;
 
-    if (D_800CC2D0->unk31C->chased) {
-        speed = D_800CC2D0->unk44;
+    if (D_800CC2D0[0].unk31C->chased) {
+        speed = D_800CC2D0[0].unk44;
     } else {
-        speed = D_800CC2D0->unk44 * D_8009A1E4;
+        speed = D_800CC2D0[0].unk44 * 0.7f;
     }
     if (speed < 17) {
         D_800D1893 += 1;
@@ -1856,22 +1849,24 @@ void func_15079FBC(void) {
     D_800D154C->unkF4 |= 0x40;
 }
 
-// D_800D2104!
+/* Sets coordinate arg1 (0 x, 1 y, 2 z) of waypoint arg0 to (s16)(arg2:arg3). */
 s32 func_1507A100(void) {
-    s32 val = ((s8)D_800D1892 << 8) | D_800D1893;
-    *(s16 *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8) + (D_800D1891 * 2) + 8) = val;
-    return val;
+    s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
+
+    ((s16 *)&D_800D2104[D_800D154C->unk13F]->points[D_800D1890])[D_800D1891] = value;
+    return value;
 }
 
-s32 func_1507A164(void) {
-    s32 tmp = D_800CC30C[0] + (s8)D_800D1892;
+/* Sets the speed to object 0's speed plus (s8)arg2, clamped to [arg1, arg0]. */
+void func_1507A164(void) {
+    s32 speed = D_800CC2D0[0].xz_velocity + (s8)D_800D1892;
 
-    if (tmp < D_800D1891) {
-        tmp = D_800D1891;
-    } else if (tmp > D_800D1890) {
-        tmp = D_800D1890;
+    if (speed < D_800D1891) {
+        speed = D_800D1891;
+    } else if (speed > D_800D1890) {
+        speed = D_800D1890;
     }
-    D_800D154C->unk44 = tmp;
+    D_800D154C->unk44 = speed;
     if (D_800D154C->unk44 == 1.0f) {
         D_800D154C->unk44 = 0.5f;
     }
@@ -1879,7 +1874,7 @@ s32 func_1507A164(void) {
 
 void func_1507A210(void) {
     D_800D154C->unk223 = 0;
-    D_800D154C->unk21C = D_800D1890 * 0x64;
+    D_800D154C->unk21C = D_800D1890 * 100;
     D_800D154C->unk22C &= 0xFD;
     func_15075498();
 }
@@ -1889,26 +1884,27 @@ void func_1507A270(void) {
 }
 
 void func_1507A2A4(void) {
-    D_800D1893 = (func_150ADA20() % (u32) D_800D1891) + D_800D1893;
+    D_800D1893 = (func_150ADA20() % (u32)D_800D1891) + D_800D1893;
     func_15075CA0();
 }
 
+/* Targets a random active object of type arg0, saving the previous target in unkA8. */
 void func_1507A2F8(void) {
     s32 i;
-    u32 used;
-    u8 sp1C[25];
+    u32 count;
+    u8 candidates[25];
 
-    used = 0;
+    count = 0;
     for (i = 0; i < 25; i++) {
         if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].id == D_800D1890)) {
-            sp1C[used] = i;
-            used++;
+            candidates[count] = i;
+            count++;
         }
     }
-    if (used != 0) {
+    if (count != 0) {
         i = func_150ADA20();
         D_800D154C->unkA8 = D_800D154C->unk222;
-        D_800D154C->unk222 = sp1C[i % used];
+        D_800D154C->unk222 = candidates[i % count];
     }
 }
 
@@ -1920,36 +1916,43 @@ void func_1507A3CC(void) {
     D_800D154C->unk229 = D_800D1890;
 }
 
-//  what is up with these??
+/* Returns the four argument bytes as one big-endian word. */
 s32 func_1507A3E8(void) {
-    return ((D_800D1890 & 0xFF) << 0x18) | ((D_800D1891 & 0xFF) << 0x10) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
+    // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
+    return ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
 }
-// s32 func_1507A3E8(void) {
-//     return (D_800D1890 << 0x18) | (D_800D1891 << 0x10) | (D_800D1892 << 8) | D_800D1893;
-// }
 
 void func_1507A428(void) {
-    s32 temp;
+    s32 flags;
 
-    temp = ((D_800D1890 & 0xFF) << 0x18) | ((D_800D1891 & 0xFF) << 0x10) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 = ~(temp | 1);
+    // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
+    flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
+    D_800D154C->unk94 = ~(flags | 1);
 }
+
 void func_1507A47C(void) {
-    s32 temp;
+    s32 flags;
 
-    temp = ((D_800D1890 & 0xFF) << 0x18) | ((D_800D1891 & 0xFF) << 0x10) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 &= ~temp;
+    // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
+    flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
+    D_800D154C->unk94 &= ~flags;
 }
+
 void func_1507A4D4(void) {
-    s32 temp;
+    s32 flags;
 
-    temp = ((D_800D1890 & 0xFF) << 0x18) | ((D_800D1891 & 0xFF) << 0x10) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
-    D_800D154C->unk94 |= temp;
+    // matching: the `& 0xFF` masks (no-ops on u8) steer IDO's register allocation
+    flags = ((D_800D1890 & 0xFF) << 24) | ((D_800D1891 & 0xFF) << 16) | ((D_800D1892 & 0xFF) << 8) | (D_800D1893 & 0xFF);
+    D_800D154C->unk94 |= flags;
 }
 
+/*
+ * Waypoint direction: arg0 0 sets the step unk221 to arg1, 1 reverses it, 2 reverses it and moves
+ * the waypoint index by the new step plus arg3 further, wrapping at arg2 (0: the path's count).
+ */
 void func_1507A528(void) {
-    s32 limit;
-    s32 temp_a1;
+    s32 count;
+    s32 index;
 
     if (D_800D1890 == 0) {
         D_800D154C->unk221 = D_800D1891;
@@ -1957,100 +1960,70 @@ void func_1507A528(void) {
         D_800D154C->unk221 = -D_800D154C->unk221;
     } else if (D_800D1890 == 2) {
         if (D_800D1892 != 0) {
-            limit = D_800D1892;
+            count = D_800D1892;
         } else {
-            limit = (*(u8 **)&D_800D2108)[*(u8 *)((u8 *)D_800D154C + 0x13F)] - 1;
+            count = D_800D2108[D_800D154C->unk13F] - 1;
         }
         D_800D154C->unk221 = -D_800D154C->unk221;
-        temp_a1 = D_800D154C->unk21E + D_800D154C->unk221;
+        index = D_800D154C->unk21E + D_800D154C->unk221;
         if (D_800D154C->unk221 > 0) {
-            temp_a1 += D_800D1893;
+            index += D_800D1893;
         } else {
-            temp_a1 -= D_800D1893;
+            index -= D_800D1893;
         }
-        if (temp_a1 >= limit) {
-            temp_a1 = temp_a1 - limit;
-        } else {
-            if (temp_a1 < 0) {
-                temp_a1 = temp_a1 + limit;
-            }
+        if (index >= count) {
+            index -= count;
+        } else if (index < 0) {
+            index += count;
         }
-        D_800D154C->unk21E = temp_a1;
+        D_800D154C->unk21E = index;
     }
 }
-// NON-MATCHING: 99% there..
-// void func_1507A528(void) {
-//     s32 limit;
-//     s32 temp_a1;
-//
-//     if (D_800D1890 == 0) {
-//         D_800D154C->unk221 = D_800D1891;
-//     } else if (D_800D1890 == 1) {
-//         D_800D154C->unk221 = -D_800D154C->unk221;
-//     } else if (D_800D1890 == 2) {
-//         if (D_800D1892 != 0) {
-//             limit = D_800D1892;
-//         } else {
-//             limit = (u8)(D_800D2108 + D_800D154C->unk13F) - 1;
-//         }
-//         D_800D154C->unk221 = -D_800D154C->unk221;
-//         temp_a1 = D_800D154C->unk21E + D_800D154C->unk221;
-//         if (D_800D154C->unk221 > 0) {
-//             temp_a1 += D_800D1893;
-//         } else {
-//             temp_a1 -= D_800D1893;
-//         }
-//         if (temp_a1 >= limit) {
-//             temp_a1 = temp_a1 - limit;
-//         } else {
-//             if (temp_a1 < 0) {
-//                 temp_a1 = temp_a1 + limit;
-//             }
-//         }
-//         D_800D154C->unk21E = temp_a1;
-//     }
-// }
 
+/*
+ * Jumps to arg0 when the angle (arg1: the object's unk78, else its facing relative to the
+ * direction to the target), in 1/256 turns, lies in [arg2, arg3).
+ */
 void func_1507A620(void) {
-    u8 idx;
-    u16 tmp;
+    u8 index;
+    u16 angle;
 
-    idx = D_800D154C->unk222;
+    index = D_800D154C->unk222;
     if (D_800D1891 != 0) {
-        tmp = D_800D154C->unk78 >> 8;
+        angle = D_800D154C->unk78 >> 8;
     } else {
-        tmp = (D_800D154C->unk7A - func_1505A630(D_800CC2D0[idx].x_position - D_800D154C->x_position, D_800D154C->z_position - D_800CC2D0[idx].z_position, 0)) >> 8;
+        angle = (D_800D154C->unk7A - func_1505A630(D_800CC2D0[index].x_position - D_800D154C->x_position,
+                                                   D_800D154C->z_position - D_800CC2D0[index].z_position, 0)) >> 8;
     }
-    if ((u8)(tmp - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
+    if ((u8)(angle - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
         func_15075400(D_800D1890);
     }
 }
 
 s32 func_1507A6FC(s32 arg0) {
-    // really??
-    u32 tmp0 = (3 * arg0) & 0xFFFFFFFFFFFFFFFF;
-    u32 tmp1 = tmp0 & 0xFFFFFFFFFFFFFFFF;
-    return D_800BE748[tmp1 & 0xFFFFFFFFFFFFFFFF];
+    return ((u16 (*)[3])D_800BE748)[arg0][0];
 }
 
+/* Jumps to arg3 when entry arg0 of D_800BE748 has all the bits of (arg1:arg2) set. */
 void func_1507A71C(void) {
-    u16 tmp0 = func_1507A6FC(D_800D1890);
-    u16 tmp1 = ((D_800D1891 << 8) | D_800D1892);
+    u16 bits = func_1507A6FC(D_800D1890);
+    u16 mask = (D_800D1891 << 8) | D_800D1892;
 
-    if ((tmp0 & tmp1) == tmp1) {
+    if ((bits & mask) == mask) {
         func_15075400(D_800D1893);
     }
 }
 
 void func_1507A774(void) {
-    u16 temp_v0 = (D_800D1891 << 8) | D_800D1892;
-    if (D_800BE9F0 == temp_v0) {
+    u16 value = (D_800D1891 << 8) | D_800D1892;
+
+    if (D_800BE9F0 == value) {
         func_15075400(D_800D1890);
     }
 }
 
 void func_1507A7C0(void) {
-    D_800D154C->disable_run = (u8) D_800D1890;
+    D_800D154C->disable_run = D_800D1890;
 }
 
 void func_1507A7DC(void) {
@@ -2072,13 +2045,14 @@ void func_1507A878(void) {
 }
 
 void func_1507A8A8(void) {
-    if ((D_800CC335 != 0) || (D_800BE616 != 0)) {
+    if ((D_800CC2D0[0].unk65 != 0) || (D_800BE616 != 0)) {
         func_15075400(D_800D1890);
     }
 }
 
+/* Jumps to arg0 when the target is (arg2 == 0) or is not (arg2 == 1) of type arg1. */
 void func_1507A8EC(void) {
-    if (D_800D1891 == D_800CC2D4[D_800D154C->unk222 * sizeof(struct127)]) {
+    if (D_800D1891 == D_800CC2D0[D_800D154C->unk222].id) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2086,19 +2060,20 @@ void func_1507A8EC(void) {
     }
 }
 
+/* Links the object to the one found by func_15083E90(arg0) (unk65 = its index + 1), or unlinks it (arg0 == 0). */
 void func_1507A984(void) {
-    s32 temp_v0;
+    struct127 *linked;
 
     if (D_800D1890 != 0) {
-        temp_v0 = func_15083E90(D_800D1890);
-        if (temp_v0 != 0) {
+        linked = func_15083E90(D_800D1890);
+        if (linked != NULL) {
             if (D_800D1892 == 0) {
                 D_800D154C->unk101 |= 4;
             }
             if (D_800D1893 != 0) {
                 D_800D154C->unk101 |= 0x40;
             }
-            D_800D154C->unk65 = ((s32) (temp_v0 - (s32)&D_800CC2D0) / 0x32C) + 1;
+            D_800D154C->unk65 = (linked - D_800CC2D0) + 1;
             D_800D154C->unk5C = D_800D1891;
         }
     } else {
