@@ -10,12 +10,6 @@ extern Vec3f D_800AAB20[];
 extern Vec3f D_800AAB38[];
 extern Vec3f D_800AAB50[];
 
-void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
-                   Vec3f **, Vec3f *);
-void func_151D5148(Actor *arg0);
-void func_151D3F14(Vec3f *arg0, u8 arg1, s32 arg2);
-void func_151D4408(Vec3f *, Vec3f *, s32, Actor *, f32, u8, s32);
-
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
 s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6) {

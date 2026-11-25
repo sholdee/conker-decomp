@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *dst, const void *src, u32 size);
 
@@ -16,78 +15,6 @@ void *memcpy(void *dst, const void *src, u32 size);
 #define EMITTER_FLAG_EMITTING 2
 #define EMITTER_FLAG_STOPPED  8
 
-/* A level-placed stream: a column of particles falling from y + height down to y. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 size;
-    s16 height;
-    u8 padA[0xA];
-    u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
-    u8 pad15[3];
-    s32 id;
-    s32 textureIndex; /* into D_800AAEE0 */
-} StreamSource;
-
-/* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
-typedef struct {
-    Vec3f pos;
-    f32 velocity;
-    f32 width;
-    s16 alpha;
-    f32 tc; /* texture t coordinate */
-} StreamParticle;
-
-/* Per-stream state, the 0x50-byte data block of a stream emitter. */
-typedef struct {
-    f32 swayAmpX;
-    f32 swayAmpZ;
-    f32 swayPhaseX;
-    f32 swayPhaseZ;
-    f32 swayRateX;
-    f32 swayRateZ;
-    Vec2fXZ spawnPos; /* where the last particle was spawned */
-    f32 unk20;
-    f32 baseWidth;
-    f32 widthAmp;
-    f32 widthPhase;
-    f32 widthRate;
-    f32 width;
-    f32 unk38;
-    f32 tc;
-    f32 spawnCount; /* particles owed; one is spawned per whole unit */
-    f32 floorY;
-    s32 id;
-    u8 textureIndex;
-    u8 pad4D[3];
-} StreamData;
-
-typedef struct LevelStream {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ StreamParticle *particles;
-    /* 0x98 */ StreamData *data;
-} LevelStream;
-
-/* The spawner task's state: owns at most one emitter for its source. */
-typedef struct {
-    StreamSource *source;
-    s32 id;
-    LevelStream *emitter;
-    u8 textureIndex;
-    u8 padD[3];
-} StreamSpawner;
-
-typedef struct {
-    TimedEffect base;
-    StreamSpawner spawner;
-} StreamTask;
-
-/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
-LevelStream *func_151CD4C0();
-void func_151CE47C(LevelStream *emitter);
 
 /* Creates the spawner task for a stream source. */
 StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
@@ -393,7 +320,6 @@ extern struct {
     s32 unk0;
     s32 unk4;
 } D_800A4AC8[];
-void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
 
 /* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */
 Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view) {
@@ -540,7 +466,6 @@ void func_151CE4DC(LevelStream *emitter) {
     func_15147928(emitter);
 }
 
-LevelStream *func_151CE634(s32 id);
 
 /* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
 void func_151CE51C(void *actor, StreamSource *source) {

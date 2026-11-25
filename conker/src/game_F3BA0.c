@@ -24,7 +24,6 @@ struct Watcher {
 };
 
 void *memcpy(void *, const void *, u32);
-u8 func_151D8E20(void);
 
 extern Vec3f D_800887E0;
 /*

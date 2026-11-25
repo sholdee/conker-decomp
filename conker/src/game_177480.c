@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **outVtx, u8 *outFresh);
-
 #define EFFECT_WIDTH_GROWN  2
 #define EFFECT_HEIGHT_GROWN 8
 

@@ -2,11 +2,20 @@
 // matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
 // was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32proto
-#define func_15152190 func_15152190_header // matching: this file keeps its own declaration of func_15152190
+#define func_15152190 func_15152190_header // matching: this file keeps its own declarations of these
+#define func_151D9014 func_151D9014_header
+#define func_151D9B8C func_151D9B8C_header
+#define func_151DB5D0 func_151DB5D0_header
+#define func_151DC034 func_151DC034_header
 #include "functions.h"
-#undef func_151D9B8C
 #undef func_15152190
+#undef func_151D9014
+#undef func_151D9B8C
+#undef func_151DB5D0
+#undef func_151DC034
+// matching: a pointer where the definition has s32 (arg 4)
 void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
+#undef func_151DB5D0
 // variables.h declares D_800A3F14 without const; this file defines it as const data (.rodata)
 #define D_800A3F14 D_800A3F14_hdr
 #include "variables.h"
@@ -978,10 +987,10 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
+// matching: u8 where the definition has s32 (arg 1); s32 where the definition has s16 (args 8, 10-11), u8 (args 9, 12); returns void (the definition: SteamParticle *)
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
+// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); returns void (the definition: SteamParticle *)
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-
 /* Blood spray from `from` towards `to`; splashes droplets instead when the ground below is surface type 3. */
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     Vec3f direction;
@@ -1248,10 +1257,6 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
     func_15134908(&desc, 0, arg4, arg5);
 }
 
-void func_151D9014(void *position, void *velocity, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
-                   f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 argA, s32 argB,
-                   s32 argC, s32 argD, s32 argE, s32 argF);
-
 /* Sprays blood from (x, y, z) against the direction (dirX, dirY, dirZ). */
 void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
     f32 position[3];
@@ -1351,7 +1356,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
 }
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32);
+extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32); // matching: s32 where the definition has u8 (arg 3)
 
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5) {
@@ -1546,8 +1551,6 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
 typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
-void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
-                    s32, f32, s32, s32, s32, s32);
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
 void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f position;

@@ -270,7 +270,6 @@ void func_151B2950(TiedRope *self) {
     }
 }
 
-extern void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;

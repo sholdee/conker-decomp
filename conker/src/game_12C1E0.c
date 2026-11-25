@@ -28,10 +28,6 @@ const Vec3f D_800A2080[2][6] = { /* two random sets of flash points */
     },
 };
 
-void func_151D5148(Actor *obj);
-void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
-
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
 void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f position;
@@ -186,9 +182,6 @@ ModelAttachment *func_150FF288(Actor *obj) {
 void func_150FF2AC(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
     func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
-
-void func_151D5174(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
-                   Vec3f *output0, Vec3f *output1, s32 *value0, s32 *value1, Vec3f *endpoint);
 
 /*
  * Finds where a shot starts. With `*valid` set, the points come from the gun's bone (func_150FF6E0),

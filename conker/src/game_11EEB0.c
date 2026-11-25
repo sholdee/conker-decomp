@@ -94,10 +94,6 @@ void func_150F1CB0(Actor *actor) {
     }
 }
 
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D3FF4(Vec3f *, u8, s32);
-
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
 void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {

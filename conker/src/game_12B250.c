@@ -7,10 +7,6 @@ extern Vec3f D_800A1F70; // muzzle point, in bone space
 extern Vec3f D_800A1F7C;
 extern Vec3f D_800A1F88; // launch point, in bone space
 
-extern void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
-extern void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
-extern void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-
 /* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
  * effects of func_150FDF38. Returns func_151C229C's result, or 0 without an obj. */
 // matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is

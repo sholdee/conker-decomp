@@ -221,7 +221,6 @@ s32 func_151B65D4(EffectObj *obj) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;

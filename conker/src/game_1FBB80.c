@@ -1,28 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct Game1FBB80Owner {
-    s16 field00;
-    s16 mask;
-} Game1FBB80Owner;
-
-typedef struct Game1FBB80Effect {
-    void *shape;
-    f32 rate;
-    f32 accumulator;
-    Game1FBB80Owner *owner;
-    f32 height;
-} Game1FBB80Effect;
-
-typedef struct Game1FBB80Object {
-    u8 pad00, flags01;
-    u8 pad02[0xA];
-    u8 flags0C;
-    u8 pad0D[0x1B];
-    Game1FBB80Effect effect;
-} Game1FBB80Object;
 
 
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one

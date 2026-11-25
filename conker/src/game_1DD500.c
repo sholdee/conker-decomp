@@ -2,8 +2,10 @@
 // matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
 // was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
+#define func_151D9B8C func_151D9B8C_header // matching: this file keeps its own declaration of func_151D9B8C
 #include "functions.h"
 #undef func_151D9B8C
+// matching: a pointer where the definition has s32 (arg 4)
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 
@@ -14,8 +16,6 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                   s32, s32, s32, s32, s32, s32, s32, s32);
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -90,8 +90,6 @@ void func_151B01B8(Actor *actor, Actor *other) {
         }
     }
 }
-
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
 void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
@@ -522,8 +520,6 @@ s32 func_151B1478(Game1DD500Particle *particle) {
     }
     return 1;
 }
-
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **out, u8 *fresh);
 
 /* Writes a particle's quad for view into that view's vertex buffer, facing the camera and tilted
  * by the particle's sideways motion. Returns the vertices, or NULL when there is no buffer. */

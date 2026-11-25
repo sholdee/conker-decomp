@@ -3,10 +3,6 @@
 // functions.h declares these three with other return types; this file uses the s32 versions below.
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
-void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 
 /* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game_1DD500 emitters. */
 const u8 D_800AB310[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
@@ -15,27 +11,6 @@ static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159
 /* Per effect kind flag. */
 static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
-
-/* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
-typedef struct {
-    u8 phaseX;
-    u8 phaseY;
-    s8 stepX;
-    s8 stepY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 spawnCredit;
-    f32 size;
-    f32 shrink; /* size multiplier per frame (timed effects) */
-    u8 kind;
-    u8 pad19[3];
-} SteamData; /* 0x1C */
-
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x18];
-    /* 0x128 */ SteamData steam;
-} SteamEffect;
 
 
 /* Effect kind for the current context: D_800E0A10, or kind 10 when level is clear and func_150A29C8(0, 0x1C) fails. */
@@ -112,49 +87,8 @@ u8 func_151D8FE0(void) {
 #define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
 #define WOBBLE_FLAG_BOUNCE     2 /* bounce on the floor instead of bursting */
 
-/* Per-particle data of a func_151D9014 particle (SteamParticle.data). */
-typedef struct {
-    f32 size;
-    u8 phaseX;
-    u8 phaseY;
-    s8 stepX;
-    s8 stepY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 burstScale;
-    f32 altBurstScale;
-    u8 kind;
-    u8 flags;
-    u8 pad1A[2];
-} SteamWobble; /* 0x1C */
-
 #define SPIN_FLAG_SPIN 1 /* oscillate desc.unk3C */
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
-
-/* Per-particle data of a func_151DB5D0 particle (SteamParticle.data). */
-typedef struct {
-    u8 flags;
-    f32 drag;
-    u8 angleX;
-    u8 angleY;
-    u8 angleZ;
-    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
-    u8 stepY;
-    u8 stepZ;
-    Vec3f amplitude;
-} ParticleSpin; /* 0x1C */
-
-/* A live sprite particle as returned by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {
-        SteamWobble wobble;
-        ParticleSpin spin;
-    } data;
-} SteamParticle;
-
-s32 func_151D9450(SteamParticle *particle, Vec3f *arg1);
-u8 func_151D9534(SteamParticle *particle, Vec3f *arg1);
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
 SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
@@ -386,21 +320,6 @@ u8 func_151D9B34(void) {
 }
 
 
-/* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
-typedef struct {
-    s16 timer;
-    f32 size;
-    Vec3f pos;
-    u8 unk14;
-    u8 unk15;
-    u8 kind;
-} DripData; /* 0x18 */
-
-typedef struct {
-    TimedEffect base;
-    DripData drip;
-} DripEffect;
-
 static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
@@ -565,9 +484,6 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     return effect;
 }
 
-SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
-                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
-
 /* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
 s32 func_151DA368(SteamEffect *effect) {
     SteamData *steam;
@@ -642,36 +558,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     }
     return 1;
 }
-
-/* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
-typedef struct {
-    f32 burstScale;
-    f32 altBurstScale;
-    u8 kind;
-    u8 pad9[3];
-} SplashBurst; /* 0xC */
-
-/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
-typedef struct {
-    TrailMotion motion;
-    u8 unk20;
-    u8 pad21[0x27];
-    SplashBurst burst;
-} SplashState;
-
-typedef struct {
-    Vec3f pos;
-    f32 unkC;
-    f32 unk10;
-} SplashNode; /* 0x14 */
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ SplashNode *nodes;
-    /* 0x98 */ SplashState *state;
-} Splash;
 
 extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                              TrailRender *, s32, s32, s32);
@@ -787,20 +673,6 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
 }
 
 
-/* Data of a func_151DAB58 effect: squashes and stretches it on one phase. */
-typedef struct {
-    u8 phase;
-    s8 step;
-    u8 pad2[2];
-    f32 amplitudeX;
-    f32 amplitudeY;
-} SquashData; /* 0xC */
-
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ SquashData squash;
-} SquashEffect;
-
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
 // matching: volatile arg4 (and the non-volatile byte read of it below) make IDO reload it from its stack slot
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
@@ -871,8 +743,6 @@ s32 func_151DADA0(SquashEffect *effect) {
     effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
 }
-
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
 
 /* Vertex function (D_80089E1C) of a particle drawn as a camera-facing quad, double-buffered per view.
  * Builds this frame's quad vertices for view `view`; returns them, or NULL when no buffer is free. */

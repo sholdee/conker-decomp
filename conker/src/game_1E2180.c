@@ -4,9 +4,6 @@
 
 #define BLOOD_PROFILE_NONE 99
 
-void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
-                   s32);
-
 /* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor` for 40-60 frames, unless its blood profile
  * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
 BloodDrip *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {

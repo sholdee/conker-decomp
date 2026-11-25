@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
 extern void *D_8008CA4C[];
@@ -95,41 +94,6 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     func_15167D84(&template, 0, 0, -1, owner, list);
 }
 
-/* A particle spawned by func_151B9690 (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];        /* object link */
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ void *anim;
-    /* 0x14 */ s32 floorAndMinSize; /* low half floor height, high half minimum size */
-    /* 0x18 */ s32 kind;
-    /* 0x1C */ s16 frame;
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ s16 size;
-    /* 0x2C */ u8 subX;
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 phase;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-} FallingParticle;
-
 /*
  * Particle callback 0 (D_8008C9C8[0]) for func_151B9690's particles. Kind 1 pulses in size while the base
  * size decays; other kinds shrink towards their minimum size. On reaching the floor the particle dies
@@ -190,27 +154,6 @@ void func_151B9964(FallingParticle *particle) {
         }
     }
 }
-
-/* Type 7 object (0x2C bytes): emits func_151B9690 particles every frame until its timer runs out. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 *followPos; /* when set, emit from this position instead of x/y/z */
-    /* 0x14 */ u8 animIndex;
-    /* 0x15 */ u8 kind;
-    /* 0x16 */ s16 x;
-    /* 0x18 */ s16 y;
-    /* 0x1A */ s16 z;
-    /* 0x1C */ s16 velY;
-    /* 0x1E */ s16 velYRange;
-    /* 0x20 */ s16 speed;
-    /* 0x22 */ s16 speedRange;
-    /* 0x24 */ s16 minSize;
-    /* 0x26 */ s16 size;
-    /* 0x28 */ s16 count;      /* particles emitted per frame besides the 4 fast ones */
-    /* 0x2A */ s16 timer;
-} FallingEmitter;
-
-void func_151B9690(s32, s32, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
 /* Creates a particle emitter (see func_151B9CB0); the parameters are its fields. */
 void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed,

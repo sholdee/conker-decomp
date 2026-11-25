@@ -275,7 +275,6 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
 }
 
 extern void *func_150F6DE4(Actor *);
-extern void func_151CD35C(s32);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_15163A60(s32, s32, s32);
 extern u8 D_8009F0D0;
@@ -474,7 +473,6 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
 
 extern void func_150F6DB0(Actor *);
-extern void func_151CD394(s32);
 extern void func_150B3DD0(void);
 extern void func_150C5C9C(Actor *);
 

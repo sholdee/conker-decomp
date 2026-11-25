@@ -334,8 +334,6 @@ s32 func_1518C540(MotionTrail *trail) {
     return 1;
 }
 
-u8 func_151D8E20(void);
-
 /* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
 s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     QuadFxData fx;

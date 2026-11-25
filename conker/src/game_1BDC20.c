@@ -6,9 +6,6 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-u8 func_151D8E20(void);
-
 /* D_800A9D40: lifetime and wobble of each kind of falling drop. */
 typedef struct {
     /* 0x00 */ s16 lifeMin;
@@ -363,8 +360,6 @@ void func_15191400(DripEmitter *emitter) {
     }
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
-
-void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
 s8 func_15191520(DripParticle *drop) {

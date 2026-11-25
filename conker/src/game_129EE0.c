@@ -285,7 +285,6 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
-extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /*
  * Per-frame update of the func_150FCFD4 particle: follows its owner (calling func_15107B78 on it at a random

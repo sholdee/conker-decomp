@@ -31,7 +31,6 @@ typedef struct Game1BBFC0Beam {
 } Game1BBFC0Beam;
 
 void *memcpy(void *, const void *, u32);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 

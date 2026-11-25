@@ -97,9 +97,6 @@ s32 func_150BB760(Actor *actor) {
     }
 }
 
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
  * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(Actor *actor) {
@@ -620,8 +617,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
     }
     return 1;
 }
-
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
 void func_150BD070(u8 arg0, s32 arg1) {

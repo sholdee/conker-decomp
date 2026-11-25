@@ -56,8 +56,6 @@ void func_150C7020(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-void func_151DB5D0(s32, f32 *pos, f32 *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Spawns one func_151DB5D0 particle at `from`, moving towards `to` with randomized size and lifetime. */
 void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task) {
     f32 vel[3];

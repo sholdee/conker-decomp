@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #include "functions.h"
+#undef func_151D9014
 #include "variables.h"
 
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */

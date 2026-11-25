@@ -184,8 +184,6 @@ s32 func_15102D90(BoneBeamParticle *particle) {
     return 1;
 }
 
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **vtx, u8 *fresh);
-
 /* Vertex function: builds the beam's quad for `viewport`, from its start to def.height of the way to its end,
  * def.width wide and facing the viewport's camera. */
 Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {

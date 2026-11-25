@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-u8 func_151D8E20(void);
-void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32,
-                   s32, s32, s32, s32);
-void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
-
 /* Calls func_151DBCBC at the current sample's (x, z) with height y, then sets the payload's
  * unk20 to 4. */
 s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {

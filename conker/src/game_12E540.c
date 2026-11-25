@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
 struct DescParticleHead;
 
 void func_151617C4(LightEffect *effect);

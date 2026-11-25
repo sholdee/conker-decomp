@@ -316,7 +316,6 @@ void func_15106610(BoltObj *bolt) {
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
@@ -439,7 +438,6 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
 }
 
 extern void (*D_80088C18[])(BoltObj *bolt);
-void func_151D5E30(void *arg0);
 
 /* Destroys the bolt's resources: the kind's cleanup callback, both end flares and the vertex buffer. */
 void func_15106E78(BoltObj *bolt) {

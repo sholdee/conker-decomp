@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151D5148(Actor *obj);
-void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-
 
 /* Muzzle points (from, to) of this gun on bone D_80088BB0. */
 const Vec3f D_800A2130 = { 10.0f, -121.0f, 81.0f };
@@ -112,10 +109,6 @@ void func_150FFC3C(Actor *obj) {
         func_151D8868(&event, 0, 0xFF, 1);
     }
 }
-
-void func_151D5A18(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
-                   Vec3f *arg5, u8 arg6);
-void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);
 
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {

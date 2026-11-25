@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
-
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
     u8 other[8];

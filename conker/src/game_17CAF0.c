@@ -148,8 +148,6 @@ void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
-
 void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     ConeBasis cone;
 
@@ -1162,8 +1160,6 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
         count--;
     }
 }
-
-extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
 void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     ConeBasis cone;

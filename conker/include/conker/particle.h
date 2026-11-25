@@ -2669,13 +2669,582 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 arg11, s32 arg12, s32 arg13, u8 arg14);
 s32 func_151AFEA4(SparkParticle *spark, s32 arg1);
 
+/* game_1DEF60.c */
+/* Per-task data kept at offset 0x28 of the task created by func_151B1AB0. */
+typedef struct {
+    Actor *owner;
+    u8 ownerUnk3B;
+    f32 timer;
+} Data151B1AB0;
+
+typedef struct {
+    TimedEffect base;
+    Data151B1AB0 data;
+} Task151B1AB0;
+
+void func_151B1AB0(Actor *owner);
+void func_151B1B34(Task151B1AB0 *task);
+void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind);
+
+/* game_1E30A0.c */
+/* Object whose sound handle func_151B5FCC stops. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x88];
+    /* 0x88 */ s32 sound;
+} SoundOwner;
+
+PulseParticle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity, s16 lifetime,
+                             u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12, s32 arg13);
+void func_151B5E8C(void);
+void func_151B5E94(PulseParticle *particle);
+void func_151B5FCC(SoundOwner *obj);
+
 /* game_1E34C0.c */
 PulseParticle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity, s16 lifetime,
                              u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12, s32 arg13);
 void func_151B6254(PulseParticle *particle);
 
+/* game_1E5FF0.c */
+/* Head of a pooled physics particle (full layout in game_15F680.c), with the bob in its vel/gravity slots. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ Vec3f rot;
+    /* 0x2C */ Vec3f scale;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ f32 bobPhase;     // vel.x
+    /* 0x48 */ f32 bobCenter;    // vel.y
+    /* 0x4C */ f32 bobSpeed;     // vel.z
+    /* 0x50 */ Vec3f rotVel;
+    /* 0x5C */ f32 bobAmplitude; // gravity
+} BobParticle;
+
+/* Sprite particle (Particle in game_2062D0.c), with the bob in its desc.vel/desc.gravity slots. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ Vec3f pos;     // desc.pos
+    /* 0x4C */ Vec3f offset;  // desc.offset
+    /* 0x58 */ f32 bobPhase;     // desc.vel.unk0
+    /* 0x5C */ f32 bobCenter;    // desc.vel.unk4
+    /* 0x60 */ f32 bobSpeed;     // desc.vel.unk8
+    /* 0x64 */ f32 bobAmplitude; // desc.gravity
+} BobSprite;
+
+/* Motion extension of a model effect (EffectMotion in game_1844C0.c), with the bob in its vel/gravity slots. */
+typedef struct {
+    /* 0x00 */ Vec3f rot;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ f32 phase;        // vel.x
+    /* 0x14 */ f32 center;       // vel.y
+    /* 0x18 */ f32 speed;        // vel.z
+    /* 0x1C */ Vec3f rotVel;
+    /* 0x28 */ f32 amplitude;    // gravity
+} EffectBob;
+
+/* Model effect (Effect in game_1844C0.c; only the fields used here). */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x54];
+    /* 0x054 */ Vec3f pos;      // params.pos
+    /* 0x060 */ u8 pad60[0x120 - 0x60];
+    /* 0x120 */ EffectBob bob;   // extra
+} BobEffect;
+
+/* Bob state that follows a game_169510.c particle (another member of its DefParticleMotion union). */
+typedef struct {
+    /* 0x00 */ f32 center;
+    /* 0x04 */ f32 amplitude;
+    /* 0x08 */ f32 phase;
+    /* 0x0C */ f32 speed;
+    /* 0x10 */ Vec3f rotVel;
+} QuadBob;
+
+/* Quad particle of game_169510.c (only the fields used here), followed by its motion state. */
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ QuadBob bob;
+} BobQuad;
+
+s32 func_151B8B40(BobParticle *particle);
+s32 func_151B8BE0(BobSprite *particle, Vec3f *prevPos);
+s32 func_151B8C54(BobEffect *effect);
+s32 func_151B8CFC(BobQuad *particle);
+
+/* game_1E6B40.c */
+/* A particle spawned by func_151B9690 (layout as Particle in game_1944C0.c). */
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[0xA];        /* object link */
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ void *anim;
+    /* 0x14 */ s32 floorAndMinSize; /* low half floor height, high half minimum size */
+    /* 0x18 */ s32 kind;
+    /* 0x1C */ s16 frame;
+    /* 0x1E */ s16 frameStep;
+    /* 0x20 */ s16 x;
+    /* 0x22 */ s16 y;
+    /* 0x24 */ s16 z;
+    /* 0x26 */ s16 velX;
+    /* 0x28 */ s16 velZ;
+    /* 0x2A */ s16 size;
+    /* 0x2C */ u8 subX;
+    /* 0x2D */ u8 subZ;
+    /* 0x2E */ u8 subY;
+    /* 0x2F */ s8 callback;
+    /* 0x30 */ s16 velY;
+    /* 0x32 */ s16 accelY;
+    /* 0x34 */ s16 width;
+    /* 0x36 */ s16 height;
+    /* 0x38 */ s16 life;
+    /* 0x3A */ s8 fadeStep;
+    /* 0x3B */ u8 phase;
+    /* 0x3C */ u8 primR;
+    /* 0x3D */ u8 primG;
+    /* 0x3E */ u8 primB;
+    /* 0x3F */ u8 primA;
+} FallingParticle;
+
+/* Type 7 object (0x2C bytes): emits func_151B9690 particles every frame until its timer runs out. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ f32 *followPos; /* when set, emit from this position instead of x/y/z */
+    /* 0x14 */ u8 animIndex;
+    /* 0x15 */ u8 kind;
+    /* 0x16 */ s16 x;
+    /* 0x18 */ s16 y;
+    /* 0x1A */ s16 z;
+    /* 0x1C */ s16 velY;
+    /* 0x1E */ s16 velYRange;
+    /* 0x20 */ s16 speed;
+    /* 0x22 */ s16 speedRange;
+    /* 0x24 */ s16 minSize;
+    /* 0x26 */ s16 size;
+    /* 0x28 */ s16 count;      /* particles emitted per frame besides the 4 fast ones */
+    /* 0x2A */ s16 timer;
+} FallingEmitter;
+
+void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32 angle, s16 angleSpread, s16 velY,
+                   s16 velYRange, s16 speed, s16 speedRange, s16 radius, s16 minSize, s16 size, u8 owner, s32 list);
+void func_151B9964(FallingParticle *particle);
+void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed, s16 speedRange,
+                   s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner, s32 list);
+void func_151B9CB0(FallingEmitter *emitter);
+
 /* game_1E9820.c */
 void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+
+/* game_1F1CD0.c */
+typedef struct Game1F1CD0Actor {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ProjectileStream emission;
+} Game1F1CD0Actor;
+
+void func_151C4820(Game1F1CD0Actor *actor);
+
+/* game_1FA770.c */
+/* A level-placed stream: a column of particles falling from y + height down to y. */
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 size;
+    s16 height;
+    u8 padA[0xA];
+    u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
+    u8 pad15[3];
+    s32 id;
+    s32 textureIndex; /* into D_800AAEE0 */
+} StreamSource;
+
+/* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
+typedef struct {
+    Vec3f pos;
+    f32 velocity;
+    f32 width;
+    s16 alpha;
+    f32 tc; /* texture t coordinate */
+} StreamParticle;
+
+/* Per-stream state, the 0x50-byte data block of a stream emitter. */
+typedef struct {
+    f32 swayAmpX;
+    f32 swayAmpZ;
+    f32 swayPhaseX;
+    f32 swayPhaseZ;
+    f32 swayRateX;
+    f32 swayRateZ;
+    Vec2fXZ spawnPos; /* where the last particle was spawned */
+    f32 unk20;
+    f32 baseWidth;
+    f32 widthAmp;
+    f32 widthPhase;
+    f32 widthRate;
+    f32 width;
+    f32 unk38;
+    f32 tc;
+    f32 spawnCount; /* particles owed; one is spawned per whole unit */
+    f32 floorY;
+    s32 id;
+    u8 textureIndex;
+    u8 pad4D[3];
+} StreamData;
+
+typedef struct LevelStream {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ StreamParticle *particles;
+    /* 0x98 */ StreamData *data;
+} LevelStream;
+
+/* The spawner task's state: owns at most one emitter for its source. */
+typedef struct {
+    StreamSource *source;
+    s32 id;
+    LevelStream *emitter;
+    u8 textureIndex;
+    u8 padD[3];
+} StreamSpawner;
+
+typedef struct {
+    TimedEffect base;
+    StreamSpawner spawner;
+} StreamTask;
+
+StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2);
+void func_151CD35C(s32 id);
+void func_151CD394(s32 id);
+void func_151CD3CC(StreamTask *task, s32 *id, u8 event);
+/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
+LevelStream *func_151CD4C0();
+s32 func_151CD674(LevelStream *emitter);
+s32 func_151CD7BC(LevelStream *emitter);
+s32 func_151CDB94(LevelStream *emitter);
+Gfx *func_151CDE20(LevelStream *emitter, Gfx *gfx, s16 view);
+void func_151CE47C(LevelStream *emitter);
+void func_151CE49C(LevelStream *emitter);
+void func_151CE4DC(LevelStream *emitter);
+void func_151CE51C(void *actor, StreamSource *source);
+LevelStream *func_151CE634(s32 id);
+
+/* game_1FBB80.c */
+typedef struct Game1FBB80Owner {
+    s16 field00;
+    s16 mask;
+} Game1FBB80Owner;
+
+typedef struct Game1FBB80Effect {
+    void *shape;
+    f32 rate;
+    f32 accumulator;
+    Game1FBB80Owner *owner;
+    f32 height;
+} Game1FBB80Effect;
+
+typedef struct Game1FBB80Object {
+    u8 pad00, flags01;
+    u8 pad02[0xA];
+    u8 flags0C;
+    u8 pad0D[0x1B];
+    Game1FBB80Effect effect;
+} Game1FBB80Object;
+
+void func_151CE6D0(Game1FBB80Object *object);
+
+/* game_200930.c */
+/* Bobbing motion stored in a debris particle's user data (object + 0x170). */
+typedef struct {
+    /* 0x0 */ s16 timer;
+    /* 0x4 */ f32 phase;
+    /* 0x8 */ f32 phaseSpeed;
+    /* 0xC */ f32 amplitude;
+} BobMotion;
+
+/* A debris particle as seen by its update callback. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x20];
+    /* 0x020 */ Vec3f unk20;
+    /* 0x02C */ u8 pad2C[0x50 - 0x2C];
+    /* 0x050 */ Vec3f unk50;
+    /* 0x05C */ u8 pad5C[0x170 - 0x5C];
+    /* 0x170 */ BobMotion wobble;
+} WobbleParticle;
+
+/* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
+typedef struct {
+    /* 0x00 */ Actor *obj;
+    /* 0x04 */ u8 uniqueId;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 posFunc;
+    /* 0x0C */ f32 spawnTimer;
+    /* 0x10 */ u8 flags; /* bit 0: pos is valid */
+    /* 0x14 */ Vec3f pos;
+} ObjEmitter;
+
+/* An effect created by func_151D469C; its user data is an ObjEmitter. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ObjEmitter emitter;
+} ObjEmitterEffect;
+
+/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ u8 unk58[0x50];
+    /* 0xA8 */ WobbleData extra;
+} Puff151D4794;
+
+/* Hit description passed to func_151D4DAC. */
+typedef struct {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ u8 pad8[0x50];
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 unk59;
+} S151D4DAC;
+
+void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5);
+s32 func_151D3D50(WobbleParticle *particle);
+void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset);
+void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3);
+void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4);
+void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+void func_151D4668(Actor *obj);
+void func_151D469C(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
+void func_151D4794(ObjEmitterEffect *effect);
+void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg);
+s32 func_151D4D04(Puff151D4794 *puff, s32 arg1);
+void func_151D4D58(Actor *obj);
+void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7,
+                   s32 arg8);
+void func_151D5148(Actor *obj);
+void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf,
+                   Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9);
+void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
+void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7);
+void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
+void func_151D57F8(Actor *obj, u8 slot);
+void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone);
+s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg);
+void func_151D5D60(void **slots, s16 index, s32 size, void **out, s8 *allocated);
+void func_151D5E30(s32 *slots);
+
+/* game_2062D0.c */
+/* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
+typedef struct {
+    u8 phaseX;
+    u8 phaseY;
+    s8 stepX;
+    s8 stepY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 spawnCredit;
+    f32 size;
+    f32 shrink; /* size multiplier per frame (timed effects) */
+    u8 kind;
+    u8 pad19[3];
+} SteamData; /* 0x1C */
+
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
+    /* 0x128 */ SteamData steam;
+} SteamEffect;
+
+/* Per-particle data of a func_151D9014 particle (SteamParticle.data). */
+typedef struct {
+    f32 size;
+    u8 phaseX;
+    u8 phaseY;
+    s8 stepX;
+    s8 stepY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 burstScale;
+    f32 altBurstScale;
+    u8 kind;
+    u8 flags;
+    u8 pad1A[2];
+} SteamWobble; /* 0x1C */
+
+/* Per-particle data of a func_151DB5D0 particle (SteamParticle.data). */
+typedef struct {
+    u8 flags;
+    f32 drag;
+    u8 angleX;
+    u8 angleY;
+    u8 angleZ;
+    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
+    u8 stepY;
+    u8 stepZ;
+    Vec3f amplitude;
+} ParticleSpin; /* 0x1C */
+
+/* A live sprite particle as returned by func_15130280. */
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {
+        SteamWobble wobble;
+        ParticleSpin spin;
+    } data;
+} SteamParticle;
+
+/* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
+typedef struct {
+    s16 timer;
+    f32 size;
+    Vec3f pos;
+    u8 unk14;
+    u8 unk15;
+    u8 kind;
+} DripData; /* 0x18 */
+
+typedef struct {
+    TimedEffect base;
+    DripData drip;
+} DripEffect;
+
+/* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
+typedef struct {
+    f32 burstScale;
+    f32 altBurstScale;
+    u8 kind;
+    u8 pad9[3];
+} SplashBurst; /* 0xC */
+
+/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
+typedef struct {
+    TrailMotion motion;
+    u8 unk20;
+    u8 pad21[0x27];
+    SplashBurst burst;
+} SplashState;
+
+typedef struct {
+    Vec3f pos;
+    f32 unkC;
+    f32 unk10;
+} SplashNode; /* 0x14 */
+
+typedef struct {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ SplashNode *nodes;
+    /* 0x98 */ SplashState *state;
+} Splash;
+
+/* Data of a func_151DAB58 effect: squashes and stretches it on one phase. */
+typedef struct {
+    u8 phase;
+    s8 step;
+    u8 pad2[2];
+    f32 amplitudeX;
+    f32 amplitudeY;
+} SquashData; /* 0xC */
+
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ SquashData squash;
+} SquashEffect;
+
+u8 func_151D8E20(void);
+u8 func_151D8E6C(void);
+u8 func_151D8EB0(void);
+u8 func_151D8EBC(void);
+u8 func_151D8EC8(void);
+u8 func_151D8EFC(void);
+u8 func_151D8F30(void);
+u8 func_151D8F7C(void);
+u8 func_151D8FB0(void);
+u8 func_151D8FBC(void);
+u8 func_151D8FC8(void);
+u8 func_151D8FD4(void);
+u8 func_151D8FE0(void);
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                             f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
+                             s32 argF);
+s32 func_151D93F4(SteamParticle *particle, Vec3f *arg1);
+s32 func_151D9450(SteamParticle *particle, Vec3f *arg1);
+u8 func_151D9534(SteamParticle *particle, Vec3f *arg1);
+u8 func_151D97A8(void);
+u8 func_151D9820(void);
+u8 func_151D9878(void);
+u8 func_151D98D0(void);
+u8 func_151D9918(void);
+u8 func_151D9960(void);
+u8 func_151D99C8(void);
+u8 func_151D9A20(void);
+u8 func_151D9A68(void);
+u8 func_151D9AC0(void);
+u8 func_151D9ADC(void);
+u8 func_151D9B34(void);
+void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
+                   s32 argA);
+void func_151D9EB0(DripEffect *effect);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8);
+s32 func_151DA368(SteamEffect *effect);
+s32 func_151DA6A8(SteamEffect *effect);
+Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
+                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
+                      u8 arg10, s32 arg11);
+s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5);
+s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5);
+void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
+s32 func_151DADA0(SquashEffect *effect);
+Vtx *func_151DAE28(DefParticleHead *effect, s16 view);
+void func_151DB004(ParticleDesc *desc);
+void func_151DB068(ParticleDesc *desc);
+void func_151DB0CC(ParticleDesc *desc);
+void func_151DB15C(ParticleDesc *desc);
+void func_151DB1EC(ParticleDesc *desc);
+void func_151DB27C(ParticleDesc *desc);
+void func_151DB2A8(ParticleDesc *desc);
+void func_151DB2CC(ParticleDesc *desc);
+void func_151DB330(ParticleDesc *desc);
+void func_151DB3D8(ParticleDesc *desc);
+void func_151DB43C(ParticleDesc *desc);
+void func_151DB4CC(ParticleDesc *desc);
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime,
+                             u8 arg8, s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
+s32 func_151DB97C(SteamParticle *particle, s32 arg1);
+void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4);
+void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4);
+void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6);
+void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   s32 arg9);
+void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6);
+void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4);
+void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4);
+extern const u8 D_800AB310[13]; // texture id per effect kind
+extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
+extern const u8 D_800AB404[13]; // flag per effect kind
+extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
+
+/* game_209B50.c */
+/* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
+    /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
+    /* 0x11 */ u8 pad11[3];
+} ColorEmitterData; /* 0x14 */
+
+/* Effect created by func_15149130 (only the fields used here). */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ColorEmitterData data;
+} ColorEmitter;
+
+void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind);
+void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind);
+void func_151DC97C(ColorEmitter *emitter);
 
 /* game_20A290.c */
 void func_151DCDE0(void *arg0, u8 arg1, s32 arg2);

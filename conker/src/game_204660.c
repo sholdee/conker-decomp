@@ -541,7 +541,6 @@ typedef struct {
     s32 unk4;
 } Mode151D80C4;
 extern Mode151D80C4 D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from

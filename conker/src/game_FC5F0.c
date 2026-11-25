@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #include "functions.h"
+#undef func_151D9014
 #include "variables.h"
 
 /* Data of an object that emits particles around an actor while that actor has bones. */

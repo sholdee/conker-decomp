@@ -238,7 +238,6 @@ typedef struct {
 extern EffectTexture D_80090B60[];
 extern Mode150DD640 D_800A4AC8[];
 void *memcpy(void *, const void *, u32);
-void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
 
 // matching: the original branches on the axis index around two identical stores
 #define SET_TEXCOORD(vtx, axis, value) \

@@ -32,7 +32,6 @@ typedef struct {
 } RibbonActor;
 
 extern RenderModePair D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
 Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {

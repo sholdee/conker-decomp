@@ -83,7 +83,6 @@ void func_150636A4(Actor *arg0) {
     }
 }
 
-void func_151D57F8(Actor *, s32);
 void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */
@@ -1009,9 +1008,6 @@ extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
 void func_150D8B88(Actor *);
-void func_151D4668(void *);
-void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends

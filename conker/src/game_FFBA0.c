@@ -125,7 +125,6 @@ void func_150D2924(SparkEffect *obj) {
 }
 
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 /*
  * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's

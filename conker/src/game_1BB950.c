@@ -6,8 +6,6 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-
 extern char D_800A7460[];
 extern char D_800A749C[];
 

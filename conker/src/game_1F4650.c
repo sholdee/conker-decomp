@@ -244,8 +244,6 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
     return (s32)obj;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-
 /* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
 void *func_151C7E98(SightBeamObject *obj, s16 view) {
     Vtx *vertices;
@@ -862,10 +860,6 @@ void func_151C970C(s32 command, s32 source) {
     msg.command = command;
     func_151403A8((s32)&msg, 0x3A);
 }
-
-extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
-extern void func_151D5514(void *, u8, s32);
-extern void func_151D3FF4(f32 *, u8, s32);
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
 void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {

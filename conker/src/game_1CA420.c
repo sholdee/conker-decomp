@@ -439,8 +439,6 @@ s32 func_1519D454(MatrixTrail *trail) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-
 /*
  * Draws a trail for view `view` as a strip of quads from the newest point to the oldest, each
  * point spread sideways by its width. Fades the head in and the tail out first if asked to.

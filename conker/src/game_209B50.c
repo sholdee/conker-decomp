@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
 
 /* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
  * flash at `pos`. */
@@ -40,20 +37,6 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
     func_151D3F14(pos, owner, kind);
     func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
-
-/* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
-    /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
-    /* 0x11 */ u8 pad11[3];
-} ColorEmitterData; /* 0x14 */
-
-/* Effect created by func_15149130 (only the fields used here). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ColorEmitterData data;
-} ColorEmitter;
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */

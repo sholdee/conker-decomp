@@ -191,18 +191,6 @@ void func_15128774(Camera *arg0, Actor *arg1);
 void func_1512D380(s32 arg0);
 struct DefParticleHead;
 
-void func_151DB004(struct ParticleDesc *desc);
-void func_151DB068(struct ParticleDesc *desc);
-void func_151DB0CC(struct ParticleDesc *desc);
-void func_151DB15C(struct ParticleDesc *desc);
-void func_151DB1EC(struct ParticleDesc *desc);
-void func_151DB27C(struct ParticleDesc *desc);
-void func_151DB2A8(struct ParticleDesc *desc);
-void func_151DB2CC(struct ParticleDesc *desc);
-void func_151DB330(struct ParticleDesc *desc);
-void func_151DB3D8(struct ParticleDesc *desc);
-void func_151DB43C(struct ParticleDesc *desc);
-void func_151DBBD4(Vec3f *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4);
 void func_151F0080(MtxF arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_151F00E0(MtxF arg0, MtxF arg1, MtxF arg2);
 
@@ -309,11 +297,6 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
-void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
-void func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, Vec3f *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8);
-void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6);
 void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);

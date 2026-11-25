@@ -109,7 +109,6 @@ typedef struct {
     u8 alpha;
 } StreakVtx;
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 

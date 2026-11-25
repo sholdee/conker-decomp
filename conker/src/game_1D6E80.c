@@ -2,11 +2,11 @@
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
 // matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
 #define func_15142314 func_15142314_functions_h
+#define func_151D9014 func_151D9014_header // matching: this file keeps its own declaration of func_151D9014
 #include "functions.h"
 #undef func_15142314
+#undef func_151D9014
 #include "variables.h"
-
-extern u8 func_151D8E20(void);
 
 struct ActorTask;
 
@@ -979,8 +979,8 @@ void func_151AB930(Actor *actor) {
     }
 }
 
+// matching: s32 where the definition has s16 (arg 5), u8 (args 6, 11); a pointer where the definition has s32 (arg 12); u8 where the definition has s32 (arg 16); returns void (the definition: SteamParticle *)
 extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, u8, u8);
-
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
 void func_151AB9C8(EmitterTask *task) {
     EmitterPayload *emitter;

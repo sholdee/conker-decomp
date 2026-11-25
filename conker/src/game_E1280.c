@@ -250,8 +250,6 @@ s32 func_150B4294(ScatterTrail *trail) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-
 /*
  * Draws the trail as a camera-facing ribbon, newest point first: each pair of points becomes a quad
  * whose sides are offset by the point's width along (segment x to-camera).

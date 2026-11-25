@@ -2,10 +2,12 @@
 #define func_1510A344 func_1510A344_header // matching: this file keeps its own declarations of these
 #define func_1516E778 func_1516E778_header
 #define func_1516F2F8 func_1516F2F8_header
+#define func_151DC8BC func_151DC8BC_header
 #include "functions.h"
 #undef func_1510A344
 #undef func_1516E778
 #undef func_1516F2F8
+#undef func_151DC8BC
 #include "variables.h"
 
 /* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
@@ -348,8 +350,6 @@ extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
-extern void func_151CD35C(s32);
-extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
 extern void func_151E53E8(s32);
 
@@ -1103,10 +1103,10 @@ extern void func_151F2BA8(void);
 extern void func_151F2BE8(void);
 extern void func_151F2C4C(void);
 extern void func_151F2D6C(s32, s32);
-extern void func_151B9BF0(s32, s32, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, f32 *, s32, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
+// matching: s16 where the definition has s32 (arg 2); s32 where the definition has u8 (args 3-5)
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_151A3390(Actor *, u8);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
@@ -1120,11 +1120,9 @@ extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
 extern void func_151090DC(void);
 extern void func_151CFA4C(Actor *, u8, s32);
-extern void func_151D5648(f32 *, u8, s32);
 extern void func_15107B78(Actor *, s16, s16, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, u8, s32);
-extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
 

@@ -107,7 +107,6 @@ void func_151563B8(StreakParticle *arg0) {
 }
 
 extern RenderModePair D_800A4AC8[];
-void func_151D5D60(Vtx **buffers, s16 viewIndex, s32 size, Vtx **vtx, u8 *fresh);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
@@ -361,8 +360,6 @@ void func_15156D24(f32 *pos, u8 owner) {
     desc.unk89 = 1;
     func_151568F8(&desc, owner);
 }
-
-extern void func_151D5E30(Vtx **);
 
 /* Frees a streak particle's per-view vertex buffers. */
 void func_15156F94(StreakParticle *particle) {

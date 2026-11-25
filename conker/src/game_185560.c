@@ -742,8 +742,6 @@ struct ParticleUpdateArg {
     /* 0x04 */ f32 unk4;
 };
 
-u8 func_151D8E20(void);
-
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
 u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     u8 alive;

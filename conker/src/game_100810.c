@@ -506,7 +506,6 @@ typedef struct {
     Vtx v[3];
 } TrailVtx;
 
-void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;

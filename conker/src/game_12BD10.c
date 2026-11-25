@@ -7,9 +7,6 @@ extern Vec3f D_800A2000;
 extern Vec3f D_800A200C;
 extern Vec3f D_800A2018;
 extern Vec3f D_800A2024;
-void func_151D5148(Actor *obj);
-void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
 
 /* Spawns a projectile (func_151C229C) along `actor`'s direction. With bone matrices it starts at
  * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / func_150FEC28 effects;

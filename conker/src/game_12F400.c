@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
-
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 struct Struct15101F50 {
     /* 0x00 */ DefParticleHead head;

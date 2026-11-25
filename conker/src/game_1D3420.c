@@ -180,8 +180,6 @@ struct Game1D2B10QuadOwner {
     u8 alpha;
 };
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-
 /* Writes the 4 vertices of a vertical quad rotated by table angle `index` into the owner's vertex
  * buffer `index` (initialised from the template the first time) and returns them, or NULL. */
 Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {

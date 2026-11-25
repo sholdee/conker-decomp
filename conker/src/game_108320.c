@@ -43,8 +43,6 @@ typedef struct {
     } u;
 } BeamQuad;
 
-extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
-
 extern Vec3f D_80088910[];
 extern Vec3f D_8008891C[];
 extern s32 D_80088928[];

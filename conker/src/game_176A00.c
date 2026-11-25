@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
-
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
 ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
     ChannelParticle *particle;

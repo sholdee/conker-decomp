@@ -141,8 +141,6 @@ extern Vec3f D_800A149C;
 extern Vec3f D_800A14A8[4];
 extern u8 D_800A14D8[4];
 void *func_15164F0C(u8, u8, void *, u8 owner, s32 kind);
-void func_151D3FF4(Vec3f *pos, u8 owner, s32 kind);
-void func_151D5514(Vec3f *pos, u8 owner, s32 kind);
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting

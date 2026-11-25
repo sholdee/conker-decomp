@@ -1,8 +1,9 @@
 #include <ultra64.h>
+#define func_151DA6F8 func_151DA6F8_header // matching: this file keeps its own declaration of func_151DA6F8
 #include "functions.h"
+#undef func_151DA6F8
 #include "variables.h"
-
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+// matching: s32 where the definition has u8 (args 5, 8, 11); returns void (the definition: Splash *)
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
 /* Randomly spawns a particle at (x, y, z): 15% nothing, 10% a random-direction one (func_151AEAB4),

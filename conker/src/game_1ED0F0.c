@@ -215,8 +215,6 @@ void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151541B8(pos, rand.f * 4.0f + 14.0f, 1.182089925f, (f32)(shade % 56 + 200), 0.0f, fxOwner, fxList);
 }
 
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, fxOwner, fxList);
 }
@@ -240,8 +238,6 @@ typedef struct Bullet88 {
     /* 0x000 */ u8 pad0[0x110];
     /* 0x110 */ s32 unk110;
 } Bullet88;
-
-s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s32, IgnoreList *);
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
 void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
@@ -570,9 +566,6 @@ void func_151C1628(Bullet *bullet) {
     func_151C1570(bullet);
     func_1513259C(bullet);
 }
-
-void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, CollisionTri *, s32, s32, s32);
-void func_151D42E8(Vec3f *, Vec3f *, Actor *, CollisionTri *, s32);
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
 void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {

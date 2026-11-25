@@ -183,9 +183,6 @@ u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
     return TRUE;
 }
 
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Particle update: once the dust particle falls below its floor, splash there and stop. */
 u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
     u8 alive;

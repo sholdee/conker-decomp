@@ -81,7 +81,6 @@ s8 func_15147EB8(MotionTrail *trail) {
     return ret;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern s32 D_800915A4;
 extern struct {
     s32 unk0;

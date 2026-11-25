@@ -659,7 +659,6 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
 extern u8 D_800D3090;
 // matching: s32 parameters where the definition has u8 (no truncation at the call)
 void func_150E7290(s32 arg0, s32 owner, s32 kind);
-void func_151CE51C(Actor *actor, TriggerZone *zone);
 
 /* ZONE_TYPE_EFFECT zone: subTypeData-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
 void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {

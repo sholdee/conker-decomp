@@ -2,9 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s32 arg4, s32 arg5,
-                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                   s32 arg12, s32 arg13, s32 arg14, s32 arg15);
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);

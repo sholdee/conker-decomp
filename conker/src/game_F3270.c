@@ -199,7 +199,6 @@ void func_150C6438(WatcherEmitter *obj) {
 }
 
 extern Vec3f D_800887D0;
-u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {

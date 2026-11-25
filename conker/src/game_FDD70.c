@@ -128,8 +128,6 @@ s32 func_150D11B4(BloodStrip *strip) {
     return 1;
 }
 
-void func_151DB5D0(s32, Vec3f *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /* BloodStrip emit callback 7: moves both strip points `time` along their velocities and emits one
  * func_151DB5D0 particle at A, heading from A to B scaled by the strip's power. */
 void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip) {

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60();
 extern void func_150A7960(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
 extern f32 D_8009F750;
 extern f32 D_8009F754;

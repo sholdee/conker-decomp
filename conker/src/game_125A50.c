@@ -17,9 +17,6 @@ const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
-void func_151D3F14(Vec3f *pos, u8, s32);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
-
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
@@ -166,7 +163,6 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 }
 
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a

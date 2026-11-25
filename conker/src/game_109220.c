@@ -135,8 +135,6 @@ struct StreamActor {
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);
-void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Creates falling stream `kind` (0 and 5: single streams; 1-4: four streams at (+-650, 736, +-650)

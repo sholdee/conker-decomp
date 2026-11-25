@@ -59,8 +59,6 @@ void func_15147740(EffectObj *obj) {
     }
 }
 
-extern void func_151D5E30(void *);
-
 void func_151478D0(EffectObj *obj) {
     func_151D5E30(obj->buffers);
 }

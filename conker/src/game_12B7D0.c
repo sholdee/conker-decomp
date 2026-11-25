@@ -14,9 +14,6 @@ extern Vec3f D_800A1FC8;
 extern Vec3f D_800A1FD4;
 extern Vec3f D_800A1FE0;
 
-void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);
-void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
 s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
@@ -113,8 +110,6 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
         }
     }
 }
-
-void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
 
 /* Handler: writes the world position of `obj`'s bone point D_800A1FC8 to `out`. */
 void func_150FE794(Actor *obj, s32 arg1, Vec3f *out) {

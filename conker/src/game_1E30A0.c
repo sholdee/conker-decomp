@@ -1,13 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Object whose sound handle func_151B5FCC stops. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x88];
-    /* 0x88 */ s32 sound;
-} SoundOwner;
 
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end

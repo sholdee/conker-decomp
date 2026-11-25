@@ -10,9 +10,11 @@
 // matching: two calls here pass a different number of arguments than these take, so the file keeps them unprototyped
 #define func_151942E8 func_151942E8_effect_h
 #define func_151B5BA0 func_151B5BA0_effect_h
+#define func_1505DADC func_1505DADC_header // matching: this file keeps its own declarations of these
 #include "functions.h"
 #undef func_151942E8
 #undef func_151B5BA0
+#undef func_1505DADC
 void func_151942E8();
 void func_151B5BA0();
 #undef func_151C6A28
@@ -192,8 +194,6 @@ typedef struct EffectLocals {
     Vec3w localPos;
 } EffectLocals;
 
-extern void func_151DC484(f32 *, CollisionHit *, s32, u8, s32);
-
 /* A floor probe result together with a point (func_15071A64, func_15074C00). */
 typedef struct {
     /* 0x00 */ CollisionHit ground;
@@ -205,8 +205,6 @@ extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
 extern void func_151A3390(void *arg0, u8 arg1);
 s32 func_151F2CDC(void);
-extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
-void func_151DC260(f32 *, void *, s32, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 
 /* One entry of an object's timed event list. */

@@ -10,7 +10,6 @@
 extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f *, s32);
 extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
 extern void (*D_8008FB70[])(HoltenRopeEffect *);
-extern void func_151D5E30(void *);
 
 /* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
 HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
@@ -81,7 +80,6 @@ typedef s32 (*HoltenRopeDrawStyle)(HoltenRopeEffect *effect, s32 *mode0, s32 *mo
                                    s32 *cycleType, u8 *renderMode, u8 *unk13);
 
 extern HoltenRopeDrawStyle D_8008FB10[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
     s32 unk4;

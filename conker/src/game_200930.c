@@ -3,7 +3,6 @@
 #include "functions.h"
 #undef func_15131958
 #include "variables.h"
-#include "effects.h"
 
 extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 
@@ -11,14 +10,6 @@ void func_15131958(void *, f32, void *); // matching: called with a third argume
 
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 void *memcpy(void *, const void *, u32);
-
-/* Bobbing motion stored in a debris particle's user data (object + 0x170). */
-typedef struct {
-    /* 0x0 */ s16 timer;
-    /* 0x4 */ f32 phase;
-    /* 0x8 */ f32 phaseSpeed;
-    /* 0xC */ f32 amplitude;
-} BobMotion;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
@@ -225,16 +216,6 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
     }
 }
 
-/* A debris particle as seen by its update callback. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x20];
-    /* 0x020 */ Vec3f unk20;
-    /* 0x02C */ u8 pad2C[0x50 - 0x2C];
-    /* 0x050 */ Vec3f unk50;
-    /* 0x05C */ u8 pad5C[0x170 - 0x5C];
-    /* 0x170 */ BobMotion wobble;
-} WobbleParticle;
-
 /* Particle update: bob unk20.y around unk50.y while the wobble timer runs, then settle on unk50. */
 s32 func_151D3D50(WobbleParticle *particle) {
     BobMotion *wobble = &particle->wobble;
@@ -413,17 +394,6 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     func_15132A4C(&p, 3, 255, 0, arg5, arg6);
 }
 
-/* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
-typedef struct {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ u8 uniqueId;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8 posFunc;
-    /* 0x0C */ f32 spawnTimer;
-    /* 0x10 */ u8 flags; /* bit 0: pos is valid */
-    /* 0x14 */ Vec3f pos;
-} ObjEmitter;
-
 /* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
 void func_151D4668(Actor *obj) {
     ActorRef handle;
@@ -467,12 +437,6 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
         memcpy((u8 *)effect + 0x28, &emitter, sizeof(ObjEmitter));
     }
 }
-
-/* An effect created by func_151D469C; its user data is an ObjEmitter. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ObjEmitter emitter;
-} ObjEmitterEffect;
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
 void func_151D4794(ObjEmitterEffect *effect) {
@@ -590,13 +554,6 @@ void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     }
 }
 
-/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ u8 unk58[0x50];
-    /* 0xA8 */ WobbleData extra;
-} Puff151D4794;
-
 /* Puff update callback. */
 s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
     WobbleData *extra;
@@ -607,8 +564,6 @@ s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
     return 1;
 }
 
-void func_151D469C(Actor *obj, s32 posFunc, s32 arg2, s32 arg3, s32 arg4);
-
 /* Attaches two emitters (point functions 0 and 1) to obj. */
 void func_151D4D58(Actor *obj) {
     func_151D469C(obj, 0, 80, 255, 1);
@@ -616,15 +571,6 @@ void func_151D4D58(Actor *obj) {
 }
 
 
-
-/* Hit description passed to func_151D4DAC. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x50];
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
-} S151D4DAC;
 
 /* Applies a hit from attacker to victim travelling along dir. */
 void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
@@ -862,8 +808,6 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
         }
     }
 }
-
-void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */

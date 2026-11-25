@@ -148,7 +148,6 @@ typedef struct {
     GameDC6B0SmokeMotion motion;
 } GameDC6B0SmokeSprite;
 
-u8 func_151D8E6C(void);
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */

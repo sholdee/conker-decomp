@@ -110,7 +110,6 @@ void func_151A7A90(Bolt *bolt) {
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /*
@@ -265,8 +264,6 @@ void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
     func_151A8340(bolt, first, middle, amp, depth - 1);
     func_151A8340(bolt, middle, last, amp, depth - 1);
 }
-
-extern void func_151D5E30(void *);
 
 /* Frees the bolt's vertex buffers. */
 void func_151A8560(Bolt *bolt) {

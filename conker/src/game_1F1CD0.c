@@ -1,12 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-typedef struct Game1F1CD0Actor {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ProjectileStream emission;
-} Game1F1CD0Actor;
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
 void func_151C4820(Game1F1CD0Actor *actor) {

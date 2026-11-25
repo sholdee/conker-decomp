@@ -1081,7 +1081,6 @@ s32 func_1513E6E8(DefParticleHead *particle) {
     return 1;
 }
 
-void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /*

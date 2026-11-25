@@ -699,8 +699,6 @@ struct FadeInSprite {
     /* 0x70 */ s16 duration;  /* the timer's starting value */
 };
 
-void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
-
 /* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
 s32 func_150FB2E0(FadeInSprite *sprite) {
     func_150FB240(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);

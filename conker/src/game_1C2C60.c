@@ -956,7 +956,6 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 

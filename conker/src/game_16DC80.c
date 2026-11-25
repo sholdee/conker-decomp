@@ -47,7 +47,6 @@ extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
-void func_151D5D60(void **, s16, s32, void **, u8 *);
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)

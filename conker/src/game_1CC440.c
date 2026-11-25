@@ -190,8 +190,6 @@ void func_1519F168(SurfaceTrail *trail) {
     func_15147928(trail);
 }
 
-u8 func_151D8E20(void);
-
 /* Creates the trail for `side` behind the owner's actor. */
 SurfaceTrail *func_1519F1C8(owner, side)
     SurfaceTrailOwner *owner;
@@ -557,7 +555,6 @@ s32 func_1519F7F0(SurfaceTrail *trail) {
 }
 
 extern u8 D_80090E0C[];
-void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
 
 /*
  * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest

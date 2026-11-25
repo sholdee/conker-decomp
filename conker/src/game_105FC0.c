@@ -497,7 +497,6 @@ s32 func_150D942C(PissTrail *trail) {
     return 1;
 }
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */

@@ -115,8 +115,6 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
-
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
  * alpha and the texture s coordinate ramp up along the ribbon.

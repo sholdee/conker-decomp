@@ -532,11 +532,6 @@ extern const f32 D_800A6820[24];
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
-// game_2062D0.c
-extern const u8 D_800AB310[13]; // texture id per effect kind
-extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
-extern const u8 D_800AB404[13]; // flag per effect kind
-extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
 
 // end of data D_800B0DBC
 

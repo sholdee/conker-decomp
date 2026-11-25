@@ -881,7 +881,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 }
 
 void light_sendEvent(u8, u8, ActorRef *);
-void func_151D4668(Actor *);
 void func_151D747C(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */

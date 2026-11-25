@@ -170,8 +170,6 @@ struct TrailPuff {
     /* 0x110 */ PuffState state;
 };
 
-void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
-
 /*
  * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a
  * trail of puffs every 70 units travelled. Returns 0 once it hit something or expired.
@@ -300,9 +298,6 @@ s32 func_150F7E20(TrailPuff *obj) {
 void func_150F7F58(TrailPuff *obj, s16 arg1) {
     func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
 }
-
-void func_151D3F14(Vec3f *pos, u8, s32);
-void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 /* Impact effect at `pos`. */
 void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
