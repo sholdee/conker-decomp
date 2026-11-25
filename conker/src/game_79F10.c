@@ -11,22 +11,22 @@ void func_15056B08(struct127 *arg0);
 void func_150585F0(struct127 *arg0, f32 arg1);
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(struct127 *actor, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
+f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_1505A250(f32, f32, f32, f32 *, f32 *);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
-f32 func_1504B0FC(struct127 *actor, f32 arg1);
-void func_1504BA38(struct127 *actor);
-void func_1504BB88(struct127 *actor);
-void func_1504BC38(struct127 *actor);
-void func_1504BE2C(struct127 *actor, u16 *arg1, f32 *arg2, s8 *arg3);
+f32 func_1504B0FC(struct127 *arg0, f32 arg1);
+void func_1504BA38(struct127 *arg0);
+void func_1504BB88(struct127 *arg0);
+void func_1504BC38(struct127 *arg0);
+void func_1504BE2C(struct127 *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
 
 extern u8 D_800CC2B1;
 extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
-void func_1504C0E8(u8 *actor, s32 arg1, f32 arg2);
-void func_1504C854(struct127 *actor);
-void func_1504C9E4(struct127 *actor, s8 arg1, u8 arg2);
+void func_1504C0E8(u8 *arg0, s32 arg1, f32 arg2);
+void func_1504C854(struct127 *arg0);
+void func_1504C9E4(struct127 *arg0, s8 arg1, u8 arg2);
 
 void func_1504CA60(struct127 *actor) {
     f32 range;
@@ -373,6 +373,11 @@ void func_15052260(struct127 *arg0);
 void func_1505250C(struct127 *arg0, s32 arg1);
 s32 func_1505C7D8(struct127 *, u8);
 void func_15059C84(struct127 *);
+
+/*
+ * Per-frame update of a player-controlled actor: reads (or overrides) the controller, turns stick input
+ * into a move angle/speed, then runs turning, swimming, climbing, pushing, floor collision and water entry.
+ */
 void func_1504CB98(Actor *actor) {
     u16 prevFacing;
     u16 moveAngle;
@@ -1863,10 +1868,7 @@ void func_150511E8(struct127 *actor) {
 
 extern f32 D_800990C0[];
 extern f32 D_800990E0[];
-void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_15087EF0(s32, void *);
-void func_1505A250(f32, f32, f32, f32 *, f32 *);
-f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 
 /* Ground/water tilt for a player-like actor: slides on steep slopes, then eases roll (unkC4) and pitch (unkB8). */
 void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
@@ -2103,7 +2105,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
     actor->unkC4 += (roll - actor->unkC4) * blend;
 }
 /* Turns a surface slope into roll/pitch angles (degrees) in the actor's frame, clamped to +-limit. */
-f32 func_1505210C(struct127 *arg0, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit) {
+f32 func_1505210C(struct127 *actor, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit) {
     f32 cosYaw;
     s32 pad; // matching: keeps the stack frame at the original size
     f32 yaw;
@@ -2112,7 +2114,7 @@ f32 func_1505210C(struct127 *arg0, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit
     f32 minLimit;
 
     slopeZ = -slopeZ;
-    yaw = arg0->unk40 * 0.01745329238f;
+    yaw = actor->unk40 * 0.01745329238f;
     cosYaw = func_150AD780(yaw);
     sinYaw = func_150AD78C(yaw);
     localX = (slopeX * cosYaw) + (slopeZ * sinYaw);
