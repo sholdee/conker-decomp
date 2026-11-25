@@ -1,21 +1,46 @@
+#include <ultra64.h>
 #include <PR/sched.h>
+#include "structs.h"
+
+/*
+ * Scheduler state, linked at 0x8003B1E8..0x8003BC28 in this order (with D_8003BC20 of func_100052A0 last).
+ * They are defined before variables.h declares them: IDO emits the .bss of a symbol that was declared
+ * extern earlier after all the others, which would change the order.
+ */
+OSMesgQueue D_8003B1E8;
+OSMesgQueue D_8003B200;
+OSMesgQueue D_8003B218;
+OSMesgQueue *D_8003B230;
+SchedulerClient *D_8003B234; /* scheduler client list */
+u8 D_8003B238;
+u8 D_8003B239;
+u8 D_8003B23A;
+OSScMsg D_8003B240; /* retrace message */
+u64 D_8003B260[0x80]; /* scheduler thread stack; [0] holds a fill pattern */
+OSMesg D_8003B660[4];
+OSMesg D_8003B670[4];
+OSMesg D_8003B680[8];
+OSThread D_8003B6A0; /* scheduler thread */
+u64 D_8003B850[0x30]; /* pre-NMI thread stack */
+OSMesgQueue D_8003B9D0;
+OSMesg D_8003B9E8[2];
+OSThread D_8003B9F0; /* pre-NMI thread */
+u64 D_8003BBA0[0x10]; /* not referenced */
 
 #include "functions.h"
 #include "variables.h"
 
 
-u64 D_8003B260; // bss
-
 void func_100050A0(OSMesgQueue *queue) {
-    D_8003B260 = 0x00000000FEFEFEFE;
+    D_8003B260[0] = 0x00000000FEFEFEFE;
     D_8003B234 = 0;
     D_8003B230 = queue;
     D_8003B238 = (u8)0xFF;
     D_8003B239 = (u8)0;
     D_8003B23A = (u8)0;
-    osCreateMesgQueue(&D_8003B1E8, &D_8003B660, 3);
-    osCreateMesgQueue(&D_8003B200, &D_8003B670, 1);
-    osCreateMesgQueue(&D_8003B218, &D_8003B680, 8);
+    osCreateMesgQueue(&D_8003B1E8, D_8003B660, 3);
+    osCreateMesgQueue(&D_8003B200, D_8003B670, 1);
+    osCreateMesgQueue(&D_8003B218, D_8003B680, 8);
     func_100039C0();
     osViSetEvent(&D_8003B218, 0, 1);
     osSetEventMesg(OS_EVENT_DP, &D_8003B218, (OSMesg *) 1);
@@ -35,7 +60,7 @@ void func_100051E8(void) {
 }
 
 void func_10005218(void) {
-    osCreateMesgQueue(&D_8003B9D0, &D_8003B9E8, 2);
+    osCreateMesgQueue(&D_8003B9D0, D_8003B9E8, 2);
     osSetEventMesg(OS_EVENT_PRENMI, &D_8003B9D0, (OSMesg *)5);
     osCreateThread(&D_8003B9F0, 0x15, (void *) func_100052A0, 0, &D_8003B9D0, OS_PRIORITY_RMON);
     osStartThread(&D_8003B9F0);
