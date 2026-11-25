@@ -38,6 +38,7 @@ tools/decomp-permuter
 tools/gzip
 tools/gfxdis
 .cycle
+.nearmiss/
 .progress_history.tsv
 tools/difficult_functions.txt
 tools/difficult_functions.tsv

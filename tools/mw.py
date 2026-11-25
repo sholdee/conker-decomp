@@ -377,7 +377,7 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
     return 1, out + ["RESULT: DIFF"]
 
 
-NEAR = REPO / ".nearmiss"   # ratchet store (tracked in git): best attempt of every open function
+NEAR = REPO / ".nearmiss"   # ratchet store (local, gitignored): best attempt of every open function
 
 
 def rank(rec):
@@ -669,9 +669,7 @@ def cmd_land(a):
         for f in landed:  # the ratchet store only holds open functions
             for ext in (".json", ".c"):
                 q = NEAR / f"{f}{ext}"
-                if q.exists():
-                    git("rm", "-q", "--cached", "--ignore-unmatch", str(q.relative_to(REPO)), check=False)
-                    q.unlink()
+                q.unlink(missing_ok=True)
         git("commit", "-q", "--amend", "--no-edit")
         print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
 
