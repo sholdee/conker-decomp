@@ -140,7 +140,7 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
 - **Named pointer in v0:** `lw v0,X(a0)` used as a base then `li v0,1` for the return comes
   from a named pointer local (`data = state->field;`), not a chained expression.
 - **Display lists:** `or v1,a0,zero … addiu a0,a0,8 … or v0,a0,zero` is a GBI block on
-  `arg0++` returning `arg0` (see the decompile-microcode skill for gSP/gDP macros).
+  `arg0++` returning `arg0` (use the gSP/gDP macros from `include/2.0L/PR/gbi.h`).
 - **Block scopes are scheduling barriers (-g3).** Wrapping a run of statements in a new `{ }`
   block — often with its locals declared inside, sometimes with an unused `s32 pad;` — makes -g3
   emit a debug block marker that the assembler won't schedule across. This fixed many "one

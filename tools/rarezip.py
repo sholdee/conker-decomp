@@ -1,11 +1,14 @@
 import os
+import shutil
 import struct
 import sys
 import subprocess
 
 def compress_file(filepath, level=9):
-    # force use of the gzip that sits along this file
+    # Rare's pre-1.5 deflate: a local build next to this file, else the toolchain image's gzip-rare
     gzip = os.path.join(os.path.dirname(os.path.realpath(__file__)), "gzip")
+    if not os.path.exists(gzip):
+        gzip = shutil.which("gzip-rare")
     args = [gzip, f"-{level}", "--no-name", "-c", filepath]
     res = subprocess.run(args, capture_output=True)
     if res.returncode != 0:

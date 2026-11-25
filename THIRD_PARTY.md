@@ -76,9 +76,8 @@ licence.
 | Path | Origin | Licence | Notes |
 |------|--------|---------|-------|
 | `ido/ido5.3_recomp/` | Static recompilation of the IRIX IDO 5.3 C compiler, built in 2021 from `tools/ido5.3_recomp` of <https://github.com/n64decomp/sm64> (recompiler by Emill, now maintained as <https://github.com/decompals/ido-static-recomp>; see its README) | The sm64 repository is now CC0-1.0; ido-static-recomp has no licence. The recompiled programs (`cc`, `cfe`, `uopt`, `ugen`, `as1`, …, `*_c.c`) are translations of SGI's proprietary IDO binaries | Prebuilt x86-64 Linux binaries |
-| `tools/gzip` | GNU gzip built from <https://github.com/mkst/gzip> (gzip patched for pre-1.5 compression output); it reports version `1.10.27-7d3a-dirty` | GPL-3.0-or-later. Copyright (C) 2018 Free Software Foundation, Inc.; Copyright (C) 1993 Jean-loup Gailly | Prebuilt x86-64 Linux binary. Its source is at the URL given (base commit `7d3a3c0a`) |
+| `gzip-rare` (toolchain image) | GNU gzip from <https://github.com/mkst/gzip> at commit `f6f21831c51dd3d13c98f536e836aa1b43a0b0b2`, configured with `--enable-rare-deflate` (restores pre-1.5 deflate output) | GPL-3.0-or-later. Copyright (C) 2018 Free Software Foundation, Inc.; Copyright (C) 1993 Jean-loup Gailly | Not distributed in this repository. `tools/toolchain/Containerfile` builds it from that source |
 | `tools/first-diff.py`, `conker/tools/first-diff.py` | Adapted from `first-diff.py` in n64decomp/sm64 | CC0-1.0 | |
-| `.claude/skills/decompile-microcode/` | F3DEX2/S2DEX command references and `gbi_internal.h`, gathered for the matching agents | Not recorded | Provenance not recorded; under review |
 
 ## Git submodules (not vendored; fetched from upstream)
 

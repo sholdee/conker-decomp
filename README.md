@@ -28,16 +28,16 @@ You need your own copy of the game to build it. This repository contains no ROM 
 
 You need:
 
-- an x86-64 Linux host, or a Linux VM (the IDO compiler in `ido/` and `tools/gzip` are prebuilt
-  x86-64 Linux binaries);
+- an x86-64 Linux host, or a Linux VM (the IDO compiler in `ido/` is a prebuilt x86-64 Linux binary);
 - [Podman](https://podman.io/) or Docker. The toolchain image (Ubuntu 24.04, MIPS binutils, Python
-  packages pinned in `tools/toolchain/constraints.txt`) is defined in
+  packages pinned in `tools/toolchain/constraints.txt`, and a gzip with Rare's compression
+  behaviour built from source) is defined in
   [tools/toolchain/Containerfile](tools/toolchain/Containerfile);
 - a US ROM of the game in big-endian `.z64` format, with sha1 `4cbadd3c4e0729dec46af64ad018050eada4f47a`.
 
 ```sh
-git clone --recursive https://github.com/sholdee/conker.git
-cd conker
+git clone --recursive https://github.com/sholdee/conker-decomp.git
+cd conker-decomp
 cp /path/to/your/rom.z64 baserom.us.z64
 sha1sum baserom.us.z64          # must print 4cbadd3c4e0729dec46af64ad018050eada4f47a
 

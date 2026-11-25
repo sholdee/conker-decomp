@@ -35,6 +35,7 @@ conker/ctx.c
 # optional tools
 
 tools/decomp-permuter
+tools/gzip
 tools/gfxdis
 .cycle
 .progress_history.tsv

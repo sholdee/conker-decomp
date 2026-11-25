@@ -1,4 +1,13 @@
+# gzip with Rare's pre-1.5 deflate behaviour (GPL-3.0-or-later), built from source at a pinned commit.
+FROM docker.io/library/ubuntu:20.04 AS gzip
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends autoconf automake autopoint build-essential ca-certificates gettext git rsync texinfo wget xz-utils && rm -rf /var/lib/apt/lists/*
+ARG GZIP_COMMIT=f6f21831c51dd3d13c98f536e836aa1b43a0b0b2
+RUN git clone https://github.com/mkst/gzip /src/gzip && cd /src/gzip && git checkout "$GZIP_COMMIT" \
+ && ./bootstrap --skip-po && ./configure --enable-rare-deflate && make -j"$(nproc)" && cp gzip /gzip-rare
+
 FROM docker.io/library/ubuntu:24.04
+COPY --from=gzip /gzip-rare /usr/local/bin/gzip-rare
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y binutils-mips-linux-gnu build-essential git less libglib2.0-0t64 python-is-python3 python3 python3-pip python3-venv unzip wget cpp && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /
