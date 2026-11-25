@@ -493,30 +493,30 @@ void func_150ED748(struct127 *obj) {
                         if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
-                            offset = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
-                            score = offset;
-                            if (offset < 0.0f) {
-                                score = -offset;
-                            }
-                            score = 35.0f - score;
-                            if (score < 0.0f) {
-                                score = 0.0f;
-                            }
-                            if (score > 0.0f) {
-                                distance = obj->x_position - other->x_position;
-                                deltaZ = obj->z_position - other->z_position;
-                                distance = sqrtf(distance * distance + deltaZ * deltaZ);
-                                if (distance < 7000.0f) {
-                                    if (distance < 1.0f) {
-                                        distance = 1.0f;
-                                    }
-                                    score = score / distance;
-                                    if (bestScore < score) {
-                                        bestScore = score;
-                                        bestIdx = i;
-                                    }
+                        offset = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
+                        score = offset;
+                        if (offset < 0.0f) {
+                            score = -offset;
+                        }
+                        score = 35.0f - score;
+                        if (score < 0.0f) {
+                            score = 0.0f;
+                        }
+                        if (score > 0.0f) {
+                            distance = obj->x_position - other->x_position;
+                            deltaZ = obj->z_position - other->z_position;
+                            distance = sqrtf(distance * distance + deltaZ * deltaZ);
+                            if (distance < 7000.0f) {
+                                if (distance < 1.0f) {
+                                    distance = 1.0f;
+                                }
+                                score = score / distance;
+                                if (bestScore < score) {
+                                    bestScore = score;
+                                    bestIdx = i;
                                 }
                             }
+                        }
                     }
                 }
                 if (bestIdx != -1) {
