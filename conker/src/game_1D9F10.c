@@ -15,9 +15,7 @@ typedef struct {
 } RopeNode;
 
 typedef struct Rope {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct Rope *next;      // next object in the same list
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 id;                  // start of the 0x24-byte spawn data
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 x;
@@ -662,7 +660,7 @@ Rope *func_151AE590(u8 id) {
         for (j = 0; j < 2; j++) {
             rope = D_800DCE50[j][D_800A9270[i]];
             while (rope != NULL) {
-                Rope *next = rope->next;
+                Rope *next = rope->header.next;
 
                 if (rope->id == id) {
                     return rope;

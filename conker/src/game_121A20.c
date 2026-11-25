@@ -25,7 +25,8 @@ typedef struct {
 
 /* An object spawned by func_1513264C with a SpiralState. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x20];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
     /* 0x020 */ Vec3f rot; /* degrees */
     /* 0x02C */ u8 pad2C[0xC];
     /* 0x038 */ Vec3f pos;
@@ -197,7 +198,7 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
         obj->unk71 = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
     } else if (event == 0x4F) {
-        func_1516972C((EffectHeader *)obj);
+        func_1516972C(&obj->header);
     }
 }
 

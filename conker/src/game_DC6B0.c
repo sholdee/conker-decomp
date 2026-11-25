@@ -350,9 +350,8 @@ void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 a
 }
 
 typedef struct Node150AFDB0 {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct Node150AFDB0 *next;
-    /* 0x0C */ u8 padC[0x33];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x2F];
     /* 0x3F */ u8 unk3F;
 } Node150AFDB0;
 
@@ -365,9 +364,9 @@ void func_150AFDB0(void) {
 
     D_800DD190++;
     for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
-        D_800DD198[D_800DD190] = node->next;
+        D_800DD198[D_800DD190] = node->header.next;
         if (node->unk3F == D_800C3E78) {
-            func_1516972C((EffectHeader *)node);
+            func_1516972C(&node->header);
         }
     }
     D_800DD190--;

@@ -13,7 +13,8 @@ typedef struct BoltSample {
 } BoltSample; /* size 0x34 */
 
 typedef struct BoltFlare {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
 } BoltFlare;
 
@@ -474,11 +475,11 @@ void func_15106E78(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        func_1516972C((EffectHeader *)flare);
+        func_1516972C(&flare->header);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        func_1516972C((EffectHeader *)flare);
+        func_1516972C(&flare->header);
     }
     func_151D5E30(bolt->vtxBuf);
 }

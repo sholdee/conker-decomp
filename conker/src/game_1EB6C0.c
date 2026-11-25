@@ -68,7 +68,8 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
 
 /* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
 typedef struct {
-    u8 pad0[0xB0];
+    EffectHeader header;
+    u8 pad10[0xA0];
     ActorRef owner;
 } OwnedParticle;
 
@@ -90,7 +91,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
         Actor *actor = msg->ref.actor;
 
         if (actor == owner->actor || msg->ref.uniqueId == owner->uniqueId) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }

@@ -25,7 +25,8 @@ typedef struct {
 } MosaicData; /* size 0x8F0 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ MosaicData data;
 } MosaicEffect;
 
@@ -205,7 +206,7 @@ void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == mosaic->owner || msg->ref.uniqueId == mosaic->ownerId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     }
 }

@@ -13,9 +13,8 @@
  */
 
 typedef struct GlowObj {
-    /* 0x000 */ u8 pad0[8];
-    /* 0x008 */ struct GlowObj *next;
-    /* 0x00C */ u8 padC[0x1F];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x1B];
     /* 0x02B */ u8 unk2B;
     /* 0x02C */ u8 pad2C[8];
     /* 0x034 */ f32 pos[3];
@@ -322,7 +321,7 @@ void func_151412BC(void) {
                         }
                     }
                 }
-                obj = obj->next;
+                obj = obj->header.next;
             }
         }
     }
@@ -417,7 +416,7 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
             if (*msg == (*params).shape.type) {
                 switch (msgType) {
                     case 0x22:
-                        func_1516972C((EffectHeader *)obj);
+                        func_1516972C(&obj->header);
                         break;
                     case 0x24:
                         params->shape.handler = -1;

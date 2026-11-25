@@ -306,7 +306,8 @@ void func_151AA170(s32 arg0) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 unk1C;
 } Task151AA17C;
@@ -381,11 +382,8 @@ void func_151AA264(Actor *actor, GroundHit *hit) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ Actor *actor;
 } Task151AA30C;
 
@@ -414,7 +412,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     pos[2] = z;
     func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, surface,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
-                  1, task->unkC, task->unk1);
+                  1, task->header.owner, task->header.kind);
 }
 
 extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);

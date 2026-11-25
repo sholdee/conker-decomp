@@ -246,7 +246,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 header[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ struct182 data;
 } OwnerEffect;
 

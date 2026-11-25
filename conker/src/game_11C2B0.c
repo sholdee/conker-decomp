@@ -150,7 +150,8 @@ typedef struct BeamEmitter {
 } BeamEmitter;
 
 typedef struct Spark {
-    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ u8 flags;               /* bit 1: drawn */
     /* 0x1D */ u8 pad1D[0x13];
     /* 0x30 */ Vec3f start;
@@ -863,7 +864,7 @@ void func_150F07E4(Spark *spark, s32 data, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((EffectHeader *)spark);
+            func_1516972C(&spark->header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -982,7 +983,8 @@ typedef struct {
 } TrailParticleLink;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x2B];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x1B];
     /* 0x2B */ u8 alpha;
     /* 0x2C */ u8 pad2C[0xC];
     /* 0x38 */ f32 width;
@@ -1113,7 +1115,7 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }
@@ -1264,7 +1266,8 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ ActorRef ref;
 } ActorBound;
 
@@ -1276,7 +1279,7 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
     if (type == 0x43) {
         msgActor = msg->ref.actor;
         if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
-            func_1516972C((EffectHeader *)self);
+            func_1516972C(&self->header);
         }
     }
 }

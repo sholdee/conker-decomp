@@ -5,11 +5,8 @@
 
 /* Partial view of a type 0x10 ModelFx object (game_1944C0.c): EffectHeader, matrices, then its data. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x83];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x80];
     /* 0x90 */ f32 x;
     /* 0x94 */ f32 y;
     /* 0x98 */ f32 z;
@@ -80,32 +77,32 @@ void func_15169C70(Debris *debris) {
         debris->y = floorHeight;
         if (debris->kind == 1) {
             func_15171200(4, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
-                          0.5f, 1.0f, 60.0f, 2, 255, -0.400000006f, debris->owner, debris->list);
+                          0.5f, 1.0f, 60.0f, 2, 255, -0.400000006f, debris->header.owner, debris->header.kind);
             // matching: the (u32) step selects IDO's unsigned int-to-float sequence
             func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 30.0f,
-                          debris->z, 50.0f, 40, 0.0030517578125f, 0, 20, debris->owner,
-                          debris->list);
+                          debris->z, 50.0f, 40, 0.0030517578125f, 0, 20, debris->header.owner,
+                          debris->header.kind);
             func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 15.0f,
-                          debris->z, 30.0f, 40, 0.0030517578125f, 0, 10, debris->owner,
-                          debris->list);
+                          debris->z, 30.0f, 40, 0.0030517578125f, 0, 10, debris->header.owner,
+                          debris->header.kind);
             func_1518CA04(debris->sound);
-            func_1516972C((EffectHeader *)debris);
+            func_1516972C(&debris->header);
             return;
         }
         if (debris->kind == 4) {
             func_15171200(3, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
-                          0.5f, 0.6999999881f, 40.0f, 2, 60, -0.5f, debris->owner, debris->list);
+                          0.5f, 0.6999999881f, 40.0f, 2, 60, -0.5f, debris->header.owner, debris->header.kind);
             func_1518CA04(debris->sound);
-            func_1516972C((EffectHeader *)debris);
+            func_1516972C(&debris->header);
             return;
         }
         if (debris->kind == 3) {
             func_15171200(2, 0xCB, debris->x, debris->y, debris->z, 6.0f, 0.5f, 1.0f, 60.0f, 5, 60,
-                          -0.6999999881f, debris->owner, debris->list);
+                          -0.6999999881f, debris->header.owner, debris->header.kind);
             func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
-                          debris->owner, debris->list);
+                          debris->header.owner, debris->header.kind);
             func_1518CA04(debris->sound);
-            func_1516972C((EffectHeader *)debris);
+            func_1516972C(&debris->header);
             return;
         }
         if (debris->kind == 6) {
@@ -122,7 +119,7 @@ void func_15169C70(Debris *debris) {
         }
         if (debris->kind == 8) {
             func_1518CA04(debris->sound);
-            func_1516972C((EffectHeader *)debris);
+            func_1516972C(&debris->header);
             return;
         }
         debris->velX *= debris->friction;
@@ -138,8 +135,8 @@ void func_15169C70(Debris *debris) {
             debris->spinZ = 0;
         } else {
             func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 15.0f,
-                          debris->z, 20.0f, 50, 0.000457763671875f, 0, 4, debris->owner,
-                          debris->list);
+                          debris->z, 20.0f, 50, 0.000457763671875f, 0, 4, debris->header.owner,
+                          debris->header.kind);
             if (debris->kind == 2) {
                 if (func_150ADA20() & 0x8000) {
                     // matching: the original treats this random draw as signed (sra + signed int->float)
@@ -147,7 +144,7 @@ void func_15169C70(Debris *debris) {
                 }
             } else if (debris->kind == 5) {
                 func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
-                              debris->owner, debris->list);
+                              debris->header.owner, debris->header.kind);
             }
         }
         debris->spinX *= debris->spinDamp;
@@ -162,7 +159,7 @@ void func_15169C70(Debris *debris) {
             alpha -= D_800BE9E4 * 4;
             if (alpha <= 0) {
                 func_1518CA04(debris->sound);
-                func_1516972C((EffectHeader *)debris);
+                func_1516972C(&debris->header);
                 return;
             }
             debris->alpha = alpha;

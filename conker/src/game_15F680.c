@@ -26,7 +26,7 @@ typedef struct {
 /* A pooled physics particle (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are copied from the
  * spawn template passed to func_1513264C; the u8 callback fields index the D_8008xxxx handler tables. */
 typedef struct Particle {
-    /* 0x000 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x010 */ f32 radius;
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
@@ -154,7 +154,7 @@ void func_151321D0(Particle *particle) {
         if (particle->destroyFn != 0) {
             D_8008997C[particle->destroyFn](particle);
         }
-        func_1516972C((EffectHeader *)particle);
+        func_1516972C(&particle->header);
     }
 }
 
@@ -219,12 +219,12 @@ void func_15132444(Particle *particle) {
 
 void func_15132570(Particle *particle) {
     func_15132444(particle);
-    func_15169804((EffectHeader *)particle);
+    func_15169804(&particle->header);
 }
 
 void func_1513259C(Particle *particle) {
     func_15132444(particle);
-    func_15169824((EffectHeader *)particle);
+    func_15169824(&particle->header);
 }
 
 /* Free the buffers func_1513264C allocated into unk154[0..D_80082FA0] and unk164. */
@@ -387,7 +387,7 @@ void func_15132A88(Particle *particle) {
 
     result = D_8008998C[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
     if (result == -1) {
-        func_1516972C((EffectHeader *)particle);
+        func_1516972C(&particle->header);
         return;
     }
 
@@ -844,7 +844,7 @@ void func_15133DE8(Particle *particle, ActorRef *data, u8 event) {
     if (event == 0) {
         obj = data->actor;
         if (obj == particle->owner || particle->ownerId == data->uniqueId) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }

@@ -12,9 +12,7 @@ extern s32 D_8008CA64;
 
 /* Object type 0x3A: a swarm centre that steers towards a target and owns a group of members. */
 typedef struct Swarm {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct Swarm *next;
-    /* 0x0C */ u8 padC[0x4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ union {
         f32 *pos;                       /* when targetZ.z == -0x8000 */
         struct { s16 x; s16 y; } fixed; /* otherwise, with targetZ.z */
@@ -73,9 +71,7 @@ typedef struct SwarmMemberState {
 
 /* Object type 0x3B: one member of a Swarm. */
 typedef struct SwarmMember {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct SwarmMember *next;
-    /* 0x0C */ u8 padC[0x4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ SwarmMemberState s;
     /* 0x48 */ s8 unk48;
 } SwarmMember;
@@ -435,7 +431,7 @@ extern SwarmMember *D_800DCF3C; /* list of live swarm members */
 Swarm *func_15178B98(u8 tag) {
     Swarm *swarm;
 
-    for (swarm = D_800DCF38; swarm != NULL; swarm = swarm->next) {
+    for (swarm = D_800DCF38; swarm != NULL; swarm = swarm->header.next) {
         if (swarm->tag == tag) {
             return swarm;
         }
@@ -497,13 +493,13 @@ void func_15178DA4(Swarm *swarm) {
     member = D_800DCF3C;
     func_100111C8(swarm->sfxHandle);
     while (member != NULL) {
-        next = member->next;
+        next = member->header.next;
         if (swarm == member->s.swarm) {
-            func_1516972C((EffectHeader *)member);
+            func_1516972C(&member->header);
         }
         member = next;
     }
-    func_15169824((EffectHeader *)swarm);
+    func_15169824(&swarm->header);
 }
 
 /* Destroys the swarm with the given tag. */

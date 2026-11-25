@@ -101,7 +101,8 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
 
 
 typedef struct {
-    u8 pad0[0x58];
+    EffectHeader header;
+    u8 pad10[0x48];
     Vtx *verts[2][4]; /* [frame][viewport], 20 vertices each */
     Mtx mtx[2];       /* [frame] */
 } Obj151BA084;
@@ -134,7 +135,7 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     ref = EFFECT_EXTRA(effect);
     owner = ref->actor;
     if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
-        func_1516972C((EffectHeader *)effect);
+        func_1516972C(&effect->header);
     }
     model = (u8 *)owner->unk1D4;
     if (model == NULL) {

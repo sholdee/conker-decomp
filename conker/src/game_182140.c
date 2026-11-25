@@ -4,9 +4,7 @@
 #include "effects.h"
 
 typedef struct ScreenSprite {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ScreenSprite *next;
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ScreenSpriteInfo info;
     /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
 } ScreenSprite;
@@ -82,7 +80,7 @@ void func_15154C90(ScreenSprite *sprite) {
         }
     }
     if (finished) {
-        func_1516972C((EffectHeader *)sprite);
+        func_1516972C(&sprite->header);
     }
 }
 
@@ -248,7 +246,7 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
         do {
             sprite = D_800DCE50[table][lists.id[i]];
             while (sprite != NULL) {
-                next = sprite->next;
+                next = sprite->header.next;
                 k = kindCount;
                 found = 0;
                 while (k > 0 && !found) {

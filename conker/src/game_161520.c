@@ -345,7 +345,8 @@ void func_1513477C(BloodDrip *drip) {
 }
 
 typedef struct {
-    u8 pad0[0x18];
+    EffectHeader header;
+    u8 pad10[0x8];
     u8 ownerId;
     u8 pad19[0x3];
     Actor *owner;
@@ -360,17 +361,17 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
 
     if ((message == 0) || (message == 3)) {
         if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (message == 0x11) {
         if (effect->unk3D == 5) {
             if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
-                func_1516972C((EffectHeader *)effect);
+                func_1516972C(&effect->header);
             }
         }
     } else if (message == 0x16) {
         if ((Actor *)msg == effect->owner) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (message == 0x2D) {
         actorA = msg->swap.actorA;

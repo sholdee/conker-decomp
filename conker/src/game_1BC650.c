@@ -28,7 +28,8 @@ typedef struct {
 } SpriteMotion;
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x01C */ s16 unk1C;
     /* 0x01E */ u8 pad1E[6];
     /* 0x024 */ s32 unk24;
@@ -102,7 +103,8 @@ typedef struct {
 } ContactKey;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ ContactKey key;
 } ContactObj;
 
@@ -200,7 +202,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
         u8 selfTag = self->key.unk4;
         u8 otherTag = other->unk4;
         if (selfId == otherId || selfTag == otherTag) {
-            func_1516972C((EffectHeader *)self);
+            func_1516972C(&self->header);
         }
     }
 }
@@ -386,7 +388,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
-        func_1516972C((EffectHeader *)sprite);
+        func_1516972C(&sprite->header);
         return;
     }
     parent = particle->parent;

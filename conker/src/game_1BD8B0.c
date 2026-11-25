@@ -4,7 +4,8 @@
 
 /* An effect bound to an actor. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ ActorRef ref;
 } BoundEffect;
 
@@ -33,7 +34,7 @@ void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type) {
         actorId = effect->ref.uniqueId;
         msgActorId = msg->uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     }
 }

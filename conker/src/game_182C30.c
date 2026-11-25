@@ -8,10 +8,7 @@
  * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
 typedef struct PlayerMarker {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct PlayerMarker *next;
-    /* 0x0C */ u8 padC[0x2];
-    /* 0x0E */ s16 timer;
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 playerId;
     /* 0x11 */ u8 state;
     /* 0x12 */ u8 bobPhase;
@@ -57,11 +54,11 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     if (marker != NULL) {
         marker->heightOffset = heightOffset;
         if (D_800CC2D0[playerId].in_water) {
-            marker->timer = 0;
+            marker->header.state = 0;
             marker->state = 0;
         } else {
             marker->state = 3;
-            marker->timer = duration;
+            marker->header.state = duration;
         }
     }
 }
@@ -93,7 +90,7 @@ void func_1515589C(PlayerMarker *marker) {
         if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
             (kind != 0x2C) && (info->aimState == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
             marker->state = 1;
-            marker->timer = 120;
+            marker->header.state = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
         } else if (marker->light != NULL) {
             func_1515F10C(marker->light);
@@ -101,13 +98,13 @@ void func_1515589C(PlayerMarker *marker) {
         }
         break;
     case 1:
-        timer = marker->timer;
-        timer -= D_800BE9E4; // matching: a single `timer = marker->timer - D_800BE9E4;` schedules differently
+        timer = marker->header.state;
+        timer -= D_800BE9E4; // matching: a single `timer = marker->header.state - D_800BE9E4;` schedules differently
         if ((timer <= 0) || (D_800CC2D0[playerId].unk31C->unk75 == 0)) {
             marker->state = 2;
             timer = 0;
         }
-        marker->timer = timer;
+        marker->header.state = timer;
         marker->bobPhase += D_800BE9E4 * 2;
         if (marker->light != NULL) {
             f32 extraHeight;
@@ -135,14 +132,14 @@ void func_1515589C(PlayerMarker *marker) {
         }
         break;
     case 3:
-        timer = marker->timer;
+        timer = marker->header.state;
         timer -= D_800BE9E4;
         if (timer <= 0) {
             marker->state = 2;
-            marker->timer = 0;
+            marker->header.state = 0;
             break;
         }
-        marker->timer = timer;
+        marker->header.state = timer;
         marker->bobPhase += D_800BE9E4 * 2;
         if (marker->light != NULL) {
             marker->light->x = player->x_position;
@@ -198,7 +195,7 @@ void func_15155EF8(PlayerMarker *arg0) {
     if (marker->light != NULL) {
         func_1515F10C(marker->light);
     }
-    func_15169804((EffectHeader *)marker);
+    func_15169804(&marker->header);
     func_1518CA04(0xA6);
 }
 
@@ -230,7 +227,7 @@ PlayerMarker *func_15155FD4(s32 playerId) {
     PlayerMarker *marker;
 
     for (list = 0; list < 2; list++) {
-        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = marker->next) {
+        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = marker->header.next) {
             if (playerId == marker->playerId) {
                 return marker;
             }
@@ -248,7 +245,7 @@ void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
         s32 player = actors[0] - D_800CC2D0;
 
         if ((player >= 0) && (player < 25) && (player == marker->playerId)) {
-            func_1516972C((EffectHeader *)marker);
+            func_1516972C(&marker->header);
         }
     } else if (eventType == 0x2D) {
         s32 from = actors[0] - D_800CC2D0;

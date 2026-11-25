@@ -179,7 +179,8 @@ typedef struct {
 
 /* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
     /* 0x048 */ u8 pad48[0x20];       // rest of the CamWobble
     /* 0x068 */ CamWobbleEnvelope envelope;

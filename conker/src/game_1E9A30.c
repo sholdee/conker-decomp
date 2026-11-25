@@ -4,7 +4,8 @@
 #include "effects.h"
 
 typedef struct {
-    u8 pad0[0x40];
+    EffectHeader header;
+    u8 pad10[0x30];
     ActorRef owner;
 } OwnedEffect40;
 
@@ -25,7 +26,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {

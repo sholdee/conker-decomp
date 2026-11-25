@@ -14,11 +14,8 @@ typedef struct EmitterParams {
 
 /* Process of type 0x21 that emits particles around its owner (see game_1BA670.c). */
 typedef struct Emitter {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0xB];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ EmitterParams params;
 } Emitter;
 
@@ -59,13 +56,13 @@ void func_1518E4A0(Emitter *emitter) {
 /* Destroy handler of an emitter process. */
 void func_1518E4CC(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169804((EffectHeader *)emitter);
+    func_15169804(&emitter->header);
 }
 
 /* Free handler of an emitter process. */
 void func_1518E4F8(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169824((EffectHeader *)emitter);
+    func_15169824(&emitter->header);
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
@@ -104,7 +101,7 @@ void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E66C(Emitter *emitter) {
-    func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->owner, emitter->list, D_800A7460);
+    func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;
@@ -112,7 +109,7 @@ s32 func_1518E66C(Emitter *emitter) {
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E6D4(Emitter *emitter) {
-    func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->owner, emitter->list, D_800A749C);
+    func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;

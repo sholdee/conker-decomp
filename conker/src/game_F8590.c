@@ -69,7 +69,8 @@ typedef struct {
 
 /* The dust particle func_150CB1F4 spawns; updated by func_150CBA30. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x01C */ s16 timer;
     /* 0x01E */ u8 pad1E[0xE];
     /* 0x02C */ f32 size0;
@@ -190,7 +191,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
             if (func_1518ABD0(D_800D98E0, particle, 2) == 0) {
-                func_1516972C((EffectHeader *)particle);
+                func_1516972C(&particle->header);
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;
@@ -207,7 +208,8 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
 
 /* Particle updated by func_150CB7CC. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ s16 timer;
     /* 0x1E */ u8 pad1E[0xA];
     /* 0x28 */ u8 alpha;
@@ -303,7 +305,8 @@ s32 func_150CBA30(DustParticle *dust) {
 
 /* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ f32 unk58;
     /* 0x5C */ u8 pad5C[4];
     /* 0x60 */ f32 unk60;
@@ -395,7 +398,8 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
 
 /* Particle moved by func_150CBE88. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x20];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
     /* 0x20 */ f32 unk20[3]; // integrated from unk50
     /* 0x2C */ u8 pad2C[0xC];
     /* 0x38 */ f32 pos[3];
@@ -418,7 +422,8 @@ s32 func_150CBE88(BallisticParticle *particle) {
 
 /* Particle handled by func_150CBF5C. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ s16 timer;
     /* 0x1E */ u8 pad1E[0x3A];
     /* 0x58 */ s32 flags;

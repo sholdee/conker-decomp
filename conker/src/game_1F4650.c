@@ -120,7 +120,8 @@ typedef struct {
 } SightStatusBlock;
 
 typedef struct {
-    u8 pad0[0x58];
+    EffectHeader header;
+    u8 pad10[0x48];
     s32 flags;
     u8 pad5C[0x12C];
     SightStatusBlock *status;
@@ -211,11 +212,8 @@ typedef struct {
 
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
+    EffectHeader header;
+    u8 pad10[0x8];
     ParticleDef spawn;
     u8 pad70[0x50];
     u8 vtxTemplate[0x40];
@@ -711,13 +709,13 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     burst.spray.pos = obj->spawn.pos;
     burst.source.normal = obj->spawn.scale;
     burst.source.triangle = state->triangle0;
-    func_1514FBFC(&burst, obj->unkC, obj->unk1);
+    func_1514FBFC(&burst, obj->header.owner, obj->header.kind);
     burst.spray.pos = obj->spawn.rot;
     burst.source.normal.x = -obj->spawn.scale.x;
     burst.source.normal.y = -obj->spawn.scale.y;
     burst.source.normal.z = -obj->spawn.scale.z;
     burst.source.triangle = state->triangle1;
-    func_1514FBFC(&burst, obj->unkC, obj->unk1);
+    func_1514FBFC(&burst, obj->header.owner, obj->header.kind);
     pos[0] = obj->spawn.pos.x;
     pos[1] = obj->spawn.pos.y;
     pos[2] = obj->spawn.pos.z;
@@ -725,15 +723,15 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     header.update = -1;
     header.lifetime = func_150ADA20() % 9U + 17;
     header.lightType = 0;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->header.owner, obj->header.kind);
     pos[0] = obj->spawn.rot.x;
     pos[1] = obj->spawn.rot.y;
     pos[2] = obj->spawn.rot.z;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->header.owner, obj->header.kind);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->header.owner, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->camera->playerIndex, 0, obj->unkC, obj->unk1);
+        func_15164F0C(2, actor->camera->playerIndex, 0, obj->header.owner, obj->header.kind);
         params8868.a = 1;
         params8868.b = 40;
         params8868.d = 1;
@@ -746,7 +744,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
     func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C((EffectHeader *)obj);
+    func_1516972C(&obj->header);
 }
 
 
@@ -755,7 +753,8 @@ void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s3
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
 typedef struct SightExtension {
-    u8 pad0[0x170];
+    EffectHeader header;
+    u8 pad10[0x160];
     SightBeamObject *owner;
 } SightExtension;
 
@@ -1265,7 +1264,8 @@ f32 func_151CC1D4(SightSprite *sprite);
 
 /* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
 typedef struct {
-    u8 pad0[0x20];
+    EffectHeader header;
+    u8 pad10[0x10];
     Camera *player;
 } SightOwnedEffect;
 
@@ -1556,7 +1556,8 @@ typedef struct {
 } SightLens;
 
 typedef struct {
-    u8 pad0[0x18];
+    EffectHeader header;
+    u8 pad10[0x8];
     SightLens lens;
     u8 pad2C[4];
     u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
@@ -1733,12 +1734,12 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (obj->lens.player == *(Camera **)msg) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == obj->lens.player) {
-            func_1516972C((EffectHeader *)obj);
+            func_1516972C(&obj->header);
         }
     }
 }
@@ -1902,12 +1903,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *(Camera **)msg) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == effect->player) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->header);
         }
     }
 }

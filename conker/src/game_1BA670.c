@@ -136,9 +136,7 @@ typedef struct EmitterSlot {
 
 /* Process of type 0x21: emits particles around (or from the bones of) its owner. */
 typedef struct Emitter {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct Emitter *next;
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ EmitterParams params;
@@ -183,9 +181,9 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
             D_800DD190++;
             emitter = D_800DCE50[i][0x21];
             while (emitter != NULL) {
-                D_800DD198[D_800DD190] = emitter->next;
+                D_800DD198[D_800DD190] = emitter->header.next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
-                    func_1516972C((EffectHeader *)emitter);
+                    func_1516972C(&emitter->header);
                 }
                 emitter = D_800DD198[D_800DD190];
             }

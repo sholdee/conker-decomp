@@ -14,7 +14,8 @@ typedef struct {
 } FF0E0ChildData;
 
 typedef struct {
-    u8 pad0[0x14];
+    EffectHeader header;
+    u8 pad10[0x4];
     FF0E0ChildData *unk14;
 } FF0E0Child;
 
@@ -130,7 +131,7 @@ void func_150D2054(FF0E0Object *obj) {
     for (i = 0; i < 6; i++) {
         child = state->children[i];
         if (child != NULL) {
-            func_1516972C((EffectHeader *)child);
+            func_1516972C(&child->header);
         }
     }
 }

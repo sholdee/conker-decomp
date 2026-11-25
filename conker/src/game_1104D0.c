@@ -18,13 +18,7 @@ typedef struct {
  * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
  */
 typedef struct HomingEffect {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ struct HomingEffect *prev;
-    /* 0x08 */ struct HomingEffect *next;
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[3];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec3f pos;
     /* 0x1C */ Vec3f target;
     /* 0x28 */ Vec3f origin;
@@ -180,7 +174,7 @@ void func_150E3514(HomingEffect *effect) {
         func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
     }
 
-    func_1516972C((EffectHeader *)effect);
+    func_1516972C(&effect->header);
 }
 
 /* Destroys the effect with the given handle, or every effect for handle 0. */
@@ -193,7 +187,7 @@ void func_150E35DC(s32 handle) {
         D_800DD190++;
         effect = D_800DCE50[list][0x27];
         while (effect != NULL) {
-            D_800DD198[D_800DD190] = effect->next;
+            D_800DD198[D_800DD190] = effect->header.next;
             if (handle == -1 || handle == effect->slot) {
                 func_150E3514(effect);
             }
@@ -214,7 +208,7 @@ void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z) {
     handle--;
     if (handle >= 0 && handle < 8) {
         effect = D_800D99D0[handle];
-        if (effect != NULL && effect->type == 0x27) {
+        if (effect != NULL && effect->header.type == 0x27) {
             *x = effect->pos.x;
             *y = effect->pos.y;
             *z = effect->pos.z;
@@ -400,7 +394,7 @@ void func_150E3738(HomingEffect *arg0) {
         }
         if (func_151C229C(&from, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f /* 1 / 190 */, randWidth * 50.0f + 10.0f,
                           scale * 191.0f + 160.0f, 80.0f, (randByte % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, randAngle,
-                          effect->unk40, 0.0f, 0xFF, -1, 0, effect->owner, effect->list) != 0) {
+                          effect->unk40, 0.0f, 0xFF, -1, 0, effect->header.owner, effect->header.kind) != 0) {
             spawned = 1;
         }
         effect->particleAccum -= 1.0f;
@@ -411,7 +405,7 @@ void func_150E3738(HomingEffect *arg0) {
             randByte = func_150ADA20();
             randAngle = func_150ADA20();
             func_15103254((randByte & 3) + 6, (randAngle % 156U) + 100,
-                          func_150ADA68() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->owner, effect->list);
+                          func_150ADA68() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->header.owner, effect->header.kind);
             effect->sparkAccum -= 1.0f;
         }
     }

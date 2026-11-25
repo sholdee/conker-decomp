@@ -38,7 +38,8 @@ typedef struct {
 
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x2B];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x1B];
     /* 0x2B */ u8 unk2B;
     /* 0x2C */ u8 pad2C[0x38 - 0x2C];
     /* 0x38 */ f32 unk38;
@@ -702,7 +703,7 @@ void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }
@@ -755,7 +756,7 @@ void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((EffectHeader *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }

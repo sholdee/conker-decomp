@@ -54,9 +54,7 @@ typedef struct ActorTrackerDesc {
 
 /* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
 typedef struct ActorTracker {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct ActorTracker *next;
-    /* 0x0C */ u8 padC[0x4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ ActorTrackerDesc desc;
@@ -191,13 +189,13 @@ ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32
 /* Destroy handler: detaches the tracker from its actor, then destroys it. */
 void func_1515BF50(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169804((EffectHeader *)tracker);
+    func_15169804(&tracker->header);
 }
 
 /* Free handler: detaches the tracker from its actor, then frees it. */
 void func_1515BF7C(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169824((EffectHeader *)tracker);
+    func_15169824(&tracker->header);
 }
 
 /*
@@ -229,7 +227,7 @@ void func_1515BFA8(ActorTracker *tracker) {
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
     }
     if (dead) {
-        func_1516972C((EffectHeader *)tracker);
+        func_1516972C(&tracker->header);
     }
 }
 
@@ -260,7 +258,7 @@ void func_1515C158(void) {
     ActorTracker *tracker;
 
     for (list = 0; list < 2; list++) {
-        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = tracker->next) {
+        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = tracker->header.next) {
             tracker->unk44 = 0;
             tracker->unk48 = -1;
         }
