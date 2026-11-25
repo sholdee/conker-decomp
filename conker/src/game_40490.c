@@ -83,7 +83,7 @@ extern Struct150139ACEntry D_80095FA0[];
 
 
 void func_15012FE0(void) {
-    D_800BE570 = 0;
+    D_800BE570 = NULL;
     D_800BE574 = 0;
     D_800BE575 = 0;
 }

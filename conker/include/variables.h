@@ -796,7 +796,7 @@ extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;
 extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
-extern s32 D_800BE570;
+extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
 extern u8  D_800BE574;
 extern u8  D_800BE575;
 extern s32 D_800BE5D0;
@@ -1079,7 +1079,7 @@ extern Bubble D_800D2460[6];
 extern u8  D_800D246D;
 extern u8  D_800D247D;
 extern s32 D_800D2548;
-extern s32 D_800D2588;
+extern Gfx *D_800D2588; // display list built by game_BC510
 extern Mtx  D_800D2590[6][2];
 extern s32 D_800D24C0;
 extern WaterStage D_800D24C8;

@@ -349,9 +349,9 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
         gfx = func_150900F0(gfx, 0);
-    } else if (D_800D2588 != 0) {
+    } else if (D_800D2588 != NULL) {
         func_1518CA04(0xB8);
-        D_800D2588 = 0;
+        D_800D2588 = NULL;
     }
     gfx = func_150911F4(gfx);
     gfx = func_15094F40(gfx);
@@ -382,8 +382,8 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     struct256 *node;
     Gfx *dl;
 
-    if (D_800D2588 == 0) {
-        D_800D2588 = func_1518C900(0xB8);
+    if (D_800D2588 == NULL) {
+        D_800D2588 = (Gfx *)func_1518C900(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -402,7 +402,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
     count = D_800D2456;
-    dl = (Gfx *)D_800D2588;
+    dl = D_800D2588;
     if (fixed != 0) {
         x = (f32)D_8009DCB4[3] - 54.0f;
         y = (f32)D_8009DCB4[4] - 52.0f;

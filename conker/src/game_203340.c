@@ -123,9 +123,9 @@ void func_151D66F0(s32 arg0, s32 arg1) {
         D_800BE575 = 0;
     }
     if (arg0 == 0) {
-        if (D_800BE570 != 0) {
-            func_100043B4((s32 *)D_800BE570, 3);
-            D_800BE570 = 0;
+        if (D_800BE570 != NULL) {
+            func_100043B4((s32 *)(s32)D_800BE570, 3); // matching: the int round trip keeps the load in v0
+            D_800BE570 = NULL;
         }
     }
 }
@@ -135,7 +135,7 @@ Gfx *func_1501A680(Gfx *arg0);
 
 Gfx *func_151D6778(Gfx *gfx) {
     s32 alpha;
-    s32 img;
+    u16 *img;
 
     if ((D_800BE574 == 0 && D_800BE9F0 != 0x32 && D_800BE9F0 != 0x33) || D_800BEAC0 != 0) {
         return gfx;
@@ -144,11 +144,11 @@ Gfx *func_151D6778(Gfx *gfx) {
     if (D_800BE574 != 0) {
         gDPPipeSync(gfx++);
         img = D_800BE570;
-        if (img != 0) {
+        if (img != NULL) {
             gfx = func_151D6418(gfx, (u8 *)img, 0, alpha);
         } else {
-            D_800BE570 = (s32)allocate_memory(D_800BE620 * D_800BE624 * 2, 1, 3, 1);
-            if (D_800BE570 == 0) {
+            D_800BE570 = allocate_memory(D_800BE620 * D_800BE624 * 2, 1, 3, 1);
+            if (D_800BE570 == NULL) {
                 return gfx;
             }
         }
