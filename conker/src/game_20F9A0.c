@@ -1731,200 +1731,204 @@ s8 func_151E5FAC(void) {
 s32 func_1000F568(s32 arg0, s32 arg1);
 void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
 
-void func_151E5FF4(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    struct127 *player;
-    s32 pad50;
-    s32 idx;
-    s32 idx2;
+/*
+ * Records a hit by source (or the player owning it) on victim: per-player hit/kill tallies in D_8008FDD4,
+ * then picks a character-specific voice line for the attacker.
+ */
+void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
+    struct127 *attacker;
+    s32 pad50; // matching: unused stack slot
+    s32 attackerIdx;
+    s32 victimIdx;
     s32 sound;
     s32 delay;
-    s32 count;
-    s32 state;
-    s32 state2;
-    s32 r;
-    u8 v;
-    s32 h;
+    s32 variants;
+    s32 sourceState;
+    s32 sourceState2;
+    s32 roll;
+    u8 victimKind;
+    s32 health;
 
-    player = arg0;
-    idx = arg0 - D_800CC2D0;
-    if (idx >= D_8008FD8C) {
-        idx = arg0->unk124 - 1;
-        if (idx >= 0) {
-            player = &D_800CC2D0[idx];
+    attacker = source;
+    attackerIdx = source - D_800CC2D0;
+    if (attackerIdx >= D_8008FD8C) {
+        attackerIdx = source->unk124 - 1;
+        if (attackerIdx >= 0) {
+            attacker = &D_800CC2D0[attackerIdx];
         }
     }
-    if ((idx >= 0) && (idx < D_8008FD8C) && (idx < D_8008FD8C)) {
-        idx2 = arg1 - D_800CC2D0;
-        D_800E0BB8[idx2] = idx | 0x80;
-        if (idx < D_8008FD90) {
-            if (D_800E0C00[idx] != D_800E0C00[idx2]) {
-                D_8008FDD4->unk66[idx].unk0++;
-                if (arg2 == 0x2E) {
-                    D_8008FDD4->unk66[idx].unk4++;
+    if ((attackerIdx >= 0) && (attackerIdx < D_8008FD8C) && (attackerIdx < D_8008FD8C) /* matching: repeated test */) {
+        victimIdx = victim - D_800CC2D0;
+        D_800E0BB8[victimIdx] = attackerIdx | 0x80;
+        if (attackerIdx < D_8008FD90) {
+            if (D_800E0C00[attackerIdx] != D_800E0C00[victimIdx]) {
+                D_8008FDD4->unk66[attackerIdx].unk0++;
+                if (cause == 0x2E) {
+                    D_8008FDD4->unk66[attackerIdx].unk4++;
                 }
             }
-            if ((arg1->health <= 0) && (D_800E0C00[idx] == D_800E0C00[idx2]) && (arg2 != 0x2D)) {
-                D_8008FDD4->unk66[idx].unkA++;
+            if ((victim->health <= 0) && (D_800E0C00[attackerIdx] == D_800E0C00[victimIdx]) && (cause != 0x2D)) {
+                D_8008FDD4->unk66[attackerIdx].unkA++;
             }
         }
-        if (arg1->health <= 0) {
-            if ((D_8008FDD4->unk46[idx] < 9999) && (D_800E0C00[idx] != D_800E0C00[idx2])) {
-                D_8008FDD4->unk46[idx]++;
+        if (victim->health <= 0) {
+            if ((D_8008FDD4->unk46[attackerIdx] < 9999) && (D_800E0C00[attackerIdx] != D_800E0C00[victimIdx])) {
+                D_8008FDD4->unk46[attackerIdx]++;
                 if (D_8008FDBC & 0x200) {
-                    func_15085710(D_800E0C00[idx] != 0, 10, 1);
+                    func_15085710(D_800E0C00[attackerIdx] != 0, 10, 1);
                 }
             }
         }
-        if (idx2 < D_8008FD90) {
-            D_8008FDD4->unk66[idx2].unk8++;
+        if (victimIdx < D_8008FD90) {
+            D_8008FDD4->unk66[victimIdx].unk8++;
         }
-        if ((player != arg1) && (arg1->unk31C != NULL) && (player->health != 0)) {
+        if ((attacker != victim) && (victim->unk31C != NULL) && (attacker->health != 0)) {
             sound = 0;
             delay = 0;
-            player->unk31C->pad98[0x17] = 0;
-            count = 0;
-            if (arg2 == 0x33) {
-                v = arg1->unk31C->unk78;
-                if ((v == 0x21) || (v == 0x22)) {
-                    func_10010630(0x510, arg1, 0x61A8, 0x12C, 0x190);
+            attacker->unk31C->pad98[0x17] = 0;
+            variants = 0;
+            if (cause == 0x33) {
+                victimKind = victim->unk31C->unk78;
+                if ((victimKind == 0x21) || (victimKind == 0x22)) {
+                    func_10010630(0x510, victim, 0x61A8, 0x12C, 0x190);
                 }
-            } else if ((player->id == 0x75) && (arg1->health <= 0)) {
-                if (player->id == arg1->id) {
-                    if ((idx2 < D_8008FD90) && (D_8008FDD4->unk66[idx2].unkA >= 4)) {
+            } else if ((attacker->id == 0x75) && (victim->health <= 0)) {
+                if (attacker->id == victim->id) {
+                    if ((victimIdx < D_8008FD90) && (D_8008FDD4->unk66[victimIdx].unkA >= 4)) {
                         sound = 0x665;
-                        count = 4;
+                        variants = 4;
                     }
-                } else if (arg2 == 0x34) {
+                } else if (cause == 0x34) {
                     if ((func_150ADA20() & 3) == 3) {
                         sound = 0x52A;
                     }
                 } else {
                     sound = 0x4D1;
-                    count = 3;
+                    variants = 3;
                 }
                 if (sound != 0) {
-                    if (count != 0) {
-                        sound = func_1000F568(sound, count);
+                    if (variants != 0) {
+                        sound = func_1000F568(sound, variants);
                     }
-                    func_10010558(sound, player, 0x6D60, 0x320, 0xBB8, delay);
+                    func_10010558(sound, attacker, 0x6D60, 0x320, 0xBB8, delay);
                 }
-            } else if (player->id == 0x80) {
-                state = -1;
-                if ((arg0 != player) && (arg0->interaction_state == 4)) {
-                    state = (u16)arg0->unk278;
+            } else if (attacker->id == 0x80) {
+                sourceState = -1;
+                if ((source != attacker) && (source->interaction_state == 4)) {
+                    sourceState = (u16)source->unk278;
                 }
-                if (player->id == arg1->id) {
-                    if ((idx2 < D_8008FD90) && (D_8008FDD4->unk66[idx2].unkA >= 4)) {
-                        count = 8;
+                if (attacker->id == victim->id) {
+                    if ((victimIdx < D_8008FD90) && (D_8008FDD4->unk66[victimIdx].unkA >= 4)) {
+                        variants = 8;
                         sound = 0x65A;
                     }
-                } else if (state == 2) {
-                    if ((arg1->health <= 0) || ((func_150ADA20() & 7) == 0)) {
-                        count = 3;
+                } else if (sourceState == 2) {
+                    if ((victim->health <= 0) || ((func_150ADA20() & 7) == 0)) {
+                        variants = 3;
                         sound = 0x571;
                     }
-                } else if (*((u8 *)arg1->unk31C + 0x1AC) != 0) {
-                    if ((arg2 != 0x21) && ((arg1->health <= 0) || ((func_150ADA20() & 3) == 3))) {
-                        count = 4;
+                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) {
+                    if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
+                        variants = 4;
                         sound = 0x582;
                         delay = 0x1E;
                     }
-                } else if (arg2 == 0x2E) {
+                } else if (cause == 0x2E) {
                     delay = 0x1E;
-                    if ((player->unk31C->unk78 == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                    if ((attacker->unk31C->unk78 == 0x23) && ((func_150ADA20() & 3) == 0)) {
                         sound = 0x587;
                     } else {
                         sound = 0x579;
-                        count = 3;
+                        variants = 3;
                     }
-                } else if (arg2 == 0x2F) {
+                } else if (cause == 0x2F) {
                     if (func_150ADA20() & 1) {
                         sound = 0x588;
                         delay = 0x1E;
                     }
-                } else if (arg2 == 0x2C) {
+                } else if (cause == 0x2C) {
                     sound = 0x56D;
-                    count = 7;
+                    variants = 7;
                     delay = 0x3C;
-                } else if (((arg2 == 0x21) || (arg2 == 0x20) || (arg2 == 0x31)) &&
-                           ((arg1->health <= 0) || ((func_150ADA20() & 7) == 3))) {
+                } else if (((cause == 0x21) || (cause == 0x20) || (cause == 0x31)) &&
+                           ((victim->health <= 0) || ((func_150ADA20() & 7) == 3))) {
                     sound = 0x571;
-                    count = 3;
+                    variants = 3;
                     delay = 0x1E;
                 }
                 if (sound != 0) {
-                    if (count != 0) {
-                        sound = func_1000F568(sound, count);
+                    if (variants != 0) {
+                        sound = func_1000F568(sound, variants);
                     }
-                    func_10010558(sound, player, 0x7D00, 0x258, 0x7D0, delay);
+                    func_10010558(sound, attacker, 0x7D00, 0x258, 0x7D0, delay);
                 }
-            } else if (player->id == 0x3B) {
-                state2 = -1;
-                if ((arg0 != player) && (arg0->interaction_state == 4)) {
-                    state2 = (u16)arg0->unk278;
+            } else if (attacker->id == 0x3B) {
+                sourceState2 = -1;
+                if ((source != attacker) && (source->interaction_state == 4)) {
+                    sourceState2 = (u16)source->unk278;
                 }
-                if (state2 == 2) {
-                    if ((arg1->health <= 0) || ((func_150ADA20() & 7) == 7)) {
+                if (sourceState2 == 2) {
+                    if ((victim->health <= 0) || ((func_150ADA20() & 7) == 7)) {
                         sound = 0x538;
-                        count = 3;
+                        variants = 3;
                     }
-                } else if (arg2 == 0x2E) {
+                } else if (cause == 0x2E) {
                     sound = 0x52F;
-                    count = 3;
+                    variants = 3;
                     delay = 0x1E;
-                } else if ((arg2 == 0x2C) || (arg2 == 0x2F)) {
+                } else if ((cause == 0x2C) || (cause == 0x2F)) {
                     sound = 0x540;
-                    count = 2;
+                    variants = 2;
                     delay = 0x3C;
-                } else if ((arg2 == 0x25) || (arg2 == 0x26)) {
-                    h = arg1->health;
-                    if (idx & 1) {
-                        if (h >= 2) {
-                            sound = 0x55F - h;
+                } else if ((cause == 0x25) || (cause == 0x26)) {
+                    health = victim->health;
+                    if (attackerIdx & 1) {
+                        if (health >= 2) {
+                            sound = 0x55F - health;
                             delay = 0x1E;
                         }
                     } else {
-                        sound = 0x565 - h;
+                        sound = 0x565 - health;
                         delay = 0x1E;
                     }
-                } else if (arg2 == 0x21) {
+                } else if (cause == 0x21) {
                     if ((func_150ADA20() & 3) == 3) {
                         sound = 0x52C;
                         delay = 0x1E;
                     }
-                } else if (arg2 == 0x20) {
-                    r = func_150ADA20() & 0xF;
-                    if (r != 0) {
-                        r++;
+                } else if (cause == 0x20) {
+                    roll = func_150ADA20() & 0xF;
+                    if (roll != 0) {
+                        roll++;
                     }
-                    if (r < 4) {
-                        sound = r + 0x52B;
+                    if (roll < 4) {
+                        sound = roll + 0x52B;
                         delay = 0x1E;
                     }
                 }
                 if (sound != 0) {
-                    if (count != 0) {
-                        sound = func_1000F568(sound, count);
+                    if (variants != 0) {
+                        sound = func_1000F568(sound, variants);
                     }
-                    func_10010558(sound, player, 0x7D00, 0x258, 0x7D0, delay);
+                    func_10010558(sound, attacker, 0x7D00, 0x258, 0x7D0, delay);
                 }
-            } else if ((player->id == 0x88) && (arg1->health <= 0)) {
-                if (arg2 == 0x34) {
+            } else if ((attacker->id == 0x88) && (victim->health <= 0)) {
+                if (cause == 0x34) {
                     if ((func_150ADA20() & 3) == 3) {
                         sound = 0x52A;
                     }
-                } else if (arg2 == 0x21) {
+                } else if (cause == 0x21) {
                     sound = 0x41A;
                 } else {
                     sound = 0x415;
                     delay = 0x1E;
-                    count = 5;
+                    variants = 5;
                 }
                 if (sound != 0) {
-                    if (count != 0) {
-                        sound = func_1000F568(sound, count);
+                    if (variants != 0) {
+                        sound = func_1000F568(sound, variants);
                     }
-                    func_10010558(sound, player, 0x6D60, 0x320, 0xBB8, delay);
+                    func_10010558(sound, attacker, 0x6D60, 0x320, 0xBB8, delay);
                 }
             }
         }
@@ -1940,17 +1944,21 @@ extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_1502B5C8();
 
-void func_151E6964(s32 arg0) {
-    u8 *p;
+/*
+ * Loads text bank (bank - 1) of language D_800E0BEA and indexes its NUL-separated strings into D_800E0BD8;
+ * bank 1 also loads bank 2's 80 strings into D_800E0B88. Bank 0 just frees the current one.
+ */
+void func_151E6964(s32 bank) {
+    u8 *cursor;
     u8 *end;
-    s32 i;
+    s32 count;
     s32 size;
 
     if (D_800E0BEA != D_800BEAAB) {
         D_800BEAAB = D_800E0BEA;
         D_800E0BD3 = 0;
     }
-    if (arg0 == D_800E0BD3) {
+    if (bank == D_800E0BD3) {
         return;
     }
     if (D_800E0BD4 != 0) {
@@ -1963,58 +1971,58 @@ void func_151E6964(s32 arg0) {
             D_8008FDD8 = 0;
         }
     }
-    D_800E0BD3 = arg0;
+    D_800E0BD3 = bank;
     if (D_800E0BD3 == 0) {
         return;
     }
 
-    D_800E0BD4 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, arg0 - 1);
-    p = (u8 *)D_800E0BD4;
-    end = p + size;
-    i = 0;
+    D_800E0BD4 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    cursor = (u8 *)D_800E0BD4;
+    end = cursor + size;
+    count = 0;
     do {
-        while (*p != 0) {
-            p++;
+        while (*cursor != 0) {
+            cursor++;
         }
-        while (*p == 0) {
-            p++;
+        while (*cursor == 0) {
+            cursor++;
         }
-        i++;
-    } while (p < end);
+        count++;
+    } while (cursor < end);
 
-    D_800E0BD8 = allocate_memory((i + 1) << 2, 1, 0, 0);
-    p = (u8 *)D_800E0BD4;
-    end = p + size;
-    i = 0;
+    D_800E0BD8 = allocate_memory((count + 1) << 2, 1, 0, 0); // matching: a shift, not `* 4` or sizeof
+    cursor = (u8 *)D_800E0BD4;
+    end = cursor + size;
+    count = 0;
     do {
-        D_800E0BD8[i] = p;
-        i++;
-        while (*p != 0) {
-            p++;
+        D_800E0BD8[count] = cursor;
+        count++;
+        while (*cursor != 0) {
+            cursor++;
         }
-        while (*p == 0) {
-            p++;
+        while (*cursor == 0) {
+            cursor++;
         }
-    } while (p < end);
+    } while (cursor < end);
 
-    if (arg0 - 1 != 0) {
+    if (bank - 1 != 0) {
         return;
     }
 
     D_8008FDD8 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
-    D_800E0B88 = allocate_memory(0x140, 1, 0, 0);
-    p = (u8 *)D_8008FDD8;
-    i = 0;
+    D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
+    cursor = (u8 *)D_8008FDD8;
+    count = 0;
     do {
-        D_800E0B88[i] = p;
-        i++;
-        while (*p != 0) {
-            p++;
+        D_800E0B88[count] = cursor;
+        count++;
+        while (*cursor != 0) {
+            cursor++;
         }
-        while (*p == 0) {
-            p++;
+        while (*cursor == 0) {
+            cursor++;
         }
-    } while (i != 80);
+    } while (count != 80);
 }
 
 void func_151E6BFC(void) {
@@ -2065,33 +2073,38 @@ f32 func_150497E0(f32 *, s32, f32);
 struct Struct151149AC *func_151149AC(s32);
 extern f32 sinf(f32);
 
-#define F2AC (*(f32 *)&p->unk2AC)
+#define UNK2AC_F32 (*(f32 *)&obj->unk2AC) // an f32; structs.h declares struct108.unk2AC as s32
 
-void func_151E6C1C(s32 arg0) {
-    struct108 *p;
-    s32 pad1A0;
+/*
+ * Moves object index along the node path selected by D_8008FDD4 (unk2B = current stop, unk8 = progress
+ * along it), spline-interpolating its position (unk2F8..) and look-at point (unk2A4..), and drives the
+ * related objects returned by func_151149AC.
+ */
+void func_151E6C1C(s32 index) {
+    struct108 *obj;
+    s32 pad1A0; // matching: unused stack slot
     s32 idx;
-    s32 cnt;
-    s32 id;
-    s32 n;
+    s32 pathLen;
+    s32 homeNode;
+    s32 nodeCount;
     f32 *speeds;
-    f32 t;
-    f32 u;
+    f32 turnT;
+    f32 pathT;
     s32 i;
     s32 k;
     f32 scale;
     f32 x[16];
     f32 y[16];
     f32 z[16];
-    s8 ids[16];
-    u8 *tbl;
-    Snd151E6C1C *snd;
+    s8 path[16];
+    u8 *nodeTable;
+    Snd151E6C1C *sounds;
     struct Struct151149AC *r;
     struct Struct151149AC *r2;
     Node151E6C1C *node;
     Node151E6C1C *cur;
     s32 seg;
-    u8 v;
+    u8 link;
     s32 state;
     u8 a;
     f32 cx, cy, cz;
@@ -2099,21 +2112,21 @@ void func_151E6C1C(s32 arg0) {
     f32 ax, ay, az;
     f32 dx, dy, dz;
 
-    p = &D_800DBFF0[arg0];
+    obj = &D_800DBFF0[index];
     if (D_8008FDD4->unk3E == 0) {
-        id = 0;
-        n = 6;
-        tbl = D_8008FF40;
+        homeNode = 0;
+        nodeCount = 6;
+        nodeTable = D_8008FF40;
         speeds = D_8008FF48;
-        snd = D_800AB908;
+        sounds = D_800AB908;
     } else {
-        id = 0x10;
-        n = 8;
-        tbl = D_8008FF88;
+        homeNode = 0x10;
+        nodeCount = 8;
+        nodeTable = D_8008FF88;
         speeds = D_8008FF90;
-        snd = D_800AB920;
+        sounds = D_800AB920;
     }
-    func_15086CBC(func_15086D48(id), &p->unk2F8, &p->unk2FC, &p->unk300);
+    func_15086CBC(func_15086D48(homeNode), &obj->unk2F8, &obj->unk2FC, &obj->unk300);
 
     if (D_8008FDD4->unk4 != 0.0f) {
         D_8008FDD4->unk0 += D_8008FDD4->unk4 * D_800BE9E4;
@@ -2125,15 +2138,15 @@ void func_151E6C1C(s32 arg0) {
             D_8008FDD4->unk0 = 0.0f;
             D_8008FDD4->unk4 = 0.0f;
             D_8008FDD4->unk2B++;
-            if (D_8008FDD4->unk2B >= n) {
-                D_8008FDD4->unk2B -= n;
+            if (D_8008FDD4->unk2B >= nodeCount) {
+                D_8008FDD4->unk2B -= nodeCount;
             }
         }
     } else if (D_8008FDD4->unkC != 0.0f || D_8008FDD4->unk8 != 0.0f) {
         if ((D_8008FDD4->unk20 & 0x20) && (D_8008FDD4->unk3E == 0 || D_8008FDD4->unk2B != 0)) {
             D_8008FDD4->unkC = -speeds[D_8008FDD4->unk2B];
-            func_1000D96C(snd[D_8008FDD4->unk2B].unk2, D_800E0A97, 0);
-            D_800E0A97 = snd[D_8008FDD4->unk2B].unk2;
+            func_1000D96C(sounds[D_8008FDD4->unk2B].unk2, D_800E0A97, 0);
+            D_800E0A97 = sounds[D_8008FDD4->unk2B].unk2;
         }
         if (D_8008FDD4->unk2A != 0 && D_8008FDD4->unk3E == 1 && D_8008FDD4->unk2B == 0) {
             if (D_8008FDD4->unk20 & 0x20) {
@@ -2157,15 +2170,15 @@ void func_151E6C1C(s32 arg0) {
     } else {
         if (D_8008FDD4->unk20 & 0x10) {
             D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
-            func_1000D96C(snd[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
-            D_800E0A97 = snd[D_8008FDD4->unk2B].unk0;
+            func_1000D96C(sounds[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
+            D_800E0A97 = sounds[D_8008FDD4->unk2B].unk0;
         } else {
             if (D_8008FDD4->unk20 & 4) {
                 D_8008FDD4->unk2B--;
                 D_8008FDD4->unk0 = 1.0f;
                 D_8008FDD4->unk4 = -0.05000000075f;
                 if (D_8008FDD4->unk2B < 0) {
-                    D_8008FDD4->unk2B += n;
+                    D_8008FDD4->unk2B += nodeCount;
                 }
             }
             if ((D_8008FDD4->unk20 & 8) || D_8008FDD4->unk43 != 0) {
@@ -2173,10 +2186,10 @@ void func_151E6C1C(s32 arg0) {
             }
             D_8008FDD4->unk43 = 0;
             if (D_8008FDD4->unk2B < 0) {
-                D_8008FDD4->unk2B += n;
+                D_8008FDD4->unk2B += nodeCount;
             }
-            if (D_8008FDD4->unk2B >= n) {
-                D_8008FDD4->unk2B -= n;
+            if (D_8008FDD4->unk2B >= nodeCount) {
+                D_8008FDD4->unk2B -= nodeCount;
             }
         }
     }
@@ -2187,8 +2200,8 @@ void func_151E6C1C(s32 arg0) {
     } else if (D_8008FDD4->unk2C != 0) {
         scale *= 0.6000000238f;
     }
-    t = sinf(D_8008FDD4->unk0 * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
-    u = sinf(scale * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
+    turnT = sinf(D_8008FDD4->unk0 * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
+    pathT = sinf(scale * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
 
     if (D_8008FDD4->unk3E == 0) {
         for (i = 0; i < 2; i++) {
@@ -2210,100 +2223,101 @@ void func_151E6C1C(s32 arg0) {
         }
     }
 
-    p->unk3D0->unk25C |= 0x200;
-    p->unk3D0->y_position = 1000.0f;
+    obj->unk3D0->unk25C |= 0x200;
+    obj->unk3D0->y_position = 1000.0f;
 
     if (scale > 0.0f) {
-        ids[0] = func_15086D48(id);
-        ids[1] = func_15086D48(tbl[D_8008FDD4->unk2B]);
-        node = &D_800D2350[ids[1]];
-        cnt = 1;
+        path[0] = func_15086D48(homeNode);
+        path[1] = func_15086D48(nodeTable[D_8008FDD4->unk2B]);
+        node = &D_800D2350[path[1]];
+        pathLen = 1;
         while (node != NULL) {
             cur = node;
             node = NULL;
             for (i = 0; i < 5; i++) {
-                v = cur->links[i];
-                if (v != 0xFF && v != ids[cnt - 1]) {
-                    cnt++;
-                    ids[cnt] = v;
+                link = cur->links[i];
+                if (link != 0xFF && link != path[pathLen - 1]) {
+                    pathLen++;
+                    path[pathLen] = link;
                     node = &D_800D2350[cur->links[i]];
                     i = 5;
                 }
             }
         }
-        cnt++;
-        if (cnt >= 4) {
-            u *= (f32)cnt - 2.0f;
-            seg = u;
-            t = u - (f32)seg;
-            if (seg >= cnt - 2) {
+        pathLen++;
+        if (pathLen >= 4) {
+            pathT *= (f32)pathLen - 2.0f;
+            seg = pathT;
+            turnT = pathT - (f32)seg;
+            if (seg >= pathLen - 2) {
                 seg = seg - 1;
-                t = 1.0f;
+                turnT = 1.0f;
             }
+            // matching: guarded do-while; a plain for loop rotates differently
             i = 1;
-            if (cnt > 0) {
+            if (pathLen > 0) {
                 do {
-                    func_15086CBC(ids[i - 1], &x[i], &y[i], &z[i]);
+                    func_15086CBC(path[i - 1], &x[i], &y[i], &z[i]);
                     i++;
-                } while (i <= cnt);
+                } while (i <= pathLen);
             }
             x[0] = x[1] - (x[2] - x[1]);
             y[0] = y[1] - (y[2] - y[1]);
             z[0] = z[1] - (z[2] - z[1]);
-            x[cnt + 1] = x[cnt] + (x[cnt - 1] - x[cnt]);
-            y[cnt + 1] = y[cnt] + (y[cnt - 1] - y[cnt]);
-            z[cnt + 1] = z[cnt] + (z[cnt - 1] - z[cnt]);
-            p->unk2F8 = func_150497E0(x, seg, t);
-            p->unk2FC = func_150497E0(y, seg, t);
-            p->unk300 = func_150497E0(z, seg, t);
-            p->unk2A4 = func_150497E0(x, seg + 1, t);
-            p->unk2A8 = func_150497E0(y, seg + 1, t);
-            F2AC = func_150497E0(z, seg + 1, t);
+            x[pathLen + 1] = x[pathLen] + (x[pathLen - 1] - x[pathLen]);
+            y[pathLen + 1] = y[pathLen] + (y[pathLen - 1] - y[pathLen]);
+            z[pathLen + 1] = z[pathLen] + (z[pathLen - 1] - z[pathLen]);
+            obj->unk2F8 = func_150497E0(x, seg, turnT);
+            obj->unk2FC = func_150497E0(y, seg, turnT);
+            obj->unk300 = func_150497E0(z, seg, turnT);
+            obj->unk2A4 = func_150497E0(x, seg + 1, turnT);
+            obj->unk2A8 = func_150497E0(y, seg + 1, turnT);
+            UNK2AC_F32 = func_150497E0(z, seg + 1, turnT);
         } else {
-            func_15086CBC(ids[0], &x[0], &y[0], &z[0]);
-            func_15086CBC(ids[1], &x[1], &y[1], &z[1]);
-            if (cnt == 3) {
-                func_15086CBC(ids[2], &x[2], &y[2], &z[2]);
+            func_15086CBC(path[0], &x[0], &y[0], &z[0]);
+            func_15086CBC(path[1], &x[1], &y[1], &z[1]);
+            if (pathLen == 3) {
+                func_15086CBC(path[2], &x[2], &y[2], &z[2]);
             } else {
                 x[2] = x[1] + (x[1] - x[0]);
                 y[2] = y[1] + (y[1] - y[0]);
                 z[2] = z[1] + (z[1] - z[0]);
             }
-            p->unk2F8 = x[0] + (x[1] - x[0]) * u;
-            p->unk2FC = y[0] + (y[1] - y[0]) * u;
-            p->unk300 = z[0] + (z[1] - z[0]) * u;
-            p->unk2A4 = x[1] + (x[2] - x[1]) * u;
-            p->unk2A8 = y[1] + (y[2] - y[1]) * u;
-            F2AC = z[1] + (z[2] - z[1]) * u;
+            obj->unk2F8 = x[0] + (x[1] - x[0]) * pathT;
+            obj->unk2FC = y[0] + (y[1] - y[0]) * pathT;
+            obj->unk300 = z[0] + (z[1] - z[0]) * pathT;
+            obj->unk2A4 = x[1] + (x[2] - x[1]) * pathT;
+            obj->unk2A8 = y[1] + (y[2] - y[1]) * pathT;
+            UNK2AC_F32 = z[1] + (z[2] - z[1]) * pathT;
         }
     } else {
         idx = D_8008FDD4->unk2B - 1;
         if (idx < 0) {
-            idx += n;
+            idx += nodeCount;
         }
         for (i = 0; i < 4; i++) {
-            func_15086CBC(func_15086D48(tbl[idx]), &x[i], &y[i], &z[i]);
+            func_15086CBC(func_15086D48(nodeTable[idx]), &x[i], &y[i], &z[i]);
             idx++;
-            if (idx >= n) {
-                idx -= n;
+            if (idx >= nodeCount) {
+                idx -= nodeCount;
             }
         }
-        p->unk2A4 = func_150497E0(x, 0, t);
-        p->unk2A8 = func_150497E0(y, 0, t);
-        F2AC = func_150497E0(z, 0, t);
+        obj->unk2A4 = func_150497E0(x, 0, turnT);
+        obj->unk2A8 = func_150497E0(y, 0, turnT);
+        UNK2AC_F32 = func_150497E0(z, 0, turnT);
     }
 
     if (D_8008FDD4->unk2A != 0) {
-        dx = p->unk2F8 - p->unk2A4;
-        dy = p->unk2FC - p->unk2A8;
-        dz = p->unk300 - F2AC;
-        p->unk2A4 = p->unk2F8 + dx;
-        p->unk2A8 = p->unk2FC + dy;
-        F2AC = p->unk300 + dz;
+        dx = obj->unk2F8 - obj->unk2A4;
+        dy = obj->unk2FC - obj->unk2A8;
+        dz = obj->unk300 - UNK2AC_F32;
+        obj->unk2A4 = obj->unk2F8 + dx;
+        obj->unk2A8 = obj->unk2FC + dy;
+        UNK2AC_F32 = obj->unk300 + dz;
     }
-    p->unk2A4 += D_8008FDD4->unk10 * D_8008FDD4->unk14;
-    p->unk2A8 += D_8008FDD4->unk10 * D_8008FDD4->unk18;
-    F2AC += D_8008FDD4->unk10 * D_8008FDD4->unk1C;
+    obj->unk2A4 += D_8008FDD4->unk10 * D_8008FDD4->unk14;
+    obj->unk2A8 += D_8008FDD4->unk10 * D_8008FDD4->unk18;
+    UNK2AC_F32 += D_8008FDD4->unk10 * D_8008FDD4->unk1C;
     if (D_8008FDD4->unk2A != 3) {
         D_8008FDD4->unk10 *= 0.8500000238f;
     } else {
@@ -2312,12 +2326,12 @@ void func_151E6C1C(s32 arg0) {
 
     if (D_8008FDD4->unk3E == 1) {
         state = 0;
-        func_15086CBC(func_15086D48(id), &ax, &ay, &az);
+        func_15086CBC(func_15086D48(homeNode), &ax, &ay, &az);
         idx = D_8008FDD4->unk2B;
-        if (idx >= n) {
+        if (idx >= nodeCount) {
             idx = 0;
         }
-        func_15086CBC(func_15086D48(tbl[idx]), &bx, &by, &bz);
+        func_15086CBC(func_15086D48(nodeTable[idx]), &bx, &by, &bz);
         bx -= ax;
         by -= ay;
         bz -= az;
@@ -2334,8 +2348,8 @@ void func_151E6C1C(s32 arg0) {
             }
             state = 1;
             D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
-            func_1000D96C(snd[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
-            D_800E0A97 = snd[D_8008FDD4->unk2B].unk0;
+            func_1000D96C(sounds[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
+            D_800E0A97 = sounds[D_8008FDD4->unk2B].unk0;
         }
         if (D_8008FDD4->unk8 < 0.25f && D_8008FDD4->unk2A == 1) {
             D_8008FDD4->unk2B = 4;
@@ -2348,7 +2362,7 @@ void func_151E6C1C(s32 arg0) {
             D_8008FDD4->unk10 = 0.0f;
         }
         if (state != 0) {
-            func_15086CBC(func_15086D48(tbl[D_8008FDD4->unk2B]), &cx, &cy, &cz);
+            func_15086CBC(func_15086D48(nodeTable[D_8008FDD4->unk2B]), &cx, &cy, &cz);
             cx -= ax;
             cy -= ay;
             cz -= az;
@@ -2388,25 +2402,25 @@ void func_151E6C1C(s32 arg0) {
         D_8008FDD4->unk2C++;
     }
     if (D_8008FDD4->unk2C < 0) {
-        D_8008FDD4->unk2C += n;
+        D_8008FDD4->unk2C += nodeCount;
     }
-    if (D_8008FDD4->unk2C >= n) {
-        D_8008FDD4->unk2C -= n;
+    if (D_8008FDD4->unk2C >= nodeCount) {
+        D_8008FDD4->unk2C -= nodeCount;
     }
     D_8008FDD4->unk2D = D_8008FDD4->unk2C;
     if (D_8008FDD4->unk3E == 1) {
         D_8008FDD4->unk2C = D_800AB570[D_8008FDD4->unk2C];
     }
 
-    p->unk2BC = p->unk2A4;
-    p->unk2C0 = p->unk2A8;
-    p->unk2C4 = F2AC;
-    *(Vec151E6C1C *)&p->unk2A4 = *(Vec151E6C1C *)&p->unk2BC;
-    p->unk390 = 0.0f;
-    p->unk1A4 = 20.0f;
-    p->unk19C = 20.0f;
-    p->unk1A8 = 15.0f;
-    p->unk1A0 = 15.0f;
+    obj->unk2BC = obj->unk2A4;
+    obj->unk2C0 = obj->unk2A8;
+    obj->unk2C4 = UNK2AC_F32;
+    *(Vec151E6C1C *)&obj->unk2A4 = *(Vec151E6C1C *)&obj->unk2BC;
+    obj->unk390 = 0.0f;
+    obj->unk1A4 = 20.0f;
+    obj->unk19C = 20.0f;
+    obj->unk1A8 = 15.0f;
+    obj->unk1A0 = 15.0f;
 
     {
     struct Struct151149AC *q1;
@@ -2432,25 +2446,26 @@ extern struct Struct151E5034 *D_8008FDD4;
 extern u8 D_8008FFB0[2][6];
 struct Struct151149AC *func_151149AC(s32);
 
+/* Sets unk80 = 2 on both objects of the current stop once the transition is far enough along. */
 void func_151E7DC0(void) {
-    struct Struct151E5034 *sp;
+    struct Struct151E5034 *state;
     struct Struct151149AC *r;
     s32 i;
-    s32 a;
+    s32 objId;
 
-    sp = D_8008FDD4;
-    if (sp->unk8 < 0.8000000119f && sp->unk3E == 0) {
+    state = D_8008FDD4;
+    if (state->unk8 < 0.8000000119f && state->unk3E == 0) {
         return;
     }
-    for (i = 0; i != 2; i++) {
-        sp = D_8008FDD4;
-        if (sp->unk3E == 0) {
-            a = D_8008FFB0[i][sp->unk2C];
+    for (i = 0; i < 2; i++) {
+        state = D_8008FDD4;
+        if (state->unk3E == 0) {
+            objId = D_8008FFB0[i][state->unk2C];
         } else {
-            a = D_8008FFB0[i][0];
+            objId = D_8008FFB0[i][0];
         }
-        r = func_151149AC(a);
-        if (r != 0) {
+        r = func_151149AC(objId);
+        if (r != NULL) {
             r->unk80 = 2;
         }
     }
