@@ -13,7 +13,7 @@ void func_151220D0(Camera *arg0) {
     f32 heading;
 
     if (!(arg0->contPad->button & 4)) {
-        func_15048F90((struct17 *)&arg0->eye.x, (struct17 *)&arg0->target.x, &vector);
+        func_15048F90((struct17 *)&arg0->eye, (struct17 *)&arg0->target, &vector);
         vector.unk0 += arg0->prevTarget.x - arg0->target.x;
         vector.unk8 += arg0->prevTarget.z - arg0->target.z;
         heading = func_15048FC8(&vector);

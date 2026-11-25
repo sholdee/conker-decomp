@@ -378,7 +378,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         facing.unk0 = sinf(angle);
         facing.unk4 = 0.0f;
         facing.unk8 = cosf(angle);
-        func_15048F90((struct17 *)&actor->eye.x, (struct17 *)&target->x_position, &toTarget);
+        func_15048F90((struct17 *)&actor->eye, (struct17 *)&target->x_position, &toTarget);
         toTarget.unk4 = 0.0f;
         if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
             side = -1;
@@ -401,7 +401,7 @@ void func_15097798(s32 actorIndex) {
 
     actor = &D_800DBFF0[actorIndex];
     if (D_800D2DB4 != 0) {
-        func_15048F90((struct17 *)&actor->focus.x, (struct17 *)&actor->eye.x, &dir);
+        func_15048F90((struct17 *)&actor->focus, (struct17 *)&actor->eye, &dir);
         func_1504917C(&dir, &dir);
 
         actor->focus.x += dir.unk0 * -2.5f * D_800D2E30[actorIndex];

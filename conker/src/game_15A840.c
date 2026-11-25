@@ -49,11 +49,11 @@ void func_1512D390(Camera *camera) {
             orbit->counter = 20;
             return;
         }
-        func_1508EF80((struct17 *)&camera->eye.x, (struct17 *)&camera->focus.x,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye.x);
+        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->focus,
+                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye);
     } else if (orbit->orbitSpeed != 0.0f) {
         orbit->orbitSpeed -= orbit->orbitSpeed * 0.2f * D_800BE9A4;
-        func_1508EF80((struct17 *)&camera->eye.x, (struct17 *)&camera->focus.x,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye.x);
+        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->focus,
+                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye);
     }
 }

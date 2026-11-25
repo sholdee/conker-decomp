@@ -129,7 +129,7 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         func_15143134(D_800AA40C, &end, &((BoneMtx *)data->second->unk1D4)[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
-        eye = (Vec3f *)&D_800DBFF0[viewIdx].eye.x;
+        eye = (Vec3f *)&D_800DBFF0[viewIdx].eye;
         gdl = func_15142B7C(gdl, 0x200005, 0x60600);
         gdl = func_15142E24(gdl, D_80090F68, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);

@@ -48,7 +48,7 @@ void func_1515AF90(s16 player) {
         f32 bottom;
 
         valid = TRUE;
-        eye = (vertex *)&D_800DBFF0[player].eye.x;
+        eye = &D_800DBFF0[player].eye;
         yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
         {
             u32 roll = func_150ADA20();

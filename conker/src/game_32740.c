@@ -122,8 +122,8 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     func_15005A60(view, resource);
     view->unk364 = -10000.0f;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
-    *(vertex *)&view->savedTarget.x = *(vertex *)&view->target.x;
-    *(vertex *)&view->savedEye.x = *(vertex *)&view->eye.x;
+    view->savedTarget = view->target;
+    view->savedEye = view->eye;
     view->unk7E8 = 50.0f;
     view->pitchOverride = 999.0f;
     view->unk8BC = D_800BE2B0[view->playerIndex];
@@ -149,7 +149,7 @@ void func_15005818(Camera *view, Actor *actor, vertex *eye) {
     view->unk27C = view->eye;
     view->prevEye = view->eye;
 
-    viewEye = (vertex *)&view->eye.x; // matching: kept live across the call in a stack slot
+    viewEye = &view->eye; // matching: kept live across the call in a stack slot
     func_1510E7A4(&view->unk644, &view->unk648, &view->unk354, &view->unk360, &view->unk640, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
@@ -159,17 +159,17 @@ void func_15005818(Camera *view, Actor *actor, vertex *eye) {
     view->focus.x = actor->x_position;
     view->focus.y = actor->y_position;
     *(f32 *)&view->focus.z = actor->z_position;
-    *(vertex *)&view->target.x = *(vertex *)&view->focus.x;
-    *(vertex *)&view->lastPlayerPos.x = *(vertex *)&view->focus.x;
+    view->target = view->focus;
+    view->lastPlayerPos = view->focus;
 
     // matching: z is read through the vector (unk2AC is typed s32); *(f32 *)&view->focus.z reorders the loads
     view->targetDistance = sqrtf((view->focus.x - view->eye.x) * (view->focus.x - view->eye.x) +
-                         (((vertex *)&view->focus.x)->z - view->eye.z) * (((vertex *)&view->focus.x)->z - view->eye.z));
+                         ((&view->focus)->z - view->eye.z) * ((&view->focus)->z - view->eye.z));
     view->unk34C = view->eye.y - view->unk354;
     view->height = view->eye.y - view->unk354;
 
-    *(vertex *)&view->savedTarget.x = *(vertex *)&view->target.x;
-    *(vertex *)&view->savedEye.x = *viewEye;
+    view->savedTarget = view->target;
+    view->savedEye = *viewEye;
     func_15124B18(view);
     func_15125330(view);
     func_1512523C(view);

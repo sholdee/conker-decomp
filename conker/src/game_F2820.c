@@ -193,7 +193,7 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
 
         update = TRUE;
         vtx = strip->quad[D_800BE9C0];
-        eye = (Vec3f *)&D_800DBFF0[view].eye.x;
+        eye = (Vec3f *)&D_800DBFF0[view].eye;
         gfx = func_15142B7C(gfx, 1, 0x600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         if (D_800DBFF0[view].status & 1) {
