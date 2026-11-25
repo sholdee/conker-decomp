@@ -477,6 +477,7 @@ void func_150AFE64(s32 altBone) {
     }
 }
 
+/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when D_800BE9F0 is 6, else on 0xDF/0xDE. */
 void func_150B003C(s32 arg0) {
     if (D_800BE9F0 == 6) {
         func_15179008(0);
@@ -486,13 +487,14 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
+/* Projectile spawn template passed to func_1513264C. */
 typedef struct GameDC6B0Packet {
     f32 field0, field4, field8, fieldC;
-    f32 angle0, angle1, angle2;
-    struct17 scale;
-    struct17 position;
-    struct17 velocity;
-    struct17 field40;
+    f32 angle0, angle1, angle2; /* elevation, heading (degrees), roll */
+    vertex scale;
+    vertex position;
+    vertex velocity;
+    vertex field40;
     f32 field4C;
     s32 field50;
     s16 field54, field56;
@@ -509,44 +511,52 @@ typedef struct GameDC6B0Packet {
     s32 field78;
 } GameDC6B0Packet;
 
-typedef struct GameDC6B0Link {
-    void *object;
-    s32 zero;
-} GameDC6B0Link;
+/* A projectile created by func_1513264C. */
+typedef struct {
+    u8 pad0[0x170];
+    struct102 *trail; /* ribbon effect (func_151B7328) following the projectile */
+} GameDC6B0Projectile;
 
-void *func_1513264C(void *, s32, s32, s32, s32, u8, s32);
-void func_15145974(void *, f32 *, f32 *);
-void *func_151B7328(void *, s32, s32, s32, s32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+/* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
+typedef struct GameDC6B0TrailArgs {
+    GameDC6B0Projectile *source;
+    s32 unk4;
+} GameDC6B0TrailArgs;
 
+GameDC6B0Projectile *func_1513264C(GameDC6B0Packet *, s32, s32, s32, s32, u8, s32);
+void func_15145974(vertex *v, f32 *heading, f32 *elevation);
+struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
+s32 func_15145128(vertex *v, vertex *out, f32 *length, f32 *invLength);
 
-void func_150B0094(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
+/* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
+ * the two points coincide. */
+void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
     GameDC6B0Packet packet;
-    struct17 delta;
+    vertex dir;
     f32 length;
-    f32 inverse_length;
-    u8 *created;
-    GameDC6B0Link link;
-    void **slot;
+    f32 invLength;
+    GameDC6B0Projectile *projectile;
+    GameDC6B0TrailArgs trailArgs;
+    struct102 **trail;
 
-    link.zero = 0;
-    delta.unk0 = arg1->unk0 - arg0->unk0;
-    delta.unk4 = arg1->unk4 - arg0->unk4;
-    delta.unk8 = arg1->unk8 - arg0->unk8;
-    if (func_15145128(&delta.unk0, &delta.unk0, &length, &inverse_length) != 0) {
+    trailArgs.unk4 = 0;
+    dir.x = to->x - from->x;
+    dir.y = to->y - from->y;
+    dir.z = to->z - from->z;
+    if (func_15145128(&dir, &dir, &length, &invLength) != 0) {
         packet.field4 = packet.field0 = 1.0f;
         packet.field8 = packet.fieldC = 0.7f;
-        packet.position = *arg0;
-        packet.velocity.unk0 = delta.unk0 * 80.0f;
-        packet.velocity.unk4 = delta.unk4 * 80.0f;
-        packet.velocity.unk8 = delta.unk8 * 80.0f;
+        packet.position = *from;
+        packet.velocity.x = dir.x * 80.0f;
+        packet.velocity.y = dir.y * 80.0f;
+        packet.velocity.z = dir.z * 80.0f;
         func_15145974(&packet.velocity, &packet.angle1, &packet.angle0);
-        packet.scale.unk8 = packet.scale.unk4 = packet.scale.unk0 = 1.0f;
+        packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
         packet.angle2 = 0.0f;
-        packet.field40 = *(struct17 *)&D_800A5480;
+        packet.field40 = *(vertex *)&D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
         packet.field50 = 0x19A0;
-        packet.field54 = 0x12C;
-        packet.field56 = 0xD2;
+        packet.field54 = 300;
+        packet.field56 = 210;
         packet.field58 = 7;
         packet.field5C = 0;
         packet.field60 = 0xFF;
@@ -565,35 +575,39 @@ void func_150B0094(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
         packet.field74 = 0xFF;
         packet.field78 = 0;
         packet.field4C = 0.0f;
-        created = func_1513264C(&packet, 3, 0xFF, 0, 4, arg2, arg3);
-        if (created != 0) {
-            slot = (void **)(created + 0x170);
-            memcpy(slot, &link.zero, 4);
-            link.object = created;
-            *slot = func_151B7328(&link, 1, 8, arg2, arg3);
+        projectile = func_1513264C(&packet, 3, 0xFF, 0, 4, arg2, arg3);
+        if (projectile != NULL) {
+            trail = &projectile->trail;
+            memcpy(trail, &trailArgs.unk4, sizeof(trailArgs.unk4));
+            trailArgs.source = projectile;
+            *trail = func_151B7328(&trailArgs, 1, sizeof(trailArgs), arg2, arg3);
         }
     }
 }
 
-void func_150B02C0(void *arg0) {
-    if (*(s32 *)((u8 *)arg0 + 0x170) != 0) {
-        func_1516972C(*(struct102 **)((u8 *)arg0 + 0x170));
+/* Releases the projectile's ribbon trail, if any. */
+void func_150B02C0(GameDC6B0Projectile *projectile) {
+    struct102 **trail = &projectile->trail;
+
+    if (*trail != NULL) {
+        func_1516972C(*trail);
     }
 }
 
-extern void func_150B02C0(void *);
 extern void func_15132570(void *);
 
-void func_150B02F0(void *arg0) {
-    func_150B02C0(arg0);
-    func_15132570(arg0);
+/* Releases the trail, then func_15132570. */
+void func_150B02F0(GameDC6B0Projectile *projectile) {
+    func_150B02C0(projectile);
+    func_15132570(projectile);
 }
 
 extern void func_1513259C(void *);
 
-void func_150B031C(void *arg0) {
-    func_150B02C0(arg0);
-    func_1513259C(arg0);
+/* Releases the trail, then func_1513259C. */
+void func_150B031C(GameDC6B0Projectile *projectile) {
+    func_150B02C0(projectile);
+    func_1513259C(projectile);
 }
 
 typedef struct {
