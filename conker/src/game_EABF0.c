@@ -5,26 +5,6 @@
 
 
 
-typedef struct GameE8C10SpawnRequest {
-    u8 pad0[0x80];
-    s32 unk80;
-    u8 pad84[0x4];
-    s16 unk88;
-    s16 unk8A;
-    s16 unk8C;
-    s16 unk8E;
-    s16 unk90;
-    s16 unk92;
-    s16 unk94;
-    s16 unk96;
-    s16 unk98;
-    u8 pad9A[0x6];
-    s8 unkA0;
-    s8 unkA1;
-    s8 unkA2;
-    u8 padA3[0x5];
-} GameE8C10SpawnRequest;
-
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 

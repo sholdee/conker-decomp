@@ -17,27 +17,6 @@ void func_10002088(s32 arg0, ...) {
     func_100020D0(func_10002070, 0, arg0, args);
 }
 
-// this is a beast:
-// contains a jump table
-typedef struct {
-    union {
-        long long ll;
-        long double ld;
-    } v;
-    unsigned char *s;
-    int n0;
-    int nz0;
-    int n1;
-    int nz1;
-    int n2;
-    int nz2;
-    int prec;
-    int width;
-    unsigned int nchar;
-    unsigned int flags;
-    unsigned char qual;
-} _Pft;
-
 extern u8 D_8002AAF0[];
 extern u8 D_8002AB14[];
 extern u8 D_8002BF80[];

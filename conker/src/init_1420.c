@@ -63,26 +63,6 @@ void func_100014C4(s32 arg0) {
     __osRestoreInt(saveMask);
 }
 
-/* printf conversion state (libultra xstdio.h). */
-typedef struct {
-    union {
-        long long ll;
-        double ld;
-    } v;
-    unsigned char *s;
-    int n0;
-    int nz0;
-    int n1;
-    int nz1;
-    int n2;
-    int nz2;
-    int prec;
-    int width;
-    unsigned int nchar;
-    unsigned int flags;
-    char qual;
-} _Pft;
-
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8
 #define FLAGS_ZERO 16
