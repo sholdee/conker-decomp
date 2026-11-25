@@ -3154,11 +3154,8 @@ void func_1508DC24(void) {
     count = base->numPlayers;
     for (; i < count; i++) {
         kind = base->gameType;
-        if ((kind == 0xB9)) {
-            if ((*(u8 *)((u8 *)&D_800CC2D0[i] + 0x128) == 0)) {
-            } else {
-                continue;
-            }
+        if (kind == 0xB9 && *(u8 *)&D_800CC2D0[i].pad128 != 0) {
+            continue;
         }
         {
             prev = D_800CC2D0[i].unk31C->unk75 & 0x7F;
