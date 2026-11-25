@@ -130,13 +130,11 @@ typedef struct {
 
 extern u8 D_800A1DD0[], D_800A1E34[];
 extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D_800A1E38[][3], D_800A1E50[][3], D_800A1E68[][3], D_800A1E80[][3];
-extern f32 D_800A1E98, D_800A1E9C, D_800A1EA0, D_800A1EA4, D_800A1EA8, D_800A1EAC;
 extern struct127 *func_1507515C(struct127 *);
 extern void func_15145EA4(void *, void *, s32, s32);
-extern void func_151450B4(struct17 *, struct17 *, struct17 *);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern s32 func_151602C0(void *, void *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15102B38(struct127 *, u8, void *, void *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern void func_1515548C(void *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(void *, s32);
 
@@ -149,8 +147,8 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     f32 lineDir[3];
     f32 edgeA[3];
     f32 edgeB[3];
-    void *srcPoints[3];
-    void *dstPoints[3];
+    f32 *srcPoints[3];
+    f32 *dstPoints[3];
     s32 matrix;
     f32 localPoint[3];
     struct17 normal;
@@ -168,6 +166,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     EffectArg_150FB8C0 effect;
     CameraArg_150FB8C0 cameraArg;
 
+    // matching: the always-false side < 0 test is needed
     if (obj == NULL || side < 0 || side >= 2) {
         return;
     }
@@ -218,6 +217,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     dstPoints[2] = edgeB;
     func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
+        // matching: IDO needs a declaration opening this block (a block-scope redeclaration of the callee)
         extern void func_151450B4(struct17 *, struct17 *, struct17 *);
 
         linePoint = TARGET_STATE(target)->linePoint;
@@ -227,7 +227,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         edgeB[0] -= origin[0];
         edgeB[1] -= origin[1];
         edgeB[2] -= origin[2];
-                func_151450B4((struct17 *)edgeA, (struct17 *)edgeB, &normal);
+        func_151450B4((struct17 *)edgeA, (struct17 *)edgeB, &normal);
         dx = origin[0] - linePoint[0];
         dy = origin[1] - linePoint[1];
         dz = origin[2] - linePoint[2];
@@ -254,9 +254,9 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     } else {
         variant = 4;
     }
-    func_151C229C(origin, (useTarget) ? NULL : dir, (useTarget) ? hitPoint : NULL, (useTarget) ? lineDir : NULL, (useTarget) ? 1 : 0, 0,
+    func_151C229C(origin, useTarget ? NULL : dir, useTarget ? hitPoint : NULL, useTarget ? lineDir : NULL, useTarget ? 1 : 0, 0,
                   252.0f, 0.003968254197f, (func_150ADA68() * 20.0f) + 75.0f, (func_150ADA68() * 250.0f) + 502.0f, 50.0f,
-                  (func_150ADA20() % 31U) + 0xE1, (target != NULL) ? target : obj, 1, 1, (D_800BE616 != 0) ? 0 : 1, 0x32, 0, 1, variant, 0x2C, timeOffset,
+                  (func_150ADA20() % 31U) + 225, target != NULL ? target : obj, 1, 1, D_800BE616 != 0 ? 0 : 1, 50, 0, 1, variant, 44, timeOffset,
                   cameraMask, 0, 0, arg4, arg5);
     if ((obj->unk74 & 0xF) != 0xF) {
         if (!(func_150ADA20() & 7)) {
@@ -267,7 +267,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
             sparkPos[0] = (s32)origin[0];
             sparkPos[1] = (s32)origin[1];
             sparkPos[2] = (s32)origin[2];
-            func_151602C0(&spark, sparkPos, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            func_151602C0(&spark, sparkPos, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         }
         if (!(func_150ADA20() & 1)) {
             trailParams[1] = (func_150ADA68() * 2.435000181f) + 3.534000158f;
@@ -277,9 +277,9 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
             } else {
                 trailCameraMask = ~(1 << target->camera->unk23D) & 0xFF;
             }
-            func_15102B38(obj, (obj->id == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->id == 0x23) ? (void *)D_800A1E38[side] : (void *)D_800A1DD4[side],
-                          (obj->id == 0x23) ? (void *)D_800A1E50[side] : (void *)D_800A1DEC[side], trailParams,
-                          (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 1012.0f) + 1497.0f, origin,
+            func_15102B38(obj, (obj->id == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->id == 0x23) ? D_800A1E38[side] : D_800A1DD4[side],
+                          (obj->id == 0x23) ? D_800A1E50[side] : D_800A1DEC[side], trailParams,
+                          (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 155, (func_150ADA68() * 1012.0f) + 1497.0f, origin,
                           trailCameraMask, 0, -1, arg4, arg5);
         }
     }
@@ -294,14 +294,15 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         effect.sizeY = (func_150ADA68() * 20.0f) + 80.0f;
         effect.unk10 = 0x80;
         effect.unk12 = (func_150ADA20() & 3) + 5;
+        // matching: the redundant (s16) and & 0xFFFF narrowing shifts the t-register allocation
         effect.flags = (s16)((side ? 2 : 0) | 0x39) & 0xFFFF;
         effect.unk16 = 3;
-        effect.unk18 = 0x55;
+        effect.unk18 = 85;
         effect.unk1A = 0;
         effect.unk1B = 0xFF;
         effect.unk1C = 0xFF;
         effect.unk1D = 0xFF;
-        effect.unk1E = (func_150ADA20() % 56U) + 0xC8;
+        effect.unk1E = (func_150ADA20() % 56U) + 200;
         effect.unk1F = 0xFF;
         effect.unk20 = 0xFF;
         effect.unk21 = 0xFF;
@@ -311,7 +312,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         effect.unk24 = 0;
         effect.unk2C = 0x1F0601;
         effect.unk30 = 3;
-        effect.unk34 = 0x22;
+        effect.unk34 = 34;
         effect.unk38 = 0x80;
         effect.unk3C = 0x20;
         effect.unk40 = 0;
@@ -515,11 +516,3 @@ void func_150FC818(EmitterObj *obj, EmitterMsg *msg, u8 msgType) {
         }
     }
 }
-s32 func_150FC930(struct260 *arg0, s32 arg1, s32 arg2);
-void func_150FC974(struct260 *arg0);
-
-extern void func_150FC974(struct260 *);
-void func_150FC9A4(struct260 *arg0);
-
-extern void func_15149368(struct260 *);
-void func_150FC9D0(struct260 *arg0);
