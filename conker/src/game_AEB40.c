@@ -23,7 +23,6 @@ typedef struct PartSet {
     /* 0x4 */ u8 count;
 } PartSet;
 
-extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
@@ -537,7 +536,7 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
                               D_800D20FC[spawnIdx].x,
                               D_800D20FC[spawnIdx].y + 150,
                               D_800D20FC[spawnIdx].z,
-                              150.0f, 150.0f, D_8009CC3C) != 0) {
+                              150.0f, 150.0f, 20000.0f) != 0) {
                 clear = 0;
             }
         }
