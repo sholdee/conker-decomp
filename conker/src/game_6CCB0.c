@@ -2,42 +2,44 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Node of the zone tree at D_800DBE48 (same layout as game_13BB20.c's ZoneNode). */
+typedef struct ZoneNode {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;     // bitmask tested by func_1503F800
+    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
+    /* 0x6 */ u16 halfSize; // half the region's side length
+    /* 0x8 */ s16 x;        // region centre
+    /* 0xA */ s16 z;
+    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
+} ZoneNode;
 
-typedef struct Node1503F800 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-} Node1503F800;
-
-extern Node1503F800 *D_800DBE48;
+extern ZoneNode *D_800DBE48;
 extern void func_1510F800(s32);
 
-s32 func_1503F800(void *arg0, s16 x, s16 y, s32 bit, s32 arg4) {
-    Node1503F800 *node;
-    s32 off;
+/* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies
+   in a leaf zone and every zone on the way has `bit` set in unk2; otherwise 1. */
+s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
+    ZoneNode *node;
+    s32 offset;
 
     func_1510F800(0);
     node = D_800DBE48;
     while (node != NULL) {
-        if (node->unk8 + node->unk6 >= x && x >= node->unk8 - node->unk6
-            && node->unkA + node->unk6 >= y && y >= node->unkA - node->unk6) {
+        if (node->x + node->halfSize >= x && x >= node->x - node->halfSize
+            && node->z + node->halfSize >= z && z >= node->z - node->halfSize) {
             if (!(node->unk2 & (1 << bit))) {
                 return 1;
             }
-            if (node->unkC != 0) {
-                off = node->unkC;
+            if (node->child != 0) {
+                offset = node->child;
             } else {
                 return 0;
             }
         } else {
-            off = node->unk4;
+            offset = node->next;
         }
-        if (off != 0) {
-            node = (Node1503F800 *)((u8 *)node + off);
+        if (offset != 0) {
+            node = (ZoneNode *)((u8 *)node + offset);
         } else {
             node = NULL;
         }
@@ -45,40 +47,31 @@ s32 func_1503F800(void *arg0, s16 x, s16 y, s32 bit, s32 arg4) {
     return 1;
 }
 
-struct Game1503F904 {
-    char pad14[0x14];
-    f32 unk14;
-    char pad18[0x4];
-    f32 unk1C;
-};
-
-extern s32 func_1503F800(void *, s16, s16, s32, s32);
-
-void func_1503F904(struct Game1503F904 *arg0, s32 arg1, s32 arg2) {
-    func_1503F800((s32)arg0 + 0x320, (s16)(s32)arg0->unk14, (s16)(s32)arg0->unk1C, arg1, 1);
+/* func_1503F800 at the object's x/z position. */
+s32 func_1503F904(struct127 *obj, s32 bit, s32 unused) {
+    return func_1503F800(obj->pad320, obj->x_position, obj->z_position, bit, 1);
 }
 
+/* Advances D_800C67F1 to the next of the first 25 objects (wrapping) with flag 0x800000 in unkF8. */
 void func_1503F964(void) {
-    s32 var_a0;
-    s32 temp_v0;
+    s32 start;
+    s32 i;
 
     if (D_800C67F0 != 0) {
-        temp_v0 = D_800C67F1;
-        var_a0 = D_800C67F1 + 1;
-        if (var_a0 >= 0x19) {
-            var_a0 = 0;
+        start = D_800C67F1;
+        i = D_800C67F1 + 1;
+        if (i >= 25) {
+            i = 0;
         }
-        if (var_a0 != temp_v0) {
-            do {
-                if ((*(s32 *)((u8 *)D_800CC2D0 + (var_a0 * 0x32C) + 0xF8) & 0x800000) != 0) {
-                    D_800C67F1 = (u8)var_a0;
-                    return;
-                }
-                var_a0 += 1;
-                if (var_a0 >= 0x19) {
-                    var_a0 = 0;
-                }
-            } while (var_a0 != temp_v0);
+        while (i != start) {
+            if (D_800CC2D0[i].unkF8 & 0x800000) {
+                D_800C67F1 = i;
+                return;
+            }
+            i++;
+            if (i >= 25) {
+                i = 0;
+            }
         }
     }
 }
