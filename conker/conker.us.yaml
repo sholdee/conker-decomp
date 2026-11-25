@@ -1655,7 +1655,7 @@ segments:
       - [0x246410, rodata]
       - [0x246440, rodata]
       - [0x2464A0, rodata]
-      - [0x2464B0, rodata]
+      - [0x2464B0, .rodata, game_121A20]
       - [0x246570, rodata]
       - [0x2465C0, rodata]
       - [0x2465F0, rodata]

@@ -3,6 +3,17 @@
 #include "variables.h"
 #include "effects.h"
 
+/* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
+const s16 D_800A19F0[3] = { 9, 10, 11 };
+const f32 D_800A19F8[3] = { 1.0f, 1.0f, 1.0f };
+const s16 D_800A1A04[16] = {
+    0x06, 0x07, 0x08, 0x23, 0x24, 0x25, 0x2D, 0x2E, 0x52, 0xA8, 0xA9, 0xAA, 0xAB, 0xBE, 0xBF, 0x95,
+};
+const f32 D_800A1A24[16] = {
+    0.2f, 0.1f, 0.1f, 0.025f, 0.025f, 0.08f, 0.2f, 0.2f,
+    0.1f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f, 0.35f, 0.2f,
+};
+
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
 #define SPIRAL_SOUND 2     /* plays a positional sound */
