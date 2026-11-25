@@ -614,13 +614,13 @@ ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out) {
 }
 
 /* A shadow-receiving vertex: light-space position and a pointer to its model-space position. */
-struct vin15185F24 {
+typedef struct ShadowVtx {
     f32 x;
     f32 y;
     f32 z;
     s16 *model;
     s32 unk10;
-};
+} ShadowVtx; /* size 0x14 */
 
 /*
  * Clips polygon in[0..count-1] to the shadow frustum and emits it as textured vertices in out, with the
@@ -628,7 +628,7 @@ struct vin15185F24 {
  * y == 0 into four quadrants, whose vertex ranges end at quadEnd[1..4] (quadEnd[0] = 0). Returns the
  * number of vertices written.
  */
-s32 func_15185F24(struct vin15185F24 *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadEnd, s32 split) {
+s32 func_15185F24(ShadowVtx *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadEnd, s32 split) {
     ClipVtx buf[2][26];
     s32 i;
     s32 j;
@@ -693,7 +693,7 @@ s32 func_15185F24(struct vin15185F24 *in, s32 count, s32 maxVerts, Vtx_t *out, s
 }
 
 extern s32 func_1510F720(s32, s32, s32, u8 **);
-extern s32 func_150A5B90(u32 *, s32, s32, s32);
+extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
 extern void func_1510F800(s32);
 extern s32 D_800D3690;
@@ -702,83 +702,81 @@ extern s32 D_800DF0EC;
 extern s32 D_800DF0F0;
 extern s32 D_800DF0F4;
 
-s32 func_1518652C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    u8 *list[16];
+/*
+ * Gathers the shadow-receiving faces within `radius` of (x, z): decodes each nearby cell's delta-encoded
+ * face list into a bitmap (keeping only flagged faces when D_800DE041 is set) and hands it to
+ * func_150A5B90 to fill out[] (up to end). Returns the number of vertices written.
+ */
+s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx *end) {
+    u8 *cells[16];
     s32 count;
-    u32 bits[187];
-    u32 v;
+    u32 bits[0x1760 / 32];
+    u32 face;
     u8 *p;
-    u32 max;
+    u32 maxFace;
     s32 c;
 
-    max = 0;
+    maxFace = 0;
     func_1510F800(0);
-    count = func_1510F720(arg0, arg1, arg2, list);
+    count = func_1510F720(x, z, radius, cells);
     if (count != 0) {
-    bzero(bits, sizeof(bits));
-    while (count != 0) {
-        v = 0;
-        count--;
-        p = list[count] + 0xE;
-        if (D_800DE041 != 0) {
-            while (*p != 0) {
-                c = *p;
-                if (c & 0x80) {
-                    v = *p++ << 8;
-                    v |= *p++;
-                    v &= 0x7FFF;
-                } else {
-                    v += c;
-                    p += 1;
+        bzero(bits, sizeof(bits));
+        while (count != 0) {
+            face = 0;
+            count--;
+            p = cells[count] + 0xE;
+            if (D_800DE041 != 0) {
+                while (*p != 0) {
+                    c = *p;
+                    if (c & 0x80) {
+                        face = *p++ << 8;
+                        face |= *p++;
+                        face &= 0x7FFF;
+                    } else {
+                        face += c;
+                        p++;
+                    }
+                    if (face < 0x1760) {
+                        if (((u8 *)D_800D3668)[face] == 1) {
+                            bits[face >> 5] |= 1 << (face & 0x1F);
+                            if (maxFace < face) {
+                                maxFace = face;
+                            }
+                        }
+                    }
                 }
-                if (v < 0x1760) {
-                    if ((*(u8 **)&D_800D3668)[v] == 1) {
-                        bits[v >> 5] |= 1 << (v & 0x1F);
-                        if (max < v) {
-                            max = v;
+            } else {
+                while (*p != 0) {
+                    c = *p;
+                    if (c & 0x80) {
+                        face = *p++ << 8;
+                        face |= *p++;
+                        face &= 0x7FFF;
+                    } else {
+                        face += c;
+                        p++;
+                    }
+                    if (face < 0x1760) {
+                        bits[face >> 5] |= 1 << (face & 0x1F);
+                        if (maxFace < face) {
+                            maxFace = face;
                         }
                     }
                 }
             }
-        } else {
-            while (*p != 0) {
-                c = *p;
-                if (c & 0x80) {
-                    v = *p++ << 8;
-                    v |= *p++;
-                    v &= 0x7FFF;
-                } else {
-                    v += c;
-                    p += 1;
-                }
-                if (v < 0x1760) {
-                    bits[v >> 5] |= 1 << (v & 0x1F);
-                    if (max < v) {
-                        max = v;
-                    }
-                }
-            }
         }
-    }
-    D_800D3690 = D_800DBE3C;
-    D_800D3694 = &bits[max >> 5] + 1;
-    D_800DF0E8 = arg0 - arg2;
-    D_800DF0EC = arg0 + arg2;
-    D_800DF0F0 = arg1 - arg2;
-    D_800DF0F4 = arg1 + arg2;
-    return (func_150A5B90(bits, arg3, arg4, arg5) - arg3) / 20;
+        D_800D3690 = D_800DBE3C;
+        D_800D3694 = &bits[(maxFace >> 5) + 1];
+        D_800DF0E8 = x - radius;
+        D_800DF0EC = x + radius;
+        D_800DF0F0 = z - radius;
+        D_800DF0F4 = z + radius;
+        return func_150A5B90(bits, out, mtx, end) - out;
     }
     return 0;
 }
 
-struct vtx151873E4 {
-    f32 x;      /* 0x00 */
-    f32 y;      /* 0x04 */
-    f32 z;      /* 0x08 */
-    s32 unkC;   /* 0x0C */
-    s32 unk10;  /* 0x10 */
-};              /* size 0x14 */
-s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, struct vtx151873E4 *arg3, f32 *arg4, struct vtx151873E4 *arg5, s32 arg6);
+s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, ShadowVtx *arg5, s32 arg6);
 
 extern s32 D_8008D3E0;
 typedef struct { u8 pad0[0x40]; Vp vp[20]; } S180_15186794;
@@ -794,7 +792,7 @@ extern s32 func_10004074(void *);
 extern void func_1503DA9C(struct127 *, s32, s32, s32);
 
 Gfx *func_15186794(Gfx *gfx, s32 arg1) {
-    struct vtx151873E4 *buf;
+    ShadowVtx *buf;
     s32 count;
     Vtx *verts;
     u32 total;
@@ -843,7 +841,7 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
     if (verts == NULL) {
         return gfx;
     }
-    buf = allocate_memory(D_8008D3E0 * sizeof(struct vtx151873E4), 2, 1, 1);
+    buf = allocate_memory(D_8008D3E0 * sizeof(ShadowVtx), 2, 1, 1);
     if (buf == NULL) {
         func_10004074(verts);
         return gfx;
@@ -886,7 +884,7 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
             }
             mtx = (f32 *)D_800DF0F8[n];
             count = func_151873E4(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, buf, mtx, &buf[D_8008D3E0 - 2],
-                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, (s32)buf, (s32)mtx, (s32)&buf[D_8008D3E0 - 2]));
+                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, buf, mtx, &buf[D_8008D3E0 - 2]));
             if (count != 0) {
                 idx = 0;
                 gfx = func_15184FA4(gfx, i, n, arg1);
@@ -1022,7 +1020,7 @@ typedef struct {
 
 extern void func_1510F800(s32);
 extern void func_150A44F0(s32, s16 *, s32);
-extern struct vtx151873E4 *func_150A5E44(s16 *, struct vtx151873E4 *, f32 *, struct vtx151873E4 *);
+extern ShadowVtx *func_150A5E44(s16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
 extern s32 D_800D3690;
 extern s16 D_800D37E0[];
@@ -1032,7 +1030,7 @@ extern s32 D_800DF0EC;
 extern s32 D_800DF0F0;
 extern s32 D_800DF0F4;
 
-s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, struct vtx151873E4 *arg3, f32 *arg4, struct vtx151873E4 *arg5, s32 arg6) {
+s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, ShadowVtx *arg5, s32 arg6) {
     unkfunc_151873E4 *entry;
     s32 found;
     s32 i;
