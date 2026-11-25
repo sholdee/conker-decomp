@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ struct127 *target;
     /* 0x04 */ u8 targetId; // target->unique_id when attached
-    /* 0x05 */ u8 bone;     // index into target->unk1D4's matrices
+    /* 0x05 */ u8 bone;     // index into the Mtx array at target->unk1D4
     /* 0x08 */ Vec3f_1DF510 offset;
 } RopeAnchor;
 
@@ -84,6 +84,10 @@ struct RopeLine {
 TiedRope *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
 extern Vec3f_1DF510 D_800AA320;
 extern Vec3f_1DF510 D_800AA32C;
+extern Vec3f_1DF510 D_800AA338;
+extern Vec3f_1DF510 D_800AA344;
+extern Vec3f_1DF510 D_800AA350;
+extern Vec3f_1DF510 D_800AA35C;
 extern Vec3f_1DF510 D_800AA368;
 extern Vec3f_1DF510 D_800AA374;
 
@@ -176,7 +180,7 @@ void func_151B22C8(RopeTie *self) {
     func_15149368(&self->base);
 }
 
-/* Returns 1 when obj1 belongs to obj0's slot (unk65) and obj1->unk5C is 1, else 2. */
+/* Returns 1 when obj1->unk65 holds obj0's 1-based index in D_800CC2D0 and obj1->unk5C is 1, else 2. */
 s32 func_151B22F4(RopeTie *self) {
     struct127 *obj0 = self->tie.obj0;
 
@@ -187,11 +191,6 @@ s32 func_151B22F4(RopeTie *self) {
     }
     return 2;
 }
-
-extern Vec3f_1DF510 D_800AA338;
-extern Vec3f_1DF510 D_800AA344;
-extern Vec3f_1DF510 D_800AA350;
-extern Vec3f_1DF510 D_800AA35C;
 
 /* State 1: hangs three ropes between bones of obj0 and obj1. */
 void func_151B2348(RopeTie *self) {
@@ -375,7 +374,7 @@ extern struct {
 /* Draws the line as a camera-facing textured quad between its two bone-relative points. */
 Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     RopeLineData *line;
-    volatile u8 dead;
+    volatile u8 dead; // matching: IDO keeps the flag in its stack slot only when volatile
     u8 update;
     Vtx *vtx;
     f32 *camera;
@@ -415,7 +414,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[5].unk0 | D_800A4AC8[5].unk4, &update);
-        // side = (end - start) x (midpoint - camera), scaled to halfWidth
+        // side = (end - start) x (midpoint - camera), scaled to halfWidth; texture is 30x30 texels (S10.5)
         dx = end.x - start.x;
         toCamX = ((dx * 0.5f) + start.x) - camera[0];
         dy = end.y - start.y;
@@ -505,7 +504,7 @@ void func_151B2F04(RopeTie *self, ObjectSwap *swap, u8 event) {
     }
 }
 
-/* Rope event handler. */
+/* Rope event handler: passes the link to func_151B47D8. */
 void func_151B2FA0(TiedRope *self, s32 arg1, u8 event) {
     func_151B47D8(self, &self->link, arg1, event);
 }
