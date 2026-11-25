@@ -17,11 +17,8 @@ extern u8 D_800AB330[]; /* per effect kind flag */
 
 /* Start of a live effect created from an ParticleDef. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
+    EffectHeader header;
+    u8 pad10[0x8];
     ParticleDef desc;
 } EffectBase; /* 0x70 */
 
@@ -630,7 +627,7 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
                 dist = func_150ADA68();
                 func_151DB5D0(steam->kind, pos, vel, avgScale * 471.0f, (dist * 154.0f + 10106.0f) * 0.0001f, 1.0f,
                               (func_150ADA68() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
-                              effect->base.unkC, effect->base.unk1);
+                              effect->base.header.owner, effect->base.header.kind);
             }
             steam->spawnCredit -= 1.0f;
         } while
