@@ -93,7 +93,7 @@ extern s32 func_1510D0EC(s32, s32 *, s32, s32);
  * allocated list (count, then the indices) of the distinct textures referenced.
  * Returns whether every texture loaded.
  */
-s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s16 **usedOut) {
+s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 lifetime, s16 **usedOut) {
     s32 seg;
     s32 i;
     s32 texSize;
@@ -129,7 +129,7 @@ s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s16 **usedOu
                 seg = dram & 0x0F000000;
                 dram &= 0xF03FFFFF;
                 if (seg == 0) {
-                    texAddr = func_1510D0EC(dram, &texSize, keepLevel, countUse);
+                    texAddr = func_1510D0EC(dram, &texSize, lifetime, countUse);
                     gfx->words.w1 = texAddr;
                     if (usedOut != NULL) {
                         value = 1 << (dram & 7);
@@ -192,92 +192,97 @@ extern void func_10006240(u8 *, Entry1510D404 *, u32);
 extern s32 func_10004074(s16 *);
 s32 func_1510D374(s32 arg0);
 
-s32 func_1510D0EC(s32 arg0, s32 *arg1, s32 arg2, s32 arg3) {
-    s32 size;
-    s32 offset;
-    s32 dst;
+/*
+ * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from
+ * D_80091D20, located by func_1510D374) are read from ROM and decompressed into a new buffer of the
+ * size given by D_800B87A0. Returns 0x80000000 for an invalid index or a failed load. Also widens the
+ * D_800D9F58..D_800D9F5C range of indices to scan, raises the texture's lifetime (see func_1510D404)
+ * to at least `lifetime` and, when countUse is set, bumps its use count. sizeOut (optional) receives
+ * the decompressed size.
+ */
+s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
+    s32 packedSize;
+    s32 romAddr;
+    s32 texture;
     s32 odd;
-    s32 buf;
+    s32 packed;
     s32 len;
 
-    if (arg0 < D_800D9F58) {
-        D_800D9F58 = arg0;
+    if (index < D_800D9F58) {
+        D_800D9F58 = index;
     }
-    if (D_800D9F5C < arg0) {
-        D_800D9F5C = arg0;
+    if (D_800D9F5C < index) {
+        D_800D9F5C = index;
     }
-    if (arg0 >= 0x1E52 || arg0 < 0) {
+    if (index >= 0x1E52 || index < 0) {
         return 0x80000000;
     }
-    size = ((u16 *)D_80091D20)[arg0];
-    if (size == 0) {
-        D_800B0E58[arg0] = 0x80000000;
-    } else if (D_800B0E58[arg0] == -1) {
+    packedSize = ((u16 *)D_80091D20)[index];
+    if (packedSize == 0) {
+        D_800B0E58[index] = 0x80000000;
+    } else if (D_800B0E58[index] == -1) {
         D_800DBDBA = 5;
-        if (arg2 == 0x3F) {
-            arg2 = 0x3E;
+        if (lifetime == 0x3F) {
+            lifetime = 0x3E;
         }
-        offset = func_1510D374(arg0);
-        len = size;
-        if (offset & 1) {
-            offset--;
+        romAddr = func_1510D374(index);
+        len = packedSize;
+        if (romAddr & 1) {
+            romAddr--;
             odd = 1;
         } else {
             odd = 0;
         }
-        size = len + odd;
-        if (size & 1) {
+        packedSize = len + odd;
+        if (packedSize & 1) {
             len++;
         }
-        buf = func_10003C6C((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
-        if (buf == 0) {
+        packed = func_10003C6C((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
+        if (packed == 0) {
             return 0x80000000;
         }
-        func_10004514(offset, (void *)buf, (len + odd + 0xF) & ~0xF, 1);
-        len = ((u16 *)D_800B87A0)[arg0];
-        dst = func_10003C6C(len, 1, 1, 0, 2);
-        if (dst == 0) {
-            func_10004074((s16 *)buf);
+        func_10004514(romAddr, (void *)packed, (len + odd + 0xF) & ~0xF, 1);
+        len = ((u16 *)D_800B87A0)[index];
+        texture = func_10003C6C(len, 1, 1, 0, 2);
+        if (texture == 0) {
+            func_10004074((s16 *)packed);
             return 0x80000000;
         }
-        func_10006240((u8 *)(buf + odd), (Entry1510D404 *)dst, D_8003809C);
-        func_10004074((s16 *)buf);
-        D_800B0E58[arg0] = dst;
-        D_800D9F68[arg0] = 0;
+        func_10006240((u8 *)(packed + odd), (Entry1510D404 *)texture, D_8003809C);
+        func_10004074((s16 *)packed);
+        D_800B0E58[index] = texture;
+        D_800D9F68[index] = 0;
     }
-    if (arg1 != NULL) {
-        len = ((u16 *)D_800B87A0)[arg0];
-        *arg1 = len;
+    if (sizeOut != NULL) {
+        len = ((u16 *)D_800B87A0)[index];
+        *sizeOut = len;
     }
-    len = D_800B0E58[arg0];
-    if (((s8 *)D_800BC448)[arg0] < arg2) {
-        ((s8 *)D_800BC448)[arg0] = arg2;
+    len = D_800B0E58[index];
+    if (((s8 *)D_800BC448)[index] < lifetime) {
+        ((s8 *)D_800BC448)[index] = lifetime;
     }
-    if (arg3 != 0) {
-        if (D_800D9F68[arg0] < 0xFF) {
-            D_800D9F68[arg0]++;
+    if (countUse != 0) {
+        if (D_800D9F68[index] < 255) {
+            D_800D9F68[index]++;
         }
     }
-    if (0) { func_10004074((s16 *)&dst); }
+    // matching: taking texture's address keeps it in memory, as in the original
+    if (0) { func_10004074((s16 *)&texture); }
     return len;
 }
 
-s32 func_1510D374(s32 arg0) {
-    s32 sum;
+/* Returns the ROM address of texture `index`'s compressed data: the textures are packed back to back. */
+s32 func_1510D374(s32 index) {
+    s32 romAddr;
     s32 i;
 
-    sum = (s32)D_1A37E0;
-    for (i = 0; i < arg0; i++) {
-        sum += ((u16 *)D_80091D20)[i];
+    romAddr = (s32)D_1A37E0;
+    for (i = 0; i < index; i++) {
+        romAddr += ((u16 *)D_80091D20)[i];
     }
 
-    return sum;
+    return romAddr;
 }
-
-extern u8 D_800DBDBA;
-
-extern void func_10006240(u8 *, Entry1510D404 *, u32);
-extern s32 func_10004074(s16 *);
 
 #define FL(i) (*(s8 *)&D_800BC448[i])
 
@@ -351,26 +356,3 @@ void func_1510D608(s32 arg0, s32 arg1) {
         *p = (temp & 0x40) | arg1;
     }
 }
-
-void func_1510D694(s32);
-extern s32 func_10004074(s16 *);
-void func_1510D630(s16 *arg0);
-void func_1510D694(s32 arg0);
-void func_1510D720(s32 arg0);
-void func_1510D7AC(s32 arg0);
-
-extern u8 D_800D9ED0;
-void func_1510D864(void);
-
-extern u8 D_800D9ED0;
-struct Entry1510D874
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-  u8 unkC;
-  u8 unkD;
-};
-extern struct Entry1510D874 D_800D9ED8[];
-void func_1510D874(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-Gfx *func_1510D8C0(Gfx *gfx, s32 arg1);
