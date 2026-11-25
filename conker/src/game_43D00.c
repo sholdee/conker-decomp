@@ -39,8 +39,6 @@ void func_15016850(void) {
 extern u8 D_1A33F0[];
 extern u8 D_1A34E0[];
 extern u8 compressed_ROM_START[];
-extern s32 func_1502B9B4(s32, s32, ...);
-extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15017114(s32 levelId);
 extern u8 func_15083DA0(void);

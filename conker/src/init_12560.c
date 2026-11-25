@@ -53,7 +53,7 @@ void func_1001263C(s32 id, s32 volume, s32 pan) {
     s32 size;
 
     size = 0;
-    data = func_1502B020(&size, 2, 22, id);
+    data = (s32)func_1502B020(&size, 2, 22, id);
     D_800427F4 = id;
     if (data != 0 && size != 0) {
         func_151F2D6C(volume, 0);

@@ -10,7 +10,6 @@ void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32
                    f32 zUp);
 void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degrees
 void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
-s32 func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
 extern s32 D_800DC290[4];        // their lengths in frames

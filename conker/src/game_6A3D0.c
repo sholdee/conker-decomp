@@ -39,8 +39,6 @@ extern void *D_800C5048[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
-extern void *func_1502B5C8(u32 *size, s32 depth, ...);
-extern void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...);
 extern s32 func_150028BC(s32 id);
 extern s32 func_15084044(Actor *obj, s32 model);
 

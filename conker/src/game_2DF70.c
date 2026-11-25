@@ -800,8 +800,8 @@ void func_150025FC(void) {
     height = D_800DBE2C;
 
     D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
-    res0 = func_1502B5C8(NULL, 2, 5, level * 2);
-    res1 = func_1502B5C8(NULL, 2, 5, level * 2 + 1);
+    res0 = (s32)func_1502B5C8(NULL, 2, 5, level * 2);
+    res1 = (s32)func_1502B5C8(NULL, 2, 5, level * 2 + 1);
     if (res0 == 0) {
         D_800BE5D0 = 0;
     } else {

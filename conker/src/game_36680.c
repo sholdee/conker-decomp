@@ -574,7 +574,6 @@ typedef struct Game36680ResourceInfo {
 extern Game36680ResourceInfo D_80095CE0[];
 extern u16 D_800BE478[15];
 extern s16 D_800DDB80[15][2];
-extern s32 func_1502B020(s32 *, s32, s32, s32);
 
 /** Clears the particle slot tables and picks this level's resources. */
 void func_1500ABA0(s32 arg0) {
@@ -598,7 +597,7 @@ void func_1500AC14(void) {
         D_800DDA90[i].used = 0;
         id = D_800BE4A0[i].id;
         if (id != 0xFF && (D_800BE478[i] != 0 || D_800BE4A0[i].id == 0x3B)) {
-            D_800DDA90[i].devAddr = func_1502B020(&size, 2, 0, id);
+            D_800DDA90[i].devAddr = (s32)func_1502B020(&size, 2, 0, id);
             D_800DDA90[i].size = (size + 15) & ~15;
             length = D_80095CE0[id].length;
             if (size == 0 || length == 0) {

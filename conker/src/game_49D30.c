@@ -40,7 +40,6 @@ void func_15020EC4(s32 scene);
 void func_1502178C(Actor *target, s32 scene, s32 onlyTrack);
 void func_1501E81C(s32 skipped, s32 scene);
 s32 func_150229E4(Actor *obj);
-extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
@@ -327,7 +326,7 @@ s32 func_1501D1D4(s32 map, s32 cutscene, s32 scene) {
     s32 unused;
     s32 file;
 
-    file = func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
+    file = (s32)func_1502B6BC(&unused, 0, &size, 3, 6, map, cutscene);
     if (file != 0) {
         D_800C3668[scene] = file;
     } else {

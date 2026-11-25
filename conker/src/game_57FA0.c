@@ -16,13 +16,6 @@ void func_1502AAF0(void) {
 void func_1502AAF8(s32 arg0) {
 }
 
-/* One 8-byte entry of the ROM asset table at assets_offsets_table_ROM_START. */
-typedef struct {
-    s32 offset; /* added to the table base to reach the next level */
-    s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed),
-                 * bit 31: last entry (tables loaded into RAM, see func_1502B4A8) */
-} RomTableEntry;
-
 /* Most-recently-used cache of ROM table entries; the newest is at the end. */
 typedef struct {
     u32 romAddr;  /* address of the entry in ROM, with bit 31 set */
@@ -320,7 +313,7 @@ void *func_1502B5C8(u32 *size, s32 depth, ...) {
  * Like func_1502B5C8, but the data loaded is a table of `count` entries (0 = terminated by bit 31),
  * which is turned into pointers by func_1502B4A8. Stores the entry count in *countOut if non-NULL.
  */
-RomTableEntry *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...) {
+void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...) {
     u32 *found;
     u8 *addr;
     u32 localSize;

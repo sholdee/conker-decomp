@@ -27,7 +27,6 @@ extern PartSet D_80086CC4[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern s32 func_1502B020(s32, s32, s32, s32);
 extern void func_150302F0(Actor *obj, s32 setId);
 extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
 extern void func_15036C70(Actor *obj);
@@ -569,7 +568,7 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
     }
     obj->unk6 = func_15084D00(obj);
     if (D_800C5A90[obj->unk6] != 0) {
-        obj->unk58 = func_1502B020(0, 2, 2, obj->unk6);
+        obj->unk58 = (s32)func_1502B020(0, 2, 2, obj->unk6);
     }
 }
 

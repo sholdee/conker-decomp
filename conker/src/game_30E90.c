@@ -29,7 +29,6 @@ extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
 void *allocate_memory(s32, u32, s32, s32);
-ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;

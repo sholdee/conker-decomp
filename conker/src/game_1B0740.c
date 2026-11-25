@@ -44,7 +44,6 @@ void func_15183974(s32);
 void func_151839F0(s32, s32);
 void func_15183ACC(s32);
 s32 func_15184118(Actor *);
-ModelResource *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_10004074(void *);
 void func_15165C80(f32 *, Vtx *, f32, f32 *, f32, f32, u8 *, s32);
 void func_1517725C(u8);

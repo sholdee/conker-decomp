@@ -8,7 +8,6 @@
 s32 func_151464B8(s16 *arg0);
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
-s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_15168E54(s32 arg0, s32 arg1);
 
 s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, CollisionHit *floor);

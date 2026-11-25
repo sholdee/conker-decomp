@@ -162,7 +162,6 @@ void func_1509B810(IdRecord *node) {
     gTaskWorkingSet.count += 1;
 }
 
-void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
 IdRecord *func_1509B8FC(s16 id) {

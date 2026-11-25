@@ -169,7 +169,6 @@ typedef struct ResourceSlot {
 } ResourceSlot;
 
 extern ResourceSlot *D_800D2FB0;
-extern void *func_1502B6BC(s32, s32, u32 *, s32, s32, s32, s32);
 extern void func_10004074(void *);
 
 /* Loads the resource table, relocates every block in it and returns its resource count in *countOut. */

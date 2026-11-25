@@ -3291,8 +3291,6 @@ void func_1505E060(AnimPlaybackState *state) {
     bcopy(state->header, state->prevHeader, sizeof(state->header));
 }
 
-s32 func_1502AF04(u8 *, s32, s32, s32);
-s32 func_1502B110(u8 *, s32, s32, u32, ...);
 extern s32 D_8008630C[];
 
 /*
@@ -3386,9 +3384,9 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             state->unk0 = 0;
         }
         if (actor != NULL && (u8 *)actor->unk58 != NULL) {
-            info = (s32 *)func_1502AF04((u8 *)actor->unk58, (s32)buf, assetId, 2);
+            info = (s32 *)func_1502AF04((u8 *)actor->unk58, buf, assetId, 2);
         } else {
-            info = (s32 *)func_1502B110(NULL, 2, (s32)buf, 3, kind, bank, assetId);
+            info = (s32 *)func_1502B110(NULL, 2, buf, 3, kind, bank, assetId);
         }
         if (info != NULL) {
             dataSize = info[1];

@@ -8,7 +8,6 @@ void func_15123070(Camera *);
 void func_1512D560(Camera *, s32, CamShot *);
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1502B5C8(u32 *, s32, s32, s32, s32);
 extern void func_1512ABF8(void);
 extern void func_1512D238(void);
 void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode);

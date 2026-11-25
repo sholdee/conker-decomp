@@ -53,8 +53,6 @@ void func_1501B640(s32);
 void func_1501BB20(void);
 void func_1501C53C(void);
 void func_1501CC3C(void);
-void func_1502AAF0(void);
-void func_1502AAF8(s32);
 void func_15044370(void);
 void func_1507DFE4(s32, s32);
 s32 func_1507E114(s32);

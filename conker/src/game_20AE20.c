@@ -3760,7 +3760,6 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
 
 extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
-s32 func_1502B5C8();
 
 /*
  * Loads text bank (bank - 1) of language D_800E0BEA and indexes its NUL-separated strings into D_800E0BD8;
@@ -3794,7 +3793,7 @@ void func_151E6964(s32 bank) {
         return;
     }
 
-    D_800E0BD4 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
+    D_800E0BD4 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, bank - 1);
     cursor = (u8 *)D_800E0BD4;
     end = cursor + size;
     count = 0;
@@ -3827,7 +3826,7 @@ void func_151E6964(s32 bank) {
         return;
     }
 
-    D_8008FDD8 = func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
+    D_8008FDD8 = (s32)func_1502B5C8(&size, 3, 0x1C, D_800BEAAB, 2);
     D_800E0B88 = allocate_memory(80 * sizeof(u8 *), 1, 0, 0);
     cursor = (u8 *)D_8008FDD8;
     count = 0;

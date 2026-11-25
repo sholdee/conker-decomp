@@ -66,9 +66,6 @@ void func_10003930(void);
 void func_10004250(void);
 void func_10004308(void);
 void func_1000440C(void);
-void func_10004470(void);
-void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-void func_10004674(void);
 void func_100084D8(u8 arg0);
 s32  func_1000853C(u8 arg0);
 void func_10008570(u8 player, OSMesgQueue *queue);
@@ -882,8 +879,6 @@ void func_10003920(void);
 s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 //func_10004074
 void func_100043B4(s32 *arg0, u32 arg1);
-//func_100046E4
-void func_1000480C(u32 devAddr, void *dramAddr, u32 size);
 //func_10005570
 //func_100056A0
 //func_100057E0
@@ -1039,7 +1034,6 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);
 
 Gfx *func_1501A490(Gfx *dl, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
-u32 func_1502B7F0(void **data, s32 depth, ...);
 ModelAttachment *func_1503195C(Actor *, s32, s32);
 s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size);
 f32  func_15047C00(f32 arg0);

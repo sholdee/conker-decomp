@@ -10,7 +10,6 @@ typedef struct PathGraph {
 } PathGraph;
 
 extern s16 D_80087294;
-PathGraph *func_1502B5C8(s32 *, s32, s32, s32);
 
 /* Loads path graph resource `id` and splits the height bands. */
 void func_15085B70(s32 id) {

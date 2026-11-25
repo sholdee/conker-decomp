@@ -1904,7 +1904,6 @@ extern s8 D_800E0C81;
 extern s8 D_800E0C82;
 extern s8 D_800E0C83;
 extern s8 D_800E0C84;
-s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *); // matching: a u32 countUse (the definition's s32 changes func_151EDF4C)
 
 /*

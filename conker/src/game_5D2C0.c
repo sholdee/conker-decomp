@@ -13,7 +13,6 @@ extern void func_10004074(void *ptr);
 void func_1518CA04(s32 model);
 
 
-AttachModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_15168E54(Gfx *, AttachModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */

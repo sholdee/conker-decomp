@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-AttachModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_15168E54(Gfx *, AttachModelHeader *);
 
 // NEAR-MISS 16 -> MATCH (wave 61). The parked candidate carried a `u8 c` local that the

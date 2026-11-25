@@ -46,7 +46,6 @@ extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* ti
 extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
 extern void func_151DD9E4(void);
 extern void func_151E7EF8(void);
-extern void *func_1502B5C8(u32 *size, s32 depth, ...); /* loads ROM table data */
 
 /* Resets the saved game state (func_15017790, every D_800C3A60 entry and the values saved with them). */
 void func_150064E0(void) {
