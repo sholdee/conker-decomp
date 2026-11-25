@@ -51,7 +51,6 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     }
 }
 
-
 /* Result of a ray cast (func_15081690) or of a projectile's path setup (func_151C4B0C). */
 typedef struct Game1F1F60Hit {
     /* 0x00 */ void *actor;
@@ -503,13 +502,6 @@ extern f32 D_800DCA24;
 void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(void *, u8, s32);
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
 
 /* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
 typedef struct {

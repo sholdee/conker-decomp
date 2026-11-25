@@ -5,13 +5,6 @@
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
 /*
  * A streak particle: a camera-facing triangle from its tail point to a
  * width-wide edge at its head. Head and tail move with separate velocities.

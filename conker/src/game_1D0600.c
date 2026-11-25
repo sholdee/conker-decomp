@@ -25,13 +25,6 @@ typedef struct {
     /* 0xB0 */ FadeEvent fade;
 } DescParticle;
 
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
 /* Settings of a func_15152B38 burst (layout as BurstConfig in game_1CE2F0.c). */
 typedef struct {
     /* 0x00 */ s32 countBase;

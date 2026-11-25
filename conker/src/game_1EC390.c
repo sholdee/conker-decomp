@@ -291,8 +291,8 @@ typedef struct ScreenSpriteInfo5C {
     /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
     /* 0x18 */ s16 fadeRate;
     /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
-    /* 0x1B */ SpriteColor color1;
-    /* 0x1F */ SpriteColor color2;
+    /* 0x1B */ Color8 color1;
+    /* 0x1F */ Color8 color2;
     /* 0x23 */ u8 unk23;
     /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
     /* 0x28 */ s32 unk28;

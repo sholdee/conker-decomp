@@ -904,13 +904,6 @@ void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 size
 
 /* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
 typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
-typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
     /* 0x08 */ Vec3f position;

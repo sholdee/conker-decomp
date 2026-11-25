@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-
 struct Vec3F { f32 x; f32 y; f32 z; };
 
 /*
@@ -306,7 +305,6 @@ void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 
         }
     }
 }
-
 
 /* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
 void func_15150178(struct AngleRange *angles, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
@@ -1271,12 +1269,6 @@ void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScal
         count--;
     }
 }
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
 
 struct Local15152520Arg {
     s32 countBase;
@@ -1715,7 +1707,6 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
         count--;
     }
 }
-
 
 typedef struct {
     struct Vec3F position;
