@@ -396,24 +396,11 @@ typedef struct {
 } Beam;
 
 typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-    u8 padA[4];
-    s16 position[3];
-} FlashSprite;
-
-/* A flash created by func_151602C0. */
-typedef struct {
-    u8 pad0[0x14];
-    FlashSprite *sprite;
-} Flash;
-
-typedef struct {
     Actor *owner;
     u8 ownerId;
     u8 pad5[3];
     Beam *beam;
-    Flash *flash;
+    LightEffect *flash; /* created by func_151602C0 */
 } BeamData;
 
 struct BeamEffect {
@@ -442,8 +429,8 @@ void func_150F6178(BeamEffect *effect) {
     }
     if (owner->ob_matrix_ptr != NULL && !(owner->unk94 & 2)) {
         Beam *beam;
-        Flash *flash;
-        FlashSprite *sprite;
+        LightEffect *flash;
+        PointLight *light;
 
         srcs[0] = D_800A1B18;
         srcs[1] = D_800A1B24;
@@ -458,11 +445,11 @@ void func_150F6178(BeamEffect *effect) {
         }
         flash = data->flash;
         if (flash != NULL) {
-            sprite = flash->sprite;
-            sprite->hidden = FALSE;
-            sprite->position[0] = start.x;
-            sprite->position[1] = start.y;
-            sprite->position[2] = start.z;
+            light = flash->light;
+            light->disabled = FALSE;
+            light->x = start.x;
+            light->y = start.y;
+            light->z = start.z;
         }
     } else {
         if (data->beam != NULL) {
@@ -471,9 +458,9 @@ void func_150F6178(BeamEffect *effect) {
             part->flags &= ~1;
         }
         if (data->flash != NULL) {
-            FlashSprite *sprite = data->flash->sprite;
+            PointLight *light = data->flash->light;
 
-            sprite->hidden = TRUE;
+            light->disabled = TRUE;
         }
     }
     if (data->beam != NULL) {

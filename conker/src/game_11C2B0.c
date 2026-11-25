@@ -106,20 +106,6 @@ void func_150EEF40(Actor *actor, u8 slot) {
     func_151403A8((s32)&msg, 0x43);
 }
 
-typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-    u8 padA[4];
-    s16 position[3];
-} FlashSprite;
-
-/* A beam's muzzle flash (created by func_151602C0). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ FlashSprite *sprite;
-    /* 0x18 */ struct Beam *beam;
-} Flash;
-
 /* State a beam object carries at +0x110. The beam runs from a bone of `actor` to `target`. */
 typedef struct {
     /* 0x00 */ Actor *actor;       /* the shooter */
@@ -133,7 +119,7 @@ typedef struct {
     /* 0x1C */ struct BeamSpark *sparks[2];
     /* 0x24 */ struct BeamEmitter *emitter;
     /* 0x28 */ struct Glow *glow;
-    /* 0x2C */ Flash *flash;
+    /* 0x2C */ LightEffect *flash;         /* muzzle flash; its payload (data.object) is the beam */
     /* 0x30 */ Vec3f direction;
     /* 0x3C */ f32 distance;
     /* 0x40 */ f32 inverse;
@@ -199,7 +185,7 @@ typedef struct BeamSpark {
 
 extern void *func_151A7950(void *, s32, u8, s32);
 struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, Beam *, u8, s32);
-Flash *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
+LightEffect *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
 
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
 Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
@@ -359,8 +345,8 @@ s32 func_150EF38C(Beam *beam) {
     beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
         if (link->flash != NULL) {
-            link->flash->sprite->hidden = FALSE;
-            position = link->flash->sprite->position;
+            link->flash->light->disabled = FALSE;
+            position = &link->flash->light->x;
             position[0] = beam->head.def.pos.x;
             position[1] = beam->head.def.pos.y;
             position[2] = beam->head.def.pos.z;
@@ -374,7 +360,7 @@ s32 func_150EF38C(Beam *beam) {
             func_1505D024(object, 0xA0038, 0, actor - movement_obj);
         }
     } else if (link->flash != NULL) {
-        link->flash->sprite->hidden = TRUE;
+        link->flash->light->disabled = TRUE;
     }
     return 1;
 }
@@ -699,8 +685,8 @@ s32 func_150F00EC(Glow *glow) {
 }
 
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
-Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
-    Flash *flash;
+LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
+    LightEffect *flash;
     LightEffectHeader header;
     Vec3i origin;
     Beam *link;
@@ -714,9 +700,9 @@ Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
     origin.y = 0;
     origin.z = 0;
 
-    flash = (Flash *)func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
+    flash = func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
     if (flash != NULL) {
-        memcpy(&flash->beam, &link, sizeof(link));
+        memcpy(&flash->data.object, &link, sizeof(link));
     }
     return flash;
 }
@@ -778,24 +764,24 @@ void func_150F0380(Glow *glow) {
     beam->link.glow = NULL;
 }
 
-void func_150F03E8(Flash *flash);
-void func_151617C4(Flash *flash);
+void func_150F03E8(LightEffect *flash);
+void func_151617C4(LightEffect *flash);
 
-void func_150F0390(Flash *flash) {
+void func_150F0390(LightEffect *flash) {
     func_150F03E8(flash);
     func_151617C4(flash);
 }
 
-void func_151617E4(Flash *flash);
+void func_151617E4(LightEffect *flash);
 
-void func_150F03BC(Flash *flash) {
+void func_150F03BC(LightEffect *flash) {
     func_150F03E8(flash);
     func_151617E4(flash);
 }
 
 /* Clears the beam's reference to this flash. */
-void func_150F03E8(Flash *flash) {
-    Beam *beam = flash->beam;
+void func_150F03E8(LightEffect *flash) {
+    Beam *beam = flash->data.object;
 
     beam->link.flash = NULL;
 }
