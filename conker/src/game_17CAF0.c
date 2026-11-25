@@ -161,115 +161,8 @@ extern f32 D_800A6000;
 extern void func_1514F808(struct ConeBasis *, f32, struct Vec3F *);
 extern void func_151DA6F8(struct Local15153CCCArg *, struct Vec3F *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
-extern void func_1515C2F0(void *, s32, void *, s32, u8, s32);
 
 extern s32 func_15147DA0(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32, u8, s32);
-
-struct Local15152B38Header {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Local15152B38Arg {
-    s32 unk0;
-    s32 unk4;
-    struct Local15152B38Header unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    u16 unk40;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-    u8 unk49;
-    u8 unk4A;
-    u8 unk4B;
-    u8 unk4C;
-    u8 unk4D;
-    u8 unk4E;
-    u8 unk4F;
-    u8 unk50;
-    u8 unk51;
-    u8 unk52;
-    u8 unk53;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    s32 unk60;
-    s16 unk64;
-    s16 unk66;
-    s16 unk68;
-    u8 unk6A;
-    u8 pad6B;
-    f32 unk6C;
-    s8 unk70;
-    s8 unk71;
-};
-
-struct Local15152B38Param {
-    struct Local15152B38Header unk0;
-    s16 unkC;
-    u16 unkE;
-    s32 unk10;
-    u8 pad14;
-    s8 unk15;
-    u8 pad16[2];
-    u8 pad18[4];
-};
-
-struct Local15152B38Spawn {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    s8 unk17;
-    s8 unk18;
-    s8 unk19;
-    s8 unk1A;
-    s8 unk1B;
-    s8 unk1C;
-    s8 unk1D;
-    s8 unk1E;
-    s8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 pad22[2];
-    s32 unk24;
-    s32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    u8 unk32;
-    u8 pad33;
-    f32 unk34;
-    s8 unk38;
-    s8 unk39;
-    u8 pad3A[2];
-};
 
 struct Local15153634Block {
     s32 unk0;
@@ -1814,56 +1707,130 @@ void func_15152ABC(Color8 *out) {
     out->blue = rgb[2];
 }
 
-void func_15152B38(struct Local15152B38Arg *arg0, u8 arg1, s32 arg2) {
+struct Local15152B38Arg {
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
+    f32 sizeBase;
+    f32 sizeRange;
+    f32 unk1C;
+    f32 unk20;
+    f32 speedBase;
+    f32 speedRange;
+    struct AngleRange angles;
+    s32 unk34;
+    s32 unk38;
+    s16 lifeBase;
+    s16 lifeRange;
+    u16 kind;
+    u8 unk42;
+    u8 unk43;
+    u8 unk44;
+    Color8 colorBase;
+    Color8 colorRange;
+    Color8 color2Base;
+    Color8 color2Range;
+    u8 unk55;
+    u8 unk56;
+    u8 unk57;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    s32 unk60;
+    s16 unk64;
+    s16 unk66;
+    s16 unk68;
+    u8 unk6A;
+    u8 pad6B;
+    f32 unk6C;
+    s8 unk70;
+    s8 unk71;
+};
+
+/* First argument of func_1515C2F0. */
+struct Local15152B38Param {
+    struct Vec3F position;
+    s16 life;
+    u16 kind;
+    s32 unk10;
+    u8 pad14;
+    s8 unk15;
+    u8 pad16[2];
+    u8 pad18[4];
+};
+
+/* Third argument of func_1515C2F0. */
+struct Local15152B38Spawn {
+    f32 size;
+    struct Vec3F velocity;
+    f32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    Color8 color;
+    Color8 color2;
+    u8 unk1F;
+    u8 unk20;
+    u8 unk21;
+    u8 pad22[2];
+    s32 unk24;
+    s32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    u8 unk32;
+    u8 pad33;
+    f32 unk34;
+    s8 unk38;
+    s8 unk39;
+    u8 pad3A[2];
+};
+
+extern void func_1515C2F0(struct Local15152B38Param *, s32, struct Local15152B38Spawn *, s32, u8, s32);
+
+void func_15152B38(struct Local15152B38Arg *config, u8 arg1, s32 arg2) {
     struct Local15152B38Param param;
     struct Local15152B38Spawn spawn;
     s32 count;
-    s32 rand0;
-    s32 rand1;
 
-    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-    param.unk0 = arg0->unk8;
-    param.unkE = arg0->unk40;
-    param.unk10 = 0xA;
-    spawn.unk14 = arg0->unk42;
-    spawn.unk15 = arg0->unk43;
-    spawn.unk16 = arg0->unk44;
-    spawn.unk20 = arg0->unk57;
-    spawn.unk21 = arg0->unk58;
-    spawn.unk24 = arg0->unk5C;
-    spawn.unk28 = arg0->unk60;
-    spawn.unk2C = arg0->unk64;
-    spawn.unk2E = arg0->unk66;
-    spawn.unk38 = arg0->unk70;
-    spawn.unk39 = arg0->unk71;
-    spawn.unk30 = arg0->unk68;
-    spawn.unk32 = arg0->unk6A;
-    spawn.unk34 = arg0->unk6C;
-
-    if (count != 0) {
-        do {
-            param.unk15 = (func_150ADA20() % (u32)(arg0->unk38 + 1)) + arg0->unk34;
-            param.unkC = (func_150ADA20() % (u32)(arg0->unk3E + 1)) + arg0->unk3C;
-            spawn.unk00 = (func_150ADA68() * arg0->unk18) + arg0->unk14;
-            spawn.unk10 = (func_150ADA68() * arg0->unk20) + arg0->unk1C;
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            func_15143794((s16)((rand0 % (u32)(arg0->unk2E + 1)) + arg0->unk2C),
-                          (s16)((rand1 % (u32)(arg0->unk32 + 1)) + arg0->unk30),
-                          (func_150ADA68() * arg0->unk28) + arg0->unk24,
-                          &spawn.unk04);
-            spawn.unk17 = (func_150ADA20() % (u32)(arg0->unk49 + 1)) + arg0->unk45;
-            spawn.unk18 = (func_150ADA20() % (u32)(arg0->unk4A + 1)) + arg0->unk46;
-            spawn.unk19 = (func_150ADA20() % (u32)(arg0->unk4B + 1)) + arg0->unk47;
-            spawn.unk1A = (func_150ADA20() % (u32)(arg0->unk4C + 1)) + arg0->unk48;
-            spawn.unk1B = (func_150ADA20() % (u32)(arg0->unk51 + 1)) + arg0->unk4D;
-            spawn.unk1C = (func_150ADA20() % (u32)(arg0->unk52 + 1)) + arg0->unk4E;
-            spawn.unk1D = (func_150ADA20() % (u32)(arg0->unk53 + 1)) + arg0->unk4F;
-            spawn.unk1E = (func_150ADA20() % (u32)(arg0->unk54 + 1)) + arg0->unk50;
-            spawn.unk1F = (func_150ADA20() % (u32)(arg0->unk56 + 1)) + arg0->unk55;
-            func_1515C2F0(&param, 0, &spawn, 0, arg1, arg2);
-            count--;
-        } while (count != 0);
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    param.position = config->position;
+    param.kind = config->kind;
+    param.unk10 = 10;
+    spawn.unk14 = config->unk42;
+    spawn.unk15 = config->unk43;
+    spawn.unk16 = config->unk44;
+    spawn.unk20 = config->unk57;
+    spawn.unk21 = config->unk58;
+    spawn.unk24 = config->unk5C;
+    spawn.unk28 = config->unk60;
+    spawn.unk2C = config->unk64;
+    spawn.unk2E = config->unk66;
+    spawn.unk38 = config->unk70;
+    spawn.unk39 = config->unk71;
+    spawn.unk30 = config->unk68;
+    spawn.unk32 = config->unk6A;
+    spawn.unk34 = config->unk6C;
+    while (count != 0) {
+        param.unk15 = (func_150ADA20() % (u32)(config->unk38 + 1)) + config->unk34;
+        param.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        spawn.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        spawn.unk10 = (func_150ADA68() * config->unk20) + config->unk1C;
+        func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
+                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+                      (func_150ADA68() * config->speedRange) + config->speedBase,
+                      &spawn.velocity.x);
+        spawn.color.red = (func_150ADA20() % (u32)(config->colorRange.red + 1)) + config->colorBase.red;
+        spawn.color.green = (func_150ADA20() % (u32)(config->colorRange.green + 1)) + config->colorBase.green;
+        spawn.color.blue = (func_150ADA20() % (u32)(config->colorRange.blue + 1)) + config->colorBase.blue;
+        spawn.color.alpha = (func_150ADA20() % (u32)(config->colorRange.alpha + 1)) + config->colorBase.alpha;
+        spawn.color2.red = (func_150ADA20() % (u32)(config->color2Range.red + 1)) + config->color2Base.red;
+        spawn.color2.green = (func_150ADA20() % (u32)(config->color2Range.green + 1)) + config->color2Base.green;
+        spawn.color2.blue = (func_150ADA20() % (u32)(config->color2Range.blue + 1)) + config->color2Base.blue;
+        spawn.color2.alpha = (func_150ADA20() % (u32)(config->color2Range.alpha + 1)) + config->color2Base.alpha;
+        spawn.unk1F = (func_150ADA20() % (u32)(config->unk56 + 1)) + config->unk55;
+        func_1515C2F0(&param, 0, &spawn, 0, arg1, arg2);
+        count--;
     }
 }
 
