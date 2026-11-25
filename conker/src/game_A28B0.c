@@ -1689,73 +1689,82 @@ u16 func_15079A98(s32 arg0) {
     return func_1505A630(path->center.x - obj->x_position, obj->z_position - path->center.z, 0);
 }
 
+/*
+ * Changes a property of an object: arg1 selects the object (0, 1: the current one, else unique id
+ * arg1 - 2), arg2 the property and, for counters 1-3, arg3 the operation applied with value arg0.
+ */
 void func_15079B30(void) {
-    s32 idx;
-    s32 *ptr;
-    struct127 *saved_ptr;
-    s32 saved_idx;
-    u16 a;
-    s32 sel;
-    sel = D_800D1891;
-    if (sel == 0) goto body;
-lbl:
+    s32 index;
+    s32 *counter;
+    struct127 *savedObj;
+    s32 savedIndex;
+    u16 angle;
+    s32 select;
+
+    select = D_800D1891;
+    if (select == 0) {
+        // matching: the jump into the switch keeps arg1 == 0 out of the jump table
+        goto current;
+    }
+select_object: // matching: unused label, splits the block for the scheduler
     switch (D_800D1891) {
     case 1:
-    body:
-        idx = D_800C3E78;
+    current:
+        index = D_800C3E78;
         break;
     default:
-        idx = func_15083FB0((u8)(D_800D1891 - 2));
-        if (idx == -1) {
+        index = func_15083FB0((u8)(D_800D1891 - 2));
+        if (index == -1) {
             return;
         }
         break;
     }
     switch (D_800D1892) {
     case 1:
-        ptr = &D_800CC2D0[idx].unk2E4;
+        counter = &D_800CC2D0[index].unk2E4;
         break;
     case 2:
-        ptr = &D_800CC2D0[idx].unk2E8;
+        counter = &D_800CC2D0[index].unk2E8;
         break;
     case 3:
-        ptr = &D_800CC2D0[idx].unk2EC;
+        counter = &D_800CC2D0[index].unk2EC;
         break;
     case 4:
-    case 5:
-    {
+    case 5: {
+        // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
         extern struct127 *D_800D154C;
-        saved_ptr = D_800D154C;
-        saved_idx = D_800C3E78;
-        D_800D154C = &D_800CC2D0[idx];
-        D_800C3E78 = idx;
+
+        // restart the object on script arg0, running as the current object meanwhile
+        savedObj = D_800D154C;
+        savedIndex = D_800C3E78;
+        D_800D154C = &D_800CC2D0[index];
+        D_800C3E78 = index;
         if (D_800D154C->unk232 != D_800D1890) {
             D_800D154C->unk232 = D_800D1890;
             D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
             D_800D154C->unk21C = 0;
         }
-        D_800C3E78 = saved_idx;
-        D_800D154C = saved_ptr;
+        D_800C3E78 = savedIndex;
+        D_800D154C = savedObj;
         return;
     }
     case 6:
-        *(f32 *)&D_800CC2D0[idx].padC8 = D_800D1890;
+        // struct127 declares 0xC8 as u32 padC8
+        *(f32 *)&D_800CC2D0[index].padC8 = D_800D1890;
         return;
     case 7:
-        D_800CC2D0[idx].unkB8 = 0.0f;
+        D_800CC2D0[index].unkB8 = 0.0f;
         return;
     case 8:
-    {
-        a = func_15079A98(D_800D154C->unk222);
-        if ((func_15079A98(D_800C3E78) - a) & 0x8000) {
+        angle = func_15079A98(D_800D154C->unk222);
+        if ((func_15079A98(D_800C3E78) - angle) & 0x8000) {
             D_800D154C->unk221 = D_800D1890;
         }
         return;
-    }
-    case 9:
-    {
-        u16 tmp = (D_800D1893 << 8) | D_800D1890;
-        D_800D154C->unk244 = tmp;
+    case 9: {
+        u16 value = (D_800D1893 << 8) | D_800D1890;
+
+        D_800D154C->unk244 = value;
         return;
     }
     case 10:
@@ -1767,25 +1776,25 @@ lbl:
     }
     switch (D_800D1893) {
     case 0:
-        *ptr = D_800D1890;
+        *counter = D_800D1890;
         break;
     case 1:
-        *ptr -= 1;
+        (*counter)--;
         break;
     case 2:
-        *ptr += D_800BE9E4;
+        *counter += D_800BE9E4;
         break;
     case 3:
-        *ptr += 1;
+        (*counter)++;
         break;
     case 4:
-        *ptr -= D_800BE9E4;
+        *counter -= D_800BE9E4;
         break;
     case 5:
-        *ptr -= D_800CC264;
+        *counter -= D_800CC264;
         break;
     case 6:
-        *ptr += D_800CC264;
+        *counter += D_800CC264;
         break;
     }
 }
