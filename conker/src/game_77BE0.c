@@ -157,13 +157,6 @@ typedef struct GameObj {
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
-// WorldObject (the 0xA0-byte entries of D_800DBEF4) with unk4F read as the unsigned flag byte it is here
-typedef struct {
-    /* 0x00 */ u8 pad0[0x4F];
-    /* 0x4F */ u8 unk4F;
-    /* 0x50 */ u8 pad50[0x50];
-} Struct131u;
-
 extern u16 D_800CBDA0[];
 extern s32 *D_800DBF94;
 void func_1508295C(s32, s32, s32);
@@ -309,7 +302,7 @@ void func_1504A730(void) {
         if (((GameObj *)D_800CC2D0)[j].interaction_state != 0 && ((GameObj *)D_800CC2D0)[j].unk31C != NULL) {
             if (((GameObj *)D_800CC2D0)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
-                    ((Struct131u *)D_800DBEF4)[D_800CBDA0[j] - 1].unk4F |= 0x84;
+                    D_800DBEF4[D_800CBDA0[j] - 1].flags |= 0x84;
                     D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
                 }
                 ((GameObj *)D_800CC2D0)[j].unk31C->unk56 = 5;
@@ -391,8 +384,8 @@ void func_1504AF10(struct127 *obj, s32 force, s32 release) {
                 D_800DBEF4[index].attach = 0;
                 return;
             }
-            ((Struct131u *)D_800DBEF4)[index].unk4F &= ~0x60;
-            ((Struct131u *)D_800DBEF4)[index].unk4F |= 0x20;
+            D_800DBEF4[index].flags &= ~0x60;
+            D_800DBEF4[index].flags |= 0x20;
             D_800DBEF4[index].x = obj->x_position;
             D_800DBEF4[index].y = obj->y_position + (s16)obj->unk90;
             D_800DBEF4[index].z = obj->z_position;

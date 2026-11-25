@@ -115,18 +115,6 @@ typedef struct ObjFloorView {
     /* 0x274 */ u8 objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
 } ObjFloorView;
 
-/* Collision fields of the 0xA0-byte level props at D_800DBEF4. */
-typedef struct PropCollision {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ s32 material;   // used when materials is NULL
-    /* 0x44 */ s32 *materials; // per-surface materials, from surface firstSurface on
-    /* 0x48 */ u8 pad48[0x4F - 0x48];
-    /* 0x4F */ u8 unk4F;
-    /* 0x50 */ u8 pad50[0x58 - 0x50];
-    /* 0x58 */ u16 firstSurface;
-    /* 0x5A */ u8 pad5A[0xA0 - 0x5A];
-} PropCollision;
-
 extern void func_1510F800();
 extern void func_150A64C8(s16, s16, s32 *, s32);
 extern void func_150A44F0(s32, s32 *, s32);
@@ -144,7 +132,6 @@ extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
 extern s32 *D_800DBF94;
 
-#define sProps ((PropCollision *)D_800DBEF4)
 // D_800DBE5C (declared s32) points at the world mesh's per-triangle materials, or is NULL.
 #define sWorldMaterials (*(s32 **)&D_800DBE5C)
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.
@@ -390,10 +377,10 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
                     D_800DBE60 = sGroundHits[bestHit].unkC + 1;
-                    if (sProps[D_800DBE60 - 1].materials != NULL) {
-                        *outFlags = sProps[D_800DBE60 - 1].materials[triIndex - sProps[D_800DBE60 - 1].firstSurface];
+                    if (D_800DBEF4[D_800DBE60 - 1].materials != NULL) {
+                        *outFlags = D_800DBEF4[D_800DBE60 - 1].materials[triIndex - D_800DBEF4[D_800DBE60 - 1].firstTri];
                     } else {
-                        *outFlags = sProps[D_800DBE60 - 1].material;
+                        *outFlags = D_800DBEF4[D_800DBE60 - 1].material;
                     }
                 } else if (outFlags != NULL) {
                     *outFlags = 0;
@@ -426,10 +413,10 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             } else if (type == PROBE_PROP) {
                                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
                                 propNum = sGroundHits[i].unkC + 1;
-                                if (sProps[propNum - 1].materials != NULL) {
-                                    ceilingFlags = sProps[propNum - 1].materials[triIndex - sProps[propNum - 1].firstSurface];
+                                if (D_800DBEF4[propNum - 1].materials != NULL) {
+                                    ceilingFlags = D_800DBEF4[propNum - 1].materials[triIndex - D_800DBEF4[propNum - 1].firstTri];
                                 } else {
-                                    ceilingFlags = sProps[propNum - 1].material;
+                                    ceilingFlags = D_800DBEF4[propNum - 1].material;
                                 }
                             } else {
                                 ceilingFlags = 0;
@@ -463,7 +450,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     if (obj != NULL) {
         obj->propNum = D_800DBE60;
         if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
-            sProps[D_800DBE60 - 1].unk4F |= 0x84;
+            D_800DBEF4[D_800DBE60 - 1].flags |= 0x84;
             D_800DBF94[D_800DBE60 - 1] |= 1 << (object - D_800CC2D0);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {

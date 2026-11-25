@@ -5,13 +5,11 @@
 #define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
 #define D_800DBE5C D_800DBE5C_hdr
-#define D_800DBEF4 D_800DBEF4_hdr
 #include "variables.h"
 #undef D_800CBE00
 #undef D_800D3300
 #undef D_800DBE3C
 #undef D_800DBE5C
-#undef D_800DBEF4
 
 
 /* A timed node in the D_800CBE00 list, allocated by func_15044964. */
@@ -372,18 +370,6 @@ typedef struct {
     Vec3s_71820 v[3];
 } CollisionTri;
 
-/* Surface record in the D_800DBEF4 array (same 0xA0 layout as WorldObject, whose header copy lacks 0x40/0x44). */
-typedef struct Game71820Surface {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ s32 default_material;
-    /* 0x44 */ s32 *materials;     // per-triangle, indexed from first_triangle
-    /* 0x48 */ u8 pad48[0x10];
-    /* 0x58 */ u16 first_triangle;
-    /* 0x5A */ u8 pad5A[0x15];
-    /* 0x6F */ u8 flags;
-    /* 0x70 */ u8 pad70[0x30];
-} Game71820Surface;
-
 /* Result of a floor/ceiling probe. */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;
@@ -393,7 +379,7 @@ typedef struct CollisionHit {
     /* 0x1C */ u8 flags;           // 2: height within the probe's limit, 4: tri is valid (fast path re-tests it)
     /* 0x1D */ u8 source;          // which collision set produced the hit (1-4)
     /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ Game71820Surface *surface;
+    /* 0x20 */ WorldObject *surface;
 } CollisionHit;
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
@@ -413,7 +399,6 @@ s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern u8 *D_800DBE3C;
 extern s32 *D_800DBE5C;
 extern Game71820Candidate D_800D3300[];
-extern Game71820Surface *D_800DBEF4;
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
 extern f32 D_800DBE68;
@@ -725,16 +710,16 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
         {
             CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->surface].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -789,16 +774,16 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
         {
             CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->surface].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -853,13 +838,13 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
-        if ((hit->surface->flags & 0x80) == 0x80) {
+        if ((hit->surface->viewFlags & 0x80) == 0x80) {
             hit->flags |= 1;
         }
         hit->source = 3;
@@ -912,13 +897,13 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
-        if ((hit->surface->flags & 0x80) == 0x80) {
+        if ((hit->surface->viewFlags & 0x80) == 0x80) {
             hit->flags |= 1;
         }
         hit->source = 3;
@@ -1304,7 +1289,7 @@ typedef struct Game71820FloorSrc {
     /* 0x56 */ u8 pad56[3];
     /* 0x59 */ u8 unk59;
     /* 0x5A */ u8 pad5A[2];
-    /* 0x5C */ Game71820Surface *surface;
+    /* 0x5C */ WorldObject *surface;
     /* 0x60 */ s32 material;
 } Game71820FloorSrc;
 
