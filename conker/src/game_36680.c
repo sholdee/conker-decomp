@@ -219,12 +219,18 @@ void func_15009944(s32 light, s32 id) {
     func_15162740(light, 1, 6, 0, 300, 2, 255, 1);
 }
 
+/* Per-light parameters of func_15009990 and func_15009A38, indexed by the light id. */
+static const u8 sCycleArg1[4] = { 1, 2, 3, 4 };
+static const u8 sCycleArg2[4] = { 23, 24, 25, 26 };
+static const u8 sCycleObjectIds[4] = { 0xF6, 0xF3, 0xED, 0xF0 };
+static const u8 sLightTypes[4] = { 27, 28, 29, 30 };
+
 void func_15009990(s32 light, s32 id) {
     LightEffect *effect;
     u8 extra[1];
 
-    extra[0] = D_80095B50[id];
-    effect = func_1516295C(light, D_80095B48[id], D_80095B4C[id], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1);
+    extra[0] = sCycleObjectIds[id - 24];
+    effect = func_1516295C(light, sCycleArg1[id - 24], sCycleArg2[id - 24], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1);
     if (effect != NULL) {
         memcpy(&effect->data.objectCycle.objectId, extra, 1);
     }
@@ -236,7 +242,7 @@ void func_15009A38(s32 light, s32 id) {
     header.flags = 2;
     header.update = -1;
     header.lifetime = 300;
-    header.lightType = D_80095B27[id];
+    header.lightType = sLightTypes[id - 69];
     func_1516037C(&header, light, 0, 255, 1);
 }
 
@@ -368,13 +374,13 @@ void func_1500A260(s32 light, s32 id) {
 }
 
 void func_1500A2AC(s32 light, s32 id) {
-    u8 kinds[4] = D_80095B70;
+    const u8 kinds[4] = { 2, 3, 4, 5 };
 
     func_151B8DB0(light, kinds[id - 51], 255, 1);
 }
 
 void func_1500A2F4(s32 light, s32 id) {
-    u8 kinds[2] = D_80095B74;
+    const u8 kinds[2] = { 0, 1 };
 
     func_15164208(light, kinds[id - 56], 255, 1);
 }

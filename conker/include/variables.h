@@ -527,15 +527,6 @@ extern u16 D_80091D20[]; // per texture: compressed size
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern u8  D_80095B27[];
-// func_15009990 suggests they are u8, but they look like floats!
-extern u8 D_80095B48[]; // 0.002188183832913637
-extern u8 D_80095B4C[]; // 20.100000381469727
-extern u8 D_80095B50[]; // 0.4000000059604645
-
-extern u8  D_80095B70[4];
-extern u8  D_80095B74[2];
-
 extern f32 D_80096220;
 extern f32 D_80096224;
 extern f32 D_80096228;
