@@ -59,3 +59,36 @@ python3 ~/conker/tools/cw.py land  clean.ITEM -m "what changed"
   `Vec3f` and `.x/.y/.z` (not `.unk0/.unk4/.unk8`). If your workspace predates this, rebase the conflicting files.
 - Header dependencies are tracked now (the Makefile generates `.d` files), and lands do a full rebuild,
   so you no longer need to touch every `.c` file after a header edit.
+
+## Wave 3a: names for types and fields (cw tree workspaces)
+
+Same loop, rules and gate as wave 2. Now the goal is names: give struct fields, struct types and enums
+their real names, tree-wide.
+
+**Original names come first.** Rare's struct browser in two prototype builds named about 480 fields of
+our structs. The coordinator decoded them into `~/conker-ws/origfields/mapping.tsv` (columns:
+our_struct, our_field, offset, original_name, confidence, evidence, ...; read `notes.md` there for the
+format, the layout shifts between Oct 2000 and US, and known viewer bugs).
+- **Keep original names exactly as Rare wrote them** (`stand_on_char`, `AimTargetOn`, `FCameraIndex`,
+  `xpos`): same spelling and case, no prefix, no camelCase conversion. This is the owner's decision.
+- `high` rows: apply them. `medium` rows: apply only after checking the code agrees (offset, type and use).
+- An original name that is not a valid C identifier (`touch.i.a`, `dst_fade_alpha[1]`, `MCache[NORMAL]`)
+  describes a nested struct, union or array: model that layout (keeping size and offsets) and use the
+  original names for its parts.
+- An original name beats our earlier guess, even when ours reads well. Keep our guess only where the
+  original row is wrong for US (a layout shift); say so in a short comment.
+- Original enums (camera modes, zone types, task flags and ids, level ids) are in
+  `~/conker-ws/origfields/enums.txt`. They are Oct 2000 orderings: check each value against US code
+  before you use it. Name the enumerators in UPPER_CASE, keeping Rare's words (`CAMERA_MODE_NORMAL`).
+- Struct type names stay ours (`Actor`, `Camera`, ...). Note the original viewer title in the struct's
+  comment, for example `/* original: movement_move (rom_debug_struct.c) */`.
+
+**Other fields and types:** name an `unkXX` field or a `structNNN` type only when the code makes its
+meaning clear (same rule as RENAMING.md). Use camelCase for these names, since there is no original to
+keep. An honest `unk` beats a wrong guess.
+
+**Exported symbols are still central.** Don't rename `func_`/`D_` symbols yourself. Write proposals to
+`~/conker-ws/clean.ITEM/renames.tsv` as `old<TAB>new<TAB>confidence<TAB>evidence`, and the coordinator
+applies them with `tools/rename.py`. A new name that clashes with an existing local or field (for example
+`level` or `zones`) is refused: rename the clashing locals or fields in your workspace first, land that,
+then propose the global.
