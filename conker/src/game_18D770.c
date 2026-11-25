@@ -41,12 +41,12 @@ s32  func_15160684(struct225 *arg0);
 s32  func_151607A4(struct225 *arg0);
 void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4);
 s32  func_15161238(struct127 *arg0, struct127 *arg1);
-struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2);
-struct225 *func_151615F8(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+struct225 *func_1516127C(struct226 *light, u8 arg1, s32 arg2);
+struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2);
+struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2);
+struct225 *func_15161494(struct226 *light, u8 arg1, s32 arg2);
+struct225 *func_15161540(struct226 *light, u8 arg1, s32 arg2);
+struct225 *func_151615F8(struct226 *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
 void func_151616D0(u8 arg0, u8 arg1, s32 arg2);
 void func_15161714(struct225 *arg0);
 void func_15161740(struct225 *arg0);
@@ -535,215 +535,239 @@ s32 func_15160E30(struct225 *effect) {
     return 1;
 }
 
-s32 func_15161238(struct127 *arg0, struct127 *arg1) {
-    if (arg0->interaction_state == 0) {
+/* Returns whether `actor` is live and is not `exclude`. */
+s32 func_15161238(struct127 *actor, struct127 *exclude) {
+    if (actor->interaction_state == 0) {
         return 0;
     }
-    if (arg0->id == 0xFF) {
+    if (actor->id == 0xFF) {
         return 0;
     }
-    if (arg0 == arg1) {
+    if (actor == exclude) {
         return 0;
     }
     return 1;
 }
 
-struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
-    Header header;
-    f32 src[4];
+/* Payload of func_15163CF8: intensity = base + amplitude * sin(phase). */
+typedef struct {
+    f32 base;
+    f32 amplitude;
+    f32 phase;
+    f32 speed; // phase advance per frame
+} LightPulse;
 
-    src[0] = 50.0f;
-    src[1] = 40.0f;
-    src[2] = func_150ADA68() * D_800A6AD8;
+/* Payload of func_15163DEC: intensity eases towards random targets, mostly between low and mid. */
+typedef struct {
+    f32 mid;
+    f32 low;
+    f32 high;
+    f32 target;
+    f32 timer;     // frames until the next target
+    f32 interval;  // longest time between targets
+    f32 smoothing; // fraction of the distance to the target covered per frame
+    f32 level;     // current intensity
+} LightJitter;
+
+struct225 *func_1516127C(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
+    Header header;
+    LightPulse pulse;
+
+    pulse.base = 50.0f;
+    pulse.amplitude = 40.0f;
+    pulse.phase = func_150ADA68() * 6.283185482f;
 
     header.unk0 = 0;
     header.unk1 = 1;
     header.unk2 = 300;
     header.unk4 = 5;
 
-    src[3] = D_800A6ADC;
+    pulse.speed = 0.1020999998f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
+    effect = func_1516037C(&header, light, sizeof(pulse), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
 
-struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
+struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
     Header header;
-    f32 tmp1[8];
+    LightJitter jitter;
 
-    tmp1[1] = 1.0f;
-    tmp1[3] = 1.0f;
+    jitter.low = 1.0f;
+    jitter.target = 1.0f;
 
     header.unk0 = 0;
     header.unk1 = 2;
     header.unk2 = 300;
     header.unk4 = 6;
 
-    tmp1[0] = 20.0f;
-    tmp1[2] = 50.0f;
-    tmp1[4] = 0.0f;
-    tmp1[5] = 10.0f;
-    tmp1[6] = D_800A6AE0;
-    tmp1[7] = 127.0f;
+    jitter.mid = 20.0f;
+    jitter.high = 50.0f;
+    jitter.timer = 0.0f;
+    jitter.interval = 10.0f;
+    jitter.smoothing = 0.2488999963f;
+    jitter.level = 127.0f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp1), arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp1, sizeof(tmp1));
+    effect = func_1516037C(&header, light, sizeof(jitter), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &jitter, sizeof(jitter));
     }
-    return temp_v0;
+    return effect;
 }
 
-struct225 *func_15161408(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
+struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
     Header header;
-    s32 tmp;
+    s32 mount;
 
-    tmp = func_151149AC(249); // what does this return?
+    mount = func_151149AC(249);
 
     header.unk0 = 0;
     header.unk1 = 3;
     header.unk2 = 300;
     header.unk4 = 8;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
-
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
+    effect = func_1516037C(&header, light, sizeof(mount), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &mount, sizeof(mount));
     }
-    return temp_v0;
+    return effect;
 }
 
-struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
+struct225 *func_15161494(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
     Header header;
-    f32 tmp[4];
+    LightPulse pulse;
 
     header.unk0 = 0;
     header.unk1 = 1;
     header.unk2 = 300;
     header.unk4 = 5;
 
-    tmp[0] = 127.0f;
-    tmp[1] = 100.0f;
-    tmp[2] = 0.0f;
-    tmp[3] = D_800A6AE4;
+    pulse.base = 127.0f;
+    pulse.amplitude = 100.0f;
+    pulse.phase = 0.0f;
+    pulse.speed = 0.07999999821f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
+    effect = func_1516037C(&header, light, sizeof(pulse), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
 
-struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
+struct225 *func_15161540(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
     Header header;
-    f32 tmp[4];
+    LightPulse pulse;
 
-    tmp[0] = 28.0f;
-    tmp[1] = 27.0f;
-    tmp[2] = func_150ADA68() * D_800A6AE8;
-    tmp[3] = D_800A6AEC;
+    pulse.base = 28.0f;
+    pulse.amplitude = 27.0f;
+    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.speed = 0.07660000026f;
 
     header.unk0 = 0;
     header.unk1 = 1;
     header.unk2 = 300;
     header.unk4 = 5;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
+    effect = func_1516037C(&header, light, sizeof(pulse), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
 
-struct225 *func_151615F8(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    struct225 *temp_v0;
+/* Creates a flicker effect; `kind` picks the peak intensity from D_800A66C0. */
+struct225 *func_151615F8(struct226 *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5) {
+    struct225 *effect;
     Header header;
-    struct232 tmp1;
-    f32 tmp;
+    LightFlicker flicker;
+    f32 peak;
 
-    if (arg2 < 0) {
-        return 0;
+    if (kind < 0) { // matching: always false for a u8, but removing it changes the object
+        return NULL;
     }
-    if (arg2 >= 9) {
-        return 0;
+    if (kind >= 9) {
+        return NULL;
     }
 
-    tmp = D_800A66C0[arg2];
-    tmp1.unk4 = tmp;
-    tmp1.unk8 = 0.0f;
-    tmp1.unkC = 0.0f;
-    tmp1.unk0 = tmp;
-    tmp1.unk10 = 0;
-    tmp1.unk12 = arg1;
+    peak = D_800A66C0[kind];
+    flicker.level = peak;
+    flicker.rate = 0.0f;
+    flicker.delay = 0.0f;
+    flicker.peak = peak;
+    flicker.count = 0;
+    flicker.sound = sound;
 
     header.unk0 = 0;
     header.unk1 = 4;
     header.unk2 = 300;
-    header.unk4 = arg3;
+    header.unk4 = type;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(tmp1), arg4, arg5);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp1, sizeof(tmp1));
+    effect = func_1516037C(&header, light, sizeof(flicker), arg4, arg5);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &flicker, sizeof(flicker));
     }
-    return temp_v0;
+    return effect;
 }
 
-void func_151616D0(u8 arg0, u8 arg1, s32 arg2) {
-    struct234 tmp;
+/* Sends event `event` to every light effect. */
+void func_151616D0(u8 arg0, u8 event, s32 arg2) {
+    struct234 message;
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = arg2;
+    message.unk0 = arg0;
+    message.unk4 = arg2;
 
-    func_1516944C(53, &tmp, arg1);
+    func_1516944C(53, &message, event);
 }
 
-void func_15161714(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
-    func_151617C4(arg0);
+void func_15161714(struct225 *effect) {
+    func_1514EDF0(effect, effect->unk18);
+    func_151617C4(effect);
 }
 
-void func_15161740(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
-    func_151617E4(arg0);
+void func_15161740(struct225 *effect) {
+    func_1514EDF0(effect, effect->unk18);
+    func_151617E4(effect);
 }
 
-void func_1516176C(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
-    func_151617C4(arg0);
+void func_1516176C(struct225 *effect) {
+    func_1514EDF0(effect, effect->unk18);
+    func_151617C4(effect);
 }
 
-void func_15161798(struct225 *arg0) {
-    func_1514EDF0(arg0, arg0->unk18);
-    func_151617E4(arg0);
+void func_15161798(struct225 *effect) {
+    func_1514EDF0(effect, effect->unk18);
+    func_151617E4(effect);
 }
 
-void func_151617C4(struct225 *arg0) {
-    func_15169804(arg0);
+void func_151617C4(struct225 *effect) {
+    func_15169804(effect);
 }
 
-void func_151617E4(struct225 *arg0) {
-    func_15169824(arg0);
+void func_151617E4(struct225 *effect) {
+    func_15169824(effect);
 }
 
-void func_15161804(struct225 *arg0) {
-    if ((arg0->unkE & 2) != 0) {
-        func_1515F10C(arg0->unk14, arg0);
+/* Frees the effect's light if it owns one, then runs the type's handler from D_8008B208. */
+void func_15161804(struct225 *effect) {
+    if (effect->unkE & 2) {
+        func_1515F10C(effect->unk14, effect);
     }
-    D_8008B208[arg0->unk12](arg0);
+    D_8008B208[effect->unk12](effect);
 }
 
-void func_15161860(struct225 *arg0) {
-    if ((arg0->unkE & 2) != 0) {
-        func_1515F10C(arg0->unk14, arg0);
+/* Frees the effect's light if it owns one, then runs the type's handler from D_8008B2B0. */
+void func_15161860(struct225 *effect) {
+    if (effect->unkE & 2) {
+        func_1515F10C(effect->unk14, effect);
     }
-    D_8008B2B0[arg0->unk12](arg0);
+    D_8008B2B0[effect->unk12](effect);
 }
 
 void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, s16 arg6) {
