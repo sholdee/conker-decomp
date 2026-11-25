@@ -3,29 +3,54 @@
 #define func_15048A40 func_15048A40_hdr
 #include "functions.h"
 #undef func_15048A40
+#define D_800D2104 D_800D2104_hdr
+#define D_80099A3C D_80099A3C_hdr
 #include "variables.h"
+#undef D_800D2104
+#undef D_80099A3C
+
+/*
+ * Object script interpreter commands.
+ *
+ * Each object runs a byte-code script (D_800D154C->unk218). A command is five bytes: an opcode
+ * (< 247, an index into D_80086730) and four argument bytes, which the interpreter copies to
+ * D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are one-byte jump labels.
+ * The handlers below act on the current object, D_800D154C.
+ */
+
+/* One point of a path: s16 world coordinates. */
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 unk6;
+} PathPoint;
+
+/* A path, D_800D2104[n]: a centre point followed by D_800D2108[n] - 1 waypoints. */
+typedef struct {
+    PathPoint center;
+    PathPoint points[1];
+} Path;
+
+extern Path **D_800D2104; // header declares it as s32 *
+
+typedef struct {
+    u8 unk0;
+    u8 unk1[9];
+} Row56A00;
+
+extern Row56A00 D_80099A3C[]; // header declares it as s16[]
 
 s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
 void func_1504715C(f32 *arg0, struct127 *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 void func_15197A7C(struct127 *arg0);
 u8 func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
+struct216 *func_1507BB28(s32 arg0, s32 arg1);
 
-typedef struct {
-    char pad_0[0x8];
-    s16 field_0x8;
-    char pad_1[0x2];
-    s16 field_0xC;
-} PathPointWindow;
-
-/* D_80099A3C is declared s16[] in the header but is really a table of 10-byte rows. */
-typedef struct {
-    u8 b[0xA];
-} Row56A00;
-
-
+/* Jumps the script: skips `arg0` commands, or for arg0 >= 247 skips forward to label arg0. */
 void func_15075400(s32 arg0) {
-    s32 tmp;
+    u8 label;
     u8 i;
 
     if (arg0 < 247) {
@@ -37,21 +62,23 @@ void func_15075400(s32 arg0) {
         if (D_800D154C->unk218->unk0 < 247) {
             D_800D154C->unk218++;
         } else {
-            tmp = D_800D154C->unk218->unk0 & 0xFF;
-            ((u8*)D_800D154C->unk218) += 1;
-            if (arg0 == tmp) {
-                D_800D154C->unk218 -= 1;
+            label = D_800D154C->unk218->unk0;
+            D_800D154C->unk218 = (struct216 *)((u8 *)D_800D154C->unk218 + 1);
+            if (arg0 == label) {
+                // the interpreter steps past the current command after this returns
+                D_800D154C->unk218--;
                 return;
             }
         }
     }
 }
 
+/* Applies the common movement flags of a move command. */
 void func_15075498(void) {
-    s32 tmp = D_800D1893 & 0x7F;
+    s32 value = D_800D1893 & 0x7F;
 
-    if (tmp != 0x7F) {
-        D_800D154C->unk244 = tmp;
+    if (value != 0x7F) {
+        D_800D154C->unk244 = value;
     }
     D_800D154C->unkF4 &= ~0x143E;
     if (D_800D1890 == 0xFA) {
@@ -59,219 +86,105 @@ void func_15075498(void) {
     } else if (D_800D1890 == 0xFB) {
         D_800D154C->unkF4 |= 4;
     }
-    if ((D_800D1893 & 0x80) != 0) {
-        D_800D154C->unkF4 |= 16;
+    if (D_800D1893 & 0x80) {
+        D_800D154C->unkF4 |= 0x10;
     }
 }
 
+/* Starts a move: mode 0, duration arg0 * 100, speed arg2 (0xFF keeps the current speed). */
 void func_15075548(void) {
-    f32 temp_f6;
-    u8 temp_a0;
+    f32 speed;
+    u8 speedArg;
 
     D_800D154C->unk223 = 0;
     D_800D154C->unk21C = D_800D1890 * 100;
-    temp_a0 = D_800D1892;
-    if (temp_a0 != 0xFF) {
-        temp_f6 = temp_a0;
-        D_800D154C->unk44 = temp_f6;
+    speedArg = D_800D1892;
+    if (speedArg != 0xFF) {
+        speed = speedArg;
+        D_800D154C->unk44 = speed;
         if (D_800D154C->unk44 == 1.0f) {
             D_800D154C->unk44 = 0.5f;
         }
         if (D_800BE616 != 0) {
-            if ((D_800D154C->id == 40) && ((D_800D154C->unk31C->unk128 & 1) != 0)) {
-                D_800D154C->unk44 *= D_8009A13C;
+            if ((D_800D154C->id == 40) && (D_800D154C->unk31C->unk128 & 1)) {
+                D_800D154C->unk44 *= 1.4f;
             }
         }
     }
     func_15075498();
 }
 
-void func_15075498(void);
-u8 func_150ADA20(void);
-extern struct127 *D_800D154C;
-extern u8 D_800D1890;
-extern u8 D_800D1891;
-extern u8 D_800D1892;
-extern u8 *D_800D2108;
-void func_15075498(void);
-void func_15075650(void)
-{
-  u8 range;
-  u8 temp_a0;
-  u8 prevIndex;
-  struct127 *temp_v1;
-  temp_a0 = (*((u8 **) (&D_800D2108)))[0, D_800D154C->unk13F] - 1;
-  if (D_800D154C->unk21F != 0)
-  {
-    temp_a0 = D_800D154C->unk21F;
-  }
-  range = temp_a0 - D_800D154C->unk220;
-  if (D_800D1891 == 0xFF)
-  {
-    if (D_800D154C->unk223 != 0xD)
-    {
-      D_800D154C->unk21E = (func_150ADA20() % ((u32) range)) + D_800D154C->unk220;
-    }
-  }
-  else
-    if (D_800D1891 == 0xFE)
-  {
-    if (D_800D154C->unk223 != 0xD)
-    {
-      prevIndex = D_800D154C->unk21E - 1;
-      if (D_800D154C->unk21E <= D_800D154C->unk220)
-      {
-        prevIndex = temp_a0 - 1;
-      }
-      temp_a0 = (func_150ADA20() % ((u32) range)) + D_800D154C->unk220;
-      if (temp_a0 != prevIndex)
-      {
-        D_800D154C->unk21E = temp_a0;
-        temp_v1 = D_800D154C;
-        temp_v1->unk223 = D_800D154C->unk220 * 0;
-        goto after_clear;
-      }
-    }
-  }
-  else
-    if (D_800D1891 == 0xFF)
-  {
-    D_800D154C->unk21E = temp_a0 - 1;
-  }
-  else
-  {
-    D_800D154C->unk21E = D_800D1891;
-  }
-  D_800D154C->unk223 = 0;
-  after_clear:
-  D_800D154C->unk21C = D_800D1890 * 0x64;
+/* Picks the next waypoint: random (arg1 0xFF), random but not the previous one (0xFE), or arg1. */
+void func_15075650(void) {
+    u8 range;
+    u8 index;
+    u8 previous;
+    struct127 *obj;
 
-  if (D_800D1892 != 0xFF)
-  {
-    D_800D154C->unk44 = D_800D1892;
-    if (D_800D154C->unk44 == 1.0f)
-    {
-      D_800D154C->unk44 = 0.5f;
+    index = D_800D2108[D_800D154C->unk13F] - 1;
+    if (D_800D154C->unk21F != 0) {
+        index = D_800D154C->unk21F;
     }
-  }
-  if (D_800D154C->unk21E < D_800D154C->unk220)
-  {
-    D_800D154C->unk21E = D_800D154C->unk220;
-  }
-  func_15075498();
+    range = index - D_800D154C->unk220;
+    if (D_800D1891 == 0xFF) {
+        if (D_800D154C->unk223 != 13) {
+            D_800D154C->unk21E = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+        }
+    } else if (D_800D1891 == 0xFE) {
+        if (D_800D154C->unk223 != 13) {
+            previous = D_800D154C->unk21E - 1;
+            if (D_800D154C->unk21E <= D_800D154C->unk220) {
+                previous = index - 1;
+            }
+            index = (func_150ADA20() % (u32)range) + D_800D154C->unk220;
+            if (index != previous) {
+                D_800D154C->unk21E = index;
+                // matching: the copy, the `* 0` and the jump steer IDO to duplicate this store into v1
+                obj = D_800D154C;
+                obj->unk223 = D_800D154C->unk220 * 0;
+                goto set_timer;
+            }
+        }
+    } else if (D_800D1891 == 0xFF) {
+        D_800D154C->unk21E = index - 1;
+    } else {
+        D_800D154C->unk21E = D_800D1891;
+    }
+    D_800D154C->unk223 = 0;
+set_timer:
+    D_800D154C->unk21C = D_800D1890 * 100;
+
+    if (D_800D1892 != 0xFF) {
+        D_800D154C->unk44 = D_800D1892;
+        if (D_800D154C->unk44 == 1.0f) {
+            D_800D154C->unk44 = 0.5f;
+        }
+    }
+    if (D_800D154C->unk21E < D_800D154C->unk220) {
+        D_800D154C->unk21E = D_800D154C->unk220;
+    }
+    func_15075498();
 }
 
-extern struct127 *D_800D154C;
-extern u8 *D_800D2108;
-
-// NON-MATCHING: 95% there
-// void func_15075650(void) {
-//     u8 range;
-//     u8 prevIndex;
-//
-//     range = D_800D2108[D_800D154C->unk13F] - 1;
-//     if (D_800D154C->unk21F != 0) {
-//         range = D_800D154C->unk21F;
-//     }
-//     range = range - D_800D154C->unk220;
-//     if (D_800D1891 == 0xFF) { // -1
-//         if (D_800D154C->unk223 != 0xD) {
-//             D_800D154C->unk21E = (func_150ADA20() % (u32) range) + D_800D154C->unk220;
-//         }
-//     } else if (D_800D1891 == 0xFE) { // -2
-//         if (D_800D154C->unk223 != 0xD) {
-//             prevIndex = D_800D154C->unk21E - 1;
-//             if (D_800D154C->unk21E <= D_800D154C->unk220) {
-//                 prevIndex = range - 1;
-//             }
-//             range = (func_150ADA20() % (u32) range) + D_800D154C->unk220;
-//             if (range != prevIndex) {
-//                 D_800D154C->unk21E = range;
-//             }
-//         }
-//     } else {
-//         if (D_800D1891 == 0xFF) { // impossible?
-//             D_800D154C->unk21E = range - 1;
-//         } else {
-//             D_800D154C->unk21E = D_800D1891;
-//         }
-//     }
-//
-//     D_800D154C->unk223 = 0;
-//     D_800D154C->unk21C = D_800D1890 * 0x64;
-//
-//     if (D_800D1892 != 0xFF) {
-//         D_800D154C->unk44 = D_800D1892;
-//         if (D_800D154C->unk44 == 1.0f) {
-//             D_800D154C->unk44 = 0.5f;
-//         }
-//     }
-//
-//     if (D_800D154C->unk21E < D_800D154C->unk220) {
-//         D_800D154C->unk21E = D_800D154C->unk220;
-//     }
-//     func_15075498();
-// }
-
+/* Starts a move towards the current waypoint, arriving in arg1 ticks. */
 void func_15075884(void) {
-    struct127 *temp_v0;
-    PathPointWindow *temp_v1;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f0;
-    f32 temp_f16;
-    f32 temp_f14;
+    struct127 *obj;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 speed;
 
     func_15075548();
-    temp_v0 = D_800D154C;
-    temp_v1 = (PathPointWindow *)((u8 *)D_800D2104[temp_v0->unk13F] + (temp_v0->unk21E * 8));
-    temp_f2 = (f32)temp_v1->field_0x8 - temp_v0->x_position;
-    temp_f12 = (f32)temp_v1->field_0xC - temp_v0->z_position;
-    temp_f0 = sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
-    temp_f2 = (f32)((u32)D_800D1891);
-    temp_f14 = temp_f0 / temp_f2;
-    temp_v0->unk44 = temp_f14 + temp_f14;
+    obj = D_800D154C;
+    dx = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].x - obj->x_position;
+    dz = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].z - obj->z_position;
+    dist = sqrtf((dx * dx) + (dz * dz));
+    dx = (f32)(u32)D_800D1891;
+    speed = dist / dx;
+    obj->unk44 = speed + speed;
 }
-// NON-MATCHING: array index is wrong
-// void func_15075884(void) {
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f2;
-//     struct169 *temp_v1;
-//     f32 speed;
-//
-//     func_15075548();
-//     temp_v1 = D_800D2104[(D_800D154C->unk13F) + (D_800D154C->unk21E)];
-//     temp_f2 = temp_v1->unk8 - D_800D154C->x_position;
-//     temp_f12 = temp_v1->unkC - D_800D154C->z_position;
-//     temp_f0 = sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
-//     D_800D154C->unk44 = 2.0f * (temp_f0 / D_800D1891);
-// }
 
-// PERMUTER CANDIDATE best 940: MYSTERY SOLVED - the "1st half" temp_v0 is a LOAD
-// (*(u8**)&D_800D2108)[unk13F] (D_800D2108 holds a pointer, same idiom as func_15075650), NOT the
-// sum `unk13F + D_800D2108` the old comment guessed. Logic is now byte-exact. Residual: target uses
-// branch-likely `bgezl` (else-block's unk13F load in delay) vs my `bgez`+nop, and hoists the
-// `lui a1,%hi(D_800D1891)` to the top so temp_v0 lands in v0 both paths (mine puts it in a1 in the
-// >=0 path -> extra `move v0,a1`). Scheduling near-miss.
-// void func_15075938(void) {
-//     u8 changed; s32 temp_a0; s32 refIndex; u8 temp_v0;
-//     changed = 0;
-//     temp_a0 = D_800D154C->unk21E - D_800D154C->unk221;
-//     if (temp_a0 < 0) {
-//         temp_v0 = (*(u8 **)&D_800D2108)[D_800D154C->unk13F];
-//         temp_a0 = (temp_a0 + temp_v0) - 1;
-//     } else {
-//         temp_v0 = (*(u8 **)&D_800D2108)[D_800D154C->unk13F];
-//         if ((temp_v0 - 1) <= temp_a0) { temp_a0 = (temp_a0 - temp_v0) + 1; }
-//     }
-//     if (D_800D1891 == 0xFF) { refIndex = temp_v0 - 2; } else { refIndex = D_800D1891; }
-//     if (D_800D1892 == 0)      { if (refIndex == temp_a0) changed = 1; }
-//     else if (D_800D1892 == 1) { if (refIndex != temp_a0) changed = 1; }
-//     else if (D_800D1892 == 2) { if (refIndex <  temp_a0) changed = 1; }
-//     else                      { if (refIndex >  temp_a0) changed = 1; }
-//     if (changed) { func_15075400(D_800D1890); }
-// }
+/* Jumps to arg0 when waypoint arg1 compares (per arg2) with the waypoint unk221 steps back. */
 void func_15075938(void) {
     s32 position;
     s32 desired;
@@ -300,45 +213,36 @@ void func_15075938(void) {
     } else if (position < desired) {
         matched = 1;
     }
-    if (matched != 0) {
+    if (matched) {
         func_15075400(D_800D1890);
     }
 }
 
+/* Jumps to arg0 when the current waypoint is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15075A50(void) {
-    u8 temp_v0 = D_800D154C->unk21E;
-    if (((D_800D1892 == 0) && (D_800D1891 == temp_v0)) ||
-       ((D_800D1892 == 1) && (D_800D1891 != temp_v0))) {
+    u8 index = D_800D154C->unk21E;
+
+    if (((D_800D1892 == 0) && (D_800D1891 == index)) ||
+        ((D_800D1892 == 1) && (D_800D1891 != index))) {
         func_15075400(D_800D1890);
     }
 }
 
-struct func_15075AAC_pt { s16 unk0; s16 unk2; s16 unk4; };
+/* Starts a move, stopping at once when already within 40 units of path record arg1. */
 void func_15075AAC(void) {
-    struct func_15075AAC_pt *temp_v0;
+    PathPoint *point;
     f32 dx;
     f32 dz;
 
     func_15075548();
-    temp_v0 = (struct func_15075AAC_pt *)((u8 *)((struct func_15075AAC_pt **)D_800D2104)[D_800D154C->unk13F] + (D_800D1891 << 3));
-    dx = temp_v0->unk0 - D_800D154C->x_position;
-    dz = temp_v0->unk4 - D_800D154C->z_position;
+    point = &D_800D2104[D_800D154C->unk13F]->center + D_800D1891;
+    dx = point->x - D_800D154C->x_position;
+    dz = point->z - D_800D154C->z_position;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
         D_800D154C->unk21C = 0;
         D_800D154C->xz_velocity = 0.0f;
     }
 }
-// what is D_800D2104?
-// void func_15075AAC(void) {
-//     struct169 *temp_v0;
-//
-//     func_15075548();
-//     temp_v0 = D_800D2104[D_800D1891 + D_800D154C->unk13F] ;
-//     if (fabsf(temp_v0->unk0 - D_800D154C->x_position) + (fabsf(temp_v0->unk4 - D_800D154C->z_position)) < 40.0f) {
-//         D_800D154C->unk21C = 0;
-//         D_800D154C->xz_velocity = 0.0f;
-//     }
-// }
 
 void func_15075B60(void) {
     func_15075548();
@@ -362,6 +266,7 @@ void func_15075BE8(void) {
     D_800D154C->unk233 = D_800D1890;
 }
 
+/* Sets the vertical velocity to the s16 (arg2:arg0) unless arg3 == 1, and gravity to (s8)arg1 unless arg3 == 2. */
 void func_15075C24(void) {
     if (D_800D1893 != 1) {
         D_800D154C->y_velocity = (s16)((D_800D1892 << 8) | D_800D1890);
@@ -407,6 +312,7 @@ void func_15075DC8(void) {
     func_15075CA0();
 }
 
+/* Switches to script arg1 (0: the object's current script id); a nonzero arg3 becomes the new id. */
 void func_15075DE8(void) {
     if (D_800D1891 == 0) {
         D_800D1891 = D_800D154C->unk232;
@@ -415,7 +321,8 @@ void func_15075DE8(void) {
         D_800D154C->unk232 = D_800D1893;
     }
     D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
-    D_800D154C->unk218 -= 1;
+    // the interpreter steps past the current command after this returns
+    D_800D154C->unk218--;
 }
 
 void func_15075E6C(void) {
@@ -427,8 +334,9 @@ void func_15075E98(void) {
     D_800D154C->unk235 = D_800D1890;
 }
 
+/* Jumps to arg0 with a chance of arg2 percent. */
 void func_15075EB4(void) {
-    if ((func_150ADA20() % 0x64U) < D_800D1892) {
+    if ((func_150ADA20() % 100U) < D_800D1892) {
         func_15075400(D_800D1890);
     }
 }
@@ -444,6 +352,7 @@ void func_15075F40(void) {
     D_800D154C->unk223 = 3;
 }
 
+/* Sets the vertical velocity (arg0, downwards if arg2), the gravity (arg1) and unk3A (arg3). */
 void func_15075F6C(void) {
     if (D_800D1890 != 0) {
         if (D_800D1892 == 0) {
@@ -458,24 +367,23 @@ void func_15075F6C(void) {
     D_800D154C->unk3A = D_800D1893;
 }
 
+/* Starts a jump towards waypoint arg1, timing the flight so that it lands there. */
 void func_1507602C(void) {
-    PathPointWindow *temp_v1;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f14;
+    f32 dx;
+    f32 dz;
+    f32 time;
 
     func_15075548();
     D_800D154C->unk21E = D_800D1891;
-    temp_v1 = (PathPointWindow *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D1891 * 8));
-    temp_f2 = (f32)temp_v1->field_0x8 - D_800D154C->x_position;
-    temp_f12 = (f32)temp_v1->field_0xC - D_800D154C->z_position;
-    temp_f14 = 2.0f * (sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12)) / D_800D154C->unk44);
-    if (temp_f14 < 12.0f) {
-        D_800D154C->unk44 *= temp_f14 * D_8009A140;
-        temp_f14 = 12.0f;
+    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].x - D_800D154C->x_position;
+    dz = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].z - D_800D154C->z_position;
+    time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->unk44);
+    if (time < 12.0f) {
+        D_800D154C->unk44 *= time * D_8009A140;
+        time = 12.0f;
     }
-    D_800D154C->unk21C = (u32)(temp_f14 * 100.0f);
-    D_800D154C->y_velocity = D_800D154C->gravity * temp_f14 * 0.5f;
+    D_800D154C->unk21C = (u32)(time * 100.0f);
+    D_800D154C->y_velocity = D_800D154C->gravity * time * 0.5f;
     D_800D154C->unk223 = 4;
 }
 
@@ -485,9 +393,8 @@ void func_150761C8(void) {
 }
 
 void func_150761F4(void) {
-
     D_800D154C->unk223 = 6;
-    D_800D154C->unk22C &= 0xFFFE;
+    D_800D154C->unk22C &= ~1;
 }
 
 void func_15076220(void) {
@@ -496,8 +403,9 @@ void func_15076220(void) {
 }
 
 void func_15076250(void) {
-    s32 tmp = (D_800D1890 << 8) | D_800D1891;
-    func_15060778(tmp, D_800D154C, 0x7D00, -0x64, 0x1F4, 0x9C4, D_800D1892);
+    s32 id = (D_800D1890 << 8) | D_800D1891;
+
+    func_15060778(id, D_800D154C, 32000, -100, 500, 2500, D_800D1892);
 }
 
 void func_150762B0(void) {
@@ -505,8 +413,10 @@ void func_150762B0(void) {
 }
 
 extern void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5);
+
 void func_150762D4(void) {
-    func_151669A0((s32)D_800D154C->x_position, (s32)(D_800D154C->y_position + 100.0f), (s32)D_800D154C->z_position, 0.44999998807907104f, 0xFF, 0);
+    func_151669A0((s32)D_800D154C->x_position, (s32)(D_800D154C->y_position + 100.0f),
+                  (s32)D_800D154C->z_position, 0.45f, 0xFF, 0);
 }
 
 void func_15076340(void) {
@@ -523,7 +433,6 @@ void func_15076394(void) {
 }
 
 void func_150763B0(void) {
-
     if (D_800D1890 == 128) {
         D_800D154C->unk1E5 = D_800D154C->unk144->unkF;
     } else {
@@ -532,7 +441,7 @@ void func_150763B0(void) {
     D_800D154C->unk1E7 = 0;
 
     if (D_800D1892 != 0) {
-        D_800D154C->unk1E5 += (func_150ADA20() % (u32) D_800D1892);
+        D_800D154C->unk1E5 += func_150ADA20() % (u32)D_800D1892;
     }
     if (D_800D1893 == 1) {
         D_800D154C->unk1E6 = 0;
@@ -562,9 +471,10 @@ void func_15076500(void) {
     D_800D154C->unk22E = (D_800D1890 << 8) | D_800D1891;
 }
 
+/* Sets `immune` to arg0 on the object's target (arg1 != 0) or on the object itself. */
 void func_1507652C(void) {
     if (D_800D1891 != 0) {
-        D_800CC3F5[D_800D154C->unk124 * 0x32C] = D_800D1890;
+        D_800CC2D0[D_800D154C->unk124].immune = D_800D1890;
     } else {
         D_800D154C->immune = D_800D1890;
     }
@@ -584,21 +494,25 @@ void func_15076608(void) {
     D_800D154C->unk24A = D_800D1890;
 }
 
+/* Sets the flags given by the four argument bytes in unkF8. */
 void func_15076624(void) {
-    s32 tmp = (D_800D1890 << 0x18) | (D_800D1891 << 0x10) | (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkF8 |= tmp;
+    s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
+
+    D_800D154C->unkF8 |= flags;
 }
 
-s32 func_15076678(void) {
-    s32 tmp = (D_800D1890 << 0x18) | (D_800D1891 << 0x10) | (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkF8 &= ~tmp;
+/* Clears the flags given by the four argument bytes in unkF8. */
+void func_15076678(void) {
+    s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
+
+    D_800D154C->unkF8 &= ~flags;
 }
 
 void func_150766D0(void) {
     if (((D_800D154C->unk28 > 0.0f) && (D_800D1890 == 0)) ||
-        (((D_800D1890 * 0x32) < D_800D154C->unk28) && (D_800D1890 != 0))) {
+        ((D_800D1890 * 50 < D_800D154C->unk28) && (D_800D1890 != 0))) {
         D_800D154C->unk21C = 99;
-        D_800D154C->unk218 -= 1;
+        D_800D154C->unk218--;
     }
 }
 
@@ -606,27 +520,25 @@ void func_15076760(void) {
 }
 
 void func_15076768(void) {
-    struct {
-        f32 sp20[9];
-        f32 sp44[3];
-    } stack;
+    f32 position[3];
+    f32 matrix[9];
 
     switch (D_800D1890) {
     case 0:
         func_15197A7C(D_800D154C);
         break;
     case 1:
-        stack.sp44[0] = D_800D154C->x_position;
-        stack.sp44[1] = -390.0f;
-        stack.sp44[2] = D_800D154C->z_position;
-        goto call_func_1504715C;
-call_func_1504715C:
-        func_1504715C(stack.sp20, D_800D154C);
-        func_1514B364(stack.sp44, stack.sp20, 0xFF, 0);
+        position[0] = D_800D154C->x_position;
+        position[1] = -390.0f;
+        position[2] = D_800D154C->z_position;
+        // matching: the jump ends the basic block, so as1 keeps the stores before the call
+        goto setup_done;
+    setup_done:
+        func_1504715C(matrix, D_800D154C);
+        func_1514B364(position, matrix, 0xFF, 0);
         break;
     }
 }
-
 
 // PERMUTER CANDIDATE best 1005: the old JUSTREG reconstruction had wrong signs; the target is
 // ((tmp0 - (D_800CC34A[...]>>8)) + D_800D1891). Splitting out tmp1 dropped 2005->1005. Residual is a
@@ -1282,18 +1194,16 @@ void func_15077F64(void) {
     f32 dz;
     u8 turn;
     u8 index;
-    PathPointWindow *point;
 
     index = D_800D1890 - 1;
-    point = (PathPointWindow *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E * 8));
-    dx = (f32)point->field_0x8 - D_800D154C->x_position;
-    dz = D_800D154C->z_position - (f32)point->field_0xC;
+    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x - D_800D154C->x_position;
+    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
     D_800D154C->unk78 = func_1505A630(dx, dz, 0);
     turn = (D_800D154C->unk78 - D_800D154C->unk76) >> 8;
     if (turn & 0x80) {
         turn = -turn;
     }
-    if (((Row56A00 *)D_80099A3C)[index].b[0] < turn) {
+    if (D_80099A3C[index].unk0 < turn) {
         D_800D154C->unk250 = D_800D1891;
         func_15056A00(D_800D154C, turn, index);
     }
@@ -2674,44 +2584,46 @@ void func_1507BB20(void) {
 }
 
 typedef struct {
-    s32 unk0;
-    u8 unk4;
-} Entry1507BB28;
+    struct216 *script;
+    u8 id;
+} ScriptEntry;
 
-extern Entry1507BB28 D_80086A88[];
-extern u8 D_8009A120[];
+extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
+extern struct216 D_8009A120[];    // empty script
 
-int func_1507BB28(s32 arg0, s32 arg1) {
-    s32 p;
-    Entry1507BB28 *tbl;
+/* Returns script `arg1` of the current object's type, falling back to the default table. */
+struct216 *func_1507BB28(s32 arg0, s32 arg1) {
+    s32 typeData;
+    ScriptEntry *table;
     s32 i;
 
-    p = D_800D1588[D_800D154C->id];
-    if (p == 0) {
-        return (s32)D_8009A120;
+    typeData = D_800D1588[D_800D154C->id];
+    if (typeData == 0) {
+        return D_8009A120;
     }
-    tbl = *(Entry1507BB28 **)(p - 0x10);
-    if (tbl == NULL) {
-        return (s32)D_8009A120;
+    table = *(ScriptEntry **)(typeData - 0x10);
+    if (table == NULL) {
+        return D_8009A120;
     }
     i = 0;
-    while (arg1 != tbl[i].unk4) {
-        if (tbl[i].unk0 == 0) {
-            Entry1507BB28 *def = D_80086A88;
+    while (arg1 != table[i].id) {
+        if (table[i].script == NULL) {
+            ScriptEntry *defaults = D_80086A88;
+
             i = 0;
-            while (arg1 != def[i].unk4) {
-                if (def[i].unk0 == 0) {
+            while (arg1 != defaults[i].id) {
+                if (defaults[i].script == NULL) {
                     /* end of the default table without a match: the original game hangs here */
                     while (1) {
                     }
                 }
                 i++;
             }
-            return def[i].unk0;
+            return defaults[i].script;
         }
         i++;
     }
-    return tbl[i].unk0;
+    return table[i].script;
 }
 
 void func_1507BC14(struct127 *arg0) {
