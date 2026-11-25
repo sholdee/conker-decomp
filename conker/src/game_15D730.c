@@ -237,18 +237,6 @@ void func_151303EC(Particle *p) {
     }
 }
 
-typedef struct ParticleView {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ f32 scaleX;
-    /* 0x20 */ f32 scaleY;
-    /* 0x24 */ f32 clipTop;
-    /* 0x28 */ f32 clipBottom;
-    /* 0x2C */ f32 clipLeft;
-    /* 0x30 */ f32 clipRight;
-    /* 0x34 */ u8 pad34[0xC];
-    /* 0x40 */ Vp_t vp[(0x180 - 0x40) / 0x10];
-} ParticleView; /* size 0x180, D_800BE628 points to one per view */
-
 typedef struct ParticleRenderMode {
     s32 unk0;
     s32 unk4;
@@ -318,7 +306,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         pos = p->desc.pos;
     }
     if (func_15144CEC(&pos, screen, &depth, &w, &scale, viewIdx)) {
-        ParticleView *view;
+        RenderView *view;
         ParticleTexture *tex;
         f32 texW;
         f32 texH;
@@ -327,10 +315,10 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         s32 t;
         s32 dsdx;
 
-        // matching: byte-offset form; &((ParticleView *)D_800BE628)[viewIdx] schedules differently
-        view = (ParticleView *)&D_800BE628[viewIdx];
-        sizeX = p->desc.width * scale * view->scaleX * 16.94900131f;
-        sizeY = p->desc.height * scale * view->scaleY * 16.94900131f;
+        // matching: byte-offset form; &D_800BE628[viewIdx] schedules differently
+        view = &D_800BE628[viewIdx];
+        sizeX = p->desc.width * scale * view->unk1C * 16.94900131f;
+        sizeY = p->desc.height * scale * view->unk20 * 16.94900131f;
         if (p->desc.flags & PARTICLE_MAX_SIZE) {
             if (p->desc.maxSize < sizeX) {
                 sizeX = p->desc.maxSize;
@@ -351,7 +339,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         lrx = screen[0] + sizeX;
         uly = screen[1] - sizeY;
         lry = screen[1] + sizeY;
-        if (view->clipLeft <= lrx && ulx <= view->clipRight && view->clipTop <= lry && uly <= view->clipBottom) {
+        if (view->left <= lrx && ulx <= view->right && view->top <= lry && uly <= view->bottom) {
             s32 dtdy;
 
             ulx *= 4.0f;
@@ -362,7 +350,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
                 gDPPipeSync(gfx++);
                 needSync = FALSE;
             }
-            gDPSetPrimDepth(gfx++, (s32)((depth * scale * ((ParticleView *)D_800BE628)[viewIdx].vp[D_800BE9C0].vscale[2] + ((ParticleView *)D_800BE628)[viewIdx].vp[D_800BE9C0].vtrans[2]) * 32.0f), 0);
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vscale[2] + D_800BE628[viewIdx].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
             tex = &D_80090B60[p->desc.texture];
             texW = tex->width;
             texH = tex->height;

@@ -12,10 +12,9 @@
 #undef D_800B0E00
 #undef D_800B0E04
 
-/* One record per view (stride 0x180); field names as in game_476D0.c. */
-
-/* D_800BE628 (s32 in variables.h) points to the RenderView array. */
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
+
 extern Mtx *D_800DC2A0[2];        // per framebuffer: one view matrix per view
 extern f32 D_800D9C10[][4][4];    // per view: view matrix (float copy of D_800DC2A0)
 extern f32 D_800D9D10[][4][4];    // per view: view matrix * projection

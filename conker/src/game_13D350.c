@@ -7,6 +7,9 @@
 #undef func_150ADA20
 #include "variables.h"
 
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define RENDER_VIEWS ((RenderView *)D_800BE628)
+
 u32 func_150ADA20(void);
 void func_1502B7F0(void **dest, s32 arg1, s32 arg2, s32 arg3);
 void func_10004074(void *data);
@@ -17,12 +20,6 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 
 extern u8 D_800DBEA8[];
 extern void *D_800DBE80; // the current sky's data: the star field (sky 1) or a textured sky's tile formats
-
-/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
- * Same layout as game_476D0.c's RenderView, with the projection fields this file uses. */
-
-/* variables.h types D_800BE628 as s32. */
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];

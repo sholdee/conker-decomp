@@ -1737,18 +1737,10 @@ void func_151CAB78(struct108 *player, u8 big) {
     }
 }
 
-/* One viewport of the D_800BE628 array (0x180 bytes each). */
-typedef struct {
-    u8 pad0[0x34];
-    f32 centerX;
-    f32 centerY;
-    u8 pad3C[0x144];
-} SightViewport;
-
 /* State of the lens effect (func_151CB110), stored at +0x18 of its object. */
 typedef struct {
     struct108 *player;
-    SightViewport *view;
+    RenderView *view;
     u16 *pixels;
     s32 left;
     u32 topOffset;
@@ -1848,7 +1840,7 @@ void func_151CAD28(struct108 *player, u8 big) {
         SightLensObject *lensObj;
 
         lens.player = player;
-        lens.view = (SightViewport *)&D_800BE628[player->unk23D];
+        lens.view = &D_800BE628[player->unk23D];
         lens.left = lens.view->centerX - 12.0f;
         lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
         spawn.unk0 = 0xE;
@@ -1869,7 +1861,7 @@ extern u8 D_800BEAC2;
 /* Draws the zoom lens: saves the 24x24 framebuffer block under it, then writes it back
  * magnified towards the centre, mirrored into all four quadrants. */
 void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
-    SightViewport *view;
+    RenderView *view;
     s32 row;
     s32 lensOffset;
     s32 screenOffset;

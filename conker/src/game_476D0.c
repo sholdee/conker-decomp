@@ -3,11 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these. */
-
-/* variables.h types these as s32: D_800BE628 and D_800BE62C point at the per-view RenderViews and Vps, and
- * D_800D9D10 holds the per-view 4x4 matrices. */
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
+
 #define VIEWPORTS ((Vp *)D_800BE62C)
 #define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
 

@@ -783,8 +783,6 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
 s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count);
 
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
-/* A 0x180-byte entry of the table at D_800BE628, holding per-frame viewports from 0x40. */
-typedef struct { u8 pad0[0x40]; Vp vp[20]; } S180_15186794;
 extern Gfx D_8008D410[];
 extern s32 D_800C48F0[];
 extern Gfx *D_800BE9C8[];
@@ -871,7 +869,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         func_10004074(vtx);
         return gfx;
     }
-    memcpy(&D_800DF090[view], &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0], sizeof(Vp));
+    memcpy(&D_800DF090[view], &D_800BE628[D_80082FA4].viewports[D_800BE9C0], sizeof(Vp));
     D_800DF090[view].vp.vtrans[2] = (s32)(D_800DF090[view].vp.vtrans[2] * (u32)D_800DE030) >> 10;
     gfxShadows = gfx;
     vtxTotal = 0;
@@ -970,7 +968,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
     }
     if (slot != 0) {
         gfx = func_1510B7B4(gfx, view);
-        gSPViewport(gfx++, &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0]);
+        gSPViewport(gfx++, &D_800BE628[D_80082FA4].viewports[D_800BE9C0]);
     } else {
         gfx = gfxShadows;
     }

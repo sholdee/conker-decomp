@@ -2,14 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
- * Same layout as game_13D350.c's and game_476D0.c's RenderView, with the projection fields this file uses. */
-
-/* variables.h types D_800BE628 as s32. */
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
-// matching: IDO allocates registers differently for &RENDER_VIEWS[i].perspNorm than for this integer arithmetic
-#define VIEW_PERSP_NORM(i) (&D_800BE628[i].perspNorm)
-
 extern f32 D_800D9B28[4][4];
 extern s16 D_800DD2F2;
 extern s16 D_800DD2F4;
@@ -27,8 +19,8 @@ void func_1510B070(s32 arg0) {
     D_800D9B20 = D_800DD2F2;
     D_800D9B1C = D_800DD2F4;
     D_800D3670 = 100.0f - D_800D9B1C;
-    func_151EF954(D_800D9B28, -RENDER_VIEWS->halfWidth, RENDER_VIEWS->halfWidth, -RENDER_VIEWS->halfHeight,
-                  RENDER_VIEWS->halfHeight, 1.0f, 10000.0f, 1.0f);
+    func_151EF954(D_800D9B28, -D_800BE628->halfWidth, D_800BE628->halfWidth, -D_800BE628->halfHeight,
+                  D_800BE628->halfHeight, 1.0f, 10000.0f, 1.0f);
 }
 
 /* Widens a view's frustum FOVs by (fovXDelta, fovYDelta) plus the global D_800C3648, updates unk1C/unk20 and
@@ -38,24 +30,24 @@ void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
     f32 farPlane;
     f32 pad; // matching: keeps the stack frame size
 
-    RENDER_VIEWS[viewIndex].frustumFovX = RENDER_VIEWS[viewIndex].fovX + fovXDelta + D_800C3648;
-    RENDER_VIEWS[viewIndex].frustumFovY = RENDER_VIEWS[viewIndex].fovY + fovYDelta + D_800C3648;
+    D_800BE628[viewIndex].frustumFovX = D_800BE628[viewIndex].fovX + fovXDelta + D_800C3648;
+    D_800BE628[viewIndex].frustumFovY = D_800BE628[viewIndex].fovY + fovYDelta + D_800C3648;
     {
         f32 dist;
         f32 cosine;
         f32 angle;
 
         /* half the FOV in radians; dist = halfWidth / tan(angle) */
-        angle = RENDER_VIEWS[viewIndex].frustumFovX * 0.008726646192f;
+        angle = D_800BE628[viewIndex].frustumFovX * 0.008726646192f;
         cosine = cosf(angle);
-        dist = (cosine * RENDER_VIEWS[viewIndex].halfWidth) / sinf(angle);
-        RENDER_VIEWS[viewIndex].unk1C =
-            (RENDER_VIEWS[viewIndex].scaleX * dist) * RENDER_VIEWS[viewIndex].pixelTanX * scale;
-        angle = RENDER_VIEWS[viewIndex].frustumFovY * 0.008726646192f;
+        dist = (cosine * D_800BE628[viewIndex].halfWidth) / sinf(angle);
+        D_800BE628[viewIndex].unk1C =
+            (D_800BE628[viewIndex].scaleX * dist) * D_800BE628[viewIndex].pixelTanX * scale;
+        angle = D_800BE628[viewIndex].frustumFovY * 0.008726646192f;
         cosine = cosf(angle);
-        dist = (cosine * RENDER_VIEWS[viewIndex].halfHeight) / sinf(angle);
-        RENDER_VIEWS[viewIndex].unk20 =
-            (RENDER_VIEWS[viewIndex].scaleY * dist) * RENDER_VIEWS[viewIndex].pixelTanY * scale;
+        dist = (cosine * D_800BE628[viewIndex].halfHeight) / sinf(angle);
+        D_800BE628[viewIndex].unk20 =
+            (D_800BE628[viewIndex].scaleY * dist) * D_800BE628[viewIndex].pixelTanY * scale;
     }
     if (D_800C364C != 0.0f) {
         nearPlane = D_800C364C;
@@ -69,8 +61,8 @@ void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
     } else {
         farPlane = D_800D9B1C;
     }
-    func_1510B5F8(viewIndex, VIEW_PERSP_NORM(viewIndex), RENDER_VIEWS[viewIndex].frustumFovY,
-                  RENDER_VIEWS[viewIndex].frustumFovX, nearPlane, farPlane, scale);
+    func_1510B5F8(viewIndex, &D_800BE628[viewIndex].perspNorm, D_800BE628[viewIndex].frustumFovY,
+                  D_800BE628[viewIndex].frustumFovX, nearPlane, farPlane, scale);
 }
 
 /* func_1510B128 with the default near plane, also remembered in D_800D9AC0 (unk0 = scale, unk4/unk8 = FOV
@@ -105,8 +97,8 @@ void func_1510B458(s32 viewIndex, f32 near, f32 far) {
     if (far == 0.0f) {
         far = D_800D9B1C;
     }
-    func_1510B5F8(viewIndex, VIEW_PERSP_NORM(viewIndex), RENDER_VIEWS[viewIndex].frustumFovY,
-                  RENDER_VIEWS[viewIndex].frustumFovX, near, far, RENDER_VIEWS[viewIndex].perspScale);
+    func_1510B5F8(viewIndex, &D_800BE628[viewIndex].perspNorm, D_800BE628[viewIndex].frustumFovY,
+                  D_800BE628[viewIndex].frustumFovX, near, far, D_800BE628[viewIndex].perspScale);
     D_800D9AF8[viewIndex].unk0 = near;
     D_800D9AF8[viewIndex].unk4 = far;
     D_800D9B18 = TRUE;
@@ -118,8 +110,8 @@ void func_1510B51C(void) {
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800D9AF8[i].unk0 != -1.0f) {
-            func_1510B5F8(i, VIEW_PERSP_NORM(i), RENDER_VIEWS[i].frustumFovY, RENDER_VIEWS[i].frustumFovX,
-                          D_800D9AF8[i].unk0, D_800D9AF8[i].unk4, RENDER_VIEWS[i].perspScale);
+            func_1510B5F8(i, &D_800BE628[i].perspNorm, D_800BE628[i].frustumFovY, D_800BE628[i].frustumFovX,
+                          D_800D9AF8[i].unk0, D_800D9AF8[i].unk4, D_800BE628[i].perspScale);
             D_800D9AF8[i].unk0 = -1.0f;
         }
     }
@@ -128,6 +120,6 @@ void func_1510B51C(void) {
 
 /* Builds a view's floating-point projection matrix and converts it into the current framebuffer's Mtx. */
 void func_1510B5F8(s32 viewIndex, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale) {
-    guPerspectiveF(RENDER_VIEWS[viewIndex].projection, perspNorm, fovy, aspect, near, far, scale);
-    guMtxF2L(RENDER_VIEWS[viewIndex].projection, &RENDER_VIEWS[viewIndex].projectionMtx[D_800BE9C0]);
+    guPerspectiveF(D_800BE628[viewIndex].projection, perspNorm, fovy, aspect, near, far, scale);
+    guMtxF2L(D_800BE628[viewIndex].projection, &D_800BE628[viewIndex].projectionMtx[D_800BE9C0]);
 }

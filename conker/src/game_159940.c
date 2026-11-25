@@ -102,13 +102,6 @@ typedef struct Camera {
     /* 0x860 */ CamVec3f shakePos;
 } Camera;
 
-/* Per-player view record (0x180 bytes) in the array D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x84];
-    /* 0x84 */ f32 unk84;
-    /* 0x88 */ u8 pad88[0xF8];
-} CamView;
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x54];
     /* 0x54 */ CamVec3f unk54;
@@ -160,7 +153,7 @@ void func_1512C490(Camera *camera) {
     f32 dirMtx[4][4];
     f32 yaw;
 
-    shakeScale = ((CamView *)D_800BE628)[camera->playerIndex].unk84;
+    shakeScale = D_800BE628[camera->playerIndex].perspScale;
     shakeScale = (1.0f - shakeScale) * 0.5f + shakeScale;
     if (camera->playerExt->unk120 != 0) {
         camera->sideTarget = 0.0f;

@@ -2,8 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-player view record (0x180 bytes) in the array D_800BE628 points to; see game_13D350.c. */
-
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 void func_15110360(s32 viewIndex, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);

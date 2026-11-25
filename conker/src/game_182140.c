@@ -54,17 +54,6 @@ typedef struct ScreenSprite {
     /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
 } ScreenSprite;
 
-/* Per-viewport record (0x180 bytes) of the table D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ f32 scaleX;
-    /* 0x18 */ f32 scaleY;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ f32 centerX;
-    /* 0x38 */ f32 centerY;
-    /* 0x3C */ u8 pad3C[0x144];
-} Viewport;
-
 typedef struct {
     u8 pad0[0x6];
     u16 width;
@@ -167,11 +156,11 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     f32 yh;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
-    Viewport *vp;
+    RenderView *vp;
 
     update = 1;
-    // matching: integer address arithmetic; indexing a Viewport array orders the addu differently
-    vp = (Viewport *)&D_800BE628[D_80082FA4];
+    // matching: integer address arithmetic; indexing a RenderView array orders the addu differently
+    vp = &D_800BE628[D_80082FA4];
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }

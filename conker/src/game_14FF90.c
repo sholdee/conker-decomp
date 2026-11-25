@@ -301,19 +301,7 @@ typedef struct Camera {
     /* 0x99C */ f32 sideOffsetTarget;
 } Camera; // size 0x9A0
 
-/* Per-player view state, D_800BE628 points at an array of these (only the fields used here). */
-typedef struct CamView {
-    /* 0x000 */ u8 pad0[0x6C];
-    /* 0x06C */ f32 unk6C;
-    /* 0x070 */ f32 unk70;
-    /* 0x074 */ u8 pad74[0x10];
-    /* 0x084 */ f32 unk84;
-    /* 0x088 */ u8 pad88[0xF8];
-} CamView; // size 0x180
-
 #define CAM_C_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
-
-#define CAM_VIEWS ((CamView *)D_800BE628)
 
 /* variables.h declares D_800C3600 as struct168 *; it is the struct itself (a scripted camera shot). */
 #define SCRIPT_CAM (*(struct168 *)&D_800C3600)
@@ -498,7 +486,7 @@ void func_15122C5C(struct108 *camera) {
         fov = 0.0f;
     }
     // matching: the playerIndex reload is assigned inside the call (a separate statement reorders it)
-    func_1510B128(index = CAM->playerIndex, CAM->unk19C, CAM->unk1A0, CAM_VIEWS[index].unk84, fov);
+    func_1510B128(index = CAM->playerIndex, CAM->unk19C, CAM->unk1A0, D_800BE628[index].perspScale, fov);
     func_15097798(CAM->playerIndex);
     func_15125A6C(camera);
     func_15128CB0(camera);
@@ -1772,9 +1760,9 @@ s32 func_15126378(struct108 *camera) {
 
     scale = 0.02f;
     ext = CAM->playerExt;
-    aspect = CAM_VIEWS[CAM->playerIndex].unk70 / CAM_VIEWS[CAM->playerIndex].unk6C;
-    maxZoom = -(CAM_VIEWS[CAM->playerIndex].unk6C - 5.0f);
-    zoomStep = CAM_VIEWS[CAM->playerIndex].unk6C * scale;
+    aspect = D_800BE628[CAM->playerIndex].fovY / D_800BE628[CAM->playerIndex].fovX;
+    maxZoom = -(D_800BE628[CAM->playerIndex].fovX - 5.0f);
+    zoomStep = D_800BE628[CAM->playerIndex].fovX * scale;
     zone = CAM->zone;
     if (((zone == 0xC) && (CAM->player->unk84.uh != 0x76)) || (zone == 0x1B)) {
         CAM->buttonsPressed |= R_TRIG;
@@ -1843,7 +1831,7 @@ s32 func_15126378(struct108 *camera) {
         CAM->unk1A4 = ext->aimZoom;
         CAM->unk1A8 = ext->aimZoomY;
         func_1510B32C(CAM->playerIndex, CAM->unk19C, CAM->unk1A0, 1.0f);
-        CAM_VIEWS[CAM->playerIndex].unk84 = 1.0f;
+        D_800BE628[CAM->playerIndex].perspScale = 1.0f;
         func_150627D4(CAM->player);
         D_800DBFF4[CAM->playerIndex] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
@@ -1963,8 +1951,8 @@ s32 func_15126378(struct108 *camera) {
         ext->aimEye = CAM->eye;
         ext->aimDir = dir;
         func_15048F90((struct17 *)&ext->aimEye, (struct17 *)&ext->aimTarget, (struct17 *)&ext->aimDir);
-        CAM_VIEWS[CAM->playerIndex].unk84 = (-0.94f * zoomRatio) + 1.0f;
-        func_1510B128(CAM->playerIndex, CAM->unk19C, CAM->unk1A0, CAM_VIEWS[CAM->playerIndex].unk84,
+        D_800BE628[CAM->playerIndex].perspScale = (-0.94f * zoomRatio) + 1.0f;
+        func_1510B128(CAM->playerIndex, CAM->unk19C, CAM->unk1A0, D_800BE628[CAM->playerIndex].perspScale,
                       (71.0f * zoomRatio) + 54.0f);
         return 1;
     }
@@ -2192,7 +2180,7 @@ void func_15127EB8(struct108 *camera) {
     CAM->unk1A4 = 0.0f;
     CAM->unk1A8 = 0.0f;
     func_1510B32C(CAM->playerIndex, 0.0f, 0.0f, 1.0f);
-    CAM_VIEWS[CAM->playerIndex].unk84 = 1.0f;
+    D_800BE628[CAM->playerIndex].perspScale = 1.0f;
     func_150627D4(CAM->player);
     D_800DBFF4[CAM->playerIndex] = 2;
 

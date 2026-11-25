@@ -10,13 +10,6 @@
 }
 
 Gfx *func_15172F70(Gfx *arg0) {
-    typedef struct {
-        char pad0[0x24];
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-    } Struct15172F70;
     u32 color;
 
     color = D_800DD2D0;
@@ -31,8 +24,8 @@ Gfx *func_15172F70(Gfx *arg0) {
         WGFX15172F70(arg0++, 0xE3000F00, 0);
         WGFX15172F70(arg0++, 0xFCFFFFFF, 0xFFFDF6FB);
         WGFX15172F70(arg0++,
-            0xF6000000 | ((((u32)((Struct15172F70 *)D_800BE628)->unk28) & 0x3FF) << 2) | ((((u32)((Struct15172F70 *)D_800BE628)->unk30) & 0x3FF) << 14),
-            ((((u32)((Struct15172F70 *)D_800BE628)->unk24) & 0x3FF) << 2) | ((((u32)((Struct15172F70 *)D_800BE628)->unk2C) & 0x3FF) << 14));
+            0xF6000000 | ((((u32)D_800BE628->bottom) & 0x3FF) << 2) | ((((u32)D_800BE628->right) & 0x3FF) << 14),
+            ((((u32)D_800BE628->top) & 0x3FF) << 2) | ((((u32)D_800BE628->left) & 0x3FF) << 14));
     }
 
     return arg0;

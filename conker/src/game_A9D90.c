@@ -638,16 +638,6 @@ void func_1507DB44(struct127 *obj, s32 arg1) {
 void func_1507DB64(void) {
 }
 
-/* Layout of the 0x180-byte D_800BE628 records, as far as func_1507DB6C uses them. */
-typedef struct ViewRecord {
-    /* 0x00 */ u8 pad0[0x24];
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ u8 pad34[0x14C];
-} ViewRecord; // size 0x180
-
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern Gfx D_80086B80[];
 extern u8 D_D0F;
@@ -661,7 +651,7 @@ extern u8 D_D0F;
 Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     s32 texture;
     s32 size;
-    ViewRecord *view;
+    RenderView *view;
     s32 right, left, bottom, top;
     s32 scale;
 
@@ -694,9 +684,10 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
         }
     }
     size = D_800D18A4_u8[player] + 4;
-    view = &((ViewRecord *)D_800BE628)[player];
-    left = right = (s32)(view->unk30 + view->unk2C) * 2;
-    top = bottom = (s32)(view->unk28 + view->unk24) * 2;
+    // matching: indexing through the (no-op) cast orders the addu as the original
+    view = &((RenderView *)D_800BE628)[player];
+    left = right = (s32)(view->right + view->left) * 2;
+    top = bottom = (s32)(view->bottom + view->top) * 2;
     left -= size;
     right += size;
     top -= size;

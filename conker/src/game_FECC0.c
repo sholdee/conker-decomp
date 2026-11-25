@@ -13,12 +13,6 @@ typedef struct {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture;
 
-/* One on-screen view; D_800BE628 points at an array of these (same layout as game_13D350.c's RenderView,
- * with only the fields this file uses). */
-
-/* variables.h types D_800BE628 as s32. */
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
-
 extern void *D_800DBE80; // the current sky's data (here its gradient texture)
 extern Vtx *D_800DBE88[][2]; // per view, per framebuffer
 extern Mtx *D_800DBEB0;
@@ -64,11 +58,11 @@ Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5
     gfx = func_1501A680(gfx);
     gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     func_151102CC(rotation, 0.0f, 0.0f, roll);
-    func_150A7A48(rotation, RENDER_VIEWS[D_80082FA4].projection, viewProj);
+    func_150A7A48(rotation, D_800BE628[D_80082FA4].projection, viewProj);
     guMtxF2L(viewProj, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPPerspNormalize(gfx++, RENDER_VIEWS[D_80082FA4].perspNorm);
+    gSPPerspNormalize(gfx++, D_800BE628[D_80082FA4].perspNorm);
     vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
     vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;
     vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((bottom + 511) << 5) + tOffset;
