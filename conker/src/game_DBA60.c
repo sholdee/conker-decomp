@@ -174,7 +174,6 @@ typedef struct {
 
 extern EffectDefList D_800886E0[];
 extern u32 D_15001B08[];
-extern void *D_800DCE50[2][104];
 void func_15001A08(void);
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from

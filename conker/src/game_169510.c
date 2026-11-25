@@ -1828,9 +1828,6 @@ Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport)
     return result;
 }
 
-/* Particle draw lists, D_800DCE50[group][list]. */
-extern Particle *D_800DCE50[][104];
-
 /* Sort key: texture, then animation frame, so that particles sharing a texture load draw together. */
 #define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
@@ -1848,7 +1845,7 @@ s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
     if (phase != 0) {
         return arg0;
     }
-    slot = &D_800DCE50[group][list];
+    slot = (Particle **)&D_800DCE50[group][list];
     node = *slot;
     head.def.texture = 0;
     head.def.frame = 0;

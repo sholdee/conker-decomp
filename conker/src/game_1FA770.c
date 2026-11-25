@@ -611,7 +611,6 @@ void func_151CE51C(void *actor, StreamSource *source) {
     }
 }
 
-extern Emitter *D_800DCE50[][0x68];
 
 /* Finds the stream emitter whose data has the given id, or NULL. */
 Emitter *func_151CE634(s32 id) {
@@ -621,7 +620,7 @@ Emitter *func_151CE634(s32 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            emitter = D_800DCE50[j][D_800A5760[i]];
+            emitter = (Emitter *)D_800DCE50[j][D_800A5760[i]];
             while (emitter != NULL) {
                 if (emitter->head.tmpl.kind == STREAM_KIND) {
                     StreamData *data = emitter->data;

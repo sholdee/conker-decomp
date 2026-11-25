@@ -614,7 +614,6 @@ typedef struct AimNode {
 
 extern AimNodeTypes D_800843E0;
 extern u8 D_80084404[];
-extern AimNode *D_800DCE50[2][104];
 ModelAttachment *func_150319CC(s32, Actor *);
 void func_1507E9E8(Actor *, s32);
 
@@ -743,7 +742,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
-                node = D_800DCE50[list][type];
+                node = (AimNode *)D_800DCE50[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
                         extern s32 D_800C6654; // matching: this redeclaration shifts IDO's scheduling of the loop

@@ -146,7 +146,6 @@ typedef struct Emitter {
 } Emitter;
 
 /* Process lists, by priority and process type. */
-extern Emitter *D_800DCE50[2][104];
 extern EmitterTable *D_8008D5E0[];
 extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
 extern s32 (*D_8008D628[])(Emitter *);
@@ -171,7 +170,7 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
     if (killExisting) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
-            emitter = D_800DCE50[i][0x21];
+            emitter = (Emitter *)D_800DCE50[i][0x21];
             while (emitter != NULL) {
                 D_800DD198[D_800DD190] = emitter->header.next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {

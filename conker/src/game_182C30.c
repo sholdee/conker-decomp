@@ -20,9 +20,6 @@ typedef struct PlayerMarker {
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
 
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern PlayerMarker *D_800DCE50[2][104];
-
 void func_1518C900(s32);
 PlayerMarker *func_15155FD4(s32 playerId);
 
@@ -226,7 +223,7 @@ PlayerMarker *func_15155FD4(s32 playerId) {
     PlayerMarker *marker;
 
     for (list = 0; list < 2; list++) {
-        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = (PlayerMarker *)marker->header.next) {
+        for (marker = (PlayerMarker *)D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = (PlayerMarker *)marker->header.next) {
             if (playerId == marker->playerId) {
                 return marker;
             }

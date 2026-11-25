@@ -1597,8 +1597,6 @@ typedef struct ListedObject {
     /* 0xED */ u8 unkED;
 } ListedObject;
 
-/* Object lists, and the stack of saved `next` pointers (depth D_800DD190) that makes walking them reentrant. */
-extern ListedObject *D_800DCE50[];
 void func_15183ACC(s32);
 s32 func_1510F8D8(s32, s32, s32, s32);
 
@@ -1637,7 +1635,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     if (&points) { // matching: address-taken points stays in its stack slot
     }
     for (i = 0; i < 3; i++) {
-        head = D_800DCE50[lists[i]];
+        head = (ListedObject *)D_800DCE50[0][lists[i]]; // flat index over both rows
         if (head != NULL) {
             node = head;
             j = actor->head.end;

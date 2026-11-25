@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-extern u8 D_800DCE50[];
 typedef struct Node150E35DC {
     u8 pad0[0x8];
     struct Node150E35DC *unk8;
@@ -16,7 +15,7 @@ void func_1515FDA0(s32 arg0) {
     arg0--;
     for (i = 0; i != 2; i++) {
         D_800DD190++;
-        node = ((Node150E35DC *(*)[104])D_800DCE50)[i][39];
+        node = (Node150E35DC *)D_800DCE50[i][39];
         while (node != NULL) {
             D_800DD198[D_800DD190] = node->unk8;
             if (arg0 == -1 || arg0 == node->unk48) {

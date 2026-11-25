@@ -68,7 +68,6 @@ typedef struct {
 
 extern TextureInfo D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
-extern Rope *D_800DCE50[][104];    // object lists, [group][list]
 
 extern void *allocate_memory(s32, s32, s32, s32);
 f32 func_150489B0(u8);
@@ -657,7 +656,7 @@ Rope *func_151AE590(u8 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            rope = D_800DCE50[j][D_800A9270[i]];
+            rope = (Rope *)D_800DCE50[j][D_800A9270[i]];
             while (rope != NULL) {
                 Rope *next = (Rope *)rope->header.next;
 

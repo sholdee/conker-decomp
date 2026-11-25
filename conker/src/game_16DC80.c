@@ -43,7 +43,6 @@ extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
-extern GlowObj *D_800DCE50[2][104];
 extern Vec3f *func_15144B34(s32);
 extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_151D5D60(void **, s16, s32, void **, u8 *);
@@ -302,7 +301,7 @@ void func_151412BC(void) {
 
     for (p = 0; p < 2; p++) {
         for (i = 0; i < 4; i++) {
-            obj = D_800DCE50[p][D_800A5168[i]];
+            obj = (GlowObj *)D_800DCE50[p][D_800A5168[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
                     obj->params.shape.zbufSample[3] = 0;

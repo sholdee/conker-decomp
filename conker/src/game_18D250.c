@@ -27,10 +27,6 @@ typedef struct {
     /* 0x18 */ ColourFrameBufferData data;
 } ColourFrameBufferEffect;
 
-
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern ScreenEffect *D_800DCE50[2][104];
-
 extern s32 (*D_8008B0D0[])(ScreenEffect *);
 extern void (*D_8008B0D8[])(ScreenEffect *, s32);
 extern void (*D_8008B0E4[])(ScreenEffect *, s32, u8);
@@ -42,7 +38,7 @@ void func_1515FDA0(s32 arg0) {
     u8 visible;
 
     for (list = 0; list < 2; list++) {
-        effect = D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
+        effect = (ScreenEffect *)D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
         D_800DD190++;
         for (; effect != NULL; effect = D_800DD198[D_800DD190]) {
             D_800DD198[D_800DD190] = effect->next;

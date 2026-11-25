@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern u8 D_A48[];
 
@@ -17,9 +16,6 @@ typedef struct ScreenOverlay {
     /* 0x14 */ s16 alpha;  /* 0..128 */
     /* 0x16 */ s8 speed;   /* 1 while running, -2 once stopped (fades back out) */
 } ScreenOverlay;
-
-/* Object lists (see game_1944C0.c): D_800DCE50[list][type] heads a linked list of objects of that type. */
-extern ScreenOverlay *D_800DCE50[2][104];
 
 /* Spawns an overlay for the given id. */
 ScreenOverlay *func_151D26C0(s16 id) {
@@ -38,7 +34,7 @@ ScreenOverlay *func_151D26C0(s16 id) {
 void func_151D2718(s16 id) {
     ScreenOverlay *overlay;
 
-    for (overlay = D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
+    for (overlay = (ScreenOverlay *)D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
         if (id == overlay->id) {
             overlay->speed = -2;
         }

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-extern u8 D_800DCE50[];
 extern void (*D_8008B0D8[])(void *, s32);
 
 typedef struct Node1515FDA0 {
@@ -19,7 +18,7 @@ void func_1515FDA0(s32 arg0) {
     s32 run;
 
     for (i = 0; i < 2; i++) {
-        node = ((Node1515FDA0 *(*)[104])D_800DCE50)[i][52];
+        node = (Node1515FDA0 *)D_800DCE50[i][52];
         D_800DD190++;
         if (node != NULL) {
             slot = (Node1515FDA0 **)&D_800DD198[D_800DD190];

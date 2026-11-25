@@ -3,9 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern EffectHeader *D_800DCE50[2][104];
-
 /* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F

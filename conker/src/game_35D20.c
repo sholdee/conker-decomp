@@ -2,12 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-#define OBJ_TYPE_COUNT 104
 
 typedef void (*ResetFunc)(void);
 
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type (see game_1944C0.c). */
-extern void *D_800DCE50[2][OBJ_TYPE_COUNT];
 /* One-entry reset callback tables for modes 1 and 2. */
 extern ResetFunc D_80082BD0;
 extern ResetFunc D_80082BD4;

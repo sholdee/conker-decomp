@@ -69,8 +69,6 @@ extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern TextureInfo D_80090B60[];
 extern OtherModeL D_800A4AC8[];
-/* Object lists: D_800DCE50[list][type] heads a linked list of objects of that type. */
-extern ActorTracker *D_800DCE50[2][104];
 
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
@@ -257,7 +255,7 @@ void func_1515C158(void) {
     ActorTracker *tracker;
 
     for (list = 0; list < 2; list++) {
-        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
+        for (tracker = (ActorTracker *)D_800DCE50[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
             tracker->unk44 = 0;
             tracker->unk48 = -1;
         }

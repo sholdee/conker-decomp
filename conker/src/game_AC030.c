@@ -733,7 +733,6 @@ typedef struct {
 extern s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range,
                          s32 noCheck, s32 axisMode);
 extern s32 func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z);
-extern ListObject *D_800DCE50[];
 extern ObjTypeList D_80086C50;
 
 /*
@@ -761,7 +760,7 @@ s32 func_1507FFD8(Actor *actor) {
         types = D_80086C50;
         for (i = 0; i < 3; i++) {
             type = types.type[i];
-            obj = D_800DCE50[type];
+            obj = (ListObject *)D_800DCE50[0][type]; // the lists are indexed flat: type runs over both rows
             while (obj != NULL) {
                 x = obj->x;
                 y = obj->y;

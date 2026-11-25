@@ -4,10 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-#define OBJ_TYPE_COUNT 104
-
-/* Object lists: D_800DCE50[list][type] is the head of a doubly linked list of EffectHeader nodes. */
-extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT];
 
 /*
  * While a list is being walked, the next node is saved in D_800DD198[depth] (depth D_800DD190) so that
@@ -17,7 +13,6 @@ extern EffectHeader *D_800DCE50[2][OBJ_TYPE_COUNT];
 extern void (*D_8008CA20[])(EffectHeader *);
 extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
-
 
 /* Template / payload of a type 0x10 object. */
 typedef struct {
@@ -50,7 +45,6 @@ typedef struct {
 } ModelFx;
 
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
 
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {

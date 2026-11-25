@@ -37,7 +37,6 @@ extern SpriteTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern Pair1515572C D_800A6038;
-extern ScreenSprite *D_800DCE50[2][0x68];
 
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
@@ -243,7 +242,7 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
         lists = D_800A6030;
         i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
-            sprite = D_800DCE50[table][lists.id[i]];
+            sprite = (ScreenSprite *)D_800DCE50[table][lists.id[i]];
             while (sprite != NULL) {
                 next = (ScreenSprite *)sprite->header.next;
                 k = kindCount;

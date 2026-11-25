@@ -43,9 +43,6 @@ typedef struct HomingEffect {
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
 } HomingEffect;
 
-/* Object lists (see game_1944C0.c); list D_800DCE50[n][0x27] holds the effects. */
-extern HomingEffect *D_800DCE50[2][104];
-
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
                       Actor *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {
@@ -184,7 +181,7 @@ void func_150E35DC(s32 handle) {
     handle--;
     for (list = 0; list != 2; list++) {
         D_800DD190++;
-        effect = D_800DCE50[list][0x27];
+        effect = (HomingEffect *)D_800DCE50[list][0x27];
         while (effect != NULL) {
             D_800DD198[D_800DD190] = effect->header.next;
             if (handle == -1 || handle == effect->slot) {

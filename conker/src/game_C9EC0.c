@@ -718,7 +718,6 @@ typedef struct Node1509DBBC {
     /* 0x48 */ u8 type;
 } Node1509DBBC;
 
-extern Node1509DBBC *D_800DCE50[][0x68];
 void func_150E36BC(s32 handle, s32 *hi, s32 *result, s32 *lo);
 
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
@@ -741,7 +740,7 @@ s32 func_1509DBBC(s32 cmdId, s32 phase, s32 arg2) {
                 /* Done once no node of type 2 is left in the watched lists. */
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 3; j++) {
-                        node = D_800DCE50[i][D_800A6060[j]];
+                        node = (Node1509DBBC *)D_800DCE50[i][D_800A6060[j]];
                         while (node != NULL) {
                             Node1509DBBC *next;
 

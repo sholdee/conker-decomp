@@ -614,6 +614,8 @@ typedef struct {
     u8 unk2;
 } struct100;
 
+#define OBJ_TYPE_COUNT 104 /* object types: D_8008B4A8 entries, lists per D_800DCE50 row */
+
 /* Common head of every object in the object lists D_800DCE50[list][type] (game_1944C0.c): effects, particles,
  * sprites, timed effects. func_15167A68 allocates one and links it in (func_15168A4C); func_1516972C destroys it
  * (the type's destroy hook, by default a move to type 1) and func_1516979C frees it. */
