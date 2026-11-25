@@ -48,7 +48,7 @@ void func_1512C150(struct108 *arg0);
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 unk18;
+    /* 0x018 */ f32 y_position;
     /* 0x01C */ u8 pad1C[0xC];
     /* 0x028 */ f32 unk28;
     /* 0x02C */ u8 pad2C[0x22];
@@ -135,25 +135,25 @@ void func_151236D0(void *);
 s32 func_15125490(void *);
 
 void func_1512A390(Obj1512A390 *arg0) {
-    f32 sp7C;
-    s32 sp78;
-    s16 sp76;
-    s16 sp74;
-    s16 sp72;
-    f32 sp6C;
-    f32 pad68;
+    f32 unused28;
+    s32 flag4E;
+    s16 height;
+    s16 width;
+    s16 depth;
+    f32 targetHeight;
+    f32 pad68; // matching: frame padding
     f32 pad64;
 
-    sp7C = arg0->unk3D0->unk28;
+    unused28 = arg0->unk3D0->unk28;
     if (arg0->unk3D4 != NULL) {
-        sp78 = arg0->unk3D4->unk4E;
-        sp6C = arg0->unk3D4->unk114;
+        flag4E = arg0->unk3D4->unk4E;
+        targetHeight = arg0->unk3D4->unk114;
     } else {
-        sp78 = 0;
-        func_1507C3E0(arg0->unk3D0, &sp76, &sp74, &sp72);
-        sp6C = sp76;
+        flag4E = 0;
+        func_1507C3E0(arg0->unk3D0, &height, &width, &depth);
+        targetHeight = height;
     }
-    if (!arg0->unk84 & 0x40) {
+    if (!arg0->unk84 & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
         arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk180;
         return;
     }
@@ -162,7 +162,7 @@ void func_1512A390(Obj1512A390 *arg0) {
         func_1510E8BC(&arg0->unk644, &arg0->unk648, &arg0->unk35C, &arg0->unk360, &arg0->unk640, 0,
                       arg0->unk2F8, arg0->unk35C, arg0->unk300, arg0->unk308, 0, 0, -10000.0f, arg0->unk2FC, 1);
     }
-    if (sp7C) {}
+    if (unused28) {} // matching: keeps the otherwise dead unk28 load
     if (D_800BE9F0 == 0x28) {
         arg0->unk364 = -10000.0f;
         arg0->unk360 = -10000.0f;
@@ -191,7 +191,7 @@ void func_1512A390(Obj1512A390 *arg0) {
         arg0->unk360 = arg0->unk364;
     }
     if (arg0->unk3D0->unk137 != 0) {
-        arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk18;
+        arg0->unk35C = arg0->unk354 = arg0->unk3D0->y_position;
     }
     if ((D_800C3671 != 0) || (arg0->unk7F4 != 0)) {
         arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk180;
@@ -225,7 +225,7 @@ void func_1512A390(Obj1512A390 *arg0) {
         }
     }
     if (!(arg0->unk84 & 0x10000000) && (arg0->unk2C != 0x80)) {
-        if ((arg0->unk5F0 & 1) && (sp78 != 0)) {
+        if ((arg0->unk5F0 & 1) && (flag4E != 0)) {
             arg0->unk35C = arg0->unk3D0->unk118;
         }
         if (arg0->unk2C == 0x80) {
@@ -262,14 +262,14 @@ void func_1512A390(Obj1512A390 *arg0) {
         }
         arg0->unk8C4 = (arg0->unk8C4 < -300.0f) ? -300.0f : ((arg0->unk8C4 > 300.0f) ? 300.0f : arg0->unk8C4);
         func_150495B0(&arg0->unk8CC, arg0->unk8C4, &arg0->unk8C8, 1.0f, 1.5f, arg0->unk7B4);
-        arg0->unk354 = arg0->unk2A8 + arg0->unk8CC + (sp6C * 0.8500000238f);
+        arg0->unk354 = arg0->unk2A8 + arg0->unk8CC + (targetHeight * 0.8500000238f);
         arg0->unk354 = (arg0->unk354 < arg0->unk3D0->unk180 + arg0->unk348) ? arg0->unk3D0->unk180 + arg0->unk348 : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk35C + 50.0f) ? arg0->unk35C + 50.0f : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk360 + 50.0f) ? arg0->unk360 + 50.0f : arg0->unk354;
         arg0->unk674 = 0.0f;
         arg0->unk84 |= 0x10000000;
         arg0->unk848 = 1;
-    lbl1: ;
+    lbl1:; // matching: the label keeps as1 from filling the branch delay slot
     } else if (arg0->unk848 != 0) {
         arg0->unk674 = 1.0f;
         arg0->unk84 &= ~0x10000000;
