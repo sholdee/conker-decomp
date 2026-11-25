@@ -11,24 +11,34 @@ struct Struct151E5034 {
     f32 unk14;
     f32 unk18;
     f32 unk1C;
-    u16 unk20;
-    u16 unk22[4];
-    s8 unk2A;
-    s8 unk2B;
-    s8 unk2C;
-    char pad2D;
-    s8 unk2E[4];
-    s8 unk32[4];
-    s8 unk36[4];
-    s8 unk3A[4];
-    s8 unk3E;
-    s8 unk3F;
-    s8 unk40;
-    s8 unk41;
-    char pad42;
+    /* 0x20 */ u16 input;       /* MENU_* bits pressed this frame on controller 1 */
+    /* 0x22 */ u16 padInput[4]; /* MENU_* bits pressed this frame, per controller */
+    /* 0x2A */ s8 unk2A;
+    /* 0x2B */ s8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ char pad2D;
+    /* 0x2E */ s8 stickX[4];    /* last stick position, per controller */
+    /* 0x32 */ s8 stickY[4];
+    /* 0x36 */ s8 repeatX[4];   /* stick auto-repeat timers */
+    /* 0x3A */ s8 repeatY[4];
+    /* 0x3E */ s8 menu;
+    /* 0x3F */ s8 page;
+    /* 0x40 */ s8 prevPage;
+    /* 0x41 */ s8 cursor;
+    /* 0x42 */ s8 selection;
     s8 unk43;
     s8 unk44;
 };
+
+/* Menu input bits (Struct151E5034.input / padInput), built from the pads in func_151DE8F0 */
+#define MENU_UP     0x01 /* stick up */
+#define MENU_DOWN   0x02 /* stick down */
+#define MENU_LEFT   0x04 /* stick left */
+#define MENU_RIGHT  0x08 /* stick right */
+#define MENU_ACCEPT 0x10 /* A or Start */
+#define MENU_BACK   0x20 /* B */
+#define MENU_CLEFT  0x40 /* C-left */
+#define MENU_CRIGHT 0x80 /* C-right */
 
 struct Struct151E4314 {
     s16 unk0;
@@ -36,26 +46,15 @@ struct Struct151E4314 {
     s8 unk3;
 };
 
-extern s8 D_800AB692[];
-extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
-extern s8 D_800E0BEB;
-extern s16 D_800E0A80;
-extern s16 D_8008FDCC;
 extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
-s32 func_1517EFDC(void);
 extern s32 D_800E0A90;
-extern u8 D_8008FE28;
 extern s8 D_800E0B96;
-extern u8 D_800D2E40;
 extern u8 D_800E0B94;
 extern u8 D_8008FDA4;
-extern s16 D_800E0B9A;
-extern u8 D_800E0B95;
-extern u8 D_800E0BDC;
-extern u16 D_800BE930;
+extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
 extern s8 D_800AB690[];
 extern s32 D_800AB754[];
 extern char D_800AB850[];
@@ -64,67 +63,29 @@ extern u8 D_800E0A95;
 extern s8 D_800E0A96;
 extern s8 D_8008FDE0;
 extern void (*D_8008FDEC[])(void);
-void func_1000E934(void);
-void func_1000F1A8(void);
-void func_1501C730(s32, s32, s32, s32, s32);
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
 void func_151E3344(s32, s32, s32, s32, s32);
-void func_151E6964(s32);
 void func_151E530C(void);
-void func_151E55A8(void);
-void func_151E557C(void);
-void func_151E7EF8(void);
 s32 func_151F2CDC(void);
-void func_151F2D6C(s32, s32);
-s32 func_1509CA30(s32);
-s32 func_1509CA50(s32);
-void func_1509CC94(s32);
-void func_1509CDDC(s32);
 s32 func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 s32 func_1509D08C(s32, s32, s32 *, s32 *);
 extern s8 D_8008FD70;
-extern s16 D_8008FDAC;
-extern u8 D_8008FDB4;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
 extern s32 D_800BE3E4;
-extern s8 D_800D23A8;
-extern s8 D_800E0B99;
 extern s8 D_800E0BB1;
-extern u8 D_800E0BD1;
 
 extern s8 D_800E0BE0[];
-extern s8 D_8008FE54[];
-extern s8 D_8008FE6C[];
-extern s8 D_8008FE84[];
 void func_151DD9E4(void);
-s32 func_151DDB94(s32 arg0);
-void func_151DDBA0(void);
-void func_151DE6D4(void);
 
-extern s32 D_800E0A90;
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern u8 D_800E0A8C;
-extern u8 D_8008FE28;
-void func_151DE85C(void);
-void func_151DE7D4(void);
 
 extern s8 D_8008FE30;
 extern s8 D_8008FD74;
-extern s8 D_800E0B96;
-void func_151DE81C(void);
 
-extern u8 D_800D2E40;
-extern u8 D_800E0B94;
 extern u8 D_8008FD80;
-extern u8 D_8008FDA4;
 extern struct Struct151E5034 *D_8008FDD4;
-void func_1501C730(s32, s32, s32, s32, s32);
-void func_151DE85C(void);
-void func_151DE8E8(void);
 
 
 
@@ -137,15 +98,7 @@ extern s8 D_8008FE2C;
 extern u8 D_8008FE34;
 extern f32 D_8008FDE8;
 
-typedef struct {
-    u16 button;
-    s8 stick_x;
-    s8 stick_y;
-    u8 errnum;
-    u8 pad;
-} Pad151DE8F0;
-
-extern Pad151DE8F0 D_800BE918[];
+extern OSContPad D_800BE918[4];
 extern s32 D_8008FE24;
 extern s8 D_8008FD84;
 /*
@@ -155,8 +108,6 @@ extern s8 D_8008FD84;
  * neighbouring data symbol (all == &D_8008FEFC) so IDO neither hoists the address nor
  * drops the repeated stores. Restore the static once the file's .data is linked.
  */
-extern s8 D_8008FEF0;
-extern s8 D_8008FEF4;
 extern u8 D_8008FF08[];
 #define TIMER_ALIAS(sym, off) (*(s16 *)((u8 *)&(sym) + (off)))
 extern f32 D_8008FE38;
@@ -182,7 +133,7 @@ void func_151DE8F0(void) {
     s32 i;
     s32 j;
     s16 timer;
-    Pad151DE8F0 *pad;
+    OSContPad *pad;
 
     if (D_8008FDA4 < 5) {
         if (D_8008FDA4 == 0) {
@@ -223,69 +174,69 @@ void func_151DE8F0(void) {
         func_151E530C();
     }
     for (i = 0; i != 4; i++) {
-        D_8008FDD4->unk22[i] = 0;
+        D_8008FDD4->padInput[i] = 0;
         if (*(u8 *)&D_800E0B96 == 0) {
             pad = &D_800BE918[i];
-            if (D_8008FDD4->unk32[i] > -50 && pad->stick_y <= -50) {
-                D_8008FDD4->unk22[i] |= 2;
+            if (D_8008FDD4->stickY[i] > -50 && pad->stick_y <= -50) {
+                D_8008FDD4->padInput[i] |= MENU_DOWN;
             }
-            if (D_8008FDD4->unk32[i] < 50 && pad->stick_y >= 50) {
-                D_8008FDD4->unk22[i] |= 1;
+            if (D_8008FDD4->stickY[i] < 50 && pad->stick_y >= 50) {
+                D_8008FDD4->padInput[i] |= MENU_UP;
             }
-            if (D_8008FDD4->unk2E[i] > -50 && pad->stick_x <= -50) {
-                D_8008FDD4->unk22[i] |= 4;
+            if (D_8008FDD4->stickX[i] > -50 && pad->stick_x <= -50) {
+                D_8008FDD4->padInput[i] |= MENU_LEFT;
             }
-            if (D_8008FDD4->unk2E[i] < 50 && pad->stick_x >= 50) {
-                D_8008FDD4->unk22[i] |= 8;
+            if (D_8008FDD4->stickX[i] < 50 && pad->stick_x >= 50) {
+                D_8008FDD4->padInput[i] |= MENU_RIGHT;
             }
-            if ((&D_800BE930)[i] & 0x1000) {
-                D_8008FDD4->unk22[i] |= 0x10;
+            if (D_800BE930[i] & START_BUTTON) {
+                D_8008FDD4->padInput[i] |= MENU_ACCEPT;
             }
-            if ((&D_800BE930)[i] & 0x8000) {
-                D_8008FDD4->unk22[i] |= 0x10;
+            if (D_800BE930[i] & A_BUTTON) {
+                D_8008FDD4->padInput[i] |= MENU_ACCEPT;
             }
-            if ((&D_800BE930)[i] & 0x4000) {
-                D_8008FDD4->unk22[i] |= 0x20;
+            if (D_800BE930[i] & B_BUTTON) {
+                D_8008FDD4->padInput[i] |= MENU_BACK;
             }
-            if ((&D_800BE930)[i] & 2) {
-                D_8008FDD4->unk22[i] |= 0x40;
+            if (D_800BE930[i] & L_CBUTTONS) {
+                D_8008FDD4->padInput[i] |= MENU_CLEFT;
             }
-            if ((&D_800BE930)[i] & 1) {
-                D_8008FDD4->unk22[i] |= 0x80;
+            if (D_800BE930[i] & R_CBUTTONS) {
+                D_8008FDD4->padInput[i] |= MENU_CRIGHT;
             }
-            D_8008FDD4->unk32[i] = pad->stick_y;
-            D_8008FDD4->unk2E[i] = pad->stick_x;
+            D_8008FDD4->stickY[i] = pad->stick_y;
+            D_8008FDD4->stickX[i] = pad->stick_x;
         } else {
         lblQ:
             if (0) goto lblQ; /* same as1 xbb fence as above */
-            D_8008FDD4->unk2E[i] = 0;
-            D_8008FDD4->unk32[i] = 0;
+            D_8008FDD4->stickX[i] = 0;
+            D_8008FDD4->stickY[i] = 0;
         }
-        if (D_8008FDD4->unk2E[i] > -50 && D_8008FDD4->unk2E[i] < 50) {
-            D_8008FDD4->unk36[i] = 0;
+        if (D_8008FDD4->stickX[i] > -50 && D_8008FDD4->stickX[i] < 50) {
+            D_8008FDD4->repeatX[i] = 0;
             *(s8 *)((u8 *)&D_8008FDE0 - 4) = D_8008FDDC & ~(1 << i);
         } else if (!(D_8008FDDC & (1 << i))) {
-            D_8008FDD4->unk36[i] += D_800BE9E4;
-            if (D_8008FDD4->unk36[i] > 50) {
-                D_8008FDD4->unk36[i] = 40;
-                D_8008FDD4->unk2E[i] = 0;
+            D_8008FDD4->repeatX[i] += D_800BE9E4;
+            if (D_8008FDD4->repeatX[i] > 50) {
+                D_8008FDD4->repeatX[i] = 40;
+                D_8008FDD4->stickX[i] = 0;
             }
         }
-        if (D_8008FDD4->unk32[i] > -50 && D_8008FDD4->unk32[i] < 50) {
-            D_8008FDD4->unk3A[i] = 0;
+        if (D_8008FDD4->stickY[i] > -50 && D_8008FDD4->stickY[i] < 50) {
+            D_8008FDD4->repeatY[i] = 0;
         } else {
-            D_8008FDD4->unk3A[i] += D_800BE9E4;
-            if (D_8008FDD4->unk3A[i] > 50) {
-                D_8008FDD4->unk3A[i] = 40;
-                D_8008FDD4->unk32[i] = 0;
+            D_8008FDD4->repeatY[i] += D_800BE9E4;
+            if (D_8008FDD4->repeatY[i] > 50) {
+                D_8008FDD4->repeatY[i] = 40;
+                D_8008FDD4->stickY[i] = 0;
             }
         }
     }
-    D_8008FDD4->unk20 = D_8008FDD4->unk22[0];
+    D_8008FDD4->input = D_8008FDD4->padInput[0];
     if (D_800C35EA == 1) {
     lbl4:
         D_8008FE24 = 0;
-        if (D_800E0A90 < 0x546 && D_800BE930 != 0) {
+        if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
             D_8008FD84 = 1;
         }
         return;
@@ -312,7 +263,7 @@ lbl5:
                         D_8008FEFC = 140;
                     }
                 }
-                if (D_8008FDD4->unk20 & 0x10) {
+                if (D_8008FDD4->input & MENU_ACCEPT) {
                     D_8008FEFC = 120;
                 }
             }
@@ -321,11 +272,11 @@ lbl5:
         }
     }
     D_800DBFF0->unk2C = 0x80000;
-    func_1000E7A0(4, D_8008FDD4->unk3E);
+    func_1000E7A0(4, D_8008FDD4->menu);
     if (D_8008FDD4 == NULL || D_8008FDA4 < 5) {
         return;
     }
-    D_8008FDD4->unk40 = D_8008FDD4->unk3F;
+    D_8008FDD4->prevPage = D_8008FDD4->page;
     {
     s32 v;
 
@@ -339,9 +290,9 @@ lbl5:
     }
     if (D_8008FDD4->unk8 >= (f32)0.5) {
         if (D_8008FDD4->unk8 < 1.0f) {
-            D_8008FDD4->unk20 &= 0xFFEF;
+            D_8008FDD4->input &= ~MENU_ACCEPT;
         }
-        switch (D_8008FDD4->unk3E) {
+        switch (D_8008FDD4->menu) {
             case 0:
                 if (D_8008FDD4->unk2C != 1) {
                     D_8008FEF8 = 0;
@@ -364,7 +315,7 @@ lbl5:
                 break;
             case 1:
                 D_8008FDA8 = -1;
-                switch (D_8008FDD4->unk3F) {
+                switch (D_8008FDD4->page) {
                     case 0:
                         func_151E0424();
                         break;
@@ -389,8 +340,8 @@ lbl5:
     } else {
         D_800E0A96 = -1;
         D_800E0A95 = 0xFF;
-        D_8008FDD4->unk3F = 0;
-        D_8008FDD4->unk41 = 0;
+        D_8008FDD4->page = 0;
+        D_8008FDD4->cursor = 0;
         D_8008FE40 = 1;
         D_8008FE44[0] = 0;
         D_8008FE2C = 0;
@@ -408,11 +359,7 @@ lbl5:
     }
 }
 
-extern u8 D_800E0A94;
 extern s8 D_800E0BE9;
-extern s8 D_8008FEF8;
-extern u8 D_8008FE34;
-extern f32 D_8008FDE8;
 extern u8 D_800E0A97;
 extern char D_800AB800[];
 void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
@@ -449,7 +396,7 @@ void func_151DF1BC(void) {
             }
             D_800E0A96 = -1;
         }
-        D_8008FDD4->unk20 &= 0xFFCF;
+        D_8008FDD4->input &= ~(MENU_ACCEPT | MENU_BACK);
     } else {
         val = D_800E0A95 + (D_800BE9E4 << 5);
         if (val >= 0x100) {
@@ -463,20 +410,20 @@ void func_151DF1BC(void) {
     }
     if (D_8008FEF8 == 0) {
         func_151E3344(0x200200, 0, 1, val & 0xFF, 1);
-        if ((D_8008FE34 == 9) && (D_8008FDD4->unk20 & 0xC)) {
+        if ((D_8008FE34 == 9) && (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT))) {
             func_151E7E9C();
             func_1000DE1C(D_800E0A97, 0);
             D_800E0A97 = func_1000EA94(D_800E0BE9);
         }
         {
         s32 flags;
-        flags = D_8008FDD4->unk20;
-        if ((flags & 0x10) && (D_8008FE34 == 0x15) && (D_8008FDE8 == 0.0f)) {
+        flags = D_8008FDD4->input;
+        if ((flags & MENU_ACCEPT) && (D_8008FE34 == 0x15) && (D_8008FDE8 == 0.0f)) {
             D_800E0A96 = 1;
-            D_8008FDD4->unk20 &= 0xFFCF;
-            flags = D_8008FDD4->unk20;
+            D_8008FDD4->input &= ~(MENU_ACCEPT | MENU_BACK);
+            flags = D_8008FDD4->input;
         }
-        if (flags & 0x20) {
+        if (flags & MENU_BACK) {
             func_15007668();
         }
         }
@@ -491,10 +438,10 @@ void func_151DF1BC(void) {
         }
     }
     if (D_8008FEF8 != 0) {
-        if (D_8008FDD4->unk20 & 0x20) {
+        if (D_8008FDD4->input & MENU_BACK) {
             D_800E0A96 = 1;
         }
-        D_8008FDD4->unk20 &= 0xFFDF;
+        D_8008FDD4->input &= ~MENU_BACK;
         if (D_8008FEF8 != 0) {
             func_1504332C(0xFF, 0, 0, val);
             func_15042D94(0x94, 0x14, 0x81, D_800AB800, 0x10);
@@ -512,13 +459,10 @@ void func_151DF1BC(void) {
 
 extern s8 D_8008FDB0;
 typedef struct { u8 r; u8 g; u8 b; } Rgb151DF574;
-extern u8 D_8008FF08[];
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B;
 extern u8 **D_800E0B88;
-extern struct Struct151E5034 *D_8008FDD4;
-extern s8 D_8008FD74;
 void func_151E30C4(void);
 
 void func_151DF574(void) {
@@ -779,14 +723,14 @@ draw_rows:
         }
     }
     if (D_800E0A95 == 0xFF) {
-        if (D_8008FDD4->unk20 & 4) {
+        if (D_8008FDD4->input & MENU_LEFT) {
             D_800E0A96 = 1;
             sfx = 0x4FF;
-        } else if (D_8008FDD4->unk20 & 8) {
+        } else if (D_8008FDD4->input & MENU_RIGHT) {
             D_800E0A96 = 2;
             sfx = 0x4FF;
         }
-        if ((D_8008FDD4->unk20 & 0x10) && (D_8008FF04 != 0xFF)) {
+        if ((D_8008FDD4->input & MENU_ACCEPT) && (D_8008FF04 != 0xFF)) {
             D_800E0B94 = 7;
             D_800E0A88 = func_151E30C4;
             *(u8 *)&D_8008FD74 = 3;
@@ -808,8 +752,6 @@ struct Struct151DFF38 {
     s8 padF;
 };
 
-extern s8 D_8008FE2C;
-extern u8 D_800E0A94;
 extern char D_800AB814[];
 extern char D_800AB818[];
 extern char D_800AB828[];
@@ -834,11 +776,11 @@ void func_151DFF38(void) {
     sfx = 0;
     idx = D_8008FDD4->unk2C - 3;
     if (D_8008FE2C < 2) {
-        if (D_8008FDD4->unk20 & 0xC) {
+        if (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT)) {
             D_8008FE2C = 1 - D_8008FE2C;
             sfx = 0x62D;
         }
-    } else if (D_8008FDD4->unk20 & 0xC) {
+    } else if (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT)) {
         D_8008FE2C = 5 - D_8008FE2C;
         sfx = 0x62D;
     }
@@ -892,7 +834,7 @@ void func_151DFF38(void) {
             func_15042E3C(D_800AB838, (D_8008FE2C != 0) + 0x18);
         }
         if (D_8008FE2C == 0) {
-            if (D_8008FDD4->unk20 & 0x10) {
+            if (D_8008FDD4->input & MENU_ACCEPT) {
                 s32 pad;
 
                 D_800E0B94 = 7;
@@ -904,14 +846,14 @@ void func_151DFF38(void) {
                 func_150076BC(entry->unkE);
                 sfx = 0x500;
             }
-        } else if (D_8008FDD4->unk20 & 0x10) {
+        } else if (D_8008FDD4->input & MENU_ACCEPT) {
             D_8008FE2C = 2;
             sfx = 0x500;
         }
     } else {
         func_15042D94(0x6C, 0xAF, 1, D_800AB83C, (D_8008FE2C == 3) + 0x1F);
         func_15042D94(0xBC, 0xAF, 1, D_800AB840, (D_8008FE2C == 2) + 0x1D);
-        if (D_8008FDD4->unk20 & 0x10) {
+        if (D_8008FDD4->input & MENU_ACCEPT) {
             if (D_8008FE2C == 3) {
                 D_8008FE2C = 0;
                 func_15007750(idx);
@@ -927,10 +869,10 @@ void func_151DFF38(void) {
                 D_8008FE2C = 1;
             }
             sfx = 0x500;
-        } else if (D_8008FDD4->unk20 & 0x20) {
+        } else if (D_8008FDD4->input & MENU_BACK) {
             D_8008FE2C = 1;
         }
-        D_8008FDD4->unk20 &= ~0x20;
+        D_8008FDD4->input &= ~MENU_BACK;
     }
     if (sfx != 0) {
         func_10010F30(sfx, 0x4650, 0x40, 0, 0);
@@ -945,10 +887,8 @@ extern s8 D_8008FE9C[];
 extern s8 D_8008FEC4[];
 extern s8 D_800E0B90[];
 extern u8 D_800E0B8C;
-extern s8 D_8008FE40;
 extern s8 D_8008FDA0;
 extern s8 D_8008FDC4;
-extern s8 D_8008FDDC;
 void func_151E22BC(void);
 
 void func_151E0424(void) {
@@ -968,11 +908,11 @@ void func_151E0424(void) {
     if (D_8008FDD4->unk2C != 0) {
         alpha = alpha2;
         if (D_800E0A96 != -1) {
-            D_8008FDD4->unk20 &= 0xFFDF;
+            D_8008FDD4->input &= ~MENU_BACK;
             i = D_800E0A95 - (D_800BE9E4 << 5);
             if (i <= 0) {
                 D_800E0A95 = 0;
-                D_8008FDD4->unk3F = D_800E0A96;
+                D_8008FDD4->page = D_800E0A96;
                 if (D_800E0A96 == 2) {
                     D_8008FDE0 = 0;
                     D_8008FDDC = 1;
@@ -1002,7 +942,7 @@ void func_151E0424(void) {
         D_8008FDA0 = 0;
         D_8008FDC4 = 0;
         D_800E0B8C = 0;
-        if (D_8008FDD4->unk20 & 0xC) {
+        if (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT)) {
             D_8008FE2C = 1 - D_8008FE2C;
             func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
         }
@@ -1012,33 +952,33 @@ void func_151E0424(void) {
         func_15042D94(0xD5, 0x7E, 1, D_800AB848, (D_8008FE2C == 1) + 0x1B);
         if ((alpha2 == 0xFF) && (D_8008FE2C == 0)) {
             if ((count != 5) || ((count == 5) && (D_8008FDE8 == 0.0f))) {
-                flags = D_8008FDD4->unk20;
-                if (flags & 1) {
+                flags = D_8008FDD4->input;
+                if (flags & MENU_UP) {
                     D_8008FDE8 = 1.0f;
-                    D_8008FDD4->unk41--;
+                    D_8008FDD4->cursor--;
                     func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
-                } else if (flags & 2) {
+                } else if (flags & MENU_DOWN) {
                     D_8008FDE8 = -1.0f;
-                    D_8008FDD4->unk41++;
+                    D_8008FDD4->cursor++;
                     func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
                 }
             }
         }
-        v = D_8008FDD4->unk41;
+        v = D_8008FDD4->cursor;
         if (v < 0) {
-            D_8008FDD4->unk41 = v + count;
-            v = D_8008FDD4->unk41;
+            D_8008FDD4->cursor = v + count;
+            v = D_8008FDD4->cursor;
         }
         if (v >= count) {
-            D_8008FDD4->unk41 = v - count;
-            v = D_8008FDD4->unk41;
+            D_8008FDD4->cursor = v - count;
+            v = D_8008FDD4->cursor;
         }
         sel = v;
         sum = 0;
         for (i = 0; i < D_8008FDD4->unk2C - 1; i++) {
             sum += D_8008FE9C[i];
         }
-        *(s8 *)&D_8008FDD4->pad42 = sel + sum;
+        D_8008FDD4->selection = sel + sum;
         if (count != 5) {
             x = 0x8C - ((count * 0x1C) >> 1);
             for (i = 0; i < count; i++) {
@@ -1064,17 +1004,17 @@ void func_151E0424(void) {
                 }
             }
             if ((D_8008FE2C == 0) && (D_8008FDE8 != 0.0f)) {
-                D_8008FDD4->unk20 &= 0xFFEF;
+                D_8008FDD4->input &= ~MENU_ACCEPT;
             }
         }
         if (alpha2 == 0xFF) {
-            flags = D_8008FDD4->unk20;
-            if (flags & 0x10) {
-                D_8008FDD4->unk20 = flags & 0xFFDF;
+            flags = D_8008FDD4->input;
+            if (flags & MENU_ACCEPT) {
+                D_8008FDD4->input = flags & ~MENU_BACK;
                 if (D_8008FE2C == 0) {
                     D_800E0A96 = 4;
-                    D_800E0BE0[0] = D_8008FDD4->unk41;
-                    t = D_800AB68C[*(s8 *)&D_8008FDD4->pad42 * 10 + 5];
+                    D_800E0BE0[0] = D_8008FDD4->cursor;
+                    t = D_800AB68C[D_8008FDD4->selection * 10 + 5];
                     if (t < 0) {
                         D_800E0B90[0] = D_8008FEC4[(-t - 1) << 2];
                     } else {
@@ -1083,7 +1023,7 @@ void func_151E0424(void) {
                     D_8008FE40 = 1;
                 } else {
                     D_800E0A96 = 2;
-                    D_8008FDD4->unk20 &= 0xFFDF;
+                    D_8008FDD4->input &= ~MENU_BACK;
                 }
             }
         }
@@ -1098,12 +1038,12 @@ void func_151E09DC(void) {
     func_15042D94(0x94, 0x7E, 1, D_800AB850, 0x1A);
     func_15042D78(0x81);
 
-    arg0 = D_800AB754[D_800AB690[D_8008FDD4->pad42 * 10]];
+    arg0 = D_800AB754[D_800AB690[D_8008FDD4->selection * 10]];
     if (D_800E0A96 == 0) {
-        D_8008FDD4->unk20 &= ~0x20;
+        D_8008FDD4->input &= ~MENU_BACK;
         temp = D_800E0A95 - (D_800BE9E4 << 5);
         if (temp <= 0) {
-            D_8008FDD4->unk3F = 0;
+            D_8008FDD4->page = 0;
             if (D_8008FDE0 != 0) {
                 func_151E2404();
             }
@@ -1121,26 +1061,19 @@ void func_151E09DC(void) {
 
     D_800E0A95 = temp;
     if (temp != 0xFF) {
-        D_8008FDD4->unk20 = 0;
+        D_8008FDD4->input = 0;
     }
     func_151E3344(arg0, 1, 0, temp & 0xFF, 0);
 
-    if (D_8008FDD4->unk20 & 0x20) {
+    if (D_8008FDD4->input & MENU_BACK) {
         D_800E0A96 = 0;
     }
-    D_8008FDD4->unk20 &= ~0x20;
+    D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern s8 D_8008FE40;
-extern s8 D_8008FE44[];
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
-extern s8 D_800AB68C[];
 extern struct127 *D_800E0BA0[];
 extern u32 D_8008FEA4[];
-extern s8 D_8008FEC4[];
 extern char D_800AB854[];
-extern s8 D_8008FE2C;
 void func_151E7F60(s32 arg0, s32 arg1);
 
 void func_151E0B70(void) {
@@ -1160,11 +1093,11 @@ void func_151E0B70(void) {
     mask = -1;
     force = 0;
     if (D_800E0A96 != -1) {
-        D_8008FDD4->unk20 &= 0xFFDF;
+        D_8008FDD4->input &= ~MENU_BACK;
         val = D_800E0A95 - (D_800BE9E4 << 5);
         if (val <= 0) {
             D_800E0A95 = 0;
-            D_8008FDD4->unk3F = D_800E0A96;
+            D_8008FDD4->page = D_800E0A96;
             D_800E0A96 = -1;
             for (i = 0; i < 4; i++) {
                 if (D_800E0BA0[i] != NULL) {
@@ -1183,9 +1116,9 @@ void func_151E0B70(void) {
         D_800E0A95 = val;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, val);
-    if (D_800AB68C[D_8008FDD4->pad42 * 10 + 5] < 0) {
+    if (D_800AB68C[D_8008FDD4->selection * 10 + 5] < 0) {
         mode = 5;
-        i = -D_800AB68C[D_8008FDD4->pad42 * 10 + 5] - 1;
+        i = -D_800AB68C[D_8008FDD4->selection * 10 + 5] - 1;
         remap = D_8008FEC4 + (i << 2);
         mask = D_8008FEA4[i];
         if (D_800E9D00 & 0x20) {
@@ -1218,7 +1151,7 @@ void func_151E0B70(void) {
         numSlots = 4;
     }
     D_800E0B8C = 0;
-    if ((mode == 5) && (D_800AB68C[D_8008FDD4->pad42 * 10 + 8] != 8)) {
+    if ((mode == 5) && (D_800AB68C[D_8008FDD4->selection * 10 + 8] != 8)) {
         if (D_800E0BA0[0] == NULL) {
             func_151E7F60(0, D_800E0B90[0]);
         }
@@ -1226,7 +1159,7 @@ void func_151E0B70(void) {
         D_800E0B8C = 1;
     }
     for (i = 1; i < 4; i++) {
-        if ((i < numSlots) && (val == 0xFF) && ((&D_800BE930)[i] & 0x1000)) {
+        if ((i < numSlots) && (val == 0xFF) && (D_800BE930[i] & START_BUTTON)) {
             found = 0;
             for (j = 0; j < D_8008FE40; j++) {
                 if (i == D_8008FE44[j]) {
@@ -1264,13 +1197,13 @@ void func_151E0B70(void) {
             j = D_8008FE44[i];
             k = D_800E0B90[i];
             dir = 1;
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[j] & 8) {
+            if (D_8008FDD4->padInput[j] & MENU_RIGHT) {
                 D_800E0B90[i]++;
                 if (D_800E0B90[i] >= 22) {
                     D_800E0B90[i] = 0;
                 }
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[j] & 4) {
+            if (D_8008FDD4->padInput[j] & MENU_LEFT) {
                 D_800E0B90[i]--;
                 dir = -1;
                 if (D_800E0B90[i] < 0) {
@@ -1295,24 +1228,20 @@ void func_151E0B70(void) {
         D_8008FE44[i] = 0xFF;
     }
     if (val == 0xFF) {
-        if (D_8008FDD4->unk20 & 0x10) {
+        if (D_8008FDD4->input & MENU_ACCEPT) {
             D_8008FD74 = 8;
             func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
             D_800E0A96 = mode;
         }
-        if (D_8008FDD4->unk20 & 0x20) {
+        if (D_8008FDD4->input & MENU_BACK) {
             D_800E0A96 = 0;
             D_8008FE2C = 0;
         }
     }
-    D_8008FDD4->unk20 &= 0xFFDF;
+    D_8008FDD4->input &= ~MENU_BACK;
 }
 
 void func_151E4314(void);
-void func_15042E3C(char *, s32);
-extern s8 D_8008FDA0;
-extern s8 D_8008FE40;
-extern s8 D_8008FE44[];
 extern s8 D_8008FEE3[];
 extern s8 D_800AB74C[][4];
 extern char D_800AB858[];
@@ -1327,11 +1256,11 @@ void func_151E1214(void) {
     s32 x;
 
     if (D_800E0A96 != -1) {
-        *(u16 *)((u8 *)D_8008FDD4 + 0x20) &= 0xFFDF;
+        D_8008FDD4->input &= ~MENU_BACK;
         alpha = D_800E0A95 - (D_800BE9E4 << 5);
         if (alpha <= 0) {
             D_800E0A95 = 0;
-            ((u8 *)D_8008FDD4)[0x3F] = D_800E0A96;
+            D_8008FDD4->page = D_800E0A96;
             D_800E0A96 = -1;
             return;
         }
@@ -1344,17 +1273,17 @@ void func_151E1214(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    limits = D_800AB74C[D_8008FEE3[-D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10 + 1]]];
+    limits = D_800AB74C[D_8008FEE3[-D_800AB690[D_8008FDD4->selection * 10 + 1]]];
     limit = *(limits - 1 + D_8008FE40);
     for (i = 0; i < D_8008FE40; i++) {
         if (D_8008FE44[i] >= 0) {
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 9) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & (MENU_UP | MENU_RIGHT)) {
                 D_8008FDA0++;
                 if (limit >= D_8008FE40 + D_8008FDA0) {
                     func_10010F30(0x4FF, 0x4650, 0x40, 0, 0);
                 }
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 6) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & (MENU_DOWN | MENU_LEFT)) {
                 D_8008FDA0--;
                 if (D_8008FDA0 >= 0) {
                     func_10010F30(0x4FF, 0x4650, 0x40, 0, 0);
@@ -1378,11 +1307,11 @@ void func_151E1214(void) {
         D_800E0C00[i] = 0;
     }
     for (i = limit; i < 16; i++) D_8008FE44[i] = -1;
-    if (alpha == 0xFF && (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x10)) {
+    if (alpha == 0xFF && (D_8008FDD4->input & MENU_ACCEPT)) {
         D_800E0B94 = 7;
         D_8008FD74 = 8;
         func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
-        if (D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10 + 2] == -1) {
+        if (D_800AB690[D_8008FDD4->selection * 10 + 2] == -1) {
             D_800E0A88 = func_151E2834;
         } else {
             D_800E0A88 = func_151E4314;
@@ -1400,13 +1329,12 @@ void func_151E1214(void) {
             x += 0x14;
         }
     }
-    if (alpha == 0xFF && (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x20)) {
+    if (alpha == 0xFF && (D_8008FDD4->input & MENU_BACK)) {
         D_800E0A96 = 4;
     }
-    *(u16 *)((u8 *)D_8008FDD4 + 0x20) &= 0xFFDF;
+    D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern s8 D_8008FDC4;
 typedef struct { s8 v[4]; } Offs4;
 extern Offs4 D_8008FF34;
 extern u8 D_800AB62C[];
@@ -1458,11 +1386,11 @@ void func_151E1744(void) {
     sfx = 0;
     offs = D_8008FF34;
     if (D_800E0A96 != -1) {
-        *(u16 *)((u8 *)D_8008FDD4 + 0x20) &= 0xFFDF;
+        D_8008FDD4->input &= ~MENU_BACK;
         alpha = D_800E0A95 - (D_800BE9E4 << 5);
         if (alpha <= 0) {
             D_800E0A95 = 0;
-            ((u8 *)D_8008FDD4)[0x3F] = D_800E0A96;
+            D_8008FDD4->page = D_800E0A96;
             D_800E0A96 = -1;
             return;
         }
@@ -1475,7 +1403,7 @@ void func_151E1744(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    entry = D_800AB710[D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10 + 1]];
+    entry = D_800AB710[D_800AB690[D_8008FDD4->selection * 10 + 1]];
     special = entry[7];
     D_800E0BB0 = entry[0];
     D_800E0BC8[0] = entry[8];
@@ -1511,19 +1439,19 @@ void func_151E1744(void) {
     for (i = 0; i < D_8008FE40; i++) {
         if (D_8008FE44[i] >= 0) {
             old = D_800E0C00[i];
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 0xF) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & (MENU_UP | MENU_DOWN | MENU_LEFT | MENU_RIGHT)) {
                 sfx = 0x4FF;
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 8) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & MENU_RIGHT) {
                 D_800E0C00[i]++;
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 4) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & MENU_LEFT) {
                 D_800E0C00[i]--;
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 2) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & MENU_DOWN) {
                 D_8008FDA0++;
             }
-            if (((u16 *)((u8 *)D_8008FDD4 + 0x22))[D_8008FE44[i]] & 1) {
+            if (D_8008FDD4->padInput[D_8008FE44[i]] & MENU_UP) {
                 D_8008FDA0--;
             }
             if (D_8008FDA0 < 0) {
@@ -1567,9 +1495,9 @@ void func_151E1744(void) {
         sizes[i] = v;
     }
     if (D_800E0BB0 == 2) {
-        if (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x40) {
+        if (D_8008FDD4->input & MENU_CLEFT) {
             D_8008FDC4++;
-        } else if (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x80) {
+        } else if (D_8008FDD4->input & MENU_CRIGHT) {
             D_8008FDC4--;
         }
         if (D_8008FE40 >= 3) {
@@ -1580,7 +1508,7 @@ void func_151E1744(void) {
             D_8008FDC4 = -lim;
         } else if (lim < D_8008FDC4) {
             D_8008FDC4 = lim;
-        } else if (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0xC0) {
+        } else if (D_8008FDD4->input & (MENU_CLEFT | MENU_CRIGHT)) {
             sfx = 0x4FF;
         }
         sizes[0] += D_8008FDC4;
@@ -1610,16 +1538,16 @@ void func_151E1744(void) {
         }
     }
     if (alpha == 0xFF) {
-        if (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x10) {
+        if (D_8008FDD4->input & MENU_ACCEPT) {
             D_800E0B94 = 7;
             D_800E0A88 = func_151E4314;
             D_8008FD74 = 8;
             sfx = 0x500;
-        } else if (*(u16 *)((u8 *)D_8008FDD4 + 0x20) & 0x20) {
+        } else if (D_8008FDD4->input & MENU_BACK) {
             D_800E0A96 = 4;
         }
     }
-    *(u16 *)((u8 *)D_8008FDD4 + 0x20) &= 0xFFDF;
+    D_8008FDD4->input &= ~MENU_BACK;
     func_1504332C(0xFF, 0xFF, 0, alpha);
     func_150432FC(0x94, ((D_800E0BB0 == 4) << 5) + 0x78);
     func_15042E3C(D_800AB864, 0x1A);
@@ -1676,8 +1604,6 @@ void func_151E1744(void) {
     }
 }
 
-extern u8 D_8008FD80;
-void func_151E530C(void);
 void func_151E43DC(void);
 
 void func_151E2284(void) {
@@ -1706,7 +1632,7 @@ void func_151E22BC(void) {
     s32 idx;
     Struct151E22BC *p;
 
-    idx = D_800AB690[*(s8 *)&D_8008FDD4->pad42 * 10];
+    idx = D_800AB690[D_8008FDD4->selection * 10];
     p = (Struct151E22BC *)(D_80082BBC + idx * 10);
     if (p->unk3 >= 5) {
         p->unk3 = 4;
@@ -1757,7 +1683,7 @@ void func_151E2404(void) {
     s8 *record;
     s32 index;
 
-    index = D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10];
+    index = D_800AB690[D_8008FDD4->selection * 10];
     record = D_80082BBC + (index * 10);
     record[0] = 0;
     record[1] = D_800E0BE0[2];
@@ -1787,190 +1713,3 @@ void func_151E2404(void) {
     record[9] = D_800E0BE0[6];
     func_150076A0(D_800E0BE0);
 }
-
-extern s8 D_800AB694[];
-extern s8 D_8008FE44[];
-extern s8 D_800E0BCE[];
-extern s8 D_800E0BEE;
-extern u8 D_800BE740;
-s32 func_151E24F0(s32 *arg0);
-
-typedef struct {
-    f32 unk0;
-    s8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 pad7;
-} Entry151E7F60;
-
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s8 unk6;
-    s8 unk7;
-    s8 unk8;
-    s8 unk9;
-} Entry151E2834;
-
-extern Entry151E7F60 D_800AB57C[];
-extern s16 D_800AB77C[];
-extern s16 D_800AB790[];
-extern s8 D_8008FD9C;
-extern s32 D_8008FD78;
-extern s8 D_8008FD7C;
-extern s8 D_8008FD88;
-extern s8 D_8008FF37[];
-extern s8 D_800E0AB0[];
-extern s8 D_800E0AC0[];
-extern s8 D_800E0AD0[];
-extern u8 D_800E0AA8;
-extern s8 D_800E0AA9;
-extern s8 D_800E0AAA;
-extern s16 D_800E0AA0[];
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
-extern s8 D_800E0BB8[];
-extern s8 D_800E0BD0;
-extern s16 D_800E0C10[];
-extern s32 D_800E0C18[];
-extern s8 D_800D2130;
-extern s8 D_80087268;
-extern u8 D_80084060[];
-extern s8 D_8008FDC8;
-extern s8 D_800AB68C[];
-extern u16 D_8008FDC0;
-void func_151E2834(void);
-void func_151E30C4(void);
-void func_151E327C(void);
-void func_151E4264(void);
-void func_151E4314(void);
-
-extern s8 D_8008FE2C;
-extern u16 D_8008FDC0;
-extern s8 D_800AB68C[];
-extern struct Struct151E4314 D_800AB7BC[];
-extern s8 D_800E0A86;
-extern s8 D_800E0AC0[];
-extern s8 D_800E0AC1;
-extern s8 D_800E0AC2;
-extern s8 D_800E0AC3;
-void func_151E4BD8(void);
-
-extern u8 D_800E0B94;
-void func_151E4DC4(void);
-
-extern s16 D_800E0B9A;
-void func_151E4DD8(void);
-void func_151E4E00(void);
-void func_151E4E64(void);
-
-extern f32 D_8008FDD0;
-extern f32 D_800ABA2C;
-extern f32 D_800ABA30;
-extern f32 D_800ABA34;
-extern f32 D_800DDDC8;
-extern f32 D_800DDDD8;
-void func_151E4EE8(void);
-
-extern struct Struct151E5034 *D_8008FDD4;
-void func_151E5034(void);
-void func_151E51EC(void);
-void func_151E530C(void);
-void func_151E53E8(s32 arg0);
-
-extern u8 D_80084060[];
-void func_151E557C(void);
-void func_151E55A8(void);
-
-extern u8 D_800E0A8C;
-void func_151E562C(void);
-
-extern s8 D_8008FDC8;
-s8 func_151E564C(void);
-
-extern u8 D_800BE616;
-extern u8 D_800E0B94;
-extern s8 D_800E0C00[];
-s32 func_151E5F64(s32 arg0);
-s8 func_151E5FAC(void);
-
-typedef struct {
-    /* 0x00 */ char pad0[0x46];
-    /* 0x46 */ s16 unk46[4];
-    /* 0x4E */ char pad4E[0x18];
-    /* 0x66 */ struct {
-        /* 0x00 */ s16 unk0;
-        /* 0x02 */ s16 unk2;
-        /* 0x04 */ s16 unk4;
-        /* 0x06 */ s16 unk6;
-        /* 0x08 */ s16 unk8;
-        /* 0x0A */ s16 unkA;
-    } rec[4];
-} ScoreState151E5FF4;
-
-s32 func_1000F568(s32 arg0, s32 arg1);
-void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
-
-#define SCORE ((ScoreState151E5FF4 *)D_8008FDD4)
-void func_151E5FF4(struct127 *arg0, struct127 *arg1, s32 arg2);
-
-extern s8 D_800E0BEA;
-extern s8 D_800E0BD3;
-extern s32 D_800E0BD4;
-extern s32 D_8008FDD8;
-extern u8 **D_800E0B88;
-extern void func_10004074(void *);
-extern void *allocate_memory(s32, s32, s32, s32);
-s32 func_1502B5C8();
-void func_151E6964(s32 arg0);
-void func_151E6BFC(void);
-
-struct Struct151149AC {
-    char pad0[0x80];
-    s32 unk80;
-};
-extern struct Struct151E5034 *D_8008FDD4;
-extern u8 D_8008FFB0[2][6];
-extern f32 D_800ABA8C;
-struct Struct151149AC *func_151149AC(s32);
-void func_151E7DC0(void);
-
-extern s8 D_800E0BE9;
-void func_151E7E9C(void);
-
-extern void func_151DDC20(void);
-void func_151E7EF8(void);
-
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[0x22];
-} Spawn151E7F60;
-
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
-    u8 pad7;
-} Pos151E7F60;
-
-extern struct127 *D_800E0BA0[];
-extern Entry151E7F60 D_800AB57C[];
-extern Pos151E7F60 D_800AB940[];
-extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern void func_15083384(struct127 *, u8);
-void func_151E7F60(s32 arg0, s32 arg1);
-void func_151E8214(void);
-void func_151E82B8(void);
-void func_151E83E8(void);
