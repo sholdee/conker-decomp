@@ -3,58 +3,72 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-
+/* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
 typedef struct {
-    u8 pad0[0x44];
-    f32 unk44;
-    u8 pad48[0x4];
-    s16 unk4C;
-} func_1503B7C0_sub;
+    /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
+    /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
+    /* 0x40 */ f32 swayAngle;   /* degrees */
+    /* 0x44 */ f32 swaySpeed;   /* degrees per frame */
+    /* 0x48 */ f32 swayAmp;
+    /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
+    /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
+} BoneChain;
 
+/* The part of the object extension (struct127.unk31C) used here. */
 typedef struct {
-    u8 pad0[0x11C];
-    func_1503B7C0_sub *unk11C;
-} func_1503B7C0_inner;
+    /* 0x000 */ u8 pad0[0x78];
+    /* 0x078 */ u8 unk78;
+    /* 0x079 */ u8 pad79[0x11C - 0x79];
+    /* 0x11C */ BoneChain *chain;
+} ChainObjExt;
 
-void func_1503B7C0(struct127 *arg0) {
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C = allocate_memory(0x50, 1, 0, 0);
-    bzero(((func_1503B7C0_inner *)arg0->unk31C)->unk11C, 0x50);
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C->unk44 = 30.0f;
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C->unk4C = func_150ADA20() % 30U;
+#define CHAIN_EXT(obj) ((ChainObjExt *)(obj)->unk31C)
+
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+
+/* Allocates and initialises the bone chain state of an object. */
+void func_1503B7C0(struct127 *obj) {
+    CHAIN_EXT(obj)->chain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
+    bzero(CHAIN_EXT(obj)->chain, sizeof(BoneChain));
+    CHAIN_EXT(obj)->chain->swaySpeed = 30.0f;
+    CHAIN_EXT(obj)->chain->swayTimer = func_150ADA20() % 30U;
 }
 
 extern u16 D_8009877C[90];
 extern u16 D_80098830[3];
 
-void func_1503B840(struct127 *arg0) {
+/*
+ * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
+ * bit 1 for the animations in D_80098830, bit 0 for those in D_8009877C.
+ */
+void func_1503B840(struct127 *obj) {
     s32 i;
 
-    if (arg0->interaction_state == 1) {
+    if (obj->interaction_state == 1) {
         for (i = 0; i < 3; i++) {
-            if (arg0->unk84.uh == D_80098830[i]) {
-                arg0->unk2FB |= 2;
+            if (obj->unk84.uh == D_80098830[i]) {
+                obj->unk2FB |= 2;
                 return;
             }
         }
         for (i = 0; i < 90; i++) {
-            if (arg0->unk84.uh == D_8009877C[i]) {
-                arg0->unk2FB |= 1;
+            if (obj->unk84.uh == D_8009877C[i]) {
+                obj->unk2FB |= 1;
                 return;
             }
         }
     }
 }
 
-extern u8 D_800CC5CB[];
+/* Returns whether object objIndex simulates its bone chain (0 while the animation poses it). */
+s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
+    s32 flags = D_800CC2D0[objIndex].unk2FB;
 
-s32 func_1503B95C(s32 arg0, u8 *arg1) {
-    s32 v = D_800CC5CB[arg0 * 812];
-    if (v & 2) {
-        arg1[0x4E] = 0;
+    if (flags & 2) {
+        chain->blendTimer = 0;
         return 0;
     }
-    if (v & 1) {
+    if (flags & 1) {
         return 0;
     }
     return 1;
