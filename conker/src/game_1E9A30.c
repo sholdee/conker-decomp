@@ -22,7 +22,7 @@ typedef struct {
     u8 idB;
 } ActorSwapMsg;
 
-/* Payload of the actor messages handled below (0: actor gone, 0x2D: actor swap). */
+/* Payload of the actor messages handled below (0 and 0x3B: an actor, 0x2D: an actor swap). */
 typedef union {
     ActorRef ref;
     ActorSwapMsg swap;
@@ -43,7 +43,7 @@ s32 func_151BC580(OwnedEffect40 *effect) {
     return 1;
 }
 
-/* Message handler: removes the effect when its owner goes away, follows the owner through a swap. */
+/* Message handler: message 0 for its owner frees the effect; 0x2D makes it follow the owner through a swap. */
 void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &effect->owner;
     struct127 *actor = owner->actor;
@@ -414,8 +414,8 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
     return gfx;
 }
 
-/* Message handler: finishes the trail when its owner goes away, follows the owner through a swap. */
-/* Message handler: finishes the trail when its owner goes away, follows the owner through a swap. */
+/* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
+/* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
 void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
     struct127 *actor;
@@ -977,7 +977,7 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
             sparkEffect.field48 = 0;
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = func_1513D2F0(&sparkEffect, &D_800A4AA0, 0, 0x25, 0, 0x1D,
-                    ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C, arg1, arg2);
+                    ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), arg1, arg2);
                 if (data->sparks[spark.index] != NULL) {
                     memcpy(&data->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
