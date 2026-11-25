@@ -2245,7 +2245,7 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     }
 }
 
-/* The part of the struct126 at struct127.unk31C read here (struct126 does not declare it). */
+/* The part of the ActorCtl at struct127.unk31C read here (ActorCtl does not declare it). */
 typedef struct {
     u8 pad0[0x130];
     vertex aimDir;

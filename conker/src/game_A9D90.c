@@ -18,7 +18,7 @@ void func_1507D1D8(struct127 *obj);
 extern void func_1509C3A0(void);
 
 
-/* View of the per-object state block hung off struct127.unk31C (struct126 lacks these fields). */
+/* View of the per-object state block hung off struct127.unk31C (ActorCtl lacks these fields). */
 typedef struct ObjState {
     /* 0x000 */ u8 pad0[0x46];
     /* 0x046 */ s16 unk46;

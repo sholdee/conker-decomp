@@ -4,7 +4,7 @@
 
 
 /* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
-typedef struct {
+typedef struct BoneChain {
     /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
     /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
     /* 0x40 */ f32 swayAngle;   /* degrees */

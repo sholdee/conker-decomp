@@ -5,7 +5,7 @@
 
 
 /* Player extension block (struct127.unk31C, cached in Camera.playerExt). File-local view: Camera
-   declares this pointer as struct127 *, and struct126 in include/ lacks these fields. */
+   declares this pointer as struct127 *, and ActorCtl in include/ lacks these fields. */
 typedef struct CamPlayerExt {
     /* 0x000 */ u8 pad0[0x8];
     /* 0x008 */ s16 unk8;

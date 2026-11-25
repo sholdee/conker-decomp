@@ -25,8 +25,8 @@ typedef struct CamPlayer {
     /* 0x180 */ f32 unk180;
 } CamPlayer;
 
-/* Camera.playerExt (struct126): 0x9C, which struct126 does not declare yet, and 0x95, read unsigned
-   here (struct126 declares it s8). */
+/* Camera.playerExt (ActorCtl): 0x9C, which ActorCtl does not declare yet, and 0x95, read unsigned
+   here (ActorCtl declares it s8). */
 typedef struct CamPlayerExt {
     /* 0x000 */ u8 pad0[0x95];
     /* 0x095 */ u8 unk95;

@@ -4,7 +4,7 @@
 #include "variables.h"
 
 // File-local views of a game object (struct127, the 0x32C-byte entries of D_800CC2D0) and of the
-// extension block it points to at 0x31C (struct126). include/structs.h lacks or mistypes several
+// extension block it points to at 0x31C (ActorCtl). include/structs.h lacks or mistypes several
 // fields used here (0x12 is a u16, 0x38 an s16, 0xBC an f32, ...); fold them in during the central pass.
 typedef struct GameObjExt {
     /* 0x000 */ u8 pad0[0x4];
@@ -771,8 +771,8 @@ void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
 }
 
 s32 func_1504C078(void) {
-    if (D_800D154C->unk31C->unk58 != 1) {
-        D_800D154C->unk31C->unk59 = 0;
+    if (D_800D154C->unk31C->idle.active != 1) {
+        D_800D154C->unk31C->idle.holdFrames = 0;
         func_1507F640();
     }
     return 999;
@@ -928,7 +928,7 @@ void func_1504C854(struct127 *obj) {
     if (obj->unk31C->unk8E > 0) {
         obj->unk31C->unk8E -= D_800BE9A0;
     } else {
-        obj->unk31C->unk8A = 0;
+        obj->unk31C->buttons = 0;
     }
     if (obj->unk31C->unk8F > 0) {
         obj->unk31C->unk8F -= D_800BE9A0;

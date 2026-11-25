@@ -283,7 +283,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     out[2] += prop->z;
 }
 
-/* struct126 (struct127.unk31C) with the fields used here that structs.h leaves as padding. */
+/* ActorCtl (struct127.unk31C) with the fields used here that structs.h leaves as padding. */
 typedef struct ObjControl {
     /* 0x00 */ u8 pad0[0x17];
     /* 0x17 */ u8 unk17;

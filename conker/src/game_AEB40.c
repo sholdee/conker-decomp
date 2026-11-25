@@ -43,7 +43,7 @@
 #undef D_800D2138
 #undef D_800D2132
 
-// File-local view of the 0x31C extension block of a game object (header struct126, 0x1C0 bytes).
+// File-local view of the 0x31C extension block of a game object (header ActorCtl, 0x1C0 bytes).
 typedef struct GameObjExt {
     /* 0x000 */ u8 pad0[0x56];
     /* 0x056 */ u8 unk56;

@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* struct126 (struct127::unk31C) fields read by func_1507C3E0 that the shared header leaves as padding. */
+/* ActorCtl (struct127::unk31C) fields read by func_1507C3E0 that the shared header leaves as padding. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x4];
     /* 0x004 */ s32 unk4;
@@ -28,13 +28,13 @@ typedef struct {
 
 void func_1507C3E0(struct127 *obj, s16 *height, s16 *width, s16 *depth);
 
-/* Refreshes the cached height/width/depth (struct126 unk114-unk118) of every object that has one. */
+/* Refreshes the cached height/width/depth (ActorCtl unk114-unk118) of every object that has one. */
 void func_1507C370(void) {
     s32 i;
     struct127 *obj = D_800CC2D0;
 
     for (i = 0; i < D_8008FD8C; i++, obj++) {
-        struct126 *ext = obj->unk31C;
+        ActorCtl *ext = obj->unk31C;
         if (ext != NULL) {
             func_1507C3E0(obj, (s16 *)&ext->unk114, (s16 *)&ext->unk116, (s16 *)&ext->unk118);
         }

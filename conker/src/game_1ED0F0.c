@@ -356,7 +356,7 @@ typedef struct {
     /* 0x60 */ s32 unk60;
 } RayHit;
 
-/* struct127.unk31C as used here (struct126 in structs.h does not declare these fields). */
+/* struct127.unk31C as used here (ActorCtl in structs.h does not declare these fields). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x130];
     /* 0x130 */ vertex aimDir;

@@ -40,7 +40,7 @@ typedef struct {
     /* 0x40 */ TrailBoneLink link;
 } TrailEmitter;
 
-/* The part of struct127.unk31C read here (struct126 stops short of it). */
+/* The part of struct127.unk31C read here (ActorCtl stops short of it). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x197];
     /* 0x197 */ u8 active;

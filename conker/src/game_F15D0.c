@@ -182,7 +182,7 @@ typedef struct {
 } GroundHit; /* size 0x24 */
 
 extern void func_1504715C(GroundHit *, struct127 *);
-extern s32 func_1514654C(struct127 *, struct126 *, s32, Vec3f **, Vec3f **, s32);
+extern s32 func_1514654C(struct127 *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
 extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1515C0F8(struct127 *, Vec3f **);
@@ -206,7 +206,7 @@ void func_150C44A4(Effect *effect) {
     GroundHit ground;
     Vec3f *offsetPtr;
     Vec3f *posPtr;
-    struct126 *bone;
+    ActorCtl *bone;
     s32 emit;
     Vec3f *wind;
     Vec3f vel;

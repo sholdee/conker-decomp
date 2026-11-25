@@ -48,7 +48,7 @@ typedef struct {
     /* 0x30 */ f32 cosYaw;
 } TriggerZone; /* size 0x34 */
 
-/* Partial view of the struct126 that struct127.unk31C points to: structs.h has 0x74 and 0x7A as padding.
+/* Partial view of the ActorCtl that struct127.unk31C points to: structs.h has 0x74 and 0x7A as padding.
    0x74 and 0x75 are two pending-text slots; bit 7 marks a slot set by a script, which zones don't override. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x74];

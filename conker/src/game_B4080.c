@@ -168,8 +168,8 @@ typedef struct MpGame {
 
 /*
  * File-local view of the per-actor state at struct127::unk31C. structs.h types it as
- * struct126, which has 0x90 as s8 and leaves 0x129..0x194 and everything past 0x1AB
- * as padding; this view covers the fields used here that struct126 lacks.
+ * ActorCtl, which has 0x90 as s8 and leaves 0x129..0x194 and everything past 0x1AB
+ * as padding; this view covers the fields used here that ActorCtl lacks.
  */
 typedef struct ObjState {
     /* 0x000 */ u8 pad0[0x78];
@@ -742,7 +742,7 @@ void func_15087FEC(s32 index, s32 lateral) {
 
 /* Ends the race for `racer` (actor obj), entering state 12 with `mode` (unk232); returns 1 if it can't finish now. */
 s32 func_1508802C(Racer *racer, struct127 *obj, s32 mode) {
-    struct126 *state;
+    ActorCtl *state;
 
     state = obj->unk31C;
     if (state->unk120 != 0) {
@@ -2459,7 +2459,7 @@ void func_1508C1A4(s32 a, s32 b) {
     struct127 *to;
     s32 fromFlag;
     s32 toFlag;
-    struct126 *fromInner;
+    ActorCtl *fromInner;
     f32 distance;
     f32 hitX;
     f32 hitY;
@@ -2640,7 +2640,7 @@ s32 func_1508C9CC(void) {
     s32 ret;
     s8 cur;
     struct127 *obj;
-    struct126 *state;
+    ActorCtl *state;
 
     count = 0;
     ret = -1;

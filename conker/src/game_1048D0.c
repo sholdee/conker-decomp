@@ -136,7 +136,7 @@ Gfx *func_150D765C(Gfx *gdl) {
     return gdl;
 }
 
-/* The fields of struct127.unk31C (a struct126) that struct126 doesn't name; it also stops short of 0x1AE. */
+/* The fields of struct127.unk31C (a ActorCtl) that ActorCtl doesn't name; it also stops short of 0x1AE. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x4F];
     /* 0x04F */ u8 unk4F;

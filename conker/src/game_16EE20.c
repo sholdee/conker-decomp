@@ -1211,7 +1211,7 @@ s32 func_15143E08(struct127 *actor) {
 
 /* The actor's facing angle in 256ths of a turn, relative to unk31C's angle when it has one. */
 s32 func_15143E24(struct127 *actor) {
-    struct126 *ref = actor->unk31C;
+    ActorCtl *ref = actor->unk31C;
     if (ref != NULL) {
         return (s16)((actor->unk7A - ref->unk12) >> 8);
     }
@@ -2421,7 +2421,7 @@ typedef struct {
     /* 0x48 */ AttachModel *model;
 } AttachPoint;
 
-s32 func_15031070(struct126 *, struct127 *, Mtx **, s32 *);
+s32 func_15031070(ActorCtl *, struct127 *, Mtx **, s32 *);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*
@@ -2431,7 +2431,7 @@ void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 s32 func_1514654C(struct127 *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
     s32 i;
     Mtx *mtx;
-    struct126 *part;
+    ActorCtl *part;
     Mtx *partMtx;
     s32 partCount;
     f32 mf[4][4];
@@ -2452,7 +2452,7 @@ s32 func_1514654C(struct127 *actor, AttachPoint *point, s32 index, f32 **offsets
         if (func_15031070(part, actor, &partMtx, &partCount) == 0) {
             return 0;
         }
-        /* struct126 (shared header) has no field for the word at 0x48 */
+        /* ActorCtl (shared header) has no field for the word at 0x48 */
         if (*(s32 *)((u8 *)part + 0x48) != 0) {
             mtx = &partMtx[point->partBone];
         } else {

@@ -59,106 +59,7 @@ void func_1504CA60(struct127 *actor) {
     actor->unk80 = 1;
 }
 
-typedef struct {
-    /* 0x000 */ f32 unk0;
-    /* 0x004 */ s32 unk4;
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8 padA;
-    /* 0x00B */ u8 unkB;
-    /* 0x00C */ u8 padC[4];
-    /* 0x010 */ s16 unk10;
-    /* 0x012 */ s16 unk12;
-    /* 0x014 */ u8 pad14[3];
-    /* 0x017 */ u8 unk17;
-    /* 0x018 */ u8 pad18[8];
-    /* 0x020 */ u8 unk20;
-    /* 0x021 */ u8 unk21;
-    /* 0x022 */ s8 unk22;
-    /* 0x023 */ s8 unk23;
-    /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 unk26;
-    /* 0x027 */ u8 pad27;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ s8 unk30;
-    /* 0x031 */ u8 unk31;
-    /* 0x032 */ u16 unk32;
-    /* 0x034 */ u16 unk34;
-    /* 0x036 */ u8 unk36;
-    /* 0x037 */ u8 pad37;
-    /* 0x038 */ s32 unk38;
-    /* 0x03C */ u8 unk3C;
-    /* 0x03D */ u8 pad3D;
-    /* 0x03E */ u16 unk3E;
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ s8 unk44;
-    /* 0x045 */ u8 pad45;
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ s16 unk48;
-    /* 0x04A */ u8 pad4A[2];
-    /* 0x04C */ u16 unk4C;
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 unk4F;
-    /* 0x050 */ s8 unk50;
-    /* 0x051 */ u8 pad51;
-    /* 0x052 */ u8 unk52;
-    /* 0x053 */ u8 unk53;
-    /* 0x054 */ s8 unk54;
-    /* 0x055 */ s8 unk55;
-    /* 0x056 */ u8 pad56[0x15];
-    /* 0x06B */ u8 unk6B;
-    /* 0x06C */ u8 pad6C[9];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ u8 pad76[2];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[4];
-    /* 0x07D */ u8 matrix_physics;
-    /* 0x07E */ u8 pad7E[6];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ s8 stick_x;  // controller input of this frame (recorded, or replayed while unk84 != 0)
-    /* 0x086 */ s8 stick_y;
-    /* 0x087 */ u8 pad87;
-    /* 0x088 */ s16 unk88;
-    /* 0x08A */ u16 buttons;
-    /* 0x08C */ u16 unk8C;
-    /* 0x08E */ u8 pad8E[7];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 unk96;
-    /* 0x097 */ u8 unk97;
-    /* 0x098 */ u8 unk98;
-    /* 0x099 */ u8 pad99[3];
-    /* 0x09C */ struct Sub9C *unk9C;
-    /* 0x0A0 */ f32 unkA0;
-    /* 0x0A4 */ u8 padA4[0xB];
-    /* 0x0AF */ u8 unkAF;
-    /* 0x0B0 */ u8 padB0[0x58];
-    /* 0x108 */ u8 unk108;
-    /* 0x109 */ u8 unk109;
-    /* 0x10A */ u8 pad10A[0x10];
-    /* 0x11A */ u8 unk11A;
-    /* 0x11B */ u8 pad11B[5];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0xB];
-    /* 0x12C */ u16 unk12C;
-    /* 0x12E */ u8 pad12E[0x3E];
-    /* 0x16C */ f32 unk16C;
-    /* 0x170 */ f32 unk170;
-    /* 0x174 */ u8 pad174[0x23];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 pad199;
-    /* 0x19A */ u8 grenade_count;
-    /* 0x19B */ u8 unk19B;
-    /* 0x19C */ u8 pad19C[6];
-    /* 0x1A2 */ u16 unk1A2;
-    /* 0x1A4 */ u8 pad1A4[8];
-    /* 0x1AC */ u8 unk1AC;
-    /* 0x1AD */ u8 pad1AD[4];
-    /* 0x1B1 */ u8 unk1B1;
-    /* 0x1B2 */ u8 pad1B2;
-    /* 0x1B3 */ u8 unk1B3;
-} S31C;
-
+/* The part of the rope (ActorCtl.rope) read here; game_1D9F10.c has the full Rope. */
 typedef struct Sub9C {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ f32 unk2C;
@@ -303,7 +204,7 @@ typedef struct Actor {
     /* 0x2F8 */ u16 unk2F8;
     /* 0x2FA */ u8 pad2FA[0x1E];
     /* 0x318 */ Camera *camera;
-    /* 0x31C */ S31C *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } Actor;
 
@@ -635,14 +536,14 @@ void func_1504CB98(Actor *actor) {
                 actor->unk78 = actor->unk76;
                 { BLK; actor->unk7A = actor->unk76; }
             }
-            if (actor->unk31C->unk197 != 0) {
+            if (actor->unk31C->aimState != 0) {
                 moveSpeed = 0.1f;
-                actor->unk7A = (s32) (actor->unk31C->unk16C * 182.04445f);
+                actor->unk7A = (s32) (actor->unk31C->aimYaw * 182.04445f);
                 moveAngle = actor->unk7A - D_800CC280;
                 if (actor->unk31C->unk84 != 0) {
                     actor->unk76 = actor->unk7A;
                 }
-                scratch = actor->unk31C->unk170;
+                scratch = actor->unk31C->aimPitch;
                 if (scratch > 180.0f) {
                     scratch -= 360.0f;
                 }
@@ -729,7 +630,7 @@ void func_1504CB98(Actor *actor) {
                     lean = (D_800CC284->stick_y / 2);
                 }
                 if ((actor->unk31C->unk78 == 0xC) || (actor->unk31C->unk78 == 0x16) || (actor->unk31C->unk78 == 0x15) || (actor->unk31C->unk78 == 0x38) || (actor->unk31C->unk78 == 0x39) || (actor->unk31C->unk78 == 0x37) || (actor->unk31C->unk78 == 0x3B) || (actor->unk31C->unk78 == 0x12) || (actor->unk31C->unk78 == 9)) {
-                    tilt = actor->unk31C->unk170;
+                    tilt = actor->unk31C->aimPitch;
                     if (tilt > 180.0f) {
                         tilt -= 360.0f;
                     }
@@ -740,7 +641,7 @@ void func_1504CB98(Actor *actor) {
                     }
                 }
                 if ((actor->unk31C->unk78 != 9) && (actor->unk31C->unk78 != 0x38) && (actor->unk31C->unk78 != 0x39) && (actor->unk31C->unk78 != 0x37) && (actor->unk31C->unk78 != 0x3B) && (actor->unk31C->unk78 != 0x15) && (actor->unk31C->unk78 != 0x26) && (actor->unk31C->unk78 != 0x3A)) {
-                    actor->unk7A = (s32) ((actor->unk31C->unk16C + 90.0f) * 182.04445f);
+                    actor->unk7A = (s32) ((actor->unk31C->aimYaw + 90.0f) * 182.04445f);
                     actor->unk76 = actor->unk7A;
                 }
             } else if ((actor->unk31C->unk78 != 0x14) && (actor->unk31C->unk78 != 0x3F)) {
@@ -756,10 +657,10 @@ void func_1504CB98(Actor *actor) {
         }
     }
     if (!(actor->unk31C->unk4E & 0xF) && (actor->health != 0) && (actor->stunned == 0) && (actor->unk28 == 0.0f) && ((D_800BE616 != 0) || ((actor->unk31C->unk78 == 9) && (actor->unk31C->matrix_physics == 0)) || (actor->unk31C->unk78 == 0x16) || (actor->unk31C->unk78 == 0x3B)) && ((actor->unk31C->unk11A == 2) || (actor->unk31C->unk11A == 0))) { BLK;
-        dirMask = ((actor->unk31C->unk78) && ((actor->unk31C->unk197 == 0) || (actor->unk31C->unk78 == 0x16)) && (actor->unk31C->unk19B == 0)) ? 0xF : 3;
+        dirMask = ((actor->unk31C->unk78) && ((actor->unk31C->aimState == 0) || (actor->unk31C->unk78 == 0x16)) && (actor->unk31C->unk19B == 0)) ? 0xF : 3;
         if ((D_800CC284->buttons & dirMask) != 0) {
             dirMask = (D_800CC284->buttons & dirMask);
-            if ((actor->unk31C->unk197 == 0) && (actor->unk31C->unk198 == 0)) {
+            if ((actor->unk31C->aimState == 0) && (actor->unk31C->unk198 == 0)) {
                 if (D_800CC284->stick_y >= 6) {
                     dirMask |= 8;
                 } else if (D_800CC284->stick_y < -5) {
@@ -781,7 +682,7 @@ void func_1504CB98(Actor *actor) {
                 actor->unk7A -= ((D_800CC284->stick_x * D_800CC264) >> 4);
                 moveAngle = ((actor->unk7A + dirAngle) - actor->unk31C->unk12) - D_800CC280;
                 moveSpeed = 34.0f;
-                if (actor->unk31C->unk197 != 0) {
+                if (actor->unk31C->aimState != 0) {
                     actor->unk76 = moveAngle + D_800CC280;
                 }
                 actor->unk31C->unk1B3 = 1;
@@ -790,7 +691,7 @@ void func_1504CB98(Actor *actor) {
             }
         } else if (actor->unk31C->unk52 != 0) {
             actor->unk76 = actor->unk7A;
-            if (actor->unk31C->unk197 != 0) {
+            if (actor->unk31C->aimState != 0) {
                 actor->xz_velocity = 0.0f;
             }
         }
@@ -923,7 +824,7 @@ void func_1504CB98(Actor *actor) {
         } else {
             if ((actor->unk31C->unk78 == 2) || (actor->unk31C->unk78 == 0x13) || (actor->unk31C->unk78 == 0xA) || (actor->unk31C->unk78 == 0x34)) {
                 if (actor->unk31C->unk198 != 0) {
-                    tiltDeg = -actor->unk31C->unk170;
+                    tiltDeg = -actor->unk31C->aimPitch;
                     if ((actor->unk31C->unk78 == 2) || (actor->unk31C->unk78 == 0x13)) {
                         tiltDeg += 30.0f;
                     } else {
@@ -1215,7 +1116,7 @@ void func_1504CB98(Actor *actor) {
             }
         }
     }
-    if ((actor->unk31C->unk98 != 0) && (actor->stunned == 0)) {
+    if ((actor->unk31C->ropeId != 0) && (actor->stunned == 0)) {
         stickX = D_800CC284->stick_x;
         stickY = D_800CC284->stick_y;
         actor->unk31C->unk31 = 0;
@@ -1244,13 +1145,13 @@ void func_1504CB98(Actor *actor) {
                 climbAnimSpeed = -stickY;
             }
         }
-        path = actor->unk31C->unk9C;
+        path = (Sub9C *)actor->unk31C->rope;
         climbRate = path->unk2C;
         climbRate = 0.08f / climbRate;
-        actor->unk31C->unkA0 += stickY * climbRate * *D_800D1550;
-        if (actor->unk31C->unkA0 > 1.0f) {
-            actor->unk31C->unkA0 = 1.0f;
-        } else if (actor->unk31C->unkA0 < 0.0f) {
+        actor->unk31C->ropeProgress += stickY * climbRate * *D_800D1550;
+        if (actor->unk31C->ropeProgress > 1.0f) {
+            actor->unk31C->ropeProgress = 1.0f;
+        } else if (actor->unk31C->ropeProgress < 0.0f) {
             func_151AE264(actor);
             actor->gravity = 5.0f;
         }
@@ -1774,7 +1675,7 @@ void func_1504CB98(Actor *actor) {
     if ((actor->unk31C->unk84 != 0) || (padOverridden != 0)) {
         *D_800CC284 = savedPad;
     }
-    actor->unk31C->unk88 = buttons;
+    actor->unk31C->prevButtons = buttons;
 }
 
 /* Tilts the actor toward the slope of the ground under it (pitch/roll and the unk164/unk168 lean). */

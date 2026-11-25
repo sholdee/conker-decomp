@@ -724,7 +724,7 @@ void func_151D4D58(struct127 *obj) {
 }
 
 
-/* The parts of an object's unk31C block used in this file (struct126 leaves them as padding). */
+/* The parts of an object's unk31C block used in this file (ActorCtl leaves them as padding). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x24];
     /* 0x024 */ s16 unk24;

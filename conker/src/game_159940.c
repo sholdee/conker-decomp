@@ -20,7 +20,7 @@ typedef struct {
     /* 0x0C */ vertex rot;
 } CamOffset;
 
-/* Camera.playerExt (struct126): the aim fields struct126 does not declare yet; see game_14FF90.c. */
+/* Camera.playerExt (ActorCtl): the aim fields ActorCtl does not declare yet; see game_14FF90.c. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x120];
     /* 0x120 */ u8 unk120;

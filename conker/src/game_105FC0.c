@@ -241,7 +241,7 @@ s32 func_150D8FAC(Trail *trail) {
     func_150D8B3C(actor, &vel);
     trail->pos = pos;
     if (data->flags & 1) {
-        flags = actor->unk31C->unk8A;
+        flags = actor->unk31C->buttons;
         if (flags & 0x2000) {
             data->speedScale += 0.001379000023f * D_800BE9A4;
             if (data->speedScale > 0.04293100163f) {

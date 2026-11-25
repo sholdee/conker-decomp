@@ -131,7 +131,7 @@ void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mt
         arg0->unk218 = NULL;
         func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
         D_800CC2D0[arg0->unk124].unk31C->unk30 = 70;
-        // unk28/unk2C are declared s32 in struct126 but hold floats
+        // unk28/unk2C are declared s32 in ActorCtl but hold floats
         *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = arg0->x_position;
         *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = arg0->z_position;
         if ((arg0->unk1D4 != NULL) && (mtxIndex != -1)) {

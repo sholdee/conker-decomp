@@ -104,7 +104,7 @@ typedef struct {
     PathPoint pts[1];
 } PathData;
 
-/* Raw field access for bytes of struct127 / struct126 that structs.h declares only as padding or with
+/* Raw field access for bytes of struct127 / ActorCtl that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
 /* Index of an object in the D_800CC2D0 object table. */
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)
@@ -279,7 +279,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             case -1:
             case 4:
             case 0x2000:
-                obj->unk31C->unk8A = v;
+                obj->unk31C->buttons = v;
                 obj->unk31C->unk8E = 2;
                 break;
             }
@@ -729,7 +729,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x4D: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v1;
         s32 v2;
 
@@ -1464,7 +1464,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk22C = ret & ~0x200;
         return ret & 0x200;
     case 0xD4: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v;
         p = obj->unk31C;
         v = 0;
@@ -1474,7 +1474,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return v;
     }
     case 0xD3: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v;
         p = obj->unk31C;
         v = 0;
@@ -1616,7 +1616,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE9:
         return FLD(obj->unk31C, 0x51, u8);
     case 0xEA: {
-        struct126 *p;
+        ActorCtl *p;
         s32 a;
         s32 b;
         a = cmd->a[0];

@@ -54,7 +54,7 @@ typedef struct struct127Hidden {
 } struct127Hidden;
 #define HIDDEN(obj) ((struct127Hidden *)(obj))
 
-/* Same for struct126 (struct127.unk31C). */
+/* Same for ActorCtl (struct127.unk31C). */
 typedef struct struct126Hidden {
     /* 0x000 */ f32 unk0;
     /* 0x004 */ u8 pad4[0x24 - 0x4];
@@ -516,7 +516,7 @@ void func_1506B634(s32 count) {
     u32 rand;
     u32 pick;
     u8 index;
-    struct126 *ext;
+    ActorCtl *ext;
 
     rand = func_150ADA20();
     pick = rand % (u32)(u8)count;
@@ -611,7 +611,7 @@ void func_1506B9AC(void) {
 }
 
 void func_1506B9C0(void) {
-    struct126 *ext;
+    ActorCtl *ext;
 
     D_800BE720[D_800C3E78] |= 0x4000;
     ext = D_800D154C->unk31C;
@@ -3343,7 +3343,7 @@ void func_150729D0(void) {
 }
 
 void func_15072A14(void) {
-    D_800D154C->unk31C->unk66 = 0;
+    D_800D154C->unk31C->idle.delay = 0;
     func_1507F640();
 }
 
@@ -3817,7 +3817,7 @@ void func_15073EA4(void) {
 }
 
 void func_15073F1C(void) {
-    struct126 *ext = func_1503195C(D_800D154C, 60, 0);
+    ActorCtl *ext = func_1503195C(D_800D154C, 60, 0);
 
     if (ext != NULL) {
         ext->unk38 = 2400;
@@ -4013,7 +4013,7 @@ void func_15074664(void) {
 void func_150746F0(void) {
     struct127 *target;
     s32 damage;
-    struct126 *ext;
+    ActorCtl *ext;
     Camera *camera;
 
     target = NULL;
@@ -4105,7 +4105,7 @@ void func_1507490C(void) {
 /* Makes every object within D_800D1580 * 8 units start chasing (unk31C->chasing = 20). */
 void func_15074980(void) {
     s32 i;
-    struct126 *ext;
+    ActorCtl *ext;
     f32 dist = D_800D1580 * 8;
 
     for (i = 0; i < D_8008FD8C; i++) {

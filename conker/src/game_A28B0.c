@@ -2375,7 +2375,7 @@ void func_1507B734(void) {
         D_800D154C->unk31C->unk8C = value;
         D_800D154C->unk31C->unk8F = D_800D1892;
     } else {
-        D_800D154C->unk31C->unk8A = value;
+        D_800D154C->unk31C->buttons = value;
         D_800D154C->unk31C->unk8E = D_800D1892;
     }
 }

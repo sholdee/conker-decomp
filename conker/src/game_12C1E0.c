@@ -6,12 +6,12 @@
 /* Local point of the gun's muzzle in its attachment's space. */
 extern struct17 D_800A2050;
 
-struct126 *func_150FF288(struct127 *obj);
+ActorCtl *func_150FF288(struct127 *obj);
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
 void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1);
 void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
                    struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
-                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, struct126 *gun);
+                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, ActorCtl *gun);
 void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
 void func_151D5148(struct127 *obj);
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
@@ -19,7 +19,7 @@ void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, st
 void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, struct17 *arg7);
-s32 func_1514654C(struct127 *obj, struct126 *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
+s32 func_1514654C(struct127 *obj, ActorCtl *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
 void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
@@ -36,7 +36,7 @@ void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
     struct17 points[6];
     s32 value0;
     s32 value1;
-    struct126 *gun;
+    ActorCtl *gun;
     u8 valid;
     s32 randomWord;
     s32 kind;
@@ -95,7 +95,7 @@ void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
 void func_150FEFD0(struct127 *obj, s16 setId, struct17 *out) {
     struct17 *src;
     struct17 *dst;
-    struct126 *attachment;
+    ActorCtl *attachment;
 
     if (setId == -1) {
         out->unk0 = obj->x_position;
@@ -129,7 +129,7 @@ void func_150FF084(struct127 *obj, u8 arg1, s32 arg2) {
     struct17 points[6];
     s32 value0;
     s32 value1;
-    struct126 *gun;
+    ActorCtl *gun;
     u8 valid;
     s32 randomWord;
     s32 hasValue1;
@@ -168,7 +168,7 @@ void func_150FF084(struct127 *obj, u8 arg1, s32 arg2) {
 }
 
 /* Returns `obj`'s gun attachment (set 0x82), or NULL. */
-struct126 *func_150FF288(struct127 *obj) {
+ActorCtl *func_150FF288(struct127 *obj) {
     return func_1503195C(obj, 0x82, 0);
 }
 
@@ -178,7 +178,7 @@ void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct1
 }
 
 u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
-                 struct127 *obj, struct126 *gun);
+                 struct127 *obj, ActorCtl *gun);
 void func_151D5174(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
                    struct17 *output0, struct17 *output1, s32 *value0, s32 *value1, struct17 *endpoint);
 
@@ -188,7 +188,7 @@ void func_151D5174(struct127 *obj, struct17 *position, struct17 *direction, stru
  */
 void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
                    struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
-                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, struct126 *gun) {
+                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, ActorCtl *gun) {
     if (*valid) {
         *valid = func_150FF6E0(points, position, hit, normal, endpoint, obj, gun);
     }
@@ -297,7 +297,7 @@ extern struct17 D_800A2080[2][6]; /* two random sets of flash points */
  * Returns FALSE if the transform fails.
  */
 u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
-                 struct127 *obj, struct126 *gun) {
+                 struct127 *obj, ActorCtl *gun) {
     u8 i;
     struct17 *src[10];
     struct17 *dst[10];
@@ -351,7 +351,7 @@ void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct17 trail[3];
     u8 scratch[0x64];
     void *buffer;
-    struct126 *state;
+    ActorCtl *state;
     s32 random1;
     s32 random0;
 

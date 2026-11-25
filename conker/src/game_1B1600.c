@@ -880,7 +880,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
             (D_800CC2D0[i].pad66 & 0x10) != 0x10 ||
             (u32)(D_800CC2D0[i].unk74 & (1 << view)) == (u32)(1 << view) ||
             D_800CC2D0[i].unk84.uh == 0x2D8 ||
-            (D_800CC2D0[i].unk31C != NULL && ((u8)D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->pad98[0] != 0)) ||
+            (D_800CC2D0[i].unk31C != NULL && (D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->ropeId != 0)) ||
             (D_800DF0E0 & (1 << i))) {
             continue;
         }

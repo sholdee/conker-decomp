@@ -1042,7 +1042,7 @@ void func_1505841C(struct127 *actor, f32 idleRate) {
 
 /* Per-frame update while the actor is stunned (stunned is the countdown; 255 = indefinitely). */
 void func_150585F0(struct127 *actor, f32 decel) {
-    struct126 *child;
+    ActorCtl *child;
     f32 yVel;
     s32 water;
     s32 stun;
@@ -1513,7 +1513,7 @@ void func_1505959C(struct127 *actor, s32 hostIdx) {
 void func_150597FC(struct127 *actor) {
     s32 i;
     s32 mask;
-    struct126 *movement;
+    ActorCtl *movement;
     struct127 *player;
 
     mask = D_800CC268;
@@ -1536,7 +1536,7 @@ void func_150597FC(struct127 *actor) {
                 ((actor->id != 0xA8) || (*(u8 *)&player->pad128 != 0))) {
                 player->unk13C = D_800C3E78 + 100;
                 player->xz_velocity = 0.0f;
-                *(s16 *)((u8 *)movement + 0x18) = 0; /* inside struct126.pad17 */
+                *(s16 *)((u8 *)movement + 0x18) = 0; /* inside ActorCtl.pad17 */
                 func_1505959C(actor, i);
             }
         }
@@ -1950,7 +1950,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
     bounce = 0;
     keepLandFlags = 1;
     dist = actor->y_position - floorY;
-    if (actor->unk31C->pad4F[0] != 0) {
+    if (actor->unk31C->unk4F != 0) {
         if (dist < 0.0f) {
             actor->unk1CC = floorY;
             dist = 0.0f;
@@ -1959,7 +1959,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
         dist = actor->y_position - (actor->unk118 - 34.0f);
         if (dist < 70.0f && actor->y_velocity < 18.0f) {
             if (actor->y_velocity > -25.0f) {
-                actor->unk31C->pad4F[0] = 2;
+                actor->unk31C->unk4F = 2;
             }
             if (dist < 0.0f) {
                 if (actor->y_velocity < -12.0f) {
@@ -1998,7 +1998,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                 actor->unk31C->unk55 = 4;
             }
             if (actor->unk28 > 0.0f) {
-                actor->unk31C->pad4F[2] = 1;
+                actor->unk31C->unk51 = 1;
                 actor->unk31C->unk31 = 0;
             }
             actor->unk100 &= 0xFD;
@@ -2021,7 +2021,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                 actor->unk31C->unk78 != 1) {
                 speed = 1.299999952f;
                 do { actor->unk31C->unk95 = 0; } while (0); // matching: the wrappers steer FP register choice
-                do { actor->unk31C->pad4F[2] = 2; } while (0);
+                do { actor->unk31C->unk51 = 2; } while (0);
                 killed = 0;
                 flags = 0;
                 hurt = 0;
@@ -2147,7 +2147,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                     s32 landAnim;
                     landAnim = 0;
                     if ((s32)actor->unk28 > 0) {
-                        struct126 *movement = actor->unk31C;
+                        ActorCtl *movement = actor->unk31C;
                         if ((movement->unk11A != 1) && (movement->unk11A != 3) && (movement->unk4E == 0)) {
                             if ((actor->unk100 & 0x10) || (!(actor->unk100 & 8) && (((actor->unk44 == 0.0f) && (actor->unkA8 == 0)) || (actor->unk100 & 4)))) {
                                 if (actor->unk100 & 0x10) {
@@ -2383,7 +2383,7 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
     s32 savedIdx;
     u8 tmp;
     s32 v;
-    struct126 *movement;
+    ActorCtl *movement;
     struct127 *other;
     struct S { void *a; u8 b; } msg;
 
@@ -2439,7 +2439,7 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
         victim->unkF8 &= 0xFEFF7FFF;
         victim->unk31C->unk95 = 0;
         victim->unk31C->unk6B = 0;
-        if (victim->unk31C->pad98[0] != 0) {
+        if (victim->unk31C->ropeId != 0) {
             func_151AE264(victim);
         }
         victim->unk31C->unk54 = 0;
@@ -2707,7 +2707,7 @@ s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, 
                     }
                     if (victim->interaction_state == 1) {
                         if ((victim->unk31C->unk4E == 2) && (victim->unk31C->unk84 == 0)) {
-                            victim->unk31C->pad4F[1] = 30;
+                            victim->unk31C->unk50 = 30;
                             victim->unk81 = 0;
                             victim->y_velocity = 50.0f;
                             victim->gravity = 2.0f;
@@ -3190,7 +3190,7 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
     s32 i;
     s32 count;
     struct127 *other;
-    struct126 *movement;
+    ActorCtl *movement;
 
     D_800CC268 = 0;
     D_800CC26C = 0;
@@ -3449,9 +3449,9 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
             if (index < D_8008FD8C) {
                 struct127 *player = &D_800CC2D0[index];
 
-                *(s8 *)&player->unk31C->unk58 = 0;
-                *(s16 *)player->unk31C->pad5A = 0;
-                *(s8 *)&player->unk31C->unk59 = 0;
+                player->unk31C->idle.active = 0;
+                player->unk31C->idle.timer = 0;
+                player->unk31C->idle.holdFrames = 0;
             }
         }
         if (state->loaded != 0) {
@@ -3816,7 +3816,7 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         actor->unk10B = 0;
         actor->unk10F = 0;
         if (actor->interaction_state == 1) {
-            actor->unk31C->unk58 = 0;
+            actor->unk31C->idle.active = 0;
             actor->unkF8 &= 0xFEFFFDFF;
         }
     } else {
@@ -3981,7 +3981,7 @@ void func_151AE264(struct127 *arg0);
 void func_151C6EA0(struct127 *arg0, s32 arg1, s32 arg2);
 void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
-/* struct126/struct127 bytes that the shared headers leave as padding */
+/* ActorCtl/struct127 bytes that the shared headers leave as padding */
 #define MOVEMENT_FIELD(off, T) (*(T *)((u8 *)actor->unk31C + (off)))
 #define ACTOR_FIELD(off, T) (*(T *)((u8 *)actor + (off)))
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
@@ -5323,7 +5323,7 @@ void func_15062800(struct127 *a, struct127 *b) {
     a->unk144 = b->unk144;
     b->unk144 = (struct129 *)u;
     D_800DBFF0[OBJ_INDEX(b)].playerExt = b->unk31C;
-    b->unk31C->unk197 = 0;
+    b->unk31C->aimState = 0;
     func_15033EC4(b->unique_id, a->unique_id);
     if (*(struct102 **)b->pad2D4 != NULL) {
         func_1516972C(*(struct102 **)b->pad2D4);
@@ -5549,7 +5549,7 @@ void func_15194FF4(struct127 *, struct127 *, s32);
 void func_15063168(struct127 *actor) {
     s32 i;
     s32 self;
-    struct126 *movement;
+    ActorCtl *movement;
 
     self = ((s32)actor - (s32)D_800CC2D0) / (s32)sizeof(struct127);
     for (i = 0; i < D_8008FD8C; i++) {

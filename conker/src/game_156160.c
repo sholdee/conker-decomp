@@ -138,7 +138,7 @@ void func_15128CB0(Camera *cam) {
             if (cam->zone == 0) {
                 func_151239CC((Camera *)cam, 1);
                 cam->playerExt->unk198 = 0;
-                cam->playerExt->unk197 = 0;
+                cam->playerExt->aimState = 0;
                 cam->unk5F8 = 1;
                 cam->unk5FC = 2;
                 cam->playerExt->unk198 = 0;
@@ -147,7 +147,7 @@ void func_15128CB0(Camera *cam) {
                 D_80089524[cam->playerIndex] = 0;
                 D_80089534[cam->playerIndex] = 0;
             } else {
-                D_80089524[cam->playerIndex] = cam->playerExt->unk197;
+                D_80089524[cam->playerIndex] = cam->playerExt->aimState;
                 D_80089534[cam->playerIndex] = cam->playerExt->unk198;
             }
             func_1512D6F0(cam);
@@ -194,7 +194,7 @@ void func_15128CB0(Camera *cam) {
                         if ((cam->zone == 12 && ((Obj15128CB0 *)cam->player)->unk84 != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
                             cam->buttonsPressed |= 0x10;
                             cam->contPad->button |= 0x10;
-                            cam->playerExt->unk197 = D_80089524[cam->playerIndex];
+                            cam->playerExt->aimState = D_80089524[cam->playerIndex];
                             func_151C9BA0(cam, cam->zone);
                             angle = cam->aim.targetYaw;
                         } else {

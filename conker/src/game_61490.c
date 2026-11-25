@@ -72,7 +72,7 @@ void func_15033FE0(GameCommand *commands, s32 index) {
 /* Appends the commands for an actor in interaction state 1. Angles are in degrees, scaled to 65536/360 units. */
 GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     struct127 *actor;
-    struct126 *sub;
+    ActorCtl *sub;
     s16 angle;
     s32 kind;
     s32 offset;

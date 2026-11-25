@@ -13,45 +13,6 @@ u8 func_150ADA20(void);
  * ones played most recently.
  */
 
-/* Per-actor idle state, stored at offset 0x58 of the actor's struct126 (actor->unk31C). */
-typedef struct {
-    /* 0x0 */ u8 active;
-    /* 0x1 */ u8 holdFrames;  // frames left before the next sequence frame
-    /* 0x2 */ u16 timer;      // time spent idle in the current phase
-    /* 0x4 */ u8 sequence;    // index into D_80086BA0, 0 = none
-    /* 0x5 */ u8 frame;       // position within the sequence
-    /* 0x6 */ u8 frameFlags;  // flags of the frame applied last
-    /* 0x7 */ u8 recent[5];   // most recently played sequences, newest first
-    /* 0xC */ u8 phase;
-    /* 0xD */ u8 phaseCount;  // sequences played in the current phase
-    /* 0xE */ s16 delay;
-} IdleState;
-
-/* The parts of struct126 this file uses. include/structs.h does not declare 0x17, 0x1A, 0x32,
- * 0x1B2 or the idle block at 0x58 yet. */
-typedef struct {
-    /* 0x000 */ u8 pad0[8];
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8 padA[0xD];
-    /* 0x017 */ u8 unk17;
-    /* 0x018 */ u8 pad18[2];
-    /* 0x01A */ u8 unk1A;
-    /* 0x01B */ u8 pad1B[0x17];
-    /* 0x032 */ u16 unk32;
-    /* 0x034 */ u8 pad34[0x1A];
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 pad4F[9];
-    /* 0x058 */ IdleState idle;
-    /* 0x068 */ u8 pad68[0x10];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0xA7];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0x77];
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 pad199[0x19];
-    /* 0x1B2 */ u8 unk1B2;
-} IdleOwner;
-
 /* One frame of an idle sequence. */
 typedef struct {
     /* 0x0 */ u16 anim;
@@ -199,7 +160,7 @@ void func_1507EEF4(void) {
     IdleState *idle;
     s32 phase;
 
-    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    idle = &D_800D154C->unk31C->idle;
     phase = idle->phase;
 
     if (phase == 0) {
@@ -248,7 +209,7 @@ void func_1507EFD0(void) {
     s32 reused;
     s32 seq;
 
-    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    idle = &D_800D154C->unk31C->idle;
     count = 0;
     /* struct127 0x139: a requested sequence, 0x13A: its countdown (pad139 in include/structs.h) */
     if (D_800D154C->pad139[1] != 0) {
@@ -258,10 +219,10 @@ void func_1507EFD0(void) {
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
-    } else if (((IdleOwner *)D_800D154C->unk31C)->idle.delay != 0 && D_800D154C->unk31C->unk78 == 0) {
+    } else if (D_800D154C->unk31C->idle.delay != 0 && D_800D154C->unk31C->unk78 == 0) {
         seq = 0xB;
         if (idle->timer >= 121) {
-            ((IdleOwner *)D_800D154C->unk31C)->idle.delay = 0;
+            D_800D154C->unk31C->idle.delay = 0;
             idle->timer = 0;
             idle->phase = 0;
             seq = 0xC;
@@ -343,7 +304,7 @@ s32 func_1507F454(void) {
     s32 sequence;
     s32 next;
 
-    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    idle = &D_800D154C->unk31C->idle;
     sequence = idle->sequence;
 
     if (sequence == 0) {
@@ -420,7 +381,7 @@ void func_1507F640(void) {
     s32 type;
     IdleFrame *entry;
     IdleState *idle;
-    IdleOwner *owner;
+    ActorCtl *owner;
     f32 speed;
     f32 blend;
     s32 anim;
@@ -439,12 +400,12 @@ void func_1507F640(void) {
     if (D_800C3E78 >= D_8008FD8C) {
         return;
     }
-    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    idle = &D_800D154C->unk31C->idle;
     idle->active = TRUE;
     if (D_800D154C->unk2F8 & 0x20) {
         return;
     }
-    if (((IdleOwner *)D_800D154C->unk31C)->unk120) {
+    if (D_800D154C->unk31C->unk120) {
         return;
     }
     if (idle->holdFrames > 0) {
@@ -469,7 +430,7 @@ void func_1507F640(void) {
     D_800D154C->unk100 &= 0xFE;
     D_800D154C->unk2F8 &= ~7;
     D_800D154C->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
-    owner = (IdleOwner *)D_800D154C->unk31C;
+    owner = D_800D154C->unk31C;
     if (owner->unk17) {
         s32 pad; // matching: unused stack slot
         if (func_150ADA20() & 3) {
@@ -576,7 +537,7 @@ void func_1507F640(void) {
         return;
     }
     if (func_1507F454()) {
-        owner = (IdleOwner *)D_800D154C->unk31C;
+        owner = D_800D154C->unk31C;
         if (owner->unk198 && idle->sequence == 0) {
             switch (owner->unk78) {
             case 3:
@@ -607,7 +568,7 @@ void func_1507F640(void) {
     override = D_80086BA0[sequence][frame];
     entry = &D_8009B8B0[override];
     if (override == 0) {
-        owner = (IdleOwner *)D_800D154C->unk31C;
+        owner = D_800D154C->unk31C;
         sequence = -1;
         switch (owner->unk78) {
         case 9:
@@ -649,7 +610,7 @@ void func_1507FC2C(struct127 *actor) {
     s32 changed;
     u8 sequence;
 
-    idle = &((IdleOwner *)actor->unk31C)->idle;
+    idle = &actor->unk31C->idle;
     if (idle->sequence != 0) {
         sequence = idle->sequence;
         frame = idle->frame;
@@ -715,7 +676,7 @@ void func_1507FEA0(struct127 *actor) {
         return;
     }
     countdown = actor->pad139[1];
-    idle = &((IdleOwner *)actor->unk31C)->idle;
+    idle = &actor->unk31C->idle;
     if (countdown != 0) {
         actor->pad139[1] = countdown - 1;
     }
@@ -732,13 +693,13 @@ void func_1507FEA0(struct127 *actor) {
         idle->phase = 0;
         idle->phaseCount = 0;
     }
-    delay = ((IdleOwner *)actor->unk31C)->idle.delay; // matching: re-read through actor, not idle
+    delay = actor->unk31C->idle.delay; // matching: re-read through actor, not idle
     if (delay != 0) {
         if (D_800BE9E4 < delay) {
-            ((IdleOwner *)actor->unk31C)->idle.delay = delay - D_800BE9E4;
+            actor->unk31C->idle.delay = delay - D_800BE9E4;
         } else {
             func_1507FF94(actor);
-            ((IdleOwner *)actor->unk31C)->idle.delay = 0;
+            actor->unk31C->idle.delay = 0;
         }
     }
     func_1507FC2C(actor);

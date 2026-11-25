@@ -283,13 +283,8 @@ void func_151027E8(struct127 *actor) {
 }
 
 typedef struct {
-    u8 pad0[0x197];
-    u8 unk197;
-} LinkedState1510281C;
-
-typedef struct {
     u8 pad0[0x31C];
-    LinkedState1510281C *unk31C;
+    ActorCtl *unk31C;
 } LinkedObj1510281C;
 
 /* State block at +0x110 of the objects referenced by Owner1510281C. */
@@ -320,7 +315,7 @@ s32 func_1510281C(Owner1510281C *owner, s16 key) {
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->unk197 != 0) {
+        if (linked == NULL || linked->unk31C->aimState != 0) {
             return 0;
         }
     }
@@ -350,7 +345,7 @@ s32 func_151028AC(Owner1510281C *owner, s16 key) {
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->unk197 != 0) {
+        if (linked == NULL || linked->unk31C->aimState != 0) {
             return 0;
         }
     }

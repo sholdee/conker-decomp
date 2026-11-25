@@ -10,7 +10,7 @@ extern void func_151254F4(Camera *camera, s32 index);
 extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
-/* File-local view of struct127.unk31C; structs.h's struct126 stops at 0x1AC, before the aim angles. */
+/* File-local view of struct127.unk31C; structs.h's ActorCtl stops at 0x1AC, before the aim angles. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x75];
     /* 0x075 */ u8 unk75;
@@ -144,7 +144,7 @@ f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targe
 
 /* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with unk197 set. */
 void func_150ED578(struct127 *obj) {
-    struct126 *state;
+    ActorCtl *state;
     s32 player;
     struct127 *owner;
     Camera *camera;
@@ -555,7 +555,7 @@ void func_150ED748(struct127 *obj) {
             } else {
                 camera = &D_800DBFF0[camSlot - 1];
                 subject = camera->playerExt;
-                if (camera->playerExt->unk197 != 0) {
+                if (camera->playerExt->aimState != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->unk170;

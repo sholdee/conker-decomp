@@ -248,7 +248,7 @@ void func_15063168(struct127 *arg0);
  * with id 0x21 use their own tables and a random wandering heading.
  */
 void func_150CE740(struct127 *obj) {
-    struct126 *owner;
+    ActorCtl *owner;
     u16 heading;
     u16 prevFacing;
     u8 isType21;
@@ -389,7 +389,7 @@ control_done:
     }
     if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
         owner = obj->unk31C;
-        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of struct126 as declared */
+        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of ActorCtl as declared */
             func_15063168(obj);
         }
     }

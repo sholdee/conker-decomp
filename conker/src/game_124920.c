@@ -373,8 +373,8 @@ void func_150F7F58(struct210 *obj, s16 arg1) {
 extern f32 func_150ADA68(void);
 void func_151541B8(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(struct17 *pos, u8, s32);
-struct126 *func_150FF288(struct127 *);
-s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
+ActorCtl *func_150FF288(struct127 *);
+s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, ActorCtl *);
 void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
 
@@ -1062,7 +1062,7 @@ s32 arg2;
     struct17 hit;
     struct17 normal;
     struct17 unk30;
-    struct126 *gun;
+    ActorCtl *gun;
 
     gun = func_150FF288(obj);
     if (gun != NULL) {

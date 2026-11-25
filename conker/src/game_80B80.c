@@ -325,13 +325,13 @@ void func_150538CC(struct127 *obj) {
         dir[0] *= inv;
         dir[1] *= inv;
         dir[2] *= inv;
-        func_15081690(obj, obj->old_x_position, obj->old_y_position, obj->old_z_position, dir[0], dir[1], dir[2], &obj->unk31C->pad98[0x18], len, 0, 0, 0, -1, 0, 0);
-        hit = func_15081E78(obj, &obj->unk31C->pad98[0x18], kind);
+        func_15081690(obj, obj->old_x_position, obj->old_y_position, obj->old_z_position, dir[0], dir[1], dir[2], &obj->unk31C->unkB0, len, 0, 0, 0, -1, 0, 0);
+        hit = func_15081E78(obj, &obj->unk31C->unkB0, kind);
         if (hit != 0) {
             done = 1;
             if ((hit == 1) && (obj->unk124 > 0)) {
                 owner = &D_800CC2D0[obj->unk124 - 1];
-                if ((owner->unk31C != NULL) && (owner->unk31C->pad98[0x17] != 0)) {
+                if ((owner->unk31C != NULL) && (owner->unk31C->unkAF != 0)) {
                     if (func_10010894(owner) == 0) {
                         func_15060A30((func_150ADA20() % 3U) + 0x53B, owner);
                     }
@@ -508,7 +508,7 @@ void func_15054A94(struct127 *obj) {
     s32 action;
     s32 hold;
     s32 enter;
-    struct126 *state;
+    ActorCtl *state;
     s32 index;
     u8 ready;
 
@@ -604,7 +604,7 @@ void func_15054A94(struct127 *obj) {
     if (state->unk78 == 0x12) {
         ready = 1;
     } else {
-        ready = state->unk197;
+        ready = state->aimState;
         if (state->unk84 == 0) {
             index = other - D_800CC2D0;
             // D_800BE728[0] points to the per-player controller pads
@@ -615,7 +615,7 @@ void func_15054A94(struct127 *obj) {
     }
     // 0x3C is past the end of struct197 as declared in structs.h
     if (other->unk84.uh == 0x10A && *(s16 *)((u8 *)otherAnim + 0x3C) <= 0 && ready &&
-        ((u16)state->unk8A & 0x2000)) {
+        (state->buttons & 0x2000)) {
         if (obj->unk2E8 == 0) {
             func_151026BC(other, -1, 3, 1, 0xFF, 1);
             obj->unk2E8 = 1;

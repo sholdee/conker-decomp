@@ -59,7 +59,7 @@ typedef struct {
 
 extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
 
-/* The fields of struct127.unk31C that func_150FB8C0 reads (struct126 only declares them as padding). */
+/* The fields of struct127.unk31C that func_150FB8C0 reads (ActorCtl only declares them as padding). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x130];
     /* 0x130 */ f32 lineDirX;

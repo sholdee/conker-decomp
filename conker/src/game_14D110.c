@@ -16,7 +16,7 @@
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
 
-/* Camera.playerExt (struct126, the player's unk31C): fields struct126 does not declare yet; layout as in
+/* Camera.playerExt (ActorCtl, the player's unk31C): fields ActorCtl does not declare yet; layout as in
    game_14FF90.c. */
 typedef struct CamPlayerExt {
     /* 0x000 */ u8 pad0[0x12];

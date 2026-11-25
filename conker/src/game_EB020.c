@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The block behind struct127.unk31C, with the fields struct126 still covers with padding. */
+/* The block behind struct127.unk31C, with the fields ActorCtl still covers with padding. */
 typedef struct ObjState {
     /* 0x000 */ u8 pad0[0x24];
     /* 0x024 */ u16 unk24;

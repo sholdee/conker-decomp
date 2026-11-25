@@ -1719,7 +1719,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
     Particle *points = actor->points;
     struct127 *owner;
-    struct126 *sub;
+    ActorCtl *sub;
     ListedObject *head;
     ListedObject *node;
     s32 i;
@@ -1739,7 +1739,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     if (sub == NULL) {
         return 0;
     }
-    if (sub->unk58 != 1) {
+    if (sub->idle.active != 1) {
         owner->unk2F8 &= ~0x100;
         return 0;
     }

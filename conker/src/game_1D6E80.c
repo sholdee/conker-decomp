@@ -1129,7 +1129,7 @@ void func_151AB854(ActorTask *task) {
             desc.unkA = 0;
         }
         if (actor->unk127 != 0xFF) {
-            actor->unk31C->unk66 = 500;
+            actor->unk31C->idle.delay = 500;
         }
         func_15190770(&desc, 0, task->unkC, task->unk1);
     }

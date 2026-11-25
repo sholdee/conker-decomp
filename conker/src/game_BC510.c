@@ -975,7 +975,7 @@ typedef struct HudTime {
     u8 pad28[0x84 - 0x28];
 } HudTime;
 
-/* struct126 (include/structs.h) has no fields at 0x12C and 0x1AE yet. */
+/* ActorCtl (include/structs.h) has no fields at 0x12C and 0x1AE yet. */
 #define HUD_S8(p, off) (*(s8 *)((u8 *)(p) + (off)))
 #define HUD_U16(p, off) (*(u16 *)((u8 *)(p) + (off)))
 
@@ -998,7 +998,7 @@ extern u8 D_D14[];
 
 /* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
  * 0x002 an icon picked by func_150859AC(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
- * (repeated per count) and bars from struct126 field 0x12C, 0x010 two rows of bars from
+ * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
  * func_150859AC(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
  * 0x020 the radar (func_15093B58). */
 Gfx *func_150918EC(Gfx *gfx) {
@@ -1017,7 +1017,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     s32 vpWidth;
     s32 lapCount;
     s32 vpRight;
-    struct126 *a1; // matching: unused, yet removing it changes the register allocation
+    ActorCtl *a1; // matching: unused, yet removing it changes the register allocation
     struct127 *player;
     s32 rowY;
     s32 cellShift;

@@ -11,6 +11,8 @@ typedef struct struct119 struct119;
 typedef struct struct124 struct124;
 typedef struct struct127 struct127;
 typedef struct Camera Camera;
+struct Rope;
+struct BoneChain;
 typedef struct struct216 struct216;
 typedef struct struct255 struct255;
 typedef struct struct256 struct256;
@@ -906,104 +908,201 @@ typedef struct {
     s32 unk28;      // used
 } struct125;
 
-// movement modifier?
+/* Idle animation state of an ActorCtl (ActorCtl.idle, 0x58). While an actor stands still it plays
+ * short "sequences" of frames, picked at random while avoiding the ones played most recently. */
 typedef struct {
-    u8  pad0[0x8];
-    u16 unk8;
-    u8  padA[0x2];
-    u8  unkC;
-    u8  padD;
-    u16 unkE;
-    u8  pad10[0x2];
-    s16 unk12;
-    u8  unk14;
-    u8  pad15;
-    u8  unk16;
-    u8  pad17[0xF];
-    s8  unk26;
-    u8  unk27;
-    s32 unk28;
-    s32 unk2C;
-    u8  unk30;
-    u8  unk31;
-    u8  pad32[0x4];
-    u8  unk36;
-    u8  pad37;
-    s32 unk38;
-    u8  pad3C[0x8];
-    s8  unk44;
-    u8  pad45[0x5];
-    /* 0x4A */ s8  chased; //unk4A;
-    /* 0x4B */ s8  chasing; //unk4B;
-    u16 unk4C;
-    u8  unk4E;
-    u8  pad4F[0x3];
-    u8  unk52;
-    u8  pad53;
-    s8  unk54;
-    s8  unk55;
-    u8  pad56;
-    u8  unk57;
-    u8  unk58;   // used
-    u8  unk59;   // used
-    u8  pad5A[0xC];
-    u16 unk66;
-    u8  pad68[0x3];
-    u8  unk6B;
-    u8  pad6C[0x9];
-    u8  unk75;
-    u8  pad76[0x2];
-    u8  unk78;
-    u8  pad79[0x4];
-    /* 0x7D */  u8  matrix_physics; //unk7D;
-    u8  pad7E[0x2];
-    s16 unk80;
-    s16 unk82;
-    u8  unk84;
-    u8  pad85[0x3];
-    s16 unk88;
-    s16 unk8A;  // used
-    u16 unk8C;  // used
-    s8  unk8E;  // used
-    s8  unk8F;  // used
-    s8  unk90;
-    s8  unk91;
-    s8  unk92;
-    s8  unk93;
-    s8  unk94;
-    s8  unk95;  // used
-    u8  pad96;
-    u8  unk97;
-    u8  pad98[0x7C];
-    u16 unk114;
-    u16 unk116;
-    u16 unk118;
-    u8  unk11A;
-    u8  pad11B[0x5];
-    u8  unk120;
-    u8  unk121;
-    u8  unk122;
-    u8  unk123;
-    s16 unk124;
-    u16 pad126;
-    u8  unk128;
-    u8  pad129[0x63];
+    /* 0x0 */ u8  active;
+    /* 0x1 */ u8  holdFrames;  // frames left before the next sequence frame
+    /* 0x2 */ u16 timer;       // time spent idle in the current phase
+    /* 0x4 */ u8  sequence;    // index into D_80086BA0, 0 = none
+    /* 0x5 */ u8  frame;       // position within the sequence
+    /* 0x6 */ u8  frameFlags;  // flags of the frame applied last
+    /* 0x7 */ u8  recent[5];   // most recently played sequences, newest first
+    /* 0xC */ u8  phase;
+    /* 0xD */ u8  phaseCount;  // sequences played in the current phase
+    /* 0xE */ s16 delay;
+} IdleState; // size 0x10
+
+/* Per-character control block (struct127.unk31C, 0x1C0 bytes, allocated for player-controlled and
+ * scripted characters): movement state, controller input, rope riding, idle animation and the
+ * first-person aim state. */
+typedef struct {
+    /* 0x000 */ f32 unk0;
+    /* 0x004 */ s32 unk4;
+    /* 0x008 */ s16 unk8;
+    /* 0x00A */ u8  padA;
+    /* 0x00B */ u8  unkB;
+    /* 0x00C */ u8  unkC;
+    /* 0x00D */ u8  unkD;
+    /* 0x00E */ u16 unkE;
+    /* 0x010 */ s16 unk10;
+    /* 0x012 */ s16 unk12;
+    /* 0x014 */ u16 unk14;
+    /* 0x016 */ u8  unk16;
+    /* 0x017 */ u8  unk17;
+    /* 0x018 */ s16 unk18;
+    /* 0x01A */ u8  unk1A;
+    /* 0x01B */ u8  unk1B;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8  unk20;
+    /* 0x021 */ u8  unk21;
+    /* 0x022 */ s8  unk22;
+    /* 0x023 */ s8  unk23;
+    /* 0x024 */ s16 unk24;
+    /* 0x026 */ u8  unk26;
+    /* 0x027 */ u8  unk27;
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ f32 unk2C;
+    /* 0x030 */ s8  unk30;
+    /* 0x031 */ u8  unk31;
+    /* 0x032 */ u16 unk32;
+    /* 0x034 */ u16 unk34;
+    /* 0x036 */ u8  unk36;
+    /* 0x037 */ u8  unk37;
+    /* 0x038 */ s32 unk38;
+    /* 0x03C */ u8  unk3C;
+    /* 0x03D */ u8  pad3D;
+    /* 0x03E */ u16 unk3E;
+    /* 0x040 */ f32 unk40;
+    /* 0x044 */ s8  unk44;
+    /* 0x045 */ u8  pad45;
+    /* 0x046 */ s16 unk46;
+    /* 0x048 */ s16 unk48;
+    /* 0x04A */ s8  chased;
+    /* 0x04B */ s8  chasing;
+    /* 0x04C */ u16 unk4C;
+    /* 0x04E */ u8  unk4E;
+    /* 0x04F */ u8  unk4F;
+    /* 0x050 */ s8  unk50;
+    /* 0x051 */ u8  unk51;
+    /* 0x052 */ u8  unk52;
+    /* 0x053 */ u8  unk53;
+    /* 0x054 */ s8  unk54;
+    /* 0x055 */ s8  unk55;
+    /* 0x056 */ u8  unk56;
+    /* 0x057 */ u8  unk57;
+    /* 0x058 */ IdleState idle;
+    /* 0x068 */ s16 unk68;
+    /* 0x06A */ u8  pad6A;
+    /* 0x06B */ u8  unk6B;      // grab state
+    /* 0x06C */ s16 holdX;      // held position (s16 world units)
+    /* 0x06E */ s16 holdY;
+    /* 0x070 */ s16 holdZ;
+    /* 0x072 */ u16 unk72;
+    /* 0x074 */ u8  unk74;
+    /* 0x075 */ u8  unk75;
+    /* 0x076 */ u8  unk76;
+    /* 0x077 */ u8  unk77;
+    /* 0x078 */ u8  unk78;
+    /* 0x079 */ u8  unk79;
+    /* 0x07A */ u8  unk7A;
+    /* 0x07B */ u8  unk7B;
+    /* 0x07C */ u8  unk7C;
+    /* 0x07D */ u8  matrix_physics;
+    /* 0x07E */ u16 unk7E;
+    /* 0x080 */ s16 unk80;
+    /* 0x082 */ s16 unk82;
+    /* 0x084 */ u8  unk84;
+    /* 0x085 */ s8  stick_x;    // this frame's controller input
+    /* 0x086 */ s8  stick_y;
+    /* 0x087 */ u8  pad87;
+    /* 0x088 */ u16 prevButtons;  // buttons of the previous frame
+    /* 0x08A */ u16 buttons;
+    /* 0x08C */ u16 unk8C;
+    /* 0x08E */ s8  unk8E;
+    /* 0x08F */ s8  unk8F;
+    /* 0x090 */ s8  unk90;
+    /* 0x091 */ s8  unk91;
+    /* 0x092 */ s8  unk92;
+    /* 0x093 */ s8  unk93;
+    /* 0x094 */ s8  unk94;
+    /* 0x095 */ u8  unk95;
+    /* 0x096 */ u8  unk96;
+    /* 0x097 */ u8  unk97;
+    /* 0x098 */ u8  ropeId;
+    /* 0x099 */ u8  pad99[3];
+    /* 0x09C */ struct Rope *rope;     // rope being ridden, or NULL
+    /* 0x0A0 */ f32 ropeProgress;      // 0..1 along the rope
+    /* 0x0A4 */ u8  padA4[4];
+    /* 0x0A8 */ f32 ropeSwingForce;
+    /* 0x0AC */ u8  ropeSwingAngle;
+    /* 0x0AD */ s8  ropeSwingTimer;
+    /* 0x0AE */ u8  ropeNode;
+    /* 0x0AF */ u8  unkAF;
+    /* 0x0B0 */ struct127 *unkB0;
+    /* 0x0B4 */ u8  padB4[4];
+    /* 0x0B8 */ f32 unkB8;
+    /* 0x0BC */ f32 unkBC;
+    /* 0x0C0 */ f32 unkC0;
+    /* 0x0C4 */ u8  padC4[0x18];
+    /* 0x0DC */ f32 unkDC[3];
+    /* 0x0E8 */ u8  padE8[0x20];
+    /* 0x108 */ u8  unk108;
+    /* 0x109 */ u8  unk109;
+    /* 0x10A */ u8  pad10A[0xA];
+    /* 0x114 */ s16 unk114;
+    /* 0x116 */ u16 unk116;
+    /* 0x118 */ u16 unk118;
+    /* 0x11A */ u8  unk11A;
+    /* 0x11B */ u8  spawnIndex;
+    /* 0x11C */ struct BoneChain *boneChain;
+    /* 0x120 */ u8  unk120;
+    /* 0x121 */ u8  unk121;
+    /* 0x122 */ u8  unk122;
+    /* 0x123 */ u8  unk123;
+    /* 0x124 */ s16 unk124;
+    /* 0x126 */ s16 unk126;
+    /* 0x128 */ u8  unk128;
+    /* 0x129 */ s8  unk129;
+    /* 0x12A */ s8  unk12A;
+    /* 0x12B */ u8  pad12B;
+    /* 0x12C */ u16 unk12C;
+    /* 0x12E */ u8  pad12E[2];
+    /* 0x130 */ vertex aimDir;
+    /* 0x13C */ vertex aimEye;
+    /* 0x148 */ vertex aimTarget;
+    /* 0x154 */ u8  pad154[0xC];
+    /* 0x160 */ vertex unk160;
+    /* 0x16C */ f32 aimYaw;
+    /* 0x170 */ f32 aimPitch;
+    /* 0x174 */ f32 aimYawTarget;
+    /* 0x178 */ f32 aimPitchTarget;
+    /* 0x17C */ f32 aimYawVel;
+    /* 0x180 */ f32 aimPitchVel;
+    /* 0x184 */ f32 aimZoom;
+    /* 0x188 */ f32 aimZoomY;
     /* 0x18C */ f32 unk18C;
-    u8  pad190[0x5];
-    u8  unk195;
-    u8  pad196;
-    /* 0x197 */ u8  unk197;
-    u8  unk198;
-    u8  pad199;
-    /* 0x19a */ u8  grenade_count;
-    u8  unk19B;
-    u8  pad19C[0x2];
-    u16 unk19E;
-    u16 unk1A0;
-    u8  pad1A2[0x7];
-    u8  unk1A9;
-    s16 unk1AA;
-} struct126;
+    /* 0x190 */ s32 aimZone;
+    /* 0x194 */ u8  aimReset;
+    /* 0x195 */ s8  unk195;
+    /* 0x196 */ s8  unk196;
+    /* 0x197 */ u8  aimState;      // nonzero while aiming in first person
+    /* 0x198 */ u8  unk198;
+    /* 0x199 */ u8  unk199;
+    /* 0x19A */ u8  grenade_count;
+    /* 0x19B */ u8  unk19B;
+    /* 0x19C */ u16 unk19C;
+    /* 0x19E */ u16 unk19E;
+    /* 0x1A0 */ u16 unk1A0;
+    /* 0x1A2 */ u16 unk1A2;
+    /* 0x1A4 */ u16 unk1A4;
+    /* 0x1A6 */ u16 unk1A6;
+    /* 0x1A8 */ u8  unk1A8;
+    /* 0x1A9 */ u8  unk1A9;
+    /* 0x1AA */ s16 unk1AA;
+    /* 0x1AC */ u8  unk1AC;
+    /* 0x1AD */ u8  unk1AD;
+    /* 0x1AE */ s8  unk1AE;
+    /* 0x1AF */ s8  unk1AF;
+    /* 0x1B0 */ s8  lastSpawnIndex;   // last multiplayer spawn point used
+    /* 0x1B1 */ u8  unk1B1;
+    /* 0x1B2 */ u8  unk1B2;
+    /* 0x1B3 */ u8  unk1B3;
+    /* 0x1B4 */ u8  unk1B4;
+    /* 0x1B5 */ u8  pad1B5[3];
+    /* 0x1B8 */ f32 unk1B8;
+    /* 0x1BC */ f32 unk1BC;
+} ActorCtl; // size 0x1C0
 
 typedef struct {
     u16 unk0;
@@ -1356,7 +1455,7 @@ struct struct127 {
     u8  unk300;
     u8  unk301[0x17];
     /* 0x318 */ Camera *camera;
-    struct126 *unk31C; // used (is this actually 127?)
+    /* 0x31C */ ActorCtl *unk31C;
     u8  pad320[0xC];
 }; // size 0x32C => 812 bytes game_object
 
@@ -1913,7 +2012,7 @@ struct Camera {
     /* 0x3CC */ s16 unk3CC;
     /* 0x3CE */ u8 pad3CE[0x2];
     /* 0x3D0 */ struct127 *player;                   /* the object the camera follows */
-    /* 0x3D4 */ struct126 *playerExt;                /* player->unk31C */
+    /* 0x3D4 */ ActorCtl *playerExt;                /* player->unk31C */
     /* 0x3D8 */ u8 pad3D8[0x4];
     /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
     /* 0x3E0 */ f32 unk3E0;

@@ -58,7 +58,7 @@ typedef struct {
 
 #define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
-// struct126 (include/structs.h) has no field at 0x12C yet.
+// ActorCtl (include/structs.h) has no field at 0x12C yet.
 #define AI_UNK12C(ai) (*(u16 *)((u8 *)(ai) + 0x12C))
 
 /**

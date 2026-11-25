@@ -136,7 +136,7 @@ Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {
     return func_1517F08C(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
 }
 
-extern struct126 *D_800CC5EC;
+extern ActorCtl *D_800CC5EC;
 
 /* Returns D_800CC5EC->matrix_physics, or 0 when D_800CC5EC is unset. */
 u8 func_151044F4(void) {

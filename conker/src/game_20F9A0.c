@@ -1688,7 +1688,7 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
         if ((attacker != victim) && (victim->unk31C != NULL) && (attacker->health != 0)) {
             sound = 0;
             delay = 0;
-            attacker->unk31C->pad98[0x17] = 0;
+            attacker->unk31C->unkAF = 0;
             variants = 0;
             if (cause == 0x33) {
                 victimKind = victim->unk31C->unk78;
@@ -1730,7 +1730,7 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) { // past the end of structs.h's struct126
+                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) { // past the end of structs.h's ActorCtl
                     if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;

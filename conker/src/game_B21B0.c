@@ -57,7 +57,7 @@ extern s8 D_800E0BE3;
 s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32 *outUnk8, u8 *outUnk6,
                   u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag) {
     s32 remember;
-    struct126 *state;
+    ActorCtl *state;
     s32 mask; // matching: also the player loop counter and link index; separate locals change regalloc
     s32 team;
     s32 best;
@@ -80,10 +80,10 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
     }
     if (playerIndex != 0xFF) {
         if (spawnIndex == -1) {
-            spawnIndex = D_800CC2D0[playerIndex].unk31C->pad11B[0];
+            spawnIndex = D_800CC2D0[playerIndex].unk31C->spawnIndex;
         }
         if (remember) {
-            D_800CC2D0[playerIndex].unk31C->pad11B[0] = 0;
+            D_800CC2D0[playerIndex].unk31C->spawnIndex = 0;
         }
     }
     spawnIndex &= 0xFFF;
@@ -111,7 +111,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                 }
             }
             bestDistSq = 0.0f;
-            /* state byte 0x1B0 (past the end of struct126) is the last multiplayer spawn index */
+            /* state byte 0x1B0 (past the end of ActorCtl) is the last multiplayer spawn index */
             lastSpawn = *(s8 *)((u8 *)state + 0x1B0);
             for (i = 0; i < count; i++) {
                 if (lastSpawn != candidates[i]) {
@@ -177,7 +177,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             outPos[2] += cosf(angle) * offset;
         }
         if (playerIndex != 0xFF && remember) {
-            D_800CC2D0[playerIndex].unk31C->pad11B[0] = spawnIndex;
+            D_800CC2D0[playerIndex].unk31C->spawnIndex = spawnIndex;
         }
         return 0;
     }
@@ -186,12 +186,12 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
 
 /* Sets the spawn index func_15084D70 falls back to for this player object. */
 void func_15085410(struct127 *obj, s32 spawnIndex) {
-    obj->unk31C->pad11B[0] = spawnIndex;
+    obj->unk31C->spawnIndex = spawnIndex;
 }
 
 /* Returns the player object's stored spawn index. */
 u8 func_15085420(struct127 *obj) {
-    return obj->unk31C->pad11B[0];
+    return obj->unk31C->spawnIndex;
 }
 
 extern f32  func_1506AD30(struct127 *, f32, s32);
@@ -249,7 +249,7 @@ void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused) {
     obj->unk16C = 0.0f;
     obj->unk170 = 0.0f;
     if (obj->unk127 != 0xFF) {
-        /* state byte 0x23 is inside struct126's pad17 */
+        /* state byte 0x23 is inside ActorCtl's pad17 */
         *((u8 *)obj->unk31C + 0x23) = unk15;
         if (D_800BE616 && D_800D18A8) {
             func_1505D6F0(obj, obj - D_800CC2D0);

@@ -280,7 +280,7 @@ void func_150B0D20(DDB60Effect *effect) {
     }
     idx = owner->unk124;
     emit = 0;
-    if (D_800CC2D0[idx].unk31C->pad4F[0] == 2) {
+    if (D_800CC2D0[idx].unk31C->unk4F == 2) {
         speed = owner->xz_velocity;
         minSpeed = D_800CC2D0[idx].unk44 * 1.350000024f;
         if (speed < minSpeed) {

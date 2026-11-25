@@ -631,7 +631,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         }
     } else if (event->type == 0xD) {
-        struct126 *s;
+        ActorCtl *s;
 
         if (obj == NULL) {
             return 1;
@@ -1405,12 +1405,12 @@ extern void func_151090DC(void);
 extern void func_150FB324(struct127 *, u8, s32);
 extern void func_150F97EC(struct127 *, u8, s32);
 extern void func_150F9950(struct127 *, u8, s32);
-extern s32 func_1514654C(struct127 *, struct126 *, s32, f32 **, f32 **, s32);
+extern s32 func_1514654C(struct127 *, ActorCtl *, s32, f32 **, f32 **, s32);
 extern void func_151C5588(struct127 *, f32 *, s32, u8, s32);
 extern void func_151C56A4(f32 *, u8, s32);
 extern void func_150E06D8(struct127 *, u8, u8, s32);
 extern void func_151CFA4C(struct127 *, u8, s32);
-extern void func_151C62D0(struct127 *, u8, s32, struct126 *, s32, s32, s32);
+extern void func_151C62D0(struct127 *, u8, s32, ActorCtl *, s32, s32, s32);
 extern void func_150BAA14(struct127 *, s32, s32);
 extern void func_150E0870(struct127 *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
@@ -2079,7 +2079,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151090DC();
                     break;
                 case 2: {
-                    struct126 *bone;
+                    ActorCtl *bone;
                     f32 vec[3];
 
                     if (obj != NULL) {
@@ -2131,7 +2131,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 5:
                     if (obj != NULL) {
-                        struct126 *bone;
+                        ActorCtl *bone;
 
                         bone = NULL;
                         if (event->unk6 != 0) {

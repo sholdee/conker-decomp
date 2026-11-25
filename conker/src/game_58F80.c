@@ -45,12 +45,6 @@ typedef struct ObjDef {
     /* 0x2E */ u8 keepTime; // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
 } ObjDef;
 
-/* struct126 (obj->unk31C) with the byte at 0x197 that struct126 still calls pad196[1]. */
-typedef struct GameObjExt {
-    /* 0x000 */ u8 pad0[0x197];
-    /* 0x197 */ u8 unk197;
-} GameObjExt;
-
 /* File-local view of struct127 (the 0x32C-byte game objects in D_800CC2D0); field names follow
    include/structs.h where it has them. Central pass: fold into struct127. */
 typedef struct GameObj {
@@ -186,7 +180,7 @@ typedef struct GameObj {
     /* 0x304 */ s32 unk304[4];
     /* 0x314 */ s32 unk314;
     /* 0x318 */ Camera *camera;
-    /* 0x31C */ GameObjExt *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
@@ -1281,7 +1275,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     } else {
         canCull = TRUE;
     }
-    if (obj->unk31C != NULL && obj->unk31C->unk197 != 0) {
+    if (obj->unk31C != NULL && obj->unk31C->aimState != 0) {
         canCull = FALSE;
     }
     if ((1 << index) & D_800C3E74) {
@@ -1289,7 +1283,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     }
     if (obj->id == 0x8A) {
         other = func_15072208(obj, 0);
-        if (other != NULL && other->unk31C != NULL && other->unk31C->unk197 != 0) {
+        if (other != NULL && other->unk31C != NULL && other->unk31C->aimState != 0) {
             canCull = FALSE;
         }
     }
@@ -1464,7 +1458,7 @@ void func_1502E4C4(s32 index) {
         view = (s32)&D_800BE628[i];
         tbl = D_800D9C10[i];
         inside = FALSE;
-        if (D_800DBFF0[i].playerExt->unk197 != 0) {
+        if (D_800DBFF0[i].playerExt->aimState != 0) {
             playerRange = 100000;
         } else {
             playerRange = range;
@@ -1515,7 +1509,7 @@ void func_1502E4C4(s32 index) {
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
-    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->unk197 != 0)) {
+    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->aimState != 0)) {
         obj->unk74 |= 1 << index;
     }
     if (D_800C35EA != 1) {

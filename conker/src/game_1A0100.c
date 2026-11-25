@@ -46,7 +46,7 @@ void func_15172D28(struct127 *actor, s32 spawnIndex) {
     func_15085430(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
     if (D_800BE9B4 == 0 && actor->unk31C != NULL) {
-        actor->unk31C->pad56 = 3;
+        actor->unk31C->unk56 = 3;
     }
 }
 
@@ -78,7 +78,7 @@ void func_15172D80(s32 player) {
 void func_15172E7C(struct127 *actor, s32 level, s32 spawnIndex) {
     s32 player = actor->unk127;
 
-    // struct126 has no field at 0x23 (only padding there in structs.h)
+    // ActorCtl has no field at 0x23 (only padding there in structs.h)
     if (actor->health != 0 && (actor->unk31C == NULL || *(s8 *)((u8 *)actor->unk31C + 0x23) <= 0)) {
         if (actor->camera != NULL) {
             if (D_800DD2B0[player] == -1) {

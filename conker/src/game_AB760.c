@@ -55,7 +55,7 @@ typedef struct {
     /* 0x136 */ u8 pad136[0x94];
     /* 0x1CA */ u8 health;
     /* 0x1CB */ u8 pad1CB[0x151];
-    /* 0x31C */ struct126 *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
 } ExpressionActor;
 
 s32 func_150302F0(ExpressionActor *, s32);

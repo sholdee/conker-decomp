@@ -887,7 +887,7 @@ void func_1503192C(struct127 *owner, s32 setId, s32 alpha, s32 index) {
 }
 
 /* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
-struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
+ActorCtl *func_1503195C(struct127 *owner, s32 setId, s32 index) {
     s32 ownerId;
     Attachment *att;
     Attachment *next;
@@ -905,7 +905,7 @@ struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
                 index--;
                 att = next;
             } else {
-                return (struct126 *)att;
+                return (ActorCtl *)att;
             }
         } else {
             att = next;
@@ -956,7 +956,7 @@ extern s32 D_8009022C;
 /* Applies a model's side effects to its owner when it is attached (undone by func_15031C14). */
 void func_15031A50(Attachment *att, struct127 *owner) {
     s32 model = att->model;
-    struct126 *unk;
+    ActorCtl *unk;
 
     switch (model) {
     case 0x37:
@@ -965,7 +965,7 @@ void func_15031A50(Attachment *att, struct127 *owner) {
     case 0x5A:
         unk = owner->unk31C;
         if (unk != NULL) {
-            *(u16 *)((u8 *)unk + 0x1A6) += 0xAA; // not covered by struct126 yet
+            *(u16 *)((u8 *)unk + 0x1A6) += 0xAA; // not covered by ActorCtl yet
         }
         break;
     case 0x90:
@@ -1023,7 +1023,7 @@ void func_15031C14(Attachment *att) {
     struct127 *owner;
     ObjectRef ref49;
     ObjectRef ref5D;
-    struct126 *unk;
+    ActorCtl *unk;
     ObjectRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
 
     owner = func_15083E90(att->ownerId);
@@ -1032,7 +1032,7 @@ void func_15031C14(Attachment *att) {
         case 0x5A:
             unk = owner->unk31C;
             if (unk != NULL) {
-                *(u16 *)((u8 *)unk + 0x1A6) -= 0xAA; // not covered by struct126 yet
+                *(u16 *)((u8 *)unk + 0x1A6) -= 0xAA; // not covered by ActorCtl yet
             }
             break;
         case 0x90:
@@ -2452,7 +2452,7 @@ s32 func_15033328(Attachment *att, struct127 *owner) {
 
 /* Hook: hides the attachment while the owner is below unk118 + 300; removes it in water. */
 s32 func_150333A8(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+    ActorCtl *unk;
 
     if (D_800C35EA == 1) {
         return 0;
@@ -2644,7 +2644,7 @@ void func_151026BC(struct127 *, s32, s32, s32, s32, s32);
 s32 func_15033838(Attachment *att, struct127 *owner) {
     s32 kind;
     s32 triggered;
-    struct126 *unk;
+    ActorCtl *unk;
 
     triggered = 0;
     if (att->setId == 0x16) {
@@ -2672,8 +2672,8 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
     if (att->unk38 == 0) {
         if (triggered) {
             unk = owner->unk31C;
-            if ((unk->unk197 != 0) || (kind == 6)) {
-                if (((u16)unk->unk8A & 0x2000) == 0x2000) {
+            if ((unk->aimState != 0) || (kind == 6)) {
+                if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->unk19E == 0) {
                         att->unk38 = 1;
                         func_151026BC(owner, -1, kind, 1, 0xFF, 1);
@@ -2681,8 +2681,8 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
                 }
             }
         }
-    } else if (!triggered || (unk = owner->unk31C, ((u16)unk->unk8A & 0x2000) == 0) ||
-               ((unk->unk197 == 0) && (kind != 6))) {
+    } else if (!triggered || (unk = owner->unk31C, (unk->buttons & 0x2000) == 0) ||
+               ((unk->aimState == 0) && (kind != 6))) {
         att->unk38 = 0;
         func_151027E8(owner);
     }
@@ -2745,7 +2745,7 @@ void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *
 s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
     Attachment *att;
     struct127 *owner;
-    struct126 *unk;
+    ActorCtl *unk;
 
     att = sound->att;
     owner = sound->owner;
@@ -2771,7 +2771,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
             } else {
                 unk = owner->unk31C;
                 if (unk != NULL) {
-                    if (*(u16 *)&unk->pad19C < 120) {
+                    if (unk->unk19C < 120) {
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
@@ -2872,7 +2872,7 @@ void func_15033EC4(s32 a, s32 b) {
 
 /* Hook: removes the attachment (clearing unk31C->unk11A) unless unk31C->unk78 is 9 or unk11A is 3. */
 s32 func_15033F0C(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+    ActorCtl *unk;
 
     if (D_800C35EA == 1) {
         return 0;
@@ -2891,7 +2891,7 @@ s32 func_15033F0C(Attachment *att, struct127 *owner) {
 
 /* Hook: like func_15033F0C, but keeps the attachment while unk31C->unk78 is 0xC or 0x16. */
 s32 func_15033F70(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+    ActorCtl *unk;
 
     if (D_800C35EA == 1) {
         return 0;

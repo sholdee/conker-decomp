@@ -5,21 +5,13 @@
 
 void func_1505A770(struct127 *arg0);
 
-/* s16 position stored in the bytes struct126 declares as pad6C (written by game_1483E0). */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} TargetPos16;
-
 /*
  * While unk31C->unk6B < 4, moves the actor toward the s16 target position in its unk31C block
  * (all the way, or 40% per call in modes 1 and 3); otherwise clears the mode once unk28 runs out.
  * Ends the mode and sets in_water when the actor drops below unk118.
  */
 void func_15052260(struct127 *actor) {
-    struct126 *ctrl = actor->unk31C;
-    TargetPos16 *target;
+    ActorCtl *ctrl = actor->unk31C;
     f32 blend;
 
     if (ctrl->unk6B == 1 || ctrl->unk6B == 3) {
@@ -30,10 +22,9 @@ void func_15052260(struct127 *actor) {
     actor->unk1CC = actor->y_position;
 
     if (ctrl->unk6B < 4) {
-        target = (TargetPos16 *)ctrl->pad6C;
-        actor->x_position += ((f32)target->x - actor->x_position) * blend;
-        actor->y_position += ((f32)(target->y - 80) - actor->y_position) * blend;
-        actor->z_position += ((f32)target->z - actor->z_position) * blend;
+        actor->x_position += ((f32)ctrl->holdX - actor->x_position) * blend;
+        actor->y_position += ((f32)(ctrl->holdY - 80) - actor->y_position) * blend;
+        actor->z_position += ((f32)ctrl->holdZ - actor->z_position) * blend;
         func_1505E650(actor, 20, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         actor->y_velocity = -10.0f;
     } else {

@@ -55,7 +55,7 @@ typedef struct {
     u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
-    struct126 *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
+    ActorCtl *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
     Particle *effects[2];
     f32 width;          // trail width at the head, eased toward targetWidth each frame
     f32 targetWidth;
@@ -114,7 +114,7 @@ typedef struct {
 } ParticleParams;
 
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3);
+s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, ActorCtl *arg3);
 Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -122,7 +122,7 @@ TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, 
 void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     TrailSpawn spawn;
     TrailState init;
-    struct126 *s126;
+    ActorCtl *s126;
     vertex end;
     TrailState *state;
 
@@ -303,7 +303,7 @@ s32 func_150D3A68(TrailActor *actor) {
     TrailState *state;
     TrailPoint *points;
     struct127 *owner;
-    struct126 *s126;
+    ActorCtl *s126;
     struct17 prevPos;
     struct17 delta;
     f32 dist;
@@ -794,7 +794,7 @@ void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
     }
 }
 
-extern s32 func_1514654C(struct127 *, struct126 *, s32, struct17 **, struct17 **, s32);
+extern s32 func_1514654C(struct127 *, ActorCtl *, s32, struct17 **, struct17 **, s32);
 extern struct17 D_800A09D0;
 extern struct17 D_800A09DC;
 
@@ -802,7 +802,7 @@ extern struct17 D_800A09DC;
  * Computes the trail's start and end points: the owner's model points D_800A09D0 / D_800A09DC
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3) {
+s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, ActorCtl *arg3) {
     struct17 *modelPoints[2];
     struct17 *out[2];
 

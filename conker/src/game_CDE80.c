@@ -446,7 +446,7 @@ void func_150A11C4(struct127 *actor) {
                             }
                             if (angle > 0x2000 && angle < 0x6000) {
                                 actor->unk31C->unk97 = flag;
-                                actor->unk31C->pad96 = 0;
+                                actor->unk31C->unk96 = 0;
                                 actor->disable_jump = 18;
                                 actor->unk31C->unk95 = i + 1;
                                 if (D_800D3098[i].unk18 != 0) {
