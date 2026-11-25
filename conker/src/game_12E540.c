@@ -78,19 +78,6 @@ typedef struct {
     BeamHitFxData data;
 } BeamHitFx;
 
-typedef struct {
-    u8 pad0[0x9];
-    u8 disabled;
-    u8 padA[4];
-    s16 pos[3];
-} BeamEndPointData;
-
-/* beam->data.endPoint: tracks the beam's end in s16 coordinates. */
-typedef struct {
-    u8 pad0[0x14];
-    BeamEndPointData *data;
-    Beam *beam;
-} BeamEndPoint;
 
 /* beam->data.line: spans the beam from start to end. */
 typedef struct {
@@ -123,7 +110,7 @@ typedef struct {
     u8 flags; // 1 = drawn, 2 = aimed by the owner
     BeamStartFx *startFx;
     BeamHitFx *hitFx;
-    BeamEndPoint *endPoint;
+    LightEffect *endPoint; // light at the beam's end; its payload (data.object) is the Beam
     BeamLine *line;
     BeamEndFx *endFx;
     f32 width;
@@ -212,18 +199,18 @@ void func_15101210(BeamHitFx *fx) {
     func_1513CAA0((struct DefParticleHead *)fx);
 }
 
-void func_15101238(BeamEndPoint *endPoint) {
-    BeamData *data = &endPoint->beam->data;
+void func_15101238(LightEffect *endPoint) {
+    BeamData *data = &((Beam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617C4((LightEffect *)endPoint);
+    func_151617C4(endPoint);
 }
 
-void func_15101260(BeamEndPoint *endPoint) {
-    BeamData *data = &endPoint->beam->data;
+void func_15101260(LightEffect *endPoint) {
+    BeamData *data = &((Beam *)endPoint->data.object)->data;
 
     data->endPoint = NULL;
-    func_151617E4((LightEffect *)endPoint);
+    func_151617E4(endPoint);
 }
 
 void func_15101288(BeamStartFx *fx) {
@@ -352,7 +339,7 @@ s8 func_15101378(Beam *beam) {
             BeamHitFxData *hitFxData;
             BeamLink *endFxLink;
             BeamEndFx *endFx;
-            BeamEndPoint *endPoint;
+            LightEffect *endPoint;
             BeamStartFx *startFx;
             BeamLine *line;
 
@@ -389,13 +376,13 @@ s8 func_15101378(Beam *beam) {
             if (data->endPoint != NULL) {
                 endPoint = data->endPoint;
                 do {} while (0); // matching: adds the uopt temp that puts the t0 spill at 0x5C
-                endPoint->data->pos[0] = beam->end.x;
-                endPoint->data->pos[1] = beam->end.y;
-                endPoint->data->pos[2] = beam->end.z;
+                endPoint->light->x = beam->end.x;
+                endPoint->light->y = beam->end.y;
+                endPoint->light->z = beam->end.z;
                 if (endIsHit != 0) {
-                    endPoint->data->disabled = 0;
+                    endPoint->light->disabled = 0;
                 } else {
-                    endPoint->data->disabled = 1;
+                    endPoint->light->disabled = 1;
                 }
             }
             if (data->startFx != NULL) {
@@ -417,7 +404,7 @@ s8 func_15101378(Beam *beam) {
             BeamHitFxData *hitFxData;
             BeamLink *endFxLink;
             BeamEndFx *endFx;
-            BeamEndPoint *endPoint;
+            LightEffect *endPoint;
             BeamStartFx *startFx;
             BeamLine *line;
 
@@ -429,7 +416,7 @@ s8 func_15101378(Beam *beam) {
             }
             if (data->endPoint != NULL) {
                 endPoint = data->endPoint;
-                endPoint->data->disabled = 1;
+                endPoint->light->disabled = 1;
             }
             if (data->startFx != NULL) {
                 startFx = data->startFx;

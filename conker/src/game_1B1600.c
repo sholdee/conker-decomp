@@ -88,7 +88,6 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
 }
 
-/* A light node in the list at D_800DCD78. */
 extern Vec3f D_800DE010; /* default light offset from the object */
 extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
 extern f32 D_800DF6F8; /* light-to-object distance */

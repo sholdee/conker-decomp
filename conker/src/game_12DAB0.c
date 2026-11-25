@@ -227,7 +227,7 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
                 flashHeader.lightType = 7;
                 if ((state->flash = func_151602C0(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
                                                   argD, argE)) != NULL) {
-                    memcpy(&state->flash->data, &flashData, sizeof(flashData));
+                    memcpy(&state->flash->data.object, &flashData, sizeof(flashData));
                 }
                 particleAData.unk2C = 0;
                 particleAData.unk0 = 0.0f;
