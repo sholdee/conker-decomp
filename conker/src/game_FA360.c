@@ -178,85 +178,66 @@ s32 func_150CD17C(Effect *effect) {
     return 1;
 }
 
-typedef struct Quad150CD59C {
-    u8 pad0[0x2C];
-    f32 halfW;
-    f32 halfH;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 rotX;
-    f32 rotY;
-    f32 rotZ;
-    f32 offX;
-    f32 offY;
-    f32 offZ;
-    u8 pad58[0x68];
-    u8 template[0x40];
-    u8 *buffers[4];
-    u8 pad110[4];
-    f32 unk114;
-} Quad150CD59C;
+extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
+void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-void func_151D5D60(void *, s16, s32, void *, u8 *);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
-void *func_150CD59C(Quad150CD59C *arg0, s16 arg1) {
-    f32 *v;
-    Vtx *vtx;
-    void *ret;
+/* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
+Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
+    s32 pad; // matching: unused stack slot
+    Vtx_t *vertices;
+    Vtx_t *result;
     f32 mtx[4][4];
-    f32 verts[4][3];
+    f32 corners[4][3];
     u8 i;
     u8 fresh;
 
-    func_151D5D60(arg0->buffers, arg1, 0x40, &vtx, &fresh);
-    ret = vtx;
-    if (vtx != 0) {
-        if (fresh != 0) {
-            memcpy(arg0->buffers[arg1], arg0->template, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->template, 0x40);
+    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    result = vertices;
+    // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
+            memcpy(effect->buffers[bufferIndex] + 4, effect->template, sizeof(effect->template));
         }
     } else {
-        return 0;
+        return NULL;
     }
     {
-        u8 i;
+        f32 *translation = mtx[3];
 
-        verts[0][0] = arg0->halfW;
-        verts[0][1] = arg0->halfH;
-        verts[0][2] = 0.0f;
-        verts[1][0] = -arg0->halfW;
-        verts[1][1] = arg0->halfH;
-        verts[1][2] = 0.0f;
-        verts[2][0] = -arg0->halfW;
-        verts[2][1] = -arg0->halfH;
-        verts[2][2] = 0.0f;
-        verts[3][0] = arg0->halfW;
-        verts[3][1] = -arg0->halfH;
-        verts[3][2] = 0.0f;
-        func_150A8050(mtx, arg0->rotX, arg0->rotY, arg0->rotZ);
-        mtx[3][0] = arg0->x;
-        mtx[3][1] = arg0->y;
-        mtx[3][2] = arg0->z;
-        if (arg0->unk114 < 0.0f) {
-            mtx[3][0] += arg0->offX;
-            mtx[3][1] += arg0->offY;
-            mtx[3][2] += arg0->offZ;
+        corners[0][0] = effect->halfWidth;
+        corners[0][1] = effect->halfHeight;
+        corners[0][2] = 0.0f;
+        corners[1][0] = -effect->halfWidth;
+        corners[1][1] = effect->halfHeight;
+        corners[1][2] = 0.0f;
+        corners[2][0] = -effect->halfWidth;
+        corners[2][1] = -effect->halfHeight;
+        corners[2][2] = 0.0f;
+        corners[3][0] = effect->halfWidth;
+        corners[3][1] = -effect->halfHeight;
+        corners[3][2] = 0.0f;
+        func_150A8050(mtx, effect->dir.x, effect->dir.y, effect->dir.z);
+        translation[0] = effect->pos.x;
+        translation[1] = effect->pos.y;
+        translation[2] = effect->pos.z;
+        if (effect->drift.vel.y < 0.0f) {
+            translation[0] += effect->sway.x;
+            translation[1] += effect->sway.y;
+            translation[2] += effect->sway.z;
         }
         for (i = 0; i < 4; i++) {
-            Vtx *p;
-            v = verts[i];
-            func_150A7960((f32 *)mtx, v[0], v[1], 0.0f, &v[0], &v[1], &v[2]);
-            vtx->v.ob[0] = v[0];
-            vtx->v.ob[1] = v[1];
-            vtx->v.ob[2] = v[2];
-            vtx->v.flag = 0;
-            p = vtx + 1;
-            vtx = p;
+            f32 *corner = corners[i];
+
+            func_150A7960(mtx, corner[0], corner[1], 0.0f, &corner[0], &corner[1], &corner[2]);
+            vertices->ob[0] = corner[0];
+            vertices->ob[1] = corner[1];
+            vertices->ob[2] = corner[2];
+            vertices->flag = 0;
+            vertices++;
         }
     }
-    return ret;
+    return result;
 }
 
 struct Particle150CD7F8 {
