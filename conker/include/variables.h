@@ -172,10 +172,10 @@ extern u32  D_80038098;
 extern u32  D_8003809C;
 extern f32  D_800380A0;
 extern f32  D_800380A4;
-extern struct54 *D_800380B0;
-extern struct54 *D_800380B4;
-extern struct54 *D_800380B8;
-extern s32 *D_800380BC;
+extern AllocatorFreeBlock *D_800380B0; // largest free heap block
+extern AllocatorBlock *D_800380B4;     // first heap block (all blocks, address order)
+extern AllocatorFreeBlock *D_800380B8; // free list head (address order)
+extern AllocatorFreeBlock *D_800380BC; // free list tail
 
 extern s32  D_800380C0;
 extern s32  D_800380C4;

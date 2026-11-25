@@ -3320,6 +3320,24 @@ typedef struct {
     u8 unkC;
 } struct258;
 
+/*
+ * Heap block header. Every block (free or allocated) starts with one; the
+ * payload handed out by func_10003C6C starts right after it. The top byte of
+ * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
+ * A free block also links into the free list through its first payload words.
+ */
+typedef struct AllocatorBlock {
+    /* 0x0 */ struct AllocatorBlock *next;
+    /* 0x4 */ struct AllocatorBlock *prev;
+    /* 0x8 */ u32 taggedSize;
+} AllocatorBlock;
+
+typedef struct AllocatorFreeBlock {
+    /* 0x00 */ AllocatorBlock header;
+    /* 0x0C */ struct AllocatorFreeBlock *nextFree;
+    /* 0x10 */ struct AllocatorFreeBlock *prevFree;
+} AllocatorFreeBlock;
+
 /* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
 typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
