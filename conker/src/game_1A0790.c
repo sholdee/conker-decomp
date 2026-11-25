@@ -9,71 +9,67 @@ void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
 extern struct104 *D_800B0DF0;
 void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
 extern s8 D_800DD2E0;
-typedef struct 
-{
-  u16 unk0;
-  u16 unk2;
-  u8 pad4[0x36];
-  s16 unk3A;
-  s16 unk3C;
-  s16 unk3E;
-  s16 unk40;
-  u8 unk42;
-  u8 unk43;
-  u8 unk44;
-  u8 unk45;
-  s8 unk46;
-} struct151732E0_arg;
-typedef struct 
-{
-  u8 unk0;
-  u8 unk1;
-  u8 unk2;
-  u8 unk3;
-  s16 unk4;
-  s16 unk6;
-  s16 unk8;
-  s16 unkA;
-  u16 unkC;
-  u16 unkE;
-} struct151732E0_state;
-extern struct151732E0_state D_8008CC70;
-void func_151732E0(s32 arg0)
-{
-  s16 value;
-  s8 idx;
-  ;
-  if ((((struct151732E0_arg *) D_800B0DF0)->unk3C == ((struct151732E0_arg *) D_800B0DF0)->unk40) && (((struct151732E0_arg *) D_800B0DF0)->unk3C == 0))
-  {
-    ((struct151732E0_arg *) D_800B0DF0)->unk40 = 0x64;
-  }
-  D_8008CC70.unk0 = ((struct151732E0_arg *) D_800B0DF0)->unk42;
-  D_8008CC70.unk1 = ((struct151732E0_arg *) D_800B0DF0)->unk43;
-  D_8008CC70.unk2 = ((struct151732E0_arg *) D_800B0DF0)->unk44;
-  D_8008CC70.unk3 = ((struct151732E0_arg *) D_800B0DF0)->unk45;
-  D_8008CC70.unk4 = ((struct151732E0_arg *) D_800B0DF0)->unk3A;
-  D_8008CC70.unk6 = ((struct151732E0_arg *) D_800B0DF0)->unk3C;
-  D_8008CC70.unk8 = ((struct151732E0_arg *) D_800B0DF0)->unk3E;
-  D_8008CC70.unkA = ((struct151732E0_arg *) D_800B0DF0)->unk40;
-  D_8008CC70.unkC = ((struct151732E0_arg *) D_800B0DF0)->unk2;
-  D_8008CC70.unkE = ((struct151732E0_arg *) D_800B0DF0)->unk0;
-  if (((struct151732E0_arg *) D_800B0DF0)->unk46 != (-1))
-  {
-    D_800DD2E0 = 1;
-    idx = ((struct151732E0_arg *) D_800B0DF0)->unk46;
-    func_151733E4(idx, idx, arg0, 0, -1);
-  }
-  else
-  {
-    D_800DD2E0 = 0;
-    func_151733E4(0, 0, arg0, 0, -1);
-  }
+
+/* View of the level header (D_800B0DF0) past the fields struct104 declares. */
+typedef struct {
+    u16 unk0;
+    u16 unk2;
+    u8 pad4[0x36];
+    s16 unk3A;
+    s16 unk3C;
+    s16 unk3E;
+    s16 unk40;
+    u8 colour[4];
+    s8 fogPreset; /* index into D_8008CC70, or -1 for none */
+} LevelFogHeader;
+
+/* One entry of the fog preset table D_8008CC70. */
+typedef struct {
+    u8 colour[4];
+    u16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    s16 unkC; /* -1: use the level header's unk2 */
+    s16 unkE; /* -1: use the level header's unk0 */
+} FogPreset;
+
+extern FogPreset D_8008CC70;
+
+#define sLevelFog ((LevelFogHeader *)D_800B0DF0)
+
+/* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
+void func_151732E0(s32 arg0) {
+    s8 preset;
+
+    if (sLevelFog->unk3C == sLevelFog->unk40 && sLevelFog->unk3C == 0) {
+        sLevelFog->unk40 = 100;
+    }
+    D_8008CC70.colour[0] = sLevelFog->colour[0];
+    D_8008CC70.colour[1] = sLevelFog->colour[1];
+    D_8008CC70.colour[2] = sLevelFog->colour[2];
+    D_8008CC70.colour[3] = sLevelFog->colour[3];
+    D_8008CC70.unk4 = sLevelFog->unk3A;
+    D_8008CC70.unk6 = sLevelFog->unk3C;
+    D_8008CC70.unk8 = sLevelFog->unk3E;
+    D_8008CC70.unkA = sLevelFog->unk40;
+    D_8008CC70.unkC = sLevelFog->unk2;
+    D_8008CC70.unkE = sLevelFog->unk0;
+    if (sLevelFog->fogPreset != -1) {
+        D_800DD2E0 = 1;
+        preset = sLevelFog->fogPreset;
+        func_151733E4(preset, preset, arg0, 0, -1);
+    } else {
+        D_800DD2E0 = 0;
+        func_151733E4(0, 0, arg0, 0, -1);
+    }
 }
 
 
-Gfx *func_151733D8(Gfx *arg0, s32 arg1) {
-    while (1) {
-        return arg0;
+/* Display-list hook that emits nothing. */
+Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
+    while (1) { // matching: under -g3 a plain return leaves the jr delay slot as a nop
+        return gfx;
     }
 }
 
