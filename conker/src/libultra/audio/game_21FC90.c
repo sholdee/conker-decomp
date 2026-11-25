@@ -1,4 +1,6 @@
+#include <ultra64.h>
 #include <n_libaudio.h>
+#include "variables.h"
 
 extern s32  D_800E0E00;
 extern s32  D_800E0E04;
@@ -12,7 +14,6 @@ extern s32  D_800E0E20;
 extern s32  D_800E0E24;
 extern s32  D_800E0E28;
 extern s32  *D_800E0E30; // 0x8000
-extern s32  D_800E0D80; // libaudio struct?
 extern s16  D_800E0DB0;
 extern s16  D_800E0DB2;
 extern s32  D_800E0DD8;
@@ -69,40 +70,6 @@ extern u8  D_800428C1;
 extern u8  D_800428C2;
 extern s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 
-/*
- * The streaming voice carries its own copy of the libaudio envmixer parameter block at the
- * same relative offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E,
- * cvolL/cvolR, the two rate pairs, the two targets), which is what lets the pan/volume ramp
- * below be the stock `(D_8002BC10[pan] * volume) >> 15` / `_getVol(...)` update.  The fields
- * outside that block are Rare's and are still unnamed.
- */
-typedef struct {
-    /* 0x00 */ u8   pad0[0xC];
-    /* 0x0C */ s16  em_pan;
-    /* 0x0E */ s16  em_volume;
-    /* 0x10 */ s16  em_cvolL;
-    /* 0x12 */ s16  em_cvolR;
-    /* 0x14 */ u8   pad14[0x4];
-    /* 0x18 */ u16  em_lratl;
-    /* 0x1A */ s16  em_lratm;
-    /* 0x1C */ s16  em_ltgt;
-    /* 0x1E */ u16  em_rratl;
-    /* 0x20 */ s16  em_rratm;
-    /* 0x22 */ s16  em_rtgt;
-    /* 0x24 */ s16  unk24;
-    /* 0x26 */ u8   pad26[0x2];
-    /* 0x28 */ s32  em_delta;
-    /* 0x2C */ s32  em_segEnd;
-    /* 0x30 */ u8   unk30[0x8];
-    /* 0x38 */ u8   unk38[0x3C];
-    /* 0x74 */ void *unk74;
-    /* 0x78 */ u8   pad78[0x10];
-    /* 0x88 */ s32  unk88;
-    /* 0x8C */ u8   pad8C[0x4];
-    /* 0x90 */ u32  unk90;
-    /* 0x94 */ s16  unk94;
-} StreamVoice;
-
 void func_151F2960(s32 arg0, s32 arg1) {
     if (D_800E0DFC == 0) {
         return;
@@ -144,7 +111,7 @@ void func_151F2960(s32 arg0, s32 arg1) {
         }
         func_151F3DE0();
     }
-    D_800E0D80 = arg0;
+    D_800E0D80.romAddr = arg0;
     D_800E0DE0 = arg1;
     D_800E0DE4 = 0;
     D_800E0E10 = 0;
@@ -277,7 +244,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 D_800E0DEC = 0;
                 D_800E0DF0 = 0;
                 D_800E0DF8 = 0;
-                bzero(((StreamVoice *) &D_800E0D80)->unk74, 0x440);
+                bzero(((StreamVoice *)&D_800E0D80)->unk74, 0x440); // matching: a no-op cast keeps the address in its own register
             }
         } else {
             D_800E0E18 = D_800E0E18 - 1;
@@ -370,7 +337,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             D_800E0DF0 = D_800E0DF0 + nSamples;
         }
-        func_151F39E4((StreamVoice *) &D_800E0D80);
+        func_151F39E4(&D_800E0D80);
         if (D_800E0E19 == 0) {
             {
                 Acmd *_a = (*cmdList)++;
@@ -384,12 +351,12 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             if (D_800E0DB2 > 0) {
                 if (D_800E0DD8 != 0) {
-                    func_1001CF38(((StreamVoice *) &D_800E0D80)->unk30, 22020.0f);
+                    func_1001CF38(&D_800E0D80.unk30, 22020.0f);
                 }
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x0B000020;
-                    _a->words.w1 = osVirtualToPhysical(((StreamVoice *) &D_800E0D80)->unk38) & 0xFFFFFF;
+                    _a->words.w1 = osVirtualToPhysical(D_800E0D80.unk38) & 0xFFFFFF;
                 }
                 if (D_800E0DD8 == 2) {
                     D_800E0DD8 = 0;
@@ -406,10 +373,10 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
                 D_800E0DA4 = 0;
                 D_800E0D9C = (D_8002BC10[D_800E0D8C] * D_800E0D8E) >> 15;
                 D_800E0D9A = _getRate(D_800E0D90, D_800E0D9C, D_800E0DAC,
-                                      &((StreamVoice *) &D_800E0D80)->em_lratl);
+                                      &D_800E0D80.em_lratl);
                 D_800E0DA2 = (D_8002BD0E[-D_800E0D8C] * D_800E0D8E) >> 15;
                 D_800E0DA0 = _getRate(D_800E0D92, D_800E0DA2, D_800E0DAC,
-                                      &((StreamVoice *) &D_800E0D80)->em_rratl);
+                                      &D_800E0D80.em_rratl);
                 {
                     Acmd *_a = (*cmdList)++;
                     _a->words.w0 = 0x09060000 | (D_800E0D90 & 0xFFFF);
@@ -528,7 +495,7 @@ s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset) {
         len = D_800E0DE0 - D_800E0DE4;
     }
     dma  = ((StreamSynth *) n_syn)->dmaNew(&addr);
-    addr = dma(D_800E0D80 + D_800E0DE4, len, 0);
+    addr = dma(D_800E0D80.romAddr + D_800E0DE4, len, 0);
     if (addr == 0) {
         return 0;
     }
@@ -546,5 +513,5 @@ void func_151F3D78(void) {
     ALDMAproc dma;
 
     dma = ((StreamSynth *) n_syn)->dmaNew(&addr);
-    dma(D_800E0D80 + D_800E0DE4, 0x810, 0);
+    dma(D_800E0D80.romAddr + D_800E0DE4, 0x810, 0);
 }

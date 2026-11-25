@@ -3049,34 +3049,49 @@ typedef struct {
     s8  unkA;
 } struct185;
 
-typedef struct {
-    u8 pad0[0x8];
-    s32 unk8; // pointer
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
-    u8  pad18[0xC];
-    u16 unk24;
-    u8  pad26[0xA];
-    u16 unk30;
-    u16 unk32;
-    u8  pad34[0x28];
-    s32 unk5C;
-    u8  pad60[0x14];
-    s32 unk74; // pointer
-    u8  pad78[0xC];
-    s32 unk84;
-    s32 unk88;
-    u8  pad8C[0x8];
-    s16 unk94;
-    s16 unk96;
-    u8  pad98[0x2];
-    u8  unk9A;
-    u8  pad9B[0x5];
-} struct186; // size 0xA0, 160 bytes
+/* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
+ * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
+ * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
+ * the two rate pairs, the two targets). The fields outside that block are Rare's. Several fields
+ * are also addressed through their own symbols (D_800E0D84..D_800E0DFC) in game_21FC90. */
+typedef struct StreamVoice {
+    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + D_800E0DE4)
+    /* 0x04 */ u8   pad4[0x4];
+    /* 0x08 */ void *unk8;          // 0x50-byte heap block
+    /* 0x0C */ s16  em_pan;
+    /* 0x0E */ s16  em_volume;
+    /* 0x10 */ s16  em_cvolL;
+    /* 0x12 */ s16  em_cvolR;
+    /* 0x14 */ s16  unk14;
+    /* 0x16 */ u16  unk16;
+    /* 0x18 */ u16  em_lratl;
+    /* 0x1A */ s16  em_lratm;
+    /* 0x1C */ s16  em_ltgt;
+    /* 0x1E */ u16  em_rratl;
+    /* 0x20 */ s16  em_rratm;
+    /* 0x22 */ s16  em_rtgt;
+    /* 0x24 */ u16  unk24;
+    /* 0x26 */ u8   pad26[0x2];
+    /* 0x28 */ s32  em_delta;
+    /* 0x2C */ s32  em_segEnd;
+    /* 0x30 */ u16  unk30;          // start of the lowpass state passed to func_1001CF38
+    /* 0x32 */ u16  unk32;
+    /* 0x34 */ u8   pad34[0x4];
+    /* 0x38 */ u8   unk38[0x24];    // DMEM-bound state block (its physical address goes in an acmd)
+    /* 0x5C */ void *unk5C;         // 8-byte heap block
+    /* 0x60 */ u8   pad60[0x14];
+    /* 0x74 */ void *unk74;         // 0x440-byte heap block, cleared on restart
+    /* 0x78 */ u8   pad78[0xC];
+    /* 0x84 */ s32  unk84;
+    /* 0x88 */ s32  unk88;          // target volume
+    /* 0x8C */ u8   pad8C[0x4];
+    /* 0x90 */ u32  unk90;
+    /* 0x94 */ s16  unk94;          // target pan
+    /* 0x96 */ s16  unk96;
+    /* 0x98 */ u8   pad98[0x2];
+    /* 0x9A */ u8   unk9A;
+    /* 0x9B */ u8   pad9B[0x5];
+} StreamVoice; // size 0xA0
 
 /* A multiplayer spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
 typedef struct SpawnPoint {
