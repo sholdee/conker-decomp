@@ -1,162 +1,187 @@
 #include <ultra64.h>
 #include "functions.h"
+/* variables.h types D_800D212C as struct187 *, which lacks the signed link fields used here;
+   shadow the declaration file-locally and use SpawnPoint instead. */
+#define D_800D212C D_800D212C_struct187_decl_in_variables_h
 #include "variables.h"
+#undef D_800D212C
 
 
 extern u8 D_8009D954[];
 extern u8 *D_80087240[];
 
-/* Looks arg0->id up in the 7 rows of D_80087240 (row lengths in D_8009D954) and returns
+/* Looks obj->id up in the 7 rows of D_80087240 (row lengths in D_8009D954) and returns
  * the first entry of the row that contains it, or the id itself when no row does.
  * Same search as func_1503D5F0 (game_6A3D0). */
-s32 func_15084D00(struct127 *arg0) {
-    s32 key = arg0->id;
+s32 func_15084D00(struct127 *obj) {
+    s32 id = obj->id;
     s32 i;
     s32 j;
 
     for (i = 0; i < 7; i++) {
         for (j = 0; j < D_8009D954[i]; j++) {
-            if (key == D_80087240[i][j]) {
+            if (id == D_80087240[i][j]) {
                 return D_80087240[i][0];
             }
         }
     }
-    return key;
+    return id;
 }
 
-typedef struct { u8 pad0[0x42]; s8 unk42; } F15084D70_obj;
-typedef struct { s16 unk0; s16 unk2; s16 unk4; u8 unk6; u8 unk7; f32 unk8; f32 unkC; f32 unk10; u8 unk14; s8 unk15; s8 unk16; u8 pad17; } F15084D70_node;
+/* A spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
+typedef struct {
+    /* 0x00 */ s16 pos[3];
+    /* 0x06 */ u8 unk6;   /* angle, 256 units per turn */
+    /* 0x07 */ u8 facing; /* angle, 256 units per turn */
+    /* 0x08 */ f32 unk8[3];
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ s8 unk15;
+    /* 0x16 */ s8 link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
+    /* 0x17 */ u8 pad17;
+} SpawnPoint;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x42];
+    /* 0x42 */ s8 unk42;
+} F15084D70_obj;
+
+extern SpawnPoint *D_800D212C;
 extern F15084D70_obj *D_8008FDD4;
 extern s8 D_800E0BE3;
-extern f32 D_8009D960;
-extern f32 D_8009D964;
 
-s32 func_15084D70(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8 *arg5, u8 *arg6, s32 *arg7, s32 *arg8, s32 arg9, s32 *argA) {
-    s32 sp94;
-    struct126 *st;
-    s32 mask;
+/* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
+ * parameters. In multiplayer (D_800BE616) with D_800D18A8 set, it instead picks the team's spawn
+ * point farthest from the other team's players, plus a random term. When `useLink` is set, the
+ * point's link is followed. Remembers the chosen index in the player's state; returns 1 when
+ * there is no spawn table, else 0. */
+s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32 *outUnk8, u8 *outUnk6,
+                  u8 *outFacing, s32 *outUnk14, s32 *outUnk15, s32 unused, s32 *outLinkFlag) {
+    s32 remember;
+    struct126 *state;
+    s32 mask; // matching: also the player loop counter and link index; separate locals change regalloc
     s32 team;
     s32 best;
     s32 i;
-    f32 minDist;
-    f32 maxDist;
+    f32 nearestDistSq;
+    f32 bestDistSq;
     f32 dx;
     f32 dz;
-    s32 cnt;
-    s32 cur_sel;
-    s32 j;
+    s32 count;
+    s32 lastSpawn;
+    s32 j; // spawn loop counter, then the chosen spawn index
 
-    sp94 = 1;
+    remember = TRUE;
     if (D_800BE9F0 == 0x2B) {
-        sp94 = 0;
+        remember = FALSE;
         D_800D18A8 = 0;
     }
-    if (D_800BE616 != 0 && D_8008FDD4->unk42 == 0 && D_800E0BE3 != 0) {
-        sp94 = 0;
+    if (D_800BE616 && D_8008FDD4->unk42 == 0 && D_800E0BE3 != 0) {
+        remember = FALSE;
     }
-    if (arg0 != 0xFF) {
-        if (arg1 == -1) {
-            arg1 = D_800CC2D0[arg0].unk31C->pad11B[0];
+    if (playerIndex != 0xFF) {
+        if (spawnIndex == -1) {
+            spawnIndex = D_800CC2D0[playerIndex].unk31C->pad11B[0];
         }
-        if (sp94 != 0) {
-            D_800CC2D0[arg0].unk31C->pad11B[0] = 0;
+        if (remember) {
+            D_800CC2D0[playerIndex].unk31C->pad11B[0] = 0;
         }
     }
-    arg1 = arg1 & 0xFFF;
-    if (arg1 >= D_800D2128 || arg1 < 0) {
-        arg1 = 0;
+    spawnIndex &= 0xFFF;
+    if (spawnIndex >= D_800D2128 || spawnIndex < 0) {
+        spawnIndex = 0;
     }
     if (D_800D212C != NULL) {
-    if (D_800BE616 != 0 && D_800D18A8 != 0) {
-        u8 sp44[32];
+        if (D_800BE616 && D_800D18A8) {
+            u8 candidates[32];
 
-
-        team = *(u8 *)&D_800CC2D0[arg0].pad128;
-        st = D_800CC2D0[arg0].unk31C;
-        cnt = 0;
-        best = 0;
-        if (team == 0) {
-            mask = D_800D2120;
-        } else {
-            mask = D_800D2124;
-        }
-        for (j = 0; j < D_800D2128; j++) {
-            if ((1 << j) & mask) {
-                sp44[cnt] = j;
-                cnt++;
+            /* the byte at 0x128 (inside struct127's pad128) is the player's team */
+            team = *(u8 *)&D_800CC2D0[playerIndex].pad128;
+            state = D_800CC2D0[playerIndex].unk31C;
+            count = 0;
+            best = 0;
+            if (team == 0) {
+                mask = D_800D2120;
+            } else {
+                mask = D_800D2124;
             }
-        }
-        maxDist = 0.0f;
-        cur_sel = *(s8 *)((u8 *)st + 0x1B0);
-        for (i = 0; i < cnt; i++) {
-            if (cur_sel != sp44[i]) {
-                minDist = D_8009D960;
-                for (mask = 0; mask < D_8008FD8C; mask++) {
-                    if (team != *(u8 *)&D_800CC2D0[mask].pad128) {
-                        dx = D_800CC2D0[mask].x_position - ((F15084D70_node *)D_800D212C)[sp44[i]].unk0;
-                        dz = D_800CC2D0[mask].z_position - ((F15084D70_node *)D_800D212C)[sp44[i]].unk4;
-                        dx = dx * dx + dz * dz;
-                        if (dx < minDist) {
-                            minDist = dx;
+            for (j = 0; j < D_800D2128; j++) {
+                if ((1 << j) & mask) {
+                    candidates[count] = j;
+                    count++;
+                }
+            }
+            bestDistSq = 0.0f;
+            /* state byte 0x1B0 (past the end of struct126) is the last multiplayer spawn index */
+            lastSpawn = *(s8 *)((u8 *)state + 0x1B0);
+            for (i = 0; i < count; i++) {
+                if (lastSpawn != candidates[i]) {
+                    nearestDistSq = 100000000.0f;
+                    for (mask = 0; mask < D_8008FD8C; mask++) {
+                        if (team != *(u8 *)&D_800CC2D0[mask].pad128) {
+                            dx = D_800CC2D0[mask].x_position - D_800D212C[candidates[i]].pos[0];
+                            dz = D_800CC2D0[mask].z_position - D_800D212C[candidates[i]].pos[2];
+                            dx = dx * dx + dz * dz;
+                            if (dx < nearestDistSq) {
+                                nearestDistSq = dx;
+                            }
                         }
                     }
-                }
-                dz = func_150ADA68() * 500.0f;
-                minDist += dz * dz;
-                if (maxDist < minDist) {
-                    best = i;
-                    maxDist = minDist;
+                    dz = func_150ADA68() * 500.0f;
+                    nearestDistSq += dz * dz;
+                    if (bestDistSq < nearestDistSq) {
+                        best = i;
+                        bestDistSq = nearestDistSq;
+                    }
                 }
             }
-        }
-        if (D_8008FDD4->unk42 != 0 || D_800E0BE3 == 0) {
-            arg1 = sp44[best];
-        }
-        st = D_800CC2D0[arg0].unk31C;
-        *(s8 *)((u8 *)st + 0x1B0) = arg1;
-        arg2 = 0;
-    }
-    j = arg1;
-    if (arg2 != 0 && (mask = ((F15084D70_node *)D_800D212C)[arg1].unk16) != 0) {
-        j = mask;
-        if (mask == -1 || mask >= D_800D2128) {
-            j = arg1;
-        }
-        if (argA != 0) {
-            mask = ((F15084D70_node *)D_800D212C)[j].unk15;
-            if (mask >= 0) {
-                *argA = 0;
-            } else if (mask == -1) {
-                *argA = 0;
-            } else {
-                *argA = 1;
+            if (D_8008FDD4->unk42 != 0 || D_800E0BE3 == 0) {
+                spawnIndex = candidates[best];
             }
+            state = D_800CC2D0[playerIndex].unk31C;
+            *(s8 *)((u8 *)state + 0x1B0) = spawnIndex;
+            useLink = FALSE;
         }
-    } else if (arg2 != 0 && ((F15084D70_node *)D_800D212C)[arg1].unk16 == 0) {
-        D_800DDE38 = 2;
-    }
-    arg4[0] = ((F15084D70_node *)D_800D212C)[j].unk8;
-    arg4[1] = ((F15084D70_node *)D_800D212C)[j].unkC;
-    arg4[2] = ((F15084D70_node *)D_800D212C)[j].unk10;
-    arg3[0] = ((F15084D70_node *)D_800D212C)[j].unk0;
-    arg3[1] = ((F15084D70_node *)D_800D212C)[j].unk2;
-    arg3[2] = ((F15084D70_node *)D_800D212C)[j].unk4;
-    *arg5 = ((F15084D70_node *)D_800D212C)[j].unk6;
-    *arg6 = ((F15084D70_node *)D_800D212C)[j].unk7;
-    *arg7 = ((F15084D70_node *)D_800D212C)[j].unk14;
-    *arg8 = ((F15084D70_node *)D_800D212C)[j].unk15;
-    if (D_800BE616 != 0 && D_800D18A8 == 0) {
-        f32 sp40;
-        f32 sp3C;
-        sp40 = *arg6 * D_8009D964 * 0.0078125f;
-        sp3C = func_150ADA68() * 80.0f - 40.0f;
-        arg3[0] += sinf(sp40) * sp3C;
-        arg3[2] += cosf(sp40) * sp3C;
-    }
-    if (arg0 != 0xFF && sp94 != 0) {
-        D_800CC2D0[arg0].unk31C->pad11B[0] = arg1;
-    }
-    return 0;
+        j = spawnIndex;
+        if (useLink && (mask = D_800D212C[spawnIndex].link) != 0) {
+            j = mask;
+            if (mask == -1 || mask >= D_800D2128) {
+                j = spawnIndex;
+            }
+            if (outLinkFlag != NULL) {
+                mask = D_800D212C[j].unk15;
+                if (mask >= 0) {
+                    *outLinkFlag = 0;
+                } else if (mask == -1) {
+                    *outLinkFlag = 0;
+                } else {
+                    *outLinkFlag = 1;
+                }
+            }
+        } else if (useLink && D_800D212C[spawnIndex].link == 0) {
+            D_800DDE38 = 2;
+        }
+        outUnk8[0] = D_800D212C[j].unk8[0];
+        outUnk8[1] = D_800D212C[j].unk8[1];
+        outUnk8[2] = D_800D212C[j].unk8[2];
+        outPos[0] = D_800D212C[j].pos[0];
+        outPos[1] = D_800D212C[j].pos[1];
+        outPos[2] = D_800D212C[j].pos[2];
+        *outUnk6 = D_800D212C[j].unk6;
+        *outFacing = D_800D212C[j].facing;
+        *outUnk14 = D_800D212C[j].unk14;
+        *outUnk15 = D_800D212C[j].unk15;
+        if (D_800BE616 && D_800D18A8 == 0) {
+            f32 angle;
+            f32 offset;
+            angle = *outFacing * 3.1415927410f * (1.0f / 128);
+            offset = func_150ADA68() * 80.0f - 40.0f;
+            outPos[0] += sinf(angle) * offset;
+            outPos[2] += cosf(angle) * offset;
+        }
+        if (playerIndex != 0xFF && remember) {
+            D_800CC2D0[playerIndex].unk31C->pad11B[0] = spawnIndex;
+        }
+        return 0;
     }
     return 1;
 }
