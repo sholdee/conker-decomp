@@ -1609,11 +1609,16 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             obj = &D_800CC2D0[arg0->unk65 - 1];
             arg0->disable_jump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
-                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
+                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0 /* matching: lhu; struct127 says s16 */) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
                     u8 mode;
- mode = 0x10;
- D_800D154C = obj;
- if (pressedButtons & B_BUTTON) { mode = 0xE; } else { obj->unk84.uh = 0; }
+
+                    mode = 0x10;
+                    D_800D154C = obj;
+                    if (pressedButtons & B_BUTTON) {
+                        mode = 0xE;
+                    } else {
+                        obj->unk84.uh = 0;
+                    }
                     obj->unk218 = func_1507BB28(1, mode);
                     obj->unk21C = 0;
                     D_800D154C = arg0;
@@ -1624,7 +1629,6 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x27:
-        do { } while (0);
         if (act != CTL(arg0)->action) {
             CTL(arg0)->action = 0x27;
             arg0->unk1C9 = 6;
@@ -1640,29 +1644,24 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             }
         }
         if (act == CTL(arg0)->action) {
-            {
-                s16 delta;
+            s16 delta;
 
-                delta = (PAD->stick_x * -0x64) - CTL(arg0)->unk80;
-                if (delta > 0x258) {
-                    delta = 0x258;
-                }
-                if (delta < -0x258) {
-                    delta = -0x258;
-                }
-                CTL(arg0)->unk80 += delta;
-                delta = ((PAD->stick_y << 5) - CTL(arg0)->unk82) + 0x240;
-                if (delta > 0x12C) {
-                    delta = 0x12C;
-                }
-                if (delta < -0x12C) {
-                    delta = -0x12C;
-                }
-                CTL(arg0)->unk82 += delta;
+            delta = (PAD->stick_x * -100) - CTL(arg0)->unk80;
+            if (delta > 600) {
+                delta = 600;
             }
-            {
-            u16 prev;
-
+            if (delta < -600) {
+                delta = -600;
+            }
+            CTL(arg0)->unk80 += delta;
+            delta = ((PAD->stick_y << 5) - CTL(arg0)->unk82) + 576;
+            if (delta > 300) {
+                delta = 300;
+            }
+            if (delta < -300) {
+                delta = -300;
+            }
+            CTL(arg0)->unk82 += delta;
             if (((arg4 != 0) && ((arg0->unk65 != 0) || (arg0->stunned != 0) || (arg0->unk28 != 0.0f))) || (arg0->in_water != 0)) {
                 func_150634E4(arg0);
             } else if (arg4 != 0) {
@@ -1677,8 +1676,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             } else {
                 arg0->disable_jump = 0xA;
                 if (CTL(arg0)->unk7D != 0) {
-                    u8 pad2;
-
+                    u16 prev;
+                    u8 lowBits;
 
                     if ((heldButtons & Z_TRIG) && (arg0->unk48 < 0.6000000238f)) {
 
@@ -1698,7 +1697,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             }
                         }
                     } else {
-                        pad2 = (CTL(arg0)->unk7E * 2) | 1; CTL(arg0)->unk7E = (CTL(arg0)->unk7E & 0xFF00) | pad2;
+                        lowBits = (CTL(arg0)->unk7E << 1) | 1;
+                        CTL(arg0)->unk7E = (CTL(arg0)->unk7E & 0xFF00) | lowBits;
                     }
                 } else {
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
@@ -1775,7 +1775,6 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         }
                     }
                 }
-            }
             }
         } else {
             speed = 1.399999976f;
