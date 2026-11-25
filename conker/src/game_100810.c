@@ -38,7 +38,7 @@ typedef struct {
     u8 pad4C[0xC];
     s32 flags;
     u8 pad5C[0x158 - 0x5C];
-    f32 scale;
+    f32 scale;          // eased toward tail.targetScale (func_150D4CC4)
     u8 pad15C[0x170 - 0x15C];
     ParticleTail tail;
 } Particle;
@@ -51,8 +51,8 @@ typedef struct {
     u8 pad6[2];
     struct126 *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
     Particle *effects[2];
-    f32 unk14;          // eased toward unk18 each frame
-    f32 unk18;
+    f32 width;          // trail width at the head, eased toward targetWidth each frame
+    f32 targetWidth;
 } TrailState; // size 0x1C
 
 typedef struct {
@@ -132,8 +132,8 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     spawn.flags = 0x12;
     spawn.unk10 = 15;
     spawn.unk14 = 1;
-    init.unk18 = 20.0f;
-    init.unk14 = 20.0f;
+    init.targetWidth = 20.0f;
+    init.width = 20.0f;
     init.mode = 1;
     init.effects[0] = NULL;
     init.effects[1] = NULL;
@@ -290,229 +290,169 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    struct17 pos;
-    f32 unkC;
-    f32 unk10;
-} Entry150D3A68;
-
-typedef struct {
-    u8 pad0[0x34];
-    struct17 unk34;
-    struct17 unk40;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x170 - 0x5C];
-    f32 unk170;
-    f32 unk174;
-} Obj150D3A68;
-
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[2];
-    struct126 *unk8;
-    Obj150D3A68 *unkC;
-    Obj150D3A68 *unk10;
-    f32 unk14;
-    f32 unk18;
-} State150D3A68;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    struct17 unk10;
-    u8 pad1C[2];
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x94 - 0x2F];
-    Entry150D3A68 *unk94;
-    State150D3A68 *unk98;
-} Actor150D3A68;
-
-s32 func_150D4AE0(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct126 *arg3);
-void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4);
+void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4);
 extern f32 func_15143E64(struct17 *);
-extern s32 func_1515C0F8(struct127 *, f32 **);
+extern s32 func_1515C0F8(struct127 *, struct17 **);
 
-s32 func_150D3A68(Actor150D3A68 *arg0) {
-    State150D3A68 *state;
-    Entry150D3A68 *table;
-    struct127 *obj;
+/*
+ * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
+ * at it and picks the mode from the owner's speed (or a player's stick tilt).
+ */
+s32 func_150D3A68(TrailActor *actor) {
+    TrailState *state;
+    TrailPoint *points;
+    struct127 *owner;
     struct126 *s126;
-    struct17 prev;
-    struct17 diff;
+    struct17 prevPos;
+    struct17 delta;
     f32 dist;
     struct17 dir;
-    f32 *sub;
-    u8 old;
-    s32 idx;
+    ParticleTail *tail;
+    u8 prevMode;
+    s32 player;
 
-    state = arg0->unk98;
-    table = arg0->unk94;
-    obj = state->unk0;
+    state = actor->state;
+    points = actor->points;
+    owner = state->owner;
     s126 = state->unk8;
-    if (obj->interaction_state == 0 || obj->unique_id != state->unk4) {
+    if (owner->interaction_state == 0 || owner->unique_id != state->ownerId) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
-        prev = arg0->unk10;
-        switch (func_150D4AE0(&arg0->unk10, &dir, obj, s126)) {
+        prevPos = actor->spawn.pos;
+        switch (func_150D4AE0(&actor->spawn.pos, &dir, owner, s126)) {
         case 0:
-            if (state->unkC != NULL) {
-                state->unkC->unk58 &= ~2;
+            if (state->effects[0] != NULL) {
+                state->effects[0]->flags &= ~2;
             }
-            if (state->unk10 != NULL) {
-                state->unk10->unk58 &= ~2;
+            if (state->effects[1] != NULL) {
+                state->effects[1]->flags &= ~2;
             }
-            arg0->unk1E &= ~4;
+            actor->spawn.flags &= ~4;
             return 1;
         case 1:
-            if (!(arg0->unk1E & 4)) {
-                prev = arg0->unk10;
+            if (!(actor->spawn.flags & 4)) {
+                prevPos = actor->spawn.pos;
             }
-            arg0->unk1E |= 4;
-            if (state->unkC != NULL) {
-                state->unkC->unk34 = arg0->unk10;
-                state->unkC->unk40 = dir;
-                state->unkC->unk58 &= ~4;
-                state->unkC->unk58 |= 2;
+            actor->spawn.flags |= 4;
+            if (state->effects[0] != NULL) {
+                state->effects[0]->pos = actor->spawn.pos;
+                state->effects[0]->dir = dir;
+                state->effects[0]->flags &= ~4;
+                state->effects[0]->flags |= 2;
             }
-            if (state->unk10 != NULL) {
-                state->unk10->unk34 = arg0->unk10;
-                state->unk10->unk40 = dir;
-                state->unk10->unk58 &= ~4;
-                state->unk10->unk58 |= 2;
+            if (state->effects[1] != NULL) {
+                state->effects[1]->pos = actor->spawn.pos;
+                state->effects[1]->dir = dir;
+                state->effects[1]->flags &= ~4;
+                state->effects[1]->flags |= 2;
             }
             break;
         case 2:
-            if (!(arg0->unk1E & 4)) {
-                prev = arg0->unk10;
+            if (!(actor->spawn.flags & 4)) {
+                prevPos = actor->spawn.pos;
             }
-            arg0->unk1E |= 4;
-            if (state->unkC != NULL) {
-                state->unkC->unk58 &= ~2;
+            actor->spawn.flags |= 4;
+            if (state->effects[0] != NULL) {
+                state->effects[0]->flags &= ~2;
             }
-            if (state->unk10 != NULL) {
-                state->unk10->unk58 &= ~2;
+            if (state->effects[1] != NULL) {
+                state->effects[1]->flags &= ~2;
             }
             break;
         }
-        diff.unk0 = arg0->unk10.unk0 - prev.unk0;
-        diff.unk4 = arg0->unk10.unk4 - prev.unk4;
-        diff.unk8 = arg0->unk10.unk8 - prev.unk8;
-        dist = func_15143E64(&diff);
+        delta.unk0 = actor->spawn.pos.unk0 - prevPos.unk0;
+        delta.unk4 = actor->spawn.pos.unk4 - prevPos.unk4;
+        delta.unk8 = actor->spawn.pos.unk8 - prevPos.unk8;
+        dist = func_15143E64(&delta);
         {
-            Entry150D3A68 *e = &table[arg0->unk2E];
-        e->pos = arg0->unk10;
-        e->unkC = dist;
-        e->unk10 = 100.0f;
-        arg0->unk2E++;
-        if (arg0->unk2E == arg0->unk25) {
-            arg0->unk2E = 0;
-        }
-        arg0->unk2C++;
-        if (arg0->unk2E == arg0->unk2D) {
-            arg0->unk2D++;
-            if (arg0->unk2D == arg0->unk25) {
-                arg0->unk2D = 0;
-            }
-            arg0->unk2C--;
-        }
-        }
-        if (obj->unk31C != NULL) {
-            sub = (state->unk10 != NULL) ? &state->unk10->unk170 : NULL;
-            old = state->unk5;
-            if (obj->unk31C->unk84 != 0) {
-                if (obj->unk44 > 6.0f) {
-                    state->unk5 = 0;
-                } else if (obj->unk44 > 3.0f) {
-                    state->unk5 = 1;
-                } else {
-                    state->unk5 = 2;
-                }
-            } else {
-                idx = (u8)(obj - D_800CC2D0);
-                if (idx >= 4) {
-                    state->unk5 = 1;
-                } else {
-                                        if (((s8 *)((*(void ***)&D_800BE728)[idx]))[3] > 20) {
-                        state->unk5 = 0;
-                    } else if (((s8 *)((*(void ***)&D_800BE728)[idx]))[3] < -20) {
-                        state->unk5 = 2;
-                    } else {
-                        state->unk5 = 1;
-                    }
-                }
-            }
-            if (state->unk5 == 0) {
-                if (sub != NULL) {
-                    sub[1] = 2.099999905f;
-                }
-                state->unk18 = 50.0f;
-                if (old != state->unk5) {
-                    f32 *sp3C;
+            TrailPoint *pt = &points[actor->head];
 
-                    if (func_1515C0F8(obj, &sp3C) == 0) {
-                        sp3C = &D_800A5480;
-                    }
-                    func_150D4D58(&arg0->unk10, (struct17 *)sp3C, obj->unk40, arg0->unkC, arg0->unk1);
+            pt->pos = actor->spawn.pos;
+            pt->len = dist;
+            pt->width = 100.0f;
+            actor->head++;
+            if (actor->head == actor->spawn.maxPoints) {
+                actor->head = 0;
+            }
+            actor->numPoints++;
+            if (actor->head == actor->tail) {
+                actor->tail++;
+                if (actor->tail == actor->spawn.maxPoints) {
+                    actor->tail = 0;
                 }
-            } else if (state->unk5 == 2) {
-                if (sub != NULL) {
-                    sub[1] = 0.200000003f;
-                }
-                state->unk18 = 10.0f;
-                if (old != state->unk5) {
+                actor->numPoints--;
+            }
+        }
+        if (owner->unk31C != NULL) {
+            tail = (state->effects[1] != NULL) ? &state->effects[1]->tail : NULL;
+            prevMode = state->mode;
+            if (owner->unk31C->unk84 != 0) {
+                if (owner->unk44 > 6.0f) {
+                    state->mode = 0;
+                } else if (owner->unk44 > 3.0f) {
+                    state->mode = 1;
+                } else {
+                    state->mode = 2;
                 }
             } else {
-                state->unk18 = 20.0f;
-                if (sub != NULL) {
-                    sub[1] = 1.0f;
+                player = (u8)(owner - D_800CC2D0);
+                if (player >= 4) {
+                    state->mode = 1;
+                } else {
+                    if (CONT_PADS[player]->stick_y > 20) {
+                        state->mode = 0;
+                    } else if (CONT_PADS[player]->stick_y < -20) {
+                        state->mode = 2;
+                    } else {
+                        state->mode = 1;
+                    }
+                }
+            }
+            if (state->mode == 0) {
+                if (tail != NULL) {
+                    tail->targetScale = 2.099999905f;
+                }
+                state->targetWidth = 50.0f;
+                if (prevMode != state->mode) {
+                    struct17 *vel;
+
+                    if (func_1515C0F8(owner, &vel) == 0) {
+                        vel = (struct17 *)&D_800A5480;
+                    }
+                    func_150D4D58(&actor->spawn.pos, vel, owner->unk40, actor->unkC, actor->unk1);
+                }
+            } else if (state->mode == 2) {
+                if (tail != NULL) {
+                    tail->targetScale = 0.200000003f;
+                }
+                state->targetWidth = 10.0f;
+                // matching: an empty mode-change check; removing it changes the code layout
+                if (prevMode != state->mode) {
+                }
+            } else {
+                state->targetWidth = 20.0f;
+                if (tail != NULL) {
+                    tail->targetScale = 1.0f;
                 }
             }
         }
     }
-    state->unk14 = state->unk14 + (state->unk18 - state->unk14) * 0.3500000238f;
+    state->width += (state->targetWidth - state->width) * 0.3500000238f;
     return 1;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 len;
-    f32 unk10;
-} TrailPt_150D3FD4;
-
-typedef struct {
-    u8 pad0[0x25];
-    u8 count;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x94 - 0x2F];
-    TrailPt_150D3FD4 *pts;
-    s32 *unk98;
-} Trail_150D3FD4;
-
-s32 func_150D3FD4(Trail_150D3FD4 *arg0) {
-    s32 *sp8C;
-    TrailPt_150D3FD4 *pts;
-    f32 acc;
-    f32 inv;
-    struct17 *sp7C;
-    f32 dist;
+/*
+ * Trims the trail to a length that grows with the owner's speed, then tapers the point widths from
+ * state->width at the head to 0 at the tail.
+ */
+s32 func_150D3FD4(TrailActor *actor) {
+    TrailState *state;
+    TrailPoint *points;
+    f32 total;
+    f32 invTotal;
+    struct17 *vel;
+    f32 speed;
     f32 maxLen;
     f32 t;
     s32 i;
@@ -524,105 +464,95 @@ s32 func_150D3FD4(Trail_150D3FD4 *arg0) {
     f32 rem;
     s32 j;
 
-    sp8C = arg0->unk98;
-    pts = arg0->pts;
+    state = actor->state;
+    points = actor->points;
     if (D_800C35EA != 1) {
-        if (func_1515C0F8(*sp8C, &sp7C) != 0) {
-            dist = func_15143E64(sp7C);
+        if (func_1515C0F8(state->owner, &vel) != 0) {
+            speed = func_15143E64(vel);
         } else {
-            dist = 0.0f;
+            speed = 0.0f;
         }
     } else if (D_800DBFF0->unk5F0 & 4) {
-        dist = 0.0f;
+        speed = 0.0f;
     } else {
-        dist = 128.0f;
+        speed = 128.0f;
     }
-    if (dist < 10.0f) {
+    if (speed < 10.0f) {
         maxLen = 0.0f;
-    } else if (dist > 70.0f) {
+    } else if (speed > 70.0f) {
         maxLen = 600.0f;
     } else {
-        maxLen = (dist - 10.0f) * 0.01666666754f * 600.0f;
+        maxLen = (speed - 10.0f) * 0.01666666754f * 600.0f;
     }
-    if (arg0->unk2C >= 2) {
-        acc = 0.0f;
-        i = arg0->unk2E - 1;
+    if (actor->numPoints >= 2) {
+        total = 0.0f;
+        i = actor->head - 1;
         if (i < 0) {
-            i = arg0->count - 1;
+            i = actor->spawn.maxPoints - 1;
         }
-        while (i != arg0->unk2D) {
+        while (i != actor->tail) {
             prev = i;
             i--;
             if (i < 0) {
-                i = arg0->count - 1;
+                i = actor->spawn.maxPoints - 1;
             }
-            acc += (prev + pts)->len;
-            if (maxLen < acc) {
-                if ((prev + pts)->len) {
-                    TrailPt_150D3FD4 *q;
+            // matching: `prev + points` (not points[prev]) keeps IDO's index-add operand order
+            total += (prev + points)->len;
+            if (maxLen < total) {
+                if ((prev + points)->len) {
+                    TrailPoint *q;
 
-                    q = pts + i;
-                    rem = q->x;
-                    t = (acc - maxLen) / (prev + pts)->len;
-                    dx = rem - (prev + pts)->x;
-                    dy = q->y - (prev + pts)->y;
-                    dz = q->z - (prev + pts)->z;
-                    q->x = rem - dx * t;
-                    q->y = q->y - dy * t;
-                    q->z = q->z - dz * t;
-                    (prev + pts)->len = (prev + pts)->len * (1.0f - t);
+                    q = points + i;
+                    rem = q->pos.unk0;
+                    t = (total - maxLen) / (prev + points)->len;
+                    dx = rem - (prev + points)->pos.unk0;
+                    dy = q->pos.unk4 - (prev + points)->pos.unk4;
+                    dz = q->pos.unk8 - (prev + points)->pos.unk8;
+                    q->pos.unk0 = rem - dx * t;
+                    q->pos.unk4 = q->pos.unk4 - dy * t;
+                    q->pos.unk8 = q->pos.unk8 - dz * t;
+                    (prev + points)->len = (prev + points)->len * (1.0f - t);
                 }
-                while (i != arg0->unk2D) {
-                    arg0->unk2D++;
-                    if (arg0->unk2D == arg0->count) {
-                        arg0->unk2D = 0;
+                while (i != actor->tail) {
+                    actor->tail++;
+                    if (actor->tail == actor->spawn.maxPoints) {
+                        actor->tail = 0;
                     }
-                    arg0->unk2C--;
+                    actor->numPoints--;
                 }
-                acc = maxLen;
+                total = maxLen;
             }
         }
-        if (acc != 0.0f) {
-            inv = 1.0f / acc;
+        if (total != 0.0f) {
+            invTotal = 1.0f / total;
         } else {
-            inv = 0.0f;
+            invTotal = 0.0f;
         }
-        acc = acc;
+        // matching: a dead early copy that steers register allocation (rem is set again below)
+        rem = total;
     }
-    if (arg0->unk2C >= 2) {
-        scale = *(f32 *)((u8 *)sp8C + 0x14) * inv;
-        j = arg0->unk2E;
-        rem = acc;
+    if (actor->numPoints >= 2) {
+        scale = state->width * invTotal;
+        j = actor->head;
+        rem = total;
         do {
-            TrailPt_150D3FD4 *pt;
+            TrailPoint *pt;
             j--;
             if (j < 0) {
-                j = arg0->count - 1;
+                j = actor->spawn.maxPoints - 1;
             }
-            pt = &pts[j];
-            pt->unk10 = rem * scale;
+            pt = &points[j];
+            pt->width = rem * scale;
             rem -= pt->len;
-        } while (j != arg0->unk2D);
+        } while (j != actor->tail);
     }
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x25];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x84 - 0x2F];
-    Vtx *unk84[4];
-    Entry150D3A68 *unk94;
-    State150D3A68 *unk98;
-} Actor150D4300;
-
+/* A ribbon segment: three vertices (edge, centre, edge) per trail point. */
 typedef struct {
     Vtx v[3];
-} Vtx3_150D4300;
+} TrailVtx;
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct17 *func_15144B34(s32);
@@ -634,14 +564,14 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-Gfx *func_150D4300(Actor150D4300 *arg0, Gfx *gfx, s16 arg2) {
-    Entry150D3A68 *table;
+Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 frame) {
+    TrailPoint *table;
     struct17 b;
     struct17 a;
-    State150D3A68 *state;
+    TrailState *state;
     struct127 *obj;
     struct17 *pos;
-    Vtx3_150D4300 *v;
+    TrailVtx *v;
     s32 i;
     s32 idxA;
     s32 idxB;
@@ -671,19 +601,19 @@ Gfx *func_150D4300(Actor150D4300 *arg0, Gfx *gfx, s16 arg2) {
     s32 pad2;
     s32 pad3;
 
-    if (arg0->unk2C < 2) {
+    if (actor->numPoints < 2) {
         return gfx;
     }
-    state = arg0->unk98;
-    table = arg0->unk94;
-    obj = state->unk0;
+    state = actor->state;
+    table = actor->points;
+    obj = state->owner;
     if (*(s32 *)((u8 *)obj + 0x1D4) == 0 || (obj->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), (void **)&vtx, &fresh);
+    func_151D5D60(actor->vtxBufs, frame, (actor->spawn.maxPoints * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), (void **)&vtx, &fresh);
     if (fresh != 0) {
-        v = (Vtx3_150D4300 *)arg0->unk84[arg2];
-        for (i = 0; i < arg0->unk25 * 2 + 10; i++) {
+        v = (TrailVtx *)actor->vtxBufs[frame];
+        for (i = 0; i < actor->spawn.maxPoints * 2 + 10; i++) {
             v->v[0].v.tc[0] = 5;
             v->v[0].v.tc[1] = 0;
             v->v[0].v.flag = 0;
@@ -696,25 +626,25 @@ Gfx *func_150D4300(Actor150D4300 *arg0, Gfx *gfx, s16 arg2) {
             v++;
         }
     }
-    pos = func_15144B34(arg2);
+    pos = func_15144B34(frame);
     update = 1;
     gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);
     gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
-    idxA = arg0->unk2E - 1;
+    idxA = actor->head - 1;
     if (idxA < 0) {
-        idxA = arg0->unk25 - 1;
+        idxA = actor->spawn.maxPoints - 1;
     }
     idxB = idxA - 1;
     if (idxB < 0) {
-        idxB = arg0->unk25 - 1;
+        idxB = actor->spawn.maxPoints - 1;
     }
     a = table[idxA].pos;
-    wA = table[idxA].unk10;
+    wA = table[idxA].width;
     b = table[idxB].pos;
-    wB = table[idxB].unk10;
+    wB = table[idxB].width;
 
     ex = a.unk0 - b.unk0;
     ey = a.unk4 - b.unk4;
@@ -806,14 +736,14 @@ loop:
         idxA = idxB;
         idxB--;
         if (idxB < 0) {
-            idxB = arg0->unk25 - 1;
+            idxB = actor->spawn.maxPoints - 1;
         }
-        if (idxA != arg0->unk2D) {
+        if (idxA != actor->tail) {
             a = table[idxA].pos;
             b = table[idxB].pos;
-            wB = table[idxB].unk10;
+            wB = table[idxB].width;
         }
-        if (idxA != arg0->unk2D) goto loop;
+        if (idxA != actor->tail) goto loop;
     return gfx;
 }
 
