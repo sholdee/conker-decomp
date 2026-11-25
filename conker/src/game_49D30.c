@@ -113,10 +113,8 @@ typedef struct {
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
 extern u8 D_800BEBA0;
-extern u64 *D_800BEB9C;
 extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
-extern u64 D_800C1060[];
 extern u64 D_800CBE10[];
 extern u64 D_8003A5E8[];
 extern void func_1501A39C(void);

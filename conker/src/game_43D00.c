@@ -4,19 +4,18 @@
 
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
-extern s32 D_800BE5A8[];
 extern u8 D_800D2100;
 
-/* Collects the distinct spawn-table model types (< 0xBB) and the asset size func_1502B7F0 reports for each. */
+/* Collects the distinct spawn-table model types (< 0xBB) and the data func_1502B7F0 loads for each. */
 void func_15016850(void) {
     s32 i;
     s32 j;
     s32 found;
-    s32 size;
+    s32 *data;
     s32 id;
 
     D_800BE590 = 0;
-    size = 0;
+    data = NULL;
     for (i = 0; i < D_800D2100; i++) {
         id = D_800D20FC[i].type;
         found = 0;
@@ -30,10 +29,10 @@ void func_15016850(void) {
             continue;
         }
         if (id < 0xBB) {
-            func_1502B7F0(&size, 2, 0x12, id);
+            func_1502B7F0((void **)&data, 2, 0x12, id);
         }
-        if (size != 0) {
-            D_800BE5A8[D_800BE590] = size;
+        if (data != NULL) {
+            D_800BE5A8[D_800BE590] = data;
             D_800BE598[D_800BE590] = id;
             D_800BE590++;
         }

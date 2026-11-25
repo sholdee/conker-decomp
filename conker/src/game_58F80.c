@@ -53,8 +53,6 @@ typedef struct ObjTexture {
 
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
-extern s32 D_800C3E88; // bone-matrix pool cursor
-extern s32 D_800C3E8C; // bone-matrix pool start
 extern u16 D_800C3E7A; // bone matrices used this frame
 extern u8 D_800C3E90;
 extern u8 D_800C3656;
@@ -62,8 +60,6 @@ extern u8 D_800C3660;
 extern u8 D_800C3FFA;
 extern u16 D_800C4778[]; // display-list parts per model id
 extern Gfx **D_800C4488[];
-extern Gfx **D_800C48F0[];
-extern s32 D_800C4BE0[];
 extern u16 D_800C4ED0[]; // bone count per model id
 extern ObjTexture *D_800C5338[];
 extern u16 D_800C5EF8[];
@@ -1014,7 +1010,7 @@ load:
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&D_800C3E88, mtx, ((ObjAnim *)obj->unk2D0), D_800C4BE0[id], count, cmd, remap, scale);
+                func_150A81D0(&D_800C3E88, mtx, ((ObjAnim *)obj->unk2D0), (s32)D_800C4BE0[id], count, cmd, remap, scale);
             }
             obj->unk7C = D_8008857C;
             moved = D_80088558;

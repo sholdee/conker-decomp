@@ -190,7 +190,6 @@ void func_1506E0EC(void);
 void func_1506E2CC(void);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
-extern s32 *D_800BE5A8[];
 extern s8 D_800E0BCE[];
 extern Vec3w D_80099B70;
 extern Vec3w D_80099B7C;

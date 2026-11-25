@@ -39,9 +39,7 @@ void func_15000AC0(void) {
 
 extern u8 D_800DBEA8[];
 extern Vtx *D_800DBE88[][2];
-extern s32 *D_800DBE80;
 extern s32 *D_800891BC[];
-extern void *D_800DBEB0;
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern s32 func_1510D0EC(s32, s32, s32, s32);
@@ -84,14 +82,14 @@ void func_15000AD0(s32 arg0) {
                 func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
-        D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
+        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
         if (D_800BE9F0 == 0x3C) {
             D_800DBEAB = 1;
         } else {
             D_800DBEAB = 0;
         }
     } else if (D_800B0DF0->unk8 == 2) {
-        D_800DBE80 = (s32 *)allocate_memory(0x1000, 1, 1, 0);
+        D_800DBE80 = allocate_memory(0x1000, 1, 1, 0);
         buf = D_800DBE80;
         switch (D_800BE9F0) {
             case 0:
@@ -264,7 +262,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
+        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= D_80082FA0; i++) {
             vtx = (Vtx *)allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;

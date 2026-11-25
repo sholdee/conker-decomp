@@ -368,7 +368,6 @@ void func_150045BC(void) {
 
 extern Mtx **D_80089250[];
 extern s16 D_800D37E0;
-extern MtxF D_800DBF08;
 extern MtxF D_800DBF48;
 extern void func_151150B0(WorldObject *obj);
 extern void func_15116058(WorldObject *obj);
@@ -399,7 +398,7 @@ void func_150045C4(s32 arg0) {
     f32 z;
 
     func_15004A4C();
-    guMtxIdentF(D_800DBF08);
+    guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
         obj = &D_800DBEF4[i];

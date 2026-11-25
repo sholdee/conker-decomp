@@ -42,8 +42,6 @@ typedef struct GfxBytes {
 /* Per-model tables, indexed by model id (0..186). */
 extern s32 *D_800C4020[];
 extern Gfx **D_800C4488[];
-extern Gfx **D_800C48F0[];
-extern void *D_800C4BE0[];
 extern ObjTexture *D_800C5338[];
 extern void *D_800C5048[];
 extern u16 D_800C4310[];      // vtxIndices count

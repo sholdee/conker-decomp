@@ -265,7 +265,6 @@ void func_15113180(void) {
 
 void func_1511490C(MtxF mtx, WorldObject *obj);
 void func_150A7B80(void *);
-extern MtxF D_800DBF08[];
 
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {

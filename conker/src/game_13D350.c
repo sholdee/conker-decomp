@@ -12,7 +12,6 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
 extern u8 D_800DBEA8[];
-extern void *D_800DBE80; // the current sky's data: the star field (sky 1) or a textured sky's tile formats
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];
@@ -662,7 +661,6 @@ extern struct Game13D350S16x2 D_800891F4;
 extern struct Game13D350U8x2 D_800891F8;
 extern struct Game13D350U8x2 D_800891FC;
 extern SkyFace D_800A2DA0[];
-extern Mtx *D_800DBEB0;
 extern Vtx *D_800DBE88[][2];
 extern Mtx D_80089470;
 

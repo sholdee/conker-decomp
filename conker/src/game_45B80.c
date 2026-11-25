@@ -120,9 +120,7 @@ extern s32 D_800DC9F0;
 extern u8 D_800BEAC2;
 extern u8 D_800BE630[];
 extern u8 D_800BEBA0;
-extern s32 D_800BEB9C;
 extern s32 D_800BEBA4;
-extern u8 D_800C1060[];
 extern LookAt D_800D9B90[];
 
 /*

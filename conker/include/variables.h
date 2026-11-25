@@ -798,6 +798,7 @@ extern u8  D_800BE500[5]; // might be a struct?
 extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
 extern u8  D_800BE574;
 extern u8  D_800BE575;
+extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
 extern u8  D_800BE5E0;
 extern u8  D_800BE9A0;
@@ -883,6 +884,8 @@ extern u8  D_800BEAC1;
 
 /* 800C0000 */
 
+extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
+extern u64 D_800C1060[]; // RSP ucode text buffer
 extern u16 D_800C18B8[];
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
@@ -906,12 +909,16 @@ extern u8  D_800C3E78;
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800C3E84;
+extern u32 D_800C3E88; // bone-matrix pool cursor
+extern u32 D_800C3E8C; // bone-matrix pool start
 extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
 extern u8  D_800C4000;
 
+extern Gfx **D_800C48F0[]; // per model: display list table (ModelHeader dlists2)
+extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
 extern u16 D_800C5A90[187]; // per model: animation count
 extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
 extern VtxTri *D_800C6070[187]; // per model id: triangles
@@ -1195,11 +1202,14 @@ extern u32 *D_800DBE5C; // per world-mesh triangle: material / surface flags
 extern u8  D_800DBE62;
 extern u8  D_800DBE63;
 extern f32 D_800DBE64;
+extern void *D_800DBE80; // the current sky data (star field, tile formats or gradient texture)
+extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern s32 D_800DBEF0;
 extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
+extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
