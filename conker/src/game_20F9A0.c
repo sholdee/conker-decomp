@@ -2387,18 +2387,6 @@ void func_151E7EF8(void) {
 }
 
 typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[0x22];
-} Spawn151E7F60;
-
-typedef struct {
     s16 unk0;
     s16 unk2;
     s16 unk4;
@@ -2414,7 +2402,7 @@ extern void func_15083384(Actor *, u8);
 void func_151E7F60(s32 slotIdx, s32 charIdx) {
     s32 objSlot;
     s32 spawnId;
-    Spawn151E7F60 *spawn;
+    SpawnRecord *spawn;
     s32 posIdx;
     s32 kind;
     Actor *obj;
@@ -2423,18 +2411,18 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
         func_15060F28(D_800E0BA0[slotIdx], 1);
     }
     spawnId = func_15083E0C(slotIdx + 0x10);
-    spawn = (Spawn151E7F60 *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order; struct258 in structs.h is not the real 0x30-byte entry
+    spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order
     kind = D_800AB57C[charIdx].unk5;
     posIdx = slotIdx;
     if (D_8008FDD4->unk2C == 7) {
         posIdx++;
     }
-    spawn->unk4 = kind;
-    spawn->unk6 = D_800AB940[posIdx].unk0;
-    spawn->unk8 = D_800AB940[posIdx].unk2;
-    spawn->unk8 += D_800AB57C[charIdx].unk4;
-    spawn->unkA = D_800AB940[posIdx].unk4;
-    spawn->unkC = D_800AB940[posIdx].unk6;
+    spawn->type = kind;
+    spawn->x = D_800AB940[posIdx].unk0;
+    spawn->y = D_800AB940[posIdx].unk2;
+    spawn->y += D_800AB57C[charIdx].unk4;
+    spawn->z = D_800AB940[posIdx].unk4;
+    spawn->angle = D_800AB940[posIdx].unk6;
     if (kind == 0x53) {
         spawn->unkD = 0x24;
     } else {

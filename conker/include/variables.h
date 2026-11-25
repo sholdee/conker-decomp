@@ -1053,20 +1053,20 @@ extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
 extern struct124 *D_800D1C90[187]; // 748 bytes, 187 pointers? 17 structs?
 extern u8  D_800D1F80[187];
 extern u8  D_800D2040[187]; // per model id counter
-extern struct258 *D_800D20FC;
+extern SpawnRecord *D_800D20FC;
 
-extern s32 *D_800D2104;
+extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
 extern u8  D_800D2DAB;
-extern s16 D_800D2110[];
+extern u16 *D_800D2110;
 extern s32 D_800D2120;
 extern s32 D_800D2124;
 extern s32 D_800D2128;
-extern struct187 *D_800D212C;
-extern u16 D_800D2132;
-extern s32 D_800D2138;
+extern SpawnPoint *D_800D212C;
+extern s16 D_800D2132;
+extern MatchState D_800D2138;
 
-extern s16 D_800D2340;
+extern u16 D_800D2340;
 extern s8  D_800D23A9;
 extern s32 D_800D23C0;
 extern Mtx  D_800D23D0;

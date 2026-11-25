@@ -2178,7 +2178,7 @@ void func_15022398(s32 track, s32 scene) {
                     }
                 } else {
                     if (slot < D_800D2100) {
-                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // 0x30-byte spawn entries
+                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // matching: integer address math
                         obj = func_1505EEF4(slot);
                         if (obj != NULL) {
                             func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);

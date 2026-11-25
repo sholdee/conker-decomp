@@ -1148,6 +1148,24 @@ typedef struct SpawnRecord {
     /* 0x2F */ u8  unk2F;
 } SpawnRecord; // size 0x30
 
+/* One point of a level path (8 bytes). D_800D2104[n] points at path n: a centre point followed by
+ * D_800D2108[n] - 1 waypoints. */
+typedef struct PathPoint {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
+} PathPoint;
+
+/* D_800D2138 (0x20C bytes, cleared by func_15017300): match state. D_800D213C (per-player stats) and
+ * D_800D2340 (= unk208) are separately named views into it. */
+typedef struct MatchState {
+    /* 0x000 */ s32 unk0;      /* indexes D_80087280; 1 = two views */
+    /* 0x004 */ u8  pad4[0x204];
+    /* 0x208 */ u16 unk208;    /* bit per player */
+    /* 0x20A */ u8  pad20A[2];
+} MatchState; // size 0x20C
+
 typedef struct {
     u8  pad0[0x4];
     u16 unk4;
@@ -2621,18 +2639,17 @@ typedef struct {
     u8  pad9B[0x5];
 } struct186; // size 0xA0, 160 bytes
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8  unk6;
-    u8  unk7;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  pad14;
-    u8  unk15;
-} struct187;
+/* A multiplayer spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
+typedef struct SpawnPoint {
+    /* 0x00 */ s16 pos[3];
+    /* 0x06 */ u8  unk6;   /* angle, 256 units per turn */
+    /* 0x07 */ u8  facing; /* angle, 256 units per turn */
+    /* 0x08 */ f32 unk8[3];
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ s8  unk15;
+    /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
+    /* 0x17 */ u8  pad17;
+} SpawnPoint; // size 0x18
 
 typedef struct {
     s32 unk0;
@@ -3303,15 +3320,6 @@ typedef struct {
     u8 pad0[0xD16];
     s16 unkD16;
 } struct257;
-
-typedef struct {
-    s32 unk0;
-    u8  pad4[0x2];
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-} struct258;
 
 /*
  * Heap block header. Every block (free or allocated) starts with one; the

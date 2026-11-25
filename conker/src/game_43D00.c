@@ -1,17 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800D20FC D_800D20FC_hdr
-#define D_800D2104 D_800D2104_hdr
-#define D_800D2110 D_800D2110_hdr
 #include "variables.h"
-#undef D_800D20FC
-#undef D_800D2104
-#undef D_800D2110
 
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 D_800BE5A8[];
-extern SpawnRecord *D_800D20FC;
 extern u8 D_800D2100;
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the asset size func_1502B7F0 reports for each. */
@@ -52,7 +45,6 @@ extern u8 D_1A34E0[];
 extern u8 D_1A37E0[];
 extern u8 D_800D2101;
 extern u8 *D_800D210C;
-extern s16 *D_800D2110; // header declares it as s16[]
 extern s32 func_1502B9B4(s32, s32, ...);
 extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -250,27 +242,11 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
     func_1508295C(level, 1, 0);
 }
 
-/* One point of a path: s16 world coordinates (as in game_A28B0.c). */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 unk6;
-} PathPoint;
-
-/* A path, D_800D2104[n]: a centre point followed by D_800D2108[n] - 1 waypoints. */
-typedef struct {
-    PathPoint center;
-    PathPoint points[1];
-} Path;
-
 /* An entry of the level's path table: the path's byte offset from the table start and its point count. */
 typedef struct {
     s32 offset;
     s32 count;
 } PathTableEntry;
-
-extern Path **D_800D2104; // header declares it as s32 *
 
 /* Allocates one path per spawn entry: an empty two-point path for each player slot, and the level's own
  * paths for the level-specific spawn entries. */
@@ -282,21 +258,21 @@ void func_15017114(s32 level) {
 
     count = D_800D2100;
     table = NULL;
-    D_800D2104 = allocate_memory(count * 4, 1, 0, 0); // matching: `* sizeof(Path *)` makes the size unsigned and moves bytes
+    D_800D2104 = allocate_memory(count * 4, 1, 0, 0); // matching: `* sizeof(PathPoint *)` makes the size unsigned and moves bytes
     countsSize = count;
     D_800D2108 = allocate_memory(countsSize, 1, 0, 0);
     bzero(D_800D2104, count * 4);
     bzero(D_800D2108, countsSize);
     for (i = 0; i < D_8008FD8C; i++) {
-        D_800D2104[i] = allocate_memory(sizeof(Path), 1, 2, 0);
-        bzero(D_800D2104[i], sizeof(Path));
+        D_800D2104[i] = allocate_memory(2 * sizeof(PathPoint), 1, 2, 0); // centre + one waypoint
+        bzero(D_800D2104[i], 2 * sizeof(PathPoint));
         D_800D2108[i] = 2;
     }
     if (func_1502B7F0((void **)&table, 2, 0x10, level) != 0) {
         for (i = D_800D2101; i < D_800D2100; i++) {
             if (table[i - D_800D2101].offset != 0) {
                 D_800D2108[i] = table[i - D_800D2101].count;
-                D_800D2104[i] = (Path *)((u8 *)table + table[i - D_800D2101].offset);
+                D_800D2104[i] = (PathPoint *)((u8 *)table + table[i - D_800D2101].offset);
             }
         }
     }

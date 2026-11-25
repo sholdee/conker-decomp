@@ -14,13 +14,9 @@ s32 func_1514D3B0(Actor *owner, s16 type, u8 msg, u8 arg);
 void func_1506160C(Actor *actor, s32 cmd, u8 value, u8 step, s32 player);
 #undef func_150ADA20
 u8 func_150ADA20(void);
-#define D_800D2104 D_800D2104_hdr
 #define D_80099A3C D_80099A3C_hdr
-#define D_800D2110 D_800D2110_hdr
 #include "variables.h"
-#undef D_800D2104
 #undef D_80099A3C
-#undef D_800D2110
 
 /*
  * Object script interpreter commands.
@@ -34,22 +30,6 @@ u8 func_150ADA20(void);
  * D_800CC2D0[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
 
-/* One point of a path: s16 world coordinates. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 unk6;
-} PathPoint;
-
-/* A path, D_800D2104[n]: a centre point followed by D_800D2108[n] - 1 waypoints. */
-typedef struct {
-    PathPoint center;
-    PathPoint points[1];
-} Path;
-
-extern Path **D_800D2104; // header declares it as s32 *
-extern s16 *D_800D2110;    // header declares it as s16[]
 
 typedef struct {
     u8 unk0;
@@ -193,8 +173,8 @@ void func_15075884(void) {
 
     func_15075548();
     obj = D_800D154C;
-    dx = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].x - obj->x_position;
-    dz = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].z - obj->z_position;
+    dx = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].x - obj->x_position;
+    dz = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].z - obj->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(u32)D_800D1891;
     speed = dist / dx;
@@ -252,7 +232,7 @@ void func_15075AAC(void) {
     f32 dz;
 
     func_15075548();
-    point = &D_800D2104[D_800D154C->unk13F]->center + D_800D1891;
+    point = D_800D2104[D_800D154C->unk13F] + D_800D1891;
     dx = point->x - D_800D154C->x_position;
     dz = point->z - D_800D154C->z_position;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
@@ -392,8 +372,8 @@ void func_1507602C(void) {
 
     func_15075548();
     D_800D154C->unk21E = D_800D1891;
-    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].x - D_800D154C->x_position;
-    dz = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].z - D_800D154C->z_position;
+    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].x - D_800D154C->x_position;
+    dz = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].z - D_800D154C->z_position;
     time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->unk44);
     if (time < 12.0f) {
         D_800D154C->unk44 *= time * 0.08333300054f;
@@ -974,9 +954,9 @@ void func_15077508(void) {
                         z += dx * dist;
                     }
                 }
-                D_800D2104[D_800D154C->unk13F]->points[0].x = x;
-                D_800D2104[D_800D154C->unk13F]->points[0].y = y;
-                D_800D2104[D_800D154C->unk13F]->points[0].z = z;
+                D_800D2104[D_800D154C->unk13F][1].x = x;
+                D_800D2104[D_800D154C->unk13F][1].y = y;
+                D_800D2104[D_800D154C->unk13F][1].z = z;
             }
         }
     }
@@ -1108,9 +1088,9 @@ void func_15077DBC(void) {
     if (D_800D1890 != 0xFA) {
         D_800D154C->unk21E = D_800D1890;
     }
-    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x;
-    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].y;
-    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
+    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x;
+    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].y;
+    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
 }
 
 void func_15077E9C(void) {
@@ -1140,8 +1120,8 @@ void func_15077F64(void) {
     u8 index;
 
     index = D_800D1890 - 1;
-    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x - D_800D154C->x_position;
-    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
+    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x - D_800D154C->x_position;
+    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
     D_800D154C->unk78 = func_1505A630(dx, dz, 0);
     turn = (D_800D154C->unk78 - D_800D154C->unk76) >> 8;
     if (turn & 0x80) {
@@ -1197,7 +1177,7 @@ void func_150781F4(void) {
     s32 index;
 
     index = D_800D1891 + 1;
-    point = &(&D_800D2104[D_800D154C->unk13F]->center)[index];
+    point = &D_800D2104[D_800D154C->unk13F][index];
     dx = point->x - D_800D154C->x_position;
     dz = point->z - D_800D154C->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
@@ -1306,9 +1286,9 @@ void func_15078544(void) {
     }
     x += offsetX * cosine + offsetZ * sine;
     z += offsetZ * cosine - offsetX * sine;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].y = y;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].y = y;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
 }
 
 /* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
@@ -1584,8 +1564,8 @@ void func_150793D8(void) {
         z = 1200;
     }
 
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
 }
 
 /* Sets the speeds for a jump that lands on the target. */
@@ -1638,8 +1618,8 @@ void func_15079790(void) {
         D_800D154C->id = 0x3A;
         offsetX = (func_150ADA20() % 500U) - 250;
         offsetZ = (func_150ADA20() % 500U) - 250;
-        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->center.x + offsetX;
-        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->center.z + offsetZ;
+        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][0].x + offsetX;
+        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][0].z + offsetZ;
     }
 }
 
@@ -1696,12 +1676,12 @@ void func_15079A58(void) {
 
 /* Returns the direction from object `arg0` to the centre of the current object's path. */
 u16 func_15079A98(s32 arg0) {
-    Path *path;
+    PathPoint *path;
     Actor *obj;
 
     path = D_800D2104[D_800D154C->unk13F];
     obj = &D_800CC2D0[arg0];
-    return func_1505A630(path->center.x - obj->x_position, obj->z_position - path->center.z, 0);
+    return func_1505A630(path[0].x - obj->x_position, obj->z_position - path[0].z, 0);
 }
 
 /*
@@ -1868,7 +1848,7 @@ void func_15079FBC(void) {
 s32 func_1507A100(void) {
     s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
 
-    ((s16 *)&D_800D2104[D_800D154C->unk13F]->points[D_800D1890])[D_800D1891] = value;
+    ((s16 *)&(D_800D2104[D_800D154C->unk13F] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
     return value;
 }
 
@@ -2099,7 +2079,7 @@ void func_1507A984(void) {
 /* Sets an angle: arg2 selects the operation, (arg0:arg1) is the operand. */
 void func_1507AA48(void) {
     u16 value;
-    Path *path;
+    PathPoint *path;
     s32 angle;
 
     value = (D_800D1890 << 8) | D_800D1891;
@@ -2123,7 +2103,7 @@ void func_1507AA48(void) {
     case 4:
         // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
         path = D_800D2104[D_800D154C->unk13F];
-        angle = (u16)(func_150484A0(path->points[D_800D1891].x - path->points[D_800D1890].x, path->points[D_800D1891].z - path->points[D_800D1890].z) * 10430.37793f) + (D_800D1893 << 8);
+        angle = (u16)(func_150484A0(path[D_800D1891 + 1].x - path[D_800D1890 + 1].x, path[D_800D1891 + 1].z - path[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
         D_800D154C->unk78 = angle + 0x4000;
         break;
     case 5:
@@ -2446,7 +2426,7 @@ void func_1507B974(void) {
     if (D_800D154C->unk65 != 0) {
         obj = &D_800CC2D0[D_800D154C->unk65 - 1];
     }
-    if (D_800D1891 == (&D_800D2104[obj->unk13F]->center)[obj->unk21E + D_800D1893].unk6) {
+    if (D_800D1891 == D_800D2104[obj->unk13F][obj->unk21E + D_800D1893].param) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {

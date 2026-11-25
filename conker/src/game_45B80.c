@@ -276,7 +276,7 @@ void func_15018DFC(void) {
         } else {
             func_1504A730();
         }
-        func_15085ABC(D_800D2340);
+        func_15085ABC((s16)D_800D2340);
     }
     func_1507C370();
     func_1507C8FC();

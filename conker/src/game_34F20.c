@@ -15,7 +15,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     func_15005270();
     func_15017300(arg0, arg1);
 
-    func_15015F40(D_80087280[D_800D2138], arg2);
+    func_15015F40(D_80087280[D_800D2138.unk0], arg2);
     func_150175E0();
     func_150177F8();
     func_15089BB0();
@@ -102,7 +102,6 @@ typedef struct Game34F20Actor {
 } Game34F20Actor;
 
 
-extern s16 D_800D2340;
 extern u8 D_800D2456;
 extern u8 D_800D2457;
 extern s32 D_800DC9F0;

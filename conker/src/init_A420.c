@@ -82,15 +82,6 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
     return distance;
 }
 
-/* One point of a path; D_800D2104[path] points to D_800D2108[path] of these. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 unk6;
-} PathPoint;
-
-#define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
 /*
  * func_1000A420 for a sound spread along a path: the sound is placed at the point of path that is nearest to
@@ -128,7 +119,7 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
     }
     bestDist = 0x7FFFFFFF;
     prevDist = bestDist;
-    for (i = 0, point = PATH_POINTS(path); i < count; i++, point++) {
+    for (i = 0, point = D_800D2104[path]; i < count; i++, point++) {
         dx = x - point->x;
         dy = y - point->y;
         dz = z - point->z;
@@ -142,20 +133,20 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
         }
         prevDist = dist;
     }
-    soundX = PATH_POINTS(path)[best].x;
-    soundY = PATH_POINTS(path)[best].y;
-    soundZ = PATH_POINTS(path)[best].z;
+    soundX = D_800D2104[path][best].x;
+    soundY = D_800D2104[path][best].y;
+    soundZ = D_800D2104[path][best].z;
     if (count >= 2 && bestDist > 28000) {
         // use the segment from best toward its nearer neighbour
         if (best >= count - 1 || beforeBestDist < afterBestDist) {
             best--;
         }
-        segment.x = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
-        segment.y = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
-        segment.z = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
-        offset.x = x - PATH_POINTS(path)[best].x;
-        offset.y = y - PATH_POINTS(path)[best].y;
-        offset.z = z - PATH_POINTS(path)[best].z;
+        segment.x = D_800D2104[path][best + 1].x - D_800D2104[path][best].x;
+        segment.y = D_800D2104[path][best + 1].y - D_800D2104[path][best].y;
+        segment.z = D_800D2104[path][best + 1].z - D_800D2104[path][best].z;
+        offset.x = x - D_800D2104[path][best].x;
+        offset.y = y - D_800D2104[path][best].y;
+        offset.z = z - D_800D2104[path][best].z;
         dot = func_150AD900(&segment.x, &offset.x);
         if (dot < 0.0f) {
             outside = TRUE;
@@ -174,12 +165,12 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
             } else {
                 best--;
             }
-            segment.x = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
-            segment.y = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
-            segment.z = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
-            offset.x = x - PATH_POINTS(path)[best].x;
-            offset.y = y - PATH_POINTS(path)[best].y;
-            offset.z = z - PATH_POINTS(path)[best].z;
+            segment.x = D_800D2104[path][best + 1].x - D_800D2104[path][best].x;
+            segment.y = D_800D2104[path][best + 1].y - D_800D2104[path][best].y;
+            segment.z = D_800D2104[path][best + 1].z - D_800D2104[path][best].z;
+            offset.x = x - D_800D2104[path][best].x;
+            offset.y = y - D_800D2104[path][best].y;
+            offset.z = z - D_800D2104[path][best].z;
             dot = func_150AD900(&segment.x, &offset.x);
             lengthSq = func_150AD930(&segment.x);
             lengthSq = lengthSq * lengthSq;
@@ -188,9 +179,9 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
             if (dot < lengthSq) {
                 func_15049148(&segment, dot / lengthSq, &segment);
             }
-            soundX = PATH_POINTS(path)[best].x + segment.x;
-            soundY = PATH_POINTS(path)[best].y + segment.y;
-            soundZ = PATH_POINTS(path)[best].z + segment.z;
+            soundX = D_800D2104[path][best].x + segment.x;
+            soundY = D_800D2104[path][best].y + segment.y;
+            soundZ = D_800D2104[path][best].z + segment.z;
         }
     }
     return func_1000A420(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,

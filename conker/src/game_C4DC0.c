@@ -3,15 +3,6 @@
 #include "variables.h"
 
 
-/* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
-typedef struct {
-    u8 pad0[2];
-    u8 unk2;
-    u8 pad3[0x2D];
-} SpawnSlot;
-
-#define SPAWN_SLOTS ((SpawnSlot *)D_800D20FC)
-
 typedef struct {
     u8 pad0[4];
     s32 unk4;
@@ -32,8 +23,8 @@ s32 func_15097910(s32 scriptId, s32 unused) {
     if (ret != -1) {
         obj = func_15083E90((u8)scriptId);
         if (obj == NULL) {
-            SPAWN_SLOTS[ret].unk2 = 0;
-            if (func_15082A44(ret + SPAWN_SLOTS, ret, 0, 0, 0) == 0) { // matching: index + base operand order
+            D_800D20FC[ret].unk2 = 0;
+            if (func_15082A44(ret + D_800D20FC, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
             ret = func_15083E0C((u8)scriptId);
@@ -56,7 +47,7 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
         return 0;
     }
     if (objId < D_800D2100) {
-        SPAWN_SLOTS[objId].unk2 = 1;
+        D_800D20FC[objId].unk2 = 1;
     }
     if (D_800D3840 == 2) {
         if (arg1->unk4 == 0) {
@@ -79,21 +70,6 @@ typedef struct {
     s32 unk4;
     s32 a[6];
 } ScriptCmd;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad;
-} PathPoint;
-
-/* D_800D2104[id] points at the path of the object with script id `id` (Actor.unk13F); D_800D2108[id]
- * is its point count. func_15099C14 reads the points from the start of the block, while func_15097A8C
- * writes them 8 bytes in (a header or 1-based indexing; unknown), hence this view. */
-typedef struct {
-    u8 pad0[8];
-    PathPoint pts[1];
-} PathData;
 
 /* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
@@ -665,9 +641,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk249 = cmd->a[0] & 0xFF;
         break;
     case 0x43:
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].x = cmd->a[1];
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].y = cmd->a[2];
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].z = cmd->a[3];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].x = cmd->a[1];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].y = cmd->a[2];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].z = cmd->a[3];
         break;
     case 0x44: {
         f32 px;
@@ -677,9 +653,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         node = func_15086D48(cmd->a[1]);
         if (node != -1) {
             func_15086CBC(node, &px, &py, &pz);
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].x = px;
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].y = py;
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].z = pz;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].x = px;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].y = py;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].z = pz;
         }
         break;
     }
@@ -1222,12 +1198,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].x;
-        z = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].z;
+        x = D_800D2104[obj->unk13F][cmd->a[0]].x;
+        z = D_800D2104[obj->unk13F][cmd->a[0]].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].y;
+        return D_800D2104[obj->unk13F][cmd->a[0]].y;
     case 0xBB:
         if (obj->unk65 != 0) {
             return D_800CC2D0[obj->unk65 - 1].unk13F;
@@ -1573,7 +1549,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 dx;
         s32 dz;
         idx = obj->unk13F;
-        pts = ((PathPoint **)D_800D2104)[idx];
+        pts = D_800D2104[idx];
         n = D_800D2108[idx];
         best = -1;
         if (pts != NULL && n != 0) {

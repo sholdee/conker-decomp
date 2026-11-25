@@ -1,11 +1,9 @@
 #include <ultra64.h>
 
-// matching: func_1506160C, D_800D20FC and D_800BE9F4 are declared below with types that differ from the shared headers
+// matching: func_1506160C and D_800BE9F4 are declared below with types that differ from the shared headers
 #include "functions.h"
-#define D_800D20FC D_800D20FC_hdr
 #define D_800BE9F4 D_800BE9F4_hdr
 #include "variables.h"
-#undef D_800D20FC
 #undef D_800BE9F4
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
@@ -300,21 +298,13 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* 0x30-byte entries of the D_800D20FC table, one per object slot. */
-typedef struct D20FCEntry {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5[0x2B];
-} D20FCEntry;
-
 void func_150054C4(Camera *, u32, s32, s32);
 void func_15085430(Actor *, s32, s32);
 void func_15181DC8(s32);
-void func_15082A44(D20FCEntry *, s32, s32, s32, s32);
+void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 void func_15088D58(Actor *);
 extern s16 D_800BE9F2;
 extern s32 D_800BE9F4;
-extern D20FCEntry *D_800D20FC;
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {
@@ -343,9 +333,9 @@ void func_1507D1D8(Actor *obj) {
             choice = (func_150ADA20() & 0xF) + 0x11;
             func_15085710(slot, 0, choice);
             if (choice < 0x1D) {
-                D_800D20FC[slot].unk4 = 0x9C;
+                D_800D20FC[slot].type = 0x9C;
             } else {
-                D_800D20FC[slot].unk4 = 0x9D;
+                D_800D20FC[slot].type = 0x9D;
             }
         }
     }

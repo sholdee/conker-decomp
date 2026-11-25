@@ -1,10 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h types D_800D212C as struct187 *, which lacks the signed link fields used here;
-   shadow the declaration file-locally and use SpawnPoint instead. */
-#define D_800D212C D_800D212C_struct187_decl_in_variables_h
 #include "variables.h"
-#undef D_800D212C
 
 extern u8 D_8009D954[];
 extern u8 *D_80087240[];
@@ -27,25 +23,12 @@ s32 func_15084D00(Actor *obj) {
     return id;
 }
 
-/* A spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
-typedef struct {
-    /* 0x00 */ s16 pos[3];
-    /* 0x06 */ u8 unk6;   /* angle, 256 units per turn */
-    /* 0x07 */ u8 facing; /* angle, 256 units per turn */
-    /* 0x08 */ f32 unk8[3];
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ s8 unk15;
-    /* 0x16 */ s8 link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
-    /* 0x17 */ u8 pad17;
-} SpawnPoint;
-
 /* Multiplayer score state (ScoreState in game_215960); only the field used here. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x42];
     /* 0x42 */ s8 unk42;
 } ScoreState;
 
-extern SpawnPoint *D_800D212C;
 extern ScoreState *D_8008FDD4;
 extern s8 D_800E0BE3;
 

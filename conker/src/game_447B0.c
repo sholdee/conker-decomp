@@ -10,7 +10,7 @@ void func_15017300(s16 arg0, s16 arg1) {
 
     tmp = arg0;
     bzero(&D_800D2138, 524);
-    D_800D2138 = tmp;
+    D_800D2138.unk0 = tmp;
 
     for (i = 0; i < 16; i++) {
         if ((1 << i) & arg1) {

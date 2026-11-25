@@ -1,25 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h gets these types wrong, so they are shadowed here: D_800D2138 is a struct, D_800D2340 (s16)
-   a u16 bit mask, and D_800D3094 (s32) the (unsigned) length of the D_800D3098 trigger-zone table. */
-#define D_800D2138 D_800D2138_s32_decl_in_variables_h
-#define D_800D2340 D_800D2340_s16_decl_in_variables_h
+/* variables.h gets this type wrong, so it is shadowed here: D_800D3094 (s32) is the (unsigned) length
+   of the D_800D3098 trigger-zone table. */
 #define D_800D3094 D_800D3094_s32_decl_in_variables_h
 #include "variables.h"
-#undef D_800D2138
-#undef D_800D2340
 #undef D_800D3094
 
 #define ZONE_TYPE(zone)  ((s32)(zone)->kind >> 2)
 #define ZONE_SHAPE(zone) ((zone)->kind & 3)
 
-typedef struct {
-    /* 0x000 */ u8  pad0[0x208];
-    /* 0x208 */ u16 unk208; /* = D_800D2340 */
-} Struct800D2138;
-
-extern Struct800D2138 D_800D2138;
-extern u16 D_800D2340;          /* bit n: actor n's occupancy bits in D_800D30F0 are current */
 extern u32 D_800D3094;          /* number of trigger zones */
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */

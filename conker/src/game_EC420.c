@@ -353,13 +353,6 @@ void func_150BF21C(WorldObject *obj) {
     }
 }
 
-/* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 pad3[0x2D];
-} SpawnSlot;
-
 void func_1511B51C(WorldObject *);
 void *func_15195FB0(WorldObject *, s32, s32, s32, s32, s32, s32);
 void func_150825C0(s32, s32);
@@ -400,7 +393,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
-                ((SpawnSlot *)D_800D20FC)[slot].unk2 = 0;
+                D_800D20FC[slot].unk2 = 0;
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }
@@ -425,7 +418,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
-                ((SpawnSlot *)D_800D20FC)[slot].unk2 = 0;
+                D_800D20FC[slot].unk2 = 0;
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }

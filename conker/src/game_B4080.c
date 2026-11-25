@@ -515,9 +515,9 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
                     D_800D23A0 = obj->y_position;
                     D_800D23A4 = cosf(f) * 300.0f + obj->z_position;
                 }
-                ((s16 **)D_800D2104)[obj->unk13F][4] = D_800D239C;
-                ((s16 **)D_800D2104)[obj->unk13F][5] = D_800D23A0;
-                ((s16 **)D_800D2104)[obj->unk13F][6] = D_800D23A4;
+                D_800D2104[obj->unk13F][1].x = D_800D239C;
+                D_800D2104[obj->unk13F][1].y = D_800D23A0;
+                D_800D2104[obj->unk13F][1].z = D_800D23A4;
                 obj->unk44 = started;
                 if (D_800D2390 == 1) {
                     obj->y_velocity = 75.0f;

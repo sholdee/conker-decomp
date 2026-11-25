@@ -1,11 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #define D_800D1550 D_800D1550_hdr
-#define D_800D2104 D_800D2104_hdr
 #include "variables.h"
 #include "effects.h"
 #undef D_800D1550
-#undef D_800D2104
 
 f32 func_150489B0(u8 arg0);
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
@@ -27,21 +25,6 @@ extern f32 D_800CC2E4;
 extern f32 D_800CC2EC;
 extern f32 D_800D1550; // matching: as the header's f32[] the multiply in func_150B10F0 schedules differently
 
-/* One point of a path: s16 world coordinates (as in game_A28B0.c). */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 unk6;
-} PathPoint;
-
-/* A path, D_800D2104[n]: a centre point followed by its waypoints. */
-typedef struct {
-    PathPoint center;
-    PathPoint points[1];
-} Path;
-
-extern Path **D_800D2104; // header declares it as s32 *
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
 void func_150B10F0(Actor *obj) {
@@ -93,7 +76,7 @@ void func_150B12FC(Actor *obj) {
     {
         f32 height;
 
-        height = D_800D2104[obj->unk13F]->center.y;
+        height = D_800D2104[obj->unk13F][0].y;
         func_15058EA4(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
     }
     func_15056B08(obj);
@@ -131,7 +114,7 @@ void func_150B1484(Actor *obj) {
     if (obj->stunned == 0) {
         f32 targetY;
 
-        targetY = (f32)((SpawnRecord *)D_800D20FC)[obj->unk13F].y + 210.0f;
+        targetY = (f32)D_800D20FC[obj->unk13F].y + 210.0f;
         if (!(obj->unk22C & 8)) {
             if (obj->unk223 != 3) {
                 obj->unkB8 = obj->y_velocity * -0.5f;
@@ -154,7 +137,7 @@ void func_150B1484(Actor *obj) {
             heightCode = (s16)obj->unk224;
             if (heightCode != 0) {
                 if (heightCode == 10000) {
-                    targetY = D_800D2104[obj->unk13F]->points[obj->unk21E].y;
+                    targetY = D_800D2104[obj->unk13F][obj->unk21E + 1].y;
                 } else if ((obj->id == 0x50) || (obj->id == 5) || (obj->id == 0xAD) || (obj->id == 0xAE) || (obj->id == 0xAF)) {
                     targetY = heightCode * 8;
                 } else {
@@ -166,7 +149,7 @@ void func_150B1484(Actor *obj) {
                 f32 maxSpeed;
 
                 if (obj->id == 0x44) {
-                    targetY = D_800D2104[obj->unk13F]->points[obj->unk21E].y;
+                    targetY = D_800D2104[obj->unk13F][obj->unk21E + 1].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {

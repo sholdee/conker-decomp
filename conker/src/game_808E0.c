@@ -39,8 +39,7 @@ s32 func_15053430(Actor *obj) {
         } else if (flags & 1) {
             func_15053694(obj);
         } else if (flags & 0x40) {
-            // D_800D2110 is a pointer; variables.h declares it as an array
-            (*(s16 **)&D_800D2110)[obj->unk13F] = 1250;
+            D_800D2110[obj->unk13F] = 1250;
             func_15060F28(obj, 1);
         } else if (result == 1) {
             func_150536D0(obj);

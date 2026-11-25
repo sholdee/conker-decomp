@@ -185,14 +185,6 @@ void func_15055E50(Actor *actor, s32 zoneSetId) {
     }
 }
 
-/* One point of an actor's path (D_800D2104[actor->unk13F]). */
-typedef struct PathPoint {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 param; /* point 0: radius / 8 of the actor's area; later points: speed */
-} PathPoint;
-
 /* Keeps the actor within unk2E8 * 8 units of its path's second point. */
 void func_15056150(Actor *actor) {
     f32 dist;
@@ -206,7 +198,7 @@ void func_15056150(Actor *actor) {
     PathPoint *path;
 
     if (actor->unk2E8 != 0) {
-        path = ((PathPoint **)D_800D2104)[actor->unk13F];
+        path = D_800D2104[actor->unk13F];
         centerX = path[1].x;
         centerZ = path[1].z;
         centerY = path[1].y;
@@ -422,7 +414,7 @@ s32 func_1505693C(Actor *actor, s32 targetIdx) {
     f32 radiusSq;
     f32 dz;
     f32 dx;
-    PathPoint *path = ((PathPoint **)D_800D2104)[actor->unk13F];
+    PathPoint *path = D_800D2104[actor->unk13F];
 
     if (path[0].param == 0) {
         return TRUE;
@@ -559,9 +551,9 @@ void func_15056B08(Actor *actor) {
         rangeSq = actor->unk23D * 8;
         rangeSq *= rangeSq;
     }
-    if (((PathPoint **)D_800D2104)[actor->unk13F]->param != 0) {
-        tx = ((PathPoint **)D_800D2104)[actor->unk13F]->x - actor->x_position;
-        tz = ((PathPoint **)D_800D2104)[actor->unk13F]->z - actor->z_position;
+    if (D_800D2104[actor->unk13F]->param != 0) {
+        tx = D_800D2104[actor->unk13F]->x - actor->x_position;
+        tz = D_800D2104[actor->unk13F]->z - actor->z_position;
     }
     if ((actor->unk25C & 4) && !(actor->unk25C & 1) && ((state == 1) || (state == 3))) {
         actor->unk21C = 0;
@@ -797,9 +789,9 @@ void func_15056B08(Actor *actor) {
                 tz = D_800CC2D0[actor->unk222].z_position;
                 ty = D_800CC2D0[actor->unk222].y_position;
             } else {
-                tx = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
-                tz = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
-                ty = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
+                tx = D_800D2104[actor->unk13F][actor->unk21E + 1].x;
+                tz = D_800D2104[actor->unk13F][actor->unk21E + 1].z;
+                ty = D_800D2104[actor->unk13F][actor->unk21E + 1].y;
             }
             if ((state == 5) || (state == 6)) {
                 f32 orbitX;
@@ -888,11 +880,11 @@ void func_15056B08(Actor *actor) {
                 n = actor->unk21F;
             }
             if (actor->unk22C & 4) {
-                actor->x_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
-                actor->z_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
+                actor->x_position = D_800D2104[actor->unk13F][actor->unk21E + 1].x;
+                actor->z_position = D_800D2104[actor->unk13F][actor->unk21E + 1].z;
                 actor->unk1FC |= 8;
                 if (actor->unk22C & 8) {
-                    actor->y_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
+                    actor->y_position = D_800D2104[actor->unk13F][actor->unk21E + 1].y;
                 }
             }
             if (!(actor->unkF4 & 0x10)) {
@@ -4741,15 +4733,15 @@ void func_150611E8(Actor *actor, s32 pathIdx) {
     z = actor->z_position;
     best = 0x7FFFFFFF;
     for (i = 0; i < count; i++) {
-        dx = x - ((PathPoint **)D_800D2104)[pathIdx][i].x;
-        dz = z - ((PathPoint **)D_800D2104)[pathIdx][i].z;
+        dx = x - D_800D2104[pathIdx][i].x;
+        dz = z - D_800D2104[pathIdx][i].z;
         if (dx * dx + dz * dz < best) {
             closest = i;
             best = dx * dx + dz * dz;
         }
     }
     if (closest != 0 && closest != count - 1) {
-        pts = ((PathPoint **)D_800D2104)[pathIdx];
+        pts = D_800D2104[pathIdx];
         if (best > 28000) {
             dx = x - pts[closest + 1].x;
             dz = z - pts[closest + 1].z;
@@ -5212,9 +5204,9 @@ s32 func_150623F4(Actor *actor) {
     if (D_800D2108[idx] != 0) {
         hidden = 1;
         for (i = 0; i < D_8008FD8C; i++) {
-            dx = ((PathPoint **)D_800D2104)[idx]->x - D_800CC2D0[i].x_position;
-            dz = ((PathPoint **)D_800D2104)[idx]->z - D_800CC2D0[i].z_position;
-            if ((dx * dx) + (dz * dz) < ((PathPoint **)D_800D2104)[idx]->param * ((PathPoint **)D_800D2104)[idx]->param) {
+            dx = D_800D2104[idx]->x - D_800CC2D0[i].x_position;
+            dz = D_800D2104[idx]->z - D_800CC2D0[i].z_position;
+            if ((dx * dx) + (dz * dz) < D_800D2104[idx]->param * D_800D2104[idx]->param) {
                 hidden = 0;
                 break;
             }

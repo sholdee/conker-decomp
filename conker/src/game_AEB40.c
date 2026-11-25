@@ -6,16 +6,8 @@
 #include "functions.h"
 
 #define D_800D1C90 D_800D1C90_hdr
-#define D_800D20FC D_800D20FC_hdr
-#define D_800D2110 D_800D2110_hdr
-#define D_800D2138 D_800D2138_hdr
-#define D_800D2132 D_800D2132_hdr
 #include "variables.h"
 #undef D_800D1C90
-#undef D_800D20FC
-#undef D_800D2110
-#undef D_800D2138
-#undef D_800D2132
 
 // One entry of a model's definition table D_800D1C90 (header struct124).
 typedef struct ModelDef {
@@ -85,18 +77,9 @@ typedef struct {
     /* 0x8 */ s32 unk8;
 } ModelReloc;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x208];
-    /* 0x208 */ u16 unk208;     // bit per player
-} Struct800D2138;
-
 extern ModelDef *D_800D1C90[187];
-extern SpawnRecord *D_800D20FC;
-extern u16 *D_800D2110;
-extern Struct800D2138 D_800D2138;
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern u8 *D_800D210C;
-extern s16 D_800D2132;
 extern u8 D_800D2100;
 extern u8 D_800D2101;
 extern s8 D_800D2130;

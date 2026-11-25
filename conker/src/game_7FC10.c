@@ -48,15 +48,6 @@ void func_15052760(Actor *obj, s16 prevAngle) {
     }
 }
 
-/* One point of a path; D_800D2104[path] points to an array of these. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad6;
-} PathPoint;
-
-#define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
 
 /**
  * Per-frame movement for a path-following object: picks a target height (the next path point, or the
@@ -76,7 +67,7 @@ void func_150528C8(Actor *obj) {
 
     climbSpeed = (s8)obj->unk22B;
     prevAngle = obj->unk76;
-    floorY = PATH_POINTS(obj->unk13F)[0].y;
+    floorY = D_800D2104[obj->unk13F][0].y;
     autoTilt = 1;
     heightMode = 0;
     // matching: the u32 compare (a no-op on a u8) steers IDO's register allocation
@@ -88,7 +79,7 @@ void func_150528C8(Actor *obj) {
     if (obj->id == 10) {
         targetY = D_800CC2D0[obj->unk222].y_position + 80.0f;
     } else {
-        targetY = PATH_POINTS(obj->unk13F)[obj->unk21E + 1].y;
+        targetY = D_800D2104[obj->unk13F][obj->unk21E + 1].y;
     }
     if ((s16)obj->unk224 != 0) {
         targetY = (s16)obj->unk224;

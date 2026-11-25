@@ -1199,13 +1199,6 @@ void func_1506CE6C(void) {
     func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, (s32)pos, flags, allocExt);
 }
 
-typedef struct MarkerPoint {
-    u8 pad0[8];
-    s16 x;
-    s16 y;
-    s16 z;
-} MarkerPoint;
-
 /* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
 void func_1506D2E8(void) {
     Actor *obj;
@@ -1234,9 +1227,9 @@ void func_1506D2E8(void) {
     obj->unk76 = angle;
     func_1505A184(angle, 5000.0f, height, &xOff, &zOff, &yOff);
 
-    ((MarkerPoint **)D_800D2104)[obj->unk13F]->x = D_800D154C->x_position + xOff;
-    ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800D154C->z_position + zOff;
-    ((MarkerPoint **)D_800D2104)[obj->unk13F]->y = D_800D154C->y_position + yOff;
+    D_800D2104[obj->unk13F][1].x = D_800D154C->x_position + xOff;
+    D_800D2104[obj->unk13F][1].z = D_800D154C->z_position + zOff;
+    D_800D2104[obj->unk13F][1].y = D_800D154C->y_position + yOff;
     obj->unk65 = 0;
     obj->unk218 = NULL;
 
@@ -3155,12 +3148,6 @@ void func_150723E0(void) {
 }
 
 /* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
-typedef struct SpawnSlot {
-    u8  pad0[2];
-    u8  unk2;
-    u8  pad3[0x2D];
-} SpawnSlot;
-
 void func_15072420(void) {
     Actor *obj;
     s32 spawnFlags;
@@ -3184,8 +3171,8 @@ void func_15072420(void) {
             func_1505F188(obj);
         }
     }
-    ((SpawnSlot *)D_800D20FC)[id].unk2 = 0;
-    slot = func_15082A44((SpawnSlot *)(id * 0x30 + (s32)D_800D20FC), id, 0, 0, 0); // matching: integer address math
+    D_800D20FC[id].unk2 = 0;
+    slot = func_15082A44((SpawnRecord *)(id * 0x30 + (s32)D_800D20FC), id, 0, 0, 0); // matching: integer address math
     if (slot == 0) {
         return;
     }
@@ -3816,7 +3803,7 @@ void func_15073FA0(void) {
     if (slot != -1) {
         state = 1;
         D_800D210C[slot] = 0;
-        idx = func_15082A44((SpawnSlot *)(slot * 0x30 + (s32)D_800D20FC), slot, 0, 0, 0); // matching: integer address math
+        idx = func_15082A44((SpawnRecord *)(slot * 0x30 + (s32)D_800D20FC), slot, 0, 0, 0); // matching: integer address math
         if (idx != 0) {
             idx--;
             obj = &D_800CC2D0[idx];
@@ -3906,14 +3893,14 @@ void func_15073FA0(void) {
                 state = 5;
                 obj->xz_velocity = 0.0f;
                 func_151A3390(obj, 0xFF);
-                ((MarkerPoint **)D_800D2104)[obj->unk13F]->x = D_800CC2D0[0].x_position;
-                ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800CC2D0[0].z_position;
+                D_800D2104[obj->unk13F][1].x = D_800CC2D0[0].x_position;
+                D_800D2104[obj->unk13F][1].z = D_800CC2D0[0].z_position;
             } else if (player->id == 0x7B) {
                 if (arg == 0x10) {
                     state = 7;
-                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->x = D_800CC2D0[0].x_position;
-                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->y = 980;
-                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800CC2D0[0].z_position;
+                    D_800D2104[obj->unk13F][1].x = D_800CC2D0[0].x_position;
+                    D_800D2104[obj->unk13F][1].y = 980;
+                    D_800D2104[obj->unk13F][1].z = D_800CC2D0[0].z_position;
                     obj->unique_id = 0xFF - idx;
                     func_1506AC8C(obj, 0xC, 0);
                     func_150F16DC(D_800D154C, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
