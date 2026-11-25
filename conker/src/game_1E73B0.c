@@ -991,114 +991,131 @@ void func_151BC074(struct127 *obj) {
     }
 }
 
-extern f32 D_800AA830;
 extern f32 D_800DCA24;
-void *func_15134908(void *, s32, u8, s32);
-void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 typedef struct {
-    f32 *unk0;
-    f32 *unk4;
-    f32 *unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 pad1A[2];
-} Spawn151BC104;
+    /* 0x00 */ f32 *x;
+    /* 0x04 */ f32 *y;
+    /* 0x08 */ f32 *z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 pad1A[2];
+} Desc15134908;
+
+/* Objects returned by func_15134908 and func_15163414 hold the owner reference at these offsets. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ EffectOwnerRef ref;
+} Fx15134908;
 
 typedef struct {
-    struct127 *owner;
-    u8 ownerId;
-} Extra151BC104;
-
-
-typedef struct {
-    Vec3f unk0;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} Header151BC104;
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ EffectOwnerRef ref;
+} Fx15163414;
 
 typedef struct {
-    struct127 *owner;
-    u8 ownerId;
-    u8 pad5[3];
-    Vec3f unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-} Payload151BC104;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} Desc15147A80;
 
-void func_151BC104(struct127 *arg0, u8 arg1, s32 arg2) {
-    void *temp_v0;
+/* Data block of the object returned by func_15147A80. */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+} Data15147A80;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x98];
+    /* 0x98 */ Data15147A80 *data;
+} Fx15147A80;
+
+Fx15134908 *func_15134908(Desc15134908 *, s32, u8, s32);
+Fx15147A80 *func_15147A80(Desc15147A80 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+
+/*
+ * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
+ * each with a reference back to its owner.
+ */
+void func_151BC104(struct127 *obj, u8 arg1, s32 arg2) {
+    Fx15134908 *fx1;
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
-        Spawn151BC104 spawn;
-        Extra151BC104 extra;
-        spawn.unkC = 15.0f;
-        spawn.unk0 = &arg0->x_position;
-        spawn.unk4 = &arg0->y_position;
-        spawn.unk8 = &arg0->z_position;
-        spawn.unk14 = 0x12C;
-        spawn.unk10 = D_800AA830 * D_800DCA24;
-        spawn.unk16 = 4;
-        spawn.unk17 = 4;
-        spawn.unk18 = 1;
-        spawn.unk19 = 0;
-        extra.owner = arg0;
-        extra.ownerId = arg0->unique_id;
-        temp_v0 = func_15134908(&spawn, 8, arg1, arg2);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x40, &extra, 8);
+        Desc15134908 desc;
+        EffectOwnerRef ref;
+
+        desc.unkC = 15.0f;
+        desc.x = &obj->x_position;
+        desc.y = &obj->y_position;
+        desc.z = &obj->z_position;
+        desc.unk14 = 300;
+        desc.unk10 = 0.3033999801f * D_800DCA24;
+        desc.unk16 = 4;
+        desc.unk17 = 4;
+        desc.unk18 = 1;
+        desc.unk19 = 0;
+        ref.owner = obj;
+        ref.ownerId = obj->unique_id;
+        fx1 = func_15134908(&desc, 8, arg1, arg2);
+        if (fx1 != NULL) {
+            memcpy(&fx1->ref, &ref, sizeof(ref));
         }
     }
     {
-        Header151BC104 header;
-        void *temp_v0_2;
-        Payload151BC104 payload;
-        header.unk15 = 0x28;
-        header.unk0.x = arg0->x_position;
-        header.unk0.y = arg0->y_position;
-        header.unk0.z = arg0->z_position;
-        header.unkC = 0x12C;
-        header.unkE = 6;
-        header.unk10 = 0xC;
-        payload.owner = arg0;
-        payload.ownerId = arg0->unique_id;
-        payload.unk8 = header.unk0;
-        payload.unk14 = 0.0f;
-        payload.unk18 = 0.0f;
-        payload.unk20 = -16384.0f;
-        payload.unk1C = -16384.0f;
-        temp_v0_2 = func_15147A80(&header, 0x28, 0x14, 0xA, 0xA, 0xA, 0, 0, 0, arg1, arg2);
-        if (temp_v0_2 != NULL) {
-            memcpy(*(void **)((u8 *)temp_v0_2 + 0x98), &payload, 0x24);
+        Desc15147A80 desc;
+        Fx15147A80 *fx2;
+        Data15147A80 data;
+
+        desc.unk15 = 40;
+        desc.pos.x = obj->x_position;
+        desc.pos.y = obj->y_position;
+        desc.pos.z = obj->z_position;
+        desc.unkC = 300;
+        desc.unkE = 6;
+        desc.unk10 = 12;
+        data.owner = obj;
+        data.ownerId = obj->unique_id;
+        data.pos = desc.pos;
+        data.unk14 = 0.0f;
+        data.unk18 = 0.0f;
+        data.unk20 = -16384.0f;
+        data.unk1C = -16384.0f;
+        fx2 = func_15147A80(&desc, 40, 20, 10, 10, 10, 0, 0, 0, arg1, arg2);
+        if (fx2 != NULL) {
+            memcpy(fx2->data, &data, sizeof(data));
         }
     }
     {
-        Extra151BC104 extra2;
-        void *temp_v0_3;
-        Header header2;
-        extra2.owner = arg0;
-        extra2.ownerId = arg0->unique_id;
-        header2.unk0 = 2;
-        header2.unk1 = 0xE;
-        header2.unk2 = 0x12C;
-        header2.unk4 = 0x1F;
-        temp_v0_3 = func_15163414(&header2, &arg0->x_position, &arg0->y_position, &arg0->z_position,
-                                0, 0, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
-        if (temp_v0_3 != NULL) {
-            memcpy((u8 *)temp_v0_3 + 0x28, &extra2, 8);
+        EffectOwnerRef ref;
+        Fx15163414 *fx3;
+        Header header;
+
+        ref.owner = obj;
+        ref.ownerId = obj->unique_id;
+        header.unk0 = 2;
+        header.unk1 = 14;
+        header.unk2 = 300;
+        header.unk4 = 31;
+        fx3 = func_15163414(&header, &obj->x_position, &obj->y_position, &obj->z_position,
+                           0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
+        if (fx3 != NULL) {
+            memcpy(&fx3->ref, &ref, sizeof(ref));
         }
     }
 }
