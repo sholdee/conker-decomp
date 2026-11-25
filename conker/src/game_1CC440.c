@@ -602,65 +602,9 @@ s32 func_1519F7F0(Trail *trail) {
     return 1;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_1519FE6C;
-
-typedef struct {
-    f32 x;
-    f32 z;
-    f32 y;
-    f32 width;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    u8 pad18[0xC];
-} Elem1519FE6C;
-
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0x25];
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 pad2D[0xB];
-    f32 unk38;
-    u8 pad3C[4];
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 pad44[2];
-    s16 unk46;
-    u8 pad48[2];
-    s16 unk4A;
-} Params1519FE6C;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3f_1519FE6C unk10;
-    u8 pad1C[2];
-    u16 unk1E;
-    s32 unk20;
-    u8 pad24;
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x55];
-    u8 unk84[0x10];
-    Elem1519FE6C *unk94;
-    Params1519FE6C *unk98;
-} Obj1519FE6C;
-
 extern u8 D_80090E0C[];
 extern s32 D_800D2C9C;
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -668,143 +612,150 @@ Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-#define EL(n) ((Elem1519FE6C *)((u8 *)elems + (n) * sizeof(Elem1519FE6C)))
-Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
+/*
+ * Draws the trail as a strip three vertices wide (outer edge, centre line, outer edge), from the newest
+ * point (or the live attach point) back to the oldest. Only the centre line is opaque.
+ */
+Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
     Vtx *vtx;
-    Params1519FE6C *params;
-    Elem1519FE6C *elems;
-    Vec3f_1519FE6C cur;
-    Vec3f_1519FE6C prev;
+    TrailConfig *config;
+    TrailPoint *points;
+    TrailVec3 cur;
+    TrailVec3 prev;
     s32 i;
     s32 j;
     f32 nx;
-    s16 cnt1;
-    s16 cnt2;
-    s16 prevColor;
-    s16 curColor;
+    s16 tailFadeLeft;
+    s16 headFadeLeft;
+    s16 prevTexS;
+    s16 curTexS;
     s32 prevAlpha;
     s32 curAlpha;
     f32 dx;
     f32 dz;
     f32 prevWidth;
-    s32 a;
-    s32 b;
-    s16 tc[3];
-    u8 alpha1;
-    u8 alpha2;
+    s32 edgeA;
+    s32 edgeB;
+    s16 texT[3]; /* t at the first edge, the centre line and the second edge */
+    u8 tailFade;
+    u8 headFade;
     u8 update;
     f32 curWidth;
-    f32 invlen;
+    f32 invLen;
     f32 nz;
     s32 k;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 3 << 4) + 0x120, (void **)&vtx, 0);
+    if (trail->count >= 2) {
+        func_151D5D60(trail->unk84, arg2, (trail->capacity * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
-            params = arg0->unk98;
-            elems = arg0->unk94;
+            config = trail->config;
+            points = trail->points;
             update = 1;
-            if (params->unk4 & 2) {
-                alpha1 = 0;
-                cnt1 = params->unk40;
-                j = arg0->unk2D;
+            if (config->flags & 2) {
+                /* fade in from the tail */
+                tailFade = 0;
+                tailFadeLeft = config->tailFadeCount;
+                j = trail->tail;
                 do {
-                    elems[j].unk14 = alpha1;
+                    points[j].fade = tailFade;
                     j++;
-                    alpha1 += params->unk41;
-                    if (j == arg0->unk25) {
+                    tailFade += config->tailFadeStep;
+                    if (j == trail->capacity) {
                         j = 0;
                     }
-                    cnt1--;
-                } while (cnt1 != 0 && j != arg0->unk2E);
-                do { } while (0);
+                    tailFadeLeft--;
+                } while (tailFadeLeft != 0 && j != trail->head);
+                do { } while (0); // matching: empty statement; IDO allocates registers differently without it
             }
-            if (params->unk4 & 4) {
-                alpha2 = 0;
-                cnt2 = params->unk42;
-                j = arg0->unk2E - 1;
+            if (config->flags & 4) {
+                /* fade out towards the head */
+                headFade = 0;
+                headFadeLeft = config->headFadeCount;
+                j = trail->head - 1;
                 if (j < 0) {
-                    j = arg0->unk25 - 1;
+                    j = trail->capacity - 1;
                 }
                 do {
-                    elems[j].unk14 = (elems[j].unk14 * alpha2) >> 8;
+                    points[j].fade = (points[j].fade * headFade) >> 8;
                     j--;
-                    alpha2 += params->unk43;
-                    cnt2--;
+                    headFade += config->headFadeStep;
+                    headFadeLeft--;
                     if (j < 0) {
-                        j = arg0->unk25 - 1;
+                        j = trail->capacity - 1;
                     }
-                } while (cnt2 != 0 && j != arg0->unk2E);
+                } while (headFadeLeft != 0 && j != trail->head);
             }
             gfx = func_15142E24(gfx, (s32)D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, params->unk2A, params->unk2B, params->unk2C, 0xFF, &update);
+            gfx = func_15142C10(gfx, config->color[0], config->color[1], config->color[2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
             gfx = func_1513F4E4(gfx, 7, &update);
             gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
-            if (arg0->unk1E & 2) {
-                i = arg0->unk2E - 1;
+            if (trail->flags & 2) {
+                /* still attached: start the strip at the live attach point */
+                i = trail->head - 1;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = trail->capacity - 1;
                 }
-                prev = arg0->unk10;
-                prevAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
-                prevColor = EL(i)->unk16;
-                prevWidth = params->unk38;
+                prev = trail->pos;
+                prevAlpha = (points[i].alpha * points[i].fade) >> 8;
+                prevTexS = points[i].texS;
+                prevWidth = config->startWidth;
             } else {
-                k = arg0->unk2E - 1;
+                k = trail->head - 1;
                 if (k < 0) {
-                    k = arg0->unk25 - 1;
+                    k = trail->capacity - 1;
                 }
                 i = k - 1;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = trail->capacity - 1;
                 }
-                prev.x = EL(k)->x;
-                prev.y = EL(k)->y;
-                prev.z = EL(k)->z;
-                prevAlpha = (EL(k)->unk14 * EL(k)->unk10) >> 8;
-                prevWidth = EL(k)->width;
-                prevColor = EL(k)->unk16;
+                prev.x = points[k].x;
+                prev.y = points[k].y;
+                prev.z = points[k].z;
+                prevAlpha = (points[k].alpha * points[k].fade) >> 8;
+                prevWidth = points[k].width;
+                prevTexS = points[k].texS;
             }
-            cur.x = EL(i)->x;
-            cur.y = EL(i)->y;
-            cur.z = EL(i)->z;
-            b = 2;
-            curColor = EL(i)->unk16;
-            curWidth = EL(i)->width;
-            curAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
+            cur.x = points[i].x;
+            cur.y = points[i].y;
+            cur.z = points[i].z;
+            edgeB = 2;
+            curTexS = points[i].texS;
+            curWidth = points[i].width;
+            curAlpha = (points[i].alpha * points[i].fade) >> 8;
             dx = cur.x - prev.x;
             dz = cur.z - prev.z;
             if (0.0001f < fabsf(dx) || 0.0001f < fabsf(dz)) {
-                invlen = 1.0f / sqrtf(dx * dx + dz * dz);
+                invLen = 1.0f / sqrtf(dx * dx + dz * dz);
             } else {
-                invlen = 1.0f;
+                invLen = 1.0f;
             }
-            tc[0] = params->unk46;
-            tc[2] = params->unk46 + params->unk4A;
-            if (tc[2] < tc[0]) {
-                tc[0] = tc[0] % 1024;
-                params->unk46 = tc[0];
-                tc[2] = params->unk46 + params->unk4A;
+            texT[0] = config->texT;
+            texT[2] = config->texT + config->texTSpan;
+            if (texT[2] < texT[0]) {
+                /* the scroll overflowed s16: wrap it */
+                texT[0] = texT[0] % 1024;
+                config->texT = texT[0];
+                texT[2] = config->texT + config->texTSpan;
             }
-            tc[1] = (tc[0] + tc[2]) >> 1;
-            if (arg0->unk20 == 6) {
-                a = 0;
-            } else if (arg0->unk20 == 7) {
-                a = 2;
-                b = 0;
+            texT[1] = (texT[0] + texT[2]) >> 1;
+            if (trail->side == TRAIL_SIDE_6) {
+                edgeA = 0;
+            } else if (trail->side == TRAIL_SIDE_7) {
+                edgeA = 2;
+                edgeB = 0;
             } else {
-                b = 0;
-                a = 2;
+                edgeB = 0;
+                edgeA = 2;
             }
-            nx = -dz * invlen * prevWidth;
-            nz = dx * invlen * prevWidth;
+            nx = -dz * invLen * prevWidth;
+            nz = dx * invLen * prevWidth;
             vtx->v.ob[0] = prev.x + nx;
             vtx->v.ob[1] = prev.y;
             vtx->v.ob[2] = prev.z + nz;
-            vtx->v.tc[0] = prevColor;
-            vtx->v.tc[1] = tc[a];
+            vtx->v.tc[0] = prevTexS;
+            vtx->v.tc[1] = texT[edgeA];
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
@@ -814,8 +765,8 @@ Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
             vtx->v.ob[0] = prev.x;
             vtx->v.ob[1] = prev.y;
             vtx->v.ob[2] = prev.z;
-            vtx->v.tc[0] = prevColor;
-            vtx->v.tc[1] = tc[1];
+            vtx->v.tc[0] = prevTexS;
+            vtx->v.tc[1] = texT[1];
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
@@ -825,8 +776,8 @@ Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
             vtx->v.ob[0] = prev.x - nx;
             vtx->v.ob[1] = prev.y;
             vtx->v.ob[2] = prev.z - nz;
-            vtx->v.tc[0] = prevColor;
-            vtx->v.tc[1] = tc[b];
+            vtx->v.tc[0] = prevTexS;
+            vtx->v.tc[1] = texT[edgeB];
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
@@ -834,13 +785,13 @@ Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
             vtx->v.flag = 0;
             vtx++;
             do {
-                nx = -dz * invlen * curWidth;
-                nz = dx * invlen * curWidth;
+                nx = -dz * invLen * curWidth;
+                nz = dx * invLen * curWidth;
                 vtx->v.ob[0] = cur.x + nx;
                 vtx->v.ob[1] = cur.y;
                 vtx->v.ob[2] = cur.z + nz;
-                vtx->v.tc[0] = curColor;
-                vtx->v.tc[1] = tc[a];
+                vtx->v.tc[0] = curTexS;
+                vtx->v.tc[1] = texT[edgeA];
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
@@ -850,8 +801,8 @@ Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
                 vtx->v.ob[0] = cur.x;
                 vtx->v.ob[1] = cur.y;
                 vtx->v.ob[2] = cur.z;
-                vtx->v.tc[0] = curColor;
-                vtx->v.tc[1] = tc[1];
+                vtx->v.tc[0] = curTexS;
+                vtx->v.tc[1] = texT[1];
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
@@ -861,48 +812,49 @@ Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
                 vtx->v.ob[0] = cur.x - nx;
                 vtx->v.ob[1] = cur.y;
                 vtx->v.ob[2] = cur.z - nz;
-                vtx->v.tc[0] = curColor;
-                vtx->v.tc[1] = tc[b];
+                vtx->v.tc[0] = curTexS;
+                vtx->v.tc[1] = texT[edgeB];
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
                 vtx->v.cn[3] = 0;
                 vtx->v.flag = 0;
                 vtx++;
+                /* quad strip between the previous row (0-2) and this row (3-5) */
                 gSPVertex(gfx++, vtx - 6, 6, 0);
                 gSP1Triangle(gfx++, 0, 3, 4, 0);
                 gSP1Triangle(gfx++, 0, 4, 1, 0);
                 gSP1Triangle(gfx++, 1, 4, 5, 0);
                 gSP1Triangle(gfx++, 1, 5, 2, 0);
-                if (prevColor != curColor) {
+                // matching: an empty test of prevTexS; IDO allocates registers differently without it
+                if (prevTexS != curTexS) {
                 }
                 k = i--;
                 if (i < 0) {
-                    i = arg0->unk25 - 1;
+                    i = trail->capacity - 1;
                 }
-                if (k != arg0->unk2D) {
+                if (k != trail->tail) {
                     prev = cur;
-                    cur.x = EL(i)->x;
-                    cur.y = EL(i)->y;
-                    cur.z = EL(i)->z;
+                    cur.x = points[i].x;
+                    cur.y = points[i].y;
+                    cur.z = points[i].z;
                     dx = cur.x - prev.x;
                     dz = cur.z - prev.z;
-                    prevColor = curColor;
-                    curColor = EL(i)->unk16;
-                    curAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
+                    prevTexS = curTexS;
+                    curTexS = points[i].texS;
+                    curAlpha = (points[i].alpha * points[i].fade) >> 8;
                     if (dx != 0.0f || dz != 0.0f) {
-                        invlen = 1.0f / sqrtf(dx * dx + dz * dz);
+                        invLen = 1.0f / sqrtf(dx * dx + dz * dz);
                     } else {
-                        invlen = 1.0f;
+                        invLen = 1.0f;
                     }
-                    curWidth = EL(i)->width;
+                    curWidth = points[i].width;
                 }
-            } while (k != arg0->unk2D);
+            } while (k != trail->tail);
         }
     }
     return gfx;
 }
-
 
 /* Spawner update: once the owner's actor is back, creates the trail for its side and removes itself. */
 void func_151A084C(TrailSpawner *spawner) {
