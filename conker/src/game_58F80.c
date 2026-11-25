@@ -89,11 +89,11 @@ typedef struct GameObj {
     /* 0x094 */ s32 unk94; // hidden display-list mask
     /* 0x098 */ s32 unk98; // blacked-out display-list mask
     /* 0x09C */ u8 pad9C[0x4];
-    /* 0x0A0 */ u32 tintParam; // packed ARGB colour, or a pointer to an f32 level
-    /* 0x0A4 */ u8 tintMode;
-    /* 0x0A5 */ u8 tintLevel;
-    /* 0x0A6 */ u8 tintRate;
-    /* 0x0A7 */ u8 tintFade;
+    /* 0x0A0 */ u32 fogColor; // packed ARGB; in mode 1 a pointer to an f32 percentage
+    /* 0x0A4 */ u8 fogMode;
+    /* 0x0A5 */ u8 fogLevel; // fade level, or pulse phase in modes 4/5
+    /* 0x0A6 */ u8 fogRate;
+    /* 0x0A7 */ u8 fogFade; // pulse fade-out, 0xFF = full
     /* 0x0A8 */ u8 padA8[0x4];
     /* 0x0AC */ u8 unkAC;
     /* 0x0AD */ u8 padAD[0xB];
@@ -127,7 +127,7 @@ typedef struct GameObj {
     /* 0x160 */ u16 unk160;
     /* 0x162 */ u8 pad162[0x1E];
     /* 0x180 */ f32 unk180;
-    /* 0x184 */ s32 unk184;
+    /* 0x184 */ u32 unk184;
     /* 0x188 */ u8 pad188[0x16];
     /* 0x19E */ u16 unk19E;
     /* 0x1A0 */ u8 pad1A0[0x28];
@@ -178,6 +178,13 @@ typedef struct GameObj {
 
 
 extern GameObj D_800CC2D0[];
+
+/* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
+   enables per-object distance fog. */
+typedef struct Struct104Ext {
+    /* 0x00 */ u8 pad0[0x3E];
+    /* 0x3E */ s16 unk3E;
+} Struct104Ext;
 void func_1505E650(GameObj *obj, u16 anim, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 void func_1506160C(GameObj *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
 GameObj *func_15072208(GameObj *obj, s32 arg1);
@@ -224,105 +231,123 @@ extern void func_1503DF48(s32);
 extern void func_150A4B04(GameObj *);
 extern void func_1517AD00(s32, s32, s32);
 
-typedef struct { u32 first, second; } Game58F80Command;
-typedef struct {
-    s32 active;
-    u8 model, kind;
-    u8 pad6[0x17E];
-    u32 flags;
-    u8 pad188[0x1A4];
-} Game58F80DrawActor;
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern s32 func_1506196C(GameObj *, s32);
 Gfx *func_1502C408(Gfx *, s32);
-s32 func_1502C974(s32, s32, s32, s32, s32);
-void *func_150368C4(s32, s32, s32);
-s32 func_15030E08(s32, s32, s32);
+Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4);
+Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
+Gfx *func_15030E08(Gfx *gdl, s32 player, s32 arg2);
 
-Game58F80Command *func_1502BAD0(Game58F80Command *commands, s32 mode, s16 arg2) {
-    Game58F80DrawActor *actor;
-    s32 index;
-    s32 active;
+/* Emits the display list of every object drawn in one render pass (mode) for one player. */
+Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
+    GameObj *obj;
+    s32 i;
+    s32 state;
 
-    { Game58F80Command *opening = commands++; opening->first = 0xDE000000; opening->second = (u32)D_80084160; }
-    actor = (Game58F80DrawActor *)&D_800CC2D0;
-    for (index = 0; index != 25; index++, actor++) {
-        D_8003C8E0 = (index & 0xFFFFFF) | 0x01000000;
-        active = actor->active;
-        if (active == 0 || actor->kind == 3 || actor->kind == 5) continue;
-        if (actor->kind == 2) {
-            if (mode != 2) continue;
-        } else if (actor->model == 0xFF) continue;
-        if (mode == 6) {
-            if (actor->kind != 7) continue;
-        } else if (mode == 0) {
-            if (!((actor->flags >> 9) & 1)) continue;
-        } else if (mode == 1) {
-            if (actor->kind == 7 || actor->kind == 1) continue;
-            if (actor->kind == 0 && func_1506196C((GameObj *)actor, arg2) < 0xFF) continue;
-        } else if (mode == 2 && actor->kind != 2) {
-            if (actor->kind == 7 || (actor->kind != 0 && actor->kind != 1)) continue;
-            if (actor->kind == 0 && func_1506196C((GameObj *)actor, arg2) == 0xFF) continue;
+    gSPDisplayList(gdl++, D_80084160);
+    obj = D_800CC2D0;
+    for (i = 0; i != 25; i++, obj++) {
+        D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
+        state = obj->interaction_state;
+        if (state == 0 || obj->unk5 == 3 || obj->unk5 == 5) {
+            continue;
         }
-        if (actor->kind == 2) {
-            commands = func_1502C408(commands, index);
+        if (obj->unk5 == 2) {
+            if (mode != 2) {
+                continue;
+            }
+        } else if (obj->id == 0xFF) {
+            continue;
+        }
+        if (mode == 6) {
+            if (obj->unk5 != 7) {
+                continue;
+            }
+        } else if (mode == 0) {
+            if (!((obj->unk184 >> 9) & 1)) {
+                continue;
+            }
+        } else if (mode == 1) {
+            if (obj->unk5 == 7 || obj->unk5 == 1) {
+                continue;
+            }
+            if (obj->unk5 == 0 && func_1506196C(obj, player) < 0xFF) {
+                continue;
+            }
+        } else if (mode == 2 && obj->unk5 != 2) {
+            if (obj->unk5 == 7 || (obj->unk5 != 0 && obj->unk5 != 1)) {
+                continue;
+            }
+            if (obj->unk5 == 0 && func_1506196C(obj, player) == 0xFF) {
+                continue;
+            }
+        }
+        if (obj->unk5 == 2) {
+            gdl = func_1502C408(gdl, i);
         } else {
-            commands = (Game58F80Command *)func_1502C974((s32)commands, index, arg2, mode, 0);
-            if (index == 0) commands = func_150368C4((s32)commands, index, arg2);
+            gdl = func_1502C974(gdl, i, player, mode, 0);
+            if (i == 0) {
+                gdl = func_150368C4(gdl, i, player);
+            }
         }
     }
     D_8003C8E0 = 0x01FFFFFF;
-    if (mode == 1) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 0);
-    else if (mode == 2) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 1);
-    else if (mode == 6) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 2);
-    { Game58F80Command *closing = commands++; closing->first = 0xDE000000; closing->second = (u32)D_80084190; }
+    if (mode == 1) {
+        gdl = func_15030E08(gdl, player, 0);
+    } else if (mode == 2) {
+        gdl = func_15030E08(gdl, player, 1);
+    } else if (mode == 6) {
+        gdl = func_15030E08(gdl, player, 2);
+    }
+    gSPDisplayList(gdl++, D_80084190);
     D_8003C8E0 = 0;
-    return commands;
+    return gdl;
 }
 
-void func_1502BD84(GameObj *arg0, s32 arg1) {
-    arg0->bones = NULL;
-    if (arg0->unk5 == 5) {
-        func_1502DF38(arg1, 1);
+/* Per-frame update of one object: LOD, culling, bone matrices, fog effect and attachments. */
+void func_1502BD84(GameObj *obj, s32 index) {
+    obj->bones = NULL;
+    if (obj->unk5 == 5) {
+        func_1502DF38(index, TRUE);
         return;
     }
-    if (arg0->id == 0xFF) {
+    if (obj->id == 0xFF) {
         return;
     }
-    if (arg0->unk5 == 3) {
+    if (obj->unk5 == 3) {
         return;
     }
-    if (arg0->unk5 == 2) {
-        func_1502C608(arg1);
+    if (obj->unk5 == 2) {
+        func_1502C608(index);
         return;
     }
-    if (arg0->lodRequest != 0) {
-        func_1502FBE8(arg0);
+    if (obj->lodRequest != 0) {
+        func_1502FBE8(obj);
     }
-    func_1502E4C4(arg1);
-    func_1502DF38(arg1, 0);
-    func_1503A08C(arg0);
-    if (arg0->bones == NULL) {
-        arg0->unk1FC = 2;
+    func_1502E4C4(index);
+    func_1502DF38(index, FALSE);
+    func_1503A08C(obj);
+    if (obj->bones == NULL) {
+        obj->unk1FC = 2;
     } else {
-        func_150345E4(arg1);
-        func_1503A830(arg0);
+        func_150345E4(index);
+        func_1503A830(obj);
     }
-    if (D_800C666F[arg1].unk0 != 0) {
-        func_1503DF48(arg1);
+    if (D_800C666F[index].unk0 != 0) {
+        func_1503DF48(index);
     }
-    if (arg0->interaction_state != 0) {
-        func_1502EEF4(arg1);
-        func_1502F264(arg1);
-        if (*(u8 *)((u8 *)arg0 + 0xA4) != 0) {
-            func_1502EAFC(arg0);
+    if (obj->interaction_state != 0) {
+        func_1502EEF4(index);
+        func_1502F264(index);
+        if (obj->fogMode != 0) {
+            func_1502EAFC(obj);
         }
-        if ((arg0->unkF8 & 0x4000) != 0) {
-            func_150A4B04(arg0);
+        if (obj->unkF8 & 0x4000) {
+            func_150A4B04(obj);
         }
-        if (*(s32 *)((u8 *)arg0 + 0x260) != 0) {
-            func_1517AD00(*(u8 *)((u8 *)arg0 + 0x134), *(u8 *)((u8 *)arg0 + 0x135), arg1);
+        if (obj->unk260 != 0) {
+            func_1517AD00(obj->unk134, obj->unk135, index);
         }
     }
 }
@@ -331,25 +356,26 @@ extern void func_1503F964(void);
 extern void func_1502F3C8(void);
 extern void func_15030468(void);
 extern void func_1507C22C(s32);
-extern void func_1502F948(ActorInteractionFields *);
+extern void func_1502F948(GameObj *);
 extern u8 D_800C3E90;
 extern s32 D_800C3E74;
 extern u8 D_800C3E70;
 extern s32 D_800D121C;
 
+/* Updates every object, parents before the objects attached to them (by attachment depth). */
 void func_1502BEE4(void) {
     GameObj *obj;
-    GameObj *p;
+    GameObj *parent;
     s32 i;
     s32 j;
     s32 state;
     u8 order[25];
     u8 depth[25];
-    s32 n;
-    s32 max;
+    s32 count;
+    s32 maxDepth;
 
     func_1503F964();
-    max = 0;
+    maxDepth = 0;
     D_800C3E90 = 0;
     D_800C3E74 = 0;
     for (i = 0; i < 25; i++) {
@@ -363,37 +389,37 @@ void func_1502BEE4(void) {
         state = obj->interaction_state;
         if (state != 0) {
             if (obj->unk65 != 0) {
-                p = obj;
+                parent = obj;
                 depth[i] = 0;
-                while (p->unk65 != 0) {
-                    p = &D_800CC2D0[p->unk65 - 1];
+                while (parent->unk65 != 0) {
+                    parent = &D_800CC2D0[parent->unk65 - 1];
                     depth[i]++;
                 }
-                if (max < depth[i]) {
-                    max = depth[i];
+                if (maxDepth < depth[i]) {
+                    maxDepth = depth[i];
                 }
             } else {
                 func_1502BD84(obj, i);
             }
         }
     }
-    n = 0;
-    if (max != 0) {
-        for (i = 1; i <= max; i++) {
+    count = 0;
+    if (maxDepth != 0) {
+        for (i = 1; i <= maxDepth; i++) {
             for (j = 0; j < 25; j++) {
                 if (i == depth[j]) {
-                    order[n++] = j;
+                    order[count++] = j;
                 }
             }
         }
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < count; i++) {
             func_1502BD84(&D_800CC2D0[order[i]], order[i]);
         }
     }
     func_1502F3C8();
     for (i = 0; i < 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0) {
-            func_1502F948((ActorInteractionFields *)&D_800CC2D0[i]);
+            func_1502F948(&D_800CC2D0[i]);
         }
     }
     func_15030468();
@@ -411,61 +437,57 @@ extern s32 func_150229E4(GameObj *);
 extern s32 func_1506196C(GameObj *, s32);
 extern struct102 *func_1510D970(s32, GameObj *, s32, s32, s32);
 extern u8 D_800C3656;
-void func_1502C1A4(void)
-{
-  GameObj *obj;
-  s32 found;
-  s32 i;
-  s32 arg2;
-  s32 arg4;
-  s32 id;
-  s32 state;
-  struct102 *temp;
- obj = D_800CC2D0; do { state = obj->interaction_state; if (state != 0) { id = obj->id; found = 0; if ((((((((obj->unk5 != 3) && (id != 0xFF)) && (obj->unk123 == 0)) && ((obj->unk66 & 0x10) != 0x10)) && ((*((u16 *) (((u8 *) obj) + 0x160))) != 0)) && (obj->unk65 == 0)) && (((D_800C3638 == 0) || (D_800C3656 != 0)) || (func_150229E4(obj) != 0))) && ((obj->unk88 == 0) || (obj->unkCC >= (-0x96)))) { i = 0; if (D_80082FA0 >= 0) { do {
-            if (func_1506196C(obj, i) != 0)
-            {
-              found = 1;
-            }
-            i++;
-          }
-          while (D_80082FA0 >= i);
-        }
-      }
-      if (found != 0)
-      {
-        if ((*((struct102 **) (((u8 *) obj) + 0x2D4))) == 0)
-        {
-          arg2 = 0;
-          if (obj->id == 0x4D)
-          {
-            arg2 = 2;
-            arg4 = 1;
-          }
-          else
-          {
-            arg4 = 0;
-          }
-          *((struct102 **) (((u8 *) obj) + 0x2D4)) = func_1510D970(0, obj, arg2, 0, arg4);
-          alloc_done:
-          ;
+/* Creates the unk2D4 effect for objects visible to some player and frees it for the rest. */
+void func_1502C1A4(void) {
+    GameObj *obj;
+    s32 visible;
+    s32 i;
+    s32 arg2;
+    s32 arg4;
+    s32 id;
+    s32 state;
+    struct102 *effect;
 
-          ;
-          ;
+    // matching: -g3 line numbers; the init shares the loop's first line (preheader schedule)
+    obj = D_800CC2D0; do {
+        state = obj->interaction_state;
+        if (state != 0) {
+            id = obj->id;
+            visible = FALSE;
+            if (obj->unk5 != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
+                obj->unk160 != 0 && obj->unk65 == 0 &&
+                (D_800C3638 == 0 || D_800C3656 != 0 || func_150229E4(obj) != 0) &&
+                (obj->unk88 == 0 || obj->unkCC >= -150)) {
+                for (i = 0; i <= D_80082FA0; i++) {
+                    if (func_1506196C(obj, i) != 0) {
+                        visible = TRUE;
+                    }
+                }
+            }
+            if (visible) {
+                if (obj->unk2D4 == NULL) {
+                    arg2 = 0;
+                    if (obj->id == 0x4D) {
+                        arg2 = 2;
+                        arg4 = 1;
+                    } else {
+                        arg4 = 0;
+                    }
+                    obj->unk2D4 = func_1510D970(0, obj, arg2, 0, arg4);
+                    // matching: the label ends the block so as1 can't move the store into the branch delay slot
+                created:;
+                }
+            } else {
+                effect = obj->unk2D4;
+                if (effect != NULL) {
+                    func_1516972C(effect);
+                    obj->unk2D4 = NULL;
+                }
+            }
         }
-      }
-      else
-      {
-        temp = *((struct102 **) (((u8 *) obj) + 0x2D4));
-        if (temp != 0)
-        {
-          func_1516972C(temp);
-          *((struct102 **) (((u8 *) obj) + 0x2D4)) = 0;
-        }
-      }
-    }
-    obj++;
-  }
-  while (obj != ((GameObj *) (&D_800D121C)));
+        obj++;
+        // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), not CSE'd with the start
+    } while (obj != (GameObj *)&D_800D121C);
 }
 
 
@@ -685,7 +707,7 @@ void func_1502C6E8(s32 arg0, s16 arg1, s32 arg2) {
     ((u8 *)obj)[0x1C8] = lod;
 }
 
-extern s32 D_800BE9C8[];
+extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern void *D_800DF7C0;
 extern u8 D_800DF7C4;
@@ -694,63 +716,65 @@ extern void func_1502D630(GameObj *, s32 *, s32);
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, void *, s32, s32 *, s32, s32);
 void func_1502D54C(s32, s32 *);
 
-s32 func_1502C974(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* Draws one object's model for one player; drops the output if the display list would overflow. */
+Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 arg4) {
     s32 lod;
     s32 alpha;
-    s32 colours[4];
-    s32 cond;
+    s32 colour[4];
+    s32 overflow;
     void *model;
-    s32 orig;
+    Gfx *start;
     GameObj *obj;
 
-    orig = arg0;
-    if ((D_800C3638 != 0) && (D_800C3656 == 0) && (func_150229E4(&D_800CC2D0[arg1]) == 0)) {
-        return arg0;
+    start = gdl;
+    if (D_800C3638 != 0 && D_800C3656 == 0 && func_150229E4(&D_800CC2D0[index]) == 0) {
+        return gdl;
     }
-    obj = &D_800CC2D0[arg1];
-    if ((obj->unk74 & (1 << arg2)) == (1 << arg2)) {
-        return arg0;
+    obj = &D_800CC2D0[index];
+    if ((obj->unk74 & (1 << player)) == (1 << player)) {
+        return gdl;
     }
-    if (func_1506196C(obj, arg2) == 0) {
-        return arg0;
+    if (func_1506196C(obj, player) == 0) {
+        return gdl;
     }
     if (obj->bones == NULL) {
-        return arg0;
+        return gdl;
     }
-    if ((arg3 != 4) && (arg3 != 5) && (arg3 != 3)) {
-        func_1502C6E8(arg1, arg2, arg3);
-        lod = ((u8 *)obj)[0x1C8];
+    if (mode != 4 && mode != 5 && mode != 3) {
+        func_1502C6E8(index, player, mode);
+        lod = obj->lod;
     } else {
         func_150849CC(obj, &lod);
     }
-    func_1502D54C(arg1, colours);
-    if (*(s16 *)((u8 *)D_800B0DF0 + 0x3E) != 0) {
-        func_1502D630(obj, colours, arg2);
+    func_1502D54C(index, colour);
+    if (((Struct104Ext *)D_800B0DF0)->unk3E != 0) {
+        func_1502D630(obj, colour, player);
     } else {
-        colours[3] = 0xFF;
+        colour[3] = 0xFF;
     }
-    alpha = func_1506196C(obj, arg2);
+    alpha = func_1506196C(obj, player);
     if (alpha < 0xFF) {
-        if ((obj->camera != NULL) && (obj->camera->unk2C == 0x100) && (arg2 != obj->unk127)) {
+        if (obj->camera != NULL && obj->camera->unk2C == 0x100 && player != obj->unk127) {
             alpha = 0xFF;
         }
     }
-    if (arg3 == 4) {
+    if (mode == 4) {
         alpha = (D_800DF7C4 * alpha) >> 8;
         model = D_800DF7C0;
     } else {
         model = obj->bones;
     }
-    arg0 = (s32)func_1502CCFC((Gfx *)arg0, arg1, arg2, model, alpha, colours, arg3, arg4);
-    if (((arg0 - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
-        cond = 1;
+    gdl = func_1502CCFC(gdl, index, player, model, alpha, colour, mode, arg4);
+    // matching: IDO materialises the comparison as a 0/1 value only through this flag
+    if (gdl - D_800BE9C8[D_800BE9C0] > D_800BEBA4) {
+        overflow = TRUE;
     } else {
-        cond = 0;
+        overflow = FALSE;
     }
-    if (cond) {
-        return orig;
+    if (overflow) {
+        return start;
     }
-    return arg0;
+    return gdl;
 }
 
 void func_1502CC34(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
@@ -1992,20 +2016,21 @@ void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4)
     *arg3 += res[2] + v[1][0][2] - diff[2] - v[0][0][2];
 }
 
-void func_1502F948(ActorInteractionFields *arg0) {
-    s32 idx;
-    void *temp;
+/* Keeps a copy of the object's bone matrices in prevBones (allocated on first use). */
+void func_1502F948(GameObj *obj) {
+    s32 id;
+    void *copy;
 
-    if ((arg0->field_0xF8 & 0x4000) && (arg0->field_0x264 != 0) && (arg0->field_0x1D4 != 0)) {
-        idx = arg0->field_0x4;
-        if (arg0->field_0x1D8 == 0) {
-            temp = allocate_memory(D_800C4ED0[idx] << 6, 1, 1, 2);
-            arg0->field_0x1D8 = temp;
-            if (temp == 0) {
+    if ((obj->unkF8 & 0x4000) && obj->unk264 != 0 && obj->bones != NULL) {
+        id = obj->id;
+        if (obj->prevBones == NULL) {
+            copy = allocate_memory(D_800C4ED0[id] * sizeof(*obj->bones), 1, 1, 2);
+            obj->prevBones = copy;
+            if (copy == NULL) {
                 return;
             }
         }
-        bcopy(arg0->field_0x1D4, arg0->field_0x1D8, D_800C4ED0[idx] << 6);
+        bcopy(obj->bones, obj->prevBones, D_800C4ED0[id] * sizeof(*obj->bones));
     }
 }
 
