@@ -1,24 +1,9 @@
 #include <ultra64.h>
-// The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
+// The headers declare D_800DBE3C with a placeholder type; this file redeclares it with its real one.
 #include "functions.h"
-#define D_800CBE00 D_800CBE00_s32
 #define D_800DBE3C D_800DBE3C_hdr
 #include "variables.h"
-#undef D_800CBE00
 #undef D_800DBE3C
-
-/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
-typedef struct TriggerNode {
-    /* 0x00 */ struct TriggerNode *next;
-    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 check;     // index into D_80085E80
-    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
-    /* 0x0E */ u8 delay;     // frames before check starts running
-    /* 0x0F */ u8 padF;
-} TriggerNode;
 
 /* A TriggerNode with a box volume (func_150448D0). */
 typedef struct TriggerVolume {
@@ -32,7 +17,6 @@ typedef struct TriggerVolume {
     /* 0x1C */ s16 *size;
 } TriggerVolume;
 
-extern TriggerNode *D_800CBE00;
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
 extern f32 sqrtf(f32);

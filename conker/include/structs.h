@@ -2657,6 +2657,19 @@ typedef struct ZoneLink {
     /* 0x4 */ TriggerZone *zone;
 } ZoneLink;
 
+/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
+typedef struct TriggerNode {
+    /* 0x00 */ struct TriggerNode *next;
+    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8 check;     // index into D_80085E80
+    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
+    /* 0x0E */ u8 delay;     // frames before check starts running
+    /* 0x0F */ u8 padF;
+} TriggerNode;
+
 typedef struct {
     s32 unk0;
     f32 unk4;

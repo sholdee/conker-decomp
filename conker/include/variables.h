@@ -933,7 +933,7 @@ extern s32 D_800C6860[];
 extern u8  D_800C68A0;
 extern u8  D_800C68A1;
 
-extern s32 D_800CBE00;
+extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 extern u8  D_800CBD60;
 extern u8  D_800CBD61;
 extern u8  D_800CBD62;
