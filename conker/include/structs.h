@@ -3709,6 +3709,15 @@ typedef struct BounceRecord {
     /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
 } BounceRecord; // size 0xA
 
+/* One loaded effect model, D_800DDE80[slot] (game_1B0740 loads and frees them). */
+typedef struct EffectModelSlot {
+    /* 0x00 */ void *resource;
+    /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
+    /* 0x08 */ Vtx *unk8;
+    /* 0x0C */ Gfx *displayList;
+    /* 0x10 */ void *unk10;
+} EffectModelSlot; // size 0x14
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

@@ -5,19 +5,11 @@
 /*
  * Effect model slots.
  *
- * D_800DDE80[11] holds one loaded model per slot (the shared header only names fields 0x0, 0xC and 0x10).
+ * D_800DDE80[11] holds one loaded model per slot (EffectModelSlot).
  * D_800DDF68[slot] is the slot's use state: 1 = used this frame, then counts down each frame;
  * -2 = unused, freed by func_15183D28.  D_800DDF78[slot] is the model's second display list.
  * D_800DDF5C[4] marks the swarm groups handed out by func_15183290.
  */
-typedef struct ModelSlot {
-    /* 0x00 */ void *resource;
-    /* 0x04 */ Vtx *unk4;
-    /* 0x08 */ Vtx *unk8;
-    /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ void *unk10;
-} ModelSlot;
-#define gModelSlots ((ModelSlot *)D_800DDE80)
 
 /* Model resource returned by the loader func_1502B6BC. */
 typedef struct ModelResource {
@@ -159,17 +151,17 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
 void func_151838B0(s32 slot) {
     ModelResource *res;
 
-    if (gModelSlots[slot].resource == NULL) {
+    if (D_800DDE80[slot].resource == NULL) {
         func_15183ACC(slot);
     }
-    if (gModelSlots[slot + 1].resource == NULL) {
+    if (D_800DDE80[slot + 1].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAE);
         if (res != NULL) {
-            gModelSlots[slot + 1].resource = res;
-            gModelSlots[slot + 1].unk4 = res->unk0;
-            gModelSlots[slot + 1].unk8 = res->unk8;
-            gModelSlots[slot + 1].unk10 = NULL;
-            gModelSlots[slot + 1].displayList = gModelSlots[slot].displayList;
+            D_800DDE80[slot + 1].resource = res;
+            D_800DDE80[slot + 1].unk4 = res->unk0;
+            D_800DDE80[slot + 1].unk8 = res->unk8;
+            D_800DDE80[slot + 1].unk10 = NULL;
+            D_800DDE80[slot + 1].displayList = D_800DDE80[slot].displayList;
             D_800DDF68[slot + 1] = 1;
         }
     }
@@ -177,12 +169,12 @@ void func_151838B0(s32 slot) {
 
 /* Loads models `slot` and slot + 1, giving slot + 1 slot's display list. */
 void func_15183974(s32 slot) {
-    if (gModelSlots[slot].resource == NULL) {
+    if (D_800DDE80[slot].resource == NULL) {
         func_15183ACC(slot);
     }
-    if (gModelSlots[slot + 1].resource == NULL) {
+    if (D_800DDE80[slot + 1].resource == NULL) {
         func_15183ACC(slot + 1);
-        gModelSlots[slot + 1].displayList = gModelSlots[slot].displayList;
+        D_800DDE80[slot + 1].displayList = D_800DDE80[slot].displayList;
     }
 }
 
@@ -190,17 +182,17 @@ void func_15183974(s32 slot) {
 void func_151839F0(s32 slot, s32 extraSlot) {
     ModelResource *res;
 
-    if (gModelSlots[slot].resource == NULL) {
+    if (D_800DDE80[slot].resource == NULL) {
         func_15183ACC(slot);
     }
-    if (gModelSlots[slot].resource != NULL && gModelSlots[extraSlot].resource == NULL) {
+    if (D_800DDE80[slot].resource != NULL && D_800DDE80[extraSlot].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, extraSlot + 0xAD);
         if (res != NULL) {
-            gModelSlots[extraSlot].resource = res;
-            gModelSlots[extraSlot].unk4 = res->unk0;
-            gModelSlots[extraSlot].unk8 = res->unk8;
-            gModelSlots[extraSlot].displayList = res->unk18;
-            gModelSlots[extraSlot].unk10 = NULL;
+            D_800DDE80[extraSlot].resource = res;
+            D_800DDE80[extraSlot].unk4 = res->unk0;
+            D_800DDE80[extraSlot].unk8 = res->unk8;
+            D_800DDE80[extraSlot].displayList = res->unk18;
+            D_800DDE80[extraSlot].unk10 = NULL;
             D_800DDF68[extraSlot] = 1;
         }
     }
@@ -210,16 +202,15 @@ void func_151839F0(s32 slot, s32 extraSlot) {
 void func_15183ACC(s32 slot) {
     ModelResource *res;
 
-    if (gModelSlots[slot].resource == NULL) {
+    if (D_800DDE80[slot].resource == NULL) {
         res = func_1502B6BC(0, 0, 0, 2, 9, slot + 0xAD);
         if (res != NULL) {
-            gModelSlots[slot].resource = res;
-            gModelSlots[slot].unk4 = res->unk0;
-            gModelSlots[slot].unk8 = res->unk8;
-            gModelSlots[slot].displayList = res->unk18;
+            D_800DDE80[slot].resource = res;
+            D_800DDE80[slot].unk4 = res->unk0;
+            D_800DDE80[slot].unk8 = res->unk8;
+            D_800DDE80[slot].displayList = res->unk18;
             D_800DDF78[slot] = (s32)res->unk10;
-            // matching: taking &gModelSlots[slot].unk10 schedules differently than the header's field10
-            func_1510CE60((Gfx *)D_800DDF78[slot], 0, 1, 0x3E, &D_800DDE80[slot].field10);
+            func_1510CE60((Gfx *)D_800DDF78[slot], 0, 1, 0x3E, &D_800DDE80[slot].unk10);
             D_800DDF68[slot] = 1;
         }
     }
@@ -247,9 +238,9 @@ Gfx *func_15183BA4(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
 /* Frees model `slot`. Slots 8 and 9 are a pair: slot 8's model is kept until slot 9 is unused too, and freeing
  * slot 9 after slot 8 also frees D_800DDF20. */
 void func_15183C28(s32 slot) {
-    if (gModelSlots[slot].unk10 != NULL) {
-        func_1510D630(gModelSlots[slot].unk10);
-        gModelSlots[slot].unk10 = NULL;
+    if (D_800DDE80[slot].unk10 != NULL) {
+        func_1510D630(D_800DDE80[slot].unk10);
+        D_800DDE80[slot].unk10 = NULL;
     }
     if (slot == 8) {
         if (D_800DDF68[9] != -2) {
@@ -260,10 +251,10 @@ void func_15183C28(s32 slot) {
         D_800DDF20 = 0;
         D_800DDF98 = 0;
     }
-    if (gModelSlots[slot].resource != NULL) {
+    if (D_800DDE80[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
-        func_10004074((void *)(s32)gModelSlots[slot].resource);
-        gModelSlots[slot].resource = NULL;
+        func_10004074((void *)(s32)D_800DDE80[slot].resource);
+        D_800DDE80[slot].resource = NULL;
         D_800DDF78[slot] = 0;
     }
 }
@@ -275,7 +266,7 @@ void func_15183D28(void) {
     Game1B0740Wave *wave;
 
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] >= -1 && (gModelSlots[i].resource == NULL || D_800DDF78[i] == 0)) {
+        if (D_800DDF68[i] >= -1 && (D_800DDE80[i].resource == NULL || D_800DDF78[i] == 0)) {
             D_800DDF68[i] = -2;
         }
     }
@@ -291,14 +282,14 @@ void func_15183D28(void) {
     for (i = 0; i < 7; i++) {
         if (D_800DDF68[i] == 1) {
             wave = &D_8008D0B0[i];
-            func_15165C80(&wave->angle, gModelSlots[i].unk8, wave->radius, &wave->velocity, wave->amplitude,
+            func_15165C80(&wave->angle, D_800DDE80[i].unk8, wave->radius, &wave->velocity, wave->amplitude,
                           wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
         }
     }
     for (i = 2; i < 5; i++) {
         if (D_800DDF68[i] == 1) {
             wave = &D_8008D318[i - 2];
-            func_15165C80(&wave->angle, gModelSlots[i].unk4, wave->radius, &wave->velocity, wave->amplitude,
+            func_15165C80(&wave->angle, D_800DDE80[i].unk4, wave->radius, &wave->velocity, wave->amplitude,
                           wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
         }
     }
@@ -314,7 +305,7 @@ void func_15183D28(void) {
         D_800DDF68[10] = 1;
     }
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] == -2 && gModelSlots[i].resource != NULL) {
+        if (D_800DDF68[i] == -2 && D_800DDE80[i].resource != NULL) {
             func_15183C28(i);
         }
     }

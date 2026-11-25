@@ -42,15 +42,6 @@ typedef struct WaveState {
     /* 0x2C */ u8 pad2C[0xC];
 } WaveState;
 
-/* D_800DDE80 viewed with the two vertex buffers that include/variables.h leaves as padding. */
-typedef struct VtxSlot {
-    /* 0x00 */ void *field0;
-    /* 0x04 */ Vtx *vtxB;
-    /* 0x08 */ Vtx *vtxA;
-    /* 0x0C */ s32 fieldC;
-    /* 0x10 */ void *field10;
-} VtxSlot;
-
 extern WaveState D_8008D0B0[];
 extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in discarded .rodata */
 extern f32 D_800A7220;
@@ -73,8 +64,8 @@ void func_15179DB0(u8 slot) {
     f32 *angle[2];
     f32 *rate[2];
 
-    vtx[1] = ((VtxSlot *)D_800DDE80)[slot].vtxB;
-    vtx[0] = ((VtxSlot *)D_800DDE80)[slot].vtxA;
+    vtx[1] = D_800DDE80[slot].unk4;
+    vtx[0] = D_800DDE80[slot].unk8;
     angle[0] = &D_8008D0B0[slot].angle[0];
     angle[1] = &D_8008D0B0[slot].angle[1];
     rate[0] = &D_8008D0B0[slot].rate[0];

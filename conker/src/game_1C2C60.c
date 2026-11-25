@@ -1710,7 +1710,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
                         func_15183ACC(5);
                         func_15168B10((s32)node, 0x18);
                         node->unkED = 5;
-                        node->unk94 = *(s32 *)((u8 *)D_800DDE80 + 0x6C);
+                        node->unk94 = (s32)D_800DDE80[5].unk8;
                         node->unk92 = 9;
                         node->unkB8 = 40.0f;
                         node->unkA8 = 40.0f;
