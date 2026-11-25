@@ -2600,7 +2600,7 @@ void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
  * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
- * Returns hitMask with the attacker's bit set when the hit landed.
+ * Returns hitMask with the victim's bit set when the hit landed.
  */
 s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
     s32 i;
@@ -2980,156 +2980,161 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
     return ret;
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
+/* Hits `victim` with a scripted attack from the dummy attacker D_800D121C; flags & 0xFF picks the entry. */
+s32 func_1505D024(struct127 *victim, s32 flags, u16 angle, s32 sourceSlot) {
     s32 pad;
     s32 ret;
-    s32 temp_lo;
-    struct252 *sp30;
+    s32 slot;
+    Entry1505C1E4 *table;
 
-    sp30 = &D_8009A9F8;
+    table = (Entry1505C1E4 *)&D_8009A9F8;
     if (D_800C35EA == 1) {
         return 0;
     }
-    if ((arg1 & 0x20000) && (arg0->immune != 0)) {
+    if ((flags & 0x20000) && (victim->immune != 0)) {
         return 0;
     }
-    if ((arg1 & 0x40000) && (arg0->stunned != 0)) {
+    if ((flags & 0x40000) && (victim->stunned != 0)) {
         return 0;
     }
-    if (((arg1 << 0xB) >= 0) && (arg0->health == 0)) {
+    if (!(flags & 0x100000) && (victim->health == 0)) {
         return 0;
     }
-    if (arg3 == -1) {
-        D_800D1340 = (u8)0;
+    if (sourceSlot == -1) {
+        D_800D1340 = 0;
     } else {
-        D_800D1340 = arg3 + 1;
+        D_800D1340 = sourceSlot + 1;
     }
-    D_800D1292 = arg2;
-    D_800D1296 = arg2;
-    if (arg1 & 0x10000) {
-        sp30 = func_1505C1A4(D_800D154C);
+    D_800D1292 = angle;
+    D_800D1296 = angle;
+    if (flags & 0x10000) {
+        table = func_1505C1A4(D_800D154C);
     }
 
-    temp_lo = arg0 - D_800CC2D0;
-    ret = 1 << temp_lo;
-    if (arg1 & 0x80000) {
-        ret = func_1505C1E4(&D_800D121C, arg0, sp30, arg1 & 0xFF, temp_lo + 1, 0, 7);
+    slot = victim - D_800CC2D0;
+    ret = 1 << slot;
+    if (flags & 0x80000) {
+        ret = func_1505C1E4(&D_800D121C, victim, table, flags & 0xFF, slot + 1, 0, 7);
     } else {
-        func_1505B9C4(&D_800D121C, arg0, sp30, sp30, arg1 & 0xFF, temp_lo + 1, 7);
+        func_1505B9C4(&D_800D121C, victim, table, table, flags & 0xFF, slot + 1, 7);
     }
     return ret;
 }
 
-void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7) {
+/* Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. */
+void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 arg6, s32 arg7) {
     s32 pad;
-    s32 tmp;
+    s32 savedIdx;
 
-    tmp = D_800C3E78;
+    savedIdx = D_800C3E78;
     func_1505F188(&D_800D121C);
-    D_800D1230 = arg0;
-    D_800D1234 = arg1;
-    D_800D1238 = arg2;
-    D_800D1340 = arg4 + 1;
+    D_800D1230 = x;
+    D_800D1234 = y;
+    D_800D1238 = z;
+    D_800D1340 = sourceSlot + 1;
     D_800D1359 = arg6;
-    D_800D1292 = arg5;
+    D_800D1292 = angle;
     D_800C3E78 = 25;
     D_800D1510 = arg7;
     D_800D1330 = 100.0f;
-    D_800D12EC = (arg3 & 0xFFFF) + 1;
+    D_800D12EC = (attackId & 0xFFFF) + 1;
     D_800D1368 = 0.5f;
     D_800D136C = 0.5f;
     func_1505C7D8(&D_800D121C, 25);
-    D_800C3E78 = tmp;
+    D_800C3E78 = savedIdx;
 }
 
-void func_1505D2B8(struct127 *arg0, u8 arg1) {
-    struct253 *temp_v0;
+/* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
+void func_1505D2B8(struct127 *actor, u8 entryIdx) {
+    struct253 *entry;
 
-    temp_v0 = &D_8009A6D8[arg1];
-    arg0->y_velocity = temp_v0->unk18;
-    arg0->xz_velocity = temp_v0->unk14;
-    arg0->gravity = temp_v0->unk1C;
-    arg0->stunned = 0xFE;
-    arg0->unk105 = 0;
-    arg0->unk106 = func_1505E7CC(arg0->unk10E & 0x7F, arg0);
-    arg0->unk10E = 0xFF;
-    func_1505E874(D_800C3E78, arg0);
+    entry = &D_8009A6D8[entryIdx];
+    actor->y_velocity = entry->unk18;
+    actor->xz_velocity = entry->unk14;
+    actor->gravity = entry->unk1C;
+    actor->stunned = 0xFE;
+    actor->unk105 = 0;
+    actor->unk106 = func_1505E7CC(actor->unk10E & 0x7F, actor);
+    actor->unk10E = 0xFF;
+    func_1505E874(D_800C3E78, actor);
 }
 
-f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
-    f32 sp24;
+/* Rotates the offset (a, b) by angleDeg - 90 degrees (after scaling); returns x, writes z. */
+f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
+    f32 sinA;
     s32 pad;
-    f32 temp_f0;
-    f32 temp_f12;
+    f32 cosA;
+    f32 rad;
 
-    if (arg3 != 1.0f) {
-        arg1 = arg1 * arg3;
-        arg2 = arg2 * arg3;
+    if (scale != 1.0f) {
+        a = a * scale;
+        b = b * scale;
     }
-    temp_f12 = (arg0 - 90.0f) * D_80099520; // 0.01745329238474369f;
-    sp24 = func_150AD780(temp_f12);
-    temp_f0 = func_150AD78C(temp_f12);
-    *arg4 = (-arg1 * temp_f0) + (arg2 * sp24);
-    return (arg1 * sp24) + arg2 * temp_f0;
+    rad = (angleDeg - 90.0f) * D_80099520; // matching: the 0.01745329238f literal allocates differently
+    sinA = func_150AD780(rad);
+    cosA = func_150AD78C(rad);
+    *outZ = (-a * cosA) + (b * sinA);
+    return (a * sinA) + b * cosA;
 }
 
 extern u8 D_800CC26C;
 extern u8 D_800CC26D;
 
-void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
-    f32 temp_f0;
-    f32 temp_f18;
-    f32 var_f2;
+/* Pushes the actor out of `other` along (nx, ny, nz) unless the other one is lighter. */
+void func_1505D408(struct127 *actor, struct127 *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
+    f32 dist;
+    f32 invDist;
+    f32 pushFactor;
     s32 temp_a2;
     s32 temp_t0;
-    u8 var_v0;
-    u8 var_v1;
+    u8 actorWeight;
+    u8 otherWeight;
 
-    var_f2 = 0.400000006f;
-    var_v0 = 0;
-    var_v1 = 0;
-    if (arg5 < 1.0f) {
-        arg5 = 1.200000048f;
+    pushFactor = 0.400000006f;
+    actorWeight = 0;
+    otherWeight = 0;
+    if (distSq < 1.0f) {
+        distSq = 1.200000048f;
     }
-    if ((arg2 == 0.0f) && (arg4 == 0.0f)) {
-        arg2 = 1.0f;
+    if ((nx == 0.0f) && (nz == 0.0f)) {
+        nx = 1.0f;
     }
-    D_800CC268 |= 1 << arg7;
-    if (arg1->unkF8 & 0x10) {
-        D_800CC26C = arg7;
-        var_f2 = 0.8000000119f;
-        if ((arg1->id == 0x61) && (arg0->interaction_state == 1)) {
+    D_800CC268 |= 1 << otherSlot;
+    if (other->unkF8 & 0x10) {
+        D_800CC26C = otherSlot;
+        pushFactor = 0.8000000119f;
+        if ((other->id == 0x61) && (actor->interaction_state == 1)) {
             goto end;
         }
     }
-    if (arg0->unkF8 & 1) {
-        var_v0 = 1;
+    if (actor->unkF8 & 1) {
+        actorWeight = 1;
     }
-    if (arg0->unkF8 & 0x200) {
-        var_v0 |= 2;
+    if (actor->unkF8 & 0x200) {
+        actorWeight |= 2;
     }
-    if (arg1->unkF8 & 1) {
-        var_v1 = 1;
+    if (other->unkF8 & 1) {
+        otherWeight = 1;
     }
-    if (arg1->unkF8 & 0x200) {
-        var_v1 |= 2;
+    if (other->unkF8 & 0x200) {
+        otherWeight |= 2;
     }
-    if (var_v1 >= var_v0) {
-        if ((arg1->unkF8 & 0x400) && (arg1->unk28 == 0.0f)) {
-            D_800CC26D = arg7 + 100;
+    if (otherWeight >= actorWeight) {
+        if ((other->unkF8 & 0x400) && (other->unk28 == 0.0f)) {
+            D_800CC26D = otherSlot + 100;
         }
-        temp_f0 = sqrtf(arg5);
-        temp_f18 = 1.0f / temp_f0;
-        arg2 *= temp_f18;
-        arg3 *= temp_f18;
-        arg4 *= temp_f18;
-        arg6 -= temp_f0;
-        arg6 *= var_f2;
-        arg0->x_position += arg6 * arg2;
-        arg0->z_position += arg6 * arg4;
-        arg0->y_position += arg6 * arg3;
+        dist = sqrtf(distSq);
+        invDist = 1.0f / dist;
+        nx *= invDist;
+        ny *= invDist;
+        nz *= invDist;
+        minDist -= dist;
+        minDist *= pushFactor;
+        actor->x_position += minDist * nx;
+        actor->z_position += minDist * nz;
+        actor->y_position += minDist * ny;
     }
-end:
+end: // matching: a jump to the shared epilogue, not an early return
     ;
 }
 void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
