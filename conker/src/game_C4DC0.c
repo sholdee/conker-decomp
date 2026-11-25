@@ -6,10 +6,14 @@
 #include "functions.h"
 #undef func_15083E90
 #undef func_150ADA20
+/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#undef D_800D3098
 
 struct127 *func_15083E90(u8);
 u32 func_150ADA20(void);
+extern struct178 *D_800D3098;
 
 /* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
 typedef struct {
@@ -79,6 +83,9 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 }
 
 
+/* A script command as passed to the object command handlers below. Arguments that are speeds, scales or
+ * distances are 16.16 fixed point (hence the many `* 1.52587890625e-05f`, i.e. 1/65536); angles in
+ * binary units convert to degrees with 0.0054931640625f (360/65536) and back with 182.04444885f. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -92,7 +99,9 @@ typedef struct {
     s16 pad;
 } PathPoint;
 
-/* D_800D2104[i]: the path (list of points) owned by script object i; D_800D2108[i] is its point count. */
+/* D_800D2104[id] points at the path of the object with script id `id` (struct127.unk13F); D_800D2108[id]
+ * is its point count. func_15099C14 reads the points from the start of the block, while func_15097A8C
+ * writes them 8 bytes in (a header or 1-based indexing; unknown), hence this view. */
 typedef struct {
     u8 pad0[8];
     PathPoint pts[1];
@@ -136,12 +145,38 @@ extern void func_151937F4(struct127 *, s32, s32);
 extern void func_151D6BFC(struct127 *, s32, s32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
+extern u8 func_15085420(struct127 *);
+extern u8 func_15085DA8(f32);
+extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
+extern void func_15086364(s32, s8, s8, s8 *, s8 *);
+extern f32 func_15086D94(f32, f32, f32, f32, f32);
+extern s32 func_150A2AEC(u32, s32, s32 *);
+extern struct178 *func_150A3194(s32, s32, s32, s32, s32);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+extern f32 func_15144BC8(f32);
+extern s8 func_151E564C(void);
+extern s8 func_151E565C(void);
+extern u8 D_80087298;
+extern u8 D_8008729C;
+extern u8 D_800D18A9;
+/* D_800D2350: per-node info, indexed by the node ids func_15086D48 returns. */
+typedef struct {
+    u8 pad0[7];
+    u8 unk7;
+    u8 pad8[8];
+} NodeInfo;
+extern NodeInfo *D_800D2350;
+extern s8 D_800E0AC0[];
+extern u8 D_800E0BB8[];
 
+/* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
+ * Returns 0 for an unknown command or missing object, 1 otherwise.
+ * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     struct127 *obj;
     s32 i;
     s32 node;
-    s32 pad3;
+    s32 pad;
 
     obj = func_1505EEF4(objId);
     if (obj == NULL) {
@@ -708,7 +743,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x4E: {
         struct127 *other;
-        s32 id;
+        s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
         if (other != NULL) {
@@ -911,7 +946,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x7A: {
         struct127 *other;
-        s32 id;
+        s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
         if (other != NULL) {
@@ -1009,29 +1044,11 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     return 1;
 }
 
-extern s32 func_15084000(s32);
-extern u8 func_15085420(struct127 *);
-extern u8 func_15085DA8(f32);
-extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
-extern void func_15086364(s32, s8, s8, s8 *, s8 *);
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
-extern f32 func_15086D94(f32, f32, f32, f32, f32);
-extern s32 func_150A2AEC(u32, s32, s32 *);
-extern struct178 *func_150A3194(s32, s32, s32, s32, s32);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern f32 func_15144BC8(f32);
-extern s8 func_151E564C(void);
-extern s8 func_151E565C(void);
-extern u8 D_80087298;
-extern u8 D_8008729C;
-extern u8 D_800D18A9;
-typedef struct { u8 pad0[7]; u8 unk7; u8 pad8[8]; } C4DC0_2350;
-extern C4DC0_2350 *D_800D2350;
-extern s8 D_800E0AC0[];
-extern u8 D_800E0BB8[];
 
 
+/* Script "query" commands: returns the value of query `opcode` (arguments `cmd->a`) for object `objId`;
+ * 0 for an unknown query or a missing object (except the existence queries 0xB0 / 0xB1 / 0xB7).
+ * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     struct127 *obj;
     struct127 *other;
@@ -1152,13 +1169,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return obj->unk40 * 65536.0f;
     case 0xA4:
         return obj->unk7A;
-    case 0xA2: {
+    case 0xA2:
         ret = 0;
         if (obj->unk31C->unk57 != 0) {
             ret = 1;
         }
         return ret;
-    }
     case 0xA3:
         return obj->unk25C & 0x40;
     case 0xA6:
@@ -1349,7 +1365,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (p == NULL) {
             return -1;
         }
-        ret = p - *(struct178 **)&D_800D3098;
+        ret = p - D_800D3098;
         return ret;
     }
     case 0xCF: {
