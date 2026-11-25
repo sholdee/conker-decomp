@@ -223,7 +223,6 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
 
 void func_151B01B8(Actor *self, Actor *other);
 void func_151B09BC(Actor *self, Actor *other, s16 arg2, u8 arg3, s32 arg4);
-void *func_151AF270(Actor *obj, u8 arg1, s32 arg2);
 
 void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);

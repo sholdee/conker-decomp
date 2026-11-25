@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151AE984(f32 *, f32, f32, f32, s32, u8);
-void func_151AEAB4(f32 *, s32, u8);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 

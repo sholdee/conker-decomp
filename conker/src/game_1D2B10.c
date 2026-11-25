@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Spawn region an emitter scatters its particles over. */
 typedef struct {
@@ -172,8 +171,6 @@ void func_151A5660(u8 *effect) {
         } while (emitter->pending > 1.0f);
     }
 }
-
-void func_151A5D2C(u16 soundHandle);
 
 /* Effect state embedded at offset 0x58 of the TimedEffect passed to the two functions below. */
 typedef struct {

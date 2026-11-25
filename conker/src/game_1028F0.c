@@ -485,8 +485,6 @@ void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     }
 }
 
-void func_151A5D58(f32, u8, f32 *, s32 *, s32, s32, s32, u8, s32);
-
 /* Impact effect on a type-0xE surface hit at pos (func_151A5D58 with randomized parameters). */
 void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
     u32 rand3;

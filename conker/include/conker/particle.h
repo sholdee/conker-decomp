@@ -253,4 +253,82 @@ s32 func_15149EC4(ChannelParticle *particle);
 /* game_1792D0.c */
 void func_1514BE20(void *arg);
 
+/* game_179400.c */
+void func_1514BF50(JitterParticle *p);
+void func_1514BF7C(JitterParticle *p);
+void func_1514BF9C(JitterParticle *p);
+s32 func_1514C258(JitterParticle *p);
+s32 func_1514C288(JitterParticle *p);
+s32 func_1514C2B8(JitterParticle *p);
+
+/* game_1797A0.c */
+void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count, u8 kind, s32 arg8, f32 arg9,
+                   s32 arg10, u8 arg11);
+void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, s32 arg10,
+                   u8 arg11);
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 count, u8 kind, s32 arg8, f32 arg9,
+                   s32 arg10, u8 arg11);
+void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 angleB, s16 count, u8 kind, s32 arg9,
+                   f32 arg10, s32 arg11, u8 arg12);
+
+/* game_1A7260.c */
+void func_15179DB0(u8 slot);
+
+/* game_1B81D0.c */
+s32 func_1518AD20(FloorParticle *particle);
+s32 func_1518B1AC(FloorParticle *particle);
+s32 func_1518B1D8(FloorParticle *particle);
+void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4);
+void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
+
+/* game_1B8B60.c */
+void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4);
+
+/* game_1BA1D0.c */
+void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2);
+
+/* game_1BB950.c */
+void func_1518E4A0(ActorEmitterProcess *emitter);
+void func_1518E4CC(ActorEmitterProcess *emitter);
+void func_1518E4F8(ActorEmitterProcess *emitter);
+void func_1518E524(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes);
+void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *renderModes);
+s32 func_1518E66C(ActorEmitterProcess *emitter);
+s32 func_1518E6D4(ActorEmitterProcess *emitter);
+Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp);
+
+/* game_1BFC70.c */
+void func_151927C0(BillboardParticle *p);
+
+/* game_1D0600.c */
+void func_151A3150(FadeEventParticle *particle);
+
+/* game_1D2B10.c */
+void func_151A5660(u8 *effect);
+void func_151A5CAC(TimedEffect *arg0);
+void func_151A5CEC(TimedEffect *arg0);
+void func_151A5D2C(u16 soundHandle);
+QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8);
+
+/* game_1DBD40.c */
+void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6);
+void func_151AE984(f32 *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5);
+void func_151AEAB4(f32 *pos, s32 flag, u8 arg2);
+
+/* game_1DC720.c */
+void *func_151AF270(Actor *actor, u8 arg1, s32 arg2);
+void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+void func_151AF388(f32 *position, f32 dx, f32 dy, f32 dz, s32 effectUnkC);
+
+/* game_1E34C0.c */
+PulseParticle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity, s16 lifetime,
+                             u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12, s32 arg13);
+void func_151B6254(PulseParticle *particle);
+
+/* game_1E9820.c */
+void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect);
+
+/* game_20A290.c */
+void func_151DCDE0(void *arg0, u8 arg1, s32 arg2);
+
 #endif

@@ -5,7 +5,6 @@
 
 void *memcpy(void *, const void *, u32);
 s32 func_1510F8CC(s32);
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 variant, f32 arg9, s32 argA, u8 owner);
 extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */

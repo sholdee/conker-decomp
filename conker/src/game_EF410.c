@@ -153,8 +153,6 @@ void func_150C2290(u8 arg0) {
     func_15151A38(&params, arg0, 1);
 }
 
-void func_1514C470(f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, u8);
-
 void func_150C2424(u8 arg0) {
     func_1514C470(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f,
                   (func_150ADA68() * 8.0f) + 8.0f, 1, 0, 0.0f, 0, arg0);

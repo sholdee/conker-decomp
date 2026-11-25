@@ -191,9 +191,6 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
     }
 }
 
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, s32 argA, u8 argB);
-
 /* func_1514C678 at the actor's bone on `side`, with a random radius below 11. */
 void func_15147040(s32 actor, s32 side, s32 strength) {
     Vec3f pos;

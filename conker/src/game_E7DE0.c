@@ -4,7 +4,6 @@
 
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
 
 void func_1504715C(CollisionHit *hit, Actor *obj);
 s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);

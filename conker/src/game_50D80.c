@@ -1258,13 +1258,10 @@ extern void func_151AF4D0(Actor *, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
 extern void func_150DB9E0(Actor *, s32, u8);
-extern void func_1518B264(f32 *, f32, f32, s32, s32);
-extern void func_1518B2A8(f32 *, f32, f32, s32, s32, s32, s32);
 extern void func_15171600(WorldObject *, u8, s32);
 extern void func_15171BF4(Actor *, u8);
 extern void func_15170EC4(WorldObject *, u8, s32);
 extern void func_151711C4(Actor *);
-extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
 
 /*

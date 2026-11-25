@@ -9,7 +9,6 @@ typedef struct PipeIds {
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
 extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
-extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(StreakBurst4C *, u8);
 extern void func_15152F70(SimplePuffSpray *, u8);
 extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);

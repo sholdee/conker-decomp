@@ -46,7 +46,6 @@ void func_15183ACC(s32);
 s32 func_15184118(Actor *);
 void func_15165C80(f32 *, Vtx *, f32, f32 *, f32, f32, u8 *, s32);
 void func_1517725C(u8);
-void func_15179DB0(u8);
 void func_15183C28(s32);
 
 extern u8 D_800A72D0[];

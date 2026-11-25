@@ -14,7 +14,6 @@ void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
 void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 void func_15151A38(PuffSpray *, u8, s32);
 
 /*

@@ -494,8 +494,6 @@ s32 func_150CA07C(BurstParticle *particle) {
     return 1;
 }
 
-extern void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16, s16, s16, u8, s32, f32, void *, u8);
-
 extern s32 func_15193CA0[];
 extern s32 func_151942B0[];
 void func_1504715C(void *, void *);

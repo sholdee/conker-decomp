@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1514C678 func_1514C678_header // matching: this file keeps its own declaration of func_1514C678
 #include "functions.h"
+#undef func_1514C678
 #include "variables.h"
 #include "effects.h"
 
@@ -37,6 +39,7 @@ extern FxSpawnRange D_800A9158[];
 extern FxImpactEntry D_800A925C[];
 
 u8 func_151D8E20(void);
+// matching: s32 parameters where the definition has s16 and u8 (no truncation at the call)
 void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
 void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 

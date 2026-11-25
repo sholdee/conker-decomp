@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 
@@ -171,8 +170,6 @@ s32 func_1518B1D8(FloorParticle *particle) {
     particle->head.alpha = alpha;
     return 1;
 }
-
-void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* func_1518B2A8 with model 4. */
 void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {

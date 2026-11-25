@@ -6,8 +6,6 @@ void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
 void func_1504715C(CollisionHit *hit, Actor *actor);
 s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, s32 argA, u8 argB);
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
 void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {

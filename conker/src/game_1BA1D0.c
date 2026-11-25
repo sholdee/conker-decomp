@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);

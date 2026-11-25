@@ -74,9 +74,6 @@ typedef struct {
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, u8 *rgb, u8 argB);
-
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
  * func_1514C678 puff there. The colour is tinted by func_150CCD90 when level is 20.

@@ -1,12 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_1516962C(s32 type, Actor *actor, u8 eventType);
 void *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-void func_151AF388(f32 *position, f32 dx, f32 dy, f32 dz, s32 effectUnkC);
 
 /* Attaches emitter 10 (func_151AF338) to bone 1 of `actor` for 320 frames. */
 void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {

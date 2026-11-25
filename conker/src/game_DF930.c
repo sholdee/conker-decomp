@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, s32 argA, u8 argB);
 void func_151D3FF4(Vec3f *, u8, s32);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 

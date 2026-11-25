@@ -83,8 +83,6 @@ typedef struct {
     s16 unk8;
 } DustColor;
 
-void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
-                   f32 arg9, Rgb8 *argA, u8 argB);
 s32 func_1518ABD0(s32, DustPuff *, s32);
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
