@@ -7,7 +7,7 @@
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
-extern f32 D_800AAA30; /* 0.1f */
+extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
 void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
@@ -774,7 +774,8 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     if (func_150ADA68() < debrisChance) {
         SpriteDef debris;
         f32 scale;
-        const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
+        // not const (here and below): the ROM keeps these tables ahead of D_800AAA30, outside the .rodata slice
+        s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
         scale = (func_150ADA68() * 15.0f) + 15.0f;
@@ -803,7 +804,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     }
     if (func_150ADA68() < sparkChance) {
         ParticleDef spark;
-        const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
+        s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
         ext = &trail->trail;
         spark.texture = shade[type];
@@ -838,10 +839,10 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     }
     if (func_150ADA68() < smokeChance) {
         SpriteBurst smoke;
-        const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
+        u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
-        const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
-                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x8D }, { 0x8D, 0x00, 0x00 } };
+        u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
+                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 }, { 0x8D, 0x8D, 0x00 } };
 
         smoke.countBase = 5;
         smoke.countRange = 15;
@@ -890,7 +891,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     if (func_150ADA68() < flashChance) {
         LightEffectHeader header;
         Vec3i header2;
-        const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
+        u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
         u8 sel;
 
         header.flags = 3;
