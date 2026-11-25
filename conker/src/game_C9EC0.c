@@ -21,7 +21,7 @@ extern ResourceDescriptor D_80087430[RESOURCE_COUNT];
 
 /* Per-resource "loaded" bitset and per-resource state bytes. */
 #define gResourceLoadedBits D_800D2E4C
-#define gResourceStates (*(u8 (*)[0xF0])&D_800D2E70)
+#define gResourceStates D_800D2E70
 #define RESOURCE_IS_LOADED(idx) (gResourceLoadedBits[(idx) >> 3] & (1 << ((idx) & 7)))
 
 /* Returns the name of resource `index`, or NULL for an empty slot. */

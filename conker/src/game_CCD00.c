@@ -3,19 +3,6 @@
 #include "variables.h"
 
 
-/* The per-id record returned by func_1509B704 (same layout as C8950Node in game_C8950.c). */
-typedef struct CCD00Node {
-    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
-    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
-    /* 0x04 */ u16 size;        // size of the whole allocation
-    /* 0x06 */ u16 dataSize;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 dataOffset;
-    /* 0x0C */ u8  padC[0xC];
-    /* 0x18 */ struct CCD00Node *next;
-    /* 0x1C */ struct CCD00Node *prev;
-} CCD00Node;
-
 /* Argument block of a command; the arguments start at 0x8. */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -44,7 +31,7 @@ extern s32 D_800D3840;
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
-CCD00Node *func_1509B704(s16 id);
+IdRecord *func_1509B704(s16 id);
 void func_150AE280(void);
 void func_1509B5AC(s32 id, s32 reload);
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -60,11 +47,11 @@ void func_15042E3C(char *fmt, s32 arg1);
  * Note: the "clear" forms below keep only `bit & 7` of the byte, exactly as the game does.
  */
 s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
-    CCD00Node *node2;
-    CCD00Node *node3;
-    CCD00Node *node5;
-    CCD00Node *node4;
-    CCD00Node *node11;
+    IdRecord *node2;
+    IdRecord *node3;
+    IdRecord *node5;
+    IdRecord *node4;
+    IdRecord *node11;
     s32 count;
     s32 i;
 
@@ -244,7 +231,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     s32 j;
     s32 threshold;
     s32 mask;
-    CCD00Node *node;
+    IdRecord *node;
 
     switch (query) {
     case 26:

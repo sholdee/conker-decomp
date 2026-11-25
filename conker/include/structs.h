@@ -3591,20 +3591,25 @@ typedef struct {
     u16 unkA;
 } struct248; // size 0xC;
 
-typedef struct struct249 struct249;
+/* Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id (game_C8950).
+ * The payload (dataSize bytes) lives inside the same allocation at dataOffset. */
+typedef struct IdRecord {
+    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
+    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
+    /* 0x04 */ u16 size;        // size of the whole allocation
+    /* 0x06 */ u16 dataSize;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 dataOffset;
+    /* 0x0C */ u8  padC[0xC];
+    /* 0x18 */ struct IdRecord *next;
+    /* 0x1C */ struct IdRecord *prev;
+} IdRecord; // size 0x20
 
-struct struct249 {
-    u16 unk0;
-    u8  pad2[0x16];
-    struct249 *next;
-};
-
-typedef struct {
-    u16 length;
-    u8  pad2[0x2];
-    struct249 *unk4;
-    s32 unk8;         // tbd
-} struct250; // size 0xC;
+typedef struct IdRecordList {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ IdRecord *head;
+    /* 0x08 */ IdRecord *tail;
+} IdRecordList; // size 0xC
 
 typedef struct {
     u16 unk0;

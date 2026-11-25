@@ -1093,7 +1093,7 @@ extern s32 D_800D2C28[16]; // segment base addresses
 extern s32 D_800D2E50;
 extern u8  D_800D2E60[];
 extern u8  D_800D2E68;
-extern s32 D_800D2E70; // struct/array of size 0xF0
+extern u8 D_800D2E70[0xF0]; // one state byte per id
 extern u8  D_800D2E41;
 extern u8  D_800D2E42;
 extern u8  D_800D2E43;
@@ -1103,7 +1103,7 @@ extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the ga
 
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;
-extern struct250 D_800D2F48; // bzero'd 0xC
+extern IdRecordList D_800D2F48;
 extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 

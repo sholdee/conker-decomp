@@ -3,46 +3,20 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id.
- * The payload (dataSize bytes) lives inside the same allocation at dataOffset.
- */
-typedef struct C8950Node {
-    /* 0x00 */ u16 key;         // bits 0-9: id; NODE_FLAGS bits: state
-    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
-    /* 0x04 */ u16 size;        // size of the whole allocation
-    /* 0x06 */ u16 dataSize;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 dataOffset;
-    /* 0x0C */ u8  padC[0xC];
-    /* 0x18 */ struct C8950Node *next;
-    /* 0x1C */ struct C8950Node *prev;
-} C8950Node;
-
-typedef struct {
-    /* 0x00 */ u16 count;
-    /* 0x04 */ C8950Node *head;
-    /* 0x08 */ C8950Node *tail;
-} C8950List;
-
 #define NODE_FLAGS 0xFC00
 
-/* variables.h declares these with partial types (struct250, struct102 *, s32). */
-#define NODE_LIST (*(C8950List *)&D_800D2F48)
 /* Bit `id` of the 0x1B-byte bit array at D_800D2E4C. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG(id) (*(((id) >> 3) + D_800D2E4C) & (1 << ((id) & 7)))
-/* One state byte per id. */
-#define ID_STATE ((u8 *)&D_800D2E70)
 
-C8950Node *func_1509B950(C8950Node *node);
-C8950Node *func_1509B704(s16 id);
-C8950Node *func_1509B5AC(s32 id, s32 reload);
-void func_1509B810(C8950Node *node);
-C8950Node *func_1509B8FC(s16 id);
+IdRecord *func_1509B950(IdRecord *node);
+IdRecord *func_1509B704(s16 id);
+IdRecord *func_1509B5AC(s32 id, s32 reload);
+void func_1509B810(IdRecord *node);
+IdRecord *func_1509B8FC(s16 id);
 void func_1509C120(void);
 void func_1509C3A0(void);
-void func_150ADAF0(C8950Node *node, s32 mode);
+void func_150ADAF0(IdRecord *node, s32 mode);
 
 /* Gets (and, if needed, creates) the record of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
 void func_1509B4A0(s32 unused, s32 reload) {
@@ -65,7 +39,7 @@ void func_1509B4A0(s32 unused, s32 reload) {
 
 /* Returns the payload of the record for `id`, or NULL if none is loaded. */
 void *func_1509B570(s32 id) {
-    C8950Node *node;
+    IdRecord *node;
 
     node = func_1509B704(id);
     if (node != NULL) {
@@ -75,8 +49,8 @@ void *func_1509B570(s32 id) {
 }
 
 /* Returns the record for `id`, creating it if needed; NULL if `reload` is 0 and the id's flag is set. */
-C8950Node *func_1509B5AC(s32 id, s32 reload) {
-    C8950Node *node;
+IdRecord *func_1509B5AC(s32 id, s32 reload) {
+    IdRecord *node;
 
     node = func_1509B704(id);
     if (!reload && ID_FLAG(id)) {
@@ -104,12 +78,12 @@ C8950Node *func_1509B5AC(s32 id, s32 reload) {
 }
 
 /* Returns the loaded record for `id`, or NULL. */
-C8950Node *func_1509B704(s16 id) {
-    C8950Node *node;
+IdRecord *func_1509B704(s16 id) {
+    IdRecord *node;
     s32 i;
 
-    node = NODE_LIST.head;
-    for (i = 0; i < NODE_LIST.count; i++) {
+    node = D_800D2F48.head;
+    for (i = 0; i < D_800D2F48.count; i++) {
         if (id == (node->key & ~NODE_FLAGS)) {
             return node;
         }
@@ -122,79 +96,79 @@ void func_10004074(void *ptr);
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Unlinks `node` from the record list and frees it. */
-void func_1509B764(C8950Node *node) {
-    if (NODE_LIST.count == 1) {
-        NODE_LIST.head = NULL;
-        NODE_LIST.tail = NULL;
+void func_1509B764(IdRecord *node) {
+    if (D_800D2F48.count == 1) {
+        D_800D2F48.head = NULL;
+        D_800D2F48.tail = NULL;
     } else {
-        if (node == NODE_LIST.head) {
-            NODE_LIST.head = node->next;
+        if (node == D_800D2F48.head) {
+            D_800D2F48.head = node->next;
             node->next->prev = NULL;
         } else {
             node->prev->next = node->next;
         }
-        if (node == NODE_LIST.tail) {
-            NODE_LIST.tail = node->prev;
+        if (node == D_800D2F48.tail) {
+            D_800D2F48.tail = node->prev;
             node->prev->next = NULL;
         } else {
             node->next->prev = node->prev;
         }
     }
     func_10004074(node);
-    NODE_LIST.count--;
+    D_800D2F48.count--;
 }
 
 /* Inserts `node` into the record list, keeping it sorted by id. */
-void func_1509B810(C8950Node *node) {
-    C8950Node *cur;
-    C8950Node *head;
+void func_1509B810(IdRecord *node) {
+    IdRecord *cur;
+    IdRecord *head;
     s32 id;
     s32 i;
 
-    cur = NODE_LIST.tail;
+    cur = D_800D2F48.tail;
     id = node->key & ~NODE_FLAGS;
-    if (NODE_LIST.count == 0) {
-        NODE_LIST.head = node;
-        NODE_LIST.tail = node;
+    if (D_800D2F48.count == 0) {
+        D_800D2F48.head = node;
+        D_800D2F48.tail = node;
         node->next = NULL;
         node->prev = NULL;
-        NODE_LIST.count += 1;
+        D_800D2F48.count += 1;
         return;
     }
 
-    for (i = 0; i < NODE_LIST.count; i++) {
+    for (i = 0; i < D_800D2F48.count; i++) {
         if ((cur->key & ~NODE_FLAGS) < id) {
-            if (cur == NODE_LIST.tail) {
+            if (cur == D_800D2F48.tail) {
                 node->prev = cur;
                 node->next = NULL;
                 cur->next = node;
-                NODE_LIST.tail = node;
-                NODE_LIST.count += 1;
+                D_800D2F48.tail = node;
+                D_800D2F48.count += 1;
                 return;
             }
             node->prev = cur;
             node->next = cur->next;
             cur->next->prev = node;
             cur->next = node;
-            NODE_LIST.count += 1;
+            D_800D2F48.count += 1;
             return;
         }
         cur = cur->prev;
     }
 
-    head = NODE_LIST.head;
-    NODE_LIST.head = node;
+    head = D_800D2F48.head;
+    D_800D2F48.head = node;
     node->prev = NULL;
     node->next = head;
     head->prev = node;
-    NODE_LIST.count += 1;
+    D_800D2F48.count += 1;
 }
 
 void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Loads a new record for `id` (via func_1502B5C8) and tags it with D_800BE9F0. */
-C8950Node *func_1509B8FC(s16 id) {
-    C8950Node *node;
+IdRecord *func_1509B8FC(s16 id) {
+    IdRecord *node;
     s32 size;
 
     node = func_1502B5C8(&size, 2, 20, id);
@@ -204,8 +178,8 @@ C8950Node *func_1509B8FC(s16 id) {
 }
 
 /* Reallocates `node` with its payload 8-byte aligned and zeroed, and frees the original. */
-C8950Node *func_1509B950(C8950Node *node) {
-    C8950Node *copy;
+IdRecord *func_1509B950(IdRecord *node) {
+    IdRecord *copy;
     s32 padding;
 
     padding = 8 - (((s32)node + node->size) & 7);
@@ -233,13 +207,13 @@ extern u8 D_800D2E69;
  * and an unk2 other than D_800BE9F0, run the mode-3 handler and are freed.
  */
 void func_1509BA04(s32 unloadAll) {
-    C8950Node *node;
-    C8950Node *next;
+    IdRecord *node;
+    IdRecord *next;
     s32 count;
     s32 i;
 
-    count = NODE_LIST.count;
-    node = NODE_LIST.head;
+    count = D_800D2F48.count;
+    node = D_800D2F48.head;
     if (D_800D2E69 != 0) {
         func_1509C228();
         D_800D2E69 = 0;
@@ -253,16 +227,16 @@ void func_1509BA04(s32 unloadAll) {
         next = node->next;
         if (ID_FLAG(id) && !unloadAll) {
             func_1509B764(node);
-            ID_STATE[id] = 3;
+            D_800D2E70[id] = 3;
         } else if (unloadAll || (key & 0x8000) || ((key & 0x1000) && D_800BE9F0 != node->unk2)) {
             D_8003C8E0 = 0x6000001;
             func_150ADAF0(node, 3);
             D_8003C8E0 = 0;
             func_1509B764(node);
             if (!ID_FLAG(id)) {
-                ID_STATE[id] = 0;
+                D_800D2E70[id] = 0;
             } else {
-                ID_STATE[id] = 3;
+                D_800D2E70[id] = 3;
             }
         }
     }
@@ -276,18 +250,18 @@ extern s32 D_800D2F58;
 
 /* Runs every record's handler for `mode` (1, 2 or 4) and updates the per-id state bytes. */
 void func_1509BBA0(s32 mode) {
-    C8950Node *node;
+    IdRecord *node;
     s32 i;
     u16 id;
     s32 key;
 
-    node = NODE_LIST.head;
+    node = D_800D2F48.head;
     func_15096D08();
     if (!D_800BE616 && D_800BE9F0 != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == 2) {
         return;
     }
     func_1509C228();
-    for (i = 0; i < NODE_LIST.count; i++) {
+    for (i = 0; i < D_800D2F48.count; i++) {
         id = node->key & 0x3FF;
         D_800D2E48 = id;
         key = node->key;
@@ -300,7 +274,7 @@ void func_1509BBA0(s32 mode) {
                 D_8003C8E0 = 0x6000002;
                 func_150ADAF0(node, 4);
                 D_8003C8E0 = 0;
-                ID_STATE[id] = 3;
+                D_800D2E70[id] = 3;
                 node->key |= 0x8000;
                 node = node->next;
                 continue;
@@ -323,13 +297,13 @@ void func_1509BBA0(s32 mode) {
                     D_8003C8E0 = 0;
                 }
                 if (mode == 2) {
-                    ID_STATE[id] = 1;
+                    D_800D2E70[id] = 1;
                 }
             } else {
-                ID_STATE[id] = 2;
+                D_800D2E70[id] = 2;
             }
         } else {
-            ID_STATE[id] = 3;
+            D_800D2E70[id] = 3;
         }
         node = node->next;
     }

@@ -18,7 +18,7 @@ void func_15017790(void) {
     bzero(D_800D2E4C, 0x1B);
     bzero(&D_800D2E50, 0x10);
     bzero(&D_800D2E60, 9);
-    bzero(&D_800D2E70, 0xCC);
+    bzero(D_800D2E70, 0xCC);
     D_800D2E44 = 0;
 }
 
@@ -34,24 +34,11 @@ void func_150177F8(void) {
     D_800D2E44 = 0;
 }
 
-/* A per-id record in the list at D_800D2F48 (see C8950Node in game_C8950.c). */
-typedef struct C8950Node {
-    /* 0x00 */ u16 key; // bits 0-9: id; bits 10-15: state flags
-    /* 0x02 */ u16 unk2; // compared with D_800BE9F0
-    /* 0x04 */ u16 size;
-    /* 0x06 */ u16 dataSize;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 dataOffset;
-    /* 0x0C */ u8 padC[0xC];
-    /* 0x18 */ struct C8950Node *next;
-    /* 0x1C */ struct C8950Node *prev;
-} C8950Node;
-
-C8950Node *func_1509B704(s16 id);
+IdRecord *func_1509B704(s16 id);
 
 /* Stamps every listed record that has flag 0x1000 with D_800BE9F0, then reloads the records. */
 void func_15017868(void) {
-    C8950Node *node;
+    IdRecord *node;
     s32 i;
 
     for (i = 0; i < D_800D2F3C; i++) {
