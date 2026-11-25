@@ -2,267 +2,260 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15150F90(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_15153634(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern f32 D_800AA8E8;
-extern f32 D_800AA8EC;
-extern f32 D_800AA8F0;
-extern f32 D_800AA8F4;
-extern f32 D_800AA8F8;
-extern f32 D_800AA8FC;
-extern f32 D_800AA900;
-extern f32 D_800AA904;
-extern f32 D_800AA908;
-extern f32 D_800AA90C;
-
+/* Particle spawn template for func_15132A4C: the same layout as Particle 0x10..0x8B (see game_15F680.c). */
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ struct17 unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ struct17 unk34;
-    /* 0x40 */ struct17 unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8  unk58;
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot; /* degrees */
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ s16 model;
+    /* 0x58 */ u8  variant;
     /* 0x59 */ u8  pad59[3];
     /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8  unk60;
-    /* 0x61 */ u8  unk61;
-    /* 0x62 */ u8  unk62;
-    /* 0x63 */ u8  unk63;
-    /* 0x64 */ u8  unk64;
-    /* 0x65 */ u8  unk65;
-    /* 0x66 */ u8  unk66;
-    /* 0x67 */ u8  unk67;
-    /* 0x68 */ u8  unk68;
+    /* 0x60 */ u8  alpha;
+    /* 0x61 */ u8  updateFn;
+    /* 0x62 */ u8  update2Fn;
+    /* 0x63 */ u8  floorHitFn;
+    /* 0x64 */ u8  floorType3Fn;
+    /* 0x65 */ u8  wallHitFn;
+    /* 0x66 */ u8  destroyFn;
+    /* 0x67 */ u8  squashFn;
+    /* 0x68 */ u8  matrixFn;
     /* 0x69 */ u8  pad69;
     /* 0x6A */ u8  unk6A;
     /* 0x6B */ u8  pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8  unk70;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8  ownerId;
     /* 0x71 */ u8  pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
     /* 0x78 */ s32 pad78;
-} S151BEEE0;
+} ParticleSpawn; // size 0x7C
 
-typedef struct { u8 b[3]; } U8x3_151BEEE0;
-extern U8x3_151BEEE0 D_8008FBC0;
-extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_15133760(void *, void *);
+/* The spawned particle; only its two matrices (Particle.mtx in game_15F680.c) are touched here. */
+typedef struct {
+    /* 0x00 */ u8  pad0[0x90];
+    /* 0x90 */ Mtx mtx[2];
+} SpawnedParticle;
 
-void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    void *ret;
-    U8x3_151BEEE0 tbl = D_8008FBC0;
+typedef struct { u8 ids[3]; } ParticleVariants;
+extern ParticleVariants D_8008FBC0;
+extern SpawnedParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
+extern void func_15133760(Mtx *mtx, SpawnedParticle *particle);
 
-    if (arg4 >= 3) {
+/* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
+void *func_151BEEE0(f32 rotY, vertex *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    SpawnedParticle *particle;
+    ParticleVariants variants = D_8008FBC0;
+
+    if (variant >= 3) {
         return NULL;
     }
     {
-    S151BEEE0 sp44;
-    s32 i;
+        ParticleSpawn spawn;
+        s32 i;
 
-    sp44.unk0 = 1.0f;
-    sp44.unk4 = 1.0f;
-    sp44.unkC = 0.9230000377f;
-    sp44.unk8 = 0.9230000377f;
-    sp44.unk10.unk0 = 0.0f;
-    sp44.unk10.unk4 = arg0;
-    sp44.unk10.unk8 = 0.0f;
-    sp44.unk1C = 1.0f;
-    sp44.unk20 = 1.0f;
-    sp44.unk24 = 1.0f;
-    sp44.unk28 = *arg1;
-    sp44.unk34.unk0 = 0.0f;
-    sp44.unk34.unk4 = 0.0f;
-    sp44.unk34.unk8 = 0.0f;
-    sp44.unk40.unk0 = 0.0f;
-    sp44.unk40.unk4 = 0.0f;
-    sp44.unk40.unk8 = 0.0f;
-    sp44.unk4C = 0.0f;
-    sp44.unk50 = (arg5 ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
-    sp44.unk54 = 0x12C;
-    sp44.unk56 = 0x26;
-    sp44.unk58 = tbl.b[arg4];
-    sp44.unk5C = arg6;
-    sp44.unk60 = 0xFF;
-    if (D_800BE9F0 == 7) {
-        sp44.unk61 = 0x18;
-    } else {
-        sp44.unk61 = 0;
-    }
-    sp44.unk62 = 0;
-    sp44.unk63 = 0;
-    sp44.unk64 = 0;
-    sp44.unk65 = 0;
-    sp44.unk66 = 0;
-    sp44.unk67 = 0;
-    sp44.unk68 = 2;
-    sp44.unk6A = 0;
-    sp44.unk6C = 0;
-    sp44.unk70 = 0;
-    sp44.unk72 = 1;
-    sp44.unk74 = 0xFF;
-    ret = func_15132A4C(&sp44, arg2, arg3, 0, arg7, arg8);
-    if (ret != NULL) {
-        for (i = 0; i < 2; i++) {
-            func_15133760((u8 *)ret + 0x90 + i * 0x40, ret);
+        spawn.radius = 1.0f;
+        spawn.elasticity = 1.0f;
+        spawn.sizeY = 0.9230000377f;
+        spawn.sizeXZ = 0.9230000377f;
+        spawn.rot.x = 0.0f;
+        spawn.rot.y = rotY;
+        spawn.rot.z = 0.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.pos = *pos;
+        spawn.vel.x = 0.0f;
+        spawn.vel.y = 0.0f;
+        spawn.vel.z = 0.0f;
+        spawn.rotVel.x = 0.0f;
+        spawn.rotVel.y = 0.0f;
+        spawn.rotVel.z = 0.0f;
+        spawn.gravity = 0.0f;
+        spawn.flags = (arg5 ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
+        spawn.lifetime = 300;
+        spawn.model = 0x26;
+        spawn.variant = variants.ids[variant];
+        spawn.unk5C = arg6;
+        spawn.alpha = 0xFF;
+        if (D_800BE9F0 == 7) {
+            spawn.updateFn = 0x18;
+        } else {
+            spawn.updateFn = 0;
         }
-    }
-    return ret;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 0;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
+        spawn.unk6A = 0;
+        spawn.owner = NULL;
+        spawn.ownerId = 0;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
+        particle = func_15132A4C(&spawn, arg2, arg3, 0, arg7, arg8);
+        if (particle != NULL) {
+            for (i = 0; i < 2; i++) {
+                func_15133760(&particle->mtx[i], particle);
+            }
+        }
+        return particle;
     }
 }
 
+/* Burst config for func_15150F90 (same layout as in game_17CAF0.c). */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F_151BF0C8;
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ vertex position;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
+    /* 0x1C */ s16 yawBase;
+    /* 0x1E */ s16 yawRange;
+    /* 0x20 */ s16 pitchBase;
+    /* 0x22 */ s16 pitchRange;
+    /* 0x24 */ f32 directionBase;
+    /* 0x28 */ f32 directionRange;
+    /* 0x2C */ f32 jitter;
+    /* 0x30 */ f32 sizeBase;
+    /* 0x34 */ f32 sizeRange;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ u8  kind;
+    /* 0x3D */ u8  pad3D;
+    /* 0x3E */ s16 lifeBase;
+    /* 0x40 */ s16 lifeRange;
+} Game150F90Config;
 
+/* Burst config for func_15153634 (struct Local15153634Arg in game_17CAF0.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Vec3F_151BF0C8 unk8;
-    f32 unk14;
-    f32 unk18;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    u8 unk3C;
-    u8 pad3D;
-    s16 unk3E;
-    s16 unk40;
-} Struct151BF0C8_A;
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ u8  unk4;
+    /* 0x05 */ u8  pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  unk1E;
+    /* 0x1F */ u8  unk1F;
+    /* 0x20 */ u8  unk20;
+    /* 0x21 */ u8  unk21;
+    /* 0x22 */ u8  unk22;
+    /* 0x23 */ u8  unk23;
+    /* 0x24 */ u8  unk24;
+    /* 0x25 */ u8  unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ vertex position;
+    /* 0x44 */ s16 yawBase;
+    /* 0x46 */ s16 pitchBase;
+    /* 0x48 */ s16 yawRange;
+    /* 0x4A */ s16 pitchRange;
+    /* 0x4C */ f32 speedBase;
+    /* 0x50 */ f32 speedRange;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8  unk60;
+    /* 0x61 */ s8  unk61;
+    /* 0x62 */ u8  unk62;
+    /* 0x63 */ u8  unk63;
+    /* 0x64 */ u8  unk64;
+    /* 0x65 */ u8  pad65[3];
+    /* 0x68 */ f32 extra;
+} Config15153634;
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    Vec3F_151BF0C8 unk38;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 unk68;
-} Struct151BF0C8_B;
+void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15153634(Config15153634 *config, u8 arg1, u8 arg2, s32 arg3);
 
-void func_151BF0C8(Vec3F_151BF0C8 *arg0) {
-    Struct151BF0C8_A sp84;
-    Struct151BF0C8_B sp18;
+/* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
+void func_151BF0C8(vertex *pos) {
+    Game150F90Config first;
+    Config15153634 second;
 
-    sp84.unk0 = 0x18;
-    sp84.unk4 = 0xA;
-    sp84.unk8 = *arg0;
-    sp84.unk14 = D_800AA8E8;
-    sp84.unk18 = D_800AA8EC;
-    sp84.unk1C = 0;
-    sp84.unk1E = 0xFF;
-    sp84.unk20 = -0x32;
-    sp84.unk22 = 0x3C;
-    sp84.unk24 = 13.0f;
-    sp84.unk28 = 13.0f;
-    sp84.unk2C = D_800AA8F0;
-    sp84.unk30 = D_800AA8F4;
-    sp84.unk34 = D_800AA8F8;
-    sp84.unk38 = D_800AA8FC;
-    sp84.unk3C = 3;
-    sp84.unk3E = 0x41;
-    sp84.unk40 = 0x1E;
-    func_15150F90(&sp84, 1, 0xFF, 1);
+    first.countBase = 24;
+    first.countRange = 10;
+    first.position = *pos;
+    first.speedBase = 0.06260000169f;
+    first.speedRange = 0.05810000002f;
+    first.yawBase = 0;
+    first.yawRange = 255;
+    first.pitchBase = -50;
+    first.pitchRange = 60;
+    first.directionBase = 13.0f;
+    first.directionRange = 13.0f;
+    first.jitter = 10.3760004f;
+    first.sizeBase = -1.048000097f;
+    first.sizeRange = 0.9950000644f;
+    first.scale = 0.9424110055f;
+    first.kind = 3;
+    first.lifeBase = 65;
+    first.lifeRange = 30;
+    func_15150F90(&first, 1, 0xFF, 1);
 
-    sp18.unk0 = 0x14;
-    sp18.unk2 = 8;
-    sp18.unk4 = 0x6C;
-    sp18.unk6 = 0x5103;
-    sp18.unk8 = 0x200005;
-    sp18.unkC = 0;
-    sp18.unk10 = 0x28;
-    sp18.unk12 = 0x28;
-    sp18.unk14 = 0;
-    sp18.unk18 = 0;
-    sp18.unk1F = 0xFF;
-    sp18.unk1C = 0xFF;
-    sp18.unk1D = 0x91;
-    sp18.unk1E = 6;
-    sp18.unk20 = 0xFF;
-    sp18.unk21 = 0xFF;
-    sp18.unk22 = 0;
-    sp18.unk23 = 0x14;
-    sp18.unk24 = 0xC8;
-    sp18.unk25 = 0xFF;
-    sp18.unk26 = 0x32;
-    sp18.unk28 = 5;
-    sp18.unk2A = 0x32;
-    sp18.unk2C = D_800AA900;
-    sp18.unk30 = 175.0f;
-    sp18.unk34 = 160.0f;
-    sp18.unk38 = *arg0;
-    sp18.unk44 = 0;
-    sp18.unk46 = -0x33;
-    sp18.unk48 = 0xFF;
-    sp18.unk4A = 0x50;
-    sp18.unk4C = 4.0f;
-    sp18.unk50 = 13.0f;
-    sp18.unk54 = D_800AA904;
-    sp18.unk58 = D_800AA908;
-    sp18.unk5C = 0x840E07;
-    sp18.unk60 = 0x10;
-    sp18.unk61 = -1;
-    sp18.unk62 = 8;
-    sp18.unk63 = 6;
-    sp18.unk64 = 1;
-    sp18.unk68 = D_800AA90C;
-    func_15153634(&sp18, 0xFF, 0xFF, 1);
+    second.countBase = 20;
+    second.countRange = 8;
+    second.unk4 = 0x6C;
+    second.unk6 = 0x5103;
+    second.unk8 = 0x200005;
+    second.unkC = 0;
+    second.unk10 = 40;
+    second.unk12 = 40;
+    second.unk14 = 0;
+    second.unk18 = 0;
+    second.unk1F = 0xFF;
+    second.unk1C = 0xFF;
+    second.unk1D = 0x91;
+    second.unk1E = 6;
+    second.unk20 = 0xFF;
+    second.unk21 = 0xFF;
+    second.unk22 = 0;
+    second.unk23 = 20;
+    second.unk24 = 200;
+    second.unk25 = 0xFF;
+    second.unk26 = 50;
+    second.unk28 = 5;
+    second.unk2A = 50;
+    second.unk2C = 1.017730951f;
+    second.unk30 = 175.0f;
+    second.unk34 = 160.0f;
+    second.position = *pos;
+    second.yawBase = 0;
+    second.pitchBase = -51;
+    second.yawRange = 255;
+    second.pitchRange = 80;
+    second.speedBase = 4.0f;
+    second.speedRange = 13.0f;
+    second.unk54 = -0.007000000216f;
+    second.unk58 = -0.006000000052f;
+    second.unk5C = 0x840E07;
+    second.unk60 = 16;
+    second.unk61 = -1;
+    second.unk62 = 8;
+    second.unk63 = 6;
+    second.unk64 = 1;
+    second.extra = 0.9411770105f;
+    func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
 extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
