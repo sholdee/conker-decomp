@@ -2,27 +2,22 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15142314(struct255 *bones, s32 bone, vertex *out);
 
-s32 func_15142314(s32, s32, s32);
+/* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
+s32 func_150C19C0(vertex *pos, struct127 *actor, u8 side) {
+    s32 bone;
 
-typedef struct {
-    char pad_0[0x1D4];
-    s32 field_0x1D4;
-} ActorFields;
-
-s32 func_150C19C0(s32 arg0, ActorFields *arg1, u8 arg2) {
-    s32 sp1C;
-
-    switch (arg2) {
+    switch (side) {
     case 1:
-        sp1C = 0x18;
+        bone = 0x18;
         break;
     case 2:
-        sp1C = 0x15;
+        bone = 0x15;
         break;
     }
 
-    func_15142314(arg1->field_0x1D4, sp1C, arg0);
+    func_15142314(actor->unk1D4, bone, pos);
     return 1;
 }
 
@@ -109,7 +104,7 @@ void func_150C1A40(Actor150C1A40 *arg0, s32 arg1, s32 arg2) {
 
     if (arg0->unk1D4 != 0) {
         size = (arg0->unk14C + arg0->unk150) * 0.5f;
-        func_150C19C0((s32)&pos, (ActorFields *)arg0, arg1);
+        func_150C19C0((vertex *)&pos, (struct127 *)arg0, arg1);
         yaw = (arg0->unk76 >> 8) + 0x40;
         radius = size * 70.0f;
         func_1514C2F0(pos.x, arg0->unk180, pos.z, radius, yaw,
@@ -170,56 +165,62 @@ void func_150C1A40(Actor150C1A40 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
+/* Effect description passed to func_1518CA80 (same layout as ParticleEffect in game_1B9F30.c). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    char padC[0xA];
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-} Struct150C1E34Stack;
+    /* 0x00 */ f32 x;            /* position as floats (mode 1) */
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
+    /* 0x0E */ s16 intY;
+    /* 0x10 */ s16 intZ;
+    /* 0x12 */ u8 subX;
+    /* 0x13 */ u8 subZ;
+    /* 0x14 */ u8 subY;
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 width;
+    /* 0x18 */ s16 height;
+    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
+    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
+    /* 0x1E */ s16 velX;
+    /* 0x20 */ s16 velZ;
+    /* 0x22 */ s16 velY;
+    /* 0x24 */ s16 accelY;
+    /* 0x26 */ s16 life;
+    /* 0x28 */ u8 primColor[3];
+    /* 0x2B */ u8 envColor[3];
+    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
+    /* 0x2F */ u8 alpha;
+    /* 0x30 */ s8 fadeStep;
+    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
+} ParticleEffect;
 
-extern f64 D_800A0228;
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern void func_1518CA80(void *, u8);
+void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
+void func_1518CA80(ParticleEffect *effect, u8 mode);
 
-s32 func_150C1E34(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7,
-                  s32 arg8, s32 arg9, s32 argA, s32 argB, f32 argC) {
-    Struct150C1E34Stack sp1C;
+/*
+ * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
+ * (fromX, fromZ), with random colours from palette 0.
+ */
+s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
+                  s32 arg8, s32 arg9, s32 argA, s32 argB, f32 size) {
+    ParticleEffect effect;
 
-    sp1C.unk0 = arg2;
-    sp1C.unk4 = arg3;
-    sp1C.unk8 = arg4;
-    sp1C.unk1E = (arg2 - arg5) * 10.0f;
-    sp1C.unk20 = (arg4 - arg7) * 10.0f;
-    sp1C.unk16 = sp1C.unk18 = argC;
-    sp1C.unk1C = sp1C.unk1A = argC * D_800A0228;
-    sp1C.unk22 = 150;
-    sp1C.unk24 = 20;
-    sp1C.unk26 = 600;
-    func_151429E0(0, &sp1C.unk28, &sp1C.unk29, &sp1C.unk2A);
-    func_151429E0(0, &sp1C.unk2B, &sp1C.unk2C, &sp1C.unk2D);
-    sp1C.unk2E = 0xFF;
-    sp1C.unk2F = 0xFF;
-    sp1C.unk30 = (func_150ADA20() % 16U) + 12;
-    sp1C.unk31 = 1;
-    func_1518CA80(&sp1C, 1);
+    effect.x = x;
+    effect.y = y;
+    effect.z = z;
+    effect.velX = (x - fromX) * 10.0f;
+    effect.velZ = (z - fromZ) * 10.0f;
+    effect.width = effect.height = size;
+    effect.heightStep = effect.widthStep = size * 0.1757;
+    effect.velY = 150;
+    effect.accelY = 20;
+    effect.life = 600;
+    func_151429E0(0, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+    func_151429E0(0, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
+    effect.intensity = 255;
+    effect.alpha = 255;
+    effect.fadeStep = (func_150ADA20() & 15) + 12;
+    effect.onExpire = 1;
+    func_1518CA80(&effect, 1);
     return 1;
 }
