@@ -2,267 +2,97 @@
 #define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
 #undef func_1513D668
-s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 #include "variables.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
+/* One entry of the D_800A0640 table: where on the owner's skeleton func_150CBF80 spawns, and its random ranges. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[2];
-    f32 unk4[3];
-    u8 unk10;
-    u8 unk11;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[2];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 pad2A[2];
-} CBF80Entry;
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 bone;
+    /* 0x04 */ f32 offset[3]; /* bone-local spawn point */
+    /* 0x10 */ u8 unk10Min;
+    /* 0x11 */ u8 unk10Range;
+    /* 0x12 */ s16 growDelayMin; /* subtracted from the lifetime */
+    /* 0x14 */ s16 growDelayRange;
+    /* 0x18 */ f32 sizeMin;
+    /* 0x1C */ f32 sizeRange;
+    /* 0x20 */ f32 growRateMin; /* per unit of size */
+    /* 0x24 */ f32 growRateRange;
+    /* 0x28 */ s16 yawOffset;
+} GroundBurstDef;
 
+/* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[0x7];
-} CBF80Ground;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ f32 unk4[6];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 pad1D[7];
+} GroundHit;
 
+/* Per-corner colour passed to func_1513D668. */
 typedef struct {
-    s16 unk0;
-    f32 unk4;
-} CBF80Extra;
+    /* 0x0 */ s16 r;
+    /* 0x2 */ s16 g;
+    /* 0x4 */ s16 b;
+    /* 0x6 */ s16 a;
+    /* 0x8 */ s16 unk8;
+} CornerColor;
 
+/* Spawn template for func_1513D668, as filled in by func_150CBF80. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} CBF80Col;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} CBF80Main;
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 lifetime;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[4];
+    /* 0x14 */ f32 size0;
+    /* 0x18 */ f32 size1;
+    /* 0x1C */ struct17 position;
+    /* 0x28 */ f32 unk28[3];
+    /* 0x34 */ f32 unk34[3];
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} GrowSpawn;
 
 typedef struct {
     u8 r;
     u8 g;
     u8 b;
-} CBF80Rgb;
+} Rgb8;
 
 typedef struct {
     f32 x, y, z;
-} CBF80Vec;
+} Vec3;
 
+/* Effect template for func_150C88D0. */
 typedef struct {
-    CBF80Vec unk0;
-    u8 unkC;
-    s8 unkD;
-    u8 padE[2];
-    f32 unk10;
-    s32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    s16 unk20;
-    u8 pad22[2];
-    f32 unk24;
-    f32 unk28;
-    s8 unk2C;
-    s8 unk2D;
-    u8 pad2E[2];
-} CBF80Fx;
-
-extern CBF80Entry D_800A0640[];
-extern f32 D_800A06C4;
-extern f32 D_800A06C8;
-void func_1504715C(CBF80Ground *, void *);
-s32 func_15046C80(f32 *, s32, f32, CBF80Ground *);
-void func_15143134(void *, f32 *, s32);
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
-void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-void func_150C88D0(void *, s32, s32, s32);
-void *memcpy(void *, void *, s32);
-
-void func_150CBF80(void *arg0, u8 arg1, s32 arg2, u8 arg3) {
-    f32 pos[3];
-    CBF80Entry *e;
-    f32 fr;
-    f32 fg;
-    f32 fb;
-    u8 r;
-    u8 g;
-    u8 b;
-    CBF80Ground ground;
-
-    if (arg0 == NULL || *(s32 *)((u8 *)arg0 + 0x1D4) == 0) {
-        return;
-    }
-    func_1504715C(&ground, arg0);
-    e = &D_800A0640[arg1];
-    func_15143134(e->unk4, pos, *(s32 *)((u8 *)arg0 + 0x1D4) + (e->unk1 << 6));
-    {
-        f32 ray[3];
-
-        ray[0] = pos[0];
-        ray[1] = pos[1] + 200.0f;
-        ray[2] = pos[2];
-        if (func_15046C80(ray, 0, pos[1] - 2000.0f, &ground) == 0) {
-            return;
-        }
-    }
-    pos[1] = ground.unk00;
-lbl:
-    func_150CCD90(pos[2], &fr, &fg, &fb);
-    r = (u8)fr;
-    g = (u8)fg;
-    b = (u8)fb;
-    {
-        CBF80Extra extra;
-        CBF80Main mn;
-        s16 spd;
-        CBF80Col cols[4];
-        s32 ret;
-
-        cols[0].unk0 = r;
-        cols[0].unk2 = g;
-        cols[0].unk4 = b;
-        cols[0].unk6 = 0xFF;
-        cols[0].unk8 = 0;
-        cols[1].unk0 = r;
-        cols[1].unk2 = g;
-        cols[1].unk4 = b;
-        cols[1].unk6 = 0xFF;
-        cols[1].unk8 = 0;
-        cols[2].unk0 = r;
-        cols[2].unk2 = g;
-        cols[2].unk4 = b;
-        cols[2].unk6 = 0xFF;
-        cols[2].unk8 = 0;
-        cols[3].unk0 = r;
-        cols[3].unk2 = g;
-        cols[3].unk4 = b;
-        cols[3].unk6 = 0xFF;
-        cols[3].unk8 = 0;
-        mn.unk0 = e->unk0;
-        mn.unk2 = 0x2601;
-        mn.unk4 = (func_150ADA20() % 51U) + 0x84;
-        mn.unk8 = 0;
-        mn.unkC = 0;
-        mn.unk10 = 0xFF;
-        mn.unk11 = 0xFF;
-        mn.unk12 = 0xFF;
-        mn.unk13 = 0xFF;
-        mn.unk14 = mn.unk18 = (func_150ADA68() * e->unk1C) + e->unk18;
-        mn.unk1C.unk0 = pos[0];
-        mn.unk1C.unk4 = pos[1] + 10.0f;
-        mn.unk1C.unk8 = pos[2];
-        mn.unk28 = 0.0f;
-        mn.unk2C = 0.0f;
-        mn.unk30 = 0.0f;
-        mn.unk34 = 1.0f;
-        mn.unk38 = 1.0f;
-        mn.unk3C = 1.0f;
-        mn.unk40 = 0x1C0001;
-        mn.unk44 = (func_150ADA20() % (u32)(e->unk11 + 1)) + e->unk10;
-        mn.unk45 = 0xFF;
-        mn.unk46 = 0;
-        mn.unk47 = 6;
-        extra.unk0 = (mn.unk4 - (func_150ADA20() % (u32)(e->unk14 + 1))) - e->unk12;
-        extra.unk4 = ((func_150ADA68() * e->unk24) + e->unk20) * mn.unk14;
-        ret = func_1513D668((s32)&mn, (s32)cols, 0, 0x18, 0, 0,
-                            (s16)((*(u16 *)((u8 *)arg0 + 0x7A) >> 8) + e->unk28),
-                            500.0f, 500.0f, 0, (s32)&ground.unk04, 1, 8, arg3, arg2);
-        if (ret != 0) {
-            memcpy((u8 *)ret + 0x128, &extra, 8);
-        }
-        {
-            CBF80Fx fx;
-            f32 d;
-
-            spd = (func_150ADA20() % 1U) + 0x29;
-            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 50.0f) + 80.0f,
-                          0, 0xFF, spd, 0x11, 0, 0.0f, 0, arg3);
-            d = D_800A06C4;
-lbl2:
-            {
-                s16 n1;
-                s16 n2;
-
-                fx.unk0 = *(CBF80Vec *)pos;
-                fx.unk10 = D_800A06C8;
-                fx.unkC = 1;
-                fx.unkD = -1;
-                fx.unk14 = 0xC;
-                fx.unk18 = 0x28;
-                fx.unk1A = 0x1E;
-                n1 = 10;
-                fx.unk1C = d / (f32)n1;
-                fx.unk20 = 0x19;
-                fx.unk24 = d / fx.unk20;
-                fx.unk2C = -1;
-                fx.unk2D = -1;
-                fx.unk28 = 0.0f;
-                func_150C88D0(&fx, 0, 0xFF, 1);
-            }
-        }
-        {
-            CBF80Rgb rgb;
-
-            spd = (func_150ADA20() % 14U) + 0xF;
-            rgb.r = r;
-            rgb.g = g;
-            rgb.b = b;
-            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 70.0f) + 70.0f,
-                          0, 0xFF, spd, 0x12, 0, 0.0f, (s32)&rgb, arg3);
-        }
-        func_151D5404((struct17 *)pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
-    }
-}
-
-extern f32 D_800BE9A4;
+    /* 0x00 */ Vec3 position;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ s8 unkD;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ s8 unk2D;
+} RingSpawn;
 
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
@@ -282,6 +112,160 @@ typedef struct {
     /* 0x05D */ u8 pad5D[0x128 - 0x5D];
     /* 0x128 */ GrowParticleExtra extra;
 } GrowParticle;
+
+typedef f32 BoneMtx[4][4];
+
+GrowParticle *func_1513D668(GrowSpawn *spawn, CornerColor *colors, u8 arg2, u8 arg3, u8 arg4, u8 arg5,
+                            s16 yaw, f32 arg7, f32 arg8, s32 arg9, f32 *argA, u8 argB, s32 argC, u8 argD,
+                            s32 argE);
+
+extern GroundBurstDef D_800A0640[];
+extern f32 D_800A06C4;
+extern f32 D_800A06C8;
+void func_1504715C(GroundHit *, struct127 *);
+s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+void func_150CCD90(f32, f32 *, f32 *, f32 *);
+void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
+void func_150C88D0(RingSpawn *, s32, s32, s32);
+void *memcpy(void *, void *, s32);
+
+/* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
+   ground-coloured particle, two func_1514C678 effects, a ring and a func_151D5404 effect. */
+void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
+    f32 pos[3];
+    GroundBurstDef *def;
+    f32 fr;
+    f32 fg;
+    f32 fb;
+    u8 r;
+    u8 g;
+    u8 b;
+    GroundHit ground;
+
+    if (owner == NULL || owner->unk1D4 == NULL) {
+        return;
+    }
+    func_1504715C(&ground, owner);
+    def = &D_800A0640[index];
+    func_15143134(def->offset, pos, &((BoneMtx *)owner->unk1D4)[def->bone]);
+    {
+        f32 ray[3];
+
+        ray[0] = pos[0];
+        ray[1] = pos[1] + 200.0f;
+        ray[2] = pos[2];
+        if (func_15046C80(ray, 0, pos[1] - 2000.0f, &ground) == 0) {
+            return;
+        }
+    }
+    pos[1] = ground.height;
+lbl: // matching: unused label ends the basic block so the store stays out of the jal delay slot
+    func_150CCD90(pos[2], &fr, &fg, &fb);
+    r = fr;
+    g = fg;
+    b = fb;
+    {
+        GrowParticleExtra extra;
+        GrowSpawn spawn;
+        s16 rnd;
+        CornerColor colors[4];
+        GrowParticle *particle;
+
+        colors[0].r = r;
+        colors[0].g = g;
+        colors[0].b = b;
+        colors[0].a = 0xFF;
+        colors[0].unk8 = 0;
+        colors[1].r = r;
+        colors[1].g = g;
+        colors[1].b = b;
+        colors[1].a = 0xFF;
+        colors[1].unk8 = 0;
+        colors[2].r = r;
+        colors[2].g = g;
+        colors[2].b = b;
+        colors[2].a = 0xFF;
+        colors[2].unk8 = 0;
+        colors[3].r = r;
+        colors[3].g = g;
+        colors[3].b = b;
+        colors[3].a = 0xFF;
+        colors[3].unk8 = 0;
+        spawn.type = def->type;
+        spawn.unk2 = 0x2601;
+        spawn.lifetime = (func_150ADA20() % 51U) + 132;
+        spawn.unk8 = 0;
+        spawn.unkC = 0;
+        spawn.color[0] = 0xFF;
+        spawn.color[1] = 0xFF;
+        spawn.color[2] = 0xFF;
+        spawn.color[3] = 0xFF;
+        spawn.size0 = spawn.size1 = (func_150ADA68() * def->sizeRange) + def->sizeMin;
+        spawn.position.unk0 = pos[0];
+        spawn.position.unk4 = pos[1] + 10.0f;
+        spawn.position.unk8 = pos[2];
+        spawn.unk28[0] = 0.0f;
+        spawn.unk28[1] = 0.0f;
+        spawn.unk28[2] = 0.0f;
+        spawn.unk34[0] = 1.0f;
+        spawn.unk34[1] = 1.0f;
+        spawn.unk34[2] = 1.0f;
+        spawn.flags = 0x1C0001;
+        spawn.unk44 = (func_150ADA20() % (u32)(def->unk10Range + 1)) + def->unk10Min;
+        spawn.unk45 = 0xFF;
+        spawn.unk46 = 0;
+        spawn.unk47 = 6;
+        extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
+        extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.size0;
+        particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->unk7A >> 8) + def->yawOffset,
+                                 500.0f, 500.0f, 0, ground.unk4, 1, 8, arg3, arg2);
+        if (particle != NULL) {
+            memcpy(&particle->extra, &extra, sizeof(extra));
+        }
+        {
+            RingSpawn ring;
+            f32 d;
+
+            rnd = (func_150ADA20() % 1U) + 41;
+            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 50.0f) + 80.0f,
+                          0, 0xFF, rnd, 0x11, 0, 0.0f, NULL, arg3);
+            d = D_800A06C4;
+lbl2: // matching: unused label ends the basic block so &ring isn't hoisted above the D_800A06C4 load
+            {
+                s16 n1;
+                s16 n2;
+
+                ring.position = *(Vec3 *)pos;
+                ring.unk10 = D_800A06C8;
+                ring.unkC = 1;
+                ring.unkD = -1;
+                ring.unk14 = 12;
+                ring.unk18 = 40;
+                ring.unk1A = 30;
+                n1 = 10;
+                ring.unk1C = d / (f32)n1;
+                ring.unk20 = 25;
+                ring.unk24 = d / ring.unk20;
+                ring.unk2C = -1;
+                ring.unk2D = -1;
+                ring.unk28 = 0.0f;
+                func_150C88D0(&ring, 0, 0xFF, 1);
+            }
+        }
+        {
+            Rgb8 rgb;
+
+            rnd = (func_150ADA20() % 14U) + 15;
+            rgb.r = r;
+            rgb.g = g;
+            rgb.b = b;
+            func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 70.0f) + 70.0f,
+                          0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
+        }
+        func_151D5404((struct17 *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
+    }
+}
 
 /* Particle update: fades in over its first 32 ticks, then grows once past its delay. */
 s32 func_150CC638(GrowParticle *p) {
