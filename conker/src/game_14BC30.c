@@ -190,100 +190,76 @@ void func_1511E780(Prop *prop) {
     prop->state &= ~3;
     prop->state |= motion;
 }
-struct Obj1511EC50 {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x28];
-    s32 unk3C;
-    u8 pad40[0x2E];
-    s8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
-};
-
-struct Obj1511ED84 {
-    u8 pad0[0x14];
-    s16 unk14;
-    u8 pad16[0x5C];
-    u8 unk72;
-    u8 pad73[0x9];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
-};
-
-void func_1511EC50(struct Obj1511EC50 *arg0) {
+/* Raises the prop up to 500 units above home while triggered (then flags it finished), lowers it back otherwise. */
+void func_1511EC50(Prop *prop) {
     f32 step;
     f32 limit;
 
-    if (arg0->unk7C == 0) {
-        arg0->unk84 = (f32)arg0->unk12;
+    if (prop->work.slide.started == 0) {
+        prop->work.slide.home = prop->y;
     }
 
-    step = (f32)D_800BE9E4 * 4.0f;
-    if (arg0->unk3C != 0) {
-        step = step * 0.25f;
+    step = D_800BE9E4 * 4.0f;
+    if (prop->params != 0) {
+        step *= 0.25f;
     }
 
-    if (arg0->unk80 != 0) {
-        arg0->unk12 = (s32)((f32)arg0->unk12 + (step * 5.0f));
-        limit = arg0->unk84 + 500.0f;
-        if (limit < (f32)arg0->unk12) {
-            arg0->unk12 = (s32)limit;
-            arg0->unk6E = 1;
+    if (prop->work.slide.triggered != 0) {
+        prop->y += step * 5.0f;
+        limit = prop->work.slide.home + 500.0f;
+        if (limit < prop->y) {
+            prop->y = limit;
+            prop->finished = TRUE;
         }
     } else {
-        limit = arg0->unk84;
-        arg0->unk12 = (s32)((f32)arg0->unk12 - step);
-        if ((f32)arg0->unk12 < limit) {
-            arg0->unk12 = (s32)limit;
+        prop->y -= step;
+        if (prop->y < prop->work.slide.home) {
+            prop->y = prop->work.slide.home;
         }
     }
-    arg0->unk7C = 1;
+    prop->work.slide.started = TRUE;
 }
 
-void func_1511ED84(struct Obj1511ED84 *arg0) {
+/*
+ * Slides the prop along z: away from home by up to 350 units while not triggered and back to home
+ * once triggered. Bit 0 of the prop's id picks the direction.
+ */
+void func_1511ED84(Prop *prop) {
     f32 step;
     f32 limit;
     s32 direction;
 
-    if (arg0->unk7C == 0) {
-        arg0->unk84 = (f32)arg0->unk14;
+    if (prop->work.slide.started == 0) {
+        prop->work.slide.home = prop->z;
     }
 
-    step = (f32)D_800BE9E4 * 4.0f;
-    direction = 1 - (arg0->unk72 & 1);
+    step = D_800BE9E4 * 4.0f;
+    direction = 1 - (prop->id & 1);
 
-    if (arg0->unk80 != 0) {
+    if (prop->work.slide.triggered != 0) {
         if (direction & 1) {
-            arg0->unk14 = (s32)((f32)arg0->unk14 + step);
-            limit = arg0->unk84;
-            if (limit < (f32)arg0->unk14) {
-                arg0->unk14 = (s32)limit;
+            prop->z += step;
+            if (prop->work.slide.home < prop->z) {
+                prop->z = prop->work.slide.home;
             }
         } else {
-            limit = arg0->unk84;
-            arg0->unk14 = (s32)((f32)arg0->unk14 - step);
-            if ((f32)arg0->unk14 < limit) {
-                arg0->unk14 = (s32)limit;
+            prop->z -= step;
+            if (prop->z < prop->work.slide.home) {
+                prop->z = prop->work.slide.home;
             }
+        }
+    } else if (direction & 1) {
+        prop->z -= step;
+        limit = prop->work.slide.home - 350.0f;
+        if (prop->z < limit) {
+            prop->z = limit;
         }
     } else {
-        if (direction & 1) {
-            arg0->unk14 = (s32)((f32)arg0->unk14 - step);
-            limit = arg0->unk84 - 350.0f;
-            if ((f32)arg0->unk14 < limit) {
-                arg0->unk14 = (s32)limit;
-            }
-        } else {
-            arg0->unk14 = (s32)((f32)arg0->unk14 + step);
-            limit = arg0->unk84 + 350.0f;
-            if (limit < (f32)arg0->unk14) {
-                arg0->unk14 = (s32)limit;
-            }
+        prop->z += step;
+        limit = prop->work.slide.home + 350.0f;
+        if (limit < prop->z) {
+            prop->z = limit;
         }
     }
-    arg0->unk7C = 1;
+    prop->work.slide.started = TRUE;
 }
