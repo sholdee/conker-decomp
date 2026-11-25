@@ -178,8 +178,8 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
         func_1512D560(view, 5, NULL);
         // the header declares D_800C3600 as a struct168 pointer, but it is the struct itself
-        *(f32 *)((u8 *)&D_800C3600 + 0xC) = view->yaw;
-        func_1512D560(view, 8, (struct168 *)&D_800C3600);
+        D_800C3600.unkC = view->yaw;
+        func_1512D560(view, 8, &D_800C3600);
         func_1512D560(view, 6, NULL);
     }
 }

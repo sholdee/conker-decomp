@@ -30,8 +30,7 @@ extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
 extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
 
-// variables.h declares D_800C3600 as `struct168 *` and D_800DC020 as `s32`, but D_800C3600 is the
-// struct168 itself and D_800DC020 holds a C3E20Pose table pointer; hence the casts below.
+// variables.h declares D_800DC020 as `s32`, but it holds a C3E20Pose table pointer; hence the casts below.
 
 void func_1512D560(Camera *, s32, struct168 *);
 
@@ -73,17 +72,17 @@ s32 func_15096A68(s32 slot) {
         D_800D2DB8 = actor->target.y;
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        ((struct168 *)&D_800C3600)->unk0 = 1;
-        ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pose->x;
-        ((struct168 *)&D_800C3600)->unk18 = pose->y;
-        ((struct168 *)&D_800C3600)->unk1C = pose->z;
-        ((struct168 *)&D_800C3600)->unk20 = pose->unk14;
-        ((struct168 *)&D_800C3600)->unk24 = pose->unkC;
-        ((struct168 *)&D_800C3600)->unk28 = pose->unk10;
-        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
+        D_800C3600.unk0 = 1;
+        D_800C3600.unk4 = 0;
+        D_800C3600.unk14 = pose->x;
+        D_800C3600.unk18 = pose->y;
+        D_800C3600.unk1C = pose->z;
+        D_800C3600.unk20 = pose->unk14;
+        D_800C3600.unk24 = pose->unkC;
+        D_800C3600.unk28 = pose->unk10;
+        D_800C3600.unk8 = 0.0f;
         func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, (struct168 *)&D_800C3600);
+        func_1512D560(actor, 7, &D_800C3600);
         if (!(D_800D2DC0[slot].flags & 1)) {
             actor->player->unk7 = 0;
             actor->player->unk25C |= 0x200;
@@ -207,18 +206,18 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         pose = &pose[args[2] & 0xFFF];
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        ((struct168 *)&D_800C3600)->unk0 = 1;
-        ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pose->x;
-        ((struct168 *)&D_800C3600)->unk18 = pose->y;
-        ((struct168 *)&D_800C3600)->unk1C = pose->z;
-        ((struct168 *)&D_800C3600)->unk20 = pose->unk14;
-        ((struct168 *)&D_800C3600)->unk24 = pose->unkC;
-        ((struct168 *)&D_800C3600)->unk28 = pose->unk10;
-        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
+        D_800C3600.unk0 = 1;
+        D_800C3600.unk4 = 0;
+        D_800C3600.unk14 = pose->x;
+        D_800C3600.unk18 = pose->y;
+        D_800C3600.unk1C = pose->z;
+        D_800C3600.unk20 = pose->unk14;
+        D_800C3600.unk24 = pose->unkC;
+        D_800C3600.unk28 = pose->unk10;
+        D_800C3600.unk8 = 0.0f;
         D_800C365C = 0;
         func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, (struct168 *)&D_800C3600);
+        func_1512D560(actor, 7, &D_800C3600);
         D_800CC2D0[0].unk25C |= 0x200;
     }
         break;

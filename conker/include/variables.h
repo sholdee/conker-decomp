@@ -895,7 +895,7 @@ extern u16 D_800C18B8[];
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
 extern u8  D_800C35EA;
-extern struct168 *D_800C3600;
+extern struct168 D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 D_800C3654[];
 extern u8  D_800C3663;

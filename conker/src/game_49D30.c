@@ -3,11 +3,9 @@
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #define D_800C35EA D_800C35EA_hdr
 #define D_800C3CA0 D_800C3CA0_hdr
-#define D_800C3600 D_800C3600_hdr
 #include "variables.h"
 #undef D_800C35EA
 #undef D_800C3CA0
-#undef D_800C3600
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
@@ -119,25 +117,6 @@ typedef struct {
 
 extern SeqSubtitle D_800C3CA0[3];
 
-/* The camera message block passed to func_1512D560 (messages 5..10) while a cutscene drives the camera. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;   // scene
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} SeqCameraMsg;
-
-extern SeqCameraMsg D_800C3600;
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqPathKey *D_800C3868[][30];
@@ -1721,7 +1700,7 @@ extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
 
 // matching: going through a cast of &D_800C3600 changes IDO's address CSE in func_15020EC4
-#define MSG (*(SeqCameraMsg *)&D_800C3600)
+#define MSG (*(struct168 *)&D_800C3600)
 // matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
 #define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&D_800C3958[a][i])

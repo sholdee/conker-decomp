@@ -2354,19 +2354,23 @@ typedef struct {
 } struct167;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    u8  unkC[0x8];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8  pad2C[0x30];
-    f32 unk5C;
-} struct168;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4; // scene
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ f32 unk14; // eye x, y, z
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24; // pitch
+    /* 0x28 */ f32 unk28; // yaw
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ u8  pad38[0x24];
+    /* 0x5C */ f32 unk5C;
+} struct168; // a scripted camera shot (func_1512D560 message), D_800C3600
 
 typedef struct {
     s16 unk0;
