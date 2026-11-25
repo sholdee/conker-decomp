@@ -5,8 +5,6 @@
 
 extern f32 cosf(f32);
 extern f32 sinf(f32);
-// matching: 0.01745329238f (degrees to radians); the literal allocates registers differently than this load
-extern f32 D_800A7154;
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
 extern EffectTexture *D_8008CA4C[];
@@ -298,10 +296,10 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
 }
 
 extern s32 func_1510E388(s32 tri, void *verts, f32 *slopeX, f32 *slopeZ);
-/* Quad corner texture coordinates for 64-, 32- and 16-texel-wide textures. */
-extern s16 D_800A6FD0[4][2];
-extern s16 D_800A6FE0[4][2];
-extern s16 D_800A6FF0[4][2];
+/* Quad corner texture coordinates (S10.5) for 64-, 32- and 16-texel-wide textures. */
+static const s16 D_800A6FD0[4][2] = { { 64 << 5, 0 }, { 0, 0 }, { 0, 64 << 5 }, { 64 << 5, 64 << 5 } };
+static const s16 D_800A6FE0[4][2] = { { 32 << 5, 0 }, { 0, 0 }, { 0, 32 << 5 }, { 32 << 5, 32 << 5 } };
+static const s16 D_800A6FF0[4][2] = { { 16 << 5, 0 }, { 0, 0 }, { 0, 16 << 5 }, { 16 << 5, 16 << 5 } };
 
 /*
  * Fills `vtx` with a quad of half-size `size` lying on the slope of collision triangle `tri`, centred on (x, y, z),
@@ -416,11 +414,9 @@ s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, 
     f32 sinT;
     f32 cosT;
     struct FloorHit floor;
-    f32 theta;
 
-    theta = (angle - 90.0f) * D_800A7154;
-    cosT = cosf(theta);
-    sinT = sinf(theta);
+    cosT = cosf((angle - 90.0f) * 0.01745329238f);
+    sinT = sinf((angle - 90.0f) * 0.01745329238f);
     x += (f32)dist * sinT;
     z += (f32)dist * cosT;
     func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
