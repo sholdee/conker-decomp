@@ -3135,21 +3135,21 @@ void func_150721A4(void) {
     func_1506160C(D_800D154C, (u8)hi, lo, mid, 0);
 }
 
-struct127 *func_150721E8(struct127 *arg0) {
-    return func_15072208(arg0, 0);
+struct127 *func_150721E8(struct127 *owner) {
+    return func_15072208(owner, 0);
 }
 
-struct127 *func_15072208(struct127 *arg0, s32 arg1) {
-    f32 t;
-    s32 idx;
+/* Returns the n-th object owned by `owner` (unk65 = owner index + 1), or NULL. */
+struct127 *func_15072208(struct127 *owner, s32 n) {
+    s32 ownerId;
     s32 count;
     s32 i;
 
-    idx = (arg0 - D_800CC2D0) + 1;
+    ownerId = (owner - D_800CC2D0) + 1;
     count = 0;
     for (i = 0; i < 25; i++) {
-        if (idx == D_800CC2D0[i].unk65) {
-            if (count == arg1) {
+        if (ownerId == D_800CC2D0[i].unk65) {
+            if (count == n) {
                 return &D_800CC2D0[i];
             }
             count++;
@@ -3160,16 +3160,18 @@ struct127 *func_15072208(struct127 *arg0, s32 arg1) {
 
 
 void func_150722F0(void) {
-    struct127 *temp_v0 = func_150721E8(D_800D154C);
-    if (temp_v0 != 0) {
-        s32 tmp0 = D_800D1580 >> 8;
-        u16 tmp1 = D_800D1580;
-        func_1506160C(temp_v0, 2, tmp0, tmp1, 0);
+    struct127 *child = func_150721E8(D_800D154C);
+
+    if (child != NULL) {
+        s32 hi = D_800D1580 >> 8;
+        u16 lo = D_800D1580;
+
+        func_1506160C(child, 2, hi, lo, 0);
     }
 }
 
 void func_1507233C(void) {
-    D_800D154C->unk94 = (s32) ~(D_800D1580 | 1);
+    D_800D154C->unk94 = ~(D_800D1580 | 1);
 }
 
 void func_15072360(void) {
@@ -3181,16 +3183,18 @@ void func_15072388(void) {
 }
 
 void func_150723AC(void) {
-    struct127 *temp_v0 = func_15083E90(D_800D1583);
-    if (temp_v0 != NULL) {
-        func_15060F28(temp_v0, 0);
+    struct127 *obj = func_15083E90(D_800D1583);
+
+    if (obj != NULL) {
+        func_15060F28(obj, 0);
     }
 }
 
 void func_150723E0(void) {
-    struct127 *temp_v0 = func_15083E90(D_800D1583);
-    if ((temp_v0 != 0) && (temp_v0->unk65 != 0)) {
-        func_15060F28(temp_v0, 0);
+    struct127 *obj = func_15083E90(D_800D1583);
+
+    if (obj != NULL && obj->unk65 != 0) {
+        func_15060F28(obj, 0);
     }
 }
 
@@ -3198,6 +3202,7 @@ extern u8 *D_800D210C;
 extern void func_1505F188(struct127 *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
+/* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
 typedef struct SpawnSlot {
     u8  pad0[2];
     u8  unk2;
@@ -3222,13 +3227,13 @@ void func_15072420(void) {
     D_800D210C[id] = 0;
     if (!(spawnFlags & 0x80)) {
         obj = func_1505EEF4(id);
-        if (obj != 0) {
+        if (obj != NULL) {
             func_15060F28(obj, 0);
             func_1505F188(obj);
         }
     }
     ((SpawnSlot *)D_800D20FC)[id].unk2 = 0;
-    slot = func_15082A44((SpawnSlot *)((id * 0x30) + (s32)D_800D20FC), id, 0, 0, 0);
+    slot = func_15082A44((SpawnSlot *)(id * 0x30 + (s32)D_800D20FC), id, 0, 0, 0); // matching: integer address math
     if (slot == 0) {
         return;
     }
@@ -3253,7 +3258,7 @@ void func_15072420(void) {
             D_800D154C->unk222 = obj - D_800CC2D0;
         }
     }
-    if ((D_800BE9F0 == 0x3F) && (obj->id == 0x16)) {
+    if (D_800BE9F0 == 0x3F && obj->id == 0x16) {
         obj->unk94 |= 2;
     }
 }
@@ -3276,7 +3281,7 @@ void func_1507266C(void) {
     obj->unk101 = 4;
     obj->stunned = 0;
     obj->immune = 0xFF;
-    obj->unk218 = 0;
+    obj->unk218 = NULL;
     obj->unkE4 = 0;
     obj->unkE6 = 0;
     obj->unk232 = packed;
@@ -3288,14 +3293,14 @@ void func_1507266C(void) {
 }
 
 void func_15072740(void) {
-    s32 temp_v0;
-    struct127 *temp_v1;
+    s32 angle;
+    struct127 *obj;
 
-    temp_v0 = D_800D1580 >> 16;
-    temp_v1 = &D_800CC2D0[D_800D154C->unk222];
-    temp_v1->unk65 = D_800C3E78 + 1;
-    temp_v1->unk5C = temp_v0;
-    temp_v1->unk101 = 4;
+    angle = D_800D1580 >> 16;
+    obj = &D_800CC2D0[D_800D154C->unk222];
+    obj->unk65 = D_800C3E78 + 1;
+    obj->unk5C = angle;
+    obj->unk101 = 4;
 }
 
 void func_150727AC(void) {
@@ -3308,7 +3313,7 @@ void func_150727F0(void) {
 
     for (i = 0; i < 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0 && D_800C3E78 + 1 == D_800CC2D0[i].unk65) {
-            D_800CC2D0[i].unk218 = 0;
+            D_800CC2D0[i].unk218 = NULL;
             D_800CC2D0[i].unk232 = D_800D1580;
         }
     }
@@ -3332,26 +3337,26 @@ void func_150729B4(void) {
 }
 
 void func_150729D0(void) {
-    D_800D154C->unk31C->unk8 = (u16)1;
+    D_800D154C->unk31C->unk8 = 1;
     func_1507EB4C(D_800D154C, 21);
     func_1506B82C();
 }
 
 void func_15072A14(void) {
-    D_800D154C->unk31C->unk66 = (u16)0;
+    D_800D154C->unk31C->unk66 = 0;
     func_1507F640();
 }
 
 void func_15072A40(void) {
-    D_800D154C->unk31C->unk19B = (u8)0;
-    D_800D154C->unk31C->unk78 = (u8)0;
+    D_800D154C->unk31C->unk19B = 0;
+    D_800D154C->unk31C->unk78 = 0;
     func_1507F640();
 }
 
 void func_15072A7C(void) {
-    if (D_800D154C->unk31C != 0) {
+    if (D_800D154C->unk31C != NULL) {
         D_800D154C->unk31C->unk1A9++;
-        if ((func_150ADA20() & 7) < (u32) D_800D154C->unk31C->unk1A9) {
+        if ((func_150ADA20() & 7) < (u32)D_800D154C->unk31C->unk1A9) {
             func_1505E650(D_800D154C, 394, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         }
     }
