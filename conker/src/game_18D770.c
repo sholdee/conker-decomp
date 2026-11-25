@@ -857,9 +857,15 @@ LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
     return effect;
 }
 
+/* Global colour cycle: a TimedEffect carrying a LightColourPulse. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ LightColourPulse pulse;
+} ColourPulseEffect;
+
 /* Starts a global colour cycle object (see func_151621B8). */
 void func_15162110(s32 arg0) {
-    struct236 *object;
+    ColourPulseEffect *object;
     LightColourPulse pulse;
 
     pulse.base.y = 15.0f;
@@ -873,16 +879,16 @@ void func_15162110(s32 arg0) {
 
     object = func_15149130(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
     if (object != NULL) {
-        memcpy(&object->unk28, &pulse, sizeof(pulse));
+        memcpy(&object->pulse, &pulse, sizeof(pulse));
     }
 }
 
 /* Sets the colour passed to func_1515D4D4 from the object's colour cycle and advances it. */
-void func_151621B8(struct236 *object) {
+void func_151621B8(ColourPulseEffect *object) {
     LightColourPulse *pulse;
     f32 sine;
 
-    pulse = (LightColourPulse *)&object->unk28;
+    pulse = &object->pulse;
     sine = sinf(pulse->phase);
 
     func_1515D4D4(

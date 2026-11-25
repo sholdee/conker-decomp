@@ -3611,21 +3611,6 @@ typedef struct {
     s32 unk4;
 } struct234; // size 0x8;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} struct235;
-
-typedef struct {
-    u8 pad0[0x28];
-    struct235 unk28; // is this just 8 f32s ?
-} struct236;
 
 typedef struct {
     f32 unk0;
