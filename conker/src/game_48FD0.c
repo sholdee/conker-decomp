@@ -18,10 +18,10 @@ extern u8 D_800E0A00;
 
 void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
-/* Arms the controller-read timer (25 * osClockRate / 1000000 ticks, i.e. 25 us) once per
-   frame, after func_1501BBB8 has consumed the previous read. */
+/* After each controller read (func_1501BBB8 sets D_80084064), arms a one-shot timer of
+   25 * osClockRate / 1000000 ticks (D_8002BD10 is osClockRate) that posts message 6 to D_8003B218. */
 void func_1501BB20(void) {
-    if (D_80084064 != 0) {
+    if (D_80084064) {
         osSetTimer(&D_800BE6E0, 25ULL * D_8002BD10 / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
         D_80084064 = 0;
     }
@@ -262,25 +262,33 @@ extern u8 *D_800BE3F0;
 void func_151DCFD8(s32);
 u8 func_151DD460(OSMesgQueue *);
 void func_15007168(void);
-void func_15006590(s32);
-void func_15006BEC(s32);
-void func_1500707C(s32);
+void func_15006590(s32 eepromSlot);
+void func_15006BEC(s32 saveSlot);
+void func_1500707C(s32 saveSlot);
 void func_1500727C(void);
 void func_15007360(void);
 void func_15007440(void);
 void func_15007558(void);
 void func_10004074(void *);
 
+/* Pending EEPROM request (enum EepromRequest in game_33990.c) and its save-slot argument;
+   variables.h declares both u8, but they are signed bytes. */
+#define EEPROM_REQUEST (*(s8 *)&D_80082BB4)
+#define EEPROM_REQUEST_SLOT (*(s8 *)&D_800BE3EC)
+
+/* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load
+   requests fall back to defaults and the others are dropped. */
 void func_1501C57C(void) {
     s32 i;
 
     func_151DCFD8(0);
-    if (*(s8 *)&D_80082BB4 != 0) {
+    if (EEPROM_REQUEST != 0) {
         if (D_80084068 != 2) {
             D_80084068 = func_151DD460(&D_800BE900);
         }
         if (D_80084068 != 2) {
-            switch (*(s8 *)&D_80082BB4) {
+            // matching: empty switch emits the original's 7-entry jump table
+            switch (EEPROM_REQUEST) {
                 case 1:
                 case 2:
                 case 3:
@@ -290,29 +298,31 @@ void func_1501C57C(void) {
                 case 7:
                     break;
             }
+            // matching: a goto loop; IDO unrolls the equivalent for/while delay loop
             i = 19;
-            loop:
+        delay:
             if (i > 0) {
                 i--;
-                goto loop;
+                goto delay;
             }
-            if (*(s8 *)&D_80082BB4 == 1) {
+            if (EEPROM_REQUEST == 1) {
                 func_150064E0();
-            } else if (*(s8 *)&D_80082BB4 == 4) {
+            } else if (EEPROM_REQUEST == 4) {
                 func_15007168();
             }
             D_80082BB4 = 0;
-        lbl:;
+        // matching: an unused label ends the block, so as1 keeps the store out of the branch delay slot
+        end:;
         } else {
-            switch (*(s8 *)&D_80082BB4) {
+            switch (EEPROM_REQUEST) {
                 case 1:
-                    func_15006590(*(s8 *)&D_800BE3EC);
+                    func_15006590(EEPROM_REQUEST_SLOT);
                     break;
                 case 2:
-                    func_15006BEC(*(s8 *)&D_800BE3EC);
+                    func_15006BEC(EEPROM_REQUEST_SLOT);
                     break;
                 case 3:
-                    func_1500707C(*(s8 *)&D_800BE3EC);
+                    func_1500707C(EEPROM_REQUEST_SLOT);
                     break;
                 case 4:
                     func_1500727C();
