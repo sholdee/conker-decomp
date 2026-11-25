@@ -101,7 +101,8 @@ def cmd_new(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
-        shutil.copy(MAIN / YAML, ws / "base" / YAML)
+        for n in SPLAT_INPUTS:
+            shutil.copy(MAIN / n, ws / "base" / n)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -136,7 +137,8 @@ def new_tree(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
-        shutil.copy(MAIN / YAML, ws / "base" / YAML)
+        for n in SPLAT_INPUTS:
+            shutil.copy(MAIN / n, ws / "base" / n)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -148,13 +150,23 @@ def new_tree(a):
 
 
 YAML = "conker.us.yaml"
+# splat's inputs: a workspace may change them (e.g. to link a file's own .rodata, or to label bss)
+SPLAT_INPUTS = (YAML, "symbol_addrs.us.txt", "undefined_syms.us.txt", "undefined_funcs.us.txt")
 SPLAT = "python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1 && python3 ../tools/filter_auto_syms.py . >/dev/null"
 
 
+def splat_changes(ws):
+    """The splat inputs the workspace changed (empty for workspaces made before this support)."""
+    out = []
+    for n in SPLAT_INPUTS:
+        b = ws / "base" / n
+        if b.exists() and not filecmp.cmp(b, ws / "conker" / n, shallow=False):
+            out.append(n)
+    return out
+
+
 def yaml_changed(ws):
-    """True if the workspace edits the splat yaml (e.g. to link a file's own .rodata)."""
-    b = ws / "base" / YAML
-    return b.exists() and not filecmp.cmp(b, ws / "conker" / YAML, shallow=False)
+    return bool(splat_changes(ws))
 
 
 def build(ws):
@@ -163,7 +175,7 @@ def build(ws):
     (wc / BIN).unlink(missing_ok=True)
     stamp = ws / ".splat_yaml"
     if yaml_changed(ws) or stamp.exists():
-        cur = (wc / YAML).read_bytes()
+        cur = b"".join((wc / n).read_bytes() for n in SPLAT_INPUTS)
         if not stamp.exists() or stamp.read_bytes() != cur:
             run(SPLAT, wc, timeout=1800)  # the yaml changed: regenerate asm/ and the linker script
             stamp.write_bytes(cur)
@@ -227,7 +239,7 @@ def log(ws, res, n=None):
 def cmd_land(a):
     ws, m = ws_of(a.name)
     files = changed_files(ws)
-    if not files:
+    if not files and not splat_changes(ws):
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
@@ -257,14 +269,15 @@ def cmd_land(a):
                          f"re-apply your edits, update base/{f} from main, check, land again")
             merged[f] = p.stdout
         ychanged = yaml_changed(ws)
-        if ychanged:
-            p = subprocess.run(["git", "merge-file", "-p", str(MAIN / YAML), str(ws / "base" / YAML), str(ws / "conker" / YAML)],
+        for n in splat_changes(ws):
+            p = subprocess.run(["git", "merge-file", "-p", str(MAIN / n), str(ws / "base" / n), str(ws / "conker" / n)],
                                capture_output=True)
             if p.returncode != 0:
-                sys.exit(f"{YAML}: merge conflict with main — copy main's yaml into the workspace and base/, re-apply, check, land")
-            merged[Path(YAML)] = p.stdout
-            files = files + [Path(YAML)]
-            rels.append(str(Path("conker") / YAML))
+                sys.exit(f"{n}: merge conflict with main — copy main's file into the workspace and base/, re-apply, check, land")
+            merged[Path(n)] = p.stdout
+            files = files + [Path(n)]
+            rels.append(str(Path("conker") / n))
+        if ychanged:
             autos = {n: (MAIN / n).read_bytes() for n in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")}
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
