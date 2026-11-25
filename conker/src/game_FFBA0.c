@@ -71,7 +71,7 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     struct260 *object;
 
     emitter.record = record;
-    emitter.angle = func_150ADA68() * 2.0f * 3.141592741f;
+    emitter.angle = func_150ADA68() * 2.0f * 3.1415927f;
     emitter.rate = func_150ADA68() * 0.4f + 0.3f;
     emitter.interval = 1.0f / emitter.rate;
     emitter.angleStep = func_150ADA68() * 0.13000001f + 0.3f;
@@ -220,111 +220,101 @@ void func_150D2924(EffectObject *obj) {
     }
 }
 
-typedef struct GameFFBA0BeamVertex {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 flag;
-    s16 s;
-    s16 t;
-    u8 color[4];
-} GameFFBA0BeamVertex;
-
-typedef struct Vec3f_150D2D6C {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_150D2D6C;
-
-void func_150AD8B0(f32 *, f32 *, f32 *);
-s32 func_15144B34(s32);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_150AD8B0(f32 *a, f32 *b, f32 *out);
+Vec3f *func_15144B34(s32 viewport);
+void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 typedef struct GameFFBA0Beam {
     u8 pad0[0x2C];
     f32 width;
     u8 pad30[4];
-    Vec3f_150D2D6C start;
-    Vec3f_150D2D6C end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0x74];
-    u8 vertexTemplate[0x40];
-    u8 *buffers[4];
+    Vtx vertexTemplate[4];
+    Vtx *buffers[4];
     f32 texture[2];
 } GameFFBA0Beam;
 
-void *func_150D2D6C(GameFFBA0Beam *arg0, s16 arg1) {
-    GameFFBA0BeamVertex *vertices;
-    void *result;
-    Vec3f_150D2D6C *camera;
-    Vec3f_150D2D6C delta;
-    Vec3f_150D2D6C end;
-    Vec3f_150D2D6C middle;
-    Vec3f_150D2D6C view;
-    Vec3f_150D2D6C side;
+/*
+ * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's
+ * vertex buffer, filling a fresh buffer from the template first. Returns the vertices, or NULL.
+ */
+Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
+    Vtx *vertices;
+    Vtx *result;
+    Vec3f *camera;
+    Vec3f delta;
+    Vec3f end;
+    Vec3f middle;
+    Vec3f view;
+    Vec3f side;
     f32 lengthSquared;
     f32 *texture;
     u8 fresh;
 
-    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(beam->buffers, index, sizeof(beam->vertexTemplate), &vertices, &fresh);
     result = vertices;
+    // matching: an early `if (vertices == NULL) return NULL;` lays the blocks out differently
     if (vertices != NULL) {
-        if (fresh != 0) {
-            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        if (fresh) {
+            memcpy(beam->buffers[index], beam->vertexTemplate, sizeof(beam->vertexTemplate));
+            memcpy(beam->buffers[index] + 4, beam->vertexTemplate, sizeof(beam->vertexTemplate));
         }
     } else {
         return NULL;
     }
-    texture = arg0->texture;
-    camera = (Vec3f_150D2D6C *)func_15144B34(arg1);
-    delta.x = arg0->end.x - arg0->start.x;
-    delta.y = arg0->end.y - arg0->start.y;
-    delta.z = arg0->end.z - arg0->start.z;
-    end.x = arg0->start.x + delta.x;
-    end.y = arg0->start.y + delta.y;
-    end.z = arg0->start.z + delta.z;
-    middle.x = arg0->start.x + delta.x * 0.5f;
-    middle.y = arg0->start.y + delta.y * 0.5f;
-    middle.z = arg0->start.z + delta.z * 0.5f;
+    texture = beam->texture;
+    camera = func_15144B34(index);
+    delta.x = beam->end.x - beam->start.x;
+    delta.y = beam->end.y - beam->start.y;
+    delta.z = beam->end.z - beam->start.z;
+    end.x = beam->start.x + delta.x;
+    end.y = beam->start.y + delta.y;
+    end.z = beam->start.z + delta.z;
+    middle.x = beam->start.x + delta.x * 0.5f;
+    middle.y = beam->start.y + delta.y * 0.5f;
+    middle.z = beam->start.z + delta.z * 0.5f;
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
     func_150AD8B0(&delta.x, &view.x, &side.x);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
-        f32 scale = arg0->width / sqrtf(lengthSquared);
+        f32 scale = beam->width / sqrtf(lengthSquared);
 
         side.x = side.x * scale;
         side.y = side.y * scale;
         side.z = side.z * scale;
     } else {
+        // matching: integer zeros; 0.0f changes the code
         side.x = 0;
         side.y = 0;
         side.z = 0;
     }
-    vertices->x = arg0->start.x - side.x;
-    vertices->y = arg0->start.y - side.y;
-    vertices->z = arg0->start.z - side.z;
-    vertices->s = texture[1];
-    vertices->flag = 0;
+    vertices->v.ob[0] = beam->start.x - side.x;
+    vertices->v.ob[1] = beam->start.y - side.y;
+    vertices->v.ob[2] = beam->start.z - side.z;
+    vertices->v.tc[0] = texture[1];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = end.x - side.x;
-    vertices->y = end.y - side.y;
-    vertices->z = end.z - side.z;
-    vertices->s = texture[0];
-    vertices->flag = 0;
+    vertices->v.ob[0] = end.x - side.x;
+    vertices->v.ob[1] = end.y - side.y;
+    vertices->v.ob[2] = end.z - side.z;
+    vertices->v.tc[0] = texture[0];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = end.x + side.x;
-    vertices->y = end.y + side.y;
-    vertices->z = end.z + side.z;
-    vertices->s = texture[0];
-    vertices->flag = 0;
+    vertices->v.ob[0] = end.x + side.x;
+    vertices->v.ob[1] = end.y + side.y;
+    vertices->v.ob[2] = end.z + side.z;
+    vertices->v.tc[0] = texture[0];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = arg0->start.x + side.x;
-    vertices->y = arg0->start.y + side.y;
-    vertices->z = arg0->start.z + side.z;
-    vertices->s = texture[1];
-    vertices->flag = 0;
+    vertices->v.ob[0] = beam->start.x + side.x;
+    vertices->v.ob[1] = beam->start.y + side.y;
+    vertices->v.ob[2] = beam->start.z + side.z;
+    vertices->v.tc[0] = texture[1];
+    vertices->v.flag = 0;
     return result;
 }
 
