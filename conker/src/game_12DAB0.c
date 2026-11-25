@@ -6,6 +6,7 @@
 #undef func_10010F30
 #undef func_1513D4B8
 #include "variables.h"
+#include "libc/string.h"
 
 /* Spawn template of a func_1513D4B8 particle (ParticleDef in game_169510.c). */
 typedef struct {
@@ -176,9 +177,9 @@ typedef struct {
 } ChildData;
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
-extern void *func_15130374(void *, u8, s32, u8, s32);
-extern void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
+extern void *func_1513D4B8(ParticleDef *, s32 *, u8, u8, u8, u8, u8, s32, u8, s32);
+extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
+extern u8 *func_151407D0(GlowParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
@@ -209,7 +210,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
     data.owner = owner;
     data.ownerId = owner->unique_id;
     data.unk20 = arg3;
-    data.unk23 = (s32)(argC ? 2 : 0);
+    data.unk23 = (s32)(argC ? 2 : 0); // matching: the (s32) cast changes IDO's register choice
     data.unk8 = *vec1;
     data.unk14 = *vec2;
     data.unk3C = arg8;
@@ -333,6 +334,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                 particleAData.parent = particle;
                 particleAData.angle[0] = func_150ADA68() * 6.283185482f;
                 particleAData.angle[1] = func_150ADA68() * 6.283185482f;
+                // matching: '+ -0.3f' (add.s), not '- 0.3f' (sub.s)
                 particleAData.unk20 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
                 particleAData.unk24 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
                 descA.texture = 0x2B;
@@ -372,7 +374,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                              PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
                 descA.primColorMode = 6;
                 descA.envColorMode = 6;
-                descA.updateFunc = 0xB;
+                descA.updateFunc = 11;
                 descA.deathFunc = -1;
                 descA.drawFunc = 0;
                 descA.handlerSet = 1;
