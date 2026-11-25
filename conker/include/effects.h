@@ -939,16 +939,11 @@ typedef struct ConeBasis {
     /* 0x28 */ f32 spread;
 } ConeBasis; /* size 0x2C */
 
-/* Three s16 vertices of a collision triangle, as stored in a ray-cast result. */
-typedef struct SurfaceTriangle {
-    /* 0x00 */ s16 v[9];
-} SurfaceTriangle; /* size 0x12 */
-
 /* A cone described by a surface triangle (three s16 vertices) and the side its normal faces
  * (func_1514F640); the first argument of func_1514FEFC / func_15153C84. */
 typedef struct TriangleSource {
     /* 0x00 */ Vec3f normal;
-    /* 0x0C */ SurfaceTriangle triangle;
+    /* 0x0C */ CollisionTri triangle;
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ f32 spread;
 } TriangleSource; /* size 0x24 */
@@ -1469,7 +1464,7 @@ typedef struct SurfaceBurst {
     /* 0x02 */ s16 countRange;
     /* 0x04 */ Vec3f position;
     /* 0x10 */ Vec3f normal;
-    /* 0x1C */ SurfaceTriangle triangle;
+    /* 0x1C */ CollisionTri triangle;
     /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ f32 spread;
     /* 0x34 */ u8 texture;          /* ParticleDef.texture */

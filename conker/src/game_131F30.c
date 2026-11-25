@@ -281,7 +281,7 @@ typedef struct ImpactHit {
     /* 0x30 */ Vec3f position;
     /* 0x3C */ u8 pad3C[0x24];
     /* 0x60 */ Vec3f velocity;
-    /* 0x6C */ SurfaceTriangle triangle;
+    /* 0x6C */ CollisionTri triangle;
     /* 0x7E */ u8 pad7E[0xA];
     /* 0x88 */ s32 surfaceFlags;   /* bits 0-4: surface type */
 } ImpactHit;
@@ -292,7 +292,7 @@ typedef struct ImpactObj {
     /* 0x110 */ ImpactHit hit;
 } ImpactObj;
 
-void *func_15102920(f32 size, u8 alpha, SurfaceTriangle *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
+void *func_15102920(f32 size, u8 alpha, CollisionTri *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
                    s32, s32);
 void func_151C329C(Vec3f *pos, u8, s32);
 

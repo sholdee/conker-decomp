@@ -293,7 +293,7 @@ typedef struct {
     f32 dist;
     Vec3f pos;
     u8 pad14[0x30];
-    SurfaceTriangle surface;
+    CollisionTri surface;
     u8 pad56[3];
     u8 hit;             /* 0 none, 1 surface, 2+ object */
     u8 pad5A[0xE];

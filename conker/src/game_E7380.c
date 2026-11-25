@@ -29,7 +29,7 @@ typedef struct {
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];
 extern s32 func_150A3058(s32, s16, s16, s16);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, SurfaceTriangle *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern s32 func_15145C90(s32);
 extern void func_151511FC(SurfaceBurst *, u8, s32);
 
@@ -63,7 +63,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         f32 dy;
         f32 dx;
         Vec3f hit;
-        SurfaceTriangle triangle;
+        CollisionTri triangle;
         s32 hitObject;
         SpriteDef sprite;
         SurfaceBurst burst;

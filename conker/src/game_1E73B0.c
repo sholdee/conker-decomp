@@ -9,7 +9,7 @@ void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s
 /* Floor below a point, from func_1504715C / func_15046C80. */
 typedef struct {
     /* 0x00 */ f32 height;
-    /* 0x04 */ SurfaceTriangle surf;
+    /* 0x04 */ CollisionTri surf;
     /* 0x16 */ u8 pad16[0x24 - 0x16];
 } FloorInfo;
 
@@ -579,9 +579,9 @@ typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, SurfaceTriangle *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 void func_15151D6C(SurfaceDebrisBurst *, s32 *, f32 *, s32, u8, s32);
 void func_151C04F8(Vec3f *, u8, s32);
@@ -589,14 +589,14 @@ void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0644(Vec3f *, u8, s32);
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3);
+void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
 void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
-    SurfaceTriangle surf;
+    CollisionTri surf;
     Vec3f hit;
     Vec3f delta;
     s32 hitInfo;
@@ -794,10 +794,10 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, SurfaceTriangle *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
-void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;

@@ -13,7 +13,7 @@ typedef struct {
 /* A surface hit record: the floor under a point, or the first pass-through surface of a bullet trace. */
 typedef struct {
     /* 0x00 */ f32 height;
-    /* 0x04 */ SurfaceTriangle surface;
+    /* 0x04 */ CollisionTri surface;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s8  unk1C;
     /* 0x1D */ s8  unk1D;
@@ -55,9 +55,9 @@ void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 void func_1514FCE8(JetSpraySpec *, u8, s32);
 void func_1504715C(SurfaceHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, SurfaceHit *);
-void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
+void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
@@ -78,7 +78,7 @@ void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxL
 }
 
 /* Bullet hit against a collision surface (or none). */
-void func_151BFE84(SurfaceTriangle *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
+void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     Vec3f v0;
     Vec3f v1;
     Vec3f v2;
@@ -199,9 +199,9 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     return TRUE;
 }
 
-void func_150E7FEC(f32, s32, SurfaceTriangle *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
+void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
     f32 rand;
@@ -267,7 +267,7 @@ typedef struct {
     /* 0x20 */ Vec3f unk20;
     /* 0x2C */ Vec3f start;
     /* 0x38 */ Vec3f dir;
-    /* 0x44 */ SurfaceTriangle surface;
+    /* 0x44 */ CollisionTri surface;
     /* 0x56 */ s16 unk56;
     /* 0x58 */ u8  unk58;
     /* 0x59 */ u8  hitType; /* 0: nothing, 1: end of trace, >= 2: hit */
@@ -581,7 +581,7 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 }
 
 void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, SurfaceTriangle *surface);
+void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);
 s32 func_151ABE40(Vec3f *, SurfaceHit *, s32, s32, s32);
@@ -697,11 +697,11 @@ void func_151C1628(Bullet *bullet) {
     func_1513259C(bullet);
 }
 
-void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, SurfaceTriangle *, s32, s32, s32);
-void func_151D42E8(Vec3f *, Vec3f *, Actor *, SurfaceTriangle *, s32);
+void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, CollisionTri *, s32, s32, s32);
+void func_151D42E8(Vec3f *, Vec3f *, Actor *, CollisionTri *, s32);
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, SurfaceTriangle *surface) {
+void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface) {
     void (*callback)(s32, s32, s32);
 
     callback = (void (*)(s32, s32, s32))D_800E0934;

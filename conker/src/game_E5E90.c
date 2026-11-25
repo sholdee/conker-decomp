@@ -203,7 +203,7 @@ typedef struct {
 } CollisionProbe;
 
 s32 func_150A3058(s32, s16, s16, s16);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *,
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,
                   s32 *, void *, f32);
 s32 func_15145C90(s32);
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
@@ -217,7 +217,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
         if (func_150A3058(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
             Vec3f move;
             Vec3f hit;
-            SurfaceTriangle triangle;
+            CollisionTri triangle;
             s32 hitObject;
             ParticleDef def;
             AxisParticle *spawned;
@@ -226,7 +226,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
             move.x = particle->pos.x - x;
             move.y = particle->pos.y - y;
             move.z = particle->pos.z - z;
-            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, triangle.v, &hit.x, &hit.y, &hit.z,
+            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, &triangle, &hit.x, &hit.y, &hit.z,
                               NULL, &hitObject, NULL, 0.0f) != 0) {
                 // matching: a switch, not an if; the if form swaps the $s0/$s1 homes of particle and probe
                 switch (func_15145C90(hitObject)) {
