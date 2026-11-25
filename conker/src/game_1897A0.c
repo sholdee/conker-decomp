@@ -366,20 +366,19 @@ s32 func_1515CF9C(Trail *trail, TrailData *data) {
 
 /* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
 s32 func_1515D030(Trail *trail, TrailData *data) {
-    s8 temp_v0;
+    s8 count;
     s32 result;
 
-    temp_v0 = trail->count;
-    result = 1;
-    if ((s32) temp_v0 >= 3) {
-        trail->count = (s8) (temp_v0 - 1);
-        trail->head = (s8) (trail->head - 1);
-        if ((s32) trail->head < 0) {
-            trail->head = (s8) (trail->header.capacity - 1);
-            result = 1;
+    count = trail->count;
+    result = TRUE;
+    if (count >= 3) {
+        trail->count = count - 1;
+        trail->head--;
+        if (trail->head < 0) {
+            trail->head = trail->header.capacity - 1;
         }
     } else {
-        result = 0;
+        result = FALSE;
     }
     return result;
 }
@@ -404,29 +403,35 @@ typedef struct LevelObject {
     /* 0x24 */ u8 pad24[0x10];
 } LevelObject;
 
-s32 func_1515D088(LevelObject *arg0)
-{
-  s32 temp_v0_2;
-  struct 
-  {
-    void *unk0;
-    f32 unk4;
-    s8 unk8;
-  } sp30;
-  temp_v0_2 = arg0->unk18;
-  sp30.unk8 = (s8) (temp_v0_2 & 0xFFFF);
-  if (((temp_v0_2 & 0xFF) < 0) || ((temp_v0_2 & 0xFF) >= 2))
-  {
-    return 0;
-  }
-  sp30.unk0 = arg0;
-  sp30.unk4 = 0.0f;
-  temp_v0_2 = (s32) func_151491F4(0x12C, -1, 0x11, 0, 0xD, 0xC, 0xFF, 1);
-  if (temp_v0_2 != 0)
-  {
-    memcpy((void *) (temp_v0_2 + 0x28), &sp30, 0xC);
-  }
-  return temp_v0_2;
+/* Data block at 0x28 of the effect func_1515D088 spawns. */
+typedef struct {
+    /* 0x0 */ LevelObject *owner;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ s8 kind;
+} LevelEffectData; /* size 0xC */
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ LevelEffectData data;
+} LevelEffect;
+
+/* Spawns an effect for the level object when its unk18 kind is 0 or 1; returns it, or NULL. */
+LevelEffect *func_1515D088(LevelObject *obj) {
+    s32 value; // matching: one variable holds the kind and then the effect (IDO's register and spill slot)
+    LevelEffectData data;
+
+    value = obj->unk18;
+    data.kind = (u16)value; // matching: the u16 step keeps the loaded word apart from value & 0xFF
+    if ((value & 0xFF) < 0 || (value & 0xFF) >= 2) {
+        return NULL;
+    }
+    data.owner = obj;
+    data.unk4 = 0.0f;
+    value = (s32)func_151491F4(300, -1, 17, 0, 13, 12, 255, 1);
+    if (value != 0) {
+        memcpy(&((LevelEffect *)value)->data, &data, sizeof(data));
+    }
+    return (LevelEffect *)value;
 }
 
 typedef struct {
