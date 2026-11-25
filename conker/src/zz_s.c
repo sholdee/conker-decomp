@@ -25,7 +25,6 @@ void func_1515FDA0(s32 arg0) {
             node = D_800DD198[D_800DD190];
         }
         {
-            extern s8 D_800DD190;
             D_800DD190--;
         }
     }

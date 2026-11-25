@@ -101,7 +101,7 @@ void func_1504A730(void) {
             D_800CC264 = D_800D1550 * 100.0f;
             {
                 // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
-                extern u8 D_800CC27C;
+                extern u8 D_800CC27C; // matching: a declaration here opens a -g3 scope block (scheduling)
                 if (D_800CC27C >= 6) {
                     D_800CC27C = 0;
                 }

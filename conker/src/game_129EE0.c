@@ -279,10 +279,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
-            extern s32 D_800A4AA0;
+            extern s32 D_800A4AA0; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             if (onGround) {
-                extern Vec3f D_800A5480;
+                extern Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 groundDef.texture = 3;
                 groundDef.type = 0;

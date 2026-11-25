@@ -109,7 +109,7 @@ void func_1518BBF4(Actor *actor) {
             }
             {
                 // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
-                extern s8 D_800DD190;
+                extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 D_800DD190--;
             }

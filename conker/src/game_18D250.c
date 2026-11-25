@@ -66,7 +66,7 @@ void func_1515FDA0(s32 arg0) {
         }
         {
             // matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first
-            extern s8 D_800DD190;
+            extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             D_800DD190--;
         }

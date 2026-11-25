@@ -181,7 +181,7 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
             }
             {
                 // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190
-                extern s8 D_800DD190;
+                extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 D_800DD190--;
             }
