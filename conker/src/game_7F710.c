@@ -5,95 +5,111 @@
 
 void func_1505A770(struct127 *arg0);
 
-void func_15052260(struct127 *arg0) {
-    struct126 *temp_v0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f0;
-    f32 temp_f2;
+/* s16 position stored in the bytes struct126 declares as pad6C (written by game_1483E0). */
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+} TargetPos16;
 
-    temp_v0 = arg0->unk31C;
-    if ((temp_v0->unk6B == 1) || (temp_v0->unk6B == 3)) {
-        temp_f12 = 0.400000006f;
+/*
+ * While unk31C->unk6B < 4, moves the actor toward the s16 target position in its unk31C block
+ * (all the way, or 40% per call in modes 1 and 3); otherwise clears the mode once unk28 runs out.
+ * Ends the mode and sets in_water when the actor drops below unk118.
+ */
+void func_15052260(struct127 *actor) {
+    struct126 *ctrl = actor->unk31C;
+    TargetPos16 *target;
+    f32 blend;
+
+    if (ctrl->unk6B == 1 || ctrl->unk6B == 3) {
+        blend = 0.400000006f;
     } else {
-        temp_f12 = 1.0f;
+        blend = 1.0f;
     }
-    temp_f14 = arg0->y_position;
-    arg0->unk1CC = temp_f14;
+    actor->unk1CC = actor->y_position;
 
-    if (temp_v0->unk6B < 4) {
-        arg0->x_position += (((f32) *(s16 *) ((u8 *) temp_v0 + 0x6C)) - arg0->x_position) * temp_f12;
-        arg0->y_position += (((f32) (*(s16 *) ((u8 *) temp_v0 + 0x6E) - 0x50)) - arg0->y_position) * temp_f12;
-        arg0->z_position += (((f32) *(s16 *) ((u8 *) temp_v0 + 0x70)) - arg0->z_position) * temp_f12;
-        func_1505E650(arg0, 0x14, 1.0f, 6.0f, 0.0f, 0.0f, 0);
-        arg0->y_velocity = -10.0f;
+    if (ctrl->unk6B < 4) {
+        target = (TargetPos16 *)ctrl->pad6C;
+        actor->x_position += ((f32)target->x - actor->x_position) * blend;
+        actor->y_position += ((f32)(target->y - 80) - actor->y_position) * blend;
+        actor->z_position += ((f32)target->z - actor->z_position) * blend;
+        func_1505E650(actor, 20, 1.0f, 6.0f, 0.0f, 0.0f, 0);
+        actor->y_velocity = -10.0f;
     } else {
-        if ((s32) arg0->unk28 == 0) {
-            temp_v0->unk6B = 0;
+        if ((s32)actor->unk28 == 0) {
+            ctrl->unk6B = 0;
         } else {
-            func_1505E650(arg0, 0x38, 1.0f, 6.0f, 0.0f, 0.0f, 0);
+            func_1505E650(actor, 56, 1.0f, 6.0f, 0.0f, 0.0f, 0);
         }
-        func_1505A770(arg0);
+        func_1505A770(actor);
     }
-    arg0->gravity = 6.199999809f;
-    if (arg0->y_position < arg0->unk118) {
-        arg0->gravity = 0.0f;
-        arg0->y_velocity = 0.0f;
-        arg0->unk31C->unk6B = 0;
-        arg0->unk83 = 0;
-        arg0->in_water = 1;
-    }
-}
-
-void func_15052408(struct127 *arg0) {
-    arg0->unkB2 = 0;
-    arg0->unk31C->unk95 = 0;
-    if (arg0->health != 0) { // if health not zero
-        arg0->unk81 = 0;
-        arg0->unk83 = 0;
-        arg0->disable_run = 6;
-    }
-    arg0->in_water = 0;
-    arg0->gravity = 4.0f;
-    arg0->unkB8 = 0.0f;
-    arg0->xz_velocity = 15.0f;
-}
-
-void func_15052458(s32 arg0) {
-}
-
-void func_15052464(struct127 *arg0) {
-    if (arg0->health == 0) {
-        func_15060F28(arg0, 1);
+    actor->gravity = 6.199999809f;
+    if (actor->y_position < actor->unk118) {
+        actor->gravity = 0.0f;
+        actor->y_velocity = 0.0f;
+        actor->unk31C->unk6B = 0;
+        actor->unk83 = 0;
+        actor->in_water = 1;
     }
 }
 
-void func_15052490(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3) {
-    arg3 *= D_800D1550[0];
+/* Clears in_water, unkB2 and unk31C->unk95, sets gravity 4, xz_velocity 15; a living actor also gets disable_run 6. */
+void func_15052408(struct127 *actor) {
+    actor->unkB2 = 0;
+    actor->unk31C->unk95 = 0;
+    if (actor->health != 0) {
+        actor->unk81 = 0;
+        actor->unk83 = 0;
+        actor->disable_run = 6;
+    }
+    actor->in_water = 0;
+    actor->gravity = 4.0f;
+    actor->unkB8 = 0.0f;
+    actor->xz_velocity = 15.0f;
+}
 
-    arg0->unk40 = (arg0->unk7A + 16384) * 0.005493164f;
+void func_15052458(s32 unused) {
+}
 
-    if (((arg1 - arg0->unk7A + 16384) & 0x8000) != 0) {
-        arg0->unkB8 -= arg2 * arg3;
+/* Calls func_15060F28(actor, 1) once the actor's health reaches zero. */
+void func_15052464(struct127 *actor) {
+    if (actor->health == 0) {
+        func_15060F28(actor, 1);
+    }
+}
+
+/*
+ * Sets unk40 to the facing angle plus a quarter turn, in degrees, and adds amount * scale to unkB8,
+ * subtracting it instead when `angle` lies in the half-turn behind that direction.
+ */
+void func_15052490(struct127 *actor, u16 angle, f32 amount, f32 scale) {
+    scale *= D_800D1550[0];
+
+    actor->unk40 = (actor->unk7A + 0x4000) * (360.0f / 65536.0f);
+
+    if ((angle - actor->unk7A + 0x4000) & 0x8000) {
+        actor->unkB8 -= amount * scale;
     } else {
-        arg0->unkB8 += arg2 * arg3;
+        actor->unkB8 += amount * scale;
     }
 }
 
-void func_1505250C(struct127 *arg0, s32 arg1) {
-    s16 temp_v0 = arg0->unkCE;
-    s16 temp_v1 = arg0->unkCC;
+/* Steps unkCC toward unkCE by a twelfth of the gap plus one, without overshooting. */
+void func_1505250C(struct127 *actor, s32 unused) {
+    s16 target = actor->unkCE;
+    s16 current = actor->unkCC;
 
-    if (temp_v0 != temp_v1) {
-        if (temp_v1 < temp_v0) {
-            arg0->unkCC = temp_v1 + ((temp_v0 - temp_v1) / 0xC) + 1;
-            if (temp_v0 < arg0->unkCC) {
-                arg0->unkCC = temp_v0;
+    if (target != current) {
+        if (current < target) {
+            actor->unkCC = current + (target - current) / 12 + 1;
+            if (target < actor->unkCC) {
+                actor->unkCC = target;
             }
         } else {
-            arg0->unkCC = (temp_v1 + ((temp_v0 - temp_v1) / 0xC)) - 1;
-            if (arg0->unkCC < temp_v0) {
-                arg0->unkCC = temp_v0;
+            actor->unkCC = current + (target - current) / 12 - 1;
+            if (actor->unkCC < target) {
+                actor->unkCC = target;
             }
         }
     }
