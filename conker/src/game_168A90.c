@@ -3,270 +3,282 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A4A84;
-extern f32 D_800A4A88;
-extern f32 D_800A4A8C;
-extern f32 D_800A4A90;
-extern f32 D_800A4A94;
-extern f32 sinf(f32);
-struct102 *func_1513B5E0(void *, u8, s32, u8, s32);
+/* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc. */
+typedef struct {
+    /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
+    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
+    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ s16 lifetime;   // counts down while DYNMODEL_FLAG_LIFETIME is set
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[0xA];
+    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
+    /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
+    /* 0x3A */ u8 pad3A[2];
+} DynModelDesc; // size 0x3C
 
-typedef struct ObjRenderState {
-    u8 pad_0[0x10];
-    u8 field_0x10;
-    u8 pad_0x11;
-    s8 field_0x12;
-    u8 pad_0x13[0x36];
-    u8 field_0x49;
-    u8 pad_0x4A[0xA];
-    u32 field_0x54;
-    u32 field_0x58[2][4];
-    Mtx field_0x78[2];
-} ObjRenderState;
+#define DYNMODEL_FLAG_LIFETIME      1
+#define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
-struct Obj1513BAE8 {
-    u8 pad0[0x50];
-    s32 unk50;
-};
+/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
+typedef struct {
+    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
+    /* 0x04 */ u8 pad4[0x24];
+    /* 0x28 */ Vtx vertices[1];
+} DynModelAsset;
 
+/*
+ * A model whose vertices are copied into per-frame, per-viewport buffers so they can be
+ * modified each frame. The buffers follow the header, then `userDataSize` bytes of user data.
+ */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ DynModelDesc desc;
+    /* 0x4C */ DynModelAsset *asset;
+    /* 0x50 */ s32 buffersSize;  // size of all vertex buffers, i.e. the offset of the user data
+    /* 0x54 */ Gfx *displayList;
+    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
+    /* 0x78 */ Mtx mtx[2];          // [frame]
+    /* 0xF8 */ u8 buffers[1];
+} DynModel;
 
-extern s32 *func_1502B6BC(void *, s32, void *, s32, s32, s32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_1510CE60(s32, s32, s32, s32, s32);
+/* User data of the water-like model spawned by func_1513BAE8. */
+typedef struct {
+    /* 0x00 */ f32 scrollS;
+    /* 0x04 */ f32 scrollT;
+    /* 0x08 */ f32 scrollTPhase;
+    /* 0x0C */ f32 scalePhaseS;
+    /* 0x10 */ f32 scalePhaseT;
+} TexWarpState;
 
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10[0x3C];
-    s32 *unk4C;
-    s32 unk50;
-    s32 unk54;
-    u8 *unk58[2][4];
-} Obj1513B5E0;
+    s32 start;
+    s32 count;
+} VtxRange;
 
-struct102 *func_1513B5E0(void *arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    Obj1513B5E0 *obj;
-    s32 *data;
-    s32 total;
-    s32 size;
-    u8 *dst;
+extern f32 sinf(f32);
+extern DynModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
+extern void func_15109064(DynModel *, s32, u8);
+extern void func_151BA468(DynModel *, s32, u8);
+extern struct17 *func_15144B34(s32);
+
+extern s32 (*D_80089C18[])(DynModel *);
+extern s32 (*D_80089C28[])(DynModel *, s16);
+extern struct17 D_800A49C0[9];
+extern VtxRange D_800A4A2C[9];
+
+DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
+
+/* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
+DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
+    DynModel *obj;
+    DynModelAsset *asset;
+    s32 buffersSize;
+    s32 vtxSize;
+    u8 *buffer;
     s32 loaded;
     s32 count;
     s32 i;
 
-    data = func_1502B6BC(&loaded, 0, &count, 2, *(s32 *)((u8 *)arg0 + 0x30), *(s32 *)((u8 *)arg0 + 0x34));
+    asset = func_1502B6BC(&loaded, 0, &count, 2, desc->unk30, desc->unk34);
     {
         s32 type;
 
-        size = (*data - (s32)data) - 0x28;
-        total = size * 2 * (D_80082FA0 + 1);
+        vtxSize = ((s32)asset->displayList - (s32)asset) - 0x28;
+        buffersSize = vtxSize * 2 * (D_80082FA0 + 1);
         if (arg1) {
             type = 0x54;
         } else {
             type = 0x38;
         }
-        obj = func_15167A68(type, arg4, arg2 + total + 0xF8, 2, arg3, 1);
+        obj = func_15167A68(type, arg4, userDataSize + buffersSize + 0xF8, 2, arg3, 1);
         if (obj == NULL) {
             return NULL;
         }
-        memcpy(obj->unk10, arg0, 0x3C);
-        obj->unk4C = data;
+        memcpy(&obj->desc, desc, sizeof(DynModelDesc));
+        obj->asset = asset;
     }
-    for (i = 0, dst = (u8 *)obj + 0xF8; i < D_80082FA0 + 1; i++) {
-        obj->unk58[0][i] = dst;
-        obj->unk58[1][i] = dst + size;
-        memcpy(dst, (u8 *)data + 0x28, size);
-        memcpy(obj->unk58[1][i], (u8 *)data + 0x28, size);
-        dst += size * 2 * sizeof(u8);
+    for (i = 0, buffer = obj->buffers; i < D_80082FA0 + 1; i++) {
+        obj->vertices[0][i] = (Vtx *)buffer;
+        obj->vertices[1][i] = (Vtx *)(buffer + vtxSize);
+        memcpy(buffer, asset->vertices, vtxSize);
+        memcpy(obj->vertices[1][i], asset->vertices, vtxSize);
+        buffer += vtxSize * 2 * sizeof(u8);
     }
-    obj->unk54 = *data;
-    obj->unk50 = total;
-    func_1510CE60(obj->unk54, 0, 1, 0x3E, 0);
-    return (struct102 *)obj;
-}
-extern s32 (*D_80089C18[])(struct102 *);
-extern s32 (*D_80089C28[])(struct102 *, s16);
-
-#define WGFX168A90(pkt, a, b)       \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
+    obj->displayList = asset->displayList;
+    obj->buffersSize = buffersSize;
+    func_1510CE60(obj->displayList, 0, 1, 0x3E, 0);
+    return obj;
 }
 
-void func_1513B798(struct102 *arg0) {
-    s32 idx;
-    u8 done = 0;
+/* Per-frame update: counts down the lifetime, runs the update callback, frees when done. */
+void func_1513B798(DynModel *obj) {
+    s32 func;
+    u8 done = FALSE;
 
-    if (*((u8 *)arg0 + 0x10) & 1) {
-        *(s16 *)((u8 *)arg0 + 0x14) -= D_800BE9E4;
-        if (*(s16 *)((u8 *)arg0 + 0x14) < 0) {
-            done = 1;
+    if (obj->desc.flags & DYNMODEL_FLAG_LIFETIME) {
+        obj->desc.lifetime -= D_800BE9E4;
+        if (obj->desc.lifetime < 0) {
+            done = TRUE;
         }
     }
     if (!done) {
-        idx = *(s8 *)((u8 *)arg0 + 0x11);
-        if (idx != -1) {
-            if (D_80089C18[idx](arg0) == 0) {
-                done = 1;
+        func = obj->desc.updateFunc;
+        if (func != -1) {
+            if (D_80089C18[func](obj) == 0) {
+                done = TRUE;
             }
         }
     }
     if (done) {
-        func_1516972C(arg0);
+        func_1516972C((struct102 *)obj);
     }
 }
-Gfx *func_1513B83C(Gfx *arg0, ObjRenderState *arg1, s16 arg2) {
-    s32 idx;
 
-    if ((arg1->field_0x10 & 2) && !(arg1->field_0x49 & (1 << arg2))) {
-        return arg0;
+/* Draws the model in one viewport, after the draw callback (if any) has updated it. */
+Gfx *func_1513B83C(Gfx *gfx, DynModel *obj, s16 viewport) {
+    s32 func;
+
+    if ((obj->desc.flags & DYNMODEL_FLAG_VIEWPORT_MASK) && !(obj->desc.viewportMask & (1 << viewport))) {
+        return gfx;
     }
 
-    idx = arg1->field_0x12;
-    if (idx != -1) {
-        if (D_80089C28[idx]((struct102 *)arg1, arg2) == 0) {
-            return arg0;
+    func = obj->desc.drawFunc;
+    if (func != -1) {
+        if (D_80089C28[func](obj, viewport) == 0) {
+            return gfx;
         }
     }
 
-    WGFX168A90(arg0++, 0xDA380003, (s32)&arg1->field_0x78[D_800BE9C0]);
-    WGFX168A90(arg0++, 0xDB060004, arg1->field_0x58[D_800BE9C0][arg2]);
-    WGFX168A90(arg0++, 0xDE000000, arg1->field_0x54);
+    gSPMatrix(gfx++, &obj->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSegment(gfx++, 1, obj->vertices[D_800BE9C0][viewport]);
+    gSPDisplayList(gfx++, obj->displayList);
 
-    return arg0;
+    return gfx;
 }
 
-s32 func_1513B968(s32 arg0, s16 arg1) {
-    // FIXME: &arg0->unk_120[D_800BE9C0]
-    func_150A7B80(arg0 + 120 + (D_800BE9C0 << 6));
+s32 func_1513B968(DynModel *obj, s16 viewport) {
+    func_150A7B80(&obj->mtx[D_800BE9C0]);
     return 1;
 }
 
-void func_1513B9A8(struct132 *arg0) {
-    func_100043B4(arg0->unk4C, 4);
-    func_15169804(arg0);
+void func_1513B9A8(DynModel *obj) {
+    func_100043B4((s32 *)obj->asset, 4);
+    func_15169804((struct102 *)obj);
 }
 
-void func_1513B9DC(struct132 *arg0) {
-    func_100043B4(arg0->unk4C, 4);
-    func_15169824(arg0);
+void func_1513B9DC(DynModel *obj) {
+    func_100043B4((s32 *)obj->asset, 4);
+    func_15169824((struct102 *)obj);
 }
 
-void func_1513BA10(struct132 *arg0) {
-    D_80089C44[arg0->unk48]();
+void func_1513BA10(DynModel *obj) {
+    D_80089C44[obj->desc.kind]();
 }
 
-void func_1513BA44(struct132 *arg0) {
-    D_80089C54[arg0->unk48]();
+void func_1513BA44(DynModel *obj) {
+    D_80089C54[obj->desc.kind]();
 }
 
-void func_15109064(struct132 *, s32, u8);
-void func_151BA468(struct132 *, s32, u8);
-
-void func_1513BA78(struct132 *arg0, s32 arg1, u8 arg2) {
-    switch (arg0->unk48) {
+void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2) {
+    switch (obj->desc.kind) {
     case 1:
-        func_15109064(arg0, arg1, arg2);
+        func_15109064(obj, arg1, arg2);
         break;
     case 2:
-        func_151BA468(arg0, arg1, arg2);
+        func_151BA468(obj, arg1, arg2);
         break;
     }
 }
 
-s32 func_1513BAD4(s32 arg0, s32 arg1) {
+s32 func_1513BAD4(DynModel *obj, s16 viewport) {
     return 0;
 }
 
-struct102 *func_1513BAE8(void) {
-    struct102 *temp_v0;
-    u8 sp38[0x3C];
-    f32 sp24[5];
+/* Spawns the scrolling, warping texture model (update func_1513BEB0, draw func_1513BBFC). */
+DynModel *func_1513BAE8(void) {
+    DynModel *obj;
+    DynModelDesc desc;
+    TexWarpState state;
 
-    sp38[1] = 2;
-    sp38[2] = 5;
-    *(s16 *)&sp38[4] = 0x12C;
-    *(s32 *)&sp38[0x30] = 9;
-    sp24[0] = 0.0f;
-    sp24[1] = 0.0f;
-    sp24[3] = 0.0f;
-    sp24[4] = 0.0f;
-    sp24[2] = 0.0f;
-    sp38[0] = 0;
-    *(s32 *)&sp38[0x34] = 0x1AE;
-    *(s32 *)&sp38[8] = 1;
-    *(s32 *)&sp38[0xC] = 0x220205;
-    *(s32 *)&sp38[0x10] = 0x40600;
-    sp38[0x24] = 0;
-    sp38[0x25] = 0;
-    *(s32 *)&sp38[0x14] = 1;
-    *(s32 *)&sp38[0x18] = 0x36;
-    *(s32 *)&sp38[0x1C] = 0x80;
-    *(s32 *)&sp38[0x20] = 0x20;
-    sp38[0x38] = 3;
+    desc.updateFunc = 2;
+    desc.drawFunc = 5;
+    desc.lifetime = 300;
+    desc.unk30 = 9;
+    state.scrollS = 0.0f;
+    state.scrollT = 0.0f;
+    state.scalePhaseS = 0.0f;
+    state.scalePhaseT = 0.0f;
+    state.scrollTPhase = 0.0f;
+    desc.flags = 0;
+    desc.unk34 = 0x1AE;
+    desc.unk8 = 1;
+    desc.unkC = 0x220205;
+    desc.unk10 = 0x40600;
+    desc.unk24 = 0;
+    desc.unk25 = 0;
+    desc.unk14 = 1;
+    desc.unk18 = 0x36;
+    desc.unk1C = 0x80;
+    desc.unk20 = 0x20;
+    desc.kind = 3;
 
-    temp_v0 = func_1513B5E0(sp38, 1, 0x14, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        if (*(s32 *)((u8 *)temp_v0 + 0x50) != 0x1180) {
-            func_1516972C(temp_v0);
+    obj = func_1513B5E0(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
+    if (obj != NULL) {
+        if (obj->buffersSize != 0x1180) {
+            func_1516972C((struct102 *)obj);
         } else {
-            memcpy((u8 *)temp_v0 + ((struct Obj1513BAE8 *)temp_v0)->unk50 + 0xF8, sp24, 0x14);
+            memcpy(obj->buffers + obj->buffersSize, &state, sizeof(TexWarpState));
         }
     }
-    return temp_v0;
+    return obj;
 }
 
-typedef struct {
-    u8 pad0[0x50];
-    s32 unk50;
-    u8 pad54[4];
-    Vtx *unk58[2][4];
-} Obj1513BBFC;
-
-typedef struct {
-    s32 start;
-    s32 count;
-} Range1513BBFC;
-
-extern struct17 D_800A49C0[];
-extern Range1513BBFC D_800A4A2C[];
-extern f32 D_800A4A74;
-extern f32 D_800A4A78;
-extern f32 D_800A4A7C;
-extern f32 D_800A4A80;
-extern struct17 *func_15144B34(s32);
-
-s32 func_1513BBFC(Obj1513BBFC *arg0, s16 arg1) {
-    f32 *v;
-    f32 scaleX;
-    f32 scaleY;
-    f32 offX;
-    f32 offY;
+/* Draw callback: recomputes the texture coordinates of each vertex group around its center. */
+s32 func_1513BBFC(DynModel *obj, s16 viewport) {
+    TexWarpState *state;
+    f32 scaleS;
+    f32 scaleT;
+    f32 offsetS;
+    f32 offsetT;
     s32 k;
-    struct17 *center;
+    struct17 *camera;
     f32 dirX;
     f32 dirZ;
     s32 j;
 
-    func_1513B968((s32)arg0, arg1);
-    v = (f32 *)((u8 *)arg0 + arg0->unk50 + 0xF8);
-    scaleX = sinf(v[3]) * D_800A4A74 + D_800A4A78;
-    scaleY = sinf(v[4]) * D_800A4A7C + D_800A4A80;
-    center = func_15144B34(arg1);
-    offX = v[0] - (s32)(v[0] * (1.0f / 1024.0f)) * 1024.0f;
-    offY = v[1] - (s32)(v[1] * (1.0f / 1024.0f)) * 1024.0f;
+    func_1513B968(obj, viewport);
+    state = (TexWarpState *)(obj->buffers + obj->buffersSize);
+    scaleS = sinf(state->scalePhaseS) * 1.210000038f + 2.854000092f;
+    scaleT = sinf(state->scalePhaseT) * 1.994000077f + 8.328000069f;
+    camera = func_15144B34(viewport);
+    offsetS = state->scrollS - (s32)(state->scrollS * (1.0f / 1024.0f)) * 1024.0f;
+    offsetT = state->scrollT - (s32)(state->scrollT * (1.0f / 1024.0f)) * 1024.0f;
     for (k = 0; k < 9; k++) {
         f32 dx;
         f32 dz;
 
-        dx = D_800A49C0[k].unk0 - center->unk0;
-        dz = D_800A49C0[k].unk8 - center->unk8;
+        dx = D_800A49C0[k].unk0 - camera->unk0;
+        dz = D_800A49C0[k].unk8 - camera->unk8;
         if (dx != 0.0f || dz != 0.0f) {
-            f32 len;
+            f32 invLen;
 
-            len = 1.0f / sqrtf(dx * dx + dz * dz);
-            dirX = dz * len;
-            dirZ = -dx * len;
+            invLen = 1.0f / sqrtf(dx * dx + dz * dz);
+            dirX = dz * invLen;
+            dirZ = -dx * invLen;
         } else {
             dirX = 1.0f;
             dirZ = 0.0f;
@@ -280,57 +292,45 @@ s32 func_1513BBFC(Obj1513BBFC *arg0, s16 arg1) {
             f32 ey;
             f32 ez;
 
-            vtx = &arg0->unk58[D_800BE9C0][arg1][j];
+            vtx = &obj->vertices[D_800BE9C0][viewport][j];
             x = vtx->v.ob[0];
             y = vtx->v.ob[1];
             z = vtx->v.ob[2];
             ex = x - D_800A49C0[k].unk0;
             ey = y - D_800A49C0[k].unk4;
             ez = z - D_800A49C0[k].unk8;
-            vtx->v.tc[0] = (ex * dirX + ez * dirZ) * scaleX - offX;
-            vtx->v.tc[1] = ey * scaleY - offY;
+            vtx->v.tc[0] = (ex * dirX + ez * dirZ) * scaleS - offsetS;
+            vtx->v.tc[1] = ey * scaleT - offsetT;
         }
     }
     return 1;
 }
 
-struct Obj1513BEB0 {
-    u8 pad0[0x50];
-    s32 unk50;
-};
+/* Update callback: advances the texture scroll and warp phases, wrapping the scroll to [0, 4096). */
+s32 func_1513BEB0(DynModel *obj) {
+    TexWarpState *state;
 
-s32 func_1513BEB0(struct Obj1513BEB0 *arg0) {
-    f32 *v0;
+    state = (TexWarpState *)(obj->buffers + obj->buffersSize);
+    state->scrollTPhase = state->scrollTPhase + 0.03700000048f * D_800BE9A4;
+    state->scrollTPhase = func_15144B68(state->scrollTPhase);
+    state->scrollS = state->scrollS + 1.899999976f * D_800BE9A4;
+    state->scrollT = sinf(state->scrollTPhase) * 77.30000305f;
+    state->scalePhaseS = state->scalePhaseS + 0.01900000125f * D_800BE9A4;
+    state->scalePhaseT = state->scalePhaseT + 0.01000000071f * D_800BE9A4;
+    state->scalePhaseS = func_15144B68(state->scalePhaseS);
+    state->scalePhaseT = func_15144B68(state->scalePhaseT);
 
-    v0 = (f32 *)((u8 *)arg0 + arg0->unk50 + 0xF8);
-    v0[2] = v0[2] + D_800A4A84 * D_800BE9A4;
-    v0[2] = func_15144B68(v0[2]);
-    v0[0] = v0[0] + D_800A4A88 * D_800BE9A4;
-    v0[1] = sinf(v0[2]) * D_800A4A8C;
-    v0[3] = v0[3] + D_800A4A90 * D_800BE9A4;
-    v0[4] = v0[4] + D_800A4A94 * D_800BE9A4;
-    v0[3] = func_15144B68(v0[3]);
-    v0[4] = func_15144B68(v0[4]);
-
-    if (4096.0f < v0[0]) {
-        do {
-            v0[0] = v0[0] - 4096.0f;
-        } while (4096.0f < v0[0]);
+    while (state->scrollS > 4096.0f) {
+        state->scrollS -= 4096.0f;
     }
-    if (v0[0] < 0.0f) {
-        do {
-            v0[0] = v0[0] + 4096.0f;
-        } while (v0[0] < 0.0f);
+    while (state->scrollS < 0.0f) {
+        state->scrollS += 4096.0f;
     }
-    if (4096.0f < v0[1]) {
-        do {
-            v0[1] = v0[1] - 4096.0f;
-        } while (4096.0f < v0[1]);
+    while (state->scrollT > 4096.0f) {
+        state->scrollT -= 4096.0f;
     }
-    if (v0[1] < 0.0f) {
-        do {
-            v0[1] = v0[1] + 4096.0f;
-        } while (v0[1] < 0.0f);
+    while (state->scrollT < 0.0f) {
+        state->scrollT += 4096.0f;
     }
     return 1;
 }
