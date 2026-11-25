@@ -45,6 +45,7 @@ extern YRange *D_800DBE44;
 void func_15002560(QuadNode *node, QuadNode *parentNext);
 void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
 s32 func_15049260(Tri3f tri);
+s32 func_150027F8(Gfx *dl);
 
 void func_15000AC0(void) {
     D_800D9E64 = 0;
@@ -812,97 +813,105 @@ void func_15002560(QuadNode *node, QuadNode *parentNext) {
     }
 }
 
+/**
+ * Loads this map's two resources (2 * map and 2 * map + 1 of resource table 5) and hands them to
+ * func_150183D0 with a row stride of ceil(D_800DBE2A / 8) bytes, rounded up to 16. Clears
+ * D_800BE5D0 when the map has no such resource.
+ */
 void func_150025FC(void) {
-    s32 tmp0;
-    s32 tmp1;
-    s32 tmp2;
-    s32 tmp3;
+    s32 width;
+    s32 height;
+    s32 res0;
+    s32 res1;
 
-    tmp0 = D_800DBE2A;
-    tmp1 = D_800DBE2C;
+    width = D_800DBE2A;
+    height = D_800DBE2C;
 
-    D_800DBE28 = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
-    tmp2 = func_1502B5C8(0, 2, 5, D_800BE9F0 << 1);
-    tmp3 = func_1502B5C8(0, 2, 5, (D_800BE9F0 << 1) + 1);
-    if (tmp2 == 0) {
+    D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
+    res0 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2);
+    res1 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2 + 1);
+    if (res0 == 0) {
         D_800BE5D0 = 0;
     } else {
-        func_150183D0(D_800DBE28, tmp1, tmp2, tmp3);
-        func_10004074(tmp3);
+        func_150183D0(D_800DBE28, height, res0, res1);
+        func_10004074(res1);
     }
 }
 
-void func_150026C4(s32 arg0) {
+/** Starts collecting the triangles of map `map`. */
+void func_150026C4(s32 map) {
     D_800DBE38 = 0;
-    func_1510F800(arg0);
+    func_1510F800(map);
 }
 
-void func_150026E8(s32 arg0) {
-    D_800DBE18[arg0] = D_800DBE38;
+/** Records the number of triangles collected for map `map`. */
+void func_150026E8(s32 map) {
+    D_800DBE18[map] = D_800DBE38;
     D_800DBE4C = D_800DBE38;
     D_800B0DE4 += D_800DBE38;
 }
 
-void func_15002724(s32 arg0) {
-    D_800DBE38 += func_150027F8(arg0);
+/** Adds the triangle count of display list `dl` to the running count. */
+void func_15002724(s32 dl) {
+    D_800DBE38 += func_150027F8((Gfx *)dl);
 }
 
+/**
+ * Carves the current map's triangle table (D_800DBDD8), x/z bounds (D_800DBDE8) and
+ * y bounds (D_800DBDF8) out of the triangle-data arena, sized for the counted triangles.
+ */
 void func_15002754(void) {
     s32 count;
-    s32 idx;
+    s32 map;
 
     D_800DBDD8[D_800DBE50] = D_800B0DC0 = ALIGN4(D_800B0DC0);
     count = D_800DBE38;
-    idx = D_800DBE50;
-    D_800B0DC0 += count * 12;
-    D_800DBDE8[idx] = D_800B0DC0;
-    D_800B0DC0 += count * 8;
-    D_800DBDF8[idx] = D_800B0DC0;
-    D_800B0DC0 += count * 4;
-    func_1510F800(idx);
+    map = D_800DBE50;
+    D_800B0DC0 += count * sizeof(MeshTri);
+    D_800DBDE8[map] = D_800B0DC0;
+    D_800B0DC0 += count * sizeof(XZRange);
+    D_800DBDF8[map] = D_800B0DC0;
+    D_800B0DC0 += count * sizeof(YRange);
+    func_1510F800(map);
     D_800DBE38 = 0;
 }
 
+/** Returns the number of triangles drawn by display list `dl` (G_TRI1, G_TRI2 and Conker's G_TRI4). */
+s32 func_150027F8(Gfx *dl) {
+    s32 i;
+    s32 numTris;
+    s32 opcode;
 
-int func_150027F8(s32 arg0) {
-    s32 var_v0;
-    s32 var_v1;
-    s32 temp_a1;
-    if (arg0 != 0) {
-        goto non_null;
+    if (dl == NULL) {
+        return 0;
     }
-    return 0;
-non_null:
-    var_v0 = 0;
-    var_v1 = 0;
-    temp_a1 = *(s8 *)arg0;
-    if (temp_a1 != -0x21) {
-        do {
-            var_v0++;
-            if ((temp_a1 >> 4) == 1) {
-                var_v1 += 4;
-            } else if (temp_a1 == 6) {
-                var_v1 += 2;
-            } else if (temp_a1 == 5) {
-                var_v1 += 1;
-            }
-            temp_a1 = *(s8 *)(arg0 + (var_v0 << 3));
-        } while (temp_a1 != -0x21);
+    i = 0;
+    numTris = 0;
+    for (opcode = *(s8 *)dl; opcode != (s8)G_ENDDL; opcode = *(s8 *)&dl[i]) {
+        i++;
+        if ((opcode >> 4) == 1) {
+            numTris += 4;
+        } else if (opcode == G_TRI2) {
+            numTris += 2;
+        } else if (opcode == G_TRI1) {
+            numTris += 1;
+        }
     }
-    return var_v1;
+    return numTris;
 }
 
+/** Returns the largest per-map triangle count (D_800DBE18[0..3]). */
 s32 func_15002878(void) {
     s32 i;
-    s32 tmp;
+    s32 count;
     s32 highest;
 
-    highest = *D_800DBE18;
+    highest = D_800DBE18[0];
 
     for (i = 0; i < 3; i++) {
-        tmp = D_800DBE1C[i];
-        if (highest < tmp) {
-            highest = tmp;
+        count = D_800DBE1C[i];
+        if (highest < count) {
+            highest = count;
         }
     }
 
