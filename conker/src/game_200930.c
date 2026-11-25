@@ -97,14 +97,12 @@ typedef struct {
     /* 0x56 */ u8 unk56;
     /* 0x57 */ u8 unk57;
     /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 unk60;
     /* 0x64 */ s16 unk64;
     /* 0x66 */ s16 unk66;
     /* 0x68 */ s16 unk68;
     /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
     /* 0x6C */ f32 unk6C;
     /* 0x70 */ s8 unk70;
     /* 0x71 */ s8 unk71;
@@ -593,53 +591,55 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     }
 }
 
+/* Spawn description passed to func_15130280. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 unk3C;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67[9];
 } Spawn151D4794;
 
+/* User data of a puff spawned by func_151D4794 (object + 0xA8). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+    /* 0x0 */ u8 unk0;
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ u8 unk2;
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ f32 unk8;
+    /* 0xC */ f32 unkC;
 } Extra151D4794;
 
 /* An effect created by func_151D469C; its user data is an ObjEmitter. */
@@ -690,44 +690,45 @@ void func_151D4794(EmitterEffect *effect) {
             void *ret;
 
             extra.unkC = 0.9156860113f;
-            spawn.unk1D = 0x6C;
+            spawn.unk1D = 108;
             spawn.unk8 = 0x5103;
             spawn.unk0 = 0x200005;
-            spawn.unk1E = 0x46;
+            spawn.unk1E = 70;
             spawn.unk20 = 3;
             spawn.unk58 = 0x90DE07;
             spawn.unk60 = 8;
             spawn.unk61 = 6;
-            spawn.unk62 = 0x20;
+            spawn.unk62 = 32;
             spawn.unk63 = -1;
             spawn.unk4 = 0;
             spawn.unkC = 0;
             spawn.unk10 = 0;
             spawn.unk64 = -1;
             spawn.unk65 = 0;
-            spawn.unk22 = 0x46;
-            spawn.unk14 = 0xDD;
-            spawn.unk15 = 0xD3;
-            spawn.unk16 = 0xCD;
-            spawn.unk17 = 0xFF;
-            spawn.unk18 = 0x57;
-            spawn.unk19 = 0x55;
-            spawn.unk1A = 0x5A;
-            spawn.unk1C = 0xFF;
+            spawn.unk22 = 70;
+            spawn.unk14 = 221;
+            spawn.unk15 = 211;
+            spawn.unk16 = 205;
+            spawn.unk17 = 255;
+            spawn.unk18 = 87;
+            spawn.unk19 = 85;
+            spawn.unk1A = 90;
+            spawn.unk1C = 255;
             spawn.unk3C.unk0 = 0.0f;
             spawn.unk3C.unk4 = 0.0f;
             spawn.unk3C.unk8 = 0.0f;
             spawn.unk24 = 1.025550008f;
             do {
                 {
-                f32 r = func_150ADA68();
-                spawn.unk30.unk0 = diff.unk0 * r + prev.unk0;
-                spawn.unk30.unk4 = diff.unk4 * r + prev.unk4;
-                spawn.unk30.unk8 = diff.unk8 * r + prev.unk8;
+                    f32 t = func_150ADA68();
+
+                    spawn.pos.unk0 = diff.unk0 * t + prev.unk0;
+                    spawn.pos.unk4 = diff.unk4 * t + prev.unk4;
+                    spawn.pos.unk8 = diff.unk8 * t + prev.unk8;
                 }
-                spawn.unk48.unk0 = diff.unk0 * D_800BE9A8 * 0.2980000079f;
-                spawn.unk48.unk4 = diff.unk4 * D_800BE9A8 * 0.2980000079f;
-                spawn.unk48.unk8 = diff.unk8 * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.unk0 = diff.unk0 * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.unk4 = diff.unk4 * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.unk8 = diff.unk8 * D_800BE9A8 * 0.2980000079f;
                 extra.unk0 = func_150ADA20() & 0xFF;
                 extra.unk1 = func_150ADA20() & 0xFF;
                 extra.unk2 = func_150ADA20() % 5U + 4;
@@ -843,7 +844,7 @@ void func_151D4DAC(struct127 *victim, struct127 *attacker, f32 *arg2, f32 *arg3,
     s32 hp;
     u16 angle;
 
-    if ((victim->id == 0x9) || (victim->id == 0xF) || (victim->id == 0x10) || (victim->id == 0x12) ||
+    if ((victim->id == 9) || (victim->id == 0xF) || (victim->id == 0x10) || (victim->id == 0x12) ||
         (victim->id == 0x17) || (victim->id == 0x1B) || (victim->id == 0x1E) || (victim->id == 0x28) ||
         (victim->id == 0x29) || (victim->id == 0x2A) || (victim->id == 0x2B) || (victim->id == 0x2C) ||
         (victim->id == 0x2E) || (victim->id == 0x38) || (victim->id == 0x41) || (victim->id == 0x42) ||
@@ -1117,7 +1118,6 @@ void func_151D5714(struct127 *obj, struct17 *from, struct17 *to, u8 bone, f32 sc
 extern struct17 *D_8008FC8C[];
 extern u8 *D_8008FC94[];
 void func_151D5A18(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, u8);
-s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 void func_150636A4(struct127 *);
 
