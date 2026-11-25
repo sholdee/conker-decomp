@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A3470;
-extern f32 D_800A3474;
-extern f32 D_800A3478;
-extern f32 D_800A347C;
 void func_15122980(struct108 *arg0);
 
 /**
@@ -36,20 +32,22 @@ void func_15122170(struct108 *arg0) {
     f32 deltaX;
     f32 distance;
     f32 heading;
+    struct17 *target;
 
     if (*arg0->unk36C & 4) {
         func_15122980(arg0);
         return;
     }
-    *(f32 *)&arg0->pad5DC[0] -= *(f32 *)&arg0->pad5DC[0] * D_800A3470;
+    *(f32 *)&arg0->pad5DC[0] -= *(f32 *)&arg0->pad5DC[0] * 0.07999999821f;
     *(f32 *)&arg0->pad6B4[0x10] = 0.0f;
     func_15125330(arg0);
-    if (*(struct17 **)&arg0->pad600[0x14] == NULL) {
+    target = *(struct17 **)&arg0->pad600[0x14];
+    if (target == NULL) {
         func_15122980(arg0);
         return;
     }
-    deltaX = (*(struct17 **)&arg0->pad600[0x14])->unk0 - arg0->unk2BC;
-    deltaZ = (*(struct17 **)&arg0->pad600[0x14])->unk8 - arg0->unk2C4;
+    deltaX = target->unk0 - arg0->unk2BC;
+    deltaZ = target->unk8 - arg0->unk2C4;
     distance = sqrtf(deltaX * deltaX + deltaZ * deltaZ);
     if (distance == 0.0f) {
         func_15122980(arg0);
@@ -57,9 +55,9 @@ void func_15122170(struct108 *arg0) {
     }
     heading = func_15048C30(-deltaX / distance);
     if (deltaZ > 0.0f) {
-        heading = 270.0f - heading * D_800A3474;
+        heading = 270.0f - heading * 57.29577637f;
     } else {
-        heading = heading * D_800A3478 + 90.0f;
+        heading = heading * 57.29577637f + 90.0f;
     }
     heading += -90.0f + *(f32 *)&arg0->pad5DC[0];
     while (heading < 0.0f) {
@@ -79,7 +77,7 @@ void func_15122170(struct108 *arg0) {
         } else {
             func_15049688(&arg0->unk37C, heading, (f32 *)&arg0->pad61C[0x14], 1.5f, 2.0f, arg0->unk7B4);
         }
-        arg0->unk39C = arg0->unk37C * D_800A347C;
+        arg0->unk39C = arg0->unk37C * 0.01745329238f;
     }
     func_1512A390(arg0);
     func_15123A54(arg0);
