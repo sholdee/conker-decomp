@@ -2220,26 +2220,11 @@ typedef struct IgnoreList {
     /* 0x04 */ Actor *objs[3];
 } IgnoreList; // size 0x10
 
-typedef struct {
-    u8  pad0[0x4];
-    s32 unk4;
-    u8  pad8[0x1C];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-} struct199; // size 0x30
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-} struct200;
-
-typedef struct {
-    u8  pad0[0x1C];
-    s16 unk1C;
-    u8  pad1E[0xA];
-    s8  unk28;
-} struct202;
+/* Near/far planes func_1510B458 recorded for a view (D_800D9AF8[view]); near -1.0f marks none. */
+typedef struct ViewClip {
+    /* 0x0 */ f32 near;
+    /* 0x4 */ f32 far;
+} ViewClip;
 
 /* The two half-axes that span a particle quad (func_1513D6FC, game_169510.c). */
 typedef struct ParticleAxes {

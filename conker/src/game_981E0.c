@@ -151,7 +151,13 @@ extern Vec3w D_80099B88;
 extern Vec3w D_80099B94;
 extern Vec3w D_80099BBC;
 extern void func_15143134(void *, void *, s32);
-extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
+extern void func_151DC484(f32 *, CollisionHit *, s32, u8, s32);
+
+/* A floor probe result together with a point (func_15071A64, func_15074C00). */
+typedef struct {
+    /* 0x00 */ CollisionHit ground;
+    /* 0x24 */ Vec3f pos;
+} GroundPoint; // size 0x30
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
 extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
@@ -2823,13 +2829,13 @@ void func_15071A34(s32 cmd) {
 }
 
 void func_15071A64(s32 cmd) {
-    struct199 hit;
+    GroundPoint hit;
 
     if (!(func_150ADA20() & 1) && D_800D154C->ob_matrix_ptr != NULL && (D_800D154C->unk74 & 0xF) != 0xF &&
         movement_obj[0].stunned != 0 && movement_obj[0].energy > 0) {
-        func_1504715C(&hit, D_800D154C);
-        func_15143134(&D_80099BBC, &hit.unk24, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
-        func_151DC484(&hit.unk24, &hit, 0, 0xFF, 1);
+        func_1504715C(&hit.ground, D_800D154C);
+        func_15143134(&D_80099BBC, &hit.pos.x, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + 15));
+        func_151DC484(&hit.pos.x, &hit.ground, 0, 0xFF, 1);
     }
 }
 
@@ -2844,7 +2850,7 @@ void func_15071B18(s32 cmd) {
             if (func_150ADA20() & 1) {
                 func_151DC260(&point.x, &collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(&point.x, (struct199 *)&collision, 0, 0xFF, 1);
+                func_151DC484(&point.x, &collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
@@ -3072,7 +3078,7 @@ void func_150723E0(void) {
     }
 }
 
-/* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
+/* Respawns the object whose spawn record (D_800D20FC, 0x30-byte SpawnRecord entries) D_800D1580 names. */
 void func_15072420(void) {
     Actor *obj;
     s32 spawnFlags;
@@ -4045,14 +4051,14 @@ void func_15074BEC(s32 arg0, s32 arg1, s32 arg2) {
 /* Collision handlers (self, other, result): */
 
 void func_15074C00(s32 self, Actor *other, s32 result) {
-    struct199 hit;
+    GroundPoint hit;
 
     if (((u8)other->intelhitroute & 0x7F) == 5) {
-        func_1504715C(&hit);
-        hit.unk24 = D_800CC2C0;
-        hit.unk28 = D_800CC2C4;
-        hit.unk2C = D_800CC2C8;
-        func_150C04C0(&hit.unk24, &hit, 22, 1, 0xFF, 0);
+        func_1504715C(&hit.ground);
+        hit.pos.x = D_800CC2C0;
+        hit.pos.y = D_800CC2C4;
+        hit.pos.z = D_800CC2C8;
+        func_150C04C0(&hit.pos.x, &hit.ground, 22, 1, 0xFF, 0);
     }
 }
 

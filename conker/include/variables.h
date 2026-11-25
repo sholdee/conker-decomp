@@ -1385,7 +1385,7 @@ extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
-extern struct200 D_800D9AF8[];
+extern ViewClip D_800D9AF8[];
 
 extern u8  D_800D9B18;
 extern f32 D_800D9B1C;

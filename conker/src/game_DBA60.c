@@ -265,10 +265,10 @@ s32 func_150AED9C(Particle150AED9C *particle) {
     return 1;
 }
 
-/* Sets unk28 to unk1C * 8 while unk1C is below 32. Always returns 1. */
-s32 func_150AEDD8(struct202 *arg0) {
-    if (arg0->unk1C < 0x20) {
-        arg0->unk28 = arg0->unk1C * 8;
+/* Sprite update D_80089C70[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
+s32 func_150AEDD8(QuadSprite *sprite) {
+    if (sprite->def.lifetime < 32) {
+        sprite->def.unk10 = sprite->def.lifetime * 8;
     }
     return 1;
 }
