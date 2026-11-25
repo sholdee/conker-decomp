@@ -32,13 +32,15 @@ void func_150186D0(void) {
     D_800D18A4 = 0;
     D_800D23A9 = 0;
 
-    while (func_1501878C() != 0) {};
+    while (func_1501878C() != 0) {
+    }
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
     *D_800BE728 = func_1501BBB8();
 
-    while (func_151DCFD8(1) != 0) {};
+    while (func_151DCFD8(1) != 0) {
+    }
 }
 
 /*
@@ -117,14 +119,14 @@ s32 func_1501878C(void) {
     message = NULL;
     osRecvMesg(&D_800BEA10, (OSMesg *)&message, 1);
     D_8002AC60 = 0;
-    D_8002AC64 = 0x320;
+    D_8002AC64 = 800;
     switch (*message) {
     case 2:
         func_1517E1AC();
         if (D_800DC9F0 != 0) {
             func_151412BC();
         }
-        (*(s16 *)&D_800BEAA8)--;
+        (*(s16 *)&D_800BEAA8)--; // matching: read signed (lh); variables.h declares it u16
         if (D_800BE615 != 0 && *(s16 *)&D_800BEAA8 == 0) {
             func_10004074(D_800BE9C8[0]);
             func_10004074(D_800BE9CC);
@@ -305,7 +307,7 @@ void func_1501905C(void) {
     func_1501C1B0();
     func_1501BB20();
     func_1502C380();
-    if (0) {};
+    if (0) {} // matching: IDO picks v0 (not v1) for the D_800DBFF0 load only with this
     func_1000D758(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
     func_10011BB8();
     if (D_800E0B94 == 2) {
@@ -647,9 +649,16 @@ extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
 extern u8 D_800BEA0C;
+// The last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder.
+// (Defined with 11 entries so tools/rodata_extern.py keeps the [10] access on this symbol.)
 f32 D_800BE5E8[11];
 void func_150A019C(void);
 
+/*
+ * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta
+ * D_800BE9A4 and its reciprocal D_800BE9A8, slowed down by D_800BEA0C when that is nonzero, and keeps
+ * a 10-frame running average in D_800BE9B8 / D_800BE9BC.
+ */
 void func_15019F20(void) {
     s32 ticks;
     u8 rate;
@@ -660,14 +669,14 @@ void func_15019F20(void) {
     D_800BEA08 = ticks;
     rate = D_800BEA0C;
     if (rate) {
-        s32 pad;
+        s32 pad; // matching: a local in this block puts a -g3 block end on the join (as1 branch fill)
         if (rate == 1) {
             D_800BE9E4 = 0;
             D_800BE5E0 = 0;
             ticks = 0;
             D_800BE9A4 = 0.0f;
         } else {
-            i = ((u32*)D_800BE5E8)[10];
+            i = ((u32 *)D_800BE5E8)[10]; // matching: D_800BE610 read via the array keeps its address out of CSE
             i += ticks;
             D_800BE9A4 = (f32)ticks / (f32)(u32)rate;
             D_800BE9E4 = D_800BE9A4;
@@ -675,7 +684,7 @@ void func_15019F20(void) {
             if (i >= rate) {
                 D_800BE9E4 = i / rate;
                 i -= D_800BE9E4 * i;
-                if (1) {} if (1) {} if (1) {} if (1) {} if (1) {}
+                if (1) {} if (1) {} if (1) {} if (1) {} if (1) {} // matching: steers ticks/i register colouring
                 D_800BE610 = i;
                 ticks = D_800BE9E4;
             } else {
@@ -694,7 +703,7 @@ void func_15019F20(void) {
     } else {
         D_800BE9A4 = 0.0f;
         D_800BE9A8 = 0.0f;
-        ;
+        ; // matching: empty statement (a compiled-out macro?); its line entry steers as1's scheduling
     }
     D_800BE9AC += ticks;
     D_800BE9B0 = D_800BE9AC % 30;
@@ -712,7 +721,7 @@ void func_15019F20(void) {
         for (i = 0; i < 10; i++) {
             sum += D_800BE5E8[i];
         }
-        D_800BE9B8 = sum * 0.1000000015f;
+        D_800BE9B8 = sum * 0.1f;
         if (D_800BE9B8 != 0) {
             D_800BE9BC = 1.0f / D_800BE9B8;
         } else {
