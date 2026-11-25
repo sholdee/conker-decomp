@@ -38,7 +38,7 @@ s32 func_15160600(LightEffect *effect);
 s32 func_1516065C(LightEffect *effect);
 s32 func_15160684(LightEffect *effect);
 s32 func_151607A4(LightEffect *effect);
-void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
+void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
 s32 func_15161238(Actor *actor, Actor *exclude);
 LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2);
@@ -308,12 +308,12 @@ s32 func_151607A4(LightEffect *effect) {
 }
 
 /* Starts one flicker: drops to dark, picks a ramp rate and delay, and optionally plays a sound at the light. */
-void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect) {
+void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect) {
     s32 pad0; // matching: unused stack slot
     Vec3f position;
     s32 pad1; // matching: unused stack slot
 
-    *level = 0.0f;
+    *intensity = 0.0f;
     *rate = *peak / ((func_150ADA68() * 12.0f) + 8.0f);
     *delay = (func_150ADA68() * 28.0f) + 1.0f;
 

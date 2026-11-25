@@ -1344,10 +1344,10 @@ void func_1502EAFC(Actor *obj) {
     case 2:
     case 3: {
         s32 step = obj->fogRate * D_800BE9E4;
-        u8 level = obj->fogLevel;
+        u8 intensity = obj->fogLevel;
 
-        if (step < level) {
-            obj->fogLevel = level - step;
+        if (step < intensity) {
+            obj->fogLevel = intensity - step;
         } else {
             obj->fogLevel = 0;
         }
@@ -1369,10 +1369,10 @@ void func_1502EAFC(Actor *obj) {
         break;
     case 6: {
         s32 step = obj->fogRate * D_800BE9E4;
-        u8 level = obj->fogLevel;
+        u8 intensity = obj->fogLevel;
 
-        if (level < 0xFF - step) {
-            obj->fogLevel = level + step;
+        if (intensity < 0xFF - step) {
+            obj->fogLevel = intensity + step;
         } else {
             obj->fogLevel = 0xFF;
         }
@@ -1381,10 +1381,10 @@ void func_1502EAFC(Actor *obj) {
         break;
     case 7: {
         s32 step = obj->fogRate * D_800BE9E4;
-        u8 level = obj->fogLevel;
+        u8 intensity = obj->fogLevel;
 
-        if (step < level) {
-            obj->fogLevel = level - step;
+        if (step < intensity) {
+            obj->fogLevel = intensity - step;
         } else {
             obj->fogMode = 0;
         }
@@ -1396,7 +1396,7 @@ void func_1502EAFC(Actor *obj) {
 /* Fog colour (r, g, b, a) of the object's current fog effect (see func_1502EAFC for the modes). */
 void func_1502EC34(Actor *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
     Actor *obj = arg0; // matching: the parameter copy gets its own stack slot
-    f32 level;
+    f32 intensity;
 
     switch (obj->fogMode) {
     case 1:
@@ -1404,9 +1404,9 @@ void func_1502EC34(Actor *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
         *g = obj->fogRate;
         *b = obj->fogFade;
         if (obj->fogColor >= 0x100) {
-            level = *(f32 *)obj->fogColor;
-            level = (level < 0.0f) ? 0.0f : ((level > 255.0f) ? 255.0f : level);
-            *a = level * 2.55f;
+            intensity = *(f32 *)obj->fogColor;
+            intensity = (intensity < 0.0f) ? 0.0f : ((intensity > 255.0f) ? 255.0f : intensity);
+            *a = intensity * 2.55f;
         } else {
             *a = obj->fogColor;
         }

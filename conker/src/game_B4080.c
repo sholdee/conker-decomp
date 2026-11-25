@@ -90,7 +90,7 @@ typedef struct MpGame {
     /* 0x1725 */ s8 side[16];                 /* eased toward the goals */
     /* 0x1735 */ s8 drop[16];
     /* 0x1745 */ s8 numZones;
-    /* 0x1748 */ MpZone zones[8];
+    /* 0x1748 */ MpZone zoneList[8];
     /* 0x17A8 */ f32 aimX[16];                /* smoothed aim point */
     /* 0x17E8 */ f32 aimY[16];
     /* 0x1828 */ f32 aimZ[16];
@@ -1938,10 +1938,10 @@ void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
 
     if (D_800D23B0 != NULL && D_800D23B0->numZones < 8) {
         n = D_800D23B0->numZones++;
-        D_800D23B0->zones[n].x = x;
-        D_800D23B0->zones[n].y = y;
-        D_800D23B0->zones[n].z = z;
-        D_800D23B0->zones[n].radiusSq = r * r;
+        D_800D23B0->zoneList[n].x = x;
+        D_800D23B0->zoneList[n].y = y;
+        D_800D23B0->zoneList[n].z = z;
+        D_800D23B0->zoneList[n].radiusSq = r * r;
     }
 }
 
@@ -1993,7 +1993,7 @@ void func_1508B2A8(u8 id, PathSearch *s) {
 
 /*
  * For each registered zone, assigns every computer player standing in it the nearest
- * path node reachable from the zone centre (unk55C), then clears the zones.
+ * path node reachable from the zone centre (unk55C), then clears the zone list.
  */
 void func_1508B3F8(void) {
     s32 i;
@@ -2010,13 +2010,13 @@ void func_1508B3F8(void) {
     f32 dx;
     s32 layer;
     f32 d;
-    MpZone *zones;
+    MpZone *list;
     PathSearch s;
     f32 bestDist;
     PathNode *node;
 
     zone = D_800D23B0->unk55C;
-    zones = D_800D23B0->zones;
+    list = D_800D23B0->zoneList;
     for (i = 0; i < D_8008FD8C; i++) {
         if (zone[i] != -1) {
             zone[i] = -2;
@@ -2024,10 +2024,10 @@ void func_1508B3F8(void) {
     }
     for (i = 0; i < D_800D23B0->numZones; i++) {
         found = 0;
-        s.radiusSq = zones[i].radiusSq;
-        x = zones[i].x;
-        y = zones[i].y;
-        z = zones[i].z;
+        s.radiusSq = list[i].radiusSq;
+        x = list[i].x;
+        y = list[i].y;
+        z = list[i].z;
         for (j = D_8008FD90; j < D_8008FD8C; j++) {
             obj = &movement_obj[j];
             d = obj->ypos - y;

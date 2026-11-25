@@ -31,12 +31,12 @@ void func_10012588(s32 heap) {
     func_151F3C1C(func_10012560);
 }
 
-/* When entering `level`, fade a running stream to silence and stop any other active one,
+/* When entering `levelId`, fade a running stream to silence and stop any other active one,
  * except when entering level 30 with D_800BE9F8 == 27. */
-void func_100125CC(s32 level) {
+void func_100125CC(s32 levelId) {
     s32 state = func_151F2CDC();
 
-    if (level != 30 || D_800BE9F8 != 27) {
+    if (levelId != 30 || D_800BE9F8 != 27) {
         if (state == 1) {
             func_151F2D6C(0, 11010);
             return;

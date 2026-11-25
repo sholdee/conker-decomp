@@ -1335,13 +1335,13 @@ extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 
 extern s32 D_800D2F58;
-extern u32 D_800D3094; // number of trigger zones in D_800D3098
+extern u32 D_800D3094; // number of TriggerZones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
 extern ZoneBounds *D_800D309C; // bounds of each trigger zone (D_800D3098)
-extern u64 D_800D30A0[3]; /* zones that are always tested */
-extern u64 D_800D30B8[3]; /* default candidate zones */
+extern u64 D_800D30A0[3]; /* TriggerZones that are always tested */
+extern u64 D_800D30B8[3]; /* default candidate TriggerZones */
 extern u16 D_800D30D0[16]; /* per actor: 1 + index of the last zone box it was found in, 0 for none */
-extern u64 D_800D30F0[16][3]; /* per actor: zones it was inside last time */
+extern u64 D_800D30F0[16][3]; /* per actor: TriggerZones it was inside last time */
 extern TriggerZone ** D_800D3270;
 extern s32 D_800D3274;
 extern GroundCandidate D_800D3300[]; // ground-probe hits
@@ -1514,8 +1514,8 @@ extern u8  D_800DCD3D;
 extern PointLightGfx D_800DCD40; // padding light for odd light counts
 extern PointLight *D_800DCD78; // list of all point lights
 extern s32 D_800DCD7C;
-extern ZoneLink *D_800DCD80; // ambient colour zones
-extern ZoneLink *D_800DCD84; // tint zones
+extern ZoneLink *D_800DCD80; // ambient colour TriggerZones
+extern ZoneLink *D_800DCD84; // tint TriggerZones
 extern f32 D_800DCD90;
 extern f32 D_800DCD94;
 extern f32 D_800DCD98;

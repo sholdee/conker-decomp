@@ -67,11 +67,11 @@ void func_15172D80(s32 player) {
 }
 
 /*
- * Warp zone touched by `actor`, leading to spawn point `spawnIndex` of `level`. A player (an actor with a
+ * Warp zone touched by `actor`, leading to spawn point `spawnIndex` of `levelId`. A player (an actor with a
  * camera) with no warp pending starts a 10-frame fade-out and records the warp; any other actor is
- * respawned at once when `level` is the current one.
+ * respawned at once when `levelId` is the current one.
  */
-void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
+void func_15172E7C(Actor *actor, s32 levelId, s32 spawnIndex) {
     s32 player = actor->playernumber;
 
     if (actor->energy != 0 && (actor->mv == NULL || actor->mv->door_walkf_time <= 0)) {
@@ -79,10 +79,10 @@ void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
             if (D_800DD2B0[player] == -1) {
                 func_1517EE40(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;
-                D_800DD2B0[player] = level;
+                D_800DD2B0[player] = levelId;
                 D_800DD2C0[player] = spawnIndex;
             }
-        } else if (level == D_800BE9F0) {
+        } else if (levelId == D_800BE9F0) {
             func_15172D28(actor, spawnIndex);
         }
     }

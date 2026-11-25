@@ -86,13 +86,13 @@ typedef union {
 
 /* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
 void func_1511AF30(WorldObject *obj) {
-    f32 level;
+    f32 intensity;
     f32 target;
     f32 diff;
     s32 roll;
 
-    level = obj->moveData.word;
-    target = 75.0f * level * 0.009999999776f;
+    intensity = obj->moveData.word;
+    target = 75.0f * intensity * 0.009999999776f;
     if (target != WORK(obj)->w1511AF30.tilt) {
         diff = target - WORK(obj)->w1511AF30.tilt;
         if (fabsf(diff) < 1.0f) {
@@ -104,7 +104,7 @@ void func_1511AF30(WorldObject *obj) {
     } else {
         roll = func_150ADA20() % 1000;
         if (roll < 500) {
-            WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * level * 0.002000000095f * 0.009999999776f;
+            WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * intensity * 0.002000000095f * 0.009999999776f;
         }
         diff = WORK(obj)->w1511AF30.wobbleTarget - WORK(obj)->w1511AF30.wobble;
         WORK(obj)->w1511AF30.wobble += diff * 0.400000006f;
@@ -398,11 +398,11 @@ void func_1511B7D4(WorldObject *obj) {
 
 /* Sets the alpha from a 0..1 level looked up by the param, never fully transparent. */
 void func_1511BA24(WorldObject *obj) {
-    f32 level;
+    f32 intensity;
 
-    level = 0.0f;
-    func_15188010(obj->moveData.word, &level);
-    obj->alpha = level * 255.0f;
+    intensity = 0.0f;
+    func_15188010(obj->moveData.word, &intensity);
+    obj->alpha = intensity * 255.0f;
     if (obj->alpha == 0) {
         obj->alpha = 1;
     }

@@ -414,7 +414,7 @@ void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
 
 /* Picks a particle's environment color for its envColorMode. */
 void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
-    u8 level;
+    u8 intensity;
 
     switch (p->desc.envColorMode) {
     case 1:
@@ -423,10 +423,10 @@ void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
         *a = 0;
         return;
     case 2:
-        level = p->desc.brightness;
-        *b = level;
-        *g = level;
-        *r = level;
+        intensity = p->desc.brightness;
+        *b = intensity;
+        *g = intensity;
+        *r = intensity;
         *a = 0;
         return;
     case 8:
@@ -447,10 +447,10 @@ void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
         *a = p->desc.alpha;
         return;
     case 7:
-        level = p->desc.brightness;
-        *b = level;
-        *g = level;
-        *r = level;
+        intensity = p->desc.brightness;
+        *b = intensity;
+        *g = intensity;
+        *r = intensity;
         *a = p->desc.alpha;
         return;
     case 9:
@@ -460,10 +460,10 @@ void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
         *a = p->desc.alpha;
         return;
     default:
-        level = p->desc.brightness;
-        *b = level;
-        *g = level;
-        *r = level;
+        intensity = p->desc.brightness;
+        *b = intensity;
+        *g = intensity;
+        *r = intensity;
         *a = (p->desc.a * p->desc.alpha) >> 8;
         return;
     }

@@ -47,7 +47,7 @@ void func_15017868(void) {
 
 void func_15017B20(TriggerZone *objects, s32 count);
 
-/* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS zones with subTypeData 0, 2 or 6. */
+/* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
 void func_15017930(s32 arg0) {
     u32 i;
     u32 count;

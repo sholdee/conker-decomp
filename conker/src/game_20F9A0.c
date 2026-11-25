@@ -1260,7 +1260,7 @@ void func_151E557C(void) {
 
 /* Ping-pongs the pulse level D_800E0B97 between 0 and 255. */
 void func_151E55A8(void) {
-    s32 level;
+    s32 intensity;
     s32 step;
     s32 direction;
 
@@ -1270,16 +1270,16 @@ void func_151E55A8(void) {
     } else {
         step = -D_800BE9E4 * 8;
     }
-    level = D_800E0B97;
-    level += step;
-    if (level > 255) {
-        level = 0x1FE - level;
+    intensity = D_800E0B97;
+    intensity += step;
+    if (intensity > 255) {
+        intensity = 0x1FE - intensity;
         D_800E0B98 = direction ^ 1;
-    } else if (level < 0) {
-        level = -level;
+    } else if (intensity < 0) {
+        intensity = -intensity;
         D_800E0B98 = direction ^ 1;
     }
-    D_800E0B97 = level;
+    D_800E0B97 = intensity;
 }
 
 /* Clears D_800E0A8C. */

@@ -45,7 +45,7 @@ void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
     }
 }
 
-/* Script command: sets text slot 0 or 1 of object objIndex, locked against trigger zones (bit 7). */
+/* Script command: sets text slot 0 or 1 of object objIndex, locked against TriggerZones (bit 7). */
 void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
     if (textId != 0) {
         textId |= 0x80;

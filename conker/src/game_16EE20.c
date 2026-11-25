@@ -1200,8 +1200,8 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     }
     return ret;
 }
-/* Colour-combiner style blend: picks the output RGBA from colour 0, colour 1 and `level` per `mode`. */
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+/* Colour-combiner style blend: picks the output RGBA from colour 0, colour 1 and `weight` per `mode`. */
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
     switch (mode) {
     case 2:
         *outR = r1;
@@ -1217,27 +1217,27 @@ void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
         *outA = a1;
         return;
     case 3:
-        *outR = (r0 * level) >> 8;
-        *outG = (g0 * level) >> 8;
-        *outB = (b0 * level) >> 8;
+        *outR = (r0 * weight) >> 8;
+        *outG = (g0 * weight) >> 8;
+        *outB = (b0 * weight) >> 8;
         *outA = 0;
         return;
     case 4:
-        *outR = (r0 * level) >> 8;
-        *outG = (g0 * level) >> 8;
-        *outB = (b0 * level) >> 8;
+        *outR = (r0 * weight) >> 8;
+        *outG = (g0 * weight) >> 8;
+        *outB = (b0 * weight) >> 8;
         *outA = 0;
         return;
     default:
-        *outR = (r0 * level) >> 8;
-        *outG = (g0 * level) >> 8;
-        *outB = (b0 * level) >> 8;
+        *outR = (r0 * weight) >> 8;
+        *outG = (g0 * weight) >> 8;
+        *outB = (b0 * weight) >> 8;
         *outA = 0;
         return;
     }
 }
 /* Second-cycle variant of func_151441A4. */
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 weight, u8 mode) {
     switch (mode) {
     case 2:
     case 3:
@@ -1256,9 +1256,9 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
         *outR = *outG = *outB = *outA = 0;
         return;
     case 1:
-        *outB = level;
-        *outG = level;
-        *outR = level;
+        *outB = weight;
+        *outG = weight;
+        *outR = weight;
         *outA = 0;
         return;
     case 7:
@@ -1271,15 +1271,15 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
         *outA = a0;
         return;
     case 4:
-        *outB = level;
-        *outG = level;
-        *outR = level;
+        *outB = weight;
+        *outG = weight;
+        *outR = weight;
         *outA = (a0 * a1) >> 8;
         return;
     case 5:
-        *outB = level;
-        *outG = level;
-        *outR = level;
+        *outB = weight;
+        *outG = weight;
+        *outR = weight;
         *outA = (a0 * a1) >> 8;
         return;
     case 6:
@@ -1301,15 +1301,15 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
         *outA = a0;
         return;
     case 9:
-        *outB = level;
-        *outG = level;
-        *outR = level;
+        *outB = weight;
+        *outG = weight;
+        *outR = weight;
         *outA = a1;
         return;
     default:
-        *outB = level;
-        *outG = level;
-        *outR = level;
+        *outB = weight;
+        *outG = weight;
+        *outR = weight;
         *outA = (a0 * a1) >> 8;
         return;
     }

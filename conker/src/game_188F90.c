@@ -70,9 +70,9 @@ Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, 
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 level, u8 mode);
+                   u8 a1, u8 weight, u8 mode);
 void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 level, u8 mode);
+                   u8 a1, u8 weight, u8 mode);
 void *memcpy(void *, const void *, u32);
 
 /*

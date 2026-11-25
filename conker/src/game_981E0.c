@@ -661,7 +661,7 @@ void func_1506BF5C(void) {
     u32 sound;
     u32 owner;
     u16 volume;
-    f32 level;
+    f32 intensity;
     f32 max;
     u32 ownerFilter;
     s32 type;
@@ -711,24 +711,24 @@ void func_1506BF5C(void) {
             break;
         }
         if (D_800D154C->mv != NULL) {
-            level = D_800D154C->mv->actual_speed;
+            intensity = D_800D154C->mv->actual_speed;
         } else {
-            level = D_800D154C->yspd;
+            intensity = D_800D154C->yspd;
         }
         if (type == 0xC) {
             max = 10.0f;
         } else {
             max = 30.0f;
         }
-        if (max < level) {
-            level = max;
+        if (max < intensity) {
+            intensity = max;
         }
-        if (level < 0.0f) {
-            level = 0.0f;
+        if (intensity < 0.0f) {
+            intensity = 0.0f;
         }
-        level *= (f32)0.5 / max; // matching: 0.5f compiles differently
-        level += 0.5f;
-        volume = volume * level;
+        intensity *= (f32)0.5 / max; // matching: 0.5f compiles differently
+        intensity += 0.5f;
+        volume = volume * intensity;
         if (type == 8) {
             func_10010630(sound, D_800D154C, volume, 500, 2500);
             break;

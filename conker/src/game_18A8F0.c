@@ -182,11 +182,11 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
     if (flags & 2) {
         func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         for (i = 0; i < 3; i++) {
-            s32 level;
-            level = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
-            dirColor[i] = (colorA[i] * level) >> 8;
-            level = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
-            color[i] = (colorB[i] * level) >> 8;
+            s32 intensity;
+            intensity = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
+            dirColor[i] = (colorA[i] * intensity) >> 8;
+            intensity = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
+            color[i] = (colorB[i] * intensity) >> 8;
         }
     }
     for (i = 0; i < 3; i++) {
@@ -344,7 +344,7 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
     u8 colorB[3];
     u8 amountA;
     u8 amountB;
-    s32 level;
+    s32 intensity;
     u8 *out;
     s32 scale;
 
@@ -364,10 +364,10 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
         func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         out = color;
         for (i = 0; i < 3; i++) {
-            level = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
-            tint[i] = (colorA[i] * level) >> 8;
-            level = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
-            *out = (colorB[i] * level) >> 8;
+            intensity = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
+            tint[i] = (colorA[i] * intensity) >> 8;
+            intensity = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
+            *out = (colorB[i] * intensity) >> 8;
             sum = *out + ((tint[i] * 7) >> 3);
             if (sum > 0xFF) {
                 sum = 255;

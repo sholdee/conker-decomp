@@ -175,7 +175,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     Gfx *gfx;
     s32 count;
     s32 notStarted;
-    f32 level;
+    f32 intensity;
     s32 ult;
     s32 i;
 
@@ -190,29 +190,29 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     switch (att->unk38) {
     case 0:
         if (actor->animseq.uh == 5) {
-            level = 1.0f;
+            intensity = 1.0f;
             att->unk38 = 1;
         } else {
             notStarted = TRUE;
         }
         break;
     case 1:
-        level = 1.0f;
+        intensity = 1.0f;
         break;
     case 2:
-        level = 0.0f;
+        intensity = 0.0f;
         break;
     }
 
     if (actor->animseq.uh == 5) {
         if (anim->frame < 69.0f) {
-            level = 1.0f;
+            intensity = 1.0f;
         } else if (84.0f < anim->frame) {
-            level = 0.0f;
+            intensity = 0.0f;
             att->unk38 = 2;
         } else {
-            level = (anim->frame - 69.0f) / 15;
-            level = 1.0f - level;
+            intensity = (anim->frame - 69.0f) / 15;
+            intensity = 1.0f - intensity;
         }
     }
 
@@ -231,7 +231,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     if (notStarted) {
         ult = 2;
     } else {
-        ult = (s32)((58.0f * level) + 44.0f);
+        ult = (s32)((58.0f * intensity) + 44.0f);
     }
     gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (ult & 0xFFF);
     return 0;

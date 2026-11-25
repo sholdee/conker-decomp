@@ -73,31 +73,31 @@ void func_150BEF7C(s32 arg0) {
 
 /* Steps the entry by D_800BE9E4 frames; returns 1 once it has faded out or shrunk to nothing. */
 s32 func_150BF0F4(Struct150BF0F4 *entry) {
-    s32 level;
+    s32 intensity;
     s32 limit;
     s32 delta;
     s32 size;
     s32 age;
 
-    level = entry->level;
+    intensity = entry->level;
     limit = entry->maxLevel;
     if (entry->rising) {
-        if (level != limit) {
-            level += D_800BE9E4 * entry->riseRate;
-            if (level > limit) {
-                level = limit;
+        if (intensity != limit) {
+            intensity += D_800BE9E4 * entry->riseRate;
+            if (intensity > limit) {
+                intensity = limit;
             }
-            entry->level = level;
+            entry->level = intensity;
         }
-    } else if (level != 0) {
-        level -= D_800BE9E4 * entry->fallRate;
-        if (level < 0) {
-            level = 0;
+    } else if (intensity != 0) {
+        intensity -= D_800BE9E4 * entry->fallRate;
+        if (intensity < 0) {
+            intensity = 0;
         }
-        entry->level = level;
+        entry->level = intensity;
     }
 
-    if (!entry->rising && level == 0) {
+    if (!entry->rising && intensity == 0) {
         return 1;
     }
 

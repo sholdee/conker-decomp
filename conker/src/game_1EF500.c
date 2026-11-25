@@ -15,14 +15,14 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     s32 volume;
     Camera *camera;
     s32 direction;
-    s16 level;
+    s16 song;
     f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
     f32 intensity;
 
     if (obj != NULL) {
         if (D_800BE616 || (camera = obj->CameraPtr) == NULL) {
-            level = D_800B0DF0->music.song;
-            if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
+            song = D_800B0DF0->music.song;
+            if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
                 func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
@@ -30,8 +30,8 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
                 }
             }
         } else {
-            level = D_800B0DF0->music.song;
-            if (level == 0x24 || level == 0x13) {
+            song = D_800B0DF0->music.song;
+            if (song == 0x24 || song == 0x13) {
                 // matching: the 0.1f literal (vs this rodata load) shifts the stack frame
                 intensity = 255.0f - distance * D_800AAA30;
                 if (intensity > 16.0f) {

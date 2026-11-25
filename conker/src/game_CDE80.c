@@ -146,8 +146,8 @@ s32 func_150A1040(s32 value) {
     return value + 0x400;
 }
 
-/* Tests the camera position against the given zones and applies the ZONE_TYPE_CHAR_FLAGS ones (camera floor height and flag 0x40000). */
-void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
+/* Tests the camera position against the given TriggerZones and applies the ZONE_TYPE_CHAR_FLAGS ones (camera floor height and flag 0x40000). */
+void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
     Actor probe;
 
     probe.xpos = cam->eye.x;
@@ -160,13 +160,13 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     cam->zoneWaterY = -10000.0f;
     cam->AvailableModes &= ~0x40000;
     while (count != 0) {
-        if (!zones) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
+        if (!zoneList) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
         }
-        if (*zones != NULL && func_150A1DA0(&probe, *zones, 0) == 0) {
-            if (ZONE_TYPE(*zones) == ZONE_TYPE_CHAR_FLAGS) {
-                switch ((*zones)->subTypeData) {
+        if (*zoneList != NULL && func_150A1DA0(&probe, *zoneList, 0) == 0) {
+            if (ZONE_TYPE(*zoneList) == ZONE_TYPE_CHAR_FLAGS) {
+                switch ((*zoneList)->subTypeData) {
                 case 2:
-                    cam->zoneWaterY = (*zones)->y + (*zones)->ySize;
+                    cam->zoneWaterY = (*zoneList)->y + (*zoneList)->ySize;
                     break;
                 case 0:
                     cam->AvailableModes |= 0x40000;
@@ -178,7 +178,7 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
             }
         }
         count--;
-        zones++;
+        zoneList++;
     }
 }
 
@@ -202,7 +202,7 @@ void func_150A24C0(TriggerZone *zone, s32 unk127);
 void func_15172E7C(Actor *actor, s32 arg1, s32 arg2);
 void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits);
 
-/* Finds the zones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
+/* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void func_150A11C4(Actor *actor) {
     u32 i;
     u32 base;
@@ -725,7 +725,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     }
 }
 
-/* Applies the ZONE_TYPE_WARP zones containing the actor (func_15172E7C), unless its unk65 is set. */
+/* Applies the ZONE_TYPE_WARP TriggerZones containing the actor (func_15172E7C), unless its unk65 is set. */
 void func_150A278C(Actor *actor) {
     s32 i;
 
@@ -881,7 +881,7 @@ s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
     return 0;
 }
 
-/* Returns whether actor `actor` is behind gate zone id (0 for zones that are not gates, 1 for bad ids). */
+/* Returns whether actor `actor` is behind gate zone id (0 for a zone that is not a gate, 1 for bad ids). */
 s32 func_150A2EE4(s32 actor, s32 id) {
     id &= 0xFFF;
     if (D_800D3094 < id) {

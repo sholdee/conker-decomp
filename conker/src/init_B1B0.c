@@ -285,7 +285,7 @@ s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 19. */
 s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
-    s32 level;
+    s32 volume;
 
     if (D_800BE9F0 == 4) {
         if ((state & 1) && D_80041F0C == 0) {
@@ -293,11 +293,11 @@ s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             state &= ~1;
         } else if (D_80041F0C != 0) {
             /* D_80041F08 / D_80041F0C: average of the values func_1000E7A0 reported */
-            level = D_80041F08 / D_80041F0C / 80;
-            if (level > 100) {
-                level = 100;
+            volume = D_80041F08 / D_80041F0C / 80;
+            if (volume > 100) {
+                volume = 100;
             }
-            func_1000E588(19, level, 0x1000);
+            func_1000E588(19, volume, 0x1000);
             state |= 1;
         }
         D_80041F08 = 0;
@@ -364,16 +364,16 @@ s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 25. */
 s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
-    s32 level = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
+    s32 volume = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
 
-    if (level >= 256) {
-        level = 255;
-    } else if (level < 16) {
-        level = 1;
+    if (volume >= 256) {
+        volume = 255;
+    } else if (volume < 16) {
+        volume = 1;
     }
-    if (level != state) {
-        func_150C851C(level - 1);
-        state = level;
+    if (volume != state) {
+        func_150C851C(volume - 1);
+        state = volume;
     }
     return state;
 }

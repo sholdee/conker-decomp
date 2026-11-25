@@ -1970,7 +1970,7 @@ enum ZoneAreaType {
 #define ZONE_TYPE(zone)      ((zone)->kind >> 2)
 #define ZONE_AREA_TYPE(zone) ((zone)->kind & 3)
 
-/* A level placement record (trigger zones, gates, markers, light points): D_800D3098 (original `zones`)
+/* A level placement record (TriggerZones proper, gates, markers, light points): D_800D3098
  * points at the table. original: struct zone (rom_debug_struct.c) */
 typedef struct TriggerZone {
     /* 0x00 */ s16 x;
@@ -2033,7 +2033,7 @@ typedef struct {
     /* 0x28 */ s16 pos2[4];
 } PointLightGfx;
 
-/* A node of the zone lists D_800DCD80 (ambient colour zones) and D_800DCD84 (tint zones), built by func_15009334. */
+/* A node of the zone lists D_800DCD80 (ambient colour TriggerZones) and D_800DCD84 (tint TriggerZones), built by func_15009334. */
 typedef struct ZoneLink {
     /* 0x0 */ struct ZoneLink *next;
     /* 0x4 */ TriggerZone *zone;
@@ -2947,7 +2947,7 @@ typedef struct {
     /* 0x0B */ u8 siz;
 } HudSprite; /* size 0xC */
 
-/* Axis-aligned bounds of trigger zone i (D_800D309C[i], built by func_15017FA4) plus the set of zones it overlaps. */
+/* Axis-aligned bounds of trigger zone i (D_800D309C[i], built by func_15017FA4) plus the set of TriggerZones it overlaps. */
 typedef struct {
     /* 0x00 */ u64 overlaps[3]; // bit j: overlaps zone j
     /* 0x18 */ u8 numOverlaps;

@@ -19,7 +19,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
     s16 value;
     s32 rounded;
     s32 rearBit;
-    s32 level;
+    s32 gain;
 
     rearBit = 0x80; // cleared when the sound is in the front quarter (|angle| < 32)
     if (farDistance & 0x8000) {
@@ -28,8 +28,8 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
     } else {
         distance = math_distance3D(distX, distY, distZ);
     }
-    level = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
-    if (level > 400) {
+    gain = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
+    if (gain > 400) {
         if (pan != NULL) {
             if (func_150AD960(dx, dz, 0, 0) > 30) {
                 ratio = sqrtf(dx * dx + dz * dz);
@@ -67,12 +67,12 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
         // the level is recomputed here, as in the original code
         if (0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance) < 0) {
             // matching: `* 0` keeps (nearDistance - farDistance) live, so IDO gives it $t1 and distance $t2
-            level = (nearDistance - farDistance) * 0;
+            gain = (nearDistance - farDistance) * 0;
         }
-        if (level >= 0x8000) {
-            level = 0x7FFF;
+        if (gain >= 0x8000) {
+            gain = 0x7FFF;
         }
-        *volume = level;
+        *volume = gain;
     } else {
         *volume = 0;
     }

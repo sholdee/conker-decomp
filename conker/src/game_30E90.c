@@ -77,7 +77,7 @@ s32 func_15004BF0(s32 fromTop);
 void func_15004CE0(DlCommand *dl, u32 base);
 
 /* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
-void func_150039E0(s32 level, s32 arg1) {
+void func_150039E0(s32 levelId, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
@@ -99,10 +99,10 @@ void func_150039E0(s32 level, s32 arg1) {
     groupedSpawns = NULL;
     setStateBit2 = FALSE;
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
-    i = func_1502B7F0(&spawns, 2, 0xB, level);
+    i = func_1502B7F0(&spawns, 2, 0xB, levelId);
     D_800DBF00 = i / sizeof(ObjectSpawn);
     D_800DBEF0 = D_800DBF00;
-    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, level, 2) / sizeof(ObjectSpawn);
+    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
     D_800DBEF0 += D_800DBF98;
     db_Object_array = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
     if (db_Object_array == NULL) {

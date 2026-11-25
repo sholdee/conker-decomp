@@ -1362,7 +1362,7 @@ void func_15126138(Camera *camera) {
     func_15124C38(camera, NULL);
 }
 
-/* Aim eye position for `obj`: a point fixed to one of its bone matrices for the zones that have one,
+/* Aim eye position for `obj`: a point fixed to one of its bone matrices for the zone values that have one,
    else the object position raised to 3/4 of its height. */
 void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
@@ -1408,7 +1408,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
     }
 }
 
-/* First-person aiming camera (R trigger in the aim zones): sets it up on the first frame, then steers
+/* First-person aiming camera (R trigger in the aim areas): sets it up on the first frame, then steers
    yaw/pitch with the stick and zoom with C-up/C-down. Returns 1 while aiming. */
 s32 func_15126378(Camera *camera) {
     ActorCtl *ext;

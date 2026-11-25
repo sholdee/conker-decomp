@@ -561,7 +561,7 @@ void func_1509093C(void) {
     s32 i;
     f32 blend;
     s32 tmp;
-    s32 level;
+    s32 intensity;
     f32 lo;
     f32 hi;
     s32 fadeRaw;
@@ -582,11 +582,11 @@ void func_1509093C(void) {
     s32 b;
 
     if (movement_obj->inwater) {
-        level = movement_obj->unkB2;
+        intensity = movement_obj->unkB2;
     } else {
-        level = 0;
+        intensity = 0;
     }
-    if (level > 90) {
+    if (intensity > 90) {
         if (D_800D24C8.alpha == 0) {
             D_800D24C8.alpha = 255;
             D_800D24C8.unk94 = 0.0f;
@@ -607,7 +607,7 @@ void func_1509093C(void) {
         if (D_800D24C8.unk9C > 1.0f) {
             D_800D24C8.unk9C = 1.0f;
         }
-        if (level < 1441) {
+        if (intensity < 1441) {
             D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
             lo = D_800D24C8.unk9C - 0.2f;
             if (lo < 0.0f) {
@@ -659,21 +659,21 @@ void func_1509093C(void) {
             dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
             dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
         }
-        if (level < 480) {
+        if (intensity < 480) {
             tex = D_8009026E;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
             tex = D_8009025A;
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
-        } else if (level < 960) {
+        } else if (intensity < 960) {
             tex = D_80090272;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
             tex = D_8009025A;
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
-        } else if (level < 1200) {
+        } else if (intensity < 1200) {
             tex = D_80090272;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
@@ -688,7 +688,7 @@ void func_1509093C(void) {
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
         }
-        fadeRaw = (level - 720) * 255;
+        fadeRaw = (intensity - 720) * 255;
         fade = fadeRaw / 480;
         if (fade < 0) {
             fade = 0;

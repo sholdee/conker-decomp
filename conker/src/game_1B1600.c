@@ -965,7 +965,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
 }
 
 /* Per-level shadow settings: vertex budget, viewport depth scale, light selection and face filtering. */
-void func_151872B0(s32 level) {
+void func_151872B0(s32 levelId) {
     D_800DE01C = 600;
     D_800DE020 = 180;
     D_800DE024 = 90;
@@ -976,7 +976,7 @@ void func_151872B0(s32 level) {
     D_800DE040 = 1;
     D_800DE041 = 1;
 
-    switch (level) {
+    switch (levelId) {
     case 0x21:
         D_800DE01C = 4800;
         D_800DE020 = D_800DE01C - 1;

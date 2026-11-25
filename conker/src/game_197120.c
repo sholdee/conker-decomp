@@ -211,7 +211,7 @@ extern void *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */
 void func_1516A3F4(DropParticle *drop) {
-    s32 level;
+    s32 intensity;
     s32 bottom;
     s32 floorY;
     SpriteFxTemplate splash;
@@ -232,12 +232,12 @@ void func_1516A3F4(DropParticle *drop) {
             splash.x = drop->x;
             splash.y = drop->floorY + 10;
             splash.z = drop->z;
-            level = drop->unk3B;
+            intensity = drop->unk3B;
             splash.fadeStep = 0;
-            dim = (level << 12) / 5100 + 204;
+            dim = (intensity << 12) / 5100 + 204;
             splash.unkE = dim;
             splash.unk10 = dim;
-            splash.unk15 = level;
+            splash.unk15 = intensity;
             splash.callback = 3; /* D_8008CA20[3] = func_1516A538 */
             func_15167AD8(&splash, drop->owner, drop->list);
         }
@@ -269,14 +269,14 @@ extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32,
 void func_1516A538(SplashFx *fx) {
     u32 angle;
     u32 texture;
-    s32 level;
+    s32 intensity;
 
     if (fx->frame >= 0x300) {
         texture = func_150ADA20() % 3;
-        level = fx->unk25;
+        intensity = fx->unk25;
         angle = func_150ADA20() % 360;
         func_15171D4C(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
-                      (level * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
+                      (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
 }
 

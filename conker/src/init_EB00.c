@@ -225,13 +225,13 @@ s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound) {
     Actor *owner = record->callback_param1.owner;
-    s32 level;
+    s32 gain;
     u16 *id;
     s32 soundId;
 
     if (owner != NULL) {
-        level = *volume;
-        if (level != 0) {
+        gain = *volume;
+        if (gain != 0) {
             if (owner->type != 0) {
                 for (id = record->callback_param2.ids; *id != 0; id++) {
                     if ((owner->animseq.uh == *id) || !(record->flags & 1)) {
@@ -245,12 +245,12 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
             }
             soundId = *sound;
             if (soundId == 0xCA) {
-                func_10010F30(0xCB, level & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30(0xCB, gain & 0xFFFF, (u8)*pan, 0, *mix);
             } else if (soundId == 0x2CF) {
-                func_10010F30(0x2D7, level & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30(0x2D7, gain & 0xFFFF, (u8)*pan, 0, *mix);
                 func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
             } else if (soundId == 0x2D2) {
-                func_10010F30(0x2DA, level & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30(0x2DA, gain & 0xFFFF, (u8)*pan, 0, *mix);
                 func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
             }
         }

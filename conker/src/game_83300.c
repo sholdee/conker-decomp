@@ -4386,7 +4386,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
  * reuses (1: unk8C, 2/3: unk8E; 3 only retunes it if the same sound is still playing), flags & 4 makes
  * it positional, flags & 8 forces channel 0.
  */
-void func_15060778(s32 sound, Actor *actor, u16 rate, s32 level, s32 minDist, s32 maxDist, s32 flags) {
+void func_15060778(s32 sound, Actor *actor, u16 rate, s32 volume, s32 minDist, s32 maxDist, s32 flags) {
     s32 channel;
     u32 handle;
     u16 *slot;
@@ -4412,10 +4412,10 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 level, s32 minDist, s3
         }
         if ((func_1001147C(handle) == sound) & 0x7FFF) {
             if (flags & 4) {
-                func_1000F91C(handle, (u16)(rate + channel * 50), (s16)(actor->listpos * 10 + level), channel & 0xFF, 0,
+                func_1000F91C(handle, (u16)(rate + channel * 50), (s16)(actor->listpos * 10 + volume), channel & 0xFF, 0,
                               (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist, maxDist);
             } else {
-                func_1000F85C(handle, 0x10, level);
+                func_1000F85C(handle, 0x10, volume);
                 func_1000F85C(handle, 8, rate + channel * 50);
             }
             return;
@@ -4424,11 +4424,11 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 level, s32 minDist, s3
         break;
     }
     if (flags & 4) {
-        handle = func_10010E78(handle, sound, (u16)(rate + channel * 50), (s16)level, channel, 0,
+        handle = func_10010E78(handle, sound, (u16)(rate + channel * 50), (s16)volume, channel, 0,
                                (s32)actor->xpos, (s32)actor->ypos, (s32)actor->zpos, minDist,
                                maxDist);
     } else {
-        handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, level, channel, 1);
+        handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, volume, channel, 1);
     }
     if (slot != NULL) {
         *slot = handle;

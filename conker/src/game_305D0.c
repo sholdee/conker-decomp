@@ -41,8 +41,8 @@ extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
 extern s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
 extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
 
-/* Loads level `level`'s models, rebases them and sets up the first four as the level's display lists. */
-void func_150031EC(s32 level) {
+/* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
+void func_150031EC(s32 levelId) {
     LevelModelEntry *models;
     ModelAsset *model;
     s32 count;
@@ -53,10 +53,10 @@ void func_150031EC(s32 level) {
     s32 size;
     s32 id;
 
-    if (level >= 69) {
-        level = 0;
+    if (levelId >= 69) {
+        levelId = 0;
     }
-    models = func_1502B6BC(&loaded, 0, &count, 2, 4, level);
+    models = func_1502B6BC(&loaded, 0, &count, 2, 4, levelId);
     D_800B0E50 = models;
     for (k = 1; k < 4; k++) {
         D_800B0E00[k] = 0;

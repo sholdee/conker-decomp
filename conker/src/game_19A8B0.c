@@ -152,15 +152,15 @@ extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16
 
 void func_1516D400(void) {
     s32 i;
-    s32 level;
+    s32 intensity;
 
     for (i = 0; i < 4; i++) {
         if (D_800DD2A0[i] < 0xFF) {
-            level = D_800DD2A0[i] + D_800BE9A0;
-            if (level > 0xFF) {
-                level = 0xFF;
+            intensity = D_800DD2A0[i] + D_800BE9A0;
+            if (intensity > 0xFF) {
+                intensity = 0xFF;
             }
-            D_800DD2A0[i] = level;
+            D_800DD2A0[i] = intensity;
         }
     }
 }
@@ -668,7 +668,7 @@ extern u8 D_800A6E0C[][3];
 
 s32 func_1516E8CC(Particle *particle) {
     s32 alpha;
-    s32 level;
+    s32 intensity;
     s32 scale;
     s32 i;
     f32 t;
@@ -700,20 +700,20 @@ s32 func_1516E8CC(Particle *particle) {
     }
 
     scale = particle->scaleX;
-    level = particle->lifetime;
+    intensity = particle->lifetime;
     scale += D_800BE9E4 * 10;
     particle->scaleY = scale;
     particle->scaleX = scale;
 
     if (particle->lifetime == 0) {
-        level += particle->alpha >> 5;
+        intensity += particle->alpha >> 5;
     } else {
-        level = level + 8;
+        intensity = intensity + 8;
     }
 
     for (i = p->u.ramp.start; i < p->u.ramp.start + 8; i++) {
-        if (level >= D_800A6E00[i]) {
-            t = (f32)(level - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
+        if (intensity >= D_800A6E00[i]) {
+            t = (f32)(intensity - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
             u = 1.0f - t;
             particle->r = D_800A6E0C[i][0] * u + D_800A6E0C[i - 1][0] * t;
             particle->g = D_800A6E0C[i][1] * u + D_800A6E0C[i - 1][1] * t;
