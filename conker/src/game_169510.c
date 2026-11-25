@@ -1235,296 +1235,294 @@ s32 func_1513E6E8(Particle *particle) {
     return 1;
 }
 
-// ???
-typedef struct Game169510ScaledOwner {
-    u8 unknown0[0x2C];
-    f32 width, height;
-    f32 x, y, z;
-    f32 rx, ry, rz;
-    f32 sx, sy, sz;
-    u8 unknown58[0x68];
-    u8 templateData[0x40];
-    u8 *buffers[1];
-} Game169510ScaledOwner;
-
-typedef struct Game169510ScaledVertex {
-    s16 x, y, z, flag;
-    u8 other[8];
-} Game169510ScaledVertex;
-
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
-void *func_1513E83C(void *arg0, s16 arg1) {
+/*
+ * Vertex functions (D_80089E1C): each fetches the particle's vertex buffer for a viewport (refilled
+ * from vtxTemplate when new), writes the quad's corner positions and returns it, or NULL.
+ */
+
+/* Quad of width x height, rotated by def.rot, scaled by def.scale and placed at def.pos. */
+Vtx *func_1513E83C(Particle *particle, s16 viewport) {
     f32 mtx[4][4];
-    Game169510ScaledOwner *owner = arg0;
-    Game169510ScaledVertex *vertices;
-    Game169510ScaledVertex *result;
-    f32 coords[4][3];
+    s32 pad; // matching: unused stack slot
+    Vtx *vertices;
+    Vtx *result;
+    f32 corners[4][3];
     u8 fresh;
     s16 i;
 
-    func_151D5D60((u8 *)arg0 + 0x100, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
+    if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
     {
-        s16 pad; /* -g3 scope: its .bgnb splits the &mtx init from the first load */
+        s16 pad; // matching: -g3 scope; its .bgnb splits the &mtx init from the first load
 
-        coords[0][0] = owner->width;
-        coords[0][1] = owner->height;
-        coords[1][0] = -owner->width;
-        coords[1][1] = owner->height;
-        coords[2][0] = -owner->width;
-        coords[2][1] = -owner->height;
-        coords[3][0] = owner->width;
-        coords[3][1] = -owner->height;
-        func_150A8050(mtx, owner->rx, owner->ry, owner->rz);
-        mtx[3][0] = owner->x;
-        mtx[3][1] = owner->y;
-        mtx[3][2] = owner->z;
-        mtx[0][0] *= owner->sx;
-        mtx[0][1] *= owner->sx;
-        mtx[0][2] *= owner->sx;
-        mtx[1][0] *= owner->sy;
-        mtx[1][1] *= owner->sy;
-        mtx[1][2] *= owner->sy;
-        mtx[2][0] *= owner->sz;
-        mtx[2][1] *= owner->sz;
-        mtx[2][2] *= owner->sz;
+        corners[0][0] = particle->def.width;
+        corners[0][1] = particle->def.height;
+        corners[1][0] = -particle->def.width;
+        corners[1][1] = particle->def.height;
+        corners[2][0] = -particle->def.width;
+        corners[2][1] = -particle->def.height;
+        corners[3][0] = particle->def.width;
+        corners[3][1] = -particle->def.height;
+        func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+        mtx[3][0] = particle->def.pos.x;
+        mtx[3][1] = particle->def.pos.y;
+        mtx[3][2] = particle->def.pos.z;
+        mtx[0][0] *= particle->def.scale.x;
+        mtx[0][1] *= particle->def.scale.x;
+        mtx[0][2] *= particle->def.scale.x;
+        mtx[1][0] *= particle->def.scale.y;
+        mtx[1][1] *= particle->def.scale.y;
+        mtx[1][2] *= particle->def.scale.y;
+        mtx[2][0] *= particle->def.scale.z;
+        mtx[2][1] *= particle->def.scale.z;
+        mtx[2][2] *= particle->def.scale.z;
         for (i = 0; i < 4; i++) {
-            f32 *c = coords[i];
+            f32 *c = corners[i];
+
             func_150A7960(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
-            vertices->x = c[0];
-            vertices->y = c[1];
-            vertices->z = c[2];
-            vertices->flag = 0;
+            vertices->v.ob[0] = c[0];
+            vertices->v.ob[1] = c[1];
+            vertices->v.ob[2] = c[2];
+            vertices->v.flag = 0;
             vertices++;
         }
     }
     return result;
 }
 
-
-void *func_1513EAD8(void *arg0, s32 arg1, s16 arg2) {
-    Game169510ScaledVertex *vertices;
-    Game169510ScaledVertex *result;
-    s16 coords[4][3];
-    f32 heightDelta, heightScale, directionZ, directionX;
+/*
+ * Upright quad of width x height facing the viewport's camera (D_800DD1D8 / D_800DD1E8 hold its
+ * direction), scaled vertically by def.scale.y; reversed mirrors the corner order.
+ */
+Vtx *func_1513EAD8(particle, reversed, viewport)
+    Particle *particle;
+    u8 reversed;
+    s16 viewport;
+{
+    Vtx *vertices;
+    Vtx *result;
+    s16 corners[4][3];
+    f32 heightDelta, heightScale, offsetZ, offsetX;
     u8 fresh;
 
-    func_151D5D60((u8 *)arg0 + 0x100, arg2, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
+    if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(*(u8 **)((u8 *)arg0 + arg2 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-            memcpy(*(u8 **)((u8 *)arg0 + arg2 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
-    directionZ = D_800DD1D8[arg2] * ((Game169510ScaledOwner *)arg0)->width;
-    directionX = D_800DD1E8[arg2] * ((Game169510ScaledOwner *)arg0)->width;
-    heightScale = ((Game169510ScaledOwner *)arg0)->sy * ((Game169510ScaledOwner *)arg0)->height;
-    heightDelta = ((Game169510ScaledOwner *)arg0)->height - heightScale;
-    vertices[0].flag = 0;
-    vertices[1].flag = 0;
-    vertices[2].flag = 0;
-    vertices[3].flag = 0;
-    coords[3][0] = coords[0][0] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->x + directionX);
-    coords[1][1] = coords[0][1] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->y - heightScale);
-    coords[3][2] = coords[0][2] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->z - directionZ);
-    coords[2][0] = coords[1][0] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->x - directionX);
-    coords[3][1] = coords[2][1] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->y + heightDelta);
-    coords[2][2] = coords[1][2] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->z + directionZ);
-    if (*(u8 *)((u8 *)&arg1 + 3) != 0) {
-        vertices[0].x = coords[1][0];
-        vertices[0].y = coords[1][1];
-        vertices[0].z = coords[1][2];
-        vertices[1].x = coords[2][0];
-        vertices[1].y = coords[2][1];
-        vertices[1].z = coords[2][2];
-        vertices[2].x = coords[3][0];
-        vertices[2].y = coords[3][1];
-        vertices[2].z = coords[3][2];
-        vertices[3].x = coords[0][0];
-        vertices[3].y = coords[0][1];
-        vertices[3].z = coords[0][2];
+    offsetZ = D_800DD1D8[viewport] * particle->def.width;
+    offsetX = D_800DD1E8[viewport] * particle->def.width;
+    heightScale = particle->def.scale.y * particle->def.height;
+    heightDelta = particle->def.height - heightScale;
+    vertices[0].v.flag = 0;
+    vertices[1].v.flag = 0;
+    vertices[2].v.flag = 0;
+    vertices[3].v.flag = 0;
+    corners[3][0] = corners[0][0] = (s16)(s32)(particle->def.pos.x + offsetX);
+    corners[1][1] = corners[0][1] = (s16)(s32)(particle->def.pos.y - heightScale);
+    corners[3][2] = corners[0][2] = (s16)(s32)(particle->def.pos.z - offsetZ);
+    corners[2][0] = corners[1][0] = (s16)(s32)(particle->def.pos.x - offsetX);
+    corners[3][1] = corners[2][1] = (s16)(s32)(particle->def.pos.y + heightDelta);
+    corners[2][2] = corners[1][2] = (s16)(s32)(particle->def.pos.z + offsetZ);
+    if (reversed != 0) {
+        vertices[0].v.ob[0] = corners[1][0];
+        vertices[0].v.ob[1] = corners[1][1];
+        vertices[0].v.ob[2] = corners[1][2];
+        vertices[1].v.ob[0] = corners[2][0];
+        vertices[1].v.ob[1] = corners[2][1];
+        vertices[1].v.ob[2] = corners[2][2];
+        vertices[2].v.ob[0] = corners[3][0];
+        vertices[2].v.ob[1] = corners[3][1];
+        vertices[2].v.ob[2] = corners[3][2];
+        vertices[3].v.ob[0] = corners[0][0];
+        vertices[3].v.ob[1] = corners[0][1];
+        vertices[3].v.ob[2] = corners[0][2];
     } else {
-        vertices[0].x = coords[0][0];
-        vertices[0].y = coords[0][1];
-        vertices[0].z = coords[0][2];
-        vertices[1].x = coords[1][0];
-        vertices[1].y = coords[1][1];
-        vertices[1].z = coords[1][2];
-        vertices[2].x = coords[2][0];
-        vertices[2].y = coords[2][1];
-        vertices[2].z = coords[2][2];
-        vertices[3].x = coords[3][0];
-        vertices[3].y = coords[3][1];
-        vertices[3].z = coords[3][2];
+        vertices[0].v.ob[0] = corners[0][0];
+        vertices[0].v.ob[1] = corners[0][1];
+        vertices[0].v.ob[2] = corners[0][2];
+        vertices[1].v.ob[0] = corners[1][0];
+        vertices[1].v.ob[1] = corners[1][1];
+        vertices[1].v.ob[2] = corners[1][2];
+        vertices[2].v.ob[0] = corners[2][0];
+        vertices[2].v.ob[1] = corners[2][1];
+        vertices[2].v.ob[2] = corners[2][2];
+        vertices[3].v.ob[0] = corners[3][0];
+        vertices[3].v.ob[1] = corners[3][1];
+        vertices[3].v.ob[2] = corners[3][2];
     }
     return result;
 }
 
-void func_1513EDB4(s32 arg0, s16 arg1) {
-    func_1513EAD8(arg0, 0, arg1);
+Vtx *func_1513EAD8(Particle *particle, s32 reversed, s32 viewport);
+
+void func_1513EDB4(s32 particle, s16 viewport) {
+    func_1513EAD8(particle, FALSE, viewport);
 }
 
-void func_1513EDE4(s32 arg0, s16 arg1) {
-    func_1513EAD8(arg0, 1, arg1);
+void func_1513EDE4(s32 particle, s16 viewport) {
+    func_1513EAD8(particle, TRUE, viewport);
 }
 
-
-void *func_1513EE14(void *arg0, s16 arg1) {
-    Game169510ScaledVertex *vertices;
-    Game169510ScaledVertex *result;
+/* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
+Vtx *func_1513EE14(Particle *particle, s16 viewport) {
+    Vtx *vertices;
+    Vtx *result;
     f32 mtx[4][4];
-    f32 coords[4][2];
+    f32 corners[4][2];
     f32 out[4][3];
     u8 fresh;
 
-    func_151D5D60((u8 *)arg0 + 0x100, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
+    if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
-    func_150A8050(mtx, ((Game169510ScaledOwner *)arg0)->rx, ((Game169510ScaledOwner *)arg0)->ry, ((Game169510ScaledOwner *)arg0)->rz);
-    mtx[3][0] = ((Game169510ScaledOwner *)arg0)->x;
-    mtx[3][1] = ((Game169510ScaledOwner *)arg0)->y;
-    mtx[3][2] = ((Game169510ScaledOwner *)arg0)->z;
-    coords[0][0] = ((Game169510ScaledOwner *)arg0)->width;
-    coords[0][1] = ((Game169510ScaledOwner *)arg0)->height;
-    coords[1][0] = -((Game169510ScaledOwner *)arg0)->width;
-    coords[1][1] = ((Game169510ScaledOwner *)arg0)->height;
-    coords[2][0] = -((Game169510ScaledOwner *)arg0)->width;
-    coords[2][1] = -((Game169510ScaledOwner *)arg0)->height;
-    coords[3][0] = ((Game169510ScaledOwner *)arg0)->width;
-    coords[3][1] = -((Game169510ScaledOwner *)arg0)->height;
-    func_150A7960(mtx, coords[0][0], coords[0][1], 0.0f, &out[0][0], &out[0][1], &out[0][2]);
-    func_150A7960(mtx, coords[1][0], coords[1][1], 0.0f, &out[1][0], &out[1][1], &out[1][2]);
-    func_150A7960(mtx, coords[2][0], coords[2][1], 0.0f, &out[2][0], &out[2][1], &out[2][2]);
-    func_150A7960(mtx, coords[3][0], coords[3][1], 0.0f, &out[3][0], &out[3][1], &out[3][2]);
-    vertices->x = out[0][0];
-    vertices->y = out[0][1];
-    vertices->z = out[0][2];
-    vertices->flag = 0;
+    func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+    mtx[3][0] = particle->def.pos.x;
+    mtx[3][1] = particle->def.pos.y;
+    mtx[3][2] = particle->def.pos.z;
+    corners[0][0] = particle->def.width;
+    corners[0][1] = particle->def.height;
+    corners[1][0] = -particle->def.width;
+    corners[1][1] = particle->def.height;
+    corners[2][0] = -particle->def.width;
+    corners[2][1] = -particle->def.height;
+    corners[3][0] = particle->def.width;
+    corners[3][1] = -particle->def.height;
+    func_150A7960(mtx, corners[0][0], corners[0][1], 0.0f, &out[0][0], &out[0][1], &out[0][2]);
+    func_150A7960(mtx, corners[1][0], corners[1][1], 0.0f, &out[1][0], &out[1][1], &out[1][2]);
+    func_150A7960(mtx, corners[2][0], corners[2][1], 0.0f, &out[2][0], &out[2][1], &out[2][2]);
+    func_150A7960(mtx, corners[3][0], corners[3][1], 0.0f, &out[3][0], &out[3][1], &out[3][2]);
+    vertices->v.ob[0] = out[0][0];
+    vertices->v.ob[1] = out[0][1];
+    vertices->v.ob[2] = out[0][2];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = out[1][0];
-    vertices->y = out[1][1];
-    vertices->z = out[1][2];
-    vertices->flag = 0;
+    vertices->v.ob[0] = out[1][0];
+    vertices->v.ob[1] = out[1][1];
+    vertices->v.ob[2] = out[1][2];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = out[2][0];
-    vertices->y = out[2][1];
-    vertices->z = out[2][2];
-    vertices->flag = 0;
+    vertices->v.ob[0] = out[2][0];
+    vertices->v.ob[1] = out[2][1];
+    vertices->v.ob[2] = out[2][2];
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = out[3][0];
-    vertices->y = out[3][1];
-    vertices->z = out[3][2];
-    vertices->flag = 0;
+    vertices->v.ob[0] = out[3][0];
+    vertices->v.ob[1] = out[3][1];
+    vertices->v.ob[2] = out[3][2];
+    vertices->v.flag = 0;
     return result;
 }
 
+/*
+ * Camera-facing upright quad that bends towards the point def.rot: the bend angle grows with the
+ * square root of that point's sideways offset (scaled by def.scale.x), capped at 90 degrees.
+ */
+Vtx *func_1513F114(Particle *particle, s16 viewport) {
+    Vtx *vertices;
+    Vtx *result;
+    f32 sinDir;
+    f32 cosDir;
+    f32 bottom;
+    f32 top;
+    f32 s;
+    f32 c;
+    f32 wc;
+    f32 ws;
+    f32 dist;
+    f32 sign;
+    f32 bs;
+    f32 bc;
+    f32 ts;
+    f32 tc;
+    f32 angle;
+    u8 fresh;
 
-void *func_1513F114(void *arg0, s16 arg1)
-{
-  Game169510ScaledVertex *vertices;
-  Game169510ScaledVertex *result;
-  f32 sinDir;
-  f32 cosDir;
-  f32 bottom;
-  f32 top;
-  f32 s;
-  f32 c;
-  f32 wc;
-  f32 ws;
-  f32 dist;
-  f32 sign;
-  f32 bs;
-  f32 bc;
-  f32 ts;
-  f32 tc;
-  f32 angle;
-  u8 fresh;
-  func_151D5D60(((u8 *) arg0) + 0x100, arg1, 0x40, (void **) (&vertices), &fresh);
-  result = vertices;
-  if (vertices != 0)
-  {
-    if (fresh != 0)
-    {
-      memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-      memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
+        }
+    } else {
+        return NULL;
     }
-  }
-  else
-  {
-    return 0;
-  }
-  {
-    sinDir = D_800DD1D8[arg1];
-    cosDir = D_800DD1E8[arg1];
-    bottom = -(((Game169510ScaledOwner *) arg0)->sy * ((Game169510ScaledOwner *) arg0)->height);
-    top = ((Game169510ScaledOwner *) arg0)->height + bottom;
-    dist = (((((Game169510ScaledOwner *) arg0)->rx - ((Game169510ScaledOwner *) arg0)->x) * cosDir) - (sinDir * (((Game169510ScaledOwner *) arg0)->rz - ((Game169510ScaledOwner *) arg0)->z))) * D_800BE9A8;
-    sign = -1.0f;
-    if (dist < 0.0f)
     {
-      sign = 1.0f;
-      dist = -dist;
+        sinDir = D_800DD1D8[viewport];
+        cosDir = D_800DD1E8[viewport];
+        bottom = -(particle->def.scale.y * particle->def.height);
+        top = particle->def.height + bottom;
+        dist = (((particle->def.rot.x - particle->def.pos.x) * cosDir) -
+                (sinDir * (particle->def.rot.z - particle->def.pos.z))) * D_800BE9A8;
+        sign = -1.0f;
+        if (dist < 0.0f) {
+            sign = 1.0f;
+            dist = -dist;
+        }
+        angle = sqrtf(dist) * particle->def.scale.x;
+        if (angle > 1.57079637050628662109375f) {
+            angle = 1.57079637050628662109375f;
+        }
+        angle *= sign;
+        s = sinf(angle);
+        c = cosf(angle);
+        wc = particle->def.width * c;
+        ws = particle->def.width * s;
+        ts = top * s;
+        tc = top * c;
+        bs = bottom * s;
+        bc = bottom * c;
+        vertices[0].v.ob[0] = particle->def.pos.x + ((wc - bs) * cosDir);
+        vertices[0].v.ob[1] = (particle->def.pos.y + bc) + ws;
+        vertices[0].v.ob[2] = particle->def.pos.z - ((wc - bs) * sinDir);
+        vertices[0].v.flag = 0;
+        dist = -(wc + bs);
+        vertices[1].v.ob[0] = particle->def.pos.x + (dist * cosDir);
+        vertices[1].v.ob[1] = (particle->def.pos.y + bc) - ws;
+        vertices[1].v.ob[2] = particle->def.pos.z - (dist * sinDir);
+        vertices[1].v.flag = 0;
+        vertices[2].v.ob[0] = particle->def.pos.x + ((-(wc + ts)) * cosDir);
+        vertices[2].v.ob[1] = (particle->def.pos.y + tc) - ws;
+        vertices[2].v.ob[2] = particle->def.pos.z - ((-(wc + ts)) * sinDir);
+        vertices[2].v.flag = 0;
+        dist = wc - ts;
+        vertices[3].v.ob[0] = particle->def.pos.x + (dist * cosDir);
+        vertices[3].v.ob[1] = (particle->def.pos.y + tc) + ws;
+        vertices[3].v.ob[2] = particle->def.pos.z - (dist * sinDir);
+        vertices[3].v.flag = 0;
     }
-    angle = sqrtf(dist) * ((Game169510ScaledOwner *) arg0)->sx;
-    if (angle > 1.57079637050628662109375f)
-    {
-      angle = 1.57079637050628662109375f;
-    }
-    angle *= sign;
-    s = sinf(angle);
-    c = cosf(angle);
-    wc = ((Game169510ScaledOwner *) arg0)->width * c;
-    ws = ((Game169510ScaledOwner *) arg0)->width * s;
-    ts = top * s;
-    tc = top * c;
-    bs = bottom * s;
-    bc = bottom * c;
-    vertices[0].x = ((Game169510ScaledOwner *) arg0)->x + ((wc - bs) * cosDir);
-    vertices[0].y = (((Game169510ScaledOwner *) arg0)->y + bc) + ws;
-    vertices[0].z = ((Game169510ScaledOwner *) arg0)->z - ((wc - bs) * sinDir);
-    vertices[0].flag = 0;
-    dist = -(wc + bs);
-    vertices[1].x = ((Game169510ScaledOwner *) arg0)->x + (dist * cosDir);
-    vertices[1].y = (((Game169510ScaledOwner *) arg0)->y + bc) - ws;
-    vertices[1].z = ((Game169510ScaledOwner *) arg0)->z - (dist * sinDir);
-    vertices[1].flag = 0;
-    vertices[2].x = ((Game169510ScaledOwner *) arg0)->x + ((-(wc + ts)) * cosDir);
-    vertices[2].y = (((Game169510ScaledOwner *) arg0)->y + tc) - ws;
-    vertices[2].z = ((Game169510ScaledOwner *) arg0)->z - ((-(wc + ts)) * sinDir);
-    vertices[2].flag = 0;
-    dist = wc - ts;
-    vertices[3].x = ((Game169510ScaledOwner *) arg0)->x + (dist * cosDir);
-    vertices[3].y = (((Game169510ScaledOwner *) arg0)->y + tc) + ws;
-    vertices[3].z = ((Game169510ScaledOwner *) arg0)->z - (dist * sinDir);
-    vertices[3].flag = 0;
-  }
-  return result;
+    return result;
 }
 
-s32 func_15140410(s32, s32, s32, s16);
+Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 
-void func_1513F4B0(struct210 *arg0, s16 arg1) {
-    func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
+/* Quad spanned by the two axes in motion.axes (vertex function 12). */
+void func_1513F4B0(struct210 *particle, s16 viewport) {
+    func_15140410(particle, &particle->unk110, &particle->unk11C, viewport);
 }
 
 s16 func_15143044(u8, s32);
@@ -1570,53 +1568,38 @@ s32 func_1513F6E8(Particle *particle) {
     return 1;
 }
 
-typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Struct1513F728Sub;
-
-typedef struct {
-    char pad0[0x34];
-    struct17 unk34;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    char pad4C[0xC4];
-    Struct1513F728Sub unk110;
-} Struct1513F728Obj;
-
-s32 func_1513F728(Struct1513F728Obj *arg0) {
-    Struct1513F728Sub *sub;
-    struct17 old;
+/*
+ * Ballistic motion: applies drag once per elapsed tick and gravity, then moves the particle by the
+ * average of its old and new velocity; also spins it by motion.ballistic.rotVel.
+ */
+s32 func_1513F728(Particle *particle) {
+    ParticleMotion *motion;
+    Vec3f oldVel;
     s32 i;
 
-    sub = (Struct1513F728Sub *)((u8 *)arg0 + 0x110);
-    old = sub->unk0;
+    motion = (ParticleMotion *)((u8 *)particle + offsetof(Particle, motion));
+    oldVel = motion->ballistic.vel;
     for (i = D_800BE9E4; i != 0; i--) {
-        sub->unk0.unk0 *= sub->unk10;
-        sub->unk0.unk4 *= sub->unk10;
-        sub->unk0.unk8 *= sub->unk10;
+        motion->ballistic.vel.x *= motion->ballistic.drag;
+        motion->ballistic.vel.y *= motion->ballistic.drag;
+        motion->ballistic.vel.z *= motion->ballistic.drag;
     }
     {
         f32 ax;
         f32 ay;
         f32 az;
 
-        sub->unk0.unk4 += sub->unkC * D_800BE9A4;
-        ax = (sub->unk0.unk0 - old.unk0) * D_800BE9A8;
-        ay = (sub->unk0.unk4 - old.unk4) * D_800BE9A8;
-        az = (sub->unk0.unk8 - old.unk8) * D_800BE9A8;
-        arg0->unk34.unk0 += (old.unk0 + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
-        arg0->unk34.unk4 += (old.unk4 + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
-        arg0->unk34.unk8 += (old.unk8 + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+        motion->ballistic.vel.y += motion->ballistic.gravity * D_800BE9A4;
+        ax = (motion->ballistic.vel.x - oldVel.x) * D_800BE9A8;
+        ay = (motion->ballistic.vel.y - oldVel.y) * D_800BE9A8;
+        az = (motion->ballistic.vel.z - oldVel.z) * D_800BE9A8;
+        particle->def.pos.x += (oldVel.x + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
+        particle->def.pos.y += (oldVel.y + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
+        particle->def.pos.z += (oldVel.z + 0.5f * az * D_800BE9A4) * D_800BE9A4;
     }
-    arg0->unk40 += sub->unk14 * D_800BE9A4;
-    arg0->unk44 += sub->unk18 * D_800BE9A4;
-    arg0->unk48 += sub->unk1C * D_800BE9A4;
+    particle->def.rot.x += motion->ballistic.rotVel.x * D_800BE9A4;
+    particle->def.rot.y += motion->ballistic.rotVel.y * D_800BE9A4;
+    particle->def.rot.z += motion->ballistic.rotVel.z * D_800BE9A4;
     return 1;
 }
 
@@ -1640,28 +1623,25 @@ typedef struct {
 } BeamVtx1513FAB4;
 
 typedef struct { f32 w; f32 l; } Scale1513FAB4;
-
 extern f32 *func_15144B34(s32);
 extern void func_150AD8B0(f32 *, f32 *, f32 *);
-
 void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3);
 
-void func_1513FA2C(void *arg0, s16 arg1) {
-    f32 stack_vals[2];
-    stack_vals[0] = 1.0f;
-    stack_vals[1] = 1.0f;
-    func_1513FAB4(arg0, 0, stack_vals, arg1);
+void func_1513FA2C(Particle *particle, s16 viewport) {
+    f32 scale[2];
+
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    func_1513FAB4(particle, FALSE, scale, viewport);
 }
 
-void func_1513FA70(s32 arg0, s16 arg1) {
-    f32 sp18[2];
+void func_1513FA70(Particle *particle, s16 viewport) {
+    f32 scale[2];
 
-    sp18[0] = 1.0f;
-    sp18[1] = 1.0f;
-    func_1513FAB4(arg0, 1, sp18, arg1);
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    func_1513FAB4(particle, TRUE, scale, viewport);
 }
-
-
 
 void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) {
     BeamVtx1513FAB4 *vertices;
@@ -1828,50 +1808,52 @@ void func_151400D0(Vtx *vtx, VtxColor *colors) {
     }
 }
 
-void *func_15140190(void *arg0, s16 arg1) {
-    Game169510ScaledVertex *vertices;
-    Game169510ScaledVertex *result;
+/* Quad of width x height, rotated by def.rot and placed at def.pos. */
+Vtx *func_15140190(Particle *particle, s16 viewport) {
+    Vtx *vertices;
+    Vtx *result;
     f32 mtx[4][4];
-    f32 coords[4][3];
+    f32 corners[4][3];
     u8 i;
     u8 fresh;
 
-    func_151D5D60((u8 *)arg0 + 0x100, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
+    if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
     {
-        s16 pad;
+        s16 pad; // matching: -g3 scope
 
-        coords[0][0] = ((Game169510ScaledOwner *)arg0)->width;
-        coords[0][1] = ((Game169510ScaledOwner *)arg0)->height;
-        coords[0][2] = 0.0f;
-        coords[1][0] = -((Game169510ScaledOwner *)arg0)->width;
-        coords[1][1] = ((Game169510ScaledOwner *)arg0)->height;
-        coords[1][2] = 0.0f;
-        coords[2][0] = -((Game169510ScaledOwner *)arg0)->width;
-        coords[2][1] = -((Game169510ScaledOwner *)arg0)->height;
-        coords[2][2] = 0.0f;
-        coords[3][0] = ((Game169510ScaledOwner *)arg0)->width;
-        coords[3][1] = -((Game169510ScaledOwner *)arg0)->height;
-        coords[3][2] = 0.0f;
-        func_150A8050(mtx, ((Game169510ScaledOwner *)arg0)->rx, ((Game169510ScaledOwner *)arg0)->ry, ((Game169510ScaledOwner *)arg0)->rz);
-        mtx[3][0] = ((Game169510ScaledOwner *)arg0)->x;
-        mtx[3][1] = ((Game169510ScaledOwner *)arg0)->y;
-        mtx[3][2] = ((Game169510ScaledOwner *)arg0)->z;
+        corners[0][0] = particle->def.width;
+        corners[0][1] = particle->def.height;
+        corners[0][2] = 0.0f;
+        corners[1][0] = -particle->def.width;
+        corners[1][1] = particle->def.height;
+        corners[1][2] = 0.0f;
+        corners[2][0] = -particle->def.width;
+        corners[2][1] = -particle->def.height;
+        corners[2][2] = 0.0f;
+        corners[3][0] = particle->def.width;
+        corners[3][1] = -particle->def.height;
+        corners[3][2] = 0.0f;
+        func_150A8050(mtx, particle->def.rot.x, particle->def.rot.y, particle->def.rot.z);
+        mtx[3][0] = particle->def.pos.x;
+        mtx[3][1] = particle->def.pos.y;
+        mtx[3][2] = particle->def.pos.z;
         for (i = 0; i < 4; i++) {
-            f32 *c = coords[i];
+            f32 *c = corners[i];
+
             func_150A7960(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
-            vertices->x = c[0];
-            vertices->y = c[1];
-            vertices->z = c[2];
-            vertices->flag = 0;
+            vertices->v.ob[0] = c[0];
+            vertices->v.ob[1] = c[1];
+            vertices->v.ob[2] = c[2];
+            vertices->v.flag = 0;
             vertices++;
         }
     }
@@ -1886,48 +1868,49 @@ void func_151403DC(s32 arg0, u8 arg1) {
     func_15169260(&D_800A5178, 3, arg0, arg1);
 }
 
-s32 func_15140410(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
-    Game169510ScaledVertex *vertices;
-    Game169510ScaledVertex *result;
-    f32 ax, ay, az, bx, by, bz;
+/* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
+Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
+    Vtx *vertices;
+    Vtx *result;
+    f32 ux, uy, uz, vx, vy, vz;
 
     {
         u8 fresh;
 
-        func_151D5D60((u8 *)arg0 + 0x100, arg3, 0x40, (void **)&vertices, &fresh);
+        func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
         result = vertices;
-        if (vertices != 0) {
+        if (vertices != NULL) {
             if (fresh != 0) {
-                memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-                memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+                memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+                memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
             }
         } else {
-            return 0;
+            return NULL;
         }
     }
-    ax = ((f32 *)arg1)[0] * ((Game169510ScaledOwner *)arg0)->width;
-    ay = ((f32 *)arg1)[1] * ((Game169510ScaledOwner *)arg0)->width;
-    az = ((f32 *)arg1)[2] * ((Game169510ScaledOwner *)arg0)->width;
-    bx = ((f32 *)arg2)[0] * ((Game169510ScaledOwner *)arg0)->height;
-    by = ((f32 *)arg2)[1] * ((Game169510ScaledOwner *)arg0)->height;
-    bz = ((f32 *)arg2)[2] * ((Game169510ScaledOwner *)arg0)->height;
-    vertices[0].x = (s32)(((Game169510ScaledOwner *)arg0)->x + ax + bx);
-    vertices[0].y = (s32)(((Game169510ScaledOwner *)arg0)->y + ay + by);
-    vertices[0].z = (s32)(((Game169510ScaledOwner *)arg0)->z + az + bz);
-    vertices[0].flag = 0;
-    vertices[1].x = (s32)(((Game169510ScaledOwner *)arg0)->x - ax + bx);
-    vertices[1].y = (s32)(((Game169510ScaledOwner *)arg0)->y - ay + by);
-    vertices[1].z = (s32)(((Game169510ScaledOwner *)arg0)->z - az + bz);
-    vertices[1].flag = 0;
-    vertices[2].x = (s32)(((Game169510ScaledOwner *)arg0)->x - ax - bx);
-    vertices[2].y = (s32)(((Game169510ScaledOwner *)arg0)->y - ay - by);
-    vertices[2].z = (s32)(((Game169510ScaledOwner *)arg0)->z - az - bz);
-    vertices[2].flag = 0;
-    vertices[3].x = (s32)(((Game169510ScaledOwner *)arg0)->x + ax - bx);
-    vertices[3].y = (s32)(((Game169510ScaledOwner *)arg0)->y + ay - by);
-    vertices[3].z = (s32)(((Game169510ScaledOwner *)arg0)->z + az - bz);
-    vertices[3].flag = 0;
-    return (s32)result;
+    ux = axisU->x * particle->def.width;
+    uy = axisU->y * particle->def.width;
+    uz = axisU->z * particle->def.width;
+    vx = axisV->x * particle->def.height;
+    vy = axisV->y * particle->def.height;
+    vz = axisV->z * particle->def.height;
+    vertices[0].v.ob[0] = (s32)(particle->def.pos.x + ux + vx);
+    vertices[0].v.ob[1] = (s32)(particle->def.pos.y + uy + vy);
+    vertices[0].v.ob[2] = (s32)(particle->def.pos.z + uz + vz);
+    vertices[0].v.flag = 0;
+    vertices[1].v.ob[0] = (s32)(particle->def.pos.x - ux + vx);
+    vertices[1].v.ob[1] = (s32)(particle->def.pos.y - uy + vy);
+    vertices[1].v.ob[2] = (s32)(particle->def.pos.z - uz + vz);
+    vertices[1].v.flag = 0;
+    vertices[2].v.ob[0] = (s32)(particle->def.pos.x - ux - vx);
+    vertices[2].v.ob[1] = (s32)(particle->def.pos.y - uy - vy);
+    vertices[2].v.ob[2] = (s32)(particle->def.pos.z - uz - vz);
+    vertices[2].v.flag = 0;
+    vertices[3].v.ob[0] = (s32)(particle->def.pos.x + ux - vx);
+    vertices[3].v.ob[1] = (s32)(particle->def.pos.y + uy - vy);
+    vertices[3].v.ob[2] = (s32)(particle->def.pos.z + uz - vz);
+    vertices[3].v.flag = 0;
+    return result;
 }
 
 /* Sort-list node (0x110 bytes); func_151406AC insertion-sorts one D_800DCE50 bucket by key. */
