@@ -8,7 +8,7 @@ typedef struct {
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
 } OwnerGoneMsg;
 
-/* Broadcasts message 0x3E for `owner`, so the beams it owns go away. */
+/* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
 void func_150F6DB0(struct127 *owner) {
     OwnerGoneMsg msg;
 
@@ -68,7 +68,7 @@ typedef struct {
     /* 0x04 */ s32 unk4;
     /* 0x08 */ struct17 pos;
     /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit; /* 0: nothing, 1: ?, other: hitObj */
+    /* 0x59 */ u8 hit; /* 0: no hit */
     /* 0x5A */ u8 pad5A[0x64 - 0x5A];
 } RayHit;
 
@@ -95,7 +95,7 @@ typedef struct {
 
 extern BeamEnd *func_15130280(BeamEndSpawn *, u8, s32, s32, u8, s32);
 
-/* Spawns a beam cast from `owner` along its facing, with two end sprites. */
+/* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
 BeamObj *func_150F6DE4(struct127 *owner) {
     BeamState state;
     u8 i;
@@ -107,7 +107,8 @@ BeamObj *func_150F6DE4(struct127 *owner) {
         state.ends[i] = NULL;
     }
     state.flags = 0;
-    obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, (struct37 *)0x78, 0xFF, 1);
+    // functions.h types the 7th argument (the size of the object data) as struct37 *
+    obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, (struct37 *)sizeof(BeamState), 0xFF, 1);
     if (obj != NULL) {
         BeamState *beam;
 
@@ -230,46 +231,48 @@ void func_150F706C(BeamObj *obj) {
     }
 }
 
-void func_150F7310(s32 arg0, s32 arg1, u8 arg2) {
-    s32 *p = &arg0;
-    s32 q;
-    if (arg2 == 0x3E) {
-        q = *p + 0x28;
-        if ((*(s32 *)q == *(s32 *)arg1) || (*(u8 *)(q + 4) == *(u8 *)(*(s32 *)&arg1 + 4))) {
-            func_1516972C((struct102 *)*p);
+/* Message handler: destroys the beam when its owner is reported gone (0x3E); other messages go to the default handler. */
+void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
+    // matching: taking &obj keeps it in its arg slot (IDO reloads it instead of saving it in s0)
+    BeamObj **objp = &obj;
+    BeamState *beam;
+
+    if (msgId == 0x3E) {
+        beam = &(*objp)->beam;
+        // matching: the punned read of msg makes IDO load it a second time for the id compare
+        if (msg->owner == beam->owner || beam->ownerId == ((OwnerGoneMsg *)*(s32 *)&msg)->ownerId) {
+            func_1516972C((struct102 *)*objp);
         }
     } else {
-        q = *p + 0x28;
-        func_15149514(arg1, arg2, q, q + 4, *p);
+        beam = &(*objp)->beam;
+        func_15149514((s32)msg, msgId, (s32)&beam->owner, (s32)&beam->ownerId, (s32)*objp);
     }
 }
 
-extern void func_1514EDF0(struct260 *, s32);
+void func_1514EDF0(BeamObj *handle, struct127 *owner);
 
-void func_150F739C(struct260 *arg0) {
-    s32 i;
-    s32 v;
-    s32 *p = (s32 *)((u8 *)arg0 + 0x28);
+/* Destroys the beam's end sprites and detaches the beam from its owner. */
+void func_150F739C(BeamObj *obj) {
+    BeamState *beam;
+    u8 i;
 
-    for (i = 0; i < 2; i = (u8)(i + 1)) {
-        v = p[i + 2];
-        if (v != 0) {
-            func_1516972C((struct102 *)v);
+    beam = &obj->beam;
+    for (i = 0; i < 2; i++) {
+        if (beam->ends[i] != NULL) {
+            func_1516972C((struct102 *)beam->ends[i]);
         }
     }
-    func_1514EDF0(arg0, p[0]);
+    func_1514EDF0(obj, beam->owner);
 }
 
-void func_150F739C(struct260 *arg0);
-
-void func_150F740C(struct260 *arg0) {
-    func_150F739C(arg0);
-    func_1514933C(arg0);
+/* Beam callback: tears the beam down (func_150F739C), then hands it to func_1514933C. */
+void func_150F740C(BeamObj *obj) {
+    func_150F739C(obj);
+    func_1514933C((struct260 *)obj);
 }
 
-void func_15149368(struct260 *arg0);
-
-void func_150F7438(struct260 *arg0) {
-    func_150F739C(arg0);
-    func_15149368(arg0);
+/* Beam callback: tears the beam down (func_150F739C), then hands it to func_15149368. */
+void func_150F7438(BeamObj *obj) {
+    func_150F739C(obj);
+    func_15149368((struct260 *)obj);
 }
