@@ -2,134 +2,178 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008B078[])(void *);
-extern s32 (*D_8008B07C[])(void *);
-s32 func_1514401C(u8, void *, void *, u8);
+typedef struct Vec3f {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
 
-struct Struct1515C158Inner {
-    u8 pad0[0x8];
-    struct Struct1515C158Inner *next;
-    u8 padC[0x38];
-    s32 unk44;
-    s32 unk48;
-};
+/* Texture table entry (D_80090B60). */
+typedef struct TextureInfo {
+    /* 0x0 */ s32 unk0;
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u16 unkA;
+} TextureInfo;
 
-extern u8 D_800DCE50[];
+typedef struct OtherModeL {
+    s32 w0;
+    s32 w1;
+} OtherModeL;
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 pad13;
-    s16 unk14;
-    u8 pad16[0x2];
-    s32 unk18;
-    s32 unk1C;
-    u8 pad20[0x18];
-    s8 unk38;
-    s8 unk39;
-} Struct1515BAE0;
+/* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
+typedef struct TexturedQuad {
+    /* 0x00 */ u8 pad0[0x10];       // object link header
+    /* 0x10 */ u8 texture;          // index into D_80090B60
+    /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
+    /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 frame;           // 16.16 frame position
+    /* 0x1C */ u32 frameSpeed;
+    /* 0x20 */ u8 color0[4];
+    /* 0x24 */ u8 color1[4];
+    /* 0x28 */ u8 colorLevel;
+    /* 0x29 */ u8 primMode;
+    /* 0x2A */ u8 envMode;
+    /* 0x2B */ u8 renderMode;       // index into D_800A4AC8
+    /* 0x2C */ u8 combiner;
+    /* 0x2D */ u8 pad2D[3];
+    /* 0x30 */ s32 geometrySet;
+    /* 0x34 */ s32 geometryClear;
+    /* 0x38 */ s8 updateFunc;       // index into D_8008B078, -1 = none
+    /* 0x39 */ s8 destroyFunc;      // index into D_8008B07C, -1 = none
+    /* 0x3A */ u8 pad3A[0x16];
+    /* 0x50 */ Vtx vtx[4];
+} TexturedQuad;
 
-void func_1515BAE0(Struct1515BAE0 *arg0) {
-    s32 temp;
-    u8 failed;
+/* What an actor tracker is created from (func_1514EE70 builds one). */
+typedef struct ActorTrackerDesc {
+    /* 0x0 */ struct127 *actor;
+    /* 0x4 */ u8 actorId;           // the actor's unique_id
+    /* 0x5 */ u8 flags;             // 1: lifetime counts down
+    /* 0x6 */ s16 lifetime;
+} ActorTrackerDesc;
 
-    failed = 0;
-    if (arg0->unk11 & 1) {
-        arg0->unk14 -= D_800BE9E4;
-        if (arg0->unk14 < 0) {
-            failed = 1;
+/* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
+typedef struct ActorTracker {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ struct ActorTracker *next;
+    /* 0x0C */ u8 padC[0x4];
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ ActorTrackerDesc desc;
+    /* 0x20 */ Vec3f pos;
+    /* 0x2C */ Vec3f prevPos;
+    /* 0x38 */ Vec3f motion;        // (prevPos - pos) * D_800BE9A8
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+} ActorTracker;
+
+/* Attachment list node (see game_179F30.c). */
+typedef struct Attachment {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ActorTracker *handle;
+} Attachment;
+
+/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
+typedef struct AttachmentOwner {
+    /* 0x000 */ u8 pad0[0x2F4];
+    /* 0x2F4 */ Attachment *attachments;
+} AttachmentOwner;
+#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
+
+extern s32 (*D_8008B078[])(TexturedQuad *);
+extern s32 (*D_8008B07C[])(TexturedQuad *);
+extern TextureInfo D_80090B60[];
+extern OtherModeL D_800A4AC8[];
+extern s32 D_800D2C9C;
+/* Object lists: D_800DCE50[list][type] heads a linked list of objects of that type. */
+extern ActorTracker *D_800DCE50[2][104];
+
+s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
+Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+                   u8 *needSync, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
+                   u8 a1, u8 level, u8 mode);
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
+                   u8 a1, u8 level, u8 mode);
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+void *memcpy(void *, const void *, u32);
+void func_1514EDF0(ActorTracker *handle, struct127 *owner);
+s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out);
+
+/*
+ * Update handler: counts the lifetime down (flag 1), runs the update callback and advances the texture
+ * animation. When the quad dies, the destroy callback (if any) decides whether it is freed.
+ */
+void func_1515BAE0(TexturedQuad *quad) {
+    s32 func;
+    u8 dead;
+
+    dead = FALSE;
+    if (quad->flags & 1) {
+        quad->lifetime -= D_800BE9E4;
+        if (quad->lifetime < 0) {
+            dead = TRUE;
         }
     }
-    if (failed == 0) {
-        temp = arg0->unk38;
-        if (temp != -1) {
-            if (D_8008B078[temp](arg0) == 0) {
-                failed = 1;
+    if (!dead) {
+        func = quad->updateFunc;
+        if (func != -1) {
+            if (D_8008B078[func](quad) == 0) {
+                dead = TRUE;
             }
         }
-        if (arg0->unk1C != 0) {
-            failed = func_1514401C(arg0->unk10, &arg0->unk1C, &arg0->unk18, arg0->unk12);
+        if (quad->frameSpeed != 0) {
+            dead = func_1514401C(quad->texture, &quad->frameSpeed, &quad->frame, quad->animFlags);
         }
     }
-    if (failed) {
-        temp = arg0->unk39;
-        if (temp != -1) {
-            if (D_8008B07C[temp](arg0) != 0) {
-                func_1516972C((struct102 *) arg0);
+    if (dead) {
+        func = quad->destroyFunc;
+        if (func != -1) {
+            if (D_8008B07C[func](quad) != 0) {
+                func_1516972C((struct102 *)quad);
             }
         } else {
-            func_1516972C((struct102 *) arg0);
+            func_1516972C((struct102 *)quad);
         }
     }
 }
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-
-typedef struct {
-    u8 pad0[0xC];
-} Struct1515BBF0_tex;
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Struct1515BBF0_mode;
-extern Struct1515BBF0_tex D_80090B60[];
-extern Struct1515BBF0_mode D_800A4AC8[];
-extern s32 D_800D2C9C;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 unk11;
-    u8 pad12[0x6];
-    s32 unk18;
-    u8 pad1C[0x4];
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 pad2D[0x3];
-    s32 unk30;
-    s32 unk34;
-    u8 pad38[0x18];
-    u8 unk50[1];
-} Struct1515BBF0;
-
-Gfx *func_1515BBF0(Gfx *gfx, Struct1515BBF0 *arg1, s32 arg2) {
+/* Draw handler: sets up colours, texture and other modes, then draws the quad as two triangles. */
+Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view) {
     s32 pad;
-    u8 update;
+    u8 needSync;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
 
-    update = 1;
-    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk20, arg1->unk21, arg1->unk22, arg1->unk23,
-                  arg1->unk24, arg1->unk25, arg1->unk26, arg1->unk27, arg1->unk28, arg1->unk29);
-    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk20, arg1->unk21, arg1->unk22, arg1->unk23,
-                  arg1->unk24, arg1->unk25, arg1->unk26, arg1->unk27, arg1->unk28, arg1->unk2A);
-    gfx = func_15142B7C(gfx, arg1->unk30, arg1->unk34);
-    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
-    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_15142E24(gfx, (s32)&D_80090B60[arg1->unk10], arg1->unk18, 0, 0, 0, arg1->unk10, 0, 0, &update, 3);
-    gfx = func_1513F4E4(gfx, arg1->unk2C, &update);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((arg1->unk11 & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[arg1->unk2B].unk0 | D_800A4AC8[arg1->unk2B].unk4, &update);
-    gSPVertex(gfx++, arg1->unk50, 4, 0);
+    needSync = TRUE;
+    func_151441A4(&primR, &primG, &primB, &primA, quad->color0[0], quad->color0[1], quad->color0[2],
+                  quad->color0[3], quad->color1[0], quad->color1[1], quad->color1[2], quad->color1[3],
+                  quad->colorLevel, quad->primMode);
+    func_151442FC(&envR, &envG, &envB, &envA, quad->color0[0], quad->color0[1], quad->color0[2],
+                  quad->color0[3], quad->color1[0], quad->color1[1], quad->color1[2], quad->color1[3],
+                  quad->colorLevel, quad->envMode);
+    gfx = func_15142B7C(gfx, quad->geometrySet, quad->geometryClear);
+    gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
+    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+    gfx = func_15142E24(gfx, &D_80090B60[quad->texture], quad->frame, 0, 0, 0, quad->texture, 0, 0, &needSync, 3);
+    gfx = func_1513F4E4(gfx, quad->combiner, &needSync);
+    gfx = func_15142FBC(gfx,
+                        G_PM_NPRIMITIVE | ((quad->flags & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP |
+                            G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE |
+                            G_CD_NOISE | G_AD_NOISE,
+                        D_800A4AC8[quad->renderMode].w0 | D_800A4AC8[quad->renderMode].w1, &needSync);
+    gSPVertex(gfx++, quad->vtx, 4, 0);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 2, 3, 0);
     return gfx;
@@ -138,234 +182,157 @@ Gfx *func_1515BBF0(Gfx *gfx, Struct1515BBF0 *arg1, s32 arg2) {
 void func_1515BE48(void) {
 }
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+/* Creates an actor tracker (object type 0x32) for desc->actor; returns NULL if there is no actor. */
+ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, s32 owner, s32 list) {
+    ActorTracker *tracker;
 
-struct Struct1515BE50_src {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
-
-struct Struct1515BE50_ret {
-    u8 pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    u8 pad18[0x8];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s32 unk44;
-    s32 unk48;
-};
-
-s32 func_1515BE50(struct Struct1515BE50_src **arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct Struct1515BE50_ret *temp_v0;
-    struct Struct1515BE50_ret *sp2C;
-
-    if (*arg0 == 0) {
-        return 0;
+    if (desc->actor == NULL) {
+        return NULL;
     }
-    temp_v0 = (struct Struct1515BE50_ret *)func_15167A68(0x32, arg3, arg1 + 0x50, 1, (u8)arg2, 1);
-    if (temp_v0 == 0) {
-        return 0;
+    tracker = func_15167A68(0x32, list, extraSize + 0x50, 1, (u8)owner, 1);
+    if (tracker == NULL) {
+        return NULL;
     }
-    sp2C = temp_v0;
-    memcpy((s32)temp_v0 + 0x18, arg0, 8);
-    sp2C->unk20 = (*arg0)->unk14;
-    sp2C->unk24 = (*arg0)->unk18;
-    sp2C->unk28 = (*arg0)->unk1C;
-    sp2C->unk2C = (*arg0)->unk14;
-    sp2C->unk30 = (*arg0)->unk18;
-    sp2C->unk34 = (*arg0)->unk1C;
-    sp2C->unk44 = 0;
-    sp2C->unk48 = -1;
-    sp2C->unk10 = 1;
-    sp2C->unk14 = 0;
-    sp2C->unk38 = 0.0f;
-    sp2C->unk3C = 0.0f;
-    sp2C->unk40 = 0.0f;
-    return sp2C;
+    memcpy(&tracker->desc, desc, sizeof(ActorTrackerDesc));
+    tracker->pos.x = desc->actor->x_position;
+    tracker->pos.y = desc->actor->y_position;
+    tracker->pos.z = desc->actor->z_position;
+    tracker->prevPos.x = desc->actor->x_position;
+    tracker->prevPos.y = desc->actor->y_position;
+    tracker->prevPos.z = desc->actor->z_position;
+    tracker->unk44 = 0;
+    tracker->unk48 = -1;
+    tracker->unk10 = 1;
+    tracker->unk14 = 0;
+    tracker->motion.x = 0.0f;
+    tracker->motion.y = 0.0f;
+    tracker->motion.z = 0.0f;
+    return tracker;
 }
 
-extern void func_1514EDF0(struct225 *, s32);
-
-void func_1515BF50(struct225 *arg0) {
-    func_1514EDF0(arg0, (s32)arg0->unk18);
-    func_15169804((struct102 *)arg0);
+/* Destroy handler: detaches the tracker from its actor, then destroys it. */
+void func_1515BF50(ActorTracker *tracker) {
+    func_1514EDF0(tracker, tracker->desc.actor);
+    func_15169804((struct102 *)tracker);
 }
 
-void func_1515BF7C(struct225 *arg0) {
-    func_1514EDF0(arg0, (s32)arg0->unk18);
-    func_15169824((struct102 *)arg0);
+/* Free handler: detaches the tracker from its actor, then frees it. */
+void func_1515BF7C(ActorTracker *tracker) {
+    func_1514EDF0(tracker, tracker->desc.actor);
+    func_15169824((struct102 *)tracker);
 }
 
-struct Struct1515BFA8Src {
-    s32 unk0;
-    u8 pad4[0x10];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1B];
-    u8 unk3B;
-};
+/*
+ * Update handler: follows the actor's position and records the motion since last frame. The tracker
+ * dies when its lifetime runs out (flag 1) or the actor is gone or has been replaced.
+ */
+void func_1515BFA8(ActorTracker *tracker) {
+    s32 dead;
+    struct127 *actor;
 
-struct Vec1515BFA8 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct Struct1515BFA8 {
-    u8 pad0[0x18];
-    struct Struct1515BFA8Src *unk18;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    struct Vec1515BFA8 unk20;
-    struct Vec1515BFA8 unk2C;
-    struct Vec1515BFA8 unk38;
-};
-
-void func_1515BFA8(struct Struct1515BFA8 *arg0) {
-    s32 remove;
-    struct Struct1515BFA8Src *src;
-
-    remove = 0;
-    if (arg0->unk1D & 1) {
-        arg0->unk1E -= D_800BE9E4;
-        if (arg0->unk1E < 0) {
-            remove = 1;
+    dead = FALSE;
+    if (tracker->desc.flags & 1) {
+        tracker->desc.lifetime -= D_800BE9E4;
+        if (tracker->desc.lifetime < 0) {
+            dead = TRUE;
         }
     }
-    src = arg0->unk18;
-    if ((src->unk0 == 0) || (src->unk3B != arg0->unk1C)) {
-        remove = 1;
+    actor = tracker->desc.actor;
+    if ((actor->interaction_state == 0) || (actor->unique_id != tracker->desc.actorId)) {
+        dead = TRUE;
     }
-    if (remove == 0) {
-        arg0->unk2C = arg0->unk20;
-        src = arg0->unk18;
-        arg0->unk20.x = src->unk14;
-        arg0->unk20.y = src->unk18;
-        arg0->unk20.z = src->unk1C;
-        arg0->unk38.x = (arg0->unk2C.x - arg0->unk20.x) * D_800BE9A8;
-        arg0->unk38.y = (arg0->unk2C.y - arg0->unk20.y) * D_800BE9A8;
-        arg0->unk38.z = (arg0->unk2C.z - arg0->unk20.z) * D_800BE9A8;
+    if (!dead) {
+        tracker->prevPos = tracker->pos;
+        actor = tracker->desc.actor;
+        tracker->pos.x = actor->x_position;
+        tracker->pos.y = actor->y_position;
+        tracker->pos.z = actor->z_position;
+        tracker->motion.x = (tracker->prevPos.x - tracker->pos.x) * D_800BE9A8;
+        tracker->motion.y = (tracker->prevPos.y - tracker->pos.y) * D_800BE9A8;
+        tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
     }
-    if (remove != 0) {
-        func_1516972C((struct102 *)arg0);
+    if (dead) {
+        func_1516972C((struct102 *)tracker);
     }
 }
 
-void func_1515C0B8(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x18, arg0 + 0x1C, arg0);
+/* Actor-event handler: dies with its actor and follows actor swaps (see func_15169850). */
+void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType) {
+    func_15169850(event, eventType, (s32)&tracker->desc.actor, (s32)&tracker->desc.actorId, (s32)tracker);
 }
 
-s32 func_1514ECE0(void *, s16, void *);
+/* Finds `actor`'s tracker attachment (type 0x16); on success stores a pointer to its motion in *motion. */
+s32 func_1515C0F8(struct127 *actor, Vec3f **motion) {
+    Attachment *node;
+    ActorTracker *tracker;
 
-s32 func_1515C0F8(struct102 *arg0, s32 *arg1) {
-    s32 *temp;
-    s32 v;
-
-    if (arg0 == 0) {
-        return 0;
+    if (actor == NULL) {
+        return FALSE;
     }
-    if (func_1514ECE0(*(void **)((u8 *)arg0 + 0x2F4), 0x16, &temp) != 0) {
-        v = *(s32 *)((u8 *)temp + 0x10);
-        *arg1 = v + 0x38;
-        return 1;
+    if (func_1514ECE0(ATTACHMENTS(actor), 0x16, &node)) {
+        tracker = node->handle;
+        *motion = &tracker->motion;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
+/* Resets unk44/unk48 of every actor tracker in both object lists. */
 void func_1515C158(void) {
-    s32 i;
-    struct Struct1515C158Inner *node;
+    s32 list;
+    ActorTracker *tracker;
 
-    i = 0;
-    do {
-        node = *(struct Struct1515C158Inner **)&D_800DCE50[i + 0xC8];
-        i += 0x1A0;
-        if (node != 0) {
-            do {
-                node->unk44 = 0;
-                node->unk48 = -1;
-                node = node->next;
-            } while (node != 0);
+    for (list = 0; list < 2; list++) {
+        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = tracker->next) {
+            tracker->unk44 = 0;
+            tracker->unk48 = -1;
         }
-    } while ((u8 *)&D_800DD190 != &D_800DCE50[i]);
-}
-
-struct Struct1515C1A0 {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0xF];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0xB2];
-    s16 unkD2;
-    s16 unkD4;
-    s16 unkD6;
-};
-
-void func_1515C1A0(struct Struct1515C1A0 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    u8 temp_v0;
-    f32 temp_f0;
-
-    temp_v0 = arg0->unk4;
-    if ((temp_v0 < 0xBB) && (temp_v0 != 0xFF)) {
-        *arg2 = arg0->unkD2;
-        *arg3 = arg0->unkD4;
-        arg1[0] = arg0->unk14;
-        arg1[1] = arg0->unk18 + arg0->unkD6;
-        arg1[2] = arg0->unk1C;
-    } else {
-        temp_f0 = 1.0f;
-        *arg2 = temp_f0;
-        *arg3 = temp_f0;
-        arg1[0] = arg0->unk14;
-        arg1[1] = arg0->unk18;
-        arg1[2] = arg0->unk1C;
     }
 }
 
-struct Struct1515C244 {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0xF];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0xC4];
-    s16 unkE4;
-    s16 unkE6;
-    s16 unkE8;
-};
+/*
+ * Gets an actor's collision ellipsoid: centre, radius and height from unkD2/unkD4/unkD6 for actor ids
+ * below 0xBB, otherwise a unit sphere at the actor's position.
+ */
+void func_1515C1A0(struct127 *actor, Vec3f *center, f32 *radius, f32 *height) {
+    u8 id;
+    f32 one;
 
-void func_1515C244(struct Struct1515C244 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    u8 temp_v0;
-    f32 temp_f0;
-
-    temp_v0 = arg0->unk4;
-    if ((temp_v0 < 0xBB) && (temp_v0 != 0xFF)) {
-        *arg2 = arg0->unkE4;
-        *arg3 = arg0->unkE6;
-        arg1[0] = arg0->unk14;
-        arg1[1] = arg0->unk18 + arg0->unkE8;
-        arg1[2] = arg0->unk1C;
+    id = actor->id;
+    if ((id < 0xBB) && (id != 0xFF)) {
+        *radius = actor->unkD2;
+        *height = actor->unkD4;
+        center->x = actor->x_position;
+        center->y = actor->y_position + actor->unkD6;
+        center->z = actor->z_position;
     } else {
-        temp_f0 = 1.0f;
-        *arg2 = temp_f0;
-        *arg3 = temp_f0;
-        arg1[0] = arg0->unk14;
-        arg1[1] = arg0->unk18;
-        arg1[2] = arg0->unk1C;
+        one = 1.0f;
+        *radius = one;
+        *height = one;
+        center->x = actor->x_position;
+        center->y = actor->y_position;
+        center->z = actor->z_position;
+    }
+}
+
+/* Like func_1515C1A0, using the second shape (unkE4/unkE6/unkE8). */
+void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *height) {
+    u8 id;
+    f32 one;
+
+    id = actor->id;
+    if ((id < 0xBB) && (id != 0xFF)) {
+        *radius = actor->unkE4;
+        *height = actor->unkE6;
+        center->x = actor->x_position;
+        center->y = actor->y_position + (s16)actor->unkE8;
+        center->z = actor->z_position;
+    } else {
+        one = 1.0f;
+        *radius = one;
+        *height = one;
+        center->x = actor->x_position;
+        center->y = actor->y_position;
+        center->z = actor->z_position;
     }
 }
