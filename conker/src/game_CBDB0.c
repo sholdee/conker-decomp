@@ -4,37 +4,41 @@
 
 extern struct127 *func_1505EEF4();
 
+/* Script operand value meaning "leave this field unchanged". */
+#define ARG_KEEP 0x7FFFFFFF
+
+/* A word that holds either a float or the raw value a script stored there. */
+typedef union {
+    f32 f;
+    s32 i;
+} FloatOrWord;
+
+/* 0xA0-byte entry of the D_800DBEF4 table, looked up by its id with func_151149AC. */
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
     /* 0x16 */ u8 pad16[0x38 - 0x16];
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
     /* 0x40 */ u8 pad40[0x4F - 0x40];
-    /* 0x4F */ u8 unk4F;
+    /* 0x4F */ u8 flags4F;
     /* 0x50 */ u8 pad50[0x5A - 0x50];
-    /* 0x5A */ s16 unk5A;
-    /* 0x5C */ s16 unk5C;
-    /* 0x5E */ s16 unk5E;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ f32 unk64;
-    /* 0x68 */ f32 unk68;
+    /* 0x5A */ s16 unk5A[3];
+    /* 0x60 */ f32 unk60[3];
     /* 0x6C */ u8 pad6C[2];
     /* 0x6E */ u8 unk6E;
     /* 0x6F */ u8 unk6F;
     /* 0x70 */ u8 pad70[2];
-    /* 0x72 */ u8 unk72;
-    /* 0x73 */ u8 unk73;
+    /* 0x72 */ u8 id;
+    /* 0x73 */ u8 flags73;
     /* 0x74 */ u8 pad74[4];
     /* 0x78 */ s32 unk78;
-    /* 0x7C */ f32 unk7C;
-    /* 0x80 */ f32 unk80;
-    /* 0x84 */ f32 unk84;
+    /* 0x7C */ FloatOrWord unk7C[3];
     /* 0x88 */ s16 unk88;
     /* 0x8A */ u8 unk8A;
     /* 0x8B */ u8 pad8B[0x92 - 0x8B];
@@ -47,27 +51,27 @@ typedef struct {
     s32 unk8;
 } Struct80088C90;
 
-extern s32 func_151149AC(u32);
+extern Struct1509E900 *func_151149AC(u8 id);
 extern s32 func_15086D48(s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern void func_150E4928(void *);
+extern void func_150E4928(Struct1509E900 *);
 extern void func_15173C90(s32, s32, s32);
 extern Struct80088C90 D_80088C90[];
 
-s32 func_1509E900(s32 arg0, s32 arg1, s32 *arg2) {
+/* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
+s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     Struct1509E900 *obj;
     f32 x;
     f32 y;
     f32 z;
-    s32 idx;
-    f32 f;
-    s32 pad;
+    s32 index;
+    s32 pad[2]; // matching: unused stack slots (target frame is 0x40)
 
-    obj = (Struct1509E900 *)func_151149AC(arg0 & 0xFF);
+    obj = func_151149AC(id);
     if (obj == NULL) {
         return 0;
     }
-    switch (arg1) {
+    switch (op) {
     case 0:
         obj->unk6E = 0;
         if (obj->unk38 != 0) {
@@ -78,207 +82,207 @@ s32 func_1509E900(s32 arg0, s32 arg1, s32 *arg2) {
         obj->unk6E = 1;
         return 1;
     case 2:
-        if (arg2[2] != 0x7FFFFFFF) {
-            obj->unk10 = arg2[2];
+        if (cmd[2] != ARG_KEEP) {
+            obj->x = cmd[2];
         }
-        if (arg2[3] != 0x7FFFFFFF) {
-            obj->unk12 = arg2[3];
+        if (cmd[3] != ARG_KEEP) {
+            obj->y = cmd[3];
         }
-        if (arg2[4] != 0x7FFFFFFF) {
-            obj->unk14 = arg2[4];
+        if (cmd[4] != ARG_KEEP) {
+            obj->z = cmd[4];
         }
         return 1;
     case 12:
-        idx = func_15086D48(arg2[2]);
-        if (idx != -1) {
-            func_15086CBC(idx, &x, &y, &z);
-            obj->unk10 = x;
-            obj->unk12 = arg2[3] + (s16)y;
-            obj->unk14 = z;
+        index = func_15086D48(cmd[2]);
+        if (index != -1) {
+            func_15086CBC(index, &x, &y, &z);
+            obj->x = x;
+            obj->y = cmd[3] + (s16)y;
+            obj->z = z;
         }
         return 1;
     case 3:
-        if ((f32)arg2[2] != 2013265920.0f) {
-        lbl_in:
-            obj->unk7C = (f32)arg2[2] / 65536.0f;
+        /* 16.16 fixed-point operands; 0x78000000 means "unchanged" */
+        if ((f32)cmd[2] != 2013265920.0f) {
+        unused_label: // matching: a label ends the block, so as1 won't pull the 65536.0f load into a bc1tl slot
+            obj->unk7C[0].f = (f32)cmd[2] / 65536.0f;
         }
-        if ((f32)arg2[3] != 2013265920.0f) {
-            obj->unk80 = (f32)arg2[3] / 65536.0f;
+        if ((f32)cmd[3] != 2013265920.0f) {
+            obj->unk7C[1].f = (f32)cmd[3] / 65536.0f;
         }
-        if ((f32)arg2[4] != 2013265920.0f) {
-            obj->unk84 = (f32)arg2[4] / 65536.0f;
+        if ((f32)cmd[4] != 2013265920.0f) {
+            obj->unk7C[2].f = (f32)cmd[4] / 65536.0f;
         }
         return 1;
     case 4:
-        if (arg2[2] != 0x7FFFFFFF) {
-            *(s32 *)&obj->unk7C = arg2[2];
+        if (cmd[2] != ARG_KEEP) {
+            obj->unk7C[0].i = cmd[2];
         }
-        if (arg2[3] != 0x7FFFFFFF) {
-            *(s32 *)&obj->unk80 = arg2[3];
+        if (cmd[3] != ARG_KEEP) {
+            obj->unk7C[1].i = cmd[3];
         }
-        if (arg2[4] != 0x7FFFFFFF) {
-            *(s32 *)&obj->unk84 = arg2[4];
+        if (cmd[4] != ARG_KEEP) {
+            obj->unk7C[2].i = cmd[4];
         }
         return 1;
     case 5:
-        obj->unk3C = arg2[2];
+        obj->unk3C = cmd[2];
         return 1;
     case 6:
-        obj->unk73 &= ~3;
-        obj->unk73 |= arg2[2] & 3;
+        obj->flags73 &= ~3;
+        obj->flags73 |= cmd[2] & 3;
         return 1;
     case 7:
-        if (arg2[2] != 0) {
-            obj->unk73 |= 4;
+        if (cmd[2] != 0) {
+            obj->flags73 |= 4;
         } else {
-            obj->unk73 &= ~4;
+            obj->flags73 &= ~4;
         }
         return 1;
     case 8:
         obj->unk3C &= 0xFFFF;
-        obj->unk3C |= arg2[2] << 16;
-        *(s32 *)&obj->unk7C = arg2[3];
+        obj->unk3C |= cmd[2] << 16;
+        obj->unk7C[0].i = cmd[3];
         return 1;
     case 9:
         func_150E4928(obj);
         break;
     case 10:
-        obj->unk38 = D_80088C90[arg2[2]].unk0;
-        obj->unk78 = D_80088C90[arg2[2]].unk4;
-        obj->unk92 = D_80088C90[arg2[2]].unk8;
+        obj->unk38 = D_80088C90[cmd[2]].unk0;
+        obj->unk78 = D_80088C90[cmd[2]].unk4;
+        obj->unk92 = D_80088C90[cmd[2]].unk8;
         break;
     case 11:
-        func_15173C90(arg2[2], arg2[3], obj->unk72);
+        func_15173C90(cmd[2], cmd[3], obj->id);
         break;
     case 13:
-        obj->unk4F = (obj->unk4F & ~arg2[3]) | arg2[2];
+        obj->flags4F = (obj->flags4F & ~cmd[3]) | cmd[2];
         break;
     case 14:
-        if (arg2[2] != 0x7FFFFFFF) {
-            obj->unk5A = arg2[2];
+        if (cmd[2] != ARG_KEEP) {
+            obj->unk5A[0] = cmd[2];
         }
-        if (arg2[3] != 0x7FFFFFFF) {
-            obj->unk5C = arg2[3];
+        if (cmd[3] != ARG_KEEP) {
+            obj->unk5A[1] = cmd[3];
         }
-        if (arg2[4] != 0x7FFFFFFF) {
-            obj->unk5E = arg2[4];
+        if (cmd[4] != ARG_KEEP) {
+            obj->unk5A[2] = cmd[4];
         }
         break;
     case 15:
-        if (arg2[2] != 0x7FFFFFFF) {
-            obj->unk60 = arg2[2];
+        if (cmd[2] != ARG_KEEP) {
+            obj->unk60[0] = cmd[2];
         }
-        if (arg2[3] != 0x7FFFFFFF) {
-            obj->unk64 = arg2[3];
+        if (cmd[3] != ARG_KEEP) {
+            obj->unk60[1] = cmd[3];
         }
-        if (arg2[4] != 0x7FFFFFFF) {
-            obj->unk68 = arg2[4];
+        if (cmd[4] != ARG_KEEP) {
+            obj->unk60[2] = cmd[4];
         }
         break;
     case 16:
-        if (arg2[2] != 0x7FFFFFFF) {
-            obj->unk0 = arg2[2];
+        if (cmd[2] != ARG_KEEP) {
+            obj->unk0 = cmd[2];
         }
-        if (arg2[3] != 0x7FFFFFFF) {
-            obj->unk4 = arg2[3];
+        if (cmd[3] != ARG_KEEP) {
+            obj->unk4 = cmd[3];
         }
-        if (arg2[4] != 0x7FFFFFFF) {
-            obj->unk8 = arg2[4];
+        if (cmd[4] != ARG_KEEP) {
+            obj->unk8 = cmd[4];
         }
         break;
     case 17:
-        obj->unk88 = arg2[2];
+        obj->unk88 = cmd[2];
         break;
     case 18:
-        obj->unk8A = arg2[2];
+        obj->unk8A = cmd[2];
         break;
     }
     return 0;
 }
 
-extern s32 func_15114050(void *, s32);
+extern s32 func_15114050(Struct1509E900 *, s32);
 extern s32 func_15084000(s32);
-extern s32 func_151140C4(void *);
+extern s32 func_151140C4(Struct1509E900 *);
 
-s32 func_1509ED74(s32 arg0, s32 arg1, s32 *arg2) {
+/* Script "query" handler for the object with id `id`: returns the value that operation `op` asks for. */
+s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
     Struct1509E900 *obj;
     s32 i;
-    s32 v;
+    s32 result;
 
-    obj = (Struct1509E900 *)func_151149AC(arg0 & 0xFF);
+    obj = func_151149AC(id);
     if (obj == NULL) {
         return 0;
     }
-    switch (arg1) {
+    switch (op) {
     case 19:
         return func_15114050(obj, -1);
     case 20:
-        return func_15114050(obj, func_15084000(arg2[2] & 0xFFFF0FFF));
+        return func_15114050(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state == arg2[2]) {
-                if (func_15114050(obj, i)) {
-                    return 1;
-                }
+            if (D_800CC2D0[i].interaction_state == cmd[2] && func_15114050(obj, i)) {
+                return 1;
             }
         }
         return 0;
     case 22:
-        if ((obj->unk4F & 4) == 4) {
+        if ((obj->flags4F & 4) == 4) {
             return 1;
         }
         return 0;
     case 23:
-        v = func_151140C4(obj);
-        if (v < 0) {
+        result = func_151140C4(obj);
+        if (result < 0) {
             return 0;
         }
-        return v | 0x2000;
+        return result | 0x2000;
     case 24:
-        return obj->unk4F;
+        return obj->flags4F;
     case 25:
-        if (*(s32 *)&obj->unk84 == *(s32 *)&obj->unk7C) {
+        if (obj->unk7C[2].i == obj->unk7C[0].i) {
             return 1;
         }
         return 0;
     case 26:
         return obj->unk3C;
     case 27:
-        return obj->unk73 & 3;
+        return obj->flags73 & 3;
     case 28:
         return obj->unk6E == 0;
     case 29:
-        return obj->unk10;
+        return obj->x;
     case 30:
-        return obj->unk12;
+        return obj->y;
     case 31:
-        return obj->unk14;
+        return obj->z;
     case 32:
         return obj->unk8;
     case 33:
-        if (arg2[2] == 0) {
-            return *(s32 *)&obj->unk7C;
+        if (cmd[2] == 0) {
+            return obj->unk7C[0].i;
         }
-        if (arg2[2] == 1) {
-            return *(s32 *)&obj->unk80;
+        if (cmd[2] == 1) {
+            return obj->unk7C[1].i;
         }
-        if (arg2[2] == 2) {
-            return *(s32 *)&obj->unk84;
+        if (cmd[2] == 2) {
+            return obj->unk7C[2].i;
         }
         break;
     case 34:
-        if (arg2[2] == 0) {
-            return obj->unk7C;
+        if (cmd[2] == 0) {
+            return obj->unk7C[0].f;
         }
-        if (arg2[2] == 1) {
-            return obj->unk80;
+        if (cmd[2] == 1) {
+            return obj->unk7C[1].f;
         }
-        if (arg2[2] == 2) {
-            return obj->unk84;
+        if (cmd[2] == 2) {
+            return obj->unk7C[2].f;
         }
         break;
     case 35:
-        return (obj->unk73 & 4) != 0;
+        return (obj->flags73 & 4) != 0;
     }
     return 0;
 }
@@ -415,17 +419,16 @@ s32 func_1509F354(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
     return arg2;
 }
 
-extern s32 func_151149AC(u32);
 extern s32 func_1000F568(s32, u8);
-extern void func_15114D24(s32, s32, s32, s16, s32, s32);
+extern void func_15114D24(Struct1509E900 *, s32, s32, s16, s32, s32);
 
 s32 func_1509F47C(arg0, arg1, arg2, arg3, arg4, arg5)
     s32 arg0; s32 arg1; s32 arg2; s32 arg3; s16 arg4; s32 arg5;
 {
-    s32 temp;
+    Struct1509E900 *obj;
 
-    temp = func_151149AC(arg3 & 0xFF);
-    func_15114D24(temp, func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, arg4, arg5, 0);
+    obj = func_151149AC(arg3);
+    func_15114D24(obj, func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, arg4, arg5, 0);
 }
 
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
