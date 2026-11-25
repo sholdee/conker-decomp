@@ -13,10 +13,6 @@ void func_15131828(void *, f32 *, u8 *, u8 *);
 void func_15131958(void *, f32, void *);
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
-typedef struct {
-    s16 v[9];
-} Surf151D3480;
-
 extern s32 func_1000EC24();
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 u8 func_15145C90(s32);
@@ -37,9 +33,9 @@ typedef struct {
 } ParticleWobble;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
-void func_151D3480(Vec3f *pos, Vec3f *dir, Surf151D3480 *surface, u8 kind, u8 arg4, s32 arg5) {
+void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
     Vec3f hitPos;
-    Surf151D3480 hitSurface;
+    CollisionTri hitSurface;
     u8 hit;
     s32 surfaceId;
     u8 solid;

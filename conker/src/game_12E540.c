@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
 struct DescParticleHead;
@@ -12,11 +13,6 @@ void func_151617E4(LightEffect *effect);
 
 typedef struct Beam Beam;
 
-/* Collision record filled in by func_150AC9C0 (0x12 bytes, halfword aligned). */
-typedef struct {
-    s16 unk0[9];
-} HitInfo;
-
 /* Aim state of the beam's owner (owner->aim). */
 typedef struct {
     u8 pad0[0xB4];
@@ -24,7 +20,7 @@ typedef struct {
     Vec3f targetPos;
     u8 padC4[0x24];
     Vec3f targetDir;
-    HitInfo targetHit;
+    CollisionTri targetHit;
     u8 pad106[3];
     u8 targetType; // 0 = no target
     u8 pad10A[0x8D];
@@ -67,7 +63,7 @@ typedef struct {
 typedef struct {
     u8 flags; // 1 = visible
     u8 pad1;
-    HitInfo hit;
+    CollisionTri hit;
     Beam *beam;
 } BeamHitFxData;
 
@@ -262,7 +258,7 @@ void func_15101350(BeamEndFx *fx) {
 
 extern void func_15143134(Vec3f *src, Vec3f *dst, f32 (*mtx)[4]);
 extern f32 func_15143E64(Vec3f *);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, HitInfo *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, CollisionTri *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 
 /*
  * Places the beam: start at the owner's bone, end at the owner's aim target or at the first
@@ -274,7 +270,7 @@ s8 func_15101378(Beam *beam) {
     BeamOwnerAim *aim;
     BeamOwner *owner;
     u8 hit;
-    HitInfo hitInfo;
+    CollisionTri hitInfo;
     Vec3f dir;
     u8 endIsHit; // matching: always tested as endIsHit != 0; a bare test changes the frame size
     f32 (*boneMtx)[4];

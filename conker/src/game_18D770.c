@@ -393,7 +393,7 @@ s32 func_15145EA4(f32 **in, f32 **out, MtxF mtx, s32 count);
 s32 func_15160E30(LightEffect *effect) {
     Actor *actor;
     LightBeam *beam;
-    s32 hitCount;
+    s32 hitType;
 
     actor = effect->data.beam.actor;
     beam = &effect->data.beam;
@@ -435,8 +435,8 @@ s32 func_15160E30(LightEffect *effect) {
             }
         }
         func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
-        hitCount = ray.hitType;
-        if (hitCount == 0) {
+        hitType = ray.hitType;
+        if (hitType == 0) {
             effect->light->x = actor->x_position;
             effect->light->y = actor->y_position;
             effect->light->z = actor->z_position;
@@ -444,7 +444,7 @@ s32 func_15160E30(LightEffect *effect) {
             effect->light->disabled = 1;
             return 1;
         }
-        if ((beam->flags & 2) && hitCount >= 2) {
+        if ((beam->flags & 2) && hitType >= 2) {
             Actor *hit;
 
             hit = ray.obj;
