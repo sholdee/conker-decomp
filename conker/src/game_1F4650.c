@@ -214,10 +214,26 @@ typedef struct {
     SightModel *model;
 } SightModelOwner;
 
+/* Animation parameters copied into an emitter part by func_151C9198. */
+typedef struct {
+    /* 0x00 */ u8  unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8  unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ u8  unkE;
+    /* 0x10 */ s32 unk10;
+} SightEmitterAnim;
+
 /* Emitter object created by func_151C9198; flag 0x20000 toggles its flash. */
 typedef struct {
     u8 pad0[0x60];
     u32 flags;
+    u8 pad64[0x2C];
+    u8 parts[2][0x40];
+    u8 pad110[0x60];
+    SightEmitterAnim anim;
 } SightEmitter;
 
 /* Generic actor fields used here; kind indexes D_800D1C90. */
@@ -326,7 +342,7 @@ typedef struct {
 extern void func_1510F800(s32);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9);
+s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
@@ -367,7 +383,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     state.speedS = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
-        extern void func_151C9198(struct102 **, vertex *, void *, vertex *, s32, u8, u8, u8, s32);
+        extern void func_151C9198(SightEmitter **, vertex *, SightTriangle *, vertex *, SightZone *, u8, u8, u8, s32);
 
         spawn.unk34.x = end->x - start->x;
         spawn.unk34.y = end->y - start->y;
@@ -908,90 +924,83 @@ typedef struct {
     u8 unk58;
     s8 unk59;
     u8 pad5A[2];
-} Struct90_151C8FCC;
+} SightExtensionParams;
 
 
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9) {
-    void *temp_v0;
-    Struct90_151C8FCC sp90;
-    SightSpawnDesc sp38;
-    s32 sp34;
+/* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
+s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+    void *effect;
+    SightExtensionParams params;
+    SightSpawnDesc desc;
+    s32 ownerCopy; // matching: copied to the stack before the memcpy below
 
-    sp38.start = *arg1;
-    sp38.end = *arg2;
-    sp34 = arg0;
-    sp90.unk00 = sp90.unk04 = 30.10000038f;
-    sp90.unk08 = sp90.unk0C = 40.0f;
-    sp90.unk18 = 1.0f;
-    sp90.unk10 = 0.0f;
-    sp90.unk14 = 0.0f;
-    sp38.kind = 0x15;
-    sp38.flags = 0x3403;
-    sp38.lifetime = 0x12C;
-    sp38.callback0 = 0;
-    sp38.callback1 = 0;
-    sp38.red = arg3;
-    sp90.unk1C = 0.3000000119f;
-    sp38.green = arg4;
-    sp38.blue = arg5;
-    sp38.alpha = 0xFF;
-    sp38.unk14 = 0.0f;
-    sp38.width = 0.0f;
-    sp38.unk34.x = 1.0f;
-    sp38.unk34.y = 1.0f;
-    sp38.unk34.z = 1.0f;
-    sp38.options = (arg7 ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
-    sp38.unk45 = 0xFF;
-    sp38.brightness = 0xFF;
-    sp38.unk46 = 0;
-    sp38.unk47 = 6;
-    sp38.mode = 3;
-    sp90.unk54 = 0;
-    sp90.unk55 = 0;
-    sp90.unk56 = 0;
-    sp90.unk57 = 0;
-    sp90.unk48 = 1.0f;
-    sp90.unk58 = 0;
-    sp38.zone = arg6;
-    sp90.unk20 = 9.999999975e-07f;
-    temp_v0 = func_151407D0(&sp90, 0x64, &sp38, 0, 0, 0, 0, 1, arg8, arg9);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x170, &sp34, 4);
+    desc.start = *start;
+    desc.end = *end;
+    ownerCopy = owner;
+    params.unk00 = params.unk04 = 30.10000038f;
+    params.unk08 = params.unk0C = 40.0f;
+    params.unk18 = 1.0f;
+    params.unk10 = 0.0f;
+    params.unk14 = 0.0f;
+    desc.kind = 0x15;
+    desc.flags = 0x3403;
+    desc.lifetime = 300;
+    desc.callback0 = 0;
+    desc.callback1 = 0;
+    desc.red = red;
+    params.unk1C = 0.3000000119f;
+    desc.green = green;
+    desc.blue = blue;
+    desc.alpha = 0xFF;
+    desc.unk14 = 0.0f;
+    desc.width = 0.0f;
+    desc.unk34.x = 1.0f;
+    desc.unk34.y = 1.0f;
+    desc.unk34.z = 1.0f;
+    desc.options = (zoneMasked ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
+    desc.unk45 = 0xFF;
+    desc.brightness = 0xFF;
+    desc.unk46 = 0;
+    desc.unk47 = 6;
+    desc.mode = 3;
+    params.unk54 = 0;
+    params.unk55 = 0;
+    params.unk56 = 0;
+    params.unk57 = 0;
+    params.unk48 = 1.0f;
+    params.unk58 = 0;
+    desc.zone = zone;
+    params.unk20 = 9.999999975e-07f;
+    effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x170, &ownerCopy, 4);
     }
-    return (s32)temp_v0;
+    return (s32)effect;
 }
 
+/* Spawn descriptor for func_15132A4C. */
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ struct17 unk34;
-    /* 0x40 */ struct17 unk40;
+    /* 0x10 */ f32 pitch;
+    /* 0x14 */ f32 yaw;
+    /* 0x18 */ f32 roll;
+    /* 0x1C */ f32 scale[3];
+    /* 0x28 */ vertex position;
+    /* 0x34 */ vertex unk34;
+    /* 0x40 */ vertex unk40;
     /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ s16 model;
     /* 0x58 */ u8  unk58;
     /* 0x59 */ u8  pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8  unk60;
-    /* 0x61 */ u8  unk61;
-    /* 0x62 */ u8  unk62;
-    /* 0x63 */ u8  unk63;
-    /* 0x64 */ u8  unk64;
-    /* 0x65 */ u8  unk65;
-    /* 0x66 */ u8  unk66;
-    /* 0x67 */ u8  unk67;
+    /* 0x5C */ SightZone *zone;
+    /* 0x60 */ u8  unk60[8];
     /* 0x68 */ u8  unk68;
     /* 0x69 */ s8  unk69;
     /* 0x6A */ u8  unk6A;
@@ -1002,64 +1011,54 @@ typedef struct {
     /* 0x72 */ s16 unk72;
     /* 0x74 */ s16 unk74;
     /* 0x76 */ u8  pad76[2];
-} S151C9198;
+} SightEmitterDesc;
 
-typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8  unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u8  unkE;
-    /* 0x10 */ s32 unk10;
-} S151C9198_b;
-
-extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
+extern s32 func_15144E80(SightTriangle *, vertex *, vertex *, vertex *);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_15133760(void *, void *);
 
-void func_151C9198(struct102 **arg0, vertex *arg1, void *arg2, vertex *arg3, s32 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
-    struct17 spEC;
-    struct17 spE0;
-    struct17 spD4;
+/* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
+void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle, vertex *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+    vertex edge0;
+    vertex edge1;
+    vertex normal;
     s32 i;
-    S151C9198 desc;
-    void *ret;
-    S151C9198_b extra;
+    SightEmitterDesc desc;
+    void *unused; // matching: reserves a stack slot
+    SightEmitterAnim anim;
 
-    if (func_15144E80(arg2, &spEC, &spE0, &spD4) != 0) {
-        func_15145974(&spD4, &desc.unk14, &desc.unk10);
+    if (func_15144E80(triangle, &edge0, &edge1, &normal) != 0) {
+        func_15145974(&normal, &desc.yaw, &desc.pitch);
         desc.unk0 = 1.0f;
         desc.unk4 = 1.0f;
-        desc.unk1C = 1.0f;
-        desc.unk20 = 1.0f;
-        desc.unk10 += 90.0f;
-        desc.unk24 = 1.0f;
+        desc.scale[0] = 1.0f;
+        desc.scale[1] = 1.0f;
+        desc.pitch += 90.0f;
+        desc.scale[2] = 1.0f;
         desc.unkC = 0.4000000059604645f;
         desc.unk8 = 0.4000000059604645f;
-        desc.unk18 = 0.0f;
-        desc.unk28 = *(struct17 *)arg1;
-        desc.unk34.unk0 = 0.0f;
-        desc.unk34.unk4 = 0.0f;
-        desc.unk34.unk8 = 0.0f;
-        desc.unk40.unk0 = 0.0f;
-        desc.unk40.unk4 = 0.0f;
-        desc.unk40.unk8 = 0.0f;
+        desc.roll = 0.0f;
+        desc.position = *pos;
+        desc.unk34.x = 0.0f;
+        desc.unk34.y = 0.0f;
+        desc.unk34.z = 0.0f;
+        desc.unk40.x = 0.0f;
+        desc.unk40.y = 0.0f;
+        desc.unk40.z = 0.0f;
         desc.unk4C = 0.0f;
-        desc.unk50 = (arg6 ? 0x400 : 0) | 0x100 | 0x800 | 0x10000 | 0x4000 | 0x40000 | 0x80000;
-        desc.unk54 = 0x12C;
-        desc.unk56 = 0x36;
+        desc.flags = (zoneMasked ? 0x400 : 0) | 0x100 | 0x800 | 0x10000 | 0x4000 | 0x40000 | 0x80000;
+        desc.lifetime = 300;
+        desc.model = 0x36;
         desc.unk58 = 0;
-        desc.unk5C = arg4;
-        desc.unk60 = 0xFF;
-        desc.unk61 = 0;
-        desc.unk62 = 0;
-        desc.unk63 = 0;
-        desc.unk64 = 0;
-        desc.unk65 = 0;
-        desc.unk66 = 0;
-        desc.unk67 = 0;
+        desc.zone = zone;
+        desc.unk60[0] = 0xFF;
+        desc.unk60[1] = 0;
+        desc.unk60[2] = 0;
+        desc.unk60[3] = 0;
+        desc.unk60[4] = 0;
+        desc.unk60[5] = 0;
+        desc.unk60[6] = 0;
+        desc.unk60[7] = 0;
         desc.unk68 = 2;
         desc.unk6A = 0;
         desc.unk6C = 0;
@@ -1067,48 +1066,48 @@ void func_151C9198(struct102 **arg0, vertex *arg1, void *arg2, vertex *arg3, s32
         desc.unk72 = 1;
         desc.unk74 = 0xFF;
         desc.unk69 = -1;
-        arg0[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
-        if (arg0[0] != NULL) {
+        emitters[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
+        if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760((u8 *)arg0[0] + 0x90 + i * 0x40, arg0[0]);
+                func_15133760(emitters[0]->parts[i], emitters[0]);
             }
         }
         desc.unk69 = 2;
-        extra.unk0 = 2;
-        extra.unk6 = 4;
-        extra.unkE = 6;
-        extra.unk8 = 0x3E;
-        extra.unk10 = 0x3E;
-        if (arg5) {
-            extra.unk4 = 0x87;
-            extra.unkC = 0x88;
+        anim.unk0 = 2;
+        anim.unk6 = 4;
+        anim.unkE = 6;
+        anim.unk8 = 0x3E;
+        anim.unk10 = 0x3E;
+        if (altColors) {
+            anim.unk4 = 0x87;
+            anim.unkC = 0x88;
         } else {
-            extra.unk4 = 0x8B;
-            extra.unkC = 0x8C;
+            anim.unk4 = 0x8B;
+            anim.unkC = 0x8C;
         }
-        desc.unk56 = 0x37;
+        desc.model = 0x37;
         desc.unk68 = 0;
-        arg0[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
-        if (arg0[1] != NULL) {
+        emitters[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760((u8 *)arg0[1] + 0x90 + i * 0x40, arg0[1]);
+                func_15133760(emitters[1]->parts[i], emitters[1]);
             }
-            memcpy((u8 *)arg0[1] + 0x170, &extra, 0x14);
+            memcpy(&emitters[1]->anim, &anim, sizeof(SightEmitterAnim));
         }
-        desc.unk56 = 0x38;
-        if (arg5) {
-            extra.unk4 = 0x89;
-            extra.unkC = 0x8A;
+        desc.model = 0x38;
+        if (altColors) {
+            anim.unk4 = 0x89;
+            anim.unkC = 0x8A;
         } else {
-            extra.unk4 = 0x8D;
-            extra.unkC = 0x8E;
+            anim.unk4 = 0x8D;
+            anim.unkC = 0x8E;
         }
-        arg0[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
-        if (arg0[2] != NULL) {
+        emitters[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        if (emitters[2] != NULL) {
             for (i = 0; i < 2; i++) {
-                func_15133760((u8 *)arg0[2] + 0x90 + i * 0x40, arg0[2]);
+                func_15133760(emitters[2]->parts[i], emitters[2]);
             }
-            memcpy((u8 *)arg0[2] + 0x170, &extra, 0x14);
+            memcpy(&emitters[2]->anim, &anim, sizeof(SightEmitterAnim));
         }
     }
 }
