@@ -1,6 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8; its asm returns a full word
- * (dsra32 v0), and func_151AF388 spills the result as a word. File-local prototype. */
+/* functions.h declares func_150ADA20 as returning u8, but it returns a full word (the
+ * callers here take % of the u32), and declares func_151D9B8C's 4th parameter as s32
+ * where a pointer keeps the matching codegen. Both get file-local prototypes. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_s32_decl_in_functions_h
 #include "functions.h"
