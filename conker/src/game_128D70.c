@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// functions.h declares func_150ADA20 as returning u8; this file uses its full u32 result.
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
@@ -61,7 +62,6 @@ typedef struct {
 } EmitterEffect; // size 0x38
 
 extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
-
 
 /* The fields of struct127.unk31C that func_150FB8C0 reads (struct126 only declares them as padding). */
 typedef struct {
@@ -131,13 +131,17 @@ typedef struct {
 extern u8 D_800A1DD0[], D_800A1E34[];
 extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D_800A1E38[][3], D_800A1E50[][3], D_800A1E68[][3], D_800A1E80[][3];
 extern struct127 *func_1507515C(struct127 *);
-extern void func_15145EA4(void *, void *, s32, s32);
+extern void func_15145EA4(f32 **, f32 **, s32, s32);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern s32 func_151602C0(void *, void *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern s32 func_151602C0(SparkArg_150FB8C0 *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern void func_1515548C(void *, s32, s32, s32, s32, s32, s32);
-extern void func_1515572C(void *, s32);
+extern void func_1515548C(EffectArg_150FB8C0 *, s32, s32, s32, s32, s32, s32);
+extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
+/* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
+ * unk1D4 matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
+ * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
+ * and trails, and a camera effect for the target's camera. */
 void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
     struct127 *target;
     u8 useTarget;
@@ -170,7 +174,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     if (obj == NULL || side < 0 || side >= 2) {
         return;
     }
-    if (skipTarget != 0) {
+    if (skipTarget) {
         target = NULL;
         useTarget = 0;
     } else {
@@ -217,7 +221,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     dstPoints[2] = edgeB;
     func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
-        // matching: IDO needs a declaration opening this block (a block-scope redeclaration of the callee)
+        // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
         extern void func_151450B4(struct17 *, struct17 *, struct17 *);
 
         linePoint = TARGET_STATE(target)->linePoint;
