@@ -29,7 +29,7 @@ struct BoneFollower {
     /* 0x29 */ s8 updateFn;         // index into D_8008FC40, -1 for none
     /* 0x2A */ s8 expireFn;         // index into D_8008FC48, -1 for none
     /* 0x2B */ u8 pad2B;
-    /* 0x2C */ s32 attached;        // struct102 *; matching: stored as an s32, the conversion at each call steers regalloc // object destroyed along with this one
+    /* 0x2C */ s32 attached;        // struct102 * destroyed with this one; matching: s32, a pointer changes regalloc
     /* 0x30 */ ActorFollowerGroup *group;
     /* 0x34 */ Vec3f position;      // offset transformed by the bone matrix
     /* 0x40 */ BoneFollower *next;
@@ -43,10 +43,10 @@ struct ActorFollowerGroup {
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15;
     /* 0x16 */ s16 timer;
-    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is posed (see func_151D2F90)
+    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
     /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
-    /* 0x1A */ s8 posedFn;          // index into D_8008FC50
-    /* 0x1B */ s8 unposedFn;        // index into D_8008FC54
+    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
+    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
     /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
     /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
     /* 0x1E */ u8 pad1E[2];
@@ -131,7 +131,7 @@ void func_151D2C40(BoneFollower *follower) {
             if (follower->expireFn != -1) {
                 D_8008FC48[follower->expireFn](follower, &position);
             }
-            follower->attached = NULL;
+            follower->attached = 0;
             func_1516972C((struct102 *)follower);
             return;
         }
@@ -153,8 +153,8 @@ void func_151D2DCC(BoneFollower *arg0) {
     BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
 
     func_151D2DAC(follower);
-    if (follower->attached != NULL) {
-        func_1516972C(follower->attached);
+    if (follower->attached != 0) {
+        func_1516972C((struct102 *)follower->attached);
     }
     func_15169804((struct102 *)follower);
 }
@@ -163,8 +163,8 @@ void func_151D2E14(BoneFollower *arg0) {
     BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
 
     func_151D2DAC(follower);
-    if (follower->attached != NULL) {
-        func_1516979C(follower->attached);
+    if (follower->attached != 0) {
+        func_1516979C((struct102 *)follower->attached);
     }
     func_15169824((struct102 *)follower);
 }
@@ -189,9 +189,7 @@ void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
         if (actor == (s32)follower->actor) {
             follower->actor = (struct127 *)msg->unk4.w;
             follower->actorUid = msg->unk9;
-            return;
-        }
-        if ((s32)follower->actor == msg->unk4.w) {
+        } else if ((s32)follower->actor == msg->unk4.w) {
             follower->actor = (struct127 *)actor;
             follower->actorUid = msg->unk8;
         }
@@ -213,14 +211,14 @@ ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3
     return group;
 }
 
-/* Per-frame update: tracks whether the actor is posed, runs the timer and the callbacks. */
+/* Per-frame update: refreshes the trackable flag, runs the timer and the callbacks. */
 void func_151D2F90(ActorFollowerGroup *group) {
     struct127 *actor;
-    u8 wasPosed;
-    u8 isPosed;
+    u8 wasTrackable;
+    u8 isTrackable;
 
     actor = group->actor;
-    wasPosed = group->flags & 2;
+    wasTrackable = group->flags & 2;
     if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != group->actorUid) {
         func_1516972C((struct102 *)group);
         return;
@@ -240,12 +238,12 @@ void func_151D2F90(ActorFollowerGroup *group) {
             return;
         }
     }
-    isPosed = group->flags & 2;
-    if (wasPosed != isPosed) {
-        if (isPosed) {
-            D_8008FC50[group->posedFn](group);
+    isTrackable = group->flags & 2;
+    if (wasTrackable != isTrackable) {
+        if (isTrackable) {
+            D_8008FC50[group->trackFn](group);
         } else {
-            D_8008FC54[group->unposedFn](group);
+            D_8008FC54[group->untrackFn](group);
         }
     }
     if (group->updateFn != -1 && D_8008FC4C[group->updateFn](group) == 0) {
@@ -270,10 +268,10 @@ void func_151D3130(ActorFollowerGroup *group) {
             if (follower->expireFn != -1) {
                 D_8008FC48[follower->expireFn](follower, &follower->position);
             }
-            follower->attached = NULL;
+            follower->attached = 0;
             func_1516972C((struct102 *)follower);
             follower = next;
-        latch: // matching: the label splits the block so as1 fills the branch delay slot from the loop top
+        latch: // matching: the label ends the block so as1 fills the branch delay slot from the loop top
             ;
         } while (next != NULL);
     }
