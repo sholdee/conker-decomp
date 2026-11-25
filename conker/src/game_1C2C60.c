@@ -3159,49 +3159,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-typedef struct Vec3f_1519B4B8 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_1519B4B8;
-
-typedef struct FlameState_1519B4B8 {
-    u8 pad0[0x2C];
-    f32 width;
-    u8 pad30[0xA];
-    u8 alpha3A;
-    u8 pad3B[0x109];
-    f32 texture144;
-    u8 pad148[8];
-    u8 flags150;
-} FlameState_1519B4B8;
-
-typedef struct FlameActor_1519B4B8 {
-    char pad0[0x10];
-    f32 position[3];
-    char pad1C[0x2];
-    u16 flags1E;
-    char pad20[0x5];
-    u8 point_capacity;
-    char pad26[0x6];
-    s8 unk2C;
-    s8 point_index;
-    s8 point_end;
-    char pad2F[0x65];
-    void *points;
-    FlameState_1519B4B8 *state;
-} FlameActor_1519B4B8;
-
-typedef struct FlamePoint_1519B4B8 {
-    Vec3f_1519B4B8 position;
-    Vec3f_1519B4B8 velocity;
-    f32 size;
-    u8 pad1C[4];
-    u8 alpha;
-    u8 pad21[3];
-    f32 texture;
-} FlamePoint_1519B4B8;
-
 typedef struct RenderView_1519B4B8 {
     u8 pad[0x180];
 } RenderView_1519B4B8;
@@ -3218,16 +3175,17 @@ extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 extern RenderView_1519B4B8 *D_800BE628;
 
-Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
-    FlameState_1519B4B8 *state;
-    Vec3f_1519B4B8 next;
-    Vec3f_1519B4B8 cur;
+/* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
+Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
+    CharacterFlamethrowerFlame *state;
+    Vec3f next;
+    Vec3f cur;
     s32 index;
-    FlamePoint_1519B4B8 *records;
-    Vec3f_1519B4B8 *camera;
-    Vec3f_1519B4B8 toCamera;
-    Vec3f_1519B4B8 delta;
-    Vec3f_1519B4B8 normal;
+    FlamePoint *points;
+    Vec3f *camera;
+    Vec3f toCamera;
+    Vec3f delta;
+    Vec3f normal;
     s32 previous;
     f32 lengthSquared;
     u8 flag;
@@ -3239,81 +3197,81 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
     Vtx_t *vtx;
     u8 curAlpha;
 
-    if (arg0->unk2C < 2) {
-        return arg1;
+    if (actor->count < 2) {
+        return gfx;
     }
-    state = arg0->state;
-    records = arg0->points;
-    if ((state->flags150 & 0x20) && (D_800BE616 == 0) && (state->flags150 & 0x10)) {
-        return arg1;
+    state = actor->state;
+    points = actor->points;
+    if ((state->flags & 0x20) && (D_800BE616 == 0) && (state->flags & 0x10)) {
+        return gfx;
     }
-    if (state->flags150 & 1) {
+    if (state->flags & 1) {
         s32 tail;
-        FlamePoint_1519B4B8 *first;
-        FlamePoint_1519B4B8 *last;
+        FlamePoint *first;
+        FlamePoint *last;
         f32 dx;
         f32 dy;
         f32 dz;
 
-        tail = arg0->point_end;
+        tail = actor->head;
         tail--;
-        index = arg0->point_index;
+        index = actor->tail;
         if (tail < 0) {
-            tail = arg0->point_capacity - 1;
+            tail = actor->capacity - 1;
         }
-        last = &records[index];
-        first = &records[tail];
-        dx = first->position.x - last->position.x;
-        dy = first->position.y - last->position.y;
-        dz = first->position.z - last->position.z;
-        if (func_150A6360(&D_800BE628[arg2], D_800D9C10 + arg2 * 0x40,
-                          (last->position.x + first->position.x) * 0.5f,
-                          (last->position.y + first->position.y) * 0.5f,
-                          (last->position.z + first->position.z) * 0.5f,
-                          sqrtf(dx * dx + dz * dz), fabsf(dy) + (state->width + state->width), 20000.0f) == 0) {
-            return arg1;
+        last = &points[index];
+        first = &points[tail];
+        dx = first->pos.x - last->pos.x;
+        dy = first->pos.y - last->pos.y;
+        dz = first->pos.z - last->pos.z;
+        if (func_150A6360(&D_800BE628[view], D_800D9C10 + view * 0x40,
+                          (last->pos.x + first->pos.x) * 0.5f,
+                          (last->pos.y + first->pos.y) * 0.5f,
+                          (last->pos.z + first->pos.z) * 0.5f,
+                          sqrtf(dx * dx + dz * dz), fabsf(dy) + (state->seed.size + state->seed.size), 20000.0f) == 0) {
+            return gfx;
         }
     }
-    func_151D5D60((u8 *)arg0 + 0x84, arg2, (arg0->point_capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(actor->buffers, view, (actor->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
-        return arg1;
+        return gfx;
     }
-    camera = (Vec3f_1519B4B8 *)func_15144B34(arg2);
+    camera = (Vec3f *)func_15144B34(view);
     flag = 1;
-    arg1 = (Gfx *)func_15142E24((s32)arg1, (s32)D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
-    arg1 = func_15142B7C(arg1, 0x200005, 0x1F0600);
-    arg1 = func_1513F4E4(arg1, 0x4C, &flag);
-    arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
-    if (arg0->flags1E & 2) {
-        index = arg0->point_end;
+    gfx = (Gfx *)func_15142E24((s32)gfx, (s32)D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x4C, &flag);
+    gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    if (actor->flags1E & 2) {
+        index = actor->head;
         index--;
         if (index < 0) {
-            index = arg0->point_capacity - 1;
+            index = actor->capacity - 1;
         }
-        cur = *(Vec3f_1519B4B8 *)arg0->position;
-        curWidth = state->width;
-        curAlpha = state->alpha3A;
-        curTexture = state->texture144;
+        cur = actor->pos;
+        curWidth = state->seed.size;
+        curAlpha = state->seed.alpha;
+        curTexture = state->texOffset;
     } else {
-        previous = arg0->point_end;
+        previous = actor->head;
         previous--;
         if (previous < 0) {
-            previous = arg0->point_capacity - 1;
+            previous = actor->capacity - 1;
         }
         index = previous;
         index--;
         if (index < 0) {
-            index = arg0->point_capacity - 1;
+            index = actor->capacity - 1;
         }
-        cur = records[previous].position;
-        curWidth = records[previous].size;
-        curAlpha = records[previous].alpha;
-        curTexture = records[previous].texture;
+        cur = points[previous].pos;
+        curWidth = points[previous].size;
+        curAlpha = points[previous].alpha;
+        curTexture = points[previous].texT;
     }
-    next = records[index].position;
-    nextWidth = records[index].size;
-    nextAlpha = records[index].alpha;
-    nextTexture = records[index].texture;
+    next = points[index].pos;
+    nextWidth = points[index].size;
+    nextAlpha = points[index].alpha;
+    nextTexture = points[index].texT;
     delta.x = cur.x - next.x;
     delta.y = cur.y - next.y;
     delta.z = cur.z - next.z;
@@ -3401,9 +3359,9 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
         vtx->cn[3] = nextAlpha;
         vtx->flag = 0;
         vtx++;
-        gSPVertex(arg1++, vtx - 4, 4, 0);
-        gSP1Triangle(arg1++, 0, 1, 2, 0);
-        gSP1Triangle(arg1++, 1, 3, 2, 0);
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 1, 3, 2, 0);
         if (nextTexture < curTexture) {
             memcpy(vtx, vtx - 2, 0x20);
             vtx[-2].tc[0] -= 0x8000;
@@ -3414,16 +3372,16 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
         previous = index;
         index--;
         if (index < 0) {
-            index = arg0->point_capacity - 1;
+            index = actor->capacity - 1;
         }
-        cur = records[previous].position;
-        next = records[index].position;
-        nextWidth = records[index].size;
-        nextAlpha = records[index].alpha;
-        curTexture = records[previous].texture;
-        nextTexture = records[index].texture;
-    } while (previous != arg0->point_index);
-    return arg1;
+        cur = points[previous].pos;
+        next = points[index].pos;
+        nextWidth = points[index].size;
+        nextAlpha = points[index].alpha;
+        curTexture = points[previous].texT;
+        nextTexture = points[index].texT;
+    } while (previous != actor->tail);
+    return gfx;
 }
 
 /* Integrates a point over `dt` under `gravity` (applied to vel.y). */
