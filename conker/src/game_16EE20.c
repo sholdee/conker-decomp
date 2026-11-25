@@ -7,9 +7,6 @@
 #include "variables.h"
 #undef D_800D3098
 
-extern f32 D_800A5698;
-extern f32 D_800A5694;
-extern f32 D_800A569C;
 extern s16 D_800DD1C0;
 extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
@@ -858,8 +855,8 @@ void func_15143134(struct17 *offset, f32 *out, Mtx *mtx) {
     D_800DCA00 = 0;
 }
 
-/* A spawn volume: a cylinder or box around (x, y, z). */
-typedef struct Game16EE20Emitter {
+/* A spawn region around (x, y, z): a disc, cylinder, sphere or (rotated) box, by flags & 3. */
+typedef struct SpawnRegion {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
@@ -867,19 +864,24 @@ typedef struct Game16EE20Emitter {
     /* 0x08 */ s16 height;
     /* 0x0A */ s16 radiusZ;
     /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation;
+    /* 0x10 */ f32 rotation; /* degrees */
     /* 0x14 */ u8 pad14;
     /* 0x15 */ u8 flags; /* bits 0-1: shape */
-} Game16EE20Emitter;
+    /* 0x16 */ u8 pad16[0xE];
+    /* 0x24 */ f32 cosineX;
+    /* 0x28 */ f32 sineX;
+    /* 0x2C */ f32 sineZ;
+    /* 0x30 */ f32 cosineZ;
+} SpawnRegion;
 
-/* Picks a random point in the emitter's volume: (x, z) and the top and bottom heights. */
-void func_151432BC(Game16EE20Emitter *emitter, f32 *x, f32 *z, f32 *top, f32 *bottom) {
-    switch (emitter->flags & 3) {
+/* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
+void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    switch (region->flags & 3) {
     default:
-        *x = emitter->x;
-        *z = emitter->z;
-        *top = emitter->y + emitter->height;
-        *bottom = emitter->y - emitter->height;
+        *x = region->x;
+        *z = region->z;
+        *top = region->y + region->height;
+        *bottom = region->y - region->height;
         return;
     case 2:
         /* rotated box */
@@ -890,15 +892,15 @@ void func_151432BC(Game16EE20Emitter *emitter, f32 *x, f32 *z, f32 *top, f32 *bo
             f32 offsetX;
             f32 offsetZ;
 
-            angle = emitter->rotation * (256.0f / 360.0f);
+            angle = region->rotation * (256.0f / 360.0f);
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * emitter->radiusX) + -emitter->radiusX;
-            offsetZ = func_150ADA68() * (2.0f * emitter->radiusZ) + -emitter->radiusZ;
-            *x = emitter->x + (offsetX * cosine + offsetZ * sine);
-            *z = emitter->z + (offsetZ * cosine - offsetX * sine);
-            *top = emitter->y + emitter->height;
-            *bottom = emitter->y;
+            offsetX = func_150ADA68() * (2.0f * region->radiusX) + -region->radiusX;
+            offsetZ = func_150ADA68() * (2.0f * region->radiusZ) + -region->radiusZ;
+            *x = region->x + (offsetX * cosine + offsetZ * sine);
+            *z = region->z + (offsetZ * cosine - offsetX * sine);
+            *top = region->y + region->height;
+            *bottom = region->y;
         }
         return;
     case 0:
@@ -912,11 +914,11 @@ void func_151432BC(Game16EE20Emitter *emitter, f32 *x, f32 *z, f32 *top, f32 *bo
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * emitter->radiusX;
-            *x = emitter->x + radius * cosine;
-            *z = emitter->z - radius * sine;
-            *top = emitter->y + emitter->height;
-            *bottom = emitter->y;
+            radius = func_150ADA68() * region->radiusX;
+            *x = region->x + radius * cosine;
+            *z = region->z - radius * sine;
+            *top = region->y + region->height;
+            *bottom = region->y;
         }
         return;
     case 1:
@@ -930,11 +932,11 @@ void func_151432BC(Game16EE20Emitter *emitter, f32 *x, f32 *z, f32 *top, f32 *bo
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * emitter->radiusX;
-            *x = emitter->x + radius * cosine;
-            *z = emitter->z - radius * sine;
-            *top = emitter->y + emitter->height;
-            *bottom = emitter->y - emitter->height;
+            radius = func_150ADA68() * region->radiusX;
+            *x = region->x + radius * cosine;
+            *z = region->z - radius * sine;
+            *top = region->y + region->height;
+            *bottom = region->y - region->height;
         }
         return;
     }
@@ -1324,244 +1326,205 @@ s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     }
     return ret;
 }
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
-    s16 temp_v0;
-    s16 temp_v0_2;
-
-    switch (arg13) {
+/* Colour-combiner style blend: picks the output RGBA from colour 0, colour 1 and `level` per `mode`. */
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+    switch (mode) {
     case 2:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg11;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a1;
         return;
     case 0:
-        *arg3 = 0;
-        temp_v0 = *arg3;
-        *arg2 = temp_v0;
-        *arg1 = temp_v0;
-        *arg0 = temp_v0;
+        *outR = *outG = *outB = *outA = 0;
         return;
     case 1:
-        *arg2 = 0;
-        temp_v0_2 = *arg2;
-        *arg1 = temp_v0_2;
-        *arg0 = temp_v0_2;
-        *arg3 = (s16) arg11;
+        *outR = *outG = *outB = 0;
+        *outA = a1;
         return;
     case 3:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     case 4:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     default:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     }
 }
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
-    s16 temp_v0;
-    s16 temp_v0_2;
-    s16 temp_v0_3;
-
-    switch (arg13) {
+/* Second-cycle variant of func_151441A4. */
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+    switch (mode) {
     case 2:
     case 3:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = (s16) arg7;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = a0;
         return;
     case 13:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = 0;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = 0;
         return;
     case 0:
-        *arg3 = 0;
-        temp_v0 = *arg3;
-        *arg2 = temp_v0;
-        *arg1 = temp_v0;
-        *arg0 = temp_v0;
+        *outR = *outG = *outB = *outA = 0;
         return;
     case 1:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = 0;
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = 0;
         return;
     case 7:
     case 12:
-        *arg2 = 0;
-        temp_v0_2 = *arg2;
-        *arg1 = temp_v0_2;
-        *arg0 = temp_v0_2;
-        *arg3 = (s16) arg11;
+        *outR = *outG = *outB = 0;
+        *outA = a1;
         return;
     case 8:
-        *arg2 = 0;
-        temp_v0_3 = *arg2;
-        *arg1 = temp_v0_3;
-        *arg0 = temp_v0_3;
-        *arg3 = (s16) arg7;
+        *outR = *outG = *outB = 0;
+        *outA = a0;
         return;
     case 4:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     case 5:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     case 6:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = (s16) arg11;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = a1;
         return;
     case 10:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg11;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a1;
         return;
     case 11:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg7;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a0;
         return;
     case 9:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) arg11;
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = a1;
         return;
     default:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     }
 }
-s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
+/* Wraps value into [lo, hi] (integer steps of hi - lo + 1). */
+s32 func_151444DC(s32 value, s32 hi, s32 lo) {
     s32 range;
-    if (arg1 < arg0) {
-        range = arg1 - arg2 + 1;
+    if (hi < value) {
+        range = hi - lo + 1;
         do {
-            arg0 -= range;
-        } while (arg1 < arg0);
+            value -= range;
+        } while (hi < value);
     }
-    if (arg0 < arg2) {
-        range = arg1 - arg2 + 1;
+    if (value < lo) {
+        range = hi - lo + 1;
         do {
-            arg0 += range;
-        } while (arg0 < arg2);
+            value += range;
+        } while (value < lo);
     }
-    return arg0;
+    return value;
 }
-f32 func_15144528(f32 arg0, f32 arg1, f32 arg2) {
-    f32 temp;
 
-    if (arg1 < arg0) {
-        temp = arg1 - arg2;
+/* Wraps value into [lo, hi]. */
+f32 func_15144528(f32 value, f32 hi, f32 lo) {
+    f32 range;
+
+    if (hi < value) {
+        range = hi - lo;
         do {
-            arg0 -= temp;
-        } while (arg1 < arg0);
+            value -= range;
+        } while (hi < value);
     }
-    if (arg0 < arg2) {
-        temp = arg1 - arg2;
+    if (value < lo) {
+        range = hi - lo;
         do {
-            arg0 += temp;
-        } while (arg0 < arg2);
+            value += range;
+        } while (value < lo);
     }
-    return arg0;
+    return value;
 }
+
+/* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
 f32 func_15144598(struct134 *arg0) {
-    f32 temp_f2;
-    s16 temp_v0;
-    s32 temp_t6;
+    SpawnRegion *region = (SpawnRegion *)arg0;
+    f32 area;
+    s16 radius;
 
-    temp_t6 = *((u8 *)arg0 + 0x15) & 3;
-    switch (temp_t6) {
+    switch (region->flags & 3) {
     default:
-        temp_f2 = 1.0f;
+        area = 1.0f;
         break;
     case 2:
-        temp_f2 = (f32)((s16)arg0->unk6 * (s16)arg0->unkA) * 4.0f;
+        area = (f32)(region->radiusX * region->radiusZ) * 4.0f;
         break;
     case 0:
     case 1:
-        temp_v0 = (s16)arg0->unk6;
-        temp_f2 = (f32)(temp_v0 * temp_v0) * D_800A5694;
+        radius = region->radiusX;
+        area = (f32)(radius * radius) * 3.1415927f;
         break;
     }
-    return temp_f2;
+    return area;
 }
+
+/* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
 f32 func_1514462C(s32 arg0) {
-    struct169 *temp_a0;
-    s32 temp_t6;
-    f32 temp_f2;
-    f32 temp_f0;
+    SpawnRegion *region = (SpawnRegion *)arg0;
+    f32 volume;
+    f32 radius;
 
-    temp_a0 = (struct169 *)arg0;
-    temp_t6 = temp_a0->unk15 & 3;
-    switch (temp_t6) {
+    switch (region->flags & 3) {
     default:
-        temp_f2 = 1.0f;
+        volume = 1.0f;
         break;
     case 2:
-        temp_f2 = (f32)(temp_a0->unk6 * temp_a0->unk8 * temp_a0->unkA);
+        volume = (f32)(region->radiusX * region->height * region->radiusZ);
         break;
     case 0:
-        temp_f2 = (f32)(temp_a0->unk6 * temp_a0->unk6) * D_800A5698 * (f32)temp_a0->unk8;
+        volume = (f32)(region->radiusX * region->radiusX) * 3.1415927f * (f32)region->height;
         break;
     case 1:
-        temp_f0 = (f32)temp_a0->unk6;
-        temp_f2 = ((temp_f0 * D_800A569C) * temp_f0) * temp_f0;
+        radius = (f32)region->radiusX;
+        volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
-    return temp_f2;
+    return volume;
 }
-typedef struct Game16EE20SampleRegion {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 radiusX;
-    s16 height;
-    s16 radiusZ;
-    u8 padC[9];
-    u8 flags;
-    u8 pad16[0xE];
-    f32 cosineX;
-    f32 sineX;
-    f32 sineZ;
-    f32 cosineZ;
-} Game16EE20SampleRegion;
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Func1514470C_Vec3f;
-
-void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
+/* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
+void func_1514470C(SpawnRegion *region, f32 *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
@@ -1571,19 +1534,19 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
     f32 cosineZ;
     s32 mode;
 
-    radiusX = arg0->radiusX;
-    height = arg0->height;
-    radiusZ = arg0->radiusZ;
-    cosineX = arg0->cosineX;
-    sineX = arg0->sineX;
-    sineZ = arg0->sineZ;
-    cosineZ = arg0->cosineZ;
-    mode = arg0->flags & 3;
+    radiusX = region->radiusX;
+    height = region->height;
+    radiusZ = region->radiusZ;
+    cosineX = region->cosineX;
+    sineX = region->sineX;
+    sineZ = region->sineZ;
+    cosineZ = region->cosineZ;
+    mode = region->flags & 3;
     switch (mode) {
     default:
-        arg1[0] = arg0->x;
-        arg1[1] = arg0->y;
-        arg1[2] = arg0->z;
+        out[0] = region->x;
+        out[1] = region->y;
+        out[2] = region->z;
         return;
     case 2:
         {
@@ -1601,10 +1564,10 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
             mixed = y * cosineX + z * sineX;
             x = x * cosineZ + mixed * sineZ;
             y = y * sineX - z * cosineX;
-            arg1[0] = arg0->x + x;
-            arg1[1] = arg0->y + y;
+            out[0] = region->x + x;
+            out[1] = region->y + y;
             rotatedZ = mixed * cosineZ - savedX * sineZ;
-            arg1[2] = arg0->z + rotatedZ;
+            out[2] = region->z + rotatedZ;
         }
         return;
     case 0:
@@ -1626,20 +1589,20 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
             mixed = y * cosineX + z * sineX;
             x = x * cosineZ + mixed * sineZ;
             y = y * sineX - z * cosineX;
-            arg1[0] = arg0->x + x;
-            arg1[1] = arg0->y + y;
-            arg1[2] = arg0->z + (mixed * cosineZ - savedX * sineZ);
+            out[0] = region->x + x;
+            out[1] = region->y + y;
+            out[2] = region->z + (mixed * cosineZ - savedX * sineZ);
         }
         return;
     case 1:
         {
-            Func1514470C_Vec3f offset;
+            struct17 offset;
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset.x);
-            arg1[0] = arg0->x + offset.x;
-            arg1[1] = arg0->y + offset.y;
-            arg1[2] = arg0->z + offset.z;
+                          func_150ADA68() * radiusX, &offset.unk0);
+            out[0] = region->x + offset.unk0;
+            out[1] = region->y + offset.unk4;
+            out[2] = region->z + offset.unk8;
         }
         return;
     }
