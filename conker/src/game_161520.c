@@ -11,7 +11,6 @@ u32 func_150ADA20(void);
 extern u8 D_800A3FE6[];
 extern u8 D_800A4058[];
 extern u8 D_800A4068[];
-extern f32 D_800A45B0;
 extern f32 D_800A482C;
 extern f32 D_800A4830;
 extern f32 D_800A4834;
@@ -630,7 +629,7 @@ typedef struct {
     Vec3f posA;
     Vec3f posB;
     f32 accumulator;
-    f32 unk74;
+    f32 power;              /* set by the rate callback */
     f32 time;
 } BloodStrip;
 
@@ -649,7 +648,7 @@ BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1) {
     strip->active = 1;
     strip->unk14 = 0;
     strip->accumulator = 0.0f;
-    strip->unk74 = 0.0f;
+    strip->power = 0.0f;
     strip->time = 0.0f;
     return strip;
 }
@@ -684,7 +683,7 @@ void func_15134E48(BloodStrip *arg0) {
             }
             if (strip->timer > 0) {
                 if (strip->rateCallback != -1) {
-                    strip->unk74 = D_80089B5C[strip->rateCallback](strip);
+                    strip->power = D_80089B5C[strip->rateCallback](strip);
                 }
                 strip->accumulator += strip->rate * D_800BE9A4;
                 if (strip->accumulator > 1.0f) {
@@ -898,23 +897,24 @@ void func_151355B8(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
     }
 }
 
-s32 func_15135658(void *arg0) {
-    *(f32 *)((u8 *)arg0 + 0x74) = 1.0f;
+/* BloodStrip sample callback 0: full power. */
+s32 func_15135658(BloodStrip *strip) {
+    strip->power = 1.0f;
     return 1;
 }
 
-f32 func_15135670(s32 arg0) {
-    // "power", "../Effects/Blood/blood.c"
-    return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * D_800A45B4;
+/* BloodStrip rate callback 0: the tunable "power" (../Effects/Blood/blood.c), in thousandths. */
+f32 func_15135670(BloodStrip *strip) {
+    return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * 0.001f;
 }
 
 void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
 typedef struct {
     f32 x, y;
-} Blood356D4Position;
+} Vec2f;
 
 typedef struct {
-    Blood356D4Position position;
+    Vec2f position;
     f32 width, height;
     u8 texture;
     u8 pad11;
@@ -929,9 +929,13 @@ typedef struct {
     u8 pad42[0x16];
 } Blood356D4Particle;
 
+/* Motion state of a blood splat particle, kept at BloodSplat::motion. */
 typedef struct {
-    s16 owner;
-    f32 growth, velocityX, velocityY, field10, field14;
+    s16 timer;              /* frames of growth before the splat starts to fall */
+    f32 growth;
+    Vec2f velocity;
+    f32 gravity;
+    f32 spread;             /* growth per unit of horizontal speed while falling */
 } Blood356D4Motion;
 
 typedef struct {
@@ -942,7 +946,8 @@ extern Blood356D4Kinds D_80089BA0;
 extern s32 D_80089BA4;
 extern Blood356D4Kinds D_80089BA8;
 
-void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, u8 arg10, s32 arg11) {
+/* Spawns a blood splat particle at *position plus a ring of smaller spark particles around it. */
+void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 arg10, s32 arg11) {
     void *result;
     Blood356D4Particle particle;
     Blood356D4Motion motion;
@@ -956,21 +961,21 @@ void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 a
 
     kinds = D_80089BA0;
     data = D_80089BA4;
-    motion.owner = arg6;
-    motion.growth = (func_150ADA68() * 100.0f + 100.0f) * arg1 * 0.001f;
-    motion.velocityX = func_150ADA68() * 6.0f * arg0->x * 0.001f;
-    motion.velocityY = func_150ADA68() * 6.0f * arg0->y * 0.001f;
-    motion.field10 = arg2;
-    motion.field14 = arg3;
-    particle.position = *arg0;
-    particle.width = arg1;
-    particle.height = arg1;
+    motion.timer = delay;
+    motion.growth = (func_150ADA68() * 100.0f + 100.0f) * size * 0.001f;
+    motion.velocity.x = func_150ADA68() * 6.0f * position->x * 0.001f;
+    motion.velocity.y = func_150ADA68() * 6.0f * position->y * 0.001f;
+    motion.gravity = gravity;
+    motion.spread = spread;
+    particle.position = *position;
+    particle.width = size;
+    particle.height = size;
     particle.texture = kinds.value[func_150ADA20() & 1];
-    particle.lifetime = arg7;
+    particle.lifetime = lifetime;
     flip = (func_150ADA20() & 1) ? 2 : 0;
-    particle.flags = ((particle.texture == 0x3A) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
-    particle.duration = arg8;
-    particle.period = arg9;
+    particle.flags = ((particle.texture == 58) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
+    particle.duration = duration;
+    particle.period = period;
     particle.mode = 2;
     particle.red = 0xFF;
     particle.green = 0xFF;
@@ -985,41 +990,41 @@ void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 a
     particle.field40 = 0;
     particle.field41 = 9;
     particle.field30 = 7;
-    particle.field34 = 0x3C;
-    particle.field38 = 0x80;
-    particle.field3C = 0x20;
-    particle.alpha = arg4;
-    particle.endAlpha = arg5;
-    result = func_1515548C(&particle, 3, (s32)&data, 1, 0x18, arg10, arg11);
+    particle.field34 = 60;
+    particle.field38 = 128;
+    particle.field3C = 32;
+    particle.alpha = alpha;
+    particle.endAlpha = endAlpha;
+    result = func_1515548C(&particle, 3, (s32)&data, 1, sizeof(motion), arg10, arg11);
     if (result != NULL) {
-        memcpy((u8 *)result + 0x70, &motion, 0x18);
+        memcpy((u8 *)result + 0x70, &motion, sizeof(motion));
         scale = (particle.width + particle.height) * 0.5f;
-        count = (func_150ADA68() * 300.0f + 100.0f) * arg1 * 0.001f;
-        spark.lifetime = 0x32;
+        count = (func_150ADA68() * 300.0f + 100.0f) * size * 0.001f;
+        spark.lifetime = 50;
         spark.flags = 9;
-        spark.duration = 0x10;
-        spark.period = 0xF;
+        spark.duration = 16;
+        spark.period = 15;
         spark.mode = 3;
         spark.red = 0xFF;
         spark.green = 0xFF;
         spark.blue = 0xFF;
-        spark.alpha = arg4;
+        spark.alpha = alpha;
         spark.maximum = 0xFF;
         spark.endRed = 0xFF;
         spark.endGreen = 0xFF;
         spark.endBlue = 0xFF;
-        spark.endAlpha = arg5;
+        spark.endAlpha = endAlpha;
         spark.zero24 = 0;
         spark.zero28 = 0;
         spark.zero2C = 0;
         spark.field40 = 0;
         spark.field41 = 9;
         spark.field30 = 7;
-        spark.field34 = 0x3C;
-        spark.field38 = 0x40;
+        spark.field34 = 60;
+        spark.field38 = 64;
         spark.field3C = 0;
-        spark.width = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
-        spark.height = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
+        spark.width = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
+        spark.height = (func_150ADA68() * 120.0f + 80.0f) * (size * scale) * 0.0001f;
         while (count > 1.0f) {
             sparkKinds = D_80089BA8;
             {
@@ -1029,11 +1034,11 @@ void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 a
                 f32 distance;
 
                 angle = func_150ADA20() & 0xFF;
-                cosine = func_151423D8(angle - 0x40);
+                cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);
                 distance = (func_150ADA68() * 300.0f + 1300.0f) * scale * 0.001f;
-                spark.position.x = arg0->x + distance * sine;
-                spark.position.y = arg0->y + distance * cosine;
+                spark.position.x = position->x + distance * sine;
+                spark.position.y = position->y + distance * cosine;
             }
             spark.texture = sparkKinds.value[func_150ADA20() & 1];
             spark.flags &= ~6;
@@ -1051,62 +1056,51 @@ void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 a
 }
 
 
-typedef struct {
-    f32 x;
-    f32 y;
-} Vec2_15135BF8;
-
-typedef struct {
-    s16 timer;
-    f32 unk4;
-    Vec2_15135BF8 vel;
-    f32 unk10;
-    f32 unk14;
-} Sub_15135BF8;
-
+/* A 2D blood splat particle spawned by func_151356D4. */
 typedef struct {
     u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    Vec2f position;
+    f32 width;
+    f32 height;
     u8 pad20[0x50];
-    s16 unk70;
-} Obj_15135BF8;
+    Blood356D4Motion motion;
+} BloodSplat;
 
-s32 func_15135BF8(Obj_15135BF8 *arg0) {
-    Sub_15135BF8 *sub;
-    s32 ret;
+/* BloodSplat callback: grows the splat, then lets it fall; returns 0 once it leaves the area. */
+s32 func_15135BF8(BloodSplat *splat) {
+    Blood356D4Motion *motion;
+    s32 alive;
 
-    sub = (Sub_15135BF8 *)&arg0->unk70;
-    ret = 1;
-    if (arg0->unk70 > 0) {
-        sub->timer -= D_800BE9E4;
-        arg0->unk10 += sub->vel.x * D_800BE9A4;
-        arg0->unk14 += sub->vel.y * D_800BE9A4;
-        arg0->unk18 += sub->unk4 * D_800BE9A4;
-        arg0->unk1C += sub->unk4 * D_800BE9A4;
+    motion = &splat->motion;
+    alive = 1;
+    if (splat->motion.timer > 0) {
+        motion->timer -= D_800BE9E4;
+        splat->position.x += motion->velocity.x * D_800BE9A4;
+        splat->position.y += motion->velocity.y * D_800BE9A4;
+        splat->width += motion->growth * D_800BE9A4;
+        splat->height += motion->growth * D_800BE9A4;
     } else {
-        Vec2_15135BF8 tmp;
+        Vec2f average;
 
-        tmp = sub->vel;
-        arg0->unk14 += sub->vel.y * D_800BE9A4 + sub->unk10 * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        sub->vel.y += sub->unk10 * D_800BE9A4;
-        tmp.x += sub->vel.x;
-        tmp.y += sub->vel.y;
-        tmp.x *= 0.5f;
-        tmp.y *= 0.5f;
+        average = motion->velocity;
+        splat->position.y += motion->velocity.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        motion->velocity.y += motion->gravity * D_800BE9A4;
+        average.x += motion->velocity.x;
+        average.y += motion->velocity.y;
+        average.x *= 0.5f;
+        average.y *= 0.5f;
         {
-            f32 f = fabsf(tmp.x) * sub->unk14;
+            f32 growth = fabsf(average.x) * motion->spread;
 
-            arg0->unk18 += f * D_800BE9A4;
-            arg0->unk1C += f * D_800BE9A4;
+            splat->width += growth * D_800BE9A4;
+            splat->height += growth * D_800BE9A4;
         }
     }
-    if (arg0->unk10 > 200.0f || arg0->unk10 < -200.0f || arg0->unk14 > 200.0f || arg0->unk14 < -200.0f) {
-        ret = 0;
+    if (splat->position.x > 200.0f || splat->position.x < -200.0f || splat->position.y > 200.0f ||
+        splat->position.y < -200.0f) {
+        alive = 0;
     }
-    return ret;
+    return alive;
 }
 
 typedef struct { f32 x, y, z; } V15135DD0;
