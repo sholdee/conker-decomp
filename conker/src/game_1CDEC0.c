@@ -4,7 +4,7 @@
 
 void *memcpy(void *, const void *, u32);
 s32 func_1510F8CC(s32);
-void func_1514C678(f32 x, f32 y, s32 z, f32 radius, s32, s32, s32, s32, s32 variant, f32, s32, s32 owner);
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 variant, f32 arg9, s32 argA, u8 owner);
 extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */
@@ -24,7 +24,7 @@ typedef struct {
 } SparkEmitterEffect;
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
-void func_151A0A10(struct127 *actor, s32 duration, u8 owner, s32 arg3) {
+void func_151A0A10(struct127 *actor, s16 duration, u8 owner, s32 arg3) {
     struct260 *effect;
     SparkEmitter emitter;
 
@@ -46,7 +46,7 @@ void func_151A0A10(struct127 *actor, s32 duration, u8 owner, s32 arg3) {
                 emitter.variant = 0;
                 break;
             }
-            effect = func_151491F4((s16)duration, -1, 1, 1, 0, sizeof(SparkEmitter), owner, arg3);
+            effect = func_151491F4(duration, -1, 1, 1, 0, sizeof(SparkEmitter), owner, arg3);
             if (effect != NULL) {
                 memcpy(&((SparkEmitterEffect *)effect)->emitter, &emitter, sizeof(SparkEmitter));
             }
@@ -59,13 +59,11 @@ void func_151A0AF8(SparkEmitterEffect *effect) {
     SparkEmitter *emitter;
 
     effect->emitter.accum += 0.1750000119f * D_800BE9A4;
-    if (effect->emitter.accum > 1.0f) {
-        emitter = &effect->emitter;
-        do {
-            func_1514C678(emitter->x, emitter->y, *(s32 *)&emitter->z, func_150ADA68() * 25.0f + 15.0f,
-                          0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->owner);
-            emitter->accum -= 1.0f;
-        } while (emitter->accum > 1.0f);
+    emitter = &effect->emitter;
+    while (emitter->accum > 1.0f) {
+        func_1514C678(emitter->x, emitter->y, emitter->z, func_150ADA68() * 25.0f + 15.0f,
+                      0, 0xFF, 5, 4, emitter->variant, 0.0f, 0, effect->owner);
+        emitter->accum -= 1.0f;
     }
 }
 
@@ -109,7 +107,6 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     f32 sinAngle;
     f32 cosAngle;
     f32 speed;
-    s32 size;
 
     tilt = func_150ADA20() % 15U - 63;
     sinTilt = func_151423D8(tilt);
@@ -117,19 +114,19 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     sinAngle = func_151423D8(angle);
     cosAngle = func_151423D8(angle - 64);
     speed = func_150ADA68() * 503.0f + 801.0f;
-    spark.velX = (s32)(speed * sinTilt * cosAngle);
-    spark.velY = (s32)(-speed * cosTilt);
-    spark.velZ = (s32)(speed * sinTilt * sinAngle);
+    spark.velX = speed * sinTilt * cosAngle;
+    spark.velY = -speed * cosTilt;
+    spark.velZ = speed * sinTilt * sinAngle;
     spark.accelY = func_150ADA20() % 41U - 130;
     spark.fadeStep = func_150ADA20() % 3U + 6;
-    size = func_150ADA20();
-    spark.width = spark.height = size % 451U + 250;
-    spark.x = (s32)x;
-    spark.y = (s32)y;
-    spark.z = (s32)z;
-    spark.subX = (u16)(s32)(x * 256.0f);
-    spark.subZ = (u16)(s32)(x * 256.0f);
-    spark.subY = (u16)(s32)(x * 256.0f);
+    spark.width = spark.height = func_150ADA20() % 451U + 250;
+    spark.x = x;
+    spark.y = y;
+    spark.z = z;
+    // matching: the u8 conversion into these s8 fields fixes the store schedule
+    spark.subX = (u8)(s32)(x * 256.0f);
+    spark.subZ = (u8)(s32)(x * 256.0f);
+    spark.subY = (u8)(s32)(x * 256.0f);
     spark.envR = 0;
     spark.envG = 0;
     spark.envB = 0;
