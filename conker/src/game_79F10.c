@@ -1847,72 +1847,75 @@ void func_1504CB98(Actor *arg0) {
     arg0->unk31C->unk88 = (s16) sp188;
 }
 
+/* Tilts the actor toward the slope of the ground under it (pitch/roll and the unk164/unk168 lean). */
 void func_150511E8(struct127 *arg0) {
-    f32 sp6C;
-    f32 sp68;
-    f32 sp64;
-    f32 sp60;
-    f32 sp5C;
+    f32 slopeX;
+    f32 slopeZ;
+    f32 normalX;
+    f32 normalZ;
+    f32 leanRate;
 
     if (arg0->unk28 <= 0.0f) {
-        s32 flag;
-        f32 a;
-        f32 b;
-        f32 c;
-        f32 d;
-        f32 ret;
+        s32 clamped;
+        f32 gain;
+        f32 damping;
+        f32 scale;
+        f32 rise;
+        f32 roll;
 
-        a = 0.6999999881f;
-        b = 0.3000000119f;
-        c = 35.0f;
-        d = 0.69999998807907104f;
+        gain = 0.6999999881f;
+        damping = 0.3000000119f;
+        scale = 35.0f;
+        // matching: a literal spelled unlike gain's is not CSE'd with it by IDO
+        rise = 0.69999998807907104f;
         if ((arg0->id == 0x28) || (arg0->id == 0x77)) {
-            a = 0.8999999762f;
-            b = 0.200000003f;
-            c = 7.0f;
-            d = 0.6000000238f;
+            gain = 0.8999999762f;
+            damping = 0.200000003f;
+            scale = 7.0f;
+            rise = 0.6000000238f;
         }
-        func_1510F820(arg0->pad188, &arg0->unk18C, &sp64, &sp60, &sp5C, &sp6C, &sp68);
+        func_1510F820(arg0->pad188, &arg0->unk18C, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
         if (arg0->unkF8 & 0x100000) {
-            f32 sp40;
+            f32 pitch;
 
-            func_1510F820(arg0->pad188, &arg0->unk18C, &sp64, &sp60, &sp5C, &sp6C, &sp68);
-            ret = func_1505210C(arg0, sp6C, sp68, &sp40, 50.0f);
-            sp40 *= a;
-            arg0->unkB8 += (sp40 - arg0->unkB8) * b;
-            arg0->unkC4 += (ret * a - arg0->unkC4) * b;
+            func_1510F820(arg0->pad188, &arg0->unk18C, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
+            roll = func_1505210C(arg0, slopeX, slopeZ, &pitch, 50.0f);
+            pitch *= gain;
+            arg0->unkB8 += (pitch - arg0->unkB8) * damping;
+            arg0->unkC4 += (roll * gain - arg0->unkC4) * damping;
         }
         if (!(arg0->unkF8 & 0x80000)) {
             return;
         }
         if (arg0->unk226 != 0) {
-            c = (u32)arg0->unk226;
+            scale = arg0->unk226;
         }
-        if ((fabsf(sp6C) < 0.09000000358f) && (fabsf(sp68) < 0.09000000358f)) {
-            sp6C = 0.0f;
-            sp5C = 0.20000000298f;
-            sp68 = 0.0f;
+        if ((fabsf(slopeX) < 0.09000000358f) && (fabsf(slopeZ) < 0.09000000358f)) {
+            slopeX = 0.0f;
+            leanRate = 0.200000003f;
+            slopeZ = 0.0f;
         } else {
-            f32 len;
+            f32 steepness;
 
-            flag = 0;
-            if (fabsf(sp6C) > 1.0f) {
-                if (sp6C < 0.0f) {
-                    sp6C = -1.00000000f;
+            clamped = 0;
+            if (fabsf(slopeX) > 1.0f) {
+                // matching: 1.00000000f (not 1.0f) keeps IDO from reusing the comparison's 1.0f register
+                if (slopeX < 0.0f) {
+                    slopeX = -1.0f;
                 } else {
-                    sp6C = 1.00000000f;
+                    slopeX = 1.00000000f;
                 }
-                flag = 1;
+                clamped = 1;
             }
-            if (fabsf(sp68) > 1.0f) {
-                if (sp68 < 0.0f) {
-                    sp68 = -1.00000000f;
+            if (fabsf(slopeZ) > 1.0f) {
+                if (slopeZ < 0.0f) {
+                    slopeZ = -1.0f;
                 } else {
-                    sp68 = 1.00000000f;
+                    slopeZ = 1.00000000f;
                 }
-                flag = 1;
+                clamped = 1;
             }
-            if (flag && (arg0->id == 0x77)) {
+            if (clamped && (arg0->id == 0x77)) {
                 if (arg0->xz_velocity > 15.0f) {
                     arg0->xz_velocity *= 0.8000000119f;
                 }
@@ -1920,17 +1923,17 @@ void func_150511E8(struct127 *arg0) {
                     arg0->disable_run = 6;
                 }
             }
-            len = sqrtf(sp6C * sp6C + sp68 * sp68);
-            sp6C *= c;
-            sp68 *= c;
-            sp5C = len * d + 0.05000000075f;
+            steepness = sqrtf(slopeX * slopeX + slopeZ * slopeZ);
+            slopeX *= scale;
+            slopeZ *= scale;
+            leanRate = steepness * rise + 0.05000000075f;
         }
     } else {
-        sp68 = 0.0f;
-        sp6C = 0.0f;
-        sp5C = 0.1000000015f;
+        slopeZ = 0.0f;
+        slopeX = 0.0f;
+        leanRate = 0.1000000015f;
     }
-    func_1505A250(-sp6C, -sp68, sp5C, &arg0->unk164, &arg0->unk168);
+    func_1505A250(-slopeX, -slopeZ, leanRate, &arg0->unk164, &arg0->unk168);
 }
 
 extern f32 D_800990C0[];
@@ -1940,76 +1943,77 @@ void func_15087EF0(s32, void *);
 void func_1505A250(f32, f32, f32, f32 *, f32 *);
 f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 
-void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
-    f32 sp94;
-    f32 sp90;
-    f32 sp8C;
-    f32 sp88;
-    u8 sp87;
+/* Ground/water tilt for a player-like actor: slides on steep slopes, then eases roll (unkC4) and pitch (unkB8). */
+void func_15051558(Obj15051558 *arg0, f32 x, f32 z, u16 facing) {
+    f32 roll;
+    f32 pitch;
+    f32 blend;
+    f32 height;
+    u8 bumped;
 
-    sp94 = 0.0f;
-    sp87 = 0;
-    sp8C = 0.200000003f;
-    sp88 = arg0->unk28;
-    sp90 = 0.0f;
+    roll = 0.0f;
+    bumped = 0;
+    blend = 0.200000003f;
+    height = arg0->unk28;
+    pitch = 0.0f;
     if (arg0->unkAD == 0) {
-        s32 sp80;
+        s32 wasSliding;
         f32 dx;
         f32 dy;
         f32 dz;
-        f32 dist;
-        f32 sp6C;
-        f32 sp68;
-        f32 sp64;
-        u16 angle;
-        f32 sp5C;
-        u16 ang2;
-        f32 sp54;
+        f32 moved;
+        f32 normalX;
+        f32 normalZ;
+        f32 leanRate;
+        u16 moveAngle;
+        f32 animSpeed;
+        u16 heading;
+        f32 sway;
         s16 shake;
         s32 kind;
         u16 anim;
 
-        sp80 = arg0->unk162;
-        sp6C = 0.0f;
-        sp68 = 0.0f;
-        sp64 = 3.0f;
+        wasSliding = arg0->unk162;
+        normalX = 0.0f;
+        normalZ = 0.0f;
+        leanRate = 3.0f;
         if (arg0->unk31C->unk4E == 2) {
-            func_1510F820(arg0->unk188, &arg0->unk18C, &sp6C, &sp68, &sp64, &sp94, &sp90);
-            if ((1.39999998f < (sp94 * sp94) + (sp90 * sp90)) && ((sp94 * sp94) + (sp90 * sp90) < 1000.0f)) {
+            func_1510F820(arg0->unk188, &arg0->unk18C, &normalX, &normalZ, &leanRate, &roll, &pitch);
+            if ((((roll * roll) + (pitch * pitch)) > 1.39999998f) && ((roll * roll) + (pitch * pitch) < 1000.0f)) {
                 arg0->unk8A = 6;
-                if ((sp88 < 80.0f) && (arg0->unk89 == 0)) {
+                if ((height < 80.0f) && (arg0->unk89 == 0)) {
                     func_15087EF0(D_800C3E78, arg0);
                 }
             }
-            if (sp88 >= 0.0f) {
-                sp6C = 0.0f;
-                sp68 = 0.0f;
-                sp94 = 0.0f;
-                sp90 = 0.0f;
-                sp64 = 3.0f;
+            if (height >= 0.0f) {
+                normalX = 0.0f;
+                normalZ = 0.0f;
+                roll = 0.0f;
+                pitch = 0.0f;
+                leanRate = 3.0f;
             }
-        } else if (((sp88 <= 0.0f) || (arg0->unk110 != 0)) && (arg0->unk31C->unk4F == 0)) {
-            func_1510F820(NULL, &arg0->unk18C, &sp6C, &sp68, &sp64, &sp94, &sp90);
+        } else if (((height <= 0.0f) || (arg0->unk110 != 0)) && (arg0->unk31C->unk4F == 0)) {
+            func_1510F820(NULL, &arg0->unk18C, &normalX, &normalZ, &leanRate, &roll, &pitch);
         }
         if ((arg0->unk31C->unk4E == 0) && (arg0->unk31C->unk84 == 0) &&
-            (((D_800CC27C == 0) && ((((sp94 * sp94) + (sp90 * sp90)) > 1.0f) || (((arg0->unk184 >> 12) & 0xF) == 4))) ||
+            (((D_800CC27C == 0) && ((((roll * roll) + (pitch * pitch)) > 1.0f) || (((arg0->unk184 >> 12) & 0xF) == 4))) ||
              ((D_800CC27C != 0) && (arg0->unk31C->unk17 != 0))) &&
             (((arg0->unk184 >> 12) & 0xF) != 3)) {
             D_800CC27C = 1;
-            sp87 = 1;
+            bumped = 1;
         }
         kind = (arg0->unk274 != 0) ? D_800CC2D0[arg0->unk274 - 1].id : -1;
         if (D_800CC27C == 0) {
-            sp6C = 0.0f;
-            sp68 = 0.0f;
-            sp64 = 3.0f;
+            normalX = 0.0f;
+            normalZ = 0.0f;
+            leanRate = 3.0f;
         }
         switch (kind) {
         case 8:
-            sp87 = 0;
+            bumped = 0;
             break;
         case 0x49:
-            sp87 = 0;
+            bumped = 0;
             break;
         }
         if ((D_800CC27C != 0) && (arg0->unk28 < 5.0f) && (arg0->unk110 != 0)) {
@@ -2020,18 +2024,18 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
         } else {
             arg0->unk162 = 0;
         }
-        dx = arg1 - arg0->oldx;
+        dx = x - arg0->oldx;
         dy = arg0->y - arg0->oldy;
-        dz = arg2 - arg0->oldz;
-        dist = 2.0f * sqrtf((dx * dx) + (dy * dy) + (dz * dz)) * D_800BE9A8;
-        if (arg0->unk162 - sp80) {
+        dz = z - arg0->oldz;
+        moved = 2.0f * sqrtf((dx * dx) + (dy * dy) + (dz * dz)) * D_800BE9A8;
+        if (arg0->unk162 - wasSliding) { // matching: the original tests the difference (subu + bnez), not !=
             if (arg0->unk162 != 0) {
                 arg0->unk164 = dx * D_800BE9A8;
                 arg0->unk168 = dz * D_800BE9A8;
                 arg0->speed = 0.0f;
             } else {
-                arg0->speed = dist;
-                if (dist < 22.0f) {
+                arg0->speed = moved;
+                if (moved < 22.0f) {
                     arg0->speed = 22.0f;
                 }
                 if (arg0->unk110 == 3) {
@@ -2041,7 +2045,7 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
                     }
                     arg0->speed = 17.8999996f;
                 }
-                arg0->unk76 = func_1505A630(arg1 - arg0->oldx, arg0->oldz - arg2, 0);
+                arg0->unk76 = func_1505A630(x - arg0->oldx, arg0->oldz - z, 0);
                 arg0->unk164 = 0.0f;
                 arg0->unk168 = 0.0f;
                 arg0->unk16C = 0.0f;
@@ -2049,22 +2053,22 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
             }
         }
         if ((D_800CC27C != 0) && (arg0->unk28 < 5.0f)) {
-            sp5C = 1.0f;
+            animSpeed = 1.0f;
             arg0->unk8A = D_800BE9A0 + 8;
-            arg0->unk112 = func_1505A630(-sp6C, sp68, 0);
-            angle = func_1505A630(arg0->x - arg0->oldx, arg0->oldz - arg0->z, 0);
+            arg0->unk112 = func_1505A630(-normalX, normalZ, 0);
+            moveAngle = func_1505A630(arg0->x - arg0->oldx, arg0->oldz - arg0->z, 0);
             D_800CC27C = 1;
             if (arg0->unk110 == 0) {
-                sp64 = D_800990C0[D_800CC27C];
-                if ((u8)(((arg0->unk112 - angle) >> 8) + 0x30) < 0x60) {
-                    ang2 = (arg0->unk44 > 8.0f) ? arg3 : arg0->unk7A;
-                    if (sp87 != 0) {
+                leanRate = D_800990C0[D_800CC27C];
+                if ((u8)(((arg0->unk112 - moveAngle) >> 8) + 0x30) < 0x60) {
+                    heading = (arg0->unk44 > 8.0f) ? facing : arg0->unk7A;
+                    if (bumped != 0) {
                         arg0->unk110 = 3;
                         anim = 0x28E;
-                        sp5C = 2.0f;
+                        animSpeed = 2.0f;
                     } else {
                         anim = 0xD0;
-                        if ((u8)(((arg0->unk112 - ang2) >> 8) + 0x58) < 0xB0) {
+                        if ((u8)(((arg0->unk112 - heading) >> 8) + 0x58) < 0xB0) {
                             arg0->unk110 = 1;
                             anim = 0x101;
                         } else {
@@ -2073,15 +2077,15 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
                     }
                     if ((arg0->unk104 == 0) && (arg0->unk13C == 0) && (arg0->unk89 != 0xFF) && (arg0->unk83 < 0xFA)) {
                         if ((arg0->unk31C->unk11A != 1) && (arg0->unk31C->unk11A != 3) && (arg0->unk31C->unk120 == 0) && (arg0->unk31C->unk19B == 0)) {
-                            func_1505E650((struct127 *)arg0, anim, sp5C, 6.0f, 0.0f, 0.0f, 0);
+                            func_1505E650((struct127 *)arg0, anim, animSpeed, 6.0f, 0.0f, 0.0f, 0);
                         }
                     }
                 }
             } else {
-                sp64 = D_800990E0[D_800CC27C];
+                leanRate = D_800990E0[D_800CC27C];
             }
         }
-        func_1505A250(-sp6C, -sp68, sp64, &arg0->unk164, &arg0->unk168);
+        func_1505A250(-normalX, -normalZ, leanRate, &arg0->unk164, &arg0->unk168);
         arg0->unk16C += (0.0f - arg0->unk16C) * 0.150000006f;
         arg0->unk170 += (0.0f - arg0->unk170) * 0.150000006f;
         if (arg0->unk110 != 0) {
@@ -2111,39 +2115,39 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
                 }
             }
         }
-        if (sp88 <= 0.0f) {
-            sp94 = func_1505210C((struct127 *)arg0, sp94, sp90, &sp90, 50.0f);
+        if (height <= 0.0f) {
+            roll = func_1505210C((struct127 *)arg0, roll, pitch, &pitch, 50.0f);
             if (arg0->unk31C->unk4E != 2) {
                 if ((arg0->unk31C->unk4 == 0) && (arg0->unk110 == 0) && ((arg0->unk31C->unk4E & 0xF) != 1)) {
-                    sp94 *= (arg0->unk31C->unk0 * 0.00899999961f) + 0.200000003f;
-                    sp90 *= (arg0->unk31C->unk0 * 0.0140000004f) + 0.200000003f;
+                    roll *= (arg0->unk31C->unk0 * 0.00899999961f) + 0.200000003f;
+                    pitch *= (arg0->unk31C->unk0 * 0.0140000004f) + 0.200000003f;
                 } else {
-                    sp94 *= 0.800000012f;
-                    sp90 *= 0.800000012f;
+                    roll *= 0.800000012f;
+                    pitch *= 0.800000012f;
                     if ((arg0->unk31C->unk4E & 0xF) == 1) {
-                        sp94 *= 0.5f;
-                        sp90 = 0.0f;
+                        roll *= 0.5f;
+                        pitch = 0.0f;
                     }
                 }
             }
         }
         if (arg0->unk31C->unk4E == 2) {
             {
-                f32 yv = arg0->yvel;
-                sp54 = arg0->unk54 * 6.0f;
-                if (yv < -30.0f) {
-                    sp90 -= -30.0f;
+                f32 yVelocity = arg0->yvel;
+                sway = arg0->unk54 * 6.0f;
+                if (yVelocity < -30.0f) {
+                    pitch -= -30.0f;
                 } else {
-                    sp90 -= yv;
+                    pitch -= yVelocity;
                 }
             }
-            sp8C = 0.400000006f;
+            blend = 0.400000006f;
             if (arg0->unk31C->unk44 > 0) {
                 shake = (D_800CC250 & 4);
                 shake -= 2;
-                shake *= (u32)(arg0->unk31C->unk44 * 2);
-                sp54 += shake;
-                sp8C = 0.25f;
+                shake *= (u32)(arg0->unk31C->unk44 * 2); // matching: unsigned multiply (multu)
+                sway += shake;
+                blend = 0.25f;
             }
             if ((fabsf(arg0->unkC4) > 70.0f) && (D_800BE616 == 0) && (arg0->health != 0) && (arg0->unk31C->unk24 == 0)) {
                 D_800D1580 = 0xFF020146;
@@ -2153,25 +2157,25 @@ void func_15051558(Obj15051558 *arg0, f32 arg1, f32 arg2, u16 arg3) {
             if (fabsf(arg0->unkC4) < 20.0f) {
                 arg0->unk31C->unk24 = 0;
             }
-            sp94 += sp54;
+            roll += sway;
         }
-        arg0->unkB8 += (sp90 - arg0->unkB8) * sp8C;
+        arg0->unkB8 += (pitch - arg0->unkB8) * blend;
     } else {
-        f32 f2;
+        f32 depth;
 
-        f2 = (arg0->unk118 - 30.0f) - arg0->y;
-        f2 += arg0->speed * 6.0f;
-        if (f2 > 250.0f) {
-            f2 = 2.5f;
+        depth = (arg0->unk118 - 30.0f) - arg0->y;
+        depth += arg0->speed * 6.0f;
+        if (depth > 250.0f) {
+            depth = 2.5f;
         } else {
-            f2 *= 0.00999999978f;
+            depth *= 0.00999999978f;
         }
-        if ((fabsf(arg0->unkB8) < 35.0f) && (f2 > 0.0f)) {
-            sp94 += arg0->unk54 * f2;
+        if ((fabsf(arg0->unkB8) < 35.0f) && (depth > 0.0f)) {
+            roll += arg0->unk54 * depth;
         }
         func_1505A250(0.0f, 0.0f, 0.300000012f, &arg0->unk164, &arg0->unk168);
     }
-    arg0->unkC4 += (sp94 - arg0->unkC4) * sp8C;
+    arg0->unkC4 += (roll - arg0->unkC4) * blend;
 }
 /* Turns a surface slope into roll/pitch angles (degrees) in the actor's frame, clamped to +-limit. */
 f32 func_1505210C(struct127 *arg0, f32 slopeX, f32 slopeZ, f32 *pitch, f32 limit) {
