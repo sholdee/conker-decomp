@@ -18,7 +18,6 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #define D_800D2454 D_800D2454_hdr
 #define D_800D23D0 D_800D23D0_hdr
 #define D_800D244C D_800D244C_hdr
-#define D_800BE628 D_800BE628_hdr
 #include "variables.h"
 #undef D_800D24C8
 #undef D_800D2460
@@ -27,7 +26,6 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #undef D_800D2454
 #undef D_800D23D0
 #undef D_800D244C
-#undef D_800BE628
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
@@ -49,7 +47,6 @@ typedef struct HudView {
     u8 pad34[0x180 - 0x34];
 } HudView;
 
-extern HudView *D_800BE628;
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);

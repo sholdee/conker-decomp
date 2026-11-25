@@ -2,108 +2,113 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Bobbing update callbacks for four particle/effect systems. Each one sets the object's Y position to
+ * center + sin(phase) * amplitude and advances the phase; the sine parameters live in the velocity and
+ * gravity slots of the object's motion data, which these bobbing objects reuse.
+ */
 
-extern f32 func_15144B68(f32);
+/* Head of a pooled physics particle (full layout in game_15F680.c), with the bob in its vel/gravity slots. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ vertex rot;
+    /* 0x2C */ vertex scale;
+    /* 0x38 */ vertex pos;
+    /* 0x44 */ f32 bobPhase;     // vel.x
+    /* 0x48 */ f32 bobCenter;    // vel.y
+    /* 0x4C */ f32 bobSpeed;     // vel.z
+    /* 0x50 */ vertex rotVel;
+    /* 0x5C */ f32 bobAmplitude; // gravity
+} BobParticle;
 
-struct Foo151B8B40 {
-    char pad20[0x20];
-    f32 unk20;
-    char pad24[0x4];
-    f32 unk28;
-    char pad2C[0x10];
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    char pad54[0x4];
-    f32 unk58;
-    f32 unk5C;
-};
-
-s32 func_151B8B40(struct Foo151B8B40 *arg0) {
-    arg0->unk3C = sinf(arg0->unk44) * arg0->unk5C + arg0->unk48;
-    arg0->unk44 = arg0->unk44 + arg0->unk4C * D_800BE9A4;
-    arg0->unk44 = func_15144B68(arg0->unk44);
-    arg0->unk20 = arg0->unk20 + arg0->unk50 * D_800BE9A4;
-    arg0->unk28 = arg0->unk28 + arg0->unk58 * D_800BE9A4;
+/* Particle update (D_800898B0): bobs the particle up and down while it spins about X and Z. */
+s32 func_151B8B40(BobParticle *particle) {
+    particle->pos.y = sinf(particle->bobPhase) * particle->bobAmplitude + particle->bobCenter;
+    particle->bobPhase += particle->bobSpeed * D_800BE9A4;
+    particle->bobPhase = func_15144B68(particle->bobPhase);
+    particle->rot.x += particle->rotVel.x * D_800BE9A4;
+    particle->rot.z += particle->rotVel.z * D_800BE9A4;
     return 1;
 }
 
-extern void func_151D9450(void*, void*);
+/* Sprite particle (Particle in game_2062D0.c), with the bob in its desc.vel/desc.gravity slots. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ struct17 pos;     // desc.pos
+    /* 0x4C */ struct17 offset;  // desc.offset
+    /* 0x58 */ f32 bobPhase;     // desc.vel.unk0
+    /* 0x5C */ f32 bobCenter;    // desc.vel.unk4
+    /* 0x60 */ f32 bobSpeed;     // desc.vel.unk8
+    /* 0x64 */ f32 bobAmplitude; // desc.gravity
+} BobSprite;
 
-struct Foo151B8BE0 {
-    char pad44[0x44];
-    f32 unk44;
-    char pad48[0x10];
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-};
+s32 func_151D9450(BobSprite *particle, struct17 *prevPos);
 
-void func_151B8BE0(struct Foo151B8BE0 *arg0, void *arg1) {
-    arg0->unk44 = sinf(arg0->unk58) * arg0->unk64 + arg0->unk5C;
-    arg0->unk58 = arg0->unk58 + arg0->unk60 * D_800BE9A4;
-    arg0->unk58 = func_15144B68(arg0->unk58);
-    func_151D9450(arg0, arg1);
+/* Sprite particle update (D_80089760): bobs the particle, then wobbles its size (func_151D9450). */
+s32 func_151B8BE0(BobSprite *particle, struct17 *prevPos) {
+    particle->pos.unk4 = sinf(particle->bobPhase) * particle->bobAmplitude + particle->bobCenter;
+    particle->bobPhase += particle->bobSpeed * D_800BE9A4;
+    particle->bobPhase = func_15144B68(particle->bobPhase);
+    return func_151D9450(particle, prevPos);
 }
 
-struct Foo151B8C54 {
-    char pad58[0x58];
-    f32 unk58;
-};
+/* Motion extension of a model effect (EffectMotion in game_1844C0.c), with the bob in its vel/gravity slots. */
+typedef struct {
+    /* 0x00 */ vertex rot;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ f32 phase;        // vel.x
+    /* 0x14 */ f32 center;       // vel.y
+    /* 0x18 */ f32 speed;        // vel.z
+    /* 0x1C */ vertex rotVel;
+    /* 0x28 */ f32 amplitude;    // gravity
+} EffectBob;
 
-struct Bar151B8C54 {
-    f32 unk0;
-    char pad4[0x4];
-    f32 unk8;
-    char padC[0x4];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    char pad20[0x4];
-    f32 unk24;
-    f32 unk28;
-};
+/* Model effect (Effect in game_1844C0.c; only the fields used here). */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x54];
+    /* 0x054 */ vertex pos;      // params.pos
+    /* 0x060 */ u8 pad60[0x120 - 0x60];
+    /* 0x120 */ EffectBob bob;   // extra
+} BobEffect;
 
-s32 func_151B8C54(struct Foo151B8C54 *arg0) {
-    struct Bar151B8C54 *v1 = (struct Bar151B8C54 *)((char *)arg0 + 0x120);
-    arg0->unk58 = sinf(v1->unk10) * v1->unk28 + v1->unk14;
-    v1->unk10 = v1->unk10 + v1->unk18 * D_800BE9A4;
-    v1->unk10 = func_15144B68(v1->unk10);
-    v1->unk0 += v1->unk1C * (&D_800BE9A4)[0];
-    v1->unk8 += v1->unk24 * (&D_800BE9A4)[0];
+/* Effect update (D_8008AD90): bobs the effect up and down while it spins about X and Z. */
+s32 func_151B8C54(BobEffect *effect) {
+    EffectBob *bob = &effect->bob;
+
+    effect->pos.y = sinf(bob->phase) * bob->amplitude + bob->center;
+    bob->phase += bob->speed * D_800BE9A4;
+    bob->phase = func_15144B68(bob->phase);
+    bob->rot.x += bob->rotVel.x * D_800BE9A4;
+    bob->rot.z += bob->rotVel.z * D_800BE9A4;
     return 1;
 }
 
-struct Foo151B8CFC {
-    char pad38[0x38];
-    f32 unk38;
-    char pad3C[0x4];
-    f32 unk40;
-    char pad44[0x4];
-    f32 unk48;
-};
+/* Bob state that follows a game_169510.c particle (another member of its ParticleMotion union). */
+typedef struct {
+    /* 0x00 */ f32 center;
+    /* 0x04 */ f32 amplitude;
+    /* 0x08 */ f32 phase;
+    /* 0x0C */ f32 speed;
+    /* 0x10 */ vertex rotVel;
+} QuadBob;
 
-struct Bar151B8CFC {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x4];
-    f32 unk18;
-};
+/* Quad particle of game_169510.c (only the fields used here), followed by its motion state. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x34];
+    /* 0x034 */ vertex pos;      // def.pos
+    /* 0x040 */ vertex rot;      // def.rot
+    /* 0x04C */ u8 pad4C[0x110 - 0x4C];
+    /* 0x110 */ QuadBob bob;
+} BobQuad;
 
-s32 func_151B8CFC(struct Foo151B8CFC *arg0) {
-    struct Bar151B8CFC *v1 = (struct Bar151B8CFC *)((char *)arg0 + 0x110);
-    arg0->unk38 = sinf(v1->unk8) * v1->unk4 + v1->unk0;
-    v1->unk8 = v1->unk8 + v1->unkC * D_800BE9A4;
-    v1->unk8 = func_15144B68(v1->unk8);
-    arg0->unk40 += v1->unk10 * (&D_800BE9A4)[0];
-    arg0->unk48 += v1->unk18 * (&D_800BE9A4)[0];
+/* Particle update (D_80089CB8): bobs the particle up and down while it spins about X and Z. */
+s32 func_151B8CFC(BobQuad *particle) {
+    QuadBob *bob = &particle->bob;
+
+    particle->pos.y = sinf(bob->phase) * bob->amplitude + bob->center;
+    bob->phase += bob->speed * D_800BE9A4;
+    bob->phase = func_15144B68(bob->phase);
+    particle->rot.x += bob->rotVel.x * D_800BE9A4;
+    particle->rot.z += bob->rotVel.z * D_800BE9A4;
     return 1;
 }

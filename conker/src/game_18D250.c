@@ -1,75 +1,87 @@
 #include <ultra64.h>
+// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
 #define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_15169260
 #include "variables.h"
 
+/* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
+#define OBJ_TYPE_SCREEN_EFFECT 0x34
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
-extern s32 (*D_8008B0D0[])(void *);
-extern char D_800A6540[];
-extern char D_800A6548[];
-extern char D_800A657C[];
-extern char D_800A6584[];
-extern char D_800A65B8[];
-extern char D_800A65C0[];
-extern char D_800A65F4[];
-extern char D_800A65FC[];
-extern char D_800A6630[];
-extern char D_800A663C[];
-extern f32 D_800A6674;
-extern f32 D_800A6678;
-extern f32 D_800A667C;
-extern f32 D_800A6680;
+/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
+typedef struct {
+    /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
+    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
+    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler, -1 for none */
+    /* 0x3 */ u8 pad3;
+    /* 0x4 */ s16 lifetime;
+    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
+    /* 0x7 */ u8 pad7;
+} EffectDesc;
+
+/* Object node of type 0x34; the effect's own data (dataSize bytes) follows at 0x18. */
+typedef struct ScreenEffect {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct ScreenEffect *next;
+    /* 0x0C */ u8 padC[2];
+    /* 0x0E */ EffectDesc desc;
+    /* 0x16 */ u8 pad16[2];
+} ScreenEffect;
+
+/* Effect data filled in by func_151600D8 from the debug tunables. */
+typedef struct {
+    /* 0x00 */ f32 pos[2];  /* s, t */
+    /* 0x08 */ f32 size[2]; /* s, t */
+    /* 0x10 */ s32 pixelation;
+} ColourFrameBufferData;
 
 typedef struct {
-    s32 unk0;
-} Data_15160274;
+    /* 0x00 */ ScreenEffect header;
+    /* 0x18 */ ColourFrameBufferData data;
+} ColourFrameBufferEffect;
 
-extern Data_15160274 D_800A6670;
-void func_15169260(Data_15160274 *, s32, s32, u8);
+extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32 arg5);
+void func_15169260(const s32 *kinds, s32 count, s32 data, u8 event);
 
-extern u8 D_800DCE50[];
-extern void (*D_8008B0D8[])(void *, s32);
+/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
+extern ScreenEffect *D_800DCE50[2][104];
+#define OBJ_ITER_NEXT ((ScreenEffect **)D_800DD198)
 
-typedef struct Node1515FDA0 {
-    u8 pad0[0x8];
-    struct Node1515FDA0 *unk8;
-    u8 padC[0x2];
-    u8 unkE;
-    u8 padF;
-    s8 unk10;
-} Node1515FDA0;
+extern s32 (*D_8008B0D0[])(ScreenEffect *);
+extern void (*D_8008B0D8[])(ScreenEffect *, s32);
+extern void (*D_8008B0E4[])(ScreenEffect *, s32, u8);
 
+/* Draws every screen effect in both object lists through its draw handler. */
 void func_1515FDA0(s32 arg0) {
-    u8 i;
-    Node1515FDA0 *node;
-    u8 run;
+    u8 list;
+    ScreenEffect *effect;
+    u8 visible;
 
-    for (i = 0; i < 2; i++) {
-        node = ((Node1515FDA0 *(*)[104])D_800DCE50)[i][52];
+    for (list = 0; list < 2; list++) {
+        effect = D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
         D_800DD190++;
-        for (; node != NULL; node = ((Node1515FDA0 **)D_800DD198)[D_800DD190]) {
-            ((Node1515FDA0 **)D_800DD198)[D_800DD190] = node->unk8;
-            if (node->unkE & 4) {
-                node->unkE &= ~4;
+        for (; effect != NULL; effect = OBJ_ITER_NEXT[D_800DD190]) {
+            OBJ_ITER_NEXT[D_800DD190] = effect->next;
+            if (effect->desc.flags & 4) {
+                effect->desc.flags &= ~4;
                 continue;
             }
-            if (node->unk10 == -1) {
+            if (effect->desc.drawIndex == -1) {
                 continue;
             }
-            run = 1;
-            if ((node->unkE & 2) && (D_800C35EA == 1)) {
-                run = 0;
+            visible = TRUE;
+            if ((effect->desc.flags & 2) && (D_800C35EA == 1)) {
+                visible = FALSE;
             }
-            if ((node->unkE & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {
-                run = 0;
+            if ((effect->desc.flags & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {
+                visible = FALSE;
             }
-            if (run) {
-                D_8008B0D8[node->unk10](node, arg0);
+            if (visible) {
+                D_8008B0D8[effect->desc.drawIndex](effect, arg0);
             }
         }
         {
+            // matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first
             extern s8 D_800DD190;
 
             D_800DD190--;
@@ -77,79 +89,76 @@ void func_1515FDA0(s32 arg0) {
     }
 }
 
-void *func_1515FF74(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    void *temp_v0;
-    void *sp24;
+/* Creates a screen effect from desc with dataSize bytes of effect data after the header. */
+ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list) {
+    ScreenEffect *effect;
 
-    temp_v0 = func_15167A68(0x34, arg3, arg1 + 0x18, 1, arg2, 1);
-    if (temp_v0 == 0) {
+    effect = func_15167A68(OBJ_TYPE_SCREEN_EFFECT, list, dataSize + sizeof(ScreenEffect), 1, owner, 1);
+    if (effect == NULL) {
         return NULL;
     }
-    sp24 = temp_v0;
-    memcpy((s32)temp_v0 + 0xE, arg0, 8);
-    return sp24;
+    memcpy(&effect->desc, desc, sizeof(EffectDesc));
+    return effect;
 }
 
-typedef struct {
-    u8 pad0[0xE];
-    u8 unkE;
-    s8 unkF;
-    u8 pad10[2];
-    s16 unk12;
-} Struct1515FFEC;
+/* Update: counts down the lifetime and runs the update handler; destroys the effect when either ends it. */
+void func_1515FFEC(ScreenEffect *effect) {
+    s32 updateIndex;
+    u8 finished;
 
-void func_1515FFEC(Struct1515FFEC *arg0) {
-    s32 temp;
-    u8 failed;
-
-    failed = 0;
-    if (arg0->unkE & 1) {
-        arg0->unk12 -= D_800BE9E4;
-        if (arg0->unk12 < 0) {
-            failed = 1;
+    finished = FALSE;
+    if (effect->desc.flags & 1) {
+        effect->desc.lifetime -= D_800BE9E4;
+        if (effect->desc.lifetime < 0) {
+            finished = TRUE;
         }
     }
-    if (failed == 0) {
-        temp = arg0->unkF;
-        if (temp != -1) {
-            if (D_8008B0D0[temp](arg0) == 0) {
-                failed = 1;
+    if (!finished) {
+        updateIndex = effect->desc.updateIndex;
+        if (updateIndex != -1) {
+            if (D_8008B0D0[updateIndex](effect) == 0) {
+                finished = TRUE;
             }
         }
     }
-    if (failed) {
-        func_1516972C((struct102 *) arg0);
+    if (finished) {
+        func_1516972C((struct102 *)effect);
     }
 }
 
-extern void (*D_8008B0E4[])(void*, s32, u8);
+/* Message handler: forwards the message to the effect's own handler, if it has one. */
+void func_15160090(ScreenEffect *effect, s32 data, u8 event) {
+    void (*handler)(ScreenEffect *, s32, u8);
 
-void func_15160090(void *arg0, s32 arg1, u8 arg2) {
-    void (*func)(void*, s32, u8);
-
-    func = D_8008B0E4[*(u8*)((char*)arg0 + 0x14)];
-    if (func != NULL) {
-        func(arg0, arg1, arg2);
+    handler = D_8008B0E4[effect->desc.messageIndex];
+    if (handler != NULL) {
+        handler(effect, data, event);
     }
 }
 
-s32 func_151600D8(void *arg0) {
-    f32 *p;
-    s32 i;
+/* Update handler: reads the effect's position, size and pixelation from the debug tunables. */
+s32 func_151600D8(ColourFrameBufferEffect *effect) {
+    ColourFrameBufferData *data;
+    s32 tunable;
 
-    p = (f32 *)((s32)arg0 + 0x18);
-    i = 0;
-    p[0] = (f32)func_151422DC(i++, D_800A6540, -2000, 2000, 0, D_800A6548, 0x1C4) * D_800A6674;
-    p[1] = (f32)func_151422DC(i++, D_800A657C, -2000, 2000, 0, D_800A6584, 0x1C9) * D_800A6678;
-    p[2] = (f32)func_151422DC(i++, D_800A65B8, 0, 2000, 500, D_800A65C0, 0x1CE) * D_800A667C;
-    p[3] = (f32)func_151422DC(i++, D_800A65F4, 0, 2000, 500, D_800A65FC, 0x1D3) * D_800A6680;
-    *(s32 *)&p[4] = func_151422DC(i, D_800A6630, 0, 0x10000, 0x10000, D_800A663C, 0x1D9);
+    data = &effect->data;
+    tunable = 0;
+    data->pos[0] = (f32)func_151422DC(tunable++, "pos s", -2000, 2000, 0,
+                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 452) * 0.001000000047f;
+    data->pos[1] = (f32)func_151422DC(tunable++, "pos t", -2000, 2000, 0,
+                                      "../Effects/ColourFrameBuffer/colourframebuffer.c", 457) * 0.001000000047f;
+    data->size[0] = (f32)func_151422DC(tunable++, "size s", 0, 2000, 500,
+                                       "../Effects/ColourFrameBuffer/colourframebuffer.c", 462) * 0.001000000047f;
+    data->size[1] = (f32)func_151422DC(tunable++, "size t", 0, 2000, 500,
+                                       "../Effects/ColourFrameBuffer/colourframebuffer.c", 467) * 0.001000000047f;
+    data->pixelation = func_151422DC(tunable, "pixelation", 0, 0x10000, 0x10000,
+                                     "../Effects/ColourFrameBuffer/colourframebuffer.c", 473);
     return 1;
 }
 
-void func_15160274(s32 arg0, u8 arg1) {
-    Data_15160274 sp1C;
+/* Sends message `event` with `data` to every screen effect. */
+void func_15160274(s32 data, u8 event) {
+    const s32 kinds[1] = { OBJ_TYPE_SCREEN_EFFECT };
 
-    sp1C = D_800A6670;
-    func_15169260(&sp1C, 1, arg0, arg1);
+    func_15169260(kinds, 1, data, event);
 }

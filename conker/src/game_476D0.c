@@ -3,43 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these. */
-typedef struct RenderView {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 onScreen;
-    /* 0x002 */ u8 pad2[2];
-    /* 0x004 */ f32 width;
-    /* 0x008 */ f32 height;
-    /* 0x00C */ f32 halfWidth;
-    /* 0x010 */ f32 halfHeight;
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[8];
-    /* 0x024 */ f32 top;
-    /* 0x028 */ f32 bottom;
-    /* 0x02C */ f32 left;
-    /* 0x030 */ f32 right;
-    /* 0x034 */ f32 centerX;
-    /* 0x038 */ f32 centerY;
-    /* 0x03C */ u8 pad3C[4];
-    /* 0x040 */ Vp viewports[2]; // indexed by the framebuffer index D_800BE9C0
-    /* 0x060 */ f32 aspect;
-    /* 0x064 */ f32 unk64;
-    /* 0x068 */ f32 unk68;
-    /* 0x06C */ f32 fovX; // degrees
-    /* 0x070 */ f32 fovY; // degrees
-    /* 0x074 */ f32 frustumFovX;
-    /* 0x078 */ f32 frustumFovY;
-    /* 0x07C */ f32 pixelTanX; // tan(fovX / 2) / halfWidth
-    /* 0x080 */ f32 pixelTanY; // tan(fovY / 2) / halfHeight
-    /* 0x084 */ f32 unk84;
-    /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
-    /* 0x0B8 */ u8 padB8[0xC8];
-} RenderView; // size 0x180
-
-/* variables.h types these as s32: D_800BE628 and D_800BE62C point at the per-view RenderViews and Vps, and
- * D_800D9D10 holds the per-view 4x4 matrices. */
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
+
 #define VIEWPORTS ((Vp *)D_800BE62C)
 #define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
 
@@ -256,8 +222,8 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
         fullWidth = VIEW_WIDTHS[0];
         fullAspect = fullWidth / (f32)D_800BE650[0];
         aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
-        RENDER_VIEWS[view].unk14 = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
-        RENDER_VIEWS[view].unk18 = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
+        RENDER_VIEWS[view].scaleX = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
+        RENDER_VIEWS[view].scaleY = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
     }
     halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
     sine = sinf(halfFov);
@@ -279,12 +245,12 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
         RENDER_VIEWS[view].viewports[D_800BE9C0] = VIEWPORTS[view];
     } while (0);
     RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
-    RENDER_VIEWS[view].unk84 = 1.0f;
+    RENDER_VIEWS[view].perspScale = 1.0f;
     RENDER_VIEWS[view].onScreen = func_1501AE94(view);
     // matching: index + base (not RENDER_VIEWS[view]) sets IDO's addu operand order
     func_1501AF44(&(view + RENDER_VIEWS)->left, &(view + RENDER_VIEWS)->top, &(view + RENDER_VIEWS)->right,
                   &(view + RENDER_VIEWS)->bottom);
-    func_1510B32C(view, 0.0f, 0.0f, RENDER_VIEWS[view].unk84);
+    func_1510B32C(view, 0.0f, 0.0f, RENDER_VIEWS[view].perspScale);
     D_800BE630[view] = view;
 }
 

@@ -4,91 +4,127 @@
 #define func_150A7CB0 func_150A7CB0_s32
 #include "functions.h"
 #undef func_150A7CB0
+/* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
+#define D_800D3098 D_800D3098_header
 #include "variables.h"
+#undef D_800D3098
 
+/* A level object placement: one 0x34-byte entry of the table D_800D3098 points to
+ * (see LevelObject in game_40490.c). */
+typedef struct LevelObject {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 sizeX;
+    /* 0x08 */ s16 sizeY;
+    /* 0x0A */ s16 sizeZ;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15; /* type << 2 | shape */
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} LevelObject; /* size 0x34 */
 
+#define OBJ_TYPE(obj) ((obj)->unk15 >> 2)
+#define OBJ_SHAPE(obj) ((obj)->unk15 & 3)
+
+extern LevelObject *D_800D3098;
+extern void *allocate_memory(s32, s32, s32, s32);
+extern u8 D_800D30D0[];
+extern u8 D_800D30F0[];
+extern LevelObject **D_800D3270;
+extern s32 D_800D3274;
+
+/* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {
     func_1509C120();
     bzero(D_800D2E4C, 0x1B);
     bzero(&D_800D2E50, 0x10);
     bzero(&D_800D2E60, 9);
     bzero(&D_800D2E70, 0xCC);
-    D_800D2E44 = (u8)0;
+    D_800D2E44 = 0;
 }
 
+/* Resets the per-id record list (D_800D2F48) and related state. */
 void func_150177F8(void) {
     func_1509BA04(1);
     bzero(&D_800D2F48, 0xC);
     func_150A00F0();
-    D_800D2DB0 = D_800968C0;
-    D_800D2E41 = 0xA;
+    D_800D2DB0 = 999.0f;
+    D_800D2E41 = 10;
     D_800D2E42 = 6;
     D_800D3858 = 0;
     D_800D2E44 = 0;
 }
 
+/* A per-id record in the list at D_800D2F48 (see C8950Node in game_C8950.c). */
+typedef struct C8950Node {
+    /* 0x00 */ u16 key; // bits 0-9: id; bits 10-15: state flags
+    /* 0x02 */ u16 unk2; // compared with D_800BE9F0
+    /* 0x04 */ u16 size;
+    /* 0x06 */ u16 dataSize;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 dataOffset;
+    /* 0x0C */ u8 padC[0xC];
+    /* 0x18 */ struct C8950Node *next;
+    /* 0x1C */ struct C8950Node *prev;
+} C8950Node;
+
+C8950Node *func_1509B704(s16 id);
+
+/* Stamps every listed record that has flag 0x1000 with D_800BE9F0, then reloads the records. */
 void func_15017868(void) {
-    u16 *temp_v0;
+    C8950Node *node;
     s32 i;
 
     for (i = 0; i < D_800D2F3C; i++) {
-        temp_v0 = func_1509B704((s16)D_800D2F40[i]);
-        if ((temp_v0 != 0) && ((temp_v0[0] & 0x1000) != 0)) {
-            temp_v0[1] = D_800BE9F0;
+        node = func_1509B704(D_800D2F40[i]);
+        if (node != NULL && (node->key & 0x1000)) {
+            node->unk2 = D_800BE9F0;
         }
-
     }
     func_1509BA04(0);
-    func_1509B4A0(*(((s16*)&D_800BE9F0)+1), 1); // er?
+    func_1509B4A0((s16)D_800BE9F0, 1);
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x15];
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 pad18[0x8];
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} Obj15017930; /* size 0x34 */
+void func_15017B20(LevelObject *objects, s32 count);
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern u8 D_800D30D0[];
-extern u8 D_800D30F0[];
-extern Obj15017930 **D_800D3270;
-extern s32 D_800D3274;
-void func_15017B20();
-
+/* Loads the level's object table and builds the list of type-1 objects in modes 0, 2 and 6. */
 void func_15017930(s32 arg0) {
     u32 i;
-    u32 n;
+    u32 count;
     s32 type;
 
     D_800D3094 = func_1502B7F0((s32 *)&D_800D3098, 3, 0xC, arg0, 5);
-    n = D_800D3094 / sizeof(Obj15017930);
-    D_800D3094 = n;
-    func_15017B20(*(Obj15017930 **)&D_800D3098, n);
+    count = D_800D3094 / sizeof(LevelObject);
+    D_800D3094 = count;
+    func_15017B20(D_800D3098, count);
     D_800D3274 = 0;
     D_800D3270 = NULL;
     for (i = 0; i < D_800D3094; i++) {
-        if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1 && ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6)) {
+        if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
+            (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
             D_800D3274++;
         }
-        type = (*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2;
+        type = OBJ_TYPE(&D_800D3098[i]);
         if (type == 2 || type == 7) {
-            (*(Obj15017930 **)&D_800D3098)[i].unk20 = 0;
+            D_800D3098[i].unk20 = 0;
         }
     }
     if (D_800D3274 != 0) {
-        if ((D_800D3270 = allocate_memory(D_800D3274 * 4, 1, 0, 0)) != NULL) {
-            Obj15017930 **out = D_800D3270;
-            Obj15017930 *base;
+        D_800D3270 = allocate_memory(D_800D3274 * sizeof(LevelObject *), 1, 0, 0);
+        if (D_800D3270 != NULL) {
+            LevelObject **out = D_800D3270;
+
             for (i = 0; i < D_800D3094; i++) {
-                if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1) {
-                    if ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6) {
-                        base = (*(Obj15017930 **)&D_800D3098);
-                        *out++ = &base[i];
-                    }
+                if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
+                    (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
+                    *out++ = &D_800D3098[i];
                 }
             }
         }
@@ -96,109 +132,109 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30F0, 0x180);
     bzero(D_800D30D0, 0x20);
 }
-typedef struct {
-    /* 0x00 */ u64 mask[3];
-    /* 0x18 */ u8 count;
-    /* 0x1A */ s16 min_x;
-    /* 0x1C */ s16 max_x;
-    /* 0x1E */ s16 min_y;
-    /* 0x20 */ s16 max_y;
-    /* 0x22 */ s16 min_z;
-    /* 0x24 */ s16 max_z;
-} Struct15017B20; /* size 0x28 */
 
+/* Axis-aligned bounds of a level object, plus the set of other objects whose bounds it overlaps. */
 typedef struct {
-    /* 0x00 */ s16 x, y, z;
-    /* 0x06 */ s16 sizeX, sizeY, sizeZ;
-    /* 0x0C */ f32 angleX, angleY;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 pad17[0x34 - 0x17];
-} Struct15017B20_In; /* size 0x34 */
+    /* 0x00 */ u64 overlaps[3]; // bit j: overlaps object j
+    /* 0x18 */ u8 numOverlaps;
+    /* 0x1A */ s16 minX;
+    /* 0x1C */ s16 maxX;
+    /* 0x1E */ s16 minY;
+    /* 0x20 */ s16 maxY;
+    /* 0x22 */ s16 minZ;
+    /* 0x24 */ s16 maxZ;
+} ObjectBounds; /* size 0x28 */
 
-extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_150A0D14(Struct15017B20_In *);
-extern void func_15017FA4(Struct15017B20_In *, Struct15017B20 *);
-extern Struct15017B20 *D_800D309C;
+extern void func_150A0D14(LevelObject *obj);
+void func_15017FA4(LevelObject *obj, ObjectBounds *bounds);
+extern ObjectBounds *D_800D309C;
 extern u64 D_800D30A0[3];
 extern u64 D_800D30B8[3];
 
+/* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))
 
-void func_15017B20(Struct15017B20_In *arg0, s32 arg1) {
-    s32 pad[6];
-    u64 bit;
-    u64 bit2;
-    u64 *var_fp;
-    u64 *var_s2;
-    u64 *var_s0;
-    Struct15017B20_In *p;
-    Struct15017B20 *a;
-    Struct15017B20 *b;
+/*
+ * Computes the bounds of every level object and the object bitsets D_800D30A0 (shape 3 or flag 8,
+ * without flag 4) and D_800D30B8 (all others without flag 4). For each object in D_800D30B8 it
+ * records which other D_800D30B8 objects its bounds overlap.
+ */
+void func_15017B20(LevelObject *objects, s32 count) {
+    s32 pad[6]; // matching: stack frame size
+    u64 bitI;
+    u64 bitJ;
+    u64 *wordI;
+    u64 *wordJ;
+    u64 *overlapWord;
     s32 i;
     s32 j;
 
-    D_800D309C = allocate_memory(arg1 * sizeof(Struct15017B20), 1, 1, 0);
-    for (i = 0; i < arg1; i++) {
-        func_150A0D14(&arg0[i]);
-        func_15017FA4(&arg0[i], &D_800D309C[i]);
+    D_800D309C = allocate_memory(count * sizeof(ObjectBounds), 1, 1, 0);
+    for (i = 0; i < count; i++) {
+        func_150A0D14(&objects[i]);
+        func_15017FA4(&objects[i], &D_800D309C[i]);
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));
-    for (i = 0; i < arg1; i++) {
-        if (((arg0[i].unk15 & 3) == 3) || (arg0[i].unk16 & 8)) {
-            if (!(arg0[i].unk16 & 4)) {
-                D_800D30A0[i >> 6] |= (u64)1 << (i & 0x3F);
+    for (i = 0; i < count; i++) {
+        if ((OBJ_SHAPE(&objects[i]) == 3) || (objects[i].flags & 8)) {
+            if (!(objects[i].flags & 4)) {
+                D_800D30A0[i >> 6] |= (u64)1 << (i & 63);
             }
         }
     }
     bzero(D_800D30B8, sizeof(D_800D30B8));
-    for (i = 0; i < arg1; i++) {
-        if ((arg0[i].unk15 & 3) != 3) {
-            if (!(arg0[i].unk16 & 8) && !(arg0[i].unk16 & 4)) {
-                D_800D30B8[i >> 6] |= (u64)1 << (i & 0x3F);
+    for (i = 0; i < count; i++) {
+        if (OBJ_SHAPE(&objects[i]) != 3) {
+            if (!(objects[i].flags & 8) && !(objects[i].flags & 4)) {
+                D_800D30B8[i >> 6] |= (u64)1 << (i & 63);
             }
         }
     }
-    var_fp = D_800D30B8;
-    bit = 1;
-    for (i = 0; i < arg1; i++) {
-        var_s2 = D_800D30B8;
-        D_800D309C[i].count = 0;
-        if (*var_fp & bit) {
-            bit2 = 1;
-            var_s0 = (u64 *)&D_800D309C[i];
-            bzero(D_800D309C[i].mask, sizeof(D_800D309C[i].mask));
-            for (j = 0; j < arg1; j++) {
-                if (*var_s2 & bit2) {
-                    if (OVERLAP(D_800D309C[i].min_x, D_800D309C[i].max_x, D_800D309C[j].min_x, D_800D309C[j].max_x) &&
-                        OVERLAP(D_800D309C[i].min_y, D_800D309C[i].max_y, D_800D309C[j].min_y, D_800D309C[j].max_y) &&
-                        OVERLAP(D_800D309C[i].min_z, D_800D309C[i].max_z, D_800D309C[j].min_z, D_800D309C[j].max_z)) {
-                        *var_s0 |= bit2;
-                        D_800D309C[i].count++;
+    wordI = D_800D30B8;
+    bitI = 1;
+    for (i = 0; i < count; i++) {
+        wordJ = D_800D30B8;
+        D_800D309C[i].numOverlaps = 0;
+        if (*wordI & bitI) {
+            bitJ = 1;
+            overlapWord = (u64 *)&D_800D309C[i]; // matching: same as .overlaps, but that form schedules differently
+            bzero(D_800D309C[i].overlaps, sizeof(D_800D309C[i].overlaps));
+            for (j = 0; j < count; j++) {
+                if (*wordJ & bitJ) {
+                    if (OVERLAP(D_800D309C[i].minX, D_800D309C[i].maxX, D_800D309C[j].minX, D_800D309C[j].maxX) &&
+                        OVERLAP(D_800D309C[i].minY, D_800D309C[i].maxY, D_800D309C[j].minY, D_800D309C[j].maxY) &&
+                        OVERLAP(D_800D309C[i].minZ, D_800D309C[i].maxZ, D_800D309C[j].minZ, D_800D309C[j].maxZ)) {
+                        *overlapWord |= bitJ;
+                        D_800D309C[i].numOverlaps++;
                     }
                 }
-                bit2 <<= 1;
-                if (bit2 == 0) {
-                    var_s2++;
-                    var_s0++;
-                    bit2 = 1;
+                bitJ <<= 1;
+                if (bitJ == 0) {
+                    wordJ++;
+                    overlapWord++;
+                    bitJ = 1;
                 }
             }
         }
-        bit <<= 1;
-        if (bit == 0) {
-            var_fp++;
-            bit = 1;
+        bitI <<= 1;
+        if (bitI == 0) {
+            wordI++;
+            bitI = 1;
         }
     }
 }
+
 void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void func_150A7DA0(f32 mtx[4][4], f32, f32, f32);
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 
-void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
+/*
+ * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the
+ * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes
+ * get zero-size bounds at the position.
+ */
+void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
     s32 i;
     s32 shape;
     s32 invalid;
@@ -209,26 +245,26 @@ void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
     f32 x, y, z;
 
     invalid = 0;
-    shape = arg0->unk15 & 3;
+    shape = OBJ_SHAPE(obj);
     switch (shape) {
     default:
         invalid = 1;
         break;
     case 0:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeX);
+        func_150A7CB0(transform, obj->sizeX, obj->sizeY * 0.5f, obj->sizeX);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A8050(rotation, obj->rotX, obj->rotY, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     case 1:
-        func_150A7CB0(transform, arg0->sizeX, arg0->sizeX, arg0->sizeX);
+        func_150A7CB0(transform, obj->sizeX, obj->sizeX, obj->sizeX);
         break;
     case 2:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeZ);
+        func_150A7CB0(transform, obj->sizeX, obj->sizeY * 0.5f, obj->sizeZ);
         func_150A7A48(rotation, transform, transform);
-        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A8050(rotation, obj->rotX, obj->rotY, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
     }
@@ -273,10 +309,10 @@ void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
             }
         }
     }
-    arg1->min_x = arg0->x + minX;
-    arg1->max_x = arg0->x + maxX;
-    arg1->min_y = arg0->y + minY;
-    arg1->max_y = arg0->y + maxY;
-    arg1->min_z = arg0->z + minZ;
-    arg1->max_z = arg0->z + maxZ;
+    bounds->minX = obj->x + minX;
+    bounds->maxX = obj->x + maxX;
+    bounds->minY = obj->y + minY;
+    bounds->maxY = obj->y + maxY;
+    bounds->minZ = obj->z + minZ;
+    bounds->maxZ = obj->z + maxZ;
 }

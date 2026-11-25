@@ -2,452 +2,424 @@
 #include "functions.h"
 #include "variables.h"
 
-
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_1515AF90;
+    f32 x, y, z;
+} Vec3f;
 
+/* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
-    Vec3f_1515AF90 position;
-    f32 scale;
-    f32 zero;
-    f32 ground;
-} GameAF90Packet;
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
+} GroundParticle;
 
+/* Result of a floor probe (CollisionHit in game_71820.c). */
 typedef struct {
-    f32 height;
-    s16 points[9];
-    s32 object;
-    u8 flags;
-    u8 active;
-    u8 pad1E[2];
-    s32 field20;
-} Game71820Hit_1515AF90;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 tri[9];
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 material;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 source;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ void *surface;
+} GroundHit;
 
-s32 func_1504697C(Vec3f_1515AF90 *, u16, f32, Game71820Hit_1515AF90 *);
-extern f32 D_800A6420;
-extern f32 D_800A6424;
-extern f32 D_800A6428;
-extern f32 D_800A642C;
-extern f32 D_800A6430;
-extern f32 D_800A6434;
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
 
-void func_1515AF90(s16 arg0) {
+/*
+ * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
+ * at an angle within 20 units of its yaw (unk380, converted from degrees). The spot needs a floor
+ * above the eye; the particle sits on the floor at most 250 units below the eye (else at that depth).
+ */
+void func_1515AF90(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
-        void *result;
-        GameAF90Packet packet;
-        Vec3f_1515AF90 *base;
-        s32 offset;
+        void *particle;
+        GroundParticle effect;
+        Vec3f *eye;
+        s32 yaw;
         u8 valid;
         s16 angle;
-        f32 radius;
+        f32 distance;
         f32 cosine;
         f32 sine;
-        Game71820Hit_1515AF90 hit;
-        Vec3f_1515AF90 query;
-        Game71820Hit_1515AF90 lowerHit;
-        Vec3f_1515AF90 lowerQuery;
-        f32 lowerHeight;
+        GroundHit hit;
+        Vec3f probe;
+        GroundHit lowerHit;
+        Vec3f lowerProbe;
+        f32 bottom;
 
-        valid = 1;
-        base = (Vec3f_1515AF90 *)&D_800DBFF0[arg0].unk2F8;
-        offset = D_800DBFF0[arg0].unk380 * D_800A6420;
+        valid = TRUE;
+        eye = (Vec3f *)&D_800DBFF0[player].unk2F8;
+        yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
         {
             u32 roll = func_150ADA20();
 
-            angle = (roll % 41U) + offset - 0x14;
-            radius = func_150ADA68() * D_800A6424 + 107.0f;
+            angle = (roll % 41U) + yaw - 20;
+            distance = func_150ADA68() * 1903.0f + 107.0f;
             cosine = func_151423D8(angle);
             sine = func_151423D8(angle - 0x40);
-            packet.position.x = base->x - radius * sine;
-            packet.position.z = base->z - radius * cosine;
+            effect.position.x = eye->x - distance * sine;
+            effect.position.z = eye->z - distance * cosine;
         }
-        query.x = packet.position.x;
-        hit.object = 0;
+        probe.x = effect.position.x;
+        hit.material = 0;
         hit.flags = 0;
-        hit.active = 0;
-        hit.field20 = 0;
-        query.y = D_800A6428;
-        query.z = packet.position.z;
-        hit.height = D_800A642C;
-        if (func_1504697C(&query, 0, base->y, &hit) != 0) {
-            packet.ground = hit.height;
+        hit.source = 0;
+        hit.surface = NULL;
+        probe.y = 19500.0f;
+        probe.z = effect.position.z;
+        hit.height = -10000.0f;
+        if (func_1504697C(&probe, 0, eye->y, &hit)) {
+            effect.upperFloorY = hit.height;
         } else {
-            valid = 0;
+            valid = FALSE;
         }
         if (valid) {
-            lowerHeight = base->y + -250.0f;
-            lowerHit.field20 = 0;
-            lowerHit.active = 0;
+            bottom = eye->y + -250.0f;
+            lowerHit.surface = NULL;
+            lowerHit.source = 0;
             lowerHit.flags = 0;
-            lowerHit.object = 0;
-            lowerHit.height = D_800A6430;
-            lowerQuery.x = packet.position.x;
-            lowerQuery.y = base->y;
-            lowerQuery.z = packet.position.z;
-            if (func_1504697C(&lowerQuery, 0, lowerHeight, &lowerHit) != 0) {
-                packet.position.y = lowerHit.height;
+            lowerHit.material = 0;
+            lowerHit.height = -10000.0f;
+            lowerProbe.x = effect.position.x;
+            lowerProbe.y = eye->y;
+            lowerProbe.z = effect.position.z;
+            if (func_1504697C(&lowerProbe, 0, bottom, &lowerHit)) {
+                effect.position.y = lowerHit.height;
             } else {
-                packet.position.y = lowerHeight;
+                effect.position.y = bottom;
             }
         }
-        func_150ADA68();
-        packet.scale = 195.0f * D_800A6434;
-        packet.zero = 0.0f;
+        effect.unkC = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
+        effect.unk10 = 0.0f;
         if (valid) {
-            angle = (func_150ADA20() % 61U) + 5;
-            result = func_151491F4(angle, -1, 0xC, 1, 7, 0x18, 0xFF, 0);
-            if (result != NULL) {
-                memcpy((u8 *)result + 0x28, &packet, sizeof(packet));
+            particle = func_151491F4((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0x28, &effect, sizeof(effect));
             }
         }
     }
 }
 
+/* Sprite-particle descriptor passed to func_151303BC (ParticleDesc in game_117490.c). */
 typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec1515B21C;
-
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 texture;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
+    /* 0x14 */ u8 unk14[7];
+    /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ s16 unk1E;
     /* 0x20 */ s16 unk20;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec1515B21C unk30;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ Vec1515B21C unk48;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f velocity;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[0x4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0x8];
-} Params1515B21C;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ s8 unk60[4];
+    /* 0x64 */ u8 pad64[8]; // matching: game_117490.c has 0xC here; this frame needs a 0x6C-byte desc
+} ParticleDesc;
 
+/* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
 typedef struct {
-    f32 unk0;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    s8 unk7;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-} Extra1515B21C;
-
-typedef struct {
-    /* 0x00 */ Vec1515B21C pos;
-    /* 0x0C */ f32 unkC;
+    /* 0x00 */ f32 size;
+    /* 0x04 */ u8 unk4[4];
+    /* 0x08 */ f32 unk8[2];
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-} Sub1515B21C;
+    /* 0x18 */ u8 unk18[4];
+    /* 0x1C */ f32 unk1C[2];
+    /* 0x24 */ f32 unk24;
+} ParticleExtra;
+
+/* Emitter state stored in an effect object at +0x28. */
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
+    /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
+    /* 0x14 */ f32 unk14;
+} ParticleEmitter;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ Sub1515B21C sub;
-    /* 0x40 */ u8 pad40[0x4];
-} Arg1515B21C;
+    /* 0x28 */ ParticleEmitter emitter;
+} EmitterObject;
 
-extern f32 D_800BE9A4;
-void *func_151303BC(Params1515B21C *, s32, s32);
+void *func_151303BC(ParticleDesc *, s32, s32);
 
-void func_1515B21C(Arg1515B21C *arg0) {
-    Sub1515B21C *sub;
-    void *temp_v0;
-    Params1515B21C params;
-    Extra1515B21C extra;
-    f32 zero;
+/* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
+void func_1515B21C(EmitterObject *obj) {
+    ParticleEmitter *emitter;
+    void *particle;
+    ParticleDesc desc;
+    ParticleExtra extra;
 
-    arg0->sub.unk10 += arg0->sub.unkC * D_800BE9A4;
-    sub = &arg0->sub;
-    if (arg0->sub.unk10 > 1.0f) {
-        zero = 0.0f;
-        {
-        f32 temp_f2;
+    emitter = &obj->emitter;
+    emitter->accumulator += emitter->rate * D_800BE9A4;
+    if (emitter->accumulator > 1.0f) {
+        f32 size;
 
-        params.unk1D = 0x2F;
-        params.unk08 = 0xC01;
-        params.unk00 = 0x200005;
-        params.unk04 = 0;
-        params.unk1A = 0;
-        params.unk19 = 0;
-        params.unk18 = 0;
-        params.unk17 = 0;
-        params.unk16 = 0;
-        params.unk15 = 0;
-        params.unk14 = 0;
-        params.unk10 = 0;
-        params.unk0C = 0;
-        params.unk1C = 0xFF;
-        params.unk22 = 0;
-        params.unk24 = zero;
-        params.unk58 = 0x3207;
-        params.unk60 = 5;
-        params.unk61 = 5;
-        params.unk62 = 4;
-        params.unk63 = -1;
-        params.unk30 = sub->pos;
-        params.unk3C = zero;
-        params.unk40 = zero;
-        params.unk44 = zero;
-        params.unk1E = 0x32;
-        params.unk20 = 5;
-        extra.unk4 = 0;
-        extra.unk5 = 0;
-        extra.unk18 = 0;
-        extra.unk19 = 0;
-        params.unk48.x = zero;
-        params.unk48.z = zero;
+        desc.unk1D = 47;
+        desc.texture = 0xC01;
+        desc.flags = 0x200005;
+        desc.unk4 = 0;
+        desc.unk14[6] = 0;
+        desc.unk14[5] = 0;
+        desc.unk14[4] = 0;
+        desc.unk14[3] = 0;
+        desc.unk14[2] = 0;
+        desc.unk14[1] = 0;
+        desc.unk14[0] = 0;
+        desc.unk10 = 0;
+        desc.unkC = 0;
+        desc.unk1C = 255;
+        desc.unk22 = 0;
+        desc.unk24 = 0.0f;
+        desc.unk58 = 0x3207;
+        desc.unk60[0] = 5;
+        desc.unk60[1] = 5;
+        desc.unk60[2] = 4;
+        desc.unk60[3] = -1;
+        desc.position = emitter->position;
+        desc.unk3C.x = 0.0f;
+        desc.unk3C.y = 0.0f;
+        desc.unk3C.z = 0.0f;
+        desc.unk1E = 50;
+        desc.unk20 = 5;
+        extra.unk4[0] = 0;
+        extra.unk4[1] = 0;
+        extra.unk18[0] = 0;
+        extra.unk18[1] = 0;
+        desc.velocity.x = 0.0f;
+        desc.velocity.z = 0.0f;
         extra.unk10 = 1.200000048f;
         extra.unk14 = 0.8333333135f;
-        extra.unk24 = sub->unk14;
+        extra.unk24 = emitter->unk14;
 
         if (func_150ADA20() & 1) {
-            params.unk58 |= 0x40;
+            desc.unk58 |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            params.unk58 |= 0x80;
+            desc.unk58 |= 0x80;
         }
 
         do {
-            params.unk48.y = func_150ADA68() * 12.0f * 0.1000000015f;
-            params.unk0A = (func_150ADA20() % 152U) + 0x96;
-            params.unk1B = (func_150ADA20() % 151U) + 0x37;
-            temp_f2 = (func_150ADA68() * 200.0f) + 100.0f;
-            params.unk28 = temp_f2;
-            extra.unk0 = temp_f2;
-            params.unk2C = temp_f2;
-            extra.unk6 = (func_150ADA20() % 5U) + 4;
-            extra.unk7 = (func_150ADA20() % 5U) + 4;
-            extra.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
-            extra.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
-            extra.unk1A = (func_150ADA20() & 3) + 2;
-            extra.unk1B = (func_150ADA20() & 3) + 2;
-            extra.unk1C = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
-            extra.unk20 = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
-            params.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+            desc.velocity.y = func_150ADA68() * 12.0f * 0.1000000015f;
+            desc.lifetime = (func_150ADA20() % 152U) + 150;
+            desc.alpha = (func_150ADA20() % 151U) + 55;
+            size = (func_150ADA68() * 200.0f) + 100.0f;
+            desc.width = size;
+            extra.size = size;
+            desc.height = size;
+            extra.unk4[2] = (func_150ADA20() % 5U) + 4;
+            extra.unk4[3] = (func_150ADA20() % 5U) + 4;
+            extra.unk8[0] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
+            extra.unk8[1] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
+            extra.unk18[2] = (func_150ADA20() & 3) + 2;
+            extra.unk18[3] = (func_150ADA20() & 3) + 2;
+            extra.unk1C[0] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
+            extra.unk1C[1] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
+            desc.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
-            temp_v0 = func_151303BC(&params, 2, 0x28);
-            if (temp_v0 != NULL) {
-                memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x28);
+            particle = func_151303BC(&desc, 2, 0x28);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }
-            sub->unk10 -= 1.0f;
-        } while (sub->unk10 > 1.0f);
-        }
+            emitter->accumulator -= 1.0f;
+        } while (emitter->accumulator > 1.0f);
     }
 }
 
-extern void func_1515572C(s16 *, s32);
-
-void func_1515B5F4(s16 arg0) {
-    s16 sp1C[2];
-
-    sp1C[0] = arg0;
-    func_1515572C(sp1C, 0xB);
-}
-
-void func_1515B62C(struct102 *arg0, s16 *arg1, u8 arg2) {
-    if (arg2 == 0xB) {
-        if (*(s16 *)((u8 *)arg0 + 0x70) == arg1[0]) {
-            func_1516972C(arg0);
-        }
-    }
-}
-
+/* Description a screen sprite is created from (ScreenSpriteInfo in game_182140.c). */
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
+    /* 0x00 */ f32 x; // centre, in viewport units
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 halfWidth;
+    /* 0x0C */ f32 halfHeight;
+    /* 0x10 */ u8 texture;
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 timer;
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 fadeStart;
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind; // index into D_8008AD04 (message handlers)
+    /* 0x1B */ u8 color1[4];
+    /* 0x1F */ u8 color2[4];
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeH;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
+    /* 0x30 */ s32 combineMode;
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[0x17];
-} struct_1515B674;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 viewport; // the only viewport drawn in when (flags & 0x10)
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 unk48[4];
+} ScreenSpriteInfo;
+
+/* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
+typedef struct {
+    /* 0x00 */ s16 player;
+    /* 0x04 */ f32 acceleration;
+    /* 0x08 */ f32 velocity;
+    /* 0x0C */ f32 baseHalfHeight;
+    /* 0x10 */ f32 stretch;
+    /* 0x14 */ f32 unk14;
+} SlidingSpriteData;
 
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8  pad14[8];
-} struct_1515B674b;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ScreenSpriteInfo info;
+    /* 0x68 */ u8 pad68[8];
+    /* 0x70 */ SlidingSpriteData data;
+} SlidingSprite;
 
-extern u8 (*D_8008FD04[])(void);
-extern s32 func_151D8E20(void);
-extern void *func_1515548C(struct_1515B674 *, s32, s32, s32, s32, u8, s32);
+#define MSG_REMOVE_PLAYER_SPRITES 0xB
 
-void func_1515B674(s16 arg0) {
-    struct_1515B674 sp9C;
-    struct_1515B674b sp80;
-    void *temp_v0;
-    s16 i;
+extern void func_1515572C(s16 *payload, s32 type);
 
-    i = (func_150ADA20() % 1U) + 10;
-    sp9C.unk14 = 0x19;
-    sp9C.unk1A = 1;
-    sp9C.unk16 = 0x14;
-    sp9C.unk18 = 0xC;
-    sp9C.unk1B = 0xFF;
-    sp9C.unk1C = 0xFF;
-    sp9C.unk1D = 0xFF;
-    sp9C.unk1F = 0xFF;
-    sp80.unk0 = arg0;
-    sp9C.unk44 = arg0;
-    sp9C.unk20 = 0xFF;
-    sp9C.unk21 = 0xFF;
-    sp9C.unk22 = 0xFF;
-    sp9C.unk23 = 0xFF;
-    sp9C.unk24 = 0;
-    sp9C.unk28 = 0;
-    sp9C.unk2C = 0;
-    sp9C.unk40 = 0;
-    sp9C.unk41 = 9;
-    sp9C.unk30 = 7;
-    sp9C.unk34 = 0x3C;
-    sp9C.unk38 = 0x80;
-    sp9C.unk3C = 0x20;
-    while (i--) {
-        sp80.unk4 = ((func_150ADA68() * 105.0f) + 105.0f) * 0.001000000047f;
-        sp80.unk8 = func_150ADA68() * 3008.0f * 0.001000000047f;
-        sp9C.unkC = sp9C.unk8 = sp80.unkC = ((func_150ADA68() * 1579.0f) + 489.0f) * 0.009999999776f;
-        sp80.unk10 = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
-        sp9C.unk0 = (func_150ADA68() * 200.0f) + -100.0f;
-        sp9C.unk4 = (func_150ADA68() * 148.0f) + -100.0f;
-        sp9C.unk10 = D_8008FD04[func_151D8E20()]();
-        sp9C.unk12 = (func_150ADA20() % 51U) + 0x32;
-        sp9C.unk1E = (func_150ADA20() % 101U) + 0x64;
-        if (func_150ADA20() & 1) {
-            sp9C.unk14 |= 2;
-        }
-        if (func_150ADA20() & 1) {
-            sp9C.unk14 |= 4;
-        }
-        temp_v0 = func_1515548C(&sp9C, 2, 0, 0, 0x18, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x70, &sp80, 0x18);
+/* Broadcasts message 0xB to the screen sprites; func_1515B62C removes the player's sliding sprites. */
+void func_1515B5F4(s16 player) {
+    s16 payload[2]; // matching: only payload[0] is sent; the array keeps the stack slot
+
+    payload[0] = player;
+    func_1515572C(payload, MSG_REMOVE_PLAYER_SPRITES);
+}
+
+/* Message handler of sprite kind 1: on message 0xB, removes the sprite if it belongs to that player. */
+void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
+    if (type == MSG_REMOVE_PLAYER_SPRITES) {
+        if (sprite->data.player == payload[0]) {
+            func_1516972C((struct102 *)sprite);
         }
     }
 }
 
-typedef struct Obj1515B994 {
-    char pad0[0x14];
-    /* 0x14 */ f32 unk14;
-    char pad18[4];
-    /* 0x1C */ f32 unk1C;
-    char pad20[0x74 - 0x20];
-    /* 0x74 */ f32 unk74;
-    /* 0x78 */ f32 unk78;
-    /* 0x7C */ f32 unk7C;
-    /* 0x80 */ f32 unk80;
-} Obj1515B994;
+extern u8 (*D_8008FD04[])(void);
+extern s32 func_151D8E20(void);
+extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
-s32 func_1515B994(void *arg0) {
-    typedef struct {
-        u8 pad0[0x14];
-        f32 x;
-        u8 pad18[4];
-        f32 z;
-        u8 pad20[0x54];
-        f32 acceleration;
-        f32 velocity;
-        f32 base;
-        f32 scale;
-    } Motion;
-    Motion *motion = arg0;
+/*
+ * Spawns 10 white sprites (kind 1, update callback 2 = func_1515B994) at random spots of the player's
+ * viewport; they slide along y and stretch as they speed up. Called when the camera rises back above
+ * its unk360 height.
+ */
+void func_1515B674(s16 player) {
+    s32 pad0; // matching: unused stack slots around info
+    ScreenSpriteInfo info;
+    s32 pad1;
+    SlidingSpriteData data;
+    SlidingSprite *sprite;
+    s16 count;
+
+    count = (func_150ADA20() % 1U) + 10;
+    info.flags = 0x19;
+    info.kind = 1;
+    info.fadeStart = 20;
+    info.fadeRate = 12;
+    info.color1[0] = 255;
+    info.color1[1] = 255;
+    info.color1[2] = 255;
+    info.color2[0] = 255;
+    data.player = player;
+    info.viewport = player;
+    info.color2[1] = 255;
+    info.color2[2] = 255;
+    info.color2[3] = 255;
+    info.unk23 = 255;
+    info.otherModeH = 0;
+    info.unk28 = 0;
+    info.unk2C = 0;
+    info.unk40 = 0;
+    info.unk41 = 9;
+    info.combineMode = 7;
+    info.unk34 = 60;
+    info.unk38 = 0x80;
+    info.unk3C = 0x20;
+    while (count--) {
+        data.acceleration = ((func_150ADA68() * 105.0f) + 105.0f) * 0.001000000047f;
+        data.velocity = func_150ADA68() * 3008.0f * 0.001000000047f;
+        info.halfHeight = info.halfWidth = data.baseHalfHeight =
+            ((func_150ADA68() * 1579.0f) + 489.0f) * 0.009999999776f;
+        data.stretch = ((func_150ADA68() * 301.0f) + 94.0f) * 0.009999999776f;
+        info.x = (func_150ADA68() * 200.0f) + -100.0f;
+        info.y = (func_150ADA68() * 148.0f) + -100.0f;
+        info.texture = D_8008FD04[func_151D8E20()]();
+        info.timer = (func_150ADA20() % 51U) + 50;
+        info.color1[3] = (func_150ADA20() % 101U) + 100;
+        if (func_150ADA20() & 1) {
+            info.flags |= 2;
+        }
+        if (func_150ADA20() & 1) {
+            info.flags |= 4;
+        }
+        sprite = func_1515548C(&info, 2, 0, 0, sizeof(SlidingSpriteData), 255, 1);
+        if (sprite != NULL) {
+            memcpy(&sprite->data, &data, sizeof(SlidingSpriteData));
+        }
+    }
+}
+
+/*
+ * Sprite update callback 2: moves the sprite along y with constant acceleration and stretches its
+ * half height with the average speed. Always returns 1 (keep alive).
+ */
+s32 func_1515B994(SlidingSprite *sprite) {
     f32 previous;
 
-    previous = motion->velocity;
-    motion->x += previous * D_800BE9A4 + 0.5f * motion->acceleration * D_800BE9A4;
-    motion->velocity = motion->velocity + motion->acceleration * D_800BE9A4;
-    motion->z = motion->base + motion->scale * (motion->velocity + previous) * 0.5f;
+    previous = sprite->data.velocity;
+    sprite->info.y += previous * D_800BE9A4 + 0.5f * sprite->data.acceleration * D_800BE9A4;
+    sprite->data.velocity = sprite->data.velocity + sprite->data.acceleration * D_800BE9A4;
+    sprite->info.halfHeight =
+        sprite->data.baseHalfHeight + sprite->data.stretch * (sprite->data.velocity + previous) * 0.5f;
     return 1;
 }
 
-void func_1515BA10(s32 arg0) {
+/*
+ * Camera hooks, called each frame by game_14FF90.c with the camera's player index, depending on
+ * whether its eye is at or below its unk360 height ("below") and was so last frame. "Special" means
+ * camera status bit 4 or mode bit 0x40000 is set.
+ */
 
+/* Stays above. */
+void func_1515BA10(s16 player) {
 }
 
-extern void func_1515AF90(s16);
-
-void func_1515BA1C(s16 arg0) {
-    func_1515AF90(arg0);
+/* Stays below. */
+void func_1515BA1C(s16 player) {
+    func_1515AF90(player);
 }
 
-void func_1515BA48(s32 arg0) {
+/* Snaps above, or rises above while special. */
+void func_1515BA48(s16 player) {
 }
 
-extern void func_1515B674(s16);
-
-void func_1515BA54(s16 arg0) {
-    func_1515B674(arg0);
+/* Rises above (not special). */
+void func_1515BA54(s16 player) {
+    func_1515B674(player);
 }
 
-extern void func_1515B5F4(s16);
-
-void func_1515BA80(s16 arg0) {
-    func_1515B5F4(arg0);
+/* Snaps below, or goes below while special. */
+void func_1515BA80(s16 player) {
+    func_1515B5F4(player);
 }
 
-void func_1515BAAC(s16 arg0) {
-    func_1515B5F4(arg0);
+/* Goes below (not special). */
+void func_1515BAAC(s16 player) {
+    func_1515B5F4(player);
 }

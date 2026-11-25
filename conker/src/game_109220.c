@@ -1,523 +1,168 @@
 #include <ultra64.h>
+// matching: functions.h declares func_150ADA20 as returning u8, but its callers here use the full u32
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #include "variables.h"
-
-
-extern f32 D_800A0C00;
-extern f32 D_800A0C04;
-extern f32 D_800A0C08;
-extern f32 D_800A0C0C;
-extern f32 D_800A0C10;
-extern f32 D_800A0C14;
-extern f32 D_800A0C18;
-extern f32 D_800A0C1C;
-extern f32 D_800A0C20;
-extern f32 D_800A0C24;
-extern f32 D_800A0C28;
-extern f32 D_800A0C2C;
-extern f32 D_800A0C30;
-extern s32 D_80090514;
-
-void func_15152F70(void *arg0, u8 arg1);
-void func_15153298(void *arg0, u8 arg1, s32 arg2);
-void func_15196438(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
-
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s8 unk38;
-    s8 unk39;
-    u8 pad3A[2];
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-} Struct150DB9E0A;
-
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    s16 unk0C;
-    s16 unk0E;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    s8 unk28;
-    s8 unk29;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    void *unk38;
-    u8 unk3C;
-    u8 unk3D;
-    u8 pad3E[2];
-} Struct150DB9E0B;
-
-typedef struct {
-    u8 pad_0x00[0x20];
-    u8 field_0x20;
-} EffectSpawnState;
-
-typedef struct {
-    f32 field_0x00;
-    f32 field_0x04;
-    f32 field_0x08;
-    f32 field_0x0C;
-    f32 field_0x10;
-} EffectSpawnPoint;
-
-typedef struct {
-    u8 pad_0x00[0x1];
-    u8 field_0x01;
-    u8 pad_0x02[0xA];
-    u8 field_0x0C;
-    u8 pad_0x0D[0x20];
-    s8 field_0x2D;
-    u8 pad_0x2E[0x66];
-    EffectSpawnPoint *field_0x94;
-    EffectSpawnState *field_0x98;
-} EffectSpawnSource;
-
-typedef struct {
-    s32 field_0x00;
-    s16 field_0x04;
-    s8 field_0x06;
-    u8 pad_0x07[0x1];
-    s32 field_0x08;
-    s32 field_0x0C;
-    u8 field_0x10;
-    u8 field_0x11;
-    u8 field_0x12;
-    u8 field_0x13;
-    u8 field_0x14;
-    u8 field_0x15;
-    u8 pad_0x16[0x2];
-    s32 field_0x18;
-    u8 pad_0x1C[0xC];
-    EffectSpawnPoint *field_0x28;
-    EffectSpawnState *field_0x2C;
-} EffectSpawnParams;
-void func_150DB9E0(s32 arg0, s32 arg1, u8 arg2);
-void func_150DBC60(void *arg0);
-
-typedef struct {
-    f32 u00;
-    u8 u04;
-    u8 pad05[0x1];
-    s16 u06;
-    f32 u08;
-    u8 u0C;
-    u8 pad0D[0x1];
-    s16 u0E;
-    f32 u10;
-    f32 u14;
-    f32 u18;
-    f32 u1C;
-    f32 u20;
-    f32 u24;
-    u8 u28;
-    u8 u29;
-    u8 pad2A[0x2];
-    f32 u2C;
-    f32 u30;
-    u8 u34;
-    u8 pad35[0x1];
-    s16 u36;
-    f32 u38;
-    u8 u3C;
-    u8 pad3D[0x1];
-    s16 u3E;
-    u8 u40;
-    u8 u41;
-    u8 u42;
-    u8 pad43[0x1];
-    s32 u44;
-    s32 u48;
-    s32 u4C;
-    s32 u50;
-    s32 u54;
-    s32 u58;
-    s32 u5C;
-    u8 u60;
-    u8 pad61[0x3];
-    f32 u64;
-    f32 u68;
-    f32 u6C;
-    s16 u70;
-    s16 u72;
-    f32 u74;
-    f32 u78;
-    s16 u7C;
-    s16 u7E;
-    f32 u80;
-    s16 u84;
-    s16 u86;
-    s16 u88;
-    u8 pad8A[0x2];
-    f32 u8C;
-    u8 * u90;
-    s32 u94;
-    s8 u98;
-    u8 pad99[0x3];
-    f32 u9C;
-    f32 uA0;
-    f32 uA4;
-    s16 uA8;
-    s16 uAA;
-    f32 uAC;
-    f32 uB0;
-    f32 uB4;
-    f32 uB8;
-    f32 uBC;
-    f32 uC0;
-    s16 uC4;
-    s16 uC6;
-    s16 uC8;
-    u8 uCA;
-    u8 padCB[0x1];
-    f32 uCC;
-    f32 uD0;
-    f32 uD4;
-    s16 uD8;
-    s16 uDA;
-    f32 uDC;
-    f32 uE0;
-    s16 uE4;
-    s16 uE6;
-    s16 uE8;
-    s16 uEA;
-    s16 uEC;
-    s16 uEE;
-    f32 uF0;
-    u8 * uF4;
-    s32 uF8;
-    s8 uFC;
-    u8 padFD[0x3];
-    f32 u100;
-    f32 u104;
-    f32 u108;
-    f32 u10C;
-    f32 u110;
-    u8 pad114[0x2];
-    s16 u116;
-    s16 u118;
-    u8 pad11A[0x2];
-} S150DBD70;
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    s16 u0C;
-    u16 u0E;
-    s32 u10;
-    u8 pad14;
-    u8 u15;
-    u8 pad16[6];
-} T150DBD70;
-
-extern u8 D_800903C8[];
-extern u8 D_80090414[];
-void *memcpy(void *, const void *, u32);
-void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
-s32 func_150DBD70(u8 arg0) {
-    T150DBD70 T;
-    S150DBD70 S;
-    void *r;
-
-    {
-    S.u20 = 0.0f;
-    S.u40 = 0;
-    T.u0E = 0;
-    S.u34 = 0;
-    }
-    switch (arg0) {
-    case 0:
-    case 5: {
-        switch (arg0) {
-        case 0: {
-            T.x = 5.0f;
-            T.y = 115.0f;
-            T.z = -1938.0f;
-            S.u24 = 40.4000015f;
-            }
-            break;
-        case 5: {
-            T.x = -693.793457f;
-            T.y = 205.640015f;
-            T.z = -1944.81384f;
-            S.u24 = 90.0f;
-            }
-            break;
-        }
-        S.u10 = T.x;
-        S.u14 = T.z;
-        S.u18 = -1.60000002f;
-        S.u1C = 1.66999996f;
-        S.u2C = 14.0f;
-        S.u30 = 4.0f;
-        S.u08 = 3.5999999f;
-        S.u6C = 45.1899986f;
-        S.u74 = 40.0f;
-        S.u80 = -185.0f;
-        S.u8C = 385.0f;
-        S.u9C = 0.224999994f;
-        S.uAC = 5.94999981f;
-        S.uB0 = 5.63000011f;
-        S.uB4 = 5.0f;
-        S.uBC = 1.10000002f;
-        T.u15 = 25;
-        T.u0C = 133;
-        S.u118 = 120;
-        S.u28 = 255;
-        S.u29 = 255;
-        S.u36 = 12;
-        S.u3C = 2;
-        S.u3E = 2;
-        S.uC0 = 0.419999987f;
-        S.u06 = 10;
-        S.u0E = 5;
-        T.u0E |= 1;
-        S.u41 = 24;
-        S.u42 = 81;
-        S.u44 = 8;
-        S.u58 = 5;
-        S.u60 = 1;
-        S.u70 = 63;
-        S.u7C = 56;
-        S.uCC = 1.48000002f;
-        S.u7E = -128;
-        S.u84 = 8;
-        S.u86 = 10;
-        S.u88 = 385;
-        S.u98 = -1;
-        S.uA8 = -63;
-        S.uAA = 43;
-        S.uC4 = 86;
-        S.uC6 = 3;
-        S.uC8 = 3;
-        S.u38 = 0.0f;
-        S.u04 = 0;
-        S.u0C = 0;
-        S.u48 = 0;
-        S.u4C = 0;
-        S.u50 = 0;
-        S.u54 = 0;
-        S.u5C = 0;
-        S.u64 = 0.0f;
-        S.u68 = 0.0f;
-        S.u72 = 0;
-        S.u90 = D_800903C8;
-        S.u94 = 0;
-        S.uA0 = 0.0f;
-        S.uCA = 12;
-        S.uD0 = 0.0f;
-        S.uD8 = -62;
-        S.uDA = 7;
-        S.uE4 = 56;
-        S.uE6 = -57;
-        S.uE8 = 21;
-        S.uEA = 7;
-        S.uEC = 3;
-        S.uEE = 309;
-        S.uF4 = D_800903C8;
-        S.uF8 = 0;
-        S.uFC = -1;
-        S.u104 = 0.0f;
-        S.u108 = 0.0f;
-        S.u00 = 6.0f;
-        S.uB8 = 6.0f;
-        S.u10C = 100.0f;
-        S.u110 = 100.0f;
-        S.u78 = 25.0f;
-        S.uA4 = 25.0f;
-        S.uD4 = 17.1900005f;
-        S.uDC = 270.0f;
-        S.uE0 = 154.0f;
-        S.uF0 = 173.0f;
-        S.u100 = 60.0f;
-        }
-        break;
-    case 1:
-    case 2:
-    case 3:
-    case 4: {
-        struct127 *p;
-        p = func_15083E90(6);
-        if (p == NULL) {
-            return 0;
-        }
-        if (p->unk84.uh == 6) {
-            {
-            S.u24 = 498.0f;
-            }
-        } else {
-            S.u24 = -37.0f;
-        }
-        T.y = 736.0f;
-        switch (arg0) {
-        case 1: {
-            T.x = 650.0f;
-            T.z = -650.0f;
-            }
-            break;
-        case 2: {
-            T.x = -650.0f;
-            T.z = -650.0f;
-            }
-            break;
-        case 3:
-            T.z = 650.0f;
-            T.x = -650.0f;
-            break;
-        case 4:
-            T.x = 650.0f;
-            T.z = 650.0f;
-            break;
-        }
-        S.u10 = T.x;
-        S.u14 = T.z;
-        S.u18 = -2.0f;
-        S.u1C = 1.25999999f;
-        S.u2C = 132.0f;
-        S.u30 = 17.6000004f;
-        S.u38 = -9.10000038f;
-        S.u64 = 0.319999993f;
-        S.u6C = 114.900002f;
-        S.u74 = 1039.0f;
-        S.u78 = 769.0f;
-        S.u80 = -51.0f;
-        S.u9C = 0.310000002f;
-        S.uA4 = 139.529999f;
-        S.uAC = 18.7999992f;
-        T.u15 = 30;
-        S.uB4 = 15.0f;
-        S.uB8 = 12.0f;
-        T.u0C = 160;
-        S.uBC = 2.75f;
-        S.u118 = 110;
-        S.u28 = 255;
-        S.u29 = 255;
-        S.u36 = 12;
-        S.u3C = 1;
-        S.u3E = 3;
-        S.u06 = 6;
-        S.u0E = 6;
-        S.uC0 = 1.19000006f;
-        T.u0E |= 1;
-        S.u41 = 25;
-        S.u42 = 81;
-        S.u44 = 8;
-        S.u4C = 6;
-        S.u60 = 2;
-        S.u70 = 36;
-        S.u72 = 26;
-        S.u7C = 600;
-        S.u7E = -72;
-        S.u84 = 6;
-        S.uCC = 0.720000029f;
-        S.u86 = 3;
-        S.u88 = 1300;
-        S.u94 = 171;
-        S.u98 = 12;
-        S.uA8 = -58;
-        S.uAA = 11;
-        S.uC4 = 70;
-        S.uC6 = 4;
-        S.uC8 = 2;
-        S.uCA = 9;
-        S.u04 = 0;
-        S.u0C = 0;
-        S.u48 = 0;
-        S.u50 = 0;
-        S.u54 = 0;
-        S.u58 = 0;
-        S.u5C = 0;
-        S.u68 = 0.0f;
-        S.u90 = D_80090414;
-        S.uA0 = 0.0f;
-        S.uD0 = 0.0f;
-        S.uD8 = -56;
-        S.uDA = 10;
-        S.uE4 = 600;
-        S.uE6 = -223;
-        S.uE8 = 64;
-        S.uEA = 6;
-        S.uEC = 4;
-        S.uEE = 1300;
-        S.uF4 = D_80090414;
-        S.uF8 = 171;
-        S.uFC = 12;
-        S.u108 = 0.0f;
-        S.u00 = 22.0f;
-        S.u08 = 22.0f;
-        S.u10C = 100.0f;
-        S.u110 = 100.0f;
-        S.u8C = 500.0f;
-        S.uF0 = 500.0f;
-        S.uB0 = 25.0f;
-        S.uD4 = 131.0f;
-        S.uDC = 2366.0f;
-        S.uE0 = 1231.0f;
-        S.u100 = 3.0f;
-        S.u104 = 0.0780000016f;
-        }
-        break;
-    default:
-        return 0;
-    }
-    T.u10 = 5;
-    S.u116 = 440;
-    r = func_15147A80(&T, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 1);
-    if (r != NULL) {
-        memcpy(*(void **)((u8 *)r + 0x98), &S, 0x11C);
-    }
-    return (s32)r;
-}
 #undef func_150ADA20
 u32 func_150ADA20(void);
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
+/*
+ * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
+ * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
+ */
 
-typedef struct Game150DC558Emission {
-    s32 texture;
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 unk0C;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 capacity; /* records[] length */
+    /* 0x16 */ u8 pad16[6];
+} StreamSpawn; // size 0x1C
+
+/* One point of the stream ring buffer. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 velocityY;
+    /* 0x10 */ f32 width;
+    /* 0x14 */ s16 alpha;
+    /* 0x16 */ u8 texCoord;
+    /* 0x17 */ u8 pad17;
+} StreamPoint; // size 0x18
+
+/* Per-stream tuning, copied into the actor's state by func_150DBD70. */
+typedef struct {
+    /* 0x00 */ f32 swayX;
+    /* 0x04 */ u8 angleX;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 angleXRange;
+    /* 0x08 */ f32 swayZ;
+    /* 0x0C */ u8 angleZ;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 angleZRange;
+    /* 0x10 */ f32 x;
+    /* 0x14 */ f32 z;
+    /* 0x18 */ f32 gravity;
+    /* 0x1C */ f32 rate;
+    /* 0x20 */ f32 count;
+    /* 0x24 */ f32 floor; /* points below this height splash */
+    /* 0x28 */ u8 unk28;
+    /* 0x29 */ u8 alpha;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ f32 widthBase;
+    /* 0x30 */ f32 widthRange;
+    /* 0x34 */ u8 widthAngle;
+    /* 0x35 */ u8 pad35;
+    /* 0x36 */ s16 widthAngleRange;
+    /* 0x38 */ f32 velocityY;
+    /* 0x3C */ u8 texCoordStep;
+    /* 0x3D */ u8 pad3D;
+    /* 0x3E */ s16 texCoordStepRange;
+    /* 0x40 */ u8 texCoord;
+    /* 0x41 */ u8 trailTexture; /* D_80090B60 index */
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 pad61[3];
+    /* 0x64 */ f32 spawnRate;
+    /* 0x68 */ f32 spawnCount;
+    /* 0x6C */ f32 radius;
+    /* 0x70 */ s16 pitchBase;
+    /* 0x72 */ s16 pitchRange;
+    /* 0x74 */ f32 speedBase;
+    /* 0x78 */ f32 speedRange;
+    /* 0x7C */ s16 lifetime;
+    /* 0x7E */ s16 accelBase;
+    /* 0x80 */ f32 accelRange;
+    /* 0x84 */ s16 fadeBase;
+    /* 0x86 */ s16 fadeRange;
+    /* 0x88 */ s16 sizeBase;
+    /* 0x8A */ u8 pad8A[2];
+    /* 0x8C */ f32 sizeRange;
+    /* 0x90 */ u8 *texture;
+    /* 0x94 */ s32 frameRate;
+    /* 0x98 */ s8 callback;
+    /* 0x99 */ u8 pad99[3];
+    /* 0x9C */ f32 splashRate;
+    /* 0xA0 */ f32 splashCount;
+    /* 0xA4 */ f32 splashRadius;
+    /* 0xA8 */ s16 splashPitchBase;
+    /* 0xAA */ s16 splashPitchRange;
+    /* 0xAC */ f32 splashSpeedBase;
+    /* 0xB0 */ f32 splashSpeedRange;
+    /* 0xB4 */ f32 splashScaleBase;
+    /* 0xB8 */ f32 splashScaleRange;
+    /* 0xBC */ f32 splashSizeBase;
+    /* 0xC0 */ f32 splashSizeRange;
+    /* 0xC4 */ s16 splashLifetime;
+    /* 0xC6 */ s16 splashCountBase;
+    /* 0xC8 */ s16 splashCountRange;
+    /* 0xCA */ u8 unkCA;
+    /* 0xCB */ u8 padCB;
+    /* 0xCC */ f32 dropRate;
+    /* 0xD0 */ f32 dropCount;
+    /* 0xD4 */ f32 dropRadius;
+    /* 0xD8 */ s16 dropPitchBase;
+    /* 0xDA */ s16 dropPitchRange;
+    /* 0xDC */ f32 dropSpeedBase;
+    /* 0xE0 */ f32 dropSpeedRange;
+    /* 0xE4 */ s16 dropLifetime;
+    /* 0xE6 */ s16 dropAccelBase;
+    /* 0xE8 */ s16 dropAccelRange;
+    /* 0xEA */ s16 dropFadeBase;
+    /* 0xEC */ s16 dropFadeRange;
+    /* 0xEE */ s16 dropSizeBase;
+    /* 0xF0 */ f32 dropSizeRange;
+    /* 0xF4 */ u8 *dropTexture;
+    /* 0xF8 */ s32 dropFrameRate;
+    /* 0xFC */ s8 dropCallback;
+    /* 0xFD */ u8 padFD[3];
+    /* 0x100 */ f32 ringY;
+    /* 0x104 */ f32 ringRate;
+    /* 0x108 */ f32 ringCount;
+    /* 0x10C */ f32 ringScaleBase;
+    /* 0x110 */ f32 ringScaleRange;
+    /* 0x114 */ u8 soundTimer;
+    /* 0x115 */ u8 pad115;
+    /* 0x116 */ s16 sound; /* 0: silent */
+    /* 0x118 */ s16 timer;
+    /* 0x11A */ u8 pad11A[2];
+} StreamState; // size 0x11C
+
+/* The actor returned by func_15147A80. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unk0C;
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ StreamSpawn spawn;
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 head; /* oldest record */
+    /* 0x2E */ s8 tail; /* next record to write */
+    /* 0x2F */ u8 pad2F[0x25];
+    /* 0x54 */ Vec3f endPos; /* the oldest record's position, the origin when empty */
+    /* 0x60 */ u8 pad60[0x34];
+    /* 0x94 */ StreamPoint *records;
+    /* 0x98 */ StreamState *state;
+} StreamActor;
+
+/* Particle spawn request passed to func_15167D84. */
+typedef struct {
+    u8 *texture;
     char pad4[8];
     s16 frame;
     s16 frame_rate;
@@ -544,113 +189,317 @@ typedef struct Game150DC558Emission {
     char pad33;
     u16 flags;
     char pad36[2];
-} Game150DC558Emission;
+} Emission;
 
-typedef struct Game150DC558Record {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 speed;
-    f32 width;
-    s16 alpha;
-    u8 color;
-    u8 pad17;
-} Game150DC558Record;
+/* Spawn template of a flat sprite (see func_1513C5B0). */
+typedef struct {
+    s32 flags;
+    s16 lifetime;
+    u8 texture; /* D_80090B60 index */
+    u8 unk7;
+    s32 frame;
+    s32 frameSpeed;
+    u8 unk10;
+    u8 unk11;
+    u8 rgba[4];
+    u8 unk16;
+    u8 unk17;
+    u32 renderModes;
+    s32 unk1C;
+    u8 viewportMask;
+    u8 pad21;
+    s16 fadeStart;
+    s16 fadeRate;
+    u8 pad26[2];
+} SpriteDef; /* size 0x28 */
 
-typedef struct Game150DC558Vec {
-    f32 x, y, z;
-} Game150DC558Vec;
+extern u8 D_800903C8[];
+extern u8 D_80090414[];
+void *memcpy(void *, const void *, u32);
+StreamActor *func_15147A80(StreamSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void *func_15167D84(Emission *, s32, s32, s8, u8, s32);
+void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
+                  s32, s32, s32, s32, s32, s32, s32, s32);
 
-typedef struct Game150DC558State {
-    u8 pad0[0x18];
-    f32 gravity;
-    u8 pad1C[8];
-    f32 floor;
-    u8 pad28[0x19];
-    u8 kind;
-    u8 pad42[0x5A];
-    f32 splashRate;
-    f32 splashCount;
-    f32 splashRadius;
-    s16 splashPitchBase;
-    s16 splashPitchRange;
-    f32 splashSpeedBase;
-    f32 splashSpeedRange;
-    f32 splashScaleBase;
-    f32 splashScaleRange;
-    f32 splashSizeBase;
-    f32 splashSizeRange;
-    s16 splashLifetime;
-    s16 splashCountBase;
-    s16 splashCountRange;
-    u8 padCA[2];
-    f32 dropRate;
-    f32 dropCount;
-    f32 dropRadius;
-    s16 dropPitchBase;
-    s16 dropPitchRange;
-    f32 dropSpeedBase;
-    f32 dropSpeedRange;
-    s16 dropLifetime;
-    s16 dropAccelBase;
-    s16 dropAccelRange;
-    s16 dropFadeBase;
-    s16 dropFadeRange;
-    s16 dropSizeBase;
-    f32 dropSizeRange;
-    s32 dropTexture;
-    s32 dropFrameRate;
-    s8 dropCallback;
-    u8 padFD[3];
-    f32 ringY;
-    f32 ringRate;
-    f32 ringCount;
-    f32 ringScaleBase;
-    f32 ringScaleRange;
-    u8 soundTimer;
-    u8 pad115;
-    s16 sound;
-} Game150DC558State;
+/*
+ * Creates falling stream `kind` (0 and 5: single streams; 1-4: four streams at (+-650, 736, +-650)
+ * that need character 6, whose unk84 picks the floor height) and copies its tuning into the actor's
+ * state. Returns the actor, or 0 on failure.
+ */
+s32 func_150DBD70(u8 kind) {
+    StreamSpawn spawn;
+    StreamState state;
+    StreamActor *actor;
 
-typedef struct Game150DC558Actor {
-    u8 pad0;
-    u8 field1;
-    u8 pad2[0xA];
-    u8 fieldC;
-    u8 padD[0x18];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 head;
-    s8 tail;
-    u8 pad2F[0x25];
-    Game150DC558Vec pos;
-    u8 pad60[0x34];
-    Game150DC558Record *records;
-    Game150DC558State *state;
-} Game150DC558Actor;
+    state.count = 0.0f;
+    state.texCoord = 0;
+    spawn.flags = 0;
+    state.widthAngle = 0;
+    switch (kind) {
+    case 0:
+    case 5:
+        switch (kind) {
+        case 0:
+            spawn.pos.x = 5.0f;
+            spawn.pos.y = 115.0f;
+            spawn.pos.z = -1938.0f;
+            state.floor = 40.4f;
+            break;
+        case 5:
+            spawn.pos.x = -693.79346f;
+            spawn.pos.y = 205.64001f;
+            spawn.pos.z = -1944.8138f;
+            state.floor = 90.0f;
+            break;
+        }
+        state.x = spawn.pos.x;
+        state.z = spawn.pos.z;
+        state.gravity = -1.6f;
+        state.rate = 1.67f;
+        state.widthBase = 14.0f;
+        state.widthRange = 4.0f;
+        state.swayZ = 3.6f;
+        state.radius = 45.19f;
+        state.speedBase = 40.0f;
+        state.accelRange = -185.0f;
+        state.sizeRange = 385.0f;
+        state.splashRate = 0.225f;
+        state.splashSpeedBase = 5.95f;
+        state.splashSpeedRange = 5.63f;
+        state.splashScaleBase = 5.0f;
+        state.splashSizeBase = 1.1f;
+        spawn.capacity = 25;
+        spawn.unk0C = 133;
+        state.timer = 120;
+        state.unk28 = 255;
+        state.alpha = 255;
+        state.widthAngleRange = 12;
+        state.texCoordStep = 2;
+        state.texCoordStepRange = 2;
+        state.splashSizeRange = 0.42f;
+        state.angleXRange = 10;
+        state.angleZRange = 5;
+        spawn.flags |= 1;
+        state.trailTexture = 24;
+        state.unk42 = 81;
+        state.unk44 = 8;
+        state.unk58 = 5;
+        state.unk60 = 1;
+        state.pitchBase = 63;
+        state.lifetime = 56;
+        state.dropRate = 1.48f;
+        state.accelBase = -128;
+        state.fadeBase = 8;
+        state.fadeRange = 10;
+        state.sizeBase = 385;
+        state.callback = -1;
+        state.splashPitchBase = -63;
+        state.splashPitchRange = 43;
+        state.splashLifetime = 86;
+        state.splashCountBase = 3;
+        state.splashCountRange = 3;
+        state.velocityY = 0.0f;
+        state.angleX = 0;
+        state.angleZ = 0;
+        state.unk48 = 0;
+        state.unk4C = 0;
+        state.unk50 = 0;
+        state.unk54 = 0;
+        state.unk5C = 0;
+        state.spawnRate = 0.0f;
+        state.spawnCount = 0.0f;
+        state.pitchRange = 0;
+        state.texture = D_800903C8;
+        state.frameRate = 0;
+        state.splashCount = 0.0f;
+        state.unkCA = 12;
+        state.dropCount = 0.0f;
+        state.dropPitchBase = -62;
+        state.dropPitchRange = 7;
+        state.dropLifetime = 56;
+        state.dropAccelBase = -57;
+        state.dropAccelRange = 21;
+        state.dropFadeBase = 7;
+        state.dropFadeRange = 3;
+        state.dropSizeBase = 309;
+        state.dropTexture = D_800903C8;
+        state.dropFrameRate = 0;
+        state.dropCallback = -1;
+        state.ringRate = 0.0f;
+        state.ringCount = 0.0f;
+        state.swayX = 6.0f;
+        state.splashScaleRange = 6.0f;
+        state.ringScaleBase = 100.0f;
+        state.ringScaleRange = 100.0f;
+        state.speedRange = 25.0f;
+        state.splashRadius = 25.0f;
+        state.dropRadius = 17.19f;
+        state.dropSpeedBase = 270.0f;
+        state.dropSpeedRange = 154.0f;
+        state.dropSizeRange = 173.0f;
+        state.ringY = 60.0f;
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4: {
+        struct127 *character = func_15083E90(6);
 
-s32 func_150DC558(Game150DC558Actor *arg0) {
-    Game150DC558State *state;
-    Game150DC558Record *records;
+        if (character == NULL) {
+            return 0;
+        }
+        if (character->unk84.uh == 6) {
+            state.floor = 498.0f;
+        } else {
+            state.floor = -37.0f;
+        }
+        spawn.pos.y = 736.0f;
+        switch (kind) {
+        case 1:
+            spawn.pos.x = 650.0f;
+            spawn.pos.z = -650.0f;
+            break;
+        case 2:
+            spawn.pos.x = -650.0f;
+            spawn.pos.z = -650.0f;
+            break;
+        case 3:
+            spawn.pos.z = 650.0f;
+            spawn.pos.x = -650.0f;
+            break;
+        case 4:
+            spawn.pos.x = 650.0f;
+            spawn.pos.z = 650.0f;
+            break;
+        }
+        state.x = spawn.pos.x;
+        state.z = spawn.pos.z;
+        state.gravity = -2.0f;
+        state.rate = 1.26f;
+        state.widthBase = 132.0f;
+        state.widthRange = 17.6f;
+        state.velocityY = -9.1f;
+        state.spawnRate = 0.32f;
+        state.radius = 114.9f;
+        state.speedBase = 1039.0f;
+        state.speedRange = 769.0f;
+        state.accelRange = -51.0f;
+        state.splashRate = 0.31f;
+        state.splashRadius = 139.53f;
+        state.splashSpeedBase = 18.8f;
+        spawn.capacity = 30;
+        state.splashScaleBase = 15.0f;
+        state.splashScaleRange = 12.0f;
+        spawn.unk0C = 160;
+        state.splashSizeBase = 2.75f;
+        state.timer = 110;
+        state.unk28 = 255;
+        state.alpha = 255;
+        state.widthAngleRange = 12;
+        state.texCoordStep = 1;
+        state.texCoordStepRange = 3;
+        state.angleXRange = 6;
+        state.angleZRange = 6;
+        state.splashSizeRange = 1.19f;
+        spawn.flags |= 1;
+        state.trailTexture = 25;
+        state.unk42 = 81;
+        state.unk44 = 8;
+        state.unk4C = 6;
+        state.unk60 = 2;
+        state.pitchBase = 36;
+        state.pitchRange = 26;
+        state.lifetime = 600;
+        state.accelBase = -72;
+        state.fadeBase = 6;
+        state.dropRate = 0.72f;
+        state.fadeRange = 3;
+        state.sizeBase = 1300;
+        state.frameRate = 171;
+        state.callback = 12;
+        state.splashPitchBase = -58;
+        state.splashPitchRange = 11;
+        state.splashLifetime = 70;
+        state.splashCountBase = 4;
+        state.splashCountRange = 2;
+        state.unkCA = 9;
+        state.angleX = 0;
+        state.angleZ = 0;
+        state.unk48 = 0;
+        state.unk50 = 0;
+        state.unk54 = 0;
+        state.unk58 = 0;
+        state.unk5C = 0;
+        state.spawnCount = 0.0f;
+        state.texture = D_80090414;
+        state.splashCount = 0.0f;
+        state.dropCount = 0.0f;
+        state.dropPitchBase = -56;
+        state.dropPitchRange = 10;
+        state.dropLifetime = 600;
+        state.dropAccelBase = -223;
+        state.dropAccelRange = 64;
+        state.dropFadeBase = 6;
+        state.dropFadeRange = 4;
+        state.dropSizeBase = 1300;
+        state.dropTexture = D_80090414;
+        state.dropFrameRate = 171;
+        state.dropCallback = 12;
+        state.ringCount = 0.0f;
+        state.swayX = 22.0f;
+        state.swayZ = 22.0f;
+        state.ringScaleBase = 100.0f;
+        state.ringScaleRange = 100.0f;
+        state.sizeRange = 500.0f;
+        state.dropSizeRange = 500.0f;
+        state.splashSpeedRange = 25.0f;
+        state.dropRadius = 131.0f;
+        state.dropSpeedBase = 2366.0f;
+        state.dropSpeedRange = 1231.0f;
+        state.ringY = 3.0f;
+        state.ringRate = 0.078f;
+        }
+        break;
+    default:
+        return 0;
+    }
+    spawn.unk10 = 5;
+    state.sound = 440;
+    actor = func_15147A80(&spawn, 0x120, sizeof(StreamPoint), 4, 4, 4, 0, 0, 0, 0xFF, 1);
+    if (actor != NULL) {
+        memcpy(actor->state, &state, sizeof(StreamState));
+    }
+    return (s32)actor;
+}
+
+/*
+ * Updates a stream: moves every record under gravity, and where one falls below the floor spawns
+ * splash particles, drops and ripple sprites there and discards it with every older record. Then ramps
+ * up the alpha of the four oldest records, plays the splash sound now and then, and tracks the oldest record's
+ * position in endPos. Always returns 1.
+ */
+s32 func_150DC558(StreamActor *actor) {
+    StreamState *state;
+    StreamPoint *records;
     s32 index;
     f32 pos[3];
     f32 vel[3];
-    Game150DC558Record *rec;
+    StreamPoint *rec;
     s32 timer;
 
-    state = arg0->state;
-    records = arg0->records;
-    index = arg0->tail;
-    while (index != arg0->head) {
+    state = actor->state;
+    records = actor->records;
+    index = actor->tail;
+    while (index != actor->head) {
         index--;
         if (index < 0) {
-            index = arg0->capacity - 1;
+            index = actor->spawn.capacity - 1;
         }
-        rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
-        rec->speed += state->gravity * D_800BE9A4;
-        rec->y += rec->speed * D_800BE9A4;
-        if (rec->y < state->floor) {
+        // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
+        rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
+        rec->velocityY += state->gravity * D_800BE9A4;
+        rec->pos.y += rec->velocityY * D_800BE9A4;
+        if (rec->pos.y < state->floor) {
             {
                 f32 speed;
                 u8 angle;
@@ -667,27 +516,27 @@ s32 func_150DC558(Game150DC558Actor *arg0) {
                     angle = func_150ADA20();
                     sine1 = func_151423D8(angle);
                     cosine1 = func_151423D8((u8)(angle - 0x40));
-                    angle2 = (func_150ADA20() % (u32)(state->splashPitchRange + 1)) + state->splashPitchBase;
+                    angle2 = (func_150ADA20() % (state->splashPitchRange + 1)) + state->splashPitchBase;
                     sine2 = func_151423D8(angle2);
                     cosine2 = func_151423D8((u8)(angle2 - 0x40));
                     radius = func_150ADA68() * state->splashRadius;
-                    pos[0] = rec->x + radius * cosine1;
+                    pos[0] = rec->pos.x + radius * cosine1;
                     pos[1] = state->floor;
-                    pos[2] = rec->z + radius * sine1;
+                    pos[2] = rec->pos.z + radius * sine1;
                     vel[0] = speed * sine2 * cosine1;
                     vel[1] = -speed * cosine2;
                     vel[2] = speed * sine2 * sine1;
                     func_151DA6F8(pos, vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
-                                  state->splashLifetime, (state->kind == 0x18) ? 0x7D : 0xFF,
+                                  state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
-                                  func_150ADA20() % (u32)(state->splashCountRange + 1) + state->splashCountBase, 1,
-                                  1.70000005f, 1.70000005f, 1, (state->kind == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
-                                  arg0->fieldC, arg0->field1);
+                                  func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,
+                                  1.7f, 1.7f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
+                                  actor->unk0C, actor->unk01);
                     state->splashCount -= 1.0f;
                 }
             }
             {
-                Game150DC558Emission packet;
+                Emission packet;
                 f32 speed;
                 u8 angle;
                 u8 angle2;
@@ -716,309 +565,122 @@ s32 func_150DC558(Game150DC558Actor *arg0) {
                     ok = 1;
                     packet.frame_rate = state->dropFrameRate;
                     packet.texture = state->dropTexture;
-                    packet.position[1] = (s16)state->floor;
+                    packet.position[1] = state->floor;
                     packet.lifetime = state->dropLifetime;
                     do {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
                         sine1 = func_151423D8(angle);
                         cosine1 = func_151423D8((u8)(angle - 0x40));
-                        angle2 = (func_150ADA20() % (u32)(state->dropPitchRange + 1)) + state->dropPitchBase;
+                        angle2 = (func_150ADA20() % (state->dropPitchRange + 1)) + state->dropPitchBase;
                         sine2 = func_151423D8(angle2);
                         cosine2 = func_151423D8((u8)(angle2 - 0x40));
                         radius = func_150ADA68() * state->dropRadius;
-                        packet.position[0] = (s16)(rec->x + radius * cosine1);
-                        packet.position[2] = (s16)(rec->z + radius * sine1);
-                        packet.velocity_x = (s16)(speed * sine2 * cosine1);
-                        packet.velocity_y = (s16)(-speed * cosine2);
-                        packet.velocity_z = (s16)(speed * sine2 * sine1);
-                        packet.acceleration = (func_150ADA20() % (u32)(state->dropAccelRange + 1)) + state->dropAccelBase;
-                        packet.fade = (func_150ADA20() % (u32)(state->dropFadeRange + 1)) + state->dropFadeBase;
-                        packet.width = packet.height = (s32)(func_150ADA68() * state->dropSizeRange + state->dropSizeBase);
-                        if (func_15167D84(&packet, 0, 0, -1, arg0->fieldC, arg0->field1) == NULL) {
+                        packet.position[0] = rec->pos.x + radius * cosine1;
+                        packet.position[2] = rec->pos.z + radius * sine1;
+                        packet.velocity_x = speed * sine2 * cosine1;
+                        packet.velocity_y = -speed * cosine2;
+                        packet.velocity_z = speed * sine2 * sine1;
+                        packet.acceleration = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fade = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
+                        if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
                             ok = 0;
                         }
                         state->dropCount -= 1.0f;
-                    } while (state->dropCount > 1.0f && ok != 0);
+                    } while (state->dropCount > 1.0f && ok);
                     while (state->dropCount > 1.0f) {
                         state->dropCount -= 1.0f;
                     }
                 }
             }
             {
-                EffectSpawnParams params;
+                u8 pad[8]; // matching: unused stack space
+                SpriteDef ring;
                 f32 scale;
-                s32 okR;
+                s32 ok;
 
                 state->ringCount += state->ringRate;
                 if (state->ringCount > 1.0f) {
-                    okR = 1;
-                    params.field_0x08 = 0;
-                    params.field_0x0C = 0;
-                    params.field_0x00 = 1;
-                    params.field_0x04 = 0x64;
-                    params.field_0x10 = 0xFF;
-                    params.field_0x11 = 0xFF;
-                    params.field_0x12 = 0;
-                    params.field_0x13 = 0;
-                    params.field_0x14 = 0;
-                    params.field_0x15 = 0xFF;
-                    params.field_0x18 = 0x30001;
+                    ok = 1;
+                    ring.frame = 0;
+                    ring.frameSpeed = 0;
+                    ring.flags = 1;
+                    ring.lifetime = 100;
+                    ring.unk10 = 0xFF;
+                    ring.unk11 = 0xFF;
+                    ring.rgba[0] = 0;
+                    ring.rgba[1] = 0;
+                    ring.rgba[2] = 0;
+                    ring.rgba[3] = 0xFF;
+                    ring.renderModes = 0x30001;
                     do {
                         scale = func_150ADA68() * state->ringScaleRange + state->ringScaleBase;
                         switch (func_150ADA20() & 1) {
                         case 0:
-                            params.field_0x06 = 0x1D;
+                            ring.texture = 0x1D;
                             break;
                         case 1:
-                            params.field_0x06 = 0x1E;
+                            ring.texture = 0x1E;
                             break;
                         }
-                        if (func_1513C5B0(&params, NULL, 5, 0, rec->x, state->ringY, rec->z, scale, scale,
+                        if (func_1513C5B0(&ring, NULL, 5, 0, rec->pos.x, state->ringY, rec->pos.z, scale, scale,
                                           func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 0, 0xFF, 0) == NULL) {
-                            okR = 0;
+                            ok = 0;
                         }
                         state->ringCount -= 1.0f;
-                    } while (state->ringCount > 1.0f && okR != 0);
+                    } while (state->ringCount > 1.0f && ok);
                     while (state->ringCount > 1.0f) {
                         state->ringCount -= 1.0f;
                     }
                 }
             }
-            while (index != arg0->head) {
-                arg0->head++;
-                if (arg0->head == arg0->capacity) {
-                    arg0->head = 0;
+            while (index != actor->head) {
+                actor->head++;
+                if (actor->head == actor->spawn.capacity) {
+                    actor->head = 0;
                 }
-                arg0->count--;
+                actor->count--;
             }
-            records[arg0->head].y = state->floor;
+            records[actor->head].pos.y = state->floor;
         }
     }
-    index = arg0->head;
+    // matching: byte-offset rec pointers as above (indexing records[] moves the multiplies)
+    index = actor->head;
     records[index].alpha = 0;
     index++;
-    if (index == arg0->capacity) {
+    if (index == actor->spawn.capacity) {
         index = 0;
     }
-    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x3F;
     index++;
-    if (index == arg0->capacity) {
+    if (index == actor->spawn.capacity) {
         index = 0;
     }
-    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x7F;
     index++;
-    if (index == arg0->capacity) {
+    if (index == actor->spawn.capacity) {
         index = 0;
     }
-    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0xBE;
     if (state->sound != 0) {
-
         timer = state->soundTimer;
-        timer -= D_800BE9E4;
+        timer -= D_800BE9E4; // matching: a separate statement (one expression reorders the loads)
         if (timer <= 0) {
             func_10010F30(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
             timer = func_150ADA20() & 0xC;
         }
         state->soundTimer = timer;
     }
-    if (arg0->count > 0) {
-        arg0->pos = *(Game150DC558Vec *)((u8 *)records + arg0->head * 0x18);
+    if (actor->count > 0) {
+        actor->endPos = records[actor->head].pos;
     } else {
-        arg0->pos.x = 0.0f;
-        arg0->pos.y = 0.0f;
-        arg0->pos.z = 0.0f;
+        actor->endPos.x = 0.0f;
+        actor->endPos.y = 0.0f;
+        actor->endPos.z = 0.0f;
     }
     return 1;
 }
-
-
-typedef struct Game10A350Emission {
-    s32 texture;
-    char pad4[8];
-    s16 frame;
-    s16 frame_rate;
-    s16 position[3];
-    s16 velocity_x;
-    s16 velocity_z;
-    char pad1A[2];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-    s8 callback;
-    s16 velocity_y;
-    s16 acceleration;
-    s16 width;
-    s16 height;
-    s16 lifetime;
-    s8 fade;
-    char pad2B;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 environment[3];
-    char pad33;
-    u16 flags;
-    char pad36[2];
-} Game10A350Emission;
-
-typedef struct Game10A350Record {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 speed;
-    f32 width;
-    s16 alpha;
-    u8 color;
-    u8 pad17;
-} Game10A350Record;
-
-typedef struct Game10A350State {
-    f32 swayX;
-    u8 angleX;
-    u8 pad5;
-    s16 angleXRange;
-    f32 swayZ;
-    u8 angleZ;
-    u8 padD;
-    s16 angleZRange;
-    f32 x;
-    f32 z;
-    f32 gravity;
-    f32 rate;
-    f32 count;
-    u8 pad24[5];
-    u8 alpha;
-    u8 pad2A[2];
-    f32 widthBase;
-    f32 widthRange;
-    u8 widthAngle;
-    u8 pad35;
-    s16 widthAngleRange;
-    f32 speed;
-    u8 colorStep;
-    u8 pad3D;
-    s16 colorStepRange;
-    u8 color;
-    u8 pad41[0x23];
-    f32 spawnRate;
-    f32 spawnCount;
-    f32 radius;
-    s16 pitchBase;
-    s16 pitchRange;
-    f32 speedBase;
-    f32 speedRange;
-    s16 lifetime;
-    s16 accelBase;
-    f32 accelRange;
-    s16 fadeBase;
-    s16 fadeRange;
-    s16 sizeBase;
-    u8 pad8A[2];
-    f32 sizeRange;
-    s32 texture;
-    s32 frameRate;
-    s8 callback;
-    u8 pad99[0x7F];
-    s16 timer;
-} Game10A350State;
-
-typedef struct Game10A350Actor {
-    u8 pad0;
-    u8 field1;
-    u8 pad2[0xA];
-    u8 fieldC;
-    u8 padD[3];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 head;
-    s8 tail;
-    u8 pad2F;
-    s8 active;
-    u8 pad31[0x63];
-    Game10A350Record *records;
-    Game10A350State *state;
-} Game10A350Actor;
-s32 func_150DCEA0(Game10A350Actor *arg0);
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f_150DD640;
-
-typedef struct {
-    Vec3f_150DD640 pos;
-    u8 pad0C[4];
-    f32 width;
-    s16 alpha;
-    u8 level;
-    u8 pad17;
-} Point150DD640;
-
-typedef struct {
-    u8 pad0[0x28];
-    u8 unk28;
-    u8 pad29[0x41 - 0x29];
-    u8 unk41;
-    u8 unk42;
-    u8 pad43[0x60 - 0x43];
-    u8 unk60;
-} Style150DD640;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3f_150DD640 pos;
-    u8 pad1C[2];
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x84 - 0x2F];
-    u8 unk84[0x10];
-    Point150DD640 *points;
-    Style150DD640 *style;
-} Owner150DD640;
-
-typedef struct {
-    u8 pad0[6];
-    u16 unk6;
-    u8 pad8[4];
-} Tex150DD640;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode150DD640;
-
-extern Tex150DD640 D_80090B60[];
-extern Mode150DD640 D_800A4AC8[];
-extern s32 D_800D2C9C;
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void *memcpy(void *, const void *, u32);
-Gfx *func_150DD640(Owner150DD640 *arg0, Gfx *gfx, s16 arg2);
-void func_150DDED0(void *arg0);
-
-s32 func_150DBD70(u8);
-s32 func_150DDF88(u8 *arg0);
-s32 func_150DDFAC(EffectSpawnSource *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5);
-s32 func_150DE12C(EffectSpawnSource *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5);
-s32 func_150DE2A4(void *arg0);
-void func_150DE2C4(void *arg0);

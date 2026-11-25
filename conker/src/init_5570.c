@@ -33,7 +33,7 @@ s32 osMotorStop(OSPfs *device) {
 
     __osSiGetAccess();
     __osContLastCmd = 3;
-    __osSiRawStartDma(1, ((u8 (*)[64])&D_8003BC30)[device->channel]);
+    __osSiRawStartDma(1, D_8003BC30[device->channel]);
     osRecvMesg(device->queue, 0, 1);
     __osSiRawStartDma(0, D_800429D0);
     osRecvMesg(device->queue, 0, 1);
@@ -60,7 +60,7 @@ s32 osMotorStart(OSPfs *device) {
 
     __osSiGetAccess();
     __osContLastCmd = 3;
-    __osSiRawStartDma(1, ((u8 (*)[64])&D_8003BD30)[device->channel]);
+    __osSiRawStartDma(1, D_8003BD30[device->channel]);
     osRecvMesg(device->queue, 0, 1);
     __osSiRawStartDma(0, D_800429D0);
     osRecvMesg(device->queue, 0, 1);

@@ -76,10 +76,10 @@ extern s32 D_800C3640[];           /* end time */
 extern u8 D_800C35E8[];            /* changes with each run of the scene */
 extern SeqQueueEntry *D_800C3D50;  /* dispatch queue, D_800C3C9A entries */
 
-extern struct131 *func_151149AC(s32);
-extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
-extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
-extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32, s32);
+extern WorldObject *func_151149AC(s32);
+extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
+extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
+extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32, s32);
 extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 void func_150238D0(void) {
@@ -552,7 +552,7 @@ extern void func_151E53E8(s32);
  * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
-s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag) {
+s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
@@ -787,7 +787,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C35C2 = event->unk4 + 1;
             D_800C35C3 = D_800BE9F0;
         } else if (event->value == 3) {
-            struct131 *target = func_151149AC((u8) event->unk6);
+            WorldObject *target = func_151149AC((u8) event->unk6);
 
             if (target == NULL) {
                 return 1;
@@ -1369,7 +1369,7 @@ extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
 extern void func_150CE150(struct127 *, s16, u8, s32);
 extern void func_150CFC38(f32);
 extern void func_15109410(struct127 *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_15109ED4(struct131 *, s16, s32, s32, f32, s32, s32, s32);
+extern void func_15109ED4(WorldObject *, s16, s32, s32, f32, s32, s32, s32);
 extern void func_1510A344(struct127 *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);
@@ -1446,9 +1446,9 @@ extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, 
 extern void func_150DB9E0(struct127 *, s32, u8);
 extern void func_1518B264(f32 *, f32, f32, s32, s32);
 extern void func_1518B2A8(f32 *, f32, f32, s32, s32, s32, s32);
-extern void func_15171600(struct131 *, u8, s32);
+extern void func_15171600(WorldObject *, u8, s32);
 extern void func_15171BF4(struct127 *, u8);
-extern void func_15170EC4(struct131 *, u8, s32);
+extern void func_15170EC4(WorldObject *, u8, s32);
 extern void func_151711C4(struct127 *);
 extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
@@ -1459,7 +1459,7 @@ extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
  * 0x11 (records the event index in D_800C3960), and the effect-spawning type-5
  * commands. Returns 1 when the event was handled.
  */
-s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag) {
+s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (event->type == 0xB) {
         s32 vol;
         s32 vol2;
@@ -2649,7 +2649,7 @@ extern void func_15155F90(void);
 extern void func_15178EFC(s32);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 extern void func_15188810(struct127 *, s32, s32);
-extern void func_1518894C(struct131 *, s32, s32);
+extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(struct127 *);
 extern void func_151D66F0(s32, s32);
 
@@ -2668,7 +2668,7 @@ extern u16 D_800C3C8E;
  * commands (8), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
  * being skipped (D_800C3C88 == 2). Returns 1 when the event was handled.
  */
-s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag, s32 skipping) {
+s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
     if ((event->type == 6) || (event->type == 10)) {
         s32 vol;
         s32 duration;
@@ -2944,7 +2944,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
  */
 void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene) {
     struct127 *obj;
-    struct131 *actor;
+    WorldObject *actor;
     f32 *pos;
     SeqTrackInfo *info;
     s32 sceneTag;

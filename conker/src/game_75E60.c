@@ -1,57 +1,61 @@
 #include <ultra64.h>
 
+#define func_15048A40 func_15048A40_hdr /* functions.h declares it returning void */
 #include "functions.h"
 #include "variables.h"
+#undef func_15048A40
 
+/*
+ * Angles here are u8 binary angles: 256 steps per full turn, so 64 is a right angle.
+ * D_8009A220 is a quarter-wave cosine table, D_8009A220[i] = cos(i * 2pi / 256) for i in 0..64.
+ */
 
-f32 func_150489B0(arg0)
-u8 arg0;
-{
-    f32 ret;
-    s32 temp_v0;
+/* Cosine of a u8 binary angle, built from the quarter-wave table by symmetry. */
+f32 func_150489B0(u8 angle) {
+    f32 value;
 
-    temp_v0 = arg0;
-    if (temp_v0 >= 65) {
-        if (temp_v0 >= 129) {
-            if (temp_v0 >= 193) {
-                ret = D_8009A620[0 - temp_v0];
+    if (angle > 64) {
+        if (angle > 128) {
+            if (angle > 192) {
+                value = D_8009A220[256 - angle];
             } else {
-                ret = -D_8009A020[temp_v0];
+                value = -D_8009A220[angle - 128];
             }
         } else {
-            ret = -D_8009A420[0 - temp_v0];
+            value = -D_8009A220[128 - angle];
         }
     } else {
-        ret = D_8009A220[arg0];
+        value = D_8009A220[angle];
     }
 
-    return ret;
+    return value;
 }
 
-void func_15048A40(u8 arg0) {
-    func_150489B0((arg0 - 0x40) & 0xFF);
+/* Sine of a u8 binary angle: sin(a) = cos(a - quarter turn). */
+f32 func_15048A40(u8 angle) {
+    return func_150489B0(angle - 64);
 }
 
-f32 func_15048A70(f32 arg0, f32 arg1) {
-    f32 tmp = arg0 - arg1;
-    if (tmp > 180.0f) {
-        arg0 -= 360.0f;
-    } else {
-        if (tmp <= -180.0f) {
-            arg1 -= 360.0f;
-        }
+/* Signed difference target - current in degrees, wrapped to take the short way round. */
+f32 func_15048A70(f32 current, f32 target) {
+    f32 diff = current - target;
+
+    if (diff > 180.0f) {
+        current -= 360.0f;
+    } else if (diff <= -180.0f) {
+        target -= 360.0f;
     }
-    return arg1 - arg0;
+    return target - current;
 }
 
-s32 func_15048AD0(s32 arg0, s32 arg1) {
-    s32 temp_v0 = arg0 - arg1;
-    if (temp_v0 >= 181) {
-        arg0 = arg0 - 360;
-    } else {
-        if (temp_v0 < -179) {
-            arg1 = arg1 - 360;
-        }
+/* Integer-degree version of func_15048A70. */
+s32 func_15048AD0(s32 current, s32 target) {
+    s32 diff = current - target;
+
+    if (diff > 180) {
+        current -= 360;
+    } else if (diff <= -180) {
+        target -= 360;
     }
-    return arg1 - arg0;
+    return target - current;
 }

@@ -36,7 +36,7 @@ typedef struct {
     /* 0x5E */ u8 pad5E[2];
 } ModelFxTemplate;
 
-/* The actor an effect is spawned at (struct131 / Obj1511C638 layout); only the fields used here. */
+/* The actor an effect is spawned at (WorldObject / Obj1511C638 layout); only the fields used here. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ s16 x;

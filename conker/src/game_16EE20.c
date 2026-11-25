@@ -2138,7 +2138,7 @@ u8 func_15145C90(s32 index) {
     if (index < 0) {
         return 1;
     } else {
-        return (D_800DBEF4[index].unk6F & 0x80) == 0x80;
+        return (D_800DBEF4[index].viewFlags & 0x80) == 0x80;
     }
 }
 

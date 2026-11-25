@@ -1,4 +1,6 @@
 #include <ultra64.h>
+/* functions.h declares func_150ADA20 as returning u8, but it returns the full 32-bit random value
+ * (callers take it modulo n with divu), so its header declaration is renamed out of the way. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
@@ -6,10 +8,11 @@ u32 func_150ADA20(void);
 #include "variables.h"
 
 
+/* Parameter block of func_15152190. */
 typedef struct {
     s32 unk00;
     s32 unk04;
-    struct17 unk08;
+    struct17 unk08; // position
     s16 unk14;
     s16 unk16;
     s16 unk18;
@@ -25,12 +28,13 @@ typedef struct {
     f32 unk38;
 } Arg150B06B0_2190;
 
+/* Parameter block of func_15153F18 (which is also passed &unk08 separately). */
 typedef struct {
     s16 unk00;
     s16 unk02;
     s16 unk04;
     s16 unk06;
-    struct17 unk08;
+    struct17 unk08; // position
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -52,6 +56,7 @@ typedef struct {
     s32 unk48;
 } Arg150B06B0_3F18;
 
+/* Filled in by func_1504715C for an actor; only passed on to func_15153F18 here. */
 typedef struct {
     u8 pad[0x24];
 } Floor150B06B0;
@@ -67,235 +72,251 @@ extern const f32 D_8009F814[1];
 extern const s32 D_8009F818[1];
 extern const f32 D_8009F81C[1];
 
-void func_150B06B0(struct127 *arg0, struct127 *arg1, u8 arg2, s32 arg3) {
+/*
+ * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets func_151C329C
+ * 50 units above it and one func_15152190 burst; any other actor gets a different burst plus two
+ * func_15153F18 passes (unk3C = 0, then 1) using the func_1504715C info for actor.
+ */
+void func_150B06B0(struct127 *actor, struct127 *other, u8 arg2, s32 arg3) {
     struct17 pos;
     s8 angle;
     Floor150B06B0 floor;
 
-    pos.unk0 = arg0->x_position;
-    pos.unk4 = arg0->y_position;
-    pos.unk8 = arg0->z_position;
-    angle = func_15143E24(arg1) + 0x40;
-    func_1504715C(&floor, arg0);
-    if (arg0->id == 0xA6) {
-        struct17 pos2;
-        Arg150B06B0_2190 b;
+    pos.unk0 = actor->x_position;
+    pos.unk4 = actor->y_position;
+    pos.unk8 = actor->z_position;
+    angle = func_15143E24(other) + 0x40;
+    func_1504715C(&floor, actor);
+    if (actor->id == 0xA6) {
+        struct17 raisedPos;
+        Arg150B06B0_2190 burst;
 
-        pos2.unk0 = pos.unk0;
-        pos2.unk4 = pos.unk4 + 50.0f;
-        pos2.unk8 = pos.unk8;
-        func_151C329C(&pos2, arg2, arg3);
-        b.unk00 = 0xA;
-        b.unk04 = 0xA;
-        b.unk08 = pos;
-        b.unk1C = 7.0f;
-        b.unk20 = 17.0f;
-        b.unk14 = angle - 0x28;
-        b.unk16 = 0x50;
-        b.unk18 = -0x2D;
-        b.unk1A = 0x1A;
-        b.unk2C = 0x19;
-        b.unk2E = 0x19;
-        b.unk24 = -0.8000000119f;
-        b.unk28 = 0.3440000117f;
-        b.unk30 = 0.7070000172f;
-        b.unk34 = 0.5070000291f;
-        b.unk38 = 26.41100121f;
-        func_15152190(&b, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
+        raisedPos.unk0 = pos.unk0;
+        raisedPos.unk4 = pos.unk4 + 50.0f;
+        raisedPos.unk8 = pos.unk8;
+        func_151C329C(&raisedPos, arg2, arg3);
+        burst.unk00 = 10;
+        burst.unk04 = 10;
+        burst.unk08 = pos;
+        burst.unk1C = 7.0f;
+        burst.unk20 = 17.0f;
+        burst.unk14 = angle - 40;
+        burst.unk16 = 80;
+        burst.unk18 = -45;
+        burst.unk1A = 26;
+        burst.unk2C = 25;
+        burst.unk2E = 25;
+        burst.unk24 = -0.8000000119f;
+        burst.unk28 = 0.3440000117f;
+        burst.unk30 = 0.7070000172f;
+        burst.unk34 = 0.5070000291f;
+        burst.unk38 = 26.41100121f;
+        func_15152190(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
     } else {
         {
-        Arg150B06B0_2190 b;
+            Arg150B06B0_2190 burst;
 
-        b.unk00 = 0xA;
-        b.unk04 = 0xA;
-        b.unk08 = pos;
-        b.unk1C = 7.0f;
-        b.unk20 = 17.0f;
-        b.unk14 = angle - 0x28;
-        b.unk16 = 0x50;
-        b.unk18 = -0x15;
-        b.unk1A = 0xD;
-        b.unk2C = 0x19;
-        b.unk2E = 0x19;
-        b.unk24 = -0.8000000119f;
-        b.unk28 = 0.3440000117f;
-        b.unk30 = 0.04900000244f;
-        b.unk34 = 0.1020000055f;
-        b.unk38 = 26.41100121f;
-        func_15152190(&b, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
+            burst.unk00 = 10;
+            burst.unk04 = 10;
+            burst.unk08 = pos;
+            burst.unk1C = 7.0f;
+            burst.unk20 = 17.0f;
+            burst.unk14 = angle - 40;
+            burst.unk16 = 80;
+            burst.unk18 = -21;
+            burst.unk1A = 13;
+            burst.unk2C = 25;
+            burst.unk2E = 25;
+            burst.unk24 = -0.8000000119f;
+            burst.unk28 = 0.3440000117f;
+            burst.unk30 = 0.04900000244f;
+            burst.unk34 = 0.1020000055f;
+            burst.unk38 = 26.41100121f;
+            func_15152190(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
         }
         {
-        Arg150B06B0_3F18 c;
-        c.unk08 = pos;
-        c.unk14 = 3.049999952f;
-        c.unk2C = 7;
-        c.unk2E = 3;
-        c.unk00 = angle - 0x3C;
-        c.unk02 = 0x78;
-        c.unk04 = -0x1E;
-        c.unk06 = 0x10;
-        c.unk30 = 3;
-        c.unk32 = 2;
-        c.unk34 = 0x14;
-        c.unk36 = 0x14;
-        c.unk38 = 0x9B;
-        c.unk3A = 0x64;
-        c.unk44 = 0x10;
-        c.unk46 = 0xF;
-        c.unk48 = 0;
-        c.unk3C = 0;
-        c.unk18 = 5.009999752f;
-        c.unk1C = 0.7000000477f;
-        c.unk20 = 0.5010000467f;
-        c.unk24 = 15.10000038f;
-        c.unk28 = 20.80000114f;
-        c.unk40 = 0.5f;
-        func_15153F18(&c, &c.unk08, &floor, arg2, arg3);
-        c.unk3C = 1;
-        func_15153F18(&c, &c.unk08, &floor, arg2, arg3);
+            Arg150B06B0_3F18 spray;
+
+            spray.unk08 = pos;
+            spray.unk14 = 3.049999952f;
+            spray.unk2C = 7;
+            spray.unk2E = 3;
+            spray.unk00 = angle - 60;
+            spray.unk02 = 120;
+            spray.unk04 = -30;
+            spray.unk06 = 16;
+            spray.unk30 = 3;
+            spray.unk32 = 2;
+            spray.unk34 = 20;
+            spray.unk36 = 20;
+            spray.unk38 = 155;
+            spray.unk3A = 100;
+            spray.unk44 = 16;
+            spray.unk46 = 15;
+            spray.unk48 = 0;
+            spray.unk3C = 0;
+            spray.unk18 = 5.009999752f;
+            spray.unk1C = 0.7000000477f;
+            spray.unk20 = 0.5010000467f;
+            spray.unk24 = 15.10000038f;
+            spray.unk28 = 20.80000114f;
+            spray.unk40 = 0.5f;
+            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
+            spray.unk3C = 1;
+            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
         }
     }
 }
 
-extern f32 D_8009F870;
+/*
+ * Picks a random spawn point on a 248-unit perimeter around owner: 122 units along the back edge
+ * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
+ * (y taken from player->unk118) and a matching s16 yaw to outAngle.
+ */
+void func_150B0A60(struct127 *owner, struct127 *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
+    f32 along;
+    f32 spread;
+    f32 side;
 
-void func_150B0A60(s32 *arg0, s32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg5) {
-    f32 r1;
-    f32 v;
-    f32 ang;
-
-    *arg5 = (s16)(*(f32 *)((s32)arg0 + 0x40) * D_8009F870 - 128.0f);
-    r1 = func_150ADA68() * 248.0f;
-    v = func_150ADA68() + -0.5f;
-    if (r1 < 122.0f) {
-        arg4[0] = arg2[0] * -31.5f + (arg3[0] * v) * 122.0f;
-        arg4[1] = 0.0f;
-        arg4[2] = arg2[1] * -31.5f + (arg3[1] * v) * 122.0f;
+    *outAngle = (s16)(owner->unk40 * 0.7111111283f - 128.0f);
+    along = func_150ADA68() * 248.0f;
+    spread = func_150ADA68() + -0.5f;
+    if (along < 122.0f) {
+        outPos[0] = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
+        outPos[1] = 0.0f;
+        outPos[2] = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
     } else {
-        f32 k = 63.0f;
-        ang = 61.0f;
-        r1 = r1 - 122.0f;
-        if (r1 < k) {
-            ang = -ang;
-            *arg5 += 0x40;
+        f32 sideLength = 63.0f; // matching: a named local, not the literal, keeps 63.0f in one register
+
+        side = 61.0f;
+        along = along - 122.0f;
+        if (along < sideLength) {
+            side = -side;
+            *outAngle += 0x40;
         } else {
-            *arg5 -= 0x40;
+            *outAngle -= 0x40;
         }
-        arg4[0] = arg2[0] * k * v + arg3[0] * ang;
-        arg4[1] = 0.0f;
-        arg4[2] = arg2[1] * k * v + arg3[1] * ang;
+        outPos[0] = forward[0] * sideLength * spread + right[0] * side;
+        outPos[1] = 0.0f;
+        outPos[2] = forward[1] * sideLength * spread + right[1] * side;
     }
-    arg4[0] += *(f32 *)((s32)arg0 + 0x14);
-    arg4[1] += *(f32 *)((s32)arg1 + 0x118);
-    arg4[2] += *(f32 *)((s32)arg0 + 0x1C);
+    outPos[0] += owner->x_position;
+    outPos[1] += player->unk118;
+    outPos[2] += owner->z_position;
 }
 
-void func_150B0C58(void *, u8, s32);
-
-s32 func_150B0C34(s32 arg0) {
-    func_150B0C58((void *)arg0, 0xFF, 1);
-}
-
-void func_150B0C58(void *arg0, u8 arg1, s32 arg2) {
-    struct {
-        void *unk0;
-        u8 unk4;
-        u8 pad5;
-        u8 pad6;
-        u8 pad7;
-        f32 unk8;
-    } sp34;
-    struct260 *temp_v0;
-
-    sp34.unk0 = arg0;
-    sp34.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-    sp34.unk8 = 0.0f;
-
-    temp_v0 = func_15149130(0x12C, -1, 0x58, -1, 0, 0x43, (struct37 *)0xC, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0xC);
-    }
-}
-
-void func_150B0CE0(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
-}
-
+/* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
 typedef struct {
-    s32 *obj;
-    u8 id;
-    u8 pad5[3];
-    f32 timer;
-} Sub28_DDB60;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
+} DDB60EffectData;
+
+/* The effect object spawned by func_150B0C58. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE; // -1 when the owner is gone
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ DDB60EffectData data;
+} DDB60Effect;
+
+void func_150B0C58(struct127 *owner, u8 arg1, s32 arg2);
+
+/* func_150B0C58 with the default arguments (0xFF, 1). */
+void func_150B0C34(struct127 *owner) {
+    func_150B0C58(owner, 0xFF, 1);
+}
+
+/* Attaches a DDB60Effect (updated by func_150B0D20) to owner. */
+void func_150B0C58(struct127 *owner, u8 arg1, s32 arg2) {
+    DDB60EffectData data;
+    DDB60Effect *effect;
+
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.timer = 0.0f;
+
+    effect = (DDB60Effect *)func_15149130(300, -1, 0x58, -1, 0, 0x43, (struct37 *)sizeof(data), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
+    }
+}
+
+/* Effect callback: hands func_15169850 the owner reference. */
+void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+}
 
 extern f32 D_8009F860[];
 extern f32 D_8009F868[];
-s32 func_1515C0F8(s32 *, f32 **);
+s32 func_1515C0F8(struct127 *, f32 **);
 void func_1514373C(f32, f32, f32 *, f32 *);
 void func_15143794(s16, s16, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
-void func_150B0D20(u8 *arg0)
-{
-  Sub28_DDB60 *sub;
-  s32 *obj;
-  s32 flag;
-  f32 dist;
-  f32 lim;
-  s32 idx;
-  f32 dir[2];
-  f32 perp[2];
-  f32 *vel;
-  f32 pos[3];
-  f32 rot[3];
-  s16 angle;
-  obj = *((s32 **) (arg0 + 0x28));
-  sub = (Sub28_DDB60 *) (arg0 + 0x28);
-  if (((*obj) == 0) || (sub->id != (*(((u8 *) obj) + 0x3B))))
-  {
-    *((s16 *) (arg0 + 0xE)) = -1;
-    return;
-  }
-  idx = *(((u8 *) obj) + 0x124);
-  flag = 0;
-  if ((*(((u8 *) D_800CC2D0[idx].unk31C) + 0x4F)) == 2)
-  {
-    dist = *((f32 *) (((u8 *) obj) + 0x3C));
-    lim = (*((f32 *) (((u8 *) (&D_800CC2D0[idx])) + 0x44))) * 1.350000024f;
-    if (dist < lim)
-    {
-      dist = lim;
+/*
+ * DDB60Effect update: while the owner lives and player D_800CC2D0[owner->unk124] has unk31C byte 0x4F == 2,
+ * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
+ */
+void func_150B0D20(DDB60Effect *effect) {
+    DDB60EffectData *data;
+    struct127 *owner;
+    s32 emit;
+    f32 speed;
+    f32 minSpeed;
+    s32 idx;
+    f32 forward[2];
+    f32 right[2];
+    f32 *refVel;
+    f32 pos[3];
+    f32 vel[3];
+    s16 angle;
+
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->unkE = -1;
+        return;
     }
-    if (dist > 26.0f)
-    {
-      if (1)
-      {
-        flag = 1;
-      }
+    idx = owner->unk124;
+    emit = 0;
+    if (D_800CC2D0[idx].unk31C->pad4F[0] == 2) {
+        speed = owner->xz_velocity;
+        minSpeed = D_800CC2D0[idx].unk44 * 1.350000024f;
+        if (speed < minSpeed) {
+            speed = minSpeed;
+        }
+        if (speed > 26.0f) {
+            if (1) { // matching: the extra block shifts IDO's register priorities (data stays in $s4)
+                emit = 1;
+            }
+        }
     }
-  }
-  if (flag)
-  {
-    sub->timer += (D_8009F860[flag] + (func_150ADA68() * D_8009F868[flag])) * D_800BE9A4;
-    if (sub->timer > 1.0f)
-    {
-      if (func_1515C0F8(obj, &vel) == 0)
-      {
-        vel = &D_800A5480;
-      }
-      func_1514373C((*((f32 *) (((u8 *) obj) + 0x40))) * 0.01745329238f, 1.0f, &dir[0], &dir[1]);
-      perp[0] = dir[1];
-      perp[1] = -dir[0];
-      do
-      {
-        func_150B0A60(obj, (s32 *) (&D_800CC2D0[idx]), dir, perp, pos, &angle);
-        func_15143794(angle, (func_150ADA20() % 26) - 41, (func_150ADA68() * 3.769999981f) + 4.059999943f, rot);
-        rot[0] -= vel[0] * 0.9250000715f;
-        rot[2] -= vel[2] * 0.9250000715f;
-        func_151D9014(pos, rot, 5, (func_150ADA68() * 0.1780000031f) + (-0.4420000315f), (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155, (func_150ADA68() * 50.0f) + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f, 1.399999976f, 1, 0, 1, 0, arg0[0xC], arg0[1]);
-        sub->timer -= 1.0f;
-      }
-      while (sub->timer > 1.0f);
+    if (emit) {
+        data->timer += (D_8009F860[emit] + func_150ADA68() * D_8009F868[emit]) * D_800BE9A4;
+        if (data->timer > 1.0f) {
+            if (func_1515C0F8(owner, &refVel) == 0) {
+                refVel = &D_800A5480;
+            }
+            func_1514373C(owner->unk40 * 0.01745329238f, 1.0f, &forward[0], &forward[1]);
+            right[0] = forward[1];
+            right[1] = -forward[0];
+            do {
+                func_150B0A60(owner, &D_800CC2D0[idx], forward, right, pos, &angle);
+                func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, vel);
+                vel[0] -= refVel[0] * 0.9250000715f;
+                vel[2] -= refVel[2] * 0.9250000715f;
+                func_151D9014(pos, vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
+                              (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
+                              func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
+                              1.399999976f, 1, 0, 1, 0, effect->unkC, effect->unk1);
+                data->timer -= 1.0f;
+            } while (data->timer > 1.0f);
+        }
     }
-  }
 }

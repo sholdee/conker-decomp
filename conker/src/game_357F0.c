@@ -2,87 +2,90 @@
 #include "functions.h"
 #include "variables.h"
 
-// bit of a beast
-typedef struct Struct357F0 {
+/* Particle spawn region; the low two bits of `flags` pick its shape. */
+typedef struct SpawnRegion {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
+    /* 0x06 */ s16 radiusX; /* circle radius, or the box's half-extent along its local x */
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 radiusZ; /* the box's half-extent along its local z */
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x10 */ f32 yaw;     /* degrees */
     /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-} Struct357F0;
+    /* 0x15 */ u8 flags;
+} SpawnRegion;
 
 f32 sinf(f32);
 f32 cosf(f32);
 
-void func_15008340(Struct357F0 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
-    switch (arg0->unk15 & 3) {
+/* Uniform random value in [0, 1], from the CPU counter times the RNG byte. */
+#define RAND_UNIT() ((f32)((osGetCount() * func_150ADA20()) & 0xFFFF) * (1.0f / 65535.0f))
+
+#define DEG_TO_RAD ((f32)(M_PI / 180.0))
+
+/*
+ * Picks a random point inside `region`: writes its x/z position and the y range [*bottom, *top].
+ *   shape 0: disc of radius radiusX, y from y to y + height
+ *   shape 1: disc of radius radiusX, y within +-radiusX
+ *   shape 2: box of half-extents radiusX x radiusZ rotated by yaw, y from y to y + height
+ *   shape 3: the centre point, y within +-height
+ */
+void func_15008340(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    // matching: each case's `break` sits after its block (with -g3 its line steers the dispatch scheduling)
+    switch (region->flags & 3) {
     default:
-        {
-            *arg1 = arg0->x;
-            *arg2 = arg0->z;
-            *arg3 = (f32)arg0->y + (f32)arg0->unk8;
-            *arg4 = (f32)arg0->y - (f32)arg0->unk8;
-        }
+        *x = region->x;
+        *z = region->z;
+        *top = (f32)region->y + (f32)region->height;
+        *bottom = (f32)region->y - (f32)region->height;
         break;
-    case 2:
-        {
-            f32 angle;
-            f32 s;
-            f32 c;
-            f32 dx;
-            f32 dz;
+    case 2: {
+        f32 angle;
+        f32 s;
+        f32 c;
+        f32 dx;
+        f32 dz;
 
-            angle = arg0->unk10 * 0.01745329238f;
-            s = sinf(angle);
-            c = cosf(angle);
-            dx = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f * ((f32)arg0->unk6 + (f32)arg0->unk6) + (f32)-arg0->unk6;
-            dz = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f * ((f32)arg0->unkA + (f32)arg0->unkA) + (f32)-arg0->unkA;
-            *arg1 = arg0->x + (dx * c + dz * s);
-            *arg2 = arg0->z + (dz * c - dx * s);
-            *arg3 = (f32)arg0->y + (f32)arg0->unk8;
-            *arg4 = arg0->y;
-        }
-        break;
-    case 0:
-        {
-            f32 angle;
-            f32 s;
-            f32 c;
-            f32 d;
+        angle = region->yaw * DEG_TO_RAD;
+        s = sinf(angle);
+        c = cosf(angle);
+        dx = RAND_UNIT() * (2.0f * region->radiusX) + -region->radiusX;
+        dz = RAND_UNIT() * (2.0f * region->radiusZ) + -region->radiusZ;
+        *x = region->x + (dx * c + dz * s);
+        *z = region->z + (dz * c - dx * s);
+        *top = (f32)region->y + (f32)region->height;
+        *bottom = region->y;
+    } break;
+    case 0: {
+        f32 angle;
+        f32 s;
+        f32 c;
+        f32 dist;
 
-            angle = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f;
-            angle = (angle + angle) * 3.141592741f;
-            s = sinf(angle);
-            c = cosf(angle);
-            d = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f * arg0->unk6;
-            *arg1 = arg0->x + d * c;
-            *arg2 = arg0->z - d * s;
-            *arg3 = (f32)arg0->y + (f32)arg0->unk8;
-            *arg4 = arg0->y;
-        }
-        break;
-    case 1:
-        {
-            f32 angle;
-            f32 s;
-            f32 c;
-            f32 d;
+        angle = RAND_UNIT() * 2.0f * (f32)M_PI;
+        s = sinf(angle);
+        c = cosf(angle);
+        dist = RAND_UNIT() * region->radiusX;
+        *x = region->x + dist * c;
+        *z = region->z - dist * s;
+        *top = (f32)region->y + (f32)region->height;
+        *bottom = region->y;
+    } break;
+    case 1: {
+        f32 angle;
+        f32 s;
+        f32 c;
+        f32 dist;
 
-            angle = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f;
-            angle = (angle + angle) * 3.141592741f;
-            s = sinf(angle);
-            c = cosf(angle);
-            d = (f32)((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * 1.5259021893e-05f * arg0->unk6;
-            *arg1 = arg0->x + d * c;
-            *arg2 = arg0->z - d * s;
-            *arg3 = (f32)arg0->y + (f32)arg0->unk6;
-            *arg4 = (f32)arg0->y - (f32)arg0->unk6;
-        }
-        break;
+        angle = RAND_UNIT() * 2.0f * (f32)M_PI;
+        s = sinf(angle);
+        c = cosf(angle);
+        dist = RAND_UNIT() * region->radiusX;
+        *x = region->x + dist * c;
+        *z = region->z - dist * s;
+        *top = (f32)region->y + (f32)region->radiusX;
+        *bottom = (f32)region->y - (f32)region->radiusX;
+    } break;
     }
 }

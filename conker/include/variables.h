@@ -26,7 +26,6 @@ extern f32 D_8002C230;
 extern f32 D_8002C234;
 extern f32 D_8002C238;
 
-extern struct120 D_8002C240[];
 
 extern f32 D_8002C3F8;
 extern f32 D_8002C3FC;
@@ -106,15 +105,13 @@ extern u16  D_8002AC64;
 extern s8   D_8002AC6C;
 extern u8   D_8002AE40;
 extern u32  D_8002AE44;
-extern s32  D_8002AE48;
+extern u32  D_8002AE48; /* sample DMAs issued this frame */
 extern s32  D_8002AE4C;
-extern s32  D_8002AE54;
 
 extern s32  D_8002B070;
-extern struct138 D_8002B074[];
 extern s32  D_8002B078[][4]; // probably not correct...
-extern s32  D_8002B9D4;
-extern s32  D_8002B9F4;
+extern s32  D_8002B9D4[]; /* default music eventTypes */
+extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 extern struct31 *D_8002BA20;
 extern struct31 *D_8002BA24;
@@ -203,13 +200,13 @@ extern u8  D_8003A572;
 extern u8  D_8003A573;
 extern u8  D_8003A574;
 extern u8  D_8003A575;
-extern u8  D_8003A580;
+extern s8   D_8003A580;
 extern u8  D_8003A581;
 extern u8  D_8003A582;
 extern u8  D_8003A583;
 extern u8  D_8003A584;
-extern u8  D_8003A588;
-extern u8  D_8003A5C8;
+extern OSTimer D_8003A588; /* audio start timer */
+extern OSScMsg D_8003A5C8; /* pre-NMI message */
 
 extern OSMesgQueue D_8003B1E8;
 extern OSMesgQueue D_8003B200;
@@ -220,7 +217,7 @@ extern OSPfs       *D_8003B234;
 extern u8 D_8003B238;
 extern u8 D_8003B239;
 extern u8 D_8003B23A;
-extern OSMesg      D_8003B240;
+extern OSScMsg D_8003B240; /* retrace message */
 
 // extern s32 *D_8003B264;
 extern OSThread    D_8003B6A0;
@@ -235,9 +232,9 @@ extern OSThread    D_8003B9F0;
 extern u64  D_8003BC20;
 extern u32  D_8003BC24;
 
-extern s32  D_8003BC30;
-extern s32  D_8003BD30;
-extern s32  D_8003BE30;
+extern u8   D_8003BC30[][64];
+extern u8   D_8003BD30[][64];
+extern u8   D_8003BE30[32];
 extern u8   D_8003BE50[];
 extern s32  D_8003BE70;
 extern s32  D_8003BE74;
@@ -254,15 +251,13 @@ extern s16  D_8003C910[];
 
 extern s32  D_8003E368;
 extern s32  D_8003E370;
-extern s32  D_8003E388;
-extern struct50 *D_8003E390[];
 extern OSThread  D_8003E3A0;
 extern s32  D_8003E640;
 
-extern OSMesgQueue *D_8003E608;
-extern OSMesg      *D_8003E620;
-extern OSMesgQueue *D_8003E5D0;
-extern OSMesg      *D_8003E5E8;
+extern OSMesgQueue D_8003E608;
+extern OSMesg      D_8003E620[8];
+extern OSMesgQueue D_8003E5D0;
+extern OSMesg      D_8003E5E8[8];
 
 extern s32  D_8003CA3C[];
 extern u8   D_8003CA48[];
@@ -273,49 +268,38 @@ extern s32  D_8003C90C;
 
 
 extern s32  D_80040000;
-extern struct147 D_800406A0;
-extern struct54 *D_800406A4;
-extern struct54 *D_800406B0;
-extern u8   D_800406B8;
-extern u32  D_80040AC8;  // 1200 byte struct?
-extern struct147 D_80040F78;
 extern u8   D_80040F84;
-extern s32  D_80040F88;
-extern s32  D_80040F8C;
-extern s32  D_80040F90;
-extern struct146 D_80040F98[];
+extern u32  D_80040F88; /* short audio frame, in samples */
+extern u32  D_80040F8C; /* audio frame, in samples */
+extern u32  D_80040F90; /* longest audio frame, in samples */
+extern OSIoMesg D_80040F98[];
 extern u8   D_80041F00;
 extern s32  D_80041F04;
 extern s32  D_80041F08;
 extern s32  D_80041F0C;
-extern struct49 *D_80041F10[];
-extern u32  D_80041F50;
+extern s32  D_80041F50;
 extern s32  D_80041F54;
 extern u16  D_80041F56;
 extern f32  D_80041F58;
-extern s32  *D_80041F5C;
+extern u8   *D_80041F5C; /* per-sound variant history */
 extern u8   D_80041F60;
 extern u8   D_80041F61;
-extern struct00 D_80041F68[];
 extern s8   D_80041FD8;
 extern u8   D_80041FD9;
 extern s32  D_80041FDC;
-extern struct15 D_80041FE0[];
 // extern struct15 **D_80041FEC[]; // struct size 0x30 ?
 extern s32 D_80041FEC[][12];
 
-extern OSMesgQueue *D_80041298;
-extern OSMesg      *D_800412B0;
-extern OSMesgQueue *D_800416F0;
-extern OSMesg      *D_80041708;
+extern OSMesgQueue D_80041298;
+extern OSMesg      D_800412B0[];
+extern OSMesgQueue D_800416F0;
+extern OSMesg      D_80041708[];
 
-extern struct151* D_800417B0[];
 extern u32 D_800417BC;
 extern u8 D_800418AC[];
-extern s32 D_800418B0[];
+extern s32 D_800418B0[3][16]; /* per-channel music event level */
 
 extern u8 D_800419A0;
-extern struct137 D_800419A8[12]; // 1200 bytes
 extern OSMesgQueue D_80041E58[3];
 extern struct117 D_80041EA0[3];
 
@@ -332,7 +316,7 @@ extern f32  D_80042794;
 extern f32  D_80042798;
 extern struct105 D_800427A0;
 extern s32  D_800427B0;
-extern s16  D_800427F4;
+extern u16  D_800427F4;
 extern struct120 D_800425E0[];
 extern struct124 *D_80042800;
 extern s32  D_80042804;
@@ -851,7 +835,7 @@ extern u8   D_800BE617;
 extern s8   D_800BE618;
 extern s32  D_800BE620;
 extern s32  D_800BE624;
-extern s32  D_800BE628; //[]; // contains structs size 0x180
+extern RenderView *D_800BE628; // one per player view
 extern s32  D_800BE62C;
 extern u8   D_800BE635;
 extern s32  D_800BE638;
@@ -1223,7 +1207,7 @@ extern u8  D_800DBE62;
 extern u8  D_800DBE63;
 extern f32 D_800DBE64;
 extern s32 D_800DBEF0;
-extern struct131 *D_800DBEF4; // ???
+extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
 extern s32 D_800DBEF8[];
 extern s8  D_800DBEFC[];
 extern u8  D_800DBF00;
@@ -1422,8 +1406,8 @@ extern u8   D_160047E0[];
 
 extern u32  D_00AB1950; // offsets table
 
-extern s32  D_100290D0; // start of data (?)
-extern s32  D_100291A0;
+extern u8   D_100290D0[]; /* rspboot text */
+extern u8   D_100291A0[]; /* end of rspboot text */
 extern s32 *D_1002AAD0;
 extern s32  D_151F3C4C;
 

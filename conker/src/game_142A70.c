@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Per-type update routines for 0xA0-byte level objects (struct131): moving platforms, a seesaw
+ * Per-type update routines for 0xA0-byte level objects (WorldObject): moving platforms, a seesaw
  * and a scrolling texture. Shared layout: rotation f32[3] at 0x0, position s16[3] at 0x10, vertex
  * count at 0x16, vertex buffers at 0x20 (double-buffered by D_800BE9C0), packed param at 0x3C,
  * flags at 0x4F (bit 2 set while triggered), per-frame position delta s16[3] at 0x5A and

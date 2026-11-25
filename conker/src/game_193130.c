@@ -2,43 +2,50 @@
 #include "functions.h"
 #include "variables.h"
 
+// matching: a 0.01745329238f literal changes the frame layout; IDO wants the rodata load
+extern f32 D_800A6C70; // degrees to radians
 
-extern f32 D_800A6C70;
-
-void func_15165C80(f32 *arg0, Vtx *arg1, f32 arg2, f32 *arg3, f32 arg4, f32 arg5, u8 *arg6, u8 arg7) {
-    f32 deg;
-    f32 sn;
-    f32 sx;
-    f32 cs;
-    f32 cx;
-    f32 vel;
+/*
+ * Places the vertices listed in vtxIndices[0 .. count/2) at (-x, y) and those in
+ * vtxIndices[count/2 .. count) at (x, y), where (x, y) is `radius` rotated by *angle
+ * degrees. Then advances *angle by *velocity per frame, reversing the velocity and
+ * clamping when the angle reaches maxAngle or minAngle.
+ */
+void func_15165C80(f32 *angle, Vtx *verts, f32 radius, f32 *velocity, f32 maxAngle, f32 minAngle, u8 *vtxIndices,
+                   u8 count) {
+    f32 degrees;
+    f32 sinA;
+    f32 sinR;
+    f32 cosA;
+    f32 cosR;
+    f32 speed;
     s32 i;
     s16 y;
     s16 x;
-    f32 rad;
+    f32 radians;
 
-    deg = *arg0;
-    vel = *arg3;
-    rad = deg * D_800A6C70;
-    sn = func_150AD78C(rad);
-    sx = sn * arg2;
-    cs = func_150AD780(rad);
-    cx = cs * arg2;
-    arg7 = arg7 >> 1;
-    y = (s16)sx;
-    x = (s16)cx;
-    for (i = 0; i < arg7; i++) {
-        arg1[arg6[i]].v.ob[0] = -x;
-        arg1[arg6[i]].v.ob[1] = y;
-        arg1[arg6[i + arg7]].v.ob[0] = x;
-        arg1[arg6[i + arg7]].v.ob[1] = y;
+    degrees = *angle;
+    speed = *velocity;
+    radians = degrees * D_800A6C70;
+    sinA = func_150AD78C(radians);
+    sinR = sinA * radius;
+    cosA = func_150AD780(radians);
+    cosR = cosA * radius;
+    count = count >> 1; // matching: `count >>= 1` schedules differently
+    y = sinR;
+    x = cosR;
+    for (i = 0; i < count; i++) {
+        verts[vtxIndices[i]].v.ob[0] = -x;
+        verts[vtxIndices[i]].v.ob[1] = y;
+        verts[vtxIndices[i + count]].v.ob[0] = x;
+        verts[vtxIndices[i + count]].v.ob[1] = y;
     }
-    *arg0 += vel * (f32)D_800BE9E4;
-    if (arg4 <= *arg0) {
-        *arg3 = -vel;
-        *arg0 = arg4;
-    } else if (*arg0 <= arg5) {
-        *arg3 = -vel;
-        *arg0 = arg5;
+    *angle += speed * D_800BE9E4;
+    if (maxAngle <= *angle) {
+        *velocity = -speed;
+        *angle = maxAngle;
+    } else if (*angle <= minAngle) {
+        *velocity = -speed;
+        *angle = minAngle;
     }
 }

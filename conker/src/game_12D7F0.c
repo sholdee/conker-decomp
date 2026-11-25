@@ -3,7 +3,7 @@
 #include "variables.h"
 
 extern s32 D_80090324[];
-extern s32 func_1510D0EC(s32, s32, s32, s32);
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void func_151616D0(u8, u8, s32);
 
 typedef struct {
@@ -12,67 +12,52 @@ typedef struct {
 
 extern Struct15100340 D_80088BC0;
 
-#define WGFX2(pkt, a, b)            \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
+/* When arg0 is 0: advances D_800DD405, then randomly toggles each of the five D_800BE500 flags,
+ * passing the matching D_80088BC0 id to func_151616D0 on each toggle. */
 void func_15100340(s32 arg0) {
-    volatile s32 pad;
-    Struct15100340 sp44 = D_80088BC0;
+    s32 pad; // matching: unused stack slot, sets the frame size
+    Struct15100340 ids = D_80088BC0;
     s32 i;
-    u8 *ptr;
-    u8 value;
-    s32 threshold;
+    u8 *flag;
+    u32 chance;
 
     if (arg0 == 0) {
-        ptr = D_800BE500;
+        flag = D_800BE500;
         D_800DD405++;
-        i = 0;
-        do {
-            threshold = (*ptr != 0) ? 0x46 : 0x23;
-            if (((u32)func_150ADA20() % 0x3E8U) < (u32)threshold) {
-                if ((*ptr ^= 1) != 0) {
-                    func_151616D0(sp44.unk0[i], 0x18, 0);
+        for (i = 0; i < 5; i++, flag++) {
+            chance = (*flag != 0) ? 70 : 35;
+            if (func_150ADA20() % 1000U < chance) {
+                if ((*flag ^= 1) != 0) {
+                    func_151616D0(ids.unk0[i], 0x18, 0);
                 } else {
-                    func_151616D0(sp44.unk0[i], 0x1C, 0);
-                    func_151616D0(sp44.unk0[i], 0x17, 0);
+                    func_151616D0(ids.unk0[i], 0x1C, 0);
+                    func_151616D0(ids.unk0[i], 0x17, 0);
                 }
             }
-            i++;
-            ptr++;
-        } while (i != 5);
+        }
     }
 }
 
-Gfx *func_15100464(Gfx *arg0) {
-    s32 sp58[4];
-    s32 *scratch;
-    s32 three;
-    s32 idx;
-    s32 data;
-    u8 *states;
+/* Sets segments 2 and 3 to D_80090324 assets cycling with D_800DD405, and segments 4-8 to
+ * D_80090324[3] or [4] depending on each D_800BE500 flag. */
+Gfx *func_15100464(Gfx *gdl) {
+    s32 size[4]; // matching: a 16-byte buffer sets the frame size; a scalar mismatches
+    s32 frame;
+    s32 i;
+    s32 addr;
 
-    scratch = sp58;
-    three = 3;
-    idx = D_800DD405 >> 2;
+    frame = D_800DD405 >> 2;
 
-    data = func_1510D0EC(D_80090324[idx % three], (s32)scratch, three, 0);
-    WGFX2(arg0++, 0xDB060008, data);
+    addr = func_1510D0EC(D_80090324[frame % 3], size, 3, 0);
+    gSPSegment(gdl++, 2, addr);
 
-    data = func_1510D0EC(D_80090324[(idx + 1) % three], (s32)scratch, three, 0);
-    WGFX2(arg0++, 0xDB06000C, data);
+    addr = func_1510D0EC(D_80090324[(frame + 1) % 3], size, 3, 0);
+    gSPSegment(gdl++, 3, addr);
 
-    states = D_800BE500;
-    idx = 0x10;
-    do {
-        data = func_1510D0EC(D_80090324[states[0] + 3], (s32)scratch, 3, 0);
-        WGFX2(arg0++, 0xDB060000 | (idx & 0xFFFF), data);
-        idx += 4;
-        states++;
-    } while (idx != 0x24);
+    for (i = 0; i < 5; i++) {
+        addr = func_1510D0EC(D_80090324[D_800BE500[i] + 3], size, 3, 0);
+        gSPSegment(gdl++, i + 4, addr);
+    }
 
-    return arg0;
+    return gdl;
 }

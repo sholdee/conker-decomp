@@ -2,107 +2,107 @@
 #include "functions.h"
 #include "variables.h"
 
+/* One point of a 40-point spring chain; neighbours pull each other level. */
+typedef struct {
+    f32 accel;
+    f32 vel;
+    f32 pos; /* height, in 1/16 world units */
+} WaveSample; /* size 0xC */
+
+/* Static per-chain parameters (D_8008D050). */
+typedef struct {
+    f32 force;    /* constant added to every sample's acceleration */
+    f32 damping;  /* velocity multiplier per step */
+    f32 scale;    /* sample index = scale * 40 * chain-local distance */
+    s16 minZ;     /* chain-local z extent (negative) */
+    s16 width;    /* chain-local x extent */
+    s16 angle;    /* yaw of the chain */
+    s16 objIndex; /* index into D_800DBEF4 for the chain's origin */
+    s16 initialPos;
+    s8  push;     /* displacement an actor applies to the sample under it */
+    u8  soundTimer;
+} WavePreset; /* size 0x18 */
+
 extern u8 D_800DDE54[];
-extern u8 D_8008D058[];
+extern WavePreset D_8008D050[];
+extern WaveSample *D_800DDE60[];
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Entry15182C5C;
+s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain);
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  pad8[4];
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s8  unk16;
-    u8  unk17;
-} Struct8008D050; /* size 0x18 */
-
-extern Struct8008D050 D_8008D050[];
-extern Entry15182C5C *D_800DDE60[];
-typedef struct {
-    u8  pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8  pad20[0x8];
-    f32 unk28;
-} Struct15182FDC;
-s32 func_15182FDC(Struct15182FDC *arg0, s32 arg1, s32 arg2);
-
+/*
+ * Steps every active wave chain: actors on it push the samples under them, each sample is pulled
+ * towards its neighbours, and a fast downward swing plays a sound at the pushing actor.
+ */
 void func_151827D0(void) {
-    s32 i;
-    s32 j;
-    s32 k;
-    s32 n;
-    s32 v;
-    s32 found;
-    s32 fall;
-    f32 a;
-    f32 b;
-    s32 sums[38];
-    s32 *ps;
-    s32 d0;
-    s32 d1;
+    s32 chain;
+    s32 sample;
+    s32 actor;
+    s32 pass;
+    s32 push;
+    s32 lastActor;
+    s32 falling;
+    f32 force;
+    f32 damping;
+    s32 pushes[39];
+    s32 left;
+    s32 right;
 
-    for (i = 0; i < D_800DDE50; i++) {
-        found = 0;
-        fall = 0;
-        a = D_8008D050[D_800DDE54[i]].unk0;
-        b = D_8008D050[D_800DDE54[i]].unk4;
-        for (k = 1, ps = sums; k < 39; k++, ps++) {
-            *ps = 0;
-            for (j = 0; j < 4; j++) {
-                if (D_800CC2D0[j].interaction_state != 0) {
-                    v = func_15182FDC((Struct15182FDC *)&D_800CC2D0[j], k, i);
-                    if (D_800CC2D0[j].unk84.uh == 0x4B) {
-                        v *= 2;
+    for (chain = 0; chain < D_800DDE50; chain++) {
+        lastActor = 0;
+        falling = 0;
+        force = D_8008D050[D_800DDE54[chain]].force;
+        damping = D_8008D050[D_800DDE54[chain]].damping;
+        for (sample = 1; sample < 39; sample++) {
+            pushes[sample] = 0;
+            for (actor = 0; actor < 4; actor++) {
+                if (D_800CC2D0[actor].interaction_state != 0) {
+                    push = func_15182FDC(&D_800CC2D0[actor], sample, chain);
+                    if (D_800CC2D0[actor].unk84.uh == 75) {
+                        push *= 2;
                     }
-                    *ps += v;
-                    if (v != 0) {
-                        found = j + 1;
+                    pushes[sample] += push;
+                    if (push != 0) {
+                        lastActor = actor + 1;
                     }
                 }
             }
         }
-        for (n = 0; n < 3; n++) {
-            ps = sums;
-            for (k = 1; k < 39; k++, ps++) {
-                d0 = D_800DDE60[i][k - 1].unk8 - D_800DDE60[i][k].unk8;
-                d1 = D_800DDE60[i][k + 1].unk8 - D_800DDE60[i][k].unk8;
-                D_800DDE60[i][k].unk0 = (f32)(d0 + d1) + a;
-                D_800DDE60[i][k].unk0 += (f32)*ps;
-                D_800DDE60[i][k].unk4 += D_800DDE60[i][k].unk0;
-                D_800DDE60[i][k].unk4 *= b;
-                if (fabsf(D_800DDE60[i][k].unk4) < 1.0f) {
-                    D_800DDE60[i][k].unk4 = 0.0f;
+        for (pass = 0; pass < 3; pass++) {
+            for (sample = 1; sample < 39; sample++) {
+                left = D_800DDE60[chain][sample - 1].pos - D_800DDE60[chain][sample].pos;
+                right = D_800DDE60[chain][sample + 1].pos - D_800DDE60[chain][sample].pos;
+                D_800DDE60[chain][sample].accel = (f32)(left + right) + force;
+                D_800DDE60[chain][sample].accel += (f32)pushes[sample];
+                D_800DDE60[chain][sample].vel += D_800DDE60[chain][sample].accel;
+                D_800DDE60[chain][sample].vel *= damping;
+                if (fabsf(D_800DDE60[chain][sample].vel) < 1.0f) {
+                    D_800DDE60[chain][sample].vel = 0.0f;
                 }
             }
-            for (k = 1; k < 39; k++) {
-                D_800DDE60[i][k].unk8 += D_800DDE60[i][k].unk4;
-                if (found != 0 && D_800DDE60[i][k].unk4 < -30.0f) {
-                    fall = 1;
+            for (sample = 1; sample < 39; sample++) {
+                D_800DDE60[chain][sample].pos += D_800DDE60[chain][sample].vel;
+                if (lastActor != 0 && D_800DDE60[chain][sample].vel < -30.0f) {
+                    falling = TRUE;
                 }
             }
-            if (found == 0) {
-                D_8008D050[D_800DDE54[i]].unk17 = 0;
+            if (lastActor == 0) {
+                D_8008D050[D_800DDE54[chain]].soundTimer = 0;
             }
-            if (fall != 0 && D_8008D050[D_800DDE54[i]].unk17 == 0) {
-                D_8008D050[D_800DDE54[i]].unk17 = (func_150ADA20() & 0x3F) + 0xB4;
-                if (D_800DDE54[i] == 2 || D_800DDE54[i] == 3) {
-                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0, D_800CC2D0[found - 1].x_position, D_800CC2D0[found - 1].y_position, D_800CC2D0[found - 1].z_position, 300, 800);
+            if (falling && D_8008D050[D_800DDE54[chain]].soundTimer == 0) {
+                D_8008D050[D_800DDE54[chain]].soundTimer = (func_150ADA20() & 0x3F) + 180;
+                if (D_800DDE54[chain] == 2 || D_800DDE54[chain] == 3) {
+                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0,
+                                  D_800CC2D0[lastActor - 1].x_position, D_800CC2D0[lastActor - 1].y_position,
+                                  D_800CC2D0[lastActor - 1].z_position, 300, 800);
                 } else {
-                    func_10010F88(0xF, 0x5DC0, 0, 0, 0, D_800CC2D0[found - 1].x_position, D_800CC2D0[found - 1].y_position, D_800CC2D0[found - 1].z_position, 300, 800);
+                    func_10010F88(15, 0x5DC0, 0, 0, 0,
+                                  D_800CC2D0[lastActor - 1].x_position, D_800CC2D0[lastActor - 1].y_position,
+                                  D_800CC2D0[lastActor - 1].z_position, 300, 800);
                 }
-            } else if (fall == 0) {
-                if (D_8008D050[D_800DDE54[i]].unk17 != 0 && D_8008D050[D_800DDE54[i]].unk17 != 0) {
-                    D_8008D050[D_800DDE54[i]].unk17 -= D_800BE9E4;
+            } else if (!falling) {
+                // matching: the duplicated test is in the original (it emits a second lbu/beqz)
+                if (D_8008D050[D_800DDE54[chain]].soundTimer != 0 && D_8008D050[D_800DDE54[chain]].soundTimer != 0) {
+                    D_8008D050[D_800DDE54[chain]].soundTimer -= D_800BE9E4;
                 }
             }
         }
@@ -110,143 +110,118 @@ void func_151827D0(void) {
 }
 
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[0xA];
-} Vtx15182C5C;
+f32 func_15182F58(s32 dist, s32 chain);
+void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-typedef struct {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0xA];
-    Vtx15182C5C *unk20[2];
-    Vtx15182C5C *unk28;
-    u8 pad2C[0x10];
-    s32 unk3C;
-} Obj15182C5C;
-
-typedef struct {
-    s16 unk0;
-    u8 pad2[0x16];
-} Tbl15182C5C;
-
-extern Tbl15182C5C D_8008D060[];
-extern Tbl15182C5C D_8008D062[];
-f32 func_15182F58(s32 arg0, s32 arg1);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
-typedef struct { u8 pad0[0x16]; u16 unk16; u8 pad18[0x88]; } Big15182C5C;
-
-
-
-void func_15182C5C(Obj15182C5C *arg0) {
-    s32 idx;
-    Vtx15182C5C *out;
+/*
+ * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated
+ * at its z, rotated into world space and written to this frame's vertex buffer.
+ */
+void func_15182C5C(WorldObject *prop) {
+    s32 chain;
+    Vtx *out;
     s32 i;
-    f32 f;
-    f32 w[2];
-    s32 lo;
-    s32 hi;
+    f32 samplePos;
+    f32 weighted[2]; // matching: two scalars give a different stack frame
+    s32 sample;
+    s32 next;
     f32 mtx[4][4];
     f32 x;
     f32 y;
     f32 z;
     f32 frac;
-    s32 ofs;
+    s32 lift;
 
-    idx = arg0->unk3C;
-    out = arg0->unk20[D_800BE9C0];
-    func_150A8050(mtx, 0.0f, -D_8008D060[D_800DDE54[idx]].unk0, 0.0f);
-    for (i = 0; i < ((Big15182C5C *)D_800DBEF4)[D_8008D062[D_800DDE54[idx]].unk0].unk16; i++) {
-        f = func_15182F58(arg0->unk28[i].unk4, idx);
-        lo = f;
-        hi = lo + 1;
-        if (hi >= 40) {
-            hi = 39;
+    chain = prop->param.word;
+    out = prop->vertices[D_800BE9C0];
+    func_150A8050(mtx, 0.0f, -D_8008D050[D_800DDE54[chain]].angle, 0.0f);
+    for (i = 0; i < D_800DBEF4[D_8008D050[D_800DDE54[chain]].objIndex].numVertices; i++) {
+        samplePos = func_15182F58(prop->srcVertices[i].v.ob[2], chain);
+        sample = samplePos;
+        next = sample + 1;
+        if (next >= 40) {
+            next = 39;
         }
-        frac = f - lo;
-        w[0] = D_800DDE60[idx][lo].unk8 * (1.0f - frac);
-        w[1] = D_800DDE60[idx][hi].unk8 * frac;
-        ofs = (s32)(w[0] + w[1]);
-        ofs >>= 4;
-        func_150A7960(&mtx[0][0], arg0->unk28[i].unk0, arg0->unk28[i].unk2 + ofs, arg0->unk28[i].unk4, &x, &y, &z);
-        out[i].unk0 = arg0->unk10 + x;
-        out[i].unk2 = arg0->unk12 + y;
-        out[i].unk4 = arg0->unk14 + z;
+        frac = samplePos - sample;
+        weighted[0] = D_800DDE60[chain][sample].pos * (1.0f - frac);
+        weighted[1] = D_800DDE60[chain][next].pos * frac;
+        lift = (s32)(weighted[0] + weighted[1]);
+        lift >>= 4; // matching: folding the shift into the line above reschedules it
+        func_150A7960(mtx, prop->srcVertices[i].v.ob[0], prop->srcVertices[i].v.ob[1] + lift, prop->srcVertices[i].v.ob[2],
+                      &x, &y, &z);
+        out[i].v.ob[0] = prop->x + x;
+        out[i].v.ob[1] = prop->y + y;
+        out[i].v.ob[2] = prop->z + z;
     }
 }
 
-f32 func_15182F58(s32 arg0, s32 arg1) {
-    f32 var_f0;
-    f32 var_f2;
+/* Maps a chain-local distance to a (fractional) sample index, clamped to [0, 39]. */
+f32 func_15182F58(s32 dist, s32 chain) {
+    f32 pos;
 
-    var_f0 = 0.0f;
-    var_f2 = *(f32 *) &D_8008D058[D_800DDE54[arg1] * 0x18] * (f32) (arg0 * 0x28);
-    if (var_f2 < var_f0) {
-        var_f2 = var_f0;
-    } else {
-        var_f0 = 39.0f;
-        if (var_f0 < var_f2) {
-            var_f2 = var_f0;
-        }
+    pos = D_8008D050[D_800DDE54[chain]].scale * (f32)(dist * 40);
+    if (pos < 0.0f) {
+        pos = 0.0f;
+    } else if (pos > 39.0f) {
+        pos = 39.0f;
     }
-    return var_f2;
+    return pos;
 }
 
 
 
 
-s32 func_15182FDC(Struct15182FDC *arg0, s32 arg1, s32 arg2) {
+/*
+ * Returns how far `actor` pushes sample `sample` of chain `chain`: the preset's push value
+ * on the sample under it, 4/7 of that on its neighbours, 0 if the actor is off the chain.
+ */
+s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 nx;
-    f32 ny;
-    f32 nz;
+    f32 localX;
+    f32 localY;
+    f32 localZ;
+    f32 originX;
+    f32 originY;
+    f32 originZ;
     f32 mtx[4][4];
-    s32 idx;
-    s32 row;
-    s8 val;
+    s32 objIndex;
+    s32 under;
+    s8 push;
 
-    if (3.0f < arg0->unk28) {
+    if (actor->unk28 > 3.0f) {
         return 0;
     }
 
-    idx = D_8008D050[D_800DDE54[arg2]].unk12;
-    nx = (f32) D_800DBEF4[idx].unk10;
-    ny = (f32) D_800DBEF4[idx].unk12;
-    nz = (f32) D_800DBEF4[idx].unk14;
-    if ((arg0->unk18 < ((D_800DDE60[arg2][arg1].unk8 * 0.0625f) + ny) - 300.0f) ||
-        (((D_800DDE60[arg2][arg1].unk8 * 0.0625f) + ny) + 300.0f < arg0->unk18)) {
+    objIndex = D_8008D050[D_800DDE54[chain]].objIndex;
+    originX = D_800DBEF4[objIndex].x;
+    originY = D_800DBEF4[objIndex].y;
+    originZ = D_800DBEF4[objIndex].z;
+    if (actor->y_position < D_800DDE60[chain][sample].pos * 0.0625f + originY - 300.0f ||
+        D_800DDE60[chain][sample].pos * 0.0625f + originY + 300.0f < actor->y_position) {
         return 0;
     }
 
-    dx = arg0->unk14 - nx;
+    dx = actor->x_position - originX;
     dy = 0.0f;
-    dz = arg0->unk1C - nz;
-    func_150A8050(mtx, 0.0f, (f32) D_8008D050[D_800DDE54[arg2]].unk10, 0.0f);
-    func_150A7960(&mtx[0][0], dx, dy, dz, &x, &y, &z);
+    dz = actor->z_position - originZ;
+    func_150A8050(mtx, 0.0f, D_8008D050[D_800DDE54[chain]].angle, 0.0f);
+    func_150A7960(mtx, dx, dy, dz, &localX, &localY, &localZ);
 
-    if ((0.0f < z) || (z < (f32) D_8008D050[D_800DDE54[arg2]].unkC) || (x < 0.0f) ||
-        ((f32) D_8008D050[D_800DDE54[arg2]].unkE < x)) {
+    if (localZ > 0.0f || localZ < D_8008D050[D_800DDE54[chain]].minZ || localX < 0.0f ||
+        D_8008D050[D_800DDE54[chain]].width < localX) {
         return 0;
     }
 
-    row = (s32) func_15182F58((s32) z, arg2);
-    val = D_8008D050[D_800DDE54[arg2]].unk16;
-    idx = row + 1;
-    if (arg1 == row) {
-        return val;
+    under = func_15182F58(localZ, chain);
+    push = D_8008D050[D_800DDE54[chain]].push;
+    objIndex = under + 1; // matching: the neighbour index must reuse objIndex's register
+    if (sample == under) {
+        return push;
     }
-    if ((arg1 == idx) || (arg1 + 1 == row)) {
-        return (val * 4) / 7;
+    if (sample == objIndex || sample + 1 == under) {
+        return push * 4 / 7;
     }
     return 0;
 }

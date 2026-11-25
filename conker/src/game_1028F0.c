@@ -1,49 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Particle spawn template passed to func_15130280. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn; /* size 0x70 */
+#include "effects.h"
 
 /* Effect (a struct260 with per-effect data at 0x28) that follows an object. */
 typedef struct {
@@ -84,7 +42,7 @@ typedef struct {
     /* 0x18 */ f32 fadeRate;
 } GrowParticleData;
 
-/* Live particle, as created by func_15130280 from a ParticleSpawn. */
+/* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x2B];
     /* 0x2B */ u8 unk2B;
@@ -116,7 +74,7 @@ typedef union {
     } pair;         /* message 0x2D */
 } ObjectMessage;
 
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(struct127 *arg0, f32 **arg1);
 extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
@@ -144,7 +102,7 @@ void func_150D5440(struct127 *obj, u8 arg1, s32 arg2) {
 void func_150D54C8(FollowEffect *effect) {
     struct127 *owner;
     FollowEffectData *data;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     f32 cosYaw;
     f32 sinYaw;
     f32 rightX;
@@ -172,36 +130,36 @@ void func_150D54C8(FollowEffect *effect) {
             func_1514373C(owner->unk40 * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
             rightX = cosYaw;
             rightZ = -sinYaw;
-            spawn.unk1D = 40;
-            spawn.unk8 = 0x2203;
+            spawn.texture = 40;
+            spawn.renderMode = 0x2203;
             spawn.unk0 = 0x200005;
-            spawn.unk14 = 0xFF;
-            spawn.unk15 = 0xFF;
-            spawn.unk16 = 0xFF;
-            spawn.unk17 = 0xFF;
-            spawn.unk18 = 0xFF;
-            spawn.unk19 = 0xFF;
-            spawn.unk1A = 0xFF;
+            spawn.r = 0xFF;
+            spawn.g = 0xFF;
+            spawn.b = 0xFF;
+            spawn.a = 0xFF;
+            spawn.r2 = 0xFF;
+            spawn.g2 = 0xFF;
+            spawn.b2 = 0xFF;
             spawn.unk4 = 0;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk1C = 0xFF;
-            spawn.unk1E = 5;
-            spawn.unk20 = 51;
-            spawn.unk22 = 1;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.brightness = 0xFF;
+            spawn.fadeStart = 5;
+            spawn.fadeRate = 51;
+            spawn.scaleStart = 1;
             spawn.flags = 0x84C207;
-            spawn.unk60 = 6;
-            spawn.unk61 = 8;
-            spawn.unk62 = -1;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.unk24 = 1.0f;
-            spawn.unk3C.x = 0.0f;
-            spawn.unk3C.y = 0.0f;
-            spawn.unk3C.z = 0.0f;
+            spawn.primColorMode = 6;
+            spawn.envColorMode = 8;
+            spawn.updateFunc = -1;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.scaleRate = 1.0f;
+            spawn.offset.x = 0.0f;
+            spawn.offset.y = 0.0f;
+            spawn.offset.z = 0.0f;
             do {
                 right = func_150ADA20() & 1;
                 along = func_150ADA68();
@@ -219,10 +177,10 @@ void func_150D54C8(FollowEffect *effect) {
                                      : -(speed = speed * 2.907000065f + 6.0000005f)) * rightX - refVel[0] * 0.5640000105f;
                 spawn.vel.y = 3.156000137f * speed;
                 spawn.vel.z = (right ? speed : -speed) * rightZ - refVel[2] * 0.564f;
-                spawn.unkA = func_150ADA20() % 10U + 31;
-                spawn.unk1B = func_150ADA20() % 76U + 180;
-                spawn.unk28 = spawn.unk2C = func_150ADA68() * 364.0f + 111.0f;
-                spawn.unk54 = func_150ADA68() * 0.1570000052f + -2.111000061f;
+                spawn.timer = func_150ADA20() % 10U + 31;
+                spawn.alpha = func_150ADA20() % 76U + 180;
+                spawn.width = spawn.height = func_150ADA68() * 364.0f + 111.0f;
+                spawn.gravity = func_150ADA68() * 0.1570000052f + -2.111000061f;
                 spawn.flags &= ~0xC0;
                 right = (func_150ADA20() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | right;
@@ -264,43 +222,6 @@ void func_150D5A4C(struct260 *effect) {
     func_15149368(effect);
 }
 
-/* Particle spawn template passed to func_15132A4C. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 scaleXZ;
-    /* 0x0C */ f32 scaleY;
-    /* 0x10 */ f32 rot[3];
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 unk78;
-} PieceSpawn;
-
 extern s32 *D_80089A20[];
 extern s32 D_800A3F14[];
 
@@ -311,7 +232,7 @@ s32 func_15144E80(f32 *, vertex *, vertex *, vertex *);
 f32 func_15144A74(vertex *, vertex *);
 void func_15146078(vertex *, vertex *, vertex *);
 void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_15132A4C(PieceSpawn *, s32, s32, s32, u8, s32);
+s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_151C05A4(vertex *, u8, s32);
 void func_151C05F0(vertex *, u8, s32);
 void func_151C0360(f32 *, s32 *, u8, s32);
@@ -341,7 +262,7 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
     vertex tangentU;
     vertex tangentV;
     s32 moving;
-    PieceSpawn piece;
+    ParticleSpawn piece;
 
     hit = 0;
     pos.x = obj->x_position;
@@ -424,34 +345,34 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
                 tangentV.z = 1.0f;
             }
         }
-        piece.unk0 = 1.0f;
-        piece.unk4 = 1.0f;
+        piece.radius = 1.0f;
+        piece.elasticity = 1.0f;
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
-        piece.scaleXZ = obj->xz_scale;
-        piece.scaleY = obj->y_scale;
-        piece.unk1C[0] = 1.0f;
-        piece.unk1C[1] = 1.0f;
-        piece.unk1C[2] = 1.0f;
+        piece.sizeXZ = obj->xz_scale;
+        piece.sizeY = obj->y_scale;
+        piece.scale.x = 1.0f;
+        piece.scale.y = 1.0f;
+        piece.scale.z = 1.0f;
         piece.pos = pos;
-        piece.unk50 = 0x21E8;
-        piece.unk58 = 0;
+        piece.flags = 0x21E8;
+        piece.variant = 0;
         piece.unk5C = 0;
-        piece.unk60 = 0xFF;
-        piece.unk61 = 8;
-        piece.unk62 = 0;
-        piece.unk63 = 0;
-        piece.unk64 = 0;
-        piece.unk65 = 0;
-        piece.unk66 = 0;
-        piece.unk67 = 0;
-        piece.unk68 = 2;
+        piece.alpha = 0xFF;
+        piece.updateFn = 8;
+        piece.update2Fn = 0;
+        piece.floorHitFn = 0;
+        piece.floorType3Fn = 0;
+        piece.wallHitFn = 0;
+        piece.destroyFn = 0;
+        piece.squashFn = 0;
+        piece.matrixFn = 2;
         piece.unk6A = 1;
-        piece.unk6C = obj;
-        piece.unk70 = obj->unique_id;
-        piece.unk78 = 0;
-        piece.unk44 = 0.0f;
+        piece.owner = obj;
+        piece.ownerId = obj->unique_id;
+        piece.sound = 0;
+        piece.rotVel.y = 0.0f;
         {
             const s32 firstModels[3] = { 0x6C, 0x6D, 0x6E };
             s32 i;
@@ -463,8 +384,8 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
             f32 offsetU2;
             s32 j;
 
-            piece.unk72 = 12;
-            piece.unk74 = 21;
+            piece.fadeStart = 12;
+            piece.fadeRate = 21;
             for (i = 0; i < 3; i++) {
                 scale = func_150ADA68() * 0.01319999993f + 0.02979999967f;
                 randAngle = func_150ADA20();
@@ -472,18 +393,18 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
                 piece.vel.x = (tangentU.x * offsetU + tangentV.x * offsetV + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU + tangentV.y * offsetV + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU + tangentV.z * offsetV + normal.z) * scale;
-                piece.rot[0] = func_150ADA68() * 360.0f;
-                piece.rot[1] = func_150ADA68() * 360.0f;
-                piece.rot[2] = func_150ADA68() * 360.0f;
-                piece.unk40 = func_150ADA68() * 38.44400024f + -19.22200012f;
-                piece.unk48 = func_150ADA68() * 38.44400024f + -19.22200012f;
-                piece.unk4C = func_150ADA68() * 0.6480000019f + -1.397000074f;
-                piece.unk54 = func_150ADA20() % 21U + 30;
-                piece.unk56 = firstModels[i];
+                piece.rot.x = func_150ADA68() * 360.0f;
+                piece.rot.y = func_150ADA68() * 360.0f;
+                piece.rot.z = func_150ADA68() * 360.0f;
+                piece.rotVel.x = func_150ADA68() * 38.44400024f + -19.22200012f;
+                piece.rotVel.z = func_150ADA68() * 38.44400024f + -19.22200012f;
+                piece.gravity = func_150ADA68() * 0.6480000019f + -1.397000074f;
+                piece.lifetime = func_150ADA20() % 21U + 30;
+                piece.model = firstModels[i];
                 func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
             }
-            piece.unk72 = 12;
-            piece.unk74 = 21;
+            piece.fadeStart = 12;
+            piece.fadeRate = 21;
             for (j = 2; j < D_800A3F14[type]; j++) {
                 scale = func_150ADA68() * 0.01999999955f + 0.005200000014f;
                 randAngle = func_150ADA20();
@@ -491,14 +412,14 @@ void func_150D5A6C(struct127 *obj, u8 arg1, s32 arg2) {
                 piece.vel.x = (tangentU.x * offsetU2 + tangentV.x * offsetV2 + normal.x) * scale;
                 piece.vel.y = (tangentU.y * offsetU2 + tangentV.y * offsetV2 + normal.y) * scale;
                 piece.vel.z = (tangentU.z * offsetU2 + tangentV.z * offsetV2 + normal.z) * scale;
-                piece.rot[0] = func_150ADA68() * 360.0f;
-                piece.rot[1] = func_150ADA68() * 360.0f;
-                piece.rot[2] = func_150ADA68() * 360.0f;
-                piece.unk40 = func_150ADA68() * 40.45000076f + -20.22500038f;
-                piece.unk48 = func_150ADA68() * 40.45000076f + -20.22500038f;
-                piece.unk4C = func_150ADA68() * 0.6260000467f + -1.089000106f;
-                piece.unk54 = func_150ADA20() % 41U + 40;
-                piece.unk56 = D_80089A20[type][j];
+                piece.rot.x = func_150ADA68() * 360.0f;
+                piece.rot.y = func_150ADA68() * 360.0f;
+                piece.rot.z = func_150ADA68() * 360.0f;
+                piece.rotVel.x = func_150ADA68() * 40.45000076f + -20.22500038f;
+                piece.rotVel.z = func_150ADA68() * 40.45000076f + -20.22500038f;
+                piece.gravity = func_150ADA68() * 0.6260000467f + -1.089000106f;
+                piece.lifetime = func_150ADA20() % 41U + 40;
+                piece.model = D_80089A20[type][j];
                 func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
             }
         }
@@ -627,10 +548,10 @@ extern void func_15143794(s16, s16, f32, vertex *);
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
 void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
     s32 count;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     DriftParticleData drift;
     Particle *particle;
-    ParticleSpawn growSpawn;
+    ParticleDesc growSpawn;
     GrowParticleData grow;
     s32 r1;
     s32 r2;
@@ -639,44 +560,44 @@ void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
     drift.owner = obj;
     drift.ownerId = obj->unique_id;
     drift.drag = 0.8711180091f;
-    spawn.unk1D = 0x6C;
-    spawn.unk8 = 0x5103;
+    spawn.texture = 0x6C;
+    spawn.renderMode = 0x5103;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk18 = 0x14;
-    spawn.unk19 = 0x14;
-    spawn.unk1A = 0x14;
-    spawn.unk17 = 0xFF;
-    spawn.unk14 = 0x4B;
-    spawn.unk15 = 0x4B;
-    spawn.unk16 = 0x4B;
-    spawn.unk1C = 0xFF;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r2 = 0x14;
+    spawn.g2 = 0x14;
+    spawn.b2 = 0x14;
+    spawn.a = 0xFF;
+    spawn.r = 0x4B;
+    spawn.g = 0x4B;
+    spawn.b = 0x4B;
+    spawn.brightness = 0xFF;
     func_150D6C98(obj, &spawn.pos);
-    spawn.unk1E = 15;
-    spawn.unk20 = 17;
+    spawn.fadeStart = 15;
+    spawn.fadeRate = 17;
     spawn.flags = 0x84DE01;
-    spawn.unk60 = 8;
-    spawn.unk61 = 6;
-    spawn.unk62 = 30;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 8;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
-    spawn.unk24 = 1.062733054f;
+    spawn.primColorMode = 8;
+    spawn.envColorMode = 6;
+    spawn.updateFunc = 30;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 8;
+    spawn.viewMask = 0;
+    spawn.views = 0xFF;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
+    spawn.scaleRate = 1.062733054f;
     do {
-        spawn.unk1B = func_150ADA20() % 156U + 100;
-        spawn.unk22 = spawn.unkA = func_150ADA20() % 14U + 8;
-        spawn.unk28 = spawn.unk2C = func_150ADA68() * 207.0f + 238.0f;
+        spawn.alpha = func_150ADA20() % 156U + 100;
+        spawn.scaleStart = spawn.timer = func_150ADA20() % 14U + 8;
+        spawn.width = spawn.height = func_150ADA68() * 207.0f + 238.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
         func_15143794(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel);
-        spawn.unk54 = func_150ADA68() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
+        spawn.gravity = func_150ADA68() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
         spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;
@@ -698,43 +619,43 @@ void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
         grow.lifetime = func_150ADA68() * 3.0f + 9.0f;
         grow.fadeStart = func_150ADA68() * 80.0f + 100.0f;
         grow.fadeRate = grow.fadeStart / (grow.lifetime * grow.lifetime);
-        growSpawn.unk1B = grow.fadeStart;
-        growSpawn.unk1D = 0x79;
-        growSpawn.unk8 = 0x4403;
+        growSpawn.alpha = grow.fadeStart;
+        growSpawn.texture = 0x79;
+        growSpawn.renderMode = 0x4403;
         growSpawn.unk0 = 0x200005;
         growSpawn.unk4 = 0;
-        growSpawn.unkC = 0;
-        growSpawn.unk10 = 0;
-        growSpawn.unk18 = 0xFF;
-        growSpawn.unk19 = 0xFF;
-        growSpawn.unk1A = 0xDF;
-        growSpawn.unk17 = 0xFF;
-        growSpawn.unk14 = 0xFF;
-        growSpawn.unk15 = 0xFF;
-        growSpawn.unk16 = 0xFF;
-        growSpawn.unk1C = 0xFF;
+        growSpawn.frame = 0;
+        growSpawn.frameRate = 0;
+        growSpawn.r2 = 0xFF;
+        growSpawn.g2 = 0xFF;
+        growSpawn.b2 = 0xDF;
+        growSpawn.a = 0xFF;
+        growSpawn.r = 0xFF;
+        growSpawn.g = 0xFF;
+        growSpawn.b = 0xFF;
+        growSpawn.brightness = 0xFF;
         func_150D6C98(obj, &growSpawn.pos);
-        growSpawn.unk3C = *(vertex *)&D_800A5480;
-        growSpawn.unk1E = 1;
-        growSpawn.unk20 = 0xFF;
-        growSpawn.unk22 = 1;
-        growSpawn.unk24 = 1.0f;
+        growSpawn.offset = *(vertex *)&D_800A5480;
+        growSpawn.fadeStart = 1;
+        growSpawn.fadeRate = 0xFF;
+        growSpawn.scaleStart = 1;
+        growSpawn.scaleRate = 1.0f;
         r1 = (func_150ADA20() & 1) ? 0x40 : 0;
         r2 = (func_150ADA20() & 1) ? 0x80 : 0;
         growSpawn.flags = r2 | 0x4C000 | r1;
-        growSpawn.unk60 = 6;
-        growSpawn.unk61 = 6;
-        growSpawn.unk62 = 31;
-        growSpawn.unk63 = -1;
-        growSpawn.unk64 = -1;
-        growSpawn.unk65 = 9;
-        growSpawn.unk5C = 0;
-        growSpawn.unk66 = 0xFF;
+        growSpawn.primColorMode = 6;
+        growSpawn.envColorMode = 6;
+        growSpawn.updateFunc = 31;
+        growSpawn.deathFunc = -1;
+        growSpawn.drawFunc = -1;
+        growSpawn.handlerSet = 9;
+        growSpawn.viewMask = 0;
+        growSpawn.views = 0xFF;
         growSpawn.vel = *(vertex *)&D_800A5480;
-        growSpawn.unkA = 300;
-        growSpawn.unk2C = 0.0f;
-        growSpawn.unk28 = 0.0f;
-        growSpawn.unk54 = 0.0f;
+        growSpawn.timer = 300;
+        growSpawn.height = 0.0f;
+        growSpawn.width = 0.0f;
+        growSpawn.gravity = 0.0f;
         particle = func_15130280(&growSpawn, 1, 0, 0x1C, arg1, arg2);
         if (particle != NULL) {
             memcpy(&particle->data.grow, &grow, sizeof(grow));

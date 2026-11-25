@@ -13,12 +13,6 @@
 #define func_1000EB00 func_1000EB00_hdr
 #define func_1000FA64 func_1000FA64_hdr
 #define func_1000FF90 func_1000FF90_hdr
-#define D_80041F10 D_80041F10_hdr
-#define D_80041F50 D_80041F50_hdr
-#define D_80041F68 D_80041F68_hdr
-#define D_80041FE0 D_80041FE0_hdr
-#define D_8002C240 D_8002C240_hdr
-#define D_80041F5C D_80041F5C_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_1000F85C
@@ -33,12 +27,6 @@
 #undef func_1000EB00
 #undef func_1000FA64
 #undef func_1000FF90
-#undef D_80041F10
-#undef D_80041F50
-#undef D_80041F68
-#undef D_80041FE0
-#undef D_8002C240
-#undef D_80041F5C
 
 typedef struct SoundRecord SoundRecord;
 
@@ -103,11 +91,9 @@ typedef struct {
 } SoundVariant;
 
 extern SoundQueueEntry D_80041F10[16];
-extern s32 D_80041F50;
 extern SoundSpatialRecord D_80041F68[];
 extern SoundRecord D_80041FE0[];
 extern SoundVariant D_8002C240[][5];
-extern u8 *D_80041F5C; // per-sound variant history for func_1000F568
 extern f32 D_8002C400;
 extern f32 D_8002C404;
 

@@ -12,18 +12,17 @@ extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
 extern u8 D_80084060[];
 extern OSTimer D_800BE6E0;
-extern f32 D_80096960;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
 extern u8 D_800E0A00;
 
-s64 __ll_mul(u64 arg0, s32 arg1, s32 arg2);
-u64 __ull_div(u64 arg0, u64 arg1);
-void func_1501C0F0(u8 arg0, f32 arg1, f32 arg2);
+void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
+/* After each controller read (func_1501BBB8 sets D_80084064), arms a one-shot timer of
+   25 * osClockRate / 1000000 ticks (D_8002BD10 is osClockRate) that posts message 6 to D_8003B218. */
 void func_1501BB20(void) {
-    if (D_80084064 != 0) {
-        osSetTimer(&D_800BE6E0, __ull_div(__ll_mul(25ULL, *(s32 *)&D_8002BD10, D_8002BD14), 1000000ULL), 0, &D_8003B218, (OSMesg)6);
+    if (D_80084064) {
+        osSetTimer(&D_800BE6E0, 25ULL * D_8002BD10 / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
         D_80084064 = 0;
     }
 }
@@ -41,15 +40,17 @@ void func_151DD8C0(void);
 
 #define PADS ((OSContPad *)D_800BE748)
 
+/* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
+   records newly pressed buttons, applies the stick dead zone and returns the pad pointer table. */
 struct14 *func_1501BBB8(void) {
-    s32 unused;
-    s32 j;
-    s32 demo;
-    s32 count;
+    s32 pad; // matching: unused stack slot in the original frame
+    s32 player;
+    s32 replaying;
+    s32 numPlayers;
     OSContPad pads[4];
     s32 i;
     s32 x;
-    s32 y;
+    s32 y; // also carries the button word
 
     for (i = 0; i < 4; i++) {
         D_800BE718[i] = PADS[i].button;
@@ -69,22 +70,22 @@ struct14 *func_1501BBB8(void) {
         }
     }
     if (D_800BE9F0 != 0x1D) {
-        count = D_8008FD90;
+        numPlayers = D_8008FD90;
     } else {
-        count = 4;
+        numPlayers = 4;
     }
-    for (j = 0; j < 4; j++) {
-        i = D_80084060[j];
-        if (i < 4 && j < count) {
-            PADS[j].button = pads[i].button;
-            PADS[j].stick_x = pads[i].stick_x;
-            PADS[j].stick_y = pads[i].stick_y;
-            PADS[j].button |= D_800BE720[i];
+    for (player = 0; player < 4; player++) {
+        i = D_80084060[player];
+        if (i < 4 && player < numPlayers) {
+            PADS[player].button = pads[i].button;
+            PADS[player].stick_x = pads[i].stick_x;
+            PADS[player].stick_y = pads[i].stick_y;
+            PADS[player].button |= D_800BE720[i];
             D_800BE720[i] = 0;
         } else {
-            PADS[j].button = 0;
-            PADS[j].stick_x = 0;
-            PADS[j].stick_y = 0;
+            PADS[player].button = 0;
+            PADS[player].stick_x = 0;
+            PADS[player].stick_y = 0;
         }
     }
     for (i = 0; i < 4; i++) {
@@ -106,16 +107,16 @@ struct14 *func_1501BBB8(void) {
         }
     }
     if (D_800E0B94 == 2 || D_800E0B95 == 2) {
-        demo = 1;
+        replaying = 1;
         func_151DD8C0();
     } else {
-        demo = 0;
+        replaying = 0;
     }
     for (i = 0; i < 4; i++) {
         y = PADS[i].button;
         D_800BE710[i] = y & ~D_800BE700[i];
         D_800BE700[i] = y;
-        if (!demo) {
+        if (!replaying) {
             x = PADS[i].stick_x;
             if (((x < 0) ? -x : x) >= 8) {
                 PADS[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
@@ -134,114 +135,112 @@ struct14 *func_1501BBB8(void) {
 }
 
 
-void func_1501C010(u8 arg0, u8 arg1) {
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f2;
-    u32 temp_v0;
+/* Starts rumble on a player's pak with an on/off pattern derived from strength (0-8). */
+void func_1501C010(u8 player, u8 strength) {
+    f32 scaled;
+    f32 onTime;
+    f32 offTime;
 
-    temp_v0 = arg1;
-    if (arg1 >= 9) {
-        arg1 = 8;
-        temp_v0 = 8;
+    if (strength > 8) {
+        strength = 8;
     }
-    if (temp_v0 == 8) {
-        temp_f2 = 20.0f;
-        temp_f12 = 0.0f;
-    } else if (temp_v0 == 0) {
-        temp_f2 = 0.0f;
-        temp_f12 = 99.0f;
+    if (strength == 8) {
+        onTime = 20.0f;
+        offTime = 0.0f;
+    } else if (strength == 0) {
+        onTime = 0.0f;
+        offTime = 99.0f;
     } else {
-        temp_f0 = ((f32)(u32)arg1 - 1.0f) * D_80096960 * 5.0f;
-        temp_f2 = temp_f0 + 2.0f;
-        temp_f12 = 7.0f - temp_f0;
+        scaled = ((f32)strength - 1.0f) * (1.0f / 6.0f) * 5.0f;
+        onTime = scaled + 2.0f;
+        offTime = 7.0f - scaled;
     }
-    func_1501C0F0(arg0, temp_f2, temp_f12);
+    func_1501C0F0(player, onTime, offTime);
 }
 
-void func_1501C0F0(u8 arg0, f32 arg1, f32 arg2) {
-    u8 temp = D_80084060[arg0];
+/* Starts a player's rumble cycle: motor on for onTime, then off for offTime, repeating. */
+void func_1501C0F0(u8 player, f32 onTime, f32 offTime) {
+    u8 channel = D_80084060[player];
 
-    if (temp < 4) {
-        if (D_800BE944[temp] != 0) {
-            D_800BE93C[temp] = 1;
-            D_800BE950[temp] = 0.0f;
-            D_800BE960[temp] = arg1;
-            D_800BE970[temp] = arg2;
-            D_800BE980[temp] = arg1 + arg2;
-        }
-    }
-}
-
-void func_1501C17C(u8 arg0) {
-    u8 temp = D_80084060[arg0];
-    if (temp < 4) {
-        D_800BE93C[temp] = 0;
+    if (channel < 4 && D_800BE944[channel]) {
+        D_800BE93C[channel] = 1;
+        D_800BE950[channel] = 0.0f;
+        D_800BE960[channel] = onTime;
+        D_800BE970[channel] = offTime;
+        D_800BE980[channel] = onTime + offTime;
     }
 }
 
+/* Stops a player's rumble cycle. */
+void func_1501C17C(u8 player) {
+    u8 channel = D_80084060[player];
+
+    if (channel < 4) {
+        D_800BE93C[channel] = 0;
+    }
+}
+
+/* D_800BE760 is the per-channel rumble pak state; variables.h declares it as struct156. */
+#define RUMBLE_PAKS ((OSPfs *)D_800BE760)
+
+/* Per-frame rumble update: (re)detects rumble paks when D_800BE938 is set, forces motors off
+   while D_800BEAC3 / D_800E0A00 are set, and otherwise drives each motor's on/off cycle. */
 void func_1501C1B0(void) {
-    s32 i;
-    s32 on;
+    s32 channel;
+    s32 motorOn;
 
-    for (i = 0; i < 4; i++) {
-        if (D_800BE938 != 0) {
-            if (_MakeMotorData(&D_800BE900, (OSPfs *)&D_800BE760[i], i) == 0) {
-                if (D_800BE944[i] == 0) {
-                    D_800BE944[i] = 1;
-                    D_800BE93C[i] = 0;
-                    D_800BE940[i] = 0;
-                    D_800BE948[i] = 0;
-                    D_800BE950[i] = 0.0f;
-                    D_800BE960[i] = 1.0f;
-                    D_800BE970[i] = 1.0f;
-                    D_800BE980[i] = 2.0f;
-                    osMotorStop((OSPfs *)&D_800BE760[i]);
+    for (channel = 0; channel < 4; channel++) {
+        if (D_800BE938) {
+            if (_MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel) == 0) {
+                if (D_800BE944[channel] == 0) {
+                    D_800BE944[channel] = 1;
+                    D_800BE93C[channel] = 0;
+                    D_800BE940[channel] = 0;
+                    D_800BE948[channel] = 0;
+                    D_800BE950[channel] = 0.0f;
+                    D_800BE960[channel] = 1.0f;
+                    D_800BE970[channel] = 1.0f;
+                    D_800BE980[channel] = 2.0f;
+                    osMotorStop(&RUMBLE_PAKS[channel]);
                 }
             } else {
-                D_800BE944[i] = 0;
+                D_800BE944[channel] = 0;
             }
         }
-        if (D_800BE944[i] != 0) {
-            if ((D_800BEAC3 != 0) || (D_800E0A00 != 0)) {
-                _MakeMotorData(&D_800BE900, (OSPfs *)&D_800BE760[i], i);
-                osMotorStop((OSPfs *)&D_800BE760[i]);
-                D_800BE948[i] = 0;
-                D_800BE93C[i] = 0;
+        if (D_800BE944[channel]) {
+            if (D_800BEAC3 || D_800E0A00) {
+                _MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel);
+                osMotorStop(&RUMBLE_PAKS[channel]);
+                D_800BE948[channel] = 0;
+                D_800BE93C[channel] = 0;
             }
-            if ((D_800BEAC1 == 0) && (D_800BEAC0 == 0) && (D_800BEAC2 == 0) && (D_800BEAC3 == 0) && (D_800E0A00 == 0)) {
-                switch (D_800BE93C[i]) {
+            if (!D_800BEAC1 && !D_800BEAC0 && !D_800BEAC2 && !D_800BEAC3 && !D_800E0A00) {
+                switch (D_800BE93C[channel]) {
                 case 0:
-                    if (D_800BE940[i] == 1) {
-                        _MakeMotorData(&D_800BE900, (OSPfs *)&D_800BE760[i], i);
-                        osMotorStop((OSPfs *)&D_800BE760[i]);
-                        D_800BE948[i] = 0;
+                    if (D_800BE940[channel] == 1) {
+                        _MakeMotorData(&D_800BE900, &RUMBLE_PAKS[channel], channel);
+                        osMotorStop(&RUMBLE_PAKS[channel]);
+                        D_800BE948[channel] = 0;
                     }
                     break;
                 case 1:
-                    D_800BE950[i] += D_800BE9A4;
-                    while (D_800BE950[i] > D_800BE980[i]) {
-                        D_800BE950[i] -= D_800BE980[i];
+                    D_800BE950[channel] += D_800BE9A4;
+                    while (D_800BE950[channel] > D_800BE980[channel]) {
+                        D_800BE950[channel] -= D_800BE980[channel];
                     }
-                    if (D_800BE960[i] <= D_800BE950[i]) {
-                        on = 0;
-                    } else {
-                        on = 1;
-                    }
-                    if (on != 0) {
-                        if (D_800BE948[i] == 0) {
-                            osMotorStart((OSPfs *)&D_800BE760[i]);
+                    motorOn = (D_800BE960[channel] <= D_800BE950[channel]) ? 0 : 1;
+                    if (motorOn) {
+                        if (D_800BE948[channel] == 0) {
+                            osMotorStart(&RUMBLE_PAKS[channel]);
                         }
-                    } else {
-                        if (D_800BE948[i] == 1) {
-                            osMotorStop((OSPfs *)&D_800BE760[i]);
-                        }
+                    } else if (D_800BE948[channel] == 1) {
+                        osMotorStop(&RUMBLE_PAKS[channel]);
                     }
-                    D_800BE948[i] = on;
+                    D_800BE948[channel] = motorOn;
                     break;
                 }
             }
-            D_800BE940[i] = D_800BE93C[i];
+            D_800BE940[channel] = D_800BE93C[channel];
         }
     }
     D_800BE938 = 0;
@@ -249,10 +248,12 @@ void func_1501C1B0(void) {
     D_800E0A00 = 0;
 }
 
+/* Stops rumble for every player. */
 void func_1501C53C(void) {
-    u8 i;
-    for (i = 0; i < 4; i++) {
-        func_1501C17C(i);
+    u8 player;
+
+    for (player = 0; player < 4; player++) {
+        func_1501C17C(player);
     }
 }
 
@@ -261,25 +262,33 @@ extern u8 *D_800BE3F0;
 void func_151DCFD8(s32);
 u8 func_151DD460(OSMesgQueue *);
 void func_15007168(void);
-void func_15006590(s32);
-void func_15006BEC(s32);
-void func_1500707C(s32);
+void func_15006590(s32 eepromSlot);
+void func_15006BEC(s32 saveSlot);
+void func_1500707C(s32 saveSlot);
 void func_1500727C(void);
 void func_15007360(void);
 void func_15007440(void);
 void func_15007558(void);
 void func_10004074(void *);
 
+/* Pending EEPROM request (enum EepromRequest in game_33990.c) and its save-slot argument;
+   variables.h declares both u8, but they are signed bytes. */
+#define EEPROM_REQUEST (*(s8 *)&D_80082BB4)
+#define EEPROM_REQUEST_SLOT (*(s8 *)&D_800BE3EC)
+
+/* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load
+   requests fall back to defaults and the others are dropped. */
 void func_1501C57C(void) {
     s32 i;
 
     func_151DCFD8(0);
-    if (*(s8 *)&D_80082BB4 != 0) {
+    if (EEPROM_REQUEST != 0) {
         if (D_80084068 != 2) {
             D_80084068 = func_151DD460(&D_800BE900);
         }
         if (D_80084068 != 2) {
-            switch (*(s8 *)&D_80082BB4) {
+            // matching: empty switch emits the original's 7-entry jump table
+            switch (EEPROM_REQUEST) {
                 case 1:
                 case 2:
                 case 3:
@@ -289,29 +298,31 @@ void func_1501C57C(void) {
                 case 7:
                     break;
             }
+            // matching: a goto loop; IDO unrolls the equivalent for/while delay loop
             i = 19;
-            loop:
+        delay:
             if (i > 0) {
                 i--;
-                goto loop;
+                goto delay;
             }
-            if (*(s8 *)&D_80082BB4 == 1) {
+            if (EEPROM_REQUEST == 1) {
                 func_150064E0();
-            } else if (*(s8 *)&D_80082BB4 == 4) {
+            } else if (EEPROM_REQUEST == 4) {
                 func_15007168();
             }
             D_80082BB4 = 0;
-        lbl:;
+        // matching: an unused label ends the block, so as1 keeps the store out of the branch delay slot
+        end:;
         } else {
-            switch (*(s8 *)&D_80082BB4) {
+            switch (EEPROM_REQUEST) {
                 case 1:
-                    func_15006590(*(s8 *)&D_800BE3EC);
+                    func_15006590(EEPROM_REQUEST_SLOT);
                     break;
                 case 2:
-                    func_15006BEC(*(s8 *)&D_800BE3EC);
+                    func_15006BEC(EEPROM_REQUEST_SLOT);
                     break;
                 case 3:
-                    func_1500707C(*(s8 *)&D_800BE3EC);
+                    func_1500707C(EEPROM_REQUEST_SLOT);
                     break;
                 case 4:
                     func_1500727C();

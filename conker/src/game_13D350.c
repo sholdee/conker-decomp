@@ -7,6 +7,9 @@
 #undef func_150ADA20
 #include "variables.h"
 
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define RENDER_VIEWS ((RenderView *)D_800BE628)
+
 u32 func_150ADA20(void);
 void func_1502B7F0(void **dest, s32 arg1, s32 arg2, s32 arg3);
 void func_10004074(void *data);
@@ -17,47 +20,6 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 
 extern u8 D_800DBEA8[];
 extern void *D_800DBE80; // the current sky's data: the star field (sky 1) or a textured sky's tile formats
-
-/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these.
- * Same layout as game_476D0.c's RenderView, with the projection fields this file uses. */
-typedef struct RenderView {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 onScreen;
-    /* 0x002 */ u8 pad2[2];
-    /* 0x004 */ f32 width;
-    /* 0x008 */ f32 height;
-    /* 0x00C */ f32 halfWidth;
-    /* 0x010 */ f32 halfHeight;
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[8];
-    /* 0x024 */ f32 top;
-    /* 0x028 */ f32 bottom;
-    /* 0x02C */ f32 left;
-    /* 0x030 */ f32 right;
-    /* 0x034 */ f32 centerX;
-    /* 0x038 */ f32 centerY;
-    /* 0x03C */ u8 pad3C[4];
-    /* 0x040 */ Vp viewports[2];
-    /* 0x060 */ f32 aspect;
-    /* 0x064 */ f32 unk64;
-    /* 0x068 */ f32 unk68;
-    /* 0x06C */ f32 fovX;
-    /* 0x070 */ f32 fovY;
-    /* 0x074 */ f32 frustumFovX;
-    /* 0x078 */ f32 frustumFovY;
-    /* 0x07C */ f32 pixelTanX;
-    /* 0x080 */ f32 pixelTanY;
-    /* 0x084 */ f32 unk84;
-    /* 0x088 */ f32 frustumPlanes[4][3];
-    /* 0x0B8 */ u16 perspNorm;
-    /* 0x0BA */ u8 padBA[2];
-    /* 0x0BC */ f32 projection[4][4];
-    /* 0x0FC */ u8 padFC[0x84];
-} RenderView; // size 0x180
-
-/* variables.h types D_800BE628 as s32. */
-#define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];

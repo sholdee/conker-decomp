@@ -3,443 +3,383 @@
 #include "n_libaudio.h"
 #include "variables.h"
 #include "n_abi.h"
+#include "libultra/audio/n_synthInternals.h"
 
-/* This TU deliberately does NOT include "functions.h".
+/* Conker's variant of the libultra reverb/chorus effect (n_reverb.c): the FX pull,
+ * its parameter handler, and the delay-line load/save/filter/modulation helpers.
  *
- * Two reasons, both forced:
+ * This TU deliberately does NOT include "functions.h":
  *   - functions.h and n_libaudio.h give n_alInit/n_alClose incompatible prototypes,
- *     so they cannot both be included; n_syn (and its 0x48 auxBus field) is what this
- *     file actually needs.
- *   - functions.h line 1005 declares
- *         void func_1001E530(s32 arg0, void *arg1, s32 arg2);
- *     which the ROM contradicts: the function returns its command-list cursor
- *     (`lw v0,0x7C(sp)` in the epilogue) and takes a sample pointer first.  That
- *     declaration is wrong and should be corrected separately -- it is not corrected
- *     here because functions.h is a dependency of every GLOBAL_ASM object.
- * The one thing this file lost by dropping the header is func_1001FA78, re-declared
- * below exactly as functions.h has it.
- */
-f32 func_1001FA78(f32 arg0[4][4], s32 arg1);
-
-/* ALLowPass as this TU actually uses it.
+ *     so they cannot both be included.
+ *   - functions.h declares `void func_1001E530(s32, void *, s32)`, which the ROM
+ *     contradicts (it returns the command-list cursor and takes the output pointer
+ *     first); that shared declaration should be corrected separately.
  *
- * src/libultra/audio/synthInternals.h declares the tail of ALLowPass as
- *     POLEF_STATE *fstate;   0x28
- *     s32          first;    0x2C
- * and that is wrong in two ways, both provable from the ROM:
- *   - the two NAMES are swapped.  0x28 is the POLEF first-frame flag: init_lpfilter
- *     zeroes it (`sw zero,0x28(a0)` in the golden object), func_1001F978 passes its
- *     low byte as the POLEF `f` operand and clears it again after use.
- *   - 0x2C is an ARRAY of state pointers, one per bus -- func_1001F978 indexes it
- *     with its `bus` parameter (`lw a0,0x2C(a0+bus*4)`).  A scalar pointer there
- *     would need a second load and cannot produce that instruction.
- * Shadowed file-locally rather than edited into the shared header, because
- * init_1CBF0.c is byte-identical under either naming and must not be disturbed.
+ * D_800428C4[bus] is the bus's stereo-routing flag (0: one delay line, 1: a second
+ * line for the other channel); D_800428C6[bus] inverts the feed coefficients and
+ * picks the alternative output buffer when routing is on.
  */
+
+/* ALLowPass as this TU uses it.  synthInternals.h has `POLEF_STATE *fstate` at 0x28
+ * and `first` at 0x2C; the ROM has them the other way round, with one filter state
+ * per bus (func_1001F978 indexes `lw a0,0x2C(a0+bus*4)`).  Shadowed file-locally
+ * because init_1CBF0.c uses the shared header and must not be disturbed; calls into
+ * init_lpfilter cast back to the header's ALLowPass. */
 typedef struct {
-    s16   fc;                   /* 0x00 */
-    s16   fgain;                /* 0x02 */
-    s32   unk4;                 /* 0x04 */
+    s16          fc;          /* 0x00 */
+    s16          fgain;       /* 0x02 */
     union {
         s16  fccoef[16];
         s64  force_aligned;
-    } fcvec;                    /* 0x08 */
-    s32   first;                /* 0x28 */
-    void *fstate[1];            /* 0x2C */
+    } fcvec;                  /* 0x08 */
+    s32          first;       /* 0x28 */
+    POLEF_STATE *fstate[2];   /* 0x2C */
 } LowPass;
 
-/* The resampler stage hanging off a voice.  Only the four fields below are touched
- * here; the 0x14 slot is an ARRAY (func_1001F28C loads state[bus] as
- * `lw a0,0x14(unk24 + bus*4)`), which together with `first` at 0x28 fixes the two
- * pointers at 0x14/0x18 and leaves ratio/upitch at 0x1C/0x20.
- */
+/* The chorus resampler attached to a delay section; one state per bus. */
 typedef struct {
-    u8    pad0[0x14];
-    void *state[2]; /* 0x14 */
-    f32   ratio;    /* 0x1C */
-    s32   upitch;   /* 0x20 */
-    f32   delta;    /* 0x24 */
-    s32   first;    /* 0x28 */
+    ALFilter        filter;   /* 0x00 */
+    RESAMPLE_STATE *state[2]; /* 0x14 */
+    f32             ratio;    /* 0x1C */
+    s32             upitch;   /* 0x20 */
+    f32             delta;    /* 0x24 */
+    s32             first;    /* 0x28 */
 } Resampler;
 
-/* One synthesiser voice, stride 0x28 (func_1001E530 and func_1001ED6C both index the
- * array at SynBufs::unk4 with a 0x28 multiply).  0x10/0x14/0x1C are the f32 triple
- * that func_1001FA78 -- declared as an f32[4][4] -- reads as arg0[1][0], arg0[1][1]
- * and arg0[1][3]: increment, phase and depth of the pitch LFO.  0x08/0x0A/0x0C are
- * the three mix gains (dry, wet-return and FX send).
- */
+/* One delay section (ALDelay): taps `input`/`output` samples behind the line's write
+ * head, feed-forward/feedback/output gains, and the chorus LFO (rsinc, rsval, rsgain)
+ * that modulates the output tap through the resampler. */
 typedef struct {
-    s32        unk0;    /* 0x00 */
-    s32        unk4;    /* 0x04 */
-    s16        unk8;    /* 0x08 */
-    s16        unkA;    /* 0x0A */
-    s16        unkC;    /* 0x0C */
-    u8         padE[0x2];
-    f32        unk10;   /* 0x10 */
-    f32        unk14;   /* 0x14 */
-    s32        unk18;   /* 0x18 */
-    f32        unk1C;   /* 0x1C */
-    LowPass   *unk20;   /* 0x20 */
-    Resampler *unk24;   /* 0x24 */
-} Voice;                /* 0x28 */
+    u32        input;   /* 0x00 */
+    u32        output;  /* 0x04 */
+    s16        ffcoef;  /* 0x08 */
+    s16        fbcoef;  /* 0x0A */
+    s16        gain;    /* 0x0C */
+    f32        rsinc;   /* 0x10 */
+    f32        rsval;   /* 0x14 */
+    s32        rsdelta; /* 0x18 */
+    f32        rsgain;  /* 0x1C */
+    LowPass   *lp;      /* 0x20 */
+    Resampler *rs;      /* 0x24 */
+} Delay;                /* 0x28 */
 
-/* The per-bus DRAM ring buffers, plus the voice array they feed.  unk0 is the ring
- * length in 16-bit samples, so unk0*2 is its length in bytes; unk20[bus] is the ring
- * base and unk28[bus] the current head.  Both transfer helpers below treat a DRAM
- * address below the base as belonging to the previous lap and fold it forward by one
- * ring length, then split the DMA at the wrap point when it would run past the end.
- * Both arrays are two entries: they are 8 bytes apart and both are indexed by bus.
- */
+/* The effect (ALFx): `length` samples of circular delay line per bus, starting at
+ * base[bus], with the write head at input[bus]. */
 typedef struct {
-    s32    unk0;      /* 0x00 */
-    Voice *unk4;      /* 0x04 */
-    u8     unk8;      /* 0x08 -- voice count */
+    u32    length;         /* 0x00 */
+    Delay *delay;          /* 0x04 */
+    u8     section_count;  /* 0x08 */
     u8     pad9[0x17];
-    u32    unk20[2];  /* 0x20 */
-    s32    unk28[2];  /* 0x28 */
-} SynBufs;
+    s16   *base[2];        /* 0x20 */
+    s16   *input[2];       /* 0x28 */
+} Fx;
 
-/* n_libaudio.h leaves N_ALAuxBus_s opaque; the stride is 0x44 (n_alSynNew allocates
- * it that way) and the FX state pointer this file wants sits at 0x1C. */
+/* The aux bus as the ROM lays it out: stride 0x44 (n_alSynNew allocates it that way)
+ * with the effect pointer at 0x1C.  n_synthInternals.h's N_ALAuxBus puts `fx` at 0x20,
+ * so this file indexes n_syn->auxBus through this view instead. */
 typedef struct {
-    u8       pad0[0x1C];
-    SynBufs *unk1C;   /* 0x1C */
-    u8       pad20[0x24];
-} FxBus;              /* 0x44 */
+    u8  pad0[0x1C];
+    Fx *primaryFx;  /* 0x1C */
+    u8  pad20[0x24];
+} FxBus;            /* 0x44 */
 
 Acmd *func_100210C0(s16 *outp, Acmd *p, s32 bus, s32 *cmdCount);
-Acmd *func_1001F28C(SynBufs *g, Voice *v, s32 bus, s32 arg3, Acmd *p);
-Acmd *func_1001F5A4(SynBufs *g, s32 bus, u32 dramOffset, s32 dmemOffset, s32 nbytes,
-                    Acmd *p);
-Acmd *func_1001F79C(SynBufs *g, s32 bus, u32 dramOffset, s32 dmemOffset, Acmd *p);
-Acmd *func_1001F978(LowPass *lp, s32 bus, s32 arg2, Acmd *p);
-void init_lpfilter(LowPass *lp);
+Acmd *func_1001F28C(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p);
+Acmd *func_1001F5A4(Fx *fx, s32 bus, s16 *curr, s32 buff, s32 count, Acmd *p);
+Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p);
+Acmd *func_1001F978(LowPass *lp, s32 bus, s32 buff, Acmd *p);
+f32 func_1001FA78(Delay *d, s32 count);
 
-/* Build one 0xB8-sample frame of the audio command list for aux bus `bus`: mix the
-   previous frame's tails down, then for every voice on every sub-bus pull its source
-   samples in, resample them, apply the dry/wet/FX gains and save the result back to
-   the voice's DRAM ring, advancing each ring head by 0x170 bytes and wrapping it. */
+/* n_alFxPull: pull the sources feeding aux bus `bus`, write the mix into the delay
+ * line(s), then run every delay section (feed-forward, feedback, low-pass, chorus) and
+ * accumulate its output gain into the aux output buffer.  Address-taken: it is the
+ * aux bus filter handler. */
 Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
-    Acmd    *ptr = p;
-    SynBufs *g = ((FxBus *)n_syn->auxBus)[bus].unk1C;
-    s16      i;
-    s16      dmemB;
-    s16      dmemA;
-    s16      dmemL;
-    s16      dmemR;
-    s32      srcAddr;
-    s32      endAddr;
-    s32      prevEnd = 0;
-    Voice   *chan;
-    s32      cmdCount = 0;
-    u32      b;
+    Acmd  *ptr = p;
+    Fx    *fx = ((FxBus *)n_syn->auxBus)[bus].primaryFx;
+    s16    i;
+    s16    buff1;
+    s16    buff2;
+    s16    input;
+    s16    output;
+    s16   *inPtr;
+    s16   *outPtr;
+    s16   *prevOutPtr = NULL;
+    Delay *d;
+    s32    cmdCount = 0;
+    u32    j;
 
     ptr = func_100210C0(outp, p, bus, &cmdCount);
-    dmemL = 0x7C0;
-    dmemR = 0x930;
-    dmemB = 0;
-    dmemA = 0x170;
+    input = N_AL_AUX_L_OUT;
+    output = N_AL_AUX_R_OUT;
+    buff1 = N_AL_TEMP_0;
+    buff2 = N_AL_TEMP_1;
     if (D_800428C4[bus] == 0) {
-        aMix(ptr++, 0, 0xC000, 0x7C0, dmemL);
-        aMix(ptr++, 0, 0x4000, 0x930, dmemL);
+        aMix(ptr++, 0, 0xC000, N_AL_AUX_L_OUT, input);
+        aMix(ptr++, 0, 0x4000, N_AL_AUX_R_OUT, input);
     }
-    ptr = func_1001F79C(g, 0, g->unk28[0], dmemL, ptr);
+    /* write the mixed input into the delay line at its write head */
+    ptr = func_1001F79C(fx, 0, fx->input[0], input, ptr);
     if (D_800428C4[bus] != 0) {
-        ptr = func_1001F79C(g, 1, g->unk28[1], 0x930, ptr);
+        ptr = func_1001F79C(fx, 1, fx->input[1], N_AL_AUX_R_OUT, ptr);
     }
-    for (b = 0; b <= D_800428C4[bus]; b++) {
-        aClearBuffer(ptr++, dmemR, 0x170);
-        for (i = 0; i < g->unk8; i++) {
-            chan = &g->unk4[i];
-            srcAddr = g->unk28[b] + -chan->unk0 * 2;
-            endAddr = g->unk28[b] + -chan->unk4 * 2;
+    for (j = 0; j <= D_800428C4[bus]; j++) {
+        aClearBuffer(ptr++, output, SAMPLES * 2);
+        for (i = 0; i < fx->section_count; i++) {
+            d = &fx->delay[i];
+            inPtr = &fx->input[j][-d->input];
+            outPtr = &fx->input[j][-d->output];
             if (D_800428C6[bus] && D_800428C4[bus]) {
-                chan->unk8 = -chan->unk8;
-                chan->unkA = -chan->unkA;
+                d->ffcoef = -d->ffcoef;
+                d->fbcoef = -d->fbcoef;
             }
-            if (srcAddr == prevEnd) {
-                s16 tmp = dmemA;
-                dmemA = dmemB;
-                dmemB = tmp;
+            if (inPtr == prevOutPtr) {
+                s16 tmp = buff2;
+                buff2 = buff1;
+                buff1 = tmp;
             } else {
-                ptr = func_1001F5A4(g, b, srcAddr, dmemB, 0xB8, ptr);
+                ptr = func_1001F5A4(fx, j, inPtr, buff1, SAMPLES, ptr);
             }
-            ptr = func_1001F28C(g, chan, b, dmemA, ptr);
-            if (chan->unk8 != 0) {
-                aMix(ptr++, 0, (u16)chan->unk8, dmemB, dmemA);
-                if (chan->unk24 == 0 && chan->unk20 == 0) {
-                    ptr = func_1001F79C(g, b, endAddr, dmemA, ptr);
+            ptr = func_1001F28C(fx, d, j, buff2, ptr);
+            if (d->ffcoef != 0) {
+                aMix(ptr++, 0, (u16)d->ffcoef, buff1, buff2);
+                if (d->rs == NULL && d->lp == NULL) {
+                    ptr = func_1001F79C(fx, j, outPtr, buff2, ptr);
                 }
             }
-            if (chan->unkA != 0) {
-                aMix(ptr++, 0, (u16)chan->unkA, dmemA, dmemB);
-                ptr = func_1001F79C(g, b, srcAddr, dmemB, ptr);
+            if (d->fbcoef != 0) {
+                aMix(ptr++, 0, (u16)d->fbcoef, buff2, buff1);
+                ptr = func_1001F79C(fx, j, inPtr, buff1, ptr);
             }
-            if (chan->unk20 != 0) {
-                ptr = func_1001F978(chan->unk20, b, dmemA, ptr);
+            if (d->lp != NULL) {
+                ptr = func_1001F978(d->lp, j, buff2, ptr);
             }
-            if (chan->unk24 == 0) {
-                ptr = func_1001F79C(g, b, endAddr, dmemA, ptr);
+            if (d->rs == NULL) {
+                ptr = func_1001F79C(fx, j, outPtr, buff2, ptr);
             }
-            if (chan->unkC != 0) {
+            if (d->gain != 0) {
                 if (D_800428C4[bus] != 0) {
-                    aMix(ptr++, 0, (u16)chan->unkC, dmemA, dmemR);
+                    aMix(ptr++, 0, (u16)d->gain, buff2, output);
                 } else {
-                    u32 vol;
+                    u32 gain = d->gain * 1.4142f;
 
-                    vol = chan->unkC * 1.4142f;
-                    if (vol >= 0x8000) {
-                        vol = 0x7FFF;
+                    if (gain >= 0x8000) {
+                        gain = 0x7FFF;
                     }
-                    aMix(ptr++, 0, (u16)vol, dmemA, dmemR);
+                    aMix(ptr++, 0, (u16)gain, buff2, output);
                 }
             }
-            prevEnd = g->unk28[b] + chan->unk4 * 2;
+            prevOutPtr = &fx->input[j][d->output];
         }
-        if (D_800428C4[bus] != 0 && b == 0) {
-            ptr = func_1001F5A4(g, 1, g->unk28[1], dmemL, 0xB8, ptr);
+        if (D_800428C4[bus] != 0 && j == 0) {
+            ptr = func_1001F5A4(fx, 1, fx->input[1], input, SAMPLES, ptr);
             if (D_800428C6[bus]) {
-                aMix(ptr++, 0, 0x5A82, dmemR, 0x650);
+                aMix(ptr++, 0, 0x5A82, output, N_AL_MAIN_R_OUT);
             } else {
-                aMix(ptr++, 0, 0x5A82, dmemR, 0x4E0);
+                aMix(ptr++, 0, 0x5A82, output, N_AL_MAIN_L_OUT);
             }
         } else {
-            /* Original-game empty else, and it is load-bearing SOURCE, not a codegen
-               hack.  IDO -g emits an if/else's merge label plus an explicit
-               `b <end of the enclosing if>; nop` only when the enclosing if HAS an
-               else; with the else deleted the two labels collapse and this function
-               compiles to 525 instructions against golden's 527 -- i.e. deleting it
-               drops us BELOW golden, which is the definition of load-bearing.  Both
-               ways were measured: with it, zero instruction mismatches; without it,
-               two instructions short at exactly this merge point.  A standalone
-               4-construct probe confirms an empty compound statement, a bare `;` and
-               deeper if-nesting all fail to reproduce it -- only an empty else (or a
-               goto to the next statement) does. */
+            // matching: IDO -g emits the extra branch at this merge only with an else
         }
-        aDMEMMove(ptr++, dmemR, 0x7C0, 0x170);
-        g->unk28[b] += 0x170;
-        if (g->unk28[b] > g->unk20[b] + g->unk0 * 2) {
-            g->unk28[b] -= g->unk0 * 2;
+        aDMEMMove(ptr++, output, N_AL_AUX_L_OUT, SAMPLES * 2);
+        /* advance the write head, modulo the line length */
+        fx->input[j] += SAMPLES;
+        if (fx->input[j] > &fx->base[j][fx->length]) {
+            fx->input[j] -= fx->length;
         }
     }
     return ptr;
 }
 
-/* n_alSynSetFXParam's back end.  `arg1` packs a parameter selector in its low 3 bits
-   and a voice index in the rest; `arg2` points at the new value.  The switch writes the
-   selected field of voice `idx` -- delay start/end (converted from milliseconds to
-   8-byte-aligned sample offsets), the three mix gains, the LFO increment, or the
-   low-pass cutoff -- then re-clamps the delay window against the bus's ring length and
-   re-derives the LFO depth from the new window width.  Case 6 is the odd one: it only
-   loads the f32 local, and the `sel != 6` test below is what stops that local being
-   overwritten before it is used.
+/* n_alFxParamHdl, called by n_alSynSetFXParam.  `paramID` packs the parameter in its
+ * low 3 bits and the delay section in the rest.  Tap positions are converted from
+ * milliseconds to 8-sample-aligned offsets and clamped to the line, and the chorus
+ * depth is re-derived for the new tap spacing.
+ *
+ * `val` is declared `int`, not `s32` (`long` here): the conversion this forces in
+ * `val * n_syn->outputRate` puts the operands of the multu in the original order. */
+s32 func_1001ED6C(void *filter, s32 paramID, void *param) {
+    Fx *f = filter;
+    s32 sel = paramID & 7;
+    s32 s = paramID >> 3;
+    int val = *(s32 *)param;
+    f32 depth;
 
-   `val` IS DECLARED `int`, NOT `s32`, AND THAT IS LOAD-BEARING SOURCE, not a spelling
-   trick.  In this codebase ultratypes.h has `typedef long s32`, so `n_syn->outputRate`
-   is a `long` while a plain `int` local is not: C89's usual arithmetic conversions then
-   put a widening node on the LEFT operand of the multiply below.  IDO canonicalises a
-   commutative `variable * temp` by evaluating the temp first, so with `s32 val` the
-   global deref is evaluated first and `multu` comes out as (outputRate, val); the
-   conversion node makes the left side a temp too, restoring golden's evaluation order
-   and its (val, outputRate) operands.  Measured: `int` 0, `s32` 101 -- and the 101 is
-   pure register naming, identical instruction count and order.  The only other spelling
-   that reaches 0 is a no-op `(s32)val` cast, which was refused as a forcer. */
-s32 func_1001ED6C(SynBufs *arg0, s32 arg1, s32 *arg2) {
-    SynBufs *g = arg0;
-    s32 sel = arg1 & 7;
-    s32 idx = arg1 >> 3;
-    int val = *arg2;
-    f32 rate;
-
-    if (idx >= g->unk8) {
+    if (s >= f->section_count) {
         return 0;
     }
     switch (sel) {
-    case 0:
-        g->unk4[idx].unk0 = val * n_syn->outputRate / 1000 & ~7;
+    case 0: /* input tap, ms */
+        f->delay[s].input = val * n_syn->outputRate / 1000 & ~7;
         break;
-    case 1:
-        g->unk4[idx].unk4 = val * n_syn->outputRate / 1000 & ~7;
+    case 1: /* output tap, ms */
+        f->delay[s].output = val * n_syn->outputRate / 1000 & ~7;
         break;
     case 2:
-        g->unk4[idx].unkA = val;
+        f->delay[s].fbcoef = val;
         break;
     case 3:
-        g->unk4[idx].unk8 = val;
+        f->delay[s].ffcoef = val;
         break;
     case 4:
-        g->unk4[idx].unkC = val;
+        f->delay[s].gain = val;
         break;
-    case 5:
-        g->unk4[idx].unk10 = val / 1000.0f * 2.0f / n_syn->outputRate;
+    case 5: /* chorus rate */
+        f->delay[s].rsinc = val / 1000.0f * 2.0f / n_syn->outputRate;
         break;
-    case 6:
-        rate = val;
+    case 6: /* chorus depth */
+        depth = val;
         break;
-    case 7:
-        if (g->unk4[idx].unk20 != 0) {
-            g->unk4[idx].unk20->fc = val;
-            init_lpfilter(g->unk4[idx].unk20);
+    case 7: /* low-pass cutoff */
+        if (f->delay[s].lp != NULL) {
+            f->delay[s].lp->fc = val;
+            init_lpfilter((ALLowPass *)f->delay[s].lp);
         }
         break;
     }
-    if (g->unk4[idx].unk0 >= (u32)(g->unk0 - 0x10)) {
-        g->unk4[idx].unk0 = g->unk0 - 0x10;
+    if (f->delay[s].input >= f->length - 16) {
+        f->delay[s].input = f->length - 16;
     }
-    if (g->unk4[idx].unk0 >= (u32)(g->unk0 - 8)) {
-        g->unk4[idx].unk0 = g->unk0 - 8;
+    if (f->delay[s].input >= f->length - 8) {
+        f->delay[s].input = f->length - 8;
     }
-    if (g->unk4[idx].unk0 >= (u32)g->unk4[idx].unk4) {
-        g->unk4[idx].unk4 = g->unk4[idx].unk0 + 8;
+    if (f->delay[s].input >= f->delay[s].output) {
+        f->delay[s].output = f->delay[s].input + 8;
     }
-    if (g->unk4[idx].unk24 != 0) {
+    /* 173123.40 = 120000 / ln(2): hundredths of a cent to ln(ratio) */
+    if (f->delay[s].rs != NULL) {
         if (sel != 6) {
-            if (g->unk4[idx].unk4 - g->unk4[idx].unk0 != 0) {
-                rate = g->unk4[idx].unk1C /
-                       (u32)(g->unk4[idx].unk4 - g->unk4[idx].unk0) * 173123.4062f;
+            if (f->delay[s].output - f->delay[s].input != 0) {
+                depth = f->delay[s].rsgain / (f->delay[s].output - f->delay[s].input) *
+                        173123.4062f;
             } else {
-                rate = 0.0f;
+                depth = 0.0f;
             }
         }
-        g->unk4[idx].unk1C =
-            (u32)(g->unk4[idx].unk4 - g->unk4[idx].unk0) * (rate / 173123.4062f);
+        f->delay[s].rsgain = (f->delay[s].output - f->delay[s].input) * (depth / 173123.4062f);
     }
     return 0;
 }
 
-/* The pitch/resample stage of one voice's command list.  When the voice has a
-   resampler attached, run the pitch LFO for this 0xB8-sample frame, fold it into a
-   fractional resample ratio, pull the (possibly ring-wrapped) source samples into
-   DMEM with func_1001F5A4 and emit the A_RESAMPLE command; when it does not, just
-   pull the frame straight through.  `slop` is the 8-byte DMA alignment slack of the
-   source address, in samples, which is paid for at both ends: read that many extra
-   samples in, then skip that many samples of DMEM on the way out. */
-Acmd *func_1001F28C(SynBufs *g, Voice *v, s32 bus, s32 arg3, Acmd *p) {
+/* _n_loadOutputBuffer: load a section's output tap into DMEM `buff`.  With a chorus
+ * resampler, the tap is modulated by the LFO and resampled: read the (8-byte aligned)
+ * source run into DMEM N_AL_TEMP_2 and A_RESAMPLE it into `buff`. */
+Acmd *func_1001F28C(Fx *fx, Delay *d, s32 bus, s32 buff, Acmd *p) {
     Acmd *ptr = p;
-    s32 pitch;
-    s32 nsamples;
-    s32 dmem = 0x2E0;
-    s32 dram;
-    f32 pos;
-    f32 incr;
-    f32 lfo;
-    s32 slop = 0;
-    s32 span;
-    s32 count = 0xB8;
-    s16 seg;
+    s32   ratio;
+    s32   count;
+    s32   rbuff = N_AL_TEMP_2;
+    s16  *outPtr;
+    f32   fincount;
+    f32   fratio;
+    f32   delta;
+    s32   ramalign = 0;
+    s32   length;
+    s32   incount = SAMPLES;
+    s16   seg;
 
-    if (v->unk24 != 0) {
-        span = v->unk4 - v->unk0;
-        lfo = func_1001FA78((f32 (*)[4])v, count);
-        lfo = lfo / span;
-        lfo = (s32)(lfo * 32768.0f);
-        lfo = lfo / 32768.0f;
-        incr = 1.0f - lfo;
-        pos = v->unk24->delta + incr * count;
-        nsamples = (s32)pos;
-        v->unk24->delta = pos - nsamples;
-        dram = g->unk28[bus] + -(v->unk4 - v->unk18) * 2;
-        slop = (dram & 7) >> 1;
-        ptr = func_1001F5A4(g, bus, dram - slop * 2, dmem, nsamples + slop, ptr);
-        pitch = incr * 32768.0f;
-        seg = arg3 >> 8;
-        n_aResample(ptr++, osVirtualToPhysical(v->unk24->state[bus]),
-                    v->unk24->first, pitch, dmem + slop * 2, seg);
-        v->unk24->first = 0;
-        v->unk18 += nsamples - count;
+    if (d->rs != NULL) {
+        length = d->output - d->input;
+        delta = func_1001FA78(d, incount);
+        delta = delta / length;
+        delta = (s32)(delta * 32768.0f);
+        delta = delta / 32768.0f;
+        fratio = 1.0f - delta;
+        fincount = d->rs->delta + fratio * incount;
+        count = (s32)fincount;
+        d->rs->delta = fincount - count;
+        outPtr = &fx->input[bus][-(d->output - d->rsdelta)];
+        ramalign = ((s32)outPtr & 7) >> 1;
+        ptr = func_1001F5A4(fx, bus, outPtr - ramalign, rbuff, count + ramalign, ptr);
+        ratio = fratio * 32768.0f;
+        seg = buff >> 8;
+        n_aResample(ptr++, osVirtualToPhysical(d->rs->state[bus]), d->rs->first, ratio,
+                    rbuff + ramalign * 2, seg);
+        d->rs->first = 0;
+        d->rsdelta += count - incount;
     } else {
-        dram = g->unk28[bus] + -v->unk4 * 2;
-        ptr = func_1001F5A4(g, bus, dram, arg3, 0xB8, ptr);
+        outPtr = &fx->input[bus][-d->output];
+        ptr = func_1001F5A4(fx, bus, outPtr, buff, SAMPLES, ptr);
     }
     return ptr;
 }
 
-/* _n_loadBuffer: DMA `nbytes/2` samples of bus `bus` from its DRAM ring buffer into
-   DMEM at `dmemOffset`, splitting into two A_LOADBUFF commands when the source run
-   crosses the end of the ring. */
-Acmd *func_1001F5A4(SynBufs *g, s32 bus, u32 dramOffset, s32 dmemOffset, s32 nbytes,
-                    Acmd *p) {
+/* _n_loadBuffer: A_LOADBUFF `count` samples of bus `bus`'s delay line, starting at
+ * `curr`, into DMEM `buff`, splitting the DMA where it wraps past the end. */
+Acmd *func_1001F5A4(Fx *fx, s32 bus, s16 *curr, s32 buff, s32 count, Acmd *p) {
     Acmd *ptr = p;
-    s32 count2;
-    s32 count1;
-    u32 end;
-    u32 bufEnd;
+    s32   afterEnd;
+    s32   beforeEnd;
+    s16  *end;
+    s16  *lineEnd;
 
-    bufEnd = g->unk20[bus] + g->unk0 * 2;
-    if (dramOffset < g->unk20[bus]) {
-        dramOffset += g->unk0 * 2;
+    lineEnd = &fx->base[bus][fx->length];
+    if (curr < fx->base[bus]) {
+        curr += fx->length;
     }
-    end = (nbytes * 2) + dramOffset;
-    if (end > bufEnd) {
-        count2 = (s32)(end - bufEnd) >> 1;
-        count1 = (s32)(bufEnd - dramOffset) >> 1;
-        n_aLoadBuffer(ptr++, count1 * 2, dmemOffset, osVirtualToPhysical(dramOffset));
-        n_aLoadBuffer(ptr++, count2 * 2, dmemOffset + count1 * 2,
-                      osVirtualToPhysical(g->unk20[bus]));
+    end = curr + count;
+    if (end > lineEnd) {
+        afterEnd = end - lineEnd;
+        beforeEnd = lineEnd - curr;
+        n_aLoadBuffer(ptr++, beforeEnd * 2, buff, osVirtualToPhysical(curr));
+        n_aLoadBuffer(ptr++, afterEnd * 2, buff + beforeEnd * 2,
+                      osVirtualToPhysical(fx->base[bus]));
     } else {
-        n_aLoadBuffer(ptr++, nbytes * 2, dmemOffset, osVirtualToPhysical(dramOffset));
+        n_aLoadBuffer(ptr++, count * 2, buff, osVirtualToPhysical(curr));
     }
     return ptr;
 }
 
-/* _n_saveBuffer: the A_SAVEBUFF mirror of func_1001F5A4.  The length is the fixed
-   0x170-byte (184-sample) synthesis frame rather than a parameter. */
-Acmd *func_1001F79C(SynBufs *g, s32 bus, u32 dramOffset, s32 dmemOffset, Acmd *p) {
+/* _n_saveBuffer: the A_SAVEBUFF mirror of func_1001F5A4, always one frame long. */
+Acmd *func_1001F79C(Fx *fx, s32 bus, s16 *curr, s32 buff, Acmd *p) {
     Acmd *ptr = p;
-    s32 count2;
-    s32 count1;
-    u32 end;
-    u32 bufEnd;
+    s32   afterEnd;
+    s32   beforeEnd;
+    s16  *end;
+    s16  *lineEnd;
 
-    bufEnd = g->unk20[bus] + g->unk0 * 2;
-    if (dramOffset < g->unk20[bus]) {
-        dramOffset += g->unk0 * 2;
+    lineEnd = &fx->base[bus][fx->length];
+    if (curr < fx->base[bus]) {
+        curr += fx->length;
     }
-    end = dramOffset + 0x170;
-    if (end > bufEnd) {
-        count2 = (s32)(end - bufEnd) >> 1;
-        count1 = (s32)(bufEnd - dramOffset) >> 1;
-        n_aSaveBuffer(ptr++, count1 * 2, dmemOffset, osVirtualToPhysical(dramOffset));
-        n_aSaveBuffer(ptr++, count2 * 2, dmemOffset + count1 * 2,
-                      osVirtualToPhysical(g->unk20[bus]));
+    end = curr + SAMPLES;
+    if (end > lineEnd) {
+        afterEnd = end - lineEnd;
+        beforeEnd = lineEnd - curr;
+        n_aSaveBuffer(ptr++, beforeEnd * 2, buff, osVirtualToPhysical(curr));
+        n_aSaveBuffer(ptr++, afterEnd * 2, buff + beforeEnd * 2,
+                      osVirtualToPhysical(fx->base[bus]));
     } else {
-        n_aSaveBuffer(ptr++, 0x170, dmemOffset, osVirtualToPhysical(dramOffset));
+        n_aSaveBuffer(ptr++, SAMPLES * 2, buff, osVirtualToPhysical(curr));
     }
     return ptr;
 }
 
-/* _n_filterBuffer: emit the two-command low-pass tail of a bus's command list --
-   DMA the 32-byte pole-filter coefficient vector into ADPCM coefficient DMEM, then
-   run A_POLEF over it.  `arg2` carries the DRAM segment in its high bits; only
-   bits 8..15 reach the command, as the top byte of the POLEF state address. */
-Acmd *func_1001F978(LowPass *lp, s32 bus, s32 arg2, Acmd *p) {
+/* _n_filterBuffer: load the low-pass coefficients and run A_POLEF over DMEM `buff`
+ * (only its bits 8..15 reach the command). */
+Acmd *func_1001F978(LowPass *lp, s32 bus, s32 buff, Acmd *p) {
     Acmd *ptr = p;
-    s16 seg = arg2 >> 8;
+    s16   seg = buff >> 8;
 
     n_aLoadADPCM(ptr++, 32, osVirtualToPhysical(lp->fcvec.fccoef));
-    n_aPoleFilter(ptr++, lp->first, lp->fgain, seg,
-                  osVirtualToPhysical(lp->fstate[bus]));
+    n_aPoleFilter(ptr++, lp->first, lp->fgain, seg, osVirtualToPhysical(lp->fstate[bus]));
     lp->first = 0;
     return ptr;
 }
 
-f32 func_1001FA78(f32 arg0[4][4], s32 arg1) {
-    f32 tmp;
+/* _doModFunc: advance the chorus LFO by `count` samples and return how many samples
+ * the output tap should move back: a triangle wave from -1 to 1 scaled by rsgain. */
+f32 func_1001FA78(Delay *d, s32 count) {
+    f32 val;
 
-    arg0[1][1] += arg0[1][0] * arg1;
-    if (arg0[1][1] > 2.0f) {
-        arg0[1][1] -= 4.0f;
-    }
-    else {
-        /* Original-game redundancy: this self-assignment is real code -- it emits a
-           load/store round-trip of arg0[1][1] plus the branch over it (see also
-           game_16EE20.c:496). It is not a codegen hack; do not delete. */
-        arg0[1][1] = arg0[1][1];
-    }
+    /* bipolar sawtooth from -2 to 2 */
+    d->rsval += d->rsinc * count;
+    d->rsval = (d->rsval > 2.0f) ? d->rsval - 4.0f : d->rsval;
 
-    tmp = arg0[1][1];
-    tmp = tmp < 0.0f ? -tmp : tmp;
-    tmp = tmp - 1.0f;
+    /* fold to a triangle from 0 to 2, then centre it on 0 */
+    val = d->rsval;
+    val = val < 0.0f ? -val : val;
+    val = val - 1.0f;
 
-    return tmp * arg0[1][3];
+    return val * d->rsgain;
 }

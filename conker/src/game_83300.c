@@ -1032,7 +1032,7 @@ void func_1505841C(struct127 *actor, f32 idleRate) {
     }
     func_1505E650(actor, actor->unk244, rate, (f32)actor->unk1D0, 0.0f, 0.0f, 0);
     if (actor->unk246 == 0xFF) {
-        fade = ((s32 (*)[16])D_800418B0)[D_800419A0][0];
+        fade = D_800418B0[D_800419A0][0];
         if (fade >= 0.0f) {
             anim = actor->unk2D0;
             anim->unk8 = (anim->unk18 * (32768.0f - fade)) / 32768.0f;

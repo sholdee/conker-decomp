@@ -8,7 +8,7 @@ extern s32 D_80088898;
 extern s32 D_8008889C;
 extern s32 *D_800DBF94; /* per prop: bit i set while D_800CC2D0[i] stands on it */
 
-extern struct131 *func_151149AC(u8 id); /* the prop whose id is `id` */
+extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */
 extern void func_151951E0(struct127 *);
 extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1507CD64(struct127 *, s32);
@@ -73,7 +73,7 @@ void func_150D08C0(struct108 *camera) {
  * D_800CC2D0[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through func_15136C3C .. func_1507CD64(6). */
 void func_150D0E90(s32 arg0) {
-    struct131 *prop;
+    WorldObject *prop;
     s32 propIndex;
     s32 i;
 

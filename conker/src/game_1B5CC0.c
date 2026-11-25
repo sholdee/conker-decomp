@@ -16,7 +16,7 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* View of a world object (struct131; Game13F9D0Obj in game_13F9D0.c). */
+/* View of a world object (WorldObject; Game13F9D0Obj in game_13F9D0.c). */
 typedef struct WorldObj {
     /* 0x00 */ u8 pad0[0x8A];
     /* 0x8A */ u8 alpha;
@@ -33,7 +33,7 @@ typedef struct Trail {
     /* 0x0C */ struct Trail *next;
     /* 0x10 */ union {
         struct127 *object;
-        struct131 *worldObj;
+        WorldObject *worldObj;
         WorldObj *worldObjView;
     } owner;
     /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
@@ -93,8 +93,8 @@ void func_15188810(struct127 *object, s32 duration, s32 maxDist) {
     }
 }
 
-/* Starts (or extends) a type-1 trail behind a struct131 object. */
-void func_1518894C(struct131 *owner, s32 duration, s32 maxDist) {
+/* Starts (or extends) a type-1 trail behind a WorldObject object. */
+void func_1518894C(WorldObject *owner, s32 duration, s32 maxDist) {
     Trail *trail;
     MtxS16 *frames;
 
@@ -322,7 +322,7 @@ void func_15188F84(Trail *arg) {
     s32 prevBase;
     MtxS16 *ownerMtx;
     MtxS16 *src;
-    struct131 *objects;
+    WorldObject *objects;
 
     trail = arg; // matching: the copy puts trail in s2 and numFrames in s3
     view = 0;

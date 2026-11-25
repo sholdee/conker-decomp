@@ -3,31 +3,37 @@
 #include "functions.h"
 #include "variables.h"
 
+/**
+ * Transforms the point (x, y, z) by the view matrix `mf` and tests whether a box of half-size
+ * (xExtent, yExtent) around it lies within the view volume: depth in [nearBound, farBound] and
+ * view-space x/y within +-xBound / +-yBound. Returns the depth (truncated), or 0 when outside.
+ */
+s32 func_15049440(f32 mf[4][4], f32 x, f32 y, f32 z, f32 xExtent, f32 yExtent, f32 nearBound, f32 farBound,
+                  f32 xBound, f32 yBound) {
+    f32 depth;
+    f32 viewX;
+    f32 viewY;
 
-s32 func_15049440(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 ret;
-    f32 tmp;
-
-    ret = -(arg0[0][2] * arg1 + arg0[1][2] * arg2 + arg0[2][2] * arg3 + arg0[3][2]);
-    if (ret < arg6) {
+    depth = -(mf[0][2] * x + mf[1][2] * y + mf[2][2] * z + mf[3][2]);
+    if (depth < nearBound) {
         return 0;
     }
-    if (arg7 < ret) {
+    if (farBound < depth) {
         return 0;
     }
-    tmp = arg0[0][0] * arg1 + arg0[1][0] * arg2 + arg0[2][0] * arg3 + arg0[3][0];
-    if (arg8 < (tmp - arg4)) {
+    viewX = mf[0][0] * x + mf[1][0] * y + mf[2][0] * z + mf[3][0];
+    if (xBound < viewX - xExtent) {
         return 0;
     }
-    if ((tmp + arg4) < -arg8) {
+    if (viewX + xExtent < -xBound) {
         return 0;
     }
-    tmp = arg0[0][1] * arg1 + arg0[1][1] * arg2 + arg0[2][1] * arg3 + arg0[3][1];
-    if (arg9 < (tmp - arg5)) {
+    viewY = mf[0][1] * x + mf[1][1] * y + mf[2][1] * z + mf[3][1];
+    if (yBound < viewY - yExtent) {
         return 0;
     }
-    if ((tmp + arg5) < -arg9) {
+    if (viewY + yExtent < -yBound) {
         return 0;
     }
-    return ret;
+    return depth;
 }

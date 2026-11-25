@@ -3,30 +3,39 @@
 #include "variables.h"
 
 extern s16 D_80082FA6;
-Gfx *func_1501A680(Gfx *arg0);
+Gfx *func_1501A680(Gfx *gfx);
 
-Gfx *func_1512E5F0(Gfx *arg0, struct108 *arg1) {
-    Gfx *ret;
+/**
+ * Copies one row of the z-buffer (D_800BE9C4, D_800BE620 pixels wide; row index at
+ * camera+0x8BA) into the camera's one-row buffer unk8BC by drawing a 1-pixel-high
+ * copy-mode texture rectangle, then restores a 1-cycle z-buffered render mode.
+ */
+Gfx *func_1512E5F0(Gfx *gfx, struct108 *camera) {
+    gDPPipeSync(gfx++);
+    gDPSetOtherMode(gfx++,
+                    G_AD_DISABLE | G_CD_DISABLE | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
+                        G_TD_CLAMP | G_TP_NONE | G_CYC_COPY | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
+                    G_AC_NONE | G_ZS_PIXEL);
+    // byte 0x8BA of struct108 (the row, an s16 per game_157840.c) is not yet a named field in structs.h
+    gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
+                       (*(u16 *)((u8 *)camera + 0x8BA) * D_800BE620 * 2) + D_800BE9C4);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, D_800BE620 - 1, CALC_DXT(D_800BE620, G_IM_SIZ_16b_BYTES));
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, ((D_800BE620 * 2) + 7) >> 3, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (D_800BE620 - 1) << 2, 0);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, camera->unk8BC);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, D_800BE620, 1);
+    gSPTextureRectangle(gfx++, 0, 0, D_800BE620 << 2, 1 << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
 
-    gDPPipeSync(arg0++);
-    gDPSetOtherMode(arg0++, 0x202CFF, 0);
-    gDPSetTextureImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                       (*(u16 *)((u8 *)arg1 + 0x8BA) * D_800BE620 * 2) + D_800BE9C4);
-    gDPSetTile(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0,
-               0, 0, 0, 0, 0, 0);
-    gDPLoadSync(arg0++);
-    gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, D_800BE620 - 1,
-                 CALC_DXT(D_800BE620, G_IM_SIZ_16b_BYTES));
-    gDPPipeSync(arg0++);
-    gDPSetTile(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, ((D_800BE620 * 2) + 7) >> 3,
-               0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
-    gDPSetTileSize(arg0++, G_TX_RENDERTILE, 0, 0, (D_800BE620 - 1) << 2, 0);
-    gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, arg1->unk8BC);
-    gDPSetScissor(arg0++, 0, 0, 0, D_800BE620, 1);
-    gSPTextureRectangle(arg0++, 0, 0, D_800BE620 * 4, 4, G_TX_RENDERTILE, 0, 0, 0x1000, 0x400);
-    gDPPipeSync(arg0++);
-
-    ret = (Gfx *)func_1501A490((s32)func_1501A680(arg0), D_80082FA6, 0, 0, 0, 0);
-    gDPSetOtherMode(ret, 0x082C3F, 0x00552230);
-    return ret + 1;
+    gfx = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gDPSetOtherMode(gfx++,
+                    G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE | G_TL_TILE |
+                        G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
+                    G_AC_NONE | G_ZS_PIXEL | Z_CMP | Z_UPD | CVG_DST_FULL | ZMODE_OPA | ALPHA_CVG_SEL |
+                        GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM) |
+                        GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
+    return gfx;
 }

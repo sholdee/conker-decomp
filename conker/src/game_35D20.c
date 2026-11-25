@@ -2,60 +2,54 @@
 #include "functions.h"
 #include "variables.h"
 
-// loops and loops
-extern u8 D_800DCE50[];
-extern void (*D_80082BD0)(void);
-extern void (*D_80082BD4)(void);
+#define OBJ_TYPE_COUNT 104
+
+typedef void (*ResetFunc)(void);
+
+/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type (see game_1944C0.c). */
+extern void *D_800DCE50[2][OBJ_TYPE_COUNT];
+/* One-entry reset callback tables for modes 1 and 2. */
+extern ResetFunc D_80082BD0;
+extern ResetFunc D_80082BD4;
+/* Texture last loaded by the object draw code; -1 forces a reload. */
 extern s32 D_800DD1B0;
 
-void func_15008870(s32 arg0) {
-    s32 lo;
-    s32 hi;
-    s32 i;
-    s32 j;
+/* Empties the object lists of both groups: mode 1 clears types 0-100, mode 2 types 101-103, any other mode all. */
+void func_15008870(s32 mode) {
+    s32 first = 0;
+    s32 last = OBJ_TYPE_COUNT;
+    s32 list;
+    s32 type;
 
-    lo = 0;
-    hi = 0x68;
-    if (arg0 == 1) {
-        hi = 0x65;
-    } else if (arg0 == 2) {
-        lo = 0x65;
+    if (mode == 1) {
+        last = 101;
+    } else if (mode == 2) {
+        first = 101;
     }
-    for (i = 0; i < 2; i++) {
-        for (j = lo; j < hi; j++) {
-            ((s32 *)&D_800DCE50[i * 0x1A0])[j] = 0;
+    for (list = 0; list < 2; list++) {
+        for (type = first; type < last; type++) {
+            D_800DCE50[list][type] = NULL;
         }
     }
 }
 
-void func_15008930(s32 arg0) {
-    void (**sp2C)(void);
-    void (**var_s1)(void);
-    s32 var_s0;
-    s32 var_s2;
+/* Runs the reset callbacks for mode 1 or 2, then invalidates the cached texture. */
+void func_15008930(s32 mode) {
+    ResetFunc *funcs;
+    s32 count;
+    s32 i;
 
-    if (arg0 == 1) {
-        sp2C = &D_80082BD0;
-        var_s2 = 1;
+    if (mode == 1) {
+        funcs = &D_80082BD0;
+        count = 1;
+    } else if (mode == 2) {
+        funcs = &D_80082BD4;
+        count = 1;
     } else {
-        var_s2 = 0;
-        if (arg0 == 2) {
-            sp2C = &D_80082BD4;
-            var_s2 = 1;
-        } else {
-            var_s2 = 0;
-        }
+        count = 0;
     }
-
-    var_s0 = 0;
-    if (var_s2 > 0) {
-        var_s1 = sp2C;
-        do {
-            (*var_s1)();
-            var_s0++;
-            var_s1++;
-        } while (var_s0 != var_s2);
+    for (i = 0; i < count; i++) {
+        funcs[i]();
     }
-
     D_800DD1B0 = -1;
 }

@@ -3,35 +3,25 @@
 #include "functions.h"
 #include "variables.h"
 
-
-/* Notes on this function's codegen (jump table jtbl_80095A30 lives in this TU's
- * .rodata; see the `- [0x23A4F0, .rodata, game/entrypoint]` entry in
- * conker.us.yaml):
- *
- * 1) The two `sh 2` stores at D_800BEA68+0x0 / +0x20 must go through a SIGNED
- *    s16 lvalue. With the u16 fields that structs.h's struct195 declares, IDO
- *    materialises the constant twice (`li v1,2` for the stores plus a separate
- *    `li s1,2` hoisted for the loop compare) and every callee-saved register
- *    shifts by one. With s16 the two 2's are one value and it lands in s7.
- *    variables.h's `struct195 *D_800BEA68` is also wrong: the asm takes the
- *    symbol's ADDRESS, so it is an object, not a pointer. Both header bugs are
- *    worked around with a file-local cast.
- *
- * 2) `while (1) { ... }` -- NOT `do { ... } while (1);`. They generate identical
- *    instructions, but only the `while` form makes IDO 32-byte-align the dead
- *    (unreachable) epilogue, which is what produces the three trailing `nop`s.
- *
- * 3) D_800BE9F4 is a 32-bit slot read as s16 by func_15007A70(s16,s16,s16);
- *    IDO narrows the load to `lh <sym>+2`.
+/*
+ * D_800BEA68 is the pair of OSScMsg "task done" messages that game_49D30.c hands
+ * to the scheduler (task->msg = &D_800BEA68[frame]). variables.h declares it as a
+ * `struct195 *`, but the code takes the symbol's address, so it is the array
+ * itself; the type must be the signed `short` of OSScMsg.type (an unsigned u16
+ * store makes IDO materialise the 2 twice and shifts every saved register).
  */
+#define sDoneMsgs ((OSScMsg *)&D_800BEA68)
 
-// game entrypoint
+/*
+ * Game entrypoint: initialises the subsystems, then runs the main loop forever,
+ * stepping the frame according to the game state in D_800BE615.
+ */
 void func_15007830(void) {
     func_15007A20();
     D_800D2C28 = 0;
     osCreateMesgQueue(&D_800BEA10, &D_800BEA28, 16);
-    ((s16 *)&D_800BEA68)[0] = 2;
-    ((s16 *)&D_800BEA68)[0x10] = 2;
+    sDoneMsgs[0].type = OS_SC_DONE_MSG;
+    sDoneMsgs[1].type = OS_SC_DONE_MSG;
     D_800BE617 = 0;
     func_100050A0(&D_800BEA10);
     func_15003570();
@@ -52,20 +42,26 @@ void func_15007830(void) {
     D_800BEA00[0] = 1;
     D_800BEAAA = 1;
     func_1509C120();
+
+    // matching: `while (1)`, not `do {} while (1)`; only this form 32-byte-aligns the dead epilogue
     while (1) {
         switch (D_800BE615) {
             case 1:
             case 5:
                 func_151E50C8();
+                /* fallthrough */
             case 2:
                 func_15017498();
-                if (2 == D_800E0B94) {
+                if (D_800E0B94 == 2) {
                     func_150ADACC(0x81280783);
                 }
-                func_15007A70(D_800BEA04[0], D_800BEA00[0], (s16)D_800BE9F4);
+                // D_800BE9F4 is really an s32 (variables.h says u16 *); pass its value as s16
+                func_15007A70(D_800BEA04[0], D_800BEA00[0], (s16)(s32)D_800BE9F4);
+                /* fallthrough */
             case 3:
                 func_15007B3C();
                 D_800BE615 = 0;
+                break;
             case 4:
                 break;
         }

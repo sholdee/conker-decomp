@@ -2,20 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ROM extent of one font's packed glyph data. */
 typedef struct {
     s32 romStart;
     s32 romEnd;
-} RomRange15015920;
+} FontRomRange;
 
-typedef struct {
-    u8 pad[4];
-    u8 b4;
-    u8 b5;
-    u8 b6;
-    u8 b7;
-} Record15015920;
-
-extern RomRange15015920 D_80082F80[];
+extern FontRomRange D_80082F80[];
 extern void func_10004074(void *);
 extern void func_15015A38(u8 *, s32, s32);
 
@@ -25,84 +18,92 @@ void func_15015910(void) {
     D_800CBD4C = 0;
 }
 
-void func_15015920(s16 arg0) {
-    u8 *data;
-    u8 *pos;
-    s32 idx;
+/*
+ * Loads font `font` from ROM into a scratch buffer and unpacks each glyph record. A record starts with
+ * the 4-byte glyph metrics, then its own byte size as a big-endian u32, then the run-length encoded rows.
+ */
+void func_15015920(s16 font) {
+    u8 *buffer;
+    u8 *record;
+    s32 glyph;
 
-    data = (u8 *)func_10003C6C(0x2800, 1, 2, 1, 0);
-    func_10004514(D_80082F80[arg0].romStart, data, D_80082F80[arg0].romEnd - D_80082F80[arg0].romStart, 1);
-    pos = data;
-    idx = 0;
-    if ((u32)(pos + 0xF) < (u32)(data + D_80082F80[arg0].romEnd - D_80082F80[arg0].romStart)) {
-        do {
-            func_15015A38(pos, idx, arg0);
-            pos = (u8 *)((s32)pos + (((Record15015920 *)pos)->b4 << 0x18) + (((Record15015920 *)pos)->b5 << 0x10) + (((Record15015920 *)pos)->b6 << 8) + ((Record15015920 *)pos)->b7);
-            idx += 1;
-        } while ((u32)(pos + 0xF) < (u32)(data + D_80082F80[arg0].romEnd - D_80082F80[arg0].romStart));
+    buffer = (u8 *)func_10003C6C(0x2800, 1, 2, 1, 0);
+    func_10004514(D_80082F80[font].romStart, buffer, D_80082F80[font].romEnd - D_80082F80[font].romStart, 1);
+    record = buffer;
+    glyph = 0;
+    while (record + 15 < buffer + D_80082F80[font].romEnd - D_80082F80[font].romStart) {
+        func_15015A38(record, glyph, font);
+        record += (record[4] << 24) + (record[5] << 16) + (record[6] << 8) + record[7];
+        glyph++;
     }
-    func_10004074(data);
+    func_10004074(buffer);
 }
 
-typedef u8 Cell15015A38[224];
-
+/* Metrics of one font glyph, in texels (the FontGlyph of game_6EA90.c). */
 typedef struct {
-    u8 width;
-    u8 height;
-    u8 unk2;
-    u8 unk3;
-} Glyph15015A38;
+    /* 0x0 */ u8 w;
+    /* 0x1 */ u8 h;
+    /* 0x2 */ u8 x; /* advance before the glyph */
+    /* 0x3 */ u8 y; /* drop below the line top */
+} FontGlyph;
 
-extern Glyph15015A38 *D_80085994[];
-extern Cell15015A38 *D_80085990[];
+extern FontGlyph *D_80085994[];  // per-font glyph metrics
+extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 
-void func_15015A38(u8 *arg0, s32 arg1, s32 arg2) {
+/*
+ * Unpacks one glyph record into glyph `glyph` of font `font`: stores its metrics (the record holds
+ * w - 1 and h - 1), then expands the run-length encoded rows into the glyph bitmap. Each data byte is
+ * a run: low nibble = length - 1, high nibble = intensity. Rows are padded to a multiple of 8 texels,
+ * odd rows are word-swapped (x ^ 4) for TMEM, and the bitmap gets a blank border row above and below
+ * and a blank first column.
+ */
+void func_15015A38(u8 *record, s32 glyph, s32 font) {
+    s32 x;
     s32 i;
-    s32 n;
-    s32 row;
-    s32 pos;
+    s32 y;
+    s32 offset;
     s32 stride;
-    s32 flip;
-    s32 len;
-    s32 val;
+    s32 swizzle;
+    s32 run;
+    s32 shade;
 
-    D_80085994[arg2][arg1].width = arg0[0] + 1;
-    D_80085994[arg2][arg1].height = arg0[1] + 1;
-    D_80085994[arg2][arg1].unk2 = arg0[2];
-    D_80085994[arg2][arg1].unk3 = arg0[3];
+    D_80085994[font][glyph].w = record[0] + 1;
+    D_80085994[font][glyph].h = record[1] + 1;
+    D_80085994[font][glyph].x = record[2];
+    D_80085994[font][glyph].y = record[3];
 
-    stride = (D_80085994[arg2][arg1].width + 7) & 0xFFF8;
-    pos = 8;
+    stride = (D_80085994[font][glyph].w + 7) & 0xFFF8;
+    offset = 8;
 
-    for (i = 0; i < D_80085994[arg2][arg1].width; i++) {
-        D_80085990[arg2][arg1][i] = 0;
+    for (x = 0; x < D_80085994[font][glyph].w; x++) {
+        D_80085990[font][glyph][x] = 0;
     }
 
-    for (row = 1; row < D_80085994[arg2][arg1].height + 1; row++) {
-        if ((row & 1) == 0) {
-            flip = 0;
+    for (y = 1; y < D_80085994[font][glyph].h + 1; y++) {
+        if ((y & 1) == 0) {
+            swizzle = 0;
         } else {
-            flip = 4;
+            swizzle = 4;
         }
-        for (i = 0; i < D_80085994[arg2][arg1].width; i++) {
-            if (i == 0) {
-                D_80085990[arg2][arg1][(i ^ flip) + row * stride] = 0;
+        for (x = 0; x < D_80085994[font][glyph].w; x++) {
+            if (x == 0) {
+                D_80085990[font][glyph][(x ^ swizzle) + y * stride] = 0;
             } else {
-                len = (arg0[pos] & 0xF) + 1;
-                val = arg0[pos] & 0xF0;
-                pos++;
-                for (n = 0; n < len; n++) {
-                    D_80085990[arg2][arg1][((i + n) ^ flip) + row * stride] = val;
+                run = (record[offset] & 0xF) + 1;
+                shade = record[offset] & 0xF0;
+                offset++;
+                for (i = 0; i < run; i++) {
+                    D_80085990[font][glyph][((x + i) ^ swizzle) + y * stride] = shade;
                 }
-                i += len - 1;
+                x += run - 1;
             }
         }
-        for (; i < stride; i++) {
-            D_80085990[arg2][arg1][(i ^ flip) + row * stride] = 0;
+        for (; x < stride; x++) {
+            D_80085990[font][glyph][(x ^ swizzle) + y * stride] = 0;
         }
     }
 
-    for (i = 0; i < stride; i++) {
-        D_80085990[arg2][arg1][i + row * stride] = 0;
+    for (x = 0; x < stride; x++) {
+        D_80085990[font][glyph][x + y * stride] = 0;
     }
 }

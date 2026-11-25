@@ -1168,7 +1168,7 @@ extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern u8 D_800C3A58;
 extern s32 D_800CC290;
-extern struct131 *D_800CC5EC;
+extern WorldObject *D_800CC5EC;
 extern void func_1000EC24();
 extern void func_1000EFB4();
 extern void func_151037DC();
@@ -1502,7 +1502,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x1:
     case 0x35:
-        if ((pressedButtons & B_BUTTON) && ((arg3 <= 0.0f) || (act == 0x35)) && (D_800CC5EC->unk4E != 1) &&
+        if ((pressedButtons & B_BUTTON) && ((arg3 <= 0.0f) || (act == 0x35)) && (D_800CC5EC->attach != 1) &&
             (arg0->unk13C < 0x64) && (arg0->unkA9 == 0)) {
             arg0->unk81 = 1;
             arg0->unkA9 = 2;

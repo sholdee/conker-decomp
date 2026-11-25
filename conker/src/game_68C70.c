@@ -3,443 +3,459 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-
+/* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
 typedef struct {
-    u8 pad0[0x44];
-    f32 unk44;
-    u8 pad48[0x4];
-    s16 unk4C;
-} func_1503B7C0_sub;
+    /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
+    /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
+    /* 0x40 */ f32 swayAngle;   /* degrees */
+    /* 0x44 */ f32 swaySpeed;   /* degrees per frame */
+    /* 0x48 */ f32 swayAmp;
+    /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
+    /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
+} BoneChain;
 
+/* The part of the object extension (struct127.unk31C) used here. */
 typedef struct {
-    u8 pad0[0x11C];
-    func_1503B7C0_sub *unk11C;
-} func_1503B7C0_inner;
+    /* 0x000 */ u8 pad0[0x78];
+    /* 0x078 */ u8 unk78;
+    /* 0x079 */ u8 pad79[0x11C - 0x79];
+    /* 0x11C */ BoneChain *chain;
+} ChainObjExt;
 
-void func_1503B7C0(struct127 *arg0) {
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C = allocate_memory(0x50, 1, 0, 0);
-    bzero(((func_1503B7C0_inner *)arg0->unk31C)->unk11C, 0x50);
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C->unk44 = 30.0f;
-    ((func_1503B7C0_inner *)arg0->unk31C)->unk11C->unk4C = func_150ADA20() % 30U;
+typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
+
+#define CHAIN_EXT(obj) ((ChainObjExt *)(obj)->unk31C)
+
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+
+/* Allocates and initialises the bone chain state of an object. */
+void func_1503B7C0(struct127 *obj) {
+    CHAIN_EXT(obj)->chain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
+    bzero(CHAIN_EXT(obj)->chain, sizeof(BoneChain));
+    CHAIN_EXT(obj)->chain->swaySpeed = 30.0f;
+    CHAIN_EXT(obj)->chain->swayTimer = func_150ADA20() % 30U;
 }
 
 extern u16 D_8009877C[90];
 extern u16 D_80098830[3];
 
-void func_1503B840(struct127 *arg0) {
+/*
+ * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
+ * bit 1 for the animations in D_80098830, bit 0 for those in D_8009877C.
+ */
+void func_1503B840(struct127 *obj) {
     s32 i;
 
-    if (arg0->interaction_state == 1) {
+    if (obj->interaction_state == 1) {
         for (i = 0; i < 3; i++) {
-            if (arg0->unk84.uh == D_80098830[i]) {
-                arg0->unk2FB |= 2;
+            if (obj->unk84.uh == D_80098830[i]) {
+                obj->unk2FB |= 2;
                 return;
             }
         }
         for (i = 0; i < 90; i++) {
-            if (arg0->unk84.uh == D_8009877C[i]) {
-                arg0->unk2FB |= 1;
+            if (obj->unk84.uh == D_8009877C[i]) {
+                obj->unk2FB |= 1;
                 return;
             }
         }
     }
 }
 
-extern u8 D_800CC5CB[];
+/* Returns whether object objIndex simulates its bone chain (0 while the animation poses it). */
+s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
+    s32 flags = D_800CC2D0[objIndex].unk2FB;
 
-s32 func_1503B95C(s32 arg0, u8 *arg1) {
-    s32 v = D_800CC5CB[arg0 * 812];
-    if (v & 2) {
-        arg1[0x4E] = 0;
+    if (flags & 2) {
+        chain->blendTimer = 0;
         return 0;
     }
-    if (v & 1) {
+    if (flags & 1) {
         return 0;
     }
     return 1;
 }
 
+/* The fields of the camera (struct127.camera) read here; see the Camera struct in game_14FF90.c. */
 typedef struct {
-    f32 pos[5][3];
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    s16 unk4C;
-    u8 unk4E;
-} func_1503B9BC_data;
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ s32 mode;       /* one-hot mode bit; 0x100 is the R-trigger camera */
+    /* 0x030 */ u8 pad30[0x2F8 - 0x30];
+    /* 0x2F8 */ f32 eyeX;
+    /* 0x2FC */ f32 eyeY;
+    /* 0x300 */ f32 eyeZ;
+    /* 0x304 */ u8 pad304[0x388 - 0x304];
+    /* 0x388 */ f32 pitch;      /* degrees */
+    /* 0x38C */ u8 pad38C[0x74C - 0x38C];
+    /* 0x74C */ f32 unk74C;
+    /* 0x750 */ f32 unk750;
+    /* 0x754 */ f32 unk754;
+} ChainCamera;
 
-typedef struct {
-    u8 pad0[0x78];
-    u8 unk78;
-    u8 pad79[0x11C - 0x79];
-    func_1503B9BC_data *unk11C;
-} func_1503B9BC_inner;
-
-typedef struct {
-    u8 pad0[0x2C];
-    s32 unk2C;
-    u8 pad30[0x2F8 - 0x30];
-    f32 unk2F8;
-    f32 unk2FC;
-    f32 unk300;
-    u8 pad304[0x388 - 0x304];
-    f32 unk388;
-    u8 pad38C[0x74C - 0x38C];
-    f32 unk74C;
-    f32 unk750;
-    f32 unk754;
-} func_1503B9BC_cam;
-
-extern f32 D_800986F0[4];
-extern f32 D_80098700[4];
-extern f32 D_80098710[4];
-extern f32 D_80098720[4];
-extern f32 D_80098730[4];
-extern f32 D_80098740[5];
-extern f32 D_80098754[5];
-extern f32 D_80098768[5];
+extern f32 D_800986F0[4]; /* link lengths */
+extern f32 D_80098700[4]; /* link lengths for objects 0x80 and 0xB0 */
+extern f32 D_80098710[4]; /* per-link x/z follow factors */
+extern f32 D_80098720[4]; /* per-link y follow factors */
+extern f32 D_80098730[4]; /* per-link bend limits, degrees */
+extern f32 D_80098740[5]; /* per-joint lift weights */
+extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18B */
+extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern u8 D_800BEA0C;
 extern u8 D_800C3C9D;
-extern f32 D_800C4008[3];
-extern f32 D_800C4010;
-void func_1503CB98(s32 arg0, s32 arg1, f32 arg2, f32 (*arg3)[3]);
+extern f32 D_800C4008[3]; /* chain anchor position */
+
+void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
 extern f32 sqrtf(f32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 
-void func_1503B9BC(s32 arg0) {
+/*
+ * Per-frame update of an object's bone chain (bones 24-28). While the animation poses the chain
+ * (mode 0) the joints just copy the bones; otherwise the chain trails the root as a rope of fixed
+ * link lengths, bobbing with the walking speed, swaying when idle and turning towards the R-trigger
+ * camera. Mode 2 blends from the animated pose back to the simulated one. Ends by rebuilding the
+ * bone matrices with func_1503CB98.
+ */
+void func_1503B9BC(s32 objIndex) {
     struct127 *obj;
-    s32 j;
+    s32 prev;
     s32 i;
-    f32 vec[3];
-    f32 offs[5][3];
-    u8 *bits;
-    f32 target[3];
-    f32 c;
-    f32 s;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    f32 x;
-    f32 y;
-    f32 z;
+    f32 link[3];
+    f32 offsets[5][3];
+    u8 *resetMask;
+    f32 goal[3];
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 dirX;
+    f32 dirY;
+    f32 dirZ;
+    f32 oldX;
+    f32 oldY;
+    f32 oldZ;
     f32 inv;
     s32 k;
-    f32 t;
-    f32 ang;
-    f32 *wtab;
+    f32 delta;
+    f32 angle;
+    f32 *liftWeights;
     f32 yaw;
-    s32 flag;
+    s32 facingCamera;
     f32 speed;
-    f32 amp;
-    f32 ratio;
+    f32 unused1; // matching: unused, keeps the stack frame layout
+    f32 blend;
     s32 mode;
     s32 reset;
     f32 bob;
-    func_1503B9BC_cam *cam;
-    f32 *table;
-    func_1503B9BC_data *data;
+    ChainCamera *cam;
+    f32 *linkLen;
+    BoneChain *chain;
     s32 anim;
-    f32 a;
-    f32 b;
-    f32 (*m)[4];
+    f32 unused2; // matching: unused, keeps the stack frame layout
+    f32 tipBob;
+    f32 (*bone)[4];
 
-    dx = dy = dz = 0.0f;
-    obj = &D_800CC2D0[arg0];
-    flag = 0;
-    if (obj->unk31C != NULL) {
-        if (((func_1503B9BC_inner *)obj->unk31C)->unk11C == NULL) {
-            func_1503B7C0(obj);
-        }
-        data = ((func_1503B9BC_inner *)obj->unk31C)->unk11C;
-        mode = func_1503B95C(arg0, (u8 *)data);
-        bits = &D_800C4000;
-        if (obj->unk1D4 == NULL) {
-            *bits |= 1 << arg0;
-            return;
-        }
-        if (D_800C4000 & (1 << arg0)) {
-            *bits = D_800C4000 & ~(1 << arg0);
-            reset = 1;
-        } else {
-            reset = 0;
-        }
-        if (*(s32 *)D_800DBFF4 != 0 || obj->pad2FC[1] != 0) {
-            reset = 1;
-        }
-        if (reset) {
-            data->unk44 = 30.0f;
-            data->unk3C = 0.0f;
-            data->unk40 = 0.0f;
-            data->unk48 = 100.0f;
-            data->unk4C = func_150ADA20() % 30U;
-        }
-        if (mode == 0) {
-            if (D_800BE9E4 < data->unk4E) {
-                if (D_800BEAC0 == 0) {
-                    data->unk4E -= D_800BE9E4;
-                }
-                mode = 2;
-            } else {
-                data->unk4E = 0;
-            }
-        }
-        j = 24;
-        m = ((f32 (*)[4][4])obj->unk1D4)[0];
-        D_800C4008[0] = m[3][0];
-        D_800C4008[1] = m[3][1];
-        D_800C4008[2] = m[3][2];
-        if (mode == 0) {
-            for (k = j; k < 28; k++) {
-                m = (f32 (*)[4])((u32)obj->unk1D4 + k * 64);
-                data->pos[k - j][0] = m[3][0];
-                data->pos[k - j][1] = m[3][1];
-                data->pos[k - j][2] = m[3][2];
-            }
-            return;
-        }
-        m = ((f32 (*)[4][4])obj->unk1D4)[24];
-        data->pos[0][0] = m[3][0];
-        data->pos[0][1] = m[3][1];
-        data->pos[0][2] = m[3][2];
-        if (obj->id == 0x80 || obj->id == 0xB0) {
-            table = D_80098700;
-        } else {
-            table = D_800986F0;
-        }
-        for (i = 0; i < 5; i++) {
-            offs[i][0] = 0.0f;
-            offs[i][1] = 0.0f;
-            offs[i][2] = 0.0f;
-        }
-        speed = obj->xz_velocity;
-        speed = CLAMP(speed, 0.0f, 60.0f);
-        if (obj->unk28 > 3.0f) {
-            speed *= 0.5f;
-        }
-        bob = sinf(data->unk3C * 0.01745329238f) * speed;
-        if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-            data->unk3C += speed;
-            if (data->unk3C >= 360.0f) {
-                data->unk3C -= 360.0f;
-            }
-        }
-        b = sinf((data->unk3C + 180.0f) * 0.01745329238f) * speed;
-        offs[0][1] += bob;
-        offs[4][1] += b;
-        cam = (func_1503B9BC_cam *)obj->camera;
-        if (cam != NULL && cam->unk2C == 0x100 && cam->unk388 > -17.0f) {
-            s32 flag2 = 0;
-            f32 diff;
-            f32 cx;
-            f32 cz;
-
-            cx = (cam->unk2F8 + cam->unk74C) - obj->x_position;
-            cz = (cam->unk300 + cam->unk754) - obj->z_position;
-            ang = func_150484A0(cx, cz) * 57.29577637f + 90.0f;
-            if (ang >= 360.0f) {
-                ang -= 360.0f;
-            }
-            diff = func_15048A70(obj->unk76 * 0.0054931640625f, ang);
-            t = fabsf(diff);
-            if (t < 90.0f) {
-                if (t < 0.5f) {
-                    diff = 0.0f;
-                }
-                diff = CLAMP(diff, -15.0f, 15.0f);
-                if (diff > 0.0f) {
-                    if (diff < 23.0f) {
-                        diff = 23.0f;
-                        flag2 = 1;
-                    }
-                } else if (diff > -23.0f) {
-                    diff = -23.0f;
-                    flag2 = 1;
-                }
-                if (flag2) {
-                    t = diff - data->unk40;
-                    diff = data->unk40 + t * 0.6000000238f;
-                }
-                data->unk40 = diff;
-                data->unk4C = 60;
-                data->unk48 = 200.0f;
-                flag = 1;
-            }
-        }
-        yaw = obj->unk40 * 0.01745329238f;
-        if (obj->unk84.uh == 0x122 || obj->unk84.uh == 0x128 || obj->unk84.uh == 0x129 || obj->unk84.uh == 0x12A) {
-            yaw -= 0.7853981853f;
-        }
-        s = sinf(yaw);
-        c = cosf(yaw);
-        anim = D_800CC2D0[arg0].unk84.uh;
-        if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
-            D_800C4008[1] = data->pos[0][1];
-            if (obj->unkB8 > 0.0f) {
-                D_800C4008[0] = data->pos[0][0] + s;
-                D_800C4010 = data->pos[0][2] + c;
-            }
-            offs[0][1] -= bob;
-            offs[1][1] += bob;
-        } else if (obj->unk28 < 0.5f) {
-            speed = obj->xz_velocity;
-            speed = CLAMP(speed, 0.0f, 30.0f);
-            bob = 60.0f - (speed + speed);
-            if (D_800C35EA == 1 && D_800C3C9D < 100) {
-                bob *= D_800C3C9D;
-                bob *= 0.009999999776f;
-            }
-            if (obj->id == 0x80 || obj->id == 0xB0) {
-                wtab = D_80098768;
-            } else if (anim == 0x1B || anim == 0x18B) {
-                wtab = D_80098754;
-                for (i = 0; i < 5; i++) {
-                    offs[i][1] = 0.0f;
-                }
-                bob = 60.0f;
-            } else {
-                wtab = D_80098740;
-            }
-            if (((func_1503B9BC_inner *)obj->unk31C)->unk78 == 0x3B && cam != NULL && cam->unk2C == 0x100 && cam->unk388 > -17.0f) {
-                bob = 0;
-            }
-            offs[0][1] += bob * wtab[0];
-            offs[1][1] += bob * wtab[1];
-            offs[2][1] += bob * wtab[2];
-            offs[3][1] += bob * wtab[3];
-            offs[4][1] += bob * wtab[4];
-            if (speed == 0.0f) {
-                if (data->unk4C != 0 && flag == 0) {
-                    data->unk4C -= D_800BE9E4;
-                    if (data->unk4C <= 0) {
-                        data->unk40 = 0.0f;
-                        data->unk48 = func_150ADA20() % 100U;
-                        bob = func_150ADA20() % 10U + 10;
-                        if (func_150ADA20() & 1) {
-                            data->unk44 = bob;
-                        } else {
-                            data->unk44 = -bob;
-                        }
-                        data->unk4C = 0;
-                    }
-                } else {
-                    bob = sinf(data->unk40 * 0.01745329238f) * data->unk48;
-                    b = sinf((data->unk40 + 30.0f) * 0.01745329238f) * data->unk48 * 5.0f;
-                    offs[4][0] += c * b;
-                    offs[0][0] += c * bob;
-                    offs[4][2] += -s * b;
-                    offs[0][2] += -s * bob;
-                    if (D_800BEAC0 == 0 && D_800BEA0C == 0 && flag == 0) {
-                        data->unk40 += data->unk44;
-                        if (data->unk40 > 360.0f || data->unk40 < -360.0f) {
-                            if (fabsf(data->unk44) > 15.0f) {
-                                data->unk44 *= 0.5f;
-                                data->unk48 *= 0.5f;
-                                if (data->unk40 > 360.0f) {
-                                    data->unk40 -= 360.0f;
-                                } else {
-                                    data->unk40 += 360.0f;
-                                }
-                            } else {
-                                data->unk4C = func_150ADA20() % 200U;
-                            }
-                        }
-                    }
-                }
-            } else if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-                data->unk4C = 200;
-            }
-        }
-        if (mode == 2) {
-            ratio = (f32)(30 - data->unk4E) / 30.0f;
-        }
-        for (i = 1; i < 5; i++) {
-            j = i - 1;
-            dx = data->pos[i - 1][0] + offs[i - 1][0] * obj->xz_scale;
-            dy = data->pos[i - 1][1] + offs[i - 1][1] * obj->y_scale;
-            dz = data->pos[i - 1][2] + offs[i - 1][2] * obj->xz_scale;
-            if (j == 0) {
-                dx -= D_800C4008[0];
-                dy -= D_800C4008[1];
-                dz -= D_800C4008[2];
-            } else {
-                dx -= data->pos[j - 1][0];
-                dy -= data->pos[j - 1][1];
-                dz -= data->pos[j - 1][2];
-            }
-            inv = 1.0f / sqrtf(dx * dx + dy * dy + dz * dz);
-            dx *= inv;
-            dy *= inv;
-            dz *= inv;
-            target[0] = data->pos[j][0] + table[j] * dx * obj->xz_scale;
-            target[1] = data->pos[j][1] + table[j] * dy * obj->y_scale;
-            target[2] = data->pos[j][2] + table[j] * dz * obj->xz_scale;
-            if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-                t = target[0] - data->pos[i][0];
-                if (!reset) {
-                    t *= D_80098710[j];
-                }
-                data->pos[i][0] += t;
-                t = target[1] - data->pos[i][1];
-                if (!reset) {
-                    t *= D_80098720[j];
-                }
-                data->pos[i][1] += t;
-                t = target[2] - data->pos[i][2];
-                if (!reset) {
-                    t *= D_80098710[j];
-                }
-                data->pos[i][2] += t;
-            }
-            vec[0] = data->pos[i][0] - data->pos[j][0];
-            vec[1] = data->pos[i][1] - data->pos[j][1];
-            vec[2] = data->pos[i][2] - data->pos[j][2];
-            inv = 1.0f / sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
-            vec[0] *= inv;
-            vec[1] *= inv;
-            vec[2] *= inv;
-            ang = func_15048360(dx * vec[0] + dy * vec[1] + dz * vec[2]) * 57.29577637f;
-            ang = fabsf(ang);
-            if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-                if (D_80098730[j] < ang) {
-                    inv = D_80098730[j] / ang;
-                    inv = 1.0f - inv;
-                    if (reset) {
-                        inv = 1.0f;
-                    }
-                    x = data->pos[i][0];
-                    y = data->pos[i][1];
-                    z = data->pos[i][2];
-                    t = target[0] - x;
-                    data->pos[i][0] += t * inv;
-                    t = target[1] - y;
-                    data->pos[i][1] += t * inv;
-                    t = target[2] - z;
-                    data->pos[i][2] += t * inv;
-                }
-            }
-            vec[0] = data->pos[i][0] - data->pos[j][0];
-            vec[1] = data->pos[i][1] - data->pos[j][1];
-            vec[2] = data->pos[i][2] - data->pos[j][2];
-            inv = 1.0f / sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
-            vec[0] *= inv;
-            vec[1] *= inv;
-            vec[2] *= inv;
-            data->pos[i][0] = data->pos[j][0] + vec[0] * table[j] * obj->xz_scale;
-            data->pos[i][1] = data->pos[j][1] + vec[1] * table[j] * obj->y_scale;
-            data->pos[i][2] = data->pos[j][2] + vec[2] * table[j] * obj->xz_scale;
-        }
-        func_1503CB98(arg0, mode, ratio, data->pos);
+    dirX = dirY = dirZ = 0.0f; // matching: dead store, steers IDO's FP register order
+    obj = &D_800CC2D0[objIndex];
+    facingCamera = 0;
+    if (obj->unk31C == NULL) {
+        return;
     }
+    if (CHAIN_EXT(obj)->chain == NULL) {
+        func_1503B7C0(obj);
+    }
+    chain = CHAIN_EXT(obj)->chain;
+    mode = func_1503B95C(objIndex, chain);
+    resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
+    if (obj->unk1D4 == NULL) {
+        *resetMask |= 1 << objIndex;
+        return;
+    }
+    if (D_800C4000 & (1 << objIndex)) {
+        *resetMask = D_800C4000 & ~(1 << objIndex);
+        reset = 1;
+    } else {
+        reset = 0;
+    }
+    /* any of the four camera hold timers, or byte 0x2FD of the object */
+    if (*(s32 *)D_800DBFF4 != 0 || obj->pad2FC[1] != 0) {
+        reset = 1;
+    }
+    if (reset) {
+        chain->swaySpeed = 30.0f;
+        chain->bobPhase = 0.0f;
+        chain->swayAngle = 0.0f;
+        chain->swayAmp = 100.0f;
+        chain->swayTimer = func_150ADA20() % 30U;
+    }
+    if (mode == 0) {
+        if (D_800BE9E4 < chain->blendTimer) {
+            if (D_800BEAC0 == 0) {
+                chain->blendTimer -= D_800BE9E4;
+            }
+            mode = 2;
+        } else {
+            chain->blendTimer = 0;
+        }
+    }
+    // matching: the loop start below goes through a variable, so IDO unrolls it for any start
+    prev = 24;
+    /* the chain is anchored at bone 0's position */
+    bone = ((MtxF *)obj->unk1D4)[0];
+    D_800C4008[0] = bone[3][0];
+    D_800C4008[1] = bone[3][1];
+    D_800C4008[2] = bone[3][2];
+    if (mode == 0) {
+        for (k = prev; k < 28; k++) {
+            bone = (f32 (*)[4])((u32)obj->unk1D4 + k * 64);
+            chain->pos[k - prev][0] = bone[3][0];
+            chain->pos[k - prev][1] = bone[3][1];
+            chain->pos[k - prev][2] = bone[3][2];
+        }
+        return;
+    }
+    bone = ((MtxF *)obj->unk1D4)[24];
+    chain->pos[0][0] = bone[3][0];
+    chain->pos[0][1] = bone[3][1];
+    chain->pos[0][2] = bone[3][2];
+    if (obj->id == 0x80 || obj->id == 0xB0) {
+        linkLen = D_80098700;
+    } else {
+        linkLen = D_800986F0;
+    }
+    for (i = 0; i < 5; i++) {
+        offsets[i][0] = 0.0f;
+        offsets[i][1] = 0.0f;
+        offsets[i][2] = 0.0f;
+    }
+    speed = obj->xz_velocity;
+    speed = CLAMP(speed, 0.0f, 60.0f);
+    if (obj->unk28 > 3.0f) {
+        speed *= 0.5f;
+    }
+    bob = sinf(chain->bobPhase * 0.01745329238f) * speed;
+    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        chain->bobPhase += speed;
+        if (chain->bobPhase >= 360.0f) {
+            chain->bobPhase -= 360.0f;
+        }
+    }
+    tipBob = sinf((chain->bobPhase + 180.0f) * 0.01745329238f) * speed;
+    offsets[0][1] += bob;
+    offsets[4][1] += tipBob;
+    cam = (ChainCamera *)obj->camera;
+    if (cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+        s32 clamped = 0;
+        f32 turn;
+        f32 toCamX;
+        f32 toCamZ;
+
+        toCamX = (cam->eyeX + cam->unk74C) - obj->x_position;
+        toCamZ = (cam->eyeZ + cam->unk754) - obj->z_position;
+        angle = func_150484A0(toCamX, toCamZ) * 57.29577637f + 90.0f;
+        if (angle >= 360.0f) {
+            angle -= 360.0f;
+        }
+        turn = func_15048A70(obj->unk76 * 0.0054931640625f, angle);
+        delta = fabsf(turn);
+        if (delta < 90.0f) {
+            if (delta < 0.5f) {
+                turn = 0.0f;
+            }
+            turn = CLAMP(turn, -15.0f, 15.0f);
+            if (turn > 0.0f) {
+                if (turn < 23.0f) {
+                    turn = 23.0f;
+                    clamped = 1;
+                }
+            } else if (turn > -23.0f) {
+                turn = -23.0f;
+                clamped = 1;
+            }
+            if (clamped) {
+                delta = turn - chain->swayAngle;
+                turn = chain->swayAngle + delta * 0.6f;
+            }
+            chain->swayAngle = turn;
+            chain->swayTimer = 60;
+            chain->swayAmp = 200.0f;
+            facingCamera = 1;
+        }
+    }
+    yaw = obj->unk40 * 0.01745329238f;
+    if (obj->unk84.uh == 0x122 || obj->unk84.uh == 0x128 || obj->unk84.uh == 0x129 || obj->unk84.uh == 0x12A) {
+        yaw -= 0.7853981853f;
+    }
+    sinYaw = sinf(yaw);
+    cosYaw = cosf(yaw);
+    anim = D_800CC2D0[objIndex].unk84.uh; // matching: reloaded via the array, not obj
+    if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
+        D_800C4008[1] = chain->pos[0][1];
+        if (obj->unkB8 > 0.0f) {
+            D_800C4008[0] = chain->pos[0][0] + sinYaw;
+            D_800C4008[2] = chain->pos[0][2] + cosYaw;
+        }
+        offsets[0][1] -= bob;
+        offsets[1][1] += bob;
+    } else if (obj->unk28 < 0.5f) {
+        speed = obj->xz_velocity;
+        speed = CLAMP(speed, 0.0f, 30.0f);
+        bob = 60.0f - (speed + speed);
+        if (D_800C35EA == 1 && D_800C3C9D < 100) {
+            bob *= D_800C3C9D;
+            bob *= 0.01f;
+        }
+        if (obj->id == 0x80 || obj->id == 0xB0) {
+            liftWeights = D_80098768;
+        } else if (anim == 0x1B || anim == 0x18B) {
+            liftWeights = D_80098754;
+            for (i = 0; i < 5; i++) {
+                offsets[i][1] = 0.0f;
+            }
+            bob = 60.0f;
+        } else {
+            liftWeights = D_80098740;
+        }
+        if (CHAIN_EXT(obj)->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+            bob = 0; // matching: an int 0 (0.0f allocates differently)
+        }
+        offsets[0][1] += bob * liftWeights[0];
+        offsets[1][1] += bob * liftWeights[1];
+        offsets[2][1] += bob * liftWeights[2];
+        offsets[3][1] += bob * liftWeights[3];
+        offsets[4][1] += bob * liftWeights[4];
+        if (speed == 0.0f) {
+            if (chain->swayTimer != 0 && facingCamera == 0) {
+                chain->swayTimer -= D_800BE9E4;
+                if (chain->swayTimer <= 0) {
+                    chain->swayAngle = 0.0f;
+                    chain->swayAmp = func_150ADA20() % 100U;
+                    bob = func_150ADA20() % 10U + 10;
+                    if (func_150ADA20() & 1) {
+                        chain->swaySpeed = bob;
+                    } else {
+                        chain->swaySpeed = -bob;
+                    }
+                    chain->swayTimer = 0;
+                }
+            } else {
+                bob = sinf(chain->swayAngle * 0.01745329238f) * chain->swayAmp;
+                tipBob = sinf((chain->swayAngle + 30.0f) * 0.01745329238f) * chain->swayAmp * 5.0f;
+                offsets[4][0] += cosYaw * tipBob;
+                offsets[0][0] += cosYaw * bob;
+                offsets[4][2] += -sinYaw * tipBob;
+                offsets[0][2] += -sinYaw * bob;
+                if (D_800BEAC0 == 0 && D_800BEA0C == 0 && facingCamera == 0) {
+                    chain->swayAngle += chain->swaySpeed;
+                    if (chain->swayAngle > 360.0f || chain->swayAngle < -360.0f) {
+                        if (fabsf(chain->swaySpeed) > 15.0f) {
+                            chain->swaySpeed *= 0.5f;
+                            chain->swayAmp *= 0.5f;
+                            if (chain->swayAngle > 360.0f) {
+                                chain->swayAngle -= 360.0f;
+                            } else {
+                                chain->swayAngle += 360.0f;
+                            }
+                        } else {
+                            chain->swayTimer = func_150ADA20() % 200U;
+                        }
+                    }
+                }
+            }
+        } else if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+            chain->swayTimer = 200;
+        }
+    }
+    if (mode == 2) {
+        blend = (f32)(30 - chain->blendTimer) / 30.0f;
+    }
+    for (i = 1; i < 5; i++) {
+        prev = i - 1;
+        dirX = chain->pos[prev][0] + offsets[prev][0] * obj->xz_scale;
+        dirY = chain->pos[prev][1] + offsets[prev][1] * obj->y_scale;
+        dirZ = chain->pos[prev][2] + offsets[prev][2] * obj->xz_scale;
+        if (prev == 0) {
+            dirX -= D_800C4008[0];
+            dirY -= D_800C4008[1];
+            dirZ -= D_800C4008[2];
+        } else {
+            dirX -= chain->pos[prev - 1][0];
+            dirY -= chain->pos[prev - 1][1];
+            dirZ -= chain->pos[prev - 1][2];
+        }
+        inv = 1.0f / sqrtf(dirX * dirX + dirY * dirY + dirZ * dirZ);
+        dirX *= inv;
+        dirY *= inv;
+        dirZ *= inv;
+        goal[0] = chain->pos[prev][0] + linkLen[prev] * dirX * obj->xz_scale;
+        goal[1] = chain->pos[prev][1] + linkLen[prev] * dirY * obj->y_scale;
+        goal[2] = chain->pos[prev][2] + linkLen[prev] * dirZ * obj->xz_scale;
+        if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+            delta = goal[0] - chain->pos[i][0];
+            if (!reset) {
+                delta *= D_80098710[prev];
+            }
+            chain->pos[i][0] += delta;
+            delta = goal[1] - chain->pos[i][1];
+            if (!reset) {
+                delta *= D_80098720[prev];
+            }
+            chain->pos[i][1] += delta;
+            delta = goal[2] - chain->pos[i][2];
+            if (!reset) {
+                delta *= D_80098710[prev];
+            }
+            chain->pos[i][2] += delta;
+        }
+        link[0] = chain->pos[i][0] - chain->pos[prev][0];
+        link[1] = chain->pos[i][1] - chain->pos[prev][1];
+        link[2] = chain->pos[i][2] - chain->pos[prev][2];
+        inv = 1.0f / sqrtf(link[0] * link[0] + link[1] * link[1] + link[2] * link[2]);
+        link[0] *= inv;
+        link[1] *= inv;
+        link[2] *= inv;
+        angle = func_15048360(dirX * link[0] + dirY * link[1] + dirZ * link[2]) * 57.29577637f;
+        angle = fabsf(angle);
+        if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+            if (D_80098730[prev] < angle) {
+                inv = D_80098730[prev] / angle;
+                inv = 1.0f - inv;
+                if (reset) {
+                    inv = 1.0f;
+                }
+                oldX = chain->pos[i][0];
+                oldY = chain->pos[i][1];
+                oldZ = chain->pos[i][2];
+                delta = goal[0] - oldX;
+                chain->pos[i][0] += delta * inv;
+                delta = goal[1] - oldY;
+                chain->pos[i][1] += delta * inv;
+                delta = goal[2] - oldZ;
+                chain->pos[i][2] += delta * inv;
+            }
+        }
+        link[0] = chain->pos[i][0] - chain->pos[prev][0];
+        link[1] = chain->pos[i][1] - chain->pos[prev][1];
+        link[2] = chain->pos[i][2] - chain->pos[prev][2];
+        inv = 1.0f / sqrtf(link[0] * link[0] + link[1] * link[1] + link[2] * link[2]);
+        link[0] *= inv;
+        link[1] *= inv;
+        link[2] *= inv;
+        chain->pos[i][0] = chain->pos[prev][0] + link[0] * linkLen[prev] * obj->xz_scale;
+        chain->pos[i][1] = chain->pos[prev][1] + link[1] * linkLen[prev] * obj->y_scale;
+        chain->pos[i][2] = chain->pos[prev][2] + link[2] * linkLen[prev] * obj->xz_scale;
+    }
+    func_1503CB98(objIndex, mode, blend, chain);
 }
 
 void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
-void func_1503CB98(s32 arg0, s32 arg1, f32 arg2, f32 (*arg3)[3]) {
+/*
+ * Rebuilds bone matrices 24-27 so that each one looks from chain joint i to joint i+1, keeping the
+ * up axis of the previous bone (of the object's own matrix for the first). In mode 2 the joints are
+ * first blended towards the animated pose by `blend`; otherwise the blend timer is rearmed.
+ */
+void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
     struct127 *obj;
     f32 up[3];
     f32 eyeX, eyeY, eyeZ;
@@ -448,34 +464,36 @@ void func_1503CB98(s32 arg0, s32 arg1, f32 arg2, f32 (*arg3)[3]) {
     f32 inv;
     s32 i;
     s32 j;
-    f32 mtx[4][4];
-    f32 pts[5][3];
-    s32 k;
-    s32 off;
-    f32 (*bones)[4][4];
-    f32 (*m)[4];
+    f32 rootMtx[4][4];
+    f32 animPos[5][3];
+    s32 boneOffset;
+    s32 joint;
+    MtxF *bones;
+    f32 (*parent)[4];
     f32 (*dst)[4];
-    f32 (*p)[3];
-    f32 (*n)[4];
+    f32 (*pos)[3];
+    f32 (*bone)[4];
 
-    obj = &D_800CC2D0[arg0];
-    func_150A9B0C(mtx, obj->unkB8, obj->unk40, obj->unkC4, 1.0f, 1.0f, 1.0f);
-    off = 0;
-    k = 0x600;
+    obj = &D_800CC2D0[objIndex];
+    func_150A9B0C(rootMtx, obj->unkB8, obj->unk40, obj->unkC4, 1.0f, 1.0f, 1.0f);
+    joint = 0;
+    boneOffset = 24 * sizeof(MtxF);
 
+    // matching: separate i/joint counters; merging them reallocates the loop registers
     i = 0;
     do {
-        p = &arg3[off];
-        dst = (f32 (*)[4])((u8 *)obj->unk1D4 + k);
-        bones = (f32 (*)[4][4])obj->unk1D4;
+        pos = &chain->pos[joint];
+        // matching: a byte offset; indexing bones[24 + i] swaps the registers of i and the offset
+        dst = (f32 (*)[4])((u8 *)obj->unk1D4 + boneOffset);
+        bones = (MtxF *)obj->unk1D4;
         if (i == 0) {
-            m = mtx;
+            parent = rootMtx;
         } else {
-            m = (f32 (*)[4])((u8 *)bones + k - 0x40);
+            parent = (f32 (*)[4])((u8 *)bones + boneOffset - sizeof(MtxF));
         }
-        up[0] = m[1][0];
-        up[1] = m[1][1];
-        up[2] = m[1][2];
+        up[0] = parent[1][0];
+        up[1] = parent[1][1];
+        up[2] = parent[1][2];
         mag = sqrtf(up[0] * up[0] + up[1] * up[1] + up[2] * up[2]);
         if (mag != 0.0f) {
             inv = 1.0f / mag;
@@ -483,45 +501,87 @@ void func_1503CB98(s32 arg0, s32 arg1, f32 arg2, f32 (*arg3)[3]) {
             up[1] *= inv;
             up[2] *= inv;
         }
-        eyeX = p[0][0];
-        eyeY = p[0][1];
-        eyeZ = p[0][2];
-        atX = p[1][0];
-        atY = p[1][1];
-        atZ = p[1][2];
-        if (arg1 == 2) {
-
+        eyeX = pos[0][0];
+        eyeY = pos[0][1];
+        eyeZ = pos[0][2];
+        atX = pos[1][0];
+        atY = pos[1][1];
+        atZ = pos[1][2];
+        if (mode == 2) {
             if (i == 0) {
-                n = (f32 (*)[4])bones;
+                // matching: bones[24 + j][3] folds the 0x600 into the loads; this keeps it in the base
+                bone = (f32 (*)[4])&bones[0];
                 for (j = 0; j < 4; j++) {
-                    n += 0x60;
-                    pts[j][0] = n[3][0];
-                    pts[j][1] = n[3][1];
-                    pts[j][2] = n[3][2];
-                    n = (f32 (*)[4])((u8 *)bones + ((j + 1) << 6));
+                    bone += 24 * 4;
+                    animPos[j][0] = bone[3][0];
+                    animPos[j][1] = bone[3][1];
+                    animPos[j][2] = bone[3][2];
+                    bone = (f32 (*)[4])&bones[j + 1];
                 }
-                pts[4][0] = (pts[3][0] - pts[2][0]) + pts[3][0];
-                pts[4][1] = (pts[3][1] - pts[2][1]) + pts[3][1];
-                pts[4][2] = (pts[3][2] - pts[2][2]) + pts[3][2];
+                animPos[4][0] = (animPos[3][0] - animPos[2][0]) + animPos[3][0];
+                animPos[4][1] = (animPos[3][1] - animPos[2][1]) + animPos[3][1];
+                animPos[4][2] = (animPos[3][2] - animPos[2][2]) + animPos[3][2];
             }
-            eyeX += ((pts + off)[0][0] - eyeX) * arg2;
-            eyeY += ((pts + off)[0][1] - eyeY) * arg2;
-            eyeZ += ((pts + off)[0][2] - eyeZ) * arg2;
-            atX += ((pts + off)[1][0] - atX) * arg2;
-            atY += ((pts + off)[1][1] - atY) * arg2;
-            atZ += ((pts + off)[1][2] - atZ) * arg2;
+            eyeX += (animPos[joint][0] - eyeX) * blend;
+            eyeY += (animPos[joint][1] - eyeY) * blend;
+            eyeZ += (animPos[joint][2] - eyeZ) * blend;
+            atX += (animPos[joint + 1][0] - atX) * blend;
+            atY += (animPos[joint + 1][1] - atY) * blend;
+            atZ += (animPos[joint + 1][2] - atZ) * blend;
         }
         if (eyeX == atX && eyeZ == atZ) {
             eyeX += 1.0f;
         }
         func_150440A0(dst, eyeX, eyeY, eyeZ, atX, atY, atZ, up[0], up[1], up[2]);
         func_15043EC8(dst, obj->xz_scale, obj->y_scale, obj->xz_scale, eyeX, eyeY, eyeZ);
-        k += 0x40;
+        boneOffset += sizeof(MtxF);
         i++;
-        off++;
+        joint++;
+        // matching: the pointer compare (not joint < 4 or a for loop) gives IDO's loop test
+    } while (&chain->pos[joint] < &chain->pos[4]);
 
-    } while (&arg3[off] < &arg3[4]);
-    if (arg1 != 2) {
-        ((u8 *)arg3)[0x4E] = 0x1E;
+    if (mode != 2) {
+        chain->blendTimer = 30;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

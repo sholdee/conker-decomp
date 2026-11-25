@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #include "libc/math.h"
 
 void func_150E5AE0(void);
@@ -52,34 +53,6 @@ typedef struct {
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
 } Vec3f;
-
-/* Sprite-particle descriptor passed to func_151303BC. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 texture;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8  unk14[7];
-    /* 0x1B */ u8  alpha;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8  pad5C[0x4];
-    /* 0x60 */ s8  unk60[4];
-    /* 0x64 */ u8  pad64[0xC];
-} ParticleDesc;
 
 /* Extra data func_151303BC's caller copies into the particle at +0xA8. */
 typedef struct {
@@ -148,37 +121,37 @@ s32 func_150EA10C(OscillatorObject *obj) {
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
+void func_150EA11C(vertex *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
     ParticleExtra extra;
 
-    desc.unk1D = 0x2F;
-    desc.texture = 0xC01;
-    desc.flags = 0x200005;
+    desc.texture = 0x2F;
+    desc.renderMode = 0xC01;
+    desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.unk14[6] = 0;
-    desc.unk14[5] = 0;
-    desc.unk14[4] = 0;
-    desc.unk14[3] = 0;
-    desc.unk14[2] = 0;
-    desc.unk14[1] = 0;
-    desc.unk14[0] = 0;
-    desc.unk10 = 0;
-    desc.unkC = 0;
-    desc.unk1C = 0xFF;
-    desc.unk22 = 0;
-    desc.unk24 = 0.0f;
-    desc.unk58 = 0x1207;
-    desc.unk60[0] = 5;
-    desc.unk60[1] = 5;
-    desc.unk60[2] = 4;
-    desc.unk60[3] = -1;
-    desc.unk3C.x = 0.0f;
-    desc.unk3C.y = 0.0f;
-    desc.unk3C.z = 0.0f;
-    desc.unk1E = 20;
-    desc.unk20 = 12;
+    desc.b2 = 0;
+    desc.g2 = 0;
+    desc.r2 = 0;
+    desc.a = 0;
+    desc.b = 0;
+    desc.g = 0;
+    desc.r = 0;
+    desc.frameRate = 0;
+    desc.frame = 0;
+    desc.brightness = 0xFF;
+    desc.scaleStart = 0;
+    desc.scaleRate = 0.0f;
+    desc.flags = 0x1207;
+    desc.primColorMode = 5;
+    desc.envColorMode = 5;
+    desc.updateFunc = 4;
+    desc.deathFunc = -1;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.fadeStart = 20;
+    desc.fadeRate = 12;
     extra.unk4[0] = 0;
     extra.unk4[1] = 0;
     extra.unk18[0] = 0;
@@ -186,22 +159,22 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
     extra.unk10 = 3.5f;
     extra.unk14 = 0.2857143f;
 
-    desc.velocity.x = (to->x - from->x) * arg5->unk74;
-    desc.velocity.y = (to->y - from->y) * arg5->unk74;
-    desc.velocity.z = (to->z - from->z) * arg5->unk74;
-    desc.position = *from;
-    desc.position.x += desc.velocity.x * t;
-    desc.position.y += desc.velocity.y * t;
-    desc.position.z += desc.velocity.z * t;
+    desc.vel.x = (to->x - from->x) * arg5->unk74;
+    desc.vel.y = (to->y - from->y) * arg5->unk74;
+    desc.vel.z = (to->z - from->z) * arg5->unk74;
+    desc.pos = *from;
+    desc.pos.x += desc.vel.x * t;
+    desc.pos.y += desc.vel.y * t;
+    desc.pos.z += desc.vel.z * t;
 
     if (func_150ADA20() & 1) {
-        desc.unk58 |= 0x40;
+        desc.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        desc.unk58 |= 0x80;
+        desc.flags |= 0x80;
     }
 
-    desc.lifetime = func_150ADA20() % 51U + 50;
+    desc.timer = func_150ADA20() % 51U + 50;
     desc.alpha = func_150ADA20() % 101U + 100;
     extra.size = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
     extra.unk4[2] = func_150ADA20() % 5U + 4;
@@ -212,7 +185,7 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
     extra.unk18[3] = func_150ADA20() % 5U + 4;
     extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
     extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    desc.unk54 = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
+    desc.gravity = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
     if (particle != NULL) {
@@ -282,54 +255,54 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     u8 *particle;
     ParticleExtra extra;
 
-    desc.position.z = z;
+    desc.pos.z = z;
     extra.unk24 = 1000.0f;
     extra.unk10 = 4.0f;
     extra.unk14 = 0.25f;
-    desc.unk1D = 0x2F;
-    desc.texture = 0xC01;
-    desc.flags = 0x200005;
+    desc.texture = 0x2F;
+    desc.renderMode = 0xC01;
+    desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.unk14[6] = 0;
-    desc.unk14[5] = 0;
-    desc.unk14[4] = 0;
-    desc.unk14[3] = 0;
-    desc.unk14[2] = 0;
-    desc.unk14[1] = 0;
-    desc.unk14[0] = 0;
-    desc.unk10 = 0;
-    desc.unkC = 0;
-    desc.unk1C = 0xFF;
-    desc.unk22 = 0;
-    desc.unk24 = 0.0f;
-    desc.unk58 = 0x3207;
-    desc.unk60[0] = 5;
-    desc.unk60[1] = 5;
-    desc.unk60[2] = 4;
-    desc.unk60[3] = -1;
-    desc.position.x = x;
-    desc.position.y = y;
-    desc.unk3C.x = 0.0f;
-    desc.unk3C.y = 0.0f;
-    desc.unk3C.z = 0.0f;
-    desc.unk1E = 30;
-    desc.unk20 = 8;
+    desc.b2 = 0;
+    desc.g2 = 0;
+    desc.r2 = 0;
+    desc.a = 0;
+    desc.b = 0;
+    desc.g = 0;
+    desc.r = 0;
+    desc.frameRate = 0;
+    desc.frame = 0;
+    desc.brightness = 0xFF;
+    desc.scaleStart = 0;
+    desc.scaleRate = 0.0f;
+    desc.flags = 0x3207;
+    desc.primColorMode = 5;
+    desc.envColorMode = 5;
+    desc.updateFunc = 4;
+    desc.deathFunc = -1;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.fadeStart = 30;
+    desc.fadeRate = 8;
     extra.unk4[0] = 0;
     extra.unk4[1] = 0;
     extra.unk18[0] = 0;
     extra.unk18[1] = 0;
-    desc.velocity.x = -vx * 0.2f;
-    desc.velocity.y = 0.0f;
-    desc.velocity.z = -vz * 0.2f;
+    desc.vel.x = -vx * 0.2f;
+    desc.vel.y = 0.0f;
+    desc.vel.z = -vz * 0.2f;
 
     if (func_150ADA20() & 1) {
-        desc.unk58 |= 0x40;
+        desc.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        desc.unk58 |= 0x80;
+        desc.flags |= 0x80;
     }
 
-    desc.lifetime = func_150ADA20() % 51U + 106;
+    desc.timer = func_150ADA20() % 51U + 106;
     desc.alpha = func_150ADA20() % 101U + 100;
     extra.size = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
     extra.unk4[2] = func_150ADA20() % 5U + 4;
@@ -340,7 +313,7 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     extra.unk18[3] = func_150ADA20() % 5U + 4;
     extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
     extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    desc.unk54 = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
+    desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
     if (particle != NULL) {
@@ -353,7 +326,7 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* A D_800DBEF4 entry (struct131) with the fields used here, which include/structs.h leaves unnamed. */
+/* A D_800DBEF4 entry (WorldObject) with the fields used here, which include/structs.h leaves unnamed. */
 typedef struct {
     /* 0x00 */ Vec3f angle; /* degrees, kept in [0, 360) */
     /* 0x0C */ u8  padC[0x4];

@@ -2,136 +2,135 @@
 #include "functions.h"
 #include "variables.h"
 
-
+/* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per view (indexed by struct108.unk23D). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    s32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    s32 unk64;
-} SomeStruct1512;
+    /* 0x00 */ f32 frequency0;     /* oscillator frequencies in Hz (elapsed is in 30 fps frames) */
+    /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in func_1512D980
+    /* 0x08 */ f32 frequency2;
+    /* 0x0C */ f32 frequency3;
+    /* 0x10 */ f32 attackTime;
+    /* 0x14 */ f32 decayTime;
+    /* 0x18 */ f32 sustainTime;
+    /* 0x1C */ f32 releaseTime;
+    /* 0x20 */ f32 peak;
+    /* 0x24 */ f32 sustainLevel;
+    /* 0x28 */ f32 elapsed;       /* -1.0f when idle */
+    /* 0x2C */ f32 amplitude;
+    /* 0x30 */ f32 attackEnd;
+    /* 0x34 */ f32 decayEnd;
+    /* 0x38 */ f32 sustainEnd;
+    /* 0x3C */ f32 releaseEnd;
+    /* 0x40 */ f32 attackRate;
+    /* 0x44 */ f32 decayRate;
+    /* 0x48 */ f32 sustainRate;
+    /* 0x4C */ f32 releaseRate;
+    /* 0x50 */ s32 stage;         /* 0 = loaded, 1..4 = attack..release, 5 = finished */
+    /* 0x54 */ f32 output[4];
+    /* 0x64 */ s32 mode;          /* nonzero: stage advances as the envelope runs */
+} ViewEnvelope;
 
-extern SomeStruct1512 D_800DC2C0[];
+extern ViewEnvelope D_800DC2C0[];
 
-void func_1512D6F0(u8 *arg0) {
-    SomeStruct1512 *sp = &D_800DC2C0[arg0[0x23D]];
-    sp->unk50 = 5;
-    sp->unk54 = 0.0f;
-    sp->unk58 = 0.0f;
-    sp->unk5C = 0.0f;
-    sp->unk60 = 0.0f;
-    sp->unk2C = 0.0f;
-    sp->unk28 = -1.0f;
+/* Stops the view's envelope and zeroes its outputs. */
+void func_1512D6F0(struct108 *view) {
+    ViewEnvelope *env = &D_800DC2C0[view->unk23D];
+
+    env->stage = 5;
+    env->output[0] = 0.0f;
+    env->output[1] = 0.0f;
+    env->output[2] = 0.0f;
+    env->output[3] = 0.0f;
+    env->amplitude = 0.0f;
+    env->elapsed = -1.0f;
 }
 
 extern u8 D_800895D0[][10];
 
-void func_1512D748(struct108 *arg0, s32 arg1, s32 arg2) {
-    SomeStruct1512 *sp = &D_800DC2C0[arg0->unk23D];
-    u8 *tbl;
-    volatile f32 sp4;
-    f32 f0;
-    f32 f2;
-    f32 f18;
-    f32 f16;
-    f32 f12;
-    f32 f14;
+/* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
+/* Loads envelope preset presetIndex into the view's envelope and restarts it from the attack stage. */
+void func_1512D748(struct108 *view, s32 presetIndex, s32 mode) {
+    ViewEnvelope *env = &D_800DC2C0[view->unk23D];
+    u8 *preset;
+    f32 sustainLevel;
+    f32 attackTime;
+    f32 decayTime;
+    f32 peak;
+    f32 releaseTime;
+    f32 decayEnd;
+    f32 sustainEnd;
 
-    if (((u8 *)arg0->unk3D4)[0x120] == 0) {
-        tbl = D_800895D0[arg1];
-        sp->unk0 = (u32)tbl[0];
-        sp->unk4 = (u32)tbl[1];
-        sp->unk8 = (u32)tbl[2];
-        sp->unkC = (u32)tbl[3];
-        sp->unk10 = (u32)tbl[4];
-        sp->unk14 = (u32)tbl[5];
-        sp->unk18 = (u32)tbl[6];
-        sp->unk1C = (u32)tbl[7];
-        sp->unk20 = (u32)tbl[8];
-        sp->unk24 = (u32)tbl[9];
-        f0 = sp->unk10;
-        f2 = sp->unk14;
-        f12 = f2 + f0;
-        f14 = sp->unk18 + f12;
-        f16 = sp->unk1C;
-        f18 = sp->unk20;
-        sp->unk30 = f0;
-        sp->unk34 = f12;
-        sp->unk38 = f14;
-        sp->unk3C = f16 + f14;
-        sp->unk28 = 0.0f;
-        sp->unk2C = 0.0f;
-        sp->unk40 = f18 / f0;
-        sp4 = sp->unk24;
-        sp->unk44 = (f18 - sp4) / f2;
-        sp->unk48 = 0.0f;
-        sp->unk4C = sp4 / f16;
-        sp->unk50 = 0;
-        sp->unk64 = arg2;
+    if (view->unk3D4->unk120 == 0) {
+        preset = D_800895D0[presetIndex];
+        env->frequency0 = preset[0];
+        env->frequency1 = preset[1];
+        env->frequency2 = preset[2];
+        env->frequency3 = preset[3];
+        env->attackTime = preset[4];
+        env->decayTime = preset[5];
+        env->sustainTime = preset[6];
+        env->releaseTime = preset[7];
+        env->peak = preset[8];
+        env->sustainLevel = preset[9];
+        attackTime = env->attackTime;
+        decayTime = env->decayTime;
+        decayEnd = decayTime + attackTime;
+        sustainEnd = env->sustainTime + decayEnd;
+        releaseTime = env->releaseTime;
+        peak = env->peak;
+        env->attackEnd = attackTime;
+        env->decayEnd = decayEnd;
+        env->sustainEnd = sustainEnd;
+        env->releaseEnd = releaseTime + sustainEnd;
+        env->elapsed = 0.0f;
+        env->amplitude = 0.0f;
+        env->attackRate = peak / attackTime;
+        sustainLevel = env->sustainLevel;
+        env->decayRate = (peak - sustainLevel) / decayTime;
+        env->sustainRate = 0.0f;
+        env->releaseRate = sustainLevel / releaseTime;
+        env->stage = 0;
+        env->mode = mode;
     }
 }
 
-void func_1512D980(struct108 *arg0) {
-    SomeStruct1512 *sp = &D_800DC2C0[arg0->unk23D];
+/* Advances the view's envelope by one frame and updates its four oscillator outputs. */
+void func_1512D980(struct108 *view) {
+    ViewEnvelope *env = &D_800DC2C0[view->unk23D];
     f32 sign;
 
-    if (func_150ADA20() & 1) {
-        sign = 1.0f;
-    } else {
-        sign = -1.0f;
-    }
-    if ((sp->unk28 != -1.0f) && (sp->unk50 != 5) && !(arg0->unk84 & 0x80000)) {
-        sp->unk54 = sinf(sp->unk28 * 0.03333333507f * sp->unk0 * 360.0f * 0.01745329238f) * (sign * sp->unk2C);
-        sp->unk58 = sinf(sp->unk28 * 0.03333333507f * sp->unk4 * 360.0f * 0.01745329238f) * (1 * sp->unk2C);
-        sp->unk5C = sinf(sp->unk28 * 0.03333333507f * sp->unk8 * 360.0f * 0.01745329238f) * (-1.0f * sp->unk2C);
-        sp->unk60 = sinf(sp->unk28 * 0.03333333507f * sp->unkC * 360.0f * 0.01745329238f) * (-1.0f * sp->unk2C);
-        if ((sp->unk28 <= sp->unk3C) && (sp->unk2C >= 0.0f)) {
-            if (sp->unk28 <= sp->unk30) {
-                if ((sp->unk50 == 0) && (sp->unk64 != 0)) {
-                    sp->unk50 = 1;
+    sign = (func_150ADA20() & 1) ? 1.0f : -1.0f;
+    if (env->elapsed != -1.0f && env->stage != 5 && !(view->unk84 & 0x80000)) {
+        env->output[0] = sinf(env->elapsed * 0.03333333507f * env->frequency0 * 360.0f * 0.01745329238f) * (sign * env->amplitude);
+        // matching: the integer `1 *` (not 1.0f, not omitted) is what IDO compiled
+        env->output[1] = sinf(env->elapsed * 0.03333333507f * env->frequency1 * 360.0f * 0.01745329238f) * (1 * env->amplitude);
+        env->output[2] = sinf(env->elapsed * 0.03333333507f * env->frequency2 * 360.0f * 0.01745329238f) * (-1.0f * env->amplitude);
+        env->output[3] = sinf(env->elapsed * 0.03333333507f * env->frequency3 * 360.0f * 0.01745329238f) * (-1.0f * env->amplitude);
+        if (env->elapsed <= env->releaseEnd && env->amplitude >= 0.0f) {
+            if (env->elapsed <= env->attackEnd) {
+                if (env->stage == 0 && env->mode != 0) {
+                    env->stage = 1;
                 }
-                sp->unk2C += sp->unk40 * D_800BE9A4;
-            } else if (sp->unk28 <= sp->unk34) {
-                if ((sp->unk50 == 1) && (sp->unk64 != 0)) {
-                    sp->unk50 = 2;
+                env->amplitude += env->attackRate * D_800BE9A4;
+            } else if (env->elapsed <= env->decayEnd) {
+                if (env->stage == 1 && env->mode != 0) {
+                    env->stage = 2;
                 }
-                sp->unk2C -= sp->unk44 * D_800BE9A4;
-            } else if (sp->unk28 <= sp->unk38) {
-                if ((sp->unk50 == 2) && (sp->unk64 != 0)) {
-                    sp->unk50 = 3;
+                env->amplitude -= env->decayRate * D_800BE9A4;
+            } else if (env->elapsed <= env->sustainEnd) {
+                if (env->stage == 2 && env->mode != 0) {
+                    env->stage = 3;
                 }
-            } else if (sp->unk28 < sp->unk3C) {
-                if ((sp->unk50 == 3) && (sp->unk64 != 0)) {
-                    sp->unk50 = 4;
+            } else if (env->elapsed < env->releaseEnd) {
+                if (env->stage == 3 && env->mode != 0) {
+                    env->stage = 4;
                 }
-                sp->unk2C -= sp->unk4C * D_800BE9A4;
+                env->amplitude -= env->releaseRate * D_800BE9A4;
             } else {
-                func_1512D6F0((u8 *)arg0);
+                func_1512D6F0(view);
             }
-            sp->unk28 += (u32)D_800BE9A0;
+            env->elapsed += D_800BE9A0;
         } else {
-            sp->unk50 = 5;
+            env->stage = 5;
         }
     }
 }

@@ -44,26 +44,27 @@ def code_segments():
 
 
 def obj_functions(wc, rel):
-    """[(name, vram, size)] for the .text symbols of this file's object, from the workspace map."""
-    obj = f"build/{rel[:-2]}.c.o"
-    rows, cur = [], False
+    """[(name, vram, size)] for the .text symbols of this file's object (rel=None: every object), from the map."""
+    obj = f"build/{rel[:-2]}.c.o" if rel else None
+    rows, cur, objs = [], False, []
     start = end = 0
-    syms = []
     for line in (wc / "build" / "conker.us.map").read_text(errors="replace").splitlines():
         m = re.match(r"^ \.text\s+0x([0-9a-f]+)\s+0x([0-9a-f]+)\s+(\S+)", line)
         if m:
-            cur = m.group(3) == obj
+            cur = (m.group(3) == obj) if obj else m.group(3).endswith(".c.o")
             if cur:
                 start, end = int(m.group(1), 16), int(m.group(1), 16) + int(m.group(2), 16)
+                objs.append([start, end, []])
             continue
         if cur:
             m = re.match(r"^\s+0x([0-9a-f]+)\s+([A-Za-z_]\w*)\s*$", line)
             if m and start <= int(m.group(1), 16) < end:
-                syms.append((int(m.group(1), 16), m.group(2)))
-    syms.sort()
-    for i, (a, n) in enumerate(syms):
-        b = syms[i + 1][0] if i + 1 < len(syms) else end
-        rows.append((n, a, b - a))
+                objs[-1][2].append((int(m.group(1), 16), m.group(2)))
+    for start, end, syms in objs:
+        syms.sort()
+        for i, (a, n) in enumerate(syms):
+            b = syms[i + 1][0] if i + 1 < len(syms) else end
+            rows.append((n, a, b - a))
     return rows
 
 
@@ -76,6 +77,8 @@ def vram_to_rom(v, segs):
 
 
 def cmd_new(a):
+    if a.tree:
+        return new_tree(a)
     rel = a.file if a.file.startswith("src/") else "src/" + a.file
     if not rel.endswith(".c"):
         rel += ".c"
@@ -113,22 +116,56 @@ def cmd_new(a):
     print(f"hack-like markers ({len(hacks)}): " + ", ".join(f"L{l}:{t}" for l, t in hacks[:40]))
 
 
+def new_tree(a):
+    """Workspace for a cross-file change (a shared header type and all its users): name = clean.<NAME>."""
+    name = "clean." + a.file
+    ws = WS_ROOT / name
+    if ws.exists():
+        if not a.force:
+            sys.exit(f"{ws} exists (use --force to recreate)")
+        attic = WS_ROOT / ".attic"
+        attic.mkdir(exist_ok=True)
+        ws.rename(attic / f"{name}.{time.strftime('%Y%m%d-%H%M%S')}")
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)
+        if sha1(MAIN / BIN) != INNER_SHA:
+            sys.exit("main is not a matching build right now; retry in a minute")
+        ws.mkdir(parents=True)
+        clone_tree(MAIN, ws / "conker")
+        (ws / "base").mkdir()
+        for d in ("src", "include"):
+            subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        head = git("rev-parse", "HEAD").strip()
+    for n in ("ido", "tools"):
+        (ws / n).symlink_to(REPO / n)
+    (ws / "my").mkdir()
+    (ws / "meta.json").write_text(json.dumps({"mode": "clean", "file": None, "tree": a.file, "head": head}, indent=1))
+    print(f"workspace : {ws}   (tree-wide: edit any file under conker/src and conker/include)")
+    print(f"check     : python3 {REPO}/tools/cw.py check {name}")
+    print(f"land      : python3 {REPO}/tools/cw.py land {name}")
+
+
 def build(ws):
     wc = ws / "conker"
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
-    r = run("make -j8 2>&1", wc, timeout=1800)
+    # The Makefile has no header dependencies: after any include/ change, rebuild everything (~15 s),
+    # or stale objects would hide breakage in files that use the changed header.
+    hdr = any(str(f).startswith("include/") for f in changed_files(ws))
+    r = run(f"make {'-B ' if hdr else ''}-j8 2>&1", wc, timeout=1800)
     return wc, r
 
 
 def cmd_check(a):
     ws, m = ws_of(a.name)
     rel = m["file"]
-    src = (ws / "conker" / rel).read_text(errors="replace")
-    base = (ws / "base" / rel).read_text(errors="replace")
-    if set(PRAGMA_RE.findall(src)) - set(PRAGMA_RE.findall(base)):
-        print("RESULT: BUILD-FAIL (new GLOBAL_ASM pragmas are not allowed in a cleanup)")
-        return 2
+    for f in ([rel] if rel else [str(x) for x in changed_files(ws) if str(x).endswith(".c")]):
+        src = (ws / "conker" / f).read_text(errors="replace")
+        b = ws / "base" / f
+        base = b.read_text(errors="replace") if b.exists() else ""
+        if set(PRAGMA_RE.findall(src)) - set(PRAGMA_RE.findall(base)):
+            print(f"RESULT: BUILD-FAIL (new GLOBAL_ASM pragmas in {f} are not allowed in a cleanup)")
+            return 2
     wc, r = build(ws)
     if not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines() if "rror" in l or "undefined reference" in l]
@@ -202,7 +239,7 @@ def cmd_land(a):
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
         (MAIN / BIN).unlink(missing_ok=True)
-        r = run("make -j16 2>&1", MAIN)
+        r = run("make -B -j16 2>&1", MAIN)  # full rebuild: no header deps in the Makefile
         if not (MAIN / BIN).exists() or sha1(MAIN / BIN) != INNER_SHA:
             for f, data in backup.items():
                 if data is None:
@@ -213,7 +250,7 @@ def cmd_land(a):
             print(r.stdout[-2500:])
             sys.exit("LAND-FAIL: main build does not match after merge; reverted")
         git("add", *rels)
-        msg = f"cleanup: {m['file']} [cw]"
+        msg = f"cleanup: {m['file'] or m.get('tree')} [cw]"
         if a.message:
             msg += "\n\n" + a.message
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
@@ -222,7 +259,7 @@ def cmd_land(a):
             (ws / "base" / f).parent.mkdir(parents=True, exist_ok=True)
             (ws / "base" / f).write_bytes((MAIN / f).read_bytes())
             (ws / "conker" / f).write_bytes((MAIN / f).read_bytes())
-        print(f"LANDED: {m['file']} — {git('rev-parse', '--short', 'HEAD').strip()}")
+        print(f"LANDED: {m['file'] or m.get('tree')} — {git('rev-parse', '--short', 'HEAD').strip()}")
 
 
 def cmd_list(a):
@@ -237,7 +274,8 @@ def cmd_list(a):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
-    q = sub.add_parser("new"); q.add_argument("file"); q.add_argument("--force", action="store_true")
+    q = sub.add_parser("new"); q.add_argument("file", help="src file, or a NAME with --tree")
+    q.add_argument("--tree", action="store_true", help="cross-file workspace named clean.NAME"); q.add_argument("--force", action="store_true")
     q = sub.add_parser("check"); q.add_argument("name")
     q = sub.add_parser("land"); q.add_argument("name"); q.add_argument("-m", "--message")
     sub.add_parser("list")

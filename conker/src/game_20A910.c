@@ -2,38 +2,34 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void __osSiGetAccess(void);
-extern void __osSiRelAccess(void);
-extern s32 func_151DD710(s32 arg0, u16 *arg1);
+void __osSiGetAccess(void);
+void __osSiRelAccess(void);
+s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data); /* __osEepStatus */
 
-s32 func_151DD460(s32 arg0) {
-    u16 sp28[4];
-    u16 *sp24;
-    s32 temp_t7;
-    s32 var_v1;
+/* func_151DD460 = osEepromProbe: returns EEPROM_TYPE_4K / EEPROM_TYPE_16K, or 0 if none. */
+s32 func_151DD460(OSMesgQueue *mq) {
+    s32 ret = 0;
+    u16 type;
+    OSContStatus sdata;
 
     __osSiGetAccess();
-    sp24 = &sp28[-2];
-    if (func_151DD710(arg0, sp24) != 0) {
-        var_v1 = 0;
+    ret = func_151DD710(mq, &sdata);
+    if (ret != 0) {
+        ret = 0;
     } else {
-        temp_t7 = (sp24[0] & 0xC000) & 0xFFFFFFFFFFFFFFFF;
-        switch (temp_t7) {
-            case 0x8000:
-                var_v1 = 1;
+        type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
+        switch (type) {
+            case CONT_EEPROM:
+                ret = EEPROM_TYPE_4K;
                 break;
-
-            case 0xC000:
-                var_v1 = 2;
+            case CONT_EEPROM | CONT_EEP16K:
+                ret = EEPROM_TYPE_16K;
                 break;
-
             default:
-                var_v1 = 0;
+                ret = 0;
                 break;
         }
     }
-    *((s32 *) (&sp24[4])) = var_v1;
     __osSiRelAccess();
-    var_v1 = *((s32 *) (&sp24[4]));
-    return var_v1;
+    return ret;
 }

@@ -2,143 +2,141 @@
 #include "functions.h"
 #include "variables.h"
 
-
-typedef struct {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-} Struct150EBEC0;
-
 extern f32 D_800A1500[3];
 extern f32 D_800A150C[3];
 extern f32 D_800A1518[][3];
 extern f32 D_800A1530[][3];
 extern u8 D_800A1548[];
-extern void func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+extern void func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern void func_15102B38(Struct150EBEC0 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Struct150EBEC0 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32,
+                  s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
-s32 func_150EBEC0(Struct150EBEC0 *arg0, u8 arg1, u8 arg2, s32 arg3) {
-    s32 ret;
-    struct17 pos;
-    struct17 dir;
-    struct17 pos2;
-    struct17 *target;
-    struct17 newdir;
-    s32 srcs[2];
-    s32 dsts[2];
-    s32 srcs1[1];
-    s32 dsts1[1];
+/* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
+ * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
+ * func_151602C0 flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
+s32 func_150EBEC0(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+    s32 tracer;
+    struct17 aimStart;
+    struct17 aimDir;
+    struct17 muzzle;
+    struct17 *tracerDir;
+    struct17 hitDir;
+    f32 *srcs[2];
+    f32 *dsts[2];
+    f32 *muzzleSrc[1];
+    f32 *muzzleDst[1];
     struct17 hit;
-    f32 off[2];
-    Header hdr;
-    Header2 hdr2;
-    f32 sp90[2];
-    f32 rand1;
-    s32 sp88;
-    f32 rand0;
-    s32 sp80;
+    f32 jitter[2];
+    Header flashHeader;
+    Header2 flashPos;
+    f32 beamSize[2];
+    f32 randB;
+    s32 randInt;
+    f32 randA;
+    s32 randInt2;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return 0;
     }
-    if (arg1 >= 2) {
+    if (slot >= 2) {
         return 0;
     }
-    if (arg0->unk1D4 == 0) {
+    if (actor->unk1D4 == NULL) {
         return 0;
     }
-    srcs[0] = (s32)D_800A1500;
-    srcs[1] = (s32)D_800A150C;
-    dsts[0] = (s32)&pos;
-    dsts[1] = (s32)&dir;
-    func_15145EA4(srcs, dsts, arg0->unk1D4 + 0x80, 2);
-    dir.unk0 -= pos.unk0;
-    dir.unk4 -= pos.unk4;
-    dir.unk8 -= pos.unk8;
+    srcs[0] = D_800A1500;
+    srcs[1] = D_800A150C;
+    dsts[0] = &aimStart.unk0;
+    dsts[1] = &aimDir.unk0;
+    func_15145EA4(srcs, dsts, (Mtx *)actor->unk1D4 + 2, 2);
+    aimDir.unk0 -= aimStart.unk0;
+    aimDir.unk4 -= aimStart.unk4;
+    aimDir.unk8 -= aimStart.unk8;
     {
-        void func_15145EA4(s32 *, s32 *, s32, s32);
+        // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
+        void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
-        srcs1[0] = (s32)D_800A1518[arg1];
-        dsts1[0] = (s32)&pos2;
-        func_15145EA4(srcs1, dsts1, (D_800A1548[arg1] << 6) + arg0->unk1D4, 1);
+        muzzleSrc[0] = D_800A1518[slot];
+        muzzleDst[0] = &muzzle.unk0;
+        func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->unk1D4 + D_800A1548[slot], 1);
     }
-    if (func_150AC9C0(pos.unk0, pos.unk4, pos.unk8, dir.unk0, dir.unk4, dir.unk8, 0, 0, &hit.unk0, &hit.unk4, &hit.unk8, 0, 0, 0, 0.0f) != 0) {
-        sp88 = func_150ADA20();
-        rand0 = func_150ADA68() * 80.0f;
-        func_15143874((s16)(sp88 & 0xFF), rand0, &off[0], &off[1]);
+    if (func_150AC9C0(aimStart.unk0, aimStart.unk4, aimStart.unk8, aimDir.unk0, aimDir.unk4, aimDir.unk8, NULL,
+                      NULL, &hit.unk0, &hit.unk4, &hit.unk8, NULL, NULL, NULL, 0.0f)) {
+        randInt = func_150ADA20();
+        randA = func_150ADA68() * 80.0f;
+        func_15143874((s16)(randInt & 0xFF), randA, &jitter[0], &jitter[1]);
         {
+            // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
             void func_15143874(s16, f32, f32 *, f32 *);
 
-            hit.unk0 += off[0];
-            hit.unk8 += off[1];
-            target = &newdir;
-            newdir.unk0 = hit.unk0 - pos2.unk0;
-            newdir.unk4 = hit.unk4 - pos2.unk4;
-            newdir.unk8 = hit.unk8 - pos2.unk8;
+            hit.unk0 += jitter[0];
+            hit.unk8 += jitter[1];
+            tracerDir = &hitDir;
+            hitDir.unk0 = hit.unk0 - muzzle.unk0;
+            hitDir.unk4 = hit.unk4 - muzzle.unk4;
+            hitDir.unk8 = hit.unk8 - muzzle.unk8;
         }
     } else {
-        target = &dir;
+        tracerDir = &aimDir;
     }
     {
+        // matching: the block (needing a declaration, so a prototype) orders the stores to tracer
         f32 func_150ADA68(void);
 
-        rand0 = func_150ADA68();
-        rand1 = func_150ADA68();
+        randA = func_150ADA68();
+        randB = func_150ADA68();
         func_150ADA20();
-        ret = func_151C229C(&pos2, target, 0, 0, 0, 0, 130.0f, 0.007692307699f, rand0 * 18.0f + 29.0f,
-                            rand1 * 400.0f + 262.0f, 100.0f, 0xFF, arg0, 1, 1, 0, 0, 0, 1, 3, 0x1A, 0.0f,
-                            0xFF, -1, 0, arg2, arg3);
+        tracer = func_151C229C(&muzzle, tracerDir, 0, 0, 0, 0, 130.0f, 1.0f / 130.0f, randA * 18.0f + 29.0f,
+                               randB * 400.0f + 262.0f, 100.0f, 255, actor, 1, 1, 0, 0, 0, 1, 3, 26, 0.0f, 255, -1,
+                               0, arg2, arg3);
     }
-    hdr.unk0 = 3;
-    hdr.unk1 = -1;
-    hdr.unk2 = (func_150ADA20() % 3U) + 3;
-    hdr.unk4 = 0;
-    hdr2.unk0 = pos2.unk0;
-    hdr2.unk4 = pos2.unk4;
-    hdr2.unk8 = pos2.unk8;
-    sp88 = (func_150ADA20() % 13U) + 0x5A;
-    func_151602C0(&hdr, &hdr2, sp88, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
-                  arg2, arg3);
-    sp90[1] = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;
-    sp90[0] = (func_150ADA68() * 1357.0f + 968.0f) * 0.1000000015f;
-    sp80 = func_150ADA20();
-    sp88 = func_150ADA20();
-    rand0 = func_150ADA68() * 1077.0f + 4000.0f;
-    func_15102B38(arg0, D_800A1548[arg1], D_800A1518[arg1], D_800A1530[arg1], sp90,
-                  (sp80 % 6U) + 6, (sp88 % 52U) + 0xC1, rand0, &pos2, 0xFF, 0, -1,
-                  arg2, arg3);
-    return ret;
+    flashHeader.unk0 = 3;
+    flashHeader.unk1 = -1;
+    flashHeader.unk2 = (func_150ADA20() % 3U) + 3;
+    flashHeader.unk4 = 0;
+    flashPos.unk0 = muzzle.unk0;
+    flashPos.unk4 = muzzle.unk4;
+    flashPos.unk8 = muzzle.unk8;
+    randInt = (func_150ADA20() % 13U) + 90;
+    func_151602C0(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
+    beamSize[1] = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;
+    beamSize[0] = (func_150ADA68() * 1357.0f + 968.0f) * 0.1000000015f;
+    randInt2 = func_150ADA20();
+    randInt = func_150ADA20();
+    randA = func_150ADA68() * 1077.0f + 4000.0f;
+    func_15102B38(actor, D_800A1548[slot], D_800A1518[slot], D_800A1530[slot], beamSize, (randInt2 % 6U) + 6,
+                  (randInt % 52U) + 193, randA, &muzzle, 255, 0, -1, arg2, arg3);
+    return tracer;
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} Struct150EC3D4;
+/* Returns whether `actor` is not `self`, is active (nonzero interaction_state) and has one of the ids 0-4, 40
+ * or 119. */
+s32 func_150EC3D4(struct127 *actor, struct127 *self) {
+    s32 id;
 
-s32 func_150EC3D4(Struct150EC3D4 *arg0, Struct150EC3D4 *arg1) {
-    s32 temp;
-
-    if (arg0 == arg1) {
-        return 0;
+    if (actor == self) {
+        return FALSE;
     }
-    if (arg0->unk0 == 0) {
-        return 0;
+    if (actor->interaction_state == 0) {
+        return FALSE;
     }
-    temp = arg0->unk4;
-    if (temp == 0xFF) {
-        return 0;
+    id = actor->id;
+    if (id == 0xFF) {
+        return FALSE;
     }
-    if ((temp == 0) || (temp == 1) || (temp == 2) || (temp == 3) || (temp == 4) || (temp == 0x28) || (temp == 0x77)) {
-        return 1;
+    if (id == 0 || id == 1 || id == 2 || id == 3 || id == 4 || id == 40 || id == 119) {
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
-void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
+void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
 
-void func_150EC45C(s32 arg0) {
-    func_151C3B0C(arg0, 1.0f, 1.0f, 1.0f, 0.0f, 0xFF, 0xFF, 0xFF);
+/* Particle callback (table D_8008FBD0): func_151C3B0C with 1.0f, 1.0f, 1.0f, 0.0f and 0xFF masks. */
+void func_150EC45C(void *particle) {
+    func_151C3B0C(particle, 1.0f, 1.0f, 1.0f, 0.0f, 0xFF, 0xFF, 0xFF);
 }

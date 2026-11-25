@@ -1,135 +1,96 @@
 #include <n_libaudio.h>
+#include "n_abi.h"
 
 extern s32 D_800E0E04;
 extern u8 D_800428C4[];
 extern u8 D_800428C6[];
 
-typedef struct { u32 w0; u32 w1; } Cmd;
-
-/* Rare's variant of libultra's ALLowPass (the aux-bus pole filter).
- * 0x0 = cutoff (fc), 0x2 = fgain, 0x8..0x27 = the 16 s16 filter
- * coefficients uploaded with A_LOADADPCM, then one A_POLEF state
- * buffer per main-out channel. */
+/* Rare's variant of libultra's ALLowPass (the aux-bus pole filter), same layout as
+ * the LowPass shadow in init_1E530.c: synthInternals.h has the 0x28/0x2C tail wrong.
+ * fstate holds one A_POLEF state buffer per main-out channel (L at DMEM 0x4E0,
+ * R at 0x650). */
 typedef struct {
-    u8  pad0[0x2];
-    /* 0x2 */  s16   fgain;
-    u8  pad4[0x4];
-    /* 0x8 */  s32   fccoef;       /* base of the 0x20-byte coefficient vector */
-    u8  padC[0x1C];
-    /* 0x28 */ s32   coeffDirty;   /* set when fc/fgain change, cleared once recomputed */
-    /* 0x2C */ void *fstateL;      /* A_POLEF state for main out L (0x4E0) */
-    /* 0x30 */ void *fstateR;      /* A_POLEF state for main out R (0x650) */
+    /* 0x00 */ s16   fc;
+    /* 0x02 */ s16   fgain;
+    /* 0x04 */ s32   unk4;
+    /* 0x08 */ union {
+        s16 fccoef[16];
+        s64 force_aligned;
+    } fcvec;
+    /* 0x28 */ s32   first;      /* set when fc/fgain change, cleared once recomputed */
+    /* 0x2C */ void *fstate[2];
 } LowPass;
 
-typedef struct {
-    u8  pad0[0x40];
+typedef Acmd *(*MainBusHandler)(s32 sampleOffset, Acmd *p, s32 bus);
+
+/* n_libaudio.h leaves the bus structs opaque; Conker's main-bus handler takes the
+ * aux bus index as a third argument, and each aux bus (stride 0x44) carries its
+ * low-pass filter at 0x40. */
+struct N_ALMainBus_s {
+    /* 0x0 */ void          *source;
+    /* 0x4 */ MainBusHandler handler;
+};
+
+struct N_ALAuxBus_s {
+    /* 0x00 */ u8       pad0[0x40];
     /* 0x40 */ LowPass *lowPass;
-} AuxBus;
-
-typedef Cmd *(*Handler)(s32, Cmd *, s32);
-
-typedef struct {
-    u8  pad0[0x4];
-    /* 0x4 */ Handler handler;
-} MainBus;
-
-typedef struct {
-    u8  pad0[0x44];
-    /* 0x44 */ MainBus *mainBus;
-    /* 0x48 */ AuxBus  *auxBus;
-    u8  pad4C[0x4];
-    /* 0x50 */ s32      maxAuxBusses;
-    /* 0x54 */ s32      outputRate;
-} Synth;
+};
 
 void func_1001CF38(void *, f32);
+s32 func_151F2E88(s32 nSamples, Acmd **cmdList);
 
-#define S ((Synth *) n_syn)
-
-Cmd *func_1001FB40(s32 sampleOffset, Cmd *cmdList) {
-    Cmd *p;
-    s32  i;
-    s32  bus;
-    Cmd *clearMain;
-    Cmd *clearAux;
-    Cmd *clearAuxPerBus;
-    Cmd *mixAuxToL;
-    Cmd *mixAuxToR;
-    Cmd *mixAuxToR2;
-    Cmd *mixAuxToR3;
-    Cmd *mixAuxToL2;
-    LowPass *lp;
-    Cmd *loadCoefs;
-    Cmd *polefL;
-    Cmd *polefR;
+/* Append one frame's bus mix-down to the audio command list: clear the main and aux
+ * buffers, then pull every aux bus (starting after the last one with an active
+ * low-pass), mix it into the L/R main outs and run its pole filter on them. */
+Acmd *func_1001FB40(s32 sampleOffset, Acmd *cmdList) {
+    Acmd    *p;
+    s32      i;
+    s32      bus;
 
     p = cmdList;
     if ((D_800E0E04 == 0) || (func_151F2E88(0xB8, &p) == 0)) {
-        clearMain = p++;
-        clearMain->w0 = 0x20004E0;
-        clearMain->w1 = 0x2E0;
-        clearAux = p++;
-        clearAux->w0 = 0x20007C0;
-        clearAux->w1 = 0x2E0;
+        aClearBuffer(p++, 0x4E0, 0x2E0);
+        aClearBuffer(p++, 0x7C0, 0x2E0);
     }
     bus = 0;
-    for (i = 1; i < S->maxAuxBusses; i++) {
-        if (S->auxBus[i].lowPass->fgain > 0) {
+    for (i = 1; i < n_syn->maxAuxBusses; i++) {
+        if (n_syn->auxBus[i].lowPass->fgain > 0) {
             bus = i;
         }
     }
-    for (i = 0; i < S->maxAuxBusses; i++, bus++) {
-        if (bus >= S->maxAuxBusses) {
+    for (i = 0; i < n_syn->maxAuxBusses; i++, bus++) {
+        if (bus >= n_syn->maxAuxBusses) {
             bus = 0;
         }
         if (i != 0) {
-            clearAuxPerBus = p++;
-            clearAuxPerBus->w0 = 0x20007C0;
-            clearAuxPerBus->w1 = 0x2E0;
+            aClearBuffer(p++, 0x7C0, 0x2E0);
         }
-        p = S->mainBus->handler(sampleOffset, p, bus);
+        p = n_syn->mainBus->handler(sampleOffset, p, bus);
         if (D_800428C4[bus] != 0) {
             if (D_800428C6[bus] != 0) {
-                mixAuxToL = p++;
-                mixAuxToL->w0 = 0xC008000;
-                mixAuxToL->w1 = 0x7C004E0;
-                goto block1;
+                aMix(p++, 0, 0x8000, 0x7C0, 0x4E0);
+            } else {
+                aMix(p++, 0, 0x7FFF, 0x7C0, 0x650);
             }
-            mixAuxToR = p++;
-            mixAuxToR->w0 = 0xC007FFF;
-            mixAuxToR->w1 = 0x7C00650;
-        block1:
-            ;
         } else {
             if (D_800428C6[bus] != 0) {
-                mixAuxToR2 = p++;
-                mixAuxToR2->w0 = 0xC008000;
-                mixAuxToR2->w1 = 0x7C00650;
-                goto block2;
+                aMix(p++, 0, 0x8000, 0x7C0, 0x650);
+            } else {
+                aMix(p++, 0, 0x7FFF, 0x7C0, 0x650);
             }
-            mixAuxToR3 = p++;
-            mixAuxToR3->w0 = 0xC007FFF;
-            mixAuxToR3->w1 = 0x7C00650;
-        block2:
-            mixAuxToL2 = p++;
-            mixAuxToL2->w0 = 0xC007FFF;
-            mixAuxToL2->w1 = 0x7C004E0;
+            aMix(p++, 0, 0x7FFF, 0x7C0, 0x4E0);
         }
-        if (S->auxBus[bus].lowPass->fgain > 0) {
-            lp = S->auxBus[bus].lowPass;
-            if (lp->coeffDirty != 0) {
-                func_1001CF38(lp, (f32) S->outputRate);
+        if (n_syn->auxBus[bus].lowPass->fgain > 0) {
+            LowPass *lp = n_syn->auxBus[bus].lowPass;
+
+            if (lp->first != 0) {
+                func_1001CF38(lp, n_syn->outputRate);
             }
-            loadCoefs = p++;
-            loadCoefs->w0 = 0xB000020;
-            loadCoefs->w1 = osVirtualToPhysical(&lp->fccoef);
-            polefL = p++;
-            polefL->w0 = 0xE0004E0;
-            polefL->w1 = osVirtualToPhysical(lp->fstateL) & 0xFFFFFF & 0xFFFFFF;
-            polefR = p++;
-            polefR->w0 = 0xE000650;
-            polefR->w1 = osVirtualToPhysical(lp->fstateR) & 0xFFFFFF & 0xFFFFFF;
-            lp->coeffDirty = 0;
+            aLoadADPCM(p++, 0x20, osVirtualToPhysical(&lp->fcvec));
+            // matching: the ROM masks the state address twice (once here, once in the macro)
+            n_aPoleFilter(p++, 0, 0x4E0, 0, osVirtualToPhysical(lp->fstate[0]) & 0xFFFFFF);
+            n_aPoleFilter(p++, 0, 0x650, 0, osVirtualToPhysical(lp->fstate[1]) & 0xFFFFFF);
+            lp->first = 0;
         }
     }
     return p;

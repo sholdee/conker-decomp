@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * A trail effect attached to a character (struct127): a ring buffer of points that is drawn as a
@@ -112,34 +113,9 @@ typedef struct {
     s8 unk59;
 } ParticleParams;
 
-/* Third argument of func_151407D0. */
-typedef struct {
-    u8 kind;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 color[4];
-    f32 unk14;
-    f32 unk18;
-    struct17 pos;
-    struct17 end;
-    f32 scale[3];
-    s32 flags;
-    u8 unk44, unk45, unk46, unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} ParticleDesc;
-
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3);
-Particle *func_151407D0(ParticleParams *, s32, ParticleDesc *, u8, u8, u8, u8, s8, u8, s32);
+Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
@@ -147,7 +123,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     TrailSpawn spawn;
     TrailState init;
     struct126 *s126;
-    struct17 end;
+    vertex end;
     TrailState *state;
 
     spawn.maxPoints = 25;
@@ -173,9 +149,9 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         spawn.pos.unk0 = 0.0f;
         spawn.pos.unk4 = 0.0f;
         spawn.pos.unk8 = 0.0f;
-        end.unk0 = 0.0f;
-        end.unk8 = 0.0f;
-        end.unk4 = 500.0f;
+        end.x = 0.0f;
+        end.z = 0.0f;
+        end.y = 500.0f;
     }
     // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
     state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
@@ -193,7 +169,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     }
     {
         ParticleParams params;
-        ParticleDesc desc;
+        ParticleDef desc;
 
         params.unk0 = 200.0f;
         params.unk4 = 40.0f;
@@ -224,35 +200,35 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         params.unk57 = 0;
         params.unk58 = 0;
         params.unk59 = -1;
-        desc.kind = 0x15;
-        desc.unk1 = 3;
-        desc.unk2 = 0x5503;
-        desc.unk4 = 300;
-        desc.unk8 = 0;
-        desc.unkC = 0;
-        desc.color[0] = 0xFF;
-        desc.color[1] = 0xFF;
-        desc.color[2] = 0xFF;
-        desc.color[3] = 0xFF;
-        desc.unk14 = 100.0f;
-        desc.unk18 = 100.0f;
-        desc.pos = spawn.pos;
-        desc.end = end;
-        desc.scale[0] = 1.0f;
-        desc.scale[1] = 1.0f;
-        desc.scale[2] = 1.0f;
+        desc.texture = 0x15;
+        desc.type = 3;
+        desc.renderModes = 0x5503;
+        desc.lifetime = 300;
+        desc.frame = 0;
+        desc.frameSpeed = 0;
+        desc.rgba[0] = 0xFF;
+        desc.rgba[1] = 0xFF;
+        desc.rgba[2] = 0xFF;
+        desc.rgba[3] = 0xFF;
+        desc.width = 100.0f;
+        desc.height = 100.0f;
+        desc.pos = *(vertex *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.rot = end;
+        desc.scale.x = 1.0f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         desc.flags = 0xCD2006;
         desc.unk44 = 0xFF;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 6;
         desc.unk48 = 0;
-        desc.unk4C = 0xFF;
+        desc.viewportMask = 0xFF;
         state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
     }
     {
         ParticleParams params;
-        ParticleDesc desc;
+        ParticleDef desc;
         ParticleTail tail;
 
         tail.timer = 0;
@@ -284,30 +260,30 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         params.unk1C = 0.8000000119f;
         params.unk20 = 9.999999975e-07f;
         // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
-        desc.kind = *(D_800A09C0 + (func_150ADA20() & 3));
-        desc.unk1 = 3;
-        desc.unk2 = 0x2203;
-        desc.unk4 = 300;
-        desc.unk8 = 0;
-        desc.unkC = 0;
-        desc.color[0] = 0xFF;
-        desc.color[1] = 0xFF;
-        desc.color[2] = 0xFF;
-        desc.color[3] = 0xFF;
-        desc.unk14 = 100.0f;
-        desc.unk18 = 100.0f;
-        desc.pos = spawn.pos;
-        desc.end = end;
+        desc.texture = *(D_800A09C0 + (func_150ADA20() & 3));
+        desc.type = 3;
+        desc.renderModes = 0x2203;
+        desc.lifetime = 300;
+        desc.frame = 0;
+        desc.frameSpeed = 0;
+        desc.rgba[0] = 0xFF;
+        desc.rgba[1] = 0xFF;
+        desc.rgba[2] = 0xFF;
+        desc.rgba[3] = 0xFF;
+        desc.width = 100.0f;
+        desc.height = 100.0f;
+        desc.pos = *(vertex *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.rot = end;
         desc.flags = 0xCD2006;
         desc.unk44 = 0xFF;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 7;
         desc.unk48 = 0;
-        desc.unk4C = 0xFF;
-        desc.scale[0] = 1.0f;
-        desc.scale[1] = 1.0f;
-        desc.scale[2] = 1.0f;
+        desc.viewportMask = 0xFF;
+        desc.scale.x = 1.0f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
         if (state->effects[1] != NULL) {
             memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
@@ -315,7 +291,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     }
 }
 
-void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4);
+void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4);
 extern f32 func_15143E64(struct17 *);
 extern s32 func_1515C0F8(struct127 *, struct17 **);
 
@@ -898,55 +874,12 @@ s32 func_150D4CC4(Particle *particle) {
     return 1;
 }
 
-/* Spark description passed to func_15130280. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 kind;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} SparkSpawn; // size 0x70
-
-extern void *func_15130280(SparkSpawn *, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
-    SparkSpawn spawn;
+void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
+    ParticleDesc spawn;
     s32 count;
     s16 yaw;
     f32 scale;
@@ -954,50 +887,50 @@ void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
     s32 r2;
 
     count = func_150ADA20() % 11U + 10;
-    spawn.unk8 = 0x2203;
+    spawn.renderMode = 0x2203;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0xFF;
-    spawn.unk19 = 0xFF;
-    spawn.unk1A = 0xFF;
-    spawn.unk1C = 0xFF;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0xFF;
+    spawn.g = 0xFF;
+    spawn.b = 0xFF;
+    spawn.a = 0xFF;
+    spawn.r2 = 0xFF;
+    spawn.g2 = 0xFF;
+    spawn.b2 = 0xFF;
+    spawn.brightness = 0xFF;
     spawn.pos = *pos;
-    spawn.unk3C = *(struct17 *)&D_800A5480;
-    spawn.unk1E = 10;
-    spawn.unk20 = 25;
-    spawn.unk22 = 1;
+    spawn.offset = *(vertex *)&D_800A5480;
+    spawn.fadeStart = 10;
+    spawn.fadeRate = 25;
+    spawn.scaleStart = 1;
     spawn.flags = 0x4C207;
-    spawn.unk60 = 0;
-    spawn.unk61 = 7;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
+    spawn.primColorMode = 0;
+    spawn.envColorMode = 7;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 0;
+    spawn.viewMask = 0;
+    spawn.views = 0xFF;
     yaw = (s16)(angle * 182.0444489f);
     yaw >>= 8;
     yaw += 0x40;
-    spawn.unk24 = 1.0f;
+    spawn.scaleRate = 1.0f;
     do {
         scale = func_150ADA68() * 0.2230000049f + 0.8050000668f;
-        spawn.kind = D_800A09C0[func_150ADA20() & 3];
-        spawn.unkA = func_150ADA20() % 18U + 27;
-        spawn.unk1B = func_150ADA20() % 156U + 100;
-        spawn.unk28 = spawn.unk2C = func_150ADA68() * 233.0f + 199.0f;
+        spawn.texture = D_800A09C0[func_150ADA20() & 3];
+        spawn.timer = func_150ADA20() % 18U + 27;
+        spawn.alpha = func_150ADA20() % 156U + 100;
+        spawn.width = spawn.height = func_150ADA68() * 233.0f + 199.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.unk0);
-        spawn.vel.unk0 -= vel->unk0 * scale;
-        spawn.vel.unk8 -= vel->unk8 * scale;
+        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.x);
+        spawn.vel.x -= vel->unk0 * scale;
+        spawn.vel.z -= vel->unk8 * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
-        spawn.unk54 = func_150ADA68() * 0.6460000277f + -0.7940000296f;
+        spawn.gravity = func_150ADA68() * 0.6460000277f + -0.7940000296f;
         spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;

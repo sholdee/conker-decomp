@@ -2,133 +2,124 @@
 #include "functions.h"
 #include "variables.h"
 
-
+/* Number of live strobe effects (read by game_58F80.c). */
 extern u8 D_800D9900;
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8);
 
-struct sub150D2110 {
-    u8  unk0;
-    u8  pad1[3];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  unk14;
-    u8  unk15;
-    u8  pad16[2];
-};
+/* Per-effect data of a strobe: the screen alternates between lit (litTime) and dark (darkTime). */
+typedef struct {
+    /* 0x00 */ u8 lit;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ f32 timer; /* position in the current period */
+    /* 0x08 */ f32 litTime;
+    /* 0x0C */ f32 darkTime;
+    /* 0x10 */ f32 period; /* litTime + darkTime */
+    /* 0x14 */ u8 litAlpha;
+    /* 0x15 */ u8 darkAlpha;
+    /* 0x16 */ u8 pad16[2];
+} StrobeData; /* size 0x18 */
 
-void func_150D2110(s16 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6) {
-    struct sub150D2110 sp38;
-    struct260 *temp_v0;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ StrobeData data;
+} StrobeEffect;
+
+/* Per-effect data of a strobe spawner: spawns a strobe after a random delay, then rearms. */
+typedef struct {
+    /* 0x00 */ s32 minDelay;
+    /* 0x04 */ s32 delayRange;
+    /* 0x08 */ s32 delay; /* frames until the next strobe */
+    /* 0x0C */ s16 minDuration;
+    /* 0x0E */ s16 durationRange;
+    /* 0x10 */ f32 litTime;
+    /* 0x14 */ f32 darkTime;
+    /* 0x18 */ u8 litAlpha;
+    /* 0x19 */ u8 darkAlpha;
+} StrobeSpawnerData;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x28 */ StrobeSpawnerData data;
+} StrobeSpawner;
+
+Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
+
+/* Spawns a strobe effect lasting `duration` frames. */
+void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 darkAlpha, u8 owner, s32 kind) {
+    StrobeData data;
+    StrobeEffect *effect;
 
     D_800D9900++;
 
-    sp38.unk8 = arg1;
-    sp38.unkC = arg2;
-    sp38.unk10 = arg1 + arg2;
-    sp38.unk0 = 0;
-    sp38.unk4 = 0.0f;
-    sp38.unk14 = arg3;
-    sp38.unk15 = arg4;
+    data.litTime = litTime;
+    data.darkTime = darkTime;
+    data.period = litTime + darkTime;
+    data.lit = FALSE;
+    data.timer = 0.0f;
+    data.litAlpha = litAlpha;
+    data.darkAlpha = darkAlpha;
 
-    temp_v0 = func_15149130(arg0, -1, 0x2F, 2, 1, 0x26, (struct37 *)0x18, arg5, arg6);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x28, &sp38, 0x18);
+    effect = (StrobeEffect *)func_15149130(duration, -1, 0x2F, 2, 1, 0x26, (struct37 *)sizeof(data), owner, kind);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-extern f32 D_800BE9A4;
+/* Strobe update: advances the timer and sets `lit` for the first litTime of each period. */
+void func_150D21CC(StrobeEffect *effect) {
+    StrobeData *data = &effect->data;
 
-struct sub150D21CC {
-    u8  unk0;
-    u8  pad1[3];
-    f32 unk4;
-    f32 unk8;
-    u8  padC[4];
-    f32 unk10;
-};
-
-struct obj150D21CC {
-    u8  pad0[0x28];
-    struct sub150D21CC unk28;
-};
-
-struct colorFadeObj {
-    u8 pad_0x0[0x28];
-    u8 field_0x28;
-    u8 pad_0x29[0x13];
-    u8 field_0x3C;
-    u8 field_0x3D;
-};
-
-void func_150D21CC(struct obj150D21CC *arg0) {
-    struct sub150D21CC *p = &arg0->unk28;
-
-    arg0->unk28.unk4 += D_800BE9A4;
-    if (arg0->unk28.unk10 < arg0->unk28.unk4) {
-        do {
-            p->unk4 -= p->unk10;
-        } while (p->unk10 < p->unk4);
+    data->timer += D_800BE9A4;
+    while (data->timer > data->period) {
+        data->timer -= data->period;
     }
-    if (p->unk4 <= p->unk8) {
-        p->unk0 = 1;
+    if (data->timer <= data->litTime) {
+        data->lit = TRUE;
         func_1515D4D4(255, 255, 255, 255);
     } else {
-        p->unk0 = 0;
+        data->lit = FALSE;
     }
 }
 
-void func_150D22D4(s32 arg0);
+void func_150D22D4(StrobeEffect *effect);
 
-void func_150D227C(s32 arg0) {
-    func_150D22D4(arg0);
-    func_1514933C((struct260 *)arg0);
+/* Strobe free handler. */
+void func_150D227C(StrobeEffect *effect) {
+    func_150D22D4(effect);
+    func_1514933C((struct260 *)effect);
 }
 
-void func_150D22A8(s32 arg0) {
-    func_150D22D4(arg0);
-    func_15149368((struct260 *)arg0);
+void func_150D22A8(StrobeEffect *effect) {
+    func_150D22D4(effect);
+    func_15149368((struct260 *)effect);
 }
 
-extern u8 D_800D9900;
-
-void func_150D22D4(s32 arg0) {
+/* Unregisters a strobe from the live count. */
+void func_150D22D4(StrobeEffect *effect) {
     D_800D9900--;
 }
 
-s32 func_1517F08C(s32, s32, s32, s32, s32, s32);
-
-s32 func_150D22F4(s32 arg0, struct colorFadeObj *arg1, s32 arg2) {
-    if (arg1->field_0x28 == 1) {
-        arg0 = func_1517F08C(arg0, arg1->field_0x3C, 0xFF, 0xFF, 0xFF, (s16)arg2);
+/* Strobe draw: fills `view` with white at litAlpha while lit, else black at darkAlpha. */
+Gfx *func_150D22F4(Gfx *gfx, StrobeEffect *effect, s16 view) {
+    if (effect->data.lit == TRUE) {
+        gfx = func_1517F08C(gfx, effect->data.litAlpha, 255, 255, 255, view);
     } else {
-        arg0 = func_1517F08C(arg0, arg1->field_0x3D, 0, 0, 0, (s16)arg2);
+        gfx = func_1517F08C(gfx, effect->data.darkAlpha, 0, 0, 0, view);
     }
-    return arg0;
+    return gfx;
 }
 
-struct sub150D2374 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    s16 unkE;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-};
+/* Strobe spawner update: when the delay runs out, spawns a strobe of random duration and rearms. */
+void func_150D2374(StrobeSpawner *spawner) {
+    StrobeSpawnerData *data = &spawner->data;
 
-void func_150D2374(u8 *arg0) {
-    struct sub150D2374 *p;
-    s32 temp;
-
-    p = (struct sub150D2374 *)(arg0 + 0x28);
-    p->unk8 -= D_800BE9E4;
-    if (p->unk8 < 0) {
-        temp = func_150ADA20();
-        func_150D2110((s16)((temp % (u32)(p->unkE + 1)) + p->unkC), p->unk10, p->unk14, p->unk18, p->unk19, arg0[0xC], arg0[1]);
-        p->unk8 = (func_150ADA20() % (u32)(p->unk4 + 1)) + p->unk0;
+    data->delay -= D_800BE9E4;
+    if (data->delay < 0) {
+        func_150D2110(func_150ADA20() % (u32)(data->durationRange + 1) + data->minDuration, data->litTime,
+                      data->darkTime, data->litAlpha, data->darkAlpha, spawner->unkC, spawner->unk1);
+        data->delay = func_150ADA20() % (u32)(data->delayRange + 1) + data->minDelay;
     }
 }

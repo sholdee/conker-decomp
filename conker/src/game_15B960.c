@@ -4,29 +4,34 @@
 
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern f32 D_800A3730;
+extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the bytes
 
-void func_1512E4B0(struct108 *arg0) {
-    s32 idx;
+/*
+ * Aims `camera` at object 0 (object 1 when camera->unk23D == 3): unk2BC..unk2C4 become the object's
+ * position raised by 150, and unk2F8..unk300 a point 60 units from there on the same height, along
+ * the heading (tenths of a degree) unk40 * 10 less the s16 angle in the upper half of unk2E4.
+ */
+void func_1512E4B0(struct108 *camera) {
+    s32 index;
     struct127 *obj;
-    s32 temp;
-    f32 angle;
+    s16 heading;
+    f32 radians;
 
-    idx = 0;
-    if (arg0->unk23D == 3) {
-        idx = 1;
+    index = 0;
+    if (camera->unk23D == 3) {
+        index = 1;
     }
 
-    obj = &D_800CC2D0[idx];
-    arg0->unk2BC = obj->x_position;
-    arg0->unk2C0 = obj->y_position + 150.0f;
-    arg0->unk2C4 = obj->z_position;
+    obj = &D_800CC2D0[index];
+    camera->unk2BC = obj->x_position;
+    camera->unk2C0 = obj->y_position + 150.0f;
+    camera->unk2C4 = obj->z_position;
 
-    temp = (s16)-*(s16 *)((u8 *)obj + 0x2E4);
-    temp = (s16)(s32)((f32)temp + (obj->unk40 * 10.0f));
-    angle = ((f32)temp * D_800A3730) / 1800.0f;
+    heading = -*(s16 *)&obj->unk2E4;
+    heading += obj->unk40 * 10.0f;
+    radians = (heading * D_800A3730) / 1800.0f;
 
-    arg0->unk2F8 = arg0->unk2BC - (sinf(angle) * 60.0f);
-    arg0->unk2FC = arg0->unk2C0;
-    arg0->unk300 = arg0->unk2C4 - (cosf(angle) * 60.0f);
+    camera->unk2F8 = camera->unk2BC - sinf(radians) * 60.0f;
+    camera->unk2FC = camera->unk2C0;
+    camera->unk300 = camera->unk2C4 - cosf(radians) * 60.0f;
 }

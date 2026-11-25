@@ -3,64 +3,69 @@
 #include "variables.h"
 
 
+/* A texture as the sprite and tile loaders take it (same layout as game_C2350.c's Texture). */
 typedef struct {
-    u32 unk0;
-    u16 unk4;
-    u16 unk6;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-} TexDesc_150D1810;
+    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
+    /* 0x4 */ u16 width;
+    /* 0x6 */ u16 height;
+    /* 0x8 */ u8 fmt;    // G_IM_FMT_*
+    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
+    /* 0xA */ u8 frames; // animation frames (0 = still)
+} Texture;
 
-extern s32 D_800DBE80;
-extern Vtx *D_800DBE88[];
+extern void *D_800DBE80; // the current sky's data (here its gradient texture)
+extern Vtx *D_800DBE88[][2]; // per view, per framebuffer
 extern Mtx *D_800DBEB0;
 extern Mtx D_80089470;
-Gfx *func_1501A680(Gfx *arg0);
-Gfx *func_150950D4(Gfx *, TexDesc_150D1810 *, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_151102CC(f32 a0[4][4], f32 a1, f32 a2, f32 a3);
+Gfx *func_1501A680(Gfx *gfx);
+Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
+void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
 void guMtxF2L(f32 mf[4][4], Mtx *m);
 
-Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f32 arg6) {
-    f32 mtx[4][4];
-    f32 mf[4][4];
-    s32 a;
-    s32 b;
-    s32 tc;
+/* Draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient texture D_800DBE80, rolled by `roll` and with its
+ * t window (rows top..bottom, chosen by D_800BE9F0) scrolled by tScroll. */
+Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll) {
+    f32 rotation[4][4];
+    f32 viewProj[4][4];
+    s32 top;
+    s32 bottom;
+    s32 tOffset;
     Vtx *vtx;
-    TexDesc_150D1810 tex;
+    Texture tex;
 
-    tc = (s32)(arg4 * 81.0f);
+    tOffset = (s32)(tScroll * 81.0f);
     if ((D_800BE9F0 == 0x33) || (D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x3F)) {
-        a = -0x62;
-        b = 0x27;
+        top = -98;
+        bottom = 39;
     } else {
-        a = -0x13;
-        b = 0x65;
+        top = -19;
+        bottom = 101;
     }
-    tex.unk0 = D_800DBE80;
-    tex.unk4 = 4;
-    tex.unk6 = 0x100;
-    tex.unk8 = 0;
-    tex.unk9 = 3;
-    tex.unkA = 0;
+    tex.addr = (u32)D_800DBE80;
+    tex.width = 4;
+    tex.height = 256;
+    tex.fmt = G_IM_FMT_RGBA;
+    tex.siz = G_IM_SIZ_32b;
+    tex.frames = 0;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
-    gDPSetOtherMode(gfx++, 0x082C0F, 0x0F0A4004);
-    { Gfx *g = gfx++; g->words.w0 = 0xFCFFFFFF; g->words.w1 = 0xFFFCF279; }
-    gfx = (Gfx *)func_1501A490((s32)gfx, *(s16 *)((u8 *)&D_80082FA4 + 2), 0, 0, 0, 0);
+    // 0xF: the low nibble below G_MDSFT_ALPHADITHER is set in the original word
+    gDPSetOtherMode(gfx++, G_TP_PERSP | G_TF_BILERP | G_TC_FILT | 0xF,
+                    G_RM_OPA_SURF | G_RM_OPA_SURF2 | G_ZS_PRIM);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
     gfx = func_1501A680(gfx);
-    gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
-    func_151102CC(mtx, 0.0f, 0.0f, arg6);
-    func_150A7A48(mtx, (f32 (*)[4])((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0xBC), mf);
-    guMtxF2L(mf, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
+    gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
+    func_151102CC(rotation, 0.0f, 0.0f, roll);
+    func_150A7A48(rotation, D_800BE628[D_80082FA4].projection, viewProj);
+    guMtxF2L(viewProj, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPPerspNormalize(gfx++, *(u16 *)((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0xB8));
-    vtx = ((Vtx *(*)[2])D_800DBE88)[D_80082FA4][D_800BE9C0];
-    vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((a + 0x100) << 5) + tc;
-    vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((b + 0x1FF) << 5) + tc;
+    gSPPerspNormalize(gfx++, D_800BE628[D_80082FA4].perspNorm);
+    vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
+    vtx[0].v.tc[1] = vtx[1].v.tc[1] = ((top + 256) << 5) + tOffset;
+    vtx[2].v.tc[1] = vtx[3].v.tc[1] = ((bottom + 511) << 5) + tOffset;
     gSPVertex(gfx++, vtx, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     return gfx;

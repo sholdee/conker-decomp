@@ -2,112 +2,98 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_1A37E0[];
+/* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
 extern u8 D_800D9F68[];
 
-#define WGFX1510CDB8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-extern u16 D_800D9E70[4][3];
-extern u8 D_800D9E88[4][3];
-extern u8 D_800D9E98[4][3];
-extern u8 D_800D9EA8[4][3];
-extern u8 D_800D9EB4[3];
-extern u8 D_800D9EB8[4][3];
-
-extern f32 func_150489B0(u8);
-void func_1510CB10(s32 arg0);
-Gfx *func_1510CDB8(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1510D374(s32 arg0);
-void func_1510D608(s32 arg0, s32 arg1);
-
-void func_1510D694(s32);
+void func_1510D608(s32 index, s32 lifetime);
 extern s32 func_10004074(s16 *);
-void func_1510D630(s16 *arg0);
-void func_1510D694(s32 arg0);
 
-void func_1510D720(s32 arg0) {
-    if ((s8)D_800BC448[arg0] != 0) {
-        if (D_800D9F68[arg0] != 0) {
-            if (--D_800D9F68[arg0] == 0) {
-                if (arg0 < D_800D9F58) {
-                    D_800D9F58 = arg0;
+/*
+ * Drops one use of texture `index`. When the last use goes, the texture is queued for
+ * aging (the D_800D9F58..D_800D9F5C range) with lifetime 2.
+ */
+void func_1510D720(s32 index) {
+    if ((s8)D_800BC448[index] != 0) {
+        if (D_800D9F68[index] != 0) {
+            if (--D_800D9F68[index] == 0) {
+                if (index < D_800D9F58) {
+                    D_800D9F58 = index;
                 }
-                if (D_800D9F5C < arg0) {
-                    D_800D9F5C = arg0;
+                if (D_800D9F5C < index) {
+                    D_800D9F5C = index;
                 }
-                func_1510D608(arg0, 2);
+                func_1510D608(index, 2);
             }
         }
     }
 }
 
-void func_1510D7AC(s32 arg0) {
-    register s8 *flag;
+/*
+ * Drops one use of texture `index` and frees it right away when the last use goes
+ * (including its packed buffer when flagged 0x40).
+ */
+void func_1510D7AC(s32 index) {
+    s8 *lifetime;
 
-    flag = (s8 *)&D_800BC448[arg0];
-    if (*flag != 0) {
-        if (D_800D9F68[arg0] != 0) {
-            if (--D_800D9F68[arg0] == 0) {
-                if (*flag & 0x40) {
-                    func_10004074(*(s16 **)D_800B0E58[arg0]);
+    lifetime = (s8 *)&D_800BC448[index];
+    if (*lifetime != 0) {
+        if (D_800D9F68[index] != 0) {
+            if (--D_800D9F68[index] == 0) {
+                if (*lifetime & 0x40) {
+                    func_10004074(*(s16 **)D_800B0E58[index]);
                 }
-                func_10004074((s16 *)D_800B0E58[arg0]);
-                D_800B0E58[arg0] = -1;
-                *flag = 0;
+                func_10004074((s16 *)D_800B0E58[index]);
+                D_800B0E58[index] = -1;
+                *lifetime = 0;
             }
         }
     }
 }
 
-extern u8 D_800D9ED0;
+/* An object's texture and palette addresses, bound to RSP segments when it is drawn. */
+typedef struct {
+    /* 0x0 */ void *object;
+    /* 0x4 */ s32 texture;
+    /* 0x8 */ s32 palette; // 0 when there is none
+    /* 0xC */ u8 textureSegment;
+    /* 0xD */ u8 paletteSegment;
+} TextureBinding; // size 0x10
 
+extern u8 D_800D9ED0; // number of bindings in use
+extern TextureBinding D_800D9ED8[8];
+
+/* Clears all texture bindings. */
 void func_1510D864(void) {
     D_800D9ED0 = 0;
 }
 
-extern u8 D_800D9ED0;
-struct Entry1510D874
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-  u8 unkC;
-  u8 unkD;
-};
-extern struct Entry1510D874 D_800D9ED8[];
-void func_1510D874(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
-{
-  struct Entry1510D874 *entry;
-  u8 idx = D_800D9ED0;
-  if (D_800D9ED0 < 8)
-  {
-    struct Entry1510D874 *e = &D_800D9ED8[idx];
-    e->unk0 = arg0;
-    e->unk4 = arg1;
-    e->unk8 = arg2;
-    entry = e;
-    entry->unkC = arg3;
-    e->unkD = arg4;
-    D_800D9ED0 = idx + 1;
-  }
+/* Adds a texture binding for `object`, if there is room. */
+void func_1510D874(void *object, s32 texture, s32 palette, s32 textureSegment, s32 paletteSegment) {
+    TextureBinding *binding;
+    u8 count = D_800D9ED0;
+
+    if (D_800D9ED0 < 8) {
+        binding = &D_800D9ED8[count];
+        binding->object = object;
+        binding->texture = texture;
+        binding->palette = palette;
+        binding->textureSegment = textureSegment;
+        binding->paletteSegment = paletteSegment;
+        D_800D9ED0 = count + 1;
+    }
 }
 
-
-Gfx *func_1510D8C0(Gfx *gfx, s32 arg1) {
+/* Emits the segment commands for every texture binding of `object`. */
+Gfx *func_1510D8C0(Gfx *gfx, void *object) {
     s32 i;
 
     for (i = 0; i < D_800D9ED0; i++) {
-        if (arg1 == D_800D9ED8[i].unk0) {
-            struct Entry1510D874 *e = &D_800D9ED8[i];
+        if (object == D_800D9ED8[i].object) {
+            TextureBinding *binding = &D_800D9ED8[i];
 
-            gSPSegment(gfx++, e->unkC, e->unk4);
-            if (e->unk8 != 0) {
-                gSPSegment(gfx++, e->unkD, e->unk8);
+            gSPSegment(gfx++, binding->textureSegment, binding->texture);
+            if (binding->palette != 0) {
+                gSPSegment(gfx++, binding->paletteSegment, binding->palette);
             }
         }
     }

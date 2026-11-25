@@ -54,7 +54,7 @@ typedef struct Game1F1F60Hit {
     /* 0x59 */ u8 type;
     /* 0x5A */ s8 field_5A;
     /* 0x5B */ u8 pad5B;
-    /* 0x5C */ struct131 *field_5C;
+    /* 0x5C */ WorldObject *field_5C;
     /* 0x60 */ s32 field_60;
 } Game1F1F60Hit; /* 0x64 */
 

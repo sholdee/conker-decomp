@@ -3,185 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
-
-s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return func_10003C6C(arg0, arg1, arg2, 0, arg3);
-}
-
-typedef struct MemBlock {
-    struct MemBlock *next;
-    struct MemBlock *prev;
-    u32 size;
-    struct MemBlock *nextFree;
-    struct MemBlock *prevFree;
-} MemBlock;
-
-extern s32 D_800380D0;
-struct S10 { s16 v[5]; };
-extern struct S10 D_8002AC34;
-extern struct S10 D_8002AC40;
-
-s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 arg4) {
-    MemBlock *blk;
-    MemBlock *cur;
-    u32 pad;
-    u32 sz;
-    MemBlock *newFree;
-    u32 rem;
-    MemBlock *prev;
-    MemBlock *nf;
-    MemBlock *pf;
-    s32 off;
-    s32 mask;
-    struct S10 offs;
-    struct S10 masks;
-    OSIntMask intMask;
-
-    offs = D_8002AC34;
-    masks = D_8002AC40;
-    D_800380C0 = size;
-    D_800380C4 = tag;
-    D_800380C8 = align;
-    D_800380CC = fromEnd;
-    D_800380D0 = arg4;
-    if (align == 2) {
-        size = (size + 0xF) & ~0xF;
-    }
-    if (size < 8) {
-        size = 8;
-    }
-    size = (size + 3) & ~3;
-    off = offs.v[align];
-    mask = masks.v[align];
-    if ((arg4 == 1) && (D_8002AC30 < 0x7800)) {
-        return 0;
-    }
-    intMask = osSetIntMask(1);
-    if (fromEnd == 0) {
-        cur = (MemBlock *)D_800380B8;
-    } else {
-        cur = (MemBlock *)D_800380BC;
-    }
-    while (1) {
-        if (cur == NULL) {
-            osSetIntMask(intMask);
-            if (arg4 == 0) {
-                D_8003C8E0 = 0x0C000042;
-                func_150AD770();
-            }
-            return 0;
-        }
-        blk = (MemBlock *)((u32)((u8 *)cur + off + 0xC) & mask);
-        sz = cur->size;
-        if ((u32)((u8 *)cur + sz + 0xC) >= (u32)blk + size) {
-            break;
-        }
-        if (fromEnd == 0) {
-            cur = cur->nextFree;
-        } else {
-            cur = cur->prevFree;
-        }
-    }
-    if (fromEnd == 0) {
-        blk = (MemBlock *)((u32)blk - 0xC);
-        newFree = (MemBlock *)((u32)blk + size + 0xC);
-        rem = ((u32)cur + sz) - ((u32)blk + size);
-    } else {
-        blk = (MemBlock *)(((((u32)cur + sz) - size + 0xC) & mask) - 0xC);
-        newFree = cur->next;
-        rem = (u32)blk - (u32)cur;
-    }
-    prev = cur->prev;
-    nf = cur->nextFree;
-    pf = cur->prevFree;
-    if (fromEnd == 0) {
-        if (rem >= 0x14) {
-            newFree->next = cur->next;
-            newFree->size = rem - 0xC;
-            if (newFree->next != NULL) {
-                newFree->next->prev = newFree;
-            }
-            rem = 0;
-            newFree->nextFree = nf;
-            newFree->prevFree = pf;
-            if (nf != NULL) {
-                nf->prevFree = newFree;
-            } else {
-                D_800380BC = (s32 *)newFree;
-            }
-            if (pf != NULL) {
-                pf->nextFree = newFree;
-            } else {
-                D_800380B8 = (struct54 *)newFree;
-            }
-        } else {
-            newFree = cur->next;
-            if (nf != NULL) {
-                nf->prevFree = pf;
-            } else {
-                D_800380BC = (s32 *)pf;
-            }
-            if (pf != NULL) {
-                pf->nextFree = nf;
-            } else {
-                D_800380B8 = (struct54 *)nf;
-            }
-        }
-        if (prev == NULL) {
-            D_800380B4 = (struct54 *)blk;
-        } else {
-            prev->next = blk;
-            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
-        }
-        blk->next = newFree;
-        blk->prev = prev;
-        blk->size = (tag << 24) | (rem + size);
-        if (newFree != NULL) {
-            newFree->prev = blk;
-        }
-    } else if (rem >= 0x14) {
-        blk->next = cur->next;
-        blk->prev = cur;
-        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
-        if (blk->next != NULL) {
-            blk->next->prev = blk;
-        }
-        cur->next = blk;
-        cur->size = rem - 0xC;
-    } else {
-        blk = (MemBlock *)((((u32)cur + off + 0xC) & mask) - 0xC);
-        blk->next = newFree;
-        blk->prev = prev;
-        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
-        if (nf != NULL) {
-            nf->prevFree = pf;
-        } else {
-            D_800380BC = (s32 *)pf;
-        }
-        if (pf != NULL) {
-            pf->nextFree = nf;
-        } else {
-            D_800380B8 = (struct54 *)nf;
-        }
-        if (prev == NULL) {
-            D_800380B4 = (struct54 *)blk;
-        } else {
-            prev->next = blk;
-            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
-        }
-        if (blk->next != NULL) {
-            blk->next->prev = blk;
-        }
-        if (blk->prev != NULL) {
-            blk->prev->next = blk;
-        }
-    }
-    if ((struct54 *)cur == D_800380B0) {
-        func_1000440C();
-    }
-    osSetIntMask(intMask);
-    return (s32)blk + 0xC;
-}
+/*
+ * Heap block header. Every block (free or allocated) starts with one; the
+ * payload handed out by func_10003C6C starts right after it. The top byte of
+ * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
+ * A free block also links into the free list through its first payload words.
+ */
 typedef struct AllocatorBlock {
     struct AllocatorBlock *next;
     struct AllocatorBlock *prev;
@@ -194,67 +21,277 @@ typedef struct AllocatorFreeBlock {
     struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
-void func_10004074(void *arg0) {
+/*
+ * Heap globals (declared in variables.h with placeholder types, hence the casts):
+ *   D_800380B4  first block of the heap (all blocks, address order)
+ *   D_800380B8  head of the free list (address order)
+ *   D_800380BC  tail of the free list
+ *   D_800380B0  largest free block, D_8002AC30 its size
+ *   D_800380C0..D_800380D0  arguments of the last func_10003C6C call
+ */
+
+/* Allocates size bytes from the front of the heap; see func_10003C6C. */
+s32 allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
+    return func_10003C6C(size, tag, align, FALSE, mode);
+}
+
+/* Per-alignment-class tables: payload offset to round from, and the rounding mask. */
+typedef struct AllocAlignTable {
+    s16 values[5];
+} AllocAlignTable;
+
+extern s32 D_800380D0;
+extern AllocAlignTable D_8002AC34;
+extern AllocAlignTable D_8002AC40;
+
+/*
+ * Allocates a block with a size-byte payload and the given tag, aligned by class
+ * align. With fromEnd FALSE the first fitting free block is split at its start;
+ * otherwise the last fitting one is split at its end. mode 1 refuses when the
+ * largest free block is under 0x7800 bytes; mode 0 treats running out of memory
+ * as fatal. Returns the payload address, or 0.
+ */
+s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
+    AllocatorBlock *block;
+    AllocatorFreeBlock *freeBlock;
+    u32 pad; // matching: unused stack slot in the original frame
+    u32 freeSize;
+    AllocatorBlock *following;
+    u32 remainder;
+    AllocatorBlock *prev;
+    AllocatorFreeBlock *nextFree;
+    AllocatorFreeBlock *prevFree;
+    s32 alignOffset;
+    s32 alignMask;
+    AllocAlignTable offsets;
+    AllocAlignTable masks;
+    OSIntMask intMask;
+
+    offsets = D_8002AC34;
+    masks = D_8002AC40;
+    D_800380C0 = size;
+    D_800380C4 = tag;
+    D_800380C8 = align;
+    D_800380CC = fromEnd;
+    D_800380D0 = mode;
+    if (align == 2) {
+        size = (size + 15) & ~15;
+    }
+    if (size < 8) {
+        size = 8;
+    }
+    size = (size + 3) & ~3;
+    alignOffset = offsets.values[align];
+    alignMask = masks.values[align];
+    if (mode == 1 && D_8002AC30 < 0x7800) {
+        return 0;
+    }
+
+    intMask = osSetIntMask(1);
+    if (!fromEnd) {
+        freeBlock = (AllocatorFreeBlock *)D_800380B8;
+    } else {
+        freeBlock = (AllocatorFreeBlock *)D_800380BC;
+    }
+    // Find a free block that still fits size bytes once its payload is aligned.
+    while (TRUE) {
+        if (freeBlock == NULL) {
+            osSetIntMask(intMask);
+            if (mode == 0) {
+                D_8003C8E0 = 0x0C000042;
+                func_150AD770();
+            }
+            return 0;
+        }
+        block = (AllocatorBlock *)((u32)((u8 *)freeBlock + alignOffset + sizeof(AllocatorBlock)) & alignMask);
+        freeSize = freeBlock->header.taggedSize;
+        if ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) >= (u32)block + size) {
+            break;
+        }
+        if (!fromEnd) {
+            freeBlock = freeBlock->nextFree;
+        } else {
+            freeBlock = freeBlock->prevFree;
+        }
+    }
+
+    // block is the aligned payload so far; step back to its header.
+    if (!fromEnd) {
+        block = (AllocatorBlock *)((u32)block - sizeof(AllocatorBlock));
+        following = (AllocatorBlock *)((u32)block + size + sizeof(AllocatorBlock));
+        remainder = ((u32)freeBlock + freeSize) - ((u32)block + size);
+    } else {
+        block = (AllocatorBlock *)(((((u32)freeBlock + freeSize) - size + sizeof(AllocatorBlock)) & alignMask) -
+                                   sizeof(AllocatorBlock));
+        following = freeBlock->header.next;
+        remainder = (u32)block - (u32)freeBlock;
+    }
+    prev = freeBlock->header.prev;
+    nextFree = freeBlock->nextFree;
+    prevFree = freeBlock->prevFree;
+
+    if (!fromEnd) {
+        if (remainder >= sizeof(AllocatorFreeBlock)) {
+            // The tail of the free block stays free: link it in its place.
+            following->next = freeBlock->header.next;
+            following->taggedSize = remainder - sizeof(AllocatorBlock);
+            if (following->next != NULL) {
+                following->next->prev = following;
+            }
+            remainder = 0;
+            ((AllocatorFreeBlock *)following)->nextFree = nextFree;
+            ((AllocatorFreeBlock *)following)->prevFree = prevFree;
+            if (nextFree != NULL) {
+                nextFree->prevFree = (AllocatorFreeBlock *)following;
+            } else {
+                D_800380BC = (s32 *)following;
+            }
+            if (prevFree != NULL) {
+                prevFree->nextFree = (AllocatorFreeBlock *)following;
+            } else {
+                D_800380B8 = (struct54 *)following;
+            }
+        } else {
+            // Too small to keep: the whole free block is used.
+            following = freeBlock->header.next;
+            if (nextFree != NULL) {
+                nextFree->prevFree = prevFree;
+            } else {
+                D_800380BC = (s32 *)prevFree;
+            }
+            if (prevFree != NULL) {
+                prevFree->nextFree = nextFree;
+            } else {
+                D_800380B8 = (struct54 *)nextFree;
+            }
+        }
+        // Any alignment gap before block goes to the previous block.
+        if (prev == NULL) {
+            D_800380B4 = (struct54 *)block;
+        } else {
+            prev->next = block;
+            prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
+        }
+        block->next = following;
+        block->prev = prev;
+        block->taggedSize = (tag << 24) | (remainder + size);
+        if (following != NULL) {
+            following->prev = block;
+        }
+    } else if (remainder >= sizeof(AllocatorFreeBlock)) {
+        // Carve block off the end; the free block keeps the front.
+        block->next = freeBlock->header.next;
+        block->prev = &freeBlock->header;
+        block->taggedSize =
+            (tag << 24) | ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) - (u32)block - sizeof(AllocatorBlock));
+        if (block->next != NULL) {
+            block->next->prev = block;
+        }
+        freeBlock->header.next = block;
+        freeBlock->header.taggedSize = remainder - sizeof(AllocatorBlock);
+    } else {
+        // Too small to keep: the whole free block becomes block.
+        block = (AllocatorBlock *)((((u32)freeBlock + alignOffset + sizeof(AllocatorBlock)) & alignMask) -
+                                   sizeof(AllocatorBlock));
+        block->next = following;
+        block->prev = prev;
+        block->taggedSize =
+            (tag << 24) | ((u32)((u8 *)freeBlock + freeSize + sizeof(AllocatorBlock)) - (u32)block - sizeof(AllocatorBlock));
+        if (nextFree != NULL) {
+            nextFree->prevFree = prevFree;
+        } else {
+            D_800380BC = (s32 *)prevFree;
+        }
+        if (prevFree != NULL) {
+            prevFree->nextFree = nextFree;
+        } else {
+            D_800380B8 = (struct54 *)nextFree;
+        }
+        if (prev == NULL) {
+            D_800380B4 = (struct54 *)block;
+        } else {
+            prev->next = block;
+            prev->taggedSize = (prev->taggedSize & 0xFF000000) | ((u32)block - (u32)prev - sizeof(AllocatorBlock));
+        }
+        if (block->next != NULL) {
+            block->next->prev = block;
+        }
+        if (block->prev != NULL) {
+            block->prev->next = block;
+        }
+    }
+
+    if ((struct54 *)freeBlock == D_800380B0) {
+        func_1000440C();
+    }
+    osSetIntMask(intMask);
+    return (s32)(block + 1);
+}
+
+/* Frees the block whose payload is ptr, merging it with free neighbours. */
+void func_10004074(void *ptr) {
     AllocatorFreeBlock *block;
     AllocatorFreeBlock *neighbor;
     AllocatorFreeBlock *cursor;
     s32 merged;
-    volatile s32 mask;
+    volatile OSIntMask mask; // matching: IDO keeps mask in a register otherwise; the target spills it to the stack
 
-    if (arg0 != 0) {
-        cursor = (AllocatorFreeBlock *)((AllocatorBlock *)arg0 - 1);
+    if (ptr != NULL) {
+        cursor = (AllocatorFreeBlock *)((AllocatorBlock *)ptr - 1);
         block = cursor;
-        merged = 0;
+        merged = FALSE;
         mask = osSetIntMask(1);
         neighbor = (AllocatorFreeBlock *)cursor->header.prev;
+        // matching: clears only the tag byte (sb); a masked u32 store emits lw/and/sw
         ((u8 *)&cursor->header.taggedSize)[0] = 0;
-        if ((neighbor != 0) && ((neighbor->header.taggedSize >> 24) == 0)) {
+        if (neighbor != NULL && (neighbor->header.taggedSize >> 24) == 0) {
             neighbor->header.next = cursor->header.next;
-            neighbor->header.taggedSize += cursor->header.taggedSize + 0xC;
-            if (neighbor->header.next != 0) {
+            neighbor->header.taggedSize += cursor->header.taggedSize + sizeof(AllocatorBlock);
+            if (neighbor->header.next != NULL) {
                 neighbor->header.next->prev = &neighbor->header;
             }
             block = neighbor;
-            merged = 1;
+            merged = TRUE;
         }
         neighbor = (AllocatorFreeBlock *)block->header.next;
-        if ((neighbor != 0) && ((neighbor->header.taggedSize >> 24) == 0)) {
+        if (neighbor != NULL && (neighbor->header.taggedSize >> 24) == 0) {
             block->header.next = neighbor->header.next;
-            block->header.taggedSize += neighbor->header.taggedSize + 0xC;
-            if (block->header.next != 0) {
+            block->header.taggedSize += neighbor->header.taggedSize + sizeof(AllocatorBlock);
+            if (block->header.next != NULL) {
                 block->header.next->prev = &block->header;
             }
             block->nextFree = neighbor->nextFree;
-            if (block->nextFree != 0) {
+            if (block->nextFree != NULL) {
                 block->nextFree->prevFree = block;
             }
             cursor = neighbor->prevFree;
-            if (cursor == 0) {
+            if (cursor == NULL) {
                 D_800380B8 = (struct54 *)block;
-                block->prevFree = 0;
+                block->prevFree = NULL;
             } else if (cursor != block) {
                 block->prevFree = cursor;
-                if (block->prevFree != 0) {
+                if (block->prevFree != NULL) {
                     block->prevFree->nextFree = block;
                 }
             }
-            merged = 1;
+            merged = TRUE;
         }
-        if (merged == 0) {
+        if (!merged) {
+            // Insert into the address-ordered free list.
             cursor = (AllocatorFreeBlock *)D_800380B8;
-            if (cursor == 0) {
-                block->nextFree = 0;
-                block->prevFree = 0;
+            if (cursor == NULL) {
+                block->nextFree = NULL;
+                block->prevFree = NULL;
                 D_800380B8 = (struct54 *)block;
             } else if ((u32)block < (u32)cursor) {
                 block->nextFree = cursor;
-                block->prevFree = 0;
+                block->prevFree = NULL;
                 cursor->prevFree = block;
                 D_800380B8 = (struct54 *)block;
             } else {
                 for (;;) {
-                    if (cursor->nextFree == 0) {
-                        block->nextFree = 0;
+                    if (cursor->nextFree == NULL) {
+                        block->nextFree = NULL;
                         block->prevFree = cursor;
                         cursor->nextFree = block;
                         break;
@@ -270,7 +307,7 @@ void func_10004074(void *arg0) {
                 }
             }
         }
-        if (block->nextFree == 0) {
+        if (block->nextFree == NULL) {
             D_800380BC = (s32 *)block;
         }
         if ((u32)D_8002AC30 < block->header.taggedSize) {
@@ -281,77 +318,67 @@ void func_10004074(void *arg0) {
     }
 }
 
+/* Frees every tag-2 block and counts tags 3 and 4 down by one (so they expire on later passes). */
 void func_10004250(void) {
-    s32 temp_v0;
-    u32 temp_v1;
+    u32 tag;
+    AllocatorBlock *block;
     OSIntMask mask;
-    struct54 *node;
 
     mask = osSetIntMask(1);
-
-    if (node = D_800380B4) {
-        do {
-            temp_v1 = node->unk8;
-            temp_v0 = temp_v1 >> 0x18;
-            if (2 == temp_v0) {
-                func_10004074(&node->unkC);
-            } else if ((temp_v0 == 3) || (temp_v0 == 4)) {
-                node->unk8 = ((temp_v0 - 1) << 0x18) | (temp_v1 & 0xFFFFFF);
-            }
-        } while(node = node->unk0);
+    for (block = (AllocatorBlock *)D_800380B4; block != NULL; block = block->next) {
+        tag = block->taggedSize >> 24;
+        if (tag == 2) {
+            func_10004074(block + 1);
+        } else if (tag == 3 || tag == 4) {
+            block->taggedSize = ((tag - 1) << 24) | (block->taggedSize & 0xFFFFFF);
+        }
     }
     osSetIntMask(mask);
 }
 
+/* Frees every block tagged 1-4. */
 void func_10004308(void) {
-    u32 temp_t6;
-    struct54 *node;
+    u32 tag;
+    AllocatorBlock *block;
     OSIntMask mask;
 
     mask = osSetIntMask(1);
-    node = D_800380B4;
+    block = (AllocatorBlock *)D_800380B4;
     func_15042D50();
-
-    if (node) {
-        do {
-            temp_t6 = node->unk8 >> 24;
-            if (temp_t6 == 1 || temp_t6 == 2 || temp_t6 == 3 || temp_t6 == 4) {
-                func_10004074(&node->unkC);
-            }
+    for (; block != NULL; block = block->next) {
+        tag = block->taggedSize >> 24;
+        if (tag == 1 || tag == 2 || tag == 3 || tag == 4) {
+            func_10004074(block + 1);
         }
-        while (node = node->unk0);
     }
     osSetIntMask(mask);
 }
 
-void func_100043B4(s32 *arg0, u32 arg1) {
+/* Replaces the tag of the allocated block whose payload is ptr. */
+void func_100043B4(s32 *ptr, u32 tag) {
     OSIntMask mask;
-    struct54 *node;
+    AllocatorBlock *block;
 
     mask = osSetIntMask(1);
-    node = (struct54 *)((u32)arg0 - 0xC);
-    node->unk8 = (node->unk8 & 0xFFFFFF) | (arg1 << 24);
+    // matching: integer subtraction; pointer arithmetic folds the -0xC into the load/store offsets
+    block = (AllocatorBlock *)((u32)ptr - sizeof(AllocatorBlock));
+    block->taggedSize = (block->taggedSize & 0xFFFFFF) | (tag << 24);
     osSetIntMask(mask);
 }
-// NON-MATCHING: missing an addiu
-// void func_100043B4(s32 *arg0, u32 arg1) {
-//     OSIntMask mask = osSetIntMask(1);
-//     *(arg0 - 1) = (arg1 << 24) | *(arg0 - 1) & 0xFFFFFF;
-//     osSetIntMask(mask);
-// }
 
+/* Rescans the free list for the largest free block, caching it and its size. */
 void func_1000440C(void) {
-    struct54 *foo;
-    struct54 *last_good_foo;
-    s32 tmp0;
+    AllocatorFreeBlock *block;
+    AllocatorFreeBlock *largest;
+    s32 largestSize;
 
-    for (foo = D_800380B8, tmp0 = NULL; foo != NULL; foo = (struct54 *)foo->unkC) {
-        if (tmp0 < (s32) foo->unk8) {
-            tmp0 = foo->unk8;
-            last_good_foo = foo;
+    for (block = (AllocatorFreeBlock *)D_800380B8, largestSize = 0; block != NULL; block = block->nextFree) {
+        if (largestSize < (s32)block->header.taggedSize) {
+            largestSize = block->header.taggedSize;
+            largest = block;
         }
     }
 
-    D_800380B0 = last_good_foo;
-    D_8002AC30 = tmp0;
+    D_800380B0 = (struct54 *)largest;
+    D_8002AC30 = largestSize;
 }

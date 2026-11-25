@@ -2,120 +2,122 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Entity {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8  unk8[0x34];
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40[0x33];
-    /* 0x73 */ u8  unk73;
-} Entity;
+/* Partial view of the Prop struct in game_144C70.c. */
+typedef struct Prop {
+    /* 0x00 */ f32 rotX;
+    /* 0x04 */ f32 rotY; /* degrees */
+    /* 0x08 */ u8 pad08[0x34];
+    /* 0x3C */ s32 params; /* bits 0-9: signed open angle, 16-23: link group */
+    /* 0x40 */ u8 pad40[0x33];
+    /* 0x73 */ u8 state; /* bits 0-1: motion state; bit 2: behaviour flag */
+} Prop;
 
-typedef struct EntitySlot {
-    /* 0x00 */ Entity *unk0;
-    /* 0x04 */ s32 unk4;
-} EntitySlot;
+/* Motion states in the low 2 bits of Prop.state (as in game_144C70.c). */
+#define PROP_REST 0
+#define PROP_RETURNING 1
+#define PROP_MOVING 2
+#define PROP_ARRIVED 3
+
+typedef struct PropLink {
+    /* 0x00 */ Prop *prop;
+    /* 0x04 */ s32 group;
+} PropLink;
 
 typedef struct Owner {
     /* 0x000 */ u8 pad0[0x11B];
     /* 0x11B */ u8 unk11B;
 } Owner;
 
-extern s32 D_800DBFC0;
-extern EntitySlot D_800DBFC8[];
+extern s32 D_800DBFC0;          /* number of used D_800DBFC8 entries */
+extern PropLink D_800DBFC8[4];
 extern Owner *D_800CC5EC;
 
+/* Clears the linked-prop table. */
 void func_1511F980(void) {
     D_800DBFC0 = 0;
 }
 
-void func_1511F990(Entity *arg0, s32 arg1) {
+/*
+ * Registers a prop in the linked-prop table (up to 4) and updates its motion state. On first
+ * registration the state is initialised from mode; afterwards a prop that starts moving or returning
+ * passes that state on to the other props of its link group.
+ */
+void func_1511F990(Prop *prop, s32 mode) {
+    s32 index;
     s32 i;
-    s32 j;
     s32 added;
-    s32 state;
+    s32 motion;
     s32 flag;
-    s32 val;
+    s32 group;
 
-    /* The & 0xFF is redundant for the value (the (s8) cast already keeps bits 16..23)
-     * but it is NOT redundant for codegen: it costs one IDO integer web in block 0,
-     * which sets the t6..t9 temp-rotation phase for the whole function.  Removing it,
-     * or spelling it (s8)(u8), rotates every temp by one and costs ~60 rows.  Keep it. */
-    val = (s8)((arg0->unk3C >> 16) & 0xFF);
-    added = 0;
-    state = arg0->unk73 & 3;
-    flag = arg0->unk73 & 4;
-    for (i = 0; i < D_800DBFC0; i++) {
-        if (D_800DBFC8[i].unk0 == arg0) {
+    // matching: the redundant & 0xFF costs one integer web, setting IDO's t6..t9 temp rotation
+    group = (s8)((prop->params >> 16) & 0xFF);
+    added = FALSE;
+    motion = prop->state & 3;
+    flag = prop->state & 4;
+    for (index = 0; index < D_800DBFC0; index++) {
+        if (D_800DBFC8[index].prop == prop) {
             break;
         }
     }
-    if (i == D_800DBFC0) {
-        if (i >= 4) {
+    if (index == D_800DBFC0) {
+        if (index >= 4) {
             return;
         }
-        D_800DBFC8[i].unk0 = arg0;
-        D_800DBFC8[i].unk4 = val;
+        D_800DBFC8[index].prop = prop;
+        D_800DBFC8[index].group = group;
         D_800DBFC0++;
-        added = 1;
+        added = TRUE;
     }
-    if (val >= 0) {
-        if (added != 0) {
-            if (val == D_800CC5EC->unk11B) {
-                if (arg1 == 0) {
-                    if (state != 0 && state != 1) {
-                        state = 1;
+    if (group >= 0) {
+        if (added) {
+            if (group == D_800CC5EC->unk11B) {
+                if (mode == 0) {
+                    if (motion != PROP_REST && motion != PROP_RETURNING) {
+                        motion = PROP_RETURNING;
                     }
-                    arg0->unk4 = (f32) ((arg0->unk3C << 22) >> 22);
-                } else if (arg1 == 1) {
-                    state = 3;
-                } else if (arg1 == 2) {
-                    state = 2;
-                } else if (arg1 == 3) {
-                    if (state != 0 && state != 1) {
-                        if (flag != 0) {
-                            state = 1;
+                    prop->rotY = (prop->params << 22) >> 22;
+                } else if (mode == 1) {
+                    motion = PROP_ARRIVED;
+                } else if (mode == 2) {
+                    motion = PROP_MOVING;
+                } else if (mode == 3) {
+                    if (motion != PROP_REST && motion != PROP_RETURNING) {
+                        if (flag) {
+                            motion = PROP_RETURNING;
                         }
-                    } else {
-                        if (flag == 0) {
-                            state = 3;
-                        }
+                    } else if (!flag) {
+                        motion = PROP_ARRIVED;
                     }
-                    arg0->unk4 = (f32) ((arg0->unk3C << 22) >> 22);
+                    prop->rotY = (prop->params << 22) >> 22;
                 }
-            } else {
-                if (arg1 == 0 || arg1 == 2 || arg1 == 3) {
-                    if (arg1 != 3 || flag != 0) {
-                        state = 0;
-                    } else {
-                        state = 3;
-                    }
+            } else if (mode == 0 || mode == 2 || mode == 3) {
+                if (mode != 3 || flag) {
+                    motion = PROP_REST;
+                } else {
+                    motion = PROP_ARRIVED;
                 }
             }
-        } else {
-            if (state == 1 || state == 2) {
-                for (j = 0; j < D_800DBFC0; j++) {
-                    if (j == i) {
-                        continue;
-                    }
-                    if (val != D_800DBFC8[j].unk4) {
-                        continue;
-                    }
-                    if (flag == 0 && (D_800DBFC8[j].unk0->unk73 & 4)) {
-                        continue;
-                    }
-                    if ((D_800DBFC8[j].unk0->unk73 & 3) == 3 && state == 2) {
-                        continue;
-                    }
-                    if ((D_800DBFC8[j].unk0->unk73 & 3) == 0 && state == 1) {
-                        continue;
-                    }
-                    D_800DBFC8[j].unk0->unk73 &= ~3;
-                    D_800DBFC8[j].unk0->unk73 |= state;
+        } else if (motion == PROP_RETURNING || motion == PROP_MOVING) {
+            /* pass the motion on to the rest of the group, skipping props already at the end it heads for */
+            for (i = 0; i < D_800DBFC0; i++) {
+                if (i == index || group != D_800DBFC8[i].group) {
+                    continue;
                 }
+                if (!flag && (D_800DBFC8[i].prop->state & 4)) {
+                    continue;
+                }
+                if ((D_800DBFC8[i].prop->state & 3) == PROP_ARRIVED && motion == PROP_MOVING) {
+                    continue;
+                }
+                if ((D_800DBFC8[i].prop->state & 3) == PROP_REST && motion == PROP_RETURNING) {
+                    continue;
+                }
+                D_800DBFC8[i].prop->state &= ~3;
+                D_800DBFC8[i].prop->state |= motion;
             }
         }
     }
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    prop->state &= ~3;
+    prop->state |= motion;
 }

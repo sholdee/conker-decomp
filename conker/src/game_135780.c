@@ -2,215 +2,224 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ParticleDesc.flags (see game_15D730.c) */
+#define PARTICLE_FLIP_S    0x40
+#define PARTICLE_HANDLERS  0x4000
+#define PARTICLE_DRAW_FUNC 0x8000
 
-/* Particle descriptor passed to func_15130280 (0x70 bytes). */
+/* Spawn parameters of a particle; func_15130280 copies them to Particle.desc (see game_15D730.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Struct151082D0Particle; /* 0x70 */
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc; /* size 0x70 */
+
+/*
+ * Per-particle data of the particles func_151082D0 spawns (update function 0x18, func_15108658).
+ * The animation frame steps 0 -> 1 -> 2 at the start of the particle's life and back at the end.
+ */
+typedef struct {
+    /* 0x00 */ f32 life;       /* remaining; the particle dies below 0 */
+    /* 0x04 */ f32 lifetime;   /* initial life */
+    /* 0x08 */ f32 frame1Time; /* time spent below frame 2 at either end */
+    /* 0x0C */ f32 frame0Time; /* time spent at frame 0 at either end */
+    /* 0x10 */ f32 flashTimer; /* counts down from 11 while flashing, 0 otherwise */
+} FlashParticleData;
+
+/* Particle created by func_15130280 (only the fields used here, see game_15D730.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ParticleDesc desc;
+    /* 0x80 */ u8 pad80[0x28];
+    /* 0xA8 */ FlashParticleData data;
+} Particle;
+
+/* Points the emitter spawns particles around: a centre, a radius and a height range. */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ s16 height;
+} EmitterArea;
+
+#define EMITTER_ENABLED 1
+
+/* Per-effect data of the func_151082D0 emitter. */
+typedef struct {
+    /* 0x00 */ f32 spawnAccum;
+    /* 0x04 */ EmitterArea *area;
+    /* 0x08 */ u8 flags;
+} EmitterData;
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct151082D0Sub;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;   /* passed to func_15130280 as its 6th argument */
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;   /* passed to func_15130280 as its 5th argument */
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ EmitterData data;
+} Emitter;
 
-typedef struct {
-    f32 accum;
-    s16 *unk4;
-    u8 unk8;
-} Struct151082D0Data;
+extern Particle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
+extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Struct151082D0Data data;
-} Struct151082D0;
+/* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
+ * spawns one at a random point of the emitter's area for each whole one. */
+void func_151082D0(Emitter *emitter) {
+    EmitterData *data;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+    data = &emitter->data;
+    data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * D_800BE9A4;
+    if (data->spawnAccum > 1.0f) {
+        if (data->flags & EMITTER_ENABLED) {
+            ParticleDesc desc;
+            FlashParticleData extra;
+            Particle *particle;
 
-void func_151082D0(Struct151082D0 *arg0) {
-    Struct151082D0Data *data;
-
-    data = &arg0->data;
-    data->accum += (0.030000001f + func_150ADA68() * 0.010000001f) * D_800BE9A4;
-    if (data->accum > 1.0f) {
-        if (data->unk8 & 1) {
-            Struct151082D0Particle spawn;
-            Struct151082D0Sub sub;
-            void *ret;
-
-            spawn.unk1D = 0x74;
-            spawn.unk8 = 0x5310;
-            spawn.unk0 = 0x200005;
-            spawn.unk4 = 0x9F0600;
-            spawn.unk14 = 0xFF;
-            spawn.unk15 = 0xFF;
-            spawn.unk16 = 0xFF;
-            spawn.unk17 = 0xFF;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk1C = 0xFF;
-            spawn.unk1E = 1;
-            spawn.unk3C.unk0 = 0.0f;
-            spawn.unk3C.unk4 = 0.0f;
-            spawn.unk3C.unk8 = 0.0f;
-            spawn.vel.unk0 = 0.0f;
-            spawn.vel.unk4 = 0.0f;
-            spawn.vel.unk8 = 0.0f;
-            spawn.unk54 = 0.0f;
-            spawn.unk20 = 0xFF;
-            spawn.unk22 = 1;
-            spawn.unk24 = 1.0f;
-            spawn.unk60 = 6;
-            spawn.unk61 = 6;
-            spawn.unk62 = 0x18;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unkA = 300;
-            spawn.unk18 = 0xFF;
-            spawn.unk19 = 0xFF;
-            spawn.unk1A = 0xFF;
-            sub.unk10 = 0.0f;
+            desc.texture = 0x74;
+            desc.renderMode = 0x5310;
+            desc.unk0 = 0x200005;
+            desc.unk4 = 0x9F0600;
+            desc.r = 0xFF;
+            desc.g = 0xFF;
+            desc.b = 0xFF;
+            desc.a = 0xFF;
+            desc.frame = 0;
+            desc.frameRate = 0;
+            desc.brightness = 0xFF;
+            desc.fadeStart = 1;
+            desc.offset.x = 0.0f;
+            desc.offset.y = 0.0f;
+            desc.offset.z = 0.0f;
+            desc.vel.x = 0.0f;
+            desc.vel.y = 0.0f;
+            desc.vel.z = 0.0f;
+            desc.gravity = 0.0f;
+            desc.fadeRate = 0xFF;
+            desc.scaleStart = 1;
+            desc.scaleRate = 1.0f;
+            desc.primColorMode = 6;
+            desc.envColorMode = 6;
+            desc.updateFunc = 0x18;
+            desc.deathFunc = -1;
+            desc.drawFunc = -1;
+            desc.handlerSet = 0;
+            desc.viewMask = NULL;
+            desc.timer = 300;
+            desc.r2 = 0xFF;
+            desc.g2 = 0xFF;
+            desc.b2 = 0xFF;
+            extra.flashTimer = 0.0f;
             do {
-                sub.unk0 = sub.unk4 = func_150ADA68() * 20.0f + 30.0f;
-                sub.unk8 = sub.unk0 * 0.15f;
-                sub.unkC = sub.unk8 * 0.5f;
-                spawn.unk28 = func_150ADA68() * 500.0f + 600.0f;
-                spawn.unk2C = spawn.unk28 * 0.5f;
-                func_1514373C(func_150ADA68() * 3.1415927f * 2.0f, data->unk4[3], &spawn.pos.unk0, &spawn.pos.unk8);
-                spawn.pos.unk0 += data->unk4[0];
-                spawn.pos.unk8 += data->unk4[2];
-                spawn.pos.unk4 = data->unk4[1] + data->unk4[4] * func_150ADA68();
-                spawn.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | 0x8000 | 0x4000;
-                spawn.unk1B = (func_150ADA20() & 0x7F) + 0x80;
-                ret = func_15130280(&spawn, 2, 0, 0x14, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0xA8, &sub, sizeof(sub));
+                extra.life = extra.lifetime = func_150ADA68() * 20.0f + 30.0f;
+                extra.frame1Time = extra.life * 0.15f;
+                extra.frame0Time = extra.frame1Time * 0.5f;
+                desc.width = func_150ADA68() * 500.0f + 600.0f;
+                desc.height = desc.width * 0.5f;
+                func_1514373C(func_150ADA68() * 3.1415927f * 2.0f, data->area->radius, &desc.pos.x, &desc.pos.z);
+                desc.pos.x += data->area->x;
+                desc.pos.z += data->area->z;
+                desc.pos.y = data->area->y + data->area->height * func_150ADA68();
+                desc.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
+                desc.alpha = (func_150ADA20() & 0x7F) + 0x80;
+                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->unkC, emitter->unk1);
+                if (particle != NULL) {
+                    memcpy(&particle->data, &extra, sizeof(extra));
                 }
-                data->accum -= 1.0f;
-            } while (data->accum > 1.0f);
+                data->spawnAccum -= 1.0f;
+            } while (data->spawnAccum > 1.0f);
         } else {
             do {
-                data->accum -= 1.0f;
-            } while (data->accum > 1.0f);
+                data->spawnAccum -= 1.0f;
+            } while (data->spawnAccum > 1.0f);
         }
     }
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct15108658Sub;
+/* Update of func_151082D0's particles: picks the animation frame from the time since birth and
+ * until death, randomly starts an 11-unit flash (drawn with draw function 3), and kills the
+ * particle when its life runs out. Returns 0 to kill it. */
+s32 func_15108658(Particle *particle, s32 arg1) {
+    FlashParticleData *data = &particle->data;
+    f32 elapsed = data->lifetime - data->life;
 
-typedef struct {
-    u8 pad0[0x1C];
-    s32 unk1C;
-    u8 pad20[0x54];
-    s8 unk74;
-    u8 pad75[0x33];
-    Struct15108658Sub unkA8;
-} Struct15108658;
-s32 func_15108658(Struct15108658 *arg0, s32 arg1) {
-    Struct15108658Sub *s = &arg0->unkA8;
-    f32 diff = s->unk4 - s->unk0;
-
-    if (s->unk0 < s->unkC || diff < s->unkC) {
-        arg0->unk1C = 0;
-    } else if (s->unk0 < s->unk8 || diff < s->unk8) {
-        arg0->unk1C = 0x10000;
+    if (data->life < data->frame0Time || elapsed < data->frame0Time) {
+        particle->desc.frame = 0;
+    } else if (data->life < data->frame1Time || elapsed < data->frame1Time) {
+        particle->desc.frame = 0x10000;
     } else {
-        arg0->unk1C = 0x20000;
+        particle->desc.frame = 0x20000;
     }
-    if (s->unk10) {
-        f32 rem = 11.0f - s->unk10;
+    if (data->flashTimer) {
+        f32 flashElapsed = 11.0f - data->flashTimer;
 
-        if (s->unk10 < 1.5730001f || rem < 1.5730001f) {
-            arg0->unk1C = 0;
-            arg0->unk74 = -1;
+        if (data->flashTimer < 1.5730001f || flashElapsed < 1.5730001f) {
+            particle->desc.frame = 0;
+            particle->desc.drawFunc = -1;
         } else {
-            arg0->unk74 = 3;
+            particle->desc.drawFunc = 3;
         }
-        s->unk10 -= D_800BE9A4;
-        if (s->unk10 < 0.0f) {
-            s->unk10 = 0.0f;
-            arg0->unk74 = -1;
+        data->flashTimer -= D_800BE9A4;
+        if (data->flashTimer < 0.0f) {
+            data->flashTimer = 0.0f;
+            particle->desc.drawFunc = -1;
         }
     } else {
-        s->unk0 -= D_800BE9A4;
-        if (s->unk0 < 0.0f) {
+        data->life -= D_800BE9A4;
+        if (data->life < 0.0f) {
             return 0;
         }
-        if (arg0->unk1C == 0x20000 && func_150ADA68() < 0.051000003f) {
-            s->unk10 = 11.0f;
+        if (particle->desc.frame == 0x20000 && func_150ADA68() < 0.051000003f) {
+            data->flashTimer = 11.0f;
         }
     }
     return 1;
 }
 
-struct SubFC {
-    u8 pad[8];
-    u8 flag;
-};
+/* Event handler of the func_151082D0 emitter: event 0x2B enables spawning, 0x2C disables it. */
+void func_151087FC(Emitter *emitter, s32 arg1, u8 event) {
+    EmitterData *data = &emitter->data;
 
-struct ObjFC {
-    u8 pad[0x28];
-    struct SubFC sub;
-};
-
-void func_151087FC(struct ObjFC *arg0, s32 arg1, u8 arg2) {
-    struct SubFC *p = &arg0->sub;
-    if (arg2 == 0x2B) {
-        p->flag |= 0x1;
-    } else if (arg2 == 0x2C) {
-        p->flag &= 0xFFFE;
+    if (event == 0x2B) {
+        data->flags |= EMITTER_ENABLED;
+    } else if (event == 0x2C) {
+        data->flags &= ~EMITTER_ENABLED;
     }
 }

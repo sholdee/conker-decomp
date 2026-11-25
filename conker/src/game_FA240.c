@@ -2,31 +2,30 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A0700;
-extern f32 D_800A0704;
-extern f32 D_800A0708;
-extern f32 D_800A070C;
+/*
+ * Computes an RGB tint (0-255 per channel) from a z coordinate: white for z > 0, fading to
+ * (172, 142, 82) at z = -1463.2, then on towards (122, 100, 83) over the next ~1970 units.
+ */
+void func_150CCD90(f32 z, f32 *r, f32 *g, f32 *b) {
+    f32 t;
 
-void func_150CCD90(f32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    f32 temp_f0;
-
-    if (arg0 > 0.0f) {
-        *arg1 = 255.0f;
-        *arg2 = 255.0f;
-        *arg3 = 255.0f;
+    if (z > 0.0f) {
+        *r = 255.0f;
+        *g = 255.0f;
+        *b = 255.0f;
         return;
     }
 
-    if (D_800A0700 < arg0) {
-        temp_f0 = -arg0 * D_800A0704;
-        *arg1 = 255.0f - (temp_f0 * 83.0f);
-        *arg2 = 255.0f - (temp_f0 * 113.0f);
-        *arg3 = 255.0f - (temp_f0 * 173.0f);
+    if (z > -1463.202271f) {
+        t = -z * 0.0006834325031f;
+        *r = 255.0f - t * 83.0f;
+        *g = 255.0f - t * 113.0f;
+        *b = 255.0f - t * 173.0f;
         return;
     }
 
-    temp_f0 = -(arg0 + D_800A0708) * D_800A070C;
-    *arg1 = 172.0f - (temp_f0 * 50.0f);
-    *arg2 = 142.0f - (temp_f0 * 42.0f);
-    *arg3 = 82.0f - (temp_f0 * -1.0f);
+    t = -(z + 1463.202271f) * 0.0005075327354f;
+    *r = 172.0f - t * 50.0f;
+    *g = 142.0f - t * 42.0f;
+    *b = 82.0f - t * -1.0f;
 }

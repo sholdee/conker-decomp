@@ -655,7 +655,7 @@ void func_1507FC2C(struct127 *actor) {
     }
 
     if (flags & 0x10) {
-        level = ((s32 (*)[16])D_800418B0)[D_800419A0][0];
+        level = D_800418B0[D_800419A0][0];
         if (level >= 0.0f) {
             sound = actor->unk2D0;
             sound->unk8 = (sound->unk18 * (32768.0f - level)) / 32768.0f;

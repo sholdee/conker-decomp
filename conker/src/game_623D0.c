@@ -174,7 +174,7 @@ s32 func_15035714(s32 mode, struct127 *obj, f32 (*mtx)[4], f32 planeY) {
     s32 id;
     f32 delta;
 
-    recp = D_800BE628;
+    recp = (s32)D_800BE628;
     id = obj->id;
     bounds = (ModelBounds *)D_800D1C90[id];
     radius = bounds->body_radius;

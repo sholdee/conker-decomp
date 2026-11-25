@@ -3,21 +3,22 @@
 #include "variables.h"
 
 
-void func_15104520(struct108 *arg0) {
-    struct127 *temp;
+// Resets four distance parameters to their defaults, then calls func_15128774 when the target
+// is moving slowly and the value at 0x370 exceeds 1.5 * unk374.
+void func_15104520(struct108 *camera) {
+    struct127 *target;
 
-    if (arg0->unk6FC != 0 || arg0->unk6C8 == 0) {
-        arg0->unk348 = 117.0f;
-        arg0->unk34C = 117.0f;
-        arg0->unk374 = 370.0f;
-        arg0->unk190 = 77.0f;
+    if (camera->unk6FC != 0 || camera->unk6C8 == 0) {
+        camera->unk348 = 117.0f;
+        camera->unk34C = 117.0f;
+        camera->unk374 = 370.0f;
+        camera->unk190 = 77.0f;
     }
-    temp = arg0->unk3D0;
-    if (temp->xz_velocity < 50.0f) {
-        if (arg0->unk3E8 == 0) {
-            if (0.5f * arg0->unk374 < *(f32 *)((u8 *)arg0 + 0x370) - arg0->unk374) {
-                func_15128774(arg0, temp);
-            }
+    target = camera->unk3D0;
+    if (target->xz_velocity < 50.0f && camera->unk3E8 == 0) {
+        // pad370 is an f32 the shared struct108 does not name yet
+        if (0.5f * camera->unk374 < *(f32 *)camera->pad370 - camera->unk374) {
+            func_15128774(camera, target);
         }
     }
 }
