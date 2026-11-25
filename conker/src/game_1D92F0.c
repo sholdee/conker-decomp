@@ -214,15 +214,9 @@ typedef struct {
 
 /* Effect state passed to the callbacks in the D_8008A3F8 / D_8008A430 handler tables. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[0xF];
-    /* 0x2D */ s8 pointIndex;
-    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ FxEmitterPoint *points;
     /* 0x98 */ FxEmitterData *data;
 } FxEmitter;
@@ -230,7 +224,7 @@ typedef struct {
 /* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
 s32 func_151AC3CC(FxEmitter *emitter) {
     FxEmitterData *data = emitter->data;
-    s32 alpha = emitter->unk1C * 8;
+    s32 alpha = emitter->head.tmpl.life * 8;
 
     if (alpha >= 256) {
         alpha = 255;
@@ -252,16 +246,16 @@ s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 a
     u8 kind;
     s32 life;
 
-    pos.x = points[emitter->pointIndex].x;
+    pos.x = points[emitter->head.start].x;
     pos.y = y;
-    pos.z = points[emitter->pointIndex].z;
+    pos.z = points[emitter->head.start].z;
     kind = func_151D8E20();
     if (func_150ADA20() & 1) {
         life = func_150ADA20() % 41 + 80;
-        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, arg5, &pos, life, 1, 1, 0, emitter->unkC,
-                      emitter->unk1);
+        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, arg5, &pos, life, 1, 1, 0, emitter->head.header.owner,
+                      emitter->head.header.kind);
     } else {
-        func_151DAB58(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->unkC, emitter->unk1);
+        func_151DAB58(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->head.header.owner, emitter->head.header.kind);
     }
     data->unk20 = 4;
     return 1;

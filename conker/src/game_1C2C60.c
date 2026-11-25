@@ -464,27 +464,8 @@ typedef struct Particle {
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct CharacterFlamethrowerActor {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ char pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ char padD[0x3];
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ char pad1C[0x2];
-    /* 0x1E */ u16 flags1E;
-    /* 0x20 */ char pad20[0x5];
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ char pad26[0x6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest point */
-    /* 0x2E */ s8 head; /* next point to write */
-    /* 0x2F */ char pad2F[0x1];
-    /* 0x30 */ s8 unk30;
-    /* 0x31 */ char pad31[0xA];
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ char pad3C[0x18];
-    /* 0x54 */ Vec3f tailPos;
-    /* 0x60 */ char pad60[0x24];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
     /* 0x98 */ void *state;
@@ -719,14 +700,14 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
 
     jet = actor->state;
     points = actor->points;
-    if (actor->count < 2 && (jet->flags & 1)) {
+    if (actor->head.count < 2 && (jet->flags & 1)) {
         return 0;
     }
-    i = actor->head;
-    while (i != actor->tail) {
+    i = actor->head.end;
+    while (i != actor->head.start) {
         i--;
         if (i < 0) {
-            i = actor->capacity - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
         points[i].vel.y += jet->gravity * D_800BE9A4;
         points[i].pos.x += points[i].vel.x * D_800BE9A4;
@@ -748,17 +729,17 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
         if (points[i].life < 0) {
             /* retire this point and every older one */
             jet->flags &= ~2;
-            while (i != actor->tail) {
-                actor->tail = actor->tail + 1;
-                if (actor->tail == actor->capacity) {
-                    actor->tail = 0;
+            while (i != actor->head.start) {
+                actor->head.start = actor->head.start + 1;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count = actor->count - 1;
+                actor->head.count = actor->head.count - 1;
             }
-            points[actor->tail].life = 0;
+            points[actor->head.start].life = 0;
         }
     }
-    i = actor->tail;
+    i = actor->head.start;
     // matching: the extra copy through jetFlags is needed
     jetFlags = jet->flags;
     flags = jetFlags;
@@ -767,21 +748,21 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
         flags = 0;
         n = jet->headFadeCount;
         do { // matching: one-line body (-g3 line numbers steer as1's scheduling)
-            points[i].alpha = flags; i++; flags += jet->headFadeStep; if (i == actor->capacity) { i = 0; } n--;
-        } while (n != 0 && i != actor->head);
+            points[i].alpha = flags; i++; flags += jet->headFadeStep; if (i == actor->head.tmpl.itemCount) { i = 0; } n--;
+        } while (n != 0 && i != actor->head.end);
         flags = jet->flags;
     }
     if (flags & 4) {
         /* fade out the newest points */
         scale = 0;
         n = jet->tailFadeCount;
-        i = actor->head - 1;
+        i = actor->head.end - 1;
         if (i < 0) {
-            i = actor->capacity - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
         do { // matching: one-line body (-g3 line numbers steer as1's scheduling)
-            points[i].alpha = (points[i].alpha * scale) >> 8; i--; scale += jet->tailFadeStep; if (i < 0) { i = actor->capacity - 1; } n--;
-        } while (n != 0 && i != actor->head);
+            points[i].alpha = (points[i].alpha * scale) >> 8; i--; scale += jet->tailFadeStep; if (i < 0) { i = actor->head.tmpl.itemCount - 1; } n--;
+        } while (n != 0 && i != actor->head.end);
     }
     if (jet->soundUpdateFn != -1) {
         D_8008F894[jet->soundUpdateFn](actor);
@@ -794,12 +775,12 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
             return 0;
         }
     }
-    if (actor->count > 0) {
-        actor->tailPos = points[actor->tail].pos;
+    if (actor->head.count > 0) {
+        actor->head.modelPos = points[actor->head.start].pos;
     } else {
-        actor->tailPos.x = 0.0f;
-        actor->tailPos.y = 0.0f;
-        actor->tailPos.z = 0.0f;
+        actor->head.modelPos.x = 0.0f;
+        actor->head.modelPos.y = 0.0f;
+        actor->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -850,7 +831,7 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
         jet->targetSpeed = D_8008F870[jet->speedFn](actor, arg1);
     }
     matrix = (s32)jet->owner->unk1D4 + (jet->bone << 6);
-    func_15143134(&jet->startOffset, &actor->pos, matrix);
+    func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
     func_15143134(&jet->endOffset, &end, matrix);
     jet->emitAccum += jet->emitRate * D_800BE9A4;
     if (jet->emitAccum > 1.0f) {
@@ -863,9 +844,9 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
             tstep = t * inv;
             size = jet->size + (jet->sizeRate * t);
             speed = jet->speed;
-            dx = actor->pos.x - jet->start.x;
-            dy = actor->pos.y - jet->start.y;
-            dz = actor->pos.z - jet->start.z;
+            dx = actor->head.tmpl.pos.x - jet->start.x;
+            dy = actor->head.tmpl.pos.y - jet->start.y;
+            dz = actor->head.tmpl.pos.z - jet->start.z;
             dx2 = end.x - jet->end.x;
             dy2 = end.y - jet->end.y;
             dz2 = end.z - jet->end.z;
@@ -882,36 +863,36 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
             if (jet->spriteAccum > 1.0f) {
                 func_151990AC(actor, &end);
             }
-            points[actor->head].spawnedChild = 0;
-            points[actor->head].pos.x = cur.x;
-            points[actor->head].pos.y = cur.y;
-            points[actor->head].pos.z = cur.z;
-            points[actor->head].vel.x = (cur2.x - cur.x) * speed;
-            points[actor->head].vel.y = (cur2.y - cur.y) * speed;
-            points[actor->head].vel.z = (cur2.z - cur.z) * speed;
-            points[actor->head].size = size;
-            points[actor->head].life = jet->life;
-            points[actor->head].holdTimer = jet->holdTime;
-            points[actor->head].alpha = 255;
-            points[actor->head].texS = jet->texS;
+            points[actor->head.end].spawnedChild = 0;
+            points[actor->head.end].pos.x = cur.x;
+            points[actor->head.end].pos.y = cur.y;
+            points[actor->head.end].pos.z = cur.z;
+            points[actor->head.end].vel.x = (cur2.x - cur.x) * speed;
+            points[actor->head.end].vel.y = (cur2.y - cur.y) * speed;
+            points[actor->head.end].vel.z = (cur2.z - cur.z) * speed;
+            points[actor->head.end].size = size;
+            points[actor->head.end].life = jet->life;
+            points[actor->head.end].holdTimer = jet->holdTime;
+            points[actor->head.end].alpha = 255;
+            points[actor->head.end].texS = jet->texS;
             jet->texS += (func_150ADA20() % 6) + 3;
-            points[actor->head].vel.y += jet->gravity * t;
-            points[actor->head].pos.x += points[actor->head].vel.x * t;
-            points[actor->head].pos.y += points[actor->head].vel.y * t;
-            points[actor->head].pos.z += points[actor->head].vel.z * t;
+            points[actor->head.end].vel.y += jet->gravity * t;
+            points[actor->head.end].pos.x += points[actor->head.end].vel.x * t;
+            points[actor->head.end].pos.y += points[actor->head.end].vel.y * t;
+            points[actor->head.end].pos.z += points[actor->head.end].vel.z * t;
             t -= tstep;
-            head = ++actor->head;
-            if ((head & 0xFFFFFFFF) == actor->capacity) { // matching: no-op mask steers the compare
-                head = (actor->head = 0);
+            head = ++actor->head.end;
+            if ((head & 0xFFFFFFFF) == actor->head.tmpl.itemCount) { // matching: no-op mask steers the compare
+                head = (actor->head.end = 0);
             }
-            actor->count++;
-            tail = actor->tail;
+            actor->head.count++;
+            tail = actor->head.start;
             if (tail == head) {
-                actor->tail = tail + 1;
-                if (actor->tail == actor->capacity) {
-                    actor->tail = 0;
+                actor->head.start = tail + 1;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count--;
+                actor->head.count--;
             }
             cur.x += dx * inv;
             cur.y += dy * inv;
@@ -982,8 +963,8 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     f32 width;
     s32 newStrip;
 
-    if (actor->count >= 2) {
-        func_151D5D60(actor->buffers, view, (actor->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    if (actor->head.count >= 2) {
+        func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             eye = &D_800DBFF0[view].eye;
             jet = actor->state;
@@ -1004,24 +985,24 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);
                 gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
-                if (actor->flags1E & 2) {
-                    j = actor->head - 1;
+                if (actor->head.tmpl.flags & 2) {
+                    j = actor->head.end - 1;
                     if (j < 0) {
-                        j = actor->capacity - 1;
+                        j = actor->head.tmpl.itemCount - 1;
                     }
-                    cur = actor->pos;
+                    cur = actor->head.tmpl.pos;
                     next = points[j].pos;
                     nextTexS = points[j].texS;
                     curTexS = points[j].texS;
                     width = jet->size;
                 } else {
-                    i = actor->head - 1;
+                    i = actor->head.end - 1;
                     if (i < 0) {
-                        i = actor->capacity - 1;
+                        i = actor->head.tmpl.itemCount - 1;
                     }
                     j = i - 1;
                     if (j < 0) {
-                        j = actor->capacity - 1;
+                        j = actor->head.tmpl.itemCount - 1;
                     }
                     cur = points[i].pos;
                     next = points[j].pos;
@@ -1135,12 +1116,12 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
                     i = j;
                     j--;
                     if (j < 0) {
-                        j = actor->capacity - 1;
+                        j = actor->head.tmpl.itemCount - 1;
                     }
                     cur = points[i].pos;
                     next = points[j].pos;
                     nextTexS = points[j].texS;
-                } while (i != actor->tail);
+                } while (i != actor->head.start);
             }
         }
     }
@@ -1414,10 +1395,10 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     cur = (Particle *)((u8 *)points + index * sizeof(Particle)); // matching: byte-offset form keeps the addu operand order
     jet->childAccum += jet->childRate;
     cur->spawnedChild = TRUE;
-    if ((i = index + 1) == actor->capacity) {
+    if ((i = index + 1) == actor->head.tmpl.itemCount) {
         i = 0;
     }
-    if (jet->childAccum > 1.0f && i != actor->head) {
+    if (jet->childAccum > 1.0f && i != actor->head.end) {
         s32 pad[2]; // matching: unused stack slots
 
         spawn.frame = 0;
@@ -1515,11 +1496,11 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
     jet = actor->state;
     points = actor->points;
     obj = &D_800CC2D0[0];
-    i = actor->head;
-    while (i != actor->tail) {
+    i = actor->head.end;
+    while (i != actor->head.start) {
         i--;
         if (i < 0) {
-            i = actor->capacity - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
         pos = points[i].pos;
         r = obj->bodyRadius;
@@ -1531,13 +1512,13 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
             func_1505D024(obj, 0x60006, obj->unk7A, jet->owner - D_800CC2D0);
-            func_1518D1C0(obj, 0xB, 0, 1, actor->unkC, actor->unk1, "Characterflamethrower");
-            while (i != actor->tail) {
-                actor->tail = actor->tail + 1;
-                if (actor->tail == actor->capacity) {
-                    actor->tail = 0;
+            func_1518D1C0(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
+            while (i != actor->head.start) {
+                actor->head.start = actor->head.start + 1;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count = actor->count - 1;
+                actor->head.count = actor->head.count - 1;
             }
         }
     }
@@ -1569,11 +1550,11 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
             continue;
         }
         {
-            i = actor->head;
-            while (i != actor->tail) {
+            i = actor->head.end;
+            while (i != actor->head.start) {
                 i--;
                 if (i < 0) {
-                    i = actor->capacity - 1;
+                    i = actor->head.tmpl.itemCount - 1;
                 }
                 pos = points[i].pos;
                 r = obj->bodyRadius;
@@ -1583,12 +1564,12 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
                 dy = pos.y - (obj->y_position + obj->bodyOffsetY);
                 dy *= (1.0f + r / h) * 0.5f;
                 if (dx * dx + dy * dy + dz * dz < r * r + 2500.0f) {
-                    while (i != actor->tail) {
-                        actor->tail = actor->tail + 1;
-                        if (actor->tail == actor->capacity) {
-                            actor->tail = 0;
+                    while (i != actor->head.start) {
+                        actor->head.start = actor->head.start + 1;
+                        if (actor->head.start == actor->head.tmpl.itemCount) {
+                            actor->head.start = 0;
                         }
-                        actor->count = actor->count - 1;
+                        actor->head.count = actor->head.count - 1;
                     }
                 }
             }
@@ -1659,17 +1640,17 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
         head = D_800DCE50[lists[i]];
         if (head != NULL) {
             node = head;
-            j = actor->head;
+            j = actor->head.end;
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = node->header.next;
                 nx = node->pos.x;
                 ny = node->pos.y;
                 nz = node->pos.z;
-                while (j != actor->tail) {
+                while (j != actor->head.start) {
                     j--;
                     if (j < 0) {
-                        j = actor->capacity - 1;
+                        j = actor->head.tmpl.itemCount - 1;
                     }
                     pos = points[j].pos;
                     r = points[j].size;
@@ -1710,11 +1691,11 @@ void func_15198C90(CharacterFlamethrowerActor *actor) {
 
     jet = actor->state;
     points = actor->points;
-    if (actor->count != 0) {
+    if (actor->head.count != 0) {
         sound = jet->sound;
         if (sound != 0) {
-            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->tail].pos.x, points[actor->tail].pos.y,
-                          points[actor->tail].pos.z, 500, 5000);
+            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
+                          points[actor->head.start].pos.z, 500, 5000);
         }
     }
 }
@@ -1725,7 +1706,7 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
     u16 sound;
 
     jet = actor->state;
-    if (actor->count != 0) {
+    if (actor->head.count != 0) {
         sound = jet->sound;
         if (sound != 0) {
             func_100111C8(sound);
@@ -1766,7 +1747,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     motion.shade = 0xFF;
     motion.flags = 0x28;
     motion.alpha = 0x82;
-    spawn.pos = actor->pos;
+    spawn.pos = actor->head.tmpl.pos;
     style.unk0 = 0;
     style.setGeometryMode = 1;
     style.clearGeometryMode = 0x160600;
@@ -1792,10 +1773,10 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         spawn.life = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->life;
         motion.halfWidth = (func_150ADA68() * preset->halfWidthRange) + preset->halfWidth;
         motion.gravity = (func_150ADA68() * preset->gravityRange) + preset->gravity;
-        motion.velocity.x = (px - actor->pos.x) * speed;
-        motion.velocity.y = (py - actor->pos.y) * speed;
-        motion.velocity.z = (pz - actor->pos.z) * speed;
-        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
+        motion.velocity.x = (px - actor->head.tmpl.pos.x) * speed;
+        motion.velocity.y = (py - actor->head.tmpl.pos.y) * speed;
+        motion.velocity.z = (pz - actor->head.tmpl.pos.z) * speed;
+        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
 }
@@ -1834,9 +1815,9 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
 
     jet = actor->state;
     preset = &D_800A8770[jet->spritePreset];
-    packet.x = actor->pos.x;
-    packet.y = actor->pos.y;
-    packet.z = actor->pos.z;
+    packet.x = actor->head.tmpl.pos.x;
+    packet.y = actor->head.tmpl.pos.y;
+    packet.z = actor->head.tmpl.pos.z;
     packet.subX = 0;
     packet.subY = 0;
     packet.subZ = 0;
@@ -1866,13 +1847,13 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
         x = end->x + preset->radius * sine2 * cosine1;
         y = end->y - preset->radius * cosine2;
         z = end->z + preset->radius * sine2 * sine1;
-        packet.velX = (x - actor->pos.x) * speed;
-        packet.velY = (y - actor->pos.y) * speed;
-        packet.velZ = (z - actor->pos.z) * speed;
+        packet.velX = (x - actor->head.tmpl.pos.x) * speed;
+        packet.velY = (y - actor->head.tmpl.pos.y) * speed;
+        packet.velZ = (z - actor->head.tmpl.pos.z) * speed;
         packet.accelY = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
         packet.fadeStep = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
         packet.width = packet.height = func_150ADA20() % (u32)(preset->size_range + 1) + preset->size;
-        func_15167D84(&packet, 0, 0, -1, actor->unkC, actor->unk1);
+        func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind);
         jet->spriteAccum -= 1.0f;
     } while (jet->spriteAccum > 1.0f);
 }
@@ -1882,8 +1863,8 @@ void func_151993B4(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
 
     jet = actor->state;
-    actor->unk30 = 0;
-    actor->flags1E &= ~2;
+    actor->head.updateKind2 = 0;
+    actor->head.tmpl.flags &= ~2;
     jet->flags |= 1;
     jet->flags |= 4;
 }
@@ -2247,8 +2228,8 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     flame = actor->state;
     points = actor->points;
     flame->flags &= ~0x10;
-    if (actor->count < 2) {
-        if (actor->flags1E & 8) {
+    if (actor->head.count < 2) {
+        if (actor->head.tmpl.flags & 8) {
             return 0;
         }
     }
@@ -2257,13 +2238,13 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
             return 0;
         }
     }
-    i = actor->head;
-    while (i != actor->tail) {
+    i = actor->head.end;
+    while (i != actor->head.start) {
         FlamePoint *pt;
 
         i--;
         if (i < 0) {
-            i = actor->capacity - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
         pt = &points[i];
         func_1519BE1C(&pt->pos, &pt->vel, flame->seed.gravity, D_800BE9A4);
@@ -2272,11 +2253,11 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     {
         FlamePoint *oldest;
 
-        if (flame->light != NULL && actor->count >= 2) {
+        if (flame->light != NULL && actor->head.count >= 2) {
             LightEffect *light = flame->light;
             PointLight *out = light->light;
 
-            oldest = &points[actor->tail];
+            oldest = &points[actor->head.start];
             out->x = oldest->pos.x;
             out->y = oldest->pos.y;
             out->z = oldest->pos.z;
@@ -2286,12 +2267,12 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
         D_8008F8BC[flame->seed.soundUpdateFn](actor);
     }
     flame->flags &= ~1;
-    if (actor->count > 0) {
-        actor->tailPos = points[actor->tail].pos;
+    if (actor->head.count > 0) {
+        actor->head.modelPos = points[actor->head.start].pos;
     } else {
-        actor->tailPos.x = 0.0f;
-        actor->tailPos.y = 0.0f;
-        actor->tailPos.z = 0.0f;
+        actor->head.modelPos.x = 0.0f;
+        actor->head.modelPos.y = 0.0f;
+        actor->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -2364,7 +2345,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         pos1.z = dir.z * 0.03200000152f + pos0.z;
         flame->flags |= 1;
     }
-    actor->pos = pos0;
+    actor->head.tmpl.pos = pos0;
     flame->emitAccum += flame->seed.emitRate * D_800BE9A4;
     if (flame->emitAccum > 1.0f) {
         f32 inv;
@@ -2401,7 +2382,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         do {
             FlamePoint *p;
 
-            p = &points[actor->head];
+            p = &points[actor->head.end];
             p->pos = cur0;
             p->vel.x = cur1.x - cur0.x;
             p->vel.y = cur1.y - cur0.y;
@@ -2412,17 +2393,17 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             p->texT = flame->texOffset;
             func_1519BE1C(&p->pos, &p->vel, flame->seed.gravity, t);
             p->size += flame->seed.sizeRate * t;
-            actor->head++;
-            if (actor->head == actor->capacity) {
-                actor->head = 0;
+            actor->head.end++;
+            if (actor->head.end == actor->head.tmpl.itemCount) {
+                actor->head.end = 0;
             }
-            actor->count++;
-            if (actor->head == actor->tail) {
-                actor->tail++;
-                if (actor->tail == actor->capacity) {
-                    actor->tail = 0;
+            actor->head.count++;
+            if (actor->head.end == actor->head.start) {
+                actor->head.start++;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count--;
+                actor->head.count--;
             }
             cur0.x += ix0;
             cur0.y += iy0;
@@ -2490,7 +2471,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                     motion.velocity.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     motion.gravity = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
                     motion.alpha = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
-                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
+                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->scatterAccum -= 1.0f;
             } while (flame->scatterAccum > 1.0f);
@@ -2554,7 +2535,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                     part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
                     part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     part.gravity = func_150ADA68() * flame->emit.unk34 + flame->emit.unk30;
-                    func_15130280(&part, 1, 0, 0, actor->unkC, actor->unk1);
+                    func_15130280(&part, 1, 0, 0, actor->head.header.owner, actor->head.header.kind);
                 }
                 flame->particleAccum -= 1.0f;
             } while (flame->particleAccum > 1.0f);
@@ -2578,7 +2559,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             spark.unk5 = 1 << obj->camera->playerIndex;
             spark.unk4 = func_150ADA20() % 7U + 2;
             spark.unk6 = -1;
-            func_151D8868(&spark, 0, actor->unkC, actor->unk1);
+            func_151D8868(&spark, 0, actor->head.header.owner, actor->head.header.kind);
             flame->sparkTimer = func_150ADA20() % 21U + 0x78;
         }
     }
@@ -2605,7 +2586,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     flame = actor->state;
     points = actor->points;
     maxLen = flame->seed.maxLength;
-    if ((flame->flags & 4) && actor->count >= 2) {
+    if ((flame->flags & 4) && actor->head.count >= 2) {
         Actor *obj;
         Vec3f *end;
         s32 i;
@@ -2619,13 +2600,13 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         f32 dz;
 
         obj = flame->seed.owner;
-        if (actor->flags1E & 2) {
-            end = &actor->pos;
+        if (actor->head.tmpl.flags & 2) {
+            end = &actor->head.tmpl.pos;
         } else {
-            i = actor->head;
+            i = actor->head.end;
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             end = &points[i].pos;
         }
@@ -2641,19 +2622,19 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             maxLen = hit;
         }
     }
-    if (actor->count >= 2) {
+    if (actor->head.count >= 2) {
         Vec3f *prev;
         s32 i;
         Vec3f diff;
 
-        i = actor->head;
+        i = actor->head.end;
         flame->length = 0.0f;
-        if (actor->flags1E & 2) {
-            prev = &actor->pos;
+        if (actor->head.tmpl.flags & 2) {
+            prev = &actor->head.tmpl.pos;
         } else {
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             prev = &points[i].pos;
         }
@@ -2662,7 +2643,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             p = &points[i];
             diff.x = p->pos.x - prev->x;
@@ -2679,19 +2660,19 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                     p->pos.z -= diff.z * t;
                     p->length = p->length * (1.0f - t);
                 }
-                while (i != actor->tail) {
-                    actor->tail++;
-                    if (actor->tail == actor->capacity) {
-                        actor->tail = 0;
+                while (i != actor->head.start) {
+                    actor->head.start++;
+                    if (actor->head.start == actor->head.tmpl.itemCount) {
+                        actor->head.start = 0;
                     }
-                    actor->count--;
+                    actor->head.count--;
                 }
                 flame->length = maxLen;
             }
             prev = &p->pos;
-        } while (i != actor->tail);
+        } while (i != actor->head.start);
     }
-    if (actor->count >= 2) {
+    if (actor->head.count >= 2) {
         f32 sum;
         f32 fadeStart;
         f32 fadeLen;
@@ -2699,7 +2680,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         s32 i;
 
         sum = 0.0f;
-        i = actor->head;
+        i = actor->head.end;
         fadeStart = flame->length * flame->seed.fadeStart;
         fadeLen = flame->length - fadeStart;
         inv = 1.0f / fadeLen;
@@ -2708,7 +2689,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             p = &points[i];
             sum += p->length;
@@ -2719,30 +2700,30 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             } else {
                 p->alpha = flame->seed.alpha;
             }
-        } while (i != actor->tail);
+        } while (i != actor->head.start);
     }
-    if (actor->count >= 2) {
+    if (actor->head.count >= 2) {
         s32 i;
         f32 sum;
 
         flame->texOffset += flame->seed.texSpeed * D_800BE9A4;
         flame->texOffset = func_15144528(flame->texOffset, 16383.0f, -16384.0f);
-        i = actor->head;
+        i = actor->head.end;
         sum = 0.0f;
         do {
             FlamePoint *p;
 
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             p = &points[i];
             sum += p->length;
             p->texT = func_15144528(flame->texOffset + sum * flame->seed.texScale, 16383.0f, -16384.0f);
-        } while (i != actor->tail);
+        } while (i != actor->head.start);
     }
-    if (actor->count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
-        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->tail].size * D_800BE9A4;
+    if (actor->head.count >= 3 && (!(flame->flags & 0x20) || !(flame->flags & 0x10)) && maxLen <= flame->length) {
+        flame->lineAccum += (flame->line.rate + func_150ADA68() * flame->line.rateRange) * points[actor->head.start].size * D_800BE9A4;
         if (flame->lineAccum > 1.0f) {
             s32 head;
             s32 next;
@@ -2761,23 +2742,23 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             SceneParticle *particle;
             s32 pad4; // matching: unused stack slots (also r, pad, pad9) keep the original frame
 
-            head = actor->tail;
+            head = actor->head.start;
             alpha = 0.0f;
             next = head + 1;
-            if (next == actor->capacity) {
+            if (next == actor->head.tmpl.itemCount) {
                 next = 0;
             }
             sum = 0.0f;
             found = 0;
             last = NULL;
             target = flame->length * flame->line.position;
-            i = actor->head;
+            i = actor->head.end;
             do {
                 FlamePoint *p;
 
                 i--;
                 if (i < 0) {
-                    i = actor->capacity - 1;
+                    i = actor->head.tmpl.itemCount - 1;
                 }
                 p = &points[i];
                 sum += p->length;
@@ -2802,7 +2783,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                     }
                 }
                 last = p;
-            } while (i != actor->tail && found == 0);
+            } while (i != actor->head.start && found == 0);
             spawn.frame = 0;
             spawn.frameSpeed = 0;
             lineData.dragA = flame->line.dragA;
@@ -2860,7 +2841,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 spawn.rot.z = spawn.pos.z + dir.z;
                 spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
                 particle = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
-                                    actor->unkC, actor->unk1);
+                                    actor->head.header.owner, actor->head.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data.line, &lineData, sizeof(lineData));
                 }
@@ -2871,22 +2852,22 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     if (flame->seed.unk35 != -1) {
         D_8008F8A8[flame->seed.unk35](actor);
     }
-    if ((flame->flags & 2) && actor->count >= 2) {
+    if ((flame->flags & 2) && actor->head.count >= 2) {
         Vec3f *end;
         FlamePoint *h;
         s32 i;
         s32 pad9;
 
-        if (actor->flags1E & 2) {
-            end = &actor->pos;
+        if (actor->head.tmpl.flags & 2) {
+            end = &actor->head.tmpl.pos;
         } else {
-            i = actor->head - 1;
+            i = actor->head.end - 1;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             end = &points[i].pos;
         }
-        h = &points[actor->tail];
+        h = &points[actor->head.start];
         func_1508B20C((h->pos.x + end->x) * 0.5f, (h->pos.y + end->y) * 0.5f,
                       (h->pos.z + end->z) * 0.5f, flame->length * 0.5f);
     }
@@ -2921,7 +2902,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vtx_t *vtx;
     u8 curAlpha;
 
-    if (actor->count < 2) {
+    if (actor->head.count < 2) {
         return gfx;
     }
     state = actor->state;
@@ -2937,11 +2918,11 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
         f32 dy;
         f32 dz;
 
-        tail = actor->head;
+        tail = actor->head.end;
         tail--;
-        index = actor->tail;
+        index = actor->head.start;
         if (tail < 0) {
-            tail = actor->capacity - 1;
+            tail = actor->head.tmpl.itemCount - 1;
         }
         last = &points[index];
         first = &points[tail];
@@ -2956,7 +2937,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
             return gfx;
         }
     }
-    func_151D5D60(actor->buffers, view, (actor->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -2966,26 +2947,26 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
-    if (actor->flags1E & 2) {
-        index = actor->head;
+    if (actor->head.tmpl.flags & 2) {
+        index = actor->head.end;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
-        cur = actor->pos;
+        cur = actor->head.tmpl.pos;
         curWidth = state->seed.size;
         curAlpha = state->seed.alpha;
         curTexture = state->texOffset;
     } else {
-        previous = actor->head;
+        previous = actor->head.end;
         previous--;
         if (previous < 0) {
-            previous = actor->capacity - 1;
+            previous = actor->head.tmpl.itemCount - 1;
         }
         index = previous;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         cur = points[previous].pos;
         curWidth = points[previous].size;
@@ -3096,7 +3077,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
         previous = index;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         cur = points[previous].pos;
         next = points[index].pos;
@@ -3104,7 +3085,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
         nextAlpha = points[index].alpha;
         curTexture = points[previous].texT;
         nextTexture = points[index].texT;
-    } while (previous != actor->tail);
+    } while (previous != actor->head.start);
     return gfx;
 }
 
@@ -3180,11 +3161,11 @@ void func_1519BFBC(CharacterFlamethrowerActor *actor) {
 
     flame = actor->state;
     points = actor->points;
-    if (actor->count != 0) {
+    if (actor->head.count != 0) {
         sound = flame->sound;
         if (sound != 0) {
-            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->tail].pos.x, points[actor->tail].pos.y,
-                          points[actor->tail].pos.z, 500, 5000);
+            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->head.start].pos.x, points[actor->head.start].pos.y,
+                          points[actor->head.start].pos.z, 500, 5000);
         }
     }
 }
@@ -3583,20 +3564,20 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
 
     state = actor->state;
     points = actor->points;
-    previous = &actor->pos;
-    if (actor->count >= 2) {
+    previous = &actor->head.tmpl.pos;
+    if (actor->head.count >= 2) {
         f32 interpolated_z; // matching: z goes through this local (other functions' code moves without it)
 
         total = 0.0f;
         spacing = state->length * fraction;
-        index = actor->head;
+        index = actor->head.end;
         next = 0.0f;
         do {
             f32 distance;
 
             index--;
             if (index < 0) {
-                index = actor->capacity - 1;
+                index = actor->head.tmpl.itemCount - 1;
             }
             point = &points[index];
             distance = point->length;
@@ -3612,6 +3593,6 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
                 next += spacing;
             }
             previous = &point->pos;
-        } while (index != actor->tail);
+        } while (index != actor->head.start);
     }
 }

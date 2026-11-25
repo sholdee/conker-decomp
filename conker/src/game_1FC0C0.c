@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 typedef struct { f32 x, z; } TrailVec2;
 
@@ -43,19 +44,11 @@ typedef struct {
 } TrailEntry;
 
 typedef struct {
-    u8 pad0[0x10];
-    Vec3f pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 count;
-    u8 pad26[6];
-    s8 num;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x65];
-    TrailEntry *entries;
-    TrailInfo *info;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailEntry *entries;
+    /* 0x98 */ TrailInfo *info;
 } TrailObj;
 
 /* Writes the point a trail is attached to: the anchor's position if there is one, else the owner's. */
@@ -101,13 +94,13 @@ s32 func_151CEC54(TrailObj *trail) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
-        prev = trail->pos;
-        if (func_151CEC10(&trail->pos, owner, anchor)) {
-            if (!(trail->flags & TRAIL_HAS_POS)) {
-                prev = trail->pos;
+        prev = trail->head.tmpl.pos;
+        if (func_151CEC10(&trail->head.tmpl.pos, owner, anchor)) {
+            if (!(trail->head.tmpl.flags & TRAIL_HAS_POS)) {
+                prev = trail->head.tmpl.pos;
             } else if (!(info->flags & TRAIL_INFO_HAS_NORMAL)) {
-                dx = trail->pos.x - prev.x;
-                dz = trail->pos.z - prev.z;
+                dx = trail->head.tmpl.pos.x - prev.x;
+                dz = trail->head.tmpl.pos.z - prev.z;
                 len = sqrtf(dx * dx + dz * dz);
                 if (len != 0.0f) {
                     inv = 1.0f / len;
@@ -120,20 +113,20 @@ s32 func_151CEC54(TrailObj *trail) {
                     info->scaled.z = nz * 51.0f;
                 }
             }
-            trail->flags |= TRAIL_HAS_POS;
+            trail->head.tmpl.flags |= TRAIL_HAS_POS;
         } else {
-            trail->flags &= ~TRAIL_HAS_POS;
+            trail->head.tmpl.flags &= ~TRAIL_HAS_POS;
             return 1;
         }
-        delta.x = trail->pos.x - prev.x;
-        delta.y = trail->pos.y - prev.y;
-        delta.z = trail->pos.z - prev.z;
+        delta.x = trail->head.tmpl.pos.x - prev.x;
+        delta.y = trail->head.tmpl.pos.y - prev.y;
+        delta.z = trail->head.tmpl.pos.z - prev.z;
         dist = func_15143E64(&delta);
         if (dist > 0.0001f) {
             TrailEntry *newest;
 
-            newest = &entries[trail->head];
-            newest->pos = trail->pos;
+            newest = &entries[trail->head.end];
+            newest->pos = trail->head.tmpl.pos;
             newest->dist = dist;
             len = sqrtf(delta.x * delta.x + delta.z * delta.z);
             if (len == 0.0f) {
@@ -144,19 +137,19 @@ s32 func_151CEC54(TrailObj *trail) {
             newest->unk14 = 0.0f;
             newest->scaled = info->scaled;
             newest->normal = info->normal;
-            trail->head++;
-            if (trail->head == trail->count) {
-                trail->head = 0;
+            trail->head.end++;
+            if (trail->head.end == trail->head.tmpl.itemCount) {
+                trail->head.end = 0;
             }
-            trail->num++;
-            if (trail->head == trail->tail) {
-                trail->tail++;
-                if (trail->tail == trail->count) {
-                    trail->tail = 0;
+            trail->head.count++;
+            if (trail->head.end == trail->head.start) {
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->num--;
+                trail->head.count--;
             }
-            if ((info->flags & TRAIL_INFO_SMOOTH) && trail->num >= 3) {
+            if ((info->flags & TRAIL_INFO_SMOOTH) && trail->head.count >= 3) {
                 TrailEntry *mid;
                 TrailEntry *oldest;
                 f32 headInv;
@@ -171,17 +164,17 @@ s32 func_151CEC54(TrailObj *trail) {
                 TrailVec2 n;
                 f32 lenSq;
 
-                midIdx = trail->head - 1;
+                midIdx = trail->head.end - 1;
                 if (midIdx < 0) {
-                    midIdx = trail->count - 1;
+                    midIdx = trail->head.tmpl.itemCount - 1;
                 }
                 midIdx--;
                 if (midIdx < 0) {
-                    midIdx = trail->count - 1;
+                    midIdx = trail->head.tmpl.itemCount - 1;
                 }
                 oldIdx = midIdx - 1;
                 if (oldIdx < 0) {
-                    oldIdx = trail->count - 1;
+                    oldIdx = trail->head.tmpl.itemCount - 1;
                 }
                 mid = &entries[midIdx];
                 oldest = &entries[oldIdx];

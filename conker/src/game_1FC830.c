@@ -28,13 +28,8 @@ typedef struct {
 
 /* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x25];
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest point */
-    /* 0x2E */ s8 head; /* next point to write */
-    /* 0x2F */ u8 pad2F[0x55];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 vtxBuffer[0x10];
     /* 0x94 */ RibbonPoint *points;
     /* 0x98 */ RibbonInfo *info;
@@ -72,7 +67,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     TrailVec2 curOffset;
     Vtx *vtx;
 
-    if (ribbon->count < 2) {
+    if (ribbon->head.count < 2) {
         return gfx;
     }
     info = ribbon->info;
@@ -80,17 +75,17 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     if (info->owner != NULL && info->owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
     gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
-    cur = ribbon->head - 1;
+    cur = ribbon->head.end - 1;
     if (cur < 0) {
-        cur = ribbon->capacity - 1;
+        cur = ribbon->head.tmpl.itemCount - 1;
     }
     next = cur - 1;
     if (next < 0) {
-        next = ribbon->capacity - 1;
+        next = ribbon->head.tmpl.itemCount - 1;
     }
     curPos = points[cur].pos;
     curWidth = points[cur].width;
@@ -128,9 +123,9 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
         cur = next;
         next--;
         if (next < 0) {
-            next = ribbon->capacity - 1;
+            next = ribbon->head.tmpl.itemCount - 1;
         }
-        if (cur != ribbon->tail) {
+        if (cur != ribbon->head.start) {
             curPos = points[cur].pos;
             // matching: dead recompute of curWidth/curX/curZ (DCE'd) steers the address base IDO keeps
             curWidth = points[cur].width;
@@ -143,7 +138,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
             nextOffset = points[next].offset;
             curOffset = points[cur].offset;
         }
-    } while (cur != ribbon->tail);
+    } while (cur != ribbon->head.start);
     return gfx;
 }
 

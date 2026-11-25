@@ -71,23 +71,8 @@ typedef struct Game10A350State {
 } Game10A350State;
 
 typedef struct Game10A350Actor {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ u8 pad1C[2];
-    /* 0x1E */ u16 flags;
-    /* 0x20 */ u8 pad20[5];
-    /* 0x25 */ u8 capacity; /* records[] length */
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 head; /* oldest record */
-    /* 0x2E */ s8 tail; /* next record to write */
-    /* 0x2F */ u8 pad2F;
-    /* 0x30 */ s8 active;
-    /* 0x31 */ u8 pad31[0x53];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ Vtx *vtxBufs[4]; /* one per view, see func_151D5D60 */
     /* 0x94 */ Game10A350Record *records;
     /* 0x98 */ Game10A350State *state;
@@ -134,8 +119,8 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
             stepScale = D_800BE9A4 * inverse;
             x = state->x;
             z = state->z;
-            dx = func_151423D8((u8)(state->angleX - 0x40)) * state->swayX + actor->pos.x - state->x;
-            dz = func_151423D8((u8)(state->angleZ - 0x40)) * state->swayZ + actor->pos.z - state->z;
+            dx = func_151423D8((u8)(state->angleX - 0x40)) * state->swayX + actor->head.tmpl.pos.x - state->x;
+            dz = func_151423D8((u8)(state->angleZ - 0x40)) * state->swayZ + actor->head.tmpl.pos.z - state->z;
             if (state->count > 1.0f) {
                 stepX = dx * inverse;
                 stepZ = dz * inverse;
@@ -158,7 +143,7 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                         spawned = TRUE;
                         packet.frameStep = state->frameRate;
                         packet.anim = state->texture;
-                        packet.y = actor->pos.y;
+                        packet.y = actor->head.tmpl.pos.y;
                         packet.life = state->lifetime;
                         do {
                             speed = func_150ADA68() * state->speedRange + state->speedBase;
@@ -168,15 +153,15 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                             pitch = (func_150ADA20() % (u32)(state->pitchRange + 1)) + state->pitchBase;
                             sinPitch = func_151423D8(pitch);
                             cosPitch = func_151423D8((u8)(pitch - 0x40));
-                            packet.x = actor->pos.x + state->radius * cosYaw;
-                            packet.z = actor->pos.z + state->radius * sinYaw;
+                            packet.x = actor->head.tmpl.pos.x + state->radius * cosYaw;
+                            packet.z = actor->head.tmpl.pos.z + state->radius * sinYaw;
                             packet.velX = speed * sinPitch * cosYaw;
                             packet.velY = -speed * cosPitch;
                             packet.velZ = speed * sinPitch * sinYaw;
                             packet.accelY = func_150ADA68() * state->accelRange + state->accelBase;
                             packet.fadeStep = (func_150ADA20() % (u32)(state->fadeRange + 1)) + state->fadeBase;
                             packet.width = packet.height = func_150ADA68() * state->sizeRange + state->sizeBase;
-                            if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
+                            if (func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                                 spawned = FALSE;
                             }
                             state->spawnCount -= 1.0f;
@@ -185,28 +170,28 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                             state->spawnCount -= 1.0f;
                         }
                     }
-                    records[actor->tail].pos.x = x;
-                    records[actor->tail].pos.y = actor->pos.y;
-                    records[actor->tail].pos.z = z;
-                    records[actor->tail].velocityY = state->velocityY;
+                    records[actor->head.end].pos.x = x;
+                    records[actor->head.end].pos.y = actor->head.tmpl.pos.y;
+                    records[actor->head.end].pos.z = z;
+                    records[actor->head.end].velocityY = state->velocityY;
                     state->widthAngle += func_150ADA20() % (u32)(state->widthAngleRange + 1);
-                    records[actor->tail].width = func_151423D8((u8)(state->widthAngle - 0x40)) * state->widthRange + state->widthBase;
-                    records[actor->tail].alpha = state->alpha;
-                    records[actor->tail].texCoord = state->texCoord;
+                    records[actor->head.end].width = func_151423D8((u8)(state->widthAngle - 0x40)) * state->widthRange + state->widthBase;
+                    records[actor->head.end].alpha = state->alpha;
+                    records[actor->head.end].texCoord = state->texCoord;
                     state->texCoord += state->texCoordStep + (func_150ADA20() % (u32)(state->texCoordStepRange + 1));
-                    records[actor->tail].velocityY += state->gravity * scale;
-                    records[actor->tail].pos.y += records[actor->tail].velocityY * scale;
-                    actor->tail++;
-                    if (actor->tail == actor->capacity) {
-                        actor->tail = 0;
+                    records[actor->head.end].velocityY += state->gravity * scale;
+                    records[actor->head.end].pos.y += records[actor->head.end].velocityY * scale;
+                    actor->head.end++;
+                    if (actor->head.end == actor->head.tmpl.itemCount) {
+                        actor->head.end = 0;
                     }
-                    actor->count++;
-                    if (actor->tail == actor->head) {
-                        actor->head++;
-                        if (actor->head == actor->capacity) {
-                            actor->head = 0;
+                    actor->head.count++;
+                    if (actor->head.end == actor->head.start) {
+                        actor->head.start++;
+                        if (actor->head.start == actor->head.tmpl.itemCount) {
+                            actor->head.start = 0;
                         }
-                        actor->count--;
+                        actor->head.count--;
                     }
                     x += stepX;
                     z += stepZ;
@@ -220,29 +205,29 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
     }
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
-        index = actor->tail - 1;
+        index = actor->head.end - 1;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         /* fade out the newest four records */
         records[index].alpha = 0;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         records[index].alpha = 0x3F;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         records[index].alpha = 0x7F;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         records[index].alpha = 0xBE;
-        actor->active = 0;
-        actor->flags &= ~2;
+        actor->head.updateKind2 = 0;
+        actor->head.tmpl.flags &= ~2;
     }
     return 1;
 }
@@ -281,7 +266,7 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
     }
 
 /*
- * Draws the trail as a flat ribbon from the newest record back to actor->head, two vertices per record
+ * Draws the trail as a flat ribbon from the newest record back to actor->head.start, two vertices per record
  * spread sideways by the view's camera sin/cos and the record's width, with the texture running along the
  * ribbon (S, or T when state->unk60 == 2).
  */
@@ -303,8 +288,8 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
     Game10A350State *state;
     Game10A350Record *records;
 
-    if (actor->count >= 2) {
-        func_151D5D60(actor->vtxBufs, view, (actor->capacity * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    if (actor->head.count >= 2) {
+        func_151D5D60(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             state = actor->state;
             records = actor->records;
@@ -325,23 +310,23 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
             gfx = func_1513F4E4(gfx, unk42High, &update);
             gfx = func_15142B7C(gfx, 1, 0x160600);
             gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
-            if (actor->flags & 2) {
+            if (actor->head.tmpl.flags & 2) {
                 /* still emitting: the ribbon starts at the actor itself (i is left unset, as in the original) */
-                j = actor->tail - 1;
+                j = actor->head.end - 1;
                 if (j < 0) {
-                    j = actor->capacity - 1;
+                    j = actor->head.tmpl.itemCount - 1;
                 }
-                newer = actor->pos;
+                newer = actor->head.tmpl.pos;
                 older = records[j].pos;
                 prevTexCoord = texCoord = records[j].texCoord;
             } else {
-                i = actor->tail - 1;
+                i = actor->head.end - 1;
                 if (i < 0) {
-                    i = actor->capacity - 1;
+                    i = actor->head.tmpl.itemCount - 1;
                 }
                 j = i - 1;
                 if (j < 0) {
-                    j = actor->capacity - 1;
+                    j = actor->head.tmpl.itemCount - 1;
                 }
                 newer = records[i].pos;
                 older = records[j].pos;
@@ -408,12 +393,12 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
                 i = j;
                 j--;
                 if (j < 0) {
-                    j = actor->capacity - 1;
+                    j = actor->head.tmpl.itemCount - 1;
                 }
                 newer = records[i].pos;
                 older = records[j].pos;
                 texCoord = records[j].texCoord;
-            } while (i != actor->head);
+            } while (i != actor->head.start);
         }
     }
     return gfx;

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 typedef struct {
     f32 x, z;
@@ -45,17 +46,8 @@ typedef struct {
 } TrailPoint; /* size 0x28 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u16 flags;
-    /* 0x20 */ u8 pad20[5];
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest sample */
-    /* 0x2E */ s8 head; /* next slot to write */
-    /* 0x2F */ u8 pad2F[0x84 - 0x2F];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
     /* 0x98 */ TrailState *state;
@@ -85,14 +77,14 @@ s32 func_151D15D0(TrailActor *actor) {
     owner = state->owner;
     motion = &owner->motion;
     if (D_800BE9E4 > 0) {
-        actor->position = motion->position;
-        actor->flags |= 4;
+        actor->head.tmpl.pos = motion->position;
+        actor->head.tmpl.flags |= 4;
         {
             TrailPoint *newest;
             f32 speed;
 
-            newest = &points[actor->head];
-            newest->position = actor->position;
+            newest = &points[actor->head.end];
+            newest->position = actor->head.tmpl.pos;
             newest->length = motion->speed;
             speed = sqrtf(motion->velocity.x * motion->velocity.x + motion->velocity.z * motion->velocity.z);
             if (speed == 0.0f) {
@@ -112,34 +104,34 @@ s32 func_151D15D0(TrailActor *actor) {
                 newest->normal.x = 0.0f;
                 newest->normal.z = 0.0f;
             }
-            actor->head++;
-            if (actor->head == actor->capacity) {
-                actor->head = 0;
+            actor->head.end++;
+            if (actor->head.end == actor->head.tmpl.itemCount) {
+                actor->head.end = 0;
             }
-            actor->count++;
-            if (actor->head == actor->tail) {
-                actor->tail++;
-                if (actor->tail == actor->capacity) {
-                    actor->tail = 0;
+            actor->head.count++;
+            if (actor->head.end == actor->head.start) {
+                actor->head.start++;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count--;
+                actor->head.count--;
             }
-            if (actor->count >= 3) {
+            if (actor->head.count >= 3) {
                 s16 unused; // matching: unused, but it reserves the target's stack slot
                 s16 middleIndex;
                 s16 olderIndex;
 
-                middleIndex = actor->head - 1;
+                middleIndex = actor->head.end - 1;
                 if (middleIndex < 0) {
-                    middleIndex = actor->capacity - 1;
+                    middleIndex = actor->head.tmpl.itemCount - 1;
                 }
                 middleIndex--;
                 if (middleIndex < 0) {
-                    middleIndex = actor->capacity - 1;
+                    middleIndex = actor->head.tmpl.itemCount - 1;
                 }
                 olderIndex = middleIndex - 1;
                 if (olderIndex < 0) {
-                    olderIndex = actor->capacity - 1;
+                    olderIndex = actor->head.tmpl.itemCount - 1;
                 }
                 if (newest->length) {
                     f32 nextX;
@@ -209,17 +201,17 @@ s32 func_151D197C(TrailActor *actor) {
 
         state->ownerScale = object->xz_scale;
     }
-    if (actor->count >= 2) {
+    if (actor->head.count >= 2) {
         total = 0; // matching: integer 0 (not 0.0f) for the target's FP register allocation
-        i = actor->head - 1;
+        i = actor->head.end - 1;
         if (i < 0) {
-            i = actor->capacity - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
-        while (i != actor->tail) {
+        while (i != actor->head.start) {
             newer = i;
             i--;
             if (i < 0) {
-                i = actor->capacity - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             newerPoint = &points[newer];
             total += newerPoint->length;
@@ -239,12 +231,12 @@ s32 func_151D197C(TrailActor *actor) {
                     older->position.z = olderZ - dz * t;
                     newerPoint->length *= 1.0f - t;
                 }
-                while (i != actor->tail) {
-                    actor->tail++;
-                    if (actor->tail == actor->capacity) {
-                        actor->tail = 0;
+                while (i != actor->head.start) {
+                    actor->head.start++;
+                    if (actor->head.start == actor->head.tmpl.itemCount) {
+                        actor->head.start = 0;
                     }
-                    actor->count--;
+                    actor->head.count--;
                 }
                 total = state->maxLength;
             }
@@ -253,13 +245,13 @@ s32 func_151D197C(TrailActor *actor) {
         invTotal = (total != 0.0f) ? 1.0f / total : 0;
         ;
     }
-    if (actor->count >= 2) {
+    if (actor->head.count >= 2) {
         f32 widthStep;
         f32 alphaStep;
         f32 distance;
         s32 j;
 
-        j = actor->head;
+        j = actor->head.end;
         distance = total;
         widthStep = state->widthScale * state->ownerScale * invTotal;
         alphaStep = state->alphaScale * invTotal;
@@ -268,16 +260,16 @@ s32 func_151D197C(TrailActor *actor) {
 
             j--;
             if (j < 0) {
-                j = actor->capacity - 1;
+                j = actor->head.tmpl.itemCount - 1;
             }
             sample = &points[j];
             sample->width = state->widthBase * state->ownerScale + distance * widthStep;
             sample->alpha = distance * alphaStep;
             distance -= sample->length;
-        } while (j != actor->tail);
+        } while (j != actor->head.start);
     }
-    if ((actor->flags & 1) && (actor->flags & 8)) {
-        state->alpha = actor->unk1C * 6;
+    if ((actor->head.tmpl.flags & 1) && (actor->head.tmpl.flags & 8)) {
+        state->alpha = actor->head.tmpl.life * 6;
     }
     return 1;
 }
@@ -301,12 +293,12 @@ Gfx *func_151D1C98(TrailActor *actor, Gfx *gfx, s16 arg2) {
     u16 firstAlpha;
     Vtx *vtx;
 
-    if (actor->count < 2) {
+    if (actor->head.count < 2) {
         return gfx;
     }
     state = actor->state;
     points = actor->points;
-    func_151D5D60(actor->unk84, arg2, (actor->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(actor->unk84, arg2, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -315,13 +307,13 @@ Gfx *func_151D1C98(TrailActor *actor, Gfx *gfx, s16 arg2) {
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
     gfx = func_1513F4E4(gfx, 0x4C, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
-    previous = actor->head - 1;
+    previous = actor->head.end - 1;
     if (previous < 0) {
-        previous = actor->capacity - 1;
+        previous = actor->head.tmpl.itemCount - 1;
     }
     index = previous - 1;
     if (index < 0) {
-        index = actor->capacity - 1;
+        index = actor->head.tmpl.itemCount - 1;
     }
     first = points[previous].position;
     firstEdgeX = points[previous].width * points[previous].normal.x;
@@ -379,9 +371,9 @@ Gfx *func_151D1C98(TrailActor *actor, Gfx *gfx, s16 arg2) {
         previous = index;
         index--;
         if (index < 0) {
-            index = actor->capacity - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
-        if (previous != actor->tail) {
+        if (previous != actor->head.start) {
             next = points[index].position;
             nextEdgeX = points[index].width * points[index].normal.x;
             firstTexture = points[previous].texture;
@@ -389,7 +381,7 @@ Gfx *func_151D1C98(TrailActor *actor, Gfx *gfx, s16 arg2) {
             nextTexture = points[index].texture;
             nextAlpha = (points[index].alpha * state->alpha) >> 8;
         }
-    } while (previous != actor->tail);
+    } while (previous != actor->head.start);
     return gfx;
 }
 

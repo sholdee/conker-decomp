@@ -47,19 +47,11 @@ typedef struct {
 
 /* The actor returned by func_15147A80. */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    EffectTemplate spawn;
-    s8 numPoints;       // points in the ring buffer
-    s8 tail;            // oldest point
-    s8 head;            // next point to write
-    u8 pad2F[0x84 - 0x2F];
-    Vtx *vtxBufs[4];
-    TrailPoint *points;
-    TrailState *state;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ Vtx *vtxBufs[4];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailState *state;
 } TrailActor;
 
 /* Sound slot passed to func_150D5124 by the sound system. */
@@ -288,8 +280,8 @@ s32 func_150D3A68(TrailActor *actor) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
-        prevPos = actor->spawn.pos;
-        switch (func_150D4AE0(&actor->spawn.pos, &end, owner, attachment)) {
+        prevPos = actor->head.tmpl.pos;
+        switch (func_150D4AE0(&actor->head.tmpl.pos, &end, owner, attachment)) {
         case 0:
             if (state->effects[0] != NULL) {
                 state->effects[0]->head.def.flags &= ~2;
@@ -297,31 +289,31 @@ s32 func_150D3A68(TrailActor *actor) {
             if (state->effects[1] != NULL) {
                 state->effects[1]->head.def.flags &= ~2;
             }
-            actor->spawn.flags &= ~4;
+            actor->head.tmpl.flags &= ~4;
             return 1;
         case 1:
-            if (!(actor->spawn.flags & 4)) {
-                prevPos = actor->spawn.pos;
+            if (!(actor->head.tmpl.flags & 4)) {
+                prevPos = actor->head.tmpl.pos;
             }
-            actor->spawn.flags |= 4;
+            actor->head.tmpl.flags |= 4;
             if (state->effects[0] != NULL) {
-                state->effects[0]->head.def.pos = actor->spawn.pos;
+                state->effects[0]->head.def.pos = actor->head.tmpl.pos;
                 state->effects[0]->head.def.rot = end;
                 state->effects[0]->head.def.flags &= ~4;
                 state->effects[0]->head.def.flags |= 2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->head.def.pos = actor->spawn.pos;
+                state->effects[1]->head.def.pos = actor->head.tmpl.pos;
                 state->effects[1]->head.def.rot = end;
                 state->effects[1]->head.def.flags &= ~4;
                 state->effects[1]->head.def.flags |= 2;
             }
             break;
         case 2:
-            if (!(actor->spawn.flags & 4)) {
-                prevPos = actor->spawn.pos;
+            if (!(actor->head.tmpl.flags & 4)) {
+                prevPos = actor->head.tmpl.pos;
             }
-            actor->spawn.flags |= 4;
+            actor->head.tmpl.flags |= 4;
             if (state->effects[0] != NULL) {
                 state->effects[0]->head.def.flags &= ~2;
             }
@@ -330,27 +322,27 @@ s32 func_150D3A68(TrailActor *actor) {
             }
             break;
         }
-        delta.x = actor->spawn.pos.x - prevPos.x;
-        delta.y = actor->spawn.pos.y - prevPos.y;
-        delta.z = actor->spawn.pos.z - prevPos.z;
+        delta.x = actor->head.tmpl.pos.x - prevPos.x;
+        delta.y = actor->head.tmpl.pos.y - prevPos.y;
+        delta.z = actor->head.tmpl.pos.z - prevPos.z;
         dist = func_15143E64(&delta);
         {
-            TrailPoint *pt = &points[actor->head];
+            TrailPoint *pt = &points[actor->head.end];
 
-            pt->pos = actor->spawn.pos;
+            pt->pos = actor->head.tmpl.pos;
             pt->len = dist;
             pt->width = 100.0f;
-            actor->head++;
-            if (actor->head == actor->spawn.itemCount) {
-                actor->head = 0;
+            actor->head.end++;
+            if (actor->head.end == actor->head.tmpl.itemCount) {
+                actor->head.end = 0;
             }
-            actor->numPoints++;
-            if (actor->head == actor->tail) {
-                actor->tail++;
-                if (actor->tail == actor->spawn.itemCount) {
-                    actor->tail = 0;
+            actor->head.count++;
+            if (actor->head.end == actor->head.start) {
+                actor->head.start++;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->numPoints--;
+                actor->head.count--;
             }
         }
         if (owner->unk31C != NULL) {
@@ -389,7 +381,7 @@ s32 func_150D3A68(TrailActor *actor) {
                     if (func_1515C0F8(owner, &vel) == 0) {
                         vel = &D_800A5480;
                     }
-                    func_150D4D58(&actor->spawn.pos, vel, owner->unk40, actor->unkC, actor->unk1);
+                    func_150D4D58(&actor->head.tmpl.pos, vel, owner->unk40, actor->head.header.owner, actor->head.header.kind);
                 }
             } else if (state->mode == 2) {
                 if (tail != NULL) {
@@ -453,17 +445,17 @@ s32 func_150D3FD4(TrailActor *actor) {
     } else {
         maxLen = (speed - 10.0f) * 0.01666666754f * 600.0f;
     }
-    if (actor->numPoints >= 2) {
+    if (actor->head.count >= 2) {
         total = 0.0f;
-        i = actor->head - 1;
+        i = actor->head.end - 1;
         if (i < 0) {
-            i = actor->spawn.itemCount - 1;
+            i = actor->head.tmpl.itemCount - 1;
         }
-        while (i != actor->tail) {
+        while (i != actor->head.start) {
             prev = i;
             i--;
             if (i < 0) {
-                i = actor->spawn.itemCount - 1;
+                i = actor->head.tmpl.itemCount - 1;
             }
             // matching: `prev + points` (not points[prev]) keeps IDO's index-add operand order
             total += (prev + points)->len;
@@ -482,12 +474,12 @@ s32 func_150D3FD4(TrailActor *actor) {
                     q->pos.z = q->pos.z - dz * t;
                     (prev + points)->len = (prev + points)->len * (1.0f - t);
                 }
-                while (i != actor->tail) {
-                    actor->tail++;
-                    if (actor->tail == actor->spawn.itemCount) {
-                        actor->tail = 0;
+                while (i != actor->head.start) {
+                    actor->head.start++;
+                    if (actor->head.start == actor->head.tmpl.itemCount) {
+                        actor->head.start = 0;
                     }
-                    actor->numPoints--;
+                    actor->head.count--;
                 }
                 total = maxLen;
             }
@@ -500,20 +492,20 @@ s32 func_150D3FD4(TrailActor *actor) {
         // matching: a dead early copy that steers register allocation (rem is set again below)
         rem = total;
     }
-    if (actor->numPoints >= 2) {
+    if (actor->head.count >= 2) {
         scale = state->width * invTotal;
-        j = actor->head;
+        j = actor->head.end;
         rem = total;
         do {
             TrailPoint *pt;
             j--;
             if (j < 0) {
-                j = actor->spawn.itemCount - 1;
+                j = actor->head.tmpl.itemCount - 1;
             }
             pt = &points[j];
             pt->width = rem * scale;
             rem -= pt->len;
-        } while (j != actor->tail);
+        } while (j != actor->head.start);
     }
     return 1;
 }
@@ -572,7 +564,7 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     s32 pad2;
     s32 pad3;
 
-    if (actor->numPoints < 2) {
+    if (actor->head.count < 2) {
         return gfx;
     }
     state = actor->state;
@@ -581,10 +573,10 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     if (owner->unk1D4 == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(actor->vtxBufs, view, (actor->spawn.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
+    func_151D5D60(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
     if (fresh != 0) {
         tv = (TrailVtx *)actor->vtxBufs[view];
-        for (i = 0; i < actor->spawn.itemCount * 2 + 10; i++) {
+        for (i = 0; i < actor->head.tmpl.itemCount * 2 + 10; i++) {
             tv->v[0].v.tc[0] = 5;
             tv->v[0].v.tc[1] = 0;
             tv->v[0].v.flag = 0;
@@ -604,13 +596,13 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);
     gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
-    cur = actor->head - 1;
+    cur = actor->head.end - 1;
     if (cur < 0) {
-        cur = actor->spawn.itemCount - 1;
+        cur = actor->head.tmpl.itemCount - 1;
     }
     next = cur - 1;
     if (next < 0) {
-        next = actor->spawn.itemCount - 1;
+        next = actor->head.tmpl.itemCount - 1;
     }
     p0 = points[cur].pos;
     width0 = points[cur].width;
@@ -712,14 +704,14 @@ loop:
     cur = next;
     next--;
     if (next < 0) {
-        next = actor->spawn.itemCount - 1;
+        next = actor->head.tmpl.itemCount - 1;
     }
-    if (cur != actor->tail) {
+    if (cur != actor->head.start) {
         p0 = points[cur].pos;
         p1 = points[next].pos;
         width1 = points[next].width;
     }
-    if (cur != actor->tail) goto loop;
+    if (cur != actor->head.start) goto loop;
     return gfx;
 }
 

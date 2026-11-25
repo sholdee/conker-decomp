@@ -419,17 +419,9 @@ typedef struct PipeExplodePoint {
 } PipeExplodePoint;
 
 typedef struct PipeExplodeActor {
-    /* 0x00 */ u8 pad00[1];
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad02[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 pad0D[0xF];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[7];
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[7];
-    /* 0x2D */ s8 pointIndex;
-    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ PipeExplodePoint *points;
     /* 0x98 */ PipeExplodeState *state;
 } PipeExplodeActor;
@@ -440,7 +432,7 @@ s32 func_150B378C(PipeExplodeActor *actor) {
     s32 alpha;
 
     state = actor->state;
-    alpha = actor->unk1C << 4;
+    alpha = actor->head.tmpl.life << 4;
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
@@ -517,12 +509,12 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
         rand2 = func_150ADA20();
 
         func_1513C73C(&particle, 1, 0, arg5,
-                      particle.points[actor->pointIndex].x,
+                      particle.points[actor->head.start].x,
                       y,
-                      particle.points[actor->pointIndex].z,
+                      particle.points[actor->head.start].z,
                       size, size,
                       rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
-                      actor->unk0C, actor->unk01);
+                      actor->head.header.owner, actor->head.header.kind);
 
     }
     style.unk0 = 0;
@@ -540,16 +532,16 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     motion.shade = state->unk1A;
     motion.flags = 8;
     motion.alpha = state->alpha;
-    pos.pos.x = particle.points[actor->pointIndex].x;
+    pos.pos.x = particle.points[actor->head.start].x;
     pos.pos.y = y;
-    pos.pos.z = particle.points[actor->pointIndex].z;
-    pos.itemCount = actor->unk25;
+    pos.pos.z = particle.points[actor->head.start].z;
+    pos.itemCount = actor->head.tmpl.itemCount;
     pos.life = 60;
     motion.halfWidth = state->unk00 * 0.75f;
     motion.gravity = state->unk10;
     motion.velocity.x = state->unk04;
     motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
     motion.velocity.z = state->unk0C;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->unk0C, actor->unk01);
+    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->head.header.owner, actor->head.header.kind);
     return 1;
 }

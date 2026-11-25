@@ -126,18 +126,9 @@ typedef struct {
 
 /* The actor returned by func_15147A80. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ EffectTemplate spawn;
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 head; /* oldest record */
-    /* 0x2E */ s8 tail; /* next record to write */
-    /* 0x2F */ u8 pad2F[0x25];
-    /* 0x54 */ Vec3f endPos; /* the oldest record's position, the origin when empty */
-    /* 0x60 */ u8 pad60[0x34];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ StreamPoint *records;
     /* 0x98 */ StreamState *state;
 } StreamActor;
@@ -418,11 +409,11 @@ s32 func_150DC558(StreamActor *actor) {
 
     state = actor->state;
     records = actor->records;
-    index = actor->tail;
-    while (index != actor->head) {
+    index = actor->head.end;
+    while (index != actor->head.start) {
         index--;
         if (index < 0) {
-            index = actor->spawn.itemCount - 1;
+            index = actor->head.tmpl.itemCount - 1;
         }
         // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
         rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
@@ -460,7 +451,7 @@ s32 func_150DC558(StreamActor *actor) {
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
                                   func_150ADA20() % (state->splashCountRange + 1) + state->splashCountBase, 1,
                                   1.7f, 1.7f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
-                                  actor->unk0C, actor->unk01);
+                                  actor->head.header.owner, actor->head.header.kind);
                     state->splashCount -= 1.0f;
                 }
             }
@@ -513,7 +504,7 @@ s32 func_150DC558(StreamActor *actor) {
                         packet.accelY = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
                         packet.fadeStep = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
                         packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
-                        if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
+                        if (func_15167D84(&packet, 0, 0, -1, actor->head.header.owner, actor->head.header.kind) == NULL) {
                             ok = 0;
                         }
                         state->dropCount -= 1.0f;
@@ -564,33 +555,33 @@ s32 func_150DC558(StreamActor *actor) {
                     }
                 }
             }
-            while (index != actor->head) {
-                actor->head++;
-                if (actor->head == actor->spawn.itemCount) {
-                    actor->head = 0;
+            while (index != actor->head.start) {
+                actor->head.start++;
+                if (actor->head.start == actor->head.tmpl.itemCount) {
+                    actor->head.start = 0;
                 }
-                actor->count--;
+                actor->head.count--;
             }
-            records[actor->head].pos.y = state->floor;
+            records[actor->head.start].pos.y = state->floor;
         }
     }
     // matching: byte-offset rec pointers as above (indexing records[] moves the multiplies)
-    index = actor->head;
+    index = actor->head.start;
     records[index].alpha = 0;
     index++;
-    if (index == actor->spawn.itemCount) {
+    if (index == actor->head.tmpl.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x3F;
     index++;
-    if (index == actor->spawn.itemCount) {
+    if (index == actor->head.tmpl.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x7F;
     index++;
-    if (index == actor->spawn.itemCount) {
+    if (index == actor->head.tmpl.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
@@ -604,12 +595,12 @@ s32 func_150DC558(StreamActor *actor) {
         }
         state->soundTimer = timer;
     }
-    if (actor->count > 0) {
-        actor->endPos = records[actor->head].pos;
+    if (actor->head.count > 0) {
+        actor->head.modelPos = records[actor->head.start].pos;
     } else {
-        actor->endPos.x = 0.0f;
-        actor->endPos.y = 0.0f;
-        actor->endPos.z = 0.0f;
+        actor->head.modelPos.x = 0.0f;
+        actor->head.modelPos.y = 0.0f;
+        actor->head.modelPos.z = 0.0f;
     }
     return 1;
 }

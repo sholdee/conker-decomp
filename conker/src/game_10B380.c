@@ -39,13 +39,9 @@ typedef struct {
 } EffectSpawnPoint;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[0x20];
-    /* 0x2D */ s8 pointIndex;
-    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSpawnPoint *points;
     /* 0x98 */ EffectSpawnState *state;
 } EffectSpawnSource;
@@ -126,8 +122,8 @@ s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
+    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 
@@ -171,8 +167,8 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
+    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 

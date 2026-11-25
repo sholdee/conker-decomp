@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 u8 func_151D8E20(void);
 void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out);
@@ -25,13 +26,9 @@ typedef struct {
 } EffectPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x20];
-    /* 0x2D */ s8 sampleIndex;
-    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSample *samples;
     /* 0x98 */ EffectPayload *payload;
 } EffectState;
@@ -43,11 +40,11 @@ s32 func_151AC550(EffectState *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 a
     EffectSample *samples = state->samples;
     f32 position[3];
 
-    position[0] = samples[state->sampleIndex].x;
+    position[0] = samples[state->head.start].x;
     position[1] = y;
-    position[2] = samples[state->sampleIndex].z;
+    position[2] = samples[state->head.start].z;
     func_151DBCBC(func_151D8E20(), payload->unk0 * 7.0f, payload->unk1B, arg5, position,
-                  state->unkC, state->unk1);
+                  state->head.header.owner, state->head.header.kind);
     payload->unk20 = 4;
     return 1;
 }
