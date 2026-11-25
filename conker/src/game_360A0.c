@@ -5,83 +5,84 @@
 
 /* structs.h's struct110 types offsets 0/2/4 as u8 and 0xC/0x10 as u8 as well; the
    golden code reads them with lh / lwc1.  File-local typedef per the usual policy. */
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
+typedef struct Game360A0Owner {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 radius;
     u8  pad8[0x4];
-    f32 unkC;
-    f32 unk10;
+    f32 angleC;     /* degrees */
+    f32 angle10;    /* degrees */
     u8  pad14[0x2];
-    u8  unk16;
+    u8  flags;
     u8  pad17[0x4];
-    u8  unk1B;
-} Struct15008BF0Obj;
+    u8  style;
+} Game360A0Owner;
 
 /* The 0x50-byte emitter descriptor handed to func_15189900 (struct145 in structs.h,
    but that copy types unk0/unk2/unk6 as u16 and unk28 as s32). */
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    s16 unk38;
-    s16 unk3A;
-    f32 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-    s32 unk4C;
-} Struct15008BF0Emit;
+typedef struct Game360A0Descriptor {
+    s16 angle;      /* 256-step binary angle */
+    s16 field2;
+    s16 field4;
+    s16 field6;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 width;
+    f32 field18;
+    f32 depth;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    f32 field2C;
+    f32 field30;
+    f32 field34;
+    s16 field38;
+    s16 field3A;
+    f32 field3C;
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+    s32 field4C;
+} Game360A0Descriptor;
 
-extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_15189900(Struct15008BF0Emit *, s32);
+extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
+extern void func_15189900(Game360A0Descriptor *descriptor, u8 style);
 
-s32 func_15008BF0(Struct15008BF0Obj *arg0) {
-    Struct15008BF0Emit sp28;
-    f32 sp24;
-    f32 sp20;
+/* Flags the owner and spawns an emitter spanning its radius, oriented by its angles. */
+s32 func_15008BF0(Game360A0Owner *owner) {
+    Game360A0Descriptor descriptor;
+    f32 offsetZ;
+    f32 offsetX;
 
-    arg0->unk16 |= 4;
-    sp28.unk28 = arg0->unk6 * 0.19600000977516174f * 0.002188183832913637f;
-    sp28.unk2C = 0.0f;
-    sp28.unk48 = 4;
-    sp28.unk4C = 2;
-    sp28.unk38 = 100;
-    sp28.unk3A = 100;
-    sp28.unk44 = 40;
-    sp28.unk46 = 20;
-    sp28.unk30 = 7.0f;
-    sp28.unk34 = 6.0f;
-    sp28.unk20 = 20.100000381469727f;
-    sp28.unk24 = 7.5f;
-    sp28.unk3C = 0.4000000059604645f;
-    sp28.unk40 = 0.6070000529289246f;
-    sp28.unk0 = arg0->unk10 * 0.7111111283302307f;
-    sp28.unk2 = 20;
-    sp28.unk4 = (arg0->unkC * 0.7111111283302307f) - 64.0f;
-    sp28.unk6 = 8;
-    func_15143874((s16)(sp28.unk0 - 64), arg0->unk6, &sp20, &sp24);
-    sp28.unk8 = arg0->unk0 - sp20;
-    sp28.unkC = arg0->unk2;
-    sp28.unk10 = arg0->unk4 - sp24;
-    sp28.unk14 = sp20 + sp20;
-    sp28.unk18 = 0.0f;
-    sp28.unk1C = sp24 + sp24;
-    func_15189900(&sp28, arg0->unk1B);
+    owner->flags |= 4;
+    descriptor.field28 = owner->radius * 0.19600001f * (1.0f / 457.0f);
+    descriptor.field2C = 0.0f;
+    descriptor.field48 = 4;
+    descriptor.field4C = 2;
+    descriptor.field38 = 100;
+    descriptor.field3A = 100;
+    descriptor.field44 = 40;
+    descriptor.field46 = 20;
+    descriptor.field30 = 7.0f;
+    descriptor.field34 = 6.0f;
+    descriptor.field20 = 20.1f;
+    descriptor.field24 = 7.5f;
+    descriptor.field3C = 0.4f;
+    descriptor.field40 = 0.60700005f;
+    descriptor.angle = owner->angle10 * (256.0f / 360.0f);
+    descriptor.field2 = 20;
+    descriptor.field4 = owner->angleC * (256.0f / 360.0f) - 64.0f;
+    descriptor.field6 = 8;
+    func_15143874(descriptor.angle - 64, owner->radius, &offsetX, &offsetZ);
+    descriptor.x = owner->x - offsetX;
+    descriptor.y = owner->y;
+    descriptor.z = owner->z - offsetZ;
+    descriptor.width = 2.0f * offsetX;
+    descriptor.field18 = 0.0f;
+    descriptor.depth = 2.0f * offsetZ;
+    func_15189900(&descriptor, owner->style);
     return 1;
 }
