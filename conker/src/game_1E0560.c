@@ -132,34 +132,17 @@ void func_151B3184(HoltenRopeEffect *effect) {
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3_151B32C8;
+/* Returns the draw settings for a rope's display list; nonzero if the rope should be drawn. */
+typedef s32 (*HoltenRopeDrawStyle)(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
+                                   s32 *primR, s32 *primG, s32 *primB, s32 *primA,
+                                   s32 *envR, s32 *envG, s32 *envB, s32 *envA,
+                                   s32 *cycleType, u8 *renderMode, u8 *unk13);
 
-typedef struct {
-    Vec3_151B32C8 p;
-    f32 pad[3];
-} Pt_151B32C8;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x1D];
-    u8 unk2E;
-    u8 pad2F;
-    f32 unk30;
-    u8 pad34[0x14];
-    Pt_151B32C8 pts[10];
-    u8 pad138[4];
-    s32 unk13C;
-    u8 unk140[0x10];
-} Struct151B32C8;
-
-extern s32 (*D_8008FB10[])(Struct151B32C8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *, u8 *);
+extern HoltenRopeDrawStyle D_8008FB10[];
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
@@ -170,162 +153,168 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-Gfx *func_151B32C8(Gfx *gfx, Struct151B32C8 *arg1, s16 arg2) {
+/*
+ * Draws the rope for view `view` as a camera-facing strip: each point gets a vertex
+ * pair offset by `halfWidth` along the side vector (segment x eye-to-point).
+ */
+Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     s32 i;
     Vtx *vtx;
-    Vec3_151B32C8 a;
-    Vec3_151B32C8 b;
-    s32 t;
-    f32 *pos;
-    f32 mx;
-    f32 my;
-    f32 mz;
+    Vec3f_1E0560 a;
+    Vec3f_1E0560 b;
+    s32 texT;
+    f32 *eye;
+    f32 toEyeX;
+    f32 toEyeY;
+    f32 toEyeZ;
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 cx;
-    f32 cy;
-    f32 cz;
-    f32 len;
-    f32 nx;
-    f32 ny;
+    f32 sideX;
+    f32 sideY;
+    f32 sideZ;
+    f32 lenSq;
+    f32 pad[2]; // matching: stack slots
 
-    if (arg1->unk10 & 4) {
+    if (effect->flags & 4) {
         return gfx;
     }
-    if (arg1->unk10 & 8) {
+    if (effect->flags & 8) {
         return gfx;
     }
-    if (arg1->unk10 & 2) {
+    if (effect->flags & 2) {
         return gfx;
     }
-    func_151D5D60(arg1->unk140, arg2, 0x190, (void **)&vtx, 0);
+    func_151D5D60(effect->vtxBuffer, view, 25 * sizeof(Vtx), (void **)&vtx, NULL);
     if (vtx != NULL) {
-        u8 update;
-        s32 r0;
-        s32 r1;
-        s32 r2;
-        s32 r3;
-        s32 r4;
-        s32 r5;
-        s32 r6;
-        s32 r7;
-        s32 r8;
-        s32 r9;
-        s32 r10;
-        u8 r12;
-        u8 r13;
-        f32 scale;
-        Pt_151B32C8 *p;
+        u8 needSync;
+        s32 mode0;
+        s32 mode1;
+        s32 primR;
+        s32 primG;
+        s32 primB;
+        s32 primA;
+        s32 envR;
+        s32 envG;
+        s32 envB;
+        s32 envA;
+        s32 cycleType;
+        u8 renderMode;
+        u8 unk13;
 
-    pos = &D_800DBFF0[arg2].unk2F8;
-    update = 1;
-lbl1:
-    if (D_8008FB10[arg1->unk2E](arg1, &r0, &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &r10, &r12, &r13) == 0) {
-        return gfx;
-    }
-    p = arg1->pts;
-    gfx = func_15142B7C(gfx, r0, r1);
-    gfx = func_15142C10(gfx, r6, r7, r8, r9, &update);
-    gfx = func_15142CF0(gfx, 0, 0, r2, r3, r4, r5, &update);
-    gfx = func_1513F4E4(gfx, r13, &update);
-    gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
-    gfx = func_15142FBC(gfx, r10 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[r12].unk0 | D_800A4AC8[r12].unk4, &update);
-    {
-    f32 nz;
+        eye = &D_800DBFF0[view].unk2F8;
+        needSync = TRUE;
+        {
+            HoltenRopePoint *points;
 
-    a = p[0].p;
-    b = p[1].p;
-    dx = b.x - a.x;
-    dy = b.y - a.y;
-    dz = b.z - a.z;
-    mx = a.x - pos[0];
-    my = a.y - pos[1];
-    mz = a.z - pos[2];
-    cx = (dy * mz) - (my * dz);
-    cy = (dz * mx) - (mz * dx);
-    cz = (dx * my) - (mx * dy);
-    len = (cx * cx) + (cy * cy) + (cz * cz);
-    if (len == 0.0f) {
-        cx = 0.0f;
-        cy = 0.0f;
-        cz = 0.0f;
-    } else {
-        dz = arg1->unk30 / sqrtf(len);
-        cx = cx * dz;
-        cy = cy * dz;
-        cz = cz * dz;
-    }
-    vtx->v.ob[0] = a.x + cx;
-    vtx->v.ob[1] = a.y + cy;
-    vtx->v.ob[2] = a.z + cz;
-    vtx->v.tc[0] = 0;
-    vtx->v.tc[1] = 0;
-    vtx->v.cn[0] = 0xFF;
-    vtx->v.cn[1] = 0x64;
-    vtx->v.cn[2] = 0x64;
-    vtx->v.cn[3] = 0xFF;
-    vtx++;
-    vtx->v.ob[0] = a.x - cx;
-    vtx->v.ob[1] = a.y - cy;
-    vtx->v.ob[2] = a.z - cz;
-    vtx->v.tc[0] = 0x3C0;
-    vtx->v.tc[1] = 0;
-    vtx->v.cn[0] = 0xFF;
-    vtx->v.cn[1] = 0x64;
-    vtx->v.cn[2] = 0x64;
-    vtx->v.cn[3] = 0xFF;
-    vtx++;
-    t = arg1->unk13C;
-    for (i = 1; i < 10; i++) {
-        a = p[i - 1].p;
-        b = p[i].p;
-        dx = b.x - a.x;
-        dy = b.y - a.y;
-        dz = b.z - a.z;
-        mx = b.x - pos[0];
-        my = b.y - pos[1];
-        mz = b.z - pos[2];
-        cx = (dy * mz) - (my * dz);
-        cy = (dz * mx) - (mz * dx);
-        cz = (dx * my) - (mx * dy);
-        len = (cx * cx) + (cy * cy) + (cz * cz);
-        if (len == 0.0f) {
-            cx = 0.0f;
-            cy = 0.0f;
-            cz = 0.0f;
-        } else {
-            dz = arg1->unk30 / sqrtf(len);
-            cx = cx * dz;
-            cy = cy * dz;
-            cz = cz * dz;
+            if (!D_8008FB10[effect->drawStyle](effect, &mode0, &mode1, &primR, &primG, &primB, &primA, &envR, &envG, &envB, &envA, &cycleType, &renderMode, &unk13)) {
+                return gfx;
+            }
+            points = effect->points;
+            gfx = func_15142B7C(gfx, mode0, mode1);
+            gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
+            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
+            gfx = func_1513F4E4(gfx, unk13, &needSync);
+            gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &needSync, 3);
+            gfx = func_15142FBC(gfx, cycleType | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4, &needSync);
+            {
+                f32 pad3; // matching: a local here opens a -g3 scope that IDO will not schedule across
+
+                /* first pair: side vector of the first segment, placed at its start */
+                a = points[0].pos;
+                b = points[1].pos;
+                dx = b.x - a.x;
+                dy = b.y - a.y;
+                dz = b.z - a.z;
+                toEyeX = a.x - eye[0];
+                toEyeY = a.y - eye[1];
+                toEyeZ = a.z - eye[2];
+                sideX = (dy * toEyeZ) - (toEyeY * dz);
+                sideY = (dz * toEyeX) - (toEyeZ * dx);
+                sideZ = (dx * toEyeY) - (toEyeX * dy);
+                lenSq = (sideX * sideX) + (sideY * sideY) + (sideZ * sideZ);
+                if (lenSq == 0.0f) {
+                    sideX = 0.0f;
+                    sideY = 0.0f;
+                    sideZ = 0.0f;
+                } else {
+                    dz = effect->halfWidth / sqrtf(lenSq);
+                    sideX *= dz;
+                    sideY *= dz;
+                    sideZ *= dz;
+                }
+                vtx->v.ob[0] = a.x + sideX;
+                vtx->v.ob[1] = a.y + sideY;
+                vtx->v.ob[2] = a.z + sideZ;
+                vtx->v.tc[0] = 0;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 255;
+                vtx->v.cn[1] = 100;
+                vtx->v.cn[2] = 100;
+                vtx->v.cn[3] = 255;
+                vtx++;
+                vtx->v.ob[0] = a.x - sideX;
+                vtx->v.ob[1] = a.y - sideY;
+                vtx->v.ob[2] = a.z - sideZ;
+                vtx->v.tc[0] = 0x3C0;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 255;
+                vtx->v.cn[1] = 100;
+                vtx->v.cn[2] = 100;
+                vtx->v.cn[3] = 255;
+                vtx++;
+                /* then one pair per point at the end of each segment, and two triangles joining it to the previous pair */
+                texT = effect->texStep;
+                for (i = 1; i < 10; i++) {
+                    a = points[i - 1].pos;
+                    b = points[i].pos;
+                    dx = b.x - a.x;
+                    dy = b.y - a.y;
+                    dz = b.z - a.z;
+                    toEyeX = b.x - eye[0];
+                    toEyeY = b.y - eye[1];
+                    toEyeZ = b.z - eye[2];
+                    sideX = (dy * toEyeZ) - (toEyeY * dz);
+                    sideY = (dz * toEyeX) - (toEyeZ * dx);
+                    sideZ = (dx * toEyeY) - (toEyeX * dy);
+                    lenSq = (sideX * sideX) + (sideY * sideY) + (sideZ * sideZ);
+                    if (lenSq == 0.0f) {
+                        sideX = 0.0f;
+                        sideY = 0.0f;
+                        sideZ = 0.0f;
+                    } else {
+                        dz = effect->halfWidth / sqrtf(lenSq);
+                        sideX *= dz;
+                        sideY *= dz;
+                        sideZ *= dz;
+                    }
+                    vtx->v.ob[0] = b.x + sideX;
+                    vtx->v.ob[1] = b.y + sideY;
+                    vtx->v.ob[2] = b.z + sideZ;
+                    vtx->v.tc[0] = 0;
+                    vtx->v.tc[1] = texT;
+                    vtx->v.cn[0] = 255;
+                    vtx->v.cn[1] = 100;
+                    vtx->v.cn[2] = 100;
+                    vtx->v.cn[3] = 255;
+                    vtx++;
+                    vtx->v.ob[0] = b.x - sideX;
+                    vtx->v.ob[1] = b.y - sideY;
+                    vtx->v.ob[2] = b.z - sideZ;
+                    vtx->v.tc[0] = 0x3C0;
+                    vtx->v.tc[1] = texT;
+                    vtx->v.cn[0] = 255;
+                    vtx->v.cn[1] = 100;
+                    vtx->v.cn[2] = 100;
+                    vtx->v.cn[3] = 255;
+                    vtx++;
+                    texT += effect->texStep;
+                    gSPVertex(gfx++, vtx - 4, 4, 0);
+                    gSP1Triangle(gfx++, 0, 1, 2, 0);
+                    gSP1Triangle(gfx++, 1, 3, 2, 0);
+                }
+            }
         }
-        vtx->v.ob[0] = b.x + cx;
-        vtx->v.ob[1] = b.y + cy;
-        vtx->v.ob[2] = b.z + cz;
-        vtx->v.tc[0] = 0;
-        vtx->v.tc[1] = t;
-        vtx->v.cn[0] = 0xFF;
-        vtx->v.cn[1] = 0x64;
-        vtx->v.cn[2] = 0x64;
-        vtx->v.cn[3] = 0xFF;
-        vtx++;
-        vtx->v.ob[0] = b.x - cx;
-        vtx->v.ob[1] = b.y - cy;
-        vtx->v.ob[2] = b.z - cz;
-        vtx->v.tc[0] = 0x3C0;
-        vtx->v.tc[1] = t;
-        vtx->v.cn[0] = 0xFF;
-        vtx->v.cn[1] = 0x64;
-        vtx->v.cn[2] = 0x64;
-        vtx->v.cn[3] = 0xFF;
-        vtx++;
-        t += arg1->unk13C;
-        gSPVertex(gfx++, vtx - 4, 4, 0);
-        gSP1Triangle(gfx++, 0, 1, 2, 0);
-        gSP1Triangle(gfx++, 1, 3, 2, 0);
-    }
-    }
     }
     return gfx;
 }
