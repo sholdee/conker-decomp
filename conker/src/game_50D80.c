@@ -421,7 +421,7 @@ typedef struct {
     u8 id;
 } ObjRef1502460C;
 
-/* Field access by offset, for fields that include/structs.h still declares as padding. */
+/* Field access by offset, for WorldObject, ActorCtl, struct104 and model fields their shared declarations still leave as padding. */
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
 #define FS32(p, o) (*(s32 *) ((u8 *) (p) + (o)))
@@ -631,8 +631,8 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             duration = 1;
         }
         if (event->unk4 == 0) {
-            FU8(obj, 0x134) = event->value;
-            FU8(obj, 0x135) = duration;
+            obj->unk134 = event->value;
+            obj->morphDuration = duration;
         }
     } else if (event->type == 3) {
         if (event->value >= D_800C363A[scene]) {
@@ -647,7 +647,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (obj == NULL) {
             return 1;
         }
-        ((u8 *) obj + 0x6C)[event->unk4] = event->value + 10;
+        obj->eyeCode[event->unk4] = event->value + 10;
     } else if (event->type == 1) {
         s32 v;
 
@@ -694,14 +694,14 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 return 1;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0xA5) = colors[event->unk5][0];
-                FU8(obj, 0xA6) = colors[event->unk5][1];
-                FU8(obj, 0xA7) = colors[event->unk5][2];
-                FU8(obj, 0xA4) = 1;
-                FPTR(obj, 0xA0) = &D_800C3958[scene][track].unk30;
+                obj->fogLevel = colors[event->unk5][0]; // mode 1: fogLevel/fogRate/fogFade hold the colour
+                obj->fogRate = colors[event->unk5][1];
+                obj->fogFade = colors[event->unk5][2];
+                obj->fogMode = 1;
+                obj->fogColor = (u32)&D_800C3958[scene][track].unk30;
             } else {
-                FU8(obj, 0xA4) = 0;
-                FPTR(obj, 0xA0) = NULL;
+                obj->fogMode = 0;
+                obj->fogColor = 0;
             }
         } else if (event->value == 0x44) {
             s32 a;
@@ -724,18 +724,18 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 obj->levelMode += event->unk5;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0x201) = event->unk6;
+                obj->unk201 = event->unk6;
             }
         } else if (event->value == 0x16) {
             if (obj == NULL) {
                 return 1;
             }
-            FU8(obj, 0x206) = !event->unk4;
-            if (FU8(obj, 0x206) != 0) {
-                FU8(obj, 0x206) += event->unk5;
+            obj->level2Mode = !event->unk4;
+            if (obj->level2Mode != 0) {
+                obj->level2Mode += event->unk5;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0x208) = event->unk6;
+                obj->unk208 = event->unk6;
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
@@ -1175,13 +1175,13 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800BEA0C = event->unk5;
         } else if (event->value == 0x6F) {
             if (obj != NULL) {
-                ((u8 *) obj + 0x68)[event->unk4] = event->unk5;
+                obj->unk68[event->unk4] = event->unk5;
             }
         } else if (event->value == 0x70) {
             D_800C3C8C = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                FF32(obj, 0xC8) = FS16(D_800D1C90[obj->id], 6);
+                obj->unkC8 = FS16(D_800D1C90[obj->id], 6);
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;
@@ -1763,8 +1763,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                             obj->unk2EC = 1;
                             half = (f32)duration * 0.5f;
-                            FF32(obj, 0x2D8) = half;
-                            FF32(obj, 0x2DC) = 1.0f / half;
+                            obj->unk2D8 = half;
+                            obj->unk2DC = 1.0f / half;
                             func_150C4120(obj, duration, sceneTag, 1);
                         }
                         break;
@@ -1984,7 +1984,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (t == 0) {
                     kind = 0xD;
                 }
-                node = FPTR(obj, 0x2F4);
+                node = (EvNode *)obj->attachments; // EvNode: this file's view of struct Attachment
                 while (node != NULL) {
                     if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
                         node->unk10->unk30 = func_1519E970(duration, node->unk10, 0,

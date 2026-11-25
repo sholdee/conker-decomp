@@ -734,9 +734,7 @@ extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 extern Gfx *func_15035D6C(Gfx *, Attachment *, s32, s32, s32);
 
-/* Actor / struct104 fields that their shared declarations don't cover yet. */
-#define OBJ_U8(o, off) (*(u8 *)((u8 *)(o) + (off)))
-#define OBJ_S32(o, off) (*(s32 *)((u8 *)(o) + (off)))
+/* struct104 field that its shared declaration doesn't cover yet. */
 #define D_800B0DF0_unk3E (*(s16 *)((u8 *)D_800B0DF0 + 0x3E))
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
@@ -807,26 +805,26 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, Actor *owner, s32 view, s32 arg4) 
         lit = FALSE;
     }
     if (lit) {
-        if (OBJ_S32(owner, 0x304 + view * 4) == 0) {
+        if (owner->unk304[view] == 0) {
             func_150832AC(owner);
             i = TRUE;
         } else {
             i = FALSE;
         }
-        if (OBJ_S32(owner, 0x304 + view * 4) != 0) {
-            if ((OBJ_U8(owner, 0x2FD) != 0) || i) {
+        if (owner->unk304[view] != 0) {
+            if ((owner->unk2FD != 0) || i) {
                 v = 0xA;
             } else {
                 v = 2;
             }
-            if ((owner->unk5 != 5) && (OBJ_U8(owner, 0x302) != 0) && (owner->unk66 & 0xC) && !i) {
-                gdl = func_1515E544(gdl, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301), OBJ_U8(owner, 0x302),
-                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8);
+            if ((owner->unk5 != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
+                gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
+                                    owner->unk314[D_800BE9C0]);
             } else {
                 gdl = func_1515D914(gdl, view, (s32)owner->x_position, (s32)owner->y_position, (s32)owner->z_position,
-                                    owner->unk184, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301),
-                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8, (u8 *)owner + 0x302, 2,
-                                    (u8 *)owner + 0x1DD, v, D_800D9E28);
+                                    owner->unk184, owner->unk304[view], owner->unk301,
+                                    owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    owner->unk1DD, v, D_800D9E28);
             }
         }
     }

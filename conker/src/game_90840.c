@@ -1062,9 +1062,6 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
-/* Bytes of Actor that structs.h still declares only as padding. */
-#define OBJ_U8(o, off) (((u8 *)(o))[off])
-
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
  * 1000 when the action consumed the input. */
@@ -2573,7 +2570,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         handled = 1;
         anim = 999;
         if (act != arg0->unk31C->unk78) {
-            if ((arg3 <= 0.0f) && (OBJ_U8(arg0, 0x110) == 0) && (arg0->disable_jump == 0)) {
+            if ((arg3 <= 0.0f) && (arg0->unk110 == 0) && (arg0->disable_jump == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
@@ -2605,7 +2602,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->unk278 = 0;
                     arg0->unk284 = 1;
                 }
-            } else if (((s8)arg0->unk284 != 0) && (OBJ_U8(arg0, 0x70) == OBJ_U8(arg0, 0x6F))) {
+            } else if (((s8)arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
                 arg0->unk284 = 0;
             }
             arg0->disable_run = 0xA;
@@ -2854,7 +2851,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x3E:
-        if (OBJ_U8(arg0, 0x128) == 0) {
+        if (arg0->team == 0) {
             if (arg0->unk83 == 0) {
                 arg0->unk83 = 1;
             }
