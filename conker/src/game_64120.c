@@ -1728,27 +1728,35 @@ void func_1503A7F0(void) {
 }
 f32 func_15048A40(u8 arg0);
 
-#define VEC0 D_800C3FE8[0]
-#define VEC1 D_800C3FE8[1]
-#define VEC2 D_800C3FE8[2]
 extern u8 D_800C3FDC;
 extern f32 D_800C3FE0;
 extern f32 D_800C3FE4;
 f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);
 
+/*
+ * Head-turn state at struct127 +0x276 (include/structs.h covers it with differently signed fields and padding).
+ * The head has two yaw/pitch pairs (part 0 and part 1) that func_1503A830 eases toward the aim target; an
+ * effect (unk276, running while unk282 counts down) can add per-part offsets unk284..unk287.
+ */
 typedef struct {
-    u8 pad0[0x2C];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    s8 unk2F;
-} Def_1503A830;
+    /* 0x276 */ u8 unk276; /* effect kind, 0-6 */
+    /* 0x277 */ u8 pad277;
+    /* 0x278 */ u16 unk278; /* effect state */
+    /* 0x27A */ s16 unk27A; /* part 1 yaw */
+    /* 0x27C */ s16 unk27C; /* part 0 yaw */
+    /* 0x27E */ s16 unk27E; /* part 1 pitch */
+    /* 0x280 */ s16 unk280; /* part 0 pitch */
+    /* 0x282 */ u16 unk282; /* effect frames left, 0xFFFF = endless */
+    /* 0x284 */ s8 unk284; /* effect offset for unk27A */
+    /* 0x285 */ s8 unk285; /* ... for unk27E */
+    /* 0x286 */ s8 unk286; /* ... for unk27C */
+    /* 0x287 */ s8 unk287; /* ... for unk280 */
+} ObjHeadTurn;
 
-#define A_U8(o) (*(u8 *)((u8 *)arg0 + (o)))
-#define A_S8(o) (*(s8 *)((u8 *)arg0 + (o)))
-#define A_U16(o) (*(u16 *)((u8 *)arg0 + (o)))
-#define A_S16(o) (*(s16 *)((u8 *)arg0 + (o)))
+#define OBJ_HEAD(obj) (*(ObjHeadTurn *)&(obj)->unk276)
+#define OBJ_DEF(id) ((ObjTypeDef *)D_800D1C90[id])
+
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define APPROACH(fld, tgt)                                       \
@@ -1758,313 +1766,320 @@ typedef struct {
         (fld) += step * (((tgt) - (fld)) < 0 ? -1 : 1);         \
     }
 
-void func_1503A830(struct127 *arg0) {
+/*
+ * Turns an object's head (two yaw/pitch pairs in OBJ_HEAD) toward its aim target, D_800C3FE8, found with
+ * func_150379DC for the object types that search, and runs the head effect selected by unk276 while unk282
+ * counts down. Angles are clamped to +-45 yaw and -15..30 pitch, scaled by the type's turn ranges and eased
+ * by up to `step` per frame.
+ */
+void func_1503A830(struct127 *obj) {
     s32 id;
-    s32 type;
-    s32 color;
-    s32 doCall;
-    f32 (*m)[4];
-    f32 d[3];
-    f32 a[2];
-    f32 b[2];
-    f32 fA;
-    f32 fB;
-    f32 fC;
-    f32 fD;
-    f32 padB4;
+    s32 bone;
+    s32 preferId;
+    s32 search;
+    f32 (*mtx)[4];
+    f32 delta[3];
+    f32 yaw[2];
+    f32 pitch[2];
+    f32 yaw0;
+    f32 yaw1;
+    f32 pitch0;
+    f32 pitch1;
+    f32 padB4; // matching: -g3 stack slots
     f32 padB0;
-    f32 vx;
-    f32 vy;
-    f32 vz;
+    f32 localX;
+    f32 localY;
+    f32 localZ;
     s32 step;
-    u8 *p;
-    u8 *q;
-    s32 copyAB;
+    AimHolder *holder;
+    AimHolderData *holderData;
+    s32 mirror;
     s32 clamp;
     s32 snap;
-    s32 n;
-    s32 doAim;
-    s32 noFx;
-    Def_1503A830 *def;
+    s32 speed;
+    s32 aim;
+    s32 noHolderTarget;
+    ObjTypeDef *unusedDef; // matching: -g3 stack slot
 
-    if (arg0->unk1D4 == NULL) {
+    if (obj->unk1D4 == NULL) {
         return;
     }
-    VEC0 = D_800C3FD0[0];
-    VEC1 = D_800C3FD0[1];
-    VEC2 = D_800C3FD0[2];
-    id = arg0->id;
+    D_800C3FE8[0] = D_800C3FD0[0];
+    D_800C3FE8[1] = D_800C3FD0[1];
+    D_800C3FE8[2] = D_800C3FD0[2];
+    id = obj->id;
     step = 8;
-    color = 0x100;
-    doCall = 1;
-    copyAB = 1;
+    preferId = 0x100;
+    search = 1;
+    mirror = 1;
     clamp = 1;
     snap = 0;
-    doAim = 1;
-    noFx = 1;
+    aim = 1;
+    noHolderTarget = 1;
     switch (id) {
-        case 0x9A:
-            type = 0xD;
-            break;
-        case 0x92:
-            type = 3;
-            break;
-        case 0x52:
-            type = 0;
-            break;
-        case 21:
-            type = 3;
-            break;
-        case 0x54:
-            type = 0x1D;
-            break;
-        case 0x45:
-            type = 3;
-            break;
-        case 24:
-        case 30:
-            type = 2;
-            if (id == 30) {
-                color = 0x22;
-            }
-            break;
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 0x82:
-        case 0x96:
-            type = 0xC;
-            doCall = 0;
-            break;
-        default:
-            return;
+    case 154:
+        bone = 13;
+        break;
+    case 146:
+        bone = 3;
+        break;
+    case 82:
+        bone = 0;
+        break;
+    case 21:
+        bone = 3;
+        break;
+    case 84:
+        bone = 29;
+        break;
+    case 69:
+        bone = 3;
+        break;
+    case 24:
+    case 30:
+        bone = 2;
+        if (id == 30) {
+            preferId = 34;
+        }
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 130:
+    case 150:
+        bone = 12;
+        search = 0;
+        break;
+    default:
+        return;
     }
-    if (doCall) {
-        func_150379DC(D_800C3FE8, type, type, arg0 - D_800CC2D0, 90.0f, color, 0);
+    if (search) {
+        func_150379DC(D_800C3FE8, bone, bone, obj - D_800CC2D0, 90.0f, preferId, 0);
     }
-    m = (f32 (*)[4])((u8 *)D_800CC2D0[arg0 - D_800CC2D0].unk1D4 + (type << 6));
-    m[3][3] = 1.0f;
-    m[2][3] = 0.0f;
-    m[1][3] = 0.0f;
-    m[0][3] = 0.0f;
-    a[0] = b[0] = 0.0f;
-    if (A_U16(0x282) == 0) {
-        A_U16(0x278) = 0;
-        A_S8(0x284) = 0;
-        A_S8(0x285) = 0;
-        A_S8(0x286) = 0;
-        A_S8(0x287) = 0;
+    // matching: byte-offset form; indexing OBJ_BONES() here changes the code
+    mtx = (f32 (*)[4])((u8 *)D_800CC2D0[obj - D_800CC2D0].unk1D4 + (bone << 6));
+    mtx[3][3] = 1.0f;
+    mtx[2][3] = 0.0f;
+    mtx[1][3] = 0.0f;
+    mtx[0][3] = 0.0f;
+    yaw[0] = pitch[0] = 0.0f;
+    if (OBJ_HEAD(obj).unk282 == 0) {
+        OBJ_HEAD(obj).unk278 = 0;
+        OBJ_HEAD(obj).unk284 = 0;
+        OBJ_HEAD(obj).unk285 = 0;
+        OBJ_HEAD(obj).unk286 = 0;
+        OBJ_HEAD(obj).unk287 = 0;
     }
-    if (A_U16(0x282) != 0) {
-        doAim = 0;
-        if (A_U8(0x276) == 0) {
-            s32 lo;
-            s32 hi;
-            f32 s;
-            f32 c;
-            s32 pad68;
+    if (OBJ_HEAD(obj).unk282 != 0) {
+        aim = 0;
+        if (OBJ_HEAD(obj).unk276 == 0) {
+            s32 phase0;
+            s32 phase1;
+            f32 sinV;
+            f32 cosV;
+            s32 pad68; // matching: -g3 stack slot
             f32 scale;
-            f32 k;
-            A_S16(0x27A) -= A_S8(0x284);
-            A_S16(0x27E) -= A_S8(0x285);
-            A_S16(0x27C) -= A_S8(0x286);
-            A_S16(0x280) -= A_S8(0x287);
-            lo = A_U16(0x278) & 0xFF;
-            hi = A_U16(0x278) >> 8;
-            lo += D_800BE9E4 * 3;
-            hi -= D_800BE9E4 * 4;
-            A_U16(0x278) = (hi << 8) | lo;
-            if (A_U16(0x282) < 30) {
-                scale = (f32)(A_U16(0x282) + 0U) / 30.0f;
+            f32 amp;
+            OBJ_HEAD(obj).unk27A -= OBJ_HEAD(obj).unk284;
+            OBJ_HEAD(obj).unk27E -= OBJ_HEAD(obj).unk285;
+            OBJ_HEAD(obj).unk27C -= OBJ_HEAD(obj).unk286;
+            OBJ_HEAD(obj).unk280 -= OBJ_HEAD(obj).unk287;
+            phase0 = OBJ_HEAD(obj).unk278 & 0xFF;
+            phase1 = OBJ_HEAD(obj).unk278 >> 8;
+            phase0 += D_800BE9E4 * 3;
+            phase1 -= D_800BE9E4 * 4;
+            OBJ_HEAD(obj).unk278 = (phase1 << 8) | phase0;
+            if (OBJ_HEAD(obj).unk282 < 30) {
+                scale = (f32)(OBJ_HEAD(obj).unk282 + 0U) / 30.0f; // matching: unsigned int to float conversion
             } else {
                 scale = 1.0f;
             }
-            s = func_15048A40(lo);
-            c = func_150489B0(lo);
-            k = 11.0f * scale;
-            A_S8(0x284) = s * k;
-            A_S8(0x285) = c * k;
-            s = func_15048A40(hi);
-            c = func_150489B0(hi);
-            A_S8(0x286) = s * k;
-            A_S8(0x287) = c * k;
-        } else if (A_U8(0x276) == 1) {
-            if (A_U16(0x278) == 0) {
-                A_U16(0x278) = 1;
-                A_S8(0x287) += func_150ADA20() % 20U;
+            sinV = func_15048A40(phase0);
+            cosV = func_150489B0(phase0);
+            amp = 11.0f * scale;
+            OBJ_HEAD(obj).unk284 = sinV * amp;
+            OBJ_HEAD(obj).unk285 = cosV * amp;
+            sinV = func_15048A40(phase1);
+            cosV = func_150489B0(phase1);
+            OBJ_HEAD(obj).unk286 = sinV * amp;
+            OBJ_HEAD(obj).unk287 = cosV * amp;
+        } else if (OBJ_HEAD(obj).unk276 == 1) {
+            if (OBJ_HEAD(obj).unk278 == 0) {
+                OBJ_HEAD(obj).unk278 = 1;
+                OBJ_HEAD(obj).unk287 += func_150ADA20() % 20U;
             }
-            if (A_U16(0x282) < 0xAE) {
-                n = A_U16(0x282) / 6 + 1;
+            if (OBJ_HEAD(obj).unk282 < 0xAE) {
+                speed = OBJ_HEAD(obj).unk282 / 6 + 1;
             } else {
-                n = 30;
+                speed = 30;
             }
-            A_S8(0x284) = 0;
-            A_S8(0x285) += n;
-            A_S8(0x287) += n;
-            A_S8(0x286) = A_S8(0x284);
+            OBJ_HEAD(obj).unk284 = 0;
+            OBJ_HEAD(obj).unk285 += speed;
+            OBJ_HEAD(obj).unk287 += speed;
+            OBJ_HEAD(obj).unk286 = OBJ_HEAD(obj).unk284;
             snap = 1;
-            a[0] = A_S8(0x284);
-            b[0] = A_S8(0x285);
-            a[1] = A_S8(0x286);
-            b[1] = A_S8(0x287);
-        } else if (A_U8(0x276) == 2) {
-            u8 *r;
+            yaw[0] = OBJ_HEAD(obj).unk284;
+            pitch[0] = OBJ_HEAD(obj).unk285;
+            yaw[1] = OBJ_HEAD(obj).unk286;
+            pitch[1] = OBJ_HEAD(obj).unk287;
+        } else if (OBJ_HEAD(obj).unk276 == 2) {
+            u8 *model;
 
-            doAim = 1;
-            p = (u8 *)func_1503195C(arg0, 0x2B, 0);
-            if (p != NULL) {
-                q = *(u8 **)(p + 0x48);
-                if (q != NULL) {
-                    r = ((u8 **)(q + 0x3E8))[D_800BE9C0];
-                    if (r != NULL) {
-                        r += 0x80;
-                        func_15043FF0((vertex *)D_800C3FE8, (struct113 *)r);
-                        noFx = 0;
+            aim = 1;
+            holder = (AimHolder *)func_1503195C(obj, 0x2B, 0);
+            if (holder != NULL) {
+                holderData = holder->unk48;
+                if (holderData != NULL) {
+                    model = (u8 *)holderData->unk3E8[D_800BE9C0];
+                    if (model != NULL) {
+                        model += 0x80;
+                        func_15043FF0((vertex *)D_800C3FE8, (struct113 *)model);
+                        noHolderTarget = 0;
                     }
                 }
             }
-        } else if (A_U8(0x276) == 3) {
-            f32 (*mtx)[4];
+        } else if (OBJ_HEAD(obj).unk276 == 3) {
+            f32 (*targetBone)[4];
 
-            if (A_U16(0x278) != -1) {
-                mtx = (f32 (*)[4])arg0->unk1D4;
-                if (mtx != NULL) {
-                    mtx = ((f32 (*)[4][4])mtx)[A_U16(0x278)];
-                    VEC0 = mtx[3][0];
-                    VEC1 = mtx[3][1];
-                    VEC2 = mtx[3][2];
+            if (OBJ_HEAD(obj).unk278 != -1) { // always true for the u16; matching: removing it changes the code
+                targetBone = (f32 (*)[4])obj->unk1D4;
+                if (targetBone != NULL) {
+                    targetBone = ((f32 (*)[4][4])targetBone)[OBJ_HEAD(obj).unk278];
+                    D_800C3FE8[0] = targetBone[3][0];
+                    D_800C3FE8[1] = targetBone[3][1];
+                    D_800C3FE8[2] = targetBone[3][2];
                 }
             }
-        } else if (A_U8(0x276) == 4) {
-            if (arg0->unk84.uh == 0x26) {
-                if (A_U16(0x278) == 0) {
-                    A_S8(0x284) -= D_800BE9E4;
-                    if (A_S8(0x284) < -20) {
-                        A_S8(0x284) = -20;
-                        A_U16(0x278) = 1;
+        } else if (OBJ_HEAD(obj).unk276 == 4) {
+            if (obj->unk84.uh == 0x26) {
+                if (OBJ_HEAD(obj).unk278 == 0) {
+                    OBJ_HEAD(obj).unk284 -= D_800BE9E4;
+                    if (OBJ_HEAD(obj).unk284 < -20) {
+                        OBJ_HEAD(obj).unk284 = -20;
+                        OBJ_HEAD(obj).unk278 = 1;
                     }
                 } else {
-                    A_S8(0x284) += D_800BE9E4 * 3;
-                    if (A_S8(0x284) > 20) {
-                        A_S8(0x284) = 20;
-                        A_U16(0x278) = 0;
+                    OBJ_HEAD(obj).unk284 += D_800BE9E4 * 3;
+                    if (OBJ_HEAD(obj).unk284 > 20) {
+                        OBJ_HEAD(obj).unk284 = 20;
+                        OBJ_HEAD(obj).unk278 = 0;
                     }
                 }
-                A_S8(0x287) = 0;
-                A_S8(0x286) = A_S8(0x284);
-                A_S8(0x285) = A_S8(0x287);
+                OBJ_HEAD(obj).unk287 = 0;
+                OBJ_HEAD(obj).unk286 = OBJ_HEAD(obj).unk284;
+                OBJ_HEAD(obj).unk285 = OBJ_HEAD(obj).unk287;
                 snap = 1;
             } else {
-                A_U16(0x282) = 0;
-                doAim = 1;
+                OBJ_HEAD(obj).unk282 = 0;
+                aim = 1;
             }
-        } else if (A_U8(0x276) == 5) {
+        } else if (OBJ_HEAD(obj).unk276 == 5) {
             f32 kx = 0.3543307185f;
             f32 ky = 0.236220479f;
 
-            a[0] = A_S8(0x284) * kx;
-            a[1] = A_S8(0x286) * kx;
-            b[0] = A_S8(0x285) * ky;
-            b[1] = A_S8(0x287) * ky;
+            yaw[0] = OBJ_HEAD(obj).unk284 * kx;
+            yaw[1] = OBJ_HEAD(obj).unk286 * kx;
+            pitch[0] = OBJ_HEAD(obj).unk285 * ky;
+            pitch[1] = OBJ_HEAD(obj).unk287 * ky;
             clamp = 0;
-            copyAB = 0;
-        } else if (A_U8(0x276) == 6) {
-            if (arg0->unk31C->unk78 == 0x2A) {
-                b[0] = 30.0f;
-                a[0] = -6.0f;
-                a[1] = 6.0f;
+            mirror = 0;
+        } else if (OBJ_HEAD(obj).unk276 == 6) {
+            if (obj->unk31C->unk78 == 0x2A) {
+                pitch[0] = 30.0f;
+                yaw[0] = -6.0f;
+                yaw[1] = 6.0f;
             } else {
-                a[0] = 0;
-                a[1] = 0;
-                b[0] = 0;
-                if (A_S16(0x27E) == 0) {
-                    A_U8(0x276) = 0;
+                yaw[0] = 0; // matching: integer zeros; 0.0f changes the code
+                yaw[1] = 0;
+                pitch[0] = 0;
+                if (OBJ_HEAD(obj).unk27E == 0) {
+                    OBJ_HEAD(obj).unk276 = 0;
                 }
             }
-            copyAB = 0;
-            b[1] = b[0];
+            mirror = 0;
+            pitch[1] = pitch[0];
         }
-        if (A_U16(0x282) != 0xFFFF) {
-            if (A_U16(0x282) >= D_800BE9E4) {
-                A_U16(0x282) -= D_800BE9E4;
+        if (OBJ_HEAD(obj).unk282 != 0xFFFF) {
+            if (OBJ_HEAD(obj).unk282 >= D_800BE9E4) {
+                OBJ_HEAD(obj).unk282 -= D_800BE9E4;
             } else {
-                A_U16(0x282) = 0;
+                OBJ_HEAD(obj).unk282 = 0;
             }
         }
     }
-    if (doAim) {
-        if (!(A_U8(0x2FB) & 4) || !noFx) {
-            if (VEC0 != -99999.0f || VEC1 != -99999.0f || VEC2 != -99999.0f) {
-            if (D_800C3FDC != 0) {
-                D_800C3FDC = 0;
-                a[0] = D_800C3FE0;
-                b[0] = D_800C3FE4;
-            } else {
-                d[0] = VEC0 - m[3][0];
-                d[1] = VEC1 - m[3][1];
-                d[2] = VEC2 - m[3][2];
-                vx = d[0] * m[0][0] + d[1] * m[0][1] + d[2] * m[0][2];
-                vy = d[0] * m[1][0] + d[1] * m[1][1] + d[2] * m[1][2];
-                vz = d[0] * m[2][0] + d[1] * m[2][1] + d[2] * m[2][2];
-                a[0] = func_150484A0(vx, vz);
-                b[0] = func_150484A0(vy, sqrtf(vx * vx + vz * vz));
-                a[0] *= 57.29577637f;
-                b[0] *= 57.29577637f;
-                if (a[0] > 180.0f) {
-                    a[0] -= 360.0f;
+    if (aim) {
+        if (!(obj->unk2FB & 4) || !noHolderTarget) {
+            if (D_800C3FE8[0] != -99999.0f || D_800C3FE8[1] != -99999.0f || D_800C3FE8[2] != -99999.0f) {
+                if (D_800C3FDC != 0) {
+                    D_800C3FDC = 0;
+                    yaw[0] = D_800C3FE0;
+                    pitch[0] = D_800C3FE4;
+                } else {
+                    delta[0] = D_800C3FE8[0] - mtx[3][0];
+                    delta[1] = D_800C3FE8[1] - mtx[3][1];
+                    delta[2] = D_800C3FE8[2] - mtx[3][2];
+                    localX = delta[0] * mtx[0][0] + delta[1] * mtx[0][1] + delta[2] * mtx[0][2];
+                    localY = delta[0] * mtx[1][0] + delta[1] * mtx[1][1] + delta[2] * mtx[1][2];
+                    localZ = delta[0] * mtx[2][0] + delta[1] * mtx[2][1] + delta[2] * mtx[2][2];
+                    yaw[0] = func_150484A0(localX, localZ);
+                    pitch[0] = func_150484A0(localY, sqrtf(localX * localX + localZ * localZ));
+                    yaw[0] *= 57.29577637f;
+                    pitch[0] *= 57.29577637f;
+                    if (yaw[0] > 180.0f) {
+                        yaw[0] -= 360.0f;
+                    }
+                    if (pitch[0] > 180.0f) {
+                        pitch[0] -= 360.0f;
+                    }
                 }
-                if (b[0] > 180.0f) {
-                    b[0] -= 360.0f;
-                }
-            }
             } else {
                 step = 4;
             }
         } else {
-            a[0] = b[0] = 0.0f;
+            yaw[0] = pitch[0] = 0.0f;
         }
     }
-    if (A_U16(0x282) == 0 && func_15022024(a, b, arg0 - D_800CC2D0, 0)) {
+    if (OBJ_HEAD(obj).unk282 == 0 && func_15022024(yaw, pitch, obj - D_800CC2D0, 0)) {
         clamp = 1;
-        copyAB = 0;
+        mirror = 0;
         snap = 0;
         step = 8;
     }
     if (clamp) {
-        a[0] = CLAMP(a[0], -45.0f, 45.0f);
-        b[0] = CLAMP(b[0], -15.0f, 30.0f);
-        a[1] = CLAMP(a[1], -45.0f, 45.0f);
-        b[1] = CLAMP(b[1], -15.0f, 30.0f);
+        yaw[0] = CLAMP(yaw[0], -45.0f, 45.0f);
+        pitch[0] = CLAMP(pitch[0], -15.0f, 30.0f);
+        yaw[1] = CLAMP(yaw[1], -45.0f, 45.0f);
+        pitch[1] = CLAMP(pitch[1], -15.0f, 30.0f);
     }
-    if (copyAB) {
-        a[1] = a[0];
-        b[1] = b[0];
+    if (mirror) {
+        yaw[1] = yaw[0];
+        pitch[1] = pitch[0];
     }
     if (D_800D1C90[id] == NULL) {
         return;
     }
-    fA = (a[0] >= 0.0f) ? ((Def_1503A830 *)D_800D1C90[id])->unk2D * a[0] / 45.0f : ((Def_1503A830 *)D_800D1C90[id])->unk2C * a[0] / -45.0f;
-    fB = (a[1] >= 0.0f) ? ((Def_1503A830 *)D_800D1C90[id])->unk2C * a[1] / 45.0f : ((Def_1503A830 *)D_800D1C90[id])->unk2D * a[1] / -45.0f;
-    fB = -fB;
-    fC = (b[0] >= 0.0f) ? ((Def_1503A830 *)D_800D1C90[id])->unk2E * b[0] / 30.0f : ((Def_1503A830 *)D_800D1C90[id])->unk2F * b[0] / -15.0f;
-    fD = (b[1] >= 0.0f) ? ((Def_1503A830 *)D_800D1C90[id])->unk2E * b[1] / 30.0f : ((Def_1503A830 *)D_800D1C90[id])->unk2F * b[1] / -15.0f;
-    APPROACH(A_S16(0x27A), (s32)fB);
-    APPROACH(A_S16(0x27C), (s32)fA);
-    APPROACH(A_S16(0x27E), (s32)fD);
-    APPROACH(A_S16(0x280), (s32)fC);
+    yaw0 = (yaw[0] >= 0.0f) ? OBJ_DEF(id)->unk2D * yaw[0] / 45.0f : OBJ_DEF(id)->unk2C * yaw[0] / -45.0f;
+    yaw1 = (yaw[1] >= 0.0f) ? OBJ_DEF(id)->unk2C * yaw[1] / 45.0f : OBJ_DEF(id)->unk2D * yaw[1] / -45.0f;
+    yaw1 = -yaw1;
+    pitch0 = (pitch[0] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[0] / 30.0f : OBJ_DEF(id)->unk2F * pitch[0] / -15.0f;
+    pitch1 = (pitch[1] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[1] / 30.0f : OBJ_DEF(id)->unk2F * pitch[1] / -15.0f;
+    APPROACH(OBJ_HEAD(obj).unk27A, (s32)yaw1);
+    APPROACH(OBJ_HEAD(obj).unk27C, (s32)yaw0);
+    APPROACH(OBJ_HEAD(obj).unk27E, (s32)pitch1);
+    APPROACH(OBJ_HEAD(obj).unk280, (s32)pitch0);
     if (snap) {
-        A_S16(0x27A) = A_S8(0x284);
-        A_S16(0x27E) = A_S8(0x285);
-        A_S16(0x27C) = A_S8(0x286);
-        A_S16(0x280) = A_S8(0x287);
+        OBJ_HEAD(obj).unk27A = OBJ_HEAD(obj).unk284;
+        OBJ_HEAD(obj).unk27E = OBJ_HEAD(obj).unk285;
+        OBJ_HEAD(obj).unk27C = OBJ_HEAD(obj).unk286;
+        OBJ_HEAD(obj).unk280 = OBJ_HEAD(obj).unk287;
     }
-    if (A_U16(0x282) != 0 && A_U8(0x276) == 0) {
-        A_S16(0x27A) += A_S8(0x284);
-        A_S16(0x27E) += A_S8(0x285);
-        A_S16(0x27C) += A_S8(0x286);
-        A_S16(0x280) += A_S8(0x287);
+    if (OBJ_HEAD(obj).unk282 != 0 && OBJ_HEAD(obj).unk276 == 0) {
+        OBJ_HEAD(obj).unk27A += OBJ_HEAD(obj).unk284;
+        OBJ_HEAD(obj).unk27E += OBJ_HEAD(obj).unk285;
+        OBJ_HEAD(obj).unk27C += OBJ_HEAD(obj).unk286;
+        OBJ_HEAD(obj).unk280 += OBJ_HEAD(obj).unk287;
     }
 }
 
