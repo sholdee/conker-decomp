@@ -1,5 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares these three with stale signatures; hide them and declare the real ones. */
+/* functions.h declares these three with stale signatures; hide them there and declare the real ones here. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #define func_1513D524 func_1513D524_decl_in_functions_h
@@ -7,7 +7,6 @@
 #undef func_150ADA20
 #undef func_151D9B8C
 #undef func_1513D524
-void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
@@ -89,7 +88,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     speed = func_150ADA68() * 5.3f + 4.4f;
     func_15143794(yaw, pitch, speed, dir);
     // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
-    func_151DA6F8(pos, dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, (s16)(func_150ADA20() % 20 + 31),
+    func_151DA6F8(pos, dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, func_150ADA20() % 20 + 31,
                   func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
                   (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
     return 1;
@@ -419,7 +418,8 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-void func_1513F680(void *, u8, u8, u8, u8);
+Game1DD500Particle *func_1513D524(Game1DD500ParticleDesc *, u8, u8, u8, u8, u8, s32, u8, s32);
+void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
 extern Game1DD500Mount D_800AA12C[11];
 extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
 extern u8 D_800AB310[];
@@ -701,7 +701,6 @@ Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view) {
 
     return ret;
 }
-
 
 /* Swings a particle's width and height around their base sizes, each on its own phase. */
 s32 func_151B1828(Game1DD500Particle *arg0) {
