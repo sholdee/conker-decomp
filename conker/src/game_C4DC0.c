@@ -864,6 +864,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 pad4;
         s32 pad5;
 
+        /* Place the object at a random distance in [a[2], a[3]) from (a[0], a[1]), at a random angle (degrees)
+         * between the bounds a[4] / a[5], which are XOR-swapped into order first. */
         if (cmd->a[4] >= cmd->a[5]) {
             lo = cmd->a[5] ^ cmd->a[4];
             hi = cmd->a[5] ^ lo;
@@ -1118,7 +1120,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (ix << 16) | (iz & 0xFFFF);
     case 0x98:
         return (s16)(s32)obj->y_position;
-    case 0x99: {
+    case 0x99:
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         dx = obj->x_position - other->x_position;
         dz = obj->z_position - other->z_position;
@@ -1126,10 +1128,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
             return 1;
         }
         return 0;
-    }
     case 0x9A: {
-        s32 pdx;
-        s32 pdz;
+        s32 pad1;
+        s32 pad2;
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         if (other == NULL) {
             return 32000;
@@ -1190,13 +1191,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return obj->unk31C->unk78;
     case 0xAB:
         return FLD(obj->unk31C, 0x79, u8);
-    case 0xAC: {
+    case 0xAC:
         ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
             return ret | 0x4000;
         }
         return 0;
-    }
     case 0xAD:
         return obj->unk251;
     case 0xAE:
@@ -1250,8 +1250,8 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xBE:
         return obj->y_velocity;
     case 0xBD: {
-        s32 pdx;
-        s32 pdz;
+        s32 pad1;
+        s32 pad2;
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         dx = obj->x_position - other->x_position;
         dz = obj->z_position - other->z_position;
@@ -1455,16 +1455,14 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return c;
     }
-    case 0xD1: {
+    case 0xD1:
         ret = obj->unk22C;
         obj->unk22C = ret & ~0x100;
         return ret & 0x100;
-    }
-    case 0xD2: {
+    case 0xD2:
         ret = obj->unk22C;
         obj->unk22C = ret & ~0x200;
         return ret & 0x200;
-    }
     case 0xD4: {
         struct126 *p;
         s32 v;
@@ -1535,13 +1533,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return 0;
     case 0xDE:
         return OBJ_INDEX(obj);
-    case 0xC6: {
+    case 0xC6:
         ret = OBJ_INDEX(obj);
         if (ret >= 0 && ret < D_8008FD8C) {
             return func_150859AC(OBJ_INDEX(obj), 6);
         }
         break;
-    }
     case 0xDF:
         if (obj->unk31C != NULL) {
             return FLD(obj->unk31C, 0x1AE, s8);
