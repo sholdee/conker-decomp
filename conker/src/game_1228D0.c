@@ -447,10 +447,7 @@ typedef struct {
 
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
-    u8 pad0[0x34];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x110 - 0x4C];
+    DefParticleHead particle; /* particle.def.pos / rot: the two end points */
     BeamPart part;
 } Beam;
 
@@ -513,8 +510,8 @@ void func_150F6178(BeamEffect *effect) {
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
-            beam->start = start;
-            beam->end = end;
+            beam->particle.def.pos = start;
+            beam->particle.def.rot = end;
         }
         flash = data->flash;
         if (flash != NULL) {

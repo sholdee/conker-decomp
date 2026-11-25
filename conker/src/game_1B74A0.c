@@ -3,17 +3,10 @@
 #include "variables.h"
 #include "effects.h"
 
-/* The object func_151407D0 spawns for func_15189FF0. Bytes 0x18.. hold a copy of the
- * ParticleDef, so `color` and `p0`/`p1` mirror ParticleDef rgba, pos and rot. */
+/* The object func_151407D0 spawns for func_15189FF0. particle.def.pos / rot are the world-space attach
+ * points, updated by func_1518A094. */
 typedef struct Emitter {
-    /* 0x000 */ u8 pad0[0x28];
-    /* 0x028 */ u8 color[4];
-    /* 0x02C */ u8 pad2C[8];
-    /* 0x034 */ Vec3f p0; // world-space attach points, updated by func_1518A094
-    /* 0x040 */ Vec3f p1;
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 pad5C[0x110 - 0x5C];
+    /* 0x000 */ DefParticleHead particle;
     /* 0x110 */ GlowShape params;
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ EmitterAttach attach;
@@ -79,14 +72,14 @@ s32 func_1518A094(Emitter *emitter) {
             Vec3f *out;
 
             mtx = attach->target->unk1D4[attach->bone];
-            out = &emitter->p0;
+            out = &emitter->particle.def.pos;
             func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
-            out = &emitter->p1;
+            out = &emitter->particle.def.rot;
             func_150A7960(mtx, attach->p1.x, attach->p1.y, attach->p1.z, &out->x, &out->y, &out->z);
-            emitter->flags |= 2;
-            emitter->flags &= ~4;
+            emitter->particle.def.flags |= 2;
+            emitter->particle.def.flags &= ~4;
         } else {
-            emitter->flags &= ~2;
+            emitter->particle.def.flags &= ~2;
         }
     } else {
         return 0;
@@ -105,31 +98,31 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
         value = 0.6f;
         params->alpha1 = value;
         params->alpha0 = value;
-        emitter->color[2] = 0;
-        emitter->color[1] = 0;
-        emitter->color[0] = 0xFF;
+        emitter->particle.def.rgba[2] = 0;
+        emitter->particle.def.rgba[1] = 0;
+        emitter->particle.def.rgba[0] = 0xFF;
         *follow = TRUE;
         break;
     case 0: // 15
-        emitter->flags &= ~2;
+        emitter->particle.def.flags &= ~2;
         *follow = FALSE;
         break;
     case 1: // 16
         value = 0.3f;
         params->alpha1 = value;
         params->alpha0 = value;
-        emitter->color[0] = 0x80;
-        emitter->color[1] = 0;
-        emitter->color[2] = 0;
+        emitter->particle.def.rgba[0] = 0x80;
+        emitter->particle.def.rgba[1] = 0;
+        emitter->particle.def.rgba[2] = 0;
         *follow = TRUE;
         break;
     case 2: // 17
         value = 0.6f;
         params->alpha1 = value;
         params->alpha0 = value;
-        emitter->color[0] = 0xFF;
-        emitter->color[1] = 0;
-        emitter->color[2] = 0;
+        emitter->particle.def.rgba[0] = 0xFF;
+        emitter->particle.def.rgba[1] = 0;
+        emitter->particle.def.rgba[2] = 0;
         *follow = TRUE;
         break;
     }
@@ -139,7 +132,7 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
 /* Handler: while the target's byte 0x6A is set, clears flag 2 and stops. */
 s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
     if (emitter->attach.target->eyeClosed[0] != 0) {
-        emitter->flags &= ~2;
+        emitter->particle.def.flags &= ~2;
         *follow = FALSE;
     } else {
         *follow = TRUE;
@@ -150,7 +143,7 @@ s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
 /* Handler: once the target's byte 0x6F is clear, clears flag 2 and stops. */
 s32 func_1518A324(Emitter *emitter, u8 *follow) {
     if (emitter->attach.target->expression == 0) {
-        emitter->flags &= ~2;
+        emitter->particle.def.flags &= ~2;
         *follow = FALSE;
     } else {
         *follow = TRUE;
