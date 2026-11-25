@@ -2829,7 +2829,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 sfx;
 
             animThrow = 0x176;
-            if ((arg0->id == 0x75) || (animDrop = 0x16C, (arg0->id == 0xB1))) {
+            if ((arg0->id == 0x75) || (animDrop = 0x16C, (arg0->id == 0xB1))) {  // matching: IDO schedules the default store between the two tests
                 animDrop = 0x16B;
                 item = 0x64;
                 sfx = 0x11;
@@ -2852,7 +2852,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     CTL(arg0)->unk11A = 0;
                 }
             } else {
-                func_15063A38(arg0, heldButtons, 0x10);
+                func_15063A38(arg0, heldButtons, R_TRIG);
                 if (CTL(arg0)->unk19B == 1) {
                     if (act != CTL(arg0)->action) {
                         CTL(arg0)->action = act;
@@ -2866,7 +2866,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         CTL(arg0)->unk1AA++;
                     }
                 } else if (CTL(arg0)->unk19B == 2) {
-                    if (!(D_800CC290 & 4) && !(arg0->unk2F8 & 0x10)) {
+                    if (!(D_800CC290 & D_CBUTTONS) && !(arg0->unk2F8 & 0x10)) {
                         CTL(arg0)->unk19B = 3;
                     }
                     if (D_800BE9E4 < CTL(arg0)->unk19C) {
@@ -2915,7 +2915,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     CTL(arg0)->unk11A = 0;
                 }
             } else {
-                func_15063A38(arg0, heldButtons, 0x10);
+                func_15063A38(arg0, heldButtons, R_TRIG);
                 if (CTL(arg0)->unk19B == 5) {
                     if (act != CTL(arg0)->action) {
                         if (item == 0x89) {
@@ -2944,7 +2944,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         }
                     }
                 } else if (CTL(arg0)->unk19B == 6) {
-                    if (!(D_800CC290 & 4)) {
+                    if (!(D_800CC290 & D_CBUTTONS)) {
                         CTL(arg0)->unk19B = 7;
                     }
                 } else if ((CTL(arg0)->unk19B == 7) && (arg3 <= 0.0f) && (arg0->unk84.uh != 0x1F9)) {
