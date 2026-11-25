@@ -1840,15 +1840,16 @@ typedef struct JetScatterPreset {
     s16 unk22;
 } JetScatterPreset;
 
+/* Spawn description, motion and style for func_15147DA0. */
 typedef struct {
     Vec3f pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
-    u8 unk14;
+    s8 unk14;
     u8 unk15;
     u8 pad16[2];
-} Spawn15198D88;
+} ScatterSpawn;
 
 typedef struct {
     f32 unk0;
@@ -1856,13 +1857,14 @@ typedef struct {
     f32 unk8;
     f32 unkC;
     f32 unk10;
-    u8 pad14[4];
+    f32 unk14;
     u8 unk18;
     u8 unk19;
     u8 unk1A;
     u8 unk1B;
-    u8 pad1C[4];
-} Motion15198D88;
+    s16 unk1C;
+    s16 unk1E;
+} ScatterMotion;
 
 typedef struct {
     s32 unk0;
@@ -1875,18 +1877,18 @@ typedef struct {
     u8 unk1C;
     u8 unk1D;
     u8 pad1E[2];
-} Style15198D88;
+} ScatterStyle;
 
 extern JetScatterPreset D_800A8728[];
-extern s32 func_15147DA0(Spawn15198D88 *, Motion15198D88 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style15198D88 *, s32, s32, s32);
+extern s32 func_15147DA0(ScatterSpawn *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, ScatterStyle *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
-    Style15198D88 style;
+    ScatterStyle style;
     CharacterFlamethrowerJet *jet;
     JetScatterPreset *preset;
-    Spawn15198D88 spawn;
-    Motion15198D88 motion;
+    ScatterSpawn spawn;
+    ScatterMotion motion;
     f32 px;
     f32 py;
     f32 pz;
@@ -2474,163 +2476,7 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    char pad21[3];
-    f32 unk24;
-} Struct15199C34Point;
-
-typedef struct {
-    char pad0[0x1AA];
-    s16 unk1AA;
-} Struct15199C34Sub31C;
-
-typedef struct {
-    char pad0[0x23D];
-    u8 unk23D;
-} Struct15199C34Sub318;
-
-typedef struct {
-    s32 unk0;
-    char pad4[0x14 - 0x4];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    char pad20[0x3B - 0x20];
-    u8 unk3B;
-    char pad3C[0x74 - 0x3C];
-    u8 unk74;
-    char pad75[0x1D4 - 0x75];
-    s32 unk1D4;
-    char pad1D8[0x318 - 0x1D8];
-    Struct15199C34Sub318 *unk318;
-    Struct15199C34Sub31C *unk31C;
-} Struct15199C34Obj;
-
-typedef struct {
-    Struct15199C34Obj *unk0;
-    u8 unk4;
-    u8 unk5;
-    char pad6[2];
-    struct17 unk8;
-    struct17 unk14;
-    f32 unk20;
-    f32 unk24;
-    char pad28[4];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x3A - 0x34];
-    u8 unk3A;
-    char pad3B[0x90 - 0x3B];
-    struct17 unk90;
-    f32 unk9C;
-    f32 unkA0;
-    s32 unkA4;
-    s32 unkA8;
-    s16 unkAC;
-    s16 unkAE;
-    f32 unkB0;
-    f32 unkB4;
-    f32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    f32 unkC4;
-    f32 unkC8;
-    s16 unkCC;
-    s16 unkCE;
-    s16 unkD0;
-    s16 unkD2;
-    struct17 unkD4;
-    f32 unkE0;
-    f32 unkE4;
-    s16 unkE8;
-    s16 unkEA;
-    s16 unkEC;
-    s16 unkEE;
-    f32 unkF0;
-    f32 unkF4;
-    f32 unkF8;
-    f32 unkFC;
-    f32 unk100;
-    f32 unk104;
-    f32 unk108;
-    s16 unk10C;
-    s16 unk10E;
-    struct17 unk110;
-    struct17 unk11C;
-    f32 unk128;
-    f32 unk12C;
-    char pad130[0x138 - 0x130];
-    f32 unk138;
-    f32 unk13C;
-    char pad140[0x144 - 0x140];
-    f32 unk144;
-    char pad148[0x150 - 0x148];
-    u8 unk150;
-    s8 unk151;
-    s16 unk152;
-} Struct15199C34Data;
-
-typedef struct {
-    char pad0;
-    u8 unk1;
-    char pad2[0xC - 0x2];
-    u8 unkC;
-    char padD[0x10 - 0xD];
-    struct17 unk10;
-    char pad1C[0x25 - 0x1C];
-    u8 unk25;
-    char pad26[0x2C - 0x26];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    char pad2F[0x94 - 0x2F];
-    Struct15199C34Point *unk94;
-    Struct15199C34Data *unk98;
-} Struct15199C34;
-
-typedef struct {
-    struct17 pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-} Struct15199C34Spawn;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} Struct15199C34Motion;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} Struct15199C34Style;
-
+/* Spawn description for func_15130280. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -2654,9 +2500,9 @@ typedef struct {
     f32 unk24;
     f32 unk28;
     f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
+    Vec3f pos;
+    Vec3f unk3C;
+    Vec3f vel;
     f32 unk54;
     u32 unk58;
     s32 unk5C;
@@ -2671,8 +2517,9 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Struct15199C34Particle;
+} FlameEmitParticle;
 
+/* Spawn description for func_151D8868. */
 typedef struct {
     u8 unk0;
     u8 unk1;
@@ -2681,71 +2528,75 @@ typedef struct {
     u8 unk5;
     s8 unk6;
     u8 pad7;
-} Struct15199C34Spark;
+} FlameSpark;
 
 void func_15145740(void *, void *, void *, void *, f32);
-s32 func_15146078(struct17 *, struct17 *, struct17 *);
+s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
 void *func_15130280(void *, u8, s32, s32, u8, s32);
 void func_151D8868(void *, s32, s32, s32);
 
-s32 func_15199C34(Struct15199C34 *arg0) {
-    Struct15199C34Data *data;
-    Struct15199C34Point *pts;
-    Struct15199C34Obj *obj;
-    struct17 pos0;
-    struct17 pos1;
-    struct17 pos2;
-    struct17 pos3;
+/*
+ * Flame emitter: tracks the owner's bone (or its position and facing when it has no bones), emits
+ * emitAccum points between last and this frame's start/end, then the scatter and emit particles and sparks.
+ */
+s32 func_15199C34(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    FlamePoint *points;
+    struct127 *obj;
+    Vec3f pos0;
+    Vec3f pos1;
+    Vec3f pos2;
+    Vec3f pos3;
 
-    data = arg0->unk98;
-    pts = arg0->unk94;
-    obj = data->unk0;
-    if (obj->unk0 == 0 || obj->unk3B != data->unk4) {
+    flame = actor->state;
+    points = actor->points;
+    obj = flame->seed.owner;
+    if (obj->interaction_state == 0 || obj->unique_id != flame->seed.ownerId) {
         return 0;
     }
     if ((obj->unk74 & 0xF) == 0xF) {
-        data->unk150 |= 0x10;
+        flame->flags |= 0x10;
     } else {
-        data->unk150 &= ~0x10;
+        flame->flags &= ~0x10;
     }
-    if (obj->unk1D4 != 0) {
-        struct17 *inputs[4];
-        struct17 *outputs[4];
+    if (obj->unk1D4 != NULL) {
+        Vec3f *inputs[4];
+        Vec3f *outputs[4];
 
-        inputs[0] = &data->unk8;
-        inputs[1] = &data->unk14;
-        inputs[2] = &data->unk90;
-        inputs[3] = &data->unkD4;
+        inputs[0] = &flame->seed.startOffset;
+        inputs[1] = &flame->seed.endOffset;
+        inputs[2] = &flame->scatter.target;
+        inputs[3] = &flame->emit.target;
         outputs[0] = &pos0;
         outputs[1] = &pos1;
         outputs[2] = &pos2;
         outputs[3] = &pos3;
-        func_15145EA4((s32 *)inputs, (s32 *)outputs, obj->unk1D4 + (data->unk5 << 6), 4);
-        data->unk150 &= ~1;
+        func_15145EA4(inputs, outputs, (s32)obj->unk1D4 + (flame->seed.bone << 6), 4);
+        flame->flags &= ~1;
     } else {
-        struct17 dir;
-        struct17 up;
+        Vec3f dir;
+        Vec3f up;
 
         func_15145740(obj, &dir, &up, 0, 0.0f);
-        pos0.unk0 = obj->unk14;
-        pos0.unk4 = obj->unk18 + 33.0f;
-        pos0.unk8 = obj->unk1C;
-        pos1.unk0 = dir.unk0 * 0.03200000152f + pos0.unk0;
-        pos1.unk4 = dir.unk4 * 0.03200000152f + pos0.unk4;
-        pos1.unk8 = dir.unk8 * 0.03200000152f + pos0.unk8;
-        data->unk150 |= 1;
+        pos0.x = obj->x_position;
+        pos0.y = obj->y_position + 33.0f;
+        pos0.z = obj->z_position;
+        pos1.x = dir.x * 0.03200000152f + pos0.x;
+        pos1.y = dir.y * 0.03200000152f + pos0.y;
+        pos1.z = dir.z * 0.03200000152f + pos0.z;
+        flame->flags |= 1;
     }
-    arg0->unk10 = pos0;
-    data->unk12C += data->unk24 * D_800BE9A4;
-    if (data->unk12C > 1.0f) {
+    actor->pos = pos0;
+    flame->emitAccum += flame->seed.emitRate * D_800BE9A4;
+    if (flame->emitAccum > 1.0f) {
         f32 inv;
         f32 t;
         f32 step;
-        struct17 d0;
-        struct17 d1;
-        struct17 cur0;
-        struct17 cur1;
+        Vec3f d0;
+        Vec3f d1;
+        Vec3f cur0;
+        Vec3f cur1;
         f32 ix0;
         f32 iy0;
         f32 iz0;
@@ -2753,72 +2604,72 @@ s32 func_15199C34(Struct15199C34 *arg0) {
         f32 iy1;
         f32 iz1;
 
-        inv = 1.0f / data->unk12C;
-        t = data->unk128 + D_800BE9A4;
+        inv = 1.0f / flame->emitAccum;
+        t = flame->timeCarry + D_800BE9A4;
         step = t * inv;
-        cur0 = data->unk110;
-        cur1 = data->unk11C;
-        d0.unk0 = pos0.unk0 - data->unk110.unk0;
-        d0.unk4 = pos0.unk4 - data->unk110.unk4;
-        d0.unk8 = pos0.unk8 - data->unk110.unk8;
-        d1.unk0 = pos1.unk0 - data->unk11C.unk0;
-        d1.unk4 = pos1.unk4 - data->unk11C.unk4;
-        d1.unk8 = pos1.unk8 - data->unk11C.unk8;
-        ix0 = d0.unk0 * inv;
-        iy0 = d0.unk4 * inv;
-        iz0 = d0.unk8 * inv;
-        ix1 = d1.unk0 * inv;
-        iy1 = d1.unk4 * inv;
-        iz1 = d1.unk8 * inv;
+        cur0 = flame->start;
+        cur1 = flame->end;
+        d0.x = pos0.x - flame->start.x;
+        d0.y = pos0.y - flame->start.y;
+        d0.z = pos0.z - flame->start.z;
+        d1.x = pos1.x - flame->end.x;
+        d1.y = pos1.y - flame->end.y;
+        d1.z = pos1.z - flame->end.z;
+        ix0 = d0.x * inv;
+        iy0 = d0.y * inv;
+        iz0 = d0.z * inv;
+        ix1 = d1.x * inv;
+        iy1 = d1.y * inv;
+        iz1 = d1.z * inv;
         do {
-            Struct15199C34Point *p;
+            FlamePoint *p;
 
-            p = &pts[arg0->unk2E];
-            p->unk0 = cur0;
-            p->unkC.unk0 = cur1.unk0 - cur0.unk0;
-            p->unkC.unk4 = cur1.unk4 - cur0.unk4;
-            p->unkC.unk8 = cur1.unk8 - cur0.unk8;
-            p->unk18 = data->unk2C;
-            p->unk1C = 0.0f;
-            p->unk20 = data->unk3A;
-            p->unk24 = data->unk144;
-            func_1519BE1C(&p->unk0, &p->unkC, data->unk20, t);
-            p->unk18 += data->unk30 * t;
-            arg0->unk2E++;
-            if (arg0->unk2E == arg0->unk25) {
-                arg0->unk2E = 0;
+            p = &points[actor->head];
+            p->pos = cur0;
+            p->vel.x = cur1.x - cur0.x;
+            p->vel.y = cur1.y - cur0.y;
+            p->vel.z = cur1.z - cur0.z;
+            p->size = flame->seed.size;
+            p->length = 0.0f;
+            p->alpha = flame->seed.alpha;
+            p->texT = flame->texOffset;
+            func_1519BE1C(&p->pos, &p->vel, flame->seed.gravity, t);
+            p->size += flame->seed.sizeRate * t;
+            actor->head++;
+            if (actor->head == actor->capacity) {
+                actor->head = 0;
             }
-            arg0->unk2C++;
-            if (arg0->unk2E == arg0->unk2D) {
-                arg0->unk2D++;
-                if (arg0->unk2D == arg0->unk25) {
-                    arg0->unk2D = 0;
+            actor->count++;
+            if (actor->head == actor->tail) {
+                actor->tail++;
+                if (actor->tail == actor->capacity) {
+                    actor->tail = 0;
                 }
-                arg0->unk2C--;
+                actor->count--;
             }
-            cur0.unk0 += ix0;
-            cur0.unk4 += iy0;
-            cur0.unk8 += iz0;
-            cur1.unk0 += ix1;
-            cur1.unk4 += iy1;
-            cur1.unk8 += iz1;
+            cur0.x += ix0;
+            cur0.y += iy0;
+            cur0.z += iz0;
+            cur1.x += ix1;
+            cur1.y += iy1;
+            cur1.z += iz1;
             t -= step;
-            data->unk12C -= 1.0f;
-        } while (data->unk12C > 1.0f);
-        data->unk110 = cur0;
-        data->unk11C = cur1;
-        data->unk128 = t;
+            flame->emitAccum -= 1.0f;
+        } while (flame->emitAccum > 1.0f);
+        flame->start = cur0;
+        flame->end = cur1;
+        flame->timeCarry = t;
     }
-    if (obj->unk1D4 != 0 && (obj->unk74 & 0xF) != 0xF) {
-        data->unk138 += (data->unk9C + func_150ADA68() * data->unkA0) * D_800BE9A4;
-        if (data->unk138 > 1.0f) {
-            s32 pad;
-            Struct15199C34Spawn spawn;
-            Struct15199C34Motion motion;
-            Struct15199C34Style style;
-            struct17 delta;
-            struct17 axisA;
-            struct17 axisB;
+    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+        flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
+        if (flame->scatterAccum > 1.0f) {
+            s32 pad; // matching: unused stack slot (also pad2 below)
+            ScatterSpawn spawn;
+            ScatterMotion motion;
+            ScatterStyle style;
+            Vec3f delta;
+            Vec3f axisA;
+            Vec3f axisB;
             f32 c;
             f32 s;
             f32 speed;
@@ -2839,43 +2690,42 @@ s32 func_15199C34(Struct15199C34 *arg0) {
             motion.unk19 = 0xA;
             motion.unk1A = 0xFF;
             motion.unk14 = -10000.0f;
-            motion.unk1C = data->unkD0;
-            motion.unk1E = data->unkD2;
+            motion.unk1C = flame->scatter.unk40;
+            motion.unk1E = flame->scatter.unk42;
             do {
-                {
+                { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34a;
 
-                spawn.unk15 = (func_150ADA20() % (u32)(data->unkA8 + 1)) + data->unkA4;
-                spawn.unkC = (func_150ADA20() % (u32)(data->unkAE + 1)) + data->unkAC;
-                    motion.unk0 = func_150ADA68() * data->unkB4 + data->unkB0;
+                    spawn.unk15 = (func_150ADA20() % (u32)(flame->scatter.unk18 + 1)) + flame->scatter.unk14;
+                    spawn.unkC = (func_150ADA20() % (u32)(flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
+                    motion.unk0 = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
                 }
                 spawn.pos = pos0;
                 delta = pos2;
-                delta.unk0 -= spawn.pos.unk0;
-                delta.unk4 -= spawn.pos.unk4;
-                delta.unk8 -= spawn.pos.unk8;
+                delta.x -= spawn.pos.x;
+                delta.y -= spawn.pos.y;
+                delta.z -= spawn.pos.z;
                 if (func_15146078(&delta, &axisA, &axisB) != 0) {
-                    speed = func_150ADA68() * data->unkBC + data->unkB8;
-                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * data->unkC0, &s, &c);
-                    motion.unk4 = (axisA.unk0 * s + axisB.unk0 * c + delta.unk0) * speed;
-                    motion.unk8 = (axisA.unk4 * s + axisB.unk4 * c + delta.unk4) * speed;
-                    motion.unkC = (axisA.unk8 * s + axisB.unk8 * c + delta.unk8) * speed;
-                    motion.unk10 = func_150ADA68() * data->unkC8 + data->unkC4;
-                    motion.unk1B = func_150ADA68() * data->unkCE + data->unkCC;
-                    func_15147DA0((Spawn15198D88 *)&spawn, (Motion15198D88 *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                                  (Style15198D88 *)&style, 0, arg0->unkC, arg0->unk1);
+                    speed = func_150ADA68() * flame->scatter.speedRange + flame->scatter.speedMin;
+                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
+                    motion.unk4 = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                    motion.unk8 = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                    motion.unkC = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                    motion.unk10 = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
+                    motion.unk1B = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
+                    func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
                 }
-                data->unk138 -= 1.0f;
-            } while (data->unk138 > 1.0f);
+                flame->scatterAccum -= 1.0f;
+            } while (flame->scatterAccum > 1.0f);
         }
     }
-    if (obj->unk1D4 != 0 && (obj->unk74 & 0xF) != 0xF) {
-        data->unk13C += (data->unkE0 + func_150ADA68() * data->unkE4) * D_800BE9A4;
-        if (data->unk13C > 1.0f) {
-            Struct15199C34Particle part;
-            struct17 delta;
-            struct17 axisA;
-            struct17 axisB;
+    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+        flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * D_800BE9A4;
+        if (flame->particleAccum > 1.0f) {
+            FlameEmitParticle part;
+            Vec3f delta;
+            Vec3f axisA;
+            Vec3f axisB;
             f32 c;
             f32 s;
             f32 speed;
@@ -2894,11 +2744,11 @@ s32 func_15199C34(Struct15199C34 *arg0) {
             part.unk19 = 0xFF;
             part.unk1A = 0xFF;
             part.pos = pos0;
-            part.unk3C.unk0 = 0.0f;
-            part.unk3C.unk4 = 0.0f;
-            part.unk3C.unk8 = 0.0f;
-            part.unk1E = data->unk10C;
-            part.unk20 = data->unk10E;
+            part.unk3C.x = 0.0f;
+            part.unk3C.y = 0.0f;
+            part.unk3C.z = 0.0f;
+            part.unk1E = flame->emit.unk38;
+            part.unk20 = flame->emit.unk3A;
             part.unk22 = 1;
             part.unk24 = 1.0f;
             part.unk58 = 0xC207;
@@ -2909,50 +2759,50 @@ s32 func_15199C34(Struct15199C34 *arg0) {
             part.unk64 = -1;
             part.unk65 = 0;
             do {
-                {
+                { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34b;
 
-                part.unkA = (func_150ADA20() % (u32)(data->unkEA + 1)) + data->unkE8;
-                part.unk1B = (func_150ADA20() % (u32)(data->unkEE + 1)) + data->unkEC;
-                    part.unk28 = part.unk2C = func_150ADA68() * data->unkF4 + data->unkF0;
+                    part.unkA = (func_150ADA20() % (u32)(flame->emit.unk16 + 1)) + flame->emit.unk14;
+                    part.unk1B = (func_150ADA20() % (u32)(flame->emit.unk1A + 1)) + flame->emit.unk18;
+                    part.unk28 = part.unk2C = func_150ADA68() * flame->emit.unk20 + flame->emit.unk1C;
                 }
                 delta = pos3;
-                delta.unk0 -= part.pos.unk0;
-                delta.unk4 -= part.pos.unk4;
-                delta.unk8 -= part.pos.unk8;
+                delta.x -= part.pos.x;
+                delta.y -= part.pos.y;
+                delta.z -= part.pos.z;
                 if (func_15146078(&delta, &axisA, &axisB) != 0) {
-                    speed = func_150ADA68() * data->unkFC + data->unkF8;
-                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * data->unk100, &s, &c);
-                    part.vel.unk0 = (axisA.unk0 * s + axisB.unk0 * c + delta.unk0) * speed;
-                    part.vel.unk4 = (axisA.unk4 * s + axisB.unk4 * c + delta.unk4) * speed;
-                    part.vel.unk8 = (axisA.unk8 * s + axisB.unk8 * c + delta.unk8) * speed;
-                    part.unk54 = func_150ADA68() * data->unk108 + data->unk104;
-                    func_15130280(&part, 1, 0, 0, arg0->unkC, arg0->unk1);
+                    speed = func_150ADA68() * flame->emit.speedRange + flame->emit.speedMin;
+                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->emit.spread, &s, &c);
+                    part.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                    part.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                    part.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                    part.unk54 = func_150ADA68() * flame->emit.unk34 + flame->emit.unk30;
+                    func_15130280(&part, 1, 0, 0, actor->unkC, actor->unk1);
                 }
-                data->unk13C -= 1.0f;
-            } while (data->unk13C > 1.0f);
+                flame->particleAccum -= 1.0f;
+            } while (flame->particleAccum > 1.0f);
         }
     }
-    data->unk151 += D_800BE9E4;
-    if (data->unk151 >= 0x3D) {
-        if (data->unk0 != NULL && data->unk0->unk31C != NULL) {
-            data->unk0->unk31C->unk1AA++;
+    flame->timer151 += D_800BE9E4;
+    if (flame->timer151 >= 0x3D) {
+        if (flame->seed.owner != NULL && flame->seed.owner->unk31C != NULL) {
+            flame->seed.owner->unk31C->unk1AA++;
         }
-        data->unk151 = 0;
+        flame->timer151 = 0;
     }
-    if ((data->unk150 & 8) && obj->unk318 != NULL) {
-        data->unk152 -= D_800BE9E4;
-        if (data->unk152 < 0) {
+    if ((flame->flags & 8) && obj->camera != NULL) {
+        flame->sparkTimer -= D_800BE9E4;
+        if (flame->sparkTimer < 0) {
             s32 pad2;
-            Struct15199C34Spark spark;
+            FlameSpark spark;
 
             spark.unk0 = 1;
             spark.unk2 = func_150ADA20() % 21U + 0x14;
-            spark.unk5 = 1 << obj->unk318->unk23D;
+            spark.unk5 = 1 << obj->camera->unk23D;
             spark.unk4 = func_150ADA20() % 7U + 2;
             spark.unk6 = -1;
-            func_151D8868(&spark, 0, arg0->unkC, arg0->unk1);
-            data->unk152 = func_150ADA20() % 21U + 0x78;
+            func_151D8868(&spark, 0, actor->unkC, actor->unk1);
+            flame->sparkTimer = func_150ADA20() % 21U + 0x78;
         }
     }
     return 1;
