@@ -6,16 +6,16 @@ struct S151BEB20 {
     u8 pad0[0x54];
     struct17 pos;
     u8 pad60[0x7C - 0x60];
-    f32 mtx[2][4][4]; /* indexed by D_800BE9C0 */
+    f32 mtx[2][4][4]; /* double-buffered, indexed by D_800BE9C0 */
     u8 padFC[0x120 - 0xFC];
-    f32 yaw;
+    f32 rotY;
 };
 
-/* Rebuilds the current matrix: rotation by `yaw`, translation to `pos`, scaled by 0.923. */
+/* Rebuilds this frame's matrix: rotation by `rotY`, translation to `pos`, axes scaled by 0.923. */
 s32 func_151BEB20(struct S151BEB20 *arg0) {
     f32 scale;
 
-    func_150A8050(arg0->mtx[D_800BE9C0], 0.0f, arg0->yaw, 0.0f);
+    func_150A8050(arg0->mtx[D_800BE9C0], 0.0f, arg0->rotY, 0.0f);
 
     scale = 0.9230000377f;
     arg0->mtx[D_800BE9C0][3][0] = arg0->pos.unk0;
@@ -74,65 +74,62 @@ void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg
 s32 func_151BEE94(struct127 *arg0);
 
 /*
- * Checks every active object against this trigger's position; for each one within range
- * it fires the trigger (sound, func_151BF340/func_151BF0C8/func_151BEEE0) and returns 0.
- * Returns 1 when no object was in range.
+ * Proximity check: for every active object whose bounding radius comes within 43 units of
+ * params.pos, plays sound 0x511 and runs func_151BF340/func_151BF0C8/func_151BEEE0.
+ * Returns 0 if any object was in range, else 1.
  */
 s32 func_151BECB8(S151BECB8 *arg0) {
     s32 untouched = 1;
 
     {
-    struct127 *obj;
-    S151BECB8Params *params;
-    f32 range = 43.0f;
-    f32 radius;
-    f32 height;
-    f32 objPos[3];
-    struct17 diff;
+        struct127 *obj;
+        S151BECB8Params *params;
+        f32 range = 43.0f; // matching: a local keeps 43.0f in $f20 across the loop
+        f32 radius;
+        f32 height;
+        f32 objPos[3];
+        struct17 diff;
 
-    obj = D_800CC2D0;
-    do {
-        if (func_151BEE94(obj) != 0) {
-            f32 dist;
+        obj = D_800CC2D0;
+        do {
+            if (func_151BEE94(obj) != 0) {
+                f32 dist;
 
-            params = &arg0->params;
-            func_1515C1A0(obj, objPos, &radius, &height);
-            diff.unk0 = objPos[0] - params->pos.unk0;
-            diff.unk4 = objPos[1] - params->pos.unk4;
-            diff.unk8 = objPos[2] - params->pos.unk8;
-            dist = func_15143E64(&diff);
-            if (dist - radius < range) {
-                func_15085710(obj->unk127, 3, params->unk10);
-                untouched = 0;
-                func_10010F30(0x511, 0x7D00, 0x40, 0, 0);
-                func_151BF340(arg0->unkC, arg0->unk1);
-                func_151BF0C8(&params->pos);
-                {
-                    s32 v;
-                    s32 kind;
+                params = &arg0->params;
+                func_1515C1A0(obj, objPos, &radius, &height);
+                diff.unk0 = objPos[0] - params->pos.unk0;
+                diff.unk4 = objPos[1] - params->pos.unk4;
+                diff.unk8 = objPos[2] - params->pos.unk8;
+                dist = func_15143E64(&diff);
+                if (dist - radius < range) {
+                    s32 mode;
+                    s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
 
+                    func_15085710(obj->unk127, 3, params->unk10);
+                    untouched = 0;
+                    func_10010F30(0x511, 0x7D00, 0x40, 0, 0);
+                    func_151BF340(arg0->unkC, arg0->unk1);
+                    func_151BF0C8(&params->pos);
                     kind = arg0->unk48;
                     switch (kind) {
                         case 1:
-                            v = 1;
+                            mode = 1;
                             break;
                         case 2:
-                            v = 2;
-                            break;
-                        case 3:
-                            v = 0;
+                            mode = 2;
                             break;
                         case 0:
+                        case 3:
                         default:
-                            v = 0;
+                            mode = 0;
                             break;
                     }
-                    func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, v, arg0->unk10 & 0x10, arg0->unk60, arg0->unkC, arg0->unk1);
+                    func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, mode, arg0->unk10 & 0x10,
+                                  arg0->unk60, arg0->unkC, arg0->unk1);
                 }
             }
-        }
-        obj++;
-    } while (obj != (struct127 *)&D_800D1548);
+            obj++;
+        } while (obj != (struct127 *)&D_800D1548); /* end of D_800CC2D0[26] */
     }
     return untouched;
 }
