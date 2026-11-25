@@ -54,8 +54,8 @@ python3 ~/conker/tools/cw.py land  clean.game_X -m "own .rodata"
   change it.
 
 ## Splitting a file
-Do this only when the ROM shows a unit boundary inside the file: end-of-unit zero padding, or front-end
-data (strings, const tables) after literals of earlier functions. The first function of the new unit
+Split a file only for a unit boundary that the ROM shows inside the file. The signs are end-of-unit
+zero padding, or front-end data (strings, const tables) after the literals of earlier functions. The first function of the new unit
 must start on a 16-byte boundary in the text.
 ```
 python3 ~/conker/tools/cw.py new --tree split.game_X          # a tree workspace: several files change
@@ -65,8 +65,8 @@ SPLIT_ROOT=~/conker-ws/split.game_X/conker python3 ~/conker/tools/split_tu.py ap
 python3 ~/conker/tools/cw.py check split.game_X                 # runs splat for the new entry
 #   carve one slice per unit (ro_migrate.py carve ... --root), check again, then land
 ```
-- Each new file keeps all top-level declarations. Delete the ones it does not use, if `check` still
-  matches.
+- Each new file keeps all top-level declarations. Delete the ones it does not use. Then make sure
+  that `check` still matches.
 - If `conker/Makefile` gives the old file special flags (search it for the file name), stop and report.
   The new files need the same flags, and agents do not edit the Makefile.
 - `cw.py land` lands the yaml, the changed file and the new files together.
@@ -74,8 +74,8 @@ python3 ~/conker/tools/cw.py check split.game_X                 # runs splat for
 ## Pinned words
 After a file links its own `.rodata`, every word of the slice must be reached through the object, not
 through an absolute `D_` name. Run `python3 ~/conker/tools/linkcheck.py ~/conker-ws/<workspace>/conker --list`.
-If a pinned `D_` name is in your file (an `extern` read of one of your own words), replace the read with
-the literal, or define the data under that name.
+A pinned `D_` name can be in your file: an `extern` read of one of your own words. Replace that read
+with the literal, or define the data under that name.
 
 ## Rules
 - The bytes of the code must not change. `cw.py check` shows each function whose bytes moved.
@@ -90,3 +90,18 @@ the literal, or define the data under that name.
 - Do not edit `tools/` or the Makefile. In the yaml, change only the slice of your own file.
 - If a file cannot be done cleanly (for example, it needs a file split or a merge), stop. Write the
   reason in `~/conker-ws/clean.<name>/notes.md`.
+
+## Static data and bss (.data and .bss of a C file)
+The same work applies to the `static` (and global) variables of a C file. The yaml must name the
+`.data` and `.bss` of the file. Otherwise the link discards that section. Then `rodata_extern.py`
+sends each reference to an absolute symbol named `.da.<file>.<ADDR>`. `linkcheck.py --list` shows
+these.
+- **.data:** carve `[0xROM, .data, file]` from the anonymous data, like a `.rodata` slice. The bytes
+  must be equal. A pointer in the data is a relocation, so its target needs a symbol.
+- **.bss:** a bss slice has no ROM bytes, so give its address with the dict form:
+  `- {start: 0xROM, type: .bss, vram: 0xVRAM, name: file}`. For `start`, use the `start` value of the
+  bss entry that contains your slice. Put a plain `{start: ..., type: bss, vram: ...}` entry after
+  your slice for the rest. IDO pads each object's `.bss` to 16 bytes, like `.rodata`.
+- The order of the variables in the section must equal the original. IDO keeps the order of the
+  definitions in the file. `linkcheck.py` reports a label that is not at its address.
+- After the carve, the `.da.` symbols of the file must be gone from `linkcheck.py --list`.

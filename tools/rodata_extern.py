@@ -172,9 +172,17 @@ DATA_SECTIONS = (".data", ".bss", ".sdata", ".sbss")
 
 
 def owns_section(yaml_path, obj, kind):
-    """True if the yaml links this object's own section `kind` (e.g. a `.data, <name>` subsegment)."""
-    return re.search(rf"\[0x[0-9A-Fa-f]+,\s*\.?{re.escape(kind.lstrip('.'))},\s*{re.escape(obj_name(obj))}\s*\]",
-                     Path(yaml_path).read_text()) is not None
+    """True if the yaml links this object's own section `kind`: a list-form subsegment
+    `[0xROM, .data, <name>]`, or a dict-form one `{start: ..., type: .bss, vram: ..., name: <name>}`
+    (the form bss needs, since its vram cannot be derived from a ROM offset)."""
+    text = Path(yaml_path).read_text()
+    k, n = re.escape(kind.lstrip(".")), re.escape(obj_name(obj))
+    if re.search(rf"\[0x[0-9A-Fa-f]+,\s*\.?{k},\s*{n}\s*\]", text):
+        return True
+    for d in re.findall(r"\{[^{}]*\}", text):
+        if re.search(rf"\btype:\s*\.{k}\b", d) and re.search(rf"\bname:\s*{n}\s*(?:[,}}]|$)", d):
+            return True
+    return False
 
 
 def main():
