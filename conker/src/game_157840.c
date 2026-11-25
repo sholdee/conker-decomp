@@ -69,124 +69,6 @@ typedef struct {
 /* The camera (Camera) as this file sees it. The shared header lacks many of these fields (0x360, 0x3EC-0x404,
  * 0x5F8, 0x60C, 0x640-0x648, 0x8B8 and up, ...), types unk5FC as u16 although it is read with lh, and splits the
  * vectors at 0x2A4-0x2C4 and 0x2F8 into floats. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ s32 unk2C; // mode
-    /* 0x030 */ u8 pad30[0x54];
-    /* 0x084 */ s32 unk84; // flags
-    /* 0x088 */ u8 pad88[0x104];
-    /* 0x18C */ f32 unk18C;
-    /* 0x190 */ u8 pad190[0x24];
-    /* 0x1B4 */ s16 unk1B4;
-    /* 0x1B6 */ u8 pad1B6[0x86];
-    /* 0x23C */ u8 unk23C;
-    /* 0x23D */ u8 unk23D; // player index
-    /* 0x23E */ u8 unk23E;
-    /* 0x23F */ u8 pad23F;
-    /* 0x240 */ s32 unk240;
-    /* 0x244 */ u8 pad244[0x28];
-    /* 0x26C */ f32 unk26C;
-    /* 0x270 */ u8 pad270[0x34];
-    /* 0x2A4 */ struct17 unk2A4;
-    /* 0x2B0 */ struct17 unk2B0;
-    /* 0x2BC */ struct17 unk2BC; // look-at target
-    /* 0x2C8 */ u8 pad2C8[0x30];
-    /* 0x2F8 */ struct17 unk2F8; // position
-    /* 0x304 */ f32 unk304;
-    /* 0x308 */ f32 unk308;
-    /* 0x30C */ f32 unk30C;
-    /* 0x310 */ u8 pad310[0x38];
-    /* 0x348 */ f32 unk348;
-    /* 0x34C */ f32 unk34C;
-    /* 0x350 */ u8 pad350[4];
-    /* 0x354 */ f32 unk354;
-    /* 0x358 */ u8 pad358[4];
-    /* 0x35C */ f32 unk35C;
-    /* 0x360 */ f32 unk360;
-    /* 0x364 */ f32 unk364;
-    /* 0x368 */ u8 pad368[4];
-    /* 0x36C */ u16 *unk36C;
-    /* 0x370 */ f32 unk370;
-    /* 0x374 */ f32 unk374;
-    /* 0x378 */ u8 pad378[4];
-    /* 0x37C */ f32 unk37C; // yaw
-    /* 0x380 */ u8 pad380[4];
-    /* 0x384 */ f32 unk384;
-    /* 0x388 */ u8 pad388[8];
-    /* 0x390 */ f32 unk390;
-    /* 0x394 */ u8 pad394[0x3C];
-    /* 0x3D0 */ CamObj *unk3D0;
-    /* 0x3D4 */ CamObj *unk3D4;
-    /* 0x3D8 */ u8 pad3D8[0x10];
-    /* 0x3E8 */ u8 unk3E8;
-    /* 0x3E9 */ u8 pad3E9[3];
-    /* 0x3EC */ f32 unk3EC; // yaw correction from func_1512B730
-    /* 0x3F0 */ s16 unk3F0;
-    /* 0x3F2 */ u8 pad3F2[2];
-    /* 0x3F4 */ f32 unk3F4;
-    /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ struct17 unk3FC; // smoothing velocity for unk2F8
-    /* 0x408 */ u8 pad408[0x1C4];
-    /* 0x5CC */ f32 unk5CC; // yaw blend factor
-    /* 0x5D0 */ u8 pad5D0[0x20];
-    /* 0x5F0 */ s32 unk5F0;
-    /* 0x5F4 */ u8 pad5F4[4];
-    /* 0x5F8 */ s16 unk5F8;
-    /* 0x5FA */ u8 pad5FA[2];
-    /* 0x5FC */ s16 unk5FC;
-    /* 0x5FE */ s16 unk5FE;
-    /* 0x600 */ u8 pad600[0xC];
-    /* 0x60C */ f32 unk60C;
-    /* 0x610 */ f32 unk610;
-    /* 0x614 */ u8 pad614[0x2C];
-    /* 0x640 */ s32 unk640;
-    /* 0x644 */ s32 unk644;
-    /* 0x648 */ s32 unk648;
-    /* 0x64C */ u8 pad64C[0x28];
-    /* 0x674 */ f32 unk674;
-    /* 0x678 */ u8 pad678[0x20];
-    /* 0x698 */ s32 unk698;
-    /* 0x69C */ u8 pad69C[0x2C];
-    /* 0x6C8 */ s32 unk6C8;
-    /* 0x6CC */ u8 pad6CC[0x64];
-    /* 0x730 */ s16 unk730;
-    /* 0x732 */ u8 pad732[0xA];
-    /* 0x73C */ s16 unk73C;
-    /* 0x73E */ u8 pad73E[0x76];
-    /* 0x7B4 */ f32 unk7B4; // frame delta
-    /* 0x7B8 */ u8 pad7B8[0x3C];
-    /* 0x7F4 */ u16 unk7F4;
-    /* 0x7F6 */ u8 pad7F6[0x52];
-    /* 0x848 */ u8 unk848;
-    /* 0x849 */ u8 pad849[0x6F];
-    /* 0x8B8 */ u8 unk8B8;
-    /* 0x8B9 */ u8 pad8B9;
-    /* 0x8BA */ s16 unk8BA;
-    /* 0x8BC */ u16 *unk8BC; // one z-buffer row
-    /* 0x8C0 */ u8 pad8C0[4];
-    /* 0x8C4 */ f32 unk8C4;
-    /* 0x8C8 */ f32 unk8C8;
-    /* 0x8CC */ f32 unk8CC;
-    /* 0x8D0 */ s32 unk8D0;
-    /* 0x8D4 */ u8 pad8D4[0x54];
-    /* 0x928 */ f32 unk928;
-    /* 0x92C */ u8 unk92C;
-    /* 0x92D */ u8 pad92D[3];
-    /* 0x930 */ f32 unk930;
-    /* 0x934 */ f32 unk934;
-    /* 0x938 */ f32 unk938;
-    /* 0x93C */ struct17 unk93C;
-    /* 0x948 */ u8 unk948;
-    /* 0x949 */ u8 pad949[3];
-    /* 0x94C */ f32 unk94C;
-    /* 0x950 */ f32 unk950;
-    /* 0x954 */ f32 unk954;
-    /* 0x958 */ f32 unk958;
-    /* 0x95C */ f32 unk95C;
-    /* 0x960 */ f32 unk960;
-    /* 0x964 */ u8 pad964[0x3C];
-} CamView;
-
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 void func_1507C3E0(CamObj *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
@@ -196,7 +78,7 @@ s32 func_15125490(void *);
 
 /* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
-void func_1512A390(CamView *arg0) {
+void func_1512A390(Camera *arg0) {
     f32 unused28;
     s32 flag4E;
     s16 height;
@@ -206,23 +88,23 @@ void func_1512A390(CamView *arg0) {
     f32 pad68; // matching: frame padding
     f32 pad64;
 
-    unused28 = arg0->unk3D0->unk28;
-    if (arg0->unk3D4 != NULL) {
-        flag4E = arg0->unk3D4->unk4E;
-        targetHeight = arg0->unk3D4->unk114;
+    unused28 = arg0->player->unk28;
+    if (arg0->playerExt != NULL) {
+        flag4E = arg0->playerExt->unk4E;
+        targetHeight = arg0->playerExt->unk114;
     } else {
         flag4E = 0;
-        func_1507C3E0(arg0->unk3D0, &height, &width, &depth);
+        func_1507C3E0(arg0->player, &height, &width, &depth);
         targetHeight = height;
     }
-    if (!arg0->unk84 & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
-        arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk180;
+    if (!arg0->flags & 0x40) { // sic: (!unk84) & 0x40 is always 0, but the original computes it
+        arg0->unk35C = arg0->unk354 = arg0->player->unk180;
         return;
     }
-    if ((arg0->unk23C != 0) || (arg0->unk84 & 0x400000) || (arg0->unk5F0 & 0x40) ||
-        (func_150A3FC4(arg0->unk2F8.unk0, arg0->unk2F8.unk8, arg0->unk644, &arg0->unk648, &arg0->unk35C) == 0)) {
+    if ((arg0->snap != 0) || (arg0->flags & 0x400000) || (arg0->status & 0x40) ||
+        (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->unk644, &arg0->unk648, &arg0->unk35C) == 0)) {
         func_1510E8BC(&arg0->unk644, &arg0->unk648, &arg0->unk35C, &arg0->unk360, &arg0->unk640, 0,
-                      arg0->unk2F8.unk0, arg0->unk35C, arg0->unk2F8.unk8, arg0->unk308, 0, 0, -10000.0f, arg0->unk2F8.unk4, 1);
+                      arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
     if (D_800BE9F0 == 0x28) {
@@ -233,89 +115,89 @@ void func_1512A390(CamView *arg0) {
         arg0->unk360 = arg0->unk364;
     }
     func_151236D0(arg0);
-    if (!(arg0->unk84 & 0x10) && (arg0->unk3D0->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
-        (arg0->unk3D0->unk17C < arg0->unk35C)) {
-        func_15128774((Camera *)arg0, (struct127 *)arg0->unk3D0);
+    if (!(arg0->flags & 0x10) && (arg0->player->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
+        (((CamObj *)arg0->player)->unk17C < arg0->unk35C)) {
+        func_15128774((Camera *)arg0, (struct127 *)arg0->player);
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {
-            arg0->unk35C = arg0->unk3D0->unk180;
+            arg0->unk35C = arg0->player->unk180;
         } else {
             arg0->unk35C = 10000.0f;
-            arg0->unk84 |= 0x800000;
+            arg0->flags |= 0x800000;
             func_1510E8BC(&arg0->unk644, &arg0->unk648, &arg0->unk35C, &arg0->unk360, &arg0->unk640, 0,
-                          arg0->unk2F8.unk0, arg0->unk2F8.unk4, arg0->unk2F8.unk8, arg0->unk308, 0, 0, -10000.0f, arg0->unk2F8.unk4, 1);
+                          arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {
-        arg0->unk84 &= ~0x800000;
+        arg0->flags &= ~0x800000;
     }
     if (-10000.0f != arg0->unk364) {
         arg0->unk360 = arg0->unk364;
     }
-    if (arg0->unk3D0->unk137 != 0) {
-        arg0->unk35C = arg0->unk354 = arg0->unk3D0->y_position;
+    if (((CamObj *)arg0->player)->unk137 != 0) {
+        arg0->unk35C = arg0->unk354 = arg0->player->y_position;
     }
-    if ((D_800C3671 != 0) || (arg0->unk7F4 != 0)) {
-        arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk180;
+    if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
+        arg0->unk35C = arg0->unk354 = arg0->player->unk180;
         return;
     }
-    if (((arg0->unk2C & 0x100) || (arg0->unk2C != 0x80)) && (arg0->unk35C < arg0->unk360) &&
-        (arg0->unk360 < arg0->unk2F8.unk4)) {
+    if (((arg0->mode & 0x100) || (arg0->mode != 0x80)) && (arg0->unk35C < arg0->unk360) &&
+        (arg0->unk360 < arg0->eye.y)) {
         arg0->unk35C = arg0->unk360;
         arg0->unk354 = arg0->unk360;
     } else {
         arg0->unk354 = arg0->unk35C;
     }
     if (arg0->unk92C != 0) {
-        if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->unk3D0->unk180)) ||
-            (arg0->unk928 < fabsf(arg0->unk354 - arg0->unk3D0->unk180))) {
-            arg0->unk354 = arg0->unk3D0->unk180;
+        if (((-10000.0f == arg0->unk354) && (arg0->unk354 < arg0->player->unk180)) ||
+            (arg0->unk928 < fabsf(arg0->unk354 - arg0->player->unk180))) {
+            arg0->unk354 = arg0->player->unk180;
         }
     } else if (D_800C3671 == 0) {
-        if (!(arg0->unk84 & 0x20000000)) {
-            if (arg0->unk84 & 0x10000000) {
-                if (arg0->unk354 < arg0->unk3D0->unk180) {
-                    arg0->unk35C = arg0->unk354 = arg0->unk3D0->unk180;
+        if (!(arg0->flags & 0x20000000)) {
+            if (arg0->flags & 0x10000000) {
+                if (arg0->unk354 < arg0->player->unk180) {
+                    arg0->unk35C = arg0->unk354 = arg0->player->unk180;
                 }
             }
-            if ((arg0->unk2C != 0x80) || ((arg0->unk5F0 & 0x80) && (arg0->unk3D0->unk81 != 0)) ||
-                (arg0->unk84 & 0x800)) {
-                if (arg0->unk354 < arg0->unk2A4.unk4) {
-                    arg0->unk354 = arg0->unk2A4.unk4;
+            if ((arg0->mode != 0x80) || ((arg0->status & 0x80) && (arg0->player->unk81 != 0)) ||
+                (arg0->flags & 0x800)) {
+                if (arg0->unk354 < arg0->focus.y) {
+                    arg0->unk354 = arg0->focus.y;
                 }
             }
         }
     }
-    if (!(arg0->unk84 & 0x10000000) && (arg0->unk2C != 0x80)) {
-        if ((arg0->unk5F0 & 1) && (flag4E != 0)) {
-            arg0->unk35C = arg0->unk3D0->unk118;
+    if (!(arg0->flags & 0x10000000) && (arg0->mode != 0x80)) {
+        if ((arg0->status & 1) && (flag4E != 0)) {
+            arg0->unk35C = arg0->player->unk118;
         }
-        if (arg0->unk2C == 0x80) {
-            if (arg0->unk2F8.unk4 < arg0->unk354 + 30.0f) {
-                arg0->unk2F8.unk4 = arg0->unk354 + 30.0f;
+        if (arg0->mode == 0x80) {
+            if (arg0->eye.y < arg0->unk354 + 30.0f) {
+                arg0->eye.y = arg0->unk354 + 30.0f;
             }
             func_1512523C((Camera *)arg0);
             return;
         }
-        if ((arg0->unk6C8 != 0) && (arg0->unk730 != 0)) {
-            arg0->unk348 = arg0->unk730;
+        if ((arg0->cmdRunning != 0) && (arg0->cmd.unk34 != 0)) {
+            arg0->height = arg0->cmd.unk34;
         } else {
-            arg0->unk348 = arg0->unk34C;
+            arg0->height = arg0->unk34C;
         }
     } else {
         arg0->unk354 = arg0->unk35C;
     }
     arg0->unk354 = arg0->unk35C + (arg0->unk354 - arg0->unk35C);
-    if (!(arg0->unk84 & 0x4000) || (func_15125490(arg0) == 0)) {
-        if ((arg0->unk3D0->unkAD == 1) && (arg0->unk2C != 0x80) && (-10000.0f != arg0->unk360)) {
+    if (!(arg0->flags & 0x4000) || (func_15125490(arg0) == 0)) {
+        if ((arg0->player->in_water == 1) && (arg0->mode != 0x80) && (-10000.0f != arg0->unk360)) {
             arg0->unk354 = arg0->unk360 + 50.0f;
         }
     }
-    if ((arg0->unk5F0 & 0x40) && (arg0->unk3D0->unk137 == 0)) {
-        if (arg0->unk2A4.unk4 - arg0->unk2B0.unk4 < -5.0f) {
+    if ((arg0->status & 0x40) && (((CamObj *)arg0->player)->unk137 == 0)) {
+        if (arg0->focus.y - arg0->lastPlayerPos.y < -5.0f) {
             arg0->unk8D0 = 2;
             arg0->unk8C4 += 10.0f;
-        } else if (arg0->unk2A4.unk4 - arg0->unk2B0.unk4 > 5.0f) {
+        } else if (arg0->focus.y - arg0->lastPlayerPos.y > 5.0f) {
             arg0->unk8D0 = 1;
             arg0->unk8C4 -= 10.0f;
         } else {
@@ -323,24 +205,24 @@ void func_1512A390(CamView *arg0) {
             arg0->unk8C4 = 0.0f;
         }
         arg0->unk8C4 = (arg0->unk8C4 < -300.0f) ? -300.0f : ((arg0->unk8C4 > 300.0f) ? 300.0f : arg0->unk8C4);
-        func_150495B0(&arg0->unk8CC, arg0->unk8C4, &arg0->unk8C8, 1.0f, 1.5f, arg0->unk7B4);
-        arg0->unk354 = arg0->unk2A4.unk4 + arg0->unk8CC + (targetHeight * 0.8500000238f);
-        arg0->unk354 = (arg0->unk354 < arg0->unk3D0->unk180 + arg0->unk348) ? arg0->unk3D0->unk180 + arg0->unk348 : arg0->unk354;
+        func_150495B0(&arg0->unk8CC, arg0->unk8C4, &arg0->unk8C8, 1.0f, 1.5f, arg0->dt);
+        arg0->unk354 = arg0->focus.y + arg0->unk8CC + (targetHeight * 0.8500000238f);
+        arg0->unk354 = (arg0->unk354 < arg0->player->unk180 + arg0->height) ? arg0->player->unk180 + arg0->height : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk35C + 50.0f) ? arg0->unk35C + 50.0f : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk360 + 50.0f) ? arg0->unk360 + 50.0f : arg0->unk354;
-        arg0->unk674 = 0.0f;
-        arg0->unk84 |= 0x10000000;
+        arg0->followRateTarget = 0.0f;
+        arg0->flags |= 0x10000000;
         arg0->unk848 = 1;
     lbl1:; // matching: the label keeps as1 from filling the branch delay slot
     } else if (arg0->unk848 != 0) {
-        arg0->unk674 = 1.0f;
-        arg0->unk84 &= ~0x10000000;
+        arg0->followRateTarget = 1.0f;
+        arg0->flags &= ~0x10000000;
         arg0->unk8D0 = 0;
         arg0->unk848 = 0;
     }
-    if ((arg0->unk2C != 0x100) && (arg0->unk3D0->unk137 == 0)) {
-        if (arg0->unk2F8.unk4 < arg0->unk35C + 40.0f) {
-            arg0->unk2F8.unk4 = arg0->unk35C + 40.0f;
+    if ((arg0->mode != 0x100) && (((CamObj *)arg0->player)->unk137 == 0)) {
+        if (arg0->eye.y < arg0->unk35C + 40.0f) {
+            arg0->eye.y = arg0->unk35C + 40.0f;
         }
     }
 }
@@ -377,36 +259,36 @@ extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
 void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
-void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth);
-s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused);
-void func_1512C150(CamView *arg0);
-s32 func_1512B53C(CamView *arg0);
+void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
+s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
+void func_1512C150(Camera *arg0);
+s32 func_1512B53C(Camera *arg0);
 
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (func_1512B730's correction, smoothed). */
-void func_1512AD54(CamView *arg0) {
+void func_1512AD54(Camera *arg0) {
     s32 screenX;
     s32 screenY;
     f32 *q; // matching: one local carries the projected depth (as s32) and later &D_800DC1FC
     f32 targetY;
-    struct17 pos;
+    vertex pos;
 
-    targetY = arg0->unk2BC.unk4;
+    targetY = arg0->target.y;
     if (func_1512B53C(arg0) != 0) {
         return;
     }
-    if (!(arg0->unk84 & 0x10)) {
-        if (arg0->unk3D0->unk180 < arg0->unk3D0->unk17C) {
-            if (arg0->unk3D0->unk17C - 40.0f <= targetY) {
-                targetY = arg0->unk3D0->unk17C - 40.0f;
+    if (!(arg0->flags & 0x10)) {
+        if (arg0->player->unk180 < ((CamObj *)arg0->player)->unk17C) {
+            if (((CamObj *)arg0->player)->unk17C - 40.0f <= targetY) {
+                targetY = ((CamObj *)arg0->player)->unk17C - 40.0f;
             }
         }
     }
-    func_1501A764(arg0->unk23D, arg0->unk2BC.unk0, targetY, arg0->unk2BC.unk8, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    func_1501A764(arg0->playerIndex, arg0->target.x, targetY, arg0->target.z, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    screenX = ((s32)D_800DC1F0 < (s32)D_800BE628[arg0->unk23D].left) ? (s32)D_800BE628[arg0->unk23D].left : (((s32)D_800BE628[arg0->unk23D].right < (s32)D_800DC1F0) ? (s32)D_800BE628[arg0->unk23D].right : (s32)D_800DC1F0);
-    screenY = ((s32)D_800DC1F4 < (s32)D_800BE628[arg0->unk23D].top) ? (s32)D_800BE628[arg0->unk23D].top : (((s32)D_800BE628[arg0->unk23D].bottom < (s32)D_800DC1F4) ? (s32)D_800BE628[arg0->unk23D].bottom : (s32)D_800DC1F4);
-    if ((screenX < D_800BE628[arg0->unk23D].left) || (D_800BE628[arg0->unk23D].right <= screenX) || (screenY < D_800BE628[arg0->unk23D].top) || (D_800BE628[arg0->unk23D].bottom <= screenY)) {
+    screenX = ((s32)D_800DC1F0 < (s32)D_800BE628[arg0->playerIndex].left) ? (s32)D_800BE628[arg0->playerIndex].left : (((s32)D_800BE628[arg0->playerIndex].right < (s32)D_800DC1F0) ? (s32)D_800BE628[arg0->playerIndex].right : (s32)D_800DC1F0);
+    screenY = ((s32)D_800DC1F4 < (s32)D_800BE628[arg0->playerIndex].top) ? (s32)D_800BE628[arg0->playerIndex].top : (((s32)D_800BE628[arg0->playerIndex].bottom < (s32)D_800DC1F4) ? (s32)D_800BE628[arg0->playerIndex].bottom : (s32)D_800DC1F4);
+    if ((screenX < D_800BE628[arg0->playerIndex].left) || (D_800BE628[arg0->playerIndex].right <= screenX) || (screenY < D_800BE628[arg0->playerIndex].top) || (D_800BE628[arg0->playerIndex].bottom <= screenY)) {
         arg0->unk5F8 = 1;
         arg0->unk8B8 = 0;
         return;
@@ -414,23 +296,23 @@ void func_1512AD54(CamView *arg0) {
     arg0->unk8B8 = 1;
     arg0->unk8BA = screenY;
     func_1512B1B8(arg0, screenX, screenY, (s32)q);
-    pos = arg0->unk2F8;
+    pos = arg0->eye;
     func_1512B730(arg0, &arg0->unk3EC, &D_800DC1FC);
     if (fabsf(arg0->unk3EC) > 3.0f) {
-        func_1508EF80(&pos, &arg0->unk2BC, arg0->unk3EC, &pos);
+        func_1508EF80(&pos, &arg0->target, arg0->unk3EC, &pos);
         {
         f32 rate1;
         f32 rate2;
 
         rate1 = 6.0f;
         rate2 = 8.0f;
-        if (*arg0->unk36C & 3) {
+        if (arg0->contPad->button & 3) {
             rate1 *= 1.2f;
             rate2 *= 1.2f;
         }
-        func_150495B0(&arg0->unk2F8.unk0, pos.unk0, &arg0->unk3FC.unk0, rate1, rate2, arg0->unk7B4);
-        func_150495B0(&arg0->unk2F8.unk4, pos.unk4, &arg0->unk3FC.unk4, rate1, rate2, arg0->unk7B4);
-        func_150495B0(&arg0->unk2F8.unk8, pos.unk8, &arg0->unk3FC.unk8, rate1, rate2, arg0->unk7B4);
+        func_150495B0(&arg0->eye.x, pos.x, &arg0->unk3FC.x, rate1, rate2, arg0->dt);
+        func_150495B0(&arg0->eye.y, pos.y, &arg0->unk3FC.y, rate1, rate2, arg0->dt);
+        func_150495B0(&arg0->eye.z, pos.z, &arg0->unk3FC.z, rate1, rate2, arg0->dt);
         }
         arg0->unk5F8 = 0;
     lbl:; // matching: the label keeps as1 from filling the branch delay slot below
@@ -439,7 +321,7 @@ void func_1512AD54(CamView *arg0) {
     }
     q = &D_800DC1FC;
     if (0.0f != D_800DC1FC) {
-        arg0->unk2F8.unk4 -= *q;
+        arg0->eye.y -= *q;
     }
     if (arg0->unk240 == 1) {
         arg0->unk240 = 0;
@@ -449,11 +331,11 @@ void func_1512AD54(CamView *arg0) {
 
 /* Runs the z-buffer occlusion check (func_1512AD54) when the camera mode allows it; otherwise marks the
  * check as off and arms the unk5FC/unk5FE countdowns. */
-void func_1512B100(CamView *arg0) {
-    if ((arg0->unk2C & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
-        if (arg0->unk2C != 0x40) {
-            if ((arg0->unk84 & 8) && !(arg0->unk84 & 0x200) && (arg0->unk23C == 0)) {
-                if (!(arg0->unk5F0 & 0x80) && !(arg0->unk5F0 & 0x40)) {
+void func_1512B100(Camera *arg0) {
+    if ((arg0->mode & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+        if (arg0->mode != 0x40) {
+            if ((arg0->flags & 8) && !(arg0->flags & 0x200) && (arg0->snap == 0)) {
+                if (!(arg0->status & 0x80) && !(arg0->status & 0x40)) {
                     func_1512AD54(arg0);
                     return;
                 }
@@ -472,11 +354,11 @@ typedef struct {
 } ZFormat;
 
 extern ZFormat D_80089630[];
-s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
+s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 
 /* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
  * with the target's depth; the first occluder on each side is recorded in that side's ZScan. */
-void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
+void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     s32 gaps[0x281];
     s32 start;
     s32 i;
@@ -487,7 +369,7 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
     ZScanParams *params;
     s16 height;
 
-    params = &D_800DC200[arg0->unk23D][arg0->unk1B4];
+    params = &D_800DC200[arg0->playerIndex][arg0->preset];
     halfWidth = params->halfWidth;
     height = params->unk2;
     arg0->unk60C += (halfWidth - arg0->unk60C) * 0.05000000075f;
@@ -497,7 +379,7 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (D_800BE628[arg0->unk23D].left < (f32)(screenX - i)) {
+        if (D_800BE628[arg0->playerIndex].left < (f32)(screenX - i)) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->unk8BC[screenX - i];
@@ -505,20 +387,20 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
             // decode the 14-bit z value: 3-bit exponent, 11-bit mantissa (low 2 bits are dz)
             fmt = &D_80089630[zcode >> 13];
             gaps[halfWidth - i] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
-            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[0], gaps[halfWidth - i], i, mid, 0)) {
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->playerIndex].scan[0], gaps[halfWidth - i], i, mid, 0)) {
                 i = halfWidth; // stop scanning
             }
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if ((f32)(screenX + i) < D_800BE628[arg0->unk23D].right) {
+        if ((f32)(screenX + i) < D_800BE628[arg0->playerIndex].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->unk8BC[screenX + i];
             }
             fmt = &D_80089630[zcode >> 13];
             gaps[i + halfWidth] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
-            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[1], gaps[i + halfWidth], i, mid, 0)) {
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->playerIndex].scan[1], gaps[i + halfWidth], i, mid, 0)) {
                 i = halfWidth; // stop scanning
             }
         }
@@ -528,12 +410,12 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
 
 
 /* While the unk5FC countdown runs, clears the z-buffer row to the far value and returns 1. */
-s32 func_1512B53C(CamView *arg0) {
+s32 func_1512B53C(Camera *arg0) {
     if (arg0->unk5FC != 0) {
         s32 i;
 
         arg0->unk5F8 = 1;
-        for (i = 0; i < D_800BE628[arg0->unk23D].width; i++) {
+        for (i = 0; i < D_800BE628[arg0->playerIndex].width; i++) {
             arg0->unk8BC[i] = 0xFFFC;
         }
         arg0->unk60C = 0.0f;
@@ -558,16 +440,16 @@ void func_1512B5FC(ZScan *scan, s32 offset, s32 gap) {
 
 /* Tests one scanned pixel: a depth gap above the threshold is an occluder, state 2 when it lies inside mid
  * and 1 when outside. Returns 1 when the pixel is an occluder, else resets scan and returns 0. */
-s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold) {
+s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold) {
     s32 threshold;
 
     if (useAltThreshold == 0) {
-        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].threshold;
+        threshold = D_800DC200[arg0->playerIndex][arg0->preset].threshold;
     } else {
-        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].altThreshold;
+        threshold = D_800DC200[arg0->playerIndex][arg0->preset].altThreshold;
     }
 
-    if (arg0->unk84 & 0x8000) {
+    if (arg0->flags & 0x8000) {
         threshold = (s16)(threshold << 1);
     }
 
@@ -592,7 +474,7 @@ s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 
 
 /* Turns the left/right z-buffer scans into a sideways correction *offset for the camera.
  * Returns whether either side is blocked. */
-s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
+s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
     s32 blocked;
     u8 state0;
     u8 state1;
@@ -603,39 +485,39 @@ s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
     f32 halfWidth;
 
     blocked = 0;
-    state0 = D_800DC0C0[arg0->unk23D].scan[0].unk0;
-    state1 = D_800DC0C0[arg0->unk23D].scan[1].unk0;
-    state2 = D_800DC0C0[arg0->unk23D].scan[2].unk0;
-    state3 = D_800DC0C0[arg0->unk23D].scan[3].unk0;
-    edge0 = D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f;
-    edge1 = D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f;
+    state0 = D_800DC0C0[arg0->playerIndex].scan[0].unk0;
+    state1 = D_800DC0C0[arg0->playerIndex].scan[1].unk0;
+    state2 = D_800DC0C0[arg0->playerIndex].scan[2].unk0;
+    state3 = D_800DC0C0[arg0->playerIndex].scan[3].unk0;
+    edge0 = D_800DC0C0[arg0->playerIndex].scan[0].offset + 1.0f;
+    edge1 = D_800DC0C0[arg0->playerIndex].scan[1].offset + 1.0f;
     if (state0 == 2 && state1 != 2) {
-        D_800DC0C0[arg0->unk23D].unk30 = 0;
+        D_800DC0C0[arg0->playerIndex].unk30 = 0;
     } else if (state0 != 2 && state1 == 2) {
-        D_800DC0C0[arg0->unk23D].unk30 = 1;
+        D_800DC0C0[arg0->playerIndex].unk30 = 1;
     }
     if (state2 == 2 && state3 != 2) {
-        D_800DC0C0[arg0->unk23D].unk30 = 2;
+        D_800DC0C0[arg0->playerIndex].unk30 = 2;
     } else if (state2 != 2 && state3 == 2) {
-        D_800DC0C0[arg0->unk23D].unk30 = 3;
+        D_800DC0C0[arg0->playerIndex].unk30 = 3;
     }
     if (state0 == 2 || state1 == 2) {
-        halfWidth = D_800DC200[arg0->unk23D][arg0->unk1B4].halfWidth + 1;
+        halfWidth = D_800DC200[arg0->playerIndex][arg0->preset].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
-            if (arg0->unk3D0->unkAD != 1 && arg0->unk3D4->unk120 == 0) {
+            if (arg0->player->in_water != 1 && arg0->playerExt->unk120 == 0) {
                 arg0->unk5FE -= D_800BE9E4;
                 if (arg0->unk5FE < 0) {
                     arg0->unk5FE = 0;
                 }
             }
-            if (arg0->unk2C != 0x80) {
+            if (arg0->mode != 0x80) {
                 arg0->unk3F0 = 30;
             }
-            if (D_800DC0C0[arg0->unk23D].scan[1].offset < D_800DC0C0[arg0->unk23D].scan[0].offset) {
+            if (D_800DC0C0[arg0->playerIndex].scan[1].offset < D_800DC0C0[arg0->playerIndex].scan[0].offset) {
                 *offset = halfWidth - edge0;
-            } else if (D_800DC0C0[arg0->unk23D].scan[0].offset < D_800DC0C0[arg0->unk23D].scan[1].offset) {
+            } else if (D_800DC0C0[arg0->playerIndex].scan[0].offset < D_800DC0C0[arg0->playerIndex].scan[1].offset) {
                 *offset = edge1 - halfWidth;
-            } else if (D_800DC0C0[arg0->unk23D].unk30 == 0) {
+            } else if (D_800DC0C0[arg0->playerIndex].unk30 == 0) {
                 *offset = halfWidth - edge0;
             } else {
                 *offset = edge1 - halfWidth;
@@ -644,17 +526,17 @@ s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
             arg0->unk3F0 = 0;
             arg0->unk5FE = 60;
             // matching: the unk23C tests below have identical branches in the original
-            if (D_800DC0C0[arg0->unk23D].scan[0].unk0 == 2) {
-                if (arg0->unk23C != 0) {
-                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f);
+            if (D_800DC0C0[arg0->playerIndex].scan[0].unk0 == 2) {
+                if (arg0->snap != 0) {
+                    *offset = halfWidth - (D_800DC0C0[arg0->playerIndex].scan[0].offset + 1.0f);
                 } else {
-                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f);
+                    *offset = halfWidth - (D_800DC0C0[arg0->playerIndex].scan[0].offset + 1.0f);
                 }
             } else {
-                if (arg0->unk23C != 0) {
-                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f) - halfWidth;
+                if (arg0->snap != 0) {
+                    *offset = (D_800DC0C0[arg0->playerIndex].scan[1].offset + 1.0f) - halfWidth;
                 } else {
-                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f) - halfWidth;
+                    *offset = (D_800DC0C0[arg0->playerIndex].scan[1].offset + 1.0f) - halfWidth;
                 }
             }
         }
@@ -664,8 +546,8 @@ s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
         arg0->unk26C = 0.004999999888f;
         }
     } else {
-        D_800DC0C0[arg0->unk23D].scan[0].unk0 = 4;
-        D_800DC0C0[arg0->unk23D].scan[1].unk0 = 4;
+        D_800DC0C0[arg0->playerIndex].scan[0].unk0 = 4;
+        D_800DC0C0[arg0->playerIndex].scan[1].unk0 = 4;
         *offset -= *offset * 0.1000000015f;
         arg0->unk5FE = 60;
     }
@@ -675,14 +557,14 @@ s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
             arg0->unk3F0 = 0;
         }
         if (arg0->unk3F4 == -1.0f) {
-            arg0->unk3F4 = arg0->unk374;
-            arg0->unk3F8 = arg0->unk348;
-            arg0->unk374 = 150.0f;
-            arg0->unk348 = 275.0f;
+            arg0->unk3F4 = arg0->targetDistance;
+            arg0->unk3F8 = arg0->height;
+            arg0->targetDistance = 150.0f;
+            arg0->height = 275.0f;
         }
     } else if (arg0->unk3F4 != -1.0f) {
-        arg0->unk374 = arg0->unk3F4;
-        arg0->unk348 = arg0->unk3F8;
+        arg0->targetDistance = arg0->unk3F4;
+        arg0->height = arg0->unk3F8;
         arg0->unk3F4 = -1.0f;
         arg0->unk3F8 = -1.0f;
     }
@@ -697,7 +579,7 @@ s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 
 /* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
  * from the camera position through the world and applies the corrected position. */
-void func_1512BB10(CamView *arg0) {
+void func_1512BB10(Camera *arg0) {
     s32 savedDD3;
     s32 flag;
     struct127 probe;
@@ -710,31 +592,31 @@ void func_1512BB10(CamView *arg0) {
 
     flag = 0;
     // matching: sub is loaded inside the condition, after the first flag test
-    if (!(arg0->unk84 & 0x40000) && (sub = arg0->unk3D4, sub->unk95 == 0) && (arg0->unk2C != 0x40) &&
-        !(arg0->unk84 & 0x80) && !(arg0->unk84 & 0x200)) {
+    if (!(arg0->flags & 0x40000) && (sub = arg0->playerExt, sub->unk95 == 0) && (arg0->mode != 0x40) &&
+        !(arg0->flags & 0x80) && !(arg0->flags & 0x200)) {
         saved2 = D_80089120[2];
         saved1 = D_80089120[1];
-        if (arg0->unk5F0 & 0x800) {
+        if (arg0->status & 0x800) {
             arg0->unk94C = 20.0f;
             arg0->unk950 = 40.0f;
-        } else if (arg0->unk5F0 & 0x10) {
+        } else if (arg0->status & 0x10) {
             arg0->unk94C = 20.0f;
             arg0->unk950 = 72.0f;
-        } else if (arg0->unk374 > 580.0f) {
+        } else if (arg0->targetDistance > 580.0f) {
             arg0->unk94C = 70.0f;
             arg0->unk950 = 140.0f;
-        } else if ((D_800BE9F0 == 0x31) && (arg0->unk23E == 3)) {
+        } else if ((D_800BE9F0 == 0x31) && (arg0->zone == 3)) {
             flag = 1;
             arg0->unk94C = 20.0f;
             arg0->unk950 = 50.0f;
         } else {
-            if (((arg0->unk73C != 0) && (arg0->unk73C != 1) && (arg0->unk73C != 3)) ||
-                ((arg0->unk3D0->unk102 != 0) &&
-                 ((arg0->unk3D0->x_position != arg0->unk2B0.unk0) || (arg0->unk3D0->z_position != arg0->unk2B0.unk8))) ||
+            if (((arg0->aimState != 0) && (arg0->aimState != 1) && (arg0->aimState != 3)) ||
+                ((arg0->player->unk102 != 0) &&
+                 ((arg0->player->x_position != arg0->lastPlayerPos.x) || (arg0->player->z_position != arg0->lastPlayerPos.z))) ||
                 (sub->unk1B3 != 0)) {
                 arg0->unk94C = 20.0f;
                 arg0->unk950 = 20.0f;
-            } else if (arg0->unk3D0->unk102 != 0) {
+            } else if (arg0->player->unk102 != 0) {
                 flag = 1;
                 arg0->unk94C = 25.0f;
                 arg0->unk950 = 30.0f;
@@ -743,49 +625,49 @@ void func_1512BB10(CamView *arg0) {
                 arg0->unk950 = 60.0f;
             }
         }
-        if (arg0->unk23C != 0) {
+        if (arg0->snap != 0) {
             arg0->unk954 = 0.0f;
             arg0->unk95C = arg0->unk94C;
             arg0->unk958 = 0.0f;
             arg0->unk960 = arg0->unk950;
         } else {
-            func_150495B0(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->unk7B4);
-            func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->unk7B4);
+            func_150495B0(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->dt);
+            func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->dt);
         }
         probe.interaction_state = 0x2D;
         probe.camera = (Camera *)arg0;
-        probe.x_position = arg0->unk2F8.unk0;
-        if (arg0->unk5F0 & 0x800) {
-            probe.y_position = arg0->unk2F8.unk4 + arg0->unk18C;
+        probe.x_position = arg0->eye.x;
+        if (arg0->status & 0x800) {
+            probe.y_position = arg0->eye.y + arg0->lift;
         } else {
-            probe.y_position = arg0->unk2F8.unk4;
+            probe.y_position = arg0->eye.y;
         }
-        probe.z_position = arg0->unk2F8.unk8;
+        probe.z_position = arg0->eye.z;
         probe.pad188 = arg0->unk644;
         probe.unk28 = probe.y_position - arg0->unk354;
         probe.unk180 = arg0->unk354;
         probe.y_velocity = 0.0f;
-        probe.unk40 = arg0->unk37C;
-        if ((arg0->unk84 & 0x80000000) || (D_800BE9F0 == 0x37)) {
+        probe.unk40 = arg0->yaw;
+        if ((arg0->flags & 0x80000000) || (D_800BE9F0 == 0x37)) {
             D_80089120[2] = 0;
         }
-        if (arg0->unk84 & 0x10000) {
+        if (arg0->flags & 0x10000) {
             D_80089120[1] = 0;
         }
         D_800CBDD2 = 1;
         savedDD3 = D_800CBDD3;
-        if (arg0->unk3D0->unk102 != 0) {
+        if (arg0->player->unk102 != 0) {
             D_800CBDD3 = 1;
         } else {
             D_800CBDD3 = 0;
         }
         savedDD4 = D_800CBDD4;
-        if ((arg0->unk23C != 0) || ((arg0->unk2C == 0x100) && (flag == 0))) {
+        if ((arg0->snap != 0) || ((arg0->mode == 0x100) && (flag == 0))) {
             D_800CBDD4 = 1;
         } else {
             D_800CBDD4 = 0;
         }
-        hit = func_15044380(arg0->unk304, arg0->unk308, arg0->unk30C, &probe, 0, 0);
+        hit = func_15044380(arg0->prevEye.x, arg0->prevEye.y, arg0->prevEye.z, &probe, 0, 0);
         D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
         D_800CBDD3 = savedDD3;
@@ -798,21 +680,21 @@ void func_1512BB10(CamView *arg0) {
             arg0->unk3E8 = 1;
             arg0->unk26C += (1.0f - arg0->unk26C) * 0.1000000015f;
         }
-        arg0->unk2F8.unk0 = probe.x_position;
-        if (arg0->unk2C != 0x100) {
-            if (arg0->unk5F0 & 0x800) {
-                arg0->unk2F8.unk4 = probe.y_position - arg0->unk18C;
+        arg0->eye.x = probe.x_position;
+        if (arg0->mode != 0x100) {
+            if (arg0->status & 0x800) {
+                arg0->eye.y = probe.y_position - arg0->lift;
             } else {
-                arg0->unk2F8.unk4 = probe.y_position;
+                arg0->eye.y = probe.y_position;
             }
         }
-        arg0->unk2F8.unk8 = probe.z_position;
-        if ((D_800BE9F0 != 0x1B) && (hit != 0) && (arg0->unk2C != 0x100)) {
-            func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->unk2F8.unk0, arg0->unk2F8.unk4, arg0->unk2F8.unk8,
-                          arg0->unk308, 0, 0, -10000.0f, arg0->unk2F8.unk4, 1);
-            if (arg0->unk2F8.unk4 < floorY + 40.0f) {
+        arg0->eye.z = probe.z_position;
+        if ((D_800BE9F0 != 0x1B) && (hit != 0) && (arg0->mode != 0x100)) {
+            func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
+                          arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
+            if (arg0->eye.y < floorY + 40.0f) {
                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                arg0->unk2F8.unk4 = floorY + 40.0f;
+                arg0->eye.y = floorY + 40.0f;
             }
         }
     } else {
@@ -822,7 +704,7 @@ void func_1512BB10(CamView *arg0) {
 }
 
 /* Measures the horizontal distance to the target; when too close, swings the yaw by 90 degrees. */
-void func_1512C068(CamView *arg0) {
+void func_1512C068(Camera *arg0) {
     f32 side;
     f32 dx;
     f32 dz;
@@ -834,14 +716,14 @@ void func_1512C068(CamView *arg0) {
         side = -2.0f;
     }
 
-    if ((arg0->unk2C != 0x80) && (arg0->unk2C != 0x40)) {
-        dx = arg0->unk2F8.unk0 - arg0->unk2BC.unk0;
-        dz = arg0->unk2F8.unk8 - arg0->unk2BC.unk8;
+    if ((arg0->mode != 0x80) && (arg0->mode != 0x40)) {
+        dx = arg0->eye.x - arg0->target.x;
+        dz = arg0->eye.z - arg0->target.z;
         dist = sqrtf((dx * dx) + (dz * dz));
-        arg0->unk370 = dist;
+        arg0->distance = dist;
 
         if (dist < 42.0f) {
-            arg0->unk384 = arg0->unk37C - (45.0f * side);
+            arg0->unk384 = arg0->yaw - (45.0f * side);
             arg0->unk5CC = 0.0f;
             func_15123A54((Camera *)arg0);
             arg0->unk240 |= 2;
@@ -852,7 +734,7 @@ void func_1512C068(CamView *arg0) {
 }
 
 /* Advances the blend factor unk5CC towards 1, easing the yaw unk384 towards unk37C until it gets there. */
-void func_1512C150(CamView *arg0) {
+void func_1512C150(Camera *arg0) {
     arg0->unk5CC += 0.006000000052f;
     arg0->unk5CC = (arg0->unk5CC > 1.0f) ? 1.0f : arg0->unk5CC;
 
@@ -860,7 +742,7 @@ void func_1512C150(CamView *arg0) {
         arg0->unk384 = 999.0f;
         arg0->unk240 &= ~2;
     } else {
-        arg0->unk384 += func_15048A70(arg0->unk384, arg0->unk37C) * arg0->unk5CC;
+        arg0->unk384 += func_15048A70(arg0->unk384, arg0->yaw) * arg0->unk5CC;
     }
 }
 
@@ -871,36 +753,36 @@ extern f32 D_800895B0;
 #define SQ(x) ((x) * (x))
 
 /* Keeps the camera outside the circle of radius unk938 around unk93C (horizontally), pushing it out to the edge. */
-void func_1512C20C(CamView *arg0) {
+void func_1512C20C(Camera *arg0) {
     f32 dz; // matching: also holds the target distance later (a separate local grows the frame)
-    struct17 pos;
-    struct17 offset;
-    struct17 toPos;
+    vertex pos;
+    vertex offset;
+    vertex toPos;
 
     if (arg0->unk948) {
         f32 dx; // matching: also holds the yaw difference later
 
-        dx = arg0->unk2F8.unk0 - arg0->unk93C.unk0;
-        dz = arg0->unk2F8.unk8 - arg0->unk93C.unk8;
-        pos = arg0->unk2F8;
+        dx = arg0->eye.x - arg0->unk93C.x;
+        dz = arg0->eye.z - arg0->unk93C.z;
+        pos = arg0->eye;
         if (sqrtf(SQ(dx) + SQ(dz)) < arg0->unk938) {
-            struct17 target;
+            vertex target;
             f32 outwardYaw;
             f32 yaw;
 
-            target = arg0->unk2A4;
-            target.unk4 = 0.0f;
-            pos.unk4 = 0.0f;
-            arg0->unk93C.unk4 = 0.0f;
+            target = arg0->focus;
+            target.y = 0.0f;
+            pos.y = 0.0f;
+            arg0->unk93C.y = 0.0f;
             func_150491EC(&arg0->unk93C, &pos, &offset);
             outwardYaw = func_15048FC8(&offset) - 180.0f;
             func_15048758(&outwardYaw);
             func_150491EC(&target, &pos, &toPos);
             func_15049148(&offset, arg0->unk938, &offset);
-            pos.unk0 = arg0->unk93C.unk0 + offset.unk0;
-            pos.unk4 = 0.0f;
-            pos.unk8 = arg0->unk93C.unk8 + offset.unk8;
-            dz = sqrtf(SQ(target.unk0 - pos.unk0) + SQ(target.unk8 - pos.unk8));
+            pos.x = arg0->unk93C.x + offset.x;
+            pos.y = 0.0f;
+            pos.z = arg0->unk93C.z + offset.z;
+            dz = sqrtf(SQ(target.x - pos.x) + SQ(target.z - pos.z));
             func_15048F90(&pos, &target, &offset);
             yaw = func_15048FC8(&offset);
             func_15048758(&yaw);
@@ -915,11 +797,11 @@ void func_1512C20C(CamView *arg0) {
                 func_1508EF80(&pos, &arg0->unk93C, dx, &pos);
             }
             D_800895B0 = dz;
-            pos.unk4 = arg0->unk2F8.unk4;
-            arg0->unk2F8 = pos;
+            pos.y = arg0->eye.y;
+            arg0->eye = pos;
         } else {
             D_800895B0 = 0.0f;
-            arg0->unk930 = arg0->unk37C;
+            arg0->unk930 = arg0->yaw;
         }
     } else {
         D_800895B0 = 0.0f;
