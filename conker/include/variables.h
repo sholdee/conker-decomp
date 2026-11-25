@@ -1125,9 +1125,9 @@ extern u8  D_800D9890;
 extern u8  D_800D9930[];
 extern u8  D_800D9920;
 extern u8  D_800D9921;
-extern u8  D_800D9928;
+extern u8  D_800D9928[14];
 extern u8  D_800D9929;
-extern u8  D_800D9938;
+extern u8  D_800D9938[14];
 extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
@@ -1259,12 +1259,9 @@ extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 
-extern u8   D_800DD2C0;
+extern u8   D_800DD2C0[16]; // per player: spawn point
 extern u8   D_800DD2D0;
-extern u8   D_800DD2A0;
-extern u8   D_800DD2A1;
-extern u8   D_800DD2A2;
-extern u8   D_800DD2A3;
+extern u8   D_800DD2A0[4];
 
 extern u8   D_800DD404;
 extern u8   D_800DD405;
@@ -1339,7 +1336,7 @@ extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;
 extern s32  D_800E0934;
 extern void *D_800E0940;
-extern u8   D_800E0950;
+extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
 extern s32  D_800E0964;
 extern s16  D_800E0968[];
 extern s32  D_800E0990[];

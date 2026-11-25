@@ -10,9 +10,6 @@
 
 extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
 
-/* variables.h declares D_800DD2C0 as a single u8; it is really a u8[16] of per-player spawn points.
- * Entry 0 is also read and written on its own as player 0's spawn point. */
-#define D_800DD2C0_ARRAY (*(u8 (*)[16])&D_800DD2C0)
 
 extern u8 D_800BE9B4;
 
@@ -27,9 +24,9 @@ void func_15172C50(s32 spawn0) {
 
     for (i = 0; i < 16; i++) {
         D_800DD2B0[i] = -1;
-        D_800DD2C0_ARRAY[i] = 0;
+        D_800DD2C0[i] = 0;
     }
-    D_800DD2C0_ARRAY[0] = spawn0;
+    D_800DD2C0[0] = spawn0;
 }
 
 /* Cancels the player's pending warp, if any, and fades their view back in over 50 frames. */
@@ -65,7 +62,7 @@ void func_15172D80(s32 player) {
             func_1501C730(1, D_800DD2B0[player], 0, 0, 0);
         } else {
             func_15172CA8(player);
-            func_15172D28(&D_800CC2D0[player], D_800DD2C0_ARRAY[player]);
+            func_15172D28(&D_800CC2D0[player], D_800DD2C0[player]);
         }
     }
 }
@@ -84,7 +81,7 @@ void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
                 func_1517EE40(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;
                 D_800DD2B0[player] = level;
-                D_800DD2C0_ARRAY[player] = spawnIndex;
+                D_800DD2C0[player] = spawnIndex;
             }
         } else if (level == D_800BE9F0) {
             func_15172D28(actor, spawnIndex);

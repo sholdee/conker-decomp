@@ -65,14 +65,13 @@ extern void (*D_8008FC58[])(ActorFollowerGroup *);
 extern void (*D_8008FC5C[])(ActorFollowerGroup *);
 extern void (*D_8008FC64[])(ActorFollowerGroup *, struct223 *, u8);
 
-// D_800E0950 is a u8 array of reference counts; variables.h declares it as a scalar.
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
 void func_151D2AB0(s32 index) {
     u32 loadInfo;
 
-    (&D_800E0950)[index]++;
-    if ((&D_800E0950)[index] < 2) {
+    D_800E0950[index]++;
+    if (D_800E0950[index] < 2) {
         D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
@@ -80,9 +79,9 @@ void func_151D2AB0(s32 index) {
 
 /* Drops a reference on shared resource `index`, freeing it with the last reference. */
 void func_151D2B4C(s32 index) {
-    if ((&D_800E0950)[index] != 0) {
-        (&D_800E0950)[index]--;
-        if ((&D_800E0950)[index] == 0) {
+    if (D_800E0950[index] != 0) {
+        D_800E0950[index]--;
+        if (D_800E0950[index] == 0) {
             func_100043B4(D_800E0990[index], 4);
         }
     }

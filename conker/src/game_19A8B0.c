@@ -150,20 +150,18 @@ void func_1516F94C(Particle *particle, s32 factor);
 extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
-/* variables.h declares D_800DD2A0 as a single u8; it is really a u8[4]. */
-#define D_800DD2A0_ARRAY (*(u8 (*)[4])&D_800DD2A0)
 
 void func_1516D400(void) {
     s32 i;
     s32 level;
 
     for (i = 0; i < 4; i++) {
-        if (D_800DD2A0_ARRAY[i] < 0xFF) {
-            level = D_800DD2A0_ARRAY[i] + D_800BE9A0;
+        if (D_800DD2A0[i] < 0xFF) {
+            level = D_800DD2A0[i] + D_800BE9A0;
             if (level > 0xFF) {
                 level = 0xFF;
             }
-            D_800DD2A0_ARRAY[i] = level;
+            D_800DD2A0[i] = level;
         }
     }
 }
@@ -799,8 +797,8 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
 }
 
 void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
-    if (object < 4 && D_800DD2A0_ARRAY[object] >= threshold) {
-        D_800DD2A0_ARRAY[object] = 0;
+    if (object < 4 && D_800DD2A0[object] >= threshold) {
+        D_800DD2A0[object] = 0;
         func_1516D99C(0, 0, 0, 4,
             0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
             2, 0, 0, 0, 0, 0, 0, 0,

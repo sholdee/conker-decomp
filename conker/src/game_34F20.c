@@ -10,7 +10,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     func_1503FB08();
     D_800BE9F0 = D_800BE9F4 = arg2;
 
-    func_15172C50(D_800DD2C0);
+    func_15172C50(D_800DD2C0[0]);
     func_15008230();
     func_15005270();
     func_15017300(arg0, arg1);
@@ -161,7 +161,7 @@ void func_15007B3C(void) {
     D_800E0920 = 0;
     func_15008840();
     D_8003E384 = 1;
-    resource = D_800DD2C0;
+    resource = D_800DD2C0[0];
     slot = func_1507E114((s32)&resource);
     if (D_800E0B94 == 2) {
         resource = D_800E0BD1;

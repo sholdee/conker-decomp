@@ -481,9 +481,9 @@ void func_151E30C4(void) {
     func_15085710(0, 9, unk0);
     D_800BE3E4 = unk0;
 
-    D_800DD2C0 = func_1509CA50(resource);
+    D_800DD2C0[0] = func_1509CA50(resource);
     if (D_8008FDB4 == 2) {
-        D_800DD2C0 = D_800E0BD1;
+        D_800DD2C0[0] = D_800E0BD1;
     }
 
     D_8008FD70 = 0;

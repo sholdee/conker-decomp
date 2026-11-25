@@ -13,9 +13,6 @@ extern s32 *D_800D98D0[];
 extern s32 *D_800D9894;
 extern u8 *D_80088870;
 
-// variables.h declares these byte arrays as scalars; index them through an array view so IDO
-// sees an array (the scalar form, (&x)[i], loses the pointer-stepped loop).
-#define ARRAY_VIEW(sym, n) (*(u8 (*)[n])&(sym))
 
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */
 void func_1500E5C0(void) {
@@ -26,13 +23,13 @@ void func_1500E5C0(void) {
     func_15008A10();
     func_15012770();
     for (i = 0; i < 20; i++) {
-        ARRAY_VIEW(D_800E0950, 20)[i] = 0;
+        D_800E0950[i] = 0;
     }
     D_800D9921 = 0;
     D_800D9920 = 0;
     for (j = 0; j < 14; j++) {
-        ARRAY_VIEW(D_800D9928, 14)[j] = 0;
-        ARRAY_VIEW(D_800D9938, 14)[j] = 0;
+        D_800D9928[j] = 0;
+        D_800D9938[j] = 0;
     }
     {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
