@@ -30,6 +30,9 @@ typedef struct LevelObject {
     /* 0x24 */ u8 pad24[0x10];
 } LevelObject; /* size 0x34 */
 
+#define OBJ_TYPE(obj) ((obj)->unk15 >> 2)
+#define OBJ_SHAPE(obj) ((obj)->unk15 & 3)
+
 extern LevelObject *D_800D3098;
 extern void *allocate_memory(s32, s32, s32, s32);
 extern u8 D_800D30D0[];
@@ -37,7 +40,7 @@ extern u8 D_800D30F0[];
 extern LevelObject **D_800D3270;
 extern s32 D_800D3274;
 
-
+/* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {
     func_1509C120();
     bzero(D_800D2E4C, 0x1B);
@@ -47,12 +50,13 @@ void func_15017790(void) {
     D_800D2E44 = 0;
 }
 
+/* Resets the per-id record list (D_800D2F48) and related state. */
 void func_150177F8(void) {
     func_1509BA04(1);
     bzero(&D_800D2F48, 0xC);
     func_150A00F0();
     D_800D2DB0 = 999.0f;
-    D_800D2E41 = 0xA;
+    D_800D2E41 = 10;
     D_800D2E42 = 6;
     D_800D3858 = 0;
     D_800D2E44 = 0;
@@ -103,11 +107,11 @@ void func_15017930(s32 arg0) {
     D_800D3274 = 0;
     D_800D3270 = NULL;
     for (i = 0; i < D_800D3094; i++) {
-        if ((D_800D3098[i].unk15 >> 2) == 1 &&
+        if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
             (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
             D_800D3274++;
         }
-        type = D_800D3098[i].unk15 >> 2;
+        type = OBJ_TYPE(&D_800D3098[i]);
         if (type == 2 || type == 7) {
             D_800D3098[i].unk20 = 0;
         }
@@ -118,7 +122,7 @@ void func_15017930(s32 arg0) {
             LevelObject **out = D_800D3270;
 
             for (i = 0; i < D_800D3094; i++) {
-                if ((D_800D3098[i].unk15 >> 2) == 1 &&
+                if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
                     (D_800D3098[i].unk17 == 2 || D_800D3098[i].unk17 == 0 || D_800D3098[i].unk17 == 6)) {
                     *out++ = &D_800D3098[i];
                 }
@@ -172,7 +176,7 @@ void func_15017B20(LevelObject *objects, s32 count) {
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));
     for (i = 0; i < count; i++) {
-        if (((objects[i].unk15 & 3) == 3) || (objects[i].flags & 8)) {
+        if ((OBJ_SHAPE(&objects[i]) == 3) || (objects[i].flags & 8)) {
             if (!(objects[i].flags & 4)) {
                 D_800D30A0[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -180,7 +184,7 @@ void func_15017B20(LevelObject *objects, s32 count) {
     }
     bzero(D_800D30B8, sizeof(D_800D30B8));
     for (i = 0; i < count; i++) {
-        if ((objects[i].unk15 & 3) != 3) {
+        if (OBJ_SHAPE(&objects[i]) != 3) {
             if (!(objects[i].flags & 8) && !(objects[i].flags & 4)) {
                 D_800D30B8[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -225,6 +229,11 @@ void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void func_150A7DA0(f32 mtx[4][4], f32, f32, f32);
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 
+/*
+ * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the
+ * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes
+ * get zero-size bounds at the position.
+ */
 void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
     s32 i;
     s32 shape;
@@ -236,7 +245,7 @@ void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
     f32 x, y, z;
 
     invalid = 0;
-    shape = obj->unk15 & 3;
+    shape = OBJ_SHAPE(obj);
     switch (shape) {
     default:
         invalid = 1;
