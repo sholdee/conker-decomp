@@ -191,42 +191,45 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_150CE694;
+/* Payload of the messages the effect handlers receive. */
+typedef union {
+    struct {
+        /* 0x00 */ struct127 *object;
+        /* 0x04 */ u8 id;
+    } one;          /* message 0 */
+    struct {
+        /* 0x00 */ struct127 *from;
+        /* 0x04 */ struct127 *to;
+        /* 0x08 */ u8 fromId;
+        /* 0x09 */ u8 toId;
+    } pair;         /* message 0x2D */
+} ObjectMessage;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8 b4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_150CE694;
+/*
+ * Message handler: message 0x2D moves the effect between the two objects of the pair,
+ * message 0 ends it when its owner goes away.
+ */
+void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
+    MosaicData *mosaic = &effect->data;
+    struct127 *object;
 
-void func_150CE694(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_150CE694 *temp_v0 = (SubA_150CE694 *)((u8 *)arg0 + 0x18);
-    ArgB_150CE694 *b = (ArgB_150CE694 *)arg1;
-    s32 b0;
-
-    if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
+    if (type == 0x2D) {
+        if (mosaic->owner == msg->pair.from) {
+            mosaic->owner = msg->pair.to;
+            mosaic->ownerId = msg->pair.toId;
         } else {
-            if (temp_v0->unk0 == b->u4.w4) {
-                temp_v0->unk0 = b->unk0;
-                temp_v0->unk4 = b->unk8;
+            if (mosaic->owner == msg->pair.to) {
+                mosaic->owner = msg->pair.from;
+                mosaic->ownerId = msg->pair.fromId;
             }
-trailing_150CE694:
+        // matching: an empty labelled statement makes this branch jump straight to the epilogue
+        end_swap:
             ;
         }
-    } else if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    } else if (type == 0) {
+        object = msg->one.object;
+        if (object == mosaic->owner || msg->one.id == mosaic->ownerId) {
+            func_1516972C((struct102 *)effect);
         }
     }
 }
