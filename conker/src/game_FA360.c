@@ -293,17 +293,17 @@ extern void func_15152874(DriftBurst *burst, u8 arg1, s32 arg2);
  * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
  */
 void func_150CD7F8(BurstEmitter *emitter) {
-    f32 *pending = &emitter->timer.pending;
+    BurstTimer *timer = &emitter->timer;
     DriftBurst burst;
     BurstYaws yaws;
     u8 index;
     f32 yaw;
     f32 heading;
+    f32 diff;
     f32 r;
-    s32 pad;
 
-    emitter->timer.pending += 0.08f * D_800BE9A4 * emitter->timer.rate;
-    if (emitter->timer.pending > 1.0f) {
+    timer->pending += 0.08f * D_800BE9A4 * timer->rate;
+    if (timer->pending > 1.0f) {
         burst.pitchBase = -23;
         burst.pitchRange = 6;
         burst.colorFunc = 0;
@@ -321,7 +321,8 @@ void func_150CD7F8(BurstEmitter *emitter) {
                 heading += 360.0f;
             }
             heading *= 0.017453292f; /* degrees to radians */
-            if (fabsf(yaw - heading) < 0.39269912f) {
+            diff = yaw - heading;
+            if (fabsf(diff) < 0.39269912f) {
                 r = func_150ADA68();
                 burst.pos.y = 1613.5835f * r + 2411.0085f + 500.0f;
                 func_1514373C(yaw, r * (10426.68 - 8400.0) + 8400.0, &burst.pos.x, &burst.pos.z);
@@ -342,8 +343,8 @@ void func_150CD7F8(BurstEmitter *emitter) {
                 burst.gravityRange = 0.201f;
                 func_15152874(&burst, emitter->unk0C, emitter->unk01);
             }
-            *pending -= 1.0f;
-        } while (*pending > 1.0f);
+            timer->pending -= 1.0f;
+        } while (timer->pending > 1.0f);
     }
 }
 
