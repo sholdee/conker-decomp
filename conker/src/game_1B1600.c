@@ -20,87 +20,65 @@ extern f32 D_800DE03C;
 extern u8 D_800DE040;
 extern u8 D_800DE041;
 
-typedef struct {
-    u8 pad0[0x30];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad3C[4];
-} Bound15184150;
-
 extern s32 func_1502DB20(s32);
 extern u8 D_800C3E90;
 
-s32 func_15184150(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3)
-{
-  s32 id;
-  struct127 *obj;
-  s32 count;
-  s32 i;
-  f32 dx;
-  f32 dy;
-  f32 dz;
-  struct255 *new_var;
-  obj = &D_800CC2D0[arg0];
-  id = obj->id;
-  *arg3 = 0.0f;
-  *arg2 = 0.0f;
-  *arg1 = 0.0f;
-  if ((obj->unk1D4 == 0) || (D_800C3E90 != 0))
-  {
-    return 0;
-  }
-  count = func_1502DB20(id);
-  for (i = 0; i < count; i++)
-  {
-    new_var = obj->unk1D4;
-    dx = ((Bound15184150 *) new_var)[i].x;
-    dy = ((Bound15184150 *) new_var)[i].y;
-    dz = ((Bound15184150 *) new_var)[i].z;
-    dx -= obj->x_position;
-    dy -= obj->y_position;
-    dz -= obj->z_position;
-    dx = (dx < 0.0f) ? (-dx) : (dx);
-    if ((*arg1) < dx)
-    {
-      *arg1 = dx;
-    }
-    dy = (dy < 0.0f) ? (-dy) : (dy);
-    if ((*arg2) < dy)
-    {
-      *arg2 = dy;
-      if (1)
-      {
-      }
-      if (1)
-      {
-      }
-      if (1)
-      {
-      }
-      if (1)
-      {
-      }
-      if (1)
-      {
-      }
-    }
-    dz = (dz < 0.0f) ? (-dz) : (dz);
-    if (dz > (*arg3))
-    {
-      *arg3 = dz;
-    }
-  }
+/* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
+s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
+    s32 id;
+    struct127 *obj;
+    s32 count;
+    s32 i;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 (*bones)[4][4];
 
-  if ((((*arg1) == 0.0f) || ((*arg2) == 0.0f)) || ((*arg3) == 0.0f))
-  {
-    dx = D_800D1C90[obj->id]->unk1A;
-    dy = obj->xz_scale * dx;
-    *arg3 = dy;
-    *arg1 = dy;
-    dx = D_800D1C90[obj->id]->unk1C + D_800D1C90[obj->id]->unk1E;
-    *arg2 = obj->y_scale * dx;
-  }
+    obj = &D_800CC2D0[objIndex];
+    id = obj->id;
+    *halfZ = 0.0f;
+    *halfY = 0.0f;
+    *halfX = 0.0f;
+    if (obj->unk1D4 == NULL || D_800C3E90 != 0) {
+        return 0;
+    }
+    count = func_1502DB20(id);
+    for (i = 0; i < count; i++) {
+        bones = (f32 (*)[4][4])obj->unk1D4;
+        dx = bones[i][3][0];
+        dy = bones[i][3][1];
+        dz = bones[i][3][2];
+        dx -= obj->x_position;
+        dy -= obj->y_position;
+        dz -= obj->z_position;
+        if (dx < 0.0f) {
+            dx = -dx;
+        }
+        if (*halfX < dx) {
+            *halfX = dx;
+        }
+        if (dy < 0.0f) {
+            dy = -dy;
+        }
+        if (*halfY < dy) {
+            *halfY = dy;
+        }
+        if (dz < 0.0f) {
+            dz = -dz;
+        }
+        if (dz > *halfZ) {
+            *halfZ = dz;
+        }
+    }
+
+    if (*halfX == 0.0f || *halfY == 0.0f || *halfZ == 0.0f) {
+        dx = D_800D1C90[obj->id]->unk1A;
+        dy = obj->xz_scale * dx;
+        *halfZ = dy;
+        *halfX = dy;
+        dx = D_800D1C90[obj->id]->unk1C + D_800D1C90[obj->id]->unk1E;
+        *halfY = obj->y_scale * dx;
+    }
 }
 
 typedef struct Node15184368 {
@@ -109,9 +87,9 @@ typedef struct Node15184368 {
     u8 pad5[4];
     u8 unk9;
     u8 padA[4];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
+    s16 x;
+    s16 y;
+    s16 z;
 } Node15184368;
 
 extern struct17 D_800DE010;
@@ -134,60 +112,66 @@ extern void func_15047390(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
-f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
+/*
+ * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
+ * beyond minDist (or a default direction), eases the light toward it, builds the light's view/projection
+ * matrices and the shadow alpha. Returns the chosen light's distance (1 for the default light), or 0 when no
+ * shadow should be drawn.
+ */
+f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 minDist) {
     struct17 delta;
-    struct17 pos;
-    struct17 target;
+    struct17 objPos;
+    struct17 lightPos;
     f32 sx;
     f32 sy;
     f32 sz;
     f32 maxX;
     f32 maxY;
     f32 maxZ;
-    f32 best;
+    f32 dist;
     f32 scale;
     f32 minY;
-    f32 mtxA[4][4];
-    f32 mtxB[4][4];
+    f32 proj[4][4];
+    f32 bias[4][4];
     s32 i;
     s32 done;
-    s32 count;
+    s32 found;
     Node15184368 *node;
-    f32 npos[3];
-    f32 fovScale;
+    f32 nodePos[3];
+    f32 perspScale;
     f32 v;
     struct127 *obj;
-    struct17 *cam;
+    struct17 *eye;
 
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[objIndex];
     done = 0;
-    best = 5000.0f;
-    pos.unk0 = obj->x_position;
-    fovScale = 2.0f;
-    pos.unk4 = obj->y_position;
-    count = 0;
-    pos.unk8 = obj->z_position;
+    dist = 5000.0f;
+    objPos.unk0 = obj->x_position;
+    perspScale = 2.0f;
+    objPos.unk4 = obj->y_position;
+    found = 0;
+    objPos.unk8 = obj->z_position;
     if (D_800DE034 == 0) {
         node = (Node15184368 *)D_800DCD78;
         while (node != NULL) {
             if (node->unk4 == 0 && node->unk9 == 0) {
-                npos[0] = node->unkE;
-                npos[1] = node->unk10;
-                npos[2] = node->unk12;
-                v = func_150AD9A0(npos[0] - pos.unk0, npos[1] - pos.unk4, npos[2] - pos.unk8);
-                if (v < best && arg5 < v) {
-                    best = v;
-                    count++;
-                    target.unk0 = npos[0];
-                    target.unk4 = npos[1];
-                    target.unk8 = npos[2];
+                nodePos[0] = node->x;
+                nodePos[1] = node->y;
+                nodePos[2] = node->z;
+                v = func_150AD9A0(nodePos[0] - objPos.unk0, nodePos[1] - objPos.unk4, nodePos[2] - objPos.unk8);
+                if (v < dist && minDist < v) {
+                    dist = v;
+                    found++;
+                    lightPos.unk0 = nodePos[0];
+                    lightPos.unk4 = nodePos[1];
+                    lightPos.unk8 = nodePos[2];
                 }
             }
             node = node->next;
         }
     }
-    if (count == 0) {
-        if (arg5 != 0.0f) {
+    if (found == 0) {
+        if (minDist != 0.0f) {
             return 0.0f;
         }
         if (D_800DE010.unk4 <= 0.0f) {
@@ -195,40 +179,40 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
             D_800DE010.unk4 = 600.0f;
             D_800DE010.unk8 = -200.0f;
         }
-        best = 1.0f;
-        target.unk0 = D_800DE010.unk0 * D_800DE03C + pos.unk0;
-        target.unk4 = D_800DE010.unk4 * D_800DE03C + pos.unk4;
-        target.unk8 = D_800DE010.unk8 * D_800DE03C + pos.unk8;
+        dist = 1.0f;
+        lightPos.unk0 = D_800DE010.unk0 * D_800DE03C + objPos.unk0;
+        lightPos.unk4 = D_800DE010.unk4 * D_800DE03C + objPos.unk4;
+        lightPos.unk8 = D_800DE010.unk8 * D_800DE03C + objPos.unk8;
     }
     if (*(s32 *)D_800DBFF4 != 0 || D_800DE038 >= 2) {
-        cam = &D_800DDFB0[arg1];
-        cam->unk0 = target.unk0;
-        cam->unk4 = target.unk4;
-        cam->unk8 = target.unk8;
+        eye = &D_800DDFB0[slot];
+        eye->unk0 = lightPos.unk0;
+        eye->unk4 = lightPos.unk4;
+        eye->unk8 = lightPos.unk8;
     } else {
-        cam = &D_800DDFB0[arg1];
-        cam->unk0 = cam->unk0 + (target.unk0 - cam->unk0) * 0.3000000119f;
-        cam->unk4 = cam->unk4 + (target.unk4 - cam->unk4) * 0.3000000119f;
-        cam->unk8 = cam->unk8 + (target.unk8 - cam->unk8) * 0.3000000119f;
+        eye = &D_800DDFB0[slot];
+        eye->unk0 = eye->unk0 + (lightPos.unk0 - eye->unk0) * 0.3f;
+        eye->unk4 = eye->unk4 + (lightPos.unk4 - eye->unk4) * 0.3f;
+        eye->unk8 = eye->unk8 + (lightPos.unk8 - eye->unk8) * 0.3f;
     }
-    func_15048F90(&pos, cam, &delta);
+    func_15048F90(&objPos, eye, &delta);
     D_800DF6F8 = func_150AD930(&delta.unk0);
     if (D_800DF6F8 < 200.0f) {
         f32 ratio;
         ratio = 200.0f / D_800DF6F8;
         D_800DF6F8 = 200.0f;
         v = delta.unk0 * ratio;
-        D_800DDFB0[arg1].unk0 += v - delta.unk0;
+        D_800DDFB0[slot].unk0 += v - delta.unk0;
         delta.unk0 = v;
         v = delta.unk4 * ratio;
-        D_800DDFB0[arg1].unk4 += v - delta.unk4;
+        D_800DDFB0[slot].unk4 += v - delta.unk4;
         delta.unk4 = v;
         v = delta.unk8 * ratio;
-        D_800DDFB0[arg1].unk8 += v - delta.unk8;
+        D_800DDFB0[slot].unk8 += v - delta.unk8;
         delta.unk8 = v;
     }
     if (D_800DE040 != 0) {
-        minY = sqrtf(delta.unk0 * delta.unk0 + delta.unk8 * delta.unk8) * 0.5773500204f;
+        minY = sqrtf(delta.unk0 * delta.unk0 + delta.unk8 * delta.unk8) * 0.57735f;
         if (minY < 10.0f) {
             minY = 10.0f;
         }
@@ -236,14 +220,14 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
         minY = 10.0f;
     }
     if (delta.unk4 < minY) {
-        D_800DDFB0[arg1].unk4 += minY - delta.unk4;
+        D_800DDFB0[slot].unk4 += minY - delta.unk4;
         delta.unk4 = minY;
         v = func_150AD9A0(delta.unk0, delta.unk4, delta.unk8);
         scale = D_800DF6F8 / v;
         D_800DF6F8 = v;
-        D_800DDFB0[arg1].unk0 += delta.unk0 * scale - delta.unk0;
-        D_800DDFB0[arg1].unk4 += delta.unk4 * scale - delta.unk4;
-        D_800DDFB0[arg1].unk8 += delta.unk8 * scale - delta.unk8;
+        D_800DDFB0[slot].unk0 += delta.unk0 * scale - delta.unk0;
+        D_800DDFB0[slot].unk4 += delta.unk4 * scale - delta.unk4;
+        D_800DDFB0[slot].unk8 += delta.unk8 * scale - delta.unk8;
     }
     if (5000.0f * D_800DE03C < D_800DF6F8) {
         D_800D3688 = 0.0f;
@@ -251,20 +235,20 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
         return 0.0f;
     }
     if (D_800DF0E1 != 0) {
-        arg3 *= 0.25f;
+        halfY *= 0.25f;
         D_800D3688 = -(D_800DE028 * D_800DE03C * 0.5f) - D_800DF6F8;
     } else {
         D_800D3688 = -D_800DE028 * D_800DE03C - D_800DF6F8;
     }
-    func_15047390(D_800DF0F8[arg1], D_800DDFB0[arg1].unk0, D_800DDFB0[arg1].unk4, D_800DDFB0[arg1].unk8, pos.unk0, pos.unk4, pos.unk8, 0.0f, 1.0f, 0.0f);
+    func_15047390(D_800DF0F8[slot], D_800DDFB0[slot].unk0, D_800DDFB0[slot].unk4, D_800DDFB0[slot].unk8, objPos.unk0, objPos.unk4, objPos.unk8, 0.0f, 1.0f, 0.0f);
     maxY = 0.0f;
     maxX = 0.0f;
     maxZ = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7960((f32 *)D_800DF0F8[arg1], D_8008D3F8[i][0] * arg2 + pos.unk0, D_8008D3F8[i][1] * arg3 + pos.unk4,
-                      D_8008D3F8[i][2] * arg4 + pos.unk8, &sx, &sy, &sz);
+        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.unk0, D_8008D3F8[i][1] * halfY + objPos.unk4,
+                      D_8008D3F8[i][2] * halfZ + objPos.unk8, &sx, &sy, &sz);
         if (sz == 0.0f) {
-            sz = 9.999999747e-05f;
+            sz = 0.0001f;
         }
         sx /= sz;
         sy /= sz;
@@ -284,7 +268,7 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
             maxZ = sz;
         }
     }
-    if (maxX < 0.009999999776f || maxY < 0.009999999776f) {
+    if (maxX < 0.01f || maxY < 0.01f) {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
         return 0.0f;
@@ -301,11 +285,11 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
         D_800D368C = maxZ;
         do {
             f32 m = 1.0f;
-            guPerspectiveF(mtxA, &D_800DF0D0[arg1], func_150484A0(1.0f, D_800D3684) * 57.29577637f,
-                           func_150484A0(1.0f, D_800D3680) * 57.29577637f, -D_800D368C, -D_800D3688, fovScale);
-            func_150A7A48(D_800DF0F8[arg1], mtxA, mtxA);
+            guPerspectiveF(proj, &D_800DF0D0[slot], func_150484A0(1.0f, D_800D3684) * 57.29577637f,
+                           func_150484A0(1.0f, D_800D3680) * 57.29577637f, -D_800D368C, -D_800D3688, perspScale);
+            func_150A7A48(D_800DF0F8[slot], proj, proj);
             for (i = 0; i < 16; i++) {
-                v = ((f32 *)mtxA)[i];
+                v = ((f32 *)proj)[i];
                 if (v < 0.0f) {
                     v = -v;
                 }
@@ -316,33 +300,33 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
             if (m < 32767.0f) {
                 done = 1;
             } else {
-                fovScale *= 0.5f;
+                perspScale *= 0.5f;
             }
         } while (done == 0);
-        func_150A7CB0(mtxB, 0.5f, 0.5f, 1.0f);
-        func_150A7A48(mtxA, mtxB, mtxA);
-        guMtxF2L(mtxA, &D_800DF2F8[arg1][D_800BE9C0]);
+        func_150A7CB0(bias, 0.5f, 0.5f, 1.0f);
+        func_150A7A48(proj, bias, proj);
+        guMtxF2L(proj, &D_800DF2F8[slot][D_800BE9C0]);
     } else {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
         return 0.0f;
     }
     D_800DF088 = ((s32)D_800DE048 + 0x3F) & ~0x3F;
-    D_800DE02C = 0xFF - (*((u8 *)&D_800CC2D0[arg0] + 0x1DD) >> 1);
+    D_800DE02C = 0xFF - (((u8 *)&D_800CC2D0[objIndex].pad1DC)[1] >> 1);
     if (D_800DE02C > 185.0f) {
         D_800DE02C = 185.0f;
     }
-    if (D_800CC2D0[arg0].unkCC < -10.0f) {
-        D_800DE02C += D_800DE02C * (D_800CC2D0[arg0].unkCC + 10.0f) * 0.01999999955f;
+    if (D_800CC2D0[objIndex].unkCC < -10.0f) {
+        D_800DE02C += D_800DE02C * (D_800CC2D0[objIndex].unkCC + 10.0f) * 0.02f;
         if (D_800DE02C <= 5.0f) {
             return 0.0f;
         }
     }
-    return best;
+    return dist;
 }
 
 extern s32 func_150AD9A0(s32, s32, s32);
-extern s32 func_15184150(s32, f32 *, f32 *, f32 *);
+s32 func_15184150(s32, f32 *, f32 *, f32 *);
 extern f32 D_800D368C;
 
 s32 func_15184DF0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
@@ -363,9 +347,9 @@ s32 func_15184DF0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
         return 0;
     }
     func_15184150(arg0, arg2, arg3, arg4);
-    *arg2 *= 1.299999952f;
-    *arg3 *= 1.299999952f;
-    *arg4 *= 1.299999952f;
+    *arg2 *= 1.3f;
+    *arg3 *= 1.3f;
+    *arg4 *= 1.3f;
     if ((*arg2 == 0.0f) || (*arg3 == 0.0f) || (*arg4 == 0.0f)) {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
@@ -833,13 +817,13 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
     }
     if (D_800DE01C < D_8008D3E0) {
         D_8008D3E0 = D_800DE01C;
-        D_800DE028 *= 0.8000000119f;
+        D_800DE028 *= 0.8f;
     } else {
         if ((*(u16 *)&D_800B0DF0->pad1C[2]) == 0) {
             (*(u16 *)&D_800B0DF0->pad1C[2]) = 400;
         }
         if (D_8008D3E0 < D_800DE020) {
-            D_800DE028 += ((f32)(u32)(*(u16 *)&D_800B0DF0->pad1C[2]) - D_800DE028) * 0.9499999881f;
+            D_800DE028 += ((f32)(u32)(*(u16 *)&D_800B0DF0->pad1C[2]) - D_800DE028) * 0.95f;
         }
         if (D_8008D3E0 < D_800DE024) {
             D_8008D3E0 = D_800DE024;
