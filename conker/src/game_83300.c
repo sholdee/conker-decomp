@@ -5164,15 +5164,18 @@ void func_15061B4C(void) {
         }
     }
 }
-typedef struct { s16 x; s16 y; s16 z; u16 r; } Pt150623F4;
 s32 func_150229E4(struct127 *);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_800D9C10[];
 
-s32 func_150623F4(struct127 *arg0) {
+/*
+ * Whether the actor should be drawn: TRUE when it has no cull radius (unk144 +0x2A) or is a player, when
+ * a player is inside its path area, or when it is inside some player's view; FALSE if fully faded.
+ */
+s32 func_150623F4(struct127 *actor) {
     f32 scale;
     s32 sum;
-    s32 ok;
+    s32 hidden;
     s32 i;
     u8 idx;
     f32 dx;
@@ -5181,121 +5184,123 @@ s32 func_150623F4(struct127 *arg0) {
     s32 id;
     u8 *p;
 
-    scale = (arg0->unk144 != NULL) ? (f32)*(u16 *)((u8 *)arg0->unk144 + 0x2A) : 0.0f;
+    scale = (actor->unk144 != NULL) ? (f32)*(u16 *)((u8 *)actor->unk144 + 0x2A) : 0.0f;
     if (scale == 0.0f) {
         return 1;
     }
-    if (arg0->unk127 != 0xFF) {
+    if (actor->unk127 != 0xFF) {
         return 1;
     }
-    if ((D_800C3638 != 0) && (func_150229E4(arg0) != 0)) {
+    if ((D_800C3638 != 0) && (func_150229E4(actor) != 0)) {
         return 1;
     }
     sum = 0;
-    p = (u8 *)arg0;
+    p = (u8 *)actor;
     if (D_80082FA0 >= 0) {
         do {
             sum += p[0xB];
             p++;
-        } while (p <= (0, D_80082FA0) + (u8 *)arg0);
+        } while (p <= (0, D_80082FA0) + (u8 *)actor); // matching: the comma expression shapes the loop test
     }
     if (sum == 0) {
         return 0;
     }
-    if ((arg0->unk74 & 0xF) != 0xF) {
+    if ((actor->unk74 & 0xF) != 0xF) {
         return 1;
     }
-    idx = arg0->unk13F;
-    if ((*(u8 **)&D_800D2108)[0, idx] != 0) {
-        ok = 1;
+    idx = actor->unk13F;
+    if (D_800D2108[idx] != 0) {
+        hidden = 1;
         for (i = 0; i < D_8008FD8C; i++) {
-            dx = ((Pt150623F4 **)D_800D2104)[idx]->x - D_800CC2D0[i].x_position;
-            dz = ((Pt150623F4 **)D_800D2104)[idx]->z - D_800CC2D0[i].z_position;
-            if ((dx * dx) + (dz * dz) < ((Pt150623F4 **)D_800D2104)[idx]->r * ((Pt150623F4 **)D_800D2104)[idx]->r) {
-                ok = 0;
+            dx = ((PathPoint **)D_800D2104)[idx]->x - D_800CC2D0[i].x_position;
+            dz = ((PathPoint **)D_800D2104)[idx]->z - D_800CC2D0[i].z_position;
+            if ((dx * dx) + (dz * dz) < ((PathPoint **)D_800D2104)[idx]->param * ((PathPoint **)D_800D2104)[idx]->param) {
+                hidden = 0;
                 break;
             }
         }
-        if (!ok) {
+        if (!hidden) {
             return 1;
         }
     }
-    id = arg0->id;
-    height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * arg0->y_scale;
+    id = actor->id;
+    height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * actor->y_scale;
     for (i = 0; i <= D_80082FA0; i++) {
-        ok = 1;
-        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, &D_800D9C10[i * 0x40], arg0->x_position,
-                          arg0->y_position + height, arg0->z_position, scale, scale, 20000.0f) != 0) {
-            ok = 0;
+        hidden = 1;
+        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, &D_800D9C10[i * 0x40], actor->x_position,
+                          actor->y_position + height, actor->z_position, scale, scale, 20000.0f) != 0) {
+            hidden = 0;
             break;
         }
     }
-    if (!ok) {
+    if (!hidden) {
         return 1;
     }
     return 0;
 }
-void func_150626EC(struct127 *arg0, s32 arg1) {
+/* Removes the non-player actors carried by this one. */
+void func_150626EC(struct127 *actor, s32 mode) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
         if ((D_800CC2D0[i].interaction_state != 0) &&
-            (((arg0 - D_800CC2D0) + 1) == D_800CC2D0[i].unk65) &&
+            (((actor - D_800CC2D0) + 1) == D_800CC2D0[i].unk65) &&
             (D_800CC2D0[i].unk127 == 0xFF)) {
-            func_15060F28(&D_800CC2D0[i], arg1);
+            func_15060F28(&D_800CC2D0[i], mode);
         }
     }
 }
 
-void func_150627D4(struct127 *arg0) {
-    arg0->unk2FB = 0;
-    func_1503B840(arg0);
-    func_15039CC8(arg0);
+void func_150627D4(struct127 *actor) {
+    actor->unk2FB = 0;
+    func_1503B840(actor);
+    func_15039CC8(actor);
 }
 
 void func_15033EC4(s32 arg0, s32 arg1);
 
 #define OBJ_INDEX(obj) ((u32)((obj) - D_800CC2D0))
 
-void func_15062800(struct127 *arg0, struct127 *arg1) {
-    s32 idx0;
+/* Swaps two actor slots (b becomes the player with a camera), fixing up indices and carry links. */
+void func_15062800(struct127 *a, struct127 *b) {
+    s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
     s32 cam;
-    struct127 tmp;
-    struct129 *t;
+    struct127 swap;
+    struct129 *pad;
     s32 i;
     s32 u;
 
-    func_15146508(arg0, arg1);
-    bcopy(arg1, &tmp, sizeof(struct127));
-    bcopy(arg0, arg1, sizeof(struct127));
-    bcopy(&tmp, arg0, sizeof(struct127));
-    idx0 = OBJ_INDEX(arg0);
-    cam = (s32)&D_800DBFF0[OBJ_INDEX(arg1)];
-    arg1->unk127 = OBJ_INDEX(arg1);
-    arg1->unique_id = OBJ_INDEX(arg1) + 1;
-    arg1->unk13F = OBJ_INDEX(arg1);
-    arg1->camera = &D_800DBFF0[OBJ_INDEX(arg1)];
-    arg0->unk127 = OBJ_INDEX(arg0);
-    arg0->unique_id = OBJ_INDEX(arg0) + 1;
-    arg0->unk13F = OBJ_INDEX(arg0);
-    arg0->camera = NULL;
-    u = (s32)arg0->unk144;
-    arg0->unk144 = arg1->unk144;
-    arg1->unk144 = (struct129 *)u;
-    D_800DBFF0[OBJ_INDEX(arg1)].unk3D4 = (struct127 *) arg1->unk31C;
-    arg1->unk31C->pad196[1] = 0;
-    func_15033EC4(arg1->unique_id, arg0->unique_id);
-    if (*(struct102 **)arg1->pad2D4 != NULL) {
-        func_1516972C(*(struct102 **)arg1->pad2D4);
-        *(struct102 **)arg1->pad2D4 = NULL;
+    func_15146508(a, b);
+    bcopy(b, &swap, sizeof(struct127));
+    bcopy(a, b, sizeof(struct127));
+    bcopy(&swap, a, sizeof(struct127));
+    idx0 = OBJ_INDEX(a);
+    cam = (s32)&D_800DBFF0[OBJ_INDEX(b)];
+    b->unk127 = OBJ_INDEX(b);
+    b->unique_id = OBJ_INDEX(b) + 1;
+    b->unk13F = OBJ_INDEX(b);
+    b->camera = &D_800DBFF0[OBJ_INDEX(b)];
+    a->unk127 = OBJ_INDEX(a);
+    a->unique_id = OBJ_INDEX(a) + 1;
+    a->unk13F = OBJ_INDEX(a);
+    a->camera = NULL;
+    u = (s32)a->unk144;
+    a->unk144 = b->unk144;
+    b->unk144 = (struct129 *)u;
+    D_800DBFF0[OBJ_INDEX(b)].unk3D4 = (struct127 *) b->unk31C;
+    b->unk31C->pad196[1] = 0;
+    func_15033EC4(b->unique_id, a->unique_id);
+    if (*(struct102 **)b->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)b->pad2D4);
+        *(struct102 **)b->pad2D4 = NULL;
     }
-    if (*(struct102 **)arg0->pad2D4 != NULL) {
-        func_1516972C(*(struct102 **)arg0->pad2D4);
-        *(struct102 **)arg0->pad2D4 = NULL;
+    if (*(struct102 **)a->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)a->pad2D4);
+        *(struct102 **)a->pad2D4 = NULL;
     }
-    func_150615DC(arg1);
+    func_150615DC(b);
     for (i = 0; i < 25; i++) {
-        if (i == OBJ_INDEX(arg1) || i == OBJ_INDEX(arg0)) {
+        if (i == OBJ_INDEX(b) || i == OBJ_INDEX(a)) {
             continue;
         }
         if (D_800CC2D0[i].interaction_state == 0) {
@@ -5304,18 +5309,18 @@ void func_15062800(struct127 *arg0, struct127 *arg1) {
         u = D_800CC2D0[i].unk65;
         if (u != 0) {
             u--;
-            if (u == OBJ_INDEX(arg1)) {
-                D_800CC2D0[i].unk65 = OBJ_INDEX(arg0) + 1;
-            } else if (u == OBJ_INDEX(arg0)) {
-                D_800CC2D0[i].unk65 = OBJ_INDEX(arg1) + 1;
+            if (u == OBJ_INDEX(b)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(a) + 1;
+            } else if (u == OBJ_INDEX(a)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(b) + 1;
             }
         }
     }
-    if (arg1->unk13C >= 100) {
-        u8 x = arg1->unk13C - 100;
-        D_800CC2D0[x].unk13D = OBJ_INDEX(arg1) + 100;
+    if (b->unk13C >= 100) {
+        u8 x = b->unk13C - 100;
+        D_800CC2D0[x].unk13D = OBJ_INDEX(b) + 100;
     }
-    func_150627D4(arg1);
+    func_150627D4(b);
 }
 
 void func_15062AC4(struct127 *arg0) {
