@@ -25,7 +25,6 @@ extern void *func_1515FF74(void *, s32, u8, s32);
 extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
-extern void (*D_8008FC10[])(struct102 *, void **, u8);
 typedef struct {
     s32 field_0x0;
     u8 pad_0x4[0x8];
@@ -71,7 +70,7 @@ typedef struct SightActor {
     u8 pad184[0x154];
     f32 unk2D8;
     u8 pad2DC[0x3C];
-    u8 *unk318;
+    struct108 *player;
 } SightActor;
 
 /* Collision query context: set up from an actor by func_1504715C, filled in by func_15046C80. */
@@ -846,7 +845,7 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.start, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.end, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->unk318[0x23D], 0, obj->unkC, obj->unk1);
+        func_15164F0C(2, actor->player->unk23D, 0, obj->unkC, obj->unk1);
         s58.a = 1;
         s58.b = 40;
         s58.d = 1;
@@ -1301,9 +1300,9 @@ s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
 extern u8 D_800CBFA8[][0x32C];
 void func_151C9ED4(struct108 *player);
 void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
-void func_151CA6A0(void *, u8);
+void func_151CA6A0(struct108 *player, u8 big);
 void func_151CAD28(void *, u8);
-void func_151CAB78(void *arg0, u8 arg1);
+void func_151CAB78(struct108 *player, u8 big);
 void func_151CCE94(void *arg0);
 void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151CC524(void *, u8, u8, u8, u8, u8);
@@ -1415,7 +1414,7 @@ typedef struct {
     /* 0x10 */ u8  texture;
     /* 0x11 */ u8  pad11;
     /* 0x12 */ s16 lifetime;
-    /* 0x14 */ s16 flags;
+    /* 0x14 */ u16 flags;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
     /* 0x1A */ u8  unk1A;
@@ -1452,7 +1451,7 @@ typedef struct {
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
+    /* 0x0D */ u8 kind;
     /* 0x0E */ u8 padE[0xA];
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -1472,6 +1471,7 @@ typedef struct {
     SightSpritePayload payload;
 } SightSprite;
 
+extern void (*D_8008FC10[])(SightSprite *, void **, u8);
 extern SightColor D_800AAC80;
 extern SightColor D_800AAC90[];
 extern SightColor D_800AACE0[];
@@ -1491,7 +1491,7 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     payload.color1 = D_800AAC90[type];
     payload.unk4C = D_800AAD44[type] - 1.0f;
     payload.unk4 = 0.0f;
-    payload.unkD = 0;
+    payload.kind = 0;
     payload.unk8 = 130.0f;
     payload.player = player;
     payload.unkC = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
@@ -1525,7 +1525,7 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     payload.unk28 = 99999.0f;
     payload.unk18 = D_800AAD6C[type][D_80082FA0 == 1];
     payload.unk20 = D_800AAD94[type][D_80082FA0 == 1];
-    payload.unkD = 3;
+    payload.kind = 3;
 
     desc.red = D_800AAC90[type].r;
     desc.green = D_800AAC90[type].g;
@@ -1536,7 +1536,7 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 
-    payload.unkD = 0;
+    payload.kind = 0;
     desc.width = D_800AAD30[type] + 2.0f;
     desc.height = D_800AAD44[type] + 2.0f;
     desc.red = D_800AACE0[type].r;
@@ -1549,294 +1549,202 @@ void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     }
 }
 
-void func_151CA6A0(void *arg0, u8 arg1) {
-    typedef struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        u8  unk10;
-        u8  pad11;
-        s16 unk12;
-        u16 unk14;
-        s16 unk16;
-        s16 unk18;
-        u8  unk1A;
-        u8  unk1B;
-        u8  unk1C;
-        u8  unk1D;
-        u8  unk1E;
-        u8  unk1F;
-        u8  unk20;
-        u8  unk21;
-        u8  unk22;
-        u8  unk23;
-        s32 unk24;
-        s32 unk28;
-        s32 unk2C;
-        s32 unk30;
-        s32 unk34;
-        s32 unk38;
-        s32 unk3C;
-        u8  unk40;
-        u8  unk41;
-        u8  pad42[2];
-        u8  unk44;
-        u8  pad45[3];
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-    } struct_151CA6A0_spA0;
-    typedef struct {
-        void *unk0;
-        f32 unk4;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-        u8 padE[0xA];
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-        u8 pad2C[0x2C];
-    } struct_151CA6A0_sp44;
-    struct_151CA6A0_spA0 spA0;
-    void *temp_v0;
-    struct_151CA6A0_sp44 sp44;
-    s32 pad1;
-    s32 pad2;
+/* Spawns the four corner brackets and a ring of 12 dots of the basic sight for `player`. */
+void func_151CA6A0(struct108 *player, u8 big) {
+    SightSpriteDesc desc;
+    SightSprite *sprite;
+    SightSpritePayload payload;
+    s32 pad[2]; // matching: unused stack space in the original frame
 
-    sp44.unkD = 0;
-    sp44.unkC = 0;
-    spA0.unkC = 25.0f;
-    spA0.unk8 = 25.0f;
-    sp44.unk0 = arg0;
-    sp44.unk4 = 0.0f;
-    sp44.unk8 = 130.0f;
+    payload.kind = 0;
+    payload.unkC = 0;
+    desc.height = 25.0f;
+    desc.width = 25.0f;
+    payload.player = player;
+    payload.unk4 = 0.0f;
+    payload.unk8 = 130.0f;
     if (D_80082FA0 > 0) {
-        spA0.unk10 = 0x73;
+        desc.texture = 0x73;
     } else {
-        spA0.unk10 = 0x5D;
+        desc.texture = 0x5D;
     }
-    spA0.unk12 = 0x12C;
-    spA0.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
-    spA0.unk16 = 1;
-    spA0.unk18 = 0xFF;
-    spA0.unk1A = 7;
-    spA0.unk1B = 0;
-    spA0.unk1C = 0xFF;
-    spA0.unk1D = 0;
-    spA0.unk1E = 0x82;
-    spA0.unk1F = 0xFF;
-    spA0.unk20 = 0xFF;
-    spA0.unk21 = 0xFF;
-    spA0.unk22 = 0xFF;
-    spA0.unk23 = 0xFF;
-    spA0.unk24 = 0;
-    spA0.unk28 = 0x200004;
-    spA0.unk2C = 0x1F0601;
-    spA0.unk30 = 8;
-    spA0.unk34 = 0x44;
-    spA0.unk38 = 0x80;
-    spA0.unk3C = 0x20;
-    spA0.unk40 = 0;
-    spA0.unk41 = 0xA;
-    spA0.unk44 = *(u8 *)((s32)arg0 + 0x23D);
-    spA0.unk14 &= ~6;
-    spA0.unk14 |= 6;
-    spA0.unk0 = 25.0f;
-    spA0.unk4 = 25.0f;
-    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    desc.lifetime = 300;
+    desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
+    desc.unk16 = 1;
+    desc.unk18 = 0xFF;
+    desc.unk1A = 7;
+    desc.red = 0;
+    desc.green = 0xFF;
+    desc.blue = 0;
+    desc.alpha = 0x82;
+    desc.unk1F = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk21 = 0xFF;
+    desc.unk22 = 0xFF;
+    desc.unk23 = 0xFF;
+    desc.unk24 = 0;
+    desc.unk28 = 0x200004;
+    desc.unk2C = 0x1F0601;
+    desc.unk30 = 8;
+    desc.unk34 = 0x44;
+    desc.unk38 = 0x80;
+    desc.unk3C = 0x20;
+    desc.unk40 = 0;
+    desc.unk41 = 10;
+    desc.playerNum = player->unk23D;
+    desc.flags &= ~6;
+    desc.flags |= 6;
+    desc.x = 25.0f;
+    desc.y = 25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA0.unk14 &= ~6;
-    spA0.unk14 |= 4;
-    spA0.unk0 = -25.0f;
-    spA0.unk4 = 25.0f;
-    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 4;
+    desc.x = -25.0f;
+    desc.y = 25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA0.unk14 &= ~6;
-    spA0.unk14 |= 0;
-    spA0.unk0 = -25.0f;
-    spA0.unk4 = -25.0f;
-    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 0;
+    desc.x = -25.0f;
+    desc.y = -25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA0.unk14 &= ~6;
-    spA0.unk14 |= 2;
-    spA0.unk0 = 25.0f;
-    spA0.unk4 = -25.0f;
-    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 2;
+    desc.x = 25.0f;
+    desc.y = -25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     {
         s32 i;
 
-        spA0.unk0 = 0.0f;
-        spA0.unk4 = 0.0f;
-        spA0.unkC = 3.0f;
-        spA0.unk8 = 3.0f;
-        spA0.unk10 = 0x99;
-        spA0.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
-        spA0.unk30 = 8;
-        spA0.unk34 = 0x44;
-        sp44.unk28 = 99999.0f;
+        desc.x = 0.0f;
+        desc.y = 0.0f;
+        desc.height = 3.0f;
+        desc.width = 3.0f;
+        desc.texture = 0x99;
+        desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
+        desc.unk30 = 8;
+        desc.unk34 = 0x44;
+        payload.unk28 = 99999.0f;
         if (D_80082FA0 == 1) {
-            sp44.unk18 = -62.0f;
+            payload.unk18 = -62.0f;
         } else {
-            sp44.unk18 = -50.0f;
+            payload.unk18 = -50.0f;
         }
-        sp44.unk1C = 0.0f;
+        payload.unk1C = 0.0f;
         if (D_80082FA0 == 1) {
-            sp44.unk20 = 0.01612903178f;
+            payload.unk20 = 0.01612903178f;
         } else {
-            sp44.unk20 = 0.01999999955f;
+            payload.unk20 = 0.01999999955f;
         }
-        i = 0;
-        sp44.unk24 = 0.0f;
+        i = 0; // matching: the counter is initialised before the angle
+        payload.angle = 0.0f;
         for (; i < 12; i++) {
-            temp_v0 = func_1515548C(&spA0, 7, 0, 0, 0x58, 0xFF, 1);
-            if (temp_v0 != NULL) {
-                memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+            sprite = func_1515548C(&desc, 7, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+            if (sprite != NULL) {
+                memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
             }
-            sp44.unk24 += 0.5235987902f;
+            payload.angle += 0.5235987902f;
         }
     }
 }
 
-void func_151CAACC(struct102 *arg0, void **arg1, u8 arg2) {
-    void (*fn)(struct102 *, void **, u8);
-    void *temp;
+/* Message handler shared by sight sprites: removes the sprite when its player's effects are
+ * reset (0x21) or when message 0 names an actor controlled by that player, then runs the
+ * handler for the sprite's kind. */
+void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
+    void (*handler)(SightSprite *, void **, u8);
+    SightActor *actor;
 
-    if (arg2 == 0x21) {
-        if (*(s32 *)((s32)arg0 + 0x70) == *(s32 *)arg1) {
-            func_1516972C(arg0);
-        label_151CAACC:
+    if (msgId == 0x21) {
+        if (sprite->payload.player == *(struct108 **)msg) {
+            func_1516972C((struct102 *)sprite);
+        // matching: an empty labelled statement keeps IDO from merging this branch's exit
+        label:
             ;
         }
-    } else if (arg2 == 0) {
-        temp = *arg1;
-        if (*(s32 *)((s32)arg0 + 0x70) == *(s32 *)((s32)temp + 0x318)) {
-            func_1516972C(arg0);
+    } else if (msgId == 0) {
+        actor = *msg;
+        if (actor->player == sprite->payload.player) {
+            func_1516972C((struct102 *)sprite);
         }
     }
-    fn = D_8008FC10[*(u8 *)((s32)arg0 + 0x7D)];
-    if (fn != NULL) {
-        fn(arg0, arg1, arg2);
+    handler = D_8008FC10[sprite->payload.kind];
+    if (handler != NULL) {
+        handler(sprite, msg, msgId);
     }
 }
 
-void func_151CAB78(void *arg0, u8 arg1) {
-    typedef struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        u8  unk10;
-        u8  pad11;
-        s16 unk12;
-        s16 unk14;
-        s16 unk16;
-        s16 unk18;
-        u8  unk1A;
-        u8  unk1B;
-        u8  unk1C;
-        u8  unk1D;
-        u8  unk1E;
-        u8  unk1F;
-        u8  unk20;
-        u8  unk21;
-        u8  unk22;
-        u8  unk23;
-        s32 unk24;
-        s32 unk28;
-        s32 unk2C;
-        s32 unk30;
-        s32 unk34;
-        s32 unk38;
-        s32 unk3C;
-        u8  unk40;
-        u8  unk41;
-        u8  pad42[2];
-        u8  unk44;
-        u8  pad45[3];
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-    } struct_151CAB78_sp90;
-    typedef struct {
-        void *unk0;
-        f32 unk4;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-        u8 padE[0x4E];
-    } struct_151CAB78_sp34;
-    struct_151CAB78_sp90 sp90;
-    struct_151CAB78_sp34 sp34;
-    void *temp_v0;
-    s32 temp_type;
-    f32 temp_f0;
+/* Spawns the plain dot sight for `player`. */
+void func_151CAB78(struct108 *player, u8 big) {
+    SightSpriteDesc desc;
+    s32 pad; // matching: unused stack slot
+    SightSpritePayload payload;
+    SightSprite *sprite;
+    s32 kind;
+    f32 scale;
 
-    sp34.unk0 = arg0;
-    sp34.unk4 = 0.0f;
-    sp34.unkD = 0;
-    sp34.unkC = 0;
-    sp34.unk8 = 130.0f;
+    payload.player = player;
+    payload.unk4 = 0.0f;
+    payload.kind = 0;
+    payload.unkC = 0;
+    payload.unk8 = 130.0f;
 
     if (D_80082FA0 > 0) {
-        temp_f0 = 2.0f;
+        scale = 2.0f;
     } else {
-        temp_f0 = 1.0f;
+        scale = 1.0f;
     }
 
-    sp90.unk10 = 0x64;
-    sp90.unk12 = 0x12C;
-    sp90.unkC = temp_f0 * 12.0f;
-    sp90.unk8 = sp90.unkC;
-    sp90.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
-    sp90.unk16 = 1;
-    sp90.unk18 = 0xFF;
-    sp90.unk1A = 7;
-    sp90.unk1B = 0xFF;
-    sp90.unk1C = 0xC8;
-    sp90.unk1D = 0;
-    sp90.unk1E = 0x82;
-    sp90.unk1F = 0xFF;
-    sp90.unk20 = 0xFF;
-    sp90.unk21 = 0xFF;
-    sp90.unk22 = 0xFF;
-    sp90.unk23 = 0xFF;
-    sp90.unk24 = 0;
-    sp90.unk28 = 0x200004;
-    sp90.unk2C = 0x1F0601;
-    sp90.unk30 = 8;
-    sp90.unk34 = 0x44;
-    sp90.unk38 = 0x80;
-    sp90.unk3C = 0x20;
-    sp90.unk40 = 0;
-    sp90.unk41 = 0xA;
-    sp90.unk0 = 0.0f;
-    sp90.unk4 = 0.0f;
-    sp90.unk44 = *(u8 *)((s32)arg0 + 0x23D);
+    desc.texture = 100;
+    desc.lifetime = 300;
+    desc.height = scale * 12.0f;
+    desc.width = desc.height;
+    desc.flags = (1 << (player->unk23D + 11)) | 0x50;
+    desc.unk16 = 1;
+    desc.unk18 = 0xFF;
+    desc.unk1A = 7;
+    desc.red = 0xFF;
+    desc.green = 200;
+    desc.blue = 0;
+    desc.alpha = 130;
+    desc.unk1F = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk21 = 0xFF;
+    desc.unk22 = 0xFF;
+    desc.unk23 = 0xFF;
+    desc.unk24 = 0;
+    desc.unk28 = 0x200004;
+    desc.unk2C = 0x1F0601;
+    desc.unk30 = 8;
+    desc.unk34 = 0x44;
+    desc.unk38 = 0x80;
+    desc.unk3C = 0x20;
+    desc.unk40 = 0;
+    desc.unk41 = 10;
+    desc.x = 0.0f;
+    desc.y = 0.0f;
+    desc.playerNum = player->unk23D;
 
-    if (arg1 != 0) {
-        temp_type = 4;
+    if (big) {
+        kind = 4;
     } else {
-        temp_type = 0;
+        kind = 0;
     }
 
-    temp_v0 = func_1515548C(&sp90, temp_type, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp34, 0x58);
+    sprite = func_1515548C(&desc, kind, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 }
 
