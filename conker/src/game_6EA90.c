@@ -498,20 +498,17 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     return gfx;
 }
 
-typedef struct {
-    u8 width;
-    u8 height;
-    u8 unk2;
-    u8 unk3;
-} Glyph150428D4;
-
+/*
+ * Measures str as drawn by func_150417AC at scale 1.0: the widest line, the total height (lines of at
+ * least 12) and how far icons are raised above the baseline (depth), all in screen units.
+ */
 void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
     s32 maxWidth;
     s32 lineHeight;
     s32 i;
     u8 c;
     u8 font;
-    s32 tmp;
+    s32 glyphHeight;
     s32 isGlyph;
 
     if (str != NULL) {
@@ -523,10 +520,10 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
         i = 0;
         font = 0;
         if (*str == 0) {
-            *height += 0xC;
+            *height += 12;
         }
         while (str[i] != 0) {
-            if (str[i] == 0xBC) {
+            if (str[i] == 0xBC) { // escape code: skip it and its argument byte
                 i += 2;
                 continue;
             }
@@ -535,34 +532,35 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
                 isGlyph = 0;
                 if (c == 0x60) {
                     *width += 4;
-                    if (lineHeight < 0xC) {
-                        lineHeight = 0xC;
+                    if (lineHeight < 12) {
+                        lineHeight = 12;
                     }
                 } else if (c > 0xA0 && c < 0xA8) {
+                    // control code: no size
                 } else if (c >= 0xA8 && c < 0x100) {
                     s32 w;
                     s32 h;
-                    f32 off;
-                    s32 unused;
+                    f32 yOffset;
+                    s32 noCombine;
                     f32 scale;
-                    s32 tmp2;
-                    func_150415E0(c, &w, &h, &off, &unused, &scale);
-                    *width = *width + w * scale;
-                    tmp2 = (s32)((s32)(h * scale) - off) + 1;
-                    if (lineHeight < tmp2) {
-                        lineHeight = tmp2;
+                    s32 iconHeight;
+                    func_150415E0(c, &w, &h, &yOffset, &noCombine, &scale);
+                    *width += w * scale;
+                    iconHeight = (s32)((s32)(h * scale) - yOffset) + 1;
+                    if (lineHeight < iconHeight) {
+                        lineHeight = iconHeight;
                     }
-                    if (*depth < off) {
-                        *depth = off;
+                    if (*depth < yOffset) {
+                        *depth = yOffset;
                     }
-                } else if (c < 0xA1) {
+                } else if (c < 0xA1) { // matching: always true here, but the test is in the original
                     if (str[i] == '\n') {
                         if (maxWidth < *width) {
                             maxWidth = *width;
                         }
                         *width = 0;
-                        if (lineHeight < 0xC) {
-                            lineHeight = 0xC;
+                        if (lineHeight < 12) {
+                            lineHeight = 12;
                         }
                         *height += lineHeight;
                         lineHeight = 0;
@@ -575,9 +573,9 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
             }
             if (isGlyph) {
                 *width += D_80085994[font][c].w + D_80085994[font][c].x - 1;
-                tmp = D_80085994[font][c].h + D_80085994[font][c].y;
-                if (lineHeight <= tmp) {
-                    lineHeight = tmp;
+                glyphHeight = D_80085994[font][c].h + D_80085994[font][c].y;
+                if (lineHeight <= glyphHeight) {
+                    lineHeight = glyphHeight;
                 }
             }
             i++;
@@ -586,9 +584,9 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
             *width = maxWidth;
         }
         *height += lineHeight;
-        *width = *width * D_800380A0;
-        *height = *height * D_800380A4;
-        *depth = *depth * D_800380A0;
+        *width *= D_800380A0;
+        *height *= D_800380A4;
+        *depth *= D_800380A0;
     }
 }
 
