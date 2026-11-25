@@ -1,18 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, s32 argA, u8 argB);
 void func_151D3FF4(Vec3f *, u8, s32);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
 
 /* Spawn parameters for a streak particle (see func_15156190 in game_183640.c). */
 typedef struct {

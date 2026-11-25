@@ -1,30 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 s32 func_150DBD70(u8 kind);
-
-/* Spawn template of a sprite (as declared in game_169510.c). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;           /* faded out with the lifetime */
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 viewportMask;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 fadeStart;
-    /* 0x24 */ s16 fadeRate;
-    /* 0x26 */ u8 pad26[2];
-} SpriteDef; /* size 0x28 */
 
 /* Sprite effect created by func_1513C350 (see game_169510.c); only the template is used here. */
 typedef struct {

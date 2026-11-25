@@ -6,9 +6,8 @@
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
- *   ParticleDef, FxParticle, SpriteDef, SpriteFx  - the particle/sprite system of game_169510.c
+ *   FxParticle, SpriteFx                         - the particle/sprite system of game_169510.c
  *   PhysicsParticle, ParticleFloor               - the pooled physics particles of game_15F680.c
- *   PuffSpray                                  - func_15151A38's argument (game_17CAF0.c)
  */
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
@@ -18,20 +17,6 @@ typedef struct {
     /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
 } FxParticle;
-
-/* Spawn template of a sprite (func_1513C4EC's def), copied to SpriteFx.def. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;           /* faded out with the lifetime (flag 0x8000) */
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x18 */ u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    /* 0x1C */ u8 pad1C[0x10];
-} SpriteDef; // matching: 0x2C here, 0x28 in game_169510.c; the extra word keeps func_150B9D8C's frame layout
 
 /* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
 typedef struct {
@@ -316,7 +301,7 @@ typedef struct {
 /* When unk98 is -1, spawns a flat sprite (updated by func_150B961C) at (unk9C, unkA6 + 2, unkA0),
  * unkA2 wide and long, with a random angle and flip. */
 void func_150B9D8C(Obj150B9D8C *obj) {
-    SpriteDef def;
+    SpriteDef2C def;
     s32 randFlipHi;
     s32 randFlipLo;
     s32 randAngle;

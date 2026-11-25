@@ -39,28 +39,6 @@ typedef struct {
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
 
-/* Sprite template (as game_169510.c's SpriteDef). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 frame;      /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 renderModes;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 viewportMask;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 fadeStart;
-    /* 0x24 */ s16 fadeRate;
-    /* 0x26 */ u8 pad26[2];
-} SpriteDef;
-
 /* Eases a sprite's animation speed toward a target that is re-picked at random intervals. */
 typedef struct {
     /* 0x00 */ Watcher *owner;

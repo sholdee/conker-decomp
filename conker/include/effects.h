@@ -1480,6 +1480,51 @@ typedef struct DebrisScatter {
     /* 0x60 */ void *extraData;     /* copied into each piece at +0x170 */
 } DebrisScatter; /* size 0x64 */
 
+/* Spawn template of a sprite: func_1513C350 / func_1513C4EC (game_169510.c) copy it to the sprite at +0x18. */
+typedef struct SpriteDef {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 texture;          /* D_80090B60 index, 0xFF = untextured */
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 frame;           /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 unk10;            /* faded out with the lifetime (flag 0x8000) */
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 rgba[4];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 renderModes;     /* low byte: D_800A4AC8 index, high half: combiner index */
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 viewportMask;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 fadeStart;       /* lifetime below which unk10 / rgba[3] fade */
+    /* 0x24 */ s16 fadeRate;
+    /* 0x26 */ u8 pad26[2];
+} SpriteDef; /* size 0x28 */
+
+/* matching: a 0x2C stack copy of SpriteDef (game_E6A10.c); the extra word keeps func_150B9D8C's frame layout. */
+typedef struct SpriteDef2C {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 texture;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 rgba[4];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 renderModes;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 viewportMask;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 fadeStart;
+    /* 0x24 */ s16 fadeRate;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ u8 pad28[4];
+} SpriteDef2C; /* size 0x2C */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

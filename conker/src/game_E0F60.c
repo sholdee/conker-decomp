@@ -1,18 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, s32);
 extern void func_151D3FF4(Vec3f *, u8, s32);
 extern Vec3f D_8009FBC0; // a point in bone space
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
 
 /* Spawn parameters for a streak particle (copy of game_183640.c's StreakParticleDesc). */
 typedef struct {

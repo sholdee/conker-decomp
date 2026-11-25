@@ -142,28 +142,6 @@ typedef struct {
     /* 0x98 */ StreamState *state;
 } StreamActor;
 
-/* Spawn template of a flat sprite (see func_1513C5B0). */
-typedef struct {
-    s32 flags;
-    s16 lifetime;
-    u8 texture; /* D_80090B60 index */
-    u8 unk7;
-    s32 frame;
-    s32 frameSpeed;
-    u8 unk10;
-    u8 unk11;
-    u8 rgba[4];
-    u8 unk16;
-    u8 unk17;
-    u32 renderModes;
-    s32 unk1C;
-    u8 viewportMask;
-    u8 pad21;
-    s16 fadeStart;
-    s16 fadeRate;
-    u8 pad26[2];
-} SpriteDef; /* size 0x28 */
-
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);

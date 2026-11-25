@@ -24,28 +24,6 @@ typedef struct {
     s32 unk1C;
 } ModelLink; /* size 0x20 */
 
-/* Spawn template of a sprite, copied to SpriteFx.def. */
-typedef struct {
-    s32 flags;
-    s16 lifetime;
-    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    u8 unk7;
-    s32 frame;          /* 16.16 animation frame */
-    s32 frameSpeed;
-    u8 unk10;           /* faded out with the lifetime (flag 0x8000) */
-    u8 unk11;
-    u8 rgba[4];
-    u8 unk16;
-    u8 unk17;
-    u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    s32 unk1C;
-    u8 viewportMask;
-    u8 pad21;
-    s16 fadeStart;      /* lifetime below which unk10 / rgba[3] fade */
-    s16 fadeRate;
-    u8 pad26[2];
-} SpriteDef; /* size 0x28 */
-
 /* Textured quad effect (with optional model) created by func_1513C350. */
 typedef struct {
     u8 pad0[0x10];
