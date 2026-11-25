@@ -240,7 +240,6 @@ typedef struct ParticleRenderMode {
 
 extern s32 (*D_80089804[])(Particle *, s16);
 extern ParticleRenderMode D_800A4AC8[];
-extern s32 D_800D2C9C;
 s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);

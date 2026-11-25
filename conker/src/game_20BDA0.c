@@ -47,7 +47,6 @@ void func_151E2834(void);
 extern s32 D_800E0A90;
 extern u8 D_800E0B96;
 extern u8 D_8008FDA4;
-extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
 /* One entry of the menu's game-mode table (D_800AB68C[]) */
 typedef struct {
     /* 0x0 */ s16 nameText;
@@ -79,7 +78,6 @@ s32 func_1509D08C(s32, s32, s32 *, s32 *);
 extern s8 D_8008FD70;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
-extern s32 D_800BE3E4;
 extern s8 D_800E0BB1;
 
 extern s8 D_800E0BE0[];

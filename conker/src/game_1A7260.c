@@ -175,7 +175,6 @@ Gfx *func_1517A394(Gfx *gfx) {
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* 0x800D35E4 has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern s32 D_800D2C9C;
 extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
 extern u8 D_8008CDF0[];
 
@@ -305,7 +304,6 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern s32 D_800DD1B0; /* texture last loaded by func_1517A9A8 */
 extern u8 D_80090614[];
 
 /* Loads particle texture `texture` unless it is already the current one. */

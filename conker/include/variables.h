@@ -791,6 +791,7 @@ extern u16 D_800B87A0[]; // per texture: size
 
 extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
+extern u32 D_800BE3E4; // saved clock (seconds)
 extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;
 extern BounceRecord *D_800BE4E0;
@@ -801,6 +802,9 @@ extern u8  D_800BE575;
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
 extern u8  D_800BE5E0;
+extern u8 D_800BE619;
+extern u8 D_800BE61A;
+extern u16 D_800BE930[4]; // button bits per controller (menu reads)
 extern u8  D_800BE9A0;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
@@ -873,6 +877,7 @@ extern OSContPad D_800BE748[4];   // per-player controller pads
 extern s32 D_800BEA00;
 extern s32 D_800BEA04;
 extern s32 D_800BEA08;
+extern u8 D_800BEA0C;
 extern OSMesgQueue D_800BEA10;
 extern OSMesg      D_800BEA28;
 extern OSScMsg D_800BEA68[2]; // "task done" messages, one per frame buffer
@@ -889,6 +894,7 @@ extern u64 D_800C1060[]; // RSP ucode text buffer
 extern u16 D_800C18B8[];
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
+extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern struct168 D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
@@ -933,6 +939,7 @@ extern s32 D_800C6860[];
 extern u8  D_800C68A0;
 extern u8  D_800C68A1;
 
+extern u8 D_800CBDD3;
 extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 extern u8  D_800CBD60;
 extern u8  D_800CBD61;
@@ -971,6 +978,7 @@ extern s32 D_800CC288;
 extern TexAnimState D_800CC298;
 extern u8  D_800CC2A2;
 
+extern s16 D_800CC2B2;
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
@@ -1056,6 +1064,7 @@ extern SpawnRecord *D_800D20FC;
 
 extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
+extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
@@ -1267,6 +1276,7 @@ extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD9
 extern u8   D_800DCDD0;
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
+extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 
@@ -1344,6 +1354,7 @@ extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display l
 /* 800E0000 */
 extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
 extern struct TrailTask *D_800E0920; // type in 1CA420
+extern u8 D_800E0A00;
 extern u8 **D_800E0B88; // bank 2 text strings (80)
 extern u8   D_800E0B94;
 extern s8   D_800E0C20;

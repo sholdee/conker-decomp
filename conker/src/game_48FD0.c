@@ -14,7 +14,6 @@ extern u8 D_80084060[];
 extern OSTimer D_800BE6E0;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
-extern u8 D_800E0A00;
 
 void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
@@ -31,7 +30,6 @@ extern u16 D_800BE700[];
 extern u16 D_800BE708[];
 extern u16 D_800BE718[];
 extern u8 D_800BE740;
-extern u16 D_800BE930[];
 extern u8 D_800E0B95;
 void func_1501C57C(void);
 void func_151DD8C0(void);

@@ -569,7 +569,6 @@ typedef struct {
     s32 unk4;
 } Mode151D80C4;
 extern Mode151D80C4 D_800A4AC8[];
-extern s32 D_800D2C9C;
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);

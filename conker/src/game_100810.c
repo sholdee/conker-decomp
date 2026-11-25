@@ -527,7 +527,6 @@ void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
 extern Vec3f *func_15144B34(s32);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern u8 D_80091100[];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;

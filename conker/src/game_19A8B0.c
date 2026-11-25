@@ -271,7 +271,6 @@ typedef struct ParticleTexture {
 } ParticleTexture;
 
 extern ParticleTexture *D_8008CA4C[];
-extern s32 D_800D2C9C;
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;

@@ -69,7 +69,6 @@ typedef struct {
 } TextureInfo;
 
 extern TextureInfo D_80090B60[];
-extern s32 D_800D2C9C;
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 extern Rope *D_800DCE50[][104];    // object lists, [group][list]
 

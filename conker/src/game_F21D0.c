@@ -168,11 +168,10 @@ void func_150C522C(void) {
     }
 }
 
-extern u8 D_800C35E8;
 
-/* Returns whether D_800C35EA is 1 and D_800C35E8 is 0xB, 0xC or 0xD. */
+/* Returns whether D_800C35EA is 1 and D_800C35E8[0] is 0xB, 0xC or 0xD. */
 s32 func_150C5280(void) {
-    if (D_800C35EA[0] == 1 && (D_800C35E8 == 0xB || D_800C35E8 == 0xC || D_800C35E8 == 0xD)) {
+    if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 0xB || D_800C35E8[0] == 0xC || D_800C35E8[0] == 0xD)) {
         return TRUE;
     }
     return FALSE;

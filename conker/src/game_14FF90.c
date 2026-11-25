@@ -24,7 +24,6 @@ typedef struct CamSound {
 } CamSound;
 
 extern f32 D_800895B0;
-extern u8 D_800BEA0C;
 extern f32 D_800DC000;
 extern f32 D_800C3614;
 extern f32 D_800C3618;

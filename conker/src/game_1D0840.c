@@ -154,7 +154,6 @@ typedef struct {
     /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
-extern s32 D_800D2C9C;
 extern u8 D_80090CD4[];
 
 void *func_1513418C(void *, s32, u8, s32);

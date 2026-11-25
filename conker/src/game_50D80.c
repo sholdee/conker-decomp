@@ -37,7 +37,6 @@ extern SeqTrackInfo *D_800C35F0[];
 extern s32 D_800C35B0[];           /* current time */
 extern s32 D_800C35B8[];           /* time at the previous update */
 extern s32 D_800C3640[];           /* end time */
-extern u8 D_800C35E8[];            /* changes with each run of the scene */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
@@ -430,7 +429,6 @@ extern f32 D_800C3674;
 extern f32 D_800C3678;
 extern s32 D_800C367C;
 extern u8 D_800C3662;
-extern u8 D_800BEA0C;
 extern u8 D_800C3680;
 extern u8 D_800DBEAC;
 extern s32 D_800D2450;

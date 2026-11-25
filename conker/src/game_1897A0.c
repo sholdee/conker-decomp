@@ -122,7 +122,6 @@ extern struct {
     s32 unk0;
     s32 unk4;
 } D_800A4AC8[];
-extern s32 D_800D2C9C;
 
 extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
 extern void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,

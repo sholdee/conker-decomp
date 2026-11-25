@@ -75,7 +75,6 @@ extern u8 D_8008FDA4;
 extern s16 D_800E0B9A;
 extern u8 D_800E0B95;
 extern u8 D_800E0BDC;
-extern u16 D_800BE930;
 extern s32 D_800AB754[];
 extern void (*D_800E0A88)(void);
 extern s8 D_8008FDE0;
@@ -102,7 +101,6 @@ extern s16 D_8008FDAC;
 extern u8 D_8008FDB4;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
-extern s32 D_800BE3E4;
 extern s8 D_800D23A8;
 extern u8 D_800E0B99;
 extern s8 D_800E0BB1;
@@ -1277,7 +1275,7 @@ void func_151E51EC(void) {
     D_800E0BDC = 0xFF;
     func_15042D78(0x81);
 
-    D_800E0B9A = D_800BE930;
+    D_800E0B9A = D_800BE930[0];
     timer = D_8008FE28;
     if (timer != 0) {
         D_8008FE28 = timer - 1;

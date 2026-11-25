@@ -232,7 +232,6 @@ Gfx *func_151106A8(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800C35E8;
 
 /* Returns how much of the sky shows for the camera at (x, y, z) looking at (pitch, yaw) on the current map
  * D_800BE9F0: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
@@ -307,7 +306,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (D_800C35EA[0] == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
+        if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -715,7 +714,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
             yaw += 360.0f;
         }
     } else if (D_800BE9F0 == 0x3C ||
-               (D_800BE9F0 == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
+               (D_800BE9F0 == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
         gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
                             RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }

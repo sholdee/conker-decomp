@@ -349,7 +349,6 @@ typedef struct {
 
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern s32 D_800D2C9C;
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
 Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {

@@ -222,7 +222,6 @@ extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
 extern s32 D_800DD1B4;
-extern s32 D_800DD1B0[];
 extern s16 D_800DD1C6;
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
@@ -235,7 +234,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         func_150A7D00(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (D_800DD1B4 != shadow->texture) {
-            D_800DD1B0[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
+            (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
             tex = func_1510D0EC(D_80091770[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);

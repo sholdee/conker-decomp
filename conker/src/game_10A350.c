@@ -264,7 +264,6 @@ typedef struct {
 
 extern Game10A350Texture D_80090B60[];
 extern Mode150DD640 D_800A4AC8[];
-extern s32 D_800D2C9C;
 void *memcpy(void *, const void *, u32);
 void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
 Gfx *func_15142E24(Gfx *gfx, Game10A350Texture *texture, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);

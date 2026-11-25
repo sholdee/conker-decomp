@@ -130,8 +130,6 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern s32 D_80091564[];
 extern s32 D_800915A4;
-extern s32 D_800DD1B0;
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;

@@ -77,7 +77,6 @@ typedef struct {
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)
 
 
-extern s32 D_800BE3E4;
 extern s16 D_800C3FF4[3];
 extern void func_1503DE70(Actor *, s32, s32);
 extern void func_1504BAF0(Actor *);

@@ -72,7 +72,6 @@ extern void func_151478F4(void *);
 extern void func_15147928(void *);
 extern u8 D_80091430[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 /* Appends the owner's position to the trail and recomputes the previous sample's normal. */
 s32 func_151D15D0(TrailActor *actor) {

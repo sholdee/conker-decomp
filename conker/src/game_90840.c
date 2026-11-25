@@ -9,7 +9,6 @@ s32 func_100109D0();
 s32 func_10010A3C();
 #include "variables.h"
 
-extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 void func_15143134(void *, f32 *, s32);
 void func_1506AC8C(Actor *, s32, void *);

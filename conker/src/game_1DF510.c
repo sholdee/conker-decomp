@@ -361,7 +361,6 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 extern void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern u8 D_80090DE8[];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;

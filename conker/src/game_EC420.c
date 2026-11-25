@@ -123,7 +123,6 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     return 0;
 }
 
-extern u8 D_800C35E8;
 
 /*
  * Behaviour scratch state (WorldObject.work) of func_150BF21C: an object whose mesh is translated toward a
@@ -167,7 +166,7 @@ void func_150BF21C(WorldObject *obj) {
     rate = 0.05f;
     if (D_800C35EA[0] == 0) {
         paused = FALSE;
-    } else if (D_800C35E8 == 1) {
+    } else if (D_800C35E8[0] == 1) {
         paused = FALSE;
     } else {
         paused = TRUE;
@@ -272,7 +271,7 @@ void func_150BF760(WorldObject *obj) {
     s32 slot;
     f32 progress = 0.0f;
 
-    if (D_800C35EA[0] != 1 || D_800C35E8 == 1) {
+    if (D_800C35EA[0] != 1 || D_800C35E8[0] == 1) {
         func_1511B51C(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);

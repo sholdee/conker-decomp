@@ -39,7 +39,6 @@ extern SpriteTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern Pair1515572C D_800A6038;
-extern s32 D_800D2C9C;
 extern ScreenSprite *D_800DCE50[2][0x68];
 
 extern s32 func_15181CC8(s32);

@@ -217,7 +217,6 @@ void func_151D8DB4(s32 data, u8 message) {
     func_15169260(D_800AB300, 1, data, message);
 }
 
-extern u8 D_800E0A00;
 
 /* Sets D_800E0A00 and releases every rumble object (message 0x58). */
 void func_151D8DE8(void) {

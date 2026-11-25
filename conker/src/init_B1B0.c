@@ -58,7 +58,6 @@ extern s32 D_80041890[3];             /* last marker position */
 extern s32 D_800418A0[3];             /* distance between the last two marker positions */
 extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack D_800419A8[12];     /* track pool */
-extern u8 D_800C35E8;
 
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
@@ -539,10 +538,10 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 1);
             func_1000E40C(35, 25000);
-        } else if (D_800C35E8 == 3) {
+        } else if (D_800C35E8[0] == 3) {
             func_1000E40C(35, 250);
             func_15178EFC(2);
-        } else if (D_800C35E8 == 6) {
+        } else if (D_800C35E8[0] == 6) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 0x40);
             func_15178EFC(2);

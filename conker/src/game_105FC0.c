@@ -538,7 +538,6 @@ Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern u8 D_80091238[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
 Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {

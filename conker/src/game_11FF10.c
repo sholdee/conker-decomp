@@ -294,7 +294,6 @@ f32 func_150F34A0(Actor *obj, f32 pitch) {
 }
 
 extern u8 D_800CC26D;
-extern u8 D_800CBDD3;
 void func_150585F0(Actor *arg0, f32 arg1);
 void func_15052590(Actor *arg0);
 u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);

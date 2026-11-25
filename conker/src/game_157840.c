@@ -537,7 +537,6 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
 
 extern u8 D_80089120[];
 extern u8 D_800CBDD2;
-extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;
 s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 

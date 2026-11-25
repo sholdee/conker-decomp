@@ -647,13 +647,10 @@ Gfx *func_15019E60(Gfx *gfx) {
 }
 
 extern u32 D_800BE610;
-extern u8 D_800BE619;
-extern u8 D_800BE61A;
 extern s32 D_800BE9AC;
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
-extern u8 D_800BEA0C;
 // The last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder.
 // (Defined with 11 entries so tools/rodata_extern.py keeps the [10] access on this symbol.)
 f32 D_800BE5E8[11];

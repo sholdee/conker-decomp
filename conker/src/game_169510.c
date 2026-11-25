@@ -439,7 +439,6 @@ typedef struct {
     s32 unk4;
 } RenderModePair;
 extern RenderModePair D_800A4AC8[];
-extern u32 D_800D2C9C;
 Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -501,7 +500,7 @@ Gfx *func_1513CBF0(Gfx *gfx, SpriteFx *sprite, s16 viewport) {
         gfx = func_1513F4E4(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((sprite->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                ((sprite->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
 
@@ -908,7 +907,7 @@ Gfx *func_1513DB00(Gfx *gfx, Particle *particle, s16 viewport) {
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((particle->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                ((particle->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
         gSPVertex(gfx++, vtx, 4, 0);

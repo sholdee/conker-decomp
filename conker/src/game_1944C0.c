@@ -207,7 +207,6 @@ void func_15167310(void) {
 
 extern Mtx D_80089470;
 extern s32 D_800BEBA4;
-extern u32 D_800DD1B0;
 extern s32 D_800DD1B4;
 extern s32 D_800DD1B8;
 extern s16 D_800DD1BC;
@@ -266,7 +265,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 D_800DD228 = NULL;
                 D_800DD220 = 0;
                 D_800DD224 = 2;
-                D_800DD1B0 = -1;
+                *(u32 *)&D_800DD1B0 = -1; // matching: an unsigned store keeps the -1 in its own register
                 D_800DD1B4 = -1;
                 D_800DD1B8 = -1;
                 D_800DD1BC = 0;
@@ -586,7 +585,6 @@ Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern s32 D_800D2C9C;
 
 /* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {

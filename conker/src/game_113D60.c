@@ -72,7 +72,6 @@ extern Game113D60StartCallback D_80088A20[];
 extern Game113D60EndCallback D_80088A2C[];
 extern Game113D60MotionCallback D_80088A34[];
 extern Game113D60Source D_800A1190[];
-extern u8 D_800C35E8;
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
@@ -84,7 +83,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8 != 9))) {
+    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {

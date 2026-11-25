@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800BEA0C;
 extern u8 D_800C365E[];
 
 f32 func_1506AD30(Actor *obj, f32 time, s32 arg2);

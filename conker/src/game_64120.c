@@ -972,7 +972,6 @@ typedef struct {
 void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
                    f32 fallbackPitch, s32 objIndex, s32 slot);
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
-extern u8 D_800BEA0C;
 extern u8 D_800C3FDC;
 extern f32 D_800C3FE0;
 extern f32 D_800C3FE4;

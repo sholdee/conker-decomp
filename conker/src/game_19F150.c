@@ -143,7 +143,6 @@ extern s16 D_800DD1C0;
 extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
 extern s16 D_800DD1C6;
-extern s32 D_800D2C9C;
 /* Filled in by func_15094F70; unused here. */
 struct TexState151720C4 {
     s32 unk0[5];

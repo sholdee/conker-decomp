@@ -9,7 +9,6 @@ void func_1512E140(Camera *camera);
 void func_15123A54(Camera *camera);
 void func_1512A390(Camera *camera);
 extern f32 D_800A3448; // 999.0f, "no saved yaw" sentinel; matching: a literal becomes lui+mtc1 instead of this load
-extern u8 D_800BEA0C;
 
 /**
  * Eases the camera yaw toward the yaw behind its actor (or straight to the saved target yaw when the camera

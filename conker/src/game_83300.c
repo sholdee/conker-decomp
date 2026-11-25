@@ -1081,7 +1081,6 @@ s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 void func_150B9ED0(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 struct216 *func_1507BB28(s32, s32);
 u8 func_1505DADC(Actor *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
-extern u8 D_800CBDD3;
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
 void func_15058898(Actor *actor, f32 prevY) {

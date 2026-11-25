@@ -413,7 +413,6 @@ s32 func_151CDB94(Emitter *emitter) {
 
 extern s32 D_800AAEE0[];
 extern u8 D_80090B60[][12];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;

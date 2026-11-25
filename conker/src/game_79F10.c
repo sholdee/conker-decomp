@@ -24,7 +24,6 @@ void func_1504BC38(Actor *arg0);
 void func_1504BE2C(Actor *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
 
 extern u8 D_800CC2B1;
-extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
 void func_1504C0E8(Actor *arg0, s32 arg1, f32 arg2);
 void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
@@ -65,11 +64,9 @@ typedef struct Sub9C {
 
 
 extern u16 D_8009917C[];
-extern u8 D_800BEA0C;
 extern f32 D_800CBD90;
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
-extern s8 D_800CBDD3;
 extern s8 D_800CBDD4;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;

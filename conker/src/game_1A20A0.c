@@ -352,7 +352,6 @@ typedef struct SwarmFlight {
 
 extern SwarmFlight D_8008D0B0[];
 extern s32 D_800C35B0;
-extern u8 D_800C35E8;
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
@@ -391,9 +390,9 @@ void func_15175958(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8 == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
-        if (D_800C35EA[0] == 0 || D_800C35E8 != 0xF) {
+        if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }
@@ -595,7 +594,7 @@ void func_15175958(SwarmActor *actor) {
         actor->x = actor->rollStep * cosPitch + -3478.0f;
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
-        if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8 != 0xF) {
+        if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }

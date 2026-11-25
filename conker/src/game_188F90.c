@@ -71,7 +71,6 @@ extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern TextureInfo D_80090B60[];
 extern OtherModeL D_800A4AC8[];
-extern s32 D_800D2C9C;
 /* Object lists: D_800DCE50[list][type] heads a linked list of objects of that type. */
 extern ActorTracker *D_800DCE50[2][104];
 

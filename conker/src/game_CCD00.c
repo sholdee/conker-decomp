@@ -216,7 +216,6 @@ typedef struct {
 } QueryArgs;
 
 extern s8 D_800E0BB1;
-extern u16 D_800BE930[];
 extern u8 D_800D2E40;
 s32 func_151E5F64(s32 arg0);
 

@@ -30,7 +30,6 @@ void func_15044370(void) {
 }
 
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
-extern u8 D_800CBDD3;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 void func_1510F800(s32);

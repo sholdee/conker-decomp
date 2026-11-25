@@ -8,7 +8,6 @@
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
 extern s32 (*D_80082E30[])(TriggerZone *);
 extern void (*D_80082F28[])(TriggerZone *, f32);
-extern u8 D_800C35E8;
 extern void func_1510F800(s32);
 s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
 s32 func_15149550(void *, s32, s32, u8, u8, s32);
@@ -439,7 +438,7 @@ s32 func_15013C38(TriggerZone *obj) {
     }
 
     if (D_800C35EA[0] == 1) {
-        if ((D_800C35E8 == 15) || (D_800C35E8 == 16) || (D_800C35E8 == 17)) {
+        if ((D_800C35E8[0] == 15) || (D_800C35E8[0] == 16) || (D_800C35E8[0] == 17)) {
             return 1;
         }
     }

@@ -109,7 +109,6 @@ extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
 extern u8 D_8009DEB8[];
 extern u8 D_8009DEBC[];
-extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {

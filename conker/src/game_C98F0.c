@@ -109,7 +109,6 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     // Events 2, 5 and 6 (and unknown ones) fall off the end with no return value.
 }
 
-extern u8 D_800C35E8;
 extern u8 D_800C3C98;
 extern u8 D_800C3672;
 
@@ -133,7 +132,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
         }
         return 0;
     case 3:
-        if ((D_800C35EA[0] == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;
@@ -142,7 +141,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
     case 5:
         return D_800C3672;
     case 6:
-        if ((D_800C35EA[0] == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;

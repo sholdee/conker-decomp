@@ -12,7 +12,6 @@ extern void *D_800DCE50[2][OBJ_TYPE_COUNT];
 extern ResetFunc D_80082BD0;
 extern ResetFunc D_80082BD4;
 /* Texture last loaded by the object draw code; -1 forces a reload. */
-extern s32 D_800DD1B0;
 
 /* Empties the object lists of both groups: mode 1 clears types 0-100, mode 2 types 101-103, any other mode all. */
 void func_15008870(s32 mode) {

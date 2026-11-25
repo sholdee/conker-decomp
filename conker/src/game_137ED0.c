@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u32 D_800BE3E4;
 
 void func_15179008(s32);
 extern void func_15114D24(void *obj, s32 sfx, s32 volume, s16 nearDistance, s32 farDistance, s32 flags);

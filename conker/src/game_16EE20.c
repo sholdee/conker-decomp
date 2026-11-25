@@ -19,7 +19,6 @@ extern s16 D_800DD1CC;
 extern s16 D_800DD1CE;
 extern s32 D_800DD1FC;
 extern s32 D_800DD200;
-extern s32 D_800DD1B0;
 extern s16 D_800DD204;
 extern s16 D_800DD206;
 extern s32 D_800DD208;

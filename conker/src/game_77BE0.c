@@ -565,7 +565,6 @@ void func_1504BC38(Actor *obj) {
 }
 
 void func_1507EB2C(void *arg0);
-extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 
 void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {

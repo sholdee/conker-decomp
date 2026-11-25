@@ -46,7 +46,6 @@ static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if n
 extern Struct33990 *D_80082BBC;
 extern u8 D_8008FE30;
 extern u8 *D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
-extern u32 D_800BE3E4;
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */

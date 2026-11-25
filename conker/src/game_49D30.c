@@ -62,7 +62,6 @@ extern SeqTrackInfo *D_800C35F0[];
 extern u8 D_800C363A[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
 extern s8 D_8008FD84[];
-extern u8 D_800C35E8[];
 extern s32 D_800C35B0[];
 extern s32 D_800C3640[];
 extern u8 D_800C3C99;
@@ -742,7 +741,7 @@ s32 func_1501E05C(s32 scene) {
     skipRequest = (s32)D_8008FD84;
 
     if (map == 0x1D) {
-        // matching: the goto orders the D_800C35E8 address load after the branch
+        // matching: the goto orders the D_800C35E8[0] address load after the branch
         if (*(s8 *)skipRequest == 0) {
             goto noRequest;
         }
