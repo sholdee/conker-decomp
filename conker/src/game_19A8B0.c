@@ -714,10 +714,11 @@ void func_1516DB90(Emitter1516DB90 *arg0) {
     }
 }
 
-void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    func_1516D99C((s16)(arg0 >> 16), (s16)(arg0 & 0xFFFF), 0, arg2,
+/* Emitter that follows the f32 position vector at `position` (flags 0x20). */
+void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
+    func_1516D99C((s16)((u32)position >> 16), (s16)((u32)position & 0xFFFF), 0, texture,
         0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
-        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1,
+        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, duration,
         0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
         0, 0, 0, 0, 0, arg3, arg4);
 }
@@ -917,60 +918,57 @@ s32 func_1516F024(Particle *particle) {
 }
 
 
-void func_1516F1C0(s32 a0, s32 a1, u8 a2, s32 a3) {
+void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3) {
     func_1516D99C(2, 0, 0, 0x2D,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, a1, 0xA, 0xA, a0, 0x3C,
+        0x50, 0, 0, duration, 0xA, 0xA, object, 0x3C,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 4, 2, a2, a3);
+        0, 4, 2, arg2, arg3);
 }
 
-void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, u8 a4, s32 a5) {
+void func_1516F2F8(u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5) {
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, a1, 4, 4, a0, 0x10,
+        0x50, 0, 0, duration, 4, 4, object, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 1, 0, a4, a5);
+        0, 1, 0, arg4, arg5);
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
-        0x50, 0, 0, 7, 4, 4, a0, a2,
+        0x50, 0, 0, 7, 4, 4, object, particleLifetime,
         0, 0, 0x81, 5, 0, 1, 0, 0,
-        0, 1, a3, a4, a5);
+        0, 1, speed, arg4, arg5);
 }
 
-/* Spawns two type-0xD particle emitters at (arg0, arg1, arg2) -- identical apart
- * from their spawn table entry (arg10 vs arg11) and the second one's extra mode
- * byte 6 -- then plays 3-D sound 7 at the same spot with arg3 as its user data.
- * The position is latched into posX/posY/posZ while the first emitter is being
- * built so both later calls reuse it. */
+/* Spawns two emitters at (x, y, z) that differ only in their particles' style (style0,
+ * style1) and the second one's spawn interval, then plays sound 7 there with arg3 as
+ * its user data. */
 void func_1516F548(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-    s32 arg4, s32 arg5, s32 arg6, s32 arg7,
-    s32 arg8, s32 arg9, s32 arg10, s32 arg11,
+    s32 x, s32 y, s32 z, s32 arg3,
+    s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
+    s32 scaleRandom, s32 radius, s32 style0, s32 style1,
     s32 arg12, s32 arg13, s32 arg14, u8 arg15,
     s32 arg16) {
-
-    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
+    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
-        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg10,
-        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
-        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
-        (s16)arg5, 0xC8, 1, 0, 0, 1, 0, 0,
+        2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style0,
+        0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)velocityY, 0xC8, 1, 0, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
+    func_1516D99C((s16)x, (s16)y, (s16)z, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
-        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg11,
-        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
-        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
-        (s16)arg5, 0xC8, 1, 6, 0, 1, 0, 0,
+        2, (u8)velocityXHigh, 0, (u8)velocityZHigh, 0, 0, 0, style1,
+        0, 0, 0, 0, 0, 0, 0, (s16)((scale << 12) / 4096),
+        (s16)((scale << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (s16)((scaleRandom << 12) / 4096), (u16)arg3, (u8)radius, 0x14, 0xFF, 0x10,
+        (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
-    func_1000FA64(7, (s16)arg0, (s16)arg1, (s16)arg2, 0x36B0, 0x3E8, 0x64,
+    func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
         (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
@@ -1077,14 +1075,14 @@ s32 func_1516F9C4(Particle *particle) {
     return 0;
 }
 
-void func_1516FA88(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    func_1516D99C(arg0, arg1, arg2, 0x1B,
+void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5) {
+    func_1516D99C(x, y, z, 0x1B,
         0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF,
         3, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0x400,
         0x400, 0, 0, 2, 0, 0, 0xFF, 0xF,
         0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5,
-        arg3, 0, 0, arg4, arg5);
+        isAlt, 0, 0, arg4, arg5);
 }
 
 s32 func_1516FBCC(Particle *particle) {
@@ -1182,37 +1180,39 @@ s32 func_1516FD50(Particle *particle) {
     return 0;
 }
 
-void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
-    s32 sp_s2;
-    s16 posHi;
-    s16 posLo;
-    s32 var_a1;
+void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
+    s32 bone;
+    s16 posHigh;
+    s16 posLow;
+    s32 flags;
     s32 i;
-    s32 var_s1;
-    s32 pos;
+    s32 velocityXHigh;
+    s32 position;
 
-    var_s1 = 0;
-    i = 0;
-    if (D_800CC2D0[arg0].interaction_state == 1) {
-        posHi = 4;
-        posLo = 0;
-        sp_s2 = 0x19;
-        var_a1 = 1;
+    velocityXHigh = 0;
+    if (D_800CC2D0[object].interaction_state == 1) {
+        /* follow the object's bone, D_800A6E30 row 4 */
+        posHigh = 4;
+        posLow = 0;
+        bone = 0x19;
+        flags = 1;
     } else {
-        pos = (s32)&D_800CC2D0[arg0].x_position;
-        posHi = (s16)(pos >> 16);
-        posLo = (s16)(pos & 0xFFFF);
-        arg0 = 0xFF;
-        var_a1 = 0x21;
+        /* follow the object's position vector; bone is left unset (unused without an object) */
+        position = (s32)&D_800CC2D0[object].x_position;
+        posHigh = position >> 16;
+        posLow = position & 0xFFFF;
+        object = 0xFF;
+        flags = 0x21;
     }
-    do {
+    for (i = 0; i < 2; i++) {
         if (i == 1) {
-            sp_s2 = 0x1B;
-            var_s1 = 8;
+            bone = 0x1B;
+            velocityXHigh = 8;
         }
-        func_1516D99C(posHi, posLo, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, var_s1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)arg1, 0x1E, 0, (u8)arg0, 0x1E, 0x168, 0x18, (u16)var_a1, 4, 0, 1, 0, 0, 0, sp_s2, 0, arg2, arg3);
-        i++;
-    } while (i != 2);
+        func_1516D99C(posHigh, posLow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, velocityXHigh, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)duration, 0x1E, 0, (u8)object, 0x1E, 0x168,
+                      0x18, (u16)flags, 4, 0, 1, 0, 0, 0, bone, 0, arg2, arg3);
+    }
 }
 
 extern u8 func_150ADA20(void);
