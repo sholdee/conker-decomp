@@ -54,22 +54,23 @@ typedef struct {
     /* 0x6 */ s16 unk6;
 } Struct150C04C0Color;
 
+/* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
 typedef struct {
-    char pad_0[0x14];
-    s16 field_0x14;
-    s16 field_0x16;
-    char pad_0x18[0x7];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x1];
-    u8 field_0x26;
-    u8 field_0x27;
-    char pad_0x28[0x4];
-    u8 field_0x2C;
-    s8 field_0x2D;
-    s8 field_0x2E;
-    u8 field_0x2F;
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u8 pad18[0x7];
+    /* 0x1F */ u8 level;
+    /* 0x20 */ u8 pad20[0x4];
+    /* 0x24 */ u8 rising;
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ u8 maxLevel;
+    /* 0x27 */ u8 riseRate;
+    /* 0x28 */ u8 pad28[0x4];
+    /* 0x2C */ u8 age;
+    /* 0x2D */ s8 unk14Rate;
+    /* 0x2E */ s8 unk16Rate;
+    /* 0x2F */ u8 fallRate;
 } Struct150BF0F4;
 
 extern Struct150C04C0Word D_800A0108;
@@ -85,86 +86,94 @@ extern f32 D_800A0190;
 extern void func_15150400(Struct150C04C0 *, Struct150C04C0Color *, u8, s32);
 
 void func_150BEF70(s32 arg0) {
-
 }
 
+/* K&R definition in game_19A8B0.c; callers pass all 49 arguments as ints. */
 extern void func_1516D99C();
 
+/* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
 void func_150BEF7C(s32 arg0) {
     s32 i;
-    s32 pos;
-    s32 v;
-    v = arg0 & 0xFFFF;
-    pos = 0x17C;
-    for (i = 0; i != 2; i++) {
-        func_1516D99C(0x1FDB, 0x25, (s16)pos, 0xD,
+    s32 z;
+    s32 timer;
+
+    timer = arg0 & 0xFFFF;
+    z = 0x17C;
+    for (i = 0; i < 2; i++) {
+        func_1516D99C(0x1FDB, 0x25, (s16)z, 0xD,
             0, 0x50, 0x8F, 0, 0, 0, 0, 0,
             8, 0xC8, 0xA, 0, 0, 0, 0, 0,
             0x28, 0x28, 4, 0, 0, 0, 0, 0x555,
-            0x555, 0x555, 0x555, v, 0x32, 0, 0xFF, 0x14,
+            0x555, 0x555, 0x555, timer, 0x32, 0, 0xFF, 0x14,
             0xFA0, 0x7D0, 1, 6, 0, 1, 0, 0,
             0, 0, 3, 0xFF, 0);
-        pos = -pos;
+        z = -z;
     }
 }
 
-s32 func_150BF0F4(Struct150BF0F4 *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a1;
+/* Steps the entry by D_800BE9E4 frames; returns 1 once it has faded out or shrunk to nothing. */
+s32 func_150BF0F4(Struct150BF0F4 *entry) {
+    s32 level;
+    s32 limit;
+    s32 delta;
+    s32 size;
+    s32 age;
 
-    temp_v0 = arg0->field_0x1F;
-    temp_v1 = arg0->field_0x26;
-    temp_a1 = arg0->field_0x24;
-    if (temp_a1 != 0) {
-        if (temp_v0 != temp_v1) {
-            temp_v0 += D_800BE9E4 * arg0->field_0x27;
-            if (temp_v1 < temp_v0) {
-                temp_v0 = temp_v1;
+    level = entry->level;
+    limit = entry->maxLevel;
+    if (entry->rising) {
+        if (level != limit) {
+            level += D_800BE9E4 * entry->riseRate;
+            if (level > limit) {
+                level = limit;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Struct150BF0F4 *)arg0)->field_0x24;
+            entry->level = level;
         }
-    } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 * arg0->field_0x2F;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
-            }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Struct150BF0F4 *)arg0)->field_0x24;
+    } else if (level != 0) {
+        level -= D_800BE9E4 * entry->fallRate;
+        if (level < 0) {
+            level = 0;
         }
+        entry->level = level;
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (!entry->rising && level == 0) {
         return 1;
     }
 
-    temp_v0 = arg0->field_0x2D;
-    temp_v0 *= D_800BE9E4;
-    arg0->field_0x14 = arg0->field_0x14 + temp_v0;
-    temp_v1 = arg0->field_0x14;
-    temp_v0 = arg0->field_0x2E;
-    temp_v0 *= D_800BE9E4;
-    arg0->field_0x16 = arg0->field_0x16 + temp_v0;
-    if ((temp_v1 <= 0) || (temp_v1 <= 0)) {
-        arg0->field_0x16 = 0;
-        arg0->field_0x14 = arg0->field_0x16;
+    delta = entry->unk14Rate;
+    delta *= D_800BE9E4;
+    entry->unk14 += delta;
+    size = entry->unk14;
+    delta = entry->unk16Rate;
+    delta *= D_800BE9E4;
+    entry->unk16 += delta;
+    if (size <= 0 || size <= 0) { /* sic: unk16 is never tested */
+        entry->unk16 = 0;
+        entry->unk14 = entry->unk16;
         return 1;
     }
 
-    temp_v1 = arg0->field_0x2C;
-    temp_v1 += D_800BE9E4;
-    if (temp_v1 >= 0x80) {
-        temp_v1 = 0x7F;
+    age = entry->age;
+    age += D_800BE9E4;
+    if (age >= 0x80) {
+        age = 0x7F;
     }
-    arg0->field_0x2C = temp_v1;
+    entry->age = age;
     return 0;
 }
 
 extern u8 D_800C35E8;
-extern f32 sinf(f32);
 
+/* A vertex of the object's mesh: 16 bytes, position first. */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u8 pad6[0xA];
+} Vtx150BF21C;
+
+/* An object whose mesh is translated toward a target height and bobs while it is at rest. */
 typedef struct {
     /* 0x000 */ f32 x;
     /* 0x004 */ f32 y;
@@ -173,29 +182,28 @@ typedef struct {
     /* 0x010 */ s16 rx;
     /* 0x012 */ s16 ry;
     /* 0x014 */ s16 rz;
-    /* 0x016 */ u16 count;
+    /* 0x016 */ u16 vtxCount;
     /* 0x018 */ u8 pad18[0x8];
-    /* 0x020 */ s16 *dst[2];
-    /* 0x028 */ s16 *src;
+    /* 0x020 */ Vtx150BF21C *dstVtx[2]; /* double-buffered, indexed by D_800BE9C0 */
+    /* 0x028 */ Vtx150BF21C *srcVtx;
     /* 0x02C */ f32 sx;
     /* 0x030 */ f32 sy;
     /* 0x034 */ f32 sz;
     /* 0x038 */ u8 pad38[0x4];
-    /* 0x03C */ s32 unk3C;
+    /* 0x03C */ s32 targetHeight;
     /* 0x040 */ u8 pad40[0x33];
-    /* 0x073 */ u8 unk73;
+    /* 0x073 */ u8 flags; /* bits 0-1: movement state */
     /* 0x074 */ u16 unk74;
     /* 0x076 */ u8 pad76[0x6];
-    /* 0x07C */ f32 unk7C;
-    /* 0x080 */ f32 unk80;
-    /* 0x084 */ f32 unk84;
+    /* 0x07C */ f32 height;
+    /* 0x080 */ f32 bobPhase;
+    /* 0x084 */ f32 speed;
     /* 0x088 */ u8 pad88[0x54];
     /* 0x0DC */ s32 unkDC;
     /* 0x0E0 */ u8 padE0[0x44];
     /* 0x124 */ f32 unk124;
 } Struct150BF21C;
 
-extern f32 cosf(f32);
 extern void func_15114D24(Struct150BF21C *, s32, s32, s16, s16, s32);
 extern void func_15114F04(Struct150BF21C *, s32, s32);
 extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
@@ -203,107 +211,109 @@ extern void func_15043F6C(f32 [4][4], f32, f32, f32, f32, f32, f32, f32, f32, f3
 extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
 extern void func_150A7960(f32 [4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 
-void func_150BF21C(Struct150BF21C *arg0) {
-    s16 *dst;
-    s16 *src;
+/* Moves the object toward targetHeight (accelerating, with sounds), bobs it while at rest, then
+ * writes its transformed mesh into the current vertex buffer. */
+void func_150BF21C(Struct150BF21C *obj) {
+    Vtx150BF21C *dst;
+    Vtx150BF21C *src;
     f32 diff;
     f32 x;
-    f32 y;
+    f32 height;
     f32 z;
-    f32 spd;
+    f32 speed;
     s32 paused;
-    f32 amp;
-    f32 mtx[4][4];
-    f32 mtx2[4][4];
-    f32 factor;
+    f32 bob;
+    f32 translate[4][4];
+    f32 model[4][4];
+    f32 rate;
     s32 i;
-    f32 amp3;
+    f32 bobXZ;
 
-    y = arg0->unk7C;
-    amp = 0.0f;
-    factor = 0.05f;
+    height = obj->height;
+    bob = 0.0f;
+    rate = 0.05f;
     if (D_800C35EA == 0) {
-        paused = 0;
+        paused = FALSE;
     } else if (D_800C35E8 == 1) {
-        paused = 0;
+        paused = FALSE;
     } else {
-        paused = 1;
+        paused = TRUE;
     }
     if (D_800BE9B4 != 0) {
-        y = arg0->unk3C;
-        arg0->unk7C = y;
+        height = obj->targetHeight;
+        obj->height = height;
     }
     if (!paused) {
-        diff = arg0->unk3C - y;
+        diff = obj->targetHeight - height;
         if (diff == 0.0f) {
-            arg0->unk84 = 0.0f;
-            arg0->unk80 += 0.05f;
-            amp = ((y / 1500.0f) + 1.0f) * D_800BE9A4;
-            if (amp < 0.0f) {
-                amp = 0.0f;
+            obj->speed = 0.0f;
+            obj->bobPhase += 0.05f;
+            bob = ((height / 1500.0f) + 1.0f) * D_800BE9A4;
+            if (bob < 0.0f) {
+                bob = 0.0f;
             }
-            func_15114D24(arg0, -1, 0x7D00, 0x1F4, 0x7D0, 0);
+            func_15114D24(obj, -1, 0x7D00, 500, 2000, 0);
         } else {
-            factor = 0.2f;
-            arg0->unk80 = 0.0f;
-            spd = arg0->unk84;
+            rate = 0.2f;
+            obj->bobPhase = 0.0f;
+            speed = obj->speed;
             if (diff < 0.0f) {
-                if (-60.0f < spd) {
-                    spd -= 5.0f;
+                if (speed > -60.0f) {
+                    speed -= 5.0f;
                 }
             } else {
-                if (spd < 6.0f) {
-                    spd += 0.5f;
+                if (speed < 6.0f) {
+                    speed += 0.5f;
                 }
-                func_15114D24(arg0, 0xB9, 0x7D00, 0x1F4, 0x7D0, 1);
+                func_15114D24(obj, 0xB9, 0x7D00, 500, 2000, 1);
             }
-            arg0->unk84 = spd;
-            if (fabsf(spd) < fabsf(diff)) {
-                y += spd * D_800BE9A4;
-                if (spd < -25.0f) {
-                    arg0->unk124 = -10.0f;
+            obj->speed = speed;
+            if (fabsf(speed) < fabsf(diff)) {
+                height += speed * D_800BE9A4;
+                if (speed < -25.0f) {
+                    obj->unk124 = -10.0f;
                 } else {
-                    arg0->unk124 = spd * 0.4000000060f;
+                    obj->unk124 = speed * 0.4000000060f;
                 }
-                arg0->unkDC = 0x7D00;
-                arg0->unk73 &= ~3;
-                arg0->unk73 |= 2;
-                if (arg0->unk74 == 0) {
-                    func_15114D24(arg0, 0xB9, 0x3E80, 0x3E8, 0xFA0, 0);
+                obj->unkDC = 0x7D00;
+                obj->flags &= ~3;
+                obj->flags |= 2;
+                if (obj->unk74 == 0) {
+                    func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
-                func_15114F04(arg0, 0x3E80, spd * 500.0f);
+                func_15114F04(obj, 0x3E80, speed * 500.0f);
             } else {
-                y = arg0->unk3C;
-                if (spd < 0.0f) {
-                    arg0->unkDC = 0x80;
+                height = obj->targetHeight;
+                if (speed < 0.0f) {
+                    obj->unkDC = 0x80;
                 }
-                arg0->unk73 &= ~3;
-                arg0->unk73 |= 3;
-                arg0->unk124 = 0.0f;
-                func_15114D24(arg0, -1, 0, 0, 0, 0);
+                obj->flags &= ~3;
+                obj->flags |= 3;
+                obj->unk124 = 0.0f;
+                func_15114D24(obj, -1, 0, 0, 0, 0);
             }
-            arg0->unk7C = y;
-            arg0->unk84 = spd;
+            obj->height = height;
+            obj->speed = speed;
         }
-        amp3 = amp * 3.0f;
-        arg0->x += ((amp3 * sinf(arg0->unk80)) - arg0->x) * factor;
-        arg0->y += (((amp * 4.0f) * sinf(arg0->unk80 * 1.100000024f)) - arg0->y) * factor;
-        arg0->z += ((amp3 * cosf(arg0->unk80)) - arg0->z) * factor;
+        bobXZ = bob * 3.0f;
+        obj->x += ((bobXZ * sinf(obj->bobPhase)) - obj->x) * rate;
+        obj->y += (((bob * 4.0f) * sinf(obj->bobPhase * 1.100000024f)) - obj->y) * rate;
+        obj->z += ((bobXZ * cosf(obj->bobPhase)) - obj->z) * rate;
     } else {
-        y = 0.0f;
+        height = 0.0f;
     }
-    func_150A7DA0(mtx, 0.0f, y, 0.0f);
-    func_15043F6C(mtx2, arg0->x, arg0->y, arg0->z, arg0->sx, arg0->sy, arg0->sz, arg0->rx, arg0->ry, arg0->rz);
-    func_150A7A48(mtx, mtx2, mtx);
-    dst = arg0->dst[D_800BE9C0];
-    src = arg0->src;
-    for (i = 0; i < arg0->count; i++) {
-        func_150A7960(mtx, src[0], src[1], src[2], &x, &y, &z);
-        dst[0] = x;
-        dst[1] = y;
-        dst[2] = z;
-        src += 8;
-        dst += 8;
+    func_150A7DA0(translate, 0.0f, height, 0.0f);
+    func_15043F6C(model, obj->x, obj->y, obj->z, obj->sx, obj->sy, obj->sz, obj->rx, obj->ry, obj->rz);
+    func_150A7A48(translate, model, translate);
+    dst = obj->dstVtx[D_800BE9C0];
+    src = obj->srcVtx;
+    for (i = 0; i < obj->vtxCount; i++) {
+        func_150A7960(translate, src->x, src->y, src->z, &x, &height, &z);
+        dst->x = x;
+        dst->y = height;
+        dst->z = z;
+        src++;
+        dst++;
     }
 }
 
