@@ -13,7 +13,7 @@ typedef struct Actor Actor;
 typedef struct Camera Camera;
 struct Rope;
 struct BoneChain;
-typedef struct struct216 struct216;
+typedef struct ObjScriptCmd ObjScriptCmd;
 typedef struct struct256 struct256;
 /* Effect objects (include/effects.h), named here for the prototypes in functions.h. */
 struct DefParticleHead;
@@ -1699,7 +1699,7 @@ struct Actor {
     /* 0x212 */ u8  unk212[0x2];
     /* 0x214 */ s16 unk214;
     /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
-    /* 0x218 */ struct216 *unk218; // struct216 is 5 bytes long
+    /* 0x218 */ ObjScriptCmd *unk218; // current script command
     /* 0x21C */ u16 unk21C;
     /* 0x21E */ u8  unk21E;
     /* 0x21F */ u8  unk21F;
@@ -3333,12 +3333,11 @@ typedef struct {
 } struct215;
 
 
-struct struct216 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
+/* One 5-byte command of an object script (Actor.unk218, run by func_1507BC14 in game_A28B0.c): op indexes the
+ * command table D_80086730, args are copied to D_800D1890..D_800D1893; an op >= 247 is a 1-byte label. */
+struct ObjScriptCmd {
+    /* 0x0 */ u8 op;
+    /* 0x1 */ u8 args[4];
 };
 
 typedef struct {

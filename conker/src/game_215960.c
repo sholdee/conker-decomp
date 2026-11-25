@@ -1973,7 +1973,7 @@ void func_151EDF4C(void) {
 extern u8 D_800ABAD4;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 extern void func_150A7D00(void *, f32, f32, f32);
-extern struct216 *func_1507BB28(s32, s32);
+extern ObjScriptCmd *func_1507BB28(s32, s32);
 
 /*
  * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):

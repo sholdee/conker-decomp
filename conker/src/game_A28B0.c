@@ -34,7 +34,7 @@ void func_1504715C(f32 *arg0, Actor *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 void func_15197A7C(Actor *arg0);
 u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
-struct216 *func_1507BB28(s32 arg0, s32 arg1);
+ObjScriptCmd *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
 void func_15075400(s32 target) {
@@ -47,11 +47,11 @@ void func_15075400(s32 target) {
     }
 
     for (i = 0; i < 100; i++) {
-        if (D_800D154C->unk218->unk0 < 247) {
+        if (D_800D154C->unk218->op < 247) {
             D_800D154C->unk218++;
         } else {
-            label = D_800D154C->unk218->unk0;
-            D_800D154C->unk218 = (struct216 *)((u8 *)D_800D154C->unk218 + 1);
+            label = D_800D154C->unk218->op;
+            D_800D154C->unk218 = (ObjScriptCmd *)((u8 *)D_800D154C->unk218 + 1);
             if (target == label) {
                 // the interpreter steps past the current command after this returns
                 D_800D154C->unk218--;
@@ -2444,15 +2444,15 @@ void func_1507BB20(void) {
 }
 
 typedef struct ScriptEntry {
-    struct216 *script;
+    ObjScriptCmd *script;
     u8 id;
 } ScriptEntry;
 
 extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
-extern struct216 D_8009A120[];    // fallback script
+extern ObjScriptCmd D_8009A120[];    // fallback script
 
 /* Returns script `scriptId` of the current object's type, falling back to the default table. */
-struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
+ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
     ActorAnim *typeData;
     ScriptEntry *table;
     s32 i;
@@ -2516,15 +2516,15 @@ void func_1507BC14(Actor *obj) {
     }
 
     while (obj->unk21C == 0) {
-        if (obj->unk218->unk0 >= 247) {
+        if (obj->unk218->op >= 247) {
             // a label: skip its single byte
-            obj->unk218 = (struct216 *)((u8 *)obj->unk218 + 1);
+            obj->unk218 = (ObjScriptCmd *)((u8 *)obj->unk218 + 1);
         } else {
-            D_800D1890 = obj->unk218->unk1;
-            D_800D1891 = obj->unk218->unk2;
-            D_800D1892 = obj->unk218->unk3;
-            D_800D1893 = obj->unk218->unk4;
-            D_80086730[obj->unk218->unk0]();
+            D_800D1890 = obj->unk218->args[0];
+            D_800D1891 = obj->unk218->args[1];
+            D_800D1892 = obj->unk218->args[2];
+            D_800D1893 = obj->unk218->args[3];
+            D_80086730[obj->unk218->op]();
             obj->unk218++;
         }
     }

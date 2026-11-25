@@ -84,7 +84,7 @@ extern void func_15063254(Actor *, s32, s32, f32);
 extern void func_15063404(Actor *);
 extern void func_150634E4(Actor *);
 extern void func_15063570(Actor *);
-extern struct216 *func_1507BB28(s32, s32);
+extern ObjScriptCmd *func_1507BB28(s32, s32);
 extern void func_1507CD64(Actor *, s32);
 extern void func_1507D1D8(Actor *);
 extern void func_1507D4F8(s32);

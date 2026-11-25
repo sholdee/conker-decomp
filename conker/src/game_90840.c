@@ -1032,7 +1032,7 @@ extern void func_151037DC();
 s32 func_1000F568(s32 arg0, s32 arg1);
 void func_1000FD38(void *, void *, s32);
 void func_15073FA0(void);
-struct216 *func_1507BB28(s32, s32);
+ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507E7E4(void *, u8, u8, u16, s32);
 void func_1507EABC(void *);
 void func_1507EB4C(Actor *, s32);

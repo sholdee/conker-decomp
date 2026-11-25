@@ -327,7 +327,7 @@ void func_151DE8F0(void) {
 }
 
 extern char D_800AB800[];
-struct216 *func_1507BB28(s32, s32);
+ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
 
