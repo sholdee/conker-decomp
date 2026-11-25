@@ -110,73 +110,64 @@ void func_151827D0(void) {
 }
 
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[0xA];
-} Vtx15182C5C;
+/* A placed level prop: one 0xA0-byte entry of the D_800DBEF4 table (see game_14BC30.c). */
+typedef struct Prop {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u16 vtxCount;
+    /* 0x18 */ u8 pad18[0x8];
+    /* 0x20 */ Vtx *vtx[2]; /* output vertices, double-buffered by D_800BE9C0 */
+    /* 0x28 */ Vtx *baseVtx; /* rest-pose vertices, chain-local */
+    /* 0x2C */ u8 pad2C[0x10];
+    /* 0x3C */ s32 chain;
+    /* 0x40 */ u8 pad40[0x60];
+} Prop; /* size 0xA0 */
 
-typedef struct {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0xA];
-    Vtx15182C5C *unk20[2];
-    Vtx15182C5C *unk28;
-    u8 pad2C[0x10];
-    s32 unk3C;
-} Obj15182C5C;
+f32 func_15182F58(s32 dist, s32 chain);
+void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-typedef struct {
-    s16 unk0;
-    u8 pad2[0x16];
-} Tbl15182C5C;
-
-extern Tbl15182C5C D_8008D060[];
-extern Tbl15182C5C D_8008D062[];
-f32 func_15182F58(s32 arg0, s32 arg1);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
-typedef struct { u8 pad0[0x16]; u16 unk16; u8 pad18[0x88]; } Big15182C5C;
-
-
-
-void func_15182C5C(Obj15182C5C *arg0) {
-    s32 idx;
-    Vtx15182C5C *out;
+/*
+ * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated
+ * at its z, rotated into world space and written to this frame's vertex buffer.
+ */
+void func_15182C5C(Prop *prop) {
+    s32 chain;
+    Vtx *out;
     s32 i;
-    f32 f;
-    f32 w[2];
-    s32 lo;
-    s32 hi;
+    f32 samplePos;
+    f32 weighted[2]; // matching: two scalars give a different stack frame
+    s32 sample;
+    s32 next;
     f32 mtx[4][4];
     f32 x;
     f32 y;
     f32 z;
     f32 frac;
-    s32 ofs;
+    s32 lift;
 
-    idx = arg0->unk3C;
-    out = arg0->unk20[D_800BE9C0];
-    func_150A8050(mtx, 0.0f, -D_8008D060[D_800DDE54[idx]].unk0, 0.0f);
-    for (i = 0; i < ((Big15182C5C *)D_800DBEF4)[D_8008D062[D_800DDE54[idx]].unk0].unk16; i++) {
-        f = func_15182F58(arg0->unk28[i].unk4, idx);
-        lo = f;
-        hi = lo + 1;
-        if (hi >= 40) {
-            hi = 39;
+    chain = prop->chain;
+    out = prop->vtx[D_800BE9C0];
+    func_150A8050(mtx, 0.0f, -D_8008D050[D_800DDE54[chain]].angle, 0.0f);
+    // D_800DBEF4's struct131 does not declare the vertex count at 0x16
+    for (i = 0; i < ((Prop *)D_800DBEF4)[D_8008D050[D_800DDE54[chain]].objIndex].vtxCount; i++) {
+        samplePos = func_15182F58(prop->baseVtx[i].v.ob[2], chain);
+        sample = samplePos;
+        next = sample + 1;
+        if (next >= 40) {
+            next = 39;
         }
-        frac = f - lo;
-        w[0] = D_800DDE60[idx][lo].pos * (1.0f - frac);
-        w[1] = D_800DDE60[idx][hi].pos * frac;
-        ofs = (s32)(w[0] + w[1]);
-        ofs >>= 4;
-        func_150A7960(&mtx[0][0], arg0->unk28[i].unk0, arg0->unk28[i].unk2 + ofs, arg0->unk28[i].unk4, &x, &y, &z);
-        out[i].unk0 = arg0->unk10 + x;
-        out[i].unk2 = arg0->unk12 + y;
-        out[i].unk4 = arg0->unk14 + z;
+        frac = samplePos - sample;
+        weighted[0] = D_800DDE60[chain][sample].pos * (1.0f - frac);
+        weighted[1] = D_800DDE60[chain][next].pos * frac;
+        lift = (s32)(weighted[0] + weighted[1]);
+        lift >>= 4; // matching: folding the shift into the line above reschedules it
+        func_150A7960(mtx, prop->baseVtx[i].v.ob[0], prop->baseVtx[i].v.ob[1] + lift, prop->baseVtx[i].v.ob[2],
+                      &x, &y, &z);
+        out[i].v.ob[0] = prop->x + x;
+        out[i].v.ob[1] = prop->y + y;
+        out[i].v.ob[2] = prop->z + z;
     }
 }
 
@@ -232,7 +223,7 @@ s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
     dy = 0.0f;
     dz = actor->z_position - originZ;
     func_150A8050(mtx, 0.0f, D_8008D050[D_800DDE54[chain]].angle, 0.0f);
-    func_150A7960(&mtx[0][0], dx, dy, dz, &localX, &localY, &localZ);
+    func_150A7960(mtx, dx, dy, dz, &localX, &localY, &localZ);
 
     if (localZ > 0.0f || localZ < D_8008D050[D_800DDE54[chain]].minZ || localX < 0.0f ||
         D_8008D050[D_800DDE54[chain]].width < localX) {
