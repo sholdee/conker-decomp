@@ -101,9 +101,15 @@ extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
 s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(s32, s32, s32, s32, s32, s32, s32 *);
+s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150C4120(s32, s32, s32, s32);
+
+typedef struct Vec3f {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
 
 /* Tells a spawned emitter how to follow its owner: two points given in the space of bone `bone`
  * of `target`, which func_1518A094 transforms every frame. */
@@ -995,30 +1001,29 @@ void func_1514DE50(struct127 *obj) {
 void func_1514DE88(struct127 *obj) {
 }
 
-void func_15160CDC(s32, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern u8 D_800A58AC;
 extern u8 D_800A58B8;
 extern u8 D_800A58C4;
-extern u8 D_800BE9B4;
 
-void func_1514DE94(s32 arg0) {
-    struct St1514DE94 *temp;
+void func_1514DE94(struct127 *obj) {
+    struct St1514DE94 *part;
 
-    func_15160CDC(arg0, 0xC, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 0x12C,
+    func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
-    temp = func_15083568((struct127 *)arg0, 0x3C, 1.0f, 0);
+    part = func_15083568(obj, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
-        temp->unk38 = 0x960;
+        part->unk38 = 2400;
     }
-    func_1514EC1C(func_15160A58(arg0, 0, &D_800A58C4, 2, 0x12C, 0xB, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), arg0, 0x19);
+    func_1514EC1C(func_15160A58(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
 
-s32 func_15083FB0(s32);
+s32 func_15083FB0(u8 uniqueId);
 
-void func_1514DFD0(u8 *arg0) {
-    arg0[0x65] = func_15083FB0(9) + 1;
-    arg0[0x101] |= 0x34;
+/** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
+void func_1514DFD0(struct127 *obj) {
+    obj->unk65 = func_15083FB0(9) + 1;
+    obj->unk101 |= 0x34;
 }
 
 void func_1514E00C(struct127 *obj) {
@@ -1182,109 +1187,120 @@ void func_1514E31C(struct127 *obj) {
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
-        struct {
-            f32 unk0;
-            f32 unk4;
-            f32 unk8;
-        } sp50;
+        Vec3f offset;
 
-        sp50.unk0 = 0.0f;
-        sp50.unk4 = 0.0f;
-        sp50.unk8 = 150.0f;
-        func_15160A58(obj, 0xC, &sp50, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = 150.0f;
+        func_15160A58(obj, 12, &offset, 2, 300, 40, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
     }
 }
 
-void func_1514E508(s32 arg0) {
-    s32 v0;
-    s32 temp;
+void func_1514E508(struct127 *obj) {
+    s32 handle;
+    s32 pos;
 
-    v0 = func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, &D_800A58D0);
-    func_1514EC1C(v0, arg0, 0xD);
-    temp = arg0 + 0x14;
-    v0 = func_1515D5F8(-0x8000, temp >> 16, temp & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(v0, arg0, 0x18);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58D0);
+    func_1514EC1C(handle, obj, 0xD);
+    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E5B8(s32 arg0) {
-    s32 v0;
-    s32 temp;
+void func_1514E5B8(struct127 *obj) {
+    s32 handle;
+    s32 pos;
 
-    v0 = func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, &D_800A58E4);
-    func_1514EC1C(v0, arg0, 0xD);
-    temp = arg0 + 0x14;
-    v0 = func_1515D5F8(-0x8000, temp >> 16, temp & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(v0, arg0, 0x18);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58E4);
+    func_1514EC1C(handle, obj, 0xD);
+    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E668(s32 arg0) {
-    s32 v0;
-    s32 temp;
+void func_1514E668(struct127 *obj) {
+    s32 handle;
+    s32 pos;
 
-    v0 = func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, &D_800A58F8);
-    func_1514EC1C(v0, arg0, 0xD);
-    temp = arg0 + 0x14;
-    v0 = func_1515D5F8(-0x8000, temp >> 16, temp & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(v0, arg0, 0x18);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58F8);
+    func_1514EC1C(handle, obj, 0xD);
+    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E718(s32 arg0) {
-    s32 v0;
-    s32 temp;
+void func_1514E718(struct127 *obj) {
+    s32 handle;
+    s32 pos;
 
-    v0 = func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, &D_800A590C);
-    func_1514EC1C(v0, arg0, 0xE);
-    temp = arg0 + 0x14;
-    v0 = func_1515D5F8(-0x8000, temp >> 16, temp & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
-    func_1514EC1C(v0, arg0, 0x18);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A590C);
+    func_1514EC1C(handle, obj, 0xE);
+    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
+    func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E7C8(s32 arg0) {
-    s32 v0;
+void func_1514E7C8(struct127 *obj) {
+    s32 handle;
 
-    v0 = func_1518D1C0(arg0, 7, 0, 1, 0xFF, 1, &D_800A5920);
-    func_1514EC1C(v0, arg0, 0xF);
+    handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, &D_800A5920);
+    func_1514EC1C(handle, obj, 0xF);
 }
 
-void func_1514E824(s32 arg0) {
+/* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
+
+void func_1514E824(s32 handle) {
 }
 
-void func_1514E830(struct102 *arg0) {
-    func_1516972C(arg0);
+void func_1514E830(struct102 *handle) {
+    func_1516972C(handle);
 }
 
 void func_1518E308(void *);
 
-void func_1514E850(void *arg0) {
-    func_1518E308(arg0);
-    func_1516972C(arg0);
+void func_1514E850(void *handle) {
+    func_1518E308(handle);
+    func_1516972C(handle);
 }
 
-void func_1514E87C(void) {
-    func_1515F10C();
+void func_1515F10C(void *);
+
+void func_1514E87C(void *handle) {
+    func_1515F10C(handle);
 }
 
-s32 func_1514E89C(arg0, arg1, arg2)
-s32 arg0;
-s32 arg1;
-s32 arg2;
-{
+/* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
+
+typedef struct ToggleTargetSub {
+    /* 0x00 */ u8 pad0[0x44];
+    /* 0x44 */ u8 *unk44;
+} ToggleTargetSub;
+
+typedef struct ToggleTarget {
+    /* 0x000 */ u8 pad0[0x10];
+    /* 0x010 */ s32 flags;
+    /* 0x014 */ u8 pad14[0xFC];
+    /* 0x110 */ ToggleTargetSub unk110;
+} ToggleTarget;
+
+/** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
+s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     s32 flags;
 
-    switch (arg1) {
+    switch (msg) {
     case 0:
-        flags = *(s32 *) (arg0 + 0x10);
+        flags = target->flags;
         if (flags & 1) {
-            *(s32 *) (arg0 + 0x10) = flags & ~1;
+            target->flags = flags & ~1;
         } else {
-            *(s32 *) (arg0 + 0x10) = flags | 1;
+            target->flags = flags | 1;
         }
         break;
     case 2:
-        *(s32 *) (arg0 + 0x10) = *(s32 *) (arg0 + 0x10) & ~1;
+        target->flags &= ~1;
         break;
     case 1:
-        *(s32 *) (arg0 + 0x10) = *(s32 *) (arg0 + 0x10) | 1;
+        target->flags |= 1;
         break;
     default:
         return 0;
@@ -1292,113 +1308,112 @@ s32 arg2;
     return 1;
 }
 
-s32 func_1514E89C();
-
-s32 func_1514E920(arg0, arg1, arg2)
-s32 arg0;
-s32 arg1;
-s32 arg2;
-{
-    u8 *sub;
+/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->unk110.unk44. */
+s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
+    // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
+    ToggleTarget *target = (ToggleTarget *)handle;
+    ToggleTargetSub *sub;
     s32 flags;
     u8 *ptr;
 
-    sub = (u8 *) arg0 + 0x110;
-    switch (arg1) {
+    sub = &target->unk110;
+    switch (msg) {
     case 0:
-        flags = *(s32 *) (arg0 + 0x10);
+        flags = target->flags;
         if (flags & 1) {
-            *(s32 *) (arg0 + 0x10) = flags & ~1;
-            ptr = *(u8 **) (sub + 0x44);
-            if (ptr != 0) {
+            target->flags = flags & ~1;
+            ptr = sub->unk44;
+            if (ptr != NULL) {
                 ptr[0x30] = 0;
             }
         } else {
-            *(s32 *) (arg0 + 0x10) = flags | 1;
+            target->flags = flags | 1;
         }
         break;
     case 2:
-        *(s32 *) (arg0 + 0x10) = *(s32 *) (arg0 + 0x10) & ~1;
-        ptr = *(u8 **) (sub + 0x44);
-        if (ptr != 0) {
+        target->flags &= ~1;
+        ptr = sub->unk44;
+        if (ptr != NULL) {
             ptr[0x30] = 0;
         }
         break;
     case 1:
-        *(s32 *) (arg0 + 0x10) = *(s32 *) (arg0 + 0x10) | 1;
+        target->flags |= 1;
         break;
     default:
-        return func_1514E89C(arg0, arg1, arg2);
+        return func_1514E89C(target, msg, arg);
     }
     return 1;
 }
 
-s32 func_1514E920();
-
-void func_1514E9DC(void) {
-    func_1514E920();
+void func_1514E9DC(s32 handle, s32 msg, s32 arg) {
+    func_1514E920(handle, msg, arg);
 }
 
-s32 func_1514E89C();
-
-void func_1514E9FC(void) {
-    func_1514E89C();
+void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
+    func_1514E89C(target, msg, arg);
 }
 
-void func_1518E37C(void *, u8);
+typedef struct ModeTarget {
+    /* 0x00 */ u8 pad0[0x22];
+    /* 0x22 */ u8 mode;                 // set through func_1518E37C
+} ModeTarget;
 
-s32 func_1514EA1C(void *arg0, s32 arg1, s32 arg2) {
-    switch (arg1) {
-        case 3:
-            if (*(u8 *)((u8 *)arg0 + 0x22) == 2) {
-                func_1518E37C(arg0, 3);
-            } else {
-                func_1518E37C(arg0, 2);
-            }
-            break;
-        case 4:
-            func_1518E37C(arg0, 3);
-            break;
-        case 5:
-            func_1518E37C(arg0, 2);
-            break;
-        case 6:
-            if (*(u8 *)((u8 *)arg0 + 0x22) == 2) {
-                func_1518E37C(arg0, 5);
-            } else {
-                func_1518E37C(arg0, 2);
-            }
-            break;
-        case 7:
-            func_1518E37C(arg0, 5);
-            break;
-        case 8:
-            func_1518E37C(arg0, 2);
-            break;
-        case 9:
-            if (*(u8 *)((u8 *)arg0 + 0x22) == 2) {
-                func_1518E37C(arg0, 6);
-            } else {
-                func_1518E37C(arg0, 2);
-            }
-            break;
-        case 10:
-            func_1518E37C(arg0, 6);
-            break;
-        case 11:
-            func_1518E37C(arg0, 2);
-            break;
-        case 12:
-            func_1518E37C(arg0, 2);
-            break;
-        default:
-            return func_1514E89C(arg0, arg1, arg2);
+void func_1518E37C(ModeTarget *, u8 mode);
+
+/** Messages 3..12 switch the target between mode 2 and modes 3, 5 and 6. */
+s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {
+    switch (msg) {
+    case 3:
+        if (target->mode == 2) {
+            func_1518E37C(target, 3);
+        } else {
+            func_1518E37C(target, 2);
+        }
+        break;
+    case 4:
+        func_1518E37C(target, 3);
+        break;
+    case 5:
+        func_1518E37C(target, 2);
+        break;
+    case 6:
+        if (target->mode == 2) {
+            func_1518E37C(target, 5);
+        } else {
+            func_1518E37C(target, 2);
+        }
+        break;
+    case 7:
+        func_1518E37C(target, 5);
+        break;
+    case 8:
+        func_1518E37C(target, 2);
+        break;
+    case 9:
+        if (target->mode == 2) {
+            func_1518E37C(target, 6);
+        } else {
+            func_1518E37C(target, 2);
+        }
+        break;
+    case 10:
+        func_1518E37C(target, 6);
+        break;
+    case 11:
+        func_1518E37C(target, 2);
+        break;
+    case 12:
+        func_1518E37C(target, 2);
+        break;
+    default:
+        return func_1514E89C((ToggleTarget *)target, msg, arg);
     }
     return 1;
 }
 
-void func_1514EB6C(void) {
-    func_1514E89C();
+void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
+    func_1514E89C(target, msg, arg);
 }
 
 s32 func_1514EB8C(s32 arg0, s32 arg1, s32 arg2) {
@@ -1736,7 +1751,7 @@ void func_1514F3CC(struct127 *arg0) {
 }
 
 extern s32 D_800A5988;
-s32 func_1518D1C0(s32, s32, s32, s32, s32, s32, s32 *);
+s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
 
 void func_1514F44C(s32 arg0) {
     s32 v0;
