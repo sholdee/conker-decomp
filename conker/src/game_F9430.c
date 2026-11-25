@@ -46,23 +46,6 @@ typedef struct {
     u8 b;
 } Rgb8;
 
-/* Effect template for func_150C88D0. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ s8 unkD;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ s8 unk2D;
-} Effect88D0Spawn;
-
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
     /* 0x0 */ s16 growDelay; /* age after which the particle starts growing */
@@ -88,7 +71,7 @@ s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
-void func_150C88D0(Effect88D0Spawn *, s32, s32, s32);
+void func_150C88D0(RadialEffectDef *, s32, s32, s32);
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
@@ -185,7 +168,7 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
             memcpy(&particle->extra, &extra, sizeof(extra));
         }
         {
-            Effect88D0Spawn fx;
+            RadialEffectDef fx;
             f32 d;
 
             rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
@@ -196,20 +179,20 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             {
                 s16 n1; // matching: a variable, not a literal, so IDO emits the runtime int-to-float convert
 
-                fx.position = *(Vec3f *)pos;
-                fx.unk10 = 70.59999847f;
-                fx.unkC = 1;
-                fx.unkD = -1;
-                fx.unk14 = 12;
-                fx.unk18 = 40;
-                fx.unk1A = 30;
+                fx.pos = *(Vec3f *)pos;
+                fx.speed = 70.59999847f;
+                fx.flags = 1;
+                fx.checkCallback = -1;
+                fx.count = 12;
+                fx.remaining = 40;
+                fx.growUntil = 30;
                 n1 = 10;
-                fx.unk1C = d / (f32)n1;
-                fx.unk20 = 25;
-                fx.unk24 = d / fx.unk20;
-                fx.unk2C = -1;
-                fx.unk2D = -1;
-                fx.unk28 = 0.0f;
+                fx.growRate = d / (f32)n1;
+                fx.shrinkFrom = 25;
+                fx.shrinkRate = d / fx.shrinkFrom;
+                fx.emitCallback = -1;
+                fx.updateCallback = -1;
+                fx.emitRate = 0.0f;
                 func_150C88D0(&fx, 0, 0xFF, 1);
             }
         }

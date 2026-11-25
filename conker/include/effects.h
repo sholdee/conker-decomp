@@ -1790,6 +1790,26 @@ typedef struct TrailStateParams {
     /* 0x3C */ f32 burstRate;
 } TrailStateParams; /* size 0x40 */
 
+/* func_150C88D0 (game_F5D80.c): spawn parameters of an expanding ring effect (copied into RadialEffect.def). */
+typedef struct RadialEffectDef {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ u8 flags;            /* bit 0: expires when remaining runs out */
+    /* 0x0D */ s8 checkCallback;    /* index into D_80088860, -1 = none */
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ f32 speed;           /* radius growth per tick */
+    /* 0x14 */ s32 count;           /* ring segments */
+    /* 0x18 */ s16 remaining;       /* ticks left */
+    /* 0x1A */ s16 growUntil;
+    /* 0x1C */ f32 growRate;
+    /* 0x20 */ s16 shrinkFrom;
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ f32 shrinkRate;
+    /* 0x28 */ f32 emitRate;        /* emissions per unit of circumference per tick */
+    /* 0x2C */ s8 emitCallback;     /* index into D_80088858, -1 = none */
+    /* 0x2D */ s8 updateCallback;   /* index into D_80088864, -1 = none */
+    /* 0x2E */ u8 pad2E[2];
+} RadialEffectDef; /* size 0x30 */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

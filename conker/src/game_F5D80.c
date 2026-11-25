@@ -7,23 +7,6 @@ void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-/* Spawn parameters for an expanding ring effect (copied into RadialEffect.def). */
-typedef struct {
-    Vec3f pos;
-    u8 flags;          /* 0x0C: bit 0 = expires when remaining runs out */
-    s8 checkCallback;  /* 0x0D: index into D_80088860, -1 = none */
-    f32 speed;         /* 0x10: radius growth per tick */
-    s32 count;         /* 0x14: ring segments */
-    s16 remaining;     /* 0x18: ticks left */
-    s16 growUntil;     /* 0x1A */
-    f32 growRate;      /* 0x1C */
-    s16 shrinkFrom;    /* 0x20 */
-    f32 shrinkRate;    /* 0x24 */
-    f32 emitRate;      /* 0x28: emissions per unit of circumference per tick */
-    s8 emitCallback;   /* 0x2C: index into D_80088858, -1 = none */
-    s8 updateCallback; /* 0x2D: index into D_80088864, -1 = none */
-} RadialEffectDef; /* size 0x30 */
-
 typedef struct {
     f32 x; /* sin of the segment angle */
     f32 z; /* cos of the segment angle */
