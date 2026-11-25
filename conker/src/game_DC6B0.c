@@ -201,21 +201,6 @@ typedef struct GameDC6B0SmokeSource {
     GameDC6B0SmokeTimers timers;
 } GameDC6B0SmokeSource;
 
-typedef struct GameDC6B0SmokePacket {
-    f32 x, y;
-    f32 scaleX, scaleY;
-    u8 selector;
-    u8 pad11;
-    s16 lifetime, flags, field16, field18;
-    u8 color0, color1, color2, color3, color4;
-    u8 color5, color6, color7, color8, color9;
-    s32 field24, field28, field2C, field30, field34, field38, field3C;
-    u8 field40, field41;
-    u8 pad42[2];
-    u8 field44;
-    u8 pad45[0x13];
-} GameDC6B0SmokePacket;
-
 typedef struct GameDC6B0SmokeMotion {
     f32 x, y;
     f32 phase; /* random in [0, 2pi) */
@@ -229,16 +214,16 @@ typedef struct {
 } GameDC6B0SmokeSprite;
 
 u8 func_151D8E6C(void);
-GameDC6B0SmokeSprite *func_1515548C(GameDC6B0SmokePacket *, u8, s32, s32, s32, u8, s32);
+GameDC6B0SmokeSprite *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
 void func_150AF7C4(GameDC6B0SmokeSource *source) {
     GameDC6B0SmokeSprite *sprite;
-    GameDC6B0SmokePacket puff;
+    ScreenSpriteInfo puff;
     GameDC6B0SmokeMotion motion;
     GameDC6B0SmokeTimers *timers;
-    GameDC6B0SmokePacket spark;
+    ScreenSpriteInfo spark;
 
     timers = &source->timers;
     timers->puff -= D_800BE9E4;
@@ -250,36 +235,36 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.x = 0.0f;
         puff.y = 0.0f;
         func_150ADA68(); /* a random value the original draws and discards */
-        puff.selector = 0xFF;
-        puff.scaleX = 1.0f;
-        puff.scaleY = 115.0f;
-        puff.lifetime = func_150ADA20() % 71U + 20;
-        if (source->maxLifetime < puff.lifetime) {
-            puff.lifetime = source->maxLifetime;
+        puff.texture = 0xFF;
+        puff.halfWidth = 1.0f;
+        puff.halfHeight = 115.0f;
+        puff.timer = func_150ADA20() % 71U + 20;
+        if (source->maxLifetime < puff.timer) {
+            puff.timer = source->maxLifetime;
         }
         puff.flags = 0x21;
-        puff.field16 = 1;
-        puff.field18 = 0xFF;
-        puff.color0 = 0;
-        puff.color1 = 0xFF;
-        puff.color2 = 0xFF;
-        puff.color3 = 0xFF;
-        puff.color4 = func_150ADA20() % 71U + 40;
-        puff.color5 = 0xFF;
-        puff.color6 = 0xFF;
-        puff.color7 = 0xFF;
-        puff.color8 = 0xFF;
-        puff.color9 = 0xFF;
-        puff.field24 = 0;
-        puff.field28 = 0x200004;
-        puff.field2C = 0x1F0601;
-        puff.field30 = 0x19;
-        puff.field34 = 0x54;
-        puff.field38 = 0x80;
-        puff.field3C = 0x20;
-        puff.field40 = 0;
-        puff.field41 = 0xA;
-        puff.field44 = 0;
+        puff.fadeStart = 1;
+        puff.fadeRate = 0xFF;
+        puff.kind = 0;
+        puff.color1.red = 0xFF;
+        puff.color1.green = 0xFF;
+        puff.color1.blue = 0xFF;
+        puff.color1.alpha = func_150ADA20() % 71U + 40;
+        puff.color2.red = 0xFF;
+        puff.color2.green = 0xFF;
+        puff.color2.blue = 0xFF;
+        puff.color2.alpha = 0xFF;
+        puff.unk23 = 0xFF;
+        puff.otherModeH = 0;
+        puff.unk28 = 0x200004;
+        puff.unk2C = 0x1F0601;
+        puff.combineMode = 0x19;
+        puff.unk34 = 0x54;
+        puff.unk38 = 0x80;
+        puff.unk3C = 0x20;
+        puff.unk40 = 0;
+        puff.unk41 = 0xA;
+        puff.viewport = 0;
         sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->group, source->owner);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
@@ -290,35 +275,35 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
     if (timers->spark < 0) {
         spark.x = func_150ADA68() * 280.0f + -140.0f;
         spark.y = func_150ADA68() * 200.0f + -100.0f;
-        spark.scaleX = spark.scaleY = 2.0f * func_150ADA68() + 1.0f;
-        spark.selector = func_151D8E6C();
-        spark.lifetime = func_150ADA20() % 7U + 5;
-        if (source->maxLifetime < spark.lifetime) {
-            spark.lifetime = source->maxLifetime;
+        spark.halfWidth = spark.halfHeight = 2.0f * func_150ADA68() + 1.0f;
+        spark.texture = func_151D8E6C();
+        spark.timer = func_150ADA20() % 7U + 5;
+        if (source->maxLifetime < spark.timer) {
+            spark.timer = source->maxLifetime;
         }
         spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
-        spark.field16 = 1;
-        spark.field18 = 0xFF;
-        spark.color0 = 0;
-        spark.color1 = 0xFF;
-        spark.color2 = 0xFF;
-        spark.color3 = 0xFF;
-        spark.color4 = func_150ADA20() % 121U + 80;
-        spark.color5 = 0xFF;
-        spark.color6 = 0xFF;
-        spark.color7 = 0xFF;
-        spark.color8 = 0xFF;
-        spark.color9 = 0xFF;
-        spark.field24 = 0;
-        spark.field28 = 0x200004;
-        spark.field2C = 0x1F0601;
-        spark.field30 = 0x19;
-        spark.field34 = 0x55;
-        spark.field38 = 0x80;
-        spark.field3C = 0x20;
-        spark.field40 = 0;
-        spark.field41 = 7;
-        spark.field44 = 0;
+        spark.fadeStart = 1;
+        spark.fadeRate = 0xFF;
+        spark.kind = 0;
+        spark.color1.red = 0xFF;
+        spark.color1.green = 0xFF;
+        spark.color1.blue = 0xFF;
+        spark.color1.alpha = func_150ADA20() % 121U + 80;
+        spark.color2.red = 0xFF;
+        spark.color2.green = 0xFF;
+        spark.color2.blue = 0xFF;
+        spark.color2.alpha = 0xFF;
+        spark.unk23 = 0xFF;
+        spark.otherModeH = 0;
+        spark.unk28 = 0x200004;
+        spark.unk2C = 0x1F0601;
+        spark.combineMode = 0x19;
+        spark.unk34 = 0x55;
+        spark.unk38 = 0x80;
+        spark.unk3C = 0x20;
+        spark.unk40 = 0;
+        spark.unk41 = 7;
+        spark.viewport = 0;
         func_1515548C(&spark, 0, 0, 0, 0, source->group, source->owner);
         timers->spark = func_150ADA20() % 11U + 3;
     }

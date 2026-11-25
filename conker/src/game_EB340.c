@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
 typedef struct {
@@ -31,47 +32,6 @@ void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {
     }
 }
 
-/* Same 0x58-byte particle-emitter descriptor as struct_150CF680 in game_FC5F0.c
- * and struct_151CAB78_sp90 in game_1F4650.c; func_1515548C copies 0x58 of it. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-} EB340Emitter;
-
 /* Copied to +0x70 of the emitter object func_1515548C returns. */
 typedef struct {
     /* 0x00 */ Camera *owner;
@@ -83,52 +43,52 @@ typedef struct {
     /* 0x14 */ u8   pad14[0x44];
 } EB340Payload;
 
-extern void *func_1515548C(EB340Emitter *, s32, s32, s32, s32, u8, s32);
+extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /* Spawner update: when the timer runs out, spawns one emitter near the owner and
  * restarts the timer at a random 25..175. */
 void func_150BDF0C(EB340Obj *obj) {
     EB340Spawn *spawn;
-    EB340Emitter emitter;
+    ScreenSpriteInfo emitter;
     void *effect;
     EB340Payload payload;
 
     obj->spawn.timer -= D_800BE9E4;
     spawn = &obj->spawn;
     if (obj->spawn.timer < 0) {
-        emitter.unk0 = (func_150ADA68() * 270.0f) + -135.0f;
-        emitter.unk4 = -120.0f;
-        emitter.unk8 = (func_150ADA68() * 10.0f) + 3.0f;
-        emitter.unkC = (func_150ADA68() * 17.0f) + 9.0f;
-        emitter.unk10 = 0xAB;
-        emitter.unk12 = 1000;
-        emitter.unk14 = 0x31;
-        emitter.unk16 = 1;
-        emitter.unk18 = 0xFF;
-        emitter.unk1A = 7;
-        emitter.unk1B = 0xFF;
-        emitter.unk1C = 0xFF;
-        emitter.unk1D = 0xFF;
-        emitter.unk1E = (func_150ADA20() % 156U) + 100;
-        emitter.unk1F = 0xFF;
-        emitter.unk20 = 0xFF;
-        emitter.unk21 = 0xFF;
-        emitter.unk22 = 0xFF;
+        emitter.x = (func_150ADA68() * 270.0f) + -135.0f;
+        emitter.y = -120.0f;
+        emitter.halfWidth = (func_150ADA68() * 10.0f) + 3.0f;
+        emitter.halfHeight = (func_150ADA68() * 17.0f) + 9.0f;
+        emitter.texture = 0xAB;
+        emitter.timer = 1000;
+        emitter.flags = 0x31;
+        emitter.fadeStart = 1;
+        emitter.fadeRate = 0xFF;
+        emitter.kind = 7;
+        emitter.color1.red = 0xFF;
+        emitter.color1.green = 0xFF;
+        emitter.color1.blue = 0xFF;
+        emitter.color1.alpha = (func_150ADA20() % 156U) + 100;
+        emitter.color2.red = 0xFF;
+        emitter.color2.green = 0xFF;
+        emitter.color2.blue = 0xFF;
+        emitter.color2.alpha = 0xFF;
         emitter.unk23 = 0xFF;
-        emitter.unk24 = 0;
+        emitter.otherModeH = 0;
         emitter.unk28 = 0x200004;
         emitter.unk2C = 0x1F0601;
-        emitter.unk30 = 3;
+        emitter.combineMode = 3;
         emitter.unk34 = 0x22;
         emitter.unk38 = 0x80;
         emitter.unk3C = 0x20;
         emitter.unk40 = 0;
         emitter.unk41 = 7;
-        emitter.unk44 = spawn->owner->playerIndex;
-        emitter.unk48 = 1.0f;
-        emitter.unk4C = 1.0f;
-        emitter.unk50 = 0.0f;
-        emitter.unk54 = 0.0f;
+        emitter.viewport = spawn->owner->playerIndex;
+        emitter.scaleX = 1.0f;
+        emitter.scaleY = 1.0f;
+        emitter.offsetS = 0.0f;
+        emitter.offsetT = 0.0f;
         payload.owner = spawn->owner;
         payload.unkD = 0;
         payload.unkC = 0;

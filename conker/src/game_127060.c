@@ -716,45 +716,6 @@ typedef struct {
     /* 0x56 */ s16 unk56;
 } Spawn15157010;
 
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-} Spawn1515548C;
-
 /*
  * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
@@ -805,44 +766,44 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
             memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));
         }
         {
-            Spawn1515548C sprite;
+            ScreenSpriteInfo sprite;
             u8 i;
             const s16 kinds[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
 
-            sprite.unk04 = 62.0f;
-            sprite.unk12 = duration;
-            sprite.unk14 = 0x29;
-            sprite.unk16 = 10;
-            sprite.unk18 = 25;
-            sprite.unk08 = 16.0f;
-            sprite.unk0C = 16.0f;
-            sprite.unk1A = 0;
-            sprite.unk1B = 0xFF;
-            sprite.unk1C = 0xFF;
-            sprite.unk1D = 0xFF;
-            sprite.unk1E = 0xFF;
-            sprite.unk1F = 0xFF;
-            sprite.unk20 = 0xFF;
-            sprite.unk21 = 0xFF;
-            sprite.unk22 = 0xFF;
+            sprite.y = 62.0f;
+            sprite.timer = duration;
+            sprite.flags = 0x29;
+            sprite.fadeStart = 10;
+            sprite.fadeRate = 25;
+            sprite.halfWidth = 16.0f;
+            sprite.halfHeight = 16.0f;
+            sprite.kind = 0;
+            sprite.color1.red = 0xFF;
+            sprite.color1.green = 0xFF;
+            sprite.color1.blue = 0xFF;
+            sprite.color1.alpha = 0xFF;
+            sprite.color2.red = 0xFF;
+            sprite.color2.green = 0xFF;
+            sprite.color2.blue = 0xFF;
+            sprite.color2.alpha = 0xFF;
             sprite.unk23 = 0xFF;
-            sprite.unk24 = 0;
+            sprite.otherModeH = 0;
             sprite.unk28 = 0x200405;
             sprite.unk2C = 0x60200;
             sprite.unk40 = 0;
             sprite.unk41 = 7;
-            sprite.unk30 = 25;
+            sprite.combineMode = 25;
             sprite.unk34 = 0x22;
             sprite.unk38 = 0x80;
             sprite.unk3C = 0x20;
-            sprite.unk44 = 0;
-            sprite.unk48 = 1.0f;
-            sprite.unk4C = 1.0f;
-            sprite.unk50 = 0.0f;
-            sprite.unk54 = 0.0f;
+            sprite.viewport = 0;
+            sprite.scaleX = 1.0f;
+            sprite.scaleY = 1.0f;
+            sprite.offsetS = 0.0f;
+            sprite.offsetT = 0.0f;
             for (i = 0; i < 8; i++) {
-                sprite.unk00 = -65.0f + i * 24.75f;
-                sprite.unk10 = kinds[i];
+                sprite.x = -65.0f + i * 24.75f;
+                sprite.texture = kinds[i];
                 spawned = func_1515548C(&sprite, 14, 0, 0, 2, owner, kind);
                 if (spawned != NULL) {
                     memcpy(&((TaggedSprite *)spawned)->tag, &tag, sizeof(tag));

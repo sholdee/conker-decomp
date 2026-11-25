@@ -133,45 +133,6 @@ typedef struct {
     f32 y;
 } Vec2f;
 
-/* Parameters for func_1515548C, which spawns a 2D particle. */
-typedef struct {
-    /* 0x00 */ Vec2f pos;
-    /* 0x08 */ f32 scaleX;
-    /* 0x0C */ f32 scaleY;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-} ScreenParticleSpawn;
-
 /* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
     /* 0x00 */ u8 flags;
@@ -202,52 +163,52 @@ typedef struct {
     } motion;
 } Particle;
 
-Particle *func_1515548C(ScreenParticleSpawn *, s32, s32, s32, s32, u8, s32);
+Particle *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
 void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
-    ScreenParticleSpawn spawn;
+    ScreenSpriteInfo spawn;
     HopMotion hop;
     Particle *particle;
 
-    spawn.pos.y = 72.0f;
-    spawn.unk10 = 0xC1;
-    spawn.unk12 = unk12;
+    spawn.y = 72.0f;
+    spawn.texture = 0xC1;
+    spawn.timer = unk12;
     spawn.flags = 0x31;
-    spawn.unk16 = 1;
-    spawn.unk18 = 0xFF;
-    spawn.unk1A = 8;
-    spawn.unk1B = 0xFF;
-    spawn.unk1C = 0xFF;
-    spawn.unk1D = 0xFF;
-    spawn.unk1E = 0xFF;
-    spawn.unk1F = 0xFF;
-    spawn.unk20 = 0xFF;
-    spawn.unk21 = 0xFF;
-    spawn.unk22 = 0xFF;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.kind = 8;
+    spawn.color1.red = 0xFF;
+    spawn.color1.green = 0xFF;
+    spawn.color1.blue = 0xFF;
+    spawn.color1.alpha = 0xFF;
+    spawn.color2.red = 0xFF;
+    spawn.color2.green = 0xFF;
+    spawn.color2.blue = 0xFF;
+    spawn.color2.alpha = 0xFF;
     spawn.unk23 = 0xFF;
     spawn.unk28 = 0x200004;
 
     hop.flags = 0;
     hop.phase = 0.0f;
-    spawn.pos.x = -300.0f;
+    spawn.x = -300.0f;
     hop.startX = -300.0f;
     hop.distance = 0.0f;
-    spawn.scaleY = 7.5f;
-    spawn.scaleX = 7.5f;
-    spawn.unk24 = 0;
+    spawn.halfHeight = 7.5f;
+    spawn.halfWidth = 7.5f;
+    spawn.otherModeH = 0;
     spawn.unk2C = 0x9F0601;
     spawn.unk40 = 0;
     spawn.unk41 = 10;
-    spawn.unk30 = 0x17;
+    spawn.combineMode = 0x17;
     spawn.unk34 = 0x44;
     spawn.unk38 = 0x80;
     spawn.unk3C = 0x20;
-    spawn.unk4C = 1.0f;
-    spawn.unk48 = 1.0f;
-    spawn.unk54 = 0.0f;
-    spawn.unk50 = 0.0f;
-    spawn.unk44 = D_80082FA0;
+    spawn.scaleY = 1.0f;
+    spawn.scaleX = 1.0f;
+    spawn.offsetT = 0.0f;
+    spawn.offsetS = 0.0f;
+    spawn.viewport = D_80082FA0;
 
     particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
     if (particle != NULL) {
@@ -262,7 +223,7 @@ void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
    dust particles. */
 s32 func_150CF800(Particle *hopper) {
     f32 phase;
-    ScreenParticleSpawn spawn;
+    ScreenSpriteInfo spawn;
     BounceMotion dust;
     s8 count;
     s32 rand;
@@ -279,41 +240,42 @@ s32 func_150CF800(Particle *hopper) {
             hop->flags &= ~1;
             count = (func_150ADA20() & 3) + 2;
             dust.floorY = hopper->pos.y + 15.0f;
-            spawn.pos = hopper->pos;
-            spawn.unk16 = 12;
-            spawn.unk18 = 0x15;
-            spawn.unk1A = 0;
-            spawn.unk1B = 0xFF;
-            spawn.unk1C = 0xFF;
-            spawn.unk1D = 0xFF;
-            spawn.unk1F = 0xFF;
-            spawn.unk20 = 0xFF;
-            spawn.unk21 = 0xFF;
-            spawn.unk22 = 0xFF;
+            // matching: x and y are copied as one Vec2f
+            *(Vec2f *)&spawn.x = hopper->pos;
+            spawn.fadeStart = 12;
+            spawn.fadeRate = 0x15;
+            spawn.kind = 0;
+            spawn.color1.red = 0xFF;
+            spawn.color1.green = 0xFF;
+            spawn.color1.blue = 0xFF;
+            spawn.color2.red = 0xFF;
+            spawn.color2.green = 0xFF;
+            spawn.color2.blue = 0xFF;
+            spawn.color2.alpha = 0xFF;
             spawn.unk23 = 0xFF;
-            spawn.unk24 = 0;
+            spawn.otherModeH = 0;
             spawn.unk28 = 0x200004;
             spawn.unk2C = 0x9F0601;
             spawn.unk40 = 0;
             spawn.unk41 = 10;
-            spawn.unk30 = 0x17;
+            spawn.combineMode = 0x17;
             spawn.unk34 = 0x44;
             spawn.unk38 = 0x80;
             spawn.unk3C = 0x20;
-            spawn.unk48 = 1.0f;
-            spawn.unk4C = 1.0f;
-            spawn.unk54 = 0.0f;
-            spawn.unk50 = 0.0f;
-            spawn.unk44 = D_80082FA0;
+            spawn.scaleX = 1.0f;
+            spawn.scaleY = 1.0f;
+            spawn.offsetT = 0.0f;
+            spawn.offsetS = 0.0f;
+            spawn.viewport = D_80082FA0;
             for (; count > 0; count--) {
-                spawn.unk1E = (func_150ADA20() % 101U) + 155;
-                spawn.unk10 = D_8008FCD0[2]();
+                spawn.color1.alpha = (func_150ADA20() % 101U) + 155;
+                spawn.texture = D_8008FCD0[2]();
                 rand = func_150ADA20();
                 phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
                 func_15143874((s16)((rand % 65U) - 160), phase, &dust.vel.x, &dust.vel.y);
                 dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
-                spawn.scaleX = spawn.scaleY = (func_150ADA68() * 1.79f) + 1.6999999f;
-                spawn.unk12 = (func_150ADA20() % 26U) + 30;
+                spawn.halfWidth = spawn.halfHeight = (func_150ADA68() * 1.79f) + 1.6999999f;
+                spawn.timer = (func_150ADA20() % 26U) + 30;
                 if (func_150ADA20() & 1) {
                     bit2 = 2;
                 } else {

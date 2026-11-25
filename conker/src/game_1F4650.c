@@ -1311,46 +1311,6 @@ typedef struct {
     f32 a;
 } SightColor;
 
-/* Spawn descriptor for a screen-space sight sprite (func_1515548C). */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 width;
-    /* 0x0C */ f32 height;
-    /* 0x10 */ u8  texture;
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 lifetime;
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  red;
-    /* 0x1C */ u8  green;
-    /* 0x1D */ u8  blue;
-    /* 0x1E */ u8  alpha;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  playerNum;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-} SightSpriteDesc;
-
 /* Per-sprite state copied to +0x70 of each spawned sight sprite. */
 typedef struct {
     /* 0x00 */ Camera *player;
@@ -1378,7 +1338,7 @@ typedef struct {
 /* A spawned sight sprite: the spawn descriptor lives on at +0x10, the payload at +0x70. */
 typedef struct {
     u8 pad0[0x10];
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     u8 pad68[8];
     SightSpritePayload payload;
 } SightSprite;
@@ -1409,7 +1369,7 @@ extern f32 D_800AAD94[][2];
 
 /* Spawns the two layers of sight ring `type` (colour/size tables indexed by type) for `player`. */
 void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
@@ -1422,30 +1382,30 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     payload.player = player;
     payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: the s32 cast changes how IDO narrows the result
     payload.sourceIndex = arg3;
-    desc.lifetime = 300;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.timer = 300;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     desc.x = D_800AAD58[type];
     desc.y = 0.0f;
-    desc.width = D_800AAD30[type];
-    desc.height = D_800AAD44[type];
+    desc.halfWidth = D_800AAD30[type];
+    desc.halfHeight = D_800AAD44[type];
     desc.texture = 0xFF;
     desc.flags = (1 << (player->playerIndex + 11)) | ((arg2 ? 0x40 : 0) | 0x10);
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x54;
     payload.rangeMax = 0.0f;
     payload.lastValue = 99999.0f;
@@ -1453,22 +1413,22 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
     payload.rangeScale = D_800AAD94[type][D_80082FA0 == 1];
     payload.kind = 3;
 
-    desc.red = D_800AAC90[type].r;
-    desc.green = D_800AAC90[type].g;
-    desc.blue = D_800AAC90[type].b;
-    desc.alpha = D_800AAC90[type].a;
+    desc.color1.red = D_800AAC90[type].r;
+    desc.color1.green = D_800AAC90[type].g;
+    desc.color1.blue = D_800AAC90[type].b;
+    desc.color1.alpha = D_800AAC90[type].a;
     sprite = func_1515548C(&desc, 8, 0, 0, sizeof(SightSpritePayload), arg4, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 
     payload.kind = 0;
-    desc.width = D_800AAD30[type] + 2.0f;
-    desc.height = D_800AAD44[type] + 2.0f;
-    desc.red = D_800AACE0[type].r;
-    desc.green = D_800AACE0[type].g;
-    desc.blue = D_800AACE0[type].b;
-    desc.alpha = D_800AACE0[type].a;
+    desc.halfWidth = D_800AAD30[type] + 2.0f;
+    desc.halfHeight = D_800AAD44[type] + 2.0f;
+    desc.color1.red = D_800AACE0[type].r;
+    desc.color1.green = D_800AACE0[type].g;
+    desc.color1.blue = D_800AACE0[type].b;
+    desc.color1.alpha = D_800AACE0[type].a;
     sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -1477,15 +1437,15 @@ void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4) {
 
 /* Spawns the four corner brackets and a ring of 12 dots of the basic sight for `player`. */
 void func_151CA6A0(Camera *player, u8 big) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
     s32 pad[2]; // matching: unused stack space in the original frame
 
     payload.kind = 0;
     payload.flags = 0;
-    desc.height = 25.0f;
-    desc.width = 25.0f;
+    desc.halfHeight = 25.0f;
+    desc.halfWidth = 25.0f;
     payload.player = player;
     payload.unk4 = 0.0f;
     payload.unk8 = 130.0f;
@@ -1494,30 +1454,30 @@ void func_151CA6A0(Camera *player, u8 big) {
     } else {
         desc.texture = 0x5D;
     }
-    desc.lifetime = 300;
+    desc.timer = 300;
     desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = 0;
-    desc.green = 0xFF;
-    desc.blue = 0;
-    desc.alpha = 0x82;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = 0;
+    desc.color1.green = 0xFF;
+    desc.color1.blue = 0;
+    desc.color1.alpha = 0x82;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     desc.flags &= ~6;
     desc.flags |= 6;
     desc.x = 25.0f;
@@ -1555,11 +1515,11 @@ void func_151CA6A0(Camera *player, u8 big) {
 
         desc.x = 0.0f;
         desc.y = 0.0f;
-        desc.height = 3.0f;
-        desc.width = 3.0f;
+        desc.halfHeight = 3.0f;
+        desc.halfWidth = 3.0f;
         desc.texture = 0x99;
         desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
-        desc.unk30 = 8;
+        desc.combineMode = 8;
         desc.unk34 = 0x44;
         payload.lastValue = 99999.0f;
         if (D_80082FA0 == 1) {
@@ -1613,7 +1573,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
 
 /* Spawns the plain dot sight for `player`. */
 void func_151CAB78(Camera *player, u8 big) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     s32 pad; // matching: unused stack slot
     SightSpritePayload payload;
     SightSprite *sprite;
@@ -1633,26 +1593,26 @@ void func_151CAB78(Camera *player, u8 big) {
     }
 
     desc.texture = 100;
-    desc.lifetime = 300;
-    desc.height = scale * 12.0f;
-    desc.width = desc.height;
+    desc.timer = 300;
+    desc.halfHeight = scale * 12.0f;
+    desc.halfWidth = desc.halfHeight;
     desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = 0xFF;
-    desc.green = 200;
-    desc.blue = 0;
-    desc.alpha = 130;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = 0xFF;
+    desc.color1.green = 200;
+    desc.color1.blue = 0;
+    desc.color1.alpha = 130;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
@@ -1660,7 +1620,7 @@ void func_151CAB78(Camera *player, u8 big) {
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
 
     if (big) {
         kind = 4;
@@ -1692,14 +1652,14 @@ typedef struct {
 
 /* Spawns the corner brackets of the zoom sight and, unless D_800BE616 is set, its centre lens. */
 void func_151CAD28(Camera *player, u8 big) {
-        SightSpriteDesc desc;
+        ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
     payload.kind = 0;
     payload.flags = 0;
-    desc.height = 25.0f;
-    desc.width = 25.0f;
+    desc.halfHeight = 25.0f;
+    desc.halfWidth = 25.0f;
     payload.player = player;
     payload.unk4 = 0.0f;
     payload.unk8 = 130.0f;
@@ -1708,30 +1668,30 @@ void func_151CAD28(Camera *player, u8 big) {
     } else {
         desc.texture = 0x65;
     }
-    desc.lifetime = 300;
+    desc.timer = 300;
     desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = 0;
-    desc.green = 0xFF;
-    desc.blue = 0;
-    desc.alpha = 130;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = 0;
+    desc.color1.green = 0xFF;
+    desc.color1.blue = 0;
+    desc.color1.alpha = 130;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     desc.flags &= ~6;
     desc.flags |= 6;
     desc.x = 25.0f;
@@ -1893,7 +1853,7 @@ void func_151CB510(SightSprite *sprite) {
         target = 0.0f;
     }
     payload->unk4 += (target - payload->unk4) * 0.400000006f;
-    sprite->desc.alpha = payload->unk4;
+    sprite->desc.color1.alpha = payload->unk4;
 }
 
 extern f32 D_800AAD84[];
@@ -1901,7 +1861,7 @@ extern f32 D_800AADAC[];
 
 /* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
 void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
@@ -1912,34 +1872,34 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     payload.flags = (s32)((arg3 == -1) ? 0 : 4); // matching: see func_151C9F38
     payload.sourceIndex = arg3;
     payload.fade = 255.0f;
-    desc.lifetime = 300;
-    desc.width = 49.0f;
+    desc.timer = 300;
+    desc.halfWidth = 49.0f;
     payload.bouncePhase = 0.0f;
-    desc.height = 18.0f;
+    desc.halfHeight = 18.0f;
     desc.flags = (1 << (player->playerIndex + 11)) | ((arg2 ? 0x40 : 0) | 0x32);
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = 0xFF;
-    desc.green = 0xFF;
-    desc.blue = 0xFF;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = 0xFF;
+    desc.color1.green = 0xFF;
+    desc.color1.blue = 0xFF;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 7;
+    desc.combineMode = 7;
     desc.unk34 = 0x22;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 7;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     payload.side = 0;
-    desc.alpha = 0xFF;
+    desc.color1.alpha = 0xFF;
     desc.texture = 0x7B;
     payload.rangeMax = 0.0f;
     desc.x = 88.0f;
@@ -1950,14 +1910,14 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    desc.alpha = 0;
+    desc.color1.alpha = 0;
     desc.texture = 0x7C;
     sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     desc.flags &= ~2;
-    desc.alpha = 0xFF;
+    desc.color1.alpha = 0xFF;
     desc.texture = 0x7B;
     payload.side = 1;
     desc.x = -88.0f;
@@ -1966,7 +1926,7 @@ void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    desc.alpha = 0;
+    desc.color1.alpha = 0;
     desc.texture = 0x7C;
     sprite = func_1515548C(&desc, 5, 0, 0, sizeof(SightSpritePayload), arg4, 0);
     if (sprite != NULL) {
@@ -2022,9 +1982,9 @@ s32 func_151CB970(SightSprite *sprite) {
 
     alpha = (u32)payload->fade;
     if (sprite->desc.texture == 0x7C) {
-        sprite->desc.alpha = 255 - alpha;
+        sprite->desc.color1.alpha = 255 - alpha;
     } else {
-        sprite->desc.alpha = alpha;
+        sprite->desc.color1.alpha = alpha;
     }
 
     payload->fade += (255.0f - payload->fade) * 0.6760000587f;
@@ -2073,22 +2033,22 @@ s32 func_151CBC60(SightSprite *sprite) {
     if (value != payload->lastValue) {
         base = payload->unk4C;
         payload->lastValue = value;
-        sprite->desc.height = base - (value - payload->rangeMin) * payload->rangeScale * base + 1.0f;
+        sprite->desc.halfHeight = base - (value - payload->rangeMin) * payload->rangeScale * base + 1.0f;
     }
     if (payload->flags & 2) {
         payload->flashTimer -= D_800BE9A4;
         value = payload->flashTimer;
         if (value <= 0.0f) {
-            sprite->desc.red = payload->color.r;
-            sprite->desc.green = payload->color.g;
-            sprite->desc.blue = payload->color.b;
-            sprite->desc.alpha = payload->color.a;
+            sprite->desc.color1.red = payload->color.r;
+            sprite->desc.color1.green = payload->color.g;
+            sprite->desc.color1.blue = payload->color.b;
+            sprite->desc.color1.alpha = payload->color.a;
             payload->flags &= ~2;
         } else {
-            sprite->desc.red = payload->color.r + (payload->flashColor.r - payload->color.r) * (value * 0.028571429f);
-            sprite->desc.green = payload->color.g + (payload->flashColor.g - payload->color.g) * (payload->flashTimer * 0.028571429f);
-            sprite->desc.blue = payload->color.b + (payload->flashColor.b - payload->color.b) * (payload->flashTimer * 0.028571429f);
-            sprite->desc.alpha = payload->color.a + (payload->flashColor.a - payload->color.a) * (payload->flashTimer * 0.028571429f);
+            sprite->desc.color1.red = payload->color.r + (payload->flashColor.r - payload->color.r) * (value * 0.028571429f);
+            sprite->desc.color1.green = payload->color.g + (payload->flashColor.g - payload->color.g) * (payload->flashTimer * 0.028571429f);
+            sprite->desc.color1.blue = payload->color.b + (payload->flashColor.b - payload->color.b) * (payload->flashTimer * 0.028571429f);
+            sprite->desc.color1.alpha = payload->color.a + (payload->flashColor.a - payload->color.a) * (payload->flashTimer * 0.028571429f);
         }
     }
     return 1;
@@ -2135,16 +2095,16 @@ void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId) {
     if ((msgId == 0x46) && (*msg == *(s32 *)payload)) {
         payload->flags |= 2;
         payload->flashTimer = 35.0f;
-        sprite->desc.red = (u32)payload->flashColor.r;
-        sprite->desc.green = (u32)payload->flashColor.g;
-        sprite->desc.blue = (u32)payload->flashColor.b;
-        sprite->desc.alpha = (u32)payload->flashColor.a;
+        sprite->desc.color1.red = (u32)payload->flashColor.r;
+        sprite->desc.color1.green = (u32)payload->flashColor.g;
+        sprite->desc.color1.blue = (u32)payload->flashColor.b;
+        sprite->desc.color1.alpha = (u32)payload->flashColor.a;
     }
 }
 
 /* Spawns the two bars of the sight's cross (colour arg1..arg3) for `player`. */
 void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
@@ -2154,36 +2114,36 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     payload.flags = 0;
     payload.unk8 = 130.0f;
 
-    desc.unk50 = 0.0f;
-    desc.unk54 = 0.0f;
-    desc.lifetime = 300;
+    desc.offsetS = 0.0f;
+    desc.offsetT = 0.0f;
+    desc.timer = 300;
     desc.flags = (1 << (player->playerIndex + 11)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = red;
-    desc.green = green;
-    desc.blue = blue;
-    desc.alpha = 0x82;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = red;
+    desc.color1.green = green;
+    desc.color1.blue = blue;
+    desc.color1.alpha = 0x82;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 10;
-    desc.playerNum = player->playerIndex;
-    desc.unk48 = 0.200000003f;
-    desc.unk4C = 1.0f;
-    desc.width = 28.0f;
-    desc.height = 4.199999809f;
+    desc.viewport = player->playerIndex;
+    desc.scaleX = 0.200000003f;
+    desc.scaleY = 1.0f;
+    desc.halfWidth = 28.0f;
+    desc.halfHeight = 4.199999809f;
     desc.y = -37.0f;
     desc.texture = 0x9A;
     desc.x = 0.0f;
@@ -2194,10 +2154,10 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
 
     desc.texture = 0x9B;
     desc.y = 0.0f;
-    desc.unk48 = 1.0f;
-    desc.unk4C = 0.200000003f;
-    desc.width = 4.199999809f;
-    desc.height = 28.0f;
+    desc.scaleX = 1.0f;
+    desc.scaleY = 0.200000003f;
+    desc.halfWidth = 4.199999809f;
+    desc.halfHeight = 28.0f;
     desc.x = -37.0f;
     sprite = func_1515548C(&desc, 9, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
@@ -2232,16 +2192,16 @@ s32 func_151CC77C(SightSprite *sprite) {
     }
     func_15145974(&aimer->aimDir, pitchp, yawp);
     if (sprite->desc.texture == 0x9A) {
-        sprite->desc.unk50 = -((angles.pitch * 0.002777777845f) * 2560.0f) * 2.0f;
+        sprite->desc.offsetS = -((angles.pitch * 0.002777777845f) * 2560.0f) * 2.0f;
     } else {
-        sprite->desc.unk54 = ((angles.yaw * 0.002777777845f) * 2560.0f) * 2.0f;
+        sprite->desc.offsetT = ((angles.yaw * 0.002777777845f) * 2560.0f) * 2.0f;
     }
     return 1;
 }
 
 /* Spawns the centre dot, side ticks and diagonal corners of the cross sight for `player`. */
 void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
 
@@ -2251,24 +2211,24 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     payload.flags = 0;
     payload.unk8 = 130.0f;
 
-    desc.lifetime = 300;
+    desc.timer = 300;
     desc.flags = (1 << (player->playerIndex + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = red;
-    desc.green = green;
-    desc.blue = blue;
-    desc.alpha = 0xB4;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = red;
+    desc.color1.green = green;
+    desc.color1.blue = blue;
+    desc.color1.alpha = 0xB4;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
@@ -2276,10 +2236,10 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     desc.texture = 0x64;
-    desc.height = 12.0f;
-    desc.width = 12.0f;
+    desc.halfHeight = 12.0f;
+    desc.halfWidth = 12.0f;
     sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
     if (sprite != NULL) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
@@ -2288,8 +2248,8 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.texture = 0x9D;
     desc.flags &= ~6;
     desc.flags |= 0;
-    desc.height = 7.0f;
-    desc.width = 7.0f;
+    desc.halfHeight = 7.0f;
+    desc.halfWidth = 7.0f;
     desc.x = 55.0f;
     desc.y = 0.0f;
     sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
@@ -2328,8 +2288,8 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     desc.texture = 0x9E;
     desc.flags &= ~6;
     desc.flags |= 6;
-    desc.height = 6.0f;
-    desc.width = 6.0f;
+    desc.halfHeight = 6.0f;
+    desc.halfWidth = 6.0f;
     desc.x = 44.0f;
     desc.y = 44.0f;
     sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), arg5, 1);
@@ -2367,7 +2327,7 @@ void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
 
 /* Spawns the large ring of the cross sight (used instead of the cross in multiplayer). */
 void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     s32 pad; // matching: unused stack slot
     SightSpritePayload payload;
     SightSprite *sprite;
@@ -2378,24 +2338,24 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     payload.flags = 0;
     payload.unk8 = 130.0f;
 
-    desc.lifetime = 300;
+    desc.timer = 300;
     desc.flags = (1 << (player->playerIndex + 11)) | 0x50;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = red;
-    desc.green = green;
-    desc.blue = blue;
-    desc.alpha = 0xB4;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = red;
+    desc.color1.green = green;
+    desc.color1.blue = blue;
+    desc.color1.alpha = 0xB4;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x44;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
@@ -2403,10 +2363,10 @@ void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue) {
     desc.unk41 = 10;
     desc.x = 0.0f;
     desc.y = 0.0f;
-    desc.playerNum = player->playerIndex;
+    desc.viewport = player->playerIndex;
     desc.texture = 0xB4;
-    desc.width = 65.0f;
-    desc.height = 65.0f;
+    desc.halfWidth = 65.0f;
+    desc.halfHeight = 65.0f;
 
     sprite = func_1515548C(&desc, 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
     if (sprite != NULL) {
@@ -2436,7 +2396,7 @@ extern SightTextureRow D_8008FC28;
 
 /* Spawns the two rows of four texture strips (top and bottom) of the scope frame for `player`. */
 void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
-    SightSpriteDesc desc;
+    ScreenSpriteInfo desc;
     SightSprite *sprite;
     SightSpritePayload payload;
     u8 i;
@@ -2452,36 +2412,36 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
     payload.flags = (s32)((arg2 == -1) ? 0 : 4); // matching: see func_151C9F38
     payload.sourceIndex = arg2;
 
-    desc.lifetime = 300;
+    desc.timer = 300;
     desc.flags = (arg1 ? 0x40 : 0) | 0x20 | 0x10;
-    desc.unk16 = 1;
-    desc.unk18 = 0xFF;
-    desc.unk1A = 7;
-    desc.red = 0xFF;
-    desc.green = 0xFF;
-    desc.blue = 0xFF;
-    desc.alpha = 0xFF;
-    desc.unk1F = 0xFF;
-    desc.unk20 = 0xFF;
-    desc.unk21 = 0xFF;
-    desc.unk22 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.kind = 7;
+    desc.color1.red = 0xFF;
+    desc.color1.green = 0xFF;
+    desc.color1.blue = 0xFF;
+    desc.color1.alpha = 0xFF;
+    desc.color2.red = 0xFF;
+    desc.color2.green = 0xFF;
+    desc.color2.blue = 0xFF;
+    desc.color2.alpha = 0xFF;
     desc.unk23 = 0xFF;
-    desc.unk24 = 0;
+    desc.otherModeH = 0;
     desc.unk28 = 0x200004;
     desc.unk2C = 0x1F0601;
-    desc.unk30 = 8;
+    desc.combineMode = 8;
     desc.unk34 = 0x13;
     desc.unk38 = 0x80;
     desc.unk3C = 0x20;
     desc.unk40 = 0;
     desc.unk41 = 0;
-    desc.playerNum = player->playerIndex;
-    desc.unk50 = 0.0f;
-    desc.unk54 = 0.0f;
-    desc.unk48 = 1.0f;
-    desc.unk4C = 1.0f;
-    desc.width = 35.75f;
-    desc.height = 16.0f;
+    desc.viewport = player->playerIndex;
+    desc.offsetS = 0.0f;
+    desc.offsetT = 0.0f;
+    desc.scaleX = 1.0f;
+    desc.scaleY = 1.0f;
+    desc.halfWidth = 35.75f;
+    desc.halfHeight = 16.0f;
 
     for (j = 0; j < 2; j++) {
         textures = D_8008FC28;

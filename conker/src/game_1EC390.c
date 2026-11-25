@@ -278,46 +278,40 @@ typedef struct {
     /* 0x120 */ PanelExtra extra;
 } CounterPanel;
 
-/* First argument of func_1515548C (Struct1515548CArg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ f32 x;
+/* matching: ScreenSpriteInfo plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ScreenSpriteInfo5C {
+    /* 0x00 */ f32 x;           /* centre, in viewport units */
     /* 0x04 */ f32 y;
-    /* 0x08 */ f32 sizeX;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ u8  unk10; /* sprite id */
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
+    /* 0x08 */ f32 halfWidth;
+    /* 0x0C */ f32 halfHeight;
+    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
     /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
+    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
+    /* 0x1B */ SpriteColor color1;
+    /* 0x1F */ SpriteColor color2;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
+    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
+    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is func_1513F4E4's combiner argument */
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-} Struct1515548CArg;
+    /* 0x40 */ s8 unk40;
+    /* 0x41 */ s8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
+    /* 0x4C */ f32 scaleY;
+    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
+    /* 0x54 */ f32 offsetT;
+    /* 0x58 */ u8 pad58[0x4];
+} ScreenSpriteInfo5C;
 
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
@@ -343,7 +337,7 @@ typedef struct {
 
 extern CounterPanel *func_15157010(Config15157010 *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
                                    s32 kind);
-extern CounterDigit *func_1515548C(Struct1515548CArg *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
+extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
                                    s32 kind);
 
 /* Shows the value of func_150859AC(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
@@ -376,7 +370,7 @@ void func_151BF340(u8 owner, s32 kind) {
         {
             Config15157010 panelConfig;
             PanelExtra panelExtra;
-            Struct1515548CArg digitArg;
+            ScreenSpriteInfo5C digitArg;
 
             panelConfig.unk38 = 0;
             panelConfig.unk00 = 0xC0;
@@ -433,43 +427,43 @@ void func_151BF340(u8 owner, s32 kind) {
                 } else {
                     digitArg.y = -62.0f;
                 }
-                digitArg.unk12 = 300;
+                digitArg.timer = 300;
                 digitArg.flags = 0x20;
-                digitArg.unk16 = 1;
-                digitArg.unk18 = 0xFF;
-                digitArg.unk1A = 0;
-                digitArg.unk1B = 0xFF;
-                digitArg.unk1C = 0xFF;
-                digitArg.unk1D = 0xFF;
-                digitArg.unk1E = 0xFF;
-                digitArg.unk1F = 0xFF;
-                digitArg.unk20 = 0xFF;
-                digitArg.unk21 = 0xFF;
-                digitArg.unk22 = 0xFF;
+                digitArg.fadeStart = 1;
+                digitArg.fadeRate = 0xFF;
+                digitArg.kind = 0;
+                digitArg.color1.red = 0xFF;
+                digitArg.color1.green = 0xFF;
+                digitArg.color1.blue = 0xFF;
+                digitArg.color1.alpha = 0xFF;
+                digitArg.color2.red = 0xFF;
+                digitArg.color2.green = 0xFF;
+                digitArg.color2.blue = 0xFF;
+                digitArg.color2.alpha = 0xFF;
                 digitArg.unk23 = 0xFF;
-                digitArg.unk24 = 0;
+                digitArg.otherModeH = 0;
                 digitArg.unk28 = 0x200004;
                 digitArg.unk2C = 0x9F0601;
                 digitArg.unk40 = 0;
                 digitArg.unk41 = 0;
-                digitArg.unk30 = 0x19;
+                digitArg.combineMode = 0x19;
                 digitArg.unk34 = 0x13;
                 digitArg.unk38 = 0x80;
                 digitArg.unk3C = 0x20;
-                digitArg.unk44 = 0;
-                digitArg.unk50 = 0.0f;
-                digitArg.unk54 = 0.0f;
-                digitArg.sizeY = 16.0f;
-                digitArg.sizeX = 16.0f;
-                digitArg.unk48 = 1.f; // matching: spelling it 1.0f swaps the FP registers of 0.0f and 1.0f
-                digitArg.unk4C = 1.f;
+                digitArg.viewport = 0;
+                digitArg.offsetS = 0.0f;
+                digitArg.offsetT = 0.0f;
+                digitArg.halfHeight = 16.0f;
+                digitArg.halfWidth = 16.0f;
+                digitArg.scaleX = 1.f; // matching: spelling it 1.0f swaps the FP registers of 0.0f and 1.0f
+                digitArg.scaleY = 1.f;
                 if (digits[0] == 0) {
-                    digitArg.unk10 = digitSprites[digits[1]];
+                    digitArg.texture = digitSprites[digits[1]];
                     display->digits[0] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
                     display->digits[1] = NULL;
                 } else {
                     for (i = 0; i < 2; i++) {
-                        digitArg.unk10 = digitSprites[digits[i]];
+                        digitArg.texture = digitSprites[digits[i]];
                         display->digits[i] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
                     }
                 }

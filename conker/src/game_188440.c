@@ -252,37 +252,6 @@ void func_1515B21C(EmitterObject *obj) {
     }
 }
 
-/* Description a screen sprite is created from (ScreenSpriteInfo in game_182140.c). */
-typedef struct {
-    /* 0x00 */ f32 x; // centre, in viewport units
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 halfWidth;
-    /* 0x0C */ f32 halfHeight;
-    /* 0x10 */ u8 texture;
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 fadeStart;
-    /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind; // index into D_8008AD04 (message handlers)
-    /* 0x1B */ u8 color1[4];
-    /* 0x1F */ u8 color2[4];
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 viewport; // the only viewport drawn in when (flags & 0x10)
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 unk48[4];
-} ScreenSpriteInfo;
-
 /* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
 typedef struct {
     /* 0x00 */ s16 player;
@@ -343,15 +312,15 @@ void func_1515B674(s16 player) {
     info.kind = 1;
     info.fadeStart = 20;
     info.fadeRate = 12;
-    info.color1[0] = 255;
-    info.color1[1] = 255;
-    info.color1[2] = 255;
-    info.color2[0] = 255;
+    info.color1.red = 255;
+    info.color1.green = 255;
+    info.color1.blue = 255;
+    info.color2.red = 255;
     data.player = player;
     info.viewport = player;
-    info.color2[1] = 255;
-    info.color2[2] = 255;
-    info.color2[3] = 255;
+    info.color2.green = 255;
+    info.color2.blue = 255;
+    info.color2.alpha = 255;
     info.unk23 = 255;
     info.otherModeH = 0;
     info.unk28 = 0;
@@ -372,7 +341,7 @@ void func_1515B674(s16 player) {
         info.y = (func_150ADA68() * 148.0f) + -100.0f;
         info.texture = D_8008FD04[func_151D8E20()]();
         info.timer = (func_150ADA20() % 51U) + 50;
-        info.color1[3] = (func_150ADA20() % 101U) + 100;
+        info.color1.alpha = (func_150ADA20() % 101U) + 100;
         if (func_150ADA20() & 1) {
             info.flags |= 2;
         }

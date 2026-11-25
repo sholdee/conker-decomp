@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* State block that func_150FC438 copies into its spawned object at offset 0x28. */
 typedef struct {
@@ -60,43 +61,6 @@ typedef struct {
 extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
-/* First argument of func_1515548C (same layout as game_113D60.c's Struct1515548CArg). */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 sizeX;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ s8 pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ s8 pad42[2];
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ u8 pad48[0x10];
-} EffectArg_150FB8C0; // size 0x58
-
 /* First argument of func_151602C0. */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -119,7 +83,7 @@ extern void func_15145EA4(f32 **, f32 **, s32, s32);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern s32 func_151602C0(SparkArg_150FB8C0 *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern void func_1515548C(EffectArg_150FB8C0 *, s32, s32, s32, s32, s32, s32);
+extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
@@ -151,7 +115,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     s32 sparkPos[3];
     f32 trailParams[2];
     u8 trailCameraMask;
-    EffectArg_150FB8C0 effect;
+    ScreenSpriteInfo effect;
     CameraArg_150FB8C0 cameraArg;
 
     // matching: the always-false side < 0 test is needed
@@ -278,34 +242,34 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
             effect.x = 59.0f;
         }
         effect.y = 68.0f;
-        effect.sizeX = (func_150ADA68() * 20.0f) + 40.0f;
-        effect.sizeY = (func_150ADA68() * 20.0f) + 80.0f;
-        effect.unk10 = 0x80;
-        effect.unk12 = (func_150ADA20() & 3) + 5;
+        effect.halfWidth = (func_150ADA68() * 20.0f) + 40.0f;
+        effect.halfHeight = (func_150ADA68() * 20.0f) + 80.0f;
+        effect.texture = 0x80;
+        effect.timer = (func_150ADA20() & 3) + 5;
         // matching: the redundant (s16) and & 0xFFFF narrowing shifts the t-register allocation
         effect.flags = (s16)((side ? 2 : 0) | 0x39) & 0xFFFF;
-        effect.unk16 = 3;
-        effect.unk18 = 85;
-        effect.unk1A = 0;
-        effect.unk1B = 0xFF;
-        effect.unk1C = 0xFF;
-        effect.unk1D = 0xFF;
-        effect.unk1E = (func_150ADA20() % 56U) + 200;
-        effect.unk1F = 0xFF;
-        effect.unk20 = 0xFF;
-        effect.unk21 = 0xFF;
-        effect.unk22 = 0xFF;
+        effect.fadeStart = 3;
+        effect.fadeRate = 85;
+        effect.kind = 0;
+        effect.color1.red = 0xFF;
+        effect.color1.green = 0xFF;
+        effect.color1.blue = 0xFF;
+        effect.color1.alpha = (func_150ADA20() % 56U) + 200;
+        effect.color2.red = 0xFF;
+        effect.color2.green = 0xFF;
+        effect.color2.blue = 0xFF;
+        effect.color2.alpha = 0xFF;
         effect.unk23 = 0xFF;
         effect.unk28 = 0x200004;
-        effect.unk24 = 0;
+        effect.otherModeH = 0;
         effect.unk2C = 0x1F0601;
-        effect.unk30 = 3;
+        effect.combineMode = 3;
         effect.unk34 = 34;
         effect.unk38 = 0x80;
         effect.unk3C = 0x20;
         effect.unk40 = 0;
         effect.unk41 = 7;
-        effect.unk44 = target->camera->playerIndex;
+        effect.viewport = target->camera->playerIndex;
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
         cameraArg.camera = target->camera;

@@ -331,50 +331,46 @@ typedef struct {
     /* 0x4 */ f32 y;
 } Vec2f;
 
-typedef struct {
-    /* 0x00 */ Vec2f position;
-    /* 0x08 */ f32 sizeX;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ u8 unk10;
+/* matching: ScreenSpriteInfo plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ScreenSpriteInfo5C {
+    /* 0x00 */ f32 x;           /* centre, in viewport units */
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 halfWidth;
+    /* 0x0C */ f32 halfHeight;
+    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
     /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 unk12;
+    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
     /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
+    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
+    /* 0x1B */ SpriteColor color1;
+    /* 0x1F */ SpriteColor color2;
     /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 unk24;
+    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
+    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
+    /* 0x34 */ s32 unk34;       /* its low byte (0x37) is func_1513F4E4's combiner argument */
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
+    /* 0x40 */ s8 unk40;
+    /* 0x41 */ s8 unk41;
     /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 unk44;
+    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
     /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-} Struct1515548CArg; // first argument of func_1515548C
+    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
+    /* 0x4C */ f32 scaleY;
+    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
+    /* 0x54 */ f32 offsetT;
+    /* 0x58 */ u8 pad58[0x4];
+} ScreenSpriteInfo5C;
 
 extern Game113D60Ids2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
 extern Game113D60Ids3 D_80088A68;
 extern Game113D60Ids3 D_80088A74;
-extern void *func_1515548C(Struct1515548CArg *, s32, s32 *, s32, s32, u8, s32);
+extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind);
@@ -424,34 +420,35 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
 /* Spawns a func_1515548C effect of the given size at `position`. */
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
-    Struct1515548CArg arg;
+    ScreenSpriteInfo5C arg;
     Game113D60Ids1 id;
 
     id = D_80088A64;
-    arg.position = *position;
-    arg.sizeX = size;
-    arg.sizeY = size;
-    arg.unk10 = id.ids[0];
-    arg.unk12 = unk12;
+    // matching: x and y are copied as one Vec2f
+    *(Vec2f *)&arg.x = *position;
+    arg.halfWidth = size;
+    arg.halfHeight = size;
+    arg.texture = id.ids[0];
+    arg.timer = unk12;
     arg.flags = flags | 0x40;
-    arg.unk16 = unk16;
-    arg.unk18 = unk18;
-    arg.unk1A = 4;
-    arg.unk1B = 0xFF;
-    arg.unk1C = 0xE6;
-    arg.unk1D = 0xBE;
-    arg.unk1E = unk1E;
-    arg.unk1F = 0xFF;
-    arg.unk20 = 0xFF;
-    arg.unk21 = 0xFF;
-    arg.unk22 = 0xFF;
+    arg.fadeStart = unk16;
+    arg.fadeRate = unk18;
+    arg.kind = 4;
+    arg.color1.red = 0xFF;
+    arg.color1.green = 0xE6;
+    arg.color1.blue = 0xBE;
+    arg.color1.alpha = unk1E;
+    arg.color2.red = 0xFF;
+    arg.color2.green = 0xFF;
+    arg.color2.blue = 0xFF;
+    arg.color2.alpha = 0xFF;
     arg.unk23 = unk23;
-    arg.unk24 = 1;
+    arg.otherModeH = 1;
     arg.unk28 = 0;
     arg.unk2C = 0;
     arg.unk40 = 0;
     arg.unk41 = 10;
-    arg.unk30 = 7;
+    arg.combineMode = 7;
     arg.unk34 = 60;
     arg.unk38 = 0x80;
     arg.unk3C = 0x20;
@@ -461,36 +458,36 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
 /* Like func_150E75A0, but placed at a random screen edge. */
 void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
                    u8 owner, s32 kind) {
-    Struct1515548CArg arg;
+    ScreenSpriteInfo5C arg;
     u8 edge;
 
     edge = func_150ADA20() & 3;
 
-    arg.unk12 = unk12;
+    arg.timer = unk12;
     arg.flags = flags & 0xFFF9;
-    arg.unk16 = unk16;
-    arg.unk18 = unk18;
-    arg.unk1A = 5;
-    arg.unk1B = 0xFF;
-    arg.unk1C = 0xE6;
-    arg.unk1D = 0xBE;
-    arg.unk1E = unk1E;
-    arg.unk1F = 0xFF;
-    arg.unk20 = 0xFF;
-    arg.unk21 = 0xFF;
-    arg.unk22 = 0xFF;
+    arg.fadeStart = unk16;
+    arg.fadeRate = unk18;
+    arg.kind = 5;
+    arg.color1.red = 0xFF;
+    arg.color1.green = 0xE6;
+    arg.color1.blue = 0xBE;
+    arg.color1.alpha = unk1E;
+    arg.color2.red = 0xFF;
+    arg.color2.green = 0xFF;
+    arg.color2.blue = 0xFF;
+    arg.color2.alpha = 0xFF;
     arg.unk23 = unk23;
-    arg.unk24 = 1;
+    arg.otherModeH = 1;
     arg.unk28 = 0;
     arg.unk2C = 0;
     arg.unk40 = 0;
     arg.unk41 = 10;
-    arg.unk30 = 7;
+    arg.combineMode = 7;
     arg.unk34 = 60;
     arg.unk38 = 0x80;
     arg.unk3C = 0x20;
-    arg.sizeY = size;
-    arg.sizeX = size;
+    arg.halfHeight = size;
+    arg.halfWidth = size;
 
     switch (edge) {
     case 0:
@@ -499,15 +496,15 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
             Game113D60Ids3 sideIds;
 
             sideIds = D_80088A68;
-            arg.unk10 = sideIds.ids[func_150ADA20() % 3];
-            arg.position.y = (func_150ADA68() * 160.0f) + -80.0f;
+            arg.texture = sideIds.ids[func_150ADA20() % 3];
+            arg.y = (func_150ADA68() * 160.0f) + -80.0f;
             switch (edge) {
             case 0:
                 arg.flags |= 2;
-                arg.position.x = 145.0f - size;
+                arg.x = 145.0f - size;
                 break;
             case 1:
-                arg.position.x = size - 145.0f;
+                arg.x = size - 145.0f;
                 break;
             }
         }
@@ -518,15 +515,15 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
             Game113D60Ids3 topIds;
 
             topIds = D_80088A74;
-            arg.unk10 = topIds.ids[func_150ADA20() % 3];
-            arg.position.x = (func_150ADA68() * 260.0f) + -130.0f;
+            arg.texture = topIds.ids[func_150ADA20() % 3];
+            arg.x = (func_150ADA68() * 260.0f) + -130.0f;
             switch (edge) {
             case 2:
                 arg.flags |= 4;
-                arg.position.y = 110.0f - size;
+                arg.y = 110.0f - size;
                 break;
             case 3:
-                arg.position.y = size - 110.0f;
+                arg.y = size - 110.0f;
                 break;
             }
         }
