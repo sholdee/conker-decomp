@@ -6,7 +6,7 @@
 extern void func_1510F800(s32);
 extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
 extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
-extern void func_1518CA80(void *effect, u8 mode);
+extern void func_1518CA80(BillboardSpawn *effect, u8 mode);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
 
 /*
@@ -292,46 +292,25 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
     return result;
 }
 
-/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ u8 padC[0xA];
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 color1[3];
-    /* 0x2B */ u8 color2[3];
-    /* 0x2E */ u8 intensity;          // func_1518CA80 scales both colours by intensity / 256
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-} ParticleEffect;
-
 /* Spawns a randomised func_1518CA80 effect at the particle's position. Returns 0. */
 s32 func_15149EC4(Particle *particle) {
-    ParticleEffect effect;
+    BillboardSpawn effect;
 
     effect.pos = particle->pos;
-    effect.unk16 = 0;
-    effect.unk18 = 0;
-    effect.unk1A = effect.unk1C = (func_150ADA20() % 6U) + 8;
-    effect.unk1E = 0;
-    effect.unk20 = 0;
-    effect.unk22 = (func_150ADA20() % 201U) + 100;
-    effect.unk24 = (func_150ADA20() % 5U) + 3;
-    effect.unk26 = 600;
-    func_151429E0(3, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
-    func_151429E0(4, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+    effect.width = 0;
+    effect.height = 0;
+    effect.widthStep = effect.heightStep = (func_150ADA20() % 6U) + 8;
+    effect.velX = 0;
+    effect.velZ = 0;
+    effect.velY = (func_150ADA20() % 201U) + 100;
+    effect.accelY = (func_150ADA20() % 5U) + 3;
+    effect.life = 600;
+    func_151429E0(3, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+    func_151429E0(4, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 0xFF;
-    effect.unk2F = (func_150ADA20() % 65U) + 92;
-    effect.unk30 = (func_150ADA20() % 3U) + 1;
-    effect.unk31 = 0;
+    effect.alpha = (func_150ADA20() % 65U) + 92;
+    effect.fadeStep = (func_150ADA20() % 3U) + 1;
+    effect.onExpire = 0;
     func_1518CA80(&effect, 1);
     return 0;
 }

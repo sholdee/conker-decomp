@@ -5,40 +5,13 @@
 
 
 extern void func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_1518CA80(void *, u8);
+extern void func_1518CA80(void *, u8); // matching: takes a BillboardSpawn; this caller passes a BillboardSpawn38
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    u8 pad0C[0xA];
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 unk28;
-    /* 0x29 */ u8 unk29;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    u8 pad32[6];
-} Struct1518B6B0b;
 
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;
     ParticleSpawn78 sp;
-    Struct1518B6B0b sp2;
+    BillboardSpawn38 sp2;
     f32 scale;
     f32 speed;
     f32 sinYaw;
@@ -102,23 +75,23 @@ void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         func_15132A4C(&sp, 3, 0xFF, 0, arg3, arg4);
     }
 
-    sp2.unk00 = arg0;
-    sp2.unk04 = arg1;
-    sp2.unk08 = arg2;
-    sp2.unk16 = 0x1F4;
-    sp2.unk18 = 0x1F4;
-    sp2.unk1A = (func_150ADA20() % 16U) + 0x32;
-    sp2.unk1C = (func_150ADA20() % 16U) + 0x32;
-    sp2.unk1E = 0;
-    sp2.unk20 = 0;
-    sp2.unk22 = (func_150ADA20() % 201U) + 0x12C;
-    sp2.unk24 = 0;
-    sp2.unk26 = 0x258;
-    func_151429E0(1, &sp2.unk28, &sp2.unk29, &sp2.unk2A);
-    func_151429E0(1, &sp2.unk2B, &sp2.unk2C, &sp2.unk2D);
-    sp2.unk2E = 0xFF;
-    sp2.unk2F = 0xFF;
-    sp2.unk30 = 0xA;
-    sp2.unk31 = 0;
+    sp2.pos.x = arg0;
+    sp2.pos.y = arg1;
+    sp2.pos.z = arg2;
+    sp2.width = 0x1F4;
+    sp2.height = 0x1F4;
+    sp2.widthStep = (func_150ADA20() % 16U) + 0x32;
+    sp2.heightStep = (func_150ADA20() % 16U) + 0x32;
+    sp2.velX = 0;
+    sp2.velZ = 0;
+    sp2.velY = (func_150ADA20() % 201U) + 0x12C;
+    sp2.accelY = 0;
+    sp2.life = 0x258;
+    func_151429E0(1, &sp2.primColor[0], &sp2.primColor[1], &sp2.primColor[2]);
+    func_151429E0(1, &sp2.envColor[0], &sp2.envColor[1], &sp2.envColor[2]);
+    sp2.intensity = 0xFF;
+    sp2.alpha = 0xFF;
+    sp2.fadeStep = 0xA;
+    sp2.onExpire = 0;
     func_1518CA80(&sp2, 1);
 }

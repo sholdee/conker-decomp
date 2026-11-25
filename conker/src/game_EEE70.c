@@ -120,37 +120,8 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-/* Effect description passed to func_1518CA80 (same layout as ParticleEffect in game_1B9F30.c). */
-typedef struct {
-    /* 0x00 */ f32 x;            /* position as floats (mode 1) */
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
-    /* 0x0E */ s16 intY;
-    /* 0x10 */ s16 intZ;
-    /* 0x12 */ u8 subX;
-    /* 0x13 */ u8 subZ;
-    /* 0x14 */ u8 subY;
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ s16 width;
-    /* 0x18 */ s16 height;
-    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
-    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
-    /* 0x1E */ s16 velX;
-    /* 0x20 */ s16 velZ;
-    /* 0x22 */ s16 velY;
-    /* 0x24 */ s16 accelY;
-    /* 0x26 */ s16 life;
-    /* 0x28 */ u8 primColor[3];
-    /* 0x2B */ u8 envColor[3];
-    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
-    /* 0x2F */ u8 alpha;
-    /* 0x30 */ s8 fadeStep;
-    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
-} ParticleEffect;
-
 void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_1518CA80(ParticleEffect *effect, u8 mode);
+void func_1518CA80(BillboardSpawn *effect, u8 mode);
 
 /*
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
@@ -158,11 +129,11 @@ void func_1518CA80(ParticleEffect *effect, u8 mode);
  */
 s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
                   s32 arg8, s32 arg9, s32 argA, s32 argB, f32 size) {
-    ParticleEffect effect;
+    BillboardSpawn effect;
 
-    effect.x = x;
-    effect.y = y;
-    effect.z = z;
+    effect.pos.x = x;
+    effect.pos.y = y;
+    effect.pos.z = z;
     effect.velX = (x - fromX) * 10.0f;
     effect.velZ = (z - fromZ) * 10.0f;
     effect.width = effect.height = size;

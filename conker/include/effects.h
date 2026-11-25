@@ -1038,6 +1038,38 @@ typedef struct PuffSpray {
     /* 0x84 */ s32 unk84;           /* EffectTemplate.unk18 */
 } PuffSpray; /* size 0x88 */
 
+/* matching: the first 0x84 bytes of PuffSpray; a full PuffSpray on the stack changes the frame. */
+typedef struct PuffSpray84 {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 sizeBase;
+    /* 0x10 */ f32 sizeRange;
+    /* 0x14 */ f32 growthBase;
+    /* 0x18 */ f32 growthRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ AngleRange angles;
+    /* 0x30 */ s16 itemCountBase;   /* EffectTemplate.itemCount */
+    /* 0x32 */ s16 itemCountRange;
+    /* 0x34 */ s16 lifeBase;
+    /* 0x36 */ s16 lifeRange;
+    /* 0x38 */ u8 green;
+    /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
+    /* 0x3A */ u8 red;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x54 */ u8 blue;
+    /* 0x55 */ u8 alphaBase;
+    /* 0x56 */ u8 alphaRange;
+    /* 0x57 */ u8 pad57;
+    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
+    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
+    /* 0x60 */ TrailRender render;
+    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
+    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
+} PuffSpray84;
+
 /* func_15151670 (game_17CAF0.c): like PuffSpray, but each puff moves in a random direction inside the cone
  * around a surface triangle's normal. */
 typedef struct SurfacePuffSpray {
@@ -1255,6 +1287,37 @@ typedef struct StreakBurst {
     /* 0x46 */ u8 kind;
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
+
+/* matching: StreakBurst plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct StreakBurst4C {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ Vec3f pos;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+    /* 0x47 */ u8 pad47;
+    /* 0x48 */ u8 pad48[0x4];
+} StreakBurst4C;
 
 struct EffectMask;
 
@@ -2008,5 +2071,60 @@ typedef struct FadeEventParticle {
     /* 0xAC */ u8 padAC[4];
     /* 0xB0 */ FadeEvent fade;
 } FadeEventParticle; /* size 0xB8 */
+
+/* Description of a growing billboard particle (callback 9) spawned by func_1518CA80 (game_1B9F30.c). */
+typedef struct BillboardSpawn {
+    /* 0x00 */ Vec3f pos;        /* position as floats (mode 1) */
+    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
+    /* 0x0E */ s16 intY;
+    /* 0x10 */ s16 intZ;
+    /* 0x12 */ u8 subX;
+    /* 0x13 */ u8 subZ;
+    /* 0x14 */ u8 subY;
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 width;
+    /* 0x18 */ s16 height;
+    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
+    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
+    /* 0x1E */ s16 velX;
+    /* 0x20 */ s16 velZ;
+    /* 0x22 */ s16 velY;
+    /* 0x24 */ s16 accelY;
+    /* 0x26 */ s16 life;
+    /* 0x28 */ u8 primColor[3];
+    /* 0x2B */ u8 envColor[3];
+    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
+    /* 0x2F */ u8 alpha;
+    /* 0x30 */ s8 fadeStep;
+    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
+} BillboardSpawn; /* size 0x34 */
+
+/* matching: BillboardSpawn plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct BillboardSpawn38 {
+    /* 0x00 */ Vec3f pos;        /* position as floats (mode 1) */
+    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
+    /* 0x0E */ s16 intY;
+    /* 0x10 */ s16 intZ;
+    /* 0x12 */ u8 subX;
+    /* 0x13 */ u8 subZ;
+    /* 0x14 */ u8 subY;
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 width;
+    /* 0x18 */ s16 height;
+    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
+    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
+    /* 0x1E */ s16 velX;
+    /* 0x20 */ s16 velZ;
+    /* 0x22 */ s16 velY;
+    /* 0x24 */ s16 accelY;
+    /* 0x26 */ s16 life;
+    /* 0x28 */ u8 primColor[3];
+    /* 0x2B */ u8 envColor[3];
+    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
+    /* 0x2F */ u8 alpha;
+    /* 0x30 */ s8 fadeStep;
+    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
+    /* 0x34 */ u8 pad34[0x4];
+} BillboardSpawn38;
 
 #endif

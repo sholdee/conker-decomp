@@ -232,38 +232,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     }
 }
 
-/* matching: the first 0x84 bytes of PuffSpray; a full PuffSpray on the stack changes the frame. */
-typedef struct PuffSpray84 {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ AngleRange angles;
-    /* 0x30 */ s16 itemCountBase;   /* EffectTemplate.itemCount */
-    /* 0x32 */ s16 itemCountRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
-    /* 0x3A */ u8 red;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x57 */ u8 pad57;
-    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
-    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
-    /* 0x60 */ TrailRender render;
-    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
-    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
-} PuffSpray84;
-
 /* What lies under an object, filled in by func_1504715C. */
 typedef struct {
     u8 unk0[0x24];

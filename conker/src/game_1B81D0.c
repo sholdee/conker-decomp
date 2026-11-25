@@ -42,29 +42,8 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } ParticleFloor; // size 0x24
 
-/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ u8 padC[0xA];
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 color1[3];
-    /* 0x2B */ u8 color2[3];
-    /* 0x2E */ u8 intensity; // func_1518CA80 scales both colours by intensity / 256
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-} ParticleEffect;
-
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern void func_1518CA80(ParticleEffect *, u8);
+extern void func_1518CA80(BillboardSpawn *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern s32 func_15046C80(Vec3f *, s32, f32, ParticleFloor *);
 
@@ -79,7 +58,7 @@ s32 func_1518AD20(Particle *particle) {
     floorY = &particle->floorY;
     if (particle->pos.y < particle->floorY) {
         ParticleSpawn spawn;
-        ParticleEffect effect;
+        BillboardSpawn effect;
         s16 count;
         f32 size;
         u8 yaw;
@@ -164,24 +143,24 @@ s32 func_1518AD20(Particle *particle) {
         effect.pos.x = particle->pos.x;
         effect.pos.y = *floorY;
         effect.pos.z = particle->pos.z;
-        effect.unk18 = effect.unk16 = particle->radius * 200.0f;
-        effect.unk1C = effect.unk1A = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
-        effect.unk1E = 0;
-        effect.unk20 = 0;
-        effect.unk22 = (func_150ADA20() % 201U) + 300;
-        effect.unk24 = 0;
-        effect.unk26 = 600;
-        func_151429E0(colour, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
-        func_151429E0(colour, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+        effect.height = effect.width = particle->radius * 200.0f;
+        effect.heightStep = effect.widthStep = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
+        effect.velX = 0;
+        effect.velZ = 0;
+        effect.velY = (func_150ADA20() % 201U) + 300;
+        effect.accelY = 0;
+        effect.life = 600;
+        func_151429E0(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+        func_151429E0(colour, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
         effect.intensity = 0xFF;
         scaled = particle->radius * 511.0f;
         if (scaled > 255.0f) {
-            effect.unk2F = 0xFF;
+            effect.alpha = 0xFF;
         } else {
-            effect.unk2F = scaled;
+            effect.alpha = scaled;
         }
-        effect.unk30 = 10;
-        effect.unk31 = 0;
+        effect.fadeStep = 10;
+        effect.onExpire = 0;
         func_1518CA80(&effect, 1);
         return 0;
     }
