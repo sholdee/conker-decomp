@@ -2,63 +2,61 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef void (*ObjectHandler)(struct127 *obj);
 
-typedef struct {
-    u8 pad00[0x4];
-    u8 unk04;
-} Obj151928B0;
-
-extern s32 func_151928B0(Obj151928B0 *a0, s32 *a1);
+s32 func_151928B0(struct127 *obj, s32 *group);
 extern s32 func_1510F8CC(s32);
-extern void (**D_8008F860[])(void *);
+extern ObjectHandler *D_8008F860[];
 
-void func_15192800(void *arg0, s32 arg1) {
-    s32 sp2C;
-    s32 *p;
-    s32 v0;
+/* Runs the handler for obj's id group, picked by the surface type in obj->unk184 (and the level). */
+void func_15192800(struct127 *obj, s32 arg1) {
+    s32 group;
+    s32 *groupPtr; // matching: IDO computes &group before the NULL test only via a local
+    s32 slot;
 
-    p = &sp2C;
-    if (arg0 != 0 && func_151928B0(arg0, p) != 0) {
-        switch (func_1510F8CC(*(s32 *)((u8 *)arg0 + 0x184))) {
+    groupPtr = &group;
+    if (obj != NULL && func_151928B0(obj, groupPtr)) {
+        switch (func_1510F8CC(obj->unk184)) {
         case 5:
-            if (D_800BE9F0 == 0x14) {
-                v0 = 2;
+            if (D_800BE9F0 == 20) {
+                slot = 2;
             } else {
-                v0 = 1;
+                slot = 1;
             }
             break;
         case 6:
-            v0 = 3;
+            slot = 3;
             break;
         default:
-            v0 = 1;
+            slot = 1;
             break;
         }
-        if (D_8008F860[sp2C][v0] != 0) {
-            D_8008F860[sp2C][v0](arg0);
+        if (D_8008F860[group][slot] != NULL) {
+            D_8008F860[group][slot](obj);
         }
     }
 }
 
-s32 func_151928B0(Obj151928B0 *arg0, s32 *arg1) {
-    s32 ret;
+/* Maps obj->id to a handler group (ids 0-4 -> 0, id 0x53 -> 1); returns FALSE for other ids. */
+s32 func_151928B0(struct127 *obj, s32 *group) {
+    s32 found;
 
-    switch (arg0->unk04) {
+    switch (obj->id) {
     case 0:
     case 1:
     case 2:
     case 3:
     case 4:
-        ret = 1;
-        *arg1 = 0;
+        found = TRUE;
+        *group = 0;
         break;
     case 0x53:
-        ret = 1;
-        *arg1 = 1;
+        found = TRUE;
+        *group = 1;
         break;
     default:
-        ret = 0;
+        found = FALSE;
         break;
     }
-    return ret;
+    return found;
 }
