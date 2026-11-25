@@ -1,61 +1,8 @@
 #include <ultra64.h>
-/* functions.h types func_150ADA20 as returning u8; it returns a full u32 random number. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 #include "libc/string.h"
-
-/* ParticleDesc.flags (as in game_15D730.c) */
-#define PARTICLE_LIFETIME  0x1
-#define PARTICLE_GRAVITY   0x2
-#define PARTICLE_MOVE      0x4
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_FLIP_T    0x80
-#define PARTICLE_FADE      0x200
-#define PARTICLE_HANDLERS  0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-#define PARTICLE_LIT       0x10000
-
-/* Spawn parameters of a func_15130374 particle (same layout as ParticleDesc in game_15D730.c). */
-typedef struct ParticleDesc {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 pad66[0xA];
-} ParticleDesc; /* size 0x70 */
 
 /* The part of a func_15046F84 probe result (from its +0x4) that dust particles keep for their splash. */
 typedef struct FloorData {
@@ -93,23 +40,12 @@ typedef struct DustParticle {
     /* 0xA8 */ DustData dust;
 } DustParticle;
 
-/* Common head of an effect object (as EffectHead in game_1228D0.c); data follows at +0x28. */
-typedef struct EffectHead {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
 typedef struct DustEmitterData {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ vertex offset;      /* emitter position in the bone's space */
+    /* 0x08 */ Vec3f offset;      /* emitter position in the bone's space */
     /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->unk1D4 */
     /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
     /* 0x1C */ f32 rateBase;
@@ -130,15 +66,16 @@ typedef struct DustEmitterData {
 } DustEmitterData; /* 0x68 */
 
 typedef struct DustEmitter {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     DustEmitterData data;
 } DustEmitter;
 
-void func_1504715C(FloorProbe *probe, struct127 *obj);
+void func_1504715C(FloorProbe *probe, Actor *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
-DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
+DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f32 rateRandom,
                           s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
                           s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
                           f32 unk60, u8 kind, u8 arg16, s32 arg17) {
@@ -171,7 +108,7 @@ DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBa
 
     // the header's struct37 * parameter is really the size of the effect's data
     effect = (DustEmitter *)func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
-                                          (duration == -1) ? 0 : 1, 0x1D, (struct37 *)sizeof(data), arg16,
+                                          (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
                                           arg17);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
@@ -179,21 +116,21 @@ DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBa
     return effect;
 }
 
-void func_15143134(vertex *in, vertex *out, void *matrix);
-s32 func_1514672C(vertex *pos);
-s32 func_15046F84(vertex *pos, s32 arg1, f32 minY, FloorProbe *probe);
-DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16 lifetime, u8 alpha,
+void func_15143134(Vec3f *in, Vec3f *out, void *matrix);
+s32 func_1514672C(Vec3f *pos);
+s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, FloorProbe *probe);
+DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
                             u8 arg11, s32 arg12);
 
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
  * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */
 void func_15191D54(DustEmitter *effect) {
-    struct127 *owner;
+    Actor *owner;
     DustEmitterData *data;
-    vertex position;
+    Vec3f position;
     f32 floorY;
-    vertex velocity;
+    Vec3f velocity;
     s32 hit;
     f32 minY;
 
@@ -231,7 +168,7 @@ void func_15191D54(DustEmitter *effect) {
                               func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
                               func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
                               func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
-                              &data->floor.data, data->kind, effect->head.unkC, effect->head.unk1);
+                              &data->floor.data, data->kind, effect->head.owner, effect->head.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
         } else {
@@ -247,7 +184,7 @@ extern u8 (*D_8008FCD0[])(void);
 
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */
-DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16 lifetime, u8 alpha,
+DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
                             u8 arg11, s32 arg12) {
     DustParticle *particle;
@@ -322,7 +259,7 @@ DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16
 void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY);
 
 /* Particle update: pulses the dust particle's width and height around its base size. */
-u8 func_15192308(DustParticle *particle, struct17 *prevPos) {
+u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
     func_15131C84(particle->dust.phase, particle->dust.phaseStep, particle->dust.baseSize,
                   particle->dust.amplitude, &particle->desc.width, &particle->desc.height);
     return TRUE;
@@ -333,11 +270,11 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Particle update: once the dust particle falls below its floor, splash there and stop. */
-u8 func_15192358(DustParticle *particle, struct17 *prevPos) {
+u8 func_15192358(DustParticle *particle, Vec3f *prevPos) {
     u8 alive;
     DustData *dust;
-    vertex position;
-    vertex velocity;
+    Vec3f position;
+    Vec3f velocity;
     f32 sizeRandom;
     f32 speedRandom;
     f32 angleRandom;
@@ -352,7 +289,7 @@ u8 func_15192358(DustParticle *particle, struct17 *prevPos) {
         position.y = dust->floorY + 2.0f;
         position.z = particle->desc.pos.z;
         func_151D9B8C(dust->kind, dust->baseSize * 0.08308f, particle->desc.alpha, (s32)&dust->floor,
-                      (struct17 *)&position, 100, 0, 1, 0, particle->unkC, particle->unk1);
+                      &position, 100, 0, 1, 0, particle->unkC, particle->unk1);
         angleRandom = func_150ADA68();
         speedRandom = func_150ADA68();
         sizeRandom = func_150ADA68();
@@ -373,7 +310,7 @@ u8 func_15192358(DustParticle *particle, struct17 *prevPos) {
 }
 
 /* Dust particle update func (D_80089760): pulse, then land on the floor. */
-u8 func_1519257C(DustParticle *particle, struct17 *prevPos) {
+u8 func_1519257C(DustParticle *particle, Vec3f *prevPos) {
     u8 alive;
 
     alive = func_15192308(particle, prevPos);
@@ -384,7 +321,7 @@ u8 func_1519257C(DustParticle *particle, struct17 *prevPos) {
 }
 
 /* Dust emitter presets, indexed by kind (see func_151925C4). */
-extern vertex D_800A8030[];
+extern Vec3f D_800A8030[];
 extern u8 D_800A8060[];
 extern f32 D_800A8064[];
 extern f32 D_800A8074[];
@@ -399,7 +336,7 @@ extern u8 D_800A80E4[];
 
 /* Spawns the dust emitter preset that suits obj's id (func_15191BE0) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
-DustEmitter *func_151925C4(struct127 *obj, s16 duration, u8 arg2, s32 arg3) {
+DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
     s32 kind;
     DustEmitter *effect;
 
@@ -437,5 +374,5 @@ DustEmitter *func_151925C4(struct127 *obj, s16 duration, u8 arg2, s32 arg3) {
 
 /* Effect callback for the dust emitter: hands func_15169850 the owner reference. */
 void func_1519277C(DustEmitter *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Two effects that character-watcher actions (D_8008AFD0) keep alive around a character:
@@ -8,12 +9,6 @@
  * to the surface above. Each frame the action sets the effect's keepAlive flag; the effect's
  * own update clears it and dies once a frame passes without it.
  */
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
 
 /* Result of a floor probe (as game_71820.c's CollisionHit). */
 typedef struct {
@@ -38,33 +33,11 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ struct127 *character;
+    /* 0x18 */ Actor *character;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ FloorHit floor;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
-
-/* Sprite template (as game_169510.c's SpriteDef). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 frame;      /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 renderModes;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 viewportMask;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 fadeStart;
-    /* 0x24 */ s16 fadeRate;
-    /* 0x26 */ u8 pad26[2];
-} SpriteDef;
 
 /* Eases a sprite's animation speed toward a target that is re-picked at random intervals. */
 typedef struct {
@@ -98,61 +71,6 @@ typedef struct Emitter {
     /* 0x58 */ EmitterLink link;
 } Emitter;
 
-/* Template for func_1513418C (as game_117490.c's EmitterDesc). */
-typedef struct {
-    /* 0x00 */ s32 target[2];
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ f32 rate;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ u8 flags;
-    /* 0x2B */ u8 emitter;     /* D_80089A70 index */
-    /* 0x2C */ s8 callback;    /* D_80089AA0 index */
-    /* 0x2D */ u8 unk2D;       /* D_80089AAC / D_80089AD4 index */
-} EmitterDesc;
-
-/* Particle template for func_151303BC (as game_15D730.c's ParticleDesc). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index */
-    /* 0x64 */ u8 pad64[0xC];
-} ParticleDesc;
-
 /* Per-particle data of the rising particles (as game_185560.c's RiseMotion, update func 4). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
@@ -180,16 +98,16 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
-void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
-Emitter *func_1513418C(EmitterDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
+Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
 void func_151346EC(struct102 *effect);
 void func_1513470C(struct102 *effect);
 
 FlickerSprite *func_150C6D90(Watcher *watcher);
-Emitter *func_150C68C4(struct127 *character, Watcher *watcher);
+Emitter *func_150C68C4(Actor *character, Watcher *watcher);
 
 extern Vec3f D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
@@ -245,7 +163,7 @@ s32 func_150C682C(FlickerSprite *sprite) {
 
 /* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
 void func_150C6870(Watcher *watcher) {
-    struct127 *character = watcher->character;
+    Actor *character = watcher->character;
 
     if (watcher->effects.emitter != NULL) {
         EmitterLink *link = &watcher->effects.emitter->link;
@@ -260,8 +178,8 @@ void func_150C6870(Watcher *watcher) {
  * Attaches an emitter to the character; its particles rise to the surface found above the
  * character (or 5000 units up when there is none).
  */
-Emitter *func_150C68C4(struct127 *character, Watcher *watcher) {
-    EmitterDesc desc;
+Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
+    BloodDripDesc desc;
     EmitterLink link;
     Emitter *emitter;
 
@@ -397,7 +315,7 @@ void func_150C6D68(Emitter *emitter) {
 FlickerSprite *func_150C6D90(Watcher *watcher) {
     FlickerSprite *sprite;
     Vec3f pos;
-    struct127 *character;
+    Actor *character;
 
     sprite = NULL;
     character = watcher->character;
@@ -455,7 +373,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C((s32)&def, 9, 3, (s32)watcher->floor.unk4,
+            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)watcher->floor.unk4,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                                                     (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
                                                     watcher->unk1);

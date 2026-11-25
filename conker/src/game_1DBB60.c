@@ -20,18 +20,18 @@ typedef struct ActorTask {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ struct127 *actor;
+    /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ GroundHit hit;
 } ActorTask;
 
 extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5);
+void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
 
 /* Ground effect 5 under the task's actor, with sound 0x5208. */
 void func_151AE6B0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];

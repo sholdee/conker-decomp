@@ -11,31 +11,10 @@ typedef struct {
 } GameCommand;
 
 /*
- * The actor fields this file uses. They overlap fields that struct127 declares with other
- * types (e.g. struct127::unk204 is an s32), so the view stays local.
- */
-typedef struct {
-    u8 pad0[4];
-    /* 0x004 */ u8 id;
-    u8 pad5[0x1FE - 5];
-    /* 0x1FE */ u8 level;      // 0..255, moved by levelStep each call
-    /* 0x1FF */ u8 levelMode;  // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
-    /* 0x200 */ u8 levelTimer;
-    /* 0x201 */ u8 unk201;
-    /* 0x202 */ s8 unk202;
-    /* 0x203 */ s8 levelStep;
-    /* 0x204 */ s16 level2;     // -255..255 (direction set by the sign of unk208)
-    /* 0x206 */ u8 level2Mode;  // same encoding as levelMode
-    /* 0x207 */ u8 level2Timer;
-    /* 0x208 */ s8 unk208;
-    /* 0x209 */ s8 level2Step;
-} Obj15034860;
-
-/*
  * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
  * advances the per-channel levels for the next call. Returns the cursor past the last command.
  */
-GameCommand *func_15034860(GameCommand *cmd, Obj15034860 *actor, s32 channel, s32 channel2) {
+GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 channel2) {
     s32 skipChannel;
     s32 padA; // matching: unused stack slot keeps the frame layout
     s32 reroll;
@@ -211,7 +190,7 @@ GameCommand *func_15034860(GameCommand *cmd, Obj15034860 *actor, s32 channel, s3
     return cmd;
 }
 
-/* Element of the array that struct127::unk1D4 points to here (0x40 bytes). */
+/* Element of the array that Actor::unk1D4 points to here (0x40 bytes). */
 typedef struct {
     u8 pad0[0x34];
     f32 unk34;
@@ -219,7 +198,7 @@ typedef struct {
 } Entry15034EB4;
 
 /* Subtracts the last value stored in D_800C3EF0, scaled by the actor's xz_scale, from unk34 of one or two entries. */
-void func_15034EB4(struct127 *actor, s32 first, s32 second) {
+void func_15034EB4(Actor *actor, s32 first, s32 second) {
     f32 amount;
     Entry15034EB4 *entry;
     Entry15034EB4 *entry2;

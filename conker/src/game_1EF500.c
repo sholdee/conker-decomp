@@ -1,34 +1,19 @@
 #include <ultra64.h>
 // matching: callers here use the full s32 return of these, unlike their functions.h prototypes
-#define func_150ADA20 func_150ADA20_u8_proto
-#define func_10010F30 func_10010F30_void
 #include "functions.h"
-#undef func_150ADA20
-#undef func_10010F30
 #include "variables.h"
+#include "effects.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-extern s32 func_150ADA20(void);
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f */
 
-/* The view of D_800B0DF0 used here; struct104 has no field at 0x2C. */
-typedef struct {
-    u8 pad0[0x2C];
-    s16 unk2C;
-} GameStruct151C2050State;
-
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
-void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
+void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
-    struct108 *camera;
+    Camera *camera;
     s32 direction;
     s16 level;
     f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
@@ -36,7 +21,7 @@ void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 dist
 
     if (obj != NULL) {
         if (D_800BE616 || (camera = obj->camera) == NULL) {
-            level = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
+            level = D_800B0DF0->music.song;
             if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
                 func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
@@ -45,7 +30,7 @@ void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 dist
                 }
             }
         } else {
-            level = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
+            level = D_800B0DF0->music.song;
             if (level == 0x24 || level == 0x13) {
                 // matching: the 0.1f literal (vs this rodata load) shifts the stack frame
                 intensity = 255.0f - distance * D_800AAA30;
@@ -59,7 +44,6 @@ void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 dist
         }
     }
 }
-
 
 /* Result of a ray cast (func_15081690) or of a projectile's path setup (func_151C4B0C). */
 typedef struct Game1F1F60Hit {
@@ -89,7 +73,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x1C */ Vec3f drift;
     /* 0x28 */ Game1F1F60Hit path;
     /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
-    /* 0x90 */ struct127 *owner;
+    /* 0x90 */ Actor *owner;
     /* 0x94 */ u8 ownerId; /* owner->unique_id at spawn */
     /* 0x95 */ u8 pad95[3];
     /* 0x98 */ f32 scale;
@@ -113,19 +97,7 @@ typedef struct Game1EF500TrailExt {
 
 /* The projectile object (allocated by func_1513D2F0). */
 typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x1F];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ u8 pad30[4];
-    /* 0x034 */ Vec3f position;
-    /* 0x040 */ u8 pad40[0x1C];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ u8 vertexTemplate[0x40];
-    /* 0x100 */ u8 *buffers[4];
+    /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;
 
@@ -141,35 +113,6 @@ typedef struct {
     u16 range;
 } FlybySound;
 
-/* Spawn template for func_1513D2F0 (0x58 bytes). */
-typedef struct Game1EF500TrailSpawn {
-    /* 0x00 */ u8 field00;
-    /* 0x01 */ u8 field01;
-    /* 0x02 */ s16 field02;
-    /* 0x04 */ s16 field04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 field08;
-    /* 0x0C */ s32 field0C;
-    /* 0x10 */ u8 field10;
-    /* 0x11 */ u8 field11;
-    /* 0x12 */ u8 field12;
-    /* 0x13 */ u8 field13;
-    /* 0x14 */ f32 field14;
-    /* 0x18 */ f32 field18;
-    /* 0x1C */ Vec3f position;
-    /* 0x28 */ f32 field28[6];
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 field44;
-    /* 0x45 */ u8 field45;
-    /* 0x46 */ u8 field46;
-    /* 0x47 */ u8 field47;
-    /* 0x48 */ s32 field48;
-    /* 0x4C */ u8 field4C;
-    /* 0x4D */ u8 pad4D[7];
-    /* 0x54 */ s16 field54;
-    /* 0x56 */ s16 field56;
-} Game1EF500TrailSpawn;
-
 extern FlybySound D_8008FBE8[];
 extern s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
 void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
@@ -178,7 +121,7 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151D5B6C(Vec3f *, Vec3f *, struct127 *, s8, s32);
+s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s8, s32);
 s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
                   u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
                   u8 arg14, u8 arg15, s32 arg16, u8 arg17);
@@ -190,11 +133,11 @@ s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *
  */
 Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
-                               f32 driftSpeed, f32 arg10, u8 arg11, struct127 *owner, u8 arg13, u8 collide, u8 arg15,
+                               f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
                                f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
     Game1EF500Trail *result;
-    Game1EF500TrailSpawn spawn;
+    ParticleDef spawn;
     Game1EF500TrailExt ext;
     Vec3f sourceDir;
     u8 useSource;
@@ -256,33 +199,33 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
     ext.drift.z = ext.path.end.z * driftSpeed;
     ext.owner = owner;
     ext.ownerId = (owner != NULL) ? owner->unique_id : 99;
-    spawn.field00 = 0x41;
+    spawn.texture = 0x41;
     ext.scale = speed;
-    spawn.field01 = 4;
-    spawn.field02 = 0x4503;
-    spawn.field04 = 300;
-    spawn.field08 = 0;
-    spawn.field0C = 0;
-    spawn.field10 = 0;
-    spawn.field11 = 0;
-    spawn.field12 = 0;
-    spawn.field13 = 0xFF;
-    spawn.field44 = arg11;
-    spawn.field45 = 0xFF;
-    spawn.field18 = driftSpeed;
-    spawn.field14 = arg8;
-    spawn.position = *origin;
-    spawn.field28[0] = 0.0f;
-    spawn.field28[1] = 0.0f;
-    spawn.field28[2] = 0.0f;
-    spawn.field28[3] = 0.0f;
-    spawn.field28[4] = 0.0f;
-    spawn.field28[5] = 0.0f;
+    spawn.type = 4;
+    spawn.renderModes = 0x4503;
+    spawn.lifetime = 300;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = 0;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.unk44 = arg11;
+    spawn.unk45 = 0xFF;
+    spawn.height = driftSpeed;
+    spawn.width = arg8;
+    spawn.pos = *origin;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = 0.0f;
+    spawn.scale.y = 0.0f;
+    spawn.scale.z = 0.0f;
     spawn.flags = 0xC04C0008;
-    spawn.field46 = 0;
-    spawn.field47 = 0;
-    spawn.field4C = arg22;
-    result = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
+    spawn.unk46 = 0;
+    spawn.unk47 = 0;
+    spawn.viewportMask = arg22;
+    result = func_1513D2F0(&spawn, &D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
         u8 failed;
 
@@ -311,7 +254,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
 s8 func_151C2734(Game1EF500Trail *trail) {
     s8 alive;
     Game1EF500TrailExt *ext;
-    struct108 *player;
+    Camera *player;
     s32 sound;
     s32 sfxIndex;
     s32 i;
@@ -340,9 +283,9 @@ s8 func_151C2734(Game1EF500Trail *trail) {
             sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
                 player = &D_800DBFF0[i];
-                dx = player->unk2F8 - trail->position.x;
-                dy = player->unk2FC - trail->position.y;
-                dz = player->unk300 - trail->position.z;
+                dx = player->eye.x - trail->head.def.pos.x;
+                dy = player->eye.y - trail->head.def.pos.y;
+                dz = player->eye.z - trail->head.def.pos.z;
                 /* distance of the player ahead along the flight direction */
                 dot = ext->path.end.x * dx + dy * ext->path.end.y + dz * ext->path.end.z;
                 if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
@@ -366,10 +309,10 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         }
         if (player != NULL) {
             volume = 0x40;
-            func_1000A420(trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
-                          trail->position.z - player->unk300, player->unk380,
-                          trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
-                          trail->position.z - player->unk300, 10000, 9999, &volume, &pan, 0);
+            func_1000A420(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
+                          trail->head.def.pos.z - player->eye.z, player->unk380,
+                          trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
+                          trail->head.def.pos.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
                 ext->sound = func_10010F30(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
             } else {
@@ -405,12 +348,12 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
-    func_151D5D60(trail->buffers, index, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(trail->head.vtxBuffers, index, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(trail->buffers[index], trail->vertexTemplate, sizeof(trail->vertexTemplate));
-            memcpy(trail->buffers[index] + 0x40, trail->vertexTemplate, sizeof(trail->vertexTemplate));
+            memcpy(trail->head.vtxBuffers[index], trail->head.vtxTemplate, sizeof(trail->head.vtxTemplate));
+            memcpy(trail->head.vtxBuffers[index] + 4, trail->head.vtxTemplate, sizeof(trail->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -418,10 +361,10 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     // matching: the loop wrapper gives IDO an extra block boundary that sets register and schedule order
     do { ext = &trail->trail; } while (0);
     eye = func_15144B34(index);
-    start = trail->position;
-    end.x = trail->position.x - ext->accel.x;
-    end.y = trail->position.y - ext->accel.y;
-    end.z = trail->position.z - ext->accel.z;
+    start = trail->head.def.pos;
+    end.x = trail->head.def.pos.x - ext->accel.x;
+    end.y = trail->head.def.pos.y - ext->accel.y;
+    end.z = trail->head.def.pos.z - ext->accel.z;
     dx = end.x - start.x;
     dy = end.y - start.y;
     dz = end.z - start.z;
@@ -436,7 +379,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     if (lengthSq == 0.0f) {
         nz = ny = nx = 0.0f;
     } else {
-        scale = trail->width / sqrtf(lengthSq);
+        scale = trail->head.def.width / sqrtf(lengthSq);
         nx = nx * scale;
         ny = ny * scale;
         nz = nz * scale;
@@ -444,7 +387,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x - nx;
     vertices->v.ob[1] = start.y - ny;
     vertices->v.ob[2] = start.z - nz;
-    vertices->v.cn[3] = trail->alpha;
+    vertices->v.cn[3] = trail->head.def.unk44;
     vertices->v.flag = 0;
     vertices++;
     vertices->v.ob[0] = end.x - nx;
@@ -462,13 +405,13 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
     vertices->v.ob[0] = start.x + nx;
     vertices->v.ob[1] = start.y + ny;
     vertices->v.ob[2] = start.z + nz;
-    vertices->v.cn[3] = trail->alpha;
+    vertices->v.cn[3] = trail->head.def.unk44;
     vertices->v.flag = 0;
     return result;
 }
 
 /* Whether obj is a live object other than self (a ray-cast filter). */
-s32 func_151C2E4C(struct127 *obj, struct127 *self) {
+s32 func_151C2E4C(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -482,7 +425,7 @@ s32 func_151C2E4C(struct127 *obj, struct127 *self) {
 }
 
 /* As func_151C2E4C, and obj's unk127 must also be set (not 0xFF). */
-s32 func_151C2E94(struct127 *obj, struct127 *self) {
+s32 func_151C2E94(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -498,73 +441,19 @@ s32 func_151C2E94(struct127 *obj, struct127 *self) {
     return TRUE;
 }
 
-s32 func_151D4DAC(void *, struct127 *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
+s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 func_151C2EF0(void *actor, struct127 *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   Game1F1F60Hit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
-                         trail->unkC, trail->unk1);
+                         trail->head.header.owner, trail->head.header.kind);
 }
 
-extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
-void func_15152B38(void *, u8, s32);
+void func_15152B38(TrailBurst *, u8, s32);
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
-/* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 sizeBase;
-    /* 0x18 */ f32 sizeRange;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 speedBase;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 yawBase;
-    /* 0x2E */ s16 yawRange;
-    /* 0x30 */ s16 pitchBase;
-    /* 0x32 */ s16 pitchRange;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s16 lifeBase;
-    /* 0x3E */ s16 lifeRange;
-    /* 0x40 */ u16 kind;
-    /* 0x42 */ u8 unk42;
-    /* 0x43 */ u8 unk43;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ Color8 colorBase;
-    /* 0x49 */ Color8 colorRange;
-    /* 0x4D */ Color8 color2Base;
-    /* 0x51 */ Color8 color2Range;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s16 unk64;
-    /* 0x66 */ s16 unk66;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ s8 unk70;
-    /* 0x71 */ s8 unk71;
-    /* 0x72 */ s8 unk72;
-    /* 0x73 */ s8 unk73;
-} BurstConfig;
 
 /* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
 void func_151C2F48(Game1EF500Trail *trail) {
@@ -574,7 +463,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
 
     ext = &trail->trail;
     func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, ext->path.surface, &ext->path.hit,
-                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->unkC, trail->unk1);
+                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
         header.unk0 = 3;
         header.unk1 = -1;
@@ -583,33 +472,33 @@ void func_151C2F48(Game1EF500Trail *trail) {
         header2.unk0 = ext->path.hit.x;
         header2.unk4 = ext->path.hit.y;
         header2.unk8 = ext->path.hit.z;
-        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->unkC,
-                      trail->unk1);
+        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
+                      trail->head.header.kind);
 
         {
-            BurstConfig burst;
+            TrailBurst burst;
 
             burst.countBase = 5 >> D_800DCA20;
             burst.countRange = 4 >> D_800DCA20;
-            burst.position = ext->path.hit;
+            burst.pos = ext->path.hit;
             burst.sizeBase = 8.25f;
             burst.sizeRange = 5.859999657f;
-            burst.unk1C = 0.0f;
-            burst.unk20 = 0.0f;
+            burst.gravityBase = 0.0f;
+            burst.gravityRange = 0.0f;
             burst.speedBase = 7.0f;
             burst.speedRange = 16.0f;
-            burst.yawBase = 0;
-            burst.yawRange = 0xFF;
-            burst.pitchBase = -61;
-            burst.pitchRange = 80;
-            burst.unk34 = 3;
-            burst.unk38 = 1;
+            burst.angles.yawBase = 0;
+            burst.angles.yawRange = 0xFF;
+            burst.angles.pitchBase = -61;
+            burst.angles.pitchRange = 80;
+            burst.capacityBase = 3;
+            burst.capacityRange = 1;
             burst.lifeBase = 12;
             burst.lifeRange = 10;
-            burst.kind = 1;
-            burst.unk42 = 4;
-            burst.unk43 = 2;
-            burst.unk44 = 3;
+            burst.headerFlags = 1;
+            burst.flags = 4;
+            burst.primMode = 2;
+            burst.envMode = 3;
             burst.colorBase.red = 0xFF;
             burst.colorBase.green = 0xFF;
             burst.colorBase.blue = 0xFF;
@@ -626,99 +515,56 @@ void func_151C2F48(Game1EF500Trail *trail) {
             burst.color2Range.green = 0;
             burst.color2Range.blue = 0;
             burst.color2Range.alpha = 0;
-            burst.unk55 = 0xFF;
-            burst.unk56 = 0;
-            burst.unk57 = 3;
-            burst.unk58 = 0x24;
-            burst.unk5C = 0x200005;
-            burst.unk60 = 0x60600;
-            burst.unk64 = 10;
-            burst.unk66 = 25;
-            burst.unk68 = 1;
-            burst.unk6A = 0;
-            burst.unk6C = 1.0f;
-            burst.unk70 = -1;
-            burst.unk71 = 0;
+            burst.colorLevelBase = 0xFF;
+            burst.colorLevelRange = 0;
+            burst.renderMode = 3;
+            burst.unk21 = 0x24;
+            burst.setGeometryMode = 0x200005;
+            burst.clearGeometryMode = 0x60600;
+            burst.fadeStart = 10;
+            burst.fadeRate = 25;
+            burst.shrinkStart = 1;
+            burst.shrinkPaused = 0;
+            burst.shrinkFactor = 1.0f;
+            burst.unk38 = -1;
+            burst.unk39 = 0;
             burst.unk72 = -1;
             burst.unk73 = -1;
-            func_15152B38(&burst, trail->unkC, trail->unk1);
+            func_15152B38(&burst, trail->head.header.owner, trail->head.header.kind);
         }
     }
 }
-
-/* Particle descriptor passed to func_15130280 (0x70 bytes, as ParticleDesc in game_1228D0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleDesc; /* 0x70 */
 
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
 void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
-    BurstConfig burst;
+    TrailBurst burst;
     ParticleDesc particle;
     Header header;
     Header2 header2;
 
     burst.countBase = 5;
     burst.countRange = 7;
-    burst.position = *pos;
+    burst.pos = *pos;
     burst.sizeBase = 3.069999933f;
     burst.sizeRange = 6.199999809f;
-    burst.unk1C = -0.9690000415f;
-    burst.unk20 = 0.7180000544f;
+    burst.gravityBase = -0.9690000415f;
+    burst.gravityRange = 0.7180000544f;
     burst.speedBase = 15.0f;
     burst.speedRange = 30.0f;
-    burst.yawBase = 0;
-    burst.yawRange = 0xFF;
-    burst.pitchBase = -64;
-    burst.pitchRange = 80;
-    burst.unk34 = 3;
-    burst.unk38 = 1;
+    burst.angles.yawBase = 0;
+    burst.angles.yawRange = 0xFF;
+    burst.angles.pitchBase = -64;
+    burst.angles.pitchRange = 80;
+    burst.capacityBase = 3;
+    burst.capacityRange = 1;
     burst.lifeBase = 20;
     burst.lifeRange = 15;
-    burst.kind = 1;
-    burst.unk42 = 4;
-    burst.unk43 = 2;
-    burst.unk44 = 3;
+    burst.headerFlags = 1;
+    burst.flags = 4;
+    burst.primMode = 2;
+    burst.envMode = 3;
     burst.colorBase.red = 0xFF;
     burst.colorBase.green = 0xFF;
     burst.colorBase.blue = 0xFF;
@@ -735,59 +581,59 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.color2Range.green = 0;
     burst.color2Range.blue = 0;
     burst.color2Range.alpha = 0;
-    burst.unk55 = 0xFF;
-    burst.unk56 = 0;
-    burst.unk57 = 3;
-    burst.unk58 = 0x24;
-    burst.unk5C = 0x200005;
-    burst.unk60 = 0x60600;
-    burst.unk64 = 8;
-    burst.unk66 = 31;
-    burst.unk68 = 1;
-    burst.unk6A = 0;
-    burst.unk6C = 1.0f;
-    burst.unk70 = -1;
-    burst.unk71 = 0;
+    burst.colorLevelBase = 0xFF;
+    burst.colorLevelRange = 0;
+    burst.renderMode = 3;
+    burst.unk21 = 0x24;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0x60600;
+    burst.fadeStart = 8;
+    burst.fadeRate = 31;
+    burst.shrinkStart = 1;
+    burst.shrinkPaused = 0;
+    burst.shrinkFactor = 1.0f;
+    burst.unk38 = -1;
+    burst.unk39 = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     func_15152B38(&burst, arg1, arg2);
-    particle.unk1D = 0x2B;
-    particle.unk8 = 0x4403;
+    particle.texture = 0x2B;
+    particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.lifetime = (func_150ADA20() % 7U) + 6;
-    particle.unkC = 0;
-    particle.unk10 = 0;
-    particle.unk14 = 0xFF;
-    particle.unk15 = 0xFF;
-    particle.unk16 = 0xFF;
-    particle.unk17 = 0xFF;
-    particle.unk18 = 0xFF;
-    particle.unk19 = 0xFF;
-    particle.unk1A = 0xFF;
-    particle.unk1B = 0xFF;
-    particle.unk1C = 0xFF;
-    particle.unk28 = particle.unk2C = func_150ADA68() * 196.0f + 106.0f;
+    particle.timer = (func_150ADA20() % 7U) + 6;
+    particle.frame = 0;
+    particle.frameRate = 0;
+    particle.r = 0xFF;
+    particle.g = 0xFF;
+    particle.b = 0xFF;
+    particle.a = 0xFF;
+    particle.r2 = 0xFF;
+    particle.g2 = 0xFF;
+    particle.b2 = 0xFF;
+    particle.alpha = 0xFF;
+    particle.brightness = 0xFF;
+    particle.width = particle.height = func_150ADA68() * 196.0f + 106.0f;
     particle.pos = *pos;
-    particle.unk1E = 3;
-    particle.unk20 = 0x55;
-    particle.unk22 = 1;
-    particle.unk3C.x = 0.0f;
-    particle.unk3C.y = 0.0f;
-    particle.unk3C.z = 0.0f;
+    particle.fadeStart = 3;
+    particle.fadeRate = 0x55;
+    particle.scaleStart = 1;
+    particle.offset.x = 0.0f;
+    particle.offset.y = 0.0f;
+    particle.offset.z = 0.0f;
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
-    particle.unk54 = 0.0f;
-    particle.unk24 = 1.0f;
+    particle.gravity = 0.0f;
+    particle.scaleRate = 1.0f;
     particle.flags = 1 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 |
                      0x200;
-    particle.unk60 = 6;
-    particle.unk61 = 6;
-    particle.unk62 = -1;
-    particle.unk63 = -1;
-    particle.unk64 = -1;
-    particle.unk65 = 4;
+    particle.primColorMode = 6;
+    particle.envColorMode = 6;
+    particle.updateFunc = -1;
+    particle.deathFunc = -1;
+    particle.drawFunc = -1;
+    particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
     header.unk0 = 3;
     header.unk1 = -1;
@@ -801,32 +647,32 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
 
 /* Smaller variant of func_151C329C. */
 void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
-    BurstConfig burst;
+    TrailBurst burst;
     ParticleDesc particle;
     Header header;
     Header2 header2;
 
     burst.countBase = 8;
     burst.countRange = 6;
-    burst.position = *pos;
+    burst.pos = *pos;
     burst.sizeBase = 2.599999905f;
     burst.sizeRange = 2.169999838f;
-    burst.unk1C = -0.9690000415f;
-    burst.unk20 = 0.7180000544f;
+    burst.gravityBase = -0.9690000415f;
+    burst.gravityRange = 0.7180000544f;
     burst.speedBase = 10.0f;
     burst.speedRange = 8.0f;
-    burst.yawBase = 0;
-    burst.yawRange = 0xFF;
-    burst.pitchBase = -64;
-    burst.pitchRange = 80;
-    burst.unk34 = 3;
-    burst.unk38 = 0;
+    burst.angles.yawBase = 0;
+    burst.angles.yawRange = 0xFF;
+    burst.angles.pitchBase = -64;
+    burst.angles.pitchRange = 80;
+    burst.capacityBase = 3;
+    burst.capacityRange = 0;
     burst.lifeBase = 15;
     burst.lifeRange = 10;
-    burst.kind = 1;
-    burst.unk42 = 4;
-    burst.unk43 = 2;
-    burst.unk44 = 3;
+    burst.headerFlags = 1;
+    burst.flags = 4;
+    burst.primMode = 2;
+    burst.envMode = 3;
     burst.colorBase.red = 0xFF;
     burst.colorBase.green = 0xFF;
     burst.colorBase.blue = 0xFF;
@@ -843,60 +689,60 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     burst.color2Range.green = 0;
     burst.color2Range.blue = 0;
     burst.color2Range.alpha = 0;
-    burst.unk55 = 0xFF;
-    burst.unk56 = 0;
-    burst.unk57 = 3;
-    burst.unk58 = 0x24;
-    burst.unk5C = 0x200005;
-    burst.unk60 = 0x60600;
-    burst.unk64 = 8;
-    burst.unk66 = 31;
-    burst.unk68 = 1;
-    burst.unk6A = 0;
-    burst.unk6C = 1.0f;
-    burst.unk70 = -1;
-    burst.unk71 = 0;
+    burst.colorLevelBase = 0xFF;
+    burst.colorLevelRange = 0;
+    burst.renderMode = 3;
+    burst.unk21 = 0x24;
+    burst.setGeometryMode = 0x200005;
+    burst.clearGeometryMode = 0x60600;
+    burst.fadeStart = 8;
+    burst.fadeRate = 31;
+    burst.shrinkStart = 1;
+    burst.shrinkPaused = 0;
+    burst.shrinkFactor = 1.0f;
+    burst.unk38 = -1;
+    burst.unk39 = 0;
     burst.unk72 = -1;
     burst.unk73 = -1;
     func_15152B38(&burst, arg1, arg2);
 
-    particle.unk1D = 0x2B;
-    particle.unk8 = 0x4403;
+    particle.texture = 0x2B;
+    particle.renderMode = 0x4403;
     particle.unk0 = 0x200005;
     particle.unk4 = 0x20000;
-    particle.lifetime = (func_150ADA20() % 5U) + 4;
-    particle.unkC = 0;
-    particle.unk10 = 0;
-    particle.unk14 = 0xFF;
-    particle.unk15 = 0xFF;
-    particle.unk16 = 0xFF;
-    particle.unk17 = 0xFF;
-    particle.unk18 = 0xFF;
-    particle.unk19 = 0xFF;
-    particle.unk1A = 0xFF;
-    particle.unk1B = 0xFF;
-    particle.unk1C = 0xFF;
-    particle.unk28 = particle.unk2C = (func_150ADA68() * 60.0f) + 80.0f;
+    particle.timer = (func_150ADA20() % 5U) + 4;
+    particle.frame = 0;
+    particle.frameRate = 0;
+    particle.r = 0xFF;
+    particle.g = 0xFF;
+    particle.b = 0xFF;
+    particle.a = 0xFF;
+    particle.r2 = 0xFF;
+    particle.g2 = 0xFF;
+    particle.b2 = 0xFF;
+    particle.alpha = 0xFF;
+    particle.brightness = 0xFF;
+    particle.width = particle.height = (func_150ADA68() * 60.0f) + 80.0f;
     particle.pos = *pos;
-    particle.unk1E = 2;
-    particle.unk20 = 0x7F;
-    particle.unk22 = 1;
-    particle.unk3C.x = 0.0f;
-    particle.unk3C.y = 0.0f;
-    particle.unk3C.z = 0.0f;
+    particle.fadeStart = 2;
+    particle.fadeRate = 0x7F;
+    particle.scaleStart = 1;
+    particle.offset.x = 0.0f;
+    particle.offset.y = 0.0f;
+    particle.offset.z = 0.0f;
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
-    particle.unk54 = 0.0f;
-    particle.unk24 = 1.0f;
+    particle.gravity = 0.0f;
+    particle.scaleRate = 1.0f;
     particle.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | (((func_150ADA20() & 1) ? 0x80 : 0) | 1) | 0x8000 | 0x4000 |
                      0x200;
-    particle.unk60 = 6;
-    particle.unk61 = 6;
-    particle.unk62 = -1;
-    particle.unk63 = -1;
-    particle.unk64 = -1;
-    particle.unk65 = 4;
+    particle.primColorMode = 6;
+    particle.envColorMode = 6;
+    particle.updateFunc = -1;
+    particle.deathFunc = -1;
+    particle.drawFunc = -1;
+    particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
 
     header.unk0 = 3;
@@ -909,77 +755,7 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} DebrisPacket; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
-
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f position;
-    /* 0x44 */ s16 yawBase;
-    /* 0x46 */ s16 pitchBase;
-    /* 0x48 */ s16 yawRange;
-    /* 0x4A */ s16 pitchRange;
-    /* 0x4C */ f32 speedBase;
-    /* 0x50 */ f32 speedRange;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 extra;
-} SmokeConfig; /* 0x6C, func_15153634 config (as Config15153634 in game_1EC390.c) */
-
-void func_15153634(SmokeConfig *, u8, u8, s32);
+void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
@@ -1016,72 +792,72 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smokeChance = sparkChance = debrisChance = 0.0f;
     }
     if (func_150ADA68() < debrisChance) {
-        DebrisPacket debris;
+        SpriteDef debris;
         f32 scale;
         const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
         scale = (func_150ADA68() * 15.0f) + 15.0f;
-        debris.unk6 = shade[type];
+        debris.texture = shade[type];
         debris.unk7 = 0;
-        debris.unk0 = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
-        debris.unk4 = (func_150ADA20() % 61U) + 0x3C;
-        debris.unk8 = 0;
-        debris.unkC = 0;
+        debris.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        debris.lifetime = (func_150ADA20() % 61U) + 0x3C;
+        debris.frame = 0;
+        debris.frameSpeed = 0;
         debris.unk10 = (func_150ADA20() % 56U) + 0xC8;
         debris.unk11 = 0xFF;
-        debris.unk12 = 0;
-        debris.unk13 = 0;
-        debris.unk14 = 0;
-        debris.unk15 = 0xFF;
+        debris.rgba[0] = 0;
+        debris.rgba[1] = 0;
+        debris.rgba[2] = 0;
+        debris.rgba[3] = 0xFF;
         big = (type == 4);
-        debris.unk18 = ((big ? 0x48 : 0x3B) << 16) + 2;
+        debris.renderModes = ((big ? 0x48 : 0x3B) << 16) + 2;
         debris.unk16 = 0;
         debris.unk17 = big ? 6 : 7;
-        debris.unk20 = debrisArg;
-        debris.unk22 = 0x20;
-        debris.unk24 = 7;
+        debris.viewportMask = debrisArg;
+        debris.fadeStart = 0x20;
+        debris.fadeRate = 7;
         ext = &trail->trail;
-        func_1513C650((s32)&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
-                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
+        func_1513C650(&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
+                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {
-        Game1EF500TrailSpawn spark;
+        ParticleDef spark;
         const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
         ext = &trail->trail;
-        spark.field00 = shade[type];
-        spark.field01 = 0;
-        spark.field02 = 0x3B03;
-        spark.field04 = (func_150ADA20() % 6U) + 0xD;
-        spark.field08 = 0;
-        spark.field0C = 0;
-        spark.field10 = 0xFF;
-        spark.field11 = 0xFF;
-        spark.field12 = 0xFF;
-        spark.field13 = 0xFF;
-        spark.field14 = (func_150ADA68() * 5.0f) + 7.0f;
-        spark.field18 = (func_150ADA68() * 40.0f) + 10.0f;
-        spark.position = ext->path.hit;
-        spark.field28[0] = ext->path.hit.x - ext->path.end.x;
-        spark.field28[1] = ext->path.hit.y - ext->path.end.y;
-        spark.field28[2] = ext->path.hit.z - ext->path.end.z;
-        spark.field28[3] = 1.269999981f;
-        spark.field28[4] = 1.0f;
-        spark.field28[5] = 56.81999969f;
+        spark.texture = shade[type];
+        spark.type = 0;
+        spark.renderModes = 0x3B03;
+        spark.lifetime = (func_150ADA20() % 6U) + 0xD;
+        spark.frame = 0;
+        spark.frameSpeed = 0;
+        spark.rgba[0] = 0xFF;
+        spark.rgba[1] = 0xFF;
+        spark.rgba[2] = 0xFF;
+        spark.rgba[3] = 0xFF;
+        spark.width = (func_150ADA68() * 5.0f) + 7.0f;
+        spark.height = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.pos = ext->path.hit;
+        spark.rot.x = ext->path.hit.x - ext->path.end.x;
+        spark.rot.y = ext->path.hit.y - ext->path.end.y;
+        spark.rot.z = ext->path.hit.z - ext->path.end.z;
+        spark.scale.x = 1.269999981f;
+        spark.scale.y = 1.0f;
+        spark.scale.z = 56.81999969f;
         spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
-        spark.field44 = (func_150ADA20() % 76U) + 0xB4;
-        spark.field45 = 0xFF;
-        spark.field46 = 0;
-        spark.field47 = 7;
-        spark.field48 = 0;
-        spark.field4C = sparkArg;
-        spark.field54 = 8;
-        spark.field56 = 0x1F;
-        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
+        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.unk45 = 0xFF;
+        spark.unk46 = 0;
+        spark.unk47 = 7;
+        spark.unk48 = 0;
+        spark.viewportMask = sparkArg;
+        spark.fadeStart = 8;
+        spark.fadeRate = 0x1F;
+        func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < smokeChance) {
-        SmokeConfig smoke;
+        SpriteBurst smoke;
         const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
         const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
@@ -1089,47 +865,47 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
 
         smoke.countBase = 5;
         smoke.countRange = 15;
-        smoke.unk4 = 0x6C;
-        smoke.unk6 = 0x5103;
+        smoke.texture = 0x6C;
+        smoke.renderMode = 0x5103;
         smoke.unk8 = 0x200005;
         smoke.unkC = 0;
-        smoke.unk10 = 0x14;
-        smoke.unk12 = 0xF;
-        smoke.unk14 = 0;
-        smoke.unk18 = 0;
-        smoke.unk1F = 0xFF;
-        smoke.unk1C = colorA[type][0];
-        smoke.unk1D = colorA[type][1];
-        smoke.unk1E = colorA[type][2];
-        smoke.unk20 = colorB[type][0];
-        smoke.unk21 = colorB[type][1];
-        smoke.unk22 = colorB[type][2];
-        smoke.unk23 = 0xE6;
-        smoke.unk24 = 0x14;
-        smoke.unk25 = 0xFF;
-        smoke.unk26 = 0x19;
-        smoke.unk28 = 0xA;
-        smoke.unk2A = 0x1E;
-        smoke.unk2C = 1.049999952f;
-        smoke.unk30 = 60.0f;
-        smoke.unk34 = 65.0f;
-        smoke.position = trail->trail.path.hit;
+        smoke.timerBase = 0x14;
+        smoke.timerRange = 0xF;
+        smoke.frameRateBase = 0;
+        smoke.frameRateRange = 0;
+        smoke.a = 0xFF;
+        smoke.r = colorA[type][0];
+        smoke.g = colorA[type][1];
+        smoke.b = colorA[type][2];
+        smoke.r2 = colorB[type][0];
+        smoke.g2 = colorB[type][1];
+        smoke.b2 = colorB[type][2];
+        smoke.alphaBase = 0xE6;
+        smoke.alphaRange = 0x14;
+        smoke.brightness = 0xFF;
+        smoke.fadeStart = 0x19;
+        smoke.fadeRate = 0xA;
+        smoke.scaleStart = 0x1E;
+        smoke.scaleRate = 1.049999952f;
+        smoke.sizeBase = 60.0f;
+        smoke.sizeRange = 65.0f;
+        smoke.pos = trail->trail.path.hit;
         smoke.yawBase = 0;
         smoke.pitchBase = -40;
         smoke.yawRange = 0xFF;
         smoke.pitchRange = 40;
         smoke.speedBase = 9.0f;
         smoke.speedRange = 17.0f;
-        smoke.unk54 = 0.00800000038f;
-        smoke.unk58 = 0.2610000074f;
-        smoke.unk5C = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
-        smoke.unk60 = 0x10;
-        smoke.unk61 = -1;
-        smoke.unk62 = 8;
-        smoke.unk63 = 6;
+        smoke.gravityBase = 0.00800000038f;
+        smoke.gravityRange = 0.2610000074f;
+        smoke.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        smoke.updateFunc = 0x10;
+        smoke.deathFunc = -1;
+        smoke.primColorMode = 8;
+        smoke.envColorMode = 6;
         smoke.unk64 = 1;
         smoke.extra = 0.8702070117f;
-        func_15153634(&smoke, smokeArg, trail->unkC, trail->unk1);
+        func_15153634(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < flashChance) {
         Header header;
@@ -1146,7 +922,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         header2.unk4 = (s32)ext->path.hit.y;
         header2.unk8 = (s32)ext->path.hit.z;
         sel = func_150ADA20() & 1;
-        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->unkC, trail->unk1);
+        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
 }
 
@@ -1168,7 +944,7 @@ void func_15081690(void *, f32, f32, f32, f32, f32, f32, Game1F1F60Hit *, f32, s
  */
 u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     u8 result;
-    struct127 *owner;
+    Actor *owner;
     f32 length;
     s32 pad[3]; // matching: unused stack space in the original frame
     Game1F1F60Hit ray;
@@ -1183,7 +959,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             length = ext->scale * dt;
         }
         if (length != 0.0f) {
-            Vec3f *from = &trail->position;
+            Vec3f *from = &trail->head.def.pos;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
@@ -1199,9 +975,9 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 
 /* Moves the projectile by velocity * dt. */
 void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
-    trail->position.x += ext->velocity.x * dt;
-    trail->position.y += ext->velocity.y * dt;
-    trail->position.z += ext->velocity.z * dt;
+    trail->head.def.pos.x += ext->velocity.x * dt;
+    trail->head.def.pos.y += ext->velocity.y * dt;
+    trail->head.def.pos.z += ext->velocity.z * dt;
 }
 
 /* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
@@ -1308,7 +1084,7 @@ void func_151C4644(Game1EF500TimedOwner *owner) {
 
         // the struct37 * parameter is really the size of the effect's data
         effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minimumLife),
-                               -1, 0x2B, -1, 1, 0, (struct37 *)sizeof(data), owner->unkC, owner->unk1);
+                               -1, 0x2B, -1, 1, 0, sizeof(data), owner->unkC, owner->unk1);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }

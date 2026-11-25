@@ -1,30 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef struct {
-    s16 x, y, z;
-} Vec3s;
-
-/* Link fields shared by every object (see game_1944C0.c). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
+#include "effects.h"
 
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern ObjLink *D_800DCE50[2][104];
+extern EffectHeader *D_800DCE50[2][104];
 
 /* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
-#define OBJ_ITER_NEXT ((ObjLink **)D_800DD198)
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
 
@@ -36,7 +18,7 @@ typedef struct {
     /* 0x0C */ f32 halfWidthRange;
     /* 0x10 */ s16 pointRange; /* each trail gets 3 + rand % (pointRange + 1) points */
     /* 0x12 */ s16 angleRange;
-    /* 0x14 */ struct127 *owner;
+    /* 0x14 */ Actor *owner;
     /* 0x18 */ u8 ownerId;     /* owner->unique_id when attached */
     /* 0x19 */ u8 texture;
     /* 0x1A */ u8 flags;
@@ -44,7 +26,7 @@ typedef struct {
 
 /* Type 0x1F object: emits trails from two points of its owner actor. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ TrailEmitterParams params;
     /* 0x2C */ s32 timers[2]; /* time until the next trail from each point */
     /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
@@ -55,8 +37,8 @@ void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5)
 TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
-TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
-    ObjLink **heads;
+TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
+    EffectHeader **heads;
     TrailEmitterParams params;
     TrailEmitter *emitter;
     s32 i;
@@ -110,7 +92,7 @@ TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
 }
 
 /* Destroys every trail emitter (after pointing each at `actor`). */
-void func_1518BBF4(struct127 *actor) {
+void func_1518BBF4(Actor *actor) {
     s32 i;
     TrailEmitter *emitter;
 
@@ -118,8 +100,8 @@ void func_1518BBF4(struct127 *actor) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
             for (emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
-                 emitter = (TrailEmitter *)OBJ_ITER_NEXT[D_800DD190]) {
-                OBJ_ITER_NEXT[D_800DD190] = emitter->link.next;
+                 emitter = (TrailEmitter *)D_800DD198[D_800DD190]) {
+                D_800DD198[D_800DD190] = emitter->link.next;
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
                 if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
@@ -150,30 +132,7 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
     return emitter;
 }
 
-/*
- * struct127 bytes 0x1AC..0x1BA (padding in structs.h): the two points trails are emitted from
- * and the actor's facing direction in 1/256 units.
- */
-typedef struct {
-    /* 0x1AC */ Vec3s points[2];
-    /* 0x1B8 */ s8 dirX;
-    /* 0x1B9 */ u8 pad1B9;
-    /* 0x1BA */ s8 dirZ;
-} ActorTrailPoints;
-
-#define ACTOR_TRAIL_POINTS(actor) ((ActorTrailPoints *)&(actor)->pad1AC)
-
 /* Trail types (see game_175250.c). */
-
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 pointCount;
-} TrailSpawn;
 
 /* One point of a trail; the points form a ring buffer. */
 typedef struct {
@@ -183,50 +142,8 @@ typedef struct {
     u8 pad12[2];
 } TrailPoint;
 
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
 typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    u8 pad14[4];
-    u8 flags;
-    u8 texture;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode;
-    union {
-        s32 word;
-        u8 bytes[4];
-    } unk10;
-    s32 unk14;
-    s32 unk18;
-    s8 unk1C;
-    s8 unk1D;
-} TrailRender; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state;      /* 0x20: handler index */
-    u8 unk21;
-    u8 finishFn;
-    u8 hitFn;
-    u8 hitKind3Fn;
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
-
-typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ Vec3f position;
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u8 pad1E[7];
@@ -252,7 +169,7 @@ typedef struct {
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
 
-extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+extern Trail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
@@ -261,7 +178,7 @@ void func_1518BD60(TrailEmitter *emitter) {
     u8 i;
     s32 point;
     Trail *trail;
-    TrailSpawn spawn;
+    EffectTemplate18 spawn;
     TrailMotion motion;
     s32 pad; // matching: stack slot between motion and render
     TrailRender render;
@@ -269,7 +186,7 @@ void func_1518BD60(TrailEmitter *emitter) {
     f32 sinA;
     f32 cosA;
     s32 angle;
-    struct127 *owner;
+    Actor *owner;
     TrailEmitterLink *link;
 
     for (i = 0; i < 2; i++) {
@@ -286,18 +203,18 @@ void func_1518BD60(TrailEmitter *emitter) {
                 speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
                 emitter->timers[i] = func_150ADA20() % 23U + 5;
                 render.unk0 = 0;
-                render.unk4 = 1;
-                render.unk8 = 0x160600;
+                render.setGeometryMode = 1;
+                render.clearGeometryMode = 0x160600;
                 render.renderMode = 3;
-                render.unk10.word = 0x10;
+                render.unk10 = 0x10;
                 render.unk14 = 0x80;
                 render.unk18 = 0x20;
-                render.unk1C = 0;
-                render.unk1D = 9;
-                spawn.pointCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
-                spawn.unk10 = 1;
-                spawn.unkE = 1;
-                spawn.unkC = func_150ADA20() % 21U + 80;
+                render.primMode = 0;
+                render.envMode = 9;
+                spawn.itemCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
+                spawn.kind = 1;
+                spawn.flags = 1;
+                spawn.life = func_150ADA20() % 21U + 80;
                 motion.texture = emitter->params.texture;
                 motion.halfWidth = func_150ADA68() * emitter->params.halfWidthRange + emitter->params.halfWidthMin;
                 motion.velocity.y = 0.0f;
@@ -305,10 +222,10 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.velocity.x = speed * cosA;
                 motion.velocity.z = speed * sinA;
                 motion.flags = emitter->params.flags | 8;
-                motion.unk1A = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
-                motion.unk1B = 0xFF;
-                trail = func_15147DA0(&spawn, &motion, spawn.pointCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
-                                      0, &render, 0, emitter->link.owner, emitter->link.list);
+                motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
+                motion.alpha = 0xFF;
+                trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                                      0, &render, 0, emitter->link.owner, emitter->link.kind);
                 if (trail != NULL) {
                     link = &((EmitterTrailParams *)trail->params)->link;
                     link->emitter = emitter;
@@ -316,8 +233,8 @@ void func_1518BD60(TrailEmitter *emitter) {
                 }
                 owner = emitter->params.owner;
             }
-            emitter->prevX[i] = ACTOR_TRAIL_POINTS(owner)->points[i].x;
-            emitter->prevZ[i] = ACTOR_TRAIL_POINTS(emitter->params.owner)->points[i].z;
+            emitter->prevX[i] = owner->aim.side[i][0];
+            emitter->prevZ[i] = emitter->params.owner->aim.side[i][2];
         }
     }
 }
@@ -359,11 +276,11 @@ s32 func_1518C0B8(Trail *trail) {
         link->emitter->params.owner->unique_id != link->emitter->params.ownerId) {
         return 0;
     }
-    pos.x = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].x;
-    pos.y = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].y;
-    pos.z = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].z;
-    dirX = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirX * (1.0f / 256);
-    dirZ = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirZ * (1.0f / 256);
+    pos.x = link->emitter->params.owner->aim.side[link->point][0];
+    pos.y = link->emitter->params.owner->aim.side[link->point][1];
+    pos.z = link->emitter->params.owner->aim.side[link->point][2];
+    dirX = link->emitter->params.owner->aim.dir[0] * (1.0f / 256);
+    dirZ = link->emitter->params.owner->aim.dir[2] * (1.0f / 256);
     lenSq = dirX * dirX + dirZ * dirZ;
     if (lenSq) {
         // matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s
@@ -429,7 +346,7 @@ s32 func_1518C0B8(Trail *trail) {
     return 1;
 }
 
-/* Trail fade: alpha (motion.unk1B) follows 8 * unk1C, capped at 0xFF. */
+/* Trail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
 s32 func_1518C540(Trail *trail) {
     s32 alpha;
     TrailParams *params;
@@ -439,7 +356,7 @@ s32 func_1518C540(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     if ((alpha & 0xFF) < 0) { /* never true */
         return 0;
     }
@@ -491,7 +408,7 @@ s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     fx.unkA1 = 0;
     fx.unk96 = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->link.owner, trail->link.list);
+    func_15168800(&fx, trail->link.owner, trail->link.kind);
     params->state = 4;
     return 1;
 }
@@ -517,7 +434,7 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
     fx.unkA1 = 0;
     fx.unk96 = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->link.owner, trail->link.list);
+    func_15168800(&fx, trail->link.owner, trail->link.kind);
     params->state = 4;
     {
         u8 kind;
@@ -527,17 +444,17 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
         pos[1] = hitY;
         pos[2] = points[trail->start].pos.z;
         kind = func_151D8E20();
-        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->link.owner, trail->link.list);
+        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->link.owner, trail->link.kind);
     }
     return 1;
 }
 
 /* Message sent to objects about an actor (see game_105FC0.c's TrailMessage). */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     union {
         u8 actorId;        /* type 0 */
-        struct127 *other;  /* type 0x2D */
+        Actor *other;  /* type 0x2D */
     } x4;
     u8 actorId;  /* type 0x2D */
     u8 otherId;  /* type 0x2D */
@@ -549,7 +466,7 @@ typedef struct {
  */
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
     ActorMessage *msg = (ActorMessage *)data;
-    struct127 *actor;
+    Actor *actor;
 
     if (type == 0x2D) {
         actor = msg->actor;

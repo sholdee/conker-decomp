@@ -73,9 +73,9 @@ void func_1500FA64(void) {
     func_1500F9D0(-0xBD5, 0x3F1, 0x659, -0x602, 2);
     func_1500F9D0(-0xE6B, -0x263, -0x427, -0x647, 1);
 
-    D_800DCDA4 = (f32)(u32)((u8 *)&D_800DCD20)[0];
-    D_800DCDA8 = (f32)(u32)((u8 *)&D_800DCD20)[1];
-    D_800DCDAC = (f32)(u32)((u8 *)&D_800DCD20)[2];
+    D_800DCDA4 = (f32)(u32)D_800DCD20[0];
+    D_800DCDA8 = (f32)(u32)D_800DCD20[1];
+    D_800DCDAC = (f32)(u32)D_800DCD20[2];
     D_800DCDB0 = (f32)(u32)D_800DCD28[0];
     D_800DCDB4 = (f32)(u32)D_800DCD28[1];
     D_800DCDB8 = (f32)(u32)D_800DCD28[2];

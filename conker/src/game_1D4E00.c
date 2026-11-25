@@ -1,16 +1,8 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a full u32 here (callers mask it); functions.h declares it u8
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 void func_1514373C(f32, f32, f32 *, f32 *);
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
 
 typedef struct {
     u8 r, g, b, a;
@@ -46,7 +38,7 @@ typedef struct {
 
 /* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
     /* 0x08 */ Vec3f boneOffset;
     /* 0x14 */ u8 bone;
@@ -146,7 +138,7 @@ void func_151A7A90(Bolt *bolt) {
             dir.y = bolt->def.end.y - bolt->def.start.y;
             dir.z = bolt->def.end.z - bolt->def.start.z;
             up = bolt->def.up;
-            func_151450B4((struct17 *)&dir, (struct17 *)&up, (struct17 *)&side);
+            func_151450B4(&dir, &up, &side);
             {
                 s32 i;
 
@@ -183,9 +175,7 @@ Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 /*
  * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
@@ -377,7 +367,7 @@ void func_151A85D4(Bolt *bolt) {
  * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
  * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
  */
-Bolt *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
                     f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
                     f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
                     s8 update2, s32 extraSize, u8 argD, s32 argE) {
@@ -465,7 +455,7 @@ extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
  */
 s32 func_151A87F8(Bolt *bolt) {
     BoltLink *link;
-    struct127 *owner;
+    Actor *owner;
     Vec3f dir;
     s32 hit;
     f32 dx;
@@ -538,9 +528,9 @@ void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
 
 /* Message 0x2D: two actors traded places (each with its unique_id). */
 typedef struct {
-    struct127 *actorA;
+    Actor *actorA;
     union {
-        struct127 *actorB;
+        Actor *actorB;
         u8 id;              /* message 0: the unique_id of the dying actor */
     } u4;
     u8 idA;
@@ -554,7 +544,7 @@ typedef struct {
 void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     BoltLink *link = bolt->link;
     BoltOwnerMsg *msg = arg;
-    struct127 *actor;
+    Actor *actor;
 
     if (msgType == 0) {
         actor = msg->actorA;
@@ -652,8 +642,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
     init.ground.surfaceType = 0;
     init.ground.unk20 = 0;
 
-    /* func_15149130 takes the data size (after its 0x28-byte header) in its struct37 * parameter */
-    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (struct37 *)(extraSize + sizeof(EmitterState)), arg3, arg4);
+    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
     if (emitter != NULL) {
         state = &emitter->state;
         memcpy(state, &init, sizeof(EmitterState));
@@ -676,7 +665,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
         }
 
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            state->area = func_15144598((struct134 *)state->def.anchor);
+            state->area = func_15144598((TriggerZone *)state->def.anchor);
         } else {
             state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }
@@ -902,7 +891,7 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650((s32)&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
+    func_1513C650(&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
                   emitter->unkC, emitter->unk1);

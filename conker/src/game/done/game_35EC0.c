@@ -19,15 +19,15 @@ void func_15008A60(void) {
 
     // unrolled loop?
     D_800DDE40 = 0;
-    D_800DDDAC = 0;
-    D_800DDE28 = 0;
-    D_800DDDB0 = 0;
-    D_800DDE1C = 0;
-    D_800DDE20 = 0;
-    D_800DDDC8 = 0.0f;
-    D_800DDDD8 = 0.0f;
+    D_800DDDAC[0] = 0;
+    D_800DDE28[0] = 0;
+    D_800DDDB0[0] = 0;
+    D_800DDE1C[0] = 0;
+    D_800DDE20[0] = 0;
+    D_800DDDC8[0] = 0.0f;
+    D_800DDDD8[0] = 0.0f;
 
-    D_800DDE3C = 0;
+    D_800DDE3C[0] = 0;
     D_800DDDAD = 0;
     D_800DDE2C = 0;
     D_800DDDB4 = 0;
@@ -55,6 +55,6 @@ void func_15008A60(void) {
     D_800DDDE4 = 0.0f;
 
     D_800DDE3F = 0;
-    D_800DDE18 = 0;
+    D_800DDE18 = NULL;
     D_800DDE38 = 0;
 }

@@ -23,11 +23,10 @@ typedef struct {
     u8  soundTimer;
 } WavePreset; /* size 0x18 */
 
-extern u8 D_800DDE54[];
 extern WavePreset D_8008D050[];
 extern WaveSample *D_800DDE60[];
 
-s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain);
+s32 func_15182FDC(Actor *actor, s32 sample, s32 chain);
 
 /*
  * Steps every active wave chain: actors on it push the samples under them, each sample is pulled
@@ -111,7 +110,7 @@ void func_151827D0(void) {
 
 
 f32 func_15182F58(s32 dist, s32 chain);
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated
@@ -125,7 +124,7 @@ void func_15182C5C(WorldObject *prop) {
     f32 weighted[2]; // matching: two scalars give a different stack frame
     s32 sample;
     s32 next;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 x;
     f32 y;
     f32 z;
@@ -175,7 +174,7 @@ f32 func_15182F58(s32 dist, s32 chain) {
  * Returns how far `actor` pushes sample `sample` of chain `chain`: the preset's push value
  * on the sample under it, 4/7 of that on its neighbours, 0 if the actor is off the chain.
  */
-s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
+s32 func_15182FDC(Actor *actor, s32 sample, s32 chain) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -185,7 +184,7 @@ s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
     f32 originX;
     f32 originY;
     f32 originZ;
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 objIndex;
     s32 under;
     s8 push;

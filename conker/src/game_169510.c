@@ -2,10 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* D_80090B60[]: one entry per texture. */
 typedef struct {
@@ -27,28 +24,6 @@ typedef struct {
     s32 unk1C;
 } ModelLink; /* size 0x20 */
 
-/* Spawn template of a sprite, copied to SpriteFx.def. */
-typedef struct {
-    s32 flags;
-    s16 lifetime;
-    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    u8 unk7;
-    s32 frame;          /* 16.16 animation frame */
-    s32 frameSpeed;
-    u8 unk10;           /* faded out with the lifetime (flag 0x8000) */
-    u8 unk11;
-    u8 rgba[4];
-    u8 unk16;
-    u8 unk17;
-    u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    s32 unk1C;
-    u8 viewportMask;
-    u8 pad21;
-    s16 fadeStart;      /* lifetime below which unk10 / rgba[3] fade */
-    s16 fadeRate;
-    u8 pad26[2];
-} SpriteDef; /* size 0x28 */
-
 /* Textured quad effect (with optional model) created by func_1513C350. */
 typedef struct {
     u8 pad0[0x10];
@@ -62,34 +37,6 @@ typedef struct {
     ModelLink link;
     Vec3f pos;
 } SpriteFx;
-
-/* Spawn template of a particle, copied to Particle.def. */
-typedef struct {
-    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    u8 type;            /* selects the D_80089F64 handler */
-    u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
-    s16 lifetime;
-    u8 pad6[2];
-    s32 frame;          /* 16.16 animation frame */
-    s32 frameSpeed;
-    u8 rgba[4];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    Vec3f rot;          /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    Vec3f scale;
-    s32 flags;
-    u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s16 *unk48;
-    u8 viewportMask;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 fadeStart;      /* lifetime below which unk44 / rgba[3] fade */
-    s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* Per-behaviour state that follows a particle. */
 typedef union {
@@ -254,14 +201,14 @@ void func_1513C060(SpriteFx *sprite) {
 }
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
-struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
+struct210 *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
                          struct167 *pos, s32 extraSize, u8 arg9, s32 argA) {
     SpriteFx *sprite;
     u8 kind;
     s32 i;
 
-    if (colors == 0) {
-        colors = (s32)&D_800A4AA0;
+    if (colors == NULL) {
+        colors = &D_800A4AA0;
     }
     if (((SpriteDef *)def)->flags & 0x40000) {
         kind = 0x4A;
@@ -299,14 +246,14 @@ struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u
 }
 
 /* Spawns a flat (xz-plane) sprite at (x, y, z). */
-struct210 *func_1513C4EC(s32 def, s32 colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+struct210 *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     struct210 *sprite;
-    struct17 pos;
+    Vec3f pos;
 
-    pos.unk0 = x;
-    pos.unk4 = y;
-    pos.unk8 = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     sprite = func_1513C350(def, colors, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
     if (sprite == NULL) {
         return NULL;
@@ -328,14 +275,14 @@ struct210 *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 
 }
 
 /* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
-struct210 *func_1513C650(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+struct210 *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     struct210 *sprite;
-    struct17 pos;
+    Vec3f pos;
 
-    pos.unk0 = x;
-    pos.unk4 = y;
-    pos.unk8 = z;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
 
     sprite = func_1513C350(def, 0, updateFn, expireFn, flip, model, arg6, &pos, extraSize, argE, argF);
     if (sprite == NULL) {
@@ -350,7 +297,7 @@ struct210 *func_1513C650(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32
 }
 
 /* As func_1513C650, without a model or stored position. */
-struct210 *func_1513C73C(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+struct210 *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
     struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
@@ -366,7 +313,7 @@ struct210 *func_1513C73C(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32
 }
 
 /* As func_1513C73C; arg1 is unused and the default colours are used. */
-struct210 *func_1513C804(s32 def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+struct210 *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
     struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 
@@ -492,7 +439,6 @@ typedef struct {
     s32 unk4;
 } RenderModePair;
 extern RenderModePair D_800A4AC8[];
-extern u32 D_800D2C9C;
 Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -554,7 +500,7 @@ Gfx *func_1513CBF0(Gfx *gfx, SpriteFx *sprite, s16 viewport) {
         gfx = func_1513F4E4(gfx, combiner, &needSync);
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((sprite->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                ((sprite->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
 
@@ -670,7 +616,7 @@ void func_1513CFE4(Particle *particle) {
 }
 
 /* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
-void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB) {
     Particle *particle;
     s32 flags;
@@ -723,39 +669,39 @@ void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expire
     return particle;
 }
 
-void func_1513D4B8(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
-                   u8 arg8, s32 arg9) {
-    func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
+void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
+                    s32 motionSize, u8 arg8, s32 arg9) {
+    return func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
 }
 
 /* As func_1513D4B8 with the default colours. */
-void func_1513D524(s32 def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
-                   s32 arg8) {
-    func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
+void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
+                    u8 arg7, s32 arg8) {
+    return func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
 }
 
 /* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
-s32 func_1513D594(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                   f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10) {
     Particle *particle;
 
     if (colors == 0) {
-        colors = (s32)&D_800A4AA0;
+        colors = &D_800A4AA0;
     }
     particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
         (func_1513D6FC((struct211 *)&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
         func_1516972C(particle);
-        return 0;
+        return NULL;
     }
-    return (s32)particle;
+    return particle;
 }
 
-void func_1513D668(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                   f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
-    func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
-                  motionSize, argD, argE);
+void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
+                    f32 width, f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
+    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
+                         motionSize, argD, argE);
 }
 
 s32 func_1510E388(s32, s32, f32 *, f32 *);
@@ -961,7 +907,7 @@ Gfx *func_1513DB00(Gfx *gfx, Particle *particle, s16 viewport) {
         gfx = func_15142FBC(gfx,
                             G_PM_NPRIMITIVE | ((particle->def.flags & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) |
                                 G_TP_PERSP | G_TD_CLAMP | G_TL_TILE |
-                                ((particle->def.texture == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT |
+                                ((particle->def.texture == 0xFF) ? 0 : (u32)D_800D2C9C /* matching: unsigned ternary */) | G_TF_BILERP | G_TC_FILT |
                                 G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[blendMode].unk0 | D_800A4AC8[blendMode].unk4, &needSync);
         gSPVertex(gfx++, vtx, 4, 0);
@@ -1235,7 +1181,7 @@ s32 func_1513E6E8(Particle *particle) {
 }
 
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /*
  * Vertex functions (D_80089E1C): each fetches the particle's vertex buffer for a viewport (refilled
@@ -1244,7 +1190,7 @@ void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /* Quad of width x height, rotated by def.rot, scaled by def.scale and placed at def.pos. */
 Vtx *func_1513E83C(Particle *particle, s16 viewport) {
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 pad; // matching: unused stack slot
     Vtx *vertices;
     Vtx *result;
@@ -1371,19 +1317,19 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
 
 Vtx *func_1513EAD8(Particle *particle, s32 reversed, s32 viewport);
 
-void func_1513EDB4(s32 particle, s16 viewport) {
-    func_1513EAD8(particle, FALSE, viewport);
+Vtx *func_1513EDB4(void *particle, s16 viewport) {
+    return func_1513EAD8(particle, FALSE, viewport);
 }
 
-void func_1513EDE4(s32 particle, s16 viewport) {
-    func_1513EAD8(particle, TRUE, viewport);
+Vtx *func_1513EDE4(void *particle, s16 viewport) {
+    return func_1513EAD8(particle, TRUE, viewport);
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
 Vtx *func_1513EE14(Particle *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 corners[4][2];
     f32 out[4][3];
     u8 fresh;
@@ -1531,7 +1477,6 @@ s16 func_15143044(u8, s32);
  * cycle 1 colour and cycle 1 alpha, in that order.
  */
 extern u8 D_800A4BA8[][16];
-extern s16 D_800DD1BE;
 
 /* Sets the colour combiner to mode combiner unless it is already current. */
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
@@ -1812,7 +1757,7 @@ void func_151400D0(Vtx *vtx, VtxColor *colors) {
 Vtx *func_15140190(Particle *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 corners[4][3];
     u8 i;
     u8 fresh;
@@ -1861,7 +1806,7 @@ Vtx *func_15140190(Particle *particle, s16 viewport) {
 }
 
 void func_151403A8(s32 arg0, u8 arg1) {
-    func_15169260(&D_800A5168, 4, arg0, arg1);
+    func_15169260(D_800A5168, 4, arg0, arg1);
 }
 
 void func_151403DC(s32 arg0, u8 arg1) {

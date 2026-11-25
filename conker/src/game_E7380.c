@@ -1,69 +1,7 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but this file was built against an
-// int-returning prototype, so hide the shared one.
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
-
-/* A collision triangle as func_150AC9C0 reports it: three s16 xyz vertices. */
-typedef struct {
-    s16 coords[9];
-} SurfaceTriangle;
-
-/* Argument of func_151511FC (layout from game_17CAF0.c): a burst of particles off a surface triangle. */
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ vertex position;
-    /* 0x10 */ vertex normal;
-    /* 0x1C */ SurfaceTriangle triangle;
-    /* 0x30 */ f32 spread;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ f32 scaleBase;
-    /* 0x40 */ f32 scaleRange;
-    /* 0x44 */ s32 flags;
-    /* 0x48 */ u8 unk48;
-    /* 0x49 */ u8 unk49;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 speedBase;
-    /* 0x58 */ f32 speedRange;
-    /* 0x5C */ u8 unk5C;
-    /* 0x5D */ u8 unk5D;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 spin;
-} SurfaceBurstConfig;
-
-/* Spawn template of a sprite (layout from game_169510.c), copied to SpriteFx.def. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;           /* faded out with the lifetime */
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 viewportMask;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 fadeStart;      /* lifetime below which unk10 / rgba[3] fade */
-    /* 0x24 */ s16 fadeRate;
-} SpriteDef; /* size 0x28 */
+#include "effects.h"
 
 /* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
 typedef struct {
@@ -71,21 +9,9 @@ typedef struct {
     /* 0x18 */ SpriteDef def;
 } SpriteFx;
 
-/* Spawn template of a particle (game_169510.c), copied to FxParticle.def. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[0x16];
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;
-    /* 0x34 */ u8 pad34[0x10];
-    /* 0x44 */ u8 unk44;           /* faded with the lifetime */
-    /* 0x45 */ u8 pad45[0x3];
-} ParticleDef;
-
 /* Per-behaviour motion block stored right after a particle. */
 typedef struct {
-    /* 0x00 */ vertex vel;
+    /* 0x00 */ Vec3f vel;
     /* 0x0C */ f32 rotVelX;
     /* 0x10 */ f32 rotVelY;
     /* 0x14 */ f32 minY;           /* the particle expires below this height */
@@ -95,18 +21,17 @@ typedef struct {
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
     /* 0x018 */ ParticleDef def;
-    /* 0x060 */ u8 pad60[0xB0];
+    /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ ParticleMotion motion;
 } FxParticle;
 
-extern u8 D_80084060[]; /* player -> controller channel map (game_48FD0.c) */
 /* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];
 extern s32 func_150A3058(s32, s16, s16, s16);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, SurfaceTriangle *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern s32 func_15145C90(s32);
-extern void func_151511FC(SurfaceBurstConfig *, u8, s32);
+extern void func_151511FC(SurfaceBurst *, u8, s32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
@@ -114,7 +39,7 @@ extern void func_151511FC(SurfaceBurstConfig *, u8, s32);
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
  * at func_151E7EF8. Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
-void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
+void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
     u32 addr;
     u32 end;
@@ -137,11 +62,11 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         f32 dz;
         f32 dy;
         f32 dx;
-        vertex hit;
+        Vec3f hit;
         SurfaceTriangle triangle;
         s32 hitObject;
         SpriteDef sprite;
-        SurfaceBurstConfig burst;
+        SurfaceBurst burst;
 
         /* Ray back along the move, i.e. minus the displacement since (prevX, prevZ). */
         dx = -(actor->x_position - prevX);
@@ -169,7 +94,7 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
             sprite.unk17 = 7;
             sprite.fadeStart = 25;
             sprite.fadeRate = 10;
-            func_1513C650((s32)&sprite, 0, 0, (s32)&triangle, hit.x, hit.y, hit.z,
+            func_1513C650(&sprite, 0, 0, (s32)&triangle, hit.x, hit.y, hit.z,
                           (func_150ADA68() * 20.0f) + 40.0f, (func_150ADA68() * 20.0f) + 40.0f, func_150ADA20() & 0xFF,
                           ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1), 3, 0xFF, 0, arg3, arg4);
         }
@@ -185,20 +110,20 @@ void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         burst.scaleRange = 10.0f;
         burst.unk4C = -1.022000074f;
         burst.unk50 = 0.5420000553f;
-        burst.unk34 = 7;
-        burst.unk36 = 0x3B01;
-        burst.unk35 = 0;
-        burst.unk38 = 26;
-        burst.unk3A = 20;
+        burst.texture = 7;
+        burst.renderModes = 0x3B01;
+        burst.type = 0;
+        burst.lifetimeBase = 26;
+        burst.lifetimeRange = 20;
         burst.flags = 0x5C0001;
-        burst.unk48 = 100;
-        burst.unk49 = 155;
-        burst.unk5C = 0;
-        burst.unk5D = 7;
+        burst.unk44Base = 100;
+        burst.unk44Range = 155;
+        burst.unk46 = 0;
+        burst.unk47 = 7;
         burst.unk60 = 3;
         burst.unk64 = 0xFF;
-        burst.unk68 = 10;
-        burst.unk6A = 25;
+        burst.fadeStart = 10;
+        burst.fadeRate = 25;
         burst.speedBase = 0.0374f;
         burst.speedRange = 0.0235f;
         burst.unk6C = 0.940404f;

@@ -1,38 +1,18 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
-#define func_10010F30 func_10010F30_void
-#define func_150ADA20 func_150ADA20_orig
+// matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
+#define func_15142314 func_15142314_functions_h
 #include "functions.h"
-#undef func_10010F30
-#undef func_150ADA20
-s32 func_150ADA20(void);
+#undef func_15142314
+void func_15142314(MtxF *bones, u8 bone, Vec3f *out, Actor *actor);
 #include "variables.h"
+#include "effects.h"
 
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
-extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
+extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 
-/* Spawn descriptor for func_1513418C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[0x3];
-    /* 0x0C */ struct127 *owner;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 pad11[0x3];
-    /* 0x14 */ f32 offset[3];
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D;
-} SpawnDesc1513418C;
-
-extern void *func_1513418C(SpawnDesc1513418C *desc, s32 payloadSize, u8 arg2, s32 arg3);
+extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
 
 /* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
 typedef struct GroundHit {
@@ -127,20 +107,20 @@ typedef struct ActorTask {
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ struct127 *actor;
+    /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ GroundHit hit;
     /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
-void func_151AA264(struct127 *actor, GroundHit *hit);
-void func_151ABE00(struct127 *actor);
+void func_151AA264(Actor *actor, GroundHit *hit);
+void func_151ABE00(Actor *actor);
 extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -161,7 +141,7 @@ void func_151A99D0(ActorTask *task) {
 
 /* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
 void func_151A9AA4(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -186,7 +166,7 @@ void func_151A9AA4(ActorTask *task) {
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
 void func_151A9BA0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -211,11 +191,11 @@ void func_151A9BA0(ActorTask *task) {
 
 /* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
-    if ((actor->unk31C != NULL) && ((u8)actor->unk31C->unk95 != 0)) {
+    if ((actor->unk31C != NULL) && (actor->unk31C->unk95 != 0)) {
         return;
     }
     pos[0] = actor->x_position;
@@ -236,7 +216,7 @@ void func_151A9CA0(ActorTask *task) {
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
 void func_151A9DC0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -260,7 +240,7 @@ void func_151A9DC0(ActorTask *task) {
 
 /* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
 void func_151A9EC0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -286,7 +266,7 @@ void func_151A9EC0(ActorTask *task) {
 
 /* Ground effect 4 under the actor. */
 void func_151A9FC8(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -307,7 +287,7 @@ void func_151A9FC8(ActorTask *task) {
 
 /* Ground effect 4 under the actor. */
 void func_151AA09C(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -382,23 +362,23 @@ void func_151AA210(Task151AA17C *task) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
-void func_151AA264(struct127 *actor, GroundHit *hit) {
-    SpawnDesc1513418C desc;
+void func_151AA264(Actor *actor, GroundHit *hit) {
+    BloodDripDesc desc;
 
     if (hit->flags & 1) {
-        desc.unk0 = 0;
-        desc.unk4 = 0;
+        desc.target[0] = 0;
+        desc.target[1] = 0;
         desc.ownerId = actor->unique_id;
-        desc.unk10 = 1;
-        desc.offset[0] = 0.0f;
-        desc.offset[1] = 0.0f;
-        desc.offset[2] = 0.0f;
-        desc.unk20 = 25.0f;
-        desc.unk24 = 1.212440014f;
-        desc.unk28 = 30;
-        desc.unk2A = 14;
-        desc.unk2B = 2;
-        desc.unk2C = -1;
+        desc.bone = 1;
+        desc.offset.x = 0.0f;
+        desc.offset.y = 0.0f;
+        desc.offset.z = 0.0f;
+        desc.radius = 25.0f;
+        desc.rate = 1.212440014f;
+        desc.lifetime = 30;
+        desc.flags = 14;
+        desc.emitter = 2;
+        desc.callback = -1;
         desc.unk2D = 0;
         desc.owner = actor;
         func_1513418C(&desc, 0, 0xFF, 0);
@@ -411,17 +391,17 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ struct127 *actor;
+    /* 0x1C */ Actor *actor;
 } Task151AA30C;
 
-extern s32 func_1515A920(struct127 *actor, s32 *out);
+extern s32 func_1515A920(Actor *actor, s32 *out);
 extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     f32 pos[3];
     f32 vel[3];
-    struct127 *actor;
+    Actor *actor;
     s32 surface;
 
     actor = task->actor;
@@ -442,39 +422,11 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
                   1, task->unkC, task->unk1);
 }
 
-/* Spawn descriptor for func_15134DAC. */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} SpawnDesc15134DAC;
-
-extern void *func_15134DAC(SpawnDesc15134DAC *desc, s32 payloadSize);
+extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);
 
 /* Spawns the pulse effect owned by `task`. */
-PulseFx *func_151AA48C(struct127 *actor, ActorTask *task) {
-    SpawnDesc15134DAC desc;
+PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
+    BloodStripDesc desc;
     PulseFx *fx;
     PulseFxPayload payload;
 
@@ -483,23 +435,23 @@ PulseFx *func_151AA48C(struct127 *actor, ActorTask *task) {
     desc.ownerId = actor->unique_id;
 
     desc.owner = actor;
-    desc.unk8 = 15;
-    desc.unkC = -11.0f;
-    desc.unk10 = -2.0f;
-    desc.unk14 = 8.0f;
-    desc.unk18 = -11.0f;
-    desc.unk1C = -2.0f;
-    desc.unk20 = 20.0f;
-    desc.unk24 = 0;
-    desc.unk26 = 60;
-    desc.unk28 = 60;
-    desc.unk2A = 300;
-    desc.unk2E = 1;
-    desc.unk2F = 0;
-    desc.unk30 = 1;
-    desc.unk34 = 0.5f;
-    desc.unk38 = 1;
-    desc.unk39 = 0;
+    desc.bone = 15;
+    desc.offsetA.x = -11.0f;
+    desc.offsetA.y = -2.0f;
+    desc.offsetA.z = 8.0f;
+    desc.offsetB.x = -11.0f;
+    desc.offsetB.y = -2.0f;
+    desc.offsetB.z = 20.0f;
+    desc.flags = 0;
+    desc.duration = 60;
+    desc.pause = 60;
+    desc.lifetime = 300;
+    desc.sampleCallback = 1;
+    desc.emitCallback = 0;
+    desc.rateCallback = 1;
+    desc.rate = 0.5f;
+    desc.mode = 1;
+    desc.updateCallback = 0;
 
     payload.phase = 0;
     payload.phaseStep = 0x11111;
@@ -523,49 +475,6 @@ s32 func_151AA5A4(PulseFx *fx) {
     func_10010F88(11, 0x55F0, (func_151EF610() % 1200) - 600, 0, 0, fx->unk58, fx->unk5C, fx->unk60, 500, 2500);
     return 1;
 }
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
-
-/* Particle burst descriptor for func_151303BC. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} BurstDesc;
 
 /* Payload copied to +0xA8 of a spawned burst. */
 typedef struct {
@@ -592,40 +501,40 @@ typedef struct {
     /* 0x74 */ f32 unk74;
 } Obj151AA6D8;
 
-void *func_151303BC(BurstDesc *desc, u8 arg1, s32 payloadSize);
+void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
-    BurstDesc burst;
+    ParticleDesc burst;
     void *spawned;
     BurstPayload payload;
 
-    burst.unk1D = 0x2F;
-    burst.unk8 = 0xC01;
-    burst.flags = 0x200005;
+    burst.texture = 0x2F;
+    burst.renderMode = 0xC01;
+    burst.unk0 = 0x200005;
     burst.unk4 = 0;
-    burst.unk1A = 0;
-    burst.unk19 = 0;
-    burst.unk18 = 0;
-    burst.unk17 = 0;
-    burst.unk16 = 0;
-    burst.unk15 = 0;
-    burst.unk14 = 0;
-    burst.unk10 = 0;
-    burst.unkC = 0;
-    burst.unk1C = 0xFF;
-    burst.unk22 = 0;
-    burst.unk24 = 0.0f;
-    burst.unk58 = 0x1207;
-    burst.unk60 = 5;
-    burst.unk61 = 5;
-    burst.unk62 = 4;
-    burst.unk63 = -1;
-    burst.unk3C.x = 0.0f;
-    burst.unk3C.y = 0.0f;
-    burst.unk3C.z = 0.0f;
-    burst.unk1E = 20;
-    burst.unk20 = 12;
+    burst.b2 = 0;
+    burst.g2 = 0;
+    burst.r2 = 0;
+    burst.a = 0;
+    burst.b = 0;
+    burst.g = 0;
+    burst.r = 0;
+    burst.frameRate = 0;
+    burst.frame = 0;
+    burst.brightness = 0xFF;
+    burst.scaleStart = 0;
+    burst.scaleRate = 0.0f;
+    burst.flags = 0x1207;
+    burst.primColorMode = 5;
+    burst.envColorMode = 5;
+    burst.updateFunc = 4;
+    burst.deathFunc = -1;
+    burst.offset.x = 0.0f;
+    burst.offset.y = 0.0f;
+    burst.offset.z = 0.0f;
+    burst.fadeStart = 20;
+    burst.fadeRate = 12;
     payload.unk4 = 0;
     payload.unk5 = 0;
     payload.unk18 = 0;
@@ -642,15 +551,15 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     burst.pos.z += burst.vel.z * t;
 
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x40;
+        burst.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x80;
+        burst.flags |= 0x80;
     }
 
-    burst.unkA = (func_150ADA20() % 51U) + 50;
-    burst.unk1B = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 39.0f) + 31.0f;
+    burst.timer = (func_150ADA20() % 51U) + 50;
+    burst.alpha = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
     payload.unk6 = (func_150ADA20() % 5U) + 4;
     payload.unk7 = (func_150ADA20() % 5U) + 4;
     payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
@@ -659,7 +568,7 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     payload.unk1B = (func_150ADA20() % 5U) + 4;
     payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
     payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    burst.unk54 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
+    burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
@@ -678,13 +587,13 @@ f32 func_151AAA4C(PulseFx *fx) {
     return value;
 }
 
-LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task);
+LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
 extern void func_151346EC(LoopSoundFx *fx);
 extern void func_1513470C(LoopSoundFx *fx);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorTaskFx *fx;
 
     actor = task->actor;
@@ -738,41 +647,13 @@ s32 func_151AABA0(PulseFx *fx) {
     return alive;
 }
 
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec3f unk08;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ u8 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} Cfg_151AABC4;
-
 extern u8 D_800A8F70[];
-extern void func_15142314(struct255 *, u8, Vec3f *, struct127 *);
-extern void func_1504715C(GroundHit *hit, struct127 *actor);
+extern void func_1504715C(GroundHit *hit, Actor *actor);
 extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, GroundHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
-void func_151AABC4(struct127 *actor, u8 index) {
+void func_151AABC4(Actor *actor, u8 index) {
     Vec3f pos;
     GroundHit floor;
     f32 y;
@@ -794,33 +675,33 @@ void func_151AABC4(struct127 *actor, u8 index) {
             hit.z = pos.z;
             func_151DBCBC(color, 40.0f, 150, (s32)floor.points, &hit, 0xFF, 1);
             {
-                Cfg_151AABC4 c;
+                SplashSpraySpec c;
 
-                c.unk08 = hit;
-                c.unk14 = 2.5f;
-                c.unk18 = 1.549999952f;
-                c.unk1C = 0.7910000086f;
-                c.unk20 = 0.2030000091f;
-                c.unk24 = 8.039999962f;
-                c.unk28 = 3.449999809f;
-                c.unk2C = 3;
-                c.unk2E = 3;
-                c.unk02 = 0xFF;
-                c.unk04 = -0x40;
-                c.unk06 = 0x1A;
-                c.unk00 = 0;
-                c.unk30 = 3;
-                c.unk32 = 1;
-                c.unk34 = 0x1E;
-                c.unk36 = 0x14;
-                c.unk38 = 0x9B;
-                c.unk3A = 0x64;
-                c.unk3C = color;
-                c.unk44 = 0x10;
-                c.unk46 = 0xF;
-                c.unk48 = 0;
-                c.unk40 = 0.0f;
-                func_15153F18(&c, &c.unk08, &floor, 0xFF, 1);
+                c.spray.pos = hit;
+                c.spray.scaleBase = 2.5f;
+                c.spray.scaleRange = 1.549999952f;
+                c.spray.sizeBase = 0.7910000086f;
+                c.spray.sizeRange = 0.2030000091f;
+                c.spray.speedBase = 8.039999962f;
+                c.spray.speedRange = 3.449999809f;
+                c.spray.countBase = 3;
+                c.spray.countRange = 3;
+                c.angles.yawRange = 0xFF;
+                c.angles.pitchBase = -0x40;
+                c.angles.pitchRange = 0x1A;
+                c.angles.yawBase = 0;
+                c.spray.itemCountBase = 3;
+                c.spray.itemCountRange = 1;
+                c.spray.lifeBase = 0x1E;
+                c.spray.lifeRange = 0x14;
+                c.spray.unk30 = 0x9B;
+                c.spray.unk32 = 0x64;
+                c.spray.kind = color;
+                c.spray.unk3C = 0x10;
+                c.spray.unk3E = 0xF;
+                c.spray.unk40 = 0;
+                c.spray.unk38 = 0.0f;
+                func_15153F18(&c.angles, &c.spray, &floor, 0xFF, 1);
             }
         }
     }
@@ -854,36 +735,15 @@ s32 func_151AADBC(Obj151AADBC *obj) {
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21[7];
-} Particle_151AADF8;
-
 extern u8 D_800AB414[];
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
 void func_151AADF8(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorTaskFx *fx;
     FlickerFxPayload *keep;
     f32 pos[3];
-    Particle_151AADF8 part;
+    SpriteDef part;
     FlickerFxPayload payload;
     f32 size;
     u8 color;
@@ -917,21 +777,21 @@ void func_151AADF8(ActorTask *task) {
         payload.target = 0.0f;
         payload.timer = 0;
         payload.easing = 0.2310000062f;
-        part.unkC = (s32)(payload.targetRange * 0.5f + payload.minTarget);
-        part.unk6 = 0x38;
-        part.unk0 = 0x60300;
-        part.unk4 = 300;
+        part.frameSpeed = (s32)(payload.targetRange * 0.5f + payload.minTarget);
+        part.texture = 0x38;
+        part.flags = 0x60300;
+        part.lifetime = 300;
         part.unk10 = 150;
-        part.unk8 = 0;
+        part.frame = 0;
         part.unk11 = 0xFF;
-        part.unk12 = D_800AB414[color * 3];
-        part.unk13 = D_800AB414[color * 3 + 1];
-        part.unk14 = D_800AB414[color * 3 + 2];
-        part.unk15 = 0xFF;
-        part.unk18 = 0x440001;
+        part.rgba[0] = D_800AB414[color * 3];
+        part.rgba[1] = D_800AB414[color * 3 + 1];
+        part.rgba[2] = D_800AB414[color * 3 + 2];
+        part.rgba[3] = 0xFF;
+        part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C((s32)&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
@@ -974,7 +834,7 @@ s32 func_151AB180(FlickerFx *fx) {
 
 /* Ground effect 3 (sound 0x5208), then func_151AA264. */
 void func_151AB1C4(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -998,8 +858,8 @@ void func_151AB1C4(ActorTask *task) {
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
-LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task) {
-    SpawnDesc1513418C desc;
+LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
+    BloodDripDesc desc;
     LoopSoundFxPayload payload;
     LoopSoundFx *fx;
 
@@ -1007,21 +867,21 @@ LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task) {
     payload.soundHandle = 0;
     payload.keepAlive = 1;
     payload.unk8 = actor->unk118;
-    desc.unk0 = 0;
-    desc.unk4 = 0;
+    desc.target[0] = 0;
+    desc.target[1] = 0;
     desc.ownerId = actor->unique_id;
-    desc.unk10 = 1;
-    desc.offset[0] = 0.0f;
-    desc.offset[1] = 0.0f;
-    desc.offset[2] = 0.0f;
-    desc.unk28 = 300;
-    desc.unk2A = 10;
-    desc.unk2B = 3;
-    desc.unk2C = 0;
+    desc.bone = 1;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.lifetime = 300;
+    desc.flags = 10;
+    desc.emitter = 3;
+    desc.callback = 0;
     desc.unk2D = 1;
     desc.owner = actor;
-    desc.unk20 = 25.0f;
-    desc.unk24 = 0.2649700046f;
+    desc.radius = 25.0f;
+    desc.rate = 0.2649700046f;
 
     fx = func_1513418C(&desc, sizeof(payload), 0xFF, 0);
     if (fx != NULL) {
@@ -1037,38 +897,38 @@ typedef struct {
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
-    BurstDesc burst;
+    ParticleDesc burst;
     void *spawned;
     BurstPayload payload;
 
-    burst.unk1D = 0x2F;
-    burst.unk8 = 0xC01;
-    burst.flags = 0x200005;
+    burst.texture = 0x2F;
+    burst.renderMode = 0xC01;
+    burst.unk0 = 0x200005;
     burst.unk4 = 0;
-    burst.unk1A = 0;
-    burst.unk19 = 0;
-    burst.unk18 = 0;
-    burst.unk17 = 0;
-    burst.unk16 = 0;
-    burst.unk15 = 0;
-    burst.unk14 = 0;
-    burst.unk10 = 0;
-    burst.unkC = 0;
-    burst.unk1C = 0xFF;
-    burst.unk22 = 0;
-    burst.unk24 = 0.0f;
-    burst.unk58 = 0x3207;
-    burst.unk60 = 5;
-    burst.unk61 = 5;
-    burst.unk62 = 4;
-    burst.unk63 = -1;
+    burst.b2 = 0;
+    burst.g2 = 0;
+    burst.r2 = 0;
+    burst.a = 0;
+    burst.b = 0;
+    burst.g = 0;
+    burst.r = 0;
+    burst.frameRate = 0;
+    burst.frame = 0;
+    burst.brightness = 0xFF;
+    burst.scaleStart = 0;
+    burst.scaleRate = 0.0f;
+    burst.flags = 0x3207;
+    burst.primColorMode = 5;
+    burst.envColorMode = 5;
+    burst.updateFunc = 4;
+    burst.deathFunc = -1;
     burst.pos.x = x;
     burst.pos.y = y;
-    burst.unk3C.x = 0.0f;
-    burst.unk3C.y = 0.0f;
-    burst.unk3C.z = 0.0f;
-    burst.unk1E = 30;
-    burst.unk20 = 8;
+    burst.offset.x = 0.0f;
+    burst.offset.y = 0.0f;
+    burst.offset.z = 0.0f;
+    burst.fadeStart = 30;
+    burst.fadeRate = 8;
     burst.pos.z = z;
     payload.unk24 = obj->unk60;
     payload.unk10 = 4.0f;
@@ -1081,14 +941,14 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     burst.vel.y = 0.0f;
     burst.vel.z = -dz * 0.2f;
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x40;
+        burst.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x80;
+        burst.flags |= 0x80;
     }
-    burst.unkA = (func_150ADA20() % 51U) + 106;
-    burst.unk1B = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 62.0f) + 41.0f;
+    burst.timer = (func_150ADA20() % 51U) + 106;
+    burst.alpha = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
     payload.unk6 = (func_150ADA20() % 5U) + 4;
     payload.unk7 = (func_150ADA20() % 5U) + 4;
     payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
@@ -1097,24 +957,24 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     payload.unk1B = (func_150ADA20() % 5U) + 4;
     payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
     payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    burst.unk54 = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
+    burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
     }
 }
 
-/* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->unk5F0 bit 0 is set. */
+/* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->status bit 0 is set. */
 s32 func_151AB6B8(LoopSoundFx *fx) {
     u8 alive;
     LoopSoundFxPayload *sound;
 
     alive = TRUE;
     sound = &fx->payload;
-    if ((fx->payload.soundHandle != 0) && !(D_800DBFF0->unk5F0 & 1)) {
+    if ((fx->payload.soundHandle != 0) && !(D_800DBFF0->status & 1)) {
         func_100111C8(sound->soundHandle);
         sound->soundHandle = 0;
-    } else if ((sound->soundHandle == 0) && (D_800DBFF0->unk5F0 & 1)) {
+    } else if ((sound->soundHandle == 0) && (D_800DBFF0->status & 1)) {
         sound->soundHandle = func_10010F30(0x355, 32000, 64, 0, 0);
     }
     if (sound->keepAlive == 0) {
@@ -1157,7 +1017,7 @@ extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
 
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
 void func_151AB854(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     struct185 desc;
 
     actor = task->actor;
@@ -1174,7 +1034,7 @@ void func_151AB854(ActorTask *task) {
             desc.unkA = 0;
         }
         if (actor->unk127 != 0xFF) {
-            actor->unk31C->unk66 = 500;
+            actor->unk31C->idle.delay = 500;
         }
         func_15190770(&desc, 0, task->unkC, task->unk1);
     }
@@ -1186,7 +1046,7 @@ void func_151AB920(s32 arg0, s32 arg1) {
 
 /* Payload at +0x28 of the spark emitter task spawned by func_151AB930. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ s32 actorSerial;  // actor->unk84 at spawn
@@ -1208,7 +1068,7 @@ typedef struct {
 } EmitterTask;
 
 /* Spawns a spark emitter task that follows `actor`. */
-void func_151AB930(struct127 *actor) {
+void func_151AB930(Actor *actor) {
     struct260 *task;
     EmitterPayload payload;
 
@@ -1292,12 +1152,12 @@ void func_151AB9C8(EmitterTask *task) {
 /* Message data for func_151ABD54; the layout depends on the message id. */
 typedef union {
     struct {
-        /* 0x00 */ struct127 *actor;
+        /* 0x00 */ Actor *actor;
         /* 0x04 */ u8 actorId;
     } m0;
     struct {
-        /* 0x00 */ struct127 *actorA;
-        /* 0x04 */ struct127 *actorB;
+        /* 0x00 */ Actor *actorA;
+        /* 0x04 */ Actor *actorB;
         /* 0x08 */ u8 idA;
         /* 0x09 */ u8 idB;
     } m2D;
@@ -1326,12 +1186,12 @@ void func_151ABD54(EmitterTask *task, TaskMsg151ABD54 *msg, u8 msgId) {
 }
 
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ s8 actorId;
 } Msg151ABE00;
 
 /* Broadcasts message 0x20 ({actor, unique_id}) via func_1516944C. */
-void func_151ABE00(struct127 *actor) {
+void func_151ABE00(Actor *actor) {
     Msg151ABE00 msg;
 
     msg.actor = actor;

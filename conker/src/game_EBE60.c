@@ -13,17 +13,16 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
-void func_1504715C(GroundHit *hit, struct127 *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
-void func_15142180(u8, vertex *, s32, f32, f32);
+void func_1504715C(GroundHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_15142180(u8, Vec3f *, s32, f32, f32);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
    buffer, also look for the ground below that point and return func_15046C80's result. */
-s32 func_150BE9B0(vertex *pos, struct127 *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_150BE9B0(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     switch (side) {
@@ -65,13 +64,13 @@ s32 func_150BEAA8(s32 arg0, s32 arg1) {
    at least 76. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BEACC(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
-    if (((struct127 *)actor)->unk1D4 != NULL) {
-        if (func_150BE9B0(&pos, (struct127 *)actor, &hit, side) != 0) {
+    if (((Actor *)actor)->unk1D4 != NULL) {
+        if (func_150BE9B0(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
-                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
                 func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
             }
@@ -80,8 +79,8 @@ void func_150BEACC(s32 actor, s32 side, s32 strength) {
 }
 
 /* Same as func_150BE9B0 with bones 0x19 and 0x16 for sides 4 and 5. */
-s32 func_150BEC30(vertex *pos, struct127 *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_150BEC30(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     switch (side) {
@@ -122,13 +121,13 @@ s32 func_150BED28(s32 arg0, s32 arg1) {
 /* Same as func_150BEACC with the func_150BEC30 bones and a scale factor of 2 instead of 3.177. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BED4C(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
-    if (((struct127 *)actor)->unk1D4 != NULL) {
-        if (func_150BEC30(&pos, (struct127 *)actor, &hit, side) != 0) {
+    if (((Actor *)actor)->unk1D4 != NULL) {
+        if (func_150BEC30(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 2,
-                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
                 func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
             }
@@ -137,15 +136,15 @@ void func_150BED4C(s32 actor, s32 side, s32 strength) {
 }
 
 /* Sets or clears flag bits in unk84 from func_1509BE40 queries. */
-void func_150BEEB0(struct108 *arg0) {
+void func_150BEEB0(Camera *arg0) {
     if (func_1509BE40(1, 0x4063, 6, 0x2000) || func_1509BE40(1, 0x4001, 6, 0x9000)) {
-        arg0->unk84 |= 0x1010;
+        arg0->flags |= 0x1010;
     } else {
-        arg0->unk84 &= ~0x1010;
+        arg0->flags &= ~0x1010;
     }
     if (func_1509BE40(1, 0x4069, 6, 0x2000)) {
-        arg0->unk84 |= 0x1000000;
+        arg0->flags |= 0x1000000;
     } else {
-        arg0->unk84 &= ~0x1000000;
+        arg0->flags &= ~0x1000000;
     }
 }

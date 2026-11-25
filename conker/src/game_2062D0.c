@@ -1,72 +1,29 @@
 #include <ultra64.h>
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
-#define func_150ADA20 func_150ADA20_orig
-#define func_1513D668 func_1513D668_void_proto
-#define func_151DA08C func_151DA08C_void_proto
 #include "functions.h"
-#undef func_150ADA20
-#undef func_1513D668
-#undef func_151DA08C
 #include "variables.h"
+#include "effects.h"
 
-s32 func_150ADA20(void);
-s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8);
-s32 func_1514672C(struct17 *arg0);
-s32 func_15046C80(struct17 *point, s32 arg1, f32 startY, f32 *floorY);
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5, s32 arg6);
-void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
-s32 func_15131918(struct17 *vel, f32 scale);
+s32 func_1514672C(Vec3f *arg0);
+s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, f32 *floorY);
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
+void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
+s32 func_15131918(Vec3f *vel, f32 scale);
 
 extern u8 (*D_8008FCD0[])(void);
 extern u8 (*D_8008FD04[])(void);
 extern u8 D_800AB330[]; /* per effect kind flag */
 extern u8 D_800AB414[]; /* RGB per effect kind */
 
-/* Effect descriptor consumed by func_1513D668 and func_1513D2F0 (copied to EffectBase.desc). */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 scaleX;
-    f32 scaleY;
-    struct17 pos;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34; /* scaleX multiplier */
-    f32 unk38; /* scaleY multiplier */
-    f32 unk3C;
-    s32 flags;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} EffectDesc; /* 0x58 */
-
-/* Start of a live effect created from an EffectDesc. */
+/* Start of a live effect created from an ParticleDef. */
 typedef struct {
     u8 unk0;
     u8 unk1;
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[0xB];
-    EffectDesc desc;
+    ParticleDef desc;
 } EffectBase; /* 0x70 */
 
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
@@ -162,47 +119,6 @@ u8 func_151D8FE0(void) {
     return ids[func_150ADA20() & 3];
 }
 
-/* Sprite particle descriptor, consumed by func_15130280 (copied to Particle.desc). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14; /* unk14-16 and unk18-1A: RGB triples (see the D_8008FD38 colour setters) */
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 fadeFrames;
-    s16 fadeStep; /* 255 / fadeFrames */
-    s16 unk22;
-    f32 unk24;
-    f32 scaleX;
-    f32 scaleY;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 gravity;
-    s32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    s16 unk68;
-    f32 unk6C;
-} ParticleDesc; /* 0x70 */
-
 #define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
 #define WOBBLE_FLAG_BOUNCE     2 /* bounce on the floor instead of bursting */
 
@@ -235,7 +151,7 @@ typedef struct {
     u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
     u8 stepY;
     u8 stepZ;
-    struct17 amplitude;
+    Vec3f amplitude;
 } ParticleSpin; /* 0x1C */
 
 /* A live sprite particle as returned by func_15130280. */
@@ -247,7 +163,7 @@ typedef struct {
     u8 padD[3];
     ParticleDesc desc;
     f32 floorY;
-    struct17 unk84;
+    Vec3f unk84;
     u8 pad90[0xD];
     u8 unk9D;
     u8 pad9E[0xA];
@@ -258,66 +174,66 @@ typedef struct {
 } Particle;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-s32 func_151D9450(Particle *particle, struct17 *arg1);
-u8 func_151D9534(Particle *particle, struct17 *arg1);
+s32 func_151D9450(Particle *particle, Vec3f *arg1);
+u8 func_151D9534(Particle *particle, Vec3f *arg1);
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                         f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
     Particle *particle;
     ParticleDesc desc;
     ParticleWobble wobble;
 
-    desc.unk1D = D_8008FCD0[kind]();
-    desc.unk8 = ((argA ? 0x44 : 0x22) << 8) + 3;
+    desc.texture = D_8008FCD0[kind]();
+    desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.unkC = 0;
-    desc.unk10 = 0;
-    desc.unk14 = 0;
-    desc.unk15 = 0;
-    desc.unk16 = 0;
-    desc.unk17 = 0xFF;
-    desc.unk18 = 0;
-    desc.unk19 = 0;
-    desc.unk1A = 0;
-    desc.unk1B = arg5;
-    desc.unk1C = 0xFF;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r = 0;
+    desc.g = 0;
+    desc.b = 0;
+    desc.a = 0xFF;
+    desc.r2 = 0;
+    desc.g2 = 0;
+    desc.b2 = 0;
+    desc.alpha = arg5;
+    desc.brightness = 0xFF;
     desc.pos = *pos;
-    desc.unk3C = *(struct17 *)&D_800A5480;
+    desc.offset = D_800A5480;
     desc.vel = *vel;
-    desc.unk22 = 1;
+    desc.scaleStart = 1;
     desc.gravity = gravity;
-    desc.unk24 = 1.0f;
+    desc.scaleRate = 1.0f;
     desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
                  ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
                  (D_800AB330[kind] ? 0x800000 : 0);
     if (lifetime == -99) {
-        desc.unkA = 300;
-        desc.fadeFrames = 1;
-        desc.fadeStep = 0xFF;
+        desc.timer = 300;
+        desc.fadeStart = 1;
+        desc.fadeRate = 0xFF;
     } else {
-        desc.unkA = lifetime + 18;
-        desc.fadeFrames = 18;
-        desc.fadeStep = 14;
+        desc.timer = lifetime + 18;
+        desc.fadeStart = 18;
+        desc.fadeRate = 14;
     }
-    desc.unk60 = 6;
-    desc.unk61 = 8;
-    desc.unk64 = -1;
-    desc.unk62 = (u8)arg7 ? 0x21 : 0x22;
-    desc.unk63 = -1;
-    desc.unk65 = 0;
-    desc.unk5C = 0;
-    desc.unk66 = 0xFF;
-    desc.unk68 = 0;
-    desc.unk6C = 10000.0f;
+    desc.primColorMode = 6;
+    desc.envColorMode = 8;
+    desc.drawFunc = -1;
+    desc.updateFunc = (u8)arg7 ? 0x21 : 0x22;
+    desc.deathFunc = -1;
+    desc.handlerSet = 0;
+    desc.viewMask = 0;
+    desc.views = 0xFF;
+    desc.minSize = 0;
+    desc.maxSize = 10000.0f;
     wobble.phaseX = func_150ADA20() & 0xFF;
     wobble.phaseY = func_150ADA20() & 0xFF;
-    if (desc.unk1D == 0x40 || desc.unk1D == 0x67) {
-        wobble.size = desc.scaleX = desc.scaleY = size * 0.7f;
+    if (desc.texture == 0x40 || desc.texture == 0x67) {
+        wobble.size = desc.width = desc.height = size * 0.7f;
     } else {
-        wobble.size = desc.scaleX = desc.scaleY = size;
+        wobble.size = desc.width = desc.height = size;
     }
     wobble.stepX = (func_150ADA20() % 6U) + 5;
     wobble.stepY = (func_150ADA20() % 6U) + 5;
@@ -335,7 +251,7 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 gravity, s16 
 }
 
 /* Per-frame update of a func_151D9014 particle; returns 0 once it should be removed. */
-s32 func_151D93F4(Particle *particle, struct17 *arg1) {
+s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
     s32 alive;
 
     if (func_151D9450(particle, arg1) != 0) {
@@ -351,7 +267,7 @@ s32 func_151D93F4(Particle *particle, struct17 *arg1) {
 }
 
 /* Wobbles the particle's two scale axes around its base size. */
-s32 func_151D9450(Particle *particle, struct17 *arg1) {
+s32 func_151D9450(Particle *particle, Vec3f *arg1) {
     ParticleWobble *wobble;
 
     wobble = &particle->data.wobble;
@@ -360,8 +276,8 @@ s32 func_151D9450(Particle *particle, struct17 *arg1) {
     }
     wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
     wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
-    particle->desc.scaleX = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
-    particle->desc.scaleY = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
+    particle->desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
+    particle->desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
     return 1;
 }
 
@@ -369,47 +285,47 @@ s32 func_151D9450(Particle *particle, struct17 *arg1) {
  * Floor collision: once the particle falls below arg1's height, finds the floor under it and either
  * bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
  */
-u8 func_151D9534(Particle *particle, struct17 *arg1) {
+u8 func_151D9534(Particle *particle, Vec3f *arg1) {
     volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
-    struct17 point;
+    Vec3f point;
     ParticleWobble *wobble;
     f32 avgScale;
 
     alive = 1;
-    if (particle->desc.pos.unk4 < arg1->unk4) {
-        point.unk0 = particle->desc.pos.unk0;
-        point.unk4 = arg1->unk4;
-        point.unk8 = particle->desc.pos.unk8;
+    if (particle->desc.pos.y < arg1->y) {
+        point.x = particle->desc.pos.x;
+        point.y = arg1->y;
+        point.z = particle->desc.pos.z;
         if (func_1514672C(&point) == 0) {
             return 0;
         }
         if (func_15046C80(&point, 0,
- particle->desc.pos.unk4, &particle->floorY) != 0) {
-            point.unk4 = particle->floorY + 2.0f;
+ particle->desc.pos.y, &particle->floorY) != 0) {
+            point.y = particle->floorY + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
-                particle->desc.pos.unk4 = (particle->desc.scaleY * 0.060000002f) + point.unk4;
-                particle->desc.vel.unk0 *= 0.39900002f;
-                particle->desc.vel.unk4 *= -0.39900002f;
-                particle->desc.vel.unk8 *= 0.39900002f;
-                if (fabsf(particle->desc.vel.unk4) < 0.326f) {
-                    particle->desc.vel.unk0 = 0.0f;
+                particle->desc.pos.y = (particle->desc.height * 0.060000002f) + point.y;
+                particle->desc.vel.x *= 0.39900002f;
+                particle->desc.vel.y *= -0.39900002f;
+                particle->desc.vel.z *= 0.39900002f;
+                if (fabsf(particle->desc.vel.y) < 0.326f) {
+                    particle->desc.vel.x = 0.0f;
                     particle->desc.flags &= ~6;
-                    particle->desc.vel.unk4 = 0.0f;
-                    particle->desc.vel.unk8 = 0.0f;
+                    particle->desc.vel.y = 0.0f;
+                    particle->desc.vel.z = 0.0f;
                     particle->desc.gravity = 0.0f;
                 }
             } else {
                 alive = 0;
                 wobble = &particle->data.wobble;
-                avgScale = (particle->desc.scaleX + particle->desc.scaleY) * 0.5f;
+                avgScale = (particle->desc.width + particle->desc.height) * 0.5f;
                 if (particle->unk9D == 3) {
-                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.unk1B,
+                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.alpha,
                                   (s32)&particle->unk84, &point, particle->unkC, particle->unk1);
                 } else if (func_150ADA20() & 1) {
-                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.unk1B,
+                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.alpha,
                                   (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
                 } else {
-                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->desc.unk1B, &point,
+                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->desc.alpha, &point,
                                   1, particle->unkC, particle->unk1);
                 }
             }
@@ -490,35 +406,12 @@ u8 func_151D9B34(void) {
     return ids[func_150ADA20() & 3];
 }
 
-/* Emitter descriptor consumed by func_1513C650, func_1513C73C and func_1513C5B0. */
-typedef struct {
-    s32 flags;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21;
-    s16 unk22;
-    s16 unk24;
-} EmitterDesc; /* 0x28 */
 
 /* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
 typedef struct {
     s16 timer;
     f32 size;
-    struct17 pos;
+    Vec3f pos;
     u8 unk14;
     u8 unk15;
     u8 kind;
@@ -533,52 +426,52 @@ typedef struct {
     DripData drip;
 } DripEffect;
 
-s32 func_15144E80(s32, struct17 *, struct17 *, struct17 *);
-s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-f32 func_15144A74(struct17 *, struct17 *);
+s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+f32 func_15144A74(Vec3f *, Vec3f *);
 
 /*
  * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
  * upward-facing surface under arg3, also starts a DripEffect there.
  */
-void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
+void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
-    EmitterDesc desc;
+    SpriteDef desc;
     struct260 *effect;
-    struct17 outA;
-    struct17 outB;
-    struct17 normal;
-    struct17 down;
+    Vec3f outA;
+    Vec3f outB;
+    Vec3f normal;
+    Vec3f down;
 
-    desc.unk22 = 32;
-    desc.unk24 = 7;
-    desc.unk6 = D_8008FD04[kind]();
+    desc.fadeStart = 32;
+    desc.fadeRate = 7;
+    desc.texture = D_8008FD04[kind]();
     desc.flags = ((lifetime == -1) ? 0 : 1) | (D_800AB330[kind] ? 0x20000 : 0) | 0x100 | 0x200 | 0x400 | 0x1000 |
                  0x2000 | 0x4000 | 0x8000;
     if (lifetime == -1) {
-        desc.unk4 = 300;
+        desc.lifetime = 300;
     } else {
-        desc.unk4 = lifetime;
+        desc.lifetime = lifetime;
     }
-    desc.unk8 = 0;
-    desc.unkC = 0;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.unk14 = 0;
-    desc.unk13 = 0;
-    desc.unk12 = 0;
-    desc.unk15 = 0xFF;
-    desc.unk18 = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
+    desc.rgba[2] = 0;
+    desc.rgba[1] = 0;
+    desc.rgba[0] = 0;
+    desc.rgba[3] = 0xFF;
+    desc.renderModes = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
     desc.unk7 = 0;
     desc.unk16 = 0;
     desc.unk17 = 7;
-    desc.unk20 = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk1C = 0;
-    if (func_1513C650((s32)&desc, 0, 0, arg3, pos->unk0, pos->unk4, pos->unk8, size, size,
+    if (func_1513C650(&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
-        down = *(struct17 *)&D_800AB3E8;
+        down = D_800AB3E8;
         func_15145128(&normal, &normal, NULL, NULL);
         if (func_15144A74(&normal, &down) < -0.5f) {
             s32 pad; // matching: stack slot that places drip at the target offset
@@ -590,9 +483,8 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, s16 life
             drip.unk14 = arg2;
             drip.unk15 = arg7;
             drip.kind = kind;
-            // the header types arg6 as a pointer; it is the size of the effect's data
             effect = func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
-                                   (struct37 *)sizeof(drip), arg9, argA);
+                                   sizeof(drip), arg9, argA);
             if (effect != NULL) {
                 memcpy(&((DripEffect *)effect)->drip, &drip, sizeof(drip));
             }
@@ -611,14 +503,14 @@ void func_151D9EB0(DripEffect *effect) {
     if (drip->timer < 0) {
         rand = func_150ADA68();
         lifeRand = func_150ADA20();
-        func_151D9014(&drip->pos, (struct17 *)&D_800A5480, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
+        func_151D9014(&drip->pos, &D_800A5480, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
                       drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->unkC, effect->unk1);
         drip->timer = (func_150ADA20() % 111U) + 30;
     }
 }
 
 /* Splash for effect kind `kind`: an emitter plus, except for kinds 2 and 5, a func_151DA08C effect. */
-void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5, s32 arg6) {
+void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6) {
     func_151DBCBC(kind, size * 0.5f, arg2, arg3, pos, arg5, arg6);
     if ((kind != 5) && (kind != 2)) {
         func_151DA08C(kind, size * 0.0003f, 1.01f, arg2, 100, arg3, pos, arg5, arg6);
@@ -626,9 +518,9 @@ void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5,
 }
 
 /* Starts a steam effect of kind `kind` at `pos` (lifetime -1: untimed, shrinking by `shrink` otherwise). */
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8) {
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8) {
     s32 effect;
-    EffectDesc desc;
+    ParticleDef desc;
     SteamData steam;
     s32 rand3;
     s32 rand2;
@@ -643,56 +535,56 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     steam.amplitudeY = ((func_150ADA68() * 0.2f) + 0.1f) * steam.size;
     steam.kind = kind;
     steam.spawnCredit = 0.0f;
-    desc.unk0 = D_8008FD04[kind]();
-    desc.unk2 = 3;
-    desc.unk8 = 0;
-    desc.unkC = 0;
-    desc.unk10 = 0;
-    desc.unk11 = 0;
-    desc.unk12 = 0;
-    desc.unk13 = 0xFF;
-    desc.scaleY = size;
-    desc.scaleX = size;
+    desc.texture = D_8008FD04[kind]();
+    desc.renderModes = 3;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
+    desc.rgba[0] = 0;
+    desc.rgba[1] = 0;
+    desc.rgba[2] = 0;
+    desc.rgba[3] = 0xFF;
+    desc.height = size;
+    desc.width = size;
     desc.pos = *pos;
     desc.flags = 0x0CDC0008;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
-    desc.unk28 = 0.0f;
-    desc.unk2C = 0.0f;
-    desc.unk30 = 0.0f;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
+    desc.rot.x = 0.0f;
+    desc.rot.y = 0.0f;
+    desc.rot.z = 0.0f;
     if (lifetime == -1) {
-        desc.unk4 = 300;
+        desc.lifetime = 300;
         steam.shrink = 1.0f;
-        desc.unk54 = 1;
-        desc.unk56 = 0xFF;
+        desc.fadeStart = 1;
+        desc.fadeRate = 0xFF;
     } else {
-        desc.unk4 = lifetime;
+        desc.lifetime = lifetime;
         desc.flags = 0x0CDC0009;
         steam.shrink = shrink;
         if (lifetime >= 0x100) {
-            desc.unk54 = 0xFF;
+            desc.fadeStart = 0xFF;
         } else {
-            desc.unk54 = lifetime;
+            desc.fadeStart = lifetime;
         }
         if (lifetime >= 0x100) {
-            desc.unk56 = 1;
+            desc.fadeRate = 1;
         } else {
-            desc.unk56 = 0xFF / lifetime;
+            desc.fadeRate = 0xFF / lifetime;
         }
     }
     desc.unk44 = arg3;
     desc.unk45 = 0xFF;
-    desc.unk1 = 0;
+    desc.type = 0;
     desc.unk46 = 4;
     desc.unk47 = 5;
     desc.unk48 = 0;
-    desc.unk4C = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk50 = 0;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     rand3 = func_150ADA20();
-    effect = func_1513D668((s32)&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
+    effect = func_1513D668(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
                            arg5, 0, sizeof(steam), 0xFF, 0);
     if (effect != 0) {
         memcpy(&((SteamEffect *)effect)->steam, &steam, sizeof(steam));
@@ -718,11 +610,11 @@ s32 func_151DA368(SteamEffect *effect) {
     steam = &effect->steam;
     steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
     steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
-    effect->base.desc.scaleX = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
-    effect->base.desc.scaleY = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
+    effect->base.desc.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
+    effect->base.desc.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
     steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
-    avgScale = (effect->base.desc.scaleX + effect->base.desc.scaleY) * 0.5f;
+    avgScale = (effect->base.desc.width + effect->base.desc.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;
         do {
@@ -766,29 +658,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     }
     return 1;
 }
-typedef struct {
-    struct17 pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    s8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} SplashSpawn; /* 0x1C */
-
-typedef struct {
-    f32 scale;
-    struct17 vel;
-    f32 size;
-    f32 unk14;
-    u8 flags;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} SplashMotion; /* 0x20 */
 
 /* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
 typedef struct {
@@ -798,29 +667,16 @@ typedef struct {
     u8 pad9[3];
 } SplashBurst; /* 0xC */
 
+/* The block a live splash points to at +0x98: its TrailMotion copy, state, and SplashBurst. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} SplashStyle; /* 0x20 */
-
-/* The block a live splash points to at +0x98: its SplashMotion copy, state, and SplashBurst. */
-typedef struct {
-    SplashMotion motion;
+    TrailMotion motion;
     u8 unk20;
     u8 pad21[0x27];
     SplashBurst burst;
 } SplashState;
 
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     f32 unkC;
     f32 unk10;
 } SplashNode; /* 0x14 */
@@ -837,44 +693,42 @@ typedef struct {
     SplashState *state;
 } Splash;
 
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
-extern Splash *func_15147DA0(SplashSpawn *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                             SplashStyle *, s32, s32, s32);
+extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                             TrailRender *, s32, s32, s32);
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
-Splash *func_151DA6F8(struct17 *pos, struct17 *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
+Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
                       u8 arg10, s32 arg11) {
     Splash *splash;
-    SplashSpawn spawn;
-    SplashMotion motion;
+    EffectTemplate spawn;
+    TrailMotion motion;
     SplashBurst burst;
     s32 a;
     s32 b;
     s32 c;
     s32 d;
-    SplashStyle style;
+    TrailRender style;
     s32 flag80;
     s32 flag20;
 
-    spawn.unk15 = arg6;
+    spawn.itemCount = arg6;
     spawn.pos = *pos;
-    spawn.unkC = lifetime + 16;
-    spawn.unkE = 0x35;
-    spawn.unk10 = 1;
+    spawn.life = lifetime + 16;
+    spawn.flags = 0x35;
+    spawn.kind = 1;
     spawn.unk14 = -1;
     spawn.unk18 = argF;
-    motion.scale = scale;
-    motion.vel = *vel;
-    motion.size = size;
+    motion.halfWidth = scale;
+    motion.velocity = *vel;
+    motion.gravity = size;
     motion.unk14 = -10000.0f;
     flag20 = D_800AB404[kind] ? 0x20 : 0;
     flag80 = D_800AB330[kind] ? 0x80 : 0;
     motion.flags = flag80 | 8 | flag20 | 0x40;
-    motion.unk19 = D_800AB3F4[kind];
-    motion.unk1A = 0xFF;
-    motion.unk1B = arg4;
+    motion.texture = D_800AB3F4[kind];
+    motion.shade = 0xFF;
+    motion.alpha = arg4;
     motion.unk1C = argD;
     motion.unk1E = argE;
     if (arg7 != 0) {
@@ -892,14 +746,14 @@ Splash *func_151DA6F8(struct17 *pos, struct17 *vel, f32 size, s16 lifetime, u8 a
         s32 pad; // matching: unused stack slot
 
         style.unk0 = 0;
-        style.unk4 = 0x220005;
-        style.unk8 = 0x50600;
-        style.unkC = 3;
+        style.setGeometryMode = 0x220005;
+        style.clearGeometryMode = 0x50600;
+        style.renderMode = 3;
         style.unk10 = 0x46;
         style.unk14 = 0x80;
         style.unk18 = 0x20;
-        style.unk1C = 0;
-        style.unk1D = 0xC;
+        style.primMode = 0;
+        style.envMode = 0xC;
         if (argA != 0) {
             c = 2;
             d = 0xFF;
@@ -920,17 +774,17 @@ Splash *func_151DA6F8(struct17 *pos, struct17 *vel, f32 size, s16 lifetime, u8 a
 s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
     SplashState *state = splash->state;
     SplashNode *nodes = splash->nodes;
-    struct17 point;
+    Vec3f point;
     SplashBurst *burst = &state->burst;
 
-    point.unk0 = nodes[splash->node].pos.unk0;
-    point.unk4 = floorY + 2.0f;
-    point.unk8 = nodes[splash->node].pos.unk8;
+    point.x = nodes[splash->node].pos.x;
+    point.y = floorY + 2.0f;
+    point.z = nodes[splash->node].pos.z;
     if (func_150ADA20() & 1) {
-        func_151D9B8C(burst->kind, (state->motion.scale * 3.0f) * burst->burstScale, state->motion.unk1B, arg5,
+        func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, arg5,
                       &point, 100, 0, 1, 0, splash->unkC, splash->unk1);
     } else {
-        func_151DAB58(burst->kind, (state->motion.scale * 1.1f) * burst->burstScale, state->motion.unk1B, &point, 1,
+        func_151DAB58(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
                       splash->unkC, splash->unk1);
     }
     state->unk20 = 4;
@@ -941,12 +795,12 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
 s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
     SplashState *state = splash->state;
     SplashNode *nodes = splash->nodes;
-    struct17 point;
+    Vec3f point;
 
-    point.unk0 = nodes[splash->node].pos.unk0;
-    point.unk4 = floorY;
-    point.unk8 = nodes[splash->node].pos.unk8;
-    func_151D9FC0(state->burst.kind, state->motion.scale * 11.0f * state->burst.altBurstScale, state->motion.unk1B,
+    point.x = nodes[splash->node].pos.x;
+    point.y = floorY;
+    point.z = nodes[splash->node].pos.z;
+    func_151D9FC0(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
                   arg5, &point, splash->unkC, splash->unk1);
     state->unk20 = 4;
     return 1;
@@ -970,56 +824,56 @@ typedef struct {
 
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
 // matching: volatile arg4 (and the non-volatile byte read of it below) make IDO reload it from its stack slot
-void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
+void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6) {
     void *effect;
-    EffectDesc desc;
+    ParticleDef desc;
     SquashData squash;
     s32 value;
     s32 coinFlip;
     s32 arg7;
 
-    desc.unk0 = D_8008FCD0[kind]();
-    desc.unk2 = ((arg4 ? 0x3B : 0x22) << 8) + 3;
+    desc.texture = D_8008FCD0[kind]();
+    desc.renderModes = ((arg4 ? 0x3B : 0x22) << 8) + 3;
 
 
-    desc.unk4 = 100;
-    desc.unk12 = 0;
-    desc.unk11 = 0;
-    desc.unk10 = 0;
-    desc.unk13 = 0xFF;
+    desc.lifetime = 100;
+    desc.rgba[2] = 0;
+    desc.rgba[1] = 0;
+    desc.rgba[0] = 0;
+    desc.rgba[3] = 0xFF;
     desc.unk44 = arg2;
     desc.unk45 = 0xFF;
     desc.pos = *pos;
     desc.flags = (D_800AB330[kind] ? 0x40000000 : 0) | 0x0CDC0009;
 
-    desc.unk28 = 0.0f;
-    desc.unk2C = 0.0f;
-    desc.unk30 = 0.0f;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
-    desc.unk8 = 0;
-    desc.unkC = 0;
-    desc.scaleY = size;
-    desc.scaleX = size;
+    desc.rot.x = 0.0f;
+    desc.rot.y = 0.0f;
+    desc.rot.z = 0.0f;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
+    desc.height = size;
+    desc.width = size;
     desc.unk46 = 0;
     desc.unk47 = 7;
     squash.phase = 0;
     squash.step = (func_150ADA20() % 3U) + 6;
     squash.amplitudeX = (func_150ADA68() * 0.2f) + 0.1f;
     squash.amplitudeY = (func_150ADA68() * 0.2f) + 0.1f;
-    desc.unk1 = 0;
+    desc.type = 0;
     desc.unk48 = 0;
-    desc.unk4C = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk50 = 0;
-    desc.unk54 = 32;
-    desc.unk56 = 7;
+    desc.fadeStart = 32;
+    desc.fadeRate = 7;
     coinFlip = (func_150ADA20() & 1) ? 1 : 0;
     value = *(u8 *)&arg4;
     arg7 = value ? 3 : 0;
     value = value ? 0xFF : 0;
     effect = func_1513D2F0(
-&desc, (s32)&D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
+&desc, &D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
                            arg6);
     if (effect != NULL) {
         memcpy(&((SquashEffect *)effect)->squash, &squash, sizeof(squash));
@@ -1034,8 +888,8 @@ s32 func_151DADA0(SquashEffect *effect) {
     squash = &effect->squash;
     squash->phase = squash->phase + squash->step * D_800BE9E4;
     wave = func_151423D8((u8)(squash->phase - 0x40));
-    effect->base.desc.unk34 = squash->amplitudeX * wave + 1.0f;
-    effect->base.desc.unk38 = 1.3f - squash->amplitudeY * wave;
+    effect->base.desc.scale.x = squash->amplitudeX * wave + 1.0f;
+    effect->base.desc.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
 }
 
@@ -1071,8 +925,8 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
         return NULL;
     }
 
-    halfWidth = effect->base.desc.scaleX * effect->base.desc.unk34;
-    height = effect->base.desc.scaleY * effect->base.desc.unk38;
+    halfWidth = effect->base.desc.width * effect->base.desc.scale.x;
+    height = effect->base.desc.height * effect->base.desc.scale.y;
     dz = D_800DD1D8[view] * halfWidth;
     dx = D_800DD1E8[view] * halfWidth;
 
@@ -1080,12 +934,12 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->base.desc.pos.unk0 + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->base.desc.pos.unk4;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->base.desc.pos.unk8 - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->base.desc.pos.unk0 - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->base.desc.pos.unk4 + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->base.desc.pos.unk8 + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->base.desc.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->base.desc.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->base.desc.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->base.desc.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->base.desc.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->base.desc.pos.z + dz;
 
     return ret;
 }
@@ -1227,48 +1081,48 @@ Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 dr
         data.stepX = (func_150ADA20() % 7U) - 3;
         data.stepY = (func_150ADA20() % 7U) - 3;
         data.stepZ = (func_150ADA20() % 7U) - 3;
-        data.amplitude.unk0 = (func_150ADA68() * 0.05f + 0.05f) * size;
-        data.amplitude.unk4 = (func_150ADA68() * 0.03f + 0.03f) * size;
-        data.amplitude.unk8 = (func_150ADA68() * 0.05f + 0.05f) * size;
+        data.amplitude.x = (func_150ADA68() * 0.05f + 0.05f) * size;
+        data.amplitude.y = (func_150ADA68() * 0.03f + 0.03f) * size;
+        data.amplitude.z = (func_150ADA68() * 0.05f + 0.05f) * size;
     } else {
         data.stepX = 0;
         data.stepY = 0;
         data.stepZ = 0;
-        data.amplitude = *(struct17 *)&D_800A5480;
+        data.amplitude = D_800A5480;
     }
     D_8008FD38[(u8)kind](&desc);
-    desc.unk1D = 0x6C;
-    desc.unk8 = 0x5103;
+    desc.texture = 0x6C;
+    desc.renderMode = 0x5103;
     desc.unk0 = 0x200005;
     desc.unk4 = 0x9F0600;
-    desc.unkA = (lifetime == -1) ? 300 : lifetime;
-    desc.unkC = 0;
-    desc.unk10 = 0;
-    desc.unk17 = 0xFF;
-    desc.scaleX = desc.scaleY = size;
-    desc.unk1B = arg8;
-    desc.unk1C = 0xFF;
-    desc.pos = *(struct17 *)pos;
-    desc.unk3C = *(struct17 *)&D_800A5480;
-    desc.vel = *(struct17 *)vel;
+    desc.timer = (lifetime == -1) ? 300 : lifetime;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.a = 0xFF;
+    desc.width = desc.height = size;
+    desc.alpha = arg8;
+    desc.brightness = 0xFF;
+    desc.pos = *(Vec3f *)pos;
+    desc.offset = D_800A5480;
+    desc.vel = *(Vec3f *)vel;
     desc.gravity = gravity;
-    desc.fadeFrames = fadeFrames;
-    desc.fadeStep = fadeStep;
-    desc.unk22 = (lifetime == -1) ? 1 : lifetime;
-    desc.unk24 = arg4;
+    desc.fadeStart = fadeFrames;
+    desc.fadeRate = fadeStep;
+    desc.scaleStart = (lifetime == -1) ? 1 : lifetime;
+    desc.scaleRate = arg4;
     desc.flags = ((lifetime == -1) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
                  ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (spin ? 0x1000 : 0) | 0x4000 |
                  0x8000 | 0x40000 | 0x800000;
-    desc.unk60 = 8;
-    desc.unk61 = 6;
-    desc.unk62 = 5;
-    desc.unk63 = -1;
-    desc.unk64 = -1;
-    desc.unk65 = 0;
-    desc.unk5C = 0;
-    desc.unk66 = 0xFF;
-    desc.unk68 = 1000;
-    desc.unk6C = 1000.0f;
+    desc.primColorMode = 8;
+    desc.envColorMode = 6;
+    desc.updateFunc = 5;
+    desc.deathFunc = -1;
+    desc.drawFunc = -1;
+    desc.handlerSet = 0;
+    desc.viewMask = 0;
+    desc.views = 0xFF;
+    desc.minSize = 1000;
+    desc.maxSize = 1000.0f;
     particle = func_15130280(&desc, 1, 0, sizeof(data), argC, argD);
     if (particle != NULL) {
         memcpy(&particle->data.spin, &data, sizeof(data));
@@ -1299,131 +1153,67 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
             f32 waveZ;
 
             waveZ = func_151423D8((u8)(spin->angleZ - 0x40));
-            particle->desc.unk3C.unk0 = spin->amplitude.unk0 * waveX;
-            particle->desc.unk3C.unk4 = spin->amplitude.unk4 * waveY;
-            particle->desc.unk3C.unk8 = spin->amplitude.unk8 * waveZ;
+            particle->desc.offset.x = spin->amplitude.x * waveX;
+            particle->desc.offset.y = spin->amplitude.y * waveY;
+            particle->desc.offset.z = spin->amplitude.z * waveZ;
         }
     }
     return 1;
 }
 
-/* Direction spread shared by the burst specs: func_15143794 takes a random angle from each range. */
-typedef struct {
-    s16 angle1;
-    s16 angle1Range;
-    s16 angle2;
-    s16 angle2Range;
-} BurstAngles;
-
-/*
- * Parameters for func_15153F18, which throws count + rand(countRange) func_151DA6F8 splashes.
- * Each `x` / `xRange` pair is drawn as x + rand(xRange). func_15153F18 reads `angles` from its first
- * argument and everything else relative to its second (&spec->pos).
- */
-typedef struct {
-    BurstAngles angles;
-    struct17 pos;
-    f32 scale;
-    f32 scaleRange;
-    f32 size;
-    f32 sizeRange;
-    f32 speed;
-    f32 speedRange;
-    s16 count;
-    s16 countRange;
-    s16 unk30; /* splash arg6 */
-    s16 unk30Range;
-    s16 lifetime;
-    s16 lifetimeRange;
-    s16 unk38; /* splash arg4 */
-    s16 unk38Range;
-    s8 kind;
-    u8 pad3D[3];
-    f32 unk40Chance; /* probability of splash arg7 */
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} SplashBurstSpec; /* 0x4C */
-
-/* Parameters for func_15150178, which throws count + rand(countRange) func_151D9014 particles. */
-typedef struct {
-    BurstAngles angles;
-    struct17 pos;
-    s16 count;
-    s16 countRange;
-    f32 speed;
-    f32 speedRange;
-    s16 lifetime;
-    s16 lifetimeRange;
-    f32 gravity;
-    f32 gravityRange;
-    u8 unk2C; /* particle arg5 */
-    u8 unk2CRange;
-    u8 pad2E[2];
-    f32 size;
-    f32 sizeRange;
-    s8 unk38;
-    u8 kind;
-    u8 pad3A[2];
-    f32 unk3CChance; /* probability of particle arg7 */
-    s8 wobble;
-    u8 pad41[3];
-    f32 bounceChance;
-} DropBurstSpec; /* 0x48 */
-
-extern void func_15153F18(SplashBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
-extern void func_15150178(DropBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, s32 arg2, u8 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
 
 /* Throws `count` splashes of effect kind `kind` from `pos`. */
-void func_151DBAA8(struct17 *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
+    splash.spray.pos = *pos;
 
-    splash.count = count;
+    splash.spray.countBase = count;
 
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.angles.angle2Range = 46;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.angles.pitchRange = 46;
 
-    splash.countRange = 0;
-    splash.angles.angle1 = 0;
-    splash.unk30 = 3;
-    splash.unk30Range = 2;
-    splash.lifetime = 30;
-    splash.lifetimeRange = 30;
-    splash.unk38 = 155;
-    splash.scale = 5.5f;
+    splash.spray.countRange = 0;
+    splash.angles.yawBase = 0;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 2;
+    splash.spray.lifeBase = 30;
+    splash.spray.lifeRange = 30;
+    splash.spray.unk30 = 155;
+    splash.spray.scaleBase = 5.5f;
 
-    splash.scaleRange = 2.9399998f;
-    splash.size = 0.61300004f;
-    splash.sizeRange = 0.60300004f;
-    splash.speed = 10.0f;
-    splash.speedRange = 10.2f;
+    splash.spray.scaleRange = 2.9399998f;
+    splash.spray.sizeBase = 0.61300004f;
+    splash.spray.sizeRange = 0.60300004f;
+    splash.spray.speedBase = 10.0f;
+    splash.spray.speedRange = 10.2f;
 
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.unk40Chance = 0.5f;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.unk38 = 0.5f;
 
-    splash.kind = kind;
+    splash.spray.kind = kind;
 
-    func_15153F18(&splash, &splash.pos, 0, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, 0, arg3, arg4);
 
 }
 
 /* Spawns a func_151D9B8C emitter of effect kind *kind just above `pos`, with random size and lifetime. */
-void func_151DBBD4(struct17 *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
-    struct17 point;
+void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
+    Vec3f point;
     u8 emitterKind;
     s32 pad; // matching: unused stack slot
     u32 rand;
     f32 sizeRand;
 
-    point.unk0 = pos->unk0;
-    point.unk4 = pos->unk4 + 5.0f;
-    point.unk8 = pos->unk8;
+    point.x = pos->x;
+    point.y = pos->y + 5.0f;
+    point.z = pos->z;
 
     emitterKind = *kind;
     sizeRand = func_150ADA68();
@@ -1436,245 +1226,245 @@ void func_151DBBD4(struct17 *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
 
 /* Spawns an emitter of effect kind `kind` (coloured from D_800AB414) at `pos`, via func_1513C73C when arg3 is set. */
 void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6) {
-    EmitterDesc desc;
+    SpriteDef desc;
 
-    desc.unk6 = 0x38;
-    desc.unkC = 0x8000;
+    desc.texture = 0x38;
+    desc.frameSpeed = 0x8000;
     desc.flags = 0x67B02;
-    desc.unk4 = 300;
-    desc.unk8 = 0;
+    desc.lifetime = 300;
+    desc.frame = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.unk12 = D_800AB414[kind * 3];
-    desc.unk13 = D_800AB414[kind * 3 + 1];
-    desc.unk14 = D_800AB414[kind * 3 + 2];
-    desc.unk15 = 0xFF;
-    desc.unk18 = 0x440001;
+    desc.rgba[0] = D_800AB414[kind * 3];
+    desc.rgba[1] = D_800AB414[kind * 3 + 1];
+    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[3] = 0xFF;
+    desc.renderModes = 0x440001;
     desc.unk7 = 0;
     desc.unk16 = 0;
     desc.unk17 = 6;
-    desc.unk22 = 1;
-    desc.unk24 = 0xFF;
-    desc.unk20 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk1C = 0;
     if (arg3 != 0) {
-        func_1513C73C((s32)&desc, 0, 0, arg3, ((struct17 *)pos)->unk0, ((struct17 *)pos)->unk4,
-                      ((struct17 *)pos)->unk8, size, size, func_150ADA20() & 0xFF,
+        func_1513C73C(&desc, 0, 0, arg3, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
+                      ((Vec3f *)pos)->z, size, size, func_150ADA20() & 0xFF,
                       (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
     } else {
-        func_1513C5B0(&desc, 0, 0, 0, ((struct17 *)pos)->unk0, ((struct17 *)pos)->unk4, ((struct17 *)pos)->unk8,
+        func_1513C5B0(&desc, 0, 0, 0, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y, ((Vec3f *)pos)->z,
                       size, size, 0, 0, 0, arg5, arg6);
     }
 }
 
 /* Starts an effect of kind `kind` (coloured from D_800AB414) at `pos`. */
-void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, struct17 *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
                    s32 arg9) {
-    EffectDesc desc;
+    ParticleDef desc;
 
-    desc.unk0 = 0x38;
-    desc.unk2 = ((arg7 != 0) ? 2 : 1) + 0x440000; // matching: the s16 store truncates 0x440000 away, but dropping it changes the code
-    desc.unk4 = lifetime;
-    desc.unk8 = 0;
-    desc.unkC = 0x4000;
-    desc.unk10 = D_800AB414[kind * 3];
-    desc.scaleX = 1.0f;
-    desc.scaleY = 1.0f;
-    desc.unk11 = D_800AB414[kind * 3 + 1];
-    desc.unk12 = D_800AB414[kind * 3 + 2];
-    desc.unk13 = 0xFF;
+    desc.texture = 0x38;
+    desc.renderModes = ((arg7 != 0) ? 2 : 1) + 0x440000; // matching: the s16 store truncates 0x440000 away, but dropping it changes the code
+    desc.lifetime = lifetime;
+    desc.frame = 0;
+    desc.frameSpeed = 0x4000;
+    desc.rgba[0] = D_800AB414[kind * 3];
+    desc.width = 1.0f;
+    desc.height = 1.0f;
+    desc.rgba[1] = D_800AB414[kind * 3 + 1];
+    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[3] = 0xFF;
 
     desc.pos = *pos;
 
-    desc.unk34 = arg2;
+    desc.scale.x = arg2;
     desc.flags = 0x466C0001;
     desc.unk44 = arg6;
     desc.unk45 = 0xFF;
-    desc.unk1 = 0;
+    desc.type = 0;
     desc.unk46 = 0;
     desc.unk47 = 6;
     desc.unk48 = 0;
-    desc.unk4C = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk50 = 0;
-    desc.unk54 = 1;
-    desc.unk56 = 0xFF;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
-    desc.unk28 = 0.0f;
-    desc.unk2C = 0.0f;
-    desc.unk30 = 0.0f;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
+    desc.rot.x = 0.0f;
+    desc.rot.y = 0.0f;
+    desc.rot.z = 0.0f;
 
-    func_1513D668((s32)&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
+    func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
                   (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
 }
 
 extern u8 D_800AB320[];
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */
-void func_151DC034(struct17 *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6) {
+void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6) {
     ParticleDesc desc;
     s32 flag800000;
     s32 flag40;
     s32 flag80;
 
-    desc.unk1D = D_800AB320[kind];
-    desc.unk8 = 0x4403;
+    desc.texture = D_800AB320[kind];
+    desc.renderMode = 0x4403;
     desc.unk0 = 0x200005;
     desc.unk4 = 0x9F0600;
-    desc.unkA = lifetime;
-    desc.unkC = 0;
-    desc.unk10 = 0;
-    desc.unk14 = 0xFF;
-    desc.unk15 = 0xFF;
-    desc.unk16 = 0xFF;
-    desc.unk17 = 0xFF;
-    desc.unk18 = 0xFF;
-    desc.unk19 = 0xFF;
-    desc.unk1A = 0xFF;
-    desc.unk1B = arg2;
-    desc.unk1C = 0xFF;
-    desc.scaleY = size;
-    desc.scaleX = size;
+    desc.timer = lifetime;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r = 0xFF;
+    desc.g = 0xFF;
+    desc.b = 0xFF;
+    desc.a = 0xFF;
+    desc.r2 = 0xFF;
+    desc.g2 = 0xFF;
+    desc.b2 = 0xFF;
+    desc.alpha = arg2;
+    desc.brightness = 0xFF;
+    desc.height = size;
+    desc.width = size;
     desc.pos = *pos;
-    desc.unk3C = *(struct17 *)&D_800A5480;
-    desc.vel = *(struct17 *)&D_800A5480;
-    desc.fadeFrames = 4;
-    desc.fadeStep = 63;
-    desc.unk22 = 1;
+    desc.offset = D_800A5480;
+    desc.vel = D_800A5480;
+    desc.fadeStart = 4;
+    desc.fadeRate = 63;
+    desc.scaleStart = 1;
     desc.gravity = 0.0f;
-    desc.unk24 = 1.0f;
+    desc.scaleRate = 1.0f;
     flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
     flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
     flag800000 = D_800AB330[kind] ? 0x800000 : 0;
     desc.flags
  = flag800000 | 1 | flag40 | flag80 | 0x4000 | 0x8000 | 0x200 | 0x10000;
-    desc.unk60 = 6;
-    desc.unk61 = 8;
-    desc.unk62 = -1;
-    desc.unk63 = -1;
-    desc.unk64 = -1;
-    desc.unk65 = 0;
-    desc.unk5C = 0;
-    desc.unk66 = 0xFF;
-    desc.unk68 = 1000;
-    desc.unk6C = 1000.0f;
+    desc.primColorMode = 6;
+    desc.envColorMode = 8;
+    desc.updateFunc = -1;
+    desc.deathFunc = -1;
+    desc.drawFunc = -1;
+    desc.handlerSet = 0;
+    desc.viewMask = 0;
+    desc.views = 0xFF;
+    desc.minSize = 1000;
+    desc.maxSize = 1000.0f;
     func_15130280(&desc, 1, 0, 0, arg5, arg6);
 }
 
 /* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
-void func_151DC260(struct17 *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
-    splash.count = 10;
-    splash.countRange = 10;
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.angles.angle2Range = 40;
-    splash.scale = 3.0f;
-    splash.angles.angle1 = 0;
-    splash.unk30 = 3;
-    splash.unk30Range = 1;
-    splash.lifetime = 60;
-    splash.lifetimeRange = 40;
-    splash.unk38 = 100;
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.scaleRange = 4.0f;
-    splash.size = 0.80700004f;
-    splash.sizeRange = 0.51000005f;
-    splash.speed = 12.0f;
-    splash.speedRange = 11.0f;
-    splash.unk40Chance = 1.0f;
-    splash.kind = kind;
-    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
+    splash.spray.pos = *pos;
+    splash.spray.countBase = 10;
+    splash.spray.countRange = 10;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.angles.pitchRange = 40;
+    splash.spray.scaleBase = 3.0f;
+    splash.angles.yawBase = 0;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 1;
+    splash.spray.lifeBase = 60;
+    splash.spray.lifeRange = 40;
+    splash.spray.unk30 = 100;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.scaleRange = 4.0f;
+    splash.spray.sizeBase = 0.80700004f;
+    splash.spray.sizeRange = 0.51000005f;
+    splash.spray.speedBase = 12.0f;
+    splash.spray.speedRange = 11.0f;
+    splash.spray.unk38 = 1.0f;
+    splash.spray.kind = kind;
+    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
 
     {
-        DropBurstSpec drops;
+        DropSpraySpec drops;
 
-        drops.pos = *pos;
-        drops.angles.angle1 = 0;
-        drops.count = 12;
-        drops.speed = 6.0f;
-        drops.countRange = 6;
-        drops.angles.angle1Range = 0xFF;
-        drops.angles.angle2 = -64;
-        drops.angles.angle2Range = 36;
-        drops.lifetime = 35;
-        drops.lifetimeRange = 15;
-        drops.unk2C = 155;
-        drops.unk2CRange = 100;
-        drops.speedRange = 8.0f;
-        drops.unk38 = 1;
-        drops.gravity = -1.266f;
-        drops.gravityRange = 0.46600002f;
-        drops.kind = kind;
-        drops.size = 123.0f;
-        drops.sizeRange = 134.0f;
-        drops.wobble = 1;
-        drops.unk3CChance = 0.6f;
-        drops.bounceChance = 0.0f;
-        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
+        drops.spray.pos = *pos;
+        drops.angles.yawBase = 0;
+        drops.spray.countBase = 12;
+        drops.spray.speedBase = 6.0f;
+        drops.spray.countRange = 6;
+        drops.angles.yawRange = 0xFF;
+        drops.angles.pitchBase = -64;
+        drops.angles.pitchRange = 36;
+        drops.spray.lifeBase = 35;
+        drops.spray.lifeRange = 15;
+        drops.spray.unk24 = 155;
+        drops.spray.unk25 = 100;
+        drops.spray.speedRange = 8.0f;
+        drops.spray.unk30 = 1;
+        drops.spray.gravityBase = -1.266f;
+        drops.spray.gravityRange = 0.46600002f;
+        drops.spray.kind = kind;
+        drops.spray.sizeBase = 123.0f;
+        drops.spray.sizeRange = 134.0f;
+        drops.spray.wobbles = 1;
+        drops.spray.unk34 = 0.6f;
+        drops.spray.bounceChance = 0.0f;
+        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
     }
 }
 
 /* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
-void func_151DC484(struct17 *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
-    splash.count = 8;
-    splash.countRange = 6;
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.scale = 3.0f;
-    splash.angles.angle1 = 0;
-    splash.angles.angle2Range = 40;
-    splash.unk30 = 3;
-    splash.unk30Range = 0;
-    splash.lifetime = 60;
-    splash.lifetimeRange = 40;
-    splash.unk38 = 100;
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.scaleRange = 2.0f;
-    splash.size = 0.642f;
-    splash.sizeRange = 0.314f;
-    splash.speed = 8.0f;
-    splash.speedRange = 5.0f;
-    splash.unk40Chance = 1.0f;
-    splash.kind = kind;
-    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
+    splash.spray.pos = *pos;
+    splash.spray.countBase = 8;
+    splash.spray.countRange = 6;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.spray.scaleBase = 3.0f;
+    splash.angles.yawBase = 0;
+    splash.angles.pitchRange = 40;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 0;
+    splash.spray.lifeBase = 60;
+    splash.spray.lifeRange = 40;
+    splash.spray.unk30 = 100;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.scaleRange = 2.0f;
+    splash.spray.sizeBase = 0.642f;
+    splash.spray.sizeRange = 0.314f;
+    splash.spray.speedBase = 8.0f;
+    splash.spray.speedRange = 5.0f;
+    splash.spray.unk38 = 1.0f;
+    splash.spray.kind = kind;
+    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
 
     {
-        DropBurstSpec drops;
+        DropSpraySpec drops;
 
-        drops.pos = *pos;
-        drops.count = 12;
-        drops.countRange = 6;
-        drops.angles.angle1Range = 0xFF;
-        drops.angles.angle1 = 0;
-        drops.angles.angle2 = -64;
-        drops.angles.angle2Range = 26;
-        drops.lifetime = 35;
-        drops.lifetimeRange = 15;
-        drops.unk2C = 155;
-        drops.unk2CRange = 100;
-        drops.size = 59.0f;
-        drops.sizeRange = 59.0f;
-        drops.unk38 = 1;
-        drops.speed = 7.0f;
-        drops.speedRange = 3.0f;
-        drops.gravity = -1.23f;
-        drops.gravityRange = 0.47500002f;
-        drops.kind = kind;
-        drops.wobble = 1;
-        drops.unk3CChance = 0.6f;
-        drops.bounceChance = 0.0f;
-        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
+        drops.spray.pos = *pos;
+        drops.spray.countBase = 12;
+        drops.spray.countRange = 6;
+        drops.angles.yawRange = 0xFF;
+        drops.angles.yawBase = 0;
+        drops.angles.pitchBase = -64;
+        drops.angles.pitchRange = 26;
+        drops.spray.lifeBase = 35;
+        drops.spray.lifeRange = 15;
+        drops.spray.unk24 = 155;
+        drops.spray.unk25 = 100;
+        drops.spray.sizeBase = 59.0f;
+        drops.spray.sizeRange = 59.0f;
+        drops.spray.unk30 = 1;
+        drops.spray.speedBase = 7.0f;
+        drops.spray.speedRange = 3.0f;
+        drops.spray.gravityBase = -1.23f;
+        drops.spray.gravityRange = 0.47500002f;
+        drops.spray.kind = kind;
+        drops.spray.wobbles = 1;
+        drops.spray.unk34 = 0.6f;
+        drops.spray.bounceChance = 0.0f;
+        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
     }
 }

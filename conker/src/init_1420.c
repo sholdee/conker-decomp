@@ -18,14 +18,14 @@ void func_10001420(void) {
     s32 size = 0xFE0;
     s32 zero2;
     s32 zero3;
-    s32 *p = (s32 *)&D_80043B40;
+    s32 *p = D_80043B40;
 
     if (1) {
         zero2 = 0;
         zero3 = 0;
         do {
             *p++ = 0;
-        } while ((u32)p < (u32)&D_80043B40 + size + zero0 + zero1 + zero2 + zero3);
+        } while ((u32)p < (u32)D_80043B40 + size + zero0 + zero1 + zero2 + zero3);
     }
 }
 

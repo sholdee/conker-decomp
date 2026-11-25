@@ -3,19 +3,6 @@
 #include "variables.h"
 
 
-/* The per-id record returned by func_1509B704 (same layout as C8950Node in game_C8950.c). */
-typedef struct CCD00Node {
-    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
-    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
-    /* 0x04 */ u16 size;        // size of the whole allocation
-    /* 0x06 */ u16 dataSize;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 dataOffset;
-    /* 0x0C */ u8  padC[0xC];
-    /* 0x18 */ struct CCD00Node *next;
-    /* 0x1C */ struct CCD00Node *prev;
-} CCD00Node;
-
 /* Argument block of a command; the arguments start at 0x8. */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -33,19 +20,14 @@ typedef struct {
 } Struct_80087410;
 
 extern Struct_80087410 D_80087410;
-extern s32 D_800D2E48;
-extern s32 D_800D2F58;
-extern u8 D_800D2E69;
 extern s32 D_800D3000;
 extern s32 D_800D3004;
-extern s32 D_800D3840;
 
-/* variables.h declares D_800D2E4C as struct102 *: it is the per-id flag bit array. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
-#define ID_FLAG_BYTE(id) (*(((id) >> 3) + (u8 *)D_800D2E4C))
+#define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
-CCD00Node *func_1509B704(s16 id);
+IdRecord *func_1509B704(s16 id);
 void func_150AE280(void);
 void func_1509B5AC(s32 id, s32 reload);
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -61,11 +43,11 @@ void func_15042E3C(char *fmt, s32 arg1);
  * Note: the "clear" forms below keep only `bit & 7` of the byte, exactly as the game does.
  */
 s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
-    CCD00Node *node2;
-    CCD00Node *node3;
-    CCD00Node *node5;
-    CCD00Node *node4;
-    CCD00Node *node11;
+    IdRecord *node2;
+    IdRecord *node3;
+    IdRecord *node5;
+    IdRecord *node4;
+    IdRecord *node11;
     s32 count;
     s32 i;
 
@@ -199,8 +181,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         D_800BE3DF = args->unk8;
         // matching: the redundant '& 0xFF' uses up a temp register that the case 19/23 allocation needs
         D_800BE3E0 = args->unkC & 0xFF;
-        // variables.h types D_800BE9F4 as u16 *, but it holds an s32 here
-        *(s32 *)&D_800BE9F4 = (s8)D_800BE3DF;
+        D_800BE9F4 = D_800BE3DF;
         break;
     case 20:
         func_151E8214();
@@ -230,10 +211,6 @@ typedef struct {
     /* 0x0C */ s32 unkC[1];  // query 34: the weights
 } QueryArgs;
 
-extern s8 D_800E0BB1;
-extern u16 D_800BE930[];
-extern u16 D_800BE918[][3];
-extern u8 D_800D2E40;
 s32 func_151E5F64(s32 arg0);
 
 /* Answers query `query` about record `id` with arguments `args`; unknown queries return 0. */
@@ -247,7 +224,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     s32 j;
     s32 threshold;
     s32 mask;
-    CCD00Node *node;
+    IdRecord *node;
 
     switch (query) {
     case 26:
@@ -270,7 +247,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 31:
         return D_800BE9F8;
     case 32:
-        return (s8)D_800BE3DF;
+        return D_800BE3DF;
     case 33:
         return D_800BE3E0;
     case 34:
@@ -299,7 +276,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 39:
         return D_800BE930[args->unk8];
     case 40:
-        return D_800BE918[args->unk8][0];
+        return D_800BE918[args->unk8].button;
     case 41:
         return D_800E0B94 == 2;
     case 42:

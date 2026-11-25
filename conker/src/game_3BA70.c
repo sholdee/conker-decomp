@@ -8,14 +8,8 @@ void func_15012470(void);
 void func_15008E10(s32);
 void func_15189900(struct145 *, u8);
 
-extern u8 D_800D9950[];
-extern s32 *D_800D98D0[];
-extern s32 *D_800D9894;
 extern u8 *D_80088870;
 
-// variables.h declares these byte arrays as scalars; index them through an array view so IDO
-// sees an array (the scalar form, (&x)[i], loses the pointer-stepped loop).
-#define ARRAY_VIEW(sym, n) (*(u8 (*)[n])&(sym))
 
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */
 void func_1500E5C0(void) {
@@ -26,17 +20,17 @@ void func_1500E5C0(void) {
     func_15008A10();
     func_15012770();
     for (i = 0; i < 20; i++) {
-        ARRAY_VIEW(D_800E0950, 20)[i] = 0;
+        D_800E0950[i] = 0;
     }
     D_800D9921 = 0;
     D_800D9920 = 0;
     for (j = 0; j < 14; j++) {
-        ARRAY_VIEW(D_800D9928, 14)[j] = 0;
-        ARRAY_VIEW(D_800D9938, 14)[j] = 0;
+        D_800D9928[j] = 0;
+        D_800D9938[j] = 0;
     }
     {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
-        s32 **entries = D_800D98D0;
+        struct102 **entries = D_800D98D0;
 
         D_800D9890 = 0;
         D_800D9894 = NULL;
@@ -63,7 +57,6 @@ void func_1500E70C(s32 id) {
     }
 }
 
-extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
@@ -161,7 +154,7 @@ void func_1500E8C0(void) {
         descriptor.unk1C = 900.0f - descriptor.unk10;
         func_15189900(&descriptor, 1);
     }
-    func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, (s32)func_1000EF40, 0, 0, 72, 0);
+    func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {

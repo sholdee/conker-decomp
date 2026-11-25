@@ -1,10 +1,7 @@
-// functions.h declares func_1502B7F0 with five parameters; this file calls it with four and five.
-#define func_1502B7F0 func_1502B7F0__proto
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
-#undef func_1502B7F0
 
 typedef void (*ObjectFunc)();
 
@@ -86,18 +83,12 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-#define HANDLES (*(s32 **)D_800DBEF8)      // per object: handle released with func_10004074
-#define RELEASE_DELAY (*(u8 **)D_800DBEFC) // per object: frames to keep the handle once hidden
-
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 extern LevelModelEntry *D_800B0E50;
 extern ObjectBehavior D_80088C90[];
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
-extern s32 *D_800DBF94;
-s32 func_1502B7F0();
 void *allocate_memory(s32, u32, s32, s32);
 ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, s32);
@@ -345,8 +336,8 @@ void func_150039E0(s32 level, s32 arg1) {
     }
     D_800DBEE0 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
     D_800DBEE4 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    HANDLES = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    RELEASE_DELAY = allocate_memory(D_800DBEF0, 1, 0, 0);
+    D_800DBEF8 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
+    D_800DBEFC = allocate_memory(D_800DBEF0, 1, 0, 0);
     for (i = 0; i < 4; i++) {
         D_800DBED0[i] = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
     }
@@ -373,19 +364,17 @@ void func_15004574(void) {
 void func_150045BC(void) {
 }
 
-extern Mtx **D_80089250[];
 extern s16 D_800D37E0;
-extern f32 D_800DBF08[4][4];
-extern f32 D_800DBF48[4][4];
+extern MtxF D_800DBF48;
 extern void func_151150B0(WorldObject *obj);
 extern void func_15116058(WorldObject *obj);
 extern void func_15116110(WorldObject *obj);
 void func_150A44F0(s32, s16 *, s32);
-void func_150A7960(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
 void func_1510F800(s32);
-void func_1511490C(f32 mf[4][4], WorldObject *obj);
+void func_1511490C(MtxF mf, WorldObject *obj);
 void func_15004A4C(void);
 
 /*
@@ -396,7 +385,7 @@ void func_15004A4C(void);
 void func_150045C4(s32 arg0) {
     s32 i;
     WorldObject *obj;
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 j;
     s32 floorFlags;
     f32 floorY;
@@ -406,7 +395,7 @@ void func_150045C4(s32 arg0) {
     f32 z;
 
     func_15004A4C();
-    guMtxIdentF(D_800DBF08);
+    guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
         obj = &D_800DBEF4[i];
@@ -486,14 +475,13 @@ void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
     }
 }
 
-
 /* Clears every object's handle and release delay. */
 void func_15004A4C(void) {
     s32 i;
 
     for (i = 0; i < D_800DBEF0; i++) {
-        HANDLES[i] = 0;
-        RELEASE_DELAY[i] = 0;
+        D_800DBEF8[i] = 0;
+        D_800DBEFC[i] = 0;
     }
 }
 

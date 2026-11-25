@@ -1,17 +1,12 @@
 #include <ultra64.h>
-/* functions.h declares these three with stale signatures; hide them there and declare the real ones here. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
+// was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
-#define func_1513D524 func_1513D524_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
 #undef func_151D9B8C
-#undef func_1513D524
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
-u32 func_150ADA20(void);
 #include "variables.h"
-
-typedef struct { f32 x, y, z; } Vec3f;
+#include "effects.h"
 
 /* Ground probe result filled by func_1504715C / func_15046C80 / func_1504697C. */
 typedef struct Game1DD500Ground {
@@ -30,45 +25,17 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-/* Parameters for the impact effect spawned by func_15153F18. */
-typedef struct Game1DD500Impact {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ s8 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} Game1DD500Impact;
-
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Game1DD500Ground *, struct127 *);
-s32 func_15134070(struct127 *);
+void func_1504715C(Game1DD500Ground *, Actor *);
+s32 func_15134070(Actor *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15153F18(Game1DD500Impact *, Vec3f *, Game1DD500Ground *, s32, s32);
+void func_15153F18(AngleRange *, SplashSpray *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
-/* Joint matrix of an actor; include/ types the array as struct255 *. */
+/* Joint matrix of an actor, as an Mtx. */
 #define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->unk1D4)[joint])
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
@@ -95,8 +62,8 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Spawns an impact effect at joint 6 of actor, styled by the profile of other. */
-void func_151B01B8(struct127 *actor, struct127 *other) {
-    Game1DD500Impact impact;
+void func_151B01B8(Actor *actor, Actor *other) {
+    SplashSpraySpec impact;
     u8 shade;
     Game1DD500Ground ground;
     s32 profile;
@@ -107,35 +74,35 @@ void func_151B01B8(struct127 *actor, struct127 *other) {
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
                 shade = (actor->unk7A >> 8) + 0x40;
-                func_15143134(&D_800AA120, &impact.position, JOINT_MTX(actor, 6));
-                impact.unk2C = 10;
-                impact.unk2E = 20;
-                impact.unk00 = shade - 0x68;
-                impact.unk14 = 7.22f;
-                impact.unk02 = 0xD0;
-                impact.unk04 = -0x1B;
-                impact.unk06 = 0x36;
-                impact.unk30 = 3;
-                impact.unk32 = 2;
-                impact.unk34 = 30;
-                impact.unk36 = 40;
-                impact.unk38 = 155;
-                impact.unk3A = 100;
-                impact.unk18 = 3.04f;
-                impact.unk1C = 0.810000062f;
-                impact.unk20 = 0.405000031f;
-                impact.unk24 = 6.0f;
-                impact.unk28 = 13.90000057f;
-                impact.unk40 = 0.5f;
+                func_15143134(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
+                impact.spray.countBase = 10;
+                impact.spray.countRange = 20;
+                impact.angles.yawBase = shade - 0x68;
+                impact.spray.scaleBase = 7.22f;
+                impact.angles.yawRange = 0xD0;
+                impact.angles.pitchBase = -0x1B;
+                impact.angles.pitchRange = 0x36;
+                impact.spray.itemCountBase = 3;
+                impact.spray.itemCountRange = 2;
+                impact.spray.lifeBase = 30;
+                impact.spray.lifeRange = 40;
+                impact.spray.unk30 = 155;
+                impact.spray.unk32 = 100;
+                impact.spray.scaleRange = 3.04f;
+                impact.spray.sizeBase = 0.810000062f;
+                impact.spray.sizeRange = 0.405000031f;
+                impact.spray.speedBase = 6.0f;
+                impact.spray.speedRange = 13.90000057f;
+                impact.spray.unk38 = 0.5f;
                 if (D_800A3FD8[profile].unkE == 1) {
-                    impact.unk3C = 1;
+                    impact.spray.kind = 1;
                 } else {
-                    impact.unk3C = 0;
+                    impact.spray.kind = 0;
                 }
-                impact.unk44 = 16;
-                impact.unk46 = 15;
-                impact.unk48 = 0;
-                func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
+                impact.spray.unk3C = 16;
+                impact.spray.unk3E = 15;
+                impact.spray.unk40 = 0;
+                func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
             }
         }
     }
@@ -148,8 +115,8 @@ void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
-void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
-    Game1DD500Impact impact;
+void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
+    SplashSpraySpec impact;
     Game1DD500Ground ground;
     s32 count;
     Game1DD500Ground scatterGround;
@@ -160,33 +127,33 @@ void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
 
     if (actor != NULL) {
         func_1504715C(&ground, actor);
-        impact.position.x = actor->x_position;
-        impact.position.y = actor->y_position;
-        impact.position.z = actor->z_position;
-        impact.unk14 = 5.08f;
-        impact.unk2C = 10;
-        impact.unk02 = 0xFF;
-        impact.unk04 = -0x3F;
-        impact.unk2E = 0;
-        impact.unk00 = 0;
-        impact.unk06 = 0x2D;
-        impact.unk30 = 3;
-        impact.unk32 = 2;
-        impact.unk34 = 40;
-        impact.unk36 = 20;
-        impact.unk38 = 155;
-        impact.unk3A = 100;
-        impact.unk3C = 0;
-        impact.unk44 = 16;
-        impact.unk46 = 15;
-        impact.unk48 = 0;
-        impact.unk18 = 3.02f;
-        impact.unk1C = 0.807000041f;
-        impact.unk20 = 0.701000035f;
-        impact.unk24 = 18.0f;
-        impact.unk28 = 11.8f;
-        impact.unk40 = 0.5f;
-        func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
+        impact.spray.pos.x = actor->x_position;
+        impact.spray.pos.y = actor->y_position;
+        impact.spray.pos.z = actor->z_position;
+        impact.spray.scaleBase = 5.08f;
+        impact.spray.countBase = 10;
+        impact.angles.yawRange = 0xFF;
+        impact.angles.pitchBase = -0x3F;
+        impact.spray.countRange = 0;
+        impact.angles.yawBase = 0;
+        impact.angles.pitchRange = 0x2D;
+        impact.spray.itemCountBase = 3;
+        impact.spray.itemCountRange = 2;
+        impact.spray.lifeBase = 40;
+        impact.spray.lifeRange = 20;
+        impact.spray.unk30 = 155;
+        impact.spray.unk32 = 100;
+        impact.spray.kind = 0;
+        impact.spray.unk3C = 16;
+        impact.spray.unk3E = 15;
+        impact.spray.unk40 = 0;
+        impact.spray.scaleRange = 3.02f;
+        impact.spray.sizeBase = 0.807000041f;
+        impact.spray.sizeRange = 0.701000035f;
+        impact.spray.speedBase = 18.0f;
+        impact.spray.speedRange = 11.8f;
+        impact.spray.unk38 = 0.5f;
+        func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = func_150ADA20() % 6 + 12;
         scatterGround.unk18 = 0;
@@ -289,27 +256,6 @@ typedef struct Game1DD500Particle {
     /* 0x110 */ Game1DD500Motion motion;
 } Game1DD500Particle;
 
-/* Spawn description passed to func_1513D524; laid out like the particle from 0x18 on. */
-typedef struct Game1DD500ParticleDesc {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 flags;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f position;
-    /* 0x28 */ Vec3f previous;
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 alpha;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[0x12];
-} Game1DD500ParticleDesc; // size 0x58
-
 /* A particle held at one of the owner's joints until its timer runs out. */
 typedef struct Game1DD500Slot {
     /* 0x0 */ Game1DD500Particle *particle;
@@ -319,7 +265,7 @@ typedef struct Game1DD500Slot {
 
 /* Effect that keeps particles stuck to an actor's joints and drops them over time. */
 typedef struct Game1DD500Emitter {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;   /* owner->unique_id at creation */
     /* 0x08 */ s32 count;    /* attached particles */
     /* 0x0C */ Game1DD500Slot slots[11];
@@ -341,14 +287,14 @@ typedef struct Game1DD500Task {
 
 /* Message 0x13 (and 0): this actor's effects should end. */
 typedef struct Game1DD500ActorMsg {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 uniqueId;
 } Game1DD500ActorMsg;
 
 /* Message 0x2D: two actors swapped identities. */
 typedef struct Game1DD500SwapMsg {
-    /* 0x0 */ struct127 *a;
-    /* 0x4 */ struct127 *b;
+    /* 0x0 */ Actor *a;
+    /* 0x4 */ Actor *b;
     /* 0x8 */ u8 uniqueIdA;
     /* 0x9 */ u8 uniqueIdB;
 } Game1DD500SwapMsg;
@@ -358,7 +304,7 @@ void func_151B1918(Game1DD500Task *task);
 void *memcpy(void *, const void *, u32);
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *func_151B09BC(struct127 *actor, struct127 *other, s16 lifetime, u8 arg3, s32 arg4) {
+Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
     Game1DD500Task *task;
     Game1DD500Emitter emitter;
     s32 profile;
@@ -418,11 +364,9 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
-Game1DD500Particle *func_1513D524(Game1DD500ParticleDesc *, u8, u8, u8, u8, u8, s32, u8, s32);
 void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
 extern Game1DD500Mount D_800AA12C[11];
 extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
-extern u8 D_800AB310[];
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
 void func_151B0B88(Game1DD500Task *task) {
@@ -483,28 +427,28 @@ void func_151B0B88(Game1DD500Task *task) {
             if (freeCount != 0) {
                 emitter->spawnTime += func_150ADA68() * 307.0f * 0.001f * D_800BE9A4;
                 if (emitter->spawnTime > 1.0f) {
-                    Game1DD500ParticleDesc desc;
+                    ParticleDef desc;
                     Game1DD500Motion motion;
 
                     last->next = head;
-                    desc.unk0 = D_800AB310[emitter->profileFlag];
-                    desc.flags = 0x1001;
-                    desc.life = func_150ADA20() % 51 + 52;
-                    desc.unk8 = 0;
-                    desc.unkC = 0;
-                    desc.color[0] = 0;
-                    desc.color[1] = 0;
-                    desc.color[2] = 0;
-                    desc.color[3] = 0xFF;
-                    desc.unk40 = 0;
+                    desc.texture = D_800AB310[emitter->profileFlag];
+                    desc.renderModes = 0x1001;
+                    desc.lifetime = func_150ADA20() % 51 + 52;
+                    desc.frame = 0;
+                    desc.frameSpeed = 0;
+                    desc.rgba[0] = 0;
+                    desc.rgba[1] = 0;
+                    desc.rgba[2] = 0;
+                    desc.rgba[3] = 0xFF;
+                    desc.flags = 0;
                     desc.scale.x = 1.0f;
                     desc.scale.y = 1.0f;
                     desc.scale.z = 1.0f;
                     motion.phaseWidth = 0;
                     motion.phaseHeight = 0;
-                    desc.previous.x = 0.0f;
-                    desc.previous.y = 0.0f;
-                    desc.previous.z = 0.0f;
+                    desc.rot.x = 0.0f;
+                    desc.rot.y = 0.0f;
+                    desc.rot.z = 0.0f;
                     motion.unk25 = emitter->profileFlag;
                     motion.checkGround = func_150ADA20() & 1;
                     desc.width = 0.0f;
@@ -525,14 +469,14 @@ void func_151B0B88(Game1DD500Task *task) {
                         }
                         index = head - emitter->slots;
                         desc.unk45 = func_150ADA20() % 101 + 100;
-                        desc.alpha = func_150ADA20() % 101 + 155;
+                        desc.unk44 = func_150ADA20() % 101 + 155;
                         motion.phaseSpeedWidth = func_150ADA20() % 5 + 4;
                         motion.phaseSpeedHeight = func_150ADA20() % 5 + 4;
                         // matching: "- 703.0f" emits sub.s; the original adds a negative constant
                         motion.gravity = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
-                        func_15143134(&D_800AA12C[index].offset, &desc.position,
+                        func_15143134(&D_800AA12C[index].offset, &desc.pos,
                                       JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
-                        desc.previous = desc.position;
+                        desc.rot = desc.pos;
                         particle = func_1513D524(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
                                                  task->unkC, task->unk1);
                         head->particle = particle;
@@ -744,7 +688,7 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
     Game1DD500Emitter *emitter = &task->emitter;
     Game1DD500ActorMsg *actorMsg = msg;
     Game1DD500SwapMsg *swap = msg;
-    struct127 *owner = emitter->owner;
+    Actor *owner = emitter->owner;
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {

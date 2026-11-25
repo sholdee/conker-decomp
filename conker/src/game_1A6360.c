@@ -1,27 +1,15 @@
 #include <ultra64.h>
 /* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
-#define func_15048A40 func_15048A40_hdr
-#define func_10010F30 func_10010F30_void
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_15048A40
-#undef func_10010F30
-#define D_800DD444 D_800DD444_hdr
-#define D_800C35EA D_800C35EA_hdr
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
-#undef D_800DD444
-#undef D_800C35EA
+#include "effects.h"
 
 #define RAIN_MAX_DROPS 300
-
-/* Link fields shared by every object (see game_1944C0.c). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
 
 /* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
 typedef struct {
@@ -50,15 +38,9 @@ typedef struct {
 
 /* Type 0xE object. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ QuadFxData data;
 } QuadFx;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} Vec3s;
 
 extern u16 D_800DD430;      /* sound handle */
 extern u8 D_800DD432;       /* wind gust timer */
@@ -70,15 +52,11 @@ extern Vec3s D_800DD438;    /* centre of the rain volume */
  * matching: int-typed; a pointer-typed global changes func_15178EFC's register allocation. */
 extern s32 D_800DD440;
 #define RAIN_DROP(i) (*(QuadFx **)(D_800DD440 + (i) * sizeof(QuadFx *)))
-extern s16 D_800DD444;      /* state timer */
 extern s8 D_800DD446;       /* rain state */
-extern u8 D_800C35EA[];
 
 extern f32 sqrtf(f32);
 extern void func_10004074(void *);
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);
 QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
@@ -245,12 +223,12 @@ void func_151794C8(void) {
     f32 s;
     f32 vx;
 
-    x = (s32)D_800DBFF0->unk2F8;
-    y = (s32)D_800DBFF0->unk2FC;
-    z = (s32)D_800DBFF0->unk300;
+    x = (s32)D_800DBFF0->eye.x;
+    y = (s32)D_800DBFF0->eye.y;
+    z = (s32)D_800DBFF0->eye.z;
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
-    angle = D_800DBFF0->unk398;
+    angle = D_800DBFF0->pitchRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     vy = 500.0f * c;
@@ -287,9 +265,9 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     packet.flags = 0;
     func_1516865C(&packet, 0xFF, 0xFF, 0xFF, 0x50);
 
-    baseX = (s32)D_800DBFF0->unk2F8;
-    baseY = (s32)D_800DBFF0->unk2FC;
-    baseZ = (s32)D_800DBFF0->unk300;
+    baseX = (s32)D_800DBFF0->eye.x;
+    baseY = (s32)D_800DBFF0->eye.y;
+    baseZ = (s32)D_800DBFF0->eye.z;
 
     x = (func_150ADA20() % 500) + baseX;
     z = (func_150ADA20() % 500) + baseZ;
@@ -336,8 +314,8 @@ void func_151797B0(QuadFx *drop) {
     s16 cy;
     s16 cz;
 
-    dx = (f32)drop->data.z - D_800DBFF0->unk300;
-    dz = (f32)drop->data.x - D_800DBFF0->unk2F8;
+    dx = (f32)drop->data.z - D_800DBFF0->eye.z;
+    dz = (f32)drop->data.x - D_800DBFF0->eye.x;
     dist = sqrtf(dx * dx + dz * dz);
     alpha = 80.0f - (80.0f * dist) / 1000.0f;
     if (alpha < 0) {
@@ -464,8 +442,8 @@ void func_15179CB0(QuadFx *splash) {
     f32 dz;
     f32 dist;
 
-    dx = (f32)splash->data.z - D_800DBFF0->unk300;
-    dz = (f32)splash->data.x - D_800DBFF0->unk2F8;
+    dx = (f32)splash->data.z - D_800DBFF0->eye.z;
+    dz = (f32)splash->data.x - D_800DBFF0->eye.x;
     dist = sqrtf((dx * dx) + (dz * dz));
     splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
 }

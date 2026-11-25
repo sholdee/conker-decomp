@@ -42,21 +42,12 @@ typedef struct WaveState {
     /* 0x2C */ u8 pad2C[0xC];
 } WaveState;
 
-/* D_800DDE80 viewed with the two vertex buffers that include/variables.h leaves as padding. */
-typedef struct VtxSlot {
-    /* 0x00 */ void *field0;
-    /* 0x04 */ Vtx *vtxB;
-    /* 0x08 */ Vtx *vtxA;
-    /* 0x0C */ s32 fieldC;
-    /* 0x10 */ void *field10;
-} VtxSlot;
-
 extern WaveState D_8008D0B0[];
 extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in discarded .rodata */
 extern f32 D_800A7220;
 
 extern Particle *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 player);
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
@@ -73,8 +64,8 @@ void func_15179DB0(u8 slot) {
     f32 *angle[2];
     f32 *rate[2];
 
-    vtx[1] = ((VtxSlot *)D_800DDE80)[slot].vtxB;
-    vtx[0] = ((VtxSlot *)D_800DDE80)[slot].vtxA;
+    vtx[1] = D_800DDE80[slot].unk4;
+    vtx[0] = D_800DDE80[slot].unk8;
     angle[0] = &D_8008D0B0[slot].angle[0];
     angle[1] = &D_8008D0B0[slot].angle[1];
     rate[0] = &D_8008D0B0[slot].rate[0];
@@ -108,8 +99,8 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
         particle->y = y;
         particle->z = z;
         particle->velY = velY;
-        particle->velX = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
-        particle->velZ = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velX = (func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velZ = (func_150ADA20() % speedRange) - (speedRange >> 1);
         if (unkAC == 5) {
             particle->x += particle->velX * 4;
             particle->y -= particle->velY * 4;
@@ -118,9 +109,9 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
         particle->rotX = 0;
         particle->rotY = 0;
         particle->rotZ = 0;
-        particle->spinX = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinY = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinZ = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinX = (func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinY = (func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinZ = (func_150ADA20() % spinRange) - (spinRange >> 1);
         rnd = func_150ADA20() & 0x7F;
         particle->scale = (rnd + 140) * 0.01f;
         particle->timer = timer;
@@ -150,10 +141,10 @@ void func_1517A1EC(Particle *particle) {
         s32 sign;
         u32 drag;
 
-        drag = (u32)func_150ADA20() % particle->dragRange;
+        drag = func_150ADA20() % particle->dragRange;
         sign = (particle->velX < 0) ? -1 : 1;
         particle->velX += -sign * drag;
-        drag = (u32)func_150ADA20() % particle->dragRange;
+        drag = func_150ADA20() % particle->dragRange;
         sign = (particle->velZ < 0) ? -1 : 1;
         particle->velZ += -sign * drag;
     }
@@ -181,11 +172,7 @@ Gfx *func_1517A394(Gfx *gfx) {
     return gfx;
 }
 
-extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
-extern s32 D_800D2C9C;
 extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
 extern u8 D_8008CDF0[];
 
@@ -244,19 +231,19 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
             particle->x = x;
             particle->z = z;
             particle->rotX = 90;
-            particle->rotY = (u32)func_150ADA20() % 360;
+            particle->rotY = func_150ADA20() % 360;
             particle->rotZ = 0;
             particle->velX = 0;
             particle->velZ = 0;
             particle->texture = texture;
-            rnd = ((u32)func_150ADA20() % 80) + 100;
+            rnd = (func_150ADA20() % 80) + 100;
             particle->scale = rnd * 0.01f;
             particle->velY = size * 0.4f;
-            rnd = (u32)func_150ADA20() % (u32)range;
+            rnd = func_150ADA20() % (u32)range;
             half = size * 0.5f;
             particle->spinX = rnd - half;
-            particle->spinY = ((u32)func_150ADA20() % (u32)range) - half;
-            particle->spinZ = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->spinY = (func_150ADA20() % (u32)range) - half;
+            particle->spinZ = (func_150ADA20() % (u32)range) - half;
             particle->timer = 0;
             particle->alpha = 0xFF;
         }
@@ -315,7 +302,6 @@ Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern s32 D_800DD1B0; /* texture last loaded by func_1517A9A8 */
 extern u8 D_80090614[];
 
 /* Loads particle texture `texture` unless it is already the current one. */
@@ -347,7 +333,7 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
             offsetZ = func_150ADA20() & 0x3F;
             offsetX -= 32;
             offsetZ -= 32;
-            chunkSize = (f32)(((u32)func_150ADA20() % (u32)range) >> 4) + size;
+            chunkSize = (f32)((func_150ADA20() % (u32)range) >> 4) + size;
             func_1517A644(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
         }
     }

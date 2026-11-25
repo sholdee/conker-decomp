@@ -26,21 +26,14 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     return found[0];
 }
 
-/* An object whose display list textures are animated by func_1511A494 (same 0xA0 stride as WorldObject). */
+/* Behaviour scratch state (WorldObject.work) of an object whose display list textures func_1511A494 animates. */
 typedef struct {
-    u8 pad0[0x18];
-    f32 unk18;
-    Gfx *dl;
-    u8 pad20[0x1C];
-    s32 unk3C;
-    u8 pad40[0x14];
-    u16 unk54;
-    u8 pad56[0x26];
-    s32 unk7C;
-    s32 texIndices;
-    s32 animState;
-    u8 pad88[0x18];
-} TexAnimObject; // size 0xA0
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 texIndices;
+    /* 0x84 */ s32 animState;
+} TexAnimWork;
+
+#define WORK(obj) ((TexAnimWork *)&(obj)->work)
 
 /* One texture animation: a sequence of texture assets, optionally restricted to one world. */
 typedef struct {
@@ -63,7 +56,7 @@ extern void func_1510D874(void *, s32, s32, s32, s32);
  * texIndices caches the G_SETTIMG indices found by func_1511A410 (second << 16 | first);
  * animState packs the play direction and tick counter (direction << 16 | tick).
  */
-void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
+void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
     s32 pad; // matching: unused stack slot
     s32 size;
     s32 i;
@@ -88,14 +81,14 @@ void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
                 kind |= 0x8000;
             }
         }
-        if (kind == 0xFF || kind == obj->unk54) {
+        if (kind == 0xFF || kind == obj->modelId) {
             anim = &D_80089324[i];
             break;
         }
     }
     if (anim != NULL) {
         if (*texIndices == 0) {
-            value = func_1511A410(obj->dl, &second);
+            value = func_1511A410(obj->displayList, &second);
             *texIndices = (second << 16) | value;
         } else {
             second = (u16)(*texIndices >> 16);
@@ -134,26 +127,26 @@ void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
     }
 }
 
-extern void func_15116110(TexAnimObject *);
+extern void func_15116110(WorldObject *);
 
 /* Runs func_15116110 while unk3C is set, then advances the texture animation. */
-void func_1511A6FC(TexAnimObject *obj) {
-    if (obj->unk3C != 0) {
+void func_1511A6FC(WorldObject *obj) {
+    if (obj->param.word != 0) {
         func_15116110(obj);
     }
-    func_1511A494(obj, &obj->texIndices, &obj->animState);
+    func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
 
 extern s32 func_15022B08(s32, s32);
-extern void func_151162D4(TexAnimObject *);
+extern void func_151162D4(WorldObject *);
 
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */
-void func_1511A738(TexAnimObject *obj) {
-    if (D_800C35EA == 1 && func_15022B08((WorldObject *)obj - D_800DBEF4, 0) != 0) {
-        obj->unk7C = 0;
-        obj->unk18 = 0.0f;
+void func_1511A738(WorldObject *obj) {
+    if (D_800C35EA[0] == 1 && func_15022B08(obj - D_800DBEF4, 0) != 0) {
+        WORK(obj)->unk7C = 0;
+        obj->yOffset = 0.0f;
     }
     func_151162D4(obj);
-    func_1511A494(obj, &obj->texIndices, &obj->animState);
+    func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }

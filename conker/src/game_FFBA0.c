@@ -1,18 +1,12 @@
-// matching: functions.h types func_1513D2F0's 2nd param as s32, but it takes a pointer and passing
-// an s32 moves regalloc in func_150D2924, so hide the header prototype and redeclare it here
-#define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
-#undef func_1513D2F0
-void *func_1513D2F0(void *params, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
-                    u8 argA, s32 argB);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
+#include "effects.h"
 
 /* Object data (at +0x28) of a trigger that spawns spark emitters. */
 typedef struct EmitterTrigger {
@@ -89,8 +83,7 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    // the header types func_15149130's data-size parameter as struct37 *
-    object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, (struct37 *)sizeof(emitter), unkC, unk1);
+    object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((EffectObject *)object)->data, &emitter, sizeof(emitter));
     }
@@ -119,32 +112,6 @@ typedef struct SparkParticle {
     SparkMotion motion;
 } SparkParticle;
 
-/* Spawn parameters passed to func_1513D2F0 for one spark. */
-typedef struct SparkSpawn {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 color[4];
-    f32 unk14;
-    f32 unk18;
-    Vec3f unk1C;
-    Vec3f position;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    s32 unk50;
-} SparkSpawn;
-
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
 
@@ -160,7 +127,7 @@ void func_150D2924(EffectObject *obj) {
     emitter->spawnAccum += emitter->rate * D_800BE9A4;
     emitter->elapsed += D_800BE9A4;
     if (emitter->spawnAccum > 1.0f) {
-        SparkSpawn spawn;
+        ParticleDef54 spawn;
         void *spark;
         SparkMotion motion;
 
@@ -168,29 +135,29 @@ void func_150D2924(EffectObject *obj) {
         motion.fadeScale = 9.0f;
         motion.phaseX = 0.0f;
         motion.phaseY = 0.0f;
-        spawn.unk0 = 0x59;
-        spawn.unk1 = 0;
-        spawn.unk2 = 0x5A03;
-        spawn.unk4 = 0x16;
-        spawn.unk8 = 0;
-        spawn.unkC = 0;
-        spawn.color[0] = emitter->color[0];
-        spawn.color[1] = emitter->color[1];
-        spawn.color[2] = emitter->color[2];
-        spawn.color[3] = 0xFF;
-        spawn.unk18 = 1.0f;
-        spawn.unk1C.x = record[0];
-        spawn.unk1C.y = record[1];
-        spawn.unk1C.z = record[2];
-        spawn.unk34 = 1.0f;
-        spawn.unk38 = 1.0f;
-        spawn.unk3C = 1.0f;
-        spawn.unk40 = 0x026C0000;
+        spawn.texture = 0x59;
+        spawn.type = 0;
+        spawn.renderModes = 0x5A03;
+        spawn.lifetime = 0x16;
+        spawn.frame = 0;
+        spawn.frameSpeed = 0;
+        spawn.rgba[0] = emitter->color[0];
+        spawn.rgba[1] = emitter->color[1];
+        spawn.rgba[2] = emitter->color[2];
+        spawn.rgba[3] = 0xFF;
+        spawn.height = 1.0f;
+        spawn.pos.x = record[0];
+        spawn.pos.y = record[1];
+        spawn.pos.z = record[2];
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.flags = 0x026C0000;
         spawn.unk45 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
         spawn.unk48 = 0;
-        spawn.unk4C = 0xFF;
+        spawn.viewportMask = 0xFF;
         do {
             motion.life = 22.0f - emitter->elapsed;
             if (motion.life > 0.0f) {
@@ -198,8 +165,8 @@ void func_150D2924(EffectObject *obj) {
 
                 func_1514373C(emitter->angle, record[3], &point.x, &point.z);
                 point.y = record[4];
-                func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.position.x, &spawn.position.y, &spawn.position.z);
-                spawn.unk14 = func_150ADA68() * 25.0f + 50.0f;
+                func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+                spawn.width = func_150ADA68() * 25.0f + 50.0f;
                 motion.posX = motion.baseX = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
                 motion.baseY = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
                 motion.posY = motion.baseY;

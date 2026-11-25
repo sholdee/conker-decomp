@@ -1,21 +1,14 @@
 #include <ultra64.h>
-// functions.h declares func_100126E8 as void; it returns its callee's result, which is used here.
-#define func_100126E8 func_100126E8_void_proto
 #include "functions.h"
-#undef func_100126E8
 #include "variables.h"
 
 /*
  * Scripted expression control for the current object.
- *
- * struct127 leaves 0x72 and 0x134-0x135 as padding. game_AB760.c's ExpressionActor view names
- * them: 0x72 u16 expressionTimer (0xFFFE = frozen), 0x134 u8 unk134, 0x135 u8 morphDuration.
  */
 
-extern s32 func_100126E8(u8 *buf, s32 size);
-extern void func_15080430(struct127 *actor, s32 expression, s32 morphDuration);
-extern s32 func_1507E968(struct127 *actor);
-extern void func_1507E500(struct127 *actor, s32 expression, s32 morphDuration);
+extern void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
+extern s32 func_1507E968(Actor *actor);
+extern void func_1507E500(Actor *actor, s32 expression, s32 morphDuration);
 extern s32 func_151EF610(void);
 extern s32 D_800427F0;
 extern s32 D_8009BD10[];
@@ -54,29 +47,29 @@ void func_15080228(void) {
  * D_800427F0 exceeds 1000 and morphDuration is below the frame step, moves unk134 to the next of
  * the 5 D_8009BD10 values with a random morphDuration of 4-10. Both clear D_800427F0.
  */
-void func_15080348(struct127 *actor) {
+void func_15080348(Actor *actor) {
     s32 index;
     s32 countdown;
 
     if (D_800D1928 != 0 && actor != NULL) {
         if (D_800D1928 == 1) {
             if (D_800427F0 < 1000) {
-                actor->unk1FF = 0;
+                actor->levelMode = 0;
             } else {
-                actor->unk1FF = 1;
+                actor->levelMode = 1;
             }
         } else {
             index = D_800D192C;
             if (D_800427F0 > 1000) {
-                countdown = ((u8 *)actor)[0x135]; // morphDuration
+                countdown = actor->morphDuration;
                 index++;
                 countdown -= D_800BE9E4;
                 if (countdown < 0) {
                     if (index >= 5) {
                         index = 0;
                     }
-                    ((u8 *)actor)[0x134] = D_8009BD10[index];
-                    ((u8 *)actor)[0x135] = (func_151EF610() % 7) + 4;
+                    actor->unk134 = D_8009BD10[index];
+                    actor->morphDuration = (func_151EF610() % 7) + 4;
                     D_800D192C = index;
                 }
             }
@@ -90,17 +83,17 @@ void func_15080348(struct127 *actor) {
  * others are set directly with morphDuration clamped to 1-20. Objects without an expression table
  * only get mode 1 (expression != 0) or 0.
  */
-void func_15080430(struct127 *actor, s32 expression, s32 morphDuration) {
+void func_15080430(Actor *actor, s32 expression, s32 morphDuration) {
     s32 enabled;
 
     if (actor != NULL) {
         if (func_1507E968(actor) > 0) {
             if (expression == 0) {
                 D_800D1928 = 0;
-                *(u16 *)((u8 *)actor + 0x72) = 20; // expressionTimer
+                actor->expressionTimer = 20;
                 func_1507E500(actor, 0, 10);
             } else {
-                *(u16 *)((u8 *)actor + 0x72) = 0xFFFE; // expressionTimer: frozen
+                actor->expressionTimer = 0xFFFE; // frozen
                 if (expression == 1) {
                     D_800D1928 = 2;
                 } else {
@@ -120,7 +113,7 @@ void func_15080430(struct127 *actor, s32 expression, s32 morphDuration) {
             enabled = (expression != 0);
             D_800D1928 = enabled;
             if (!enabled) {
-                actor->unk1FF = 0;
+                actor->levelMode = 0;
             }
         }
     }

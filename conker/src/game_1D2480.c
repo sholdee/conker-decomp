@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260 with an s32 first argument; this file passes a typed pointer. */
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 /* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
@@ -85,21 +82,7 @@ void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
     D_8008F900[effect->type](arg0, effect, arg2);
 }
 
-/* Viewport descriptor: D_800BE628 points to an array of these. */
-struct Scr151A5170 {
-    /* 0x000 */ u8 pad0[0x4];
-    /* 0x004 */ f32 width;
-    /* 0x008 */ f32 height;
-    /* 0x00C */ u8 padC[0x18];
-    /* 0x024 */ f32 top;
-    /* 0x028 */ u8 pad28[0x4];
-    /* 0x02C */ f32 left;
-    /* 0x030 */ u8 pad30[0x150];
-}; /* size 0x180 */
-
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
-#define VIEWPORT(i) (&((struct Scr151A5170 *)D_800BE628)[i])
 
 /*
  * Redraws the effect's viewport from the current framebuffer, tinted by the effect's colour.
@@ -118,32 +101,32 @@ Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetPrimColor(gfx++, 1, 0, effect->red, effect->green, effect->blue, 255);
-    func_1501A490((s32)gfx, arg2, 0, 0, 0, 3);
+    func_1501A490(gfx, arg2, 0, 0, 0, 3);
     state = 0;
     gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &state);
 
-    viewWidth = VIEWPORT(effect->viewport)->width;
-    viewHeight = VIEWPORT(effect->viewport)->height;
+    viewWidth = D_800BE628[effect->viewport].width;
+    viewHeight = D_800BE628[effect->viewport].height;
 
     for (pass = 0; pass < 2; pass++) {
         if (pass == 0) {
-            left = VIEWPORT(effect->viewport)->left;
+            left = D_800BE628[effect->viewport].left;
             rows = 8;
             columns = (viewWidth > 256) ? 256 : viewWidth;
         } else {
             if (viewWidth <= 256) {
                 break;
             }
-            left = VIEWPORT(effect->viewport)->left + 256.0f;
+            left = D_800BE628[effect->viewport].left + 256.0f;
             columns = viewWidth - 256;
             rows = 54;
         }
 
-        y = VIEWPORT(effect->viewport)->top;
+        y = D_800BE628[effect->viewport].top;
 
-        while (y < VIEWPORT(effect->viewport)->top + viewHeight) {
-            if (VIEWPORT(effect->viewport)->top + viewHeight < y + rows) {
-                rows = VIEWPORT(effect->viewport)->top + viewHeight - y;
+        while (y < D_800BE628[effect->viewport].top + viewHeight) {
+            if (D_800BE628[effect->viewport].top + viewHeight < y + rows) {
+                rows = D_800BE628[effect->viewport].top + viewHeight - y;
             }
 
             gDPPipeSync(gfx++);
@@ -183,7 +166,6 @@ struct Data151A561C {
 };
 
 extern struct Data151A561C D_800A8D70;
-void func_15169260(struct Data151A561C *, s32, s32, u8);
 
 /* Forwards a message to func_15169260 with a local copy of the D_800A8D70 descriptor. */
 void func_151A561C(s32 arg0, u8 arg1) {

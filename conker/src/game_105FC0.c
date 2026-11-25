@@ -1,30 +1,12 @@
 #include <ultra64.h>
-// matching: functions.h declares these with other return types; the file needs the s32 forms
-#define func_10010F88 func_10010F88_void
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_10010F88
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn description passed to func_15147A80. */
-typedef struct {
-    struct17 pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} TrailSpawn;
-
 /* One point of a trail's ring buffer (0x24 bytes). */
 typedef struct {
-    struct17 pos;
-    struct17 vel;
+    Vec3f pos;
+    Vec3f vel;
     f32 len;        /* distance to the newer neighbour */
     u8 alpha;
     u8 pad1D[3];
@@ -33,12 +15,12 @@ typedef struct {
 
 /* Trail state block (0x50 bytes), copied into trail->data at spawn. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad5[3];
-    struct17 unk8;
-    struct17 lastPos;
-    struct17 lastVel;
+    Vec3f unk8;
+    Vec3f lastPos;
+    Vec3f lastVel;
     f32 time;
     u16 sound;
     u8 pad32[2];
@@ -60,7 +42,7 @@ typedef struct {
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[3];
-    struct17 pos;
+    Vec3f pos;
     u16 unk1C;
     u16 flags;
     u8 pad20[5];
@@ -72,7 +54,7 @@ typedef struct {
     u8 pad2F;
     u8 unk30;
     u8 pad31[0x23];
-    struct17 unk54;
+    Vec3f unk54;
     u8 pad60[0x24];
     u8 unk84[0x10];
     TrailPoint *points;
@@ -81,35 +63,33 @@ typedef struct {
 
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
-extern s32 func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131828(void *, f32 *, void *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
-void func_150D8B10(struct127 *actor, struct17 *out) {
-    out->unk0 = actor->x_position;
-    out->unk4 = actor->y_position + 20.0f;
-    out->unk8 = actor->z_position;
+void func_150D8B10(Actor *actor, Vec3f *out) {
+    out->x = actor->x_position;
+    out->y = actor->y_position + 20.0f;
+    out->z = actor->z_position;
 }
 
-extern u8 D_800BE616;
-void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
+void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
 
 /* Trail launch vector from the actor (func_15145740's offset direction). */
-void func_150D8B3C(struct127 *actor, struct17 *out) {
-    struct17 target;
-    struct17 dir;
+void func_150D8B3C(Actor *actor, Vec3f *out) {
+    Vec3f target;
+    Vec3f dir;
 
     func_15145740(actor, &target, &dir, out, D_800BE616 ? 0.8400000334f : 1.15200007f);
 }
 
 /* Spawns a trail object that follows the actor. */
-void func_150D8B88(struct127 *actor) {
-    TrailSpawn spawn;
+void func_150D8B88(Actor *actor) {
+    EffectTemplate spawn;
     s32 pad; // matching: stack slot above data
     TrailData data;
-    struct17 pos;
+    Vec3f pos;
     Trail *trail;
     s32 variant;
 
@@ -144,10 +124,10 @@ void func_150D8B88(struct127 *actor) {
             }
         }
 
-        spawn.unk15 = 50;
-        spawn.unkC = 300;
-        spawn.unkE = 54;
-        spawn.unk10 = 2;
+        spawn.itemCount = 50;
+        spawn.life = 300;
+        spawn.flags = 54;
+        spawn.kind = 2;
         spawn.unk14 = 5;
         spawn.unk18 = 0;
 
@@ -159,14 +139,14 @@ void func_150D8B88(struct127 *actor) {
 }
 
 /* Advances pos by vel over dt under gravity. */
-void func_150D8D84(struct17 *pos, struct17 *vel, f32 dt) {
-    struct17 v0;
+void func_150D8D84(Vec3f *pos, Vec3f *vel, f32 dt) {
+    Vec3f v0;
 
     v0 = *vel;
-    vel->unk4 += -1.91200006f * dt;
-    pos->unk0 += v0.unk0 * dt;
-    pos->unk4 += (v0.unk4 * dt) + ((-0.95600003f * dt) * dt);
-    pos->unk8 += v0.unk8 * dt;
+    vel->y += -1.91200006f * dt;
+    pos->x += v0.x * dt;
+    pos->y += (v0.y * dt) + ((-0.95600003f * dt) * dt);
+    pos->z += v0.z * dt;
 }
 
 void func_150D8E1C(Trail *trail) {
@@ -201,9 +181,9 @@ s32 func_150D8E4C(Trail *trail) {
     if (trail->count > 0) {
         trail->unk54 = points[trail->tail].pos;
     } else {
-        trail->unk54.unk0 = 0.0f;
-        trail->unk54.unk4 = 0.0f;
-        trail->unk54.unk8 = 0.0f;
+        trail->unk54.x = 0.0f;
+        trail->unk54.y = 0.0f;
+        trail->unk54.z = 0.0f;
     }
 
     data->timer += D_800BE9E4;
@@ -221,15 +201,15 @@ s32 func_150D8E4C(Trail *trail) {
 s32 func_150D8FAC(Trail *trail) {
     TrailData *data;
     TrailPoint *points;
-    struct127 *actor;
-    struct17 pos;
-    struct17 vel;
+    Actor *actor;
+    Vec3f pos;
+    Vec3f vel;
     f32 time;
     f32 inv;
     u16 flags;
     f32 step;
-    struct17 dpos;
-    struct17 dvel;
+    Vec3f dpos;
+    Vec3f dvel;
 
     data = trail->data;
     points = trail->points;
@@ -244,7 +224,7 @@ s32 func_150D8FAC(Trail *trail) {
     func_150D8B3C(actor, &vel);
     trail->pos = pos;
     if (data->flags & 1) {
-        flags = actor->unk31C->unk8A;
+        flags = actor->unk31C->buttons;
         if (flags & 0x2000) {
             data->speedScale += 0.001379000023f * D_800BE9A4;
             if (data->speedScale > 0.04293100163f) {
@@ -259,38 +239,38 @@ s32 func_150D8FAC(Trail *trail) {
     }
     data->pending += 0.380000025f * D_800BE9A4;
     if (data->pending > 1.0f) {
-        struct17 cur;
-        struct17 curVel;
+        Vec3f cur;
+        Vec3f curVel;
         f32 dpx;
         f32 dpy;
         f32 dpz;
-        struct17 dvs;
+        Vec3f dvs;
 
         inv = 1.0f / data->pending;
         time = data->time + D_800BE9A4;
         cur = data->lastPos;
         curVel = data->lastVel;
         step = time * inv;
-        dpos.unk0 = pos.unk0 - data->lastPos.unk0;
-        dpos.unk4 = pos.unk4 - data->lastPos.unk4;
-        dpos.unk8 = pos.unk8 - data->lastPos.unk8;
-        dvel.unk0 = vel.unk0 - data->lastVel.unk0;
-        dvel.unk4 = vel.unk4 - data->lastVel.unk4;
-        dvel.unk8 = vel.unk8 - data->lastVel.unk8;
-        dpx = dpos.unk0 * inv;
-        dpy = dpos.unk4 * inv;
-        dpz = dpos.unk8 * inv;
-        dvs.unk0 = dvel.unk0 * inv;
-        dvs.unk4 = dvel.unk4 * inv;
-        dvs.unk8 = dvel.unk8 * inv;
+        dpos.x = pos.x - data->lastPos.x;
+        dpos.y = pos.y - data->lastPos.y;
+        dpos.z = pos.z - data->lastPos.z;
+        dvel.x = vel.x - data->lastVel.x;
+        dvel.y = vel.y - data->lastVel.y;
+        dvel.z = vel.z - data->lastVel.z;
+        dpx = dpos.x * inv;
+        dpy = dpos.y * inv;
+        dpz = dpos.z * inv;
+        dvs.x = dvel.x * inv;
+        dvs.y = dvel.y * inv;
+        dvs.z = dvel.z * inv;
         do {
             TrailPoint *point;
 
             point = &points[trail->head];
             point->pos = cur;
-            point->vel.unk0 = data->speedScale * curVel.unk0;
-            point->vel.unk4 = data->speedScale * curVel.unk4;
-            point->vel.unk8 = data->speedScale * curVel.unk8;
+            point->vel.x = data->speedScale * curVel.x;
+            point->vel.y = data->speedScale * curVel.y;
+            point->vel.z = data->speedScale * curVel.z;
             point->len = 0.0f;
             point->alpha = 255;
             point->texture = 0.0f;
@@ -309,12 +289,12 @@ s32 func_150D8FAC(Trail *trail) {
                 }
                 trail->count--;
             }
-            cur.unk0 += dpx;
-            cur.unk4 += dpy;
-            cur.unk8 += dpz;
-            curVel.unk0 += dvs.unk0;
-            curVel.unk4 += dvs.unk4;
-            curVel.unk8 += dvs.unk8;
+            cur.x += dpx;
+            cur.y += dpy;
+            cur.z += dpz;
+            curVel.x += dvs.x;
+            curVel.y += dvs.y;
+            curVel.z += dvs.z;
             data->pending -= 1.0f;
         } while (data->pending > 1.0f);
         data->lastPos = cur;
@@ -324,19 +304,13 @@ s32 func_150D8FAC(Trail *trail) {
     return 1;
 }
 
-/* Surface record of a ray hit (passed on to the particle spawners). */
-typedef struct {
-    u8 unk0[0x10];
-    u16 unk10;
-} RaySurface;
-
 /* Result of the func_15081690 ray cast. */
 typedef struct {
-    struct127 *obj;
+    Actor *obj;
     f32 dist;
-    struct17 pos;
+    Vec3f pos;
     u8 pad14[0x30];
-    RaySurface surface;
+    SurfaceTriangle surface;
     u8 pad56[3];
     u8 hit;             /* 0 none, 1 surface, 2+ object */
     u8 pad5A[0xE];
@@ -344,12 +318,11 @@ typedef struct {
 
 f32 sqrtf(f32);
 
-extern f32 func_150484A0(f32, f32);
 extern f32 func_15143E64(f32 *);
 extern f32 func_15144528(f32, f32, f32);
-extern void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
+extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1505D024(Actor *, s32, u16, s32);
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir);
 
 /*
@@ -372,8 +345,8 @@ s32 func_150D942C(Trail *trail) {
     TrailPoint *points;
     TrailPoint *prev;
     TrailData *data;
-    struct127 *owner;
-    struct127 *target;
+    Actor *owner;
+    Actor *target;
     f32 dx;
     f32 dz;
     s32 ownerIndex;
@@ -408,9 +381,9 @@ s32 func_150D942C(Trail *trail) {
                 i = trail->capacity - 1;
             }
             cur = &points[i];
-            delta[0] = cur->pos.unk0 - prev->pos.unk0;
-            delta[1] = cur->pos.unk4 - prev->pos.unk4;
-            delta[2] = cur->pos.unk8 - prev->pos.unk8;
+            delta[0] = cur->pos.x - prev->pos.x;
+            delta[1] = cur->pos.y - prev->pos.y;
+            delta[2] = cur->pos.z - prev->pos.z;
             len = func_15143E64(delta);
             totalLen += len;
             cur->len = len;
@@ -423,9 +396,9 @@ s32 func_150D942C(Trail *trail) {
                     dir[1] = delta[1] * invLen;
                     excess = (totalLen - maxLen) * invLen;
                     dir[2] = delta[2] * invLen;
-                    cur->pos.unk0 -= delta[0] * excess;
-                    cur->pos.unk4 -= delta[1] * excess;
-                    cur->pos.unk8 -= delta[2] * excess;
+                    cur->pos.x -= delta[0] * excess;
+                    cur->pos.y -= delta[1] * excess;
+                    cur->pos.z -= delta[2] * excess;
                     cur->len *= 1.0f - excess;
                 }
                 totalLen = maxLen;
@@ -445,7 +418,7 @@ s32 func_150D942C(Trail *trail) {
                     dir[1] = delta[1] * invLen;
                     dir[2] = delta[2] * invLen;
                 }
-                func_15081690(owner, prev->pos.unk0, prev->pos.unk4, prev->pos.unk8, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
+                func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
                 if (hit.hit != 0) {
                     func_150DA67C(trail, &hit, dir);
                     if (hit.hit >= 2) {
@@ -455,7 +428,7 @@ s32 func_150D942C(Trail *trail) {
                             target->unk232 = 10;
                             target->unk218 = NULL;
                         } else if (target->id == 0x10 && target->unk251 == 1) {
-                            func_1505A250(target->x_position - hit.pos.unk0, target->z_position - hit.pos.unk8,
+                            func_1505A250(target->x_position - hit.pos.x, target->z_position - hit.pos.z,
                                           ((1.0f - (totalLen - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f,
                                           &target->unk164, &target->unk168);
                             if (target->unk232 == 15) {
@@ -463,8 +436,8 @@ s32 func_150D942C(Trail *trail) {
                                 target->unk218 = NULL;
                             }
                         } else if (target->id == 0x10) {
-                            dx = cur->pos.unk0 - owner->x_position;
-                            dz = cur->pos.unk8 - owner->z_position;
+                            dx = cur->pos.x - owner->x_position;
+                            dz = cur->pos.z - owner->z_position;
                             if (target->unk232 == 16) {
                                 target->xz_velocity *= 0.7200000286f;
                                 excess = 1.0f / (sqrtf(dx * dx + dz * dz) * -0.07000000030f);
@@ -499,7 +472,7 @@ s32 func_150D942C(Trail *trail) {
                         trail->count--;
                     }
                     if (data->sound != 0) {
-                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.unk0, (s32)cur->pos.unk4, (s32)cur->pos.unk8, 500, 5000);
+                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.x, (s32)cur->pos.y, (s32)cur->pos.z, 500, 5000);
                     }
                 }
             }
@@ -558,25 +531,23 @@ s32 func_150D942C(Trail *trail) {
 }
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-struct17 *func_15144B34(s32);
+Vec3f *func_15144B34(s32);
 Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern u8 D_80091238[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */
 Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     TrailPoint *points;
-    struct17 next;
-    struct17 cur;
-    struct17 toCamera;
-    struct17 delta;
-    struct17 normal;
+    Vec3f next;
+    Vec3f cur;
+    Vec3f toCamera;
+    Vec3f delta;
+    Vec3f normal;
     TrailData *data;
-    struct17 *camera;
+    Vec3f *camera;
     s32 index;
     s32 previous;
     f32 lengthSquared;
@@ -623,30 +594,30 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     next = points[index].pos;
     alpha = points[index].alpha;
     nextTexture = points[index].texture;
-    delta.unk0 = cur.unk0 - next.unk0;
-    delta.unk4 = cur.unk4 - next.unk4;
-    delta.unk8 = cur.unk8 - next.unk8;
-    toCamera.unk0 = cur.unk0 - camera->unk0;
-    toCamera.unk4 = cur.unk4 - camera->unk4;
-    toCamera.unk8 = cur.unk8 - camera->unk8;
-    normal.unk0 = delta.unk4 * toCamera.unk8 - toCamera.unk4 * delta.unk8;
-    normal.unk4 = delta.unk8 * toCamera.unk0 - toCamera.unk8 * delta.unk0;
-    normal.unk8 = delta.unk0 * toCamera.unk4 - toCamera.unk0 * delta.unk4;
-    lengthSquared = normal.unk0 * normal.unk0 + normal.unk4 * normal.unk4 + normal.unk8 * normal.unk8;
+    delta.x = cur.x - next.x;
+    delta.y = cur.y - next.y;
+    delta.z = cur.z - next.z;
+    toCamera.x = cur.x - camera->x;
+    toCamera.y = cur.y - camera->y;
+    toCamera.z = cur.z - camera->z;
+    normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
+    normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
+    normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
+    lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
     if (lengthSquared != 0.0f) {
         f32 scale = 4.0f / sqrtf(lengthSquared);
 
-        normal.unk0 *= scale;
-        normal.unk4 *= scale;
-        normal.unk8 *= scale;
+        normal.x *= scale;
+        normal.y *= scale;
+        normal.z *= scale;
     } else {
-        normal.unk0 = 0.0f;
-        normal.unk4 = 0.0f;
-        normal.unk8 = 0.0f;
+        normal.x = 0.0f;
+        normal.y = 0.0f;
+        normal.z = 0.0f;
     }
-    vtx->ob[0] = cur.unk0 + normal.unk0;
-    vtx->ob[1] = cur.unk4 + normal.unk4;
-    vtx->ob[2] = cur.unk8 + normal.unk8;
+    vtx->ob[0] = cur.x + normal.x;
+    vtx->ob[1] = cur.y + normal.y;
+    vtx->ob[2] = cur.z + normal.z;
     vtx->tc[0] = curTexture;
     vtx->tc[1] = 0x400;
     vtx->cn[0] = 0xFF;
@@ -655,9 +626,9 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     vtx->cn[3] = alpha;
     vtx->flag = 0;
     vtx++;
-    vtx->ob[0] = cur.unk0 - normal.unk0;
-    vtx->ob[1] = cur.unk4 - normal.unk4;
-    vtx->ob[2] = cur.unk8 - normal.unk8;
+    vtx->ob[0] = cur.x - normal.x;
+    vtx->ob[1] = cur.y - normal.y;
+    vtx->ob[2] = cur.z - normal.z;
     vtx->tc[0] = curTexture;
     vtx->tc[1] = 0;
     vtx->cn[0] = 0xFF;
@@ -667,30 +638,30 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     vtx->flag = 0;
     vtx++;
     do {
-        delta.unk0 = cur.unk0 - next.unk0;
-        delta.unk4 = cur.unk4 - next.unk4;
-        delta.unk8 = cur.unk8 - next.unk8;
-        toCamera.unk0 = next.unk0 - camera->unk0;
-        toCamera.unk4 = next.unk4 - camera->unk4;
-        toCamera.unk8 = next.unk8 - camera->unk8;
-        normal.unk0 = delta.unk4 * toCamera.unk8 - toCamera.unk4 * delta.unk8;
-        normal.unk4 = delta.unk8 * toCamera.unk0 - toCamera.unk8 * delta.unk0;
-        normal.unk8 = delta.unk0 * toCamera.unk4 - toCamera.unk0 * delta.unk4;
-        lengthSquared = normal.unk0 * normal.unk0 + normal.unk4 * normal.unk4 + normal.unk8 * normal.unk8;
+        delta.x = cur.x - next.x;
+        delta.y = cur.y - next.y;
+        delta.z = cur.z - next.z;
+        toCamera.x = next.x - camera->x;
+        toCamera.y = next.y - camera->y;
+        toCamera.z = next.z - camera->z;
+        normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
+        normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
+        normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
+        lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
         if (lengthSquared != 0.0f) {
             f32 scale = 4.0f / sqrtf(lengthSquared);
 
-            normal.unk0 *= scale;
-            normal.unk4 *= scale;
-            normal.unk8 *= scale;
+            normal.x *= scale;
+            normal.y *= scale;
+            normal.z *= scale;
         } else {
-            normal.unk0 = 0.0f;
-            normal.unk4 = 0.0f;
-            normal.unk8 = 0.0f;
+            normal.x = 0.0f;
+            normal.y = 0.0f;
+            normal.z = 0.0f;
         }
-        vtx->ob[0] = next.unk0 + normal.unk0;
-        vtx->ob[1] = next.unk4 + normal.unk4;
-        vtx->ob[2] = next.unk8 + normal.unk8;
+        vtx->ob[0] = next.x + normal.x;
+        vtx->ob[1] = next.y + normal.y;
+        vtx->ob[2] = next.z + normal.z;
         vtx->tc[0] = nextTexture;
         vtx->tc[1] = 0x400;
         vtx->cn[0] = 0xFF;
@@ -699,9 +670,9 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
         vtx->cn[3] = alpha;
         vtx->flag = 0;
         vtx++;
-        vtx->ob[0] = next.unk0 - normal.unk0;
-        vtx->ob[1] = next.unk4 - normal.unk4;
-        vtx->ob[2] = next.unk8 - normal.unk8;
+        vtx->ob[0] = next.x - normal.x;
+        vtx->ob[1] = next.y - normal.y;
+        vtx->ob[2] = next.z - normal.z;
         vtx->tc[0] = nextTexture;
         vtx->tc[1] = 0;
         vtx->cn[0] = 0xFF;
@@ -760,10 +731,10 @@ void func_150DA4E0(Trail *trail) {
 
 /* Message broadcast to trails by func_15147D64. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     union {
         u8 ownerId;             /* types 0, 0x44 */
-        struct127 *other;       /* type 0x2D */
+        Actor *other;       /* type 0x2D */
     } x4;
     union {
         f32 speedScale;         /* type 0x44 */
@@ -777,7 +748,7 @@ typedef struct {
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
 void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
     TrailData *data = trail->data;
-    struct127 *owner;
+    Actor *owner;
 
     if (type == 0x44) {
         if ((msg->owner == data->owner) || (msg->x4.ownerId == data->ownerId)) {
@@ -805,7 +776,7 @@ void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
 extern void func_15147D64(TrailMessage *, s32);
 
 /* Sets the speed scale of every trail owned by the actor. */
-void func_150DA5EC(struct127 *actor, f32 speedScale) {
+void func_150DA5EC(Actor *actor, f32 speedScale) {
     TrailMessage msg;
 
     msg.owner = actor;
@@ -841,56 +812,18 @@ s32 func_150DA628(Spark *particle, s32 arg1) {
 }
 
 typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    s32 unk40;
-} ImpactEmitter; /* 0x44 */
-
-typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-typedef struct {
-    u8 unk0;
-    struct17 dir;
-    struct17 unk10;
-    struct17 unk1C;
-    f32 unk28;
-} ImpactCone; /* 0x2C */
-
-typedef struct {
-    struct17 dir;
-    RaySurface surface;
-    f32 unk20;
-} ImpactSpray; /* 0x24 */
-
 extern Spark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
-extern void func_15153CCC(ImpactCone *, ImpactEmitter *, ImpactOrigin *, u8, s32);
-extern void func_15153C84(ImpactSpray *, ImpactEmitter *, ImpactOrigin *, u8, s32);
+extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
+extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
     TrailData *data;
-    struct127 *target;
+    Actor *target;
 
     data = trail->data;
     target = hit->obj;
@@ -931,8 +864,8 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 spawn.offset.y = 0.0f;
                 spawn.offset.z = 0.0f;
                 spawn.scaleRate = 1.038234949f;
-                spawn.pos = *(vertex *)&hit->pos; // TODO(vectors): struct17/vertex mix
-                spawn.vel = *(vertex *)&D_800A5480;
+                spawn.pos = hit->pos;
+                spawn.vel = D_800A5480;
                 do {
                     sub.unk0 = func_150ADA20();
                     sub.unk1 = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
@@ -956,51 +889,51 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
         } else {
             data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
             if (data->impactAccum > 1.0f) {
-                ImpactEmitter emit;
+                SplashSpray emit;
                 ImpactOrigin origin;
 
                 func_150472C0(&origin, hit);
-                emit.unk0 = hit->pos;
-                emit.unkC = 3.480000019f;
-                emit.unk24 = 1;
-                emit.unk26 = 2;
-                emit.unk28 = 3;
-                emit.unk2A = 1;
-                emit.unk2C = 20;
-                emit.unk2E = 10;
+                emit.pos = hit->pos;
+                emit.scaleBase = 3.480000019f;
+                emit.countBase = 1;
+                emit.countRange = 2;
+                emit.itemCountBase = 3;
+                emit.itemCountRange = 1;
+                emit.lifeBase = 20;
+                emit.lifeRange = 10;
                 emit.unk30 = 200;
                 emit.unk32 = 55;
                 emit.unk3C = 16;
                 emit.unk3E = 15;
                 emit.unk40 = 0;
-                emit.unk34 = 3;
-                emit.unk10 = 2.659999847f;
-                emit.unk14 = 1.33100009f;
-                emit.unk18 = 1.160000086f;
-                emit.unk1C = 0.01499999966f;
-                emit.unk20 = 0.00699999975f;
+                emit.kind = 3;
+                emit.scaleRange = 2.659999847f;
+                emit.sizeBase = 1.33100009f;
+                emit.sizeRange = 1.160000086f;
+                emit.speedBase = 0.01499999966f;
+                emit.speedRange = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
                 if (hit->hit >= 2) {
-                    ImpactCone cone;
+                    ConeBasis cone;
 
-                    cone.unk0 = 1;
-                    cone.dir.unk0 = -dir[0];
-                    cone.dir.unk4 = -dir[1];
-                    cone.dir.unk8 = -dir[2];
-                    cone.unk10 = cone.unk1C = *(struct17 *)&D_800A5480;
-                    cone.unk28 = 300.0f;
+                    cone.flags = 1;
+                    cone.direction.x = -dir[0];
+                    cone.direction.y = -dir[1];
+                    cone.direction.z = -dir[2];
+                    cone.axis0 = cone.axis1 = D_800A5480;
+                    cone.spread = 300.0f;
                     do {
                         func_15153CCC(&cone, &emit, &origin, trail->unkC, trail->unk1);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 } else {
-                    ImpactSpray spray;
+                    TriangleSource spray;
 
-                    spray.dir.unk0 = -dir[0];
-                    spray.dir.unk4 = -dir[1];
-                    spray.dir.unk8 = -dir[2];
-                    spray.surface = hit->surface;
-                    spray.unk20 = 300.0f;
+                    spray.normal.x = -dir[0];
+                    spray.normal.y = -dir[1];
+                    spray.normal.z = -dir[2];
+                    spray.triangle = hit->surface;
+                    spray.spread = 300.0f;
                     do {
                         func_15153C84(&spray, &emit, &origin, trail->unkC, trail->unk1);
                         data->impactAccum -= 1.0f;

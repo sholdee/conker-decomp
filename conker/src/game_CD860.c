@@ -1,25 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3098
-
-/* struct178 (the D_800D3098 record) with the fields this file reads named. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8 pad8[0x8];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 pad15[2];
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 pad24[0x10];
-} Record_CD860; /* size 0x34 */
 
 /* A command/query message: an 8-byte header followed by word parameters. */
 typedef struct {
@@ -27,9 +8,6 @@ typedef struct {
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 params[5];
 } Msg_CD860;
-
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-extern Record_CD860 *D_800D3098;
 
 void func_150A3444(s32, s16, s16, s16);
 void func_151C970C(s32, void *);
@@ -67,8 +45,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     return 0;
 }
 
-extern s32 D_800D3840;
-struct127 *func_1505EEF4(s32);
+Actor *func_1505EEF4(s32);
 s32 func_150A2D84(s32, s32);
 s32 func_150A2EE4(s32, s32);
 s32 func_150A2FA4(s32, s32);
@@ -85,7 +62,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 pad; // matching: unused stack slot keeps `result` at the original sp offset
             s32 id;
             s32 result;
-            struct127 *obj;
+            Actor *obj;
             s32 ret = 0;
 
             id = msg->params[0] & 0xFFFF0FFF;
@@ -115,7 +92,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA == 0) {
+            if (D_800C35EA[0] == 0) {
                 return 1;
             }
             break;
@@ -131,21 +108,21 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA == 1) {
+            if (D_800C35EA[0] == 1) {
                 return 1;
             }
             break;
         }
     case 10:
         {
-            Record_CD860 *rec;
+            TriggerZone *rec;
             s32 hi;
             s32 lo;
 
             // matching: the no-op cast changes IDO's register numbering
-            rec = (Record_CD860 *)D_800D3098 + slot;
-            hi = rec->unk0;
-            lo = rec->unk4;
+            rec = (TriggerZone *)D_800D3098 + slot; // matching: the (no-op) cast orders the addu
+            hi = rec->x;
+            lo = rec->z;
             return (hi << 16) | (lo & 0xFFFF);
         }
     case 11:
@@ -164,13 +141,13 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             return 0;
         }
     case 7:
-        return D_800D3098[slot].unk14;
+        return D_800D3098[slot].disabled;
     case 13:
         {
             s32 pad; // matching: unused stack slot; removing it shifts the frame layout
             s32 id;
             s32 result;
-            struct127 *obj;
+            Actor *obj;
 
             id = msg->params[0] & 0xFFFF0FFF;
             switch (msg->params[0] & 0xF000) {
@@ -185,7 +162,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             return result;
         }
     case 14:
-        return D_800D3098[slot].unk2;
+        return D_800D3098[slot].y;
     case 15:
         if (func_150A2CA4(slot) == -1) {
             return 0;
@@ -218,7 +195,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
 
             which = msg->params[0];
             if (which == 0) {
-                return D_800D3098[slot].unk17;
+                return D_800D3098[slot].subtype;
             } else if (which == 1) {
                 return D_800D3098[slot].unk18;
             } else if (which == 2) {
@@ -229,7 +206,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             break;
         }
     case 18:
-        return D_800D3098[slot].unk10;
+        return D_800D3098[slot].yaw;
     }
     return 0;
 }

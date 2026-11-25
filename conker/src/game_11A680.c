@@ -1,46 +1,14 @@
-#define func_1514D3B0 func_1514D3B0_hdr
 #include <ultra64.h>
 #include "functions.h"
-#undef func_1514D3B0
 // matching: functions.h's (s32, s16, u8, u8) prototype changes the call; this file passes plain ints
-extern s32 func_1514D3B0(void *, s16, s32, s32);
 #include "variables.h"
 
-extern void func_151254F4(struct108 *camera, s32 index);
+extern void func_151254F4(Camera *camera, s32 index);
 extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
-/* File-local view of struct127.unk31C; structs.h's struct126 stops at 0x1AC, before the aim angles. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x75];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ u8 pad76[2];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0xB];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0x9B];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[7];
-    /* 0x128 */ u8 flags;
-    /* 0x129 */ s8 target;   /* index into D_800CC2D0, or -1 */
-    /* 0x12A */ s8 unk12A;
-    /* 0x12B */ u8 pad12B;
-    /* 0x12C */ u16 timer;   /* counts down by D_800BE9E4 */
-    /* 0x12E */ u8 pad12E[0x69];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 pad198[0x20];
-    /* 0x1B8 */ f32 aimPitch; /* degrees, clamped to [-20, 80] */
-    /* 0x1BC */ f32 aimYaw;   /* degrees, wrapped to [0, 360) */
-} ObjState;
 
-#define STATE(obj) ((ObjState *)(obj)->unk31C)
-
-/* variables.h declares these as plain arrays: D_800BE748 is the OSContPad array and
-   D_800BE728 holds a pointer to the per-controller OSContPad pointers. */
-#define PADS ((OSContPad *)D_800BE748)
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
-/* struct127 (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
+/* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
 
 /* Signed angle in degrees from `from` to `to`, in (-180, 180]. */
@@ -56,7 +24,7 @@ f32 func_150ED1D0(f32 from, f32 to) {
 }
 
 /* Signed angle in degrees from `self`'s heading (unk40) to the direction of `target`. */
-f32 func_150ED234(struct127 *self, struct127 *target) {
+f32 func_150ED234(Actor *self, Actor *target) {
     s32 angle;
 
     angle = func_1505A630(target->x_position - self->x_position, self->z_position - target->z_position, 0) + 0x4000;
@@ -72,7 +40,7 @@ extern void func_150A7960(f32 *mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f3
  * Returns how far the shell lands short (+) or long (-) of the target, or, when the target is too high
  * to reach, 1000 times the extra elevation it needs.
  */
-f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
+f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
     Mtx *bones;
     f32 gravity;
     f32 disc;
@@ -88,7 +56,7 @@ f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targe
     f32 time;
     f32 result;
     f32 root;
-    f32 mf[4][4];
+    MtxF mf;
     f32 firstTime;
 
     if (obj->unk1D4 != NULL) {
@@ -143,21 +111,21 @@ f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targe
 }
 
 /* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with unk197 set. */
-void func_150ED578(struct127 *obj) {
-    struct126 *state;
+void func_150ED578(Actor *obj) {
+    ActorCtl *state;
     s32 player;
-    struct127 *owner;
-    struct108 *camera;
+    Actor *owner;
+    Camera *camera;
 
     state = obj->unk31C;
     if ((state != NULL) && (state->unk84 == 0)) {
         player = D_800BE616 ? obj->unk127 : obj->unk124;
-        if (CONT_PADS[player]->button & R_TRIG) {
+        if (D_800BE728[player]->button & R_TRIG) {
             owner = &D_800CC2D0[player];
-            if (STATE(owner)->unk197 != 0) {
+            if (owner->unk31C->aimState != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
-                    obj->pad2FC[0] |= 1 << camera->unk23D;
+                    obj->unk2FC |= 1 << camera->playerIndex;
                 }
             }
         }
@@ -165,10 +133,10 @@ void func_150ED578(struct127 *obj) {
 }
 
 // matching: arg2 as s32 here; the u8 of game_83300.c's definition would add a narrowing
-extern void func_15062FC0(struct127 *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
+extern void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 
 /* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
-void func_150ED638(struct127 *obj, s32 left, s32 right) {
+void func_150ED638(Actor *obj, s32 left, s32 right) {
     s32 temp;
     s32 size;
 
@@ -188,13 +156,12 @@ void func_150ED638(struct127 *obj, s32 left, s32 right) {
     func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
-extern s8 D_800E0BCE[];
 extern s32 func_1508DAEC(s32 player, s32 mode);
 extern struct216 *func_1507BB28(s32 arg0, s32 scriptId);
-extern void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
-extern void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
+extern void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
+extern void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern void func_15052590(struct127 *obj);
+extern void func_15052590(Actor *obj);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
@@ -207,7 +174,7 @@ extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hi
  *   the pitch homes in on the best object ahead, or follow the line of sight of camera camSlot - 1.
  *   They end up in unk2E4 as two s16 angles (x50).
  */
-void func_150ED748(struct127 *obj) {
+void func_150ED748(Actor *obj) {
     s32 viewer[1]; // matching: an array keeps the viewer index in memory; a scalar is register-allocated
     f32 velocity;
     s32 health;
@@ -226,12 +193,12 @@ void func_150ED748(struct127 *obj) {
     s32 right;
     s32 stateFlags;
     f32 blend;
-    struct127 *driver;
-    struct127 *other;
+    Actor *driver;
+    Actor *other;
     s32 reversing;
     OSContPad *pad;
     s8 unused1; // matching: unused, but keeps the stack layout
-    struct127 *target;
+    Actor *target;
     f32 aimOffset;
     f32 heading;
     f32 leadX;
@@ -264,8 +231,8 @@ void func_150ED748(struct127 *obj) {
     f32 farPoint[3];
     f32 tNear;
     f32 tFar;
-    struct108 *camera;
-    struct127 *subject;
+    Camera *camera;
+    Actor *subject;
 
     health = 1;
     if (D_800BE616) {
@@ -273,7 +240,7 @@ void func_150ED748(struct127 *obj) {
     } else {
         viewer[0] = 0;
     }
-    obj->pad2FC[0] = 0;
+    obj->unk2FC = 0;
     obj->unk124 = 0;
     controlled = 0;
     player = obj->unk124;
@@ -300,18 +267,18 @@ void func_150ED748(struct127 *obj) {
             }
             driver = &D_800CC2D0[player];
             if (driver->health != 0) {
-                if (STATE(driver)->flags & 0x80) {
-                    if (STATE(driver)->timer != 0) {
+                if (driver->unk31C->unk128 & 0x80) {
+                    if (driver->unk31C->unk12C != 0) {
                         obj->immune = 0xFF;
-                        if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
-                            STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
+                        if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
+                            D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
                         } else {
-                            STATE(&D_800CC2D0[player])->timer = 0;
+                            D_800CC2D0[player].unk31C->unk12C = 0;
                             func_1508DAEC(player, 0);
                             obj->immune = 0;
                         }
                     }
-                } else if ((STATE(driver)->flags & 0x10) && (STATE(driver)->timer == 0)) {
+                } else if ((driver->unk31C->unk128 & 0x10) && (driver->unk31C->unk12C == 0)) {
                     func_1508DAEC(player, 0);
                 }
             }
@@ -324,20 +291,20 @@ void func_150ED748(struct127 *obj) {
         lockFlags = 0;
         health = D_800CC2D0[player].health;
         if (health != 0) {
-            steer = PADS[player].stick_x;
+            steer = D_800BE748[player].stick_x;
             obj->unk247 = 50;
             obj->unk248 = 50;
             throttleScale = 0.6399999857f;
-            stateFlags = STATE(&D_800CC2D0[player])->flags;
-            if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (STATE(&D_800CC2D0[player])->timer != 0)) {
+            stateFlags = D_800CC2D0[player].unk31C->unk128;
+            if ((stateFlags & 1) && (D_800BE728[player]->button & A_BUTTON) && (D_800CC2D0[player].unk31C->unk12C != 0)) {
                 obj->unk247 = 28;
                 obj->unk248 = 28;
-                PADS[player].stick_y = 80;
+                D_800BE748[player].stick_y = 80;
                 throttleScale += throttleScale;
-                if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
-                    STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
+                if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
+                    D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
                 } else {
-                    STATE(&D_800CC2D0[player])->timer = 0;
+                    D_800CC2D0[player].unk31C->unk12C = 0;
                     func_1508DAEC(player, 0);
                 }
             }
@@ -346,7 +313,7 @@ void func_150ED748(struct127 *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((CONT_PADS[player]->button & R_TRIG) && ((STATE(&D_800CC2D0[player])->flags & 2) || (D_800BE616 == 0))) {
+            if ((D_800BE728[player]->button & R_TRIG) && ((D_800CC2D0[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -379,12 +346,12 @@ void func_150ED748(struct127 *obj) {
             throttleScale = 0.0f;
             obj->disable_run--;
         }
-        obj->unk44 = PADS[player].stick_y * throttleScale;
-        STATE(&D_800CC2D0[player])->unk75 = lockFlags;
-        STATE(&D_800CC2D0[player])->unk78 = lockFlags;
+        obj->unk44 = D_800BE748[player].stick_y * throttleScale;
+        D_800CC2D0[player].unk31C->unk75 = lockFlags;
+        D_800CC2D0[player].unk31C->unk78 = lockFlags;
     } else if (D_800C3E78 < D_8008FD8C) {
         func_1504C854(obj);
-        if ((player < 4) && (CONT_PADS[player]->button & Z_TRIG)) {
+        if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
             D_800CC288 = Z_TRIG;
         }
         if (D_800CC288 & Z_TRIG) {
@@ -393,7 +360,7 @@ void func_150ED748(struct127 *obj) {
     }
     obj->unk247 = 50;
     obj->unk248 = 50;
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (STATE(obj)->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
         func_15052590(obj);
     }
     if (obj->interaction_state != 0) {
@@ -401,7 +368,7 @@ void func_150ED748(struct127 *obj) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
             subject = &D_800CC2D0[obj->unk124];
-            if ((subject->unk65 == 0) && (STATE(subject)->unk78 == 0) && (obj->unk25C & 0x400)) {
+            if ((subject->unk65 == 0) && (subject->unk31C->unk78 == 0) && (obj->unk25C & 0x400)) {
                 if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
                 } else if ((subject->disable_run == 0) && (subject->unk28 > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
@@ -443,15 +410,15 @@ void func_150ED748(struct127 *obj) {
                 func_1514D3B0(obj, 25, 14, 0);
             }
             reversing = reversing ? 12 : 15;
-            ((u8 *)&obj->pad6C)[0] = reversing + 10;
-            ((u8 *)&obj->pad6C)[1] = 19;
+            obj->eyeCode[0] = reversing + 10;
+            obj->eyeCode[1] = 19;
         }
         /* Gun aim. */
         if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
-            if (STATE(obj)->target >= 0) {
+            if (obj->unk31C->unk129 >= 0) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
-                target = &D_800CC2D0[STATE(obj)->target];
+                target = &D_800CC2D0[obj->unk31C->unk129];
                 offset = target->x_position - obj->x_position;
                 score = target->z_position - obj->z_position;
                 lead = sqrtf(offset * offset + score * score) / 200.0f;
@@ -465,14 +432,14 @@ void func_150ED748(struct127 *obj) {
                 dirX = sinf(bearing) * cosf(obj->unkC4 * 0.01745329238f);
                 dirZ = cosf(bearing) * cosf(obj->unkB8 * 0.01745329238f);
                 angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
-                aimOffset = STATE(obj)->unk12A * 400.0f;
-                STATE(obj)->aimYaw -= func_150ED1D0(angle * 57.29577637f + STATE(obj)->unk12A * 10.0f, STATE(obj)->aimYaw) * 0.125f;
-                STATE(obj)->aimPitch += func_150ED298(obj, STATE(obj)->aimPitch - obj->unkB8, target->x_position, target->y_position, target->z_position, aimOffset) * 0.001000000047f;
+                aimOffset = obj->unk31C->unk12A * 400.0f;
+                obj->unk31C->unk1BC -= func_150ED1D0(angle * 57.29577637f + obj->unk31C->unk12A * 10.0f, obj->unk31C->unk1BC) * 0.125f;
+                obj->unk31C->unk1B8 += func_150ED298(obj, obj->unk31C->unk1B8 - obj->unkB8, target->x_position, target->y_position, target->z_position, aimOffset) * 0.001000000047f;
                 target->x_position -= leadX;
                 target->z_position -= leadZ;
             } else {
-                STATE(obj)->aimYaw *= 0.8999999762f;
-                STATE(obj)->aimPitch *= 0.8999999762f;
+                obj->unk31C->unk1BC *= 0.8999999762f;
+                obj->unk31C->unk1B8 *= 0.8999999762f;
             }
         } else if (controlled && health) {
             typedef s32 scope; // matching: as above
@@ -484,15 +451,15 @@ void func_150ED748(struct127 *obj) {
             if ((D_800BE616 != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
                 camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
-                pad = &PADS[viewer[0]];
+                pad = &D_800BE748[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
-                    STATE(obj)->aimYaw += yawStep;
+                    obj->unk31C->unk1BC += yawStep;
                 }
                 if (pad->button & L_CBUTTONS) {
-                    STATE(obj)->aimYaw -= yawStep;
+                    obj->unk31C->unk1BC -= yawStep;
                 }
             }
-            if (STATE(&D_800CC2D0[player])->unk197 != 0) {
+            if (D_800CC2D0[player].unk31C->aimState != 0) {
                 camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
@@ -506,7 +473,7 @@ void func_150ED748(struct127 *obj) {
                         if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
-                        offset = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
+                        offset = func_150ED1D0(func_150ED234(obj, other), obj->unk31C->unk1BC);
                         score = offset;
                         if (offset < 0.0f) {
                             score = -offset;
@@ -538,7 +505,7 @@ void func_150ED748(struct127 *obj) {
                     if (D_800BE616 != 0) {
                         limit = subject->y_position + 40.0f;
                     } else {
-                        limit = ((s16 *)&subject->pad1A8)[1];
+                        limit = subject->aim.topY;
                     }
                     deltaZ = func_150ED298(obj, 0.0f, subject->x_position, limit, subject->z_position, 0.0f) * 0.001000000047f;
                     limit = 4.0f * D_800BE9A4;
@@ -548,14 +515,14 @@ void func_150ED748(struct127 *obj) {
                     if (deltaZ < -limit) {
                         deltaZ = -limit;
                     }
-                    STATE(obj)->aimPitch += deltaZ;
+                    obj->unk31C->unk1B8 += deltaZ;
                 } else {
-                    STATE(obj)->aimPitch *= 0.8999999762f;
+                    obj->unk31C->unk1B8 *= 0.8999999762f;
                 }
             } else {
                 camera = &D_800DBFF0[camSlot - 1];
-                subject = camera->unk3D4;
-                if (camera->unk3D4->unk197 != 0) {
+                subject = camera->playerExt;
+                if (camera->playerExt->aimState != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->unk170;
@@ -575,90 +542,90 @@ void func_150ED748(struct127 *obj) {
                     while (angle2 < -180.0f) {
                         angle2 += 360.0f;
                     }
-                    STATE(obj)->aimPitch = angle;
-                    STATE(obj)->aimYaw = angle2;
+                    obj->unk31C->unk1B8 = angle;
+                    obj->unk31C->unk1BC = angle2;
                 } else {
                     /* Aim at what the camera's look ray hits: level geometry or another object. */
-                    dir[0] = camera->unk2BC - camera->unk2F8;
-                    dir[1] = camera->unk2C0 - camera->unk2FC;
-                    dir[2] = camera->unk2C4 - camera->unk300;
+                    dir[0] = camera->target.x - camera->eye.x;
+                    dir[1] = camera->target.y - camera->eye.y;
+                    dir[2] = camera->target.z - camera->eye.z;
                     score = 1.0f / sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
                     dir[0] *= score;
                     dir[1] *= score;
                     dir[2] *= score;
                     dist = 100000.0f;
-                    hit = func_150AC9C0(camera->unk2F8, camera->unk2FC, camera->unk300, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
+                    hit = func_150AC9C0(camera->eye.x, camera->eye.y, camera->eye.z, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
                     if (hit != 0) {
                         hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
-                        if (*(u8 *)&obj->pad128 != *(u8 *)&D_800CC2D0[j].pad128) {
-                            hitX = D_800CC2D0[j].x_position - camera->unk2F8;
-                            hitZ = D_800CC2D0[j].z_position - camera->unk300;
+                        if (obj->team != D_800CC2D0[j].team) {
+                            hitX = D_800CC2D0[j].x_position - camera->eye.x;
+                            hitZ = D_800CC2D0[j].z_position - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&camera->unk2F8, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                if (func_151452C4(&camera->eye.x, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
                                     dist = tNear;
                                     hit = 2;
                                 }
                             }
                         }
                     }
-                    *(u8 *)&subject->pad128 &= ~0x40;
+                    subject->team &= ~0x40;
                     if (hit != 0) {
                         if (hit == 2) {
-                            *(u8 *)&subject->pad128 |= 0x40;
+                            subject->team |= 0x40;
                         }
-                        hitX = dir[0] * dist + camera->unk2F8;
-                        hitY = dir[1] * dist + camera->unk2FC;
-                        hitZ = dir[2] * dist + camera->unk300;
-                        STATE(obj)->aimPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
+                        hitX = dir[0] * dist + camera->eye.x;
+                        hitY = dir[1] * dist + camera->eye.y;
+                        hitZ = dir[2] * dist + camera->eye.z;
+                        obj->unk31C->unk1B8 += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
-                        STATE(obj)->aimPitch *= 0.8999999762f;
+                        obj->unk31C->unk1B8 *= 0.8999999762f;
                     }
                 }
             }
         }
-        if (STATE(obj)->aimPitch < -20.0f) {
-            STATE(obj)->aimPitch = -20.0f;
+        if (obj->unk31C->unk1B8 < -20.0f) {
+            obj->unk31C->unk1B8 = -20.0f;
         }
-        if (STATE(obj)->aimPitch > 80.0f) {
-            STATE(obj)->aimPitch = 80.0f;
+        if (obj->unk31C->unk1B8 > 80.0f) {
+            obj->unk31C->unk1B8 = 80.0f;
         }
-        if (STATE(obj)->aimYaw > 360.0f) {
-            STATE(obj)->aimYaw -= 360.0f;
+        if (obj->unk31C->unk1BC > 360.0f) {
+            obj->unk31C->unk1BC -= 360.0f;
         }
-        if (STATE(obj)->aimYaw < 0.0f) {
-            STATE(obj)->aimYaw += 360.0f;
+        if (obj->unk31C->unk1BC < 0.0f) {
+            obj->unk31C->unk1BC += 360.0f;
         }
-        ((s16 *)&obj->unk2E4)[0] = STATE(obj)->aimYaw * 50.0f;
-        ((s16 *)&obj->unk2E4)[1] = -(s16)(STATE(obj)->aimPitch * 50.0f);
+        ((s16 *)&obj->unk2E4)[0] = obj->unk31C->unk1BC * 50.0f;
+        ((s16 *)&obj->unk2E4)[1] = -(s16)(obj->unk31C->unk1B8 * 50.0f);
     }
 }
 
 /* Sets `obj` to state 3 (immune) and gives its camera back to player object 0 or 1, clearing that pad's R. */
-void func_150EEC84(struct127 *obj) {
-    struct108 *camera;
-    struct127 *player;
+void func_150EEC84(Actor *obj) {
+    Camera *camera;
+    Actor *player;
     s32 index;
 
     obj->unk5 = 3;
-    obj->unkE4 = 0;
+    obj->bodyRadius = 0;
     obj->immune = 0xFF;
-    obj->pad320[8] = 0;
+    obj->unk328 = 0;
     if (obj->camera != NULL) {
         camera = obj->camera;
         index = 0;
-        if (camera->unk23D == 3) {
+        if (camera->playerIndex == 3) {
             index = 1;
         }
         func_151254F4(camera, index);
         obj->unk31C->unk78 = 0x29;
-        PADS[index].button &= ~R_TRIG;
+        D_800BE748[index].button &= ~R_TRIG;
         player = &D_800CC2D0[index];
-        player->pad2FC[0] |= 1 << camera->unk23D;
-        if (player->pad10A != 0) {
-            func_1517F488(0xFF, 0, 0, 180, 20, camera->unk23D);
-            player->pad10A = 0;
+        player->unk2FC |= 1 << camera->playerIndex;
+        if (player->unk10A != 0) {
+            func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
+            player->unk10A = 0;
         }
     }
 }
@@ -666,11 +633,11 @@ void func_150EEC84(struct127 *obj) {
 extern void func_151045E0(void *, s32, f32);
 
 /* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
-void func_150EEDA8(struct127 *obj) {
+void func_150EEDA8(Actor *obj) {
     if (obj->unk5 != 3) {
         func_151045E0(obj, 15, 250.0f);
         obj->unk5 = 3;
-        obj->unkE4 = 0;
+        obj->bodyRadius = 0;
         obj->immune = 0xFF;
     }
     func_15052590(obj);

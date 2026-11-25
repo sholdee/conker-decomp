@@ -1,15 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
 
 /*
  * A streak particle: a camera-facing triangle from its tail point to a
@@ -17,10 +11,10 @@ typedef struct {
  */
 typedef struct {
     /* 0x00 */ u8 header[0x10];
-    /* 0x10 */ vertex headPos;
-    /* 0x1C */ vertex headVel;
-    /* 0x28 */ vertex tailPos;
-    /* 0x34 */ vertex tailVel;
+    /* 0x10 */ Vec3f headPos;
+    /* 0x1C */ Vec3f headVel;
+    /* 0x28 */ Vec3f tailPos;
+    /* 0x34 */ Vec3f tailVel;
     /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
     /* 0x42 */ s16 lifetime;
     /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
@@ -33,29 +27,12 @@ typedef struct {
     /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
 } StreakParticle;
 
-/* Spawn parameters for a streak particle. */
-typedef struct {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex dir;
-    /* 0x18 */ f32 headSpeed;
-    /* 0x1C */ f32 tailSpeed;
-    /* 0x20 */ Color8 headColor;
-    /* 0x24 */ Color8 tailColor;
-    /* 0x28 */ u8 flags;
-    /* 0x2A */ s16 lifetime;
-    /* 0x2C */ u16 renderMode;
-    /* 0x30 */ f32 width;
-    /* 0x34 */ u8 alpha;
-    /* 0x36 */ s16 fadeStart;
-    /* 0x38 */ s16 fadeRate;
-} StreakParticleDesc;
-
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
 StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
-    vertex pos;
+    Vec3f pos;
 
     switch (kind) {
         case 0:
@@ -171,10 +148,10 @@ f32 sqrtf(f32);
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
 Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     StreakParticle *p;
-    vertex axis;
-    vertex toEye;
-    vertex side;
-    vertex *eye;
+    Vec3f axis;
+    Vec3f toEye;
+    Vec3f side;
+    Vec3f *eye;
     f32 lengthSquared;
     u8 needSync;
     s16 cullFlags;
@@ -192,7 +169,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
         memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
         memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
     }
-    eye = (vertex *)&D_800DBFF0[viewIndex].unk2F8;
+    eye = &D_800DBFF0[viewIndex].eye;
     needSync = TRUE;
     cullFlags = particle->flags & 6;
     mode = particle->renderMode & 0xFF;
@@ -244,79 +221,9 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     return gfx;
 }
 
-/* A burst of streak particles (func_151539B4); same layout as struct Local151539B4Arg in game_17CAF0.c. */
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ vertex pos;
-    /* 0x10 */ s16 yawBase;
-    /* 0x12 */ s16 pitchBase;
-    /* 0x14 */ s16 yawRange;
-    /* 0x16 */ s16 pitchRange;
-    /* 0x18 */ f32 headSpeedBase;
-    /* 0x1C */ f32 headSpeedRange;
-    /* 0x20 */ f32 tailSpeedBase;
-    /* 0x24 */ f32 tailSpeedRange;
-    /* 0x28 */ Color8 headColor;
-    /* 0x2C */ Color8 tailColor;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31;
-    /* 0x32 */ s16 lifetimeBase;
-    /* 0x34 */ s16 lifetimeRange;
-    /* 0x36 */ u16 renderMode;
-    /* 0x38 */ f32 widthBase;
-    /* 0x3C */ f32 widthRange;
-    /* 0x40 */ u8 alphaBase;
-    /* 0x41 */ u8 alphaRange;
-    /* 0x42 */ s16 fadeStart;
-    /* 0x44 */ s16 fadeRate;
-    /* 0x46 */ u8 kind;
-} StreakBurstDesc;
-
-typedef struct {
-    f32 width;
-    f32 height;
-} ParticleSize;
-
-/* Spawn parameters of a particle (func_15130374); same layout as ParticleDesc in game_15D730.c. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ ParticleSize size;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ u8 pad64[0xC];
-} ParticleSpawnDesc;
-
 /* A streak burst plus one particle at the same point (func_151568F8). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 countBase;
     /* 0x0E */ s16 countRange;
     /* 0x10 */ s16 yawBase;
@@ -372,16 +279,16 @@ typedef struct {
     /* 0x8C */ u8 unk8C;
 } StreakBurstEffectDesc;
 
-extern void func_151539B4(StreakBurstDesc *, u8);
-extern void func_15130374(ParticleSpawnDesc *, u8, s32, u8, s32);
+extern void func_151539B4(StreakBurst *, u8);
+extern void func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns the streak burst and the particle described by desc. */
 void func_151568F8(desc, owner)
     StreakBurstEffectDesc *desc;
     u8 owner;
 {
-    StreakBurstDesc burst;
-    ParticleSpawnDesc particle;
+    StreakBurst burst;
+    ParticleDesc particle;
 
     burst.countBase = desc->countBase;
     burst.countRange = desc->countRange;
@@ -441,7 +348,7 @@ void func_151568F8(desc, owner)
     particle.scaleStart = desc->particleScaleStart;
     particle.scaleRate = desc->particleScaleRate;
     particle.timer = desc->particleTimer;
-    particle.size = desc->particleSize;
+    *(ParticleSize *)&particle.width = desc->particleSize; // matching: width and height are copied as one struct
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;
@@ -450,17 +357,6 @@ void func_151568F8(desc, owner)
 }
 
 void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
-
-/* Common head of effect objects (same layout as Game113D60EffectHeader in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-} EffectHeader;
 
 /* A countdown restarted at base + rand() % (range + 1). */
 typedef struct {
@@ -472,6 +368,7 @@ typedef struct {
 /* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 

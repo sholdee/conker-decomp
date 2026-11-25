@@ -2,14 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
 
 /* The object a trail follows. */
 typedef struct {
     s32 unk0;
     u8 pad4[0x10];
-    TrailVec3 pos;
+    Vec3f pos;
     u8 pad20[0x1B];
     u8 unk3B;
 } TrailOwner;
@@ -17,7 +16,7 @@ typedef struct {
 /* Optional anchor that overrides the owner's position. */
 typedef struct {
     u8 pad0[0x40];
-    TrailVec3 pos;
+    Vec3f pos;
 } TrailAnchor;
 
 #define TRAIL_HAS_POS 4 /* TrailObj.flags: pos holds a valid previous position */
@@ -35,7 +34,7 @@ typedef struct {
 } TrailInfo;
 
 typedef struct {
-    TrailVec3 pos;
+    Vec3f pos;
     f32 dist;
     f32 invLen;
     f32 unk14;
@@ -45,7 +44,7 @@ typedef struct {
 
 typedef struct {
     u8 pad0[0x10];
-    TrailVec3 pos;
+    Vec3f pos;
     u8 pad1C[2];
     u16 flags;
     u8 pad20[5];
@@ -60,7 +59,7 @@ typedef struct {
 } TrailObj;
 
 /* Writes the point a trail is attached to: the anchor's position if there is one, else the owner's. */
-s32 func_151CEC10(TrailVec3 *out, TrailOwner *owner, TrailAnchor *anchor) {
+s32 func_151CEC10(Vec3f *out, TrailOwner *owner, TrailAnchor *anchor) {
     if (anchor != NULL) {
         *out = anchor->pos;
     } else {
@@ -71,7 +70,7 @@ s32 func_151CEC10(TrailVec3 *out, TrailOwner *owner, TrailAnchor *anchor) {
     return TRUE;
 }
 
-f32 func_15143E64(TrailVec3 *);
+f32 func_15143E64(Vec3f *);
 
 /*
  * Follows the trail's attachment point and, once it has moved far enough, pushes it as the newest point
@@ -84,8 +83,8 @@ s32 func_151CEC54(TrailObj *trail) {
     TrailEntry *entries;
     TrailOwner *owner;
     TrailAnchor *anchor;
-    TrailVec3 prev;
-    TrailVec3 delta;
+    Vec3f prev;
+    Vec3f delta;
     f32 dist;
     f32 len;
     f32 inv;

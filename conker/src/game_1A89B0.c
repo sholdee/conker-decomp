@@ -137,7 +137,6 @@ s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     return 0;
 }
 
-extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern Game1A89B0Position *D_800DDD18;
 
 /* Quicksorts D_800DDD18[first..last] by x, or by z when D_8008CEB4 is set (pivot = last element). */
@@ -192,14 +191,6 @@ typedef struct {
     s16 unk2;
 } Game1A89B0AnimRef;
 
-typedef struct {
-    s32 devAddr;
-    s32 size;
-    s32 buf;
-    u8 used; /* set when a sprite of this type was built this frame */
-    u8 padD[3];
-} Game1A89B0TexFile;
-
 /* Texture coordinate extents of a sprite type's frame. */
 typedef struct {
     s16 s;
@@ -210,14 +201,7 @@ extern Game1A89B0Anim D_8008CEBC[];
 extern Game1A89B0AnimRef D_8008CF00[][8];
 /* Per sprite type (15 types) unless noted: */
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
-extern s16 D_800DDC90[];   /* animation phases, 4 per type (frame << 8) */
 extern Game1A89B0TexSize D_800DDB80[];
-extern u8 D_800DDBC0[];    /* index into D_80095CE0 */
-extern u8 D_800DDBD0[];    /* frame count the phases cycle through */
-extern u8 D_800DDBE0[];    /* frame shown while a sprite is disturbed (unkB >= 0x21) */
-extern u8 D_800DDBF0[];    /* draw pass (see func_1517D7B0) */
-extern u8 D_800DDC10[];    /* per-phase direction bits for ping-pong animation */
-extern u8 D_800DDC80[];    /* row of D_8008CF00 */
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
@@ -226,12 +210,10 @@ extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x ==
 extern void func_10004074(s32);
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
-#define sTexFiles ((Game1A89B0TexFile *)&D_800DDA90)
 #define FRAMES_PER_TYPE 26
-#define sFrames ((s32 *)&D_800DD478) /* [15][FRAMES_PER_TYPE], indexed by a vertex's texture id */
 
 /* This frame's sprite vertex buffer, four vertices per sprite. */
-#define VTX(n) (((Vtx *) D_800DDD10[D_800BE9C0])[n])
+#define VTX(n) (((Vtx *)(s32)D_800DDD10[D_800BE9C0])[n]) // matching: the int round trip keeps the original addressing
 
 /* Whether sorted sprite k is still inside the box, walking from its near edge in direction dir along the axis. */
 #define IN_WINDOW(k)                                                                \
@@ -344,12 +326,12 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     i = mid;
     if (IN_WINDOW(mid)) {
         j = ((u32) D_800DDD20 < (u32) D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
-        D_800DDD10[D_800BE9C0] = (s32) allocate_memory(j << 6, 4, 2, 0);
-        if (D_800DDD10[D_800BE9C0] == 0) {
+        D_800DDD10[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
+        if (D_800DDD10[D_800BE9C0] == NULL) {
             return;
         }
     } else {
-        D_800DDD10[D_800BE9C0] = 0;
+        D_800DDD10[D_800BE9C0] = NULL;
         return;
     }
     for (j = 0; (u32) j < (u32) D_800DDD0C && IN_WINDOW(i); i += dir) {
@@ -364,29 +346,29 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                 if (fadeDist < 240) {
                     dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
                 }
-                if (sFrames[type * FRAMES_PER_TYPE] == 0) {
-                    if (sTexFiles[type].devAddr != 0) {
+                if (D_800DD478[type * FRAMES_PER_TYPE] == 0) {
+                    if (D_800DDA90[type].devAddr != 0) {
                         hi = D_80095CE0[D_800DDBC0[type]].frameSize * D_80095CE0[D_800DDBC0[type]].frameCount;
-                        sTexFiles[type].buf = func_10003C6C(sTexFiles[type].size, 1, 2, 1, 0);
-                        if (sTexFiles[type].buf != 0) {
-                            sFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
-                            if (sFrames[type * FRAMES_PER_TYPE] != 0) {
-                                func_10004514(sTexFiles[type].devAddr, (void *) sTexFiles[type].buf, sTexFiles[type].size, 1);
-                                sTexFiles[type].used = 1;
+                        D_800DDA90[type].buf = func_10003C6C(D_800DDA90[type].size, 1, 2, 1, 0);
+                        if (D_800DDA90[type].buf != 0) {
+                            D_800DD478[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
+                            if (D_800DD478[type * FRAMES_PER_TYPE] != 0) {
+                                func_10004514(D_800DDA90[type].devAddr, (void *) D_800DDA90[type].buf, D_800DDA90[type].size, 1);
+                                D_800DDA90[type].used = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
-                                    sFrames[type * FRAMES_PER_TYPE + frame] = sFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
+                                    D_800DD478[type * FRAMES_PER_TYPE + frame] = D_800DD478[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
-                                func_10004074(sTexFiles[type].buf);
+                                func_10004074(D_800DDA90[type].buf);
                             }
                         }
                     }
                 texdone:; // matching: IDO needs this empty labelled statement (a block join) here
                 } else {
-                    if (sTexFiles[type].used == 0) {
-                        sTexFiles[type].used = 1;
-                        func_100043B4((s32 *) sFrames[type * FRAMES_PER_TYPE], 4);
+                    if (D_800DDA90[type].used == 0) {
+                        D_800DDA90[type].used = 1;
+                        func_100043B4((s32 *) D_800DD478[type * FRAMES_PER_TYPE], 4);
                     }
                 }
                 vtx = &VTX(j << 2);
@@ -544,12 +526,12 @@ void func_1517CFC4(void) {
     s32 i;
 
     for (i = 0; i < 15; i++) {
-        if (sTexFiles[i].buf != 0) {
-            if (sFrames[i * FRAMES_PER_TYPE] != 0) {
-                func_10006240(sTexFiles[i].buf, sFrames[i * FRAMES_PER_TYPE], D_8003809C);
-                func_10004074(sTexFiles[i].buf);
+        if (D_800DDA90[i].buf != 0) {
+            if (D_800DD478[i * FRAMES_PER_TYPE] != 0) {
+                func_10006240(D_800DDA90[i].buf, D_800DD478[i * FRAMES_PER_TYPE], D_8003809C);
+                func_10004074(D_800DDA90[i].buf);
             }
-            sTexFiles[i].buf = 0;
+            D_800DDA90[i].buf = 0;
         }
     }
 }
@@ -686,7 +668,7 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
     s16 height;
 
     tex = 0xFFFF; /* no texture loaded yet */
-    if (D_800DDD10[D_800BE9C0] == 0) {
+    if (D_800DDD10[D_800BE9C0] == NULL) {
         return;
     }
     *gfx = func_1517D690(*gfx, D_800DDD24);
@@ -721,7 +703,7 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
                         tex = v[quad].v.flag;
                         width = (v[quad + 2].v.tc[0] + 1) >> 5;
                         height = (v[quad + 2].v.tc[1] + 1) >> 5;
-                        gDPLoadTextureBlock((*gfx)++, sFrames[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
+                        gDPLoadTextureBlock((*gfx)++, D_800DD478[tex], G_IM_FMT_RGBA, G_IM_SIZ_16b, width,
                                             (height * 5 + 3) >> 2, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
                                             G_TX_NOLOD, G_TX_NOLOD);
                         gDPSetTile((*gfx)++, G_IM_FMT_I, G_IM_SIZ_4b, ((width >> 1) + 7) >> 3, (width * height) >> 2, 1, 0,
@@ -754,14 +736,14 @@ void func_1517DE5C(void) {
 
     if (D_800DDD20 != 0) {
         for (i = 0; i < 15; i++) {
-            sTexFiles[i].used = 0;
+            D_800DDA90[i].used = 0;
         }
         func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
-                      D_800DBFF0->unk380, D_800DBFF0->unk2F8, D_800DBFF0->unk2FC, D_800DBFF0->unk300);
+                      D_800DBFF0->unk380, D_800DBFF0->eye.x, D_800DBFF0->eye.y, D_800DBFF0->eye.z);
         for (i = 0; i < 15; i++) {
-            if (sFrames[i * FRAMES_PER_TYPE] != 0 && sTexFiles[i].used == 0) {
-                sFrames[i * FRAMES_PER_TYPE] = 0;
-                sTexFiles[i].buf = 0;
+            if (D_800DD478[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
+                D_800DD478[i * FRAMES_PER_TYPE] = 0;
+                D_800DDA90[i].buf = 0;
             }
         }
     }

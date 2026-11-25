@@ -1,10 +1,7 @@
-/* functions.h declares func_150ADA20 as returning u8; the code here needs the s32 version. */
-#define func_150ADA20 func_150ADA20_orig
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
+#include "effects.h"
 
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
@@ -16,35 +13,12 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } Ground_150BABE0;
 
-/* Spawn descriptor passed to func_1513C73C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21[7];
-} DecalDesc_150BABE0;
-
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
-void func_15142314(s32, s32, vertex *);
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
-void func_1504715C(Ground_150BABE0 *, struct127 *);
-s32 func_15046C80(vertex *, s32, f32, Ground_150BABE0 *);
+void func_1504715C(Ground_150BABE0 *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, Ground_150BABE0 *);
 s32 func_1518ABD0(s32, struct210 *, u8);
 
 /*
@@ -52,13 +26,13 @@ s32 func_1518ABD0(s32, struct210 *, u8);
  * two particle bursts and, when the ground below is found, a ground decal.
  */
 // matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
-void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
-    vertex pos;
+void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
+    Vec3f pos;
     s32 joint;
     s32 yaw;
     Ground_150BABE0 ground;
-    vertex probe;
-    DecalDesc_150BABE0 desc;
+    Vec3f probe;
+    SpriteDef desc;
     struct210 *decal;
     f32 size;
 
@@ -81,8 +55,9 @@ void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
         joint = 0x1A;
         break;
     }
+    // matching: an integer cast keeps unk1D4 out of a0 (a pointer argument is loaded straight into a0)
     func_15142314((s32)obj->unk1D4, joint, &pos);
-    pos.y = obj->unk180;
+    pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 50.0f + 40.0f, yaw + 60, yaw - 60,
@@ -93,24 +68,24 @@ void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
     probe.z = pos.z;
     if (func_15046C80(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = func_150ADA68() * 200.0f + 200.0f;
-        desc.unk6 = 0x2A;
+        desc.texture = 0x2A;
         desc.unk7 = 0;
-        desc.unk0 = 0x7340;
-        desc.unk4 = 300;
-        desc.unk8 = 0;
-        desc.unkC = func_150ADA20() % 2001U + 2000;
+        desc.flags = 0x7340;
+        desc.lifetime = 300;
+        desc.frame = 0;
+        desc.frameSpeed = func_150ADA20() % 2001U + 2000;
         desc.unk10 = 0xFF;
         desc.unk11 = 0xFF;
-        desc.unk12 = 0;
-        desc.unk13 = 0;
-        desc.unk14 = 0;
-        desc.unk15 = 0xFF;
+        desc.rgba[0] = 0;
+        desc.rgba[1] = 0;
+        desc.rgba[2] = 0;
+        desc.rgba[3] = 0xFF;
         desc.unk16 = 0;
         desc.unk17 = 0xD;
-        desc.unk20 = 0xFF;
+        desc.viewportMask = 0xFF;
         desc.unk1C = 0;
-        desc.unk18 = 0x170002;
-        decal = func_1513C73C((s32)&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
+        desc.renderModes = 0x170002;
+        decal = func_1513C73C(&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {
             func_1516972C((struct102 *)decal);
@@ -120,37 +95,6 @@ void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
                   func_150ADA20() % 7U + 6, 6, 0, 0.0f, 0, *(u8 *)&arg2);
 }
 
-/* Particle descriptor for func_15130374 (as Struct15130374Arg in game_173D40.c). */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 fadeDuration;
-    /* 0x20 */ s16 fadeStep;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex position;
-    /* 0x3C */ u8 pad3C[0xC];
-    /* 0x48 */ vertex velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags; /* 0x40 and 0x80 are set at random */
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[4];
-} ParticleDesc_150BAFEC;
-
 /* Live particle returned by func_15130374; its per-kind extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x18];
@@ -159,7 +103,7 @@ typedef struct {
     /* 0x1E */ u8 pad1E[0xA];
     /* 0x28 */ u8 alpha;
     /* 0x29 */ u8 pad29[0x2F];
-    /* 0x58 */ vertex velocity;
+    /* 0x58 */ Vec3f velocity;
     /* 0x64 */ u8 pad64[0x1D];
     /* 0x81 */ u8 unk81;
     /* 0x82 */ u8 pad82[0x26];
@@ -169,14 +113,14 @@ typedef struct {
     /* 0xB2 */ s16 fadeStep;
 } Particle_150BAFEC;
 
-extern Particle_150BAFEC *func_15130374(ParticleDesc_150BAFEC *, u8, s32, u8, s32);
+extern Particle_150BAFEC *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 speed;
     Particle_150BAFEC *particle;
-    ParticleDesc_150BAFEC desc;
+    ParticleDesc68 desc;
     s32 pad; // matching: unused stack slot
     f32 damping;
     s16 pitch;
@@ -187,49 +131,49 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
     cosYaw = func_151423D8(yaw - 0x40);
     sinYaw = func_151423D8(yaw);
-    desc.unk1D = 0x29;
-    desc.unk08 = 0xE03;
-    desc.unk00 = 0x200005;
-    desc.unk04 = 0;
-    desc.lifetime = func_150ADA20() % 36U + 70;
-    desc.unk0C = 0;
-    desc.unk10 = 0;
-    desc.color1[0] = 0xB0;
-    desc.color1[1] = 0xA0;
-    desc.color1[2] = 0x2A;
-    desc.color0[0] = 0x40;
-    desc.color0[1] = 0xB;
-    desc.color0[2] = 0x6A;
-    desc.color0[3] = 0xFF;
-    desc.color1[3] = func_150ADA20() % 52U + 90;
-    desc.unk1C = 0xFF;
-    desc.unk60 = 3;
-    desc.unk61 = 3;
+    desc.texture = 0x29;
+    desc.renderMode = 0xE03;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.timer = func_150ADA20() % 36U + 70;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r2 = 0xB0;
+    desc.g2 = 0xA0;
+    desc.b2 = 0x2A;
+    desc.r = 0x40;
+    desc.g = 0xB;
+    desc.b = 0x6A;
+    desc.a = 0xFF;
+    desc.alpha = func_150ADA20() % 52U + 90;
+    desc.brightness = 0xFF;
+    desc.primColorMode = 3;
+    desc.envColorMode = 3;
     desc.width = desc.height = func_150ADA68() * 165.0f + 800.0f;
-    desc.position.x = x;
-    desc.position.y = y;
-    desc.position.z = z;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.pos.z = z;
     pitch = func_150ADA20() % 11U - 12;
     cosPitch = func_151423D8(pitch - 0x40);
     sinPitch = func_151423D8(pitch);
     speed = func_150ADA68() * 11.0f + 15.0f;
     desc.flags = 0xE05;
-    desc.velocity.x = speed * sinPitch * cosYaw;
-    desc.velocity.y = -speed * cosPitch;
-    desc.velocity.z = speed * sinPitch * sinYaw;
-    desc.unk54 = 0.0f;
+    desc.vel.x = speed * sinPitch * cosYaw;
+    desc.vel.y = -speed * cosPitch;
+    desc.vel.z = speed * sinPitch * sinYaw;
+    desc.gravity = 0.0f;
     if (func_150ADA20() & 1) {
         desc.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
         desc.flags |= 0x80;
     }
-    desc.unk62 = 2;
-    desc.unk63 = -1;
-    desc.fadeDuration = 22;
-    desc.fadeStep = 11;
-    desc.unk22 = 1;
-    desc.unk24 = 1.02f;
+    desc.updateFunc = 2;
+    desc.deathFunc = -1;
+    desc.fadeStart = 22;
+    desc.fadeRate = 11;
+    desc.scaleStart = 1;
+    desc.scaleRate = 1.02f;
     damping = 0.95f;
     particle = func_15130374(&desc, 0, sizeof(damping), argE, 1);
     if (particle != NULL) {
@@ -274,44 +218,7 @@ s32 func_150BB450(Particle_150BAFEC *particle) {
     return 1;
 }
 
-/* Spawn template passed to func_15132A4C (same layout as PieceSpawn in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 scaleXZ;
-    /* 0x0C */ f32 scaleY;
-    /* 0x10 */ f32 rot[3];
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 unk78;
-} PieceSpawn_150BB498;
-
-extern s32 func_15132A4C(PieceSpawn_150BB498 *, s32, s32, s32, u8, s32);
+extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
 s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
@@ -322,23 +229,23 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     f32 cosPitch;
     f32 sinPitch;
     f32 speed;
-    PieceSpawn_150BB498 piece;
+    ParticleSpawn piece;
     f32 scale;
 
     cosYaw = func_151423D8(yaw - 0x40);
     sinYaw = func_151423D8(yaw);
 
-    piece.unk50 = 0x9E8;
-    piece.rot[0] = 0.0f;
-    piece.rot[1] = 0.0f;
-    piece.rot[2] = 0.0f;
-    piece.unk1C[0] = 1.0f;
-    piece.unk1C[1] = 1.0f;
-    piece.unk1C[2] = 1.0f;
+    piece.flags = 0x9E8;
+    piece.rot.x = 0.0f;
+    piece.rot.y = 0.0f;
+    piece.rot.z = 0.0f;
+    piece.scale.x = 1.0f;
+    piece.scale.y = 1.0f;
+    piece.scale.z = 1.0f;
     piece.pos.x = x;
     piece.pos.y = y;
     piece.pos.z = z;
-    piece.unk04 = 0.2f;
+    piece.elasticity = 0.2f;
 
     pitch = func_150ADA20() % 13U - 52;
     cosPitch = func_151423D8(pitch - 0x40);
@@ -349,34 +256,34 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     piece.vel.y = -speed * cosPitch;
     piece.vel.z = speed * sinPitch * sinYaw;
 
-    piece.unk40 = func_150ADA68() * 50.0f + -25.0f;
-    piece.unk44 = 0.0f;
-    piece.unk48 = func_150ADA68() * 50.0f + -25.0f;
-    piece.unk54 = func_150ADA20() % 68U + 38;
+    piece.rotVel.x = func_150ADA68() * 50.0f + -25.0f;
+    piece.rotVel.y = 0.0f;
+    piece.rotVel.z = func_150ADA68() * 50.0f + -25.0f;
+    piece.lifetime = func_150ADA20() % 68U + 38;
 
-    piece.unk4C = func_150ADA68() * -0.1f + -0.3f;
-    piece.unk00 = 1.0f;
+    piece.gravity = func_150ADA68() * -0.1f + -0.3f;
+    piece.radius = 1.0f;
 
     scale = func_150ADA68() * 18.80000114f + 5.6f;
-    piece.unk56 = 31;
-    piece.unk58 = 0;
+    piece.model = 31;
+    piece.variant = 0;
     piece.unk5C = 0;
-    piece.scaleXZ = scale;
-    piece.unk60 = 0xFF;
-    piece.unk61 = 1;
-    piece.unk62 = 0;
-    piece.unk63 = 0;
-    piece.unk64 = 0;
-    piece.unk65 = 0;
-    piece.unk66 = 0;
-    piece.unk67 = 0;
-    piece.unk68 = 0;
+    piece.sizeXZ = scale;
+    piece.alpha = 0xFF;
+    piece.updateFn = 1;
+    piece.update2Fn = 0;
+    piece.floorHitFn = 0;
+    piece.floorType3Fn = 0;
+    piece.wallHitFn = 0;
+    piece.destroyFn = 0;
+    piece.squashFn = 0;
+    piece.matrixFn = 0;
     piece.unk6A = 0;
-    piece.unk6C = 0;
-    piece.unk70 = 0;
-    piece.unk72 = 1;
-    piece.unk74 = 0xFF;
-    piece.scaleY = scale;
+    piece.owner = 0;
+    piece.ownerId = 0;
+    piece.fadeStart = 1;
+    piece.fadeRate = 0xFF;
+    piece.sizeY = scale;
 
     func_15132A4C(&piece, 3, 0xFF, 0, arg14, 0);
     return 1;

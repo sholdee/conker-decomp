@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real f32 one below
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
@@ -128,7 +125,6 @@ void func_15166204(QuadEffect *effect) {
     effect->life = life;
 }
 
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
@@ -242,12 +238,7 @@ Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s
 Gfx *func_15142FBC(Gfx *gdl, s32 modeH, s32 modeL, u8 *needSync);
 extern s32 D_800903F4;
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 extern s16 D_800DCE40;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
-extern void *D_800DD228;
-extern s32 D_800DD230;
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
 Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {

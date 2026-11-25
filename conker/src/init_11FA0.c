@@ -35,13 +35,9 @@ typedef struct {
 extern MainSelectorPair D_8002BA10;
 extern MainSelectorPair D_8002BA18;
 
-// The f32 globals D_80042780 and D_80042788 are really f32[2] arrays: the values last sent per channel.
-#define sAppliedFrequencies ((f32 *)&D_80042780)
-#define sAppliedGains ((f32 *)&D_80042788)
-
 /*
  * Per-frame audio mix update. Picks the active selector (override > fallback > one-shot request,
- * forced to 1 by D_800DBFF0->unk5F0 bit 0 unless D_800B0DF0 byte 0x2A bit 0), eases the volume, gain and frequency
+ * forced to 1 by D_800DBFF0->status bit 0 unless D_800B0DF0 byte 0x2A bit 0), eases the volume, gain and frequency
  * targets for it, and sends any values that changed to the audio channels.
  */
 void func_10012020(void) {
@@ -53,7 +49,7 @@ void func_10012020(void) {
     f32 scale;
 
     selector = D_80042770;
-    if ((D_800DBFF0->unk5F0 & 1) && !(D_800B0DF0->pad2A[0] & 1)) { // byte 0x2A is unnamed in struct104
+    if ((D_800DBFF0->status & 1) && !(D_800B0DF0->flags & 1)) {
         selector = 1;
     }
     if (D_80042774 != 0) {
@@ -69,7 +65,7 @@ void func_10012020(void) {
             volume = (13.0f - D_80042790) + D_80042790;
             D_8004277C = 0;
             gains.values[0] = 127.0f;
-            frequencies.values[0] = sAppliedFrequencies[0] + ((519.0f + sinf(D_80042798 * 0.052359879f) * 200.0f) - sAppliedFrequencies[0]);
+            frequencies.values[0] = D_80042780[0] + ((519.0f + sinf(D_80042798 * 0.052359879f) * 200.0f) - D_80042780[0]);
             break;
         case 2:
             D_8004277C = 0;
@@ -80,8 +76,8 @@ void func_10012020(void) {
         case 3:
             volume = (52.0f - D_80042790) * 0.08f + D_80042790;
             D_8004277C = 0;
-            gains.values[0] = sAppliedGains[0] + (127.0f - sAppliedGains[0]) * 0.08f;
-            frequencies.values[0] = sAppliedFrequencies[0] + ((436.0f + sinf(D_80042798 * 0.122173049f) * 282.0f) - sAppliedFrequencies[0]) * 0.08f;
+            gains.values[0] = D_80042788[0] + (127.0f - D_80042788[0]) * 0.08f;
+            frequencies.values[0] = D_80042780[0] + ((436.0f + sinf(D_80042798 * 0.122173049f) * 282.0f) - D_80042780[0]) * 0.08f;
             D_80041FD9 = 0;
             break;
         case 4:
@@ -90,7 +86,7 @@ void func_10012020(void) {
             if (D_800BE9B4 != 0) {
                 frequencies.values[1] = 400.0f;
             } else {
-                frequencies.values[1] = sAppliedFrequencies[1] + (400.0f - sAppliedFrequencies[1]);
+                frequencies.values[1] = D_80042780[1] + (400.0f - D_80042780[1]);
             }
             D_80041FD9 = 0;
             break;
@@ -101,7 +97,7 @@ void func_10012020(void) {
             break;
         default:
             if (D_8004277C == 4) {
-                frequencies.values[1] = sAppliedFrequencies[1] + (11000.0f - sAppliedFrequencies[1]) * 0.05f;
+                frequencies.values[1] = D_80042780[1] + (11000.0f - D_80042780[1]) * 0.05f;
                 if (frequencies.values[1] < 9000.0f) {
                     D_8004277C = 4;
                 } else {
@@ -121,13 +117,13 @@ void func_10012020(void) {
         D_80042794 = 1.0f;
     }
     for (i = 0; i < 2; i++) {
-        if (frequencies.values[i] != sAppliedFrequencies[i]) {
+        if (frequencies.values[i] != D_80042780[i]) {
             func_10008B60(i, i, 9, 0, (s32)frequencies.values[i]);
-            sAppliedFrequencies[i] = frequencies.values[i];
+            D_80042780[i] = frequencies.values[i];
         }
-        if (gains.values[i] != sAppliedGains[i]) {
+        if (gains.values[i] != D_80042788[i]) {
             func_10008B60(i, i, 8, 0, (s32)gains.values[i]);
-            sAppliedGains[i] = gains.values[i];
+            D_80042788[i] = gains.values[i];
         }
     }
     D_80042770 = 0;

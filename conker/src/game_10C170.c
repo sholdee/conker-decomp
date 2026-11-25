@@ -1,74 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
-
-/* Spawn descriptor for func_1513264C (0x7C bytes). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ struct17 unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ u16 unk56;
-    /* 0x58 */ s8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ s8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ s8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 sound;
-} EffectSpawn;
-
-/* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x04 */ struct17 pos;
-    /* 0x10 */ s16 lifetime;
-    /* 0x14 */ f32 radius; /* spawn points lie within this distance of pos */
-    /* 0x18 */ s16 yawBase;
-    /* 0x1A */ s16 yawRange;
-    /* 0x1C */ s16 pitchBase;
-    /* 0x1E */ s16 pitchRange;
-    /* 0x20 */ f32 speedBase;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 velYBase;
-    /* 0x2C */ f32 velYRange;
-    /* 0x30 */ struct17 dir;
-    /* 0x3C */ f32 sizeBase;
-    /* 0x40 */ f32 sizeRange;
-    /* 0x44 */ f32 gravityBase;
-    /* 0x48 */ f32 gravityRange;
-    /* 0x4C */ f32 spinBase;
-    /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;
-    /* 0x55 */ u8 landPuffFlag;
-    /* 0x56 */ s16 landPuffLifeBase;
-    /* 0x58 */ s16 landPuffLifeRange;
-} DebrisEmitter;
 
 /* Effect object header from func_15149130; effect-specific data starts at 0x28. */
 typedef struct {
@@ -77,10 +12,10 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ struct17 pos;
+    /* 0x28 */ Vec3f pos;
 } PointEffect;
 
-extern struct17 D_800A0D60[15];
+extern Vec3f D_800A0D60[15];
 extern f32 D_800A0E14[15];
 extern f32 D_800A0E50[15];
 extern f32 D_800A0E8C[15];
@@ -88,12 +23,12 @@ extern f32 D_80088960[3];
 extern f32 D_8008896C[3];
 
 void *memcpy(void *, const void *, u32);
-s32 func_1513264C(EffectSpawn *, s32, s32, s32, s32, u8, s32);
+s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(struct17 *, u8, s32);
-void func_151D3FF4(struct17 *, u8, s32);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+void func_151D5514(Vec3f *, u8, s32);
+void func_151D3FF4(Vec3f *, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_151A6F00(DebrisEmitter *, u8, u8, s32);
 
 /*
@@ -101,10 +36,10 @@ void func_151A6F00(DebrisEmitter *, u8, u8, s32);
  * func_151D5404/5334/5514/3FF4 and func_151541B8 effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
-void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
+void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     s32 yaw;
     s32 i;
-    EffectSpawn spawn;
+    ParticleSpawn spawn;
     u8 idx;
     DebrisEmitter debris;
 
@@ -113,55 +48,55 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     {
         extern f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
 
-        spawn.unk00 = 15.0f;
-        spawn.unk0C = 1.0f;
-        spawn.unk08 = 1.0f;
-        spawn.unk04 = 0.200000003f;
-        spawn.unk10 = *(struct17 *)&D_800A5480;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk44 = 0.0f;
-        spawn.unk50 = 0x29E9;
-        spawn.unk58 = 0;
+        spawn.radius = 15.0f;
+        spawn.sizeY = 1.0f;
+        spawn.sizeXZ = 1.0f;
+        spawn.elasticity = 0.200000003f;
+        spawn.rot = D_800A5480;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.rotVel.y = 0.0f;
+        spawn.flags = 0x29E9;
+        spawn.variant = 0;
         spawn.unk5C = 0;
-        spawn.unk60 = 255;
-        spawn.unk61 = 13;
-        spawn.unk62 = 0;
-        spawn.unk63 = 10;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
+        spawn.alpha = 255;
+        spawn.updateFn = 13;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 10;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
         spawn.unk6A = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
-        spawn.unk72 = 35;
-        spawn.unk74 = 7;
+        spawn.fadeStart = 35;
+        spawn.fadeRate = 7;
         spawn.sound = 0;
-        spawn.vel.unk0 = 0.0f;
-        spawn.vel.unk8 = 0.0f;
+        spawn.vel.x = 0.0f;
+        spawn.vel.z = 0.0f;
         for (i = 0; i < 15; i++) {
             idx = D_800A0EC8[i];
-            spawn.pos.unk0 = D_800A0D60[i].unk0 + pos->unk0;
-            spawn.pos.unk4 = D_800A0D60[i].unk4 + pos->unk4;
-            spawn.pos.unk8 = D_800A0D60[i].unk8 + pos->unk8;
-            spawn.vel.unk4 = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
-            spawn.unk40 = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
-            spawn.unk48 = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
-            spawn.unk4C = func_150ADA68() * 0.2080000043f + -1.032000065f;
-            spawn.unk54 = func_150ADA20() % 111U + 130;
+            spawn.pos.x = D_800A0D60[i].x + pos->x;
+            spawn.pos.y = D_800A0D60[i].y + pos->y;
+            spawn.pos.z = D_800A0D60[i].z + pos->z;
+            spawn.vel.y = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
+            spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
+            spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
+            spawn.gravity = func_150ADA68() * 0.2080000043f + -1.032000065f;
+            spawn.lifetime = func_150ADA20() % 111U + 130;
             if (func_150ADA20() & 1) {
-                spawn.unk56 = 0xC4;
+                spawn.model = 0xC4;
             } else {
-                spawn.unk56 = 0xC5;
+                spawn.model = 0xC5;
             }
             // matching: *(u8 *)&owner re-reads owner from its stack slot at every use (a K&R u8 gets CSE'd)
             func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);
         }
     }
-    func_15165F80(-1, (s32)pos->unk0, (s32)pos->unk4, (s32)pos->unk8, 30, 50, 0, *(u8 *)&owner, kind);
+    func_15165F80(-1, (s32)pos->x, (s32)pos->y, (s32)pos->z, 30, 50, 0, *(u8 *)&owner, kind);
     func_151D5404(pos, 506.0f, 1013.0f, 0.0009871668881f, 15, 20, *(u8 *)&owner, kind);
     func_151D5334(pos, 506.0f, 1013.0f, 0.0009871668881f, 5, *(u8 *)&owner, kind);
     func_151D5514(pos, *(u8 *)&owner, kind);
@@ -179,15 +114,15 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     debris.speedBase = 5.0f;
     debris.velYBase = 15.0f;
     debris.velYRange = 15.0f;
-    debris.dir.unk0 = 0.0f;
-    debris.dir.unk4 = 0.0f;
+    debris.dir.x = 0.0f;
+    debris.dir.y = 0.0f;
     debris.landPuffs = 1;
     debris.landPuffFlag = 1;
     debris.landPuffLifeBase = 100;
     debris.landPuffLifeRange = 50;
     debris.speedRange = 10.0f;
     debris.spinRange = 10.0f;
-    debris.dir.unk8 = 0.0f;
+    debris.dir.z = 0.0f;
     debris.sizeBase = 0.25f;
     debris.sizeRange = 0.5f;
     debris.gravityBase = -0.6999999881f;
@@ -196,10 +131,10 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     func_151A6F00(&debris, 0, *(u8 *)&owner, kind);
     {
         struct260 *effect;
-        struct17 effectPos;
+        Vec3f effectPos;
 
         effectPos = *pos;
-        effect = func_15149130(15, 8, -1, -1, 1, 0, (struct37 *)sizeof(effectPos), *(u8 *)&owner, kind);
+        effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));
         }
@@ -212,73 +147,47 @@ typedef struct {
     /* 0x04 */ u8 pad4[0x20];
 } GroundHit; /* size 0x24 */
 
-s32 func_1504697C(struct17 *, s32, f32, GroundHit *);
-void func_150E83AC(struct17 *, s16, u8, s32);
-void func_151A9834(struct17 *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
+s32 func_1504697C(Vec3f *, s32, f32, GroundHit *);
+void func_150E83AC(Vec3f *, s16, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
 
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
  * point effect (func_150E83AC) there and scatters 3-5 func_151A9834 spawns around it.
  */
 void func_150DF334(PointEffect *effect) {
-    struct17 *pos;
+    Vec3f *pos;
     GroundHit hit;
     u8 onGround;
-    struct17 groundPos;
-    struct17 probe;
-    struct17 center;
+    Vec3f groundPos;
+    Vec3f probe;
+    Vec3f center;
 
     pos = &effect->pos;
     onGround = 0;
-    probe.unk0 = effect->pos.unk0;
-    probe.unk4 = effect->pos.unk4 + 500.0f;
-    probe.unk8 = effect->pos.unk8;
-    if (func_1504697C(&probe, 0, probe.unk4 - 1000.0f, &hit) != 0) {
-        groundPos.unk0 = pos->unk0;
-        groundPos.unk4 = hit.height;
-        groundPos.unk8 = pos->unk8;
+    probe.x = effect->pos.x;
+    probe.y = effect->pos.y + 500.0f;
+    probe.z = effect->pos.z;
+    if (func_1504697C(&probe, 0, probe.y - 1000.0f, &hit) != 0) {
+        groundPos.x = pos->x;
+        groundPos.y = hit.height;
+        groundPos.z = pos->z;
         onGround = 1;
     }
     func_150E83AC(onGround ? &groundPos : pos, (s16)(func_150ADA20() % 62U + 120), effect->owner, effect->kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
-    center.unk4 += 500.0f;
-    func_151A9834(&center, center.unk4 - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->owner,
+    center.y += 500.0f;
+    func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->owner,
                   effect->kind);
 }
 
-/* Particle emitter description passed to func_15149550. */
-typedef struct {
-    /* 0x00 */ struct17 pos;
-    /* 0x0C */ f32 maxA;
-    /* 0x10 */ f32 maxB;
-    /* 0x14 */ f32 minA;
-    /* 0x18 */ f32 minB;
-    /* 0x1C */ f32 altB;
-    /* 0x20 */ s16 maxC;
-    /* 0x22 */ s16 minC;
-    /* 0x24 */ s16 life;
-    /* 0x26 */ u8 color[4];
-    /* 0x2A */ u16 flags;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s32 extraSize;
-    /* 0x34 */ u8 effect;
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ f32 maxHeight;
-    /* 0x40 */ f32 shrinkRate;
-    /* 0x44 */ f32 growRate;
-} ParticleEmitter;
-
-void *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
+void *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */
-void func_150DF4B8(struct17 *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
-    ParticleEmitter emitter;
+void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
+    ParticleEmitterDesc emitter;
     f32 scaleA;
     f32 scaleB;
     s32 count;
@@ -310,9 +219,9 @@ void func_150DF4B8(struct17 *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
     emitter.growRate = 0.699999988f;
     func_15149550(&emitter, 10, 0, 0, owner, kind);
     for (count = func_150ADA20() % 3U + 1; count > 0; count--) {
-        func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.unk0, &emitter.pos.unk8);
-        emitter.pos.unk0 += pos->unk0;
-        emitter.pos.unk8 += pos->unk8;
+        func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
+        emitter.pos.x += pos->x;
+        emitter.pos.z += pos->z;
         scaleA = func_150ADA68() * 0.5f + 0.75f;
         scaleB = func_150ADA68() * 0.5f + 0.75f;
         emitter.maxA = 22.6f * scaleA;

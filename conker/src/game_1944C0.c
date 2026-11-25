@@ -2,30 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
-
-/*
- * Object type descriptors: D_8008B4A8[type], 0x34 bytes each (struct115 in structs.h only names unk0/unk18).
- * D_8008B4D0 / D_8008B4D4 in variables.h are this table's +0x28 / +0x2C fields seen as struct115.
- */
-typedef struct {
-    /* 0x00 */ void (*unk0)(struct102 *);
-    /* 0x04 */ void (*unk4)(struct102 *);
-    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
-    /* 0x0C */ void (*unkC)(struct102 *);
-    /* 0x10 */ Gfx *drawBeginDL;
-    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
-    /* 0x18 */ void (*unk18)(void);
-    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
-    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
-    /* 0x24 */ Gfx *drawEndDL;
-    /* 0x28 */ void (*destroy)(struct102 *);
-    /* 0x2C */ void (*free)(struct102 *);
-    /* 0x30 */ s8 drawMode;
-    /* 0x31 */ u8 pad31[3];
-} ObjType;
+#include "effects.h"
 
 #define OBJ_TYPE_COUNT 104
-#define OBJ_TYPES ((ObjType *)D_8008B4A8)
 
 /* Object lists: D_800DCE50[list][type] is the head of a doubly linked list of struct102 nodes. */
 extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
@@ -34,26 +13,11 @@ extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
  * While a list is being walked, the next node is saved in D_800DD198[depth] (depth D_800DD190) so that
  * callbacks may destroy the current node; func_151696DC repairs saved entries that point at a dying node.
  */
-#define OBJ_ITER_NEXT ((struct102 **)D_800DD198)
-
-/* Link fields shared by every object (struct102 has only u8 fields at 0x4). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
 
 extern void (*D_8008CA20[])(struct102 *);
 extern void (*D_8008C9C8[])(struct102 *);
 extern void (*D_8008CB64[3])(void);
 
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
 
 /* Template / payload of a type 0x10 object. */
 typedef struct {
@@ -80,7 +44,7 @@ typedef struct {
 
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
     /* 0x90 */ ModelFxData data;
 } ModelFx;
@@ -88,22 +52,9 @@ typedef struct {
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 
-/*
- * Sprite animation: `frames` is a single (segmented, < 0x10000000) texture address or a pointer to a table of
- * `frameCount` texture addresses.
- */
-typedef struct {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 unk6;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u8 unkA;
-} SpriteAnim;
-
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ SpriteAnim *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
     /* 0x16 */ s16 frameStep;
@@ -130,70 +81,19 @@ typedef struct {
     /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
 } SpriteParams;
 
-/* Particle flags (Particle.flags). */
-#define PARTICLE_ENV_COLOR      0x1    /* use envR/G/B instead of the per-texture default */
-#define PARTICLE_PINGPONG       0x2    /* reverse the animation at either end instead of wrapping */
-#define PARTICLE_FLIP_S         0x4
-#define PARTICLE_FLIP_T         0x8
-#define PARTICLE_DIE_AT_END     0x20
-#define PARTICLE_DIE_AT_START   0x40
-#define PARTICLE_LOOPED         0x80   /* set once the animation has passed its last frame */
-#define PARTICLE_CUSTOM_MODE    0x100  /* render/combine modes come from unk14 */
-#define PARTICLE_2CYCLE         0x200
-
-/* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84). */
-typedef struct {
-    /* 0x00 */ ObjLink link;
-    /* 0x10 */ SpriteAnim *anim;
-    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
-    /* 0x18 */ s32 unk18;       /* low byte: angle offset in 1/256ths of a turn */
-    /* 0x1C */ s16 frame;       /* 8.8 fixed point index into anim->frames */
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ u8 subX;         /* fractional (1/256) parts of x, z, y */
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;       /* < 0: scaled by the viewing angle */
-    /* 0x36 */ s16 height;      /* < 0: scaled by the viewing angle */
-    /* 0x38 */ s16 life;        /* 0x7FFF = forever */
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-    /* 0x40 */ u8 envR;
-    /* 0x41 */ u8 envG;
-    /* 0x42 */ u8 envB;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ u16 flags;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
-} Particle;
-
-
-
 extern SpriteAnim *D_8008CA4C[];
 
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
-    struct115 *entry;
-    struct115 *end;
+    ObjType *entry;
+    ObjType *end;
     void (*func)(void);
     s32 unused;
 
     entry = D_8008B4A8;
-    end = (struct115 *)((u32)entry + 101 * sizeof(struct115));
+    end = (ObjType *)((u32)entry + 101 * sizeof(ObjType));
     unused = 0;
     // matching: a goto loop plus the dead `unused` (saved s1) give the target's base-relative end
     // and sltu exit; for/while/do forms fold `end` to a constant address
@@ -228,13 +128,13 @@ void func_151670C0(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (OBJ_TYPES[type].unk0 != NULL) {
+            if (D_8008B4A8[type].unk0 != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    OBJ_TYPES[type].unk0(node);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    D_8008B4A8[type].unk0(node);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -250,13 +150,13 @@ void func_151671E8(void) {
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
-            if (OBJ_TYPES[type].unk4 != NULL) {
+            if (D_8008B4A8[type].unk4 != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    OBJ_TYPES[type].unk4(node);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    D_8008B4A8[type].unk4(node);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -286,13 +186,13 @@ void func_15167310(void) {
 
         for (type = 0; type != OBJ_TYPE_COUNT; type++) {
             for (list = 0; list != 2; list++) {
-                if (D_800DCE50[list][type] != NULL && OBJ_TYPES[type].unkC != NULL) {
+                if (D_800DCE50[list][type] != NULL && D_8008B4A8[type].unkC != NULL) {
                     node = D_800DCE50[list][type];
                     D_800DD190++;
                     while (node != NULL) {
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                        OBJ_TYPES[type].unkC(node);
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        D_8008B4A8[type].unkC(node);
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 }
@@ -301,32 +201,7 @@ void func_15167310(void) {
     }
 }
 
-extern Mtx D_80089470;
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
-extern u32 D_800DD1B0;
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B8;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1BE;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
-extern s16 D_800DD1CE;
 extern s16 D_800DD1F8;
-extern s32 D_800DD1FC;
-extern s32 D_800DD200;
-extern s16 D_800DD204;
-extern s16 D_800DD206;
-extern s32 D_800DD208;
-extern s32 D_800DD20C;
-extern s32 D_800DD210;
-extern s32 D_800DD214;
-extern s32 D_800DD218;
-extern s32 D_800DD21C;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
-extern s32 D_800DD228;
 void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*
@@ -349,22 +224,22 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     func_15168F84(group, &first, &last);
     for (type = first; type < last; type++) {
-        if (OBJ_TYPES[type].draw != NULL) {
+        if (D_8008B4A8[type].draw != NULL) {
             head = &D_800DCE50[list][type];
             if (*head != NULL) {
                 D_8003C8E0 = (type & 0xFFFFFF) | 0x7000000;
                 overflowed = FALSE;
-                if (OBJ_TYPES[type].drawMode == 0) {
+                if (D_8008B4A8[type].drawMode == 0) {
                     mode0Start = gfx;
                 }
-                if (OBJ_TYPES[type].drawMode == 1) {
+                if (D_8008B4A8[type].drawMode == 1) {
                     mode1Start = gfx;
                 }
                 D_800D2DAB = 0;
-                D_800DD228 = 0;
+                D_800DD228 = NULL;
                 D_800DD220 = 0;
                 D_800DD224 = 2;
-                D_800DD1B0 = -1;
+                *(u32 *)&D_800DD1B0 = -1; // matching: an unsigned store keeps the -1 in its own register
                 D_800DD1B4 = -1;
                 D_800DD1B8 = -1;
                 D_800DD1BC = 0;
@@ -382,42 +257,42 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 D_800DD214 = 0;
                 D_800DD218 = 0;
                 D_800DD21C = 0;
-                if (OBJ_TYPES[type].drawBeginDL != NULL) {
-                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawBeginDL);
+                if (D_8008B4A8[type].drawBeginDL != NULL) {
+                    gSPDisplayList(gfx++, D_8008B4A8[type].drawBeginDL);
                 }
-                if (OBJ_TYPES[type].drawBegin != NULL) {
-                    gfx = OBJ_TYPES[type].drawBegin(gfx, type, list, arg2);
+                if (D_8008B4A8[type].drawBegin != NULL) {
+                    gfx = D_8008B4A8[type].drawBegin(gfx, type, list, arg2);
                 }
                 gSPClearGeometryMode(gfx++, G_LIGHTING);
                 node = *head;
-                if (OBJ_TYPES[type].drawMode == 1) {
+                if (D_8008B4A8[type].drawMode == 1) {
                     D_800DD190++;
                     while (node != NULL) {
                         prev = gfx;
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        gfx = D_8008B4A8[type].draw(gfx, node, arg2);
                         full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
                         }
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 } else {
                     D_800DD190++;
                     while (node != NULL) {
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        gfx = D_8008B4A8[type].draw(gfx, node, arg2);
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 }
-                if (OBJ_TYPES[type].drawEndDL != NULL) {
-                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawEndDL);
+                if (D_8008B4A8[type].drawEndDL != NULL) {
+                    gSPDisplayList(gfx++, D_8008B4A8[type].drawEndDL);
                 }
-                if (OBJ_TYPES[type].drawEnd != NULL) {
-                    gfx = OBJ_TYPES[type].drawEnd(gfx, type, arg2);
+                if (D_8008B4A8[type].drawEnd != NULL) {
+                    gfx = D_8008B4A8[type].drawEnd(gfx, type, arg2);
                 }
                 if (overflowed) {
                     full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
@@ -426,7 +301,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                         return mode1Start;
                     }
                 }
-                if (OBJ_TYPES[type].drawMode == 0) {
+                if (D_8008B4A8[type].drawMode == 0) {
                     full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                     if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
@@ -441,7 +316,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     return gfx;
 }
 
-void func_15168A4C(ObjLink *obj, s32 type);
+void func_15168A4C(EffectHeader *obj, s32 type);
 
 /* Allocates a `size`-byte object (func_10003C6C) and links it into D_800DCE50[list][type]. */
 void *func_15167A68(type, list, size, arg3, owner, arg5)
@@ -452,11 +327,11 @@ void *func_15167A68(type, list, size, arg3, owner, arg5)
     u8 owner;
     u8 arg5;
 {
-    ObjLink *obj;
+    EffectHeader *obj;
 
-    obj = (ObjLink *)func_10003C6C(size, 1, arg3, 0, arg5);
+    obj = (EffectHeader *)func_10003C6C(size, 1, arg3, 0, arg5);
     if (obj != NULL) {
-        obj->list = list;
+        obj->kind = list;
         func_15168A4C(obj, type);
         obj->owner = owner;
     }
@@ -556,114 +431,114 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     return (Gfx *)func_15095760(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
-Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
-    Particle *src;
+BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
+    BillboardTemplate *src;
     s32 altType;
     s32 extra;
     s8 onDeath;
     u8 owner;
     s32 list;
 {
-    Particle *particle;
+    BillboardParticle *particle;
 
     particle = func_15167A68((altType == 0) ? 5 : 0x42, list, extra + 0x50, 0, owner, 1);
     if (particle == NULL) {
         return particle;
     }
-    bcopy(src, &particle->anim, 0x38);
+    bcopy(src, &particle->tmpl, sizeof(BillboardTemplate));
     particle->onDeath = onDeath;
     return particle;
 }
-/* Particle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
-void func_15167E0C(Particle *p) {
+/* BillboardParticle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
+void func_15167E0C(BillboardParticle *p) {
     void (*func)(struct102 *);
     u8 finished;
     s32 limit;
 
     finished = 0;
-    if (p->life != 0x7FFF) {
-        p->life -= D_800BE9E4;
-        if (p->life < 0) {
-            p->life = 0;
+    if (p->tmpl.life != 0x7FFF) {
+        p->tmpl.life -= D_800BE9E4;
+        if (p->tmpl.life < 0) {
+            p->tmpl.life = 0;
             finished = 1;
         }
     }
 
-    if (p->fadeStep > 0) {
-        if (p->fadeStep < p->primA) {
-            p->primA -= p->fadeStep;
+    if (p->tmpl.fadeStep > 0) {
+        if (p->tmpl.fadeStep < p->tmpl.primA) {
+            p->tmpl.primA -= p->tmpl.fadeStep;
         } else {
-            p->life = 0;
+            p->tmpl.life = 0;
             finished = 1;
         }
     }
 
-    if (p->callback != -1) {
-        func = D_8008C9C8[p->callback];
+    if (p->tmpl.callback != -1) {
+        func = D_8008C9C8[p->tmpl.callback];
         if (func != NULL) {
             func((struct102 *)p);
         }
     }
 
-    if (p->life != 0) {
+    if (p->tmpl.life != 0) {
         s32 posY;
         s32 posX;
         s32 posZ;
         s32 delta;
 
-        p->velY += p->accelY;
+        p->tmpl.velY += p->tmpl.accelY;
 
         // matching: 24.8 fixed point moves written step by step (incl. the redundant (u8)) for IDO's temp registers
-        posY = p->y;
-        posY = (posY << 8) | p->subY;
-        delta = p->velY * D_800BE9E4;
+        posY = p->tmpl.y;
+        posY = (posY << 8) | p->tmpl.subY;
+        delta = p->tmpl.velY * D_800BE9E4;
         posY += delta;
-        p->y = posY >> 8;
+        p->tmpl.y = posY >> 8;
         posY = (u8)posY;
-        p->subY = posY;
-        posX = p->x;
-        posX = (posX << 8) | p->subX;
-        delta = p->velX * D_800BE9E4;
+        p->tmpl.subY = posY;
+        posX = p->tmpl.x;
+        posX = (posX << 8) | p->tmpl.subX;
+        delta = p->tmpl.velX * D_800BE9E4;
         posX += delta;
-        p->x = posX >> 8;
+        p->tmpl.x = posX >> 8;
         posX = (u8)posX;
-        p->subX = posX;
-        posZ = p->z;
-        posZ = (posZ << 8) | p->subZ;
-        delta = p->velZ * D_800BE9E4;
+        p->tmpl.subX = posX;
+        posZ = p->tmpl.z;
+        posZ = (posZ << 8) | p->tmpl.subZ;
+        delta = p->tmpl.velZ * D_800BE9E4;
         posZ += delta;
-        p->z = posZ >> 8;
+        p->tmpl.z = posZ >> 8;
         posZ = (u8)posZ;
-        p->subZ = posZ;
-        if (p->frameStep != 0) {
-            limit = (p->anim->frameCount << 8) - 1;
-            p->frame += p->frameStep * D_800BE9E4;
-            if (limit < p->frame) {
-                if (p->flags & PARTICLE_DIE_AT_END) {
-                    p->life = 0;
+        p->tmpl.subZ = posZ;
+        if (p->tmpl.frameStep != 0) {
+            limit = (p->tmpl.anim->frameCount << 8) - 1;
+            p->tmpl.frame += p->tmpl.frameStep * D_800BE9E4;
+            if (limit < p->tmpl.frame) {
+                if (p->tmpl.flags & BILLBOARD_DIE_AT_END) {
+                    p->tmpl.life = 0;
                     finished = 1;
                 } else {
-                    p->flags |= PARTICLE_LOOPED;
-                    if (p->flags & PARTICLE_PINGPONG) {
-                        p->frame = limit - (p->frame % limit);
-                        p->frameStep = -p->frameStep;
+                    p->tmpl.flags |= BILLBOARD_LOOPED;
+                    if (p->tmpl.flags & BILLBOARD_PINGPONG) {
+                        p->tmpl.frame = limit - (p->tmpl.frame % limit);
+                        p->tmpl.frameStep = -p->tmpl.frameStep;
                     } else {
                         do {
-                            p->frame -= limit;
-                        } while (limit < p->frame);
+                            p->tmpl.frame -= limit;
+                        } while (limit < p->tmpl.frame);
                     }
                 }
-            } else if (p->frame < 0) {
-                if (p->flags & PARTICLE_DIE_AT_START) {
-                    p->life = 0;
+            } else if (p->tmpl.frame < 0) {
+                if (p->tmpl.flags & BILLBOARD_DIE_AT_START) {
+                    p->tmpl.life = 0;
                     finished = 1;
-                } else if (p->flags & PARTICLE_PINGPONG) {
-                    p->frame = -p->frame % limit;
-                    p->frameStep = -p->frameStep;
+                } else if (p->tmpl.flags & BILLBOARD_PINGPONG) {
+                    p->tmpl.frame = -p->tmpl.frame % limit;
+                    p->tmpl.frameStep = -p->tmpl.frameStep;
                 } else {
                     do {
-                        p->frame += limit;
-                    } while (p->frame < 0);
+                        p->tmpl.frame += limit;
+                    } while (p->tmpl.frame < 0);
                 }
             }
         }
@@ -684,10 +559,9 @@ Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern s32 D_800D2C9C;
 
-/* Particle draw: sets render/combine modes and colours, then the current frame as a billboard. */
-s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
+/* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
+s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     s32 view;
     SpriteParams params;
     s32 pad1[2]; // matching: stack layout of the target frame
@@ -701,37 +575,37 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
     SpriteAnim *white;
 
     params.flip = 0;
-    if (p->flags & PARTICLE_FLIP_S) {
+    if (p->tmpl.flags & BILLBOARD_FLIP_S) {
         params.flip = 1;
     }
-    if (p->flags & PARTICLE_FLIP_T) {
+    if (p->tmpl.flags & BILLBOARD_FLIP_T) {
         params.flip |= 2;
     }
     // matching: two empty tests of the same condition steer IDO's scheduling of the texture load
-    if ((u32)p->anim->frames < 0x10000000) {
+    if ((u32)p->tmpl.anim->frames < 0x10000000) {
     }
-    if ((u32)p->anim->frames < 0x10000000) {
+    if ((u32)p->tmpl.anim->frames < 0x10000000) {
     }
     update = 1;
     {
         s32 texture;
 
-        anim = p->anim;
+        anim = p->tmpl.anim;
         if ((u32)anim->frames < 0x10000000) {
             texture = (s32)anim->frames;
         } else {
-            texture = anim->frames[p->frame >> 8];
+            texture = anim->frames[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, (s32)anim, p->frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, (s32)anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
     }
     view = viewIndex;
-    params.x = p->x;
-    params.y = p->y;
-    params.z = p->z;
-    size = p->width;
+    params.x = p->tmpl.x;
+    params.y = p->tmpl.y;
+    params.z = p->tmpl.z;
+    size = p->tmpl.width;
     if (size < 0) {
         /* 0.0111 = 1/90: fold the view angle into 0..90 degrees */
-        angle = fabsf(D_800DBFF0[view].unk380 + (p->unk18 & 0xFF) * 1.40625f);
+        angle = fabsf(D_800DBFF0[view].unk380 + (p->tmpl.unk8 & 0xFF) * 1.40625f);
         while (angle >= 360.0f) {
             angle -= 360.0f;
         }
@@ -747,32 +621,32 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
         }
     }
     params.unk6 = size;
-    size = p->height;
+    size = p->tmpl.height;
     if (size < 0) {
-        view = (p->width < 0) ? 0 : p->width;
-        size = fabsf(D_800DBFF0[viewIndex].unk388) * (view + size) * 0.01111111138f - size;
+        view = (p->tmpl.width < 0) ? 0 : p->tmpl.width;
+        size = fabsf(D_800DBFF0[viewIndex].pitch) * (view + size) * 0.01111111138f - size;
     }
     params.unk8 = size;
-    if (p->flags & PARTICLE_CUSTOM_MODE) {
+    if (p->tmpl.flags & BILLBOARD_CUSTOM_MODE) {
         u8 renderMode;
         u8 combineMode;
         s32 pad3[2]; // matching: stack layout of the target frame
 
-        renderMode = p->unk14 & 0xFF;
-        combineMode = (p->unk14 & 0xFFFF0000) >> 16;
+        renderMode = p->tmpl.unk4 & 0xFF;
+        combineMode = (p->tmpl.unk4 & 0xFFFF0000) >> 16;
         gfx = func_15142B7C(gfx, 5, 0);
         gfx = func_1513F4E4(gfx, combineMode, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->flags & PARTICLE_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
-    } else if (p->anim->unkA != 5) {
+    } else if (p->tmpl.anim->unkA != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->anim->unkA == 3) {
+    } else if (p->tmpl.anim->unkA == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->flags & 0x10) {
+    } else if (p->tmpl.flags & 0x10) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x12].unk0 | D_800A4AC8[0x12].unk4 | 4, &update);
@@ -781,18 +655,18 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x11].unk0 | D_800A4AC8[0x11].unk4 | 4, &update);
     }
-    c0 = p->primG;
-    c1 = p->primB;
-    c2 = p->primA;
-    gfx = func_15142CF0(gfx, 1, 0, p->primR, c0, c1, c2, &update);
-    if (p->flags & PARTICLE_ENV_COLOR) {
-        c0 = p->envR;
-        c1 = p->envG;
-        c2 = p->envB;
+    c0 = p->tmpl.primG;
+    c1 = p->tmpl.primB;
+    c2 = p->tmpl.primA;
+    gfx = func_15142CF0(gfx, 1, 0, p->tmpl.primR, c0, c1, c2, &update);
+    if (p->tmpl.flags & BILLBOARD_ENV_COLOR) {
+        c0 = p->tmpl.envR;
+        c1 = p->tmpl.envG;
+        c2 = p->tmpl.envB;
     } else {
-        anim = p->anim;
+        anim = p->tmpl.anim;
         white = &D_8009053C;
-        if (p->anim == &D_800907FC) {
+        if (p->tmpl.anim == &D_800907FC) {
             c0 = 0x80;
             c1 = 0x80;
             c2 = 0xFF;
@@ -827,7 +701,7 @@ typedef struct {
 
 /* Type 0xE object. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ QuadFxData data;
 } QuadFx;
 
@@ -840,9 +714,9 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     s32 i;
 
     tA = 0x2000;
-    tB = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
+    tB = (D_8008CA4C[q->animIndex]->height + 0x100) << 5;
     sA = 0x2000;
-    sB = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
+    sB = (D_8008CA4C[q->animIndex]->width + 0x100) << 5;
     for (i = 0; i < 2; i++) {
         q->vtx[i * 4 + 1].v.flag = 0;
         q->vtx[i * 4 + 1].v.cn[0] = r;
@@ -867,11 +741,11 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     }
     if (q->flags & 0x80) {
         tB = 0x2000;
-        tA = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
+        tA = (D_8008CA4C[q->animIndex]->height + 0x100) << 5;
     }
     if (q->flags & 0x100) {
         sB = 0x2000;
-        sA = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
+        sA = (D_8008CA4C[q->animIndex]->width + 0x100) << 5;
     }
     q->vtx[1].v.tc[0] = q->vtx[5].v.tc[0] = q->vtx[2].v.tc[0] = q->vtx[6].v.tc[0] = sA;
     q->vtx[2].v.tc[1] = q->vtx[6].v.tc[1] = q->vtx[3].v.tc[1] = q->vtx[7].v.tc[1] = tA;
@@ -955,13 +829,13 @@ void func_15168870(QuadFx *fx) {
 void func_15168A2C(s32 obj) {
     func_15168B10(obj, 0);
 }
-/* Pushes obj onto the front of list D_800DCE50[obj->list][type] and sets its type. */
-void func_15168A4C(ObjLink *obj, s32 type) {
+/* Pushes obj onto the front of list D_800DCE50[obj->kind][type] and sets its type. */
+void func_15168A4C(EffectHeader *obj, s32 type) {
     s32 list;
-    ObjLink **head;
+    EffectHeader **head;
 
-    list = obj->list;
-    head = (ObjLink **)&D_800DCE50[list][type];
+    list = obj->kind;
+    head = (EffectHeader **)&D_800DCE50[list][type];
     obj->next = *head;
     if (obj->next != NULL) {
         obj->next->prev = obj;
@@ -972,10 +846,10 @@ void func_15168A4C(ObjLink *obj, s32 type) {
 }
 
 /* Unlinks obj from its current list. */
-void func_15168A9C(ObjLink *obj) {
-    s32 list = obj->list;
+void func_15168A9C(EffectHeader *obj) {
+    s32 list = obj->kind;
     s32 type = obj->type;
-    ObjLink **head = (ObjLink **)&D_800DCE50[list][type];
+    EffectHeader **head = (EffectHeader **)&D_800DCE50[list][type];
 
     if (obj == *head) {
         *head = obj->next;
@@ -990,25 +864,25 @@ void func_15168A9C(ObjLink *obj) {
 
 /* Moves obj to the list for another type. */
 void func_15168B10(s32 obj, s32 type) {
-    func_15168A9C((ObjLink *)obj);
-    func_15168A4C((ObjLink *)obj, type);
+    func_15168A9C((EffectHeader *)obj);
+    func_15168A4C((EffectHeader *)obj, type);
 }
 
 /*
- * Particle callback: unk14 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
+ * BillboardParticle callback: tmpl.unk4 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
  * (life = 30) while the delay counts down, then fades primA by the rate each call and lets it die.
  * Readable equivalent:
- *     word = p->unk14;
+ *     word = p->tmpl.unk4;
  *     if (word & 0xFFFF) {
- *         p->unk14 &= 0xFFFF0000; p->life = 30; p->unk14 |= (u16)((word & 0xFFFF) - 1); return;
+ *         p->tmpl.unk4 &= 0xFFFF0000; p->tmpl.life = 30; p->tmpl.unk4 |= (u16)((word & 0xFFFF) - 1); return;
  *     }
- *     if ((u16)(word >> 16) < p->primA) { p->primA -= (u16)(word >> 16); p->life = 30; } else { p->life = 0; }
+ *     if ((u16)(word >> 16) < p->tmpl.primA) { p->tmpl.primA -= (u16)(word >> 16); p->tmpl.life = 30; } else { p->tmpl.life = 0; }
  */
 // matching: permuter output; every readable form tried allocates `word` and the delay in other registers
 
 void func_15168B44(void *arg0)
 {
-  Particle *a;
+  BillboardParticle *a;
   s32 v1;
   s32 new_var2;
   u16 t6;
@@ -1026,7 +900,7 @@ void func_15168B44(void *arg0)
   s32 keep;
   a = arg0;
   hi = 0x1E;
-  v1 = a->unk14;
+  v1 = a->tmpl.unk4;
   new_var2 = v1;
   t6 = ((u16) new_var2) ^ 0;
   new_var = t6 - (1 & 0xFFFFFFFFu);
@@ -1048,8 +922,8 @@ void func_15168B44(void *arg0)
     hi--;
     t9 = (v1 & 0xFFFF0000) | new_var;
     v1 = 0;
-    a->unk14 = t9;
-    a->life = hi;
+    a->tmpl.unk4 = t9;
+    a->tmpl.life = hi;
     if (keep)
     {
       ;
@@ -1058,23 +932,23 @@ void func_15168B44(void *arg0)
     return;
   }
   hi = (u16) (v1 >> 16);
-  v1 = a->primA;
+  v1 = a->tmpl.primA;
   if (0)
   {
   }
   a2 = v1;
   if (hi < a2)
   {
-    a->primA = a2 - hi;
+    a->tmpl.primA = a2 - hi;
     if (1)
     {
     }
-    a->life = 0x1E;
+    a->tmpl.life = 0x1E;
   }
   else
   {
     a2 = 0;
-    a->life = (a2, 0);
+    a->tmpl.life = (a2, 0);
   }
 }
 /* Type 0x10 update: runs the object's callback, if any. */
@@ -1235,7 +1109,7 @@ void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
 void func_15143D18(s32 *, s32 *, s32, s32);
-void func_1516968C(ObjLink *obj, u8 *event, u8 eventType);
+void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
@@ -1246,23 +1120,23 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
     for (type = first; type < last; type++) {
         s32 list;
         for (list = 0; list != 2; list++) {
-            if (OBJ_TYPES[type].handleEvent != NULL) {
+            if (D_8008B4A8[type].handleEvent != NULL) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    OBJ_TYPES[type].handleEvent(node, event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_8008B4A8[type].handleEvent(node, event, eventType);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             } else {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -1271,31 +1145,31 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
 }
 
 /* Sends an event to every object of the `count` types listed in `types`. */
-void func_15169260(s32 types, s32 count, s32 event, u8 eventType) {
+void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
     s32 *type;
     s32 i;
     s32 list;
     struct102 *node;
 
-    for (i = 0, type = (s32 *)types; i < count; i++) {
+    for (i = 0, type = types; i < count; i++) {
         for (list = 0; list != 2; list++) {
-            if (OBJ_TYPES[*type].handleEvent != NULL) {
+            if (D_8008B4A8[*type].handleEvent != NULL) {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    OBJ_TYPES[*type].handleEvent(node, event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_8008B4A8[*type].handleEvent(node, event, eventType);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             } else {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -1313,23 +1187,23 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
         type = OBJ_TYPE_COUNT - 1;
     }
     for (list = 0; list != 2; list++) {
-        if (OBJ_TYPES[type].handleEvent != NULL) {
+        if (D_8008B4A8[type].handleEvent != NULL) {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                OBJ_TYPES[type].handleEvent(node, event, eventType);
-                node = OBJ_ITER_NEXT[D_800DD190];
+                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                D_8008B4A8[type].handleEvent(node, event, eventType);
+                node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         } else {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                node = OBJ_ITER_NEXT[D_800DD190];
+                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         }
@@ -1337,20 +1211,20 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
 }
 /* Event payload naming an actor (event types 0 and others). */
 typedef struct {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 id;             /* the actor's unique_id */
 } ActorEvent;
 
 /* Event type 0x2D payload: ownership moves from one actor to another. */
 typedef struct {
-    /* 0x0 */ struct127 *from;
-    /* 0x4 */ struct127 *to;
+    /* 0x0 */ Actor *from;
+    /* 0x4 */ Actor *to;
     /* 0x8 */ u8 fromId;
     /* 0x9 */ u8 toId;
 } ActorSwapEvent;
 
 /* Sends an actor event about `actor` to every object. */
-void func_151695F0(struct127 *actor, u8 eventType) {
+void func_151695F0(Actor *actor, u8 eventType) {
     ActorEvent event;
 
     event.actor = actor;
@@ -1359,7 +1233,7 @@ void func_151695F0(struct127 *actor, u8 eventType) {
 }
 
 /* Sends an actor event about `actor` to every object of one type. */
-void func_1516962C(s32 type, struct127 *actor, u8 eventType) {
+void func_1516962C(s32 type, Actor *actor, u8 eventType) {
     ActorEvent event;
     event.actor = actor;
     event.id = actor->unique_id;
@@ -1373,7 +1247,7 @@ s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 /* Default event handling: event types 0xF and 0x10 destroy objects owned by event[0]. */
-void func_1516968C(ObjLink *obj, u8 *event, u8 eventType) {
+void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType) {
     if (eventType == 0xF || eventType == 0x10) {
         // matching: obj->owner read as a byte array; the struct field form swaps the two loads
         if (event[0] == ((u8 *)obj)[0xC]) {
@@ -1387,8 +1261,8 @@ void func_151696DC(struct102 *obj) {
     s8 depth;
 
     for (depth = 0; depth < D_800DD190; depth++) {
-        if (obj == OBJ_ITER_NEXT[depth]) {
-            OBJ_ITER_NEXT[depth] = (struct102 *)obj->unk8;
+        if (obj == D_800DD198[depth]) {
+            D_800DD198[depth] = (struct102 *)obj->unk8;
         }
     }
 }
@@ -1400,7 +1274,7 @@ void func_1516972C(struct102 *obj) {
     func_151696DC(obj);
 
     if (obj->unk0 >= 2) {
-        destroy = OBJ_TYPES[obj->unk0].destroy;
+        destroy = D_8008B4A8[obj->unk0].destroy;
         if (destroy != NULL) {
             destroy(obj);
             return;
@@ -1414,7 +1288,7 @@ void func_1516979C(struct102 *obj) {
     void (*free)(struct102 *obj);
 
     func_151696DC(obj);
-    free = OBJ_TYPES[obj->unk0].free;
+    free = D_8008B4A8[obj->unk0].free;
     if (free != NULL) {
         free(obj);
         return;
@@ -1429,7 +1303,7 @@ void func_15169804(struct102 *obj) {
 
 /* Default free: unlinks the object and releases its memory. */
 void func_15169824(struct102 *obj) {
-    func_15168A9C((ObjLink *)obj);
+    func_15168A9C((EffectHeader *)obj);
     func_10004074(obj);
 }
 
@@ -1437,20 +1311,20 @@ void func_15169824(struct102 *obj) {
  * Shared actor-event handler for objects that remember an owner (`owner`, `ownerId`): event type 0 destroys
  * `obj` if the event names its owner; type 0x2D hands ownership over to the other actor of the swap.
  */
-void func_15169850(s32 event, u8 eventType, s32 owner, s32 ownerId, s32 obj) {
+void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj) {
     if (eventType == 0) {
-        if (((ActorEvent *)event)->actor == *(struct127 **)owner || ((ActorEvent *)event)->id == *(u8 *)ownerId) {
-            func_1516972C((struct102 *)obj);
+        if (((ActorEvent *)event)->actor == *owner || ((ActorEvent *)event)->id == *ownerId) {
+            func_1516972C(obj);
         }
     } else if (eventType == 0x2D) {
-        struct127 *from = ((ActorSwapEvent *)event)->from;
+        Actor *from = ((ActorSwapEvent *)event)->from;
 
-        if (from == *(struct127 **)owner) {
-            *(struct127 **)owner = ((ActorSwapEvent *)event)->to;
-            *(u8 *)ownerId = ((ActorSwapEvent *)event)->toId;
-        } else if (((ActorSwapEvent *)event)->to == *(struct127 **)owner) {
-            *(struct127 **)owner = from;
-            *(u8 *)ownerId = ((ActorSwapEvent *)event)->fromId;
+        if (from == *owner) {
+            *owner = ((ActorSwapEvent *)event)->to;
+            *ownerId = ((ActorSwapEvent *)event)->toId;
+        } else if (((ActorSwapEvent *)event)->to == *owner) {
+            *owner = from;
+            *ownerId = ((ActorSwapEvent *)event)->fromId;
         }
     }
 }

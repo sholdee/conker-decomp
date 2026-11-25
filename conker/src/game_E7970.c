@@ -9,7 +9,7 @@ void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s
 
 /* Per-effect data: the object the effect is attached to and a spawn accumulator. */
 typedef struct {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
     /* 0x8 */ f32 spawnAccum;
 } EffectE7970Data; // size 0xC
@@ -27,7 +27,7 @@ typedef struct {
 } EffectE7970;
 
 /* Spawns an effect attached to `owner`. */
-void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
+void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
     struct260 *effect;
 
@@ -35,19 +35,19 @@ void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, (struct37 *)0xC, arg1, arg2);
+    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
     if (effect != NULL) {
         memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }
 }
 
 void func_15143794(s16, s16, f32, f32 *);
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
+void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_1518A3C0(f32 *arg0, f32 *arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC);
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
 void func_150BA55C(EffectE7970 *effect) {
-    struct127 *owner;
+    Actor *owner;
     EffectE7970Data *data;
     s32 heading;
     f32 ownerPos[3];
@@ -100,7 +100,7 @@ void func_150BA55C(EffectE7970 *effect) {
 }
 
 void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Ground probe result filled by func_15046C80. */
@@ -113,28 +113,28 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_1504715C(GroundHit *hit, struct127 *obj);
-s32 func_15046C80(struct17 *pos, s32 arg1, f32 minY, GroundHit *hit);
+void func_1504715C(GroundHit *hit, Actor *obj);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(struct17 *pos, struct127 *obj, GroundHit *hit, s32 arg3) {
-    struct17 probe;
+s32 func_150BA930(Vec3f *pos, Actor *obj, GroundHit *hit, s32 arg3) {
+    Vec3f probe;
 
-    pos->unk0 = obj->x_position;
-    if (-9500.0f < obj->unk180) {
-        pos->unk4 = obj->unk180;
+    pos->x = obj->x_position;
+    if (-9500.0f < obj->floorY) {
+        pos->y = obj->floorY;
     } else {
-        pos->unk4 = obj->y_position;
+        pos->y = obj->y_position;
     }
-    pos->unk8 = obj->z_position;
+    pos->z = obj->z_position;
     if (hit == NULL) {
         return 1;
     }
-    probe.unk0 = pos->unk0;
-    probe.unk4 = pos->unk4 + 100.0f;
-    probe.unk8 = pos->unk8;
+    probe.x = pos->x;
+    probe.y = pos->y + 100.0f;
+    probe.z = pos->z;
     func_1504715C(hit, obj);
-    return func_15046C80(&probe, 0, pos->unk4 - 100.0f, hit);
+    return func_15046C80(&probe, 0, pos->y - 100.0f, hit);
 }
 
 /* Constant handler; always returns 9. */
@@ -143,8 +143,8 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 }
 
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
-void func_150BAA14(struct127 *obj, s32 arg1, s32 arg2) {
-    struct17 pos;
+void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
+    Vec3f pos;
     GroundHit hit;
     s32 angle;
     u8 onGround;
@@ -160,9 +160,9 @@ void func_150BAA14(struct127 *obj, s32 arg1, s32 arg2) {
 
     if (onGround) {
         angle = (s32)(D_800DBFF0[D_80082FA4].unk380 * D_8009FE64);
-        func_15165F80(-1, (s32)pos.unk0, (s32)(pos.unk4 + 6.0f), (s32)pos.unk8,
+        func_15165F80(-1, (s32)pos.x, (s32)(pos.y + 6.0f), (s32)pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
-        func_1514C678(pos.unk0, pos.unk4, pos.unk8,
+        func_1514C678(pos.x, pos.y, pos.z,
                       (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,
                       (func_150ADA20() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
     }

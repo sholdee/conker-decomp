@@ -1,29 +1,30 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
-void func_15145740(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(struct127 *, struct126 *, s32, vertex **, f32 **, s32);
-s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
+void func_15145740(Actor *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
+s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, f32 **, s32);
+s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
 /* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
-extern vertex D_800AAA90;
-extern vertex D_800AAAA8;
+extern Vec3f D_800AAA90;
+extern Vec3f D_800AAAA8;
 
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
  * position, or, when it has unk1D4, between two points of model part 0x46, plus func_151C56A4 and
  * (half the time) func_151C5588 effects at the segment start. */
-void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 start[3];
     f32 end[3];
     f32 dir[3];
     f32 unkB0[3];
-    struct126 *part;
-    vertex *modelPoints[2];
+    ActorCtl *part;
+    Vec3f *modelPoints[2];
     f32 *worldPoints[2];
     s32 arg16;
     s32 arg23;
@@ -82,11 +83,11 @@ void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15102B38(struct127 *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern vertex D_800AAA9C;
+extern void func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern Vec3f D_800AAA9C;
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
-void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
+void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
     f32 scale[2];
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
@@ -117,49 +118,6 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-/* Particle spawn template passed to func_15130280 (same layout as ParticleSpawn in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ u32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn; /* size 0x70 */
-
 /* Per-particle data at 0xB0 of the particles func_151C5F44 spawns. */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -176,37 +134,37 @@ typedef struct {
 
 /* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ ParticleData data;
 } Particle;
 
-extern s32 func_15137C64(vertex *, vertex *, f32 *, f32 *, f32 *, vertex *, vertex *, vertex *);
-extern void func_151DC034(vertex *, f32, u8, s16, s32, u8, s32);
-extern void func_151DA6F8(vertex *, vertex *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, vertex *);
+extern s32 func_15137C64(Vec3f *, Vec3f *, f32 *, f32 *, f32 *, Vec3f *, Vec3f *, Vec3f *);
+extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
+extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_15143794(s16, s16, f32, Vec3f *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
-void func_151D9014(vertex *a0, vertex *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+void func_151D9014(Vec3f *a0, Vec3f *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
 
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
  * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
  * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
-void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
+void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7) {
-    vertex unkPos;
-    vertex origin;
+    Vec3f unkPos;
+    Vec3f origin;
     f32 dir[3];
     f32 basisA[3];
     f32 basisB[3];
     s16 ringCount;
     f32 sinv;
     f32 cosv;
-    vertex vel;
+    Vec3f vel;
     s32 randB;
     s32 bit80;
-    vertex vel2;
+    Vec3f vel2;
     s32 count;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     f32 unkA8;
     f32 f;
     f32 f2;
@@ -253,51 +211,51 @@ void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 do
         if (doScatter) {
             count = func_150ADA20() % 7U + 3;
             unkA8 = 0.9508649707f;
-            spawn.unk1D = 0x6C;
-            spawn.unk08 = 0x5103;
-            spawn.unk00 = 0x200005;
-            spawn.unk1E = 20;
-            spawn.unk20 = 12;
+            spawn.texture = 0x6C;
+            spawn.renderMode = 0x5103;
+            spawn.unk0 = 0x200005;
+            spawn.fadeStart = 20;
+            spawn.fadeRate = 12;
             spawn.flags = 0x80D207;
-            spawn.unk60 = 8;
-            spawn.unk61 = 6;
-            spawn.unk62 = 0x10;
-            spawn.unk04 = 0;
-            spawn.unk0C = 0;
-            spawn.unk10 = 0;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk22 = 1;
-            spawn.unk24 = 1.0f;
-            spawn.unk14 = 0xE2;
-            spawn.unk15 = 0xB2;
-            spawn.unk16 = 0x60;
-            spawn.unk17 = 0xFF;
-            spawn.unk18 = 0x39;
-            spawn.unk19 = 0xF;
-            spawn.unk1A = 0;
-            spawn.unk1C = 0xFF;
+            spawn.primColorMode = 8;
+            spawn.envColorMode = 6;
+            spawn.updateFunc = 0x10;
+            spawn.unk4 = 0;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.scaleStart = 1;
+            spawn.scaleRate = 1.0f;
+            spawn.r = 0xE2;
+            spawn.g = 0xB2;
+            spawn.b = 0x60;
+            spawn.a = 0xFF;
+            spawn.r2 = 0x39;
+            spawn.g2 = 0xF;
+            spawn.b2 = 0;
+            spawn.brightness = 0xFF;
             spawn.pos = origin;
-            spawn.unk3C.x = 0.0f;
-            spawn.unk3C.y = 0.0f;
-            spawn.unk3C.z = 0.0f;
+            spawn.offset.x = 0.0f;
+            spawn.offset.y = 0.0f;
+            spawn.offset.z = 0.0f;
             for (; count > 0; count--) {
                 randA = func_150ADA20();
                 randC = func_150ADA20();
                 func_15143794(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
                 f = func_150ADA68() * 117.0f;
                 spawn.flags &= ~0xC0;
-                spawn.unk54 = (f + -197.0f) * 0.001f;
+                spawn.gravity = (f + -197.0f) * 0.001f;
                 bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
                 // matching: reusing randB for the 0x40 bit; a separate local changes the frame
                 randB = (func_150ADA20() & 1) ? 0x40 : 0;
                 spawn.flags |= randB | bit80;
-                spawn.unk1B = func_150ADA20() % 66U + 190;
-                spawn.unk0A = func_150ADA20() % 45U + 44;
+                spawn.alpha = func_150ADA20() % 66U + 190;
+                spawn.timer = func_150ADA20() % 45U + 44;
                 f2 = func_150ADA68() * 122.0f + 77.0f;
-                spawn.unk28 = f2;
-                spawn.unk2C = f2;
+                spawn.width = f2;
+                spawn.height = f2;
                 particle = func_15130280(&spawn, 1, 0, sizeof(f32), arg6, arg7);
                 if (particle != NULL) {
                     memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
@@ -307,22 +265,14 @@ void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 do
     }
 }
 
-/* Effect record passed to func_151C5E74; unkC and unk1 are the owner arguments of spawned particles. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} Effect151C5E74;
-
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect, vertex *pos, vertex *unk60,
-                   vertex *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
+void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect, Vec3f *pos, Vec3f *unk60,
+                   Vec3f *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
 /* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect) {
-    vertex pos;
-    vertex unk60;
-    vertex vel;
+void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {
+    Vec3f pos;
+    Vec3f unk60;
+    Vec3f vel;
     /* func_151D9014 arguments 3..6 */
     f32 param3;
     s16 param4;
@@ -330,15 +280,15 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 
     f32 param6;
 
     func_15137F30(a0, a1, a2, a3, arg4, effect, &pos, &unk60, &vel, &param3, &param4, &param5, &param6);
-    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->unkC,
-                  effect->unk1);
+    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->owner,
+                  effect->kind);
 }
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     f32 unkA8;
     Particle *particle;
     ParticleExtra extra;
@@ -347,55 +297,55 @@ Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 
     s32 bit40;
 
     unkA8 = unkA8Value;
-    spawn.unk1D = 0x6C;
-    spawn.unk08 = 0x5103;
-    spawn.unk00 = 0x200005;
-    spawn.unk04 = 0;
-    spawn.unk0C = 0;
-    spawn.unk10 = 0;
-    spawn.unk1E = 20;
-    spawn.unk20 = 12;
+    spawn.texture = 0x6C;
+    spawn.renderMode = 0x5103;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.fadeStart = 20;
+    spawn.fadeRate = 12;
     bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
     hasUnk0A = (unk0A == -1) ? 0 : 1;
     bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
     spawn.flags = bit80 | hasUnk0A | 2 | 4 | bit40 | 0x4000 | 0x8000 | 0x200 | 0x800000;
-    spawn.unk60 = 8;
-    spawn.unk61 = 6;
+    spawn.primColorMode = 8;
+    spawn.envColorMode = 6;
     if (altUnk62) {
-        spawn.unk62 = 0x1D;
+        spawn.updateFunc = 0x1D;
     } else {
-        spawn.unk62 = 0xA;
+        spawn.updateFunc = 0xA;
     }
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk22 = 1;
-    spawn.unk65 = 0;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.scaleStart = 1;
+    spawn.handlerSet = 0;
     extra.unk0 = 1;
     extra.unk1 = 0;
-    spawn.unk14 = 0xE2;
-    spawn.unk15 = 0xB2;
-    spawn.unk16 = 0x60;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0x39;
-    spawn.unk19 = 0xF;
-    spawn.unk1A = 0;
-    spawn.unk1C = 0xFF;
-    spawn.unk24 = 1.0f;
+    spawn.r = 0xE2;
+    spawn.g = 0xB2;
+    spawn.b = 0x60;
+    spawn.a = 0xFF;
+    spawn.r2 = 0x39;
+    spawn.g2 = 0xF;
+    spawn.b2 = 0;
+    spawn.brightness = 0xFF;
+    spawn.scaleRate = 1.0f;
     extra.unk4 = 0.703f;
     spawn.pos = *pos;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     spawn.vel = *vel;
-    spawn.unk54 = unk54;
-    spawn.unk1B = unk1B;
+    spawn.gravity = unk54;
+    spawn.alpha = unk1B;
     if (unk0A == -1) {
-        spawn.unk0A = 300;
+        spawn.timer = 300;
     } else {
-        spawn.unk0A = unk0A;
+        spawn.timer = unk0A;
     }
-    spawn.unk2C = size;
-    spawn.unk28 = size;
+    spawn.height = size;
+    spawn.width = size;
     particle = func_15130280(&spawn, 1, arg8, sizeof(ParticleData), arg9, argA);
     if (particle != NULL) {
         memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
@@ -404,61 +354,37 @@ Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 
     return particle;
 }
 
-/* Effect descriptor passed to func_15154684. */
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ vertex *unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ s8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex *unk38;
-} Effect15154684;
-
-void func_15154684(Effect15154684 *desc, u8 arg1, s32 arg2);
+void func_15154684(ParticleBurst *desc, u8 arg1, s32 arg2);
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
-void func_151C61A0(vertex *arg0, vertex *arg1, u8 arg2, s32 arg3) {
-    Effect15154684 desc;
+void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
+    ParticleBurst desc;
 
-    desc.unk00 = 10;
-    desc.unk02 = 4;
-    desc.unk04 = arg0;
-    desc.unk08 = 0;
-    desc.unk0C = 255;
-    desc.unk0A = -24;
-    desc.unk0E = 25;
-    desc.unk10 = 5.0f;
-    desc.unk14 = 7.0f;
-    desc.unk18 = -0.2080000043f;
-    desc.unk1C = 0.08500000089f;
+    desc.countBase = 10;
+    desc.countRange = 4;
+    desc.pos = arg0;
+    desc.yawBase = 0;
+    desc.yawRange = 255;
+    desc.pitchBase = -24;
+    desc.pitchRange = 25;
+    desc.speedBase = 5.0f;
+    desc.speedRange = 7.0f;
+    desc.gravityBase = -0.2080000043f;
+    desc.gravityRange = 0.08500000089f;
     desc.unk20 = 0.9706320167f;
-    desc.unk24 = 190;
-    desc.unk25 = 65;
-    desc.unk26 = 200;
-    desc.unk28 = 150;
-    desc.unk2C = 96.0f;
-    desc.unk30 = 109.0f;
-    desc.unk34 = 1.0f;
-    desc.unk38 = arg1;
+    desc.alphaBase = 190;
+    desc.alphaRange = 65;
+    desc.timerBase = 200;
+    desc.timerRange = 150;
+    desc.sizeBase = 96.0f;
+    desc.sizeRange = 109.0f;
+    desc.altChance = 1.0f;
+    desc.ground = arg1;
     func_15154684(&desc, arg2, arg3);
 }
 
 /* D_80086C90 object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
-s32 func_151C6290(struct127 *obj, struct127 *self, s32 arg2) {
+s32 func_151C6290(Actor *obj, Actor *self, s32 arg2) {
     if (obj->id == 0x5A || obj->id == 0x74 || obj->id == 0x7A) {
         return FALSE;
     }

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Sprite descriptor passed to func_15169968; the sprite it creates keeps these fields from +0x10. */
 typedef struct {
@@ -165,8 +166,8 @@ typedef struct {
 
 /* Picks the hook's texture (an entry of D_80090274) from the actor's animation frame while
  * the actor is in state 0xAE. */
-s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
-    struct197 *anim;
+s32 func_150F56B0(DrawHook *hook, Actor *actor) {
+    AnimInstance *anim;
     s32 frame;
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
     f32 t;
@@ -178,41 +179,41 @@ s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
     frame = 6;
     two = 2.0f;
     if (actor->unk84.uh == 0xAE) {
-        if ((anim->unk8 >= 36.0f) && (anim->unk8 <= 51.0f)) {
-            t = anim->unk8 - 36.0f;
+        if ((anim->frame >= 36.0f) && (anim->frame <= 51.0f)) {
+            t = anim->frame - 36.0f;
             t *= 0.0625f;
             t = 1.0f - t;
             frame = (s32)(6.0f * t);
-        } else if ((anim->unk8 > 51.0f) && (anim->unk8 <= 54.0f)) {
+        } else if ((anim->frame > 51.0f) && (anim->frame <= 54.0f)) {
             frame = 0;
-        } else if ((anim->unk8 > 54.0f) && (anim->unk8 <= 60.0f)) {
-            t = anim->unk8 - 54.0f;
+        } else if ((anim->frame > 54.0f) && (anim->frame <= 60.0f)) {
+            t = anim->frame - 54.0f;
             t *= 0.1428571492f;
             frame = (s32)(6.0f * t);
-        } else if ((anim->unk8 > 60.0f) && (anim->unk8 <= 65.0f)) {
-            t = anim->unk8 - 60.0f;
+        } else if ((anim->frame > 60.0f) && (anim->frame <= 65.0f)) {
+            t = anim->frame - 60.0f;
             t *= 0.1666666716f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 65.0f) && (anim->unk8 <= 67.0f)) {
-            t = anim->unk8 - 65.0f;
+        } else if ((anim->frame > 65.0f) && (anim->frame <= 67.0f)) {
+            t = anim->frame - 65.0f;
             t *= 0.3333333433f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 67.0f) && (anim->unk8 <= 70.0f)) {
-            t = anim->unk8 - 67.0f;
+        } else if ((anim->frame > 67.0f) && (anim->frame <= 70.0f)) {
+            t = anim->frame - 67.0f;
             t *= 0.25f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->unk8 > 70.0f) && (anim->unk8 <= 74.0f)) {
-            t = anim->unk8 - 70.0f;
+        } else if ((anim->frame > 70.0f) && (anim->frame <= 74.0f)) {
+            t = anim->frame - 70.0f;
             t *= 0.200000003f;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->unk8 > 74.0f) && (anim->unk8 <= 119.0f)) {
-            t = anim->unk8 - 74.0f;
+        } else if ((anim->frame > 74.0f) && (anim->frame <= 119.0f)) {
+            t = anim->frame - 74.0f;
             t *= 0.02173913084f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 119.0f) && (anim->unk8 <= 150.0f)) {
-            t = anim->unk8 - 119.0f;
+        } else if ((anim->frame > 119.0f) && (anim->frame <= 150.0f)) {
+            t = anim->frame - 119.0f;
             t *= 0.03125f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
@@ -224,8 +225,8 @@ s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
 
 /* While the actor is in state 5, slides the hook's texture over animation frames 69-84 by
  * patching the upper-left t of the first G_SETTILESIZE in its display list. */
-s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
-    struct197 *anim;
+s32 func_150F5A54(DrawHook *hook, Actor *actor) {
+    AnimInstance *anim;
     Gfx *gfx;
     s32 count;
     s32 notStarted;
@@ -259,13 +260,13 @@ s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
     }
 
     if (actor->unk84.uh == 5) {
-        if (anim->unk8 < 69.0f) {
+        if (anim->frame < 69.0f) {
             level = 1.0f;
-        } else if (84.0f < anim->unk8) {
+        } else if (84.0f < anim->frame) {
             level = 0.0f;
             hook->fadeState = 2;
         } else {
-            level = (anim->unk8 - 69.0f) / 15;
+            level = (anim->frame - 69.0f) / 15;
             level = 1.0f - level;
         }
     }
@@ -291,33 +292,22 @@ s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
     return 0;
 }
 
-/* Common head of an effect object (struct260 is a shorter view). Each effect keeps its own data
- * from +0x28. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     u8 pad5[3];
     f32 accum;  /* sparks owed; one is spawned per whole unit */
 } SparkData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     SparkData data;
 } SparkEffect;
 
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
-void func_150F5C08(struct127 *owner, s16 arg1, u8 arg2, s32 arg3) {
+void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
     struct260 *effect;
 
@@ -326,58 +316,15 @@ void func_150F5C08(struct127 *owner, s16 arg1, u8 arg2, s32 arg3) {
     data.accum = 0.0f;
 
     // the header's struct37 * parameter is really the size of the effect's data
-    effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, (struct37 *)sizeof(data), arg2, arg3);
+    effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&((SparkEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
-/* Particle descriptor passed to func_15130280 (0x70 bytes). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 lifetime;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} ParticleDesc; /* 0x70 */
-
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
-    u8 pad0[0xA8];
+    DescParticleHead head;
     f32 unkA8;
 } Particle;
 
@@ -389,12 +336,12 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
 void func_150F5C98(SparkEffect *effect) {
-    struct127 *owner;
+    Actor *owner;
     SparkData *data;
     ParticleDesc spawn;
     f32 scale;
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -410,68 +357,68 @@ void func_150F5C98(SparkEffect *effect) {
     if (owner->unk1D4 != NULL) {
         data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
         if (data->accum > 1.0f) {
-            spawn.unk14 = 0xFF;
-            spawn.unk15 = 0xFF;
-            spawn.unk16 = 0xFF;
-            spawn.unk18 = 0xB4;
-            spawn.unk19 = 0xB4;
-            spawn.unk1A = 0xB4;
+            spawn.r = 0xFF;
+            spawn.g = 0xFF;
+            spawn.b = 0xFF;
+            spawn.r2 = 0xB4;
+            spawn.g2 = 0xB4;
+            spawn.b2 = 0xB4;
             srcs[0] = D_800A1B00;
             srcs[1] = D_800A1B0C;
-            dsts[0] = &start.unk0;
-            dsts[1] = &end.unk0;
+            dsts[0] = &start.x;
+            dsts[1] = &end.x;
             func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 5, 2);
-            spawn.unk1D = 0x6C;
-            spawn.unk8 = 0x5103;
+            spawn.texture = 0x6C;
+            spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
             spawn.unk4 = 0x9F0600;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk17 = 0xFF;
-            spawn.unk1C = 0xFF;
-            dx = end.unk0 - start.unk0;
-            dy = end.unk4 - start.unk4;
-            dz = end.unk8 - start.unk8;
-            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.a = 0xFF;
+            spawn.brightness = 0xFF;
+            dx = end.x - start.x;
+            dy = end.y - start.y;
+            dz = end.z - start.z;
+            spawn.offset = D_800A5480;
             spawn.flags = 0x84CE07;
-            spawn.unk60 = 8;
-            spawn.unk61 = 6;
-            spawn.unk62 = 0x10;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.unk68 = 1000;
-            spawn.unk6C = 1000.0f;
+            spawn.primColorMode = 8;
+            spawn.envColorMode = 6;
+            spawn.updateFunc = 0x10;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.minSize = 1000;
+            spawn.maxSize = 1000.0f;
             scale = 0.9730340242f;
-            spawn.unk24 = 1.022472024f;
+            spawn.scaleRate = 1.022472024f;
             do {
                 f32 speed;
                 f32 t;
                 s32 flipX;
                 Particle *spark;
 
-                spawn.lifetime = func_150ADA20() % 21U + 20;
-                spawn.unk22 = spawn.lifetime;
-                spawn.unk1E = spawn.lifetime;
-                spawn.unk20 = 0xFF / spawn.lifetime;
-                spawn.unk1B = func_150ADA20() % 26U + 8;
-                spawn.unk28 = spawn.unk2C = func_150ADA68() * 70.0f + 148.0f;
-                spawn.unk54 = func_150ADA68() * 0.2190000117f + 0.08600000292f;
+                spawn.timer = func_150ADA20() % 21U + 20;
+                spawn.scaleStart = spawn.timer;
+                spawn.fadeStart = spawn.timer;
+                spawn.fadeRate = 0xFF / spawn.timer;
+                spawn.alpha = func_150ADA20() % 26U + 8;
+                spawn.width = spawn.height = func_150ADA68() * 70.0f + 148.0f;
+                spawn.gravity = func_150ADA68() * 0.2190000117f + 0.08600000292f;
                 speed = func_150ADA68() * 0.04100000113f + 0.07800000161f;
-                spawn.vel.unk0 = dx * speed;
-                spawn.vel.unk4 = dy * speed;
-                spawn.vel.unk8 = dz * speed;
+                spawn.vel.x = dx * speed;
+                spawn.vel.y = dy * speed;
+                spawn.vel.z = dz * speed;
                 /* Start a random part of a frame along the path. */
                 t = func_150ADA68() * D_800BE9A4;
                 spawn.flags &= ~0xC0;
-                spawn.pos.unk0 = spawn.vel.unk0 * t + start.unk0;
-                spawn.pos.unk4 = spawn.vel.unk4 * t + start.unk4;
-                spawn.pos.unk8 = spawn.vel.unk8 * t + start.unk8;
+                spawn.pos.x = spawn.vel.x * t + start.x;
+                spawn.pos.y = spawn.vel.y * t + start.y;
+                spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                spark = func_15130280(&spawn, 1, 0, 4, effect->head.unkC, effect->head.unk1);
+                spark = func_15130280(&spawn, 1, 0, 4, effect->head.owner, effect->head.kind);
                 if (spark != NULL) {
                     memcpy(&spark->unkA8, &scale, sizeof(scale));
                 }
@@ -484,7 +431,7 @@ void func_150F5C98(SparkEffect *effect) {
 /* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
  * (pointer and id). */
 void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
-    func_15149514(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 typedef struct BeamEffect BeamEffect;
@@ -500,10 +447,7 @@ typedef struct {
 
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
-    u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
-    u8 pad4C[0x110 - 0x4C];
+    DefParticleHead head; /* head.def.pos / rot: the two end points */
     BeamPart part;
 } Beam;
 
@@ -521,7 +465,7 @@ typedef struct {
 } Flash;
 
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad5[3];
     Beam *beam;
@@ -529,7 +473,8 @@ typedef struct {
 } BeamData;
 
 struct BeamEffect {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     BeamData data;
 };
 
@@ -540,9 +485,9 @@ extern f32 D_800A1B24[3];
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
 void func_150F6178(BeamEffect *effect) {
     BeamData *data;
-    struct127 *owner;
-    struct17 start;
-    struct17 end;
+    Actor *owner;
+    Vec3f start;
+    Vec3f end;
     f32 *srcs[2];
     f32 *dsts[2];
 
@@ -559,22 +504,22 @@ void func_150F6178(BeamEffect *effect) {
 
         srcs[0] = D_800A1B18;
         srcs[1] = D_800A1B24;
-        dsts[0] = &start.unk0;
-        dsts[1] = &end.unk0;
+        dsts[0] = &start.x;
+        dsts[1] = &end.x;
         func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
-            beam->start = start;
-            beam->end = end;
+            beam->head.def.pos = start;
+            beam->head.def.rot = end;
         }
         flash = data->flash;
         if (flash != NULL) {
             sprite = flash->sprite;
             sprite->hidden = FALSE;
-            sprite->position[0] = start.unk0;
-            sprite->position[1] = start.unk4;
-            sprite->position[2] = start.unk8;
+            sprite->position[0] = start.x;
+            sprite->position[1] = start.y;
+            sprite->position[2] = start.z;
         }
     } else {
         if (data->beam != NULL) {
@@ -614,7 +559,6 @@ void func_150F6368(BeamEffect *effect) {
     func_1514933C((struct260 *)effect);
 }
 
-void func_15149368(struct260 *);
 
 void func_150F6394(BeamEffect *effect) {
     func_150F631C(effect);
@@ -623,7 +567,7 @@ void func_150F6394(BeamEffect *effect) {
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
 void func_150F63C0(BeamEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
@@ -656,7 +600,6 @@ void func_150F6484(struct210 *obj) {
     func_151411A4(obj);
 }
 
-void func_151411C4(struct210 *);
 
 void func_150F64B0(struct210 *obj) {
     func_150F6478(obj);
@@ -665,28 +608,29 @@ void func_150F64B0(struct210 *obj) {
 
 /* Data of the effect run by func_150F64DC. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 timer; /* frames until the next burst */
-} BurstData;
+} FlashBurstData;
 
 typedef struct {
-    EffectHead head;
-    BurstData data;
-} BurstEffect;
+    EffectHeader head;
+    u8 pad10[0x18];
+    FlashBurstData data;
+} FlashBurstEffect;
 
 extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
+void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
-void func_150F64DC(BurstEffect *effect) {
-    BurstData *data;
-    struct127 *owner;
+void func_150F64DC(FlashBurstEffect *effect) {
+    FlashBurstData *data;
+    Actor *owner;
     s8 count;
 
     owner = effect->data.owner;
@@ -719,8 +663,8 @@ void func_150F64DC(BurstEffect *effect) {
                 origin.unk4 = pos[1];
                 origin.unk8 = pos[2];
                 rand3 = (func_150ADA20() % 61U) + 60;
-                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.unkC,
-                              effect->head.unk1);
+                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.owner,
+                              effect->head.kind);
                 do {
                     color[0] = 0xA0;
                     color[1] = 0xA0;
@@ -730,8 +674,8 @@ void func_150F64DC(BurstEffect *effect) {
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
                     func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
-                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.unkC,
-                                  effect->head.unk1);
+                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.owner,
+                                  effect->head.kind);
                     count--;
                 } while (count > 0);
                 data->timer = (func_150ADA20() % 91U) + 90;
@@ -741,64 +685,36 @@ void func_150F64DC(BurstEffect *effect) {
 }
 
 /* Effect callback for the burst effect: hands func_15169850 the owner reference. */
-void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Descriptor passed to func_15134DAC. */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_150F6890;
-
-void *func_15134DAC(struct_150F6890 *, s32);
+void *func_15134DAC(BloodStripDesc *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`. */
-void func_150F6890(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
-    struct_150F6890 desc;
+void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+    BloodStripDesc desc;
 
     desc.ownerId = owner->unique_id;
-    desc.unk1C = 4.700000286f;
-    desc.unk20 = 8.5f;
-    desc.unk34 = 1.0f;
+    desc.offsetB.y = 4.700000286f;
+    desc.offsetB.z = 8.5f;
+    desc.rate = 1.0f;
     desc.owner = owner;
-    desc.unk8 = 3;
-    desc.unkC = 0.0f;
-    desc.unk10 = 0.0f;
-    desc.unk14 = 0.0f;
-    desc.unk18 = 0.0f;
-    desc.unk24 = 2;
-    desc.unk26 = 40;
-    desc.unk28 = 16;
-    desc.unk2A = arg1;
-    desc.unk2E = 5;
-    desc.unk2F = 8;
-    desc.unk30 = -1;
-    desc.unk38 = 0;
-    desc.unk39 = -1;
-    desc.unk2C = 0;
+    desc.bone = 3;
+    desc.offsetA.x = 0.0f;
+    desc.offsetA.y = 0.0f;
+    desc.offsetA.z = 0.0f;
+    desc.offsetB.x = 0.0f;
+    desc.flags = 2;
+    desc.duration = 40;
+    desc.pause = 16;
+    desc.lifetime = arg1;
+    desc.sampleCallback = 5;
+    desc.emitCallback = 8;
+    desc.rateCallback = -1;
+    desc.mode = 0;
+    desc.updateCallback = -1;
+    desc.sound = 0;
 
     func_15134DAC(&desc, 0);
 }
@@ -810,7 +726,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xC - 0x2];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1C - 0xD];
-    /* 0x1C */ struct127 *owner;
+    /* 0x1C */ Actor *owner;
 } BloodStrip;
 
 /* Ground probe result filled by func_1504715C (game_105760.c's Ground_150D85AC). */
@@ -827,7 +743,7 @@ typedef struct {
 void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
                    f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Ground *, struct127 *);
+void func_1504715C(Ground *, Actor *);
 
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */

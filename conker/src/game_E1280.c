@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Particle trails: a ring buffer of points emitted from a moving source and drawn as a ribbon. */
 
@@ -9,10 +10,6 @@
 #define TRAIL_FADE_HEAD 4 /* state->flags: ramp alpha up from the newest point */
 
 #define TRAIL_ATTACHED  2 /* trail->flags: the ribbon starts at the emitter position */
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
 
 /* One point of a trail's ring buffer. */
 typedef struct {
@@ -67,7 +64,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ Vec3f pos;     /* 0x10-0x2B are copied from the TrailSpawn header */
+    /* 0x10 */ Vec3f pos;     /* 0x10-0x2B are copied from the EffectTemplate header */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u16 flags;
     /* 0x20 */ s32 kind;
@@ -86,17 +83,6 @@ typedef struct {
     /* 0x94 */ TrailPoint *points;
     /* 0x98 */ TrailState *state;
 } Trail;
-
-/* Header copied to trail+0x10 when a trail is spawned. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 kind;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity;
-    /* 0x16 */ u8 pad16[6];
-} TrailSpawn; // size = 0x1C
 
 extern void func_15147D64(s32, s32);
 
@@ -136,17 +122,17 @@ void func_150B3EE8(Trail *trail) {
 extern void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
-Trail *func_150B3F5C(TrailState *params, Vec3f *pos, s16 capacity) {
-    TrailSpawn spawn;
+Trail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {
+    EffectTemplate spawn;
     TrailState state;
     Trail *trail;
 
-    memcpy(&state, params, 0x40); /* the settings, up to state.speed */
+    memcpy(&state, params, sizeof(TrailStateParams)); /* the settings, up to state.speed */
     state.emitAccum = 0.0f;
-    spawn.capacity = capacity;
+    spawn.itemCount = capacity;
     state.texS = 0;
     spawn.flags = TRAIL_ATTACHED;
-    spawn.unkC = 500;
+    spawn.life = 500;
     state.speedTarget = params->speedBase + params->speedSwing;
     state.phase = 0;
     state.burstAccum = 0.0f;
@@ -156,7 +142,7 @@ Trail *func_150B3F5C(TrailState *params, Vec3f *pos, s16 capacity) {
 
     trail = func_15147A80(&spawn, sizeof(TrailState), sizeof(TrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
-        func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, (s32)func_1000EF40, 0, 0, 8,
+        func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);
         memcpy(trail->state, &state, sizeof(TrailState));
     }
@@ -288,8 +274,6 @@ s32 func_150B4294(Trail *trail) {
     return 1;
 }
 
-extern u8 D_80091238[];
-extern s32 D_800D2C9C;
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -334,7 +318,7 @@ Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 camIdx) {
     if (trail->count >= 2) {
         func_151D5D60(trail->unk84, camIdx, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            cam = &D_800DBFF0[camIdx].unk2F8;
+            cam = &D_800DBFF0[camIdx].eye.x;
             state = trail->state;
             points = trail->points;
             update = 1;
@@ -534,40 +518,15 @@ typedef struct {
     /* 0x22 */ s16 capacityRange;
 } TrailBurstPreset; // size = 0x24
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ Vec3f vel;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 shade;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 pad1C[4];
-} BurstParticle; // size = 0x20
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} BurstStyle; // size = 0x20
-
 extern TrailBurstPreset D_8009FBF0[];
-extern s32 func_15147DA0(TrailSpawn *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, BurstStyle *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(Trail *trail) {
-    BurstStyle style;
+    TrailRender style;
     TrailState *state;
-    TrailSpawn spawn;
-    BurstParticle particle;
+    EffectTemplate spawn;
+    TrailMotion particle;
     f32 x;
     f32 y;
     f32 z;
@@ -584,18 +543,18 @@ void func_150B5088(Trail *trail) {
     preset = &D_8009FBF0[state->burstPreset];
 
     style.unk0 = 0;
-    style.unk4 = 1;
-    style.unk8 = 0x160600;
-    style.unkC = 3;
+    style.setGeometryMode = 1;
+    style.clearGeometryMode = 0x160600;
+    style.renderMode = 3;
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.unk1C = 0;
-    style.unk1D = 9;
+    style.primMode = 0;
+    style.envMode = 9;
     spawn.flags = 1;
-    particle.unk19 = 6;
+    particle.texture = 6;
     particle.shade = state->shade;
-    particle.unk18 = 8;
+    particle.flags = 8;
     particle.alpha = state->alpha;
     spawn.pos = trail->pos;
 
@@ -610,13 +569,13 @@ void func_150B5088(Trail *trail) {
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;
-        spawn.capacity = ((u32)func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
-        spawn.unkC = ((u32)func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
-        particle.unk0 = func_150ADA68() * preset->unk10 + preset->unkC;
-        particle.unk10 = func_150ADA68() * preset->unk18 + preset->unk14;
-        particle.vel.x = speed * x;
-        particle.vel.y = speed * y;
-        particle.vel.z = speed * z;
+        spawn.itemCount = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
+        spawn.life = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
+        particle.halfWidth = func_150ADA68() * preset->unk10 + preset->unkC;
+        particle.gravity = func_150ADA68() * preset->unk18 + preset->unk14;
+        particle.velocity.x = speed * x;
+        particle.velocity.y = speed * y;
+        particle.velocity.z = speed * z;
         func_15147DA0(&spawn, &particle, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, trail->unkC, trail->unk1);
         state->burstAccum -= 1.0f;
     } while (state->burstAccum > 1.0f);

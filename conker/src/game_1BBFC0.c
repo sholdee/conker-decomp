@@ -2,15 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Game1BBFC0Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game1BBFC0Vec3f;
-
 typedef struct Game1BBFC0Motion {
     /* 0x00 */ u8 unknown0[0x30];
-    /* 0x30 */ Game1BBFC0Vec3f velocity;
+    /* 0x30 */ Vec3f velocity;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 drag;
     /* 0x44 */ f32 shrinkRate;
@@ -25,8 +19,8 @@ typedef struct Game1BBFC0Beam {
     /* 0x01E */ u8 unknown1E[0xE];
     /* 0x02C */ f32 width;
     /* 0x030 */ f32 progress;
-    /* 0x034 */ Game1BBFC0Vec3f start;
-    /* 0x040 */ Game1BBFC0Vec3f end;
+    /* 0x034 */ Vec3f start;
+    /* 0x040 */ Vec3f end;
     /* 0x04C */ u8 unknown4C[0x10];
     /* 0x05C */ u8 unk5C;
     /* 0x05D */ u8 unknown5D[0x63];
@@ -49,13 +43,13 @@ Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
     Vtx *vtx;
     Vtx *result;
     f32 progress;
-    Game1BBFC0Vec3f tip;
+    Vec3f tip;
     f32 dx, dy, dz;
     f32 vx, vy, vz;
     f32 nx, ny, nz;
     f32 lengthSquared;
     u8 fresh;
-    Game1BBFC0Vec3f *eye;
+    Vec3f *eye;
     f32 scale;
 
     func_151D5D60(beam->buffers, cam, 4 * sizeof(Vtx), (void **)&vtx, &fresh);
@@ -76,7 +70,7 @@ Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
     tip.x = beam->start.x + dx * progress;
     tip.y = beam->start.y + dy * progress;
     tip.z = beam->start.z + dz * progress;
-    eye = (Game1BBFC0Vec3f *)&D_800DBFF0[cam].unk2F8;
+    eye = &D_800DBFF0[cam].eye;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;

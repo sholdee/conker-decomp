@@ -29,69 +29,6 @@ typedef struct {
     s32 unk4;
 } MessageEntry;
 
-/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
-typedef struct TextBoxConfig {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
-    /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
-    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
-    /* 0x10 */ f32 worldY;
-    /* 0x14 */ f32 worldZ;
-    /* 0x18 */ f32 *screenXPercent; /* TEXTBOX_SCREEN_POS placement */
-    /* 0x1C */ f32 *screenYPercent;
-    /* 0x20 */ f32 *anglePercent;
-    /* 0x24 */ u8 pad24[2];
-    /* 0x26 */ u16 duration;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
-    /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
-} TextBoxConfig;
-
-/* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 pad1[0xC];
-    /* 0x0D */ u8 source;           /* 0: D_800DD254 text, 1: D_800DD258 text, 2: caller string */
-    /* 0x0E */ u8 visible;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ TextBoxConfig *config;
-    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
-    /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
-    /* 0x16 */ s16 timer;
-    /* 0x18 */ s16 fadeTimer;
-    /* 0x1A */ u8 textAlpha;
-    /* 0x1B */ u8 bubbleAlpha[3];
-    /* 0x1E */ u8 bubbleIndex;
-    /* 0x1F */ u8 placed;           /* screen position taken from the world point */
-    /* 0x20 */ s8 page;
-    /* 0x21 */ u8 pad21[3];
-    /* 0x24 */ u8 *text;            /* current page */
-    /* 0x28 */ f32 scale;
-    /* 0x2C */ f32 scaleSpeed;
-    /* 0x30 */ f32 halfTextWidth;
-    /* 0x34 */ f32 halfTextHeight;
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ f32 x;               /* anchor (tip of the tail) */
-    /* 0x44 */ f32 y;
-    /* 0x48 */ f32 bodyX;           /* scaled body position */
-    /* 0x4C */ f32 bodyY;
-    /* 0x50 */ f32 centerX;         /* unscaled body position: the text origin */
-    /* 0x54 */ f32 centerY;
-    /* 0x58 */ f32 angle;           /* direction from the anchor to the body, radians */
-    /* 0x5C */ f32 anchorX;
-    /* 0x60 */ f32 anchorY;
-    /* 0x64 */ f32 baseX;
-    /* 0x68 */ f32 baseY;
-    /* 0x6C */ f32 yaw;             /* object heading relative to the camera, degrees */
-    /* 0x70 */ f32 bubbleX;
-} TextBox;
-
 /* TextBox.state */
 #define TEXTBOX_STATE_INIT      0x1
 #define TEXTBOX_STATE_GROW      0x2
@@ -108,14 +45,13 @@ extern MessageEntry *D_800DD258;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object, set by func_1516A7B0 */
 s32 func_151F2CDC(void);
 void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's register allocation)
 
 /* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
 void func_1516AA70(TextBox *box) {
     s32 unused; // matching: unused local, needed for the original stack frame
-    struct108 *player;
+    Camera *player;
     s32 width;
     s32 height;
     s32 advance;
@@ -124,7 +60,7 @@ void func_1516AA70(TextBox *box) {
 
     player = D_800DBFF0;
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
-    if (box->config->unk2B != 0 && D_800C35EA != 1) {
+    if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
         func_1516972C((struct102 *)box);
         return;
@@ -320,7 +256,7 @@ void func_1516AA70(TextBox *box) {
             }
             box->config->flags &= ~TEXTBOX_CB_CLOSED;
             D_800CC4B3[box->config->objIndex][0] = 0;
-            *(s16 *)((u8 *)player + 0x6CC) = 0; /* struct108 has no field here yet */
+            *(s16 *)((u8 *)player + 0x6CC) = 0; /* Camera has no field here yet */
             box->config->numPages = 0;
             func_1516972C((struct102 *)box);
         }
@@ -363,12 +299,6 @@ extern struct {
     u32 cycle1;
     u32 cycle2;
 } D_800A4AC8[];
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern u8 D_800E0BDC;
 Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
 Gfx *func_1516C934(Gfx *, TextBox *, s32, s32, s32, s32);
@@ -669,20 +599,6 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
     return gfx;
 }
 
-/* What D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 width;
-    /* 0x08 */ f32 height;
-    /* 0x0C */ u8 padC[0x18];
-    /* 0x24 */ f32 minY;
-    /* 0x28 */ f32 maxY;
-    /* 0x2C */ f32 minX;
-    /* 0x30 */ f32 maxX;
-} TextBoxView;
-
-#define VIEW ((TextBoxView *)D_800BE628)
-
 void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
@@ -701,10 +617,10 @@ void func_1516CC58(TextBox *box) {
     config = box->config;
     if (config->flags & TEXTBOX_SCREEN_POS) {
         scale = *config->screenXPercent * 0.01f;
-        box->anchorX = VIEW->width * scale;
+        box->anchorX = D_800BE628->width * scale;
         scale = *config->screenYPercent * 0.01f;
         scale = 1.0f - scale;
-        box->anchorY = VIEW->height * scale;
+        box->anchorY = D_800BE628->height * scale;
         angle = *config->anglePercent * 0.01f;
         angle = (angle < 0.0f) ? 0.0f : ((angle > 1.0f) ? 1.0f : angle);
         angle = 70.0f * angle + 55.0f;
@@ -718,7 +634,7 @@ void func_1516CC58(TextBox *box) {
         if (box->placed == 0) {
             box->baseX = screenX;
             box->baseY = screenY;
-            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->unk37C - 180.0f;
+            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->yaw - 180.0f;
             box->placed = 1;
         }
         angle = box->yaw;
@@ -769,15 +685,15 @@ void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     left = bodyX - halfW;
     right = halfW + bodyX;
     if (box != NULL) {
-        if (top < VIEW->minY) {
-            *y = VIEW->minY + h;
-        } else if (VIEW->maxY < anchorY) {
-            *y = VIEW->maxY;
+        if (top < D_800BE628->top) {
+            *y = D_800BE628->top + h;
+        } else if (D_800BE628->bottom < anchorY) {
+            *y = D_800BE628->bottom;
         }
-        if (left < VIEW->minX) {
-            *x -= left - VIEW->minX;
-        } else if (VIEW->maxX < right) {
-            *x += VIEW->maxX - right;
+        if (left < D_800BE628->left) {
+            *x -= left - D_800BE628->left;
+        } else if (D_800BE628->right < right) {
+            *x += D_800BE628->right - right;
         }
         *x = (s32)*x;
         *y = (s32)*y;

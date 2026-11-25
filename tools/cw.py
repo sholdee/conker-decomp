@@ -151,7 +151,9 @@ def build(ws):
     (wc / BIN).unlink(missing_ok=True)
     # The Makefile has no header dependencies: after any include/ change, rebuild everything (~15 s),
     # or stale objects would hide breakage in files that use the changed header.
-    hdr = any(str(f).startswith("include/") for f in changed_files(ws))
+    # Workspaces created from a Makefile with generated header deps (cpp -MM) rebuild exactly the users.
+    has_deps = "cpp -MM" in (wc / "Makefile").read_text(errors="replace")
+    hdr = not has_deps and any(str(f).startswith("include/") for f in changed_files(ws))
     r = run(f"make {'-B ' if hdr else ''}-j8 2>&1", wc, timeout=1800)
     return wc, r
 

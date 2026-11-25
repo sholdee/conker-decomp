@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
 #define STICK_DEADZONE 20
 
 /*
@@ -18,7 +15,7 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
     OSContPad *pad;
     s16 stickX;
 
-    pad = CONT_PADS[controller];
+    pad = D_800BE728[controller];
     if (--D_80084484 != 0) {
         *dirX = 0;
         *dirY = 0;
@@ -73,7 +70,7 @@ s32 func_1509CB68(void);
 s32 strlen(const char *);
 
 /* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */
-#define TASK_BIT_SET(idx) (((u8 *)D_800D2E4C)[(idx) >> 3] & (1 << ((idx) & 7)))
+#define TASK_BIT_SET(idx) (D_800D2E4C[(idx) >> 3] & (1 << ((idx) & 7)))
 
 #define MENU_MAX_ROWS 19
 #define SCROLL_LIMIT 11.0f
@@ -155,7 +152,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
         D_800C6850 = rowY;
         if (fabsf(D_800C6850) >= SCROLL_LIMIT) {
-            step = (CONT_PADS[0]->button & Z_TRIG) ? 3 : 1;
+            step = (D_800BE728[0]->button & Z_TRIG) ? 3 : 1;
             if (D_80084488 == 1) {
                 D_80084498 -= step;
                 if (D_80084498 > taskCount) {
@@ -197,7 +194,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         } else {
             func_150428D4(func_1509CA10(taskIndex), &width, &height, &depth);
             // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
-            if (*((taskIndex >> 3) + (u8 *)D_800D2E4C) & (1 << (taskIndex & 7))) {
+            if (*((taskIndex >> 3) + D_800D2E4C) & (1 << (taskIndex & 7))) {
                 if (entry == D_80084498) {
                     if (D_80084494 != 0) {
                         text = D_80098948;

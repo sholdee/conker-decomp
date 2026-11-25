@@ -3,12 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 // A triangle's vertex positions, passed by value (36 bytes).
 typedef struct Tri3f {
     Vec3f pts[3];

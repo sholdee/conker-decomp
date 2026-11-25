@@ -1,22 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern f32 cosf(f32);
 extern f32 sinf(f32);
 // matching: 0.01745329238f (degrees to radians); the literal allocates registers differently than this load
 extern f32 D_800A7154;
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
-
-/* Sprite animation (same layout as SpriteAnim in game_1944C0.c). */
-typedef struct {
-    /* 0x0 */ s32 *frames; // one segmented texture address (< 0x10000000) or a table of frameCount addresses
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 unkA; // 5: two-texture (two-cycle) animation
-} SpriteAnim;
 
 extern SpriteAnim *D_8008CA4C[];
 
@@ -145,14 +136,6 @@ void func_15171FC0(Particle19F150 *particle) {
 }
 
 /* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B8;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
-extern s32 D_800D2C9C;
 /* Filled in by func_15094F70; unused here. */
 struct TexState151720C4 {
     s32 unk0[5];

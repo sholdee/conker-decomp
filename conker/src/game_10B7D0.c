@@ -1,55 +1,16 @@
 #include <ultra64.h>
 /* functions.h has placeholder prototypes for these (void returns, no args); hide them while it is
  * included and declare the real ones below. */
-#define func_15048A40 func_15048A40_hdr
-#define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150DE32C
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
-#define D_800A5480 D_800A5480_f32_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3098
-#undef D_800A5480
-extern struct178 *D_800D3098;
+#include "effects.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
-extern Vec3f D_800A5480;
-
-/* An object with a rotation and a position (func_150DE458's argument; func_151149AC returns one). */
-typedef struct {
-    /* 0x00 */ f32 rotation[3]; // degrees, wrapped into [0, 360)
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s32 gravity;
-    /* 0x40 */ u8  pad40[0x14];
-    /* 0x54 */ u16 kind; // bit 15 is a flag
-    /* 0x56 */ u8  pad56[0x4];
-    /* 0x5A */ s16 velocity[3];
-    /* 0x60 */ f32 spin[3]; // degrees per frame added to rotation
-    /* 0x6C */ u8  pad6C[0x2];
-    /* 0x6E */ u8  dead;
-    /* 0x6F */ u8  pad6F[0x4];
-    /* 0x73 */ u8  state; // low two bits == 3 while moving
-    /* 0x74 */ u8  pad74[0x8];
-    /* 0x7C */ s32 assetSet; // row of D_80090204
-    /* 0x80 */ u8  pad80[0xA];
-    /* 0x8A */ u8  timer; // frames left before dead is set
-} Prop;
-
-extern f32 func_15048A40(u8 angle);
-extern s32 func_150A32B4(struct178 *, s32, s32, s32);
-extern Prop *func_151149AC(u8);
+extern s32 func_150A32B4(TriggerZone *, s32, s32, s32);
+extern WorldObject *func_151149AC(u8);
 extern void func_150A2864(s32, s32);
 extern s32 D_80090204[][2];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(Prop *, s32, s32, s32, s32);
+extern void func_1510D874(WorldObject *, s32, s32, s32, s32);
 
 void func_150DE320(s32 arg0) {
 }
@@ -58,7 +19,7 @@ void func_150DE320(s32 arg0) {
  * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
-    Prop *prop;
+    WorldObject *prop;
     const u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
     const u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
@@ -66,7 +27,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
         if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
-                prop->state = (prop->state & ~3) | 3;
+                prop->behaviorState = (prop->behaviorState & ~3) | 3;
             } else {
                 func_150A2864(ids[i], 1);
             }
@@ -75,9 +36,9 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
- * velocity to the position and counts the timer down to dead; kind 0xC props also get two
- * D_80090204 assets passed to func_1510D874. */
-void func_150DE458(Prop *prop) {
+ * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
+ * until inactive; kind 0xC props also get two assets of D_80090204 row work.words[0] passed to func_1510D874. */
+void func_150DE458(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
     f32 frames;
@@ -88,51 +49,51 @@ void func_150DE458(Prop *prop) {
     s32 slot;
     s32 nextSlot;
 
-    if ((prop->state & 3) == 3) {
+    if ((prop->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        prop->rotation[0] += prop->spin[0] * frames;
-        angle = prop->rotation[0];
+        prop->rotX += prop->spinX * frames;
+        angle = prop->rotX;
         if (angle < 0.0f) {
-            prop->rotation[0] = angle + 360.0f;
+            prop->rotX = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[0] = angle - 360.0f;
+            prop->rotX = angle - 360.0f;
         }
 
-        prop->rotation[1] += prop->spin[1] * frames;
-        angle = prop->rotation[1];
+        prop->rotY += prop->spinY * frames;
+        angle = prop->rotY;
         if (angle < 0.0f) {
-            prop->rotation[1] = angle + 360.0f;
+            prop->rotY = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[1] = angle - 360.0f;
+            prop->rotY = angle - 360.0f;
         }
 
-        prop->rotation[2] += prop->spin[2] * frames;
-        angle = prop->rotation[2];
+        prop->rotZ += prop->spinZ * frames;
+        angle = prop->rotZ;
         if (angle < 0.0f) {
-            prop->rotation[2] = angle + 360.0f;
+            prop->rotZ = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[2] = angle - 360.0f;
+            prop->rotZ = angle - 360.0f;
         }
 
-        timer = prop->timer;
-        prop->velocity[1] -= prop->gravity * D_800BE9E4;
-        prop->position[0] += prop->velocity[0] * D_800BE9E4;
-        prop->position[1] += prop->velocity[1] * D_800BE9E4;
-        prop->position[2] += prop->velocity[2] * D_800BE9E4;
+        timer = prop->alpha;
+        prop->moveY -= prop->param.word * D_800BE9E4;
+        prop->x += prop->moveX * D_800BE9E4;
+        prop->y += prop->moveY * D_800BE9E4;
+        prop->z += prop->moveZ * D_800BE9E4;
 
         timer -= D_800BE9E4;
         if (timer > 0) {
-            prop->timer = timer;
+            prop->alpha = timer;
         } else {
-            prop->dead = 1;
+            prop->inactive = 1;
         }
     }
 
-    if ((prop->kind & ~0x8000) == 0xC) {
+    if ((prop->modelId & ~0x8000) == 0xC) {
         // matching: a for (i = 0; i < 2; i++) form (slots i * 2 + 4, i * 2 + 5) grows the frame by 8;
         // the original steps the asset pointer and both slot numbers separately
-        asset = D_80090204[prop->assetSet];
+        asset = D_80090204[prop->work.words[0]];
         slot = 4;
         nextSlot = 5;
         do {
@@ -145,53 +106,16 @@ void func_150DE458(Prop *prop) {
     }
 }
 
-/* An object func_150DE6D8 sways; its rotation and position are laid out as in Prop. */
-typedef struct {
-    /* 0x00 */ f32 rotation[3];
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ u8  pad16[0x66];
-    /* 0x7C */ s32 phase[3]; // wave phases, in 1/8 steps of func_15048A40's angle
-} SwayingProp;
-
-/* Sways the object: position[1] bobs around 1130 and rotation[0] / rotation[2] rock, each driven by
- * func_15048A40 of its own phase; the phases advance 12, 16 and 24 per frame. */
-void func_150DE6D8(SwayingProp *prop) {
-    prop->position[1] = func_15048A40(prop->phase[0] >> 3) * 10.19999981f + 1130.0f;
-    prop->rotation[0] = func_15048A40(prop->phase[1] >> 3) * 1.100000024f;
-    prop->rotation[2] = func_15048A40(prop->phase[2] >> 3) * 1.100000024f;
-    prop->phase[0] += D_800BE9E4 * 12;
-    prop->phase[1] += D_800BE9E4 * 16;
-    prop->phase[2] += D_800BE9E4 * 24;
+/* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by func_15048A40 of its own
+ * phase (work.words[0..2], in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
+void func_150DE6D8(WorldObject *prop) {
+    prop->y = func_15048A40(prop->work.words[0] >> 3) * 10.19999981f + 1130.0f;
+    prop->rotX = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
+    prop->rotZ = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
+    prop->work.words[0] += D_800BE9E4 * 12;
+    prop->work.words[1] += D_800BE9E4 * 16;
+    prop->work.words[2] += D_800BE9E4 * 24;
 }
-
-/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef;
 
 /* State func_150DE7C0 stores after each particle it spawns. */
 typedef struct {
@@ -203,9 +127,7 @@ typedef struct {
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
 } Particle;
 
@@ -306,7 +228,7 @@ void func_150DE7C0(Emitter *emitter) {
         def.scale.x = 1.0f;
         def.scale.y = 1.0f;
         def.scale.z = 1.0f;
-        particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
+        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
                                  emitter->unk1);
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
@@ -317,9 +239,9 @@ void func_150DE7C0(Emitter *emitter) {
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
 s32 func_150DEACC(Particle *particle) {
-    particle->def.pos.x += particle->travel.velocity.x * D_800BE9A4;
-    particle->def.pos.y += particle->travel.velocity.y * D_800BE9A4;
-    particle->def.pos.z += particle->travel.velocity.z * D_800BE9A4;
+    particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
+    particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
+    particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
     particle->travel.timeLeft -= D_800BE9A4;
     if (particle->travel.timeLeft < 0.0f) {
         return 0;
@@ -327,10 +249,10 @@ s32 func_150DEACC(Particle *particle) {
     return 1;
 }
 
-/* Calls func_15140410 with the particle's side / forward axes, unless D_800DBFF0[D_80082FA0].unk388 is
+/* Calls func_15140410 with the particle's side / forward axes, unless D_800DBFF0[D_80082FA0].pitch is
  * below 5. */
 s32 func_150DEB58(Particle *particle, s16 arg1) {
-    if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
+    if (D_800DBFF0[D_80082FA0].pitch < 5.0f) {
         return 0;
     }
     return func_15140410(particle, &particle->travel.side, &particle->travel.forward, arg1);

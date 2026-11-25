@@ -4,13 +4,13 @@
 
 /* Message 0x48 payload: "this actor is gone"; effects it owns destroy themselves on it. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
 } OwnerGoneMsg;
 
 /* Data of the effect spawned by func_151001B4 for an actor. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
@@ -24,7 +24,7 @@ typedef struct {
 } OwnerEffect;
 
 /* Sends message 0x48 (func_151494E0) for `owner`; effects it owns destroy themselves on it. */
-void func_15100180(struct127 *owner) {
+void func_15100180(Actor *owner) {
     OwnerGoneMsg msg;
 
     msg.owner = owner;
@@ -33,7 +33,7 @@ void func_15100180(struct127 *owner) {
 }
 
 /* Spawns the owner effect (func_15149130) on `owner`. */
-void func_151001B4(struct127 *owner) {
+void func_151001B4(Actor *owner) {
     OwnerEffectData data;
     struct260 *effect;
 
@@ -42,7 +42,7 @@ void func_151001B4(struct127 *owner) {
     data.timer = 0;
 
     // the header's struct37 * parameter is really the size of the effect's data
-    effect = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, (struct37 *)sizeof(data), 0xFF, 1);
+    effect = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(&((OwnerEffect *)effect)->data, &data, sizeof(data));
     }
@@ -59,7 +59,7 @@ void func_15100230(OwnerEffect *effect, OwnerGoneMsg *msg, u8 msgId) {
             func_1516972C((struct102 *)effect);
         }
     } else {
-        func_15149514((s32)msg, msgId, (s32)&data->owner, (s32)&data->ownerId, (s32)effect);
+        func_15149514((s32)msg, msgId, &data->owner, &data->ownerId, effect);
     }
 }
 
@@ -67,7 +67,7 @@ void func_15100230(OwnerEffect *effect, OwnerGoneMsg *msg, u8 msgId) {
  * while the owner has a camera. */
 void func_151002BC(OwnerEffect *effect) {
     OwnerEffectData *data = &effect->data;
-    struct127 *owner = data->owner;
+    Actor *owner = data->owner;
 
     if (owner->interaction_state == 0 || owner->id == 0xFF || owner->unique_id != data->ownerId) {
         effect->state = -1;

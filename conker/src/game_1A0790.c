@@ -2,23 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DBEA8[];
-extern u8 D_800DD2E4[];
 void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
 extern s8 D_800DD2E0;
-
-/* View of the level header (D_800B0DF0) past the fields struct104 declares. */
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    u8 pad4[0x36];
-    s16 unk3A;
-    s16 unk3C;
-    s16 unk3E;
-    s16 unk40;
-    u8 colour[4];
-    s8 fogPreset; /* index into D_8008CC70, or -1 for none */
-} LevelFogHeader;
 
 /* One entry of the fog preset table D_8008CC70. */
 typedef struct {
@@ -33,26 +18,24 @@ typedef struct {
 
 extern FogPreset D_8008CC70;
 
-#define sLevelFog ((LevelFogHeader *)D_800B0DF0)
-
 /* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
 void func_151732E0(s32 arg0) {
-    if (sLevelFog->unk3C == sLevelFog->unk40 && sLevelFog->unk3C == 0) {
-        sLevelFog->unk40 = 100;
+    if (D_800B0DF0->unk3C == D_800B0DF0->unk40 && D_800B0DF0->unk3C == 0) {
+        D_800B0DF0->unk40 = 100;
     }
-    D_8008CC70.colour[0] = sLevelFog->colour[0];
-    D_8008CC70.colour[1] = sLevelFog->colour[1];
-    D_8008CC70.colour[2] = sLevelFog->colour[2];
-    D_8008CC70.colour[3] = sLevelFog->colour[3];
-    D_8008CC70.unk4 = sLevelFog->unk3A;
-    D_8008CC70.unk6 = sLevelFog->unk3C;
-    D_8008CC70.unk8 = sLevelFog->unk3E;
-    D_8008CC70.unkA = sLevelFog->unk40;
-    D_8008CC70.unkC = sLevelFog->unk2;
-    D_8008CC70.unkE = sLevelFog->unk0;
-    if (sLevelFog->fogPreset != -1) {
+    D_8008CC70.colour[0] = D_800B0DF0->fogColour[0];
+    D_8008CC70.colour[1] = D_800B0DF0->fogColour[1];
+    D_8008CC70.colour[2] = D_800B0DF0->fogColour[2];
+    D_8008CC70.colour[3] = D_800B0DF0->fogColour[3];
+    D_8008CC70.unk4 = D_800B0DF0->unk3A;
+    D_8008CC70.unk6 = D_800B0DF0->unk3C;
+    D_8008CC70.unk8 = D_800B0DF0->unk3E;
+    D_8008CC70.unkA = D_800B0DF0->unk40;
+    D_8008CC70.unkC = D_800B0DF0->unk2;
+    D_8008CC70.unkE = D_800B0DF0->unk0;
+    if (D_800B0DF0->fogPreset != -1) {
         D_800DD2E0 = 1;
-        func_151733E4(sLevelFog->fogPreset, sLevelFog->fogPreset, arg0, 0, -1);
+        func_151733E4(D_800B0DF0->fogPreset, D_800B0DF0->fogPreset, arg0, 0, -1);
     } else {
         D_800DD2E0 = 0;
         func_151733E4(0, 0, arg0, 0, -1);
@@ -67,13 +50,9 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
     }
 }
 
-extern u16 D_800DD2E8;
 extern u16 D_800DD2EA;
-extern u16 D_800DD2EC;
 extern u16 D_800DD2EE;
 extern s16 D_800DD2F0;
-extern s16 D_800DD2F2;
-extern s16 D_800DD2F4;
 s8 func_15173994(s32 arg0);
 #define sFogPresets (&D_8008CC70)
 
@@ -146,18 +125,18 @@ void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest) {
     *out6 = (sFogPresets[to].unk6 - sFogPresets[from].unk6) * blend / 4096 + sFogPresets[from].unk6;
     *out8 = (sFogPresets[to].unk8 - sFogPresets[from].unk8) * blend / 4096 + sFogPresets[from].unk8;
     *outA = (sFogPresets[to].unkA - sFogPresets[from].unkA) * blend / 4096 + sFogPresets[from].unkA;
-    fromValue = (sFogPresets[from].unkC == -1) ? (s16)sLevelFog->unk2 : sFogPresets[from].unkC;
-    toValue = (sFogPresets[to].unkC == -1) ? (s16)sLevelFog->unk2 : sFogPresets[to].unkC;
+    fromValue = (sFogPresets[from].unkC == -1) ? (s16)D_800B0DF0->unk2 : sFogPresets[from].unkC;
+    toValue = (sFogPresets[to].unkC == -1) ? (s16)D_800B0DF0->unk2 : sFogPresets[to].unkC;
     *outC = (toValue - fromValue) * blend / 4096 + fromValue;
-    fromValue = (sFogPresets[from].unkE == -1) ? (s16)sLevelFog->unk0 : sFogPresets[from].unkE;
-    toValue = (sFogPresets[to].unkE == -1) ? (s16)sLevelFog->unk0 : sFogPresets[to].unkE;
+    fromValue = (sFogPresets[from].unkE == -1) ? (s16)D_800B0DF0->unk0 : sFogPresets[from].unkE;
+    toValue = (sFogPresets[to].unkE == -1) ? (s16)D_800B0DF0->unk0 : sFogPresets[to].unkE;
     *outE = (toValue - fromValue) * blend / 4096 + fromValue;
 }
 
-/* With no level fog preset, re-applies preset 6 (if D_800DBFF0->unk5F0 bit 0 is set) or preset 0. */
+/* With no level fog preset, re-applies preset 6 (if D_800DBFF0->status bit 0 is set) or preset 0. */
 void func_151738C4(s32 arg0) {
-    if (sLevelFog->fogPreset == -1) {
-        if (D_800DBFF0->unk5F0 & 1) {
+    if (D_800B0DF0->fogPreset == -1) {
+        if (D_800DBFF0->status & 1) {
             func_151733E4(6, 6, arg0, 0, -1);
             D_800DBEA8[0] = D_800DD2E4[0];
             D_800DBEA8[1] = D_800DD2E4[1];
@@ -173,5 +152,5 @@ void func_151738C4(s32 arg0) {
 
 /* Returns the level's fog preset index (-1 for none). */
 s8 func_15173994(s32 arg0) {
-    return sLevelFog->fogPreset;
+    return D_800B0DF0->fogPreset;
 }

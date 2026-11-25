@@ -2,14 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef void (*ObjectHandler)(struct127 *obj);
+typedef void (*ObjectHandler)(Actor *obj);
 
-s32 func_151928B0(struct127 *obj, s32 *group);
+s32 func_151928B0(Actor *obj, s32 *group);
 extern s32 func_1510F8CC(s32);
 extern ObjectHandler *D_8008F860[];
 
 /* Runs the handler for obj's id group, picked by the surface type in obj->unk184 (and the level). */
-void func_15192800(struct127 *obj, s32 arg1) {
+void func_15192800(Actor *obj, s32 arg1) {
     s32 group;
     s32 *groupPtr; // matching: IDO computes &group before the NULL test only via a local
     s32 slot;
@@ -38,7 +38,7 @@ void func_15192800(struct127 *obj, s32 arg1) {
 }
 
 /* Maps obj->id to a handler group (ids 0-4 -> 0, id 0x53 -> 1); returns FALSE for other ids. */
-s32 func_151928B0(struct127 *obj, s32 *group) {
+s32 func_151928B0(Actor *obj, s32 *group) {
     s32 found;
 
     switch (obj->id) {

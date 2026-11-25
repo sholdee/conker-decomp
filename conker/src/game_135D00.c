@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 /* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc (same layout as in game_168A90.c). */
@@ -160,12 +157,6 @@ void func_15108850(struct226 *light) {
     }
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 f32 sinf(f32);
 void func_15108B80(DynModel *model);
 void func_15108BC0(DynModel *model);
@@ -203,12 +194,10 @@ void func_15108BC0(DynModel *model) {
 
     if (track == TRACK_NONE) {
         lamp->height = 226.0f;
-    } else if (D_800C35EA == 1) {
-        // D_800C3958 is really the per-scene array of track states (see game_49D30.c); this is scene 0
-        struct233 **sceneTracks = &D_800C3958;
-        struct233 *state = &sceneTracks[0][track];
+    } else if (D_800C35EA[0] == 1) {
+        SeqTrackState *state = &D_800C3958[0][track];
 
-        lamp->height = state->unk4;
+        lamp->height = state->y;
     } else {
         lamp->height = 226.0f;
     }
@@ -236,7 +225,7 @@ s32 func_15108C38(DynModel *model) {
 
 /* Draw function 1: builds this frame's lamp matrix, swung, raised to its height and scaled by 0.157. */
 s32 func_15108D24(DynModel *model, s32 viewport) {
-    f32 mtx[4][4];
+    MtxF mtx;
     LampData *lamp;
 
     lamp = LAMP_DATA(model);
@@ -255,7 +244,7 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     return 1;
 }
 
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /*
@@ -267,7 +256,7 @@ s32 func_15108E10(struct225 *effect) {
     DynModel *model;
     LampData *lamp;
     Vec3f end;
-    f32 mtx[4][4];
+    MtxF mtx;
     Vec3f pad2; // matching: unused stack slots
     Vec3f hit;
 
@@ -318,7 +307,6 @@ typedef struct {
 
 extern MsgTarget D_80088C50;
 extern MsgTarget D_80088C58;
-void func_15169260(MsgTarget *target, s32 arg1, void *data, u8 event);
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
@@ -329,7 +317,7 @@ void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
     msg.track = track;
     msg.duration = duration;
     msg.sceneTag = sceneTag;
-    func_15169260(&target, 2, &msg, 0x1D);
+    func_15169260(&target, 2, (s32)&msg, 0x1D);
 }
 
 /* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
@@ -359,19 +347,19 @@ void func_151090DC(void) {
     MsgTarget target;
 
     target = D_80088C58;
-    func_15169260(&target, 2, NULL, 0x1E);
+    func_15169260(&target, 2, 0, 0x1E);
 }
 
-struct17 *func_15144B34(s32);
+Vec3f *func_15144B34(s32);
 
 /*
  * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
  * `viewport`'s buffer, projected on the horizontal axis perpendicular to the camera.
  */
 s32 func_15109120(DynModel *model, s16 viewport) {
-    f32 mtx[4][4];
+    MtxF mtx;
     LampData *lamp;
-    struct17 *camera;
+    Vec3f *camera;
     f32 dirX;
     f32 dirZ;
     f32 x;
@@ -399,12 +387,12 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     mtx[2][2] *= 0.157f;
     guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
     camera = func_15144B34(viewport);
-    camX = camera->unk0;
-    if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->unk4)) {
+    camX = camera->x;
+    if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->y)) {
         f32 camZ;
         f32 invLen;
 
-        camZ = camera->unk8;
+        camZ = camera->z;
         invLen = 1.0f / sqrtf(camX * camX + camZ * camZ);
         dirX = camZ * invLen;
         dirZ = -camX * invLen;

@@ -1,50 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260(s32, ...); passing a struct pointer through an s32 cast changes codegen. */
-#define func_15169260 func_15169260_s32_decl
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
-
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} SpriteColor;
-
-/* The 0x58-byte description a screen sprite is created from (copied to ScreenSprite.info). */
-typedef struct {
-    /* 0x00 */ f32 x;           /* centre, in viewport units */
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 halfSize[2];
-    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
-    /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
-    /* 0x1B */ SpriteColor color1;
-    /* 0x1F */ SpriteColor color2;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
-    /* 0x34 */ u8 pad34[3];
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
-    /* 0x4C */ f32 scaleY;
-    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
-    /* 0x54 */ f32 offsetT;
-} ScreenSpriteInfo;
+#include "effects.h"
 
 typedef struct ScreenSprite {
     /* 0x00 */ u8 pad0[8];
@@ -82,10 +39,8 @@ extern SpriteTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern Pair1515572C D_800A6038;
-extern s32 D_800D2C9C;
 extern ScreenSprite *D_800DCE50[2][0x68];
 
-extern void func_15169260(Pair1515572C *, s32, s32, u8);
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
 extern ScreenSprite *func_15167A68(s32, s32, s32, s32, u8, s32);
@@ -164,7 +119,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
-    if ((sprite->info.flags & 0x40) && (D_800C35EA == 1)) {
+    if ((sprite->info.flags & 0x40) && (D_800C35EA[0] == 1)) {
         return gfx;
     }
     /* flag bits 11 and up: per viewport, skip unless func_15181CC8 and func_1517EF00 allow it */
@@ -187,15 +142,16 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
                   sprite->info.unk23, sprite->info.unk41);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, sprite->info.unk37, &update);
+    // matching: the draw reads only the low byte of unk34 (lbu at 0x37)
+    gfx = func_1513F4E4(gfx, ((u8 *)&sprite->info.unk34)[3], &update);
     gfx = func_15142FBC(gfx, sprite->info.otherModeH | D_800D2C9C | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
                         D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
     y = vp->centerY + sprite->info.y * vp->scaleY;
     while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register
-    halfWidth = sprite->info.halfSize[0] * vp->scaleX;
-    halfHeight = sprite->info.halfSize[1] * vp->scaleY;
+    halfWidth = sprite->info.halfWidth * vp->scaleX;
+    halfHeight = sprite->info.halfHeight * vp->scaleY;
     xl = (x - halfWidth) * 4.0f;
     yl = (y - halfHeight) * 4.0f;
     xh = (x + halfWidth) * 4.0f;
@@ -247,8 +203,8 @@ ScreenSprite *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 ki
     f32 halfSize[2];
 
     if ((kinds != NULL) && (kindCount > 0)) {
-        halfSize[0] = info->halfSize[0];
-        halfSize[1] = info->halfSize[1];
+        halfSize[0] = info->halfWidth;
+        halfSize[1] = info->halfHeight;
         if (func_151555AC(&info->x, halfSize, kinds, kindCount) != 0) {
             return NULL;
         }
@@ -303,8 +259,9 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
                     }
                 }
                 if (found) {
-                    w = halfSize[0] + sprite->info.halfSize[0];
-                    h = halfSize[1] + sprite->info.halfSize[1];
+                    // matching: indexing from halfWidth (as an array) keeps the original load order
+                    w = halfSize[0] + (&sprite->info.halfWidth)[0];
+                    h = halfSize[1] + (&sprite->info.halfWidth)[1];
                     if (center[0] - w <= sprite->info.x && sprite->info.x <= center[0] + w &&
                         center[1] - h <= sprite->info.y && sprite->info.y <= center[1] + h) {
                         return 1;

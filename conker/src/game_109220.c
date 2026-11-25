@@ -1,30 +1,12 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but its callers here use the full u32
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #include "variables.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
+#include "effects.h"
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 capacity; /* records[] length */
-    /* 0x16 */ u8 pad16[6];
-} StreamSpawn; // size 0x1C
 
 /* One point of the stream ring buffer. */
 typedef struct {
@@ -149,7 +131,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unk0C;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ StreamSpawn spawn;
+    /* 0x10 */ EffectTemplate spawn;
     /* 0x2C */ s8 count;
     /* 0x2D */ s8 head; /* oldest record */
     /* 0x2E */ s8 tail; /* next record to write */
@@ -160,64 +142,11 @@ typedef struct {
     /* 0x98 */ StreamState *state;
 } StreamActor;
 
-/* Particle spawn request passed to func_15167D84. */
-typedef struct {
-    u8 *texture;
-    char pad4[8];
-    s16 frame;
-    s16 frame_rate;
-    s16 position[3];
-    s16 velocity_x;
-    s16 velocity_z;
-    char pad1A[2];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-    s8 callback;
-    s16 velocity_y;
-    s16 acceleration;
-    s16 width;
-    s16 height;
-    s16 lifetime;
-    s8 fade;
-    char pad2B;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 environment[3];
-    char pad33;
-    u16 flags;
-    char pad36[2];
-} Emission;
-
-/* Spawn template of a flat sprite (see func_1513C5B0). */
-typedef struct {
-    s32 flags;
-    s16 lifetime;
-    u8 texture; /* D_80090B60 index */
-    u8 unk7;
-    s32 frame;
-    s32 frameSpeed;
-    u8 unk10;
-    u8 unk11;
-    u8 rgba[4];
-    u8 unk16;
-    u8 unk17;
-    u32 renderModes;
-    s32 unk1C;
-    u8 viewportMask;
-    u8 pad21;
-    s16 fadeStart;
-    s16 fadeRate;
-    u8 pad26[2];
-} SpriteDef; /* size 0x28 */
-
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);
-StreamActor *func_15147A80(StreamSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void *func_15167D84(Emission *, s32, s32, s8, u8, s32);
+StreamActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -227,7 +156,7 @@ void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
  * state. Returns the actor, or 0 on failure.
  */
 s32 func_150DBD70(u8 kind) {
-    StreamSpawn spawn;
+    EffectTemplate spawn;
     StreamState state;
     StreamActor *actor;
 
@@ -268,8 +197,8 @@ s32 func_150DBD70(u8 kind) {
         state.splashSpeedRange = 5.63f;
         state.splashScaleBase = 5.0f;
         state.splashSizeBase = 1.1f;
-        spawn.capacity = 25;
-        spawn.unk0C = 133;
+        spawn.itemCount = 25;
+        spawn.life = 133;
         state.timer = 120;
         state.unk28 = 255;
         state.alpha = 255;
@@ -343,7 +272,7 @@ s32 func_150DBD70(u8 kind) {
     case 2:
     case 3:
     case 4: {
-        struct127 *character = func_15083E90(6);
+        Actor *character = func_15083E90(6);
 
         if (character == NULL) {
             return 0;
@@ -387,10 +316,10 @@ s32 func_150DBD70(u8 kind) {
         state.splashRate = 0.31f;
         state.splashRadius = 139.53f;
         state.splashSpeedBase = 18.8f;
-        spawn.capacity = 30;
+        spawn.itemCount = 30;
         state.splashScaleBase = 15.0f;
         state.splashScaleRange = 12.0f;
-        spawn.unk0C = 160;
+        spawn.life = 160;
         state.splashSizeBase = 2.75f;
         state.timer = 110;
         state.unk28 = 255;
@@ -463,7 +392,7 @@ s32 func_150DBD70(u8 kind) {
     default:
         return 0;
     }
-    spawn.unk10 = 5;
+    spawn.kind = 5;
     state.sound = 440;
     actor = func_15147A80(&spawn, 0x120, sizeof(StreamPoint), 4, 4, 4, 0, 0, 0, 0xFF, 1);
     if (actor != NULL) {
@@ -493,7 +422,7 @@ s32 func_150DC558(StreamActor *actor) {
     while (index != actor->head) {
         index--;
         if (index < 0) {
-            index = actor->spawn.capacity - 1;
+            index = actor->spawn.itemCount - 1;
         }
         // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
         rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
@@ -536,7 +465,7 @@ s32 func_150DC558(StreamActor *actor) {
                 }
             }
             {
-                Emission packet;
+                BillboardTemplate packet;
                 f32 speed;
                 u8 angle;
                 u8 angle2;
@@ -549,24 +478,24 @@ s32 func_150DC558(StreamActor *actor) {
 
                 state->dropCount += state->dropRate;
                 if (state->dropCount > 1.0f) {
-                    packet.fraction_x = 0;
-                    packet.fraction_z = 0;
-                    packet.fraction_y = 0;
-                    packet.red = 0xFF;
-                    packet.green = 0xFF;
-                    packet.blue = 0xFF;
-                    packet.environment[0] = 0;
-                    packet.environment[1] = 0;
-                    packet.environment[2] = 0;
-                    packet.alpha = 0xFF;
+                    packet.subX = 0;
+                    packet.subY = 0;
+                    packet.subZ = 0;
+                    packet.primR = 0xFF;
+                    packet.primG = 0xFF;
+                    packet.primB = 0xFF;
+                    packet.envR = 0;
+                    packet.envG = 0;
+                    packet.envB = 0;
+                    packet.primA = 0xFF;
                     packet.callback = state->dropCallback;
                     packet.flags = 0x12;
                     packet.frame = 0;
                     ok = 1;
-                    packet.frame_rate = state->dropFrameRate;
-                    packet.texture = state->dropTexture;
-                    packet.position[1] = state->floor;
-                    packet.lifetime = state->dropLifetime;
+                    packet.frameStep = state->dropFrameRate;
+                    packet.anim = state->dropTexture;
+                    packet.y = state->floor;
+                    packet.life = state->dropLifetime;
                     do {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
@@ -576,13 +505,13 @@ s32 func_150DC558(StreamActor *actor) {
                         sine2 = func_151423D8(angle2);
                         cosine2 = func_151423D8((u8)(angle2 - 0x40));
                         radius = func_150ADA68() * state->dropRadius;
-                        packet.position[0] = rec->pos.x + radius * cosine1;
-                        packet.position[2] = rec->pos.z + radius * sine1;
-                        packet.velocity_x = speed * sine2 * cosine1;
-                        packet.velocity_y = -speed * cosine2;
-                        packet.velocity_z = speed * sine2 * sine1;
-                        packet.acceleration = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
-                        packet.fade = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.x = rec->pos.x + radius * cosine1;
+                        packet.z = rec->pos.z + radius * sine1;
+                        packet.velX = speed * sine2 * cosine1;
+                        packet.velY = -speed * cosine2;
+                        packet.velZ = speed * sine2 * sine1;
+                        packet.accelY = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fadeStep = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
                         packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
                         if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
                             ok = 0;
@@ -637,7 +566,7 @@ s32 func_150DC558(StreamActor *actor) {
             }
             while (index != actor->head) {
                 actor->head++;
-                if (actor->head == actor->spawn.capacity) {
+                if (actor->head == actor->spawn.itemCount) {
                     actor->head = 0;
                 }
                 actor->count--;
@@ -649,19 +578,19 @@ s32 func_150DC558(StreamActor *actor) {
     index = actor->head;
     records[index].alpha = 0;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x3F;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x7F;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));

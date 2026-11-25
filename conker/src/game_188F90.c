@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Texture table entry (D_80090B60). */
 typedef struct TextureInfo {
     /* 0x0 */ s32 unk0;
@@ -52,7 +46,7 @@ typedef struct TexturedQuad {
 
 /* What an actor tracker is created from (func_1514EE70 builds one). */
 typedef struct ActorTrackerDesc {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId;           // the actor's unique_id
     /* 0x5 */ u8 flags;             // 1: lifetime counts down
     /* 0x6 */ s16 lifetime;
@@ -73,24 +67,10 @@ typedef struct ActorTracker {
     /* 0x48 */ s32 unk48;
 } ActorTracker;
 
-/* Attachment list node (see game_179F30.c). */
-typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ ActorTracker *handle;
-} Attachment;
-
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
-typedef struct AttachmentOwner {
-    /* 0x000 */ u8 pad0[0x2F4];
-    /* 0x2F4 */ Attachment *attachments;
-} AttachmentOwner;
-#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
-
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern TextureInfo D_80090B60[];
 extern OtherModeL D_800A4AC8[];
-extern s32 D_800D2C9C;
 /* Object lists: D_800DCE50[list][type] heads a linked list of objects of that type. */
 extern ActorTracker *D_800DCE50[2][104];
 
@@ -108,7 +88,7 @@ void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
                    u8 a1, u8 level, u8 mode);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void *memcpy(void *, const void *, u32);
-void func_1514EDF0(ActorTracker *handle, struct127 *owner);
+void func_1514EDF0(ActorTracker *handle, Actor *owner);
 s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out);
 
 /*
@@ -228,7 +208,7 @@ void func_1515BF7C(ActorTracker *tracker) {
  */
 void func_1515BFA8(ActorTracker *tracker) {
     s32 dead;
-    struct127 *actor;
+    Actor *actor;
 
     dead = FALSE;
     if (tracker->desc.flags & 1) {
@@ -257,18 +237,18 @@ void func_1515BFA8(ActorTracker *tracker) {
 
 /* Actor-event handler: dies with its actor and follows actor swaps (see func_15169850). */
 void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType) {
-    func_15169850(event, eventType, (s32)&tracker->desc.actor, (s32)&tracker->desc.actorId, (s32)tracker);
+    func_15169850(event, eventType, &tracker->desc.actor, &tracker->desc.actorId, tracker);
 }
 
 /* Finds `actor`'s tracker attachment (type 0x16); on success stores a pointer to its motion in *motion. */
-s32 func_1515C0F8(struct127 *actor, Vec3f **motion) {
+s32 func_1515C0F8(Actor *actor, Vec3f **motion) {
     Attachment *node;
     ActorTracker *tracker;
 
     if (actor == NULL) {
         return FALSE;
     }
-    if (func_1514ECE0(ATTACHMENTS(actor), 0x16, &node)) {
+    if (func_1514ECE0(actor->attachments, 0x16, &node)) {
         tracker = node->handle;
         *motion = &tracker->motion;
         return TRUE;
@@ -293,7 +273,7 @@ void func_1515C158(void) {
  * Gets an actor's collision bounds: for actor ids below 0xBB, radius unkD2, *arg3 unkD4 and a centre
  * raised by unkD6; for other ids, 1.0 and 1.0 at the actor's position.
  */
-void func_1515C1A0(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+void func_1515C1A0(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
         *radius = actor->unkD2;
         *arg3 = actor->unkD4;
@@ -309,13 +289,13 @@ void func_1515C1A0(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     }
 }
 
-/* Like func_1515C1A0, using the second set of bounds (unkE4/unkE6/unkE8). */
-void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3) {
+/* Like func_1515C1A0, using the body cylinder (bodyRadius/bodyHeight/bodyOffsetY). */
+void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
-        *radius = actor->unkE4;
-        *arg3 = actor->unkE6;
+        *radius = actor->bodyRadius;
+        *arg3 = actor->bodyHeight;
         center->x = actor->x_position;
-        center->y = actor->y_position + (s16)actor->unkE8; // struct127 declares unkE8 u16; read signed (lh)
+        center->y = actor->y_position + actor->bodyOffsetY;
         center->z = actor->z_position;
     } else {
         *radius = 1.0f;

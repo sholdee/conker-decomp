@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
 typedef struct StripDesc {
     /* 0x00 */ Vec3f p0;
@@ -21,7 +15,7 @@ typedef struct StripDesc {
 
 /* Character the strip end follows; stored right after the object header. */
 typedef struct StripTarget {
-    /* 0x00 */ struct127 *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ u8 uniqueId;     // obj->unique_id when attached
     /* 0x05 */ u8 bone;         // matrix index into obj->unk1D4
     /* 0x06 */ u8 pad6[2];
@@ -109,7 +103,7 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-extern void func_1514EDF0(StripObj *handle, struct127 *owner);
+extern void func_1514EDF0(StripObj *handle, Actor *owner);
 
 /** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {
@@ -160,9 +154,7 @@ void func_150C5568(StripObj *strip) {
     }
 }
 
-extern u8 D_80090DE8[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -193,10 +185,10 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
 
         update = TRUE;
         vtx = strip->quad[D_800BE9C0];
-        eye = (Vec3f *)&D_800DBFF0[view].unk2F8;
+        eye = &D_800DBFF0[view].eye;
         gfx = func_15142B7C(gfx, 1, 0x600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
-        if (D_800DBFF0[view].unk5F0 & 1) {
+        if (D_800DBFF0[view].status & 1) {
             gfx = func_15142C10(gfx, D_800D9B78[view][0], D_800D9B78[view][1], D_800D9B78[view][2], 0xFF, &update);
             gfx = func_15142CF0(gfx, 0xF2, 0, D_800D9B68[view][0], D_800D9B68[view][1], D_800D9B68[view][2], 0xFF, &update);
             gfx = func_1513F4E4(gfx, 30, &update);
@@ -302,24 +294,24 @@ s32 func_150C5BD4(StripObj *strip) {
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C74(struct127 *obj) {
+void func_150C5C74(Actor *obj) {
     func_1514D3B0((s32)obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C9C(struct127 *obj) {
+void func_150C5C9C(Actor *obj) {
     func_1514D3B0((s32)obj, 0x15, 2, 0);
 }
 
 /* func_150C5D0C's data; which member applies depends on the message. */
 typedef union StripMsgData {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } m0; // message 0
     struct {
-        struct127 *objA;
-        struct127 *objB;
+        Actor *objA;
+        Actor *objB;
         u8 uniqueIdA;
         u8 uniqueIdB;
     } m2D; // message 0x2D

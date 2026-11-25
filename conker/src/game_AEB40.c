@@ -1,288 +1,7 @@
 #include <ultra64.h>
 
-// functions.h and variables.h declare several of the symbols below with types that do not fit how
-// this file uses them (struct127 lacks or mistypes many object fields, model tables are declared as
-// plain s32, ...). Their header declarations are renamed out of the way and redeclared further down.
-#define func_150ADA20 func_150ADA20_hdr
-#define func_15083E90 func_15083E90_hdr
-#define func_15083568 func_15083568_hdr
-#define func_1505E650 func_1505E650_hdr
-#define func_1505F0AC func_1505F0AC_hdr
-#define func_15060F28 func_15060F28_hdr
-#define func_150615DC func_150615DC_hdr
-#define func_1506160C func_1506160C_hdr
-#define func_15062BDC func_15062BDC_hdr
 #include "functions.h"
-#undef func_150ADA20
-#undef func_15083E90
-#undef func_15083568
-#undef func_1505E650
-#undef func_1505F0AC
-#undef func_15060F28
-#undef func_150615DC
-#undef func_1506160C
-#undef func_15062BDC
-
-#define D_800CC2D0 D_800CC2D0_hdr
-#define D_800C5A90 D_800C5A90_hdr
-#define D_800D19A0 D_800D19A0_hdr
-#define D_800D1C90 D_800D1C90_hdr
-#define D_800D1F80 D_800D1F80_hdr
-#define D_800D2040 D_800D2040_hdr
-#define D_800D20FC D_800D20FC_hdr
-#define D_800D2110 D_800D2110_hdr
-#define D_800D2138 D_800D2138_hdr
-#define D_800D2132 D_800D2132_hdr
 #include "variables.h"
-#undef D_800CC2D0
-#undef D_800C5A90
-#undef D_800D19A0
-#undef D_800D1C90
-#undef D_800D1F80
-#undef D_800D2040
-#undef D_800D20FC
-#undef D_800D2110
-#undef D_800D2138
-#undef D_800D2132
-
-// File-local view of the 0x31C extension block of a game object (header struct126, 0x1C0 bytes).
-typedef struct GameObjExt {
-    /* 0x000 */ u8 pad0[0x56];
-    /* 0x056 */ u8 unk56;
-    /* 0x057 */ u8 pad57[0x2D];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0x115];
-    /* 0x19A */ u8 grenade_count;
-    /* 0x19B */ u8 pad19B[0xF];
-    /* 0x1AA */ s16 unk1AA;
-    /* 0x1AC */ u8 pad1AC;
-    /* 0x1AD */ u8 unk1AD;
-    /* 0x1AE */ u8 pad1AE;
-    /* 0x1AF */ u8 unk1AF;
-    /* 0x1B0 */ s8 unk1B0;
-    /* 0x1B1 */ u8 pad1B1;
-    /* 0x1B2 */ u8 unk1B2;
-    /* 0x1B3 */ u8 pad1B3[0x5];
-    /* 0x1B8 */ f32 unk1B8;
-    /* 0x1BC */ u8 pad1BC[0x4];
-} GameObjExt; // size 0x1C0
-
-// One 0x30-byte entry of the level's spawn table D_800D20FC.
-typedef struct SpawnRecord {
-    /* 0x00 */ u16 flags;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 interaction_state;
-    /* 0x04 */ u8 type;         // model id, 0xFF for none
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 angle;        // high byte of the facing angle
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x2];
-    /* 0x18 */ s32 objFlags;    // copied to the object's unkF8
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[0x2];
-    /* 0x20 */ f32 xz_scale;
-    /* 0x24 */ f32 y_scale;
-    /* 0x28 */ u8 unique_id;
-    /* 0x29 */ u8 partSet;      // 1-based index into D_80086CC4, 0 for none
-    /* 0x2A */ u8 pad2A[0x2];
-    /* 0x2C */ u16 unk2C;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-} SpawnRecord; // size 0x30
-
-// The 0xC-byte block a game object keeps at 0x260 for some models.
-typedef struct ObjAlloc260 {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ u8 unk8;
-    /* 0x9 */ u8 unk9;
-} ObjAlloc260;
-
-// File-local view of a game object (struct127, the 0x32C-byte entries of D_800CC2D0).
-// include/structs.h lacks or mistypes several fields used here (0x10 is a u16, 0x38 an s16, 0x140 a
-// u8, 0x2C4 a pointer, ...); fold them in during the central pass.
-typedef struct GameObj {
-    /* 0x000 */ s32 interaction_state;
-    /* 0x004 */ u8 id;
-    /* 0x005 */ u8 unk5;
-    /* 0x006 */ u8 unk6;
-    /* 0x007 */ u8 pad7[0x9];
-    /* 0x010 */ u16 unk10;
-    /* 0x012 */ u8 pad12[0x2];
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ f32 y_velocity;
-    /* 0x024 */ f32 gravity;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 old_x_position;
-    /* 0x030 */ f32 old_y_position;
-    /* 0x034 */ f32 old_z_position;
-    /* 0x038 */ s16 unk38;
-    /* 0x03A */ u8 pad3A;
-    /* 0x03B */ u8 unique_id;
-    /* 0x03C */ f32 xz_velocity;
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ u8 pad44[0x14];
-    /* 0x058 */ s32 unk58;
-    /* 0x05C */ s32 unk5C;
-    /* 0x060 */ u8 pad60[0x5];
-    /* 0x065 */ u8 unk65;       // 1-based index of the owning object, 0 for none
-    /* 0x066 */ u8 unk66;
-    /* 0x067 */ u8 pad67;
-    /* 0x068 */ u8 unk68;
-    /* 0x069 */ u8 unk69;
-    /* 0x06A */ u8 pad6A[0xC];
-    /* 0x076 */ u16 unk76;
-    /* 0x078 */ u16 unk78;
-    /* 0x07A */ u16 unk7A;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ u16 unk90;
-    /* 0x092 */ u16 unk92;
-    /* 0x094 */ s32 unk94;
-    /* 0x098 */ u8 pad98[0x13];
-    /* 0x0AB */ u8 unkAB;
-    /* 0x0AC */ u8 unkAC;
-    /* 0x0AD */ u8 padAD[0x5];
-    /* 0x0B2 */ u16 unkB2;
-    /* 0x0B4 */ u8 padB4[0x4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ u8 padBC[0x8];
-    /* 0x0C4 */ f32 unkC4;
-    /* 0x0C8 */ f32 unkC8;
-    /* 0x0CC */ u8 padCC[0x6];
-    /* 0x0D2 */ s16 unkD2;
-    /* 0x0D4 */ s16 unkD4;
-    /* 0x0D6 */ s16 unkD6;
-    /* 0x0D8 */ u8 padD8[0x4];
-    /* 0x0DC */ f32 unkDC;
-    /* 0x0E0 */ f32 unkE0;
-    /* 0x0E4 */ s16 unkE4;
-    /* 0x0E6 */ s16 unkE6;
-    /* 0x0E8 */ u16 unkE8;
-    /* 0x0EA */ u8 padEA[0xE];
-    /* 0x0F8 */ s32 unkF8;
-    /* 0x0FC */ u8 padFC[0x5];
-    /* 0x101 */ u8 unk101;
-    /* 0x102 */ u8 pad102[0x2];
-    /* 0x104 */ u8 stunned;
-    /* 0x105 */ u8 pad105[0x1E];
-    /* 0x123 */ u8 unk123;
-    /* 0x124 */ u8 unk124;
-    /* 0x125 */ u8 immune;
-    /* 0x126 */ u8 pad126;
-    /* 0x127 */ u8 unk127;
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ u8 pad129[0x12];
-    /* 0x13B */ u8 unk13B;
-    /* 0x13C */ u8 pad13C[0x3];
-    /* 0x13F */ u8 unk13F;      // index of the spawn record this object came from
-    /* 0x140 */ u8 unk140;
-    /* 0x141 */ u8 pad141[0x3];
-    /* 0x144 */ SpawnRecord *spawn;
-    /* 0x148 */ u8 pad148[0x4];
-    /* 0x14C */ f32 xz_scale;
-    /* 0x150 */ f32 y_scale;
-    /* 0x154 */ f32 unk154;
-    /* 0x158 */ f32 unk158;
-    /* 0x15C */ u8 pad15C[0x4];
-    /* 0x160 */ s16 unk160;
-    /* 0x162 */ u8 pad162[0x67];
-    /* 0x1C9 */ u8 unk1C9;
-    /* 0x1CA */ u8 health;
-    /* 0x1CB */ u8 pad1CB;
-    /* 0x1CC */ f32 unk1CC;
-    /* 0x1D0 */ s8 unk1D0;
-    /* 0x1D1 */ u8 pad1D1[0xC];
-    /* 0x1DD */ u8 unk1DD[3];
-    /* 0x1E0 */ u8 unk1E0[3];
-    /* 0x1E3 */ u8 pad1E3;
-    /* 0x1E4 */ u8 unk1E4;
-    /* 0x1E5 */ u8 unk1E5;
-    /* 0x1E6 */ u8 unk1E6;
-    /* 0x1E7 */ u8 pad1E7[0x15];
-    /* 0x1FC */ u8 unk1FC;
-    /* 0x1FD */ u8 pad1FD[0x12];
-    /* 0x20F */ u8 unk20F;
-    /* 0x210 */ u8 unk210;
-    /* 0x211 */ u8 unk211;
-    /* 0x212 */ u8 unk212;
-    /* 0x213 */ u8 pad213[0xE];
-    /* 0x221 */ s8 unk221;
-    /* 0x222 */ u8 pad222[0x2];
-    /* 0x224 */ s16 unk224;
-    /* 0x226 */ u8 pad226[0xC];
-    /* 0x232 */ u8 unk232;
-    /* 0x233 */ u8 pad233[0x9];
-    /* 0x23C */ u8 unk23C;
-    /* 0x23D */ u8 unk23D;
-    /* 0x23E */ u8 unk23E;
-    /* 0x23F */ u8 pad23F[0x7];
-    /* 0x246 */ u8 unk246;
-    /* 0x247 */ u8 unk247;
-    /* 0x248 */ u8 unk248;
-    /* 0x249 */ u8 pad249[0x17];
-    /* 0x260 */ ObjAlloc260 *unk260;
-    /* 0x264 */ u8 pad264[0xC];
-    /* 0x270 */ f32 unk270;
-    /* 0x274 */ u8 pad274[0x14];
-    /* 0x288 */ u8 unk288;
-    /* 0x289 */ u8 pad289[0x3];
-    /* 0x28C */ u8 *modelData[7][2];  // per model in modelIds: shared or private copies of D_800D19A0[id]
-    /* 0x2C4 */ u8 *modelIds;
-    /* 0x2C8 */ u8 unk2C8;
-    /* 0x2C9 */ u8 modelCount;
-    /* 0x2CA */ u8 pad2CA;
-    /* 0x2CB */ s8 unk2CB;
-    /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ struct197 *unk2D0;
-    /* 0x2D4 */ u8 pad2D4[0x18];
-    /* 0x2EC */ s32 unk2EC;
-    /* 0x2F0 */ u8 pad2F0[0x10];
-    /* 0x300 */ u8 unk300;
-    /* 0x301 */ u8 unk301;
-    /* 0x302 */ u8 pad302[0x2];
-    /* 0x304 */ s32 unk304[4];      // one per player
-    /* 0x314 */ s32 *unk314;
-    /* 0x318 */ struct108 *camera;
-    /* 0x31C */ GameObjExt *unk31C;
-    /* 0x320 */ u8 pad320[0xC];
-} GameObj; // size 0x32C
-
-// One entry of a model's definition table D_800D1C90 (header struct124).
-typedef struct ModelDef {
-    /* 0x00 */ u8 pad0[0x2];
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 subModelCount;
-    /* 0x05 */ u8 subModelList;     // index into D_80086CAC
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8 pad8[0x6];
-    /* 0x0E */ u16 unkE;
-    /* 0x10 */ u8 pad10[0x2];
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 pad13[0x16];
-    /* 0x29 */ u8 unk29;
-    /* 0x2A */ u16 unk2A;
-    /* 0x2C */ u8 pad2C[0x7];
-    /* 0x33 */ s8 unk33;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 extraModelCount;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 pad3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ u8 unk3C;
-} ModelDef;
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
@@ -306,13 +25,13 @@ typedef struct PartSet {
 
 // Result of a ray cast (func_15081690), consumed by func_15081E78.
 typedef struct RayHit {
-    /* 0x00 */ GameObj *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ f32 dist;
-    /* 0x08 */ struct17 hit;
-    /* 0x14 */ struct17 centre;
-    /* 0x20 */ struct17 far;
-    /* 0x2C */ struct17 origin;
-    /* 0x38 */ struct17 dir;
+    /* 0x08 */ Vec3f hit;
+    /* 0x14 */ Vec3f centre;
+    /* 0x20 */ Vec3f far;
+    /* 0x2C */ Vec3f origin;
+    /* 0x38 */ Vec3f dir;
     /* 0x44 */ u8 unk44[0x12];
     /* 0x56 */ u16 unk56;
     /* 0x58 */ u8 unk58;
@@ -328,70 +47,34 @@ typedef struct {
     /* 0x8 */ s32 unk8;
 } ModelReloc;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x208];
-    /* 0x208 */ u16 unk208;     // bit per player
-} Struct800D2138;
-
-extern GameObj D_800CC2D0[26];
-extern u16 D_800C5A90[187];
-extern u8 *D_800D19A0[187];
-extern ModelDef *D_800D1C90[187];
-extern u8 D_800D1F80[187];
-extern u8 D_800D2040[187];
-extern SpawnRecord *D_800D20FC;
-extern u16 *D_800D2110;
-extern Struct800D2138 D_800D2138;
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
-extern u8 *D_800D210C;
-extern s16 D_800D2132;
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern s8 D_800D2130;
-extern u8 *D_80086CAC[];
 extern PartSet D_80086CC4[];
-extern s32 (*D_80086C90[])(GameObj *, GameObj *, s32);
-extern s8 D_8008FE44[];
-extern u8 D_80099AC4[];
+extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 extern u8 D_800A7230[][8];
-extern u8 D_800BE590;
-extern u16 D_800BE598[];
 extern ModelReloc *D_800C5338[];
-extern u16 D_800C5628[];
-extern u16 D_800C57A0[];
-extern f32 D_800D9C10[][4][4];
 
-// func_150ADA20 returns a full-width random value here (functions.h has it as u8).
-extern s32 func_150ADA20(void);
-extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
-extern GameObj *func_1505F0AC(s32);
-extern void func_15060F28(GameObj *obj, s32 arg1);
-extern void func_150615DC(GameObj *obj);
-extern void func_1506160C(GameObj *obj, s32, u8, u8, s32);
-extern void func_15062BDC(GameObj *obj, f32 arg1, f32 arg2);
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern void func_100043B4(s32 *arg0, u32 arg1);
 extern s32 func_1502B020(s32, s32, s32, s32);
-extern void func_150302F0(GameObj *obj, s32 setId);
-extern GameObj *func_15030AF4(GameObj *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-extern void func_150335C8(GameObj *, GameObj *, s32, s32, s32, s32);
-extern void func_15036C70(GameObj *obj);
+extern void func_150302F0(Actor *obj, s32 setId);
+extern Actor *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
+extern void func_15036C70(Actor *obj);
 extern s32 func_1503D660(s32 modelId, s32 arg1);
 extern s32 func_1503D774(s32 modelId, s32 arg1);
-extern s32 func_1503DA9C(GameObj *, s32, s32, s32);
-extern s32 func_1505D024(GameObj *, s32, u16, s32);
-extern GameObj *func_1505ED34(void);
-extern GameObj *func_1505EEF4(void);
-extern void func_1505F188(GameObj *obj);
-extern void func_15060A30(s32, GameObj *);
-extern void func_15060A9C(s32, GameObj *);
-extern void func_1506AC8C(GameObj *, s32, s32);
-extern void func_1507DE4C(GameObj *);
-extern void func_1507DF10(GameObj *obj, s32 arg1);
-extern s32 func_1508114C(GameObj *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-extern s32 func_15084D00(GameObj *);
-extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
+extern s32 func_1503DA9C(Actor *, s32, s32, s32);
+extern s32 func_1505D024(Actor *, s32, u16, s32);
+extern Actor *func_1505ED34(void);
+extern Actor *func_1505EEF4(void);
+extern void func_1505F188(Actor *obj);
+extern void func_15060A30(s32, Actor *);
+extern void func_15060A9C(s32, Actor *);
+extern void func_1506AC8C(Actor *, s32, s32);
+extern void func_1507DE4C(Actor *);
+extern void func_1507DF10(Actor *obj, s32 arg1);
+extern s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
+extern s32 func_15084D00(Actor *);
+extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern void func_150B5C38(void *, u8, s32);
 extern void func_150B6754(u8, s32);
@@ -400,40 +83,38 @@ extern void func_150D728C(void *, void *, void *, u8, s32);
 extern void func_150EB484(f32 *, f32 *, f32 *);
 extern void func_15104608(f32, f32, f32, s32);
 extern void func_1510D720(s32 arg0);
-extern void func_15137610(GameObj *, void *, void *, void *, u8, s32);
-extern void func_15138C80(GameObj *, s32, s32);
-extern f32 func_15143E64(struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+extern void func_15137610(Actor *, void *, void *, void *, u8, s32);
+extern void func_15138C80(Actor *, s32, s32);
+extern f32 func_15143E64(Vec3f *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+extern s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern void func_15145974(void *, f32 *, f32 *);
-extern s32 func_1514D15C(GameObj *obj);
-extern s32 *func_1515D440(void);
+extern s32 func_1514D15C(Actor *obj);
+extern void *func_1515D440(void);
 extern s32 func_1515D480(s32);
 extern s32 func_151D3480(void *, void *, void *, u8, u8, s32);
 extern s32 func_151E5F64(s32 arg0);
 
-s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist);
-void func_15081E0C(GameObj *obj, u16 part, u8 skip);
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
+void func_15081E0C(Actor *obj, u16 part, u8 skip);
 s32 func_150825C0(s32 spawnIdx, s32 arg1);
 s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
-void func_150829D8(GameObj *obj);
-void func_150832AC(GameObj *obj);
-void func_15083384(GameObj *obj, s32 arg1);
-GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3);
+void func_150829D8(Actor *obj);
+void func_150832AC(Actor *obj);
+void func_15083384(Actor *obj, s32 arg1);
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
-s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3);
-void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn);
-GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
-GameObj *func_15083E90(u8 id);
-void func_150843AC(GameObj *obj, s32 model);
+s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3);
+void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn);
+Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
+void func_150843AC(Actor *obj, s32 model);
 void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
-u8 func_150849A0(GameObj *obj);
-void func_15084C30(GameObj *obj);
+u8 func_150849A0(Actor *obj);
+void func_15084C30(Actor *obj);
 s32 func_15084CB0(s32 modelId);
 
 /* Casts a ray from origin along dir against the world and every active object (except self and those in
    ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
-void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
+void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
     s32 surf;
     f32 hitX;
     f32 hitY;
@@ -444,25 +125,25 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
     s32 bone;
     s16 offset[4];
     s32 i;
-    GameObj *obj;
+    Actor *obj;
     s32 best;
     s32 skip;
     s32 ret;
     u8 childSlot[25];
-    struct17 near;
-    struct17 far;
-    struct17 centre;
-    struct17 origin;
-    struct17 dir;
+    Vec3f near;
+    Vec3f far;
+    Vec3f centre;
+    Vec3f origin;
+    Vec3f dir;
     s32 index;
     s32 surfIdx;
 
-    origin.unk0 = originX;
-    origin.unk4 = originY;
-    origin.unk8 = originZ;
-    dir.unk0 = dirX;
-    dir.unk4 = dirY;
-    dir.unk8 = dirZ;
+    origin.x = originX;
+    origin.y = originY;
+    origin.z = originZ;
+    dir.x = dirX;
+    dir.y = dirY;
+    dir.z = dirZ;
     out->dist = -1.0f;
     out->obj = NULL;
     out->hitType = 0;
@@ -494,9 +175,9 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
         dist < maxDist) {
         out->dist = dist;
         out->hitType = 1;
-        out->hit.unk0 = hitX;
-        out->hit.unk4 = hitY;
-        out->hit.unk8 = hitZ;
+        out->hit.x = hitX;
+        out->hit.y = hitY;
+        out->hit.z = hitZ;
         out->far = out->hit;
         if (surfIdx != -1) {
             out->surface = &D_800DBEF4[surfIdx];
@@ -561,55 +242,55 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
 
 /* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
    unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
-s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist) {
-    struct17 pos;
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
+    Vec3f pos;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + obj->unkD6;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + obj->unkD6;
+    pos.z = obj->z_position;
     {
-        struct17 start;
-        struct17 unitDir;
-        struct17 center;
+        Vec3f start;
+        Vec3f unitDir;
+        Vec3f center;
         f32 yScale;
         f32 yUnscale;
 
         yScale = obj->unkDC;
         yUnscale = obj->unkE0;
-        start.unk0 = origin->unk0;
-        start.unk4 = origin->unk4 * yScale;
-        start.unk8 = origin->unk8;
-        unitDir.unk0 = dir->unk0;
-        unitDir.unk4 = dir->unk4 * yScale;
-        unitDir.unk8 = dir->unk8;
+        start.x = origin->x;
+        start.y = origin->y * yScale;
+        start.z = origin->z;
+        unitDir.x = dir->x;
+        unitDir.y = dir->y * yScale;
+        unitDir.z = dir->z;
         if (func_15145128(&unitDir, &unitDir, NULL, NULL) == 0) {
             return 0;
         }
-        center.unk0 = pos.unk0;
-        center.unk4 = pos.unk4 * yScale;
-        center.unk8 = pos.unk8;
+        center.x = pos.x;
+        center.y = pos.y * yScale;
+        center.z = pos.z;
         if (func_151452C4(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
-        outNear->unk4 *= yUnscale;
-        outFar->unk4 *= yUnscale;
+        outNear->y *= yUnscale;
+        outFar->y *= yUnscale;
         {
-            struct17 diff;
+            Vec3f diff;
 
-            diff.unk0 = outNear->unk0 - origin->unk0;
-            diff.unk4 = outNear->unk4 - origin->unk4;
-            diff.unk8 = outNear->unk8 - origin->unk8;
+            diff.x = outNear->x - origin->x;
+            diff.y = outNear->y - origin->y;
+            diff.z = outNear->z - origin->z;
             *outNearDist = func_15143E64(&diff);
-            diff.unk0 = outFar->unk0 - origin->unk0;
-            diff.unk4 = outFar->unk4 - origin->unk4;
-            diff.unk8 = outFar->unk8 - origin->unk8;
+            diff.x = outFar->x - origin->x;
+            diff.y = outFar->y - origin->y;
+            diff.z = outFar->z - origin->z;
             *outFarDist = func_15143E64(&diff);
         }
     }
     return 1;
 }
 
-void func_15081E0C(GameObj *obj, u16 part, u8 skip) {
+void func_15081E0C(Actor *obj, u16 part, u8 skip) {
     if (D_800BE616 == 0) {
         if (obj->health != 0) {
             obj->health = 7;
@@ -623,13 +304,13 @@ void func_15081E0C(GameObj *obj, u16 part, u8 skip) {
 /* Applies the effects of a ray hit of the given kind fired by self: world impact effects for a world
    hit, otherwise hit reactions, sounds and effects on the object that was hit. Returns 0 for no hit,
    1 for a world hit and 2 for an object hit. */
-s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
+s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     s32 sound;
     f32 yaw;
     f32 pitch;
     u8 playImpact;
-    GameObj *obj;
-    GameObjExt *ext;
+    Actor *obj;
+    ActorCtl *ext;
     // matching: volatile keeps IDO from hoisting the li/lw of noHealth out of the if/else
     volatile s32 noHealth;
     s32 longShot;
@@ -675,19 +356,19 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
                 f32 front[3];
                 f32 back[3];
 
-                front[0] = hit->hit.unk0 + hit->dir.unk0 * 5.0f;
-                front[1] = hit->hit.unk4 + hit->dir.unk4 * 5.0f;
-                front[2] = hit->hit.unk8 + hit->dir.unk8 * 5.0f;
-                back[0] = hit->hit.unk0 - hit->dir.unk0 * 5.0f;
-                back[1] = hit->hit.unk4 - hit->dir.unk4 * 5.0f;
-                back[2] = hit->hit.unk8 - hit->dir.unk8 * 5.0f;
+                front[0] = hit->hit.x + hit->dir.x * 5.0f;
+                front[1] = hit->hit.y + hit->dir.y * 5.0f;
+                front[2] = hit->hit.z + hit->dir.z * 5.0f;
+                back[0] = hit->hit.x - hit->dir.x * 5.0f;
+                back[1] = hit->hit.y - hit->dir.y * 5.0f;
+                back[2] = hit->hit.z - hit->dir.z * 5.0f;
                 func_150EB484(front, back, &vc);
             }
             // fallthrough
         case 9:
         case 10:
             effect = -1;
-            func_15104608(hit->hit.unk0, hit->hit.unk4, hit->hit.unk8, self->unk124);
+            func_15104608(hit->hit.x, hit->hit.y, hit->hit.z, self->unk124);
             func_1506AC8C(self, 2, 0);
             break;
         default:
@@ -742,7 +423,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
                 if (obj->unk31C != NULL) {
                     obj->unk31C->unk1AD = 1;
                 }
-                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.unk4 - 5.5f > hit->centre.unk4) {
+                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.y - 5.5f > hit->centre.y) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
@@ -780,11 +461,11 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
             break;
         }
         if (spawnEffect != 0 && obj->health < 2) {
-            GameObj source;
+            Actor source;
 
-            source.x_position = hit->hit.unk0;
-            source.y_position = hit->hit.unk4;
-            source.z_position = hit->hit.unk8;
+            source.x_position = hit->hit.x;
+            source.y_position = hit->hit.y;
+            source.z_position = hit->hit.z;
             source.unkB8 = pitch;
             source.unk40 = yaw + 180.0f;
             source.unkC4 = 0.0f;
@@ -913,7 +594,7 @@ void func_1508295C(s32 arg0, s32 arg1, s32 firstRange) {
     }
 }
 
-void func_150829D8(GameObj *obj) {
+void func_150829D8(Actor *obj) {
     obj->unkF8 &= 0xF7FFFFFD;
     obj->unkF8 |= 4;
     if ((obj->unk31C != NULL) && (obj->unk31C->unk56 == 0)) {
@@ -943,14 +624,14 @@ void func_150829D8(GameObj *obj) {
    reuse, 0 for the default). Returns the 1-based slot, or 0 on failure. */
 s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot) {
     s32 type;
-    GameObj *obj;
+    Actor *obj;
     s32 idx;
     s32 ret;
     s32 t;
     s32 i;
     s32 found;
     u32 model;
-    ObjAlloc260 *mem;
+    VtxMorphState *mem;
     u16 angle;
 
     if (D_800D210C[spawnIdx] & ~0x80) {
@@ -987,8 +668,8 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     ret = idx + 1;
     func_15084488(spawn, obj->unk13F, arg3);
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
-        obj->unk31C = allocate_memory(sizeof(GameObjExt), 1, 0, 0);
-        bzero(obj->unk31C, sizeof(GameObjExt));
+        obj->unk31C = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
+        bzero(obj->unk31C, sizeof(ActorCtl));
         obj->unk31C->unk1B8 = 5.0f;
     }
     obj->unique_id = spawn->unique_id;
@@ -1001,11 +682,11 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     obj->x_position = spawn->x;
     obj->y_position = spawn->y;
     obj->z_position = spawn->z;
-    obj->unk212 = 0xFF;
+    obj->unk212[0] = 0xFF;
     obj->unk20F = 0xFF;
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
-    obj->unk128 = 0xFF;
+    obj->team = 0xFF;
     obj->old_x_position = obj->x_position;
     obj->old_y_position = obj->y_position;
     obj->unk1CC = obj->y_position;
@@ -1023,10 +704,10 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         u8 pad;
 
         if (obj->unk127 != 0xFF) {
-            obj->unk128 = func_151E5F64(obj->unk127);
+            obj->team = func_151E5F64(obj->unk127);
             obj->unk31C->grenade_count = D_800D2130;
             obj->unk31C->unk1AF = 0x40;
-            obj->unk31C->unk1B0 = -1;
+            obj->unk31C->lastSpawnIndex = -1;
         }
     }
     obj->health = spawn->unkE & 0xF;
@@ -1099,12 +780,12 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             t = 3;
         }
         if (type == 0x3B) {
-            obj->unk68 = t + 1;
+            obj->unk68[0] = t + 1;
         } else if (type == 0x77) {
-            obj->unk68 = t + 0x10;
+            obj->unk68[0] = t + 0x10;
         }
     }
-    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->unk2E == 0xFF)) {
+    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->keepTime == 0xFF)) {
         found = obj->modelCount;
         if (found == 0) {
             found = 1;
@@ -1126,20 +807,20 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         }
     }
     if (found) {
-        mem = allocate_memory(sizeof(ObjAlloc260), 1, 0, 2);
-        obj->unk260 = mem;
+        mem = allocate_memory(sizeof(VtxMorphState), 1, 0, 2);
+        obj->morph = mem;
         if (mem != NULL) {
-            mem->unk8 = 0;
-            mem->unk9 = 0xFF;
-            mem->unk0 = 0.0f;
-            mem->unk4 = 1.0f;
+            mem->prev = 0;
+            mem->cur = 0xFF;
+            mem->blend = 0.0f;
+            mem->rate = 1.0f;
         }
     }
     func_15084C30(obj);
     return ret;
 }
 
-void func_150832AC(GameObj *obj) {
+void func_150832AC(Actor *obj) {
     SpawnRecord *spawn;
     u8 n;
     s32 i;
@@ -1167,10 +848,10 @@ void func_150832AC(GameObj *obj) {
     }
 }
 
-void func_15083384(GameObj *obj, s32 arg1) {
+void func_15083384(Actor *obj, s32 arg1) {
     s32 partSet;
     s32 group;
-    GameObjExt *ext;
+    ActorCtl *ext;
 
     partSet = -1;
     switch (arg1) {
@@ -1247,9 +928,9 @@ void func_15083384(GameObj *obj, s32 arg1) {
 }
 
 /* Creates every part of part set setId (1-based) on parent; returns the last part created. */
-GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3) {
+Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     PartDef *parts;
-    GameObj *ret;
+    Actor *ret;
     s32 i;
 
     setId--;
@@ -1267,7 +948,7 @@ GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3) {
 }
 
 /* Removes the child objects of part set setId (1-based) that belong to parent. */
-void func_150836CC(GameObj *parent, s32 setId) {
+void func_150836CC(Actor *parent, s32 setId) {
     PartSet *set;
     s32 i;
     PartDef *parts;
@@ -1277,7 +958,7 @@ void func_150836CC(GameObj *parent, s32 setId) {
     set = &D_80086CC4[setId];
     parts = set->parts;
     for (i = 0; i < set->count; i++) {
-        GameObj *child;
+        Actor *child;
 
         if (parts[i].type == 0) {
             child = func_1505F0AC(parts[i].unk0);
@@ -1292,14 +973,14 @@ void func_150836CC(GameObj *parent, s32 setId) {
 
 /* Sets object objIdx's model to modelId (0xFF for none) and loads its per-model state. */
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
-    GameObj *obj = &D_800CC2D0[objIdx];
+    Actor *obj = &D_800CC2D0[objIdx];
     ModelDef *def;
 
     obj->id = modelId;
     if (modelId == 0xFF) {
-        obj->unkE4 = 0;
-        obj->unkE6 = 0;
-        obj->unkE8 = 0;
+        obj->bodyRadius = 0;
+        obj->bodyHeight = 0;
+        obj->bodyOffsetY = 0;
         obj->unkD2 = 70;
         obj->unkD4 = 70;
         obj->unkD6 = 0;
@@ -1318,11 +999,11 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
 }
 
 /* Allocates the animation state block of obj's model. Returns 1 only if the allocation fails. */
-s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3) {
+s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
     modelId = obj->id;
-    if (D_800D1588[modelId] == 0) {
+    if (D_800D1588[modelId] == NULL) {
         return 0;
     }
     if (D_800C5A90[modelId] == 0) {
@@ -1338,7 +1019,7 @@ s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3) {
 }
 
 /* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides unk10. */
-void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
+void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
     ModelDef *def;
     u16 override;
 
@@ -1365,14 +1046,14 @@ void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk2CB = def->unk33;
         obj->unk2CC = def->unk34;
         obj->unk5 = def->unk12;
-        obj->unk68 = def->unk3B;
-        obj->unk69 = def->unk3C;
+        obj->unk68[0] = def->eyeDefault[0];
+        obj->unk68[1] = def->eyeDefault[1];
         obj->unk160 = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = D_80086CAC[def->subModelList];
-            obj->unk2C8 = def->subModelCount;
+            obj->lodCount = def->subModelCount;
         }
-        obj->modelCount = obj->unk2C8 + def->extraModelCount;
+        obj->modelCount = obj->lodCount + def->extraModelCount;
         if (def->unk29 != 0) {
             func_15036C70(obj);
         }
@@ -1380,8 +1061,8 @@ void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
 }
 
 /* Creates a child object of parent with model modelId (a part from func_15083568). */
-GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
-    GameObj *obj;
+Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
+    Actor *obj;
     // matching: unused stack slot
     s32 pad;
     s32 animFlag;
@@ -1428,7 +1109,7 @@ GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 sta
     func_1503D774(modelId, 0);
     if (arg5 & 1) {
         obj->unkF8 |= 0x4000;
-        obj->unk270 = D_800D1C90[modelId]->unkE * obj->xz_scale;
+        obj->unk270 = D_800D1C90[modelId]->bodyRadius * obj->xz_scale;
     }
     animFlag = 0;
     if (arg5 & 2) {
@@ -1441,7 +1122,7 @@ GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 sta
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         blocked = 1;
     } else {
         blocked = 0;
@@ -1492,8 +1173,8 @@ s32 func_15083E0C(u8 id) {
 }
 
 /* Returns the active object with unique id id, or NULL. */
-GameObj *func_15083E90(u8 id) {
-    GameObj *obj;
+Actor *func_15083E90(u8 id) {
+    Actor *obj;
     s32 i;
 
     if (id == 0) {
@@ -1512,7 +1193,7 @@ GameObj *func_15083E90(u8 id) {
 
 /* Returns the slot of the active object with unique id id, or -1. */
 s32 func_15083FB0(u8 id) {
-    GameObj *obj;
+    Actor *obj;
 
     obj = func_15083E90(id);
     if (obj != NULL) {
@@ -1522,7 +1203,7 @@ s32 func_15083FB0(u8 id) {
 }
 
 s32 func_15084000(void) {
-    GameObj *obj = func_1505EEF4();
+    Actor *obj = func_1505EEF4();
 
     if (obj != NULL) {
         return obj - D_800CC2D0;
@@ -1532,7 +1213,7 @@ s32 func_15084000(void) {
 
 /* Sets up obj's two data pointers for its model'th model: shared with D_800D19A0[id] or private
    copies, depending on the owning spawn record's mode (unk10 & 3). Returns 1 if an allocation failed. */
-s32 func_15084044(GameObj *obj, s32 model) {
+s32 func_15084044(Actor *obj, s32 model) {
     u8 *slot;
     SpawnRecord *spawn;
     s32 mode;
@@ -1621,7 +1302,7 @@ s32 func_15084044(GameObj *obj, s32 model) {
 }
 
 /* Releases the data pointers of all of obj's models. */
-void func_1508434C(GameObj *obj) {
+void func_1508434C(Actor *obj) {
     s32 count;
     s32 i;
 
@@ -1636,7 +1317,7 @@ void func_1508434C(GameObj *obj) {
 
 /* Releases the data pointers of obj's model'th model: frees private copies, drops the
    reference count of shared ones. */
-void func_150843AC(GameObj *obj, s32 model) {
+void func_150843AC(Actor *obj, s32 model) {
     // matching: a named trip count takes its saved register before the D_800D19A0 base
     u8 limit;
     u8 *data;
@@ -1690,7 +1371,7 @@ void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
 
 /* Releases obj's model data, and frees each of its models (and their tables) that no other
    active object still uses. */
-void func_15084558(GameObj *self) {
+void func_15084558(Actor *self) {
     s32 id;
     u8 *list;
     s32 i;
@@ -1700,14 +1381,14 @@ void func_15084558(GameObj *self) {
     s32 unique;
     s32 freeData;
     s32 freeDef;
-    GameObj *obj;
+    Actor *obj;
     u8 otherCount;
     u8 *otherList;
     // matching: unused stack slot
     s32 pad;
-    s32 data;
+    ActorAnim *data;
     u8 *block;
-    s32 table;
+    TexCoord *table;
 
     id = self->id;
     if (id != 0xFF && D_800D19A0[id] != NULL) {
@@ -1733,7 +1414,7 @@ void func_15084558(GameObj *self) {
                             if (otherList[k] == list[i]) {
                                 unique = 0;
                             }
-                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != 0) {
+                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != NULL) {
                                 freeData = 0;
                             }
                             if (D_800D1C90[otherList[k]] == D_800D1C90[list[i]] && D_800D1C90[otherList[k]] != NULL) {
@@ -1743,13 +1424,13 @@ void func_15084558(GameObj *self) {
                     }
                 }
             }
-            if (freeData && D_800D1588[list[i]] != 0) {
+            if (freeData && D_800D1588[list[i]] != NULL) {
                 data = D_800D1588[list[i]];
                 {
-                    func_100043B4((s32 *)(data - 0x10), 3);
+                    func_100043B4((s32 *)ANIM_HEADER(data), 3);
                     for (k = 0; k < 187; k++) {
                         if (data == D_800D1588[k]) {
-                            D_800D1588[k] = 0;
+                            D_800D1588[k] = NULL;
                         }
                     }
                 }
@@ -1764,16 +1445,16 @@ void func_15084558(GameObj *self) {
             }
             if (unique) {
                 if (D_800D19A0[list[i]] != NULL) {
-                    if (D_800C5C08[id] != 0) {
-                        func_10004074((void *)D_800C5C08[id]);
-                        D_800C5C08[id] = 0;
-                        func_10004074((void *)D_800C6070[id]);
-                        D_800C6070[id] = 0;
+                    if (D_800C5C08[id] != NULL) {
+                        func_10004074((void *)(s32)D_800C5C08[id]); // matching: the int round trip keeps the load in v0
+                        D_800C5C08[id] = NULL;
+                        func_10004074(D_800C6070[id]);
+                        D_800C6070[id] = NULL;
                     }
                     table = D_800C6360[id];
-                    if (table != 0) {
-                        func_10004074((void *)table);
-                        D_800C6360[id] = 0;
+                    if (table != NULL) {
+                        func_10004074(table);
+                        D_800C6360[id] = NULL;
                     }
                 }
             }
@@ -1781,9 +1462,9 @@ void func_15084558(GameObj *self) {
     }
 }
 
-/* Returns obj's current model id (modelIds[unk1C9 - 1], or the first). */
-u8 func_150849A0(GameObj *obj) {
-    s32 current = obj->unk1C9;
+/* Returns obj's current model id (modelIds[lodRequest - 1], or the first). */
+u8 func_150849A0(Actor *obj) {
+    s32 current = obj->lodRequest;
 
     if (current != 0) {
         return obj->modelIds[current - 1];
@@ -1791,16 +1472,16 @@ u8 func_150849A0(GameObj *obj) {
     return obj->modelIds[0];
 }
 
-/* Like func_150849A0, falling back to modelIds[unk2C8 - 1]; stores the index in *outIndex. */
-u8 func_150849CC(GameObj *obj, s32 *outIndex) {
+/* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
+u8 func_150849CC(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 
-    n = obj->unk1C9;
+    n = obj->lodRequest;
     if (n != 0) {
         index = n - 1;
     } else {
-        n = obj->unk2C8;
+        n = obj->lodCount;
         if (n != 0) {
             index = n - 1;
         } else {
@@ -1818,7 +1499,7 @@ u8 func_150849CC(GameObj *obj, s32 *outIndex) {
 void func_15084A18(void) {
     s32 i;
     s32 m;
-    GameObj *obj;
+    Actor *obj;
     s32 j;
     s32 k;
     ModelReloc *relocs;
@@ -1830,7 +1511,7 @@ void func_15084A18(void) {
             continue;
         }
         if (*timer == 1) {
-            if (D_800D19A0[i] != NULL && D_800C5C08[i] == 0) {
+            if (D_800D19A0[i] != NULL && D_800C5C08[i] == NULL) {
                 for (m = 0; m < 25; m++) {
                     obj = &D_800CC2D0[m];
                     if (obj->interaction_state != 0) {
@@ -1861,14 +1542,14 @@ void func_15084A18(void) {
     }
 }
 
-void func_15084C30(GameObj *obj) {
-    struct197 *anim;
+void func_15084C30(Actor *obj) {
+    AnimInstance *anim;
     f32 phase;
 
     if (obj->id == 0x94) {
         anim = obj->unk2D0;
-        phase = (u32)func_150ADA20() % (s32)anim->unk18;
-        anim->unk8 = phase;
+        phase = func_150ADA20() % (s32)anim->numFrames;
+        anim->frame = phase;
     }
 }
 

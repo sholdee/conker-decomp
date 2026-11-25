@@ -6,11 +6,11 @@
 
 void func_15004D50(void) { 
     s32 i; //s0
-    struct222** s1;
+    Vtx **s1;
 
-    D_800C3FC0 = (struct222*) &D_80084300;
+    D_800C3FC0[0] = D_80084300;
     for( i = 1;  i <= D_80082FA0; i++){
-        (&D_800C3FC0)[i] = (struct222 *) allocate_memory(0x50, 1, 2, 0); //allocate_memory
-        bcopy(D_800C3FC0, (&D_800C3FC0)[i], 0x50); //bcopy
+        D_800C3FC0[i] = allocate_memory(sizeof(D_80084300), 1, 2, 0);
+        bcopy(D_800C3FC0[0], D_800C3FC0[i], sizeof(D_80084300));
     }
 }

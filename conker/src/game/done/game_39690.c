@@ -16,6 +16,6 @@ void func_1500C1E0(void) {
     bzero(D_800DDE80, 220); // bzero 220 bytes
 
     for (i = 0; i < 11; i++) {
-        D_800DDF78[i] = 0;
+        D_800DDF78[i] = NULL;
     }
 }

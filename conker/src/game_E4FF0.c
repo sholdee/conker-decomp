@@ -1,88 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Particle spawn template passed to func_15132A4C (game_15F680.c's ParticleSpawn, up to 0x78). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-} ModelParticleSpawn;
-
-/* Burst config read by func_15151A38 (game_17CAF0.c's struct Local15151A38Arg). */
-typedef struct {
-    /* 0x00 */ vertex position;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ s16 yawBase;
-    /* 0x2A */ s16 yawRange;
-    /* 0x2C */ s16 pitchBase;
-    /* 0x2E */ s16 pitchRange;
-    /* 0x30 */ s16 fadeBase;
-    /* 0x32 */ s16 fadeRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 enabled;
-    /* 0x3A */ u8 red;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60; /* 0x60..0x7D: params block for func_15147DA0 */
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ u8 unk7C;
-    /* 0x7D */ u8 unk7D;
-    /* 0x7E */ u8 pad7E[2];
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 unk84;
-} BurstConfig;
+#include "effects.h"
 
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
@@ -95,43 +14,43 @@ extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
 // matching: the model is passed as s32; a pointer type moves the unk1D4 temp from v0 to a3
-void func_15142314(s32 model, s32 joint, f32 *out);
 void func_15143134(f32 *in, f32 *out, void *mtx);
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_150B82D0(vertex *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(vertex *, f32 *, f32 *, u8, s32);
-void func_1504715C(Ground *, struct127 *);
-s32 func_15046C80(vertex *, s32, f32, Ground *);
+void func_1515C244(Actor *, f32 *, f32 *, f32 *);
+void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
+void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
+void func_1504715C(Ground *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, Ground *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-s32 func_15132A4C(ModelParticleSpawn *, s32, s32, s32, u8, s32);
-void func_15151A38(BurstConfig *, u8, s32);
+s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
+void func_15151A38(PuffSpray *, u8, s32);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
  * func_150B85C0), an effect on the ground below it, and two chunks, each with a burst, flung
  * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
-void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
-    vertex joints[2];
-    vertex root;
+void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
+    Vec3f joints[2];
+    Vec3f root;
     f32 scaleXZ;
     f32 scaleY;
     f32 scale;
     f32 dirX;
     f32 dirZ;
     s32 pad5; // matching: unused stack slot; keeps the frame layout
-    ModelParticleSpawn chunk;
+    ParticleSpawn78 chunk;
     s32 pad2[3]; // matching: unused stack slots; keep the frame layout
     s8 i;
     f32 velX;
     f32 velZ;
-    vertex center;
+    Vec3f center;
     f32 height;
     f32 radius;
     f32 aspect;
 
     if (obj != NULL) {
         if (obj->unk1D4 != NULL) {
+            // matching: integer casts keep unk1D4 out of a0 (a pointer argument is loaded straight into a0)
             func_15142314((s32)obj->unk1D4, 4, &joints[0].x);
             func_15142314((s32)obj->unk1D4, 5, &joints[1].x);
             func_15142314((s32)obj->unk1D4, 0, &root.x);
@@ -159,7 +78,7 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
                 f32 dx;
                 f32 dz;
 
-                mtx = (u8 *)obj->unk1D4 + 0x80; /* a matrix inside the model (struct255 is opaque here) */
+                mtx = (u8 *)obj->unk1D4 + 0x80; /* bone 2 */
                 func_15143134(D_8009FD30, &center.x, mtx);
                 func_15143134(D_8009FD3C, bottom, mtx);
                 func_15143134(D_8009FD48, side, mtx);
@@ -180,7 +99,7 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
         func_150B85C0(&center, &height, &radius, arg1, arg2);
         {
             Ground ground;
-            vertex probe;
+            Vec3f probe;
 
             probe.x = center.x;
             probe.y = center.y + 100.0f;
@@ -246,7 +165,7 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
             f32 sinPitch;
             f32 cosPitch;
             f32 horizontal;
-            BurstConfig burst;
+            PuffSpray burst;
 
             speed = (func_150ADA68() * 30.0f * obj->y_scale) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
@@ -264,46 +183,46 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
             chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
             func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
             scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.96f;
-            burst.position = joints[i];
+            burst.pos = joints[i];
             burst.countBase = 4;
             burst.countRange = 4;
-            burst.yawRange = 0xFF;
-            burst.pitchBase = -0x3F;
-            burst.pitchRange = 0x4B;
+            burst.angles.yawRange = 0xFF;
+            burst.angles.pitchBase = -0x3F;
+            burst.angles.pitchRange = 0x4B;
             burst.sizeBase = 3.0f * scale;
             burst.sizeRange = 3.0f * scale;
             burst.growthBase = 0.6f;
             burst.growthRange = 0.231f;
             burst.speedBase = 15.0f * scale;
             burst.speedRange = 10.0f * scale;
-            burst.yawBase = 0;
-            burst.fadeBase = 3;
-            burst.fadeRange = 3;
+            burst.angles.yawBase = 0;
+            burst.itemCountBase = 3;
+            burst.itemCountRange = 3;
             burst.lifeBase = 50;
             burst.lifeRange = 20;
             burst.green = 1;
-            burst.enabled = 0x21;
+            burst.headerFlags = 0x21;
             burst.red = 0x48;
-            burst.unk3C = 1;
-            burst.unk40 = 0;
-            burst.unk44 = 0;
-            burst.unk48 = 0;
-            burst.unk4C = 0;
-            burst.unk50 = 0;
+            burst.handlers[0] = 1;
+            burst.handlers[1] = 0;
+            burst.handlers[2] = 0;
+            burst.handlers[3] = 0;
+            burst.handlers[4] = 0;
+            burst.handlers[5] = 0;
             burst.blue = 0;
             burst.alphaBase = 0x9B;
             burst.alphaRange = 0x64;
             burst.unk58 = 3;
             burst.unk5C = 0xFF;
-            burst.unk60 = 0;
-            burst.unk64 = 0x220005;
-            burst.unk68 = 0x1D0600;
-            burst.unk6C = 1;
-            burst.unk70 = 0x3B;
-            burst.unk74 = 0x80;
-            burst.unk78 = 0x20;
-            burst.unk7C = 0;
-            burst.unk7D = 7;
+            burst.render.unk0 = 0;
+            burst.render.setGeometryMode = 0x220005;
+            burst.render.clearGeometryMode = 0x1D0600;
+            burst.render.renderMode = 1;
+            burst.render.unk10 = 0x3B;
+            burst.render.unk14 = 0x80;
+            burst.render.unk18 = 0x20;
+            burst.render.primMode = 0;
+            burst.render.envMode = 7;
             burst.unk80 = 10;
             burst.unk82 = 25;
             burst.unk84 = obj->unk184;
@@ -319,7 +238,7 @@ void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32,
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.
  */
-void func_150B82D0(vertex *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
+void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
     s32 count;
     f32 pos[3];
     f32 rot[3];
@@ -350,88 +269,55 @@ void func_150B82D0(vertex *center, f32 *height, f32 *radius, f32 *yScale, u8 arg
     }
 }
 
-/* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_1368C0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 pad66[0x70 - 0x66];
-} ParticleSpawn; /* size 0x70 */
-
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
     /* 0xA8 */ f32 extra;
 } SpawnedParticle;
 
-extern SpawnedParticle *func_15130374(ParticleSpawn *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
+extern SpawnedParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
-void func_150B85C0(vertex *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
-    ParticleSpawn spawn;
+void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
+    ParticleDesc spawn;
 
-    spawn.unk1D = 0x29;
-    spawn.unk8 = 0xE03;
+    spawn.texture = 0x29;
+    spawn.renderMode = 0xE03;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.lifetime = (func_150ADA20() % 11U) + 35;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.color1[0] = 0xB0;
-    spawn.color1[1] = 0xA0;
-    spawn.color1[2] = 0x2A;
-    spawn.color0[0] = 0x40;
-    spawn.color0[1] = 0x0B;
-    spawn.color0[2] = 0x6A;
-    spawn.color0[3] = 0xFF;
-    spawn.color1[3] = (func_150ADA20() % 51U) + 100;
-    spawn.unk1C = 0xFF;
-    spawn.unk60 = 3;
-    spawn.unk61 = 3;
+    spawn.timer = (func_150ADA20() % 11U) + 35;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r2 = 0xB0;
+    spawn.g2 = 0xA0;
+    spawn.b2 = 0x2A;
+    spawn.r = 0x40;
+    spawn.g = 0x0B;
+    spawn.b = 0x6A;
+    spawn.a = 0xFF;
+    spawn.alpha = (func_150ADA20() % 51U) + 100;
+    spawn.brightness = 0xFF;
+    spawn.primColorMode = 3;
+    spawn.envColorMode = 3;
     spawn.width = *radius * 20.0f;
     spawn.height = *height * 20.0f;
     spawn.pos = *center;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    spawn.unk54 = 0.0f;
+    spawn.gravity = 0.0f;
     spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE01) | 0x4000 | 0x8000;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
     spawn.fadeStart = 25;
     spawn.fadeRate = 10;
-    spawn.unk22 = 40;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk24 = 1.009518027f;
+    spawn.scaleStart = 40;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 0;
+    spawn.scaleRate = 1.009518027f;
     func_15130374(&spawn, 1, 0, arg3, arg4);
 }
 
@@ -443,46 +329,46 @@ s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 extra;
     SpawnedParticle *particle;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
 
-    spawn.unk1D = 0x29;
-    spawn.unk8 = 0xE03;
+    spawn.texture = 0x29;
+    spawn.renderMode = 0xE03;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
     extra = 0.9172409773f;
-    spawn.lifetime = (func_150ADA20() & 0xF) + 25;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.color1[0] = 0xB0;
-    spawn.color1[1] = 0xA0;
-    spawn.color1[2] = 0x2A;
-    spawn.color0[0] = 0x40;
-    spawn.color0[1] = 0x0B;
-    spawn.color0[2] = 0x6A;
-    spawn.color0[3] = 0xFF;
-    spawn.color1[3] = (func_150ADA20() % 71U) + 60;
-    spawn.unk1C = 0xFF;
-    spawn.unk60 = 3;
-    spawn.unk61 = 3;
+    spawn.timer = (func_150ADA20() & 0xF) + 25;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r2 = 0xB0;
+    spawn.g2 = 0xA0;
+    spawn.b2 = 0x2A;
+    spawn.r = 0x40;
+    spawn.g = 0x0B;
+    spawn.b = 0x6A;
+    spawn.a = 0xFF;
+    spawn.alpha = (func_150ADA20() % 71U) + 60;
+    spawn.brightness = 0xFF;
+    spawn.primColorMode = 3;
+    spawn.envColorMode = 3;
     spawn.width = spawn.height = ((func_150ADA68() * 15738.0f) + 24699.0f) * 0.01f;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     func_15143874(angle, ((func_150ADA68() * 154.0f) + 205.0f) * 0.1f, &spawn.vel.x, &spawn.vel.z);
     spawn.vel.y = 0.0f;
-    spawn.unk54 = 0.0f;
+    spawn.gravity = 0.0f;
     spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 0xE05) | 0x4000 | 0x8000;
-    spawn.unk62 = 10;
-    spawn.unk63 = -1;
+    spawn.updateFunc = 10;
+    spawn.deathFunc = -1;
     spawn.fadeStart = 28;
     spawn.fadeRate = 9;
-    spawn.unk22 = 25;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk24 = 1.033332944f;
+    spawn.scaleStart = 25;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 0;
+    spawn.scaleRate = 1.033332944f;
     particle = func_15130374(&spawn, 1, sizeof(extra), argE, 1);
     if (particle != NULL) {
         memcpy(&particle->extra, &extra, sizeof(extra));

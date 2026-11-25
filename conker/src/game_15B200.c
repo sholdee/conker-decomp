@@ -2,58 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// Current camera command (embedded in the camera at 0x6FC); the fields below are the ones a
-// rail command (type 15) uses. See CamCmd in game_15BD90.c.
-typedef struct {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ u32 heightOffset; // copied to rail.heightOffset
-    /* 0x0C */ u8 padC[0x4];
-    /* 0x10 */ s16 x; // rail midpoint
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 halfLength;
-    /* 0x18 */ u8 pad18[0x4];
-    /* 0x1C */ u32 offsetMode; // copied to rail.offsetMode
-    /* 0x20 */ u32 offset; // copied to rail.offset
-    /* 0x24 */ f32 unk24; // unk24/unk28 split halfLength into horizontal/vertical parts,
-    /* 0x28 */ f32 unk28; // unk2C/unk30 split the horizontal part into x/z
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-} CamRailCmd;
-
-// Camera rail: a line segment the camera eye slides along (embedded in the camera at 0x870).
-typedef struct {
-    /* 0x00 */ u8 offsetMode; // which side of the rail the eye sits on (0..3)
-    /* 0x04 */ vertex start;
-    /* 0x10 */ vertex dir; // unit direction from start to end
-    /* 0x1C */ f32 invLength;
-    /* 0x20 */ f32 offset; // horizontal distance of the eye from the rail
-    /* 0x24 */ f32 heightOffset;
-    /* 0x28 */ f32 eyeEaseA; // easing parameters for the eye, eased toward 10.0
-    /* 0x2C */ f32 eyeEaseB;
-    /* 0x30 */ f32 eyeEaseAVel;
-    /* 0x34 */ f32 eyeEaseBVel;
-    /* 0x38 */ vertex eyeGoal;
-} CamRail;
-
-// This file's view of a camera (struct108, 0x9A0 bytes).
-typedef struct {
-    /* 0x000 */ u8 pad0[0x23C];
-    /* 0x23C */ u8 snap; // nonzero: jump to targets instead of easing
-    /* 0x23D */ u8 pad23D[0x7F];
-    /* 0x2BC */ vertex target; // look-at point
-    /* 0x2C8 */ u8 pad2C8[0x30];
-    /* 0x2F8 */ vertex eye; // camera position
-    /* 0x304 */ u8 pad304[0xBC];
-    /* 0x3C0 */ vertex eyeVel; // easing velocity of eye
-    /* 0x3CC */ u8 pad3CC[0x330];
-    /* 0x6FC */ CamRailCmd cmd;
-    /* 0x730 */ u8 pad730[0x84];
-    /* 0x7B4 */ f32 dt; // frame time scale
-    /* 0x7B8 */ u8 pad7B8[0xB8];
-    /* 0x870 */ CamRail rail;
-} Camera;
-
 void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
 
 // Builds the camera rail from the current rail command: a segment of length 2 * halfLength
@@ -61,12 +9,12 @@ void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 
 void func_1512DD50(Camera *camera) {
     CamRail *rail;
     f32 z;
-    CamRailCmd *cmd;
+    CamCmd *cmd;
     f32 x;
     f32 y;
     f32 scale;
     f32 dy;
-    vertex span;
+    Vec3f span;
     f32 dx;
     f32 dz;
 
@@ -94,9 +42,9 @@ void func_1512DD50(Camera *camera) {
     rail->dir.x = scale * span.x;
     rail->dir.y = scale * span.y;
     rail->dir.z = scale * span.z;
-    rail->offset = cmd->offset;
-    rail->heightOffset = cmd->heightOffset;
-    rail->offsetMode = cmd->offsetMode;
+    rail->offset = cmd->unk20;
+    rail->heightOffset = cmd->unk8;
+    rail->offsetMode = cmd->unk1C;
     rail->eyeEaseA = 0.0f;
     rail->eyeEaseB = 0.0f;
 }

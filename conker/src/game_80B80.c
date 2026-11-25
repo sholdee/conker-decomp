@@ -1,28 +1,24 @@
 #include <ultra64.h>
 
-// matching: functions.h declares func_150ADA20 as returning u8, but the callers here use its full s32 result
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
-void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
-void func_1505A770(struct127 *arg0);
-void func_15055B0C(struct127 *arg0, s32 arg1);
+void func_1505A770(Actor *arg0);
+void func_15055B0C(Actor *arg0, s32 arg1);
 void func_151026BC(void *, s32, s32, s32, s32, s32);
 void func_15188810(void *, s32, s32);
-void func_150836CC(struct127 *, s32);
+void func_150836CC(Actor *, s32);
 void func_1507C324(void *, void *);
 void func_1514AD9C(f32 *, s32, s32);
-void func_1503192C(struct127 *, s32, s32, s32);
-void func_151DCDE0(struct17 *, s32, s32);
+void func_1503192C(Actor *, s32, s32, s32);
+void func_151DCDE0(Vec3f *, s32, s32);
 
-s32 func_1505C7D8(struct127 *, u8);
-void func_15059C84(struct127 *);
+s32 func_1505C7D8(Actor *, u8);
+void func_15059C84(Actor *);
 
 typedef struct {
     f32 unk0;
@@ -32,45 +28,38 @@ typedef struct {
 } Struct800872A0;
 
 extern Struct800872A0 *D_800872A0;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
-s32 func_1508855C(struct127 *arg0);
+s32 func_1508855C(Actor *arg0);
 void func_15087350(s32, s32, f32);
-struct127 *func_150883B0(s32, s32, f32 *, s32 *);
+Actor *func_150883B0(s32, s32, f32 *, s32 *);
 s32 func_15104634(f32, f32, f32, f32 *);
-u8 func_15059B54(struct127 *arg0, u16 arg1);
+u8 func_15059B54(Actor *arg0, u16 arg1);
 s32 func_151EF610(void);
-s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3);
-void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-s32 func_15081E78(struct127 *, void *, s32);
-void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_1505D6F0(struct127 *arg0, s32 arg1);
+s8 func_1505DDA8(Actor *arg0, s32 arg1, u16 arg2, f32 arg3);
+void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+s32 func_15081E78(Actor *, void *, s32);
+void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505D6F0(Actor *arg0, s32 arg1);
 void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
-void func_15088780(struct127 *);
+void func_15088780(Actor *);
 
-void func_150536D0(struct127 *obj) {
+void func_150536D0(Actor *obj) {
     obj->interaction_state = 13;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
 }
 
-void func_150536E8(struct127 *obj) {
+void func_150536E8(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
 }
 
-void func_1505371C(struct127 *obj) {
+void func_1505371C(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
 }
 
 // Moves the object's scale towards (unk154, unk158) by at most unk15C per call.
-void func_15053750(struct127 *obj) {
+void func_15053750(Actor *obj) {
     f32 diff;
     f32 step;
 
@@ -95,14 +84,14 @@ void func_15053750(struct127 *obj) {
     }
 }
 
-void func_15053894(struct127 *obj) {
+void func_15053894(Actor *obj) {
     obj->unk7F++;
     if (obj->unk7F >= 31) {
         func_15060F28(obj, 1);
     }
 }
 
-void func_150538CC(struct127 *obj) {
+void func_150538CC(Actor *obj) {
     s8 done;
     s32 left;
     f32 prevY;
@@ -118,7 +107,7 @@ void func_150538CC(struct127 *obj) {
     f32 slotValue;
     s32 searchDir;
     s32 slotFlag;
-    struct127 *target;
+    Actor *target;
 
     done = 0;
     kind = (u16)obj->unk278;
@@ -149,7 +138,7 @@ void func_150538CC(struct127 *obj) {
                 maxStep = 30.0f;
             }
             func_15087350(slot, 0, dist);
-            obj->pad320[8] = 1; // 0x328
+            obj->unk328 = 1; // 0x328
             if (obj->unk221 == -1) {
                 target = func_150883B0(slot, searchDir, &slotValue, &slotFlag);
                 if ((obj->unk124 != 0) && (target + 1 == &D_800CC2D0[obj->unk124])) {
@@ -215,8 +204,7 @@ void func_150538CC(struct127 *obj) {
         if (obj->unkB2 != 0) {
             obj->unk83++;
         }
-        // variables.h declares D_800E0C20 as s32; only its first byte is read here
-        if ((*(s8 *)&D_800E0C20 != 0) || (D_800E0B94 != 0)) {
+        if ((D_800E0C20 != 0) || (D_800E0B94 != 0)) {
             obj->unk83 = 1;
             done = 1;
         }
@@ -232,10 +220,10 @@ void func_150538CC(struct127 *obj) {
         if (obj->unk102 != 0) {
             obj->unk82 = 40;
         }
-        obj->unk78 = func_1505A630(D_800CC2D0[obj->pad126].x_position - obj->x_position, obj->z_position - D_800CC2D0[obj->pad126].z_position, 0);
+        obj->unk78 = func_1505A630(D_800CC2D0[obj->unk126].x_position - obj->x_position, obj->z_position - D_800CC2D0[obj->unk126].z_position, 0);
         if ((u8)(((s32)(obj->unk78 - obj->unk76) >> 8) + obj->unk82) < (obj->unk82 * 2)) {
-            climb = ((D_800CC2D0[obj->pad126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
-            ownerDist = func_1505A72C(&D_800CC2D0[obj->pad126], obj);
+            climb = ((D_800CC2D0[obj->unk126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
+            ownerDist = func_1505A72C(&D_800CC2D0[obj->unk126], obj);
             func_15059B54(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->xz_velocity * 16.0f))) {
                 if (climb > 90.0f) {
@@ -308,13 +296,13 @@ void func_150538CC(struct127 *obj) {
     D_800CC25C = obj->z_position;
     prevY = obj->y_position;
     func_15058898(obj, obj->old_y_position);
-    func_1505B5F8(obj, obj->unk180);
+    func_1505B5F8(obj, obj->floorY);
     if (sweep != 0) {
         f32 dir[3];
         f32 len;
         f32 inv;
         s32 hit;
-        struct127 *owner;
+        Actor *owner;
 
         dir[0] = obj->x_position - obj->old_x_position;
         dir[1] = obj->y_position - obj->old_y_position;
@@ -329,13 +317,13 @@ void func_150538CC(struct127 *obj) {
         dir[0] *= inv;
         dir[1] *= inv;
         dir[2] *= inv;
-        func_15081690(obj, obj->old_x_position, obj->old_y_position, obj->old_z_position, dir[0], dir[1], dir[2], &obj->unk31C->pad98[0x18], len, 0, 0, 0, -1, 0, 0);
-        hit = func_15081E78(obj, &obj->unk31C->pad98[0x18], kind);
+        func_15081690(obj, obj->old_x_position, obj->old_y_position, obj->old_z_position, dir[0], dir[1], dir[2], &obj->unk31C->unkB0, len, 0, 0, 0, -1, 0, 0);
+        hit = func_15081E78(obj, &obj->unk31C->unkB0, kind);
         if (hit != 0) {
             done = 1;
             if ((hit == 1) && (obj->unk124 > 0)) {
                 owner = &D_800CC2D0[obj->unk124 - 1];
-                if ((owner->unk31C != NULL) && (owner->unk31C->pad98[0x17] != 0)) {
+                if ((owner->unk31C != NULL) && (owner->unk31C->unkAF != 0)) {
                     if (func_10010894(owner) == 0) {
                         func_15060A30((func_150ADA20() % 3U) + 0x53B, owner);
                     }
@@ -366,7 +354,7 @@ void func_150538CC(struct127 *obj) {
                 hitFlags |= 8;
                 obj->xz_velocity *= 0.3000000119f;
                 if (kind == 15) {
-                    struct127 *other;
+                    Actor *other;
 
                     other = func_15083E90(6);
                     if (other != NULL) {
@@ -380,7 +368,7 @@ void func_150538CC(struct127 *obj) {
                 } else {
                     s32 attacker;
 
-                    attacker = obj->pad108 & 0x7F;
+                    attacker = obj->unk108 & 0x7F;
                     if (attacker < 25) {
                         obj->unk76 = func_1505A630(obj->old_x_position - D_800CC2D0[attacker].x_position, D_800CC2D0[attacker].z_position - obj->old_z_position, 0);
                     }
@@ -393,7 +381,7 @@ void func_150538CC(struct127 *obj) {
             func_1505A3A8(0.0f, obj, 1.0f, 1.0f, 0);
             func_1505D6F0(obj, D_800C3E78);
             if ((D_800CC268 >> 1) != 0) {
-                struct127 *other;
+                Actor *other;
 
                 other = func_15083E90(6);
                 if (D_800CC268 & (1U << (other - D_800CC2D0))) {
@@ -467,15 +455,15 @@ void func_150538CC(struct127 *obj) {
 void func_150548D8(s32 arg0) {
 }
 
-void func_150548E4(struct127 *obj) {
-    struct127 *owner;
+void func_150548E4(Actor *obj) {
+    Actor *owner;
     s32 sfx;
     s32 i;
 
     owner = &D_800CC2D0[obj->unk65 - 1];
 
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((D_800CC2D0[i].unk274 == (obj - D_800CC2D0) + 1) && (owner->unk232 == 1)) {
+        if ((D_800CC2D0[i].objectNum == (obj - D_800CC2D0) + 1) && (owner->unk232 == 1)) {
             owner->unk218 = NULL;
             if (func_150ADA20() & 1) {
                 owner->unk232 = 2;
@@ -489,30 +477,30 @@ void func_150548E4(struct127 *obj) {
     }
 }
 
-void func_15054A0C(struct127 *obj) {
+void func_15054A0C(Actor *obj) {
     if (obj->unk2D0 != NULL) {
-        if ((obj->unk2D0->unk18 - 1.0f) <= obj->unk2D0->unk8) {
+        if ((obj->unk2D0->numFrames - 1.0f) <= obj->unk2D0->frame) {
             func_15060F28(obj, 0);
         }
     }
 }
 
-void func_15054A5C(struct127 *obj, struct127 *other) {
+void func_15054A5C(Actor *obj, Actor *other) {
     other->unk31C->unk11A = 0;
     func_151027E8(other);
     func_15060F28(obj, 0);
 }
 
-void func_15054A94(struct127 *obj) {
-    struct197 *anim;
-    struct127 *other;
-    struct197 *otherAnim;
+void func_15054A94(Actor *obj) {
+    AnimInstance *anim;
+    Actor *other;
+    AnimInstance *otherAnim;
     s32 motion;
     s32 attach;
     s32 action;
     s32 hold;
     s32 enter;
-    struct126 *state;
+    ActorCtl *state;
     s32 index;
     u8 ready;
 
@@ -530,13 +518,13 @@ void func_15054A94(struct127 *obj) {
             func_15060F28(obj, 0);
             return;
         }
-        if (obj->unk84.uh == 0 && anim->unk8 == 0.0f) {
+        if (obj->unk84.uh == 0 && anim->frame == 0.0f) {
             func_15188810(obj, 100, 0);
         }
         if (obj->unk84.uh == 0 && other->unk84.uh == 0x4B) {
             func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         }
-        if (obj->unk84.uh == 1 && anim->unk18 - 1.0f <= anim->unk8) {
+        if (obj->unk84.uh == 1 && anim->numFrames - 1.0f <= anim->frame) {
             func_15060F28(obj, 0);
         }
         return;
@@ -578,11 +566,11 @@ void func_15054A94(struct127 *obj) {
     if (hold == other->unk84.uh) {
         motion = 2;
         if (obj->unk2E4 == 0) {
-            if (otherAnim->unk8 >= 6.0f && otherAnim->unk8 < 11.0f) {
+            if (otherAnim->frame >= 6.0f && otherAnim->frame < 11.0f) {
                 obj->unk2E4 = 1;
                 func_15083568(obj, action, 1.0f, 0);
             }
-        } else if (otherAnim->unk8 >= 11.0f) {
+        } else if (otherAnim->frame >= 11.0f) {
             obj->unk2E4 = 0;
             func_150836CC(obj, action);
         }
@@ -608,18 +596,17 @@ void func_15054A94(struct127 *obj) {
     if (state->unk78 == 0x12) {
         ready = 1;
     } else {
-        ready = state->pad196[1]; // 0x197
+        ready = state->aimState;
         if (state->unk84 == 0) {
             index = other - D_800CC2D0;
             // D_800BE728[0] points to the per-player controller pads
-            if (index < 4 && !(((OSContPad **)D_800BE728[0])[index]->button & R_TRIG)) {
+            if (index < 4 && !(D_800BE728[index]->button & R_TRIG)) {
                 ready = 0;
             }
         }
     }
-    // 0x3C is past the end of struct197 as declared in structs.h
-    if (other->unk84.uh == 0x10A && *(s16 *)((u8 *)otherAnim + 0x3C) <= 0 && ready &&
-        ((u16)state->unk8A & 0x2000)) {
+    if (other->unk84.uh == 0x10A && otherAnim->unk3C <= 0 && ready &&
+        (state->buttons & 0x2000)) {
         if (obj->unk2E8 == 0) {
             func_151026BC(other, -1, 3, 1, 0xFF, 1);
             obj->unk2E8 = 1;
@@ -630,7 +617,7 @@ void func_15054A94(struct127 *obj) {
     }
 }
 
-void func_15054F74(struct127 *obj) {
+void func_15054F74(Actor *obj) {
     s16 angle;
     f32 offsetX;
     f32 offsetY;
@@ -684,11 +671,11 @@ void func_15054F74(struct127 *obj) {
     }
 }
 
-void func_15055260(struct127 *obj, struct127 *target, s32 hitIndex) {
+void func_15055260(Actor *obj, Actor *target, s32 hitIndex) {
     func_150335C8(obj, target, 0x4D, hitIndex, 0, 0);
 }
 
-void func_1505528C(struct127 *obj) {
+void func_1505528C(Actor *obj) {
     f32 prevX;
     f32 prevY;
     f32 prevZ;
@@ -697,7 +684,7 @@ void func_1505528C(struct127 *obj) {
     f32 hoverHeight;
     s32 hitFlags;
     s32 timer;
-    struct127 *target;
+    Actor *target;
 
     kind = (u16)obj->unk278;
     hitFlags = 0;
@@ -762,7 +749,7 @@ void func_1505528C(struct127 *obj) {
             func_10010344((func_150ADA20() % 5U) + 0x3A4, obj, 0x7D00, 500, 2500);
         }
     }
-    func_1505B5F8(obj, obj->unk180);
+    func_1505B5F8(obj, obj->floorY);
     if (obj->unk28 <= hoverHeight) {
         obj->unk7F++;
         hitFlags |= 2;
@@ -785,7 +772,7 @@ void func_1505528C(struct127 *obj) {
             t = y - obj->old_y_position;
             obj->y_velocity = 0;
             obj->xz_velocity = 0;
-            obj->y_position = obj->unk180 + hoverHeight;
+            obj->y_position = obj->floorY + hoverHeight;
             if (t != 0.0f) {
                 t = (obj->y_position - obj->old_y_position) / t;
             } else {
@@ -806,11 +793,11 @@ void func_1505528C(struct127 *obj) {
     if ((hitFlags != 0) && (kind == 0x35)) {
         func_10010630(0x360, obj, 0x4E20, 500, 2500);
         if (obj->unk118 < obj->y_position) {
-            struct17 pos;
+            Vec3f pos;
 
-            pos.unk0 = obj->x_position;
-            pos.unk4 = obj->y_position + 20.0f;
-            pos.unk8 = obj->z_position;
+            pos.x = obj->x_position;
+            pos.y = obj->y_position + 20.0f;
+            pos.z = obj->z_position;
             func_151DCDE0(&pos, 0xFF, 1);
         }
         func_15060F28(obj, 1);
@@ -830,13 +817,13 @@ void func_1505528C(struct127 *obj) {
     }
     func_1503192C(obj, kind, alpha, 0);
     if (kind == 0x1F) {
-        struct108 *player;
+        Camera *player;
         f32 distSq;
 
         player = D_800DBFF0;
-        distSq = ((player->unk2F8 - obj->x_position) * (player->unk2F8 - obj->x_position)) +
-                 ((player->unk2FC - obj->y_position) * (player->unk2FC - obj->y_position)) +
-                 ((player->unk300 - obj->z_position) * (player->unk300 - obj->z_position));
+        distSq = ((player->eye.x - obj->x_position) * (player->eye.x - obj->x_position)) +
+                 ((player->eye.y - obj->y_position) * (player->eye.y - obj->y_position)) +
+                 ((player->eye.z - obj->z_position) * (player->eye.z - obj->z_position));
         if (distSq < 900.0f) {
             func_1512D748(player, 8, 0);
             func_10010F88(0x2E1, 0x6D60, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 500, 1000);
@@ -860,15 +847,15 @@ void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4) {
     func_10010F88(sfx, 32700, func_150ADA20() % 500U, 0, 0, x, y, z, range, 3000);
 }
 
-void func_15055B0C(struct127 *obj, s32 duration) {
+void func_15055B0C(Actor *obj, s32 duration) {
     obj->interaction_state = 39;
     func_1505E650(obj, obj->unk84.uh, 0, 0.0f, 0.0f, 0.0f, 0);
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     obj->unk21C = duration;
 }
 
-void func_15055B64(struct127 *obj) {
+void func_15055B64(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
     obj->unkF8 |= 0x1000000;
 
@@ -882,17 +869,17 @@ void func_15055B64(struct127 *obj) {
     }
 }
 
-void func_15055BF8(struct127 *obj) {
+void func_15055BF8(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
     obj->unkF8 |= 0x1000000;
     obj->y_position -= D_800BE9A4;
 
-    if (obj->y_position < (obj->unk180 - 100.0f)) {
+    if (obj->y_position < (obj->floorY - 100.0f)) {
         func_15060F28(obj, 0);
     }
 }
 
-void func_15055C88(struct127 *obj) {
+void func_15055C88(Actor *obj) {
     s32 sfx = 0x2007E4;
 
     if (!(obj->unk9C & 0x1000) && func_1506E46C(obj, &sfx, 1)) {
@@ -910,7 +897,7 @@ void func_15055C88(struct127 *obj) {
     func_1507CD64(obj, 9);
 }
 
-void func_15055D48(struct127 *obj) {
+void func_15055D48(Actor *obj) {
     obj->unk31C->unk36 += D_800BE9A0;
     if (obj->unk31C->unk36 >= 141) {
         D_800D18A0 |= 1 << (obj - D_800CC2D0);
@@ -919,8 +906,8 @@ void func_15055D48(struct127 *obj) {
             obj->stunned = 0xFF;
             obj->disable_run = 0xFF;
             obj->unkF8 |= 0x200;
-            obj->unkE4 = 0;
-            obj->unkE6 = 0;
+            obj->bodyRadius = 0;
+            obj->bodyHeight = 0;
             obj->unk7 = 0;
             obj->health = 0;
             obj->interaction_state = 5;

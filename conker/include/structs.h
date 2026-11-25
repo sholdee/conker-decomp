@@ -9,10 +9,11 @@ typedef struct struct54 struct54;
 typedef struct struct56 struct56;
 typedef struct struct119 struct119;
 typedef struct struct124 struct124;
-typedef struct struct127 struct127;
-typedef struct struct108 struct108;
+typedef struct Actor Actor;
+typedef struct Camera Camera;
+struct Rope;
+struct BoneChain;
 typedef struct struct216 struct216;
-typedef struct struct255 struct255;
 typedef struct struct256 struct256;
 
 /*
@@ -241,11 +242,29 @@ typedef struct {
     u32 pad38;
 } struct16; // 0x3C
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} struct17; // TODO: replace with vertex
+/* Three-float vector: positions, directions, velocities, scales. */
+typedef struct Vec3f {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+} Vec3f; // size 0xC
+
+/* 4x4 float matrix (row-major, the guMtxF2L layout) for bone and camera transforms. */
+typedef f32 MtxF[4][4];
+
+/* Three-short vector: packed positions, angles. */
+typedef struct Vec3s {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+} Vec3s; // size 0x6
+
+/* Three-int vector. */
+typedef struct Vec3i {
+    /* 0x0 */ s32 x;
+    /* 0x4 */ s32 y;
+    /* 0x8 */ s32 z;
+} Vec3i; // size 0xC
 
 typedef struct {
     s32 unk0;
@@ -531,11 +550,6 @@ typedef struct {
     u8  unk1F;
 } struct47;
 
-typedef struct {
-    s16 unk0;
-    s8  unk2;
-    s8  unk3;
-} struct49;
 
 typedef struct {
     s32 unk0;   // used
@@ -628,12 +642,6 @@ typedef struct {
 } struct57;
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} vertex;
-
-typedef struct {
     u8 unk0;
     u8 unk1;
     u8 unk2;
@@ -672,34 +680,65 @@ typedef struct {
     u8  unk3D;
 } struct102;
 
-typedef struct {
-    u16 unk0;
-    u16 unk2;  // used
-    u8  unk4;
-    u8  unk5;
-    u8  unk6;
-    u8  unk7;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  padB[0x3];
-    u8  unkE;
-    u8  padF;
-    u8  unk10;
-    u8  pad11;
-    u8  unk12;
-    u8  unk13;
-    u8  unk14;
-    u8  pad15;
-    s16 unk16;
-    u8  pad18[0x2];
-    u16 unk1A;
-    u8  pad1C[0xD];
-    u8  unk29;
-    u8  pad2A[0x1F];
-    u8  unk49;
-    u8  unk4A;
-} struct104;
+/* Music settings of a level (LevelHeader.music), applied by func_150000B0: up to two songs, each with
+ * two parameters (func_1000E40C / func_1000E46C). */
+typedef struct LevelMusic {
+    /* 0x0 */ s16 song;     // -1 = none
+    /* 0x2 */ u16 unk2;
+    /* 0x4 */ u16 unk4;
+    /* 0x6 */ s16 song2;    // -1 = none
+    /* 0x8 */ u16 unk8;
+    /* 0xA */ u16 unkA;
+    /* 0xC */ u8  mode;
+    /* 0xD */ u8  unkD;
+} LevelMusic; // size 0xE
+
+/* The current level's settings resource, D_800B0DF0 (loaded by func_15000F04 in game_2DF70). The
+ * one-byte callback fields index handler tables; 0 means none. */
+typedef struct LevelHeader {
+    /* 0x00 */ u16 unk0;            // fog (D_8008CC70.unkE), D_800D9B1C
+    /* 0x02 */ u16 unk2;            // fog (D_8008CC70.unkC), D_800D9B20, RenderView.unk67C
+    /* 0x04 */ u8  unk4;
+    /* 0x05 */ u8  unk5;            // background colour (D_800DBEA8)
+    /* 0x06 */ u8  unk6;
+    /* 0x07 */ u8  unk7;
+    /* 0x08 */ u8  unk8;            // sky mode (D_800891D8); 4 = textured sky
+    /* 0x09 */ u8  unk9;            // sky texture set (D_800891BC)
+    /* 0x0A */ u8  unkA;            // callback, D_80082D90
+    /* 0x0B */ u8  updateCallback;  // D_8008CD04
+    /* 0x0C */ u8  drawCallback1;   // D_8008CD74
+    /* 0x0D */ u8  drawCallback2;   // D_8008CD7C
+    /* 0x0E */ u8  unkE;            // callback, D_80082B40
+    /* 0x0F */ u8  unkF;            // callback, D_80089670
+    /* 0x10 */ u8  unk10;           // sun position, index into D_8008CFFC
+    /* 0x11 */ s8  unk11;           // game_34F20 adds it to 0xEB
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  unk13;           // landing step (game_83300)
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ u8  pad15;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u16 maxParticles;    // level-triangle particles (game_36680)
+    /* 0x1A */ u16 unk1A;           // D_800C3E7C, a count of 0x40-byte entries
+    /* 0x1C */ u16 gfxCount;        // display list length in Gfx (func_15015E80 adds 400)
+    /* 0x1E */ u16 unk1E;           // game_1B1600
+    /* 0x20 */ u8  pad20;
+    /* 0x21 */ u8  vtxColorFlags;   // game_1A0E60
+    /* 0x22 */ u8  pad22[7];
+    /* 0x29 */ u8  unk29;
+    /* 0x2A */ u8  flags;           // bit 0 checked by init_11FA0
+    /* 0x2B */ u8  ucode;           // game_49D30
+    /* 0x2C */ LevelMusic music;
+    /* 0x3A */ s16 unk3A;           // fog (D_8008CC70.unk4..unkA)
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;           // nonzero: level fog on objects
+    /* 0x40 */ s16 unk40;
+    /* 0x42 */ u8  fogColour[4];
+    /* 0x46 */ s8  fogPreset;       // fog preset (func_151733E4), -1 = none
+    /* 0x47 */ u8  pad47[2];
+    /* 0x49 */ u8  unk49;           // callback, D_80086004
+    /* 0x4A */ u8  unk4A;           // callback, D_8008600C
+    /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
+} LevelHeader; // size 0x4C
 
 typedef struct {
     s32 unk0;  // used
@@ -708,13 +747,30 @@ typedef struct {
     s32 unkC;  // used
 } struct105;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s8  pad[0x3];
-    u8  unkF;
-} struct106;
+/* One simulated bone of an object broken into parts (game_6B320; size 0x68). */
+typedef struct ObjPart {
+    /* 0x00 */ f32 initPos[3];
+    /* 0x0C */ f32 initRot[3];   /* degrees */
+    /* 0x18 */ f32 initScale[3];
+    /* 0x24 */ f32 pos[3];
+    /* 0x30 */ f32 rot[3];
+    /* 0x3C */ f32 scale[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 rotVel[3];
+    /* 0x60 */ f32 gravity;
+    /* 0x64 */ u8 active;
+    /* 0x65 */ u8 pad65[3];
+} ObjPart;
+
+/* Per-object parts state (D_800C6660[objIndex]; game_6B320). */
+typedef struct ObjPartsState {
+    /* 0x00 */ ObjPart *parts;
+    /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
+    /* 0x08 */ s32 partMaskHi;   /* parts 32..63 (shift count taken mod 32) */
+    /* 0x0C */ s16 timer;
+    /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
+    /* 0x0F */ u8 state;         /* PARTS_STATE_* */
+} ObjPartsState;
 
 
 typedef struct {
@@ -803,27 +859,28 @@ typedef struct {
     u8  unk3B;
 } struct114;
 
-typedef struct {
-    void (*unk0)(struct102 *arg0); // used
-    u8 pad0[0x14];
-    void (*unk18)(struct102 *arg0); // used
-    u8 pad1[0x18];
-} struct115;
+/* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
+typedef struct ObjType {
+    /* 0x00 */ void (*unk0)(struct102 *);
+    /* 0x04 */ void (*unk4)(struct102 *);
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
+    /* 0x0C */ void (*unkC)(struct102 *);
+    /* 0x10 */ Gfx *drawBeginDL;
+    /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
+    /* 0x18 */ void (*unk18)(void);
+    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
+    /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
+    /* 0x24 */ Gfx *drawEndDL;
+    /* 0x28 */ void (*destroy)(struct102 *);
+    /* 0x2C */ void (*free)(struct102 *);
+    /* 0x30 */ s8 drawMode;
+    /* 0x31 */ u8 pad31[3];
+} ObjType; // size 0x34
 
 typedef struct {
     u8 pad[0x20];
 } struct117; // used as OSMesg
 
-typedef struct {
-    u8  pad0[0x14];
-    s32 unk14;
-    f32 unk18;
-    u8  pad1C[0xfc];
-    s32 unk118;
-    s32 unk11C;
-    s32 unk120;
-    s32 unk124;
-} struct118;
 
 struct struct119 {
     s16 unk0;
@@ -898,6 +955,50 @@ struct struct124 {
     } data;
 }; // size 0x2C
 
+/* Per model-type definition, D_800D1C90[id] (loaded by func_1503D774; freed by func_15084558 with its
+ * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
+ * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
+typedef struct ModelDef {
+    /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (func_1503A08C)
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8  subModelCount;
+    /* 0x05 */ u8  subModelList;    // index into D_80086CAC
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8  texture[2][3];   // texture per eye slot (Actor.unk6C) and state
+    /* 0x0E */ u16 bodyRadius;
+    /* 0x10 */ s16 bodyHeight;
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  pad13;
+    /* 0x14 */ s16 headHeight;
+    /* 0x16 */ u8  pad16;
+    /* 0x17 */ u8  viewAngle;       // width of the spotting cone, in 1/256 turns
+    /* 0x18 */ u8  unk18;
+    /* 0x19 */ u8  unk19;
+    /* 0x1A */ s16 unk1A;           // body cylinder (Actor.unkE4/E6/E8)
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;           // hit cylinder (Actor.unkD2/D4/D6)
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u8  aimBone;
+    /* 0x27 */ u8  headBone;
+    /* 0x28 */ u8  flags;
+    /* 0x29 */ u8  unk29;
+    /* 0x2A */ u16 unk2A;
+    /* 0x2C */ s8  headYaw[2];      // head turn range: yaw one way / the other (func_1503A830)
+    /* 0x2E */ s8  headPitch[2];    // pitch up / down
+    /* 0x30 */ s8  aimReach;        // aim point along the aim bone's z axis
+    /* 0x31 */ u8  pad31[2];
+    /* 0x33 */ s8  unk33;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8  extraModelCount;
+    /* 0x39 */ u8  unk39;
+    /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
+    /* 0x3B */ u8  eyeDefault[2];   // default Actor.unk68[0..1]
+    /* 0x3D */ u8  pad3D;
+    /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by xz_scale
+} ModelDef;
+
 typedef struct {
     s16 unk0;
     s16 unk2;       // used
@@ -906,461 +1007,854 @@ typedef struct {
     s32 unk28;      // used
 } struct125;
 
-// movement modifier?
+/* Idle animation state of an ActorCtl (ActorCtl.idle, 0x58). While an actor stands still it plays
+ * short "sequences" of frames, picked at random while avoiding the ones played most recently. */
 typedef struct {
-    u8  pad0[0x8];
-    u16 unk8;
-    u8  padA[0x2];
-    u8  unkC;
-    u8  padD;
-    u16 unkE;
-    u8  pad10[0x2];
-    s16 unk12;
-    u8  unk14;
-    u8  pad15;
-    u8  unk16;
-    u8  pad17[0xF];
-    s8  unk26;
-    u8  unk27;
-    s32 unk28;
-    s32 unk2C;
-    u8  unk30;
-    u8  unk31;
-    u8  pad32[0x4];
-    u8  unk36;
-    u8  pad37;
-    s32 unk38;
-    u8  pad3C[0x8];
-    s8  unk44;
-    u8  pad45[0x5];
-    /* 0x4A */ s8  chased; //unk4A;
-    /* 0x4B */ s8  chasing; //unk4B;
-    u16 unk4C;
-    u8  unk4E;
-    u8  pad4F[0x3];
-    u8  unk52;
-    u8  pad53;
-    s8  unk54;
-    s8  unk55;
-    u8  pad56;
-    u8  unk57;
-    u8  unk58;   // used
-    u8  unk59;   // used
-    u8  pad5A[0xC];
-    u16 unk66;
-    u8  pad68[0x3];
-    u8  unk6B;
-    u8  pad6C[0x9];
-    u8  unk75;
-    u8  pad76[0x2];
-    u8  unk78;
-    u8  pad79[0x4];
-    /* 0x7D */  u8  matrix_physics; //unk7D;
-    u8  pad7E[0x2];
-    s16 unk80;
-    s16 unk82;
-    u8  unk84;
-    u8  pad85[0x3];
-    s16 unk88;
-    s16 unk8A;  // used
-    u16 unk8C;  // used
-    s8  unk8E;  // used
-    s8  unk8F;  // used
-    s8  unk90;
-    s8  unk91;
-    s8  unk92;
-    s8  unk93;
-    s8  unk94;
-    s8  unk95;  // used
-    u8  pad96;
-    u8  unk97;
-    u8  pad98[0x7C];
-    u16 unk114;
-    u16 unk116;
-    u16 unk118;
-    u8  unk11A;
-    u8  pad11B[0x5];
-    u8  unk120;
-    u8  unk121;
-    u8  unk122;
-    u8  unk123;
-    s16 unk124;
-    u16 pad126;
-    u8  unk128;
-    u8  pad129[0x6C];
-    u8  unk195;
-    u8  pad196[0x2];
-    u8  unk198;
-    u8  pad199;
-    /* 0x19a */ u8  grenade_count;
-    u8  unk19B;
-    u8  pad19C[0x2];
-    u16 unk19E;
-    u16 unk1A0;
-    u8  pad1A2[0x7];
-    u8  unk1A9;
-    s16 unk1AA;
-} struct126;
+    /* 0x0 */ u8  active;
+    /* 0x1 */ u8  holdFrames;  // frames left before the next sequence frame
+    /* 0x2 */ u16 timer;       // time spent idle in the current phase
+    /* 0x4 */ u8  sequence;    // index into D_80086BA0, 0 = none
+    /* 0x5 */ u8  frame;       // position within the sequence
+    /* 0x6 */ u8  frameFlags;  // flags of the frame applied last
+    /* 0x7 */ u8  recent[5];   // most recently played sequences, newest first
+    /* 0xC */ u8  phase;
+    /* 0xD */ u8  phaseCount;  // sequences played in the current phase
+    /* 0xE */ s16 delay;
+} IdleState; // size 0x10
 
+/* Per-character control block (Actor.unk31C, 0x1C0 bytes, allocated for player-controlled and
+ * scripted characters): movement state, controller input, rope riding, idle animation and the
+ * first-person aim state. */
 typedef struct {
-    u16 unk0;
-    u8  unk2;
-    u8  unk3;
-    u8  unk4;
-    u8  pad5[0x9];
-    u8  unkE;
-    u8  unkF;
-    u8  pad10[0x8];
-    s32 unk18;
-    u8  unk1C[0x4];
-    f32 unk20;
-    f32 unk24;
-} struct129;
+    /* 0x000 */ f32 unk0;
+    /* 0x004 */ s32 unk4;
+    /* 0x008 */ s16 unk8;
+    /* 0x00A */ u8  padA;
+    /* 0x00B */ u8  unkB;
+    /* 0x00C */ u8  unkC;
+    /* 0x00D */ u8  unkD;
+    /* 0x00E */ u16 unkE;
+    /* 0x010 */ s16 unk10;
+    /* 0x012 */ s16 unk12;
+    /* 0x014 */ u16 unk14;
+    /* 0x016 */ u8  unk16;
+    /* 0x017 */ u8  unk17;
+    /* 0x018 */ s16 unk18;
+    /* 0x01A */ u8  unk1A;
+    /* 0x01B */ u8  unk1B;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8  unk20;
+    /* 0x021 */ u8  unk21;
+    /* 0x022 */ s8  unk22;
+    /* 0x023 */ s8  unk23;
+    /* 0x024 */ s16 unk24;
+    /* 0x026 */ u8  unk26;
+    /* 0x027 */ u8  unk27;
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ f32 unk2C;
+    /* 0x030 */ s8  unk30;
+    /* 0x031 */ u8  unk31;
+    /* 0x032 */ u16 unk32;
+    /* 0x034 */ u16 unk34;
+    /* 0x036 */ u8  unk36;
+    /* 0x037 */ u8  unk37;
+    /* 0x038 */ s32 unk38;
+    /* 0x03C */ u8  unk3C;
+    /* 0x03D */ u8  pad3D;
+    /* 0x03E */ u16 unk3E;
+    /* 0x040 */ f32 unk40;
+    /* 0x044 */ s8  unk44;
+    /* 0x045 */ u8  pad45;
+    /* 0x046 */ s16 unk46;
+    /* 0x048 */ s16 unk48;
+    /* 0x04A */ s8  chased;
+    /* 0x04B */ s8  chasing;
+    /* 0x04C */ u16 unk4C;
+    /* 0x04E */ u8  unk4E;
+    /* 0x04F */ u8  unk4F;
+    /* 0x050 */ s8  unk50;
+    /* 0x051 */ u8  unk51;
+    /* 0x052 */ u8  unk52;
+    /* 0x053 */ u8  unk53;
+    /* 0x054 */ s8  unk54;
+    /* 0x055 */ s8  unk55;
+    /* 0x056 */ u8  unk56;
+    /* 0x057 */ u8  unk57;
+    /* 0x058 */ IdleState idle;
+    /* 0x068 */ u16 unk68;
+    /* 0x06A */ u8  pad6A;
+    /* 0x06B */ u8  unk6B;      // grab state
+    /* 0x06C */ s16 holdX;      // held position (s16 world units)
+    /* 0x06E */ s16 holdY;
+    /* 0x070 */ s16 holdZ;
+    /* 0x072 */ u16 unk72;
+    /* 0x074 */ u8  unk74;
+    /* 0x075 */ u8  unk75;
+    /* 0x076 */ u8  unk76;
+    /* 0x077 */ u8  unk77;
+    /* 0x078 */ u8  unk78;
+    /* 0x079 */ u8  unk79;
+    /* 0x07A */ u8  unk7A;
+    /* 0x07B */ u8  unk7B;
+    /* 0x07C */ u8  unk7C;
+    /* 0x07D */ u8  matrix_physics;
+    /* 0x07E */ u16 unk7E;
+    /* 0x080 */ s16 unk80;
+    /* 0x082 */ s16 unk82;
+    /* 0x084 */ u8  unk84;
+    /* 0x085 */ s8  stick_x;    // this frame's controller input
+    /* 0x086 */ s8  stick_y;
+    /* 0x087 */ u8  pad87;
+    /* 0x088 */ u16 prevButtons;  // buttons of the previous frame
+    /* 0x08A */ u16 buttons;
+    /* 0x08C */ u16 unk8C;
+    /* 0x08E */ s8  unk8E;
+    /* 0x08F */ s8  unk8F;
+    /* 0x090 */ f32 unk90;
+    /* 0x094 */ u8  unk94;
+    /* 0x095 */ u8  unk95;
+    /* 0x096 */ u8  unk96;
+    /* 0x097 */ u8  unk97;
+    /* 0x098 */ u8  ropeId;
+    /* 0x099 */ u8  pad99[3];
+    /* 0x09C */ struct Rope *rope;     // rope being ridden, or NULL
+    /* 0x0A0 */ f32 ropeProgress;      // 0..1 along the rope
+    /* 0x0A4 */ u8  padA4[4];
+    /* 0x0A8 */ f32 ropeSwingForce;
+    /* 0x0AC */ u8  ropeSwingAngle;
+    /* 0x0AD */ u8  ropeSwingTimer;
+    /* 0x0AE */ u8  ropeNode;
+    /* 0x0AF */ u8  unkAF;
+    /* 0x0B0 */ Actor *unkB0;
+    /* 0x0B4 */ u8  padB4[4];
+    /* 0x0B8 */ f32 unkB8;
+    /* 0x0BC */ f32 unkBC;
+    /* 0x0C0 */ f32 unkC0;
+    /* 0x0C4 */ u8  padC4[0x18];
+    /* 0x0DC */ Vec3f unkDC;
+    /* 0x0E8 */ Vec3f unkE8;      // a direction (func_15145974 turns it into heading/elevation)
+    /* 0x0F4 */ u8  padF4[0x14];
+    /* 0x108 */ u8  unk108;
+    /* 0x109 */ u8  unk109;
+    /* 0x10A */ u8  pad10A[0xA];
+    /* 0x114 */ s16 height;      // cached size from func_1507C3E0
+    /* 0x116 */ s16 width;
+    /* 0x118 */ s16 depth;
+    /* 0x11A */ u8  unk11A;
+    /* 0x11B */ u8  spawnIndex;
+    /* 0x11C */ struct BoneChain *boneChain;
+    /* 0x120 */ u8  unk120;
+    /* 0x121 */ u8  unk121;
+    /* 0x122 */ u8  unk122;
+    /* 0x123 */ u8  unk123;
+    /* 0x124 */ s16 unk124;
+    /* 0x126 */ s16 unk126;
+    /* 0x128 */ u8  unk128;
+    /* 0x129 */ s8  unk129;
+    /* 0x12A */ s8  unk12A;
+    /* 0x12B */ u8  pad12B;
+    /* 0x12C */ u16 unk12C;
+    /* 0x12E */ u8  pad12E[2];
+    /* 0x130 */ Vec3f aimDir;
+    /* 0x13C */ Vec3f aimEye;
+    /* 0x148 */ Vec3f aimTarget;
+    /* 0x154 */ u8  pad154[0xC];
+    /* 0x160 */ Vec3f unk160;
+    /* 0x16C */ f32 aimYaw;
+    /* 0x170 */ f32 aimPitch;
+    /* 0x174 */ f32 aimYawTarget;
+    /* 0x178 */ f32 aimPitchTarget;
+    /* 0x17C */ f32 aimYawVel;
+    /* 0x180 */ f32 aimPitchVel;
+    /* 0x184 */ f32 aimZoom;
+    /* 0x188 */ f32 aimZoomY;
+    /* 0x18C */ f32 unk18C;
+    /* 0x190 */ s32 aimZone;
+    /* 0x194 */ u8  aimReset;
+    /* 0x195 */ s8  unk195;
+    /* 0x196 */ s8  unk196;
+    /* 0x197 */ u8  aimState;      // nonzero while aiming in first person
+    /* 0x198 */ u8  unk198;
+    /* 0x199 */ u8  unk199;
+    /* 0x19A */ u8  grenade_count;
+    /* 0x19B */ u8  unk19B;
+    /* 0x19C */ u16 unk19C;
+    /* 0x19E */ u16 unk19E;
+    /* 0x1A0 */ u16 unk1A0;
+    /* 0x1A2 */ u16 unk1A2;
+    /* 0x1A4 */ u16 unk1A4;
+    /* 0x1A6 */ u16 unk1A6;
+    /* 0x1A8 */ u8  unk1A8;
+    /* 0x1A9 */ u8  unk1A9;
+    /* 0x1AA */ s16 unk1AA;
+    /* 0x1AC */ u8  unk1AC;
+    /* 0x1AD */ u8  unk1AD;
+    /* 0x1AE */ s8  unk1AE;
+    /* 0x1AF */ s8  unk1AF;
+    /* 0x1B0 */ s8  lastSpawnIndex;   // last multiplayer spawn point used
+    /* 0x1B1 */ u8  unk1B1;
+    /* 0x1B2 */ u8  unk1B2;
+    /* 0x1B3 */ u8  unk1B3;
+    /* 0x1B4 */ u8  unk1B4;
+    /* 0x1B5 */ u8  pad1B5[3];
+    /* 0x1B8 */ f32 unk1B8;
+    /* 0x1BC */ f32 unk1BC;
+} ActorCtl; // size 0x1C0
 
+/* One 0x30-byte entry of the level's spawn table D_800D20FC; Actor.spawn points at the one it came from. */
+typedef struct SpawnRecord {
+    /* 0x00 */ u16 flags;
+    /* 0x02 */ u8  unk2;
+    /* 0x03 */ u8  interaction_state;
+    /* 0x04 */ u8  type;         // model id, 0xFF for none
+    /* 0x05 */ u8  unk5;
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8  angle;        // high byte of the facing angle
+    /* 0x0D */ u8  unkD;
+    /* 0x0E */ u8  unkE;
+    /* 0x0F */ u8  unkF;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  unk11;
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  unk13;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8  pad16[0x2];
+    /* 0x18 */ s32 objFlags;     // copied to the object's unkF8
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  pad1E[0x2];
+    /* 0x20 */ f32 xz_scale;
+    /* 0x24 */ f32 y_scale;
+    /* 0x28 */ u8  unique_id;
+    /* 0x29 */ u8  partSet;      // 1-based index into D_80086CC4, 0 for none
+    /* 0x2A */ u16 unk2A;        // cull radius, 0 = always drawn (func_150623F4)
+    /* 0x2C */ u16 unk2C;
+    /* 0x2E */ u8  keepTime;     // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
+    /* 0x2F */ u8  unk2F;
+} SpawnRecord; // size 0x30
+
+/* One point of a level path (8 bytes). D_800D2104[n] points at path n: a centre point followed by
+ * D_800D2108[n] - 1 waypoints. */
+typedef struct PathPoint {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u16 param; /* point 0: radius / 8 of the path's area; later points: speed */
+} PathPoint;
+
+/* D_800D2138 (0x20C bytes, cleared by func_15017300): match state. D_800D213C (per-player stats) and
+ * D_800D2340 (= unk208) are separately named views into it. */
+typedef struct MatchState {
+    /* 0x000 */ s32 unk0;      /* indexes D_80087280; 1 = two views */
+    /* 0x004 */ u8  pad4[0x204];
+    /* 0x208 */ u16 unk208;    /* bit per player */
+    /* 0x20A */ u8  pad20A[2];
+} MatchState; // size 0x20C
+
+/* Text resource loaded by func_1502B6BC: the text, then the sound effects voiced one per word. */
+typedef struct TextResource {
+    /* 0x0 */ char *text;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ u16 *sounds;
+    /* 0xC */ u32 soundsSize; /* in bytes */
+} TextResource;
+
+/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
+typedef struct TextBoxConfig {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
+    /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
+    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
+    /* 0x10 */ f32 worldY;
+    /* 0x14 */ f32 worldZ;
+    /* 0x18 */ f32 *screenXPercent; /* TEXTBOX_SCREEN_POS placement */
+    /* 0x1C */ f32 *screenYPercent;
+    /* 0x20 */ f32 *anglePercent;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u16 duration;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
+    /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
+} TextBoxConfig;
+
+/* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
 typedef struct {
-    u8  pad0[0x4];
-    u16 unk4;
-    u8  pad6[0x2];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  pad14[0x4];
-    f32 unk18;
-} struct197;
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 pad1[0xC];
+    /* 0x0D */ u8 source;           /* 0: D_800DD254 text, 1: D_800DD258 text, 2: caller string */
+    /* 0x0E */ u8 visible;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ TextBoxConfig *config;
+    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
+    /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ s16 fadeTimer;
+    /* 0x1A */ u8 textAlpha;
+    /* 0x1B */ u8 bubbleAlpha[3];
+    /* 0x1E */ u8 bubbleIndex;
+    /* 0x1F */ u8 placed;           /* screen position taken from the world point */
+    /* 0x20 */ s8 page;
+    /* 0x21 */ u8 pad21[3];
+    /* 0x24 */ u8 *text;            /* current page */
+    /* 0x28 */ f32 scale;
+    /* 0x2C */ f32 scaleSpeed;
+    /* 0x30 */ f32 halfTextWidth;
+    /* 0x34 */ f32 halfTextHeight;
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 height;
+    /* 0x40 */ f32 x;               /* anchor (tip of the tail) */
+    /* 0x44 */ f32 y;
+    /* 0x48 */ f32 bodyX;           /* scaled body position */
+    /* 0x4C */ f32 bodyY;
+    /* 0x50 */ f32 centerX;         /* unscaled body position: the text origin */
+    /* 0x54 */ f32 centerY;
+    /* 0x58 */ f32 angle;           /* direction from the anchor to the body, radians */
+    /* 0x5C */ f32 anchorX;
+    /* 0x60 */ f32 anchorY;
+    /* 0x64 */ f32 baseX;
+    /* 0x68 */ f32 baseY;
+    /* 0x6C */ f32 yaw;             /* object heading relative to the camera, degrees */
+    /* 0x70 */ f32 bubbleX;
+} TextBox;
 
-struct struct127 {
-    /* 0x00 */  s32 interaction_state;
-    /* 0x04 */  u8  id;
-    u8  unk5;
-    u8  unk6;
-    u8  unk7;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  unkB;
-    u8  unkC;
-    u8  unkD;
-    union {
-      s16 h;
-      u8  ub[2];
-    } unkE;
-    s8  unk10;
-    s8  unk11;
-    u8  unk12;
-    u8  unk13;
-    /* 0x14 */  f32 x_position;
-    /* 0x18 */  f32 y_position;
-    /* 0x1C */  f32 z_position;
-    /* 0x20 */  f32 y_velocity;
-    /* 0x24 */  f32 gravity;
-    f32 unk28;
-    /* 0x2C */  f32 old_x_position;
-    /* 0x30 */  f32 old_y_position;
-    /* 0x34 */  f32 old_z_position;
-    u8  unk38;
-    u8  pad39;
-    s8  unk3A;
-    /* 0x3B */  u8  unique_id;
-    /* 0x3C */  f32 xz_velocity;
-    f32 unk40;  // used
-    f32 unk44;
-    f32 unk48;
-    /* 0x4C */  f32 animation_speed;
-    u32 pad50;
-    u32 pad54;
-    u32 pad58;
-    s32 unk5C;  // used
-    s32 unk60;
-    s8  unk64;
-    u8  unk65;  // used
-    u8  pad66;
-    u8  pad67;
-    u32 pad68;
-    s16 pad6C;
-    s8  unk6E;
-    s8  pad6F;
-    u32 pad70;
-    u8  unk74;
-    s8  pad75;
-    u16 unk76;  // moving_angle
-    u16 unk78;
-    u16 unk7A;  // facing angle
-    u16 unk7C;
-    u8  unk7E;
-    u8  unk7F;  // counter
-    u8  unk80;  // counter
-    u8  unk81;  // counter
-    u8  unk82;  // counter
-    u8  unk83;  // used
-    union {
+/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Most fields come in pairs: the
+ * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
+ * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
+ * past that (size 0x3F8).
+ * File-local views of the same object: AnimPlaybackState (83300), ObjAnim (58F80). */
+typedef struct AnimInstance {
+    /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
+    /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
+    /* 0x006 */ u16 prevAnim;
+    /* 0x008 */ f32 frame;
+    /* 0x00C */ f32 prevFrame;
+    /* 0x010 */ f32 speed;
+    /* 0x014 */ f32 prevSpeed;
+    /* 0x018 */ f32 numFrames;      // playback end
+    /* 0x01C */ f32 prevNumFrames;
+    /* 0x020 */ f32 start;          // playback start (loop point)
+    /* 0x024 */ f32 prevStart;
+    /* 0x028 */ s32 animId;         // changes whenever a new animation is started
+    /* 0x02C */ u8  pad2C[0xC];
+    /* 0x038 */ s8  unk38;
+    /* 0x039 */ s8  unk39;
+    /* 0x03A */ s16 unk3A;          // blend step
+    /* 0x03C */ s16 unk3C;          // blend countdown
+    /* 0x03E */ u8  pad3E[0x45 - 0x3E];
+    /* 0x045 */ u8  unk45;          // byte 5 of the animation's data header
+    /* 0x046 */ u8  pad46[0x215 - 0x46];
+    /* 0x215 */ u8  unk215;         // byte 5 of the previous animation's data header
+    /* 0x216 */ u8  pad216[0x3E0 - 0x216];
+    /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
+    /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
+    /* 0x3F0 */ s32 unk3F0;
+    /* 0x3F4 */ u8  numParts;
+    /* 0x3F5 */ u8  bank;           // animation bank passed to func_1505E0C4
+    /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
+} AnimInstance; // size 0x3F8
+
+/* One animation of a model's animation table (D_800D1588[id]); unk0 == 999 ends the table. */
+typedef struct ActorAnim {
+    /* 0x0 */ u16 unk0;
+    /* 0x4 */ s32 offset; // relative to the table until func_1503D484 relocates it
+} ActorAnim; // size 0x8
+
+/* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
+typedef struct AnimHeader {
+    /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
+    /* 0x4 */ struct Entry1505C1E4 *hits;             // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
+    /* 0xC */ u32 reactionsSize;                      // byte size of reactions
+} AnimHeader; // size 0x10
+
+/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
+} SeqPathKey; // size 0x8
+
+/* What a scene track drives (D_800C35F0[scene][track]). */
+typedef struct SeqTrackInfo {
+    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (func_15083E90), 3 = an actor (func_151149AC)
+    /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ s16 yOffset;
+    /* 0x6 */ s16 unk6;
+} SeqTrackInfo; // size 0x8
+
+/* The header in front of an animation table from D_800D1588. */
+#define ANIM_HEADER(anims) ((AnimHeader *)(anims) - 1)
+
+/* Position/rotation offset of a ModelAttachment from its owner's joint. */
+typedef struct AttachmentOffset {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ f32 rotZ;
+} AttachmentOffset;
+
+/* A model attached to a game object; doubly linked list headed by D_800C3EE0 (game_5D2C0). */
+typedef struct ModelAttachment {
+    /* 0x00 */ u8 ownerId;            // unique_id of the owning Actor
+    /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
+    /* 0x02 */ u8 bone;               // owner joint matrix the model follows
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 flags;
+    /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
+    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
+    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
+    /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
+    /* 0x09 */ u8 loaded;
+    /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
+    /* 0x10 */ u8 pad10[3];
+    /* 0x13 */ u8 hiddenDLists;       // bit i set: display list i is not drawn
+    /* 0x14 */ u8 numDLists;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
+    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
+    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
+    /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
+    /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
+    /* 0x20 */ u16 parentMtx;
+    /* 0x22 */ s16 rotZ;
+    /* 0x24 */ Gfx **dlists;
+    /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
+    /* 0x38 */ s32 unk38;             // per-model hook state (F4890 flash: frames left)
+    /* 0x3C */ s32 unk3C;             // per-model hook state (F4890 flash: brightness 0..255)
+    /* 0x40 */ f32 scale;
+    /* 0x44 */ AttachmentOffset *offset;
+    /* 0x48 */ AnimInstance *anim;
+    /* 0x4C */ void *reflMtx[2];      // mirrored matrices, one per frame buffer (game_623D0)
+    /* 0x54 */ struct ModelAttachment *next;
+    /* 0x58 */ struct ModelAttachment *prev;
+} ModelAttachment; // size 0x5C
+
+/* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: func_1514EC1C attaches,
+ * func_1514ECE0 finds by type, func_1514ED3C finds by handle). */
+typedef struct Attachment {
+    /* 0x00 */ u8 pad0[0x10];               // allocator header
+    /* 0x10 */ void *handle;                // the attached thing; what it is depends on `type`
+    /* 0x14 */ struct Attachment *next;
+    /* 0x18 */ struct Attachment *prev;
+    /* 0x1C */ s16 type;                    // index into D_8008ABE8
+} Attachment;
+
+/* Attachment types form a tree (first child / next sibling), so a message sent to a type
+ * also reaches attachments of its subtypes. D_8008ABE8 holds one per type. */
+typedef struct AttachmentType {
+    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
+    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
+    /* 0x4 */ s16 firstChild;               // -1 terminates
+    /* 0x6 */ s16 nextSibling;              // -1 terminates
+} AttachmentType;
+
+/* Defined by the files that use them. */
+struct CamData;
+struct TimedEvent;
+
+/* Aim and trail points an actor keeps at 0x1A4 (filled in by func_1503A08C). */
+typedef struct ActorAimPoints {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 topY;
+    /* 0x08 */ s16 side[2][3]; // points pushed out to either side (trails are emitted from them)
+    /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
+} ActorAimPoints; // size 0x18
+
+/* A triangle of three s16 vertices: an actor's floor triangle, collision hits (game_71820). */
+typedef struct CollisionTri {
+    /* 0x00 */ Vec3s v[3];
+} CollisionTri; // size 0x12
+
+/* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
+typedef struct VtxMorphState {
+    /* 0x0 */ f32 blend; // 0.0f (prev) .. 1.0f (cur)
+    /* 0x4 */ f32 rate;  // blend increase per tick
+    /* 0x8 */ u8  prev;
+    /* 0x9 */ u8  cur;
+    /* 0xA */ u8  hold;  // counts down once the blend has reached 1.0f
+} VtxMorphState; // size 0xC
+
+/* The game actor: the 0x32C-byte entries of D_800CC2D0. */
+struct Actor {
+    /* 0x000 */ s32 interaction_state;
+    /* 0x004 */ u8  id;
+    /* 0x005 */ u8  unk5;
+    /* 0x006 */ u8  unk6;
+    /* 0x007 */ u8  unk7;
+    /* 0x008 */ u8  unk8;
+    /* 0x009 */ u8  unk9;
+    /* 0x00A */ u8  unkA;
+    /* 0x00B */ u8  unkB[4];  // one per player
+    /* 0x00F */ u8  unkF;     // per-player bits (<< 4: seen by player i)
+    /* 0x010 */ u16 unk10;    // view range
+    /* 0x012 */ u16 unk12;    // frame counter
+    /* 0x014 */ f32 x_position;
+    /* 0x018 */ f32 y_position;
+    /* 0x01C */ f32 z_position;
+    /* 0x020 */ f32 y_velocity;
+    /* 0x024 */ f32 gravity;
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ f32 old_x_position;
+    /* 0x030 */ f32 old_y_position;
+    /* 0x034 */ f32 old_z_position;
+    /* 0x038 */ s16 unk38;
+    /* 0x03A */ s8  unk3A;
+    /* 0x03B */ u8  unique_id;
+    /* 0x03C */ f32 xz_velocity;
+    /* 0x040 */ f32 unk40;  // used
+    /* 0x044 */ f32 unk44;
+    /* 0x048 */ f32 unk48;
+    /* 0x04C */ f32 animation_speed;
+    /* 0x050 */ u32 pad50;
+    /* 0x054 */ f32 unk54;
+    /* 0x058 */ s32 unk58;
+    /* 0x05C */ s32 unk5C;  // used
+    /* 0x060 */ s16 unk60;    // texture scroll
+    /* 0x062 */ s16 unk62;    // its speed
+    /* 0x064 */ s8  unk64;
+    /* 0x065 */ u8  unk65;  // used
+    /* 0x066 */ u8  unk66;      // flags
+    /* 0x067 */ u8  pad67;
+    /* 0x068 */ u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
+    /* 0x06A */ u8  eyeClosed[2]; // per eye, toggled by blinking
+    /* 0x06C */ u8  eyeCode[2];   // >= 10: set by the current expression
+    /* 0x06E */ u8  blinkTimer;
+    /* 0x06F */ u8  expression;   // current expression index
+    /* 0x070 */ u8  defaultExpression;
+    /* 0x071 */ u8  expressionPriority;
+    /* 0x072 */ u16 expressionTimer; // 0xFFFF = no timeout, 0xFFFE = frozen
+    /* 0x074 */ u8  unk74;
+    /* 0x075 */ s8  pad75;
+    /* 0x076 */ u16 unk76;  // moving_angle
+    /* 0x078 */ u16 unk78;
+    /* 0x07A */ u16 unk7A;  // facing angle
+    /* 0x07C */ u16 unk7C;
+    /* 0x07E */ u8  unk7E;
+    /* 0x07F */ u8  unk7F;  // counter
+    /* 0x080 */ u8  unk80;  // counter
+    /* 0x081 */ u8  unk81;  // counter
+    /* 0x082 */ u8  unk82;  // counter
+    /* 0x083 */ u8  unk83;  // used
+    /* 0x084 */ union {
         u16 uh;
         u8  ub[2];
     }   unk84;
-    u8  unk86;
-    u8  unk87;
-    u8  unk88;
-    /* 0x89 */  u8  disable_run;   // slowdown?
-    /* 0x8A */  u8  disable_jump; // unk8A;
-    u16 unk8C;  // used
-    u16 unk8E;  // used
-    u16 unk90;
-    u16 unk92;
-    s32 unk94;
-    u32 pad98;
-    u32 unk9C;
-    u32 padA0;
-    u32 padA4;
-    u8  unkA8;
-    u8  unkA9;
-    u8  unkAA;
-    u8  unkAB;
-    u8  padAC;
-    /* 0xAD */  u8  in_water;
-    u8  unkAE;
-    u8  padAF;
-    s8  unkB0;
-    u8  padB1;
-    u16 unkB2;  // (oxygen?)
-    s32 padB4;
-    f32 unkB8;  // used
-    u32 padBC;
-    /* 0xC0 */  f32 target_speed;
-    f32 unkC4;
-    u32 padC8;
-    s16 unkCC;
-    s16 unkCE;
-    u8  unkD0;
-    s8  padD1;
-    s16 unkD2;    // used
-    s16 unkD4;    // used
-    s16 unkD6;    // used
-    s16 unkD8;
-    s16 unkDA;
-    f32 unkDC;    // used
-    f32 unkE0;    // used
-    s16 unkE4;    // used
-    s16 unkE6;    // used
-    u16 unkE8;    // used
-    u16 unkEA;
-    f32 unkEC;
-    f32 unkF0;
-    s32 unkF4;
-    s32 unkF8;
-    s32 unkFC;
-    u8  unk100;   // used
-    u8  unk101;
-    u8  unk102;
-    u8  unk103;
+    /* 0x086 */ u8  unk86;
+    /* 0x087 */ u8  unk87;
+    /* 0x088 */ u8  unk88;
+    /* 0x089 */ u8  disable_run;   // slowdown?
+    /* 0x08A */ u8  disable_jump; // unk8A;
+    /* 0x08B */ u8  pad8B;
+    /* 0x08C */ u16 unk8C;  // used
+    /* 0x08E */ u16 unk8E;  // used
+    /* 0x090 */ s16 unk90;    // saved unkE4
+    /* 0x092 */ u16 unk92;
+    /* 0x094 */ s32 unk94;
+    /* 0x098 */ s32 unk98;     // blacked-out display-list mask
+    /* 0x09C */ u32 unk9C;
+    /* 0x0A0 */ u32 fogColor;  // packed ARGB; in fog mode 1 a pointer to an f32 percentage
+    /* 0x0A4 */ u8  fogMode;
+    /* 0x0A5 */ u8  fogLevel;  // fade level, or pulse phase in modes 4/5
+    /* 0x0A6 */ u8  fogRate;
+    /* 0x0A7 */ u8  fogFade;   // pulse fade-out, 0xFF = full
+    /* 0x0A8 */ u8  unkA8;
+    /* 0x0A9 */ u8  unkA9;
+    /* 0x0AA */ u8  unkAA;
+    /* 0x0AB */ u8  unkAB;
+    /* 0x0AC */ u8  unkAC;
+    /* 0x0AD */ u8  in_water;
+    /* 0x0AE */ u8  unkAE;
+    /* 0x0AF */ u8  padAF;
+    /* 0x0B0 */ s8  unkB0;
+    /* 0x0B1 */ u8  padB1;
+    /* 0x0B2 */ u16 unkB2;  // (oxygen?)
+    /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (func_1506AD30)
+    /* 0x0B8 */ f32 unkB8;  // used
+    /* 0x0BC */ f32 unkBC;
+    /* 0x0C0 */ f32 target_speed;
+    /* 0x0C4 */ f32 unkC4;
+    /* 0x0C8 */ f32 unkC8;
+    /* 0x0CC */ s16 unkCC;
+    /* 0x0CE */ s16 unkCE;
+    /* 0x0D0 */ u8  unkD0;
+    /* 0x0D1 */ s8  padD1;
+    /* 0x0D2 */ s16 unkD2;    // first set of bounds (func_1515C1A0): radius,
+    /* 0x0D4 */ s16 unkD4;    // ...
+    /* 0x0D6 */ s16 unkD6;    // ... and centre height above the position
+    /* 0x0D8 */ s16 unkD8;
+    /* 0x0DA */ s16 unkDA;
+    /* 0x0DC */ f32 unkDC;    // used
+    /* 0x0E0 */ f32 unkE0;    // used
+    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (func_15062AC4, collisions in game_83300)
+    /* 0x0E6 */ s16 bodyHeight;
+    /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by y_scale)
+    /* 0x0EA */ u16 unkEA;
+    /* 0x0EC */ f32 unkEC;
+    /* 0x0F0 */ f32 unkF0;
+    /* 0x0F4 */ s32 unkF4;
+    /* 0x0F8 */ s32 unkF8;
+    /* 0x0FC */ s32 unkFC;
+    /* 0x100 */ u8  unk100;   // used
+    /* 0x101 */ u8  unk101;
+    /* 0x102 */ u8  unk102;
+    /* 0x103 */ u8  unk103;
     /* 0x104 */ u8  stunned; //unk104;
-    u8  unk105;
-    u8  unk106;
-    u8  unk107;
-    u8  pad108;
-    u8  unk109;
-    u8  pad10A;
-    u8  unk10B;
-    s16 unk10C;
-    u8  unk10E;
-    u8  unk10F;
-    u32 pad110;
-    f32 unk114;
-    f32 unk118;
-    f32 unk11C;
-    u8  unk120;
-    u8  unk121;
-    u8  unk122;
-    u8  unk123;
-    u8  unk124;
+    /* 0x105 */ u8  unk105;
+    /* 0x106 */ u8  unk106;
+    /* 0x107 */ u8  unk107;
+    /* 0x108 */ u8  unk108;  // attacker slot | 0x80
+    /* 0x109 */ u8  unk109;
+    /* 0x10A */ u8  unk10A;  // victim/attacker slot | 0x80
+    /* 0x10B */ u8  unk10B;
+    /* 0x10C */ s16 unk10C;
+    /* 0x10E */ u8  unk10E;
+    /* 0x10F */ u8  unk10F;
+    /* 0x110 */ u8  unk110;
+    /* 0x111 */ u8  pad111;
+    /* 0x112 */ u16 unk112;
+    /* 0x114 */ f32 unk114;
+    /* 0x118 */ f32 unk118;
+    /* 0x11C */ f32 unk11C;
+    /* 0x120 */ s16 unk120;
+    /* 0x122 */ u8  unk122;
+    /* 0x123 */ u8  unk123;
+    /* 0x124 */ u8  unk124;
     /* 0x125 */ u8  immune; // used
-    u8  pad126;
-    u8  unk127;
-    u32 pad128;
-    u32 pad12C;
-    u32 pad130;
-    u32 pad134;
-    u8  unk138;
-    u8  pad139[0x3];
-    u8  unk13C; // used
-    u8  unk13D;
-    u8  unk13E;
-    u8  unk13F; // used
-    s32 unk140;
-    struct129 *unk144; // used
-    f32 unk148;
+    /* 0x126 */ u8  unk126;  // owner index into D_800CC2D0
+    /* 0x127 */ u8  unk127;
+    /* 0x128 */ u8  team;
+    /* 0x129 */ u8  unk129;
+    /* 0x12A */ u8  unk12A;
+    /* 0x12B */ u8  pad12B;
+    /* 0x12C */ s16 unk12C;
+    /* 0x12E */ u16 pad12E;
+    /* 0x130 */ u32 pad130;
+    /* 0x134 */ u8  unk134;
+    /* 0x135 */ u8  morphDuration;
+    /* 0x136 */ u8  unk136;  // sprite texture
+    /* 0x137 */ u8  unk137;
+    /* 0x138 */ u8  unk138;
+    /* 0x139 */ u8  unk139;  // requested sequence
+    /* 0x13A */ u8  unk13A;  // its countdown
+    /* 0x13B */ u8  unk13B;
+    /* 0x13C */ u8  unk13C; // used
+    /* 0x13D */ u8  unk13D;
+    /* 0x13E */ u8  unk13E;
+    /* 0x13F */ u8  unk13F; // index of its spawn record in D_800D20FC, 0xFF = none
+    /* 0x140 */ u8  unk140;
+    /* 0x141 */ u8  pad141[0x3];
+    /* 0x144 */ SpawnRecord *spawn; // the spawn record this actor came from
+    /* 0x148 */ f32 unk148;
     /* 0x14C */ f32 xz_scale;
     /* 0x150 */ f32 y_scale;
-    f32 unk154;
-    f32 unk158;
-    f32 unk15C;
-    u32 pad160;
-    f32 unk164;
-    f32 unk168;
-    f32 unk16C;
-    f32 unk170;
-    u32 pad174;
-    u32 pad178;
-    u32 pad17C;
-    f32 unk180;
-    s32 unk184;
-    u32 pad188;
-    f32 unk18C; // used
-    u32 pad190;
-    u8  pad194;
-    u8  unk195;
-    u8  pad196;
-    u8  unk197;
-    u8  unk198;
-    u8  pad199;
-    u8  pad19A;
-    u8  pad19B;
-    u32 pad19C;
-    u32 pad1A0;
-    u16 pad1A4;
-    s16 unk1A6;
-    u32 pad1A8;
-    u32 pad1AC;
-    u32 pad1B0;
-    u32 pad1B4;
-    u32 pad1B8;
-    u32 pad1BC;
-    u32 pad1C0;
-    u32 pad1C4;
-    u8  pad1C8;
-    u8  unk1C9;
+    /* 0x154 */ f32 unk154;
+    /* 0x158 */ f32 unk158;
+    /* 0x15C */ f32 unk15C;
+    /* 0x160 */ u16 unk160;  // shadow size, scaled by xz_scale (game_13AE20)
+    /* 0x162 */ u8  unk162;
+    /* 0x163 */ u8  pad163;
+    /* 0x164 */ f32 unk164;
+    /* 0x168 */ f32 unk168;
+    /* 0x16C */ f32 unk16C;
+    /* 0x170 */ f32 unk170;
+    /* 0x174 */ f32 unk174;
+    /* 0x178 */ f32 unk178;
+    /* 0x17C */ f32 ceilingY;
+    /* 0x180 */ f32 floorY;
+    /* 0x184 */ u32 unk184;     // floor material from the floor probe
+    /* 0x188 */ void *unk188;     // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
+    /* 0x18C */ CollisionTri floorTri; // the floor triangle under the actor
+    /* 0x19E */ u16 floorTriIndex;
+    /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none
+    /* 0x1A2 */ s16 floorType;
+    /* 0x1A4 */ ActorAimPoints aim;
+    /* 0x1BC */ s16 unk1BC[3];   // a bone position (game_83300)
+    /* 0x1C2 */ u8  pad1C2[0x2];
+    /* 0x1C4 */ struct TimedEvent *events; // timed event list
+    /* 0x1C8 */ u8  lod;       // current level of detail
+    /* 0x1C9 */ u8  lodRequest; // requested LOD + 1, 0xFF = reset to 0
     /* 0x1CA */ u8  health;
-    u8  unk1CB;
-    f32 unk1CC;
-    s8  unk1D0;
-    s8  unk1D1;
-    u16 pad1D2;
-    struct255 *unk1D4;
-    u32 pad1D8;
-    u32 pad1DC;
-    u32 pad1E0;
-    u8  unk1E4;
-    u8  unk1E5;
-    u8  unk1E6;
-    u8  unk1E7;
-    u8  unk1E8;
-    u8  pad1E9;
-    u16 unk1EA;
-    u16 unk1EC;
-    u8  pad1EE[0x2];
-    u32 pad1F0;
-    s32 unk1F4;
-    u32 pad1F8;
-    u8  unk1FC;
-    u8  unk1FD;
-    u8  pad1FE;
-    u8  unk1FF;
-    s8  unk200;
-    u8  pad201[0x3];
-    s32 unk204;
-    u32 pad208;
-    u8  pad20C[0x3];
-    u8  unk20F;
-    u8  pad210;
-    u8  unk211;
-    u8  unk212[0x2];
-    s32 unk214;
-    struct216 *unk218; // struct216 is 5 bytes long
-    u16 unk21C;
-    u8  unk21E;
-    u8  unk21F;
-    u8  unk220;
-    s8  unk221;
-    u8  unk222;
-    u8  unk223;
-    u16 unk224;
-    u8  unk226;
-    u8  pad227;
-    u8  unk228;
-    u8  unk229;
-    u8  pad22A;
-    u8  unk22B;
-    u16 unk22C;
-    s16 unk22E;
-    u8  pad230;
-    u8  unk231;
-    u8  unk232; // used
-    u8  unk233;
-    u8  unk234;
-    u8  unk235;
-    u8  unk236;
-    u8  unk237;
-    u8  unk238;
-    s8  unk239; // used
-    u8  unk23A;
-    u8  unk23B;
-    u8  pad23C;
-    u8  unk23D;
-    u8  unk23E;
-    u8  unk23F;
-    u8  unk240;
-    u8  unk241;
-    u8  unk242;
-    u8  pad243;
-    s16 unk244;
-    u8  unk246;
-    u8  unk247;
-    u8  unk248;
-    u8  unk249;
-    u8  unk24A;
-    u8  pad24B;
-    u8  unk24C;
-    u8  unk24D;
-    u8  unk24E;
-    s8  unk24F;
-    u8  unk250;
-    u8  unk251;
-    u8  unk252;
-    u8  unk253;
-    u8  unk254;
-    u8  unk255;
-    u8  unk256;
-    u8  unk257;
-    u8  unk258;
-    u8  pad259[0x3];
-    s32 unk25C;
-    u8  pad260[0x14];
-    u8  unk274;
-    u8  pad275;
-    s8  unk276;
-    u8  pad277;
-    s16 unk278;
-    u8  unk27A[0x8];
-    s16 unk282;
-    u8  unk284;
-    u8  unk285;
-    u8  unk286;
-    u8  unk287;
-    u8  pad288[0x41];
-    u8  unk2C9;
-    s8  unk2CA;
-    s8  unk2CB;
-    s32 unk2CC;
-    struct197 *unk2D0;
-    u8  pad2D4[0x10];
-    s32 unk2E4;
-    s32 unk2E8;
-    s32 unk2EC;
-    u8  pad2F0[0x8];
-    u16 unk2F8; // wait animation?
-    u8  unk2FA;
-    u8  unk2FB;
-    u8  pad2FC[0x3];
-    u8  unk2FF;
-    u8  unk300;
-    u8  unk301[0x17];
-    /* 0x318 */ struct108 *camera;
-    struct126 *unk31C; // used (is this actually 127?)
-    u8  pad320[0xC];
+    /* 0x1CB */ u8  unk1CB;
+    /* 0x1CC */ f32 unk1CC;
+    /* 0x1D0 */ s8  unk1D0;
+    /* 0x1D1 */ s8  unk1D1;
+    /* 0x1D2 */ u16 pad1D2;
+    /* 0x1D4 */ MtxF *unk1D4;   // this frame's bone matrices
+    /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
+    /* 0x1DC */ u8  unk1DC;
+    /* 0x1DD */ u8  unk1DD[3];
+    /* 0x1E0 */ u8  unk1E0[3];
+    /* 0x1E3 */ u8  unk1E3;
+    /* 0x1E4 */ u8  unk1E4;
+    /* 0x1E5 */ u8  unk1E5;
+    /* 0x1E6 */ u8  unk1E6;
+    /* 0x1E7 */ u8  unk1E7;
+    /* 0x1E8 */ u8  unk1E8;
+    /* 0x1E9 */ u8  pad1E9;
+    /* 0x1EA */ u16 unk1EA;
+    /* 0x1EC */ u16 unk1EC;
+    /* 0x1EE */ u8  pad1EE[0x2];
+    /* 0x1F0 */ u32 pad1F0;
+    /* 0x1F4 */ f32 unk1F4;
+    /* 0x1F8 */ f32 unk1F8;
+    /* 0x1FC */ u8  unk1FC;
+    /* 0x1FD */ u8  unk1FD;
+    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (func_15034860)
+    /* 0x1FF */ u8  levelMode;   // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
+    /* 0x200 */ u8  levelTimer;
+    /* 0x201 */ u8  unk201;
+    /* 0x202 */ s8  unk202;
+    /* 0x203 */ s8  levelStep;
+    /* 0x204 */ s16 level2;      // -255..255 (direction set by the sign of unk208)
+    /* 0x206 */ u8  level2Mode;  // same encoding as levelMode
+    /* 0x207 */ u8  level2Timer;
+    /* 0x208 */ s8  unk208;
+    /* 0x209 */ s8  level2Step;
+    /* 0x20A */ u8  unk20A;
+    /* 0x20B */ u8  unk20B[4];   // script variables (command 0x59)
+    /* 0x20F */ u8  unk20F;
+    /* 0x210 */ u8  unk210;
+    /* 0x211 */ u8  unk211;
+    /* 0x212 */ u8  unk212[0x2];
+    /* 0x214 */ s16 unk214;
+    /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
+    /* 0x218 */ struct216 *unk218; // struct216 is 5 bytes long
+    /* 0x21C */ u16 unk21C;
+    /* 0x21E */ u8  unk21E;
+    /* 0x21F */ u8  unk21F;
+    /* 0x220 */ u8  unk220;
+    /* 0x221 */ s8  unk221;
+    /* 0x222 */ u8  unk222;
+    /* 0x223 */ u8  unk223;
+    /* 0x224 */ s16 unk224;
+    /* 0x226 */ u8  unk226;
+    /* 0x227 */ u8  pad227;
+    /* 0x228 */ u8  unk228;
+    /* 0x229 */ u8  unk229;
+    /* 0x22A */ u8  unk22A;
+    /* 0x22B */ u8  unk22B;
+    /* 0x22C */ u16 unk22C;
+    /* 0x22E */ u16 unk22E;   // cooldown
+    /* 0x230 */ u8  pad230;
+    /* 0x231 */ u8  unk231;
+    /* 0x232 */ u8  unk232; // used
+    /* 0x233 */ u8  unk233;
+    /* 0x234 */ u8  unk234;
+    /* 0x235 */ u8  unk235;
+    /* 0x236 */ u8  unk236;
+    /* 0x237 */ u8  unk237;
+    /* 0x238 */ u8  unk238;
+    /* 0x239 */ s8  unk239; // used
+    /* 0x23A */ u8  unk23A;
+    /* 0x23B */ u8  unk23B;
+    /* 0x23C */ u8  unk23C;
+    /* 0x23D */ u8  unk23D;
+    /* 0x23E */ u8  unk23E;
+    /* 0x23F */ u8  unk23F;
+    /* 0x240 */ u8  unk240;
+    /* 0x241 */ u8  unk241;
+    /* 0x242 */ u8  unk242;
+    /* 0x243 */ u8  pad243;
+    /* 0x244 */ s16 unk244;
+    /* 0x246 */ u8  unk246;
+    /* 0x247 */ u8  unk247;
+    /* 0x248 */ u8  unk248;
+    /* 0x249 */ u8  unk249;
+    /* 0x24A */ u8  unk24A;
+    /* 0x24B */ u8  pad24B;
+    /* 0x24C */ u8  unk24C;
+    /* 0x24D */ u8  unk24D;
+    /* 0x24E */ u8  unk24E;
+    /* 0x24F */ s8  unk24F;
+    /* 0x250 */ u8  unk250;
+    /* 0x251 */ u8  unk251;
+    /* 0x252 */ u8  unk252;
+    /* 0x253 */ u8  unk253;
+    /* 0x254 */ u8  unk254;
+    /* 0x255 */ u8  unk255;
+    /* 0x256 */ u8  unk256;
+    /* 0x257 */ u8  unk257;
+    /* 0x258 */ u8  unk258;
+    /* 0x259 */ u8  unk259[3];
+    /* 0x25C */ s32 unk25C;
+    /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
+    /* 0x264 */ s32 unk264;      // allocations freed with the actor (func_15060F28)
+    /* 0x268 */ s32 unk268;
+    /* 0x26C */ s32 unk26C;
+    /* 0x270 */ f32 unk270;
+    /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
+    /* 0x275 */ u8  unk275;  // D_800CC2D0 index + 1
+    /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
+    /* 0x277 */ u8  pad277;
+    /* 0x278 */ u16 unk278;      // effect state
+    /* 0x27A */ s16 unk27A[2];   // yaw of head parts 1 and 0
+    /* 0x27E */ s16 unk27E[2];   // pitch of head parts 1 and 0
+    /* 0x282 */ u16 unk282;      // effect frames left, 0xFFFF = endless
+    /* 0x284 */ s8  unk284;      // effect offset for unk27A[0]
+    /* 0x285 */ s8  unk285;      // ... for unk27E[0]
+    /* 0x286 */ s8  unk286;      // ... for unk27A[1]
+    /* 0x287 */ s8  unk287;      // ... for unk27E[1]
+    /* 0x288 */ u8  unk288;
+    /* 0x289 */ u8  pad289[0x3];
+    /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer
+    /* 0x2C4 */ u8 *modelIds;
+    /* 0x2C8 */ u8  lodCount;   // models in modelIds that are LODs
+    /* 0x2C9 */ u8  modelCount; // lodCount + extra sub-models
+    /* 0x2CA */ s8  unk2CA;
+    /* 0x2CB */ s8  unk2CB;
+    /* 0x2CC */ s32 unk2CC;
+    /* 0x2D0 */ AnimInstance *unk2D0;
+    /* 0x2D4 */ struct102 *unk2D4;
+    /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22;
+                                 // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)
+    /* 0x2E4 */ s32 unk2E4;     // per-type state; game_EB340 saves 2E4/2E8 as commands 0xE/0x68
+    /* 0x2E8 */ s32 unk2E8;
+    /* 0x2EC */ s32 unk2EC;     // nonzero while the unk2D8 fade runs
+    /* 0x2F0 */ u32 pad2F0;
+    /* 0x2F4 */ Attachment *attachments; // head of the attachment list
+    /* 0x2F8 */ u16 unk2F8; // wait animation?
+    /* 0x2FA */ u8  unk2FA;
+    /* 0x2FB */ u8  unk2FB;
+    /* 0x2FC */ u8  unk2FC;
+    /* 0x2FD */ u8  unk2FD;
+    /* 0x2FE */ u8  unk2FE;
+    /* 0x2FF */ u8  unk2FF;
+    /* 0x300 */ u8  unk300;
+    /* 0x301 */ u8  unk301;
+    /* 0x302 */ u8  unk302;
+    /* 0x303 */ u8  unk303;
+    /* 0x304 */ s32 unk304[4]; // one per view
+    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
+    /* 0x318 */ Camera *camera;
+    /* 0x31C */ ActorCtl *unk31C;
+    /* 0x320 */ u32 unk320;
+    /* 0x324 */ struct CamData *camData; // aim easing state, one entry per aim slot
+    /* 0x328 */ s8  unk328;
+    /* 0x329 */ u8  pad329[0x3];
 }; // size 0x32C => 812 bytes game_object
 
 /*
  * A world object: one 0xA0-byte entry of the level's object array D_800DBEF4 (D_800DBEF0 entries),
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  */
+typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
+
 typedef struct WorldObject WorldObject;
 struct WorldObject {
     /* 0x00 */ f32 rotX; // degrees
@@ -1420,9 +1914,10 @@ struct WorldObject {
     /* 0x73 */ u8 behaviorState;     // per-behaviour state bits
     /* 0x74 */ u16 sound;            // handle from func_15114D24
     /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ void (*onContact)(WorldObject *obj, struct127 *actor);
+    /* 0x78 */ void (*onContact)(WorldObject *obj, Actor *actor);
     /* 0x7C */ union {
         s32 words[3];
+        f32 floats[3];
         struct {
             /* 0x7C */ s32 unk7C;
             /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4
@@ -1436,7 +1931,7 @@ struct WorldObject {
     /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
     /* 0x92 */ u8 unk92;
     /* 0x93 */ u8 pad93;
-    /* 0x94 */ struct102 *shadow;    // created and freed by func_15113C88
+    /* 0x94 */ Shadow *shadow;       // created and freed by func_15113C88
     /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
@@ -1613,38 +2108,6 @@ typedef struct {
 } struct148;
 
 typedef struct {
-    s32 unk0;   // used (unk3?)
-    s32 unk4;   // used
-    s32 unk8;
-    s32 unkC;
-    s32 *unk10;
-    s8  unk14;
-    u8  unk15;  // used
-    s8  unk16;
-    s8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;  // used
-    u8  pad34[0x4];
-    s32 unk38;
-    u8  unk3C[0x10];
-    u16 unk4C;
-    u16 unk4E;
-    u16 unk50;
-    u16 unk52;
-    u8  pad54[0x4];
-    u16 unk58;
-    s16 unk5A;
-    s16 unk5C;
-    u8  pad5E[0x2];
-    struct00 *unk60;  // used
-} struct151;
-
-typedef struct {
     s32 pad0;
     u8  unk4;
     s8  unk5; // used
@@ -1672,9 +2135,6 @@ typedef struct {
     f32 unk34;  // used
 } struct154;
 
-typedef struct {
-    u8 pad[0x68];
-} struct156; // size 0x68
 
 typedef struct {
     s32 unk0;
@@ -1699,195 +2159,386 @@ typedef struct {
     s16 unk24;
 } struct157;
 
-struct struct108 {
-                u16 unk0;
-                u16 unk2[0x15];
-    /* 0x02C */ s32 unk2C;
-    /* 0x030 */ struct150 *unk30;
-    /* 0x034 */ u8  pad34[0x50];
-    /* 0x084 */ s32 unk84;
-                s32 unk88;
-    /* 0x088 */ u8  pad8C[0x50];
+/* Camera command playback state (Camera.cmdState, at 0x6CC). */
+typedef struct CamCmdState {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 cmdId;                            /* id (cmd.id) of the command last started */
+    /* 0x04 */ s16 lastType;                         /* cmd.type of the last command run */
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s16 blending;                         /* still easing back (blend < 1) after a type 1 command */
+    /* 0x0A */ u8 padA[0x6];
+    /* 0x10 */ f32 blend;                            /* 0..1 easing factor */
+    /* 0x14 */ f32 pushRate;                         /* 0..0.04, scales the minimum-distance push */
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 minHeight;
+    /* 0x28 */ f32 maxHeight;
+    /* 0x2C */ f32 maxDistance;
+} CamCmdState; // size 0x30
+
+/* Current camera command (Camera.cmd, at 0x6FC). Type 15 is a rail (see CamRail). */
+typedef struct CamCmd {
+    /* 0x00 */ u32 type;
+    /* 0x04 */ s16 id;
+    /* 0x06 */ u8 pad6[0x2];
+    /* 0x08 */ u32 unk8;                             /* type 7: path options (copied to Camera.pathFlags); type 15: rail height offset */
+    /* 0x0C */ u8 padC[0x4];
+    /* 0x10 */ s16 x;                                /* type 15: rail midpoint */
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ s16 halfLength;                       /* type 15: half the rail length */
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ u32 unk1C;                            /* type 15: rail offset mode (copied to rail.offsetMode) */
+    /* 0x20 */ u32 unk20;                            /* type 15: rail offset (copied to rail.offset) */
+    /* 0x24 */ f32 unk24;                            /* type 15: unk24/unk28 split halfLength into horizontal/vertical parts, */
+    /* 0x28 */ f32 unk28;                            /* unk2C/unk30 split the horizontal part into x/z */
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ u8 pad36[0x2];
+} CamCmd; // size 0x38
+
+/* Aim (first-person swing) state (Camera.aim, at 0x740). */
+typedef struct CamAim {
+    /* 0x00 */ Vec3f orbitPos;                      /* eye position on the orbit around the target */
+    /* 0x0C */ Vec3f offset;                        /* sideways shift of the aim ray (x and z only) */
+    /* 0x18 */ f32 yawVel;
+    /* 0x1C */ f32 pitchVel;
+    /* 0x20 */ f32 savedYaw;                         /* view to return to on exit */
+    /* 0x24 */ f32 savedTargetDistance;
+    /* 0x28 */ f32 savedHeight;
+    /* 0x2C */ f32 savedUnk134;
+    /* 0x30 */ f32 savedUnk354;
+    /* 0x34 */ f32 targetYaw;
+    /* 0x38 */ f32 targetPitch;
+    /* 0x3C */ f32 pitch;
+    /* 0x40 */ f32 signedPitch;                      /* pitch in -180..180 */
+    /* 0x44 */ f32 distance;
+    /* 0x48 */ f32 turnDistance;                     /* swing round once Camera.distance passes this */
+    /* 0x4C */ u8 useOverride;                       /* take pitch, yaw offset and distance from the fields below */
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ s8 approachDir;                       /* -1: distance grows towards turnDistance, 1: it shrinks */
+    /* 0x4F */ u8 pad4F[0x1];
+    /* 0x50 */ f32 overridePitch;
+    /* 0x54 */ f32 overrideYawOffset;
+    /* 0x58 */ f32 overrideDistance;
+    /* 0x5C */ f32 offsetXVel;
+    /* 0x60 */ f32 offsetZVel;
+    /* 0x64 */ s32 stickLock;                        /* bit 0: stick_x held at <= 0, bit 1: at >= 0 */
+} CamAim; // size 0x68
+
+/* Smooth transition of the camera to a new target/yaw (func_15128030; Camera.transition, at 0x7F4). */
+typedef struct CamTransition {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u8 pad2[0x2];
+    /* 0x04 */ Vec3f startTarget;
+    /* 0x10 */ Vec3f endTarget;
+    /* 0x1C */ f32 startDistance;
+    /* 0x20 */ f32 startYaw;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 endDistance;
+    /* 0x2C */ f32 endYaw;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 endUnk5E8;
+    /* 0x38 */ f32 endUnk3A8;
+    /* 0x3C */ f32 progress;
+    /* 0x40 */ u16 duration;
+    /* 0x42 */ u8 pad42[0x2];
+    /* 0x44 */ f32 endHeight;
+    /* 0x48 */ f32 startHeight;
+    /* 0x4C */ s16 timer;
+    /* 0x4E */ u8 pad4E[0x2];
+} CamTransition; // size 0x50
+
+/* Camera rail: a line segment the eye slides along (Camera.rail, at 0x870; set up by a type 15 command). */
+typedef struct CamRail {
+    /* 0x00 */ u8 offsetMode;                        /* which side of the rail the eye sits on (0..3) */
+    /* 0x01 */ u8 pad1[0x3];
+    /* 0x04 */ Vec3f start;
+    /* 0x10 */ Vec3f dir;                           /* unit direction from start to end */
+    /* 0x1C */ f32 invLength;
+    /* 0x20 */ f32 offset;                           /* horizontal distance of the eye from the rail */
+    /* 0x24 */ f32 heightOffset;
+    /* 0x28 */ f32 eyeEaseA;                         /* easing parameters for the eye, eased toward 10.0 */
+    /* 0x2C */ f32 eyeEaseB;
+    /* 0x30 */ f32 eyeEaseAVel;
+    /* 0x34 */ f32 eyeEaseBVel;
+    /* 0x38 */ Vec3f eyeGoal;
+} CamRail; // size 0x44
+
+/* One player camera (Actor.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
+struct Camera {
+    /* 0x000 */ u16 modeIndex;                       /* bit index of mode */
+    /* 0x002 */ u16 savedModeIndex[21];
+    /* 0x02C */ s32 mode;                            /* one-hot mode bit; 0x100 is the R-trigger camera */
+    /* 0x030 */ s32 savedMode[21];
+    /* 0x084 */ s32 flags;
+    /* 0x088 */ s32 savedFlags[21];
     /* 0x0DC */ s32 unkDC;
-                s32 unkE0;
-    /* 0x0E0 */ u8  padE4[0x50];
+    /* 0x0E0 */ s32 savedUnkDC[21];
     /* 0x134 */ s32 unk134;
-                s32 unk138;
-    /* 0x138 */ u8  pad13C[0x50];
-    /* 0x18C */ f32 unk18C;      // used
-    /* 0x190 */ f32 unk190;      // used
-    /* 0x194 */ f32 unk194;
-                f32 unk198;
+    /* 0x138 */ s32 savedUnk134[21];
+    /* 0x18C */ f32 lift;                            /* vertical offset of eye and target */
+    /* 0x190 */ f32 liftTarget;
+    /* 0x194 */ f32 side;                            /* sideways offset of eye and target */
+    /* 0x198 */ f32 sideTarget;
     /* 0x19C */ f32 unk19C;
     /* 0x1A0 */ f32 unk1A0;
     /* 0x1A4 */ f32 unk1A4;
     /* 0x1A8 */ f32 unk1A8;
-    /* 0x1AC */ u8  pad1AC[0x8];
-    /* 0x1B4 */ s16 unk1B4;      // used
-    /* 0x1B6 */ u16 unk1B6[0x15]; // 0x15 * 2 => 0x1E0
-    /* 0x1E0 */ s16 unk1E0;
-    /* 0x1E2 */ s16 unk1E2;
-    /* 0x1E4 */ u8  pad1E4[0x28];
-    /* 0x20C */ s16 unk20C[0x15];
-    /* 0x236 */ u8  pad236[0x2];
+    /* 0x1AC */ u8 pad1AC[0x8];
+    /* 0x1B4 */ s16 preset;                          /* row of D_800A34B0 (distance, height) */
+    /* 0x1B6 */ s16 savedPreset[21];
+    /* 0x1E0 */ s16 presetMask;                      /* presets reachable with the C buttons */
+    /* 0x1E2 */ s16 savedPresetMask[21];
+    /* 0x20C */ s16 slotUsed[21];
+    /* 0x236 */ u8 pad236[0x2];
     /* 0x238 */ s32 unk238;
-    /* 0x23C */ u8  unk23C;
-    /* 0x23D */ u8  unk23D;
-    /* 0x23E */ u8  unk23E; // used
-    /* 0x23F */ u8  unk23F;
+    /* 0x23C */ u8 snap;                             /* nonzero: jump to targets instead of easing (counts down) */
+    /* 0x23D */ u8 playerIndex;                      /* this camera's slot in the per-camera tables */
+    /* 0x23E */ u8 zone;                             /* copy of playerExt->cameraZone */
+    /* 0x23F */ u8 unk23F;
     /* 0x240 */ s32 unk240;
-    /* 0x244 */ s16 unk244;
-    /* 0x246 */ s16 pad246;
-    /* 0x248 */ s32 unk248;
+    /* 0x244 */ s16 pairIndex;                       /* second object kept in frame (0 = none) */
+    /* 0x246 */ u8 pad246[0x2];
+    /* 0x248 */ Actor *pairObj;
     /* 0x24C */ f32 unk24C;
     /* 0x250 */ f32 unk250;
-    /* 0x254 */ u8  pad254[0x18];
+    /* 0x254 */ u8 pad254[0x4];
+    /* 0x258 */ f32 distanceVel;
+    /* 0x25C */ f32 heightVel;
+    /* 0x260 */ u8 pad260[0x4];
+    /* 0x264 */ f32 swayVel;
+    /* 0x268 */ u8 pad268[0x4];
     /* 0x26C */ f32 unk26C;
-    /* 0x270 */ s16 pad270;
+    /* 0x270 */ u8 pad270[0x2];
     /* 0x272 */ s16 unk272;
-    /* 0x274 */ u8  pad274[0x24];
-    /* 0x298 */ u16 unk298;
-    /* 0x29A */ u8  pad29A[0xA];
-    /* 0x2A4 */ f32 unk2A4;
-    /* 0x2A8 */ f32 unk2A8;
-    /* 0x2AC */ s32 unk2AC; // is this really s32?
-    /* 0x2B0 */ f32 unk2B0;
-    /* 0x2B4 */ f32 unk2B4;
-    /* 0x2B8 */ f32 unk2B8;
-    /* 0x2BC */ f32 unk2BC;
-    /* 0x2C0 */ f32 unk2C0;
-    /* 0x2C4 */ f32 unk2C4;
-    /* 0x2C8 */ s32 unk2C8;
-    /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ s32 unk2D0;
-    /* 0x2D4 */ u8  pad2D4[0xC];
-    /* 0x2E0 */ s32 unk2E0;
-    /* 0x2E4 */ s32 unk2E4;
-    /* 0x2E8 */ s32 unk2E8;
-    /* 0x2EC */ s32 unk2EC;
-    /* 0x2F0 */ s32 unk2F0;
-    /* 0x2F4 */ s32 unk2F4;
-    /* 0x2F8 */ f32 unk2F8; // struct ptr?
-    /* 0x2FC */ f32 unk2FC;
-    /* 0x300 */ f32 unk300;
-    /* 0x304 */ f32 unk304;
-    /* 0x308 */ f32 unk308;
-    /* 0x30C */ f32 unk30C;
-    /* 0x310 */ u8  pad310[0x38];
-    /* 0x348 */ f32 unk348;      // used
-    /* 0x34C */ f32 unk34C;      // used
-    /* 0x350 */ u8  pad350[0x4];
+    /* 0x274 */ s16 unk274;
+    /* 0x276 */ u8 pad276[0x2];
+    /* 0x278 */ f32 unk278;
+    /* 0x27C */ Vec3f unk27C;
+    /* 0x288 */ Vec3f unk288;
+    /* 0x294 */ u8 pad294[0x4];
+    /* 0x298 */ s16 playerMoved;
+    /* 0x29A */ u8 pad29A[0x2];
+    /* 0x29C */ f32 swayPhase;
+    /* 0x2A0 */ f32 targetYVel;
+    /* 0x2A4 */ Vec3f focus;                        /* point followed on the player */
+    /* 0x2B0 */ Vec3f lastPlayerPos;
+    /* 0x2BC */ Vec3f target;                       /* look-at point */
+    /* 0x2C8 */ Vec3f prevTarget;
+    /* 0x2D4 */ u8 pad2D4[0xC];
+    /* 0x2E0 */ Vec3f savedTarget;
+    /* 0x2EC */ Vec3f savedEye;
+    /* 0x2F8 */ Vec3f eye;                          /* camera position */
+    /* 0x304 */ Vec3f prevEye;
+    /* 0x310 */ u8 pad310[0x34];
+    /* 0x344 */ f32 unk344;
+    /* 0x348 */ f32 height;
+    /* 0x34C */ f32 unk34C;
+    /* 0x350 */ u8 pad350[0x4];
     /* 0x354 */ f32 unk354;
     /* 0x358 */ f32 unk358;
     /* 0x35C */ f32 unk35C;
-    /* 0x360 */ u32 pad360;
+    /* 0x360 */ f32 unk360;
     /* 0x364 */ f32 unk364;
-    /* 0x368 */ s16 unk368;
-    /* 0x36A */ u16 unk36A;
-    /* 0x36C */ u16 *unk36C;
-    /* 0x370 */ u8  pad370[0x4];
-    /* 0x374 */ f32 unk374;      // used
-    /* 0x378 */ u32 pad378;
-    /* 0x37C */ f32 unk37C;
+    /* 0x368 */ s16 controller;
+    /* 0x36A */ u16 buttonsPressed;
+    /* 0x36C */ OSContPad *contPad;
+    /* 0x370 */ f32 distance;
+    /* 0x374 */ f32 targetDistance;
+    /* 0x378 */ u8 pad378[0x4];
+    /* 0x37C */ f32 yaw;                             /* degrees */
     /* 0x380 */ f32 unk380;
     /* 0x384 */ f32 unk384;
-    /* 0x388 */ f32 unk388;
+    /* 0x388 */ f32 pitch;                           /* degrees */
     /* 0x38C */ f32 unk38C;
     /* 0x390 */ f32 unk390;
-    /* 0x394 */ s32 pad394;
-    /* 0x398 */ f32 unk398;
-    /* 0x39C */ f32 unk39C;
-    /* 0x3A0 */ f32 unk3A0;
-    /* 0x3A4 */ f32 pad3A4;
+    /* 0x394 */ f32 unk394;
+    /* 0x398 */ f32 pitchRad;
+    /* 0x39C */ f32 yawRad;
+    /* 0x3A0 */ f32 unk3A0;                          /* unk380 in radians */
+    /* 0x3A4 */ f32 unk3A4;
     /* 0x3A8 */ f32 unk3A8;
-    /* 0x3AC */ u8  pad3AC[0x20];
+    /* 0x3AC */ u8 pad3AC[0x8];
+    /* 0x3B4 */ f32 distanceAccel;
+    /* 0x3B8 */ f32 distanceMaxSpeed;
+    /* 0x3BC */ u8 pad3BC[0x4];
+    /* 0x3C0 */ Vec3f eyeVel;                       /* easing velocity of eye */
     /* 0x3CC */ s16 unk3CC;
-    /* 0x3CE */ u16 pad3CE;
-    /* 0x3D0 */ struct127 *unk3D0;
-    /* 0x3D4 */ struct127 *unk3D4;
-    /* 0x3D8 */ u8  pad3D8[0x8];
+    /* 0x3CE */ u8 pad3CE[0x2];
+    /* 0x3D0 */ Actor *player;                   /* the object the camera follows */
+    /* 0x3D4 */ ActorCtl *playerExt;                /* player->unk31C */
+    /* 0x3D8 */ u8 pad3D8[0x4];
+    /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
     /* 0x3E0 */ f32 unk3E0;
-    /* 0x3E4 */ u32 pad3E4;
-    /* 0x3E8 */ u8  unk3E8;
-    /* 0x3E9 */ u8  pad3E9[0xb];
+    /* 0x3E4 */ u8 pad3E4[0x4];
+    /* 0x3E8 */ u8 unk3E8;
+    /* 0x3E9 */ u8 pad3E9[0x3];
+    /* 0x3EC */ f32 unk3EC;
+    /* 0x3F0 */ s16 unk3F0;
+    /* 0x3F2 */ u8 pad3F2[0x2];
     /* 0x3F4 */ f32 unk3F4;
     /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ u8  pad3FC[0x1d0];
+    /* 0x3FC */ Vec3f unk3FC;
+    /* 0x408 */ u8 pad408[0x1C4];
     /* 0x5CC */ f32 unk5CC;
-    /* 0x5D0 */ u32 pad5D0;
+    /* 0x5D0 */ f32 unk5D0;
     /* 0x5D4 */ s32 unk5D4;
     /* 0x5D8 */ f32 unk5D8;
-    /* 0x5DC */ u8  pad5DC[0xC];
+    /* 0x5DC */ f32 unk5DC;
+    /* 0x5E0 */ u8 pad5E0[0x8];
     /* 0x5E8 */ f32 unk5E8;
-    /* 0x5EC */ s32 pad5EC;
-    /* 0x5F0 */ s32 unk5F0;
-    /* 0x5F4 */ u8  pad5F4[0x6];
+    /* 0x5EC */ f32 swayAmount;                      /* roll, degrees */
+    /* 0x5F0 */ s32 status;
+    /* 0x5F4 */ u8 pad5F4[0x4];
+    /* 0x5F8 */ s16 unk5F8;
     /* 0x5FA */ s16 unk5FA;
-    /* 0x5FC */ u16 unk5FC;
-    /* 0x5FE */ u16 unk5FE;
-    /* 0x600 */ u8  pad600[0x18];
-    /* 0x618 */ s32 unk618; // struct ptr
-    /* 0x61C */ u8  pad61C[0x48];
-    /* 0x664 */ f32 unk664;
-    /* 0x668 */ f32 unk668;
-    /* 0x66C */ f32 unk66C;
-    /* 0x670 */ f32 unk670;
-    /* 0x674 */ f32 unk674;
-    /* 0x678 */ u8  pad678[0x4];
+    /* 0x5FC */ s16 unk5FC;
+    /* 0x5FE */ s16 unk5FE;
+    /* 0x600 */ u8 blocked;                          /* wall between focus and eye this frame */
+    /* 0x601 */ u8 pad601[0x3];
+    /* 0x604 */ f32 blockedDistance;
+    /* 0x608 */ u8 pad608[0x4];
+    /* 0x60C */ f32 unk60C;
+    /* 0x610 */ f32 unk610;
+    /* 0x614 */ Vec3f *unk614;
+    /* 0x618 */ Vec3f unk618;
+    /* 0x624 */ u8 pad624[0x4];
+    /* 0x628 */ s32 unk628;
+    /* 0x62C */ f32 unk62C;
+    /* 0x630 */ f32 unk630;                          /* yaw velocity while turning toward unk614 (func_15122170) */
+    /* 0x634 */ u8 pad634[0xC];
+    /* 0x640 */ s32 unk640;
+    /* 0x644 */ s32 unk644;
+    /* 0x648 */ s32 unk648;
+    /* 0x64C */ u8 pad64C[0x10];
+    /* 0x65C */ f32 unk65C;
+    /* 0x660 */ f32 unk660;
+    /* 0x664 */ Vec3f forward;
+    /* 0x670 */ f32 followRate;
+    /* 0x674 */ f32 followRateTarget;
+    /* 0x678 */ f32 followRateVel;
     /* 0x67C */ f32 unk67C;
-    /* 0x680 */ u8  pad680[0x18];
+    /* 0x680 */ u8 pad680[0x18];
     /* 0x698 */ s32 unk698;
-    /* 0x69C */ u8  pad69C[0x14];
-    /* 0x6B0 */ s32 unk6B0;
-    /* 0x6B4 */ u8  pad6B4[0x14];
-    /* 0x6C8 */ s32 unk6C8;
-    /* 0x6CC */ u8  pad6CC[0x30];
-    /* 0x6FC */ s32 unk6FC; // struct pointer
-    /* 0x700 */ u8  pad700[0xC];
-                s16 unk70C;
-                s16 unk70E;
-                s16 unk710;
-                s16 unk712;
-                u8  pad714[0xC];
-                f32 unk720;
-                f32 unk724;
-                f32 unk728;
-                f32 unk72C;
-                u8  pad730[0xC];
-    /* 0x73C */ s16 unk73C;
-    /* 0x73E */ u8  pad73E[0x42];
-                f32 unk780;
-                u8  pad784[0x30];
-    /* 0x7B4 */ f32 unk7B4; // used
-    /* 0x7B8 */ f32 unk7B8;
+    /* 0x69C */ u8 pad69C[0x14];
+    /* 0x6B0 */ s32 unk6B0;                          /* orbit direction */
+    /* 0x6B4 */ u8 pad6B4[0xC];
+    /* 0x6C0 */ s32 orbitCounter;
+    /* 0x6C4 */ f32 orbitSpeed;                      /* degrees per frame, clamped to +-10 */
+    /* 0x6C8 */ s32 cmdRunning;
+    /* 0x6CC */ CamCmdState cmdState;
+    /* 0x6FC */ CamCmd cmd;
+    /* 0x734 */ s32 unk734;
+    /* 0x738 */ s32 unk738;
+    /* 0x73C */ s16 aimState;
+    /* 0x73E */ u8 pad73E[0x2];
+    /* 0x740 */ CamAim aim;
+    /* 0x7A8 */ u8 pad7A8[0x8];
+    /* 0x7B0 */ f32 wobblePhase;
+    /* 0x7B4 */ f32 dt;                              /* frame time scale */
+    /* 0x7B8 */ s32 presetCooldown;
     /* 0x7BC */ f32 unk7BC;
-    /* 0x7C0 */ u8  pad7C0[0x8];
-                s32 unk7C8;
+    /* 0x7C0 */ f32 unk7C0;
+    /* 0x7C4 */ u8 pad7C4[0x4];
+    /* 0x7C8 */ f32 yawEaseVel;                      /* velocity of yaw while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
     /* 0x7CC */ s32 unk7CC;
-    /* 0x7D0 */ u8  pad7D0[0x14];
-                u8  unk7E4;
-                u8  pad7E5;
-                u16 unk7E6;
+    /* 0x7D0 */ f32 sideVel;
+    /* 0x7D4 */ f32 liftVel;
+    /* 0x7D8 */ f32 wobbleVel;
+    /* 0x7DC */ f32 wobbleAmount;
+    /* 0x7E0 */ f32 spinDir;
+    /* 0x7E4 */ u8 unk7E4;
+    /* 0x7E5 */ u8 pad7E5[0x1];
+    /* 0x7E6 */ u16 unk7E6;
     /* 0x7E8 */ f32 unk7E8;
-    /* 0x7EC */ u32 pad7EC;
-    /* 0x7F0 */ u32 pad7F0;
-    /* 0x7F4 */ u16 unk7F4;
-    /* 0x7F6 */ u16 unk7F6;
-                f32 unk7F8;
-                f32 unk7FC;
-                f32 unk800;
-    /* 0x7F8 */ u8  pad814[0x68];
-    /* 0x86C */ f32 unk86C;
-    /* 0x870 */ s32 unk870; // struct pointer
-                f32 unk874;
-                f32 unk878;
-                f32 unk87C;
-    /* 0x874 */ u8  pad880[0x3C];
-    /* 0x8BC */ s32 unk8BC;
-    /* 0x8C0 */ u8  pad8C0[0x2D];
-                u8  unk8ED;
-                u8  pad8EE[0xB1];
+    /* 0x7EC */ u8 pad7EC[0x8];
+    /* 0x7F4 */ CamTransition transition;
+    /* 0x844 */ f32 yawVel;
+    /* 0x848 */ u8 unk848;
+    /* 0x849 */ u8 pad849[0x1];
+    /* 0x84A */ s16 aimTimer;                        /* frames left before the aim swing gives up */
+    /* 0x84C */ u8 zoneHookActive;                   /* func_151C9BA0 ran; func_151C9ED4 undoes it */
+    /* 0x84D */ u8 shakeState;                       /* 0 idle, 1 start requested, 2 playing */
+    /* 0x84E */ u8 shakeFrame;
+    /* 0x84F */ u8 pad84F[0x1];
+    /* 0x850 */ s32 shakeIndex;                      /* which D_800DC280 table */
+    /* 0x854 */ Vec3f shakeRot;
+    /* 0x860 */ Vec3f shakePos;
+    /* 0x86C */ f32 pitchOverride;                   /* degrees, 999.0f = none */
+    /* 0x870 */ CamRail rail;
+    /* 0x8B4 */ f32 unk8B4;
+    /* 0x8B8 */ u8 unk8B8;
+    /* 0x8B9 */ u8 pad8B9[0x1];
+    /* 0x8BA */ s16 unk8BA;
+    /* 0x8BC */ u16 *unk8BC;
+    /* 0x8C0 */ f32 yawSpringVel;                    /* yaw velocity for func_15121C00 */
+    /* 0x8C4 */ f32 unk8C4;
+    /* 0x8C8 */ f32 unk8C8;
+    /* 0x8CC */ f32 unk8CC;
+    /* 0x8D0 */ s32 unk8D0;
+    /* 0x8D4 */ f32 yawFollowTarget;
+    /* 0x8D8 */ f32 yawFollowVel;
+    /* 0x8DC */ f32 yawFollow;                       /* how fast yaw turns toward the target */
+    /* 0x8E0 */ f32 lookBehindYawVel;
+    /* 0x8E4 */ u8 lookBehindTimer;
+    /* 0x8E5 */ u8 pad8E5[0x3];
+    /* 0x8E8 */ s32 lookBehindHold;
+    /* 0x8EC */ u8 lookingBehind;
+    /* 0x8ED */ u8 unk8ED;
+    /* 0x8EE */ u8 pad8EE[0x2];
+    /* 0x8F0 */ f32 unk8F0;
+    /* 0x8F4 */ f32 unk8F4;
+    /* 0x8F8 */ f32 unk8F8;
+    /* 0x8FC */ f32 unk8FC;
+    /* 0x900 */ f32 unk900;
+    /* 0x904 */ f32 unk904;
+    /* 0x908 */ f32 unk908;
+    /* 0x90C */ f32 unk90C;
+    /* 0x910 */ f32 unk910;
+    /* 0x914 */ f32 unk914;
+    /* 0x918 */ f32 unk918;
+    /* 0x91C */ f32 unk91C;
+    /* 0x920 */ u16 pathFlags;                       /* type 7 command options (cmd.unk8) */
+    /* 0x922 */ u8 pad922[0x2];
+    /* 0x924 */ f32 unk924;
+    /* 0x928 */ f32 unk928;
+    /* 0x92C */ u8 unk92C;
+    /* 0x92D */ u8 pad92D[0x3];
+    /* 0x930 */ f32 unk930;
+    /* 0x934 */ f32 unk934;
+    /* 0x938 */ f32 unk938;
+    /* 0x93C */ Vec3f unk93C;
+    /* 0x948 */ u8 unk948;
+    /* 0x949 */ u8 unk949;
+    /* 0x94A */ u8 pad94A[0x2];
+    /* 0x94C */ f32 unk94C;
+    /* 0x950 */ f32 unk950;
+    /* 0x954 */ f32 unk954;
+    /* 0x958 */ f32 unk958;
+    /* 0x95C */ f32 unk95C;
+    /* 0x960 */ f32 unk960;
+    /* 0x964 */ f32 unk964;
+    /* 0x968 */ f32 unk968;
+    /* 0x96C */ f32 speed;                           /* yaw easing speed and limit for func_15049688 (game_14F130.c) */
+    /* 0x970 */ f32 limit;
+    /* 0x974 */ f32 unk974;
+    /* 0x978 */ f32 unk978;
+    /* 0x97C */ f32 targetSpeed;
+    /* 0x980 */ f32 targetLimit;
+    /* 0x984 */ f32 unk984;
+    /* 0x988 */ f32 unk988;
+    /* 0x98C */ f32 speedVel;
+    /* 0x990 */ f32 limitVel;
+    /* 0x994 */ f32 sideOffset;
+    /* 0x998 */ f32 sideOffsetVel;
+    /* 0x99C */ f32 sideOffsetTarget;
 }; // size 0x9A0
+
+
 
 // func_80002E50
 typedef struct {
@@ -1940,12 +2591,58 @@ typedef struct {
     s8  pad2F;
 } struct162;
 
+/* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to func_1516A7B0. */
 typedef struct {
-    u16 unk0;
-    u8  pad2[0xA];
-    u8  unkC;
-    u8  padD[0x2B];
-} struct163; // size 0x38
+    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 flags;
+    /* 0x08 */ u8 *text;
+    /* 0x0C */ u8 isOpen;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ f32 *unk1C;
+    /* 0x20 */ f32 *unk20;
+    /* 0x24 */ f32 *unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ u8 r;
+    /* 0x2D */ u8 g;
+    /* 0x2E */ u8 b;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 pad30[4];
+    /* 0x34 */ s32 handle;
+} SeqSubtitle; // size 0x38
+
+/* Summary of one of the three save files the player can pick. */
+typedef struct SaveSlotInfo {
+    /* 0x00 */ s32 playTime;   /* D_800BE3E8, in seconds */
+    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
+    /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
+    /* 0x0C */ u8 unkC;        /* D_800BE3DF */
+    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
+    /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
+    /* 0x0F */ s8 padF;
+} SaveSlotInfo; /* size = 0x10 */
+
+/* The texture coordinates of one vertex (Vtx.v.tc); D_800C6360[id] saves a model's originals. */
+typedef struct TexCoord {
+    /* 0x0 */ s16 s;
+    /* 0x2 */ s16 t;
+} TexCoord;
+
+/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_36680.c). */
+typedef struct ParticleResource {
+    /* 0x0 */ u16 id; // 0xFF: none
+    /* 0x2 */ u16 flags;
+} ParticleResource;
+
+/* The texture file of one particle sprite type (D_800DDA90[15]; loaded by game_1A89B0.c). */
+typedef struct ParticleTexFile {
+    /* 0x0 */ s32 devAddr;
+    /* 0x4 */ s32 size;
+    /* 0x8 */ s32 buf;
+    /* 0xC */ u8  used; // set when a sprite of this type was built this frame
+    /* 0xD */ u8  padD[3];
+} ParticleTexFile; // size 0x10
 
 typedef struct {
     f32 unk0;   // used
@@ -1975,19 +2672,23 @@ typedef struct {
 } struct167;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    u8  unkC[0x8];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8  pad2C[0x30];
-    f32 unk5C;
-} struct168;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4; // scene
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ f32 unk14; // eye x, y, z
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24; // pitch
+    /* 0x28 */ f32 unk28; // yaw
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ u8  pad38[0x24];
+    /* 0x5C */ f32 unk5C;
+} struct168; // a scripted camera shot (func_1512D560 message), D_800C3600
 
 typedef struct {
     s16 unk0;
@@ -2130,7 +2831,7 @@ typedef struct {
 } struct174; // size 0x10
 
 typedef struct {
-    struct127* unk0;
+    Actor* unk0;
     u8  unk4;
     u8  pad5;
     s16 unk6;
@@ -2152,12 +2853,176 @@ typedef struct {
     s32 unk8;
 } struct177;
 
+/* A level placement record (trigger zones, gates, markers, light points): D_800D3098 points at the table. */
+typedef struct TriggerZone {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius; // or the x extent
+    /* 0x08 */ s16 height; // or the y extent
+    /* 0x0A */ s16 depth;  // or the z extent
+    /* 0x0C */ f32 pitch;  // degrees
+    /* 0x10 */ f32 yaw;    // degrees
+    /* 0x14 */ u8  disabled;
+    /* 0x15 */ u8  kind;   // (type << 2) | shape
+    /* 0x16 */ u8  flags;  // bit 0: only triggers near the ground
+    /* 0x17 */ u8  subtype;
+    /* 0x18 */ u32 unk18;  // per-type parameter (a colour for light points)
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ f32 sinPitch;
+    /* 0x28 */ f32 cosPitch;
+    /* 0x2C */ f32 sinYaw;
+    /* 0x30 */ f32 cosYaw;
+} TriggerZone; // size 0x34
+
+/*
+ * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
+ * linked list D_800DCD78. struct226 is a partial view of this.
+ */
+typedef struct PointLight {
+    /* 0x00 */ struct PointLight *next;
+    /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
+    /* 0x05 */ u8 color[3];
+    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
+    /* 0x09 */ u8 disabled;
+    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
+    /* 0x0B */ u8 group;             // id used by func_1515F170
+    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by func_1515D69C
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 viewPos[4][3];    // position transformed by player i's view matrix
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 radius;
+    /* 0x30 */ u8 viewPosValid;      // per-player bit: viewPos[i] is up to date
+} PointLight;
+
+/* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
 typedef struct {
-    s16 unk0;
-    s16 pad2;
-    s16 unk4;
-    u8  unk6[0x2E];
-} struct178; // size 0x34
+    /* 0x00 */ u8 col[3];
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ u8 colc[3];
+    /* 0x07 */ u8 pad7;
+    /* 0x08 */ s8 dir[3];
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x13];
+    /* 0x20 */ s16 pos[4];
+    /* 0x28 */ s16 pos2[4];
+} PointLightGfx;
+
+/* A node of the zone lists D_800DCD80 (ambient colour zones) and D_800DCD84 (tint zones), built by func_15009334. */
+typedef struct ZoneLink {
+    /* 0x0 */ struct ZoneLink *next;
+    /* 0x4 */ TriggerZone *zone;
+} ZoneLink;
+
+/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
+typedef struct TriggerNode {
+    /* 0x00 */ struct TriggerNode *next;
+    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8 check;     // index into D_80085E80
+    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
+    /* 0x0E */ u8 delay;     // frames before check starts running
+    /* 0x0F */ u8 padF;
+} TriggerNode;
+
+typedef struct {
+    u8 r, g, b;
+} Color24;
+
+/* A group of vertices whose colors fade together towards their own target colors. */
+typedef struct {
+    /* 0x0 */ Color24 *colors; // target color of each vertex
+    /* 0x4 */ u16 *vertexIndices;
+    /* 0x8 */ s32 count;
+} VtxColorGroup; // size 0xC
+
+/* D_800CC298 (0x18 bytes): state of the per-type texture animations (func_15061B4C, game_11C2B0.c). */
+typedef struct TexAnimState {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ s8  unk8;
+    /* 0x09 */ s8  unk9;
+    /* 0x0A */ s8  unkA;
+    /* 0x0B */ u8  unkB[4];
+    /* 0x0F */ u8  unkF;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  pad11;
+    /* 0x12 */ s16 tilt;
+    /* 0x14 */ s16 pulse;
+    /* 0x16 */ u8  pad16[2];
+} TexAnimState; // size 0x18
+
+/* One rising bubble sprite (drawn by func_15090630); D_800D2460[6]. */
+typedef struct Bubble {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 originX;
+    /* 0x6 */ s16 size;
+    /* 0x8 */ s16 radius;
+    /* 0xA */ s16 timer;
+    /* 0xC */ u8  accel;
+    /* 0xD */ u8  state;
+    /* 0xE */ u8  angle;
+    /* 0xF */ u8  phase;
+} Bubble; // size 0x10
+
+/* A water-surface vertex (Vtx layout) and its rest position/colour (game_BC510.c). */
+typedef struct WaterVtx {
+    /* 0x0 */ s16 ob[3];
+    /* 0x6 */ u16 flag;
+    /* 0x8 */ s16 tc[2];
+    /* 0xC */ u8  cn[4];
+} WaterVtx; // size 0x10
+
+typedef struct WaterBase {
+    /* 0x0 */ s16 ob[3];
+    /* 0x6 */ u8  cn[4];
+} WaterBase; // size 0xA
+
+/* D_800D24C8: the animated water surface (game_BC510.c). */
+typedef struct WaterStage {
+    /* 0x00 */ Mtx mtx[2];
+    /* 0x80 */ s32 dl;
+    /* 0x84 */ WaterVtx *vtx[2];
+    /* 0x8C */ WaterBase *base;
+    /* 0x90 */ WaterBase *target;
+    /* 0x94 */ f32 unk94;
+    /* 0x98 */ f32 unk98;
+    /* 0x9C */ f32 unk9C;
+    /* 0xA0 */ f32 unkA0;
+    /* 0xA4 */ f32 unkA4;
+    /* 0xA8 */ f32 unkA8;
+    /* 0xAC */ f32 unkAC;
+    /* 0xB0 */ u16 tex[4];
+    /* 0xB8 */ s16 timer;
+    /* 0xBA */ u8  alpha;
+    /* 0xBB */ u8  count;
+} WaterStage; // size 0xC0
+
+/* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
+typedef struct ParticleNode {
+    /* 0x0 */ s32 *resource;
+    /* 0x4 */ struct ParticleNode *next;
+    /* 0x8 */ struct ParticleNode *prev;
+    /* 0xC */ u16 model;
+    /* 0xE */ u8 keepLoaded;
+} ParticleNode;
+
+/* A cached keyframe: loaded vertex positions plus ticks left before it is freed. */
+typedef struct {
+    s16 (*positions)[3];
+    u8 timer;
+    u8 pad5[3];
+} VtxMorphFrame;
 
 typedef struct {
     s32 unk0;
@@ -2182,7 +3047,7 @@ typedef struct {
 } struct181;
 
 typedef struct {
-    struct127 *unk0;
+    Actor *unk0;
     u8 unk4;
     u8 pad5[0x1];
     s16 unk6;
@@ -2216,7 +3081,7 @@ typedef struct {
 } struct184; // size 0x20, 32 bytes
 
 typedef struct {
-    struct127* unk0;
+    Actor* unk0;
     u8  unk4;
     u8  pad5;
     s16 unk6;
@@ -2225,47 +3090,61 @@ typedef struct {
     s8  unkA;
 } struct185;
 
-typedef struct {
-    u8 pad0[0x8];
-    s32 unk8; // pointer
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
-    u8  pad18[0xC];
-    u16 unk24;
-    u8  pad26[0xA];
-    u16 unk30;
-    u16 unk32;
-    u8  pad34[0x28];
-    s32 unk5C;
-    u8  pad60[0x14];
-    s32 unk74; // pointer
-    u8  pad78[0xC];
-    s32 unk84;
-    s32 unk88;
-    u8  pad8C[0x8];
-    s16 unk94;
-    s16 unk96;
-    u8  pad98[0x2];
-    u8  unk9A;
-    u8  pad9B[0x5];
-} struct186; // size 0xA0, 160 bytes
+/* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
+ * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
+ * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
+ * the two rate pairs, the two targets). The fields outside that block are Rare's. Several fields
+ * are also addressed through their own symbols (D_800E0D84..D_800E0DFC) in game_21FC90. */
+typedef struct StreamVoice {
+    /* 0x00 */ s32  romAddr;        // ROM address of the stream (read at romAddr + D_800E0DE4)
+    /* 0x04 */ u8   pad4[0x4];
+    /* 0x08 */ void *unk8;          // 0x50-byte heap block
+    /* 0x0C */ s16  em_pan;
+    /* 0x0E */ s16  em_volume;
+    /* 0x10 */ s16  em_cvolL;
+    /* 0x12 */ s16  em_cvolR;
+    /* 0x14 */ s16  unk14;
+    /* 0x16 */ u16  unk16;
+    /* 0x18 */ u16  em_lratl;
+    /* 0x1A */ s16  em_lratm;
+    /* 0x1C */ s16  em_ltgt;
+    /* 0x1E */ u16  em_rratl;
+    /* 0x20 */ s16  em_rratm;
+    /* 0x22 */ s16  em_rtgt;
+    /* 0x24 */ u16  unk24;
+    /* 0x26 */ u8   pad26[0x2];
+    /* 0x28 */ s32  em_delta;
+    /* 0x2C */ s32  em_segEnd;
+    /* 0x30 */ u16  unk30;          // start of the lowpass state passed to func_1001CF38
+    /* 0x32 */ u16  unk32;
+    /* 0x34 */ u8   pad34[0x4];
+    /* 0x38 */ u8   unk38[0x24];    // DMEM-bound state block (its physical address goes in an acmd)
+    /* 0x5C */ void *unk5C;         // 8-byte heap block
+    /* 0x60 */ u8   pad60[0x14];
+    /* 0x74 */ void *unk74;         // 0x440-byte heap block, cleared on restart
+    /* 0x78 */ u8   pad78[0xC];
+    /* 0x84 */ s32  unk84;
+    /* 0x88 */ s32  unk88;          // target volume
+    /* 0x8C */ u8   pad8C[0x4];
+    /* 0x90 */ u32  unk90;
+    /* 0x94 */ s16  unk94;          // target pan
+    /* 0x96 */ s16  unk96;
+    /* 0x98 */ u8   pad98[0x2];
+    /* 0x9A */ u8   unk9A;
+    /* 0x9B */ u8   pad9B[0x5];
+} StreamVoice; // size 0xA0
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8  unk6;
-    u8  unk7;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  pad14;
-    u8  unk15;
-} struct187;
+/* A multiplayer spawn point (0x18 bytes) in the D_800D212C table, D_800D2128 entries long. */
+typedef struct SpawnPoint {
+    /* 0x00 */ s16 pos[3];
+    /* 0x06 */ u8  unk6;   /* angle, 256 units per turn */
+    /* 0x07 */ u8  facing; /* angle, 256 units per turn */
+    /* 0x08 */ f32 unk8[3];
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ s8  unk15;
+    /* 0x16 */ s8  link;   /* index of the spawn point to use instead; 0 = none, -1 = invalid */
+    /* 0x17 */ u8  pad17;
+} SpawnPoint; // size 0x18
 
 typedef struct {
     s32 unk0;
@@ -2329,8 +3208,8 @@ typedef struct {
 } struct192; // size 0x14
 
 typedef struct {
-    struct127 *unk0;
-    struct127 *unk4;
+    Actor *unk0;
+    Actor *unk4;
     u8 unk8;
     u8 unk9;
 } struct193;
@@ -2344,15 +3223,10 @@ typedef struct {
     s16 unk14;
 } struct194;
 
-typedef struct {
-    u16 unk0;
-    u8  pad2[0x1E];
-    u16 unk20;
-} struct195;
 
 typedef struct {
     s32 unk0;
-    struct127 *unk4;
+    Actor *unk4;
     s32 unk8;
     s32 unkC;
 } struct198;
@@ -2396,25 +3270,6 @@ typedef struct {
     u8  pad2C[0x8];
     u8  unk34;
 } struct204;
-
-typedef struct {
-    u8 pad0[0x14];
-    u8 unk14;
-} struct205;
-
-typedef struct {
-    struct205 *unk0;
-    u16 unk4;
-    u8  pad6[0x6];
-    u8  unkC;
-    u8  padD[0x63];
-    s32 *unk70; // tbd
-} struct206;
-
-typedef struct {
-    u8 pad0[0x28];
-    struct206 *unk28;
-} struct207;
 
 typedef struct {
     u16 unk0;
@@ -2618,9 +3473,6 @@ typedef struct {
     f32 unk8;
 } struct221; // size 0xC
 
-typedef struct {
-    u8 unk0[8];
-} struct222; //size 0x08
 
 typedef struct {
     s32 unk0;
@@ -2657,19 +3509,6 @@ typedef struct {
     f32 unk4;
     f32 unk8;
     f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8  pad20[0x4E];
-    u8  unk6E;
-} struct228;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
     s16 unk10;
     u8  pad12[0x12];
     u8  unk24;
@@ -2692,7 +3531,7 @@ typedef struct {
 } struct226;
 
 typedef struct {
-    struct127 *unk0; // struct127 pointer?
+    Actor *unk0; // Actor pointer?
     u8  unk4;
     u8  pad5[0x9];
     u8  unkE; // 6 bytes?
@@ -2703,7 +3542,7 @@ typedef struct {
     struct226 *unk14;
     struct227 *unk18; // struct227 pointer?
     f32 unk1C;
-    s32 unk20; // struct17 pointer?
+    s32 unk20; // Vec3f pointer?
     s8  unk24;
     u8  unk25;
     u8  pad26[0x2];
@@ -2718,7 +3557,7 @@ typedef struct {
 // only used by func_15163B98 ?
 typedef struct {
     u8 pad0[0x28];
-    struct228 *unk28;
+    WorldObject *unk28;
     u8  pad2C[0x14];
     f32 unk40;
 } struct230;
@@ -2741,18 +3580,26 @@ typedef struct {
     u8  pad13;
 } struct232; // size 0x14
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8  padC[0xC];
-    f32 unk18;
-    u8  unk1C[0x8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8  pad30[0x14];
-} struct233; // size 0x44
+/* Per-track state of a running cutscene; D_800C3958[scene] points at one per track. */
+typedef struct SeqTrackState {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18; // light intensity (func_15161A68)
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24; // light colour r, g, b (func_15161A68)
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 yOffset;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} SeqTrackState; // size 0x44
 
 typedef struct {
     s8  unk0;
@@ -2808,15 +3655,6 @@ typedef struct {
 } struct239;
 
 typedef struct {
-    u8  pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8  pad16[0x66];
-    s32 unk7C;
-} struct240;
-
-typedef struct {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -2838,7 +3676,7 @@ typedef struct {
     s32 *unk18; // struct ptr?
     f32 unk1C;
     s32 unk20;
-    s32 *unk24; // struct17 struct ptr?
+    s32 *unk24; // Vec3f pointer?
 } struct242;
 
 typedef struct {
@@ -2884,9 +3722,6 @@ typedef struct {
     s32 unk30;
 } struct246;
 
-typedef struct {
-    u8 pad0[0x760];
-} struct247; // maybe naudio?
 
 typedef struct {
     u16 unk0; // is this a pointer?
@@ -2897,20 +3732,25 @@ typedef struct {
     u16 unkA;
 } struct248; // size 0xC;
 
-typedef struct struct249 struct249;
+/* Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id (game_C8950).
+ * The payload (dataSize bytes) lives inside the same allocation at dataOffset. */
+typedef struct IdRecord {
+    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
+    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
+    /* 0x04 */ u16 size;        // size of the whole allocation
+    /* 0x06 */ u16 dataSize;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u16 dataOffset;
+    /* 0x0C */ u8  padC[0xC];
+    /* 0x18 */ struct IdRecord *next;
+    /* 0x1C */ struct IdRecord *prev;
+} IdRecord; // size 0x20
 
-struct struct249 {
-    u16 unk0;
-    u8  pad2[0x16];
-    struct249 *next;
-};
-
-typedef struct {
-    u16 length;
-    u8  pad2[0x2];
-    struct249 *unk4;
-    s32 unk8;         // tbd
-} struct250; // size 0xC;
+typedef struct IdRecordList {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ IdRecord *head;
+    /* 0x08 */ IdRecord *tail;
+} IdRecordList; // size 0xC
 
 typedef struct {
     u16 unk0;
@@ -2936,16 +3776,6 @@ typedef struct {
     u8  pad20[0x8];
 } struct253; // size 0x28
 
-typedef struct {
-    u8 pad0[0x1A];
-    s16 unk1A;
-} struct254;
-
-struct struct255 {
-    u8 pad0[0x240];
-    struct254 *unk240;
-};
-
 struct struct256 {
     u8 pad0[0x80];
     struct256 *unk80;
@@ -2970,14 +3800,176 @@ typedef struct {
     s16 unkD16;
 } struct257;
 
+/*
+ * Heap block header. Every block (free or allocated) starts with one; the
+ * payload handed out by func_10003C6C starts right after it. The top byte of
+ * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
+ * A free block also links into the free list through its first payload words.
+ */
+typedef struct AllocatorBlock {
+    /* 0x0 */ struct AllocatorBlock *next;
+    /* 0x4 */ struct AllocatorBlock *prev;
+    /* 0x8 */ u32 taggedSize;
+} AllocatorBlock;
+
+typedef struct AllocatorFreeBlock {
+    /* 0x00 */ AllocatorBlock header;
+    /* 0x0C */ struct AllocatorFreeBlock *nextFree;
+    /* 0x10 */ struct AllocatorFreeBlock *prevFree;
+} AllocatorFreeBlock;
+
+/* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game_447B0).
+ * Each member is (kind << 12 | index); kind 2 is an object, indexing D_800DBEF4. */
+typedef struct ObjGroup {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ u16 count;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 members[8];
+} ObjGroup; // size 0x18
+
+/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game_3D2E0, stepped in
+ * game_F5800). */
+typedef struct BounceRecord {
+    /* 0x0 */ u8  table;        // which D_80088810 table to draw from (0 or 1)
+    /* 0x1 */ u8  pad1;
+    /* 0x2 */ s8  dir;          // +1 / -1, flips when pos bounces off either end
+    /* 0x3 */ u8  pad3;
+    /* 0x4 */ s16 pos;          // bounces within [0, 0x500); pos >> 8 picks the table entry
+    /* 0x6 */ s16 speed;        // eased towards targetSpeed each tick
+    /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
+} BounceRecord; // size 0xA
+
+/* One loaded effect model, D_800DDE80[slot] (game_1B0740 loads and frees them). */
+typedef struct EffectModelSlot {
+    /* 0x00 */ void *resource;
+    /* 0x04 */ Vtx *unk4;          // two vertex buffers (swarm flap frames, wave deformation)
+    /* 0x08 */ Vtx *unk8;
+    /* 0x0C */ Gfx *displayList;
+    /* 0x10 */ void *unk10;
+} EffectModelSlot; // size 0x14
+
+/* A camera's message ring buffer, D_800DC2B0[camera index] (game_15AA10; allocated in game_32740).
+ * func_1512D560 appends, func_1512D604 takes the next message. */
+typedef struct CamMsgQueue {
+    /* 0x00 */ struct { s32 type; s32 arg; } msgs[20];
+    /* 0xA0 */ u8  padA0[8];
+    /* 0xA8 */ s32 head;   // next message to read
+    /* 0xAC */ s32 tail;   // next free slot
+} CamMsgQueue; // size 0xB0
+
+/* A run of consecutive model vertices loaded under one matrix (bone); D_800C5C08[id] holds
+ * D_800C5EF8[id] of them, sorted by address (built by func_150028BC in game_2DF70). */
+typedef struct VtxRun {
+    /* 0x0 */ Vtx *start;
+    /* 0x4 */ s32 count;
+    /* 0x8 */ u32 mtxIndex; // the bone the vertices are skinned to
+} VtxRun;
+
+/* A model triangle as the offsets of its three vertices in the model's vertex data
+ * (D_800C6070[id], built by func_150028BC; the vertex base is D_800D19A0[id]). */
+typedef struct VtxTri {
+    /* 0x0 */ s32 v[3];
+} VtxTri;
+
+/* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
 typedef struct {
-    s32 unk0;
-    u8  pad4[0x2];
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-} struct258;
+    /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
+    /* 0x04 */ f32 amplitude;
+    /* 0x08 */ u16 radius;
+    /* 0x0A */ s16 center[3]; // relative to the object's position
+    /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
+    /* 0x12 */ s8 speed;
+    /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
+    /* 0x14 */ u8 unk14[6];   // only used by mode 1
+    /* 0x1A */ u8 pad1A[2];
+} WaveParams;
+
+/* Moves an object's vertices in a sine wave (game_1A48C0; D_800DD410 holds pointers to them). */
+typedef struct WaveDeformer {
+    /* 0x00 */ u8 objectId;
+    /* 0x01 */ u8 flags;
+    /* 0x02 */ u8 sharesObject; // an earlier deformer already targets this object
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ WaveParams params;
+    /* 0x20 */ f32 *vertexWeight; // WAVE_WEIGHTED only
+    /* 0x24 */ s8 *vertexPhase;
+    /* 0x28 */ u8 *vertexAngle;   // mode 2 only; byte angle (256 per turn)
+} WaveDeformer; // size 0x2C
+
+/* A lens flare (game_1AB530); D_800DDD64 heads the list. */
+typedef struct LensFlare {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 screenX;
+    /* 0x10 */ f32 screenY;
+    /* 0x14 */ f32 dir[3];
+    /* 0x20 */ f32 minFacing;
+    /* 0x24 */ struct LensFlare *next;
+    /* 0x28 */ s16 brightness;
+    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
+    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
+    /* 0x2E */ u8 flags;
+    /* 0x2F */ u8 type;
+    /* 0x30 */ u8 alpha;
+} LensFlare; // size 0x34
+
+/* A trigger zone in a weighted list (built by func_1515F1B0 in game_18A8F0). D_800DCDC4 is a list of
+ * spawn regions whose areas add up to D_800DCD90; game_113D60 picks one at random by area. */
+typedef struct RegionNode {
+    /* 0x00 */ TriggerZone *region;
+    /* 0x04 */ f32 volume;
+    /* 0x08 */ f32 area;          // the pick weight in D_800DCDC4
+    /* 0x0C */ struct RegionNode *next;
+} RegionNode;
+
+/* A camera pose of the level's pose table D_800DC020 (D_80089550 entries, loaded by func_15005290 in
+ * game_32740); game_15BD90 reads the position, game_C3E20's scripted moves also the angles. */
+typedef struct CamPose {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ u8  pad6[6];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} CamPose; // size 0x18
+
+/* Mtx viewed as its s16 integer and fraction halves. */
+typedef struct MtxS16 {
+    s16 intPart[4][4];
+    s16 fracPart[4][4];
+} MtxS16;
+
+/* A bone-matrix trail ("afterimage") drawn behind an object (game_1B5CC0); D_800DF7C8[type] lists them. */
+typedef struct BoneTrail {
+    /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
+    /* 0x01 */ u8 numFrames; /* history length */
+    /* 0x02 */ u8 numFilled; /* history frames captured so far */
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see func_15189118 */
+    /* 0x06 */ s16 timer;
+    /* 0x08 */ MtxS16 *frames;
+    /* 0x0C */ struct BoneTrail *next;
+    /* 0x10 */ union {
+        Actor *object;
+        WorldObject *worldObj;
+    } owner;
+    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
+} BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
+
+/* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
+ * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
+ * which is 0 for the static world mesh. */
+typedef struct MeshTri {
+    /* 0x0 */ Vtx *verts[3];
+} MeshTri;
+
+/* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
+typedef struct GroundCandidate {
+    /* 0x0 */ s32 height;  // 24.8 fixed point
+    /* 0x4 */ s32 *tri;    // collision triangle (a D_800DBE3C entry): three vertex offsets from vtxBase
+    /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
+    /* 0xC */ s32 unkC;    // group or object index (D_800DBEF4), depending on the probe type
+} GroundCandidate;
 
 /* One on-screen view (a player's region of the framebuffer). D_800BE628 points at an array of these,
  * one per player view (allocated in game_476D0.c). */
@@ -3014,7 +4006,7 @@ typedef struct RenderView {
     /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
     /* 0x0B8 */ u16 perspNorm;
     /* 0x0BA */ u8  padBA[2];
-    /* 0x0BC */ f32 projection[4][4];
+    /* 0x0BC */ MtxF projection;
     /* 0x0FC */ u8  padFC[4];
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
@@ -3030,5 +4022,12 @@ typedef struct {
     s32 unk14; // union here?
     u8  pad18[0xC];
 } struct260; // size at least 0x24
+
+/* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
+typedef struct SchedulerClient {
+    /* 0x0 */ struct SchedulerClient *next;
+    /* 0x4 */ OSMesgQueue *msgQ;
+    /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
+} SchedulerClient;
 
 #endif

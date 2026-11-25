@@ -10,9 +10,9 @@ typedef struct {
     s32 unk8;
 } RelocRange;
 
-/* variables.h declares these pointer variables as arrays; view them as what they hold. */
-#define sRangeLists (*(RelocRange ***)D_800B0E30)
-#define sRangeCounts (*(u8 **)D_800B0E34)
+/* The vertex color groups D_800B0E30 (VtxColorGroup) as loaded: their pointers are still offsets to rebase. */
+#define sRangeLists (*(RelocRange ***)&D_800B0E30)
+#define sRangeCounts D_800B0E34
 
 /* Rebases entry `index`'s zero-terminated range list (at offset `list` in `base`) and stores its length. */
 void func_15003120(s32 index, s32 base, s32 list) {
@@ -52,19 +52,8 @@ typedef struct {
     s32 loaded;
 } LevelModelEntry;
 
-/* The byte past the end of struct104 (variables.h's type for D_800B0DF0). */
-typedef struct {
-    u8 pad0[0x4B];
-    u8 assetList; // index into D_80082B20, 0 = none
-} LevelInfo;
-
-/* Zero-terminated lists of asset ids loaded with each level (variables.h declares D_80082B20 as s32). */
-#define sLevelAssetLists ((s32 **)&D_80082B20)
-
 extern s32 D_800B0E10[];
 extern s32 D_800B0E20[];
-extern u8  D_800B0E38;
-extern s32 D_800B0E40[];
 extern LevelModelEntry *D_800B0E50;
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
@@ -118,7 +107,7 @@ void func_150031EC(s32 level) {
                 if (i < 4) {
                     D_800B0E00[i] = model->displayList;
                     D_800B0E10[i] = (s32)model->vertices;
-                    D_800B0E40[i] = (u32)(D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx);
+                    D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
                     D_800B0E20[i] = model->unk8;
                     if (i == 0) {
                         func_150039BC(model->unk10);
@@ -131,9 +120,9 @@ void func_150031EC(s32 level) {
             }
         }
     }
-    if (((LevelInfo *)D_800B0DF0)->assetList != 0) {
+    if (D_800B0DF0->assetList != 0) {
         j = 0;
-        while ((id = sLevelAssetLists[((LevelInfo *)D_800B0DF0)->assetList][j++]) != 0) {
+        while ((id = D_80082B20[D_800B0DF0->assetList][j++]) != 0) {
             func_1510D0EC(id, &size, 62, 0);
         }
     }
@@ -141,9 +130,6 @@ void func_150031EC(s32 level) {
 
 #define NUM_TEXTURES 7762
 
-/* Per-texture u16 tables (variables.h declares them as s32 arrays). */
-#define sTexCompressedSizes ((u16 *)D_80091D20)
-#define sTexSizes ((u16 *)D_800B87A0)
 
 /* Marks every texture unloaded and resets the requested texture id range. */
 s32 func_150034B4(void) {
@@ -183,25 +169,17 @@ void func_15003570(void) {
             romAddr--;
             odd = 1;
         } else {
-            odd = sTexCompressedSizes[i] * 0; // matching: a use here ranks the size-table IV above the store IV
+            odd = D_80091D20[i] * 0; // matching: a use here ranks the size-table IV above the store IV
         }
         func_10004514(romAddr, buf, 16, 1);
         header = odd + buf; // matching: operand order fixes the addu operand order
         size = (header[0] << 24) + (header[1] << 16) + (header[2] << 8) + header[3];
-        sTexSizes[i] = size;
-        romAddr += sTexCompressedSizes[i] + odd;
+        D_800B87A0[i] = size;
+        romAddr += D_80091D20[i] + odd;
     }
 
     func_10004074(buf);
 }
-
-/* The D_800D3300 hit records (variables.h declares D_800D3300 as a pointer, but it is the array). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} HitRecord;
-
-#define sHitRecords ((HitRecord *)&D_800D3300)
 
 extern void func_15001460(s32 dl);
 extern void func_15002754(void);
@@ -242,7 +220,7 @@ void func_15003668(s32 unused) {
     func_15002754();
 
     D_800D2C68 = 1;
-    D_800D2C2C = 0;
+    D_800D2C28[1] = 0;
     for (i = 0; i < D_800DBEF0; i++) {
         if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
@@ -258,12 +236,12 @@ void func_15003668(s32 unused) {
     func_150026E8(2);
 
     D_800D2C68 = 0;
-    sHitRecords[0].unk0 = 0;
-    sHitRecords[0].unk4 = D_800DBE3C << 8;
+    D_800D3300[0].height = 0;
+    D_800D3300[0].tri = (s32 *)((s32)D_800DBE3C << 8);
     func_1510F800(0);
 
     size = (func_15002878() + 7) & ~7;
-    D_800D3668 = D_8003809C;
+    D_800D3668 = (u8 *)D_8003809C;
     D_800D366C = D_800D3668 + size;
     func_1510F800(2);
 }
@@ -294,10 +272,10 @@ s32 func_1500390C(s32 addr) {
 void func_150039B0(s32 arg0) {
 }
 
-/* Sets D_800DBE5C to `addr` + 8, or to 0 when `addr` is 0. */
+/* Sets D_800DBE5C to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */
 void func_150039BC(s32 addr) {
-    D_800DBE5C = addr;
-    if (D_800DBE5C) {
-        D_800DBE5C += 8;
+    D_800DBE5C = (u32 *)addr;
+    if (D_800DBE5C != NULL) {
+        D_800DBE5C += 2;
     }
 }

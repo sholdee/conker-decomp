@@ -5,7 +5,7 @@
 
 s32 func_15178E50(s32 arg0) {
     if ((D_800B0DF0->unk14 == 1)) {
-        s32 tmp = D_800DBFF0->unk2FC;
+        s32 tmp = D_800DBFF0->eye.y;
         if (D_800B0DF0->unk16 < tmp) {
             return 1;
         }

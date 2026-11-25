@@ -1,23 +1,10 @@
 #include <ultra64.h>
-// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
+#include "effects.h"
 
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
 #define OBJ_TYPE_SCREEN_EFFECT 0x34
-
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: ends when lifetime runs out, 2/8: hidden in some states, 4: skip one draw */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler, -1 for none */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-    /* 0x7 */ u8 pad7;
-} EffectDesc;
 
 /* Object node of type 0x34; the effect's own data (dataSize bytes) follows at 0x18. */
 typedef struct ScreenEffect {
@@ -41,11 +28,9 @@ typedef struct {
 } ColourFrameBufferEffect;
 
 extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32 arg5);
-void func_15169260(const s32 *kinds, s32 count, s32 data, u8 event);
 
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
 extern ScreenEffect *D_800DCE50[2][104];
-#define OBJ_ITER_NEXT ((ScreenEffect **)D_800DD198)
 
 extern s32 (*D_8008B0D0[])(ScreenEffect *);
 extern void (*D_8008B0D8[])(ScreenEffect *, s32);
@@ -60,8 +45,8 @@ void func_1515FDA0(s32 arg0) {
     for (list = 0; list < 2; list++) {
         effect = D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
         D_800DD190++;
-        for (; effect != NULL; effect = OBJ_ITER_NEXT[D_800DD190]) {
-            OBJ_ITER_NEXT[D_800DD190] = effect->next;
+        for (; effect != NULL; effect = D_800DD198[D_800DD190]) {
+            D_800DD198[D_800DD190] = effect->next;
             if (effect->desc.flags & 4) {
                 effect->desc.flags &= ~4;
                 continue;
@@ -70,7 +55,7 @@ void func_1515FDA0(s32 arg0) {
                 continue;
             }
             visible = TRUE;
-            if ((effect->desc.flags & 2) && (D_800C35EA == 1)) {
+            if ((effect->desc.flags & 2) && (D_800C35EA[0] == 1)) {
                 visible = FALSE;
             }
             if ((effect->desc.flags & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {

@@ -1,9 +1,7 @@
-#define D_8003B234 D_8003B234_hdr
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
-#undef D_8003B234
 
 /* Messages received on the scheduler's interrupt queue D_8003B218. */
 #define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
@@ -12,21 +10,12 @@
 #define SCHED_MESG_AUDIO_TIMER 3 /* delay before starting the pending audio task */
 #define SCHED_MESG_CONT_READ   6 /* timer set in game_48FD0.c: start a controller read */
 
-/* A thread that receives the retrace message; linked in by func_100051C8. */
-typedef struct SchedulerClient_49E0 {
-    struct SchedulerClient_49E0 *next;
-    OSMesgQueue *msgQ;
-    u32 flags; /* bit 0: don't send retrace messages */
-} SchedulerClient_49E0;
-
-extern SchedulerClient_49E0 *D_8003B234; /* client list */
-
 void func_10004DB0(void);
 
 /* Scheduler thread: dispatches VI retrace, RSP/RDP completion and timer messages. */
 void func_100049E0(void *arg) {
     OSMesg msg;
-    SchedulerClient_49E0 *client;
+    SchedulerClient *client;
     OSTime delay;
 
     D_8003A581 = 0;
@@ -158,7 +147,7 @@ void func_10004F00(void) {
         D_8003A583 = 1;
         D_8003A584 = 0;
         if ((D_8003B238 == 255) ||
-            ((D_8003B238 >= 11) && ((D_8003B238 >= 21) || (D_800C35EA != 1)))) {
+            ((D_8003B238 >= 11) && ((D_8003B238 >= 21) || (D_800C35EA[0] != 1)))) {
             D_8003B238 = 2;
         }
         D_800BE9E4 = D_8003B238;

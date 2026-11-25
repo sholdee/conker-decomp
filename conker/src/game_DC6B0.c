@@ -1,16 +1,16 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-extern s32 *D_800DBF94;
 extern WorldObject *func_151149AC(u8);
-extern s32 func_1505D024(struct127 *, s32, u16, s32);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern s32 func_1505D024(Actor *, s32, u16, s32);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                           f32 halfWidth, f32 length, u16 lifetime, s32 texture, s32 mode, s16 onTime, s16 offTime,
-                          struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
+                          Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
                           f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ);
-extern void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
+extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
                           f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
 extern void func_15179008(s32);
 
@@ -52,46 +52,6 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Particle spawn template passed to func_15130280. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 scaleX;
-    /* 0x2C */ f32 scaleY;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags; /* 0x40: flip X, 0x80: flip Y */
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67[9];
-} ParticleSpawn; /* size 0x70 */
-
 /* Per-particle data of the wobbling particles func_150AF328 spawns (updated by func_150AF6E4). */
 typedef struct {
     /* 0x00 */ u8 phase[2];     /* x and z angles of the wobble ellipse */
@@ -103,14 +63,14 @@ typedef struct {
 /* A particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ vertex vel;
+    /* 0x58 */ Vec3f vel;
     /* 0x64 */ u8 pad64[0xA8 - 0x64];
     /* 0xA8 */ WobbleData wobble;
 } Particle;
 
 /* Per-effect data of the func_150AF328 emitter. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 spawnAccum;
 } EmitterData;
 
@@ -123,9 +83,9 @@ typedef struct {
     /* 0x28 */ EmitterData data;
 } Emitter;
 
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
-extern void func_15131958(vertex *vel, f32 drag);
+extern void func_15131958(Vec3f *vel, f32 drag);
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
@@ -135,42 +95,42 @@ void func_150AF328(Emitter *emitter) {
     data = &emitter->data;
     data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
-        ParticleSpawn spawn;
+        ParticleDesc spawn;
         WobbleData wobble;
         Particle *particle;
 
         wobble.drag = 0.9704700112f;
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
+        spawn.texture = 0x6C;
+        spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
-        spawn.unk1E = 70;
-        spawn.unk20 = 3;
+        spawn.fadeStart = 70;
+        spawn.fadeRate = 3;
         spawn.flags = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x16;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = 0x16;
         wobble.phase[0] = 0;
         wobble.phase[1] = 0;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 70;
-        spawn.unk14 = 0xC7;
-        spawn.unk15 = 0x78;
-        spawn.unk16 = 8;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x30;
-        spawn.unk19 = 0xE;
-        spawn.unk1A = 0;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.021028996f;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleStart = 70;
+        spawn.r = 0xC7;
+        spawn.g = 0x78;
+        spawn.b = 8;
+        spawn.a = 0xFF;
+        spawn.r2 = 0x30;
+        spawn.g2 = 0xE;
+        spawn.b2 = 0;
+        spawn.brightness = 0xFF;
+        spawn.scaleRate = 1.021028996f;
         spawn.pos = data->pos;
-        spawn.unk3C.x = 0.0f;
-        spawn.unk3C.y = 0.0f;
-        spawn.unk3C.z = 0.0f;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
         spawn.vel.x = 0.0f;
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
@@ -179,12 +139,12 @@ void func_150AF328(Emitter *emitter) {
             wobble.phaseStep[1] = func_150ADA20() % 5U + 4;
             wobble.amplitude[0] = func_150ADA68() * 11.0f;
             wobble.amplitude[1] = func_150ADA68() * 11.0f;
-            spawn.unk54 = func_150ADA68() * 0.172f + 0.09800000489f;
+            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 101U + 100;
-            spawn.unkA = func_150ADA20() % 51U + 80;
-            spawn.scaleX = spawn.scaleY = func_150ADA68() * 71.0f + 80.0f;
+            spawn.alpha = func_150ADA20() % 101U + 100;
+            spawn.timer = func_150ADA20() % 51U + 80;
+            spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(&particle->wobble, &wobble, sizeof(wobble));
@@ -203,16 +163,6 @@ s32 func_150AF6E4(Particle *particle, s32 arg1) {
     func_15131958(&particle->vel, wobble->drag);
     return 1;
 }
-
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: the effect ends when lifetime runs out */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-} EffectDesc;
 
 extern void func_1515FF74(EffectDesc *desc, s32 dataSize, u8, s32);
 
@@ -250,21 +200,6 @@ typedef struct GameDC6B0SmokeSource {
     GameDC6B0SmokeTimers timers;
 } GameDC6B0SmokeSource;
 
-typedef struct GameDC6B0SmokePacket {
-    f32 x, y;
-    f32 scaleX, scaleY;
-    u8 selector;
-    u8 pad11;
-    s16 lifetime, flags, field16, field18;
-    u8 color0, color1, color2, color3, color4;
-    u8 color5, color6, color7, color8, color9;
-    s32 field24, field28, field2C, field30, field34, field38, field3C;
-    u8 field40, field41;
-    u8 pad42[2];
-    u8 field44;
-    u8 pad45[0x13];
-} GameDC6B0SmokePacket;
-
 typedef struct GameDC6B0SmokeMotion {
     f32 x, y;
     f32 phase; /* random in [0, 2pi) */
@@ -278,16 +213,16 @@ typedef struct {
 } GameDC6B0SmokeSprite;
 
 u8 func_151D8E6C(void);
-GameDC6B0SmokeSprite *func_1515548C(GameDC6B0SmokePacket *, u8, s32, s32, s32, u8, s32);
+GameDC6B0SmokeSprite *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 
 /* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
 void func_150AF7C4(GameDC6B0SmokeSource *source) {
     GameDC6B0SmokeSprite *sprite;
-    GameDC6B0SmokePacket puff;
+    ScreenSpriteInfo puff;
     GameDC6B0SmokeMotion motion;
     GameDC6B0SmokeTimers *timers;
-    GameDC6B0SmokePacket spark;
+    ScreenSpriteInfo spark;
 
     timers = &source->timers;
     timers->puff -= D_800BE9E4;
@@ -299,36 +234,36 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.x = 0.0f;
         puff.y = 0.0f;
         func_150ADA68(); /* a random value the original draws and discards */
-        puff.selector = 0xFF;
-        puff.scaleX = 1.0f;
-        puff.scaleY = 115.0f;
-        puff.lifetime = func_150ADA20() % 71U + 20;
-        if (source->maxLifetime < puff.lifetime) {
-            puff.lifetime = source->maxLifetime;
+        puff.texture = 0xFF;
+        puff.halfWidth = 1.0f;
+        puff.halfHeight = 115.0f;
+        puff.timer = func_150ADA20() % 71U + 20;
+        if (source->maxLifetime < puff.timer) {
+            puff.timer = source->maxLifetime;
         }
         puff.flags = 0x21;
-        puff.field16 = 1;
-        puff.field18 = 0xFF;
-        puff.color0 = 0;
-        puff.color1 = 0xFF;
-        puff.color2 = 0xFF;
-        puff.color3 = 0xFF;
-        puff.color4 = func_150ADA20() % 71U + 40;
-        puff.color5 = 0xFF;
-        puff.color6 = 0xFF;
-        puff.color7 = 0xFF;
-        puff.color8 = 0xFF;
-        puff.color9 = 0xFF;
-        puff.field24 = 0;
-        puff.field28 = 0x200004;
-        puff.field2C = 0x1F0601;
-        puff.field30 = 0x19;
-        puff.field34 = 0x54;
-        puff.field38 = 0x80;
-        puff.field3C = 0x20;
-        puff.field40 = 0;
-        puff.field41 = 0xA;
-        puff.field44 = 0;
+        puff.fadeStart = 1;
+        puff.fadeRate = 0xFF;
+        puff.kind = 0;
+        puff.color1.red = 0xFF;
+        puff.color1.green = 0xFF;
+        puff.color1.blue = 0xFF;
+        puff.color1.alpha = func_150ADA20() % 71U + 40;
+        puff.color2.red = 0xFF;
+        puff.color2.green = 0xFF;
+        puff.color2.blue = 0xFF;
+        puff.color2.alpha = 0xFF;
+        puff.unk23 = 0xFF;
+        puff.otherModeH = 0;
+        puff.unk28 = 0x200004;
+        puff.unk2C = 0x1F0601;
+        puff.combineMode = 0x19;
+        puff.unk34 = 0x54;
+        puff.unk38 = 0x80;
+        puff.unk3C = 0x20;
+        puff.unk40 = 0;
+        puff.unk41 = 0xA;
+        puff.viewport = 0;
         sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->group, source->owner);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
@@ -339,35 +274,35 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
     if (timers->spark < 0) {
         spark.x = func_150ADA68() * 280.0f + -140.0f;
         spark.y = func_150ADA68() * 200.0f + -100.0f;
-        spark.scaleX = spark.scaleY = 2.0f * func_150ADA68() + 1.0f;
-        spark.selector = func_151D8E6C();
-        spark.lifetime = func_150ADA20() % 7U + 5;
-        if (source->maxLifetime < spark.lifetime) {
-            spark.lifetime = source->maxLifetime;
+        spark.halfWidth = spark.halfHeight = 2.0f * func_150ADA68() + 1.0f;
+        spark.texture = func_151D8E6C();
+        spark.timer = func_150ADA20() % 7U + 5;
+        if (source->maxLifetime < spark.timer) {
+            spark.timer = source->maxLifetime;
         }
         spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
-        spark.field16 = 1;
-        spark.field18 = 0xFF;
-        spark.color0 = 0;
-        spark.color1 = 0xFF;
-        spark.color2 = 0xFF;
-        spark.color3 = 0xFF;
-        spark.color4 = func_150ADA20() % 121U + 80;
-        spark.color5 = 0xFF;
-        spark.color6 = 0xFF;
-        spark.color7 = 0xFF;
-        spark.color8 = 0xFF;
-        spark.color9 = 0xFF;
-        spark.field24 = 0;
-        spark.field28 = 0x200004;
-        spark.field2C = 0x1F0601;
-        spark.field30 = 0x19;
-        spark.field34 = 0x55;
-        spark.field38 = 0x80;
-        spark.field3C = 0x20;
-        spark.field40 = 0;
-        spark.field41 = 7;
-        spark.field44 = 0;
+        spark.fadeStart = 1;
+        spark.fadeRate = 0xFF;
+        spark.kind = 0;
+        spark.color1.red = 0xFF;
+        spark.color1.green = 0xFF;
+        spark.color1.blue = 0xFF;
+        spark.color1.alpha = func_150ADA20() % 121U + 80;
+        spark.color2.red = 0xFF;
+        spark.color2.green = 0xFF;
+        spark.color2.blue = 0xFF;
+        spark.color2.alpha = 0xFF;
+        spark.unk23 = 0xFF;
+        spark.otherModeH = 0;
+        spark.unk28 = 0x200004;
+        spark.unk2C = 0x1F0601;
+        spark.combineMode = 0x19;
+        spark.unk34 = 0x55;
+        spark.unk38 = 0x80;
+        spark.unk3C = 0x20;
+        spark.unk40 = 0;
+        spark.unk41 = 7;
+        spark.viewport = 0;
         func_1515548C(&spark, 0, 0, 0, 0, source->group, source->owner);
         timers->spark = func_150ADA20() % 11U + 3;
     }
@@ -429,8 +364,8 @@ void func_150AFDB0(void) {
     Node150AFDB0 *node;
 
     D_800DD190++;
-    for (node = D_800DCE94; node != NULL; node = ((Node150AFDB0 **)D_800DD198)[D_800DD190]) {
-        ((Node150AFDB0 **)D_800DD198)[D_800DD190] = node->next;
+    for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
+        D_800DD198[D_800DD190] = node->next;
         if (node->unk3F == D_800C3E78) {
             func_1516972C((struct102 *)node);
         }
@@ -457,7 +392,7 @@ void func_150AFE64(s32 altBone) {
             bone = 2;
         }
 
-        mtx = ((f32 (*)[4][4])D_800D154C->unk1D4)[bone];
+        mtx = D_800D154C->unk1D4[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
@@ -485,30 +420,6 @@ void func_150B003C(s32 arg0) {
     func_150AF200(0xDF, 0xDE);
 }
 
-/* Projectile spawn template passed to func_1513264C. */
-typedef struct GameDC6B0Packet {
-    f32 field0, field4, field8, fieldC;
-    f32 angle0, angle1, angle2; /* elevation, heading (degrees), roll */
-    vertex scale;
-    vertex position;
-    vertex velocity;
-    vertex field40;
-    f32 field4C;
-    s32 field50;
-    s16 field54, field56;
-    u8 field58;
-    u8 pad59[3];
-    s32 field5C;
-    u8 field60, field61, field62, field63;
-    u8 field64, field65, field66, field67;
-    u8 field68, pad69, field6A, pad6B;
-    s32 field6C;
-    u8 field70, pad71;
-    s16 field72, field74;
-    u8 pad76[2];
-    s32 field78;
-} GameDC6B0Packet;
-
 /* A projectile created by func_1513264C. */
 typedef struct {
     u8 pad0[0x170];
@@ -521,16 +432,16 @@ typedef struct GameDC6B0TrailArgs {
     s32 unk4;
 } GameDC6B0TrailArgs;
 
-GameDC6B0Projectile *func_1513264C(GameDC6B0Packet *, s32, s32, s32, s32, u8, s32);
-void func_15145974(vertex *v, f32 *heading, f32 *elevation);
+GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
+void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
 struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
-s32 func_15145128(vertex *v, vertex *out, f32 *length, f32 *invLength);
+s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
-void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
-    GameDC6B0Packet packet;
-    vertex dir;
+void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
+    ParticleSpawn packet;
+    Vec3f dir;
     f32 length;
     f32 invLength;
     GameDC6B0Projectile *projectile;
@@ -542,37 +453,37 @@ void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
     dir.y = to->y - from->y;
     dir.z = to->z - from->z;
     if (func_15145128(&dir, &dir, &length, &invLength) != 0) {
-        packet.field4 = packet.field0 = 1.0f;
-        packet.field8 = packet.fieldC = 0.7f;
-        packet.position = *from;
-        packet.velocity.x = dir.x * 80.0f;
-        packet.velocity.y = dir.y * 80.0f;
-        packet.velocity.z = dir.z * 80.0f;
-        func_15145974(&packet.velocity, &packet.angle1, &packet.angle0);
+        packet.elasticity = packet.radius = 1.0f;
+        packet.sizeXZ = packet.sizeY = 0.7f;
+        packet.pos = *from;
+        packet.vel.x = dir.x * 80.0f;
+        packet.vel.y = dir.y * 80.0f;
+        packet.vel.z = dir.z * 80.0f;
+        func_15145974(&packet.vel, &packet.rot.y, &packet.rot.x);
         packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
-        packet.angle2 = 0.0f;
-        packet.field40 = *(vertex *)&D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
-        packet.field50 = 0x19A0;
-        packet.field54 = 300;
-        packet.field56 = 210;
-        packet.field58 = 7;
-        packet.field5C = 0;
-        packet.field60 = 0xFF;
-        packet.field61 = 8;
-        packet.field62 = 0;
-        packet.field63 = 0;
-        packet.field64 = 0;
-        packet.field65 = 0;
-        packet.field66 = 0;
-        packet.field67 = 0;
-        packet.field68 = 2;
-        packet.field6A = 0;
-        packet.field6C = 0;
-        packet.field70 = 0;
-        packet.field72 = 1;
-        packet.field74 = 0xFF;
-        packet.field78 = 0;
-        packet.field4C = 0.0f;
+        packet.rot.z = 0.0f;
+        packet.rotVel = D_800A5480;
+        packet.flags = 0x19A0;
+        packet.lifetime = 300;
+        packet.model = 210;
+        packet.variant = 7;
+        packet.unk5C = 0;
+        packet.alpha = 0xFF;
+        packet.updateFn = 8;
+        packet.update2Fn = 0;
+        packet.floorHitFn = 0;
+        packet.floorType3Fn = 0;
+        packet.wallHitFn = 0;
+        packet.destroyFn = 0;
+        packet.squashFn = 0;
+        packet.matrixFn = 2;
+        packet.unk6A = 0;
+        packet.owner = 0;
+        packet.ownerId = 0;
+        packet.fadeStart = 1;
+        packet.fadeRate = 0xFF;
+        packet.sound = 0;
+        packet.gravity = 0.0f;
         projectile = func_1513264C(&packet, 3, 0xFF, 0, 4, arg2, arg3);
         if (projectile != NULL) {
             trail = &projectile->trail;
@@ -608,76 +519,7 @@ void func_150B031C(GameDC6B0Projectile *projectile) {
     func_1513259C(projectile);
 }
 
-/* Particle burst description passed to func_15153634. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ u8 kind;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 flags;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 timer;
-    /* 0x12 */ s16 timerRange;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex position;
-    /* 0x44 */ s16 yaw;
-    /* 0x46 */ s16 pitch;
-    /* 0x48 */ s16 yawRange;
-    /* 0x4A */ s16 pitchRange;
-    /* 0x4C */ f32 speed;
-    /* 0x50 */ f32 speedRange;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 unk68;
-} ParticleBurst;
-
-/* Debris description passed to func_15152190: a random number of pieces thrown in random
- * directions from origin. */
-typedef struct {
-    /* 0x00 */ s32 count;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex origin;
-    /* 0x14 */ s16 yaw;
-    /* 0x16 */ s16 yawRange;
-    /* 0x18 */ s16 pitch;
-    /* 0x1A */ s16 pitchRange;
-    /* 0x1C */ f32 speed;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 scale;
-    /* 0x34 */ f32 scaleRange;
-    /* 0x38 */ f32 spin;
-} DebrisBurst;
-
-extern void func_15153634(ParticleBurst *, s32, u8, s32);
+extern void func_15153634(SpriteBurst *, s32, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
                           f32 radius, s32, u8, s32);
 
@@ -685,76 +527,76 @@ extern const s32 D_8009F790[5];
 extern const f32 D_8009F7A4[5];
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
-void func_150B0348(struct127 *obj, u8 arg1, s32 arg2) {
-    vertex pos;
+void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
+    Vec3f pos;
 
     pos.x = obj->x_position;
     pos.y = obj->y_position + 30.0f;
     pos.z = obj->z_position;
     {
-        ParticleBurst burst;
+        SpriteBurst burst;
 
-        burst.count = 10;
+        burst.countBase = 10;
         burst.countRange = 7;
-        burst.kind = 0x6C;
-        burst.unk6 = 0x5103;
-        burst.flags = 0x200005;
+        burst.texture = 0x6C;
+        burst.renderMode = 0x5103;
+        burst.unk8 = 0x200005;
         burst.unkC = 0;
-        burst.timer = 30;
+        burst.timerBase = 30;
         burst.timerRange = 15;
-        burst.unk14 = 0;
-        burst.unk18 = 0;
-        burst.unk1F = 0xFF;
-        burst.unk1C = 0x7F;
-        burst.unk1D = 0x4B;
-        burst.unk1E = 6;
-        burst.unk20 = 0x80;
-        burst.unk21 = 0x53;
-        burst.unk22 = 0;
-        burst.unk23 = 100;
-        burst.unk24 = 100;
-        burst.unk25 = 0xFF;
-        burst.unk26 = 32;
-        burst.unk28 = 7;
-        burst.unk2A = 32;
-        burst.unk2C = 1.025728941f;
-        burst.unk30 = 351.0f;
-        burst.unk34 = 200.0f;
-        burst.position = pos;
-        burst.yaw = 0;
-        burst.pitch = -25;
+        burst.frameRateBase = 0;
+        burst.frameRateRange = 0;
+        burst.a = 0xFF;
+        burst.r = 0x7F;
+        burst.g = 0x4B;
+        burst.b = 6;
+        burst.r2 = 0x80;
+        burst.g2 = 0x53;
+        burst.b2 = 0;
+        burst.alphaBase = 100;
+        burst.alphaRange = 100;
+        burst.brightness = 0xFF;
+        burst.fadeStart = 32;
+        burst.fadeRate = 7;
+        burst.scaleStart = 32;
+        burst.scaleRate = 1.025728941f;
+        burst.sizeBase = 351.0f;
+        burst.sizeRange = 200.0f;
+        burst.pos = pos;
+        burst.yawBase = 0;
+        burst.pitchBase = -25;
         burst.yawRange = 0xFF;
         burst.pitchRange = 21;
-        burst.speed = 5.0f;
+        burst.speedBase = 5.0f;
         burst.speedRange = 25.0f;
-        burst.unk54 = 0.008f;
-        burst.unk58 = 0.266f;
-        burst.unk5C = 0x40E07;
-        burst.unk60 = 16;
-        burst.unk61 = -1;
-        burst.unk62 = 8;
-        burst.unk63 = 6;
+        burst.gravityBase = 0.008f;
+        burst.gravityRange = 0.266f;
+        burst.flags = 0x40E07;
+        burst.updateFunc = 16;
+        burst.deathFunc = -1;
+        burst.primColorMode = 8;
+        burst.envColorMode = 6;
         burst.unk64 = 1;
-        burst.unk68 = 0.938608f;
+        burst.extra = 0.938608f;
         func_15153634(&burst, 0xFF, arg1, arg2);
     }
     {
         DebrisBurst debris;
 
-        debris.count = 36;
+        debris.countBase = 36;
         debris.countRange = 10;
-        debris.origin = pos;
-        debris.yaw = 0;
-        debris.yawRange = 0xFF;
-        debris.pitch = -40;
-        debris.pitchRange = 20;
-        debris.speed = 11.0f;
+        debris.pos = pos;
+        debris.angles.yawBase = 0;
+        debris.angles.yawRange = 0xFF;
+        debris.angles.pitchBase = -40;
+        debris.angles.pitchRange = 20;
+        debris.speedBase = 11.0f;
         debris.speedRange = 8.0f;
-        debris.unk24 = -1.09f;
-        debris.unk28 = 0.3710000217f;
-        debris.unk2C = 34;
-        debris.unk2E = 15;
-        debris.scale = 0.302000016f;
+        debris.gravityBase = -1.09f;
+        debris.gravityRange = 0.3710000217f;
+        debris.lifeBase = 34;
+        debris.lifeRange = 15;
+        debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
         func_15152190(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);

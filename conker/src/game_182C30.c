@@ -1,12 +1,11 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr2 /* hide the header's wrong prototype; redeclared below */
 #include "functions.h"
 #include "variables.h"
 
 /*
  * Type 0x50 object: a marker over player D_800CC2D0[playerId], made of a white point light and a sprite
  * (*D_800E03E0) that bob 160 units above the player.
- * The link header (type, list, prev, next) is shared with every object (see ObjLink in game_1944C0.c).
+ * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
 typedef struct PlayerMarker {
     /* 0x00 */ u8 pad0[0x8];
@@ -67,10 +66,7 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     }
 }
 
-/* functions.h declares func_15048A40 (sine of a u8 angle) as returning void. */
-#undef func_15048A40
-extern f32 func_15048A40(u8 angle);
-/* Creates a point light (struct226 is a partial view of game_18A8F0.c's PointLight); func_1515F10C frees it. */
+/* Creates a point light (struct226 is a partial view of PointLight in structs.h); func_1515F10C frees it. */
 struct226 *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, s32 group);
 void func_1515F10C();
 
@@ -82,10 +78,10 @@ void func_1515F10C();
  */
 void func_1515589C(PlayerMarker *marker) {
     s32 playerId;
-    struct127 *player;
+    Actor *player;
     s32 timer;
     s32 kind;
-    struct126 *info;
+    ActorCtl *info;
 
     playerId = marker->playerId;
     // matching: indexing with marker->playerId here and D_800CC2D0[playerId] below (not player->) orders the loads
@@ -95,7 +91,7 @@ void func_1515589C(PlayerMarker *marker) {
         info = D_800CC2D0[playerId].unk31C;
         kind = (info != NULL) ? info->unk75 : 0;
         if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
-            (kind != 0x2C) && (info->pad196[1] == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
+            (kind != 0x2C) && (info->aimState == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
             marker->state = 1;
             marker->timer = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
@@ -167,7 +163,7 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
     s32 playerId;
     f32 yaw;
-    struct127 *player;
+    Actor *player;
     f32 extraHeight;
 
     state = marker->state;
@@ -247,7 +243,7 @@ PlayerMarker *func_15155FD4(s32 playerId) {
  * Event handler. `actors` is the event payload: event type 0 (actors[0] is gone) destroys the marker of that
  * player; type 0x2D (actors[0] and actors[1] swap) moves the marker to the other player.
  */
-void func_15156028(PlayerMarker *marker, struct127 **actors, u8 eventType) {
+void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
     if (eventType == 0) {
         s32 player = actors[0] - D_800CC2D0;
 

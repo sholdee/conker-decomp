@@ -1,84 +1,7 @@
 #include <ultra64.h>
-/* func_150ADA20 returns a full 32-bit value; the shared header narrows it to u8 */
-#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
-
-/* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x04 */ vertex pos;
-    /* 0x10 */ s16 lifetime;
-    /* 0x14 */ f32 radius;     /* spawn points lie within this distance of pos */
-    /* 0x18 */ s16 yawBase;
-    /* 0x1A */ s16 yawRange;
-    /* 0x1C */ s16 pitchBase;
-    /* 0x1E */ s16 pitchRange;
-    /* 0x20 */ f32 speedBase;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 velYBase;   /* mode 0 only */
-    /* 0x2C */ f32 velYRange;
-    /* 0x30 */ vertex dir;     /* modes 2 and 3 */
-    /* 0x3C */ f32 sizeBase;
-    /* 0x40 */ f32 sizeRange;
-    /* 0x44 */ f32 gravityBase;
-    /* 0x48 */ f32 gravityRange;
-    /* 0x4C */ f32 spinBase;
-    /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;   /* see DebrisData */
-    /* 0x55 */ u8 landPuffFlag;
-    /* 0x56 */ s16 landPuffLifeBase;
-    /* 0x58 */ s16 landPuffLifeRange;
-} DebrisEmitter;
-
-/* Spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (see game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[6];
-} ParticleSpawn; // size 0x7C
-
-/* Spawn parameters of a BloodTrail effect (see game_161520.c). */
-typedef struct {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 radius;
-    /* 0x10 */ f32 rate;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 emitter;     /* D_80089AFC index */
-} BloodTrailDesc; // matching: the callee copies 0x1C bytes (two more fields), but this frame holds only 0x18
+#include "effects.h"
 
 /* A BloodTrail effect; the effect header's bytes 1 and 0xC are passed on to the drops it emits. */
 typedef struct {
@@ -107,11 +30,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -120,7 +43,7 @@ typedef struct {
 } Particle;
 
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern BloodTrail *func_15134908(BloodTrailDesc *, s32, u8, s32);
+extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*
  * Spawns emitter->count debris particles at random points within emitter->radius of emitter->pos,
@@ -225,7 +148,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         spawn.rotVel.z = func_150ADA68() * emitter->spinRange + emitter->spinBase;
         particle = func_15132A4C(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
         if (particle != NULL) {
-            BloodTrailDesc trailDesc;
+            BloodTrailDesc18 trailDesc;
             DebrisData *data;
             BloodTrail *trail;
             data = &particle->debris;
@@ -361,49 +284,6 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
                   15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
 }
 
-/* Billboard particle created by func_15167D84 (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 link[0x10];
-    /* 0x10 */ void *anim;
-    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s16 frame;
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ u8 subX;
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;        /* counts down */
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-    /* 0x40 */ u8 envR;
-    /* 0x41 */ u8 envG;
-    /* 0x42 */ u8 envB;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ u16 flags;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s8 onDeath;
-    /* 0x49 */ u8 pad49[7];
-} SpriteParticle; // the spawner's extra data follows at 0x50
-
-#define PARTICLE_ENV_COLOR   0x1
-#define PARTICLE_CUSTOM_MODE 0x100
-#define PARTICLE_2CYCLE      0x200
-
 /* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
 typedef struct {
     /* 0x0 */ s16 tintStart;    /* from here the env colour follows life (callback 0x15) */
@@ -415,40 +295,40 @@ typedef struct {
 } SwellParticleData;
 
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
-void func_151A77C0(SpriteParticle *particle) {
+void func_151A77C0(BillboardParticle *particle) {
     SwellParticleData *data = (SwellParticleData *)(particle + 1);
 
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    if (particle->life < data->tintStart) {
-        particle->callback = 0x15;
-        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_2CYCLE;
-        particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
-        particle->unk14 = 0xC000F;
+    if (particle->tmpl.life < data->tintStart) {
+        particle->tmpl.callback = 0x15;
+        particle->tmpl.flags |= BILLBOARD_ENV_COLOR | BILLBOARD_2CYCLE;
+        particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
+        particle->tmpl.unk4 = 0xC000F;
     }
 }
 
 /* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
-void func_151A787C(SpriteParticle *particle) {
+void func_151A787C(BillboardParticle *particle) {
     SwellParticleData *data = (SwellParticleData *)(particle + 1);
 
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
+    particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */

@@ -1,26 +1,16 @@
 #include <ultra64.h>
 #include "libc/stdarg.h"
 
-// functions.h declares func_15043BB8 as void(struct105 *); hide that to define the real signature
-#define func_15043BB8 func_15043BB8_header_mismatch
 #include "functions.h"
-#undef func_15043BB8
 #include "variables.h"
 
 void func_15042ECC(u8 *format, s32 *argumentWords);
 Gfx *func_15043384(Gfx *gfx);
 s32 strlen(const char *);
 
-typedef struct Game70200Anchor {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-} Game70200Anchor;
-
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
 typedef struct Game70200TextNode {
-    Game70200Anchor *anchor; /* if set, the text is drawn over this object */
+    Actor *anchor; /* if set, the text is drawn over this actor */
     f32 scale;
     s16 x;
     s16 y; /* height above the anchor while one is attached */
@@ -47,22 +37,23 @@ void *allocate_memory(s32, s32, s32, s32);
 s32 func_151EFF94(u8 *, const u8 *, ...);
 extern u8 D_80085CC0[]; /* "%s%s", deliberately unterminated: runs on into the spec buffer below */
 extern u8 D_80085CC4[]; /* conversion spec being parsed, e.g. "%2d" */
-extern Game70200TextNode *D_800CBD68;
+extern Game70200TextNode *D_800CBD64; /* head */
+extern Game70200TextNode *D_800CBD68; /* tail */
 extern u8 D_800CBD6C;
 extern u8 D_800CBD6D;
 extern u8 D_800CBD6E;
 extern u8 D_800CBD6F;
 
 /*
- * Text queue state (declared in variables.h): D_800CBD64 = head node, D_800CBD68 = tail node,
+ * Text queue state (D_800CBD64/68 declared above): D_800CBD64 = head node, D_800CBD68 = tail node,
  * D_800CBD60..63 = RGBA, D_800CBD6C..6F = node unk12..unk15, D_800CBD70/72 = x/y,
- * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor object, D_800CBD7C = height above it,
+ * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor actor, D_800CBD7C = height above it,
  * D_800CBD80 = scale. All apply to the next queued nodes; drawing resets them.
  */
 
 /** Drop the queued text without drawing (or freeing) it and reset the text state. */
 void func_15042D50(void) {
-    D_800CBD64 = 0;
+    D_800CBD64 = NULL;
     func_15043384(NULL);
 }
 
@@ -127,7 +118,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
         newNode->next = NULL;
         finished = 0;
         if (D_800CBD68 == NULL) {
-            D_800CBD64 = (s32)newNode;
+            D_800CBD64 = newNode;
         } else {
             D_800CBD68->next = newNode;
         }
@@ -197,7 +188,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
 
         node = newNode;
         node->flags = D_800CBD74;
-        node->anchor = (Game70200Anchor *)D_800CBD78;
+        node->anchor = D_800CBD78;
         if (node->anchor != NULL) {
             node->y = D_800CBD7C;
             node->flags |= TEXT_FLAG_CENTERED;
@@ -229,7 +220,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
             D_800CBD72 += 11; /* line height */
         }
     }
-    D_800CBD78 = 0;
+    D_800CBD78 = NULL;
 }
 
 /** Set the scale of subsequently queued text. */
@@ -242,7 +233,7 @@ void func_150432CC(s32 object, s32 yOffset) {
     D_800CBD74 |= TEXT_FLAG_CENTERED;
     D_800CBD74 = D_800CBD74; // matching: IDO re-stores the flags byte after the OR
     D_800CBD7C = yOffset;
-    D_800CBD78 = object;
+    D_800CBD78 = (Actor *)object;
 }
 
 /** Set the screen position of subsequently queued text. */
@@ -278,10 +269,7 @@ typedef struct Game70200Sprite {
 extern Gfx D_800859A0[];
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-extern s32 D_800BE9AC;
 extern Game70200Sprite D_80090060;
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
 void func_10004074(void *);
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
@@ -299,7 +287,7 @@ Gfx *func_15043384(Gfx *gfx) {
     s32 icon;
     Game70200TextNode *node;
     Game70200TextNode *next;
-    Game70200Anchor *anchor;
+    Actor *anchor;
     u32 visible;
     s32 shadow;
     f32 scale;
@@ -310,7 +298,7 @@ Gfx *func_15043384(Gfx *gfx) {
     s32 pulse;
     s32 frame;
 
-    node = (Game70200TextNode *)D_800CBD64;
+    node = D_800CBD64;
     // matching: D_80085CD0 (frame counter) is read as word 4 past D_80085CC0, i.e. D_80085CD0++
     D_80085CD0 = ((s32 *)D_80085CC0)[4] + 1;
     if (node != NULL) {
@@ -334,7 +322,7 @@ Gfx *func_15043384(Gfx *gfx) {
                 if (node->anchor != NULL) {
                     anchor = node->anchor;
                     D_80082FA4 = 0;
-                    visible = func_1509563C(anchor->x, anchor->y + node->y, anchor->z,
+                    visible = func_1509563C(anchor->x_position, anchor->y_position + node->y, anchor->z_position,
                                             &screenX, &screenY, &screenZ, &screenW, 30000.0f);
                     if (visible) {
                         node->x = screenX;
@@ -425,9 +413,9 @@ Gfx *func_15043384(Gfx *gfx) {
     D_800CBD72 = 10;
     D_800CBD80 = 1.0f;
     D_800CBD74 = 0;
-    D_800CBD64 = 0;
+    D_800CBD64 = NULL;
     D_800CBD68 = 0;
-    D_800CBD78 = 0;
+    D_800CBD78 = NULL;
     return gfx;
 }
 

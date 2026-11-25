@@ -23,7 +23,7 @@ void func_150120B0(s32 arg0) {
     }
 }
 
-void func_1501214C(struct127 *arg0) {
+void func_1501214C(Actor *arg0) {
     struct185 tmp;
 
     if (D_800BE9F0 != 24) {

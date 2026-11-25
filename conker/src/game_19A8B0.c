@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15048A40 as void; it returns f32 (declared below). */
-#define func_15048A40 func_15048A40_void_unused
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 
@@ -153,20 +150,18 @@ void func_1516F94C(Particle *particle, s32 factor);
 extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
-/* variables.h declares D_800DD2A0 as a single u8; it is really a u8[4]. */
-#define D_800DD2A0_ARRAY (*(u8 (*)[4])&D_800DD2A0)
 
 void func_1516D400(void) {
     s32 i;
     s32 level;
 
     for (i = 0; i < 4; i++) {
-        if (D_800DD2A0_ARRAY[i] < 0xFF) {
-            level = D_800DD2A0_ARRAY[i] + D_800BE9A0;
+        if (D_800DD2A0[i] < 0xFF) {
+            level = D_800DD2A0[i] + D_800BE9A0;
             if (level > 0xFF) {
                 level = 0xFF;
             }
-            D_800DD2A0_ARRAY[i] = level;
+            D_800DD2A0[i] = level;
         }
     }
 }
@@ -223,7 +218,6 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 /* The int-argument prototype that callers use (game_19E040.c declares the same one). */
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_1516972C(struct102 *arg0);
 extern s32 (*D_8008CBA0[])(Particle *);
 
 void func_1516D678(Particle *particle) {
@@ -277,14 +271,6 @@ typedef struct ParticleTexture {
 } ParticleTexture;
 
 extern ParticleTexture *D_8008CA4C[];
-extern s32 D_800D2C9C;
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
 Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7,
                    s32 sprite, u8 *synced, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);
@@ -438,7 +424,6 @@ void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 
@@ -594,7 +579,7 @@ void func_1516DB90(Emitter *arg0) {
                 scaleX = emitter->scaleX;
                 scaleY = emitter->scaleY;
                 if (emitter->scaleXRandom != 0) {
-                    scaleRandom = (u32)func_150ADA20() % (u32)emitter->scaleXRandom;
+                    scaleRandom = func_150ADA20() % (u32)emitter->scaleXRandom;
                 } else {
                     scaleRandom = 0;
                 }
@@ -604,38 +589,38 @@ void func_1516DB90(Emitter *arg0) {
                 } else {
                     scaleX += scaleRandom;
                     if (emitter->scaleYRandom != 0) {
-                        scaleY += (u32)func_150ADA20() % (u32)emitter->scaleYRandom;
+                        scaleY += func_150ADA20() % (u32)emitter->scaleYRandom;
                     }
                 }
                 if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
                     velocityY = emitter->velocityY;
                     if (emitter->velocityYRandom != 0) {
-                        velocityY += (u32)func_150ADA20() % emitter->velocityYRandom;
+                        velocityY += func_150ADA20() % emitter->velocityYRandom;
                     }
                     velXHigh = emitter->velocityXHigh;
                     if (emitter->velocityXHighRandom != 0) {
-                        velXHigh += (u32)func_150ADA20() % emitter->velocityXHighRandom;
+                        velXHigh += func_150ADA20() % emitter->velocityXHighRandom;
                         if (velXHigh >= 0x100) {
                             velXHigh = 0xFF;
                         }
                     }
                     velXLow = emitter->velocityXLow;
                     if (emitter->velocityXLowRandom != 0) {
-                        velXLow += (u32)func_150ADA20() % emitter->velocityXLowRandom;
+                        velXLow += func_150ADA20() % emitter->velocityXLowRandom;
                         if (velXLow >= 0x100) {
                             velXLow = 0xFF;
                         }
                     }
                     velZHigh = emitter->velocityZHigh;
                     if (emitter->velocityZHighRandom != 0) {
-                        velZHigh += (u32)func_150ADA20() % emitter->velocityZHighRandom;
+                        velZHigh += func_150ADA20() % emitter->velocityZHighRandom;
                         if (velZHigh >= 0x100) {
                             velZHigh = 0xFF;
                         }
                     }
                     velZLow = emitter->velocityZLow;
                     if (emitter->velocityZLowRandom != 0) {
-                        velZLow += (u32)func_150ADA20() % emitter->velocityZLowRandom;
+                        velZLow += func_150ADA20() % emitter->velocityZLowRandom;
                         if (velZLow >= 0x100) {
                             velZLow = 0xFF;
                         }
@@ -804,8 +789,8 @@ void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
 }
 
 void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
-    if (object < 4 && D_800DD2A0_ARRAY[object] >= threshold) {
-        D_800DD2A0_ARRAY[object] = 0;
+    if (object < 4 && D_800DD2A0[object] >= threshold) {
+        D_800DD2A0[object] = 0;
         func_1516D99C(0, 0, 0, 4,
             0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
             2, 0, 0, 0, 0, 0, 0, 0,
@@ -925,7 +910,7 @@ void func_1516F548(
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
     func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
-        (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
+        (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */

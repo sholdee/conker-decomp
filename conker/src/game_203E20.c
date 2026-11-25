@@ -1,25 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-extern void func_150D6730(struct127 *obj, u8 arg1, s32 arg2);
+extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 extern u32 D_80083740[];
 extern u32 D_800838C0[];
 
-/* Header shared by the objects func_15149130 creates (same layout as in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; // set to -1 to remove the object
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} ObjHeader;
-
-/* Text box data (same layout as TextBox in game_FC5F0.c). */
+/* Text box data (same layout as TextLines in game_FC5F0.c). */
 typedef struct {
     /* 0x00 */ u8 id;
     /* 0x01 */ u8 pad1[3];
@@ -36,17 +26,18 @@ typedef struct {
     /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
     /* 0x25 */ u8 msgFn; // index into D_800888B0
     /* 0x26 */ u8 pad26[2];
-} TextBox;
+} TextLines;
 
 /* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
 typedef struct {
-    /* 0x00 */ ObjHeader header;
-    /* 0x28 */ TextBox text;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ TextLines text;
 } TextObj;
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when the box was made
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ s32 amount;
@@ -56,185 +47,86 @@ typedef struct {
 
 /* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
    while D_800BE9F0 is 0x32 or 0x33. */
-void func_151D6970(struct127 *character, void *obj) {
+void func_151D6970(Actor *character, void *obj) {
     if ((D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x33)) {
         func_150D6730(character, 0xFF, 1);
     }
 }
 
-/* Parameter block for func_15153F18 (Params15153F18 in game_16EE20.c). */
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    f32 pos[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    u8 unk3C;
-    u8 pad3D[3];
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} Params15153F18;
-
-/* Parameter block for func_15150178. */
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    f32 pos[3];
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41[3];
-    f32 unk44;
-} Params15150178;
-
-/* Pickup object (Obj15119FC0 in game_147470.c; only the fields used here). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 position[3];
-} Pickup;
-
-extern void func_1504715C(void *ground, struct127 *actor);
-extern void func_15153F18(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
-extern void func_15150178(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
+extern void func_1504715C(void *ground, Actor *actor);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, void *ground, s32 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, void *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
-void func_151D69B4(Pickup *pickup, struct127 *player) {
+void func_151D69B4(WorldObject *pickup, Actor *player) {
     u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
-    Params15153F18 first;
+    SplashSpraySpec first;
 
     func_1504715C(ground, player);
-    first.pos[0] = pickup->position[0];
-    first.pos[1] = pickup->position[1];
-    first.pos[2] = pickup->position[2];
-    first.unk14 = 2.49000001f;
-    first.unk2C = 3;
-    first.unk2E = 3;
-    first.unk02 = 0xFF;
-    first.unk04 = -0x2B;
-    first.unk00 = 0;
-    first.unk06 = 0x20;
-    first.unk30 = 3;
-    first.unk32 = 2;
-    first.unk34 = 0x28;
-    first.unk36 = 0x14;
-    first.unk38 = 0x9B;
-    first.unk3A = 0x64;
-    first.unk44 = 0x10;
-    first.unk46 = 0xF;
-    first.unk48 = 0;
-    first.unk3C = 9;
-    first.unk18 = 2.029999971f;
-    first.unk1C = 0.6080000401f;
-    first.unk20 = 0.2569999993f;
-    first.unk24 = 17.0f;
-    first.unk28 = 3.5f;
-    first.unk40 = 0.400000006f;
-    func_15153F18(&first.unk00, first.pos, ground, 0xFF, 1);
+    first.spray.pos.x = pickup->x;
+    first.spray.pos.y = pickup->y;
+    first.spray.pos.z = pickup->z;
+    first.spray.scaleBase = 2.49000001f;
+    first.spray.countBase = 3;
+    first.spray.countRange = 3;
+    first.angles.yawRange = 0xFF;
+    first.angles.pitchBase = -0x2B;
+    first.angles.yawBase = 0;
+    first.angles.pitchRange = 0x20;
+    first.spray.itemCountBase = 3;
+    first.spray.itemCountRange = 2;
+    first.spray.lifeBase = 0x28;
+    first.spray.lifeRange = 0x14;
+    first.spray.unk30 = 0x9B;
+    first.spray.unk32 = 0x64;
+    first.spray.unk3C = 0x10;
+    first.spray.unk3E = 0xF;
+    first.spray.unk40 = 0;
+    first.spray.kind = 9;
+    first.spray.scaleRange = 2.029999971f;
+    first.spray.sizeBase = 0.6080000401f;
+    first.spray.sizeRange = 0.2569999993f;
+    first.spray.speedBase = 17.0f;
+    first.spray.speedRange = 3.5f;
+    first.spray.unk38 = 0.400000006f;
+    func_15153F18(&first.angles, &first.spray, ground, 0xFF, 1);
     {
-        Params15150178 second;
+        DropSpraySpec second;
 
-        second.pos[0] = pickup->position[0];
-        second.pos[1] = pickup->position[1];
-        second.pos[2] = pickup->position[2];
-        second.unk14 = 0xF;
-        second.unk16 = 6;
-        second.unk00 = 0;
-        second.unk02 = 0xFF;
-        second.unk04 = -0x40;
-        second.unk06 = 0xC;
-        second.unk20 = 0x3C;
-        second.unk22 = 0x2D;
-        second.unk2C = 0xC8;
-        second.unk2D = 0x37;
-        second.unk38 = 1;
-        second.unk39 = 9;
-        second.unk3C = 1.0f;
-        second.unk40 = 0;
-        second.unk44 = 1.0f;
-        second.unk18 = 10.0f;
-        second.unk1C = 6.0f;
-        second.unk24 = -1.506000042f;
-        second.unk28 = 0.8140000105f;
-        second.unk30 = 44.0f;
-        second.unk34 = 88.0f;
-        func_15150178(&second.unk00, second.pos, ground, 0xFF, 1);
+        second.spray.pos.x = pickup->x;
+        second.spray.pos.y = pickup->y;
+        second.spray.pos.z = pickup->z;
+        second.spray.countBase = 0xF;
+        second.spray.countRange = 6;
+        second.angles.yawBase = 0;
+        second.angles.yawRange = 0xFF;
+        second.angles.pitchBase = -0x40;
+        second.angles.pitchRange = 0xC;
+        second.spray.lifeBase = 0x3C;
+        second.spray.lifeRange = 0x2D;
+        second.spray.unk24 = 0xC8;
+        second.spray.unk25 = 0x37;
+        second.spray.unk30 = 1;
+        second.spray.kind = 9;
+        second.spray.unk34 = 1.0f;
+        second.spray.wobbles = 0;
+        second.spray.bounceChance = 1.0f;
+        second.spray.speedBase = 10.0f;
+        second.spray.speedRange = 6.0f;
+        second.spray.gravityBase = -1.506000042f;
+        second.spray.gravityRange = 0.8140000105f;
+        second.spray.sizeBase = 44.0f;
+        second.spray.sizeRange = 88.0f;
+        func_15150178(&second.angles, &second.spray, ground, 0xFF, 1);
     }
 }
-
-/* Effect spawn parameters (same layout as EffectParams in game_1844C0.c). */
-typedef struct {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ s8 updateFunc;   // index into D_8008AD90, -1 = none
-    /* 0x02 */ s8 updateFunc2;  // index into D_8008ADA0, -1 = none
-    /* 0x03 */ s8 preDrawFunc;  // index into D_8008ADBC, -1 = none
-    /* 0x04 */ s8 postDrawFunc; // index into D_8008ADCC, -1 = none
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 lifetime;
-    /* 0x08 */ s32 model;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 otherModeH;
-    /* 0x14 */ s32 geometrySet;
-    /* 0x18 */ s32 geometryClear;
-    /* 0x1C */ s32 renderMode;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 otherModeH2;
-    /* 0x28 */ s32 otherModeH3;
-    /* 0x2C */ s8 primMode;
-    /* 0x2D */ s8 envMode;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ u8 color0[4];
-    /* 0x34 */ u8 color1[4];
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ struct127 *owner;
-    /* 0x40 */ u8 ownerId;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ struct17 pos;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart; // alpha fades once lifetime drops below this
-    /* 0x56 */ s16 fadeRate;
-} EffectParams; // size 0x58
 
 /* Model effect object (Effect in game_1844C0.c; only the fields used here). */
 typedef struct {
     /* 0x00 */ u8 header[0x10];
     /* 0x10 */ EffectParams params;
     /* 0x68 */ u8 pad68[0x7C - 0x68];
-    /* 0x7C */ f32 mtx[2][4][4]; // per frame
+    /* 0x7C */ MtxF mtx[2]; // per frame
 } ModelEffect;
 
 typedef struct {
@@ -251,7 +143,7 @@ extern Struct1509B570 *func_1509B570(s32);
  * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
  * showing a random amount as "$ %d" (style 3: func_151D7000 / func_151D70CC).
  */
-void func_151D6BFC(struct127 *owner, u8 arg1, s32 arg2) {
+void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     EffectParams params;
     Struct1509B570 *entry;
 
@@ -264,27 +156,27 @@ void func_151D6BFC(struct127 *owner, u8 arg1, s32 arg2) {
     params.lifetime = 150;
     params.model = 0xA5;
     params.unkC = 0x17;
-    params.otherModeH = 0;
-    params.geometrySet = 0x220405;
-    params.geometryClear = 0x40200;
-    params.envMode = 8;
-    params.renderMode = 1;
-    params.unk20 = 0x38;
-    params.primMode = 0;
-    params.otherModeH2 = 0x80;
-    params.otherModeH3 = 0x20;
-    params.color0[0] = 0xFF;
-    params.color0[1] = 0xFF;
-    params.color0[2] = 0xFF;
-    params.color0[3] = 0xFF;
-    params.color1[0] = 0xFF;
-    params.color1[1] = 0xFF;
-    params.color1[2] = 0xFF;
-    params.color1[3] = 0xFF;
+    params.render.unk0 = 0;
+    params.render.setGeometryMode = 0x220405;
+    params.render.clearGeometryMode = 0x40200;
+    params.render.envMode = 8;
+    params.render.renderMode = 1;
+    params.render.unk10 = 0x38;
+    params.render.primMode = 0;
+    params.render.unk14 = 0x80;
+    params.render.unk18 = 0x20;
+    params.color0.red = 0xFF;
+    params.color0.green = 0xFF;
+    params.color0.blue = 0xFF;
+    params.color0.alpha = 0xFF;
+    params.color1.red = 0xFF;
+    params.color1.green = 0xFF;
+    params.color1.blue = 0xFF;
+    params.color1.alpha = 0xFF;
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = *(struct17 *)&D_800A5480; // variables.h declares D_800A5480 as f32; it is a struct17
+    params.pos = D_800A5480;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
     func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
@@ -355,7 +247,7 @@ s32 func_151D6E60(ModelEffect *fx) {
  * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
  */
 s32 func_151D7000(TextObj *obj) {
-    struct127 *owner;
+    Actor *owner;
     AmountTextStyle *style;
     s16 timeLeft;
     s16 pad; // matching: unused, but alpha's register allocation depends on it
@@ -367,7 +259,7 @@ s32 func_151D7000(TextObj *obj) {
         return 0;
     }
 
-    timeLeft = obj->header.unkE;
+    timeLeft = obj->header.state;
     if (timeLeft < style->fadeStart) {
         alpha = timeLeft * style->fadeRate;
         if (alpha < 0) {
@@ -387,7 +279,7 @@ s32 func_151D7000(TextObj *obj) {
 void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
     AmountTextStyle *style = obj->text.style;
 
-    func_15169850((s32)payload, type, (s32)&style->owner, (s32)&style->ownerId, (s32)obj);
+    func_15169850((s32)payload, type, &style->owner, &style->ownerId, obj);
 }
 
 /*
@@ -395,7 +287,7 @@ void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed) {
-    if (fx->params.color0[3] < 0xFF) {
+    if (fx->params.color0.alpha < 0xFF) {
         gSPSegment(gfx++, 8, D_80083740);
     } else {
         gSPSegment(gfx++, 8, D_800838C0);

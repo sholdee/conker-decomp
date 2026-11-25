@@ -109,7 +109,7 @@ void func_16000058(void) {
         } else {
             func_16001338(255, 255, 255);
         }
-        func_160012B0(position, (u8 *)D_16003B20[i]); // "REGISTERS", "STACK"
+        func_160012B0(position, D_16003B20[i]); // "REGISTERS", "STACK"
         position += 32;
     }
     if (D_16003B1C == 2) {
@@ -118,7 +118,7 @@ void func_16000058(void) {
         func_16001338(255, 255, 255);
     }
     if (D_16003AF0 != 0) {
-        if ((D_1600389C->unk120 == EXC_SYSCALL) && (D_160038A4 == 0)) { // unk120 is context.cause
+        if ((D_1600389C->context.cause == EXC_SYSCALL) && (D_160038A4 == 0)) {
             func_160012B0(position, D_160046DC); // "CONTINUE"
         } else if (D_16003AF0 != 0) {
             func_160012B0(position, D_160046E8); // "HOSTDEBUG"
@@ -181,11 +181,11 @@ void func_16000314(void) {
     switch (D_16003B28) {
         case 0:
             func_16000424(D_1600389C);
-            func_160006CC((OSThread *)D_1600389C);
+            func_160006CC(D_1600389C);
             break;
         case 1:
         case 2:
-            func_16000590((OSThread *)D_1600389C);
+            func_16000590(D_1600389C);
             break;
     }
 }
@@ -216,10 +216,10 @@ s32 func_16000384(void) {
 }
 
 /* Register page 0, top half: pc, cause (with its exception name), sr, badvaddr and thread id. */
-void func_16000424(struct118 *faulted) {
+void func_16000424(OSThread *faulted) {
     u32 cause;
     u32 exception;
-    OSThread *thread = (OSThread *)faulted; // struct118 is an OSThread
+    OSThread *thread = faulted; // matching: the extra local keeps IDO's stack-slot layout
 
     func_16001338(255, 255, 255);
     func_160012B0(35, D_16004728); // "Pc"
@@ -230,7 +230,7 @@ void func_16000424(struct118 *faulted) {
     cause = thread->context.cause;
     exception = (cause >> 2) & 0xF;
 
-    func_160012B0(107, (u8 *)D_16003848[exception]); // exception name
+    func_160012B0(107, D_16003848[exception]); // exception name
     if (exception == 11) { // coprocessor unusable: show which one
         func_16001044(111, PRINT_DEC, (cause >> 28) & 3);
     }
@@ -325,7 +325,7 @@ void func_1600078C(void) {
     u32 value;
     u32 segment;
 
-    stack = (u32 *)(u32)((OSThread *)D_1600389C)->context.sp;
+    stack = (u32 *)(u32)D_1600389C->context.sp;
     func_16001338(0, 255, 0);
     func_160012B0(11, D_160047B0); // "STACK-VIEW"
     address = stack + D_16003B4C;
@@ -423,9 +423,9 @@ s32 func_16000B14(OSThread *thread) {
         return 0;
     }
     D_16003888 = 0;
-    if ((D_8002AAE8[0] == 0) || (D_8002AAE8[1] == 0)) {
-        D_8002AAE8[0] = 0x80350000;
-        D_8002AAE8[1] = 0x80350000;
+    if ((D_8002AAE8[0] == NULL) || (D_8002AAE8[1] == NULL)) {
+        D_8002AAE8[0] = (u16 *)0x80350000;
+        D_8002AAE8[1] = (u16 *)0x80350000;
         return 0;
     }
     func_16003650();
@@ -459,7 +459,7 @@ s32 func_16000B14(OSThread *thread) {
     if (framebuffer == (u32 *)D_8002AAE8[1]) {
         *(s8 *)&D_16003888 = 1; // matching: an s8 store lets IDO reuse the 1 already in a register
     }
-    D_1600389C = (struct118 *)thread;
+    D_1600389C = thread;
     D_160038A4 = 0;
     if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)func_150AD770)) {
         *(s8 *)&D_160038A4 = 1; // matching: as above

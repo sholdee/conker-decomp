@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
+extern s8 D_800E0BE0[];
 struct Struct151E5034 {
     f32 unk0;
     f32 unk4;
@@ -40,14 +41,9 @@ struct Struct151E5034 {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
-extern s32 D_800E0A90;
-extern u8 D_800E0B96;
-extern u8 D_8008FDA4;
-extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
 /* One entry of the menu's game-mode table (D_800AB68C[]) */
 typedef struct {
     /* 0x0 */ s16 nameText;
@@ -62,12 +58,9 @@ typedef struct {
 } MenuEntry;
 
 extern MenuEntry D_800AB68C[];
-extern s32 D_800AB754[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
-extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
-extern s8 D_8008FDE0;
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
 void func_151E3344(s32, s32, s32, s32, s32);
@@ -76,40 +69,19 @@ s32 func_151F2CDC(void);
 s32 func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 s32 func_1509D08C(s32, s32, s32 *, s32 *);
-extern s8 D_8008FD70;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
-extern s32 D_800BE3E4;
-extern s8 D_800E0BB1;
 
-extern s8 D_800E0BE0[];
 void func_151DD9E4(void);
 
 
-extern s8 D_8008FE30;
-extern s8 D_8008FD74;
 
-extern u8 D_8008FD80;
 extern struct Struct151E5034 *D_8008FDD4;
 
 
 
 extern s8 D_8008FDDC;
-extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
-extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
-extern s8 D_8008FEF8;
-extern s8 D_8008FE40; /* number of players in D_8008FE44 */
-extern s8 D_8008FE2C;
-extern u8 D_8008FE34;
-extern f32 D_8008FDE8;
 
-extern OSContPad D_800BE918[4];
 extern s32 D_8008FE24;
-extern s8 D_8008FD84;
 extern u8 D_8008FF08[];
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FDE4;
 void func_151EDF4C(void);
 void func_15007778(void);
 void func_151E81EC(void);
@@ -154,7 +126,7 @@ void func_151DE8F0(void) {
         }
     }
     if (D_8008FD80) {
-        D_800DBFF0->unk2C = 0x80000;
+        D_800DBFF0->mode = 0x80000;
         func_1501D348(D_800BE9F0, 1, 0, 0, 0);
         D_8008FD80 = 0;
         return;
@@ -231,10 +203,10 @@ void func_151DE8F0(void) {
         }
     }
     D_8008FDD4->input = D_8008FDD4->padInput[0];
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_8008FE24 = 0;
         if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
-            D_8008FD84 = 1;
+            D_8008FD84[0] = 1;
         }
         return;
     }
@@ -266,7 +238,7 @@ void func_151DE8F0(void) {
             func_15042D94(0x94, 0xC0, 0x81, D_800E0BD8[0x8F]);
         }
     }
-    D_800DBFF0->unk2C = 0x80000;
+    D_800DBFF0->mode = 0x80000;
     func_1000E7A0(4, D_8008FDD4->menu);
     if (D_8008FDD4 == NULL || D_8008FDA4 < 5) {
         return;
@@ -354,8 +326,6 @@ void func_151DE8F0(void) {
     }
 }
 
-extern s8 D_800E0BE9;
-extern u8 D_800E0A97;
 extern char D_800AB800[];
 struct216 *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
@@ -366,7 +336,7 @@ void func_151DF1BC(void) {
     u16 unused; // matching: unused stack slot sets IDO's frame layout
     s32 alpha;
     s32 anim;
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_15083E90(9);
     if (D_800E0A96 != -1) {
@@ -387,7 +357,7 @@ void func_151DF1BC(void) {
                 D_800C3E78 = D_800D154C - D_800CC2D0;
                 obj->unk218 = func_1507BB28(0, obj->unk232);
                 obj->unk21C = 0;
-                obj->pad201[0] = 0x14;
+                obj->unk201 = 0x14;
             }
             D_800E0A96 = -1;
         }
@@ -426,11 +396,11 @@ void func_151DF1BC(void) {
     }
     if (obj != NULL) {
         if (func_151F2CDC() == 1) {
-            if (obj->unk1FF == 0) {
-                obj->unk1FF = 1;
+            if (obj->levelMode == 0) {
+                obj->levelMode = 1;
             }
         } else {
-            obj->unk1FF = 0;
+            obj->levelMode = 0;
         }
     }
     if (D_8008FEF8 != 0) {
@@ -457,7 +427,6 @@ extern s8 D_8008FDB0; /* highlighted row of the func_151DF574 list */
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
-extern char **D_800E0B88; /* text strings */
 void func_151E30C4(void);
 
 /*
@@ -742,16 +711,6 @@ draw_rows: // matching: unused label splits the basic block for as1
 }
 
 /* Saved-record slot (D_800BE3F8[]); see game_33990.c */
-typedef struct {
-    /* 0x0 */ u32 time;  /* in seconds */
-    /* 0x4 */ s32 score;
-    /* 0x8 */ s32 id;    /* -1: empty slot */
-    /* 0xC */ s8 unkC;
-    /* 0xD */ s8 padD;
-    /* 0xE */ s8 unkE;
-    /* 0xF */ s8 padF;
-} RecordSlot;
-
 extern char D_800AB814[];
 extern char D_800AB818[];
 extern char D_800AB828[];
@@ -770,7 +729,7 @@ void func_151DFF38(void) {
     u8 alpha;
     s32 sfx;
     s32 score;
-    RecordSlot *entry;
+    SaveSlotInfo *entry;
     s32 y;
 
     alpha = D_800E0A94;
@@ -786,9 +745,8 @@ void func_151DFF38(void) {
         sfx = 0x62D;
     }
     func_150432FC(0x94, 0x46);
-    // variables.h declares D_800BE3F8 as a pointer; it is the slot array itself
-    entry = &((RecordSlot *)&D_800BE3F8)[slot];
-    if (entry->id == -1) {
+    entry = &D_800BE3F8[slot];
+    if (entry->sequence == -1) {
         D_8008FE2C = 0;
     }
     if (slot == 2) {
@@ -798,8 +756,8 @@ void func_151DFF38(void) {
     } else {
         func_1504332C(0x20, 0x55, 0xFF, alpha);
     }
-    if (entry->id != -1) {
-        score = entry->score;
+    if (entry->sequence != -1) {
+        score = entry->unk4;
         y = 0;
         if (score == 32000) {
             score = 1000000;
@@ -812,14 +770,14 @@ void func_151DFF38(void) {
             u32 time;
             u32 seconds;
 
-            time = entry->time;
+            time = entry->playTime;
             seconds = time % 60;
             time /= 60;
             func_15042D94(0xA4, 0x33, 0, D_800AB818, time / 60, time % 60, seconds);
         }
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-    if (entry->id >= 0) {
+    if (entry->sequence >= 0) {
         func_15042D94(0x94, 0xAF, 1, D_800AB828, 0x1A);
         func_150432FC(0x58, 0xAF);
         if (D_8008FE2C < 2) {
@@ -832,7 +790,7 @@ void func_151DFF38(void) {
     }
     func_150432FC(0xD0, 0xAF);
     if (D_8008FE2C < 2) {
-        if (entry->id >= 0) {
+        if (entry->sequence >= 0) {
             func_15042E3C(D_800AB838, (D_8008FE2C != 0) + 0x18);
         }
         if (D_8008FE2C == 0) {
@@ -845,7 +803,7 @@ void func_151DFF38(void) {
                 D_8008FDA8 = slot;
                 D_800BE3DC = -1;
                 D_80082BC0 = 0;
-                func_150076BC(entry->unkE);
+                func_150076BC(entry->eepromSlot);
                 sfx = 0x500;
             }
         } else if (D_8008FDD4->input & MENU_ACCEPT) {
@@ -864,8 +822,8 @@ void func_151DFF38(void) {
                 D_800BE3E4 = 0;
                 func_15017790();
                 entry->unkC = 0x18;
-                entry->score = 0;
-                entry->id = -1;
+                entry->unk4 = 0;
+                entry->sequence = -1;
                 D_8008FDA4 = 0;
             } else {
                 D_8008FE2C = 1;
@@ -886,8 +844,6 @@ extern char D_800AB848[];
 extern char D_800AB84C[];
 extern s8 D_8008FE9C[];
 extern s8 D_8008FEC4[]; /* [preset][4] team per player; a 2D declaration mismatches */
-extern s8 D_800E0B90[];
-extern u8 D_800E0B8C;
 extern s8 D_8008FDA0; /* extra (non-controller) slots in the player list */
 extern s8 D_8008FDC4;
 void func_151E22BC(void);
@@ -1074,7 +1030,6 @@ void func_151E09DC(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern struct127 *D_800E0BA0[];
 extern u32 D_8008FEA4[];
 extern char D_800AB854[];
 void func_151E7F60(s32, s32);
@@ -1375,8 +1330,6 @@ extern char D_800AB88C[];
 extern char D_800AB890[];
 extern char D_800AB894[];
 extern char D_800AB898[];
-extern s8 D_800E0BB0;
-extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *);
 
 /*

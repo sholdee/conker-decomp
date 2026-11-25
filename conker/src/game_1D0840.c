@@ -1,17 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /*
  * Creation parameters of a trail (a ribbon of points that follows a point
  * on one of an actor's bones). The same 0x30 bytes start TrailState.
  */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 pad6[2];
@@ -31,7 +28,7 @@ typedef struct {
     /* 0x2D */ u8 headFadeCount;
     /* 0x2E */ u8 headFadeStep;
     /* 0x2F */ u8 pad2F;
-} TrailParams;
+} BoneTrailParams;
 
 #define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
 #define TRAIL_FADE_TAIL 2
@@ -39,7 +36,7 @@ typedef struct {
 
 /* Per-trail state, stored at TrailEffect.state. */
 typedef struct {
-    /* 0x00 */ TrailParams params;
+    /* 0x00 */ BoneTrailParams params;
     /* 0x30 */ u8 flags;
     /* 0x31 */ u8 pad31[3];
     /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
@@ -50,18 +47,6 @@ typedef struct {
     /* 0x4C */ u8 texOffset;
     /* 0x4D */ u8 pad4D[3];
 } TrailState;
-
-/* Leading fields of a new effect object, passed to func_15147A80 (they land at its 0x10). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} EffectSpawnInfo;
 
 /* One point of a trail. */
 typedef struct {
@@ -101,72 +86,6 @@ typedef struct {
     /* 0x98 */ TrailState *state;
 } TrailEffect;
 
-/* Parameters for func_1513418C, laid out like the other bone-attached effects here. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 ownerId;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
-    /* 0x10 */ u8 bone;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D;
-} BoneEffectParams151A4590;
-
-/* Leading fields shared by the effect and task objects in this file. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ s16 unkE;
-} EffectHeader;
-
-/* Particle emitter description passed to func_15130374. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ u8 pad3C[0xC];
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} ParticleSpawn151A4638;
-
 /* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
 typedef struct {
     /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
@@ -198,7 +117,7 @@ typedef struct {
 
 /* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 rate;            /* emissions per second */
@@ -214,63 +133,15 @@ typedef struct {
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
-/* Particle emitter description passed to func_15153634. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 flags;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 unk68;
-} ParticleSpawn151A4A38;
-
 /* Message sent to effects about their owner actor. */
 typedef union {
     struct {
-        struct127 *actor;
+        Actor *actor;
         u8 actorId;
     } removed;                      /* type 0: the actor (or any actor with this id) is gone */
     struct {
-        struct127 *actorA;
-        struct127 *actorB;
+        Actor *actorA;
+        Actor *actorB;
         u8 idA;
         u8 idB;
     } swap;                         /* type 0x2D: the two actors trade places */
@@ -280,16 +151,14 @@ typedef union {
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ TrailParams trail;
+    /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
-extern s32 D_800D2C9C;
-extern u8 D_80090CD4[];
 
 void *func_1513418C(void *, s32, u8, s32);
 void *func_15130374(void *spawn, u8, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15147A80(EffectSpawnInfo *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
@@ -298,16 +167,16 @@ Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
-TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
-void func_151A4590(struct127 *owner, u8 arg1);
-void func_151A499C(struct127 *owner, u8 arg1);
-s32 func_151A4E34(TrailParams *params, Vec3f *out);
+void func_15153634(SpriteBurst *, s32, s32, s32);
+TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
+void func_151A4590(Actor *owner, u8 arg1);
+void func_151A499C(Actor *owner, u8 arg1);
+s32 func_151A4E34(BoneTrailParams *params, Vec3f *out);
 void func_151A4E9C(TrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
-void func_151A3390(struct127 *owner, u8 arg1) {
-    TrailParams params;
+void func_151A3390(Actor *owner, u8 arg1) {
+    BoneTrailParams params;
     f32 origin[3];
 
     params.owner = owner;
@@ -340,8 +209,8 @@ void func_151A3390(struct127 *owner, u8 arg1) {
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
-TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
-    EffectSpawnInfo info;
+TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
+    EffectTemplate info;
     TrailState state;
     TrailEffect *effect;
 
@@ -349,11 +218,11 @@ TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
         return NULL;
     }
 
-    memcpy(&state, params, sizeof(TrailParams));
+    memcpy(&state, params, sizeof(BoneTrailParams));
     state.texCoord = 0;
-    info.unk15 = 50;
+    info.itemCount = 50;
     info.flags = TRAIL_EFFECT_ATTACHED;
-    info.unkC = 1000;
+    info.life = 1000;
     state.flags = TRAIL_FADE_TAIL | TRAIL_FADE_HEAD;
     state.texOffset = 0;
     state.pending = 0.0f;
@@ -364,7 +233,7 @@ TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
         info.flags |= TRAIL_EFFECT_STARTED;
     }
 
-    info.unk10 = 8;
+    info.kind = 8;
     effect = func_15147A80(&info, sizeof(TrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
     if (effect != NULL) {
         memcpy(effect->state, &state, sizeof(TrailState));
@@ -430,10 +299,10 @@ s32 func_151A361C(TrailEffect *effect) {
 s32 func_151A37C0(TrailEffect *effect) {
     TrailState *state = effect->state;
     TrailPoint *points = effect->points;
-    struct127 *owner;
+    Actor *owner;
     Vec3f delta;
     s32 started;
-    TrailParams retry;
+    BoneTrailParams retry;
 
     owner = state->params.owner;
     if (owner->interaction_state == 0) {
@@ -454,11 +323,11 @@ s32 func_151A37C0(TrailEffect *effect) {
     }
     if (!started && func_151A4E34(&state->params, &effect->headPos) == 0) {
         func_151A4E9C(effect);
-        memcpy(&retry, state, sizeof(TrailParams));
+        memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(TrailParams), effect->unkC, 0);
+            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->unkC, 0);
             if (task != NULL) {
-                memcpy(&task->trail, &retry, sizeof(TrailParams));
+                memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
         }
         return 1;
@@ -567,7 +436,7 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
         func_151D5D60(effect->unk84, view, (effect->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
-            camPos = &D_800DBFF0[view].unk2F8;
+            camPos = &D_800DBFF0[view].eye.x;
             points = effect->points;
             stateFlag = 1;
         fence:; // matching: a label here is a uopt barrier before the fade loops
@@ -747,24 +616,24 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-void func_151A4590(struct127 *owner, u8 arg1) {
-    BoneEffectParams151A4590 params;
+void func_151A4590(Actor *owner, u8 arg1) {
+    BloodDripDesc params;
 
     // matching: an integer test makes IDO reload owner from its arg slot
     if ((s32)owner != 0) {
-        params.unk0 = 0;
-        params.unk4 = 0;
+        params.target[0] = 0;
+        params.target[1] = 0;
         params.ownerId = owner->unique_id;
         params.bone = 1;
         params.offset.x = 0.0f;
         params.offset.y = 0.0f;
         params.offset.z = 0.0f;
-        params.unk20 = 14.69999981f;
-        params.unk24 = 3.0f;
-        params.unk28 = 100;
-        params.unk2A = 10;
-        params.unk2B = 1;
-        params.unk2C = -1;
+        params.radius = 14.69999981f;
+        params.rate = 3.0f;
+        params.lifetime = 100;
+        params.flags = 10;
+        params.emitter = 1;
+        params.callback = -1;
         params.unk2D = 0;
         params.owner = owner;
         func_1513418C(&params, 0, arg1, 0);
@@ -773,31 +642,31 @@ void func_151A4590(struct127 *owner, u8 arg1) {
 
 /* Emits a particle burst at (x, y, z), moving against the given direction. */
 void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent) {
-    ParticleSpawn151A4638 spawn;
+    ParticleDesc spawn;
     f32 scale;
     s16 params[6];
     Particle *particles;
 
-    spawn.unk1D = 0x27;
-    spawn.unk08 = 0x1401;
-    spawn.unk00 = 0x200005;
-    spawn.unk04 = 0;
-    spawn.unk0A = (func_150ADA20() % 5U) + 15;
-    spawn.unk0C = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0x8A;
-    spawn.unk15 = 0;
-    spawn.unk16 = 0;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0;
-    spawn.unk19 = 0;
-    spawn.unk1A = 0;
-    spawn.unk1E = 1;
-    spawn.unk20 = 0xFF;
-    spawn.unk22 = 1;
-    spawn.unk24 = 1.0f;
+    spawn.texture = 0x27;
+    spawn.renderMode = 0x1401;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.timer = (func_150ADA20() % 5U) + 15;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0x8A;
+    spawn.g = 0;
+    spawn.b = 0;
+    spawn.a = 0xFF;
+    spawn.r2 = 0;
+    spawn.g2 = 0;
+    spawn.b2 = 0;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.scaleStart = 1;
+    spawn.scaleRate = 1.0f;
 
-    spawn.unk28 = spawn.unk2C = func_150ADA68() * 50.0f + 500.0f;
+    spawn.width = spawn.height = func_150ADA68() * 50.0f + 500.0f;
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
@@ -806,9 +675,9 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     spawn.vel.y = -dirY * scale;
     spawn.vel.z = -dirZ * scale;
     spawn.flags = 0xD;
-    spawn.unk60 = 1;
-    spawn.unk61 = 1;
-    spawn.unk54 = 0.0f;
+    spawn.primColorMode = 1;
+    spawn.envColorMode = 1;
+    spawn.gravity = 0.0f;
 
     if (func_150ADA20() & 1) {
         spawn.flags |= 0x40;
@@ -818,10 +687,10 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
         spawn.flags |= 0x80;
     }
 
-    spawn.unk1B = 0xFF;
-    spawn.unk1C = 0xFF;
-    spawn.unk62 = 0;
-    spawn.unk63 = -1;
+    spawn.alpha = 0xFF;
+    spawn.brightness = 0xFF;
+    spawn.updateFunc = 0;
+    spawn.deathFunc = -1;
     params[0] = 16;
     params[1] = 15;
     params[2] = 13;
@@ -829,7 +698,7 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     params[4] = 17;
     params[5] = -24;
 
-    particles = func_15130374(&spawn, 0, 12, parent->unkC, 1);
+    particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
         memcpy(&particles->ageParams, params, sizeof(params));
     }
@@ -888,7 +757,7 @@ s32 func_151A4900(Particle *particle, u8 arg1) {
 }
 
 /* Starts a BoneEmitterTask on the owner's bone 1. */
-void func_151A499C(struct127 *owner, u8 arg1) {
+void func_151A499C(Actor *owner, u8 arg1) {
     BoneEmitterTask *task;
     BoneEmitter emitter;
 
@@ -913,13 +782,13 @@ void func_151A499C(struct127 *owner, u8 arg1) {
 void func_151A4A38(BoneEmitterTask *task) {
     BoneEmitter *emitter;
     Vec3f pos;
-    ParticleSpawn151A4A38 spawn;
+    SpriteBurst spawn;
     s16 angle;
 
     emitter = &task->emitter;
     if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
-        task->header.unkE = -1;
+        task->header.state = -1;
         task->header.unkD |= 1;
         return;
     }
@@ -936,43 +805,43 @@ void func_151A4A38(BoneEmitterTask *task) {
         angle = (emitter->owner->unk76 >> 8) - 0x40;
         func_15143134(&emitter->offset, &pos, (s32)emitter->owner->unk1D4 + emitter->bone * sizeof(Mtx));
 
-        spawn.count = emitter->pending;
-        spawn.unk2 = 0;
-        emitter->pending -= spawn.count;
-        spawn.unk4 = 0x28;
-        spawn.unk6 = 0xC01;
+        spawn.countBase = emitter->pending;
+        spawn.countRange = 0;
+        emitter->pending -= spawn.countBase;
+        spawn.texture = 0x28;
+        spawn.renderMode = 0xC01;
         spawn.unk8 = 0x200005;
         spawn.unkC = 0;
-        spawn.unk10 = 23;
-        spawn.unk12 = 13;
-        spawn.unk14 = 0;
-        spawn.unk18 = 0;
-        spawn.unk1C = 0;
-        spawn.unk1D = 0;
-        spawn.unk1E = 0;
-        spawn.unk1F = 0xFF;
-        spawn.unk20 = 0;
-        spawn.unk21 = 0;
-        spawn.unk22 = 0;
-        spawn.unk30 = 300.0f;
-        spawn.unk34 = 400.0f;
+        spawn.timerBase = 23;
+        spawn.timerRange = 13;
+        spawn.frameRateBase = 0;
+        spawn.frameRateRange = 0;
+        spawn.r = 0;
+        spawn.g = 0;
+        spawn.b = 0;
+        spawn.a = 0xFF;
+        spawn.r2 = 0;
+        spawn.g2 = 0;
+        spawn.b2 = 0;
+        spawn.sizeBase = 300.0f;
+        spawn.sizeRange = 400.0f;
         spawn.pos = pos;
-        spawn.unk26 = 1;
-        spawn.unk28 = 0;
-        spawn.unk2A = 1;
-        spawn.unk2C = 1.0f;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0;
+        spawn.scaleStart = 1;
+        spawn.scaleRate = 1.0f;
         spawn.unk64 = 0;
-        spawn.unk44 = angle - 25;
-        spawn.unk46 = -44;
-        spawn.unk48 = 50;
-        spawn.unk4A = 50;
-        spawn.unk4C = 0.0f;
-        spawn.unk50 = 15.0f;
-        spawn.unk54 = -0.5f;
-        spawn.unk58 = -0.5f;
+        spawn.yawBase = angle - 25;
+        spawn.pitchBase = -44;
+        spawn.yawRange = 50;
+        spawn.pitchRange = 50;
+        spawn.speedBase = 0.0f;
+        spawn.speedRange = 15.0f;
+        spawn.gravityBase = -0.5f;
+        spawn.gravityRange = -0.5f;
         spawn.flags = 7;
-        spawn.unk62 = 1;
-        spawn.unk63 = 0;
+        spawn.primColorMode = 1;
+        spawn.envColorMode = 0;
 
         if (func_150ADA20() & 1) {
             spawn.flags |= 0x40;
@@ -981,18 +850,18 @@ void func_151A4A38(BoneEmitterTask *task) {
             spawn.flags |= 0x80;
         }
 
-        spawn.unk23 = 0xFF;
-        spawn.unk24 = 0;
-        spawn.unk25 = 0xFF;
-        spawn.unk60 = -1;
-        spawn.unk61 = -1;
-        func_15153634(&spawn, 0xFF, task->header.unkC, task->header.unk1);
+        spawn.alphaBase = 0xFF;
+        spawn.alphaRange = 0;
+        spawn.brightness = 0xFF;
+        spawn.updateFunc = -1;
+        spawn.deathFunc = -1;
+        func_15153634(&spawn, 0xFF, task->header.owner, task->header.kind);
     }
 }
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
 void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
-    TrailParams *trail = &effect->state->params;
+    BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
         if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
@@ -1032,8 +901,8 @@ void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
  * Transforms the trail's attachment offset by its owner's bone matrix into out.
  * Returns 0 if the owner has no bone matrices or is not being drawn.
  */
-s32 func_151A4E34(TrailParams *params, Vec3f *out) {
-    struct127 *owner = params->owner;
+s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
+    Actor *owner = params->owner;
     u8 *bones = (u8 *)owner->unk1D4;
 
     if (bones == NULL) {
@@ -1061,7 +930,7 @@ void func_151A4E9C(TrailEffect *effect) {
  * once the trail has been re-created on the owner's bone.
  */
 void func_151A4ECC(TrailRetryTask *task) {
-    TrailParams *trail;
+    BoneTrailParams *trail;
     u8 done;
 
     done = 0;
@@ -1073,18 +942,18 @@ void func_151A4ECC(TrailRetryTask *task) {
         done = 1;
     }
     if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
-        func_151A3504(trail, task->header.unkC);
+        func_151A3504(trail, task->header.owner);
         done = 1;
     }
     if (done) {
-        task->header.unkE = -1;
+        task->header.state = -1;
         task->header.unkD |= 1;
     }
 }
 
 /* Message handler of a TrailRetryTask: end when the owner is removed. */
 void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
-    TrailParams *trail = &task->trail;
+    BoneTrailParams *trail = &task->trail;
 
     if (type == 0) {
         if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {

@@ -1,16 +1,7 @@
 #include <ultra64.h>
 
-// functions.h declares func_15169260's first parameter as s32; this file passes a pointer.
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef f32 BoneMatrix[4][4];
 
 typedef struct BoneFollower BoneFollower;
 typedef struct ActorFollowerGroup ActorFollowerGroup;
@@ -18,7 +9,7 @@ typedef struct ActorFollowerGroup ActorFollowerGroup;
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ struct127 *actor;
+    /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15[3];
     /* 0x18 */ Vec3f offset;        // point in bone space
@@ -39,7 +30,7 @@ struct BoneFollower {
 /* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
 struct ActorFollowerGroup {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ struct127 *actor;
+    /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15;
     /* 0x16 */ s16 timer;
@@ -58,9 +49,8 @@ struct ActorFollowerGroup {
 }; // size 0x30
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-void func_15143134(Vec3f *in, Vec3f *out, BoneMatrix *mtx);
-void func_1514EDF0(ActorFollowerGroup *, struct127 *);
-void func_15169260(s32 *, s32, s32, u8);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
+void func_1514EDF0(ActorFollowerGroup *, Actor *);
 
 void func_151D3308(BoneFollower *follower);
 void func_151D3354(BoneFollower *follower);
@@ -75,25 +65,24 @@ extern void (*D_8008FC58[])(ActorFollowerGroup *);
 extern void (*D_8008FC5C[])(ActorFollowerGroup *);
 extern void (*D_8008FC64[])(ActorFollowerGroup *, struct223 *, u8);
 
-// D_800E0950 is a u8 array of reference counts; variables.h declares it as a scalar.
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
 void func_151D2AB0(s32 index) {
     u32 loadInfo;
 
-    (&D_800E0950)[index]++;
-    if ((&D_800E0950)[index] < 2) {
-        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+    D_800E0950[index]++;
+    if (D_800E0950[index] < 2) {
+        D_800E0990[index] = (struct BoneAnchor *)func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
 }
 
 /* Drops a reference on shared resource `index`, freeing it with the last reference. */
 void func_151D2B4C(s32 index) {
-    if ((&D_800E0950)[index] != 0) {
-        (&D_800E0950)[index]--;
-        if ((&D_800E0950)[index] == 0) {
-            func_100043B4(D_800E0990[index], 4);
+    if (D_800E0950[index] != 0) {
+        D_800E0950[index]--;
+        if (D_800E0950[index] == 0) {
+            func_100043B4((s32 *)D_800E0990[index], 4);
         }
     }
 }
@@ -113,7 +102,7 @@ BoneFollower *func_151D2BA4(void *params, Vec3f *position, s32 extraSize, u8 arg
 
 /* Per-frame update: tracks the bone, runs the timer and the update callback. */
 void func_151D2C40(BoneFollower *follower) {
-    struct127 *actor;
+    Actor *actor;
     Vec3f position;
 
     actor = follower->actor;
@@ -123,7 +112,7 @@ void func_151D2C40(BoneFollower *follower) {
         return;
     }
 
-    func_15143134(&follower->offset, &position, &((BoneMatrix *)actor->unk1D4)[follower->bone]);
+    func_15143134(&follower->offset, &position, &actor->unk1D4[follower->bone]);
 
     if (follower->flags & 1) {
         follower->timer -= D_800BE9E4;
@@ -187,10 +176,10 @@ void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
     } else if (type == 0x2D) {
         actor = msg->unk0;
         if (actor == (s32)follower->actor) {
-            follower->actor = (struct127 *)msg->unk4.w;
+            follower->actor = (Actor *)msg->unk4.w;
             follower->actorUid = msg->unk9;
         } else if ((s32)follower->actor == msg->unk4.w) {
-            follower->actor = (struct127 *)actor;
+            follower->actor = (Actor *)actor;
             follower->actorUid = msg->unk8;
         }
     }
@@ -213,7 +202,7 @@ ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3
 
 /* Per-frame update: refreshes the trackable flag, runs the timer and the callbacks. */
 void func_151D2F90(ActorFollowerGroup *group) {
-    struct127 *actor;
+    Actor *actor;
     u8 wasTrackable;
     u8 isTrackable;
 
@@ -301,10 +290,10 @@ void func_151D324C(ActorFollowerGroup *group, struct223 *msg, u8 type) {
     } else if (type == 0x2D) {
         otherActor = msg->unk0;
         if ((s32)group->actor == otherActor) {
-            group->actor = (struct127 *)msg->unk4.w;
+            group->actor = (Actor *)msg->unk4.w;
             group->actorUid = msg->unk9;
         } else if ((s32)group->actor == msg->unk4.w) {
-            group->actor = (struct127 *)otherActor;
+            group->actor = (Actor *)otherActor;
             group->actorUid = msg->unk8;
         }
     }

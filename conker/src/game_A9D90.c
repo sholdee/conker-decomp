@@ -1,62 +1,25 @@
 #include <ultra64.h>
 
-// matching: func_1506160C, D_800D20FC and D_800BE9F4 are declared below with types that differ from the shared headers
-#define func_1506160C func_1506160C_hdr
 #include "functions.h"
-#undef func_1506160C
-#define D_800D20FC D_800D20FC_hdr
-#define D_800BE9F4 D_800BE9F4_hdr
 #include "variables.h"
-#undef D_800D20FC
-#undef D_800BE9F4
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-void func_1507D1D8(struct127 *obj);
+void func_1507D1D8(Actor *obj);
 extern void func_1509C3A0(void);
 
-
-/* View of the per-object state block hung off struct127.unk31C (struct126 lacks these fields). */
-typedef struct ObjState {
-    /* 0x000 */ u8 pad0[0x46];
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ u8 pad48[0x2D];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ u8 pad76[0xE];
-    /* 0x084 */ u8 team;
-    /* 0x085 */ u8 pad85[0x96];
-    /* 0x11B */ u8 unk11B;
-    /* 0x11C */ u8 pad11C[4];
-    /* 0x120 */ u8 state;
-    /* 0x121 */ u8 cause;
-    /* 0x122 */ u8 finished;
-    /* 0x123 */ u8 pad123;
-    /* 0x124 */ s16 timer;
-    /* 0x126 */ s16 elapsed;
-    /* 0x128 */ u8 pad128[0x82];
-    /* 0x1AA */ s16 unk1AA;
-    /* 0x1AC */ u8 unk1AC;
-    /* 0x1AD */ u8 pad1AD[2];
-    /* 0x1AF */ s8 unk1AF;
-    /* 0x1B0 */ s8 unk1B0;
-    /* 0x1B1 */ u8 unk1B1;
-} ObjState;
-
-#define STATE(obj) ((ObjState *)(obj)->unk31C)
-
-void func_1507CD0C(struct127 *obj);
-void func_1506160C(struct127 *, u8, u8, u8, u8);
+void func_1507CD0C(Actor *obj);
 void func_1507D4F8(s32);
-void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
+void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1517EE40(s32, s32, s32, s32, s8, s32);
 void func_1517F814(s32, f32, f32, f32, s32);
 
 /* Puts obj into state 2 with the given timer. */
-void func_1507C8E0(struct127 *obj, s32 timer) {
-    STATE(obj)->state = 2;
-    STATE(obj)->timer = timer;
+void func_1507C8E0(Actor *obj, s32 timer) {
+    obj->unk31C->unk120 = 2;
+    obj->unk31C->unk124 = timer;
 }
 
 /* Per-frame update of every active player's state machine. */
@@ -65,82 +28,82 @@ void func_1507C8FC(void) {
     f32 x;
     f32 y;
     f32 z;
-    struct127 *player;
+    Actor *player;
 
     if (D_800BEAC0 == 0) {
         player = D_800CC2D0;
         for (i = 0; i < D_8008FD8C; i++, player++) {
-            if (STATE(player) == NULL) {
+            if (player->unk31C == NULL) {
                 continue;
             }
-            if (STATE(player)->state == 0) {
-                STATE(player)->elapsed = 0;
+            if (player->unk31C->unk120 == 0) {
+                player->unk31C->unk126 = 0;
                 continue;
             }
-            if (STATE(player)->state == 1) {
+            if (player->unk31C->unk120 == 1) {
                 continue;
             }
             if (i <= D_80082FA0) {
                 if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
-                    STATE(player)->state = 2;
-                    STATE(player)->timer = 60;
+                    player->unk31C->unk120 = 2;
+                    player->unk31C->unk124 = 60;
                 }
-                if (STATE(player)->state == 11) {
+                if (player->unk31C->unk120 == 11) {
                     func_1517EE40(0, 0, 0, 15, 1, i);
-                    STATE(player)->state = 12;
+                    player->unk31C->unk120 = 12;
                     continue;
                 }
-                if (STATE(player)->state == 12) {
+                if (player->unk31C->unk120 == 12) {
                     if (func_1517EFAC(i) != 0) {
                         func_1507D4F8(i);
                     }
                     continue;
                 }
-                if (STATE(player)->state == 2) {
-                    if (STATE(player)->timer > 0) {
-                        STATE(player)->timer -= D_800BE9E4;
+                if (player->unk31C->unk120 == 2) {
+                    if (player->unk31C->unk124 > 0) {
+                        player->unk31C->unk124 -= D_800BE9E4;
                     } else {
                         func_1507CD0C(player);
                     }
-                } else if (STATE(player)->state == 7) {
-                    if (STATE(player)->timer > 0) {
-                        STATE(player)->timer -= D_800BE9E4;
+                } else if (player->unk31C->unk120 == 7) {
+                    if (player->unk31C->unk124 > 0) {
+                        player->unk31C->unk124 -= D_800BE9E4;
                     } else {
-                        STATE(player)->state = 8;
+                        player->unk31C->unk120 = 8;
                         func_1506160C(player, 2, 0, 60, 0);
                     }
                 }
-                STATE(player)->elapsed += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && STATE(player)->team == 0) ||
-                    func_150859AC(i, 3) < 2 || (STATE(player)->team == 1 && STATE(player)->elapsed >= 181)) {
-                    STATE(player)->finished = TRUE;
+                player->unk31C->unk126 += D_800BE9E4;
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->unk31C->unk84 == 0) ||
+                    func_150859AC(i, 3) < 2 || (player->unk31C->unk84 == 1 && player->unk31C->unk126 >= 181)) {
+                    player->unk31C->unk122 = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
-                    STATE(player)->finished = FALSE;
+                    player->unk31C->unk122 = FALSE;
                 }
                 func_1507E1D0(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
-                if (STATE(player)->finished && STATE(player)->state == 5) {
-                    STATE(player)->state = 6;
+                if (player->unk31C->unk122 && player->unk31C->unk120 == 5) {
+                    player->unk31C->unk120 = 6;
                 }
-                if (STATE(player)->state == 9) {
+                if (player->unk31C->unk120 == 9) {
                     func_1507D4F8(i);
                 }
-            } else if (STATE(player)->state == 11) {
+            } else if (player->unk31C->unk120 == 11) {
                 func_1507D4F8(i);
                 continue;
-            } else if (STATE(player)->state == 2) {
-                if (STATE(player)->timer > 0) {
-                    STATE(player)->timer -= D_800BE9E4;
+            } else if (player->unk31C->unk120 == 2) {
+                if (player->unk31C->unk124 > 0) {
+                    player->unk31C->unk124 -= D_800BE9E4;
                 } else {
-                    STATE(player)->state = 7;
+                    player->unk31C->unk120 = 7;
                 }
             } else {
-                STATE(player)->elapsed += D_800BE9E4;
-                if (player->unk7 == 0xFF && STATE(player)->elapsed >= 161) {
+                player->unk31C->unk126 += D_800BE9E4;
+                if (player->unk7 == 0xFF && player->unk31C->unk126 >= 161) {
                     func_1506160C(player, 2, 0, 60, 0);
                 }
-                if (STATE(player)->elapsed >= 181 && STATE(player)->state != 10) {
+                if (player->unk31C->unk126 >= 181 && player->unk31C->unk120 != 10) {
                     func_1507D4F8(i);
                 }
             }
@@ -150,10 +113,10 @@ void func_1507C8FC(void) {
 }
 
 /* Puts obj into state 3 and, for a local player slot, calls func_15181D70 on it. */
-void func_1507CD0C(struct127 *obj) {
+void func_1507CD0C(Actor *obj) {
     s32 slot = obj - D_800CC2D0;
 
-    STATE(obj)->state = 3;
+    obj->unk31C->unk120 = 3;
 
     if (slot <= D_80082FA0) {
         func_15181D70(slot);
@@ -161,49 +124,47 @@ void func_1507CD0C(struct127 *obj) {
 }
 
 typedef struct CD64Msg {
-    struct127 *obj;
+    Actor *obj;
     u8 id;
 } CD64Msg;
 
-extern u8 D_800D18A9;
-extern s16 D_800E0AD0[];
 void func_15169040(void *, s32);
-void func_1504BAF0(struct127 *);
+void func_1504BAF0(Actor *);
 void func_150E7994(s16, f32, u8, s32);
 
 /* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
-void func_1507CD64(struct127 *obj, s32 cause) {
+void func_1507CD64(Actor *obj, s32 cause) {
     f32 f;
     s32 sound;
     u32 r;
     s32 mode;
     s32 slot;
     CD64Msg msg;
-    struct127 *saved;
+    Actor *saved;
     s32 again;
     s32 flag;
 
-    if (STATE(obj) == NULL) {
+    if (obj->unk31C == NULL) {
         return;
     }
     slot = obj - D_800CC2D0;
     if (slot >= D_8008FD8C) {
         return;
     }
-    if (STATE(obj)->state != 0) {
-        if (cause != 9 || cause == STATE(obj)->cause) {
+    if (obj->unk31C->unk120 != 0) {
+        if (cause != 9 || cause == obj->unk31C->unk121) {
             return;
         }
         again = TRUE;
     } else {
         again = FALSE;
     }
-    STATE(obj)->cause = cause;
+    obj->unk31C->unk121 = cause;
     if (D_800BE616 != 0 && !again) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
-        if ((D_8008FDBC & 0x20) && *(u8 *)&obj->pad128 == 0) { // byte at 0x128 (struct127 has a u32 pad there)
+        if ((D_8008FDBC & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
             func_15085710(1, 10, 1);
         }
     }
@@ -215,7 +176,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     sound = -1;
     flag = 0;
     mode = 0;
-    if (STATE(obj)->unk1AC) {
+    if (obj->unk31C->unk1AC) {
         D_800D18A9 = 2;
     }
     switch (cause) {
@@ -298,10 +259,10 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     obj->stunned = 0xFF;
     obj->disable_run = 0xFF;
     obj->unkF8 |= 0x200;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     obj->xz_velocity = 0.0f;
-    STATE(obj)->unk46 = 0;
+    obj->unk31C->unk46 = 0;
     if (obj->unk13C != 0) {
         saved = D_800D154C;
         D_800D154C = obj;
@@ -309,12 +270,12 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         D_800D154C = saved;
     }
     if (mode == 0 || mode == 3) {
-        STATE(obj)->state = 1;
+        obj->unk31C->unk120 = 1;
     } else {
         func_1507C8E0(obj, 0);
     }
     if (mode == 2) {
-        STATE(obj)->state = 11;
+        obj->unk31C->unk120 = 11;
     } else if (mode == 3) {
         func_1507D4F8(slot);
     }
@@ -332,24 +293,14 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-/* 0x30-byte entries of the D_800D20FC table, one per object slot. */
-typedef struct D20FCEntry {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5[0x2B];
-} D20FCEntry;
-
-void func_150054C4(struct108 *, u32, s32, s32);
-void func_15085430(struct127 *, s32, s32);
+void func_150054C4(Camera *, u32, s32, s32);
+void func_15085430(Actor *, s32, s32);
 void func_15181DC8(s32);
-void func_15082A44(D20FCEntry *, s32, s32, s32, s32);
-void func_15088D58(struct127 *);
-extern s16 D_800BE9F2;
-extern s32 D_800BE9F4;
-extern D20FCEntry *D_800D20FC;
+void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
+void func_15088D58(Actor *);
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
-void func_1507D1D8(struct127 *obj) {
+void func_1507D1D8(Actor *obj) {
     s32 value;
     s32 saved1AA;
     s8 player;
@@ -359,12 +310,12 @@ void func_1507D1D8(struct127 *obj) {
     s32 choice;
     s32 slot;
 
-    saved1AA = STATE(obj)->unk1AA;
-    saved1B0 = STATE(obj)->unk1B0;
-    saved328 = *(s8 *)&obj->pad320[8]; // signed byte at 0x328 (struct127 types it u8)
-    saved1AF = STATE(obj)->unk1AF;
+    saved1AA = obj->unk31C->unk1AA;
+    saved1B0 = obj->unk31C->lastSpawnIndex;
+    saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
+    saved1AF = obj->unk31C->unk1AF;
     if (D_800BE616 != 0) {
-        player = STATE(obj)->unk11B;
+        player = obj->unk31C->spawnIndex;
     } else {
         player = -1;
     }
@@ -375,9 +326,9 @@ void func_1507D1D8(struct127 *obj) {
             choice = (func_150ADA20() & 0xF) + 0x11;
             func_15085710(slot, 0, choice);
             if (choice < 0x1D) {
-                D_800D20FC[slot].unk4 = 0x9C;
+                D_800D20FC[slot].type = 0x9C;
             } else {
-                D_800D20FC[slot].unk4 = 0x9D;
+                D_800D20FC[slot].type = 0x9D;
             }
         }
     }
@@ -385,9 +336,9 @@ void func_1507D1D8(struct127 *obj) {
     func_15060F28(obj, 0);
     D_800D18A8 = 1;
     func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
-    STATE(obj)->unk1B0 = saved1B0;
-    STATE(obj)->unk1AF = saved1AF;
-    obj->pad320[8] = saved328;
+    obj->unk31C->lastSpawnIndex = saved1B0;
+    obj->unk31C->unk1AF = saved1AF;
+    obj->unk328 = saved328;
     if (D_80082FA0 >= slot) {
         func_150054C4(&D_800DBFF0[slot], slot, D_800BE9F2, player);
         func_15181DC8(slot);
@@ -397,22 +348,22 @@ void func_1507D1D8(struct127 *obj) {
         func_15085430(obj, player, 0);
     }
     D_800D18A8 = 0;
-    STATE(obj)->state = 0;
-    STATE(obj)->finished = FALSE;
-    STATE(obj)->timer = 0;
-    STATE(obj)->unk1AA = saved1AA;
+    obj->unk31C->unk120 = 0;
+    obj->unk31C->unk122 = FALSE;
+    obj->unk31C->unk124 = 0;
+    obj->unk31C->unk1AA = saved1AA;
     obj->health = D_8008726C;
     obj->unk22C |= 0x100;
-    STATE(obj)->unk75 = 0;
+    obj->unk31C->unk75 = 0;
     obj->unk20F = 0xFF;
-    obj->pad210 = 0xFF;
+    obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
     obj->unk232 = 1;
     obj->unk218 = NULL;
-    STATE(obj)->unk11B = player;
+    obj->unk31C->spawnIndex = player;
     if (D_800BE616 != 0) {
         obj->immune = 150;
-        STATE(obj)->unk1B1 = obj->immune;
+        obj->unk31C->unk1B1 = obj->immune;
         if (D_800BE9F0 == 0x33) {
             func_1507D158(slot, 120, 0, 0, 0);
             func_15088D58(obj);
@@ -422,8 +373,8 @@ void func_1507D1D8(struct127 *obj) {
 
 /* Ends slot's current run: re-initialises it if func_150859AC(slot, 3) allows, else retires it (state 10). */
 void func_1507D4F8(s32 slot) {
-    struct127 *obj;
-    ObjState *state;
+    Actor *obj;
+    ActorCtl *state;
 
     if (!(D_8008FDBC & 1)) {
         func_15085710(slot, 4, 1);
@@ -435,20 +386,20 @@ void func_1507D4F8(s32 slot) {
         obj->unkB2 = 0;
 
         if (D_800BE616 != 0) {
-            if (*(s8 *)&D_800E0C20 == 0) {
+            if (D_800E0C20 == 0) {
                 func_1507D1D8(obj);
                 return;
             }
-            STATE(obj)->state = 10;
+            obj->unk31C->unk120 = 10;
             return;
         }
 
         D_800D18A8 = 1;
-        if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
+        if (!(D_800D2E4C[0x19] & 4) && D_8008FDA8 >= 0) {
             func_1501C730(1, 0x22, 0, 0, 0);
             return;
         }
-        func_1501C730(2, *(s8 *)&D_800BE3DF, D_800BE3E0, 0, 0);
+        func_1501C730(2, D_800BE3DF, D_800BE3E0, 0, 0);
         return;
     }
 
@@ -464,60 +415,41 @@ void func_1507D4F8(s32 slot) {
     }
 
     obj = &D_800CC2D0[slot];
-    state = STATE(obj);
-    if (state->team == 0) {
+    state = obj->unk31C;
+    if (state->unk84 == 0) {
         // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
-        *(volatile s8 *)&D_8008FD94 = *(s8 *)&D_8008FD94 - 1;
-        state = *(ObjState *volatile *)&obj->unk31C;
+        *(volatile s8 *)&D_8008FD94 = D_8008FD94 - 1;
+        state = *(ActorCtl *volatile *)&obj->unk31C;
     }
-    state->state = 10;
+    state->unk120 = 10;
     D_800BE618--;
 }
 
-/* Object returned by func_151149AC (WorldObject in game_11FF10.c is a narrower view of the same 0xA0 bytes). */
-typedef struct D754Obj {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x58];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[0xD];
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ s32 unk84;
-    /* 0x88 */ u8 pad88[2];
-    /* 0x8A */ u8 unk8A;
-} D754Obj;
-
-extern void func_150B0348(struct127 *, s32, s32);
-extern void func_150BFFE0(struct127 *);
-extern void func_150D85AC(struct127 *);
-extern void func_150F1D10(struct127 *, s32, s32);
-extern void func_151C9740(struct127 *, s32, s32);
-extern void func_151CFA4C(struct127 *, s32, s32);
-extern void func_150BE494(struct127 *, s32, s32);
-extern void func_150AEB9C(struct127 *);
-extern void func_151BA518(struct127 *, s32, s32);
-extern D754Obj *func_151149AC(s32);
-extern void *func_1507515C(struct127 *);
+extern void func_150B0348(Actor *, s32, s32);
+extern void func_150BFFE0(Actor *);
+extern void func_150D85AC(Actor *);
+extern void func_150F1D10(Actor *, s32, s32);
+extern void func_151C9740(Actor *, s32, s32);
+extern void func_151CFA4C(Actor *, s32, s32);
+extern void func_150BE494(Actor *, s32, s32);
+extern void func_150AEB9C(Actor *);
+extern void func_151BA518(Actor *, s32, s32);
+extern WorldObject *func_151149AC(s32);
+extern void *func_1507515C(Actor *);
 extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B7B40(struct127 *, s32, s32);
-extern void func_150BC488(struct127 *);
-extern void func_150BBB5C(struct127 *);
-extern void func_151A6C90(struct127 *, s32, s32);
-extern void func_150E0870(struct127 *, s32, s32);
-extern void func_151D22B0(struct127 *, s32, s32);
-void func_1503DE70(struct127 *, s32, s32);
-void func_1507DB44(struct127 *obj, s32 arg1);
+extern void func_150B7B40(Actor *, s32, s32);
+extern void func_150BC488(Actor *);
+extern void func_150BBB5C(Actor *);
+extern void func_151A6C90(Actor *, s32, s32);
+extern void func_150E0870(Actor *, s32, s32);
+extern void func_151D22B0(Actor *, s32, s32);
+void func_1503DE70(Actor *, s32, s32);
+void func_1507DB44(Actor *obj, s32 arg1);
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
-s32 func_1507D754(struct127 *obj) {
-    D754Obj *spawned;
+s32 func_1507D754(Actor *obj) {
+    WorldObject *spawned;
     void *handle;
 
     switch (obj->id) {
@@ -551,7 +483,7 @@ s32 func_1507D754(struct127 *obj) {
     case 0xAD:
     case 0xAE:
     case 0xAF:
-        obj->pad320[8] = 0;
+        obj->unk328 = 0;
         func_1507DB44(obj, 0);
         func_150AEB9C(obj);
         return 1;
@@ -580,22 +512,22 @@ s32 func_1507D754(struct127 *obj) {
                 spawned = func_151149AC(1);
             }
             handle = func_1507515C(obj);
-            if (handle != NULL && D_800C35EA != 1) {
+            if (handle != NULL && D_800C35EA[0] != 1) {
                 func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
         if (spawned != NULL) {
-            spawned->unk6E = 0;
-            spawned->unk10 = obj->x_position;
-            spawned->unk12 = obj->y_position;
-            spawned->unk14 = obj->z_position;
-            spawned->unk0 = obj->unkB8;
-            spawned->unk4 = obj->unk40;
-            spawned->unk8 = obj->unkC4;
-            spawned->unk8A = 0xFF;
-            spawned->unk7C = 0;
-            spawned->unk80 = 0;
-            spawned->unk84 = 0;
+            spawned->inactive = 0;
+            spawned->x = obj->x_position;
+            spawned->y = obj->y_position;
+            spawned->z = obj->z_position;
+            spawned->rotX = obj->unkB8;
+            spawned->rotY = obj->unk40;
+            spawned->rotZ = obj->unkC4;
+            spawned->alpha = 0xFF;
+            spawned->work.words[0] = 0;
+            spawned->work.words[1] = 0;
+            spawned->work.words[2] = 0;
         }
         if (D_800BE616 != 0) {
             return 2;
@@ -631,7 +563,7 @@ void func_1507DB34(void) {
 void func_1507DB3C(void) {
 }
 
-void func_1507DB44(struct127 *obj, s32 arg1) {
+void func_1507DB44(Actor *obj, s32 arg1) {
     func_1503DE70(obj, arg1, -1);
 }
 
@@ -641,7 +573,6 @@ void func_1507DB64(void) {
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern Gfx D_80086B80[];
 extern u8 D_D0F;
-#define D_800D18A4_u8 ((u8 *)&D_800D18A4) /* one byte per player: half-size of the square, minus 4 */
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the
@@ -669,8 +600,8 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
                         G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE,
                     G_AC_NONE | G_ZS_PRIM | G_RM_OPA_SURF | G_RM_OPA_SURF2);
     if (D_800D18A2 & (1 << player)) {
-        if (D_800D18A4_u8[player] >= 4) {
-            D_800D18A4_u8[player] -= 4;
+        if (D_800D18A4[player] >= 4) {
+            D_800D18A4[player] -= 4;
         } else {
             D_800D18A2 &= ~(1 << player);
             func_15181DC8(player);
@@ -678,12 +609,12 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
             return gfx;
         }
     } else {
-        D_800D18A4_u8[player] += 4;
-        if (D_800D18A4_u8[player] > 60) {
-            D_800D18A4_u8[player] = 60;
+        D_800D18A4[player] += 4;
+        if (D_800D18A4[player] > 60) {
+            D_800D18A4[player] = 60;
         }
     }
-    size = D_800D18A4_u8[player] + 4;
+    size = D_800D18A4[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
     view = &((RenderView *)D_800BE628)[player];
     left = right = (s32)(view->right + view->left) * 2;
@@ -697,10 +628,10 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_150836CC(struct127 *, s32);
+void func_150836CC(Actor *, s32);
 
 /* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when interaction_state is 1). */
-void func_1507DE4C(struct127 *obj) {
+void func_1507DE4C(Actor *obj) {
     if (obj->interaction_state == 1) {
         func_150836CC(obj, 0x44);
         func_150836CC(obj, 0x23);
@@ -724,7 +655,7 @@ void func_1507DE4C(struct127 *obj) {
 }
 
 /* Sets obj's unk94/unk9C flags and unk2E4 (1, 2, 4 or 8) for part 4..9. */
-void func_1507DF10(struct127 *obj, s32 part) {
+void func_1507DF10(Actor *obj, s32 part) {
     switch (part) {
     case 9:
         obj->unk94 |= 0x20;
@@ -766,7 +697,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 kind;
     s32 type;
 
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_15084D70(0, resource, 1, pos, vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {
@@ -804,26 +735,24 @@ s32 func_1507E114(s32 arg0) {
     if (mode == 0x22 || mode == 0x18) {
         return 0;
     }
-    D_800BE9F4 = (s8)D_800BE3DF;
+    D_800BE9F4 = D_800BE3DF;
     func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
-/* unk1D4 points at an array of 4x4 f32 bone matrices (0x40 bytes each). */
-typedef f32 BoneMtx[4][4];
 
-void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 
 /* Gets obj's tracking point: 30 * y_scale up through bone 0 (12 or 3 in some states), or its position. */
-void func_1507E1D0(struct127 *obj, f32 *x, f32 *y, f32 *z) {
+void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->unk1D4 != NULL) {
-        BoneMtx *bone;
+        MtxF *bone;
         f32 in[3];
         f32 out[3];
 
         in[0] = 0.0f;
         in[1] = obj->y_scale * 30.0f;
         in[2] = 0.0f;
-        bone = (BoneMtx *)obj->unk1D4;
+        bone = obj->unk1D4;
         if (obj->interaction_state == 1) {
             bone += 12;
         } else if (obj->interaction_state == 0x1E) {

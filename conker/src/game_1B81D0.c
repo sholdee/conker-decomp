@@ -1,42 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-
-/* Spawn template passed to func_15132A4C: the layout of Particle 0x10..0x8B (see game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[6];
-} ParticleSpawn; // size 0x7C
 
 /* A live func_15132A4C particle (layout as Particle in game_15F680.c). The droplets spawned in
  * this file carry 4 bytes of extra data: the height of the floor below them. */
@@ -50,11 +16,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -76,31 +42,10 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } ParticleFloor; // size 0x24
 
-/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
-typedef struct {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ u8 padC[0xA];
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 color1[3];
-    /* 0x2B */ u8 color2[3];
-    /* 0x2E */ u8 intensity; // func_1518CA80 scales both colours by intensity / 256
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-} ParticleEffect;
-
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern void func_1518CA80(ParticleEffect *, u8);
+extern void func_1518CA80(BillboardSpawn *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern s32 func_15046C80(vertex *, s32, f32, ParticleFloor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, ParticleFloor *);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
@@ -113,7 +58,7 @@ s32 func_1518AD20(Particle *particle) {
     floorY = &particle->floorY;
     if (particle->pos.y < particle->floorY) {
         ParticleSpawn spawn;
-        ParticleEffect effect;
+        BillboardSpawn effect;
         s16 count;
         f32 size;
         u8 yaw;
@@ -198,24 +143,24 @@ s32 func_1518AD20(Particle *particle) {
         effect.pos.x = particle->pos.x;
         effect.pos.y = *floorY;
         effect.pos.z = particle->pos.z;
-        effect.unk18 = effect.unk16 = particle->radius * 200.0f;
-        effect.unk1C = effect.unk1A = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
-        effect.unk1E = 0;
-        effect.unk20 = 0;
-        effect.unk22 = (func_150ADA20() % 201U) + 300;
-        effect.unk24 = 0;
-        effect.unk26 = 600;
-        func_151429E0(colour, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
-        func_151429E0(colour, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+        effect.height = effect.width = particle->radius * 200.0f;
+        effect.heightStep = effect.widthStep = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
+        effect.velX = 0;
+        effect.velZ = 0;
+        effect.velY = (func_150ADA20() % 201U) + 300;
+        effect.accelY = 0;
+        effect.life = 600;
+        func_151429E0(colour, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+        func_151429E0(colour, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
         effect.intensity = 0xFF;
         scaled = particle->radius * 511.0f;
         if (scaled > 255.0f) {
-            effect.unk2F = 0xFF;
+            effect.alpha = 0xFF;
         } else {
-            effect.unk2F = scaled;
+            effect.alpha = scaled;
         }
-        effect.unk30 = 10;
-        effect.unk31 = 0;
+        effect.fadeStep = 10;
+        effect.onExpire = 0;
         func_1518CA80(&effect, 1);
         return 0;
     }
@@ -265,10 +210,10 @@ s32 func_1518B1D8(Particle *particle) {
     return 1;
 }
 
-void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
+void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* func_1518B2A8 with model 4. */
-void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
+void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
     func_1518B2A8(pos, radius, size, count, 4, 0xFF, arg4);
 }
 
@@ -277,7 +222,7 @@ void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
  * is spawned only where func_15046C80 finds a floor below the point, together with 1-4 smaller ones
  * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
  */
-void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
     ParticleFloor floor;
     u8 angle;

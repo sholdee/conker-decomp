@@ -10,16 +10,12 @@
 
 extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
 
-/* variables.h declares D_800DD2C0 as a single u8; it is really a u8[16] of per-player spawn points.
- * Entry 0 is also read and written on its own as player 0's spawn point. */
-#define D_800DD2C0_ARRAY (*(u8 (*)[16])&D_800DD2C0)
 
-extern u8 D_800BE9B4;
 
 void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
 s32 func_1517F40C(s32 view);
 void func_1501C730(s32, s32, s32, s32, s32);
-void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused);
+void func_15085430(Actor *obj, s32 spawnIndex, s32 unused);
 
 /* Clears every pending warp and spawn point, then sets player 0's spawn point to `spawn0`. */
 void func_15172C50(s32 spawn0) {
@@ -27,9 +23,9 @@ void func_15172C50(s32 spawn0) {
 
     for (i = 0; i < 16; i++) {
         D_800DD2B0[i] = -1;
-        D_800DD2C0_ARRAY[i] = 0;
+        D_800DD2C0[i] = 0;
     }
-    D_800DD2C0_ARRAY[0] = spawn0;
+    D_800DD2C0[0] = spawn0;
 }
 
 /* Cancels the player's pending warp, if any, and fades their view back in over 50 frames. */
@@ -42,11 +38,11 @@ void func_15172CA8(s32 player) {
 }
 
 /* Respawns `actor` at spawn point `spawnIndex` and clears its warping flag (0x10). */
-void func_15172D28(struct127 *actor, s32 spawnIndex) {
+void func_15172D28(Actor *actor, s32 spawnIndex) {
     func_15085430(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
     if (D_800BE9B4 == 0 && actor->unk31C != NULL) {
-        actor->unk31C->pad56 = 3;
+        actor->unk31C->unk56 = 3;
     }
 }
 
@@ -65,7 +61,7 @@ void func_15172D80(s32 player) {
             func_1501C730(1, D_800DD2B0[player], 0, 0, 0);
         } else {
             func_15172CA8(player);
-            func_15172D28(&D_800CC2D0[player], D_800DD2C0_ARRAY[player]);
+            func_15172D28(&D_800CC2D0[player], D_800DD2C0[player]);
         }
     }
 }
@@ -75,17 +71,16 @@ void func_15172D80(s32 player) {
  * camera) with no warp pending starts a 10-frame fade-out and records the warp; any other actor is
  * respawned at once when `level` is the current one.
  */
-void func_15172E7C(struct127 *actor, s32 level, s32 spawnIndex) {
+void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
     s32 player = actor->unk127;
 
-    // struct126 has no field at 0x23 (only padding there in structs.h)
-    if (actor->health != 0 && (actor->unk31C == NULL || *(s8 *)((u8 *)actor->unk31C + 0x23) <= 0)) {
+    if (actor->health != 0 && (actor->unk31C == NULL || actor->unk31C->unk23 <= 0)) {
         if (actor->camera != NULL) {
             if (D_800DD2B0[player] == -1) {
                 func_1517EE40(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;
                 D_800DD2B0[player] = level;
-                D_800DD2C0_ARRAY[player] = spawnIndex;
+                D_800DD2C0[player] = spawnIndex;
             }
         } else if (level == D_800BE9F0) {
             func_15172D28(actor, spawnIndex);

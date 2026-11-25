@@ -6,34 +6,6 @@
 
 void func_150E5AE0(void);
 
-/* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_E9FE0;
-
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */
 typedef struct {
     /* 0x00 */ u32 phase;
@@ -47,12 +19,6 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x80];
     /* 0x80 */ Oscillator oscillator;
 } OscillatorObject;
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
 
 /* Extra data func_151303BC's caller copies into the particle at +0xA8. */
 typedef struct {
@@ -74,33 +40,33 @@ typedef struct {
 
 void *func_151303BC(ParticleDesc *, s32, s32);
 
-void *func_15134DAC(struct_E9FE0 *, s32);
+void *func_15134DAC(BloodStripDesc *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
-    struct_E9FE0 desc;
+OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
+    BloodStripDesc desc;
     OscillatorObject *obj;
     Oscillator oscillator;
 
     desc.ownerId = owner->unique_id;
     desc.owner = owner;
-    desc.unk8 = 8;
-    desc.unkC = -9.0f;
-    desc.unk10 = -14.0f;
-    desc.unk14 = 27.0f;
-    desc.unk18 = -21.0f;
-    desc.unk1C = -14.0f;
-    desc.unk20 = 41.0f;
-    desc.unk24 = 2;
-    desc.unk26 = 60;
-    desc.unk28 = 60;
-    desc.unk2A = arg1;
-    desc.unk2E = 2;
-    desc.unk2F = 2;
-    desc.unk30 = 2;
-    desc.unk34 = 0.5f;
-    desc.unk38 = 3;
-    desc.unk39 = -1;
+    desc.bone = 8;
+    desc.offsetA.x = -9.0f;
+    desc.offsetA.y = -14.0f;
+    desc.offsetA.z = 27.0f;
+    desc.offsetB.x = -21.0f;
+    desc.offsetB.y = -14.0f;
+    desc.offsetB.z = 41.0f;
+    desc.flags = 2;
+    desc.duration = 60;
+    desc.pause = 60;
+    desc.lifetime = arg1;
+    desc.sampleCallback = 2;
+    desc.emitCallback = 2;
+    desc.rateCallback = 2;
+    desc.rate = 0.5f;
+    desc.mode = 3;
+    desc.updateCallback = -1;
 
     oscillator.phase = 0;
     oscillator.phaseStep = 0x11111;
@@ -121,7 +87,7 @@ s32 func_150EA10C(OscillatorObject *obj) {
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void func_150EA11C(vertex *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
+void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
     ParticleExtra extra;
@@ -203,29 +169,11 @@ f32 func_150EA490(OscillatorObject *obj) {
     return value;
 }
 
-/* Descriptor passed to func_1513418C (same layout as game_10CD70.c's BloodDripDesc). */
-typedef struct {
-    /* 0x00 */ s32 target[2];
-    /* 0x08 */ u8  ownerId;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ struct127 *owner;
-    /* 0x10 */ u8  bone;
-    /* 0x11 */ u8  pad11[0x3];
-    /* 0x14 */ Vec3f offset;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ f32 rate;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ u8  flags;
-    /* 0x2B */ u8  emitter;
-    /* 0x2C */ s8  callback;
-    /* 0x2D */ u8  unk2D;
-} EmitterDesc;
-
-void *func_1513418C(EmitterDesc *, s32, u8, s32);
+void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(struct127 *owner, s16 lifetime, s32 arg2, s32 arg3) {
-    EmitterDesc desc;
+void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
+    BloodDripDesc desc;
 
     desc.target[0] = 0;
     desc.target[1] = 0;
@@ -326,86 +274,62 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* A D_800DBEF4 entry (WorldObject) with the fields used here, which include/structs.h leaves unnamed. */
-typedef struct {
-    /* 0x00 */ Vec3f angle; /* degrees, kept in [0, 360) */
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s32 gravity;
-    /* 0x40 */ u8  pad40[0x1A];
-    /* 0x5A */ s16 velocityX;
-    /* 0x5C */ s16 velocityY;
-    /* 0x5E */ s16 velocityZ;
-    /* 0x60 */ Vec3f angularVelocity;
-    /* 0x6C */ u8  pad6C[0x2];
-    /* 0x6E */ u8  expired;
-    /* 0x6F */ u8  pad6F[0x3];
-    /* 0x72 */ u8  unk72;
-    /* 0x73 */ u8  flags;
-    /* 0x74 */ u8  pad74[0x8];
-    /* 0x7C */ s32 yFixed; /* y in 1/8 units */
-    /* 0x80 */ u8  pad80[0xA];
-    /* 0x8A */ u8  timer;
-    /* 0x8B */ u8  pad8B[0x15];
-} struct_EA944; // size 0xA0
-
-/* Sets flag bits 0 and 1 on D_800DBEF4 entry `index` if its unk72 is 0xE0. */
+/* Sets behaviorState bits 0 and 1 on D_800DBEF4 entry `index` if its id is 0xE0. */
 void func_150EA904(s32 arg0, s32 index) {
-    struct_EA944 *entry = (struct_EA944 *)D_800DBEF4 + index;
+    // matching: the no-op cast makes IDO load the array base before scaling index
+    WorldObject *entry = (WorldObject *)D_800DBEF4 + index;
 
-    if (entry->unk72 == 0xE0) {
-        entry->flags = (entry->flags & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
+    if (entry->id == 0xE0) {
+        entry->behaviorState = (entry->behaviorState & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
-/* While both flag bits are set: spins and moves the entry, applies gravity, and counts its timer down. */
-void func_150EA944(struct_EA944 *entry) {
+/* While behaviorState bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
+ * units in work.words[0]) and fades its alpha out, then marks it inactive. */
+void func_150EA944(WorldObject *entry) {
     f32 frames;
     f32 angle;
     s32 timer;
 
-    if ((entry->flags & 3) == 3) {
+    if ((entry->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        entry->angle.x += entry->angularVelocity.x * frames;
-        angle = entry->angle.x;
+        entry->rotX += entry->spinX * frames;
+        angle = entry->rotX;
         if (angle < 0.0f) {
-            entry->angle.x = angle + 360.0f;
+            entry->rotX = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.x = angle - 360.0f;
+            entry->rotX = angle - 360.0f;
         }
 
-        entry->angle.y += entry->angularVelocity.y * frames;
-        angle = entry->angle.y;
+        entry->rotY += entry->spinY * frames;
+        angle = entry->rotY;
         if (angle < 0.0f) {
-            entry->angle.y = angle + 360.0f;
+            entry->rotY = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.y = angle - 360.0f;
+            entry->rotY = angle - 360.0f;
         }
 
-        entry->angle.z += entry->angularVelocity.z * frames;
-        angle = entry->angle.z;
+        entry->rotZ += entry->spinZ * frames;
+        angle = entry->rotZ;
         if (angle < 0.0f) {
-            entry->angle.z = angle + 360.0f;
+            entry->rotZ = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.z = angle - 360.0f;
+            entry->rotZ = angle - 360.0f;
         }
 
-        timer = entry->timer;
-        entry->velocityY -= entry->gravity * D_800BE9E4;
-        entry->x += entry->velocityX * D_800BE9E4;
-        entry->yFixed += entry->velocityY * D_800BE9E4;
-        entry->y = entry->yFixed >> 3;
-        entry->z += entry->velocityZ * D_800BE9E4;
+        timer = entry->alpha;
+        entry->moveY -= entry->param.word * D_800BE9E4;
+        entry->x += entry->moveX * D_800BE9E4;
+        entry->work.words[0] += entry->moveY * D_800BE9E4;
+        entry->y = entry->work.words[0] >> 3;
+        entry->z += entry->moveZ * D_800BE9E4;
 
         timer -= D_800BE9E4 * 4;
         if (timer > 0) {
-            entry->timer = timer;
+            entry->alpha = timer;
         } else {
-            entry->expired = 1;
+            entry->inactive = 1;
         }
     }
 }

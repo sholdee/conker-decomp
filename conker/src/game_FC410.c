@@ -3,16 +3,11 @@
 #include "variables.h"
 
 
-extern s32 func_151149AC(u32);
+extern WorldObject *func_151149AC(u32);
 extern void func_150A3444(s32, s16, s16, s16);
 extern void func_151749A0(s32, s32);
 extern f32 D_800A0830;
 extern f32 D_800A0834;
-
-struct Obj150CEF60 {
-    u8 pad0[0x8];
-    f32 unk8;
-};
 
 struct CPad150CEF60 {
     f32 c;
@@ -20,7 +15,7 @@ struct CPad150CEF60 {
 };
 
 void func_150CEF60(s32 arg0) {
-    struct Obj150CEF60 *temp_v0;
+    WorldObject *temp_v0;
     f32 angle;
     struct CPad150CEF60 c;
     f32 s;
@@ -29,8 +24,8 @@ void func_150CEF60(s32 arg0) {
 
     cx = -1.0f;
     cy = 44.0f;
-    temp_v0 = (struct Obj150CEF60 *)func_151149AC(4);
-    angle = temp_v0->unk8 * D_800A0830;
+    temp_v0 = func_151149AC(4);
+    angle = temp_v0->rotZ * D_800A0830;
     c.c = func_150AD78C(angle);
     s = func_150AD780(angle);
     func_150A3444(2,

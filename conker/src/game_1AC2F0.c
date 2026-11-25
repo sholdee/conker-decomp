@@ -1,32 +1,6 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr
-#define func_15149130 func_15149130_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_15149130
-#define D_800DDDAC D_800DDDAC_hdr
-#define D_800DDDB0 D_800DDDB0_hdr
-#define D_800DDDC8 D_800DDDC8_hdr
-#define D_800DDDD8 D_800DDDD8_hdr
-#define D_800DDE18 D_800DDE18_hdr
-#define D_800DDE1C D_800DDE1C_hdr
-#define D_800DDE20 D_800DDE20_hdr
-#define D_800DDE28 D_800DDE28_hdr
-#define D_800DDE3C D_800DDE3C_hdr
-#define D_800D9D10 D_800D9D10_hdr
-#define D_800CC2D0 D_800CC2D0_hdr
 #include "variables.h"
-#undef D_800DDDAC
-#undef D_800DDDB0
-#undef D_800DDDC8
-#undef D_800DDDD8
-#undef D_800DDE18
-#undef D_800DDE1C
-#undef D_800DDE20
-#undef D_800DDE28
-#undef D_800DDE3C
-#undef D_800D9D10
-#undef D_800CC2D0
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
@@ -40,24 +14,17 @@ typedef struct {
     u8 b;
 } FadeColor;
 
-extern f32 D_800D9D10[][4][4]; // per-view projection matrices
 
-f32 func_15048A40(u8 angle); // -1..1 wave over a 256-step angle (used as a sine)
 
 /* Colour fade (func_1517EE40) */
 extern FadeColor D_800DDDA0[]; // colour
-extern s8 D_800DDDAC[];        // nonzero: fading to the colour, 0: fading from it
-extern s32 D_800DDDB0[];       // elapsed frames
 extern u8 D_800DDDC0[];        // fixed alpha that overrides the timer when nonzero
-extern s32 D_800DDE28[];       // duration in frames
 
 /* Colour flash (func_1517F488) */
 extern FadeColor D_800DDD90[];
 extern u8 D_800DDD9C[];  // alpha
-extern u16 D_800DDE10[]; // frames left
 
 /* Pulsing full-screen tint (func_1517F720), view 0 only */
-extern u16 D_800DDE08; // frames left
 extern u8 D_800DDD88;  // pulse speed (angle step per frame)
 extern u8 D_800DDD89;  // pulse angle
 extern u8 D_800DDD8A;  // colour pair index into D_8008D010
@@ -66,21 +33,14 @@ extern u8 D_800DDD8C;  // nonzero: alpha pulses
 extern u8 D_8008D010[][6]; // two RGB colours per entry
 
 /* Iris wipe */
-extern f32 D_800DDDC8[];     // closure: 0 open .. 1 closed
-extern f32 D_800DDDD8[];     // closure change per frame
 extern f32 D_800DDDE8[][2];  // hole centre, relative to the view centre
-extern u8 D_800DDE1C[];      // style: 0 plain, 1 with sight marks, 2 with an animated overlay
-extern u8 D_800DDE20[];      // nonzero: scripted iris driven by the player's mode state
-extern u8 D_800DDE3C[];      // nonzero: iris tracking the player (state 1..4)
 extern u8 D_800DDD70[];      // wobble frames left
 extern u8 D_800DDD74[];      // wobble angle
 extern u8 D_800DDD78[];      // overlay animation frame
 extern u16 D_800DDD80[];     // hold frames left
 
 /* Letterbox */
-extern f32 *D_800DDE18; // bar amount in percent, or NULL when off
 
-extern s32 D_800BE9E4; // frames elapsed this update
 
 /* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
  * unless that same fade has already run to completion. */
@@ -279,7 +239,7 @@ void func_1517F7B4(void) {
     }
 }
 
-void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /* Moves the iris hole of `view` to the screen position x,y (`onScreen`) or to the projection
  * of the world point x,y,z, clamped to +-10000. */
@@ -427,12 +387,7 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
     return gfx;
 }
 
-extern u8 D_800DDE40;    // nonzero: iris driven by the cutscene tracks below
-extern f32 *D_800DDE44; // closure, percent
-extern f32 *D_800DDE48; // hole x, percent of the view width
-extern f32 *D_800DDE4C; // hole y, percent of the view height
 extern Gfx D_8008D018[];
-extern s32 D_80090298[]; // texture ids
 extern s32 func_1510D0EC(s32, s32 *, s32, s32); // texture address of a texture id
 
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
@@ -440,7 +395,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     f32 closure;
 
     if (D_800DDE40 != 0) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             f32 scale;
 
             closure = *D_800DDE44 * 0.01f;
@@ -620,29 +575,6 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     return gfx;
 }
 
-typedef struct Game1AC2F0Mode {
-    u8 unknown000[0x120];
-    u8 state;
-    u8 unknown121[3];
-    s16 timer;
-} Game1AC2F0Mode;
-
-typedef struct Game1AC2F0Player {
-    s32 kind;
-    u8 unknown004[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 unknown020[0x130];
-    f32 height;
-    u8 unknown154[0x80];
-    u8 *model;
-    u8 unknown1D8[0x144];
-    Game1AC2F0Mode *mode;
-    u8 unknown320[0xC];
-} Game1AC2F0Player;
-
-extern Game1AC2F0Player D_800CC2D0[];
 void func_150A7960(void *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
 extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
@@ -651,23 +583,23 @@ extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
  * tracking irises follow the player, and free irises run at their speed until open or closed. */
 void func_151814FC(void) {
     s32 i;
-    Game1AC2F0Player *player;
+    Actor *player;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800DDE20[i] != 0) {
 
             player = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
-            if (player->mode == NULL) {
+            if (player->unk31C == NULL) {
                 D_800DDDC8[i] = 1.0f;
-            } else if (player->mode->state == 3) {
+            } else if (player->unk31C->unk120 == 3) {
                 if (D_800A7260[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->mode->state = 4;
+                    player->unk31C->unk120 = 4;
                     D_800DDD70[i] = 30;
                     D_800DDD74[i] = 0;
                 }
-            } else if (player->mode->state == 4) {
+            } else if (player->unk31C->unk120 == 4) {
                 if (D_800DDD70[i]) {
                     f32 scale;
 
@@ -685,27 +617,27 @@ void func_151814FC(void) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0] + scale * func_15048A40(D_800DDD74[i]);
                 } else {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->mode->state = 5;
+                    player->unk31C->unk120 = 5;
                 }
-            } else if (player->mode->state == 5) {
+            } else if (player->unk31C->unk120 == 5) {
                 D_800DDDC8[i] = D_800A7260[D_80082FA0];
-            } else if (player->mode->state == 6) {
+            } else if (player->unk31C->unk120 == 6) {
                 D_800DDDD8[i] = 0.009f;
                 if (D_800A7270[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7270[D_80082FA0];
-                    player->mode->state = 7;
-                    player->mode->timer = 30;
+                    player->unk31C->unk120 = 7;
+                    player->unk31C->unk124 = 30;
                     D_800DDDD8[i] = 0.0f;
                 }
-            } else if (player->mode->state == 8) {
+            } else if (player->unk31C->unk120 == 8) {
                 D_800DDDD8[i] = 0.004f;
                 if (D_800DDDC8[i] >= 1.0f) {
                     D_800DDDC8[i] = 1.0f;
-                    player->mode->state = 9;
+                    player->unk31C->unk120 = 9;
                 }
             }
         } else if (D_800DDE3C[i] != 0) {
-            Game1AC2F0Player *actor;
+            Actor *actor;
             f32 x;
             f32 y;
             f32 z;
@@ -718,20 +650,20 @@ void func_151814FC(void) {
 
             actor = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
-            if (actor->model != NULL) {
-                u8 *model;
+            if (actor->unk1D4 != NULL) {
+                MtxF *model;
                 f32 height;
 
-                model = actor->model;
-                if (actor->kind == 1) {
-                    model += 0x300;
+                model = actor->unk1D4;
+                if (actor->interaction_state == 1) {
+                    model += 12; // bone 12
                 }
-                height = actor->height * 40.0f;
+                height = actor->y_scale * 40.0f;
                 func_150A7960(model, 0.0f, height, 0.0f, &x, &y, &z);
             } else {
-                x = actor->x;
-                y = actor->y;
-                z = actor->z;
+                x = actor->x_position;
+                y = actor->y_position;
+                z = actor->z_position;
             }
             prevX = D_800DDDE8[i][0];
             prevY = D_800DDDE8[i][1];
@@ -987,7 +919,6 @@ typedef struct {
     /* 0x28 */ FlashData data;
 } FlashEffect;
 
-void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 void *memcpy(void *, const void *, u32);
 
 /* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over

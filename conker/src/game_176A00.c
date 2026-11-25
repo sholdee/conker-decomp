@@ -1,65 +1,13 @@
 #include <ultra64.h>
-// matching: functions.h declares func_1513D524 as void; it returns the spawned object here
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
+#include "effects.h"
 
 extern void func_1510F800(s32);
-extern void *func_1513D524(void *spawn, u8, u8, u8, u8, u8, s32 extraSize, u8, s32);
 extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
 extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
-extern void func_1518CA80(void *effect, u8 mode);
+extern void func_1518CA80(BillboardSpawn *effect, u8 mode);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
-
-/* Emitter description that func_15149550 turns into a spawned particle. */
-typedef struct {
-    /* 0x00 */ struct17 pos;
-    /* 0x0C */ f32 maxA;
-    /* 0x10 */ f32 maxB;
-    /* 0x14 */ f32 minA;
-    /* 0x18 */ f32 minB;
-    /* 0x1C */ f32 altB;
-    /* 0x20 */ s16 maxC;
-    /* 0x22 */ s16 minC;
-    /* 0x24 */ s16 life;
-    /* 0x26 */ u8 color[4];
-    /* 0x2A */ u16 flags;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s32 extraSize;
-    /* 0x34 */ u8 effect;
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ f32 maxHeight;
-    /* 0x40 */ f32 shrinkRate;
-    /* 0x44 */ f32 growRate;
-} ParticleEmitter;
-
-/* Spawn parameters passed to func_1513D524. */
-typedef struct {
-    /* 0x00 */ u8 kind;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ struct17 unk34;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s32 unk48;              // func_1510FD20(x, z) when flag 0x01000000 is set
-    /* 0x4C */ s32 pad4C[3];
-} ParticleSpawn;
 
 /*
  * Per-particle motion state, stored at +0x110 of the spawned object. Each channel (A, B, C)
@@ -102,7 +50,7 @@ typedef struct {
     /* 0x028 */ u8 pad28[4];
     /* 0x02C */ f32 width;            // eased by motion channel A
     /* 0x030 */ f32 height;           // eased by motion channel B
-    /* 0x034 */ struct17 pos;
+    /* 0x034 */ Vec3f pos;
     /* 0x040 */ u8 pad40[0xC];
     /* 0x04C */ f32 accelY;
     /* 0x050 */ f32 velY;
@@ -121,9 +69,9 @@ typedef struct {
 } Particle;
 
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
-Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
+Particle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
     Particle *particle;
-    ParticleSpawn spawn;
+    ParticleDef spawn;
     ParticleMotion motion;
     s32 flip;
 
@@ -132,7 +80,7 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
     if (arg2) {
         spawn.flags |= 0x01000000;
         func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.unk0, spawn.pos.unk8);
+        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.flags &= ~0x01000000;
         spawn.unk48 = 0;
@@ -140,35 +88,35 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
 
     switch (kind) {
     case 1:
-        spawn.kind = 0x13;
+        spawn.texture = 0x13;
         break;
     case 2:
-        spawn.kind = 0x71;
+        spawn.texture = 0x71;
         break;
     case 0:
     default:
         if (func_150ADA20() & 1) {
-            spawn.kind = 0x13;
+            spawn.texture = 0x13;
         } else {
-            spawn.kind = 0x14;
+            spawn.texture = 0x14;
         }
         break;
     }
 
-    spawn.unk2 = 0x301;
-    spawn.life = emitter->life;
-    spawn.color[0] = emitter->color[0];
-    spawn.color[1] = emitter->color[1];
-    spawn.color[2] = emitter->color[2];
-    spawn.color[3] = emitter->color[3];
+    spawn.renderModes = 0x301;
+    spawn.lifetime = emitter->life;
+    spawn.rgba[0] = emitter->color[0];
+    spawn.rgba[1] = emitter->color[1];
+    spawn.rgba[2] = emitter->color[2];
+    spawn.rgba[3] = emitter->color[3];
     spawn.unk44 = emitter->unk2C;
     spawn.unk45 = emitter->unk2D;
-    spawn.unk28.unk0 = 0.0f;
-    spawn.unk28.unk4 = 0.0f;
-    spawn.unk28.unk8 = 0.0f;
-    spawn.unk34.unk0 = emitter->scale;
-    spawn.unk34.unk4 = 0.0f;
-    spawn.unk34.unk8 = 1.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = emitter->scale;
+    spawn.scale.y = 0.0f;
+    spawn.scale.z = 1.0f;
 
     motion.maxA = emitter->maxA;
     motion.minA = emitter->minA;
@@ -191,10 +139,10 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
     motion.rateC = 0.231f;
     motion.shrinkRate = emitter->shrinkRate;
     motion.growRate = emitter->growRate;
-    spawn.unk8 = 0;
-    spawn.unkC = (motion.maxC + motion.minC) >> 1;
-    spawn.unk14 = 0.0f;
-    spawn.unk18 = 0.0f;
+    spawn.frame = 0;
+    spawn.frameSpeed = (motion.maxC + motion.minC) >> 1;
+    spawn.width = 0.0f;
+    spawn.height = 0.0f;
     motion.effect = emitter->effect;
     motion.maxHeight = emitter->maxHeight;
 
@@ -300,8 +248,8 @@ s32 func_15149C58(Particle *particle) {
     particle->width -= particle->width * particle->motion.shrinkRate;
     particle->height -= particle->height * particle->motion.shrinkRate;
     particle->velY += particle->accelY * D_800BE9A4;
-    particle->pos.unk4 += particle->velY * D_800BE9A4;
-    if (particle->motion.maxHeight < particle->pos.unk4) {
+    particle->pos.y += particle->velY * D_800BE9A4;
+    if (particle->motion.maxHeight < particle->pos.y) {
         return 0;
     }
     if (particle->width < 4.0f || particle->height < 4.0f) {
@@ -334,56 +282,35 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
     dz = D_800DD1D8[index] * particle->width;
     dx = D_800DD1E8[index] * particle->width;
 
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.unk0 + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.unk4;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.unk8 - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.unk0 - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.unk4 + particle->height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.unk8 + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.y + particle->height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.z + dz;
 
     return result;
 }
 
-/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
-typedef struct {
-    /* 0x00 */ struct17 pos;
-    /* 0x0C */ u8 padC[0xA];
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 color1[3];
-    /* 0x2B */ u8 color2[3];
-    /* 0x2E */ u8 intensity;          // func_1518CA80 scales both colours by intensity / 256
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-} ParticleEffect;
-
 /* Spawns a randomised func_1518CA80 effect at the particle's position. Returns 0. */
 s32 func_15149EC4(Particle *particle) {
-    ParticleEffect effect;
+    BillboardSpawn effect;
 
     effect.pos = particle->pos;
-    effect.unk16 = 0;
-    effect.unk18 = 0;
-    effect.unk1A = effect.unk1C = (func_150ADA20() % 6U) + 8;
-    effect.unk1E = 0;
-    effect.unk20 = 0;
-    effect.unk22 = (func_150ADA20() % 201U) + 100;
-    effect.unk24 = (func_150ADA20() % 5U) + 3;
-    effect.unk26 = 600;
-    func_151429E0(3, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
-    func_151429E0(4, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+    effect.width = 0;
+    effect.height = 0;
+    effect.widthStep = effect.heightStep = (func_150ADA20() % 6U) + 8;
+    effect.velX = 0;
+    effect.velZ = 0;
+    effect.velY = (func_150ADA20() % 201U) + 100;
+    effect.accelY = (func_150ADA20() % 5U) + 3;
+    effect.life = 600;
+    func_151429E0(3, &effect.primColor[0], &effect.primColor[1], &effect.primColor[2]);
+    func_151429E0(4, &effect.envColor[0], &effect.envColor[1], &effect.envColor[2]);
     effect.intensity = 0xFF;
-    effect.unk2F = (func_150ADA20() % 65U) + 92;
-    effect.unk30 = (func_150ADA20() % 3U) + 1;
-    effect.unk31 = 0;
+    effect.alpha = (func_150ADA20() % 65U) + 92;
+    effect.fadeStep = (func_150ADA20() % 3U) + 1;
+    effect.onExpire = 0;
     func_1518CA80(&effect, 1);
     return 0;
 }

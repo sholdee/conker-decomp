@@ -1,45 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
 
-/* Particle spawn descriptor passed to func_15149550. */
-typedef struct {
-    struct17 pos;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-} Struct15149550Arg;
-
-s32 func_15149550(Struct15149550Arg *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
-
-typedef struct Vec3f1514A6A0 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f1514A6A0;
+s32 func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
@@ -50,8 +16,8 @@ typedef struct Beam1514A6A0 {
     u8 unknown0[0x2C];
     f32 width;
     f32 progress;
-    Vec3f1514A6A0 start;
-    Vec3f1514A6A0 end;
+    Vec3f start;
+    Vec3f end;
     f32 radius;
     u8 unknown50[0x70];
     u8 vertexTemplate[0x40];
@@ -63,12 +29,12 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     Vtx1514A6A0 *vertices;
     void *result;
     f32 distanceSquared;
-    Vec3f1514A6A0 tip;
+    Vec3f tip;
     f32 dx, dy, dz;
     f32 vx, vy, vz;
     f32 nx, ny, nz;
     f32 lengthSquared;
-    Vec3f1514A6A0 *eye;
+    Vec3f *eye;
     f32 radiusSquared;
     u8 fresh;
 
@@ -88,7 +54,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     tip.x = beam->start.x + dx * beam->progress;
     tip.y = beam->start.y + dy * beam->progress;
     tip.z = beam->start.z + dz * beam->progress;
-    eye = (Vec3f1514A6A0 *)&D_800DBFF0[cam].unk2F8;
+    eye = &D_800DBFF0[cam].eye;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;
@@ -165,7 +131,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
 /* Spawns `count` particles at random points within `radius` of (x, y, z). */
 void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
                    f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11) {
-    Struct15149550Arg particle;
+    ParticleEmitterDesc particle;
     u8 angle;
     f32 sin;
     f32 cos;
@@ -175,22 +141,22 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 
     if (count > 0) {
         // matching: both stores on one line (-g3 line numbers steer as1 scheduling)
-        particle.unk20 = 0x6231; particle.unk22 = 0x1A4D;
-        particle.unk26 = 0;
-        particle.unk27 = 0;
-        particle.unk28 = 0;
-        particle.unk29 = 0xFF;
-        particle.unk2A = 1;
+        particle.maxC = 0x6231; particle.minC = 0x1A4D;
+        particle.color[0] = 0;
+        particle.color[1] = 0;
+        particle.color[2] = 0;
+        particle.color[3] = 0xFF;
+        particle.flags = 1;
         particle.unk2C = 0xFF;
         particle.unk2D = 0xFF;
         particle.unk2F = arg11;
-        particle.unk38 = 0.0f;
-        particle.unk40 = 0.045f;
-        particle.unk44 = 0.7f;
-        particle.unk30 = 0;
+        particle.scale = 0.0f;
+        particle.shrinkRate = 0.045f;
+        particle.growRate = 0.7f;
+        particle.extraSize = 0;
         particle.unk2E = 0;
-        particle.unk34 = 15;
-        particle.pos.unk4 = y;
+        particle.effect = 15;
+        particle.pos.y = y;
 
         do {
             // matching: explicit mask; func_150ADA20 really returns a full word
@@ -200,14 +166,14 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             dist = func_150ADA68() * radius;
             size = func_150ADA68() * sizeRange + sizeBase;
             height = func_150ADA68() * heightRange + heightBase;
-            particle.pos.unk0 = dist * sin + x;
-            particle.pos.unk8 = dist * cos + z;
-            particle.unkC = 22.6f * size;
-            particle.unk14 = 13.786f * size;
-            particle.unk10 = 57.969f * height;
-            particle.unk18 = 42.714f * height;
-            particle.unk1C = 118.763f * height;
-            particle.unk24 = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
+            particle.pos.x = dist * sin + x;
+            particle.pos.z = dist * cos + z;
+            particle.maxA = 22.6f * size;
+            particle.minA = 13.786f * size;
+            particle.maxB = 57.969f * height;
+            particle.minB = 42.714f * height;
+            particle.altB = 118.763f * height;
+            particle.life = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
             func_15149550(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
@@ -215,36 +181,36 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 }
 
 /* Spawns one particle at `pos` with randomized size, lifetime and fade. */
-void func_1514AD9C(struct17 *pos, u8 arg1, s32 arg2) {
-    Struct15149550Arg particle;
+void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
+    ParticleEmitterDesc particle;
     f32 size;
     f32 height;
 
     // matching: both stores on one line (-g3 line numbers steer as1 scheduling)
-    particle.unk20 = 0x6231; particle.unk22 = 0x1A4D; particle.pos = *pos;
-    particle.unk26 = 0;
-    particle.unk27 = 0;
-    particle.unk28 = 0;
-    particle.unk29 = 0xFF;
+    particle.maxC = 0x6231; particle.minC = 0x1A4D; particle.pos = *pos;
+    particle.color[0] = 0;
+    particle.color[1] = 0;
+    particle.color[2] = 0;
+    particle.color[3] = 0xFF;
     particle.unk2D = 0xFF;
     particle.unk2E = 0;
     particle.unk2F = 1;
-    particle.unk30 = 0;
-    particle.unk2A = 1;
-    particle.unk34 = 28;
-    particle.unk3C = 0.0f;
-    particle.unk40 = 0.080000006f;
-    particle.unk44 = 0.4f;
+    particle.extraSize = 0;
+    particle.flags = 1;
+    particle.effect = 28;
+    particle.maxHeight = 0.0f;
+    particle.shrinkRate = 0.080000006f;
+    particle.growRate = 0.4f;
     size = (func_150ADA68() * 501.0f + 999.0f) * 0.001f;
     height = func_150ADA68();
-    particle.unkC = 22.6f * size;
-    particle.unk14 = 13.786f * size;
+    particle.maxA = 22.6f * size;
+    particle.minA = 13.786f * size;
     height = (height * 1007.0f + 1505.0f) * 0.001f;
-    particle.unk10 = 57.969f * height;
-    particle.unk18 = 42.714f * height;
-    particle.unk1C = 118.763f * height;
-    particle.unk24 = func_150ADA20() % 17U + 16;
-    particle.unk38 = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
+    particle.maxB = 57.969f * height;
+    particle.minB = 42.714f * height;
+    particle.altB = 118.763f * height;
+    particle.life = func_150ADA20() % 17U + 16;
+    particle.scale = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
     particle.unk2C = func_150ADA20() % 156U + 100;
     func_15149550(&particle, 10, 0, 0, arg1, arg2);
 }
@@ -289,174 +255,51 @@ s32 func_1514AF74(Particle177B50 *p) {
 extern void func_15143874(s16, f32, f32 *, f32 *);
 
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
-void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
+void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 count;
-    Struct15149550Arg particle;
+    ParticleEmitterDesc particle;
     s32 angle;
     f32 size;
     f32 height;
 
     count = (func_150ADA68() * 20.0f + 29.0f) * 0.0001f * 5541.7695f;
     if (count > 1.0f) {
-        particle.unk20 = 0x6231;
-        particle.unk22 = 0x1A4D;
-        particle.pos.unk4 = pos->unk4;
-        particle.unk26 = 0;
-        particle.unk27 = 0;
-        particle.unk28 = 0;
-        particle.unk29 = 0xFF;
+        particle.maxC = 0x6231;
+        particle.minC = 0x1A4D;
+        particle.pos.y = pos->y;
+        particle.color[0] = 0;
+        particle.color[1] = 0;
+        particle.color[2] = 0;
+        particle.color[3] = 0xFF;
         particle.unk2D = 0xFF;
         particle.unk2E = 0;
         particle.unk2F = 1;
-        particle.unk30 = 0;
-        particle.unk2A = 1;
-        particle.unk34 = 28;
-        particle.unk3C = 0.0f;
+        particle.extraSize = 0;
+        particle.flags = 1;
+        particle.effect = 28;
+        particle.maxHeight = 0.0f;
         do {
             angle = func_150ADA20();
-            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.unk0, &particle.pos.unk8);
-            particle.pos.unk0 += pos->unk0;
-            particle.pos.unk8 += pos->unk8;
-            particle.unk40 = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
-            particle.unk44 = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
+            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
+            particle.pos.x += pos->x;
+            particle.pos.z += pos->z;
+            particle.shrinkRate = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
+            particle.growRate = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
             size = (func_150ADA68() * 1205.0f + 304.0f) * 0.001f;
             height = (func_150ADA68() * 1006.0f + 504.0f) * 0.001f;
-            particle.unkC = 22.6f * size;
-            particle.unk14 = 13.786f * size;
-            particle.unk10 = 57.969f * height;
-            particle.unk18 = 42.714f * height;
-            particle.unk1C = 118.763f * height;
-            particle.unk24 = func_150ADA20() % 31U + 20;
-            particle.unk38 = func_150ADA68() * 497.0f * 0.001f;
+            particle.maxA = 22.6f * size;
+            particle.minA = 13.786f * size;
+            particle.maxB = 57.969f * height;
+            particle.minB = 42.714f * height;
+            particle.altB = 118.763f * height;
+            particle.life = func_150ADA20() % 31U + 20;
+            particle.scale = func_150ADA68() * 497.0f * 0.001f;
             particle.unk2C = func_150ADA20() % 156U + 100;
             func_15149550(&particle, 10, 0, 0, arg1, arg2);
             count -= 1.0f;
         } while (count > 1.0f);
     }
 }
-
-/* Particle descriptor passed to func_1513D2F0 and func_1513D668. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 life;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 flags;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    s32 pad4C;
-    s32 pad50;
-    s16 unk54;
-    s16 unk56;
-} Struct1514B8E4Desc;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    struct17 unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    u16 unk40;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-    u8 unk49;
-    u8 unk4A;
-    u8 unk4B;
-    u8 unk4C;
-    u8 unk4D;
-    u8 unk4E;
-    u8 unk4F;
-    u8 unk50;
-    u8 unk51;
-    u8 unk52;
-    u8 unk53;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    s32 unk60;
-    s16 unk64;
-    s16 unk66;
-    s16 unk68;
-    u8 unk6A;
-    u8 pad6B[1];
-    f32 unk6C;
-    s8 unk70;
-    s8 unk71;
-    s8 unk72;
-    s8 unk73;
-} Struct1514B364Spawn;
-
-typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-} Struct1514B364Emit;
 
 typedef struct {
     f32 unk00;
@@ -470,153 +313,153 @@ typedef struct {
     u8 pad1D[0x7];
 } Struct1514B364Hit;
 
-extern s32 func_15046C80(struct17 *, s32, f32, Struct1514B364Hit *);
-extern void func_15152B38(Struct1514B364Spawn *, u8, s32);
-extern void func_15152F70(Struct1514B364Emit *, u8);
+extern s32 func_15046C80(Vec3f *, s32, f32, Struct1514B364Hit *);
+extern void func_15152B38(TrailBurst *, u8, s32);
+extern void func_15152F70(SimplePuffSpray *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
-    struct17 pos;
+void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
+    Vec3f pos;
 
     pos = *position;
     {
-        struct17 probe;
+        Vec3f probe;
 
-        probe.unk0 = position->unk0;
-        probe.unk4 = position->unk4 + 200.0f;
-        probe.unk8 = position->unk8;
-        if (func_15046C80(&probe, 0, position->unk4 - 200.0f, ground) == 0) {
+        probe.x = position->x;
+        probe.y = position->y + 200.0f;
+        probe.z = position->z;
+        if (func_15046C80(&probe, 0, position->y - 200.0f, ground) == 0) {
             return;
         }
     }
     {
-        Struct1514B364Spawn spawn;
+        TrailBurst spawn;
 
-        spawn.unk0 = 10;
-        spawn.unk4 = 0;
-        spawn.unk14 = 9.900001f;
-        spawn.unk18 = 21.0f;
-        spawn.unk1C = -3.0000002f;
-        spawn.unk20 = 1.016f;
-        spawn.unk24 = 30.0f;
-        spawn.unk28 = 30.4f;
-        spawn.unk2C = 0;
-        spawn.unk2E = 0xFF;
-        spawn.unk30 = -63;
-        spawn.unk32 = 43;
-        spawn.unk34 = 4;
-        spawn.unk38 = 5;
-        spawn.unk3C = 30;
-        spawn.unk3E = 30;
-        spawn.unk40 = 1;
-        spawn.unk42 = 12;
-        spawn.unk43 = 2;
-        spawn.unk44 = 3;
-        spawn.unk45 = 180;
-        spawn.unk46 = 0;
-        spawn.unk47 = 0;
-        spawn.unk48 = 155;
-        spawn.unk49 = 50;
-        spawn.unk4A = 100;
-        spawn.unk4B = 0;
-        spawn.unk4C = 100;
-        spawn.unk4D = 0xFF;
-        spawn.unk4E = 0xFF;
-        spawn.unk4F = 0xFF;
-        spawn.unk50 = 0xFF;
-        spawn.unk51 = 0;
-        spawn.unk52 = 0;
-        spawn.unk53 = 0;
-        spawn.unk54 = 0;
-        spawn.unk55 = 0xFF;
-        spawn.unk56 = 0;
-        spawn.unk57 = 1;
-        spawn.unk58 = 36;
-        spawn.unk5C = 0x200005;
-        spawn.unk60 = 0x60600;
-        spawn.unk64 = 20;
-        spawn.unk66 = 12;
-        spawn.unk68 = 1;
-        spawn.unk6A = 0;
-        spawn.unk6C = 1.0; // matching: a double literal; 1.0f loads differently
-        spawn.unk70 = -1;
-        spawn.unk71 = 0;
+        spawn.countBase = 10;
+        spawn.countRange = 0;
+        spawn.sizeBase = 9.900001f;
+        spawn.sizeRange = 21.0f;
+        spawn.gravityBase = -3.0000002f;
+        spawn.gravityRange = 1.016f;
+        spawn.speedBase = 30.0f;
+        spawn.speedRange = 30.4f;
+        spawn.angles.yawBase = 0;
+        spawn.angles.yawRange = 0xFF;
+        spawn.angles.pitchBase = -63;
+        spawn.angles.pitchRange = 43;
+        spawn.capacityBase = 4;
+        spawn.capacityRange = 5;
+        spawn.lifeBase = 30;
+        spawn.lifeRange = 30;
+        spawn.headerFlags = 1;
+        spawn.flags = 12;
+        spawn.primMode = 2;
+        spawn.envMode = 3;
+        spawn.colorBase.red = 180;
+        spawn.colorBase.green = 0;
+        spawn.colorBase.blue = 0;
+        spawn.colorBase.alpha = 155;
+        spawn.colorRange.red = 50;
+        spawn.colorRange.green = 100;
+        spawn.colorRange.blue = 0;
+        spawn.colorRange.alpha = 100;
+        spawn.color2Base.red = 0xFF;
+        spawn.color2Base.green = 0xFF;
+        spawn.color2Base.blue = 0xFF;
+        spawn.color2Base.alpha = 0xFF;
+        spawn.color2Range.red = 0;
+        spawn.color2Range.green = 0;
+        spawn.color2Range.blue = 0;
+        spawn.color2Range.alpha = 0;
+        spawn.colorLevelBase = 0xFF;
+        spawn.colorLevelRange = 0;
+        spawn.renderMode = 1;
+        spawn.unk21 = 36;
+        spawn.setGeometryMode = 0x200005;
+        spawn.clearGeometryMode = 0x60600;
+        spawn.fadeStart = 20;
+        spawn.fadeRate = 12;
+        spawn.shrinkStart = 1;
+        spawn.shrinkPaused = 0;
+        spawn.shrinkFactor = 1.0; // matching: a double literal; 1.0f loads differently
+        spawn.unk38 = -1;
+        spawn.unk39 = 0;
         spawn.unk72 = -1;
         spawn.unk73 = -1;
-        spawn.unk8 = pos;
+        spawn.pos = pos;
         func_15152B38(&spawn, arg2, arg3);
     }
     {
-        Struct1514B364Emit emit;
+        SimplePuffSpray emit;
 
-        emit.unk0 = pos;
-        emit.unkC = 3.99f;
-        emit.unk10 = 8.11f;
-        emit.unk14 = 0.60200006f;
-        emit.unk18 = 0.407f;
-        emit.unk1C = 10.139999f;
-        emit.unk20 = 10.2699995f;
-        emit.unk24 = 8;
-        emit.unk26 = 8;
-        emit.unk28 = 0;
-        emit.unk2A = 0xFF;
-        emit.unk2C = -64;
-        emit.unk2E = 44;
-        emit.unk30 = 5;
-        emit.unk32 = 4;
-        emit.unk34 = 66;
-        emit.unk36 = 30;
-        emit.unk38 = 10;
-        emit.unk39 = 33;
-        emit.unk3C = 1;
-        emit.unk40 = 12;
-        emit.unk44 = 0;
-        emit.unk48 = 0;
-        emit.unk4C = 0;
-        emit.unk50 = 0;
-        emit.unk54 = 0xFF;
-        emit.unk55 = func_150ADA20() % 101U + 155;
+        emit.pos = pos;
+        emit.sizeBase = 3.99f;
+        emit.sizeRange = 8.11f;
+        emit.growthBase = 0.60200006f;
+        emit.growthRange = 0.407f;
+        emit.speedBase = 10.139999f;
+        emit.speedRange = 10.2699995f;
+        emit.countBase = 8;
+        emit.countRange = 8;
+        emit.angles.yawBase = 0;
+        emit.angles.yawRange = 0xFF;
+        emit.angles.pitchBase = -64;
+        emit.angles.pitchRange = 44;
+        emit.itemCountBase = 5;
+        emit.itemCountRange = 4;
+        emit.lifeBase = 66;
+        emit.lifeRange = 30;
+        emit.green = 10;
+        emit.red = 33;
+        emit.handlers[0] = 1;
+        emit.handlers[1] = 12;
+        emit.handlers[2] = 0;
+        emit.handlers[3] = 0;
+        emit.handlers[4] = 0;
+        emit.handlers[5] = 0;
+        emit.blue = 0xFF;
+        emit.alpha = func_150ADA20() % 101U + 155;
         func_15152F70(&emit, 0xFF);
     }
     func_1514B034(&pos, arg2, arg3);
 
     {
-        Struct1514B8E4Desc desc;
+        ParticleDef desc;
         s32 randA;
         s32 randC;
         s32 randB;
         s32 sum;
 
-        desc.unk0 = 56;
-        desc.unk2 = 1;
-        desc.life = 50;
-        desc.unk8 = 0;
-        desc.unkC = 0x6666;
-        desc.unk13 = 0xFF;
-        desc.unk14 = 1.0f;
-        desc.unk18 = 1.0f;
-        desc.unk1C.unk0 = pos.unk0;
-        desc.unk1C.unk4 = pos.unk4 + 10.0f;
-        desc.unk1C.unk8 = pos.unk8;
-        desc.unk28 = 0.0f;
-        desc.unk2C = 0.0f;
-        desc.unk30 = 0.0f;
-        desc.unk34 = 0.2f;
-        desc.unk38 = 1.0f;
-        desc.unk3C = 1.0f;
+        desc.texture = 56;
+        desc.renderModes = 1;
+        desc.lifetime = 50;
+        desc.frame = 0;
+        desc.frameSpeed = 0x6666;
+        desc.rgba[3] = 0xFF;
+        desc.width = 1.0f;
+        desc.height = 1.0f;
+        desc.pos.x = pos.x;
+        desc.pos.y = pos.y + 10.0f;
+        desc.pos.z = pos.z;
+        desc.rot.x = 0.0f;
+        desc.rot.y = 0.0f;
+        desc.rot.z = 0.0f;
+        desc.scale.x = 0.2f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         desc.flags = 0x400C0001;
         desc.unk44 = func_150ADA20() % 101U + 100;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 6;
-        desc.unk10 = func_150ADA20() % 51U + 180;
-        desc.unk11 = func_150ADA20() % 101U;
-        desc.unk12 = func_150ADA20() % 1U;
+        desc.rgba[0] = func_150ADA20() % 51U + 180;
+        desc.rgba[1] = func_150ADA20() % 101U;
+        desc.rgba[2] = func_150ADA20() % 1U;
         randA = func_150ADA20();
         randB = func_150ADA20();
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
-        func_1513D668((s32)&desc, 0, 18, 29, 0, sum, (u8)randC,
+        func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
                       100.0f, 100.0f, 0, (s32)&ground->unk04, 0, 0, arg2, arg3);
     }
 }
@@ -653,8 +496,6 @@ typedef struct {
     f32 unk4;
 } Struct1514B8E4Size;
 
-
-
 /* Particle state at offset 0x110 written by func_1514B8E4 and animated by func_1514BC08. */
 typedef struct {
     /* 0x00 */ f32 base2C;
@@ -671,7 +512,7 @@ typedef struct {
     /* 0x2C */ f32 target24;
     /* 0x30 */ f32 timer24;
     /* 0x34 */ f32 value24;
-    /* 0x38 */ struct17 unk38;
+    /* 0x38 */ Vec3f unk38;
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
@@ -681,26 +522,26 @@ typedef struct {
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *arg4,
                     f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
-    Struct1514B8E4Desc desc;
+    ParticleDef desc;
     Wobble1514BC08 state;
     s32 flag;
 
     if (arg4 != NULL) {
         state.unk38 = *arg4;
     } else {
-        state.unk38.unk0 = 0.0f;
-        state.unk38.unk4 = 0.0f;
-        state.unk38.unk8 = 0.0f;
+        state.unk38.x = 0.0f;
+        state.unk38.y = 0.0f;
+        state.unk38.z = 0.0f;
     }
     state.unk44 = arg5;
     state.timer2C = 0.0f;
     state.timer30 = 0.0f;
     state.timer24 = 0.0f;
-    desc.unkC = 15935;
+    desc.frameSpeed = 15935;
     state.value24 = 15935.0f;
     state.target24 = 15935.0f;
     state.unk48 = arg6;
@@ -710,46 +551,46 @@ void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3,
     state.base2C = scale->unk0 * 15.045272f;
     state.range2C = scale->unk0 * 5.8676558f;
     state.target2C = scale->unk0 * 12.111444f;
-    desc.unk14 = 0.0f;
+    desc.width = 0.0f;
     state.base30 = scale->unk4 * 0.396174f;
     state.range30A = scale->unk4 * 0.1042563f;
     state.range30B = scale->unk4 * 0.5197371f;
     state.target30 = scale->unk4 * 0.34404588f;
-    desc.unk18 = 0.0f;
-    desc.unk0 = argB;
-    desc.unk1 = 0;
-    desc.unk2 = 0x2203;
+    desc.height = 0.0f;
+    desc.texture = argB;
+    desc.type = 0;
+    desc.renderModes = 0x2203;
     if (life == -1) {
-        desc.life = 300;
+        desc.lifetime = 300;
     } else {
-        desc.life = life;
+        desc.lifetime = life;
     }
-    desc.unk8 = 0;
-    desc.unk10 = 0xFF;
-    desc.unk11 = 0xFF;
-    desc.unk12 = 0xFF;
-    desc.unk13 = 0xFF;
-    desc.unk1C = *pos;
-    desc.unk28 = pos->unk0;
-    desc.unk2C = pos->unk4 + 100.0f;
-    desc.unk30 = pos->unk8;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
+    desc.frame = 0;
+    desc.rgba[0] = 0xFF;
+    desc.rgba[1] = 0xFF;
+    desc.rgba[2] = 0xFF;
+    desc.rgba[3] = 0xFF;
+    desc.pos = *pos;
+    desc.rot.x = pos->x;
+    desc.rot.y = pos->y + 100.0f;
+    desc.rot.z = pos->z;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
     desc.flags = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
     desc.unk44 = arg3;
     desc.unk45 = 0xFF;
     desc.unk46 = 0;
     desc.unk47 = 7;
     desc.unk48 = 0;
-    desc.unk54 = argD;
-    desc.unk56 = argE;
+    desc.fadeStart = argD;
+    desc.fadeRate = argE;
     if (func_150ADA20() & 1) {
         flag = 1;
     } else {
         flag = 0;
     }
-    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
+    particle = func_1513D2F0(&desc, &D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0x110, &state, sizeof(state));
     }

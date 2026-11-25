@@ -12,7 +12,6 @@ struct CB3D0_arg1 {
 extern f32 D_800D2FC0[];
 extern f32 D_800D2FD8[];
 extern u8 D_800D2FEC[];
-extern s32 D_800D3840;
 
 // On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
 // 16.16 fixed-point `value` and flags the entry.
@@ -58,7 +57,6 @@ extern void func_15087FC4(s32, s32);
 extern s32 func_150880F8(s32, s32);
 extern void func_1508B1D4(s32);
 extern void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
-extern s32 D_800D2450;
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
 s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
@@ -66,7 +64,7 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
     f32 x;
     f32 y;
     f32 z;
-    struct127 *obj;
+    Actor *obj;
     f32 scale;
 
     switch (cmd) {
@@ -140,18 +138,18 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        struct108 *cam = D_800DBFF0;
+        Camera *cam = D_800DBFF0;
         func_150495B0(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->unk7B4);
+                      args->params[2] * scale, args->params[3] * scale, cam->dt);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 26:
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        struct108 *cam = D_800DBFF0;
+        Camera *cam = D_800DBFF0;
         func_15049688(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->unk7B4);
+                      args->params[2] * scale, args->params[3] * scale, cam->dt);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 24:
@@ -178,12 +176,11 @@ extern s32 func_150882B0(s32 arg0);
 extern s32 func_150882E4(s32 arg0, s32 arg1);
 extern s32 func_150887F8(void);
 extern s32 func_1508B194(s32 arg0);
-extern s8 D_800E0BD0;
 extern s8 D_800E0BE0[];
 
 // Answers query `cmd` with up to four integer params and returns the result as an s32.
 s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
-    struct127 *obj;
+    Actor *obj;
     // matching: cases 1 and 18 must share these two locals for IDO's register allocation
     s32 x;
     s32 z;

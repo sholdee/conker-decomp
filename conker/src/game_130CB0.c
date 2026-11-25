@@ -1,12 +1,6 @@
 #include <ultra64.h>
 
-// matching: functions.h declares these with the wrong parameter types (u16 param, s32 callback);
-// hide those prototypes and declare the real ones below.
-#define func_1000F85C func_1000F85C_hdr
-#define func_1000FA64 func_1000FA64_hdr
 #include "functions.h"
-#undef func_1000F85C
-#undef func_1000FA64
 #include "variables.h"
 
 typedef struct ObjSoundRecord ObjSoundRecord;
@@ -28,16 +22,12 @@ struct ObjSoundRecord {
     /* 0x14 */ ObjSoundCallback callback;
     /* 0x18 */ s32 delay; // low half: countdown (bit 15: skip the fade, func_15103AA0 only);
                           // high half: the sound id held back while counting down
-    /* 0x1C */ struct127 *obj;
+    /* 0x1C */ Actor *obj;
     /* 0x20 */ u8 pad20[4];
     /* 0x24 */ u16 handle;
 };
 
-struct127 *func_1505EEF4(s32 id);
-void func_1000F85C(u16 handle, s16 param, s32 value);
-u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
-                  s16 nearDistance, ObjSoundCallback callback, s32 delay, struct127 *obj,
-                  s32 flags, s32 cents);
+Actor *func_1505EEF4(s32 id);
 
 // Clear the per-slot cooldowns of func_15103C14.
 void func_15103800(void) {
@@ -64,7 +54,7 @@ void func_15103828(void) {
 s32 func_15103910(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     s16 remaining;
-    struct127 *obj;
+    Actor *obj;
 
     obj = record->obj;
     remaining = record->delay;
@@ -110,7 +100,7 @@ s32 func_15103910(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s3
 s32 func_15103AA0(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     u32 remaining;
-    struct127 *obj;
+    Actor *obj;
 
     obj = record->obj;
     remaining = record->delay & 0x7FFF;
@@ -153,7 +143,7 @@ s32 func_15103AA0(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s3
 // cooldown slot `slot` is still running (sound 0x58D ignores it). With pairVariants, the
 // variants come in pairs: the even one for an object with a camera, the odd one otherwise.
 void func_15103C14(s32 sound, s32 objId, u32 variantCount, s32 slot, s32 pairVariants) {
-    struct127 *obj;
+    Actor *obj;
     s32 hasCamera;
 
     hasCamera = FALSE;

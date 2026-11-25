@@ -26,7 +26,6 @@ typedef struct {
 } Queue;
 
 extern void (*D_8008D5C0[])(s32);
-extern s32 D_800BE9E4;
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 

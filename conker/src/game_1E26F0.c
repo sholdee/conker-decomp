@@ -2,19 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef f32 BoneMtx[4][4];
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
 typedef struct {
     /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
-    /* 0x580 */ struct127 *first;
+    /* 0x580 */ Actor *first;
     /* 0x584 */ u8 firstId;             // first->unique_id, to notice the slot being reused
     /* 0x585 */ u8 pad585[3];
-    /* 0x588 */ struct127 *second;
+    /* 0x588 */ Actor *second;
     /* 0x58C */ u8 secondId;
     /* 0x58D */ u8 pad58D[3];
     /* 0x590 */ f32 width;
@@ -34,15 +28,15 @@ typedef struct {
 
 /* Message 0x2D: actors a and b swapped slots. */
 typedef struct {
-    struct127 *a;
-    struct127 *b;
+    Actor *a;
+    Actor *b;
     u8 aId;
     u8 bId;
 } ActorSwap;
 
 /* Message 0: an actor went away. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 id;
 } ActorGone;
 
@@ -61,14 +55,14 @@ BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = (BeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, (struct37 *)sizeof(data), arg1, arg2);
+    effect = (BeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
     return effect;
 }
 
-void func_15143134(const f32 *in, Vec3f *out, BoneMtx *mtx);
+void func_15143134(const f32 *in, Vec3f *out, MtxF *mtx);
 Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
@@ -84,7 +78,6 @@ extern u8 D_80090F68[];
 extern s32 D_800A4AC8[][2];
 static const f32 D_800AA400[3] = { -3.0f, 11.0f, -4.0f };  // beam start, in first's bone space
 static const f32 D_800AA40C[3] = { 0.0f, -5.0f, -7.0f };   // beam end, in second's bone space
-extern s32 D_800D2C9C;
 
 /*
  * Beam effect draw: a red textured strip of 10 quads from a point on first's bone D_8008FB80 to a
@@ -125,11 +118,11 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->unk1D4 != NULL && data->second->unk1D4 != NULL) {
-        func_15143134(D_800AA400, &start, &((BoneMtx *)data->first->unk1D4)[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &((BoneMtx *)data->second->unk1D4)[D_8008FB84]);
+        func_15143134(D_800AA400, &start, &data->first->unk1D4[D_8008FB80]);
+        func_15143134(D_800AA40C, &end, &data->second->unk1D4[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
-        eye = (Vec3f *)&D_800DBFF0[viewIdx].unk2F8;
+        eye = &D_800DBFF0[viewIdx].eye;
         gdl = func_15142B7C(gdl, 0x200005, 0x60600);
         gdl = func_15142E24(gdl, D_80090F68, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
@@ -252,7 +245,7 @@ void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
         }
     } else if (type == 0) {
         ActorGone *gone = msg;
-        struct127 *actor = gone->actor;
+        Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->id == data->firstId || gone->id == data->secondId) {
             func_1516972C((struct102 *)effect);

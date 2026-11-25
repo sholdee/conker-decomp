@@ -1,180 +1,52 @@
 #include <ultra64.h>
-/* functions.h declares these with prototypes that do not fit how this file calls them. */
-#define func_15083568 func_15083568_void_proto
-#define func_150ADA20 func_150ADA20_u8_proto
-#define func_1000FA64 func_1000FA64_hdr
-#define func_1000FF90 func_1000FF90_hdr
+// matching: this file calls func_100109D0/func_10010A3C (void (Actor *)) through unprototyped views
 #define func_100109D0 func_100109D0_hdr
 #define func_10010A3C func_10010A3C_hdr
 #include "functions.h"
-#undef func_15083568
-#undef func_150ADA20
-#undef func_1000FA64
-#undef func_1000FF90
 #undef func_100109D0
 s32 func_100109D0();
 #undef func_10010A3C
 s32 func_10010A3C();
-s32 func_1000FF90(void *arg0, s32 arg1, s32 arg2);
-u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, void *arg7, void *arg8, void *arg9, s32 argA, s32 argB);
-u32 func_150ADA20(void);
-struct127 *func_15083568(struct127 *, s32, f32, s32);
 #include "variables.h"
 
-/*
- * The per-object control block that struct127.unk31C points to. struct126 in structs.h only
- * declares part of it (and types unk95 as s8, which this file reads with lbu), so this file
- * views it through its own layout.
- */
-typedef struct ActorCtl {
-    /* 0x000 */ u8 pad0[8];
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8 padA[3];
-    /* 0x00D */ u8 unkD;
-    /* 0x00E */ u16 unkE;
-    /* 0x010 */ u8 pad10[2];
-    /* 0x012 */ s16 unk12;
-    /* 0x014 */ u8 pad14[2];
-    /* 0x016 */ u8 unk16;
-    /* 0x017 */ u8 unk17;
-    /* 0x018 */ s16 unk18;
-    /* 0x01A */ u8 unk1A;
-    /* 0x01B */ u8 unk1B;
-    /* 0x01C */ u8 pad1C[7];
-    /* 0x023 */ s8 unk23;
-    /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 pad26;
-    /* 0x027 */ u8 unk27;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ u8 unk30;
-    /* 0x031 */ u8 unk31;
-    /* 0x032 */ u16 unk32;
-    /* 0x034 */ u8 pad34[8];
-    /* 0x03C */ u8 unk3C;
-    /* 0x03D */ u8 pad3D[9];
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ u8 pad48[4];
-    /* 0x04C */ u16 unk4C;
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 pad4F;
-    /* 0x050 */ s8 unk50;
-    /* 0x051 */ u8 pad51[7];
-    /* 0x058 */ u8 unk58;
-    /* 0x059 */ u8 pad59[0x19];
-    /* 0x072 */ u16 unk72;
-    /* 0x074 */ u8 pad74;
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ u8 pad76[2];
-    /* 0x078 */ u8 action;        /* current action; bit 0x80 is a flag */
-    /* 0x079 */ u8 pad79;
-    /* 0x07A */ u8 unk7A;
-    /* 0x07B */ u8 unk7B;         /* one-shot scripted move request */
-    /* 0x07C */ u8 unk7C;
-    /* 0x07D */ u8 unk7D;
-    /* 0x07E */ u16 unk7E;
-    /* 0x080 */ s16 unk80;
-    /* 0x082 */ s16 unk82;
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[3];
-    /* 0x088 */ u16 unk88;
-    /* 0x08A */ u8 pad8A[0xB];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x19];
-    /* 0x0AF */ u8 soundPending;
-    /* 0x0B0 */ struct127 *unkB0;
-    /* 0x0B4 */ u8 padB4[4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 unkC0;
-    /* 0x0C4 */ u8 padC4[0x45];
-    /* 0x109 */ u8 unk109;
-    /* 0x10A */ u8 pad10A[0x10];
-    /* 0x11A */ u8 unk11A;
-    /* 0x11B */ u8 pad11B[0x11];
-    /* 0x12C */ u16 unk12C;
-    /* 0x12E */ u8 pad12E[2];
-    /* 0x130 */ f32 unk130;
-    /* 0x134 */ f32 unk134;
-    /* 0x138 */ f32 unk138;
-    /* 0x13C */ f32 unk13C;
-    /* 0x140 */ f32 unk140;
-    /* 0x144 */ f32 unk144;
-    /* 0x148 */ u8 pad148[0x24];
-    /* 0x16C */ f32 unk16C;       /* yaw, degrees */
-    /* 0x170 */ f32 unk170;       /* pitch, degrees */
-    /* 0x174 */ u8 pad174[0x21];
-    /* 0x195 */ u8 unk195;
-    /* 0x196 */ u8 unk196;
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 unk199;
-    /* 0x19A */ u8 grenade_count;
-    /* 0x19B */ u8 unk19B;
-    /* 0x19C */ u16 unk19C;
-    /* 0x19E */ u16 unk19E;
-    /* 0x1A0 */ u8 pad1A0[2];
-    /* 0x1A2 */ u16 unk1A2;
-    /* 0x1A4 */ u16 unk1A4;
-    /* 0x1A6 */ u8 pad1A6[4];
-    /* 0x1AA */ s16 unk1AA;
-    /* 0x1AC */ u8 pad1AC[6];
-    /* 0x1B2 */ u8 unk1B2;
-    /* 0x1B3 */ u8 pad1B3;
-    /* 0x1B4 */ u8 pending;       /* deferred work flags, consumed by func_150636F0 */
-} ActorCtl;
-
-#define CTL(obj) ((ActorCtl *)(obj)->unk31C)
-
-/* Controller state that D_800CC284 points to. */
-typedef struct ContPad {
-    /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-} ContPad;
-
-#define PAD ((ContPad *)D_800CC284)
-
-extern s16 D_800CC2B2;
-extern f32 D_800CC2B4;
 void func_15143134(void *, f32 *, s32);
-void func_1506AC8C(struct127 *, s32, void *);
+void func_1506AC8C(Actor *, s32, void *);
 
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
-    struct127 *thrower;
+    Actor *thrower;
     f32 position[3];
     s32 throwerId;          /* object index + 1 */
     volatile s32 anim;      // matching: volatile keeps the anim in its stack slot across the call
 } ThrowPacket;
 
 /* Returns the angle from this object to the object it is linked to (unk222). */
-s16 func_15063390(struct127 *arg0) {
-    struct127 *other;
+s16 func_15063390(Actor *arg0) {
+    Actor *other;
 
     other = &D_800CC2D0[arg0->unk222];
     return func_1505A630(other->x_position - arg0->x_position, arg0->z_position - other->z_position, 0);
 }
 
-void func_15063404(struct127 *arg0) {
-    struct127 *self = &D_800CC2D0[arg0 - D_800CC2D0];
+void func_15063404(Actor *arg0) {
+    Actor *self = &D_800CC2D0[arg0 - D_800CC2D0];
 
-    CTL(self)->action = 9;
+    self->unk31C->unk78 = 9;
     func_15083568(arg0, 0x1D, 1.0f, 0);
     func_15083568(arg0, 0x1E, 1.0f, 0);
     arg0->disable_jump = 20;
     arg0->disable_run = 0;
     arg0->unk83 = 0;
-    CTL(self)->unk24 = 60;
-    CTL(self)->unk11A = 2;
+    self->unk31C->unk24 = 60;
+    self->unk31C->unk11A = 2;
     func_1505E650(arg0, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150836CC(struct127 *arg0, s32 arg1);
+void func_150836CC(Actor *arg0, s32 arg1);
 
-void func_150634E4(struct127 *arg0) {
-    CTL(&D_800CC2D0[arg0 - D_800CC2D0])->action = 0;
-    CTL(&D_800CC2D0[arg0 - D_800CC2D0])->unk11A = 0;
+void func_150634E4(Actor *arg0) {
+    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0;
+    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 0;
     func_150836CC(arg0, 0x1D);
     func_150836CC(arg0, 0x1E);
     arg0->disable_jump = 0;
@@ -182,9 +54,9 @@ void func_150634E4(struct127 *arg0) {
     arg0->unk83 = 0;
 }
 
-void func_15063570(struct127 *arg0) {
-    CTL(&D_800CC2D0[arg0 - D_800CC2D0])->action = 0x3B;
-    CTL(&D_800CC2D0[arg0 - D_800CC2D0])->unk11A = 2;
+void func_15063570(Actor *arg0) {
+    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0x3B;
+    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 2;
     func_15083568(arg0, 0x89, 1.0f, 0);
     arg0->disable_jump = 20;
     arg0->disable_run = 0;
@@ -192,36 +64,36 @@ void func_15063570(struct127 *arg0) {
     func_1505E650(arg0, 0x221, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, struct127 **, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(struct127 *arg0);
+void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, Actor **, f32, s32, s32, s32, s32, s32, s32);
+void func_150636A4(Actor *arg0);
 
-void func_15063628(struct127 *arg0, f32 arg1) {
-    ActorCtl *ctl = CTL(arg0);
+void func_15063628(Actor *arg0, f32 arg1) {
+    ActorCtl *ctl = arg0->unk31C;
 
-    func_15081690(arg0, ctl->unk13C, ctl->unk140, ctl->unk144,
-                  ctl->unk130, ctl->unk134, ctl->unk138, &ctl->unkB0,
+    func_15081690(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
+                  ctl->aimDir.x, ctl->aimDir.y, ctl->aimDir.z, &ctl->unkB0,
                   arg1, 0, 0, 0, -1, 0, 0);
     func_150636A4(arg0);
 }
 
 /* Tells the object in unkB0 (if any) that this object is targeting it. */
-void func_150636A4(struct127 *arg0) {
-    struct127 *target;
+void func_150636A4(Actor *arg0) {
+    Actor *target;
     ActorCtl *targetCtl;
 
-    target = CTL(arg0)->unkB0;
+    target = arg0->unk31C->unkB0;
     if (target != NULL) {
-        targetCtl = CTL(target);  // matching: the null test uses this copy; the stores reload unk31C
+        targetCtl = target->unk31C;  // matching: the null test uses this copy; the stores reload unk31C
         if (targetCtl != NULL) {
-            CTL(target)->unk195 = 30;
-            CTL(target)->unk196 = arg0 - D_800CC2D0;
+            target->unk31C->unk195 = 30;
+            target->unk31C->unk196 = arg0 - D_800CC2D0;
         }
     }
 }
 
-void func_15063FA0(struct127 *, s32);
-void func_151D57F8(struct127 *, s32);
-s32 func_15081E78(struct127 *, struct127 **, s32);
+void func_15063FA0(Actor *, s32);
+void func_151D57F8(Actor *, s32);
+s32 func_15081E78(Actor *, Actor **, s32);
 void func_10010558(u16, void *, s32, s32, s32, s32);
 void func_150FFCC8(void *, void *, void *, void *, void *);
 void func_150FFD84(f32 *, f32 *, s32, s32);
@@ -229,7 +101,7 @@ void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */
 void func_150636F0(void) {
-    struct127 *actor;
+    Actor *actor;
     s32 index;
     s32 action;
     f32 position[3];
@@ -237,34 +109,34 @@ void func_150636F0(void) {
     f32 side[3];
     f32 up[3];
     ActorCtl *ctl;
-    struct108 *camera;
+    Camera *camera;
 
     D_800CC2B0 = 0;
     actor = D_800CC2D0;
     for (index = 0; index < 25; index++, actor++) {
-        if ((actor->interaction_state != 0) && (actor->unk31C != NULL) && (CTL(actor)->pending != 0)) {
+        if ((actor->interaction_state != 0) && (actor->unk31C != NULL) && (actor->unk31C->unk1B4 != 0)) {
             D_800C3E78 = index;
             D_800D154C = actor;
-            ctl = CTL(actor);
-            if (ctl->pending & 1) {
+            ctl = actor->unk31C;
+            if (ctl->unk1B4 & 1) {
                 func_15063628(actor, 0.0f);
-                ctl = CTL(actor);
+                ctl = actor->unk31C;
             }
-            if (ctl->pending & 4) {
+            if (ctl->unk1B4 & 4) {
                 func_151D57F8(actor, 0);
-                ctl = CTL(actor);
+                ctl = actor->unk31C;
             }
-            if (ctl->pending & 8) {
+            if (ctl->unk1B4 & 8) {
                 func_151D57F8(actor, 1);
-                ctl = CTL(actor);
+                ctl = actor->unk31C;
             }
-            if (ctl->pending & 2) {
-                action = ctl->action & ~0x80;
+            if (ctl->unk1B4 & 2) {
+                action = ctl->unk78 & ~0x80;
                 switch (action) {
                 case 0x18:
                 case 0x41:
                     func_15063FA0(actor, 6);
-                    ctl = CTL(actor);
+                    ctl = actor->unk31C;
                     ctl->unk1AA++;
                     camera = actor->camera;
                     if (camera != NULL) {
@@ -278,7 +150,7 @@ void func_150636F0(void) {
                     } else {
                         func_15063FA0(actor, 0x12);
                     }
-                    ctl = CTL(actor);
+                    ctl = actor->unk31C;
                     ctl->unk1AA++;
                     camera = actor->camera;
                     if (camera != NULL) {
@@ -287,9 +159,9 @@ void func_150636F0(void) {
                     break;
                 case 0x24:
                     if (func_15081E78(actor, &ctl->unkB0, 7) != 2) {
-                        ctl = CTL(actor);
-                        if (ctl->soundPending != 0) {
-                            ctl->soundPending = 0;
+                        ctl = actor->unk31C;
+                        if (ctl->unkAF != 0) {
+                            ctl->unkAF = 0;
                             if (func_10010894(actor) == 0) {
                                 func_10010558(func_150ADA20() % 3 + 0x53B, actor, 0x7D00, 800, 3000, 30);
                             }
@@ -313,17 +185,17 @@ void func_150636F0(void) {
                     }
                     break;
                 }
-                ctl = CTL(actor);
+                ctl = actor->unk31C;
             }
-            ctl->pending = 0;
+            ctl->unk1B4 = 0;
         }
     }
 }
 
 /* Stores in D_800CC2B2 (and returns) how far this object's heading is off the bearing to its
  * linked object, clamped to +-16000. */
-s32 func_150639BC(struct127 *arg0) {
-    D_800CC2B2 = arg0->unk7A - CTL(arg0)->unk12 - func_15063390(arg0);
+s32 func_150639BC(Actor *arg0) {
+    D_800CC2B2 = arg0->unk7A - arg0->unk31C->unk12 - func_15063390(arg0);
     if (D_800CC2B2 > 16000) {
         D_800CC2B2 = 16000;
     }
@@ -335,15 +207,15 @@ s32 func_150639BC(struct127 *arg0) {
 
 /* When any of `mask` is set in `buttons`, turns the object's unk12 offset from the stick (or
  * toward its linked object), limited to +-9000; the excess turns the whole object. */
-s32 func_15063A38(struct127 *arg0, s32 buttons, s32 mask) {
+s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
     if (buttons & mask) {
-        D_800CC2B2 = PAD->stick_x * 200;
-        if (CTL(arg0)->unk84 != 0) {
+        D_800CC2B2 = D_800CC284->stick_x * 200;
+        if (arg0->unk31C->unk84 != 0) {
             D_800CC2B2 = func_150639BC(arg0);
         }
 
         D_800CC2B4 = 12.0f;
-        D_800CC2B2 = CTL(arg0)->unk12 + ((D_800CC2B2 * D_800CC264) / 2000);
+        D_800CC2B2 = arg0->unk31C->unk12 + ((D_800CC2B2 * D_800CC264) / 2000);
 
         if (D_800CC2B2 < -9000) {
             arg0->unk76 = arg0->unk7A = (arg0->unk7A - D_800CC2B2) - 9000;
@@ -355,14 +227,14 @@ s32 func_15063A38(struct127 *arg0, s32 buttons, s32 mask) {
             D_800CC2B2 = 9000;
         }
 
-        CTL(arg0)->unk12 = D_800CC2B2;
+        arg0->unk31C->unk12 = D_800CC2B2;
         return 1;
     }
     return 0;
 }
 
 /* Throws one of the object's grenades (anim 0x64 for ids 0x75 and 0xB1, 0x2C otherwise). */
-void func_15063B64(struct127 *arg0) {
+void func_15063B64(Actor *arg0) {
     ThrowPacket packet;
 
     if ((arg0->id == 0x75) || (arg0->id == 0xB1)) {
@@ -385,17 +257,17 @@ void func_15063B64(struct127 *arg0) {
         func_1506AC8C(arg0, 0xB, &packet);
         func_150836CC(arg0, packet.anim);
 
-        if (CTL(arg0)->grenade_count != 0) {
-            CTL(arg0)->grenade_count--;
+        if (arg0->unk31C->grenade_count != 0) {
+            arg0->unk31C->grenade_count--;
         }
-        CTL(arg0)->unk11A = 0;
+        arg0->unk31C->unk11A = 0;
     }
 }
 
 /* Returns the active object with id `id` that is linked (unk65) to arg0, or NULL.
  * (asm-differ shows relocation-addend diffs here: the .s names interior symbols of
  * D_800CC2D0[], C spells them base+offset; the linked bytes are identical.) */
-struct127 *func_15063C60(struct127 *arg0, s32 id) {
+Actor *func_15063C60(Actor *arg0, s32 id) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -409,13 +281,13 @@ struct127 *func_15063C60(struct127 *arg0, s32 id) {
 
 /* Starts `anim` as a new action when the object stands on the ground with nothing else going
  * on and B is pressed. Returns `anim`, or 999 when the action can't start. */
-s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
+s32 func_15063E84(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
     s32 state;
 
     if ((buttons & B_BUTTON) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f) &&
-        (CTL(arg0)->unk95 == 0) && (arg0->unk84.uh != anim)) {
-        state = CTL(arg0)->unk11A;
-        if ((state == 0 || state == 2) && (CTL(arg0)->unk27 == 0)) {
+        (arg0->unk31C->unk95 == 0) && (arg0->unk84.uh != anim)) {
+        state = arg0->unk31C->unk11A;
+        if ((state == 0 || state == 2) && (arg0->unk31C->unk27 == 0)) {
             if (action != 0 && arg0->disable_jump != 0) {
                 return 999;
             }
@@ -423,14 +295,14 @@ s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons)
                 arg0->disable_jump = 20;
             }
             if (action != 0) {
-                if (CTL(arg0)->unk11A == 2) {
+                if (arg0->unk31C->unk11A == 2) {
                     return 999;
                 }
-                CTL(arg0)->unk11A = 1;
+                arg0->unk31C->unk11A = 1;
             } else {
-                CTL(arg0)->unk11A = 3;
+                arg0->unk31C->unk11A = 3;
             }
-            CTL(arg0)->action = action;
+            arg0->unk31C->unk78 = action;
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
             return anim;
@@ -441,7 +313,7 @@ s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons)
 
 /* Fires a shot of kind `kind` (2, 3, 6, 0x12) from the object's muzzle (unk13C..unk144),
  * aimed along its yaw/pitch or, when unk109 is set, at the point unkB8..unkC0. */
-void func_15063FA0(struct127 *arg0, s32 kind) {
+void func_15063FA0(Actor *arg0, s32 kind) {
     f32 velX;
     f32 velY;
     f32 velZ;
@@ -471,16 +343,16 @@ void func_15063FA0(struct127 *arg0, s32 kind) {
         dist = 500.0f;
         break;
     }
-    angle = CTL(arg0)->unk16C * 0.01745329238f;
+    angle = arg0->unk31C->aimYaw * 0.01745329238f;
     off[0] = sinf(angle) * radius;
     off[1] = cosf(angle) * radius;
-    pos[0] = off[0] + CTL(arg0)->unk13C;
-    pos[1] = CTL(arg0)->unk140 + height;
-    pos[2] = off[1] + CTL(arg0)->unk144;
-    ctl = CTL(arg0);
+    pos[0] = off[0] + arg0->unk31C->aimEye.x;
+    pos[1] = arg0->unk31C->aimEye.y + height;
+    pos[2] = off[1] + arg0->unk31C->aimEye.z;
+    ctl = arg0->unk31C;
     if (ctl->unk109 == 0) {
-        pitch = -ctl->unk170;
-        yaw = ctl->unk16C + 90.0f;
+        pitch = -ctl->aimPitch;
+        yaw = ctl->aimYaw + 90.0f;
     } else {
         dx = ctl->unkB8 - pos[0];
         dy = ctl->unkBC - pos[1];
@@ -493,13 +365,13 @@ void func_15063FA0(struct127 *arg0, s32 kind) {
     func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
 }
 
-s32 func_1505DADC(struct127 *, u16 *, s32, s32, s32);
+s32 func_1505DADC(Actor *, u16 *, s32, s32, s32);
 
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
  * (or returns 999 while unk107 < 40). Returns 999 when animC is already playing. */
-u16 func_150641D8(struct127 *arg0, u16 animA, u16 animB, u16 animC) {
+u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
     u16 selected;
-    struct127 *actor = arg0;  // matching: the copy reserves the extra stack slot IDO gave the original
+    Actor *actor = arg0;  // matching: the copy reserves the extra stack slot IDO gave the original
     u16 angle;
 
     angle = 0;
@@ -523,7 +395,6 @@ u16 func_150641D8(struct127 *arg0, u16 animA, u16 animB, u16 animC) {
     return selected;
 }
 
-extern s32 D_800CC28C;
 
 /* A libultra fixed-point Mtx viewed as its integer and fraction halves. */
 typedef struct MtxParts {
@@ -531,16 +402,16 @@ typedef struct MtxParts {
     u16 frac[4][4];
 } MtxParts;
 void func_15074664(void);
-void func_15060A30(s32 arg0, struct127 *arg1);
+void func_15060A30(s32 arg0, Actor *arg1);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
 /* Handles the scripted move requested in unk7B, then the default B-button move; plays the
  * chosen animation unless `noPlay` is set. */
-void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
+void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
     s32 anim;
     f32 speed;
     f32 blend;
-    struct127 *obj;
+    Actor *obj;
     s32 pad;  // matching: unused stack slot
     MtxParts *mtx;
     f32 dx;
@@ -559,8 +430,8 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
         buttons &= ~B_BUTTON;
         D_800CC28C &= ~B_BUTTON;
     }
-    if (CTL(arg0)->unk7B != 0) {
-        switch (CTL(arg0)->unk7B) {
+    if (arg0->unk31C->unk7B != 0) {
+        switch (arg0->unk31C->unk7B) {
         case 1: {
             s16 pad;  // matching: unused stack slot
 
@@ -569,9 +440,9 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
             x = (arg0->unk2E4 >> 16) & 0xFFFF;
             z = arg0->unk2E4 & 0xFFFF;
             arg0->unk84.uh = 0;
-            CTL(arg0)->unk30 = 0xD;
-            CTL(arg0)->unk28 = x;
-            CTL(arg0)->unk2C = z;
+            arg0->unk31C->unk30 = 0xD;
+            arg0->unk31C->unk28 = x;
+            arg0->unk31C->unk2C = z;
             anim = 0x96;
             arg0->unk76 = arg0->unk2E8 & 0xFFFF;
         }
@@ -587,14 +458,14 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_15083568(arg0, 0x17, 1.0f, 0);
-                CTL(arg0)->unk11A = 2;
+                arg0->unk31C->unk11A = 2;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x151;
-                CTL(arg0)->unk11A = 1;
+                arg0->unk31C->unk11A = 1;
             }
             break;
         case 4:
@@ -602,14 +473,14 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_150836CC(arg0, 0x17);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x14E;
-                CTL(arg0)->unk11A = 3;
+                arg0->unk31C->unk11A = 3;
             }
             break;
         case 5:
@@ -680,9 +551,9 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
         default:
             break;
         }
-        CTL(arg0)->unk7B = 0;
+        arg0->unk31C->unk7B = 0;
     }
-    if (CTL(arg0)->unk198 == 0 && anim == 0 && (buttons & B_BUTTON) && (CTL(arg0)->unk4E & 0xF) != 1 &&
+    if (arg0->unk31C->unk198 == 0 && anim == 0 && (buttons & B_BUTTON) && (arg0->unk31C->unk4E & 0xF) != 1 &&
         arg2 <= 0.0f && arg0->disable_run != 0xFF) {
         if (arg0->unk13C >= 100) {
             if (!(arg0->unk25C & 0x20)) {
@@ -698,10 +569,10 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
                 arg0->unk83 = 0xFF;
                 arg0->disable_run = 0xFF;
             }
-        } else if ((CTL(arg0)->unk75 == 0 && CTL(arg0)->unk7C == 0) || CTL(arg0)->unk4E == 2) {
+        } else if ((arg0->unk31C->unk75 == 0 && arg0->unk31C->unk7C == 0) || arg0->unk31C->unk4E == 2) {
             if (D_800BE9F0 != 0x2D && D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
                 anim = 0x33;
-                if (CTL(arg0)->unk8 != 0) {
+                if (arg0->unk31C->unk8 != 0) {
                     arg0->unk83 = 0xFF;
                     arg0->disable_run = 0xFF;
                     speed = 1.600000024f;
@@ -717,10 +588,10 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
                         anim = 0x354;
                     }
                     speed = 1.350000024f;
-                    if (CTL(arg0)->unk84 == 0 && CTL(arg0)->unk4E == 0) {
+                    if (arg0->unk31C->unk84 == 0 && arg0->unk31C->unk4E == 0) {
                         arg0->disable_run = 0xFF;
                         arg0->y_velocity = -4.0f;
-                        arg0->unk76 = CTL(arg0)->unk4C;
+                        arg0->unk76 = arg0->unk31C->unk4C;
                         speed = 1.0;  // matching: double literal; 1.0f drops its .rodata entry
                         anim = 0x46;
                     }
@@ -738,26 +609,26 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
 /* Copies object srcIndex's animation position (unk2D0->unk8) to object dstIndex, keeping it
  * below dstIndex's unk18. */
 void func_150649A0(s32 srcIndex, s32 dstIndex) {
-    struct127 *objects;
-    struct197 *dst;
-    struct197 *src;
+    Actor *objects;
+    AnimInstance *dst;
+    AnimInstance *src;
 
     objects = D_800CC2D0;
     dst = objects[dstIndex].unk2D0;
     src = objects[srcIndex].unk2D0;
 
     if (dst != NULL && src != NULL) {
-        dst->unk8 = src->unk8;
-        if (dst->unk18 <= dst->unk8) {
-            dst->unk8 = dst->unk18 - 1.0f;
+        dst->frame = src->frame;
+        if (dst->numFrames <= dst->frame) {
+            dst->frame = dst->numFrames - 1.0f;
         }
     }
 }
 
 /* Plays the animation that pairs with what the linked object (unk65) is doing, and syncs
  * this object's animation to it. */
-void func_15064A14(struct127 *arg0) {
-    struct127 *partner;
+void func_15064A14(Actor *arg0) {
+    Actor *partner;
     s32 anim;
     s32 variant;
 
@@ -780,7 +651,7 @@ void func_15064A14(struct127 *arg0) {
     } else if (partner->id == 0x21) {
         anim = 0x169;
     } else if (partner->id == 0x8A) {
-        variant = ((arg0->unk31C != NULL) && (CTL(arg0)->unk1B2 != 0)) ? 1 : 0;
+        variant = ((arg0->unk31C != NULL) && (arg0->unk31C->unk1B2 != 0)) ? 1 : 0;
         if (partner->unk232 == 4) {
             anim = variant ? 0x350 : 0x1A4;
         } else {
@@ -793,7 +664,7 @@ void func_15064A14(struct127 *arg0) {
 
 /* Picks the object's movement animation from its action and speed, plays it, and returns it
  * (0 or 999 when nothing new plays). */
-s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
+s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     s32 anim;
     f32 blend;
     f32 speed;
@@ -801,7 +672,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
 
     anim = 0;
     blend = 4.0f;
-    ctl = CTL(arg0);
+    ctl = arg0->unk31C;
     speed = 1.0f;
     if (ctl->unk46 > 0) {
         anim = 0x4C;
@@ -865,7 +736,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
                 break;
             }
         }
-    } else if (overrideAnim != 0 && ctl->action == 0) {
+    } else if (overrideAnim != 0 && ctl->unk78 == 0) {
         anim = overrideAnim;
         speed = arg1 / 15.0f + 0.6f;
     } else if (2.6f < arg0->unk44 && (ctl->unk32 & 1)) {
@@ -873,7 +744,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
         blend = 5.0f;
         speed = arg0->unk44 / 15.0f + 0.5f;
         anim = func_1504C0B8();
-    } else if (ctl->action == 0x16) {
+    } else if (ctl->unk78 == 0x16) {
         if (arg0->unk44 >= 1.0f) {
             anim = ctl->unk1B2 != 0 ? 0x2C6 : 0xE8;
             arg0->unkAA = 0x1E;
@@ -882,7 +753,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 9) {
+    } else if (ctl->unk78 == 9) {
         if (arg0->unk44 >= 1.0f) {
             if (D_800BE616 == 0) {
                 arg0->unkAA = 0x37;
@@ -898,7 +769,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x38) {
+    } else if (ctl->unk78 == 0x38) {
         if (arg0->unk44 >= 1.0f) {
             anim = 0x1E1;
             if (arg0->unk44 >= 20.0f) {
@@ -909,7 +780,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x39) {
+    } else if (ctl->unk78 == 0x39) {
         if (arg0->unk84.uh != 0x1EB) {
             if (arg0->unk44 >= 1.0f) {
                 anim = 0x1EC;
@@ -924,7 +795,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
         } else {
             anim = 999;
         }
-    } else if (ctl->action == 0x37) {
+    } else if (ctl->unk78 == 0x37) {
         if (arg0->unk84.uh != 0x1F4) {
             if (arg0->unk44 >= 1.0f) {
                 anim = 0x1F5;
@@ -939,7 +810,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
         } else {
             anim = 999;
         }
-    } else if (ctl->action == 0x3B) {
+    } else if (ctl->unk78 == 0x3B) {
         if (arg0->unk84.uh != 0x222 && arg0->unk84.uh != 0x236) {
             if (arg0->unk44 >= 1.0f || ctl->unk23 > 0) {
                 anim = 0x223;
@@ -955,7 +826,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
         } else {
             anim = 999;
         }
-    } else if (ctl->action == 0x12 || ctl->action == 0x18 || ctl->action == 0x41) {
+    } else if (ctl->unk78 == 0x12 || ctl->unk78 == 0x18 || ctl->unk78 == 0x41) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xEC;
@@ -968,7 +839,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x24) {
+    } else if (ctl->unk78 == 0x24) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x158;
@@ -981,7 +852,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x22) {
+    } else if (ctl->unk78 == 0x22) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x15B;
@@ -994,7 +865,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x21) {
+    } else if (ctl->unk78 == 0x21) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x6E;
             anim = 0x123;
@@ -1007,7 +878,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x26) {
+    } else if (ctl->unk78 == 0x26) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x178;
@@ -1020,7 +891,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x3A) {
+    } else if (ctl->unk78 == 0x3A) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x1FB;
@@ -1029,7 +900,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x25) {
+    } else if (ctl->unk78 == 0x25) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xD7;
@@ -1041,7 +912,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x2D || ctl->action == 0x2E) {
+    } else if (ctl->unk78 == 0x2D || ctl->unk78 == 0x2E) {
         if (arg0->unk44 >= 1.0f) {
             anim = 0x1B0;
             speed = arg1 * 0.0625f + 0.6f;
@@ -1053,7 +924,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x23) {
+    } else if (ctl->unk78 == 0x23) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x161;
@@ -1066,7 +937,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x15) {
+    } else if (ctl->unk78 == 0x15) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xED;
@@ -1078,7 +949,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->action == 0x19 || ctl->action == 0x40) {
+    } else if (ctl->unk78 == 0x19 || ctl->unk78 == 0x40) {
         if (arg0->xz_velocity >= 1.0f) {
             anim = 0x112;
             blend = 8.0f;
@@ -1107,7 +978,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
         }
     } else if (ctl->unk17 != 0) {
         blend = 5.0f;
-        if (PAD->buttons & Z_TRIG) {
+        if (D_800CC284->button & Z_TRIG) {
             if (arg0->unk84.uh != 0x283) {
                 arg0->xz_velocity *= 0.2f;
                 D_800D1580 = 0xFF010604;
@@ -1150,24 +1021,10 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
     return anim;
 }
 
-/* An entry of the point table MARKERS points to: a position and a facing in degrees. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ u8 pad6[0xA];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[0x18];
-} MarkerPoint;
-
 extern u16 D_800996A0[][4];
 extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
-extern u8 D_800C3A58;
-extern s32 D_800CC290;
 extern WorldObject *D_800CC5EC;
 extern void func_1000EC24();
 extern void func_1000EFB4();
@@ -1178,28 +1035,23 @@ void func_15073FA0(void);
 struct216 *func_1507BB28(s32, s32);
 void func_1507E7E4(void *, u8, u8, u16, s32);
 void func_1507EABC(void *);
-void func_1507EB4C(struct127 *, s32);
+void func_1507EB4C(Actor *, s32);
 void func_15080828(s32 arg0);
 void func_15080BE8(void);
 s32 func_15080CF4(void);
-void func_150D8B88(struct127 *);
+void func_150D8B88(Actor *);
 s32 func_150DBD70(u8);
-void func_150FC438(struct127 *, struct127 *, u8, u8);
-void func_1514F568(struct127 *);
+void func_150FC438(Actor *, Actor *, u8, u8);
+void func_1514F568(Actor *);
 void func_151D4668(void *);
 void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
-/* variables.h types D_800D3098 as a struct178 array, but its first word points to the MarkerPoint table. */
-#define MARKERS (*(MarkerPoint **)&D_800D3098)
-/* Bytes of struct127 that structs.h still declares only as padding. */
-#define OBJ_U8(o, off) (((u8 *)(o))[off])
-
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
  * 1000 when the action consumed the input. */
-s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
+s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
     s32 anim;
     f32 speed;
     f32 blend;
@@ -1218,12 +1070,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
     animParam = 0.0f;
     anim = 0;
 
-    if ((CTL(arg0)->unk11A == 3) || (arg0->stunned != 0) || (arg4 != 0)) {
+    if ((arg0->unk31C->unk11A == 3) || (arg0->stunned != 0) || (arg4 != 0)) {
         pressedButtons &= ~B_BUTTON;
         D_800CC28C &= ~B_BUTTON;
         if (arg4 != 0) {
             if (arg0->stunned == 0) {
-                arg0->pad1C4 = 0;
+                arg0->events = NULL;
             }
             pressedButtons &= ~Z_TRIG;
             D_800CC28C &= ~Z_TRIG;
@@ -1255,68 +1107,68 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 switch (act) {
                 case 0x34:
                     func_150836CC(arg0, 0x3D);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                     break;
                 case 0xA:
                     func_150836CC(arg0, 0x28);
                     func_150836CC(arg0, 0x29);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                     break;
                 }
             }
-            if (act == CTL(arg0)->action) {
+            if (act == arg0->unk31C->unk78) {
                 arg0->xz_velocity = 0.0f;
             }
-            if ((arg0->in_water != 0) && ((act == CTL(arg0)->action) || (CTL(arg0)->unk11A != 0))) {
-                CTL(arg0)->action = 0;
+            if ((arg0->in_water != 0) && ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0))) {
+                arg0->unk31C->unk78 = 0;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0;
                 if (act == 0xA) {
                     func_150836CC(arg0, 0x28);
                     func_150836CC(arg0, 0x29);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                 }
             } else if (((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) || (arg4 != 0)) {
-                if ((CTL(arg0)->action != 0) || (arg4 != 0)) {
-                    if ((CTL(arg0)->unk72 == 0) || (arg4 != 0)) {
+                if ((arg0->unk31C->unk78 != 0) || (arg4 != 0)) {
+                    if ((arg0->unk31C->unk72 == 0) || (arg4 != 0)) {
                         arg0->disable_run = 0xFF;
                         arg0->disable_jump = 0xFF;
                         arg0->unk83 = 0xFF;
                         anim = D_800996A0[idx][3];
-                        CTL(arg0)->unk11A = 3;
-                        CTL(arg0)->unk72 = 0x5A;
+                        arg0->unk31C->unk11A = 3;
+                        arg0->unk31C->unk72 = 0x5A;
                         setUnk58 = 1;
                     }
-                } else if (CTL(arg0)->unk72 == 0) {
-                    if ((arg0->camera->unk73C != 1) && (arg0->camera->unk73C != 3)) {
-                        CTL(arg0)->unk1B = 0;
-                        CTL(arg0)->unk11A = 1;
+                } else if (arg0->unk31C->unk72 == 0) {
+                    if ((arg0->camera->aimState != 1) && (arg0->camera->aimState != 3)) {
+                        arg0->unk31C->unk1B = 0;
+                        arg0->unk31C->unk11A = 1;
                         anim = D_800996A0[idx][0];
                         arg0->unk83 = 0xFF;
                         arg0->disable_run = 0xFF;
-                        CTL(arg0)->unk72 = 0x5A;
+                        arg0->unk31C->unk72 = 0x5A;
                     }
                 }
                 pressedButtons &= ~B_BUTTON;
             }
-            if (CTL(arg0)->action && (pressedButtons & Z_TRIG) && (anim == 0) && (arg0->unk84.uh == D_800996A0[idx][1])) {
+            if (arg0->unk31C->unk78 && (pressedButtons & Z_TRIG) && (anim == 0) && (arg0->unk84.uh == D_800996A0[idx][1])) {
                 anim = D_800996A0[idx][2];
-                CTL(arg0)->unk1B++;
+                arg0->unk31C->unk1B++;
             }
             if (((arg0->unk84.uh == D_800996A0[idx][1]) || (arg0->unk84.uh == D_800996A0[idx][0]) ||
                  (arg0->unk84.uh == D_800996A0[idx][2]) || (anim != 0)) && (anim != D_800996A0[idx][3])) {
-                CTL(arg0)->action = act;
-                PAD->buttons &= ~Z_TRIG;
+                arg0->unk31C->unk78 = act;
+                D_800CC284->button &= ~Z_TRIG;
                 setUnk58 = 1;
             } else {
-                CTL(arg0)->action = 0;
+                arg0->unk31C->unk78 = 0;
             }
             if (D_800C3A58 != 0) {
-                if ((CTL(arg0)->unk11A == 1) || (CTL(arg0)->unk11A == 2U)) {
+                if ((arg0->unk31C->unk11A == 1) || (arg0->unk31C->unk11A == 2U)) {
                     anim = D_800996A0[idx][1];
                     arg0->unk83 = 0xFF;
-                    CTL(arg0)->action = act;
-                    CTL(arg0)->unk11A = 2;
+                    arg0->unk31C->unk78 = act;
+                    arg0->unk31C->unk11A = 2;
                     switch (act) {
                     case 0xA:
                         func_15083568(arg0, 0x28, 1.0f, 0);
@@ -1328,8 +1180,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         break;
                     }
                 } else {
-                    CTL(arg0)->unk11A = 0;
-                    CTL(arg0)->action = 0;
+                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->unk78 = 0;
                     switch (act) {
                     case 0x34:
                         func_150836CC(arg0, 0x3D);
@@ -1373,52 +1225,52 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 animFast = 0x2CD;
             }
             anim = 999;
-            if ((arg7 != 0) && (CTL(arg0)->action != 0)) {
+            if ((arg7 != 0) && (arg0->unk31C->unk78 != 0)) {
                 func_15083568(arg0, sfx, 1.0f, 0);
             }
             if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
-                if (CTL(arg0)->action != 0) {
+                if (arg0->unk31C->unk78 != 0) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     arg0->disable_jump = 0xFF;
-                    CTL(arg0)->unk11A = 3;
+                    arg0->unk31C->unk11A = 3;
                     speed = 2.0f;
                     anim = animEnd;
-                    CTL(arg0)->action = 0;
+                    arg0->unk31C->unk78 = 0;
                 } else {
                     arg0->disable_run = 0x10;
                     arg0->unk83 = 0x10;
                     arg0->disable_jump = 0x10;
                     speed = 2.0f;
-                    CTL(arg0)->unk11A = 1;
+                    arg0->unk31C->unk11A = 1;
                     anim = animStart;
-                    CTL(arg0)->action = act;
+                    arg0->unk31C->unk78 = act;
                 }
             }
             if (anim != 999) {
                 speed = 2.0f;
             } else if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, sfx);
-                CTL(arg0)->unk11A = 0;
-            } else if (act == CTL(arg0)->action) {
+                arg0->unk31C->unk11A = 0;
+            } else if (act == arg0->unk31C->unk78) {
                 arg0->unkAA = 0x4B;
                 if (arg6 != 0) {
                     clearAction = 0;
-                } else if (CTL(arg0)->unk197 != 0) {
+                } else if (arg0->unk31C->aimState != 0) {
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     if (pressedButtons & Z_TRIG) {
-                        if (CTL(arg0)->unk72 == 0) {
+                        if (arg0->unk31C->unk72 == 0) {
                             arg0->unk83 = 0xF;
-                            CTL(arg0)->pending |= 3;
+                            arg0->unk31C->unk1B4 |= 3;
                             D_800CC2B0 = 1;
                             anim = animHit;
                             animParam = 6.0f;
-                            CTL(arg0)->unk72 = 0x28;
+                            arg0->unk31C->unk72 = 0x28;
                         }
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg3 <= 0.0f) && (arg0->disable_run == 0) && (CTL(arg0)->unk72 == 0)) {
-                    CTL(arg0)->unk72 = 0x28;
+                } else if ((pressedButtons & Z_TRIG) && (arg3 <= 0.0f) && (arg0->disable_run == 0) && (arg0->unk31C->unk72 == 0)) {
+                    arg0->unk31C->unk72 = 0x28;
                     if (arg0->xz_velocity > 2.0f) {
                         anim = animFast;
                     } else {
@@ -1435,55 +1287,55 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         handled = 1;
         if ((arg4 != 0) || (arg6 != 0)) {
             if (D_800BE9F0 != 0xA) {
-                CTL(arg0)->action = 0;
-                CTL(arg0)->unkD = 0;
+                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->unkD = 0;
                 arg0->unk83 = 0;
             }
             if (arg6 != 0) {
                 clearAction = 0;
             }
-        } else if (CTL(arg0)->unk16 == 0) {
-            if (CTL(arg0)->unk8 != 0) {
-                CTL(arg0)->unk8 -= D_800BE9A0;
-                if (CTL(arg0)->unk8 < 0x64) {
-                    CTL(arg0)->unkE = 0xAD;
-                    CTL(arg0)->unk16 = 0xC8;
+        } else if (arg0->unk31C->unk16 == 0) {
+            if (arg0->unk31C->unk8 != 0) {
+                arg0->unk31C->unk8 -= D_800BE9A0;
+                if (arg0->unk31C->unk8 < 0x64) {
+                    arg0->unk31C->unkE = 0xAD;
+                    arg0->unk31C->unk16 = 0xC8;
                     func_1507EB4C(arg0, 0x2A);
                     speed = 1.3f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     anim = 0x2D;
-                    CTL(arg0)->action = 0;
+                    arg0->unk31C->unk78 = 0;
                 }
             }
-            if (CTL(arg0)->unk16 == 0) {
+            if (arg0->unk31C->unk16 == 0) {
                 if ((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    if (CTL(arg0)->action != 0) {
+                    if (arg0->unk31C->unk78 != 0) {
                         anim = 0x2D;
                         speed = 1.3f;
-                        CTL(arg0)->action = 0;
+                        arg0->unk31C->unk78 = 0;
                     } else {
-                        CTL(arg0)->action = 3;
+                        arg0->unk31C->unk78 = 3;
                         anim = 0x2E;
-                        CTL(arg0)->unkD = 0;
+                        arg0->unk31C->unkD = 0;
                         speed = 1.6f;
                     }
-                } else if ((CTL(arg0)->action == 3) && (arg0->disable_run != 0xFF)) {
-                    CTL(arg0)->action = 3;
+                } else if ((arg0->unk31C->unk78 == 3) && (arg0->disable_run != 0xFF)) {
+                    arg0->unk31C->unk78 = 3;
                     anim = 0x2C;
                     if (D_800BE616 != 0) {
                         arg0->disable_jump = 0xA;
                     }
-                    D_800CC2B2 = PAD->stick_x * 0x96;
-                    if (CTL(arg0)->unk84 != 0) {
-                        CTL(arg0)->unk12 = 0;
-                    } else if ((D_800CC2B2 < -0x1F40) && (CTL(arg0)->unk12 < -0x1B58)) {
+                    D_800CC2B2 = D_800CC284->stick_x * 0x96;
+                    if (arg0->unk31C->unk84 != 0) {
+                        arg0->unk31C->unk12 = 0;
+                    } else if ((D_800CC2B2 < -0x1F40) && (arg0->unk31C->unk12 < -0x1B58)) {
                         arg0->unk76 = arg0->unk7A = arg0->unk76 + (D_800CC264 * 7);
                         anim = 0xE0;
                         speed = 3.0f;
-                    } else if ((D_800CC2B2 > 0x1F40) && (CTL(arg0)->unk12 > 0x1B58)) {
+                    } else if ((D_800CC2B2 > 0x1F40) && (arg0->unk31C->unk12 > 0x1B58)) {
                         arg0->unk76 = arg0->unk7A = arg0->unk76 - (D_800CC264 * 7);
                         anim = 0xE0;
                         speed = 3.0f;
@@ -1492,8 +1344,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     blend = 8.0f;
                     arg0->disable_run = 0x10;
                     arg0->unk83 = 0x10;
-                    if (CTL(arg0)->unkD == 0) {
-                        CTL(arg0)->unkD = 1;
+                    if (arg0->unk31C->unkD == 0) {
+                        arg0->unk31C->unkD = 1;
                         func_150D8B88(arg0);
                     }
                 }
@@ -1513,23 +1365,23 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             arg0->xz_velocity *= 0.5f;
             speed = 1.799999952f;
             arg0->y_velocity = 80.0f;
-            CTL(arg0)->unk31 = 0;
+            arg0->unk31C->unk31 = 0;
         }
         break;
     case 0x4:
         if (pressedButtons & B_BUTTON) {
-            CTL(arg0)->action = act;
+            arg0->unk31C->unk78 = act;
             return 0;
         }
-        CTL(arg0)->action = 0;
+        arg0->unk31C->unk78 = 0;
         return 0;
     case 0x42:
         if (!(D_800D2E68 & 4)) {
             if (pressedButtons & B_BUTTON) {
-                CTL(arg0)->action = act;
+                arg0->unk31C->unk78 = act;
                 return 0;
             }
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         }
         return 0;
     case 0x5:
@@ -1537,15 +1389,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             if (arg0->unk84.uh == 0x2F) {
                 anim = 999;
             } else {
-                CTL(arg0)->unk30 = 0x12;
+                arg0->unk31C->unk30 = 0x12;
                 anim = 0x2F;
                 if (D_800BE9F0 == 0x31) {
-                    CTL(arg0)->unk28 = MARKERS[12].x;
-                    CTL(arg0)->unk2C = MARKERS[12].z;
+                    arg0->unk31C->unk28 = D_800D3098[12].x;
+                    arg0->unk31C->unk2C = D_800D3098[12].z;
                     func_150DBD70(5);
                 } else {
-                    CTL(arg0)->unk28 = MARKERS[2].x;
-                    CTL(arg0)->unk2C = MARKERS[2].z;
+                    arg0->unk31C->unk28 = D_800D3098[2].x;
+                    arg0->unk31C->unk2C = D_800D3098[2].z;
                     func_150DBD70(0);
                 }
                 arg0->unk76 = 0xC000;
@@ -1558,24 +1410,24 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x6:
-        if (CTL(arg0)->action == 0) {
-            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (CTL(arg0)->unk72 == 0)) {
+        if (arg0->unk31C->unk78 == 0) {
+            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->unk72 == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
                 anim = 0x44;
-                CTL(arg0)->action = 6;
+                arg0->unk31C->unk78 = 6;
             }
         } else if (arg0->unk84.uh != 0x44) {
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         } else {
             anim = 999;
         }
         break;
     case 0x36:
         if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
-            struct126 *found;
+            ActorCtl *found;
 
             found = func_1503195C(arg0, 0x3C, 0);
             if ((found != NULL) && (found->unk38 < 0x12C)) {
@@ -1587,29 +1439,29 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x7:
-        if (CTL(arg0)->action == 0) {
-            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (CTL(arg0)->unk72 == 0)) {
+        if (arg0->unk31C->unk78 == 0) {
+            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->unk72 == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
                 anim = 0x45;
-                CTL(arg0)->action = 7;
+                arg0->unk31C->unk78 = 7;
             }
         } else if (arg0->unk84.uh != 0x45) {
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         } else {
             anim = 999;
         }
         break;
     case 0x8:
         {
-            struct127 *obj;
+            Actor *obj;
 
             obj = &D_800CC2D0[arg0->unk65 - 1];
             arg0->disable_jump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
-                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0 /* matching: lhu; struct127 says s16 */) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
+                if ((obj->unk84.uh == 0) || (obj->unk22E != 0) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
                     u8 mode;
 
                     mode = 0x10;
@@ -1629,39 +1481,39 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x27:
-        if (act != CTL(arg0)->action) {
-            CTL(arg0)->action = 0x27;
-            arg0->unk1C9 = 6;
-            CTL(arg0)->unk17 = 1;
+        if (act != arg0->unk31C->unk78) {
+            arg0->unk31C->unk78 = 0x27;
+            arg0->lodRequest = 6;
+            arg0->unk31C->unk17 = 1;
         }
         break;
     case 0x9:
         if (D_800C3A58 != 0) {
-            if ((CTL(arg0)->unk11A == 1) || (CTL(arg0)->unk11A == 2)) {
+            if ((arg0->unk31C->unk11A == 1) || (arg0->unk31C->unk11A == 2)) {
                 func_15063404(arg0);
             } else {
                 func_150634E4(arg0);
             }
         }
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             s16 delta;
 
-            delta = (PAD->stick_x * -100) - CTL(arg0)->unk80;
+            delta = (D_800CC284->stick_x * -100) - arg0->unk31C->unk80;
             if (delta > 600) {
                 delta = 600;
             }
             if (delta < -600) {
                 delta = -600;
             }
-            CTL(arg0)->unk80 += delta;
-            delta = ((PAD->stick_y << 5) - CTL(arg0)->unk82) + 576;
+            arg0->unk31C->unk80 += delta;
+            delta = ((D_800CC284->stick_y << 5) - arg0->unk31C->unk82) + 576;
             if (delta > 300) {
                 delta = 300;
             }
             if (delta < -300) {
                 delta = -300;
             }
-            CTL(arg0)->unk82 += delta;
+            arg0->unk31C->unk82 += delta;
             if (((arg4 != 0) && ((arg0->unk65 != 0) || (arg0->stunned != 0) || (arg0->unk28 != 0.0f))) || (arg0->in_water != 0)) {
                 func_150634E4(arg0);
             } else if (arg4 != 0) {
@@ -1675,17 +1527,17 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 clearAction = 0;
             } else {
                 arg0->disable_jump = 0xA;
-                if (CTL(arg0)->unk7D != 0) {
+                if (arg0->unk31C->matrix_physics != 0) {
                     u16 prev;
                     u8 lowBits;
 
                     if ((heldButtons & Z_TRIG) && (arg0->unk48 < 0.6000000238f)) {
 
-                        prev = CTL(arg0)->unk7E;
-                        CTL(arg0)->unk7E = prev + ((D_800CC264 * 4) / 3);
-                        if ((prev ^ CTL(arg0)->unk7E) & 0x100) {
+                        prev = arg0->unk31C->unk7E;
+                        arg0->unk31C->unk7E = prev + ((D_800CC264 * 4) / 3);
+                        if ((prev ^ arg0->unk31C->unk7E) & 0x100) {
                             D_800D1580 = 0x13;
-                            if (CTL(arg0)->unk7E & 0x200) {
+                            if (arg0->unk31C->unk7E & 0x200) {
                                 D_800D1580 = 0x14;
                             }
                             func_15071D38();
@@ -1697,23 +1549,23 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             }
                         }
                     } else {
-                        lowBits = (CTL(arg0)->unk7E << 1) | 1;
-                        CTL(arg0)->unk7E = (CTL(arg0)->unk7E & 0xFF00) | lowBits;
+                        lowBits = (arg0->unk31C->unk7E << 1) | 1;
+                        arg0->unk31C->unk7E = (arg0->unk31C->unk7E & 0xFF00) | lowBits;
                     }
                 } else {
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                     if ((arg0->unk84.uh != 0x11A) && (arg0->unk84.uh != 0x7B)) {
                         u8 endEffect;
                         endEffect = 0;
-                        if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) {
+                        if (!(heldButtons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG)) {
                             endEffect = 1;
                         }
-                        if ((CTL(arg0)->unk24 == 0) || (pressedButtons & A_BUTTON)) {
+                        if ((arg0->unk31C->unk24 == 0) || (pressedButtons & A_BUTTON)) {
                             anim = 0x11A;
                             if (!(pressedButtons & A_BUTTON)) {
                                 endEffect = 1;
                             }
-                            CTL(arg0)->unk24 = 0x3C;
+                            arg0->unk31C->unk24 = 0x3C;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                         } else if ((heldButtons & Z_TRIG) && (arg0->disable_run == 0)) {
@@ -1725,10 +1577,10 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                                     anim = 0x20D;
                                 }
                                 if (!(heldButtons & R_TRIG)) {
-                                    CTL(arg0)->unk12 = 0;
-                                    CTL(arg0)->unk3C = 3;
+                                    arg0->unk31C->unk12 = 0;
+                                    arg0->unk31C->unk3C = 3;
                                 } else {
-                                    CTL(arg0)->unk3C = 0;
+                                    arg0->unk31C->unk3C = 0;
                                 }
                                 if (D_800BE616 == 0) {
                                     arg0->unkAA = 0x37;
@@ -1780,15 +1632,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             speed = 1.399999976f;
             anim = func_15063E84(arg0, 0x7B, 1, act, pressedButtons);
             if (anim != 999) {
-                CTL(arg0)->unk24 = 0x3C;
+                arg0->unk31C->unk24 = 0x3C;
             }
         }
         break;
     case 0x38:
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x7B);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -1799,7 +1651,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if (arg0->unk84.uh != 0x1DD) {
                     endEffect = 0;
-                    if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) {
+                    if (!(heldButtons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG)) {
                         endEffect = 1;
                     }
                     if (heldButtons & Z_TRIG) {
@@ -1811,8 +1663,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                                 anim = 0x253;
                             }
                             if (!(heldButtons & R_TRIG)) {
-                                CTL(arg0)->unk3C = 3;
-                                CTL(arg0)->unk12 = 0;
+                                arg0->unk31C->unk3C = 3;
+                                arg0->unk31C->unk12 = 0;
                             }
                         } else {
                             anim = 0x1E0;
@@ -1833,19 +1685,19 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                                 func_1000FA64(sound, arg0->x_position, arg0->y_position, arg0->z_position, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C8, 0, 0);
                             }
                         }
-                        CTL(arg0)->unk1A4 += D_800BE9E4 * 0xA;
-                        if (CTL(arg0)->unk1A2 > 0xAF) {
-                            CTL(arg0)->unk1A2 = 0xAF;
+                        arg0->unk31C->unk1A4 += D_800BE9E4 * 0xA;
+                        if (arg0->unk31C->unk1A2 > 0xAF) {
+                            arg0->unk31C->unk1A2 = 0xAF;
                         }
-                        CTL(arg0)->unk1A2 += CTL(arg0)->unk1A4 * D_800BE9E4;
-                        if (CTL(arg0)->unk1A2 > 0x1E00) {
-                            CTL(arg0)->unk1A2 = 0x1E00;
+                        arg0->unk31C->unk1A2 += arg0->unk31C->unk1A4 * D_800BE9E4;
+                        if (arg0->unk31C->unk1A2 > 0x1E00) {
+                            arg0->unk31C->unk1A2 = 0x1E00;
                         }
                     } else {
                         speed = 1.399999976f;
                         anim = func_15063E84(arg0, 0x1DE, 1, 0, pressedButtons);
-                        CTL(arg0)->unk1A2 = 0;
-                        CTL(arg0)->unk1A4 = 0;
+                        arg0->unk31C->unk1A2 = 0;
+                        arg0->unk31C->unk1A4 = 0;
                     }
                     if (endEffect != 0) {
                         func_151D469C(arg0, 5, 0x78, 0xFF, 1);
@@ -1858,10 +1710,10 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x39:
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x82);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -1871,9 +1723,9 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     if (arg0->unk84.uh == 0x21E) {
                         arg0->disable_run = 0xFF;
                     }
-                    if ((CTL(arg0)->unk24 == 0) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x21E))) {
+                    if ((arg0->unk31C->unk24 == 0) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x21E))) {
                         if (arg0->unk28 == 0.0f) {
-                            CTL(arg0)->unk24 = 0x1E;
+                            arg0->unk31C->unk24 = 0x1E;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                             anim = 0x21E;
@@ -1901,28 +1753,28 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             speed = 1.399999976f;
             anim = func_15063E84(arg0, 0x1EE, 1, act, pressedButtons);
             if (anim != 999) {
-                CTL(arg0)->unk24 = 0x1E;
+                arg0->unk31C->unk24 = 0x1E;
             }
         }
         break;
     case 0x37:
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x85);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
                 arg0->disable_jump = 0xA;
                 func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x1F7) && (CTL(arg0)->unk19E == 0)) {
+                if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x1F7) && (arg0->unk31C->unk19E == 0)) {
                     if (func_150ADA20() & 3) {
                         anim = 0x1F4;
                     } else {
                         anim = 0x235;
                     }
                     blend = 0.0f;
-                    CTL(arg0)->unk19E = 0x78;
+                    arg0->unk31C->unk19E = 0x78;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                 } else if (pressedButtons & B_BUTTON) {
@@ -1937,7 +1789,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0xB:
         if (arg0->unk84.uh == 0x68) {
-            if ((arg0->unk2D0->unk8 < 68.0f) && (arg0->unk222 != 0)) {
+            if ((arg0->unk2D0->frame < 68.0f) && (arg0->unk222 != 0)) {
                 D_800CC2B2 = (arg0->unk7A - func_15063390(arg0)) - 0x2000;
             }
             anim = 999;
@@ -1954,7 +1806,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
     case 0x16:
         anim = 999;
         if ((arg4 != 0) && (act == 0x16)) {
-            if (act == CTL(arg0)->action) {
+            if (act == arg0->unk31C->unk78) {
                 s32 cancel;
 
                 cancel = 1;
@@ -1967,33 +1819,33 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 }
                 if (cancel != 0) {
                     func_150836CC(arg0, 0x24);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                     arg0->unk83 = 0;
                     arg0->disable_run = 0;
                 }
             }
-        } else if (act == CTL(arg0)->action) {
+        } else if (act == arg0->unk31C->unk78) {
             arg0->disable_jump = 0xA;
             if ((arg4 != 0) && ((arg0->unk65 != 0) || ((s32)arg0->unk28 != 0))) {
                 func_150836CC(arg0, 0x24);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 if ((act == 0x16) || ((act == 0xC) && (arg0->unk28 == 0.0f) && (arg0->health != 0))) {
                     clearAction = 0;
                 } else {
                     func_150836CC(arg0, 0x24);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                 }
             } else if ((pressedButtons & B_BUTTON) || (arg4 != 0)) {
                 pressedButtons |= B_BUTTON;
                 anim = func_15063E84(arg0, 0x78, 1, 0, pressedButtons);
                 if ((anim == 999) && (arg4 != 0)) {
                     func_150836CC(arg0, 0x24);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                     arg0->unk83 = 0;
                 }
-            } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x76) && (CTL(arg0)->unk19E == 0)) {
-                if (CTL(arg0)->unk1B2 != 0) {
+            } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x76) && (arg0->unk31C->unk19E == 0)) {
+                if (arg0->unk31C->unk1B2 != 0) {
                     anim = 0x2C7;
                 } else if ((act == 0xC) || (D_800BE9F0 == 0x2B) || (D_800BE616 == 0)) {
                     anim = 0x207;
@@ -2003,24 +1855,24 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 blend = 0.0f;
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
-                if (CTL(arg0)->unk197 != 0) {
+                if (arg0->unk31C->aimState != 0) {
                     if (arg0->camera != NULL) {
                         func_1512D2E4(arg0->camera, 0);
                     }
                 }
-                CTL(arg0)->unk19E = 0x78;
-            } else if ((CTL(arg0)->unk197 != 0) && (arg0->camera != NULL) && (arg0->id == 0x80) && (func_10010894(arg0) == 0) && !(func_150ADA20() & 0x7F)) {
+                arg0->unk31C->unk19E = 0x78;
+            } else if ((arg0->unk31C->aimState != 0) && (arg0->camera != NULL) && (arg0->id == 0x80) && (func_10010894(arg0) == 0) && !(func_150ADA20() & 0x7F)) {
                 func_15060A30(func_1000F568(0x568, 4), arg0);
             }
         } else {
             anim = func_15063E84(arg0, 0x76, 1, act, pressedButtons);
         }
-        if ((act == 0xC) && ((act == CTL(arg0)->action) || (CTL(arg0)->unk11A != 0))) {
+        if ((act == 0xC) && ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0))) {
             arg0->xz_velocity = 0.0f;
             if ((s32)arg0->unk28 != 0) {
                 func_150836CC(arg0, 0x24);
-                CTL(arg0)->unk11A = 0;
-                CTL(arg0)->action = 0;
+                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->unk78 = 0;
             }
         }
         break;
@@ -2039,8 +1891,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             }
             if (arg6 != 0) {
                 clearAction = 0;
-            } else if (act == CTL(arg0)->action) {
-                if (CTL(arg0)->unk11A == 2) {
+            } else if (act == arg0->unk31C->unk78) {
+                if (arg0->unk31C->unk11A == 2) {
                     if (pressedButtons & Z_TRIG) {
                         anim = func_150641D8(arg0, 0x113, 0x113, 0x119);
                         arg0->disable_run = 0xFF;
@@ -2059,29 +1911,29 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0xF:
         anim = 999;
-        if ((act == CTL(arg0)->action) && ((arg6 != 0) || (arg0->unk65 != 0) || (arg4 != 0))) {
+        if ((act == arg0->unk31C->unk78) && ((arg6 != 0) || (arg0->unk65 != 0) || (arg4 != 0))) {
             func_150836CC(arg0, 0x3A);
-            CTL(arg0)->unk11A = 0;
+            arg0->unk31C->unk11A = 0;
             arg0->disable_run = 0;
             arg0->unk83 = 0;
         } else if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
             anim = 0xB4;
-            if (act == CTL(arg0)->action) {
+            if (act == arg0->unk31C->unk78) {
                 anim = 0xB6;
             }
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
-            CTL(arg0)->action = act;
+            arg0->unk31C->unk78 = act;
         }
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             arg0->disable_jump = 0xA;
             arg0->xz_velocity = 0.0f;
         }
         break;
     case 0x10:
         speed = 1.399999976f;
-        if (act == CTL(arg0)->action) {
-            D_800CC2B2 = PAD->stick_x * 0xC8;
+        if (act == arg0->unk31C->unk78) {
+            D_800CC2B2 = D_800CC284->stick_x * 0xC8;
             arg0->disable_jump = 0xA;
             if ((heldButtons & Z_TRIG) && (anim = 0xC1, (arg0->unk84.uh != 0xBE))) {
                 speed = 1.0f;
@@ -2093,10 +1945,10 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x15:
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x4B);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -2105,8 +1957,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 if ((heldButtons & Z_TRIG) && (arg0->unk84.uh != 0x168)) {
                     if (arg0->xz_velocity != 0.0f) {
                         arg0->unkAA = 0x50;
-                        CTL(arg0)->unk3C = 3;
-                        CTL(arg0)->unk12 = 0;
+                        arg0->unk31C->unk3C = 3;
+                        arg0->unk31C->unk12 = 0;
                         anim = 0x22B;
                         speed = (arg0->xz_velocity * 0.0625f) + 0.6000000238f;
                         if (arg0->unk44 >= 20.0f) {
@@ -2122,7 +1974,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
 
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
-                        CTL(arg0)->unk1AA++;
+                        arg0->unk31C->unk1AA++;
                         func_1506AC8C(arg0, 9, anims);
                     }
                 } else {
@@ -2146,38 +1998,38 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 animStart = 0x2C8;
                 animAlt = 0x2C9;
             }
-            if (act == CTL(arg0)->action) {
+            if (act == arg0->unk31C->unk78) {
                 if (arg6 != 0) {
                     clearAction = 0;
-                } else if ((CTL(arg0)->unk197 != 0) && (CTL(arg0)->unk11A == 2)) {
+                } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2)) {
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     arg0->unk83 = 0xA;
-                    if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG)) {
-                        CTL(arg0)->pending |= 1;
+                    if ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
+                        arg0->unk31C->unk1B4 |= 1;
                         D_800CC2B0 = 1;
                     }
                     if (animStart != arg0->unk84.uh) {
-                        if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (CTL(arg0)->unk19E == 0)) {
-                            CTL(arg0)->pending |= 2;
+                        if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk31C->unk19E == 0)) {
+                            arg0->unk31C->unk1B4 |= 2;
                             D_800CC2B0 = 1;
                             blend = 0.0f;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                             anim = 0x10C;
-                            CTL(arg0)->unk19E = 0x3C;
+                            arg0->unk31C->unk19E = 0x3C;
                         } else if (arg0->unk84.uh != 0x10C) {
                             anim = 0x10A;
                         }
                     }
                 } else {
                     arg0->disable_jump = 0x14;
-                    if ((pressedButtons & Z_TRIG) && (animStart != arg0->unk84.uh) && (CTL(arg0)->unk19E == 0)) {
+                    if ((pressedButtons & Z_TRIG) && (animStart != arg0->unk84.uh) && (arg0->unk31C->unk19E == 0)) {
                         anim = animAlt;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        CTL(arg0)->unk19E = 0x3C;
+                        arg0->unk31C->unk19E = 0x3C;
                     } else {
                         anim = func_15063E84(arg0, 0xC6, 1, 0, pressedButtons);
                     }
@@ -2197,15 +2049,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
     case 0x25:
     case 0x2D:
     case 0x2E:
-        CTL(arg0)->action = act;
+        arg0->unk31C->unk78 = act;
         arg0->disable_jump = 0x14;
         break;
     case 0x28:
         if (arg4 != 0) {
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         } else if ((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) {
-            if (act != CTL(arg0)->action) {
-                CTL(arg0)->action = act;
+            if (act != arg0->unk31C->unk78) {
+                arg0->unk31C->unk78 = act;
             }
         }
         break;
@@ -2220,49 +2072,49 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             if (arg0->unk13C != 0) {
                 s16 old;
                 f32 mag;
-                struct127 *obj;
+                Actor *obj;
 
-                old = CTL(arg0)->unk18;
+                old = arg0->unk31C->unk18;
                 arg0->unk83 = 0xFF;
                 arg0->disable_run = 0xFF;
-                if (CTL(arg0)->unk18 >= 0) {
-                    CTL(arg0)->unk18 -= 0x14;
+                if (arg0->unk31C->unk18 >= 0) {
+                    arg0->unk31C->unk18 -= 0x14;
                 } else {
-                    CTL(arg0)->unk18 += 0x14;
+                    arg0->unk31C->unk18 += 0x14;
                 }
-                if ((old ^ CTL(arg0)->unk18) & 0x8000) {
-                    CTL(arg0)->unk18 = 0;
+                if ((old ^ arg0->unk31C->unk18) & 0x8000) {
+                    arg0->unk31C->unk18 = 0;
                 }
                 if (arg0->unk44 > 10.0f) {
                     s16 diff;
 
-                    diff = CTL(arg0)->unk4C - CTL(arg0)->unk7E;
+                    diff = arg0->unk31C->unk4C - arg0->unk31C->unk7E;
                     if ((diff < 0x2000) && (diff > -0x2000) && ((diff > 0x100) || (diff < -0x100))) {
                         if (diff & 0x8000) {
-                            CTL(arg0)->unk18 -= 0x28;
+                            arg0->unk31C->unk18 -= 0x28;
                         } else {
-                            CTL(arg0)->unk18 += 0x28;
+                            arg0->unk31C->unk18 += 0x28;
                         }
-                        if (CTL(arg0)->unk18 > 0x1000) {
-                            CTL(arg0)->unk18 = 0x1000;
+                        if (arg0->unk31C->unk18 > 0x1000) {
+                            arg0->unk31C->unk18 = 0x1000;
                         }
-                        if (CTL(arg0)->unk18 < -0x1000) {
-                            CTL(arg0)->unk18 = -0x1000;
+                        if (arg0->unk31C->unk18 < -0x1000) {
+                            arg0->unk31C->unk18 = -0x1000;
                         }
                     }
                 }
-                arg0->unk76 = arg0->unk7A = arg0->unk7A + ((CTL(arg0)->unk18 * D_800CC264) / 100);
-                if ((CTL(arg0)->unk18 > 0x200) || (CTL(arg0)->unk18 < -0x200)) {
+                arg0->unk76 = arg0->unk7A = arg0->unk7A + ((arg0->unk31C->unk18 * D_800CC264) / 100);
+                if ((arg0->unk31C->unk18 > 0x200) || (arg0->unk31C->unk18 < -0x200)) {
                     after = D_800CC280 - arg0->unk7A;
-                    if ((((before < 0x1000) || (before > 0xF000)) && (after >= 0x1000) && (after < 0x7000) && (CTL(arg0)->unk18 < 0)) ||
-                        ((before > 0x7000) && (after <= 0x7000) && (CTL(arg0)->unk18 > 0))) {
+                    if ((((before < 0x1000) || (before > 0xF000)) && (after >= 0x1000) && (after < 0x7000) && (arg0->unk31C->unk18 < 0)) ||
+                        ((before > 0x7000) && (after <= 0x7000) && (arg0->unk31C->unk18 > 0))) {
                         D_800D1580 = -0xFEFA4A;
                         func_1506E5FC();
                     }
                 }
-                CTL(arg0)->unk7E = CTL(arg0)->unk4C;
+                arg0->unk31C->unk7E = arg0->unk31C->unk4C;
                 anim = 0x288;
-                mag = fabsf(CTL(arg0)->unk18);
+                mag = fabsf(arg0->unk31C->unk18);
                 if (mag > 200.0f) {
                     anim = 0x286;
                 }
@@ -2308,12 +2160,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
     case 0x21:
         if ((arg4 != 0) && (arg0->unk65 != 0)) {
             func_150836CC(arg0, 0x58);
-            CTL(arg0)->unk11A = 0;
+            arg0->unk31C->unk11A = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
         } else if (arg3 <= 0.0f) {
-            if (act == CTL(arg0)->action) {
-                if (CTL(arg0)->unk11A == 2) {
+            if (act == arg0->unk31C->unk78) {
+                if (arg0->unk31C->unk11A == 2) {
                     if (pressedButtons & Z_TRIG) {
                         anim = func_150641D8(arg0, 0x129, 0x12A, 0x128);
                         speed = 1.299999952f;
@@ -2333,11 +2185,11 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         speed = 1.399999976f;
         if ((arg4 != 0) && (arg0->unk65 != 0)) {
             func_150836CC(arg0, 0x56);
-            CTL(arg0)->unk11A = 0;
+            arg0->unk31C->unk11A = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
-        } else if ((act == CTL(arg0)->action) && (arg3 <= 0.0f)) {
-            if (CTL(arg0)->unk11A == 2) {
+        } else if ((act == arg0->unk31C->unk78) && (arg3 <= 0.0f)) {
+            if (arg0->unk31C->unk11A == 2) {
                 if (pressedButtons & Z_TRIG) {
                     anim = func_150641D8(arg0, 0x15F, 0x15F, 0x15F);
                     speed = 1.299999952f;
@@ -2352,11 +2204,11 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x24:
         if (arg4 != 0) {
-            if (act == CTL(arg0)->action) {
+            if (act == arg0->unk31C->unk78) {
                 s32 cancel;
 
                 cancel = 1;
-                if (((s32)arg0->unk28 == 0) && (CTL(arg0)->unk11A == 2)) {
+                if (((s32)arg0->unk28 == 0) && (arg0->unk31C->unk11A == 2)) {
                     pressedButtons |= B_BUTTON;
                     anim = func_15063E84(arg0, 0x155, 1, 0, pressedButtons);
                     if (anim != 999) {
@@ -2365,33 +2217,33 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 }
                 if (cancel != 0) {
                     func_150836CC(arg0, 0x63);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                     arg0->unk83 = 0;
                     arg0->disable_run = 0;
                 }
             }
-        } else if (act == CTL(arg0)->action) {
+        } else if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x63);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
-            } else if ((CTL(arg0)->unk197 != 0) && (CTL(arg0)->unk11A == 2) && (arg4 == 0)) {
+            } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2) && (arg4 == 0)) {
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
-                    CTL(arg0)->pending |= 1;
+                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                    arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x152) {
-                    if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh == 0x157) && (CTL(arg0)->unk19E == 0)) {
-                        CTL(arg0)->pending |= 2;
+                    if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x157) && (arg0->unk31C->unk19E == 0)) {
+                        arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        CTL(arg0)->unk19E = 0x78;
+                        arg0->unk31C->unk19E = 0x78;
                         anim = 0x156;
                         if ((arg0->camera != NULL) && (((arg0->unk184 & 0x1F) == 5) || ((arg0->unk184 & 0x1F) == 3) ||
                                                        ((arg0->unk184 & 0x1F) == 6) || ((arg0->unk184 & 0x1F) == 9))) {
@@ -2409,14 +2261,14 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     anim = 0x155;
                     if ((s32)arg0->unk28 != 0) {
                         func_150836CC(arg0, 0x63);
-                        CTL(arg0)->unk11A = 0;
+                        arg0->unk31C->unk11A = 0;
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x152) && (CTL(arg0)->unk19E == 0)) {
+                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x152) && (arg0->unk31C->unk19E == 0)) {
                     anim = 0x154;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    CTL(arg0)->unk19E = 0x78;
+                    arg0->unk31C->unk19E = 0x78;
                 } else {
                     anim = func_15063E84(arg0, 0x155, 1, 0, pressedButtons);
                 }
@@ -2430,32 +2282,32 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 held;
 
             if (D_800C3A58 != 0) {
-                if (act == CTL(arg0)->action) {
+                if (act == arg0->unk31C->unk78) {
                     func_15083568(arg0, 0x89, 1.0f, 0);
-                    CTL(arg0)->unk11A = 2;
+                    arg0->unk31C->unk11A = 2;
                 } else {
                     func_150836CC(arg0, 0x89);
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk11A = 0;
                 }
             }
-            if (((act == CTL(arg0)->action) || (CTL(arg0)->unk11A != 0)) && (arg0->in_water != 0)) {
-                CTL(arg0)->action = 0;
+            if (((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0)) && (arg0->in_water != 0)) {
+                arg0->unk31C->unk78 = 0;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0;
                 func_150836CC(arg0, 0x89);
-                CTL(arg0)->unk11A = 0;
-            } else if (act == CTL(arg0)->action) {
+                arg0->unk31C->unk11A = 0;
+            } else if (act == arg0->unk31C->unk78) {
                 if ((arg4 != 0) && ((arg0->unk65 != 0) || (arg0->stunned != 0) || (arg0->unk13C != 0))) {
                     func_150836CC(arg0, 0x89);
-                    CTL(arg0)->unk11A = 0;
-                    CTL(arg0)->action = 0;
+                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->unk78 = 0;
                 } else if (arg4 != 0) {
                     pressedButtons |= B_BUTTON;
                     anim = func_15063E84(arg0, 0x226, 1, 0, pressedButtons);
                     if (anim == 999) {
                         func_150836CC(arg0, 0x89);
-                        CTL(arg0)->unk11A = 0;
-                        CTL(arg0)->action = 0;
+                        arg0->unk31C->unk11A = 0;
+                        arg0->unk31C->unk78 = 0;
                         arg0->unk83 = 0;
                     }
                 } else if (arg6 != 0) {
@@ -2463,12 +2315,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 } else {
                     arg0->disable_jump = 0x14;
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                    if ((CTL(arg0)->unk19E == 0) && ((D_800CC290 & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
-                        if (CTL(arg0)->unk198 == 2) {
-                            CTL(arg0)->pending |= 4;
+                    if ((arg0->unk31C->unk19E == 0) && ((D_800CC290 & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                        if (arg0->unk31C->unk198 == 2) {
+                            arg0->unk31C->unk1B4 |= 4;
                             D_800CC2B0 = 1;
                         } else {
-                            CTL(arg0)->pending |= 1;
+                            arg0->unk31C->unk1B4 |= 1;
                             D_800CC2B0 = 1;
                         }
                     }
@@ -2478,21 +2330,21 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         anim = 0x226;
                         if ((s32)arg0->unk28 != 0) {
                             func_150836CC(arg0, 0x89);
-                            CTL(arg0)->unk11A = 0;
+                            arg0->unk31C->unk11A = 0;
                         }
                     } else {
                         held = D_800CC290 & R_TRIG;
-                        if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) ||
+                        if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG)) ||
                                     ((held == 0) && (D_800CC28C & Z_TRIG))) &&
                                    (arg0->unk84.uh != 0x225) && (arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) &&
-                                   (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (CTL(arg0)->unk19E == 0)) {
-                            if (PAD->buttons & R_TRIG) {
+                                   (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (arg0->unk31C->unk19E == 0)) {
+                            if (D_800CC284->button & R_TRIG) {
                                 if (func_150ADA20() & 3) {
                                     anim = 0x227;
                                 } else {
                                     anim = 0x237;
                                 }
-                                CTL(arg0)->pending |= 2;
+                                arg0->unk31C->unk1B4 |= 2;
                                 D_800CC2B0 = 1;
                             } else {
                                 if (func_150ADA20() & 3) {
@@ -2504,13 +2356,13 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             blend = 0.0f;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
-                            CTL(arg0)->unk19E = 0x3C;
+                            arg0->unk31C->unk19E = 0x3C;
                         } else if ((held != 0) && (D_800CC290 & Z_TRIG) && (arg0->unk84.uh != 0x225)) {
                             arg0->disable_run = 0;
                             arg0->disable_jump = 8;
                             arg0->unk83 = 8;
                             if ((arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) && (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237)) {
-                                if ((arg0->unk44 >= 1.0f) || (CTL(arg0)->unk23 > 0)) {
+                                if ((arg0->unk44 >= 1.0f) || (arg0->unk31C->unk23 > 0)) {
                                     anim = 0x223;
                                     if (arg0->unk44 >= 20.0f) {
                                         anim = 0x31B;
@@ -2531,23 +2383,23 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x12:
-        if (((act == CTL(arg0)->action) || (CTL(arg0)->unk11A != 0)) && (arg0->in_water != 0)) {
-            CTL(arg0)->action = 0;
+        if (((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0)) && (arg0->in_water != 0)) {
+            arg0->unk31C->unk78 = 0;
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            CTL(arg0)->unk11A = 0;
-        } else if (act == CTL(arg0)->action) {
+            arg0->unk31C->unk11A = 0;
+        } else if (act == arg0->unk31C->unk78) {
             arg0->xz_velocity = 0.0f;
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else {
                 arg0->disable_jump = 0x14;
-                if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG)) {
-                    if (CTL(arg0)->unk198 == 2) {
-                        CTL(arg0)->pending |= 8;
+                if ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
+                    if (arg0->unk31C->unk198 == 2) {
+                        arg0->unk31C->unk1B4 |= 8;
                         D_800CC2B0 = 1;
                     } else {
-                        CTL(arg0)->pending |= 1;
+                        arg0->unk31C->unk1B4 |= 1;
                         D_800CC2B0 = 1;
                     }
                 }
@@ -2556,15 +2408,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     arg0->unk83 = 0xFF;
                     anim = 0xC6;
                     if ((s32)arg0->unk28 != 0) {
-                        CTL(arg0)->unk11A = 0;
+                        arg0->unk31C->unk11A = 0;
                     }
-                } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (CTL(arg0)->unk19E == 0)) {
+                } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (arg0->unk31C->unk19E == 0)) {
                     anim = 0xC7;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    CTL(arg0)->unk19E = 0x3C;
-                } else if ((PAD->buttons & Z_TRIG) && (arg0->unk84.uh != 0xC4)) {
+                    arg0->unk31C->unk19E = 0x3C;
+                } else if ((D_800CC284->button & Z_TRIG) && (arg0->unk84.uh != 0xC4)) {
                     arg0->disable_run = 0;
                     arg0->disable_jump = 8;
                     arg0->unk83 = 8;
@@ -2583,63 +2435,63 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         }
         break;
     case 0x23:
-        if (act == CTL(arg0)->action) {
+        if (act == arg0->unk31C->unk78) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x16);
-                CTL(arg0)->unk11A = 0;
+                arg0->unk31C->unk11A = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
-            } else if ((CTL(arg0)->unk197 != 0) && (CTL(arg0)->unk11A == 2)) {
+            } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2)) {
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
-                    CTL(arg0)->pending |= 1;
+                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                    arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x163) {
-                    if ((CTL(arg0)->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E))) {
+                    if ((arg0->unk31C->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E))) {
                         if (arg0->unk28 == 0.0f) {
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
-                            CTL(arg0)->unk19E = 0xB4;
+                            arg0->unk31C->unk19E = 0xB4;
                             anim = 0x26E;
-                            CTL(arg0)->unk199 = 0;
+                            arg0->unk31C->unk199 = 0;
                         }
-                    } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh == 0x165) && (CTL(arg0)->unk19E == 0)) {
-                        CTL(arg0)->pending |= 2;
+                    } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x165) && (arg0->unk31C->unk19E == 0)) {
+                        arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
                         anim = 0x167;
-                        CTL(arg0)->unk199++;
-                        CTL(arg0)->unk19E = 0x1E;
+                        arg0->unk31C->unk199++;
+                        arg0->unk31C->unk19E = 0x1E;
                     } else if (arg0->unk84.uh != 0x167) {
                         anim = 0x165;
                     }
                 }
             } else {
                 arg0->disable_jump = 0x14;
-                if ((arg0->unk84.uh != 0x163) && ((CTL(arg0)->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E)))) {
+                if ((arg0->unk84.uh != 0x163) && ((arg0->unk31C->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E)))) {
                     if (arg0->unk28 == 0.0f) {
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        CTL(arg0)->unk19E = 0xB4;
+                        arg0->unk31C->unk19E = 0xB4;
                         anim = 0x26E;
-                        CTL(arg0)->unk199 = 0;
+                        arg0->unk31C->unk199 = 0;
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x163) && (arg0->unk84.uh != 0x166) && (CTL(arg0)->unk19E == 0)) {
+                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x163) && (arg0->unk84.uh != 0x166) && (arg0->unk31C->unk19E == 0)) {
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     anim = 0x166;
-                    CTL(arg0)->unk199++;
-                    CTL(arg0)->unk19E = 0x1E;
+                    arg0->unk31C->unk199++;
+                    arg0->unk31C->unk19E = 0x1E;
                 } else {
                     anim = func_15063E84(arg0, 0x164, 1, 0, pressedButtons);
                     if (anim == 0x163) {
-                        CTL(arg0)->unk199 = 0;
+                        arg0->unk31C->unk199 = 0;
                     }
                 }
             }
@@ -2655,40 +2507,40 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             f32 angle;
 
             ok = 1;
-            if (CTL(arg0)->unk7A != 0) {
-                angle = func_15048A70(MARKERS[CTL(arg0)->unk7A].unk10, arg0->unk40);
-                if ((MARKERS[CTL(arg0)->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+            if (arg0->unk31C->unk7A != 0) {
+                angle = func_15048A70(D_800D3098[arg0->unk31C->unk7A].yaw, arg0->unk40);
+                if ((D_800D3098[arg0->unk31C->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
             if (ok != 0) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
-                CTL(arg0)->action = 0x17;
+                arg0->unk31C->unk78 = 0x17;
                 anim = 0x8E;
-                arg0->unk76 = (u32)(MARKERS[CTL(arg0)->unk7A].unk10 * 182.0444489f) - 0x4000;
+                arg0->unk76 = (u32)(D_800D3098[arg0->unk31C->unk7A].yaw * 182.0444489f) - 0x4000;
             }
         }
         break;
     case 0x1A:
         handled = 1;
         anim = 999;
-        if (act != CTL(arg0)->action) {
+        if (act != arg0->unk31C->unk78) {
             if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 arg0->xz_velocity = 0.0f;
                 anim = 0x12C;
-                CTL(arg0)->action = act;
+                arg0->unk31C->unk78 = act;
                 func_15080828(0);
             }
         } else if (arg6 != 0) {
             func_15080BE8();
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         } else if (func_15080CF4() != 0) {
             if (D_800D1940 == 0x42) {
-                CTL(arg0)->action = 0;
+                arg0->unk31C->unk78 = 0;
                 anim = 0x358;
                 D_800D2E60[D_800D1940 >> 3] |= 1 << (D_800D1940 & 7);
             } else {
@@ -2696,20 +2548,20 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             }
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
-        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[D_800C3E78] & 0x8000) && (!(D_800D1958[0] & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[D_800C3E78] & 0x8000) && (!(D_800D1958.flags & 0x20) || (func_151F2CDC() == 0))) {
             anim = 0x142;
         }
         break;
     case 0x2A:
         handled = 1;
         anim = 999;
-        if (act != CTL(arg0)->action) {
-            if ((arg3 <= 0.0f) && (OBJ_U8(arg0, 0x110) == 0) && (arg0->disable_jump == 0)) {
+        if (act != arg0->unk31C->unk78) {
+            if ((arg3 <= 0.0f) && (arg0->unk110 == 0) && (arg0->disable_jump == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 arg0->xz_velocity = 0.0f;
-                CTL(arg0)->action = act;
+                arg0->unk31C->unk78 = act;
                 anim = 0x26F;
                 arg0->unk276 = 6;
                 arg0->unk282 = 0x64;
@@ -2719,9 +2571,9 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             }
         } else if (arg6 != 0) {
             func_15080BE8();
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
         } else if (func_15080CF4() != 0) {
-            CTL(arg0)->action = 0;
+            arg0->unk31C->unk78 = 0;
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0;
             func_1507EABC(arg0);
@@ -2729,14 +2581,14 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 sounds[2] = { 0x39, 0x35 };
 
             arg0->unk282 = 0x64;
-            if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); struct127 declares u8
+            if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
                 arg0->unk278 = (u16)arg0->unk278 + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->unk278) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->unk278 = 0;
                     arg0->unk284 = 1;
                 }
-            } else if (((s8)arg0->unk284 != 0) && (OBJ_U8(arg0, 0x70) == OBJ_U8(arg0, 0x6F))) {
+            } else if (((s8)arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
                 arg0->unk284 = 0;
             }
             arg0->disable_run = 0xA;
@@ -2746,7 +2598,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x1B:
         {
-            struct127 *obj;
+            Actor *obj;
             s32 animHold;
             s32 animIdle;
             s32 animRelease;
@@ -2755,12 +2607,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 next;
 
             obj = &D_800CC2D0[arg0->unk65 - 1];
-            CTL(arg0)->action = 0x1B;
+            arg0->unk31C->unk78 = 0x1B;
             arg0->disable_jump = 0x14;
             if ((D_800BE616 == 0) || (arg0->unk65 != 0)) {
                 clearAction = 0;
             }
-            if (CTL(arg0)->unk19E == 0) {
+            if (arg0->unk31C->unk19E == 0) {
                 next = 0;
                 if (obj->id == 0x23) {
                     animHold = 0xD;
@@ -2775,14 +2627,14 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     animGrab = 1;
                     animSpecial = 0;
                 }
-                if (PAD->buttons & Z_TRIG) {
+                if (D_800CC284->button & Z_TRIG) {
                     if (animHold != obj->unk232) {
                         func_10010A3C(obj);
                         func_100109D0(obj);
                     }
                     obj->unk232 = animHold;
                     obj->unk218 = NULL;
-                    CTL(arg0)->unk199 = 1;
+                    arg0->unk31C->unk199 = 1;
                     if ((animGrab != obj->unk84.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
                         func_150FC438(obj, arg0, 0, animGrab);
                         func_10010A3C(obj);
@@ -2790,8 +2642,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             func_1000FA64(func_1000F568(0x57C, 6), arg0->x_position, arg0->y_position, arg0->z_position, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, D_800996D0, 0, 0);
                         }
                     }
-                    if (D_800BE9E4 < CTL(arg0)->unk24) {
-                        CTL(arg0)->unk24 -= D_800BE9E4;
+                    if (D_800BE9E4 < arg0->unk31C->unk24) {
+                        arg0->unk31C->unk24 -= D_800BE9E4;
                     } else {
                         next = animRelease;
                         func_100109D0(obj);
@@ -2799,8 +2651,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 } else if ((D_800C3A58 != 0) && (animSpecial != obj->unk232) && (animSpecial != 0)) {
                     obj->unk232 = animSpecial;
                     obj->unk218 = NULL;
-                } else if (CTL(arg0)->unk199 == 1) {
-                    CTL(arg0)->unk199 = 0;
+                } else if (arg0->unk31C->unk199 == 1) {
+                    arg0->unk31C->unk199 = 0;
                     if (func_1000FF90(func_1000EC24, -1, -1) == -1) {
                         func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->x_position, arg0->y_position, arg0->z_position, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     }
@@ -2811,8 +2663,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     func_100109D0(obj);
                 }
                 if (next != 0) {
-                    CTL(arg0)->unk24 = 0x258;
-                    CTL(arg0)->unk19E = 0x96;
+                    arg0->unk31C->unk24 = 0x258;
+                    arg0->unk31C->unk19E = 0x96;
                     func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->x_position, arg0->y_position, arg0->z_position, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     obj->unk232 = next;
                     obj->unk218 = NULL;
@@ -2839,53 +2691,53 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 sfx = 0x12;
             }
             if (arg6 != 0) {
-                if ((act == CTL(arg0)->action) || (CTL(arg0)->unk19B == 4)) {
-                    if ((func_1503195C(arg0, item, 0) != NULL) || (CTL(arg0)->unk19B == 4)) {
+                if ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk19B == 4)) {
+                    if ((func_1503195C(arg0, item, 0) != NULL) || (arg0->unk31C->unk19B == 4)) {
                         func_150836CC(arg0, item);
                         D_800D1580 = (u16)sfx | 0x10000;
                         func_15073FA0();
-                        if (CTL(arg0)->grenade_count != 0) {
-                            CTL(arg0)->grenade_count--;
+                        if (arg0->unk31C->grenade_count != 0) {
+                            arg0->unk31C->grenade_count--;
                         }
                     }
-                    CTL(arg0)->unk19B = 0;
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk19B = 0;
+                    arg0->unk31C->unk11A = 0;
                 }
             } else {
                 func_15063A38(arg0, heldButtons, R_TRIG);
-                if (CTL(arg0)->unk19B == 1) {
-                    if (act != CTL(arg0)->action) {
-                        CTL(arg0)->action = act;
-                        CTL(arg0)->unk11A = 1;
+                if (arg0->unk31C->unk19B == 1) {
+                    if (act != arg0->unk31C->unk78) {
+                        arg0->unk31C->unk78 = act;
+                        arg0->unk31C->unk11A = 1;
                         arg0->disable_run = 0x1E;
                         arg0->disable_jump = 0x1E;
                         arg0->unk83 = 0x1E;
-                        CTL(arg0)->unk19B = 2;
+                        arg0->unk31C->unk19B = 2;
                         anim = animThrow;
-                        CTL(arg0)->unk19C = 0xF0;
-                        CTL(arg0)->unk1AA++;
+                        arg0->unk31C->unk19C = 0xF0;
+                        arg0->unk31C->unk1AA++;
                     }
-                } else if (CTL(arg0)->unk19B == 2) {
+                } else if (arg0->unk31C->unk19B == 2) {
                     if (!(D_800CC290 & D_CBUTTONS) && !(arg0->unk2F8 & 0x10)) {
-                        CTL(arg0)->unk19B = 3;
+                        arg0->unk31C->unk19B = 3;
                     }
-                    if (D_800BE9E4 < CTL(arg0)->unk19C) {
-                        CTL(arg0)->unk19C -= D_800BE9E4;
+                    if (D_800BE9E4 < arg0->unk31C->unk19C) {
+                        arg0->unk31C->unk19C -= D_800BE9E4;
                     } else {
-                        CTL(arg0)->unk19B = 0;
-                        CTL(arg0)->action = 0;
+                        arg0->unk31C->unk19B = 0;
+                        arg0->unk31C->unk78 = 0;
                         arg0->immune = 0;
                         func_15063B64(arg0);
                     }
-                } else if ((CTL(arg0)->unk19B == 3) && (arg3 <= 0.0f) && (animThrow != arg0->unk84.uh)) {
+                } else if ((arg0->unk31C->unk19B == 3) && (arg3 <= 0.0f) && (animThrow != arg0->unk84.uh)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    CTL(arg0)->unk19B = 4;
+                    arg0->unk31C->unk19B = 4;
                     anim = animDrop;
-                    CTL(arg0)->action = 0;
-                    CTL(arg0)->unk11A = 3;
-                    if (CTL(arg0)->grenade_count != 0) {
-                        CTL(arg0)->grenade_count--;
+                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->unk11A = 3;
+                    if (arg0->unk31C->grenade_count != 0) {
+                        arg0->unk31C->grenade_count--;
                     }
                 }
             }
@@ -2893,7 +2745,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x3A:
         {
-            struct127 *obj;
+            Actor *obj;
             s32 item;
 
             if (D_800BE9F0 == 0x3F) {
@@ -2902,7 +2754,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 item = 0x89;
             }
             if (arg6 != 0) {
-                if (act == CTL(arg0)->action) {
+                if (act == arg0->unk31C->unk78) {
                     obj = func_15063C60(arg0, item);
                     if (obj != NULL) {
                         obj->unk65 = 0;
@@ -2910,27 +2762,27 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         obj->y_velocity = 0.0f;
                         obj->xz_velocity = 0.0f;
                     }
-                    CTL(arg0)->unk19B = 0;
-                    CTL(arg0)->action = 0;
-                    CTL(arg0)->unk11A = 0;
+                    arg0->unk31C->unk19B = 0;
+                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->unk11A = 0;
                 }
             } else {
                 func_15063A38(arg0, heldButtons, R_TRIG);
-                if (CTL(arg0)->unk19B == 5) {
-                    if (act != CTL(arg0)->action) {
+                if (arg0->unk31C->unk19B == 5) {
+                    if (act != arg0->unk31C->unk78) {
                         if (item == 0x89) {
                             obj = func_15083568(arg0, 0x86, 1.0f, 0);
                         } else {
                             obj = func_15083568(arg0, 0x9F, 1.0f, 0);
                         }
                         if (obj != NULL) {
-                            CTL(arg0)->action = act;
+                            arg0->unk31C->unk78 = act;
                             anim = 0x1F9;
-                            CTL(arg0)->unk11A = 1;
+                            arg0->unk31C->unk11A = 1;
                             arg0->disable_run = 0x1E;
                             arg0->disable_jump = 0xFF;
                             arg0->unk83 = 0xFF;
-                            CTL(arg0)->unk19B = 6;
+                            arg0->unk31C->unk19B = 6;
                             obj->immune = 0xFF;
                             func_15062BDC(obj, 1.0f, 1.0f);
                             obj->unk2E4 = 0xF0;
@@ -2940,24 +2792,24 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             func_1505E650(obj, 2, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                             func_1514F568(obj);
                         } else {
-                            CTL(arg0)->unk19B = 0;
+                            arg0->unk31C->unk19B = 0;
                         }
                     }
-                } else if (CTL(arg0)->unk19B == 6) {
+                } else if (arg0->unk31C->unk19B == 6) {
                     if (!(D_800CC290 & D_CBUTTONS)) {
-                        CTL(arg0)->unk19B = 7;
+                        arg0->unk31C->unk19B = 7;
                     }
-                } else if ((CTL(arg0)->unk19B == 7) && (arg3 <= 0.0f) && (arg0->unk84.uh != 0x1F9)) {
+                } else if ((arg0->unk31C->unk19B == 7) && (arg3 <= 0.0f) && (arg0->unk84.uh != 0x1F9)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    CTL(arg0)->unk19B = 0;
+                    arg0->unk31C->unk19B = 0;
                     anim = 0x1FC;
-                    CTL(arg0)->action = 0;
-                    CTL(arg0)->unk11A = 0;
-                    if (CTL(arg0)->grenade_count != 0) {
-                        CTL(arg0)->grenade_count--;
+                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->unk11A = 0;
+                    if (arg0->unk31C->grenade_count != 0) {
+                        arg0->unk31C->grenade_count--;
                     }
-                    CTL(arg0)->unk1AA++;
+                    arg0->unk31C->unk1AA++;
                     obj = func_15063C60(arg0, item);
                     if (obj != NULL) {
                         s16 pitch;
@@ -2969,8 +2821,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         obj->unk65 = 0;
                         dist = ((240 - obj->unk2E4) * 210.0f) / 240.0f;
                         dist += 40.0f;
-                        if (CTL(arg0)->unk198 != 0) {
-                            pitch = (30.0f - CTL(arg0)->unk170) * 182.0444489f;
+                        if (arg0->unk31C->unk198 != 0) {
+                            pitch = (30.0f - arg0->unk31C->aimPitch) * 182.0444489f;
                         } else {
                             pitch = 0x1555;
                         }
@@ -2978,41 +2830,41 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         obj->y_velocity = -vy;
                         obj->xz_velocity = vx;
                         obj->gravity = 4.0f;
-                        obj->unk76 = obj->unk7A = arg0->unk7A - CTL(arg0)->unk12;
+                        obj->unk76 = obj->unk7A = arg0->unk7A - arg0->unk31C->unk12;
                     }
                 }
             }
         }
         break;
     case 0x3E:
-        if (OBJ_U8(arg0, 0x128) == 0) {
+        if (arg0->team == 0) {
             if (arg0->unk83 == 0) {
                 arg0->unk83 = 1;
             }
-            if (CTL(arg0)->unk12C >= D_800BE9E4) {
-                CTL(arg0)->unk12C -= D_800BE9E4;
+            if (arg0->unk31C->unk12C >= D_800BE9E4) {
+                arg0->unk31C->unk12C -= D_800BE9E4;
                 arg0->unkAA = 0x96;
             } else {
                 arg0->unkAA = 0x4B;
-                CTL(arg0)->unk12C = 0;
+                arg0->unk31C->unk12C = 0;
             }
         }
         break;
     }
 
     if ((arg4 != 0) || (arg6 != 0)) {
-        CTL(arg0)->unk72 = 0;
+        arg0->unk31C->unk72 = 0;
         if (arg6 != 0) {
             anim = 0;
             handled = 1;
             if (clearAction != 0) {
-                CTL(arg0)->action = 0;
+                arg0->unk31C->unk78 = 0;
             }
         } else {
-            CTL(arg0)->unk75 = 0;
-            CTL(arg0)->action = 0;
-            if (CTL(arg0)->unk11A != 3) {
-                CTL(arg0)->unk11A = 0;
+            arg0->unk31C->unk75 = 0;
+            arg0->unk31C->unk78 = 0;
+            if (arg0->unk31C->unk11A != 3) {
+                arg0->unk31C->unk11A = 0;
             }
         }
     }
@@ -3020,7 +2872,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         func_1505E650(arg0, anim, speed, blend, animParam, 0.0f, 0);
     }
     if (setUnk58 != 0) {
-        CTL(arg0)->unk58 = 1;
+        arg0->unk31C->idle.active = 1;
     }
     if (pendingSound != 0) {
         func_15060A30(pendingSound, arg0);

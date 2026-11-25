@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void
-#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 /* One F3DEX2 display-list command, read a byte at a time. */
@@ -240,7 +237,7 @@ void func_151179BC(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
-void func_15117D3C(WorldObject *prop, struct127 *obj) {
+void func_15117D3C(WorldObject *prop, Actor *obj) {
     s32 delay = prop->param.word & 0xFFFF;
 
     if (obj->interaction_state == 1 && (prop->flags & 4) && !(prop->behaviorState & 3) && !(prop->behaviorState & 4) &&
@@ -286,22 +283,8 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     out[2] += prop->z;
 }
 
-/* struct126 (struct127.unk31C) with the fields used here that structs.h leaves as padding. */
-typedef struct ObjControl {
-    /* 0x00 */ u8 pad0[0x17];
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 pad18[0xF];
-    /* 0x27 */ u8 unk27;
-    /* 0x28 */ u8 pad28[0x43];
-    /* 0x6B */ u8 grabState;
-    /* 0x6C */ s16 holdX;
-    /* 0x6E */ s16 holdY;
-    /* 0x70 */ s16 holdZ;
-} ObjControl;
 
-#define OBJ_CONTROL(obj) ((ObjControl *)(obj)->unk31C)
-
-extern void func_15060A30(s32, struct127 *);
+extern void func_15060A30(s32, Actor *);
 extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 /*
@@ -313,8 +296,8 @@ void func_15117F3C(WorldObject *prop) {
     s32 pad1; // matching: pad1-pad4 are unused stack slots of the original frame
     f32 speed;
     f32 accel;
-    struct127 *obj;
-    ObjControl *control;
+    Actor *obj;
+    ActorCtl *control;
     s32 i;
     f32 dx;
     f32 dy;
@@ -322,7 +305,7 @@ void func_15117F3C(WorldObject *prop) {
     s32 sound;
     f32 rangeSq;
     s32 pad2;
-    struct127 *target;
+    Actor *target;
     s32 pad3;
     f32 anchorX;
     f32 anchorY;
@@ -438,18 +421,18 @@ void func_15117F3C(WorldObject *prop) {
             if (obj->stunned) {
                 continue;
             }
-            control = OBJ_CONTROL(obj);
+            control = obj->unk31C;
             if (control->unk17) {
                 continue;
             }
             if (control->unk27) {
                 continue;
             }
-            if (control->grabState >= 4) {
+            if (control->unk6B >= 4) {
                 continue;
             }
             if (obj->y_position + 40.0f < anchor[1]) {
-                dy = (obj->y_position + (f32)obj->unkE6) - anchor[1];
+                dy = (obj->y_position + (f32)obj->bodyHeight) - anchor[1];
                 dz = obj->z_position - anchor[2];
                 dx = obj->x_position - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);
@@ -464,7 +447,7 @@ void func_15117F3C(WorldObject *prop) {
     if (target == NULL && motion == PROP_MOVING) {
         for (i = 0; i < D_8008FD8C; i++) {
             obj = &D_800CC2D0[i];
-            if (OBJ_CONTROL(obj)->grabState != 0) {
+            if (obj->unk31C->unk6B != 0) {
                 target = obj;
                 break;
             }
@@ -483,9 +466,9 @@ void func_15117F3C(WorldObject *prop) {
             }
             if (target != NULL) {
                 if (timer != 0) {
-                    OBJ_CONTROL(target)->grabState = 1;
+                    target->unk31C->unk6B = 1;
                 } else {
-                    OBJ_CONTROL(target)->grabState = 2;
+                    target->unk31C->unk6B = 2;
                 }
             }
             if (timer != 0) {
@@ -514,26 +497,26 @@ void func_15117F3C(WorldObject *prop) {
                     started = 0;
                     func_15114D24(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
-                        OBJ_CONTROL(target)->grabState = 0;
+                        target->unk31C->unk6B = 0;
                     }
                 }
             }
             if (target != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                OBJ_CONTROL(target)->holdX = anchor[0];
-                OBJ_CONTROL(target)->holdY = anchor[1];
-                OBJ_CONTROL(target)->holdZ = anchor[2];
+                target->unk31C->holdX = anchor[0];
+                target->unk31C->holdY = anchor[1];
+                target->unk31C->holdZ = anchor[2];
             }
         } else {
-            if (target != NULL && (control = OBJ_CONTROL(target)) != NULL) {
-                if (started == 0 && control->grabState == 0) {
+            if (target != NULL && (control = target->unk31C) != NULL) {
+                if (started == 0 && control->unk6B == 0) {
                     timer = 50;
                     started++;
                 }
                 if (timer != 0) {
-                    control->grabState = 3;
-                } else if (control->grabState == 3) {
-                    control->grabState = 4;
+                    control->unk6B = 3;
+                } else if (control->unk6B == 3) {
+                    control->unk6B = 4;
                     started = 0;
                 }
                 if (timer != 0) {
@@ -546,11 +529,11 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            if (OBJ_CONTROL(target) != NULL) {
+            if (target->unk31C != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                OBJ_CONTROL(target)->holdX = anchor[0];
-                OBJ_CONTROL(target)->holdY = anchor[1];
-                OBJ_CONTROL(target)->holdZ = anchor[2];
+                target->unk31C->holdX = anchor[0];
+                target->unk31C->holdY = anchor[1];
+                target->unk31C->holdZ = anchor[2];
             }
         }
     } else if (stayOpen == 0 || motion == PROP_RETURNING) {
@@ -575,7 +558,7 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            OBJ_CONTROL(target)->grabState = 0;
+            target->unk31C->unk6B = 0;
         }
     }
     PROP_SET_MOTION(prop, motion);
@@ -728,7 +711,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     }
     WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->rotY) {
-        if (D_800C35EA == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
+        if (D_800C35EA[0] == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
             angle = prop->rotY;
         } else {
             prop->rotY = angle;
@@ -849,7 +832,7 @@ void func_15118F24(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
-void func_151193AC(WorldObject *prop, struct127 *obj) {
+void func_151193AC(WorldObject *prop, Actor *obj) {
     if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->behaviorState & 3) && !(prop->behaviorState & 4)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
@@ -950,7 +933,6 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     }
 }
 
-extern f32 func_15048A40(u8 angle);
 extern f32 func_150489B0(u8 angle);
 
 /*
@@ -1026,7 +1008,7 @@ void func_151196D4(WorldObject *prop) {
 }
 
 extern s32 func_151EF610(void);
-extern struct127 *func_1505EFD0(s32);
+extern Actor *func_1505EFD0(s32);
 
 /*
  * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed
@@ -1039,7 +1021,7 @@ void func_15119938(WorldObject *prop) {
     s32 yaw;
     s32 i;
     f32 *bend;
-    struct127 *player;
+    Actor *player;
     f32 posX;
     f32 posY;
     f32 posZ;

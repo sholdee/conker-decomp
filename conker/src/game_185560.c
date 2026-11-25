@@ -1,55 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
-/* Orientation, scale and simple ballistic motion stored after an effect actor's header. */
-typedef struct {
-    /* 0x00 */ Vec3f angle;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ Vec3f velocity;
-    /* 0x1C */ Vec3f angularVelocity;
-    /* 0x28 */ f32 gravity;
-    /* 0x2C */ f32 damping;
-} EffectMotion;
+#include "effects.h"
 
 /*
  * Effect actor allocated by func_15167A68. Bytes 0x10..0x53 are copied from a 0x44-byte
  * template; type-specific data follows the 0xF8-byte header.
  */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ u8 flags; /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s8 updateCallback; /* index into D_8008AE00, -1 for none */
-    /* 0x13 */ s8 drawCallback;   /* index into D_8008AE0C, -1 for none */
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 displayList;    /* index into D_8008AFB8 */
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ s32 otherModeH;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 renderPreset;  /* index into D_800A4AC8 */
-    /* 0x28 */ u8 pad28[3];
-    /* 0x2B */ u8 combineMode;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s8 primColorMode;
-    /* 0x35 */ s8 envColorMode;
-    /* 0x36 */ u8 pad36[2];
-    /* 0x38 */ u8 color0[4]; /* [3] is alpha */
-    /* 0x3C */ u8 color1[4];
-    /* 0x40 */ void *owner;
-    /* 0x44 */ u8 ownerId;
-    /* 0x45 */ u8 attachMode;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ Vec3f position;
-    /* 0x54 */ u8 pad54[4];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ EffectActorTemplate tmpl;
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
     /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
     /* 0xDC */ u8 unkDC;
@@ -58,7 +18,7 @@ typedef struct {
     /* 0xF0 */ s32 *sharedHandle;
     /* 0xF4 */ s32 unkF4;
     /* 0xF8 */ union {
-        EffectMotion motion;
+        TumbleMotion motion;
         f32 size;
         struct {
             s16 duration;
@@ -72,7 +32,7 @@ extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
-EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
+EffectActor *func_151580B0(EffectActorTemplate *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
                            s32 arg6) {
     EffectActor *actor;
     s32 i;
@@ -81,7 +41,7 @@ EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s
     if (actor == NULL) {
         return NULL;
     }
-    memcpy(&actor->flags, template, 0x44);
+    memcpy(&actor->tmpl, template, sizeof(EffectActorTemplate));
     actor->attachment = attachment;
     actor->unkF4 = arg2;
     actor->unkDC = 0;
@@ -99,7 +59,7 @@ EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s
     return actor;
 }
 
-EffectActor *func_151581D8(void *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
+EffectActor *func_151581D8(EffectActorTemplate *template, u8 large, s32 extraSize, u8 arg3, s32 arg4) {
     return func_151580B0(template, 0, 0, large, extraSize, arg3, arg4);
 }
 
@@ -111,14 +71,14 @@ void func_15158224(EffectActor *actor) {
     u8 expired;
 
     expired = 0;
-    if (actor->flags & 1) {
-        actor->lifetime -= D_800BE9E4;
-        if (actor->lifetime < 0) {
+    if (actor->tmpl.flags & 1) {
+        actor->tmpl.lifetime -= D_800BE9E4;
+        if (actor->tmpl.lifetime < 0) {
             expired = 1;
         }
     }
     if (expired == 0) {
-        callback = actor->updateCallback;
+        callback = actor->tmpl.updateCallback;
         if (callback != -1) {
             if (D_8008AE00[callback](actor) == 0) {
                 expired = 1;
@@ -158,39 +118,39 @@ Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
     u8 update;
 
     update = 1;
-    if (actor->drawCallback != -1) {
-        if (D_8008AE0C[actor->drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
+    if (actor->tmpl.drawCallback != -1) {
+        if (D_8008AE0C[actor->tmpl.drawCallback](&actor->mtx[D_800BE9C0], actor) == 0) {
             return gfx;
         }
     }
-    gfx = func_15142B7C(gfx, actor->unk1C, actor->unk20);
-    func_151441A4(&primR, &primG, &primB, &primA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
-                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->primColorMode);
-    func_151442FC(&envR, &envG, &envB, &envA, actor->color1[0], actor->color1[1], actor->color1[2], actor->color1[3],
-                  actor->color0[0], actor->color0[1], actor->color0[2], actor->color0[3], 255, actor->envColorMode);
+    gfx = func_15142B7C(gfx, actor->tmpl.render.setGeometryMode, actor->tmpl.render.clearGeometryMode);
+    func_151441A4(&primR, &primG, &primB, &primA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+                  actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.primMode);
+    func_151442FC(&envR, &envG, &envB, &envA, actor->tmpl.color1.red, actor->tmpl.color1.green, actor->tmpl.color1.blue, actor->tmpl.color1.alpha,
+                  actor->tmpl.color0.red, actor->tmpl.color0.green, actor->tmpl.color0.blue, actor->tmpl.color0.alpha, 255, actor->tmpl.render.envMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, actor->combineMode, &update);
-    gfx = func_15142FBC(gfx, actor->otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->unk2C | actor->unk30,
-                        D_800A4AC8[actor->renderPreset].unk0 | D_800A4AC8[actor->renderPreset].unk4, &update);
-    if (actor->flags & 2) {
-        gfx = func_151462C8(gfx, &actor->attachment, actor->attachMode, actor->owner, actor->ownerId, arg2,
-                            &actor->position, (actor->flags & 4) ? 1 : 0, 0);
+    gfx = func_1513F4E4(gfx, ((u8 *)&actor->tmpl.render.unk10)[3] /* matching: reads the low byte */, &update);
+    gfx = func_15142FBC(gfx, actor->tmpl.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | actor->tmpl.render.unk14 | actor->tmpl.render.unk18,
+                        D_800A4AC8[actor->tmpl.render.renderMode].unk0 | D_800A4AC8[actor->tmpl.render.renderMode].unk4, &update);
+    if (actor->tmpl.flags & 2) {
+        gfx = func_151462C8(gfx, &actor->attachment, actor->tmpl.attachMode, actor->tmpl.owner, actor->tmpl.ownerId, arg2,
+                            &actor->tmpl.position, (actor->tmpl.flags & 4) ? 1 : 0, 0);
     }
     gSPMatrix(gfx++, &actor->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
-    gSPDisplayList(gfx++, D_8008AFB8[actor->displayList]);
+    gSPDisplayList(gfx++, D_8008AFB8[actor->tmpl.displayList]);
     return gfx;
 }
 
-/* Draw callback: rotates by data.motion.angle, scales uniformly and translates to the actor's position. */
+/* Draw callback: rotates by data.motion.rot, scales uniformly and translates to the actor's position. */
 s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
-    EffectMotion *motion = &actor->data.motion;
-    f32 mf[4][4];
+    TumbleMotion *motion = &actor->data.motion;
+    MtxF mf;
 
-    func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
-    mf[3][0] = actor->position.x;
-    mf[3][1] = actor->position.y;
-    mf[3][2] = actor->position.z;
+    func_150A8050(mf, motion->rot.x, motion->rot.y, motion->rot.z);
+    mf[3][0] = actor->tmpl.position.x;
+    mf[3][1] = actor->tmpl.position.y;
+    mf[3][2] = actor->tmpl.position.z;
     mf[0][0] *= motion->scale;
     mf[0][1] *= motion->scale;
     mf[0][2] *= motion->scale;
@@ -206,52 +166,53 @@ s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
 
 /* Update callback: damps horizontal velocity, applies gravity and integrates position and angle. */
 s32 func_15158684(EffectActor *actor) {
-    EffectMotion *motion;
+    TumbleMotion *motion;
     Vec3f prevVelocity;
     s32 i;
 
     motion = &actor->data.motion;
-    prevVelocity = motion->velocity;
+    prevVelocity = motion->vel;
     for (i = D_800BE9E4; i != 0; i--) {
-        motion->velocity.x *= motion->damping;
-        motion->velocity.z *= motion->damping;
+        motion->vel.x *= motion->drag;
+        motion->vel.z *= motion->drag;
     }
     {
         f32 accelX;
         f32 accelZ;
         f32 accelY;
 
-        motion->velocity.y += motion->gravity * D_800BE9A4;
-        accelX = (motion->velocity.x - prevVelocity.x) * D_800BE9A8;
+        motion->vel.y += motion->gravity * D_800BE9A4;
+        accelX = (motion->vel.x - prevVelocity.x) * D_800BE9A8;
         accelY = motion->gravity;
-        accelZ = (motion->velocity.z - prevVelocity.z) * D_800BE9A8;
-        actor->position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        actor->position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        actor->position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        accelZ = (motion->vel.z - prevVelocity.z) * D_800BE9A8;
+        actor->tmpl.position.x += (prevVelocity.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        actor->tmpl.position.y += (prevVelocity.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        actor->tmpl.position.z += (prevVelocity.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
     }
-    motion->angle.x += motion->angularVelocity.x * D_800BE9A4;
-    motion->angle.y += motion->angularVelocity.y * D_800BE9A4;
-    motion->angle.z += motion->angularVelocity.z * D_800BE9A4;
+    motion->rot.x += motion->rotVel.x * D_800BE9A4;
+    motion->rot.y += motion->rotVel.y * D_800BE9A4;
+    motion->rot.z += motion->rotVel.z * D_800BE9A4;
     return 1;
 }
 
+/* A matrix wrapped in a struct so that it can be copied by assignment. */
 typedef struct {
-    f32 m[4][4];
-} MtxF;
+    MtxF m;
+} MtxFBox;
 
-extern MtxF D_8008AE18;
+extern MtxFBox D_8008AE18;
 
 /* Draw callback: scales the fixed matrix D_8008AE18 by data.size and translates to the actor's position. */
 s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     f32 scale;
     s32 pad; // matching: IDO's frame has an unused slot here
-    MtxF mf;
+    MtxFBox mf;
 
     mf = D_8008AE18;
     scale = actor->data.size * 0.003921568859f;
-    mf.m[3][0] = actor->position.x;
-    mf.m[3][1] = actor->position.y;
-    mf.m[3][2] = actor->position.z;
+    mf.m[3][0] = actor->tmpl.position.x;
+    mf.m[3][1] = actor->tmpl.position.y;
+    mf.m[3][2] = actor->tmpl.position.z;
     mf.m[0][0] *= scale;
     mf.m[0][1] *= scale;
     mf.m[0][2] *= scale;
@@ -297,10 +258,10 @@ void func_15158AD0(EffectActor *actor) {
 s32 func_15158AFC(EffectActor *actor) {
     s32 alpha;
 
-    if (actor->lifetime < actor->data.fade.duration) {
-        alpha = actor->lifetime * actor->data.fade.alphaPerTick;
-        if (alpha < actor->color0[3]) {
-            actor->color0[3] = alpha;
+    if (actor->tmpl.lifetime < actor->data.fade.duration) {
+        alpha = actor->tmpl.lifetime * actor->data.fade.alphaPerTick;
+        if (alpha < actor->tmpl.color0.alpha) {
+            actor->tmpl.color0.alpha = alpha;
         }
     }
     return 1;
@@ -308,9 +269,9 @@ s32 func_15158AFC(EffectActor *actor) {
 
 /* Message passed to the effect message handlers; msgId 0x2D swaps owners first <-> second. */
 typedef struct {
-    /* 0x00 */ struct127 *first;
+    /* 0x00 */ Actor *first;
     /* 0x04 */ union {
-        struct127 *ptr;
+        Actor *ptr;
         u8 uniqueId; /* msgId 0: unique id of `first` */
     } second;
     /* 0x08 */ u8 firstId;
@@ -319,29 +280,29 @@ typedef struct {
 
 /* Message handler: follows owner swaps (0x2D) and drops the owner when it goes away (0). */
 void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
-    struct127 *first;
+    Actor *first;
 
     if (msgId == 0x2D) {
         first = msg->first;
-        if (actor->owner == first) {
-            actor->owner = msg->second.ptr;
-            actor->ownerId = msg->secondId;
+        if (actor->tmpl.owner == first) {
+            actor->tmpl.owner = msg->second.ptr;
+            actor->tmpl.ownerId = msg->secondId;
         } else {
-            if (actor->owner == msg->second.ptr) {
-                actor->owner = first;
-                actor->ownerId = msg->firstId;
+            if (actor->tmpl.owner == msg->second.ptr) {
+                actor->tmpl.owner = first;
+                actor->tmpl.ownerId = msg->firstId;
             }
         dummy_label_356969: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 0) {
         first = msg->first;
-        if (actor->owner != first) {
-            if (msg->second.uniqueId != actor->ownerId) {
+        if (actor->tmpl.owner != first) {
+            if (msg->second.uniqueId != actor->tmpl.ownerId) {
                 return;
             }
         }
-        actor->owner = NULL;
-        actor->ownerId = 0;
+        actor->tmpl.owner = NULL;
+        actor->tmpl.ownerId = 0;
     }
 }
 
@@ -353,7 +314,7 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ struct127 *character;
+    /* 0x18 */ Actor *character;
     /* 0x1C */ u8 characterId;
     /* 0x1D */ u8 mode; /* from func_15159370 */
     /* 0x1E */ u8 pad1E[2];
@@ -369,11 +330,11 @@ typedef struct {
     /* 0x50 */ u8 unk50;
 } CharacterWatcher;
 
-s32 func_15159370(struct127 *chr, u8 *mode);
-void func_1514EDF0(CharacterWatcher *watcher, struct127 *chr);
+s32 func_15159370(Actor *chr, u8 *mode);
+void func_1514EDF0(CharacterWatcher *watcher, Actor *chr);
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
-CharacterWatcher *func_15158BD0(struct127 *chr, u8 enableActions, s32 extraSize) {
+CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     CharacterWatcher *watcher;
 
     if (chr == NULL) {
@@ -417,11 +378,11 @@ void func_15158D00(CharacterWatcher *watcher) {
     func_15169824((struct102 *)watcher);
 }
 
-s32 func_15159084(struct127 *chr, u8 mode);
-s32 func_15159120(struct127 *chr, u8 mode);
-s32 func_15159184(struct127 *chr, u8 mode);
-s32 func_15159230(struct127 *chr, Vec3f *lastPosition, u8 prevState);
-s32 func_151592B8(struct127 *chr, u8 mode);
+s32 func_15159084(Actor *chr, u8 mode);
+s32 func_15159120(Actor *chr, u8 mode);
+s32 func_15159184(Actor *chr, u8 mode);
+s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState);
+s32 func_151592B8(Actor *chr, u8 mode);
 
 /* A state-change rule: both masks are unions of STATE_BITS values. */
 typedef struct {
@@ -501,7 +462,7 @@ void func_1519F400(void *);
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
 void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
     CharacterWatcher *watcher = self;
-    struct127 *first;
+    Actor *first;
 
     if (msgId == 0) {
         if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
@@ -526,7 +487,7 @@ void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
     }
 }
 
-s32 func_15159084(struct127 *chr, u8 mode) {
+s32 func_15159084(Actor *chr, u8 mode) {
     s32 ret;
     s32 flags;
 
@@ -536,7 +497,7 @@ s32 func_15159084(struct127 *chr, u8 mode) {
     } else {
         if ((-10000.0f == chr->unk118) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->unk118 < chr->y_position) || (((u8 *)&chr->pad134)[3] != 0)) { /* byte 0x137 */
+        } else if ((chr->unk118 < chr->y_position) || (chr->unk137 != 0)) { /* byte 0x137 */
             ret = 1;
         } else {
             ret = 0;
@@ -545,12 +506,12 @@ s32 func_15159084(struct127 *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159120(struct127 *chr, u8 mode) {
+s32 func_15159120(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
         ret = 1;
-    } else if (chr->unk180 < (chr->unk118 - 35.0f)) {
+    } else if (chr->floorY < (chr->unk118 - 35.0f)) {
         ret = 1;
     } else {
         ret = 0;
@@ -558,11 +519,11 @@ s32 func_15159120(struct127 *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159184(struct127 *chr, u8 mode) {
+s32 func_15159184(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
-        if (D_800C35EA != 1) {
+        if (D_800C35EA[0] != 1) {
             ret = 0;
         } else if ((chr->unk118 - 75.0f) < chr->y_position) {
             ret = 1;
@@ -578,7 +539,7 @@ s32 func_15159184(struct127 *chr, u8 mode) {
 }
 
 /* Returns 0 if chr has not moved since lastPosition, 1 if it started moving, 2 if it kept moving. */
-s32 func_15159230(struct127 *chr, Vec3f *lastPosition, u8 prevState) {
+s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     s32 ret;
 
     if ((chr->x_position != lastPosition->x) || (chr->y_position != lastPosition->y) ||
@@ -597,7 +558,7 @@ s32 func_15159230(struct127 *chr, Vec3f *lastPosition, u8 prevState) {
 extern u16 D_8008B040; /* two u8 ids, 0x3B and 0x3C */
 
 /* Returns 3 on one of the D_8008B040 ids (mode 0 only), 2 in water, 1 if unk28 is set, else 4. */
-s32 func_151592B8(struct127 *chr, u8 mode) {
+s32 func_151592B8(Actor *chr, u8 mode) {
     s32 i;
     s32 found;
     union {
@@ -630,7 +591,7 @@ s32 func_151592B8(struct127 *chr, u8 mode) {
 }
 
 /* Picks the watcher mode for chr; returns 0 if nothing applies. */
-s32 func_15159370(struct127 *chr, u8 *mode) {
+s32 func_15159370(Actor *chr, u8 *mode) {
     s32 ret;
 
     ret = 0;
@@ -664,21 +625,15 @@ s32 func_15159370(struct127 *chr, u8 *mode) {
     return ret;
 }
 
-/* Node returned by func_1514ECE0; component 0x13 holds the character's watcher. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ CharacterWatcher *watcher;
-} WatcherNode;
-
-s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /*
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
- * chr+0x2F4 (unnamed in struct127) is its component list.
+ * chr's watcher is its type-0x13 attachment.
  */
-u8 func_1515942C(struct127 *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
+u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
     CharacterWatcher *watcher;
-    WatcherNode *node;
+    Attachment *node;
     u8 ret;
     s32 mask0;
     s32 mask1;
@@ -689,10 +644,10 @@ u8 func_1515942C(struct127 *chr, s16 state0, s16 state1, s16 state2, s16 moveSta
     s32 have;
 
     ret = 0;
-    if (func_1514ECE0(*(void **)&chr->pad2F0[4], 0x13, &node) == 0) {
+    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
-    watcher = node->watcher;
+    watcher = node->handle; // attachment type 0x13 holds the character's watcher
     if (moveState == -1) {
         maskMove = 0x1E00;
     } else {
@@ -791,7 +746,7 @@ typedef struct {
 
 #define GROUND_UNKNOWN -99999.8984375f
 
-/* Particle object created by func_151303BC / func_15130280 from a ParticleSpawn. */
+/* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -898,73 +853,40 @@ s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-/* Spawn parameters for func_151303BC / func_15130280; most fields land at +0x10 in the Particle. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4]; /* [3] becomes Particle.alpha */
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 fadeDuration;
-    /* 0x20 */ s16 fadeStep; /* alpha lost per tick while fading */
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
-    /* 0x5C */ u8 pad5C[0x4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 pad66[0x6];
-} ParticleSpawn;
-
-Particle *func_151303BC(ParticleSpawn *spawn, s32 arg1, s32 motionSize);
+Particle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
 
 /* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
 Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
-    ParticleSpawn spawn;
+    ParticleDesc6C spawn;
     Particle *particle;
     RiseMotion rise;
 
-    spawn.unk1D = 0x2F;
-    spawn.unk08 = 0xC01;
-    spawn.unk00 = 0x200005;
-    spawn.unk04 = 0;
-    spawn.color1[2] = 0;
-    spawn.color1[1] = 0;
-    spawn.color1[0] = 0;
-    spawn.color0[3] = 0;
-    spawn.color0[2] = 0;
-    spawn.color0[1] = 0;
-    spawn.color0[0] = 0;
-    spawn.unk10 = 0;
-    spawn.unk0C = 0;
-    spawn.unk1C = 0xFF;
-    spawn.unk22 = 0;
-    spawn.unk24 = 0.0f;
+    spawn.texture = 0x2F;
+    spawn.renderMode = 0xC01;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.b2 = 0;
+    spawn.g2 = 0;
+    spawn.r2 = 0;
+    spawn.a = 0;
+    spawn.b = 0;
+    spawn.g = 0;
+    spawn.r = 0;
+    spawn.frameRate = 0;
+    spawn.frame = 0;
+    spawn.brightness = 0xFF;
+    spawn.scaleStart = 0;
+    spawn.scaleRate = 0.0f;
     spawn.flags = 0x3207;
-    spawn.unk60 = 5;
-    spawn.unk61 = 5;
-    spawn.unk62 = 4;
-    spawn.unk63 = -1;
-    spawn.position = *pos;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.primColorMode = 5;
+    spawn.envColorMode = 5;
+    spawn.updateFunc = 4;
+    spawn.deathFunc = -1;
+    spawn.pos = *pos;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     rise.widthPhase = 0;
     rise.heightPhase = 0;
     rise.swayPhaseX = 0;
@@ -972,7 +894,7 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     rise.ceiling = 1000.0f;
     rise.maxRiseSpeed = 4.0f;
     rise.swayPerSpeed = 0.25f;
-    spawn.velocity = *velocity;
+    spawn.vel = *velocity;
 
     if (func_150ADA20() & 1) {
         spawn.flags |= 0x40;
@@ -981,10 +903,10 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
         spawn.flags |= 0x80;
     }
 
-    spawn.lifetime = (func_150ADA20() % 25U) + 30;
-    spawn.fadeDuration = 30;
-    spawn.fadeStep = 8;
-    spawn.color1[3] = (func_150ADA20() % 101U) + 100;
+    spawn.timer = (func_150ADA20() % 25U) + 30;
+    spawn.fadeStart = 30;
+    spawn.fadeRate = 8;
+    spawn.alpha = (func_150ADA20() % 101U) + 100;
     size = (func_150ADA68() * 20.0f) + 49.0f;
     spawn.width = size;
     rise.baseSize = size;
@@ -997,7 +919,7 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
     rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
     rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-    spawn.unk54 = ((func_150ADA68() * 254.0f) + 108.0f) * 0.001000000047f;
+    spawn.gravity = ((func_150ADA68() * 254.0f) + 108.0f) * 0.001000000047f;
 
     particle = func_151303BC(&spawn, 2, sizeof(RiseMotion));
     if (particle != NULL) {
@@ -1006,16 +928,8 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     return particle;
 }
 
-/* Common object header bytes that spawn functions pass along. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} ObjectHeader;
-
 /* Spawns one stationary rising particle at (x, y, z). */
-void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHeader *obj) {
+void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -1025,7 +939,7 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHead
     velocity.y = 0.0f;
     velocity.z = 0.0f;
     pos.z = z;
-    func_15159890(&pos, &velocity, obj->unkC, obj->unk1);
+    func_15159890(&pos, &velocity, obj->owner, obj->kind);
 }
 
 /* Emitter data at 0x28 of the func_15159C08 emitter. */
@@ -1046,10 +960,9 @@ typedef struct {
     /* 0x28 */ DiskEmitter emitter;
 } DiskEmitterObject;
 
-extern u8 D_800BE9EB;
 extern float sinf(float);
 extern float cosf(float);
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
 void func_15159C08(DiskEmitterObject *obj) {
@@ -1057,10 +970,10 @@ void func_15159C08(DiskEmitterObject *obj) {
     Particle *particle;
 
     emitter = &obj->emitter;
-    if (func_151454BC(D_800BE9EB, 3000.0f, (struct17 *)emitter)) {
+    if (func_151454BC(D_800BE9EB, 3000.0f, (Vec3f *)emitter)) {
         emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * D_800BE9A4;
         if (emitter->pending > 1.0f) {
-            ParticleSpawn spawn;
+            ParticleDesc6C spawn;
             OscillateMotion oscillate;
             f32 angle;
             f32 radius;
@@ -1068,39 +981,39 @@ void func_15159C08(DiskEmitterObject *obj) {
             f32 z;
             f32 scale;
             f32 invScale;
-            f32 mtx[4][4];
+            MtxF mtx;
             f32 dist;
             f32 fadeTime;
             f32 size;
 
-            spawn.unk1D = 0x2F;
-            spawn.unk08 = 0xC01;
-            spawn.unk00 = 0x200005;
-            spawn.unk04 = 0;
-            spawn.color1[2] = 0;
-            spawn.color1[1] = 0;
-            spawn.color1[0] = 0;
-            spawn.color0[3] = 0;
-            spawn.color0[2] = 0;
-            spawn.color0[1] = 0;
-            spawn.color0[0] = 0;
-            spawn.unk10 = 0;
-            spawn.unk0C = 0;
-            spawn.unk1C = 0xFF;
-            spawn.unk22 = 0;
-            spawn.unk24 = 0.0f;
+            spawn.texture = 0x2F;
+            spawn.renderMode = 0xC01;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.b2 = 0;
+            spawn.g2 = 0;
+            spawn.r2 = 0;
+            spawn.a = 0;
+            spawn.b = 0;
+            spawn.g = 0;
+            spawn.r = 0;
+            spawn.frameRate = 0;
+            spawn.frame = 0;
+            spawn.brightness = 0xFF;
+            spawn.scaleStart = 0;
+            spawn.scaleRate = 0.0f;
             spawn.flags = 0x1205;
-            spawn.unk60 = 5;
-            spawn.unk61 = 5;
-            spawn.unk62 = 12;
-            spawn.unk63 = -1;
-            spawn.position = emitter->position;
-            spawn.unk3C.x = 0.0f;
-            spawn.unk3C.y = 0.0f;
-            spawn.unk3C.z = 0.0f;
+            spawn.primColorMode = 5;
+            spawn.envColorMode = 5;
+            spawn.updateFunc = 12;
+            spawn.deathFunc = -1;
+            spawn.pos = emitter->position;
+            spawn.offset.x = 0.0f;
+            spawn.offset.y = 0.0f;
+            spawn.offset.z = 0.0f;
             oscillate.widthPhase = 0;
             oscillate.heightPhase = 0;
-            spawn.unk54 = 0.0f;
+            spawn.gravity = 0.0f;
             do {
                 angle = func_150ADA68() * 6.283185482f;
                 radius = func_150ADA68() * emitter->radius;
@@ -1118,16 +1031,16 @@ void func_15159C08(DiskEmitterObject *obj) {
                     invScale = 1.0f / scale;
                     dist = emitter->unk18 * invScale;
                     fadeTime = ((func_150ADA68() * 6596.0f) + 2402.0f) * 0.1000000015f * invScale;
-                    spawn.velocity.x = emitter->velocity.x * scale;
-                    spawn.velocity.y = emitter->velocity.y * scale;
-                    spawn.velocity.z = emitter->velocity.z * scale;
+                    spawn.vel.x = emitter->velocity.x * scale;
+                    spawn.vel.y = emitter->velocity.y * scale;
+                    spawn.vel.z = emitter->velocity.z * scale;
                     if (dist > 500.0f) {
-                        spawn.lifetime = 500;
+                        spawn.timer = 500;
                     } else {
-                        spawn.lifetime = (fadeTime * 0.5f) + dist;
+                        spawn.timer = (fadeTime * 0.5f) + dist;
                     }
-                    spawn.fadeDuration = fadeTime;
-                    spawn.fadeStep = 0xFF / spawn.fadeDuration;
+                    spawn.fadeStart = fadeTime;
+                    spawn.fadeRate = 0xFF / spawn.fadeStart;
                     spawn.flags &= ~0xC0;
                     if (func_150ADA20() & 1) {
                         spawn.flags |= 0x40;
@@ -1135,7 +1048,7 @@ void func_15159C08(DiskEmitterObject *obj) {
                     if (func_150ADA20() & 1) {
                         spawn.flags |= 0x80;
                     }
-                    spawn.color1[3] = (func_150ADA20() % 51U) + 124;
+                    spawn.alpha = (func_150ADA20() % 51U) + 124;
                     size = (func_150ADA68() * 100.0f) + 240.0f;
                     spawn.width = size;
                     oscillate.baseSize = size;
@@ -1155,7 +1068,6 @@ void func_15159C08(DiskEmitterObject *obj) {
     }
 }
 
-f32 func_15144B68(f32 angle);
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
 s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
@@ -1181,53 +1093,53 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
     return 1;
 }
 
-void *func_15130280(ParticleSpawn *spawn, u8 arg1, GroundHit *ground, s32 motionSize, u8 arg4, s32 arg5);
+void *func_15130280(ParticleDesc6C *spawn, u8 arg1, GroundHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
 Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, GroundHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     Particle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
-    ParticleSpawn spawn;
+    ParticleDesc6C spawn;
     DriftMotion drift;
     GroundHit hit;
     s32 flipY;
     s32 flipX;
 
-    spawn.unk1D = 0x2F;
-    spawn.unk08 = 0x2203;
-    spawn.unk00 = 0x200005;
-    spawn.unk04 = 0;
-    spawn.color1[2] = 0;
-    spawn.color1[1] = 0;
-    spawn.color1[0] = 0;
-    spawn.color0[3] = 0;
-    spawn.color0[2] = 0;
-    spawn.color0[1] = 0;
-    spawn.color0[0] = 0;
-    spawn.unk10 = 0;
-    spawn.unk0C = 0;
-    spawn.unk1C = 0xFF;
-    spawn.unk22 = 0;
-    spawn.unk24 = 0.0f;
+    spawn.texture = 0x2F;
+    spawn.renderMode = 0x2203;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.b2 = 0;
+    spawn.g2 = 0;
+    spawn.r2 = 0;
+    spawn.a = 0;
+    spawn.b = 0;
+    spawn.g = 0;
+    spawn.r = 0;
+    spawn.frameRate = 0;
+    spawn.frame = 0;
+    spawn.brightness = 0xFF;
+    spawn.scaleStart = 0;
+    spawn.scaleRate = 0.0f;
     flipX = (func_150ADA20() & 1) ? 0x40 : 0;
     flipY = (func_150ADA20() & 1) ? 0x80 : 0;
     spawn.flags = flipY | 0x1007 | flipX | 0x8000 | 0x4000;
-    spawn.unk60 = 6;
-    spawn.unk61 = 8;
+    spawn.primColorMode = 6;
+    spawn.envColorMode = 8;
     if (arg8) {
-        spawn.unk62 = 0x15;
+        spawn.updateFunc = 0x15;
     } else {
-        spawn.unk62 = 0x14;
+        spawn.updateFunc = 0x14;
     }
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.position = *pos;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
-    spawn.fadeDuration = 1;
-    spawn.fadeStep = 0xFF;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.pos = *pos;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
     drift.baseSize = size;
     spawn.width = size;
     spawn.height = size;
@@ -1243,11 +1155,11 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Grou
     drift.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
     drift.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
     drift.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * drift.baseSize;
-    spawn.velocity = *velocity;
-    spawn.unk65 = 0;
-    spawn.lifetime = lifetime;
-    spawn.color1[3] = alpha;
-    spawn.unk54 = arg2;
+    spawn.vel = *velocity;
+    spawn.handlerSet = 0;
+    spawn.timer = lifetime;
+    spawn.alpha = alpha;
+    spawn.gravity = arg2;
     drift.damping = damping;
     if (velocity->x != 0 || velocity->z != 0) {
         drift.groundHeight = GROUND_UNKNOWN;
@@ -1338,14 +1250,14 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Returns the address of chr's watcher unk34 block through *out; 0 if chr has no watcher. */
-s32 func_1515A920(struct127 *chr, u8 **out) {
-    WatcherNode *node;
+s32 func_1515A920(Actor *chr, u8 **out) {
+    Attachment *node;
     CharacterWatcher *watcher;
 
-    if (func_1514ECE0(*(void **)&chr->pad2F0[4], 0x13, &node) == 0) {
+    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
-    watcher = node->watcher;
+    watcher = node->handle;
     *out = watcher->unk34;
     return 1;
 }
@@ -1462,8 +1374,8 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = (RiseEmitterObject *)func_15149130((u32)func_150ADA20() % (data->types.range + 1) + data->types.base,
-                                             -1, 0x3F, -1, 1, 0, (struct37 *)sizeof(RiseEmitter), spawner->unkC,
+    obj = (RiseEmitterObject *)func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
+                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->unkC,
                                              spawner->unk1);
     if (obj != NULL) {
         memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));
@@ -1478,7 +1390,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
     emitter->pending += (emitter->settings.rate + (func_150ADA68() * emitter->settings.rateRandom)) * D_800BE9A4;
     if (emitter->pending > 1.0f) {
         s32 pad; // matching: 4 unused frame bytes sit above spawn
-        ParticleSpawn spawn;
+        ParticleDesc6C spawn;
         RiseMotion rise;
         Particle *particle;
         s32 flipY;
@@ -1491,38 +1403,38 @@ void func_1515AB88(RiseEmitterObject *obj) {
         rise.maxRiseSpeed = emitter->settings.maxRiseSpeed;
         rise.swayPerSpeed = emitter->settings.swayPerSpeed;
         rise.ceiling = emitter->ceiling;
-        spawn.unk1D = 0x2F;
-        spawn.unk08 = 0x4403;
-        spawn.unk00 = 0x200005;
-        spawn.unk04 = 0x9F0600;
-        spawn.lifetime = 300;
-        spawn.unk0C = 0;
-        spawn.unk10 = 0;
-        spawn.color1[0] = 0xFF;
-        spawn.color1[1] = 0xFF;
-        spawn.color1[2] = 0xFF;
-        spawn.color0[3] = 0xFF;
-        spawn.color0[0] = emitter->settings.color[0];
-        spawn.color0[1] = emitter->settings.color[1];
-        spawn.color0[2] = emitter->settings.color[2];
-        spawn.unk1C = 0xFF;
-        spawn.position = emitter->position;
-        spawn.velocity.x = 0.0f;
-        spawn.velocity.y = 0.0f;
-        spawn.velocity.z = 0.0f;
-        spawn.fadeDuration = 1;
-        spawn.fadeStep = 0xFF;
-        spawn.unk22 = 1;
-        spawn.unk24 = 1.0f;
-        spawn.unk60 = 6;
-        spawn.unk61 = 9;
-        spawn.unk62 = 4;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk3C.x = 0.0f;
-        spawn.unk3C.y = 0.0f;
-        spawn.unk3C.z = 0.0f;
+        spawn.texture = 0x2F;
+        spawn.renderMode = 0x4403;
+        spawn.unk0 = 0x200005;
+        spawn.unk4 = 0x9F0600;
+        spawn.timer = 300;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.r2 = 0xFF;
+        spawn.g2 = 0xFF;
+        spawn.b2 = 0xFF;
+        spawn.a = 0xFF;
+        spawn.r = emitter->settings.color[0];
+        spawn.g = emitter->settings.color[1];
+        spawn.b = emitter->settings.color[2];
+        spawn.brightness = 0xFF;
+        spawn.pos = emitter->position;
+        spawn.vel.x = 0.0f;
+        spawn.vel.y = 0.0f;
+        spawn.vel.z = 0.0f;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
+        spawn.scaleStart = 1;
+        spawn.scaleRate = 1.0f;
+        spawn.primColorMode = 6;
+        spawn.envColorMode = 9;
+        spawn.updateFunc = 4;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
         do {
             rise.widthPhaseStep = (func_150ADA20() % 5U) + 4;
             rise.heightPhaseStep = (func_150ADA20() % 5U) + 4;
@@ -1534,8 +1446,8 @@ void func_1515AB88(RiseEmitterObject *obj) {
             rise.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
             rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
             rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
-            spawn.unk54 = (func_150ADA68() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
-            spawn.color1[3] = ((u32)func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
+            spawn.gravity = (func_150ADA68() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
+            spawn.alpha = (func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
             flipX = (func_150ADA20() & 1) ? 0x40 : 0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;

@@ -1,70 +1,39 @@
 #include <ultra64.h>
 
-/*
- * The shared headers declare these with parameter types that would change the code here (extra
- * narrowing in callers) or the variable type; hide those declarations and declare them below.
- */
-#define func_1506160C func_1506160C_hdr
-#define func_1000F85C func_1000F85C_hdr
+// matching: the shared headers declare these with parameter types that would change the code here
+// (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
 #define func_1000F91C func_1000F91C_hdr
-#define func_10010BE8 func_10010BE8_hdr
-#define func_1505E874 func_1505E874_hdr
 #include "functions.h"
-#undef func_1506160C
-#undef func_1000F85C
 #undef func_1000F91C
-#undef func_10010BE8
-#undef func_1505E874
-void func_1505E874(s32, struct127 *);
-void func_1000F85C(u16, s32, s32);
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-u16 func_10010BE8(u16, s32, s32, s32, s32, s32, s32);
-#define D_800D1550 D_800D1550_hdr
-#define D_800CC298 D_800CC298_hdr
 #include "variables.h"
-#undef D_800D1550
-#undef D_800CC298
-extern f32 D_800D1550; /* frame time step */
-
-/* State of the per-type texture animations in func_15061B4C. */
-typedef struct Game83300Anim298 {
-    f32 unk0;
-    f32 unk4;
-    s8 unk8;
-    s8 unk9;
-    s8 unkA;
-    u8 unkB[4];
-    u8 unkF;
-    u8 unk10;
-} Game83300Anim298;
-extern Game83300Anim298 D_800CC298;
 
 
-void func_15058F24(struct127 *arg0, f32, f32);
-void func_1505D6F0(struct127 *arg0, s32 arg1);
-u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
+void func_15058F24(Actor *arg0, f32, f32);
+void func_1505D6F0(Actor *arg0, s32 arg1);
+u8   func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-void func_150611E8(struct127 *arg0, s32 arg1);
-void func_1505A770(struct127 *actor);
-void func_15059C84(struct127 *actor);
-void func_1505A3A8(f32 targetSpeed, struct127 *actor, f32 accel, f32 decel, u8 turnDiff);
+void func_150611E8(Actor *arg0, s32 arg1);
+void func_1505A770(Actor *actor);
+void func_15059C84(Actor *actor);
+void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff);
 
 s32 func_15080738(s32 arg0);
-void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
-s32 func_15065A5C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+void func_150642AC(Actor *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
+s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
 struct Entry1505C1E4;
-void func_1505B9C4(struct127 *attacker, struct127 *victim, struct Entry1505C1E4 *base, struct Entry1505C1E4 *hit, u8 index, s32 victimSlot, u8 damageMask);
-extern void (*D_80086694[])(void *, struct127 *, u8 *);
-s32 func_1506E46C(struct127 *, s32 *, s32);
+void func_1505B9C4(Actor *attacker, Actor *victim, struct Entry1505C1E4 *base, struct Entry1505C1E4 *hit, u8 index, s32 victimSlot, u8 damageMask);
+extern void (*D_80086694[])(void *, Actor *, u8 *);
+s32 func_1506E46C(Actor *, s32 *, s32);
 struct Entry1505C1E4;
-s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern struct255 *D_800CC4A4;
-void func_1505F188(struct127 *arg0);
-s32 func_1505C7D8(struct127 *arg0, s32 arg1);
+s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern MtxF *D_800CC4A4;
+void func_1505F188(Actor *arg0);
+s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
-/* An actor's animation playback state (struct127.unk2D0); the previous animation is kept for blending. */
+/* An actor's animation playback state (Actor.unk2D0); the previous animation is kept for blending. */
 typedef struct {
     /* 0x000 */ s32 unk0;
     /* 0x004 */ u16 anim; /* bit 0x8000: set by func_1505E0C4's last argument */
@@ -107,7 +76,7 @@ typedef struct {
 extern Tbl15055E50 *D_800D18B0;
 
 /* Keeps the actor inside its zone set: pushed out of obstacle circles, snapped to the nearest allowed circle. */
-void func_15055E50(struct127 *actor, s32 zoneSetId) {
+void func_15055E50(Actor *actor, s32 zoneSetId) {
     s32 pad[5]; // matching: stack frame size
     f32 bestX;
     f32 bestZ;
@@ -199,16 +168,8 @@ void func_15055E50(struct127 *actor, s32 zoneSetId) {
     }
 }
 
-/* One point of an actor's path (D_800D2104[actor->unk13F]). */
-typedef struct PathPoint {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 param; /* point 0: radius / 8 of the actor's area; later points: speed */
-} PathPoint;
-
 /* Keeps the actor within unk2E8 * 8 units of its path's second point. */
-void func_15056150(struct127 *actor) {
+void func_15056150(Actor *actor) {
     f32 dist;
     f32 centerX;
     f32 centerZ;
@@ -220,7 +181,7 @@ void func_15056150(struct127 *actor) {
     PathPoint *path;
 
     if (actor->unk2E8 != 0) {
-        path = ((PathPoint **)D_800D2104)[actor->unk13F];
+        path = D_800D2104[actor->unk13F];
         centerX = path[1].x;
         centerZ = path[1].z;
         centerY = path[1].y;
@@ -242,7 +203,7 @@ void func_15056150(struct127 *actor) {
 }
 
 /* Moves the actor with the change in unk118 since last frame, scaled by its height above it. */
-void func_15056258(struct127 *actor) {
+void func_15056258(Actor *actor) {
     f32 delta;
     f32 heightFactor;
 
@@ -263,8 +224,8 @@ typedef struct {
     u8 flags; /* bit 0: copied to unk10B; & 0xFE: stun time / 100 */
 } Game83300AnimSub;
 
-/* An actor type's reaction (0x18 bytes); ((s32 *)D_800D1588[id])[-2] points to the table. */
-typedef struct {
+/* An actor type's reaction (0x18 bytes); ANIM_HEADER(D_800D1588[id])->reactions points to the table. */
+typedef struct Game83300AnimEntry {
     u8 kind; /* matched by func_1505E7CC */
     u8 pad1[3];
     s32 sound;
@@ -276,8 +237,8 @@ typedef struct {
 void func_150649A0(s32, s32);
 
 /* Moves the actor toward its host D_800CC2D0[unk13D - 100] and picks the carried animation. */
-void func_150562FC(struct127 *actor) {
-    s32 *animTable;
+void func_150562FC(Actor *actor) {
+    ActorAnim *animTable;
     Game83300AnimEntry *anims;
     s16 *hostData;
     u32 animIdx;
@@ -301,7 +262,7 @@ void func_150562FC(struct127 *actor) {
     actor->immune = 30;
     variant = 0;
     animKind = 13;
-    actor->unk180 = D_800CC2D0[hostIdx].unk180;
+    actor->floorY = D_800CC2D0[hostIdx].floorY;
     actor->unk1CC = actor->y_position;
     actor->gravity = 4.5f;
     actor->y_velocity = 0.0;
@@ -359,8 +320,8 @@ void func_150562FC(struct127 *actor) {
         }
     }
     animIdx = func_1505E7CC(animKind, actor);
-    animTable = (s32 *)D_800D1588[actor->id];
-    anims = (Game83300AnimEntry *)animTable[-2];
+    animTable = D_800D1588[actor->id];
+    anims = ANIM_HEADER(animTable)->reactions;
     if ((D_800CC2D0[hostIdx].interaction_state == 1) && (D_800CC2D0[hostIdx].in_water != 0)) {
         actor->unk5C = 4;
         attached = 1; if (anims[animIdx].sub[1].anim != 0) { // matching: same line (as1 tie-break)
@@ -432,11 +393,11 @@ void func_150562FC(struct127 *actor) {
 }
 
 /* Whether actor D_800CC2D0[targetIdx] is inside the circle (radius * 8) around the actor's first path point. */
-s32 func_1505693C(struct127 *actor, s32 targetIdx) {
+s32 func_1505693C(Actor *actor, s32 targetIdx) {
     f32 radiusSq;
     f32 dz;
     f32 dx;
-    PathPoint *path = ((PathPoint **)D_800D2104)[actor->unk13F];
+    PathPoint *path = D_800D2104[actor->unk13F];
 
     if (path[0].param == 0) {
         return TRUE;
@@ -453,16 +414,16 @@ s32 func_1505693C(struct127 *actor, s32 targetIdx) {
     return FALSE;
 }
 
-/* D_80099A3C is really u8[][10] (variables.h declares s16[]). Neither caller reads a return value. */
-void func_15056A00(struct127 *actor, u8 turn, u8 row) {
+/* Neither caller reads a return value. */
+void func_15056A00(Actor *actor, u8 turn, u8 row) {
     u8 col;
     u16 angle;
     u8 *entry;
 
     col = 0;
-    if (((u8 (*)[10])D_80099A3C)[row][7] < turn) {
+    if (D_80099A3C[row][7] < turn) {
         col = 5;
-    } else if (((u8 (*)[10])D_80099A3C)[row][2] < turn) {
+    } else if (D_80099A3C[row][2] < turn) {
         col = 2;
     }
     angle = actor->unk76;
@@ -471,7 +432,7 @@ void func_15056A00(struct127 *actor, u8 turn, u8 row) {
     } else {
         col += 4;
     }
-    entry = &((u8 (*)[10])D_80099A3C)[row][col];
+    entry = &D_80099A3C[row][col];
     if (*entry != 0xFF) {
         actor->unk218--;
         actor->unk21C = 20000;
@@ -485,32 +446,18 @@ void func_15056A00(struct127 *actor, u8 turn, u8 row) {
         actor->unk138 = 0;
     }
 }
-/* Per actor-type info, D_800D1C90[id] (only the fields used here). */
-typedef struct ActorInfo15056B08 {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 headHeight;
-    /* 0x16 */ u8 pad16;
-    /* 0x17 */ u8 viewAngle; /* width of the spotting cone, in 1/256 turns */
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 pad1A[0xD];
-    /* 0x27 */ u8 headBone;
-} ActorInfo15056B08;
-
 struct216 *func_1507BB28(s32, s32);
-void func_1507BC14(struct127 *);
-s32 func_150229E4(struct127 *);
-void func_15047390(f32 mf[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
-void func_1504C9E4(struct127 *arg0, s8 arg1, u8 arg2);
-u8 func_15059B54(struct127 *arg0, u16 arg1);
-extern f32 D_800CC2E4;
-extern f32 D_800CC2EC;
+void func_1507BC14(Actor *);
+s32 func_150229E4(Actor *);
+void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
+u8 func_15059B54(Actor *arg0, u16 arg1);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
  * looks for targets to switch behaviour script (unk218), then turns and moves toward the point.
  */
-void func_15056B08(struct127 *actor) {
+void func_15056B08(Actor *actor) {
     f32 tx;
     f32 tz;
     f32 ty;
@@ -527,10 +474,10 @@ void func_15056B08(struct127 *actor) {
     u16 moveTurnSpeed;
     u8 faceTurnRate;
     f32 targetDist;
-    struct127 *target;
+    Actor *target;
     f32 arriveDist;
     u8 scanForTargets;
-    ActorInfo15056B08 *info;
+    ModelDef *info;
     f32 dx;
     f32 dz;
     f32 distSqXZ;
@@ -566,30 +513,30 @@ void func_15056B08(struct127 *actor) {
         return;
     }
     state = mode;
-    info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+    info = D_800D1C90[actor->id];
     if (actor->unk23D == 0xFF) {
         rangeSq = 1000000000.0f;
     } else {
         rangeSq = actor->unk23D * 8;
         rangeSq *= rangeSq;
     }
-    if (((PathPoint **)D_800D2104)[actor->unk13F]->param != 0) {
-        tx = ((PathPoint **)D_800D2104)[actor->unk13F]->x - actor->x_position;
-        tz = ((PathPoint **)D_800D2104)[actor->unk13F]->z - actor->z_position;
+    if (D_800D2104[actor->unk13F]->param != 0) {
+        tx = D_800D2104[actor->unk13F]->x - actor->x_position;
+        tz = D_800D2104[actor->unk13F]->z - actor->z_position;
     }
     if ((actor->unk25C & 4) && !(actor->unk25C & 1) && ((state == 1) || (state == 3))) {
         actor->unk21C = 0;
     }
     if ((actor->unk25C & 1) && ((state == 0) || (state == 5))) {
-        if (func_1505693C(actor, actor->pad259[2]) != 0) {
+        if (func_1505693C(actor, actor->unk259[2]) != 0) {
             actor->unk218 = func_1507BB28(1, actor->unk233);
             actor->unk21C = 0;
-            actor->unkA8 = actor->pad259[2] | 0x80;
-            actor->unk222 = actor->pad259[2];
+            actor->unkA8 = actor->unk259[2] | 0x80;
+            actor->unk222 = actor->unk259[2];
         }
     }
-    if (actor->pad259[1] != 0) {
-        actor->unk44 = actor->pad259[1];
+    if (actor->unk259[1] != 0) {
+        actor->unk44 = actor->unk259[1];
     }
     if ((state == 1) || (state == 0xC) || (state == 2) || (state == 3) || (state == 9) || (state == 0xA) ||
         ((state == 6) && !(actor->unk22C & 1))) {
@@ -645,10 +592,10 @@ void func_15056B08(struct127 *actor) {
                     actor->unk21C = 0;
                 }
             }
-            if ((u16)actor->unk22E != 0) {
+            if (actor->unk22E != 0) {
                 range = 0.0f;
             } else if (!actor->unk236) {
-                range = actor->pad23C * 8;
+                range = actor->unk23C * 8;
             } else {
                 range = (actor->unk236 == 0xFF) ? 3000000.0f : actor->unk236 * 8;
             }
@@ -657,8 +604,8 @@ void func_15056B08(struct127 *actor) {
                 if ((actor->id == 8) && (range < fabsf(actor->y_position - target->y_position))) {
                     ok = 0;
                 }
-                if (actor->pad22A != 0) {
-                    range = actor->pad22A * 8.0f;
+                if (actor->unk22A != 0) {
+                    range = actor->unk22A * 8.0f;
                     if ((D_800C3E78 != 0) && (fabsf(actor->y_position - D_800CC2E8[0]) < range)) {
                         ok = 0;
                     }
@@ -746,8 +693,8 @@ void func_15056B08(struct127 *actor) {
             if (info->unk18 <= actor->xz_velocity) {
                 if (func_1505693C(actor, 0) != 0) {
                     spotted = 0;
-                    px = D_800CC2E4 - (s16)actor->pad1A4;
-                    pz = *(s16 *)&actor->pad1A8 - D_800CC2EC;
+                    px = D_800CC2E4 - actor->aim.x;
+                    pz = actor->aim.z - D_800CC2EC;
                     if ((actor->id == 0x9E) && (actor->unk2E4 == 0)) {
                         rangeSq = 129600.0f;
                     }
@@ -762,7 +709,7 @@ void func_15056B08(struct127 *actor) {
                             if ((D_800C3E78 != 0) &&
                                 (!actor->unk229 || (fabsf(actor->y_position - D_800CC2E8[0]) < dsq))) {
                                 if (actor->id == 0x9E) {
-                                    f32 mtx[4][4];
+                                    MtxF mtx;
                                     f32 lookX;
                                     f32 lookZ;
                                     f32 lookY;
@@ -811,9 +758,9 @@ void func_15056B08(struct127 *actor) {
                 tz = D_800CC2D0[actor->unk222].z_position;
                 ty = D_800CC2D0[actor->unk222].y_position;
             } else {
-                tx = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
-                tz = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
-                ty = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
+                tx = D_800D2104[actor->unk13F][actor->unk21E + 1].x;
+                tz = D_800D2104[actor->unk13F][actor->unk21E + 1].z;
+                ty = D_800D2104[actor->unk13F][actor->unk21E + 1].y;
             }
             if ((state == 5) || (state == 6)) {
                 f32 orbitX;
@@ -869,7 +816,7 @@ void func_15056B08(struct127 *actor) {
         if (actor->unk223 == 0x11) {
             actor->unk78 += (((actor->unk21C / 100) & 0x10) - 8) << 9;
         }
-        if ((actor->unkF4 & 0x200) && (*(f32 *)&actor->unk1F4 < 3.0f)) {
+        if ((actor->unkF4 & 0x200) && (actor->unk1F4 < 3.0f)) {
             moveTurnSpeed = 0;
             faceTurnRate = 0;
         }
@@ -878,7 +825,7 @@ void func_15056B08(struct127 *actor) {
         if (state != 0xD) {
             if (((u8)actor->unk24F != 0) && ((state != 0) || (arriveDist < targetDist))) {
                 k = (u8)actor->unk24F - 1;
-                if (((u8(*)[10])D_80099A3C)[k][0] < turnDiff) {
+                if (D_80099A3C[k][0] < turnDiff) {
                     actor->unk76 = prevMoveAngle;
                     func_15056A00(actor, turnDiff, k);
                 }
@@ -902,11 +849,11 @@ void func_15056B08(struct127 *actor) {
                 n = actor->unk21F;
             }
             if (actor->unk22C & 4) {
-                actor->x_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].x;
-                actor->z_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].z;
+                actor->x_position = D_800D2104[actor->unk13F][actor->unk21E + 1].x;
+                actor->z_position = D_800D2104[actor->unk13F][actor->unk21E + 1].z;
                 actor->unk1FC |= 8;
                 if (actor->unk22C & 8) {
-                    actor->y_position = ((PathPoint **)D_800D2104)[actor->unk13F][actor->unk21E + 1].y;
+                    actor->y_position = D_800D2104[actor->unk13F][actor->unk21E + 1].y;
                 }
             }
             if (!(actor->unkF4 & 0x10)) {
@@ -967,9 +914,9 @@ void func_15056B08(struct127 *actor) {
             } else {
                 r = accel;
             }
-            func_1505A250(wantVelX, wantVelZ, r, (f32 *)&actor->pad174, (f32 *)&actor->pad178);
-            actor->unk76 = func_1505A630(*(f32 *)&actor->pad174, -*(f32 *)&actor->pad178, 0);
-            r = sqrtf((*(f32 *)&actor->pad178 * *(f32 *)&actor->pad178) + (*(f32 *)&actor->pad174 * *(f32 *)&actor->pad174));
+            func_1505A250(wantVelX, wantVelZ, r, &actor->unk174, &actor->unk178);
+            actor->unk76 = func_1505A630(actor->unk174, -actor->unk178, 0);
+            r = sqrtf((actor->unk174 * actor->unk174) + (actor->unk178 * actor->unk178));
             actor->xz_velocity = r + r;
         } else {
             func_1505A3A8(speed, actor, accel, decel, turnDiff);
@@ -1000,8 +947,8 @@ void func_15056B08(struct127 *actor) {
     }
 }
 /* Plays the actor's movement animation (unk244) at a rate derived from its speed, or at `idleRate`. */
-void func_1505841C(struct127 *actor, f32 idleRate) {
-    struct197 *anim;
+void func_1505841C(Actor *actor, f32 idleRate) {
+    AnimInstance *anim;
     f32 speed;
     f32 fade;
     f32 rate;
@@ -1035,14 +982,14 @@ void func_1505841C(struct127 *actor, f32 idleRate) {
         fade = D_800418B0[D_800419A0][0];
         if (fade >= 0.0f) {
             anim = actor->unk2D0;
-            anim->unk8 = (anim->unk18 * (32768.0f - fade)) / 32768.0f;
+            anim->frame = (anim->numFrames * (32768.0f - fade)) / 32768.0f;
         }
     }
 }
 
 /* Per-frame update while the actor is stunned (stunned is the countdown; 255 = indefinitely). */
-void func_150585F0(struct127 *actor, f32 decel) {
-    struct126 *child;
+void func_150585F0(Actor *actor, f32 decel) {
+    ActorCtl *child;
     f32 yVel;
     s32 water;
     s32 stun;
@@ -1124,18 +1071,17 @@ void func_150585F0(struct127 *actor, f32 decel) {
     }
 }
 
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-s32 func_150A3FC4(f32, f32, s32, void *, void *);
-void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, struct127 *arg11, f32 arg12, f32 arg13, s32 arg14);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
+s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
+void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, Actor *arg11, f32 arg12, f32 arg13, s32 arg14);
 f32 func_1510F648(f32, f32, f32);
 s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
-void func_150B9ED0(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_150B9ED0(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 struct216 *func_1507BB28(s32, s32);
-u8 func_1505DADC(struct127 *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
-extern u8 D_800CBDD3;
+u8 func_1505DADC(Actor *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
-void func_15058898(struct127 *actor, f32 prevY) {
+void func_15058898(Actor *actor, f32 prevY) {
     f32 groundY;
     s32 hostIdx;
     s32 fastFloor;
@@ -1153,7 +1099,7 @@ void func_15058898(struct127 *actor, f32 prevY) {
         return;
     }
     if (actor->unkF8 & 0x200000) {
-        actor->unk180 = (s16)actor->unk224;
+        actor->floorY = (s16)actor->unk224;
         return;
     }
     fastFloor = actor->unkF8 & 2;
@@ -1163,13 +1109,13 @@ void func_15058898(struct127 *actor, f32 prevY) {
         fastFloor = D_800CC2D0[flags].unkF8 & 2;
     }
     if (!fastFloor ||
-        !func_150A3FC4(actor->x_position, actor->z_position, actor->pad188, &actor->unk18C, &groundY)) {
+        !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorTri.v, &groundY)) {
         if (actor->unkF8 & 8) {
             floorOut = &actor->unk118;
         } else {
             floorOut = NULL;
         }
-        func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, floorOut, &actor->unk184, (u8 *)actor + 0x1A2,
+        func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, floorOut, &actor->unk184, &actor->floorType,
                       actor->x_position, actor->y_position, actor->z_position, prevY, 0, actor, -10000.0f,
                       actor->y_position, actor->unkF8 & 0x04000000);
     } else if (actor->unkF8 & 8) {
@@ -1236,9 +1182,9 @@ void func_15058898(struct127 *actor, f32 prevY) {
                 }
             }
             if (!(actor->unkF8 & 2) ||
-                !func_150A3FC4(actor->x_position, actor->z_position, actor->pad188, &actor->unk18C, &groundY)) {
-                func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, &actor->unk118, &actor->unk184,
-                              (u8 *)actor + 0x1A2, actor->x_position, actor->y_position, actor->z_position, prevY, 0,
+                !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorTri.v, &groundY)) {
+                func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, &actor->unk118, &actor->unk184,
+                              &actor->floorType, actor->x_position, actor->y_position, actor->z_position, prevY, 0,
                               actor, -10000.0f, actor->y_position, actor->unkF8 & 0x04000000);
             }
         }
@@ -1248,7 +1194,7 @@ void func_15058898(struct127 *actor, f32 prevY) {
 
         if (1) { // matching: the extra block makes IDO pick v0 for fallScript
             if ((fallScript != 0) && (actor->stunned == 0) &&
-                (groundY < (actor->unk180 - (f32)(actor->unk256 * 8)))) {
+                (groundY < (actor->floorY - (f32)(actor->unk256 * 8)))) {
                 actor->y_velocity = 0.0f;
                 actor->gravity = 0.0f;
                 actor->xz_velocity = 0.0f;
@@ -1259,11 +1205,11 @@ void func_15058898(struct127 *actor, f32 prevY) {
             }
         }
     }
-    actor->unk180 = groundY;
+    actor->floorY = groundY;
 }
 
 /* Picks gravity by height band and clamps the vertical velocity. */
-void func_15058EA4(struct127 *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravityBelow, f32 maxVelY, f32 minVelY) {
+void func_15058EA4(Actor *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 gravityBelow, f32 maxVelY, f32 minVelY) {
     if (maxY < actor->y_position) {
         actor->gravity = gravityAbove;
     } else if (actor->y_position < minY) {
@@ -1277,7 +1223,7 @@ void func_15058EA4(struct127 *actor, f32 maxY, f32 gravityAbove, f32 minY, f32 g
 }
 
 /* Floats the actor on the water surface (unk118 + 9); `depth` in [0, 1) sets how low it sits. */
-void func_15058F24(struct127 *actor, f32 depth, f32 arg2) {
+void func_15058F24(Actor *actor, f32 depth, f32 arg2) {
     f32 tmp; // matching: one variable for the damping, offset and sink limit (IDO allocates it as one)
     f32 surfaceY;
     f32 lift;
@@ -1329,7 +1275,7 @@ void func_15058F24(struct127 *actor, f32 depth, f32 arg2) {
 }
 
 /* Per-frame movement/physics step for a non-player actor. */
-void func_15059140(struct127 *actor) {
+void func_15059140(Actor *actor) {
     f32 stepRate;
 
     stepRate = 0.5f;
@@ -1363,12 +1309,12 @@ void func_15059140(struct127 *actor) {
         func_15059444(actor);
     }
     if (actor->id == 0xA) {
-        actor->unk180 = -5000.0f;
+        actor->floorY = -5000.0f;
     }
     if ((actor->unkF8 & 0x180000) != 0) {
         func_150511E8(actor);
     }
-    func_1505B5F8(actor, actor->unk180);
+    func_1505B5F8(actor, actor->floorY);
     if (((actor->unkF4 & 0x1000) != 0) && (actor->unk28 < 0.200000003f)) {
         func_15056B08(actor);
     }
@@ -1399,7 +1345,7 @@ void func_15059140(struct127 *actor) {
 }
 
 /* Eases the actor's push velocity (unk16C, unk170) toward `speed` along `angle`. */
-void func_150593C4(struct127 *actor, u16 angle, f32 speed, f32 rate) {
+void func_150593C4(Actor *actor, u16 angle, f32 speed, f32 rate) {
     f32 x;
     f32 z;
     f32 y;
@@ -1410,7 +1356,7 @@ void func_150593C4(struct127 *actor, u16 angle, f32 speed, f32 rate) {
 }
 
 /* Applies the current map's (D_800BE9F0) water current to a swimming actor. */
-void func_15059444(struct127 *actor) {
+void func_15059444(Actor *actor) {
     s32 pathIdx;
     s32 id;
     s32 tmp;
@@ -1456,9 +1402,9 @@ void func_15059444(struct127 *actor) {
 }
 
 /* Attaches the actor to D_800CC2D0[hostIdx] (grabbed/carried) and starts both actors' animations. */
-void func_1505959C(struct127 *actor, s32 hostIdx) {
+void func_1505959C(Actor *actor, s32 hostIdx) {
     Game83300AnimEntry *anims;
-    s32 *animTable;
+    ActorAnim *animTable;
     s32 variant;
 
     actor->unkF8 &= ~0x800000;
@@ -1493,9 +1439,9 @@ void func_1505959C(struct127 *actor, s32 hostIdx) {
     actor->unk106 = func_1505E7CC(D_800860E4[variant], actor);
     actor->unk84.uh = 0xFFFF;
     func_1505E874(D_800C3E78, actor);
-    animTable = (s32 *)D_800D1588[actor->id];
+    animTable = D_800D1588[actor->id];
     if (animTable != NULL) {
-        anims = (Game83300AnimEntry *)animTable[-2];
+        anims = ANIM_HEADER(animTable)->reactions;
         if ((anims != NULL) && (anims[actor->unk106].sub[2].flags & 2)) {
             actor->unk7A = D_800CC2D0[hostIdx].unk7A;
         }
@@ -1510,11 +1456,11 @@ void func_1505959C(struct127 *actor, s32 hostIdx) {
 }
 
 /* Lets a free player in D_800CC268's mask grab the actor (see func_1505959C). */
-void func_150597FC(struct127 *actor) {
+void func_150597FC(Actor *actor) {
     s32 i;
     s32 mask;
-    struct126 *movement;
-    struct127 *player;
+    ActorCtl *movement;
+    Actor *player;
 
     mask = D_800CC268;
     for (i = 0; i < D_8008FD8C; i++) {
@@ -1532,11 +1478,11 @@ void func_150597FC(struct127 *actor) {
                 ((actor->stunned != 0) || (actor->unk25C & 0x1000) || (actor->id == 0x57)) &&
                 (actor->unk28 == 0.0f) && (player->unk28 == 0.0f) && (actor->unk25C & 8) &&
                 (movement->unk19B == 0) &&
-                ((actor->id != 0xA9) || (*(u8 *)&player->pad128 == 0)) &&
-                ((actor->id != 0xA8) || (*(u8 *)&player->pad128 != 0))) {
+                ((actor->id != 0xA9) || (player->team == 0)) &&
+                ((actor->id != 0xA8) || (player->team != 0))) {
                 player->unk13C = D_800C3E78 + 100;
                 player->xz_velocity = 0.0f;
-                *(s16 *)((u8 *)movement + 0x18) = 0; /* inside struct126.pad17 */
+                movement->unk18 = 0;
                 func_1505959C(actor, i);
             }
         }
@@ -1544,7 +1490,7 @@ void func_150597FC(struct127 *actor) {
 }
 
 /* Turns the facing angle (unk7A) toward targetAngle, limited per frame; returns the remaining gap >> 8. */
-u8 func_150599C8(struct127 *actor, u8 turnRate, u16 targetAngle) {
+u8 func_150599C8(Actor *actor, u8 turnRate, u16 targetAngle) {
     s16 delta;
     s16 maxDelta;
     s16 minDelta;
@@ -1586,7 +1532,7 @@ u8 func_150599C8(struct127 *actor, u8 turnRate, u16 targetAngle) {
 }
 
 /* Turns the moving angle (unk76) toward unk78 by at most maxStep; returns the gap before turning >> 8. */
-u8 func_15059B54(struct127 *actor, u16 maxStep) {
+u8 func_15059B54(Actor *actor, u16 maxStep) {
     s16 delta;
     s16 maxDelta;
     s16 minDelta;
@@ -1641,7 +1587,7 @@ typedef struct Game83300Triangle {
 void func_15049350(Game83300Triangle);
 
 /* Applies one frame of horizontal movement (speed along unk76, plus push velocities), following the floor slope. */
-void func_15059C84(struct127 *actor) {
+void func_15059C84(Actor *actor) {
     f32 x;
     f32 z;
     f32 y;
@@ -1663,8 +1609,8 @@ void func_15059C84(struct127 *actor) {
         return;
     }
     if (actor->unk127 != 0xFF) {
-        if (*(s16 *)((u8 *)actor->unk31C + 0x46) > 0) {
-            angle += *(u16 *)((u8 *)actor->unk31C + 0x10);
+        if (actor->unk31C->unk46 > 0) {
+            angle += *(u16 *)&actor->unk31C->unk10; // matching: read unsigned here (lhu); stored signed elsewhere
             actor->unk7A = angle;
         }
     }
@@ -1673,13 +1619,13 @@ void func_15059C84(struct127 *actor) {
             actor->unk7E += 1;
         }
         if (actor->unk164 == 0.0f && actor->unk168 == 0.0f && actor->unk16C == 0.0f && actor->unk170 == 0.0f) {
-            *(f32 *)&actor->unk1F4 = 0.0f;
+            actor->unk1F4 = 0.0f;
             return;
         }
     } else {
         actor->unk7E = 0;
     }
-    if ((actor->in_water != 0 && (actor->unk31C == NULL || *((u8 *)actor->unk31C + 0x21) == 0)) ||
+    if ((actor->in_water != 0 && (actor->unk31C == NULL || actor->unk31C->unk21 == 0)) ||
         (actor->unk22C & 8)) {
         x = actor->unkB8;
         if (x > 90.0f) {
@@ -1693,25 +1639,25 @@ void func_15059C84(struct127 *actor) {
     if (actor->unk1FC & 1) {
         actor->unk1FC &= ~1;
         if (D_800D1550) {
-            speed = 2.0f * (actor->xz_scale * *(f32 *)&actor->unk1F4 / D_800D1550);
+            speed = 2.0f * (actor->unk1F4 * actor->xz_scale / D_800D1550); // matching: operand order
         }
-        *(f32 *)&actor->unk1F4 = actor->xz_velocity;
+        actor->unk1F4 = actor->xz_velocity;
         angle = actor->unk7A;
     }
-    *(f32 *)&actor->unk1F4 = speed;
+    actor->unk1F4 = speed;
     func_1505A184(angle, speed, x, &x, &z, &y);
     x += actor->unk164 + actor->unk16C;
     z += actor->unk168 + actor->unk170;
     if (actor->in_water == 10) {
         y = 0.0f;
     }
-    if ((actor->interaction_state != 1 || *((u8 *)actor->unk31C + 0x4F) == 0) && actor->unk28 <= 0.0f &&
+    if ((actor->interaction_state != 1 || actor->unk31C->unk4F == 0) && actor->unk28 <= 0.0f &&
         actor->in_water == 0 && !(actor->unk22C & 8)) {
         /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
-            triangle.vertices[i].values[0] = ((s16 (*)[3])&actor->unk18C)[i][0];
-            triangle.vertices[i].values[1] = ((s16 (*)[3])&actor->unk18C)[i][1];
-            triangle.vertices[i].values[2] = ((s16 (*)[3])&actor->unk18C)[i][2];
+            triangle.vertices[i].values[0] = actor->floorTri.v[i].x;
+            triangle.vertices[i].values[1] = actor->floorTri.v[i].y;
+            triangle.vertices[i].values[2] = actor->floorTri.v[i].z;
         }
         func_15049350(triangle);
         if (D_800CC214 != 0.0f) {
@@ -1734,8 +1680,6 @@ void func_15059C84(struct127 *actor) {
     actor->z_position += z;
     actor->y_position += y;
 }
-f32 func_150AD780(f32);
-f32 func_150AD78C(f32);
 /* Splits `speed` (halved) along yaw `angle` and pitch `pitch` (degrees) into x/z/y components. */
 void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
     f32 sinYaw;
@@ -1789,9 +1733,8 @@ void func_1505A250(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
     }
 }
 
-
 /* Accelerates/decelerates the actor's xz_velocity toward targetSpeed; player rates are scaled in water and other states. */
-void func_1505A3A8(f32 targetSpeed, struct127 *actor, f32 accel, f32 decel, u8 turnDiff) {
+void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff) {
     accel *= D_800D1550;
     decel *= D_800D1550;
     if (D_800CC27C != 0 && actor->unk28 < 5.0f && actor->interaction_state != 0x1E) {
@@ -1851,14 +1794,14 @@ void func_1505A3A8(f32 targetSpeed, struct127 *actor, f32 accel, f32 decel, u8 t
     }
 }
 
-/* Analog stick deflection of a controller pad (unk2/unk3 = stick x/y), scaled and capped at 35. */
-f32 func_1505A5CC(struct49 *pad) {
+/* Analog stick deflection of a controller pad, scaled and capped at 35. */
+f32 func_1505A5CC(OSContPad *pad) {
     f32 x, y;
     f32 mag;
 
-    mag = pad->unk2; // matching: staging x through mag steers IDO's register choice
+    mag = pad->stick_x; // matching: staging x through mag steers IDO's register choice
     x = mag;
-    y = pad->unk3;
+    y = pad->stick_y;
 
     x = sqrtf(x * x + y * y) * 0.6000000238f;
     mag = x;
@@ -1876,7 +1819,7 @@ u16 func_1505A630(f32 x, f32 z, s32 unused) {
 }
 
 /* Horizontal (xz) distance between two actors. */
-f32 func_1505A6F8(struct127 *a, struct127 *b) {
+f32 func_1505A6F8(Actor *a, Actor *b) {
     f32 x, z;
 
     x = a->x_position - b->x_position;
@@ -1887,7 +1830,7 @@ f32 func_1505A6F8(struct127 *a, struct127 *b) {
 }
 
 /* 3D distance between two actors. */
-f32 func_1505A72C(struct127 *a, struct127 *b) {
+f32 func_1505A72C(Actor *a, Actor *b) {
     f32 x, y, z;
 
     x = a->x_position - b->x_position;
@@ -1900,7 +1843,7 @@ f32 func_1505A72C(struct127 *a, struct127 *b) {
 }
 
 /* Applies gravity: in the air it integrates in 0.1 steps; on the ground in a single step. Fall speed is capped at 500. */
-void func_1505A770(struct127 *actor) {
+void func_1505A770(Actor *actor) {
     f32 velocity;
     f32 decrement;
     s32 count;
@@ -1925,13 +1868,13 @@ void func_1505A770(struct127 *actor) {
     }
 }
 // a big one, but could be ok
-void func_15055C88(struct127 *);
-void func_1513783C(struct127 *, u8, s32);
-void func_1507CD64(struct127 *arg0, s32 arg1);
-void func_15060A9C(s32 arg0, struct127 *arg1);
+void func_15055C88(Actor *);
+void func_1513783C(Actor *, u8, s32);
+void func_1507CD64(Actor *arg0, s32 arg1);
+void func_15060A9C(s32 arg0, Actor *arg1);
 
 /* Lands the player on floorY: water entry, fall damage/death, landing animations and bounce. */
-void func_1505A9AC(struct127 *actor, f32 floorY) {
+void func_1505A9AC(Actor *actor, f32 floorY) {
     f32 dist;
     f32 deathFall;
     u8 bounce;
@@ -1950,7 +1893,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
     bounce = 0;
     keepLandFlags = 1;
     dist = actor->y_position - floorY;
-    if (actor->unk31C->pad4F[0] != 0) {
+    if (actor->unk31C->unk4F != 0) {
         if (dist < 0.0f) {
             actor->unk1CC = floorY;
             dist = 0.0f;
@@ -1959,7 +1902,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
         dist = actor->y_position - (actor->unk118 - 34.0f);
         if (dist < 70.0f && actor->y_velocity < 18.0f) {
             if (actor->y_velocity > -25.0f) {
-                actor->unk31C->pad4F[0] = 2;
+                actor->unk31C->unk4F = 2;
             }
             if (dist < 0.0f) {
                 if (actor->y_velocity < -12.0f) {
@@ -1991,14 +1934,14 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
             
             landState = 0;
             if (actor->in_water == 0) {
-                *((u8 *)actor + 0x137) = 0;
+                actor->unk137 = 0;
                 actor->gravity = 5.0f;
             }
             if (actor->in_water == 0) {
                 actor->unk31C->unk55 = 4;
             }
             if (actor->unk28 > 0.0f) {
-                actor->unk31C->pad4F[2] = 1;
+                actor->unk31C->unk51 = 1;
                 actor->unk31C->unk31 = 0;
             }
             actor->unk100 &= 0xFD;
@@ -2021,7 +1964,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                 actor->unk31C->unk78 != 1) {
                 speed = 1.299999952f;
                 do { actor->unk31C->unk95 = 0; } while (0); // matching: the wrappers steer FP register choice
-                do { actor->unk31C->pad4F[2] = 2; } while (0);
+                do { actor->unk31C->unk51 = 2; } while (0);
                 killed = 0;
                 flags = 0;
                 hurt = 0;
@@ -2123,10 +2066,10 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                     actor->unk7F = 10;
                 }
                 if (actor->unkA9 == 2) {
-                    struct127 *other;
+                    Actor *other;
                     found = 0;
-                    if (actor->unk274 != 0) {
-                        other = &D_800CC2D0[actor->unk274 - 1];
+                    if (actor->objectNum != 0) {
+                        other = &D_800CC2D0[actor->objectNum - 1];
                         if (other->unk24C != 0) {
                             found = 1;
                             other->unk218 = 0;
@@ -2147,7 +2090,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                     s32 landAnim;
                     landAnim = 0;
                     if ((s32)actor->unk28 > 0) {
-                        struct126 *movement = actor->unk31C;
+                        ActorCtl *movement = actor->unk31C;
                         if ((movement->unk11A != 1) && (movement->unk11A != 3) && (movement->unk4E == 0)) {
                             if ((actor->unk100 & 0x10) || (!(actor->unk100 & 8) && (((actor->unk44 == 0.0f) && (actor->unkA8 == 0)) || (actor->unk100 & 4)))) {
                                 if (actor->unk100 & 0x10) {
@@ -2206,7 +2149,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
                         if (actor->xz_velocity > 20.0f) {
                             actor->xz_velocity = 20.0f;
                         }
-                    } else if (*((u8 *)actor + 0x110) == 0) {
+                    } else if (actor->unk110 == 0) {
                         actor->unk164 = 0.0f;
                         actor->unk168 = 0.0f;
                     }
@@ -2259,7 +2202,7 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
 }
 
 /* Lands a non-player actor on floorY: fall damage, landing bounce/sound, and the fall-off reaction (unk252). */
-void func_1505B5F8(struct127 *actor, f32 floorY) {
+void func_1505B5F8(Actor *actor, f32 floorY) {
     f32 prevHeight;
     f32 y;
     f32 factor;
@@ -2268,7 +2211,7 @@ void func_1505B5F8(struct127 *actor, f32 floorY) {
     s32 health;
     s32 step;
     s32 sound;
-    struct129 *owner;
+    SpawnRecord *owner;
 
     prevHeight = actor->unk28;
     if (!(actor->unkF8 & 0x8000)) {
@@ -2286,7 +2229,7 @@ void func_1505B5F8(struct127 *actor, f32 floorY) {
         actor->unk28 = y - floorY;
         if (y <= floorY) {
             actor->unkF4 |= 0x8000;
-            step = ((u8 *)D_800B0DF0)[0x13];
+            step = D_800B0DF0->unk13;
             if (step != 0 && prevHeight != 0.0f) {
                 func_15174690(D_800C3E78, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }
@@ -2301,7 +2244,7 @@ void func_1505B5F8(struct127 *actor, f32 floorY) {
                     if (actor->unk1CC - actor->y_position > 450.0f) {
                         health = actor->health;
                         if (health > 0) {
-                            owner = actor->unk144;
+                            owner = actor->spawn;
                             if (owner != NULL && !(owner->unkE & 0x80)) {
                                 actor->health = health - 1;
                             }
@@ -2364,27 +2307,25 @@ typedef struct Entry1505C1E4 {
 } Entry1505C1E4;
 
 extern f32 D_800CC270, D_800CC274, D_800CC278;
-extern u8 D_800BE616;
-extern s16 D_800D1582;
-f32 func_1506AD30(struct127 *, f32, s32, s32);
-void func_151AE264(struct127 *);
-void func_151E5FF4(void *, struct127 *, u8);
+f32 func_1506AD30(Actor *, f32, s32, s32);
+void func_151AE264(Actor *);
+void func_151E5FF4(void *, Actor *, u8);
 void func_15169070(s32, s32, void *, s32);
 
 /*
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
  * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
  */
-void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, Entry1505C1E4 *hit, u8 index,
+void func_1505B9C4(Actor *attacker, Actor *victim, Entry1505C1E4 *base, Entry1505C1E4 *hit, u8 index,
                    s32 victimSlot, u8 damageMask) {
     u8 reaction;
     s32 slot;
-    struct127 *savedActor;
+    Actor *savedActor;
     s32 savedIdx;
     u8 tmp;
     s32 v;
-    struct126 *movement;
-    struct127 *other;
+    ActorCtl *movement;
+    Actor *other;
     struct S { void *a; u8 b; } msg;
 
     if (hit[index].unk0 & 0x80) {
@@ -2439,12 +2380,12 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
         victim->unkF8 &= 0xFEFF7FFF;
         victim->unk31C->unk95 = 0;
         victim->unk31C->unk6B = 0;
-        if (victim->unk31C->pad98[0] != 0) {
+        if (victim->unk31C->ropeId != 0) {
             func_151AE264(victim);
         }
         victim->unk31C->unk54 = 0;
         tmp = victim->unk65;
-        ((u8 *)&victim->pad134)[3] = 0;
+        victim->unk137 = 0;
         if (tmp != 0) {
             extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
             v = tmp - 1;
@@ -2467,7 +2408,7 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
                     other->unk232 = v;
                     other->unk218 = NULL;
                 }
-                other->pad2FC[0] = 0;
+                other->unk2FC = 0;
                 other->unk13C = 0;
                 victim->unk239 = 0;
                 victim->unk65 = 0;
@@ -2520,14 +2461,14 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
     victim->unkD0 = 0;
     v = attacker->unk124;
     if (v) {
-        victim->pad10A = v + 0x7F;
+        victim->unk10A = v + 0x7F;
     } else {
-        victim->pad10A = D_800C3E78 | 0x80;
+        victim->unk10A = D_800C3E78 | 0x80;
     }
-    attacker->pad108 = slot | 0x80;
+    attacker->unk108 = slot | 0x80;
     if (reaction != 0x27) {
         if ((base[index].unk24 & 0x40) && (victim->interaction_state == 1)) {
-            *(s16 *)((u8 *)D_800CC2D0[slot].unk31C + 0x46) = 8000;
+            D_800CC2D0[slot].unk31C->unk46 = 8000;
         } else {
             v = victim->unk23B;
             if (v != 0) {
@@ -2565,7 +2506,7 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
 }
 
 /* How far (binary angle, absolute) the attacker is from the victim's facing direction. */
-s16 func_1505C140(struct127 *attacker, struct127 *victim) {
+s16 func_1505C140(Actor *attacker, Actor *victim) {
     s16 ret = func_1505A630(attacker->x_position - victim->x_position, victim->z_position - attacker->z_position, 0);
     ret -= victim->unk7A;
 
@@ -2576,12 +2517,12 @@ s16 func_1505C140(struct127 *attacker, struct127 *victim) {
 }
 
 /* The actor type's hit-reaction table (stored before its animation table), or the default one. */
-Entry1505C1E4 *func_1505C1A4(struct127 *actor) {
+Entry1505C1E4 *func_1505C1A4(Actor *actor) {
     Entry1505C1E4 **slot;
     Entry1505C1E4 *ret;
 
-    if ((actor->id != 0xFF) && (D_800D1588[actor->id] != 0)) {
-        slot = (Entry1505C1E4 **)D_800D1588[actor->id] - 3; // matching: the address is formed before the load
+    if ((actor->id != 0xFF) && (D_800D1588[actor->id] != NULL)) {
+        slot = &ANIM_HEADER(D_800D1588[actor->id])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
         ret = (Entry1505C1E4 *)&D_8009A9F8;
@@ -2599,18 +2540,17 @@ typedef struct {
     u8 unk3;
 } Rule1505C1E4;
 
-
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
-s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
-void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
+s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
+void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
  * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
  * Returns hitMask with the victim's bit set when the hit landed.
  */
-s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
+s32 func_1505C1E4(Actor *attacker, Actor *victim, Entry1505C1E4 *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
     s32 i;
     u8 done;
     u8 kind;
@@ -2694,9 +2634,9 @@ s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, 
                     done = TRUE;
                     victim->unkF4 &= ~0x40040;
                     hitMask |= 1 << (victimSlot + 0x1F);
-                    attacker->pad108 = victimSlot + 0x7F;
+                    attacker->unk108 = victimSlot + 0x7F;
                     attacker->unk107 = 0x3C;
-                    victim->pad1C4 = 0;
+                    victim->events = NULL;
                     victim->unk232 = rules[i].unk3;
                     victim->unk218 = NULL;
                     victim->disable_run = 1;
@@ -2707,7 +2647,7 @@ s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, 
                     }
                     if (victim->interaction_state == 1) {
                         if ((victim->unk31C->unk4E == 2) && (victim->unk31C->unk84 == 0)) {
-                            victim->unk31C->pad4F[1] = 30;
+                            victim->unk31C->unk50 = 30;
                             victim->unk81 = 0;
                             victim->y_velocity = 50.0f;
                             victim->gravity = 2.0f;
@@ -2772,26 +2712,20 @@ s32 func_1505C1E4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *table, 
     hitMask |= 1 << (i + 0x1F);
     return hitMask;
 }
-s32 func_1505C7D8(struct127 *arg0, s32 arg1);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec1505C7D8;
+s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
 extern s32 D_800B2CD0;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
-void func_1507C3E0(struct127 *, s16 *, s32, s32);
+void func_1507C3E0(Actor *, s16 *, s32, s32);
 f32 func_15143E64(f32 *);
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
-s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
+s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     s32 i;
     s32 slotEnd;
     s32 attackIdx;
     s32 ret;
-    struct127 *victim;
+    Actor *victim;
     Entry1505C1E4 *hits;
     f32 dz2;
     Entry1505C1E4 *hit;
@@ -2822,7 +2756,7 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
     f32 offZ2;
     f32 pad4;
     f32 pad5;
-    Vec1505C7D8 pos;
+    Vec3f pos;
     f32 hitZ;
     f32 hitY;
     f32 hitX;
@@ -2843,7 +2777,7 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
         attacker->unkD0 = 0;
         return 0;
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     attackIdx = attacker->unkD0 - 1;
@@ -2937,8 +2871,8 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
         }
         if (dist < maxDist) {
             if ((hit->unk24 & 0x2000) && i != attacker->unk13D) {
-                if (*(Vec1505C7D8 **)((u8 *)attacker + 0x2F4) != NULL) {
-                    pos = **(Vec1505C7D8 **)((u8 *)attacker + 0x2F4);
+                if (attacker->attachments != NULL) {
+                    pos = *(Vec3f *)attacker->attachments; // the first attachment's first 12 bytes
                 } else {
                     func_1507C3E0(attacker, &halfHeightRaw, 0, 0);
                     pos.x = attacker->x_position;
@@ -2947,7 +2881,7 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
                 }
                 rx = victim->x_position;
                 if (victim->unk31C != NULL) {
-                    height = *(s16 *)((u8 *)victim->unk31C + 0x114) * 0.5f;
+                    height = victim->unk31C->height * 0.5f;
                 } else {
                     height = 20.0f;
                 }
@@ -2971,8 +2905,8 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
     }
     if (ret != 0) {
         hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
-        /* pad108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
-        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->pad108][0] == 1) {
+        /* unk108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
+        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
             if (attacker->unk254 != 0) {
                 attacker->unk232 = attacker->unk254;
                 attacker->unk218 = NULL;
@@ -2989,14 +2923,14 @@ s32 func_1505C7D8(struct127 *attacker, s32 selfSlot) {
 }
 
 /* Hits `victim` with a scripted attack from the dummy attacker D_800D121C; flags & 0xFF picks the entry. */
-s32 func_1505D024(struct127 *victim, s32 flags, u16 angle, s32 sourceSlot) {
+s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     s32 pad;
     s32 ret;
     s32 slot;
     Entry1505C1E4 *table;
 
     table = (Entry1505C1E4 *)&D_8009A9F8;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if ((flags & 0x20000) && (victim->immune != 0)) {
@@ -3031,7 +2965,7 @@ s32 func_1505D024(struct127 *victim, s32 flags, u16 angle, s32 sourceSlot) {
 
 /*
  * Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. The D_800D12xx..D_800D15xx
- * globals written here are that dummy's struct127 fields: position (0x14), unk124, unk13D, unk76, unk2F4
+ * globals written here are that dummy's Actor fields: position (0x14), unk124, unk13D, unk76, unk2F4
  * (line-of-sight origin), unk114 (timer), unkD0 (attack + 1) and the xz/y scales.
  */
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
@@ -3057,7 +2991,7 @@ void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle,
 }
 
 /* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
-void func_1505D2B8(struct127 *actor, u8 entryIdx) {
+void func_1505D2B8(Actor *actor, u8 entryIdx) {
     struct253 *entry;
 
     entry = &D_8009A6D8[entryIdx];
@@ -3089,11 +3023,9 @@ f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
     return (a * sinA) + b * cosA;
 }
 
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
 
 /* Pushes the actor out of `other` along (nx, ny, nz) unless the other one is lighter. */
-void func_1505D408(struct127 *actor, struct127 *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
+void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
     f32 dist;
     f32 invDist;
     f32 pushFactor;
@@ -3149,10 +3081,10 @@ void func_1505D408(struct127 *actor, struct127 *other, f32 nx, f32 ny, f32 nz, f
 end: // matching: a jump to the shared epilogue, not an early return
     ;
 }
-void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
+void func_1505D408(Actor *arg0, Actor *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
 
 /* Pushes the actor out of an extra collision cylinder attached to `other` (offset in other's frame). */
-void func_1505D5D0(struct127 *actor, struct127 *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
+void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
                    f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB) {
     f32 offsetX;
     f32 dx;
@@ -3174,8 +3106,8 @@ void func_1505D5D0(struct127 *actor, struct127 *other, f32 x, f32 y, f32 z, f32 
         func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, otherSlot);
     }
 }
-/* Resolves collisions between the actor's body cylinder (unkE4/unkE8/unkEC) and every other actor's. */
-void func_1505D6F0(struct127 *actor, s32 selfIdx) {
+/* Resolves collisions between the actor's body cylinder (bodyRadius/bodyOffsetY/unkEC) and every other actor's. */
+void func_1505D6F0(Actor *actor, s32 selfIdx) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -3189,8 +3121,8 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
     f32 z;
     s32 i;
     s32 count;
-    struct127 *other;
-    struct126 *movement;
+    Actor *other;
+    ActorCtl *movement;
 
     D_800CC268 = 0;
     D_800CC26C = 0;
@@ -3198,12 +3130,12 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
     count = 25;
     if (((actor->interaction_state != 1) ||
          ((D_800CC2D0[selfIdx].unk31C->unk4E == 0) && (D_800CC2D0[selfIdx].unk31C->unk27 == 0))) &&
-        (actor->unk13D < 100) && (actor->unkE4 != 0) && (actor->unk65 == 0) && !(actor->unkF8 & 0x01000000) &&
+        (actor->unk13D < 100) && (actor->bodyRadius != 0) && (actor->unk65 == 0) && !(actor->unkF8 & 0x01000000) &&
         !(actor->unkF8 & 0x4000)) {
-        radius = actor->unkE4;
+        radius = actor->bodyRadius;
         height = actor->unkEC;
         x = actor->x_position;
-        y = actor->y_position + (s16)actor->unkE8;
+        y = actor->y_position + actor->bodyOffsetY;
         z = actor->z_position;
         if (actor->unkF8 & 0x02000000) {
             count = 1;
@@ -3213,7 +3145,7 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
             if (other->interaction_state == 0) {
                 continue;
             }
-            if (other->unkE4 < 2) {
+            if (other->bodyRadius < 2) {
                 continue;
             }
             if ((other->unkF8 & 0x02000000) && (actor->unk127 == 0xFF)) {
@@ -3234,15 +3166,15 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
             if (other->unk2FA == 0) {
                 continue;
             }
-            otherRadius = other->unkE4;
+            otherRadius = other->bodyRadius;
             sumRadius = radius + otherRadius;
             dx = x - other->x_position;
             dz = z - other->z_position;
-            dy = y - (other->y_position + (s16)other->unkE8);
+            dy = y - (other->y_position + other->bodyOffsetY);
             dy *= (height + other->unkEC) * 0.5f;
             if ((D_800BE616 != 0) && (((dx * dx) + (dy * dy) + (dz * dz)) < 30000.0f) &&
                 (actor->interaction_state == 1) && (other->interaction_state == 1) &&
-                (*(u8 *)&other->pad128 != *(u8 *)&actor->pad128)) {
+                (actor->team != other->team)) {
                 movement = actor->unk31C;
                 if ((movement->unk78 == 0) && (other->unk31C->unk78 != 0)) {
                     movement->chased = 20;
@@ -3262,18 +3194,18 @@ void func_1505D6F0(struct127 *actor, s32 selfIdx) {
         }
     }
 }
-f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
+f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
 /*
  * Picks the nearest visible living actor inside a cone around the actor's facing (halfCone wide,
  * pitch +-0x10 around `pitch`), skipping skipIdx. Returns its index (0xFF if none), angle in *outAngle.
  */
-u8 func_1505DADC(struct127 *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone) {
+u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone) {
     u8 bestStunned;
     u8 i;
     u16 angle;
-    struct127 *other;
+    Actor *other;
     f32 best;
     f32 dist;
     f32 distXZ;
@@ -3319,10 +3251,10 @@ u8 func_1505DADC(struct127 *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfC
 
     return bestIdx;
 }
-f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
+f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
 /* The first live actor that the actor would reach within `time` at its speed, inside a cone of its move angle; -1 if none. */
-s8 func_1505DDA8(struct127 *actor, s32 unused, u16 cone, f32 time) {
+s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time) {
     u8 i;
     u16 angle;
     f32 distXZ;
@@ -3343,8 +3275,8 @@ s8 func_1505DDA8(struct127 *actor, s32 unused, u16 cone, f32 time) {
     return -1;
 }
 /* Both callers pass a 6th argument (always 0) that the body never reads. */
-f32 func_1505DF10(struct127 *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused) {
-    struct127 *other;
+f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused) {
+    Actor *other;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -3361,10 +3293,9 @@ f32 func_1505DF10(struct127 *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ
     *outDistSqXZ = dx + dz;
     return (dx + dy) + dz;
 }
-extern u16 D_800C4ED0[];
 
 /* Stops the actor's animation and clears its playback state. */
-void func_1505DFDC(struct127 *actor) {
+void func_1505DFDC(Actor *actor) {
     s32 id;
     AnimPlaybackState *state;
     u16 *p;
@@ -3404,7 +3335,7 @@ extern u16 D_800993F8[];
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
  * already playing. `actor` may be NULL for non-actor users; blendFrames >= 1 blends from the old one.
  */
-void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
                    s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000) {
     s32 index;
     s32 changed;
@@ -3442,16 +3373,16 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
         if (actor != NULL) {
             actor->unk84.uh = anim;
             actor->animation_speed = speed;
-            actor->pad1C4 = *(s32 *)(animEntry + 2);
-            *(s8 *)&actor->unk138 = 0;
+            actor->events = *(struct TimedEvent **)(animEntry + 2);
+            actor->unk138 = 0;
             actor->unk103 = 0;
-            *(f32 *)&actor->padB4 = 0.0f;
+            actor->lastEventTime = 0.0f;
             if (index < D_8008FD8C) {
-                struct127 *player = &D_800CC2D0[index];
+                Actor *player = &D_800CC2D0[index];
 
-                *(s8 *)&player->unk31C->unk58 = 0;
-                *(s16 *)player->unk31C->pad5A = 0;
-                *(s8 *)&player->unk31C->unk59 = 0;
+                player->unk31C->idle.active = 0;
+                player->unk31C->idle.timer = 0;
+                player->unk31C->idle.holdFrames = 0;
             }
         }
         if (state->loaded != 0) {
@@ -3490,8 +3421,8 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
         } else {
             state->unk0 = 0;
         }
-        if (actor != NULL && *(u8 **)&actor->pad58 != NULL) {
-            info = (s32 *)func_1502AF04(*(u8 **)&actor->pad58, (s32)buf, assetId, 2);
+        if (actor != NULL && (u8 *)actor->unk58 != NULL) {
+            info = (s32 *)func_1502AF04((u8 *)actor->unk58, (s32)buf, assetId, 2);
         } else {
             info = (s32 *)func_1502B110(NULL, 2, (s32)buf, 3, kind, bank, assetId);
         }
@@ -3558,7 +3489,7 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
         } else {
             state->anim &= 0xFFFF7FFF;
         }
-        if (D_800C35EA == 1 && (state->anim & 0x8000)) {
+        if (D_800C35EA[0] == 1 && (state->anim & 0x8000)) {
             state->unk8 = arg9;
         }
     }
@@ -3567,41 +3498,41 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
     }
 }
 /* Starts animation `anim` of the actor's type (see func_1505E0C4); ignored while a cutscene holds the actor. */
-void func_1505E650(struct127 *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
-    u16 (*animTable)[4];
+void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
+    ActorAnim *animTable;
     s32 idx;
     u16 *entry;
     u8 *data;
 
     idx = actor->id;
-    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(actor) != 0))) {
+    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (func_150229E4(actor) != 0))) {
         return;
     }
     if (actor->id == 0xFF) {
         return;
     }
-    if ((u16)D_800C5A90[actor->id] == 0) {
+    if (D_800C5A90[actor->id] == 0) {
         return;
     }
     data = (u8 *)actor->unk2D0;
     if (data == NULL) {
         return;
     }
-    if ((u16)D_800C5A90[actor->id] != 0) {
-        if (anim >= (u16)D_800C5A90[actor->id]) {
+    if (D_800C5A90[actor->id] != 0) {
+        if (anim >= D_800C5A90[actor->id]) {
             return;
         }
     } else {
         return;
     }
-    animTable = (u16 (*)[4])D_800D1588[idx];
+    animTable = D_800D1588[idx];
     if (animTable == NULL) {
         func_1505DFDC(actor);
         return;
     }
-    if (anim < (u16)D_800C5A90[idx]) {
-        if (animTable[0][0] != 999) {
-            entry = animTable[anim];
+    if (anim < D_800C5A90[idx]) {
+        if (animTable[0].unk0 != 999) {
+            entry = ((u16 (*)[4])animTable)[anim]; // matching: indexing a u16[4] row view puts the base first in the addu
             animTable = NULL; // matching: dead store and do-while(0) shape the block like the original
             do {
                 if (entry[0] != 999) {
@@ -3619,9 +3550,9 @@ void func_1505E650(struct127 *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f
     }
 }
 /* Index of the actor type's reaction entry of the given kind (0 if there is none). */
-u32 func_1505E7CC(s32 kind, struct127 *actor) {
+u32 func_1505E7CC(s32 kind, Actor *actor) {
     s32 id;
-    s32 *animTable;
+    ActorAnim *animTable;
     u32 count;
     Game83300AnimEntry *table;
     Game83300AnimEntry *entry;
@@ -3631,16 +3562,16 @@ u32 func_1505E7CC(s32 kind, struct127 *actor) {
     if (id == 0xFF) {
         return 0;
     }
-    animTable = (s32 *)D_800D1588[id];
+    animTable = D_800D1588[id];
     if (animTable == NULL) {
         return 0;
     }
-    count = animTable[-1];
+    count = ANIM_HEADER(animTable)->reactionsSize;
     if (count == 0) {
         return 0;
     }
     count = count / sizeof(Game83300AnimEntry);
-    table = (Game83300AnimEntry *)animTable[-2];
+    table = ANIM_HEADER(animTable)->reactions;
     if (table == NULL) {
         return 0;
     }
@@ -3659,18 +3590,18 @@ u32 func_1505E7CC(s32 kind, struct127 *actor) {
     return 0;
 }
 
-s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
-void func_15060A30(s32 arg0, struct127 *arg1);
-void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
-void func_1507CD64(struct127 *arg0, s32 arg1);
+s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
+void func_15060A30(s32 arg0, Actor *arg1);
+void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
+void func_1507CD64(Actor *arg0, s32 arg1);
 void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 /*
  * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation
  * and stun time, starts the death animation when it ends with no health left, or ends the reaction.
  */
-void func_1505E874(s32 sourceIdx, struct127 *actor) {
-    s32 *ptr;
+void func_1505E874(s32 sourceIdx, Actor *actor) {
+    ActorAnim *ptr;
     Game83300AnimEntry *table;
     f32 animSpeed;
     f32 blend;
@@ -3683,8 +3614,8 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         return;
     }
     anim = actor->unk106;
-    ptr = (s32 *)D_800D1588[actor->id];
-    table = (Game83300AnimEntry *)ptr[-2];
+    ptr = D_800D1588[actor->id];
+    table = ANIM_HEADER(ptr)->reactions;
     if (table == NULL) {
         return;
     }
@@ -3716,8 +3647,8 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         actor->unk10B &= ~1;
         actor->unk10B |= table[anim].sub[actor->unk105].flags & 1;
         if ((actor->unk127 != 0xFF) && (actor->unk105 == 0) && (actor->unk31C != NULL) &&
-            (actor->camera != NULL) && (*((u8 *)actor->unk31C + 0x197) != 0)) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->unk23D);
+            (actor->camera != NULL) && (actor->unk31C->aimState != 0)) {
+            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->playerIndex);
         }
         if ((actor->unk127 != 0xFF) && (actor->health == 0)) {
             i = actor->unk105;
@@ -3770,7 +3701,7 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
                             deathKind = 0x10;
                             break;
                         case 0x10:
-                            *((u8 *)actor->unk31C + 0x1AC) = 1;
+                            actor->unk31C->unk1AC = 1;
                             D_800D1580 = 0xFF010434;
                             deathKind = 0;
                             func_1506E5FC();
@@ -3816,7 +3747,7 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         actor->unk10B = 0;
         actor->unk10F = 0;
         if (actor->interaction_state == 1) {
-            actor->unk31C->unk58 = 0;
+            actor->unk31C->idle.active = 0;
             actor->unkF8 &= 0xFEFFFDFF;
         }
     } else {
@@ -3824,9 +3755,9 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
     }
 }
 /* Allocates an actor slot: a free one, else one in state 0x27 is released and reused. Returns it cleared. */
-struct127 *func_1505ED34(void) {
+Actor *func_1505ED34(void) {
     s32 i;
-    struct127 *ptr;
+    Actor *ptr;
 
     for (i = 0, ptr = D_800CC2D0; (i < 25) && (ptr->interaction_state != 0); i++, ptr++) {
     }
@@ -3870,8 +3801,8 @@ struct127 *func_1505ED34(void) {
 }
 
 /* The first actor in `state` (or past the end); its index goes to *outIdx. */
-struct127 *func_1505EEB0(s32 state, s32 *outIdx) {
-    struct127 *ptr;
+Actor *func_1505EEB0(s32 state, s32 *outIdx) {
+    Actor *ptr;
     s32 i;
 
     for (ptr = D_800CC2D0, i = 0; (i < 25) && (state != ptr->interaction_state); i++, ptr++) {
@@ -3882,8 +3813,8 @@ struct127 *func_1505EEB0(s32 state, s32 *outIdx) {
 }
 
 /* The first live actor following path `pathIdx` (unk13F), or NULL. */
-struct127 *func_1505EEF4(s32 pathIdx) {
-    struct127 *actor = D_800CC2D0;
+Actor *func_1505EEF4(s32 pathIdx) {
+    Actor *actor = D_800CC2D0;
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -3897,17 +3828,17 @@ struct127 *func_1505EEF4(s32 pathIdx) {
 
 /* matching: aliases of D_800CC2D0[0].unk127 and &D_800CC2D0[1]; IDO addresses each symbol separately */
 extern u8 D_800CC3F7;
-extern struct127 D_800CC5FC;
+extern Actor D_800CC5FC;
 
 /* The live actor whose unk127 is `key`, or NULL. */
-struct127 *func_1505EFD0(s32 key) {
-    struct127 *actor;
+Actor *func_1505EFD0(s32 key) {
+    Actor *actor;
     s32 i;
 
     actor = &D_800CC5FC;
     if (D_800CC2D0[0].interaction_state != 0) {
         if (key == D_800CC3F7) {
-            return (struct127 *)(D_800CC2D4 - 4); /* &D_800CC2D0[0] */
+            return (Actor *)(D_800CC2D4 - 4); /* &D_800CC2D0[0] */
         }
     }
 
@@ -3920,8 +3851,8 @@ struct127 *func_1505EFD0(s32 key) {
 }
 
 /* The first live actor of type `id`, or NULL. */
-struct127 *func_1505F0AC(s32 id) {
-    struct127 *actor = D_800CC2D0;
+Actor *func_1505F0AC(s32 id) {
+    Actor *actor = D_800CC2D0;
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -3933,7 +3864,7 @@ struct127 *func_1505F0AC(s32 id) {
     return NULL;
 }
 /* Clears an actor slot and sets its default fields. */
-void func_1505F188(struct127 *actor) {
+void func_1505F188(Actor *actor) {
     s32 *p;
     f32 one;
     f32 initial;
@@ -3943,49 +3874,45 @@ void func_1505F188(struct127 *actor) {
     }
     one = 1.0f;
     initial = -10000.0f;
-    actor->pad2FC[1] = 2;
-    *(s16 *)&actor->unk38 = -10000;
+    actor->unk2FD = 2;
+    actor->unk38 = -10000;
     actor->xz_scale = one;
     actor->y_scale = one;
     actor->unk118 = initial;
-    actor->unk180 = initial;
+    actor->floorY = initial;
     actor->gravity = 3.3f;
-    ((u8 *)&actor->pad1DC)[0] = 0xFF;
+    actor->unk1DC = 0xFF;
     actor->unk127 = 0xFF;
     actor->unk84.uh = 0xFFFF;
     actor->unk13F = 0xFF;
-    *(s32 *)&actor->pad288[0x3C] = (s32)&actor->id; /* 0x2C4 */
-    actor->pad288[0x40] = 1; /* 0x2C8 */
-    actor->unk2C9 = 1;
+    actor->modelIds = &actor->id;
+    actor->lodCount = 1;
+    actor->modelCount = 1;
     actor->id = 0xFF;
     actor->unk2CB = 50;
     actor->unk48 = one;
-    actor->unk6E = (func_150ADA20() % 50U) + 50;
+    actor->blinkTimer = (func_150ADA20() % 50U) + 50;
     func_150615DC(actor);
-    ((u8 *)&actor->pad1DC)[1] = 0xFF;
-    ((u8 *)&actor->pad1DC)[2] = 0xFF;
-    ((u8 *)&actor->pad1DC)[3] = 0xFF;
-    ((s16 (*)[3])&actor->unk18C)[0][0] = 0;
-    ((s16 (*)[3])&actor->unk18C)[0][1] = 0;
-    ((s16 (*)[3])&actor->unk18C)[0][2] = 0;
-    ((s16 (*)[3])&actor->unk18C)[1][0] = 0;
-    ((s16 (*)[3])&actor->unk18C)[1][1] = 0;
-    ((s16 (*)[3])&actor->unk18C)[1][2] = 10;
-    ((s16 (*)[3])&actor->unk18C)[2][0] = 10;
-    ((s16 (*)[3])&actor->unk18C)[2][1] = 0;
-    ((s16 (*)[3])&actor->unk18C)[2][2] = 0;
+    actor->unk1DD[0] = 0xFF;
+    actor->unk1DD[1] = 0xFF;
+    actor->unk1DD[2] = 0xFF;
+    actor->floorTri.v[0].x = 0;
+    actor->floorTri.v[0].y = 0;
+    actor->floorTri.v[0].z = 0;
+    actor->floorTri.v[1].x = 0;
+    actor->floorTri.v[1].y = 0;
+    actor->floorTri.v[1].z = 10;
+    actor->floorTri.v[2].x = 10;
+    actor->floorTri.v[2].y = 0;
+    actor->floorTri.v[2].z = 0;
 }
 extern u8 D_80099428[];
 void func_1000EFB4();
-void func_151AE264(struct127 *arg0);
-void func_151C6EA0(struct127 *arg0, s32 arg1, s32 arg2);
-void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
-void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
-/* struct126/struct127 bytes that the shared headers leave as padding */
-#define MOVEMENT_FIELD(off, T) (*(T *)((u8 *)actor->unk31C + (off)))
-#define ACTOR_FIELD(off, T) (*(T *)((u8 *)actor + (off)))
+void func_151AE264(Actor *arg0);
+void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
+void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
-void func_1505F298(struct127 *actor, OSContPad *pad) {
+void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
     s32 sound;
     f32 speed;
@@ -4012,36 +3939,36 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
         actor->target_speed = 0.0f;
         return;
     }
-    if ((MOVEMENT_FIELD(0x46, s16) > 0) || (actor->unk31C->unk36 >= 0x64) || (actor->unk31C->unk6B != 0)) {
+    if ((actor->unk31C->unk46 > 0) || (actor->unk31C->unk36 >= 0x64) || (actor->unk31C->unk6B != 0)) {
         return;
     }
     height = actor->unk28;
     if (actor->unk31C->unk4E == 2) {
         height = actor->unk28 - 150.0f;
-    } else if (MOVEMENT_FIELD(0x4F, u8) == 2) {
+    } else if (actor->unk31C->unk4F == 2) {
         height = 0.0f;
     } else if (actor->y_velocity > 0.0f) {
         height += 50.0f;
     }
-    if (ACTOR_FIELD(0x110, u8) != 0) {
+    if (actor->unk110 != 0) {
         buttons = pad->button & ~0x2000;
     } else {
         buttons = pad->button;
     }
-    if ((actor->in_water != 0) && (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk84.uh != 0x262)) {
+    if ((actor->in_water != 0) && (actor->unk31C->unk95 == 0) && (actor->unk84.uh != 0x262)) {
         if (actor->in_water == 1) {
             rate = 2.0f;
             anim = 0;
-            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (MOVEMENT_FIELD(0x8, s16) <= 0)) &&
+            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (actor->unk31C->unk8 <= 0)) &&
                 (((actor->unk118 - 60.0f) - 30.0f) < actor->y_position)) {
                 func_15052408(actor);
                 actor->unk31C->unk31 = 0;
                 rate = 0.0f;
-                if ((MOVEMENT_FIELD(0x7B, u8) != 7) && (MOVEMENT_FIELD(0x7B, u8) != 8)) {
+                if ((actor->unk31C->unk7B != 7) && (actor->unk31C->unk7B != 8)) {
                     actor->unk31C->unk31 = 1;
                 }
                 actor->unk76 = actor->unk7A = actor->unk78 = actor->unk31C->unk4C;
-                if ((MOVEMENT_FIELD(0x68, u16) != 0) && ((actor->unk76 - MOVEMENT_FIELD(0x68, u16) + 0x4000) & 0x8000)) {
+                if ((actor->unk31C->unk68 != 0) && ((actor->unk76 - actor->unk31C->unk68 + 0x4000) & 0x8000)) {
                     actor->xz_velocity = 0.0f;
                     actor->disable_run = 0xFF;
                 }
@@ -4054,12 +3981,12 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
             }
             actor->target_speed = 0.0f;
             if ((D_800CC288 & 0x4000) && !(pad->button & 0x10)) {
-                if (MOVEMENT_FIELD(0x22, s8) < 0x69) {
-                    MOVEMENT_FIELD(0x22, s8) = 0xF;
+                if (actor->unk31C->unk22 < 0x69) {
+                    actor->unk31C->unk22 = 0xF;
                 }
             }
-            if (((actor->xz_velocity > 2.0f) && (MOVEMENT_FIELD(0x21, u8) != 0)) ||
-                ((MOVEMENT_FIELD(0x21, u8) == 0) && ((MOVEMENT_FIELD(0x22, s8) > 0) || (!(pad->button & 0x10) && (pad->button & 0x4000))))) {
+            if (((actor->xz_velocity > 2.0f) && (actor->unk31C->unk21 != 0)) ||
+                ((actor->unk31C->unk21 == 0) && ((actor->unk31C->unk22 > 0) || (!(pad->button & 0x10) && (pad->button & 0x4000))))) {
                 if (anim != 0x32) {
                     rate = 9.0f;
                     actor->unk83 = 0;
@@ -4100,26 +4027,26 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
         }
         return;
     }
-    if (ACTOR_FIELD(0x137, u8) == 1) {
+    if (actor->unk137 == 1) {
         anim = 0;
-        if (MOVEMENT_FIELD(0x53, u8) == 0) {
+        if (actor->unk31C->unk53 == 0) {
             if (pad->stick_y >= 0x33) {
                 speed = 2.200000048f;
                 actor->unk31C->unk54 = 0xC;
                 anim = 0xEA;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 actor->disable_run = 0x10;
                 actor->unk81 = 1;
                 actor->gravity = 5.0f;
                 actor->y_velocity = 48.0f;
             } else if (pad->stick_y < -0x32) {
                 anim = 0x38;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 actor->gravity = 3.5f;
             }
         }
         if ((D_800CC288 & 0x8000) || (actor->unk31C->unk84 != 0)) {
-            ACTOR_FIELD(0x137, u8) = 2;
+            actor->unk137 = 2;
             anim = 0x40;
             speed = 3.0f;
         }
@@ -4140,7 +4067,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
         }
     }
     if ((jumpType != 0) || (height <= 0.0f) || (actor->unk31C->unk55 != 0)) {
-        ACTOR_FIELD(0x137, u8) = 0;
+        actor->unk137 = 0;
         jumped = 0;
         animArg4 = 0.0f;
         if (D_800CC288 & 0x8000) {
@@ -4152,7 +4079,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
                 if (flag != 0) {
                     func_1506160C(actor, 1, 0xFF, 0, 0);
                 }
-                if (MOVEMENT_FIELD(0x17, u8) != 0) {
+                if (actor->unk31C->unk17 != 0) {
                     animArg4 = 0.0f;
                     anim = 0x279;
                     speed = 1.25f;
@@ -4160,20 +4087,20 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
                     actor->disable_jump = 0xA;
                     actor->disable_run = 0xFF;
                     actor->unk83 = 0xFF;
-                } else if (MOVEMENT_FIELD(0x8, s16) != 0) {
+                } else if (actor->unk31C->unk8 != 0) {
                     actor->unk83 = 0xFF;
                     actor->disable_run = 0xFF;
                     jumped = 0;
                     func_1505E650(actor, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
                 } else {
-                    if (MOVEMENT_FIELD(0x1A, u8) != 0) {
+                    if (actor->unk31C->unk1A != 0) {
                         anim = 0x32;
                         animArg4 = 0.0f;
                         actor->disable_run = 0xFF;
                         actor->unk81 = 1;
                         actor->y_velocity = 47.0f;
                         actor->gravity = 6.0f;
-                    } else if (!(buttons & 0x2000) || (MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                    } else if (!(buttons & 0x2000) || (actor->unk31C->unk7B == 7) || (actor->unk31C->unk7B == 8)) {
                         if (actor->disable_run != 0) {
                             actor->disable_run = 0;
                             actor->unk7A = actor->unk76 = actor->unk31C->unk4C;
@@ -4191,7 +4118,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
                                 speed = 1.399999976f;
                             }
                         }
-                        if ((MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                        if ((actor->unk31C->unk7B == 7) || (actor->unk31C->unk7B == 8)) {
                             actor->unk31C->unk31 = 0;
                         }
                         if (actor->unk31C->unk4E == 1) {
@@ -4287,7 +4214,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
             }
             height = 25.0f;
             actor->unkB8 = 0.0f;
-            ACTOR_FIELD(0x110, u8) = 0;
+            actor->unk110 = 0;
             actor->unk100 &= 0x53;
         }
         anim = 0;
@@ -4296,7 +4223,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
     {
     s32 pad;
     rate = 2.0f;
-    if (((MOVEMENT_FIELD(0x98, u8) != 0) || (MOVEMENT_FIELD(0x95, u8) != 0)) && (actor->disable_jump == 0) && (D_800CC288 & 0x8000)) {
+    if (((actor->unk31C->ropeId != 0) || (actor->unk31C->unk95 != 0)) && (actor->disable_jump == 0) && (D_800CC288 & 0x8000)) {
         actor->unk76 = actor->unk7A = actor->unk31C->unk4C;
         actor->unk31C->unk31 = 1;
         actor->unk80 = 0xA;
@@ -4314,20 +4241,20 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
         if (actor->unk44 < 4.0f) {
             actor->unk76 = actor->unk7A = actor->unk76 + 0x8000;
         }
-        MOVEMENT_FIELD(0x95, u8) = 0;
+        actor->unk31C->unk95 = 0;
         actor->unk31C->unk97 = 0;
-        if (MOVEMENT_FIELD(0x98, u8) != 0) {
+        if (actor->unk31C->ropeId != 0) {
             func_151AE264(actor);
         }
         actor->unk31C->unk54 = 0;
     } else if ((D_800CC288 & 0x8000) && (actor->unk31C->unk4E == 0)) {
-        if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (ACTOR_FIELD(0x137, u8) == 0) && (actor->unk13C == 0) &&
-            (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
-            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->unk180) > 100.0f)) {
+        if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (actor->unk137 == 0) && (actor->unk13C == 0) &&
+            (actor->unk31C->unk95 == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
+            if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->floorY) > 100.0f)) {
                 actor->gravity = 6.0f;
                 actor->unk81 = 1;
                 actor->disable_run = 0x78;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 anim = 0x3B;
                 actor->unk1CC = actor->y_position;
             }
@@ -4350,7 +4277,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
                     if (actor->unk84.uh != 0xE9) {
                         func_100109D0(actor);
                         func_1000FA64(0x61E, (s16)(s32)actor->x_position, (s16)(s32)actor->y_position, (s16)(s32)actor->z_position,
-                                      0x7FFF, 0x1F4, 0xC8, (s32)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
+                                      0x7FFF, 0x1F4, 0xC8, (SoundRecordCallback)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
                 }
@@ -4366,7 +4293,7 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
                 }
                 anim = 0xE9;
                 speed = actor->animation_speed;
-                MOVEMENT_FIELD(0x3C, u8) = 6;
+                actor->unk31C->unk3C = 6;
                 if ((!(pad->button & 0x8000) && (actor->unk31C->unk31 >= 0x13)) || (actor->unk31C->unk31 >= 0x3E)) {
                     actor->disable_run = 0xFF;
                     actor->unk100 = 0x55;
@@ -4397,10 +4324,8 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
         actor->gravity = 6.199999809f;
     }
 }
-#undef MOVEMENT_FIELD
-#undef ACTOR_FIELD
 /* Runs the player's current action/item (unk31C->unk75, overridden by context) for this frame's input. */
-void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
+void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
     s32 stunned;
     s32 state;
     s32 expired;
@@ -4410,29 +4335,29 @@ void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 n
     s32 idx;
 
     result = 0;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return;
     }
     held = 0;
     stunned = 0;
     expired = 0;
 
-    if ((*(u16 *)((u8 *)actor->unk31C + 0x72) != 0) && (nested == 0)) {
-        if (D_800BE9E4 < *(u16 *)((u8 *)actor->unk31C + 0x72)) {
-            *(u16 *)((u8 *)actor->unk31C + 0x72) -= D_800BE9E4;
+    if ((actor->unk31C->unk72 != 0) && (nested == 0)) {
+        if (D_800BE9E4 < actor->unk31C->unk72) {
+            actor->unk31C->unk72 -= D_800BE9E4;
         } else {
             expired = 1;
-            *(u16 *)((u8 *)actor->unk31C + 0x72) = 0;
+            actor->unk31C->unk72 = 0;
         }
     }
 
     state = actor->unk31C->unk75 & ~0x80;
-    if ((((u8 *)actor->unk31C)[0x7C] != 0) && (state == 0)) {
-        state = ((u8 *)actor->unk31C)[0x7C];
+    if ((actor->unk31C->unk7C != 0) && (state == 0)) {
+        state = actor->unk31C->unk7C;
     }
 
     if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (actor->unk31C->unk78 == 0) &&
-        (*(u16 *)D_800CC284 & 0x20) && (func_15080738(state) != 0)) {
+        (D_800CC284->button & 0x20) && (func_15080738(state) != 0)) {
         state = 0x1A;
     }
 
@@ -4443,7 +4368,7 @@ void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 n
         state = 0x2A;
     }
 
-    if ((actor->unk13C != 0) || (((u8 *)&actor->pad134)[3] != 0)) {
+    if ((actor->unk13C != 0) || (actor->unk137 != 0)) {
         if (nested == 0) {
             state = 0;
         } else {
@@ -4470,7 +4395,7 @@ void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 n
         }
     }
 
-    if (((u8 *)actor->unk31C)[0x17] != 0) {
+    if (actor->unk31C->unk17 != 0) {
         state = 0x3C;
     }
 
@@ -4492,7 +4417,7 @@ void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 n
         result = func_15065A5C(actor, buttons, pressed, height, nested, state, stunned, expired, held);
     }
 
-    if ((((u8 *)actor->unk31C)[0x7B] != 0) || (pressed & 0x4000)) {
+    if ((actor->unk31C->unk7B != 0) || (pressed & 0x4000)) {
         func_150642AC(actor, pressed, height, held, result);
     }
 }
@@ -4501,7 +4426,7 @@ void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 n
  * reuses (1: unk8C, 2/3: unk8E; 3 only retunes it if the same sound is still playing), flags & 4 makes
  * it positional, flags & 8 forces channel 0.
  */
-void func_15060778(s32 sound, struct127 *actor, u16 rate, s32 level, s32 minDist, s32 maxDist, s32 flags) {
+void func_15060778(s32 sound, Actor *actor, u16 rate, s32 level, s32 minDist, s32 maxDist, s32 flags) {
     s32 channel;
     u32 handle;
     u16 *slot;
@@ -4550,7 +4475,7 @@ void func_15060778(s32 sound, struct127 *actor, u16 rate, s32 level, s32 minDist
     }
 }
 /* Plays an actor sound (players use handle slot 1). */
-void func_15060A30(s32 sound, struct127 *actor) {
+void func_15060A30(s32 sound, Actor *actor) {
     if (actor->camera == NULL) {
         func_10010344(sound, actor, 28000, 500, 2500);
     } else {
@@ -4558,7 +4483,7 @@ void func_15060A30(s32 sound, struct127 *actor) {
     }
 }
 /* Plays an actor sound without a handle slot. */
-void func_15060A9C(s32 sound, struct127 *actor) {
+void func_15060A9C(s32 sound, Actor *actor) {
     if (actor->camera == NULL) {
         func_10010630(sound, actor, 24000, 500, 2500);
     } else {
@@ -4567,7 +4492,7 @@ void func_15060A9C(s32 sound, struct127 *actor) {
 }
 
 /* func_15060A9C with an explicit rate. */
-void func_15060B04(s32 sound, struct127 *actor, s32 rate) {
+void func_15060B04(s32 sound, Actor *actor, s32 rate) {
     if (actor->camera == NULL) {
         func_10010630(sound, actor, rate, 500, 2500);
     } else {
@@ -4581,7 +4506,7 @@ void func_15060B70(s32 sound, void *actor) {
 }
 
 /* Adds health up to the maximum of 6; returns FALSE when already full. */
-s32 func_15060BA4(struct127 *actor, s32 amount) {
+s32 func_15060BA4(Actor *actor, s32 amount) {
     if (actor->health == 6) {
         return FALSE;
     }
@@ -4591,10 +4516,9 @@ s32 func_15060BA4(struct127 *actor, s32 amount) {
     }
     return TRUE;
 }
-extern u8 D_800C3E90;
 
 /* Stores the actor's head position (s16 at 0x1BC): headHeight along its head bone's up axis, or its origin. */
-void func_15060BE0(struct127 *actor) {
+void func_15060BE0(Actor *actor) {
     f32 pad0; // matching: pad0..pad3 reproduce the stack layout
     f32 pad1;
     f32 pad2;
@@ -4609,13 +4533,13 @@ void func_15060BE0(struct127 *actor) {
     f32 scale;
     f32 offX;
     s32 done;
-    ActorInfo15056B08 *info;
+    ModelDef *info;
     f32 (*bone)[4];
 
     done = FALSE;
     if (actor->id != 0xFF) {
         if ((actor->unk1D4 != 0) && (D_800C3E90 == 0)) {
-            info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+            info = D_800D1C90[actor->id];
             bone = (f32 (*)[4])((u8 *)actor->unk1D4 + (info->headBone << 6)); /* 4x4 float matrices */
             height = (f32)info->headHeight * actor->y_scale;
             if (height) {
@@ -4635,19 +4559,19 @@ void func_15060BE0(struct127 *actor) {
                 offX = offY;
             }
             done = TRUE;
-            ((s16 *)&actor->pad1BC)[0] = (s16)(s32)(bone[3][0] + offX);
-            ((s16 *)&actor->pad1BC)[1] = (s16)(s32)(bone[3][1] + offY);
-            ((s16 *)&actor->pad1BC)[2] = (s16)(s32)(bone[3][2] + offZ);
+            actor->unk1BC[0] = (s16)(s32)(bone[3][0] + offX);
+            actor->unk1BC[1] = (s16)(s32)(bone[3][1] + offY);
+            actor->unk1BC[2] = (s16)(s32)(bone[3][2] + offZ);
         }
     }
     if (done == FALSE) {
-        ((s16 *)&actor->pad1BC)[0] = (s16)(s32)actor->x_position;
-        ((s16 *)&actor->pad1BC)[1] = (s16)(s32)actor->y_position;
-        ((s16 *)&actor->pad1BC)[2] = (s16)(s32)actor->z_position;
+        actor->unk1BC[0] = (s16)(s32)actor->x_position;
+        actor->unk1BC[1] = (s16)(s32)actor->y_position;
+        actor->unk1BC[2] = (s16)(s32)actor->z_position;
     }
 }
 /* Detaches every actor carried by (unk65 pointing at) this one. */
-void func_15060D54(struct127 *actor) {
+void func_15060D54(Actor *actor) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -4656,19 +4580,18 @@ void func_15060D54(struct127 *actor) {
         }
     }
 }
-extern s32 func_1514D310(struct127 *);
-extern void func_151695F0(struct127 *, s32);
-extern void func_15084558(struct127 *);
-extern void func_1504AF10(struct127 *, s32, s32);
+extern s32 func_1514D310(Actor *);
+extern void func_151695F0(Actor *, s32);
+extern void func_15084558(Actor *);
+extern void func_1504AF10(Actor *, s32, s32);
 extern void func_1503E260(s32);
-extern s32 func_150303E4(struct127 *);
-extern void func_15188AD0(struct127 *);
+extern s32 func_150303E4(Actor *);
+extern void func_15188AD0(Actor *);
 extern void func_10004074(void *);
-extern u8 *D_800D210C;
-void func_150626EC(struct127 *arg0, s32 arg1);
+void func_150626EC(Actor *arg0, s32 arg1);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
-void func_15060F28(struct127 *actor, s32 mode) {
+void func_15060F28(Actor *actor, s32 mode) {
     func_1514D310(actor);
     func_151695F0(actor, 0);
     if ((actor->unk5 != 2) && (actor->unk5 != 3)) {
@@ -4681,16 +4604,16 @@ void func_15060F28(struct127 *actor, s32 mode) {
     }
     if (actor->unk13F != 0xFF) {
         if (mode != 2) {
-            /* matching: unk144 is read as an s32 at each use; pointer reads let IDO keep it in a register */
-            if ((*(s32 *)&actor->unk144) != 0) {
-                if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 0x20) {
-                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+            /* matching: spawn is read as an s32 at each use; pointer reads let IDO keep it in a register */
+            if ((*(s32 *)&actor->spawn) != 0) {
+                if (((SpawnRecord *)*(s32 *)&actor->spawn)->flags & 0x20) {
+                    ((SpawnRecord *)*(s32 *)&actor->spawn)->unk2 = 1;
                     D_800D210C[actor->unk13F] = 0;
-                } else if (((struct129 *)*(s32 *)&actor->unk144)->unk0 & 1) {
+                } else if (((SpawnRecord *)*(s32 *)&actor->spawn)->flags & 1) {
                     D_800D210C[actor->unk13F] = 0;
                 } else {
                     s32 pad;
-                    ((struct129 *)*(s32 *)&actor->unk144)->unk2 = 1;
+                    ((SpawnRecord *)*(s32 *)&actor->spawn)->unk2 = 1;
                     D_800D210C[actor->unk13F] &= 0x80;
                 }
             } else {
@@ -4700,55 +4623,56 @@ void func_15060F28(struct127 *actor, s32 mode) {
             D_800D210C[actor->unk13F] = 0;
         }
     }
-    /* free the allocations held in the actor's padding (0x260..0x26C, 0x1D8, ...) */
-    if (*(void **)((u8 *)actor + 0x260) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x260));
+    /* free the actor's allocations */
+    if (actor->morph != NULL) {
+        func_10004074(actor->morph);
     }
-    if (*(s32 *)((u8 *)actor + 0x264) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x264));
+    if (actor->unk264 != 0) {
+        func_10004074((void *)actor->unk264);
     }
-    if (*(s32 *)((u8 *)actor + 0x268) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x268));
+    if (actor->unk268 != 0) {
+        func_10004074((void *)actor->unk268);
     }
-    if (*(s32 *)((u8 *)actor + 0x26C) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x26C));
+    if (actor->unk26C != 0) {
+        func_10004074((void *)actor->unk26C);
     }
-    if (*(void **)((u8 *)actor + 0x1D8) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x1D8));
+    if (actor->prevBones != NULL) {
+        func_10004074(actor->prevBones);
     }
-    if (*(struct102 **)((u8 *)actor + 0x2D4) != NULL) {
-        func_1516972C(*(struct102 **)((u8 *)actor + 0x2D4));
+    if (actor->unk2D4 != NULL) {
+        func_1516972C(actor->unk2D4);
     }
-    if (*(s32 **)((u8 *)actor + 0x304) != NULL) {
+    if (actor->unk304[0] != 0) {
         s32 i;
         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
-            func_100043B4(*(s32 **)((u8 *)actor + (i * 4) + 0x304), 4);
+            func_100043B4((s32 *)actor->unk304[i], 4);
         }
     }
-    if (*(s32 *)((u8 *)actor + 0x314) != 0) {
-        func_100043B4((s32 *)*(s32 *)((u8 *)actor + 0x314), 4);
+    // matching: unk314 is read as an s32 (one load feeds both the test and the call)
+    if (*(s32 *)&actor->unk314 != 0) {
+        func_100043B4((s32 *)*(s32 *)&actor->unk314, 4);
     }
     if (actor->unk2D0 != NULL) {
         func_10004074(actor->unk2D0);
     }
-    if (*(void **)((u8 *)actor + 0x324) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x324));
+    if (actor->camData != NULL) {
+        func_10004074(actor->camData);
     }
-    if ((actor->unk31C != NULL) && (*(void **)((u8 *)actor->unk31C + 0x11C) != NULL)) {
-        func_10004074(*(void **)((u8 *)actor->unk31C + 0x11C));
+    if ((actor->unk31C != NULL) && (actor->unk31C->boneChain != NULL)) {
+        func_10004074(actor->unk31C->boneChain);
     }
     func_10010AA8(actor);
     func_150303E4(actor);
     func_15060D54(actor);
     func_15188AD0(actor);
     if (actor->unk31C != NULL) {
-        func_10004074((void *)(s32)actor->unk31C);
+        func_10004074((void *)(s32)actor->unk31C); // matching: passing actor->unk31C directly mismatches
     }
     func_1505F188(actor);
 }
 
 /* Drifts the actor along water-current path pathIdx, from the nearest of its points. */
-void func_150611E8(struct127 *actor, s32 pathIdx) {
+void func_150611E8(Actor *actor, s32 pathIdx) {
     s32 count;
     s32 closest;
     s32 i;
@@ -4771,15 +4695,15 @@ void func_150611E8(struct127 *actor, s32 pathIdx) {
     z = actor->z_position;
     best = 0x7FFFFFFF;
     for (i = 0; i < count; i++) {
-        dx = x - ((PathPoint **)D_800D2104)[pathIdx][i].x;
-        dz = z - ((PathPoint **)D_800D2104)[pathIdx][i].z;
+        dx = x - D_800D2104[pathIdx][i].x;
+        dz = z - D_800D2104[pathIdx][i].z;
         if (dx * dx + dz * dz < best) {
             closest = i;
             best = dx * dx + dz * dz;
         }
     }
     if (closest != 0 && closest != count - 1) {
-        pts = ((PathPoint **)D_800D2104)[pathIdx];
+        pts = D_800D2104[pathIdx];
         if (best > 28000) {
             dx = x - pts[closest + 1].x;
             dz = z - pts[closest + 1].z;
@@ -4801,21 +4725,21 @@ void func_150611E8(struct127 *actor, s32 pathIdx) {
         }
         angle = func_1505A630(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
         if (actor->unk31C != NULL && speed > 20.0f) {
-            *(s16 *)((u8 *)actor->unk31C + 0x68) = angle | 1;
+            actor->unk31C->unk68 = angle | 1;
         }
         func_150593C4(actor, angle, speed, scale);
     }
 }
 
-// TODO: is this really struct127?
+// TODO: is this really Actor?
 /* Resets the actor's bytes 0x7..0xF. */
-void func_150615DC(struct127 *actor) {
+void func_150615DC(Actor *actor) {
     actor->unk7 = 0xFF;
     actor->unk8 = 0xFF;
     actor->unk9 = 0;
     actor->unkA = 0;
-    actor->unkE.ub[1] = 0;
-    actor->unkB = actor->unkC = actor->unkD = actor->unkE.ub[0] = 0xFF;
+    actor->unkF = 0;
+    actor->unkB[0] = actor->unkB[1] = actor->unkB[2] = actor->unkB[3] = 0xFF;
 }
 
 /*
@@ -4823,7 +4747,7 @@ void func_150615DC(struct127 *actor) {
  * then removed). Bytes unkB..unkE.ub[0] are per-player alphas, unkE.ub[1] holds per-player hide bits
  * (low nibble) and pending bits (high nibble). Commands 8 and up act on player `player` only.
  */
-void func_1506160C(struct127 *actor, u8 cmd, u8 value, u8 step, s32 player) {
+void func_1506160C(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
     s32 bit;
     s32 hi;
 
@@ -4831,24 +4755,24 @@ void func_1506160C(struct127 *actor, u8 cmd, u8 value, u8 step, s32 player) {
         if (cmd != 10) {
             if (cmd == 8) {
                 bit = 1 << (u8)player;
-                actor->unkE.ub[1] |= bit;
+                actor->unkF |= bit;
                 value = 0;
             } else {
                 bit = 1 << (u8)player;
-                actor->unkE.ub[1] &= ~bit;
+                actor->unkF &= ~bit;
                 value = 0xFF;
             }
             hi = bit << 4;
-            if (actor->unkE.ub[1] & hi) {
-                (&actor->unkB)[(u8)player] = value;
+            if (actor->unkF & hi) {
+                actor->unkB[(u8)player] = value;
             }
-            actor->unkE.ub[1] &= ~hi;
+            actor->unkF &= ~hi;
         } else {
-            actor->unkE.ub[1] |= (1 << (u8)player) << 4;
+            actor->unkF |= (1 << (u8)player) << 4;
             value = 0;
         }
-        if ((actor->pad2FC[1] != 0) || (D_800DBFF4[(u8)player] != 0)) {
-            (&actor->unkB)[(u8)player] = value;
+        if ((actor->unk2FD != 0) || (D_800DBFF4[(u8)player] != 0)) {
+            actor->unkB[(u8)player] = value;
         }
     } else if (cmd >= actor->unkA) {
         if (cmd == 4) {
@@ -4880,7 +4804,7 @@ void func_1506160C(struct127 *actor, u8 cmd, u8 value, u8 step, s32 player) {
 }
 
 /* Per-frame fade step (see func_1506160C); removes the actor when a fade-out finishes. */
-void func_150617BC(struct127 *actor) {
+void func_150617BC(Actor *actor) {
     s32 i;
     s32 mask;
     s32 value;
@@ -4888,29 +4812,29 @@ void func_150617BC(struct127 *actor) {
     if (actor->interaction_state != 0) {
         mask = 1;
         for (i = 0; i <= D_80082FA0; i++) {
-            if (actor->unkE.ub[1] & mask) {
-                if ((&actor->unkB)[i] > 0) {
-                    if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = (&actor->unkB)[i] - 50;
+            if (actor->unkF & mask) {
+                if (actor->unkB[i] > 0) {
+                    if (D_800DBFF4[i] == 0) {
+                        value = actor->unkB[i] - 50;
                         if (value < 0) {
                             value = 0;
                         }
                     } else {
                         value = 0;
                     }
-                    (&actor->unkB)[i] = value;
+                    actor->unkB[i] = value;
                 }
             } else {
-                if ((&actor->unkB)[i] < 0xFF) {
-                    if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = (&actor->unkB)[i] + 50;
+                if (actor->unkB[i] < 0xFF) {
+                    if (D_800DBFF4[i] == 0) {
+                        value = actor->unkB[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
                         }
                     } else {
                         value = 0xFF;
                     }
-                    (&actor->unkB)[i] = value;
+                    actor->unkB[i] = value;
                 }
             }
             mask <<= 1;
@@ -4945,8 +4869,8 @@ void func_150617BC(struct127 *actor) {
 }
 
 /* The actor's alpha as seen by `player` (0..255). */
-s32 func_1506196C(struct127 *actor, s32 player) {
-    s32 alpha = actor->unk7 * (&actor->unkB)[player];
+s32 func_1506196C(Actor *actor, s32 player) {
+    s32 alpha = actor->unk7 * actor->unkB[player];
 
     if (alpha == 255 * 255) {
         alpha = 255;
@@ -4956,7 +4880,7 @@ s32 func_1506196C(struct127 *actor, s32 player) {
     return alpha;
 }
 
-s32 func_150623F4(struct127 *arg0);
+s32 func_150623F4(Actor *arg0);
 /*
  * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
  * actor is visible, or when one of its linked actors (keys in bytes 0x20B..0x20E) is.
@@ -4966,16 +4890,16 @@ void func_150619A8(void) {
     s32 count;
     u8 list[25];
     s32 j;
-    struct127 *actor;
-    struct127 *other;
+    Actor *actor;
+    Actor *other;
     s32 idx;
 
     count = 0;
     for (i = 0; i < 25; i++) {
         actor = &D_800CC2D0[i];
         if (actor->interaction_state != 0) {
-            if (actor->pad2FC[1] != 0) {
-                actor->pad2FC[1]--;
+            if (actor->unk2FD != 0) {
+                actor->unk2FD--;
             }
             func_150617BC(actor);
             if (func_150623F4(actor) != 0) {
@@ -5013,19 +4937,15 @@ extern Game83300Step4 D_800860F0;
 
 void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
-void func_1501B660(struct127 *arg0, f32 *arg1, s32 arg2);
+void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
+void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 f32 func_150489B0(u8 arg0);
-void func_150F1CB0(struct127 *arg0);
-extern s32 *D_800C4020[];
+void func_150F1CB0(Actor *arg0);
 extern s32 D_8009942C[];
-
-/* struct127 bytes 0x68..0x6D (padding in the shared header) */
-#define OBJB(o, off) (((u8 *)(o))[off])
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
-    struct127 *unused; // matching: stack slot
+    Actor *unused; // matching: stack slot
     s32 id;
     s32 i;
     u8 done[10];
@@ -5080,7 +5000,6 @@ void func_15061B4C(void) {
             s32 j;
             Game83300Step4 step = D_800860F0;
 
-
             if (D_800CC2D0[i].unk1D4 != NULL) {
                 for (j = 0; j < 4; j++) {
                     weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
@@ -5101,41 +5020,42 @@ void func_15061B4C(void) {
             }
             if (D_800CC298.unkF >= 4) {
                 D_800CC298.unkF = 0;
-                if (OBJB(&D_800CC2D0[i], 0x69) == 5) {
-                    OBJB(&D_800CC2D0[i], 0x69) = 0;
+                if (D_800CC2D0[i].unk68[1] == 5) {
+                    D_800CC2D0[i].unk68[1] = 0;
                 } else {
-                    OBJB(&D_800CC2D0[i], 0x69)++;
+                    D_800CC2D0[i].unk68[1]++;
                 }
-                if (OBJB(&D_800CC2D0[i], 0x69) >= 3) {
-                    OBJB(&D_800CC2D0[i], 0x68) = 5 - OBJB(&D_800CC2D0[i], 0x69);
+                if (D_800CC2D0[i].unk68[1] >= 3) {
+                    D_800CC2D0[i].unk68[0] = 5 - D_800CC2D0[i].unk68[1];
                 } else {
-                    OBJB(&D_800CC2D0[i], 0x68) = OBJB(&D_800CC2D0[i], 0x69);
+                    D_800CC2D0[i].unk68[0] = D_800CC2D0[i].unk68[1];
                 }
-                OBJB(&D_800CC2D0[i], 0x68) += 0xF;
+                D_800CC2D0[i].unk68[0] += 0xF;
             } else {
                 D_800CC298.unkF += D_800BE9E4;
             }
         } else if (id == 0x45) {
-            s32 val = OBJB(&D_800CC2D0[i], 0x6D);
+            s32 val = D_800CC2D0[i].eyeCode[1];
 
             if (val >= 10) {
                 val -= 10;
             } else {
                 val = val * 2 + 6;
             }
-            OBJB(&D_800CC2D0[i], 0x68) = val;
+            D_800CC2D0[i].unk68[0] = val;
         } else if (id == 0x5B) {
             s32 v;
             s32 k;
 
+            // matching: eyeCode[k] / unk68[k] as fields change how IDO strength-reduces k
             for (k = 0; k < 2; k++) {
-                v = OBJB(&D_800CC2D0[i], 0x6C + k);
+                v = ((u8 *)&D_800CC2D0[i])[0x6C + k]; // eyeCode[k]
                 if (v >= 10) {
                     v -= 10;
                 } else {
                     v = D_8009942C[v];
                 }
-                OBJB(&D_800CC2D0[i], 0x68 + k) = v;
+                ((u8 *)&D_800CC2D0[i])[0x68 + k] = v; // unk68[k]
             }
         } else if (id == 0x54) {
             f32 scale;
@@ -5173,18 +5093,18 @@ void func_15061B4C(void) {
             }
         } else if (id == 0x42) {
             if ((D_800CC2D0[i].unk84.uh == 2) || (D_800CC2D0[i].unk84.uh == 1)) {
-                if (OBJB(&D_800CC2D0[i], 0x68) == 0xD) {
-                    OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                if (D_800CC2D0[i].unk68[0] == 0xD) {
+                    D_800CC2D0[i].unk68[0] = 0xC;
                 }
                 if ((func_150ADA20() & 3) == 0) {
-                    if (OBJB(&D_800CC2D0[i], 0x68) == 0x15) {
-                        OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                    if (D_800CC2D0[i].unk68[0] == 0x15) {
+                        D_800CC2D0[i].unk68[0] = 0xC;
                     } else {
-                        OBJB(&D_800CC2D0[i], 0x68) = 0x15;
+                        D_800CC2D0[i].unk68[0] = 0x15;
                     }
                 }
             } else {
-                OBJB(&D_800CC2D0[i], 0x68) = 0xD;
+                D_800CC2D0[i].unk68[0] = 0xD;
             }
         } else if (id == 0x7B) {
             func_150F1CB0(&D_800CC2D0[i]);
@@ -5198,15 +5118,14 @@ void func_15061B4C(void) {
         }
     }
 }
-s32 func_150229E4(struct127 *);
+s32 func_150229E4(Actor *);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800D9C10[];
 
 /*
- * Whether the actor should be drawn: TRUE when it has no cull radius (unk144 +0x2A) or is a player, when
+ * Whether the actor should be drawn: TRUE when it has no cull radius (spawn->unk2A) or is a player, when
  * a player is inside its path area, or when it is inside some player's view; FALSE if fully faded.
  */
-s32 func_150623F4(struct127 *actor) {
+s32 func_150623F4(Actor *actor) {
     f32 scale;
     s32 sum;
     s32 hidden;
@@ -5218,7 +5137,7 @@ s32 func_150623F4(struct127 *actor) {
     s32 id;
     u8 *p;
 
-    scale = (actor->unk144 != NULL) ? (f32)*(u16 *)((u8 *)actor->unk144 + 0x2A) : 0.0f;
+    scale = (actor->spawn != NULL) ? (f32)actor->spawn->unk2A : 0.0f;
     if (scale == 0.0f) {
         return 1;
     }
@@ -5246,9 +5165,9 @@ s32 func_150623F4(struct127 *actor) {
     if (D_800D2108[idx] != 0) {
         hidden = 1;
         for (i = 0; i < D_8008FD8C; i++) {
-            dx = ((PathPoint **)D_800D2104)[idx]->x - D_800CC2D0[i].x_position;
-            dz = ((PathPoint **)D_800D2104)[idx]->z - D_800CC2D0[i].z_position;
-            if ((dx * dx) + (dz * dz) < ((PathPoint **)D_800D2104)[idx]->param * ((PathPoint **)D_800D2104)[idx]->param) {
+            dx = D_800D2104[idx]->x - D_800CC2D0[i].x_position;
+            dz = D_800D2104[idx]->z - D_800CC2D0[i].z_position;
+            if ((dx * dx) + (dz * dz) < D_800D2104[idx]->param * D_800D2104[idx]->param) {
                 hidden = 0;
                 break;
             }
@@ -5258,10 +5177,10 @@ s32 func_150623F4(struct127 *actor) {
         }
     }
     id = actor->id;
-    height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * actor->y_scale;
+    height = D_800D1C90[id]->bodyHeight * actor->y_scale;
     for (i = 0; i <= D_80082FA0; i++) {
         hidden = 1;
-        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, &D_800D9C10[i * 0x40], actor->x_position,
+        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, D_800D9C10[i], actor->x_position,
                           actor->y_position + height, actor->z_position, scale, scale, 20000.0f) != 0) {
             hidden = 0;
             break;
@@ -5273,7 +5192,7 @@ s32 func_150623F4(struct127 *actor) {
     return 0;
 }
 /* Removes the non-player actors carried by this one. */
-void func_150626EC(struct127 *actor, s32 mode) {
+void func_150626EC(Actor *actor, s32 mode) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -5286,7 +5205,7 @@ void func_150626EC(struct127 *actor, s32 mode) {
 }
 
 /* Called after the actor's animation changed. */
-void func_150627D4(struct127 *actor) {
+void func_150627D4(Actor *actor) {
     actor->unk2FB = 0;
     func_1503B840(actor);
     func_15039CC8(actor);
@@ -5297,18 +5216,18 @@ void func_15033EC4(s32 arg0, s32 arg1);
 #define OBJ_INDEX(obj) ((u32)((obj) - D_800CC2D0))
 
 /* Swaps two actor slots (b becomes the player with a camera), fixing up indices and carry links. */
-void func_15062800(struct127 *a, struct127 *b) {
+void func_15062800(Actor *a, Actor *b) {
     s32 idx0; // matching: idx0, cam and pad are dead, but keep the frame layout
     s32 cam;
-    struct127 swap;
-    struct129 *pad;
+    Actor swap;
+    SpawnRecord *pad;
     s32 i;
     s32 u;
 
     func_15146508(a, b);
-    bcopy(b, &swap, sizeof(struct127));
-    bcopy(a, b, sizeof(struct127));
-    bcopy(&swap, a, sizeof(struct127));
+    bcopy(b, &swap, sizeof(Actor));
+    bcopy(a, b, sizeof(Actor));
+    bcopy(&swap, a, sizeof(Actor));
     idx0 = OBJ_INDEX(a);
     cam = (s32)&D_800DBFF0[OBJ_INDEX(b)];
     b->unk127 = OBJ_INDEX(b);
@@ -5319,19 +5238,19 @@ void func_15062800(struct127 *a, struct127 *b) {
     a->unique_id = OBJ_INDEX(a) + 1;
     a->unk13F = OBJ_INDEX(a);
     a->camera = NULL;
-    u = (s32)a->unk144;
-    a->unk144 = b->unk144;
-    b->unk144 = (struct129 *)u;
-    D_800DBFF0[OBJ_INDEX(b)].unk3D4 = (struct127 *) b->unk31C;
-    b->unk31C->pad196[1] = 0;
+    u = (s32)a->spawn;
+    a->spawn = b->spawn;
+    b->spawn = (SpawnRecord *)u;
+    D_800DBFF0[OBJ_INDEX(b)].playerExt = b->unk31C;
+    b->unk31C->aimState = 0;
     func_15033EC4(b->unique_id, a->unique_id);
-    if (*(struct102 **)b->pad2D4 != NULL) {
-        func_1516972C(*(struct102 **)b->pad2D4);
-        *(struct102 **)b->pad2D4 = NULL;
+    if (b->unk2D4 != NULL) {
+        func_1516972C(b->unk2D4);
+        b->unk2D4 = NULL;
     }
-    if (*(struct102 **)a->pad2D4 != NULL) {
-        func_1516972C(*(struct102 **)a->pad2D4);
-        *(struct102 **)a->pad2D4 = NULL;
+    if (a->unk2D4 != NULL) {
+        func_1516972C(a->unk2D4);
+        a->unk2D4 = NULL;
     }
     func_150615DC(b);
     for (i = 0; i < 25; i++) {
@@ -5358,31 +5277,31 @@ void func_15062800(struct127 *a, struct127 *b) {
     func_150627D4(b);
 }
 
-/* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius unkE4, height unkE6). */
-void func_15062AC4(struct127 *actor) {
-    if (actor->unkE6 && actor->unkE4) {
-        f32 radius = actor->unkE4;
-        actor->unkEC = radius / actor->unkE6;
-        actor->unkF0 = actor->unkE6 / radius;
+/* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius bodyRadius, height bodyHeight). */
+void func_15062AC4(Actor *actor) {
+    if (actor->bodyHeight && actor->bodyRadius) {
+        f32 radius = actor->bodyRadius;
+        actor->unkEC = radius / actor->bodyHeight;
+        actor->unkF0 = actor->bodyHeight / radius;
     } else {
         actor->unkF0 = actor->unkEC = 0.0f;
     }
 }
 
 /* Sets the body radius to xz_scale * radius. */
-void func_15062B1C(struct127 *actor, f32 radius) {
-    actor->unkE4 = actor->xz_scale * radius;
+void func_15062B1C(Actor *actor, f32 radius) {
+    actor->bodyRadius = actor->xz_scale * radius;
     func_15062AC4(actor);
 }
 
 /* Sets the body height to y_scale * height. */
-void func_15062B50(struct127 *actor, f32 height) {
-    actor->unkE6 = actor->y_scale * height;
+void func_15062B50(Actor *actor, f32 height) {
+    actor->bodyHeight = actor->y_scale * height;
     func_15062AC4(actor);
 }
 
 /* func_15062AC4 for the hit cylinder (radius unkD2, height unkD4). */
-void func_15062B84(struct127 *actor) {
+void func_15062B84(Actor *actor) {
     if (actor->unkD4 && actor->unkD2) {
         f32 radius = actor->unkD2;
         actor->unkDC = radius / actor->unkD4;
@@ -5394,8 +5313,8 @@ void func_15062B84(struct127 *actor) {
 }
 
 /* Sets the actor's scale and rescales its hit and body cylinders from the type info. */
-void func_15062BDC(struct127 *actor, f32 xzScale, f32 yScale) {
-    struct124 *info;
+void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
+    ModelDef *info;
 
     actor->xz_scale = xzScale;
     actor->y_scale = yScale;
@@ -5404,9 +5323,9 @@ void func_15062BDC(struct127 *actor, f32 xzScale, f32 yScale) {
         actor->unkD2 = (s32) (info->unk20 * actor->xz_scale);
         actor->unkD4 = (s32) (info->unk22 * actor->y_scale);
         actor->unkD6 = (s32) (info->unk24 * actor->y_scale);
-        actor->unkE4 = (s32) (info->unk1A * actor->xz_scale);
-        actor->unkE6 = (s32) (info->unk1C * actor->y_scale);
-        actor->unkE8 = (s32) (info->unk1E * actor->y_scale);
+        actor->bodyRadius = (s32) (info->unk1A * actor->xz_scale);
+        actor->bodyHeight = (s32) (info->unk1C * actor->y_scale);
+        actor->bodyOffsetY = (s32) (info->unk1E * actor->y_scale);
         func_15062AC4(actor);
         func_15062B84(actor);
     }
@@ -5417,7 +5336,6 @@ typedef struct {
     s32 unk4; /* tile size - 2, packed the same way */
 } Entry62D10;
 extern Entry62D10 **D_800C4488[];
-extern s32 D_800D19A0;
 /*
  * Scrolls texture tile `tile` of actor type `type` (set `set`) by (ds, dt), wrapping at the tile size;
  * with `absolute` set the coordinates are set instead. Coordinates are packed 12:12 in unk0.
@@ -5429,7 +5347,7 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     newS = 0;
     wrapS = 0;
     wrapT = 0;
-    if ((&D_800D19A0)[type] == 0) {
+    if (D_800D19A0[type] == NULL) {
         return;
     }
     base = D_800C4488[type][set];
@@ -5491,7 +5409,7 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
                 w *= 2;
                 h *= 2;
             }
-            vtx = ((Vtx **)&D_800CC2D0[i].pad288[4])[D_800BE9C0];
+            vtx = ((Vtx **)D_800CC2D0[i].modelData)[D_800BE9C0];
             if (vtx != NULL) {
                 vtx += firstVtx;
                 func_15094AB8(vtx, (s16 (*)[2])D_800C6360[type] + arg3, arg2, arg4, h, w);
@@ -5499,13 +5417,12 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
         }
     }
 }
-extern s32 *D_800C4020[];
 
 /*
  * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the
  * actor's current vertex buffer, copying from the other buffer and wrapping at (wrapS, wrapT).
  */
-void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
+void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
     u8 *channelBase;
     Vtx *source;
     Vtx *target;
@@ -5513,7 +5430,7 @@ void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s
     s32 i;
 
     /* two vertex buffers per channel at 0x28C (double-buffered by D_800BE9C0) */
-    channelBase = (u8 *)actor + (actor->pad1C8 * 8);
+    channelBase = (u8 *)actor + (actor->lod * 8);
     target = ((Vtx **)(channelBase + 0x28C))[D_800BE9C0];
     source = ((Vtx **)(channelBase + 0x28C))[!D_800BE9C0];
     if (target == NULL) {
@@ -5543,15 +5460,15 @@ void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s
         target[i].v.tc[1] = source[i].v.tc[1] + dt;
     }
 }
-void func_15194FF4(struct127 *, struct127 *, s32);
+void func_15194FF4(Actor *, Actor *, s32);
 
 /* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
-void func_15063168(struct127 *actor) {
+void func_15063168(Actor *actor) {
     s32 i;
     s32 self;
-    struct126 *movement;
+    ActorCtl *movement;
 
-    self = ((s32)actor - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    self = ((s32)actor - (s32)D_800CC2D0) / (s32)sizeof(Actor);
     for (i = 0; i < D_8008FD8C; i++) {
         if (i == self) {
             continue;
@@ -5563,7 +5480,7 @@ void func_15063168(struct127 *actor) {
         if (movement == NULL) {
             continue;
         }
-        if (((u8 *)movement)[0x1AC] != 0) {
+        if (movement->unk1AC != 0) {
             continue;
         }
         func_15194FF4(actor, &D_800CC2D0[i], 1);
@@ -5571,12 +5488,12 @@ void func_15063168(struct127 *actor) {
 }
 
 void func_15082A44(void *, s32, s32, s32, s32);
-/* Respawns the actor in place: rebuilds its slot from its spawn entry (unk144), keeping position, angles and camera. */
-void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
-    struct129 *spawn;
+/* Respawns the actor in place: rebuilds its slot from its spawn entry (spawn), keeping position, angles and camera. */
+void func_15063254(Actor *actor, s32 type, s32 interaction_state, f32 scale) {
+    SpawnRecord *spawn;
     s32 pathIdx;
     s32 index;
-    struct108 *camera;
+    Camera *camera;
     f32 x;
     f32 y;
     f32 z;
@@ -5586,11 +5503,11 @@ void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
     s32 angle;
 
     pathIdx = actor->unk13F;
-    spawn = actor->unk144;
-    spawn->unk4 = unk4Value;
-    spawn->unk3 = unk3Value;
-    spawn->unk20 = scale;
-    spawn->unk24 = scale;
+    spawn = actor->spawn;
+    spawn->type = type;
+    spawn->interaction_state = interaction_state;
+    spawn->xz_scale = scale;
+    spawn->y_scale = scale;
     spawn->unk2 = 0;
     camera = actor->camera;
     x = actor->x_position;
@@ -5616,5 +5533,5 @@ void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
     actor->old_y_position = y;
     actor->old_z_position = actor->z_position;
     actor->unk1CC = actor->y_position;
-    actor->camera->unk3D4 = (struct127 *)actor->unk31C;
+    actor->camera->playerExt = actor->unk31C;
 }

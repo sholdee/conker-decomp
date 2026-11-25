@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -15,49 +13,47 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; /* 0x24 */
 
-// matching: functions.h declares func_150ADA20 as returning u8; the % below needs the full u32
-extern u32 func_150ADA20(void);
-void func_1504715C(GroundHit *, struct127 *);
-s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
-void func_151D3FF4(struct17 *, u8, s32);
-void func_150E7FEC(f32, u8, s16 *, struct17 *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_150E83AC(struct17 *, s16, u8, s32);
-void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(struct17 *, u8, s32);
-void func_151D40D4(struct17 *, s32, struct127 *, struct127 *, s32, s32, s32, s32);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, u8, s32);
+void func_1504715C(GroundHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+void func_151D3FF4(Vec3f *, u8, s32);
+void func_150E7FEC(f32, u8, s16 *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_150E83AC(Vec3f *, s16, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+void func_151D5514(Vec3f *, u8, s32);
+void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */
-void func_150E0870(struct127 *obj, u8 arg1, s32 arg2) {
-    struct17 origin;
-    struct17 impact;
+void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
+    Vec3f origin;
+    Vec3f impact;
     u8 hitGround;
 
     if (obj == NULL) {
         return;
     }
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
         func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
-    origin.unk0 = obj->x_position;
-    origin.unk4 = obj->y_position + 20.0f;
-    origin.unk8 = obj->z_position;
+    origin.x = obj->x_position;
+    origin.y = obj->y_position + 20.0f;
+    origin.z = obj->z_position;
     hitGround = FALSE;
     {
-        struct17 top;
+        Vec3f top;
         GroundHit hit;
 
-        top.unk0 = origin.unk0;
-        top.unk4 = origin.unk4 + 100.0f;
-        top.unk8 = origin.unk8;
+        top.x = origin.x;
+        top.y = origin.y + 100.0f;
+        top.z = origin.z;
         func_1504715C(&hit, obj);
-        if (func_15046C80(&top, 0, origin.unk4 - 200.0f, &hit) && (hit.flags & 1)) {
-            impact.unk0 = top.unk0;
+        if (func_15046C80(&top, 0, origin.y - 200.0f, &hit) && (hit.flags & 1)) {
+            impact.x = top.x;
             hitGround = TRUE;
-            impact.unk4 = hit.height;
-            impact.unk8 = top.unk8;
+            impact.y = hit.height;
+            impact.z = top.z;
             func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, hit.points, &impact,
                           func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
@@ -75,14 +71,14 @@ void func_150E0870(struct127 *obj, u8 arg1, s32 arg2) {
 
 extern u16 D_800CC346;
 
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
-s32 func_150535F4(struct127 *arg0);
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
+void func_15056B08(Actor *arg0);
+void func_150585F0(Actor *arg0, f32 arg1);
+u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
+s32 func_150535F4(Actor *arg0);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 
 /* Per-frame update for obj: steps its unk83 counter while unk87 is set, moves it, then stores its x/z displacement since last frame. */
-void func_150E0BE0(struct127 *obj) {
+void func_150E0BE0(Actor *obj) {
     s32 counter;
 
     obj->unkB0 = 15;
@@ -132,7 +128,7 @@ void func_150E0BE0(struct127 *obj) {
     /* facing angle (0x10000 units per turn) rotated a quarter turn, in degrees */
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * (360.0f / 0x10000);
     func_15059140(obj);
-    *(f32 *)&obj->padBC = obj->x_position - obj->old_x_position; // 0xBC is an f32 that structs.h still calls padBC
+    obj->unkBC = obj->x_position - obj->old_x_position; // 0xBC is an f32 that structs.h still calls padBC
     obj->unk148 = obj->z_position - obj->old_z_position;
     if (func_150535F4(obj) == 0) {
         func_1502178C(obj, 0, -1);

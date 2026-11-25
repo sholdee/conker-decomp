@@ -1,16 +1,6 @@
 #include <ultra64.h>
-/* functions.h declares func_1502B7F0 with five parameters; this file calls it with three. */
-#define func_1502B7F0 func_1502B7F0_5
 #include "functions.h"
-#undef func_1502B7F0
-/* variables.h types D_800CC2D0 as struct127[], whose 0x128 is inside `u32 pad128`;
-   func_151E9D18 needs a byte there, so shadow the declaration file-locally. */
-#define D_800CC2D0 D_800CC2D0_struct127_decl_in_variables_h
-/* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
-#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
-#undef D_800CC2D0
-#undef D_800BE3F8
 
 /* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
 typedef struct {
@@ -29,7 +19,7 @@ typedef struct {
     /* 0x1C */ s32 unk1C; /* segment 1 base */
     /* 0x20 */ s32 unk20;
     /* 0x24 */ HudModelAnim *anim;
-    /* 0x28 */ f32 matrices[2][4][4];
+    /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
 /* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
@@ -42,30 +32,20 @@ typedef struct {
     /* 0x0B */ u8 siz;
 } HudSprite; /* size 0xC */
 
-extern s32 D_800E0A74;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
 extern Gfx D_80090028;
 extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern s32 D_80000300;
-extern u8 D_800BE616;
-extern u8 D_800BE740;
-extern s8 D_8008FD90;
-extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
-extern u8 D_800E0A94;
 extern u8 D_800E0C85;
 extern HudSprite D_8009013C;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-extern s32 func_1502B7F0(s32 *, s32, s32);
 extern void func_10004074(void *);
 Gfx *func_151ED1E0(Gfx *);
 void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
@@ -113,14 +93,9 @@ Gfx *func_151E84B0(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800E0B94;
 extern Gfx *(*D_8008FFC0[])(Gfx *);
-extern s32 D_8003C8E0;
 extern HudModel *D_80090058;
 extern s16 D_800E0C78;
-extern u8 D_800BE9C0;
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
 Gfx *func_151E8620(Gfx *gfx) {
@@ -150,8 +125,6 @@ Gfx *func_151E8620(Gfx *gfx) {
     return gfx;
 }
 
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
 /* Emits a scissored texture rectangle, scaled by the current screen scale factors. */
 Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
     f32 yScale;
@@ -170,40 +143,11 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 }
 
 
-typedef struct {
-    /* 0x000 */ char pad0[0x75];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ char pad76[0xB2];
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ char pad129[0x81];
-    /* 0x1AA */ s16 unk1AA;
-} ScoreObjSub;
 
-typedef struct {
-    /* 0x000 */ char pad0[0x14];
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ char pad20[0x108];
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ char pad129[0x13];
-    /* 0x13C */ u8 unk13C;
-    /* 0x13D */ char pad13D[0x1A7];
-    /* 0x2E4 */ s32 unk2E4;
-    /* 0x2E8 */ char pad2E8[0x34];
-    /* 0x31C */ ScoreObjSub *unk31C;
-    /* 0x320 */ char pad320[0xC];
-} ScoreObj; /* size 0x32C */
-
-extern ScoreObj D_800CC2D0[];
 extern u8 D_800ABA90[][4];
-extern s8 D_800E0BB0;
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
-extern u16 D_8008FDC0;
-extern u16 D_800E0BCC;
-extern s32 D_800BE9AC;
 extern u8 D_8009006C[];
 extern u8 D_80090070[];
 extern s32 func_15086D48(s32, s32);
@@ -226,8 +170,8 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     s32 team;
     s32 width;
     s32 kind;
-    ScoreObjSub *sub;
-    ScoreObj *obj;
+    ActorCtl *sub;
+    Actor *obj;
     u8 nearTarget;
     u8 flags;
     s8 started;
@@ -259,7 +203,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
         sub = obj->unk31C;
         kind = sub->unk75 & 0x7F;
         if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
-            team = obj->unk128;
+            team = obj->team;
             (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
         }
         if ((team != -1) && (D_8008FDC0 & 0x8000)) {
@@ -270,13 +214,13 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             }
             team = -1;
         }
-        if ((obj->unk128 == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
+        if ((obj->team == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
             flags |= 4;
         }
         if (kind == 0x25) {
             func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
-            px -= obj->unk14;
-            pz -= obj->unk1C;
+            px -= obj->x_position;
+            pz -= obj->z_position;
             pz = px * px + pz * pz;
             if (pz < 6250000.0f) {
                 D_8008FDBC |= 0x10;
@@ -424,9 +368,6 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     return gfx;
 }
 
-extern s8 D_80087268;
-extern s16 D_800E0AA0[];
-extern s8 D_800E0C00[];
 
 
 /* Draws each team's row of score pips; teams with no active player get a separate icon. */
@@ -562,11 +503,6 @@ typedef struct {
 } ScoreState;
 
 extern ScoreState *D_8008FDD4;
-extern s8 D_8008FDC8;
-extern s8 D_8008FD7C;
-extern s8 D_8008FE44[];
-extern s8 D_800E0AC0[];
-extern s16 D_800E0AD0[];
 extern u8 D_800ABAA8;
 extern u8 D_800ABAAC;
 extern u8 D_800ABAB0;
@@ -637,7 +573,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
                 if (amount < 0) {
                     amount = 0;
                 }
-                if (D_800CC2D0[i].unk128 == 0) {
+                if (D_800CC2D0[i].team == 0) {
                     team0Total += amount;
                 } else {
                     team1Total += amount;
@@ -944,11 +880,7 @@ extern u8 D_80E;
 extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
-extern s32 *D_800891BC[];
-extern s8 D_8008FEF0;
 extern HudModel *D_8009005C;
-extern u8 D_800BEAC1;
-extern s16 D_800C3C9E;
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
     /* 0x64 */ s32 unk64;
@@ -960,7 +892,6 @@ s32 func_1509BE40(s32, s32, s32);
 Struct1509B570 *func_1509B570(s32);
 Gfx *func_150900F0(Gfx *, s32);
 
-extern s16 D_8008FDCC;
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
 void func_151EDB58(HudModel *model);
@@ -968,15 +899,6 @@ HudModel *func_151ED90C(s32, s32, s32, f32);
 Gfx *func_151EDBDC(Gfx *, HudModel *, f32, f32, f32);
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 Gfx *func_151EADFC(Gfx *, s32, s32, s32);
-
-/* Per-player view, size 0x180; D_800BE628 points at an array of these. Only the fields used here. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 width;
-    /* 0x08 */ f32 height;
-} HudView;
-
-#define VIEWS ((HudView *)D_800BE628)
 
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *func_151EB06C(Gfx *gfx) {
@@ -989,7 +911,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     extern s32 func_1510D0EC(); // matching: unprototyped, so the texture-id calls below pass pointers as-is
     static s8 D_800900B8 = 0;
 
-    show = (D_800D2E4C->unk19 & 4) || (D_8008FDA8 < 0);
+    show = (D_800D2E4C[0x19] & 4) || (D_8008FDA8 < 0);
     if (D_800BE616 && !D_800BEAC0 && !D_800BEAC1) {
         if (!func_151E564C() || D_8008FDD4->unk42 == 1) {
             gfx = func_151E89A0(gfx, 0, 0xFF);
@@ -1069,7 +991,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
                     value = 0;
                 }
             }
-            if (D_800C35EA == 1 && D_800C3C9E != -1) {
+            if (D_800C35EA[0] == 1 && D_800C3C9E != -1) {
                 if (D_800C3C9E == 0) {
                     value = 0;
                 } else {
@@ -1089,8 +1011,8 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gSPSetGeometryMode(gfx++, 0x220404);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
-            halfWidth = VIEWS[0].width * 0.5f;
-            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(VIEWS[0].height * 0.5f), VIEWS[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            halfWidth = D_800BE628[0].width * 0.5f;
+            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
@@ -1143,8 +1065,6 @@ Gfx *func_151EB930(Gfx *gfx) {
     return gfx;
 }
 
-extern s16 D_800E0A80;
-extern s32 D_800E0A90;
 
 /* Draws the current message, a run of text lines ended by a "*" line, fading in and out. */
 Gfx *func_151EB96C(Gfx *gfx) {
@@ -1208,8 +1128,6 @@ Gfx *func_151EB96C(Gfx *gfx) {
 extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
-extern s32 D_800BE620;
-extern s32 D_800BE624;
 
 /* Draws a timed full-screen sequence over black: a growing title, a page of text lines, then an image. */
 Gfx *func_151EBB50(Gfx *gfx) {
@@ -1391,17 +1309,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     return gfx;
 }
 
-typedef struct {
-    /* 0x00 */ char pad0[8];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ char padD[3];
-} SaveSlot215960; /* size 0x10 */
 
-extern SaveSlot215960 D_800BE3F8[];
-
-extern u8 D_800E0A95;
-extern s8 D_8008FEF8;
 extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
@@ -1412,7 +1320,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     static u8 D_800900D4;
     s32 alpha;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_800900D4 = 0;
         return gfx;
     }
@@ -1452,7 +1360,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         }
         if (D_8008FDD4->unk8 >= 0.5f) {
             if (D_8008FDD4->unk2C >= 3) {
-                if (D_800BE3F8[D_8008FDD4->unk2C - 3].unk8 != -1) {
+                if (D_800BE3F8[D_8008FDD4->unk2C - 3].sequence != -1) {
                     gfx = func_151EEBE8(gfx, D_800BE3F8[D_8008FDD4->unk2C - 3].unkC);
                 }
             }
@@ -1463,13 +1371,8 @@ Gfx *func_151EC3E8(Gfx *gfx) {
 
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern f32 D_8008FDE8;
-extern s8 D_8008FE2C;
-extern s8 D_8008FE40;
 extern u8 *D_800900D8[];
 extern u8 *D_800900FC[];
-extern s8 D_800E0B90[];
-extern struct127 *D_800E0BA0[];
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;
@@ -1619,7 +1522,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         s32 slot;
         s32 valueIndex;
         s32 values[3];
-        struct127 **slotObj;
+        Actor **slotObj;
 
         sc = (D_800BE9AC & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
@@ -1737,10 +1640,6 @@ Gfx *func_151ED1E0(Gfx *gfx) {
 }
 
 
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
 
 /* Sets up the load and render tiles for a sprite; stores its LoadBlock texel count in *blockSizeOut. */
 Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
@@ -1929,7 +1828,6 @@ void func_151EDB58(HudModel *model) {
     }
 }
 
-extern Mtx D_80089470;
 extern Gfx D_80090110;
 extern Gfx D_80090128;
 extern u8 D_507;
@@ -2088,7 +1986,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     s32 rowLength;
     s32 i;
     s32 selectedKey;
-    struct127 *obj;
+    Actor *obj;
     Mtx *mtx;
     s32 j;
     u32 matchMask;
@@ -2153,7 +2051,7 @@ Gfx *func_151EE184(Gfx *gfx) {
         selectedKey--;
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
-    if (D_800BE748[0] & 0x8000) {
+    if (D_800BE748[0].button & A_BUTTON) {
         D_800E0C82 += 8;
     } else {
         D_800E0C82 -= 8;
@@ -2362,7 +2260,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         u32 size;
 
         table = NULL;
-        size = func_1502B7F0((s32 *)&table, 1, 0x1D);
+        size = func_1502B7F0((void **)&table, 1, 0x1D);
         if ((u32)index < size >> 1) {
             D_8009013C.texId = (void *)table[index];
         } else {

@@ -1,61 +1,19 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real one.
-#define func_15048A40 func_15048A40_hdr
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_15048A40
-extern f32 func_15048A40(u8 arg0);
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 extern s32 func_151EF610(void);
 
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
-/* Chunk spawn request for func_15132A4C. */
-typedef struct Struct150E5558 {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 rot[3];    // degrees
-    /* 0x1C */ f32 scale[3];
-    /* 0x28 */ f32 pos[3];
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 unk40[3];  // random in [-3, 3)
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 kind;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[6];
-} Struct150E5558;
-
-
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
-typedef struct Struct150E42F8D99F0 {
-    s16 x;
-    s16 y;
-    s16 z;
-} Struct150E42F8D99F0;
-extern Struct150E42F8D99F0 D_800D99F0;
+extern Vec3s D_800D99F0;
 
 /* Stores the point 500 units ahead of D_800DBFF0 (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
 void func_150E41C0(void) {
@@ -69,10 +27,10 @@ void func_150E41C0(void) {
     f32 c;
     f32 dx;
 
-    x = D_800DBFF0->unk2F8;
-    y = D_800DBFF0->unk2FC;
-    z = D_800DBFF0->unk300;
-    angle = D_800DBFF0->unk398;
+    x = D_800DBFF0->eye.x;
+    y = D_800DBFF0->eye.y;
+    z = D_800DBFF0->eye.z;
+    angle = D_800DBFF0->pitchRad;
     s = sinf(angle);
     c = cosf(angle);
     dx = 0.0f;
@@ -116,9 +74,9 @@ void func_150E42F8(s32 count) {
         z = func_150ADA20() % 500 + centerZ;
         y = func_1510F8D8(x, y, z, &surface);
         if (noHit != y && surface != 0) {
-            idx = (surface - D_800DBE3C) / 12;
+            idx = (surface - (s32)D_800DBE3C) / 12;
             if (idx >= 0 && idx < D_800DBE4C) {
-                material = func_1510F8CC(((s32 *)D_800DBE5C)[idx]);
+                material = func_1510F8CC(D_800DBE5C[idx]);
                 if (material != 0) {
                     func_150E4550(x, y, z, 0, material, (s16 **)surface, 0xFF);
                 }
@@ -256,45 +214,17 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
     }
 }
 
-/* Ground-probe hit records written to D_800D3300 by func_150A43E0. */
-typedef struct GroundHit {
-    s32 height; // 24.8 fixed point
-    s32 *tri;   // collision triangle: three vertex-buffer offsets
-    s32 unk8;
-    s32 unkC;
-} GroundHit;
-
-// D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
-#define sGroundHits ((GroundHit *)&D_800D3300)
-
-/* 0xA0-byte entries of the D_800DBEF4 array. */
-typedef struct Struct150E4928 {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0xA];
-    /* 0x20 */ s32 vertexBuffers[8]; // indexed by D_800BE9C0
-    /* 0x40 */ s32 material;         // used when materials is NULL
-    /* 0x44 */ s32 *materials;       // per-surface materials, from surface firstSurface on
-    /* 0x48 */ u8 pad48[8];
-    /* 0x50 */ u16 radius;           // random scatter around (x, z)
-    /* 0x52 */ u8 pad52[6];
-    /* 0x58 */ u16 firstSurface;
-    /* 0x5A */ u8 pad5A[0x46];
-} Struct150E4928;
-
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_1511490C(f32 arg0[4][4], void *arg1);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF mtx, WorldObject *obj);
 extern void func_1510F800(s32);
 
 /*
  * Probes the ground below `obj` (up to 5 random points within its radius), then spawns the hit
  * surface's impact effects there, passing the hit triangle transformed by obj's matrix.
  */
-void func_150E4928(Struct150E4928 *obj) {
+void func_150E4928(WorldObject *obj) {
     s16 idx;
     s32 i;
     s32 found;
@@ -310,10 +240,10 @@ void func_150E4928(Struct150E4928 *obj) {
     f32 outx;
     f32 outy;
     f32 outz;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     height = -10000.0f;
-    i = obj - (Struct150E4928 *)D_800DBEF4;
+    i = obj - D_800DBEF4;
     tries = 5;
     if (i < D_800DBEF0 && i >= 0) {
         idx = i;
@@ -323,17 +253,17 @@ void func_150E4928(Struct150E4928 *obj) {
         while (tries != 0) {
             x = obj->x;
             z = obj->z;
-            if (obj->radius != 0) {
-                x += (func_151EF610() % obj->radius) * 2 - obj->radius;
-                z += (func_151EF610() % obj->radius) * 2 - obj->radius;
+            if (obj->unk50 != 0) {
+                x += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
+                z += (func_151EF610() % obj->unk50) * 2 - obj->unk50;
             }
             found = func_150A43E0(x, z, 1, &idx);
             if (found) {
                 best = -0x800000;
                 while (found--) {
-                    if (best < sGroundHits[found].height) {
-                        best = sGroundHits[found].height;
-                        tri = sGroundHits[found].tri;
+                    if (best < D_800D3300[found].height) {
+                        best = D_800D3300[found].height;
+                        tri = D_800D3300[found].tri;
                         height = best / 256.0f;
                     }
                 }
@@ -345,8 +275,8 @@ void func_150E4928(Struct150E4928 *obj) {
         }
         if (found) {
             if (obj->materials != NULL) {
-                i = ((s32)tri - D_800DBE3C) / 12;
-                material = obj->materials[i - obj->firstSurface];
+                i = ((s32)tri - (s32)D_800DBE3C) / 12;
+                material = obj->materials[i - obj->firstTri];
             } else {
                 material = obj->material;
             }
@@ -354,13 +284,13 @@ void func_150E4928(Struct150E4928 *obj) {
             if (tri != NULL) {
                 // matching: IDO keeps the sum in one register only when built up in i
                 i = tri[0];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[0] = (s16 *)i;
                 i = tri[1];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[1] = (s16 *)i;
                 i = tri[2];
-                i += obj->vertexBuffers[D_800BE9C0];
+                i += (s32)obj->vertices[D_800BE9C0];
                 verts[2] = (s16 *)i;
                 for (i = 0; i < 3; i++) {
                     func_150A7960(mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);
@@ -375,7 +305,6 @@ void func_150E4928(Struct150E4928 *obj) {
         }
     }
 }
-
 
 typedef struct Struct150E4CBC {
     /* 0x00 */ u8 pad0[0x90];
@@ -413,56 +342,15 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vtx150E5810;
-
-typedef struct {
-    Vtx150E5810 v[3];
+    Vec3f v[3];
 } Tri150E5810;
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
 extern void func_15049350(Tri150E5810);
 
-/* Particle spawn request for func_15167D84. */
-typedef struct {
-    /* 0x00 */ void *data;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velX;
-    /* 0x18 */ s16 velZ;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ s8 unk1F;
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 a;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-} Spawn150E4E04;
-
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
 extern u8 D_800918AC[];
 extern u8 D_80090520[];
-extern void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+extern void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 extern f32 func_150489B0(u8);
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
@@ -487,8 +375,8 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     f32 dirZ;
     f32 len;
     f32 baseSpeed;
-    f32 mtx[4][4];
-    Spawn150E4E04 spawn;
+    MtxF mtx;
+    BillboardTemplate spawn;
     f32 speed;
     u8 angle;
     f32 vx;
@@ -540,40 +428,40 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         spawn.x = x;
         spawn.y = y;
         spawn.z = z;
-        spawn.r = 180;
-        spawn.g = 180;
-        spawn.b = 180;
-        spawn.a = 255;
-        spawn.unk1F = -1;
-        spawn.unk34 = 0;
-        spawn.unk0C = 0;
-        spawn.unk0E = 0;
+        spawn.primR = 180;
+        spawn.primG = 180;
+        spawn.primB = 180;
+        spawn.primA = 255;
+        spawn.callback = -1;
+        spawn.flags = 0;
+        spawn.frame = 0;
+        spawn.frameStep = 0;
         minScale = D_800A1110[size][1] * 95.0f / 256.0f;
         rangeScale = D_800A1110[size][1] * 130.0f / 256.0f;
         if (kind == 0x11) {
-            spawn.data = D_8009187C;
+            spawn.anim = D_8009187C;
         } else if (kind == 0xA) {
-            spawn.data = D_800918A0;
+            spawn.anim = D_800918A0;
         } else if (kind == 4 || kind == 9) {
-            spawn.data = D_800918A0;
+            spawn.anim = D_800918A0;
         } else if (kind == 8) {
-            spawn.data = D_80090520;
+            spawn.anim = D_80090520;
             minScale = 180.0f;
             rangeScale = 200.0f;
         } else {
-            spawn.data = D_800918AC;
+            spawn.anim = D_800918AC;
         }
         if (size == 2) {
             big = 1;
-            spawn.unk22 = -373;
+            spawn.accelY = -373;
             count = 12;
             baseSpeed *= 0.5f * (func_151EF610() % 3 + 1);
         } else if (size == 0) {
-            spawn.unk22 = -218;
+            spawn.accelY = -218;
             count = 12;
             baseSpeed *= 0.5f;
         } else {
-            spawn.unk22 = -218;
+            spawn.accelY = -218;
         }
         while (count-- && ok) {
             speed = func_150ADA68() * 957.0f + baseSpeed;
@@ -592,14 +480,14 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
             vx = 0.3149999976f * dirX;
             vy = dirY;
             vz = 0.3149999976f * dirZ;
-            spawn.unk28 = func_151EF610() % 2 + 386;
+            spawn.life = func_151EF610() % 2 + 386;
             spawn.velX = speed * vx;
             spawn.velY = speed * vy;
             spawn.velZ = speed * vz;
             func_151EF610();
-            spawn.unk2A = 10;
-            spawn.unk24 = func_150ADA68() * rangeScale + minScale;
-            spawn.unk26 = func_150ADA68() * rangeScale + minScale;
+            spawn.fadeStep = 10;
+            spawn.width = func_150ADA68() * rangeScale + minScale;
+            spawn.height = func_150ADA68() * rangeScale + minScale;
             if (!func_15167D84(&spawn, 0, 0, -1, 0xFF, 0)) {
                 ok = 0;
             }
@@ -612,7 +500,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
 
 /* Launches a chunk of debris `kind` from (x, y, z), flying along (dirX, -dirY, dirZ) and oriented to match. */
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size) {
-    Struct150E5558 chunk;
+    ParticleSpawn chunk;
     f32 pitch;
     f32 yaw;
     f32 speed;
@@ -632,64 +520,63 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
         yaw = 90.0f;
     }
 
-    chunk.rot[1] = yaw;
-    chunk.rot[2] = pitch;
-    chunk.scale[0] = 1.0f;
-    chunk.scale[1] = 1.0f;
-    chunk.scale[2] = 1.0f;
-    chunk.unk00 = 1.0f;
-    chunk.unk08 = 0.1700000018f;
-    chunk.unk0C = 0.1700000018f;
-    chunk.pos[0] = x;
-    chunk.pos[1] = y;
-    chunk.pos[2] = z;
-    chunk.rot[0] = 0.0f;
+    chunk.rot.y = yaw;
+    chunk.rot.z = pitch;
+    chunk.scale.x = 1.0f;
+    chunk.scale.y = 1.0f;
+    chunk.scale.z = 1.0f;
+    chunk.radius = 1.0f;
+    chunk.sizeXZ = 0.1700000018f;
+    chunk.sizeY = 0.1700000018f;
+    chunk.pos.x = x;
+    chunk.pos.y = y;
+    chunk.pos.z = z;
+    chunk.rot.x = 0.0f;
 
     if (kind == 4) {
-        chunk.kind = 6;
-        chunk.unk04 = 0.6000000238f;
+        chunk.model = 6;
+        chunk.elasticity = 0.6000000238f;
     } else if (kind == 9) {
-        chunk.kind = 8;
-        chunk.unk04 = 0.3000000119f;
+        chunk.model = 8;
+        chunk.elasticity = 0.3000000119f;
     } else {
-        chunk.kind = 7;
-        chunk.unk04 = 0.3000000119f;
+        chunk.model = 7;
+        chunk.elasticity = 0.3000000119f;
     }
 
     chunk.lifetime = func_151EF610() % 60 + 60;
     chunk.flags = 0x29E9;
 
     rand = func_150ADA68();
-    chunk.unk4C = -0.7799999714f;
+    chunk.gravity = -0.7799999714f;
     speed = rand * 4.599999905f + 1.5f;
-    chunk.vel[0] = speed * dirX;
-    chunk.vel[1] = -speed * dirY;
-    chunk.vel[2] = speed * dirZ;
+    chunk.vel.x = speed * dirX;
+    chunk.vel.y = -speed * dirY;
+    chunk.vel.z = speed * dirZ;
 
-    chunk.unk40[0] = func_150ADA68() * 6.0f + -3.0f;
-    chunk.unk40[2] = func_150ADA68() * 6.0f + -3.0f;
+    chunk.rotVel.x = func_150ADA68() * 6.0f + -3.0f;
+    chunk.rotVel.z = func_150ADA68() * 6.0f + -3.0f;
     rand = func_150ADA68() * 6.0f + -3.0f;
-    chunk.unk58 = 0;
+    chunk.variant = 0;
     chunk.unk5C = 0;
-    chunk.unk40[1] = rand;
-    chunk.unk60 = 0xFF;
-    chunk.unk61 = 1;
-    chunk.unk62 = 0;
-    chunk.unk63 = 3;
-    chunk.unk64 = 0;
-    chunk.unk65 = 0;
-    chunk.unk66 = 0;
-    chunk.unk67 = 0;
-    chunk.unk68 = 0;
+    chunk.rotVel.y = rand;
+    chunk.alpha = 0xFF;
+    chunk.updateFn = 1;
+    chunk.update2Fn = 0;
+    chunk.floorHitFn = 3;
+    chunk.floorType3Fn = 0;
+    chunk.wallHitFn = 0;
+    chunk.destroyFn = 0;
+    chunk.squashFn = 0;
+    chunk.matrixFn = 0;
     chunk.unk6A = 2;
-    chunk.unk6C = 0;
-    chunk.unk70 = 0;
-    chunk.unk72 = 0x20;
-    chunk.unk74 = 7;
+    chunk.owner = 0;
+    chunk.ownerId = 0;
+    chunk.fadeStart = 0x20;
+    chunk.fadeRate = 7;
 
     func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
-
 
 typedef struct Struct150E5810 {
     /* 0x00 */ u8 pad0[0x10];
@@ -718,9 +605,9 @@ s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY
     f32 len;
     f32 pad; // matching: unused stack slot
     f32 dot;
-    struct17 vel;
-    struct17 normal;
-    struct17 unit;
+    Vec3f vel;
+    Vec3f normal;
+    Vec3f unit;
 
     obj->unk3C = obj->unk10 * 1.100000024f + groundY;
     if (obj->velY > -2.0f) {
@@ -737,21 +624,21 @@ s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY
                 tri.v[i].z = verts[i][2];
             }
             func_15049350(tri);
-            normal.unk0 = -D_800CC210;
-            normal.unk4 = -D_800CC214;
-            normal.unk8 = -D_800CC218;
-            len = func_150AD930(&normal.unk0);
+            normal.x = -D_800CC210;
+            normal.y = -D_800CC214;
+            normal.z = -D_800CC218;
+            len = func_150AD930(&normal.x);
             if (len > 9.999999747e-06f) {
                 func_15049148(&normal, 1.0f / len, &unit);
-                vel.unk0 = obj->velX;
-                vel.unk4 = obj->velY;
-                vel.unk8 = obj->velZ;
-                dot = func_150AD900(&unit.unk0, &vel.unk0);
+                vel.x = obj->velX;
+                vel.y = obj->velY;
+                vel.z = obj->velZ;
+                dot = func_150AD900(&unit.x, &vel.x);
                 func_15049148(&unit, 2.0f * dot, &normal);
                 func_15048F58(&vel, &normal, &normal);
-                obj->velX = obj->bounce * normal.unk0 * 0.8000000119f;
-                obj->velY = obj->bounce * normal.unk4;
-                obj->velZ = obj->bounce * normal.unk8 * 0.8000000119f;
+                obj->velX = obj->bounce * normal.x * 0.8000000119f;
+                obj->velY = obj->bounce * normal.y;
+                obj->velZ = obj->bounce * normal.z * 0.8000000119f;
             }
         } else {
             obj->velX *= obj->bounce;

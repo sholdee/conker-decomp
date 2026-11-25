@@ -1,17 +1,11 @@
 #include <ultra64.h>
-/* functions.h declares func_1513D524 as returning void; this file uses the particle it returns. */
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* Settings an emitter is created with; copied verbatim into Emitter.params. */
 typedef struct EmitterParams {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId;   // owner->unique_id at creation; the emitter dies when it changes
     /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
     /* 0x8 */ u8 flags;
@@ -86,30 +80,6 @@ typedef struct {
     /* 0x110 */ ParticleData data;
 } Particle;
 
-/* Arguments for func_1513D524, partly filled by a D_8008D620 callback. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 pad4[4];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[0x12];
-} ParticleSpawn; /* 0x58 */
-
 /* An emission point attached to one of the owner's bones. */
 typedef struct {
     /* 0x0 */ Vec3f pos;
@@ -136,14 +106,14 @@ typedef struct {
     /* 0x34 */ u8 bone;
 } EmitterInfo;
 
-/* IDs (struct127.unk84) that select one row of an EmitterTable. */
+/* IDs (Actor.unk84) that select one row of an EmitterTable. */
 typedef struct {
     /* 0x0 */ s16 count;
     /* 0x4 */ u8 *ids;
 } EmitterIdList;
 
 /*
- * infos holds (n + 2) entries per owner variant (struct127.pad1C8): one per id list,
+ * infos holds (n + 2) entries per owner variant (Actor.lod): one per id list,
  * then the attached-mode default, then the unattached one.
  */
 typedef struct {
@@ -192,7 +162,6 @@ extern s32 (*D_8008D628[])(Emitter *);
 
 void *memcpy(void *, const void *, u32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern Particle *func_1513D524(ParticleSpawn *, u8, u8, u8, u8, u8, s32, u8, s32);
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -200,7 +169,7 @@ void func_1518E308(Emitter *emitter);
 Emitter *func_1518E3C4(EmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
     EmitterParams params;
     s32 i;
@@ -214,11 +183,11 @@ Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting
             D_800DD190++;
             emitter = D_800DCE50[i][0x21];
             while (emitter != NULL) {
-                ((Emitter **)D_800DD198)[D_800DD190] = emitter->next;
+                D_800DD198[D_800DD190] = emitter->next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
                     func_1516972C((struct102 *)emitter);
                 }
-                emitter = ((Emitter **)D_800DD198)[D_800DD190];
+                emitter = D_800DD198[D_800DD190];
             }
             {
                 // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190
@@ -402,7 +371,7 @@ void func_1518D6E0(Emitter *emitter) {
             table = D_8008D5E0[self->params.table];
             if (self->params.owner->unk1D4 != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
                 attach = 4;
-                row = &table->infos[self->params.owner->pad1C8 * (table->n + 2)];
+                row = &table->infos[self->params.owner->lod * (table->n + 2)];
                 i = 0;
                 found = 0;
                 info = row[table->n];
@@ -420,7 +389,7 @@ void func_1518D6E0(Emitter *emitter) {
                     } while (!found && i < table->n);
                 }
             } else {
-                info = table->infos[self->params.owner->pad1C8 * (table->n + 2) + table->n + 1];
+                info = table->infos[self->params.owner->lod * (table->n + 2) + table->n + 1];
                 attach = 2;
             }
             if (!(self->state & 8) && (self->state != attach || info->mode != self->infoMode)) {
@@ -472,7 +441,7 @@ void func_1518D6E0(Emitter *emitter) {
                         func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
                         slot->particle->lifetime =
-                            (u32)func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
+                            func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->flags |= 1;
                         slot->particle = NULL;
                         self->count--;
@@ -492,7 +461,7 @@ void func_1518D6E0(Emitter *emitter) {
             if (numFree != 0) {
                 self->accum += info->rate;
                 if (self->accum > 1.0f) {
-                    ParticleSpawn spawn;
+                    ParticleDef spawn;
                     ParticleData data;
                     ParticleTemplate *tmpl;
                     u8 ok;
@@ -501,11 +470,11 @@ void func_1518D6E0(Emitter *emitter) {
                     tmpl = info->tmpl;
                     ok = 1;
                     prevFree->next = freeSlot;
-                    spawn.unk8 = 0;
+                    spawn.frame = 0;
                     data.unk20 = tmpl->unk14;
                     data.unk24 = tmpl->unk18;
                     data.unk2C = 0;
-                    spawn.unkC = (tmpl->unk14 + tmpl->unk18) * 0.5f;
+                    spawn.frameSpeed = (tmpl->unk14 + tmpl->unk18) * 0.5f;
                     data.unk3C = tmpl->unk1C;
                     data.unk40 = tmpl->unk20;
                     data.unk44 = tmpl->unk24;
@@ -516,29 +485,29 @@ void func_1518D6E0(Emitter *emitter) {
                     data.unk0 = tmpl->unk0 * self->scale;
                     data.unk4 = tmpl->unk4 * self->scale;
                     data.unk1C = 0;
-                    data.unk8 = spawn.unk14 = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
+                    data.unk8 = spawn.width = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
                     data.unkC = tmpl->unk8 * self->scale;
                     data.unk10 = tmpl->unkC * self->scale;
                     data.unk14 = tmpl->unk10 * self->scale;
                     data.unk1E = 0;
-                    data.unk18 = spawn.unk18 = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
+                    data.unk18 = spawn.height = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
                     data.tmpl = tmpl;
-                    spawn.unk34 = 1.0f;
-                    spawn.unk38 = 0.0f;
-                    spawn.unk3C = 1.0f;
-                    spawn.unk40 = 0x40000000;
+                    spawn.scale.x = 1.0f;
+                    spawn.scale.y = 0.0f;
+                    spawn.scale.z = 1.0f;
+                    spawn.flags = 0x40000000;
                     spawn.unk44 = 0xFF;
                     spawn.unk45 = 0xFF;
                     while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
                         s32 skip;
 
-                        skip = (u32)func_150ADA20() % (numFree + 1);
+                        skip = func_150ADA20() % (numFree + 1);
                         while (skip--) {
                             prevFree = freeSlot;
                             freeSlot = freeSlot->next;
                         }
-                        D_8008D620[tmpl->spawnCb](&spawn.unk0, &spawnFlag, &spawn.unk10, &spawn.unk11,
-                                                  &spawn.unk12, &spawn.unk13, &spawn.unk2);
+                        D_8008D620[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
+                                                  &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
                         freeSlot->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
                                                            spawnFlag, sizeof(ParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
@@ -590,7 +559,7 @@ void func_1518D6E0(Emitter *emitter) {
                                               (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
                             }
                             freeSlot->particle->prevPos = freeSlot->particle->pos;
-                            freeSlot->timer = (u32)func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
+                            freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
                             freeSlot = freeSlot->next;
                             prevFree->next = freeSlot;
                             self->count++;
@@ -622,12 +591,12 @@ typedef struct {
     /* 0x04 */ s16 y;
     /* 0x06 */ s16 z;
     /* 0x08 */ u8 pad8[0x14];
-    /* 0x1C */ struct127 *target;
+    /* 0x1C */ Actor *target;
 } Struct1518E298;
 
 /* Copies the target's position into the tracker (as s16); returns 1 when there is no live target. */
 s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
-    struct127 *target;
+    Actor *target;
 
     target = tracker->target;
     if (target != NULL && target->interaction_state != 0) {

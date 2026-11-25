@@ -23,23 +23,23 @@ void func_15016690(s32 arg0) {
         D_800D212C = allocate_memory(24, 1, 0, 0);
         D_800D2128 = 1U;
         if (D_800D20FC) {
-            D_800D212C->unk0 = D_800D20FC->unk6;
-            D_800D212C->unk2 = D_800D20FC->unk8;
-            D_800D212C->unk4 = D_800D20FC->unkA;
-            D_800D212C->unk8 = D_800D20FC->unk6 + 100;
-            D_800D212C->unkC = D_800D20FC->unk8 + 100;
-            D_800D212C->unk10 = D_800D20FC->unkA;
+            D_800D212C->pos[0] = D_800D20FC->x;
+            D_800D212C->pos[1] = D_800D20FC->y;
+            D_800D212C->pos[2] = D_800D20FC->z;
+            D_800D212C->unk8[0] = D_800D20FC->x + 100;
+            D_800D212C->unk8[1] = D_800D20FC->y + 100;
+            D_800D212C->unk8[2] = D_800D20FC->z;
             D_800D212C->unk6 = 0;
-            D_800D212C->unk7 = D_800D20FC->unkC;
+            D_800D212C->facing = D_800D20FC->angle;
             D_800D212C->unk15 = 0;
         } else {
-            D_800D212C->unk0 = 0xE10;
-            D_800D212C->unk2 = -0xC80;
-            D_800D212C->unk4 = -0x898;
-            D_800D212C->unk10 = 1000.0f;
-            D_800D212C->unk8 = D_800D212C->unkC = D_800D212C->unk10;
+            D_800D212C->pos[0] = 0xE10;
+            D_800D212C->pos[1] = -0xC80;
+            D_800D212C->pos[2] = -0x898;
+            D_800D212C->unk8[2] = 1000.0f;
+            D_800D212C->unk8[0] = D_800D212C->unk8[1] = D_800D212C->unk8[2];
             D_800D212C->unk6 = 0;
-            D_800D212C->unk7 = 0;
+            D_800D212C->facing = 0;
             D_800D212C->unk15 = 0;
           }
     }

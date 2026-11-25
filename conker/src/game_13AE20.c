@@ -1,20 +1,11 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real one.
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-} Point3s; /* size = 0x6 */
-
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
-typedef struct {
+struct Shadow {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
     /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
@@ -28,8 +19,8 @@ typedef struct {
     /* 0x123 */ u8 visible;
     /* 0x124 */ u8 flags;
     /* 0x125 */ u8 pad125[3];
-    /* 0x128 */ Point3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
-} Shadow; /* size = 0x128 or 0x13A */
+    /* 0x128 */ Vec3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
+}; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
 Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s32 flags) {
@@ -74,57 +65,16 @@ Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s3
     return shadow;
 }
 
-/* This file's view of a struct127 game object (cf. GameObj in game_58F80.c), shadow owner type 0. */
-typedef struct {
-    /* 0x000 */ u8 pad0[4];
-    /* 0x004 */ u8 id;
-    /* 0x005 */ u8 pad5[0xF];
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ u8 pad20[0x5A];
-    /* 0x07A */ u16 unk7A; /* high byte: yaw angle */
-    /* 0x07C */ u8 pad7C[0xD0];
-    /* 0x14C */ f32 xz_scale;
-    /* 0x150 */ u8 pad150[0x10];
-    /* 0x160 */ u16 unk160;
-    /* 0x162 */ u8 pad162[0x1E];
-    /* 0x180 */ f32 floorY;
-    /* 0x184 */ u8 pad184[4];
-    /* 0x188 */ Point3s **floorTriPtrs;
-    /* 0x18C */ Point3s floorTri[3];
-} GameObj;
-
-/* This file's view of the 0xA0-byte objects at D_800DBEF4 (cf. Game13F9D0Obj in game_13F9D0.c), owner type 1. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Point3s pos;
-    /* 0x16 */ u8 pad16[0x16];
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ u8 pad30[0x1D];
-    /* 0x4D */ u8 unk4D;
-    /* 0x4E */ u8 pad4E[0x20];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[2];
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ u8 pad72[0x18];
-    /* 0x8A */ u8 alpha;
-    /* 0x8B */ u8 viewAlpha[5];
-    /* 0x90 */ u8 pad90[4];
-    /* 0x94 */ Shadow *shadow;
-} Game13F9D0Obj;
-
-extern f32 func_15048A40(u8 angle); /* sin */
 extern f32 func_150489B0(u8 angle); /* cos */
-extern s32 func_150A3FC4(f32, f32, s32, Point3s *, f32 *);
-s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ);
-extern void func_1510E7A4(s32, Point3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
+extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
+s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
+extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
 void func_1510DA84(Shadow *shadow) {
     s32 i;
     s32 alpha;
-    GameObj *obj;
+    Actor *obj;
     s32 pad[4]; // matching: -g3 gives unused locals stack slots; these pads keep corner, x, floorY... at the target offsets
     f32 corner[2][3];
     f32 height;
@@ -141,18 +91,18 @@ void func_1510DA84(Shadow *shadow) {
     f32 z;
     f32 floorY;
     f32 scale;
-    Point3s **triPtrs;
-    Point3s *tri;
+    Vec3s **triPtrs;
+    Vec3s *tri;
     u8 angle;
     f32 sinYaw;
     f32 cosYaw;
     s32 pad6; // matching: stack slot pad
-    Game13F9D0Obj *prop;
+    WorldObject *prop;
 
     shadow->visible = FALSE;
     switch (shadow->ownerType) {
         case 0:
-            obj = (GameObj *)shadow->owner;
+            obj = (Actor *)shadow->owner;
             x = obj->x_position;
             ownerY = obj->y_position;
             z = obj->z_position;
@@ -160,25 +110,25 @@ void func_1510DA84(Shadow *shadow) {
             if (obj->id == 0x25) {
                 ownerY = floorY;
             }
-            triPtrs = obj->floorTriPtrs;
-            tri = obj->floorTri;
+            triPtrs = obj->unk188;
+            tri = obj->floorTri.v;
             scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
             angle = (obj->unk7A >> 8) + 0x20;
             break;
         case 1:
-            prop = (Game13F9D0Obj *)shadow->owner;
-            if (prop->unk6E == 1) {
+            prop = (WorldObject *)shadow->owner;
+            if (prop->inactive == 1) {
                 return;
             }
             tri = prop->shadow->floorTri;
-            if (func_150A3FC4(prop->pos.x, prop->pos.z, 0, tri, &floorY) == 0) {
-                func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->pos.x, prop->pos.y, prop->pos.z, prop->pos.y,
-                              prop->unk71 + 1, 0, -10000.0f, prop->pos.y);
+            if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
+                func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
+                              prop->index + 1, 0, -10000.0f, prop->y);
             }
             triPtrs = NULL;
-            x = prop->pos.x;
-            ownerY = prop->pos.y;
-            z = prop->pos.z;
+            x = prop->x;
+            ownerY = prop->y;
+            z = prop->z;
             scale = (f32)(prop->unk4D * 4) * prop->scaleX;
             angle = 0;
             break;
@@ -271,9 +221,6 @@ extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B0[];
-extern s16 D_800DD1C6;
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
@@ -285,7 +232,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         func_150A7D00(&shadow->mtx[D_800BE9C0], shadow->x, shadow->floorY, shadow->z);
         gSPMatrix(gfx++, &shadow->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (D_800DD1B4 != shadow->texture) {
-            D_800DD1B0[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
+            (&D_800DD1B0)[1] = shadow->texture; // matching: D_800DD1B4 through another symbol keeps the split %hi/%lo
             tex = func_1510D0EC(D_80091770[shadow->texture], 0, 0x3E, 0);
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
@@ -299,7 +246,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
                 ownerAlpha = func_1506196C(shadow->owner, view);
                 break;
             case 1: {
-                Game13F9D0Obj *prop = (Game13F9D0Obj *)shadow->owner;
+                WorldObject *prop = (WorldObject *)shadow->owner;
 
                 ownerAlpha = (prop->alpha * prop->viewAlpha[view] + 0xFF) >> 8;
                 break;
@@ -323,7 +270,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
  * Solves the plane of a triangle (given as vertices or as vertex pointers) for its slopes dy/dx and dy/dz,
  * trying each corner and edge order until the system is solvable. Returns 0 (slopes 0) if none is.
  */
-s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ) {
+s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
     f32 ax;
     f32 ay;
     f32 az;
@@ -418,7 +365,6 @@ s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ) {
     return 1;
 }
 
-extern Mtx D_80089470;
 
 /* Loads the fixed matrix D_80089470 as the modelview matrix (arg1 and arg2 are unused). */
 Gfx *func_1510E634(Gfx *gfx, s32 arg1, s32 arg2) {

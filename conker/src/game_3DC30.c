@@ -17,17 +17,17 @@ void func_15010880(void) {
     func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
     D_800E0934 = (s32) func_150DE32C;
 dummy_label_15010880:
-    base = *(s32 *) &D_800D3098;
+    base = (s32)D_800D3098;
 
     tmp.unk0 = 0;
     tmp.unk4 = base + 0xEA0;
     tmp.unk8 = base + 0xED4;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0, (struct37 *) 0xC, 0xFF, 1);
+    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *) temp_v0 + 0x28, &tmp, 0xC);
     }
-    if (D_800D2E4C->unk12 & 0x40) {
+    if (D_800D2E4C[0x12] & 0x40) {
         func_15149130(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
     }
 }
@@ -47,7 +47,7 @@ dummy_label_15010880:
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
-//     if ((D_800D2E4C->unk12 & 0x40) != 0) {
+//     if ((D_800D2E4C[0x12] & 0x40) != 0) {
 //         func_15149130(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }

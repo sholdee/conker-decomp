@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800D98F0;
 void func_151827D0(void);
 
 void func_150D0730(s32 arg0) {
@@ -37,9 +36,9 @@ void func_150D0730(s32 arg0) {
     if (var_s0 != 0) {
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
         func_10010F88((func_150ADA20() % 3U) + 0x6C, 0x5DC0, 0, 0, 0,
-                      ((struct178 *)*(s32 *)&D_800D3098)[var_s0].unk0,
-                      ((struct178 *)*(s32 *)&D_800D3098)[var_s0].pad2,
-                      ((struct178 *)*(s32 *)&D_800D3098)[var_s0].unk4,
+                      D_800D3098[var_s0].x,
+                      D_800D3098[var_s0].y,
+                      D_800D3098[var_s0].z,
                       0x320, 0x5DC);
     }
 }

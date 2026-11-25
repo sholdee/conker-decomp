@@ -3,20 +3,20 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-s32 func_150229E4(struct127 *arg0);
-void func_1504BB88(struct127 *arg0);
-s32 func_150535F4(struct127 *arg0);
-void func_15053750(struct127 *arg0);
-void func_15054F74(struct127 *arg0);
-void func_150562FC(struct127 *arg0);
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_150597FC(struct127 *arg0);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
+s32 func_150229E4(Actor *arg0);
+void func_1504BB88(Actor *arg0);
+s32 func_150535F4(Actor *arg0);
+void func_15053750(Actor *arg0);
+void func_15054F74(Actor *arg0);
+void func_150562FC(Actor *arg0);
+void func_15056B08(Actor *arg0);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_150597FC(Actor *arg0);
 void func_150AFC68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 /* Object update step shared by several behaviours: runs the common per-object helpers. */
-void func_15052590(struct127 *obj) {
+void func_15052590(Actor *obj) {
     s32 flags;
 
     flags = obj->unk25C;
@@ -26,8 +26,7 @@ void func_15052590(struct127 *obj) {
         func_150AFC68(D_800C3E78, 2, 0x3FC, 6, 0xFF, 0);
     }
 
-    // D_800C3654 is declared s32 in variables.h but is read here as a byte
-    if ((D_800C35EA != 1) || ((*(u8 *)&D_800C3654 != 0) && (func_150229E4(obj) == 0))) {
+    if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
         func_15053750(obj);
         func_1504BB88(obj);
         obj->unk80 = 10;

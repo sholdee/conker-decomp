@@ -5,16 +5,17 @@
 
 
 void func_10003BD0(void) {
-    struct54 *tmp;
+    AllocatorFreeBlock *heap;
 
-    D_800380B4 = (struct54 *)&D_800E9D10;
-    D_800380B4->unk0 = NULL;
-    D_800380B4->unk4 = NULL;
-    D_800380B4->unk8 = D_80038098 - (u32)&D_800E9D10 - 0x14;
-    D_800380B4->unkC = 0;
-    D_800380B4->unk10 = 0;
-    tmp = D_800380B4;
-    D_800380BC = (s32 *)tmp;
-    D_800380B8 = (struct54 *)D_800380BC;
-    D_800380B0 = tmp;
+    // the whole heap starts as one free block
+    D_800380B4 = (AllocatorBlock *)D_800E9D10;
+    D_800380B4->next = NULL;
+    D_800380B4->prev = NULL;
+    D_800380B4->taggedSize = D_80038098 - (u32)D_800E9D10 - sizeof(AllocatorFreeBlock);
+    ((AllocatorFreeBlock *)D_800380B4)->nextFree = NULL;
+    ((AllocatorFreeBlock *)D_800380B4)->prevFree = NULL;
+    heap = (AllocatorFreeBlock *)D_800380B4;
+    D_800380BC = heap;
+    D_800380B8 = D_800380BC;
+    D_800380B0 = heap;
 }

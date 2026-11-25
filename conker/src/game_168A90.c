@@ -74,11 +74,11 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);
-extern struct17 *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 
 extern s32 (*D_80089C18[])(DynModel *);
 extern s32 (*D_80089C28[])(DynModel *, s16);
-extern struct17 D_800A49C0[9];
+extern Vec3f D_800A49C0[9];
 extern VtxRange D_800A4A2C[9];
 
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
@@ -255,7 +255,7 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
     f32 offsetS;
     f32 offsetT;
     s32 k;
-    struct17 *viewPos;
+    Vec3f *viewPos;
     f32 dirX;
     f32 dirZ;
     s32 j;
@@ -271,8 +271,8 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
         f32 dx;
         f32 dz;
 
-        dx = D_800A49C0[k].unk0 - viewPos->unk0;
-        dz = D_800A49C0[k].unk8 - viewPos->unk8;
+        dx = D_800A49C0[k].x - viewPos->x;
+        dz = D_800A49C0[k].z - viewPos->z;
         if (dx != 0.0f || dz != 0.0f) {
             f32 invLen;
 
@@ -296,9 +296,9 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
             x = vtx->v.ob[0];
             y = vtx->v.ob[1];
             z = vtx->v.ob[2];
-            ex = x - D_800A49C0[k].unk0;
-            ey = y - D_800A49C0[k].unk4;
-            ez = z - D_800A49C0[k].unk8;
+            ex = x - D_800A49C0[k].x;
+            ey = y - D_800A49C0[k].y;
+            ez = z - D_800A49C0[k].z;
             vtx->v.tc[0] = (ex * dirX + ez * dirZ) * scaleS - offsetS;
             vtx->v.tc[1] = ey * scaleT - offsetT;
         }

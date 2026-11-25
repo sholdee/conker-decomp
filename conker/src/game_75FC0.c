@@ -10,9 +10,9 @@ static const f32 D_80099038[] = { 21.71730423f, -48.57290649f, 37.10492325f, -11
 static const f32 D_8009904C[] = { 0.0f, -3.184573889f, 3.210297108f, -0.6077240109f };
 static const f32 D_8009905C[] = { -19.10744667f, 27.86013031f, -11.06533718f, 1.0f, 0.0f };
 
-void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF out);
 
 /*
  * Builds the inverse of the rigid part (translation and rotation, no scale) of a transform.
@@ -28,12 +28,12 @@ void func_15048B10(s32 mtx, s32 out) {
     f32 rotX;
     f32 rotY;
     f32 rotZ;
-    f32 rotXMtx[4][4];
-    f32 rotYMtx[4][4];
-    f32 rotZMtx[4][4];
-    f32 translate[4][4];
-    f32 tmp1[4][4];
-    f32 tmp2[4][4];
+    MtxF rotXMtx;
+    MtxF rotYMtx;
+    MtxF rotZMtx;
+    MtxF translate;
+    MtxF tmp1;
+    MtxF tmp2;
 
     func_1503E5F8((f32 (*)[4])mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
     guMtxIdentF(translate);
@@ -120,40 +120,40 @@ f32 func_15048C30(f32 x) {
 }
 
 /* out = a + b */
-void func_15048F20(struct17 *a, struct17 *b, struct17 *out) {
-    out->unk0 = a->unk0 + b->unk0;
-    out->unk4 = a->unk4 + b->unk4;
-    out->unk8 = a->unk8 + b->unk8;
+void func_15048F20(Vec3f *a, Vec3f *b, Vec3f *out) {
+    out->x = a->x + b->x;
+    out->y = a->y + b->y;
+    out->z = a->z + b->z;
 }
 
 /* out = a - b */
-void func_15048F58(struct17 *a, struct17 *b, struct17 *out) {
-    out->unk0 = a->unk0 - b->unk0;
-    out->unk4 = a->unk4 - b->unk4;
-    out->unk8 = a->unk8 - b->unk8;
+void func_15048F58(Vec3f *a, Vec3f *b, Vec3f *out) {
+    out->x = a->x - b->x;
+    out->y = a->y - b->y;
+    out->z = a->z - b->z;
 }
 
 /* out = to - from */
-void func_15048F90(struct17 *from, struct17 *to, struct17 *out) {
-    out->unk0 = to->unk0 - from->unk0;
-    out->unk4 = to->unk4 - from->unk4;
-    out->unk8 = to->unk8 - from->unk8;
+void func_15048F90(Vec3f *from, Vec3f *to, Vec3f *out) {
+    out->x = to->x - from->x;
+    out->y = to->y - from->y;
+    out->z = to->z - from->z;
 }
 
 /* Heading of a vector in the XZ plane, in degrees [0, 360). */
-f32 func_15048FC8(struct17 *vec) {
+f32 func_15048FC8(Vec3f *vec) {
     f32 len;
     f32 angle;
 
-    len = sqrtf((vec->unk0 * vec->unk0) + (vec->unk8 * vec->unk8));
+    len = sqrtf((vec->x * vec->x) + (vec->z * vec->z));
     if (len == 0.0f) {
         return 0.0f;
     }
 
-    angle = -vec->unk0 / len; // matching: the sine goes through `angle` before the asinf call
+    angle = -vec->x / len; // matching: the sine goes through `angle` before the asinf call
     angle = func_15048C30(angle);
 
-    if (vec->unk8 > 0.0f) {
+    if (vec->z > 0.0f) {
         angle = 270.0f - (angle * 57.29577637f);
     } else {
         angle = 90.0f + (angle * 57.29577637f);
@@ -168,20 +168,20 @@ f32 func_15048FC8(struct17 *vec) {
 }
 
 /* Heading of a vector in the XZ plane as an integer angle, from the func_15048864 lookup table. */
-s32 func_150490A8(struct17 *vec) {
+s32 func_150490A8(Vec3f *vec) {
     f32 len;
     s32 angle;
 
-    len = sqrtf((vec->unk0 * vec->unk0) + (vec->unk8 * vec->unk8));
+    len = sqrtf((vec->x * vec->x) + (vec->z * vec->z));
 
     if (len == 0.0f) {
         return 0;
     }
 
-    len = vec->unk0 / len; // matching: IDO needs the ratio in the same f32 local as the length
+    len = vec->x / len; // matching: IDO needs the ratio in the same f32 local as the length
     angle = func_15048864(len);
 
-    if (vec->unk8 > 0.0f) {
+    if (vec->z > 0.0f) {
         if (angle < 64) {
             angle = 128 - angle;
         } else {
@@ -192,28 +192,28 @@ s32 func_150490A8(struct17 *vec) {
 }
 
 /* out = vec * scale */
-void func_15049148(struct17 *vec, f32 scale, struct17 *out) {
-    out->unk0 = vec->unk0 * scale;
-    out->unk4 = vec->unk4 * scale;
-    out->unk8 = vec->unk8 * scale;
+void func_15049148(Vec3f *vec, f32 scale, Vec3f *out) {
+    out->x = vec->x * scale;
+    out->y = vec->y * scale;
+    out->z = vec->z * scale;
 }
 
 /* out = vec normalized (a zero vector stays zero) */
-void func_1504917C(struct17 *vec, struct17 *out) {
-    f32 scale = func_150AD930(&vec->unk0);
+void func_1504917C(Vec3f *vec, Vec3f *out) {
+    f32 scale = func_150AD930(&vec->x);
 
     if (scale != 0.0f) {
         scale = 1.0f / scale;
     }
-    out->unk0 = vec->unk0 * scale;
-    out->unk4 = vec->unk4 * scale;
-    out->unk8 = vec->unk8 * scale;
+    out->x = vec->x * scale;
+    out->y = vec->y * scale;
+    out->z = vec->z * scale;
 }
 
 /* out = unit vector pointing from `from` to `to` */
-void func_150491EC(struct17 *from, struct17 *to, struct17 *out) {
-    out->unk0 = to->unk0 - from->unk0;
-    out->unk4 = to->unk4 - from->unk4;
-    out->unk8 = to->unk8 - from->unk8;
+void func_150491EC(Vec3f *from, Vec3f *to, Vec3f *out) {
+    out->x = to->x - from->x;
+    out->y = to->y - from->y;
+    out->z = to->z - from->z;
     func_1504917C(out, out);
 }

@@ -1,59 +1,58 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as void; it returns f32
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
-extern f32 func_15048A40(u8 angle);
+/*
+ * Behaviour scratch state (WorldObject.work) of the two behaviours here: the pendulum's push phase
+ * (func_150C4D20) and the texture scroll state (func_150C4E9C).
+ */
+typedef union {
+    struct {
+        /* 0x7C */ s32 phase; // drives the push of func_15048A40; plays sound 0xF each time it wraps 256
+    } pendulum;
+    struct {
+        /* 0x7C */ struct ScrollState *state; // allocated on first use
+    } scroll;
+} WorkF21D0;
 
-/* An object func_150C4D20 swings like a pendulum about angle 0. */
-typedef struct {
-    /* 0x00 */ f32 angle; // degrees, wrapped into [0, 360)
-    /* 0x04 */ u8  pad4[0xC];
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ u8  pad16[0x39];
-    /* 0x4F */ u8  flags;
-    /* 0x50 */ u8  pad50[0x10];
-    /* 0x60 */ f32 angularVelocity; // degrees per frame
-    /* 0x64 */ u8  pad64[0x18];
-    /* 0x7C */ s32 phase; // drives the push of func_15048A40; plays sound 0xF each time it wraps 256
-} Pendulum;
+#define WORK(obj) ((WorkF21D0 *)&(obj)->work)
 
-/* Swings the pendulum: a spring pulls it back toward angle 0, a periodic push from func_15048A40(phase)
- * (plus a constant one while flags bit 2 is set) drives it, and 20% damping is applied every frame. */
-void func_150C4D20(Pendulum *pendulum) {
+/*
+ * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward
+ * angle 0, a periodic push from func_15048A40(phase) (plus a constant one while flags bit 2 is set) drives
+ * it, and 20% damping is applied every frame.
+ */
+void func_150C4D20(WorldObject *pendulum) {
     f32 velocity;
     f32 angle;
     f32 push;
     s32 phase;
 
-    angle = pendulum->angle;
-    velocity = pendulum->angularVelocity;
+    angle = pendulum->rotX;
+    velocity = pendulum->spinX;
     if (angle > 180.0f) {
         angle -= 360.0f;
     }
-    phase = pendulum->phase;
+    phase = WORK(pendulum)->pendulum.phase;
     phase += D_800BE9E4;
     velocity -= angle * 0.009f;
     if (phase >= 256.0f) {
         phase -= 256.0f;
-        func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->position[0], pendulum->position[1], pendulum->position[2],
-                      500, 1000);
+        func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->x, pendulum->y, pendulum->z, 500, 1000);
     }
-    pendulum->phase = phase;
+    WORK(pendulum)->pendulum.phase = phase;
     push = func_15048A40(phase);
     velocity += push * 0.1f;
     if ((pendulum->flags & 4) == 4) {
         velocity += 0.1f;
     }
     velocity *= 0.8f;
-    pendulum->angularVelocity = velocity;
-    pendulum->angle += velocity;
-    if (pendulum->angle < 0.0f) {
-        pendulum->angle += 360.0f;
-    } else if (pendulum->angle >= 360.0f) {
-        pendulum->angle -= 360.0f;
+    pendulum->spinX = velocity;
+    pendulum->rotX += velocity;
+    if (pendulum->rotX < 0.0f) {
+        pendulum->rotX += 360.0f;
+    } else if (pendulum->rotX >= 360.0f) {
+        pendulum->rotX -= 360.0f;
     }
 }
 
@@ -66,51 +65,38 @@ extern u8 D_2C1;
 extern u8 D_1C0;
 
 /* Per-object state of func_150C4E9C, allocated on first use. */
-typedef struct {
+typedef struct ScrollState {
     /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from func_1511A410
     /* 0x04 */ s16 startT;        // vertex 0's initial t texture coordinate
     /* 0x06 */ u8  pad6[2];
     /* 0x08 */ f32 speed;         // t units scrolled per frame
     /* 0x0C */ f32 unkC;
-} TexScroll;
-
-typedef struct {
-    /* 0x00 */ u8  pad0[0x16];
-    /* 0x16 */ u16 vertexCount;
-    /* 0x18 */ u8  pad18[4];
-    /* 0x1C */ Gfx *dl;
-    /* 0x20 */ Vtx *vertices[2]; // double-buffered, indexed by D_800BE9C0
-    /* 0x28 */ Vtx *unk28;
-    /* 0x2C */ u8  pad2C[0x47];
-    /* 0x73 */ u8  state; // low two bits: scroll mode
-    /* 0x74 */ u8  pad74[8];
-    /* 0x7C */ TexScroll *scroll;
-} TexScrollObject;
+} ScrollState;
 
 /*
- * Scrolls the t texture coordinate of the object's vertices. Scroll mode (state & 3): 0 and 3 stand still,
+ * Scrolls the t texture coordinate of the object's vertices. Scroll mode (behaviorState & 3): 0 and 3 stand still,
  * 2 speeds up to 300 per frame, 1 slows to 100 and then stops (switching to mode 3) once the scroll lines up
  * with the start position again. Binds texture 0x2C1 (modes 0, 2) or 0x1C0 (modes 1, 3) to segment 4 and,
  * when the dl has a second G_SETTIMG, the texture's last 0x200 bytes to segment 5.
  */
-void func_150C4E9C(TexScrollObject *obj) {
+void func_150C4E9C(WorldObject *obj) {
     s32 texture;
     s32 size;
     s32 addr;
     s32 tailAddr;
-    TexScroll *scroll;
+    ScrollState *scroll;
     s32 mode;
     s32 i;
 
-    mode = obj->state & 3;
-    if (obj->scroll == NULL) {
-        scroll = obj->scroll = allocate_memory(sizeof(TexScroll), 1, 0, 0);
-        func_1511A410(obj->dl, &scroll->secondSetTImg);
-        scroll->startT = obj->unk28->v.tc[1];
+    mode = obj->behaviorState & 3;
+    if (WORK(obj)->scroll.state == NULL) {
+        scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
+        func_1511A410(obj->displayList, &scroll->secondSetTImg);
+        scroll->startT = obj->srcVertices->v.tc[1];
         scroll->speed = 0.0f;
         scroll->unkC = 0.0f;
     } else {
-        scroll = obj->scroll;
+        scroll = WORK(obj)->scroll.state;
     }
     // matching: the texture index is loaded as a symbol address (lui/addiu), not as a literal
     if (mode == 0 || mode == 2) {
@@ -145,18 +131,18 @@ void func_150C4E9C(TexScrollObject *obj) {
             }
             if (t >= startT && t - scroll->speed <= startT) {
                 scroll->speed = t - startT;
-                obj->state &= ~3;
-                obj->state |= 3; // mode 3: stopped
+                obj->behaviorState &= ~3;
+                obj->behaviorState |= 3; // mode 3: stopped
             }
         }
     }
     if (scroll->speed) {
-        for (i = 0; i < obj->vertexCount; i++) {
+        for (i = 0; i < obj->numVertices; i++) {
             obj->vertices[D_800BE9C0][i].v.tc[1] -= scroll->speed;
         }
     }
     if (obj->vertices[D_800BE9C0]->v.tc[1] < -0x2800) {
-        for (i = 0; i < obj->vertexCount; i++) {
+        for (i = 0; i < obj->numVertices; i++) {
             obj->vertices[D_800BE9C0][i].v.tc[1] += 0x2800;
         }
     }
@@ -169,7 +155,6 @@ void func_150C4E9C(TexScrollObject *obj) {
 }
 
 // the four objects func_1500F40C spawns with func_1500F290
-extern struct102 *D_800D98D0[4];
 
 /* Destroys the four objects in D_800D98D0 (func_1516972C) and clears their slots. */
 void func_150C522C(void) {
@@ -183,11 +168,10 @@ void func_150C522C(void) {
     }
 }
 
-extern u8 D_800C35E8;
 
-/* Returns whether D_800C35EA is 1 and D_800C35E8 is 0xB, 0xC or 0xD. */
+/* Returns whether D_800C35EA is 1 and D_800C35E8[0] is 0xB, 0xC or 0xD. */
 s32 func_150C5280(void) {
-    if (D_800C35EA == 1 && (D_800C35E8 == 0xB || D_800C35E8 == 0xC || D_800C35E8 == 0xD)) {
+    if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 0xB || D_800C35E8[0] == 0xC || D_800C35E8[0] == 0xD)) {
         return TRUE;
     }
     return FALSE;

@@ -1,19 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C3958 D_800C3958_hdr
-#define D_800C35EA D_800C35EA_hdr
-#define D_800C3654 D_800C3654_hdr
-#define D_800BEAA8 D_800BEAA8_hdr
-#define D_800C3CA0 D_800C3CA0_hdr
-#define D_800C3600 D_800C3600_hdr
 #include "variables.h"
-#undef D_800C3958
-#undef D_800C35EA
-#undef D_800C3654
-#undef D_800BEAA8
-#undef D_800C3CA0
-#undef D_800C3600
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
@@ -28,13 +15,6 @@ typedef struct {
     /* 0x6 */ s16 unk6;
 } SeqEvent;
 
-/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
-} SeqPathKey; // size 0x8
 
 /* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
 typedef struct {
@@ -44,14 +24,6 @@ typedef struct {
     /* 0x6 */ s16 time;
 } SeqChannelKey; // size 0x8
 
-/* What a track drives (D_800C35F0[scene][track]); type 2 tracks name an actor id in unk2. */
-typedef struct {
-    /* 0x0 */ u16 type;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ s16 yOffset;
-    /* 0x6 */ s16 unk6;
-} SeqTrackInfo; // size 0x8
 
 /* Arc-length data for a track's path (D_800C3A50[scene][track]), plus the cubic of the cached segment. */
 typedef struct {
@@ -68,43 +40,9 @@ typedef struct {
 
 /* Current animated values of a track (one SeqTrackState array per slot at D_800C3958). Which property
    each unk field holds depends on the track's SeqTrackInfo type. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 yOffset;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} SeqTrackState; // size 0x44
-
-extern SeqTrackState *D_800C3958[];
-extern u8 D_800C35EA[];
-extern u8 D_800C3654[];
-extern s16 D_800BEAA8;
 
 extern u16 *D_800C35C8[];
-extern u16 *D_800C35D8[];
-extern SeqTrackInfo *D_800C35F0[];
-extern u8 D_800C363A[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
-extern s8 D_8008FD84[];
-extern u8 D_800C35E8[];
-extern s32 D_800C35B0[];
-extern s32 D_800C3640[];
-extern u8 D_800C3C99;
-extern u8 D_800C3C9C;
-extern u8 D_800D2E40;
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
 extern void func_1507F640(void);
@@ -112,64 +50,21 @@ extern void func_1508F060(void);
 extern void func_150242F8(s32, s32);
 void func_1501EC38(s32 scene);
 void func_15020EC4(s32 scene);
-void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack);
+void func_1502178C(Actor *target, s32 scene, s32 onlyTrack);
 void func_1501E81C(s32 skipped, s32 scene);
-s32 func_150229E4(struct127 *obj);
+s32 func_150229E4(Actor *obj);
 extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern SeqEvent *D_800C3688[][30];
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
 extern WorldObject *func_151149AC(u8);
-extern struct127 *func_1505EEF4(s32);
+extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
-extern u8 D_800D2100;
 
-/* A subtitle slot (see func_150234A4); same layout as in game_50D80.c. */
-typedef struct {
-    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
-} SeqSubtitle;
 
-extern SeqSubtitle D_800C3CA0[3];
-
-/* The camera message block passed to func_1512D560 (messages 5..10) while a cutscene drives the camera. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;   // scene
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} SeqCameraMsg;
-
-extern SeqCameraMsg D_800C3600;
 
 extern SeqTrackPath *D_800C3A50[];
-extern SeqPathKey *D_800C3868[][30];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
 s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut);
 void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys);
@@ -188,19 +83,10 @@ typedef struct {
     /* 0x5C */ void *msg;
 } GfxSchedTask; /* 0x60 */
 
-typedef struct {
-    u8 unk0[0x20];
-} GfxSchedMsg;
-
-extern u8 D_800BE9C0;
-extern s32 D_800BE9C8[];
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
-extern u8 D_800BEBA0;
-extern u64 *D_800BEB9C;
 extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
-extern u64 D_800C1060[];
 extern u64 D_800CBE10[];
 extern u64 D_8003A5E8[];
 extern void func_1501A39C(void);
@@ -209,8 +95,7 @@ void func_1501CC3C(void);
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */
 #define GFX_APPEND_NOPARAM(cmd)                 \
 {                                               \
-    Gfx *gfx = (Gfx *)D_800BE9D0;               \
-    D_800BE9D0 += sizeof(Gfx);                  \
+    Gfx *gfx = D_800BE9D0++;                    \
     gfx->words.w0 = _SHIFTL(cmd, 24, 8);        \
     gfx->words.w1 = 0;                          \
 }
@@ -218,30 +103,30 @@ void func_1501CC3C(void);
 /* Finish this frame's display list and send it to the scheduler as an RSP graphics task. */
 void func_1501C880(s32 unused, s32 swapBuffers) {
     s32 capacity;
-    s32 *dlBase;
+    Gfx **dlBase;
     s32 used;
 
     dlBase = D_800BE9C8;
-    capacity = (dlBase[1] - dlBase[0]) >> 3;
+    capacity = dlBase[1] - dlBase[0];
     D_800BEAD4 = &D_800BEAD8[D_800BE9C0];
     D_800BEAD4->next = 0;
-    used = (D_800BE9D0 - dlBase[D_800BE9C0]) >> 3;
+    used = D_800BE9D0 - dlBase[D_800BE9C0];
     if ((used < 0) || (used > capacity)) {
         func_1501A39C();
         D_800BE9D0 = D_800BE9D8[D_800BE9C0];
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
-        used = (D_800BE9D0 - dlBase[D_800BE9C0]) >> 3;
+        used = D_800BE9D0 - dlBase[D_800BE9C0];
     }
 
     if ((used < 0) || (used > (capacity - 400))) {
-        D_800BE9D0 = dlBase[D_800BE9C0] + ((capacity - 400) << 3);
+        D_800BE9D0 = dlBase[D_800BE9C0] + (capacity - 400);
         GFX_APPEND_NOPARAM(G_RDPFULLSYNC);
         GFX_APPEND_NOPARAM(G_ENDDL);
     }
 
     D_800BEAD4->list.data_ptr = (u64 *)dlBase[D_800BE9C0];
-    D_800BEAD4->list.data_size = ((D_800BE9D0 - dlBase[D_800BE9C0]) >> 3) << 3;
+    D_800BEAD4->list.data_size = (D_800BE9D0 - dlBase[D_800BE9C0]) * sizeof(Gfx);
     func_1501CC3C();
 
     D_800BEAD4->list.type = M_GFXTASK;
@@ -271,7 +156,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
         D_800BE617 = 0;
     }
     D_800BEAD4->msgQ = &D_800BEA10;
-    D_800BEAD4->msg = &((GfxSchedMsg *)&D_800BEA68)[D_800BE9C0];
+    D_800BEAD4->msg = &D_800BEA68[D_800BE9C0];
     D_800BEAD4->framebuffer = D_8002AAE8[D_800BE9C0];
     osWritebackDCacheAll();
     osSendMesg(&D_8003B1E8, D_800BEAD4, 1);
@@ -280,7 +165,6 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     }
     D_800BEAA8++;
 }
-
 
 /* ROM offsets (relative to D_2D4B0) of one RSP microcode's text and data. */
 typedef struct {
@@ -303,7 +187,7 @@ void func_1501CC3C(void) {
     s32 altOffset;
     UcodeRomEntry *alt;
 
-    ucode = D_800B0DF0->pad2A[1];
+    ucode = D_800B0DF0->ucode;
     if (ucode >= 2) {
         ucode -= 2;
         altOffset = 0;
@@ -326,7 +210,6 @@ void func_1501CC3C(void) {
     }
 }
 
-extern u8 *D_800C3960[][30];
 
 /* Mark every track's active-event table (D_800C3960) as empty. */
 void func_1501CDC0(s32 scene) {
@@ -411,35 +294,8 @@ s32 func_1501CFF8(s32 scene) {
     return sum;
 }
 
-extern s32 D_800C35B8[];
-extern u8 D_800C35C0[];
-extern u16 D_800C3C8E;
-extern u8 D_800C35F8;
-extern f32 D_800C3648;
-extern f32 D_800C364C;
-extern f32 D_800C3650;
-extern u8 D_800C3656[];
-extern u8 D_800C3658[];
-extern u8 D_800C365A[];
-extern u8 D_800C365C[];
-extern u8 D_800C365E[];
-extern u8 D_800C3660[];
-extern u8 D_800C3662;
-extern u8 D_800C3C8C;
-extern u8 D_800C3C8D;
-extern u8 D_800C35C2;
-extern u8 D_800C3A58;
 extern f32 D_800C35A4;
-extern s8 D_800C3C8A;
-extern u8 D_800C3C8B;
-extern f32 D_800C3674;
 extern f32 D_800C3678;
-extern s32 D_800C367C;
-extern u8 D_800C3680;
-extern u8 D_800C3672;
-extern u8 D_800C3C9D;
-extern s16 D_800C3C9E;
-extern s32 D_800C3D50;
 void func_150233BC(void);
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
@@ -450,7 +306,7 @@ void func_1501D044(s32 scene) {
     D_800C3C8E = 0;
     D_800C363A[scene] = 0;
     D_800C35EA[scene] = 0;
-    D_800C3D50 = 0;
+    D_800C3D50 = NULL;
     D_800C35F8 = 0xFF;
     D_800C3648 = 0.0f;
     D_800C364C = 0.0f;
@@ -546,9 +402,6 @@ void func_15022528(s32 scene);
 void func_1501DAAC(s32 scene);
 extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
-extern u8 D_800C3C98;
-extern u16 D_800C3C9A;
-extern s32 *D_800C35E0[];
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
    maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
@@ -646,7 +499,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
                 D_800840FC[callback](map, cutscene, scene, callbackArg);
             }
             D_800C3C9A = func_1501CFF8(scene);
-            D_800C3D50 = (s32)allocate_memory(D_800C3C9A * 12, 1, 0, 0);
+            D_800C3D50 = allocate_memory(D_800C3C9A * 12, 1, 0, 0);
             D_800C35B0[scene] = 0;
             func_1501CDC0(scene);
             func_1501CE54(scene);
@@ -758,7 +611,7 @@ void func_1501DAAC(s32 scene) {
 void func_1501DE18(s32 scene) {
     s32 i;
     s32 count;
-    struct127 *obj;
+    Actor *obj;
 
     D_800C35B0[scene] = D_800C3640[scene] + D_800BEA08;
     func_150242F8(1, 0);
@@ -779,21 +632,13 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-s32 func_100127D0(void);
-void func_15060F28(struct127 *arg0, s32 arg1);
-struct127 *func_15072208(struct127 *, s32);
-extern u8 D_800C35C4;
-extern u8 D_800C3663;
-extern struct127 D_800CC2D0[26];
-extern s32 D_800D121C;
-extern u8 D_800DBFF4[];
 extern void func_1000E17C(void);
 extern void func_151F2BA8(void);
 void func_1501DE18(s32 scene);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
    then restore the screen fade and clear the objects' cutscene state. */
 void func_1501DF04(s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     u8 chained;
     s32 sceneCopy;
 
@@ -815,21 +660,18 @@ void func_1501DF04(s32 scene) {
             } while ((chained != 0) && (D_800C35C4 == 0));
         }
     }
-    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling),
-    // and the loop walks D_800CC2D0 by bytes (0xA4 is padding in struct127)
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { u8 *ptr = (u8 *)D_800CC2D0; u8 *end = (u8 *)&D_800D121C; do {
-        if (*(s32 *)ptr != 0) {
-            ptr[0xA4] = 0;
+    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = D_800CC2D0; Actor *end = &D_800D121C; do {
+        if (obj->interaction_state != 0) {
+            obj->fogMode = 0;
         }
-        ptr += sizeof(struct127);
-    } while (ptr != end); }
+        obj++;
+    } while (obj != end); }
     D_800C3663 = 0;
     func_1000E17C();
     D_800DBFF4[0] = 4;
     D_800C3672 = 1;
 }
-
-
 
 /* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
    0x1D and 0x21). */
@@ -842,7 +684,7 @@ s32 func_1501E05C(s32 scene) {
     skipRequest = (s32)D_8008FD84;
 
     if (map == 0x1D) {
-        // matching: the goto orders the D_800C35E8 address load after the branch
+        // matching: the goto orders the D_800C35E8[0] address load after the branch
         if (*(s8 *)skipRequest == 0) {
             goto noRequest;
         }
@@ -876,7 +718,6 @@ s32 func_1501E05C(s32 scene) {
     return 0;
 }
 
-extern u8 D_800C3C89;
 s32 func_151F2CDC(void);
 void func_151F2D6C(s32, s32);
 
@@ -996,41 +837,32 @@ void func_1501E540(s32 scene) {
         D_800C35D8[scene] = NULL;
         D_800C35E0[scene] = NULL;
         func_10004074(D_800C3D50);
-        D_800C3D50 = 0;
+        D_800C3D50 = NULL;
         func_10004074(D_800C3668[scene]);
         D_800C3668[scene] = 0;
     }
 }
 
-/* struct127 bytes 0x6A..0x6D, which include/structs.h still declares as padding. */
-typedef struct {
-    u8 pad0[0x6A];
-    u8 unk6A;
-    u8 unk6B;
-    u8 unk6C;
-    u8 unk6D;
-} ObjAnimBytes;
-
 void func_1507EABC(void *);
 
-/* For each object bound to a track: wrap its 0x6C/0x6D counters at 10 and call func_1507EABC. */
+/* For each object bound to a track: wrap its eyeCode counters at 10 and call func_1507EABC. */
 void func_1501E73C(s32 scene) {
     s32 i;
-    ObjAnimBytes *obj;
+    Actor *obj;
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = (ObjAnimBytes *)func_15083E90(D_800C35F0[scene][i].unk2);
+            obj = func_15083E90(D_800C35F0[scene][i].targetId);
             if (obj == NULL) {
                 continue;
             }
-            if (obj->unk6C >= 10) {
-                obj->unk6C = 0;
-                obj->unk6A = 0;
+            if (obj->eyeCode[0] >= 10) {
+                obj->eyeCode[0] = 0;
+                obj->eyeClosed[0] = 0;
             }
-            if (obj->unk6D >= 10) {
-                obj->unk6D = 0;
-                obj->unk6B = 0;
+            if (obj->eyeCode[1] >= 10) {
+                obj->eyeCode[1] = 0;
+                obj->eyeClosed[1] = 0;
             }
             func_1507EABC(obj);
         }
@@ -1038,7 +870,6 @@ void func_1501E73C(s32 scene) {
 }
 
 extern void func_15169040(u8 *, u8);
-extern u8 D_800C35C3;
 void func_1501EA18(s32 scene);
 void func_150233E4(void);
 s32 func_150235DC(s32 scene);
@@ -1046,7 +877,7 @@ s32 func_150235DC(s32 scene);
 /* End the scene's cutscene: report it (func_15169040), flag it played, release its data and restore
    the camera. If another cutscene is chained (D_800C35C2), start it instead. */
 void func_1501E81C(s32 skipped, s32 scene) {
-    struct108 *player;
+    Camera *player;
 
     player = D_800DBFF0;
     if (D_800C35EA[scene] != 0) {
@@ -1111,19 +942,19 @@ extern f32 D_800C35A0;
 
 /* Hand control back after the scene's cutscene: restore the player camera and object state. */
 void func_1501EA18(s32 scene) {
-    struct108 *player;
-    struct127 *obj;
+    Camera *player;
+    Actor *obj;
     s32 i;
 
     player = D_800DBFF0;
     D_800C3600.unk0 = 1;
     D_800C3600.unk4 = scene;
-    D_800C3600.unk14 = player->unk2F8;
-    D_800C3600.unk18 = player->unk2FC;
-    D_800C3600.unk1C = player->unk300;
+    D_800C3600.unk14 = player->eye.x;
+    D_800C3600.unk18 = player->eye.y;
+    D_800C3600.unk1C = player->eye.z;
     D_800C3600.unk20 = 0.0f;
-    D_800C3600.unk24 = player->unk388;
-    D_800C3600.unk28 = player->unk37C;
+    D_800C3600.unk24 = player->pitch;
+    D_800C3600.unk28 = player->yaw;
     if (D_800C3671 == 0) {
         func_1512D560(player, 7, &D_800C3600);
         if (D_800C3674 != 999.0f) {
@@ -1149,7 +980,7 @@ void func_1501EA18(s32 scene) {
     func_150227BC(scene);
     for (i = 0; i != 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0 && func_150229E4(&D_800CC2D0[i]) != 0) {
-            *(u8 *)&D_800CC2D0[i].padA4 = 0;
+            D_800CC2D0[i].fogMode = 0;
             D_800CC2D0[i].unkB8 = 0.0f;
             D_800CC2D0[i].unkC4 = 0.0f;
         }
@@ -1408,11 +1239,6 @@ void func_1501EC38(s32 scene) {
     }
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} SeqVec3f;
 void func_15020878(s32 track, s32 segment, s32 scene);
 
 /* Find the path segment containing distance `dist` along track `track` and write two points to
@@ -1423,7 +1249,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
     s32 lo;
     s32 hi;
     s32 sample;
-    SeqVec3f points[4];
+    Vec3f points[4];
     f32 *distances;
     s32 i;
     u8 j;
@@ -1470,9 +1296,9 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         j = 0;
         for (i = 0; i < 2; i++) {
             t = (f32)(sample + i) * 0.01f;
-            ((SeqVec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
-            ((SeqVec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
-            ((SeqVec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
+            ((Vec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
+            ((Vec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
+            ((Vec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
             j ^= 1;
         }
     } else {
@@ -1485,15 +1311,14 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         }
         j = 0;
         for (i = 0; i < 2; i++) {
-            ((SeqVec3f *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
-            ((SeqVec3f *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
-            ((SeqVec3f *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
+            ((Vec3f *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
+            ((Vec3f *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
+            ((Vec3f *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
             j ^= 1;
         }
     }
     return sample;
 }
-
 
 /* Position of track `track` at `percent` (0-100) of its path length. */
 void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
@@ -1597,9 +1422,9 @@ void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
     }
 
     for (i = start; i < start + count; outIdx++, i++) {
-        ((SeqVec3f *)out)[outIdx].x = keys[i].x;
-        ((SeqVec3f *)out)[outIdx].y = keys[i].y;
-        ((SeqVec3f *)out)[outIdx].z = keys[i].z;
+        ((Vec3f *)out)[outIdx].x = keys[i].x;
+        ((Vec3f *)out)[outIdx].y = keys[i].y;
+        ((Vec3f *)out)[outIdx].z = keys[i].z;
     }
 
     if (!(flags & 1)) {
@@ -1682,7 +1507,6 @@ void func_15020388(s32 track, s32 scene) {
     }
 }
 
-
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
@@ -1756,37 +1580,13 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
     D_800C3A50[scene][track].segment = segment;
 }
 
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[4];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x16];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x16];
-    u8 unk4E;
-    u8 pad4F[0x1F];
-    u8 unk6E;
-    u8 unk6F;
-    u8 pad70[2];
-    u8 unk72;
-    u8 pad73[0x17];
-    u8 unk8A;
-} SeqActor; // WorldObject with the fields this file uses (include/structs.h still pads them)
-
-SeqVec3f D_800C3620;
-extern void func_15128CB0(struct108 *);
+Vec3f D_800C3620;
+extern void func_15128CB0(Camera *);
 extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
 
 // matching: going through a cast of &D_800C3600 changes IDO's address CSE in func_15020EC4
-#define MSG (*(SeqCameraMsg *)&D_800C3600)
+#define MSG (*(struct168 *)&D_800C3600)
 // matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
 #define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&D_800C3958[a][i])
@@ -1797,9 +1597,9 @@ s32 func_15023264(s32 scene, s32 time);
 void func_15020EC4(s32 scene) {
     s32 track;
     s32 pass;
-    struct108 *player;
+    Camera *player;
     SeqTrackState *state;
-    SeqActor *actor;
+    WorldObject *actor;
     f32 tilt3C;
     f32 tilt40;
 
@@ -1829,7 +1629,7 @@ void func_15020EC4(s32 scene) {
                     if (track != D_800C35F8) {
                         continue;
                     }
-                    if (!(player->unk2C & 0x40000)) {
+                    if (!(player->mode & 0x40000)) {
                         if (D_800C3671 == 0) {
                             func_1512D560(player, 5, (void *)scene);
                         }
@@ -1864,7 +1664,7 @@ void func_15020EC4(s32 scene) {
                     MSG.unk14 = state->x;
                     MSG.unk18 = state->y;
                     MSG.unk1C = state->z;
-                    if (ENT(scene, track)->unk2 == 1) {
+                    if (ENT(scene, track)->targetId == 1) {
                         MSG.unk0 = 0;
                         MSG.unk20 = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
                         MSG.unk24 = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
@@ -1872,8 +1672,8 @@ void func_15020EC4(s32 scene) {
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 2) {
-                        struct127 *obj;
+                    } else if (ENT(scene, track)->targetId == 2) {
+                        Actor *obj;
 
                         obj = func_15083E90(ENT(scene, track)->unk3);
                         if (obj == NULL) {
@@ -1886,21 +1686,21 @@ void func_15020EC4(s32 scene) {
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 3) {
-                        SeqActor *actor3;
+                    } else if (ENT(scene, track)->targetId == 3) {
+                        WorldObject *actor3;
 
-                        actor3 = (SeqActor *)func_151149AC(ENT(scene, track)->unk3);
+                        actor3 = func_151149AC(ENT(scene, track)->unk3);
                         if (actor3 == NULL) {
                             continue;
                         }
                         MSG.unk0 = 0;
-                        D_800C3620.x = actor3->unk10;
-                        D_800C3620.y = (actor3->unk12 + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        D_800C3620.z = actor3->unk14;
+                        D_800C3620.x = actor3->x;
+                        D_800C3620.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        D_800C3620.z = actor3->z;
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 0) {
+                    } else if (ENT(scene, track)->targetId == 0) {
                         MSG.unk0 = 1;
                         MSG.unk20 = -state->unk14;
                         MSG.unk24 = state->unkC;
@@ -1913,46 +1713,46 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &MSG);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = (SeqActor *)func_151149AC(ENT(scene, track)->unk2);
+                    actor = func_151149AC(ENT(scene, track)->targetId);
                     if (actor == NULL) {
                         continue;
                     }
-                    actor->unk4E = 0;
-                    actor->unk6F &= ~0x80;
-                    actor->unk6F = actor->unk6F; // matching: forces the byte reload
-                    actor->unk10 = ELEM(scene, track)->x;
-                    actor->unk12 = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
-                    actor->unk14 = ELEM(scene, track)->z;
-                    actor->unk0 = ELEM(scene, track)->unkC;
-                    actor->unk4 = ELEM(scene, track)->unk10;
-                    actor->unk8 = ELEM(scene, track)->unk14;
+                    actor->attach = 0;
+                    actor->viewFlags &= ~0x80;
+                    actor->viewFlags = actor->viewFlags; // matching: forces the byte reload
+                    actor->x = ELEM(scene, track)->x;
+                    actor->y = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
+                    actor->z = ELEM(scene, track)->z;
+                    actor->rotX = ELEM(scene, track)->unkC;
+                    actor->rotY = ELEM(scene, track)->unk10;
+                    actor->rotZ = ELEM(scene, track)->unk14;
                     if (ELEM(scene, track)->unk18 != -9999.0f) {
-                        actor->unk2C = ELEM(scene, track)->unk18 * 0.01f;
+                        actor->scaleX = ELEM(scene, track)->unk18 * 0.01f;
                     }
                     if (ELEM(scene, track)->unk1C != -9999.0f) {
-                        actor->unk30 = ELEM(scene, track)->unk1C * 0.01f;
+                        actor->scaleY = ELEM(scene, track)->unk1C * 0.01f;
                     }
                     if (ELEM(scene, track)->unk20 != -9999.0f) {
-                        actor->unk34 = ELEM(scene, track)->unk20 * 0.01f;
+                        actor->scaleZ = ELEM(scene, track)->unk20 * 0.01f;
                     }
                     if ((s32)ELEM(scene, track)->unk34 >= 0x100) {
-                        actor->unk8A = 0xFF;
+                        actor->alpha = 0xFF;
                     } else if ((s32)ELEM(scene, track)->unk34 < 0) {
-                        actor->unk8A = 0;
+                        actor->alpha = 0;
                     } else {
-                        actor->unk8A = (s32)ELEM(scene, track)->unk34;
+                        actor->alpha = (s32)ELEM(scene, track)->unk34;
                     }
                 } else if (ENT(scene, track)->type == 2) {
-                    struct127 *obj2;
+                    Actor *obj2;
 
-                    obj2 = func_15083E90(ENT(scene, track)->unk2);
+                    obj2 = func_15083E90(ENT(scene, track)->targetId);
                     func_1502178C(obj2, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
-                    arr[0] = ENT(scene, track)->unk2;
-                    arr[1] = ENT(scene, track)->unk2;
-                    arr[2] = ENT(scene, track)->unk2;
+                    arr[0] = ENT(scene, track)->targetId;
+                    arr[1] = ENT(scene, track)->targetId;
+                    arr[2] = ENT(scene, track)->targetId;
                 } else if (ENT(scene, track)->type == 5) {
                     state = ELEM(scene, track);
                     if (state->unk34 >= 1.0f) {
@@ -1965,17 +1765,16 @@ void func_15020EC4(s32 scene) {
     }
 }
 
-extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, struct127 *, f32, f32);
+extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, Actor *, f32, f32);
 
 // matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
-extern f32 D_800D35E0;
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
-void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
+void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
     s32 track;
     f32 floorY;
-    struct127 *obj;
+    Actor *obj;
     s32 end;
     SeqTrackInfo *info;
     f32 angle;
@@ -1998,7 +1797,7 @@ void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
             }
             info = &D_800C35F0[scene][track];
             if (info->type == 2) {
-                obj = func_15083E90(info->unk2);
+                obj = func_15083E90(info->targetId);
                 if (obj != NULL && obj == target) {
                     oldPos[0] = obj->x_position;
                     oldPos[1] = obj->y_position;
@@ -2016,19 +1815,19 @@ void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
                         obj->xz_velocity = 0.0f;
                     }
                     if (obj->unk31C != NULL) {
-                        *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
+                        obj->unk31C->unk0 = obj->xz_velocity * 2.0f;
                     }
-                    *(f32 *)&obj->pad54 = 0.0f;
+                    obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
-                    *(u8 *)&D_800D35DC = (target - D_800CC2D0) + 1;
-                    func_1510E7A4(&obj->pad188, &obj->unk18C, &floorY, &obj->unk118, &obj->unk184, (u8 *)obj + 0x1A2,
+                    D_800D35DC = (target - D_800CC2D0) + 1;
+                    func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);
                     ((u8 *)&D_800D35E0)[-4] = 0;
-                    obj->unk180 = floorY;
+                    obj->floorY = floorY;
                     obj->unkD0 = 0;
-                    obj->unk28 = obj->y_position - obj->unk180;
+                    obj->unk28 = obj->y_position - obj->floorY;
                     if (obj->interaction_state == 1) {
                         if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
                             obj->in_water = 1;
@@ -2073,14 +1872,13 @@ void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
     }
 }
 
-
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in D_800C3960 (slot 2: another track's position, slot 1: this track's
    unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
 s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
     s32 track;
     u8 *active;
-    struct108 *player;
+    Camera *player;
     f32 none;
 
     if (D_800C35EA[scene] != 1) {
@@ -2091,7 +1889,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             continue;
         }
         if (D_800C35F0[scene][track].type != 2 ||
-            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].unk2) {
+            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].targetId) {
             continue;
         }
         active = D_800C3960[scene][track];
@@ -2117,9 +1915,9 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
                 return 1;
             }
             player = D_800DBFF0;
-            target[0] = player->unk2F8;
-            target[1] = player->unk2FC + (f32)event->unk6;
-            target[2] = player->unk300;
+            target[0] = player->eye.x;
+            target[1] = player->eye.y + (f32)event->unk6;
+            target[2] = player->eye.z;
             return 0;
         }
         none = -99999.0f;
@@ -2131,7 +1929,6 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
     return 0;
 }
 
-
 /* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (outA) and unk3C
    (outB) values, each written twice (0 where unset). */
 s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
@@ -2142,7 +1939,7 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     }
     for (track = 0; track < D_800C363A[scene]; track++) {
         if (D_800C35C8[scene][track] != 0) {
-            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].unk2) {
+            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].targetId) {
                 outA[1] = 0.0f;
                 outB[1] = 0.0f;
                 outA[0] = 0.0f;
@@ -2161,7 +1958,6 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     }
     return 0;
 }
-
 
 /* Set D_800C358C/D_800C3594 and raise D_800C3663. */
 void func_15022190(s16 x, s16 y, s16 z, f32 value) {
@@ -2220,25 +2016,25 @@ void func_1502225C(s32 id, s32 scene) {
 
 /* Reset the animation state of the object bound to the scene's track `track`. */
 void func_150222E0(s32 track, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 2) {
-            obj = func_15083E90(info->unk2);
+            obj = func_15083E90(info->targetId);
             if (obj != NULL) {
-                ((ObjAnimBytes *)obj)->unk6C = 0;
-                ((ObjAnimBytes *)obj)->unk6D = 0;
-                ((ObjAnimBytes *)obj)->unk6A = 0;
-                ((ObjAnimBytes *)obj)->unk6B = 0;
+                obj->eyeCode[0] = 0;
+                obj->eyeCode[1] = 0;
+                obj->eyeClosed[0] = 0;
+                obj->eyeClosed[1] = 0;
                 obj->unk282 = 0;
-                *(u16 *)&obj->unk27A[0] = 0;
-                *(u16 *)&obj->unk27A[2] = 0;
-                *(u16 *)&obj->unk27A[4] = 0;
-                *(u16 *)&obj->unk27A[6] = 0;
+                obj->unk27A[0] = 0;
+                obj->unk27A[1] = 0;
+                obj->unk27E[0] = 0;
+                obj->unk27E[1] = 0;
                 func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
-                *(u8 *)((u8 *)obj + 0x71) = 0;
+                obj->expressionPriority = 0;
             }
         }
     }
@@ -2247,13 +2043,13 @@ void func_150222E0(s32 track, s32 scene) {
 /* Make sure the object bound to the scene's track `track` exists: spawn it from its D_800D20FC
    slot if needed and add it to the scene's D_800C3518 list. */
 void func_15022398(s32 track, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     s32 slot;
     s32 id;
 
     if (D_800C35C8[scene][track] != 0) {
         if (D_800C35F0[scene][track].type == 2) {
-            id = D_800C35F0[scene][track].unk2;
+            id = D_800C35F0[scene][track].targetId;
             slot = func_15083E0C(id);
             if (slot != -1) {
                 obj = func_1505EEF4(slot);
@@ -2270,7 +2066,7 @@ void func_15022398(s32 track, s32 scene) {
                     }
                 } else {
                     if (slot < D_800D2100) {
-                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // 0x30-byte spawn entries
+                        func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0); // matching: integer address math
                         obj = func_1505EEF4(slot);
                         if (obj != NULL) {
                             func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
@@ -2286,7 +2082,7 @@ void func_15022398(s32 track, s32 scene) {
 /* Apply every object track of the scene to its object (func_1502178C). */
 void func_15022528(s32 scene) {
     s32 track;
-    struct127 *obj;
+    Actor *obj;
 
     for (track = 0; track < D_800C363A[scene]; track++) {
         if (D_800C35D0[scene][track] == 0) {
@@ -2296,7 +2092,7 @@ void func_15022528(s32 scene) {
             continue;
         }
         if (D_800C35F0[scene][track].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][track].unk2);
+            obj = func_15083E90(D_800C35F0[scene][track].targetId);
             if (obj != NULL) {
                 func_1502178C(obj, scene, track);
             }
@@ -2329,20 +2125,20 @@ void func_15022640(s32 id, s32 scene) {
     *countPtr = count + 1;
 }
 
-/* If the actor bound to the scene's track `track` has unk6E set, record its unk72 id
+/* If the actor bound to the scene's track `track` is inactive, record its id
    (func_15022640) and clear the flag. */
 void func_150226BC(s32 track, s32 scene) {
-    SeqActor *actor;
+    WorldObject *actor;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 3) {
-            actor = (SeqActor *)func_151149AC(info->unk2);
+            actor = func_151149AC(info->targetId);
             if (actor != NULL) {
-                if (actor->unk6E == 1) {
-                    func_15022640(actor->unk72, scene);
-                    actor->unk6E = 0;
+                if (actor->inactive == 1) {
+                    func_15022640(actor->id, scene);
+                    actor->inactive = 0;
                 }
             }
         }
@@ -2359,14 +2155,14 @@ void func_15022754(s32 scene) {
     }
 }
 
-/* Set unk6E again on every actor recorded in the scene's D_800C3550 list. */
+/* Set inactive again on every actor recorded in the scene's D_800C3550 list. */
 void func_150227BC(s32 scene) {
     s32 i;
     u8 *count;
 
     count = &D_800C354A[scene];
     for (i = 0; i < *count; i++) {
-        ((SeqActor *)func_151149AC(D_800C3550[scene][i]))->unk6E = 1;
+        func_151149AC(D_800C3550[scene][i])->inactive = 1;
     }
 }
 
@@ -2390,7 +2186,7 @@ void func_15022848(s32 scene) {
 void func_150228E4(s32 scene) {
     s32 i;
     s32 count;
-    struct127 *obj;
+    Actor *obj;
     u8 *countPtr;
 
     countPtr = &D_800C3510[scene];
@@ -2415,7 +2211,7 @@ void func_15022998(s32 *obj) {
 
 /* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
    bound itself, 2 when bound through its parent (obj->unk65). */
-s32 func_150229E4(struct127 *obj) {
+s32 func_150229E4(Actor *obj) {
     s32 i;
     s32 scene;
     s32 parent;
@@ -2442,7 +2238,7 @@ s32 func_150229E4(struct127 *obj) {
     }
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].unk2) {
+            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].targetId) {
                 if (parent == 0) {
                     return 1;
                 }
@@ -2460,8 +2256,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            // matching: byte arithmetic on the actor array (0x72 is padding in WorldObject; indexing schedules differently)
-            if (D_800C35F0[scene][i].unk2 == ((u8 *)D_800DBEF4 + actorIndex * 0xA0)[0x72]) {
+            if (D_800C35F0[scene][i].targetId == D_800DBEF4[actorIndex].id) {
                 return 1;
             }
         }
@@ -2495,8 +2290,8 @@ void func_15022BA4(s32 scene) {
                 key = D_800C3868[scene][track];
                 func_15022190(key->x, key->y, key->z, 0.0f);
             }
-            if (D_800C35F0[scene][track].unk2 == 0) {
-                struct127 *obj;
+            if (D_800C35F0[scene][track].targetId == 0) {
+                Actor *obj;
                 obj = func_15083E90(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
                     return;
@@ -2504,7 +2299,7 @@ void func_15022BA4(s32 scene) {
                 x = obj->x_position;
                 y = obj->y_position;
                 z = obj->z_position;
-            } else if (D_800C35F0[scene][track].unk2 == 1) {
+            } else if (D_800C35F0[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
                 obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;
@@ -2671,7 +2466,6 @@ void func_15023440(SeqSubtitle *sub, s32 force) {
     entry->active = 0;
 }
 
-
 /* Find the subtitle slot of `track`, or claim a free one (stealing slot 0 when all are busy). */
 SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
     s32 i;
@@ -2715,8 +2509,8 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
 /* Give object 1 back to normal control after a cutscene: stop it, drop it to the floor or leave it
    swimming, and clear its movement locks. */
 s32 func_150235DC(s32 scene) {
-    struct127 *obj;
-    void *unk31C;
+    Actor *obj;
+    ActorCtl *ctl;
     s8 zero;
 
     D_800CC2D0[0].unk25C &= ~0x200;
@@ -2724,12 +2518,12 @@ s32 func_150235DC(s32 scene) {
         obj = func_15083E90(1);
         if (obj != NULL) {
             D_800C3E78 = obj - D_800CC2D0;
-            unk31C = obj->unk31C;
+            ctl = obj->unk31C;
             obj->xz_velocity = 0.0f;
-            if (unk31C != NULL) {
-                *(f32 *)unk31C = 0.0f;
+            if (ctl != NULL) {
+                ctl->unk0 = 0.0f;
             }
-            *(f32 *)&obj->pad54 = 0.0f;
+            obj->unk54 = 0.0f;
             obj->unkCC = 0;
             obj->unkD0 = 0;
 
@@ -2737,7 +2531,7 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 1;
                 obj->y_velocity = 0.0f;
                 obj->gravity = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->unk1A6) || ((((u8 *)obj->unk31C)[0x20] & 1) != 0)) {
+                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->unk31C->unk20 & 1) != 0)) {
                     obj->unkB2 = 0;
                     func_1508F060();
                 }
@@ -2745,8 +2539,8 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 0;
                 obj->unkB2 = 0;
                 obj->y_velocity = -4.0f;
-                obj->y_position = obj->unk180;
-                obj->unk1CC = obj->unk180;
+                obj->y_position = obj->floorY;
+                obj->unk1CC = obj->floorY;
                 obj->gravity = 5.0f;
             }
 
@@ -2755,28 +2549,27 @@ s32 func_150235DC(s32 scene) {
             obj->disable_run = 0;
             obj->disable_jump = 0;
             obj->stunned = 0;
-            obj->unk28 = obj->y_position - obj->unk180;
+            obj->unk28 = obj->y_position - obj->floorY;
             D_800D154C = obj;
             func_1507F640();
-            ((u8 *)obj->unk31C)[0x23] = 0;
+            obj->unk31C->unk23 = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
             obj->unk276 = 0;
             obj->unk282 = 0;
             obj->unk278 = 0;
-            obj->unk286 = zero;
-            obj->unk285 = zero;
-            obj->unk284 = zero;
+            // matching: the (u8) casts keep the register allocation of the u8 view this was matched with
+            obj->unk286 = (u8)zero;
+            obj->unk285 = (u8)zero;
+            obj->unk284 = (u8)zero;
             return zero;
         }
     }
 }
 
-void func_150627D4(struct127 *arg0);
-extern u8 D_800C3E78;
 extern void func_1504A730(void);
-extern void func_1507E73C(struct127 *);
-extern void func_1507FEA0(struct127 *);
+extern void func_1507E73C(Actor *);
+extern void func_1507FEA0(Actor *);
 extern void func_15061B4C(void);
 void func_15022998(s32 *obj);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
@@ -2786,7 +2579,7 @@ void func_1502378C(void) {
     s32 i;
     s32 limit;
     s32 one;
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800CC2D0;
     i = 0;

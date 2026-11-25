@@ -1,35 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-// variables.h declares these with types that don't fit this file; the real views are below.
-#define D_800CC2D0 D_800CC2D0_hdr
-#define D_800D19A0 D_800D19A0_hdr
-#define D_800DD460 D_800DD460_hdr
 #include "variables.h"
-#undef D_800CC2D0
-#undef D_800D19A0
-#undef D_800DD460
-
-/* Per-actor vertex morph state: blends from keyframe `prev` to keyframe `cur`. */
-typedef struct {
-    f32 blend; // 0.0f (prev) .. 1.0f (cur)
-    f32 rate;  // blend increase per tick
-    u8 prev;
-    u8 cur;
-    u8 hold;   // counts down once the blend has reached 1.0f
-} VtxMorphState;
-
-/* The parts of the game object (struct127, 0x32C bytes) this file uses. */
-typedef struct {
-    u8 pad0[4];
-    u8 id;
-    u8 pad5[0x1C8 - 0x5];
-    u8 unk1C8;
-    u8 pad1C9[0x260 - 0x1C9];
-    VtxMorphState *morph;
-    u8 pad264[0x28C - 0x264];
-    Vtx *vtxBuffers[2][2]; // [set][D_800BE9C0]
-    u8 pad29C[0x32C - 0x29C];
-} MorphActor;
 
 /* One morph group: which model kind it applies to and how its vertices are split into parts. */
 typedef struct {
@@ -38,19 +9,7 @@ typedef struct {
     u16 partVtxCounts[3];
 } VtxMorphGroup;
 
-/* A cached keyframe: loaded vertex positions plus ticks left before it is freed. */
-typedef struct {
-    s16 (*positions)[3];
-    u8 timer;
-    u8 pad5[3];
-} VtxMorphFrame;
-
-extern MorphActor D_800CC2D0[];
-extern s32 D_800D19A0[];
-extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern VtxMorphGroup D_800A7230[2];
-extern u16 D_800C4310[];  // part count, indexed by VtxMorphGroup.kind
-extern s32 *D_800C4020[]; // per-id first vertex of each part
 extern void func_10004074(void *);
 s32 func_150849A0(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -101,7 +60,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
 
     id = D_800CC2D0[actorIndex].id;
     kind = func_150849A0(&D_800CC2D0[actorIndex]);
-    set = D_800CC2D0[actorIndex].unk1C8;
+    set = D_800CC2D0[actorIndex].lod;
     config = NULL;
     for (i = 0; i < 2; i++) {
         if (kind == D_800A7230[i].kind) {
@@ -117,7 +76,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (set != 0) {
         set = 0;
         id = kind;
-        if (D_800CC2D0[actorIndex].vtxBuffers[set][D_800BE9C0] == NULL || D_800D19A0[id] == 0) {
+        if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
             if (frame == morph->cur) {
                 if (D_800BEAC0 == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
@@ -140,10 +99,10 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
             return -1;
         }
     }
-    if (D_800D19A0[id] == 0) {
+    if (D_800D19A0[id] == NULL) {
         return -1;
     }
-    if (D_800CC2D0[actorIndex].vtxBuffers[set][D_800BE9C0] == NULL) {
+    if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL) {
         return -1;
     }
     if (frame == morph->cur && morph->hold == 0) {
@@ -194,7 +153,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (morph->blend > 1.0f) {
         morph->blend = 1.0f;
     }
-    vtxBase = D_800CC2D0[actorIndex].vtxBuffers[set][D_800BE9C0];
+    vtxBase = (Vtx *)D_800CC2D0[actorIndex].modelData[set][D_800BE9C0];
     for (part = 0; part < D_800C4310[config->kind]; part++) {
         if (D_800DD460[group][part][morph->cur].positions == NULL) {
             D_800DD460[group][part][morph->cur].positions =

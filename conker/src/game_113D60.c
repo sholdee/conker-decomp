@@ -1,20 +1,5 @@
 #include <ultra64.h>
-/* include/functions.h declares func_15169260's first parameter as s32; func_150E8930 passes
- * a struct address that IDO must build directly in a0, which only a pointer parameter
- * produces.  The header declaration is renamed out of the way and a file-local prototype
- * is used instead (same approach as game_10CD70.c).  Likewise func_150ADA20 returns the full
- * 32-bit random value (callers take it modulo n), not the u8 functions.h declares, and the
- * seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
-#define func_15169260 func_15169260_s32_decl_in_functions_h
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15169260
-#undef func_150ADA20
-#undef func_15149130
-u32 func_150ADA20(void);
-void func_15169260(void *, s32, s32, s32);
-struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
 #include "effects.h"
 
@@ -48,30 +33,21 @@ typedef struct Game113D60Emission {
     /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
     /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
     /* 0x20 */ f32 time, rate, remaining;
-    /* 0x2C */ vertex position;
+    /* 0x2C */ Vec3f position;
     /* 0x38 */ f32 scale;
     /* 0x3C */ s16 duration, durationRange;
     /* 0x40 */ u8 color;
 } Game113D60Emission; // size 0x44
 
-/* Common head of the effect objects this file updates; each effect's own data starts at 0x28. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-} Game113D60EffectHeader; // size 0x28
-
-typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
     /* 0x28 */ u8 data[1]; // effect-specific data
 } Game113D60AnyEffect;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Emission emission;
 } Game113D60Effect;
 
@@ -87,28 +63,27 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(vertex *, s32);
-typedef void (*Game113D60StartCallback)(vertex *);
-typedef void (*Game113D60MotionCallback)(vertex *, vertex *, vertex *, Game113D60Emission *);
+typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60StartCallback)(Vec3f *);
+typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
 void *memcpy(void *, const void *, u32);
 extern Game113D60StartCallback D_80088A20[];
 extern Game113D60EndCallback D_80088A2C[];
 extern Game113D60MotionCallback D_80088A34[];
 extern Game113D60Source D_800A1190[];
-extern u8 D_800C35E8;
 
 /* Randomly starts an emission of the source effect `sourceIndex` from one of the start
  * points towards `actor`. */
 void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Source *source;
-    vertex end;
-    vertex start;
-    vertex delta;
+    Vec3f end;
+    Vec3f start;
+    Vec3f delta;
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
+    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8[0] != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {
@@ -158,8 +133,8 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
 }
 
 extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, vertex *);
-extern s32 func_150E5FD0(vertex *, vertex *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern void func_151436B4(f32, f32, f32, Vec3f *);
+extern s32 func_150E5FD0(Vec3f *, Vec3f *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
 extern f32 func_15144528(f32, f32, f32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
@@ -174,7 +149,7 @@ void func_150E6B84(Game113D60Effect *effect) {
     f32 speedY;
     f32 factor;
     f32 period;
-    vertex direction;
+    Vec3f direction;
     f32 phaseX;
     f32 phaseY;
     f32 sineX;
@@ -223,15 +198,15 @@ void func_150E6B84(Game113D60Effect *effect) {
 }
 
 typedef struct {
-    /* 0x00 */ vertex start;
-    /* 0x0C */ vertex end;
+    /* 0x00 */ Vec3f start;
+    /* 0x0C */ Vec3f end;
 } Game113D60Segment;
 
 extern Game113D60Segment *D_80088A3C;
 extern Game113D60Segment *D_80088A40;
 
 /* Start callback: a random point on one of two segments. */
-void func_150E6E34(vertex *out) {
+void func_150E6E34(Vec3f *out) {
     Game113D60Segment *segment;
     f32 t;
 
@@ -246,18 +221,17 @@ void func_150E6E34(vertex *out) {
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
 
-extern void func_1514470C(struct134 *, void *);
+extern void func_1514470C(TriggerZone *, void *);
 
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
-void func_150E6ED8(vertex *out) {
-    // D_800D9A20 is declared as a single pointer in variables.h but is a two-entry table here.
-    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], out);
+void func_150E6ED8(Vec3f *out) {
+    func_1514470C(D_800D9A20[func_150ADA20() & 1], out);
 }
 
 extern Game113D60Segment *D_80088A44[];
 
 /* Start callback: a random point on one of six segments. */
-void func_150E6F18(vertex *out) {
+void func_150E6F18(Vec3f *out) {
     Game113D60Segment *segment;
     f32 t;
 
@@ -270,59 +244,47 @@ void func_150E6F18(vertex *out) {
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ vertex unk38;
+    /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Bone150E6FAC *unk10;
-} Node150E6FAC;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ vertex position;
-    /* 0x020 */ u8 pad20[0x2D4];
-    /* 0x2F4 */ void *unk2F4;
-} Actor150E6FAC;
-
-s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */
-void func_150E6FAC(vertex *out, Actor150E6FAC *actor) {
-    Node150E6FAC *node;
+void func_150E6FAC(Vec3f *out, Actor *actor) {
+    Attachment *node;
     f32 sine;
     f32 radius;
     s16 angle;
     f32 cosine;
 
-    if (func_1514ECE0(actor->unk2F4, 0x16, &node) != 0) {
+    if (func_1514ECE0(actor->attachments, 0x16, &node) != 0) {
         Bone150E6FAC *bone;
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
         angle = func_150ADA20() & 0xFF;
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
-        bone = node->unk10;
-        out->x = actor->position.x + (bone->unk38.x * -80.0f) + (cosine * radius);
-        out->y = actor->position.y + (bone->unk38.y * -80.0f) + 100.0f;
-        out->z = actor->position.z + (bone->unk38.z * -80.0f) + (sine * radius);
+        bone = node->handle;
+        out->x = actor->x_position + (bone->unk38.x * -80.0f) + (cosine * radius);
+        out->y = actor->y_position + (bone->unk38.y * -80.0f) + 100.0f;
+        out->z = actor->z_position + (bone->unk38.z * -80.0f) + (sine * radius);
     } else {
-        out->x = actor->position.x;
-        out->y = actor->position.y;
-        out->z = actor->position.z;
+        out->x = actor->x_position;
+        out->y = actor->y_position;
+        out->z = actor->z_position;
     }
 }
 
 /* End callback: the actor's position. */
-void func_150E70CC(vertex *out, Actor150E6FAC *actor) {
-    out->x = actor->position.x;
-    out->y = actor->position.y;
-    out->z = actor->position.z;
+void func_150E70CC(Vec3f *out, Actor *actor) {
+    out->x = actor->x_position;
+    out->y = actor->y_position;
+    out->z = actor->z_position;
 }
 
 /* Motion callback: aims the emission along `delta` with a random wobble. */
-void func_150E70EC(vertex *start, vertex *end, vertex *delta, Game113D60Emission *emission) {
+void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
     f32 dx;
     f32 dz;
 
@@ -339,7 +301,7 @@ void func_150E70EC(vertex *start, vertex *end, vertex *delta, Game113D60Emission
 }
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
-void func_150E71E4(vertex *start, vertex *end, vertex *delta, Game113D60Emission *emission) {
+void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
     emission->x = func_150484A0(delta->x, delta->z);
     emission->amplitudeX = 0.471238941f;
     emission->phaseX = func_150ADA68() * 6.283185482f;
@@ -355,50 +317,11 @@ typedef struct {
     /* 0x4 */ f32 y;
 } Vec2f;
 
-typedef struct {
-    /* 0x00 */ Vec2f position;
-    /* 0x08 */ f32 sizeX;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-} Struct1515548CArg; // first argument of func_1515548C
-
 extern Game113D60Ids2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
 extern Game113D60Ids3 D_80088A68;
 extern Game113D60Ids3 D_80088A74;
-extern void *func_1515548C(Struct1515548CArg *, s32, s32 *, s32, s32, u8, s32);
+extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind);
@@ -448,34 +371,35 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
 /* Spawns a func_1515548C effect of the given size at `position`. */
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
-    Struct1515548CArg arg;
+    ScreenSpriteInfo5C arg;
     Game113D60Ids1 id;
 
     id = D_80088A64;
-    arg.position = *position;
-    arg.sizeX = size;
-    arg.sizeY = size;
-    arg.unk10 = id.ids[0];
-    arg.unk12 = unk12;
+    // matching: x and y are copied as one Vec2f
+    *(Vec2f *)&arg.x = *position;
+    arg.halfWidth = size;
+    arg.halfHeight = size;
+    arg.texture = id.ids[0];
+    arg.timer = unk12;
     arg.flags = flags | 0x40;
-    arg.unk16 = unk16;
-    arg.unk18 = unk18;
-    arg.unk1A = 4;
-    arg.unk1B = 0xFF;
-    arg.unk1C = 0xE6;
-    arg.unk1D = 0xBE;
-    arg.unk1E = unk1E;
-    arg.unk1F = 0xFF;
-    arg.unk20 = 0xFF;
-    arg.unk21 = 0xFF;
-    arg.unk22 = 0xFF;
+    arg.fadeStart = unk16;
+    arg.fadeRate = unk18;
+    arg.kind = 4;
+    arg.color1.red = 0xFF;
+    arg.color1.green = 0xE6;
+    arg.color1.blue = 0xBE;
+    arg.color1.alpha = unk1E;
+    arg.color2.red = 0xFF;
+    arg.color2.green = 0xFF;
+    arg.color2.blue = 0xFF;
+    arg.color2.alpha = 0xFF;
     arg.unk23 = unk23;
-    arg.unk24 = 1;
+    arg.otherModeH = 1;
     arg.unk28 = 0;
     arg.unk2C = 0;
     arg.unk40 = 0;
     arg.unk41 = 10;
-    arg.unk30 = 7;
+    arg.combineMode = 7;
     arg.unk34 = 60;
     arg.unk38 = 0x80;
     arg.unk3C = 0x20;
@@ -485,36 +409,36 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
 /* Like func_150E75A0, but placed at a random screen edge. */
 void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
                    u8 owner, s32 kind) {
-    Struct1515548CArg arg;
+    ScreenSpriteInfo5C arg;
     u8 edge;
 
     edge = func_150ADA20() & 3;
 
-    arg.unk12 = unk12;
+    arg.timer = unk12;
     arg.flags = flags & 0xFFF9;
-    arg.unk16 = unk16;
-    arg.unk18 = unk18;
-    arg.unk1A = 5;
-    arg.unk1B = 0xFF;
-    arg.unk1C = 0xE6;
-    arg.unk1D = 0xBE;
-    arg.unk1E = unk1E;
-    arg.unk1F = 0xFF;
-    arg.unk20 = 0xFF;
-    arg.unk21 = 0xFF;
-    arg.unk22 = 0xFF;
+    arg.fadeStart = unk16;
+    arg.fadeRate = unk18;
+    arg.kind = 5;
+    arg.color1.red = 0xFF;
+    arg.color1.green = 0xE6;
+    arg.color1.blue = 0xBE;
+    arg.color1.alpha = unk1E;
+    arg.color2.red = 0xFF;
+    arg.color2.green = 0xFF;
+    arg.color2.blue = 0xFF;
+    arg.color2.alpha = 0xFF;
     arg.unk23 = unk23;
-    arg.unk24 = 1;
+    arg.otherModeH = 1;
     arg.unk28 = 0;
     arg.unk2C = 0;
     arg.unk40 = 0;
     arg.unk41 = 10;
-    arg.unk30 = 7;
+    arg.combineMode = 7;
     arg.unk34 = 60;
     arg.unk38 = 0x80;
     arg.unk3C = 0x20;
-    arg.sizeY = size;
-    arg.sizeX = size;
+    arg.halfHeight = size;
+    arg.halfWidth = size;
 
     switch (edge) {
     case 0:
@@ -523,15 +447,15 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
             Game113D60Ids3 sideIds;
 
             sideIds = D_80088A68;
-            arg.unk10 = sideIds.ids[func_150ADA20() % 3];
-            arg.position.y = (func_150ADA68() * 160.0f) + -80.0f;
+            arg.texture = sideIds.ids[func_150ADA20() % 3];
+            arg.y = (func_150ADA68() * 160.0f) + -80.0f;
             switch (edge) {
             case 0:
                 arg.flags |= 2;
-                arg.position.x = 145.0f - size;
+                arg.x = 145.0f - size;
                 break;
             case 1:
-                arg.position.x = size - 145.0f;
+                arg.x = size - 145.0f;
                 break;
             }
         }
@@ -542,15 +466,15 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
             Game113D60Ids3 topIds;
 
             topIds = D_80088A74;
-            arg.unk10 = topIds.ids[func_150ADA20() % 3];
-            arg.position.x = (func_150ADA68() * 260.0f) + -130.0f;
+            arg.texture = topIds.ids[func_150ADA20() % 3];
+            arg.x = (func_150ADA68() * 260.0f) + -130.0f;
             switch (edge) {
             case 2:
                 arg.flags |= 4;
-                arg.position.y = 110.0f - size;
+                arg.y = 110.0f - size;
                 break;
             case 3:
-                arg.position.y = size - 110.0f;
+                arg.y = size - 110.0f;
                 break;
             }
         }
@@ -574,7 +498,8 @@ typedef struct {
 } Game113D60Burst;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Burst burst;
 } Game113D60BurstEffect;
 
@@ -666,56 +591,34 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         burst->head.accum -= 1.0f;
     }
     if (burst->head.next >= burst->head.count) {
-        effect->header.unkE = -1;
+        effect->header.state = -1;
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 unk07;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} Struct1513C650Arg; // first argument of func_1513C650 / func_1513C73C (passed as an s32)
-
 /* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, vertex *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
-    Struct1513C650Arg arg;
+    SpriteDef arg;
     s32 argB;
     s32 argC;
 
-    arg.unk22 = 20;
-    arg.unk24 = 12;
-    arg.unk06 = 0x4F;
-    arg.unk07 = 0;
+    arg.fadeStart = 20;
+    arg.fadeRate = 12;
+    arg.texture = 0x4F;
+    arg.unk7 = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
-    arg.unk04 = (duration == -1) ? 300 : duration + 20;
-    arg.unk08 = 0;
-    arg.unk0C = 0;
+    arg.lifetime = (duration == -1) ? 300 : duration + 20;
+    arg.frame = 0;
+    arg.frameSpeed = 0;
     arg.unk10 = arg1;
     arg.unk11 = 0xFF;
-    arg.unk12 = arg7;
-    arg.unk13 = arg8;
-    arg.unk14 = arg9;
-    arg.unk15 = 0xFF;
-    arg.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    arg.rgba[0] = arg7;
+    arg.rgba[1] = arg8;
+    arg.rgba[2] = arg9;
+    arg.rgba[3] = 0xFF;
+    arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
     arg.unk16 = 0;
     arg.unk17 = 6;
     if (arg5 != 0) {
@@ -725,42 +628,13 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, vertex *position, s16 duration, 
         argB = 0;
         argC = 0;
     }
-    func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+    func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ vertex position;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Struct1514FCE8Arg; // first argument of func_1514FCE8
-
-extern vertex D_800A1290[];
-extern void func_151D3FF4(vertex *position, u8 owner, s32 kind);
-extern void func_1514FCE8(Struct1514FCE8Arg *arg0, u8 owner, s32 kind);
+extern Vec3f D_800A1290[];
+extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
+extern void func_1514FCE8(JetSpraySpec *arg0, u8 owner, s32 kind);
 
 /* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
  * 200 units above the point, plus an event. */
@@ -769,8 +643,8 @@ void func_150E81A8(index, owner, kind)
     u8 owner;
     s32 kind;
 {
-    vertex position;
-    Struct1514FCE8Arg arg;
+    Vec3f position;
+    JetSpraySpec arg;
     Game113D60Event event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
@@ -778,32 +652,32 @@ void func_150E81A8(index, owner, kind)
         position.y += 200.0f;
         func_151D3FF4(&position, owner, kind);
 
-        arg.unk00 = 0;
-        arg.unk02 = 0xFF;
-        arg.unk04 = -0x40;
-        arg.unk06 = 0x4D;
-        arg.unk08 = 10;
-        arg.unk0C = 5;
-        arg.position = position;
-        arg.unk1C = 252.0f;
-        arg.unk20 = 117.0f;
-        arg.unk24 = 308.0f;
-        arg.unk28 = 256.0f;
-        arg.unk2C = 699.0f;
-        arg.unk30 = 511.0f;
-        arg.unk34 = 4;
-        arg.unk38 = 7;
-        arg.unk3C = 27.0f;
-        arg.unk40 = 0.7820000648f;
-        arg.unk44 = -0.9300000668f;
-        arg.unk48 = 0.7300000191f;
-        arg.unk4C = 25;
-        arg.unk4E = 15;
-        arg.unk50 = 100;
-        arg.unk52 = 100;
-        arg.unk54 = 12;
-        arg.unk56 = 20;
-        arg.unk58 = 0;
+        arg.angles.yawBase = 0;
+        arg.angles.yawRange = 0xFF;
+        arg.angles.pitchBase = -0x40;
+        arg.angles.pitchRange = 0x4D;
+        arg.spray.countBase = 10;
+        arg.spray.countRange = 5;
+        arg.spray.pos = position;
+        arg.spray.speedBase = 252.0f;
+        arg.spray.speedRange = 117.0f;
+        arg.spray.sizeBase = 308.0f;
+        arg.spray.sizeRange = 256.0f;
+        arg.spray.sizeSlopeBase = 699.0f;
+        arg.spray.sizeSlopeRange = 511.0f;
+        arg.spray.particleCountBase = 4;
+        arg.spray.particleCountRange = 7;
+        arg.spray.spread = 27.0f;
+        arg.spray.drag = 0.7820000648f;
+        arg.spray.gravityBase = -0.9300000668f;
+        arg.spray.gravityRange = 0.7300000191f;
+        arg.spray.delayBase = 25;
+        arg.spray.delayRange = 15;
+        arg.spray.alphaBase = 100;
+        arg.spray.alphaRange = 100;
+        arg.spray.fadeStart = 12;
+        arg.spray.fadeOutStart = 20;
+        arg.spray.eventFunc = 0;
 
         func_1514FCE8(&arg, owner, kind);
 
@@ -817,12 +691,12 @@ void func_150E81A8(index, owner, kind)
 }
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unkC;
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
-void func_150E83AC(vertex *position, s16 duration, u8 owner, s32 kind) {
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
     struct260 *effect;
 
@@ -847,17 +721,18 @@ typedef struct {
 } Game113D60ParticleExtra;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ Game113D60ParticleExtra extra;
 } Game113D60Particle;
 
 typedef struct {
-    /* 0x0 */ vertex position;
+    /* 0x0 */ Vec3f position;
     /* 0xC */ f32 accum;
 } Game113D60Emitter;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Emitter emitter;
 } Game113D60EmitterEffect;
 
@@ -950,7 +825,8 @@ void func_150E8854(void) {
 }
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ f32 timer;
 } Game113D60TimerEffect;
 
@@ -967,7 +843,6 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
 }
 
 extern Game113D60Ids2 D_80088A80;
-extern u8 D_800BE9EB;
 void func_150E8A80(void);
 void func_150E90DC(void);
 
@@ -986,10 +861,10 @@ void func_150E8930(void) {
     event.unk4 = (func_150ADA20() % 6) + 3;
     event.unk6 = -1;
     func_151D8868(&event, 0, 0xFF, 1);
-    if (D_800DCDC4 != 0) {
+    if (D_800DCDC4 != NULL) {
         func_150E8A80();
     }
-    if (D_800DCDC4 != 0) {
+    if (D_800DCDC4 != NULL) {
         func_150E90DC();
     }
     func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
@@ -1017,14 +892,6 @@ void func_150E8A80(void) {
     }
 }
 
-/* Node of the weighted region list at D_800DCDC4, whose weights add up to D_800DCD90. */
-typedef struct Game113D60WeightedNode {
-    /* 0x0 */ struct134 *region;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ f32 weight;
-    /* 0xC */ struct Game113D60WeightedNode *next;
-} Game113D60WeightedNode;
-
 /* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
 typedef struct {
     /* 0x0 */ f32 rate;
@@ -1033,25 +900,26 @@ typedef struct {
 } Game113D60Spawner;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Spawner spawner;
 } Game113D60RegionSpawnerEffect;
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
 } Game113D60Data8B1C;
 
-extern vertex *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
  * position func_15144B34 returns. */
 void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
-    vertex *center;
+    Vec3f *center;
     Game113D60Spawner *spawner;
-    Game113D60WeightedNode *node;
+    RegionNode *node;
     f32 pick;
     Game113D60Data8B1C data;
     Game113D60Data8B1C *dataPtr;
@@ -1066,9 +934,9 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
-            node = (Game113D60WeightedNode *)D_800DCDC4;
-            while (node->weight < pick) {
-                pick -= node->weight;
+            node = D_800DCDC4;
+            while (node->area < pick) {
+                pick -= node->area;
                 node = node->next;
             }
             func_1514470C(node->region, dataPtr);
@@ -1092,59 +960,21 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex position;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-} Struct15130374Arg; // matching: 0x64-byte view of ParticleDesc; the full 0x70 changes the stack frame
-
 /* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
     /* 0x14 */ f32 accum;
 } Game113D60PointSpawner;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
 
-struct260 *func_15130374(Struct15130374Arg *, u8, s32, u8, s32);
+struct260 *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
@@ -1152,7 +982,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     struct260 *particle;
     s32 flip80;
     s32 flip40;
-    Struct15130374Arg arg;
+    ParticleDesc64 arg;
     s32 pad; // matching: unused stack slot
     f32 extra;
     f32 zero; // matching: writing 0.0f literals instead does not match
@@ -1164,34 +994,34 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
         {
             f32 size;
 
-            arg.unk1D = 0x16;
-            arg.unk08 = 0xE01;
-            arg.unk00 = 0x200005;
-            arg.unk04 = 0;
-            arg.unk0C = 0;
-            arg.unk10 = 0;
+            arg.texture = 0x16;
+            arg.renderMode = 0xE01;
+            arg.unk0 = 0x200005;
+            arg.unk4 = 0;
+            arg.frame = 0;
+            arg.frameRate = 0;
             arg.flags = 0x801E05;
-            arg.unk60 = 3;
-            arg.unk61 = 3;
-            arg.unk62 = 0x1A;
-            arg.unk63 = -1;
-            arg.unk3C = zero;
-            arg.unk40 = zero;
-            arg.unk44 = zero;
-            arg.unk54 = zero;
-            arg.unk17 = 0xFF;
-            arg.unk1C = 0xFF;
-            arg.unk1E = 30;
-            arg.unk20 = 8;
-            arg.unk48 = zero;
-            arg.unk50 = zero;
+            arg.primColorMode = 3;
+            arg.envColorMode = 3;
+            arg.updateFunc = 0x1A;
+            arg.deathFunc = -1;
+            arg.offset.x = zero;
+            arg.offset.y = zero;
+            arg.offset.z = zero;
+            arg.gravity = zero;
+            arg.a = 0xFF;
+            arg.brightness = 0xFF;
+            arg.fadeStart = 30;
+            arg.fadeRate = 8;
+            arg.vel.x = zero;
+            arg.vel.z = zero;
             do {
                 extra = 0.9700999856f;
-                arg.unk22 = arg.unk0A = (func_150ADA20() & 0xF) + 40;
-                arg.unk1B = (func_150ADA20() % 119) + 100;
+                arg.scaleStart = arg.timer = (func_150ADA20() & 0xF) + 40;
+                arg.alpha = (func_150ADA20() % 119) + 100;
                 size = (func_150ADA68() * 59.0f) + 80.0f;
-                arg.unk2C = arg.unk28 = size;
-                arg.unk24 = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
+                arg.height = arg.width = size;
+                arg.scaleRate = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
                 arg.flags &= ~0xC0;
                 if (func_150ADA20() & 1) {
                     flip80 = 0x80;
@@ -1204,18 +1034,18 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                     flip40 = 0;
                 }
                 arg.flags |= (u32)(flip40 | flip80);
-                arg.unk18 = 0x44;
-                arg.unk19 = 0x3C;
-                arg.unk1A = 0x27;
-                arg.unk14 = 0xF;
-                arg.unk15 = 0x11;
-                arg.unk16 = 5;
+                arg.r2 = 0x44;
+                arg.g2 = 0x3C;
+                arg.b2 = 0x27;
+                arg.r = 0xF;
+                arg.g = 0x11;
+                arg.b = 5;
                 func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f,
-                              &arg.position);
-                arg.position.x += spawner->position.x;
-                arg.position.y += spawner->position.y;
-                arg.position.z += spawner->position.z;
-                arg.unk4C = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
+                              &arg.pos);
+                arg.pos.x += spawner->position.x;
+                arg.pos.y += spawner->position.y;
+                arg.pos.z += spawner->position.z;
+                arg.vel.y = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
                 particle = func_15130374(&arg, 0, sizeof(extra), effect->header.owner, effect->header.kind);
                 if (particle != NULL) {
                     memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
@@ -1248,7 +1078,7 @@ void func_150E90DC(void) {
 }
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -1262,9 +1092,9 @@ typedef struct {
 
 /* Like func_150E8B1C, but spawns effect 0x37 within 1400 units. */
 void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
-    vertex *center;
+    Vec3f *center;
     Game113D60Spawner *spawner;
-    Game113D60WeightedNode *node;
+    RegionNode *node;
     f32 pick;
     Game113D60Data9178 data;
     f32 dx;
@@ -1277,9 +1107,9 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
-            node = (Game113D60WeightedNode *)D_800DCDC4;
-            while (node->weight < pick) {
-                pick -= node->weight;
+            node = D_800DCDC4;
+            while (node->area < pick) {
+                pick -= node->area;
                 node = node->next;
             }
             func_1514470C(node->region, &data);
@@ -1316,64 +1146,24 @@ typedef struct {
 } Game113D60DebrisExtra;
 
 typedef struct {
-    /* 0x000 */ Game113D60EffectHeader header;
+    /* 0x000 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x028 */ u8 pad28[0x10];
-    /* 0x038 */ vertex position;
+    /* 0x038 */ Vec3f position;
     /* 0x044 */ u8 pad44[0x12C];
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
 
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ vertex position;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} Struct15132A4CArg; // matching: 0x78-byte view of ParticleSpawn; the full 0x7C changes the stack frame
-
 extern u8 D_800A12F0[];
 extern f32 D_800A12F4[];
-extern Game113D60Debris *func_15132A4C(Struct15132A4CArg *, s32, s32, s32, u8, s32);
+extern Game113D60Debris *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
  * spawner's position. */
 void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
     Game113D60Debris *debris;
-    Struct15132A4CArg arg;
+    ParticleSpawn78 arg;
     s32 i;
     Game113D60DebrisExtra extra; // copied into the particle uninitialized
 
@@ -1383,48 +1173,48 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
         {
             f32 pad; // matching: unused stack slot
 
-            arg.unk00 = 0.0f;
-            arg.unk04 = 1.0f;
-            arg.unk1C = 1.0f;
-            arg.unk20 = 1.0f;
-            arg.unk24 = 1.0f;
-            arg.unk50 = 0x49E8;
-            arg.unk34 = 0.0f;
-            arg.unk38 = 0.0f;
-            arg.unk3C = 0.0f;
-            arg.unk44 = 0.0f;
-            arg.unk58 = 0;
+            arg.radius = 0.0f;
+            arg.elasticity = 1.0f;
+            arg.scale.x = 1.0f;
+            arg.scale.y = 1.0f;
+            arg.scale.z = 1.0f;
+            arg.flags = 0x49E8;
+            arg.vel.x = 0.0f;
+            arg.vel.y = 0.0f;
+            arg.vel.z = 0.0f;
+            arg.rotVel.y = 0.0f;
+            arg.variant = 0;
             arg.unk5C = 0;
-            arg.unk60 = 0xFF;
-            arg.unk62 = 0;
-            arg.unk63 = 0;
-            arg.unk64 = 0;
-            arg.unk65 = 0;
-            arg.unk66 = 0;
-            arg.unk67 = 0;
-            arg.unk68 = 2;
+            arg.alpha = 0xFF;
+            arg.update2Fn = 0;
+            arg.floorHitFn = 0;
+            arg.floorType3Fn = 0;
+            arg.wallHitFn = 0;
+            arg.destroyFn = 0;
+            arg.squashFn = 0;
+            arg.matrixFn = 2;
             arg.unk6A = 2;
-            arg.unk6C = 0;
-            arg.unk70 = 0;
-            arg.unk72 = 1;
-            arg.unk74 = 0xFF;
+            arg.owner = 0;
+            arg.ownerId = 0;
+            arg.fadeStart = 1;
+            arg.fadeRate = 0xFF;
             do {
                 i = func_150ADA20() % 1;
-                arg.unk56 = D_800A12F0[i];
-                arg.unk08 = arg.unk0C = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
-                arg.unk10 = func_150ADA68() * 360.0f;
-                arg.unk14 = func_150ADA68() * 360.0f;
-                arg.unk18 = func_150ADA68() * 360.0f;
-                arg.unk4C = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
-                arg.unk54 = (func_150ADA20() % 1) + 100;
-                arg.unk40 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
-                arg.unk48 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                arg.model = D_800A12F0[i];
+                arg.sizeXZ = arg.sizeY = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
+                arg.rot.x = func_150ADA68() * 360.0f;
+                arg.rot.y = func_150ADA68() * 360.0f;
+                arg.rot.z = func_150ADA68() * 360.0f;
+                arg.gravity = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
+                arg.lifetime = (func_150ADA20() % 1) + 100;
+                arg.rotVel.x = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                arg.rotVel.z = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
                 func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f,
-                              &arg.position);
-                arg.position.x += spawner->position.x;
-                arg.position.y += spawner->position.y;
-                arg.position.z += spawner->position.z;
-                arg.unk61 = 8;
+                              &arg.pos);
+                arg.pos.x += spawner->position.x;
+                arg.pos.y += spawner->position.y;
+                arg.pos.z += spawner->position.z;
+                arg.updateFn = 8;
                 debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->header.owner, effect->header.kind);
                 if (debris != NULL) {
                     memcpy(&debris->extra, &extra, sizeof(extra));
@@ -1441,7 +1231,7 @@ extern s32 func_151337C0(Game113D60Debris *);
  * ends (returns 0), spawning a func_1513C73C splash first if its type is 0xA. */
 s32 func_150E971C(Game113D60Debris *debris) {
     Game113D60DebrisExtra *extra;
-    Struct1513C650Arg splash;
+    SpriteDef splash;
 
     func_151337C0(debris);
     extra = &debris->extra;
@@ -1451,25 +1241,25 @@ s32 func_150E971C(Game113D60Debris *debris) {
 
             size = (func_150ADA68() * 20.0f) + 20.0f;
 
-            splash.unk06 = 0xB;
-            splash.unk07 = 0;
+            splash.texture = 0xB;
+            splash.unk7 = 0;
             splash.flags = 0x9701;
-            splash.unk04 = 100;
-            splash.unk08 = 0;
-            splash.unk0C = 0;
+            splash.lifetime = 100;
+            splash.frame = 0;
+            splash.frameSpeed = 0;
             splash.unk10 = 0xFF;
             splash.unk11 = 0xFF;
-            splash.unk12 = 0xFF;
-            splash.unk13 = 0xFF;
-            splash.unk14 = 0xFF;
-            splash.unk15 = 0xFF;
-            splash.unk18 = 0x3B0003;
+            splash.rgba[0] = 0xFF;
+            splash.rgba[1] = 0xFF;
+            splash.rgba[2] = 0xFF;
+            splash.rgba[3] = 0xFF;
+            splash.renderModes = 0x3B0003;
             splash.unk16 = 0;
             splash.unk17 = 7;
-            splash.unk22 = 20;
-            splash.unk24 = 12;
+            splash.fadeStart = 20;
+            splash.fadeRate = 12;
 
-            func_1513C73C((s32)&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
+            func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
                           debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->header.owner,
                           debris->header.kind);
         }

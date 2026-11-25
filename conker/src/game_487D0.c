@@ -1,12 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800DCD30 D_800DCD30_hdr
 #include "variables.h"
-#undef D_800DCD30
 
-extern f32 D_800BE6C0[];     // per-player smoothed light pitch (degrees, -180..180)
-extern f32 D_800BE6D0[];     // per-player smoothed light yaw (degrees, 0..360)
-extern s8 D_800DCD30[4][3];  // per-player directional light direction
 
 /*
  * Eases player's directional light towards the camera's pitch (unk388) and yaw (unk380),
@@ -31,7 +26,7 @@ void func_1501B320(s32 player) {
         } else {
             rate = 0.02999999933f;
         }
-        pitch = D_800DBFF0[player].unk388;
+        pitch = D_800DBFF0[player].pitch;
         yaw = D_800DBFF0[player].unk380;
         if (pitch < 0.0f) {
             pitch += 360.0f;

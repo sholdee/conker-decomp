@@ -2,12 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800D9B28[4][4];
-extern s16 D_800DD2F2;
-extern s16 D_800DD2F4;
-extern f32 D_800C3648; // added to both FOVs of every view
-extern f32 D_800C364C; // near-plane override when non-zero
-extern f32 D_800C3650; // far-plane override when non-zero
+extern MtxF D_800D9B28;
 
 f32 cosf(f32);
 f32 sinf(f32);
@@ -69,9 +64,9 @@ void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
  * deltas) so func_1510B3B0 can re-apply it. */
 void func_1510B32C(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale) {
     func_1510B128(viewIndex, fovXDelta, fovYDelta, scale, 0.0f);
-    D_800D9AC0[viewIndex].unk0 = scale;
-    D_800D9AC0[viewIndex].unk4 = fovXDelta;
-    D_800D9AC0[viewIndex].unk8 = fovYDelta;
+    D_800D9AC0[viewIndex].x = scale;
+    D_800D9AC0[viewIndex].y = fovXDelta;
+    D_800D9AC0[viewIndex].z = fovYDelta;
     D_800D9AF0 = TRUE;
 }
 
@@ -80,9 +75,9 @@ void func_1510B3B0(void) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
-        if (D_800D9AC0[i].unk0 != -1.0f) {
-            func_1510B128(i, D_800D9AC0[i].unk4, D_800D9AC0[i].unk8, D_800D9AC0[i].unk0, 0.0f);
-            D_800D9AC0[i].unk0 = -1.0f;
+        if (D_800D9AC0[i].x != -1.0f) {
+            func_1510B128(i, D_800D9AC0[i].y, D_800D9AC0[i].z, D_800D9AC0[i].x, 0.0f);
+            D_800D9AC0[i].x = -1.0f;
         }
     }
     D_800D9AF0 = FALSE;

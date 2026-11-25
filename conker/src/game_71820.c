@@ -1,33 +1,6 @@
 #include <ultra64.h>
-// The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
-#define D_800CBE00 D_800CBE00_s32
-#define D_800D3300 D_800D3300_hdr
-#define D_800DBE3C D_800DBE3C_hdr
-#define D_800DBE5C D_800DBE5C_hdr
-#define D_800DBEF4 D_800DBEF4_hdr
 #include "variables.h"
-#undef D_800CBE00
-#undef D_800D3300
-#undef D_800DBE3C
-#undef D_800DBE5C
-#undef D_800DBEF4
-
-
-/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
-typedef struct TriggerNode {
-    /* 0x00 */ struct TriggerNode *next;
-    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 check;     // index into D_80085E80
-    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
-    /* 0x0E */ u8 delay;     // frames before check starts running
-    /* 0x0F */ u8 padF;
-} TriggerNode;
 
 /* A TriggerNode with a box volume (func_150448D0). */
 typedef struct TriggerVolume {
@@ -41,7 +14,6 @@ typedef struct TriggerVolume {
     /* 0x1C */ s16 *size;
 } TriggerVolume;
 
-extern TriggerNode *D_800CBE00;
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
 extern f32 sqrtf(f32);
@@ -57,20 +29,16 @@ void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-extern u8 D_80089120[4]; // per collision set: 1 = enabled
-extern u8 D_800CBDD3;
-extern f32 D_800CBDF4;
-extern f32 D_800CBDF8;
 void func_1510F800(s32);
-void func_15044660(struct127 *, f32, f32, f32);
-s32 func_150AB1F0(f32, f32, f32, struct127 *, s32);
-void func_150AC3E4(f32, f32, f32, struct127 *, s32);
+void func_15044660(Actor *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
+void func_150AC3E4(f32, f32, f32, Actor *, s32);
 
 /*
  * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
  * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
  */
-s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass) {
+s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
     s32 i;
     s32 total;
     s32 saved_mode;
@@ -78,7 +46,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass)
     D_800CBDF4 = -32768.0f;
     D_800CBDF8 = -32768.0f;
     total = 0;
-    obj->pad275 = 0;
+    obj->unk275 = 0;
     func_15044660(obj, x, y, z);
     saved_mode = D_800CBDD3;
     for (i = 3; i >= 0; i--) {
@@ -104,7 +72,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass)
 }
 
 /* Copies a triangle's three s16 vertices into out, relative to (ox, oy, oz) and rotated about Y. */
-void func_1504452C(s16 **vertices, struct17 *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
+void func_1504452C(s16 **vertices, Vec3f *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
     s16 *vtx;
     f32 x;
     f32 y;
@@ -116,9 +84,9 @@ void func_1504452C(s16 **vertices, struct17 *out, f32 sinY, f32 cosY, f32 ox, f3
         x = vtx[0] - ox;
         y = vtx[1] - oy;
         z = vtx[2] - oz;
-        out[i].unk0 = (x * cosY) + (z * sinY);
-        out[i].unk4 = y;
-        out[i].unk8 = (z * cosY) - (x * sinY);
+        out[i].x = (x * cosY) + (z * sinY);
+        out[i].y = y;
+        out[i].z = (z * cosY) - (x * sinY);
     }
 }
 
@@ -127,10 +95,10 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(struct127 *obj, s16 *height, s16 *arg2, s16 *arg3);
+void func_1507C3E0(Actor *obj, s16 *height, s16 *arg2, s16 *arg3);
 
 /* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
-void func_15044660(struct127 *obj, f32 x, f32 y, f32 z) {
+void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
     s16 height;
     s16 unk2C;
     s16 unk2A;
@@ -275,7 +243,6 @@ void func_15044A28(void) {
     }
 }
 
-extern f32 func_15048A40(u8); // sine of a 256-step angle (header declares it void)
 extern f32 func_150489B0(u8); // cosine of a 256-step angle
 
 /* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */
@@ -291,9 +258,9 @@ s32 func_15044B78(TriggerVolume *volume) {
     s32 playerWidth;
     s32 playerDepth;
 
-    playerHalfHeight = (s16)D_800CC2D0[0].unk31C->unk114 >> 1;
-    playerWidth = (s16)D_800CC2D0[0].unk31C->unk116;
-    playerDepth = (s16)D_800CC2D0[0].unk31C->unk118;
+    playerHalfHeight = D_800CC2D0[0].unk31C->height >> 1;
+    playerWidth = D_800CC2D0[0].unk31C->width;
+    playerDepth = D_800CC2D0[0].unk31C->depth;
     dx = D_800CC2D0[0].x_position - volume->node.x;
     dy = (D_800CC2D0[0].y_position - volume->node.y) + playerHalfHeight;
     dz = D_800CC2D0[0].z_position - volume->node.z;
@@ -331,7 +298,7 @@ s32 func_15044D40(TriggerVolume *volume) {
     return FALSE;
 }
 
-s32 func_1505D024(struct127 *obj, s32 type, u16 angle, s32 arg3);
+s32 func_1505D024(Actor *obj, s32 type, u16 angle, s32 arg3);
 
 /* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 
@@ -346,7 +313,7 @@ void func_15044DE8(void) {
     if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_1505D024(&D_800CC2D0[0], 4, D_800CC2D0[0].unk7A, -1);
     }
 }
@@ -365,28 +332,6 @@ void func_15044E88(void) {
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} Vec3s_71820;
-
-typedef struct {
-    Vec3s_71820 v[3];
-} CollisionTri;
-
-/* Surface record in the D_800DBEF4 array (same 0xA0 layout as WorldObject, whose header copy lacks 0x40/0x44). */
-typedef struct Game71820Surface {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ s32 default_material;
-    /* 0x44 */ s32 *materials;     // per-triangle, indexed from first_triangle
-    /* 0x48 */ u8 pad48[0x10];
-    /* 0x58 */ u16 first_triangle;
-    /* 0x5A */ u8 pad5A[0x15];
-    /* 0x6F */ u8 flags;
-    /* 0x70 */ u8 pad70[0x30];
-} Game71820Surface;
-
 /* Result of a floor/ceiling probe. */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;
@@ -396,16 +341,10 @@ typedef struct CollisionHit {
     /* 0x1C */ u8 flags;           // 2: height within the probe's limit, 4: tri is valid (fast path re-tests it)
     /* 0x1D */ u8 source;          // which collision set produced the hit (1-4)
     /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ Game71820Surface *surface;
+    /* 0x20 */ WorldObject *surface;
 } CollisionHit;
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
-typedef struct Game71820Candidate {
-    /* 0x00 */ s32 height;         // 24.8 fixed point
-    /* 0x04 */ s32 *vertices;      // entry in the D_800DBE3C triangle table: three vertex-array bases
-    /* 0x08 */ s32 index;          // vertex index (or byte offset) into each base
-    /* 0x0C */ s32 surface;        // index into D_800DBEF4
-} Game71820Candidate;
 
 s32 func_150A3A70(s32, s32);
 s32 func_150A4FA0(s32, s32);
@@ -413,48 +352,41 @@ s32 func_150A43E0(s32, s32, s32, void *);
 void func_150A44F0(s32, void *, s32);
 s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
-extern u8 *D_800DBE3C;
-extern s32 *D_800DBE5C;
-extern Game71820Candidate D_800D3300[];
-extern Game71820Surface *D_800DBEF4;
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
-extern f32 D_800DBE68;
-extern f32 D_800DBE6C;
-extern f32 D_800DBE70;
 extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
-s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
+s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
     f32 height;
 
-    if (top < pos->unk4) {
+    if (top < pos->y) {
         hit->flags &= ~2;
         return FALSE;
     }
     hit->height = 99999.8984375f;
     best = -1;
     func_1510F800(0);
-    count = func_150A3A70(pos->unk0, pos->unk8);
+    count = func_150A3A70(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (pos->unk4 <= height && height < hit->height) {
+        if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 index;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        index = candidate->index;
+        vertices = candidate->tri;
+        index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             Vtx *vtx = (Vtx *)vertices[j] + index;
             hit->tri.v[j].x = vtx->v.ob[0];
@@ -462,7 +394,7 @@ s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         {
-            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
             hit->material = D_800DBE5C[triangle];
         }
         hit->flags |= 5;
@@ -479,40 +411,40 @@ s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe against collision set 0: highest triangle between bottom and pos.y. */
-s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
+s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
     f32 height;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->flags &= ~2;
         return FALSE;
     }
     hit->height = -10000.0f;
     best = -1;
     func_1510F800(0);
-    D_800DBE68 = pos->unk0;
-    D_800DBE6C = pos->unk4;
-    D_800DBE70 = pos->unk8;
+    D_800DBE68 = pos->x;
+    D_800DBE6C = pos->y;
+    D_800DBE70 = pos->z;
     D_800DBE74 = bottom;
-    count = func_150A3A70(pos->unk0, pos->unk8);
+    count = func_150A3A70(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (height <= pos->unk4 && hit->height < height) {
+        if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 index;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        index = candidate->index;
+        vertices = candidate->tri;
+        index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             Vtx *vtx = (Vtx *)vertices[j] + index;
             hit->tri.v[j].x = vtx->v.ob[0];
@@ -520,7 +452,7 @@ s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         if (D_800DBE5C != NULL) {
-            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
             hit->material = D_800DBE5C[triangle];
         } else {
             hit->material = 0;
@@ -538,10 +470,10 @@ s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
     return FALSE;
 }
 
-s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit);
+s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit);
 
 /* Ceiling probe: re-tests the cached triangle first, then searches collision set 0. */
-s32 func_1504530C(struct17 *pos, f32 top, CollisionHit *hit) {
+s32 func_1504530C(Vec3f *pos, f32 top, CollisionHit *hit) {
     switch (func_150470B0(pos, top, hit)) {
     case 0:
         return func_15044ED0(pos, top, hit);
@@ -553,36 +485,36 @@ s32 func_1504530C(struct17 *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Ceiling probe against collision set 3. */
-s32 func_15045384(struct17 *pos, f32 top, CollisionHit *hit) {
+s32 func_15045384(Vec3f *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
     f32 height;
 
-    if (top < pos->unk4) {
+    if (top < pos->y) {
         hit->flags &= ~2;
         return FALSE;
     }
     hit->height = 99999.8984375f;
     best = -1;
     func_1510F800(3);
-    count = func_150A4FA0(pos->unk0, pos->unk8);
+    count = func_150A4FA0(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (pos->unk4 <= height && height < hit->height) {
+        if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 offset;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
@@ -604,36 +536,36 @@ s32 func_15045384(struct17 *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe against collision set 3. */
-s32 func_1504554C(struct17 *pos, f32 bottom, CollisionHit *hit) {
+s32 func_1504554C(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
     f32 height;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->flags &= ~2;
         return FALSE;
     }
     hit->height = -10000.0f;
     best = -1;
     func_1510F800(3);
-    count = func_150A4FA0(pos->unk0, pos->unk8);
+    count = func_150A4FA0(pos->x, pos->z);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (height <= pos->unk4 && hit->height < height) {
+        if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 offset;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
@@ -655,19 +587,19 @@ s32 func_1504554C(struct17 *pos, f32 bottom, CollisionHit *hit) {
 }
 
 /* Selects the two surface sets (collision set 2) under pos for the func_15045880-style probes. */
-void func_15045714(struct17 *pos, u16 mask, s32 *setA, s32 *setB) {
+void func_15045714(Vec3f *pos, u16 mask, s32 *setA, s32 *setB) {
     func_1510F800(2);
-    *setA = func_150A6500(pos->unk0, pos->unk8, setB, mask);
+    *setA = func_150A6500(pos->x, pos->z, setB, mask);
 }
 
-s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit);
+s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit);
 
 /* Floor probe against surface set B only. */
-s32 func_15045780(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15045780(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     s32 setA;
     s32 setB;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->flags &= ~2;
         return FALSE;
     }
@@ -675,10 +607,10 @@ s32 func_15045780(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     return func_15045F8C(pos, bottom, &setB, hit);
 }
 
-s32 func_15047004(struct17 *pos, f32 bottom, CollisionHit *hit);
+s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit);
 
 /* Floor probe: re-tests the cached triangle first, then func_15045780. */
-s32 func_15045800(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15045800(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     switch (func_15047004(pos, bottom, hit)) {
     case 0:
         return func_15045780(pos, mask, bottom, hit);
@@ -690,7 +622,7 @@ s32 func_15045800(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling probe against surface set A. */
-s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
+s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -699,16 +631,16 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
     hit->height = 99999.8984375f;
     best = -1;
     func_150A44F0(*set, D_800D37E0, 0);
-    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D37E0);
+    count = func_150A43E0(pos->x, pos->z, *set, D_800D37E0);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (pos->unk4 <= height && height < hit->height) {
+        if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -716,28 +648,28 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         u32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -754,7 +686,7 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
 }
 
 /* Floor probe against surface set A. */
-s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
+s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -763,16 +695,16 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     hit->height = -10000.0f;
     best = -1;
     func_150A44F0(*set, D_800D37E0, 0);
-    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D37E0);
+    count = func_150A43E0(pos->x, pos->z, *set, D_800D37E0);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (height <= pos->unk4 && hit->height < height) {
+        if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -780,28 +712,28 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         u32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -818,7 +750,7 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
 }
 
 /* Ceiling probe against surface set B. */
-s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
+s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -827,16 +759,16 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
     hit->height = 99999.8984375f;
     best = -1;
     func_150A44F0(*set, D_800D3830, 0);
-    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D3830);
+    count = func_150A43E0(pos->x, pos->z, *set, D_800D3830);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (pos->unk4 <= height && height < hit->height) {
+        if (pos->y <= height && height < hit->height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -844,25 +776,25 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         s32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
-        if ((hit->surface->flags & 0x80) == 0x80) {
+        if ((hit->surface->viewFlags & 0x80) == 0x80) {
             hit->flags |= 1;
         }
         hit->source = 3;
@@ -877,7 +809,7 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
 }
 
 /* Floor probe against surface set B. */
-s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
+s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
     s32 i;
@@ -886,16 +818,16 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     hit->height = -10000.0f;
     best = -1;
     func_150A44F0(*set, D_800D3830, 0);
-    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D3830);
+    count = func_150A43E0(pos->x, pos->z, *set, D_800D3830);
     for (i = 0; i < count; i++) {
         height = D_800D3300[i].height * 0.00390625f;
-        if (height <= pos->unk4 && hit->height < height) {
+        if (height <= pos->y && hit->height < height) {
             best = i;
             hit->height = height;
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -903,25 +835,25 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         s32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->default_material;
+            hit->material = hit->surface->material;
         }
         hit->flags |= 6;
-        if ((hit->surface->flags & 0x80) == 0x80) {
+        if ((hit->surface->viewFlags & 0x80) == 0x80) {
             hit->flags |= 1;
         }
         hit->source = 3;
@@ -936,7 +868,7 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
 }
 
 /* Ceiling probe: the nearer of surface sets A and B. */
-s32 func_150461D0(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+s32 func_150461D0(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     s32 setA;
     s32 setB;
     CollisionHit hitA;
@@ -944,7 +876,7 @@ s32 func_150461D0(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
     u8 foundA;
     u8 foundB;
 
-    if (top < pos->unk4) {
+    if (top < pos->y) {
         hit->flags &= ~2;
         return FALSE;
     }
@@ -979,7 +911,7 @@ s32 func_150461D0(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe: the nearer of surface sets A and B. */
-s32 func_15046460(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15046460(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     s32 setA;
     s32 setB;
     CollisionHit hitA;
@@ -987,7 +919,7 @@ s32 func_15046460(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     u8 foundA;
     u8 foundB;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->source = 0;
         hit->surface = NULL;
         hit->flags &= ~2;
@@ -1024,13 +956,13 @@ s32 func_15046460(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling probe: the nearer of surface sets A/B and collision set 0. */
-s32 func_150466F8(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+s32 func_150466F8(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
     u8 foundB;
 
-    if (top < pos->unk4) {
+    if (top < pos->y) {
         hit->flags &= ~2;
         return FALSE;
     }
@@ -1069,13 +1001,13 @@ s32 func_150466F8(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe: the nearer of surface sets A/B and collision set 0. */
-s32 func_1504697C(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
     u8 foundB;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->flags &= ~2;
         return FALSE;
     }
@@ -1114,7 +1046,7 @@ s32 func_1504697C(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling probe with the cached-triangle fast path (func_150466F8). */
-s32 func_15046C00(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+s32 func_15046C00(Vec3f *pos, u16 mask, f32 top, CollisionHit *hit) {
     switch (func_150470B0(pos, top, hit)) {
     case 0:
         return func_150466F8(pos, mask, top, hit);
@@ -1126,7 +1058,7 @@ s32 func_15046C00(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
 }
 
 /* Floor probe with the cached-triangle fast path (func_1504697C). */
-s32 func_15046C80(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15046C80(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     switch (func_15047004(pos, bottom, hit)) {
     case 0:
         return func_1504697C(pos, mask, bottom, hit);
@@ -1138,13 +1070,13 @@ s32 func_15046C80(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Floor probe: func_1504697C or collision set 3, whichever is nearer. */
-s32 func_15046D00(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15046D00(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     CollisionHit hitA;
     CollisionHit hitB;
     u8 foundA;
     u8 foundB;
 
-    if (pos->unk4 < bottom) {
+    if (pos->y < bottom) {
         hit->flags &= ~2;
         return FALSE;
     }
@@ -1183,7 +1115,7 @@ s32 func_15046D00(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
 }
 
 /* Floor probe with the cached-triangle fast path (func_15046D00). */
-s32 func_15046F84(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+s32 func_15046F84(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit) {
     switch (func_15047004(pos, bottom, hit)) {
     case 0:
         return func_15046D00(pos, mask, bottom, hit);
@@ -1198,13 +1130,13 @@ s32 func_15046F84(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
  * Fast path for floor probes: if hit->tri is still valid and pos lies over it, re-measure its height.
  * Returns 0 when not over the cached triangle, 1 when over it but outside [bottom, pos.y], 2 on a hit.
  */
-s32 func_15047004(struct17 *pos, f32 bottom, CollisionHit *hit) {
+s32 func_15047004(Vec3f *pos, f32 bottom, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->unk0, pos->unk8, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
             if (bottom <= height) {
-                if (height <= pos->unk4) {
+                if (height <= pos->y) {
                     hit->height = height;
                     hit->flags |= 2;
                     return 2;
@@ -1217,13 +1149,13 @@ s32 func_15047004(struct17 *pos, f32 bottom, CollisionHit *hit) {
 }
 
 /* Ceiling counterpart of func_15047004: a hit lies in [pos.y, top]. */
-s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit) {
+s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
     f32 height;
 
     if (hit->flags & 4) {
-        if (func_150A3FC4(pos->unk0, pos->unk8, 0, &hit->tri, &height)) {
+        if (func_150A3FC4(pos->x, pos->z, 0, &hit->tri, &height)) {
             if (height <= top) {
-                if (pos->unk4 <= height) {
+                if (pos->y <= height) {
                     hit->height = height;
                     hit->flags |= 2;
                     return 2;
@@ -1235,37 +1167,21 @@ s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit) {
     return 0;
 }
 
-/* Floor state an object keeps (overlays struct127, whose header copy lacks these fields). */
-typedef struct ObjFloorState {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 x;
-    /* 0x018 */ f32 y;
-    /* 0x01C */ f32 z;
-    /* 0x020 */ u8 pad20[0xD8];
-    /* 0x0F8 */ u32 flags;
-    /* 0x0FC */ u8 padFC[0x84];
-    /* 0x180 */ f32 floor_height;
-    /* 0x184 */ s32 floor_material;
-    /* 0x188 */ u8 pad188[4];
-    /* 0x18C */ CollisionTri floor_tri;
-    /* 0x19E */ u8 pad19E[2];
-    /* 0x1A0 */ u16 floor_surface; // 1-based index into D_800DBEF4; 0 = none
-} ObjFloorState;
-
+/* Floor state an object keeps (overlays Actor, whose header copy lacks these fields). */
 /* Seeds a CollisionHit from the floor an object last stood on (a flat triangle if flag 0x200000 is set). */
-void func_1504715C(CollisionHit *hit, ObjFloorState *obj) {
+void func_1504715C(CollisionHit *hit, Actor *obj) {
     s32 surface;
     s32 flag;
 
-    hit->height = obj->floor_height;
-    if (obj->flags & 0x200000) {
+    hit->height = obj->floorY;
+    if (obj->unkF8 & 0x200000) {
         s16 x;
         s16 y;
         s16 z;
 
-        x = obj->x;
-        y = obj->floor_height;
-        z = obj->z;
+        x = obj->x_position;
+        y = obj->floorY;
+        z = obj->z_position;
         hit->tri.v[0].x = x + 1000;
         hit->tri.v[0].y = y;
         hit->tri.v[0].z = z + 1000;
@@ -1276,12 +1192,12 @@ void func_1504715C(CollisionHit *hit, ObjFloorState *obj) {
         hit->tri.v[2].y = y;
         hit->tri.v[2].z = z - 1000;
     } else {
-        hit->tri = obj->floor_tri;
+        hit->tri = obj->floorTri;
     }
-    hit->material = obj->floor_material;
+    hit->material = obj->unk184;
     hit->flags = 6;
-    if (obj->floor_surface != 0) {
-        surface = obj->floor_surface - 1;
+    if (obj->propNum != 0) {
+        surface = obj->propNum - 1;
         hit->source = 2;
         hit->surface = &D_800DBEF4[surface];
         if (func_15145C90(surface) != 0) {
@@ -1307,7 +1223,7 @@ typedef struct Game71820FloorSrc {
     /* 0x56 */ u8 pad56[3];
     /* 0x59 */ u8 unk59;
     /* 0x5A */ u8 pad5A[2];
-    /* 0x5C */ Game71820Surface *surface;
+    /* 0x5C */ WorldObject *surface;
     /* 0x60 */ s32 material;
 } Game71820FloorSrc;
 
@@ -1337,7 +1253,7 @@ void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
 }
 
 /* guLookAtF equivalent: view matrix from eye, target and up vector (sqrtf called out of line). */
-void func_15047390(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+void func_15047390(MtxF mf, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 scale;
     f32 xRight;
     f32 yRight;
@@ -1405,7 +1321,7 @@ void func_15047390(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt,
 
 /* guLookAt equivalent: func_15047390 converted to a fixed-point Mtx. */
 void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
-    f32 mf[4][4];
+    MtxF mf;
 
     func_15047390(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);
@@ -1414,7 +1330,7 @@ void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 z
 #pragma intrinsic(sqrtf)
 
 /* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
-void func_15047700(f32 mf[4][4], LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+void func_15047700(MtxF mf, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
     f32 yLook;
@@ -1517,7 +1433,7 @@ void func_15047700(f32 mf[4][4], LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xA
 /* guLookAtReflect equivalent: func_15047700 converted to a fixed-point Mtx. */
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp) {
-    f32 mf[4][4];
+    MtxF mf;
 
     func_15047700(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(mf, m);

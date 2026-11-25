@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern f32 D_800A07B4; // matching: 401.0f; as a literal IDO allocates the FP temps in a different order
 
@@ -17,14 +18,14 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_1504715C(GroundHit *hit, struct127 *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_1504715C(GroundHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, s32 argA, u8 argB);
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
-void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
-    vertex pos;
+void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
+    Vec3f pos;
 
     if (actor == NULL) {
         return;
@@ -45,49 +46,6 @@ void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
     func_1514C678(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
 
-/* Spawn parameters of a func_15130374 particle (same layout as ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc; /* size 0x70 */
-
 /* A particle object (same layout as Particle in game_15D730.c); its kind's own data follows at +0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
@@ -95,9 +53,6 @@ typedef struct {
     /* 0x80 */ u8 pad80[0x28];
     /* 0xA8 */ f32 unkA8;
 } Particle;
-
-#define PARTICLE_FLIP_S 0x40
-#define PARTICLE_FLIP_T 0x80
 
 Particle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
@@ -160,47 +115,12 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-/* Spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (as ParticleSpawn in game_1D43B0.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[0xA]; // matching: 4 bytes past the 0x7C template; the stack frame needs the larger size
-} ParticleSpawn; // size 0x80
-
-s32 func_15132A4C(ParticleSpawn *spawn, s32, s32, s32, u8, s32);
+s32 func_15132A4C(ParticleSpawn80 *spawn, s32, s32, s32, u8, s32);
 
 /* Spawns a spinning model-0x20 particle at (x, y, z), launched along `yaw` at a random pitch. */
 s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
-    ParticleSpawn spawn;
+    ParticleSpawn80 spawn;
     f32 speed;
     u32 random;
 

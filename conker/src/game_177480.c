@@ -16,7 +16,7 @@ typedef struct {
     /* 0x18 */ f32 heightTarget;
     /* 0x1C */ s16 widthTimer;
     /* 0x1E */ s16 heightTimer;
-    /* 0x20 */ struct17 vel;
+    /* 0x20 */ Vec3f vel;
     /* 0x2C */ f32 gravity;
     /* 0x30 */ f32 damping;
     /* 0x34 */ f32 shrinkRate;
@@ -26,7 +26,7 @@ typedef struct {
     /* 0x44 */ s16 unk24Timer;
     /* 0x46 */ s16 unk156;
     /* 0x48 */ s16 unk158;
-} EffectParams;
+} FlickerParams;
 
 /* Effect instance shared by the update callbacks in this file. */
 typedef struct {
@@ -37,8 +37,8 @@ typedef struct {
     /* 0x028 */ u8 pad28[0x4];
     /* 0x02C */ f32 width;
     /* 0x030 */ f32 height;
-    /* 0x034 */ struct17 pos;
-    /* 0x040 */ struct17 prevPos;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f prevPos;
     /* 0x04C */ u8 pad4C[0x8];
     /* 0x054 */ f32 trailFactor;
     /* 0x058 */ u8 pad58[0x4];
@@ -52,7 +52,7 @@ typedef struct {
     /* 0x075 */ u8 pad75[0x4B];
     /* 0x0C0 */ Vtx vtxTemplate[4];
     /* 0x100 */ Vtx *vtxBuffers[4];
-    /* 0x110 */ EffectParams params;
+    /* 0x110 */ FlickerParams params;
 } Effect;
 
 #define EFFECT_WIDTH_GROWN  2
@@ -85,19 +85,19 @@ Vtx *func_15149FD0(Effect *effect, s16 index) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->pos.unk0 + offsetX;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->pos.unk4;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->pos.unk8 - offsetZ;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->pos.unk0 - offsetX;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->pos.unk4 + effect->height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->pos.unk8 + offsetZ;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->pos.x + offsetX;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->pos.z - offsetZ;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->pos.x - offsetX;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->pos.y + effect->height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->pos.z + offsetZ;
 
     return ret;
 }
 
 /* Flickers width, height and unk24 towards random targets that are re-rolled on timers. */
 s32 func_1514A19C(Effect *effect) {
-    EffectParams *params;
+    FlickerParams *params;
 
     params = &effect->params;
 
@@ -130,7 +130,7 @@ s32 func_1514A19C(Effect *effect) {
 
 /* Grows width and height towards their targets; once both are within 95%, calls func_1513F680(..., 4, ...). */
 s32 func_1514A380(Effect *effect) {
-    EffectParams *params;
+    FlickerParams *params;
     s32 done;
 
     done = TRUE;
@@ -173,14 +173,14 @@ s32 func_1514A4EC(Effect *effect) {
 
     damping = effect->params.damping;
     effect->prevPos = effect->pos;
-    effect->params.vel.unk0 *= damping;
-    effect->params.vel.unk4 += effect->params.gravity * D_800BE9A4;
+    effect->params.vel.x *= damping;
+    effect->params.vel.y += effect->params.gravity * D_800BE9A4;
     // matching: block boundary makes IDO load the return value 1 into v0 early, freeing it from &D_800BE9A4
     if (1) {}
-    effect->params.vel.unk8 *= damping;
-    effect->pos.unk0 += effect->params.vel.unk0 * D_800BE9A4;
-    effect->pos.unk4 += effect->params.vel.unk4 * D_800BE9A4;
-    effect->pos.unk8 += effect->params.vel.unk8 * D_800BE9A4;
+    effect->params.vel.z *= damping;
+    effect->pos.x += effect->params.vel.x * D_800BE9A4;
+    effect->pos.y += effect->params.vel.y * D_800BE9A4;
+    effect->pos.z += effect->params.vel.z * D_800BE9A4;
     return 1;
 }
 
@@ -190,21 +190,21 @@ s32 func_1514A594(Effect *effect) {
     f32 dy;
     f32 dz;
 
-    effect->params.vel.unk0 *= effect->params.damping;
-    effect->params.vel.unk4 += effect->params.gravity * D_800BE9A4;
-    effect->params.vel.unk8 *= effect->params.damping;
-    dx = effect->params.vel.unk0 * D_800BE9A4;
-    dy = effect->params.vel.unk4 * D_800BE9A4;
-    dz = effect->params.vel.unk8 * D_800BE9A4;
+    effect->params.vel.x *= effect->params.damping;
+    effect->params.vel.y += effect->params.gravity * D_800BE9A4;
+    effect->params.vel.z *= effect->params.damping;
+    dx = effect->params.vel.x * D_800BE9A4;
+    dy = effect->params.vel.y * D_800BE9A4;
+    dz = effect->params.vel.z * D_800BE9A4;
     // matching: volatile read makes pos.x a fresh CSE entry after pos.y/z, giving the lerp its FP registers
-    effect->pos.unk0 = *(volatile f32 *)&effect->pos.unk0 + dx;
-    effect->pos.unk4 += dy;
-    effect->pos.unk8 += dz;
-    effect->prevPos.unk0 += dx;
-    effect->prevPos.unk4 += dy;
-    effect->prevPos.unk8 += dz;
-    effect->prevPos.unk0 = effect->pos.unk0 + (effect->prevPos.unk0 - effect->pos.unk0) * effect->trailFactor;
-    effect->prevPos.unk4 = effect->pos.unk4 + (effect->prevPos.unk4 - effect->pos.unk4) * effect->trailFactor;
-    effect->prevPos.unk8 = effect->pos.unk8 + (effect->prevPos.unk8 - effect->pos.unk8) * effect->trailFactor;
+    effect->pos.x = *(volatile f32 *)&effect->pos.x + dx;
+    effect->pos.y += dy;
+    effect->pos.z += dz;
+    effect->prevPos.x += dx;
+    effect->prevPos.y += dy;
+    effect->prevPos.z += dz;
+    effect->prevPos.x = effect->pos.x + (effect->prevPos.x - effect->pos.x) * effect->trailFactor;
+    effect->prevPos.y = effect->pos.y + (effect->prevPos.y - effect->pos.y) * effect->trailFactor;
+    effect->prevPos.z = effect->pos.z + (effect->prevPos.z - effect->pos.z) * effect->trailFactor;
     return 1;
 }

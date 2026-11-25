@@ -1,13 +1,7 @@
 #include <ultra64.h>
-// functions.h declares these two with the wrong return types (func_1513EDE4 returns its Vtx *, and
-// func_150ADA20's result is used as a full u32), so its declarations are renamed away and redeclared below.
-#define func_1513EDE4 func_1513EDE4_orig
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_1513EDE4
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 extern void func_150FCBC0(u8 arg0);
 extern s32 func_1000EC24();
@@ -36,9 +30,9 @@ void func_150FCA30(void) {
     func_150FCBC0(2);
 
     // func_1000FA64(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
-    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (s32)func_1000EC24, (void *)45, 0, 0, 0);
-    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (s32)func_1000EC24, NULL, 0, 0, 0);
-    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (s32)func_1000EC24, (void *)90, 0, 0, 0);
+    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)45, 0, 0, 0);
+    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, NULL, 0, 0, 0);
+    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)90, 0, 0, 0);
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);
@@ -52,47 +46,18 @@ void func_150FCA30(void) {
     func_151D8868(&params, 0, 0xFF, 0);
 }
 
-typedef struct {
-    /* 0x00 */ s16 angle;
-    /* 0x02 */ s16 spread;
-    /* 0x04 */ s16 pitch;
-    /* 0x06 */ s16 pitchSpread;
-    /* 0x08 */ s32 count;
-    /* 0x0C */ s32 countSpread;
-    /* 0x10 */ struct17 position;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} ParticleBurstDesc; /* emitter description passed to func_1514FCE8 */
-
 
 extern const s16 D_800A1EE0[3][2];
-void *func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void *func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_1514FCE8(ParticleBurstDesc *, u8, s32);
+extern void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
-    struct134 *area;
-    struct17 pos;
+    TriggerZone *area;
+    Vec3f pos;
     const s16 *range;
-    ParticleBurstDesc desc;
+    JetSpraySpec desc;
     s16 count;
     u8 angle;
     u32 randInt;
@@ -105,66 +70,66 @@ void func_150FCBC0(u8 index) {
     if (area == NULL) {
         return;
     }
-    pos.unk0 = area->unk0;
-    pos.unk4 = (s16)area->unk2 + (s16)area->unk8 * 0.5f;
-    pos.unk8 = area->unk4;
+    pos.x = area->x;
+    pos.y = area->y + area->height * 0.5f;
+    pos.z = area->z;
     randFrac = func_150ADA68();
     func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
         range = D_800A1EE0[index];
-        desc.spread = 80;
-        desc.pitch = -32;
-        desc.pitchSpread = 43;
-        desc.count = 1;
-        desc.countSpread = 8;
-        desc.unk1C = 249.0f;
-        desc.unk20 = 451.0f;
-        desc.unk24 = 506.0f;
-        desc.unk28 = 100.0f;
-        desc.unk2C = 1505.0f;
-        desc.unk30 = 1511.0f;
-        desc.unk34 = 3;
-        desc.unk38 = 2;
-        desc.unk3C = 90.0f;
-        desc.unk40 = 0.813f;
-        desc.unk44 = -2.0f;
-        desc.unk48 = 1.085f;
-        desc.unk4C = 12;
-        desc.unk4E = 50;
-        desc.unk50 = 100;
-        desc.unk52 = 100;
-        desc.unk54 = 12;
-        desc.unk56 = 12;
-        desc.unk58 = -1;
+        desc.angles.yawRange = 80;
+        desc.angles.pitchBase = -32;
+        desc.angles.pitchRange = 43;
+        desc.spray.countBase = 1;
+        desc.spray.countRange = 8;
+        desc.spray.speedBase = 249.0f;
+        desc.spray.speedRange = 451.0f;
+        desc.spray.sizeBase = 506.0f;
+        desc.spray.sizeRange = 100.0f;
+        desc.spray.sizeSlopeBase = 1505.0f;
+        desc.spray.sizeSlopeRange = 1511.0f;
+        desc.spray.particleCountBase = 3;
+        desc.spray.particleCountRange = 2;
+        desc.spray.spread = 90.0f;
+        desc.spray.drag = 0.813f;
+        desc.spray.gravityBase = -2.0f;
+        desc.spray.gravityRange = 1.085f;
+        desc.spray.delayBase = 12;
+        desc.spray.delayRange = 50;
+        desc.spray.alphaBase = 100;
+        desc.spray.alphaRange = 100;
+        desc.spray.fadeStart = 12;
+        desc.spray.fadeOutStart = 12;
+        desc.spray.eventFunc = -1;
         do {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
-            desc.angle = angle - 40;
-            func_15143874((s16)angle, (s16)area->unk6, &desc.position.unk0, &desc.position.unk8);
-            desc.position.unk0 += area->unk0;
-            desc.position.unk8 += area->unk4;
-            desc.position.unk4 = func_150ADA68() * (s16)area->unk8 + (s16)area->unk2;
+            desc.angles.yawBase = angle - 40;
+            func_15143874((s16)angle, area->radius, &desc.spray.pos.x, &desc.spray.pos.z);
+            desc.spray.pos.x += area->x;
+            desc.spray.pos.z += area->z;
+            desc.spray.pos.y = func_150ADA68() * area->height + area->y;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
     }
 }
 
-extern f32 func_15165BB0(void *arg0, struct17 *pos, f32 arg2, f32 arg3, f32 arg4);
+extern f32 func_15165BB0(void *arg0, Vec3f *pos, f32 arg2, f32 arg3, f32 arg4);
 
 /* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {
-    struct134 *area;
-    struct17 pos;
+    TriggerZone *area;
+    Vec3f pos;
 
     area = D_800D9AA0[0];
     if (area == NULL) {
         return 1.0f;
     }
-    pos.unk0 = area->unk0;
-    pos.unk4 = (s16)area->unk2;
-    pos.unk8 = area->unk4;
+    pos.x = area->x;
+    pos.y = area->y;
+    pos.z = area->z;
     return func_15165BB0(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 
@@ -185,37 +150,11 @@ typedef struct {
     /* 0x1D */ u8 pad1D[0x7];
 } GroundHit; /* 0x24 */
 
-/* Particle spawn template (the layout of ParticleDef in game_169510.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ s16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 rot;
-    /* 0x34 */ struct17 scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef; /* 0x58 */
-
 typedef struct Actor150FD514 Actor150FD514;
 
 /* State that follows the particle (its ParticleMotion slot at 0x110). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
     /* 0x08 */ f32 maxWidth;
     /* 0x0C */ f32 timer;       /* counts down by D_800BE9A4; the particle dies below 0 */
@@ -236,32 +175,25 @@ typedef struct {
 
 /* A particle (Particle in game_169510.c) with Ext150FCFD4 as its motion state. */
 struct Actor150FD514 {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Ext150FCFD4 ext;
 };
 
-extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
-extern void func_1504715C(GroundHit *, struct127 *);
-extern s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1504715C(GroundHit *, Actor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
  * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
  */
-void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     GroundHit ground;
-    struct17 pos;
+    Vec3f pos;
     u8 onGround;
-    struct17 probe;
+    Vec3f probe;
     ParticleDef def;
     Ext150FCFD4 ext;
     Actor150FD514 *particle;
@@ -274,17 +206,17 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
     if (obj->unk7 < 0xFF) {
         return;
     }
-    pos.unk0 = obj->x_position;
-    probe.unk0 = pos.unk0;
-    probe.unk4 = obj->y_position + 100.0f;
-    pos.unk8 = obj->z_position;
-    probe.unk8 = pos.unk8;
+    pos.x = obj->x_position;
+    probe.x = pos.x;
+    probe.y = obj->y_position + 100.0f;
+    pos.z = obj->z_position;
+    probe.z = pos.z;
     func_1504715C(&ground, obj);
     if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
-        pos.unk4 = ground.height;
+        pos.y = ground.height;
         onGround = 1;
     } else {
-        pos.unk4 = obj->y_position;
+        pos.y = obj->y_position;
         onGround = 0;
     }
     func_1505D024(obj, 0x39, obj->unk7A, -1);
@@ -302,7 +234,7 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
     ext.groundParticle = NULL;
     ext.emitCounter = 0.0f;
     ext.ground = ground;
-    ext.soundHandle = func_1000FA64(0x69E, pos.unk0, pos.unk4, pos.unk8, 32000, 3000, 500, 0, 0, 0, 0, 0);
+    ext.soundHandle = func_1000FA64(0x69E, pos.x, pos.y, pos.z, 32000, 3000, 500, 0, 0, 0, 0, 0);
     flag = onGround ? 1 : 0; // matching: the s32 temp keeps IDO's branchy 0/1 select
     ext.onGround = flag;
     def.texture = 0x59;
@@ -319,10 +251,10 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
     def.width = 0.0f;
     def.height = 1500.0f;
     def.pos = pos;
-    def.rot = *(struct17 *)&D_800A5480;
-    def.scale.unk0 = 1.0f;
-    def.scale.unk4 = 0.0f;
-    def.scale.unk8 = 1.0f;
+    def.rot = D_800A5480;
+    def.scale.x = 1.0f;
+    def.scale.y = 0.0f;
+    def.scale.z = 1.0f;
     def.flags = 0x24EC0008;
     def.unk45 = 0xFF;
     def.unk46 = 0;
@@ -332,7 +264,7 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
     def.unk50 = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
-    particle = func_1513D2F0(&def, (s32)D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
+    particle = func_1513D2F0(&def, D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
@@ -340,9 +272,9 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
         header.unk1 = 2;
         header.unk2 = 300;
         header.unk4 = 6;
-        posInt[0] = pos.unk0;
-        posInt[1] = pos.unk4;
-        posInt[2] = pos.unk8;
+        posInt[0] = pos.x;
+        posInt[1] = pos.y;
+        posInt[2] = pos.z;
         dst->unk24 = func_1516284C(&header, posInt, 0xFF, 0, 0, 0xFF, 0, 0, 0x17, arg1, arg2);
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
@@ -350,7 +282,7 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
             extern s32 D_800A4AA0;
 
             if (onGround) {
-                extern f32 D_800A5480;
+                extern Vec3f D_800A5480;
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -365,13 +297,13 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
                 groundDef.unk44 = 0xFF;
                 groundDef.width = 1.0f;
                 groundDef.height = 1.0f;
-                groundDef.pos.unk0 = pos.unk0;
-                groundDef.pos.unk4 = pos.unk4 + 5.0f;
-                groundDef.pos.unk8 = pos.unk8;
-                groundDef.rot = *(struct17 *)&D_800A5480;
-                groundDef.scale.unk0 = 1.0f;
-                groundDef.scale.unk4 = 1.0f;
-                groundDef.scale.unk8 = 1.0f;
+                groundDef.pos.x = pos.x;
+                groundDef.pos.y = pos.y + 5.0f;
+                groundDef.pos.z = pos.z;
+                groundDef.rot = D_800A5480;
+                groundDef.scale.x = 1.0f;
+                groundDef.scale.y = 1.0f;
+                groundDef.scale.z = 1.0f;
                 groundDef.flags = 0x04EC0008;
                 groundDef.unk45 = 0xFF;
                 groundDef.unk46 = 0;
@@ -381,17 +313,17 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = (Actor150FD514 *)func_1513D594((s32)&groundDef, (s32)&D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
 }
 
-extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
-extern void func_15107B78(struct127 *, s32, s32, s32, s32);
-extern void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
+extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
+extern void func_15107B78(Actor *, s32, s32, s32, s32);
+extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E83AC(struct17 *, s16, u8, s32);
+extern void func_150E83AC(Vec3f *, s16, u8, s32);
 extern f32 sinf(f32);
 
 /*
@@ -400,11 +332,11 @@ extern f32 sinf(f32);
  * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
  */
 s32 func_150FD514(Actor150FD514 *particle) {
-    struct127 *owner;
+    Actor *owner;
     Ext150FCFD4 *ext;
     f32 z;
     f32 x;
-    struct17 groundPos;
+    Vec3f groundPos;
 
     ext = &particle->ext;
     owner = ext->owner;
@@ -417,42 +349,42 @@ s32 func_150FD514(Actor150FD514 *particle) {
         x = owner->x_position;
         z = owner->z_position;
     } else {
-        x = particle->def.pos.unk0;
-        z = particle->def.pos.unk8;
+        x = particle->head.def.pos.x;
+        z = particle->head.def.pos.z;
     }
     if (owner != NULL) {
         func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
         ext->emitCounter += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
         while (ext->emitCounter > 1.0f) {
-            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->unkC, particle->unk1);
+            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), particle->head.header.owner, particle->head.header.kind);
             ext->emitCounter -= 1.0f;
         }
     }
     if (ext->timer > 20.0f) {
-        particle->def.width = (50.0f - ext->timer) * 0.033333335f * ext->maxWidth;
+        particle->head.def.width = (50.0f - ext->timer) * 0.033333335f * ext->maxWidth;
     } else if (ext->timer > 10.0f) {
-        particle->def.width = ext->maxWidth;
+        particle->head.def.width = ext->maxWidth;
     } else {
-        particle->def.width = ext->timer * 0.1f * ext->maxWidth;
+        particle->head.def.width = ext->timer * 0.1f * ext->maxWidth;
         if (ext->burstDone == 0) {
             if (owner != NULL) {
                 func_1505D024(owner, 0x16, owner->unk7A, -1);
-                func_10010F88(0x69D, 32000, 0, 0, 0, particle->def.pos.unk0, particle->def.pos.unk4, particle->def.pos.unk8, 500, 3000);
+                func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
-            func_151D5404(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->unkC, particle->unk1);
-            func_151D5334(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->unkC, particle->unk1);
+            func_151D5404(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->head.header.owner, particle->head.header.kind);
+            func_151D5334(&particle->head.def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->head.header.owner, particle->head.header.kind);
             if (ext->onGround & 1) {
-                groundPos.unk0 = particle->def.pos.unk0;
-                groundPos.unk4 = ext->ground.height;
-                groundPos.unk8 = particle->def.pos.unk8;
+                groundPos.x = particle->head.def.pos.x;
+                groundPos.y = ext->ground.height;
+                groundPos.z = particle->head.def.pos.z;
                 func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
-                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->unkC, 0);
-                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->unkC, particle->unk1);
+                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
+                func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
-    particle->def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
+    particle->head.def.unk44 = sinf(ext->pulsePhase) * 57.0f + 198.0f;
     ext->pulsePhase += 0.28500003f * D_800BE9A4;
     ext->pulsePhase = func_15144B68(ext->pulsePhase);
     ext->texPhase0 += 0.10700001f * D_800BE9A4;
@@ -462,13 +394,13 @@ s32 func_150FD514(Actor150FD514 *particle) {
     ext->texS0 = func_150AD78C(ext->texPhase0) * 1666.0f + -4633.0f;
     ext->texS1 = func_150AD78C(ext->texPhase1) * 1192.0f + 1242.0f;
     if (ext->groundParticle != NULL) {
-        ext->groundParticle->def.width = ext->groundParticle->def.height = particle->def.width * 0.02f;
-        ext->groundParticle->def.unk44 = particle->def.unk44;
-        ext->groundParticle->def.pos.unk0 = x;
-        ext->groundParticle->def.pos.unk8 = z;
+        ext->groundParticle->head.def.width = ext->groundParticle->head.def.height = particle->head.def.width * 0.02f;
+        ext->groundParticle->head.def.unk44 = particle->head.def.unk44;
+        ext->groundParticle->head.def.pos.x = x;
+        ext->groundParticle->head.def.pos.z = z;
     }
-    particle->def.pos.unk0 = x;
-    particle->def.pos.unk8 = z;
+    particle->head.def.pos.x = x;
+    particle->head.def.pos.z = z;
     ext->timer -= D_800BE9A4;
     if (ext->timer < 0.0f) {
         return 0;

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but this file uses its full 32-bit result
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 struct Struct151E5034 {
@@ -41,40 +37,17 @@ struct Struct151E5034 {
     } unk66[4];
 };
 
-extern OSContPad D_800BE918[];
-extern u16 D_800BE930[]; /* button bits per controller, read by the menus */
 extern OSIoMesg D_800388E0;
 extern struct Struct151E5034 *D_8008FDD4;
 extern void (*D_800E0A88)(void);
 
-extern s8 D_8008FD74;
-extern s32 D_8008FD78;
-extern u8 D_8008FD80;
 extern s8 D_8008FD98;
-extern s8 D_8008FD9C;
-extern u8 D_8008FDA4;
 extern u8 D_8008FDB8;
 extern u8 D_8008FDCD;
-extern u8 D_8008FE28;
-extern s8 D_8008FE2C;
-extern s8 D_8008FE30;
 extern s8 D_8008FEEC;
-extern s8 D_8008FEF0;
-extern u8 D_800BEAC3;
-extern u8 D_800C35E8;
-extern u8 D_800D2E40;
-extern s32 D_800D2E48;
 extern s8 D_800E0A85;
-extern u8 D_800E0A8C;
-extern s32 D_800E0A90;
 extern u8 D_800E0A98;
 extern s8 D_800E0A99;
-extern u8 D_800E0B94;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern s16 D_800E0B9A;
-extern s8 D_800E0BE3;
 
 extern char D_800AB7D4[];
 extern char D_800AB7DC[];
@@ -128,12 +101,12 @@ void func_151DDC20(void) {
     if (D_800BE9F0 == 0x22) {
         reducedMenu = 1;
     }
-    if ((D_800C35EA != 1) || (D_800BE9F0 != 0x18) || (D_800C35E8 != 1)) {
+    if ((D_800C35EA[0] != 1) || (D_800BE9F0 != 0x18) || (D_800C35E8[0] != 1)) {
         if (func_1517EFDC() != 0) {
             blocked = 1;
         }
     }
-    if ((D_800C35EA == 1) && (D_800C3683 != 0)) {
+    if ((D_800C35EA[0] == 1) && (D_800C3683 != 0)) {
         blocked = 1;
     }
     if (D_8008FEEC > 0) {

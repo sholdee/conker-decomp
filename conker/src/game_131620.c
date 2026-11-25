@@ -6,8 +6,8 @@
 // Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
 typedef struct {
     u8         pad0[0x10];
-    struct127 *owner;  // 0x10
-    struct127 *source; // 0x14
+    Actor *owner;  // 0x10
+    Actor *source; // 0x14
     u16        timer;  // 0x18
     u8         state;  // 0x1A
     u8         alpha;  // 0x1B
@@ -17,7 +17,7 @@ typedef struct {
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a fade effect for owner/source; mode picks how it triggers. */
-void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
+void func_15104170(s32 mode, Actor *owner, Actor *source) {
     FadeEffect *effect;
 
     effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
@@ -31,22 +31,21 @@ void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
     }
 }
 
-extern u8 D_800BEA0C;
 void func_1000E2F4(s32 arg0);
-void func_151254F4(struct108 *camera, s32 arg1);
+void func_151254F4(Camera *camera, s32 arg1);
 void func_151D66F0(s32 arg0, s32 arg1);
 
 /* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
 void func_151041E4(FadeEffect *effect) {
     s32 triggered;
     s32 mode;
-    struct197 *anim;
+    AnimInstance *anim;
     f32 frame;
 
     switch (effect->state) {
     case 0:
         anim = effect->owner->unk2D0;
-        frame = anim->unk8;
+        frame = anim->frame;
         mode = effect->mode;
         triggered = FALSE;
         if (mode == 0) {
@@ -61,8 +60,8 @@ void func_151041E4(FadeEffect *effect) {
             }
         }
         if (triggered) {
-            struct127 *source;
-            struct127 *owner;
+            Actor *source;
+            Actor *owner;
 
             source = effect->source;
             owner = effect->owner;
@@ -75,7 +74,7 @@ void func_151041E4(FadeEffect *effect) {
             func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
             func_151D66F0(210, 2);
             func_151254F4(owner->camera, source->unk13F);
-            owner->camera->unk674 = 0.0f;
+            owner->camera->followRateTarget = 0.0f;
         }
         break;
     case 1: {
@@ -93,7 +92,7 @@ void func_151041E4(FadeEffect *effect) {
     }
         break;
     case 2: {
-        struct127 *owner;
+        Actor *owner;
 
         if (D_800BEA08 < effect->timer) {
             effect->timer -= D_800BEA08;
@@ -102,7 +101,7 @@ void func_151041E4(FadeEffect *effect) {
             D_800BEA0C = 0;
             func_1000E2F4(0);
             func_151254F4(owner->camera, owner->unk13F);
-            owner->camera->unk674 = 0.0f;
+            owner->camera->followRateTarget = 0.0f;
             effect->state = 3;
         }
     }
@@ -136,7 +135,7 @@ Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {
     return func_1517F08C(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
 }
 
-extern struct126 *D_800CC5EC;
+extern ActorCtl *D_800CC5EC;
 
 /* Returns D_800CC5EC->matrix_physics, or 0 when D_800CC5EC is unset. */
 u8 func_151044F4(void) {

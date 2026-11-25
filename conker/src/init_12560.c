@@ -1,6 +1,11 @@
 #include <ultra64.h>
 
+// matching: func_15043BB8 takes (ring, message, size); this caller passes only the ring and lets its own
+// a1/a2 through, so it keeps a one-parameter view
+#define func_15043BB8 func_15043BB8_functions_h
 #include "functions.h"
+#undef func_15043BB8
+void func_15043BB8(struct105 *ring);
 #include "variables.h"
 
 /*
@@ -63,15 +68,15 @@ void func_1001263C(s32 id, s32 volume, s32 pan) {
 }
 
 /* Pop the next logged message into `dst` (at most `dstSize` bytes). */
-void func_100126E8(s32 dst, s32 dstSize) {
-    func_15043CA4(&D_800427A0, dst, dstSize);
+s32 func_100126E8(u8 *dst, s32 dstSize) {
+    return func_15043CA4(&D_800427A0, dst, dstSize);
 }
 
 /*
  * Start track `id` as if played from `obj`'s position: full `volume` and centred when `obj` is
  * a camera, otherwise attenuated between `nearDistance` and `farDistance` and panned.
  */
-s32 func_10012718(u16 id, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+s32 func_10012718(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     s32 pan;
     s32 attenuatedVolume;
     s32 unused;

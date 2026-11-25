@@ -17,13 +17,6 @@ s32 func_15104620(s32 arg0, s32 arg1) {
     return 0x1;
 }
 
-typedef struct Struct15104634 {
-    s32 unk0;
-    s32 *unk4;
-    s32 unk8;
-    s32 unkC;
-} Struct15104634;
-
 s32 func_150A3A70(s32, s32);
 void func_1510F800(s32);
 
@@ -54,9 +47,9 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {
     }
     n = 0;
     for (i = 0; i < count; i++) {
-        t = ((Struct15104634 *)&D_800D3300)[i].unk4;
+        t = D_800D3300[i].tri;
         for (j = 0; j < 3; j++) {
-            v = (s16 *)(((Struct15104634 *)&D_800D3300)[i].unk8 + t[j]);
+            v = (s16 *)(D_800D3300[i].vtxBase + t[j]);
             vx[j] = v[0];
             vz[j] = v[2];
         }
@@ -75,13 +68,13 @@ s32 func_15104634(f32 x, f32 z, f32 y, f32 *out) {
     bestd = 10000.0f;
     for (k = 0; k < n; k++) {
         i = list[k];
-        b = ((Struct15104634 *)&D_800D3300)[i].unk0 * 0.00390625f - y;
-        if (b < 0.0f) b = -(((Struct15104634 *)&D_800D3300)[i].unk0 * 0.00390625f - y);
+        b = D_800D3300[i].height * 0.00390625f - y;
+        if (b < 0.0f) b = -(D_800D3300[i].height * 0.00390625f - y);
         if (b < bestd || best == -1) {
             bestd = b;
             best = i;
         }
     }
-    *out = ((Struct15104634 *)&D_800D3300)[best].unk0 * 0.00390625f;
+    *out = D_800D3300[best].height * 0.00390625f;
     return 1;
 }

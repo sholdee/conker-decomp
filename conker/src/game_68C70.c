@@ -2,9 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-
 /* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
-typedef struct {
+typedef struct BoneChain {
     /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
     /* 0x3C */ f32 bobPhase;    /* degrees, advanced by the walking speed */
     /* 0x40 */ f32 swayAngle;   /* degrees */
@@ -14,26 +13,14 @@ typedef struct {
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
 
-/* The part of the object extension (struct127.unk31C) used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x78];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0x11C - 0x79];
-    /* 0x11C */ BoneChain *chain;
-} ChainObjExt;
-
-typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
-
-#define CHAIN_EXT(obj) ((ChainObjExt *)(obj)->unk31C)
-
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Allocates and initialises the bone chain state of an object. */
-void func_1503B7C0(struct127 *obj) {
-    CHAIN_EXT(obj)->chain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
-    bzero(CHAIN_EXT(obj)->chain, sizeof(BoneChain));
-    CHAIN_EXT(obj)->chain->swaySpeed = 30.0f;
-    CHAIN_EXT(obj)->chain->swayTimer = func_150ADA20() % 30U;
+void func_1503B7C0(Actor *obj) {
+    obj->unk31C->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
+    bzero(obj->unk31C->boneChain, sizeof(BoneChain));
+    obj->unk31C->boneChain->swaySpeed = 30.0f;
+    obj->unk31C->boneChain->swayTimer = func_150ADA20() % 30U;
 }
 
 extern u16 D_8009877C[90];
@@ -43,7 +30,7 @@ extern u16 D_80098830[3];
  * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
  * bit 1 for the animations in D_80098830, bit 0 for those in D_8009877C.
  */
-void func_1503B840(struct127 *obj) {
+void func_1503B840(Actor *obj) {
     s32 i;
 
     if (obj->interaction_state == 1) {
@@ -76,22 +63,6 @@ s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
     return 1;
 }
 
-/* The fields of the camera (struct127.camera) read here; see the Camera struct in game_14FF90.c. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ s32 mode;       /* one-hot mode bit; 0x100 is the R-trigger camera */
-    /* 0x030 */ u8 pad30[0x2F8 - 0x30];
-    /* 0x2F8 */ f32 eyeX;
-    /* 0x2FC */ f32 eyeY;
-    /* 0x300 */ f32 eyeZ;
-    /* 0x304 */ u8 pad304[0x388 - 0x304];
-    /* 0x388 */ f32 pitch;      /* degrees */
-    /* 0x38C */ u8 pad38C[0x74C - 0x38C];
-    /* 0x74C */ f32 unk74C;
-    /* 0x750 */ f32 unk750;
-    /* 0x754 */ f32 unk754;
-} ChainCamera;
-
 extern f32 D_800986F0[4]; /* link lengths */
 extern f32 D_80098700[4]; /* link lengths for objects 0x80 and 0xB0 */
 extern f32 D_80098710[4]; /* per-link x/z follow factors */
@@ -100,8 +71,6 @@ extern f32 D_80098730[4]; /* per-link bend limits, degrees */
 extern f32 D_80098740[5]; /* per-joint lift weights */
 extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18B */
 extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
-extern u8 D_800BEA0C;
-extern u8 D_800C3C9D;
 extern f32 D_800C4008[3]; /* chain anchor position */
 
 void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
@@ -119,7 +88,7 @@ extern f32 cosf(f32);
  * bone matrices with func_1503CB98.
  */
 void func_1503B9BC(s32 objIndex) {
-    struct127 *obj;
+    Actor *obj;
     s32 prev;
     s32 i;
     f32 link[3];
@@ -147,7 +116,7 @@ void func_1503B9BC(s32 objIndex) {
     s32 mode;
     s32 reset;
     f32 bob;
-    ChainCamera *cam;
+    Camera *cam;
     f32 *linkLen;
     BoneChain *chain;
     s32 anim;
@@ -161,10 +130,10 @@ void func_1503B9BC(s32 objIndex) {
     if (obj->unk31C == NULL) {
         return;
     }
-    if (CHAIN_EXT(obj)->chain == NULL) {
+    if (obj->unk31C->boneChain == NULL) {
         func_1503B7C0(obj);
     }
-    chain = CHAIN_EXT(obj)->chain;
+    chain = obj->unk31C->boneChain;
     mode = func_1503B95C(objIndex, chain);
     resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
     if (obj->unk1D4 == NULL) {
@@ -178,7 +147,7 @@ void func_1503B9BC(s32 objIndex) {
         reset = 0;
     }
     /* any of the four camera hold timers, or byte 0x2FD of the object */
-    if (*(s32 *)D_800DBFF4 != 0 || obj->pad2FC[1] != 0) {
+    if (*(s32 *)D_800DBFF4 != 0 || obj->unk2FD != 0) {
         reset = 1;
     }
     if (reset) {
@@ -201,7 +170,7 @@ void func_1503B9BC(s32 objIndex) {
     // matching: the loop start below goes through a variable, so IDO unrolls it for any start
     prev = 24;
     /* the chain is anchored at bone 0's position */
-    bone = ((MtxF *)obj->unk1D4)[0];
+    bone = obj->unk1D4[0];
     D_800C4008[0] = bone[3][0];
     D_800C4008[1] = bone[3][1];
     D_800C4008[2] = bone[3][2];
@@ -214,7 +183,7 @@ void func_1503B9BC(s32 objIndex) {
         }
         return;
     }
-    bone = ((MtxF *)obj->unk1D4)[24];
+    bone = obj->unk1D4[24];
     chain->pos[0][0] = bone[3][0];
     chain->pos[0][1] = bone[3][1];
     chain->pos[0][2] = bone[3][2];
@@ -243,15 +212,15 @@ void func_1503B9BC(s32 objIndex) {
     tipBob = sinf((chain->bobPhase + 180.0f) * 0.01745329238f) * speed;
     offsets[0][1] += bob;
     offsets[4][1] += tipBob;
-    cam = (ChainCamera *)obj->camera;
+    cam = obj->camera;
     if (cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
         s32 clamped = 0;
         f32 turn;
         f32 toCamX;
         f32 toCamZ;
 
-        toCamX = (cam->eyeX + cam->unk74C) - obj->x_position;
-        toCamZ = (cam->eyeZ + cam->unk754) - obj->z_position;
+        toCamX = (cam->eye.x + cam->aim.offset.x) - obj->x_position;
+        toCamZ = (cam->eye.z + cam->aim.offset.z) - obj->z_position;
         angle = func_150484A0(toCamX, toCamZ) * 57.29577637f + 90.0f;
         if (angle >= 360.0f) {
             angle -= 360.0f;
@@ -301,7 +270,7 @@ void func_1503B9BC(s32 objIndex) {
         speed = obj->xz_velocity;
         speed = CLAMP(speed, 0.0f, 30.0f);
         bob = 60.0f - (speed + speed);
-        if (D_800C35EA == 1 && D_800C3C9D < 100) {
+        if (D_800C35EA[0] == 1 && D_800C3C9D < 100) {
             bob *= D_800C3C9D;
             bob *= 0.01f;
         }
@@ -316,7 +285,7 @@ void func_1503B9BC(s32 objIndex) {
         } else {
             liftWeights = D_80098740;
         }
-        if (CHAIN_EXT(obj)->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
+        if (obj->unk31C->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
             bob = 0; // matching: an int 0 (0.0f allocates differently)
         }
         offsets[0][1] += bob * liftWeights[0];
@@ -448,7 +417,7 @@ void func_1503B9BC(s32 objIndex) {
     func_1503CB98(objIndex, mode, blend, chain);
 }
 
-void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
 /*
  * Rebuilds bone matrices 24-27 so that each one looks from chain joint i to joint i+1, keeping the
@@ -456,7 +425,7 @@ void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
  * first blended towards the animated pose by `blend`; otherwise the blend timer is rearmed.
  */
 void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
-    struct127 *obj;
+    Actor *obj;
     f32 up[3];
     f32 eyeX, eyeY, eyeZ;
     f32 atX, atY, atZ;
@@ -464,7 +433,7 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
     f32 inv;
     s32 i;
     s32 j;
-    f32 rootMtx[4][4];
+    MtxF rootMtx;
     f32 animPos[5][3];
     s32 boneOffset;
     s32 joint;
@@ -485,7 +454,7 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
         pos = &chain->pos[joint];
         // matching: a byte offset; indexing bones[24 + i] swaps the registers of i and the offset
         dst = (f32 (*)[4])((u8 *)obj->unk1D4 + boneOffset);
-        bones = (MtxF *)obj->unk1D4;
+        bones = obj->unk1D4;
         if (i == 0) {
             parent = rootMtx;
         } else {
@@ -544,44 +513,4 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
         chain->blendTimer = 30;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -48,8 +48,8 @@ s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
 }
 
 /* func_1503F800 at the object's x/z position. */
-s32 func_1503F904(struct127 *obj, s32 bit, s32 unused) {
-    return func_1503F800(obj->pad320, obj->x_position, obj->z_position, bit, 1);
+s32 func_1503F904(Actor *obj, s32 bit, s32 unused) {
+    return func_1503F800(&obj->unk320, obj->x_position, obj->z_position, bit, 1);
 }
 
 /* Advances D_800C67F1 to the next of the first 25 objects (wrapping) with flag 0x800000 in unkF8. */

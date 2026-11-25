@@ -8,7 +8,7 @@
  * (xExtent, yExtent) around it lies within the view volume: depth in [nearBound, farBound] and
  * view-space x/y within +-xBound / +-yBound. Returns the depth (truncated), or 0 when outside.
  */
-s32 func_15049440(f32 mf[4][4], f32 x, f32 y, f32 z, f32 xExtent, f32 yExtent, f32 nearBound, f32 farBound,
+s32 func_15049440(MtxF mf, f32 x, f32 y, f32 z, f32 xExtent, f32 yExtent, f32 nearBound, f32 farBound,
                   f32 xBound, f32 yBound) {
     f32 depth;
     f32 viewX;

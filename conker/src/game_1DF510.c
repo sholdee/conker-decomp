@@ -2,17 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_1DF510;
-
 /* Template copied into a new rope (HoltenRopeEffect 0x10-0x47, see game_1E0560.c). */
 typedef struct {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1;
     /* 0x02 */ s16 timer;
-    /* 0x04 */ Vec3f_1DF510 start;
-    /* 0x10 */ Vec3f_1DF510 end;
+    /* 0x04 */ Vec3f start;
+    /* 0x10 */ Vec3f end;
     /* 0x1C */ s8 startCallback;
     /* 0x1D */ s8 endCallback;
     /* 0x1E */ u8 drawStyle;
@@ -28,10 +24,10 @@ typedef struct {
 
 /* A point fixed relative to one of an object's bones. */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId; // target->unique_id when attached
     /* 0x05 */ u8 bone;     // index into the Mtx array at target->unk1D4
-    /* 0x08 */ Vec3f_1DF510 offset;
+    /* 0x08 */ Vec3f offset;
 } RopeAnchor;
 
 typedef struct TiedRope TiedRope;
@@ -39,9 +35,9 @@ typedef struct RopeLine RopeLine;
 
 /* Data at 0x28 of the effect that ties obj0 to obj1 with ropes. */
 typedef struct {
-    /* 0x00 */ struct127 *obj0;
+    /* 0x00 */ Actor *obj0;
     /* 0x04 */ u8 obj0Id;   // obj0->unique_id when attached
-    /* 0x08 */ struct127 *obj1;
+    /* 0x08 */ Actor *obj1;
     /* 0x0C */ u8 obj1Id;
     /* 0x0D */ u8 state;    // last func_151B22F4 result, 0 before the first update
     /* 0x10 */ TiedRope *ropes[3];
@@ -70,7 +66,7 @@ struct TiedRope {
 /* Data at 0x28 of the straight line effect a RopeTie owns. */
 typedef struct {
     /* 0x00 */ RopeAnchor anchor; // anchor.offset is the start point
-    /* 0x14 */ Vec3f_1DF510 endOffset;
+    /* 0x14 */ Vec3f endOffset;
     /* 0x20 */ f32 halfWidth;
     /* 0x24 */ RopeTie *owner;
 } RopeLineData;
@@ -82,14 +78,14 @@ struct RopeLine {
 };
 
 TiedRope *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
-extern Vec3f_1DF510 D_800AA320;
-extern Vec3f_1DF510 D_800AA32C;
-extern Vec3f_1DF510 D_800AA338;
-extern Vec3f_1DF510 D_800AA344;
-extern Vec3f_1DF510 D_800AA350;
-extern Vec3f_1DF510 D_800AA35C;
-extern Vec3f_1DF510 D_800AA368;
-extern Vec3f_1DF510 D_800AA374;
+extern Vec3f D_800AA320;
+extern Vec3f D_800AA32C;
+extern Vec3f D_800AA338;
+extern Vec3f D_800AA344;
+extern Vec3f D_800AA350;
+extern Vec3f D_800AA35C;
+extern Vec3f D_800AA368;
+extern Vec3f D_800AA374;
 
 s32 func_151B22F4(RopeTie *self);
 void func_151B222C(RopeTie *self);
@@ -98,7 +94,7 @@ void func_151B2690(RopeTie *self);
 void func_151B47D8(TiedRope *rope, RopeTieLink *link, s32 arg2, u8 event);
 
 /* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
-void func_151B2060(struct127 *obj) {
+void func_151B2060(Actor *obj) {
     RopeTie *effect;
     RopeTieData tie;
 
@@ -121,8 +117,8 @@ void func_151B2060(struct127 *obj) {
 /* Per-frame update: dies when either object is gone, and respawns the ropes when the state changes. */
 void func_151B2100(RopeTie *self) {
     RopeTieData *tie;
-    struct127 *obj0;
-    struct127 *obj1;
+    Actor *obj0;
+    Actor *obj1;
     u8 oldState;
 
     obj0 = self->tie.obj0;
@@ -182,7 +178,7 @@ void func_151B22C8(RopeTie *self) {
 
 /* Returns 1 when obj1->unk65 holds obj0's 1-based index in D_800CC2D0 and obj1->unk5C is 1, else 2. */
 s32 func_151B22F4(RopeTie *self) {
-    struct127 *obj0 = self->tie.obj0;
+    Actor *obj0 = self->tie.obj0;
 
     if (self->tie.obj1->unk65 == (obj0 - D_800CC2D0) + 1) {
         if (self->tie.obj1->unk5C == 1) {
@@ -194,8 +190,8 @@ s32 func_151B22F4(RopeTie *self) {
 
 /* State 1: hangs three ropes between bones of obj0 and obj1. */
 void func_151B2348(RopeTie *self) {
-    struct127 *obj1;
-    struct127 *obj0;
+    Actor *obj1;
+    Actor *obj0;
     RopeTieData *tie;
     HoltenRopeDesc desc;
     RopeTieLink link;
@@ -282,7 +278,7 @@ void func_151B2348(RopeTie *self) {
 
 /* States 0 and 2: hangs two ropes and a line from obj0's bones. */
 void func_151B2690(RopeTie *self) {
-    struct127 *obj;
+    Actor *obj;
     RopeTieData *tie;
     HoltenRopeDesc desc;
     RopeTieLink link;
@@ -340,7 +336,7 @@ void func_151B2690(RopeTie *self) {
     lineData.endOffset = D_800AA374;
     lineData.halfWidth = 5.0f;
     lineData.owner = self;
-    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, (struct37 *)sizeof(RopeLineData), 0xFF, 1);
+    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
     if (tie->line != NULL) {
         memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }
@@ -362,10 +358,8 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern void func_15143134(Vec3f_1DF510 *in, Vec3f_1DF510 *out, Mtx *mtx);
+extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 extern void func_151D5D60(void *, s16, s32, void **, u8 *);
-extern u8 D_80090DE8[];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -385,8 +379,8 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     f32 dy;
     f32 dz;
     f32 lenSq;
-    Vec3f_1DF510 start;
-    Vec3f_1DF510 end;
+    Vec3f start;
+    Vec3f end;
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
@@ -407,7 +401,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        camera = &D_800DBFF0[view].unk2F8;
+        camera = &D_800DBFF0[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
@@ -471,13 +465,13 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
 
 /* Line event handler: lets func_15169850 retarget the anchor object. */
 void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
-    func_15169850(arg1, event, (s32)&self->line.anchor.target, (s32)&self->line.anchor.targetId, (s32)self);
+    func_15169850(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
 /* Event 0x2D payload: two objects that swap places. */
 typedef struct {
-    /* 0x00 */ struct127 *a;
-    /* 0x04 */ struct127 *b;
+    /* 0x00 */ Actor *a;
+    /* 0x04 */ Actor *b;
     /* 0x08 */ u8 aId;
     /* 0x09 */ u8 bId;
 } ObjectSwap;
@@ -533,6 +527,6 @@ void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
     RopeTieLink *link;
 
     link = &self->link;
-    func_15169850(arg1, event, (s32)&link->start.target, (s32)&link->start.targetId, (s32)self);
-    func_15169850(arg1, event, (s32)&link->end.target, (s32)&link->end.targetId, (s32)self);
+    func_15169850(arg1, event, &link->start.target, &link->start.targetId, self);
+    func_15169850(arg1, event, &link->end.target, &link->end.targetId, self);
 }

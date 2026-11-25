@@ -1,15 +1,8 @@
 #include <ultra64.h>
-#define func_1511FC2C func_1511FC2C__proto
-#define func_1511FC44 func_1511FC44__proto
-#define func_150A7CB0 func_150A7CB0__proto
 #include "functions.h"
-#undef func_1511FC2C
-#undef func_1511FC44
-#undef func_150A7CB0
 #include "variables.h"
 
-void func_150A7CB0(f32 mtx[4][4], f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_10004074();
 
 /* Turret settings (WorldObject.param.data); angles in degrees. */
@@ -142,10 +135,6 @@ typedef struct DrawEntry {
 } DrawEntry;
 
 extern DrawEntry **D_80089240[]; // per view
-extern Mtx **D_80089250[];       // per frame buffer: one Mtx per object
-extern u16 D_800DBEE8[];         // per view: entries in D_80089240
-extern f32 D_800D9C10[][4][4];   // per view
-extern u8 D_800C3658[];
 
 extern s32 func_15022B08(s32, s32);
 extern s32 func_1503F800(void *, s16, s16, s32, s32);
@@ -184,15 +173,15 @@ void func_15112A80(s32 player) {
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
-                          (D_800C3658[player] != 0 || (&D_800C35EA)[player] != 1 || func_15022B08(i, player) != 0) &&
-                          (((&D_800C35EA)[player] == 1 && func_15022B08(i, player) != 0) ||
+                          (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
+                          ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
                         f32 (*mtx)[4];
 
                         mtx = D_800D9C10[view];
                         dp = (s32 *)((u8 *)dist + (i - start) * 4); // matching: &dist[i - start] scales i and start separately
-                        if (D_800DBFF0[view].unk3D4->unk197 != 0) {
+                        if (D_800DBFF0[view].playerExt->aimState != 0) {
                             drawDist = D_800D9B1C;
                         } else if (obj->drawDistance == 0) {
                             drawDist = D_800D9B1C;
@@ -271,35 +260,15 @@ void func_15113180(void) {
     }
 }
 
-/* The part of the D_800CC2D0 actor (struct127) this file uses. */
-typedef struct Game13F9D0Actor {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 pos[3];
-    /* 0x020 */ u8 pad20[0x56];
-    /* 0x076 */ u16 movingAngle;
-    /* 0x078 */ u8 pad78[2];
-    /* 0x07A */ s16 facingAngle;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ s16 unk90;
-    /* 0x092 */ u8 pad92[0xA5];
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x9C];
-    /* 0x1D4 */ struct { f32 mtx[4][4]; } *unk1D4; // world matrix
-    /* 0x1D8 */ u8 pad1D8[0x154];
-} Game13F9D0Actor; // size 0x32C
-
-#define ACTORS ((Game13F9D0Actor *)D_800CC2D0)
-
-void func_1511490C(f32 mtx[4][4], WorldObject *obj);
+void func_1511490C(MtxF mtx, WorldObject *obj);
 void func_150A7B80(void *);
-extern f32 D_800DBF08[][4][4];
 
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
     WorldObject *obj;
-    Game13F9D0Actor *actor;
+    Actor *actor;
     f32 (*parent)[4];
-    f32 mf[4][4];
+    MtxF mf;
     s32 j;
     s32 view;
     s32 pad1[2]; // matching: unused stack slots
@@ -323,18 +292,18 @@ void func_15113218(void) {
                     func_1511490C(mf, obj);
                     guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
-                    actor = &ACTORS[obj->attach - 100];
+                    actor = &D_800CC2D0[obj->attach - 100];
                     if (actor->unk1D4 == NULL) {
                         func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
-                        mf[3][0] = actor->pos[0];
-                        mf[3][1] = actor->pos[1];
-                        mf[3][2] = actor->pos[2];
+                        mf[3][0] = actor->x_position;
+                        mf[3][1] = actor->y_position;
+                        mf[3][2] = actor->z_position;
                         guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
-                        parent = actor->unk1D4->mtx;
+                        parent = actor->unk1D4[0];
                         func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
@@ -355,8 +324,6 @@ void func_15113218(void) {
 Gfx *func_151733D8(Gfx *gfx, s32);
 Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
-extern Mtx D_80089470;
-extern u8 D_800D9E21;
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
 Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
@@ -387,16 +354,12 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32, s32 view);
-Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
 Gfx *func_1510D8C0(Gfx *gfx, WorldObject *obj);
 Gfx *func_150CF5E8(Gfx *gfx);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 mtx[4][4], s32, s32, s32);
+Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
-extern s32 D_800BE9C8[];
-extern s32 D_800BEBA4;
 
 /*
  * Draws one object in one view, if it belongs to this pass (opaque pass: alpha 255 and no flags bit 0x10).
@@ -465,14 +428,14 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
         Gfx *cmd = gfx++; cmd->words.w0 = 0xD9EEFFFF; cmd->words.w1 = 0; // gSPClearGeometryMode(G_FOG | G_LOD)
         cmd = gfx++; cmd->words.w0 = 0xE7000000; cmd->words.w1 = 0;      // gDPPipeSync
     }
-    overflow = (D_800BEBA4 < gfx - (Gfx *)D_800BE9C8[D_800BE9C0]) ? 1 : 0;
+    overflow = (D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0;
     if (overflow != 0) {
         return start;
     }
     return gfx;
 }
 
-extern struct102 *func_1510D970(s32, void *, s32, s32, s32);
+extern Shadow *func_1510D970(s32, void *, s32, s32, s32);
 
 /* Creates or frees each object's shadow depending on whether the object is shown (in every active view). */
 void func_15113C88(void) {
@@ -493,7 +456,7 @@ void func_15113C88(void) {
         }
         do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
             if ((obj->state & 8) || obj->unk4C == 0 || (obj->flags & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
+                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;
@@ -504,23 +467,14 @@ void func_15113C88(void) {
                 obj->shadow = func_1510D970(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C(obj->shadow);
+            func_1516972C((struct102 *)obj->shadow); // functions.h types the handle struct102 *
             obj->shadow = NULL;
         }
     }
 }
 
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 
 /* A group of objects that move together; the first member leads. */
-typedef struct ObjGroup {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ u16 count;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 members[8]; // high nibble: kind (2 = object), low 12 bits: index into D_800DBEF4
-} ObjGroup; // size 0x18
-
-#define GROUPS (*(ObjGroup **)&D_800D23C0) // D_80087380 entries
 
 /* Runs the update callback of every flagged object: first the ungrouped ones, then each group's members,
    where followers take the leader's move delta and floor triangle. */
@@ -548,9 +502,9 @@ void func_15113E54(s32 arg0) {
     }
 
     for (i = 0; i < (s32)D_80087380; i++) {
-        if ((GROUPS[i].members[0] >> 12) == 2) {
-            for (j = 0; j < GROUPS[i].count; j++) {
-                member = GROUPS[i].members[j];
+        if ((D_800D23C0[i].members[0] >> 12) == 2) {
+            for (j = 0; j < D_800D23C0[i].count; j++) {
+                member = D_800D23C0[i].members[j];
                 if ((member >> 12) == 2) {
                     obj = (member & 0xFFF) + D_800DBEF4; // matching: operand order of the addu
                     if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
@@ -574,7 +528,6 @@ void func_15113E54(s32 arg0) {
     }
 }
 
-extern s32 *D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
@@ -604,7 +557,7 @@ s32 func_151140C4(WorldObject *obj) {
     return 0;
 }
 
-void func_1511473C(Game13F9D0Actor *actor, s32 objIndex);
+void func_1511473C(Actor *actor, s32 objIndex);
 
 /* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
 void func_15114188(void) {
@@ -620,7 +573,7 @@ void func_15114188(void) {
                         D_800DBEF4[i].onContact(i + D_800DBEF4, &D_800CC2D0[j]); // matching: addu operand order
                     }
                     if ((D_800DBEF4[i].flags & 4) == 4 && !(D_800DBEF4[i].flags & 8)) {
-                        func_1511473C(&ACTORS[j], i);
+                        func_1511473C(&D_800CC2D0[j], i);
                     }
                 }
             }
@@ -629,7 +582,7 @@ void func_15114188(void) {
     }
 }
 
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin
@@ -642,8 +595,8 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     f32 rx;
     f32 ry;
     f32 rz;
-    f32 m[4][4];
-    f32 m2[4][4];
+    MtxF m;
+    MtxF m2;
     f32 zaxis[3];
     f32 yaxis[3];
     f32 xaxis[3];
@@ -690,23 +643,22 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
 }
 
 extern f32 D_800A2F60;
-extern u16 D_800CBDA0[];
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
-void func_1511473C(Game13F9D0Actor *actor, s32 objIndex) {
+void func_1511473C(Actor *actor, s32 objIndex) {
     if (actor == NULL || objIndex >= D_800DBEF0) {
         return;
     }
-    func_15114348(objIndex, &actor->pos[0], &actor->pos[1], &actor->pos[2]);
-    actor->movingAngle += D_800DBEF4[objIndex].spinY * D_800A2F60;
-    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - ACTORS]) {
-        actor->facingAngle = actor->movingAngle;
+    func_15114348(objIndex, &actor->x_position, &actor->y_position, &actor->z_position);
+    actor->unk76 += D_800DBEF4[objIndex].spinY * D_800A2F60;
+    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - D_800CC2D0]) {
+        actor->unk7A = actor->unk76;
     }
 }
 
 /* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
-void func_151148A8(f32 mtx[4][4], WorldObject *obj) {
-    f32 pitchRoll[4][4];
+void func_151148A8(MtxF mtx, WorldObject *obj) {
+    MtxF pitchRoll;
 
     func_150A8050(mtx, 0.0f, obj->rotY, 0.0f);
     func_150A8050(pitchRoll, obj->rotX, 0.0f, obj->rotZ);
@@ -714,8 +666,8 @@ void func_151148A8(f32 mtx[4][4], WorldObject *obj) {
 }
 
 /* Builds an object's model matrix: scale, then rotation, then translation to (x, y + yOffset, z). */
-void func_1511490C(f32 mtx[4][4], WorldObject *obj) {
-    f32 scale[4][4];
+void func_1511490C(MtxF mtx, WorldObject *obj) {
+    MtxF scale;
 
     func_151148A8(mtx, obj);
     mtx[3][0] = obj->x;
@@ -740,9 +692,6 @@ WorldObject *func_151149AC(u8 id) {
     return NULL;
 }
 
-#define HANDLES (*(s32 **)&D_800DBEF8)      // per object: handle released with func_10004074
-#define RELEASE_DELAY (*(u8 **)&D_800DBEFC) // per object: frames to keep the handle once hidden
-
 /* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
 void func_15114A1C(void) {
     s32 i;
@@ -751,30 +700,30 @@ void func_15114A1C(void) {
     for (i = 0; i < D_800DBEF0; i++) {
         if ((D_800DBEF4[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
-            handle = HANDLES[i];
+            handle = D_800DBEF8[i];
             if (&D_800DBEF8) {}
-            if (HANDLES[i] != 0) {
+            if (D_800DBEF8[i] != 0) {
                 if (D_800DBEF4[i].attach != 3 && !(D_800DBEF4[i].viewFlags & 0x80)) {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(HANDLES[j]);
+                    func_10004074(D_800DBEF8[j]);
                     if (handle) {}
-                    HANDLES[j] = 0;
-                } else if (RELEASE_DELAY[i] != 0) {
-                    RELEASE_DELAY[i]--;
+                    D_800DBEF8[j] = 0;
+                } else if (D_800DBEFC[i] != 0) {
+                    D_800DBEFC[i]--;
                 } else {
                     s32 j;
 
                     j = i;
                     if (j) {}
-                    func_10004074(HANDLES[j]);
-                    HANDLES[j] = 0;
+                    func_10004074(D_800DBEF8[j]);
+                    D_800DBEF8[j] = 0;
                 }
             }
         } else if (!(D_800DBEF4[i].viewFlags & 0x80)) {
-            HANDLES[i] = 0;
+            D_800DBEF8[i] = 0;
         }
     }
 }
@@ -785,7 +734,7 @@ void func_15114B94(u32 index) {
 
     if (index < D_800DBEF0) {
         if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C(D_800DBEF4[index].shadow);
+            func_1516972C((struct102 *)D_800DBEF4[index].shadow);
             D_800DBEF4[index].shadow = NULL;
         }
         D_800DBEF4[index].state |= 8;
@@ -877,7 +826,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
         if (handle != 0) {
             func_1001123C(handle);
         }
-        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (s32)func_15114CC4, obj, 0, 0, 0);
+        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
     }
 }
 

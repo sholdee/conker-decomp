@@ -4,24 +4,9 @@
 #include "effects.h"
 
 /*
- * A trail effect attached to a character (struct127): a ring buffer of points that is drawn as a
+ * A trail effect attached to a character (Actor): a ring buffer of points that is drawn as a
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
-
-/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
-/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
-typedef struct {
-    struct17 pos;
-    s16 unkC;
-    u16 flags;      // 4: pos was found on the owner's model
-    s32 unk10;
-    u8 unk14;
-    u8 maxPoints;   // ring buffer size
-    u8 pad16[2];
-    s32 unk18;
-} TrailSpawn; // size 0x1C
 
 /* Written by func_15147A80's caller into a particle object at 0x170, read by func_150D4CC4. */
 typedef struct {
@@ -36,14 +21,7 @@ typedef struct {
 
 /* A particle object returned by func_151407D0. */
 typedef struct {
-    u8 pad0[0x18];
-    u8 kind;
-    u8 pad19[0x34 - 0x19];
-    struct17 pos;
-    struct17 end;
-    u8 pad4C[0xC];
-    s32 flags;
-    u8 pad5C[0x110 - 0x5C];
+    DefParticleHead head;
     ParticleUnk110 unk110;
     u8 pad15C[0x170 - 0x15C];
     ParticleTail tail;
@@ -51,18 +29,18 @@ typedef struct {
 
 /* Per-trail state, at TrailActor.state; also the sound callbacks' user data. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
-    struct126 *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
+    ActorCtl *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
     Particle *effects[2];
     f32 width;          // trail width at the head, eased toward targetWidth each frame
     f32 targetWidth;
 } TrailState; // size 0x1C
 
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     f32 len;            // distance from the previous point
     f32 width;
 } TrailPoint;
@@ -74,7 +52,7 @@ typedef struct {
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[3];
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     s8 numPoints;       // points in the ring buffer
     s8 tail;            // oldest point
     s8 head;            // next point to write
@@ -103,33 +81,23 @@ typedef struct {
 s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
                   s32 arg5, u16 *playing);
 
-/* First argument of func_151407D0. */
-typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    s8 unk59;
-} ParticleParams;
-
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3);
-Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3);
+Particle *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
-void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
-    TrailSpawn spawn;
+void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
+    EffectTemplate spawn;
     TrailState init;
-    struct126 *s126;
-    vertex end;
+    ActorCtl *s126;
+    Vec3f end;
     TrailState *state;
 
-    spawn.maxPoints = 25;
-    spawn.unkC = 300;
+    spawn.itemCount = 25;
+    spawn.life = 300;
     spawn.flags = 0x12;
-    spawn.unk10 = 15;
+    spawn.kind = 15;
     spawn.unk14 = 1;
     init.targetWidth = 20.0f;
     init.width = 20.0f;
@@ -146,9 +114,9 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     if (func_150D4AE0(&spawn.pos, &end, owner, (init.unk8 = s126)) != 0) {
         spawn.flags |= 4;
     } else {
-        spawn.pos.unk0 = 0.0f;
-        spawn.pos.unk4 = 0.0f;
-        spawn.pos.unk8 = 0.0f;
+        spawn.pos.x = 0.0f;
+        spawn.pos.y = 0.0f;
+        spawn.pos.z = 0.0f;
         end.x = 0.0f;
         end.z = 0.0f;
         end.y = 500.0f;
@@ -161,45 +129,45 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     state = ((TrailActor *)state)->state;
     memcpy(state, &init, sizeof(TrailState));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B3, 12, 0);
+        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B4, 12, 0);
+    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || owner->camera != NULL) {
-        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5BC, 12, 0);
+        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
     }
     {
-        ParticleParams params;
+        GlowShape params;
         ParticleDef desc;
 
-        params.unk0 = 200.0f;
-        params.unk4 = 40.0f;
-        params.unk8 = 40.0f;
-        params.unkC = 40.0f;
-        params.unk10 = 0.05000000075f;
-        params.unk14 = 0.05000000075f;
-        params.unk18 = 0.4499999881f;
-        params.unk1C = 0.3000000119f;
-        params.unk20 = 9.999999975e-07f;
-        params.unk24 = -1;
-        params.unk34 = -1;
-        params.unk28 = -1;
-        params.unk38 = -1;
-        params.unk2C = -1;
-        params.unk3C = -1;
-        params.unk30 = -1;
-        params.unk40 = -1;
-        params.unk44 = 0;
-        params.unk48 = 1.0f;
-        params.unk4C = 0;
-        params.unk4E = 0;
-        params.unk50 = 0;
-        params.unk52 = 0;
-        params.unk54 = 0;
-        params.unk55 = 0;
-        params.unk56 = 0;
-        params.unk57 = 0;
-        params.unk58 = 0;
-        params.unk59 = -1;
+        params.width1 = 200.0f;
+        params.height1 = 40.0f;
+        params.width0 = 40.0f;
+        params.height0 = 40.0f;
+        params.offset1 = 0.05000000075f;
+        params.offset0 = 0.05000000075f;
+        params.alpha1 = 0.4499999881f;
+        params.alpha0 = 0.3000000119f;
+        params.fadeRate = 9.999999975e-07f;
+        params.screenX[0] = -1;
+        params.screenY[0] = -1;
+        params.screenX[1] = -1;
+        params.screenY[1] = -1;
+        params.screenX[2] = -1;
+        params.screenY[2] = -1;
+        params.screenX[3] = -1;
+        params.screenY[3] = -1;
+        params.attach = 0;
+        params.scale = 1.0f;
+        params.zbufSample[0] = 0;
+        params.zbufSample[1] = 0;
+        params.zbufSample[2] = 0;
+        params.zbufSample[3] = 0;
+        params.visibility[0] = 0;
+        params.visibility[1] = 0;
+        params.visibility[2] = 0;
+        params.visibility[3] = 0;
+        params.type = 0;
+        params.handler = -1;
         desc.texture = 0x15;
         desc.type = 3;
         desc.renderModes = 0x5503;
@@ -212,7 +180,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         desc.rgba[3] = 0xFF;
         desc.width = 100.0f;
         desc.height = 100.0f;
-        desc.pos = *(vertex *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = spawn.pos;
         desc.rot = end;
         desc.scale.x = 1.0f;
         desc.scale.y = 1.0f;
@@ -227,38 +195,38 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
     }
     {
-        ParticleParams params;
+        GlowShape params;
         ParticleDef desc;
         ParticleTail tail;
 
         tail.timer = 0;
         tail.targetScale = 1.0f;
-        params.unk0 = params.unk4 = 45.0f;
-        params.unk8 = params.unkC = 25.5f;
-        params.unk14 = params.unk10 = 0.1000000015f;
-        params.unk18 = 1.0f;
-        params.unk24 = -1;
-        params.unk34 = -1;
-        params.unk28 = -1;
-        params.unk38 = -1;
-        params.unk2C = -1;
-        params.unk3C = -1;
-        params.unk30 = -1;
-        params.unk40 = -1;
-        params.unk44 = 0;
-        params.unk48 = 1.0f;
-        params.unk4C = 0;
-        params.unk4E = 0;
-        params.unk50 = 0;
-        params.unk52 = 0;
-        params.unk54 = 0;
-        params.unk55 = 0;
-        params.unk56 = 0;
-        params.unk57 = 0;
-        params.unk58 = 0;
-        params.unk59 = -1;
-        params.unk1C = 0.8000000119f;
-        params.unk20 = 9.999999975e-07f;
+        params.width1 = params.height1 = 45.0f;
+        params.width0 = params.height0 = 25.5f;
+        params.offset0 = params.offset1 = 0.1000000015f;
+        params.alpha1 = 1.0f;
+        params.screenX[0] = -1;
+        params.screenY[0] = -1;
+        params.screenX[1] = -1;
+        params.screenY[1] = -1;
+        params.screenX[2] = -1;
+        params.screenY[2] = -1;
+        params.screenX[3] = -1;
+        params.screenY[3] = -1;
+        params.attach = 0;
+        params.scale = 1.0f;
+        params.zbufSample[0] = 0;
+        params.zbufSample[1] = 0;
+        params.zbufSample[2] = 0;
+        params.zbufSample[3] = 0;
+        params.visibility[0] = 0;
+        params.visibility[1] = 0;
+        params.visibility[2] = 0;
+        params.visibility[3] = 0;
+        params.type = 0;
+        params.handler = -1;
+        params.alpha0 = 0.8000000119f;
+        params.fadeRate = 9.999999975e-07f;
         // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
         desc.texture = *(D_800A09C0 + (func_150ADA20() & 3));
         desc.type = 3;
@@ -272,7 +240,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
         desc.rgba[3] = 0xFF;
         desc.width = 100.0f;
         desc.height = 100.0f;
-        desc.pos = *(vertex *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = spawn.pos;
         desc.rot = end;
         desc.flags = 0xCD2006;
         desc.unk44 = 0xFF;
@@ -291,9 +259,9 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     }
 }
 
-void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4);
-extern f32 func_15143E64(struct17 *);
-extern s32 func_1515C0F8(struct127 *, struct17 **);
+void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
+extern f32 func_15143E64(Vec3f *);
+extern s32 func_1515C0F8(Actor *, Vec3f **);
 
 /*
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
@@ -302,12 +270,12 @@ extern s32 func_1515C0F8(struct127 *, struct17 **);
 s32 func_150D3A68(TrailActor *actor) {
     TrailState *state;
     TrailPoint *points;
-    struct127 *owner;
-    struct126 *s126;
-    struct17 prevPos;
-    struct17 delta;
+    Actor *owner;
+    ActorCtl *s126;
+    Vec3f prevPos;
+    Vec3f delta;
     f32 dist;
-    struct17 end;
+    Vec3f end;
     ParticleTail *tail;
     u8 prevMode;
     s32 player;
@@ -324,10 +292,10 @@ s32 func_150D3A68(TrailActor *actor) {
         switch (func_150D4AE0(&actor->spawn.pos, &end, owner, s126)) {
         case 0:
             if (state->effects[0] != NULL) {
-                state->effects[0]->flags &= ~2;
+                state->effects[0]->head.def.flags &= ~2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->flags &= ~2;
+                state->effects[1]->head.def.flags &= ~2;
             }
             actor->spawn.flags &= ~4;
             return 1;
@@ -337,16 +305,16 @@ s32 func_150D3A68(TrailActor *actor) {
             }
             actor->spawn.flags |= 4;
             if (state->effects[0] != NULL) {
-                state->effects[0]->pos = actor->spawn.pos;
-                state->effects[0]->end = end;
-                state->effects[0]->flags &= ~4;
-                state->effects[0]->flags |= 2;
+                state->effects[0]->head.def.pos = actor->spawn.pos;
+                state->effects[0]->head.def.rot = end;
+                state->effects[0]->head.def.flags &= ~4;
+                state->effects[0]->head.def.flags |= 2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->pos = actor->spawn.pos;
-                state->effects[1]->end = end;
-                state->effects[1]->flags &= ~4;
-                state->effects[1]->flags |= 2;
+                state->effects[1]->head.def.pos = actor->spawn.pos;
+                state->effects[1]->head.def.rot = end;
+                state->effects[1]->head.def.flags &= ~4;
+                state->effects[1]->head.def.flags |= 2;
             }
             break;
         case 2:
@@ -355,16 +323,16 @@ s32 func_150D3A68(TrailActor *actor) {
             }
             actor->spawn.flags |= 4;
             if (state->effects[0] != NULL) {
-                state->effects[0]->flags &= ~2;
+                state->effects[0]->head.def.flags &= ~2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->flags &= ~2;
+                state->effects[1]->head.def.flags &= ~2;
             }
             break;
         }
-        delta.unk0 = actor->spawn.pos.unk0 - prevPos.unk0;
-        delta.unk4 = actor->spawn.pos.unk4 - prevPos.unk4;
-        delta.unk8 = actor->spawn.pos.unk8 - prevPos.unk8;
+        delta.x = actor->spawn.pos.x - prevPos.x;
+        delta.y = actor->spawn.pos.y - prevPos.y;
+        delta.z = actor->spawn.pos.z - prevPos.z;
         dist = func_15143E64(&delta);
         {
             TrailPoint *pt = &points[actor->head];
@@ -373,13 +341,13 @@ s32 func_150D3A68(TrailActor *actor) {
             pt->len = dist;
             pt->width = 100.0f;
             actor->head++;
-            if (actor->head == actor->spawn.maxPoints) {
+            if (actor->head == actor->spawn.itemCount) {
                 actor->head = 0;
             }
             actor->numPoints++;
             if (actor->head == actor->tail) {
                 actor->tail++;
-                if (actor->tail == actor->spawn.maxPoints) {
+                if (actor->tail == actor->spawn.itemCount) {
                     actor->tail = 0;
                 }
                 actor->numPoints--;
@@ -401,9 +369,9 @@ s32 func_150D3A68(TrailActor *actor) {
                 if (player >= 4) {
                     state->mode = 1;
                 } else {
-                    if (CONT_PADS[player]->stick_y > 20) {
+                    if (D_800BE728[player]->stick_y > 20) {
                         state->mode = 0;
-                    } else if (CONT_PADS[player]->stick_y < -20) {
+                    } else if (D_800BE728[player]->stick_y < -20) {
                         state->mode = 2;
                     } else {
                         state->mode = 1;
@@ -416,10 +384,10 @@ s32 func_150D3A68(TrailActor *actor) {
                 }
                 state->targetWidth = 50.0f;
                 if (prevMode != state->mode) {
-                    struct17 *vel;
+                    Vec3f *vel;
 
                     if (func_1515C0F8(owner, &vel) == 0) {
-                        vel = (struct17 *)&D_800A5480;
+                        vel = &D_800A5480;
                     }
                     func_150D4D58(&actor->spawn.pos, vel, owner->unk40, actor->unkC, actor->unk1);
                 }
@@ -452,7 +420,7 @@ s32 func_150D3FD4(TrailActor *actor) {
     TrailPoint *points;
     f32 total;
     f32 invTotal;
-    struct17 *vel;
+    Vec3f *vel;
     f32 speed;
     f32 maxLen;
     f32 t;
@@ -467,13 +435,13 @@ s32 func_150D3FD4(TrailActor *actor) {
 
     state = actor->state;
     points = actor->points;
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         if (func_1515C0F8(state->owner, &vel) != 0) {
             speed = func_15143E64(vel);
         } else {
             speed = 0.0f;
         }
-    } else if (D_800DBFF0->unk5F0 & 4) {
+    } else if (D_800DBFF0->status & 4) {
         speed = 0.0f;
     } else {
         speed = 128.0f;
@@ -489,13 +457,13 @@ s32 func_150D3FD4(TrailActor *actor) {
         total = 0.0f;
         i = actor->head - 1;
         if (i < 0) {
-            i = actor->spawn.maxPoints - 1;
+            i = actor->spawn.itemCount - 1;
         }
         while (i != actor->tail) {
             prev = i;
             i--;
             if (i < 0) {
-                i = actor->spawn.maxPoints - 1;
+                i = actor->spawn.itemCount - 1;
             }
             // matching: `prev + points` (not points[prev]) keeps IDO's index-add operand order
             total += (prev + points)->len;
@@ -504,19 +472,19 @@ s32 func_150D3FD4(TrailActor *actor) {
                     TrailPoint *q;
 
                     q = points + i;
-                    rem = q->pos.unk0;
+                    rem = q->pos.x;
                     t = (total - maxLen) / (prev + points)->len;
-                    dx = rem - (prev + points)->pos.unk0;
-                    dy = q->pos.unk4 - (prev + points)->pos.unk4;
-                    dz = q->pos.unk8 - (prev + points)->pos.unk8;
-                    q->pos.unk0 = rem - dx * t;
-                    q->pos.unk4 = q->pos.unk4 - dy * t;
-                    q->pos.unk8 = q->pos.unk8 - dz * t;
+                    dx = rem - (prev + points)->pos.x;
+                    dy = q->pos.y - (prev + points)->pos.y;
+                    dz = q->pos.z - (prev + points)->pos.z;
+                    q->pos.x = rem - dx * t;
+                    q->pos.y = q->pos.y - dy * t;
+                    q->pos.z = q->pos.z - dz * t;
                     (prev + points)->len = (prev + points)->len * (1.0f - t);
                 }
                 while (i != actor->tail) {
                     actor->tail++;
-                    if (actor->tail == actor->spawn.maxPoints) {
+                    if (actor->tail == actor->spawn.itemCount) {
                         actor->tail = 0;
                     }
                     actor->numPoints--;
@@ -540,7 +508,7 @@ s32 func_150D3FD4(TrailActor *actor) {
             TrailPoint *pt;
             j--;
             if (j < 0) {
-                j = actor->spawn.maxPoints - 1;
+                j = actor->spawn.itemCount - 1;
             }
             pt = &points[j];
             pt->width = rem * scale;
@@ -556,10 +524,8 @@ typedef struct {
 } TrailVtx;
 
 void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
-extern struct17 *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern u8 D_80091100[];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -571,11 +537,11 @@ extern struct {
  */
 Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     TrailPoint *points;
-    struct17 p1;
-    struct17 p0;
+    Vec3f p1;
+    Vec3f p0;
     TrailState *state;
-    struct127 *owner;
-    struct17 *eye;
+    Actor *owner;
+    Vec3f *eye;
     TrailVtx *tv;
     s32 i;
     s32 cur;
@@ -615,10 +581,10 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     if (owner->unk1D4 == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(actor->vtxBufs, view, (actor->spawn.maxPoints * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
+    func_151D5D60(actor->vtxBufs, view, (actor->spawn.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
     if (fresh != 0) {
         tv = (TrailVtx *)actor->vtxBufs[view];
-        for (i = 0; i < actor->spawn.maxPoints * 2 + 10; i++) {
+        for (i = 0; i < actor->spawn.itemCount * 2 + 10; i++) {
             tv->v[0].v.tc[0] = 5;
             tv->v[0].v.tc[1] = 0;
             tv->v[0].v.flag = 0;
@@ -640,23 +606,23 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
     cur = actor->head - 1;
     if (cur < 0) {
-        cur = actor->spawn.maxPoints - 1;
+        cur = actor->spawn.itemCount - 1;
     }
     next = cur - 1;
     if (next < 0) {
-        next = actor->spawn.maxPoints - 1;
+        next = actor->spawn.itemCount - 1;
     }
     p0 = points[cur].pos;
     width0 = points[cur].width;
     p1 = points[next].pos;
     width1 = points[next].width;
 
-    segX = p0.unk0 - p1.unk0;
-    segY = p0.unk4 - p1.unk4;
-    segZ = p0.unk8 - p1.unk8;
-    viewX = p0.unk0 - eye->unk0;
-    viewY = p0.unk4 - eye->unk4;
-    viewZ = p0.unk8 - eye->unk8;
+    segX = p0.x - p1.x;
+    segY = p0.y - p1.y;
+    segZ = p0.z - p1.z;
+    viewX = p0.x - eye->x;
+    viewY = p0.y - eye->y;
+    viewZ = p0.z - eye->z;
     sideX = segY * viewZ - viewY * segZ;
     sideY = segZ * viewX - viewZ * segX;
     sideZ = segX * viewY - viewX * segY;
@@ -677,9 +643,9 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     {
         s32 px; // matching: block-local copy of px steers register allocation
 
-        px = p0.unk0;
-        py = p0.unk4;
-        pz = p0.unk8;
+        px = p0.x;
+        py = p0.y;
+        pz = p0.z;
         ox = sideX;
         oy = sideY;
         oz = sideZ;
@@ -698,12 +664,12 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     }
     // matching: a goto loop; IDO optimizes a do/while or for loop here differently
 loop:
-    segX = p0.unk0 - p1.unk0;
-    segY = p0.unk4 - p1.unk4;
-    segZ = p0.unk8 - p1.unk8;
-    viewX = p1.unk0 - eye->unk0;
-    viewY = p1.unk4 - eye->unk4;
-    viewZ = p1.unk8 - eye->unk8;
+    segX = p0.x - p1.x;
+    segY = p0.y - p1.y;
+    segZ = p0.z - p1.z;
+    viewX = p1.x - eye->x;
+    viewY = p1.y - eye->y;
+    viewZ = p1.z - eye->z;
     sideX = segY * viewZ - viewY * segZ;
     sideY = segZ * viewX - viewZ * segX;
     sideZ = segX * viewY - viewX * segY;
@@ -721,9 +687,9 @@ loop:
         sideZ = 0.0f;
     }
     {
-        px = p1.unk0;
-        py = p1.unk4;
-        pz = p1.unk8;
+        px = p1.x;
+        py = p1.y;
+        pz = p1.z;
         ox = sideX;
         oy = sideY;
         oz = sideZ;
@@ -746,7 +712,7 @@ loop:
     cur = next;
     next--;
     if (next < 0) {
-        next = actor->spawn.maxPoints - 1;
+        next = actor->spawn.itemCount - 1;
     }
     if (cur != actor->tail) {
         p0 = points[cur].pos;
@@ -760,12 +726,12 @@ loop:
 /* Message data for func_150D49C0. */
 typedef union {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } gone;             // messages 0, 3 and 0x2E
     struct {
-        struct127 *objA;
-        struct127 *objB;
+        Actor *objA;
+        Actor *objB;
         u8 uniqueIdA;
         u8 uniqueIdB;
     } swap;             // message 0x2D: objA and objB trade places
@@ -774,7 +740,7 @@ typedef union {
 /* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
 void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
     TrailState *state = actor->state;
-    struct127 *obj;
+    Actor *obj;
 
     if (id == 0 || id == 0x2E || id == 3) {
         obj = msg->gone.obj;
@@ -794,17 +760,17 @@ void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
     }
 }
 
-extern s32 func_1514654C(struct127 *, struct126 *, s32, struct17 **, struct17 **, s32);
-extern struct17 D_800A09D0;
-extern struct17 D_800A09DC;
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
+extern Vec3f D_800A09D0;
+extern Vec3f D_800A09DC;
 
 /*
  * Computes the trail's start and end points: the owner's model points D_800A09D0 / D_800A09DC
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *arg3) {
-    struct17 *modelPoints[2];
-    struct17 *out[2];
+s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3) {
+    Vec3f *modelPoints[2];
+    Vec3f *out[2];
 
     if (owner->unk1D4 != NULL) {
         modelPoints[0] = &D_800A09D0;
@@ -817,12 +783,12 @@ s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *a
         return 0;
     }
 
-    start->unk0 = owner->x_position;
-    start->unk4 = owner->y_position + 100.0f;
-    start->unk8 = owner->z_position;
-    end->unk0 = owner->x_position;
-    end->unk4 = owner->y_position + 100.0f + 500.0f;
-    end->unk8 = owner->z_position;
+    start->x = owner->x_position;
+    start->y = owner->y_position + 100.0f;
+    start->z = owner->z_position;
+    end->x = owner->x_position;
+    end->y = owner->y_position + 100.0f + 500.0f;
+    end->z = owner->z_position;
     return 2;
 }
 
@@ -866,7 +832,7 @@ s32 func_150D4CC4(Particle *particle) {
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {
-        particle->kind = D_800A09C0[func_150ADA20() & 3];
+        particle->head.def.texture = D_800A09C0[func_150ADA20() & 3];
         particle->tail.timer = (func_150ADA20() & 7) + 3;
     }
 
@@ -878,7 +844,7 @@ extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
-void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
+void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
     s32 count;
     s16 yaw;
@@ -901,7 +867,7 @@ void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
     spawn.b2 = 0xFF;
     spawn.brightness = 0xFF;
     spawn.pos = *pos;
-    spawn.offset = *(vertex *)&D_800A5480;
+    spawn.offset = D_800A5480;
     spawn.fadeStart = 10;
     spawn.fadeRate = 25;
     spawn.scaleStart = 1;
@@ -927,8 +893,8 @@ void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
         r1 = func_150ADA20();
         r2 = func_150ADA20();
         func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.x);
-        spawn.vel.x -= vel->unk0 * scale;
-        spawn.vel.z -= vel->unk8 * scale;
+        spawn.vel.x -= vel->x * scale;
+        spawn.vel.z -= vel->z * scale;
         // matching: `+ -x` (a subtraction emits sub.s instead of add.s)
         spawn.gravity = func_150ADA68() * 0.6460000277f + -0.7940000296f;
         spawn.flags &= ~0xC0;
@@ -940,7 +906,6 @@ void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
     } while (count > 0);
 }
 
-extern void func_100111C8(u16);
 
 /*
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward
@@ -1041,7 +1006,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
     snd->y = state->owner->y_position;
     snd->z = state->owner->z_position;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         snd->volume = volume >> 1;
         *arg2 >>= 1;
     } else {

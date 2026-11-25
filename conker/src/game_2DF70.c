@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-// functions.h declares func_1502B7F0 with five parameters; this file calls it with four.
-#define func_1502B7F0 func_1502B7F0__proto
 #include "functions.h"
-#undef func_1502B7F0
 #include "variables.h"
 
 #include "macros.h"
@@ -18,17 +15,6 @@ typedef struct QuadNode {
     /* 0xA */ s16 z;
     /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
 } QuadNode;
-
-// One entry of the triangle table D_800DBE3C: the triangle's three vertices.
-typedef struct MeshTri {
-    Vtx *verts[3];
-} MeshTri;
-
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
 
 // A triangle's vertex positions, passed by value to the box test func_15049260.
 typedef struct Tri3f {
@@ -51,14 +37,6 @@ void func_15000AC0(void) {
     D_800D9E64 = 0;
 }
 
-extern u8 D_800DBEA8[];
-extern Vtx *D_800DBE88[][2];
-extern s32 *D_800DBE80;
-extern s32 *D_800891BC[];
-extern void *D_800DBEB0;
-extern u8 D_800DBEAB;
-extern u8 D_800DBEAC;
-s32 func_1502B7F0();
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 
@@ -99,14 +77,14 @@ void func_15000AD0(s32 arg0) {
                 func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
-        D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
+        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 2, 0);
         if (D_800BE9F0 == 0x3C) {
             D_800DBEAB = 1;
         } else {
             D_800DBEAB = 0;
         }
     } else if (D_800B0DF0->unk8 == 2) {
-        D_800DBE80 = (s32 *)allocate_memory(0x1000, 1, 1, 0);
+        D_800DBE80 = allocate_memory(0x1000, 1, 1, 0);
         buf = D_800DBE80;
         switch (D_800BE9F0) {
             case 0:
@@ -279,7 +257,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
+        D_800DBEB0 = allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= D_80082FA0; i++) {
             vtx = (Vtx *)allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;
@@ -310,7 +288,7 @@ void func_15000AD0(s32 arg0) {
     } else if (D_800B0DF0->unk8 == 1) {
         func_15111858();
     }
-    if (D_800D2E4C->unk14 & 1) {
+    if (D_800D2E4C[0x14] & 1) {
         D_800DBEAC = 1;
     } else {
         D_800DBEAC = 0;
@@ -382,7 +360,7 @@ void func_15001460(Gfx *dl) {
             addr = gfx->words.w1;
             if ((addr >> 24) & 0xF) {
                 // segmented address: rebase through the segment table
-                addr = (&D_800D2C28)[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+                addr = D_800D2C28[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
             }
             numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
             first = ((s32)gfx->words.w0 >> 1) & 0x7F;
@@ -423,7 +401,7 @@ void func_15001460(Gfx *dl) {
                 }
             }
             for (j = 0; j < 3; j++) {
-                ((MeshTri *)D_800DBE3C)[count].verts[j] = verts[tris[t][j]];
+                D_800DBE3C[count].verts[j] = verts[tris[t][j]];
             }
             D_800DBE40[count].minx = min[0];
             D_800DBE40[count].maxx = max[0];
@@ -484,7 +462,7 @@ void func_15001A08(void) {
     D_800B0DE0 = D_800B0DDC;
     D_800B0DCC = 0;
     D_800B0DD0 = 0;
-    D_800DBE30 = 0;
+    D_800DBE30[0] = 0;
     D_800DBE32 = 0;
     D_800DBE34 = 0;
     D_800DBE36 = 0;
@@ -671,7 +649,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index];
+        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {
@@ -736,7 +714,7 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
 
     for (i = 1; i < total; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index];
+        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {
@@ -918,28 +896,14 @@ s32 func_15002878(void) {
     return highest;
 }
 
-// A run of consecutive vertices loaded under one matrix.
-typedef struct VtxRun {
-    u32 addr;
-    s32 count;
-    u32 mtxIndex;
-} VtxRun;
-
-// A triangle as the offsets of its three vertices in the map's vertex data.
-typedef struct VtxTri {
-    s32 v[3];
-} VtxTri;
-
-extern u16 D_800C5918[];
-extern u16 D_800C5EF8[];
 extern s8 **D_800C4488[];
 
 // matching: these stay macros; naming them as locals changes the frame and register allocation
 #define CMD (dl + (j << 3)) // command j of the display list, as bytes
 #define W0 (*(s32 *)CMD)
 #define W1 (*(s32 *)(CMD + 4))
-#define RUNS ((VtxRun **)&D_800C5C08[map])
-#define TRIS ((VtxTri **)&D_800C6070[map])
+#define RUNS (&D_800C5C08[map])
+#define TRIS (&D_800C6070[map])
 
 /**
  * Builds map `map`'s vertex runs (D_800C5C08[map], D_800C5EF8[map] of them, sorted by address)
@@ -995,7 +959,7 @@ s32 func_150028BC(s32 map) {
     }
     numRuns = 0;
     numTris = 0;
-    base = (&D_800D19A0)[map];
+    base = (s32)D_800D19A0[map];
     for (i = 0; i < numLists; i++) {
         dl = D_800C4488[map][i];
         j = 0;
@@ -1014,11 +978,11 @@ s32 func_150028BC(s32 map) {
                     for (k = 0; k < count; k++) {
                         verts[k + first] = (k << 4) + vaddr;
                     }
-                    if (numRuns != 0 && base + vtxIndex * 16 == (*RUNS)[numRuns - 1].addr + (*RUNS)[numRuns - 1].count * 16 &&
+                    if (numRuns != 0 && base + vtxIndex * 16 == (u32)(*RUNS)[numRuns - 1].start + (*RUNS)[numRuns - 1].count * 16 &&
                         mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
                         (*RUNS)[numRuns - 1].count += count;
                     } else {
-                        (*RUNS)[numRuns].addr = vtxIndex * 16 + base;
+                        (*RUNS)[numRuns].start = (Vtx *)(vtxIndex * 16 + base);
                         (*RUNS)[numRuns].mtxIndex = mtxIndex;
                         (*RUNS)[numRuns].count = count;
                         numRuns++;
@@ -1078,7 +1042,7 @@ s32 func_150028BC(s32 map) {
             break;
         }
         run = &(*RUNS)[j];
-        if (run->addr < run[-1].addr) {
+        if (run->start < run[-1].start) {
             swap = *run;
             *run = run[-1];
             (*RUNS)[j - 1] = swap;
@@ -1122,7 +1086,7 @@ void func_15002FB4(s32 map) {
     struct00 *res; // TBD
     s32 count;
     s32 loaded;
-    struct104 *info;
+    LevelHeader *info;
     s32 romWord;
 
     res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);

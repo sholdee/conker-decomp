@@ -1,25 +1,16 @@
 #include <ultra64.h>
-// functions.h declares these two with the wrong signatures; this file declares them below.
-#define func_1502B7F0 func_1502B7F0__proto
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_1502B7F0
-#undef func_150ADA20
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
-u32 func_150ADA20(void);
-void func_1502B7F0(void **dest, s32 arg1, s32 arg2, s32 arg3);
 void func_10004074(void *data);
 void func_1510D694(s32 arg0);
 Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
-extern u8 D_800DBEA8[];
-extern void *D_800DBE80; // the current sky's data: the star field (sky 1) or a textured sky's tile formats
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];
@@ -34,7 +25,6 @@ typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f
 
 Gfx *func_151106A8(Gfx *);
 s32 func_151108C4(f32, f32, f32, f32, f32);
-extern s16 D_80082FA6;
 extern u8 D_800D9B69;
 extern u8 D_800D9B6A;
 extern u8 D_800D9B6B;
@@ -103,36 +93,33 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800BE635 != 0) {
         gfx = func_15110544(gfx, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
     }
-    if (D_800C35EA == 1 && D_800C3681 != 0) {
+    if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    // matching: byte offsets into D_800DBFF0[D_80082FA4] (struct108 unk388/unk380/unk2F8..unk300); IDO
-    // schedules the struct-member loads differently
-    pitch = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x388) + D_800DCDE0[D_80082FA4].pitch);
+    pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].pitch);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) + D_800DCDE0[D_80082FA4].yaw);
+    yaw = 360.0f - (D_800DBFF0[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].yaw);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    // struct108 (structs.h) has no f32 field at 0x5EC yet
-    roll = *(f32 *)&D_800DBFF0[D_80082FA4].pad5EC + D_800DCDE0[D_80082FA4].roll;
+    roll = D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].roll;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
     while (roll >= 180.0f) {
         roll -= 360.0f;
     }
-    x = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2F8);
-    y = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2FC);
-    z = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x300);
+    x = D_800DBFF0[D_80082FA4].eye.x;
+    y = D_800DBFF0[D_80082FA4].eye.y;
+    z = D_800DBFF0[D_80082FA4].eye.z;
     if (D_800C3682 != 0) {
         view = &RENDER_VIEWS[D_80082FA4];
         return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
@@ -141,17 +128,17 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (visible != 0) {
         gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
-    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     return gfx;
 }
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
  * three angles, func_150A7A48 multiplies). */
-void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
-    f32 rotation[4][4];
+void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
+    MtxF rotation;
 
     func_150A8050(mtx, 0.0f, yaw, 0.0f);
     func_150A8050(rotation, pitch, 0.0f, 0.0f);
@@ -161,7 +148,7 @@ void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
 }
 
 /* Builds view viewIndex's view-projection matrix in mtx from the camera angles. */
-void func_15110360(s32 viewIndex, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
+void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
     func_151102CC(mtx, pitch, yaw, roll);
     func_150A7A48(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
 }
@@ -177,7 +164,7 @@ Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     if (D_80082FA0 != 0) {
         if (D_80082FA4 == 0) {
             gDPPipeSync(gfx++);
-            gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
             gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
@@ -203,16 +190,15 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
  * background colour D_800DBEA8. */
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    // unk78 is the high byte of struct127's u16 unk78
+    // unk78 is the high byte of Actor's u16 unk78
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
-        (D_800BE9F0 == 0x31 && *(u8 *)&D_800DBFF0->unk3D4->unk78 == 3)) {
+        (D_800BE9F0 == 0x31 && D_800DBFF0->playerExt->unk78 == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }
     return gfx;
 }
 
-extern u8 D_800BEAC2;
 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
  * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
@@ -223,13 +209,13 @@ Gfx *func_151106A8(Gfx *gfx) {
         gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
         gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
         gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
-        gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+        gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
         gDPFillRectangle(gfx++, 2, 0, D_800BE620 - 2, D_800BE624);
         gDPPipeSync(gfx++);
         gfx = func_1501A680(gfx);
         if (D_80082FA0 != 0) {
             gDPPipeSync(gfx++);
-            gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
             gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
@@ -243,7 +229,6 @@ Gfx *func_151106A8(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800C35E8;
 
 /* Returns how much of the sky shows for the camera at (x, y, z) looking at (pitch, yaw) on the current map
  * D_800BE9F0: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
@@ -318,7 +303,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
+        if (D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -354,11 +339,9 @@ typedef struct SkyTile {
     s32 format;
 } SkyTile;
 
-s32 func_150A6210(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
+s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
-extern u8 D_800DBEAB;
-extern u8 D_800DBEAC;
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
  * textured quads in the plane `axis` ('x', 'y' or 'z') through (x, y, z). Quads outside the view
@@ -366,7 +349,7 @@ extern u8 D_800DBEAC;
  * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
  * pointer arguments. quad is scratch (callers pass NULL). */
 Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
-                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 mtx[4][4], s32 limit,
+                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastFormatPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts, u8 *tiles, s32 texSet) {
     Vtx *vtxBuf;
@@ -571,7 +554,6 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
     return gfx;
 }
 
-extern s32 *D_800891BC[];
 void func_15111858(void);
 
 /* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky
@@ -672,9 +654,6 @@ extern struct Game13D350S16x2 D_800891F4;
 extern struct Game13D350U8x2 D_800891F8;
 extern struct Game13D350U8x2 D_800891FC;
 extern SkyFace D_800A2DA0[];
-extern Mtx *D_800DBEB0;
-extern Vtx *D_800DBE88[][2];
-extern Mtx D_80089470;
 
 
 Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
@@ -697,8 +676,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     s32 axis;
     s32 texSet;
     s32 *texList;
-    f32 rotation[4][4];
-    f32 viewProj[4][4];
+    MtxF rotation;
+    MtxF viewProj;
     Vtx *vtx;
     s32 vtxCount;
     s32 vtxIdx;
@@ -719,7 +698,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     tlutCounts = D_800891F8;
     tiles = D_800891FC;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gfx = func_1501A680((Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0));
+    gfx = func_1501A680(func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
     if (D_800BE9F0 == 0x41) {
         yaw -= 119.0f;
@@ -727,7 +706,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
             yaw += 360.0f;
         }
     } else if (D_800BE9F0 == 0x3C ||
-               (D_800BE9F0 == 0x13 && D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
+               (D_800BE9F0 == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8[0] == 2 || D_800C35E8[0] == 1))) {
         gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
                             RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }

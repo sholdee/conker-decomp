@@ -1,25 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-
-/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
-typedef struct {
-    /* 0x0 */ u8 flags;        /* 1: the effect ends when lifetime runs out */
-    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler */
-    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler */
-    /* 0x3 */ u8 pad3;
-    /* 0x4 */ s16 lifetime;
-    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
-    /* 0x7 */ u8 pad7;
-} EffectDesc;
 
 /*
  * Mosaic (pixelate) effect: a screen rectangle around one of the owner's bones is redrawn in
  * blocks of 0x10000 / step pixels.
  */
 typedef struct {
-    /* 0x000 */ struct127 *owner;
+    /* 0x000 */ Actor *owner;
     /* 0x004 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x008 */ f32 halfWidth;
     /* 0x00C */ f32 halfHeight;
@@ -42,7 +32,7 @@ typedef struct {
 extern MosaicEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 
 /* Starts a mosaic effect over owner for lifetime frames. */
-MosaicEffect *func_150CE150(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3) {
+MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     EffectDesc desc;
     MosaicData data;
     MosaicEffect *effect;
@@ -194,12 +184,12 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
 /* Payload of the messages the effect handlers receive. */
 typedef union {
     struct {
-        /* 0x00 */ struct127 *object;
+        /* 0x00 */ Actor *object;
         /* 0x04 */ u8 id;
     } one;          /* message 0 */
     struct {
-        /* 0x00 */ struct127 *from;
-        /* 0x04 */ struct127 *to;
+        /* 0x00 */ Actor *from;
+        /* 0x04 */ Actor *to;
         /* 0x08 */ u8 fromId;
         /* 0x09 */ u8 toId;
     } pair;         /* message 0x2D */
@@ -211,7 +201,7 @@ typedef union {
  */
 void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
     MosaicData *mosaic = &effect->data;
-    struct127 *object;
+    Actor *object;
 
     if (type == 0x2D) {
         if (mosaic->owner == msg->pair.from) {
@@ -237,18 +227,18 @@ void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
 extern u16 D_800BE648[];
 extern u8 D_800A080F[];
 extern u8 D_800A0818[];
-void func_15052590(struct127 *arg0);
-void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_15063168(struct127 *arg0);
+void func_15052590(Actor *arg0);
+void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_15063168(Actor *arg0);
 
 /*
  * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the
  * target speed (unk44) and heading (unk78), then eases unkC4 toward the clamped turn. Objects
  * with id 0x21 use their own tables and a random wandering heading.
  */
-void func_150CE740(struct127 *obj) {
-    struct126 *owner;
+void func_150CE740(Actor *obj) {
+    ActorCtl *owner;
     u16 heading;
     u16 prevFacing;
     u8 isType21;
@@ -300,9 +290,9 @@ void func_150CE740(struct127 *obj) {
     if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->unk84 == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = D_800DBFF0[D_800C3E78].unk37C * 182.0444488525390625f;
-            heading = func_1505A630(((struct49 *)D_800CC284)->unk2, ((struct49 *)D_800CC284)->unk3, 0) + D_800CC280;
-            obj->unk44 = func_1505A5CC((struct49 *)D_800CC284);
+            D_800CC280 = D_800DBFF0[D_800C3E78].yaw * 182.0444488525390625f;
+            heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
+            obj->unk44 = func_1505A5CC(D_800CC284);
         } else {
             obj->unk44 = D_800CC2D0[obj->unk124].unk44 * 1.75f;
             heading = D_800CC2D0[obj->unk124].unk31C->unk4C;
@@ -389,7 +379,7 @@ control_done:
     }
     if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
         owner = obj->unk31C;
-        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of struct126 as declared */
+        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of ActorCtl as declared */
             func_15063168(obj);
         }
     }

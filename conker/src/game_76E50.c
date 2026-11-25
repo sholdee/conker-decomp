@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150499A0(f32 m[4][4], f32 out[4][4]) {
+void func_150499A0(MtxF m, MtxF out) {
     f32 det;
 
     det = 0.0f;

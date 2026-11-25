@@ -8,12 +8,8 @@
 /* Conker's variant of the libultra reverb/chorus effect (n_reverb.c): the FX pull,
  * its parameter handler, and the delay-line load/save/filter/modulation helpers.
  *
- * This TU deliberately does NOT include "functions.h":
- *   - functions.h and n_libaudio.h give n_alInit/n_alClose incompatible prototypes,
- *     so they cannot both be included.
- *   - functions.h declares `void func_1001E530(s32, void *, s32)`, which the ROM
- *     contradicts (it returns the command-list cursor and takes the output pointer
- *     first); that shared declaration should be corrected separately.
+ * This TU deliberately does NOT include "functions.h": functions.h and n_libaudio.h
+ * give n_alInit/n_alClose incompatible prototypes, so they cannot both be included.
  *
  * D_800428C4[bus] is the bus's stereo-routing flag (0: one delay line, 1: a second
  * line for the other channel); D_800428C6[bus] inverts the feed coefficients and

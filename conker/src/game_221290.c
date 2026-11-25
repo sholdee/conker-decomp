@@ -112,9 +112,6 @@ extern f32 D_800B0C3C;
 extern f32 D_800B0C40;
 extern f32 D_800B0C44;
 extern f32 D_800B0C48;
-extern s32 *D_800E0E20;          /* Huffman table pointers, relocated by D_800E0E28 */
-extern s32 D_800E0E28;
-extern f32 *D_800E0E30;          /* storage for the pow43 table */
 /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
 extern f32 D_800E0E38[4][36];
 extern f32 *D_800E1078;          /* pow43: i^(4/3) */
@@ -150,7 +147,6 @@ extern f32 D_800B067C[8];        /* alias-reduction ca */
 extern f32 D_800B069C[8];        /* alias-reduction cs */
 extern Mp3Decoder D_800E1880;
 extern void (*D_800E0E00)(s32, void *, s32);
-extern s32 D_800E0E04;
 extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
 extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
 

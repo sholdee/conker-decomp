@@ -10,12 +10,12 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     func_1503FB08();
     D_800BE9F0 = D_800BE9F4 = arg2;
 
-    func_15172C50(D_800DD2C0);
+    func_15172C50(D_800DD2C0[0]);
     func_15008230();
     func_15005270();
     func_15017300(arg0, arg1);
 
-    func_15015F40(D_80087280[D_800D2138], arg2);
+    func_15015F40(D_80087280[D_800D2138.unk0], arg2);
     func_150175E0();
     func_150177F8();
     func_15089BB0();
@@ -25,46 +25,26 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     D_800BE9ED = 0;
 }
 
-void func_15000AC0(void);
-void func_15002F40(s32);
-void func_15002FB4(s32);
 void func_15003668(s32);
-void func_150038A0(void);
-void func_150039B0(s32);
 void func_15004574(void);
 void func_15004D50(void);
-void func_15004E00(void);
-void func_15004E80(void);
-void func_15004F00(void);
-void func_15004F10(void);
-void func_150081E4(void);
-void func_15008248(s32);
-void func_150082CC(void);
-void func_15008840(void);
 void func_15008870(s32);
 void func_15008930(s32);
 void func_15008A60(void);
-void func_15008DD0(void);
-void func_15009150(s32);
 void func_150091D0(void);
 void func_150092DC(void);
-void func_1500BE68(void);
 void func_1500C2A0(void);
 void func_1500E470(s32);
 void func_1500E70C(s32);
 void func_1500E738(void);
-void func_15012780(void);
 void func_15012F90(void);
 void func_15013000(void);
 void func_15015910(void);
 void func_15015E80(void);
 void func_150162B0(void);
-void func_15016370(void);
 void func_150163D0(s32);
-void func_15016500(void);
 void func_15016670(void);
 void func_15016690(s32);
-void func_1501748C(s16);
 void func_15017578(s32);
 void func_15017640(void);
 void func_15017868(void);
@@ -92,12 +72,7 @@ void func_151BF340(s32, s32);
 void func_151D8DE8(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);
-void func_100014C4(s32);
 void func_10003ACC(s32, s32, s32);
-void func_10004308(void);
-void func_1000F248(s32);
-void func_10011FEC(void);
-void func_100125CC(s32);
 void func_150000B0(void);
 void func_15000AD0(s32);
 void func_150031EC(s32);
@@ -109,35 +84,8 @@ void func_150169A0(s32);
 void func_15017930(s32);
 void func_150A11C4(void *);
 void func_151E81EC(void);
-extern s32 D_8003E384;
-extern s32 D_80082FA0;
-extern s32 D_800BE3E4;
-extern u8 D_800BE616;
-extern s8 D_800BE619;
-extern s8 D_800BE61A;
-extern s32 D_800BE9E4;
-extern s32 D_800BE9E8;
-extern s32 D_800BE9F8;
-extern s8 D_800BEA0C;
-typedef struct Game34F20Actor {
-    s32 field_0;
-    u8 pad4[0x123];
-    u8 field_127;
-    u8 pad128[0x204];
-} Game34F20Actor;
 
 
-extern s16 D_800D2340;
-extern u8 D_800D2456;
-extern u8 D_800D2457;
-extern s32 D_800DC9F0;
-extern u8 D_800DDE38;
-extern s32 D_800E0920;
-extern s8 D_800E0A00;
-extern u8 D_800E0B94;
-extern u8 D_800E0B99;
-extern u8 D_800E0BD1;
-extern u8 D_800C35EA;
 
 
 void func_15007B3C(void) {
@@ -152,8 +100,8 @@ void func_15007B3C(void) {
         D_800BE9B4 = 1;
     }
     func_10004308();
-    func_15002FB4((*(s32 *)&D_800BE9F4));
-    switch ((*(s32 *)&D_800BE9F4)) {
+    func_15002FB4(D_800BE9F4);
+    switch (D_800BE9F4) {
     case 0x1A:
     case 0x24:
     case 0x2B:
@@ -163,27 +111,27 @@ void func_15007B3C(void) {
     case 0x34:
     case 0x3F:
         value = 0x103;
-        if ((*(s32 *)&D_800BE9F4) == 0x24) {
+        if (D_800BE9F4 == 0x24) {
             value = 0xF3;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x33) {
+        if (D_800BE9F4 == 0x33) {
             value -= 8;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x3F) {
+        if (D_800BE9F4 == 0x3F) {
             value -= 8;
         }
-        if ((*(s32 *)&D_800BE9F4) == 0x34) {
+        if (D_800BE9F4 == 0x34) {
             value += 8;
         }
         break;
     case 0x13:
         value = 0xEB;
-        if (!(*((u8 *)D_800D2E4C + 0x11) & 4)) {
-            value = *((s8 *)D_800B0DF0 + 0x11) + 0xEB;
+        if (!(D_800D2E4C[0x11] & 4)) {
+            value = D_800B0DF0->unk11 + 0xEB;
         }
         break;
     default:
-        value = *((s8 *)D_800B0DF0 + 0x11) + 0xEB;
+        value = D_800B0DF0->unk11 + 0xEB;
         break;
     }
     func_100014C4(value);
@@ -191,16 +139,16 @@ void func_15007B3C(void) {
     func_1500E738();
     func_1500C2A0();
     D_800DC9F0 = 0;
-    D_800E0920 = 0;
+    D_800E0920 = NULL;
     func_15008840();
     D_8003E384 = 1;
-    resource = D_800DD2C0;
+    resource = D_800DD2C0[0];
     slot = func_1507E114((s32)&resource);
     if (D_800E0B94 == 2) {
         resource = D_800E0BD1;
     }
     D_800BE9F8 = D_800BE9F0;
-    D_800BE9F0 = (*(s32 *)&D_800BE9F4);
+    D_800BE9F0 = D_800BE9F4;
     func_150091D0();
     func_15187F90();
     D_800BE619 = 0;
@@ -213,7 +161,7 @@ void func_15007B3C(void) {
     } else {
         func_10003ACC(0, 0, 0);
     }
-    if ((D_800BE616 == 0) && !(*((u8 *)D_800D2E4C + 0x18) & 1)) {
+    if ((D_800BE616 == 0) && !(D_800D2E4C[0x18] & 1)) {
         D_800D2457 = D_800D2456 = 3;
         func_15085710(0, 5, 3);
     }
@@ -301,7 +249,7 @@ void func_15007B3C(void) {
     if ((D_800E0B99 != 0) || (D_800DDE38 == 2)) {
         s32 enabled = 1;
 
-        if ((D_800C35EA == 1) || (D_800DDE38 == 1)) {
+        if ((D_800C35EA[0] == 1) || (D_800DDE38 == 1)) {
             enabled = 0;
         }
         if (enabled) {
@@ -324,20 +272,20 @@ void func_15007B3C(void) {
         func_151BF340(0xFF, 1);
     }
     func_1509C3A0();
-    (*(s32 *)&D_800BE9F4) = D_800BE9F0;
+    D_800BE9F4 = D_800BE9F0;
     func_151D8DE8();
 }
 
 void func_150081E4(void) {
     s32 i;
 
-    D_800D3668 = 0;
-    D_800CBE00 = 0;
-    D_800DDD64 = 0;
+    D_800D3668 = NULL;
+    D_800CBE00 = NULL;
+    D_800DDD64 = NULL;
 
     for (i = 0; i < 2; i++)
     {
-        D_800DF7C8[i] = 0;
+        D_800DF7C8[i] = NULL;
     }
 
     D_800D245C = 0;
@@ -362,8 +310,8 @@ void func_15008248(s32 arg0) {
 
     for (i = 0; i < 3; i++)
     {
-        D_800C3CA0[i].unk0 = 0;
-        D_800C3CA0[i].unkC = 0;
+        D_800C3CA0[i].active = 0;
+        D_800C3CA0[i].isOpen = 0;
     }
 
     D_800C3681 = 0;
@@ -376,7 +324,7 @@ void func_150082CC(void) {
 
     if (D_800C35C4 != 0) {
         if (D_800C35C5 == 0) {
-            D_800C35EA = 2;
+            D_800C35EA[0] = 2;
         }
         D_800C35C4 = 0;
         func_1501D348(D_800BE9F0, tmp, 0, D_800C3C90, D_800C3C94);

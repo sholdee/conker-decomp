@@ -1,51 +1,9 @@
 #include <ultra64.h>
 
-#define func_1515D4D4 func_1515D4D4_header
 #include "functions.h"
-#undef func_1515D4D4
-void func_1515D4D4();
-#define D_800D3098 D_800D3098_header
-#define D_800DCD30 D_800DCD30_header
-#define D_800DCD80 D_800DCD80_header
-#define D_800DCD84 D_800DCD84_header
-#define D_800BE4A0 D_800BE4A0_header
-#define D_800DDA90 D_800DDA90_header
-#define D_800B0DF0 D_800B0DF0_header
-#define D_800DBE5C D_800DBE5C_header
 #include "variables.h"
-#undef D_800D3098
-#undef D_800DCD30
-#undef D_800DCD80
-#undef D_800DCD84
-#undef D_800BE4A0
-#undef D_800DDA90
-#undef D_800B0DF0
-#undef D_800DBE5C
 
-extern u8 D_800DCD30[4][3];
 
-typedef struct Game36680Point {
-    s16 position[3];
-    u8 pad6[0xF];
-    u8 type;
-    u8 flags;
-    u8 pad17;
-    u32 color;
-    u32 settings;
-    u32 action;
-    u8 pad24[0x10];
-} Game36680Point; // size 0x34
-
-typedef struct Game36680PointLink {
-    struct Game36680PointLink *next;
-    Game36680Point *point;
-} Game36680PointLink;
-
-extern Game36680Point *D_800D3098;
-extern Game36680PointLink *D_800DCD80;
-extern Game36680PointLink *D_800DCD84;
-
-extern u8 D_800DDBD0[15];
 
 void func_15009334(s32 index);
 
@@ -53,7 +11,7 @@ void func_15009334(s32 index);
 void func_150091D0(void) {
     s32 i;
 
-    D_800DCD78 = 0;
+    D_800DCD78 = NULL;
     D_800DCD7C = 1;
     D_800DCD80 = NULL;
     D_800DCD84 = NULL;
@@ -108,34 +66,34 @@ void func_15009334(s32 index) {
     s32 duration;
     s32 light;
     s32 callback;
-    Game36680PointLink *link;
+    ZoneLink *link;
     s32 type;
 
-    type = D_800D3098[index].type >> 2;
+    type = D_800D3098[index].kind >> 2;
     switch (type) {
         case 9:
         case 10:
         case 16:
-            red = D_800D3098[index].color & 0xFF;
-            green = (D_800D3098[index].color >> 8) & 0xFF;
-            blue = (D_800D3098[index].color >> 16) & 0xFF;
+            red = D_800D3098[index].unk18 & 0xFF;
+            green = (D_800D3098[index].unk18 >> 8) & 0xFF;
+            blue = (D_800D3098[index].unk18 >> 16) & 0xFF;
             D_800D3098[index].flags |= 4;
             switch (type) {
                 case 10:
                     func_1515D4D4(red, green, blue, 0);
-                    if (D_800D3098[index].action != 0) {
-                        func_1500AB5C(D_800D3098[index].action);
+                    if (D_800D3098[index].unk20 != 0) {
+                        func_1500AB5C(D_800D3098[index].unk20);
                     }
                     break;
                 case 9:
-                    x = D_800D3098[index].position[0];
-                    y = D_800D3098[index].position[1];
-                    z = D_800D3098[index].position[2];
-                    settings = (D_800D3098[index].settings >> 8) & 0xFF;
-                    strength = (D_800D3098[index].color >> 24) & 0x7F;
-                    enabled = (D_800D3098[index].color >> 31) & 1;
-                    callback = D_800D3098[index].action & 0xFFFF;
-                    duration = (D_800D3098[index].action >> 16) & 0xFFFF;
+                    x = D_800D3098[index].x;
+                    y = D_800D3098[index].y;
+                    z = D_800D3098[index].z;
+                    settings = (D_800D3098[index].unk1C >> 8) & 0xFF;
+                    strength = (D_800D3098[index].unk18 >> 24) & 0x7F;
+                    enabled = (D_800D3098[index].unk18 >> 31) & 1;
+                    callback = D_800D3098[index].unk20 & 0xFFFF;
+                    duration = (D_800D3098[index].unk20 >> 16) & 0xFFFF;
                     light = func_1515D5AC(x, y, z, settings, red, green, blue, strength, enabled, duration);
                     if (light != 0 && callback != 0) {
                         func_1500A94C(light, callback);
@@ -145,24 +103,24 @@ void func_15009334(s32 index) {
                     D_800DCD24[0] = red;
                     D_800DCD24[1] = green;
                     D_800DCD24[2] = blue;
-                    D_800DCD28[0] = D_800D3098[index].settings & 0xFF;
-                    D_800DCD28[1] = (D_800D3098[index].settings >> 8) & 0xFF;
-                    D_800DCD28[2] = (D_800D3098[index].settings >> 16) & 0xFF;
-                    D_800DCD3C = (D_800D3098[index].settings >> 24) & 0xFF;
-                    D_800DCD3D = (D_800D3098[index].color >> 24) & 0xFF;
+                    D_800DCD28[0] = D_800D3098[index].unk1C & 0xFF;
+                    D_800DCD28[1] = (D_800D3098[index].unk1C >> 8) & 0xFF;
+                    D_800DCD28[2] = (D_800D3098[index].unk1C >> 16) & 0xFF;
+                    D_800DCD3C = (D_800D3098[index].unk1C >> 24) & 0xFF;
+                    D_800DCD3D = (D_800D3098[index].unk18 >> 24) & 0xFF;
                     break;
             }
             break;
         case 15:
-            link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
-            link->point = &D_800D3098[index];
+            link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
+            link->zone = &D_800D3098[index];
             link->next = D_800DCD80;
             D_800DCD80 = link;
         unused_label: // matching: an unused label keeps IDO from threading this break to the epilogue
             break;
         case 24:
-            link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
-            link->point = &D_800D3098[index];
+            link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
+            link->zone = &D_800D3098[index];
             link->next = D_800DCD84;
             D_800DCD84 = link;
             break;
@@ -476,18 +434,11 @@ void func_1500A68C(s32 light, s32 id) {
 extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32);
 
-typedef struct Game36680AttachmentObject {
-    u8 pad0[0x10];
-    s16 x;
-    s16 y;
-    s16 z;
-} Game36680AttachmentObject;
-
 /** Payload of an effect that attaches a light to a level object. */
 typedef struct Game36680LightAttachment {
     f32 offset;
     f32 scale;
-    Game36680AttachmentObject *object;
+    WorldObject *object;
     f32 x;
     f32 y;
     f32 z;
@@ -520,7 +471,7 @@ void func_1500A79C(s32 light, s32 id) {
 
 extern u8 D_80082BF4[6];
 
-extern Game36680AttachmentObject *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
@@ -624,23 +575,6 @@ typedef struct Game36680ResourceInfo {
     u8 pad9;
 } Game36680ResourceInfo; // size 0xA
 
-/** Resource picked for one of the 15 particle slots. */
-typedef struct Game36680ResourceChoice {
-    u16 id; // 0xFF: none
-    u16 flags;
-} Game36680ResourceChoice;
-
-/** Texture file of one particle slot (loaded later by game_1A89B0). */
-typedef struct Game36680ResourceFile {
-    s32 devAddr;
-    s32 size;
-    s32 buf;
-    u8 loaded;
-    u8 padD[3];
-} Game36680ResourceFile; // size 0x10
-
-extern Game36680ResourceChoice D_800BE4A0[15];
-extern Game36680ResourceFile D_800DDA90[15];
 extern Game36680ResourceInfo D_80095CE0[];
 extern u16 D_800BE478[15];
 extern s16 D_800DDB80[15][2];
@@ -651,7 +585,7 @@ void func_1500ABA0(s32 arg0) {
     bzero(D_800BE4A0, sizeof(D_800BE4A0));
     func_1502B8E0(D_800BE4A0, sizeof(D_800BE4A0), 3, 12, arg0, 10);
     bzero(D_800DDA90, sizeof(D_800DDA90));
-    bzero(&D_800DD478, 1560);
+    bzero(D_800DD478, sizeof(D_800DD478));
 }
 
 /** Looks up the texture file of every used particle slot and computes its texture extents. */
@@ -665,7 +599,7 @@ void func_1500AC14(void) {
         D_800DDA90[i].devAddr = 0;
         D_800DDA90[i].buf = 0;
         D_800DDA90[i].size = 0;
-        D_800DDA90[i].loaded = 0;
+        D_800DDA90[i].used = 0;
         id = D_800BE4A0[i].id;
         if (id != 0xFF && (D_800BE478[i] != 0 || D_800BE4A0[i].id == 0x3B)) {
             D_800DDA90[i].devAddr = func_1502B020(&size, 2, 0, id);
@@ -683,11 +617,7 @@ void func_1500AC14(void) {
 
 extern u8 D_80095CC4[];
 extern s16 D_800BE438[15][2];
-extern u8 D_800DDBC0[];
-extern u8 D_800DDBE0[];
-extern u8 D_800DDBF0[];
 extern u8 D_800DDC20[][2];
-extern u8 D_800DDC80[];
 
 /** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
 void func_1500AD84(s32 slot, s32 id, s32 flags) {
@@ -747,12 +677,6 @@ typedef struct Game36680Particle {
     u8 scaleY;
 } Game36680Particle; // size 0xE
 
-typedef struct Game36680LevelHeader {
-    u8 pad0[0x18];
-    u16 maxParticles;
-} Game36680LevelHeader;
-
-extern Game36680LevelHeader *D_800B0DF0;
 extern Game36680Particle *D_800DDD18;
 extern s32 func_151EF610(void);
 
@@ -835,13 +759,7 @@ s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tr
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game36680Vec3f;
-
-typedef struct {
-    Game36680Vec3f points[3];
+    Vec3f points[3];
 } Game36680Triangle;
 
 extern void func_15049350(Game36680Triangle);
@@ -1003,8 +921,8 @@ void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **t
 }
 
 void func_1500BE40(s32 unused) {
-    D_800DDD10[0] = 0;
-    D_800DDD10[1] = 0;
+    D_800DDD10[0] = NULL;
+    D_800DDD10[1] = NULL;
     D_800DDD0C = 110;
 }
 
@@ -1032,10 +950,6 @@ typedef struct Game36680EmitterChoice {
 
 extern Game36680EmitterChoice D_8008CF00[][8];
 extern Game36680Emitter D_8008CEB8[];
-extern s32 D_8008CEB4;
-extern u32 *D_800DBE5C;
-extern u8 D_800DDC10[];
-extern s16 D_800DDC90[60];
 extern void func_1510F800(s32);
 extern void func_1517B89C(s32, s32);
 
@@ -1073,11 +987,9 @@ void func_1500BEC0(void) {
             if (packed & 0xF0000) {
                 slot = ((packed >> 16) & 0xF) - 1;
                 kind = (packed >> 20) & 7;
-                // matching: D_800DBE3C (s32) holds the address of the 12-byte triangles (3 vertex
-                // pointers each); indexing it as a typed array swaps the operands of an addu
                 D_800DDD20 = D_8008CEB8[D_8008CF00[D_800DDC80[slot]][kind].emitter].emit(
                     D_8008CF00[D_800DDC80[slot]][kind].count, kind, slot,
-                    ((packed >> 5) & 3) ^ 3, D_800DDD20, (s16 **)(D_800DBE3C + i * 12));
+                    ((packed >> 5) & 3) ^ 3, D_800DDD20, (s16 **)&D_800DBE3C[i]);
                 D_800BE478[slot]++;
             }
         }

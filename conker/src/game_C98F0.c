@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern struct127 *func_1505EEF4(s32);
+extern Actor *func_1505EEF4(s32);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_150221E8(s16, s16, s16, f32);
 
@@ -13,11 +13,6 @@ typedef struct {
 } Struct_1509C440;
 
 extern void func_1501D348(s32, s32, s32, s32, s32);
-extern s32 D_800D3840;
-extern u8 D_800C35C2;
-extern u8 D_800C35C3;
-extern u8 D_800C3C99;
-extern u8 D_800C3C9C;
 void func_1509C8FC(s32 ref, s32 alt);
 
 /* Fixed-point 16.16 to float scale. */
@@ -36,7 +31,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
 
     switch (event) {
     case 1:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             value = D_800BE9F0;
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
@@ -53,7 +48,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 4:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             }
@@ -66,7 +61,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 3:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             extra0 = params->args[0];
             extra1 = params->args[1];
             value2 = D_800BE9F0;
@@ -109,9 +104,6 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     // Events 2, 5 and 6 (and unknown ones) fall off the end with no return value.
 }
 
-extern u8 D_800C35E8;
-extern u8 D_800C3C98;
-extern u8 D_800C3672;
 
 /* Condition check per event; its table entry (80088498) sits near func_1509C440's (800884D4). */
 s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
@@ -120,7 +112,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
         if (D_800C35C4 != 0) {
             return 0;
         }
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             return 1;
         }
         if (id == D_800C3C98) {
@@ -128,21 +120,21 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
         }
         return 1;
     case 2:
-        if ((D_800C35EA == 1) && (id == D_800C3C98)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C3C98)) {
             return 1;
         }
         return 0;
     case 3:
-        if ((D_800C35EA == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;
     case 4:
-        return D_800C35EA != 1;
+        return D_800C35EA[0] != 1;
     case 5:
         return D_800C3672;
     case 6:
-        if ((D_800C35EA == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8[0])) {
             return 1;
         }
         return 0;
@@ -154,18 +146,18 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
  * player's (D_800DBFF0) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
  */
 void func_1509C8FC(s32 ref, s32 alt) {
-    struct127 *obj;
-    struct108 *player;
+    Actor *obj;
+    Camera *player;
     f32 angle;
 
     obj = func_1505EEF4(ref & 0xFFF);
     if (obj != NULL) {
         player = D_800DBFF0;
-        if (player->unk2C & 0x100) {
-            // struct108 (include/structs.h) has no field at 0x760; it lies inside pad73E.
+        if (player->mode & 0x100) {
+            // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
             angle = *(f32 *)((u8 *)player + 0x760);
         } else {
-            angle = player->unk37C;
+            angle = player->yaw;
         }
 
         if (alt) {

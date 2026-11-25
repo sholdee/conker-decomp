@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_15143794(s32, s32, f32, f32 *);
 void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
@@ -64,96 +65,6 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
 }
 
-/* Sprite animation (as in game_1944C0.c): one texture, or a table of frameCount textures. */
-typedef struct {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 unk6;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u8 unkA;
-} SpriteAnim;
-
-/* 0x38-byte particle template; func_15167D84 copies it to Particle.anim onwards. */
-typedef struct {
-    /* 0x00 */ SpriteAnim *anim;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frameStep;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velX;
-    /* 0x18 */ s16 velZ;
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ u8 subX;
-    /* 0x1D */ u8 subZ;
-    /* 0x1E */ u8 subY;
-    /* 0x1F */ s8 callback;
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 accelY;
-    /* 0x24 */ s16 width;
-    /* 0x26 */ s16 height;
-    /* 0x28 */ s16 life;
-    /* 0x2A */ s8 fadeStep;
-    /* 0x2B */ u8 pad2B;
-    /* 0x2C */ u8 primR;
-    /* 0x2D */ u8 primG;
-    /* 0x2E */ u8 primB;
-    /* 0x2F */ u8 primA;
-    /* 0x30 */ u8 envR;
-    /* 0x31 */ u8 envG;
-    /* 0x32 */ u8 envB;
-    /* 0x33 */ u8 pad33;
-    /* 0x34 */ u16 flags;
-    /* 0x36 */ u8 pad36[2];
-} ParticleTemplate;
-
-/* Particle object (layout as in game_1944C0.c); the spawner's extra data follows it at 0x50. */
-typedef struct {
-    /* 0x00 */ u8 link[0x10];
-    /* 0x10 */ SpriteAnim *anim;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s16 frame;
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ u8 subX;
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-    /* 0x40 */ u8 envR;
-    /* 0x41 */ u8 envG;
-    /* 0x42 */ u8 envB;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ u16 flags;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s8 onDeath;
-    /* 0x49 */ u8 pad49[7];
-} Particle;
-
-#define PARTICLE_ENV_COLOR   0x1
-#define PARTICLE_FLIP_S      0x4
-#define PARTICLE_FLIP_T      0x8
-#define PARTICLE_CUSTOM_MODE 0x100
-
 /* Emitter settings at 0x28 of the emitter objects below. */
 typedef struct {
     /* 0x00 */ f32 x;
@@ -181,7 +92,7 @@ typedef struct {
 
 /*
  * Extra data of the particles spawned by func_151A11E4, read by its callback func_151A175C.
- * The *Start/*End fields are values of Particle.life, which counts down.
+ * The *Start/*End fields are values of BillboardParticle.life, which counts down.
  */
 typedef struct {
     /* 0x00 */ s16 fadeInStep;
@@ -204,12 +115,12 @@ typedef struct {
 } DriftParticleData;
 
 extern SpriteAnim D_80090B60[];
-Particle *func_15167D84(ParticleTemplate *, s32, s32, s8, u8, s32);
+BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
 void func_151A11E4(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     DriftParticleData data;
     u8 angle1;
     u8 angle2;
@@ -226,7 +137,7 @@ void func_151A11E4(Emitter *emitter) {
     s16 life;
     f32 inv;
     f32 vx;
-    Particle *particle;
+    BillboardParticle *particle;
 
     emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
     params = &emitter->params;
@@ -263,10 +174,10 @@ void func_151A11E4(Emitter *emitter) {
             ty = params->y - dist * cos2;
             tz = params->z + horiz * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -313,45 +224,45 @@ void func_151A11E4(Emitter *emitter) {
 }
 
 /* Callback 0x10 (func_151A11E4's particles): fade in and grow, drift, then fade out and shrink. */
-void func_151A175C(Particle *particle) {
+void func_151A175C(BillboardParticle *particle) {
     DriftParticleData *data = (DriftParticleData *)(particle + 1);
 
-    if (particle->life > data->fadeInEnd) {
-        particle->primA = (data->fadeInStart - particle->life) * data->fadeInStep;
+    if (particle->tmpl.life > data->fadeInEnd) {
+        particle->tmpl.primA = (data->fadeInStart - particle->tmpl.life) * data->fadeInStep;
     }
-    if (particle->life > data->growEnd) {
-        particle->width = particle->height = (data->growStart - particle->life) * data->growStep;
+    if (particle->tmpl.life > data->growEnd) {
+        particle->tmpl.width = particle->tmpl.height = (data->growStart - particle->tmpl.life) * data->growStep;
     }
-    if (particle->life > data->moveEnd) {
+    if (particle->tmpl.life > data->moveEnd) {
         s32 px, py, pz, vx, vy, vz;
 
-        px = particle->x;
-        px = (px << 8) | particle->subX;
+        px = particle->tmpl.x;
+        px = (px << 8) | particle->tmpl.subX;
         vx = data->velX;
         vx = (vx << 8) | data->velSubX;
         px += vx * D_800BE9E4;
-        particle->x = px >> 8;
-        particle->subX = px & 0xFF;
-        py = particle->y;
-        py = (py << 8) | particle->subY;
+        particle->tmpl.x = px >> 8;
+        particle->tmpl.subX = px & 0xFF;
+        py = particle->tmpl.y;
+        py = (py << 8) | particle->tmpl.subY;
         vy = data->velY;
         vy = (vy << 8) | data->velSubY;
         py += vy * D_800BE9E4;
-        particle->y = py >> 8;
-        particle->subY = py & 0xFF;
-        pz = particle->z;
-        pz = (pz << 8) | particle->subZ;
+        particle->tmpl.y = py >> 8;
+        particle->tmpl.subY = py & 0xFF;
+        pz = particle->tmpl.z;
+        pz = (pz << 8) | particle->tmpl.subZ;
         vz = data->velZ;
         vz = (vz << 8) | data->velSubZ;
         pz += vz * D_800BE9E4;
-        particle->z = pz >> 8;
-        particle->subZ = pz & 0xFF;
+        particle->tmpl.z = pz >> 8;
+        particle->tmpl.subZ = pz & 0xFF;
     }
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->shrinkStart) {
-        particle->width = particle->height = particle->life * data->shrinkStep;
+    if (particle->tmpl.life < data->shrinkStart) {
+        particle->tmpl.width = particle->tmpl.height = particle->tmpl.life * data->shrinkStep;
     }
 }
 
@@ -430,7 +341,7 @@ typedef struct {
 /* Spawns particles at random points in a sphere around the emitter; they stay where they are. */
 void func_151A1998(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     PuffParticleData data;
     f32 cos1;
     f32 sin1;
@@ -444,7 +355,7 @@ void func_151A1998(Emitter *emitter) {
     u8 angle2;
     s16 size;
     s16 life;
-    Particle *particle;
+    BillboardParticle *particle;
 
     emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
     if (emitter->params.spawnAccum > 1.0f) {
@@ -479,10 +390,10 @@ void func_151A1998(Emitter *emitter) {
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -513,23 +424,23 @@ void func_151A1998(Emitter *emitter) {
 }
 
 /* Callback 0x11 (func_151A1998's particles): fade in and grow, then fade out and shrink. */
-void func_151A1E34(Particle *particle) {
+void func_151A1E34(BillboardParticle *particle) {
     s16 life;
     PuffParticleData *data;
 
     data = (PuffParticleData *)(particle + 1);
-    life = particle->life;
+    life = particle->tmpl.life;
     if (data->fadeInEnd < life) {
-        particle->primA = (data->fadeInStart - life) * data->fadeInStep;
+        particle->tmpl.primA = (data->fadeInStart - life) * data->fadeInStep;
     }
     if (data->growEnd < life) {
-        particle->width = particle->height = (data->growStart - life) * data->growStep;
+        particle->tmpl.width = particle->tmpl.height = (data->growStart - life) * data->growStep;
     }
     if (life < data->fadeOutStart) {
-        particle->primA = life * data->fadeOutStep;
+        particle->tmpl.primA = life * data->fadeOutStep;
     }
     if (life < data->shrinkStart) {
-        particle->width = particle->height = life * data->shrinkStep;
+        particle->tmpl.width = particle->tmpl.height = life * data->shrinkStep;
     }
 }
 
@@ -572,7 +483,7 @@ void func_151A1EE8(EffectSpawner *spawner) {
 
 /*
  * Extra data of the particles spawned by func_151A1FB4, read by its callbacks func_151A24A8 and
- * func_151A25E0. The *Start/*End fields are values of Particle.life, which counts down.
+ * func_151A25E0. The *Start/*End fields are values of BillboardParticle.life, which counts down.
  */
 typedef struct {
     /* 0x00 */ s16 fadeInStep;
@@ -594,7 +505,7 @@ typedef struct {
 /* Spawns particles at random points in a sphere around the emitter; they grow, tint and accelerate. */
 void func_151A1FB4(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     SmokeParticleData data;
     u8 angle1;
     u8 angle2;
@@ -607,7 +518,7 @@ void func_151A1FB4(Emitter *emitter) {
     f32 z;
     f32 dist;
     s16 size;
-    Particle *particle;
+    BillboardParticle *particle;
 
     emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
     params = &emitter->params;
@@ -643,10 +554,10 @@ void func_151A1FB4(Emitter *emitter) {
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -682,126 +593,61 @@ void func_151A1FB4(Emitter *emitter) {
 }
 
 /* Callback 0x12 (func_151A1FB4's particles): fade in, grow, fade out, swell; switches to 0x13 to tint. */
-void func_151A24A8(Particle *particle) {
+void func_151A24A8(BillboardParticle *particle) {
     SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
-    if (particle->life > data->fadeInEnd) {
-        particle->primA = (data->fadeInStart - particle->life) * data->fadeInStep;
+    if (particle->tmpl.life > data->fadeInEnd) {
+        particle->tmpl.primA = (data->fadeInStart - particle->tmpl.life) * data->fadeInStep;
     }
-    if (particle->life > data->growEnd) {
-        particle->width = particle->height = (data->growStart - particle->life) * data->growStep;
+    if (particle->tmpl.life > data->growEnd) {
+        particle->tmpl.width = particle->tmpl.height = (data->growStart - particle->tmpl.life) * data->growStep;
     }
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    if (particle->life < data->tintStart) {
-        particle->callback = 0x13;
-        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_CUSTOM_MODE;
-        particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
-        particle->unk14 = 0x520003;
+    if (particle->tmpl.life < data->tintStart) {
+        particle->tmpl.callback = 0x13;
+        particle->tmpl.flags |= BILLBOARD_ENV_COLOR | BILLBOARD_CUSTOM_MODE;
+        particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
+        particle->tmpl.unk4 = 0x520003;
     }
-    if (particle->life < data->accelStart) {
-        particle->accelY = data->accel;
+    if (particle->tmpl.life < data->accelStart) {
+        particle->tmpl.accelY = data->accel;
         data->accelStart = -9999;
     }
 }
 
 /* Callback 0x13: func_151A24A8 after the switch, with the env colour following life. */
-void func_151A25E0(Particle *particle) {
+void func_151A25E0(BillboardParticle *particle) {
     SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
-    if (particle->life > data->fadeInEnd) {
-        particle->primA = (data->fadeInStart - particle->life) * data->fadeInStep;
+    if (particle->tmpl.life > data->fadeInEnd) {
+        particle->tmpl.primA = (data->fadeInStart - particle->tmpl.life) * data->fadeInStep;
     }
-    if (particle->life > data->growEnd) {
-        particle->width = particle->height = (data->growStart - particle->life) * data->growStep;
+    if (particle->tmpl.life > data->growEnd) {
+        particle->tmpl.width = particle->tmpl.height = (data->growStart - particle->tmpl.life) * data->growStep;
     }
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    if (particle->life < data->accelStart) {
-        particle->accelY = data->accel;
+    if (particle->tmpl.life < data->accelStart) {
+        particle->tmpl.accelY = data->accel;
         data->accelStart = -9999;
     }
-    particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
+    particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
 }
-
-/* Spawn parameters of a func_15130374 particle (layout as ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 offset;
-    /* 0x48 */ struct17 vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
-    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc;
-
-/* Fade-out and one-shot event of func_151A26EC's particles, run by func_151A2960. */
-typedef struct {
-    /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */
-    /* 0x2 */ s16 fadeOutStep;
-    /* 0x4 */ s16 eventTime;     /* desc.timer value, -1 for none */
-    /* 0x6 */ s8 eventFunc;      /* D_8008F8E0 index, -1 for none */
-} FadeEvent;
-
-/* The particle func_15130374 returns (layout as Particle in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 unk80[0x28];
-    /* 0xA8 */ f32 drag;         /* read by func_1513170C */
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ FadeEvent fade;
-} DescParticle;
 
 /* func_151A26EC's per-particle data, before it is copied into the particle. */
 typedef struct {
@@ -809,17 +655,17 @@ typedef struct {
     /* 0x4 */ FadeEvent fade;
 } ParticleData151A26EC;
 
-s32 func_1513170C(DescParticle *, struct17 *);
-extern void (*D_8008F8E0[])(DescParticle *, s32);
+s32 func_1513170C(FadeEventParticle *, Vec3f *);
+extern void (*D_8008F8E0[])(FadeEventParticle *, s32);
 
-extern DescParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
+extern FadeEventParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
-s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 drag, f32 gravity, f32 size,
+s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
-    DescParticle *particle;
+    FadeEventParticle *particle;
     ParticleDesc desc;
 
     if (fadeStart <= 0) {
@@ -878,28 +724,28 @@ s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 drag, f32 
 }
 
 /* Update func 0x11 (func_151A26EC's particles): dim out, run the one-shot event, then apply drag. */
-s32 func_151A2960(DescParticle *particle, struct17 *prevPos) {
+s32 func_151A2960(FadeEventParticle *particle, Vec3f *prevPos) {
     FadeEvent *fade;
 
     fade = &particle->fade;
-    if (particle->desc.timer < fade->fadeOutStart) {
-        particle->desc.brightness = particle->desc.timer * fade->fadeOutStep;
+    if (particle->head.desc.timer < fade->fadeOutStart) {
+        particle->head.desc.brightness = particle->head.desc.timer * fade->fadeOutStep;
     }
     if (D_800BE616 == 0 && fade->eventTime != -1 && fade->eventFunc != -1 &&
-        fade->eventTime >= particle->desc.timer) {
+        fade->eventTime >= particle->head.desc.timer) {
         D_8008F8E0[fade->eventFunc](particle, fade->eventTime);
         fade->eventTime = -1;
     }
     return func_1513170C(particle, prevPos);
 }
 
-void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
                    s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles);
 
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
-void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
+void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18,
                    s32 arg19) {
@@ -909,7 +755,7 @@ void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f
 }
 
 /* Bursts `count` particles from pos moving along dir, scaled down over the burst. */
-void func_151A2AD4(struct17 *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
+void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
                    f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
                    s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17) {
     func_151A2C24(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
@@ -934,14 +780,14 @@ void func_151A2BD0(f32 *dir, s32 yaw, s32 pitch, f32 speed, f32 t, f32 *out) {
     func_15143794((s16)yaw, (s16)pitch, (1.0f - t) * speed, out);
 }
 
-/* Particle colours picked at random by func_151A2C24 (a local initializer's rodata). */
+/* BillboardParticle colours picked at random by func_151A2C24 (a local initializer's rodata). */
 typedef struct {
     u8 rgb[4][3];
 } BurstColors;
 extern BurstColors D_8008F8E8;
 
 /* Spawns `count` func_151A26EC particles around pos; size and speed change linearly over the burst. */
-void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
                    s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles) {
@@ -986,7 +832,7 @@ void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 s
         } else {
             b = -1;
         }
-        func_151A26EC(pos, (struct17 *)offset, (struct17 *)vel, drag, rand * gravityRange + gravityBase,
+        func_151A26EC(pos, (Vec3f *)offset, (Vec3f *)vel, drag, rand * gravityRange + gravityBase,
                       sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
                       fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
                       colors.rgb[color][2], arg13, arg14);
@@ -995,91 +841,38 @@ void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 s
     }
 }
 
-/* Settings of a func_15152B38 burst (layout as struct Local15152B38Arg in game_17CAF0.c). */
-typedef struct {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-} Color8;
-
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ struct17 position;
-    /* 0x14 */ f32 sizeBase;
-    /* 0x18 */ f32 sizeRange;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 speedBase;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 yawBase;
-    /* 0x2E */ s16 yawRange;
-    /* 0x30 */ s16 pitchBase;
-    /* 0x32 */ s16 pitchRange;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s16 lifeBase;
-    /* 0x3E */ s16 lifeRange;
-    /* 0x40 */ u16 kind;
-    /* 0x42 */ u8 unk42;
-    /* 0x43 */ u8 unk43;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ Color8 colorBase;
-    /* 0x49 */ Color8 colorRange;
-    /* 0x4D */ Color8 color2Base;
-    /* 0x51 */ Color8 color2Range;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s16 unk64;
-    /* 0x66 */ s16 unk66;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ s8 unk70;
-    /* 0x71 */ s8 unk71;
-    /* 0x72 */ s8 unk72;
-    /* 0x73 */ s8 unk73;
-} BurstConfig;
-
-void func_15152B38(BurstConfig *, u8, s32);
+void func_15152B38(TrailBurst *, u8, s32);
 
 /* D_8008F8E0[0]: a func_15152B38 burst at the particle's position, sized by the particle. */
-void func_151A2F0C(DescParticle *particle) {
-    BurstConfig config;
+void func_151A2F0C(FadeEventParticle *particle) {
+    TrailBurst config;
 
     config.countBase = 8;
     config.countRange = 6;
-    config.position = particle->desc.pos;
-    if (particle->desc.flags & 0x1000) {
-        config.position.unk0 += particle->desc.offset.unk0;
-        config.position.unk4 += particle->desc.offset.unk4;
-        config.position.unk8 += particle->desc.offset.unk8;
+    config.pos = particle->head.desc.pos;
+    if (particle->head.desc.flags & 0x1000) {
+        config.pos.x += particle->head.desc.offset.x;
+        config.pos.y += particle->head.desc.offset.y;
+        config.pos.z += particle->head.desc.offset.z;
     }
-    config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.01999999955f;
-    config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.03529999778f;
-    config.unk1C = -0.2680000067f;
-    config.unk20 = 0.0f;
+    config.sizeBase = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.01999999955f;
+    config.sizeRange = (particle->head.desc.width + particle->head.desc.height) * 0.5f * 0.03529999778f;
+    config.gravityBase = -0.2680000067f;
+    config.gravityRange = 0.0f;
     config.speedBase = 8.0f;
     config.speedRange = 10.0f;
-    config.yawBase = 0;
-    config.yawRange = 255;
-    config.pitchBase = -64;
-    config.pitchRange = 86;
-    config.unk34 = 3;
-    config.unk38 = 1;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.angles.pitchBase = -64;
+    config.angles.pitchRange = 86;
+    config.capacityBase = 3;
+    config.capacityRange = 1;
     config.lifeBase = 17;
     config.lifeRange = 18;
-    config.kind = 1;
-    config.unk42 = 4;
-    config.unk43 = 2;
-    config.unk44 = 3;
+    config.headerFlags = 1;
+    config.flags = 4;
+    config.primMode = 2;
+    config.envMode = 3;
     config.colorBase.red = 255;
     config.colorBase.green = 200;
     config.colorBase.blue = 200;
@@ -1096,21 +889,21 @@ void func_151A2F0C(DescParticle *particle) {
     config.color2Range.green = 0;
     config.color2Range.blue = 0;
     config.color2Range.alpha = 0;
-    config.unk55 = 255;
-    config.unk56 = 0;
-    config.unk57 = 1;
-    config.unk58 = 0x24;
-    config.unk5C = 0x200005;
-    config.unk60 = 0x60600;
-    config.unk64 = 7;
-    config.unk66 = 0x24;
-    config.unk68 = 1;
-    config.unk6A = 0;
-    config.unk6C = 1.0f;
-    config.unk70 = -1;
-    config.unk71 = 0;
+    config.colorLevelBase = 255;
+    config.colorLevelRange = 0;
+    config.renderMode = 1;
+    config.unk21 = 0x24;
+    config.setGeometryMode = 0x200005;
+    config.clearGeometryMode = 0x60600;
+    config.fadeStart = 7;
+    config.fadeRate = 0x24;
+    config.shrinkStart = 1;
+    config.shrinkPaused = 0;
+    config.shrinkFactor = 1.0f;
+    config.unk38 = -1;
+    config.unk39 = 0;
     config.unk72 = -1;
     config.unk73 = -1;
 
-    func_15152B38(&config, particle->unkC, particle->unk1);
+    func_15152B38(&config, particle->head.header.owner, particle->head.header.kind);
 }

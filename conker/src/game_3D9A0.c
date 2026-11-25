@@ -3,26 +3,20 @@
 #include "variables.h"
 
 
-struct Obj150104F0 {
-    u8 pad0[0x7C];
-    f32 unk7C;
-};
-
-extern u8 D_800D9950[];
 extern u8 D_800D9946[];
-extern struct Obj150104F0 *func_151149AC(u32);
+extern WorldObject *func_151149AC(u32);
 
 // ???
 void func_150104F0(void) {
-    struct Obj150104F0 *temp_v0;
+    WorldObject *temp_v0;
 
     D_800D9950[0] = (D_800D9950[1] = (D_800D9950[2] = 0));
     temp_v0 = func_151149AC(0xF6);
-    temp_v0->unk7C = 2.0f;
+    temp_v0->work.floats[0] = 2.0f;
     D_80088980 = 0;
 }
 
-void func_15010538(struct127 *arg0) {
+void func_15010538(Actor *arg0) {
     struct175 tmp;
     struct37 *temp_v0;
 
@@ -46,8 +40,8 @@ void func_15010600(void) {
 
     D_800D9921 = 0;
     D_800D9920 = 0;
-    D_800D9928 = 0;
-    D_800D9938 = 0;
+    D_800D9928[0] = 0;
+    D_800D9938[0] = 0;
     D_800D9929 = 0;
     for (D_800D9939 = 0, i = 0;;) {
         D_800D992A[i + 1] = 0;

@@ -1,72 +1,16 @@
 #include <ultra64.h>
 
-#define func_15048A40 func_15048A40_hdr
-#define func_150ADA20 func_150ADA20_hdr
-#define func_150A7CB0 func_150A7CB0_hdr
-#define func_1502B7F0 func_1502B7F0_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150ADA20
-#undef func_150A7CB0
-#undef func_1502B7F0
 void func_1509093C(void);
-void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
-#define D_800D24C8 D_800D24C8_hdr
-#define D_800D2460 D_800D2460_hdr
-#define D_800D2890 D_800D2890_hdr
-#define D_800D2590 D_800D2590_hdr
-#define D_800D2454 D_800D2454_hdr
-#define D_800D23D0 D_800D23D0_hdr
-#define D_800D244C D_800D244C_hdr
 #include "variables.h"
-#undef D_800D24C8
-#undef D_800D2460
-#undef D_800D2890
-#undef D_800D2590
-#undef D_800D2454
-#undef D_800D23D0
-#undef D_800D244C
-extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
-extern u8 D_800CC49A;
-extern f32 D_800D2890[3];
-extern Mtx D_800D2590[6][2];
-extern u16 D_800D2454;
-extern Mtx D_800D23D0;
-extern Mtx *D_800D244C;
-
-/* Per-player screen viewport (split screen), bounds in screen pixels. */
-typedef struct HudView {
-    u8 pad0[0x24];
-    f32 top;
-    f32 bottom;
-    f32 left;
-    f32 right;
-    u8 pad34[0x180 - 0x34];
-} HudView;
 
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
-
-/* One rising bubble sprite (drawn by func_15090630). */
-typedef struct Bubble {
-    s16 x;
-    s16 y;
-    s16 originX;
-    s16 size;
-    s16 radius;
-    s16 timer;
-    u8 accel;
-    u8 state;
-    u8 angle;
-    u8 phase;
-} Bubble;
-
-extern Bubble D_800D2460[6];
 
 /* Resets all bubbles to the idle state. */
 void func_1508F060(void) {
@@ -204,7 +148,7 @@ void func_1508F0D4(void) {
 
 /* Removes the top block and spawns a debris particle at its position. */
 void func_1508F7BC(void) {
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 unused;
     struct256 *node;
 
@@ -231,7 +175,6 @@ void func_1508F9C4(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
-extern f32 func_15048A40(u8 arg0);
 
 /* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
 void func_1508F9F4(void) {
@@ -357,9 +300,6 @@ Gfx *func_150911F4(Gfx *);
 Gfx *func_15094F40(Gfx *);
 Gfx *func_15096934(Gfx *);
 void func_1518CA04(s32);
-extern f32 D_8008FE1C;
-extern s32 D_800BEBA4;
-extern Gfx *D_800BE9C8[];
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
@@ -388,7 +328,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     if (D_800D2458 != 0) {
         gfx = func_150938BC(gfx);
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return gfx;
     }
     if (D_8008CD00 != 0) {
@@ -406,9 +346,9 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
         gfx = func_150900F0(gfx, 0);
-    } else if (D_800D2588 != 0) {
+    } else if (D_800D2588 != NULL) {
         func_1518CA04(0xB8);
-        D_800D2588 = 0;
+        D_800D2588 = NULL;
     }
     gfx = func_150911F4(gfx);
     gfx = func_15094F40(gfx);
@@ -420,9 +360,8 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     return gfx;
 }
-extern s16 D_8008FDCC;
 extern s16 D_8009DC90[][3];
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
@@ -434,13 +373,13 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     f32 y;
     f32 z;
     f32 scale;
-    f32 mtx[4][4];
-    f32 base[4][4];
+    MtxF mtx;
+    MtxF base;
     struct256 *node;
     Gfx *dl;
 
-    if (D_800D2588 == 0) {
-        D_800D2588 = func_1518C900(0xB8);
+    if (D_800D2588 == NULL) {
+        D_800D2588 = (Gfx *)func_1518C900(0xB8);
     }
     gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
@@ -459,7 +398,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
     count = D_800D2456;
-    dl = (Gfx *)D_800D2588;
+    dl = D_800D2588;
     if (fixed != 0) {
         x = (f32)D_8009DCB4[3] - 54.0f;
         y = (f32)D_8009DCB4[4] - 52.0f;
@@ -606,42 +545,8 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-typedef struct WaterVtx {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} WaterVtx;
-
-typedef struct WaterBase {
-    s16 ob[3];
-    u8 cn[4];
-} WaterBase;
-
-typedef struct WaterStage {
-    Mtx mtx[2];
-    s32 dl;
-    WaterVtx *vtx[2];
-    WaterBase *base;
-    WaterBase *target;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    u16 tex[4];
-    s16 timer;
-    u8 alpha;
-    u8 count;
-} WaterStage;
-
-extern WaterStage D_800D24C8;
 extern s32 D_800D2558[];
 extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
-extern s32 func_1502B7F0(s32 *, s32, s32, s32);
-extern u16 D_800CC382;
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;
@@ -858,8 +763,6 @@ void func_1509093C(void) {
 
 extern u8 D_80083440[];
 extern u8 D_800835C0[];
-extern u8 D_80084160[];
-extern u8 D_80084190[];
 
 /* Draws the water surface mesh animated by func_1509093C. */
 Gfx *func_150911F4(Gfx *gfx) {
@@ -991,22 +894,15 @@ typedef struct HudTime {
     u8 pad28[0x84 - 0x28];
 } HudTime;
 
-/* struct126 (include/structs.h) has no fields at 0x12C and 0x1AE yet. */
-#define HUD_S8(p, off) (*(s8 *)((u8 *)(p) + (off)))
-#define HUD_U16(p, off) (*(u16 *)((u8 *)(p) + (off)))
-
 extern HudBars D_800873B0;
 extern Gfx D_80087390[];
 extern u8 D_800873B4[];
 extern u8 D_800873BC[];
 extern u8 D_800873C4[];
 extern u8 D_800873C8[];
-extern u16 D_8008FDC0;
 extern HudScore *D_8008FDD4;
-extern s8 D_800E0AC0[];
 extern HudNames *D_800E0BD8;
 extern HudTime *D_800872A0;
-extern s8 D_800E0BE7;
 extern u8 D_CF1[];
 extern u8 D_CF2[];
 extern u8 D_D13[];
@@ -1014,7 +910,7 @@ extern u8 D_D14[];
 
 /* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
  * 0x002 an icon picked by func_150859AC(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
- * (repeated per count) and bars from struct126 field 0x12C, 0x010 two rows of bars from
+ * (repeated per count) and bars from ActorCtl field 0x12C, 0x010 two rows of bars from
  * func_150859AC(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
  * 0x020 the radar (func_15093B58). */
 Gfx *func_150918EC(Gfx *gfx) {
@@ -1033,8 +929,8 @@ Gfx *func_150918EC(Gfx *gfx) {
     s32 vpWidth;
     s32 lapCount;
     s32 vpRight;
-    struct126 *a1; // matching: unused, yet removing it changes the register allocation
-    struct127 *player;
+    ActorCtl *a1; // matching: unused, yet removing it changes the register allocation
+    Actor *player;
     s32 rowY;
     s32 cellShift;
     s32 k;
@@ -1181,7 +1077,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x32:
                     case 0x33:
-                        n = HUD_S8(player->unk31C, 0x1AE);
+                        n = player->unk31C->unk1AE;
                         icon = 11;
                         break;
                     case 0x40:
@@ -1274,9 +1170,9 @@ Gfx *func_150918EC(Gfx *gfx) {
                     }
                     if (icon >= 0 && icon != 3) {
                         if (barShift > 0) {
-                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> barShift;
+                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> barShift;
                         } else {
-                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) << -barShift;
+                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C << -barShift;
                         }
                         barMode = 1;
                     }
@@ -1294,11 +1190,11 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x30:
                     case 0x31:
-                        n = HUD_S8(D_800CC2D0[i].unk31C, 0x1AE);
+                        n = D_800CC2D0[i].unk31C->unk1AE;
                         icon = 6;
                         break;
                     case 0x3E:
-                        barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> 4;
+                        barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> 4;
                         barMode = 2;
                         break;
                     }
@@ -1459,7 +1355,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
                 for (k = 0, player = D_800CC2D0; k != 25; k++, player++) {
-                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || (s8)player->pad320[8] != 0) {
+                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || player->unk328 != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
@@ -1502,7 +1398,6 @@ void func_15093878(void) {
     D_800D244C = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
-extern s32 D_800D2450;
 extern u8 D_11AD[];
 void func_150A7D00(Mtx *, f32, f32, f32);
 
@@ -1538,7 +1433,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     return gfx;
 }
 extern u8 D_800AB62C[][3];
-extern u16 D_800E0BCC;
 u8 func_15085DA8(f32 arg0);
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
@@ -1602,9 +1496,9 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             s32 dsdx;
             s32 x;
             s32 y;
-            struct127 *obj;
-            struct108 *cam;
-            struct108 *cam2;
+            Actor *obj;
+            Camera *cam;
+            Camera *cam2;
 
             x = (((s32)D_800BE628[i].right - scaled[7]) - radius) * 4;
             y = ((s32)D_800BE628[i].top + scaled[21] + radius) * 4;
@@ -1629,7 +1523,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
             gDPSetEnvColor(gfx++, 255, 0, 0, 255);
             cam = &D_800DBFF0[i];
-            angle = cam->unk37C * 0.01745327935f;
+            angle = cam->yaw * 0.01745327935f;
             sinv = sinf(angle);
             cosv = cosf(angle);
             if (obj->interaction_state != 0x25) {
@@ -1647,7 +1541,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 cam2 = obj->camera;
                 obj = D_800CC2D0;
                 skip = 0;
-                if (cam2 != NULL && cam2->unk23D == 3) {
+                if (cam2 != NULL && cam2->playerIndex == 3) {
                     skip = 1;
                 }
                 obj += skip;
@@ -1663,7 +1557,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 s32 yl;
                 s32 xh;
                 s32 yh;
-                struct127 *other;
+                Actor *other;
                 u8 *rgb;
 
                 if (j == i || j == skip) {
@@ -1671,8 +1565,8 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 }
                 other = &D_800CC2D0[j];
                 if (other->interaction_state != 0) {
-                    if ((s8)other->pad320[8] != 0) {
-                        color = (s8)other->pad320[8] - 1;
+                    if (other->unk328 != 0) {
+                        color = other->unk328 - 1;
                         if (j < D_8008FD8C) {
                             if (func_150859AC(j, 3) <= 0) {
                                 color = -1;

@@ -3,7 +3,6 @@
 #define osMotorInit osMotorInit_os_motor_h
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares these as scalar s32; they are motor buffers. */
 #include "variables.h"
 #undef osMotorInit
 

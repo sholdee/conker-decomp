@@ -1,38 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Debris emitter settings read by func_151A6F00 (same layout as in game_1D43B0.c). */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x04 */ vertex pos;
-    /* 0x10 */ s16 lifetime;
-    /* 0x14 */ f32 radius;
-    /* 0x18 */ s16 yawBase;
-    /* 0x1A */ s16 yawRange;
-    /* 0x1C */ s16 pitchBase;
-    /* 0x1E */ s16 pitchRange;
-    /* 0x20 */ f32 speedBase;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 velYBase;
-    /* 0x2C */ f32 velYRange;
-    /* 0x30 */ vertex dir;
-    /* 0x3C */ f32 sizeBase;
-    /* 0x40 */ f32 sizeRange;
-    /* 0x44 */ f32 gravityBase;
-    /* 0x48 */ f32 gravityRange;
-    /* 0x4C */ f32 spinBase;
-    /* 0x50 */ f32 spinRange;
-    /* 0x54 */ u8 landPuffs;
-    /* 0x55 */ u8 landPuffFlag;
-    /* 0x56 */ s16 landPuffLifeBase;
-    /* 0x58 */ s16 landPuffLifeRange;
-} DebrisEmitter;
+#include "effects.h"
 
 extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
 
 /* Bursts three debris pieces from the object's position. */
-void func_1506A5F0(struct127 *obj, s32 arg1) {
+void func_1506A5F0(Actor *obj, s32 arg1) {
     DebrisEmitter emitter;
 
     emitter.count = 3;
@@ -71,46 +45,42 @@ extern f32 D_800D1560[3];
 extern f32 D_800D1570[3];
 
 /* Bitmask of the objects (D_800CC2D0 indices) hit in the last collision check. */
-extern s32 D_800CC260;
 
 /* Object position saved before the collision move. */
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
 
-extern void (*D_80086110[])(struct127 *, s32);
+extern void (*D_80086110[])(Actor *, s32);
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
 } ObjectRef;
 
-void func_150E0348(struct127 *, s32, s32);
-void func_151BB61C(struct127 *, f32 *, f32 *, s32, s32);
-void func_151BBA9C(struct127 *, f32 *, f32 *, s32, s32);
+void func_150E0348(Actor *, s32, s32);
+void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
+void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
 void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
-void func_151BC104(struct127 *, s32, s32);
+void func_151BC104(Actor *, s32, s32);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151B7144(struct127 *, s32, s32);
-void func_151B6320(struct127 *, s32, s32);
-void func_15137610(struct127 *, f32 *, f32 *, s32, s32, s32);
-void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
+void func_151B7144(Actor *, s32, s32);
+void func_151B6320(Actor *, s32, s32);
+void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
+void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 void func_151B7328(ObjectRef *, s32, s32, s32, s32);
-void func_151CEAAC(struct127 *, s32, s32, s32, s32);
+void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
-void func_1506A6FC(struct127 *obj, s32 arg1) {
+void func_1506A6FC(Actor *obj, s32 arg1) {
     func_150E0348(obj, 0xFF, 1);
 }
 
-void func_1506A724(struct127 *obj, s32 arg1) {
+void func_1506A724(Actor *obj, s32 arg1) {
     func_151BB61C(obj, D_800D1560, D_800D1570, 0xFF, 1);
 }
 
-void func_1506A760(struct127 *obj, s32 arg1) {
+void func_1506A760(Actor *obj, s32 arg1) {
     func_151BBA9C(obj, D_800D1560, D_800D1570, 0xFF, 1);
 }
 
-void func_1506A79C(struct127 *obj, s32 arg1) {
+void func_1506A79C(Actor *obj, s32 arg1) {
     f32 pos[3];
     f32 delta[3];
 
@@ -123,12 +93,12 @@ void func_1506A79C(struct127 *obj, s32 arg1) {
     func_151D3480(pos, delta, 0, 0, 0xFF, 1);
 }
 
-void func_1506A83C(struct127 *obj, s32 arg1) {
+void func_1506A83C(Actor *obj, s32 arg1) {
     func_151BC104(obj, 0xFF, 1);
 }
 
 /* Spawns a flash 50 units above the object. */
-void func_1506A864(struct127 *obj, s32 arg1) {
+void func_1506A864(Actor *obj, s32 arg1) {
     struct225 *flash;
     Header header;
     f32 params[4];
@@ -152,7 +122,7 @@ void func_1506A864(struct127 *obj, s32 arg1) {
     }
 }
 
-void func_1506A968(struct127 *obj, s32 arg1) {
+void func_1506A968(Actor *obj, s32 arg1) {
     f32 pos[3];
     f32 delta[3];
 
@@ -165,7 +135,7 @@ void func_1506A968(struct127 *obj, s32 arg1) {
     func_151D3480(pos, delta, 0, 1, 0xFF, 1);
 }
 
-void func_1506AA08(struct127 *obj, s32 arg1) {
+void func_1506AA08(Actor *obj, s32 arg1) {
     func_151B7144(obj, 0xFF, 1);
     func_151B6320(obj, 0xFF, 1);
 }
@@ -176,7 +146,7 @@ typedef struct {
 } Pair1506AA48;
 
 /* Spawns an effect that carries the object and the two words at arg as its data. */
-void func_1506AA48(struct127 *obj, Pair1506AA48 *arg) {
+void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     struct260 *effect;
     struct {
         ObjectRef ref;
@@ -188,16 +158,16 @@ void func_1506AA48(struct127 *obj, Pair1506AA48 *arg) {
     data.value = *arg;
 
     /* functions.h types the data-size parameter as struct37 * */
-    effect = func_15149130(10, 7, 35, -1, 1, 33, (struct37 *)sizeof(data), 0xFF, 1);
+    effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
 }
 
 /* Calls func_15137610 for every object in the hit mask D_800CC260. */
-void func_1506AAE0(struct127 *obj, s32 arg1) {
+void func_1506AAE0(Actor *obj, s32 arg1) {
     s32 mask;
-    struct127 *hit;
+    Actor *hit;
 
     for (mask = D_800CC260, hit = D_800CC2D0; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
@@ -207,20 +177,20 @@ void func_1506AAE0(struct127 *obj, s32 arg1) {
 }
 
 typedef struct {
-    /* 0x00 */ struct127 *unk0;
-    /* 0x04 */ struct17 unk4;
+    /* 0x00 */ Actor *unk0;
+    /* 0x04 */ Vec3f unk4;
     /* 0x10 */ s32 unk10;
 } Arg1506AB7C;
 
-void func_1506AB7C(struct127 *obj, Arg1506AB7C *arg) {
+void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
     func_15103E40(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);
 }
 
-void func_1506ABC4(struct127 *obj, Arg1506AB7C *arg) {
+void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
     func_15103E40(obj, arg->unk0, &arg->unk4, 2, arg->unk10, 0xFF, 1);
 }
 
-void func_1506AC0C(struct127 *obj, s32 arg1) {
+void func_1506AC0C(Actor *obj, s32 arg1) {
     ObjectRef ref;
 
     ref.owner = obj;
@@ -228,12 +198,12 @@ void func_1506AC0C(struct127 *obj, s32 arg1) {
     func_151B7328(&ref, 0, 8, 0xFF, 1);
 }
 
-void func_1506AC58(struct127 *obj, s32 arg1) {
+void func_1506AC58(Actor *obj, s32 arg1) {
     func_151CEAAC(obj, 0, 1, 0xFF, 1);
 }
 
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
-void func_1506AC8C(struct127 *obj, s32 type, s32 arg) {
+void func_1506AC8C(Actor *obj, s32 type, s32 arg) {
     if (type >= 0 && type < 15) {
         D_800D1560[0] = obj->old_x_position;
         D_800D1560[1] = obj->old_y_position;

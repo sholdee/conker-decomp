@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-/* functions.h declares func_1502B7F0 with fixed parameters; it is variadic. */
-#define func_1502B7F0 func_1502B7F0_fixed_args
 #include "functions.h"
-#undef func_1502B7F0
 #include "variables.h"
 
 #include "macros.h"

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 // Ground info for an object, as filled in by func_1504715C.
 typedef struct GroundInfo {
@@ -8,11 +9,7 @@ typedef struct GroundInfo {
     /* 0x04 */ u8 unk4[0x20];
 } GroundInfo;
 
-extern void func_1504715C(GroundInfo *ground, struct127 *obj);
-
-typedef struct Vec3f {
-    f32 x, y, z;
-} Vec3f;
+extern void func_1504715C(GroundInfo *ground, Actor *obj);
 
 // Parameters for func_151D8868.
 typedef struct {
@@ -26,9 +23,9 @@ typedef struct {
 } Struct15195738Small;
 
 extern void func_151D8868(Struct15195738Small *params, s32 arg1, u8 arg2, s32 arg3);
-extern void func_151C0098(f32 *pos, struct127 *obj, s32 arg2, u8 arg3, s32 arg4);
-extern void func_1507CD64(struct127 *obj, s32 arg1);
-extern s32 func_1518D1C0(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
+extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
+extern void func_1507CD64(Actor *obj, s32 arg1);
+extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
 extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
@@ -38,7 +35,7 @@ extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
-void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
+void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
     GroundInfo ground;
     s32 type;
@@ -61,7 +58,7 @@ void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
             sum ^= *(u32 *)addr;
         }
         if (sum != 0xA3C35D52) {
-            addr = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
+            addr = (u32)&D_80043B40[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
             *(s32 *)addr = osGetCount() & 0x3FFFF7;
         }
     }
@@ -89,18 +86,17 @@ void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
     func_151DC260(pos, &ground, type, arg2, arg3);
 }
 
-
-void func_151942B0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151942E8(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 
 extern u8 D_800A8210;
 
-void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0:
     case 1:
@@ -114,7 +110,7 @@ void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
 
 extern u8 D_800A822C;
 
-void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0:
     case 1:
@@ -126,42 +122,12 @@ void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-// Parameters for func_15153F18, which spawns a random number of effects flying out from a point.
-// Each xxxMin/xxxRange pair is picked as min + rand() % (range + 1) (or min + randf() * range).
-typedef struct BurstParams {
-    /* 0x00 */ s16 yawMin;
-    /* 0x02 */ s16 yawRange;
-    /* 0x04 */ s16 pitchMin;
-    /* 0x06 */ s16 pitchRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 speedMin;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 countMin;
-    /* 0x2E */ s16 countRange;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ u8 unk3C;
-    /* 0x40 */ f32 unk40Chance;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} BurstParams;
-
-
-extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
-extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, GroundInfo *ground, u8 arg3, s32 arg4);
+extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
-void func_15194408(struct127 *self, struct127 *other) {
-    BurstParams burst;
+void func_15194408(Actor *self, Actor *other) {
+    SplashSpraySpec burst;
     GroundInfo ground;
 
     switch (other->id) {
@@ -177,51 +143,51 @@ void func_15194408(struct127 *self, struct127 *other) {
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
     func_1504715C(&ground, other);
-    burst.position.x = other->x_position;
-    burst.position.y = other->y_position + 50.0f;
-    burst.position.z = other->z_position;
-    burst.unk14 = 6.0f;
-    burst.countMin = 12;
-    burst.countRange = 5;
-    burst.yawRange = 0xFF;
-    burst.pitchMin = -0x3F;
-    burst.yawMin = 0;
-    burst.pitchRange = 0x23;
-    burst.unk30 = 3;
-    burst.unk32 = 2;
-    burst.unk34 = 30;
-    burst.unk36 = 30;
-    burst.unk38 = 100;
-    burst.unk3A = 100;
-    burst.unk44 = 16;
-    burst.unk46 = 15;
-    burst.unk48 = 0;
-    burst.unk3C = 0;
-    burst.unk18 = 3.0f;
-    burst.unk1C = 0.21f;
-    burst.unk20 = 0.406f;
-    burst.speedMin = 13.0f;
-    burst.speedRange = 8.0f;
-    burst.unk40Chance = 0.3f;
-    func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+    burst.spray.pos.x = other->x_position;
+    burst.spray.pos.y = other->y_position + 50.0f;
+    burst.spray.pos.z = other->z_position;
+    burst.spray.scaleBase = 6.0f;
+    burst.spray.countBase = 12;
+    burst.spray.countRange = 5;
+    burst.angles.yawRange = 0xFF;
+    burst.angles.pitchBase = -0x3F;
+    burst.angles.yawBase = 0;
+    burst.angles.pitchRange = 0x23;
+    burst.spray.itemCountBase = 3;
+    burst.spray.itemCountRange = 2;
+    burst.spray.lifeBase = 30;
+    burst.spray.lifeRange = 30;
+    burst.spray.unk30 = 100;
+    burst.spray.unk32 = 100;
+    burst.spray.unk3C = 16;
+    burst.spray.unk3E = 15;
+    burst.spray.unk40 = 0;
+    burst.spray.kind = 0;
+    burst.spray.scaleRange = 3.0f;
+    burst.spray.sizeBase = 0.21f;
+    burst.spray.sizeRange = 0.406f;
+    burst.spray.speedBase = 13.0f;
+    burst.spray.speedRange = 8.0f;
+    burst.spray.unk38 = 0.3f;
+    func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
-extern void func_150C7020(struct127 *obj, s32 arg1, u8 arg2, s32 arg3);
+extern void func_150C7020(Actor *obj, s32 arg1, u8 arg2, s32 arg3);
 
-void func_15194588(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194588(Actor *self, Actor *other, u8 *arg2) {
     func_150C7020(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
 
 extern u8 D_800A3FE6[];
-extern s32 func_15134070(struct127 *);
-extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
+extern s32 func_15134070(Actor *);
+extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
-void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
-    BurstParams burst;
+    SplashSpraySpec burst;
     GroundInfo ground;
 
     facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
@@ -237,46 +203,46 @@ void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
         if (kind != 0x63) {
             profile = D_800A3FE6[kind * 16]; // 16-byte records
             if (profile != 2) {
-                burst.position = pos;
-                burst.unk14 = 6.699999809f;
-                burst.unk18 = 2.329999924f;
-                burst.unk1C = 0.6800000072f;
-                burst.unk20 = 0.0f;
-                burst.speedMin = 4.400000095f;
-                burst.countMin = 15;
-                burst.countRange = 12;
-                burst.yawMin = facingYaw - 0x40;
-                burst.yawRange = 0x80;
-                burst.pitchMin = -0xA0;
-                burst.pitchRange = 0x20;
-                burst.unk30 = 3;
-                burst.unk32 = 1;
-                burst.unk34 = 31;
-                burst.unk36 = 19;
-                burst.unk38 = 155;
-                burst.unk3A = 100;
-                burst.unk44 = 16;
-                burst.unk46 = 15;
-                burst.unk48 = 0;
-                burst.speedRange = 5.300000191f;
-                burst.unk40Chance = 0.5f;
+                burst.spray.pos = pos;
+                burst.spray.scaleBase = 6.699999809f;
+                burst.spray.scaleRange = 2.329999924f;
+                burst.spray.sizeBase = 0.6800000072f;
+                burst.spray.sizeRange = 0.0f;
+                burst.spray.speedBase = 4.400000095f;
+                burst.spray.countBase = 15;
+                burst.spray.countRange = 12;
+                burst.angles.yawBase = facingYaw - 0x40;
+                burst.angles.yawRange = 0x80;
+                burst.angles.pitchBase = -0xA0;
+                burst.angles.pitchRange = 0x20;
+                burst.spray.itemCountBase = 3;
+                burst.spray.itemCountRange = 1;
+                burst.spray.lifeBase = 31;
+                burst.spray.lifeRange = 19;
+                burst.spray.unk30 = 155;
+                burst.spray.unk32 = 100;
+                burst.spray.unk3C = 16;
+                burst.spray.unk3E = 15;
+                burst.spray.unk40 = 0;
+                burst.spray.speedRange = 5.300000191f;
+                burst.spray.unk38 = 0.5f;
                 if (profile == 1) {
-                    burst.unk3C = 1;
+                    burst.spray.kind = 1;
                 } else {
-                    burst.unk3C = 0;
+                    burst.spray.kind = 0;
                 }
-                func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+                func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
                 func_151B4CD0(other, 0xFF, 1);
             }
         }
     }
 }
 
-void func_151B01B8(struct127 *self, struct127 *other);
-void func_151B09BC(struct127 *self, struct127 *other, s16 arg2, u8 arg3, s32 arg4);
-void *func_151AF270(struct127 *obj, u8 arg1, s32 arg2);
+void func_151B01B8(Actor *self, Actor *other);
+void func_151B09BC(Actor *self, Actor *other, s16 arg2, u8 arg3, s32 arg4);
+void *func_151AF270(Actor *obj, u8 arg1, s32 arg2);
 
-void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
     switch (other->id) {
@@ -291,9 +257,9 @@ void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
 }
 
 // For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
-void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
-    BurstParams burst;
+    SplashSpraySpec burst;
     GroundInfo ground;
     Struct15195738Small params;
 
@@ -309,31 +275,31 @@ void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
         pos.z = other->z_position;
     fence: // matching: this basic-block boundary keeps as1 from scheduling across it
         func_1504715C(&ground, other);
-        burst.position = pos;
-        burst.unk14 = 10.0f;
-        burst.countMin = 15;
-        burst.countRange = 10;
-        burst.yawRange = 0xFF;
-        burst.pitchMin = -0x3F;
-        burst.yawMin = 0;
-        burst.pitchRange = 0x39;
-        burst.unk30 = 3;
-        burst.unk32 = 2;
-        burst.unk34 = 70;
-        burst.unk36 = 22;
-        burst.unk38 = 155;
-        burst.unk3A = 100;
-        burst.unk44 = 16;
-        burst.unk46 = 15;
-        burst.unk48 = 0;
-        burst.unk3C = 0;
-        burst.unk18 = 5.0f;
-        burst.unk1C = 0.6750000119f;
-        burst.unk20 = 0.2310000062f;
-        burst.speedMin = 5.0f;
-        burst.speedRange = 25.10000038f;
-        burst.unk40Chance = 0.5f;
-        func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+        burst.spray.pos = pos;
+        burst.spray.scaleBase = 10.0f;
+        burst.spray.countBase = 15;
+        burst.spray.countRange = 10;
+        burst.angles.yawRange = 0xFF;
+        burst.angles.pitchBase = -0x3F;
+        burst.angles.yawBase = 0;
+        burst.angles.pitchRange = 0x39;
+        burst.spray.itemCountBase = 3;
+        burst.spray.itemCountRange = 2;
+        burst.spray.lifeBase = 70;
+        burst.spray.lifeRange = 22;
+        burst.spray.unk30 = 155;
+        burst.spray.unk32 = 100;
+        burst.spray.unk3C = 16;
+        burst.spray.unk3E = 15;
+        burst.spray.unk40 = 0;
+        burst.spray.kind = 0;
+        burst.spray.scaleRange = 5.0f;
+        burst.spray.sizeBase = 0.6750000119f;
+        burst.spray.sizeRange = 0.2310000062f;
+        burst.spray.speedBase = 5.0f;
+        burst.spray.speedRange = 25.10000038f;
+        burst.spray.unk38 = 0.5f;
+        func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.unk0 = 1;
         params.unk2 = (func_150ADA20() % 11U) + 20;
         params.unk4 = 8;
@@ -344,29 +310,29 @@ void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_151949E0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
-extern void func_1507DE4C(struct127 *obj);
-extern void func_15138BC0(struct127 *obj, u8 arg1, s32 arg2);
+extern void func_15104170(s32 arg0, Actor *self, Actor *other);
+extern void func_1507DE4C(Actor *obj);
+extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
 
 // Calls func_15104170 when D_8008FD90 == 1 and self's unk31C->unk1A0 cooldown has run out, then restarts it.
-void func_151949F4(s32 arg0, struct127 *self, struct127 *other) {
+void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
         func_15104170(arg0, self, other);
         self->unk31C->unk1A0 = 1200;
     }
 }
 
-void func_15194A68(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
     func_1507DE4C(other);
     func_15138BC0(other, 0xFF, 1);
     func_151949F4(0, self, other);
 }
 
 // Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
-void func_15194AB4(struct127 *obj) {
+void func_15194AB4(Actor *obj) {
     s32 anim;
 
     obj->unk9C |= 0xFFFE;
@@ -384,10 +350,10 @@ void func_15194AB4(struct127 *obj) {
     }
 }
 
-extern void func_15138120(struct127 *obj, s32 kind, s32 arg2);
-extern void func_15136C3C(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
+extern void func_15138120(Actor *obj, s32 kind, s32 arg2);
+extern void func_15136C3C(Actor *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
-void func_15194B1C(struct127 *obj) {
+void func_15194B1C(Actor *obj) {
     s32 kind;
 
     kind = func_15134070(obj);
@@ -398,7 +364,7 @@ void func_15194B1C(struct127 *obj) {
     func_15194AB4(obj);
 }
 
-void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
     if (other->id == 0x53) {
         func_151942B0(self, other, arg2);
         return;
@@ -407,7 +373,7 @@ void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
     func_151949F4(1, self, other);
 }
 
-void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0x16:
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
@@ -461,19 +427,19 @@ void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_15194FF4(struct127 *self, struct127 *other, s32 arg2);
+void func_15194FF4(Actor *self, Actor *other, s32 arg2);
 
-void func_15194D80(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, FALSE);
 }
 
-void func_15194DA4(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, TRUE);
 }
 
 extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
 
-void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     GroundInfo ground;
 
     if (D_800BE616 != 0) {
@@ -485,9 +451,9 @@ void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
     func_1514B364(&other->x_position, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(struct127 *obj, struct127 *other, u8 arg2, s32 arg3);
+extern void func_150B06B0(Actor *obj, Actor *other, u8 arg2, s32 arg3);
 
-void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
     if (other->id == 0x3E || other->id == 0xA6) {
         func_150B06B0(other, self, 0xFF, 1);
     }
@@ -495,7 +461,7 @@ void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
 
 extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
-void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     u8 result;
     u32 rand1;
     u32 rand0;
@@ -504,13 +470,13 @@ void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
     if (other->camera != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->unk23D, 0xFF, 1);
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->playerIndex, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);
 }
 
-void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     f32 pos[3];
 
     pos[0] = other->x_position;
@@ -525,15 +491,15 @@ void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct127 *source;
+    Actor *source;
 } Struct15194FF4;
 
-extern u8 *func_1518F51C(struct127 *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-extern void func_15190518(struct127 *obj);
+extern u8 *func_1518F51C(Actor *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(Actor *obj);
 
 void func_15194FF4(self, other, arg2)
-struct127 *self;
-struct127 *other;
+Actor *self;
+Actor *other;
 u8 arg2;
 {
     u8 *spawned;
@@ -558,10 +524,10 @@ u8 arg2;
             if (spawned != NULL && arg2 != 0) {
                 memcpy(spawned + 0x90, &info, sizeof(info));
                 {
-                    u8 *ext = (u8 *)other->unk31C; // unk31C is longer than struct126 declares
+                    ActorCtl *ext = other->unk31C;
 
                     if (ext != NULL) {
-                        ext[0x1AC] = 1;
+                        ext->unk1AC = 1;
                     }
                 }
             }
@@ -572,24 +538,20 @@ u8 arg2;
     }
 }
 
-extern struct127 *func_1505ED34(void);
-extern s32 func_150838EC(struct127 *obj, s32 anim, s32 arg2, f32 speed);
-extern void func_150D10E4(struct127 *obj, u8 arg1);
-
-// struct127 declares these offsets as padding, so they are reached by offset.
-#define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
-#define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
+extern Actor *func_1505ED34(void);
+extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
+extern void func_150D10E4(Actor *obj, u8 arg1);
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
-void func_151951E0(struct127 *obj) {
-    struct127 *copy;
+void func_151951E0(Actor *obj) {
+    Actor *copy;
 
     obj->health = 0;
     func_1507CD64(obj, 5);
     func_15194AB4(obj);
     obj->interaction_state = 0x28;
     obj->xz_velocity = -3.0f;
-    F32AT(obj, 0xBC) = -10.0f - (func_150ADA20() % 5U);
+    obj->unkBC = -10.0f - (func_150ADA20() % 5U);
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
     obj->y_velocity = 0.0f;
     obj->gravity = 0.0f;
@@ -608,14 +570,14 @@ void func_151951E0(struct127 *obj) {
     copy->xz_scale = obj->xz_scale;
     copy->y_scale = obj->y_scale;
     copy->xz_velocity = 10.0f;
-    F32AT(copy, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    copy->unkBC = (func_150ADA20() % 5U) + 10.0f;
     copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    U8AT(copy, 0x68) = U8AT(obj, 0x68);
-    U8AT(copy, 0x69) = U8AT(obj, 0x69);
-    U8AT(copy, 0x6A) = U8AT(obj, 0x6A);
-    U8AT(copy, 0x6B) = U8AT(obj, 0x6B);
-    U8AT(copy, 0x6C) = U8AT(obj, 0x6C);
-    U8AT(copy, 0x6D) = U8AT(obj, 0x6D);
+    copy->unk68[0] = obj->unk68[0];
+    copy->unk68[1] = obj->unk68[1];
+    copy->eyeClosed[0] = obj->eyeClosed[0];
+    copy->eyeClosed[1] = obj->eyeClosed[1];
+    copy->eyeCode[0] = obj->eyeCode[0];
+    copy->eyeCode[1] = obj->eyeCode[1];
     copy->unk76 += (func_150ADA20() % 10922U) - 65536.0f / 12;
     copy->unk40 = (obj->unk76 + 0x4000) * (360.0f / 65536);
     copy->unkF8 = obj->unkF8;
@@ -626,10 +588,10 @@ void func_151951E0(struct127 *obj) {
 }
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15137610(struct127 *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
+extern void func_15137610(Actor *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
-void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;
     f32 from[3];
     f32 to[3];
@@ -657,12 +619,12 @@ void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
     func_15137610(other, from, to, dir, 0xFF, 1);
 }
 
-void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195650(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
 }
 
-void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     if (other->health == 0 && other->unk127 != 0xFF) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
@@ -673,7 +635,7 @@ void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_15195738(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195738(Actor *self, Actor *other, u8 *arg2) {
     Struct15195738Small params;
 
     params.unk0 = 1;

@@ -36,10 +36,43 @@ STT_SECTION, STB_GLOBAL, STB_WEAK, SHN_ABS = 3, 1, 2, 0xFFF1
 OP_LUI, OP_LDC1, OP_SDC1 = 0x0F, 0x35, 0x3D
 
 
+_FLAT = {}
+
+
 def flat_segments(yaml_path):
-    """[(rom_start, type, name, vram - rom)] for every segment/subsegment, sorted."""
+    """[(rom_start, type, name, vram - rom)] for every segment/subsegment, sorted.
+
+    Cached in-process and on disk (build/.flat_segments.json, keyed by the yaml's size and mtime):
+    this runs once per object of every build, and parsing the yaml dominated its cost."""
+    import json, os
+    yp = Path(yaml_path).resolve()
+    st = yp.stat()
+    key = f"{yp}:{st.st_size}:{st.st_mtime_ns}"
+    if key in _FLAT:
+        return _FLAT[key]
+    cache = yp.parent / "build" / ".flat_segments.json"
+    try:
+        c = json.loads(cache.read_text())
+        if c.get("key") == key:
+            _FLAT[key] = [tuple(t) for t in c["flat"]]
+            return _FLAT[key]
+    except (OSError, ValueError):
+        pass
+    flat = _flat_segments_parse(yp)
+    try:
+        tmp = cache.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_text(json.dumps({"key": key, "flat": flat}))
+        os.replace(tmp, cache)
+    except OSError:
+        pass
+    _FLAT[key] = flat
+    return flat
+
+
+def _flat_segments_parse(yaml_path):
     import yaml
-    cfg = yaml.safe_load(Path(yaml_path).read_text())
+    loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+    cfg = yaml.load(Path(yaml_path).read_text(), Loader=loader)
     flat = []
     for seg in cfg["segments"]:
         if isinstance(seg, list):

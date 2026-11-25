@@ -117,10 +117,9 @@ void func_1000480C(u32 romAddr, void *dest, u32 size) {
     u32 readAddr;
     u8 *writeAddr;
 
-    // D_8003A572/3/5 are flags shared with other threads; variables.h declares them plain u8.
-    *(vu8 *)&D_8003A572 = 1;
+    D_8003A572 = 1;
     size = (size + 1) & ~1;
-    while (*(vu8 *)&D_8003A573) {
+    while (D_8003A573) {
     }
     // matching: the status local is needed (IDO -g3 frame size)
     while ((status = IO_READ(PI_STATUS_REG)) & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY)) {
@@ -167,8 +166,8 @@ void func_1000480C(u32 romAddr, void *dest, u32 size) {
             *(u16 *)((u8 *)dest + offset) = data.half[0];
         }
     }
-    *(vu8 *)&D_8003A572 = 0;
-    if (*(vu8 *)&D_8003A575) {
-        osStartThread((OSThread *)&D_80035910); // variables.h declares the thread as OSThread *
+    D_8003A572 = 0;
+    if (D_8003A575) {
+        osStartThread(&D_80035910);
     }
 }

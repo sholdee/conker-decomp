@@ -1,21 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn header that func_15147A80 copies to EffectObject+0x10. */
-typedef struct EffectSpawn {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 lifetime;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity; /* number of points in the ring buffer */
-    /* 0x16 */ u8 pad16[2];
-} EffectSpawn;
+#include "effects.h"
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct EffectObject {
@@ -81,21 +67,21 @@ typedef struct TrailPoint {
 } TrailPoint;
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern EffectObject *func_15147A80(EffectSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern EffectObject *func_15147A80(EffectTemplate18 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail effect that follows target. */
 void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     s32 top_dummy; // matching: stack pad
-    EffectSpawn spawn;
+    EffectTemplate18 spawn;
     s32 pad_dummy; // matching: stack pad
     TrailState state;
     EffectObject *obj;
 
-    spawn.capacity = 10;
+    spawn.itemCount = 10;
     spawn.pos.x = target->pos.x;
     spawn.pos.y = target->pos.y;
     spawn.pos.z = target->pos.z;
-    spawn.lifetime = 300;
+    spawn.life = 300;
     spawn.flags = 6;
     state.target = target;
     state.targetUnk3B = target->unk3B;
@@ -105,7 +91,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     state.texS = -16384.0f;
     state.targetTexS = -16384.0f;
     state.distance = 0.0f;
-    spawn.unk10 = 13;
+    spawn.kind = 13;
 
     obj = func_15147A80(&spawn, 0x30, sizeof(TrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
@@ -268,8 +254,6 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-extern u8 D_80090CD4[];
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -480,63 +464,22 @@ void func_151B70B4(EffectObject *obj, void *msg, u8 msgType) {
     }
 }
 
-/* Particle description passed to func_15130280. */
-typedef struct ParticleSpawn {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f unk48;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x68 */ s16 unk68;
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn;
-
-extern void *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a particle at target's position. */
 void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
 
-    spawn.unk1D = 0x29;
-    spawn.unk8 = 0xE03;
+    spawn.texture = 0x29;
+    spawn.renderMode = 0xE03;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk1E = 18;
-    spawn.unk20 = 14;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.fadeStart = 18;
+    spawn.fadeRate = 14;
     if (func_150ADA20() & 1) {
         flag40 = 0x40;
     } else {
@@ -548,35 +491,35 @@ void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
         flag80 = 0;
     }
     spawn.flags = flag80 | 1 | flag40 | 0x4000 | 0x8000 | 0x200 | 0x400 | 0x800 | 0x10000;
-    spawn.unk60 = 3;
-    spawn.unk61 = 3;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk22 = 40;
-    spawn.unk14 = 0xDD;
-    spawn.unk15 = 0xD3;
-    spawn.unk16 = 0xCD;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0x57;
-    spawn.unk19 = 0x55;
-    spawn.unk1A = 0x5A;
-    spawn.unk1C = 0xFF;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.05674696f;
+    spawn.primColorMode = 3;
+    spawn.envColorMode = 3;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 0;
+    spawn.scaleStart = 40;
+    spawn.r = 0xDD;
+    spawn.g = 0xD3;
+    spawn.b = 0xCD;
+    spawn.a = 0xFF;
+    spawn.r2 = 0x57;
+    spawn.g2 = 0x55;
+    spawn.b2 = 0x5A;
+    spawn.brightness = 0xFF;
+    spawn.gravity = 0.0f;
+    spawn.scaleRate = 1.05674696f;
     spawn.pos.x = target->pos.x;
     spawn.pos.y = target->pos.y;
     spawn.pos.z = target->pos.z;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
-    spawn.unk1B = func_150ADA20() % 56U + 200;
-    spawn.unkA = func_150ADA20() % 10U + 30;
-    spawn.unk28 = spawn.unk2C = func_150ADA68() * 50.0f + 89.0f;
-    spawn.unk48.x = 0.0f;
-    spawn.unk48.y = 0.0f;
-    spawn.unk48.z = 0.0f;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
+    spawn.alpha = func_150ADA20() % 56U + 200;
+    spawn.timer = func_150ADA20() % 10U + 30;
+    spawn.width = spawn.height = func_150ADA68() * 50.0f + 89.0f;
+    spawn.vel.x = 0.0f;
+    spawn.vel.y = 0.0f;
+    spawn.vel.z = 0.0f;
     func_15130280(&spawn, 1, 0, 0, arg1, arg2);
 }
 
@@ -609,20 +552,20 @@ extern s32 (*D_8008FB90[])(EffectObject *, Vec3f *);
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
 EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
     EffectObject *obj;
-    EffectSpawn spawn;
+    EffectTemplate18 spawn;
     s32 pad; // matching: stack pad
     RibbonState init;
     RibbonState *state;
-    ParticleSpawn particle;
+    ParticleDesc particle;
 
     init.linked = NULL;
     init.args = NULL;
     init.selector = selector;
-    spawn.capacity = 20;
-    spawn.pos = *(Vec3f *)&D_800A5480; /* D_800A5480 holds a Vec3f; variables.h declares it as f32 */
-    spawn.lifetime = 300;
+    spawn.itemCount = 20;
+    spawn.pos = D_800A5480;
+    spawn.life = 300;
     spawn.flags = 20;
-    spawn.unk10 = 16;
+    spawn.kind = 16;
     spawn.unk14 = 2;
     obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
@@ -639,31 +582,31 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
         const s32 unk1DChoices[4] = { 0x60, 0x61, 0x62, 0x63 };
         s32 flag80;
         s32 flag40;
-        particle.unk1D = unk1DChoices[func_150ADA20() & 3];
-        particle.unk8 = 0x1303;
+        particle.texture = unk1DChoices[func_150ADA20() & 3];
+        particle.renderMode = 0x1303;
         particle.unk0 = 0x200005;
         particle.unk4 = 0;
-        particle.unkA = 300;
-        particle.unkC = 0;
-        particle.unk10 = 0;
-        particle.unk14 = 0xFF;
-        particle.unk15 = 0xFF;
-        particle.unk16 = 0xFF;
-        particle.unk17 = 0xFF;
-        particle.unk18 = 0xFF;
-        particle.unk19 = 0xFF;
-        particle.unk1A = 0xFF;
-        particle.unk1B = 0xFF;
-        particle.unk1C = 0xFF;
-        particle.unk28 = particle.unk2C = func_150ADA68() * 800.0f + 1700.0f;
+        particle.timer = 300;
+        particle.frame = 0;
+        particle.frameRate = 0;
+        particle.r = 0xFF;
+        particle.g = 0xFF;
+        particle.b = 0xFF;
+        particle.a = 0xFF;
+        particle.r2 = 0xFF;
+        particle.g2 = 0xFF;
+        particle.b2 = 0xFF;
+        particle.alpha = 0xFF;
+        particle.brightness = 0xFF;
+        particle.width = particle.height = func_150ADA68() * 800.0f + 1700.0f;
         particle.pos = spawn.pos;
-        particle.unk3C = *(Vec3f *)&D_800A5480;
-        particle.unk48 = *(Vec3f *)&D_800A5480;
-        particle.unk1E = 1;
-        particle.unk20 = 0xFF;
-        particle.unk22 = 1;
-        particle.unk54 = 0.0f;
-        particle.unk24 = 1.0f;
+        particle.offset = D_800A5480;
+        particle.vel = D_800A5480;
+        particle.fadeStart = 1;
+        particle.fadeRate = 0xFF;
+        particle.scaleStart = 1;
+        particle.gravity = 0.0f;
+        particle.scaleRate = 1.0f;
         if (func_150ADA20() & 1) {
             flag40 = 0x40;
         } else {
@@ -675,14 +618,14 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
             flag80 = 0;
         }
         particle.flags = flag80 | flag40 | 0x4000 | 0x8000 | 0x40000;
-        particle.unk60 = 6;
-        particle.unk61 = 5;
-        particle.unk62 = -1;
-        particle.unk63 = -1;
-        particle.unk64 = -1;
-        particle.unk65 = 0;
-        particle.unk5C = 0;
-        particle.unk66 = 0xFF;
+        particle.primColorMode = 6;
+        particle.envColorMode = 5;
+        particle.updateFunc = -1;
+        particle.deathFunc = -1;
+        particle.drawFunc = -1;
+        particle.handlerSet = 0;
+        particle.viewMask = 0;
+        particle.views = 0xFF;
         state->linked = func_15130280(&particle, 1, 0, 0, arg3, arg4);
         }
     }
@@ -723,7 +666,7 @@ s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
     RibbonState *state;
     RotatedTarget **ref;
     RotatedTarget *target;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     state = obj->state;
     ref = state->args;
@@ -872,7 +815,6 @@ s32 func_151B7998(EffectObject *obj) {
     return 1;
 }
 
-extern u8 D_80091100[];
 
 /* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
 Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {

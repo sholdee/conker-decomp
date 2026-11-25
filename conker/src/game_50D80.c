@@ -1,19 +1,7 @@
 #include <ultra64.h>
-#define func_1514D3B0 func_1514D3B0_hdr
-#define func_15048A40 func_15048A40_void_proto
-#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
-#undef func_1514D3B0
-#undef func_15048A40
-#undef func_150ADA20
-/* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C3958 D_800C3958_hdr
-#define D_800C3654 D_800C3654_hdr
-#define D_800D3098 D_800D3098_hdr
+#include "effects.h"
 #include "variables.h"
-#undef D_800C3958
-#undef D_800C3654
-#undef D_800D3098
 
 /* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
 typedef struct {
@@ -26,60 +14,22 @@ typedef struct {
 } SeqEvent;
 
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
-typedef struct {
+typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
     /* 0x4 */ s32 time;
     /* 0x8 */ u8 track;
     /* 0xA */ u16 index;
 } SeqQueueEntry;
 
-/* Per-track state of a running cutscene (0x44 bytes); D_800C3958[scene] holds one per track. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} SeqTrackState;
 
-extern SeqTrackState *D_800C3958[];
-extern u8 D_800C3654[];
-extern struct178 *D_800D3098;
-
-/* What a cutscene track is bound to: 2 = an object (func_15083E90), 3 = an actor (func_151149AC). */
-typedef struct {
-    /* 0x0 */ u16 targetType;
-    /* 0x2 */ u8 targetId;
-    /* 0x3 */ u8 pad3[5];
-} SeqTrackInfo;
 
 /* Cutscene state, indexed by scene (and track). */
 extern SeqEvent *D_800C3688[][30]; /* each track's events */
-extern u16 *D_800C35D8[];          /* each track's event count */
-extern u8 D_800C363A[];            /* track count */
-extern SeqTrackInfo *D_800C35F0[];
-extern s32 D_800C35B0[];           /* current time */
-extern s32 D_800C35B8[];           /* time at the previous update */
-extern s32 D_800C3640[];           /* end time */
-extern u8 D_800C35E8[];            /* changes with each run of the scene */
-extern SeqQueueEntry *D_800C3D50;  /* dispatch queue, D_800C3C9A entries */
 
 extern WorldObject *func_151149AC(s32);
-extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
-extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
-extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32, s32);
+extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
+extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
+extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32, s32);
 extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 void func_150238D0(void) {
@@ -110,7 +60,6 @@ typedef struct {
     /* 0x18 */ SeqSound *userData;
 } SeqVoice;
 
-extern u8 D_800C3C89;
 extern void func_10004074(void *);
 
 /*
@@ -136,7 +85,7 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
         if (states != NULL) {
             voice->x = states[snd->track].x;
             state = &D_800C3958[snd->scene][snd->track];
-            voice->y = state->unk38 + state->y;
+            voice->y = state->yOffset + state->y;
             voice->z = D_800C3958[snd->scene][snd->track].z;
         }
     }
@@ -327,7 +276,6 @@ void func_15024130(s32 count, s32 scene) {
     }
 }
 
-extern u16 D_800C3C9A;
 
 /*
  * Inserts an event into the time-sorted dispatch queue. When the queue is full
@@ -359,8 +307,6 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     (*count)++;
 }
 
-extern u8 D_800C35C0[];
-extern u8 D_800C3C8C;
 
 /*
  * Queues and dispatches every event of `scene` whose time falls in
@@ -373,8 +319,8 @@ void func_150242F8(s32 mode, s32 scene) {
     s32 time;
     s32 queued;
 
-    // matching: D_800C35EA must stay the scalar declared in variables.h (an array extern addresses it differently)
-    if ((D_800C3C8C != 2) && ((&D_800C35EA)[scene] == 1) && (D_800C3C9A != 0)) {
+    // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
+    if ((D_800C3C8C != 2) && ((&D_800C35EA[0])[scene] == 1) && (D_800C3C9A != 0)) {
         D_800C3638 = 0;
         queued = 0;
         for (track = 0; track < D_800C363A[scene]; track++) {
@@ -431,33 +377,12 @@ void func_150242F8(s32 mode, s32 scene) {
     }
 }
 
-/* A subtitle slot (see func_150234A4); from `flags` on it is the parameter block passed to func_1516A7B0. */
 typedef struct {
-    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
-} SeqSubtitle;
-
-typedef struct {
-    struct127 *obj;
+    Actor *obj;
     u8 id;
 } ObjRef1502460C;
 
-/* Field access by offset, for fields that include/structs.h still declares as padding. */
+/* Field access by offset, for WorldObject and ActorCtl fields their shared declarations still leave as padding. */
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
 #define FS32(p, o) (*(s32 *) ((u8 *) (p) + (o)))
@@ -465,50 +390,22 @@ typedef struct {
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
 extern s8 D_800E0BF4;
-extern u8 **D_800C35E0[];
 extern s32 D_80090214[];
-extern u8 D_800C35F8;
-extern u8 D_800C3656[];
-extern u8 D_800C3658[];
-extern u8 D_800C365A[];
-extern u8 D_800C365C[];
-extern u8 D_800C365E[];
-extern u8 D_800C35C2;
-extern u8 D_800C35C3;
-extern f32 D_800C364C;
-extern f32 D_800C3650;
-extern u8 D_800C3660[];
-extern u8 D_800C3C8B;
-extern u8 D_800C3C8D;
-extern s16 D_800DDE10;
-extern f32 *D_800DDE44;
-extern f32 *D_800DDE48;
-extern f32 *D_800DDE4C;
-extern f32 D_800C3674;
 extern f32 D_800C3678;
-extern s32 D_800C367C;
-extern u8 D_800C3662;
-extern u8 D_800BEA0C;
-extern u8 D_800C3680;
-extern u8 D_800DBEAC;
-extern s32 D_800D2450;
-extern u8 D_800C3C9D;
-extern s16 D_800C3C9E;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
-extern s32 func_1514D3B0(void *, s16, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
 extern SeqSubtitle *func_150234A4(s32, s32);
-extern s32 func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_15053430(struct127 *);
+extern s32 func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_15053430(Actor *);
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
 extern void func_1507EB4C(void *, s32);
-extern void func_150836CC(struct127 *, s32);
+extern void func_150836CC(Actor *, s32);
 extern s32 func_15083FB0(s32);
 extern void func_150B648C(u8);
 extern void func_150B7220(s32, s32, s32, s32);
-extern void func_150C5C74(struct127 *);
-extern void func_150C5C9C(struct127 *);
+extern void func_150C5C74(Actor *);
+extern void func_150C5C9C(Actor *);
 extern void func_150C851C(s32);
 extern void func_150E0300(void);
 extern void func_150F5340(void);
@@ -528,20 +425,20 @@ extern s32 func_1516D378(s32);
 extern s32 func_1516D3C4(s32);
 extern void func_1517F488(s32, s32, s32, s32, s32, s32);
 extern void func_1517F720(s32, s32, s32, s32, s32);
-extern s32 func_1518D1C0(struct127 *, s16, s16, s32, u8, s32, char *);
+extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
 extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
-extern u8 *func_1519003C(struct127 *, s32 *);
+extern u8 *func_1519003C(Actor *, s32 *);
 extern void func_15190518(void *);
 extern void func_15191B8C(ObjRef1502460C *, u8);
-extern void func_151937F4(struct127 *, s32, s32);
+extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
-extern void func_151C970C(s32, struct178 *);
+extern void func_151C970C(s32, TriggerZone *);
 extern void func_151C9DE8(void *, u8, s8, u8, s32);
-extern void func_151C9ED4(struct108 *);
+extern void func_151C9ED4(Camera *);
 extern void func_151CD35C(s32);
 extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
@@ -552,7 +449,7 @@ extern void func_151E53E8(s32);
  * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
-s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
+s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
@@ -635,7 +532,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         }
     } else if (event->type == 0xD) {
-        struct126 *s;
+        ActorCtl *s;
 
         if (obj == NULL) {
             return 1;
@@ -668,23 +565,23 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             duration = 1;
         }
         if (event->unk4 == 0) {
-            FU8(obj, 0x134) = event->value;
-            FU8(obj, 0x135) = duration;
+            obj->unk134 = event->value;
+            obj->morphDuration = duration;
         }
     } else if (event->type == 3) {
         if (event->value >= D_800C363A[scene]) {
             return 1;
         }
-        if (D_800C35F0[scene][event->value].targetType == 1 && D_800C35F8 != event->value) {
+        if (D_800C35F0[scene][event->value].type == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
-            D_800DBFF0->unk5F0 |= 4;
+            D_800DBFF0->status |= 4;
         }
     } else if (event->type == 9) {
         if (obj == NULL) {
             return 1;
         }
-        ((u8 *) obj + 0x6C)[event->unk4] = event->value + 10;
+        obj->eyeCode[event->unk4] = event->value + 10;
     } else if (event->type == 1) {
         s32 v;
 
@@ -695,13 +592,13 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (v == 0) {
             v = 0xFF;
         }
-        obj->unk1C9 = v;
+        obj->lodRequest = v;
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {
-                D_800DDE18 = (s32) &D_800C3958[scene][track].unk28;
+                D_800DDE18 = &D_800C3958[scene][track].unk28;
             } else {
-                D_800DDE18 = 0;
+                D_800DDE18 = NULL;
             }
         } else if (event->value == 8) {
             D_800C3656[scene] = !event->unk4;
@@ -731,14 +628,14 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 return 1;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0xA5) = colors[event->unk5][0];
-                FU8(obj, 0xA6) = colors[event->unk5][1];
-                FU8(obj, 0xA7) = colors[event->unk5][2];
-                FU8(obj, 0xA4) = 1;
-                FPTR(obj, 0xA0) = &D_800C3958[scene][track].unk30;
+                obj->fogLevel = colors[event->unk5][0]; // mode 1: fogLevel/fogRate/fogFade hold the colour
+                obj->fogRate = colors[event->unk5][1];
+                obj->fogFade = colors[event->unk5][2];
+                obj->fogMode = 1;
+                obj->fogColor = (u32)&D_800C3958[scene][track].unk30;
             } else {
-                FU8(obj, 0xA4) = 0;
-                FPTR(obj, 0xA0) = NULL;
+                obj->fogMode = 0;
+                obj->fogColor = 0;
             }
         } else if (event->value == 0x44) {
             s32 a;
@@ -756,27 +653,27 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            obj->unk1FF = !event->unk4;
-            if (obj->unk1FF != 0) {
-                obj->unk1FF += event->unk5;
+            obj->levelMode = !event->unk4;
+            if (obj->levelMode != 0) {
+                obj->levelMode += event->unk5;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0x201) = event->unk6;
+                obj->unk201 = event->unk6;
             }
         } else if (event->value == 0x16) {
             if (obj == NULL) {
                 return 1;
             }
-            FU8(obj, 0x206) = !event->unk4;
-            if (FU8(obj, 0x206) != 0) {
-                FU8(obj, 0x206) += event->unk5;
+            obj->level2Mode = !event->unk4;
+            if (obj->level2Mode != 0) {
+                obj->level2Mode += event->unk5;
             }
             if (event->unk4 == 0) {
-                FU8(obj, 0x208) = event->unk6;
+                obj->unk208 = event->unk6;
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
-            if (D_800C35F0[scene][track].targetType == 3 && actor != NULL) {
+            if (D_800C35F0[scene][track].type == 3 && actor != NULL) {
                 if (event->unk4 == 0) {
                     FU8(actor, 0x6E) = 1;
                 } else {
@@ -1109,7 +1006,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 v = event->unk6 != 0 ? event->unk6 : 0x7F;
                 func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
             } else {
-                D_800DDE10 = 0;
+                D_800DDE10[0] = 0;
             }
         } else if (event->value == 0x38) {
             s32 duration;
@@ -1146,7 +1043,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
             }
         } else if (event->value == 0x62) {
-            FU8(D_800B0DF0, 8) = 0;
+            D_800B0DF0->unk8 = 0;
         } else if (event->value == 0x7C) {
             D_800C3681 = !event->unk4;
         } else if (event->value == 0x84) {
@@ -1212,13 +1109,13 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800BEA0C = event->unk5;
         } else if (event->value == 0x6F) {
             if (obj != NULL) {
-                ((u8 *) obj + 0x68)[event->unk4] = event->unk5;
+                obj->unk68[event->unk4] = event->unk5;
             }
         } else if (event->value == 0x70) {
             D_800C3C8C = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                FF32(obj, 0xC8) = FS16(D_800D1C90[obj->id], 6);
+                obj->unkC8 = D_800D1C90[obj->id]->unk6;
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;
@@ -1263,23 +1160,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-typedef struct EvNode {
-    u8 pad0[0x10];
-    struct EvNodeData *unk10;
-    struct EvNode *unk14;
-    u8 pad18[4];
-    s16 unk1C;
-} EvNode;
-
 typedef struct EvNodeData {
     u8 pad0[0x30];
     s32 unk30;
 } EvNodeData;
-
-typedef struct {
-    u8 pad0[4];
-    s16 unk4;
-} Ev8008ABE8;
 
 /* Result of a func_15046C80 ground probe. */
 typedef struct {
@@ -1290,16 +1174,6 @@ typedef struct {
     /* 0x1E */ u8 pad1E[6];
 } EvFloor;
 
-typedef struct {
-    f32 *unk0;
-    f32 *unk4;
-    f32 *unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s8 unk16;
-    s8 unk17;
-} Ev15134908;
 
 typedef struct {
     s32 unk0;
@@ -1316,7 +1190,7 @@ typedef struct {
 } Ev15167AD8;
 
 typedef struct {
-    struct127 *unk0;
+    Actor *unk0;
     u8 unk4;
     s16 unk6;
     s8 unk8;
@@ -1332,9 +1206,6 @@ typedef struct {
     s8 unk6;
 } Ev151D8868;
 
-extern u8 *D_800C3960[][30];
-extern s16 *D_800C3868[][30];
-extern Ev8008ABE8 *D_8008ABE8[];
 extern s32 D_8008CA50;
 extern f32 *D_800AAA90;
 typedef struct {
@@ -1353,38 +1224,36 @@ extern void func_15167AD8(Ev15167AD8 *, u8, s32);
 extern void func_15177F90(u8, f32 *, u8, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150B0094(f32 *, f32 *, u8, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
-extern void func_150E2DB4(struct127 *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
+extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32);
 extern void func_150BEF7C(s32);
 extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
-extern u32 func_150ADA20(void);
 extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
-extern void func_150BA4C0(struct127 *, u8, s32);
-extern void func_151A3390(struct127 *, u8);
+extern void func_150BA4C0(Actor *, u8, s32);
+extern void func_151A3390(Actor *, u8);
 extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B2494(struct127 *, s32, s32);
+extern void func_150B2494(Actor *, s32, s32);
 extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
-extern void func_150CE150(struct127 *, s16, u8, s32);
+extern void func_150CE150(Actor *, s16, u8, s32);
 extern void func_150CFC38(f32);
-extern void func_15109410(struct127 *, s16, s32, s32, f32, s32, s32, s32);
+extern void func_15109410(Actor *, s16, s32, s32, f32, s32, s32, s32);
 extern void func_15109ED4(WorldObject *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_1510A344(struct127 *, s16, u8, s32);
+extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);
 extern void func_15190770(Ev15190770 *, s32, u8, s32);
 extern void func_150F802C(SeqTrackState *, s16, u8, s32);
 extern void func_150AF738(s16, u8, s32);
-extern void func_150F5C08(struct127 *, s16, u8, s32);
+extern void func_150F5C08(Actor *, s16, u8, s32);
 extern void func_1519EB8C(SeqTrackState *, u16, s16, u8, s32);
-extern void func_150C4120(struct127 *, s16, u8, s32);
-extern void func_150F6890(struct127 *, s16, u8, s32);
+extern void func_150C4120(Actor *, s16, u8, s32);
+extern void func_150F6890(Actor *, s16, u8, s32);
 extern void func_150D0134(u8, s32, s16, u8, s32);
 extern void func_150D02B4(u8, s32, s16, u8, s32);
 extern void func_150D04C4(u8, s32, s16, u8, s32);
 extern void func_150CF680(s16, u8, s32);
-extern void func_151925C4(struct127 *, s16, u8, s32);
+extern void func_151925C4(Actor *, s16, u8, s32);
 extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150FAE18(s16, u8, s32);
 extern s32 func_15046C80(f32 *, s32, f32, EvFloor *);
@@ -1392,64 +1261,64 @@ extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
 extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
-extern void func_15192D48(struct127 *, s16, u8, s32);
-extern void func_151B09BC(struct127 *, s32, s16, u8, s32);
-extern void func_15134908(Ev15134908 *, s32, u8, s32);
-extern void func_150E9FE0(struct127 *, s16, u8, s32);
-extern void func_150EA500(struct127 *, s16, u8, s32);
+extern void func_15192D48(Actor *, s16, u8, s32);
+extern void func_151B09BC(Actor *, s32, s16, u8, s32);
+extern void func_15134908(BloodTrailDesc18 *, s32, u8, s32);
+extern void func_150E9FE0(Actor *, s16, u8, s32);
+extern void func_150EA500(Actor *, s16, u8, s32);
 extern void func_151356D4(f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150C7020(struct127 *, s32, u8, s32);
+extern void func_150C7020(Actor *, s32, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern s32 func_1514D4B8(s16, s16);
 extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
 extern void func_1516F1C0(s32, s32, u8, s32);
-extern void func_15136404(struct127 *, f32, u8, s32);
-extern void func_1504715C(EvFloor *, struct127 *);
+extern void func_15136404(Actor *, f32, u8, s32);
+extern void func_1504715C(EvFloor *, Actor *);
 extern void func_150CA930(f32 *);
 extern void func_151090DC(void);
-extern void func_150FB324(struct127 *, u8, s32);
-extern void func_150F97EC(struct127 *, u8, s32);
-extern void func_150F9950(struct127 *, u8, s32);
-extern s32 func_1514654C(struct127 *, struct126 *, s32, f32 **, f32 **, s32);
-extern void func_151C5588(struct127 *, f32 *, s32, u8, s32);
+extern void func_150FB324(Actor *, u8, s32);
+extern void func_150F97EC(Actor *, u8, s32);
+extern void func_150F9950(Actor *, u8, s32);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, f32 **, f32 **, s32);
+extern void func_151C5588(Actor *, f32 *, s32, u8, s32);
 extern void func_151C56A4(f32 *, u8, s32);
-extern void func_150E06D8(struct127 *, u8, u8, s32);
-extern void func_151CFA4C(struct127 *, u8, s32);
-extern void func_151C62D0(struct127 *, u8, s32, struct126 *, s32, s32, s32);
-extern void func_150BAA14(struct127 *, s32, s32);
-extern void func_150E0870(struct127 *, u8, s32);
+extern void func_150E06D8(Actor *, u8, u8, s32);
+extern void func_151CFA4C(Actor *, u8, s32);
+extern void func_151C62D0(Actor *, u8, s32, ActorCtl *, s32, s32, s32);
+extern void func_150BAA14(Actor *, s32, s32);
+extern void func_150E0870(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
-extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15143134(const f32 *, f32 *, void *);
 extern void func_151C329C(f32 *, u8, s32);
-extern void func_15107B78(struct127 *, s16, s16, u8, s32);
-extern void func_151CC290(struct108 *);
+extern void func_15107B78(Actor *, s16, s16, u8, s32);
+extern void func_151CC290(Camera *);
 extern void func_1519EA78(f32 *, u16, f32, u8, s32);
-extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
-extern void func_150F16DC(struct127 *, u8, u8, u8, s32);
+extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
+extern void func_150F16DC(Actor *, u8, u8, u8, s32);
 extern void func_15131EE4(f32 *, f32, u8, s32);
 extern void func_15170B90(void *, s32, s32, s32, s32, s32);
-extern void func_1507DE4C(struct127 *);
-extern void func_15138C80(struct127 *, u8, s32);
-extern void func_15193660(struct127 *, u8, s32);
-extern void func_151A0A10(struct127 *, s32, u8, s32);
+extern void func_1507DE4C(Actor *);
+extern void func_15138C80(Actor *, u8, s32);
+extern void func_15193660(Actor *, u8, s32);
+extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151A6F00(void *, s32, u8, s32);
-extern void func_15153F18(s16 *, f32 *, s32, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
-extern void func_151AF4D0(struct127 *, u8, u8, s32);
+extern void func_151AF4D0(Actor *, u8, u8, s32);
 extern void func_150C1F60(u8);
 extern void func_150C2290(u8);
 extern void func_150C2424(u8);
-extern void func_150DAE70(struct127 *, s32, u8, s32);
+extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
-extern void func_150DB9E0(struct127 *, s32, u8);
+extern void func_150DB9E0(Actor *, s32, u8);
 extern void func_1518B264(f32 *, f32, f32, s32, s32);
 extern void func_1518B2A8(f32 *, f32, f32, s32, s32, s32, s32);
 extern void func_15171600(WorldObject *, u8, s32);
-extern void func_15171BF4(struct127 *, u8);
+extern void func_15171BF4(Actor *, u8);
 extern void func_15170EC4(WorldObject *, u8, s32);
-extern void func_151711C4(struct127 *);
+extern void func_151711C4(Actor *);
 extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
 extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
@@ -1459,7 +1328,7 @@ extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
  * 0x11 (records the event index in D_800C3960), and the effect-spawning type-5
  * commands. Returns 1 when the event was handled.
  */
-s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
+s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (event->type == 0xB) {
         s32 vol;
         s32 vol2;
@@ -1587,16 +1456,16 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 f32 from[3];
                 f32 to[3];
 
-                from[0] = D_800C3868[scene][track][0];
-                from[1] = D_800C3868[scene][track][1];
-                from[2] = D_800C3868[scene][track][2];
+                from[0] = D_800C3868[scene][track]->x;
+                from[1] = D_800C3868[scene][track]->y;
+                from[2] = D_800C3868[scene][track]->z;
                 to[0] = D_800C3958[scene][track].x;
-                to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].unk38;
+                to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
                 to[2] = D_800C3958[scene][track].z;
                 func_150B0094(from, to, sceneTag, 1);
             } else {
-                func_150E1AB0(0, D_800C3868[scene][track][0], D_800C3868[scene][track][1], D_800C3868[scene][track][2],
-                              D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].unk38,
+                func_150E1AB0(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
+                              D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
                               D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             }
@@ -1777,7 +1646,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_150AF738((s16)duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, (struct37 *)4, sceneTag, 1);
+                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
                         if (p != NULL) {
                             memcpy((u8 *)p + 0x28, data, 4);
                         }
@@ -1802,8 +1671,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                             obj->unk2EC = 1;
                             half = (f32)duration * 0.5f;
-                            FF32(obj, 0x2D8) = half;
-                            FF32(obj, 0x2DC) = 1.0f / half;
+                            obj->unk2D8[0] = half;
+                            obj->unk2D8[1] = 1.0f / half;
                             func_150C4120(obj, duration, sceneTag, 1);
                         }
                         break;
@@ -1874,9 +1743,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         f32 from[3];
                         s32 to[3];
 
-                        from[0] = D_800C3868[scene][track][0];
-                        from[1] = D_800C3868[scene][track][1];
-                        from[2] = D_800C3868[scene][track][2];
+                        from[0] = D_800C3868[scene][track]->x;
+                        from[1] = D_800C3868[scene][track]->y;
+                        from[2] = D_800C3868[scene][track]->z;
                         to[0] = D_800C3958[scene][track].x;
                         to[1] = D_800C3958[scene][track].y;
                         to[2] = D_800C3958[scene][track].z;
@@ -1947,16 +1816,16 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 endTime = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
                 {
                     f32 *p = pos; // matching: IDO needs the pointer copied to a local here
-                    Ev15134908 sp;
+                    BloodTrailDesc18 sp;
 
-                    sp.unk4 = p + 1;
-                    sp.unk8 = p + 2;
-                    sp.unk0 = p;
-                    sp.unkC = 2.0f;
-                    sp.unk10 = 1.0f;
-                    sp.unk14 = endTime - eventTime;
-                    sp.unk16 = 1;
-                    sp.unk17 = 2;
+                    sp.y = p + 1;
+                    sp.z = p + 2;
+                    sp.x = p;
+                    sp.radius = 2.0f;
+                    sp.rate = 1.0f;
+                    sp.lifetime = endTime - eventTime;
+                    sp.flags = 1;
+                    sp.emitter = 2;
                     func_15134908(&sp, 0, sceneTag, 0);
                 }
             }
@@ -2015,7 +1884,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             SeqEvent *found;
             u8 t;
             u8 kind;
-            EvNode *node;
+            Attachment *node;
 
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
@@ -2023,14 +1892,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (t == 0) {
                     kind = 0xD;
                 }
-                node = FPTR(obj, 0x2F4);
+                node = obj->attachments;
                 while (node != NULL) {
-                    if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
-                        node->unk10->unk30 = func_1519E970(duration, node->unk10, 0,
-                                                           &D_800C3958[scene][track].unk30,
-                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
+                    if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
+                        ((EvNodeData *)node->handle)->unk30 = func_1519E970(duration, node->handle, 0,
+                                                                           &D_800C3958[scene][track].unk30,
+                                                                           &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
-                    node = node->unk14;
+                    node = node->next;
                 }
             }
         } else if (event->value == 0x23) {
@@ -2085,7 +1954,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151090DC();
                     break;
                 case 2: {
-                    struct126 *bone;
+                    ActorCtl *bone;
                     f32 vec[3];
 
                     if (obj != NULL) {
@@ -2137,7 +2006,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 5:
                     if (obj != NULL) {
-                        struct126 *bone;
+                        ActorCtl *bone;
 
                         bone = NULL;
                         if (event->unk6 != 0) {
@@ -2184,7 +2053,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 sel = c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(sel, out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
                         func_151C329C(out, sceneTag, 1);
                     }
                     break;
@@ -2271,7 +2140,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[event->unk5], out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(offs[event->unk5], out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
                         func_15131EE4(out, 6.990000248f, sceneTag, 0);
                     }
                     break;
@@ -2420,62 +2289,35 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.unk50 = 8.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
-            struct {
-                s16 unk0;
-                s16 unk2;
-                s16 unk4;
-                s16 unk6;
-                f32 unk8;
-                f32 unkC;
-                f32 unk10;
-                f32 unk14;
-                f32 unk18;
-                f32 unk1C;
-                f32 unk20;
-                f32 unk24;
-                f32 unk28;
-                s16 unk2C;
-                s16 unk2E;
-                s16 unk30;
-                s16 unk32;
-                s16 unk34;
-                s16 unk36;
-                s16 unk38;
-                s16 unk3A;
-                s8 unk3C;
-                f32 unk40;
-                s16 unk44;
-                s16 unk46;
-                s32 unk48;
-            } sp;
+            SplashSpraySpec sp;
 
-            sp.unk8 = pos[0];
-            sp.unkC = pos[1];
-            sp.unk10 = pos[2];
-            sp.unk14 = 2.900000095f;
-            sp.unk18 = 17.0f;
-            sp.unk1C = 2.5f;
-            sp.unk2C = 0xF;
-            sp.unk20 = 0.5770000219f;
-            sp.unk24 = 25.0f;
-            sp.unk28 = 20.20000076f;
-            sp.unk2E = 0xA;
-            sp.unk0 = -0x14;
-            sp.unk2 = 0x31;
-            sp.unk4 = -0x34;
-            sp.unk6 = 0x2B;
-            sp.unk30 = 3;
-            sp.unk32 = 4;
-            sp.unk34 = 0x28;
-            sp.unk36 = 0x1E;
-            sp.unk38 = 0x64;
-            sp.unk3A = 0x64;
-            sp.unk3C = 0;
-            sp.unk44 = 0x10;
-            sp.unk46 = 0xF;
-            sp.unk48 = 0;
-            sp.unk40 = 0.5f;
-            func_15153F18(&sp.unk0, &sp.unk8, 0, sceneTag, 1);
+            sp.spray.pos.x = pos[0];
+            sp.spray.pos.y = pos[1];
+            sp.spray.pos.z = pos[2];
+            sp.spray.scaleBase = 2.900000095f;
+            sp.spray.scaleRange = 17.0f;
+            sp.spray.sizeBase = 2.5f;
+            sp.spray.countBase = 0xF;
+            sp.spray.sizeRange = 0.5770000219f;
+            sp.spray.speedBase = 25.0f;
+            sp.spray.speedRange = 20.20000076f;
+            sp.spray.countRange = 0xA;
+            sp.angles.yawBase = -0x14;
+            sp.angles.yawRange = 0x31;
+            sp.angles.pitchBase = -0x34;
+            sp.angles.pitchRange = 0x2B;
+            sp.spray.itemCountBase = 3;
+            sp.spray.itemCountRange = 4;
+            sp.spray.lifeBase = 0x28;
+            sp.spray.lifeRange = 0x1E;
+            sp.spray.unk30 = 0x64;
+            sp.spray.unk32 = 0x64;
+            sp.spray.kind = 0;
+            sp.spray.unk3C = 0x10;
+            sp.spray.unk3E = 0xF;
+            sp.spray.unk40 = 0;
+            sp.spray.unk38 = 0.5f;
+            func_15153F18(&sp.angles, &sp.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             f32 p[3];
             s32 count;
@@ -2522,7 +2364,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             i4 = state->unk20 * 0.05000000075f;
             i5 = (state->unk10 + 180.0f) * 0.7111111283f;
             i6 = state->unkC * 0.7111111283f;
-            f7 = (state->unk38 * 0.1000000015f) + 0.5f;
+            f7 = (state->yOffset * 0.1000000015f) + 0.5f;
             f9 = (state->unk18 * 0.1000000015f) + 1.0f;
             f10 = state->unk1C * 0.1000000015f;
             n = (event->unk5 != 0) ? event->unk5 : 0x64;
@@ -2643,14 +2485,14 @@ extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_1000D96C(s32, s32, s32);
 extern void func_1000DE1C(s32, s32);
 extern s32 func_1000E134(s32);
-extern void func_1503DE70(struct127 *, s32, s32);
+extern void func_1503DE70(Actor *, s32, s32);
 extern void func_151557FC(s32, s32, f32);
 extern void func_15155F90(void);
 extern void func_15178EFC(s32);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_15188810(struct127 *, s32, s32);
+extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
-extern void func_15188AD0(struct127 *);
+extern void func_15188AD0(Actor *);
 extern void func_151D66F0(s32, s32);
 
 typedef struct {
@@ -2660,15 +2502,13 @@ typedef struct {
 } SeqColor;
 
 extern SeqColor D_80084110[];
-extern s8 D_800C3C8A;
-extern u16 D_800C3C8E;
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio
  * commands (8), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
  * being skipped (D_800C3C88 == 2). Returns 1 when the event was handled.
  */
-s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
+s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
     if ((event->type == 6) || (event->type == 10)) {
         s32 vol;
         s32 duration;
@@ -2740,7 +2580,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
                 func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918,
-                              (s32)func_150238D8, snd, 0, sflags, fade);
+                              (SoundRecordCallback)func_150238D8, snd, 0, sflags, fade);
             }
         }
     } else if (event->type == 8) {
@@ -2816,7 +2656,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
-                speed = obj->unk2D0->unk18 / duration * 2.0f;
+                speed = obj->unk2D0->numFrames / duration * 2.0f;
             } else {
                 speed = 0.0f;
             }
@@ -2943,7 +2783,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
  * then offers the event to each handler until one accepts it.
  */
 void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     WorldObject *actor;
     f32 *pos;
     SeqTrackInfo *info;
@@ -2954,13 +2794,13 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
     pos = NULL;
     sceneTag = D_800C35E8[scene];
     info = &D_800C35F0[scene][track];
-    if (info->targetType == 2) {
+    if (info->type == 2) {
         obj = func_15083E90(info->targetId);
         if (obj == NULL) {
             return;
         }
         pos = &obj->x_position;
-    } else if (info->targetType == 3) {
+    } else if (info->type == 3) {
         actor = func_151149AC(info->targetId);
         if (actor == NULL) {
             return;

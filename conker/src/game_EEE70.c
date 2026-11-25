@@ -1,11 +1,16 @@
 #include <ultra64.h>
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
-s32 func_150C19C0(vertex *pos, struct127 *actor, u8 side) {
+s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
     s32 bone;
 
     switch (side) {
@@ -25,41 +30,6 @@ s32 func_150C1A2C(s32 arg0, s32 arg1) {
     return 7;
 }
 
-/* Spawn template for func_15132A4C (layout as ParticleSpawn in game_1D43B0.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s16 *unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x76 */ u8 pad76[6];
-} ParticleSpawn; // size 0x7C
-
 /* A live func_15132A4C particle; this file's particles keep 4 bytes of extra data at 0x170. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x170];
@@ -75,8 +45,8 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
  * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.
  */
-void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
-    vertex pos;
+void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
+    Vec3f pos;
     f32 scale;
     ParticleSpawn spawn;
     f32 radius;
@@ -96,9 +66,9 @@ void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
     func_150C19C0(&pos, actor, side);
     startAngle = (actor->unk76 >> 8) + 0x40;
     radius = scale * 70.0f;
-    func_1514C2F0(pos.x, actor->unk180, pos.z, radius, startAngle,
+    func_1514C2F0(pos.x, actor->floorY, pos.z, radius, startAngle,
                   (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
-    func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->unk180 + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
+    func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->floorY + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
     spawn.model = 5;
     spawn.flags = 0x29E9;
     spawn.variant = 0;
@@ -132,7 +102,7 @@ void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
         sine = func_151423D8(angle);
         spawn.lifetime = (func_150ADA20() & 15) + 30;
         spawn.pos.x = radius * cosine + pos.x;
-        spawn.pos.y = actor->unk180 + 2.0f;
+        spawn.pos.y = actor->floorY + 2.0f;
         spawn.pos.z = radius * sine + pos.z;
         spawn.vel.x = speed * cosine;
         spawn.vel.y = 2.0f * speed;
@@ -145,42 +115,13 @@ void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
         spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
         particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
         if (particle != NULL) {
-            particle->unk170 = actor->unk180;
+            particle->unk170 = actor->floorY;
         }
     }
 }
 
-/* Effect description passed to func_1518CA80 (same layout as ParticleEffect in game_1B9F30.c). */
-typedef struct {
-    /* 0x00 */ f32 x;            /* position as floats (mode 1) */
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ s16 intX;         /* position as integer + 1/256ths (other modes) */
-    /* 0x0E */ s16 intY;
-    /* 0x10 */ s16 intZ;
-    /* 0x12 */ u8 subX;
-    /* 0x13 */ u8 subZ;
-    /* 0x14 */ u8 subY;
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ s16 width;
-    /* 0x18 */ s16 height;
-    /* 0x1A */ s16 widthStep;    /* added to the particle's width every frame */
-    /* 0x1C */ s16 heightStep;   /* added to the particle's height every frame */
-    /* 0x1E */ s16 velX;
-    /* 0x20 */ s16 velZ;
-    /* 0x22 */ s16 velY;
-    /* 0x24 */ s16 accelY;
-    /* 0x26 */ s16 life;
-    /* 0x28 */ u8 primColor[3];
-    /* 0x2B */ u8 envColor[3];
-    /* 0x2E */ u8 intensity;     /* both colours are scaled by intensity / 256 */
-    /* 0x2F */ u8 alpha;
-    /* 0x30 */ s8 fadeStep;
-    /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
-} ParticleEffect;
-
 void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_1518CA80(ParticleEffect *effect, u8 mode);
+void func_1518CA80(BillboardSpawn *effect, u8 mode);
 
 /*
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from
@@ -188,11 +129,11 @@ void func_1518CA80(ParticleEffect *effect, u8 mode);
  */
 s32 func_150C1E34(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, f32 fromX, f32 fromY, f32 fromZ,
                   s32 arg8, s32 arg9, s32 argA, s32 argB, f32 size) {
-    ParticleEffect effect;
+    BillboardSpawn effect;
 
-    effect.x = x;
-    effect.y = y;
-    effect.z = z;
+    effect.pos.x = x;
+    effect.pos.y = y;
+    effect.pos.z = z;
     effect.velX = (x - fromX) * 10.0f;
     effect.velZ = (z - fromZ) * 10.0f;
     effect.width = effect.height = size;

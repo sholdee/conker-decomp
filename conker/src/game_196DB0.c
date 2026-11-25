@@ -94,7 +94,6 @@ typedef struct {
     s32 cycle2;
 } Game196DB0RenderMode;
 extern Game196DB0RenderMode D_800A4AC8[];
-extern s32 D_800D2C9C;
 
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_1509629C(Gfx *, void *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32);

@@ -1,9 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_1513D668 as void; this file uses its real return value (declared below) */
-#define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
-#undef func_1513D668
 #include "variables.h"
+#include "effects.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
@@ -42,58 +40,11 @@ typedef struct {
     /* 0x8 */ s16 unk8;
 } CornerColor;
 
-/* Spawn template for func_1513D668, as filled in by func_150CBF80. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 size0;
-    /* 0x18 */ f32 size1;
-    /* 0x1C */ struct17 position;
-    /* 0x28 */ f32 unk28[3];
-    /* 0x34 */ f32 unk34[3];
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} GrowSpawn;
-
 typedef struct {
     u8 r;
     u8 g;
     u8 b;
 } Rgb8;
-
-typedef struct {
-    f32 x, y, z;
-} Vec3;
-
-/* Effect template for func_150C88D0. */
-typedef struct {
-    /* 0x00 */ Vec3 position;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ s8 unkD;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ s8 unk2D;
-} Effect88D0Spawn;
 
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
@@ -114,24 +65,18 @@ typedef struct {
     /* 0x128 */ GrowParticleExtra extra;
 } GrowParticle;
 
-typedef f32 BoneMtx[4][4];
-
-GrowParticle *func_1513D668(GrowSpawn *spawn, CornerColor *colors, u8 arg2, u8 arg3, u8 arg4, u8 arg5,
-                            s16 yaw, f32 arg7, f32 arg8, s32 arg9, f32 *argA, u8 argB, s32 argC, u8 argD,
-                            s32 argE);
-
 extern GroundBurstDef D_800A0640[];
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
-void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
-void func_150C88D0(Effect88D0Spawn *, s32, s32, s32);
+void func_150C88D0(RadialEffectDef *, s32, s32, s32);
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
    ground-coloured particle, two func_1514C678 effects, a func_150C88D0 effect and a func_151D5404 effect. */
-void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
+void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     f32 pos[3];
     GroundBurstDef *def;
     f32 fr;
@@ -147,8 +92,7 @@ void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
     }
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
-    /* struct127.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
-    func_15143134(def->offset, pos, &((BoneMtx *)owner->unk1D4)[def->bone]);
+    func_15143134(def->offset, pos, &owner->unk1D4[def->bone]);
     {
         f32 ray[3];
 
@@ -167,7 +111,7 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
     b = fb;
     {
         GrowParticleExtra extra;
-        GrowSpawn spawn;
+        ParticleDef spawn;
         s16 rnd;
         CornerColor colors[4];
         GrowParticle *particle;
@@ -192,39 +136,39 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         colors[3].b = b;
         colors[3].a = 0xFF;
         colors[3].unk8 = 0;
-        spawn.type = def->type;
-        spawn.unk2 = 0x2601;
+        spawn.texture = def->type;
+        spawn.renderModes = 0x2601;
         spawn.lifetime = (func_150ADA20() % 51U) + 132;
-        spawn.unk8 = 0;
-        spawn.unkC = 0;
-        spawn.color[0] = 0xFF;
-        spawn.color[1] = 0xFF;
-        spawn.color[2] = 0xFF;
-        spawn.color[3] = 0xFF;
-        spawn.size0 = spawn.size1 = (func_150ADA68() * def->sizeRange) + def->sizeMin;
-        spawn.position.unk0 = pos[0];
-        spawn.position.unk4 = pos[1] + 10.0f;
-        spawn.position.unk8 = pos[2];
-        spawn.unk28[0] = 0.0f;
-        spawn.unk28[1] = 0.0f;
-        spawn.unk28[2] = 0.0f;
-        spawn.unk34[0] = 1.0f;
-        spawn.unk34[1] = 1.0f;
-        spawn.unk34[2] = 1.0f;
+        spawn.frame = 0;
+        spawn.frameSpeed = 0;
+        spawn.rgba[0] = 0xFF;
+        spawn.rgba[1] = 0xFF;
+        spawn.rgba[2] = 0xFF;
+        spawn.rgba[3] = 0xFF;
+        spawn.width = spawn.height = (func_150ADA68() * def->sizeRange) + def->sizeMin;
+        spawn.pos.x = pos[0];
+        spawn.pos.y = pos[1] + 10.0f;
+        spawn.pos.z = pos[2];
+        spawn.rot.x = 0.0f;
+        spawn.rot.y = 0.0f;
+        spawn.rot.z = 0.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
         spawn.flags = 0x1C0001;
         spawn.unk44 = (func_150ADA20() % (u32)(def->unk10Range + 1)) + def->unk10Min;
         spawn.unk45 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
         extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
-        extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.size0;
+        extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->unk7A >> 8) + def->yawOffset,
                                  500.0f, 500.0f, 0, ground.unk4, 1, 8, arg3, arg2);
         if (particle != NULL) {
             memcpy(&particle->extra, &extra, sizeof(extra));
         }
         {
-            Effect88D0Spawn fx;
+            RadialEffectDef fx;
             f32 d;
 
             rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
@@ -235,20 +179,20 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             {
                 s16 n1; // matching: a variable, not a literal, so IDO emits the runtime int-to-float convert
 
-                fx.position = *(Vec3 *)pos;
-                fx.unk10 = 70.59999847f;
-                fx.unkC = 1;
-                fx.unkD = -1;
-                fx.unk14 = 12;
-                fx.unk18 = 40;
-                fx.unk1A = 30;
+                fx.pos = *(Vec3f *)pos;
+                fx.speed = 70.59999847f;
+                fx.flags = 1;
+                fx.checkCallback = -1;
+                fx.count = 12;
+                fx.remaining = 40;
+                fx.growUntil = 30;
                 n1 = 10;
-                fx.unk1C = d / (f32)n1;
-                fx.unk20 = 25;
-                fx.unk24 = d / fx.unk20;
-                fx.unk2C = -1;
-                fx.unk2D = -1;
-                fx.unk28 = 0.0f;
+                fx.growRate = d / (f32)n1;
+                fx.shrinkFrom = 25;
+                fx.shrinkRate = d / fx.shrinkFrom;
+                fx.emitCallback = -1;
+                fx.updateCallback = -1;
+                fx.emitRate = 0.0f;
                 func_150C88D0(&fx, 0, 0xFF, 1);
             }
         }
@@ -262,7 +206,7 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 70.0f) + 70.0f,
                           0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
         }
-        func_151D5404((struct17 *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
+        func_151D5404((Vec3f *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
     }
 }
 
@@ -289,97 +233,66 @@ s32 func_150CC638(GrowParticle *p) {
     return 1;
 }
 
-/* Spawn template for func_15130374, as filled in by func_150CC6B8. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 size0;
-    /* 0x2C */ f32 size1;
-    /* 0x30 */ f32 position[3];
-    /* 0x3C */ u8 pad3C[0xC];
-    /* 0x48 */ f32 velocity[3];
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} DecaySpawn;
-
 /* Spawns a particle at (x, y, z) flung along yaw with a random pitch; it shrinks by 0.901 per tick (func_150CC8D4). */
 s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
     struct260 *particle;
-    DecaySpawn spawn;
+    ParticleDesc spawn;
     f32 size;
     f32 decay;
     f32 speed;
     u32 random;
 
-    spawn.unk1D = 0x29;
-    spawn.unk8 = 0xE03;
-    spawn.flags = 0x200005;
+    spawn.texture = 0x29;
+    spawn.renderMode = 0xE03;
+    spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.lifetime = (func_150ADA20() & 0xF) + 20;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.color1[0] = 0xB0;
-    spawn.color1[1] = 0xA0;
-    spawn.color1[2] = 0x2A;
-    spawn.color0[0] = 0x40;
-    spawn.color0[1] = 0xB;
-    spawn.color0[2] = 0x6A;
-    spawn.color0[3] = 0xFF;
+    spawn.timer = (func_150ADA20() & 0xF) + 20;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r2 = 0xB0;
+    spawn.g2 = 0xA0;
+    spawn.b2 = 0x2A;
+    spawn.r = 0x40;
+    spawn.g = 0xB;
+    spawn.b = 0x6A;
+    spawn.a = 0xFF;
 
-    spawn.color1[3] = (func_150ADA20() % 156U) + 100;
-    spawn.unk1C = 0xFF;
-    spawn.unk60 = 3;
-    spawn.unk61 = 3;
+    spawn.alpha = (func_150ADA20() % 156U) + 100;
+    spawn.brightness = 0xFF;
+    spawn.primColorMode = 3;
+    spawn.envColorMode = 3;
 
     size = (func_150ADA68() * 401.0f) + 300.0f;
-    spawn.size0 = size;
-    spawn.size1 = size;
-    spawn.position[0] = x;
-    spawn.position[1] = y;
-    spawn.position[2] = z;
+    spawn.width = size;
+    spawn.height = size;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.pos.z = z;
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 350.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 21U) - 25), speed, spawn.velocity);
+    func_15143794(yaw, (s16)((random % 21U) - 25), speed, &spawn.vel.x);
 
-    spawn.unk54 = 0.0f;
-    spawn.unk58 = 0xE05;
+    spawn.gravity = 0.0f;
+    spawn.flags = 0xE05;
 
     if (func_150ADA20() & 1) {
-        spawn.unk58 |= 0x40;
+        spawn.flags |= 0x40;
     }
 
     if (func_150ADA20() & 1) {
-        spawn.unk58 |= 0x80;
+        spawn.flags |= 0x80;
     }
 
-    spawn.unk62 = 8;
-    spawn.unk24 = 1.039999962f;
+    spawn.updateFunc = 8;
+    spawn.scaleRate = 1.039999962f;
     decay = 0.9010000229f;
-    spawn.unk63 = -1;
-    spawn.unk1E = 10;
-    spawn.unk20 = 25;
-    spawn.unk22 = 27;
+    spawn.deathFunc = -1;
+    spawn.fadeStart = 10;
+    spawn.fadeRate = 25;
+    spawn.scaleStart = 27;
 
     particle = func_15130374(&spawn, 1, 4, arg14, 1);
     if (particle != NULL) {
@@ -411,94 +324,56 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
     return 1;
 }
 
-/* Spawn template for func_15132A4C, as filled in by func_150CCA7C. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 size0;
-    /* 0x0C */ f32 size1;
-    /* 0x10 */ f32 rotation[3];
-    /* 0x1C */ f32 scale[3];
-    /* 0x28 */ f32 position[3];
-    /* 0x34 */ f32 velocity[3];
-    /* 0x40 */ f32 rotationVel[3];
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[0xA];
-} TumbleSpawn;
-
 /* Spawns a tumbling particle at (x, y, z), flung along yaw with a random upward pitch and spin. */
 s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    TumbleSpawn spawn;
+    ParticleSpawn80 spawn;
     f32 speed;
     u32 random;
 
-    spawn.position[0] = x;
-    spawn.position[1] = y;
-    spawn.scale[0] = 1.0f;
-    spawn.scale[1] = 1.0f;
-    spawn.scale[2] = 1.0f;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
     spawn.flags = 0x29E8;
-    spawn.rotation[0] = 0.0f;
-    spawn.rotation[1] = 0.0f;
-    spawn.rotation[2] = 0.0f;
-    spawn.rotationVel[1] = 0.0f;
-    spawn.unk0 = 1.0f;
-    spawn.unk56 = 0x20;
-    spawn.position[2] = z;
-    spawn.unk4 = 0.200000003f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.model = 0x20;
+    spawn.pos.z = z;
+    spawn.elasticity = 0.200000003f;
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 44U) - 63), speed, spawn.velocity);
+    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel.x);
 
-    spawn.rotationVel[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    spawn.rotationVel[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.lifetime = (func_150ADA20() % 51U) + 50;
     spawn.gravity = (func_150ADA68() * 1500.0f + -3500.0f) * 0.001000000047f;
 
-    spawn.size0 = spawn.size1 = (func_150ADA68() * 500.0f + 100.0f) * 0.001000000047f;
-    spawn.unk58 = 0;
+    spawn.sizeXZ = spawn.sizeY = (func_150ADA68() * 500.0f + 100.0f) * 0.001000000047f;
+    spawn.variant = 0;
     spawn.unk5C = 0;
 
     spawn.alpha = (func_150ADA20() % 101U) + 155;
-    spawn.unk61 = 3;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.updateFn = 3;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 0x20;
-    spawn.unk74 = 7;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 0x20;
+    spawn.fadeRate = 7;
 
     func_15132A4C(&spawn, 3, 0xFF, 0, arg14, 0);
     return 1;

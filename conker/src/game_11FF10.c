@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern f32 D_800A1950[];
 
@@ -9,7 +10,7 @@ void func_15143134(f32 *, f32 *, Mtx *);
 
 /* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
     /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
     /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
@@ -28,50 +29,22 @@ typedef struct {
     /* 0x28 */ EmitterState state;
 } Emitter;
 
-/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 rot;
-    /* 0x34 */ struct17 scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef;
-
 /* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
     /* 0x08 */ f32 age;
     /* 0x0C */ f32 lifetime;
     /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
     /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
     /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
-    /* 0x1C */ struct17 axisU; // quad axes for func_15140410
-    /* 0x28 */ struct17 axisV;
+    /* 0x1C */ Vec3f axisU; // quad axes for func_15140410
+    /* 0x28 */ Vec3f axisV;
 } ParticleState;
 
 /* A particle spawned by func_1513D2F0. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleState state;
 } Particle;
 
@@ -81,12 +54,10 @@ extern struct {
     u8 pad0[0x120];
     u8 unk120;
 } *D_800CC5EC;
-extern s32 *D_800DBF94;
 extern u8 D_800CC40C;
-extern u8 D_800CC49A;
 WorldObject *func_151149AC(s32);
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(struct127 *, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *, s32);
 void func_15196318(s32, s32, s32);
 
 /* While D_800CC2D0[0] has unk31C: if entry 0xFA or 0xF9 of D_800DBEF4 has its D_800DBF94 bit 0 set, runs
@@ -95,7 +66,7 @@ void func_15196318(s32, s32, s32);
 void func_150F2A60(s32 arg0) {
     s32 i;
     s32 scroll;
-    struct127 *obj;
+    Actor *obj;
     WorldObject *entry;
     s32 entryIndex;
 
@@ -132,7 +103,7 @@ void func_150F2A60(s32 arg0) {
 }
 
 /* Spawns an emitter object that follows `target` (see func_150F2D14). */
-void func_150F2C8C(struct127 *target) {
+void func_150F2C8C(Actor *target) {
     EmitterState state;
     Emitter *emitter;
 
@@ -142,28 +113,28 @@ void func_150F2C8C(struct127 *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, (struct37 *)0x10, 0xFF, 1);
+    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }
 }
 
 extern f32 D_800A195C[];
-void func_1502EA98(struct127 *, s32, s32, s32, s32, s32, s32);
+void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */
 void func_150F2D14(Emitter *emitter) {
     EmitterState *state;
-    struct127 *target;
+    Actor *target;
     ParticleDef def;
     ParticleState particle;
     Particle *spawned;
 
     state = &emitter->state;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return;
     }
     target = state->target;
@@ -193,16 +164,16 @@ void func_150F2D14(Emitter *emitter) {
                 {
                     f32 *src[2];
                     f32 *dst[2];
-                    struct17 dir;
+                    Vec3f dir;
 
                     src[0] = D_800A1950;
                     src[1] = D_800A195C;
-                    dst[0] = &def.pos.unk0;
-                    dst[1] = &dir.unk0;
+                    dst[0] = &def.pos.x;
+                    dst[1] = &dir.x;
                     func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
-                    dir.unk0 -= def.pos.unk0;
-                    dir.unk4 -= def.pos.unk4;
-                    dir.unk8 -= def.pos.unk8;
+                    dir.x -= def.pos.x;
+                    dir.y -= def.pos.y;
+                    dir.z -= def.pos.z;
                     if (!func_15146078(&dir, &particle.axisU, &particle.axisV)) {
                         return;
                     }
@@ -219,10 +190,10 @@ void func_150F2D14(Emitter *emitter) {
                     def.rgba[3] = 0xFF;
                     def.height = 0.0f;
                     def.width = 0.0f;
-                    def.rot = *(struct17 *)&D_800A5480;
-                    def.scale.unk0 = 1.0f;
-                    def.scale.unk4 = 1.0f;
-                    def.scale.unk8 = 1.0f;
+                    def.rot = D_800A5480;
+                    def.scale.x = 1.0f;
+                    def.scale.y = 1.0f;
+                    def.scale.z = 1.0f;
                     def.flags = 0x04EC0000;
                     def.unk45 = 0xFF;
                     def.unk46 = 0;
@@ -232,7 +203,7 @@ void func_150F2D14(Emitter *emitter) {
                     def.unk50 = 0;
                     def.fadeStart = 1;
                     def.fadeRate = 0xFF;
-                    spawned = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
+                    spawned = func_1513D2F0(&def, &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
                     if (spawned != NULL) {
                         memcpy(&spawned->state, &particle, sizeof(particle));
                     }
@@ -246,18 +217,18 @@ void func_150F2D14(Emitter *emitter) {
 
 /* Hands the emitter's target pointer and id to func_15169850. */
 void func_150F3194(Emitter *emitter, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&emitter->state.target, (s32)&emitter->state.targetId, (s32)emitter);
+    func_15169850(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
 /* Hands the particle's target pointer and id to func_15169850. */
 void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&particle->state.target, (s32)&particle->state.targetId, (s32)particle);
+    func_15169850(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
 s32 func_150F3214(Particle *particle) {
     ParticleState *state;
-    struct127 *target;
+    Actor *target;
     f32 size;
 
     state = &particle->state;
@@ -267,13 +238,13 @@ s32 func_150F3214(Particle *particle) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->def.pos.unk0, (Mtx *)target->unk1D4 + 15);
+    func_15143134(D_800A1950, &particle->head.def.pos.x, (Mtx *)target->unk1D4 + 15);
 
     size = sqrtf(state->age) * state->growth;
-    particle->def.height = size;
-    particle->def.width = size;
+    particle->head.def.height = size;
+    particle->head.def.width = size;
 
-    particle->def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
+    particle->head.def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
     state->age = state->age + D_800BE9A4;
 
     if (state->lifetime < state->age) {
@@ -287,34 +258,28 @@ void func_150F337C(Particle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x4F];
-    /* 0x4F */ u8 unk4F_hi : 7;
-    /* 0x4F */ u8 unk4F_0 : 1;
-} Struct150F33B0;
-
-/* Sets bit 0 of obj->unk4F unless D_800DBFF0->unk300 is below -2000. */
-void func_150F33B0(Struct150F33B0 *obj) {
-    if (D_800DBFF0->unk300 < -2000.0f) {
-        obj->unk4F_0 = 0;
+/* Sets bit 0 of obj->flags unless D_800DBFF0->eye.z is below -2000. */
+void func_150F33B0(WorldObject *obj) {
+    if (D_800DBFF0->eye.z < -2000.0f) {
+        obj->flags &= ~1;
         return;
     }
-    obj->unk4F_0 = 1;
+    obj->flags = (obj->flags & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
-/* While D_800DBFF0[player].unk300 is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+/* While D_800DBFF0[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
 void func_150F33F8(s32 player) {
-    if (D_800DBFF0[player].unk300 < -2100.0f) {
-        if (D_800DBFF0[player].unk2FC > 840.0f) {
-            *(s16 *)D_800D9A40 |= 1 << player;
+    if (D_800DBFF0[player].eye.z < -2100.0f) {
+        if (D_800DBFF0[player].eye.y > 840.0f) {
+            *D_800D9A40 |= 1 << player;
             return;
         }
-        *(s16 *)D_800D9A40 &= ~(1 << player);
+        *D_800D9A40 &= ~(1 << player);
     }
 }
 
 /* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
-f32 func_150F34A0(struct127 *obj, f32 pitch) {
+f32 func_150F34A0(Actor *obj, f32 pitch) {
     f32 speed;
 
     if (pitch < -5.0f) {
@@ -326,26 +291,17 @@ f32 func_150F34A0(struct127 *obj, f32 pitch) {
     return speed;
 }
 
-typedef struct {
-    /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-} ContPad;
-
-extern u8 D_800CC26D;
-extern u8 D_800CBDD3;
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_15052590(struct127 *arg0);
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_15052590(Actor *arg0);
+u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
 f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_15073FA0(void);
 
-#define PAD ((ContPad *)D_800CC284) // controller state for this frame
 
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when D_800BE9F0 is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
-void func_150F34F4(struct127 *actor) {
+void func_150F34F4(Actor *actor) {
     u16 angle;
     f32 mag;
     f32 accel;
@@ -360,7 +316,7 @@ void func_150F34F4(struct127 *actor) {
     s32 i;
     f32 dist;
     f32 minDist;
-    struct127 *obj;
+    Actor *obj;
     s32 idx;
 
     floorLevel = 0.0f;
@@ -368,11 +324,11 @@ void func_150F34F4(struct127 *actor) {
     actor->unk80 = 1;
     actor->unk222 = 0;
     D_800CC288 = D_800BE710[0];
-    D_800CC284 = *(s32 *)D_800BE728[0];
-    if ((D_800C3E78 <= D_80082FA0) && ((&D_800DDE3C)[D_800C3E78] != 0) && ((&D_800DDDC8)[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
-        PAD->stick_x = 0;
-        PAD->stick_y = 0;
-        PAD->buttons = 0;
+    D_800CC284 = D_800BE728[0];
+    if ((D_800C3E78 <= D_80082FA0) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
+        D_800CC284->stick_x = 0;
+        D_800CC284->stick_y = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
     }
     actor->unkF8 |= 0x40;
@@ -385,7 +341,7 @@ void func_150F34F4(struct127 *actor) {
         func_15059140(actor);
         actor->unk40 = ((s16)actor->unk7A + 0x4000) * (360.0f / 65536.0f);
         if (actor->unk13C != 0) {
-            struct127 *rider;
+            Actor *rider;
 
             idx = actor->unk13C - 100;
             rider = &D_800CC2D0[idx];
@@ -401,9 +357,9 @@ void func_150F34F4(struct127 *actor) {
     }
     if (actor->unk102 == 0) {
         actor->in_water = 0;
-        angle = func_1505A630(PAD->stick_x, PAD->stick_y, 0);
-        mag = func_1505A5CC((struct49 *)D_800CC284);
-        if (PAD->buttons & R_TRIG) {
+        angle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
+        mag = func_1505A5CC(D_800CC284);
+        if (D_800CC284->button & R_TRIG) {
             mag = 0.0f;
         }
         angle += D_800CC280;
@@ -440,14 +396,14 @@ void func_150F34F4(struct127 *actor) {
     if (speed > 60.0f) {
         speed = 60.0f;
     }
-    pitch = PAD->stick_y * 1.25f;
-    rHeld = PAD->buttons & R_TRIG;
+    pitch = D_800CC284->stick_y * 1.25f;
+    rHeld = D_800CC284->button & R_TRIG;
     if (rHeld) {
         pitch = 0.0f;
     }
     if (actor->unk13C != 0) {
         if (!rHeld) {
-            actor->y_position -= 16.0f * D_800D1550[0];
+            actor->y_position -= 16.0f * D_800D1550;
         }
     } else {
         minDist = 1000.0f;
@@ -475,9 +431,9 @@ void func_150F34F4(struct127 *actor) {
         }
         pitch = 40.0f;
     }
-    temp = PAD->stick_x;
-    actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550[0]);
-    actor->unk76 -= (s16)(actor->unkC4 * D_800D1550[0] * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
+    temp = D_800CC284->stick_x;
+    actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550);
+    actor->unk76 -= (s16)(actor->unkC4 * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     actor->unk7E = 0x19;
     func_150599C8(actor, 8, actor->unk76);
     actor->target_speed = 0.0f;
@@ -493,13 +449,13 @@ void func_150F34F4(struct127 *actor) {
         actor->unk86 = 0;
         actor->y_velocity = 9.0f;
     }
-    if (!(PAD->buttons & R_TRIG)) {
-        if (PAD->buttons & A_BUTTON) {
+    if (!(D_800CC284->button & R_TRIG)) {
+        if (D_800CC284->button & A_BUTTON) {
             actor->target_speed = -22.0f;
             speed = 1.0f;
             accel = 1.8f;
         }
-        if (PAD->buttons & B_BUTTON) {
+        if (D_800CC284->button & B_BUTTON) {
             actor->target_speed = 30.0f;
             if (actor->y_velocity < 0.0f) {
                 actor->target_speed -= actor->y_velocity * 0.6f;
@@ -538,8 +494,8 @@ void func_150F34F4(struct127 *actor) {
         actor->gravity = 0.0f;
     }
     actor->in_water = 10;
-    if (PAD->buttons & R_TRIG) {
-        actor->unkB8 += (PAD->stick_y - actor->unkB8) * 0.2f;
+    if (D_800CC284->button & R_TRIG) {
+        actor->unkB8 += (D_800CC284->stick_y - actor->unkB8) * 0.2f;
         actor->y_velocity = 0.0f;
         actor->gravity = 0.0f;
     } else {
@@ -557,7 +513,7 @@ void func_150F34F4(struct127 *actor) {
     if ((actor->unk13C != 0) && (actor->unk28 < 50.0f)) {
         floorLevel = 50.0f;
     }
-    if (!(PAD->buttons & R_TRIG)) {
+    if (!(D_800CC284->button & R_TRIG)) {
         if ((D_800CC26D != 0) && (actor->unk13C == 0) && (D_800CC2D0[D_800CC26D - 100].unk28 == 0.0f)) {
             actor->y_position = D_800CC2D0[D_800CC26D - 100].y_position + 70.0f;
             actor->y_velocity = 20.0f;
@@ -568,7 +524,7 @@ void func_150F34F4(struct127 *actor) {
         }
         if (actor->unk13C != 0) {
             if (actor->unk25C & 2) {
-                struct127 *rider;
+                Actor *rider;
 
                 actor->unk25C &= ~2;
                 idx = actor->unk13C - 100;
@@ -593,7 +549,7 @@ void func_150F34F4(struct127 *actor) {
                         count++;
                     }
                     obj++;
-                } while (obj != (struct127 *)&D_800D121C);
+                } while (obj != &D_800D121C);
                 if (count < 5) {
                     D_800D1580 = 6;
                     actor->unk103 = 4;
@@ -604,7 +560,7 @@ void func_150F34F4(struct127 *actor) {
     }
     if (actor->unk28 <= floorLevel) {
         actor->xz_velocity *= 0.6f;
-        if ((PAD->buttons & B_BUTTON) || (actor->unk86 != 0) || (actor->unk13C != 0)) {
+        if ((D_800CC284->button & B_BUTTON) || (actor->unk86 != 0) || (actor->unk13C != 0)) {
             if (actor->unk13C != 0) {
                 if (actor->y_velocity < -10.0f) {
                     D_800D1580 = 0xFF0100A7;
@@ -629,7 +585,7 @@ void func_150F34F4(struct127 *actor) {
             actor->unkB8 = 0.0f;
         }
     }
-    if (!(PAD->buttons & R_TRIG)) {
+    if (!(D_800CC284->button & R_TRIG)) {
         actor->unkB8 += 20.0f;
     } else {
         actor->y_velocity = actor->unkB8 * -0.35f;
@@ -661,35 +617,35 @@ void func_150F34F4(struct127 *actor) {
     func_1505E650(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150F43F0(struct108 *actor) {
-    if (actor->unk23E == 0x3B) {
+void func_150F43F0(Camera *actor) {
+    if (actor->zone == 0x3B) {
         func_1509BFB0(0, 0x405C, 1);
-        if (actor->unk2C != 0x100 && actor->unk6C8 == 0) {
+        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
             if (func_15123934(actor, 8, 0, 0, 0) != 0) {
-                actor->unk84 |= 0x300000;
-                actor->unk84 &= ~4;
-                actor->unk1B4 = 1;
-                actor->unk1E0 = 3;
+                actor->flags |= 0x300000;
+                actor->flags &= ~4;
+                actor->preset = 1;
+                actor->presetMask = 3;
                 func_15124B18(actor);
             }
             actor->unk134 = 0;
-            actor->unk348 = 125.0f;
+            actor->height = 125.0f;
             actor->unk34C = 125.0f;
-            actor->unk374 = 220.0f;
-            actor->unk190 = 30.0f;
+            actor->targetDistance = 220.0f;
+            actor->liftTarget = 30.0f;
         } else {
-            actor->unk190 = 0.0f;
+            actor->liftTarget = 0.0f;
         }
-    } else if (actor->unk2C == 8) {
-        if (actor->unk6C8 == 0) {
+    } else if (actor->mode == 8) {
+        if (actor->cmdRunning == 0) {
             func_151239CC(actor, 0);
             func_1509BFB0(0, 0x405C, 0);
         }
     }
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0 && func_1509BE40(1, 0x405E, 6, 0x9000) == 0) {
-        actor->unk84 |= 0x80000000;
+        actor->flags |= 0x80000000;
     } else {
-        actor->unk84 &= ~0x80000000;
+        actor->flags &= ~0x80000000;
     }
 }

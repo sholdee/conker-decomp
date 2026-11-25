@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
 typedef struct {
@@ -14,45 +11,10 @@ typedef struct {
 } ModelInstance;
 
 /* Visibility mask: bit n set = draw in view n. */
-typedef struct {
+typedef struct EffectMask {
     /* 0x0 */ s16 unk0;
     /* 0x2 */ s16 viewBits;
 } EffectMask;
-
-/* Spawn parameters, copied verbatim into an effect at 0x10. */
-typedef struct {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ s8 updateFunc;   /* index into D_8008AD90, -1 = none */
-    /* 0x02 */ s8 updateFunc2;  /* index into D_8008ADA0, -1 = none */
-    /* 0x03 */ s8 preDrawFunc;  /* index into D_8008ADBC, -1 = none */
-    /* 0x04 */ s8 postDrawFunc; /* index into D_8008ADCC, -1 = none */
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 lifetime;
-    /* 0x08 */ s32 model;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 otherModeH;
-    /* 0x14 */ s32 geometrySet;
-    /* 0x18 */ s32 geometryClear;
-    /* 0x1C */ s32 renderMode;   /* index into D_800A4AC8 (other-mode L words) */
-    /* 0x20 */ u8 pad20[3];
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH2;
-    /* 0x28 */ s32 otherModeH3;
-    /* 0x2C */ s8 primMode;
-    /* 0x2D */ s8 envMode;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ u8 color0[4];
-    /* 0x34 */ u8 color1[4];
-    /* 0x38 */ u8 pad38[4];
-    /* 0x3C */ void *owner;   /* actor; see func_15169850 */
-    /* 0x40 */ u8 ownerId;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ Vec3f pos;
-    /* 0x50 */ EffectMask *mask;
-    /* 0x54 */ s16 fadeStart; /* alpha fades once lifetime drops below this */
-    /* 0x56 */ s16 fadeRate;
-} EffectParams; /* size 0x58 */
 
 /* Attachment state handed to func_151462C8. */
 typedef struct {
@@ -61,22 +23,6 @@ typedef struct {
     /* 0x08 */ s32 unk8[4]; /* func_1515D480 allocations, one per entry up to D_80082FA0 */
     /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
 } EffectAttach;
-
-/* Extension used by the D_8008AD90/D_8008ADA0 update callbacks below. */
-typedef struct {
-    /* 0x00 */ Vec3f rot;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ Vec3f vel;
-    /* 0x1C */ Vec3f rotVel;
-    /* 0x28 */ f32 gravity;
-    /* 0x2C */ f32 drag;
-    /* 0x30 */ u8 flags; /* 1: move, 2: spin, 4: gravity, 8: drag */
-} EffectMotion;
-
-typedef union {
-    f32 raw[0xE];
-    EffectMotion motion;
-} EffectExtra; /* size 0x38 */
 
 /* Model effect object (types 0x36 / 0x4C / 0x5B). */
 typedef struct {
@@ -88,7 +34,7 @@ typedef struct {
     /* 0x071 */ u8 pad71[3];
     /* 0x074 */ s32 segment1;
     /* 0x078 */ s32 unk78;
-    /* 0x07C */ f32 mtx[2][4][4]; /* per frame */
+    /* 0x07C */ MtxF mtx[2]; /* per frame */
     /* 0x0FC */ EffectAttach attach;
     /* 0x118 */ s32 unk118;
     /* 0x11C */ u8 pad11C[4];
@@ -219,8 +165,8 @@ void func_151572D0(Effect *fx) {
         lifetime = fx->params.lifetime;
         if (lifetime < fx->params.fadeStart) {
             value = lifetime * fx->params.fadeRate;
-            if (value < fx->params.color0[3]) {
-                fx->params.color0[3] = value;
+            if (value < fx->params.color0.alpha) {
+                fx->params.color0.alpha = value;
             }
         }
     }
@@ -277,20 +223,20 @@ Gfx *func_15157420(Gfx *gfx, Effect *fx, s16 view) {
         return gfx;
     }
 setup: // matching: a label here keeps as1 from filling the branch delay slots with the next load
-    gfx = func_15142B7C(gfx, fx->params.geometrySet, fx->params.geometryClear);
-    func_151441A4(&primR, &primG, &primB, &primA, fx->params.color0[0], fx->params.color0[1], fx->params.color0[2],
-                  fx->params.color0[3], fx->params.color1[0], fx->params.color1[1], fx->params.color1[2],
-                  fx->params.color1[3], 0xFF, fx->params.primMode);
-    func_151442FC(&envR, &envG, &envB, &envA, fx->params.color0[0], fx->params.color0[1], fx->params.color0[2],
-                  fx->params.color0[3], fx->params.color1[0], fx->params.color1[1], fx->params.color1[2],
-                  fx->params.color1[3], 0xFF, fx->params.envMode);
+    gfx = func_15142B7C(gfx, fx->params.render.setGeometryMode, fx->params.render.clearGeometryMode);
+    func_151441A4(&primR, &primG, &primB, &primA, fx->params.color0.red, fx->params.color0.green, fx->params.color0.blue,
+                  fx->params.color0.alpha, fx->params.color1.red, fx->params.color1.green, fx->params.color1.blue,
+                  fx->params.color1.alpha, 0xFF, fx->params.render.primMode);
+    func_151442FC(&envR, &envG, &envB, &envA, fx->params.color0.red, fx->params.color0.green, fx->params.color0.blue,
+                  fx->params.color0.alpha, fx->params.color1.red, fx->params.color1.green, fx->params.color1.blue,
+                  fx->params.color1.alpha, 0xFF, fx->params.render.envMode);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
-    gfx = func_1513F4E4(gfx, fx->params.unk23, &needSync);
+    gfx = func_1513F4E4(gfx, ((u8 *)&fx->params.render.unk10)[3] /* matching: reads the low byte */, &needSync);
     gfx = func_15142FBC(gfx,
-                        fx->params.otherModeH | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.otherModeH2 |
-                            fx->params.otherModeH3,
-                        D_800A4AC8[fx->params.renderMode].w0 | D_800A4AC8[fx->params.renderMode].w1, &needSync);
+                        fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
+                            fx->params.render.unk18,
+                        D_800A4AC8[fx->params.render.renderMode].w0 | D_800A4AC8[fx->params.render.renderMode].w1, &needSync);
     if (fx->params.flags & 2) {
         gfx = func_151462C8(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);
@@ -299,7 +245,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
     gSPSegment(gfx++, 3, fx->model->mtxBuf[D_800BE9C0]);
     gSPSegment(gfx++, 1, fx->segment1);
-    if (fx->params.color0[3] < 0xFF || fx->params.color1[3] < 0xFF) {
+    if (fx->params.color0.alpha < 0xFF || fx->params.color1.alpha < 0xFF) {
         gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083A40 : D_80083740);
     } else {
         gSPSegment(gfx++, 8, (fx->params.flags & 0x40) ? D_80083BC0 : D_800838C0);
@@ -320,7 +266,7 @@ s32 func_15157860(Effect *fx) {
 }
 
 /* func_15157010 plus a 0x38-byte extension copied from `extra`. */
-Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
+Effect *func_15157898(EffectParams *params, EffectMotion *motion, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
     Effect *fx;
 
@@ -328,7 +274,7 @@ Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 ar
     if (fx == NULL) {
         return NULL;
     }
-    memcpy(&fx->extra, extra, sizeof(EffectExtra));
+    memcpy(&fx->extra, motion, sizeof(EffectExtra)); /* 4 bytes past an EffectMotion */
     return fx;
 }
 
@@ -396,7 +342,7 @@ s32 func_15157AA8(Effect *fx) {
 
 /* Event handler: lets func_15169850 track or retarget this effect's owner. */
 void func_15157D88(Effect *fx, s32 event, u8 eventType) {
-    func_15169850(event, eventType, (s32)&fx->params.owner, (s32)&fx->params.ownerId, (s32)fx);
+    func_15169850(event, eventType, &fx->params.owner, &fx->params.ownerId, fx);
 }
 
 void func_15157DEC(Effect *fx, f32 *xform);
@@ -427,7 +373,6 @@ void func_15157DEC(Effect *fx, f32 *xform) {
     fx->mtx[D_800BE9C0][2][2] *= xform[3];
 }
 
-extern Mtx D_80089470;
 
 /* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
 Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
@@ -441,13 +386,12 @@ Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
 Gfx *func_15157FE8(Gfx *gfx, Effect *fx, s32 view, u8 *needSync) {
     gSPMatrix(gfx++, &D_800BE628[view].projectionMtx[D_800BE9C0],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, ((Mtx **)&D_800DC2A0)[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, D_800DC2A0[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;
 }
 
-extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
 
 /* Sends an event to every model effect. */
 void func_15158078(s32 event, u8 eventType) {
-    func_15169260((s32)D_800A6060, 3, event, eventType);
+    func_15169260(D_800A6060, 3, event, eventType);
 }

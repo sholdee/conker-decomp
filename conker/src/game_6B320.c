@@ -1,38 +1,20 @@
 #include <ultra64.h>
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
+// matching: func_150A7CB0 takes three floats (in a1-a3); this file passes their raw bits through an integer view
+#define func_150A7CB0 func_150A7CB0_functions_h
 #include "functions.h"
+#undef func_150A7CB0
+void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
 
 /*
  * Object "parts" effects: an object's skeleton is broken into separately simulated parts (one per
  * bone) that fly off, spin, fall and bounce. D_800C6660[objIndex] holds the per-object state.
  */
-
-/* One simulated bone of an object (size 0x68). */
-typedef struct {
-    /* 0x00 */ f32 initPos[3];
-    /* 0x0C */ f32 initRot[3];   /* degrees */
-    /* 0x18 */ f32 initScale[3];
-    /* 0x24 */ f32 pos[3];
-    /* 0x30 */ f32 rot[3];
-    /* 0x3C */ f32 scale[3];
-    /* 0x48 */ f32 vel[3];
-    /* 0x54 */ f32 rotVel[3];
-    /* 0x60 */ f32 gravity;
-    /* 0x64 */ u8 active;
-    /* 0x65 */ u8 pad65[3];
-} ObjPart;
-
-/* Per-object parts state; D_800C6660 viewed as an array of these (size 0x10). */
-typedef struct {
-    /* 0x00 */ ObjPart *parts;
-    /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
-    /* 0x08 */ s32 partMaskHi;   /* parts 32..63 (shift count taken mod 32) */
-    /* 0x0C */ s16 timer;
-    /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
-    /* 0x0F */ u8 state;         /* PARTS_STATE_* */
-} ObjPartsState;
-
-#define sPartsStates ((ObjPartsState *)D_800C6660)
 
 #define PARTS_STATE_IDLE    0
 #define PARTS_STATE_RUNNING 1
@@ -56,14 +38,14 @@ extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
 extern void func_1503E260(s32 objIndex);
 extern void func_1503ECA0(s32 objIndex);
 extern f32 sqrtf(f32);
-extern void func_150499A0(f32 src[4][4], f32 out[4][4]);  /* inverse, as used here */
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);  /* out = a * b */
-extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+extern void func_150499A0(MtxF src, MtxF out);  /* inverse, as used here */
+extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
+extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
-void func_1503DE70(struct127 *obj, s32 kind, s32 variant) {
+void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
         func_1503DF0C(obj - D_800CC2D0, kind, D_8008446C[kind][variant].lo, D_8008446C[kind][variant].hi);
         return;
@@ -72,10 +54,10 @@ void func_1503DE70(struct127 *obj, s32 kind, s32 variant) {
 }
 
 void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
-    sPartsStates[objIndex].partMaskLo |= maskLo;
-    sPartsStates[objIndex].partMaskHi |= maskHi;
-    sPartsStates[objIndex].kind = kind;
-    sPartsStates[objIndex].state = PARTS_STATE_START;
+    D_800C6660[objIndex].partMaskLo |= maskLo;
+    D_800C6660[objIndex].partMaskHi |= maskHi;
+    D_800C6660[objIndex].kind = kind;
+    D_800C6660[objIndex].state = PARTS_STATE_START;
 }
 
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -97,7 +79,7 @@ void func_1503DF48(s32 objIndex) {
     s32 count;
     s32 i;
 
-    ps = &sPartsStates[objIndex];
+    ps = &D_800C6660[objIndex];
     state = ps->state;
     if (state == PARTS_STATE_START) {
         D_800CC2D0[objIndex].unk74 |= 0x80;
@@ -150,11 +132,11 @@ void func_1503DF48(s32 objIndex) {
 /* Whether part `partIndex` of object `objIndex` is selected in its part masks. */
 s32 func_1503E1F4(s32 partIndex, s32 objIndex) {
     if (partIndex < 32) {
-        if (sPartsStates[objIndex].partMaskLo & (1 << partIndex)) {
+        if (D_800C6660[objIndex].partMaskLo & (1 << partIndex)) {
             return TRUE;
         }
     } else {
-        if (sPartsStates[objIndex].partMaskHi & (1 << partIndex)) {
+        if (D_800C6660[objIndex].partMaskHi & (1 << partIndex)) {
             return TRUE;
         }
     }
@@ -170,21 +152,21 @@ void func_1503E260(s32 objIndex) {
     u8 *flagBits;
     s32 count;
 
-    if (sPartsStates[objIndex].state != PARTS_STATE_IDLE) {
-        flagBits = D_80084460[sPartsStates[objIndex].kind];
+    if (D_800C6660[objIndex].state != PARTS_STATE_IDLE) {
+        flagBits = D_80084460[D_800C6660[objIndex].kind];
         if (flagBits != NULL) {
-            count = D_80098914[sPartsStates[objIndex].kind];
+            count = D_80098914[D_800C6660[objIndex].kind];
             for (i = 0; i < count; i++) {
                 if (flagBits[i] != 0xFF && func_1503E1F4(i, objIndex)) {
                     D_800CC2D0[objIndex].unk94 |= 1 << flagBits[i];
                 }
             }
         }
-        sPartsStates[objIndex].state = PARTS_STATE_IDLE;
-        if (sPartsStates[objIndex].parts != NULL) {
-            func_10004074((s32)sPartsStates[objIndex].parts);
+        D_800C6660[objIndex].state = PARTS_STATE_IDLE;
+        if (D_800C6660[objIndex].parts != NULL) {
+            func_10004074((s32)D_800C6660[objIndex].parts);
         }
-        sPartsStates[objIndex].parts = NULL;
+        D_800C6660[objIndex].parts = NULL;
         D_800CC2D0[objIndex].unk74 &= ~0x80;
     }
 }
@@ -198,9 +180,9 @@ void func_1503E260(s32 objIndex) {
  */
 void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent) {
     s32 pad; // matching: unused stack slot above the matrices
-    f32 local[4][4];
-    f32 parentInv[4][4];
-    struct127 *obj;
+    MtxF local;
+    MtxF parentInv;
+    Actor *obj;
     s32 parent;
     f32 len;
     f32 dx;
@@ -212,7 +194,7 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     if (noParent) {
         parent = PART_PARENT_NONE;
     } else {
-        parent = D_80084454[sPartsStates[objIndex].kind][partIndex];
+        parent = D_80084454[D_800C6660[objIndex].kind][partIndex];
     }
     if (parent != PART_PARENT_NONE) {
         func_150499A0(OBJ_BONE(obj, parent), parentInv);
@@ -251,9 +233,9 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
 
 /* Decompose a 4x4 transform into translation, rotation (degrees) and per-axis scale. */
-void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
-    f32 m[4][4];
+    MtxF m;
     f32 cross[4];
     s32 i;
     f32 len;
@@ -278,7 +260,7 @@ void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, 
         } else {
             *scaleZ = len;
         }
-        func_15049148((struct17 *)m[i], 1.0f / len, (struct17 *)m[i]);
+        func_15049148((Vec3f *)m[i], 1.0f / len, (Vec3f *)m[i]);
     }
     /* A mirrored basis: flip the scale signs and axes back to a rotation. */
     func_150AD8B0(m[1], m[2], cross);
@@ -306,7 +288,7 @@ void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, 
     *rotZ = rz * 57.29577637f;
 }
 
-extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
 
 /* Rebuild the object's bone matrices from its simulated parts. */
 void func_1503E82C(s32 objIndex) {
@@ -315,36 +297,35 @@ void func_1503E82C(s32 objIndex) {
     s32 i;
     s32 parent;
     f32 (*bone)[4];
-    f32 m[4][4];
+    MtxF m;
     ObjPart *part;
 
     if (D_800CC2D0[objIndex].unk1D4 != NULL) {
-        count = D_80098914[sPartsStates[objIndex].kind];
-        parents = D_80084454[sPartsStates[objIndex].kind];
+        count = D_80098914[D_800C6660[objIndex].kind];
+        parents = D_80084454[D_800C6660[objIndex].kind];
         for (i = 0; i < count; i++) {
             if (parents[i] == PART_SKIP) {
                 continue;
             }
-            part = &sPartsStates[objIndex].parts[i];
+            part = &D_800C6660[objIndex].parts[i];
             if (!part->active) {
                 continue;
             }
             bone = OBJ_BONE(&D_800CC2D0[objIndex], i);
-            parent = D_80084454[sPartsStates[objIndex].kind][i];
+            parent = D_80084454[D_800C6660[objIndex].kind][i];
             if (parent != PART_PARENT_NONE) {
                 /* bone = scale * rotation * (translation * parent bone) */
                 func_150A7DA0(m, part->pos[0], part->pos[1], part->pos[2]);
                 func_150A7A48(m, OBJ_BONE(&D_800CC2D0[objIndex], parent), m);
-                part = &sPartsStates[objIndex].parts[i];
+                part = &D_800C6660[objIndex].parts[i];
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
                 func_150A7A48(bone, m, bone);
-                part = &sPartsStates[objIndex].parts[i];
-                // functions.h declares func_150A7CB0 with s32 params; it takes the float bits
+                part = &D_800C6660[objIndex].parts[i];
                 func_150A7CB0(m, *(s32 *)&part->scale[0], *(s32 *)&part->scale[1], *(s32 *)&part->scale[2]);
                 func_150A7A48(m, bone, bone);
             } else {
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
-                part = &sPartsStates[objIndex].parts[i];
+                part = &D_800C6660[objIndex].parts[i];
                 func_15043EC8(bone, part->scale[0], part->scale[1], part->scale[2],
                               part->pos[0], part->pos[1], part->pos[2]);
             }
@@ -359,16 +340,16 @@ void func_1503EA54(s32 objIndex) {
     s32 i;
     f32 dt;
 
-    count = D_80098914[sPartsStates[objIndex].kind];
+    count = D_80098914[D_800C6660[objIndex].kind];
     dt = D_800BE9E4;
     for (i = 0; i < count; i++) {
-        if (!sPartsStates[objIndex].parts[i].active) {
+        if (!D_800C6660[objIndex].parts[i].active) {
             continue;
         }
-        if (D_80084454[sPartsStates[objIndex].kind][i] != PART_PARENT_NONE) {
+        if (D_80084454[D_800C6660[objIndex].kind][i] != PART_PARENT_NONE) {
             continue;
         }
-        part = &sPartsStates[objIndex].parts[i];
+        part = &D_800C6660[objIndex].parts[i];
         part->pos[0] += part->vel[0] * dt;
         part->pos[1] += part->vel[1] * dt;
         part->pos[2] += part->vel[2] * dt;
@@ -429,7 +410,7 @@ void func_1503ECA0(s32 objIndex) {
     s32 count;
 
     func_1510F800(0);
-    ps = &sPartsStates[objIndex];
+    ps = &D_800C6660[objIndex];
     count = D_80098914[ps->kind];
     for (i = 0; i < count; i++) {
         if (ps->parts[i].active) {
@@ -470,7 +451,7 @@ void func_1503EEC0(s32 objIndex) {
     s32 timer;
 
     func_1503ECA0(objIndex);
-    ps = &sPartsStates[objIndex];
+    ps = &D_800C6660[objIndex];
     timer = ps->timer;
     timer -= D_800BE9E4;
     ps->timer = timer;
@@ -488,10 +469,10 @@ s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex) {
     // matching: byte arithmetic gives `addu row, offset` (&row[variant] swaps the operands)
     masks = (PartMasks *)((u8 *)row + variant * sizeof(PartMasks));
     // matching: `(base + i)->field` keeps the `and` operand order of the target
-    if (masks->lo != 0 && !(masks->lo & (sPartsStates + objIndex)->partMaskLo)) {
+    if (masks->lo != 0 && !(masks->lo & (D_800C6660 + objIndex)->partMaskLo)) {
         goto fail;
     }
-    if (masks->hi != 0 && !(masks->hi & (sPartsStates + objIndex)->partMaskHi)) {
+    if (masks->hi != 0 && !(masks->hi & (D_800C6660 + objIndex)->partMaskHi)) {
         goto fail;
     }
     return TRUE;
@@ -501,7 +482,7 @@ fail: // matching: one shared `return FALSE` block
 
 /* Start for kind 0: 120-tick timer and a random vertical kick for every part. */
 void func_1503EFC4(s32 objIndex) {
-    ObjPartsState *ps = &sPartsStates[objIndex];
+    ObjPartsState *ps = &D_800C6660[objIndex];
     s32 i;
     s32 count;
 
@@ -527,7 +508,7 @@ void func_1503F0D8(ObjPart *part, s32 objIndex) {
 
 /* Start for kind 1: 140-tick timer; sets the object's unk94 to 6 and kicks part 4 upwards. */
 void func_1503F108(s32 objIndex) {
-    ObjPartsState *ps = &sPartsStates[objIndex];
+    ObjPartsState *ps = &D_800C6660[objIndex];
 
     ps->timer = 140;
     D_800CC2D0[objIndex].unk94 = 6;
@@ -536,7 +517,7 @@ void func_1503F108(s32 objIndex) {
 
 /* Start for kind 2: 300-tick timer; updates unk94 flags for the selected variants 0..2. */
 void func_1503F16C(s32 objIndex) {
-    sPartsStates[objIndex].timer = 300;
+    D_800C6660[objIndex].timer = 300;
     if (func_1503EF4C(2, 0, objIndex)) {
         D_800CC2D0[objIndex].unk94 |= 0x40;
         D_800CC2D0[objIndex].unk94 &= ~0x200;
@@ -555,7 +536,7 @@ void func_1503F2B0(s32 objIndex) {
     ObjPartsState *ps;
 
     func_1503ECA0(objIndex);
-    ps = &sPartsStates[objIndex];
+    ps = &D_800C6660[objIndex];
     ps->timer -= D_800BE9E4;
     if (ps->timer > 0) {
         return;
@@ -572,12 +553,11 @@ void func_1503F2B0(s32 objIndex) {
     }
 }
 
-extern u8 D_800C3E90;
 
 /* func_1503E5F8 on an Mtx, which is fixed point when D_800C3E90 is set and plain floats otherwise. */
 void func_1503F404(Mtx *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
-    f32 m[4][4];
+    MtxF m;
 
     if (D_800C3E90) {
         guMtxL2F(m, mtx);

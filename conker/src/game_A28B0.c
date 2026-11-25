@@ -1,20 +1,25 @@
 #include <ultra64.h>
 
-#define func_15048A40 func_15048A40_hdr
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
+// matching: func_1506160C takes a u8 cmd; this file was built against an s32 view (no narrowing at the calls)
+#define func_1506160C func_1506160C_functions_h
+// matching: func_1514D3B0 takes s32 msg/arg; this file narrows them to u8 at the call (u8 view)
+#define func_1514D3B0 func_1514D3B0_functions_h
 #include "functions.h"
-#undef func_15048A40
-#define D_800D2104 D_800D2104_hdr
-#define D_80099A3C D_80099A3C_hdr
-#define D_800D2110 D_800D2110_hdr
+#undef func_1514D3B0
+s32 func_1514D3B0(Actor *owner, s16 type, u8 msg, u8 arg);
+#undef func_1506160C
+void func_1506160C(Actor *actor, s32 cmd, u8 value, u8 step, s32 player);
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
-#undef D_800D2104
-#undef D_80099A3C
-#undef D_800D2110
 
 /*
  * Object script interpreter commands.
  *
- * Each object runs a byte-code script (struct127.unk218 points at its next command). A command
+ * Each object runs a byte-code script (Actor.unk218 points at its next command). A command
  * is five bytes: an opcode (< 247, an index into D_80086730) and four argument bytes, which the
  * interpreter copies to D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are
  * one-byte jump labels.
@@ -23,35 +28,12 @@
  * D_800CC2D0[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
 
-/* One point of a path: s16 world coordinates. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 unk6;
-} PathPoint;
 
-/* A path, D_800D2104[n]: a centre point followed by D_800D2108[n] - 1 waypoints. */
-typedef struct {
-    PathPoint center;
-    PathPoint points[1];
-} Path;
-
-extern Path **D_800D2104; // header declares it as s32 *
-extern s16 *D_800D2110;    // header declares it as s16[]
-
-typedef struct {
-    u8 unk0;
-    u8 unk1[9];
-} Row56A00;
-
-extern Row56A00 D_80099A3C[]; // header declares it as s16[]
-
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
-void func_1504715C(f32 *arg0, struct127 *arg1);
+s32 func_1505D024(Actor *arg0, s32 arg1, u16 arg2, s32 arg3);
+void func_1504715C(f32 *arg0, Actor *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
-void func_15197A7C(struct127 *arg0);
-u8 func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
+void func_15197A7C(Actor *arg0);
+u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
 struct216 *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
@@ -125,7 +107,7 @@ void func_15075650(void) {
     u8 range;
     u8 index;
     u8 previous;
-    struct127 *obj;
+    Actor *obj;
 
     index = D_800D2108[D_800D154C->unk13F] - 1;
     if (D_800D154C->unk21F != 0) {
@@ -174,7 +156,7 @@ set_timer:
 
 /* Starts a move towards the current waypoint, arriving in arg1 ticks. */
 void func_15075884(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -182,8 +164,8 @@ void func_15075884(void) {
 
     func_15075548();
     obj = D_800D154C;
-    dx = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].x - obj->x_position;
-    dz = (f32)D_800D2104[obj->unk13F]->points[obj->unk21E].z - obj->z_position;
+    dx = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].x - obj->x_position;
+    dz = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].z - obj->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(u32)D_800D1891;
     speed = dist / dx;
@@ -241,7 +223,7 @@ void func_15075AAC(void) {
     f32 dz;
 
     func_15075548();
-    point = &D_800D2104[D_800D154C->unk13F]->center + D_800D1891;
+    point = D_800D2104[D_800D154C->unk13F] + D_800D1891;
     dx = point->x - D_800D154C->x_position;
     dz = point->z - D_800D154C->z_position;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
@@ -381,8 +363,8 @@ void func_1507602C(void) {
 
     func_15075548();
     D_800D154C->unk21E = D_800D1891;
-    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].x - D_800D154C->x_position;
-    dz = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D1891].z - D_800D154C->z_position;
+    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].x - D_800D154C->x_position;
+    dz = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].z - D_800D154C->z_position;
     time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->unk44);
     if (time < 12.0f) {
         D_800D154C->unk44 *= time * 0.08333300054f;
@@ -440,7 +422,7 @@ void func_15076394(void) {
 
 void func_150763B0(void) {
     if (D_800D1890 == 128) {
-        D_800D154C->unk1E5 = D_800D154C->unk144->unkF;
+        D_800D154C->unk1E5 = D_800D154C->spawn->unkF;
     } else {
         D_800D154C->unk1E5 = D_800D1890;
     }
@@ -548,7 +530,7 @@ void func_15076768(void) {
 
 /* Jumps to arg0 when the direction from the object to its target is within arg1 of the target's facing. */
 void func_150767F4(void) {
-    struct127 *target;
+    Actor *target;
     u16 angle;
 
     target = &D_800CC2D0[D_800D154C->unk222];
@@ -569,12 +551,12 @@ void func_150768DC(void) {
     s32 viewAngle;
     f32 dist;
     s32 self;
-    struct127 *found;
-    struct127 *obj;
+    Actor *found;
+    Actor *obj;
     f32 nearest;
     s32 i;
     u8 script;
-    struct124 *type;
+    ModelDef *type;
     u8 angle;
     u8 foundIndex;
 
@@ -592,7 +574,7 @@ void func_150768DC(void) {
                 dist = func_1505A72C(D_800D154C, obj);
                 if (dist < nearest) {
                     type = D_800D1C90[D_800D154C->id];
-                    viewAngle = type->unk17;
+                    viewAngle = type->viewAngle;
                     angle = func_1505A630(obj->x_position - D_800D154C->x_position,
                                           D_800D154C->z_position - obj->z_position, 0) >> 8;
                     if (((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
@@ -850,12 +832,11 @@ typedef struct PathNode {
 } PathNode;
 
 extern PathNode *D_800D2350;
-extern s32 D_800D2354;
 s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
 s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 
-/* the s16 at 0x216 overlaps struct127's s32 unk214 */
+/* the s16 at 0x216 overlaps Actor's s32 unk214 */
 #define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
 
 /*
@@ -907,7 +888,7 @@ void func_15077508(void) {
             if (D_800D1890 == 1) {
                 hasGoal2 = 0;
                 hasGoal = 0;
-                next = D_800D154C->pad210;
+                next = D_800D154C->unk210;
             }
             if (next == 0xFF) {
                 next = func_15086098(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
@@ -917,14 +898,14 @@ void func_15077508(void) {
             if (D_800D1890 == 1) {
                 best = 0xFF;
                 node = &D_800D2350[current];
-                if (D_800D154C->pad210 != 0xFF) {
+                if (D_800D154C->unk210 != 0xFF) {
                     // matching: dead code standing in for something the original compiled away; it
                     // keeps IDO's branch on pad210 and its register assignment
-                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->pad210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
+                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
                 }
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
-                    if (node->links[i] != 0xFF && D_800D154C->pad210 != node->links[i]) {
+                    if (node->links[i] != 0xFF && D_800D154C->unk210 != node->links[i]) {
                         roll = func_150ADA68();
                         if (roll < bestRoll) {
                             bestRoll = roll;
@@ -935,7 +916,7 @@ void func_15077508(void) {
                 next = best;
                 if (next == 0xFF) {
                     D_800D154C->unk25C |= 0x800;
-                    next = D_800D154C->pad210;
+                    next = D_800D154C->unk210;
                 }
             } else {
                 next = func_15086364(current, hasGoal, hasGoal2, &D_800D154C->unk211, D_800D154C->unk212);
@@ -945,7 +926,7 @@ void func_15077508(void) {
             D_800D154C->unk21E = 0;
             if (func_15086CBC(next, &x, &y, &z)) {
                 UNK216(D_800D154C) = D_800D2354;
-                D_800D154C->pad210 = D_800D154C->unk20F;
+                D_800D154C->unk210 = D_800D154C->unk20F;
                 D_800D154C->unk20F = next;
                 {
                     f32 width;
@@ -963,9 +944,9 @@ void func_15077508(void) {
                         z += dx * dist;
                     }
                 }
-                D_800D2104[D_800D154C->unk13F]->points[0].x = x;
-                D_800D2104[D_800D154C->unk13F]->points[0].y = y;
-                D_800D2104[D_800D154C->unk13F]->points[0].z = z;
+                D_800D2104[D_800D154C->unk13F][1].x = x;
+                D_800D2104[D_800D154C->unk13F][1].y = y;
+                D_800D2104[D_800D154C->unk13F][1].z = z;
             }
         }
     }
@@ -994,7 +975,7 @@ void func_150779A8(void) {
 
 /* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
 void func_150779D4(void) {
-    struct127 *obj;
+    Actor *obj;
     u8 index;
     f32 range;
 
@@ -1040,7 +1021,7 @@ void func_15077B80(void) {
 
 /* Restarts the object returned by func_1505F0AC(arg1) on script arg0. */
 void func_15077BB4(void) {
-    struct127 *obj = func_1505F0AC(D_800D1891);
+    Actor *obj = func_1505F0AC(D_800D1891);
 
     obj->unk218 = NULL;
     obj->unk232 = D_800D1890;
@@ -1061,7 +1042,7 @@ void func_15077C1C(void) {
  * type arg0 or in state arg1 and not stunned: the first one found if arg3 == 0, else the nearest.
  */
 void func_15077C38(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 nearest;
     f32 dist;
     s32 i;
@@ -1097,9 +1078,9 @@ void func_15077DBC(void) {
     if (D_800D1890 != 0xFA) {
         D_800D154C->unk21E = D_800D1890;
     }
-    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x;
-    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].y;
-    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
+    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x;
+    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].y;
+    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
 }
 
 void func_15077E9C(void) {
@@ -1129,14 +1110,14 @@ void func_15077F64(void) {
     u8 index;
 
     index = D_800D1890 - 1;
-    dx = (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].x - D_800D154C->x_position;
-    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F]->points[D_800D154C->unk21E].z;
+    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x - D_800D154C->x_position;
+    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
     D_800D154C->unk78 = func_1505A630(dx, dz, 0);
     turn = (D_800D154C->unk78 - D_800D154C->unk76) >> 8;
     if (turn & 0x80) {
         turn = -turn;
     }
-    if (D_80099A3C[index].unk0 < turn) {
+    if (D_80099A3C[index][0] < turn) {
         D_800D154C->unk250 = D_800D1891;
         func_15056A00(D_800D154C, turn, index);
     }
@@ -1145,7 +1126,7 @@ void func_15077F64(void) {
 /* Jumps to arg0 when any other active object is within arg3 * 8 units. */
 void func_15078074(void) {
     f32 range;
-    struct127 *obj;
+    Actor *obj;
     s32 i;
 
     range = 8 * D_800D1893;
@@ -1186,7 +1167,7 @@ void func_150781F4(void) {
     s32 index;
 
     index = D_800D1891 + 1;
-    point = &(&D_800D2104[D_800D154C->unk13F]->center)[index];
+    point = &D_800D2104[D_800D154C->unk13F][index];
     dx = point->x - D_800D154C->x_position;
     dz = point->z - D_800D154C->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
@@ -1224,7 +1205,7 @@ void func_15078358(void) {
  * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: unk23D * 8).
  */
 void func_1507839C(void) {
-    struct127 *target;
+    Actor *target;
     f32 dist;
     f32 threshold;
 
@@ -1252,7 +1233,6 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
@@ -1263,7 +1243,7 @@ extern f32 cosf(f32);
  * (mode 1) or by the direction from the target to this object (mode 2).
  */
 void func_15078544(void) {
-    struct127 *pad; // matching: unused stack slot
+    Actor *pad; // matching: unused stack slot
     f32 y;
     f32 x;
     f32 offsetX;
@@ -1296,19 +1276,19 @@ void func_15078544(void) {
     }
     x += offsetX * cosine + offsetZ * sine;
     z += offsetZ * cosine - offsetX * sine;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].y = y;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].y = y;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
 }
 
 /* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
 void func_1507879C(void) {
-    struct197 *data;
+    AnimInstance *data;
     f32 value;
     s32 compare;
 
     data = D_800CC2D0[D_800D154C->unk222].unk2D0;
-    value = data->unk8;
+    value = data->frame;
     compare = D_800D1892;
     if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
         ((compare == 1) && ((f32)(u32)D_800D1891 < value))) {
@@ -1342,13 +1322,13 @@ void func_15078900(void) {
 
 /* Copies unk8 and unkC of the target's unk2D0 data into the object's own. */
 void func_15078A08(void) {
-    struct197 *dst;
-    struct197 *src;
+    AnimInstance *dst;
+    AnimInstance *src;
 
     dst = D_800D154C->unk2D0;
     src = D_800CC2D0[D_800D154C->unk222].unk2D0;
-    dst->unk8 = src->unk8;
-    dst->unkC = src->unkC;
+    dst->frame = src->frame;
+    dst->prevFrame = src->prevFrame;
 }
 
 /*
@@ -1399,7 +1379,7 @@ s32 func_15078A60(s32 index) {
         break;
     case 9:
         value = 0;
-        if (((s16)D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
+        if ((D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
             value = 2;
         }
         break;
@@ -1482,26 +1462,26 @@ void func_1507911C(void) {
 }
 
 void func_150791F0(void) {
-    if (D_800D154C->unk2C9 < D_800D1890) {
-        D_800D154C->unk1C9 = 0xFF;
+    if (D_800D154C->modelCount < D_800D1890) {
+        D_800D154C->lodRequest = 0xFF;
     } else {
-        D_800D154C->unk1C9 = D_800D1890;
+        D_800D154C->lodRequest = D_800D1890;
     }
 }
 
 /* Calls func_1505D024 with the direction from gate unk251 to the object (never 0) and holds for a tick. */
 void func_15079228(void) {
-    struct127 *obj;
-    struct178 *gate;
+    Actor *obj;
+    TriggerZone *gate;
     f32 x;
     f32 z;
     u16 angle;
 
-    // D_800D3098 holds a pointer (the header declares an array); the load through its address matches
-    gate = &(*(struct178 **)&D_800D3098)[D_800D154C->unk251];
+    // matching: the (no-op) load through the variable's address orders the address computation as the original
+    gate = &(*(TriggerZone **)&D_800D3098)[D_800D154C->unk251];
     obj = D_800D154C;
-    x = gate->unk0;
-    z = gate->unk4;
+    x = gate->x;
+    z = gate->z;
     angle = func_1505A630(obj->x_position - x, z - obj->z_position, 0);
     if (angle == 0) {
         angle = 1;
@@ -1522,7 +1502,7 @@ void func_150792FC(void) {
 
 /* Restarts the object found by func_150768DC on script arg0. */
 void func_15079334(void) {
-    struct127 *found;
+    Actor *found;
 
     if (D_800D154C->unkA8 != 0) {
         found = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
@@ -1574,8 +1554,8 @@ void func_150793D8(void) {
         z = 1200;
     }
 
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
-    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
 }
 
 /* Sets the speeds for a jump that lands on the target. */
@@ -1593,7 +1573,7 @@ void func_15079570(void) {
 /* Restarts the object with unique id arg0 on script arg1. */
 void func_1507965C(void) {
     s32 index;
-    struct127 *obj;
+    Actor *obj;
 
     index = func_15083FB0(D_800D1890);
     if (index != -1) {
@@ -1628,8 +1608,8 @@ void func_15079790(void) {
         D_800D154C->id = 0x3A;
         offsetX = (func_150ADA20() % 500U) - 250;
         offsetZ = (func_150ADA20() % 500U) - 250;
-        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->center.x + offsetX;
-        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->center.z + offsetZ;
+        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][0].x + offsetX;
+        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][0].z + offsetZ;
     }
 }
 
@@ -1686,12 +1666,12 @@ void func_15079A58(void) {
 
 /* Returns the direction from object `arg0` to the centre of the current object's path. */
 u16 func_15079A98(s32 arg0) {
-    Path *path;
-    struct127 *obj;
+    PathPoint *path;
+    Actor *obj;
 
     path = D_800D2104[D_800D154C->unk13F];
     obj = &D_800CC2D0[arg0];
-    return func_1505A630(path->center.x - obj->x_position, obj->z_position - path->center.z, 0);
+    return func_1505A630(path[0].x - obj->x_position, obj->z_position - path[0].z, 0);
 }
 
 /*
@@ -1701,7 +1681,7 @@ u16 func_15079A98(s32 arg0) {
 void func_15079B30(void) {
     s32 index;
     s32 *counter;
-    struct127 *savedObj;
+    Actor *savedObj;
     s32 savedIndex;
     u16 angle;
     s32 select;
@@ -1737,7 +1717,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 4:
     case 5: {
         // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern struct127 *D_800D154C;
+        extern Actor *D_800D154C;
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;
@@ -1754,8 +1734,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         return;
     }
     case 6:
-        // struct127 declares 0xC8 as u32 padC8
-        *(f32 *)&D_800CC2D0[index].padC8 = D_800D1890;
+        D_800CC2D0[index].unkC8 = D_800D1890;
         return;
     case 7:
         D_800CC2D0[index].unkB8 = 0.0f;
@@ -1776,7 +1755,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         D_800D154C->unk236 = D_800D154C->unk23D + (s8)D_800D1890;
         return;
     case 11:
-        D_800D154C->pad22A = D_800D1890;
+        D_800D154C->unk22A = D_800D1890;
         return;
     }
     switch (D_800D1893) {
@@ -1858,7 +1837,7 @@ void func_15079FBC(void) {
 s32 func_1507A100(void) {
     s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
 
-    ((s16 *)&D_800D2104[D_800D154C->unk13F]->points[D_800D1890])[D_800D1891] = value;
+    ((s16 *)&(D_800D2104[D_800D154C->unk13F] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
     return value;
 }
 
@@ -2006,7 +1985,7 @@ void func_1507A620(void) {
 }
 
 s32 func_1507A6FC(s32 arg0) {
-    return ((u16 (*)[3])D_800BE748)[arg0][0];
+    return D_800BE748[arg0].button;
 }
 
 /* Jumps to arg3 when entry arg0 of D_800BE748 has all the bits of (arg1:arg2) set. */
@@ -2067,7 +2046,7 @@ void func_1507A8EC(void) {
 
 /* Links the object to the one found by func_15083E90(arg0) (unk65 = its index + 1), or unlinks it (arg0 == 0). */
 void func_1507A984(void) {
-    struct127 *linked;
+    Actor *linked;
 
     if (D_800D1890 != 0) {
         linked = func_15083E90(D_800D1890);
@@ -2089,7 +2068,7 @@ void func_1507A984(void) {
 /* Sets an angle: arg2 selects the operation, (arg0:arg1) is the operand. */
 void func_1507AA48(void) {
     u16 value;
-    Path *path;
+    PathPoint *path;
     s32 angle;
 
     value = (D_800D1890 << 8) | D_800D1891;
@@ -2113,7 +2092,7 @@ void func_1507AA48(void) {
     case 4:
         // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
         path = D_800D2104[D_800D154C->unk13F];
-        angle = (u16)(func_150484A0(path->points[D_800D1891].x - path->points[D_800D1890].x, path->points[D_800D1891].z - path->points[D_800D1890].z) * 10430.37793f) + (D_800D1893 << 8);
+        angle = (u16)(func_150484A0(path[D_800D1891 + 1].x - path[D_800D1890 + 1].x, path[D_800D1891 + 1].z - path[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
         D_800D154C->unk78 = angle + 0x4000;
         break;
     case 5:
@@ -2211,7 +2190,7 @@ void func_1507B040(void) {
 
 /* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
-    struct127 *savedObj = D_800D154C;
+    Actor *savedObj = D_800D154C;
     s32 savedIndex = D_800C3E78;
 
     D_800D154C = func_15072208(D_800D154C, 0);
@@ -2242,7 +2221,7 @@ void func_1507B178(void) {
     s16 value = (D_800D1891 << 8) | D_800D1890;
 
     if (D_800D1893 == 2) {
-        D_800D154C->unkE8 = (s16)(value * D_800D154C->y_scale);
+        D_800D154C->bodyOffsetY = (s16)(value * D_800D154C->y_scale);
     } else if (D_800D1893 == 1) {
         func_15062B50(D_800D154C, value);
     } else {
@@ -2373,7 +2352,7 @@ void func_1507B734(void) {
         D_800D154C->unk31C->unk8C = value;
         D_800D154C->unk31C->unk8F = D_800D1892;
     } else {
-        D_800D154C->unk31C->unk8A = value;
+        D_800D154C->unk31C->buttons = value;
         D_800D154C->unk31C->unk8E = D_800D1892;
     }
 }
@@ -2385,7 +2364,7 @@ void func_1507B7BC(void) {
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void func_1507B7E8(void) {
-    struct127 *target = &D_800CC2D0[D_800D154C->unk222];
+    Actor *target = &D_800CC2D0[D_800D154C->unk222];
 
     if ((target->stunned != 0) || (target->health == 0)) {
         D_800D1891 ^= 1;
@@ -2397,7 +2376,7 @@ void func_1507B7E8(void) {
 
 /* Calls handler arg0 of D_80086150, preserving the current object. */
 void func_1507B884(void) {
-    struct127 *savedObj;
+    Actor *savedObj;
     s32 savedIndex;
     u8 index;
     void (*handler)(s32);
@@ -2430,13 +2409,13 @@ void func_1507B958(void) {
  * if any) is (arg2 == 0) or is not (arg2 == 1) arg1.
  */
 void func_1507B974(void) {
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800D154C;
     if (D_800D154C->unk65 != 0) {
         obj = &D_800CC2D0[D_800D154C->unk65 - 1];
     }
-    if (D_800D1891 == (&D_800D2104[obj->unk13F]->center)[obj->unk21E + D_800D1893].unk6) {
+    if (D_800D1891 == D_800D2104[obj->unk13F][obj->unk21E + D_800D1893].param) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2464,7 +2443,7 @@ void func_1507BAF8(void) {
 void func_1507BB20(void) {
 }
 
-typedef struct {
+typedef struct ScriptEntry {
     struct216 *script;
     u8 id;
 } ScriptEntry;
@@ -2474,15 +2453,15 @@ extern struct216 D_8009A120[];    // fallback script
 
 /* Returns script `scriptId` of the current object's type, falling back to the default table. */
 struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
-    s32 typeData;
+    ActorAnim *typeData;
     ScriptEntry *table;
     s32 i;
 
     typeData = D_800D1588[D_800D154C->id];
-    if (typeData == 0) {
+    if (typeData == NULL) {
         return D_8009A120;
     }
-    table = *(ScriptEntry **)(typeData - 0x10);
+    table = ANIM_HEADER(typeData)->scripts;
     if (table == NULL) {
         return D_8009A120;
     }
@@ -2511,7 +2490,7 @@ struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
  * Runs an object's script: counts down the wait timer unk21C (25500 waits forever) and, once it
  * expires, executes commands until one sets a new wait time.
  */
-void func_1507BC14(struct127 *obj) {
+void func_1507BC14(Actor *obj) {
     if (obj->unk21C != 0) {
         if (obj->unk218 != NULL) {
             if (obj->unk21C != 25500) {

@@ -1,113 +1,20 @@
 #include <ultra64.h>
 /* functions.h declares these two void, but both return a value. */
-#define func_10010F30 func_10010F30_void
-#define func_1513D4B8 func_1513D4B8_void
 #include "functions.h"
-#undef func_10010F30
-#undef func_1513D4B8
 #include "variables.h"
+#include "effects.h"
 #include "libc/string.h"
-
-/* Spawn template of a func_1513D4B8 particle (ParticleDef in game_169510.c). */
-typedef struct {
-    u8 texture;         /* D_80090B60 index */
-    u8 type;
-    u16 renderModes;
-    s16 lifetime;
-    u8 pad6[2];
-    s32 frame;          /* 16.16 animation frame */
-    s32 frameSpeed;
-    u8 rgba[4];
-    f32 width;
-    f32 height;
-    f32 pos[3];
-    f32 rot[3];
-    f32 scale[3];
-    s32 flags;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 pad48[0x10];
-} ParticleDef; /* size 0x58 */
-
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME 0x1
-#define PARTICLE_FLIP_S   0x40
-#define PARTICLE_FLIP_T   0x80
-#define PARTICLE_HANDLERS 0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-
-/* Spawn parameters of a func_15130374 particle (ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;       /* 16.16 animation frame */
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;      /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ f32 pos[3];
-    /* 0x3C */ f32 offset[3];
-    /* 0x48 */ f32 vel[3];
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;   /* -1 for none */
-    /* 0x63 */ s8 deathFunc;    /* -1 for none */
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 pad66[0xA];
-} ParticleDesc; /* size 0x70 */
-
-/* Glow parameters handed to func_151407D0 (GlowParams in game_16DC80.c, without the animation union). */
-typedef struct {
-    /* 0x00 */ f32 width1;      /* width, height and offset when facing the viewer... */
-    /* 0x04 */ f32 height1;
-    /* 0x08 */ f32 width0;      /* ...and when facing away */
-    /* 0x0C */ f32 height0;
-    /* 0x10 */ f32 offset1;
-    /* 0x14 */ f32 offset0;
-    /* 0x18 */ f32 alpha1;
-    /* 0x1C */ f32 alpha0;
-    /* 0x20 */ f32 fadeRate;
-    /* 0x24 */ s32 screenX[4];
-    /* 0x34 */ s32 screenY[4];
-    /* 0x44 */ void *attach;
-    /* 0x48 */ f32 scale;
-    /* 0x4C */ u16 zbufSample[4];
-    /* 0x54 */ u8 visibility[4];
-    /* 0x58 */ u8 type;
-    /* 0x59 */ u8 pad59[3];
-} GlowParams;
 
 /* State of the effect, stored after its main particle. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ struct17 unk8;
-    /* 0x14 */ struct17 unk14;
+    /* 0x08 */ Vec3f unk8;
+    /* 0x14 */ Vec3f unk14;
     /* 0x20 */ u8 unk20;
     /* 0x21 */ s8 ownerSlot;        /* owner's index in D_800CC2D0 */
-    /* 0x22 */ u8 unk22;            /* owner->camera->unk23D, 0xFF without a camera */
+    /* 0x22 */ u8 unk22;            /* owner->camera->playerIndex, 0xFF without a camera */
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
@@ -142,7 +49,7 @@ typedef struct {
 
 /* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectState. */
 typedef struct {
-    u8 pad0[0x110];
+    DefParticleHead head;
     EffectState state;
 } EffectParticle;
 
@@ -176,10 +83,8 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(ParticleDef *, s32 *, u8, u8, u8, u8, u8, s32, u8, s32);
 extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern u8 *func_151407D0(GlowParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
@@ -187,7 +92,7 @@ extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s3
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
-EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, u8 arg3, s16 lifetime, u8 r,
+EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s16 lifetime, u8 r,
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;
@@ -203,7 +108,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
     }
     data.ownerSlot = owner - D_800CC2D0;
     if (owner->camera != NULL) {
-        data.unk22 = owner->camera->unk23D;
+        data.unk22 = owner->camera->playerIndex;
     } else {
         data.unk22 = 0xFF;
     }
@@ -251,15 +156,15 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
     def.rgba[3] = 0xFF;
     def.width = 100.0f;
     def.height = 100.0f;
-    def.pos[0] = 0.0f;
-    def.pos[1] = 0.0f;
-    def.pos[2] = 0.0f;
-    def.rot[0] = 0.0f;
-    def.rot[1] = 0.0f;
-    def.rot[2] = 0.0f;
-    def.scale[0] = 1.0f;
-    def.scale[1] = 1.0f;
-    def.scale[2] = 1.0f;
+    def.pos.x = 0.0f;
+    def.pos.y = 0.0f;
+    def.pos.z = 0.0f;
+    def.rot.x = 0.0f;
+    def.rot.y = 0.0f;
+    def.rot.z = 0.0f;
+    def.scale.x = 1.0f;
+    def.scale.y = 1.0f;
+    def.scale.z = 1.0f;
     def.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | 0x80000000;
     def.unk44 = 0xFF;
     def.unk45 = 0xFF;
@@ -294,15 +199,15 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                 subDef.rgba[3] = 0xFF;
                 subDef.height = 0.0f;
                 subDef.width = 0.0f;
-                subDef.pos[0] = 0.0f;
-                subDef.pos[1] = 0.0f;
-                subDef.pos[2] = 0.0f;
-                subDef.rot[0] = 0.0f;
-                subDef.rot[1] = 0.0f;
-                subDef.rot[2] = 0.0f;
-                subDef.scale[0] = 1.0f;
-                subDef.scale[1] = 1.0f;
-                subDef.scale[2] = 1.0f;
+                subDef.pos.x = 0.0f;
+                subDef.pos.y = 0.0f;
+                subDef.pos.z = 0.0f;
+                subDef.rot.x = 0.0f;
+                subDef.rot.y = 0.0f;
+                subDef.rot.z = 0.0f;
+                subDef.scale.x = 1.0f;
+                subDef.scale.y = 1.0f;
+                subDef.scale.z = 1.0f;
                 subDef.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x400000;
                 subDef.unk44 = 0xFF;
                 subDef.unk45 = 0xFF;
@@ -355,15 +260,15 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                 descA.brightness = 0xFF;
                 descA.height = 0.0f;
                 descA.width = 0.0f;
-                descA.pos[0] = 0.0f;
-                descA.pos[1] = 0.0f;
-                descA.pos[2] = 0.0f;
-                descA.offset[0] = 0.0f;
-                descA.offset[1] = 0.0f;
-                descA.offset[2] = 0.0f;
-                descA.vel[0] = 0.0f;
-                descA.vel[1] = 0.0f;
-                descA.vel[2] = 0.0f;
+                descA.pos.x = 0.0f;
+                descA.pos.y = 0.0f;
+                descA.pos.z = 0.0f;
+                descA.offset.x = 0.0f;
+                descA.offset.y = 0.0f;
+                descA.offset.z = 0.0f;
+                descA.vel.x = 0.0f;
+                descA.vel.y = 0.0f;
+                descA.vel.z = 0.0f;
                 descA.gravity = 0.0f;
                 descA.fadeStart = 1;
                 descA.fadeRate = 0xFF;
@@ -382,7 +287,7 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                     memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
                 }
                 {
-                    GlowParams glowParams;
+                    GlowShape glowParams;
                     ParticleDef glowDef;
                     ChildData glowData;
 
@@ -400,15 +305,15 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                     glowDef.rgba[3] = 0xFF;
                     glowDef.width = 100.0f;
                     glowDef.height = 100.0f;
-                    glowDef.pos[0] = 0.0f;
-                    glowDef.pos[1] = 0.0f;
-                    glowDef.pos[2] = 0.0f;
-                    glowDef.rot[0] = 0.0f;
-                    glowDef.rot[1] = 0.0f;
-                    glowDef.rot[2] = 500.0f;
-                    glowDef.scale[0] = 1.0f;
-                    glowDef.scale[1] = 1.0f;
-                    glowDef.scale[2] = 1.0f;
+                    glowDef.pos.x = 0.0f;
+                    glowDef.pos.y = 0.0f;
+                    glowDef.pos.z = 0.0f;
+                    glowDef.rot.x = 0.0f;
+                    glowDef.rot.y = 0.0f;
+                    glowDef.rot.z = 500.0f;
+                    glowDef.scale.x = 1.0f;
+                    glowDef.scale.y = 1.0f;
+                    glowDef.scale.z = 1.0f;
                     glowDef.flags = (hasLifetime ? 1 : 0) | 0x2 | 0x10 | 0x2000 | 0x20000 | 0x40000 | 0x80000 |
                                     0x400000;
                     glowDef.unk45 = 0xFF;
@@ -457,15 +362,15 @@ EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, 
                         descB.brightness = 0xFF;
                         descB.height = 125.0f;
                         descB.width = 125.0f;
-                        descB.pos[0] = 0.0f;
-                        descB.pos[1] = 0.0f;
-                        descB.pos[2] = 0.0f;
-                        descB.offset[0] = 0.0f;
-                        descB.offset[1] = 0.0f;
-                        descB.offset[2] = 0.0f;
-                        descB.vel[0] = 0.0f;
-                        descB.vel[1] = 0.0f;
-                        descB.vel[2] = 0.0f;
+                        descB.pos.x = 0.0f;
+                        descB.pos.y = 0.0f;
+                        descB.pos.z = 0.0f;
+                        descB.offset.x = 0.0f;
+                        descB.offset.y = 0.0f;
+                        descB.offset.z = 0.0f;
+                        descB.vel.x = 0.0f;
+                        descB.vel.y = 0.0f;
+                        descB.vel.z = 0.0f;
                         descB.gravity = 0.0f;
                         descB.fadeStart = 1;
                         descB.fadeRate = 0xFF;

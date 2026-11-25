@@ -2,9 +2,7 @@
 
 #include "functions.h"
 
-/* variables.h is deliberately not included: it declares D_80035910 as an
- * OSThread *, but the PI thread's ADDRESS is what gets passed to osStopThread
- * here. src/libultra/io/pimgr.c carries the same file-local override. */
+/* libultra code (with Rare additions): declares the few globals it needs itself, like pimgr.c. */
 extern OSThread D_80035910; /* piThread */
 extern u8 D_8003A572;
 extern u8 D_8003A573;

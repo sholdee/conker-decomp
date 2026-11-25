@@ -3,7 +3,6 @@
 #include "variables.h"
 
 /* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
-extern u8 D_800D9F68[];
 
 void func_1510D608(s32 index, s32 lifetime);
 extern s32 func_10004074(s16 *);
@@ -13,7 +12,7 @@ extern s32 func_10004074(s16 *);
  * aging (the D_800D9F58..D_800D9F5C range) with lifetime 2.
  */
 void func_1510D720(s32 index) {
-    if ((s8)D_800BC448[index] != 0) {
+    if (D_800BC448[index] != 0) {
         if (D_800D9F68[index] != 0) {
             if (--D_800D9F68[index] == 0) {
                 if (index < D_800D9F58) {
@@ -35,7 +34,7 @@ void func_1510D720(s32 index) {
 void func_1510D7AC(s32 index) {
     s8 *lifetime;
 
-    lifetime = (s8 *)&D_800BC448[index];
+    lifetime = &D_800BC448[index];
     if (*lifetime != 0) {
         if (D_800D9F68[index] != 0) {
             if (--D_800D9F68[index] == 0) {

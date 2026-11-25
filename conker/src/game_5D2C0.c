@@ -1,15 +1,11 @@
 #include <ultra64.h>
-/* functions.h declares func_15083568 as void; it returns the new Attachment (declared below). */
-#define func_15083568 func_15083568_orig
 #include "functions.h"
-#undef func_15083568
 #include "variables.h"
 
-extern u8 D_800BEA0C;
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 s32 func_15033BDC();
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
+extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *ptr);
@@ -26,11 +22,9 @@ typedef struct ModelHeader {
     /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
 } ModelHeader;
 
-extern u8 D_800DF7D0[];            // per-model load reference counts
-extern s32 D_800DF9B8[];
 extern ModelHeader *D_800E0148[];  // per-model loaded headers
 ModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, s32 *);
+void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
 void func_15168E54(Gfx *, ModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
@@ -70,86 +64,16 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
     return 0;
 }
 
-/* Position and rotation offset from the attachment's bone (func_15030D54). */
-typedef struct AttachmentOffset {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ f32 rotZ;
-} AttachmentOffset;
 
-/* Animated-model instance driven by func_1503F5B8 (struct197 is a prefix of it). */
-typedef struct AnimInstance {
-    /* 0x000 */ u8 pad0[0x4];
-    /* 0x004 */ u16 anim;        // current animation; bit 15 is a flag
-    /* 0x006 */ u8 pad6[0x2];
-    /* 0x008 */ f32 frame;
-    /* 0x00C */ u8 padC[0xC];
-    /* 0x018 */ f32 numFrames;
-    /* 0x01C */ u8 pad1C[0x1D];
-    /* 0x039 */ s8 unk39;
-    /* 0x03A */ s16 unk3A;
-    /* 0x03C */ s16 unk3C;
-    /* 0x03E */ u8 pad3E[0x215 - 0x3E];
-    /* 0x215 */ u8 unk215;
-    /* 0x216 */ u8 pad216[0x3E0 - 0x216];
-    /* 0x3E0 */ u8 *unk3E0[2];   // per-frame matrices (indexed by D_800BE9C0)
-    /* 0x3E8 */ u8 *unk3E8[2];
-    /* 0x3F0 */ u8 pad3F0[6];
-    /* 0x3F6 */ u8 unk3F6;
-} AnimInstance;
 
-/* A model attached to a bone of a game object. Allocated by func_15030AF4 and kept in the
- * doubly linked list headed by D_800C3EE0. */
-typedef struct Attachment {
-    /* 0x00 */ u8 ownerId;            // unique_id of the owning struct127
-    /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
-    /* 0x02 */ u8 bone;               // owner joint matrix the model follows
-    /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 flags;
-    /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
-    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
-    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
-    /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
-    /* 0x09 */ u8 loaded;
-    /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
-    /* 0x10 */ u8 pad10[3];
-    /* 0x13 */ u8 hiddenDLists;       // bit i set: display list i is not drawn
-    /* 0x14 */ u8 numDLists;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
-    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
-    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
-    /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
-    /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
-    /* 0x20 */ u16 parentMtx;
-    /* 0x22 */ s16 rotZ;
-    /* 0x24 */ Gfx **dlists;
-    /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
-    /* 0x38 */ s32 unk38;             // per-model hook state
-    /* 0x3C */ s32 unk3C;             // per-model hook state
-    /* 0x40 */ f32 scale;
-    /* 0x44 */ AttachmentOffset *offset;
-    /* 0x48 */ AnimInstance *anim;
-    /* 0x4C */ void *unk4C;
-    /* 0x50 */ void *unk50;
-    /* 0x54 */ struct Attachment *next;
-    /* 0x58 */ struct Attachment *prev;
-} Attachment; // size 0x5C
 
-void func_15031C14(Attachment *att);
-Attachment *func_15083568(struct127 *obj, s32 setId, f32 arg2, s32 arg3);
+void func_15031C14(ModelAttachment *att);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
 void func_1503F7B8(AnimInstance *anim);
 s32 func_1503F62C(s32 model, s32 animSet, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **anim);
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
-s32 func_1502FFD8(Attachment *att, struct127 *owner) {
+s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
     u8 *data;
     s32 mode;
     s32 size;
@@ -165,7 +89,7 @@ s32 func_1502FFD8(Attachment *att, struct127 *owner) {
             }
         }
 
-        mode = owner->pad66 & 0xC;
+        mode = owner->unk66 & 0xC;
         size = (u8 *)att->dlists - data;
         if (!(att->flags & 0x10) && (mode == 8) && (att->unk30 != 0)) {
             att->vtx[0] = allocate_memory(size, 1, 2, 2);
@@ -193,7 +117,7 @@ s32 func_1502FFD8(Attachment *att, struct127 *owner) {
 }
 
 /* Unlinks and frees an attachment; `immediate` frees its buffers now instead of deferring it. */
-void func_15030158(Attachment *att, s32 immediate) {
+void func_15030158(ModelAttachment *att, s32 immediate) {
     if (!immediate) {
         func_15031C14(att);
     }
@@ -224,23 +148,23 @@ void func_15030158(Attachment *att, s32 immediate) {
 
         func_10004074(offset);
     }
-    if (att->unk4C != NULL) {
+    if (att->reflMtx[0] != NULL) {
         if (immediate) {
-            func_10004074(att->unk4C);
+            func_10004074(att->reflMtx[0]);
         } else {
-            func_100043B4(att->unk4C, 4);
+            func_100043B4(att->reflMtx[0], 4);
         }
     }
-    if (att->unk50 != NULL) {
+    if (att->reflMtx[1] != NULL) {
         if (immediate) {
-            func_10004074(att->unk50);
+            func_10004074(att->reflMtx[1]);
         } else {
-            func_100043B4(att->unk50, 4);
+            func_100043B4(att->reflMtx[1], 4);
         }
     }
 
-    if (att == (Attachment *)D_800C3EE0) {
-        D_800C3EE0 = (s32)att->next;
+    if (att == D_800C3EE0) {
+        D_800C3EE0 = att->next;
     }
     if (att->prev != NULL) {
         att->prev->next = att->next;
@@ -251,25 +175,25 @@ void func_15030158(Attachment *att, s32 immediate) {
     func_10004074(att);
 }
 
-s32 func_15030310(struct127 *owner, s32 setId, s32 index);
+s32 func_15030310(Actor *owner, s32 setId, s32 index);
 
 /* Removes every attachment of set `setId` from `owner`. */
-s32 func_150302F0(struct127 *owner, s32 setId) {
+s32 func_150302F0(Actor *owner, s32 setId) {
     return func_15030310(owner, setId, 0xFF);
 }
 
 /* Removes attachment number `index` of set `setId` from `owner` (all of them when index is 0xFF). */
-s32 func_15030310(struct127 *owner, s32 setId, s32 index) {
-    Attachment *att;
+s32 func_15030310(Actor *owner, s32 setId, s32 index) {
+    ModelAttachment *att;
     s32 removed;
 
     if (owner->unique_id == 0) {
         return 0;
     }
     removed = 0;
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
-        Attachment *next = att->next;
+        ModelAttachment *next = att->next;
 
         if ((att->ownerId == owner->unique_id) && (att->setId == setId)) {
             if ((index != 0xFF) && (index != 0)) {
@@ -290,16 +214,16 @@ s32 func_15030310(struct127 *owner, s32 setId, s32 index) {
 }
 
 /* Removes every attachment of `owner`. */
-s32 func_150303E4(struct127 *owner) {
-    Attachment *att;
-    Attachment *next;
+s32 func_150303E4(Actor *owner) {
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 removed;
 
     if (owner->unique_id == 0) {
         return 0;
     }
 
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     removed = 0;
     while (att != NULL) {
         next = att->next;
@@ -312,46 +236,46 @@ s32 func_150303E4(struct127 *owner) {
     return removed;
 }
 
-/* Per-model hooks, indexed by Attachment.handler; a nonzero return removes the attachment. */
-typedef s32 (*AttachmentHook)(Attachment *att, struct127 *owner);
+/* Per-model hooks, indexed by ModelAttachment.handler; a nonzero return removes the attachment. */
+typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
 extern AttachmentHook D_800841C0[];
-s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx);
+s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
 void func_1503F4B0(AnimInstance *anim);
 
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's
  * matrix are updated in a second pass, after the ones they follow. */
 void func_15030468(void) {
-    Attachment *att;
-    Attachment *next;
-    struct127 *owner;
+    ModelAttachment *att;
+    ModelAttachment *next;
+    Actor *owner;
     u16 timer;
     s32 ret;
     s32 i;
     s32 j;
-    f32 normMtx[4][4];
-    f32 offsetMtx[4][4];
-    f32 resultMtx[4][4];
+    MtxF normMtx;
+    MtxF offsetMtx;
+    MtxF resultMtx;
     f32 (*boneMtx)[4];
     Mtx *mtx;
     s32 remove;
-    f32 boneBuf[4][4];
+    MtxF boneBuf;
     s32 pass;
     s32 hasFollowers;
     f32 inv;
     Mtx *parentMtx;
     Mtx *parentBoneMtx;
-    f32 rotMtx[4][4];
-    f32 rotResultMtx[4][4];
-    f32 rotMtx2[4][4];
-    f32 rotResultMtx2[4][4];
+    MtxF rotMtx;
+    MtxF rotResultMtx;
+    MtxF rotMtx2;
+    MtxF rotResultMtx2;
 
     hasFollowers = FALSE;
     for (pass = 0; pass < 2; pass++) {
         if (pass == 1 && !hasFollowers) {
             break;
         }
-        att = (Attachment *)D_800C3EE0;
+        att = D_800C3EE0;
         while (att != NULL) {
             next = att->next;
             ret = 0;
@@ -390,13 +314,13 @@ void func_15030468(void) {
                             att = next;
                             continue;
                         }
-                        if (func_15031070((Attachment *)ret, owner, &parentMtx, &parentBoneMtx) == 0) {
+                        if (func_15031070((ModelAttachment *)ret, owner, &parentMtx, &parentBoneMtx) == 0) {
                             func_15030158(att, 0);
                             att = next;
                             continue;
                         }
                         boneMtx = boneBuf;
-                        if (((Attachment *)ret)->anim != NULL) {
+                        if (((ModelAttachment *)ret)->anim != NULL) {
                             parentMtx += att->parentMtx;
                             guMtxL2F(boneMtx, parentMtx);
                             mtx = (Mtx *)boneMtx; // matching: dead store (overwritten or unused below)
@@ -477,9 +401,9 @@ void func_15030468(void) {
             }
             if (att->anim != NULL) {
                 if (att->mtx != NULL) {
-                    att->anim->unk3E0[D_800BE9C0] = (u8 *)mtx;
+                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])mtx;
                 } else {
-                    att->anim->unk3E0[D_800BE9C0] = (u8 *)boneMtx;
+                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
                 }
                 func_1503F4B0(att->anim);
             }
@@ -513,21 +437,21 @@ void func_15030468(void) {
     }
 }
 
-void func_15031A50(Attachment *att, struct127 *owner);
+void func_15031A50(ModelAttachment *att, Actor *owner);
 
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
-Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
+ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
                           s32 setId, s32 handler, u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
-    Attachment *att;
-    Attachment *next;
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 err;
 
     if (owner->unique_id == 0) {
         return NULL;
     }
     if (!(flags & 8)) {
-        att = (Attachment *)D_800C3EE0;
+        att = D_800C3EE0;
         if (att != NULL) {
             do {
                 next = att->next;
@@ -538,17 +462,17 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
             } while (next != NULL);
         }
     }
-    att = allocate_memory(sizeof(Attachment), 1, 0, 2);
+    att = allocate_memory(sizeof(ModelAttachment), 1, 0, 2);
     if (att == NULL) {
         return NULL;
     }
     err = 0;
-    if ((Attachment *)D_800C3EE0 != NULL) {
-        ((Attachment *)D_800C3EE0)->prev = att;
+    if (D_800C3EE0 != NULL) {
+        D_800C3EE0->prev = att;
     }
-    att->next = (Attachment *)D_800C3EE0;
+    att->next = D_800C3EE0;
     att->prev = NULL;
-    D_800C3EE0 = (s32)att;
+    D_800C3EE0 = att;
     att->ownerId = owner->unique_id;
     att->model = model;
     att->bone = bone;
@@ -578,8 +502,8 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
     att->parentSet = parentSet;
     att->parentMtx = parentMtx;
     att->hiddenDLists = 0;
-    att->unk4C = NULL;
-    att->unk50 = NULL;
+    att->reflMtx[0] = NULL;
+    att->reflMtx[1] = NULL;
     att->updated = 0;
     att->rotZ = 0;
     if ((unk16 == 4) || (flags & 4)) {
@@ -607,7 +531,7 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
 }
 
 /* Gives the attachment a fixed offset from its bone, and a matrix buffer to draw it with. */
-void func_15030D54(Attachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ) {
+void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ) {
     att->offset = allocate_memory(sizeof(AttachmentOffset), 1, 0, 2);
     if (att->offset != NULL) {
         att->offset->x = x;
@@ -622,18 +546,18 @@ void func_15030D54(Attachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32
     }
 }
 
-s32 func_1506196C(struct127 *obj, s32 view);
-Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 arg4);
+s32 func_1506196C(Actor *obj, s32 view);
+Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
 
 /* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
  * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
 Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
-    Attachment *att;
-    Attachment *next;
-    struct127 *owner;
+    ModelAttachment *att;
+    ModelAttachment *next;
+    Actor *owner;
     s32 alpha;
 
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (att->alpha == 0) {
@@ -669,14 +593,14 @@ Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
 }
 
 /* Draws the visible attachments of `owner` in viewport `view`. */
-Gfx *func_15030F94(Gfx *gdl, struct127 *owner, s32 view, s32 arg3) {
-    Attachment *att;
-    Attachment *next;
+Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
+    ModelAttachment *att;
+    ModelAttachment *next;
 
     if ((owner == NULL) || (owner->unk1D4 == NULL) || (owner->unique_id == 0)) {
         return gdl;
     }
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if ((att->ownerId != owner->unique_id) || (att->alpha == 0)) {
@@ -691,20 +615,20 @@ Gfx *func_15030F94(Gfx *gdl, struct127 *owner, s32 view, s32 arg3) {
 
 /* Finds the matrix to draw `att` with this frame (*mtx) and the bone matrix it follows (*boneMtx).
  * Returns 0 when none is available yet. */
-s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx) {
-    Attachment *parent;
+s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) {
+    ModelAttachment *parent;
 
     if (att->anim != NULL) {
         if (att->anim->unk3F6 == 0) {
             return 0;
         }
-        *mtx = (Mtx *)att->anim->unk3E8[D_800BE9C0];
-        *boneMtx = (Mtx *)att->anim->unk3E0[D_800BE9C0];
+        *mtx = att->anim->partMtx[D_800BE9C0];
+        *boneMtx = (Mtx *)att->anim->matrices[D_800BE9C0];
     } else if (att->mtx != NULL) {
         *mtx = &att->mtx[D_800BE9C0];
         *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
     } else if (att->parentSet) {
-        parent = (Attachment *)func_1503195C(owner, att->parentSet, 0);
+        parent = (ModelAttachment *)func_1503195C(owner, att->parentSet, 0);
         if (parent == NULL) {
             return 0;
         }
@@ -724,30 +648,21 @@ s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx) {
     return 1;
 }
 
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
 extern u8 D_800D9E28[];
-extern u8 D_800DD2E4[];
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
 extern void func_1502D54C(s32, s32 *);
-extern void func_1502D630(struct127 *, s32 *, s32, s32);
-extern void func_1502CC34(struct127 *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
-extern void func_150832AC(struct127 *);
+extern void func_1502D630(Actor *, s32 *, s32, s32);
+extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
+extern void func_150832AC(Actor *);
 extern s32 func_1510D0EC(void *, s32 *, s32, s32);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
-extern Gfx *func_15035D6C(Gfx *, Attachment *, s32, s32, s32);
+extern Gfx *func_15035D6C(Gfx *, ModelAttachment *, s32, s32, s32);
 
-/* struct127 / struct104 fields that their shared declarations don't cover yet. */
-#define OBJ_U8(o, off) (*(u8 *)((u8 *)(o) + (off)))
-#define OBJ_S32(o, off) (*(s32 *)((u8 *)(o) + (off)))
-#define D_800B0DF0_unk3E (*(s16 *)((u8 *)D_800B0DF0 + 0x3E))
 
 /* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
  * `arg4` nonzero draws it through func_15035D6C instead of its own display lists. Returns the
  * original `gdl` if the display list would overflow. */
-Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 arg4) {
+Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4) {
     Mtx *mtx;
     Mtx *boneMtx;
     s32 segScratch[3];
@@ -790,7 +705,7 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
         return gdl;
     }
     func_1502D54C(owner - D_800CC2D0, light);
-    if (D_800B0DF0_unk3E != 0) {
+    if (D_800B0DF0->unk3E != 0) {
         func_1502D630(&D_800CC2D0[owner - D_800CC2D0], light, view, owner - D_800CC2D0);
     } else {
         light[3] = 0xFF;
@@ -798,11 +713,11 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
     func_1502CC34(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
                   &fogA);
     lit = TRUE;
-    fogOverride = D_800B0DF0_unk3E;
-    if ((owner->pad66 & 0xC) == 0xC) {
+    fogOverride = D_800B0DF0->unk3E;
+    if ((owner->unk66 & 0xC) == 0xC) {
         gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);
-    } else if (((owner->pad66 & 0xC) != 8) && !(att->flags & 1)) {
+    } else if (((owner->unk66 & 0xC) != 8) && !(att->flags & 1)) {
         gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
         lit = FALSE;
     } else if (D_800DCD7C != 0) {
@@ -812,26 +727,26 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
         lit = FALSE;
     }
     if (lit) {
-        if (OBJ_S32(owner, 0x304 + view * 4) == 0) {
+        if (owner->unk304[view] == 0) {
             func_150832AC(owner);
             i = TRUE;
         } else {
             i = FALSE;
         }
-        if (OBJ_S32(owner, 0x304 + view * 4) != 0) {
-            if ((OBJ_U8(owner, 0x2FD) != 0) || i) {
+        if (owner->unk304[view] != 0) {
+            if ((owner->unk2FD != 0) || i) {
                 v = 0xA;
             } else {
                 v = 2;
             }
-            if ((owner->unk5 != 5) && (OBJ_U8(owner, 0x302) != 0) && (owner->pad66 & 0xC) && !i) {
-                gdl = func_1515E544(gdl, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301), OBJ_U8(owner, 0x302),
-                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8);
+            if ((owner->unk5 != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
+                gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
+                                    owner->unk314[D_800BE9C0]);
             } else {
                 gdl = func_1515D914(gdl, view, (s32)owner->x_position, (s32)owner->y_position, (s32)owner->z_position,
-                                    owner->unk184, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301),
-                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8, (u8 *)owner + 0x302, 2,
-                                    (u8 *)owner + 0x1DD, v, D_800D9E28);
+                                    owner->unk184, owner->unk304[view], owner->unk301,
+                                    owner->unk314[D_800BE9C0], &owner->unk302, 2,
+                                    owner->unk1DD, v, D_800D9E28);
             }
         }
     }
@@ -877,27 +792,27 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
 }
 
 /* Sets the alpha of attachment number `index` of set `setId` on `owner`. */
-void func_1503192C(struct127 *owner, s32 setId, s32 alpha, s32 index) {
-    Attachment *att;
+void func_1503192C(Actor *owner, s32 setId, s32 alpha, s32 index) {
+    ModelAttachment *att;
 
-    att = (Attachment *)func_1503195C(owner, setId, index);
+    att = (ModelAttachment *)func_1503195C(owner, setId, index);
     if (att != NULL) {
         att->alpha = alpha;
     }
 }
 
 /* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
-struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
+ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
     s32 ownerId;
-    Attachment *att;
-    Attachment *next;
+    ModelAttachment *att;
+    ModelAttachment *next;
 
     ownerId = owner->unique_id;
     if (ownerId == 0) {
         return NULL;
     }
 
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if ((ownerId == att->ownerId) && (setId == att->setId)) {
@@ -905,7 +820,7 @@ struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
                 index--;
                 att = next;
             } else {
-                return (struct126 *)att;
+                return (ActorCtl *)att;
             }
         } else {
             att = next;
@@ -915,13 +830,13 @@ struct126 *func_1503195C(struct127 *owner, s32 setId, s32 index) {
 }
 
 /* Returns the first attachment of set `setId`, preferring one owned by `owner`. */
-Attachment *func_150319CC(s32 setId, struct127 *owner) {
-    Attachment *att;
-    Attachment *next;
+ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
+    ModelAttachment *att;
+    ModelAttachment *next;
     u8 ownerId;
 
     if (owner != NULL) {
-        att = (Attachment *)D_800C3EE0;
+        att = D_800C3EE0;
         if (att != NULL) {
             ownerId = owner->unique_id;
             do {
@@ -933,7 +848,7 @@ Attachment *func_150319CC(s32 setId, struct127 *owner) {
             } while (att != NULL);
         }
     }
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (att->setId == setId) {
@@ -954,9 +869,9 @@ extern s32 D_80090228;
 extern s32 D_8009022C;
 
 /* Applies a model's side effects to its owner when it is attached (undone by func_15031C14). */
-void func_15031A50(Attachment *att, struct127 *owner) {
+void func_15031A50(ModelAttachment *att, Actor *owner) {
     s32 model = att->model;
-    struct126 *unk;
+    ActorCtl *unk;
 
     switch (model) {
     case 0x37:
@@ -965,7 +880,7 @@ void func_15031A50(Attachment *att, struct127 *owner) {
     case 0x5A:
         unk = owner->unk31C;
         if (unk != NULL) {
-            *(u16 *)((u8 *)unk + 0x1A6) += 0xAA; // not covered by struct126 yet
+            unk->unk1A6 += 0xAA;
         }
         break;
     case 0x90:
@@ -1006,24 +921,24 @@ void func_15031A50(Attachment *att, struct127 *owner) {
 
 /* An object pointer plus the unique_id it had, passed to event handlers. */
 typedef struct ObjectRef {
-    struct127 *obj;
+    Actor *obj;
     u8 uniqueId;
 } ObjectRef;
 
-void func_15100180(struct127 *);
+void func_15100180(Actor *);
 void func_151616D0(u8, u8, ObjectRef *);
 void func_15147D64(ObjectRef *, s32);
-void func_151BD7F4(struct127 *);
-void func_151D4668(struct127 *);
-void func_151D747C(struct127 *);
-void func_151027E8(struct127 *);
+void func_151BD7F4(Actor *);
+void func_151D4668(Actor *);
+void func_151D747C(Actor *);
+void func_151027E8(Actor *);
 
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
-void func_15031C14(Attachment *att) {
-    struct127 *owner;
+void func_15031C14(ModelAttachment *att) {
+    Actor *owner;
     ObjectRef ref49;
     ObjectRef ref5D;
-    struct126 *unk;
+    ActorCtl *unk;
     ObjectRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
 
     owner = func_15083E90(att->ownerId);
@@ -1032,7 +947,7 @@ void func_15031C14(Attachment *att) {
         case 0x5A:
             unk = owner->unk31C;
             if (unk != NULL) {
-                *(u16 *)((u8 *)unk + 0x1A6) -= 0xAA; // not covered by struct126 yet
+                unk->unk1A6 -= 0xAA;
             }
             break;
         case 0x90:
@@ -1091,7 +1006,7 @@ void func_15031C14(Attachment *att) {
 }
 
 /* Hook: cycles seg6Id back and forth through the three D_800902BC entries, one step per call. */
-s32 func_15031E2C(Attachment *att, struct127 *owner) {
+s32 func_15031E2C(ModelAttachment *att, Actor *owner) {
     s32 step;
 
     step = att->unk38;
@@ -1111,8 +1026,8 @@ s32 func_15031E2C(Attachment *att, struct127 *owner) {
 
 /* Hook: sets the tile t of the first display list's 4th G_SETTILESIZE from the owner's
  * animation frame (0..120 maps to 27..2). */
-s32 func_15031E7C(Attachment *att, struct127 *owner) {
-    struct197 *anim;
+s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
+    AnimInstance *anim;
     Gfx *gfx;
     s32 count;
     s32 i;
@@ -1132,8 +1047,8 @@ s32 func_15031E7C(Attachment *att, struct127 *owner) {
         t = 1.0f;
     } else if (owner->unk84.uh == 0x56) {
         t = 0.0f;
-    } else if ((0.0f <= anim->unk8) && (anim->unk8 <= 120.0f)) {
-        t = anim->unk8 * 0.008333333768f;
+    } else if ((0.0f <= anim->frame) && (anim->frame <= 120.0f)) {
+        t = anim->frame * 0.008333333768f;
         t = 1.0f - t;
     } else {
         t = 0.0f;
@@ -1161,7 +1076,7 @@ extern void func_1505E060(AnimInstance *anim);
 
 /* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
  * from the owner's id and state, then keeps its frame in step with the owner's animation. */
-s32 func_15031FC8(Attachment *att, struct127 *owner) {
+s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
     s32 animId;
     u8 pad1; // matching: stack padding
@@ -1172,7 +1087,7 @@ s32 func_15031FC8(Attachment *att, struct127 *owner) {
     s32 pad; // matching: stack padding
     s32 syncAll;
 
-    ownerAnim = (AnimInstance *)owner->unk2D0;
+    ownerAnim = owner->unk2D0;
     animId = -1;
     anim = att->anim;
     if (anim == NULL) {
@@ -2388,8 +2303,8 @@ static AttachmentHook const D_800841D4_entry[] = { func_15031FC8 };
 
 
 /* Hook: plays the owner's unk2E4 animation on the attachment and keeps it in step with the owner's frame. */
-s32 func_150331B8(Attachment *att, struct127 *owner) {
-    struct197 *ownerAnim;
+s32 func_150331B8(ModelAttachment *att, Actor *owner) {
+    AnimInstance *ownerAnim;
     AnimInstance *anim;
 
     ownerAnim = owner->unk2D0;
@@ -2401,7 +2316,7 @@ s32 func_150331B8(Attachment *att, struct127 *owner) {
         func_1503F5B8(anim, 0, owner->unk2E4 & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
-        att->anim->frame = ownerAnim->unk8;
+        att->anim->frame = ownerAnim->frame;
         anim = att->anim;
         if (anim->numFrames <= anim->frame) {
             anim->frame = anim->numFrames - 1.0f;
@@ -2411,7 +2326,7 @@ s32 func_150331B8(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: plays animation 0 on the attachment once; removes the attachment when it has finished. */
-s32 func_1503327C(Attachment *att, struct127 *owner) {
+s32 func_1503327C(ModelAttachment *att, Actor *owner) {
     AnimInstance *anim;
 
     anim = att->anim;
@@ -2429,14 +2344,14 @@ s32 func_1503327C(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: removes the attachment after 30 ticks with its owner out of water and unk118 < unk180. */
-s32 func_15033328(Attachment *att, struct127 *owner) {
+s32 func_15033328(ModelAttachment *att, Actor *owner) {
     s32 delta;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if (owner->in_water == 0) {
-        if (owner->unk118 < owner->unk180) {
+        if (owner->unk118 < owner->floorY) {
             delta = D_800BE9E4;
             if (delta < att->unk38) {
                 att->unk38 -= delta;
@@ -2451,10 +2366,10 @@ s32 func_15033328(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: hides the attachment while the owner is below unk118 + 300; removes it in water. */
-s32 func_150333A8(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+s32 func_150333A8(ModelAttachment *att, Actor *owner) {
+    ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if (owner->in_water != 0) {
@@ -2473,7 +2388,7 @@ s32 func_150333A8(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: while the owner's unk5 is 5, moves models 0x27/0x35/0x29 to bone 0 (spinning 0x27/0x35). */
-s32 func_15033440(Attachment *att, struct127 *owner) {
+s32 func_15033440(ModelAttachment *att, Actor *owner) {
     switch (att->model) {
     case 0x27:
     case 0x35:
@@ -2492,7 +2407,7 @@ s32 func_15033440(Attachment *att, struct127 *owner) {
 }
 
 /* Scrolls the tile of model 0x37's 4th G_SETTILESIZE, wrapping s and t within the tile size. */
-s32 func_150334B8(Attachment *att, struct127 *owner) {
+s32 func_150334B8(ModelAttachment *att, Actor *owner) {
     Gfx *gfx;
     s32 count;
     s32 i;
@@ -2549,12 +2464,12 @@ s32 func_150334B8(Attachment *att, struct127 *owner) {
 
 /* Attaches set `setId` to bone `bone` of `target`, with the offset that keeps it where `obj` is now
  * (only rotation when `noTranslation`). */
-Attachment *func_150335C8(struct127 *obj, struct127 *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
-    Attachment *att;
-    f32 boneMtx[4][4];
-    f32 invBoneMtx[4][4];
-    f32 objMtx[4][4];
-    f32 relMtx[4][4];
+ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
+    ModelAttachment *att;
+    MtxF boneMtx;
+    MtxF invBoneMtx;
+    MtxF objMtx;
+    MtxF relMtx;
     f32 x;
     f32 y;
     f32 z;
@@ -2612,7 +2527,7 @@ Attachment *func_150335C8(struct127 *obj, struct127 *target, s32 setId, s32 bone
 }
 
 /* Hook: model 0x11 is removed unless its owner is in one of a few states. */
-s32 func_1503378C(Attachment *att, struct127 *owner) {
+s32 func_1503378C(ModelAttachment *att, Actor *owner) {
     u16 state = owner->unk84.uh;
 
     if (att->model == 0x11) {
@@ -2627,7 +2542,7 @@ s32 func_1503378C(Attachment *att, struct127 *owner) {
 extern s32 D_800902FC[];
 
 /* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
-s32 func_150337E4(Attachment *att, struct127 *owner) {
+s32 func_150337E4(ModelAttachment *att, Actor *owner) {
     att->unk38 += D_800BE9E4;
     if (att->unk38 >= 16) {
         att->unk38 = 0;
@@ -2637,14 +2552,14 @@ s32 func_150337E4(Attachment *att, struct127 *owner) {
     return 0;
 }
 
-void func_151026BC(struct127 *, s32, s32, s32, s32, s32);
+void func_151026BC(Actor *, s32, s32, s32, s32, s32);
 
 /* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
  * unk31C allows it), and stops it with func_151027E8 when that no longer holds. */
-s32 func_15033838(Attachment *att, struct127 *owner) {
+s32 func_15033838(ModelAttachment *att, Actor *owner) {
     s32 kind;
     s32 triggered;
-    struct126 *unk;
+    ActorCtl *unk;
 
     triggered = 0;
     if (att->setId == 0x16) {
@@ -2672,8 +2587,8 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
     if (att->unk38 == 0) {
         if (triggered) {
             unk = owner->unk31C;
-            if ((unk->pad196[1] != 0) || (kind == 6)) {
-                if (((u16)unk->unk8A & 0x2000) == 0x2000) {
+            if ((unk->aimState != 0) || (kind == 6)) {
+                if ((unk->buttons & 0x2000) == 0x2000) {
                     if (unk->unk19E == 0) {
                         att->unk38 = 1;
                         func_151026BC(owner, -1, kind, 1, 0xFF, 1);
@@ -2681,8 +2596,8 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
                 }
             }
         }
-    } else if (!triggered || (unk = owner->unk31C, ((u16)unk->unk8A & 0x2000) == 0) ||
-               ((unk->pad196[1] == 0) && (kind != 6))) {
+    } else if (!triggered || (unk = owner->unk31C, (unk->buttons & 0x2000) == 0) ||
+               ((unk->aimState == 0) && (kind != 6))) {
         att->unk38 = 0;
         func_151027E8(owner);
     }
@@ -2691,9 +2606,9 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
 
 /* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
  * unless D_800BEA0C is set. */
-s32 func_150339C8(Attachment *att, struct127 *owner) {
+s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     func_150334B8(att, owner);
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
                 func_1000FD38(func_15033BDC, att, (s32)owner);
@@ -2701,7 +2616,7 @@ s32 func_150339C8(Attachment *att, struct127 *owner) {
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
             att->unk3C = func_1000FA64(0x448, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
-                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0) |
+                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
     }
@@ -2709,7 +2624,7 @@ s32 func_150339C8(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: after a 30-tick delay, starts sound 0x513 at the owner (func_15033BDC follows it up). */
-s32 func_15033AD8(Attachment *att, struct127 *owner) {
+s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
     if (D_800BE616 != 0) {
         func_1508B20C(owner->x_position, owner->y_position, owner->z_position, 900.0f);
     }
@@ -2718,7 +2633,7 @@ s32 func_15033AD8(Attachment *att, struct127 *owner) {
             att->unk3C += D_800BE9E4;
         } else {
             att->unk3C = func_1000FA64(0x513, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
-                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0);
+                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
     }
@@ -2732,20 +2647,20 @@ typedef struct AttachmentSound {
     /* 0x04 */ s16 y;
     /* 0x06 */ s16 z;
     /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ Attachment *att;
-    /* 0x1C */ struct127 *owner;
+    /* 0x18 */ ModelAttachment *att;
+    /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 pad20[0x4];
     /* 0x24 */ u16 unk24;
 } AttachmentSound;
 
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5);
+void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
 
 /* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
  * when the sound should stop. */
 s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
-    Attachment *att;
-    struct127 *owner;
-    struct126 *unk;
+    ModelAttachment *att;
+    Actor *owner;
+    ActorCtl *unk;
 
     att = sound->att;
     owner = sound->owner;
@@ -2771,11 +2686,11 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
             } else {
                 unk = owner->unk31C;
                 if (unk != NULL) {
-                    if (*(u16 *)&unk->pad19C < 120) {
+                    if (unk->unk19C < 120) {
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
-                                                       owner->z_position, 32000, 1000, 500, (s32)func_15033BDC, att,
+                                                       owner->z_position, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }
@@ -2798,7 +2713,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
 }
 
 /* Hook: removes the attachment once its owner's unk5 becomes 3. */
-s32 func_15033E00(Attachment *att, struct127 *owner) {
+s32 func_15033E00(ModelAttachment *att, Actor *owner) {
     if (owner->unk5 == 3) {
         return 1;
     }
@@ -2806,13 +2721,13 @@ s32 func_15033E00(Attachment *att, struct127 *owner) {
 }
 
 /* Stores every attachment of `owner` into `out` and returns how many there are. */
-s32 func_15033E28(struct127 *owner, Attachment **out) {
-    Attachment *head;
-    Attachment *att;
-    Attachment *next;
+s32 func_15033E28(Actor *owner, ModelAttachment **out) {
+    ModelAttachment *head;
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 count;
 
-    head = (Attachment *)D_800C3EE0;
+    head = D_800C3EE0;
     count = 0;
     if (head == NULL) {
         return 0;
@@ -2830,12 +2745,12 @@ s32 func_15033E28(struct127 *owner, Attachment **out) {
 }
 
 /* Returns the first attachment of `owner`, or NULL. */
-Attachment *func_15033E84(struct127 *owner) {
-    Attachment *att;
-    Attachment *next;
+ModelAttachment *func_15033E84(Actor *owner) {
+    ModelAttachment *att;
+    ModelAttachment *next;
     u8 ownerId;
 
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     if (att != NULL) {
         ownerId = owner->unique_id;
         do {
@@ -2851,13 +2766,13 @@ Attachment *func_15033E84(struct127 *owner) {
 
 /* Swaps the owners of all attachments of owner ids `a` and `b`. */
 void func_15033EC4(s32 a, s32 b) {
-    Attachment *att;
-    Attachment *next;
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 idA;
     s32 ownerId;
 
     idA = a; // matching: IDO keeps the copy in a2
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         ownerId = att->ownerId;
@@ -2871,10 +2786,10 @@ void func_15033EC4(s32 a, s32 b) {
 }
 
 /* Hook: removes the attachment (clearing unk31C->unk11A) unless unk31C->unk78 is 9 or unk11A is 3. */
-s32 func_15033F0C(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
+    ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     unk = owner->unk31C;
@@ -2890,10 +2805,10 @@ s32 func_15033F0C(Attachment *att, struct127 *owner) {
 }
 
 /* Hook: like func_15033F0C, but keeps the attachment while unk31C->unk78 is 0xC or 0x16. */
-s32 func_15033F70(Attachment *att, struct127 *owner) {
-    struct126 *unk;
+s32 func_15033F70(ModelAttachment *att, Actor *owner) {
+    ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     unk = owner->unk31C;

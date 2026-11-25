@@ -9,7 +9,7 @@ extern f32 sqrtf(f32);
 
 /* Builds an Mtx from a rotation (func_150A8050), per-axis scale and translation. */
 void func_15043D90(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
-    f32 mtx[4][4];
+    MtxF mtx;
 
     func_150A8050(mtx, rotX, rotY, rotZ);
     mtx[3][0] = x;
@@ -29,7 +29,7 @@ void func_15043D90(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY,
 
 /* Builds an Mtx from a rotation (func_150A8050) and translation. */
 void func_15043E68(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
-    f32 mtx[4][4];
+    MtxF mtx;
 
     func_150A8050(mtx, rotX, rotY, rotZ);
     mtx[3][0] = x;
@@ -39,7 +39,7 @@ void func_15043E68(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
 }
 
 /* Sets mtx's translation and scales its three basis rows by x, y and z. */
-void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 transZ) {
+void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 transZ) {
     mtx[3][0] = transX;
     mtx[3][1] = transY;
     mtx[3][2] = transZ;
@@ -55,7 +55,7 @@ void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 transX, f32 transY, f
 }
 
 /* Builds a rotate-scale matrix (func_150A9B0C) with translation x, y, z and a clean last column. */
-void func_15043F6C(f32 mtx[4][4], f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
+void func_15043F6C(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
     func_150A9B0C(mtx, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
     mtx[3][0] = x;
     mtx[3][1] = y;
@@ -67,7 +67,7 @@ void func_15043F6C(f32 mtx[4][4], f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 
 }
 
 /* Converts a 16.16 fixed-point position (integer parts at unk18, fractions at unk38) to floats. */
-void func_15043FF0(vertex *out, struct113 *src) {
+void func_15043FF0(Vec3f *out, struct113 *src) {
     out->x = src->unk18;
     out->y = src->unk1A;
     out->z = src->unk1C;
@@ -80,7 +80,7 @@ void func_15043FF0(vertex *out, struct113 *src) {
  * Builds a look-at orientation from eye, target and up: columns hold the right, up and look axes
  * (look is the negated eye->target direction, as in guLookAtF), and the translation row is the eye itself.
  */
-void func_150440A0(f32 mtx[4][4], f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ) {
+void func_150440A0(MtxF mtx, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ) {
     f32 lookX;
     f32 lookY;
     f32 lookZ;

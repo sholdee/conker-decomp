@@ -8,7 +8,6 @@ typedef struct {
     /* 0x2 */ s16 ids[1]; /* actually [count] */
 } IdList;
 
-extern u8 D_800D9F68[]; /* per-id reference count */
 
 extern void func_10004074(void *);
 void func_1510D608(s32 id, s32 arg1);
@@ -32,8 +31,7 @@ void func_1510D630(IdList *list) {
 
 /* Drops one reference to id; when the last one goes, records id in the [D_800D9F58, D_800D9F5C] range and calls func_1510D608(id, 3). */
 void func_1510D694(s32 id) {
-    // matching: the original loads D_800BC448 as s8 (lb); variables.h declares it u8
-    if ((s8)D_800BC448[id] != 0 && D_800D9F68[id] != 0 && --D_800D9F68[id] == 0) {
+    if (D_800BC448[id] != 0 && D_800D9F68[id] != 0 && --D_800D9F68[id] == 0) {
         if (id < D_800D9F58) {
             D_800D9F58 = id;
         }

@@ -1,45 +1,14 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but this file was built against an
-// int-returning prototype (u8 results spill as bytes into a smaller frame), so hide the shared one.
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
- *   ParticleDef, FxParticle, SpriteDef, SpriteFx  - the particle/sprite system of game_169510.c
+ *   FxParticle, SpriteFx                         - the particle/sprite system of game_169510.c
  *   PhysicsParticle, ParticleFloor               - the pooled physics particles of game_15F680.c
- *   BurstConfig                                  - func_15151A38's argument (game_17CAF0.c)
  */
-
-/* Spawn template of a particle (func_1513D594's def), copied to FxParticle.def. */
-typedef struct {
-    /* 0x00 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;
-    /* 0x34 */ vertex scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;      /* lifetime below which unk44 / rgba[3] fade */
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
@@ -48,20 +17,6 @@ typedef struct {
     /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
 } FxParticle;
-
-/* Spawn template of a sprite (func_1513C4EC's def), copied to SpriteFx.def. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    /* 0x08 */ s32 frame;          /* 16.16 animation frame */
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 unk10;           /* faded out with the lifetime (flag 0x8000) */
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 rgba[4];
-    /* 0x18 */ u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
-    /* 0x1C */ u8 pad1C[0x10];
-} SpriteDef; // matching: 0x2C here, 0x28 in game_169510.c; the extra word keeps func_150B9D8C's frame layout
 
 /* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
 typedef struct {
@@ -88,11 +43,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;        /* the look-at point of func_150B9D14's matrix */
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;        /* the look-at point of func_150B9D14's matrix */
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -113,51 +68,9 @@ typedef struct {
     /* 0x168 */ s32 unk168;
 } PhysicsParticle;
 
-/* func_15151A38's argument: spawns a random count of particles at position. */
-typedef struct {
-    /* 0x00 */ vertex position;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ s16 yawBase;
-    /* 0x2A */ s16 yawRange;
-    /* 0x2C */ s16 pitchBase;
-    /* 0x2E */ s16 pitchRange;
-    /* 0x30 */ s16 fadeBase;
-    /* 0x32 */ s16 fadeRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 enabled;
-    /* 0x3A */ u8 red;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 params[7];
-    /* 0x7C */ u8 params1C;
-    /* 0x7D */ u8 params1D;
-    /* 0x7E */ u8 pad7E[2];
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 unk84;
-} BurstConfig; /* size 0x88 */
-
 void *memcpy(void *, const void *, u32);
-void func_15151A38(BurstConfig *config, u8 arg1, s32 arg2);
-s32 func_15046C80(vertex *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
+void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
 extern s32 D_80088740;
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
                    f32 atX, f32 atY, f32 atZ);
@@ -212,10 +125,10 @@ s32 func_150B961C(SpriteFx *sprite) {
  */
 s32 func_150B963C(PhysicsParticle *particle) {
     f32 distSq;
-    vertex playerPos;
+    Vec3f playerPos;
     f32 dirX;
     f32 dirZ;
-    vertex pos;
+    Vec3f pos;
 
     if ((D_80088730 == NULL) || (D_80088730->interaction_state == 0) || (D_80088730->unique_id != 1)) {
         D_80088730 = func_15083E90(1);
@@ -284,7 +197,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
                     def.scale.z = 0.0f;
                     extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.unk18;
-                    spawned = func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
+                    spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
                                             500.0f, 500.0f, 0, (s32)&particle->floor.surface, particle->unk14C,
                                             particle->unk168, 0, 8, particle->unkC, particle->unk1);
@@ -295,29 +208,29 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 }
             }
             {
-                BurstConfig burst;
-                burst.position = particle->pos;
+                PuffSpray burst;
+                burst.pos = particle->pos;
                 burst.sizeBase = 3.0f;
                 burst.sizeRange = 3.100000143f; // not 3.1f: the original constant is one ulp above it
                 burst.countBase = 6;
                 burst.countRange = 6;
-                burst.yawRange = 0xFF;
-                burst.pitchBase = -0x40;
-                burst.pitchRange = 30;
-                burst.yawBase = 0;
-                burst.fadeBase = 3;
-                burst.fadeRange = 3;
+                burst.angles.yawRange = 0xFF;
+                burst.angles.pitchBase = -0x40;
+                burst.angles.pitchRange = 30;
+                burst.angles.yawBase = 0;
+                burst.itemCountBase = 3;
+                burst.itemCountRange = 3;
                 burst.lifeBase = 30;
                 burst.lifeRange = 20;
                 burst.green = 1;
-                burst.enabled = 0x21;
+                burst.headerFlags = 0x21;
                 burst.red = 0x48;
-                burst.unk3C = 1;
-                burst.unk40 = 0;
-                burst.unk44 = 0;
-                burst.unk48 = 0;
-                burst.unk4C = 0;
-                burst.unk50 = 0;
+                burst.handlers[0] = 1;
+                burst.handlers[1] = 0;
+                burst.handlers[2] = 0;
+                burst.handlers[3] = 0;
+                burst.handlers[4] = 0;
+                burst.handlers[5] = 0;
                 burst.blue = 0;
                 burst.alphaBase = 0x9A;
                 burst.alphaRange = 0x65;
@@ -327,15 +240,15 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 burst.speedRange = 7.0f;
                 burst.unk58 = particle->unk14C;
                 burst.unk5C = particle->unk168;
-                burst.params[0] = 0;
-                burst.params[1] = 0x220005;
-                burst.params[2] = 0x1D0600;
-                burst.params[3] = 1;
-                burst.params[4] = 0x3B;
-                burst.params[5] = 0x80;
-                burst.params[6] = 0x20;
-                burst.params1C = 0;
-                burst.params1D = 7;
+                burst.render.unk0 = 0;
+                burst.render.setGeometryMode = 0x220005;
+                burst.render.clearGeometryMode = 0x1D0600;
+                burst.render.renderMode = 1;
+                burst.render.unk10 = 0x3B;
+                burst.render.unk14 = 0x80;
+                burst.render.unk18 = 0x20;
+                burst.render.primMode = 0;
+                burst.render.envMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.unk18;
@@ -388,7 +301,7 @@ typedef struct {
 /* When unk98 is -1, spawns a flat sprite (updated by func_150B961C) at (unk9C, unkA6 + 2, unkA0),
  * unkA2 wide and long, with a random angle and flip. */
 void func_150B9D8C(Obj150B9D8C *obj) {
-    SpriteDef def;
+    SpriteDef2C def;
     s32 randFlipHi;
     s32 randFlipLo;
     s32 randAngle;
@@ -411,7 +324,7 @@ void func_150B9D8C(Obj150B9D8C *obj) {
         randFlipLo = func_150ADA20();
         randFlipHi = func_150ADA20();
 
-        func_1513C4EC((s32)&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
+        func_1513C4EC(&def, 0, 2, 0, obj->unk9C, obj->unkA6 + 2, obj->unkA0, obj->unkA2, obj->unkA2,
                       randAngle & 0xFF, ((randFlipHi & 1) << 1) + (randFlipLo & 1), 3, 0xFF, 0, obj->unkC,
                       obj->unk1);
     }

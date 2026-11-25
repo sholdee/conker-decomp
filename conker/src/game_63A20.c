@@ -2,15 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-/* D_800C3FC0 is declared as a single struct222 *; it is really one vertex buffer per actor. */
-#define VTX_BUFFERS ((Vtx **)&D_800C3FC0)
-
 /* D_800C3FC4 (declared as one s32): a smoothed position per actor, as s16 x, y, z. */
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
-
-/* An actor's bone matrix: struct127.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
 
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 
@@ -26,17 +20,17 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 targetY;
     f32 targetZ;
     Vtx *vtx;
-    struct127 *actor;
+    Actor *actor;
     s32 state;
     f32 frame;
     s16 *anchor;
     f32 blend;
     f32 delta;
 
-    vtx = VTX_BUFFERS[index];
+    vtx = D_800C3FC0[index];
     actor = &D_800CC2D0[index];
     state = actor->unk84.uh;
-    frame = actor->unk2D0->unk8;
+    frame = actor->unk2D0->frame;
     if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
         ((state == 0x3D || state == 0xD9) && frame > 21.0f)) {
         func_150A7960(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);
@@ -79,24 +73,9 @@ typedef struct {
     /* 0x28 */ Vtx *vtx[2]; // one per frame buffer
 } AttachmentView;
 
-/* struct127 fields this file reads that the shared definition only has as padding (pad66, unk301[]). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x66];
-    /* 0x066 */ u8 unk66;
-    /* 0x067 */ u8 pad67[0x29A];
-    /* 0x301 */ u8 unk301;
-    /* 0x302 */ u8 unk302;
-    /* 0x303 */ u8 pad303;
-    /* 0x304 */ s32 unk304[4]; // one per view
-    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
-} ActorTail;
-
-#define ACTOR_TAIL(index) ((ActorTail *)&D_800CC2D0[index])
-
 Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
 Gfx *func_15094F70(Gfx *gfx, void *, s32, void *, s32, s32, s32, s32, s32);
 extern Gfx D_80084350[];
-extern Mtx D_80089470;
 extern u8 D_800903BC[];
 
 /*
@@ -122,21 +101,21 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     color = &attachment->vtx[D_800BE9C0][48];
     for (i = 0; i < 5; i++) {
-        VTX_BUFFERS[index][i].v.cn[0] = color->v.cn[0];
-        VTX_BUFFERS[index][i].v.cn[1] = color->v.cn[1];
-        VTX_BUFFERS[index][i].v.cn[2] = color->v.cn[2];
+        D_800C3FC0[index][i].v.cn[0] = color->v.cn[0];
+        D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];
+        D_800C3FC0[index][i].v.cn[2] = color->v.cn[2];
     }
-    bones = (MtxF *)D_800CC2D0[index].unk1D4;
+    bones = D_800CC2D0[index].unk1D4;
     if (bones == NULL) {
         return gfx;
     }
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
-    gfx = func_1515E544(gfx, ACTOR_TAIL(index)->unk304[view], ACTOR_TAIL(index)->unk301,
-                        ACTOR_TAIL(index)->unk302, ACTOR_TAIL(index)->unk314[D_800BE9C0]);
-    if ((ACTOR_TAIL(index)->unk66 & 0xC) == 0xC) {
+    gfx = func_1515E544(gfx, D_800CC2D0[index].unk304[view], D_800CC2D0[index].unk301,
+                        D_800CC2D0[index].unk302, D_800CC2D0[index].unk314[D_800BE9C0]);
+    if ((D_800CC2D0[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
-    } else if ((ACTOR_TAIL(index)->unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
+    } else if ((D_800CC2D0[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if (D_800DCD7C != 0) {
         gSPSetGeometryMode(gfx++, G_LIGHTING);
@@ -145,9 +124,9 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     gfx = func_15094F70(gfx, D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &VTX_BUFFERS[index][0], 1, 0);
+    gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &VTX_BUFFERS[index][1], 4, 1);
+    gSPVertex(gfx++, &D_800C3FC0[index][1], 4, 1);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 3, 4, 0);
     return gfx;

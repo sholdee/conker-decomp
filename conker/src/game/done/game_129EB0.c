@@ -4,8 +4,8 @@
 #include "variables.h"
 
 
-void func_150FCA00(struct108 *arg0) {
-    arg0->unk348 = 500.0f;
+void func_150FCA00(Camera *arg0) {
+    arg0->height = 500.0f;
     arg0->unk34C = 500.0f;
-    arg0->unk374 = 800.0f;
+    arg0->targetDistance = 800.0f;
 }

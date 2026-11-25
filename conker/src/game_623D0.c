@@ -23,7 +23,7 @@ void func_15034F20(void) {
 
 void func_150A7A48(void *, void *, void *);
 void guMtxF2L2(void *, void *);
-void func_15034728(struct127 *);
+void func_15034728(Actor *);
 s32 func_150AD960(s32, s32, s32, s32);
 
 /*
@@ -32,18 +32,18 @@ s32 func_150AD960(s32, s32, s32, s32);
  * vertical plane through (planeX, planeZ) at `angle`. `srcIsFixed`: the sources are fixed point
  * (Mtx); `dstToFixed`: convert the results to fixed point.
  */
-void func_15034F30(struct127 *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4][4],
-                   f32 (*dstMtx)[4][4], s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
+void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
+                   MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
                    f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
                    s32 srcIsFixed, s32 dstToFixed) {
-    f32 flip[4][4];
-    f32 rotA[4][4];
-    f32 rotB[4][4];
+    MtxF flip;
+    MtxF rotA;
+    MtxF rotB;
     s32 i;
     f32 (*src)[4];
     f32 dist;
-    f32 temp[4][4];
-    struct255 *savedMtx;
+    MtxF temp;
+    MtxF *savedMtx;
 
     guMtxIdentF(flip);
     if (mode == 1 || mode == 0) {
@@ -132,7 +132,7 @@ void func_15034F30(struct127 *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMt
     }
     if (obj != NULL && obj->unk9C != 0) {
         savedMtx = obj->unk1D4;
-        obj->unk1D4 = (struct255 *)dstMtx;
+        obj->unk1D4 = (MtxF *)dstMtx;
         func_15034728(obj);
         obj->unk1D4 = savedMtx;
     }
@@ -149,86 +149,48 @@ ReflectionEntry *func_150356C8(void) {
 }
 
 
-/* Per model-type bounds, D_800D1C90[id] (only the fields used here). */
-typedef struct ModelBounds {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u16 body_radius;
-    /* 0x10 */ s16 body_height;
-} ModelBounds;
-
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-extern u8 D_800D9C10; // view matrices
 
 /*
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
  * In modes 0 and 1 the bounds centre is mirrored in the plane y = planeY.
  */
-s32 func_15035714(s32 mode, struct127 *obj, f32 (*mtx)[4], f32 planeY) {
+s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 height;
     f32 radiusXZ;
     f32 radiusY;
     f32 radius;
     f32 y;
     s32 recp;
-    ModelBounds *bounds;
+    ModelDef *bounds;
     s32 id;
     f32 delta;
 
     recp = (s32)D_800BE628;
     id = obj->id;
-    bounds = (ModelBounds *)D_800D1C90[id];
-    radius = bounds->body_radius;
+    bounds = D_800D1C90[id];
+    radius = bounds->bodyRadius;
     radiusXZ = radius;
     radiusY = radius;
     radiusXZ *= obj->xz_scale;
     radiusY *= obj->y_scale;
-    height = bounds->body_height * obj->y_scale;
+    height = bounds->bodyHeight * obj->y_scale;
     if (mode == 1 || mode == 0) {
         delta = (obj->y_position + height) - planeY;
         y = planeY - delta;
     } else {
         y = obj->y_position + height;
     }
-    if (func_150A6360(recp, &D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
+    if (func_150A6360(recp, D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;
 }
 
-/* Model animation state (layout as in game_5D2C0.c; only the field used here). */
-typedef struct AnimInstance {
-    /* 0x000 */ u8 pad0[0x3F4];
-    /* 0x3F4 */ u8 numMtx;
-} AnimInstance;
-
-/* A model attached to a game object, from the list headed by D_800C3EE0 (layout as in
- * game_5D2C0.c; only the fields used here). */
-typedef struct Attachment {
-    /* 0x00 */ u8 ownerId;        // unique_id of the owning struct127
-    /* 0x01 */ u8 pad1[2];
-    /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 pad4[2];
-    /* 0x06 */ u8 setId;
-    /* 0x07 */ u8 pad7[0xC];
-    /* 0x13 */ u8 hiddenDLists;   // bit i set: display list i is not drawn
-    /* 0x14 */ u8 numDLists;
-    /* 0x15 */ u8 pad15[0xF];
-    /* 0x24 */ Gfx **dlists;
-    /* 0x28 */ u8 pad28[0xC];
-    /* 0x34 */ Mtx *mtx;
-    /* 0x38 */ u8 pad38[0x10];
-    /* 0x48 */ AnimInstance *anim;
-    /* 0x4C */ u32 reflMtx[2];    // mirrored matrices, one per frame buffer
-    /* 0x54 */ struct Attachment *next;
-} Attachment;
-
-extern u16 D_800C3E7A; // bone matrices used this frame
-extern u32 D_800C3E88; // bone-matrix pool cursor
-extern u32 D_800C3E8C; // bone-matrix pool start
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(Attachment *, struct127 *, struct255 **, s32 *);
+s32 func_15031070(ModelAttachment *, Actor *, MtxF **, s32 *);
 s32 func_150AD9A0(s32, s32, s32);
 
 /*
@@ -240,10 +202,10 @@ void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f
     ReflectionEntry *entry;
     u32 mtx;
     s32 color[3];
-    struct255 *srcMtx;
+    MtxF *srcMtx;
     s32 partCount[4]; // matching: one s32 is written; the array keeps the stack layout
-    Attachment *att;
-    Attachment *next;
+    ModelAttachment *att;
+    ModelAttachment *next;
     s32 range;
     s32 numBones;
     s32 fade;
@@ -276,12 +238,12 @@ visible:;
     if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + numBones * sizeof(Mtx) - D_800C3E8C) {
         return;
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         range = 10000;
     }
-    dist = func_150AD9A0(D_800DBFF0->unk2F8 - D_800CC2D0[objIndex].x_position,
-                         D_800DBFF0->unk2FC - D_800CC2D0[objIndex].y_position,
-                         D_800DBFF0->unk300 - D_800CC2D0[objIndex].z_position);
+    dist = func_150AD9A0(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,
+                         D_800DBFF0->eye.y - D_800CC2D0[objIndex].y_position,
+                         D_800DBFF0->eye.z - D_800CC2D0[objIndex].z_position);
     if ((f32)range < dist) {
         return;
     }
@@ -319,7 +281,7 @@ visible:;
     D_800C3E88 += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
     D_800C3E7A += numBones;
 
-    att = (Attachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (D_800CC2D0[objIndex].unique_id != att->ownerId || att->alpha == 0) {
@@ -343,12 +305,12 @@ visible:;
         }
         numMtx = 1;
         if (att->anim != NULL) {
-            numMtx = att->anim->numMtx;
+            numMtx = att->anim->numParts;
         }
-        if (att->reflMtx[D_800BE9C0] == 0) {
-            att->reflMtx[D_800BE9C0] = (u32)allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
+        if (att->reflMtx[D_800BE9C0] == NULL) {
+            att->reflMtx[D_800BE9C0] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
         }
-        entry->mtx = att->reflMtx[D_800BE9C0];
+        entry->mtx = (u32)att->reflMtx[D_800BE9C0];
         mtx = entry->mtx;
         attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
         if (att->mtx == NULL && att->anim == NULL) {
@@ -364,14 +326,12 @@ visible:;
     }
 }
 
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
 
 /*
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with
  * the reflection's matrices in segment 3 and its alpha in the env colour.
  */
-Gfx *func_15035D6C(Gfx *gfx, Attachment *att, s32 red, s32 green, s32 blue) {
+Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue) {
     ReflectionEntry *entry;
     s32 alpha;
     s32 i;
@@ -447,7 +407,7 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 
 /*
  * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1
@@ -461,13 +421,13 @@ void func_15036148(void) {
     s16 unusedB;
     s32 i;
 
-    if (!(D_800DBFF0->unk5F0 & 1)) {
+    if (!(D_800DBFF0->status & 1)) {
         for (i = 0; i < 25; i++) {
             if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
                 if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position &&
-                    D_800CC2D0[i].unk180 < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
+                    D_800CC2D0[i].floorY < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
                     func_1507C3E0(&D_800CC2D0[i], &height, &unusedA, &unusedB);
-                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].unk180) {
+                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].floorY) {
                         func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118,
                                       D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }

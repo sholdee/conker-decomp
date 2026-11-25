@@ -2,22 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
-
-/* Per-player view record (0x180 bytes) in the array D_800BE628 points to; see game_126F60.c. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 width;
-    /* 0x08 */ u8 pad8[0x1C];
-    /* 0x24 */ f32 top;
-    /* 0x28 */ f32 bottom;
-    /* 0x2C */ f32 left;
-    /* 0x30 */ f32 right;
-    /* 0x34 */ u8 pad34[0x14C];
-} ProbeView; // size 0x180
-
-#define VIEWS ((ProbeView *)D_800BE628)
 
 /* Copies 4 pixels starting at (x, y) of the z-buffer into zDest and of the current frame buffer into
  * colorDest, using copy-mode texture rectangles that load one screen row of view's width. */
@@ -30,15 +15,15 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPLoadTextureBlock(gfx++, (y * D_800BE620 * 2) + D_800BE9C4, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)VIEWS[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, D_800BE9C4 + y * D_800BE620, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
-    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)VIEWS[view].width, 1);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)D_800BE628[view].width, 1);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
-    gDPLoadTextureBlock(gfx++, D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)VIEWS[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, (u8 *)D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 
-    gfx = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     return gfx;
 }
@@ -139,8 +124,8 @@ Gfx *func_151742EC(Gfx *gfx, s32 view) {
             x = screenX;
             y = screenY;
             D_800DD300[i] = screenZ;
-            if (x >= (s32)VIEWS[view].left && x < (s32)VIEWS[view].right && y >= (s32)VIEWS[view].top &&
-                y < (s32)VIEWS[view].bottom) {
+            if (x >= (s32)D_800BE628[view].left && x < (s32)D_800BE628[view].right && y >= (s32)D_800BE628[view].top &&
+                y < (s32)D_800BE628[view].bottom) {
                 gfx = func_15173D00(gfx, x, y, 1, (s32)((u8 *)D_800DD310 + i * 8), (s32)((u8 *)D_800DD328 + i * 8), view);
             }
             // matching: dead guard; gives 0xFFFF a 2nd reference so it outranks view for a register

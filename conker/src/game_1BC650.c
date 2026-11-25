@@ -1,11 +1,7 @@
 #include <ultra64.h>
-// functions.h declares these pointer parameters as s32; this file uses the real pointer types.
-#define func_15169260 func_15169260_hdr
-#define func_15169850 func_15169850_hdr
 #include "functions.h"
-#undef func_15169260
-#undef func_15169850
 #include "variables.h"
+#include "effects.h"
 
 /* Per-type state of a sprite effect, at sprite + 0x110. */
 typedef struct {
@@ -26,7 +22,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ struct17 velocity;
+    /* 0x38 */ Vec3f velocity;
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 unk48;
 } SpriteMotion;
@@ -39,7 +35,7 @@ typedef struct {
     /* 0x028 */ u8 pad28[4];
     /* 0x02C */ f32 unk2C;
     /* 0x030 */ f32 unk30;
-    /* 0x034 */ struct17 target;
+    /* 0x034 */ Vec3f target;
     /* 0x040 */ u8 pad40[0x18];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0x10];
@@ -54,62 +50,8 @@ typedef struct {
     } data;
 } EffectSprite;
 
-/* 0x50-byte emitter template (D_8008D630), copied into EmitterParams after `accum`. */
 typedef struct {
-    /* 0x00 */ f32 rate;
-    /* 0x04 */ f32 rateRange;
-    /* 0x08 */ f32 burstBase;
-    /* 0x0C */ f32 burstRange;
-    /* 0x10 */ f32 sizeX;
-    /* 0x14 */ f32 sizeY;
-    /* 0x18 */ f32 sizeXRange;
-    /* 0x1C */ f32 sizeYRange;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21Range;
-    /* 0x22 */ s16 lifeMin;
-    /* 0x24 */ s16 lifeRange;
-    /* 0x26 */ u8 pad26[2];
-    /* 0x28 */ s32 maxCount;
-    /* 0x2C */ f32 velocityScale;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34Range;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42Range;
-    /* 0x44 */ s32 anchorSet;
-    /* 0x48 */ u8 flags;
-    /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 unk4C;
-} EmitterTemplate; /* 0x50 */
-
-typedef struct {
-    /* 0x00 */ f32 accum;
-    /* 0x04 */ EmitterTemplate tmpl;
-    /* 0x54 */ struct225 *child;
-    /* 0x58 */ s8 updateFunc;
-    /* 0x59 */ s8 unk59Func;
-    /* 0x5A */ u8 unk5A;
-    /* 0x5B */ u8 pad5B;
-} EmitterParams; /* 0x5C */
-
-/* Object returned by func_151D2F00. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct127 *owner;
-    /* 0x14 */ u8 pad14[0xC];
-    /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[0xE];
-    /* 0x30 */ EmitterParams params;
-} Emitter;
-
-typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 duration;
@@ -123,30 +65,30 @@ typedef struct {
 } EmitterDesc;
 
 /* One entry of a bone anchor set (D_800E0990). */
-typedef struct {
+typedef struct BoneAnchor {
     /* 0x00 */ u8 bone;
-    /* 0x04 */ struct17 offset;
+    /* 0x04 */ Vec3f offset;
 } BoneAnchor; /* 0x10 */
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
-    /* 0x08 */ struct17 offset;
+    /* 0x08 */ Vec3f offset;
     /* 0x14 */ u8 bone;
     /* 0x16 */ s16 duration;
     /* 0x18 */ u8 unk18;
     /* 0x19 */ u8 unk19;
     /* 0x1A */ u8 unk1A;
     /* 0x1C */ void *sprite;
-    /* 0x20 */ Emitter *parent;
+    /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
 
 /* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ EffectSprite *sprite;
-    /* 0x30 */ Emitter *parent;
-    /* 0x34 */ struct17 pos;
+    /* 0x30 */ AnchorEmitter *parent;
+    /* 0x34 */ Vec3f pos;
 } EmitterParticle;
 
 typedef struct {
@@ -169,40 +111,38 @@ typedef struct {
 } Desc15169260;
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
 } ChildOwner;
 
 typedef struct {
-    /* 0x00 */ Emitter *emitter;
+    /* 0x00 */ AnchorEmitter *emitter;
     /* 0x04 */ f32 params[8];
     /* 0x24 */ ChildOwner owner;
     /* 0x2C */ Header header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
-void func_15169260(Desc15169260 *, s32, s32, u8);
-void func_15169850(ContactKey *, u8, s32 *, u8 *, ContactObj *);
 void *memcpy(void *, const void *, u32);
 s32 func_1518E298();
-void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
-void *func_1514B8E4(struct17 *, SpriteSize *, s16, u8, struct17 *, f32, f32, f32, u8, u8, u8, s32, u8, s16,
+void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
+void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, u8, u8, s32, u8, s16,
                     s16, s32, u8, s32);
 void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
-void func_151D2BA4(EmitterParticleDesc *, struct17 *, s32, u8, s32);
-Emitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
+void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
+AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
 
-s32 func_1518FDC4(struct127 *obj, u8 *kind, u8 variant);
-Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
+AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
-void func_1518F8E0(Emitter *emitter);
-struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+void func_1518F8E0(AnchorEmitter *emitter);
+struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
-extern EmitterTemplate *D_8008D630[];
-extern s32 (*D_8008D67C[])(Emitter *);
+extern AnchorEmitterTemplate *D_8008D630[];
+extern s32 (*D_8008D67C[])(AnchorEmitter *);
 extern void (*D_8008D680[])(void);
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
@@ -258,7 +198,7 @@ void func_1518F45C(s32 arg0, u8 arg1) {
 }
 
 void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
-    func_15169850(other, arg2, &self->key.unk0, &self->key.unk4, self);
+    func_15169850((s32)other, arg2, (Actor **)&self->key.unk0, &self->key.unk4, self);
     if (arg2 == 0x49) {
         s32 selfId = self->key.unk0;
         s32 otherId = other->unk0;
@@ -271,7 +211,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id. */
-Emitter *func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
+AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
                        u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -287,13 +227,13 @@ Emitter *func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, 
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     EmitterDesc desc;
     u8 pad[4]; // matching: unused stack slot
-    EmitterParams params;
-    EmitterParams *dest;
-    Emitter *emitter;
+    AnchorEmitterParams params;
+    AnchorEmitterParams *dest;
+    AnchorEmitter *emitter;
     s8 hasDuration;
 
     params.accum = 0.0f;
@@ -319,7 +259,7 @@ Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8
     emitter = func_151D2F00(&desc, arg7 + 0x60, arg8, arg9);
     if (emitter != NULL) {
         dest = &emitter->params;
-        memcpy(dest, &params, sizeof(EmitterParams));
+        memcpy(dest, &params, sizeof(AnchorEmitterParams));
         if (childKind != -1) {
             dest->child = func_1519021C(emitter, owner, childKind, duration, arg8, arg9);
         } else {
@@ -327,14 +267,14 @@ Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8
         }
         func_151D2AB0(dest->tmpl.anchorSet);
         func_1000FA64(0x4D, owner->x_position, owner->y_position, owner->z_position, 15000, 2000, 800,
-                      (s32)func_1518E298, emitter, (s32)owner, 0, 0);
+                      (SoundRecordCallback)func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
 }
 
 /* Accumulates the emission rate, spawns particles, then runs the emitter's update callback. */
-s32 func_1518F7C4(Emitter *emitter) {
-    EmitterParams *params;
+s32 func_1518F7C4(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * D_800BE9A4;
@@ -345,8 +285,8 @@ s32 func_1518F7C4(Emitter *emitter) {
     return 1;
 }
 
-void func_1518F858(Emitter *emitter) {
-    EmitterParams *params = &emitter->params;
+void func_1518F858(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
         D_8008D680[params->unk59Func]();
@@ -354,8 +294,8 @@ void func_1518F858(Emitter *emitter) {
 }
 
 /* Emits a random-sized burst of particles. */
-void func_1518F89C(Emitter *emitter) {
-    EmitterParams *params;
+void func_1518F89C(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum = func_150ADA68() * params->tmpl.burstRange + params->tmpl.burstBase;
@@ -363,11 +303,11 @@ void func_1518F89C(Emitter *emitter) {
 }
 
 /* Spawns one particle at a random bone anchor of the owner per whole unit in `accum`. */
-void func_1518F8E0(Emitter *emitter) {
-    EmitterParams *params;
-    struct127 *owner;
+void func_1518F8E0(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
+    Actor *owner;
     SpriteSize size;
-    struct17 pos;
+    Vec3f pos;
     BoneAnchor *anchor;
     s32 set;
     s32 kind;
@@ -382,7 +322,7 @@ void func_1518F8E0(Emitter *emitter) {
             do {
                 if (emitter->count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
-                    anchor = &((BoneAnchor *)D_800E0990[set])[(u32)func_150ADA20() % ((u16 *)D_800E0968)[set]];
+                    anchor = &D_800E0990[set][func_150ADA20() % D_800E0968[set]];
                     size.x = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.y = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     func_15143134(&anchor->offset, &pos, (Mtx *)owner->unk1D4 + anchor->bone);
@@ -394,7 +334,7 @@ void func_1518F8E0(Emitter *emitter) {
                     }
                     sprite = func_1514B8E4(&pos, &size, -1,
                                            (u32)frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                           (struct17 *)&D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
                     if (sprite != NULL) {
                         desc.owner = owner;
@@ -424,7 +364,7 @@ void func_1518F8E0(Emitter *emitter) {
     }
 }
 
-s32 func_1518FC04(EmitterParticle *particle, struct17 *target) {
+s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
@@ -433,7 +373,7 @@ s32 func_1518FC04(EmitterParticle *particle, struct17 *target) {
     return 1;
 }
 
-s32 func_1518FC44(EmitterParticle *particle, struct17 *target) {
+s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
@@ -443,11 +383,11 @@ s32 func_1518FC44(EmitterParticle *particle, struct17 *target) {
 }
 
 /* Launches the particle's sprite from its position toward `dest`, or frees it if it has no emitter. */
-void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
+void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     EffectSprite *sprite;
     SpriteMotion *motion;
-    EmitterParams *params;
-    Emitter *parent;
+    AnchorEmitterParams *params;
+    AnchorEmitter *parent;
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
@@ -455,9 +395,9 @@ void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
         return;
     }
     parent = particle->parent;
-    sprite->data.motion.velocity.unk0 = (dest->unk0 - particle->pos.unk0) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.unk4 = (dest->unk4 - particle->pos.unk4) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.unk8 = (dest->unk8 - particle->pos.unk8) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.x = (dest->x - particle->pos.x) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.y = (dest->y - particle->pos.y) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->data.motion;
     motion->unk44 = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
@@ -475,7 +415,7 @@ void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
 }
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */
-s32 func_1518FDC4(struct127 *obj, u8 *kind, u8 variant) {
+s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant) {
     switch (obj->id) {
     case 0x87:
     case 0xB0:
@@ -632,7 +572,7 @@ extern u8 D_800A7B0C;
 extern u8 D_800A7B10;
 
 /* Returns the per-object-id data block (all empty in this build), setting *found. */
-u8 *func_1519003C(struct127 *obj, s32 *found) {
+u8 *func_1519003C(Actor *obj, s32 *found) {
     u8 *data;
 
     switch (obj->id) {
@@ -732,7 +672,7 @@ u8 *func_1519003C(struct127 *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Header2 pos;
     struct225 *child;

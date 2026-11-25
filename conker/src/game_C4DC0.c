@@ -1,28 +1,7 @@
 #include <ultra64.h>
-// matching: functions.h declares func_15083E90 as taking s32 and func_150ADA20 as returning u8; the
-// callers here need a u8 parameter and a full u32 return, so hide those declarations
-#define func_15083E90 func_15083E90_s32_decl_in_functions_h
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_15083E90
-#undef func_150ADA20
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3098
 
-struct127 *func_15083E90(u8);
-u32 func_150ADA20(void);
-extern struct178 *D_800D3098;
-
-/* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
-typedef struct {
-    u8 pad0[2];
-    u8 unk2;
-    u8 pad3[0x2D];
-} SpawnSlot;
-
-#define SPAWN_SLOTS ((SpawnSlot *)D_800D20FC)
 
 typedef struct {
     u8 pad0[4];
@@ -30,22 +9,20 @@ typedef struct {
 } C4DC0_arg1;
 
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern struct127 *func_1505EEF4(s32);
-extern s32 func_15053430(struct127 *);
-extern u8 D_800D2100;
-extern s32 D_800D3840;
+extern Actor *func_1505EEF4(s32);
+extern s32 func_15053430(Actor *);
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
 s32 func_15097910(s32 scriptId, s32 unused) {
     s32 ret;
-    struct127 *obj;
+    Actor *obj;
 
     ret = func_15083E0C((u8)scriptId);
     if (ret != -1) {
         obj = func_15083E90((u8)scriptId);
         if (obj == NULL) {
-            SPAWN_SLOTS[ret].unk2 = 0;
-            if (func_15082A44(ret + SPAWN_SLOTS, ret, 0, 0, 0) == 0) { // matching: index + base operand order
+            D_800D20FC[ret].unk2 = 0;
+            if (func_15082A44(ret + D_800D20FC, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
             ret = func_15083E0C((u8)scriptId);
@@ -61,14 +38,14 @@ s32 func_15097910(s32 scriptId, s32 unused) {
 
 /* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
 s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_1505EEF4(objId);
     if (obj == NULL) {
         return 0;
     }
     if (objId < D_800D2100) {
-        SPAWN_SLOTS[objId].unk2 = 1;
+        D_800D20FC[objId].unk2 = 1;
     }
     if (D_800D3840 == 2) {
         if (arg1->unk4 == 0) {
@@ -92,76 +69,55 @@ typedef struct {
     s32 a[6];
 } ScriptCmd;
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad;
-} PathPoint;
-
-/* D_800D2104[id] points at the path of the object with script id `id` (struct127.unk13F); D_800D2108[id]
- * is its point count. func_15099C14 reads the points from the start of the block, while func_15097A8C
- * writes them 8 bytes in (a header or 1-based indexing; unknown), hence this view. */
-typedef struct {
-    u8 pad0[8];
-    PathPoint pts[1];
-} PathData;
-
-/* Raw field access for bytes of struct127 / struct126 that structs.h declares only as padding or with
+/* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
 /* Index of an object in the D_800CC2D0 object table. */
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)
 
-#define FLD(p, off, T) (*(T *)((u8 *)(p) + (off)))
 
-extern s32 D_800BE3E4;
-extern s16 D_800C3FF4[3];
-extern void func_1503DE70(struct127 *, s32, s32);
-extern void func_1504BAF0(struct127 *);
-extern void func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1503DE70(Actor *, s32, s32);
+extern void func_1504BAF0(Actor *);
+extern void func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_1505D024(Actor *, s32, u16, s32);
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-extern void func_15063254(struct127 *, s32, s32, f32);
-extern void func_15063404(struct127 *);
-extern void func_150634E4(struct127 *);
-extern void func_15063570(struct127 *);
+extern void func_15063254(Actor *, s32, s32, f32);
+extern void func_15063404(Actor *);
+extern void func_150634E4(Actor *);
+extern void func_15063570(Actor *);
 extern struct216 *func_1507BB28(s32, s32);
-extern void func_1507CD64(struct127 *, s32);
-extern void func_1507D1D8(struct127 *);
+extern void func_1507CD64(Actor *, s32);
+extern void func_1507D1D8(Actor *);
 extern void func_1507D4F8(s32);
-extern void func_1507EB2C(struct127 *);
-extern void func_1507EB4C(struct127 *, s32);
+extern void func_1507EB2C(Actor *);
+extern void func_1507EB4C(Actor *, s32);
 extern void func_15080620(s32, s32, s32, s32);
-extern void func_150836CC(struct127 *, s32);
+extern void func_150836CC(Actor *, s32);
 extern s32 func_15084000(s32);
-extern void func_15085410(struct127 *, s32);
+extern void func_15085410(Actor *, s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1510E7A4(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
-extern void func_1514DE94(struct127 *);
-extern void func_15172D28(struct127 *, s32);
+extern void func_1514DE94(Actor *);
+extern void func_15172D28(Actor *, s32);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_1518BA90(struct127 *, s32, s32);
-extern void func_1518BBF4(struct127 *);
-extern void func_15193660(struct127 *, s32, s32);
-extern void func_151937F4(struct127 *, s32, s32);
-extern void func_151D6BFC(struct127 *, s32, s32);
+extern void func_1518BA90(Actor *, s32, s32);
+extern void func_1518BBF4(Actor *);
+extern void func_15193660(Actor *, s32, s32);
+extern void func_151937F4(Actor *, s32, s32);
+extern void func_151D6BFC(Actor *, s32, s32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern u8 func_15085420(struct127 *);
+extern u8 func_15085420(Actor *);
 extern u8 func_15085DA8(f32);
 extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
 extern void func_15086364(s32, s8, s8, s8 *, s8 *);
 extern f32 func_15086D94(f32, f32, f32, f32, f32);
 extern s32 func_150A2AEC(u32, s32, s32 *);
-extern struct178 *func_150A3194(s32, s32, s32, s32, s32);
+extern TriggerZone *func_150A3194(s32, s32, s32, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
 extern s8 func_151E565C(void);
-extern u8 D_80087298;
-extern u8 D_8008729C;
-extern u8 D_800D18A9;
 /* D_800D2350: per-node info, indexed by the node ids func_15086D48 returns. */
 typedef struct {
     u8 pad0[7];
@@ -169,14 +125,12 @@ typedef struct {
     u8 pad8[8];
 } NodeInfo;
 extern NodeInfo *D_800D2350;
-extern s8 D_800E0AC0[];
-extern u8 D_800E0BB8[];
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
-    struct127 *obj;
+    Actor *obj;
     s32 i;
     s32 node;
     s32 pad;
@@ -282,7 +236,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             case -1:
             case 4:
             case 0x2000:
-                obj->unk31C->unk8A = v;
+                obj->unk31C->buttons = v;
                 obj->unk31C->unk8E = 2;
                 break;
             }
@@ -398,7 +352,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x72:
         if (obj->unk31C != NULL) {
-            FLD(obj->unk31C, 0x129, u8) = cmd->a[0];
+            obj->unk31C->unk129 = cmd->a[0];
         } else {
             obj->unk222 = cmd->a[0];
         }
@@ -414,7 +368,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x1A:
-        FLD(obj, 0x20A, u8) = cmd->a[0];
+        obj->unk20A = cmd->a[0];
         break;
     case 0x1B:
         if (cmd->a[0] == 1) {
@@ -470,7 +424,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         for (j = 0; j < D_800D3840 - 2; j++) {
             if (cmd->a[j] != 0x78000000) {
-                FLD(obj, 0x2D8 + j * 4, f32) = cmd->a[j] * 1.52587890625e-05f;
+                obj->unk2D8[j] = cmd->a[j] * 1.52587890625e-05f;
             }
         }
         break;
@@ -495,7 +449,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             obj->unk31C->unk8 = 0;
             obj->unk31C->unk16 = 0;
         } else {
-            FLD(obj->unk31C, 0x8, s16) = 1;
+            obj->unk31C->unk8 = 1;
             if (cmd->a[0] == 1) {
                 func_1507EB4C(obj, 0x15);
             } else if (cmd->a[0] == 2) {
@@ -521,7 +475,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x28:
-        FLD(obj->unk31C, 0x76, u8) = cmd->a[0];
+        obj->unk31C->unk76 = cmd->a[0];
         break;
     case 0x29:
         obj->unk251 = cmd->a[0];
@@ -540,13 +494,13 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x2E:
         D_800BE710[cmd->a[0]] = cmd->a[1];
-        *((u16 **)D_800BE728[0])[cmd->a[0]] = cmd->a[1];
+        D_800BE728[cmd->a[0]]->button = cmd->a[1];
         break;
     case 0x56:
         obj->unk65 = cmd->a[0];
         break;
     case 0x2F: {
-        struct127 *other;
+        Actor *other;
 
         other = func_15072208(obj, cmd->a[0]);
         if (other != NULL) {
@@ -572,7 +526,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk239 = cmd->a[0];
         break;
     case 0x32:
-        obj->pad10A = cmd->a[0];
+        obj->unk10A = cmd->a[0];
         break;
     case 0x33:
         D_800D1898[cmd->a[0]] = cmd->a[1] * 1.52587890625e-05f;
@@ -582,8 +536,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 z;
         f32 y;
 
-        x = D_800DBFF0->unk2F8;
-        z = D_800DBFF0->unk300;
+        x = D_800DBFF0->eye.x;
+        z = D_800DBFF0->eye.z;
         x = x - sinf(D_800DBFF0->unk3A0) * 1800.0f;
         z = z - cosf(D_800DBFF0->unk3A0) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
@@ -598,7 +552,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         } else if (z > cmd->a[3]) {
             z = cmd->a[3] + (cmd->a[3] - z);
         }
-        y = D_800DBFF0->unk2FC;
+        y = D_800DBFF0->eye.y;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = x;
         obj->y_position = cmd->a[4] + y;
@@ -613,9 +567,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x36:
         if (cmd->a[0] != 0) {
-            FLD(obj->unk31C, 0x20, u8) |= cmd->a[1];
+            obj->unk31C->unk20 |= cmd->a[1];
         } else {
-            FLD(obj->unk31C, 0x20, u8) &= ~cmd->a[1];
+            obj->unk31C->unk20 &= ~cmd->a[1];
         }
         break;
     case 0x37:
@@ -635,16 +589,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x3B:
-        FLD(obj->unk31C, 0x32, u16) |= cmd->a[0];
+        obj->unk31C->unk32 |= cmd->a[0];
         if (D_800D3840 == 4) {
-            FLD(obj->unk31C, 0x34, u16) = cmd->a[1];
+            obj->unk31C->unk34 = cmd->a[1];
         }
         break;
     case 0x3C:
         if (cmd->a[0] != 0) {
-            FLD(obj->unk31C, 0x1A, u8) = 1;
+            obj->unk31C->unk1A = 1;
         } else {
-            FLD(obj->unk31C, 0x1A, u8) = 0;
+            obj->unk31C->unk1A = 0;
         }
         break;
     case 0x3D:
@@ -677,9 +631,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk249 = cmd->a[0] & 0xFF;
         break;
     case 0x43:
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].x = cmd->a[1];
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].y = cmd->a[2];
-        ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].z = cmd->a[3];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].x = cmd->a[1];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].y = cmd->a[2];
+        D_800D2104[obj->unk13F][cmd->a[0] + 1].z = cmd->a[3];
         break;
     case 0x44: {
         f32 px;
@@ -689,14 +643,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         node = func_15086D48(cmd->a[1]);
         if (node != -1) {
             func_15086CBC(node, &px, &py, &pz);
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].x = px;
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].y = py;
-            ((PathData *)D_800D2104[obj->unk13F])->pts[cmd->a[0]].z = pz;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].x = px;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].y = py;
+            D_800D2104[obj->unk13F][cmd->a[0] + 1].z = pz;
         }
         break;
     }
     case 0x45:
-        FLD(obj->unk31C, 0x7B, u8) = cmd->a[0];
+        obj->unk31C->unk7B = cmd->a[0];
         break;
     case 0x46:
         obj->unk234 = cmd->a[0];
@@ -704,14 +658,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk237 = cmd->a[2];
         break;
     case 0x47:
-        FLD(obj->unk31C, 0x1B, u8) = cmd->a[0];
+        obj->unk31C->unk1B = cmd->a[0];
         break;
     case 0x48:
         obj->unkD0 = cmd->a[0];
         obj->unk114 = cmd->a[1];
         break;
     case 0x49:
-        obj->unk1C9 = cmd->a[0];
+        obj->lodRequest = cmd->a[0];
         break;
     case 0x4A:
         func_1507EB4C(obj, cmd->a[0]);
@@ -732,7 +686,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x4D: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v1;
         s32 v2;
 
@@ -745,7 +699,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x4E: {
-        struct127 *other;
+        Actor *other;
         s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
@@ -787,7 +741,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk21C = cmd->a[0];
         break;
     case 0x58:
-        FLD(obj, 0x140, u8) = cmd->a[0];
+        obj->unk140 = cmd->a[0];
         break;
     case 0x55: {
         s32 pad;
@@ -795,16 +749,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = OBJ_INDEX(obj);
         if (idx < 4) {
-            *((u16 **)D_800BE728[0])[idx] |= 0x4000;
+            D_800BE728[idx]->button |= B_BUTTON;
             D_800BE710[idx] |= 0x4000;
         }
     }
         break;
     case 0x59:
-        ((u8 *)obj + 0x20B)[cmd->a[1]] = cmd->a[0];
+        obj->unk20B[cmd->a[1]] = cmd->a[0];
         break;
     case 0x68:
-        FLD(obj, 0x10, s16) = cmd->a[0];
+        obj->unk10 = cmd->a[0];
         break;
     case 0x69:
         D_800D18C0 |= cmd->a[0];
@@ -841,7 +795,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = cmd->a[0];
         val = cmd->a[1];
-        ((u8 *)obj + 0x6C)[idx] = val + 10;
+        obj->eyeCode[idx] = val + 10;
     }
         break;
     case 0x6F: {
@@ -850,7 +804,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = cmd->a[0];
         val = cmd->a[1];
-        ((u8 *)obj + 0x68)[idx] = val;
+        obj->unk68[idx] = val;
     }
         break;
     case 0x71: {
@@ -894,7 +848,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x76:
         if (obj->unk31C != NULL) {
-            FLD(obj->unk31C, 0x1AE, u8) = cmd->a[0];
+            obj->unk31C->unk1AE = cmd->a[0];
         }
         break;
     case 0x77:
@@ -919,11 +873,11 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             func_1514DE94(obj);
             break;
         case 2:
-            FLD(obj->unk31C, 0x17, u8) = 1;
-            obj->unk1C9 = 6;
+            obj->unk31C->unk17 = 1;
+            obj->lodRequest = 6;
             break;
         case 3: {
-            struct127 *other;
+            Actor *other;
 
             other = func_1505EEF4(cmd->a[1] & 0xFFFF0FFF);
             if (other != NULL) {
@@ -950,7 +904,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x7A: {
-        struct127 *other;
+        Actor *other;
         s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
@@ -962,19 +916,19 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x7B:
-        FLD(obj->unk31C, 0x1AF, u8) = cmd->a[0];
+        obj->unk31C->unk1AF = cmd->a[0];
         break;
     case 0x7C:
         obj->unk23E = cmd->a[0];
         break;
     case 0x7D:
-        FLD(obj, 0x328, u8) = cmd->a[0] + 1;
+        obj->unk328 = cmd->a[0] + 1;
         break;
     case 0x7E:
-        FLD(obj->unk31C, 0x7C, u8) = cmd->a[0];
+        obj->unk31C->unk7C = cmd->a[0];
         break;
     case 0x7F:
-        obj->unk144->unk0 = cmd->a[0];
+        obj->spawn->flags = cmd->a[0];
         break;
     case 0x80:
         {
@@ -985,7 +939,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x81:
-        obj->pad275 = cmd->a[0];
+        obj->unk275 = cmd->a[0];
         break;
     case 0x82: {
         u16 saved;
@@ -1018,11 +972,11 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk22E = cmd->a[0];
         break;
     case 0x8A:
-        FLD(obj, 0xA4, u8) = cmd->a[0];
-        FLD(obj, 0xA5, u8) = cmd->a[1];
-        FLD(obj, 0xA6, u8) = cmd->a[2];
-        obj->padA0 = cmd->a[3];
-        FLD(obj, 0xA7, u8) = cmd->a[4];
+        obj->fogMode = cmd->a[0];
+        obj->fogLevel = cmd->a[1];
+        obj->fogRate = cmd->a[2];
+        obj->fogColor = cmd->a[3];
+        obj->fogFade = cmd->a[4];
         break;
     case 0x8C:
         obj->unk31C->unk11A = cmd->a[0];
@@ -1041,7 +995,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x8E:
-        obj->unk180 = cmd->a[0];
+        obj->floorY = cmd->a[0];
         break;
     default:
         return 0;
@@ -1055,8 +1009,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
  * 0 for an unknown query or a missing object (except the existence queries 0xB0 / 0xB1 / 0xB7).
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
-    struct127 *obj;
-    struct127 *other;
+    Actor *obj;
+    Actor *other;
     s32 ret;
     s32 ix;
     s32 iz;
@@ -1186,11 +1140,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xA7:
         return func_15085420(obj) | 0xD000;
     case 0xA9:
-        return FLD(obj->unk31C, 0x77, u8);
+        return obj->unk31C->unk77;
     case 0xAA:
         return obj->unk31C->unk78;
     case 0xAB:
-        return FLD(obj->unk31C, 0x79, u8);
+        return obj->unk31C->unk79;
     case 0xAC:
         ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
@@ -1205,17 +1159,17 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->unk31C->unk16 != 0) {
             return 2;
         }
-        if (FLD(obj->unk31C, 0x8, s16) != 0) {
+        if (obj->unk31C->unk8 != 0) {
             return 1;
         }
         return 0;
     case 0xB2:
         return (&obj->unk2E4)[cmd->a[0]];
     case 0xB4:
-        return obj->pad10A;
+        return obj->unk10A;
     case 0xB5: {
         u8 v;
-        v = obj->pad10A;
+        v = obj->unk10A;
         if (v & 0x80) {
             return D_800CC2D0[v & ~0x80].interaction_state;
         }
@@ -1234,12 +1188,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].x;
-        z = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].z;
+        x = D_800D2104[obj->unk13F][cmd->a[0]].x;
+        z = D_800D2104[obj->unk13F][cmd->a[0]].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].y;
+        return D_800D2104[obj->unk13F][cmd->a[0]].y;
     case 0xBB:
         if (obj->unk65 != 0) {
             return D_800CC2D0[obj->unk65 - 1].unk13F;
@@ -1260,7 +1214,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xBF:
         return (f32)(s32)obj->unk28 * 65536.0f;
     case 0xC0:
-        return FLD(obj->unk31C, 0x1B, u8);
+        return obj->unk31C->unk1B;
     case 0xC1:
         return obj->unk31C->unk4E;
     case 0xC2:
@@ -1303,7 +1257,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
             x -= obj->x_position;
             y -= obj->y_position;
             z -= obj->z_position;
-            dist = FLD(obj, 0x216, s16) + (s32)sqrtf(x * x + y * y + z * z);
+            dist = obj->unk216 + (s32)sqrtf(x * x + y * y + z * z);
             if (obj->unk20F != obj->unk211) {
                 if (func_15086CBC(obj->unk211, &x, &y, &z) != 0) {
                     x -= obj->x_position;
@@ -1363,7 +1317,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return 0;
     }
     case 0xCC: {
-        struct178 *p;
+        TriggerZone *p;
         p = func_150A3194(3, 11, obj->x_position, obj->y_position, obj->z_position);
         if (p == NULL) {
             return -1;
@@ -1467,7 +1421,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk22C = ret & ~0x200;
         return ret & 0x200;
     case 0xD4: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v;
         p = obj->unk31C;
         v = 0;
@@ -1477,7 +1431,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return v;
     }
     case 0xD3: {
-        struct126 *p;
+        ActorCtl *p;
         s32 v;
         p = obj->unk31C;
         v = 0;
@@ -1523,15 +1477,15 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return 0;
     case 0xDA:
-        return obj->unk180;
+        return obj->floorY;
     case 0xDC:
-        if (FLD(obj->unk31C, 0x195, s8) != 0) {
-            return FLD(obj->unk31C, 0x196, s8) | 0x80;
+        if (obj->unk31C->unk195 != 0) {
+            return obj->unk31C->unk196 | 0x80;
         }
         return 0;
     case 0xDD:
         if (obj->unk31C != NULL) {
-            return FLD(obj->unk31C, 0x23, s8);
+            return obj->unk31C->unk23;
         }
         return 0;
     case 0xDE:
@@ -1544,7 +1498,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0xDF:
         if (obj->unk31C != NULL) {
-            return FLD(obj->unk31C, 0x1AE, s8);
+            return obj->unk31C->unk1AE;
         }
         return 0;
     case 0xE0:
@@ -1558,13 +1512,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE4:
         return D_800D18A8;
     case 0xE5:
-        return obj->pad275;
+        return obj->unk275;
     case 0xE6: {
         u8 v;
-        struct127 *p;
-        if (obj->pad275 != 0) {
-            p = &D_800CC2D0[obj->pad275 - 1];
-            obj->pad275 = 0;
+        Actor *p;
+        if (obj->unk275 != 0) {
+            p = &D_800CC2D0[obj->unk275 - 1];
+            obj->unk275 = 0;
             if (p->id == cmd->a[0]) {
                 return 1;
             }
@@ -1585,7 +1539,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 dx;
         s32 dz;
         idx = obj->unk13F;
-        pts = ((PathPoint **)D_800D2104)[idx];
+        pts = D_800D2104[idx];
         n = D_800D2108[idx];
         best = -1;
         if (pts != NULL && n != 0) {
@@ -1617,9 +1571,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE8:
         return obj->unk84.uh;
     case 0xE9:
-        return FLD(obj->unk31C, 0x51, u8);
+        return obj->unk31C->unk51;
     case 0xEA: {
-        struct126 *p;
+        ActorCtl *p;
         s32 a;
         s32 b;
         a = cmd->a[0];
@@ -1664,7 +1618,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (ret << 16) | (iz & 0xFFFF);
     }
     case 0xEC:
-        return FLD(obj->unk31C, 0x95, u8);
+        return obj->unk31C->unk95;
     case 0xED:
         return D_800BE710[objId];
     case 0xEE: {
@@ -1682,7 +1636,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xEF:
         return obj->interaction_state;
     case 0xF0:
-        return D_800E0AC0[FLD(obj, 0x128, u8)];
+        return D_800E0AC0[obj->team];
     case 0xF1:
         return (obj->unk74 & 0xF) == 0xF;
     case 0xF2:

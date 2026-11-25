@@ -14,37 +14,37 @@ typedef struct {
 } Event_150FE288;
 
 extern u8 D_80088B80;      // bone of the muzzle points below
-extern struct17 D_800A1F70; // muzzle point, in bone space
-extern struct17 D_800A1F7C;
-extern struct17 D_800A1F88; // launch point, in bone space
+extern Vec3f D_800A1F70; // muzzle point, in bone space
+extern Vec3f D_800A1F7C;
+extern Vec3f D_800A1F88; // launch point, in bone space
 
-extern s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, struct17 *position, s32 cameraMask, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-extern void func_15145740(struct127 *obj, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
-extern s32 func_151C229C(struct17 *origin, struct17 *dir, struct17 *hitPoint, struct17 *lineDir, s32 useTarget,
-                         s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *owner,
+extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *mtx, s32 count);
+extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
+                          f32 arg7, Vec3f *position, s32 cameraMask, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
+extern void func_15145740(Actor *obj, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
+extern s32 func_151C229C(Vec3f *origin, Vec3f *dir, Vec3f *hitPoint, Vec3f *lineDir, s32 useTarget,
+                         s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *owner,
                          s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20,
                          f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-extern void func_151D3E04(struct127 *obj, struct17 *out, struct17 *localPos, u8 bone, f32 yOffset);
-extern void func_151D3E6C(struct127 *obj, struct17 *a, struct17 *b, s32 arg3);
-extern void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
+extern void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
+extern void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
+extern void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
 extern void func_151D8868(Event_150FE288 *event, s32 arg1, s32 arg2, s32 arg3);
 
-void func_150FDF38(struct127 *obj, s32 arg1, s32 arg2, struct17 *muzzleOut, struct17 *launchOut);
-void func_150FE0B8(struct127 *obj, struct17 *muzzle, s32 arg2, s32 arg3);
-void func_150FE288(struct127 *obj);
+void func_150FDF38(Actor *obj, s32 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
+void func_150FE0B8(Actor *obj, Vec3f *muzzle, s32 arg2, s32 arg3);
+void func_150FE288(Actor *obj);
 
 /* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
  * effects of func_150FDF38. Returns func_151C229C's result, or 0 without an obj. */
 // matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is
 // narrowed once into a spilled copy instead
-s32 func_150FDDA0(struct127 *obj, s32 arg1, s32 arg2) {
+s32 func_150FDDA0(Actor *obj, s32 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
-    struct17 dir;
-    struct17 muzzle;
-    struct17 target;
-    struct17 launch;
+    Vec3f dir;
+    Vec3f muzzle;
+    Vec3f target;
+    Vec3f launch;
     u32 random;
     s32 kind;
     f32 rand1;
@@ -70,16 +70,16 @@ s32 func_150FDDA0(struct127 *obj, s32 arg1, s32 arg2) {
 /* Computes obj's muzzle and launch points (bone D_80088B80, or 56 above its origin without bone
  * matrices), runs the muzzle effects there and optionally returns both points. */
 void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
-    struct127 *obj;
+    Actor *obj;
     u8 arg1;
     s32 arg2;
-    struct17 *muzzleOut;
-    struct17 *launchOut;
+    Vec3f *muzzleOut;
+    Vec3f *launchOut;
 {
-    struct17 muzzle;
-    struct17 launch;
-    struct17 *src[2];
-    struct17 *dst[2];
+    Vec3f muzzle;
+    Vec3f launch;
+    Vec3f *src[2];
+    Vec3f *dst[2];
 
     if (obj != NULL) {
         if (obj->unk1D4 != NULL) {
@@ -89,9 +89,9 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
             dst[1] = &launch;
             func_15145EA4(src, dst, (Mtx *)obj->unk1D4 + D_80088B80, 2);
         } else {
-            muzzle.unk0 = obj->x_position;
-            muzzle.unk4 = obj->y_position + 56.0f;
-            muzzle.unk8 = obj->z_position;
+            muzzle.x = obj->x_position;
+            muzzle.y = obj->y_position + 56.0f;
+            muzzle.z = obj->z_position;
             launch = muzzle;
         }
         func_151D3E6C(obj, &muzzle, &launch, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
@@ -110,8 +110,8 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
 /* Muzzle effect (func_15102B38) at `muzzle` for objects with bone matrices, hidden from the
  * camera of obj's unk31C target while that has unk197 set. */
 void func_150FE0B8(obj, muzzle, arg2, arg3)
-    struct127 *obj;
-    struct17 *muzzle;
+    Actor *obj;
+    Vec3f *muzzle;
     u8 arg2;
     s32 arg3;
 {
@@ -125,8 +125,8 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
         params[1] = func_150ADA68() * 1.5f + 2.0f;
         params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
 
-        if (obj->unk31C != NULL && ((struct127 *)obj->unk31C)->unk197 != 0 && obj->camera != NULL) {
-            cameraMask = ~(1 << obj->camera->unk23D) & 0xFF;
+        if (obj->unk31C != NULL && obj->unk31C->aimState != 0 && obj->camera != NULL) {
+            cameraMask = ~(1 << obj->camera->playerIndex) & 0xFF;
         } else {
             cameraMask = 0xFF;
         }
@@ -139,18 +139,18 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
 }
 
 /* Handler: writes the world position of obj's muzzle point to `out`. */
-void func_150FE248(struct127 *obj, s32 arg1, struct17 *out) {
+void func_150FE248(Actor *obj, s32 arg1, Vec3f *out) {
     func_151D3E04(obj, out, &D_800A1F70, D_80088B80, 0.0f);
 }
 
 /* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */
-void func_150FE288(struct127 *obj) {
+void func_150FE288(Actor *obj) {
     Event_150FE288 event;
 
     if (obj->camera != NULL) {
         event.type = 1;
         event.duration = (func_150ADA20() % 9U) + 15;
-        event.cameraMask = 1 << obj->camera->unk23D;
+        event.cameraMask = 1 << obj->camera->playerIndex;
         event.unk4 = (func_150ADA20() & 3) + 3;
         event.unk6 = -1;
         func_151D8868(&event, 0, 0xFF, 1);

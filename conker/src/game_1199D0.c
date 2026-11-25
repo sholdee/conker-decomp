@@ -25,13 +25,13 @@ typedef struct {
 
 /* Data of the particle source effect (func_150EC6B0). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 accumulator;
 } ParticleSourceData;
 
 /* Data of the fog flash effect (func_150ECB8C). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 r;
     /* 0x06 */ u8 g;
@@ -73,7 +73,7 @@ void func_150EC520(Effect *effect) {
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
                 spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
-                                                  (struct37 *)sizeof(point), effect->owner, effect->kind);
+                                                  sizeof(point), effect->owner, effect->kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
                 }
@@ -96,7 +96,7 @@ typedef struct {
 
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ SourceParticleData data;
 } Particle;
 
@@ -170,7 +170,7 @@ void func_150EC6B0(Effect *effect) {
 
 /* Attaches a fog flash effect to obj: flashes it with fog colour (r, g, b, a) each frame,
  * for duration frames or, when duration is -1, until obj goes away. */
-void func_150ECA68(struct127 *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
+void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
     FogFlashData data;
     Effect *effect;
 
@@ -183,7 +183,7 @@ void func_150ECA68(struct127 *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration
     data.b = b;
 
     effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
-                                     0x45, (struct37 *)sizeof(data), owner, kind);
+                                     0x45, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -191,15 +191,15 @@ void func_150ECA68(struct127 *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration
 
 /* Effect callback for the fog flash effect: hands func_15169850 the owner reference. */
 void func_150ECB4C(Effect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.fog.owner, (s32)&effect->data.fog.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
-extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
+extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
 void func_150ECB8C(Effect *effect) {
     FogFlashData *fog = &effect->data.fog;
-    struct127 *owner = fog->owner;
+    Actor *owner = fog->owner;
 
     if ((owner->interaction_state == 0) || (owner->unique_id != fog->ownerId)) {
         effect->state = -1;
@@ -208,10 +208,10 @@ void func_150ECB8C(Effect *effect) {
     }
 }
 
-extern void func_151C9AC0(struct127 *, u8, s32);
+extern void func_151C9AC0(Actor *, u8, s32);
 
 /* Runs func_151C9AC0 on obj and flashes it green. */
-void func_150ECC00(struct127 *obj, u8 owner, s32 kind) {
+void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_151C9AC0(obj, owner, kind);
     func_150ECA68(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
@@ -232,7 +232,7 @@ extern f32 D_80088AF0;
 /* Per-frame handler driven by setting 0x403B: while it is on, picks a target colour (one channel
  * at 128 per settings 0x4038-0x403A) and applies settings 0x9C/0x9A of mode 0x2007; otherwise
  * resets the colour to white. Then eases the current colour toward the target and sends it out. */
-void func_150ECC70(struct108 *obj) {
+void func_150ECC70(Camera *obj) {
     s32 value9C;
     s32 value9A;
     s32 half;
@@ -243,7 +243,7 @@ void func_150ECC70(struct108 *obj) {
         func_1509BFB0(0, 0x4031, 1);
         func_1509BFB0(0, 0x4032, 1);
         func_1509BFB0(0, 0x4033, 1);
-        obj->unk84 |= 0x80021200;
+        obj->flags |= 0x80021200;
         if (func_1509BE40(1, 0x4038, 6, 0x2000) != 0) {
             D_80088ADC = 128.0f;
             D_80088AE0 = 255.0f;
@@ -264,7 +264,7 @@ void func_150ECC70(struct108 *obj) {
         mode = func_1509BE40(0, 0x2007, 0xB7) | 0x2000;
         if (func_1509BE40(1, 0x4010, 6, 0x2000) == 0) {
             obj->unk134 = 0;
-            obj->unk190 = 0.0f;
+            obj->liftTarget = 0.0f;
             return;
         }
         // matching: mode always has 0x2000 set, but IDO still emits this test
@@ -287,7 +287,7 @@ void func_150ECC70(struct108 *obj) {
             half = 231;
         }
         func_1509BFB0(2, 0x9000, 8, value9A, half);
-        obj->unk190 = 220.0f;
+        obj->liftTarget = 220.0f;
     } else {
         D_80088ADC = 255.0f;
         D_80088AE0 = 255.0f;
@@ -295,12 +295,12 @@ void func_150ECC70(struct108 *obj) {
         func_1509BFB0(0, 0x4031, 0);
         func_1509BFB0(0, 0x4032, 0);
         func_1509BFB0(0, 0x4033, 0);
-        obj->unk84 &= ~0x80021200;
-        obj->unk84 |= 8;
+        obj->flags &= ~0x80021200;
+        obj->flags |= 8;
     }
-    func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->unk7B4);
-    func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->unk7B4);
-    func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->unk7B4);
+    func_150495B0(&D_80088AD0, D_80088ADC, &D_80088AE8, 4.0f, 6.0f, obj->dt);
+    func_150495B0(&D_80088AD4, D_80088AE0, &D_80088AEC, 4.0f, 6.0f, obj->dt);
+    func_150495B0(&D_80088AD8, D_80088AE4, &D_80088AF0, 4.0f, 6.0f, obj->dt);
     func_1509BFB0(1, 0x30F3, 0x12, (u8)D_80088AD0);
     func_1509BFB0(1, 0x30F4, 0x12, (u8)D_80088AD4);
     func_1509BFB0(1, 0x30F5, 0x12, (u8)D_80088AD8);

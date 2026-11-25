@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150A7CB0 with s32 arguments; it takes floats. */
-#define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
-#undef func_150A7CB0
-void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #include "variables.h"
 
 /* A shadow-polygon vertex while it is clipped in light space. */
@@ -33,18 +29,17 @@ extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the
 extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
 
 extern s32 func_1502DB20(s32);
-extern u8 D_800C3E90;
 
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     s32 id;
-    struct127 *obj;
+    Actor *obj;
     s32 count;
     s32 i;
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 (*bones)[4][4];
+    MtxF *bones;
 
     obj = &D_800CC2D0[objIndex];
     id = obj->id;
@@ -56,7 +51,7 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
     count = func_1502DB20(id);
     for (i = 0; i < count; i++) {
-        bones = (f32 (*)[4][4])obj->unk1D4;
+        bones = obj->unk1D4;
         dx = bones[i][3][0];
         dy = bones[i][3][1];
         dz = bones[i][3][2];
@@ -94,24 +89,12 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
 }
 
 /* A light node in the list at D_800DCD78. */
-typedef struct Node15184368 {
-    struct Node15184368 *next;
-    u8 unk4;
-    u8 pad5[4];
-    u8 unk9;
-    u8 padA[4];
-    s16 x;
-    s16 y;
-    s16 z;
-} Node15184368;
-
-extern struct17 D_800DE010; /* default light offset from the object */
-extern struct17 D_800DDFB0[]; /* light position per shadow slot */
+extern Vec3f D_800DE010; /* default light offset from the object */
+extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
 extern f32 D_800DF6F8; /* light-to-object distance */
 extern f32 D_800DE028;
 extern f32 D_800DE02C;
-extern u8 D_800DF0E1;
-extern f32 D_800DF0F8[][4][4];
+extern MtxF D_800DF0F8[];
 extern u16 D_800DF0D0[];
 extern Mtx D_800DF2F8[][2];
 extern s32 D_800DF088;
@@ -121,9 +104,9 @@ extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
 extern s32 func_150AD9A0(s32, s32, s32);
-extern void func_15047390(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_15047390(MtxF mf, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
@@ -132,9 +115,9 @@ extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
  * shadow should be drawn.
  */
 f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 minDist) {
-    struct17 delta;
-    struct17 objPos;
-    struct17 lightPos;
+    Vec3f delta;
+    Vec3f objPos;
+    Vec3f lightPos;
     f32 sx;
     f32 sy;
     f32 sz;
@@ -144,40 +127,40 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     f32 dist;
     f32 scale;
     f32 minY;
-    f32 proj[4][4];
-    f32 bias[4][4];
+    MtxF proj;
+    MtxF bias;
     s32 i;
     s32 done;
     s32 found;
-    Node15184368 *node;
+    PointLight *node;
     f32 nodePos[3];
     f32 perspScale;
     f32 v;
-    struct127 *obj;
-    struct17 *eye;
+    Actor *obj;
+    Vec3f *eye;
 
     obj = &D_800CC2D0[objIndex];
     done = 0;
     dist = 5000.0f;
-    objPos.unk0 = obj->x_position;
+    objPos.x = obj->x_position;
     perspScale = 2.0f;
-    objPos.unk4 = obj->y_position;
+    objPos.y = obj->y_position;
     found = 0;
-    objPos.unk8 = obj->z_position;
+    objPos.z = obj->z_position;
     if (D_800DE034 == 0) {
-        node = (Node15184368 *)D_800DCD78;
+        node = D_800DCD78;
         while (node != NULL) {
-            if (node->unk4 == 0 && node->unk9 == 0) {
+            if (node->unk4 == 0 && node->disabled == 0) {
                 nodePos[0] = node->x;
                 nodePos[1] = node->y;
                 nodePos[2] = node->z;
-                v = func_150AD9A0(nodePos[0] - objPos.unk0, nodePos[1] - objPos.unk4, nodePos[2] - objPos.unk8);
+                v = func_150AD9A0(nodePos[0] - objPos.x, nodePos[1] - objPos.y, nodePos[2] - objPos.z);
                 if (v < dist && minDist < v) {
                     dist = v;
                     found++;
-                    lightPos.unk0 = nodePos[0];
-                    lightPos.unk4 = nodePos[1];
-                    lightPos.unk8 = nodePos[2];
+                    lightPos.x = nodePos[0];
+                    lightPos.y = nodePos[1];
+                    lightPos.z = nodePos[2];
                 }
             }
             node = node->next;
@@ -187,60 +170,60 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
         if (minDist != 0.0f) {
             return 0.0f;
         }
-        if (D_800DE010.unk4 <= 0.0f) {
-            D_800DE010.unk0 = 100.0f;
-            D_800DE010.unk4 = 600.0f;
-            D_800DE010.unk8 = -200.0f;
+        if (D_800DE010.y <= 0.0f) {
+            D_800DE010.x = 100.0f;
+            D_800DE010.y = 600.0f;
+            D_800DE010.z = -200.0f;
         }
         dist = 1.0f;
-        lightPos.unk0 = D_800DE010.unk0 * D_800DE03C + objPos.unk0;
-        lightPos.unk4 = D_800DE010.unk4 * D_800DE03C + objPos.unk4;
-        lightPos.unk8 = D_800DE010.unk8 * D_800DE03C + objPos.unk8;
+        lightPos.x = D_800DE010.x * D_800DE03C + objPos.x;
+        lightPos.y = D_800DE010.y * D_800DE03C + objPos.y;
+        lightPos.z = D_800DE010.z * D_800DE03C + objPos.z;
     }
     if (*(s32 *)D_800DBFF4 != 0 || D_800DE038 >= 2) {
         eye = &D_800DDFB0[slot];
-        eye->unk0 = lightPos.unk0;
-        eye->unk4 = lightPos.unk4;
-        eye->unk8 = lightPos.unk8;
+        eye->x = lightPos.x;
+        eye->y = lightPos.y;
+        eye->z = lightPos.z;
     } else {
         eye = &D_800DDFB0[slot];
-        eye->unk0 = eye->unk0 + (lightPos.unk0 - eye->unk0) * 0.3f;
-        eye->unk4 = eye->unk4 + (lightPos.unk4 - eye->unk4) * 0.3f;
-        eye->unk8 = eye->unk8 + (lightPos.unk8 - eye->unk8) * 0.3f;
+        eye->x = eye->x + (lightPos.x - eye->x) * 0.3f;
+        eye->y = eye->y + (lightPos.y - eye->y) * 0.3f;
+        eye->z = eye->z + (lightPos.z - eye->z) * 0.3f;
     }
     func_15048F90(&objPos, eye, &delta);
-    D_800DF6F8 = func_150AD930(&delta.unk0);
+    D_800DF6F8 = func_150AD930(&delta.x);
     if (D_800DF6F8 < 200.0f) {
         f32 ratio;
         ratio = 200.0f / D_800DF6F8;
         D_800DF6F8 = 200.0f;
-        v = delta.unk0 * ratio;
-        D_800DDFB0[slot].unk0 += v - delta.unk0;
-        delta.unk0 = v;
-        v = delta.unk4 * ratio;
-        D_800DDFB0[slot].unk4 += v - delta.unk4;
-        delta.unk4 = v;
-        v = delta.unk8 * ratio;
-        D_800DDFB0[slot].unk8 += v - delta.unk8;
-        delta.unk8 = v;
+        v = delta.x * ratio;
+        D_800DDFB0[slot].x += v - delta.x;
+        delta.x = v;
+        v = delta.y * ratio;
+        D_800DDFB0[slot].y += v - delta.y;
+        delta.y = v;
+        v = delta.z * ratio;
+        D_800DDFB0[slot].z += v - delta.z;
+        delta.z = v;
     }
     if (D_800DE040 != 0) {
-        minY = sqrtf(delta.unk0 * delta.unk0 + delta.unk8 * delta.unk8) * 0.57735f;
+        minY = sqrtf(delta.x * delta.x + delta.z * delta.z) * 0.57735f;
         if (minY < 10.0f) {
             minY = 10.0f;
         }
     } else {
         minY = 10.0f;
     }
-    if (delta.unk4 < minY) {
-        D_800DDFB0[slot].unk4 += minY - delta.unk4;
-        delta.unk4 = minY;
-        v = func_150AD9A0(delta.unk0, delta.unk4, delta.unk8);
+    if (delta.y < minY) {
+        D_800DDFB0[slot].y += minY - delta.y;
+        delta.y = minY;
+        v = func_150AD9A0(delta.x, delta.y, delta.z);
         scale = D_800DF6F8 / v;
         D_800DF6F8 = v;
-        D_800DDFB0[slot].unk0 += delta.unk0 * scale - delta.unk0;
-        D_800DDFB0[slot].unk4 += delta.unk4 * scale - delta.unk4;
-        D_800DDFB0[slot].unk8 += delta.unk8 * scale - delta.unk8;
+        D_800DDFB0[slot].x += delta.x * scale - delta.x;
+        D_800DDFB0[slot].y += delta.y * scale - delta.y;
+        D_800DDFB0[slot].z += delta.z * scale - delta.z;
     }
     if (5000.0f * D_800DE03C < D_800DF6F8) {
         D_800D3688 = 0.0f;
@@ -253,13 +236,13 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     } else {
         D_800D3688 = -D_800DE028 * D_800DE03C - D_800DF6F8;
     }
-    func_15047390(D_800DF0F8[slot], D_800DDFB0[slot].unk0, D_800DDFB0[slot].unk4, D_800DDFB0[slot].unk8, objPos.unk0, objPos.unk4, objPos.unk8, 0.0f, 1.0f, 0.0f);
+    func_15047390(D_800DF0F8[slot], D_800DDFB0[slot].x, D_800DDFB0[slot].y, D_800DDFB0[slot].z, objPos.x, objPos.y, objPos.z, 0.0f, 1.0f, 0.0f);
     maxY = 0.0f;
     maxX = 0.0f;
     maxZ = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.unk0, D_8008D3F8[i][1] * halfY + objPos.unk4,
-                      D_8008D3F8[i][2] * halfZ + objPos.unk8, &sx, &sy, &sz);
+        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.x, D_8008D3F8[i][1] * halfY + objPos.y,
+                      D_8008D3F8[i][2] * halfZ + objPos.z, &sx, &sy, &sz);
         if (sz == 0.0f) {
             sz = 0.0001f;
         }
@@ -326,7 +309,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     }
     /* The shadow texture lives in D_800DE048, 64-byte aligned. */
     D_800DF088 = ((s32)D_800DE048 + 0x3F) & ~0x3F;
-    D_800DE02C = 0xFF - (((u8 *)&D_800CC2D0[objIndex].pad1DC)[1] >> 1);
+    D_800DE02C = 0xFF - (D_800CC2D0[objIndex].unk1DD[0] >> 1);
     if (D_800DE02C > 185.0f) {
         D_800DE02C = 185.0f;
     }
@@ -352,9 +335,9 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     x = D_800CC2D0[objIndex].x_position;
     y = D_800CC2D0[objIndex].y_position;
     z = D_800CC2D0[objIndex].z_position;
-    dist = func_150AD9A0(x - D_800DBFF0[view].unk2F8,
-                         y - D_800DBFF0[view].unk2FC,
-                         z - D_800DBFF0[view].unk300);
+    dist = func_150AD9A0(x - D_800DBFF0[view].eye.x,
+                         y - D_800DBFF0[view].eye.y,
+                         z - D_800DBFF0[view].eye.z);
     if (dist > 2000) {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
@@ -375,10 +358,9 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
 extern Gfx D_8008D448[];
 extern Vp D_8008D3E8;
 extern Mtx D_89470;
-extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
-extern s32 func_1506196C(struct127 *, s32);
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, struct255 *, s32, s32 *, s32, s32);
+extern s32 func_1506196C(Actor *, s32);
+extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
 
 /*
@@ -390,9 +372,9 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     s32 col[3];
 
     if (D_800CC2D0[objIndex].unk127 == 0xFF) {
-        lod = D_800CC2D0[objIndex].pad1C8 + 1;
+        lod = D_800CC2D0[objIndex].lod + 1;
     } else {
-        lod = D_800CC2D0[objIndex].pad1C8;
+        lod = D_800CC2D0[objIndex].lod;
     }
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 64, D_800DF088);
@@ -419,7 +401,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
         gDPPipeSync(gfx++);
     }
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
-    gfx = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
     gfx = func_1510B7B4(gfx, view);
     D_800CC2D0[objIndex].unk123 = 1;
     return gfx;
@@ -700,7 +682,7 @@ extern s32 func_1510F720(s32, s32, s32, u8 **);
 extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
 extern void func_1510F800(s32);
-extern s32 D_800D3690;
+extern MeshTri *D_800D3690;
 extern s32 D_800DF0E8;
 extern s32 D_800DF0EC;
 extern s32 D_800DF0F0;
@@ -741,7 +723,7 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
                         p++;
                     }
                     if (face < 0x1760) {
-                        if (((u8 *)D_800D3668)[face] == 1) {
+                        if (D_800D3668[face] == 1) {
                             bits[face >> 5] |= 1 << (face & 0x1F);
                             if (maxFace < face) {
                                 maxFace = face;
@@ -784,15 +766,11 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
-extern s32 D_800C48F0[];
-extern Gfx *D_800BE9C8[];
-extern s32 D_800BEBA4;
 extern Vp D_800DF090[];
-extern u8 D_800DF0E0;
-extern s32 func_150849CC(struct127 *, s32 *);
+extern s32 func_150849CC(Actor *, s32 *);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern void func_1503DA9C(struct127 *, s32, s32, s32);
+extern void func_1503DA9C(Actor *, s32, s32, s32);
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)
@@ -850,11 +828,11 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         D_8008D3E0 = D_800DE01C;
         D_800DE028 *= 0.8f;
     } else {
-        if ((*(u16 *)&D_800B0DF0->pad1C[2]) == 0) {
-            (*(u16 *)&D_800B0DF0->pad1C[2]) = 400;
+        if (D_800B0DF0->unk1E == 0) {
+            D_800B0DF0->unk1E = 400;
         }
         if (D_8008D3E0 < D_800DE020) {
-            D_800DE028 += ((f32)(u32)(*(u16 *)&D_800B0DF0->pad1C[2]) - D_800DE028) * 0.95f;
+            D_800DE028 += ((f32)(u32)D_800B0DF0->unk1E - D_800DE028) * 0.95f;
         }
         if (D_8008D3E0 < D_800DE024) {
             D_8008D3E0 = D_800DE024;
@@ -877,24 +855,24 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
         if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk1D4 == NULL ||
             ((v = D_800CC2D0[i].unk74) & (1 << view)) || D_800CC2D0[i].unk5 != 0 ||
-            (D_800CC2D0[i].pad66 & 0x10) != 0x10 ||
+            (D_800CC2D0[i].unk66 & 0x10) != 0x10 ||
             (u32)(D_800CC2D0[i].unk74 & (1 << view)) == (u32)(1 << view) ||
             D_800CC2D0[i].unk84.uh == 0x2D8 ||
-            (D_800CC2D0[i].unk31C != NULL && ((u8)D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->pad98[0] != 0)) ||
+            (D_800CC2D0[i].unk31C != NULL && (D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->ropeId != 0)) ||
             (D_800DF0E0 & (1 << i))) {
             continue;
         }
         if (D_800CC2D0[i].unk65 != 0 && D_800CC2D0[i].id != 0x62) {
             continue;
         }
-        if (D_800CC2D0[i].pad288[0x40] != 0) {
+        if (D_800CC2D0[i].lodCount != 0) {
             modelId = func_150849CC(&D_800CC2D0[i], &modelSub);
             func_1503DA9C(&D_800CC2D0[i], modelId, modelSub, 0);
         } else {
             modelId = D_800CC2D0[i].id;
             modelSub = 0;
         }
-        if (D_800C48F0[modelId] == 0) {
+        if (D_800C48F0[modelId] == NULL) {
             continue;
         }
         if (func_15184DF0(i, view, &halfX, &halfY, &halfZ) == 0) {
@@ -913,7 +891,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
                 idx = 0;
                 gfx = func_15184FA4(gfx, i, slot, view);
                 batch = 0;
-                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].pad1C8 < 2) {
+                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].lod < 2) {
                     split = 1;
                 } else if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 &&
                            D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {
@@ -1028,21 +1006,6 @@ void func_151872B0(s32 level) {
 }
 
 
-/* The fields of a D_800DBEF4 entry (WorldObject) read here. */
-typedef struct {
-    u8  pad0[0x10];
-    s16 x;
-    u8  pad12[0x2];
-    s16 z;
-    u8  pad16[0x39];
-    u8  unk4F;
-    u16 unk50;
-    u16 unk52;
-    u8  pad54[0x1A];
-    u8  unk6E;
-    u8  pad6F[0x31];
-} unkfunc_151873E4; /* size 0xA0 */
-
 extern void func_150A44F0(s32, s16 *, s32);
 extern ShadowVtx *func_150A5E44(s16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
@@ -1054,7 +1017,7 @@ extern s32 D_800DF0E4;
  * the square of half-size `range` around (x, z). Returns the new vertex count.
  */
 s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count) {
-    unkfunc_151873E4 *entry;
+    WorldObject *entry;
     s32 found;
     s32 i;
     s32 extent;
@@ -1073,11 +1036,11 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 
     found = 0;
     for (i = 0; i < D_800DBEF0; i++) {
-        entry = (unkfunc_151873E4 *)&D_800DBEF4[i];
-        if (entry->unk6E != 0) {
+        entry = &D_800DBEF4[i];
+        if (entry->inactive != 0) {
             continue;
         }
-        if (entry->unk4F & 0x60) {
+        if (entry->flags & 0x60) {
             continue;
         }
         extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;

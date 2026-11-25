@@ -1,116 +1,10 @@
 #include <ultra64.h>
 // functions.h declares these two with other signatures; this file uses its own prototypes
-#define func_15083568 func_15083568_orig
-#define func_1514D3B0 func_1514D3B0_orig
 #include "functions.h"
-#undef func_15083568
-#undef func_1514D3B0
 #include "variables.h"
+#include "effects.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
-/* One node of an object's attachment list: something spawned for the object (an effect, a
- * sound, a sub-object) together with the attachment type that knows how to message or free it. */
-typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];               // allocator header
-    /* 0x10 */ s32 handle;                  // the attached thing, passed to the type's handlers
-    /* 0x14 */ struct Attachment *next;
-    /* 0x18 */ struct Attachment *prev;
-    /* 0x1C */ s16 type;                    // index into D_8008ABE8
-} Attachment;
-
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
-typedef struct AttachmentOwner {
-    /* 0x000 */ u8 pad0[0x2F4];
-    /* 0x2F4 */ Attachment *attachments;
-} AttachmentOwner;
-#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
-
-/* Attachment types form a tree (first child / next sibling), so a message sent to a type
- * also reaches attachments of its subtypes. */
-typedef struct AttachmentType {
-    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
-    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
-    /* 0x4 */ s16 firstChild;               // -1 terminates
-    /* 0x6 */ s16 nextSibling;              // -1 terminates
-} AttachmentType;
-
-/* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of
- * bone `bone` of `target`, which func_1518A094 transforms every frame. */
-typedef struct EmitterAttach {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
-    /* 0x18 */ struct127 *target;
-    /* 0x1C */ u8 bone;
-    /* 0x1D */ u8 targetId;             // the target's unique_id
-    /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
-    /* 0x1F */ u8 pad1F;
-} EmitterAttach;
-
-/* Object spawn parameters, passed on to func_1513D524 by func_151407D0. */
-typedef struct SpawnParams {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;                 // unk10..unk13 hold RGBA-like values
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} SpawnParams;
-
-/* Emitter parameters; func_151407D0 copies them into the spawned object at +0x110. */
-typedef struct EmitterParams {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x20];
-    /* 0x44 */ u8 *unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 pad4C[8];
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 pad58[4];
-} EmitterParams;
-
-/* What func_15083568 returns, seen as a raw view (struct127 has a u8 at 0x38). */
+/* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
 struct St1514DE94 {
     /* 0x00 */ u8 pad0[0x38];
     /* 0x38 */ s32 unk38;
@@ -119,7 +13,7 @@ struct St1514DE94 {
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
-    /* 0x08 */ struct127 *obj;
+    /* 0x08 */ Actor *obj;
     /* 0x0C */ u8 uniqueId;
     /* 0x0D */ u8 pad0D[3];
     /* 0x10 */ f32 unk10;
@@ -139,8 +33,8 @@ typedef struct HudSpriteHandle {
 } HudSpriteHandle;
 
 /* Spawn-callback tables (see func_1514D15C). */
-extern void (*D_8008AA70[])(struct127 *);
-extern void (*D_8008AACC[])(struct127 *);
+extern void (*D_8008AA70[])(Actor *);
+extern void (*D_8008AACC[])(Actor *);
 extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
@@ -148,7 +42,6 @@ extern u8 D_800A5ED8[];
 /* Attachment type tables. */
 extern void (*D_8008AB58[])(s32);
 extern s32 (*D_8008AB64[])(s32, s32, s32);
-extern AttachmentType *D_8008ABE8[];
 
 /* Emitter offsets. */
 extern Vec3f D_800A58A0;
@@ -162,37 +55,36 @@ extern Vec3f D_800A5958;
 extern Vec3f D_800A5964;
 
 /* This file. */
-s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
+s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
 s32 func_1514D4B8(s16 root, s16 type);
-Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
-void func_1514F194(struct127 *obj);
+Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
+void func_1514F194(Actor *obj);
 
 /* Elsewhere. */
-void func_1501175C(struct127 *obj, u8 arg1, s32 arg2);
-struct St1514DE94 *func_15083568(struct127 *obj, s32 arg1, f32 arg2, s32 arg3);
+void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
 s32 func_15083FB0(u8 uniqueId);
 void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
-void func_150C4120(struct127 *obj, s32 arg1, s32 arg2, s32 arg3);
+void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);
 s32 func_150C5370(void *desc, s32 payloadSize);
 void *func_15155780(s32 slot, s32 arg1);
 struct102 *func_15155FD4(s32 slot);
-s32 func_15158BD0(struct127 *obj, s32 arg1, s32 payloadSize);
+s32 func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
-s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_15189FF0(SpawnParams *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
+s32 func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(struct127 *obj, s32, s32, s32, s32, s32, char *name);
+s32 func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
-s32 func_151ACA60(struct127 *obj, f32 arg1, s32 arg2);
-void func_151B2060(struct127 *obj);
-void func_151B9F00(struct127 *obj, s32, s32);
-void func_151BB044(struct127 *obj);
-void func_151BC074(struct127 *obj);
-void func_151BD2F8(struct127 *obj, s32, s32);
-void func_151D0F60(struct127 *obj, s32, s32, s32);
-void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
+s32 func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
+void func_151B2060(Actor *obj);
+void func_151B9F00(Actor *obj, s32, s32);
+void func_151BB044(Actor *obj);
+void func_151BC074(Actor *obj);
+void func_151BD2F8(Actor *obj, s32, s32);
+void func_151D0F60(Actor *obj, s32, s32, s32);
+void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 
 
@@ -202,7 +94,7 @@ void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
  * one chosen by D_800BE9F0 (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
  * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
  */
-s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
+s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     u8 found = 0;
 
     switch (obj->id) {
@@ -559,7 +451,7 @@ s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot)
  * Runs the spawn callbacks for `obj` (see func_1514CA80), after freeing whatever is still
  * queued for its slot. Does nothing if the object already has attachments.
  */
-s32 func_1514D15C(struct127 *obj) {
+s32 func_1514D15C(Actor *obj) {
     s32 uniqueSlot;
     s32 globalSlot;
     s32 idSlot;
@@ -573,7 +465,7 @@ s32 func_1514D15C(struct127 *obj) {
     globalSlot = -1;
     idSlot = -1;
     slot = obj - D_800CC2D0;
-    if (ATTACHMENTS(obj) != NULL) {
+    if (obj->attachments != NULL) {
         return 0;
     }
 
@@ -619,15 +511,15 @@ s32 func_1514D15C(struct127 *obj) {
 }
 
 /** Frees every attachment of `owner`, letting each attachment type release its handle first. */
-s32 func_1514D310(struct127 *owner) {
+s32 func_1514D310(Actor *owner) {
     Attachment *node;
     Attachment *next;
 
-    node = ATTACHMENTS(owner);
+    node = owner->attachments;
     while (node != NULL) {
         next = node->next;
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[node->type]->destroyHandler](node->handle);
+            D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
         }
         func_1516972C((struct102 *)node);
         node = next;
@@ -639,15 +531,15 @@ s32 func_1514D310(struct127 *owner) {
  * Sends message `msg` (with `arg`) to every attachment of `owner` whose type is `type` or one
  * of its subtypes. Returns the result of the last handler called, as 0 or 1.
  */
-s32 func_1514D3B0(struct127 *owner, s16 type, s32 msg, s32 arg) {
+s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
     Attachment *node;
     s32 result;
 
     result = 0;
-    for (node = ATTACHMENTS(owner); node != NULL; node = node->next) {
+    for (node = owner->attachments; node != NULL; node = node->next) {
         if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
             if (D_8008ABE8[node->type]->messageHandler != -1) {
-                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
+                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler]((s32)node->handle, msg, arg)) {
                     result = 1;
                 } else {
                     result = 0;
@@ -676,7 +568,7 @@ s32 func_1514D4B8(s16 root, s16 type) {
 }
 
 typedef struct Struct1514D564Payload {
-    struct127 *obj;
+    Actor *obj;
     u8 uniqueId;
     s8 unk5;
     u8 pad6[2];
@@ -697,7 +589,7 @@ typedef struct Struct1514D564Desc {
 } Struct1514D564Desc;
 
 /** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
-void func_1514D564(struct127 *obj) {
+void func_1514D564(Actor *obj) {
     Struct1514D564Desc desc;
     s32 spawned;   // the object func_150C5370 allocated; the payload goes at +0xC8
     Struct1514D564Payload payload;
@@ -725,38 +617,38 @@ void func_1514D564(struct127 *obj) {
 }
 
 /** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
-void func_1514D64C(struct127 *obj) {
-    EmitterParams emitter;
-    SpawnParams spawn;
+void func_1514D64C(Actor *obj) {
+    GlowShape emitter;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 28.0f;
-    emitter.unk04 = 28.0f;
-    emitter.unk10 = 0.5f;
-    emitter.unk14 = 0.5f;
-    emitter.unk08 = 4.0f;
-    emitter.unk0C = 17.0f;
-    emitter.unk18 = 0.75f;
-    emitter.unk1C = 0.25f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 28.0f;
+    emitter.height1 = 28.0f;
+    emitter.offset1 = 0.5f;
+    emitter.offset0 = 0.5f;
+    emitter.width0 = 4.0f;
+    emitter.height0 = 17.0f;
+    emitter.alpha1 = 0.75f;
+    emitter.alpha0 = 0.25f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.target = obj;
@@ -765,55 +657,55 @@ void func_1514D64C(struct127 *obj) {
     attach.p1.x = 0.0f;
     attach.p1.y = 0.0f;
     attach.bone = 0x2B;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 1;
 
     attach.p0.z = 25.0f;
     attach.p1.z = 75.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
 
-    emitter.unk00 = 30.0f;
-    emitter.unk04 = 30.0f;
-    emitter.unk08 = 10.0f;
-    emitter.unk10 = 0.8000000119f;
-    emitter.unk14 = 0.8000000119f;
+    emitter.width1 = 30.0f;
+    emitter.height1 = 30.0f;
+    emitter.width0 = 10.0f;
+    emitter.offset1 = 0.8000000119f;
+    emitter.offset0 = 0.8000000119f;
 
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
-    emitter.unk18 = 0.6000000238f;
-    emitter.unk1C = 0.6000000238f;
-    emitter.unk0C = 16.0f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.alpha1 = 0.6000000238f;
+    emitter.alpha0 = 0.6000000238f;
+    emitter.height0 = 16.0f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.target = obj;
     attach.bone = 5;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 0;
     attach.p0.y = 10.0f;
     attach.p0.x = 0.0f;
@@ -821,17 +713,17 @@ void func_1514D64C(struct127 *obj) {
     attach.p0.z = -70.0f;
     attach.p1.y = 20.0f;
     attach.p1.z = -140.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
     func_15160A58(obj, 5, &attach, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514D96C(struct127 *obj) {
+void func_1514D96C(Actor *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x20-byte payload. */
-void func_1514D978(struct127 *obj) {
+void func_1514D978(Actor *obj) {
     struct {
         s32 unk0;
         s32 unk4;
@@ -860,7 +752,7 @@ void func_1514D978(struct127 *obj) {
     }
 }
 
-void func_1514D9F4(struct127 *obj) {
+void func_1514D9F4(Actor *obj) {
     s32 handle;
 
     func_1514D978(obj);
@@ -869,7 +761,7 @@ void func_1514D9F4(struct127 *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x1C-byte payload. */
-void func_1514DA38(struct127 *obj) {
+void func_1514DA38(Actor *obj) {
     s32 handle;
     struct {
         s32 unk0;
@@ -895,7 +787,7 @@ void func_1514DA38(struct127 *obj) {
 }
 
 /** Sets bit 1 of obj->unk94 and attaches a func_15158BD0 object (type 0x13) with an 8-byte payload. */
-void func_1514DAA4(struct127 *obj) {
+void func_1514DAA4(Actor *obj) {
     s32 handle;
     s32 payload[2];
 
@@ -914,7 +806,7 @@ void func_1514DAA4(struct127 *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) without payload. */
-void func_1514DB18(struct127 *obj) {
+void func_1514DB18(Actor *obj) {
     s32 handle = func_15158BD0(obj, 1, 0);
 
     if (handle != 0) {
@@ -922,104 +814,104 @@ void func_1514DB18(struct127 *obj) {
     }
 }
 
-void func_1514DB58(struct127 *obj) {
+void func_1514DB58(Actor *obj) {
 }
 
-void func_1514DB64(struct127 *obj) {
+void func_1514DB64(Actor *obj) {
     if (D_800BE9F0 == 20) {
         func_151B2060(obj);
     }
 }
 
-void func_1514DB98(struct127 *obj) {
+void func_1514DB98(Actor *obj) {
     func_1514F194(obj);
 }
 
-void func_1514DBB8(struct127 *obj) {
+void func_1514DBB8(Actor *obj) {
     func_15160A58(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-void func_1514DC38(struct127 *obj) {
+void func_1514DC38(Actor *obj) {
     func_1500EE18(obj, 0xFF, 1);
 }
 
-void func_1514DC5C(struct127 *obj) {
+void func_1514DC5C(Actor *obj) {
     func_151D0F60(obj, 0, 0xFF, 1);
 }
 
-void func_1514DC84(struct127 *obj) {
+void func_1514DC84(Actor *obj) {
     obj->unk94 |= 2;
 }
 
-void func_1514DC98(struct127 *obj) {
+void func_1514DC98(Actor *obj) {
     obj->unk94 |= 0x710;
 }
 
 /** Sets obj->unk9C to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
-void func_1514DCAC(struct127 *obj) {
+void func_1514DCAC(Actor *obj) {
     obj->unk9C = 0x6000;
     func_15083568(obj, 0x23, 1.0f, 0);
     func_15083568(obj, 0x44, 1.0f, 0);
 }
 
-void func_1514DCF4(struct127 *obj) {
+void func_1514DCF4(Actor *obj) {
     if (obj->unk31C != NULL) {
         obj->unk31C->unk94 = 1;
     }
     func_15083568(obj, 0x17, 1.0f, 0);
 }
 
-void func_1514DD2C(struct127 *obj) {
+void func_1514DD2C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD4C(struct127 *obj) {
+void func_1514DD4C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD6C(struct127 *obj) {
+void func_1514DD6C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD8C(struct127 *obj) {
+void func_1514DD8C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDAC(struct127 *obj) {
+void func_1514DDAC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDCC(struct127 *obj) {
+void func_1514DDCC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDEC(struct127 *obj) {
+void func_1514DDEC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DE0C(struct127 *obj) {
+void func_1514DE0C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DE2C(struct127 *obj) {
+void func_1514DE2C(Actor *obj) {
 }
 
-void func_1514DE38(struct127 *obj) {
+void func_1514DE38(Actor *obj) {
 }
 
-void func_1514DE44(struct127 *obj) {
+void func_1514DE44(Actor *obj) {
 }
 
-void func_1514DE50(struct127 *obj) {
-    if (((u8 *)D_800D2E4C)[0x11] & 8) { // low byte of D_800D2E4C->unk10
+void func_1514DE50(Actor *obj) {
+    if (D_800D2E4C[0x11] & 8) { // low byte of D_800D2E4C[0x10]
         func_1514DCAC(obj);
     }
 }
 
-void func_1514DE88(struct127 *obj) {
+void func_1514DE88(Actor *obj) {
 }
 
-void func_1514DE94(struct127 *obj) {
+void func_1514DE94(Actor *obj) {
     struct St1514DE94 *part;
 
     func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
@@ -1032,43 +924,43 @@ void func_1514DE94(struct127 *obj) {
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
-void func_1514DFD0(struct127 *obj) {
+void func_1514DFD0(Actor *obj) {
     obj->unk65 = func_15083FB0(9) + 1;
     obj->unk101 |= 0x34;
 }
 
-void func_1514E00C(struct127 *obj) {
-    EmitterParams emitter;
-    SpawnParams spawn;
+void func_1514E00C(Actor *obj) {
+    GlowShape emitter;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12002;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12002;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0x8E;
-    spawn.unk12 = 0x19;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0x8E;
+    spawn.rgba[2] = 0x19;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 20.0f;
-    emitter.unk04 = 20.0f;
-    emitter.unk08 = 20.0f;
-    emitter.unk0C = 20.0f;
-    emitter.unk10 = 0.0f;
-    emitter.unk14 = 0.0f;
-    emitter.unk18 = 0.5f;
-    emitter.unk1C = 0.5f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 20.0f;
+    emitter.height1 = 20.0f;
+    emitter.width0 = 20.0f;
+    emitter.height0 = 20.0f;
+    emitter.offset1 = 0.0f;
+    emitter.offset0 = 0.0f;
+    emitter.alpha1 = 0.5f;
+    emitter.alpha0 = 0.5f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 35.0f;
@@ -1077,52 +969,52 @@ void func_1514E00C(struct127 *obj) {
     attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = -1;
 
     attach.p0.z = 59.0f;
     attach.p1.z = 559.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E194(struct127 *obj) {
-    EmitterParams emitter;
-    SpawnParams spawn;
+void func_1514E194(Actor *obj) {
+    GlowShape emitter;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12002;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12002;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0x8E;
-    spawn.unk12 = 0x19;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0x8E;
+    spawn.rgba[2] = 0x19;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 16.0f;
-    emitter.unk04 = 16.0f;
-    emitter.unk08 = 16.0f;
-    emitter.unk0C = 16.0f;
-    emitter.unk10 = 0.0f;
-    emitter.unk14 = 0.0f;
-    emitter.unk18 = 0.5f;
-    emitter.unk1C = 0.5f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 16.0f;
+    emitter.height1 = 16.0f;
+    emitter.width0 = 16.0f;
+    emitter.height0 = 16.0f;
+    emitter.offset1 = 0.0f;
+    emitter.offset0 = 0.0f;
+    emitter.alpha1 = 0.5f;
+    emitter.alpha0 = 0.5f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 35.0f;
@@ -1131,52 +1023,52 @@ void func_1514E194(struct127 *obj) {
     attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = -1;
 
     attach.p0.z = 59.0f;
     attach.p1.z = 559.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E31C(struct127 *obj) {
-    EmitterParams emitter;
-    SpawnParams spawn;
+void func_1514E31C(Actor *obj) {
+    GlowShape emitter;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x2012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x2012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0xE6;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0xE6;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
-    emitter.unk00 = 45.0f;
-    emitter.unk0C = 45.0f;
-    emitter.unk10 = 0.5f;
-    emitter.unk14 = 0.5f;
-    emitter.unk1C = 0.0f;
-    emitter.unk04 = 55.0f;
-    emitter.unk08 = 25.0f;
-    emitter.unk18 = 0.8999999762f;
-    emitter.unk20 = 9.999999975e-07f;
+    emitter.width1 = 45.0f;
+    emitter.height0 = 45.0f;
+    emitter.offset1 = 0.5f;
+    emitter.offset0 = 0.5f;
+    emitter.alpha0 = 0.0f;
+    emitter.height1 = 55.0f;
+    emitter.width0 = 25.0f;
+    emitter.alpha1 = 0.8999999762f;
+    emitter.fadeRate = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
     attach.p0.x = 0.0f;
@@ -1185,15 +1077,15 @@ void func_1514E31C(struct127 *obj) {
     attach.p1.y = 0.0f;
     attach.target = obj;
     attach.bone = 0xC;
-    emitter.unk54 = 0;
-    emitter.unk55 = 0;
-    emitter.unk56 = 0;
-    emitter.unk57 = 0;
+    emitter.visibility[0] = 0;
+    emitter.visibility[1] = 0;
+    emitter.visibility[2] = 0;
+    emitter.visibility[3] = 0;
     attach.handler = 2;
 
     attach.p0.z = 100.0f;
     attach.p1.z = 600.0f;
-    emitter.unk48 = 1.0f;
+    emitter.scale = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
@@ -1208,7 +1100,7 @@ void func_1514E31C(struct127 *obj) {
 }
 
 /** Attaches the "Charactereffect 0" effect (type 0xD) and a func_1515D5F8 object tracking obj's position (type 0x18). */
-void func_1514E508(struct127 *obj) {
+void func_1514E508(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1219,7 +1111,7 @@ void func_1514E508(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E5B8(struct127 *obj) {
+void func_1514E5B8(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1230,7 +1122,7 @@ void func_1514E5B8(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E668(struct127 *obj) {
+void func_1514E668(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1241,7 +1133,7 @@ void func_1514E668(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E718(struct127 *obj) {
+void func_1514E718(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1252,7 +1144,7 @@ void func_1514E718(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E7C8(struct127 *obj) {
+void func_1514E7C8(Actor *obj) {
     s32 handle;
 
     handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
@@ -1283,7 +1175,7 @@ typedef struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
-    /* 0x110 */ EmitterParams emitter;    // for objects spawned by func_15189FF0
+    /* 0x110 */ GlowShape emitter;    // for objects spawned by func_15189FF0
 } ToggleTarget;
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
@@ -1311,11 +1203,11 @@ s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
     return 1;
 }
 
-/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.unk44. */
+/** Like func_1514E89C, but clearing bit 0 also zeroes byte 0x30 of target->emitter.attach. */
 s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
     // matching: with an s32 parameter IDO keeps &target->unk110 in its own register
     ToggleTarget *target = (ToggleTarget *)handle;
-    EmitterParams *emitter;
+    GlowShape *emitter;
     s32 flags;
     u8 *ptr;
 
@@ -1325,7 +1217,7 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         flags = target->flags;
         if (flags & 1) {
             target->flags = flags & ~1;
-            ptr = emitter->unk44;
+            ptr = emitter->attach;
             if (ptr != NULL) {
                 ptr[0x30] = 0;
             }
@@ -1335,7 +1227,7 @@ s32 func_1514E920(s32 handle, s32 msg, s32 arg) {
         break;
     case 2:
         target->flags &= ~1;
-        ptr = emitter->unk44;
+        ptr = emitter->attach;
         if (ptr != NULL) {
             ptr[0x30] = 0;
         }
@@ -1431,7 +1323,7 @@ Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
     if (node == NULL) {
         return NULL;
     }
-    node->handle = handle;
+    node->handle = (void *)handle;
     node->next = NULL;
     node->prev = NULL;
     node->type = type;
@@ -1442,7 +1334,7 @@ Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
  * Attaches `handle` to `owner` as an attachment of `type` (pushed at the head of its list).
  * If no node can be allocated, the handle is released instead. Returns the node or NULL.
  */
-Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type) {
+Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type) {
     Attachment *result;
     Attachment *node;
 
@@ -1451,8 +1343,8 @@ Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type) {
         node = func_1514EBA4(handle, type, 0);
         result = node;
         if (node != NULL) {
-            node->next = ATTACHMENTS(owner);
-            ATTACHMENTS(owner) = node;
+            node->next = owner->attachments;
+            owner->attachments = node;
             node->prev = NULL;
             if (node->next != NULL) {
                 node->next->prev = node;
@@ -1500,7 +1392,7 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
     if (node != NULL) {
         do {
             next = node->next;
-            if (handle == node->handle) {
+            if (handle == (s32)node->handle) {
                 found = TRUE;
             } else {
                 node = next;
@@ -1514,11 +1406,11 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
 }
 
 /** Unlinks `node` from `owner`'s attachment list and frees it. Returns the node's handle. */
-s32 func_1514ED8C(Attachment *node, struct127 *owner) {
+s32 func_1514ED8C(Attachment *node, Actor *owner) {
     s32 handle;
 
-    if (node == ATTACHMENTS(owner)) {
-        ATTACHMENTS(owner) = node->next;
+    if (node == owner->attachments) {
+        owner->attachments = node->next;
     }
     if (node->next != NULL) {
         node->next->prev = node->prev;
@@ -1526,19 +1418,19 @@ s32 func_1514ED8C(Attachment *node, struct127 *owner) {
     if (node->prev != NULL) {
         node->prev->next = node->next;
     }
-    handle = node->handle;
+    handle = (s32)node->handle;
     func_1516972C((struct102 *)node);
     return handle;
 }
 
 /** Removes (without releasing the handle) every attachment of `owner` that holds `handle`. */
-void func_1514EDF0(s32 handle, struct127 *owner) {
+void func_1514EDF0(s32 handle, Actor *owner) {
     Attachment *node;
     s32 ret;
     Attachment *match;
     u8 found;
 
-    node = ATTACHMENTS(owner);
+    node = owner->attachments;
     match = NULL;
     do {
         // matching: test the s32 result, loop on the u8 copy
@@ -1552,7 +1444,7 @@ void func_1514EDF0(s32 handle, struct127 *owner) {
 }
 
 struct Struct1514EE70 {
-    struct127 *obj;
+    Actor *obj;
     u8 uniqueId;
     u8 unk5;
     u16 unk6;
@@ -1561,7 +1453,7 @@ struct Struct1514EE70 {
 s32 func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
-void func_1514EE70(struct127 *obj) {
+void func_1514EE70(Actor *obj) {
     struct Struct1514EE70 desc;
     s32 handle;
 
@@ -1574,75 +1466,75 @@ void func_1514EE70(struct127 *obj) {
 }
 
 
-void func_1514EECC(struct127 *obj) {
+void func_1514EECC(Actor *obj) {
     s32 handle;
 
     handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x19);
     {
-        SpawnParams spawn;
-        EmitterParams emitter;
+        ParticleDef spawn;
+        GlowShape emitter;
         EmitterAttach attach;
 
-        spawn.unk00 = 0x69;
-        spawn.unk40 = 0x04ED200A;
-        spawn.unk04 = 300;
-        spawn.unk08 = 0;
-        spawn.unk0C = 0;
+        spawn.texture = 0x69;
+        spawn.flags = 0x04ED200A;
+        spawn.lifetime = 300;
+        spawn.frame = 0;
+        spawn.frameSpeed = 0;
         spawn.unk45 = 0xFF;
-        spawn.unk10 = 0xFF;
-        spawn.unk11 = 0;
-        spawn.unk12 = 0;
-        spawn.unk13 = 0xFF;
-        spawn.unk02 = 0x4403;
-        spawn.unk1C = 0.0f;
-        spawn.unk20 = 0.0f;
-        spawn.unk24 = 0.0f;
-        spawn.unk28 = 0.0f;
-        spawn.unk2C = 0.0f;
-        spawn.unk30 = 0.0f;
-        spawn.unk01 = 3;
-        spawn.unk18 = 100.0f;
-        spawn.unk14 = 100.0f;
-        spawn.unk34 = 1.0f;
-        spawn.unk38 = 1.0f;
-        spawn.unk3C = 1.0f;
+        spawn.rgba[0] = 0xFF;
+        spawn.rgba[1] = 0;
+        spawn.rgba[2] = 0;
+        spawn.rgba[3] = 0xFF;
+        spawn.renderModes = 0x4403;
+        spawn.pos.x = 0.0f;
+        spawn.pos.y = 0.0f;
+        spawn.pos.z = 0.0f;
+        spawn.rot.x = 0.0f;
+        spawn.rot.y = 0.0f;
+        spawn.rot.z = 0.0f;
+        spawn.type = 3;
+        spawn.height = 100.0f;
+        spawn.width = 100.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
         spawn.unk44 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
         spawn.unk48 = 0;
-        spawn.unk4C = 0xFF;
+        spawn.viewportMask = 0xFF;
         spawn.unk50 = 0;
-        spawn.unk54 = 1;
-        spawn.unk56 = 0xFF;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
 
-        emitter.unk04 = 95.0f;
-        emitter.unk00 = 95.0f;
-        emitter.unk0C = 65.0f;
-        emitter.unk08 = 65.0f;
-        emitter.unk10 = 0.150000006f;
-        emitter.unk14 = 0.150000006f;
-        emitter.unk18 = 0.6999999881f;
-        emitter.unk1C = 0.400000006f;
-        emitter.unk20 = 9.999999975e-07f;
+        emitter.height1 = 95.0f;
+        emitter.width1 = 95.0f;
+        emitter.height0 = 65.0f;
+        emitter.width0 = 65.0f;
+        emitter.offset1 = 0.150000006f;
+        emitter.offset0 = 0.150000006f;
+        emitter.alpha1 = 0.6999999881f;
+        emitter.alpha0 = 0.400000006f;
+        emitter.fadeRate = 9.999999975e-07f;
 
         attach.targetId = obj->unique_id;
         attach.target = obj;
         attach.p0 = D_800A5940;
         attach.p1 = D_800A594C;
         attach.bone = 1;
-        emitter.unk54 = 0;
-        emitter.unk55 = 0;
-        emitter.unk56 = 0;
-        emitter.unk57 = 0;
-        emitter.unk48 = 1.0f;
+        emitter.visibility[0] = 0;
+        emitter.visibility[1] = 0;
+        emitter.visibility[2] = 0;
+        emitter.visibility[3] = 0;
+        emitter.scale = 1.0f;
         attach.handler = 3;
 
         func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0);
     }
 }
 
-void func_1514F110(struct127 *obj) {
+void func_1514F110(Actor *obj) {
     func_1514F194(obj);
 }
 
@@ -1660,7 +1552,7 @@ s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514F194(struct127 *obj) {
+void func_1514F194(Actor *obj) {
     s32 handle;
 
     func_151D0F60(obj, 1, 0xFF, 1);
@@ -1678,7 +1570,7 @@ void func_1514F194(struct127 *obj) {
     }
 }
 
-void func_1514F308(struct127 *obj) {
+void func_1514F308(Actor *obj) {
     Vec3f pointA = { 52.0f, 0.0f, 80.0f };
     Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
@@ -1686,9 +1578,9 @@ void func_1514F308(struct127 *obj) {
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514F3CC(struct127 *obj) {
+void func_1514F3CC(Actor *obj) {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
         f32 unk8;
     } payload;
@@ -1699,45 +1591,45 @@ void func_1514F3CC(struct127 *obj) {
     payload.unk8 = 0.0f;
 
     // the seventh argument is the payload size
-    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, (struct37 *)sizeof(payload), 0xFF, 1);
+    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, sizeof(payload), 0xFF, 1);
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0x28, &payload, sizeof(payload));
     }
 }
 
-void func_1514F44C(struct127 *obj) {
+void func_1514F44C(Actor *obj) {
     s32 handle;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
     func_1514EC1C(handle, obj, 0xD);
 }
 
-void func_1514F4A8(struct127 *obj) {
+void func_1514F4A8(Actor *obj) {
     func_151D74B0(obj, 1, -1, 0xFF, 1);
 }
 
-void func_1514F4D8(struct127 *obj) {
+void func_1514F4D8(Actor *obj) {
     func_151D74B0(obj, 2, 1, 0xFF, 1);
 }
 
-void func_1514F508(struct127 *obj) {
+void func_1514F508(Actor *obj) {
     func_151D74B0(obj, 3, 0, 0xFF, 1);
 }
 
-void func_1514F538(struct127 *obj) {
+void func_1514F538(Actor *obj) {
     func_151D74B0(obj, 4, -1, 0xFF, 1);
 }
 
-void func_1514F568(struct127 *obj) {
+void func_1514F568(Actor *obj) {
     func_150C4120(obj, -1, 0xFF, 1);
 }
 
-void func_1514F590(struct127 *obj) {
+void func_1514F590(Actor *obj) {
     func_1501175C(obj, 0xFF, 1);
     func_15011A78(obj, 0xFF, 1);
 }
 
-void func_1514F5CC(struct127 *obj) {
+void func_1514F5CC(Actor *obj) {
     Struct1514F5CCArg desc;
 
     desc.unk00 = 0;

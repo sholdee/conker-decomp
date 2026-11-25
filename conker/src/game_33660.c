@@ -11,16 +11,15 @@ extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
 extern OSContStatus D_800BE2C0[];
 extern s32 D_800BE72C;
-extern u8  D_800BE740;
 
 
 void func_150061B0(void) {
     osCreateMesgQueue(&D_800BE900, &D_800BE2D0, 8);
     osSetEventMesg(OS_EVENT_SI, &D_800BE900, D_800BE9E0);
-    D_800BE730.unk0 = &D_800BE748;
-    D_800BE730.unk4 = &D_800BE74E;
-    D_800BE730.unk8 = &D_800BE754;
-    D_800BE730.unkC = &D_800BE75A;
+    D_800BE730[0] = &D_800BE748[0];
+    D_800BE730[1] = &D_800BE748[1];
+    D_800BE730[2] = &D_800BE748[2];
+    D_800BE730[3] = &D_800BE748[3];
     func_15007644();
 }
 
@@ -51,11 +50,11 @@ void func_15006234(void) {
                 D_800BE72C++;
                 if (D_800BE2C0[i].type & CONT_JOYPORT) {
                     if (D_800BE2C0[i].status & CONT_CARD_ON) {
-                        ret = osPfsInit(&D_800BE900, (OSPfs *)&D_800BE760[i], i);
+                        ret = osPfsInit(&D_800BE900, &D_800BE760[i], i);
                         if ((ret == PFS_ERR_ID_FATAL) || (ret == PFS_ERR_DEVICE)) {
-                            if (_MakeMotorData(&D_800BE900, (OSPfs *)&D_800BE760[i], i) == 0) {
+                            if (_MakeMotorData(&D_800BE900, &D_800BE760[i], i) == 0) {
                                 D_800BE944[i] = 1;
-                                osMotorStop((OSPfs *)&D_800BE760[i]);
+                                osMotorStop(&D_800BE760[i]);
                             }
                         }
                     }

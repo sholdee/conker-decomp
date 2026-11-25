@@ -1,25 +1,12 @@
 #include <ultra64.h>
-/* functions.h declares func_1509BFB0 void; it ends by tail-dispatching through D_800884D4
- * via jalr and leaves that result in v0. Declaring it s32 matches the caller's regalloc.
- * The seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
+/* matching: func_1509BFB0 is void, but it ends by tail-dispatching through D_800884D4 via jalr and
+ * leaves that result in v0; this file was built against an s32-returning prototype (caller regalloc). */
 #define func_1509BFB0 func_1509BFB0_hdr
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_1509BFB0
-#undef func_15149130
 s32 func_1509BFB0(s32 num, s32, s32, ...);
-struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* A level object (func_151149AC returns one; see Prop in game_10B7D0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 position[3];
-} Prop;
+#include "effects.h"
 
 /* What func_1510FD20 returns for an x/z position. */
 typedef struct {
@@ -30,12 +17,11 @@ typedef struct {
 /* Data of the effect func_150E1060 spawns and func_150E114C updates. */
 typedef struct {
     /* 0x00 */ u8 index; // 0 or 1: row of D_800A0FE0, D_800A0FE4 and D_800A0FFC
-    /* 0x04 */ Prop *prop;
+    /* 0x04 */ WorldObject *prop;
     /* 0x08 */ Struct1510FD20 *lookup; // func_1510FD20 at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } Emitter;
 
-/* Effect object header from func_15149130; effect-specific data starts at 0x28. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 kind;
@@ -46,69 +32,69 @@ typedef struct {
 } EmitterEffect;
 
 extern u8 D_800A0FE0[];
-extern Prop *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern void func_1510F800(s32);
 
 s32 func_1509BE40(s32, s32, s32, s32);
 
-/* Sets camera distances when camera->unk23E is 9 (else when unk2C is 8), and flag bits in unk84
+/* Sets camera distances when camera->zone is 9 (else when unk2C is 8), and flag bits in unk84
  * from func_1509BE40 queries for the levels D_800BE9F0 == 0x1E, 0x1B and 0x2F. */
-void func_150E0D90(struct108 *camera) {
-    if (camera->unk23E == 9) {
+void func_150E0D90(Camera *camera) {
+    if (camera->zone == 9) {
         if (D_800BE9F0 == 0x1E) {
             func_1509BFB0(0, 0x4044, 1);
         }
-        if ((camera->unk2C != 0x100) && (camera->unk6C8 == 0)) {
+        if ((camera->mode != 0x100) && (camera->cmdRunning == 0)) {
             if (func_15123934(camera, 8, 0, 0, 0) != 0) {
-                camera->unk84 |= 0x300000;
-                camera->unk84 &= ~4;
-                camera->unk1B4 = 1;
-                camera->unk1E0 = 3;
+                camera->flags |= 0x300000;
+                camera->flags &= ~4;
+                camera->preset = 1;
+                camera->presetMask = 3;
                 func_15124B18(camera);
             }
-            camera->unk348 = 125.0f;
+            camera->height = 125.0f;
             camera->unk34C = 125.0f;
-            camera->unk374 = 220.0f;
-            camera->unk190 = 30.0f;
+            camera->targetDistance = 220.0f;
+            camera->liftTarget = 30.0f;
         } else {
-            camera->unk190 = 0.0f;
+            camera->liftTarget = 0.0f;
         }
     } else {
-        if ((camera->unk2C == 8) && (camera->unk6C8 == 0) && (func_151239CC(camera, 0) != 0)) {
+        if ((camera->mode == 8) && (camera->cmdRunning == 0) && (func_151239CC(camera, 0) != 0)) {
             camera->unk34C = 110.0f;
-            camera->unk348 = 110.0f;
-            camera->unk374 = 300.0f;
+            camera->height = 110.0f;
+            camera->targetDistance = 300.0f;
         }
         if (D_800BE9F0 == 0x1E) {
             func_1509BFB0(0, 0x4044, 0);
         }
     }
     if (D_800BE9F0 == 0x2F) {
-        camera->unk84 &= 0x7FFFFFFF;
+        camera->flags &= 0x7FFFFFFF;
     } else if (D_800BE9F0 == 0x1E) {
         if (func_1509BE40(1, 0x4042, 6, 0x9000) != 0) {
-            camera->unk84 &= 0x7FFFFFFF;
+            camera->flags &= 0x7FFFFFFF;
         } else {
-            camera->unk84 |= 0x80000000;
+            camera->flags |= 0x80000000;
         }
         if (func_1509BE40(1, 0x4044, 6, 0x2000) != 0) {
-            camera->unk84 |= 0x20001010;
-            camera->unk84 &= ~8;
+            camera->flags |= 0x20001010;
+            camera->flags &= ~8;
         } else {
-            camera->unk84 &= 0xDFFFEFEF;
-            camera->unk84 |= 8;
+            camera->flags &= 0xDFFFEFEF;
+            camera->flags |= 8;
         }
     }
     if (D_800BE9F0 == 0x1B) {
         if (func_1509BE40(1, 0x406E, 6, 0x9000) != 0) {
-            camera->unk84 |= 0x200;
+            camera->flags |= 0x200;
         } else {
-            camera->unk84 &= ~0x200;
+            camera->flags &= ~0x200;
         }
         if (func_1509BE40(1, 0x406F, 6, 0x9000) != 0) {
-            camera->unk84 |= 0x80000000;
+            camera->flags |= 0x80000000;
         } else {
-            camera->unk84 &= 0x7FFFFFFF;
+            camera->flags &= 0x7FFFFFFF;
         }
     }
 }
@@ -133,7 +119,7 @@ struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
     }
 
     func_1510F800(0);
-    emitter.lookup = (Struct1510FD20 *)func_1510FD20(emitter.prop->position[0], emitter.prop->position[2]);
+    emitter.lookup = (Struct1510FD20 *)func_1510FD20(emitter.prop->x, emitter.prop->z);
     emitter.accum = 0.0f;
 
     effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
@@ -143,54 +129,11 @@ struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
     return effect;
 }
 
-/* Spawn parameters passed to func_15130374 (see Struct15130374Arg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 position[3];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 pad66[2];
-} ParticleSpawnArgs;
-
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
 extern Vec3f D_800A0FE4[];
 extern Vec3f D_800A0FFC[];
-extern struct260 *func_15130374(ParticleSpawnArgs *, u8, s32, u8, s32);
-extern void func_15145CD0(Prop *, Vec3f **, f32 **, s32);
+extern struct260 *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
+extern void func_15145CD0(WorldObject *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
@@ -199,7 +142,7 @@ void func_150E114C(EmitterEffect *effect) {
     s32 i;
     s16 mask;
     s32 pad[2]; // matching: two unused stack words above args
-    ParticleSpawnArgs args;
+    ParticleDesc68 args;
     f32 extra;
     f32 dir[3];
     Vec3f *points[2];
@@ -223,58 +166,58 @@ void func_150E114C(EmitterEffect *effect) {
         }
         {
             f32 *d; // matching: the block-scoped pointer steers regalloc for the subtraction below
-            args.unk1D = 0x29;
-            args.unk08 = 0x4403;
-            args.unk00 = 0x200005;
-            args.unk1E = 0x21;
-            args.unk20 = 7;
+            args.texture = 0x29;
+            args.renderMode = 0x4403;
+            args.unk0 = 0x200005;
+            args.fadeStart = 0x21;
+            args.fadeRate = 7;
             args.flags = 0x1CE05;
-            args.unk60 = 6;
-            args.unk61 = 8;
-            args.unk62 = 0x10;
-            args.unk63 = -1;
-            args.unk04 = 0;
-            args.unk0C = 0;
-            args.unk10 = 0;
-            args.unk54 = 0.0f;
-            args.unk64 = -1;
-            args.unk65 = 0;
-            args.unk22 = 0x27;
-            args.unk14 = 0xDD;
-            args.unk15 = 0xD3;
-            args.unk16 = 0xCD;
-            args.unk17 = 0xFF;
-            args.unk18 = 0x57;
-            args.unk19 = 0x55;
-            args.unk1A = 0x5A;
-            args.unk1C = 0xFF;
+            args.primColorMode = 6;
+            args.envColorMode = 8;
+            args.updateFunc = 0x10;
+            args.deathFunc = -1;
+            args.unk4 = 0;
+            args.frame = 0;
+            args.frameRate = 0;
+            args.gravity = 0.0f;
+            args.drawFunc = -1;
+            args.handlerSet = 0;
+            args.scaleStart = 0x27;
+            args.r = 0xDD;
+            args.g = 0xD3;
+            args.b = 0xCD;
+            args.a = 0xFF;
+            args.r2 = 0x57;
+            args.g2 = 0x55;
+            args.b2 = 0x5A;
+            args.brightness = 0xFF;
             extra = 0.962338984f;
-            args.unk24 = 1.011461973f;
+            args.scaleRate = 1.011461973f;
             points[0] = &D_800A0FE4[emitter->index];
             points[1] = &D_800A0FFC[emitter->index];
-            results[0] = args.position;
+            results[0] = &args.pos.x;
             results[1] = dir;
             func_15145CD0(emitter->prop, points, results, 2);
             d = dir;
-            d[0] -= args.position[0];
-            d[1] -= args.position[1];
-            d[2] -= args.position[2];
+            d[0] -= args.pos.x;
+            d[1] -= args.pos.y;
+            d[2] -= args.pos.z;
         }
         do {
             args.flags &= ~0xC0;
             flip80 = (func_150ADA20() & 1) ? 0x80 : 0;
             flip40 = (func_150ADA20() & 1) ? 0x40 : 0;
             args.flags |= flip40 | flip80;
-            args.unk3C = 0.0f;
-            args.unk40 = 0.0f;
-            args.unk44 = 0.0f;
-            args.unk1B = 0xFF;
-            args.unk0A = (func_150ADA20() % 17U) + 50;
-            args.unk28 = args.unk2C = (func_150ADA68() * 165.0f) + 357.0f;
+            args.offset.x = 0.0f;
+            args.offset.y = 0.0f;
+            args.offset.z = 0.0f;
+            args.alpha = 0xFF;
+            args.timer = (func_150ADA20() % 17U) + 50;
+            args.width = args.height = (func_150ADA68() * 165.0f) + 357.0f;
             speed = ((func_150ADA68() * 195.0f) + 356.0f) * 0.001f;
-            args.unk48 = dir[0] * speed;
-            args.unk4C = dir[1] * speed;
-            args.unk50 = dir[2] * speed;
+            args.vel.x = dir[0] * speed;
+            args.vel.y = dir[1] * speed;
+            args.vel.z = dir[2] * speed;
             particle = func_15130374(&args, 1, sizeof(extra), effect->owner, effect->kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));

@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 (random) as returning u8; this file needs the full u32 */
-#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -32,29 +29,13 @@ typedef struct SwarmActor {
     /* 0xE4 */ f32 targetY;
     /* 0xE8 */ u32 surfaceFlags;
     /* 0xEC */ u8 brightness;
-    /* 0xED */ u8 modelIndex;        /* index into gSwarmModels / D_8008D0B0 */
+    /* 0xED */ u8 modelIndex;        /* index into D_800DDE80 / D_8008D0B0 */
     /* 0xEE */ u16 sound;
     /* 0xF0 */ u8 alpha;
     /* 0xF1 */ u8 fadingOut;
 } SwarmActor;
 
-/* Per-model data in D_800DDE80 (the shared header only names fields 0x0, 0xC and 0x10). */
-typedef struct SwarmModel {
-    /* 0x00 */ void *loaded;
-    /* 0x04 */ Vtx *unk4;
-    /* 0x08 */ Vtx *unk8;
-    /* 0x0C */ Gfx *displayList;
-    /* 0x10 */ void *unk10;
-} SwarmModel;
-#define gSwarmModels ((SwarmModel *)D_800DDE80)
 
-typedef struct HeightSample {
-    s32 height;
-    u8 pad04[0xC];
-} HeightSample;
-#define gHeightSamples ((HeightSample *)&D_800D3300) /* filled by func_150A3A70 */
-
-u32 func_150ADA20(void);
 void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
@@ -75,14 +56,14 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     s32 onGround;
     s32 model;
     s32 surfaceIndex;
-    struct17 diff;
+    Vec3f diff;
     u32 surfaceFlags;
     s32 surface;
 
     height = (f32)y;
-    diff.unk0 = x - D_800DBFF0[player].unk2F8;
-    diff.unk4 = height - D_800DBFF0[player].unk2FC;
-    diff.unk8 = z - D_800DBFF0[player].unk300;
+    diff.x = x - D_800DBFF0[player].eye.x;
+    diff.y = height - D_800DBFF0[player].eye.y;
+    diff.z = z - D_800DBFF0[player].eye.z;
     angle = func_15048FC8(&diff);
     for (i = 0; i < count; i++) {
         actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
@@ -111,7 +92,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
         actor->rollStep = 0.0f;
         actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
         model = func_150ADA20() & 1;
-        actor->vertices = gSwarmModels[model].unk8;
+        actor->vertices = D_800DDE80[model].unk8;
         actor->modelIndex = model;
         if (i == 0) {
             actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, actorX, y, actorZ, 1000, 4000);
@@ -123,8 +104,8 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
             actor->flags |= 0x80;
             actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
             if (surface != 0) {
-                surfaceIndex = (surface - D_800DBE3C) / 12;
-                surfaceFlags = ((u32 *)D_800DBE5C)[surfaceIndex];
+                surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
+                surfaceFlags = D_800DBE5C[surfaceIndex];
             } else {
                 surfaceFlags = 0;
             }
@@ -181,16 +162,16 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         actor->rollStep = 0.0f;
         actor->yawStep = 3.0f;
         actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
-        actor->vertices = gSwarmModels[7].unk8;
+        actor->vertices = D_800DDE80[7].unk8;
         actor->modelIndex = 7;
         samples = func_150A3A70(actorX, actorZ);
         if (samples == 0) {
             func_1516979C((struct102 *)actor);
         } else {
-            lowest = gHeightSamples[0].height;
+            lowest = D_800D3300[0].height;
             for (j = 1; j < samples; j++) {
-                if (gHeightSamples[j].height < lowest) {
-                    lowest = gHeightSamples[j].height;
+                if (D_800D3300[j].height < lowest) {
+                    lowest = D_800D3300[j].height;
                 }
             }
             lowest >>= 8;
@@ -234,7 +215,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
     s32 angle;
     s32 ringWidth;
     s32 onGround;
-    struct17 diff;
+    Vec3f diff;
     u32 variant;
     s32 surface;
 
@@ -242,9 +223,9 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         return;
     }
     if (flags & 0x10000) {
-        diff.unk0 = x - D_800DBFF0[player].unk2F8;
-        diff.unk4 = y - D_800DBFF0[player].unk2FC;
-        diff.unk8 = z - D_800DBFF0[player].unk300;
+        diff.x = x - D_800DBFF0[player].eye.x;
+        diff.y = y - D_800DBFF0[player].eye.y;
+        diff.z = z - D_800DBFF0[player].eye.z;
         angle = func_15048FC8(&diff);
     }
     for (i = 0; i < count; i++) {
@@ -310,7 +291,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
             }
         }
         variant += baseModel;
-        actor->vertices = gSwarmModels[variant].unk8;
+        actor->vertices = D_800DDE80[variant].unk8;
         actor->modelIndex = variant;
         actor->originX = x;
         actor->originY = y;
@@ -333,8 +314,8 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
             actor->flags |= 0x80;
             // matching: reusing ringWidth/onGround here keeps the original stack frame size
             if (surface != 0) {
-                ringWidth = (surface - D_800DBE3C) / 12;
-                onGround = ((u32 *)D_800DBE5C)[ringWidth];
+                ringWidth = (surface - (s32)D_800DBE3C) / 12;
+                onGround = D_800DBE5C[ringWidth];
             } else {
                 onGround = 0;
             }
@@ -348,7 +329,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
     }
 }
 
-/* Per-model flight parameters, indexed like gSwarmModels. */
+/* Per-model flight parameters, indexed like D_800DDE80. */
 typedef struct SwarmFlight {
     /* 0x00 */ u8 maxSpeed;
     /* 0x01 */ u8 minSpeed;
@@ -370,15 +351,10 @@ typedef struct SwarmFlight {
 } SwarmFlight;
 
 extern SwarmFlight D_8008D0B0[];
-extern s32 D_800C35B0;
-extern u8 D_800C35E8;
-extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
-extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
-s32 func_150490A8(struct17 *arg0);
+s32 func_150490A8(Vec3f *arg0);
 s32 func_150AD960(s32, s32, s32, s32);
-s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
  * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
@@ -397,29 +373,29 @@ void func_15175958(SwarmActor *actor) {
     s32 surfaceFlags;
     s32 angle;
     s32 dist;
-    struct17 vec;
+    Vec3f vec;
     s32 surface;
     SwarmFlight *flight;
-    SwarmModel *model;
+    EffectModelSlot *model;
     s32 alpha;
     f32 dx;
     f32 dz;
     u16 sound;
 
-    if (gSwarmModels[actor->modelIndex].loaded == NULL || D_800DDF78[actor->modelIndex] == 0) {
+    if (D_800DDE80[actor->modelIndex].resource == NULL || D_800DDF78[actor->modelIndex] == NULL) {
         func_1516972C((struct102 *)actor);
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C35E8 == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
-        if (D_800C35EA == 0 || D_800C35E8 != 0xF) {
+        if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }
         /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
          * hold the orbit angle, its angular speed and the orbit radius */
-        if (D_800C35B0 >= 60 && !(actor->flags & 0x200)) {
+        if (D_800C35B0[0] >= 60 && !(actor->flags & 0x200)) {
             actor->flags = (actor->flags & ~0x4C) | 0x200;
             dx = actor->x - -3478.0f;
             dz = actor->z - 3858.0f;
@@ -449,8 +425,7 @@ void func_15175958(SwarmActor *actor) {
         }
         actor->alpha = alpha;
     }
-    // matching: index D_800DDE80 before the cast; &gSwarmModels[i] schedules differently
-    model = (SwarmModel *)&D_800DDE80[actor->modelIndex];
+    model = &D_800DDE80[actor->modelIndex];
     flight = &D_8008D0B0[actor->modelIndex];
     D_800DDF68[actor->modelIndex] = 1;
     sound = actor->sound;
@@ -467,8 +442,8 @@ void func_15175958(SwarmActor *actor) {
         dist = func_150AD960((s32)actor->x, (s32)actor->z, actor->originX, actor->originZ);
         tooClose = ((actor->flags & 0x10) && dist < actor->minRadius) ? TRUE : FALSE;
         if (actor->maxRadius < dist || tooClose) {
-            vec.unk0 = actor->originX - actor->x;
-            vec.unk8 = actor->z - actor->originZ;
+            vec.x = actor->originX - actor->x;
+            vec.z = actor->z - actor->originZ;
             angle = func_150490A8(&vec);
             if (tooClose) {
                 angle += 0x80;
@@ -526,8 +501,8 @@ void func_15175958(SwarmActor *actor) {
     if (actor->flags & 0x80) {
         actor->groundHeight = func_1510F8D8(actor->x, actor->y, actor->z, &surface);
         if (surface != 0) {
-            surfaceIndex = (surface - D_800DBE3C) / 12;
-            surfaceFlags = ((u32 *)D_800DBE5C)[surfaceIndex];
+            surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
+            surfaceFlags = D_800DBE5C[surfaceIndex];
         } else {
             surfaceFlags = 0;
         }
@@ -616,7 +591,7 @@ void func_15175958(SwarmActor *actor) {
         actor->x = actor->rollStep * cosPitch + -3478.0f;
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
-        if (actor->y < -3100.0f || D_800C35EA == 0 || D_800C35E8 != 0xF) {
+        if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }
@@ -643,7 +618,7 @@ void func_15175958(SwarmActor *actor) {
     }
     if ((actor->flags & 2) &&
         func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
-        (D_800D2138 != 1 ||
+        (D_800D2138.unk0 != 1 ||
          func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
         func_1516972C((struct102 *)actor);
     }
@@ -733,7 +708,7 @@ void func_1517685C(SwarmActor *actor) {
 void func_15176B84(SwarmActor *actor) {
     s32 alpha;
 
-    if ((gSwarmModels[actor->modelIndex].loaded == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
+    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
         func_1516972C((struct102 *)actor);
         return;
     }
@@ -769,9 +744,9 @@ void func_15176B84(SwarmActor *actor) {
                               (s32)actor->z) < 200) {
                 actor->state = 2;
                 actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
-                actor->vertices = gSwarmModels[actor->modelIndex].unk8;
+                actor->vertices = D_800DDE80[actor->modelIndex].unk8;
             } else {
-                actor->vertices = gSwarmModels[actor->modelIndex].unk4;
+                actor->vertices = D_800DDE80[actor->modelIndex].unk4;
             }
             return;
         case 2:
@@ -787,20 +762,20 @@ void func_15176B84(SwarmActor *actor) {
     func_15175958(actor);
 }
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */
 Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 pad; // matching: unused stack slot
-    f32 rot[4][4];
-    f32 mtx[4][4];
+    MtxF rot;
+    MtxF mtx;
     s32 col[3];
     s32 brightness;
     s32 target;
 
-    if ((gSwarmModels[actor->modelIndex].loaded == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
+    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
         return gdl;
     }
     func_150A8050(mtx, 0.0f, actor->yaw, 0.0f);
@@ -845,7 +820,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
         update = 0;
         gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
         gDPSetEnvColor(gdl++, col[0], col[1], col[2], actor->alpha);
-        gSPDisplayList(gdl++, gSwarmModels[actor->modelIndex].displayList);
+        gSPDisplayList(gdl++, D_800DDE80[actor->modelIndex].displayList);
     }
     return gdl;
 }
@@ -853,7 +828,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
 /* Draws a swarm actor for camera `camera`, unless it is outside that camera's view.
  * Perched actors (state 0) use model 10's resting pose; the rest go through func_15176DF0. */
 Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 culled;
 
     culled = func_1510AEE0(D_800D9C10[camera], actor->x, actor->y, actor->z,
@@ -867,8 +842,8 @@ Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
             mtx[3][2] = actor->z;
             guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
             gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gSPSegment(gdl++, 1, gSwarmModels[10].unk4);
-            gSPDisplayList(gdl++, gSwarmModels[10].displayList);
+            gSPSegment(gdl++, 1, D_800DDE80[10].unk4);
+            gSPDisplayList(gdl++, D_800DDE80[10].displayList);
             break;
         case 1:
         case 2:
@@ -893,7 +868,7 @@ void func_1517725C(u8 index) {
     f32 cosAngle;
 
     flight = &D_8008D0B0[index];
-    vtx = gSwarmModels[index].unk8;
+    vtx = D_800DDE80[index].unk8;
     angle = flight->flapPhase * 0.01745329238f;
     flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
     angle = flight->flapAngle * 0.01745329238f;

@@ -1,49 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares the seventh argument of func_15149130 as a struct37 pointer; it is the size of the
- * effect data (as in game_113D60.c). */
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15149130
-void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
-
-/* Particle spawn template for func_15132A4C: the same layout as Particle 0x10..0x8B (see game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot; /* degrees */
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 model;
-    /* 0x58 */ u8  variant;
-    /* 0x59 */ u8  pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8  alpha;
-    /* 0x61 */ u8  updateFn;
-    /* 0x62 */ u8  update2Fn;
-    /* 0x63 */ u8  floorHitFn;
-    /* 0x64 */ u8  floorType3Fn;
-    /* 0x65 */ u8  wallHitFn;
-    /* 0x66 */ u8  destroyFn;
-    /* 0x67 */ u8  squashFn;
-    /* 0x68 */ u8  matrixFn;
-    /* 0x69 */ u8  pad69;
-    /* 0x6A */ u8  unk6A;
-    /* 0x6B */ u8  pad6B;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8  ownerId;
-    /* 0x71 */ u8  pad71;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x78 */ s32 pad78;
-} ParticleSpawn; // size 0x7C
+#include "effects.h"
 
 /* The spawned particle; only its two matrices (Particle.mtx in game_15F680.c) are touched here. */
 typedef struct {
@@ -57,7 +15,7 @@ extern SpawnedParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, 
 extern void func_15133760(Mtx *mtx, SpawnedParticle *particle);
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, vertex *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
     SpawnedParticle *particle;
     ParticleVariants variants = D_8008FBC0;
 
@@ -119,94 +77,23 @@ void *func_151BEEE0(f32 rotY, vertex *pos, s32 arg2, u8 arg3, u8 variant, u8 arg
     }
 }
 
-/* Burst config for func_15150F90 (same layout as in game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex position;
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedRange;
-    /* 0x1C */ s16 yawBase;
-    /* 0x1E */ s16 yawRange;
-    /* 0x20 */ s16 pitchBase;
-    /* 0x22 */ s16 pitchRange;
-    /* 0x24 */ f32 directionBase;
-    /* 0x28 */ f32 directionRange;
-    /* 0x2C */ f32 jitter;
-    /* 0x30 */ f32 sizeBase;
-    /* 0x34 */ f32 sizeRange;
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ u8  kind;
-    /* 0x3D */ u8  pad3D;
-    /* 0x3E */ s16 lifeBase;
-    /* 0x40 */ s16 lifeRange;
-} Game150F90Config;
-
-/* Burst config for func_15153634 (struct Local15153634Arg in game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex position;
-    /* 0x44 */ s16 yawBase;
-    /* 0x46 */ s16 pitchBase;
-    /* 0x48 */ s16 yawRange;
-    /* 0x4A */ s16 pitchRange;
-    /* 0x4C */ f32 speedBase;
-    /* 0x50 */ f32 speedRange;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8  unk60;
-    /* 0x61 */ s8  unk61;
-    /* 0x62 */ u8  unk62;
-    /* 0x63 */ u8  unk63;
-    /* 0x64 */ u8  unk64;
-    /* 0x65 */ u8  pad65[3];
-    /* 0x68 */ f32 extra;
-} Config15153634;
-
-void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
-void func_15153634(Config15153634 *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
 
 /* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
-void func_151BF0C8(vertex *pos) {
-    Game150F90Config first;
-    Config15153634 second;
+void func_151BF0C8(Vec3f *pos) {
+    PieceSpray first;
+    SpriteBurst second;
 
     first.countBase = 24;
     first.countRange = 10;
-    first.position = *pos;
+    first.pos = *pos;
     first.speedBase = 0.06260000169f;
     first.speedRange = 0.05810000002f;
-    first.yawBase = 0;
-    first.yawRange = 255;
-    first.pitchBase = -50;
-    first.pitchRange = 60;
+    first.angles.yawBase = 0;
+    first.angles.yawRange = 255;
+    first.angles.pitchBase = -50;
+    first.angles.pitchRange = 60;
     first.directionBase = 13.0f;
     first.directionRange = 13.0f;
     first.jitter = 10.3760004f;
@@ -220,93 +107,52 @@ void func_151BF0C8(vertex *pos) {
 
     second.countBase = 20;
     second.countRange = 8;
-    second.unk4 = 0x6C;
-    second.unk6 = 0x5103;
+    second.texture = 0x6C;
+    second.renderMode = 0x5103;
     second.unk8 = 0x200005;
     second.unkC = 0;
-    second.unk10 = 40;
-    second.unk12 = 40;
-    second.unk14 = 0;
-    second.unk18 = 0;
-    second.unk1F = 0xFF;
-    second.unk1C = 0xFF;
-    second.unk1D = 0x91;
-    second.unk1E = 6;
-    second.unk20 = 0xFF;
-    second.unk21 = 0xFF;
-    second.unk22 = 0;
-    second.unk23 = 20;
-    second.unk24 = 200;
-    second.unk25 = 0xFF;
-    second.unk26 = 50;
-    second.unk28 = 5;
-    second.unk2A = 50;
-    second.unk2C = 1.017730951f;
-    second.unk30 = 175.0f;
-    second.unk34 = 160.0f;
-    second.position = *pos;
+    second.timerBase = 40;
+    second.timerRange = 40;
+    second.frameRateBase = 0;
+    second.frameRateRange = 0;
+    second.a = 0xFF;
+    second.r = 0xFF;
+    second.g = 0x91;
+    second.b = 6;
+    second.r2 = 0xFF;
+    second.g2 = 0xFF;
+    second.b2 = 0;
+    second.alphaBase = 20;
+    second.alphaRange = 200;
+    second.brightness = 0xFF;
+    second.fadeStart = 50;
+    second.fadeRate = 5;
+    second.scaleStart = 50;
+    second.scaleRate = 1.017730951f;
+    second.sizeBase = 175.0f;
+    second.sizeRange = 160.0f;
+    second.pos = *pos;
     second.yawBase = 0;
     second.pitchBase = -51;
     second.yawRange = 255;
     second.pitchRange = 80;
     second.speedBase = 4.0f;
     second.speedRange = 13.0f;
-    second.unk54 = -0.007000000216f;
-    second.unk58 = -0.006000000052f;
-    second.unk5C = 0x840E07;
-    second.unk60 = 16;
-    second.unk61 = -1;
-    second.unk62 = 8;
-    second.unk63 = 6;
+    second.gravityBase = -0.007000000216f;
+    second.gravityRange = -0.006000000052f;
+    second.flags = 0x840E07;
+    second.updateFunc = 16;
+    second.deathFunc = -1;
+    second.primColorMode = 8;
+    second.envColorMode = 6;
     second.unk64 = 1;
     second.extra = 0.9411770105f;
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
-/* First argument of func_15157010. */
-typedef struct {
-    /* 0x00 */ u8  unk00;
-    /* 0x01 */ s8  unk01;
-    /* 0x02 */ u8  unk02;
-    /* 0x03 */ s8  unk03;
-    /* 0x04 */ s8  unk04;
-    /* 0x05 */ u8  pad05;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u8  unk2C;
-    /* 0x2D */ u8  unk2D;
-    /* 0x2E */ u8  pad2E[2];
-    /* 0x30 */ u8  unk30;
-    /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  unk32;
-    /* 0x33 */ u8  unk33;
-    /* 0x34 */ u8  unk34;
-    /* 0x35 */ u8  unk35;
-    /* 0x36 */ u8  unk36;
-    /* 0x37 */ u8  unk37;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ u8  pad39[3];
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ vertex position;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} Config15157010;
-
 /* The block copied to the panel's +0x120. */
 typedef struct {
-    /* 0x00 */ vertex unk0;
+    /* 0x00 */ Vec3f unk0;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
 } PanelExtra;
@@ -319,47 +165,6 @@ typedef struct {
     /* 0x05C */ u8  pad5C[0x120 - 0x5C];
     /* 0x120 */ PanelExtra extra;
 } CounterPanel;
-
-/* First argument of func_1515548C (Struct1515548CArg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 sizeX;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ u8  unk10; /* sprite id */
-    /* 0x11 */ u8  pad11;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-} Struct1515548CArg;
 
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
@@ -383,9 +188,9 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-extern CounterPanel *func_15157010(Config15157010 *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
+extern CounterPanel *func_15157010(EffectParams *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
                                    s32 kind);
-extern CounterDigit *func_1515548C(Struct1515548CArg *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
+extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
                                    s32 kind);
 
 /* Shows the value of func_150859AC(0, 3) (less one, capped at 99) as a two-digit counter that slides in. */
@@ -416,49 +221,49 @@ void func_151BF340(u8 owner, s32 kind) {
         display = &effect->display;
         memcpy(display, &init, sizeof(init));
         {
-            Config15157010 panelConfig;
+            EffectParams panelConfig;
             PanelExtra panelExtra;
-            Struct1515548CArg digitArg;
+            ScreenSpriteInfo5C digitArg;
 
             panelConfig.unk38 = 0;
-            panelConfig.unk00 = 0xC0;
-            panelConfig.unk01 = -1;
-            panelConfig.unk02 = 5;
-            panelConfig.unk03 = 3;
-            panelConfig.unk04 = 0;
-            panelConfig.unk06 = 300;
-            panelConfig.unk08 = 0xA3;
-            panelConfig.unk0C = 8;
-            panelConfig.unk10 = 0x100000;
-            panelConfig.unk14 = 0x200004;
-            panelConfig.unk18 = 0x60601;
-            panelConfig.unk2D = 8;
-            panelConfig.unk1C = 1;
-            panelConfig.unk20 = 0x38;
-            panelConfig.unk2C = 0;
-            panelConfig.unk24 = 0x80;
-            panelConfig.unk28 = 0x20;
-            panelConfig.unk30 = 0xFF;
-            panelConfig.unk31 = 0xFF;
-            panelConfig.unk32 = 0xFF;
-            panelConfig.unk33 = 0xFF;
-            panelConfig.unk34 = 0xFF;
-            panelConfig.unk35 = 0xFF;
-            panelConfig.unk36 = 0xFF;
-            panelConfig.unk37 = 0xFF;
-            panelConfig.unk3C = 0;
-            panelConfig.unk40 = 0;
+            panelConfig.flags = 0xC0;
+            panelConfig.updateFunc = -1;
+            panelConfig.updateFunc2 = 5;
+            panelConfig.preDrawFunc = 3;
+            panelConfig.postDrawFunc = 0;
+            panelConfig.lifetime = 300;
+            panelConfig.model = 0xA3;
+            panelConfig.unkC = 8;
+            panelConfig.render.unk0 = 0x100000;
+            panelConfig.render.setGeometryMode = 0x200004;
+            panelConfig.render.clearGeometryMode = 0x60601;
+            panelConfig.render.envMode = 8;
+            panelConfig.render.renderMode = 1;
+            panelConfig.render.unk10 = 0x38;
+            panelConfig.render.primMode = 0;
+            panelConfig.render.unk14 = 0x80;
+            panelConfig.render.unk18 = 0x20;
+            panelConfig.color0.red = 0xFF;
+            panelConfig.color0.green = 0xFF;
+            panelConfig.color0.blue = 0xFF;
+            panelConfig.color0.alpha = 0xFF;
+            panelConfig.color1.red = 0xFF;
+            panelConfig.color1.green = 0xFF;
+            panelConfig.color1.blue = 0xFF;
+            panelConfig.color1.alpha = 0xFF;
+            panelConfig.owner = 0;
+            panelConfig.ownerId = 0;
             panelConfig.unk41 = 1;
-            panelConfig.unk54 = 1;
-            panelConfig.unk56 = 0xFF;
-            panelConfig.position.x = 300.0f;
+            panelConfig.fadeStart = 1;
+            panelConfig.fadeRate = 0xFF;
+            panelConfig.pos.x = 300.0f;
             if (D_800D2458) {
-                panelConfig.position.y = 32.0f;
+                panelConfig.pos.y = 32.0f;
             } else {
-                panelConfig.position.y = 79.0f;
+                panelConfig.pos.y = 79.0f;
             }
-            panelConfig.position.z = 0.0f;
-            panelExtra.unk0 = *(vertex *)&D_800A5480; /* variables.h declares D_800A5480 as a single f32 */
+            panelConfig.pos.z = 0.0f;
+            panelExtra.unk0 = D_800A5480;
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
             display->panel = func_15157010(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
@@ -475,43 +280,43 @@ void func_151BF340(u8 owner, s32 kind) {
                 } else {
                     digitArg.y = -62.0f;
                 }
-                digitArg.unk12 = 300;
+                digitArg.timer = 300;
                 digitArg.flags = 0x20;
-                digitArg.unk16 = 1;
-                digitArg.unk18 = 0xFF;
-                digitArg.unk1A = 0;
-                digitArg.unk1B = 0xFF;
-                digitArg.unk1C = 0xFF;
-                digitArg.unk1D = 0xFF;
-                digitArg.unk1E = 0xFF;
-                digitArg.unk1F = 0xFF;
-                digitArg.unk20 = 0xFF;
-                digitArg.unk21 = 0xFF;
-                digitArg.unk22 = 0xFF;
+                digitArg.fadeStart = 1;
+                digitArg.fadeRate = 0xFF;
+                digitArg.kind = 0;
+                digitArg.color1.red = 0xFF;
+                digitArg.color1.green = 0xFF;
+                digitArg.color1.blue = 0xFF;
+                digitArg.color1.alpha = 0xFF;
+                digitArg.color2.red = 0xFF;
+                digitArg.color2.green = 0xFF;
+                digitArg.color2.blue = 0xFF;
+                digitArg.color2.alpha = 0xFF;
                 digitArg.unk23 = 0xFF;
-                digitArg.unk24 = 0;
+                digitArg.otherModeH = 0;
                 digitArg.unk28 = 0x200004;
                 digitArg.unk2C = 0x9F0601;
                 digitArg.unk40 = 0;
                 digitArg.unk41 = 0;
-                digitArg.unk30 = 0x19;
+                digitArg.combineMode = 0x19;
                 digitArg.unk34 = 0x13;
                 digitArg.unk38 = 0x80;
                 digitArg.unk3C = 0x20;
-                digitArg.unk44 = 0;
-                digitArg.unk50 = 0.0f;
-                digitArg.unk54 = 0.0f;
-                digitArg.sizeY = 16.0f;
-                digitArg.sizeX = 16.0f;
-                digitArg.unk48 = 1.f; // matching: spelling it 1.0f swaps the FP registers of 0.0f and 1.0f
-                digitArg.unk4C = 1.f;
+                digitArg.viewport = 0;
+                digitArg.offsetS = 0.0f;
+                digitArg.offsetT = 0.0f;
+                digitArg.halfHeight = 16.0f;
+                digitArg.halfWidth = 16.0f;
+                digitArg.scaleX = 1.f; // matching: spelling it 1.0f swaps the FP registers of 0.0f and 1.0f
+                digitArg.scaleY = 1.f;
                 if (digits[0] == 0) {
-                    digitArg.unk10 = digitSprites[digits[1]];
+                    digitArg.texture = digitSprites[digits[1]];
                     display->digits[0] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
                     display->digits[1] = NULL;
                 } else {
                     for (i = 0; i < 2; i++) {
-                        digitArg.unk10 = digitSprites[digits[i]];
+                        digitArg.texture = digitSprites[digits[i]];
                         display->digits[i] = func_1515548C(&digitArg, 0, NULL, 0, 0, owner, kind);
                     }
                 }
@@ -537,7 +342,7 @@ void func_151BF81C(CounterEffect *effect) {
         return;
     }
     if (!(display->flags & 1)) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             return;
         }
         if (func_15181CC8(0) == 0) {

@@ -1,17 +1,10 @@
 #include <ultra64.h>
-/* include/functions.h types func_15149130's seventh parameter as a struct37 pointer, but every caller
- * passes the byte size of the effect's extra data; the header declaration is renamed out of the way
- * (same approach as game_113D60.c). */
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15149130
 #include "variables.h"
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_151D5E30(void *);
 
-struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
-                         u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8);
 
 /* Allocates a timed callback object (0x28 header bytes plus dataSize) and initializes its header. */
 struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
@@ -122,9 +115,10 @@ s32 func_15149490(s32 arg0, struct260 *object, s16 arg2) {
 }
 
 void func_151494E0(s32 arg0, u8 arg1) {
-    func_15169260(&D_800A5770, 2, arg0, arg1);
+    func_15169260(D_800A5770, 2, arg0, arg1);
 }
 
-void func_15149514(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    func_15169850(arg0, arg1, arg2, arg3, arg4);
+/* func_15169850 for effects: tracks or retargets the effect's owner on actor events. */
+void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj) {
+    func_15169850(event, eventType, owner, ownerId, obj);
 }

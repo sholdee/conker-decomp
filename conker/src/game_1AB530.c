@@ -15,37 +15,19 @@ extern void func_10004074(void *ptr);
 #define FLARE_FLASH     2 /* also drives the screen flash level D_800DD2D0 */
 #define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
-typedef struct LensFlare {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ f32 screenX;
-    /* 0x10 */ f32 screenY;
-    /* 0x14 */ f32 dir[3];
-    /* 0x20 */ f32 minFacing;
-    /* 0x24 */ struct LensFlare *next;
-    /* 0x28 */ s16 brightness;
-    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
-    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
-    /* 0x2E */ u8 flags;
-    /* 0x2F */ u8 type;
-    /* 0x30 */ u8 alpha;
-} LensFlare; // size 0x34
-
-/* D_800DDD64 (declared s32 in variables.h) is the head of the flare list. */
-#define sFlareList (*(LensFlare **)&D_800DDD64)
-
 /* Appends a new flare of the given type and alpha to the end of the flare list. */
 LensFlare *func_1517E080(s32 type, s32 alpha) {
     LensFlare *flare;
     LensFlare **link;
 
-    flare = sFlareList;
+    flare = D_800DDD64;
     if (flare != NULL) {
         while (flare->next != NULL) {
             flare = flare->next;
         }
         link = &flare->next;
     } else {
-        link = &sFlareList;
+        link = &D_800DDD64;
     }
 
     flare = allocate_memory(sizeof(LensFlare), 1, 0, 1);
@@ -67,10 +49,10 @@ LensFlare *func_1517E080(s32 type, s32 alpha) {
 void func_1517E134(LensFlare *flare) {
     LensFlare *prev;
 
-    if (flare == sFlareList) {
-        sFlareList = flare->next;
+    if (flare == D_800DDD64) {
+        D_800DDD64 = flare->next;
     } else {
-        prev = sFlareList;
+        prev = D_800DDD64;
         while (prev != NULL && prev->next != flare) {
             prev = prev->next;
         }
@@ -88,12 +70,12 @@ void func_1517E1AC(void) {
     f32 x;
     f32 y;
 
-    for (cur = sFlareList; cur != NULL; cur = cur->next) {
+    for (cur = D_800DDD64; cur != NULL; cur = cur->next) {
         x = cur->screenX;
         if (x >= 0.0f && x < (f32)D_800BE620) {
             y = cur->screenY;
             if (y >= 0.0f && y < (f32)D_800BE624) {
-                cur->zbufSample = ((u16 *)D_800BE9C4)[(s32)x + (s32)y * D_800BE620];
+                cur->zbufSample = D_800BE9C4[(s32)x + (s32)y * D_800BE620];
             }
         }
     }
@@ -130,14 +112,14 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     u8 *flash;
 
     D_800DDD60 = FALSE;
-    for (flare = sFlareList; flare != NULL; flare = flare->next) {
+    for (flare = D_800DDD64; flare != NULL; flare = flare->next) {
         if (flare->alpha != 0) {
             hidden = FALSE;
             if (flare->flags & FLARE_SUN) {
                 if (D_800DCDD0 == 0) {
                     hidden = TRUE;
                 } else {
-                    sunPos = (f32 *)D_8008CFFC[D_800B0DF0->unk10];
+                    sunPos = D_8008CFFC[D_800B0DF0->unk10];
                     if (func_1517EAAC(sunPos[0], sunPos[1], sunPos[2], &flare->screenX, &flare->screenY) != 1) {
                         hidden = TRUE;
                     }
@@ -176,9 +158,6 @@ typedef struct {
 
 extern u8 D_800903AC;          /* flare sprite texture */
 extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
 extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Gfx *func_15095A48(Gfx *, FlareSprite *, f32, f32);
 extern Gfx *func_1517EA4C(Gfx *gfx);
@@ -285,7 +264,7 @@ Gfx *func_1517EA4C(Gfx *gfx) {
     return gfx;
 }
 
-/* Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
+/* matching: RenderView.viewports as Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
 typedef struct {
     /* 0x00 */ s16 scaleX;
     /* 0x02 */ s16 scaleY;
@@ -297,27 +276,17 @@ typedef struct {
     /* 0x0E */ s16 transW;
 } FlareViewport;
 
-/* Per-player camera, size 0x180 (D_800BE628 is declared s32 in variables.h). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ f32 centerX;
-    /* 0x10 */ f32 centerY;
-    /* 0x14 */ u8 pad14[0x2C];
-    /* 0x40 */ FlareViewport viewport[2]; /* indexed by D_800BE9C0 */
-    /* 0x60 */ u8 pad60[0x120];
-} FlareCamera;
+#define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
 
-#define CAMERAS ((FlareCamera *)D_800BE628)
-
-void func_15110360(s32 player, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
-void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void func_15110360(s32 player, MtxF mtx, f32 pitch, f32 yaw, f32 roll);
+void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /*
  * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
  * is in front of the camera, otherwise 0 with (0, 0).
  */
 s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
-    struct108 *player;
+    Camera *player;
     f32 pitch;
     f32 yaw;
     f32 roll;
@@ -325,19 +294,19 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 sy;
     f32 sz;
     f32 sw;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 cx;
     f32 cy;
     f32 scale;
 
     // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &D_800DBFF0[i]
-    player = (struct108 *)((u8 *)D_800DBFF0 + D_80082FA4 * sizeof(struct108));
-    pitch = -player->unk388;
+    player = (Camera *)((u8 *)D_800DBFF0 + D_80082FA4 * sizeof(Camera));
+    pitch = -player->pitch;
     yaw = -player->unk380;
-    roll = *(f32 *)&player->pad5EC; // struct108 declares 0x5EC as s32 padding
+    roll = player->swayAmount;
     func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
-    cx = CAMERAS[D_80082FA4].centerX;
-    cy = CAMERAS[D_80082FA4].centerY;
+    cx = D_800BE628[D_80082FA4].halfWidth;
+    cy = D_800BE628[D_80082FA4].halfHeight;
     func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;
@@ -389,9 +358,9 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
                       &clip.f.w, 4000.0f) == 1) {
         if (flare->flags & FLARE_DIRECTED) {
-            dx = flare->pos[0] - D_800DBFF0->unk2F8;
-            dy = flare->pos[1] - D_800DBFF0->unk2FC;
-            dz = flare->pos[2] - D_800DBFF0->unk300;
+            dx = flare->pos[0] - D_800DBFF0->eye.x;
+            dy = flare->pos[1] - D_800DBFF0->eye.y;
+            dz = flare->pos[2] - D_800DBFF0->eye.z;
 
             // matching: the facing cosine reuses dx's register
             dx = (dx * flare->dir[0] + dy * flare->dir[1] + dz * flare->dir[2]) /
@@ -405,8 +374,8 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
         exponent = sample >> 13;
         *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
         // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
-        flare->depth = (u32)(((f32)(CAMERAS->viewport + D_800BE9C0)->transZ +
-                              (clip.f.z / clip.f.w) * (f32)(CAMERAS->viewport + D_800BE9C0)->scaleZ) * 32.0f);
+        flare->depth = (u32)(((f32)(VIEWPORTS + D_800BE9C0)->transZ +
+                              (clip.f.z / clip.f.w) * (f32)(VIEWPORTS + D_800BE9C0)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;

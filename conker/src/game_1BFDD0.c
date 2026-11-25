@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
@@ -10,7 +11,7 @@
 
 /* Data of an effect that follows an object. */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId; /* object->unique_id when attached */
     /* 0x08 */ f32 spawnAccum;
 } ObjectEmitterData; /* size 0xC */
@@ -24,66 +25,14 @@ typedef struct {
     /* 0x28 */ ObjectEmitterData data;
 } Effect1BFDD0;
 
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME  0x1
-#define PARTICLE_MOVE      0x4
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_FLIP_T    0x80
-#define PARTICLE_FADE      0x200
-#define PARTICLE_SCALE     0x400
-#define PARTICLE_SCALE_MUL 0x800
-
-/* Spawn parameters of a particle (ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc; /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;  /* D_80089800 index, -1 for none */
-    /* 0x64 */ s8 drawFunc;   /* D_80089804 index, -1 for none */
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc; /* size 0x70 */
-
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 drag; /* read by update func 10 (func_151316DC) */
 } Particle1BFDD0;
 
 /* Attaches effect 0x23 to the object. */
-void func_15192920(struct127 *object) {
+void func_15192920(Actor *object) {
     Effect1BFDD0 *effect;
     ObjectEmitterData data;
 
@@ -100,7 +49,7 @@ void func_15192920(struct127 *object) {
     }
 }
 
-extern s32 func_1515C0F8(struct127 *, vertex **);
+extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
@@ -111,7 +60,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
     ParticleDesc desc;
     u8 side;
     f32 drag;
-    vertex *dir;
+    Vec3f *dir;
     f32 speed;
     Particle1BFDD0 *particle;
 
@@ -152,7 +101,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             func_15143874(data->object->unk7A >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
             desc.pos.x += data->object->x_position;
             desc.pos.z += data->object->z_position;
-            desc.pos.y = data->object->unk180 + 20.0f;
+            desc.pos.y = data->object->floorY + 20.0f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             if (func_150ADA20() & 1) {
                 desc.flags |= PARTICLE_FLIP_S;
@@ -173,7 +122,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
 }
 
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
-Effect1BFDD0 *func_15192D48(struct127 *object, s16 type, u8 arg2, s32 arg3) {
+Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     Effect1BFDD0 *effect;
     ObjectEmitterData data;
 
@@ -192,8 +141,8 @@ Effect1BFDD0 *func_15192D48(struct127 *object, s16 type, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_15143134(const vertex *, vertex *, Mtx *);
-extern void func_15143794(s16 yaw, s16 pitch, f32 speed, vertex *out);
+extern void func_15143134(const Vec3f *, Vec3f *, Mtx *);
+extern void func_15143794(s16 yaw, s16 pitch, f32 speed, Vec3f *out);
 
 /* Update of func_15192D48's effect: emits 0.79-1.99 particles per D_800BE9A4 tick from bone 1 of the
  * object, flung out to either side. */
@@ -204,7 +153,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
     s16 yaw;
     f32 drag;
     s32 rand;
-    vertex offset;
+    Vec3f offset;
     Particle1BFDD0 *particle;
 
     data = &effect->data;
@@ -277,15 +226,15 @@ void func_15192DF0(Effect1BFDD0 *effect) {
 
 /* Payload of message 0x2D: two objects trade places. */
 typedef struct {
-    /* 0x00 */ struct127 *from;
-    /* 0x04 */ struct127 *to;
+    /* 0x00 */ Actor *from;
+    /* 0x04 */ Actor *to;
     /* 0x08 */ u8 fromId;
     /* 0x09 */ u8 toId;
 } ObjectSwapMessage;
 
 /* Payload of message 0: names an object by pointer or by unique id. */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId;
 } ObjectRemovedMessage;
 
@@ -295,7 +244,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
     ObjectRemovedMessage *removal = msg;
-    struct127 *removed;
+    Actor *removed;
 
     if (msgType == 0x2D) {
         if (data->object == swap->from) {
@@ -320,7 +269,7 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
     ObjectRemovedMessage *removal = msg;
-    struct127 *removed;
+    Actor *removed;
 
     if (msgType == 0x2D) {
         if (data->object == swap->from) {

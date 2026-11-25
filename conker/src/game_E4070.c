@@ -126,7 +126,6 @@ void func_150B6BC0(s32 unused) {
     }
 }
 
-extern struct102 *D_800D9894;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
 static struct102 *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
@@ -316,9 +315,9 @@ void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
     desc.alpha = 0xFF;
     desc.unk36 = 7;
     desc.unk37 = 0x11;
-    if (x < (D_800BE638 >> 1)) {
+    if (x < (D_800BE638[0] >> 1)) {
         do { // matching: the loop's -g3 markers steer IDO's register choice for r
-            r = D_800BE638 - x;
+            r = D_800BE638[0] - x;
         } while (0);
     } else {
         r = x;

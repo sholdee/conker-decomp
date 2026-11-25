@@ -1,20 +1,15 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-extern s32 D_80088890;
-extern s32 D_80088894;
-extern s32 D_80088898;
-extern s32 D_8008889C;
-extern s32 *D_800DBF94; /* per prop: bit i set while D_800CC2D0[i] stands on it */
 
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */
-extern void func_151951E0(struct127 *);
-extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1507CD64(struct127 *, s32);
+extern void func_151951E0(Actor *);
+extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_1507CD64(Actor *, s32);
 
 s32 func_1509BE40(s32, s32, s32, ...);
-void func_1509BFB0(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 
@@ -31,9 +26,9 @@ extern f32 D_800888E0;
 
 /* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
  * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
-void func_150D08C0(struct108 *camera) {
+void func_150D08C0(Camera *camera) {
     if (func_1509BE40(1, 0x403D, 6, 0x9000)) {
-        camera->unk84 |= 0x80021000;
+        camera->flags |= 0x80021000;
         if (func_1509BE40(1, 0x4043, 6, 0x9000)) {
             D_800888CC = 64.0f;
             D_800888D0 = 255.0f;
@@ -55,12 +50,12 @@ void func_150D08C0(struct108 *camera) {
         D_800888CC = 255.0f;
         D_800888D0 = 255.0f;
         D_800888D4 = 255.0f;
-        camera->unk84 &= ~0x80021000;
-        camera->unk84 |= 8;
+        camera->flags &= ~0x80021000;
+        camera->flags |= 8;
     }
-    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->unk7B4);
-    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->unk7B4);
-    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->unk7B4);
+    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->dt);
+    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->dt);
+    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->dt);
     func_1509BFB0(1, 0x30F5, 0x12, (u8)D_800888C0);
     func_1509BFB0(1, 0x30F4, 0x12, (u8)D_800888C4);
     func_1509BFB0(1, 0x30F3, 0x12, (u8)D_800888C8);
@@ -103,35 +98,6 @@ void func_150D0E90(s32 arg0) {
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn parameters of a blood strip (see func_15134DAC in game_161520.c). */
-typedef struct {
-    /* 0x00 */ u8 ownerId;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ struct127 *owner;
-    /* 0x08 */ u8 bone;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ Vec3f offsetA;
-    /* 0x18 */ Vec3f offsetB;
-    /* 0x24 */ u8 flags;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 duration;
-    /* 0x28 */ s16 pause;
-    /* 0x2A */ s16 lifetime;
-    /* 0x2C */ u16 sound;
-    /* 0x2E */ s8 sampleCallback;
-    /* 0x2F */ s8 emitCallback;
-    /* 0x30 */ s8 rateCallback;
-    /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ f32 rate;
-    /* 0x38 */ u8 mode;
-    /* 0x39 */ s8 updateCallback;
-    /* 0x3A */ u8 pad3A[2];
-} BloodStripDesc;
-
 /* A live blood strip (see game_161520.c); only the fields used here are named. */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -147,7 +113,7 @@ BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
  * mirrored selects which way it is offset. */
-void func_150D10E4(struct127 *obj, u8 mirrored) {
+void func_150D10E4(Actor *obj, u8 mirrored) {
     BloodStripDesc desc;
 
     desc.ownerId = obj->unique_id;

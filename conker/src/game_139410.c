@@ -149,12 +149,6 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     return count;
 }
 
-/* Saved texture coordinates of one vertex. */
-typedef struct {
-    /* 0x00 */ s16 s;
-    /* 0x02 */ s16 t;
-} TexCoord;
-
 /* Scrolls the texture coordinates of one mesh's vertices along a circle. */
 typedef struct {
     /* 0x00 */ TexCoord *primary;   /* original UVs of the vertices in mesh 0 */
@@ -172,7 +166,6 @@ typedef struct {
 
 extern UvWobble *D_800D9E60[];
 extern Vtx *D_800B0E10[];
-extern s32 D_800917B8;
 extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */

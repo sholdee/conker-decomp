@@ -22,7 +22,7 @@ s32 func_150F51BC(void) {
 void func_150F51E8(s32 arg0) {
     if (((D_800CC454 & 0X1F) == 3) || ((D_800CC454 & 0x1F) == 4)) {
         if (D_800BE9E4 < D_80088B44){
-            if(D_800C35EA != 1) {
+            if(D_800C35EA[0] != 1) {
                 D_80088B44 = (D_80088B44 - D_800BE9E4);
             }
         } else {

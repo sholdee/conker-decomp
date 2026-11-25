@@ -1,66 +1,18 @@
 #include <ultra64.h>
-#define func_1502B7F0 func_1502B7F0_43D00
 #include "functions.h"
-#undef func_1502B7F0
-#define D_800D20FC D_800D20FC_hdr
-#define D_800D2104 D_800D2104_hdr
-#define D_800D2110 D_800D2110_hdr
 #include "variables.h"
-#undef D_800D20FC
-#undef D_800D2104
-#undef D_800D2110
 
-// One 0x30-byte entry of the level's spawn table D_800D20FC (same layout as game_AEB40.c's SpawnRecord).
-typedef struct SpawnRecord {
-    /* 0x00 */ u16 flags;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 interaction_state;
-    /* 0x04 */ u8 type;         // model id
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ s16 x;
-    /* 0x08 */ s16 y;
-    /* 0x0A */ s16 z;
-    /* 0x0C */ u8 angle;        // high byte of the facing angle
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 unkE;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x2];
-    /* 0x18 */ s32 objFlags;    // copied to the object's unkF8
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[0x2];
-    /* 0x20 */ f32 xz_scale;
-    /* 0x24 */ f32 y_scale;
-    /* 0x28 */ u8 unique_id;
-    /* 0x29 */ u8 partSet;
-    /* 0x2A */ u8 pad2A[0x2];
-    /* 0x2C */ u16 unk2C;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-} SpawnRecord; // size 0x30
 
-extern s32 func_1502B7F0(s32 *, s32, s32, s32);
-extern u8 D_800BE590;
-extern u16 D_800BE598[];
-extern s32 D_800BE5A8[];
-extern SpawnRecord *D_800D20FC;
-extern u8 D_800D2100;
-
-/* Collects the distinct spawn-table model types (< 0xBB) and the asset size func_1502B7F0 reports for each. */
+/* Collects the distinct spawn-table model types (< 0xBB) and the data func_1502B7F0 loads for each. */
 void func_15016850(void) {
     s32 i;
     s32 j;
     s32 found;
-    s32 size;
+    s32 *data;
     s32 id;
 
     D_800BE590 = 0;
-    size = 0;
+    data = NULL;
     for (i = 0; i < D_800D2100; i++) {
         id = D_800D20FC[i].type;
         found = 0;
@@ -74,10 +26,10 @@ void func_15016850(void) {
             continue;
         }
         if (id < 0xBB) {
-            func_1502B7F0(&size, 2, 0x12, id);
+            func_1502B7F0((void **)&data, 2, 0x12, id);
         }
-        if (size != 0) {
-            D_800BE5A8[D_800BE590] = size;
+        if (data != NULL) {
+            D_800BE5A8[D_800BE590] = data;
             D_800BE598[D_800BE590] = id;
             D_800BE590++;
         }
@@ -87,9 +39,6 @@ void func_15016850(void) {
 extern u8 D_1A33F0[];
 extern u8 D_1A34E0[];
 extern u8 D_1A37E0[];
-extern u8 D_800D2101;
-extern u8 *D_800D210C;
-extern s16 *D_800D2110; // header declares it as s16[]
 extern s32 func_1502B9B4(s32, s32, ...);
 extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -105,7 +54,7 @@ void func_150169A0(s32 level) {
     u8 *romEnd;
     u8 *romStart;
     u32 size;
-    struct127 *obj;
+    Actor *obj;
     s32 count;
     s32 i;
 
@@ -287,27 +236,11 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
     func_1508295C(level, 1, 0);
 }
 
-/* One point of a path: s16 world coordinates (as in game_A28B0.c). */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 unk6;
-} PathPoint;
-
-/* A path, D_800D2104[n]: a centre point followed by D_800D2108[n] - 1 waypoints. */
-typedef struct {
-    PathPoint center;
-    PathPoint points[1];
-} Path;
-
 /* An entry of the level's path table: the path's byte offset from the table start and its point count. */
 typedef struct {
     s32 offset;
     s32 count;
 } PathTableEntry;
-
-extern Path **D_800D2104; // header declares it as s32 *
 
 /* Allocates one path per spawn entry: an empty two-point path for each player slot, and the level's own
  * paths for the level-specific spawn entries. */
@@ -319,21 +252,21 @@ void func_15017114(s32 level) {
 
     count = D_800D2100;
     table = NULL;
-    D_800D2104 = allocate_memory(count * 4, 1, 0, 0); // matching: `* sizeof(Path *)` makes the size unsigned and moves bytes
+    D_800D2104 = allocate_memory(count * 4, 1, 0, 0); // matching: `* sizeof(PathPoint *)` makes the size unsigned and moves bytes
     countsSize = count;
     D_800D2108 = allocate_memory(countsSize, 1, 0, 0);
     bzero(D_800D2104, count * 4);
     bzero(D_800D2108, countsSize);
     for (i = 0; i < D_8008FD8C; i++) {
-        D_800D2104[i] = allocate_memory(sizeof(Path), 1, 2, 0);
-        bzero(D_800D2104[i], sizeof(Path));
+        D_800D2104[i] = allocate_memory(2 * sizeof(PathPoint), 1, 2, 0); // centre + one waypoint
+        bzero(D_800D2104[i], 2 * sizeof(PathPoint));
         D_800D2108[i] = 2;
     }
-    if (func_1502B7F0((s32 *)&table, 2, 0x10, level) != 0) {
+    if (func_1502B7F0((void **)&table, 2, 0x10, level) != 0) {
         for (i = D_800D2101; i < D_800D2100; i++) {
             if (table[i - D_800D2101].offset != 0) {
                 D_800D2108[i] = table[i - D_800D2101].count;
-                D_800D2104[i] = (Path *)((u8 *)table + table[i - D_800D2101].offset);
+                D_800D2104[i] = (PathPoint *)((u8 *)table + table[i - D_800D2101].offset);
             }
         }
     }

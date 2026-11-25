@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 typedef struct Game1F1CD0Emission {
     /* 0x00 */ f32 x, y;
     /* 0x08 */ f32 amplitudeX, amplitudeY;

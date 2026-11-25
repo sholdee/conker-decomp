@@ -1,20 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 unk15;
-} TrailSpawn;
+#include "effects.h"
 
 /* One point of a trail; the points form a ring buffer (0x14 bytes each). */
 typedef struct {
@@ -23,48 +10,6 @@ typedef struct {
     u16 phase; /* texture coordinate along the trail */
     u8 pad12[2];
 } TrailPoint;
-
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    u8 pad14[4];
-    u8 flags;
-    u8 texture; /* index into D_80091564 */
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0; /* ORed into the other-mode high word */
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode; /* index into D_800A4AC8 */
-    union {
-        s32 word;
-        u8 bytes[4];
-    } unk10;
-    s32 unk14; /* ORed into the other-mode high word */
-    s32 unk18; /* ORed into the other-mode high word */
-    s8 unk1C;
-    s8 unk1D;
-} TrailRender; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state;      /* 0x20: handler index into D_8008A3E0 */
-    u8 unk21;      /* handler index into D_8008A3F8 */
-    u8 finishFn;   /* handler index into D_8008A42C */
-    u8 hitFn;      /* handler index into D_8008A430 */
-    u8 hitKind3Fn; /* handler index into D_8008A450 */
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
 
 /* Result block filled by func_15046C80. */
 typedef struct {
@@ -92,16 +37,16 @@ typedef struct {
     TrailParams *params;      /* 0x98 */
 } Trail;
 
-extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Creates a trail object from a spawn description, motion block and render settings. */
-Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+Trail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
                      s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
                      s32 arg12, u8 arg13, s32 arg14) {
     Trail *trail;
     TrailParams *params;
 
-    spawn->unk10 = 1;
+    spawn->kind = 1;
     trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(TrailPoint), 1, 0, 1, arg9, arg10,
                           arg12, arg13, arg14);
     if (trail == NULL) {
@@ -118,7 +63,6 @@ Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 
     params->render = *render;
     return trail;
 }
-
 
 typedef s32 (*TrailFunc)();
 extern TrailFunc D_8008A3E0[];
@@ -151,8 +95,8 @@ s8 func_15147EB8(Trail *trail) {
         unk1C = trail->unk1C;
         if (unk1C < params->motion.unk1C) {
             fade = unk1C * params->motion.unk1E;
-            if (fade < params->motion.unk1B) {
-                params->motion.unk1B = fade;
+            if (fade < params->motion.alpha) {
+                params->motion.alpha = fade;
             }
         }
     }
@@ -184,10 +128,7 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern s32 D_80091564[];
 extern s32 D_800915A4;
-extern s32 D_800DD1B0;
-extern s32 D_800D2C9C;
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -243,12 +184,12 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.unk1C);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.unk1D);
-            gfx = func_15142B7C(gfx, params->render.unk4, params->render.unk8);
+            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.primMode);
+            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.alpha, params->motion.shade, params->render.envMode);
+            gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
-            gfx = func_1513F4E4(gfx, params->render.unk10.bytes[3], &update);
+            gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
             gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
             i = trail->end - 1;
             if (i < 0) {
@@ -553,18 +494,9 @@ s32 func_15148EF8(Trail *trail, s32 arg1, s32 arg2, s32 arg3) {
 void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
                    f32 halfWidth, f32 gravity, u8 arg11) {
     f32 yawWaveQ;
-    TrailSpawn spawn;
+    EffectTemplate18 spawn;
     f32 horizontal;
-    struct {
-        f32 halfWidth;
-        Vec3f velocity;
-        f32 gravity;
-        u8 pad14[4];
-        u8 flags;
-        u8 texture;
-        u8 unk1A;
-        u8 unk1B;
-    } motion; /* TrailMotion without unk1C/unk1E (func_15147DA0 copies past its end) */
+    TrailMotion1C motion;
     f32 pitchWave;
     f32 pitchWaveQ;
     f32 yawWave;
@@ -577,9 +509,9 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     yawWave = func_151423D8((u8)yaw);
     yawWaveQ = func_151423D8((u8)(yaw - 0x40));
 
-    spawn.unk10 = 1;
-    spawn.unkE = 1;
-    motion.unk1A = 0xFF;
+    spawn.kind = 1;
+    spawn.flags = 1;
+    motion.shade = 0xFF;
     motion.flags = 8;
     tex = texture; // matching: the u8 copy owns the stack slot above render
     motion.texture = tex;
@@ -596,20 +528,20 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     motion.velocity.x = horizontal * yawWaveQ;
     motion.velocity.y = -speed * pitchWaveQ;
     motion.velocity.z = horizontal * yawWave;
-    motion.unk1B = 0xFF;
-    spawn.unk15 = arg4 + 3;
-    spawn.unkC = arg8;
+    motion.alpha = 0xFF;
+    spawn.itemCount = arg4 + 3;
+    spawn.life = arg8;
 
     render.unk0 = 0;
-    render.unk4 = 1;
-    render.unk8 = 0x160600;
+    render.setGeometryMode = 1;
+    render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10.word = 0x10;
+    render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.unk1C = 0;
-    render.unk1D = 9;
-    func_15147DA0(&spawn, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
+    render.primMode = 0;
+    render.envMode = 9;
+    func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
@@ -620,7 +552,7 @@ s32 func_151490C8(Trail *trail) {
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
-    params->motion.unk1B = alpha;
+    params->motion.alpha = alpha;
     if ((u8)alpha < 0) { // matching: never true, but IDO still emits the test
         return 0;
     }

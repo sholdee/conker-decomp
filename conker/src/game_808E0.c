@@ -3,16 +3,16 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_15053430(struct127 *arg0);
-s32 func_1507D754(struct127 *arg0);
+s32 func_15053430(Actor *arg0);
+s32 func_1507D754(Actor *arg0);
 void func_151669A0(s32 x, s32 y, s32 z, f32 arg3, s32 arg4, s32 arg5);
-void func_15055B0C(struct127 *arg0, s32 arg1);
+void func_15055B0C(Actor *arg0, s32 arg1);
 
 /**
  * Death handling for obj (called once its health is 0): picks the outcome from the
  * flag byte of its D_800D1C90 entry. Returns 0 only when unk10E is in 1..0xEF.
  */
-s32 func_15053430(struct127 *obj) {
+s32 func_15053430(Actor *obj) {
     u8 flags;
 
     if (obj->id == 0xFF) {
@@ -20,7 +20,7 @@ s32 func_15053430(struct127 *obj) {
         return 1;
     }
 
-    flags = D_800D1C90[obj->id]->data.i.unk0;
+    flags = D_800D1C90[obj->id]->flags;
     if ((obj->unk10E != 0) && (obj->unk10E < 0xF0)) {
         func_1505D2B8(obj, 9);
     } else {
@@ -39,8 +39,7 @@ s32 func_15053430(struct127 *obj) {
         } else if (flags & 1) {
             func_15053694(obj);
         } else if (flags & 0x40) {
-            // D_800D2110 is a pointer; variables.h declares it as an array
-            (*(s16 **)&D_800D2110)[obj->unk13F] = 1250;
+            D_800D2110[obj->unk13F] = 1250;
             func_15060F28(obj, 1);
         } else if (result == 1) {
             func_150536D0(obj);
@@ -56,7 +55,7 @@ s32 func_15053430(struct127 *obj) {
  * Runs func_15053430 for obj once its health is 0 and its D_800D1C90 flags (or
  * unk10F == 0) allow it. Returns 0 when nothing was done.
  */
-s32 func_150535F4(struct127 *obj) {
+s32 func_150535F4(Actor *obj) {
     u8 flags;
 
     if (obj->health == 0) {
@@ -64,7 +63,7 @@ s32 func_150535F4(struct127 *obj) {
             func_15060F28(obj, 1);
             return 1;
         }
-        flags = D_800D1C90[obj->id]->data.i.unk0;
+        flags = D_800D1C90[obj->id]->flags;
         if ((flags & 0x10) ||
             ((flags & 8) && (obj->unk28 == 0.0f)) ||
             (obj->unk10F == 0)) {
@@ -75,9 +74,9 @@ s32 func_150535F4(struct127 *obj) {
 }
 
 /** Sets obj's interaction state to 8 and starts func_1506160C mode 6. */
-void func_15053694(struct127 *obj) {
+void func_15053694(Actor *obj) {
     obj->interaction_state = 8;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     func_1506160C(obj, 6, 0, 0, 0);
 }

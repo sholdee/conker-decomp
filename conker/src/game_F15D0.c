@@ -1,53 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Spawn parameters of a particle (same layout as ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f offset;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ s8 drawFunc;
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc; /* size 0x70 */
+#include "effects.h"
 
 /* Per-particle data of a pulsing particle: two sizes oscillating around a base size
  * (same layout as ParticlePulse in game_15D730.c). */
@@ -68,7 +22,7 @@ typedef struct {
 
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x08 */ f32 unk8;
     /* 0x0C */ Particle *particle;
@@ -94,7 +48,7 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
-void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
+void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     EffectData data;
     Effect *effect;
     EffectData *state;
@@ -114,7 +68,7 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
         data.flags = 1;
     }
     effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
-                                     0x40, (struct37 *)sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
+                                     0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));
@@ -143,9 +97,9 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
             spawn.brightness = 0xFF;
-            spawn.pos = *(Vec3f *)&D_800A5480;
-            spawn.offset = *(Vec3f *)&D_800A5480;
-            spawn.vel = *(Vec3f *)&D_800A5480;
+            spawn.pos = D_800A5480;
+            spawn.offset = D_800A5480;
+            spawn.vel = D_800A5480;
             spawn.scaleStart = 1;
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
@@ -181,11 +135,11 @@ typedef struct {
     s32 unk20;
 } GroundHit; /* size 0x24 */
 
-extern void func_1504715C(GroundHit *, struct127 *);
-extern s32 func_1514654C(struct127 *, struct126 *, s32, Vec3f **, Vec3f **, s32);
+extern void func_1504715C(GroundHit *, Actor *);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
 extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern s32 func_1515C0F8(struct127 *, Vec3f **);
+extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_151C36D8(Vec3f *, s32, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
 extern Vec3f D_800A0350[];
@@ -196,7 +150,7 @@ extern u8 D_800A03A8[];
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
 void func_150C44A4(Effect *effect) {
-    struct127 *owner;
+    Actor *owner;
     EffectData *data;
     Vec3f pos;
     Vec3f offset;
@@ -206,7 +160,7 @@ void func_150C44A4(Effect *effect) {
     GroundHit ground;
     Vec3f *offsetPtr;
     Vec3f *posPtr;
-    struct126 *bone;
+    ActorCtl *bone;
     s32 emit;
     Vec3f *wind;
     Vec3f vel;
@@ -236,9 +190,8 @@ void func_150C44A4(Effect *effect) {
         if (bone == NULL) {
             return;
         }
-        /* struct127 has no fields at 0x2D8/0x2DC yet */
-        if (owner->unk2EC != 0) {
-            progress = *(f32 *)((u8 *)owner + 0x2D8) * *(f32 *)((u8 *)owner + 0x2DC);
+        if (owner->unk2EC != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
+            progress = owner->unk2D8[0] * owner->unk2D8[1];
         } else {
             progress = 0.0f;
         }
@@ -291,7 +244,7 @@ void func_150C44A4(Effect *effect) {
     data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * D_800BE9A4;
     if (data->unk10 > 1.0f) {
         if (func_1515C0F8(owner, &wind) == 0) {
-            wind = (Vec3f *)&D_800A5480;
+            wind = &D_800A5480;
         }
         do {
             rand1 = func_150ADA20();
@@ -340,6 +293,6 @@ void func_150C4B60(Effect *effect, s32 arg1, u8 event) {
     } else if (event == 0x56) {
         data->flags |= 2;
     } else {
-        func_15149514(arg1, event, (s32)data, (s32)&data->ownerId, (s32)effect);
+        func_15149514(arg1, event, &data->owner, &data->ownerId, effect);
     }
 }

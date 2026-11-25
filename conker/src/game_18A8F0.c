@@ -1,72 +1,7 @@
 #include <ultra64.h>
-#define func_1515D4D4 func_1515D4D4_prototype
-#define func_1515D6D0 func_1515D6D0_prototype
 #include "functions.h"
-#undef func_1515D4D4
-#undef func_1515D6D0
-#define D_800DCD20 D_800DCD20_hdr
-#define D_800DCD24 D_800DCD24_hdr
-#define D_800DCD30 D_800DCD30_hdr
-#define D_800DCD40 D_800DCD40_hdr
-#define D_800DCD78 D_800DCD78_hdr
-#define D_800DCD80 D_800DCD80_hdr
-#define D_800DCD84 D_800DCD84_hdr
 #include "variables.h"
-#undef D_800DCD20
-#undef D_800DCD24
-#undef D_800DCD30
-#undef D_800DCD40
-#undef D_800DCD78
-#undef D_800DCD80
-#undef D_800DCD84
 
-/*
- * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
- * linked list D_800DCD78. struct226 in structs.h is a partial view of this.
- */
-typedef struct PointLight {
-    /* 0x00 */ struct PointLight *next;
-    /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
-    /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
-    /* 0x09 */ u8 disabled;
-    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
-    /* 0x0B */ u8 group;             // id used by func_1515F170
-    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by func_1515D69C
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-    /* 0x14 */ s16 viewPos[4][3];    // position transformed by player i's view matrix
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 radius;
-    /* 0x30 */ u8 viewPosValid;      // per-player bit: viewPos[i] is up to date
-} PointLight;
-
-/* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
-typedef struct {
-    /* 0x00 */ u8 col[3];
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ u8 colc[3];
-    /* 0x07 */ u8 pad7;
-    /* 0x08 */ s8 dir[3];
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x13];
-    /* 0x20 */ s16 pos[4];
-    /* 0x28 */ s16 pos2[4];
-} PointLightGfx;
-
-extern u8 D_800DCD20[3];            // ambient colour
-extern u8 D_800DCD24[3];
-extern u8 D_800DCD27;               // priority of the current ambient colour
-extern s8 D_800DCD30[4][3];         // per-player directional light direction
-extern PointLightGfx D_800DCD40;    // padding light for odd light counts
-extern PointLight *D_800DCD78;      // list of all point lights
-extern struct ZoneNode *D_800DCD80; // ambient colour zones
-extern struct ZoneNode *D_800DCD84; // tint zones
 
 void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
@@ -77,7 +12,7 @@ extern void func_10004074(void *);
 /* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
 struct ZoneLinkObj {
     u8 pad0[0x98];
-    struct127 *unk98;
+    Actor *unk98;
 };
 
 struct ZoneLinkObj *func_15105C24(s32 owner);
@@ -273,9 +208,9 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         pos[2] = z;
     } else {
         // sample 1000 units along the camera's view direction instead
-        dir[0] = D_800DBFF0[player].unk2BC - D_800DBFF0[player].unk2F8;
-        dir[1] = D_800DBFF0[player].unk2C0 - D_800DBFF0[player].unk2FC;
-        dir[2] = D_800DBFF0[player].unk2C4 - D_800DBFF0[player].unk300;
+        dir[0] = D_800DBFF0[player].target.x - D_800DBFF0[player].eye.x;
+        dir[1] = D_800DBFF0[player].target.y - D_800DBFF0[player].eye.y;
+        dir[2] = D_800DBFF0[player].target.z - D_800DBFF0[player].eye.z;
         scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         if (scale != 0.0f) {
             scale = 1000.0f / scale;
@@ -393,28 +328,7 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
 }
 
 
-/* A zone record: struct178 with the fields this file reads named (structs.h has them as a blob). */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ u8 pad8[0xC];
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;     // >> 2 is the zone type
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u32 unk18;    // light zones: colour in the low 24 bits, mask in the top byte;
-                             // trigger zones: index into D_8008B090
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u8 pad20[0x14];
-} Zone;
-
-typedef struct ZoneNode {
-    struct ZoneNode *next;
-    Zone *zone;
-} ZoneNode;
-
-Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node);
+TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
 
 /*
  * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the
@@ -422,7 +336,7 @@ Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node);
  * D_800DCD84 tint is applied on top.
  */
 void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
-    Zone *zone;
+    TriggerZone *zone;
     s32 i;
     s32 sum;
     u8 tint[3];
@@ -467,7 +381,7 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
 
 /* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
-    Zone *zone;
+    TriggerZone *zone;
 
     zone = func_1515EB84(x, y, z, 0, D_800DCD84);
     if (zone != NULL) {
@@ -518,7 +432,6 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     return gfx;
 }
 
-extern u8 D_800D9E21;                // light count byte func_1515D914 stored for player 0
 extern PointLight *D_800D9E28[];     // the lights it picked
 
 /*
@@ -589,16 +502,16 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 func_150A1DA0(struct127 *obj, Zone *zone, s32);
+s32 func_150A1DA0(Actor *obj, TriggerZone *zone, s32);
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
-Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
-    struct127 probe;
-    Zone *zone;
+TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
+    Actor probe;
+    TriggerZone *zone;
 
     probe.x_position = x;
     probe.y_position = y;
-    probe.unk180 = y;
+    probe.floorY = y;
     probe.old_x_position = x;
     probe.old_y_position = y;
     probe.z_position = z;
@@ -606,15 +519,14 @@ Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
 
     for (; node != NULL; node = node->next) {
         zone = node->zone;
-        if (zone->unk14 == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
-            ((zone->unk15 >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+        if (zone->disabled == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
+            ((zone->kind >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
             return node->zone;
         }
     }
     return NULL;
 }
 
-extern f32 D_800D9C10[][4][4];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
 /*
@@ -757,14 +669,7 @@ void func_1515F170(s32 group, u8 disabled) {
 }
 
 /* A node of a list of spawn regions with their cached volume and area. */
-typedef struct RegionNode {
-    /* 0x00 */ struct134 *region;
-    /* 0x04 */ f32 volume;
-    /* 0x08 */ f32 area;
-    /* 0x0C */ struct RegionNode *next;
-} RegionNode;
-
-RegionNode *func_1515F1B0(struct134 *region) {
+RegionNode *func_1515F1B0(TriggerZone *region) {
     RegionNode *node;
 
     node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
@@ -792,12 +697,12 @@ void func_1515F25C(RegionNode **list, RegionNode *node) {
     *list = node;
 }
 
-typedef void (*ZoneHandler)(struct127 *obj, Zone *zone);
+typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
 
 extern ZoneHandler D_8008B090[12];
 
 /* Runs zone handler zone->unk18 for `obj`. */
-void func_1515F270(struct127 *obj, Zone *zone) {
+void func_1515F270(Actor *obj, TriggerZone *zone) {
     s32 idx = zone->unk18;
 
     if (idx >= 0 && idx < 12) {
@@ -807,16 +712,16 @@ void func_1515F270(struct127 *obj, Zone *zone) {
     }
 }
 
-s32 func_1505D024(struct127 *obj, s32 arg1, u16 arg2, s32 arg3);
+s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
 
-void func_1515F2B8(struct127 *obj, Zone *zone) {
+void func_1515F2B8(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x6001D, obj->unk7A, -1);
 }
 
 extern ZoneHandler D_8008B0C0[3];
 
-/* Zone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
-void func_1515F2E8(struct127 *obj, Zone *zone) {
+/* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
+void func_1515F2E8(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
@@ -828,7 +733,7 @@ void func_1515F2E8(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
-void func_1515F338(struct127 *obj, Zone *zone) {
+void func_1515F338(Actor *obj, TriggerZone *zone) {
     u8 red;
     u8 green;
     u8 blue;
@@ -852,7 +757,7 @@ void func_1515F338(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
-void func_1515F5C4(struct127 *obj, Zone *zone) {
+void func_1515F5C4(Actor *obj, TriggerZone *zone) {
     u8 red;
     u8 green;
     u8 blue;
@@ -876,7 +781,7 @@ void func_1515F5C4(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
-void func_1515F850(struct127 *obj, Zone *zone) {
+void func_1515F850(Actor *obj, TriggerZone *zone) {
     f32 s;
     f32 targetR;
     f32 targetG;
@@ -907,8 +812,8 @@ void func_1515F850(struct127 *obj, Zone *zone) {
     func_1515D4D4(color[0], color[1], color[2], 0);
 }
 
-/* Zone handler: func_1515F2E8 for a handler table that is empty in this build. */
-void func_1515FB70(struct127 *obj, Zone *zone) {
+/* TriggerZone handler: func_1515F2E8 for a handler table that is empty in this build. */
+void func_1515FB70(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
@@ -918,14 +823,14 @@ void func_1515FB70(struct127 *obj, Zone *zone) {
     }
 }
 
-void func_1515FB94(struct127 *obj, Zone *zone) {
+void func_1515FB94(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x6002D, obj->unk7A, -1);
 }
 
-/* Zone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
-void func_1515FBC4(struct127 *obj, Zone *zone) {
+/* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
+void func_1515FBC4(Actor *obj, TriggerZone *zone) {
     struct ZoneLinkObj *link;
-    struct127 *target;
+    Actor *target;
     s32 targetIndex;
 
     target = NULL;
@@ -941,19 +846,19 @@ void func_1515FBC4(struct127 *obj, Zone *zone) {
     func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
 }
 
-void func_1515FC34(struct127 *obj, Zone *zone) {
+void func_1515FC34(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x33, 0xC000, -1);
 }
 
 s32 func_150AD960(s32, s32, s32, s32);
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(struct127 *, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *, s32);
 
 /*
- * Zone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
+ * TriggerZone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
  * is outside of, fires event 0x2F on `obj`.
  */
-void func_1515FC60(struct127 *obj, Zone *zone) {
+void func_1515FC60(Actor *obj, TriggerZone *zone) {
     s32 pad; // matching: stack slot
     f32 limit;
     f32 scale;
@@ -964,7 +869,7 @@ void func_1515FC60(struct127 *obj, Zone *zone) {
         if (value != 0) {
             scale = (f32)(u32)value * 0.009999999776f;
             value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
-            limit = (zone->radius * scale) - obj->unkE4;
+            limit = (zone->radius * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;
             }

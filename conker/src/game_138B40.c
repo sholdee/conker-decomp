@@ -1,42 +1,17 @@
 #include <ultra64.h>
-#define func_1510B9D0 func_1510B9D0_hdr
 #include "functions.h"
-#undef func_1510B9D0
-#define D_800D9D10 D_800D9D10_hdr
-#define D_800DC2A0 D_800DC2A0_hdr
-#define D_800B0E00 D_800B0E00_hdr
-#define D_800B0E04 D_800B0E04_hdr
 #include "variables.h"
-#undef D_800D9D10
-#undef D_800DC2A0
-#undef D_800B0E00
-#undef D_800B0E04
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
 
-extern Mtx *D_800DC2A0[2];        // per framebuffer: one view matrix per view
-extern f32 D_800D9C10[][4][4];    // per view: view matrix (float copy of D_800DC2A0)
-extern f32 D_800D9D10[][4][4];    // per view: view matrix * projection
-extern Gfx *D_800B0E00;
-extern Gfx *D_800B0E04;
 extern Gfx *D_800B0E08;
-extern Mtx D_80089470;
-extern f32 D_800D35E0;
-extern f32 D_800D35E8;
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern u8 D_800C3662;
-extern u8 D_800BEBA0;
-extern LookAt D_800D9B90[];
-extern u8 D_800D9BD0[][2][8];
-extern s32 D_800D9E10[];
-extern u8 D_800D9E20;
-extern u8 D_800D9E21;
 extern s32 D_800D9E28;
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_1501B22C(s32 view);
 void func_1510CB10(s32 view);
 Gfx *func_1510CDB8(Gfx *gfx, s32 arg1, s32 arg2, s32 view);
@@ -50,15 +25,15 @@ void func_1510F800(s32 arg0);
 Gfx *func_1515D914(Gfx *gfx, s16 view, s32 x, s32 y, s32 z, s32 arg5, s32 arg6, s32 arg7, void *arg8, void *arg9,
                    s32 argA, s32 argB, s32 argC, void *argD);
 Gfx *func_1515E544(Gfx *gfx, s32 arg1, u8 arg2, u8 arg3, void *arg4);
-Gfx *func_150A5378(Gfx *dl, Gfx *gfx, f32 viewMtx[4][4], s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 viewMtx[4][4], s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_1512E5F0(Gfx *gfx, struct108 *camera);
+Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
+Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
+Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
 Gfx *func_151742EC(Gfx *gfx, s16 view);
 
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void func_1510B690(void) {
     s16 view;
-    f32 projection[4][4];
+    MtxF projection;
 
     for (view = 0; view <= D_80082FA0; view++) {
         guMtxL2F(projection, &gRenderViews[view].projectionMtx[D_800BE9C0]);
@@ -98,13 +73,13 @@ void func_1510B958(s32 view) {
 
 /* Builds the world display list for one view. */
 Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
-    struct108 *camera;
+    Camera *camera;
     s32 skipWorld;
 
     camera = &D_800DBFF0[view];
     D_800BEBA0 = 1;
     skipWorld = FALSE;
-    if (D_800C35EA == 1 && D_800C3662 != 0) {
+    if (D_800C35EA[0] == 1 && D_800C3662 != 0) {
         skipWorld = TRUE;
     }
     if (D_800D18A0 & (1 << view)) {
@@ -140,7 +115,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     if (D_800DCD7C == 0) {
         gDma2p(gfx++, G_MOVEMEM, D_800D9BD0[view][D_800BE9C0], 48, G_MV_LIGHT, G_MVO_L2);
     }
-    gfx = func_1515D914(gfx, view, D_800DBFF0[view].unk2F8, D_800DBFF0[view].unk2FC, D_800DBFF0[view].unk300, 0,
+    gfx = func_1515D914(gfx, view, D_800DBFF0[view].eye.x, D_800DBFF0[view].eye.y, D_800DBFF0[view].eye.z, 0,
                         D_800D9E10[view], D_800D9E20, D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
                         &D_800D9E28);
     if (!skipWorld) {
@@ -149,9 +124,9 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                 gDPPipeSync(gfx++);
                 if (D_800DBE62) {
                     if (D_800BE9F0 != 0x14 && D_800BE9F0 != 0x33 && D_800BE9F0 != 0x32) {
-                        gfx = func_150A5378(D_800B0E00, gfx, D_800D9C10[view], 0, 0, 1 << view);
+                        gfx = func_150A5378(D_800B0E00[0], gfx, D_800D9C10[view], 0, 0, 1 << view);
                     } else {
-                        gSPDisplayList(gfx++, D_800B0E00);
+                        gSPDisplayList(gfx++, D_800B0E00[0]);
                     }
                     if (D_800B0E04 != NULL) {
                         gDPPipeSync(gfx++);
@@ -163,18 +138,18 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gSPDisplayList(gfx++, D_800B0E04);
                     }
                     D_800BEBA0 = 0;
-                    // byte 0x8B8 of struct108 is not yet a named field in structs.h
-                    if (camera->pad880[0x8B8 - 0x880] && (camera->unk84 & 8)) {
+                    // byte 0x8B8 of Camera is not yet a named field in structs.h
+                    if (camera->unk8B8 && (camera->flags & 8)) {
                         gfx = func_1512E5F0(gfx, camera);
                         gDPPipeSync(gfx++);
                     }
                 } else {
-                    gSPDisplayList(gfx++, D_800B0E00);
+                    gSPDisplayList(gfx++, D_800B0E00[0]);
                 }
             } else if (D_800BEAAA) {
-                gfx = func_150A50C0(D_800B0E00, gfx, D_800D9C10[view], 0, 0, 0);
+                gfx = func_150A50C0(D_800B0E00[0], gfx, D_800D9C10[view], 0, 0, 0);
             } else {
-                gSPDisplayList(gfx++, D_800B0E00);
+                gSPDisplayList(gfx++, D_800B0E00[0]);
             }
         }
         gfx = func_1515E544(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, D_800D9BD0[view][D_800BE9C0]);

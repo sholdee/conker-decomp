@@ -1,16 +1,14 @@
 #include <ultra64.h>
 
+// matching: func_1501A490 is defined below with the display list as an integer (functions.h gives callers the
+// Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
+#define func_1501A490 func_1501A490_hdr
 #include "functions.h"
+#undef func_1501A490
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
-
-#define VIEWPORTS ((Vp *)D_800BE62C)
-#define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
-
-/* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
-#define VIEW_WIDTHS (&D_800BE638)
 
 void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
 s32 func_1501AE94(s32 viewIndex);
@@ -39,7 +37,7 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
     D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
     if (D_80082FA0 == 1) {
-        width = (f32)VIEW_WIDTHS[1] - 2.0f;
+        width = (f32)D_800BE638[1] - 2.0f;
         scaled = width;
         scaled *= *(f32 *)&D_800968E0; // matching: 0.8f; the rodata load and in-place multiply pick IDO's FP regs
         scaledWidth = scaled;
@@ -63,7 +61,6 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
 }
 
 extern Gfx D_8002C930[];
-extern Gfx *D_800BE9C8[];
 
 /* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
  * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
@@ -78,13 +75,13 @@ void func_1501A39C(void) {
         gSPDisplayList(gfx++, D_8002C930);
         gDPSetDepthImage(gfx++, D_800BE9C4);
         gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
-        D_800BE9D8[i] = (s32)gfx;
+        D_800BE9D8[i] = gfx;
     }
 }
 
 /* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
  * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
-// matching: functions.h types the display list as s32 and IDO's -g3 frame only fits one Gfx * per command,
+// matching: the display list is advanced as an integer and IDO's -g3 frame only fits one Gfx * per command,
 // so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
 // on one line: -g3 line numbers steer the scheduler).
 s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
@@ -153,7 +150,7 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
     return gfx;
 }
 
-void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /* Projects a world point through view's matrix to screen x, y and a depth value. */
 void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
@@ -162,7 +159,7 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
     f32 projZ;
     f32 invW;
 
-    func_150A7A00(VIEW_MATRICES[view], x, y, z, &projX, &projY, &projZ, &invW);
+    func_150A7A00(D_800D9D10[view], x, y, z, &projX, &projY, &projZ, &invW);
     invW = 1.0f / invW;
     *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
     *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;
@@ -171,8 +168,6 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
 }
 
 extern f32 D_80082FA8[];
-extern s16 D_800BE668[][5][2];
-extern u8 D_800BE630[];
 void func_1501B0A0(s32 view, s32 layout);
 
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
@@ -188,7 +183,7 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     f32 vpHeight;
     s16 *center;
 
-    RENDER_VIEWS[view].width = VIEW_WIDTHS[layout];
+    RENDER_VIEWS[view].width = D_800BE638[layout];
     RENDER_VIEWS[view].height = D_800BE650[layout];
     if (layout != 0) {
         RENDER_VIEWS[view].width -= 2.0f;
@@ -219,7 +214,7 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     if (arg3 != 0) {
         func_1501B0A0(view, layout);
     } else {
-        fullWidth = VIEW_WIDTHS[0];
+        fullWidth = D_800BE638[0];
         fullAspect = fullWidth / (f32)D_800BE650[0];
         aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
         RENDER_VIEWS[view].scaleX = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
@@ -232,17 +227,17 @@ void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
     sine = sinf(halfFov);
     RENDER_VIEWS[view].pixelTanY = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfHeight);
     vpWidth = RENDER_VIEWS[view].width + 10.0f;
-    VIEWPORTS[view].vp.vscale[0] = vpWidth + vpWidth;
+    D_800BE62C[view].vp.vscale[0] = vpWidth + vpWidth;
     vpHeight = RENDER_VIEWS[view].height + 10.0f;
-    VIEWPORTS[view].vp.vscale[1] = vpHeight + vpHeight;
-    VIEWPORTS[view].vp.vscale[2] = zRange >> 1;
-    VIEWPORTS[view].vp.vscale[3] = 0;
-    VIEWPORTS[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
-    VIEWPORTS[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
-    VIEWPORTS[view].vp.vtrans[2] = zRange >> 1;
-    VIEWPORTS[view].vp.vtrans[3] = 0;
+    D_800BE62C[view].vp.vscale[1] = vpHeight + vpHeight;
+    D_800BE62C[view].vp.vscale[2] = zRange >> 1;
+    D_800BE62C[view].vp.vscale[3] = 0;
+    D_800BE62C[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
+    D_800BE62C[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
+    D_800BE62C[view].vp.vtrans[2] = zRange >> 1;
+    D_800BE62C[view].vp.vtrans[3] = 0;
     do { // matching: the loop scope changes IDO's register allocation for the copies below
-        RENDER_VIEWS[view].viewports[D_800BE9C0] = VIEWPORTS[view];
+        RENDER_VIEWS[view].viewports[D_800BE9C0] = D_800BE62C[view];
     } while (0);
     RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
     RENDER_VIEWS[view].perspScale = 1.0f;
@@ -336,7 +331,7 @@ void func_1501B0A0(s32 view, s32 layout) {
     halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
     tanX = sinf(halfFovX) / cosf(halfFovX);
     tanY = sinf(halfFovY) / cosf(halfFovY);
-    distX = (f32)VIEW_WIDTHS[layout] / (2.0f * tanX);
+    distX = (f32)D_800BE638[layout] / (2.0f * tanX);
     distY = (f32)D_800BE650[layout] / (2.0f * tanY);
     x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
     y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;

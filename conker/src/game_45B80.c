@@ -1,7 +1,22 @@
 #include <ultra64.h>
 
+// matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
+#define func_1515D6D0 func_1515D6D0_functions_h
+// matching: func_1000D758 takes three floats; this file passes z as raw bits in a2 through an integer view
+#define func_1000D758 func_1000D758_functions_h
 #include "functions.h"
+#undef func_1000D758
+void func_1000D758(f32 x, f32 y, s32 zBits);
+#undef func_1515D6D0
+s32 func_1515D6D0(s32 gfx, s32 player);
+// matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
+// (pointer-typed loads pick different registers in func_1501878C's command appends)
+#define D_800BE9D0 D_800BE9D0_hdr
 #include "variables.h"
+#undef D_800BE9D0
+extern s32 D_800BE9D0;
+
+OSContPad **func_1501BBB8(void);
 
 
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
@@ -16,7 +31,6 @@ Gfx *func_151D6778(Gfx *gfx);
 Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
 Gfx *func_15035FE8(Gfx *gfx, s32 player);
 Gfx *func_15043384(Gfx *gfx);
-extern Mtx D_80089470;
 s32 func_1501878C(void);
 void func_15019F20(void);
 
@@ -29,7 +43,7 @@ void func_150186D0(void) {
     D_800BE5E0 = 1;
     D_800D18A0 = 0;
     D_800D18A2 = 0;
-    D_800D18A4 = 0;
+    *(s32 *)D_800D18A4 = 0; // clears all four players with one word store
     D_800D23A9 = 0;
 
     while (func_1501878C() != 0) {
@@ -37,14 +51,14 @@ void func_150186D0(void) {
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
-    *D_800BE728 = func_1501BBB8();
+    D_800BE728 = func_1501BBB8();
 
     while (func_151DCFD8(1) != 0) {
     }
 }
 
 /*
- * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (declared s32).
+ * Append one GBI command (w0, w1) at the frame's display-list write head D_800BE9D0 (read as s32 here).
  * matching: GBI macros on a post-incremented head, or taking &D_800BE9D0, move the pointer to v0.
  */
 #define DL_APPEND(hi, lo)                       \
@@ -70,7 +84,7 @@ void func_150186D0(void) {
 
 void func_1517E1AC(void);
 void func_151412BC(void);
-void func_10004074(s32);
+void func_10004074(void *);
 void func_151E51EC(void);
 void func_1510B3B0(void);
 void func_1510B51C(void);
@@ -101,16 +115,6 @@ void func_1000E2F4(s32);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
-extern s32 D_800DC9F0;
-extern s32 D_800BE9C8[];
-extern s32 D_800BE9CC;
-extern u8 D_800BEAC2;
-extern u8 D_800BE630[];
-extern u8 D_800BEBA0;
-extern s32 D_800BEB9C;
-extern s32 D_800BEBA4;
-extern u8 D_800C1060[];
-extern LookAt D_800D9B90[];
 
 /*
  * Waits for the next message on D_800BEA10 and handles it; type 1 runs and draws one game frame.
@@ -130,11 +134,11 @@ s32 func_1501878C(void) {
         if (D_800DC9F0 != 0) {
             func_151412BC();
         }
-        (*(s16 *)&D_800BEAA8)--; // matching: read signed (lh); variables.h declares it u16
-        if (D_800BE615 != 0 && *(s16 *)&D_800BEAA8 == 0) {
+        D_800BEAA8--;
+        if (D_800BE615 != 0 && D_800BEAA8 == 0) {
             func_10004074(D_800BE9C8[0]);
-            func_10004074(D_800BE9CC);
-            D_800BE9C8[0] = 0;
+            func_10004074(D_800BE9C8[1]);
+            D_800BE9C8[0] = NULL;
             return 0;
         }
         break;
@@ -180,7 +184,7 @@ s32 func_1501878C(void) {
                             D_800BE9D0 = (s32)func_150195A0((Gfx *)D_800BE9D0, D_80082FA4);
                             // Out of display-list space: drop this player's commands.
                             // matching: the ?: materialises the flag (move v1,zero / li v1,1)
-                            if (((Gfx *)D_800BE9D0 - (Gfx *)D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
+                            if (((Gfx *)D_800BE9D0 - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? 1 : 0) {
                                 D_800BE9D0 = (s32)savedHead;
                             }
                         }
@@ -258,12 +262,12 @@ void func_15018DFC(void) {
     func_150619A8();
     func_1501C870();
     if (D_800BEAC0 == 0) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             func_1502378C();
         } else {
             func_1504A730();
         }
-        func_15085ABC(D_800D2340);
+        func_15085ABC((s16)D_800D2340);
     }
     func_1507C370();
     func_1507C8FC();
@@ -290,23 +294,23 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     return gfx;
 }
 
-/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->unk388). */
+/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->pitch). */
 void func_15018F80(s16 player) {
-    struct108 *camera = &D_800DBFF0[player];
+    Camera *camera = &D_800DBFF0[player];
     D_8003C8E0 = 0xA000000;
     if ((func_1517F40C(player) == 0) && (D_800BEAC0 == 0)) {
         func_1517F448(player);
     }
     func_1501B640(player);
-    D_800D3674 = (camera->unk388 < 0.0f) ? -1000 : 5000;
+    D_800D3674 = (camera->pitch < 0.0f) ? -1000 : 5000;
     func_15172D80(player);
     D_8003C8E0 = 0;
 }
 
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
-    D_800BE9D0 = D_800BE9D8[D_800BE9C0];
-    *D_800BE728 = func_1501BBB8();
+    D_800BE9D0 = (s32)D_800BE9D8[D_800BE9C0];
+    D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
         func_15169040(0, 0x47);
@@ -315,7 +319,8 @@ void func_1501905C(void) {
     func_1501BB20();
     func_1502C380();
     if (0) {} // matching: IDO picks v0 (not v1) for the D_800DBFF0 load only with this
-    func_1000D758(D_800DBFF0->unk2A4, D_800DBFF0->unk2A8, D_800DBFF0->unk2AC);
+    // matching: callers pass z as raw bits (lw into a2); functions.h declares the third parameter s32
+    func_1000D758(D_800DBFF0->focus.x, D_800DBFF0->focus.y, *(s32 *)&D_800DBFF0->focus.z);
     func_10011BB8();
     if (D_800E0B94 == 2) {
         func_150ADACC(0x81280783);
@@ -362,7 +367,6 @@ void func_15036148(void);
 void func_1515D6C8(void);
 void func_1516706C(void);
 void func_151671E8(void);
-extern u8 D_800DCD27;
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.
@@ -401,7 +405,7 @@ s32 func_15019130(void) {
     func_150242F8(0, 0);
     func_15020EC4(0);
     func_1501E2F8(0);
-    if (*(s8 *)&D_800D23A9 != 0) { // matching: read signed (lb); variables.h declares it u8
+    if (D_800D23A9 != 0) {
         func_15087CC0();
     }
     func_15122AE0();
@@ -448,7 +452,7 @@ s32 func_15019130(void) {
     func_15036148();
     func_1515D6C8();
     for (i = 0; i < TLB_SLOT_COUNT; i++) {
-        ((TlbSlot *)&D_80043B40)[i].age++;
+        ((TlbSlot *)D_80043B40)[i].age++;
     }
     return 1;
 }
@@ -463,28 +467,13 @@ void func_15019414(void) {
     }
 }
 
-/*
- * Per-player view record, 0x180 bytes each; D_800BE628 points at one per player plus a final
- * full-screen one (index D_80082FA0 + 1). vp[] and proj[] are double-buffered by D_800BE9C0.
- */
-typedef struct PlayerView {
-    /* 0x000 */ u8 unk0[0x40];
-    /* 0x040 */ Vp vp[2];
-    /* 0x060 */ u8 unk60[0xA0];
-    /* 0x100 */ Mtx proj[2];
-} PlayerView; // size 0x180
-
-#define VIEWS ((PlayerView *)D_800BE628)
-
-extern s16 D_80084480;
-extern Mtx D_80089470;
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 
 /* Sets up player's viewport and draws the first pass of their scene. */
 Gfx *func_15019464(Gfx *gfx, s16 player) {
     func_1510B958(player);
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
         return gfx;
     }
@@ -496,12 +485,12 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
         return gfx;
     }
     gfx = (Gfx *)func_1515D6D0((s32)gfx, player);
-    return (Gfx *)func_1510B9D0((s32)gfx, player);
+    return func_1510B9D0(gfx, player);
 }
 
 /* Draws the main pass of player's scene. */
 Gfx *func_150195A0(Gfx *gfx, s16 player) {
-    struct108 *camera = &D_800DBFF0[player];
+    Camera *camera = &D_800DBFF0[player];
 
     if (D_800BEAC0 != 0) {
         return gfx;
@@ -515,8 +504,8 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     if (D_80082FA0 > 0) {
         gfx = (Gfx *)func_1515D6D0((s32)func_1510B7B4(gfx, player), player);
         func_1510B958(player);
-        gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
-        gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+        gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
+        gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     }
     gfx = func_151135C4(gfx, 1, player);
     if (D_800BE575 == 2) {
@@ -525,11 +514,11 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_151674F8(gfx, 6, player, 0);
     gfx = func_151674F8(gfx, 6, player, 1);
     gfx = func_15186794(gfx, player);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gfx = func_1502BAD0(gfx, 1, player);
     gfx = func_15035FE8(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    if (camera->unk5F0 & 1) {
+    if (camera->status & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = func_151135C4(gfx, 0, player);
         gfx = func_15018F08(gfx, player);
@@ -563,11 +552,11 @@ Gfx *func_150198FC(Gfx *gfx) {
     }
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
-        gSPViewport(gfx++, &(D_80082FA4 + VIEWS)->vp[0]); // matching: index + base operand order
+        gSPViewport(gfx++, &(D_80082FA4 + D_800BE628)->viewports[0]); // matching: index + base operand order
     } else {
-        gSPViewport(gfx++, &VIEWS[0].vp[0]);
+        gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
-    gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
         if (D_80082F90 == 0) {
             gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
@@ -604,8 +593,8 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 
 /* Draws player's late pass (group 4 display lists) into their viewport. */
 Gfx *func_15019BB8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gfx = func_1517F4D8(gfx, player);
     gfx = func_1517F3A0(gfx, player);
     gfx = func_15180580(gfx, player);
@@ -616,21 +605,21 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     return func_151674F8(gfx, 4, player, 1);
 }
 
-/* D_800DC2A0 (declared struct10 *) is one Mtx array per framebuffer, indexed by player. */
-#define FRAME_MTX(fb, player) (&((Mtx **)&D_800DC2A0)[fb][player])
+/* D_800DC2A0 is one Mtx array per framebuffer, indexed by player. */
+#define FRAME_MTX(fb, player) (&D_800DC2A0[fb][player])
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    gSPMatrix(gfx++, &VIEWS[player].proj[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (D_800BE9F0 == 0x1D) {
         gfx = func_1502BAD0(gfx, 6, player);
     }
     gfx = func_151674F8(gfx, 5, 0, 0);
     gfx = func_151674F8(gfx, 5, 0, 1);
-    gSPMatrix(gfx++, &VIEWS[player].proj[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
     return gfx;
 }
@@ -641,21 +630,17 @@ Gfx *func_151E8620(Gfx *gfx);
 Gfx *func_15019E60(Gfx *gfx) {
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
-        gSPViewport(gfx++, &(D_80082FA4 + VIEWS)->vp[0]); // matching: index + base operand order
+        gSPViewport(gfx++, &(D_80082FA4 + D_800BE628)->viewports[0]); // matching: index + base operand order
     } else {
-        gSPViewport(gfx++, &VIEWS[0].vp[0]);
+        gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
-    return func_15043384(func_151E8620((Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0)));
+    return func_15043384(func_151E8620(func_1501A490(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
 extern u32 D_800BE610;
-extern u8 D_800BE619;
-extern u8 D_800BE61A;
-extern s32 D_800BE9AC;
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
-extern u8 D_800BEA0C;
 // The last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder.
 // (Defined with 11 entries so tools/rodata_extern.py keeps the [10] access on this symbol.)
 f32 D_800BE5E8[11];

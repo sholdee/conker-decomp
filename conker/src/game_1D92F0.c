@@ -1,11 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but it returns a full word and the
- * callers here use all of it (divu on v0), so this file declares it locally. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /* Surface hit record from a ground/collision probe (cf. GroundHit in game_1D6E80.c). */
 typedef struct {
@@ -49,10 +45,10 @@ extern FxImpactEntry D_800A925C[];
 
 u8 func_151D8E20(void);
 void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
-void func_151DBE80(u8, f32, f32, s16, vertex *, void *, s32, s32, s32, s32);
+void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(vertex *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) {
+void func_151ABE40(Vec3f *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) {
     FxImpactSet *set;
     u8 kind;
 
@@ -117,45 +113,8 @@ typedef struct {
     /* 0x2C */ f32 chance;
 } FxSprayParams; // size 0x30
 
-typedef struct {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-} FxSpraySpawn;
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 vel[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 flags;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 pad1C[4];
-} FxSprayPart;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} FxSprayStyle;
-
 extern FxSprayParams D_800A9068[];
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
-s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, FxSprayStyle *,
+s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
                   FxSurfaceHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
@@ -163,10 +122,10 @@ s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9,
                   s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
     FxSprayParams *params;
-    FxSpraySpawn spawn;
-    FxSprayPart part;
+    EffectTemplate18 spawn;
+    TrailMotion part;
     f32 roll;
-    FxSprayStyle style;
+    TrailRender style;
     f32 sinYaw;
     f32 cosYaw;
     f32 speed;
@@ -186,22 +145,22 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         sinYaw = func_151423D8(yaw);
         cosYaw = func_151423D8(yaw - 0x40);
         style.unk0 = 0;
-        style.unk4 = 1;
-        style.unk8 = 0x160600;
-        style.unkC = 1;
+        style.setGeometryMode = 1;
+        style.clearGeometryMode = 0x160600;
+        style.renderMode = 1;
         style.unk10 = 16;
         style.unk14 = 128;
         style.unk18 = 32;
-        style.unk1C = 0;
-        style.unk1D = 9;
-        spawn.unk10 = 1;
-        spawn.unkE = 1;
-        spawn.pos[1] = y;
+        style.primMode = 0;
+        style.envMode = 9;
+        spawn.kind = 1;
+        spawn.flags = 1;
+        spawn.pos.y = y;
         part.unk14 = y;
-        spawn.pos[0] = x;
-        spawn.pos[2] = z;
-        part.unk19 = D_800AB3F4[payload->kind];
-        part.unk1A = 255;
+        spawn.pos.x = x;
+        spawn.pos.z = z;
+        part.texture = D_800AB3F4[payload->kind];
+        part.shade = 255;
         colorFlag = D_800AB404[payload->kind] ? 0x20 : 0;
         part.flags = colorFlag | 8;
     }
@@ -216,23 +175,23 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         part.flags &= ~3;
     }
     random = func_150ADA20();
-    part.unk1B = random % (params->unk1 + 1) + params->unk0;
+    part.alpha = random % (params->unk1 + 1) + params->unk0;
     random = func_150ADA20();
     pitch = random % (params->pitchRange + 1) + params->pitchBase;
     sinPitch = func_151423D8(pitch);
     cosPitch = func_151423D8(pitch - 0x40);
     speed = func_150ADA68() * params->speedRange + params->speedBase;
     horizontal = speed * sinPitch;
-    part.vel[0] = horizontal * cosYaw;
+    part.velocity.x = horizontal * cosYaw;
     vertical = -speed * cosPitch;
-    part.vel[1] = vertical;
-    part.vel[2] = horizontal * sinYaw;
+    part.velocity.y = vertical;
+    part.velocity.z = horizontal * sinYaw;
     random = func_150ADA20();
-    spawn.unk15 = random % (params->unk14 + 1) + params->unk10;
+    spawn.itemCount = random % (params->unk14 + 1) + params->unk10;
     random = func_150ADA20();
-    spawn.unkC = random % (params->unk1A + 1) + params->unk18;
-    part.unk0 = func_150ADA68() * params->unk20 + params->unk1C;
-    part.unk10 = func_150ADA68() * params->unk28 + params->unk24;
+    spawn.life = random % (params->unk1A + 1) + params->unk18;
+    part.halfWidth = func_150ADA68() * params->unk20 + params->unk1C;
+    part.gravity = func_150ADA68() * params->unk28 + params->unk24;
     func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);
     return 1;
 }
@@ -282,20 +241,20 @@ s32 func_151AC3CC(FxEmitter *emitter) {
     return 1;
 }
 
-void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, s32);
+void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, s32);
 
 /* Spawns a burst at the emitter's current point (with height `y`): randomly one of two
  * effects, scaled from the emitter's data. */
 s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     FxEmitterData *data = emitter->data;
     FxEmitterPoint *points = emitter->points;
-    struct17 pos;
+    Vec3f pos;
     u8 kind;
     s32 life;
 
-    pos.unk0 = points[emitter->pointIndex].x;
-    pos.unk4 = y;
-    pos.unk8 = points[emitter->pointIndex].z;
+    pos.x = points[emitter->pointIndex].x;
+    pos.y = y;
+    pos.z = points[emitter->pointIndex].z;
     kind = func_151D8E20();
     if (func_150ADA20() & 1) {
         life = func_150ADA20() % 41 + 80;

@@ -3,15 +3,15 @@
 #include "variables.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
-extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
     char pad0[0x2C];
     f32 width;
     f32 height;
-    struct17 pos;
+    Vec3f pos;
     char pad40[0x80];
     Vtx vtxTemplate[4];
     Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
@@ -25,8 +25,8 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot in the original frame
     Vtx *vtx;
     Vtx *ret;
-    struct17 axisU;
-    struct17 axisV;
+    Vec3f axisU;
+    Vec3f axisV;
     u8 isNew;
 
     func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
@@ -52,28 +52,28 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     func_15145128(&axisU, &axisU, NULL, NULL);
     func_15145128(&axisV, &axisV, NULL, NULL);
 
-    axisU.unk0 *= particle->width;
-    axisU.unk4 *= particle->width;
-    axisU.unk8 *= particle->width;
-    axisV.unk0 *= particle->height;
-    axisV.unk4 *= particle->height;
-    axisV.unk8 *= particle->height;
+    axisU.x *= particle->width;
+    axisU.y *= particle->width;
+    axisU.z *= particle->width;
+    axisV.x *= particle->height;
+    axisV.y *= particle->height;
+    axisV.z *= particle->height;
 
-    vtx[0].v.ob[0] = (particle->pos.unk0 - axisU.unk0) + axisV.unk0;
-    vtx[0].v.ob[1] = (particle->pos.unk4 - axisU.unk4) + axisV.unk4;
-    vtx[0].v.ob[2] = (particle->pos.unk8 - axisU.unk8) + axisV.unk8;
+    vtx[0].v.ob[0] = (particle->pos.x - axisU.x) + axisV.x;
+    vtx[0].v.ob[1] = (particle->pos.y - axisU.y) + axisV.y;
+    vtx[0].v.ob[2] = (particle->pos.z - axisU.z) + axisV.z;
     vtx[0].v.flag = 0;
-    vtx[1].v.ob[0] = (particle->pos.unk0 + axisU.unk0) + axisV.unk0;
-    vtx[1].v.ob[1] = (particle->pos.unk4 + axisU.unk4) + axisV.unk4;
-    vtx[1].v.ob[2] = (particle->pos.unk8 + axisU.unk8) + axisV.unk8;
+    vtx[1].v.ob[0] = (particle->pos.x + axisU.x) + axisV.x;
+    vtx[1].v.ob[1] = (particle->pos.y + axisU.y) + axisV.y;
+    vtx[1].v.ob[2] = (particle->pos.z + axisU.z) + axisV.z;
     vtx[1].v.flag = 0;
-    vtx[2].v.ob[0] = (particle->pos.unk0 + axisU.unk0) - axisV.unk0;
-    vtx[2].v.ob[1] = (particle->pos.unk4 + axisU.unk4) - axisV.unk4;
-    vtx[2].v.ob[2] = (particle->pos.unk8 + axisU.unk8) - axisV.unk8;
+    vtx[2].v.ob[0] = (particle->pos.x + axisU.x) - axisV.x;
+    vtx[2].v.ob[1] = (particle->pos.y + axisU.y) - axisV.y;
+    vtx[2].v.ob[2] = (particle->pos.z + axisU.z) - axisV.z;
     vtx[2].v.flag = 0;
-    vtx[3].v.ob[0] = (particle->pos.unk0 - axisU.unk0) - axisV.unk0;
-    vtx[3].v.ob[1] = (particle->pos.unk4 - axisU.unk4) - axisV.unk4;
-    vtx[3].v.ob[2] = (particle->pos.unk8 - axisU.unk8) - axisV.unk8;
+    vtx[3].v.ob[0] = (particle->pos.x - axisU.x) - axisV.x;
+    vtx[3].v.ob[1] = (particle->pos.y - axisU.y) - axisV.y;
+    vtx[3].v.ob[2] = (particle->pos.z - axisU.z) - axisV.z;
     vtx[3].v.flag = 0;
 
     return ret;
@@ -230,7 +230,7 @@ extern u8 D_800A2248[];
 s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
+s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
     s32 unk5;
     s32 unk6;
 
@@ -269,12 +269,12 @@ s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5)
 
 /* Message payload: an actor reference. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
 } ActorRefMsg;
 
 /* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
-void func_151027E8(struct127 *actor) {
+void func_151027E8(Actor *actor) {
     ActorRefMsg msg;
 
     msg.actor = actor;
@@ -282,19 +282,10 @@ void func_151027E8(struct127 *actor) {
     func_151403A8((s32)&msg, 0x1A);
 }
 
-typedef struct {
-    u8 pad0[0x197];
-    u8 unk197;
-} LinkedState1510281C;
-
-typedef struct {
-    u8 pad0[0x31C];
-    LinkedState1510281C *unk31C;
-} LinkedObj1510281C;
 
 /* State block at +0x110 of the objects referenced by Owner1510281C. */
 typedef struct {
-    LinkedObj1510281C *linked;
+    Actor *linked;
     u8 pad4[0x1E];
     u8 unk22;
 } Block1510281C;
@@ -316,11 +307,11 @@ typedef struct {
 /* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
 s32 func_1510281C(Owner1510281C *owner, s16 key) {
     Block1510281C *block = &owner->unkD0->block;
-    LinkedObj1510281C *linked;
+    Actor *linked;
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->unk197 != 0) {
+        if (linked == NULL || linked->unk31C->aimState != 0) {
             return 0;
         }
     }
@@ -346,11 +337,11 @@ s32 func_15102884(Obj15102884 *obj, s32 arg1) {
 /* Same test as func_1510281C, on unk170 and unk174. */
 s32 func_151028AC(Owner1510281C *owner, s16 key) {
     Block1510281C *block = &owner->unk170->block;
-    LinkedObj1510281C *linked;
+    Actor *linked;
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->unk197 != 0) {
+        if (linked == NULL || linked->unk31C->aimState != 0) {
             return 0;
         }
     }

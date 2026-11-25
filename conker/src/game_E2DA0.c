@@ -1,16 +1,12 @@
 #include <ultra64.h>
-/* functions.h types func_150ADA20 as returning u8; golden spills/uses the full u32 return
- * (same shadow-prototype idiom as game_121A20.c). */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
-void func_150B5A3C(vertex *pos, u8 owner, s32 kind);
-void func_150B5E34(vertex *pos, u8 owner, s32 kind);
-void func_150B6000(vertex *pos, u8 owner, s32 kind);
-void func_150B60E0(struct127 *obj, vertex *out);
+void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind);
+void func_150B5E34(Vec3f *pos, u8 owner, s32 kind);
+void func_150B6000(Vec3f *pos, u8 owner, s32 kind);
+void func_150B60E0(Actor *obj, Vec3f *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 typedef struct ObjBurstEffect {
@@ -21,69 +17,11 @@ typedef struct ObjBurstEffect {
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 timer; /* frames left (as in FlashEffect, game_1AC2F0.c) */
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ struct127 *obj;
+    /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
 } ObjBurstEffect;
 
-/* Effect template passed to func_15152B38. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ vertex pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ u8 unk42;
-    /* 0x43 */ u8 unk43;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ u8 unk48;
-    /* 0x49 */ u8 unk49;
-    /* 0x4A */ u8 unk4A;
-    /* 0x4B */ u8 unk4B;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 unk4D;
-    /* 0x4E */ u8 unk4E;
-    /* 0x4F */ u8 unk4F;
-    /* 0x50 */ u8 unk50;
-    /* 0x51 */ u8 unk51;
-    /* 0x52 */ u8 unk52;
-    /* 0x53 */ u8 unk53;
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s16 unk64;
-    /* 0x66 */ s16 unk66;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ s8 unk70;
-    /* 0x71 */ s8 unk71;
-    /* 0x72 */ s8 unk72;
-    /* 0x73 */ s8 unk73;
-} EffectSpawn; /* size 0x74 */
-
-void func_15152B38(EffectSpawn *spawn, u8 owner, s32 kind);
+void func_15152B38(TrailBurst *spawn, u8 owner, s32 kind);
 
 
 typedef struct GameCommand {
@@ -93,7 +31,7 @@ typedef struct GameCommand {
 
 /** Emits command 0x1A carrying object objIndex's facing angle (skipped when D_800C35EA == 1). */
 GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return cmd;
     }
     cmd->opcode = 0x1A;
@@ -103,9 +41,9 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
 
 /** Randomly spawns particle bursts at the tracked object; ends the effect once that object is gone. */
 void func_150B5950(ObjBurstEffect *effect) {
-    vertex *posp;
-    vertex pos;
-    struct127 *obj;
+    Vec3f *posp;
+    Vec3f pos;
+    Actor *obj;
 
     obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
@@ -130,59 +68,59 @@ void func_150B5950(ObjBurstEffect *effect) {
 }
 
 /** Spawns a func_15152B38 effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
-void func_150B5A3C(vertex *pos, u8 owner, s32 kind) {
-    EffectSpawn spawn;
+void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
+    TrailBurst spawn;
 
-    spawn.unk00 = 5;
-    spawn.unk04 = 5;
+    spawn.countBase = 5;
+    spawn.countRange = 5;
     spawn.pos = *pos;
-    spawn.unk14 = 20.0f;
-    spawn.unk18 = 10.08f;
-    spawn.unk1C = -1.353f;
-    spawn.unk20 = 0.731f;
-    spawn.unk24 = 39.0f;
-    spawn.unk28 = 35.0f;
-    spawn.unk2C = 0;
-    spawn.unk2E = 0xFF;
-    spawn.unk30 = -31;
-    spawn.unk32 = 80;
-    spawn.unk34 = 3;
-    spawn.unk38 = 2;
-    spawn.unk3C = 20;
-    spawn.unk3E = 30;
-    spawn.unk40 = 1;
-    spawn.unk42 = 4;
-    spawn.unk43 = 2;
-    spawn.unk44 = 3;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0xFF;
-    spawn.unk47 = 0xFF;
-    spawn.unk48 = 0xFF;
-    spawn.unk49 = 0;
-    spawn.unk4A = 0;
-    spawn.unk4B = 0;
-    spawn.unk4C = 0;
-    spawn.unk4D = 0xFF;
-    spawn.unk4E = 0xFF;
-    spawn.unk4F = 0xFF;
-    spawn.unk50 = 0xFF;
-    spawn.unk51 = 0;
-    spawn.unk52 = 0;
-    spawn.unk53 = 0;
-    spawn.unk54 = 0;
-    spawn.unk55 = 0xFF;
-    spawn.unk56 = 0;
-    spawn.unk57 = 3;
-    spawn.unk58 = 36;
-    spawn.unk5C = 0x200005;
-    spawn.unk60 = 0x60600;
-    spawn.unk64 = 8;
-    spawn.unk66 = 31;
-    spawn.unk68 = 1;
-    spawn.unk6A = 0;
-    spawn.unk6C = 1.0f;
-    spawn.unk70 = -1;
-    spawn.unk71 = 0;
+    spawn.sizeBase = 20.0f;
+    spawn.sizeRange = 10.08f;
+    spawn.gravityBase = -1.353f;
+    spawn.gravityRange = 0.731f;
+    spawn.speedBase = 39.0f;
+    spawn.speedRange = 35.0f;
+    spawn.angles.yawBase = 0;
+    spawn.angles.yawRange = 0xFF;
+    spawn.angles.pitchBase = -31;
+    spawn.angles.pitchRange = 80;
+    spawn.capacityBase = 3;
+    spawn.capacityRange = 2;
+    spawn.lifeBase = 20;
+    spawn.lifeRange = 30;
+    spawn.headerFlags = 1;
+    spawn.flags = 4;
+    spawn.primMode = 2;
+    spawn.envMode = 3;
+    spawn.colorBase.red = 0xFF;
+    spawn.colorBase.green = 0xFF;
+    spawn.colorBase.blue = 0xFF;
+    spawn.colorBase.alpha = 0xFF;
+    spawn.colorRange.red = 0;
+    spawn.colorRange.green = 0;
+    spawn.colorRange.blue = 0;
+    spawn.colorRange.alpha = 0;
+    spawn.color2Base.red = 0xFF;
+    spawn.color2Base.green = 0xFF;
+    spawn.color2Base.blue = 0xFF;
+    spawn.color2Base.alpha = 0xFF;
+    spawn.color2Range.red = 0;
+    spawn.color2Range.green = 0;
+    spawn.color2Range.blue = 0;
+    spawn.color2Range.alpha = 0;
+    spawn.colorLevelBase = 0xFF;
+    spawn.colorLevelRange = 0;
+    spawn.renderMode = 3;
+    spawn.unk21 = 36;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x60600;
+    spawn.fadeStart = 8;
+    spawn.fadeRate = 31;
+    spawn.shrinkStart = 1;
+    spawn.shrinkPaused = 0;
+    spawn.shrinkFactor = 1.0f;
+    spawn.unk38 = -1;
+    spawn.unk39 = 0;
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
@@ -192,59 +130,59 @@ void func_150B5A3C(vertex *pos, u8 owner, s32 kind) {
 }
 
 /** Larger variant of func_150B5A3C (different template values). */
-void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
-    EffectSpawn spawn;
+void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
+    TrailBurst spawn;
 
-    spawn.unk00 = 13;
-    spawn.unk04 = 8;
+    spawn.countBase = 13;
+    spawn.countRange = 8;
     spawn.pos = *pos;
-    spawn.unk14 = 15.88f;
-    spawn.unk18 = 36.1f;
-    spawn.unk1C = -3.603000164f;
-    spawn.unk20 = 2.166000128f;
-    spawn.unk24 = 152.0f;
-    spawn.unk28 = 100.0f;
-    spawn.unk2C = 0;
-    spawn.unk2E = 0xFF;
-    spawn.unk30 = -20;
-    spawn.unk32 = 50;
-    spawn.unk34 = 3;
-    spawn.unk38 = 2;
-    spawn.unk3C = 20;
-    spawn.unk3E = 15;
-    spawn.unk40 = 1;
-    spawn.unk42 = 4;
-    spawn.unk43 = 2;
-    spawn.unk44 = 3;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0xFF;
-    spawn.unk47 = 0xB4;
-    spawn.unk48 = 0xFF;
-    spawn.unk49 = 0;
-    spawn.unk4A = 0;
-    spawn.unk4B = 0;
-    spawn.unk4C = 0;
-    spawn.unk4D = 0xFF;
-    spawn.unk4E = 0xFF;
-    spawn.unk4F = 0xB4;
-    spawn.unk50 = 0xFF;
-    spawn.unk51 = 0;
-    spawn.unk52 = 0;
-    spawn.unk53 = 0;
-    spawn.unk54 = 0;
-    spawn.unk55 = 0xFF;
-    spawn.unk56 = 0;
-    spawn.unk57 = 3;
-    spawn.unk58 = 36;
-    spawn.unk5C = 0x200005;
-    spawn.unk60 = 0x60600;
-    spawn.unk64 = 8;
-    spawn.unk66 = 31;
-    spawn.unk68 = 1;
-    spawn.unk6A = 0;
-    spawn.unk6C = 1.0f;
-    spawn.unk70 = -1;
-    spawn.unk71 = 0;
+    spawn.sizeBase = 15.88f;
+    spawn.sizeRange = 36.1f;
+    spawn.gravityBase = -3.603000164f;
+    spawn.gravityRange = 2.166000128f;
+    spawn.speedBase = 152.0f;
+    spawn.speedRange = 100.0f;
+    spawn.angles.yawBase = 0;
+    spawn.angles.yawRange = 0xFF;
+    spawn.angles.pitchBase = -20;
+    spawn.angles.pitchRange = 50;
+    spawn.capacityBase = 3;
+    spawn.capacityRange = 2;
+    spawn.lifeBase = 20;
+    spawn.lifeRange = 15;
+    spawn.headerFlags = 1;
+    spawn.flags = 4;
+    spawn.primMode = 2;
+    spawn.envMode = 3;
+    spawn.colorBase.red = 0xFF;
+    spawn.colorBase.green = 0xFF;
+    spawn.colorBase.blue = 0xB4;
+    spawn.colorBase.alpha = 0xFF;
+    spawn.colorRange.red = 0;
+    spawn.colorRange.green = 0;
+    spawn.colorRange.blue = 0;
+    spawn.colorRange.alpha = 0;
+    spawn.color2Base.red = 0xFF;
+    spawn.color2Base.green = 0xFF;
+    spawn.color2Base.blue = 0xB4;
+    spawn.color2Base.alpha = 0xFF;
+    spawn.color2Range.red = 0;
+    spawn.color2Range.green = 0;
+    spawn.color2Range.blue = 0;
+    spawn.color2Range.alpha = 0;
+    spawn.colorLevelBase = 0xFF;
+    spawn.colorLevelRange = 0;
+    spawn.renderMode = 3;
+    spawn.unk21 = 36;
+    spawn.setGeometryMode = 0x200005;
+    spawn.clearGeometryMode = 0x60600;
+    spawn.fadeStart = 8;
+    spawn.fadeRate = 31;
+    spawn.shrinkStart = 1;
+    spawn.shrinkPaused = 0;
+    spawn.shrinkFactor = 1.0f;
+    spawn.unk38 = -1;
+    spawn.unk39 = 0;
     spawn.unk72 = -1;
     spawn.unk73 = -1;
 
@@ -253,102 +191,59 @@ void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
     func_150B6000(pos, owner, kind);
 }
 
-/* Particle spawn template passed to func_15130280 (same layout as in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} ParticleSpawn; /* size 0x70 */
-
-extern void *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
-void func_150B5E34(vertex *pos, u8 owner, s32 kind) {
-    ParticleSpawn spawn;
+void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
+    ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
 
-    spawn.unk1D = 0x2B;
-    spawn.unk8 = 0x4403;
+    spawn.texture = 0x2B;
+    spawn.renderMode = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.unkA = func_150ADA20() % 7U + 4;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0xFF;
-    spawn.unk19 = 0xFF;
-    spawn.unk1A = 0xFF;
-    spawn.unk1B = 0xFF;
-    spawn.unk1C = 0xFF;
-    spawn.unk28 = spawn.unk2C = func_150ADA68() * 500.0f + 500.0f;
+    spawn.timer = func_150ADA20() % 7U + 4;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0xFF;
+    spawn.g = 0xFF;
+    spawn.b = 0xFF;
+    spawn.a = 0xFF;
+    spawn.r2 = 0xFF;
+    spawn.g2 = 0xFF;
+    spawn.b2 = 0xFF;
+    spawn.alpha = 0xFF;
+    spawn.brightness = 0xFF;
+    spawn.width = spawn.height = func_150ADA68() * 500.0f + 500.0f;
     spawn.pos = *pos;
-    spawn.unk1E = 3;
-    spawn.unk20 = 0x55;
-    spawn.unk22 = 1;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
+    spawn.fadeStart = 3;
+    spawn.fadeRate = 0x55;
+    spawn.scaleStart = 1;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
     spawn.vel.x = 0.0f;
     spawn.vel.y = 0.0f;
     spawn.vel.z = 0.0f;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.0f;
+    spawn.gravity = 0.0f;
+    spawn.scaleRate = 1.0f;
     flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
     flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
     spawn.flags = flag80 | 1 | flag40 | 0x200 | 0x4000 | 0x8000;
-    spawn.unk60 = 6;
-    spawn.unk61 = 6;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 4;
+    spawn.primColorMode = 6;
+    spawn.envColorMode = 6;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 4;
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
-void func_150B6000(vertex *pos, u8 owner, s32 kind) {
+void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     Header header;
     Header2 ipos;
 
@@ -364,11 +259,11 @@ void func_150B6000(vertex *pos, u8 owner, s32 kind) {
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-extern void func_15143134(vertex *in, vertex *out, void *mtx);
-extern vertex D_8009FC30;
+extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
+extern Vec3f D_8009FC30;
 
 /** Transforms the fixed point D_8009FC30 by the matrix at obj->unk1D4 + 0x140 into out. */
-void func_150B60E0(struct127 *obj, vertex *out) {
+void func_150B60E0(Actor *obj, Vec3f *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 
@@ -399,30 +294,8 @@ typedef struct {
     /* 0x28 */ BoltRingData data;
 } BoltRingEffect;
 
-/* Spawn parameters for each bolt of a chain (same layout as in game_131F30.c / game_133190.c). */
-typedef struct BoltChainConfig {
-    /* 0x00 */ f32 widthBase;
-    /* 0x04 */ f32 widthRange;
-    /* 0x08 */ f32 jitter;
-    /* 0x0C */ f32 bendBase;
-    /* 0x10 */ f32 bendRange;
-    /* 0x14 */ s16 bendSpread;
-    /* 0x16 */ s16 rejitterBase;
-    /* 0x18 */ s16 rejitterRange;
-    /* 0x1A */ s16 lifeBase;
-    /* 0x1C */ s16 lifeRange;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 segmentsBase;
-    /* 0x24 */ s32 segmentsRange;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 alphaBase;
-    /* 0x2C */ u8 alphaRange;
-} BoltChainConfig; /* size 0x30 */
-
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
+extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
 
 /**
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
@@ -447,8 +320,8 @@ void func_150B6110(BoltRingEffect *effect) {
     data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
         BoltChainConfig config;
-        vertex start;
-        vertex end;
+        Vec3f start;
+        Vec3f end;
         f32 spread;
 
         config.widthBase = 35.0f;
@@ -493,42 +366,11 @@ void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
     }
 }
 
-/*
- * Trail settings passed to func_150B3F5C: the first 0x40 bytes of TrailState (game_E1280.c),
- * whose remaining fields are emitter state that the spawner fills in.
- */
-typedef struct {
-    /* 0x00 */ vertex baseVel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ u8 phaseJitter;
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedSwing;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 pad1D[3];
-    /* 0x20 */ f32 emitRate;
-    /* 0x24 */ u8 shade;
-    /* 0x25 */ u8 pad25;
-    /* 0x26 */ s16 alpha;
-    /* 0x28 */ f32 widthGrowth;
-    /* 0x2C */ f32 width;
-    /* 0x30 */ u8 texStep;
-    /* 0x31 */ u8 texStepJitter;
-    /* 0x32 */ u8 fadeTailCount;
-    /* 0x33 */ u8 fadeTailStep;
-    /* 0x34 */ u8 fadeHeadCount;
-    /* 0x35 */ u8 fadeHeadStep;
-    /* 0x36 */ s16 life;
-    /* 0x38 */ u8 burstPreset;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ f32 burstRate;
-} TrailParams; /* size 0x40 */
-
-extern void *func_150B3F5C(TrailParams *params, vertex *pos, s16 capacity);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
+extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Per-variant trail settings used by func_150B648C. */
-extern vertex D_8009FC3C[];   /* emitter position (variants 1 and 2) */
+extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */
 extern f32 D_8009FC60[];      /* gravity */
 extern f32 D_8009FC6C[];      /* widthGrowth */
 extern f32 D_8009FC78[];      /* width */
@@ -537,8 +379,8 @@ extern s16 D_8009FC8E[][2];   /* capacity */
 
 /** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
 void func_150B648C(u8 variant) {
-    TrailParams params;
-    vertex pos;
+    TrailStateParams params;
+    Vec3f pos;
 
     if (variant == 0) {
         params.baseVel.x = func_151423D8(0xAA) * 10.0f;

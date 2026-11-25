@@ -1,60 +1,19 @@
 #include <ultra64.h>
-#define func_15169260 func_15169260_s32
-#define func_1513D524 func_1513D524_void_proto
-#define func_15169850 func_15169850_s32
 #include "functions.h"
-#undef func_15169260
-#undef func_1513D524
-#undef func_15169850
 #include "variables.h"
+#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15169260(s32 *types, s32 count, struct ActorRef *ref, u8 msg);
-void func_15169850(struct ActorRef *ref, u8 msg, struct127 **actor, u8 *actorId, struct102 *self);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
-                    u8 owner, s32 list);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 u8 func_151D8E20(void);
 
 typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef struct {
     f32 width, height;
 } Size2f;
-
-/* Spawn template of a particle (as in game_169510.c), copied to Particle.def. */
-typedef struct {
-    u8 texture;
-    u8 type;
-    u16 renderModes;
-    s16 lifetime;
-    u8 pad6[2];
-    s32 frame;
-    s32 frameSpeed;
-    u8 rgba[4];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    Vec3f rot;
-    Vec3f scale;
-    s32 flags;
-    u8 unk44;           /* alpha, faded out with the lifetime */
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s16 *unk48;
-    u8 viewportMask;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 fadeStart;
-    s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* Ground probe state filled by func_1504715C and updated by func_15046C80. */
 typedef struct {
@@ -113,13 +72,13 @@ extern DropKind D_800A9D40[];
 
 /* Actor reference sent with object messages (func_15191B8C). */
 typedef struct ActorRef {
-    struct127 *actor;
+    Actor *actor;
     u8 id;
 } ActorRef;
 
 /* An emitter's attachment to its actor. */
 typedef struct {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId;           /* actor->unique_id when attached */
     /* 0x5 */ u8 pad5;
     /* 0x6 */ s16 timer;
@@ -221,9 +180,7 @@ typedef struct {
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
-extern u8 D_800AB310[];
-extern u8 D_800AB404[];
-void func_1504715C(Ground *ground, struct127 *actor);
+void func_1504715C(Ground *ground, Actor *actor);
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
@@ -570,7 +527,7 @@ s8 func_15191520(Particle *drop) {
                               (s32)motion->ground.unk4, &probe, drop->owner, drop->list);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->def.width * drop->def.height * 0.150000006f, drop->def.unk44,
-                              (s32)motion->ground.unk4, (struct17 *)&probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              (s32)motion->ground.unk4, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->owner, drop->list);
             } else {
                 func_151DAB58(motion->kind, drop->def.width * drop->def.height * 0.05000000075f, drop->def.unk44,
@@ -599,7 +556,7 @@ s32 func_1519187C(Particle *drop) {
 
 /* Retries creating the emitter until its actor has bone matrices; gives up when the actor is gone. */
 void func_151918BC(DripRetryTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorLink *link;
     u8 done;
 
@@ -652,7 +609,7 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
     } else if (msg == 0x4E) {
         func_1516972C((struct102 *)emitter);
     } else {
-        func_15169850(ref, msg, &emitter->link.actor, &emitter->link.actorId, (struct102 *)emitter);
+        func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }
 }
 
@@ -684,7 +641,7 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         task->header.timer = 100;
     skip:;
     } else {
-        func_15169850(ref, msg, &link->actor, &link->actorId, (struct102 *)task);
+        func_15169850((s32)ref, msg, &link->actor, &link->actorId, task);
     }
 }
 
@@ -694,5 +651,5 @@ void func_15191B8C(ActorRef *ref, u8 msg) {
     s32 types[1] = { 0x20 };
 
     func_151494E0((s32)ref, msg);
-    func_15169260(types, 1, ref, msg);
+    func_15169260(types, 1, (s32)ref, msg);
 }

@@ -3,18 +3,18 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-s32 func_150535F4(struct127 *arg0);
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_1504CA60(struct127 *arg0);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
+s32 func_150535F4(Actor *arg0);
+void func_15056B08(Actor *arg0);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_1504CA60(Actor *arg0);
 void func_150D7790(u8 *arg0, s32 arg1);
 
 /**
  * Eases the object's unkC4 toward its turn rate: the change from prevAngle to the current moving angle,
  * scaled by 100 / D_800CC264.
  */
-void func_15052760(struct127 *obj, s16 prevAngle) {
+void func_15052760(Actor *obj, s16 prevAngle) {
     f32 blend;
     s8 direction;
     s32 divisor;
@@ -48,24 +48,12 @@ void func_15052760(struct127 *obj, s16 prevAngle) {
     }
 }
 
-/* One point of a path; D_800D2104[path] points to an array of these. */
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad6;
-} PathPoint;
-
-#define PATH_POINTS(path) (((PathPoint **)D_800D2104)[path])
-
-// struct126 (include/structs.h) has no field at 0x12C yet.
-#define AI_UNK12C(ai) (*(u16 *)((u8 *)(ai) + 0x12C))
 
 /**
  * Per-frame movement for a path-following object: picks a target height (the next path point, or the
  * object in unk222), eases y_position toward it, updates the pitch-like unkB8, then moves the object.
  */
-void func_150528C8(struct127 *obj) {
+void func_150528C8(Actor *obj) {
     f32 targetY;
     f32 climbSpeed;
     u32 pitch;
@@ -79,7 +67,7 @@ void func_150528C8(struct127 *obj) {
 
     climbSpeed = (s8)obj->unk22B;
     prevAngle = obj->unk76;
-    floorY = PATH_POINTS(obj->unk13F)[0].y;
+    floorY = D_800D2104[obj->unk13F][0].y;
     autoTilt = 1;
     heightMode = 0;
     // matching: the u32 compare (a no-op on a u8) steers IDO's register allocation
@@ -91,7 +79,7 @@ void func_150528C8(struct127 *obj) {
     if (obj->id == 10) {
         targetY = D_800CC2D0[obj->unk222].y_position + 80.0f;
     } else {
-        targetY = PATH_POINTS(obj->unk13F)[obj->unk21E + 1].y;
+        targetY = D_800D2104[obj->unk13F][obj->unk21E + 1].y;
     }
     if ((s16)obj->unk224 != 0) {
         targetY = (s16)obj->unk224;
@@ -139,13 +127,13 @@ void func_150528C8(struct127 *obj) {
     if (obj->unk226 == 0xFF) {
         f32 vel;
         if (obj->unk31C != NULL) {
-            if (D_800BE9E4 < AI_UNK12C(obj->unk31C)) {
-                AI_UNK12C(obj->unk31C) -= D_800BE9E4;
+            if (D_800BE9E4 < obj->unk31C->unk12C) {
+                obj->unk31C->unk12C -= D_800BE9E4;
                 if (obj->health > 0) {
                     obj->xz_velocity = 254.0f;
                 }
             } else {
-                AI_UNK12C(obj->unk31C) = 0;
+                obj->unk31C->unk12C = 0;
             }
             if ((obj->unk31C->unk8C & 0x2000) && (obj->health != 0)) {
                 func_150D7790((u8 *)obj, obj->unk31C->unk75 & 0x7F);

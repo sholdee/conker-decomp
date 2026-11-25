@@ -58,29 +58,13 @@ struct Struct151E4314 {
 };
 
 extern ModeEntry D_800AB68C[];
-/* variables.h types D_8008FD94/D_800E0C20 (s8), D_800BE3DF (signed) and D_800BE9F4 (a u16 value) wrongly: hence casts. */
 extern struct Struct151E4314 D_800AB7A4[];
-extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
-extern s16 D_800E0A80;
-extern s16 D_8008FDCC;
 extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 s32 func_1517EFDC(void);
-extern s32 D_800E0A90;
-extern s8 D_8008FE28;
-extern u8 D_800E0B96;
-extern u8 D_800D2E40;
-extern u8 D_800E0B94;
-extern u8 D_8008FDA4;
-extern s16 D_800E0B9A;
-extern u8 D_800E0B95;
-extern u8 D_800E0BDC;
-extern u16 D_800BE930;
-extern s32 D_800AB754[];
 extern void (*D_800E0A88)(void);
-extern s8 D_8008FDE0;
 extern void (*D_8008FDEC[])(void);
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, char *, ...);
@@ -99,60 +83,32 @@ void func_1509CDDC(s32);
 void func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 void func_1509D08C(s32, s32, s32 *, s32 *);
-extern s8 D_8008FD70;
 extern s16 D_8008FDAC;
 extern u8 D_8008FDB4;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
-extern s32 D_800BE3E4;
-extern s8 D_800D23A8;
-extern u8 D_800E0B99;
-extern s8 D_800E0BB1;
-extern u8 D_800E0BD1;
 
-static struct127 *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
+static Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 static s8 D_800E0BE0[23]; /* option values (see func_151E3344) */
-extern s8 D_8008FE54[];
-extern s8 D_8008FE6C[];
-extern s8 D_8008FE84[];
 void func_151DDBA0(void);
 
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern u8 D_800E0A8C;
 void func_151DE7D4(void);
 
-extern u8 D_8008FD74;
 
-extern u8 D_8008FD80;
 extern struct Struct151E5034 *D_8008FDD4;
 
-extern s8 D_800E0BE9;
-extern u8 D_8008FE34;
-extern f32 D_8008FDE8;
-extern u8 D_800E0A97;
 void func_151E7E9C(void);
 
-extern s8 D_8008FE2C;
 void func_15042E3C(char *, ...);
 void func_151E327C(void);
 
-extern s8 D_8008FE44[];
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
 void func_151E7F60(s32 arg0, s32 arg1);
 
 void func_151E4314(void);
 
-extern s8 D_800E0BB0;
-extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *arg0);
 
 void func_151E43DC(void);
 
-extern s8 D_800E0BCE[];
 extern s8 D_800E0BEE;
-extern u8 D_800BE740;
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
@@ -242,27 +198,12 @@ typedef struct {
 extern Entry151E7F60 D_800AB57C[];
 extern s16 D_800AB77C[];
 extern s16 D_800AB790[];
-extern s8 D_8008FD9C;
-extern s32 D_8008FD78;
-extern s8 D_8008FD7C;
 extern s8 D_8008FD88;
 extern s8 D_8008FF37[];
 extern s8 D_800E0AB0[];
-extern s8 D_800E0AC0[];
-extern s16 D_800E0AD0[16];
 extern u8 D_800E0AA8;
 extern s8 D_800E0AA9;
 extern s8 D_800E0AAA;
-extern s16 D_800E0AA0[];
-extern s8 D_800E0BB8[];
-extern s8 D_800E0BD0;
-extern s16 D_800E0C10[];
-extern s32 D_800E0C18[];
-extern s8 D_800D2130;
-extern s8 D_80087268;
-extern u8 D_80084060[];
-extern s8 D_8008FDC8;
-extern u16 D_8008FDC0;
 
 /* Sets up a match from the current mode's table entry: roster, teams, rules flags and per-player kinds. */
 void func_151E2834(void) {
@@ -417,7 +358,7 @@ void func_151E2834(void) {
             D_800E0AA8 |= 1 << D_800E0C00[i];
         }
     }
-    *(s8 *)&D_8008FD94 = D_8008FD90;
+    D_8008FD94 = D_8008FD90;
     D_800BE618 = D_8008FD8C;
     bzero(D_800E0BB8, 0x10);
     D_800E0AAA = -1;
@@ -453,7 +394,7 @@ void func_151E2834(void) {
     D_800E0AA0[0] = 0;
     D_800E0AA0[1] = 0;
     func_151E7EF8();
-    *(s8 *)&D_800E0C20 = 0;
+    D_800E0C20 = 0;
     D_800D2E40 = 0;
     D_8008FD7C = D_80087270[0];
     func_1501C730(6, param, 0, D_8008FF37[D_8008FD88], playerMask);
@@ -477,13 +418,13 @@ void func_151E30C4(void) {
     func_15017790();
     func_1509CC94(resource);
     func_1509CDDC(resource);
-    D_800BE9F4 = (u16 *)func_1509CA30(resource);
+    D_800BE9F4 = func_1509CA30(resource);
     func_15085710(0, 9, unk0);
     D_800BE3E4 = unk0;
 
-    D_800DD2C0 = func_1509CA50(resource);
+    D_800DD2C0[0] = func_1509CA50(resource);
     if (D_8008FDB4 == 2) {
-        D_800DD2C0 = D_800E0BD1;
+        D_800DD2C0[0] = D_800E0BD1;
     }
 
     D_8008FD70 = 0;
@@ -494,7 +435,7 @@ void func_151E30C4(void) {
     D_800E0B99 = 1;
     D_8008FD8C = 1;
     D_8008FD90 = 1;
-    *(s8 *)&D_8008FD94 = 1;
+    D_8008FD94 = 1;
 
     D_800BE618 = 1;
     D_80087260 = 3;
@@ -507,7 +448,7 @@ void func_151E30C4(void) {
     D_800E0BB1 = 1;
     func_151E7EF8();
     D_800D2E40 = 1;
-    func_1501C730(6, (s32)D_800BE9F4, func_1509CA50(resource), 0, 1);
+    func_1501C730(6, D_800BE9F4, func_1509CA50(resource), 0, 1);
 }
 
 /* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
@@ -520,13 +461,13 @@ void func_151E327C(void) {
     D_80087270[0] = 0;
     D_8008FD8C = 1;
     D_8008FD90 = 1;
-    *(s8 *)&D_8008FD94 = 1;
+    D_8008FD94 = 1;
     D_8008FDBC = 0;
     D_800BE618 = 1;
     D_800D23A8 = 0;
     D_800E0B94 = 0;
     D_800D2E40 = 0;
-    func_1501C730(6, *(s8 *)&D_800BE3DF, D_800BE3E0, 0, 1);
+    func_1501C730(6, D_800BE3DF, D_800BE3E0, 0, 1);
     D_800E0B99 = 1;
     D_800E0BB1 = 1;
     func_151E7EF8();
@@ -535,9 +476,6 @@ void func_151E327C(void) {
 extern s8 D_800AB64C[];
 extern s16 D_800E0A82;
 extern s8 D_800E0A84;
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FDE4;
 extern char D_800AB89C[];
 extern char D_800AB8A0[];
 extern char D_800AB8A4[];
@@ -905,8 +843,8 @@ void func_151E4264(void) {
     }
 
     func_151E530C();
-    if ((D_800E0B9A != 0) || (D_800C35EA != 1)) {
-        if ((D_800C35EA == 1) && (func_151F2CDC() == 1)) {
+    if ((D_800E0B9A != 0) || (D_800C35EA[0] != 1)) {
+        if ((D_800C35EA[0] == 1) && (func_151F2CDC() == 1)) {
             func_151F2D6C(0, 0x2DE0);
         }
         D_800E0B94 = 7;
@@ -939,7 +877,6 @@ void func_151E4314(void) {
     }
 }
 extern s8 D_800BE91A;
-extern u8 D_800C3C8C;
 extern char D_800AB8CC[];
 extern char D_800AB8D0[];
 extern char D_800AB8D4[];
@@ -1005,7 +942,7 @@ void func_151E43DC(void) {
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
-                D_800DBFF0->unk2C = 0x80000;
+                D_800DBFF0->mode = 0x80000;
             }
             if (D_800AB68C[D_8008FDD4->unk42].unk5 < 0) {
                 if (D_8008FDD4->unk42 == 11 || D_8008FDD4->unk42 == 12) {
@@ -1062,7 +999,7 @@ void func_151E43DC(void) {
             func_15042D94(213, 180, 1, D_800AB900, (D_8008FE2C == 1) + 0xE);
             func_15042D94(148, 180, 1, D_800AB904, 0x1A);
             if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
-                if (D_800C35EA == 1 && func_151F2CDC() == 1) {
+                if (D_800C35EA[0] == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
                 }
                 if (D_800E0A90 > 2400) {
@@ -1189,8 +1126,6 @@ void func_151E4E64(void) {
 }
 
 extern f32 D_8008FDD0;
-extern f32 D_800DDDC8;
-extern f32 D_800DDDD8;
 
 /* Advances the screen fade D_800E0B96; once fully faded, runs the pending transition D_800E0A88. */
 void func_151E4EE8(void) {
@@ -1198,15 +1133,15 @@ void func_151E4EE8(void) {
 
     D_8008FDD0 = 1.0f - (f32)D_800E0B96 / 255.0f;
     if (D_8008FD74 == 0xFF) {
-        if (0.8700000048f < D_800DDDC8) {
+        if (0.8700000048f < D_800DDDC8[0]) {
             D_800E0B96 += D_800BE9E4;
             if (D_800E0B96 < 0x55) {
-                D_800DDDD8 = 9.999999975e-07f;
+                D_800DDDD8[0] = 9.999999975e-07f;
             } else {
-                D_800DDDD8 = 0.01111111138f;
+                D_800DDDD8[0] = 0.01111111138f;
             }
         }
-        if (D_800DDDC8 < 1.0f) {
+        if (D_800DDDC8[0] < 1.0f) {
             return;
         }
         if (D_800E0B96 < 0x6E) {
@@ -1281,7 +1216,7 @@ void func_151E51EC(void) {
     D_800E0BDC = 0xFF;
     func_15042D78(0x81);
 
-    D_800E0B9A = D_800BE930;
+    D_800E0B9A = D_800BE930[0];
     timer = D_8008FE28;
     if (timer != 0) {
         D_8008FE28 = timer - 1;
@@ -1441,7 +1376,7 @@ s32 func_151E565C(void) {
     s32 *pj;
 
     gameOver = 0;
-    if (*(s8 *)&D_800E0C20 != 0) {
+    if (D_800E0C20 != 0) {
         return 1;
     }
     if (D_800E0BE0[3] >= 3 && D_8008FD78 <= 0) {
@@ -1461,7 +1396,7 @@ s32 func_151E565C(void) {
                 }
             }
         }
-        if (D_800BE618 - D_8008FD70 < 2 || *(s8 *)&D_8008FD94 - D_8008FD70 <= 0) {
+        if (D_800BE618 - D_8008FD70 < 2 || D_8008FD94 - D_8008FD70 <= 0) {
             gameOver = 1;
         }
         D_800E0AAA = -1;
@@ -1513,7 +1448,7 @@ s32 func_151E565C(void) {
                 }
             }
         }
-        *(s8 *)&D_800E0C20 = gameOver;
+        D_800E0C20 = gameOver;
         return gameOver;
     }
 
@@ -1522,7 +1457,7 @@ s32 func_151E565C(void) {
     }
     k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
     for (i = 0; i < D_8008FD8C; i++) {
-        team = *(u8 *)&D_800CC2D0[i].pad128; // team: first byte of an unnamed struct127 field
+        team = D_800CC2D0[i].team; // team: first byte of an unnamed Actor field
         teamStats[team] += D_8008FDD4->unk46[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
@@ -1579,7 +1514,7 @@ s32 func_151E565C(void) {
     j = 0;
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
-            team = *(u8 *)&D_800CC2D0[i].pad128;
+            team = D_800CC2D0[i].team;
             if (!(D_800D18A0 & (1 << i))) {
                 liveTeams |= 1 << team;
             }
@@ -1600,11 +1535,10 @@ s32 func_151E565C(void) {
         gameOver = 1;
         D_800E0AAA = -1;
     }
-    *(s8 *)&D_800E0C20 = gameOver;
+    D_800E0C20 = gameOver;
     return gameOver;
 }
 
-extern u8 D_800BE616;
 
 /* Returns the team of player during a match (0 if none), else player itself. */
 s32 func_151E5F64(s32 player) {
@@ -1632,14 +1566,14 @@ s8 func_151E5FAC(void) {
 }
 
 s32 func_1000F568(s32 arg0, s32 arg1);
-void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
+void func_10010558(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
 
 /*
  * Records a hit by source (or the player owning it) on victim: per-player hit/kill tallies in D_8008FDD4,
  * then picks a character-specific voice line for the attacker.
  */
-void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
-    struct127 *attacker;
+void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
+    Actor *attacker;
     s32 pad50; // matching: unused stack slot
     s32 attackerIdx;
     s32 victimIdx;
@@ -1688,7 +1622,7 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
         if ((attacker != victim) && (victim->unk31C != NULL) && (attacker->health != 0)) {
             sound = 0;
             delay = 0;
-            attacker->unk31C->pad98[0x17] = 0;
+            attacker->unk31C->unkAF = 0;
             variants = 0;
             if (cause == 0x33) {
                 victimKind = victim->unk31C->unk78;
@@ -1730,7 +1664,7 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) { // past the end of structs.h's struct126
+                } else if (victim->unk31C->unk1AC != 0) {
                     if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
@@ -1839,10 +1773,8 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
 }
 
 extern s8 D_800E0BEA;
-extern s8 D_800E0BD3;
 extern s32 D_800E0BD4;
 extern s32 D_8008FDD8;
-extern u8 **D_800E0B88;
 extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_1502B5C8();
@@ -1935,13 +1867,6 @@ void func_151E6BFC(void) {
     D_8008FDD8 = 0;
 }
 
-struct Struct151149AC {
-    char pad0[0x6E];
-    u8 unk6E;
-    char pad6F[0x11];
-    s32 unk80;
-};
-
 typedef struct {
     u8 pad0[9];
     u8 links[5];
@@ -1952,10 +1877,6 @@ typedef struct {
     u16 unk0;
     u16 unk2;
 } Snd151E6C1C;
-
-typedef struct {
-    f32 x, y, z;
-} Vec151E6C1C;
 
 extern u8 D_8008FF40[];
 extern f32 D_8008FF48[];
@@ -1971,10 +1892,10 @@ extern Node151E6C1C *D_800D2350;
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1000D96C(s32, s32, s32);
-struct Struct151149AC *func_151149AC(s32);
+WorldObject *func_151149AC(s32);
 extern f32 sinf(f32);
 
-#define UNK2AC_F32 (*(f32 *)&obj->unk2AC) // an f32; structs.h declares struct108.unk2AC as s32
+#define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 
 /*
  * Moves object index along the node path selected by D_8008FDD4 (unk2B = current stop, unk8 = progress
@@ -1982,7 +1903,7 @@ extern f32 sinf(f32);
  * related objects returned by func_151149AC.
  */
 void func_151E6C1C(s32 index) {
-    struct108 *obj;
+    Camera *obj;
     s32 pad1A0; // matching: unused stack slot
     s32 idx;
     s32 pathLen;
@@ -2000,8 +1921,8 @@ void func_151E6C1C(s32 index) {
     s8 path[16];
     u8 *nodeTable;
     Snd151E6C1C *sounds;
-    struct Struct151149AC *r;
-    struct Struct151149AC *r2;
+    WorldObject *r;
+    WorldObject *r2;
     Node151E6C1C *node;
     Node151E6C1C *cur;
     s32 seg;
@@ -2027,7 +1948,7 @@ void func_151E6C1C(s32 index) {
         speeds = D_8008FF90;
         sounds = D_800AB920;
     }
-    func_15086CBC(func_15086D48(homeNode), &obj->unk2F8, &obj->unk2FC, &obj->unk300);
+    func_15086CBC(func_15086D48(homeNode), &obj->eye.x, &obj->eye.y, &obj->eye.z);
 
     if (D_8008FDD4->unk4 != 0.0f) {
         D_8008FDD4->unk0 += D_8008FDD4->unk4 * D_800BE9E4;
@@ -2112,11 +2033,11 @@ void func_151E6C1C(s32 index) {
                 if (r != NULL) {
                     if (D_8008FDD4->unkC > 0.0f || D_8008FDD0 < 1.0f) {
                         if (D_8008FF78[D_8008FDD4->unk2C] < (s32)(scale * 100.0f)) {
-                            r->unk80 = 1;
+                            r->work.words[1] = 1;
                         }
                     } else if (D_8008FDD4->unkC < 0.0f) {
                         if (D_8008FF80[D_8008FDD4->unk2C] >= (s32)(scale * 100.0f)) {
-                            r->unk80 = 0;
+                            r->work.words[1] = 0;
                         }
                     }
                 }
@@ -2124,8 +2045,8 @@ void func_151E6C1C(s32 index) {
         }
     }
 
-    obj->unk3D0->unk25C |= 0x200;
-    obj->unk3D0->y_position = 1000.0f;
+    obj->player->unk25C |= 0x200;
+    obj->player->y_position = 1000.0f;
 
     if (scale > 0.0f) {
         path[0] = func_15086D48(homeNode);
@@ -2168,11 +2089,11 @@ void func_151E6C1C(s32 index) {
             x[pathLen + 1] = x[pathLen] + (x[pathLen - 1] - x[pathLen]);
             y[pathLen + 1] = y[pathLen] + (y[pathLen - 1] - y[pathLen]);
             z[pathLen + 1] = z[pathLen] + (z[pathLen - 1] - z[pathLen]);
-            obj->unk2F8 = func_150497E0(x, seg, turnT);
-            obj->unk2FC = func_150497E0(y, seg, turnT);
-            obj->unk300 = func_150497E0(z, seg, turnT);
-            obj->unk2A4 = func_150497E0(x, seg + 1, turnT);
-            obj->unk2A8 = func_150497E0(y, seg + 1, turnT);
+            obj->eye.x = func_150497E0(x, seg, turnT);
+            obj->eye.y = func_150497E0(y, seg, turnT);
+            obj->eye.z = func_150497E0(z, seg, turnT);
+            obj->focus.x = func_150497E0(x, seg + 1, turnT);
+            obj->focus.y = func_150497E0(y, seg + 1, turnT);
             UNK2AC_F32 = func_150497E0(z, seg + 1, turnT);
         } else {
             func_15086CBC(path[0], &x[0], &y[0], &z[0]);
@@ -2184,11 +2105,11 @@ void func_151E6C1C(s32 index) {
                 y[2] = y[1] + (y[1] - y[0]);
                 z[2] = z[1] + (z[1] - z[0]);
             }
-            obj->unk2F8 = x[0] + (x[1] - x[0]) * pathT;
-            obj->unk2FC = y[0] + (y[1] - y[0]) * pathT;
-            obj->unk300 = z[0] + (z[1] - z[0]) * pathT;
-            obj->unk2A4 = x[1] + (x[2] - x[1]) * pathT;
-            obj->unk2A8 = y[1] + (y[2] - y[1]) * pathT;
+            obj->eye.x = x[0] + (x[1] - x[0]) * pathT;
+            obj->eye.y = y[0] + (y[1] - y[0]) * pathT;
+            obj->eye.z = z[0] + (z[1] - z[0]) * pathT;
+            obj->focus.x = x[1] + (x[2] - x[1]) * pathT;
+            obj->focus.y = y[1] + (y[2] - y[1]) * pathT;
             UNK2AC_F32 = z[1] + (z[2] - z[1]) * pathT;
         }
     } else {
@@ -2203,21 +2124,21 @@ void func_151E6C1C(s32 index) {
                 idx -= nodeCount;
             }
         }
-        obj->unk2A4 = func_150497E0(x, 0, turnT);
-        obj->unk2A8 = func_150497E0(y, 0, turnT);
+        obj->focus.x = func_150497E0(x, 0, turnT);
+        obj->focus.y = func_150497E0(y, 0, turnT);
         UNK2AC_F32 = func_150497E0(z, 0, turnT);
     }
 
     if (D_8008FDD4->unk2A != 0) {
-        dx = obj->unk2F8 - obj->unk2A4;
-        dy = obj->unk2FC - obj->unk2A8;
-        dz = obj->unk300 - UNK2AC_F32;
-        obj->unk2A4 = obj->unk2F8 + dx;
-        obj->unk2A8 = obj->unk2FC + dy;
-        UNK2AC_F32 = obj->unk300 + dz;
+        dx = obj->eye.x - obj->focus.x;
+        dy = obj->eye.y - obj->focus.y;
+        dz = obj->eye.z - UNK2AC_F32;
+        obj->focus.x = obj->eye.x + dx;
+        obj->focus.y = obj->eye.y + dy;
+        UNK2AC_F32 = obj->eye.z + dz;
     }
-    obj->unk2A4 += D_8008FDD4->unk10 * D_8008FDD4->unk14;
-    obj->unk2A8 += D_8008FDD4->unk10 * D_8008FDD4->unk18;
+    obj->focus.x += D_8008FDD4->unk10 * D_8008FDD4->unk14;
+    obj->focus.y += D_8008FDD4->unk10 * D_8008FDD4->unk18;
     UNK2AC_F32 += D_8008FDD4->unk10 * D_8008FDD4->unk1C;
     if (D_8008FDD4->unk2A != 3) {
         D_8008FDD4->unk10 *= 0.8500000238f;
@@ -2313,10 +2234,10 @@ void func_151E6C1C(s32 index) {
         D_8008FDD4->unk2C = D_800AB570[D_8008FDD4->unk2C];
     }
 
-    obj->unk2BC = obj->unk2A4;
-    obj->unk2C0 = obj->unk2A8;
-    obj->unk2C4 = UNK2AC_F32;
-    *(Vec151E6C1C *)&obj->unk2A4 = *(Vec151E6C1C *)&obj->unk2BC;
+    obj->target.x = obj->focus.x;
+    obj->target.y = obj->focus.y;
+    obj->target.z = UNK2AC_F32;
+    obj->focus = obj->target;
     obj->unk390 = 0.0f;
     obj->unk1A4 = 20.0f;
     obj->unk19C = 20.0f;
@@ -2324,20 +2245,20 @@ void func_151E6C1C(s32 index) {
     obj->unk1A0 = 15.0f;
 
     {
-    struct Struct151149AC *q1;
+    WorldObject *q1;
     r = func_151149AC(0xF8);
     if (r != NULL) {
-        r->unk6E = 1;
+        r->inactive = 1;
     }
     q1 = func_151149AC(0xF6);
     r2 = func_151149AC(0xF7);
     if (q1 != NULL && r2 != NULL) {
         if (D_8008FDD4->unk3E == 0) {
-            q1->unk6E = 0;
-            r2->unk6E = 1;
+            q1->inactive = 0;
+            r2->inactive = 1;
         } else {
-            q1->unk6E = 1;
-            r2->unk6E = 0;
+            q1->inactive = 1;
+            r2->inactive = 0;
         }
     }
     }
@@ -2346,7 +2267,7 @@ void func_151E6C1C(s32 index) {
 /* Sets unk80 = 2 on both objects of the current stop once the transition is far enough along. */
 void func_151E7DC0(void) {
     struct Struct151E5034 *state;
-    struct Struct151149AC *r;
+    WorldObject *r;
     s32 i;
     s32 objId;
 
@@ -2363,7 +2284,7 @@ void func_151E7DC0(void) {
         }
         r = func_151149AC(objId);
         if (r != NULL) {
-            r->unk80 = 2;
+            r->work.words[1] = 2;
         }
     }
 }
@@ -2400,18 +2321,6 @@ void func_151E7EF8(void) {
 }
 
 typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[0x22];
-} Spawn151E7F60;
-
-typedef struct {
     s16 unk0;
     s16 unk2;
     s16 unk4;
@@ -2421,33 +2330,33 @@ typedef struct {
 
 extern Pos151E7F60 D_800AB940[];
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern void func_15083384(struct127 *, u8);
+extern void func_15083384(Actor *, u8);
 
 /* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
 void func_151E7F60(s32 slotIdx, s32 charIdx) {
     s32 objSlot;
     s32 spawnId;
-    Spawn151E7F60 *spawn;
+    SpawnRecord *spawn;
     s32 posIdx;
     s32 kind;
-    struct127 *obj;
+    Actor *obj;
 
     if (D_800E0BA0[slotIdx] != NULL) {
         func_15060F28(D_800E0BA0[slotIdx], 1);
     }
     spawnId = func_15083E0C(slotIdx + 0x10);
-    spawn = (Spawn151E7F60 *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order; struct258 in structs.h is not the real 0x30-byte entry
+    spawn = (SpawnRecord *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order
     kind = D_800AB57C[charIdx].unk5;
     posIdx = slotIdx;
     if (D_8008FDD4->unk2C == 7) {
         posIdx++;
     }
-    spawn->unk4 = kind;
-    spawn->unk6 = D_800AB940[posIdx].unk0;
-    spawn->unk8 = D_800AB940[posIdx].unk2;
-    spawn->unk8 += D_800AB57C[charIdx].unk4;
-    spawn->unkA = D_800AB940[posIdx].unk4;
-    spawn->unkC = D_800AB940[posIdx].unk6;
+    spawn->type = kind;
+    spawn->x = D_800AB940[posIdx].unk0;
+    spawn->y = D_800AB940[posIdx].unk2;
+    spawn->y += D_800AB57C[charIdx].unk4;
+    spawn->z = D_800AB940[posIdx].unk4;
+    spawn->angle = D_800AB940[posIdx].unk6;
     if (kind == 0x53) {
         spawn->unkD = 0x24;
     } else {
@@ -2465,14 +2374,13 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
             bzero(obj->unk31C, 0x1C0);
         }
         if (kind == 0x3B) {
-            *(s8 *)&obj->pad68 = slotIdx + 1; // first byte of struct127's unnamed pad68
+            obj->unk68[0] = slotIdx + 1;
         }
         func_15083384(obj, D_800AB57C[charIdx].unk6);
         func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     }
 }
 
-extern s8 D_8008FD84[];
 /* Clears the spawned character slots. */
 void func_151E81EC(void) {
     s32 i;

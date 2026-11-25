@@ -1,10 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* One of the three exploding pipes: where it is and which way it faces. */
 typedef struct PipeSpot {
-    vertex pos;
+    Vec3f pos;
     u8 yaw;
 } PipeSpot;
 
@@ -12,218 +13,156 @@ typedef struct PipeIds {
     s32 id[3];
 } PipeIds;
 
-/* Parameter block for func_151A6F00. */
-typedef struct Fx151A6F00Args {
-    s16 unk00;
-    s16 pad02;
-    vertex pos;
-    s16 unk10;
-    s16 pad12;
-    f32 unk14;
-    s16 angle;
-    s16 unk1A, unk1C, unk1E;
-    f32 unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50;
-    u8 unk54, unk55;
-    s16 unk56, unk58;
-} Fx151A6F00Args;
-
-/* Parameter block for func_151539B4. */
-typedef struct Fx151539B4Args {
-    s16 unk00, unk02;
-    vertex pos;
-    s16 angle;
-    s16 unk12, unk14, unk16;
-    f32 unk18, unk1C, unk20, unk24;
-    u8 unk28, unk29, unk2A, unk2B, unk2C, unk2D, unk2E, unk2F, unk30;
-    u8 pad31;
-    s16 unk32, unk34, unk36;
-    f32 unk38, unk3C;
-    u8 unk40, unk41;
-    s16 unk42, unk44;
-    u8 unk46;
-    s32 unk48;
-} Fx151539B4Args;
-
-/* Parameter block for func_15152F70. */
-typedef struct Fx15152F70Args {
-    vertex pos;
-    f32 unk0C, unk10, unk14, unk18, unk1C, unk20;
-    s16 unk24, unk26;
-    s16 angle;
-    s16 unk2A, unk2C, unk2E, unk30, unk32, unk34, unk36;
-    u8 unk38, unk39;
-    s16 pad3A;
-    s32 unk3C, unk40, unk44, unk48, unk4C, unk50;
-    u8 unk54, unk55;
-} Fx15152F70Args;
-
-/* Parameter block for func_150B3F5C. */
-typedef struct Fx150B3F5CArgs {
-    vertex vel;
-    f32 unk0C;
-    u8 unk10;
-    f32 unk14, unk18;
-    u8 unk1C;
-    f32 unk20;
-    u8 unk24;
-    s16 unk26;
-    f32 unk28, unk2C;
-    u8 unk30, unk31, unk32, unk33, unk34, unk35;
-    s16 unk36;
-    u8 unk38;
-    f32 unk3C;
-} Fx150B3F5CArgs;
-
 extern PipeSpot D_8009F920[3];
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
-extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
+extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
-extern void func_151539B4(Fx151539B4Args *, u8);
-extern void func_15152F70(Fx15152F70Args *, u8);
-extern void func_150B3F5C(Fx150B3F5CArgs *, vertex *, s32);
+extern void func_151539B4(StreakBurst4C *, u8);
+extern void func_15152F70(SimplePuffSpray *, u8);
+extern void func_150B3F5C(TrailStateParams *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
-    Fx151A6F00Args argsA;
+    DebrisEmitter argsA;
     s16 i;
-    Fx151539B4Args argsB;
-    Fx15152F70Args argsC;
+    StreakBurst4C argsB;
+    SimplePuffSpray argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
-    vertex origin;
-    Fx150B3F5CArgs argsD;
+    Vec3f origin;
+    TrailStateParams argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-    argsA.unk00 = (func_150ADA20() & 1) + 3;
+    argsA.count = (func_150ADA20() & 1) + 3;
     argsA.pos = D_8009F920[pipe].pos;
-    argsA.unk14 = 170.0f;
-    argsA.unk20 = 16.20000076f;
-    argsA.unk24 = 17.60000038f;
-    argsA.unk28 = 19.30000114f;
-    argsA.unk2C = 21.30000114f;
-    argsA.unk10 = 300;
-    argsA.angle = D_8009F920[pipe].yaw - 0x20;
-    argsA.unk1A = 65;
-    argsA.unk1C = -40;
-    argsA.unk1E = 80;
-    argsA.unk54 = 1;
-    argsA.unk55 = 0;
-    argsA.unk56 = 50;
-    argsA.unk58 = 25;
-    argsA.unk30 = 0.0f;
-    argsA.unk34 = 0.0f;
-    argsA.unk38 = 0.0f;
-    argsA.unk3C = 0.4670000076f;
-    argsA.unk40 = 0.5139999986f;
-    argsA.unk44 = -1.0f;
-    argsA.unk48 = -2.600000143f;
-    argsA.unk4C = -5.0f;
-    argsA.unk50 = 10.0f;
+    argsA.radius = 170.0f;
+    argsA.speedBase = 16.20000076f;
+    argsA.speedRange = 17.60000038f;
+    argsA.velYBase = 19.30000114f;
+    argsA.velYRange = 21.30000114f;
+    argsA.lifetime = 300;
+    argsA.yawBase = D_8009F920[pipe].yaw - 0x20;
+    argsA.yawRange = 65;
+    argsA.pitchBase = -40;
+    argsA.pitchRange = 80;
+    argsA.landPuffs = 1;
+    argsA.landPuffFlag = 0;
+    argsA.landPuffLifeBase = 50;
+    argsA.landPuffLifeRange = 25;
+    argsA.dir.x = 0.0f;
+    argsA.dir.y = 0.0f;
+    argsA.dir.z = 0.0f;
+    argsA.sizeBase = 0.4670000076f;
+    argsA.sizeRange = 0.5139999986f;
+    argsA.gravityBase = -1.0f;
+    argsA.gravityRange = -2.600000143f;
+    argsA.spinBase = -5.0f;
+    argsA.spinRange = 10.0f;
     func_151A6F00(&argsA, 0, arg1, 1);
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;
         func_1514C858(D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, yawSin, D_8009F920[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
-    argsB.unk00 = 30;
-    argsB.unk02 = 15;
+    argsB.countBase = 30;
+    argsB.countRange = 15;
     argsB.pos = D_8009F920[pipe].pos;
-    argsB.angle = D_8009F920[pipe].yaw - 0x40;
-    argsB.unk14 = 128;
-    argsB.unk12 = -45;
-    argsB.unk16 = 90;
-    argsB.unk28 = 0xFF;
-    argsB.unk29 = 0xFF;
-    argsB.unk2A = 0xFF;
-    argsB.unk2B = 0xFF;
-    argsB.unk2C = 0xFF;
-    argsB.unk2D = 0xFF;
-    argsB.unk2E = 0xFF;
-    argsB.unk2F = 0xFF;
-    argsB.unk30 = 9;
-    argsB.unk32 = 16;
-    argsB.unk34 = 22;
-    argsB.unk36 = 0x1601;
-    argsB.unk40 = 0x7F;
-    argsB.unk41 = 0x7F;
-    argsB.unk42 = 10;
-    argsB.unk44 = 25;
-    argsB.unk46 = 0;
-    argsB.unk18 = 6.0f;
-    argsB.unk1C = 2.549999952f;
-    argsB.unk20 = 2.700000048f;
-    argsB.unk24 = 3.419999838f;
-    argsB.unk38 = 4.139999866f;
-    argsB.unk3C = 4.859999657f;
+    argsB.yawBase = D_8009F920[pipe].yaw - 0x40;
+    argsB.yawRange = 128;
+    argsB.pitchBase = -45;
+    argsB.pitchRange = 90;
+    argsB.headColor.red = 0xFF;
+    argsB.headColor.green = 0xFF;
+    argsB.headColor.blue = 0xFF;
+    argsB.headColor.alpha = 0xFF;
+    argsB.tailColor.red = 0xFF;
+    argsB.tailColor.green = 0xFF;
+    argsB.tailColor.blue = 0xFF;
+    argsB.tailColor.alpha = 0xFF;
+    argsB.flags = 9;
+    argsB.lifetimeBase = 16;
+    argsB.lifetimeRange = 22;
+    argsB.renderMode = 0x1601;
+    argsB.alphaBase = 0x7F;
+    argsB.alphaRange = 0x7F;
+    argsB.fadeStart = 10;
+    argsB.fadeRate = 25;
+    argsB.kind = 0;
+    argsB.headSpeedBase = 6.0f;
+    argsB.headSpeedRange = 2.549999952f;
+    argsB.tailSpeedBase = 2.700000048f;
+    argsB.tailSpeedRange = 3.419999838f;
+    argsB.widthBase = 4.139999866f;
+    argsB.widthRange = 4.859999657f;
     func_151539B4(&argsB, arg1);
     {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
-    extern void func_15152F70(Fx15152F70Args *, u8);
+    extern void func_15152F70(SimplePuffSpray *, u8);
 
     argsC.pos = D_8009F920[pipe].pos;
-    argsC.unk24 = 15;
-    argsC.unk26 = 8;
-    argsC.angle = D_8009F920[pipe].yaw - 25;
-    argsC.unk2A = 50;
-    argsC.unk2C = -50;
-    argsC.unk2E = 60;
-    argsC.unk30 = 3;
-    argsC.unk32 = 2;
-    argsC.unk34 = 60;
-    argsC.unk36 = 20;
-    argsC.unk38 = 6;
-    argsC.unk39 = 8;
-    argsC.unk3C = 1;
-    argsC.unk40 = 7;
-    argsC.unk44 = 0;
-    argsC.unk48 = 0;
-    argsC.unk4C = 0;
-    argsC.unk50 = 0;
-    argsC.unk54 = 0xFF;
-    argsC.unk55 = 0xA0;
-    argsC.unk1C = 20.0f;
-    argsC.unk20 = 40.0f;
-    argsC.unk0C = 10.0f;
-    argsC.unk10 = 30.0f;
-    argsC.unk14 = 1.5f;
-    argsC.unk18 = 1.0f;
+    argsC.countBase = 15;
+    argsC.countRange = 8;
+    argsC.angles.yawBase = D_8009F920[pipe].yaw - 25;
+    argsC.angles.yawRange = 50;
+    argsC.angles.pitchBase = -50;
+    argsC.angles.pitchRange = 60;
+    argsC.itemCountBase = 3;
+    argsC.itemCountRange = 2;
+    argsC.lifeBase = 60;
+    argsC.lifeRange = 20;
+    argsC.green = 6;
+    argsC.red = 8;
+    argsC.handlers[0] = 1;
+    argsC.handlers[1] = 7;
+    argsC.handlers[2] = 0;
+    argsC.handlers[3] = 0;
+    argsC.handlers[4] = 0;
+    argsC.handlers[5] = 0;
+    argsC.blue = 0xFF;
+    argsC.alpha = 0xA0;
+    argsC.speedBase = 20.0f;
+    argsC.speedRange = 40.0f;
+    argsC.sizeBase = 10.0f;
+    argsC.sizeRange = 30.0f;
+    argsC.growthBase = 1.5f;
+    argsC.growthRange = 1.0f;
     func_15152F70(&argsC, arg1);
     }
-    argsC.unk24 = 10;
-    argsC.unk26 = 6;
-    argsC.unk34 = 100;
-    argsC.unk36 = 0;
-    argsC.unk39 = 9;
-    argsC.unk48 = 5;
+    argsC.countBase = 10;
+    argsC.countRange = 6;
+    argsC.lifeBase = 100;
+    argsC.lifeRange = 0;
+    argsC.red = 9;
+    argsC.handlers[3] = 5;
     func_15152F70(&argsC, arg1);
     yawSin = func_151423D8(D_8009F920[pipe].yaw);
     yawCos = func_151423D8(D_8009F920[pipe].yaw - 0x40);
     origin.x = D_8009F920[pipe].pos.x - 150.0f * yawCos;
     origin.y = D_8009F920[pipe].pos.y;
     origin.z = D_8009F920[pipe].pos.z - 150.0f * yawSin;
-    argsD.unk24 = 0x80;
-    argsD.vel.x = 10.0f * yawCos;
-    argsD.vel.y = 3.0f;
-    argsD.vel.z = 10.0f * yawSin;
-    argsD.unk0C = -3.710000038f;
-    argsD.unk26 = 0xFF;
-    argsD.unk30 = 2;
-    argsD.unk31 = 5;
-    argsD.unk10 = 4;
-    argsD.unk38 = 0;
-    argsD.unk36 = 30;
-    argsD.unk1C = 6;
-    argsD.unk32 = 5;
-    argsD.unk33 = 0x33;
-    argsD.unk34 = 3;
-    argsD.unk35 = 0x55;
-    argsD.unk20 = 0.400000006f;
-    argsD.unk2C = 47.0f;
-    argsD.unk28 = 1.840000033f;
-    argsD.unk14 = 3.299999952f;
-    argsD.unk18 = 0.6999999881f;
-    argsD.unk3C = 0.3000000119f;
+    argsD.shade = 0x80;
+    argsD.baseVel.x = 10.0f * yawCos;
+    argsD.baseVel.y = 3.0f;
+    argsD.baseVel.z = 10.0f * yawSin;
+    argsD.gravity = -3.710000038f;
+    argsD.alpha = 0xFF;
+    argsD.texStep = 2;
+    argsD.texStepJitter = 5;
+    argsD.phaseJitter = 4;
+    argsD.burstPreset = 0;
+    argsD.life = 30;
+    argsD.flags = 6;
+    argsD.fadeTailCount = 5;
+    argsD.fadeTailStep = 0x33;
+    argsD.fadeHeadCount = 3;
+    argsD.fadeHeadStep = 0x55;
+    argsD.emitRate = 0.400000006f;
+    argsD.width = 47.0f;
+    argsD.widthGrowth = 1.840000033f;
+    argsD.speedBase = 3.299999952f;
+    argsD.speedSwing = 0.6999999881f;
+    argsD.burstRate = 0.3000000119f;
     {
         u8 idBuf[4];
         PipeIds idsA;
@@ -241,44 +180,6 @@ void func_150B2740(u8 pipe, u8 arg1) {
     func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
 }
 
-/* Spawn request passed to func_15132A4C (same layout as game_111670.c's Struct150E5558). */
-typedef struct PipeChunkSpawn {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex unk40;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 kind;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[6];
-} PipeChunkSpawn;
-
 /* The chunk object func_15132A4C creates; func_150B36AC is its floor-hit callback. */
 typedef struct PipeChunk {
     /* 0x000 */ u8 pad0[0x10];
@@ -287,8 +188,8 @@ typedef struct PipeChunk {
     /* 0x018 */ u8 pad18[0x3C - 0x18];
     /* 0x03C */ f32 unk3C;
     /* 0x040 */ u8 pad40[0x44 - 0x40];
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex unk50;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f unk50;
     /* 0x05C */ u8 pad5C[0x60 - 0x5C];
     /* 0x060 */ s32 flags;
     /* 0x064 */ s16 lifetime;
@@ -296,7 +197,7 @@ typedef struct PipeChunk {
     /* 0x170 */ f32 minBounceVelY; // a hit with vel.y above this stops the chunk
 } PipeChunk;
 
-extern PipeChunk *func_15132A4C(PipeChunkSpawn *, s32, s32, s32, u8, s32);
+extern PipeChunk *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
@@ -310,7 +211,7 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 pitchCos;
     f32 pitchSin;
     f32 speed;
-    PipeChunkSpawn spawn;
+    ParticleSpawn spawn;
 
     yawCos = func_151423D8(arg8 - 0x40);
     yawSin = func_151423D8(arg8);
@@ -325,7 +226,7 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    spawn.unk04 = 0.200000003f;
+    spawn.elasticity = 0.200000003f;
 
     speed = (func_150ADA68() * 31.0f) + 18.0f;
     angle = (arg9 - 0x40) + (s16)(60.0f * yawSin * argA * argC);
@@ -339,34 +240,34 @@ s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.unk40.x = (func_150ADA68() * 80.0f) + -40.0f;
-    spawn.unk40.y = 0.0f;
-    spawn.unk40.z = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.x = (func_150ADA68() * 80.0f) + -40.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.rotVel.z = (func_150ADA68() * 80.0f) + -40.0f;
     spawn.lifetime = 100;
 
     spawn.gravity = (func_150ADA68() * -1.752000093f) + -0.8370000124f;
-    spawn.unk00 = 1.0f;
+    spawn.radius = 1.0f;
 
     pitchSin = (func_150ADA68() * 72.5f) + 29.80000114f; // matching: reused as the size
-    spawn.kind = 0x1C;
-    spawn.unk58 = 0;
-    spawn.unk08 = pitchSin;
+    spawn.model = 0x1C;
+    spawn.variant = 0;
+    spawn.sizeXZ = pitchSin;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 1;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 1;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 1;
-    spawn.unk74 = 0xFF;
-    spawn.unk0C = pitchSin;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.sizeY = pitchSin;
 
     func_15132A4C(&spawn, 3, 0xFF, 0, argE, 0);
     return 1;
@@ -398,7 +299,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     f32 scaleRange;
     f32 xzAngle;
     f32 yzAngle;
-    PipeChunkSpawn spawn;
+    ParticleSpawn spawn;
     PipeChunk *chunk;
     f32 minBounceVelY;
 
@@ -426,7 +327,7 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.pos.x = x;
     spawn.pos.y = y;
     spawn.pos.z = z;
-    spawn.unk04 = 0.200000003f;
+    spawn.elasticity = 0.200000003f;
 
     speed = (func_150ADA68() * speedRange) + minSpeed;
     angle = (arg9 - 0x40) + (s16)(xzAngle * yawSin * argA * argC);
@@ -440,34 +341,34 @@ s32 func_150B3188(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     spawn.vel.y = -speed * pitchCos;
     spawn.vel.z = (speed * pitchSin) * headingSin;
 
-    spawn.unk40.x = (func_150ADA68() * 4.0f) + -2.0f;
-    spawn.unk40.y = 0.0f;
-    spawn.unk40.z = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.x = (func_150ADA68() * 4.0f) + -2.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.rotVel.z = (func_150ADA68() * 4.0f) + -2.0f;
     spawn.lifetime = life + 32;
 
     spawn.gravity = (func_150ADA68() * gravRange) + minGrav;
 
     pitchSin = (func_150ADA68() * scaleRange) + minScale; // matching: reused as the size
-    spawn.unk08 = pitchSin;
-    spawn.kind = 0x1C;
-    spawn.unk58 = 0;
+    spawn.sizeXZ = pitchSin;
+    spawn.model = 0x1C;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 1;
-    spawn.unk00 = pitchSin * 0.1000000015f;
-    spawn.unk62 = 0;
-    spawn.unk63 = 5;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 1;
+    spawn.radius = pitchSin * 0.1000000015f;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 5;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 32;
-    spawn.unk74 = 7;
-    spawn.unk0C = pitchSin;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 32;
+    spawn.fadeRate = 7;
+    spawn.sizeY = pitchSin;
 
     chunk = func_15132A4C(&spawn, 3, 0xFF, 4, argE, 0);
     if (chunk != NULL) {
@@ -576,53 +477,14 @@ typedef struct PipeExplodeParticle {
     /* 0x28 */ PipeExplodePoint *points;
 } PipeExplodeParticle;
 
-/* First three parameter blocks for func_15147DA0. */
-typedef struct PipeTrailPos {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 unk15;
-    /* 0x18 */ s32 pad18;
-} PipeTrailPos;
-
-typedef struct PipeTrailMotion {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ s32 pad1C;
-} PipeTrailMotion;
-
-typedef struct PipeTrailStyle {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-} PipeTrailStyle;
-
 typedef struct PipeKinds {
     s16 kind[3];
 } PipeKinds;
 
 extern PipeKinds D_80088700;
 
-s32 func_15147DA0(PipeTrailPos *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
+s32 func_15147DA0(EffectTemplate *pos, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns a random particle and a trail at the actor's current point, at height `y`. */
@@ -631,9 +493,9 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     PipeExplodeParticle particle;
     f32 size;
     PipeKinds kinds;
-    PipeTrailPos pos;
-    PipeTrailMotion motion;
-    PipeTrailStyle style;
+    EffectTemplate pos;
+    TrailMotion motion;
+    TrailRender style;
 
     {
         s32 rand2;
@@ -661,7 +523,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C((s32)&particle, 1, 0, arg5,
+        func_1513C73C(&particle, 1, 0, arg5,
                       particle.points[actor->pointIndex].x,
                       y,
                       particle.points[actor->pointIndex].z,
@@ -670,31 +532,31 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
                       actor->unk0C, actor->unk01);
 
     }
-    style.unk00 = 0;
-    style.unk04 = 1;
-    style.unk08 = 0x160600;
-    style.unk0C = 3;
+    style.unk0 = 0;
+    style.setGeometryMode = 1;
+    style.clearGeometryMode = 0x160600;
+    style.renderMode = 3;
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.unk1C = 0;
-    style.unk1D = 9;
-    pos.unk10 = 1;
-    pos.unk0E = 1;
-    motion.unk19 = state->unk19;
-    motion.unk1A = state->unk1A;
-    motion.unk18 = 8;
+    style.primMode = 0;
+    style.envMode = 9;
+    pos.kind = 1;
+    pos.flags = 1;
+    motion.texture = state->unk19;
+    motion.shade = state->unk1A;
+    motion.flags = 8;
     motion.alpha = state->alpha;
-    pos.x = particle.points[actor->pointIndex].x;
-    pos.y = y;
-    pos.z = particle.points[actor->pointIndex].z;
-    pos.unk15 = actor->unk25;
-    pos.unk0C = 60;
-    motion.unk00 = state->unk00 * 0.75f;
-    motion.unk10 = state->unk10;
-    motion.unk04 = state->unk04;
-    motion.unk08 = func_150ADA68() * 15.0f + 15.0f;
-    motion.unk0C = state->unk0C;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, (s32 *)&style, 0, actor->unk0C, actor->unk01);
+    pos.pos.x = particle.points[actor->pointIndex].x;
+    pos.pos.y = y;
+    pos.pos.z = particle.points[actor->pointIndex].z;
+    pos.itemCount = actor->unk25;
+    pos.life = 60;
+    motion.halfWidth = state->unk00 * 0.75f;
+    motion.gravity = state->unk10;
+    motion.velocity.x = state->unk04;
+    motion.velocity.y = func_150ADA68() * 15.0f + 15.0f;
+    motion.velocity.z = state->unk0C;
+    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->unk0C, actor->unk01);
     return 1;
 }

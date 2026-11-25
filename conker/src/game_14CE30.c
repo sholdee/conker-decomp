@@ -2,24 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Partial view of the Prop struct in game_144C70.c. */
-typedef struct Prop {
-    /* 0x00 */ f32 rotX;
-    /* 0x04 */ f32 rotY; /* degrees */
-    /* 0x08 */ u8 pad08[0x34];
-    /* 0x3C */ s32 params; /* bits 0-9: signed open angle, 16-23: link group */
-    /* 0x40 */ u8 pad40[0x33];
-    /* 0x73 */ u8 state; /* bits 0-1: motion state; bit 2: behaviour flag */
-} Prop;
-
-/* Motion states in the low 2 bits of Prop.state (as in game_144C70.c). */
+/* Motion states in the low 2 bits of WorldObject.behaviorState (as in game_144C70.c). */
 #define PROP_REST 0
 #define PROP_RETURNING 1
 #define PROP_MOVING 2
 #define PROP_ARRIVED 3
 
 typedef struct PropLink {
-    /* 0x00 */ Prop *prop;
+    /* 0x00 */ WorldObject *prop;
     /* 0x04 */ s32 group;
 } PropLink;
 
@@ -42,7 +32,7 @@ void func_1511F980(void) {
  * registration the state is initialised from mode; afterwards a prop that starts moving or returning
  * passes that state on to the other props of its link group.
  */
-void func_1511F990(Prop *prop, s32 mode) {
+void func_1511F990(WorldObject *prop, s32 mode) {
     s32 index;
     s32 i;
     s32 added;
@@ -51,10 +41,10 @@ void func_1511F990(Prop *prop, s32 mode) {
     s32 group;
 
     // matching: the redundant & 0xFF costs one integer web, setting IDO's t6..t9 temp rotation
-    group = (s8)((prop->params >> 16) & 0xFF);
+    group = (s8)((prop->param.word >> 16) & 0xFF);
     added = FALSE;
-    motion = prop->state & 3;
-    flag = prop->state & 4;
+    motion = prop->behaviorState & 3;
+    flag = prop->behaviorState & 4;
     for (index = 0; index < D_800DBFC0; index++) {
         if (D_800DBFC8[index].prop == prop) {
             break;
@@ -76,7 +66,7 @@ void func_1511F990(Prop *prop, s32 mode) {
                     if (motion != PROP_REST && motion != PROP_RETURNING) {
                         motion = PROP_RETURNING;
                     }
-                    prop->rotY = (prop->params << 22) >> 22;
+                    prop->rotY = (prop->param.word << 22) >> 22;
                 } else if (mode == 1) {
                     motion = PROP_ARRIVED;
                 } else if (mode == 2) {
@@ -89,7 +79,7 @@ void func_1511F990(Prop *prop, s32 mode) {
                     } else if (!flag) {
                         motion = PROP_ARRIVED;
                     }
-                    prop->rotY = (prop->params << 22) >> 22;
+                    prop->rotY = (prop->param.word << 22) >> 22;
                 }
             } else if (mode == 0 || mode == 2 || mode == 3) {
                 if (mode != 3 || flag) {
@@ -104,20 +94,20 @@ void func_1511F990(Prop *prop, s32 mode) {
                 if (i == index || group != D_800DBFC8[i].group) {
                     continue;
                 }
-                if (!flag && (D_800DBFC8[i].prop->state & 4)) {
+                if (!flag && (D_800DBFC8[i].prop->behaviorState & 4)) {
                     continue;
                 }
-                if ((D_800DBFC8[i].prop->state & 3) == PROP_ARRIVED && motion == PROP_MOVING) {
+                if ((D_800DBFC8[i].prop->behaviorState & 3) == PROP_ARRIVED && motion == PROP_MOVING) {
                     continue;
                 }
-                if ((D_800DBFC8[i].prop->state & 3) == PROP_REST && motion == PROP_RETURNING) {
+                if ((D_800DBFC8[i].prop->behaviorState & 3) == PROP_REST && motion == PROP_RETURNING) {
                     continue;
                 }
-                D_800DBFC8[i].prop->state &= ~3;
-                D_800DBFC8[i].prop->state |= motion;
+                D_800DBFC8[i].prop->behaviorState &= ~3;
+                D_800DBFC8[i].prop->behaviorState |= motion;
             }
         }
     }
-    prop->state &= ~3;
-    prop->state |= motion;
+    prop->behaviorState &= ~3;
+    prop->behaviorState |= motion;
 }

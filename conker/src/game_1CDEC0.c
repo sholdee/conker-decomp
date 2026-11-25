@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
 s32 func_1510F8CC(s32);
@@ -24,15 +25,15 @@ typedef struct {
 } SparkEmitterEffect;
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
-void func_151A0A10(struct127 *actor, s16 duration, u8 owner, s32 arg3) {
+void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
     struct260 *effect;
     SparkEmitter emitter;
 
     if (actor != NULL) {
         emitter.x = actor->x_position;
         emitter.z = actor->z_position;
-        if (D_800C35EA != 1) {
-            emitter.y = actor->unk180;
+        if (D_800C35EA[0] != 1) {
+            emitter.y = actor->floorY;
             emitter.accum = 0.0f;
             switch (func_1510F8CC(actor->unk184)) {
             case 10:
@@ -67,32 +68,7 @@ void func_151A0AF8(SparkEmitterEffect *effect) {
     }
 }
 
-/* 0x38-byte template that func_15167D84 copies into a new particle (fields as in game_1944C0's Particle). */
-typedef struct {
-    /* 0x00 */ void *anim;
-    /* 0x04 */ u8 pad04[8];
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frameStep;
-    /* 0x10 */ s16 x, y, z;
-    /* 0x16 */ s16 velX, velZ;
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ s8 subX, subZ, subY;
-    /* 0x1F */ s8 callback;
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 accelY;
-    /* 0x24 */ s16 width, height;
-    /* 0x28 */ s16 life;
-    /* 0x2A */ s8 fadeStep;
-    /* 0x2B */ u8 pad2B;
-    /* 0x2C */ u8 primR, primG, primB, primA;
-    /* 0x30 */ s8 envR, envG, envB;
-    /* 0x33 */ u8 pad33;
-    /* 0x34 */ s16 flags;
-} ParticleTemplate;
-
 extern u8 D_8008F8D0[];
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
 
 /*
  * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random
@@ -100,7 +76,7 @@ extern u8 D_800918A0[];
  */
 s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 originY, f32 originZ,
                   s32 angle, s32 baseAngle, f32 radius, s32 variant, f32 arg12, s32 arg13, u8 owner) {
-    ParticleTemplate spark;
+    BillboardTemplate spark;
     s16 tilt;
     f32 sinTilt;
     f32 cosTilt;
@@ -124,10 +100,10 @@ s32 func_151A0C0C(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     spark.y = y;
     spark.z = z;
     /* all three fractions come from x in the original */
-    // matching: the u8 conversion into these s8 fields fixes the store schedule
-    spark.subX = (u8)(s32)(x * 256.0f);
-    spark.subZ = (u8)(s32)(x * 256.0f);
-    spark.subY = (u8)(s32)(x * 256.0f);
+    // matching: a u8 conversion stored through an s8 lvalue fixes the store schedule
+    *(s8 *)&spark.subX = (u8)(s32)(x * 256.0f);
+    *(s8 *)&spark.subZ = (u8)(s32)(x * 256.0f);
+    *(s8 *)&spark.subY = (u8)(s32)(x * 256.0f);
     spark.envR = 0;
     spark.envG = 0;
     spark.envB = 0;

@@ -1,31 +1,7 @@
 #include <ultra64.h>
-/* func_150ADA20 returns a full 32-bit value (asm: dsra32 v0); the shared header narrows it to u8 */
-#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
-
-typedef struct { f32 x, y, z; } Vec3f;
-typedef struct { u8 r, g, b, a; } ColorRGBA;
-
-/* Parameters of a lightning bolt: a cubic Bezier from start to end, split into jittered segments. */
-typedef struct BoltDesc {
-    /* 0x00 */ s16 life;
-    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
-    /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ s32 segments;
-    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
-    /* 0x40 */ f32 width;         /* half width of the drawn strip */
-    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
-    /* 0x46 */ s16 rejitterRange;
-    /* 0x48 */ ColorRGBA color;
-    /* 0x4C */ u8 kind;           /* index into D_80088C18 / D_80088C28 */
-    /* 0x4D */ u8 pad4D[3];
-} BoltDesc; /* size 0x50 */
+#include "effects.h"
 
 /* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
 typedef struct BoltSample {
@@ -57,28 +33,6 @@ typedef struct BoltObj {
     /* 0x84 */ s32 vtxBufSize;
 } BoltObj; /* size 0x88 */
 
-/* Spawn parameters for each bolt of a chain; "base + rand % (range + 1)" or "base + randf * range". */
-typedef struct BoltChainConfig {
-    /* 0x00 */ f32 widthBase;
-    /* 0x04 */ f32 widthRange;
-    /* 0x08 */ f32 jitter;
-    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
-    /* 0x10 */ f32 bendRange;
-    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
-    /* 0x16 */ s16 rejitterBase;
-    /* 0x18 */ s16 rejitterRange;
-    /* 0x1A */ s16 lifeBase;
-    /* 0x1C */ s16 lifeRange;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 segmentsBase;
-    /* 0x24 */ s32 segmentsRange;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 alphaBase;
-    /* 0x2C */ u8 alphaRange;
-} BoltChainConfig; /* size 0x30 */
-
 /* A chain of bolts along a randomly spaced line of points, one bolt (link) at a time. */
 typedef struct BoltChain {
     /* 0x00 */ s32 count;          /* number of points */
@@ -107,49 +61,12 @@ typedef struct RayHit {
     /* 0x5A */ u8 pad5A[0x64 - 0x5A];
 } RayHit;
 
-/* Spawn descriptor for func_15130280 (an end flare). */
-typedef struct FlareSpawn {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 life;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;          /* 0x40, 0x80: random flips */
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} FlareSpawn;
-
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
-void func_15107F54(struct127 *actor, u8 bone, Vec3f *localPos, Vec3f *out);
+void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
 void func_15143794(s32 yaw, s32 pitch, f32 length, Vec3f *out);
-void func_15081690(struct127 *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
+void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
 void func_15106610(BoltObj *bolt);
@@ -189,43 +106,43 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     /* three vertices per joint point */
     bolt->vtxBufSize = (bolt->desc.segments + 2) * 3 * sizeof(Vtx);
     {
-        FlareSpawn spawn;
+        ParticleDesc spawn;
 
-        spawn.unk1D = 0x2B;
-        spawn.unk8 = 0x4404;
+        spawn.texture = 0x2B;
+        spawn.renderMode = 0x4404;
         spawn.unk0 = 0x200005;
         spawn.unk4 = 0;
-        spawn.life = 300;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.color0[0] = 0xFF;
-        spawn.color0[1] = 0xFF;
-        spawn.color0[2] = 0xFF;
-        spawn.color0[3] = 0xFF;
-        spawn.color1[0] = desc->color.r;
-        spawn.color1[1] = desc->color.g;
-        spawn.color1[2] = desc->color.b;
-        spawn.color1[3] = desc->color.a;
-        spawn.unk1C = 0xFF;
-        spawn.unk3C = *(Vec3f *)&D_800A5480;
-        spawn.vel = *(Vec3f *)&D_800A5480;
-        spawn.unk1E = 1;
-        spawn.unk20 = 0xFF;
-        spawn.unk22 = 1;
+        spawn.timer = 300;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.r = 0xFF;
+        spawn.g = 0xFF;
+        spawn.b = 0xFF;
+        spawn.a = 0xFF;
+        spawn.r2 = desc->color.red;
+        spawn.g2 = desc->color.green;
+        spawn.b2 = desc->color.blue;
+        spawn.alpha = desc->color.alpha;
+        spawn.brightness = 0xFF;
+        spawn.offset = D_800A5480;
+        spawn.vel = D_800A5480;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
+        spawn.scaleStart = 1;
         spawn.flags = 0xC000;
-        spawn.unk60 = 6;
-        spawn.unk61 = 6;
-        spawn.unk62 = -1;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk5C = 0;
-        spawn.unk66 = 0xFF;
-        spawn.unk68 = 0;
-        spawn.unk54 = 0.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk6C = 1000000.0f;
-        spawn.unk28 = spawn.unk2C = desc->width * 0.07692307979f * 200.0f;
+        spawn.primColorMode = 6;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = -1;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.viewMask = 0;
+        spawn.views = 0xFF;
+        spawn.minSize = 0;
+        spawn.gravity = 0.0f;
+        spawn.scaleRate = 1.0f;
+        spawn.maxSize = 1000000.0f;
+        spawn.width = spawn.height = desc->width * 0.07692307979f * 200.0f;
         for (i = 0; i < 2; i++) {
             spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
             spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
@@ -423,9 +340,7 @@ Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
 Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
@@ -450,7 +365,7 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     flag = 1;
     points = func_151061EC(bolt);
     gdl = func_15142E24(gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
-    gdl = func_15142C10(gdl, bolt->desc.color.r, bolt->desc.color.g, bolt->desc.color.b, bolt->desc.color.a, &flag);
+    gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);
     gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
@@ -575,7 +490,6 @@ void func_15106EF8(BoltObj *bolt) {
     func_15169804((struct102 *)bolt);
 }
 
-void func_15169824(struct102 *arg0);
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
@@ -606,7 +520,7 @@ BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig
     chain.config = *config;
     chain.kind = kind;
 
-    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (struct37 *)(chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
+    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));
@@ -681,11 +595,11 @@ void func_151072BC(BoltChainObj *obj) {
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
         desc.ctrl[2].z = desc.ctrl[3].z + offset.z;
-        desc.color.r = config->r;
-        desc.color.g = config->g;
-        desc.color.b = config->b;
+        desc.color.red = config->r;
+        desc.color.green = config->g;
+        desc.color.blue = config->b;
         desc.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
-        desc.color.a = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
+        desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
         desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
         chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
@@ -716,7 +630,6 @@ void func_1510764C(BoltChainObj *obj) {
     func_1514933C(&obj->base);
 }
 
-void func_15149368(struct260 *arg0);
 
 void func_15107678(BoltChainObj *obj) {
     func_1510761C(obj);
@@ -732,7 +645,7 @@ void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
 
 /* User data of a kind-2 bolt: starts on the owner actor's bounds, in direction yaw/pitch. */
 typedef struct BoltAnchor {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 yaw;
@@ -742,7 +655,7 @@ typedef struct BoltAnchor {
 
 /* User data of a kind-3 bolt: starts at localPos in one of the owner actor's bone matrices. */
 typedef struct BoltBoneAnchor {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ Vec3f localPos;
@@ -754,7 +667,7 @@ typedef struct BoltBoneAnchor {
  * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
  * from that point away from the actor hits. life -1 means it never runs out.
  */
-BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
+BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
     BoltAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -787,12 +700,12 @@ BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segme
     desc.width = width;
     desc.rejitterBase = rejitterBase;
     desc.rejitterRange = rejitterRange;
-    desc.color = *(ColorRGBA *)color;
+    desc.color = *(Color8 *)color;
     desc.kind = 2;
 
     // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-        void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+        void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 
         func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
         func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
@@ -813,13 +726,13 @@ BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segme
 
 /* D_80088C28 handler for kind 2. */
 void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
+    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }
 
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
 s32 func_15107924(BoltObj *bolt, u8 *moved) {
     BoltAnchor *anchor;
-    struct127 *owner;
+    Actor *owner;
     Vec3f oldStart;
 
     anchor = bolt->userData;
@@ -837,10 +750,10 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3);
+void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
 
 /* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
-void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
     Vec3f center;
     f32 radius;
     f32 unused;
@@ -876,7 +789,7 @@ void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
 extern void func_151C329C(void *, s32, s32);
 
 /* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
-void func_15107B78(struct127 *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
+void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
     Vec3f pos;
     Vec3f center;
     f32 radius;
@@ -897,7 +810,7 @@ void func_15107B78(struct127 *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(struct127 *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -930,7 +843,7 @@ BoltObj *func_15107C1C(struct127 *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 
     desc.width = width;
     desc.rejitterBase = rejitterBase;
     desc.rejitterRange = rejitterRange;
-    desc.color = *(ColorRGBA *)color;
+    desc.color = *(Color8 *)color;
     desc.kind = 3;
 
     func_15107F54(actor, bone, localPos, &desc.ctrl[0]);
@@ -956,7 +869,7 @@ BoltObj *func_15107C1C(struct127 *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 
 /* updateKind 1: keeps a kind-3 bolt's start on its owner's bone; returns 0 once the owner is gone. */
 s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     BoltBoneAnchor *anchor;
-    struct127 *owner;
+    Actor *owner;
     Vec3f oldStart;
 
     anchor = bolt->userData;
@@ -980,11 +893,11 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at unk1D4). */
-void func_15107F54(struct127 *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
+void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
     func_15143134(localPos, out, (s32)actor->unk1D4 + (bone << 6));
 }
 
 /* D_80088C28 handler for kind 3. */
 void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
+    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }

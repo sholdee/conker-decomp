@@ -24,7 +24,7 @@ typedef struct {
     s16 texture;    // index into D_8008CA4C
     u8 ownerId;     // owner's unique_id when attached
     u8 drawn;
-    struct127 *owner;
+    Actor *owner;
     s16 ownerTag;   // compared with owner->unk84.uh; -1 for none
     u8 bone;
     u8 attachDelay;
@@ -46,8 +46,8 @@ extern Game10EF60Texture *D_8008CA4C[];
 
 /* Payload of message 0x2D: a pair of objects (see func_150E2FC0). */
 typedef struct {
-    struct127 *objA;
-    struct127 *objB;
+    Actor *objA;
+    Actor *objB;
     u8 idA; // unique_id of objA
     u8 idB;
 } Game10EF60ObjectSwap;
@@ -56,7 +56,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
-                   struct127 *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
+                   Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
     Game10EF60Effect *effect;
     s32 i;
@@ -140,12 +140,9 @@ typedef struct {
 
 extern Game10EF60Impact D_800D9960[];
 
-/* An actor's bone matrices: struct127.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
-
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
-s32 func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
 s32 func_1510F8CC(s32);
 s32 func_151EF610(void);
@@ -170,7 +167,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     s32 impact;
     s16 angle;
     f32 incoming[3];
-    struct17 reflected;
+    Vec3f reflected;
     f32 fwdY;
     f32 fwdZ;
     f32 rayX;
@@ -196,7 +193,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     if (effect->mode != 0) {
         if (effect->attachDelay == 0) {
             if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->unk127) != 0xFF) {
-                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                bone = effect->owner->unk1D4[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 effect->attachDelay = 3;
@@ -208,7 +205,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId) {
-                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                bone = effect->owner->unk1D4[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 aim = effect->owner->unk127;
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
@@ -235,12 +232,12 @@ void func_150E1D14(Game10EF60Effect *effect) {
                                 incoming[0] = effect->target_x - effect->x;
                                 incoming[1] = effect->target_y - effect->y;
                                 incoming[2] = effect->target_z - effect->z;
-                                func_15049148((struct17 *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
-                                func_15048F58((struct17 *)incoming, &reflected, &reflected);
-                                reflected.unk0 += effect->target_x;
-                                reflected.unk4 += effect->target_y;
-                                reflected.unk8 += effect->target_z;
-                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.unk0, reflected.unk4, reflected.unk8, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                func_15049148((Vec3f *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
+                                func_15048F58((Vec3f *)incoming, &reflected, &reflected);
+                                reflected.x += effect->target_x;
+                                reflected.y += effect->target_y;
+                                reflected.z += effect->target_z;
+                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                                 func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
@@ -264,9 +261,9 @@ void func_150E1D14(Game10EF60Effect *effect) {
                             effect->target_y = rayY;
                             effect->target_z = rayZ;
                             stopDist = 1.0f;
-                            i = (hitTri - D_800DBE3C) / 12;
-                            if (i >= 0 && i < D_800DBE4C && D_800DBE5C != 0) {
-                                impact = func_1510F8CC(((s32 *)D_800DBE5C)[i]);
+                            i = (hitTri - (u32)D_800DBE3C) / 12;
+                            if (i >= 0 && i < D_800DBE4C && D_800DBE5C != NULL) {
+                                impact = func_1510F8CC(D_800DBE5C[i]);
                             }
                         }
                     }
@@ -346,18 +343,12 @@ void func_150E1D14(Game10EF60Effect *effect) {
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-typedef struct {
     u8 pad0[0x10];
     void *unk10;
 } Game10EF60TexState;
 
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern s32 D_800D2C9C;
 
 /* Draws a tracer as a camera-facing quad from its position along its direction. */
 Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
@@ -383,9 +374,9 @@ Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
         points[1].x = effect->x + effect->length * effect->dx;
         points[1].y = effect->y + effect->length * effect->dy;
         points[1].z = effect->z + effect->length * effect->dz;
-        camera[0] = D_800DBFF0[view].unk2F8;
-        camera[1] = D_800DBFF0[view].unk2FC;
-        camera[2] = D_800DBFF0[view].unk300;
+        camera[0] = D_800DBFF0[view].eye.x;
+        camera[1] = D_800DBFF0[view].eye.y;
+        camera[2] = D_800DBFF0[view].eye.z;
         halfWidth = effect->halfWidth;
         for (i = 0; i < 2; i++) {
             distances[i] = (points[i].x - camera[0]) * (points[i].x - camera[0]) + (points[i].y - camera[1]) * (points[i].y - camera[1]) + (points[i].z - camera[2]) * (points[i].z - camera[2]);
@@ -448,7 +439,7 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
 }
 
 /* Spawns a tracer attached to a bone of owner, refiring every onTime + offTime frames. */
-void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
                   owner, ownerId, bone, ownerTag, 0, unkFE, startX, startY, startZ, endX, endY, endZ);
@@ -456,7 +447,7 @@ void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 sta
 
 /* Like func_150E2DB4 with a caller-chosen width, length and speed. */
 // matching: functions.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
-void func_150E2EA4(struct127 *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
                    s32 unkFE, f32 speed) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),

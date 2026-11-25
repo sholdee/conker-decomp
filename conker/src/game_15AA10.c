@@ -3,8 +3,9 @@
 #include "variables.h"
 
 
-extern s32 D_800DC2B0;
 
+// matching: D_800DC2B0 is a CamMsgQueue array; the original code indexes it as raw 0xB0-byte rows
+// (typed CamMsgQueue access swaps the base/offset addu operands and changes the reloads).
 typedef u8 Entry15[0xB0];
 
 void func_1512D560(u8 *arg0, s32 arg1, s32 arg2) {
@@ -40,11 +41,10 @@ u8 *func_1512D604(u8 *arg0, s32 temp) {
     return ret;
 }
 
-extern s32 D_800DC2B0;
 
 void func_1512D66C(u8 *arg0) {
-    *(s32 *)((*(s32 *)&D_800DC2B0) + arg0[0x23D] * 0xB0 + 0xA8) = 0;
-    *(s32 *)((*(s32 *)&D_800DC2B0) + arg0[0x23D] * 0xB0 + 0xAC) = 0;
+    D_800DC2B0[arg0[0x23D]].head = 0;
+    D_800DC2B0[arg0[0x23D]].tail = 0;
 }
 
 s32 func_1512D6B0(u8 *arg0) {

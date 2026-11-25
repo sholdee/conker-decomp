@@ -1,17 +1,7 @@
 #include <ultra64.h>
 
-/* The shared headers give this file's music tables and lookups placeholder types; their real
-   declarations follow below. */
-#define func_1000B1B0 func_1000B1B0_hdr
-#define func_1000B1FC func_1000B1FC_hdr
-#define func_1000D758 func_1000D758_hdr
-#define func_1000DF68 func_1000DF68_hdr
 #include "functions.h"
 #include "variables.h"
-#undef func_1000B1B0
-#undef func_1000B1FC
-#undef func_1000D758
-#undef func_1000DF68
 
 /* Per-frame update hook of a music sequence: takes and returns its private state word. */
 typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
@@ -32,8 +22,6 @@ typedef struct {
     u16 target;
     u16 rate;
 } VolumeRamp;
-
-typedef struct MusicTrack MusicTrack;
 
 /* One music sequence instance, from the pool D_800419A8. */
 struct MusicTrack {
@@ -70,16 +58,12 @@ extern s32 D_80041890[3];             /* last marker position */
 extern s32 D_800418A0[3];             /* distance between the last two marker positions */
 extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack D_800419A8[12];     /* track pool */
-extern u8 D_800C35E8;
 
-MusicTrack *func_1000B1B0(s32 id);
-MusicTrack *func_1000B1FC(s32 id);
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
-void func_1000DF68(s32 id, s32 volume, s32 frames);
 void func_10008C04(u8, u8, s32);
 s32 func_10008CE8(u8, s32);
-void func_1507E7E4(struct127 *, u8, u8, u16, s32);
+void func_1507E7E4(Actor *, u8, u8, u16, s32);
 void func_15178EFC(s32 arg0);
 s32 func_151F2CDC(void);
 
@@ -285,7 +269,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 16. */
 s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
-    s32 flag = D_800DBFF0->unk5F0 & 1;
+    s32 flag = D_800DBFF0->status & 1;
 
     if (flag != 0 && state == 0) {
         state = 1;
@@ -453,7 +437,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     oldMix = state >> 8;
     if (!(state & 0x80)) {
         func_1000E40C(34, 24000);
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             func_1000DF68(34, 20, 1);
         }
         state = 0x80;
@@ -550,14 +534,14 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
-        if (D_800C35EA != 1) {
+        if (D_800C35EA[0] != 1) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 1);
             func_1000E40C(35, 25000);
-        } else if (D_800C35E8 == 3) {
+        } else if (D_800C35E8[0] == 3) {
             func_1000E40C(35, 250);
             func_15178EFC(2);
-        } else if (D_800C35E8 == 6) {
+        } else if (D_800C35E8[0] == 6) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 0x40);
             func_15178EFC(2);
@@ -698,7 +682,7 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag;
 
     volume = 0;
-    flag = D_800DBFF0->unk5F0 & 1;
+    flag = D_800DBFF0->status & 1;
     if (flag != 0) {
         maxVolume = 0x7FFF;
     } else {
@@ -721,7 +705,7 @@ s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
     if (D_800BE9F0 == 55) {
-        if (D_800DBFF0->unk5F0 & 1) {
+        if (D_800DBFF0->status & 1) {
             volume = 0;
         } else {
             func_100114D0(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);

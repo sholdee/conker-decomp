@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
@@ -51,7 +48,7 @@ void func_1515AF90(s16 player) {
         f32 bottom;
 
         valid = TRUE;
-        eye = (Vec3f *)&D_800DBFF0[player].unk2F8;
+        eye = &D_800DBFF0[player].eye;
         yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
         {
             u32 roll = func_150ADA20();
@@ -103,34 +100,6 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Sprite-particle descriptor passed to func_151303BC (ParticleDesc in game_117490.c). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 texture;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14[7];
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ s8 unk60[4];
-    /* 0x64 */ u8 pad64[8]; // matching: game_117490.c has 0xC here; this frame needs a 0x6C-byte desc
-} ParticleDesc;
-
 /* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -156,13 +125,13 @@ typedef struct {
     /* 0x28 */ ParticleEmitter emitter;
 } EmitterObject;
 
-void *func_151303BC(ParticleDesc *, s32, s32);
+void *func_151303BC(ParticleDesc6C *, s32, s32);
 
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     ParticleEmitter *emitter;
     void *particle;
-    ParticleDesc desc;
+    ParticleDesc6C desc;
     ParticleExtra extra;
 
     emitter = &obj->emitter;
@@ -170,53 +139,53 @@ void func_1515B21C(EmitterObject *obj) {
     if (emitter->accumulator > 1.0f) {
         f32 size;
 
-        desc.unk1D = 47;
-        desc.texture = 0xC01;
-        desc.flags = 0x200005;
+        desc.texture = 47;
+        desc.renderMode = 0xC01;
+        desc.unk0 = 0x200005;
         desc.unk4 = 0;
-        desc.unk14[6] = 0;
-        desc.unk14[5] = 0;
-        desc.unk14[4] = 0;
-        desc.unk14[3] = 0;
-        desc.unk14[2] = 0;
-        desc.unk14[1] = 0;
-        desc.unk14[0] = 0;
-        desc.unk10 = 0;
-        desc.unkC = 0;
-        desc.unk1C = 255;
-        desc.unk22 = 0;
-        desc.unk24 = 0.0f;
-        desc.unk58 = 0x3207;
-        desc.unk60[0] = 5;
-        desc.unk60[1] = 5;
-        desc.unk60[2] = 4;
-        desc.unk60[3] = -1;
-        desc.position = emitter->position;
-        desc.unk3C.x = 0.0f;
-        desc.unk3C.y = 0.0f;
-        desc.unk3C.z = 0.0f;
-        desc.unk1E = 50;
-        desc.unk20 = 5;
+        desc.b2 = 0;
+        desc.g2 = 0;
+        desc.r2 = 0;
+        desc.a = 0;
+        desc.b = 0;
+        desc.g = 0;
+        desc.r = 0;
+        desc.frameRate = 0;
+        desc.frame = 0;
+        desc.brightness = 255;
+        desc.scaleStart = 0;
+        desc.scaleRate = 0.0f;
+        desc.flags = 0x3207;
+        desc.primColorMode = 5;
+        desc.envColorMode = 5;
+        desc.updateFunc = 4;
+        desc.deathFunc = -1;
+        desc.pos = emitter->position;
+        desc.offset.x = 0.0f;
+        desc.offset.y = 0.0f;
+        desc.offset.z = 0.0f;
+        desc.fadeStart = 50;
+        desc.fadeRate = 5;
         extra.unk4[0] = 0;
         extra.unk4[1] = 0;
         extra.unk18[0] = 0;
         extra.unk18[1] = 0;
-        desc.velocity.x = 0.0f;
-        desc.velocity.z = 0.0f;
+        desc.vel.x = 0.0f;
+        desc.vel.z = 0.0f;
         extra.unk10 = 1.200000048f;
         extra.unk14 = 0.8333333135f;
         extra.unk24 = emitter->unk14;
 
         if (func_150ADA20() & 1) {
-            desc.unk58 |= 0x40;
+            desc.flags |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            desc.unk58 |= 0x80;
+            desc.flags |= 0x80;
         }
 
         do {
-            desc.velocity.y = func_150ADA68() * 12.0f * 0.1000000015f;
-            desc.lifetime = (func_150ADA20() % 152U) + 150;
+            desc.vel.y = func_150ADA68() * 12.0f * 0.1000000015f;
+            desc.timer = (func_150ADA20() % 152U) + 150;
             desc.alpha = (func_150ADA20() % 151U) + 55;
             size = (func_150ADA68() * 200.0f) + 100.0f;
             desc.width = size;
@@ -230,7 +199,7 @@ void func_1515B21C(EmitterObject *obj) {
             extra.unk18[3] = (func_150ADA20() & 3) + 2;
             extra.unk1C[0] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
             extra.unk1C[1] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
-            desc.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+            desc.gravity = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
             particle = func_151303BC(&desc, 2, 0x28);
             if (particle != NULL) {
@@ -240,37 +209,6 @@ void func_1515B21C(EmitterObject *obj) {
         } while (emitter->accumulator > 1.0f);
     }
 }
-
-/* Description a screen sprite is created from (ScreenSpriteInfo in game_182140.c). */
-typedef struct {
-    /* 0x00 */ f32 x; // centre, in viewport units
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 halfWidth;
-    /* 0x0C */ f32 halfHeight;
-    /* 0x10 */ u8 texture;
-    /* 0x11 */ u8 pad11;
-    /* 0x12 */ s16 timer;
-    /* 0x14 */ u16 flags;
-    /* 0x16 */ s16 fadeStart;
-    /* 0x18 */ s16 fadeRate;
-    /* 0x1A */ u8 kind; // index into D_8008AD04 (message handlers)
-    /* 0x1B */ u8 color1[4];
-    /* 0x1F */ u8 color2[4];
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeH;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 combineMode;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ u8 viewport; // the only viewport drawn in when (flags & 0x10)
-    /* 0x45 */ u8 pad45[3];
-    /* 0x48 */ f32 unk48[4];
-} ScreenSpriteInfo;
 
 /* Per-sprite data func_1515B674 appends to its sprites (at ScreenSprite +0x70). */
 typedef struct {
@@ -332,15 +270,15 @@ void func_1515B674(s16 player) {
     info.kind = 1;
     info.fadeStart = 20;
     info.fadeRate = 12;
-    info.color1[0] = 255;
-    info.color1[1] = 255;
-    info.color1[2] = 255;
-    info.color2[0] = 255;
+    info.color1.red = 255;
+    info.color1.green = 255;
+    info.color1.blue = 255;
+    info.color2.red = 255;
     data.player = player;
     info.viewport = player;
-    info.color2[1] = 255;
-    info.color2[2] = 255;
-    info.color2[3] = 255;
+    info.color2.green = 255;
+    info.color2.blue = 255;
+    info.color2.alpha = 255;
     info.unk23 = 255;
     info.otherModeH = 0;
     info.unk28 = 0;
@@ -361,7 +299,7 @@ void func_1515B674(s16 player) {
         info.y = (func_150ADA68() * 148.0f) + -100.0f;
         info.texture = D_8008FD04[func_151D8E20()]();
         info.timer = (func_150ADA20() % 51U) + 50;
-        info.color1[3] = (func_150ADA20() % 101U) + 100;
+        info.color1.alpha = (func_150ADA20() % 101U) + 100;
         if (func_150ADA20() & 1) {
             info.flags |= 2;
         }

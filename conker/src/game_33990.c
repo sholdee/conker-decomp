@@ -1,10 +1,7 @@
 #include <ultra64.h>
 
 #include "functions.h"
-/* variables.h declares D_800BE3F8 as a pointer; this file uses it as the array of SaveSlotInfo. */
-#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
-#undef D_800BE3F8
 
 /*
  * EEPROM save data. The EEPROM is addressed in 8-byte blocks:
@@ -16,17 +13,6 @@
  * Under -g3 the line table steers the scheduling of the unrolled loops, so short loop bodies stay on
  * one line.
  */
-
-/* Summary of one of the three save files the player can pick. */
-typedef struct SaveSlotInfo {
-    /* 0x00 */ s32 unk0;       /* D_800BE3E8 */
-    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
-    /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
-    /* 0x0C */ s8 unkC;        /* D_800BE3DF */
-    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
-    /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
-    /* 0x0F */ s8 padF;
-} SaveSlotInfo; /* size = 0x10 */
 
 typedef struct Struct33990 {
     /* 0x00 */ u8 unk0;
@@ -53,15 +39,11 @@ enum EepromRequest {
     EEPROM_REQ_SAVE_SETTINGS  /* func_15007558 */
 };
 
-extern SaveSlotInfo D_800BE3F8[3];
 extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
 static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
 extern Struct33990 *D_80082BBC;
-extern u8 D_8008FE30;
-extern u8 *D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
-extern u32 D_800BE3E4;
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
@@ -107,7 +89,7 @@ void func_15006590(s32 eepromSlot) {
     u8 backup[27];
 
     for (i = 0; i < 27; i++) {
-        backup[i] = ((u8 *)D_800D2E4C)[i];
+        backup[i] = D_800D2E4C[i];
     }
     if (D_800BE3F0 == NULL) {
         D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
@@ -124,7 +106,7 @@ void func_15006590(s32 eepromSlot) {
         func_150064E0();
         if (D_800BE3DC >= 0 && D_80082BC0 != 0) {
             for (i = 0; i < 27; i++) {
-                ((u8 *)D_800D2E4C)[i] = backup[i];
+                D_800D2E4C[i] = backup[i];
             }
         }
         if (block == 0x34) {
@@ -138,7 +120,7 @@ void func_15006590(s32 eepromSlot) {
         sequence |= p[-2] << 8;
         sequence |= p[-1];
         for (i = 0; i < 27; i++) {
-            ((u8 *)D_800D2E4C)[i] = *p++;
+            D_800D2E4C[i] = *p++;
         }
         for (i = 0; i < 9; i++) {
             D_800D2E60[i] = *p++;
@@ -176,7 +158,7 @@ void func_15006590(s32 eepromSlot) {
             if (D_800BE3F8[saveSlot].sequence < sequence) {
                 flagCount = 0;
                 for (i = 0; i < 27; i++) {
-                    bits = ((u8 *)D_800D2E4C)[i];
+                    bits = D_800D2E4C[i];
                     for (j = 8; j != 0; j--) {
                         if (bits & 1) {
                             flagCount++;
@@ -184,9 +166,9 @@ void func_15006590(s32 eepromSlot) {
                         bits >>= 1;
                     }
                 }
-                D_800BE3F8[saveSlot].unk0 = D_800BE3E8;
+                D_800BE3F8[saveSlot].playTime = D_800BE3E8;
                 D_800BE3F8[saveSlot].flagCount = flagCount;
-                D_800BE3F8[saveSlot].unkC = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
+                D_800BE3F8[saveSlot].unkC = D_800BE3DF;
                 D_800BE3F8[saveSlot].unk4 = D_800BE3E4;
                 D_800BE3F8[saveSlot].sequence = sequence;
                 D_800BE3F8[saveSlot].eepromSlot = eepromSlot;
@@ -197,12 +179,12 @@ void func_15006590(s32 eepromSlot) {
                     }
                 } else {
                     for (i = 0; i < 27; i++) {
-                        ((u8 *)D_800D2E4C)[i] = backup[i];
+                        D_800D2E4C[i] = backup[i];
                     }
                 }
             } else {
                 for (i = 0; i < 27; i++) {
-                    ((u8 *)D_800D2E4C)[i] = backup[i];
+                    D_800D2E4C[i] = backup[i];
                 }
             }
         }
@@ -258,9 +240,9 @@ void func_15006BEC(s32 saveSlot) {
     *p++ = (sequence >> 16) & 0xFF;
     *p++ = (sequence >> 8) & 0xFF;
     *p++ = sequence & 0xFF;
-    for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
+    for (i = 0; i < 27; i++) { *p++ = D_800D2E4C[i]; }
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
-    *p++ = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
+    *p++ = D_800BE3DF; // matching: original loads it signed (lb)
     *p++ = D_800BE3E0;
     D_800BE3E4 = func_150859AC(0, 6);
     *p++ = (D_800BE3E4 >> 8) & 0xFF;
@@ -483,7 +465,7 @@ void func_15007778(void) {
     D_800BE3DC = -1;
     D_800BE3DE = 0;
     D_80082BC0 = 1;
-    for (i = 0; i < 27; i++) { ((u8 *)D_800D2E4C)[i] = 0; }
+    for (i = 0; i < 27; i++) { D_800D2E4C[i] = 0; }
     for (i = 0; i < 9; i++) { D_800D2E60[i] = 0; }
     for (i = 0; i < 4; i++) { D_800BE3D8[i] = -1; }
 }

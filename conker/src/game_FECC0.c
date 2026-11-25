@@ -13,21 +13,17 @@ typedef struct {
     /* 0xA */ u8 frames; // animation frames (0 = still)
 } Texture;
 
-extern void *D_800DBE80; // the current sky's data (here its gradient texture)
-extern Vtx *D_800DBE88[][2]; // per view, per framebuffer
-extern Mtx *D_800DBEB0;
-extern Mtx D_80089470;
 Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
-void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
-void guMtxF2L(f32 mf[4][4], Mtx *m);
+void func_150A7A48(MtxF a, MtxF b, MtxF out);
+void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
+void guMtxF2L(MtxF mf, Mtx *m);
 
 /* Draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient texture D_800DBE80, rolled by `roll` and with its
  * t window (rows top..bottom, chosen by D_800BE9F0) scrolled by tScroll. */
 Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll) {
-    f32 rotation[4][4];
-    f32 viewProj[4][4];
+    MtxF rotation;
+    MtxF viewProj;
     s32 top;
     s32 bottom;
     s32 tOffset;
@@ -54,7 +50,7 @@ Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5
     gDPSetOtherMode(gfx++, G_TP_PERSP | G_TF_BILERP | G_TC_FILT | 0xF,
                     G_RM_OPA_SURF | G_RM_OPA_SURF2 | G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
+    gfx = func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
     gfx = func_1501A680(gfx);
     gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     func_151102CC(rotation, 0.0f, 0.0f, roll);

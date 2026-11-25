@@ -1,33 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-/* Link fields shared by every object (see game_1944C0.c). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
+#include "effects.h"
 
 /* Trail types (see game_175250.c). */
-
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 pointCount;
-    u8 pad16[0xA];
-} TrailSpawn;
 
 /* One point of a trail; the points form a ring buffer. */
 typedef struct {
@@ -37,45 +13,6 @@ typedef struct {
     u8 pad12[2];
 } TrailPoint;
 
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    f32 unk14;
-    u8 flags;
-    u8 texture;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-} TrailRender; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state; /* 0x20: handler index */
-    u8 unk21;
-    u8 finishFn;
-    u8 hitFn;
-    u8 hitKind3Fn;
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
-
 /* Params of a trail spawned by a SprayEmitter: the TrailParams, then the floor height. */
 typedef struct {
     /* 0x00 */ TrailParams base;
@@ -83,7 +20,7 @@ typedef struct {
 } SprayTrailParams;
 
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ u8 pad10[0x1D];
     /* 0x2D */ s8 start; /* oldest point */
     /* 0x2E */ u8 pad2E[0x66];
@@ -106,18 +43,18 @@ typedef struct {
     /* 0x2C */ f32 rateRange;
     /* 0x30 */ f32 halfWidth;
     /* 0x34 */ f32 halfWidthRange;
-    /* 0x38 */ s16 unk1B; /* TrailMotion.unk1B */
+    /* 0x38 */ s16 unk1B; /* TrailMotion.alpha */
     /* 0x3A */ s16 unk1BRange;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 gravityRange;
-    /* 0x44 */ s16 unkC; /* TrailSpawn.unkC */
+    /* 0x44 */ s16 unkC; /* EffectTemplate20.unkC */
     /* 0x46 */ s16 unkCRange;
     /* 0x48 */ s32 pointCount;
     /* 0x4C */ s32 pointCountRange;
 } SprayDesc;
 
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ SprayDesc desc;
     /* 0x60 */ s16 idleTimer; /* frames until the next check for a nearby player */
     /* 0x62 */ u8 pad62[2];
@@ -131,10 +68,9 @@ typedef struct {
 extern SprayEmitter *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510F800(s32);
 extern s32 func_151464B8(s32);
-extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
-extern u8 D_800BE630[];
 extern u8 func_151D8E20(void);
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */
@@ -174,7 +110,7 @@ void func_15189A00(SprayEmitter *emitter) {
     f32 dy;
     f32 dz;
     s32 player;
-    TrailSpawn spawn;
+    EffectTemplate20 spawn;
     TrailMotion motion;
     f32 floorY;
     TrailRender render;
@@ -191,7 +127,7 @@ void func_15189A00(SprayEmitter *emitter) {
         found = FALSE;
         for (i = 0; (i <= D_80082FA0) && !found; i++) {
             player = D_800BE630[i];
-            playerPos = &D_800DBFF0[player].unk2F8;
+            playerPos = &D_800DBFF0[player].eye.x;
             dx = playerPos[0] - emitter->desc.origin.x;
             dy = playerPos[1] - emitter->desc.origin.y;
             dz = playerPos[2] - emitter->desc.origin.z;
@@ -206,25 +142,25 @@ void func_15189A00(SprayEmitter *emitter) {
     emitter->pending += (emitter->desc.rate + (func_150ADA68() * emitter->desc.rateRange)) * D_800BE9A4;
     if (emitter->pending > 1.0f) {
         floorY = emitter->floorY;
-        spawn.unk10 = 1;
-        spawn.unkE = 5;
+        spawn.kind = 1;
+        spawn.flags = 5;
         motion.unk1C = 16;
         motion.unk1E = 15;
         motion.unk14 = -10000.0f;
         motion.flags = 0x48;
         motion.texture = 3;
-        motion.unk1A = 0xFF;
+        motion.shade = 0xFF;
         render.unk0 = 0;
-        render.unk4 = 1;
-        render.unk8 = 0x160600;
+        render.setGeometryMode = 1;
+        render.clearGeometryMode = 0x160600;
         render.renderMode = 3;
         render.unk10 = 0x22;
         render.unk14 = 0x80;
         render.unk18 = 0x20;
-        render.unk1C = 0;
-        render.unk1D = 7;
+        render.primMode = 0;
+        render.envMode = 7;
         do {
-            spawn.pointCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
+            spawn.itemCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {
                 f32 t;
                 t = func_150ADA68();
@@ -254,10 +190,10 @@ void func_15189A00(SprayEmitter *emitter) {
                 motion.velocity.z = (speed * sinPitch) * sinYaw;
             }
             motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
-            motion.unk1B = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.unkC = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            motion.alpha = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
+            spawn.life = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
-                                  emitter->link.owner, emitter->link.list);
+                                  emitter->link.owner, emitter->link.kind);
             if (trail != NULL) {
                 params = trail->params;
                 memcpy(&params->floorY, &floorY, sizeof(floorY));
@@ -280,8 +216,8 @@ s32 func_15189EBC(Trail *trail) {
             splashPos.x = points[trail->start].pos.x;
             splashPos.y = params->floorY;
             splashPos.z = points[trail->start].pos.z;
-            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.unk1B, 0,
-                          &splashPos, trail->link.owner, trail->link.list);
+            func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
+                          &splashPos, trail->link.owner, trail->link.kind);
         }
         params->base.state = 4;
         params->floorY = -10000.0f;

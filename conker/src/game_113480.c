@@ -1,15 +1,7 @@
 #include <ultra64.h>
-// functions.h declares func_1513D524 as void; this file uses the object it returns
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
+#include "effects.h"
 
 /* Hit record copied to Streak.impact (+0x110) when a streak is spawned. */
 typedef struct {
@@ -46,74 +38,49 @@ typedef struct {
     /* 0x110 */ StreakImpact impact;
 } Streak;
 
-/* Spawn description passed to func_1513D524. */
-typedef struct {
-    /* 0x00 */ u8 kind;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 flags;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ Vec3f position;
-    /* 0x28 */ Vec3f direction;
-    /* 0x34 */ Vec3f unk34;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[0x12];
-} StreakSpawnInfo; /* size 0x58 */
-
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern f32 func_15144A74(Vec3f *, Vec3f *);
 extern s32 func_15145C90(s32);
-extern void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /* Spawns a streak particle from start along dir; when checkHit is set, records where its path hits a surface. */
 void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
                     s16 life, s8 callback) {
     void *streak;
-    StreakSpawnInfo info;
+    ParticleDef info;
     StreakImpact impact;
     s32 hitObject;
     Vec3f offset;
     s32 randomBit0;
     s32 randomBit1;
 
-    info.kind = 0x41;
-    info.flags = 0x2301;
-    info.unk8 = 0;
-    info.unkC = 0;
-    info.unk10 = 0;
-    info.unk11 = 0;
-    info.unk12 = 0;
-    info.life = life;
-    info.unk13 = 0xFF;
+    info.texture = 0x41;
+    info.renderModes = 0x2301;
+    info.frame = 0;
+    info.frameSpeed = 0;
+    info.rgba[0] = 0;
+    info.rgba[1] = 0;
+    info.rgba[2] = 0;
+    info.lifetime = life;
+    info.rgba[3] = 0xFF;
     info.unk44 = arg8;
     info.unk45 = 0xFF;
-    info.unk14 = arg3;
-    info.unk18 = arg4;
-    info.position = *start;
-    info.direction = *dir;
-    info.unk34.x = 0.0f;
-    info.unk34.y = arg2;
-    info.unk34.z = 0.0f;
-    info.unk40 = 1;
+    info.width = arg3;
+    info.height = arg4;
+    info.pos = *start;
+    info.rot = *dir;
+    info.scale.x = 0.0f;
+    info.scale.y = arg2;
+    info.scale.z = 0.0f;
+    info.flags = 1;
     impact.flags = 0;
     impact.callback = callback;
     if (checkHit && func_150AC9C0(start->x, start->y, start->z, dir->x, dir->y, dir->z, &impact.unk10, &impact.unk14,
                                   &impact.point.x, &impact.point.y, &impact.point.z, NULL, &hitObject, NULL, 0.0f) &&
         func_15145C90(hitObject)) {
         impact.flags |= 1;
-        offset.x = impact.point.x - info.position.x;
-        offset.y = impact.point.y - info.position.y;
-        offset.z = impact.point.z - info.position.z;
+        offset.x = impact.point.x - info.pos.x;
+        offset.y = impact.point.y - info.pos.y;
+        offset.z = impact.point.z - info.pos.z;
         if (func_15144A74(&offset, &impact.point) < 0.0f) {
             impact.side = -1.0f;
         } else {
@@ -212,7 +179,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     } else {
         return NULL;
     }
-    eye = (Vec3f *)&D_800DBFF0[viewIdx].unk2F8;
+    eye = &D_800DBFF0[viewIdx].eye;
     length = streak->length;
     start = streak->position;
     do { // matching: a do/while(0) (a VEC3 macro body) splits uopt's block so length's f0 is reused for dx; { } does not
@@ -319,7 +286,7 @@ s32 func_150E67D0(Streak *streak) {
     info.unk18 = 0x130001;
 
     impact = &streak->impact;
-    func_1513C73C((s32)&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
+    func_1513C73C(&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
                   50.0f, func_150ADA20() & 0xFF, 0, 0, streak->unkC, streak->unk1);
     return 0;
 }
