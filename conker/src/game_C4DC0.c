@@ -109,6 +109,9 @@ typedef struct {
 
 /* Raw field access for bytes of struct127 / struct126 that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
+/* Index of an object in the D_800CC2D0 object table. */
+#define OBJ_INDEX(o) ((o) - D_800CC2D0)
+
 #define FLD(p, off, T) (*(T *)((u8 *)(p) + (off)))
 
 extern s32 D_800BE3E4;
@@ -261,7 +264,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x14:
         obj->unk232 = cmd->a[0];
         D_800D154C = obj;
-        D_800C3E78 = D_800D154C - D_800CC2D0;
+        D_800C3E78 = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, obj->unk232);
         obj->unk21C = 0;
         break;
@@ -305,19 +308,19 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x62: {
         s32 pad;
 
-        if ((obj - D_800CC2D0) >= 0 && (obj - D_800CC2D0) < D_8008FD8C) {
-            func_15085710(obj - D_800CC2D0, 10, cmd->a[0]);
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+            func_15085710(OBJ_INDEX(obj), 10, cmd->a[0]);
         }
-        D_800BE3E4 = func_150859AC(obj - D_800CC2D0, 6);
+        D_800BE3E4 = func_150859AC(OBJ_INDEX(obj), 6);
     }
         break;
     case 0x63: {
         s32 pad;
 
-        if ((obj - D_800CC2D0) >= 0 && (obj - D_800CC2D0) < D_8008FD8C) {
-            func_15085710(obj - D_800CC2D0, 9, cmd->a[0]);
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+            func_15085710(OBJ_INDEX(obj), 9, cmd->a[0]);
         }
-        D_800BE3E4 = func_150859AC(obj - D_800CC2D0, 6);
+        D_800BE3E4 = func_150859AC(OBJ_INDEX(obj), 6);
     }
         break;
     case 0x64: {
@@ -327,14 +330,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (D_800BE616 == 0 && (D_800E9D00 & 0x200)) {
             v = 0x33;
         }
-        if ((obj - D_800CC2D0) >= 0 && (obj - D_800CC2D0) < D_8008FD8C) {
-            func_15085710(obj - D_800CC2D0, 2, v);
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+            func_15085710(OBJ_INDEX(obj), 2, v);
         }
         break;
     }
     case 0x65:
-        if ((obj - D_800CC2D0) >= 0 && (obj - D_800CC2D0) < D_8008FD8C) {
-            func_15085710(obj - D_800CC2D0, 3, cmd->a[0]);
+        if (OBJ_INDEX(obj) >= 0 && OBJ_INDEX(obj) < D_8008FD8C) {
+            func_15085710(OBJ_INDEX(obj), 3, cmd->a[0]);
         }
         break;
     case 0x5F:
@@ -352,7 +355,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk25C &= ~0x800;
         obj->unk232 = cmd->a[1];
         D_800D154C = obj;
-        D_800C3E78 = D_800D154C - D_800CC2D0;
+        D_800C3E78 = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, obj->unk232);
         obj->unk21C = 0;
         break;
@@ -604,7 +607,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x35:
         D_800D154C = obj;
-        D_800C3E78 = D_800D154C - D_800CC2D0;
+        D_800C3E78 = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, cmd->a[0]);
         obj->unk21C = 0;
         break;
@@ -750,7 +753,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (cmd->a[2] == 0) {
                 obj->unk101 |= 4;
             }
-            obj->unk65 = (other - D_800CC2D0) + 1;
+            obj->unk65 = OBJ_INDEX(other) + 1;
             obj->unk5C = cmd->a[1];
         }
     }
@@ -790,7 +793,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 pad;
         s32 idx;
 
-        idx = obj - D_800CC2D0;
+        idx = OBJ_INDEX(obj);
         if (idx < 4) {
             *((u16 **)D_800BE728[0])[idx] |= 0x4000;
             D_800BE710[idx] |= 0x4000;
@@ -904,7 +907,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
             v = 0x79;
             func_15083568(obj, v, 0.0f, 0);
-            if ((obj - D_800CC2D0) < D_8008FD90) {
+            if (OBJ_INDEX(obj) < D_8008FD90) {
                 obj->unk31C->unk4E = 2;
                 func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
@@ -950,9 +953,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         other = func_15083E90(cmd->a[0] & 0xFF);
         if (other != NULL) {
-            obj->unk13C = (other - D_800CC2D0) + 100;
+            obj->unk13C = OBJ_INDEX(other) + 100;
             obj->xz_velocity = 0.0f;
-            func_1505959C(other, obj - D_800CC2D0);
+            func_1505959C(other, OBJ_INDEX(obj));
         }
         break;
     }
@@ -998,7 +1001,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk31C->unk4E = cmd->a[0];
         break;
     case 0x85:
-        func_1507D4F8(obj - D_800CC2D0);
+        func_1507D4F8(OBJ_INDEX(obj));
         break;
     case 0x86:
         obj->unk23D = cmd->a[0];
@@ -1023,13 +1026,13 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk31C->unk11A = cmd->a[0];
         break;
     case 0x8B:
-        if ((obj - D_800CC2D0) <= D_80082FA0) {
-            func_1517EE40(cmd->a[0], cmd->a[1], cmd->a[2], cmd->a[3], cmd->a[4], obj - D_800CC2D0);
+        if (OBJ_INDEX(obj) <= D_80082FA0) {
+            func_1517EE40(cmd->a[0], cmd->a[1], cmd->a[2], cmd->a[3], cmd->a[4], OBJ_INDEX(obj));
         }
         break;
     case 0x8D:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state != 0 && (obj - D_800CC2D0) + 1 == D_800CC2D0[i].unk124 &&
+            if (D_800CC2D0[i].interaction_state != 0 && OBJ_INDEX(obj) + 1 == D_800CC2D0[i].unk124 &&
                 D_800CC2D0[i].unk5 == 5) {
                 func_15060F28(&D_800CC2D0[i], 0);
             }
@@ -1188,7 +1191,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAB:
         return FLD(obj->unk31C, 0x79, u8);
     case 0xAC: {
-        ret = func_150A2AEC(obj - D_800CC2D0, D_800D3840 - 2, cmd->a);
+        ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
             return ret | 0x4000;
         }
@@ -1221,7 +1224,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB6: {
         u8 *p;
         s32 v;
-        p = &D_800E0BB8[obj - D_800CC2D0];
+        p = &D_800E0BB8[OBJ_INDEX(obj)];
         v = *p;
         *p &= 0x7F;
         return v;
@@ -1531,11 +1534,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         return 0;
     case 0xDE:
-        return obj - D_800CC2D0;
+        return OBJ_INDEX(obj);
     case 0xC6: {
-        ret = obj - D_800CC2D0;
+        ret = OBJ_INDEX(obj);
         if (ret >= 0 && ret < D_8008FD8C) {
-            return func_150859AC(obj - D_800CC2D0, 6);
+            return func_150859AC(OBJ_INDEX(obj), 6);
         }
         break;
     }
