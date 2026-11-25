@@ -65,15 +65,14 @@ extern u8 D_800DCD27;               // priority of the current ambient colour
 extern s8 D_800DCD30[4][3];         // per-player directional light direction
 extern PointLightGfx D_800DCD40;    // padding light for odd light counts
 extern PointLight *D_800DCD78;      // list of all point lights
-extern struct LightZoneNode *D_800DCD80; // ambient colour zones
-extern struct LightZoneNode *D_800DCD84; // tint zones
+extern struct ZoneNode *D_800DCD80; // ambient colour zones
+extern struct ZoneNode *D_800DCD84; // tint zones
 
 void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
 void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
 extern void func_10004074(void *);
-extern f32 D_800A6530;
 
 struct Struct1515FBC4 {
     u8 pad0[0x98];
@@ -394,26 +393,28 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
 }
 
 
-/* struct178 with the fields this file reads named (structs.h has them as a blob). */
+/* A zone record: struct178 with the fields this file reads named (structs.h has them as a blob). */
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 pad6[0xE];
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ u8 pad8[0xC];
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 unk15;     // >> 2 is the zone type
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u32 unk18;    // colour in the low 24 bits; top byte doubles as a mask
+    /* 0x18 */ u32 unk18;    // light zones: colour in the low 24 bits, mask in the top byte;
+                             // trigger zones: index into D_8008B090
     /* 0x1C */ u32 unk1C;
     /* 0x20 */ u8 pad20[0x14];
-} LightZone;
+} Zone;
 
-typedef struct LightZoneNode {
-    struct LightZoneNode *next;
-    LightZone *zone;
-} LightZoneNode;
+typedef struct ZoneNode {
+    struct ZoneNode *next;
+    Zone *zone;
+} ZoneNode;
 
-LightZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, LightZoneNode *node);
+Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node);
 
 /*
  * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the
@@ -421,7 +422,7 @@ LightZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, LightZoneNode *node);
  * D_800DCD84 tint is applied on top.
  */
 void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
-    LightZone *zone;
+    Zone *zone;
     s32 i;
     s32 sum;
     u8 tint[3];
@@ -466,7 +467,7 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
 
 /* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
-    LightZone *zone;
+    Zone *zone;
 
     zone = func_1515EB84(x, y, z, 0, D_800DCD84);
     if (zone != NULL) {
@@ -588,12 +589,12 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 func_150A1DA0(struct127 *obj, LightZone *zone, s32);
+s32 func_150A1DA0(struct127 *obj, Zone *zone, s32);
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
-LightZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, LightZoneNode *node) {
+Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
     struct127 probe;
-    LightZone *zone;
+    Zone *zone;
 
     probe.x_position = x;
     probe.y_position = y;
@@ -661,14 +662,14 @@ void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32
     } else {
         dir[0] = 0;
         dir[1] = 0;
-        dir[2] = 0x7F;
+        dir[2] = 127;
     }
-        if (light->viewPosValid & (1 << player)) {
+    if (light->viewPosValid & (1 << player)) {
         pos[0] = light->viewPos[player][0];
         pos[1] = light->viewPos[player][1];
         pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(D_800D9C10[player][0], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        func_150A7960(&D_800D9C10[player][0][0], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
         pos[0] = viewPos[0];
         pos[1] = viewPos[1];
         pos[2] = viewPos[2];
@@ -687,336 +688,290 @@ void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32
     out->unkC = light->radius;
 }
 
-void func_1515EF74(s16 *arg0) {
-    func_1515F040(1.0f / func_1515F008(arg0, 0), 0);
-    func_1515F040(1.0f / func_1515F008(arg0, 5), 1);
-    func_1515F040(1.0f / func_1515F008(arg0, 0xA), 2);
-    func_1515F0AC(-func_1515F008(arg0, 0xE), 3);
+/*
+ * Stores the light-space scale for a fixed-point Mtx (viewed as halfwords: 16 integer parts,
+ * then 16 fraction parts): 1 / the diagonal as 16.16 in D_800DCD10[0..2], and -z translation
+ * in D_800DCD10[3].
+ */
+void func_1515EF74(s16 *mtx) {
+    func_1515F040(1.0f / func_1515F008(mtx, 0), 0);
+    func_1515F040(1.0f / func_1515F008(mtx, 5), 1);
+    func_1515F040(1.0f / func_1515F008(mtx, 10), 2);
+    func_1515F0AC(-func_1515F008(mtx, 14), 3);
 }
 
-f32 func_1515F008(s16 *arg0, s32 arg1) {
-    s32 hi = arg0[arg1];
-    hi = (hi << 16) | (u16)arg0[arg1 + 0x10];
-    return (f32)hi * 1.52587890625e-05f;
+/* Element `i` (0-15) of a fixed-point Mtx as a float. */
+f32 func_1515F008(s16 *mtx, s32 i) {
+    s32 value = mtx[i];
+    value = (value << 16) | (u16)mtx[i + 16];
+    return (f32)value * (1.0f / 65536.0f);
 }
 
-extern s32 D_800DCD10[];
-
-void func_1515F040(f32 arg0, s32 arg1) {
-    f32 var_fv0;
-
-    var_fv0 = 32767.0f;
-    if (var_fv0 <= arg0) {
-        arg0 = var_fv0;
-    } else if (arg0 < -32768.0f) {
-        arg0 = -32768.0f;
+/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as 16.16 fixed point. */
+void func_1515F040(f32 value, s32 i) {
+    if (value >= 32767.0f) {
+        value = 32767.0f;
+    } else if (value < -32768.0f) {
+        value = -32768.0f;
     }
-    arg0 *= 65536.0f;
-    D_800DCD10[arg1] = (s32) arg0;
+    value *= 65536.0f;
+    D_800DCD10[i] = (s32)value;
 }
 
-extern s32 D_800DCD10[];
-
-void func_1515F0AC(f32 arg0, s32 arg1) {
-    f32 var_fv0;
-
-    var_fv0 = 32767.0f;
-    if (arg0 >= var_fv0) {
-        arg0 = var_fv0;
-    } else if (arg0 < -32768.0f) {
-        arg0 = -32768.0f;
+/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as an integer. */
+void func_1515F0AC(f32 value, s32 i) {
+    if (value >= 32767.0f) {
+        value = 32767.0f;
+    } else if (value < -32768.0f) {
+        value = -32768.0f;
     }
-    D_800DCD10[arg1] = (s32) arg0;
+    D_800DCD10[i] = (s32)value;
 }
 
-struct Node1515F10C {
-    struct Node1515F10C *next;
-};
+/* Unlinks `light` from the light list and frees it. */
+void func_1515F10C(PointLight *light) {
+    PointLight *node;
+    PointLight *prev;
 
-void func_1515F10C(struct Node1515F10C *arg0) {
-    struct Node1515F10C *node;
-    struct Node1515F10C *prev;
-
-    node = (struct Node1515F10C *)D_800DCD78;
-    prev = 0;
-    if (node != arg0) {
-        do {
-            prev = node;
-            node = node->next;
-        } while (node != arg0);
+    prev = NULL;
+    for (node = D_800DCD78; node != light; node = node->next) {
+        prev = node;
     }
-    if (prev != 0) {
+    if (prev != NULL) {
         prev->next = node->next;
     } else {
-        D_800DCD78 = (s32)node->next;
+        D_800DCD78 = node->next;
     }
     func_10004074(node);
 }
 
-struct Node1515F170 {
-    struct Node1515F170 *next;
-    char pad4[5];
-    s8 unk9;
-    char padA[1];
-    u8 unkB;
-};
+/* Sets the disabled flag of every light in `group`. */
+void func_1515F170(s32 group, u8 disabled) {
+    PointLight *light;
 
-void func_1515F170(s32 arg0, u8 arg1) {
-    struct Node1515F170 *p;
-
-    for (p = (struct Node1515F170 *)D_800DCD78; p != 0; p = p->next) {
-        if (arg0 == p->unkB) {
-            p->unk9 = arg1;
+    for (light = D_800DCD78; light != NULL; light = light->next) {
+        if (group == light->group) {
+            light->disabled = disabled;
         }
     }
 }
 
-struct Node1515F1B0 {
-    s32 unk0;
-    f32 unk4;
-    f32 unk8;
-    s32 unkC;
-};
+/* A node of a list of spawn regions with their cached volume and area. */
+typedef struct RegionNode {
+    /* 0x00 */ struct134 *region;
+    /* 0x04 */ f32 volume;
+    /* 0x08 */ f32 area;
+    /* 0x0C */ struct RegionNode *next;
+} RegionNode;
 
-struct Node1515F1B0 *func_1515F1B0(s32 arg0) {
-    struct Node1515F1B0 *temp;
+RegionNode *func_1515F1B0(struct134 *region) {
+    RegionNode *node;
 
-    temp = (struct Node1515F1B0 *)func_10003C6C(0x10, 1, 2, 0, 1);
-    if (temp == 0) {
-        return 0;
+    node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    if (node == NULL) {
+        return NULL;
     }
-    temp->unk0 = arg0;
-    if (arg0 != 0) {
-        temp->unk4 = func_1514462C(arg0);
+    node->region = region;
+    if (region != NULL) {
+        node->volume = func_1514462C((s32)region);
     } else {
-        temp->unk4 = 0.0f;
+        node->volume = 0.0f;
     }
-    if (arg0 != 0) {
-        temp->unk8 = func_15144598((struct134 *)arg0);
+    if (region != NULL) {
+        node->area = func_15144598(region);
     } else {
-        temp->unk8 = 0.0f;
+        node->area = 0.0f;
     }
-    temp->unkC = 0;
-    return temp;
+    node->next = NULL;
+    return node;
 }
 
-void func_1515F25C(void **arg0, void *arg1) {
-    *(void **)((u8 *)arg1 + 0xC) = *arg0;
-    *arg0 = arg1;
+/* Pushes `node` onto the front of `list`. */
+void func_1515F25C(RegionNode **list, RegionNode *node) {
+    node->next = *list;
+    *list = node;
 }
 
-extern void (*D_8008B090[])(s32);
+typedef void (*ZoneHandler)(struct127 *obj, Zone *zone);
 
-void func_1515F270(s32 arg0, s32 *arg1) {
-    s32 idx = arg1[6];
+extern ZoneHandler D_8008B090[12];
+
+/* Runs zone handler zone->unk18 for `obj`. */
+void func_1515F270(struct127 *obj, Zone *zone) {
+    s32 idx = zone->unk18;
 
     if (idx >= 0 && idx < 12) {
-        if (D_8008B090[idx] != 0) {
-            D_8008B090[idx](arg0);
+        if (D_8008B090[idx] != NULL) {
+            D_8008B090[idx](obj, zone);
         }
     }
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
+s32 func_1505D024(struct127 *obj, s32 arg1, u16 arg2, s32 arg3);
 
-s32 func_1515F2B8(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x6001D, arg0->unk7A, -1);
+void func_1515F2B8(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x6001D, obj->unk7A, -1);
 }
 
-extern void (*D_8008B0C0[])(void);
+extern ZoneHandler D_8008B0C0[3];
 
-void func_1515F2E8(u8 *arg0, s32 *arg1) {
+/* Zone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
+void func_1515F2E8(struct127 *obj, Zone *zone) {
     s32 idx;
 
-    if (arg0[0x3B] == 1) {
-        idx = arg1[7];
+    if (obj->unique_id == 1) {
+        idx = zone->unk1C;
         if (idx >= 0 && idx < 3) {
-            D_8008B0C0[idx]();
+            D_8008B0C0[idx](obj, zone);
         }
     }
 }
 
-void func_1515F338(s32 arg0, s32 arg1) {
-    u8 temp_v1;
-    u8 temp_t0;
-    u8 temp_t1;
+/* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
+void func_1515F338(struct127 *obj, Zone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
 
-    temp_v1 = ((u8 *)&D_800DCD20)[0];
-    temp_t0 = ((u8 *)&D_800DCD20)[1];
-    temp_t1 = ((u8 *)&D_800DCD20)[2];
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
     if (D_800DCD94 != 97.0f) {
         D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
-        temp_v1 = (u8)(u32)D_800DCD94;
+        red = (u32)D_800DCD94;
     }
     if (D_800DCD98 != 96.0f) {
         D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
-        temp_t0 = (u8)(u32)D_800DCD98;
+        green = (u32)D_800DCD98;
     }
     if (D_800DCD9C != 98.0f) {
         D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
-        temp_t1 = (u8)(u32)D_800DCD9C;
+        blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(temp_v1, temp_t0, temp_t1, 0);
+    func_1515D4D4(red, green, blue, 0);
 }
 
-void func_1515F5C4(s32 arg0, s32 arg1) {
-    u8 temp_v1;
-    u8 temp_t0;
-    u8 temp_t1;
+/* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
+void func_1515F5C4(struct127 *obj, Zone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
 
-    temp_v1 = ((u8 *)&D_800DCD20)[0];
-    temp_t0 = ((u8 *)&D_800DCD20)[1];
-    temp_t1 = ((u8 *)&D_800DCD20)[2];
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
     if (D_800DCD94 != 229.0f) {
         D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
-        temp_v1 = (u8)(u32)D_800DCD94;
+        red = (u32)D_800DCD94;
     }
     if (D_800DCD98 != 253.0f) {
         D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
-        temp_t0 = (u8)(u32)D_800DCD98;
+        green = (u32)D_800DCD98;
     }
     if (D_800DCD9C != 160.0f) {
         D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
-        temp_t1 = (u8)(u32)D_800DCD9C;
+        blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(temp_v1, temp_t0, temp_t1, 0);
+    func_1515D4D4(red, green, blue, 0);
 }
 
-struct Stack1515F850 {
-    s32 pad14;
-    s32 pad18;
-    u8 sp1C;
-    u8 sp1D;
-    u8 sp1E;
-    u8 pad1F;
-    f32 sp20;
-    f32 sp24;
-    f32 sp28;
-};
+/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
+void func_1515F850(struct127 *obj, Zone *zone) {
+    f32 s;
+    f32 targetR;
+    f32 targetG;
+    f32 targetB;
+    u8 color[3];
 
-void func_1515F850(s32 arg0, s32 arg1) {
-    s32 pad;
-    struct Stack1515F850 stack;
-    f32 temp_f0;
-    f32 temp_f14;
-    f32 temp_f16;
-    f32 temp_f18;
-
-    stack.sp1C = ((u8 *)&D_800DCD20)[0];
-    stack.sp1D = ((u8 *)&D_800DCD20)[1];
-    stack.sp1E = ((u8 *)&D_800DCD20)[2];
-    temp_f0 = sinf(D_800DCDA0);
-    temp_f14 = (temp_f0 * 29.5f) + 127.5f;
-    temp_f16 = (temp_f0 * 71.0f) + 109.0f;
-    stack.sp28 = temp_f14;
-    stack.sp24 = temp_f16;
-    temp_f18 = (temp_f0 * 26.0f) + 26.0f;
-    stack.sp20 = temp_f18;
-    D_800DCDA0 += D_800A6530 * D_800BE9A4;
+    color[0] = D_800DCD20[0];
+    color[1] = D_800DCD20[1];
+    color[2] = D_800DCD20[2];
+    s = sinf(D_800DCDA0);
+    targetR = (s * 29.5f) + 127.5f;
+    targetG = (s * 71.0f) + 109.0f;
+    targetB = (s * 26.0f) + 26.0f;
+    D_800DCDA0 += 0.07100000232f * D_800BE9A4;
     D_800DCDA0 = func_15144B68(D_800DCDA0);
-    if (stack.sp28 != D_800DCD94) {
-        D_800DCD94 += (stack.sp28 - D_800DCD94) * 0.5f;
-        stack.sp1C = (u8)(u32)D_800DCD94;
+    if (targetR != D_800DCD94) {
+        D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
+        color[0] = (u32)D_800DCD94;
     }
-    if (stack.sp24 != D_800DCD98) {
-        D_800DCD98 += (stack.sp24 - D_800DCD98) * 0.5f;
-        stack.sp1D = (u8)(u32)D_800DCD98;
+    if (targetG != D_800DCD98) {
+        D_800DCD98 += (targetG - D_800DCD98) * 0.5f;
+        color[1] = (u32)D_800DCD98;
     }
-    if (stack.sp20 != D_800DCD9C) {
-        D_800DCD9C += (stack.sp20 - D_800DCD9C) * 0.5f;
-        stack.sp1E = (u8)(u32)D_800DCD9C;
+    if (targetB != D_800DCD9C) {
+        D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
+        color[2] = (u32)D_800DCD9C;
     }
-    func_1515D4D4(stack.sp1C, stack.sp1D, stack.sp1E, 0);
+    func_1515D4D4(color[0], color[1], color[2], 0);
 }
 
-long func_1515FB70(u8 *a0, u8 *a1)
-{
-  long offset;
-  s32 v0;
-  s32 *slot;
-  v0 = (*((u8 *) (a0 + 0x3B))) == 1;
-  if ((*((u8 *) (a0 + 0x3B))) == 1)
-  {
-    v0 = *((s32 *) (a1 + 0x1C));
-    if (v0 >= 0)
-    {
-      offset = 0x1C;
-      if (!v0)
-      {
-        slot = (s32 *) (a1 + offset);
-      }
+/* Zone handler: func_1515F2E8 for a handler table that is empty in this build. */
+void func_1515FB70(struct127 *obj, Zone *zone) {
+    s32 idx;
+
+    if (obj->unique_id == 1) {
+        idx = zone->unk1C;
+        if (idx >= 0 && idx < 0) {
+        }
     }
-  }
 }
 
-
-s32 func_1515FB94(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x6002D, arg0->unk7A, -1);
+void func_1515FB94(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x6002D, obj->unk7A, -1);
 }
 
-void func_1515FBC4(struct127 *arg0, s32 arg1) {
-    struct Struct1515FBC4 *temp_v0;
-    struct127 *temp_v1;
-    s32 temp_a3;
+/* Zone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
+void func_1515FBC4(struct127 *obj, Zone *zone) {
+    struct Struct1515FBC4 *link;
+    struct127 *target;
+    s32 targetIndex;
 
-    temp_v1 = 0;
-    temp_v0 = func_15105C24(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = temp_v0->unk98;
+    target = NULL;
+    link = func_15105C24((s32)zone);
+    if (link != NULL) {
+        target = link->unk98;
     }
-    if (temp_v1 != 0) {
-        temp_a3 = ((s32)temp_v1 - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    if (target != NULL) {
+        targetIndex = target - D_800CC2D0;
     } else {
-        temp_a3 = -1;
+        targetIndex = -1;
     }
-    func_1505D024(arg0, 0x6002E, arg0->unk7A, temp_a3);
+    func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
-
-s32 func_1515FC34(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x33, 0xC000, -1);
+void func_1515FC34(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x33, 0xC000, -1);
 }
 
-struct Struct1515FC60 {
-    s16 unk0;
-    u8 pad2[2];
-    s16 unk4;
-    s16 unk6;
-    u8 pad8[0x14];
-    u32 unk1C;
-};
-
-union Union1515FC60 {
-    f32 f;
-    f32 pad[2];
-};
-
-extern f32 D_800A6534;
 s32 func_150AD960(s32, s32, s32, s32);
 void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(struct127 *, s32);
 
-void func_1515FC60(struct127 *arg0, struct Struct1515FC60 *arg1) {
-    f32 temp_f0;
-    union Union1515FC60 temp_f18;
-    s32 temp_v0;
+/*
+ * Zone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
+ * is outside of, fires event 0x2F on `obj`.
+ */
+void func_1515FC60(struct127 *obj, Zone *zone) {
+    s32 pad; // matching: stack slot
+    f32 limit;
+    f32 scale;
+    s32 value;
 
-    if (arg0->unk31C != NULL) {
-        if (arg0->unk31C->unk120 == 0) {
-            temp_v0 = arg1->unk1C;
-            if (temp_v0 != 0) {
-                temp_f18.f = (f32)(u32)temp_v0 * D_800A6534;
-                temp_v0 = func_150AD960(arg1->unk0, arg1->unk4, (s32)arg0->x_position, (s32)arg0->z_position);
-                temp_f0 = ((f32)arg1->unk6 * temp_f18.f) - (f32)arg0->unkE4;
-                if (temp_f0 > (f32)temp_v0) {
-                    return;
-                }
+    if (obj->unk31C != NULL && obj->unk31C->unk120 == 0) {
+        value = zone->unk1C;
+        if (value != 0) {
+            scale = (f32)(u32)value * 0.009999999776f;
+            value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
+            limit = (zone->radius * scale) - obj->unkE4;
+            if (limit > value) {
+                return;
             }
-            func_1505D024(arg0, 0x2F, 0, -1);
-            func_15136C3C(arg0, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(arg0);
-            func_1507CD64(arg0, 6);
         }
+        func_1505D024(obj, 0x2F, 0, -1);
+        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(obj);
+        func_1507CD64(obj, 6);
     }
 }
