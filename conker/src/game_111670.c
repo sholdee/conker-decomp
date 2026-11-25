@@ -257,12 +257,15 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
 }
 
 /* Ground-probe hit records written to D_800D3300 by func_150A43E0. */
-typedef struct unkfunc_1510F8D8 {
+typedef struct GroundHit {
     s32 height; // 24.8 fixed point
     s32 *tri;   // collision triangle: three vertex-buffer offsets
     s32 unk8;
     s32 unkC;
-} unkfunc_1510F8D8;
+} GroundHit;
+
+// D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
+#define sGroundHits ((GroundHit *)&D_800D3300)
 
 /* 0xA0-byte entries of the D_800DBEF4 array. */
 typedef struct Struct150E4928 {
@@ -328,9 +331,9 @@ void func_150E4928(Struct150E4928 *obj) {
             if (found) {
                 best = -0x800000;
                 while (found--) {
-                    if (best < ((unkfunc_1510F8D8 *)&D_800D3300)[found].height) {
-                        best = ((unkfunc_1510F8D8 *)&D_800D3300)[found].height;
-                        tri = ((unkfunc_1510F8D8 *)&D_800D3300)[found].tri;
+                    if (best < sGroundHits[found].height) {
+                        best = sGroundHits[found].height;
+                        tri = sGroundHits[found].tri;
                         height = best / 256.0f;
                     }
                 }
@@ -545,8 +548,8 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         spawn.unk34 = 0;
         spawn.unk0C = 0;
         spawn.unk0E = 0;
-        minScale = (u32)D_800A1110[size][1] * 95.0f / 256.0f;
-        rangeScale = (u32)D_800A1110[size][1] * 130.0f / 256.0f;
+        minScale = D_800A1110[size][1] * 95.0f / 256.0f;
+        rangeScale = D_800A1110[size][1] * 130.0f / 256.0f;
         if (kind == 0x11) {
             spawn.data = D_8009187C;
         } else if (kind == 0xA) {
