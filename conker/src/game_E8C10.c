@@ -791,6 +791,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             particle.rotation.x = func_150ADA68() * 360.0f;
             particle.rotation.y = func_150ADA68() * 360.0f;
             particle.rotation.z = func_150ADA68() * 360.0f;
+            // matching: the "+ -c" addends here must stay; writing "- c" changes the emitted code
             particle.rotationVel.x = func_150ADA68() * 45.46600342f + -22.73300171f;
             particle.rotationVel.z = func_150ADA68() * 45.46600342f + -22.73300171f;
             func_1514470C(anchors[func_150ADA20() & 1], &particle.pos);
