@@ -15,6 +15,7 @@ Gfx *func_1502BAD0(Gfx *arg0, s32 arg1, s16 arg2);
 Gfx *func_15035FE8(Gfx *arg0, s32 arg1);
 extern u8 D_80089470;
 s32 func_1501878C(void);
+void func_15019F20(void);
 
 
 void func_150186D0(void) {
@@ -678,4 +679,85 @@ s32 func_15019E60(Gfx *arg0) {
     return func_15043384(func_151E8620(func_1501A490(arg0, 0xFF, 0, 0, 0, 0)));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019F20.s")
+extern u32 D_800BE610;
+extern u8 D_800BE619;
+extern u8 D_800BE61A;
+extern s32 D_800BE9AC;
+extern s32 D_800BE9B0;
+extern f32 D_800BE9B8;
+extern f32 D_800BE9BC;
+extern u8 D_800BEA0C;
+f32 D_800BE5E8[11];
+void func_150A019C(void);
+
+void func_15019F20(void) {
+    s32 ticks;
+    u8 rate;
+    f32 sum;
+    u32 i;
+
+    ticks = D_800BE9E4;
+    D_800BEA08 = ticks;
+    rate = D_800BEA0C;
+    if (rate) {
+        s32 pad;
+        if (rate == 1) {
+            D_800BE9E4 = 0;
+            D_800BE5E0 = 0;
+            ticks = 0;
+            D_800BE9A4 = 0.0f;
+        } else {
+            i = ((u32*)D_800BE5E8)[10];
+            i += ticks;
+            D_800BE9A4 = (f32)ticks / (f32)(u32)rate;
+            D_800BE9E4 = D_800BE9A4;
+            D_800BE9A4 *= 0.5f;
+            if (i >= rate) {
+                D_800BE9E4 = i / rate;
+                i -= D_800BE9E4 * i;
+                if (1) {} if (1) {} if (1) {} if (1) {} if (1) {}
+                D_800BE610 = i;
+                ticks = D_800BE9E4;
+            } else {
+                D_800BE610 = i;
+                D_800BE9E4 = ticks = 0;
+            }
+        }
+    } else {
+        D_800BE9A4 = (f32)ticks * 0.5f;
+    }
+    D_800BE5E0 &= 1;
+    D_800BE5E0 += ticks;
+    D_800BE9A0 = D_800BE5E0 >> 1;
+    if (D_800BE9A4 != 0) {
+        D_800BE9A8 = 1.0f / D_800BE9A4;
+    } else {
+        D_800BE9A4 = 0.0f;
+        D_800BE9A8 = 0.0f;
+        ;
+    }
+    D_800BE9AC += ticks;
+    D_800BE9B0 = D_800BE9AC % 30;
+    D_800BE5E8[D_800BE619] = D_800BE9A4;
+    D_800BE619++;
+    if (D_800BE619 == 10) {
+        D_800BE619 = 0;
+    }
+    if (D_800BE61A < 10) {
+        D_800BE61A++;
+        D_800BE9B8 = D_800BE9A4;
+        D_800BE9BC = D_800BE9A8;
+    } else {
+        sum = 0.0f;
+        for (i = 0; i < 10; i++) {
+            sum += D_800BE5E8[i];
+        }
+        D_800BE9B8 = sum * 0.1000000015f;
+        if (D_800BE9B8 != 0) {
+            D_800BE9BC = 1.0f / D_800BE9B8;
+        } else {
+            D_800BE9BC = 0.0f;
+        }
+    }
+    func_150A019C();
+}

@@ -3466,7 +3466,100 @@ void func_15072AF8(void) {
     func_1505E650(D_800D154C, D_800D154C->unk84.uh + 1, 1.0f, 6.0f, 0.0f, 0.0f, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072B44.s")
+void func_15072B44(void) {
+    s32 state;
+    s32 anim = -1;
+
+    state = D_800D154C->unk84.uh;
+    switch (state) {
+    case 0x26F:
+    case 0x270:
+    case 0x271:
+    case 0x272:
+    case 0x273:
+        anim = state + 1;
+        break;
+    case 0x274:
+        anim = 0x26F;
+        break;
+    case 0x1D6:
+        anim = 0x1D7;
+        break;
+    case 0x1D7:
+        anim = 0x1D8;
+        break;
+    case 0x175:
+        anim = 0x177;
+        break;
+    case 0x176:
+        anim = 0x177;
+        break;
+    case 0x35:
+        anim = 0x3A;
+        break;
+    case 0x3F:
+        anim = 0x3A;
+        break;
+    case 0x1CD:
+        anim = 0x1CE;
+        break;
+    case 0x1CF:
+        anim = 0x1CE;
+        break;
+    case 0xFD:
+        anim = 0xFE;
+        break;
+    case 0x10A:
+        anim = 0x10A;
+        break;
+    case 0x12C:
+        anim = 0x12D;
+        break;
+    case 0x142:
+        anim = 0x12D;
+        break;
+    case 0x138:
+        anim = 0x3E;
+        break;
+    case 0x10C:
+        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+            anim = 0x10A;
+        } else {
+            func_1507F640();
+        }
+        break;
+    case 0x156:
+        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+            anim = 0x157;
+        } else {
+            func_1507F640();
+        }
+        break;
+    case 0x167:
+        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+            anim = 0x165;
+        } else {
+            func_1507F640();
+        }
+        break;
+    default:
+        if ((state == 0xBE) ||
+            ((state == 0xC1) && !(*(s32 *)((u8 *)D_800D154C->unk31C + 0x38) & 0x2000))) {
+            anim = 0xBF;
+        }
+        break;
+    }
+    if (anim != -1) {
+        func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+    }
+}
+
+/* The original TU defined the state-handler table D_8008630C (now asm/data/22AC10.rodata.s)
+ * holding this function's address. That data reference makes as1 treat the entry as an
+ * indirect-jump target, which changes its delay-slot filling (the jump-table index
+ * subtractions are hoisted into earlier delay slots). Game .c.o(.rodata) is discarded at
+ * link, so this only restores the assembler's view. */
+static void (*const D_8008630C_entry[])(void) = { func_15072B44 };
 void func_15072DA0(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
     D_800D154C->unk2F8 |= D_800D1580;

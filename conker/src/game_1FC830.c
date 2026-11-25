@@ -779,7 +779,186 @@ void func_151D0128(ConkerStruct151D0128 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FC830/func_151D014C.s")
+typedef struct {
+    s32 unk0;
+    char pad4[0x3B - 4];
+    u8 unk3B;
+    char pad3C[0x1D4 - 0x3C];
+    s32 unk1D4;
+} Obj151D014C;
+
+typedef struct {
+    Obj151D014C *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    f32 unk8;
+    u8 unkC;
+    u8 unkD;
+} Sub151D014C;
+
+typedef struct {
+    char pad0[0xE];
+    s16 unkE;
+    char pad10[4];
+    u8 unk14[0x14];
+    Sub151D014C unk28;
+} Arg151D014C;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode151D014C;
+
+extern struct17 D_800AAF5C[];
+extern struct17 D_800AAF74;
+extern u8 D_800AAF80[];
+extern u8 D_80091154[];
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+
+Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
+    Sub151D014C *sub;
+    Vtx *vtx;
+    Obj151D014C *obj;
+    u8 update;
+    struct17 *cam;
+    f32 mx;
+    f32 my;
+    f32 mz;
+    f32 n[3];
+    f32 s;
+    struct17 from;
+    struct17 to;
+    struct17 diff;
+    f32 stepx;
+    f32 stepy;
+    f32 stepz;
+    struct17 pos;
+    f32 ang;
+    f32 t;
+    f32 dist;
+    f32 amp;
+    f32 tex;
+    f32 unused;
+    f32 wx;
+    f32 wy;
+    f32 wz;
+    s32 i;
+
+    obj = arg1->unk28.unk0;
+    sub = &arg1->unk28;
+    if (obj->unk0 == 0 || obj->unk3B != sub->unk4) {
+        arg1->unkE = -1;
+        return gfx;
+    }
+    if (obj->unk1D4 == 0) {
+        return gfx;
+    }
+    func_151D5D60(arg1->unk14, arg2, 0x1C0, (void **)&vtx, NULL);
+    if (vtx == NULL) {
+        return gfx;
+    }
+    update = 1;
+    func_15143134(&D_800AAF5C[sub->unkD], &from, obj->unk1D4 + 0x80);
+    func_15143134(&D_800AAF74, &to, (D_800AAF80[sub->unkD] << 6) + obj->unk1D4);
+    cam = func_15144B34(arg2);
+    gfx = func_15142B7C(gfx, 0x200005, 0x60600);
+    gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
+    gfx = func_1513F4E4(gfx, 0x3B, &update);
+    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, sub->unkC, &update);
+    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+    diff.unk0 = to.unk0 - from.unk0;
+    diff.unk4 = to.unk4 - from.unk4;
+    diff.unk8 = to.unk8 - from.unk8;
+    dist = func_15143E64(&diff);
+    mx = diff.unk0 * 0.5f + from.unk0 - cam->unk0;
+    my = diff.unk4 * 0.5f + from.unk4 - cam->unk4;
+    mz = diff.unk8 * 0.5f + from.unk8 - cam->unk8;
+    wx = diff.unk4 * mz - my * diff.unk8;
+    wy = diff.unk8 * mx - mz * diff.unk0;
+    wz = diff.unk0 * my - mx * diff.unk4;
+    if (wx * wx + wy * wy + wz * wz == 0.0f) {
+        n[0] = 0.0f;
+        n[1] = 0.0f;
+        n[2] = 0.0f;
+    } else {
+        amp = (35.0f * sub->unk8) / sqrtf(wx * wx + wy * wy + wz * wz);
+        n[0] = wx * amp;
+        n[1] = wy * amp;
+        n[2] = wz * amp;
+    }
+    stepx = diff.unk0 * 0.1666666716f;
+    stepy = diff.unk4 * 0.1666666716f;
+    stepz = diff.unk8 * 0.1666666716f;
+    if (dist < 20.0f) {
+        amp = 0.0f;
+    } else if (dist < 70.0f) {
+        amp = (dist - 20.0f) * 0.01999999955f * 0.6000000238f;
+    } else {
+        amp = 0.6000000238f;
+    }
+    /* One source line on purpose: as1 orders the hoisted loop constants against the copy by line number. */
+    pos = from; t = 0.0f; ang = 0.0f; tex = 0.0f; i = 0; do {
+        s = 1.0f - sinf(ang) * amp;
+        wx = n[0] * s;
+        vtx->v.ob[0] = (s32)(wx + pos.unk0);
+        vtx->v.ob[1] = (s32)(n[1] * s + pos.unk4);
+        vtx->v.ob[2] = (s32)(n[2] * s + pos.unk8);
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = 0xFF;
+        vtx->v.tc[0] = 0;
+        vtx->v.tc[1] = (s32)tex;
+        vtx++;
+        vtx->v.ob[0] = (s32)(pos.unk0 - wx);
+        vtx->v.ob[1] = (s32)(pos.unk4 - n[1] * s);
+        vtx->v.ob[2] = (s32)(pos.unk8 - n[2] * s);
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = 0xFF;
+        vtx->v.tc[0] = 0x7C0;
+        vtx->v.tc[1] = (s32)tex;
+        vtx++;
+        s = 1.0f - sinf(ang + 0.5235987902f) * amp;
+        wx = n[0] * s;
+        vtx->v.ob[0] = (s32)(pos.unk0 + stepx - wx);
+        wy = n[1] * s;
+        vtx->v.ob[1] = (s32)(pos.unk4 + stepy - wy);
+        wz = n[2] * s;
+        vtx->v.ob[2] = (s32)(pos.unk8 + stepz - wz);
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = 0xFF;
+        vtx->v.tc[0] = 0x7C0;
+        vtx->v.tc[1] = (s32)(tex + 341.3333435f);
+        vtx++;
+        /* Dead store on purpose: its two variable reads shift where uopt splits the basic block. */
+        unused = wx + wy;
+        vtx->v.ob[0] = (s32)(pos.unk0 + stepx + wx);
+        vtx->v.ob[1] = (s32)(pos.unk4 + stepy + wy);
+        vtx->v.ob[2] = (s32)(pos.unk8 + stepz + wz);
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = 0xFF;
+        vtx->v.tc[0] = 0;
+        vtx->v.tc[1] = (s32)(tex + 341.3333435f);
+        vtx++;
+        i++;
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 0, 2, 3, 0);
+        pos.unk0 += stepx;
+        pos.unk4 += stepy;
+        pos.unk8 += stepz;
+        t += 0.1666666716f;
+        ang += 0.5235987902f;
+        tex += 341.3333435f;
+    } while (i != 6);
+    return gfx;
+}
 
 typedef struct {
     s32 unk0;

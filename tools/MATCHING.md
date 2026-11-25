@@ -149,6 +149,13 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
 - **Look at the compiler's own view.** `cc -K` keeps IDO's intermediate files (e.g. the binasm
   before the assembler's scheduling pass) — compare pre- and post-scheduling order to tell a
   code-generation difference from a scheduling one. Offline compiles don't count as checks.
+- **Address-taken functions schedule differently.** IDO's assembler (as1) only hoists a switch's
+  jump-table index arithmetic into earlier delay slots, and keeps some dead copies, when the
+  function's entry is address-taken. If the target's jtbl code looks "impossible", grep asm/data for
+  the function's address (a handler table). Then add a static table in the C file, for example
+  `static s32 (*const D_800841D4_entry[])(...) = { func_X };`. Game `.rodata` from C objects is
+  discarded at link, so this adds no bytes. It landed func_15072B44 and func_15031FC8, which were
+  wrongly skip-listed.
 - **Offline variant sweeps land near-misses in 2-3 checks.** Agents who closed register,
   stack-slot and scheduling residues fastest wrote a small script in `my/`. It runs the
   workspace's `../ido/ido5.3_recomp/cc` through `mw.run(cmd, cwd)`, using the same flags
