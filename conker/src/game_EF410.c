@@ -154,14 +154,6 @@ void func_150C2290(u8 arg0) {
     func_15151A38(&params, arg0, 1);
 }
 
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x40];
-    /* 0x150 */ f32 unk150;
-    /* 0x154 */ u8 pad154[0xC];
-    /* 0x160 */ f32 unk160;
-} Particle_EF410;
-
 void func_1514C470(f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, u8);
 
 void func_150C2424(u8 arg0) {
@@ -171,7 +163,7 @@ void func_150C2424(u8 arg0) {
                   (func_150ADA68() * 3.0f) + 4.0f, 3, 0, 0.0f, 0, arg0);
 }
 
-s32 func_150C251C(Particle_EF410 *particle) {
+s32 func_150C251C(ChannelParticle *particle) {
     struct133 *sub = particle->head.unk98;
     s32 alpha = particle->head.def.lifetime << 3;
 

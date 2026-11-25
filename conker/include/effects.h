@@ -2467,6 +2467,45 @@ typedef struct ParticleJitter {
     /* 0x4C */ f32 unk4C;
 } ParticleJitter; /* size 0x50 */
 
+/*
+ * Per-particle motion state at +0x110 of a func_15149550 particle (game_176A00.c). Each channel (A, B, C)
+ * picks a new random target between its min and max whenever its timer runs out, and the
+ * particle field it drives eases towards that target by `rate` per frame.
+ */
+typedef struct ParticleChannels {
+    /* 0x00 */ f32 maxA;
+    /* 0x04 */ f32 minA;
+    /* 0x08 */ f32 targetA;
+    /* 0x0C */ s16 timerA;
+    /* 0x0E */ s16 periodA;
+    /* 0x10 */ f32 rateA;
+    /* 0x14 */ f32 maxB;
+    /* 0x18 */ f32 minB;
+    /* 0x1C */ f32 altB;
+    /* 0x20 */ f32 targetB;
+    /* 0x24 */ s16 timerB;
+    /* 0x26 */ s16 periodB;
+    /* 0x28 */ f32 rateB;
+    /* 0x2C */ s32 maxC;
+    /* 0x30 */ s32 minC;
+    /* 0x34 */ s32 targetC;
+    /* 0x38 */ s16 timerC;
+    /* 0x3A */ s16 periodC;
+    /* 0x3C */ f32 rateC;
+    /* 0x40 */ f32 shrinkRate;
+    /* 0x44 */ f32 growRate;
+    /* 0x48 */ u8 effect;
+    /* 0x49 */ u8 pad49[3];
+    /* 0x4C */ f32 maxHeight;
+} ParticleChannels; /* size 0x50 */
+
+/* The particle func_15149550 (game_176A00.c) spawns through func_1513D524. */
+typedef struct ChannelParticle {
+    /* 0x000 */ DefParticleHead head; /* head.def.scale.x: accelY, head.def.scale.y: velY, head.unk74: growFlags */
+    /* 0x110 */ ParticleChannels motion;
+    /* 0x160 */ f32 extra; /* the caller's emitter->extraSize bytes; game_EFEA0.c keeps a yaw angle here */
+} ChannelParticle;
+
 /* Per-particle data of the age-driven fade (func_151A483C / func_151A4900 for DescParticleHead particles,
  * game_1D0840.c; billboard callbacks 0x14 / 0x15, game_1D43B0.c). Each *Start is a remaining-life value:
  * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
