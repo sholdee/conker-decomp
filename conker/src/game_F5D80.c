@@ -553,104 +553,92 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     }
 }
 
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
+/* Spawn packet for func_15132A4C objects; the spawned object holds these fields at +0x10. */
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 rotation[3]; /* 0x10: degrees */
+    f32 scale[3];    /* 0x1C */
+    Vec3f pos;       /* 0x28 */
+    f32 velocity[3]; /* 0x34 */
+    f32 spin[3];     /* 0x40: rotation per tick */
+    f32 gravity;     /* 0x4C */
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    u8 pad69;
+    u8 unk6A;
+    s32 unk6C;
+    u8 unk70;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[6];
+} BurstPacket; /* size 0x7C */
 
-void func_150C9DC4(RadialEffect *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
-    struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        struct17 unk28;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        u8 unk63;
-        u8 unk64;
-        u8 unk65;
-        u8 unk66;
-        u8 unk67;
-        u8 unk68;
-        u8 pad69;
-        u8 unk6A;
-        u8 pad6B;
-        s32 unk6C;
-        u8 unk70;
-        u8 pad71;
-        s16 unk72;
-        s16 unk74;
-        u8 pad76[6];
-    } sp34;
+/* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
+void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
+    BurstPacket packet;
     f32 r;
     f32 g;
     f32 b;
 
-    func_150CCD90(arg1->unk8, &r, &g, &b);
+    func_150CCD90(pos->z, &r, &g, &b);
     {
-    typedef s32 T;
-    sp34.unk28 = *arg1;
+        typedef s32 T; // matching: a scope with a declaration orders the struct copy
+        packet.pos = *pos;
     }
-    sp34.unk1C = 1.0f;
-    sp34.unk20 = 1.0f;
-    sp34.unk24 = 1.0f;
-    sp34.unk50 = 0x29E8;
-    sp34.unk10 = func_150ADA68() * 360.0f;
-    sp34.unk14 = func_150ADA68() * 360.0f;
-    sp34.unk18 = func_150ADA68() * 360.0f;
-    sp34.unk56 = 0x20;
-    sp34.unk04 = 0.200000003f;
-    sp34.unk44 = 0.0f;
-    sp34.unk00 = 1.0f;
-
-    ((s32 *)&sp34)[-5] = func_150ADA20();
-    func_15143794((u8)arg2, (s16)((((s32 *)&sp34)[-5] % 26U) - 45),
-                  (func_150ADA68() * 81.0f + 60.0f) * arg0->def.speed * 0.009999999776f,
-                  &sp34.unk34);
-
-    sp34.unk40 = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    sp34.unk48 = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    sp34.unk54 = (func_150ADA20() % 41U) + 0x28;
-    sp34.unk4C = (func_150ADA68() * 1533.0f + -2500.0f) * 0.001000000047f;
-
-    sp34.unk08 = sp34.unk0C = (func_150ADA68() * 400.0f + 199.0f) * 0.001000000047f;
-    sp34.unk58 = 0;
-    sp34.unk5C = 0;
-
-    sp34.unk60 = (func_150ADA20() % 101U) + 0x9B;
-    sp34.unk61 = 7;
-    sp34.unk62 = 0;
-    sp34.unk63 = 0;
-    sp34.unk64 = 0;
-    sp34.unk65 = 0;
-    sp34.unk66 = 0;
-    sp34.unk67 = 0;
-    sp34.unk68 = 0;
-    sp34.unk6A = 2;
-    sp34.unk6C = 0;
-    sp34.unk70 = 0;
-    sp34.unk72 = 0x20;
-    sp34.unk74 = 7;
-
-    func_15132A4C(&sp34, 3, 0xFF, 0, arg0->unkC, arg0->unk1);
+    packet.scale[0] = 1.0f;
+    packet.scale[1] = 1.0f;
+    packet.scale[2] = 1.0f;
+    packet.unk50 = 0x29E8;
+    packet.rotation[0] = func_150ADA68() * 360.0f;
+    packet.rotation[1] = func_150ADA68() * 360.0f;
+    packet.rotation[2] = func_150ADA68() * 360.0f;
+    packet.unk56 = 0x20;
+    packet.unk04 = 0.200000003f;
+    packet.spin[1] = 0.0f;
+    packet.unk00 = 1.0f;
+    // matching: the original func_150ADA20 returned a full word; its spill is the
+    // call-argument slot at sp+0x20, 0x14 below packet
+    ((s32 *)&packet)[-5] = func_150ADA20();
+    func_15143794(heading, (s16)((((s32 *)&packet)[-5] % 26U) - 45),
+                  (func_150ADA68() * 81.0f + 60.0f) * effect->def.speed * 0.009999999776f,
+                  packet.velocity);
+    packet.spin[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.spin[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.unk54 = (func_150ADA20() % 41U) + 40;
+    packet.gravity = (func_150ADA68() * 1533.0f + -2500.0f) * 0.001000000047f;
+    packet.unk08 = packet.unk0C = (func_150ADA68() * 400.0f + 199.0f) * 0.001000000047f;
+    packet.unk58 = 0;
+    packet.unk5C = 0;
+    packet.unk60 = (func_150ADA20() % 101U) + 155;
+    packet.unk61 = 7;
+    packet.unk62 = 0;
+    packet.unk63 = 0;
+    packet.unk64 = 0;
+    packet.unk65 = 0;
+    packet.unk66 = 0;
+    packet.unk67 = 0;
+    packet.unk68 = 0;
+    packet.unk6A = 2;
+    packet.unk6C = 0;
+    packet.unk70 = 0;
+    packet.unk72 = 0x20;
+    packet.unk74 = 7;
+    func_15132A4C(&packet, 3, 0xFF, 0, effect->unkC, effect->unk1);
 }
 
 /* Spawned burst particle: the BurstPacket fields live at +0x10. */
