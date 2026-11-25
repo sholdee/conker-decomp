@@ -678,7 +678,7 @@ extern f32 D_800A56BC; // 57.2957763671875
 extern f32 D_800A56C0;
 extern f32 D_800A56C4;
 extern f32 D_800A56C8;
-extern s32 D_800A5770;
+extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern u8  D_800A6690[5];  // "scale"
@@ -1088,8 +1088,7 @@ extern WaterStage D_800D24C8;
 extern f32 D_800D2890[3];
 
 extern u8  D_800D2C68;
-extern s32 D_800D2C28;
-extern s32 D_800D2C2C;
+extern s32 D_800D2C28[16]; // segment base addresses
 
 extern s32 D_800D2E50;
 extern u8  D_800D2E60[];

@@ -18,7 +18,7 @@
  */
 void func_15007830(void) {
     func_15007A20();
-    D_800D2C28 = 0;
+    D_800D2C28[0] = 0;
     osCreateMesgQueue(&D_800BEA10, &D_800BEA28, 16);
     sDoneMsgs[0].type = OS_SC_DONE_MSG;
     sDoneMsgs[1].type = OS_SC_DONE_MSG;

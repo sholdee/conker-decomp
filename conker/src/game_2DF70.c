@@ -367,7 +367,7 @@ void func_15001460(Gfx *dl) {
             addr = gfx->words.w1;
             if ((addr >> 24) & 0xF) {
                 // segmented address: rebase through the segment table
-                addr = (&D_800D2C28)[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+                addr = D_800D2C28[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
             }
             numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
             first = ((s32)gfx->words.w0 >> 1) & 0x7F;

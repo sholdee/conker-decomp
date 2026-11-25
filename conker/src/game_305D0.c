@@ -228,7 +228,7 @@ void func_15003668(s32 unused) {
     func_15002754();
 
     D_800D2C68 = 1;
-    D_800D2C2C = 0;
+    D_800D2C28[1] = 0;
     for (i = 0; i < D_800DBEF0; i++) {
         if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)

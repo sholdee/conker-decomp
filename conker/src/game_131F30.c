@@ -562,7 +562,7 @@ ListObj *func_15105C24(s32 owner) {
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = D_800DCE50[list][(&D_800A5770)[i]]; obj != NULL; obj = obj->next) {
+            for (obj = D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
                 if (obj->type == 0x2E && owner == obj->owner) {
                     return obj;
                 }

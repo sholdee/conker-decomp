@@ -115,7 +115,7 @@ s32 func_15149490(s32 arg0, struct260 *object, s16 arg2) {
 }
 
 void func_151494E0(s32 arg0, u8 arg1) {
-    func_15169260(&D_800A5770, 2, arg0, arg1);
+    func_15169260(D_800A5770, 2, arg0, arg1);
 }
 
 /* func_15169850 for effects: tracks or retargets the effect's owner on actor events. */
