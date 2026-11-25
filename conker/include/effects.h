@@ -2210,6 +2210,46 @@ typedef struct EffectObjHead {
     /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
+/* Data of the tracker effect (game_1FC830.c): follows one point of its owner and leaves a TrackerTrail behind it. */
+typedef struct TrackerData {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;        /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ struct TrackerTrail *trail; /* spawned by func_151D1448 */
+    /* 0x0C */ Vec3f prevPos;
+    /* 0x18 */ Vec3f pos;
+    /* 0x24 */ Vec3f delta;
+    /* 0x30 */ f32 dist;          /* distance moved this frame */
+    /* 0x34 */ u8 pointFn;        /* index into D_8008FC30 */
+} TrackerData;
+
+typedef struct TrackerEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ TrackerData data;
+} TrackerEffect;
+
+/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FC830.c; run by game_1FEA80.c). */
+typedef struct TrackerTrailData {
+    /* 0x00 */ TrackerEffect *owner; /* NULL once the tracker lets go of the trail */
+    /* 0x04 */ f32 texture;       /* running texture coordinate of the newest sample */
+    /* 0x08 */ u8 alpha;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ f32 maxLength;
+    /* 0x10 */ f32 widthBase;
+    /* 0x14 */ f32 widthScale;
+    /* 0x18 */ f32 alphaScale;
+    /* 0x1C */ f32 ownerScale;    /* the tracker owner's xz_scale */
+} TrackerTrailData; /* size 0x20 */
+
+/* The ribbon trail of a tracker effect (func_15147A80 object, kind 19). */
+typedef struct TrackerTrail {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ struct TrackerTrailPoint *points; /* game_1FEA80.c */
+    /* 0x98 */ TrackerTrailData *state;
+} TrackerTrail;
+
 /* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
  * a timed rumble on the controllers of the players in a mask. */
 typedef struct RumbleParams {

@@ -142,36 +142,13 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     return gfx;
 }
 
-/* Data of a trail actor that follows an owner (copied in at spawn by func_151D1448). */
-typedef struct {
-    /* 0x00 */ void *owner; /* NULL once the owner lets go of the trail */
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 scale;
-} FollowerData;
-
-/* Trail actor created by func_15147A80 (see game_105FC0.c's Trail). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u16 flags;
-    /* 0x20 */ u8 pad20[0x10];
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 pad31[0x98 - 0x31];
-    /* 0x98 */ FollowerData *data;
-} FollowerActor;
-
 /* Message handler of a following actor: lets func_15169850 update or end the link to its owner. */
-void func_151CF844(FollowerActor *actor, s32 arg1, u8 arg2) {
-    FollowerData *data = actor->data;
+void func_151CF844(TrackerTrail *actor, s32 arg1, u8 arg2) {
+    TrackerTrailData *data = actor->state;
 
     if (data->owner != NULL) {
-        func_15169850(arg1, arg2, &data->owner, &data->unk4, actor);
+        // the owner pointer and the byte after it are handled like an actor reference
+        func_15169850(arg1, arg2, (Actor **)&data->owner, (u8 *)&data->texture, actor);
     }
 }
 
@@ -783,24 +760,6 @@ void func_151D0F34(CarrierParticle *particle) {
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
 extern s32 (*D_8008FC30[])(Actor *obj, Vec3f *out);
 
-/* Data of the tracker effect: follows one point of its owner and leaves a trail behind it. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ FollowerActor *trail; /* spawned by func_151D1448 */
-    /* 0x0C */ Vec3f prevPos;
-    /* 0x18 */ Vec3f pos;
-    /* 0x24 */ Vec3f delta;
-    /* 0x30 */ f32 dist; /* distance moved this frame */
-    /* 0x34 */ u8 pointFn; /* index into D_8008FC30 */
-} TrackerData;
-
-typedef struct {
-    TimedEffect base;
-    TrackerData data;
-} TrackerEffect;
-
 /* Spawns a tracker effect that follows the object's point D_8008FC30[pointFn]. */
 void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     TrackerEffect *effect;
@@ -926,53 +885,53 @@ void func_151D13B4(TrackerEffect *effect) {
 /* Lets go of the tracker's trail, which then fades out on its own. */
 void func_151D13E0(TrackerEffect *effect) {
     TrackerData *data = &effect->data;
-    FollowerData *trailData;
+    TrackerTrailData *trailData;
 
     if (data->trail != NULL) {
-        trailData = data->trail->data;
-        data->trail->unk30 = 0;
-        data->trail->flags &= ~0x2;
-        data->trail->flags |= 0x8;
-        data->trail->flags |= 0x1;
-        data->trail->unk1C = 40;
+        trailData = data->trail->state;
+        data->trail->head.updateKind2 = 0;
+        data->trail->head.tmpl.flags &= ~0x2;
+        data->trail->head.tmpl.flags |= 0x8;
+        data->trail->head.tmpl.flags |= 0x1;
+        data->trail->head.tmpl.life = 40;
         trailData->owner = NULL;
         data->trail = NULL;
     }
 }
 
-extern FollowerActor *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern TrackerTrail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the trail that follows the tracker effect. */
 void func_151D1448(TrackerEffect *effect) {
     TrackerData *data;
     struct {
         EffectTemplate spawn;
-        FollowerData data;
+        TrackerTrailData data;
     } req;
     Actor *owner;
-    FollowerActor *trail;
+    TrackerTrail *trail;
 
     data = &effect->data;
     owner = data->owner;
     req.data.owner = effect;
-    req.data.unk8 = 0xFF;
-    req.data.unk4 = 0.0f;
+    req.data.alpha = 0xFF;
+    req.data.texture = 0.0f;
     if (owner->id == 0x25) {
-        req.data.unkC = 800.0f;
-        req.data.unk10 = 36.0f;
-        req.data.unk14 = 50.0f;
-        req.data.unk18 = 200.0f;
+        req.data.maxLength = 800.0f;
+        req.data.widthBase = 36.0f;
+        req.data.widthScale = 50.0f;
+        req.data.alphaScale = 200.0f;
     } else {
         if (D_80082FA0 > 0) {
-            req.data.unkC = 260.0f;
+            req.data.maxLength = 260.0f;
         } else {
-            req.data.unkC = 500.0f;
+            req.data.maxLength = 500.0f;
         }
-        req.data.unk10 = 40.0f;
-        req.data.unk14 = 40.0f;
-        req.data.unk18 = 180.0f;
+        req.data.widthBase = 40.0f;
+        req.data.widthScale = 40.0f;
+        req.data.alphaScale = 180.0f;
     }
-    req.data.scale = data->owner->xz_scale;
+    req.data.ownerScale = data->owner->xz_scale;
     req.spawn.itemCount = 25;
     req.spawn.pos = data->pos;
     req.spawn.life = 300;
@@ -980,9 +939,9 @@ void func_151D1448(TrackerEffect *effect) {
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
     req.spawn.unk18 = 0;
-    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
+    trail = func_15147A80(&req.spawn, sizeof(TrackerTrailData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->base.header.owner, effect->base.header.kind);
     if (trail != NULL) {
-        memcpy(trail->data, &req.data, sizeof(FollowerData));
+        memcpy(trail->state, &req.data, sizeof(TrackerTrailData));
         data->trail = trail;
     }
 }
