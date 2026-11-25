@@ -8,9 +8,12 @@
  * header and side-info bit widths read in func_151F8088 / func_151F6FD0 pin
  * them down.
  *
- * The per-granule/channel side-info arrays are declared [2][1]: the ROM indexes
- * them [gr][ch] with BOTH indices striding one element (only gr 0 / mono ever
- * reach them), so a few arrays below overlap their neighbours for ch 1. */
+ * The ROM's address arithmetic makes several per-granule / per-channel arrays
+ * overlap their neighbours, so their bounds below are the largest that do not
+ * collide: the side-info arrays are [2][1] because [gr][ch] both stride one
+ * element; scfsi[1] would run into part23Length, huffVal[1] starts at huffSign,
+ * nonZero[1] is zeroTail[0], and xr[1] is xrSb.  Only gr 0 of a mono stream is
+ * safe from the overlaps. */
 typedef struct Mp3Decoder Mp3Decoder;
 
 typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
@@ -100,6 +103,7 @@ struct Mp3Decoder {
     /* 0x847C */ Mp3DecodeFn readSideInfo;
 }; /* size 0x8480 */
 
+/* func_151F3DE0's constants and the tables it builds */
 extern f32 D_800B0C2C;
 extern f32 D_800B0C30;
 extern f32 D_800B0C34;
@@ -108,14 +112,54 @@ extern f32 D_800B0C3C;
 extern f32 D_800B0C40;
 extern f32 D_800B0C44;
 extern f32 D_800B0C48;
-extern s32 *D_800E0E20;
+extern s32 *D_800E0E20;          /* Huffman table pointers, relocated by D_800E0E28 */
 extern s32 D_800E0E28;
-extern f32 *D_800E0E30;
-/* The IMDCT window for each block type (0 normal, 1 start, 2 short, 3 stop). */
-extern f32 D_800E0E38[4][36];
-extern f32 *D_800E1078;
-extern f32 D_800E1080[256];
-extern f32 D_800E1480[256];
+extern f32 *D_800E0E30;          /* storage for the pow43 table */
+extern f32 D_800E0E38[4][36];    /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
+extern f32 *D_800E1078;          /* pow43: i^(4/3) */
+extern f32 D_800E1080[256];      /* scalefactor gain powers */
+extern f32 D_800E1480[256];      /* 0.25^i: subblock gain powers */
+
+/* The pretab (preemphasis) table; a struct so it can be copied by value. */
+typedef struct {
+    /* 0x00 */ s32 band[22];
+} Mp3Pretab; /* size 0x58 */
+
+/* nr_of_sfb_block for MPEG-2 LSF scalefactors: [isRight][slen class][block kind][part] */
+typedef struct {
+    /* 0x000 */ s32 unk000[2][3][3][4];
+} Mp3SfbCounts; /* size 0x120 */
+
+extern u8  D_800AEB54[8];        /* scfsi band group boundaries: 0 6 11 16 21 | 0 6 12 */
+extern u8  D_800AEB5C[2][16];    /* the two MPEG-1 scalefactor length (slen) tables */
+extern s16 D_800AE840[][3][22];  /* long-block band ends, [id][sampleRateIndex] */
+extern u8  D_800AE948[][3][13];  /* short-block band ends, [id][sampleRateIndex] */
+extern s32 D_800AE7B8[34];       /* Huffman linbits, per table */
+extern Mp3Pretab D_800B0AB4;
+/* Scalefactor-band boundary table, six [id][sfreq] rows of 37 s16: entries
+ * 0..22 are the 23 long-block boundaries, 23..36 the 14 short-block ones. */
+extern s16 D_800AE998[6][37];
+extern Mp3SfbCounts D_800B0B0C;
+extern s16 D_800AEB7C[2][3][576]; /* short-block reorder index, [id][sampleRateIndex] */
+extern f32 D_800B067C[8];        /* alias-reduction ca */
+extern f32 D_800B069C[8];        /* alias-reduction cs */
+extern Mp3Decoder D_800E1880;
+extern void (*D_800E0E00)(s32, void *, s32);
+extern s32 D_800E0E04;
+extern s32 D_800B06BC[2][15];    /* bitrate table, indexed [id][bitrateIndex] */
+extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIndex] */
+
+f32 func_1504A400(f32, f32);
+s32 func_151F8960(void *, s32 *, s32);
+s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
+s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
+s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
+s32 func_151F9BF0(f32 *, s32, f32 *, f32 *);
+s32 func_151F4F38(Mp3Decoder *, s32, s32);
+s32 func_151F6FD0(Mp3Decoder *);
+s32 func_151F78B4(Mp3Decoder *);
+s32 func_151F7F60(Mp3Decoder *);
+s32 func_151F8088(Mp3Decoder *, s32);
 
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration
@@ -190,107 +234,13 @@ s32 func_151F3DE0(void) {
     }
     return 1;
 }
-/* The per-granule frame view of the decoder context.  Three pairs of fields in
- * here genuinely OVERLAP in the ROM -- unk3BF8[1] runs into unk3C78, unk3F94[1]
- * would start where unk4418[0] does, and unk465C[1] is the same word as
- * unk4660[0] -- so the array bounds below are written to the largest size that
- * does not collide.  The address arithmetic (strides 1156 / 578 / 128 / 4) is
- * what the ROM encodes.  A [2][1] shape reproduces a pair of indices that both
- * stride by one element. */
-extern u8  D_800AEB54[8];    /* scalefactor-band group boundaries: 0 6 11 16 21 | 0 6 12 */
-extern u8  D_800AEB5C[2][16];/* the two scalefactor length (slen) tables */
-extern s16 D_800AE840[][3][22];
-extern u8  D_800AE948[][3][13];
-extern s32 D_800AE7B8[34];
 
-typedef struct {
-    /* 0x00 */ s32 unk00[23];
-    /* 0x5C */ s32 unk5C[3][13];
-} AudSfRow; /* size 0xF8 */
-
-typedef struct {
-    /* 0x0000 */ u8  pad0000[0x1C];
-    /* 0x001C */ u8  unk001C[0x2004];
-    /* 0x2020 */ s32 unk2020;
-    /* 0x2024 */ u8  pad2024[0x3BA4 - 0x2024];
-    /* 0x3BA4 */ s32 unk3BA4;
-    /* 0x3BA8 */ u8  pad3BA8[0x3BB4 - 0x3BA8];
-    /* 0x3BB4 */ s32 unk3BB4;
-    /* 0x3BB8 */ u8  pad3BB8[0x3BF8 - 0x3BB8];
-    /* 0x3BF8 */ s32 unk3BF8[1][32];
-    /* 0x3C78 */ s32 unk3C78[2][1];
-    /* 0x3C80 */ s32 unk3C80[2][1];
-    /* 0x3C88 */ u8  pad3C88[0x3C90 - 0x3C88];
-    /* 0x3C90 */ s32 unk3C90[2][1];
-    /* 0x3C98 */ s32 unk3C98[2][1];
-    /* 0x3CA0 */ s32 unk3CA0[2][1];
-    /* 0x3CA8 */ s32 unk3CA8[2][1];
-    /* 0x3CB0 */ s32 unk3CB0[2][1][3];
-    /* 0x3CC8 */ u8  pad3CC8[0x3CE0 - 0x3CC8];
-    /* 0x3CE0 */ s32 unk3CE0[2][1];
-    /* 0x3CE8 */ s32 unk3CE8[2][1];
-    /* 0x3CF0 */ u8  pad3CF0[0x3D00 - 0x3CF0];
-    /* 0x3D00 */ s32 unk3D00[2][1];
-    /* 0x3D08 */ AudSfRow unk3D08[2][1];
-    /* 0x3EF8 */ u8  pad3EF8[0x3F94 - 0x3EF8];
-    /* 0x3F94 */ s16 unk3F94[1][578];
-    /* 0x4418 */ u8  unk4418[1][578];
-    /* 0x465A */ u8  pad465A[0x465C - 0x465A];
-    /* 0x465C */ s32 unk465C[1];
-    /* 0x4660 */ s32 unk4660[2];
-} AudFrm;
-
-s32 func_151F8960(void *, s32 *, s32);
-s32 func_151F4F38(AudFrm *, s32, s32);
-s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
-s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
-
-/* The requantisation + reordering pass of the layer-III decoder. */
-typedef struct {
-    /* 0x00 */ s32 unk00[22];
-} AudPretab; /* size 0x58 */
-
-extern AudPretab D_800B0AB4;
-
-/* Scalefactor-band boundary table, six [id][sfreq] rows of 37 s16: entries
- * 0..22 are the 23 long-block boundaries, 23..36 the 14 short-block ones. */
-extern s16 D_800AE998[6][37];
-
-f32 func_1504A400(f32, f32);
-
-typedef struct {
-    /* 0x0000 */ u8  pad0000[0x3BA4];
-    /* 0x3BA4 */ s32 unk3BA4;
-    /* 0x3BA8 */ u8  pad3BA8[0x3BB4 - 0x3BA8];
-    /* 0x3BB4 */ s32 unk3BB4;
-    /* 0x3BB8 */ u8  pad3BB8[0x3C88 - 0x3BB8];
-    /* 0x3C88 */ s32 unk3C88[2][1];
-    /* 0x3C90 */ u8  pad3C90[0x3C98 - 0x3C90];
-    /* 0x3C98 */ s32 unk3C98[2][1];
-    /* 0x3CA0 */ s32 unk3CA0[2][1];
-    /* 0x3CA8 */ s32 unk3CA8[2][1];
-    /* 0x3CB0 */ u8  pad3CB0[0x3CC8 - 0x3CB0];
-    /* 0x3CC8 */ s32 unk3CC8[2][1][3];
-    /* 0x3CE0 */ u8  pad3CE0[0x3CF0 - 0x3CE0];
-    /* 0x3CF0 */ s32 unk3CF0[2][1];
-    /* 0x3CF8 */ s32 unk3CF8[2][1];
-    /* 0x3D00 */ u8  pad3D00[0x3D08 - 0x3D00];
-    /* 0x3D08 */ AudSfRow unk3D08[2][1];
-    /* 0x3EF8 */ u8  pad3EF8[0x3F94 - 0x3EF8];
-    /* 0x3F94 */ s16 unk3F94[1][578];
-    /* 0x4418 */ u8  unk4418[1][578];
-    /* 0x465A */ u8  pad465A[0x465C - 0x465A];
-    /* 0x465C */ s32 unk465C[1];
-    /* 0x4660 */ s32 unk4660[1];
-    /* 0x4664 */ f32 unk4664[1][576];
-} AudRqt;
-
-s32 func_151F42E8(AudRqt *arg0, s32 arg1, s32 arg2) {
+s32 func_151F42E8(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
     s32 sp1BC;
     s32 sp1B8;
     s32 sp1B4;
     s32 sp1B0;
-    AudPretab sp158 = D_800B0AB4;
+    Mp3Pretab sp158 = D_800B0AB4;
     f32 sp100[22];
     f32 sp64[3][13];
     f32 sp60;
@@ -310,9 +260,9 @@ s32 func_151F42E8(AudRqt *arg0, s32 arg1, s32 arg2) {
     s32 sp28;
     f32 *sp24;
 
-    sp1BC = arg0->unk3BB4 + arg0->unk3BA4 * 3;
-    if ((arg0->unk3C98[arg1][arg2] != 0) && (arg0->unk3CA0[arg1][arg2] == 2)) {
-        if (arg0->unk3CA8[arg1][arg2] != 0) {
+    sp1BC = arg0->sampleRateIndex + arg0->id * 3;
+    if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
+        if (arg0->mixedBlock[arg1][arg2] != 0) {
             sp1B8 = D_800AE998[sp1BC][1];
         } else {
             sp1B8 = D_800AE998[sp1BC][24] * 3;
@@ -322,29 +272,29 @@ s32 func_151F42E8(AudRqt *arg0, s32 arg1, s32 arg2) {
     } else {
         sp1B8 = D_800AE998[sp1BC][1];
     }
-    sp60 = func_1504A400(2.0f, ((f32)arg0->unk3C88[arg1][arg2] - 210.0f) * 0.25f);
-    sp54 = arg0->unk3CF8[arg1][arg2];
+    sp60 = func_1504A400(2.0f, ((f32)arg0->globalGain[arg1][arg2] - 210.0f) * 0.25f);
+    sp54 = arg0->scalefacScale[arg1][arg2];
     for (sp5C = 0; sp5C < 22; sp5C++) {
-        sp4C = (arg0->unk3D08[arg1][arg2].unk00[sp5C] +
-                arg0->unk3CF0[arg1][arg2] * sp158.unk00[sp5C]) * (sp54 + 1);
+        sp4C = (arg0->scalefac[arg1][arg2].l[sp5C] +
+                arg0->preflag[arg1][arg2] * sp158.band[sp5C]) * (sp54 + 1);
         sp100[sp5C] = D_800E1080[sp4C] * sp60;
     }
     for (sp58 = 0; sp58 < 3; sp58++) {
         for (sp5C = 0; sp5C < 13; sp5C++) {
-            sp50 = arg0->unk3CC8[arg1][arg2][sp58];
-            sp4C = arg0->unk3D08[arg1][arg2].unk5C[sp58][sp5C] * (sp54 + 1);
+            sp50 = arg0->subblockGain[arg1][arg2][sp58];
+            sp4C = arg0->scalefac[arg1][arg2].s[sp58][sp5C] * (sp54 + 1);
             sp64[sp58][sp5C] = sp60 * D_800E1480[sp50] * D_800E1080[sp4C];
         }
     }
     sp5C = 0;
     sp48 = 0;
-    sp44 = arg0->unk465C[arg2];
-    sp40 = arg0->unk4664[arg2];
-    sp3C = arg0->unk3F94[arg2];
-    sp38 = arg0->unk4418[arg2];
-    sp34 = (arg0->unk3CA0[arg1][arg2] == 2) && (arg0->unk3CA8[arg1][arg2] == 0);
-    sp30 = (arg0->unk3CA0[arg1][arg2] == 2) && (arg0->unk3CA8[arg1][arg2] != 0);
-    sp2C = arg0->unk3C98[arg1][arg2];
+    sp44 = arg0->nonZero[arg2];
+    sp40 = arg0->xr[arg2];
+    sp3C = arg0->huffVal[arg2];
+    sp38 = arg0->huffSign[arg2];
+    sp34 = (arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] == 0);
+    sp30 = (arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] != 0);
+    sp2C = arg0->windowSwitching[arg1][arg2];
     while (sp48 < sp44) {
         if (sp1B8 > sp44) {
             sp1B8 = sp44;
@@ -374,8 +324,8 @@ s32 func_151F42E8(AudRqt *arg0, s32 arg1, s32 arg2) {
             }
             sp48++;
         }
-        if ((arg0->unk3C98[arg1][arg2] != 0) && (arg0->unk3CA0[arg1][arg2] == 2)) {
-            if (arg0->unk3CA8[arg1][arg2] != 0) {
+        if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
+            if (arg0->mixedBlock[arg1][arg2] != 0) {
                 if (D_800AE998[sp1BC][8] == sp48) {
                     sp1B8 = D_800AE998[sp1BC][27] * 3;
                     sp5C = 3;
@@ -404,41 +354,41 @@ s32 func_151F42E8(AudRqt *arg0, s32 arg1, s32 arg2) {
        it drops us BELOW golden.  An if/else with a `return 1` in each arm is wrong the
        other way: it adds the else's merge jump, giving 790. */
     if (sp48 < 0x240) {
-        bzero(sp40, arg0->unk4660[arg2] * 4);
+        bzero(sp40, arg0->zeroTail[arg2] * 4);
         return 1;
     }
     return 1;
 }
 
-s32 func_151F4F38(AudFrm *arg0, s32 arg1, s32 arg2) {
+s32 func_151F4F38(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
     s32 sp34;
     s32 sp30;
     s32 sp2C;
 
-    if ((arg0->unk3C98[arg1][arg2] != 0) && (arg0->unk3CA0[arg1][arg2] == 2)) {
-        if (arg0->unk3CA8[arg1][arg2] != 0) {
+    if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
+        if (arg0->mixedBlock[arg1][arg2] != 0) {
             for (sp30 = 0; sp30 < 8; sp30++) {
-                arg0->unk3D08[arg1][arg2].unk00[sp30] =
-                    (D_800AEB5C[0][arg0->unk3C90[arg1][arg2]] != 0)
-                        ? func_151F8960(arg0->unk001C, &arg0->unk2020,
-                                        D_800AEB5C[0][arg0->unk3C90[arg1][arg2]])
+                arg0->scalefac[arg1][arg2].l[sp30] =
+                    (D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]] != 0)
+                        ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
+                                        D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]])
                         : 0;
             }
             for (sp30 = 3; sp30 < 6; sp30++) {
                 for (sp2C = 0; sp2C < 3; sp2C++) {
-                    arg0->unk3D08[arg1][arg2].unk5C[sp2C][sp30] =
-                        (D_800AEB5C[0][arg0->unk3C90[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->unk001C, &arg0->unk2020,
-                                            D_800AEB5C[0][arg0->unk3C90[arg1][arg2]])
+                    arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
+                        (D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]] != 0)
+                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
+                                            D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]])
                             : 0;
                 }
             }
             for (sp30 = 6; sp30 < 0xC; sp30++) {
                 for (sp2C = 0; sp2C < 3; sp2C++) {
-                    arg0->unk3D08[arg1][arg2].unk5C[sp2C][sp30] =
-                        (D_800AEB5C[1][arg0->unk3C90[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->unk001C, &arg0->unk2020,
-                                            D_800AEB5C[1][arg0->unk3C90[arg1][arg2]])
+                    arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
+                        (D_800AEB5C[1][arg0->scalefacCompress[arg1][arg2]] != 0)
+                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
+                                            D_800AEB5C[1][arg0->scalefacCompress[arg1][arg2]])
                             : 0;
                 }
             }
@@ -446,84 +396,48 @@ s32 func_151F4F38(AudFrm *arg0, s32 arg1, s32 arg2) {
             for (sp34 = 0; sp34 < 2; sp34++) {
                 for (sp30 = D_800AEB54[sp34 + 5]; sp30 < D_800AEB54[sp34 + 6]; sp30++) {
                     for (sp2C = 0; sp2C < 3; sp2C++) {
-                        arg0->unk3D08[arg1][arg2].unk5C[sp2C][sp30] =
-                            (D_800AEB5C[sp34][arg0->unk3C90[arg1][arg2]] != 0)
-                                ? func_151F8960(arg0->unk001C, &arg0->unk2020,
-                                                D_800AEB5C[sp34][arg0->unk3C90[arg1][arg2]])
+                        arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
+                            (D_800AEB5C[sp34][arg0->scalefacCompress[arg1][arg2]] != 0)
+                                ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
+                                                D_800AEB5C[sp34][arg0->scalefacCompress[arg1][arg2]])
                                 : 0;
                     }
                 }
             }
         }
         for (sp2C = 0; sp2C < 3; sp2C++) {
-            arg0->unk3D08[arg1][arg2].unk5C[sp2C][12] = 0;
+            arg0->scalefac[arg1][arg2].s[sp2C][12] = 0;
         }
     } else {
         for (sp34 = 0; sp34 < 4; sp34++) {
-            if ((arg0->unk3BF8[arg2][sp34] == 0) || (arg1 == 0)) {
+            if ((arg0->scfsi[arg2][sp34] == 0) || (arg1 == 0)) {
                 for (sp30 = D_800AEB54[sp34]; sp30 < D_800AEB54[sp34 + 1]; sp30++) {
-                    arg0->unk3D08[arg1][arg2].unk00[sp30] =
-                        (D_800AEB5C[(sp34 < 2) ? 0 : 1][arg0->unk3C90[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->unk001C, &arg0->unk2020,
+                    arg0->scalefac[arg1][arg2].l[sp30] =
+                        (D_800AEB5C[(sp34 < 2) ? 0 : 1][arg0->scalefacCompress[arg1][arg2]] != 0)
+                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
                                             D_800AEB5C[(sp34 < 2) ? 0 : 1]
-                                                      [arg0->unk3C90[arg1][arg2]])
+                                                      [arg0->scalefacCompress[arg1][arg2]])
                             : 0;
                 }
             } else {
                 for (sp30 = D_800AEB54[sp34]; sp30 < D_800AEB54[sp34 + 1]; sp30++) {
-                    arg0->unk3D08[1][arg2].unk00[sp30] = arg0->unk3D08[0][arg2].unk00[sp30];
+                    arg0->scalefac[1][arg2].l[sp30] = arg0->scalefac[0][arg2].l[sp30];
                 }
             }
         }
-        arg0->unk3D08[arg1][arg2].unk00[22] = 0;
+        arg0->scalefac[arg1][arg2].l[22] = 0;
     }
     return 1;
 }
 
-/* Rare's compressed-audio bitstream decoder context. Not in structs.h. */
-typedef struct {
-    /* 0x00 */ s32 unk00[23];
-    /* 0x5C */ s32 unk5C[13];
-    /* 0x90 */ s32 unk90[13];
-    /* 0xC4 */ s32 unkC4[13];
-} AudRow; /* size 0xF8 */
-
-typedef struct {
-    /* 0x0000 */ u8 unk0000[0x1C];
-    /* 0x001C */ u8 unk001C[0x2004];
-    /* 0x2020 */ s32 unk2020;
-    /* 0x2024 */ u8 unk2024[0x3BC4 - 0x2024];
-    /* 0x3BC4 */ s32 unk3BC4;
-    /* 0x3BC8 */ u8 unk3BC8[0x3C90 - 0x3BC8];
-    /* 0x3C90 */ s32 unk3C90[2];
-    /* 0x3C98 */ s32 unk3C98[2];
-    /* 0x3CA0 */ s32 unk3CA0[2];
-    /* 0x3CA8 */ s32 unk3CA8[2];
-    /* 0x3CB0 */ u8 unk3CB0[0x3CF0 - 0x3CB0];
-    /* 0x3CF0 */ s32 unk3CF0[2];
-    /* 0x3CF8 */ u8 unk3CF8[0x3D08 - 0x3CF8];
-    /* 0x3D08 */ AudRow unk3D08[2];
-    /* 0x3EF8 */ s32 unk3EF8;
-    /* 0x3EFC */ s32 unk3EFC[6];
-    /* 0x3F14 */ s32 unk3F14[16];
-} AudCtx;
-
-typedef struct {
-    /* 0x000 */ s32 unk000[2][3][3][4];
-} AudCounts; /* size 0x120 */
-
-extern AudCounts D_800B0B0C;
-
-s32 func_151F8960(void *, s32 *, s32);
-
-s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
-    AudCounts sp70 = D_800B0B0C;
+s32 func_151F578C(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
+    Mp3SfbCounts sp70 = D_800B0B0C;
     s32 sp60[4];
-    s32 sp5C = arg0->unk3C90[arg2];
-    s32 *sp58 = &arg0->unk3CF0[arg2];
-    s32 sp54 = arg0->unk3CA8[arg2];
-    s32 sp50 = arg0->unk3CA0[arg2];
-    s32 sp4C = arg0->unk3C98[arg2];
+    s32 sp5C = arg0->scalefacCompress[0][arg2];
+    s32 *sp58 = &arg0->preflag[0][arg2];
+    s32 sp54 = arg0->mixedBlock[0][arg2];
+    s32 sp50 = arg0->blockType[0][arg2];
+    s32 sp4C = arg0->windowSwitching[0][arg2];
     s32 sp48;
     s32 sp44;
     s32 sp40;
@@ -534,7 +448,7 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
     s32 sp20;
     s32 sp1C;
 
-    if (((arg0->unk3BC4 != 1) && (arg0->unk3BC4 != 3)) || (arg2 != 1)) {
+    if (((arg0->modeExtension != 1) && (arg0->modeExtension != 3)) || (arg2 != 1)) {
         sp48 = 0;
         if (sp5C < 0x190) {
             sp60[0] = (sp5C >> 4) / 5;
@@ -559,8 +473,8 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
             sp44 = 2;
         }
     }
-    if (((arg0->unk3BC4 == 1) || (arg0->unk3BC4 == 3)) && (arg2 == 1)) {
-        arg0->unk3EF8 = sp5C % 2;
+    if (((arg0->modeExtension == 1) || (arg0->modeExtension == 3)) && (arg2 == 1)) {
+        arg0->intensityScale = sp5C % 2;
         sp38 = sp5C >> 1;
         sp48 = 1;
         if (sp38 < 0xB4) {
@@ -597,8 +511,8 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
             sp20 = sp60[sp40];
             sp1C = (1 << sp20) - 1;
             for (sp3C = 0; sp3C < sp28[sp40]; sp3C++) {
-                arg0->unk3D08[arg2].unk00[sp24] =
-                    (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
+                arg0->scalefac[0][arg2].l[sp24] =
+                    (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
                 if (arg2 != 0) {
                     arg0->unk3EFC[sp24] = sp1C;
                 }
@@ -612,12 +526,12 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
                     sp20 = sp60[sp40];
                     sp1C = (1 << sp20) - 1;
                     for (sp3C = 0; sp3C < sp28[sp40]; sp3C += 3) {
-                        arg0->unk3D08[arg2].unk5C[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
-                        arg0->unk3D08[arg2].unk90[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
-                        arg0->unk3D08[arg2].unkC4[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[0][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[1][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[2][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
                         if (arg2 != 0) {
                             arg0->unk3F14[sp24] = sp1C;
                         }
@@ -628,8 +542,8 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
                 sp20 = sp60[0];
                 sp1C = (1 << sp20) - 1;
                 for (sp3C = 0; sp3C < 6; sp3C++) {
-                    arg0->unk3D08[arg2].unk00[sp24] =
-                        (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
+                    arg0->scalefac[0][arg2].l[sp24] =
+                        (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
                     if (arg2 != 0) {
                         arg0->unk3EFC[sp24] = sp1C;
                     }
@@ -641,12 +555,12 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
                     sp20 = sp60[sp40];
                     sp1C = (1 << sp20) - 1;
                     for (sp3C = 0; sp3C < sp28[sp40]; sp3C += 3) {
-                        arg0->unk3D08[arg2].unk5C[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
-                        arg0->unk3D08[arg2].unk90[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
-                        arg0->unk3D08[arg2].unkC4[sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->unk001C, &arg0->unk2020, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[0][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[1][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
+                        arg0->scalefac[0][arg2].s[2][sp24] =
+                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
                         if (arg2 != 0) {
                             arg0->unk3F14[sp24] = sp1C;
                         }
@@ -659,7 +573,7 @@ s32 func_151F578C(AudCtx *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-s32 func_151F63C4(AudFrm *arg0, s32 arg1, s32 arg2) {
+s32 func_151F63C4(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
     s32 sp64;
     s32 sp60;
     s32 sp54[3];
@@ -675,27 +589,27 @@ s32 func_151F63C4(AudFrm *arg0, s32 arg1, s32 arg2) {
     s32 sp2C;
     s32 sp28;
 
-    sp64 = arg0->unk2020;
-    if (arg0->unk3BA4 != 0) {
+    sp64 = arg0->mainDataBit;
+    if (arg0->id != 0) {
         func_151F4F38(arg0, arg1, arg2);
     } else {
-        func_151F578C((AudCtx *)arg0, arg1, arg2);
+        func_151F578C(arg0, arg1, arg2);
     }
-    sp60 = arg0->unk3C80[arg1][arg2] * 2;
-    sp50 = &D_800AE840[arg0->unk3BA4][arg0->unk3BB4][0];
-    sp4C = &D_800AE948[arg0->unk3BA4][arg0->unk3BB4][0];
-    if ((arg0->unk3C98[arg1][arg2] == 0) && (arg0->unk3CA0[arg1][arg2] == 0)) {
-        sp54[0] = sp50[arg0->unk3CE0[arg1][arg2]] + 1;
+    sp60 = arg0->bigValues[arg1][arg2] * 2;
+    sp50 = &D_800AE840[arg0->id][arg0->sampleRateIndex][0];
+    sp4C = &D_800AE948[arg0->id][arg0->sampleRateIndex][0];
+    if ((arg0->windowSwitching[arg1][arg2] == 0) && (arg0->blockType[arg1][arg2] == 0)) {
+        sp54[0] = sp50[arg0->region0Count[arg1][arg2]] + 1;
         if (sp54[0] > sp60) {
             sp54[0] = sp54[1] = sp60;
         } else {
-            sp54[1] = sp50[arg0->unk3CE0[arg1][arg2] + arg0->unk3CE8[arg1][arg2] + 1] + 1;
+            sp54[1] = sp50[arg0->region0Count[arg1][arg2] + arg0->region1Count[arg1][arg2] + 1] + 1;
             if (sp54[1] > sp60) {
                 sp54[1] = sp60;
             }
         }
     } else {
-        if ((arg0->unk3CA0[arg1][arg2] == 2) && (arg0->unk3CA8[arg1][arg2] == 0)) {
+        if ((arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] == 0)) {
             sp54[0] = (sp4C[2] * 3) + 3;
         } else {
             sp54[0] = sp50[7] + 1;
@@ -707,10 +621,10 @@ s32 func_151F63C4(AudFrm *arg0, s32 arg1, s32 arg2) {
     }
     sp54[2] = sp60;
     sp48 = 0;
-    sp44 = arg0->unk3F94[arg2];
-    sp40 = arg0->unk4418[arg2];
+    sp44 = arg0->huffVal[arg2];
+    sp40 = arg0->huffSign[arg2];
     for (sp3C = 0; sp3C < 3; sp3C++) {
-        sp38 = arg0->unk3CB0[arg1][arg2][sp3C];
+        sp38 = arg0->tableSelect[arg1][arg2][sp3C];
         sp34 = D_800AE7B8[sp38];
         sp30 = sp54[sp3C];
         if (D_800E0E20[sp38] == 0) {
@@ -720,28 +634,27 @@ s32 func_151F63C4(AudFrm *arg0, s32 arg1, s32 arg2) {
             sp40 += sp2C;
             sp48 = sp30;
         } else {
-            sp48 = func_151F8994(arg0->unk001C, &arg0->unk2020, sp38, sp48, sp34, sp30, &sp44,
+            sp48 = func_151F8994(arg0->mainData, &arg0->mainDataBit, sp38, sp48, sp34, sp30, &sp44,
                                  &sp40);
         }
     }
-    sp38 = arg0->unk3D00[arg1][arg2] + 0x20;
-    sp28 = arg0->unk3C78[arg1][arg2] + sp64;
-    sp48 = func_151F8B4C(arg0->unk001C, &arg0->unk2020, sp38, sp48, sp28, &sp44, &sp40);
-    arg0->unk2020 = sp28;
+    sp38 = arg0->count1TableSelect[arg1][arg2] + 0x20;
+    sp28 = arg0->part23Length[arg1][arg2] + sp64;
+    sp48 = func_151F8B4C(arg0->mainData, &arg0->mainDataBit, sp38, sp48, sp28, &sp44, &sp40);
+    arg0->mainDataBit = sp28;
     if (sp48 > 0x240) {
-        arg0->unk465C[arg2] = 0x240;
+        arg0->nonZero[arg2] = 0x240;
     } else {
-        arg0->unk465C[arg2] = sp48;
+        arg0->nonZero[arg2] = sp48;
     }
     if (sp48 < 0x240) {
-        arg0->unk4660[arg2] = 0x240 - sp48;
-        bzero(sp44, arg0->unk4660[arg2] * 2);
+        arg0->zeroTail[arg2] = 0x240 - sp48;
+        bzero(sp44, arg0->zeroTail[arg2] * 2);
     } else {
-        arg0->unk4660[arg2] = 0;
+        arg0->zeroTail[arg2] = 0;
     }
     return 1;
 }
-extern s16 D_800AEB7C[2][3][576];
 
 /* Short-block reordering: xr is copied into xrSb, short blocks through the
  * D_800AEB7C index table (mixed blocks keep their first 36 long lines). */
@@ -771,26 +684,6 @@ s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
     }
     return 1;
 }
-
-/* The de-interleave/rotation pass of the bitstream decoder.  The context is
- * re-described locally: the shared AudCtx above only names the fields the
- * already-decompiled functions need. */
-extern f32 D_800B067C[8];
-extern f32 D_800B069C[8];
-
-typedef struct {
-    /* 0x00 */ f32 unk00[8];
-    /* 0x20 */ f32 unk20[8];
-    /* 0x40 */ u8  pad40[0x8];
-} AudBlk151F6B28; /* size 0x48 */
-
-typedef struct {
-    /* 0x0000 */ u8  pad0000[0x3C98];
-    /* 0x3C98 */ s32 unk3C98[2][1];
-    /* 0x3CA0 */ s32 unk3CA0[2][1];
-    /* 0x3CA8 */ u8  pad3CA8[0x4F44 - 0x3CA8];
-    /* 0x4F44 */ AudBlk151F6B28 unk4F44[2][32];
-} AudState151F6B28;
 
 s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 sb;
@@ -849,19 +742,6 @@ s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
 
     return 1;
 }
-
-extern Mp3Decoder D_800E1880;
-extern void (*D_800E0E00)(s32, void *, s32);
-extern s32 D_800E0E04;
-extern s32 D_800B06BC[2][15];  /* bitrate table, indexed [mpegId][bitrateIndex] */
-extern s32 D_800B0734[2][4];   /* sample-rate table, indexed [mpegId][srIndex]   */
-
-s32 func_151F8088(Mp3Decoder *, s32);
-s32 func_151F6FD0(Mp3Decoder *);
-s32 func_151F78B4(Mp3Decoder *);
-s32 func_151F7F60(Mp3Decoder *);
-s32 func_151F9BF0(f32 *, s32, f32 *, f32 *);
-s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
 
 /* Reads the side info that follows the frame header and derives the frame's
  * main-data size. Returns 0 on a short read. */
@@ -953,6 +833,7 @@ s32 func_151F6FD0(Mp3Decoder *dec) {
     dec->mainDataSize = dec->frameSize + dec->paddingBit - (dec->headerLen + dec->sideInfoLen);
     return 1;
 }
+
 /* Layer III frame decode: reads the main data, then per channel Huffman-decodes,
  * dequantises, reorders, alias-reduces and runs the IMDCT, and writes a block of
  * s16 subband samples (after a 2-word scale header) to the current outBuf. */
@@ -1238,4 +1119,3 @@ s32 func_151F86B0(Mp3Decoder *decoder, u8 **outBlock, s32 *outChannels) {
 end:
     return ret;
 }
-
