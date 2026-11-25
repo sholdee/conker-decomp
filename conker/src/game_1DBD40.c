@@ -7,35 +7,34 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A9D84;
-extern f32 D_800A9D88;
 void func_151AE984(f32 *, f32, f32, f32, s32, u8);
 void func_151AEAB4(f32 *, s32, u8);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
-void func_151AE890(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
-    f32 sp2C[3];
-    register f32 temp_f0;
+/* Spawns a random spark or debris particle at (x, y, z); arg6[0xC] is passed through. */
+void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
+    f32 pos[3];
+    f32 roll;
 
-    sp2C[0] = arg0;
-    sp2C[1] = arg1;
-    sp2C[2] = arg2;
-    temp_f0 = func_150ADA68();
-    if (temp_f0 < D_800A9D84) {
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    roll = func_150ADA68();
+    if (roll < 0.15000000596f) {
         return;
     }
-    if (temp_f0 < 0.25f) {
-        register s32 temp_a1;
+    if (roll < 0.25f) {
+        s32 flag;
 
-        temp_f0 = func_150ADA68();
-        temp_a1 = (0.0f < temp_f0) ? 1 : 0;
-        func_151AEAB4(sp2C, temp_a1, arg6[0xC]);
+        roll = func_150ADA68();
+        flag = (roll > 0.0f) ? 1 : 0;
+        func_151AEAB4(pos, flag, arg6[0xC]);
     } else {
-        register s32 temp_v0;
+        s32 flag;
 
-        temp_f0 = func_150ADA68();
-        temp_v0 = (D_800A9D88 < temp_f0) ? 1 : 0;
-        func_151AE984(sp2C, arg3, arg4, arg5, temp_v0, arg6[0xC]);
+        roll = func_150ADA68();
+        flag = (roll > 0.8050000668f) ? 1 : 0;
+        func_151AE984(pos, dirX, dirY, dirZ, flag, arg6[0xC]);
     }
 }
 
