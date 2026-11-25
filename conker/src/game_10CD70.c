@@ -15,8 +15,6 @@ s32 func_150ADA20(void);
 #undef D_800D3098
 extern struct178 *D_800D3098;
 
-
-
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
     union {
@@ -50,7 +48,8 @@ extern void func_150A2864(s32, s32);
 extern void func_150A3444(s32, s16, s16, s16);
 extern void func_151749A0(s32, s32);
 
-/* Places markers 3 and 4 above actors 6 and 7, then scrolls the texture of each of the three
+/* Points slots 3 and 4 (func_150A2864/func_150A3444) 200 units above actors 6 and 7, or
+ * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
     struct127 *obj;
@@ -76,7 +75,7 @@ void func_150DF920(s32 arg0) {
     id = 6;
     slot = 3;
     for (i = 0; i < 2; i++) {
-        obj = func_15083E90((u8)id) /* takes a u8; functions.h says s32 */;
+        obj = func_15083E90((u8)id); // takes a u8; functions.h says s32
         id = 7;
         if (obj != NULL) {
             func_150A2864(slot, 0);
@@ -117,15 +116,16 @@ void func_150DF920(s32 arg0) {
                 j = -1;
                 break;
             }
-        } while (dl[j].w1 != (i << 24) + 0x02000000);
+        } while (dl[j].w1 != (i << 24) + 0x02000000); // segment (2 + i), offset 0
 
         if (j != -1) {
             /* Then the G_SETTILESIZE after it. */
+            // matching: the opcode copy steers register allocation
             while ((opcode = GFX_CMD(dl, j)->w0.opcode) != (s8)G_SETTILESIZE) {
                 j++;
             }
 
-            if (j != -1) {
+            if (j != -1) { // matching: always true here, but dropping it changes the branches
                 if (active) {
                     uls = (dl[j].w0.word >> 12) & 0xFFF;
                     ult = dl[j].w0.word & 0xFFF;
@@ -141,7 +141,6 @@ void func_150DF920(s32 arg0) {
 }
 
 extern s32 D_80090324[];
-extern u8 D_800DD405;
 
 /* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
  * active material gets entry 9 + D_800DD405 of D_80090324, an inactive one entry 8. */
@@ -182,31 +181,31 @@ typedef struct {
 
 /* Moves pos back and forth between 11 and 55: the target speed flips sign at either end and
  * the speed eases towards it by 0.05 per call. */
-void func_150DFCA8(SwingObject *arg0) {
+void func_150DFCA8(SwingObject *obj) {
     f32 pos;
     f32 target;
 
     // matching: the step shares target's register
-    target = arg0->speed * D_800BE9E4;
-    arg0->pos += target;
-    pos = arg0->pos;
+    target = obj->speed * D_800BE9E4;
+    obj->pos += target;
+    pos = obj->pos;
     if (pos < 11.0f) {
-        arg0->targetSpeed = target = 0.55f;
-    } else if (arg0->pos > 55.0f) {
+        obj->targetSpeed = target = 0.55f;
+    } else if (obj->pos > 55.0f) {
         pos = D_800A0FA4; // matching: the negated constant goes through pos's register
-        arg0->targetSpeed = target = -pos;
+        obj->targetSpeed = target = -pos;
     } else {
-        target = arg0->targetSpeed;
+        target = obj->targetSpeed;
     }
-    if (arg0->speed < target) {
-        arg0->speed += 0.05f;
-        if (target < arg0->speed) {
-            arg0->speed = target;
+    if (obj->speed < target) {
+        obj->speed += 0.05f;
+        if (target < obj->speed) {
+            obj->speed = target;
         }
-    } else if (target < arg0->speed) {
-        arg0->speed -= 0.05f;
-        if (arg0->speed < target) {
-            arg0->speed = target;
+    } else if (target < obj->speed) {
+        obj->speed -= 0.05f;
+        if (obj->speed < target) {
+            obj->speed = target;
         }
     }
 }
@@ -240,27 +239,27 @@ typedef struct {
 
 /* Counts the fade timer down (returning 1 once it expires) and rewrites the G_SETTILESIZE of
  * the object's display list: uls follows the fade, ult steps back by a third of the old uls. */
-s32 func_150DFDD0(Game10CD70Object *arg0, Game10CD70FadeState *arg1) {
+s32 func_150DFDD0(Game10CD70Object *obj, Game10CD70FadeState *state) {
     f32 fade;
     GfxCmd *dl;
     u32 w0;
     s32 j;
     s32 ult;
 
-    if (arg1->active != 0) {
-        arg0->unk13 = 2;
-        arg1->timer -= D_800BE9A4;
-        if (arg1->timer < 0.0f) {
-            arg1->active = 0;
+    if (state->active != 0) {
+        obj->unk13 = 2;
+        state->timer -= D_800BE9A4;
+        if (state->timer < 0.0f) {
+            state->active = 0;
             return 1;
         }
-        fade = 1.0f - (arg1->rate * arg1->timer);
+        fade = 1.0f - (state->rate * state->timer);
     } else {
         fade = 0.0f;
-        arg0->unk13 = 0;
+        obj->unk13 = 0;
     }
 
-    dl = *arg0->dl;
+    dl = *obj->dl;
     if (dl != NULL) {
         j = 0;
         while (GFX_CMD(dl, j)->w0.opcode != (s8)G_SETTILESIZE) {
@@ -405,11 +404,11 @@ void func_150E0348(struct127 *actor, u8 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.bone = 0;
     desc.owner = actor;
-    desc.offset = *(struct17 *)&D_800A5480;
+    desc.offset = *(struct17 *)&D_800A5480; /* a Vec3; variables.h declares it as one f32 */
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
-    desc.emitter = 11;
-    desc.callback = -1;
+    desc.emitter = 11; /* D_80089A70[11] = func_150E03F8 */
+    desc.callback = -1; /* none */
     desc.unk2D = 0;
     desc.radius = 10.90000057f;
     desc.rate = 0.2312099934f;
@@ -502,35 +501,36 @@ void func_150E05F8(DistanceFadeObject *obj) {
 }
 
 extern u8 D_80088988;
-extern const f32 D_800A0F70[][3];
-extern const f32 D_800A0F88[][3];
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern void func_15102B38(s32, u8, const f32 *, const f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+extern f32 D_800A0F70[][3];
+extern f32 D_800A0F88[][3];
+extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
+extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+                          s32);
 
-void func_150E06D8(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
-    struct17 sp64;
+/* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
+ * actor's bone D_80088988, starting at the first point in world space. */
+void func_150E06D8(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+    struct17 start;
     f32 scale;
-    f32 sp58[2];
-    s32 sp54[1];
-    s32 sp50[1];
-    f32 sp4C;
-    s32 sp48;
-    s32 sp44;
+    f32 params[2];
+    f32 *src[1];
+    f32 *dst[1];
+    f32 rand0;
+    s32 randB;
+    s32 randA;
 
-    if (((struct127 *)arg0)->unk1D4 == 0) {
+    if (actor->unk1D4 == NULL) {
         return;
     }
-    sp54[0] = (s32)D_800A0F70[arg1];
-    sp50[0] = (s32)&sp64;
-    func_15145EA4(sp54, sp50, (s32)((struct127 *)arg0)->unk1D4 + (D_80088988 << 6), 1);
-    scale = 1.0f;
-    sp58[1] = func_150ADA68() * scale + 2.0f;
-    sp58[0] = func_150ADA68() * 14.0f + 28.0f;
-    sp44 = func_150ADA20();
-    sp48 = func_150ADA20();
-    sp4C = func_150ADA68() * 300.0f + 400.0f;
-    func_15102B38(arg0, D_80088988, D_800A0F70[arg1], D_800A0F88[arg1], sp58,
-                  (sp44 % 3U) + 4, (sp48 % 0x9CU) + 0x64,
-                  sp4C, &sp64, 0xFF,
-                  0, -1, arg2, arg3);
+    src[0] = D_800A0F70[slot];
+    dst[0] = &start.unk0;
+    func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_80088988, 1);
+    scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
+    params[1] = func_150ADA68() * scale + 2.0f;
+    params[0] = func_150ADA68() * 14.0f + 28.0f;
+    randA = func_150ADA20();
+    randB = func_150ADA20();
+    rand0 = func_150ADA68() * 300.0f + 400.0f;
+    func_15102B38(actor, D_80088988, D_800A0F70[slot], D_800A0F88[slot], params, randA % 3U + 4,
+                  randB % 156U + 100, rand0, &start, 255, 0, -1, arg2, arg3);
 }
