@@ -143,250 +143,213 @@ struct260 *func_151A3504(TrailParams *params, u8 arg1) {
     return effect;
 }
 
-typedef struct TimedVec151A361C {
-    f32 x;
-    f32 y;
-    f32 z;
-} TimedVec151A361C;
+/* One point of a trail. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 width;
+    /* 0x10 */ s16 intensity;       /* alpha scale; the point dies when it drops below 0 */
+    /* 0x12 */ s16 holdTime;        /* ticks before intensity starts to fall */
+    /* 0x14 */ u8 alpha;
+    /* 0x15 */ u8 texCoord;
+    /* 0x16 */ u8 pad16[2];
+} TrailPoint;
 
-typedef struct TimedEntry151A361C {
-    TimedVec151A361C value0;
-    f32 fieldC;
-    s16 field10;
-    s16 field12;
-    u8 field14;
-    u8 field15;
-    u8 pad16[2];
-} TimedEntry151A361C;
+#define TRAIL_EFFECT_ATTACHED 2     /* the head follows the owner's bone */
+#define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
 
-typedef struct TimedState151A361C {
-    u8 *owner;
-    u8 identity;
-    u8 transformIndex;
-    u8 pad06[2];
-    TimedVec151A361C input08;
-    f32 field14;
-    s16 field18;
-    s16 field1A;
-    s16 field1C;
-    u8 pad1E[2];
-    f32 field20;
-    f32 field24;
-    u8 field28;
-    u8 field29;
-    s8 field2A;
-    u8 pad2B[5];
-    u8 flags30;
-    u8 pad31[3];
-    TimedVec151A361C previous34;
-    f32 field40;
-    u8 field44;
-    u8 pad45[3];
-    f32 field48;
-    u8 field4C;
-} TimedState151A361C;
+/* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 pad0D[3];
+    /* 0x10 */ Vec3f headPos;
+    /* 0x1C */ u8 pad1C[2];
+    /* 0x1E */ u16 flags;
+    /* 0x20 */ u8 pad20[5];
+    /* 0x25 */ u8 capacity;
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail;             /* oldest point */
+    /* 0x2E */ s8 head;             /* slot the next point goes in */
+    /* 0x2F */ u8 pad2F;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[0x23];
+    /* 0x54 */ Vec3f tailPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailState *state;
+} TrailEffect;
 
-typedef struct TimedObject151A361C {
-    u8 pad0[0xC];
-    u8 fieldC;
-    u8 pad0D[3];
-    TimedVec151A361C position10;
-    u8 pad1C[2];
-    u16 flags1E;
-    u8 pad20[5];
-    u8 field25;
-    u8 pad26[6];
-    s8 field2C;
-    s8 field2D;
-    s8 field2E;
-    u8 pad2F[0x25];
-    TimedVec151A361C output54;
-    u8 pad60[0x34];
-    TimedEntry151A361C *entries94;
-    TimedState151A361C *state98;
-} TimedObject151A361C;
+/*
+ * Per-tick update of a trail's points: ages and fades them, drops dead ones from
+ * the tail and publishes the tail position. Returns 0 to kill a detached trail.
+ */
+s32 func_151A361C(TrailEffect *effect) {
+    TrailState *state = effect->state;
+    TrailPoint *points = effect->points;
+    TrailPoint *point;
+    s32 i;
 
-s32 func_151A361C(TimedObject151A361C *arg0) {
-    TimedState151A361C *state = arg0->state98;
-    TimedEntry151A361C *entries = arg0->entries94;
-    TimedEntry151A361C *entry;
-    s32 index;
-
-    if (arg0->field2C < 2 && (state->flags30 & 1)) {
+    if (effect->count < 2 && (state->flags & TRAIL_DETACHED)) {
         return 0;
     }
-    state->field4C = (u32)state->field4C + (u32)(s32)state->field2A * (u32)D_800BE9E4;
-    index = arg0->field2E;
-    if (index != arg0->field2D) {
+    state->texOffset += state->params.texScroll * D_800BE9E4;
+    i = effect->head;
+    if (i != effect->tail) {
         do {
-            index--;
-            if (index < 0) {
-                index = arg0->field25 - 1;
+            i--;
+            if (i < 0) {
+                i = effect->capacity - 1;
             }
-            entry = &entries[index];
-            if (entry->field12 > 0) {
-                entry->field12 = (u32)(s32)entry->field12 - (u32)D_800BE9E4;
+            point = &points[i];
+            if (point->holdTime > 0) {
+                point->holdTime -= D_800BE9E4;
             } else {
-                entry->field10 = (u32)(s32)entry->field10 - (u32)D_800BE9E4 * (u32)(s32)state->field1C;
+                point->intensity -= D_800BE9E4 * state->params.fadeRate;
             }
-            entry->field14 = 0xFF;
-            entry->fieldC += D_800BE9A4 * state->field24;
-            if (entry->field10 < 0) {
-                state->flags30 &= ~2;
-                while (index != arg0->field2D) {
-                    arg0->field2D++;
-                    if (arg0->field2D == arg0->field25) {
-                        arg0->field2D = 0;
+            point->alpha = 0xFF;
+            point->width += D_800BE9A4 * state->params.widthGrowth;
+            if (point->intensity < 0) {
+                state->flags &= ~TRAIL_FADE_TAIL;
+                while (i != effect->tail) {
+                    effect->tail++;
+                    if (effect->tail == effect->capacity) {
+                        effect->tail = 0;
                     }
-                    arg0->field2C--;
+                    effect->count--;
                 }
-                entries[arg0->field2D].field10 = 0;
+                points[effect->tail].intensity = 0;
             }
-        } while (index != arg0->field2D);
+        } while (i != effect->tail);
     }
-    if (arg0->field2C > 0) {
-        arg0->output54 = entries[arg0->field2D].value0;
+    if (effect->count > 0) {
+        effect->tailPos = points[effect->tail].pos;
     } else {
-        arg0->output54.x = 0.0f;
-        arg0->output54.y = 0.0f;
-        arg0->output54.z = 0.0f;
+        effect->tailPos.x = 0.0f;
+        effect->tailPos.y = 0.0f;
+        effect->tailPos.z = 0.0f;
     }
     return 1;
 }
 
 void func_151A4E9C(void *arg0);
 
-s32 func_151A37C0(TimedObject151A361C *arg0) {
-    TimedState151A361C *state = arg0->state98;
-    TimedEntry151A361C *entries = arg0->entries94;
-    u8 *owner;
-    TimedVec151A361C delta;
-    s32 found;
-    u8 buf[0x30];
+/*
+ * Per-tick update of a trail's head: follows the owner's bone and emits points
+ * along the path travelled. If the bone can no longer be found, the trail is
+ * detached and a TrailRetryTask is started to re-create it later.
+ */
+s32 func_151A37C0(TrailEffect *effect) {
+    TrailState *state = effect->state;
+    TrailPoint *points = effect->points;
+    struct127 *owner;
+    Vec3f delta;
+    s32 started;
+    TrailParams retry;
 
-    owner = state->owner;
-    if (*(s32 *)owner == 0) {
+    owner = state->params.owner;
+    if (owner->interaction_state == 0) {
         return 0;
     }
-    if (state->identity != owner[0x3B]) {
+    if (owner->unique_id != state->params.ownerId) {
         return 0;
     }
-    found = 0;
-    if (!(arg0->flags1E & 4)) {
-        if (func_151A4E34((TrailParams *)state, (Vec3f *)&arg0->position10) != 0) {
-            found = 1;
-            state->previous34 = arg0->position10;
-            arg0->flags1E |= 4;
+    started = 0;
+    if (!(effect->flags & TRAIL_EFFECT_STARTED)) {
+        if (func_151A4E34(&state->params, &effect->headPos) != 0) {
+            started = 1;
+            state->lastPos = effect->headPos;
+            effect->flags |= TRAIL_EFFECT_STARTED;
         } else {
             return 1;
         }
     }
-    if (!found && func_151A4E34((TrailParams *)state, (Vec3f *)&arg0->position10) == 0) {
-        func_151A4E9C(arg0);
-        memcpy(buf, state, 0x30);
+    if (!started && func_151A4E34(&state->params, &effect->headPos) == 0) {
+        func_151A4E9C(effect);
+        memcpy(&retry, state, sizeof(TrailParams));
         {
-            struct260 *ret = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, arg0->fieldC, 0);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0x28, buf, 0x30);
+            struct260 *task = func_151491F4(300, -1, 10, 0, 5, sizeof(TrailParams), effect->unkC, 0);
+            if (task != NULL) {
+                memcpy((u8 *)task + 0x28, &retry, sizeof(TrailParams));
             }
         }
         return 1;
     }
-    delta.x = arg0->position10.x - state->previous34.x;
-    delta.y = arg0->position10.y - state->previous34.y;
-    delta.z = arg0->position10.z - state->previous34.z;
+    delta.x = effect->headPos.x - state->lastPos.x;
+    delta.y = effect->headPos.y - state->lastPos.y;
+    delta.z = effect->headPos.z - state->lastPos.z;
     if (fabsf(delta.x) > 0.0001f || fabsf(delta.y) > 0.0001f || fabsf(delta.z) > 0.0001f) {
-        state->field40 += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->field14;
+        state->pending += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->params.pointsPerUnit;
     }
-    if (state->field40 > 1.0f) {
-        f32 inv;
-        f32 val48;
-        f32 step48;
-        f32 path;
-        TimedVec151A361C cur;
-        f32 sx;
-        f32 sy;
-        f32 diff;
-        f32 sz;
-        f32 pathStep;
+    if (state->pending > 1.0f) {
+        f32 invPending;
+        f32 age;
+        f32 ageStep;
+        f32 width;
+        Vec3f pos;
+        f32 stepX;
+        f32 stepY;
+        f32 widthLeft;
+        f32 stepZ;
+        f32 widthStep;
 
-        inv = 1.0f / state->field40;
-        val48 = state->field48 + D_800BE9A4;
-        cur = state->previous34;
-        step48 = val48 * inv;
-        path = state->field20 + state->field24 * val48;
-        sx = delta.x * inv;
-        sy = delta.y * inv;
-        sz = delta.z * inv;
-        diff = state->field20 - path;
-        pathStep = diff * inv;
+        invPending = 1.0f / state->pending;
+        age = state->age + D_800BE9A4;
+        pos = state->lastPos;
+        ageStep = age * invPending;
+        width = state->params.width + state->params.widthGrowth * age;
+        stepX = delta.x * invPending;
+        stepY = delta.y * invPending;
+        stepZ = delta.z * invPending;
+        widthLeft = state->params.width - width;
+        widthStep = widthLeft * invPending;
         do {
-            TimedEntry151A361C *entry = &entries[arg0->field2E];
-            entry->value0 = cur;
-            entry->fieldC = path;
-            entry->field10 = state->field18;
-            entry->field12 = state->field1A;
-            entry->field15 = state->field44;
-            found = func_150ADA20(); state->field44 += state->field28 + (u32)found % (u32)(state->field29 + 1);
-            entry->field14 = 0xFF;
-            arg0->field2E++;
-            if (arg0->field2E == arg0->field25) {
-                arg0->field2E = 0;
+            TrailPoint *point = &points[effect->head];
+            point->pos = pos;
+            point->width = width;
+            point->intensity = state->params.intensity;
+            point->holdTime = state->params.holdTime;
+            point->texCoord = state->texCoord;
+            // matching: reusing "started" for the random value (on one line) sets the frame layout
+            started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (u32)(state->params.texStepRandom + 1);
+            point->alpha = 0xFF;
+            effect->head++;
+            if (effect->head == effect->capacity) {
+                effect->head = 0;
             }
-            arg0->field2C++;
-            if (arg0->field2E == arg0->field2D) {
-                arg0->field2D++;
-                if (arg0->field2D == arg0->field25) {
-                    arg0->field2D = 0;
+            effect->count++;
+            if (effect->head == effect->tail) {
+                effect->tail++;
+                if (effect->tail == effect->capacity) {
+                    effect->tail = 0;
                 }
-                arg0->field2C--;
+                effect->count--;
             }
-            path += pathStep;
-            cur.x += sx;
-            cur.y += sy;
-            cur.z += sz;
-            val48 -= step48;
-            state->field40 -= 1.0f;
-        } while (state->field40 > 1.0f);
-        state->previous34 = cur;
-        state->field48 = val48;
+            width += widthStep;
+            pos.x += stepX;
+            pos.y += stepY;
+            pos.z += stepZ;
+            age -= ageStep;
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
+        state->lastPos = pos;
+        state->age = age;
     }
-    {
-        typedef s32 T0;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x40); state = state;
-    }
-    {
-        typedef s32 T1;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x44); state = state;
-    }
-    {
-        typedef s32 T2;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x48); state = state;
-    }
-    {
-        typedef s32 T3;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x4C); state = state;
-    }
-    {
-        typedef s32 T4;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x50); state = state;
-    }
-    {
-        typedef s32 T5;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x54); state = state;
-    }
-    {
-        typedef s32 T6;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x58); state = state;
-    }
-    {
-        typedef s32 T7;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x5C); state = state;
-    }
-    {
-        typedef s32 T8;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x60); state = state;
-    }
+    /*
+     * matching: nine scopes holding a kept dead load each give as1 enough extra
+     * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
+     * (ledger: ~/conker-ws/func_151A37C0/notes.md, pass6).
+     */
+    { typedef s32 T0; state = *(TrailState **)((u8 *)effect + 0x40); state = state; }
+    { typedef s32 T1; state = *(TrailState **)((u8 *)effect + 0x44); state = state; }
+    { typedef s32 T2; state = *(TrailState **)((u8 *)effect + 0x48); state = state; }
+    { typedef s32 T3; state = *(TrailState **)((u8 *)effect + 0x4C); state = state; }
+    { typedef s32 T4; state = *(TrailState **)((u8 *)effect + 0x50); state = state; }
+    { typedef s32 T5; state = *(TrailState **)((u8 *)effect + 0x54); state = state; }
+    { typedef s32 T6; state = *(TrailState **)((u8 *)effect + 0x58); state = state; }
+    { typedef s32 T7; state = *(TrailState **)((u8 *)effect + 0x5C); state = state; }
+    { typedef s32 T8; state = *(TrailState **)((u8 *)effect + 0x60); state = state; }
     return 1;
 }
 
