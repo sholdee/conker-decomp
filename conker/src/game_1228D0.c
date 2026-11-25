@@ -237,7 +237,8 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
+/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98 (sparks along a
+ * segment of the owner's bone 5). */
 typedef struct {
     Actor *owner;
     u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
@@ -248,7 +249,7 @@ typedef struct {
 typedef struct {
     TimedEffect base;
     SparkData data;
-} SparkEffect;
+} BoneSparkEffect;
 
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
 void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
@@ -261,7 +262,7 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
     effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
-        memcpy(&((SparkEffect *)effect)->data, &data, sizeof(data));
+        memcpy(&((BoneSparkEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
@@ -278,7 +279,7 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
-void func_150F5C98(SparkEffect *effect) {
+void func_150F5C98(BoneSparkEffect *effect) {
     Actor *owner;
     SparkData *data;
     ParticleDesc spawn;
@@ -373,7 +374,7 @@ void func_150F5C98(SparkEffect *effect) {
 
 /* Effect callback for the spark effect: hands func_15149514 the effect's owner reference
  * (pointer and id). */
-void func_150F6138(SparkEffect *effect, s32 arg1, u8 arg2) {
+void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 

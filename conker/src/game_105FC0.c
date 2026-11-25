@@ -761,9 +761,9 @@ typedef struct {
     u8 pad0[0x58];
     u8 unk58[0x50];
     WobbleData spark;
-} Spark;
+} TrailSpark;
 
-s32 func_150DA628(Spark *particle, s32 arg1) {
+s32 func_150DA628(TrailSpark *particle, s32 arg1) {
     WobbleData *spark;
 
     spark = &particle->spark;
@@ -776,7 +776,7 @@ typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-extern Spark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern TrailSpark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
 extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
 extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
@@ -794,7 +794,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
                 WobbleData sub;
-                Spark *spark;
+                TrailSpark *spark;
 
                 sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;

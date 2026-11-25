@@ -130,7 +130,7 @@ typedef struct {
     /* 0x10 */ f32 widthPhase;
     /* 0x14 */ f32 alphaPhase;
     /* 0x18 */ u8 flags;               /* bit 0: the beam is aimed this frame */
-    /* 0x1C */ struct Spark *sparks[2];
+    /* 0x1C */ struct BeamSpark *sparks[2];
     /* 0x24 */ struct BeamEmitter *emitter;
     /* 0x28 */ struct Glow *glow;
     /* 0x2C */ Flash *flash;
@@ -183,7 +183,7 @@ typedef struct BeamEmitter {
     /* 0x28 */ EmitterLink link;
 } BeamEmitter;
 
-typedef struct Spark {
+typedef struct BeamSpark {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ u8 flags;               /* bit 1: drawn */
@@ -195,7 +195,7 @@ typedef struct Spark {
     /* 0x58 */ f32 inverse;
     /* 0x5C */ u8 pad5C[4];
     /* 0x60 */ SparkLink *link;
-} Spark;
+} BeamSpark;
 
 extern void *func_151A7950(void *, s32, u8, s32);
 struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, Beam *, u8, s32);
@@ -489,7 +489,7 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
 
 
 /* Per-frame update of a beam spark: follows the beam while it is aimed, hides otherwise. */
-s32 func_150EFA4C(Spark *spark) {
+s32 func_150EFA4C(BeamSpark *spark) {
     Beam *beam;
     BeamLink *link;
     SparkLink *sparkLink;
@@ -721,18 +721,18 @@ Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
     return flash;
 }
 
-void func_150F02A0(Spark *spark);
+void func_150F02A0(BeamSpark *spark);
 
-void func_150F0260(Spark *spark) {
+void func_150F0260(BeamSpark *spark) {
     func_150F02A0(spark);
 }
 
-void func_150F0280(Spark *spark) {
+void func_150F0280(BeamSpark *spark) {
     func_150F02A0(spark);
 }
 
 /* Clears the beam's reference to this spark. */
-void func_150F02A0(Spark *spark) {
+void func_150F02A0(BeamSpark *spark) {
     SparkLink *link = spark->link;
     Beam *beam = link->beam;
 
@@ -878,7 +878,7 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
 
 /* Message handler of a beam spark: releases it when its actor goes away (type 0)
  * and follows its actor through an identity swap (type 0x2D). */
-void func_150F07E4(Spark *spark, s32 data, u8 type) {
+void func_150F07E4(BeamSpark *spark, s32 data, u8 type) {
     SparkLink *link = spark->link;
     ActorMsg *msg = (ActorMsg *)data;
     Actor *msgActor;
