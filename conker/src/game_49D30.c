@@ -801,27 +801,31 @@ void func_1501DF04(s32 scene) {
 extern u8 D_800C3663;
 
 
-s32 func_1501E05C(s32 arg0) {
-    s32 temp_a2;
-    s32 temp_v1;
+/* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
+   0x1D and 0x21). */
+s32 func_1501E05C(s32 scene) {
+    s32 map;
+    s32 skipRequest;
 
-    temp_a2 = D_800BE9F0;
-    temp_v1 = (s32) D_8008FD84;
+    map = D_800BE9F0;
+    // matching: holding the address as an integer keeps IDO from folding it into the loads
+    skipRequest = (s32)D_8008FD84;
 
-    if (temp_a2 == 0x1D) {
-        if (*(s8 *)temp_v1 == 0) {
-            goto check_mode_1d;
+    if (map == 0x1D) {
+        // matching: the goto orders the D_800C35E8 address load after the branch
+        if (*(s8 *)skipRequest == 0) {
+            goto noRequest;
         }
-        *(s8 *)temp_v1 = 0;
+        *(s8 *)skipRequest = 0;
         return 1;
-check_mode_1d:
+    noRequest:
         if (D_800C35E8[0] != 5) {
             return 0;
         }
     }
 
-    if (temp_a2 == 0x21) {
-        if ((D_800BE710[0] & 0x1000) && (D_8000030C == 1) && (D_800C35B0[0] >= 0x12D)) {
+    if (map == 0x21) {
+        if ((D_800BE710[0] & 0x1000) && (D_8000030C == 1) && (D_800C35B0[0] >= 301)) {
             return 1;
         }
         return 0;
@@ -832,8 +836,8 @@ check_mode_1d:
             if (D_800D2E40 != 0) {
                 return 1;
             }
-            if (func_1501D2C4(temp_a2, D_800C35E8[arg0]) != 0) {
-                if ((D_800C3C99 != 0) || ((D_800C35B0[arg0] + 0x1E) < D_800C3640[arg0])) {
+            if (func_1501D2C4(map, D_800C35E8[scene]) != 0) {
+                if ((D_800C3C99 != 0) || ((D_800C35B0[scene] + 30) < D_800C3640[scene])) {
                     return 1;
                 }
             }
@@ -846,20 +850,22 @@ extern u8 D_800C3C89;
 s32 func_151F2CDC(void);
 void func_151F2D6C(s32, s32);
 
-void func_1501E1B4(s32 arg0) {
+/* Cutscene skip state machine (D_800C3C88): 0 = waiting for a skip request (needs at least 91
+   ticks left), 1 = fading out for 30 ticks (D_800C3C89), 2 = skipping (func_1501DF04). */
+void func_1501E1B4(s32 scene) {
     if (D_800C3C88 == 0) {
-        if (D_800C35EA[arg0] != 1) {
+        if (D_800C35EA[scene] != 1) {
             return;
         }
-        if (func_1501E05C(arg0) == 0) {
+        if (func_1501E05C(scene) == 0) {
             return;
         }
         D_8008FD84[0] = 0;
-        if (D_800C3640[arg0] - D_800C35B0[arg0] < 0x5B) {
+        if (D_800C3640[scene] - D_800C35B0[scene] < 91) {
             return;
         }
         D_800C3C88 = 1;
-        D_800C3C89 = 0x1E;
+        D_800C3C89 = 30;
         func_1517EE40(0, 0, 0, 0x1E, 1, 0);
         func_1000E17C();
         if ((func_151F2CDC() == 1) || (func_151F2CDC() == 2)) {
@@ -872,18 +878,20 @@ void func_1501E1B4(s32 arg0) {
         }
         D_800C3C89 = 0;
         D_800C3C88 = 2;
-        func_1501DF04(arg0);
+        func_1501DF04(scene);
         D_800C3C88 = 0;
     }
 }
 
 void func_1501E400(s32 arg0);
 
-void func_1501E2F8(s32 arg0) {
-    if ((D_800C35EA[arg0] == 1) && (D_800C35B0[arg0] >= D_800C3640[arg0])) {
+/* At the scene's end time, finish it (func_1501E81C) unless D_800C3C8C holds it; if a chained
+   scene started, run its first frame. */
+void func_1501E2F8(s32 scene) {
+    if ((D_800C35EA[scene] == 1) && (D_800C35B0[scene] >= D_800C3640[scene])) {
         if (D_800C3C8C == 0) {
-            func_1501E81C(0, arg0);
-            if (D_800C35EA[arg0] == 1) {
+            func_1501E81C(0, scene);
+            if (D_800C35EA[scene] == 1) {
                 func_1501E400(0);
                 func_150242F8(1, 0);
                 func_1501EC38(0);
@@ -899,26 +907,27 @@ void func_1501E2F8(s32 arg0) {
 
 void func_15080228(void);
 
-void func_1501E400(s32 arg0) {
+/* Advance the scene clock D_800C35B0 by this frame's ticks, clamped to the end time. */
+void func_1501E400(s32 scene) {
     if (D_800C3A58 != 0) {
         D_800C3A58 -= 1;
     }
-    D_800C35B8[arg0] = D_800C35B0[arg0];
-    if (D_800C35EA[arg0] == 1) {
-        func_1501E1B4(arg0);
-        if ((arg0 != 0) || (D_800BEAC0 == 0)) {
-            D_800C35B0[arg0] += D_800BEA08;
+    D_800C35B8[scene] = D_800C35B0[scene];
+    if (D_800C35EA[scene] == 1) {
+        func_1501E1B4(scene);
+        if ((scene != 0) || (D_800BEAC0 == 0)) {
+            D_800C35B0[scene] += D_800BEA08;
         }
-        if ((D_800C35C0[arg0] == 0) &&
-            (D_800C3C8E == D_800C35B8[arg0]) &&
-            (D_800C3C8E != D_800C35B0[arg0])) {
-            D_800C35B8[arg0] = -1;
+        if ((D_800C35C0[scene] == 0) &&
+            (D_800C3C8E == D_800C35B8[scene]) &&
+            (D_800C3C8E != D_800C35B0[scene])) {
+            D_800C35B8[scene] = -1;
         }
         if (func_151F2CDC() == 1) {
             func_15080228();
         }
-        if (D_800C35B0[arg0] >= D_800C3640[arg0]) {
-            D_800C35B0[arg0] = D_800C3640[arg0];
+        if (D_800C35B0[scene] >= D_800C3640[scene]) {
+            D_800C35B0[scene] = D_800C3640[scene];
         }
     }
 }
@@ -926,50 +935,41 @@ void func_1501E400(s32 arg0) {
 void func_10004074(s32);
 extern s32 D_800C3D50;
 
-void func_1501E540(s32 arg0) {
-    s32 index;
-    u16 *count;
+/* Free everything func_1501D348 allocated for the scene, and the cutscene file itself. */
+void func_1501E540(s32 scene) {
+    s32 track;
+    SeqFileHeader *hdr;
+    u8 **active;
 
-    if (D_800C3668[arg0] != 0) {
-        count = *(u16 **)D_800C3668[arg0];
-        index = 0;
-        if ((s32)*count > 0) {
-            do {
-                if (((u16 *)D_800C35C8[arg0])[index] != 0) {
-                    func_10004074(*(s32 *)((u8 *)D_800C3A50[arg0] + (index << 6) + 4));
-                    func_10004074(*(s32 *)((u8 *)D_800C3A50[arg0] + (index << 6) + 0x38));
-                }
-                index++;
-            } while (index < (s32)*count);
-            index = 0;
+    if (D_800C3668[scene] != 0) {
+        hdr = *(SeqFileHeader **)D_800C3668[scene];
+        for (track = 0; track < hdr->numTracks; track++) {
+            if (D_800C35C8[scene][track] != 0) {
+                func_10004074((s32)D_800C3A50[scene][track].keyDistance);
+                func_10004074((s32)D_800C3A50[scene][track].arcLength);
+            }
         }
-        func_10004074((s32)D_800C3A50[arg0]);
-        D_800C3A50[arg0] = 0;
-        func_10004074((s32)D_800C3958[arg0]);
-        D_800C3958[arg0] = NULL;
-        if ((s32)*count > 0) {
-            s32 *cursor;
-
-            cursor = (s32 *)((u8 *)D_800C3960 + arg0 * 0x78);
-            do {
-                func_10004074(*cursor);
-                *cursor = 0;
-                index++;
-                cursor++;
-            } while (index < (s32)*count);
+        func_10004074((s32)D_800C3A50[scene]);
+        D_800C3A50[scene] = NULL;
+        func_10004074((s32)D_800C3958[scene]);
+        D_800C3958[scene] = NULL;
+        active = D_800C3960[scene];
+        for (track = 0; track < hdr->numTracks; track++) {
+            func_10004074((s32)active[track]);
+            active[track] = NULL;
         }
-        func_10004074((s32)D_800C35C8[arg0]);
-        func_10004074((s32)D_800C35D0[arg0]);
-        func_10004074((s32)D_800C35D8[arg0]);
-        func_10004074((s32)D_800C35E0[arg0]);
-        D_800C35C8[arg0] = 0;
-        D_800C35D0[arg0] = 0;
-        D_800C35D8[arg0] = 0;
-        D_800C35E0[arg0] = 0;
+        func_10004074((s32)D_800C35C8[scene]);
+        func_10004074((s32)D_800C35D0[scene]);
+        func_10004074((s32)D_800C35D8[scene]);
+        func_10004074((s32)D_800C35E0[scene]);
+        D_800C35C8[scene] = NULL;
+        D_800C35D0[scene] = NULL;
+        D_800C35D8[scene] = NULL;
+        D_800C35E0[scene] = NULL;
         func_10004074(D_800C3D50);
         D_800C3D50 = 0;
-        func_10004074(D_800C3668[arg0]);
-        D_800C3668[arg0] = 0;
+        func_10004074(D_800C3668[scene]);
+        D_800C3668[scene] = 0;
     }
 }
 
