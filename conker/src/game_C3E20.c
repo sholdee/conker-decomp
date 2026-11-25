@@ -28,7 +28,10 @@ typedef struct {
 
 extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
-extern f32 D_800D2DB8;
+extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
+
+// variables.h declares D_800C3600 as `struct168 *` and D_800DC020 as `s32`, but D_800C3600 is the
+// struct168 itself and D_800DC020 holds a C3E20Pose table pointer; hence the casts below.
 
 void func_1512D560(struct108 *, s32, struct168 *);
 
@@ -51,64 +54,71 @@ s32 func_150969A0(s32 count) {
     return FALSE;
 }
 
-s32 func_15096A68(s32 arg0) {
-    u8 idx;
-    C3E20Pose *pos;
-    struct108 *obj;
-    struct108 *obj2;
+/*
+ * Advances command slot `slot`: starts the actor's move to its pose, then counts the timer down and
+ * restores the actor when it runs out. Returns FALSE once the command has finished.
+ */
+s32 func_15096A68(s32 slot) {
+    switch (D_800D2DC0[slot].state) {
+    case 1: {
+        u8 actorIndex;
+        C3E20Pose *pose;
+        struct108 *actor;
 
-    switch (D_800D2DC0[arg0].state) {
-    case 1:
-        idx = D_800D2DC0[arg0].actor;
-        obj = &D_800DBFF0[idx];
-        pos = *(C3E20Pose **)&D_800DC020;
-        pos = &pos[D_800D2DC0[arg0].poseIndex & 0xFF];
-        D_800D2DB8 = obj->unk2C0;
+        actorIndex = D_800D2DC0[slot].actor;
+        actor = &D_800DBFF0[actorIndex];
+        pose = (C3E20Pose *)D_800DC020;
+        // matching: the redundant mask on the u8 index steers IDO's register allocation
+        pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
+        D_800D2DB8 = actor->unk2C0;
         D_800D2DB4 = 1;
-        D_800DBFF4[idx] = 3;
+        D_800DBFF4[actorIndex] = 3;
         ((struct168 *)&D_800C3600)->unk0 = 1;
         ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pos->x;
-        ((struct168 *)&D_800C3600)->unk18 = pos->y;
-        ((struct168 *)&D_800C3600)->unk1C = pos->z;
-        ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
-        ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
-        ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
+        ((struct168 *)&D_800C3600)->unk14 = pose->x;
+        ((struct168 *)&D_800C3600)->unk18 = pose->y;
+        ((struct168 *)&D_800C3600)->unk1C = pose->z;
+        ((struct168 *)&D_800C3600)->unk20 = pose->unk14;
+        ((struct168 *)&D_800C3600)->unk24 = pose->unkC;
+        ((struct168 *)&D_800C3600)->unk28 = pose->unk10;
         ((struct168 *)&D_800C3600)->unk8 = 0.0f;
-        func_1512D560(obj, 5, 0);
-        func_1512D560(obj, 7, (struct168 *)&D_800C3600);
-        if (!(D_800D2DC0[arg0].flags & 1)) {
-            obj->unk3D0->unk7 = 0;
-            obj->unk3D0->unk25C |= 0x200;
+        func_1512D560(actor, 5, NULL);
+        func_1512D560(actor, 7, (struct168 *)&D_800C3600);
+        if (!(D_800D2DC0[slot].flags & 1)) {
+            actor->unk3D0->unk7 = 0;
+            actor->unk3D0->unk25C |= 0x200;
         }
-        D_800D2E30[arg0] = D_800D2DC0[arg0].scale;
-        D_800D2DC0[arg0].state = 2;
-    lbl1:
+        D_800D2E30[slot] = D_800D2DC0[slot].scale;
+        D_800D2DC0[slot].state = 2;
+    }
         break;
-    case 2:
-        obj2 = &D_800DBFF0[D_800D2DC0[arg0].actor];
-        D_800D2DC0[arg0].timer -= D_800BE9A0;
-        if (obj2->unk3D0->health == 0) {
-            D_800D2DC0[arg0].timer = 0;
+    case 2: {
+        struct108 *actor;
+
+        actor = &D_800DBFF0[D_800D2DC0[slot].actor];
+        D_800D2DC0[slot].timer -= D_800BE9A0;
+        if (actor->unk3D0->health == 0) {
+            D_800D2DC0[slot].timer = 0;
         }
-        if (D_800D2DC0[arg0].timer <= 0) {
-            obj2->pad3A4 = D_800D2DC0[arg0].unk20;
-            if (!(D_800D2DC0[arg0].flags & 2)) {
-                func_1512D560(obj2, 6, 0);
+        if (D_800D2DC0[slot].timer <= 0) {
+            actor->pad3A4 = D_800D2DC0[slot].unk20;
+            if (!(D_800D2DC0[slot].flags & 2)) {
+                func_1512D560(actor, 6, NULL);
             }
             D_800D2DB4 = 0;
-            if (!(D_800D2DC0[arg0].flags & 1)) {
-                obj2->unk3D0->unk25C &= ~0x200;
-                obj2->unk3D0->unk7 = 0xFF;
+            if (!(D_800D2DC0[slot].flags & 1)) {
+                actor->unk3D0->unk25C &= ~0x200;
+                actor->unk3D0->unk7 = 0xFF;
             }
-            D_800D2DC0[arg0].timer = 0;
-            D_800D2DC0[arg0].state = 0;
-            obj2->unk2C0 = D_800D2DB8;
-            return 0;
+            D_800D2DC0[slot].timer = 0;
+            D_800D2DC0[slot].state = 0;
+            actor->unk2C0 = D_800D2DB8;
+            return FALSE;
         }
+    }
         break;
     }
-    return 1;
+    return TRUE;
 }
 
 /* Runs the active command slots until one of them is still busy. */
