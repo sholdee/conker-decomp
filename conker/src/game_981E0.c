@@ -12,12 +12,18 @@ u16 func_10010154(u16 arg0, void *arg1, u32 arg2, s16 arg3, u16 arg4);
 void func_10010630(u16 arg0, struct127 *arg1, u32 arg2, s16 arg3, u16 arg4);
 #define D_80099A3C D_80099A3C_s16_hdr
 #define D_80099A3E D_80099A3E_s16_hdr
+#define D_80099AB4 D_80099AB4_s16_hdr
+#define D_80099ABC D_80099ABC_s16_hdr
 #include "variables.h"
 #undef D_80099A3C
 #undef D_80099A3E
+#undef D_80099AB4
+#undef D_80099ABC
 /* variables.h types these as s16; they are byte tables (lbu). */
 extern u8 D_80099A3C[];
 extern u8 D_80099A3E;
+extern u8 D_80099AB4[];
+extern u8 D_80099ABC[];
 
 /*
  * struct127 fields that include/structs.h only covers with padding, as a same-layout view.
@@ -214,6 +220,67 @@ extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
 extern void func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
 
+extern u8 *D_80086CAC[];
+u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
+s32 func_1510F8CC(s32);
+extern struct127 *func_1505EEB0(s32 state, s32 *arg1);
+extern u8 func_1505DADC(struct127 *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
+extern void *allocate_memory(s32, s32, s32, s32);
+extern s16 D_80099AD8[][4];
+extern void func_1506AC8C(struct127 *, s32, s32);
+extern struct127 *func_1505ED34(void);
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern s32 func_1515D480(s32);
+extern s32 *func_1515D440(void);
+extern s32 func_15158BD0(struct127 *, s32, s32);
+extern void func_1514EC1C(s32, struct127 *, s32);
+extern u8 D_800C3E90;
+extern u8 D_80099AC4[];
+extern void func_15145974(void *, f32 *, f32 *);
+extern struct127 *func_1505EEF4(s32 arg0);
+extern void func_151A3390(void *arg0, u8 arg1);
+extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
+void func_1516F1C0(s32, s32, u8, s32);
+void func_1516F2F8(u8, s32, s32, s32, u8, s32);
+void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
+void func_150AFDB0(void);
+void func_150AFE64(s32);
+void func_1506E0EC(void);
+void func_1506E2CC(void);
+void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+s32 func_151F2CDC(void);
+extern s32 *D_800BE5A8[];
+extern s8 D_800E0BCE[];
+extern Vec3w_15070D24 D_80099B70;
+extern Vec3w_15070D24 D_80099B7C;
+extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
+extern struct127 *func_1507515C(struct127 *);
+extern void func_151C1860(void *, s32, s32);
+void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
+extern Vec3w_15070D24 D_80099BA0;
+extern Vec3w_15070D24 D_80099BAC;
+extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
+extern void func_150FE860(struct127 *arg0, s32 arg1, s32 arg2);
+extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2);
+extern void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2);
+extern u32 D_80099BB8;
+void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
+void func_151DC260(f32 *, void *, s32, s32, s32);
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+extern f32 D_80099BC8[3][3];
+extern u8 D_80099BEC[];
+extern u8 D_80099C04[];
+extern u8 *D_800D210C;
+extern void func_1505F188(struct127 *arg0);
+extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
+s32 func_1505D024(void *, s32, u16, s32);
+extern s32 func_15033BDC();
+extern void func_100100E0(void *, void *, void *, void *, void *, s32);
+extern void func_150F16DC(struct127 *, u8, u8, s32, s32);
+void func_15194408(struct127 *arg0, struct127 *arg1);
 
 typedef struct {
     f32 time;
@@ -473,9 +540,9 @@ void func_1506B634(s32 count) {
                 index = 0;
             }
         }
-        ext->unkE = ((u8 *)D_80099ABC)[index];
+        ext->unkE = D_80099ABC[index];
     } else {
-        ext->unkE = ((u8 *)D_80099AB4)[(u8)pick];
+        ext->unkE = D_80099AB4[(u8)pick];
     }
 
     if (D_800D154C->unk31C->unkE == 0xA7) {
@@ -677,10 +744,6 @@ void func_1506BF1C(void) {
     }
 }
 
-extern u8 *D_80086CAC[];
-u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
-s32 func_1510F8CC(s32);
-
 void func_1506BF5C(void) {
     u32 sound;
     u32 owner;
@@ -825,20 +888,6 @@ void func_1506C43C(void) {
 }
 
 // requires jump table
-extern struct127 *func_1505EEB0(s32 state, s32 *arg1);
-extern u8 func_1505DADC(struct127 *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
-extern void *allocate_memory(s32, s32, s32, s32);
-extern s16 D_80099AD8[][4];
-extern void func_1506AC8C(struct127 *, s32, s32);
-extern struct127 *func_1505ED34(void);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_1515D480(s32);
-extern s32 *func_1515D440(void);
-extern s32 func_15158BD0(struct127 *, s32, s32);
-extern void func_1514EC1C(s32, struct127 *, s32);
-extern u8 D_800C3E90;
-extern u8 D_80099AC4[];
-
 
 /*
  * Spawns a projectile object of the given kind (D_80099AD8 / D_80099AC4 rows) from the current
@@ -1019,7 +1068,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     obj->unk7A = angle;
     obj->unk76 = angle;
-    obj->unk40 = (s16)((u16)angle + 0x4000) * 0.005493164f;
+    obj->unk40 = (s16)((u16)angle + 0x4000) * 0.0054931640625f;
     obj->gravity = gravity;
     obj->y_velocity = yVelocity;
     obj->xz_velocity = speed;
@@ -1084,8 +1133,6 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     return (u8 *)obj;
 }
 // requires jump table
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_15145974(void *, f32 *, f32 *);
 
 /* Fires projectile kind D_800D1580 from the current object, aimed by its facing and camera pitch. */
 void func_1506CE6C(void) {
@@ -1116,7 +1163,7 @@ void func_1506CE6C(void) {
     elevation = 45.0f;
     dist = 323.0f;
     scale = 0.5f;
-    heading = (D_800D154C->unk7A + 0x4000) * 0.005493164f;
+    heading = (D_800D154C->unk7A + 0x4000) * 0.0054931640625f;
     bone = -1;
     allocExt = 0;
     pos = NULL;
@@ -1208,9 +1255,6 @@ void func_1506CE6C(void) {
     func_1506C460(heading, speed, yVelocity, gravity, 100, kind, 0.0f, scale, (s32)pos, flags, allocExt);
 }
 
-extern struct127 *func_1505EEF4(s32 arg0);
-extern void func_151A3390(void *arg0, u8 arg1);
-
 typedef struct MarkerPoint {
     u8 pad0[8];
     s16 x;
@@ -1283,8 +1327,6 @@ void func_1506D538(void) {
 void func_1506D570(void) {
     D_800D154C->unk6E = 0;
 }
-
-extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
 
 /*
  * func_1507E7E4 with the two bytes of D_800D1580's high half and its low half (0xFFFF = none)
@@ -1495,13 +1537,6 @@ void func_1506DE04(void) {
 }
 
 // jump table
-void func_1516F1C0(s32, s32, u8, s32);
-void func_1516F2F8(u8, s32, s32, s32, u8, s32);
-void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
-void func_150AFDB0(void);
-void func_150AFE64(s32);
-void func_1506E0EC(void);
-void func_1506E2CC(void);
 
 void func_1506DE84(void) {
     switch (D_800D1580) {
@@ -1557,9 +1592,6 @@ void func_1506DE84(void) {
         break;
     }
 }
-
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Passes the corners of a +-270 square in the object's root matrix, at height unk180, to func_151700D8. */
 void func_1506E0EC(void) {
@@ -1645,8 +1677,6 @@ void func_1506E2CC(void) {
         func_151700D8((f32 *)verts, posX, posZ, 5, D_800D154C->xz_scale * 0.5f, 0, 4, 4, 0xFF, 0);
     }
 }
-s32 func_151F2CDC(void);
-extern s32 *D_800BE5A8[];
 /*
  * Resolves a sound command in place: bit 21 skips it while func_100107F8 / func_10010894 /
  * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's D_800BE5A8 table,
@@ -2269,7 +2299,6 @@ void func_1506FCFC(s32 cmd) {
     func_15196438(D_800D154C, 5, 0xFF, 0);
 }
 
-
 void func_1506FD30(s32 cmd) {
     func_150E2EA4(D_800D154C, D_800D154C->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
 }
@@ -2388,13 +2417,6 @@ void func_15070224(s32 cmd) {
 
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
-
-extern s8 D_800E0BCE[];
-extern Vec3w_15070D24 D_80099B70;
-extern Vec3w_15070D24 D_80099B7C;
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-extern struct127 *func_1507515C(struct127 *);
-extern void func_151C1860(void *, s32, s32);
 
 typedef struct {
     s32 unk0;
@@ -2631,7 +2653,6 @@ void func_15070C18(s32 cmd) {
     func_15199834(D_800D154C);
 }
 
-void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
 void func_15070C40(u8 variant) {
     struct17 pos;
     struct127 *obj;
@@ -2689,9 +2710,6 @@ void func_15070D24(s32 cmd) {
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
-extern Vec3w_15070D24 D_80099BA0;
-extern Vec3w_15070D24 D_80099BAC;
-extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
 void func_15070F60(cmd)
     u8 cmd;
 {
@@ -2743,9 +2761,6 @@ void func_15071278(s32 cmd) {
     func_150FC438(D_800D154C, 0, 1, D_800D154C->unk84.ub[1]);
 }
 
-extern void func_150FE860(struct127 *arg0, s32 arg1, s32 arg2);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-
 /* Argument block for func_151D8868. */
 typedef struct Struct151D8868Args {
     /* 0x0 */ u8 unk0;
@@ -2770,9 +2785,6 @@ void func_150712AC(s32 cmd) {
         func_151D8868(&args, 0, 0xFF, 1);
     }
 }
-
-extern void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2);
-extern void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2);
 
 void func_15071360(s32 cmd) {
     Struct151D8868Args args;
@@ -2895,10 +2907,6 @@ void func_15071888(s32 cmd) {
     func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
-extern u32 D_80099BB8;
-void func_15143134(void *, void *, s32);
-void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
-
 /* Spawns effect func_151C329C at one of four random bones (packed bytes of D_80099BB8). */
 void func_150718E4(s32 cmd) {
     f32 *p;
@@ -2962,12 +2970,6 @@ typedef struct Game981E0SmokeConfig {
     f32 value1;
     f32 value2;
 } Game981E0SmokeConfig;
-
-void func_151DC260(f32 *, void *, s32, s32, s32);
-void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
-extern f32 D_80099BC8[3][3];
-extern u8 D_80099BEC[];
-extern u8 D_80099C04[];
 
 void func_15071B18(s32 cmd) {
     Game981E0EffectPoint point;
@@ -3082,7 +3084,6 @@ void func_15071FB0(void) {
     }
 }
 
-
 /*
  * Launches the player (D_800CC2D0[0]) with the current object's stored velocity unk2D8..unk2E0
  * and an animation. With D_800D1580 == 0, only if player->unk274 names the object owned by the
@@ -3170,7 +3171,6 @@ struct127 *func_15072208(struct127 *owner, s32 n) {
     return NULL;
 }
 
-
 void func_150722F0(void) {
     struct127 *child = func_150721E8(D_800D154C);
 
@@ -3209,10 +3209,6 @@ void func_150723E0(void) {
         func_15060F28(obj, 0);
     }
 }
-
-extern u8 *D_800D210C;
-extern void func_1505F188(struct127 *arg0);
-extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 /* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
 typedef struct SpawnSlot {
@@ -3559,7 +3555,6 @@ void func_150730D0(void) {
     }
 }
 
-
 /*
  * Spawns a projectile (state 0x21) playing animation `anim`, at bone `bone` of `parent` offset by
  * (offX, offY, offZ), or at the parent's position. Returns the new object.
@@ -3627,8 +3622,6 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
     func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
     return (u8 *)obj;
 }
-s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
-u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 
 /* Fires projectiles from the current object; D_800D1580 picks the volley (0: aimed at the camera target). */
 void func_1507342C(void) {
@@ -3736,8 +3729,6 @@ void func_150739C0(void) {
 void func_15073A28(void) {
     D_800D154C->unk44 = D_800D1580;
 }
-
-s32 func_1505D024(void *, s32, u16, s32);
 
 /* Applies func_1505D024 (D_800D1580 & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
 void func_15073A50(void) {
@@ -3852,12 +3843,6 @@ void func_15073F78(void) {
     D_800D154C->unk10B &= ~D_800D1580;
 }
 
-extern u8 *D_800D210C;
-extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern s32 func_15033BDC();
-extern void func_100100E0(void *, void *, void *, void *, void *, s32);
-extern void func_1506AC8C(struct127 *, s32, s32);
-extern void func_150F16DC(struct127 *, u8, u8, s32, s32);
 /*
  * Spawns the object D_800D1580 & 0xFFFF as a thrown/fired item of the current object, at a bone
  * or above it, then sets its launch velocity and state (unk232) per thrower id.
@@ -4016,7 +4001,6 @@ void func_15073FA0(void) {
         }
     }
 }
-
 
 void func_15074644(void) {
     D_800D154C->unk31C->unk11A = D_800D1580;
@@ -4289,8 +4273,6 @@ void func_15074F30(struct127 *self, struct127 *other, s32 result) {
     self->unk232 = other->unk109;
     self->unk218 = NULL;
 }
-
-void func_15194408(struct127 *arg0, struct127 *arg1);
 
 /* Sends `other` towards (-2641, 3039). */
 void func_15074F48(struct127 *self, struct127 *other, s32 result) {
