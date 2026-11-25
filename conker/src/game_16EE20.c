@@ -2126,98 +2126,107 @@ s32 func_15145AD8(struct17 *start, struct17 *dir, struct127 *actor, struct17 *hi
     return 1;
 }
 
-u8 func_15145C90(s32 arg0) {
-    if (arg0 < 0) {
+/* Whether entry `index` of D_800DBEF4 has flag 0x80 in unk6F (true for a negative index). */
+u8 func_15145C90(s32 index) {
+    if (index < 0) {
         return 1;
     } else {
-        return (D_800DBEF4[arg0].unk6F & 0x80) == 0x80;
+        return (D_800DBEF4[index].unk6F & 0x80) == 0x80;
     }
 }
 
-void func_15145CD0(u8 *arg0, f32 **arg1, f32 **arg2, s32 arg3) {
-    f32 matrix[4][4];
+/* A rotation (as passed to func_150A8050) and an integer position. */
+typedef struct {
+    /* 0x00 */ f32 rot[3];
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ s16 pos[3];
+} Placement;
+
+/* Transforms `count` points (given by pointer) by the placement. */
+void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
+    f32 mf[4][4];
     f32 **src;
     f32 **dst;
-    f32 *in;
-    f32 *out;
+    f32 *p;
+    f32 *q;
 
-    func_150A8050(matrix, *(f32 *)(arg0 + 0), *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8));
-    matrix[3][0] = *(s16 *)(arg0 + 0x10);
-    matrix[3][1] = *(s16 *)(arg0 + 0x12);
-    matrix[3][2] = *(s16 *)(arg0 + 0x14);
-    if (arg3 <= 0) {
+    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
+    mf[3][0] = placement->pos[0];
+    mf[3][1] = placement->pos[1];
+    mf[3][2] = placement->pos[2];
+    if (count <= 0) {
         return;
     }
-    src = arg1;
-    dst = arg2;
+    src = in;
+    dst = out;
     do {
-        in = *src;
-        out = *dst;
-        func_150A7960(matrix[0], in[0], in[1], in[2], out, out + 1, out + 2);
-        arg3--;
+        p = *src;
+        q = *dst;
+        func_150A7960(mf[0], p[0], p[1], p[2], q, q + 1, q + 2);
+        count--;
         src++;
         dst++;
-    } while (arg3 > 0);
+    } while (count > 0);
 }
-typedef struct {
-    f32 x, y, z;
-} Func15145DB4_Vec3f;
 
-void func_15145DB4(u8 *arg0, Func15145DB4_Vec3f *arg1, Func15145DB4_Vec3f *arg2, s32 arg3) {
-    f32 matrix[4][4];
+/* Transforms the `count` points in[] by the placement into out[]. */
+void func_15145DB4(Placement *placement, struct17 *in, struct17 *out, s32 count) {
+    f32 mf[4][4];
     s32 i;
 
-    func_150A8050(matrix, *(f32 *)(arg0 + 0), *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8));
-    matrix[3][0] = *(s16 *)(arg0 + 0x10);
-    matrix[3][1] = *(s16 *)(arg0 + 0x12);
-    matrix[3][2] = *(s16 *)(arg0 + 0x14);
-    for (i = 0; arg3 > 0; i++) {
-        func_150A7960(matrix[0], arg1[i].x, arg1[i].y, arg1[i].z, &arg2[i].x, &arg2[i].y, &arg2[i].z);
-        arg3--;
+    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
+    mf[3][0] = placement->pos[0];
+    mf[3][1] = placement->pos[1];
+    mf[3][2] = placement->pos[2];
+    for (i = 0; count > 0; i++) {
+        func_150A7960(mf[0], in[i].unk0, in[i].unk4, in[i].unk8, &out[i].unk0, &out[i].unk4, &out[i].unk8);
+        count--;
     }
 }
-void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
+
+/* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
+void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
     f32 *input;
-    f32 transform[4][4];
+    f32 mf[4][4];
     f32 *output;
     f32 **outputs;
 
     if (D_800C3E90 != 0) {
-        guMtxL2F(transform, arg2);
-        if (arg3 > 0) {
-            f32 **inputs = arg0;
+        guMtxL2F(mf, mtx);
+        if (count > 0) {
+            f32 **inputs = offsets;
 
-            outputs = arg1;
+            outputs = results;
             do {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(transform[0], input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf[0], input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
-                    func_15142314(arg2, 0, *outputs);
+                    func_15142314(mtx, 0, *outputs);
                 }
-                arg3--;
+                count--;
                 inputs++;
                 outputs++;
-            } while (arg3 > 0);
+            } while (count > 0);
         }
     } else {
-        if (arg3 > 0) {
-            f32 **inputs = arg0;
+        if (count > 0) {
+            f32 **inputs = offsets;
 
-            outputs = arg1;
+            outputs = results;
             do {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960((f32 *)arg2, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960((f32 *)mtx, input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
-                    func_15142314(arg2, 0, *outputs);
+                    func_15142314(mtx, 0, *outputs);
                 }
-                arg3--;
+                count--;
                 inputs++;
                 outputs++;
-            } while (arg3 > 0);
+            } while (count > 0);
         }
     }
 }
