@@ -288,14 +288,11 @@ void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 v
  */
 void func_151B9CB0(ParticleEmitter *emitter) {
     f32 *followPos;
-    ParticleEmitter *self;
+    ParticleEmitter *self; // matching: the target reloads count through a second copy of `emitter`
     s16 x;
     s16 y;
     s16 z;
     s32 i;
-    f32 angle;
-    s32 threeHalves;
-    s32 fastCount;
     s32 timer;
 
     followPos = emitter->followPos;
@@ -310,31 +307,18 @@ void func_151B9CB0(ParticleEmitter *emitter) {
         z = followPos[2];
     }
 
-    i = 0;
-    if (emitter->count > 0) {
-        angle = 0.0f;
-        do {
-            func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, angle, 360, emitter->velY,
-                          emitter->velYRange, emitter->speed, emitter->speedRange, 15, emitter->minSize,
-                          emitter->size, emitter->owner, emitter->list);
-            i++;
-        } while (i < self->count);
-        i = 0;
+    for (i = 0; i < self->count; i++) {
+        func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360, emitter->velY,
+                      emitter->velYRange, emitter->speed, emitter->speedRange, 15, emitter->minSize,
+                      emitter->size, emitter->owner, emitter->list);
     }
-    angle = 0.0f;
-
-    fastCount = 4;
-    threeHalves = 3;
-    while (1) {
-        func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, angle, 360,
-                      (emitter->velY * threeHalves) / 2, emitter->velYRange * 2, emitter->speed,
+    for (i = 0; i < 4; i++) {
+        func_151B9690(emitter->animIndex, emitter->kind, x, y, z, -80, 0.0f, 360,
+                      (emitter->velY * 3) / 2, emitter->velYRange * 2, emitter->speed,
                       emitter->speedRange, 15, emitter->minSize, emitter->size, emitter->owner, emitter->list);
-        i++;
-        if (i == fastCount) {
-            break;
-        }
     }
 
+    // matching: two statements give the target's register order for the subtraction
     timer = emitter->timer;
     timer -= D_800BE9E4;
     if (timer < 0) {
