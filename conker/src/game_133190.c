@@ -3,26 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct { u8 r, g, b, a; } ColorRGBA;
-
-/* Parameters of a lightning bolt: a cubic Bezier from start to end, split into jittered segments. */
-typedef struct BoltDesc {
-    /* 0x00 */ s16 life;
-    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
-    /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ s32 segments;
-    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
-    /* 0x40 */ f32 width;         /* half width of the drawn strip */
-    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
-    /* 0x46 */ s16 rejitterRange;
-    /* 0x48 */ ColorRGBA color;
-    /* 0x4C */ u8 kind;           /* index into D_80088C18 / D_80088C28 */
-    /* 0x4D */ u8 pad4D[3];
-} BoltDesc; /* size 0x50 */
-
 /* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
 typedef struct BoltSample {
     /* 0x00 */ f32 t;
@@ -52,28 +32,6 @@ typedef struct BoltObj {
     /* 0x74 */ u8 vtxBuf[0x10];
     /* 0x84 */ s32 vtxBufSize;
 } BoltObj; /* size 0x88 */
-
-/* Spawn parameters for each bolt of a chain; "base + rand % (range + 1)" or "base + randf * range". */
-typedef struct BoltChainConfig {
-    /* 0x00 */ f32 widthBase;
-    /* 0x04 */ f32 widthRange;
-    /* 0x08 */ f32 jitter;
-    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
-    /* 0x10 */ f32 bendRange;
-    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
-    /* 0x16 */ s16 rejitterBase;
-    /* 0x18 */ s16 rejitterRange;
-    /* 0x1A */ s16 lifeBase;
-    /* 0x1C */ s16 lifeRange;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 segmentsBase;
-    /* 0x24 */ s32 segmentsRange;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 alphaBase;
-    /* 0x2C */ u8 alphaRange;
-} BoltChainConfig; /* size 0x30 */
 
 /* A chain of bolts along a randomly spaced line of points, one bolt (link) at a time. */
 typedef struct BoltChain {
@@ -161,10 +119,10 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         spawn.g = 0xFF;
         spawn.b = 0xFF;
         spawn.a = 0xFF;
-        spawn.r2 = desc->color.r;
-        spawn.g2 = desc->color.g;
-        spawn.b2 = desc->color.b;
-        spawn.alpha = desc->color.a;
+        spawn.r2 = desc->color.red;
+        spawn.g2 = desc->color.green;
+        spawn.b2 = desc->color.blue;
+        spawn.alpha = desc->color.alpha;
         spawn.brightness = 0xFF;
         spawn.offset = D_800A5480;
         spawn.vel = D_800A5480;
@@ -409,7 +367,7 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     flag = 1;
     points = func_151061EC(bolt);
     gdl = func_15142E24(gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
-    gdl = func_15142C10(gdl, bolt->desc.color.r, bolt->desc.color.g, bolt->desc.color.b, bolt->desc.color.a, &flag);
+    gdl = func_15142C10(gdl, bolt->desc.color.red, bolt->desc.color.green, bolt->desc.color.blue, bolt->desc.color.alpha, &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
     gdl = func_1513F4E4(gdl, 0x44, &flag);
     gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
@@ -639,11 +597,11 @@ void func_151072BC(BoltChainObj *obj) {
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
         desc.ctrl[2].z = desc.ctrl[3].z + offset.z;
-        desc.color.r = config->r;
-        desc.color.g = config->g;
-        desc.color.b = config->b;
+        desc.color.red = config->r;
+        desc.color.green = config->g;
+        desc.color.blue = config->b;
         desc.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
-        desc.color.a = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
+        desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
         desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
         chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
@@ -744,7 +702,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
     desc.width = width;
     desc.rejitterBase = rejitterBase;
     desc.rejitterRange = rejitterRange;
-    desc.color = *(ColorRGBA *)color;
+    desc.color = *(Color8 *)color;
     desc.kind = 2;
 
     // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
@@ -887,7 +845,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitc
     desc.width = width;
     desc.rejitterBase = rejitterBase;
     desc.rejitterRange = rejitterRange;
-    desc.color = *(ColorRGBA *)color;
+    desc.color = *(Color8 *)color;
     desc.kind = 3;
 
     func_15107F54(actor, bone, localPos, &desc.ctrl[0]);

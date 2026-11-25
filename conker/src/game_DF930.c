@@ -8,23 +8,6 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
 void func_151D3FF4(Vec3f *, u8, s32);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 
-/* Spawn parameters for a streak particle (see func_15156190 in game_183640.c). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f dir;
-    /* 0x18 */ f32 headSpeed;
-    /* 0x1C */ f32 tailSpeed;
-    /* 0x20 */ Color8 headColor;
-    /* 0x24 */ Color8 tailColor;
-    /* 0x28 */ u8 flags;
-    /* 0x2A */ s16 lifetime;
-    /* 0x2C */ u16 renderMode;
-    /* 0x30 */ f32 width;
-    /* 0x34 */ u8 alpha;
-    /* 0x36 */ s16 fadeStart;
-    /* 0x38 */ s16 fadeRate;
-} StreakParticleDesc;
-
 extern void *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
 
 s32 func_150B2480(s32 arg0, s32 arg1) {

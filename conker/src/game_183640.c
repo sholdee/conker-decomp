@@ -27,23 +27,6 @@ typedef struct {
     /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
 } StreakParticle;
 
-/* Spawn parameters for a streak particle. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f dir;
-    /* 0x18 */ f32 headSpeed;
-    /* 0x1C */ f32 tailSpeed;
-    /* 0x20 */ Color8 headColor;
-    /* 0x24 */ Color8 tailColor;
-    /* 0x28 */ u8 flags;
-    /* 0x2A */ s16 lifetime;
-    /* 0x2C */ u16 renderMode;
-    /* 0x30 */ f32 width;
-    /* 0x34 */ u8 alpha;
-    /* 0x36 */ s16 fadeStart;
-    /* 0x38 */ s16 fadeRate;
-} StreakParticleDesc;
-
 /* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
 StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
     StreakParticle *newParticle;

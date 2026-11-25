@@ -1163,32 +1163,12 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 /* First argument of func_15156190. */
-struct Local151539B4Spawn {
-    Vec3f position;
-    Vec3f direction;
-    f32 unk18;
-    f32 unk1C;
-    Color8 color0;
-    Color8 color1;
-    u8 unk28;
-    u8 pad29;
-    s16 unk2A;
-    u16 unk2C;
-    u8 pad2E[2];
-    f32 unk30;
-    u8 unk34;
-    u8 pad35;
-    s16 unk36;
-    s16 unk38;
-    u8 pad3A[2];
-};
-
-extern void func_15156190(struct Local151539B4Spawn *, u8, s32, u8, s32);
+extern void func_15156190(StreakParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random
  * yaw and pitch (a direction of length 10). */
 void func_151539B4(StreakBurst *config, u8 arg1) {
-    struct Local151539B4Spawn spawn;
+    StreakParticleDesc spawn;
     s32 count;
     s16 yaw;
     s16 pitch;
@@ -1199,19 +1179,19 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
     f32 sinYaw;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-    spawn.position = config->pos;
-    spawn.color0.red = config->headColor.red;
-    spawn.color0.green = config->headColor.green;
-    spawn.color0.blue = config->headColor.blue;
-    spawn.color0.alpha = config->headColor.alpha;
-    spawn.color1.red = config->tailColor.red;
-    spawn.color1.green = config->tailColor.green;
-    spawn.color1.blue = config->tailColor.blue;
-    spawn.color1.alpha = config->tailColor.alpha;
-    spawn.unk28 = config->flags;
-    spawn.unk2C = config->renderMode;
-    spawn.unk36 = config->fadeStart;
-    spawn.unk38 = config->fadeRate;
+    spawn.pos = config->pos;
+    spawn.headColor.red = config->headColor.red;
+    spawn.headColor.green = config->headColor.green;
+    spawn.headColor.blue = config->headColor.blue;
+    spawn.headColor.alpha = config->headColor.alpha;
+    spawn.tailColor.red = config->tailColor.red;
+    spawn.tailColor.green = config->tailColor.green;
+    spawn.tailColor.blue = config->tailColor.blue;
+    spawn.tailColor.alpha = config->tailColor.alpha;
+    spawn.flags = config->flags;
+    spawn.renderMode = config->renderMode;
+    spawn.fadeStart = config->fadeStart;
+    spawn.fadeRate = config->fadeRate;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
         pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
@@ -1220,14 +1200,14 @@ void func_151539B4(StreakBurst *config, u8 arg1) {
         cosYaw = func_151423D8((u8)yaw);
         horizontal = 10.0f * cosPitch;
         sinYaw = func_151423D8((u8)(yaw - 0x40));
-        spawn.direction.x = horizontal * sinYaw;
-        spawn.direction.y = -10.0f * sinPitch;
-        spawn.direction.z = horizontal * cosYaw;
-        spawn.unk18 = (func_150ADA68() * config->headSpeedRange) + config->headSpeedBase;
-        spawn.unk1C = (func_150ADA68() * config->tailSpeedRange) + config->tailSpeedBase;
-        spawn.unk2A = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
-        spawn.unk30 = (func_150ADA68() * config->widthRange) + config->widthBase;
-        spawn.unk34 = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
+        spawn.dir.x = horizontal * sinYaw;
+        spawn.dir.y = -10.0f * sinPitch;
+        spawn.dir.z = horizontal * cosYaw;
+        spawn.headSpeed = (func_150ADA68() * config->headSpeedRange) + config->headSpeedBase;
+        spawn.tailSpeed = (func_150ADA68() * config->tailSpeedRange) + config->tailSpeedBase;
+        spawn.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        spawn.width = (func_150ADA68() * config->widthRange) + config->widthBase;
+        spawn.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
         func_15156190(&spawn, config->kind, 0, arg1, 0);
         count--;
     }

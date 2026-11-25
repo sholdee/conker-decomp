@@ -1525,6 +1525,67 @@ typedef struct SpriteDef2C {
     /* 0x28 */ u8 pad28[4];
 } SpriteDef2C; /* size 0x2C */
 
+/* func_15156190 / func_15156388 (game_183640.c): spawn parameters of a streak particle. */
+typedef struct StreakParticleDesc {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f dir;
+    /* 0x18 */ f32 headSpeed;
+    /* 0x1C */ f32 tailSpeed;
+    /* 0x20 */ Color8 headColor;
+    /* 0x24 */ Color8 tailColor;
+    /* 0x28 */ u8 flags;
+    /* 0x29 */ u8 pad29;
+    /* 0x2A */ s16 lifetime;
+    /* 0x2C */ u16 renderMode;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ f32 width;
+    /* 0x34 */ u8 alpha;
+    /* 0x35 */ u8 pad35;
+    /* 0x36 */ s16 fadeStart;
+    /* 0x38 */ s16 fadeRate;
+    /* 0x3A */ u8 pad3A[2];
+} StreakParticleDesc; /* size 0x3C */
+
+/* Spawn parameters for each bolt of a chain (game_133190.c); "base + rand % (range + 1)" or "base + randf * range". */
+typedef struct BoltChainConfig {
+    /* 0x00 */ f32 widthBase;
+    /* 0x04 */ f32 widthRange;
+    /* 0x08 */ f32 jitter;
+    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
+    /* 0x10 */ f32 bendRange;
+    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
+    /* 0x16 */ s16 rejitterBase;
+    /* 0x18 */ s16 rejitterRange;
+    /* 0x1A */ s16 lifeBase;
+    /* 0x1C */ s16 lifeRange;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 segmentsBase;
+    /* 0x24 */ s32 segmentsRange;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 alphaBase;
+    /* 0x2C */ u8 alphaRange;
+} BoltChainConfig; /* size 0x30 */
+
+/* Parameters of a lightning bolt (game_133190.c): a cubic Bezier from start to end, split into jittered segments. */
+typedef struct BoltDesc {
+    /* 0x00 */ s16 life;
+    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
+    /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ s32 segments;
+    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
+    /* 0x40 */ f32 width;         /* half width of the drawn strip */
+    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
+    /* 0x46 */ s16 rejitterRange;
+    /* 0x48 */ Color8 color;
+    /* 0x4C */ u8 kind;           /* index into D_80088C18 / D_80088C28 */
+    /* 0x4D */ u8 pad4D[3];
+} BoltDesc; /* size 0x50 */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

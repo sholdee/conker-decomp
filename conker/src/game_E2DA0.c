@@ -294,28 +294,6 @@ typedef struct {
     /* 0x28 */ BoltRingData data;
 } BoltRingEffect;
 
-/* Spawn parameters for each bolt of a chain (same layout as in game_131F30.c / game_133190.c). */
-typedef struct BoltChainConfig {
-    /* 0x00 */ f32 widthBase;
-    /* 0x04 */ f32 widthRange;
-    /* 0x08 */ f32 jitter;
-    /* 0x0C */ f32 bendBase;
-    /* 0x10 */ f32 bendRange;
-    /* 0x14 */ s16 bendSpread;
-    /* 0x16 */ s16 rejitterBase;
-    /* 0x18 */ s16 rejitterRange;
-    /* 0x1A */ s16 lifeBase;
-    /* 0x1C */ s16 lifeRange;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 segmentsBase;
-    /* 0x24 */ s32 segmentsRange;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 alphaBase;
-    /* 0x2C */ u8 alphaRange;
-} BoltChainConfig; /* size 0x30 */
-
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
 

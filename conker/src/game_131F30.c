@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct { u8 r, g, b, a; } ColorRGBA;
-
 /* Same layout as SpawnRegion in game_16EE20.c. */
 typedef struct SpawnRegion {
     /* 0x00 */ s16 x;
@@ -18,24 +16,6 @@ typedef struct SpawnRegion {
     /* 0x14 */ u8 unk14;     /* the effects here set it to 1 while off */
     /* 0x15 */ u8 flags;     /* bits 0-1: shape */
 } SpawnRegion;
-
-/* Same layout as BoltDesc in game_133190.c: a lightning bolt along a cubic Bezier. */
-typedef struct BoltDesc {
-    /* 0x00 */ s16 life;
-    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
-    /* 0x34 */ s8 updateKind;     /* -1: none */
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ s32 segments;
-    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
-    /* 0x40 */ f32 width;         /* half width of the drawn strip */
-    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
-    /* 0x46 */ s16 rejitterRange;
-    /* 0x48 */ ColorRGBA color;
-    /* 0x4C */ u8 kind;
-    /* 0x4D */ u8 pad4D[3];
-} BoltDesc; /* size 0x50 */
 
 /* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
 typedef struct ListObj {
@@ -167,9 +147,9 @@ void func_15104C44(BoltRainObj *obj) {
                 desc.ctrl[0].y = state->pos.y + state->height;
                 desc.ctrl[0].z = state->pos.z;
                 desc.ctrl[1].y = state->pos.y + state->height - 180.0f;
-                desc.color.r = 0x61;
-                desc.color.g = 0xF2;
-                desc.color.b = 0xFF;
+                desc.color.red = 0x61;
+                desc.color.green = 0xF2;
+                desc.color.blue = 0xFF;
                 do {
                     func_15143874(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * state->radius,
                                   &ground[0], &ground[2]);
@@ -187,7 +167,7 @@ void func_15104C44(BoltRainObj *obj) {
                         desc.ctrl[2].y = desc.ctrl[3].y + 180.0f;
                         desc.ctrl[2].z = offZ2 + ground[2];
                         desc.life = func_150ADA20() % 13U + 8;
-                        desc.color.a = func_150ADA20() % 156U + 100;
+                        desc.color.alpha = func_150ADA20() % 156U + 100;
                         desc.segments = func_150ADA20() % 3U + 5;
                         func_15105CE0(&desc, 0, obj->header.owner, obj->header.kind);
                     }
@@ -210,28 +190,6 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
                       func_1000EF40, state->region, 0, 8, 0);
     }
 }
-
-/* Same layout as BoltChainConfig in game_133190.c: spawn parameters for each bolt of a chain. */
-typedef struct BoltChainConfig {
-    /* 0x00 */ f32 widthBase;
-    /* 0x04 */ f32 widthRange;
-    /* 0x08 */ f32 jitter;
-    /* 0x0C */ f32 bendBase;       /* distance of the inner control points from the ends */
-    /* 0x10 */ f32 bendRange;
-    /* 0x14 */ s16 bendSpread;     /* pitch range of the inner control points */
-    /* 0x16 */ s16 rejitterBase;
-    /* 0x18 */ s16 rejitterRange;
-    /* 0x1A */ s16 lifeBase;
-    /* 0x1C */ s16 lifeRange;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 segmentsBase;
-    /* 0x24 */ s32 segmentsRange;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 alphaBase;
-    /* 0x2C */ u8 alphaRange;
-} BoltChainConfig; /* size 0x30 */
 
 /* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
 typedef struct BoltArcState {
