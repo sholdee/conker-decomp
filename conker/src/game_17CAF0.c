@@ -23,12 +23,6 @@ extern f32 D_800A6020;
 extern f32 D_800A6024;
 extern f32 D_800A6028;
 extern f32 D_800A602C;
-extern f32 D_800A6004;
-extern f32 D_800A6008;
-extern f32 D_800A600C;
-extern f32 D_800A6010;
-extern f32 D_800A6014;
-extern f32 D_800A6018;
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
@@ -2160,169 +2154,156 @@ void func_15153F18(struct AngleRange *angles, struct Local15153CCCArg *config, s
     }
 }
 
-void *func_151541B8(struct Vec3F *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6) {
-    void *ret;
-    s32 flag;
-    struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        struct Vec3F unk28;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        u8 unk63;
-        u8 unk64;
-        u8 unk65;
-        u8 unk66;
-        u8 unk67;
-        u8 unk68;
-        u8 pad69;
-        u8 unk6A;
-        u8 pad6B;
-        s32 unk6C;
-        u8 unk70;
-        u8 pad71;
-        s16 unk72;
-        s16 unk74;
-        u8 pad76[2];
-    } sp40;
-    struct {
-        s32 pad00;
-        s32 pad04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        u8 unk1C;
-        u8 pad1D[3];
-    } sp28;
+/* Copied into the object spawned by func_151541B8 at +0x170; advanced each frame by func_1515452C. */
+typedef struct {
+    f32 elapsed;
+    f32 duration;
+    f32 growth; /* size = growth * sqrt(elapsed) */
+    f32 alpha;  /* alpha - fade * elapsed^2 */
+    f32 fade;
+    u8 growOneAxis; /* grow only the first size field */
+} Extra1515452C;
 
-    if (arg1 <= 0.0f) {
-        return 0;
+/* Spawns a single object at `position` that grows and fades out over `duration`. With a nonzero arg4
+ * it gets no random x/z rotation, spins only around y and grows along one axis. */
+void *func_151541B8(struct Vec3F *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 arg5, s32 arg6) {
+    void *object;
+    s32 oneAxis;
+    Spawn15132A4C spawn;
+    Extra1515452C extra;
+    s32 pad[2]; // matching: unused stack slots
+
+    if (duration <= 0.0f) {
+        return NULL;
     }
 
-    sp28.unk08 = 0.0f;
-    sp28.unk0C = arg1;
-    sp28.unk10 = arg2;
-    sp28.unk14 = arg3;
-    sp28.unk18 = arg3 / (arg1 * arg1);
+    extra.elapsed = 0.0f;
+    extra.duration = duration;
+    extra.growth = growth;
+    extra.alpha = alpha;
+    extra.fade = alpha / (duration * duration);
     if (arg4 != 0) {
-        flag = 1;
+        oneAxis = TRUE;
     } else {
-        flag = 0;
+        oneAxis = FALSE;
     }
-    sp28.unk1C = flag;
+    extra.growOneAxis = oneAxis;
 
-    sp40.unk08 = 0.0f;
-    sp40.unk0C = arg4;
-    sp40.unk00 = 1.0f;
-    sp40.unk04 = 1.0f;
+    spawn.unk08 = 0.0f;
+    spawn.unk0C = arg4;
+    spawn.unk00 = 1.0f;
+    spawn.unk04 = 1.0f;
     if (arg4 != 0) {
-        sp40.unk10 = 0.0f;
+        spawn.rotation.x = 0.0f;
     } else {
-        sp40.unk10 = func_150ADA68() * 360.0f;
+        spawn.rotation.x = func_150ADA68() * 360.0f;
     }
-    sp40.unk14 = func_150ADA68() * 360.0f;
+    spawn.rotation.y = func_150ADA68() * 360.0f;
     if (arg4 != 0) {
-        sp40.unk18 = 0.0f;
+        spawn.rotation.z = 0.0f;
     } else {
-        sp40.unk18 = func_150ADA68() * 360.0f;
+        spawn.rotation.z = func_150ADA68() * 360.0f;
     }
-    sp40.unk1C = 1.0f;
-    sp40.unk20 = 1.0f;
-    sp40.unk24 = 1.0f;
-    sp40.unk28 = *arg0;
-    sp40.unk34 = 0.0f;
-    sp40.unk38 = 0.0f;
-    sp40.unk3C = 0.0f;
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.position = *position;
+    spawn.velocity.x = 0.0f;
+    spawn.velocity.y = 0.0f;
+    spawn.velocity.z = 0.0f;
     if (arg4 != 0) {
-        sp40.unk40 = 0.0f;
+        spawn.spin.x = 0.0f;
     } else {
-        sp40.unk40 = (func_150ADA68() * D_800A6004) + D_800A6008;
-    }
-    if (arg4 != 0) {
-        sp40.unk44 = (func_150ADA68() * D_800A600C) + D_800A6010;
-    } else {
-        sp40.unk44 = 0.0f;
+        spawn.spin.x = (func_150ADA68() * 8.512000084f) + -4.256000042f;
     }
     if (arg4 != 0) {
-        sp40.unk48 = 0.0f;
+        spawn.spin.y = (func_150ADA68() * 8.512000084f) + -4.256000042f;
     } else {
-        sp40.unk48 = (func_150ADA68() * D_800A6014) + D_800A6018;
+        spawn.spin.y = 0.0f;
     }
-    sp40.unk4C = 0.0f;
-    sp40.unk50 = 0x100140;
-    sp40.unk56 = 0x54;
-    sp40.unk58 = 0;
-    sp40.unk5C = 0;
-    sp40.unk60 = arg3;
-    sp40.unk61 = 0xF;
-    sp40.unk62 = 0;
-    sp40.unk63 = 0;
-    sp40.unk64 = 0;
-    sp40.unk65 = 0;
-    sp40.unk66 = 0;
-    sp40.unk67 = 0;
-    sp40.unk68 = 2;
-    sp40.unk6A = 0;
-    sp40.unk6C = 0;
-    sp40.unk70 = 0;
-    sp40.unk72 = 1;
-    sp40.unk74 = 0xFF;
-    sp40.unk54 = 0x12C;
+    if (arg4 != 0) {
+        spawn.spin.z = 0.0f;
+    } else {
+        spawn.spin.z = (func_150ADA68() * 8.512000084f) + -4.256000042f;
+    }
+    spawn.unk4C = 0.0f;
+    spawn.flags = 0x100140;
+    spawn.variantId = 84;
+    spawn.unk58 = 0;
+    spawn.unk5C = 0;
+    spawn.unk60 = alpha;
+    spawn.unk61 = 15;
+    spawn.unk62 = 0;
+    spawn.unk63 = 0;
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 2;
+    spawn.unk6A = 0;
+    spawn.unk6C = 0;
+    spawn.unk70 = 0;
+    spawn.unk72 = 1;
+    spawn.unk74 = 0xFF;
+    spawn.unk54 = 300;
 
-    ret = func_15132A4C(&sp40, 0, 0, 0x18, arg5, arg6);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0x170, &sp28.unk08, 0x18);
+    object = func_15132A4C(&spawn, 0, 0, sizeof(extra), arg5, arg6);
+    if (object != NULL) {
+        memcpy((u8 *)object + 0x170, &extra, sizeof(extra));
     }
-    return ret;
+    return object;
 }
 
 f32 sqrtf(f32);
 
-s32 func_1515452C(u8 *arg0) {
-    f32 temp_fv1;
-    u8 *temp_v0;
+/* Copied into the object spawned by func_15154884 at +0x170; advanced each frame by func_15154A88. */
+typedef struct {
+    f32 remaining;
+    f32 unk4;
+    f32 alpha;
+    f32 unkC; /* sizes follow unk4 * sinf(unkC) */
+    f32 unk10;
+} Extra15154A88;
 
-    temp_v0 = (void *)(arg0 + 0x170);
-    temp_fv1 = *(f32 *)((u8 *)arg0 + 0x178) * sqrtf(*(f32 *)((u8 *)arg0 + 0x170));
-    *(f32 *)((u8 *)arg0 + 0x18) = temp_fv1;
-    if (!(*(u8 *)((u8 *)arg0 + 0x184) & 1)) {
-        *(f32 *)((u8 *)arg0 + 0x1C) = temp_fv1;
+/* The fields of a func_15132A4C object that the update functions below use. */
+typedef struct {
+    u8 pad0[0x18];
+    f32 unk18;
+    f32 unk1C;
+    struct Vec3F position;
+    u8 pad2C[0x24];
+    struct Vec3F velocity;
+    u8 pad5C[0x14];
+    u8 alpha;
+    u8 pad71[0xFF];
+    union {
+        Extra1515452C grow;
+        Extra15154A88 pulse;
+    } extra;
+} Object15132A4C;
+
+/* Per-frame update for func_151541B8's objects: grow, fade, move; returns 0 once expired. */
+s32 func_1515452C(Object15132A4C *object) {
+    f32 size;
+    Extra1515452C *extra;
+
+    extra = &object->extra.grow;
+    size = extra->growth * sqrtf(extra->elapsed);
+    object->unk18 = size;
+    if (!(extra->growOneAxis & 1)) {
+        object->unk1C = size;
     }
     {
-        f32 temp_fv0 = *(f32 *)temp_v0;
-    *(s8 *)((u8 *)arg0 + 0x70) = (s8) (u32) (*(f32 *)((u8 *)temp_v0 + 0xC) - (*(f32 *)((u8 *)temp_v0 + 0x10) * temp_fv0 * temp_fv0));
-    *(f32 *)temp_v0 += D_800BE9A4;
-    if (*(f32 *)((u8 *)temp_v0 + 4) < *(f32 *)temp_v0) {
-        return 0;
-    }
-    *(f32 *)((u8 *)arg0 + 0x20) += *(f32 *)((u8 *)arg0 + 0x50) * D_800BE9A4;
-    *(f32 *)((u8 *)arg0 + 0x24) += *(f32 *)((u8 *)arg0 + 0x54) * D_800BE9A4;
-    *(f32 *)((u8 *)arg0 + 0x28) += *(f32 *)((u8 *)arg0 + 0x58) * D_800BE9A4;
-    return 1;
+        f32 elapsed = extra->elapsed;
+        object->alpha = (s8)(u32)(extra->alpha - (extra->fade * elapsed * elapsed));
+        extra->elapsed += D_800BE9A4;
+        if (extra->duration < extra->elapsed) {
+            return 0;
+        }
+        object->position.x += object->velocity.x * D_800BE9A4;
+        object->position.y += object->velocity.y * D_800BE9A4;
+        object->position.z += object->velocity.z * D_800BE9A4;
+        return 1;
     }
 }
 
