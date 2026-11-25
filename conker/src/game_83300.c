@@ -4381,13 +4381,14 @@ void func_1505F298(struct127 *actor, OSContPad *pad) {
 }
 #undef MOVEMENT_FIELD
 #undef ACTOR_FIELD
-void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
+/* Runs the player's current action/item (unk31C->unk75, overridden by context) for this frame's input. */
+void func_1506045C(struct127 *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
     s32 stunned;
     s32 state;
     s32 expired;
     s32 held;
     s32 result;
-    s32 old_unk75;
+    s32 savedUnk75;
     s32 idx;
 
     result = 0;
@@ -4398,42 +4399,42 @@ void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
     stunned = 0;
     expired = 0;
 
-    if ((*(u16 *)((u8 *)arg0->unk31C + 0x72) != 0) && (arg4 == 0)) {
-        if (D_800BE9E4 < *(u16 *)((u8 *)arg0->unk31C + 0x72)) {
-            *(u16 *)((u8 *)arg0->unk31C + 0x72) -= D_800BE9E4;
+    if ((*(u16 *)((u8 *)actor->unk31C + 0x72) != 0) && (nested == 0)) {
+        if (D_800BE9E4 < *(u16 *)((u8 *)actor->unk31C + 0x72)) {
+            *(u16 *)((u8 *)actor->unk31C + 0x72) -= D_800BE9E4;
         } else {
             expired = 1;
-            *(u16 *)((u8 *)arg0->unk31C + 0x72) = 0;
+            *(u16 *)((u8 *)actor->unk31C + 0x72) = 0;
         }
     }
 
-    state = arg0->unk31C->unk75 & ~0x80;
-    if ((((u8 *)arg0->unk31C)[0x7C] != 0) && (state == 0)) {
-        state = ((u8 *)arg0->unk31C)[0x7C];
+    state = actor->unk31C->unk75 & ~0x80;
+    if ((((u8 *)actor->unk31C)[0x7C] != 0) && (state == 0)) {
+        state = ((u8 *)actor->unk31C)[0x7C];
     }
 
-    if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (arg0->unk31C->unk78 == 0) &&
+    if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (actor->unk31C->unk78 == 0) &&
         (*(u16 *)D_800CC284 & 0x20) && (func_15080738(state) != 0)) {
         state = 0x1A;
     }
 
-    if (arg0->unk31C->unk78 == 0x1A) {
+    if (actor->unk31C->unk78 == 0x1A) {
         state = 0x1A;
     }
-    if (arg0->unk31C->unk78 == 0x2A) {
+    if (actor->unk31C->unk78 == 0x2A) {
         state = 0x2A;
     }
 
-    if ((arg0->unk13C != 0) || (((u8 *)arg0)[0x137] != 0)) {
-        if (arg4 == 0) {
+    if ((actor->unk13C != 0) || (((u8 *)&actor->pad134)[3] != 0)) {
+        if (nested == 0) {
             state = 0;
         } else {
             held = 1;
         }
     }
 
-    idx = arg0->unk65;
-    if ((idx != 0) && (arg4 == 0)) {
+    idx = actor->unk65;
+    if ((idx != 0) && (nested == 0)) {
         switch (D_800CC2D0[idx - 1].id) {
         case 0x23:
         case 0x8A:
@@ -4451,122 +4452,125 @@ void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
         }
     }
 
-    if (((u8 *)arg0->unk31C)[0x17] != 0) {
+    if (((u8 *)actor->unk31C)[0x17] != 0) {
         state = 0x3C;
     }
 
-    if ((arg4 == 0) && arg0->unk31C->unk78 && (state != (arg0->unk31C->unk78 & ~0x80))) {
-        old_unk75 = arg0->unk31C->unk75;
-        arg0->unk31C->unk75 = arg0->unk31C->unk78;
-        func_1506045C(arg0, arg1, arg2, arg3, 1);
-        arg0->unk31C->unk75 = old_unk75;
-        arg0->unk31C->unk78 = 0;
+    if ((nested == 0) && actor->unk31C->unk78 && (state != (actor->unk31C->unk78 & ~0x80))) {
+        savedUnk75 = actor->unk31C->unk75;
+        actor->unk31C->unk75 = actor->unk31C->unk78;
+        func_1506045C(actor, buttons, pressed, height, 1);
+        actor->unk31C->unk75 = savedUnk75;
+        actor->unk31C->unk78 = 0;
     }
 
-    if (arg0->stunned != 0) {
+    if (actor->stunned != 0) {
         stunned = 1;
-        arg2 = 0;
-        arg1 = 0;
+        pressed = 0;
+        buttons = 0;
     }
 
-    if ((state != 0) && (arg0->unk31C->unk4E == 0)) {
-        result = func_15065A5C(arg0, arg1, arg2, arg3, arg4, state, stunned, expired, held);
+    if ((state != 0) && (actor->unk31C->unk4E == 0)) {
+        result = func_15065A5C(actor, buttons, pressed, height, nested, state, stunned, expired, held);
     }
 
-    if ((((u8 *)arg0->unk31C)[0x7B] != 0) || (arg2 & 0x4000)) {
-        func_150642AC(arg0, arg2, arg3, held, result);
+    if ((((u8 *)actor->unk31C)[0x7B] != 0) || (pressed & 0x4000)) {
+        func_150642AC(actor, pressed, height, held, result);
     }
 }
-void func_15060778(s32 arg0, struct127 *arg1, u16 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Plays sound `sound` on an actor that has a camera (a player). flags & 3 picks the handle slot it
+ * reuses (1: unk8C, 2/3: unk8E; 3 only retunes it if the same sound is still playing), flags & 4 makes
+ * it positional, flags & 8 forces channel 0.
+ */
+void func_15060778(s32 sound, struct127 *actor, u16 rate, s32 level, s32 minDist, s32 maxDist, s32 flags) {
     s32 channel;
     u32 handle;
     u16 *slot;
 
     handle = 0;
-    slot = 0;
-    if (arg6 & 8) {
+    slot = NULL;
+    if (flags & 8) {
         channel = 0;
     } else {
-        channel = (*(u32 *)&((u8 *)arg1)[0x184] >> 3) & 0x30;
+        channel = ((u32)actor->unk184 >> 3) & 0x30;
     }
-    switch (arg6 & 3) {
+    switch (flags & 3) {
     case 1:
-        slot = (u16 *)&((u8 *)arg1)[0x8C];
-        handle = *(u16 *)&((u8 *)arg1)[0x8C];
+        slot = &actor->unk8C;
+        handle = actor->unk8C;
         break;
     case 2:
     case 3:
-        slot = (u16 *)&((u8 *)arg1)[0x8E];
-        handle = *(u16 *)&((u8 *)arg1)[0x8E];
-        if ((arg6 & 3) == 2) {
+        slot = &actor->unk8E;
+        handle = actor->unk8E;
+        if ((flags & 3) == 2) {
             break;
         }
-        if ((func_1001147C(handle) == arg0) & 0x7FFF) {
-            if (arg6 & 4) {
-                func_1000F91C(handle, (u16)(arg2 + channel * 50),
-                              (s16)(((u8 *)arg1)[0x13F] * 10 + arg3), channel & 0xFF, 0,
-                              (s32)*(f32 *)&((u8 *)arg1)[0x14],
-                              (s32)*(f32 *)&((u8 *)arg1)[0x18],
-                              (s32)*(f32 *)&((u8 *)arg1)[0x1C], arg4, arg5);
+        if ((func_1001147C(handle) == sound) & 0x7FFF) {
+            if (flags & 4) {
+                func_1000F91C(handle, (u16)(rate + channel * 50), (s16)(actor->unk13F * 10 + level), channel & 0xFF, 0,
+                              (s32)actor->x_position, (s32)actor->y_position, (s32)actor->z_position, minDist, maxDist);
             } else {
-                func_1000F85C(handle, 0x10, arg3);
-                func_1000F85C(handle, 8, arg2 + channel * 50);
+                func_1000F85C(handle, 0x10, level);
+                func_1000F85C(handle, 8, rate + channel * 50);
             }
             return;
         }
-        arg0 |= 0x8000;
+        sound |= 0x8000;
         break;
     }
-    if (arg6 & 4) {
-        handle = func_10010E78(handle, arg0, (u16)(arg2 + channel * 50),
-                              (s16)arg3, channel, 0,
-                              (s32)*(f32 *)&((u8 *)arg1)[0x14],
-                              (s32)*(f32 *)&((u8 *)arg1)[0x18],
-                              (s32)*(f32 *)&((u8 *)arg1)[0x1C], arg4, arg5);
+    if (flags & 4) {
+        handle = func_10010E78(handle, sound, (u16)(rate + channel * 50), (s16)level, channel, 0,
+                               (s32)actor->x_position, (s32)actor->y_position, (s32)actor->z_position, minDist,
+                               maxDist);
     } else {
-        handle = func_10010BE8(handle, arg0, (u16)(arg2 + channel * 50),
-                              0x40, arg3, channel, 1);
+        handle = func_10010BE8(handle, sound, (u16)(rate + channel * 50), 0x40, level, channel, 1);
     }
-    if (slot != 0) {
+    if (slot != NULL) {
         *slot = handle;
     }
 }
-void func_15060A30(s32 arg0, struct127 *arg1) {
-    if (arg1->camera == NULL) {
-        func_10010344(arg0, arg1, 0x6D60, 0x1F4, 0x9C4);
+/* Plays an actor sound (players use handle slot 1). */
+void func_15060A30(s32 sound, struct127 *actor) {
+    if (actor->camera == NULL) {
+        func_10010344(sound, actor, 28000, 500, 2500);
     } else {
-        func_15060778(arg0, arg1, 0x5DC0, 0, 0x1F4, 0x9C4, 1);
+        func_15060778(sound, actor, 24000, 0, 500, 2500, 1);
     }
 }
-void func_15060A9C(s32 arg0, struct127 *arg1) {
-    if (arg1->camera == NULL) {
-        func_10010630(arg0, arg1, 0x5DC0, 0x1F4, 0x9C4);
+/* Plays an actor sound without a handle slot. */
+void func_15060A9C(s32 sound, struct127 *actor) {
+    if (actor->camera == NULL) {
+        func_10010630(sound, actor, 24000, 500, 2500);
     } else {
-        func_15060778(arg0, arg1, 0x5DC0, 0, 0x1F4, 0x9C4, 0);
+        func_15060778(sound, actor, 24000, 0, 500, 2500, 0);
     }
 }
 
-void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->camera == NULL) {
-        func_10010630(arg0, arg1, arg2, 500, 2500);
+/* func_15060A9C with an explicit rate. */
+void func_15060B04(s32 sound, struct127 *actor, s32 rate) {
+    if (actor->camera == NULL) {
+        func_10010630(sound, actor, rate, 500, 2500);
     } else {
-        func_15060778(arg0, arg1, arg2, 0, 500, 2500, 0);
+        func_15060778(sound, actor, rate, 0, 500, 2500, 0);
     }
 }
 
-void func_15060B70(s32 arg0, void *arg1) {
-    func_10010154(arg0, arg1, 0x6D60, 0x1F4, 0x9C4);
+void func_15060B70(s32 sound, void *actor) {
+    func_10010154(sound, actor, 28000, 500, 2500);
 }
 
-s32 func_15060BA4(struct127 *arg0, s32 arg1) {
-    if (arg0->health == 6) {
-        return 0;
+/* Adds health up to the maximum of 6; returns FALSE when already full. */
+s32 func_15060BA4(struct127 *actor, s32 amount) {
+    if (actor->health == 6) {
+        return FALSE;
     }
-    arg0->health += arg1;
-    if (arg0->health >= 7) {
-        arg0->health = 6;
+    actor->health += amount;
+    if (actor->health >= 7) {
+        actor->health = 6;
     }
-    return 1;
+    return TRUE;
 }
 extern u8 D_800C3E90;
 
