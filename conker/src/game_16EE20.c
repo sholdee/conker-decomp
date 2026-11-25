@@ -30,7 +30,7 @@ extern s32 D_800DD214;
 extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern u8 D_800C3E90;
-extern u8 D_8008A160[];
+extern u8 D_8008A160[]; /* palettes of four RGB triples */
 extern s32 D_800DCA00;
 extern Mtx *D_800DCA04;
 extern f32 D_800DCA08;
@@ -378,18 +378,13 @@ s32 func_151420F8(s32 actor) {
     }
     return 1;
 }
-struct vec15142180 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-};
-
-struct conker15142180 {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ struct vec15142180 unk08;
+/* Parameter block for func_15153F18. */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ struct17 pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -409,41 +404,42 @@ struct conker15142180 {
     /* 0x44 */ s16 unk44;
     /* 0x46 */ s16 unk46;
     /* 0x48 */ s32 unk48;
-};
+} Params15153F18;
 
 extern f32 D_800A5470;
 extern f32 D_800A5474;
 
-void func_15153F18(struct conker15142180 *a0, struct vec15142180 *a1, s32 a2, s32 a3, s32 a4);
+void func_15153F18(Params15153F18 *params, struct17 *pos, s32, s32, s32);
 
-void func_15142180(u8 arg0, struct vec15142180 *arg1, s32 arg2, f32 arg3, f32 arg4) {
-    struct conker15142180 sp24;
+/* Spawns the func_15153F18 effect of the given kind at `pos`. */
+void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
+    Params15153F18 params;
 
-    sp24.unk08 = *arg1;
-    sp24.unk2C = 3;
-    sp24.unk2E = 3;
-    sp24.unk02 = 0xFF;
-    sp24.unk04 = -0x19;
-    sp24.unk06 = 0xA;
-    sp24.unk14 = 2.5f * arg3;
-    sp24.unk18 = (1.0f + 1.0f) * arg3;
-    sp24.unk1C = D_800A5470;
-    sp24.unk20 = D_800A5474;
-    sp24.unk24 = 3.0f * arg4;
-    sp24.unk28 = 3.5f * arg4;
-    sp24.unk00 = 0;
-    sp24.unk30 = 3;
-    sp24.unk32 = 1;
-    sp24.unk34 = 9;
-    sp24.unk36 = 0xF;
-    sp24.unk38 = 0xB4;
-    sp24.unk3A = 0x4B;
-    sp24.unk40 = 0.0f;
-    sp24.unk44 = 0xC;
-    sp24.unk46 = 0x15;
-    sp24.unk48 = arg2;
-    sp24.unk3C = arg0;
-    func_15153F18(&sp24, &sp24.unk08, 0, 0xFF, 1);
+    params.pos = *pos;
+    params.unk2C = 3;
+    params.unk2E = 3;
+    params.unk2 = 255;
+    params.unk4 = -25;
+    params.unk6 = 10;
+    params.unk14 = 2.5f * scaleA;
+    params.unk18 = (1.0f + 1.0f) * scaleA;
+    params.unk1C = D_800A5470;
+    params.unk20 = D_800A5474;
+    params.unk24 = 3.0f * scaleB;
+    params.unk28 = 3.5f * scaleB;
+    params.unk0 = 0;
+    params.unk30 = 3;
+    params.unk32 = 1;
+    params.unk34 = 9;
+    params.unk36 = 15;
+    params.unk38 = 180;
+    params.unk3A = 75;
+    params.unk40 = 0.0f;
+    params.unk44 = 12;
+    params.unk46 = 21;
+    params.unk48 = arg2;
+    params.unk3C = kind;
+    func_15153F18(&params, &params.pos, 0, 0xFF, 1);
 }
 
 s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -458,94 +454,121 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-void func_15142314(Mtx *arg0, s32 arg1, f32 *arg2) {
-    u8 *p;
+/* Fixed-point Mtx: integer halves of all elements, then the fraction halves. */
+typedef struct {
+    s16 whole[4][4];
+    s16 frac[4][4];
+} MtxFixed;
 
-    p = ((u8 *)arg0) + (arg1 << 6);
+/* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
+typedef union {
+    MtxFixed fx;
+    f32 mf[4][4];
+} MtxView;
+
+/* Copies the translation of mtx[index] to out (fixed-point when D_800C3E90 is set). */
+void func_15142314(Mtx *mtx, s32 index, f32 *out) {
+    MtxView *m;
+
+    m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
     if (D_800C3E90 != 0) {
-        p = ((u8 *)arg0) + (arg1 << 6);
-        do {
-            f32 scale = 0.000015258789f;
-            arg2[0] = (((f32)((*((s16 *)(p + 0x18))) << 0x10)) + ((f32)(*((s16 *)(p + 0x38))))) * scale;
-            arg2[1] = (((f32)((*((s16 *)(p + 0x1A))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3A))))) * scale;
-            arg2[2] = (((f32)((*((s16 *)(p + 0x1C))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3C))))) * scale;
-        } while (0);
+        // matching: the original recomputes m here; IDO keeps both computations
+        m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
+        {
+            f32 scale = 1.0f / 65536.0f;
+            out[0] = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
+            out[1] = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
+            out[2] = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
+        }
         return;
     }
-    arg2[0] = *((f32 *)(p + 0x30));
-    arg2[1] = *((f32 *)(p + 0x34));
-    arg2[2] = *((f32 *)(p + 0x38));
+    out[0] = m->mf[3][0];
+    out[1] = m->mf[3][1];
+    out[2] = m->mf[3][2];
 }
-f32 func_151423D8(u8 arg0) {
-    s32 temp_v1;
-    s32 temp_v0 = arg0;
-    u16 temp_t0;
-    if (temp_v0 & 0x40) {
-        temp_v1 = 0x40 - (temp_v0 & 0x3F);
+
+/* Cosine of a binary angle (256 steps per turn), from the quarter-wave table D_8009A220. */
+f32 func_151423D8(u8 angle) {
+    s32 index;
+    s32 a = angle;
+    u16 quadrant;
+
+    if (a & 0x40) {
+        index = 0x40 - (a & 0x3F);
     } else {
-        temp_v1 = temp_v0 & 0x3F;
+        index = a & 0x3F;
     }
-    temp_t0 = temp_v0 & 0xC0;
-    if ((temp_t0 == 0) || (temp_t0 == 0xC0)) {
-        return D_8009A220[temp_v1];
+    quadrant = a & 0xC0;
+    if ((quadrant == 0) || (quadrant == 0xC0)) {
+        return D_8009A220[index];
     }
-    return -D_8009A220[temp_v1];
+    return -D_8009A220[index];
 }
-struct127 *func_15142444(u8 arg0, struct127 *arg1) {
-    s32 temp_v0;
-    struct127 *ret;
 
-    temp_v0 = arg0;
-    if (temp_v0 == 0xFF) {
-        if (arg1->unk1D4 != NULL) {
-            return arg1;
+/* Resolves an actor unique id (0xFF: `self`) to an actor with a model (unk1D4), or NULL. */
+struct127 *func_15142444(u8 uniqueId, struct127 *self) {
+    s32 id;
+    struct127 *actor;
+
+    id = uniqueId;
+    if (id == 0xFF) {
+        if (self->unk1D4 != NULL) {
+            return self;
         }
         return NULL;
     }
 
-    if ((arg1 != NULL) && (arg1->interaction_state != 0) && (temp_v0 == arg1->unique_id)) {
-        if (arg1->unk1D4 != NULL) {
-            return arg1;
+    if ((self != NULL) && (self->interaction_state != 0) && (id == self->unique_id)) {
+        if (self->unk1D4 != NULL) {
+            return self;
         }
         return NULL;
     }
 
-    ret = func_15083E90();
-    if ((ret != NULL) && (ret->unk1D4 != NULL)) {
-        return ret;
+    actor = func_15083E90();
+    if ((actor != NULL) && (actor->unk1D4 != NULL)) {
+        return actor;
     }
     return NULL;
 }
 void func_150A8050(f32 (*)[4], f32, f32, f32);
 
-void func_151424F4(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
-    f32 sp28[4][4];
+/*
+ * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled
+ * by scaleXZ and row 1 by scaleY, columns by (sx, sy, sz).
+ */
+void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
+                   f32 x, f32 y, f32 z) {
+    f32 mf[4][4];
 
-    func_150A8050(&sp28, arg3, arg4, arg5);
-    sp28[3][0] = arg9;
-    sp28[3][1] = arg10;
-    sp28[3][2] = arg11;
-    sp28[0][0] *= arg6 * arg1;
-    sp28[0][1] *= arg7 * arg1;
-    sp28[0][2] *= arg8 * arg1;
-    sp28[1][0] *= arg6 * arg2;
-    sp28[1][1] *= arg7 * arg2;
-    sp28[1][2] *= arg8 * arg2;
-    sp28[2][0] *= arg6 * arg1;
-    sp28[2][1] *= arg7 * arg1;
-    sp28[2][2] *= arg8 * arg1;
-    guMtxF2L(&sp28, arg0);
+    func_150A8050(&mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= sx * scaleXZ;
+    mf[0][1] *= sy * scaleXZ;
+    mf[0][2] *= sz * scaleXZ;
+    mf[1][0] *= sx * scaleY;
+    mf[1][1] *= sy * scaleY;
+    mf[1][2] *= sz * scaleY;
+    mf[2][0] *= sx * scaleXZ;
+    mf[2][1] *= sy * scaleXZ;
+    mf[2][2] *= sz * scaleXZ;
+    guMtxF2L(&mf, out);
 }
-void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
+
+/* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
+void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
+                   f32 atX, f32 atY, f32 atZ) {
     f32 mf[4][4];
     f32 inv;
     f32 fx, fy, fz;
     f32 ux, uy, uz;
     f32 rx, rz;
 
-    fx = arg9 - arg6;
-    fy = arg10 - arg7;
-    fz = arg11 - arg8;
+    fx = atX - x;
+    fy = atY - y;
+    fz = atZ - z;
     inv = 1.0f / sqrtf(fx * fx + fy * fy + fz * fz);
     fx *= inv;
     fy *= inv;
@@ -559,85 +582,99 @@ void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     uy = fz * rx - fx * rz;
     uz = -fy * rx;
     inv = 1.0f / sqrtf(ux * ux + uy * uy + uz * uz);
-    mf[0][0] = rx * arg3 * arg1;
-    mf[1][0] = ux * inv * arg3 * arg2;
-    mf[2][0] = fx * arg3 * arg1;
-    mf[3][0] = arg6;
+    mf[0][0] = rx * sx * scaleXZ;
+    mf[1][0] = ux * inv * sx * scaleY;
+    mf[2][0] = fx * sx * scaleXZ;
+    mf[3][0] = x;
     mf[0][1] = 0.0f;
-    mf[1][1] = uy * inv * arg4 * arg2;
-    mf[2][1] = fy * arg4 * arg1;
-    mf[3][1] = arg7;
-    mf[0][2] = rz * arg5 * arg1;
-    mf[1][2] = uz * inv * arg5 * arg2;
-    mf[2][2] = fz * arg5 * arg1;
-    mf[3][2] = arg8;
+    mf[1][1] = uy * inv * sy * scaleY;
+    mf[2][1] = fy * sy * scaleXZ;
+    mf[3][1] = y;
+    mf[0][2] = rz * sz * scaleXZ;
+    mf[1][2] = uz * inv * sz * scaleY;
+    mf[2][2] = fz * sz * scaleXZ;
+    mf[3][2] = z;
     mf[0][3] = 0.0f;
     mf[1][3] = 0.0f;
     mf[2][3] = 0.0f;
     mf[3][3] = 1.0f;
-    guMtxF2L(mf, arg0);
+    guMtxF2L(mf, out);
 }
-void func_15142838(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
-    f32 mtx[4][4];
 
-    func_150A8050(mtx, arg3, arg4, arg5);
-    mtx[3][0] = arg6;
-    mtx[3][1] = arg7;
-    mtx[3][2] = arg8;
-    mtx[0][0] *= arg1;
-    mtx[0][1] *= arg1;
-    mtx[0][2] *= arg1;
-    mtx[1][0] *= arg2;
-    mtx[1][1] *= arg2;
-    mtx[1][2] *= arg2;
-    mtx[2][0] *= arg1;
-    mtx[2][1] *= arg1;
-    mtx[2][2] *= arg1;
-    guMtxF2L(mtx, arg0);
-}
-void func_15142914(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
-    func_150A8050(mtx, arg3, arg4, arg5);
-    mtx[3][0] = arg6;
-    mtx[3][1] = arg7;
-    mtx[3][2] = arg8;
-    mtx[0][0] *= arg1;
-    mtx[0][1] *= arg1;
-    mtx[0][2] *= arg1;
-    mtx[1][0] *= arg2;
-    mtx[1][1] *= arg2;
-    mtx[1][2] *= arg2;
-    mtx[2][0] *= arg1;
-    mtx[2][1] *= arg1;
-    mtx[2][2] *= arg1;
-}
-void func_151429E0(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
-    u8 *temp_v1;
+/* Builds a rotation matrix at (x, y, z), rows 0/2 scaled by scaleXZ and row 1 by scaleY. */
+void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+    f32 mf[4][4];
 
-    temp_v1 = &D_8008A160[((func_150ADA20() & 3) * 3) + (arg0 * 0xC)];
-    *arg1 = temp_v1[0];
-    *arg2 = temp_v1[1];
-    *arg3 = temp_v1[2];
+    func_150A8050(mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= scaleXZ;
+    mf[0][1] *= scaleXZ;
+    mf[0][2] *= scaleXZ;
+    mf[1][0] *= scaleY;
+    mf[1][1] *= scaleY;
+    mf[1][2] *= scaleY;
+    mf[2][0] *= scaleXZ;
+    mf[2][1] *= scaleXZ;
+    mf[2][2] *= scaleXZ;
+    guMtxF2L(mf, out);
 }
-s32 func_15142A5C(struct127 *arg0) {
-    void *temp_v0 = arg0->unk2D0;
+
+/* Float version of func_15142838. */
+void func_15142914(f32 mf[4][4], f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+    func_150A8050(mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= scaleXZ;
+    mf[0][1] *= scaleXZ;
+    mf[0][2] *= scaleXZ;
+    mf[1][0] *= scaleY;
+    mf[1][1] *= scaleY;
+    mf[1][2] *= scaleY;
+    mf[2][0] *= scaleXZ;
+    mf[2][1] *= scaleXZ;
+    mf[2][2] *= scaleXZ;
+}
+
+/* Picks one of the four RGB colours of palette `palette` at random. */
+void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b) {
+    u8 *color;
+
+    color = &D_8008A160[(func_150ADA20() & 3) * 3 + palette * 12];
+    *r = color[0];
+    *g = color[1];
+    *b = color[2];
+}
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x3C];
+    /* 0x3C */ s16 unk3C;
+} Unk2D0View;
+
+s32 func_15142A5C(struct127 *actor) {
+    Unk2D0View *unk2D0 = (Unk2D0View *)actor->unk2D0;
     s32 ret = 0;
 
-    if (*(s16 *)((s32)temp_v0 + 0x3C) > 0) {
+    if (unk2D0->unk3C > 0) {
         return 1;
     }
     return ret;
 }
-f32 func_15142A80(f32 arg0) {
-    return ((1.0f - arg0) * (arg0 - 2.0f) * arg0) * D_800A5624;
+
+/* Cubic Lagrange interpolation weights for samples at -1, 0, 1, 2 (t in [0, 1]). */
+f32 func_15142A80(f32 t) {
+    return ((1.0f - t) * (t - 2.0f) * t) * (1.0f / 6.0f);
 }
-f32 func_15142AC0(f32 arg0) {
-    return ((arg0 + 1.0f) * (arg0 - 1.0f) * (arg0 - 2.0f)) * 0.5f;
+f32 func_15142AC0(f32 t) {
+    return ((t + 1.0f) * (t - 1.0f) * (t - 2.0f)) * 0.5f;
 }
-f32 func_15142B04(f32 arg0) {
-    return ((2.0f - arg0) * (arg0 + 1.0f) * arg0) * 0.5f;
+f32 func_15142B04(f32 t) {
+    return ((2.0f - t) * (t + 1.0f) * t) * 0.5f;
 }
-f32 func_15142B44(f32 arg0) {
-    return ((arg0 + 1.0f) * (arg0 - 1.0f) * arg0) * D_800A5628;
+f32 func_15142B44(f32 t) {
+    return ((t + 1.0f) * (t - 1.0f) * t) * (1.0f / 6.0f);
 }
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2) {
     if (~D_800DD200 & arg2) {
