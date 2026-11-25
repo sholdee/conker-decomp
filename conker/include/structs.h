@@ -13,6 +13,7 @@ typedef struct BlockDebris BlockDebris;
 struct DefParticleHead;
 struct ParticleDesc;
 struct QuadSprite;
+struct BillboardParticle;
 union ActorMsg;
 
 /*
@@ -309,28 +310,6 @@ typedef struct ObjPartsState {
     /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
 } ObjPartsState;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;  // used
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s16 unk28;
-    s16 unk2A;  // used
-    s32 unk2C;
-    s32 unk30;
-    s16 unk34;  // used
-    s16 unk36;  // used
-    s16 unk38;
-    s8  unk3A;  // used
-    u8  unk3B;
-} struct114;
 
 /* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
 typedef struct ObjType {

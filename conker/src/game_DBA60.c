@@ -227,14 +227,15 @@ void func_150AECCC(struct42 *arg0) {
     }
 }
 
-/* Raises unk34 by unk14 per elapsed frame; on passing the limit unk2A it is clamped and unk3A set to 70. */
-void func_150AED4C(struct114 *arg0) {
-    arg0->unk34 += arg0->unk14 * D_800BE9E4;
-    if (arg0->unk2A < arg0->unk34) {
-        arg0->unk3A = 70;
-        arg0->unk34 = arg0->unk2A;
+/* Particle callback 11 (D_8008C9C8[11]): grows the billboard square by tmpl.unk4 per elapsed frame up to the
+   size tmpl.unk1A, then starts its fade (fadeStep 70). */
+void func_150AED4C(BillboardParticle *p) {
+    p->tmpl.width += p->tmpl.unk4 * D_800BE9E4;
+    if (p->tmpl.unk1A < p->tmpl.width) {
+        p->tmpl.fadeStep = 70;
+        p->tmpl.width = p->tmpl.unk1A;
     }
-    arg0->unk36 = arg0->unk34;
+    p->tmpl.height = p->tmpl.width;
 }
 
 typedef struct {
