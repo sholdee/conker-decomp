@@ -684,18 +684,6 @@ void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
     }
 }
 
-/* First two arguments of func_15147DA0. */
-typedef struct {
-    Vec3f position;
-    s16 life;
-    s16 enabled;
-    s32 active;
-    u8 pad14;
-    u8 fade;
-    u8 pad16[2];
-    s32 unk18;
-} Spawn15147DA0;
-
 typedef struct {
     f32 size;
     Vec3f velocity;
@@ -709,29 +697,12 @@ typedef struct {
     s16 unk1E;
 } Motion15147DA0;
 
-extern s32 func_15147DA0(Spawn15147DA0 *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
-
-typedef struct {
-    Vec3f position;
-    Vec3f normal;
-    s16 triangle[9];
-    u8 pad2A[2];
-    f32 spread;
-    f32 sizeBase, sizeRange, growthBase, growthRange, speedBase, speedRange;
-    s16 countBase, countRange, fadeBase, fadeRange, lifeBase, lifeRange;
-    u8 green, enabled, red, pad57;
-    s32 unk58[6];
-    u8 blue, alphaBase, alphaRange, pad73;
-    s32 unk74, unk78;
-    TrailRender params;
-    s16 unk9C, unk9E;
-    s32 unkA0;
-} Game151670Config;
+extern s32 func_15147DA0(EffectTemplate *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
 
 /* Spawns a random number of particles off a surface triangle, each moving in a random direction
  * inside the cone around the triangle's normal. */
-void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
-    Spawn15147DA0 spawn;
+void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2) {
+    EffectTemplate spawn;
     Motion15147DA0 motion;
     u8 kind;
     Vec3f axis0;
@@ -747,11 +718,11 @@ void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
     u32 rand;
 
     kind = arg1; // matching: IDO keeps arg1 in a saved register only through a copy
-    if (func_15144E80(config->triangle, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &config->normal) < 0.0f) {
+        if (func_15144A74(&normal, &config->source.normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -759,81 +730,41 @@ void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
-        spawn.active = 1;
-        spawn.enabled = config->enabled;
+        spawn.kind = 1;
+        spawn.flags = config->headerFlags;
         motion.green = config->green;
         motion.blue = config->blue;
         motion.red = config->red;
         motion.unk1C = config->unk9C;
         motion.unk1E = config->unk9E;
-        spawn.position = config->position;
-        spawn.unk18 = config->unkA0;
+        spawn.pos = config->pos;
+        spawn.unk18 = (void *)config->unkA0;
         count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
         while (count != 0) {
             rand = func_150ADA20();
-            func_15143874((s16)(rand & 0xFF), func_150ADA68() * config->spread, &first, &second);
+            func_15143874((s16)(rand & 0xFF), func_150ADA68() * config->source.spread, &first, &second);
             speed = func_150ADA68() * config->speedRange + config->speedBase;
             motion.alpha = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
-            spawn.fade = func_150ADA20() % (u32)(config->fadeRange + 1) + config->fadeBase;
+            spawn.itemCount = func_150ADA20() % (u32)(config->itemCountRange + 1) + config->itemCountBase;
             spawn.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
             motion.size = func_150ADA68() * config->sizeRange + config->sizeBase;
             motion.growth = func_150ADA68() * config->growthRange + config->growthBase;
             motion.velocity.x = (axis0.x * first + axis1.x * second + normal.x) * speed;
             motion.velocity.y = (axis0.y * first + axis1.y * second + normal.y) * speed;
             motion.velocity.z = (axis0.z * first + axis1.z * second + normal.z) * speed;
-            func_15147DA0(&spawn, &motion, 0, config->unk58[0], config->unk58[1],
-                          config->unk58[2], config->unk58[3], config->unk58[4],
-                          config->unk58[5], config->unk74, config->unk78,
-                          &config->params, 0, kind, arg2);
+            func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1],
+                          config->handlers[2], config->handlers[3], config->handlers[4],
+                          config->handlers[5], config->unk74, config->unk78,
+                          &config->render, 0, kind, arg2);
             count--;
         }
     }
 }
 
-struct Local15151A38Arg {
-    Vec3f position;
-    f32 sizeBase;
-    f32 sizeRange;
-    f32 growthBase;
-    f32 growthRange;
-    f32 speedBase;
-    f32 speedRange;
-    s16 countBase;
-    s16 countRange;
-    s16 yawBase;
-    s16 yawRange;
-    s16 pitchBase;
-    s16 pitchRange;
-    s16 fadeBase;
-    s16 fadeRange;
-    s16 lifeBase;
-    s16 lifeRange;
-    u8 green;
-    u8 enabled;
-    u8 red;
-    u8 pad3B;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 blue;
-    u8 alphaBase;
-    u8 alphaRange;
-    u8 pad57;
-    s32 unk58;
-    s32 unk5C;
-    TrailRender params;
-    s16 unk80;
-    s16 unk82;
-    s32 unk84;
-};
-
 /* Spawns a random number of particles at config->position, each moving at a random yaw (around y)
  * and pitch; func_151423D8 is the cosine of a 256-step angle. */
-void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
-    Spawn15147DA0 spawn;
+void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
+    EffectTemplate spawn;
     Motion15147DA0 motion;
     s32 count;
     s16 yaw;
@@ -845,26 +776,26 @@ void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
     f32 cosPitch;
     f32 horizontal;
 
-    spawn.active = 1;
-    spawn.enabled = config->enabled;
+    spawn.kind = 1;
+    spawn.flags = config->headerFlags;
     motion.green = config->green;
     motion.blue = config->blue;
     motion.red = config->red;
-    spawn.position = config->position;
+    spawn.pos = config->pos;
     motion.unk1C = config->unk80;
     motion.unk1E = config->unk82;
-    spawn.unk18 = config->unk84;
+    spawn.unk18 = (void *)config->unk84;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
-        pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
+        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
         cosPitch = func_151423D8((u8)pitch);
         sinPitch = func_151423D8((u8)(pitch - 0x40));
         cosYaw = func_151423D8((u8)yaw);
         sinYaw = func_151423D8((u8)(yaw - 0x40));
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
         motion.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
-        spawn.fade = (func_150ADA20() % (u32)(config->fadeRange + 1)) + config->fadeBase;
+        spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
         motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;
@@ -872,8 +803,8 @@ void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
         motion.velocity.x = horizontal * sinYaw;
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = horizontal * cosYaw;
-        func_15147DA0(&spawn, &motion, 0, config->unk3C, config->unk40, config->unk44, config->unk48,
-                      config->unk4C, config->unk50, config->unk58, config->unk5C, &config->params, 0, arg1, arg2);
+        func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
+                      config->handlers[4], config->handlers[5], config->unk58, config->unk5C, &config->render, 0, arg1, arg2);
         count--;
     }
 }
@@ -1353,7 +1284,7 @@ typedef struct {
 
 /* Like func_15151A38, with a fixed color and fixed func_15147DA0 parameters. */
 void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
-    Spawn15147DA0 spawn;
+    EffectTemplate spawn;
     s32 count;
     MotionShort15147DA0 motion;
     s16 yaw;
@@ -1365,13 +1296,13 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
     f32 cosYaw;
     f32 sinYaw;
 
-    spawn.active = 1;
-    spawn.enabled = 1;
+    spawn.kind = 1;
+    spawn.flags = 1;
     motion.green = config->green;
     motion.blue = config->blue;
     motion.red = config->red;
     motion.alpha = config->alpha;
-    spawn.position = config->position;
+    spawn.pos = config->position;
     params.unk0 = 0;
     params.setGeometryMode = 1;
     params.clearGeometryMode = 0x160600;
@@ -1390,7 +1321,7 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
         cosYaw = func_151423D8((u8)yaw);
         sinYaw = func_151423D8((u8)(yaw - 0x40));
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        spawn.fade = (func_150ADA20() % (u32)(config->fadeRange + 1)) + config->fadeBase;
+        spawn.itemCount = (func_150ADA20() % (u32)(config->fadeRange + 1)) + config->fadeBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
         motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;

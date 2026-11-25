@@ -8,7 +8,7 @@
  * use are padding):
  *   ParticleDef, FxParticle, SpriteDef, SpriteFx  - the particle/sprite system of game_169510.c
  *   PhysicsParticle, ParticleFloor               - the pooled physics particles of game_15F680.c
- *   BurstConfig                                  - func_15151A38's argument (game_17CAF0.c)
+ *   PuffSpray                                  - func_15151A38's argument (game_17CAF0.c)
  */
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
@@ -83,50 +83,8 @@ typedef struct {
     /* 0x168 */ s32 unk168;
 } PhysicsParticle;
 
-/* func_15151A38's argument: spawns a random count of particles at position. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ s16 yawBase;
-    /* 0x2A */ s16 yawRange;
-    /* 0x2C */ s16 pitchBase;
-    /* 0x2E */ s16 pitchRange;
-    /* 0x30 */ s16 fadeBase;
-    /* 0x32 */ s16 fadeRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 enabled;
-    /* 0x3A */ u8 red;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 params[7];
-    /* 0x7C */ u8 params1C;
-    /* 0x7D */ u8 params1D;
-    /* 0x7E */ u8 pad7E[2];
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 unk84;
-} BurstConfig; /* size 0x88 */
-
 void *memcpy(void *, const void *, u32);
-void func_15151A38(BurstConfig *config, u8 arg1, s32 arg2);
+void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
 s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
 extern s32 D_80088740;
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
@@ -265,29 +223,29 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 }
             }
             {
-                BurstConfig burst;
-                burst.position = particle->pos;
+                PuffSpray burst;
+                burst.pos = particle->pos;
                 burst.sizeBase = 3.0f;
                 burst.sizeRange = 3.100000143f; // not 3.1f: the original constant is one ulp above it
                 burst.countBase = 6;
                 burst.countRange = 6;
-                burst.yawRange = 0xFF;
-                burst.pitchBase = -0x40;
-                burst.pitchRange = 30;
-                burst.yawBase = 0;
-                burst.fadeBase = 3;
-                burst.fadeRange = 3;
+                burst.angles.yawRange = 0xFF;
+                burst.angles.pitchBase = -0x40;
+                burst.angles.pitchRange = 30;
+                burst.angles.yawBase = 0;
+                burst.itemCountBase = 3;
+                burst.itemCountRange = 3;
                 burst.lifeBase = 30;
                 burst.lifeRange = 20;
                 burst.green = 1;
-                burst.enabled = 0x21;
+                burst.headerFlags = 0x21;
                 burst.red = 0x48;
-                burst.unk3C = 1;
-                burst.unk40 = 0;
-                burst.unk44 = 0;
-                burst.unk48 = 0;
-                burst.unk4C = 0;
-                burst.unk50 = 0;
+                burst.handlers[0] = 1;
+                burst.handlers[1] = 0;
+                burst.handlers[2] = 0;
+                burst.handlers[3] = 0;
+                burst.handlers[4] = 0;
+                burst.handlers[5] = 0;
                 burst.blue = 0;
                 burst.alphaBase = 0x9A;
                 burst.alphaRange = 0x65;
@@ -297,15 +255,15 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 burst.speedRange = 7.0f;
                 burst.unk58 = particle->unk14C;
                 burst.unk5C = particle->unk168;
-                burst.params[0] = 0;
-                burst.params[1] = 0x220005;
-                burst.params[2] = 0x1D0600;
-                burst.params[3] = 1;
-                burst.params[4] = 0x3B;
-                burst.params[5] = 0x80;
-                burst.params[6] = 0x20;
-                burst.params1C = 0;
-                burst.params1D = 7;
+                burst.render.unk0 = 0;
+                burst.render.setGeometryMode = 0x220005;
+                burst.render.clearGeometryMode = 0x1D0600;
+                burst.render.renderMode = 1;
+                burst.render.unk10 = 0x3B;
+                burst.render.unk14 = 0x80;
+                burst.render.unk18 = 0x20;
+                burst.render.envMode = 0;
+                burst.render.primMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.unk18;

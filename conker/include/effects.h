@@ -991,4 +991,73 @@ typedef struct TrailRender {
     /* 0x1E */ u8 pad1E[2];
 } TrailRender; /* size 0x20 */
 
+/* func_15151A38 (game_17CAF0.c): countBase + rand % (countRange + 1) puffs (func_15147DA0 effects) at pos,
+ * each moving at a random yaw/pitch from `angles`, with random size, growth, speed, item count, life and
+ * alpha. */
+typedef struct PuffSpray {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 sizeBase;
+    /* 0x10 */ f32 sizeRange;
+    /* 0x14 */ f32 growthBase;
+    /* 0x18 */ f32 growthRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ AngleRange angles;
+    /* 0x30 */ s16 itemCountBase;   /* EffectTemplate.itemCount */
+    /* 0x32 */ s16 itemCountRange;
+    /* 0x34 */ s16 lifeBase;
+    /* 0x36 */ s16 lifeRange;
+    /* 0x38 */ u8 green;
+    /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
+    /* 0x3A */ u8 red;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x54 */ u8 blue;
+    /* 0x55 */ u8 alphaBase;
+    /* 0x56 */ u8 alphaRange;
+    /* 0x57 */ u8 pad57;
+    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
+    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
+    /* 0x60 */ TrailRender render;
+    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
+    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
+    /* 0x84 */ s32 unk84;           /* EffectTemplate.unk18 */
+} PuffSpray; /* size 0x88 */
+
+/* func_15151670 (game_17CAF0.c): like PuffSpray, but each puff moves in a random direction inside the cone
+ * around a surface triangle's normal. */
+typedef struct SurfacePuffSpray {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ TriangleSource source;
+    /* 0x30 */ f32 sizeBase;
+    /* 0x34 */ f32 sizeRange;
+    /* 0x38 */ f32 growthBase;
+    /* 0x3C */ f32 growthRange;
+    /* 0x40 */ f32 speedBase;
+    /* 0x44 */ f32 speedRange;
+    /* 0x48 */ s16 countBase;
+    /* 0x4A */ s16 countRange;
+    /* 0x4C */ s16 itemCountBase;   /* EffectTemplate.itemCount */
+    /* 0x4E */ s16 itemCountRange;
+    /* 0x50 */ s16 lifeBase;
+    /* 0x52 */ s16 lifeRange;
+    /* 0x54 */ u8 green;
+    /* 0x55 */ u8 headerFlags;      /* EffectTemplate.flags */
+    /* 0x56 */ u8 red;
+    /* 0x57 */ u8 pad57;
+    /* 0x58 */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x70 */ u8 blue;
+    /* 0x71 */ u8 alphaBase;
+    /* 0x72 */ u8 alphaRange;
+    /* 0x73 */ u8 pad73;
+    /* 0x74 */ s32 unk74;           /* func_15147DA0's arg9 */
+    /* 0x78 */ s32 unk78;           /* func_15147DA0's arg10 */
+    /* 0x7C */ TrailRender render;
+    /* 0x9C */ s16 unk9C;           /* copied to the motion block's 0x1C */
+    /* 0x9E */ s16 unk9E;           /* copied to the motion block's 0x1E */
+    /* 0xA0 */ s32 unkA0;           /* EffectTemplate.unk18 */
+} SurfacePuffSpray; /* size 0xA4 */
+
 #endif

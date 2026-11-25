@@ -9,8 +9,8 @@
  * padding):
  *   PhysicsParticle, ParticleFloor, CollisionProbe - game_15F680.c
  *   ParticleDef, AxisParticle                      - the particle system of game_169510.c
- *   BurstConfig                                    - func_15151A38's argument (game_17CAF0.c)
- *   SurfaceBurstConfig                             - func_15151670's argument (game_17CAF0.c)
+ *   PuffSpray                                    - func_15151A38's argument (game_17CAF0.c)
+ *   SurfacePuffSpray                             - func_15151670's argument (game_17CAF0.c)
  */
 
 /* A particle spawned by func_1513D594: the 0x110-byte particle, its 0x18-byte quad axes, then the
@@ -66,53 +66,11 @@ typedef struct {
     /* 0x168 */ s32 unk168;
 } PhysicsParticle;
 
-/* func_15151A38's argument: spawns a random count of particles at position. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ s16 yawBase;
-    /* 0x2A */ s16 yawRange;
-    /* 0x2C */ s16 pitchBase;
-    /* 0x2E */ s16 pitchRange;
-    /* 0x30 */ s16 fadeBase;
-    /* 0x32 */ s16 fadeRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 enabled;
-    /* 0x3A */ u8 red;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 params[7];
-    /* 0x7C */ u8 params1C;
-    /* 0x7D */ u8 params1D;
-    /* 0x7E */ u8 pad7E[2];
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 unk84;
-} BurstConfig; /* size 0x88 */
-
 extern s32 D_80088734[];
 extern s32 D_8008873C;
 void *memcpy(void *, const void *, u32);
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_15151A38(BurstConfig *config, u8 arg1, s32 arg2);
+void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
  * otherwise it comes to rest, pointing its matrix 200 units along its current facing. */
@@ -162,50 +120,50 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
                 memcpy(((AxisParticle *)surface)->motion, extra, 8);
             }
             {
-                BurstConfig burst;
+                PuffSpray burst;
 
-                burst.position.x = x;
+                burst.pos.x = x;
                 burst.countBase = 6;
                 burst.countRange = 6;
-                burst.yawRange = 0xFF;
-                burst.pitchBase = -63;
-                burst.pitchRange = 29;
+                burst.angles.yawRange = 0xFF;
+                burst.angles.pitchBase = -63;
+                burst.angles.pitchRange = 29;
                 burst.sizeBase = 3.0f;
                 burst.sizeRange = 3.0f;
                 burst.speedBase = 10.0f;
                 burst.speedRange = 10.0f;
-                burst.yawBase = 0;
-                burst.fadeBase = 3;
-                burst.fadeRange = 3;
+                burst.angles.yawBase = 0;
+                burst.itemCountBase = 3;
+                burst.itemCountRange = 3;
                 burst.lifeBase = 50;
                 burst.lifeRange = 20;
                 burst.green = 1;
-                burst.enabled = 0x21;
+                burst.headerFlags = 0x21;
                 burst.red = 0x48;
-                burst.unk3C = 1;
-                burst.unk40 = 0;
-                burst.unk44 = 0;
-                burst.unk48 = 0;
-                burst.unk4C = 0;
-                burst.unk50 = 0;
+                burst.handlers[0] = 1;
+                burst.handlers[1] = 0;
+                burst.handlers[2] = 0;
+                burst.handlers[3] = 0;
+                burst.handlers[4] = 0;
+                burst.handlers[5] = 0;
                 burst.blue = 0;
                 burst.alphaBase = 155;
                 burst.alphaRange = 100;
-                burst.position.y = floorHeight;
-                burst.position.z = z;
+                burst.pos.y = floorHeight;
+                burst.pos.z = z;
                 burst.growthBase = 0.661f;
                 burst.growthRange = 0; // matching: 0.0f would keep the float zero above live in $f20 across the calls
                 burst.unk58 = particle->unk14C;
                 burst.unk5C = particle->unk168;
-                burst.params[0] = 0;
-                burst.params[1] = 0x220005;
-                burst.params[2] = 0x1D0600;
-                burst.params[3] = 1;
-                burst.params[4] = 0x3B;
-                burst.params[5] = 0x80;
-                burst.params[6] = 0x20;
-                burst.params1C = 0;
-                burst.params1D = 7;
+                burst.render.unk0 = 0;
+                burst.render.setGeometryMode = 0x220005;
+                burst.render.clearGeometryMode = 0x1D0600;
+                burst.render.renderMode = 1;
+                burst.render.unk10 = 0x3B;
+                burst.render.unk14 = 0x80;
+                burst.render.unk18 = 0x20;
+                burst.render.envMode = 0;
+                burst.render.primMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.unk18;
@@ -237,31 +195,6 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
     return 1;
 }
 
-/* The surface triangle a ray hit, as func_150AC9C0 returns it. */
-typedef struct {
-    s16 coords[9];
-} HitTriangle;
-
-/* func_15151670's argument: spawns a random count of particles off a surface triangle, moving inside
- * the cone around its normal. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ Vec3f normal;
-    /* 0x18 */ HitTriangle triangle;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 spread;
-    /* 0x30 */ f32 sizeBase, sizeRange, growthBase, growthRange, speedBase, speedRange;
-    /* 0x48 */ s16 countBase, countRange, fadeBase, fadeRange, lifeBase, lifeRange;
-    /* 0x54 */ u8 green, enabled, red, pad57;
-    /* 0x58 */ s32 unk58[6];
-    /* 0x70 */ u8 blue, alphaBase, alphaRange, pad73;
-    /* 0x74 */ s32 unk74, unk78;
-    /* 0x7C */ s32 params[7];
-    /* 0x98 */ u8 params1C, params1D, pad9A[2];
-    /* 0x9C */ s16 unk9C, unk9E;
-    /* 0xA0 */ s32 unkA0;
-} SurfaceBurstConfig; /* size 0xA4 */
-
 /* Wall-collision query of game_15F680.c (only its position is read here). */
 typedef struct {
     /* 0x00 */ s32 type;
@@ -273,7 +206,7 @@ s32 func_150A3058(s32, s16, s16, s16);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *,
                   s32 *, void *, f32);
 s32 func_15145C90(s32);
-void func_15151670(SurfaceBurstConfig *config, u8 arg1, s32 arg2);
+void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
 
 /* Wall hit (x, y, z: the position before the move): a hard hit casts a ray along the move, puffs dust
  * off the surface it finds and destroys the particle; a soft one stops it against the wall. */
@@ -284,7 +217,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
         if (func_150A3058(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
             Vec3f move;
             Vec3f hit;
-            HitTriangle triangle;
+            SurfaceTriangle triangle;
             s32 hitObject;
             ParticleDef def;
             AxisParticle *spawned;
@@ -293,7 +226,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
             move.x = particle->pos.x - x;
             move.y = particle->pos.y - y;
             move.z = particle->pos.z - z;
-            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, triangle.coords, &hit.x, &hit.y, &hit.z,
+            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, triangle.v, &hit.x, &hit.y, &hit.z,
                               NULL, &hitObject, NULL, 0.0f) != 0) {
                 // matching: a switch, not an if; the if form swaps the $s0/$s1 homes of particle and probe
                 switch (func_15145C90(hitObject)) {
@@ -339,14 +272,14 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     break;
                 }
                 {
-                    SurfaceBurstConfig burst;
+                    SurfacePuffSpray burst;
 
-                    burst.normal.x = -move.x;
-                    burst.normal.y = -move.y;
-                    burst.normal.z = -move.z;
-                    burst.triangle = triangle;
-                    burst.spread = 502.0f;
-                    burst.position = hit;
+                    burst.source.normal.x = -move.x;
+                    burst.source.normal.y = -move.y;
+                    burst.source.normal.z = -move.z;
+                    burst.source.triangle = triangle;
+                    burst.source.spread = 502.0f;
+                    burst.pos = hit;
                     burst.sizeBase = 3.0f;
                     burst.sizeRange = 3.0f;
                     burst.growthBase = 0.2650000155f; // not 0.265f: one ulp above it
@@ -355,33 +288,33 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     burst.speedRange = 0.01349999942f; // not 0.0135f: one ulp below it
                     burst.countBase = 6;
                     burst.countRange = 6;
-                    burst.fadeBase = 3;
-                    burst.fadeRange = 3;
+                    burst.itemCountBase = 3;
+                    burst.itemCountRange = 3;
                     burst.lifeBase = 50;
                     burst.lifeRange = 20;
                     burst.green = 1;
-                    burst.enabled = 0x21;
+                    burst.headerFlags = 0x21;
                     burst.red = 0x48;
-                    burst.unk58[0] = 1;
-                    burst.unk58[1] = 0;
-                    burst.unk58[2] = 0;
-                    burst.unk58[3] = 0;
-                    burst.unk58[4] = 0;
-                    burst.unk58[5] = 0;
+                    burst.handlers[0] = 1;
+                    burst.handlers[1] = 0;
+                    burst.handlers[2] = 0;
+                    burst.handlers[3] = 0;
+                    burst.handlers[4] = 0;
+                    burst.handlers[5] = 0;
                     burst.blue = 0;
                     burst.alphaBase = 155;
                     burst.alphaRange = 100;
                     burst.unk74 = particle->unk14C;
                     burst.unk78 = particle->unk168;
-                    burst.params[0] = 0;
-                    burst.params[1] = 0x220005;
-                    burst.params[2] = 0x1D0600;
-                    burst.params[3] = 1;
-                    burst.params[4] = 0x3B;
-                    burst.params[5] = 0x80;
-                    burst.params[6] = 0x20;
-                    burst.params1C = 0;
-                    burst.params1D = 7;
+                    burst.render.unk0 = 0;
+                    burst.render.setGeometryMode = 0x220005;
+                    burst.render.clearGeometryMode = 0x1D0600;
+                    burst.render.renderMode = 1;
+                    burst.render.unk10 = 0x3B;
+                    burst.render.unk14 = 0x80;
+                    burst.render.unk18 = 0x20;
+                    burst.render.envMode = 0;
+                    burst.render.primMode = 7;
                     burst.unk9C = 10;
                     burst.unk9E = 25;
                     burst.unkA0 = particle->floor.unk18;

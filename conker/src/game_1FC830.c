@@ -232,52 +232,37 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     }
 }
 
-/* Spawn request for func_15151A38. */
-typedef struct {
+/* matching: the first 0x84 bytes of PuffSpray; a full PuffSpray on the stack changes the frame. */
+typedef struct PuffSpray84 {
     /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ s8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ s8 unk7C;
-    /* 0x7D */ s8 unk7D;
-    /* 0x7E */ s16 pad7E;
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-} Spawn15151A38;
+    /* 0x0C */ f32 sizeBase;
+    /* 0x10 */ f32 sizeRange;
+    /* 0x14 */ f32 growthBase;
+    /* 0x18 */ f32 growthRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ AngleRange angles;
+    /* 0x30 */ s16 itemCountBase;   /* EffectTemplate.itemCount */
+    /* 0x32 */ s16 itemCountRange;
+    /* 0x34 */ s16 lifeBase;
+    /* 0x36 */ s16 lifeRange;
+    /* 0x38 */ u8 green;
+    /* 0x39 */ u8 headerFlags;      /* EffectTemplate.flags */
+    /* 0x3A */ u8 red;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x54 */ u8 blue;
+    /* 0x55 */ u8 alphaBase;
+    /* 0x56 */ u8 alphaRange;
+    /* 0x57 */ u8 pad57;
+    /* 0x58 */ s32 unk58;           /* func_15147DA0's arg9 */
+    /* 0x5C */ s32 unk5C;           /* func_15147DA0's arg10 */
+    /* 0x60 */ TrailRender render;
+    /* 0x80 */ s16 unk80;           /* copied to the motion block's 0x1C */
+    /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
+} PuffSpray84;
 
 /* Spawn request for func_15150D1C. */
 typedef struct {
@@ -309,7 +294,7 @@ void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(Spawn15150D1C *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
-void func_15151A38(Spawn15151A38 *, u8, s32);
+void func_15151A38(PuffSpray84 *, u8, s32);
 void func_1504715C(FloorInfo *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
@@ -373,48 +358,48 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             }
         }
         {
-            Spawn15151A38 cfg;
+            PuffSpray84 cfg;
 
             cfg.pos = pos;
-            cfg.unk0C = 8.0f;
-            cfg.unk10 = 13.0f;
-            cfg.unk14 = 0.8000000119f;
-            cfg.unk18 = 0.400000006f;
-            cfg.unk1C = 23.0f;
-            cfg.unk20 = 7.0f;
-            cfg.unk24 = 13;
-            cfg.unk26 = 6;
-            cfg.unk28 = 0;
-            cfg.unk2A = 0xFF;
-            cfg.unk2C = -64;
-            cfg.unk2E = 50;
-            cfg.unk30 = 3;
-            cfg.unk32 = 2;
-            cfg.unk34 = 40;
-            cfg.unk36 = 25;
-            cfg.unk38 = 9;
-            cfg.unk39 = 1;
-            cfg.unk3A = 0x48;
-            cfg.unk3C = 1;
-            cfg.unk40 = 0;
-            cfg.unk44 = 0;
-            cfg.unk48 = 0;
-            cfg.unk4C = 0;
-            cfg.unk50 = 0;
-            cfg.unk54 = 0;
-            cfg.unk55 = 150;
-            cfg.unk56 = 105;
+            cfg.sizeBase = 8.0f;
+            cfg.sizeRange = 13.0f;
+            cfg.growthBase = 0.8000000119f;
+            cfg.growthRange = 0.400000006f;
+            cfg.speedBase = 23.0f;
+            cfg.speedRange = 7.0f;
+            cfg.countBase = 13;
+            cfg.countRange = 6;
+            cfg.angles.yawBase = 0;
+            cfg.angles.yawRange = 0xFF;
+            cfg.angles.pitchBase = -64;
+            cfg.angles.pitchRange = 50;
+            cfg.itemCountBase = 3;
+            cfg.itemCountRange = 2;
+            cfg.lifeBase = 40;
+            cfg.lifeRange = 25;
+            cfg.green = 9;
+            cfg.headerFlags = 1;
+            cfg.red = 0x48;
+            cfg.handlers[0] = 1;
+            cfg.handlers[1] = 0;
+            cfg.handlers[2] = 0;
+            cfg.handlers[3] = 0;
+            cfg.handlers[4] = 0;
+            cfg.handlers[5] = 0;
+            cfg.blue = 0;
+            cfg.alphaBase = 150;
+            cfg.alphaRange = 105;
             cfg.unk58 = 3;
             cfg.unk5C = 0xFF;
-            cfg.unk60 = 0;
-            cfg.unk64 = 0x220005;
-            cfg.unk68 = 0x1D0600;
-            cfg.unk6C = 3;
-            cfg.unk70 = 0x3B;
-            cfg.unk74 = 0x80;
-            cfg.unk78 = 0x20;
-            cfg.unk7C = 0;
-            cfg.unk7D = 7;
+            cfg.render.unk0 = 0;
+            cfg.render.setGeometryMode = 0x220005;
+            cfg.render.clearGeometryMode = 0x1D0600;
+            cfg.render.renderMode = 3;
+            cfg.render.unk10 = 0x3B;
+            cfg.render.unk14 = 0x80;
+            cfg.render.unk18 = 0x20;
+            cfg.render.envMode = 0;
+            cfg.render.primMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
             func_15151A38(&cfg, arg1, arg2);

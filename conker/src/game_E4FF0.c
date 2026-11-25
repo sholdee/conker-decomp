@@ -3,54 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Burst config read by func_15151A38 (game_17CAF0.c's struct Local15151A38Arg). */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 sizeBase;
-    /* 0x10 */ f32 sizeRange;
-    /* 0x14 */ f32 growthBase;
-    /* 0x18 */ f32 growthRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ s16 countBase;
-    /* 0x26 */ s16 countRange;
-    /* 0x28 */ s16 yawBase;
-    /* 0x2A */ s16 yawRange;
-    /* 0x2C */ s16 pitchBase;
-    /* 0x2E */ s16 pitchRange;
-    /* 0x30 */ s16 fadeBase;
-    /* 0x32 */ s16 fadeRange;
-    /* 0x34 */ s16 lifeBase;
-    /* 0x36 */ s16 lifeRange;
-    /* 0x38 */ u8 green;
-    /* 0x39 */ u8 enabled;
-    /* 0x3A */ u8 red;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 blue;
-    /* 0x55 */ u8 alphaBase;
-    /* 0x56 */ u8 alphaRange;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60; /* 0x60..0x7D: params block for func_15147DA0 */
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ u8 unk7C;
-    /* 0x7D */ u8 unk7D;
-    /* 0x7E */ u8 pad7E[2];
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 unk84;
-} BurstConfig;
-
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
     /* 0x00 */ f32 height;
@@ -70,7 +22,7 @@ void func_1504715C(Ground *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, Ground *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-void func_15151A38(BurstConfig *, u8, s32);
+void func_15151A38(PuffSpray *, u8, s32);
 
 /*
  * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
@@ -213,7 +165,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             f32 sinPitch;
             f32 cosPitch;
             f32 horizontal;
-            BurstConfig burst;
+            PuffSpray burst;
 
             speed = (func_150ADA68() * 30.0f * obj->y_scale) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
@@ -231,46 +183,46 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
             func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
             scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.96f;
-            burst.position = joints[i];
+            burst.pos = joints[i];
             burst.countBase = 4;
             burst.countRange = 4;
-            burst.yawRange = 0xFF;
-            burst.pitchBase = -0x3F;
-            burst.pitchRange = 0x4B;
+            burst.angles.yawRange = 0xFF;
+            burst.angles.pitchBase = -0x3F;
+            burst.angles.pitchRange = 0x4B;
             burst.sizeBase = 3.0f * scale;
             burst.sizeRange = 3.0f * scale;
             burst.growthBase = 0.6f;
             burst.growthRange = 0.231f;
             burst.speedBase = 15.0f * scale;
             burst.speedRange = 10.0f * scale;
-            burst.yawBase = 0;
-            burst.fadeBase = 3;
-            burst.fadeRange = 3;
+            burst.angles.yawBase = 0;
+            burst.itemCountBase = 3;
+            burst.itemCountRange = 3;
             burst.lifeBase = 50;
             burst.lifeRange = 20;
             burst.green = 1;
-            burst.enabled = 0x21;
+            burst.headerFlags = 0x21;
             burst.red = 0x48;
-            burst.unk3C = 1;
-            burst.unk40 = 0;
-            burst.unk44 = 0;
-            burst.unk48 = 0;
-            burst.unk4C = 0;
-            burst.unk50 = 0;
+            burst.handlers[0] = 1;
+            burst.handlers[1] = 0;
+            burst.handlers[2] = 0;
+            burst.handlers[3] = 0;
+            burst.handlers[4] = 0;
+            burst.handlers[5] = 0;
             burst.blue = 0;
             burst.alphaBase = 0x9B;
             burst.alphaRange = 0x64;
             burst.unk58 = 3;
             burst.unk5C = 0xFF;
-            burst.unk60 = 0;
-            burst.unk64 = 0x220005;
-            burst.unk68 = 0x1D0600;
-            burst.unk6C = 1;
-            burst.unk70 = 0x3B;
-            burst.unk74 = 0x80;
-            burst.unk78 = 0x20;
-            burst.unk7C = 0;
-            burst.unk7D = 7;
+            burst.render.unk0 = 0;
+            burst.render.setGeometryMode = 0x220005;
+            burst.render.clearGeometryMode = 0x1D0600;
+            burst.render.renderMode = 1;
+            burst.render.unk10 = 0x3B;
+            burst.render.unk14 = 0x80;
+            burst.render.unk18 = 0x20;
+            burst.render.envMode = 0;
+            burst.render.primMode = 7;
             burst.unk80 = 10;
             burst.unk82 = 25;
             burst.unk84 = obj->unk184;
