@@ -10,8 +10,11 @@ u32 func_150ADA20(void);
 void func_151AE984(f32 *, f32, f32, f32, s32, u8);
 void func_151AEAB4(f32 *, s32, u8);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+f32 func_151423D8(u8);
+void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
-/* Spawns a random spark or debris particle at (x, y, z); arg6[0xC] is passed through. */
+/* Randomly spawns a particle at (x, y, z): 15% nothing, 10% a random-direction one (func_151AEAB4),
+ * 75% one moving against (dirX, dirY, dirZ) (func_151AE984). arg6[0xC] is passed through. */
 void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
     f32 pos[3];
     f32 roll;
@@ -27,7 +30,7 @@ void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
         s32 flag;
 
         roll = func_150ADA68();
-        flag = (roll > 0.0f) ? 1 : 0;
+        flag = (roll > 0.0f) ? 1 : 0; // matching: a plain `roll > 0.0f` compiles differently
         func_151AEAB4(pos, flag, arg6[0xC]);
     } else {
         s32 flag;
@@ -38,7 +41,7 @@ void func_151AE890(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
     }
 }
 
-/* Spawns a spark at pos flying back against (dirX, dirY, dirZ) with random size, lifetime and shade. */
+/* Spawns a particle at pos moving against (dirX, dirY, dirZ), with randomized parameters. */
 void func_151AE984(f32 *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) {
     f32 scale;
     f32 velocity[3];
@@ -60,51 +63,44 @@ void func_151AE984(f32 *pos, f32 dirX, f32 dirY, f32 dirZ, s32 flag, u8 arg5) {
                   shade, (u8)flag, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
 }
 
-f32 func_150ADA68(void);
-f32 func_151423D8(u8);
-extern f32 D_800A9D98;
-extern f32 D_800A9D9C;
-extern f32 D_800A9DA0;
-extern f32 D_800A9DA4;
-void func_151AEAB4(f32 *, s32, u8);
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
-void func_151AEAB4(f32 *arg0, s32 arg1, u8 arg2)
-{
-  s32 pad94;
-  struct 
-  {
-    u32 sp60;
-    u32 sp64;
-    f32 sp68;
-    u8 pad6C[4];
-    f32 sp70;
-    f32 sp74;
-    f32 sp78;
-    f32 sp7C;
-    u8 pad80[6];
-    u8 sp86;
-    u8 sp87;
-    f32 sp88[3];
-  } sp;
-  f32 temp_f12;
-  f32 temp_f2;
-  sp.sp87 = func_150ADA20();
-  sp.sp86 = (u8) (func_150ADA20() & 0x7F) - 0x3F;
-  sp.sp7C = func_151423D8(sp.sp87);
-  sp.sp78 = func_151423D8((u8) (sp.sp87 - 0x40));
-  sp.sp74 = func_151423D8(sp.sp86);
-  sp.sp70 = func_151423D8((u8) (sp.sp86 - 0x40));
-  temp_f2 = ((func_150ADA68() * 80.0f) + 20.0f) * D_800A9D98;
-  temp_f12 = temp_f2 * sp.sp74;
-  sp.sp88[0] = temp_f12 * sp.sp78;
-  sp.sp88[1] = (-temp_f2) * sp.sp70;
-  sp.sp88[2] = temp_f12 * sp.sp7C;
-  goto next;
-  next:
-  *((f32 *) (((u8 *) (&sp)) - 4)) = func_150ADA68();
+/* Spawns a particle at pos moving in a random direction at a random speed, with randomized parameters.
+ * func_151423D8 is cos() over a 256-step circle, so cos(a - 0x40) is sin(a). */
+void func_151AEAB4(f32 *pos, s32 flag, u8 arg2) {
+    u32 phase; // matching: passing yaw - 0x40 through a u32 temp is needed for identical bytes
+    f32 velocity[3];
+    u8 yaw;
+    u8 pitch;
+    f32 horizontal;
+    f32 yawCos;
+    f32 yawSin;
+    f32 pitchCos;
+    f32 pitchSin;
+    f32 speed;
 
-  sp.sp60 = func_150ADA20();
-  sp.sp64 = func_150ADA20();
-  sp.sp68 = func_150ADA68();
-  func_151DA6F8(arg0, sp.sp88, ((*((f32 *) (((u8 *) (&sp)) - 4))) * D_800A9D9C) + D_800A9DA0, (s16) ((sp.sp60 % 41U) + 0x3C), (sp.sp64 % 101U) + 0x9B, (sp.sp68 * 4.0f) + D_800A9DA4, (func_150ADA20() % 5U) + 3, ((u8 *) (&arg1))[3], 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, arg2, 1);
+    yaw = func_150ADA20() & 0xFF; // matching: the redundant mask is needed for identical bytes
+    pitch = (func_150ADA20() & 0x7F) - 0x3F;
+    yawCos = func_151423D8(yaw);
+    phase = yaw - 0x40;
+    yawSin = func_151423D8(phase);
+    pitchCos = func_151423D8(pitch);
+    pitchSin = func_151423D8(pitch - 0x40);
+    speed = (func_150ADA68() * 80.0f + 20.0f) * 0.1000000015f;
+    horizontal = speed * pitchCos;
+    velocity[0] = horizontal * yawSin;
+    velocity[1] = -speed * pitchSin;
+    velocity[2] = horizontal * yawCos;
+    {
+        f32 rand3;
+        u32 rand2;
+        u32 rand1;
+        f32 rand0;
+
+        rand0 = func_150ADA68();
+        rand1 = func_150ADA20();
+        rand2 = func_150ADA20();
+        rand3 = func_150ADA68();
+        func_151DA6F8(pos, velocity, rand0 * 0.4060000181f + 0.2100000083f, rand1 % 41 + 60, rand2 % 101 + 155,
+                      rand3 * 4.0f + 3.100000143f, func_150ADA20() % 5 + 3, (u8)flag, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0,
+                      arg2, 1);
+    }
 }
