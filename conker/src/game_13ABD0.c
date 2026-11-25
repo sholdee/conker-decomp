@@ -33,7 +33,7 @@ void func_1510D720(s32 index) {
  * (including its packed buffer when flagged 0x40).
  */
 void func_1510D7AC(s32 index) {
-    register s8 *lifetime;
+    s8 *lifetime;
 
     lifetime = (s8 *)&D_800BC448[index];
     if (*lifetime != 0) {
