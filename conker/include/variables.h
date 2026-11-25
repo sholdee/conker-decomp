@@ -536,26 +536,6 @@ extern u8 D_80095B50[]; // 0.4000000059604645
 extern u8  D_80095B70[4];
 extern u8  D_80095B74[2];
 
-extern f32 D_8009616C;
-extern f32 D_80096170;
-extern f32 D_80096174;
-extern f32 D_80096178;
-extern f32 D_8009617C;
-extern f32 D_80096180;
-extern f32 D_80096184;
-
-extern f32 D_800961A8;
-extern f32 D_800961AC;
-extern f32 D_800961B0;
-extern f32 D_800961B4;
-extern f32 D_800961B8;
-extern f32 D_800961BC;
-extern f32 D_800961C0;
-
-extern s32 D_80096210;
-extern f32 D_80096214;
-extern f32 D_80096218;
-extern f32 D_8009621C;
 extern f32 D_80096220;
 extern f32 D_80096224;
 extern f32 D_80096228;
@@ -576,25 +556,12 @@ extern f32 D_80096534;
 extern f32 D_80096540;
 
 extern f32 D_80096560;
-extern f32 D_80096570;
-extern u32 D_8009667C;
 extern f32 D_800968B0;
-extern f32 D_800968C0;
 extern s32 D_800968E0;
-extern f32 D_80096900;
-extern f32 D_80096904;
 
 extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
-extern f32 D_80098DB0; // 0.008726646192371845
-extern f32 D_80098DB4; // 0.008726646192371845
 
-extern f32 D_800990B0; // 0.6931471824645996f
-extern f32 D_800990B4; // 0.6931471824645996f
 extern const u16 D_8009919C[6];
-extern f32 D_800991A8;
-extern f32 D_800991AC;
-extern f32 D_800991B0;
-extern f32 D_800991D4; // 0.10000000149011612f
 
 extern f32 D_80099440; // 0.10000000149011612f
 extern f32 D_80099444;
