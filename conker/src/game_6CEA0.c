@@ -42,12 +42,14 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
     *dirY = (*dirY < -1) ? -1 : (*dirY > 1) ? 1 : *dirY;
 }
 
-extern s32 D_80084488;
-extern f32 D_800C6850;
-extern s32 D_8008448C;
-extern u8 D_80084490;
-extern u8 D_80084494;
+/* State of the task list menu drawn by func_1503FB40. */
+extern s32 D_80084488; // scroll in progress: 1 = up, -1 = down, 0 = idle
+extern f32 D_800C6850; // scroll animation offset, +-11 at the end of a step
+extern s32 D_8008448C; // frames left showing "RESETTING ALL TASKS"
+extern s8 D_80084490;  // frames until the selection blink toggles
+extern u8 D_80084494;  // blink phase
 
+/* Resets the task list menu's scroll and blink state. */
 void func_1503FB08(void) {
     D_80084488 = 0;
     D_800C6850 = 0.0f;
@@ -56,13 +58,13 @@ void func_1503FB08(void) {
     D_80084494 = 0;
 }
 
-extern u8 D_80084498;
-extern char D_8008449C[];
+extern u8 D_80084498;     // selected task (index into the list of tasks in use)
+extern char D_8008449C[]; // "ERROR"
 extern Gfx D_800859A0[];
-extern char D_80098930[];
-extern char D_80098944[];
-extern char D_80098948[];
-Gfx *func_150417AC(Gfx *, f32, f32, char *, u8, u8, u8, u8, f32, f32, u32);
+extern char D_80098930[]; // "RESETTING ALL TASKS"
+extern char D_80098944[]; // "."
+extern char D_80098948[]; // "RESET TO PLAY !"
+Gfx *func_150417AC(Gfx *, f32, f32, char *, u8, u8, u8, u8, f32, f32, s32);
 void func_150428D4(char *, s32 *, s32 *, s32 *);
 char *func_1509CA10(s32);
 s32 func_1509CA78(s32);
@@ -70,27 +72,41 @@ s32 func_1509CA98(s32);
 s32 func_1509CB68(void);
 s32 strlen(const char *);
 
-s32 func_1503FB40(Gfx **arg0, u16 arg1, u16 arg2) {
-    s32 id;
-    s16 spE2;
-    s16 spE0;
+/* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */
+#define TASK_BIT_SET(idx) (((u8 *)D_800D2E4C)[(idx) >> 3] & (1 << ((idx) & 7)))
+
+#define MENU_MAX_ROWS 19
+#define SCROLL_LIMIT 11.0f
+#define TEXT_SCALE_1 4096.0f
+
+/*
+ * Debug task menu: draws up to MENU_MAX_ROWS task names centred on the selected one, fading at the
+ * top and bottom, and scrolls the selection with C-up/C-down or the stick (3 at a time with Z held).
+ * L+R together resets all tasks. Returns the selected task's descriptor index when a button in
+ * `selectButtons` is pressed and the task's bit is clear, -1 when a button in `backButtons` or B is
+ * pressed, otherwise -2.
+ */
+s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
+    s32 taskIndex;
+    s16 stickDirX;
+    s16 stickDirY;
     u8 alpha;
     u8 i;
-    s32 y;
+    s32 lineY;
     s32 row;
     s32 width;
     s32 height;
-    s32 spC8;
-    s32 total;
-    f32 x;
-    f32 ty;
-    f32 sy;
+    s32 depth;
+    s32 taskCount;
+    f32 textX;
+    f32 rowY;
+    f32 textY;
     char *text;
-    s32 dir;
+    s32 step;
     u16 buttons;
-    u8 start;
-    u8 count;
-    s32 spA8;
+    u8 entry;
+    u8 rowCount;
+    s32 unusedHeight;
 
     alpha = 0;
     buttons = D_800BE710[0];
@@ -98,15 +114,15 @@ s32 func_1503FB40(Gfx **arg0, u16 arg1, u16 arg2) {
     row = 0;
     width = 0;
     height = 0;
-    total = func_1509CB68();
-    gSPDisplayList((*arg0)++, D_800859A0);
-    if (total < 19) {
-        count = total;
+    taskCount = func_1509CB68();
+    gSPDisplayList((*gfxp)++, D_800859A0);
+    if (taskCount < MENU_MAX_ROWS) {
+        rowCount = taskCount;
     } else {
-        count = 19;
+        rowCount = MENU_MAX_ROWS;
     }
-    y = 1;
-    if (D_8008448C == 0 && (buttons & 0x20) && (buttons & 0x10)) {
+    lineY = 1;
+    if (D_8008448C == 0 && (buttons & L_TRIG) && (buttons & R_TRIG)) {
         D_8008448C = 60;
         func_15017790();
         func_150177F8();
@@ -118,115 +134,117 @@ s32 func_1503FB40(Gfx **arg0, u16 arg1, u16 arg2) {
             D_8008448C = 0;
         }
     }
-    if (buttons & arg2) {
-        if (!(*((u8 *)D_800D2E4C + (func_1509CA98(D_80084498 + 1) >> 3)) & (1 << (func_1509CA98(D_80084498 + 1) & 7)))) {
+    if (buttons & selectButtons) {
+        if (!TASK_BIT_SET(func_1509CA98(D_80084498 + 1))) {
             return func_1509CA98(D_80084498 + 1);
         }
     }
-    if ((buttons & arg1) || (buttons & 0x4000)) {
+    if ((buttons & backButtons) || (buttons & B_BUTTON)) {
         return -1;
     }
-    func_1503F9F0(0, &spE2, &spE0);
+    func_1503F9F0(0, &stickDirX, &stickDirY);
     if (D_80084488 != 0) {
-        D_800C6850 += 1.25f * (f32)(D_80084488 * D_800BE9E4);
-        ty = -11.0f;
-        if (D_800C6850 < -11.0f) {
-        } else if (D_800C6850 > 11.0f) {
-            ty = 11.0f;
+        D_800C6850 += 1.25f * (D_80084488 * D_800BE9E4);
+        rowY = -SCROLL_LIMIT;
+        if (D_800C6850 < -SCROLL_LIMIT) {
+        } else if (D_800C6850 > SCROLL_LIMIT) {
+            rowY = SCROLL_LIMIT;
         } else {
-            ty = D_800C6850;
+            rowY = D_800C6850;
         }
-        D_800C6850 = ty;
-        if (fabsf(D_800C6850) >= 11.0f) {
-            dir = (**(u16 **)D_800BE728[0] & 0x2000) ? 3 : 1;
+        D_800C6850 = rowY;
+        if (fabsf(D_800C6850) >= SCROLL_LIMIT) {
+            step = (CONT_PADS[0]->button & Z_TRIG) ? 3 : 1;
             if (D_80084488 == 1) {
-                D_80084498 -= dir;
-                if (total < D_80084498) {
-                    D_80084498 += total;
+                D_80084498 -= step;
+                if (taskCount < D_80084498) {
+                    D_80084498 += taskCount;
                 }
             } else if (D_80084488 == -1) {
-                D_80084498 = (D_80084498 + dir) % total;
+                D_80084498 = (D_80084498 + step) % taskCount;
             }
             D_80084488 = 0;
             D_800C6850 = 0.0f;
         }
-    } else if ((buttons & 4) || (spE0 == -1)) {
+    } else if ((buttons & D_CBUTTONS) || (stickDirY == -1)) {
         D_80084488 = -1;
         D_800C6850 = 0.0f;
-    } else if ((buttons & 8) || (spE0 == 1)) {
+    } else if ((buttons & U_CBUTTONS) || (stickDirY == 1)) {
         D_80084488 = 1;
         D_800C6850 = 0.0f;
     }
-    start = D_80084498 - (u8)((count - 1) >> 1);
-    if (total < start) {
-        start += total;
+    entry = D_80084498 - (u8)((rowCount - 1) >> 1);
+    if (taskCount < entry) {
+        entry += taskCount;
     }
-    *(s8 *)&D_80084490 -= D_800BE9E4;
-    if (*(s8 *)&D_80084490 <= 0) {
+    D_80084490 -= D_800BE9E4;
+    if (D_80084490 <= 0) {
         D_80084490 = 30;
         D_80084494 ^= 1;
     }
     do {
         {
-        s32 width2;
-        s32 height2;
-        f32 x2;
-        f32 y2;
+        s32 dotWidth;
+        s32 dotHeight;
+        f32 dotX;
+        f32 dotY;
 
-        id = func_1509CA98(start + 1);
+        taskIndex = func_1509CA98(entry + 1);
         if (D_8008448C != 0) {
             text = D_80098930;
-            func_150428D4(text, &width, &height, &spC8);
+            func_150428D4(text, &width, &height, &depth);
         } else {
-            func_150428D4(func_1509CA10(id), &width, &height, &spC8);
-            if (*((id >> 3) + (u8 *)D_800D2E4C) & (1 << (id & 7))) {
-                if (start == D_80084498) {
+            func_150428D4(func_1509CA10(taskIndex), &width, &height, &depth);
+            // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
+            if (*((taskIndex >> 3) + (u8 *)D_800D2E4C) & (1 << (taskIndex & 7))) {
+                if (entry == D_80084498) {
                     if (D_80084494 != 0) {
                         text = D_80098948;
                     } else {
-                        text = func_1509CA10(id);
+                        text = func_1509CA10(taskIndex);
                     }
-                    func_150428D4(text, &width, &spA8, &spC8);
+                    func_150428D4(text, &width, &unusedHeight, &depth);
                 } else {
-                    text = func_1509CA10(id);
+                    text = func_1509CA10(taskIndex);
                 }
             } else {
-                text = func_1509CA10(id);
+                text = func_1509CA10(taskIndex);
             }
         }
-        ty = (f32)y + 1.0f;
-        x = (f32)D_800BE620 * 0.5f - (f32)(width >> 1);
-        sy = ty + D_800C6850;
-        if (func_1509CA78(id) & 0x80000000) {
-            func_150428D4(D_80098944, &width2, &height2, &spC8);
-            x2 = (f32)D_800BE620 * 0.5f - (f32)(width2 >> 1);
-            y2 = ty + D_800C6850;
-            *arg0 = func_150417AC(*arg0, x2, y2, D_80098944,
-                                  0xFF, 0xFF, 0xFF, alpha, 4096.0f, 4096.0f, strlen(D_80098944));
-            y += height2;
-            sy += (f32)height2;
+        rowY = lineY + 1.0f;
+        textX = D_800BE620 * 0.5f - (width >> 1);
+        textY = rowY + D_800C6850;
+        if (func_1509CA78(taskIndex) & 0x80000000) {
+            /* Flagged tasks get a "." line above them. */
+            func_150428D4(D_80098944, &dotWidth, &dotHeight, &depth);
+            dotX = D_800BE620 * 0.5f - (dotWidth >> 1);
+            dotY = rowY + D_800C6850;
+            *gfxp = func_150417AC(*gfxp, dotX, dotY, D_80098944, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(D_80098944));
+            lineY += dotHeight;
+            textY += dotHeight;
         }
         if (row < 3) {
-            alpha = (row << 6) + 0x40;
-        } else if (count - 3 < row) {
-            alpha = (count - row) << 6;
+            alpha = (row << 6) + 64;
+        } else if (rowCount - 3 < row) {
+            alpha = (rowCount - row) << 6;
         } else {
-            alpha = 0xFF;
+            alpha = 255;
         }
         if (text == NULL) {
             text = D_8008449C;
         }
-        if (D_8008448C == 0 && (start != D_80084498 || D_80084488 != 0)) {
-            *arg0 = func_150417AC(*arg0, x, sy, text, 0xFF, 0xFF, 0xFF, alpha, 4096.0f, 4096.0f, strlen(text));
+        if (D_8008448C == 0 && (entry != D_80084498 || D_80084488 != 0)) {
+            *gfxp = func_150417AC(*gfxp, textX, textY, text, 255, 255, 255, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
         } else {
-            *arg0 = func_150417AC(*arg0, x, sy, text, 0xFF, 0, 0, alpha, 4096.0f, 4096.0f, strlen(text));
+            /* the selected task, and every row while resetting, is drawn in red */
+            *gfxp = func_150417AC(*gfxp, textX, textY, text, 255, 0, 0, alpha, TEXT_SCALE_1, TEXT_SCALE_1, strlen(text));
         }
-        y += height;
+        lineY += height;
         row++;
-        start++;
-        start %= total;
+        entry++;
+        entry %= taskCount;
         }
         i++;
-    } while (i < count);
+    } while (i < rowCount);
     return -2;
 }
