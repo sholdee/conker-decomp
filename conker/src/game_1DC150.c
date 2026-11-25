@@ -65,17 +65,19 @@ void func_151AECA0(struct127 *obj, u8 arg1, s32 arg2) {
     f32 pos[3];
     f32 center[3];
     f32 centerProbe[3];
-    f32 unused[15];
+    f32 unused[15]; // matching: unused, pads the frame to the original 0x160 bytes
     u32 randA;
     u32 randB;
     f32 randF1;
     f32 randF2;
-    volatile u32 angle;
+    volatile u32 angle; // matching: volatile forces the spill to sp+0x6C between the two calls
 
     if (obj == NULL) {
         return;
     }
     func_1504715C(&ground, obj);
+// matching: the unused labels lbD/lbA/lbC/lbB/lbl split basic blocks; without them uopt
+// register-allocates far more (callee-saved $f22-$f30, s5/s6) and the frame grows
 lbD:
     burst.position[0] = obj->x_position;
     burst.position[1] = obj->y_position;
@@ -124,7 +126,7 @@ lbC:
             func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
                           ground.unk4, pos, 100, 0, 1, 0, arg1, arg2);
         } else {
-            func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155,
+            func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
                           pos, 1, arg1, arg2);
         }
         count--;
