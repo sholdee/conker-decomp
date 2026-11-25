@@ -2,6 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
+// Ground info for an object, as filled in by func_1504715C.
+typedef struct GroundInfo {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ u8 unk4[0x20];
+} GroundInfo;
+
+extern void func_1504715C(GroundInfo *ground, struct127 *obj);
+
+typedef struct Vec3f {
+    f32 x, y, z;
+} Vec3f;
+
+// Parameters for func_151D8868.
 typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
@@ -12,727 +25,611 @@ typedef struct {
     /* 0x7 */ u8 unk7;
 } Struct15195738Small;
 
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_151C0098(f32 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_1507CD64(struct127 *arg0, s32 arg1);
-extern void func_1504715C(f32 *arg0, struct127 *arg1);
-extern void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
-extern s32 func_1518D1C0(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6);
+extern void func_151D8868(Struct15195738Small *params, s32 arg1, u8 arg2, s32 arg3);
+extern void func_151C0098(f32 *pos, struct127 *obj, s32 arg2, u8 arg3, s32 arg4);
+extern void func_1507CD64(struct127 *obj, s32 arg1);
+extern s32 func_1518D1C0(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
-
-extern void func_151C329C(f32 *arg0, s32 arg1, s32 arg2);
-extern void func_151DC260(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151DC484(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
+extern void func_151DC260(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
+extern void func_151DC484(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
 extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
-void func_15193CA0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+// Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
+void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
-    f32 scratch[9];
+    GroundInfo ground;
     s32 type;
 
-    func_1504715C(scratch, arg0);
+    func_1504715C(&ground, obj);
     pos[0] = D_800CC2C0;
     pos[1] = D_800CC2C4;
     pos[2] = D_800CC2C8;
     {
-        u32 start;
+        // Anti-tamper: checksum a code range and corrupt memory if it was modified.
+        u32 addr;
         u32 sum;
         u32 end;
-        s32 pad;
+        s32 pad; // matching: IDO needs the extra stack slot
 
-        start = (u32)&func_150A11C4;
+        addr = (u32)&func_150A11C4;
         end = (u32)&func_150A1DA0;
         sum = 0;
-        for (; start < end; start += 4) {
-            sum ^= *(u32 *)start;
+        for (; addr < end; addr += 4) {
+            sum ^= *(u32 *)addr;
         }
         if (sum != 0xA3C35D52) {
-            start = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8];
-            *(s32 *)start = osGetCount() & 0x3FFFF7;
+            addr = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
+            *(s32 *)addr = osGetCount() & 0x3FFFF7;
         }
     }
-    if (arg0->id == 6 || arg0->id == 6 || arg0->id == 9 || arg0->id == 0xC || arg0->id == 0xF || arg0->id == 0x10 || arg0->id == 0x12 || arg0->id == 0x17 || arg0->id == 0x1B || arg0->id == 0x1E || arg0->id == 0x28 || arg0->id == 0x29 || arg0->id == 0x2A || arg0->id == 0x2B || arg0->id == 0x2C || arg0->id == 0x2D || arg0->id == 0x2E || arg0->id == 0x30 || arg0->id == 0x34 || arg0->id == 0x38 || arg0->id == 0x3A || arg0->id == 0x41 || arg0->id == 0x42 || arg0->id == 0x4B || arg0->id == 0x46 || arg0->id == 0x47 || arg0->id == 0x49 || arg0->id == 0x4A || arg0->id == 0x4C || arg0->id == 0x4D || arg0->id == 0x4E || arg0->id == 0x4F || arg0->id == 0x51 || arg0->id == 0x52 || arg0->id == 0x55 || arg0->id == 0x56 || arg0->id == 0x5D || arg0->id == 0x60 || arg0->id == 0x61 || arg0->id == 0x62 || arg0->id == 0x63 || arg0->id == 0x66 || arg0->id == 0x67 || arg0->id == 0x6F || arg0->id == 0x70 || arg0->id == 0x73 || arg0->id == 0x77 || arg0->id == 0x7B || arg0->id == 0x7D || arg0->id == 0x7E || arg0->id == 0x7F || arg0->id == 0x82 || arg0->id == 0x83 || arg0->id == 0x84 || arg0->id == 0x89 || arg0->id == 0x8C || arg0->id == 0x8E || arg0->id == 0x8F || arg0->id == 0x91 || arg0->id == 0x94 || arg0->id == 0x9E || arg0->id == 0xA1 || arg0->id == 0xA6 || arg0->id == 0xAB || arg0->id == 0xAC || arg0->id == 0xB2 || arg0->id == 0xB4 || arg0->id == 0xB7 || arg0->id == 0xB8 || arg0->id == 0xB9) {
+    if (obj->id == 6 || obj->id == 6 || obj->id == 9 || obj->id == 0xC || obj->id == 0xF || obj->id == 0x10 || obj->id == 0x12 || obj->id == 0x17 || obj->id == 0x1B || obj->id == 0x1E || obj->id == 0x28 || obj->id == 0x29 || obj->id == 0x2A || obj->id == 0x2B || obj->id == 0x2C || obj->id == 0x2D || obj->id == 0x2E || obj->id == 0x30 || obj->id == 0x34 || obj->id == 0x38 || obj->id == 0x3A || obj->id == 0x41 || obj->id == 0x42 || obj->id == 0x4B || obj->id == 0x46 || obj->id == 0x47 || obj->id == 0x49 || obj->id == 0x4A || obj->id == 0x4C || obj->id == 0x4D || obj->id == 0x4E || obj->id == 0x4F || obj->id == 0x51 || obj->id == 0x52 || obj->id == 0x55 || obj->id == 0x56 || obj->id == 0x5D || obj->id == 0x60 || obj->id == 0x61 || obj->id == 0x62 || obj->id == 0x63 || obj->id == 0x66 || obj->id == 0x67 || obj->id == 0x6F || obj->id == 0x70 || obj->id == 0x73 || obj->id == 0x77 || obj->id == 0x7B || obj->id == 0x7D || obj->id == 0x7E || obj->id == 0x7F || obj->id == 0x82 || obj->id == 0x83 || obj->id == 0x84 || obj->id == 0x89 || obj->id == 0x8C || obj->id == 0x8E || obj->id == 0x8F || obj->id == 0x91 || obj->id == 0x94 || obj->id == 0x9E || obj->id == 0xA1 || obj->id == 0xA6 || obj->id == 0xAB || obj->id == 0xAC || obj->id == 0xB2 || obj->id == 0xB4 || obj->id == 0xB7 || obj->id == 0xB8 || obj->id == 0xB9) { // matching: the repeated first id test is in the original
         func_151C329C(pos, arg2, arg3);
         return;
     }
-    if (arg0->id == 5 || arg0->id == 5 || arg0->id == 7 || arg0->id == 0x13 || arg0->id == 0x20 || arg0->id == 0x23 || arg0->id == 0x44 || arg0->id == 0x5A || arg0->id == 0x5C || arg0->id == 0x5E || arg0->id == 0x5F || arg0->id == 0x6D || arg0->id == 0x74 || arg0->id == 0x75 || arg0->id == 0x78 || arg0->id == 0x7A || arg0->id == 0x8A || arg0->id == 0x8D || arg0->id == 0xAD || arg0->id == 0xAE || arg0->id == 0xAF || arg0->id == 0xB1) {
+    if (obj->id == 5 || obj->id == 5 || obj->id == 7 || obj->id == 0x13 || obj->id == 0x20 || obj->id == 0x23 || obj->id == 0x44 || obj->id == 0x5A || obj->id == 0x5C || obj->id == 0x5E || obj->id == 0x5F || obj->id == 0x6D || obj->id == 0x74 || obj->id == 0x75 || obj->id == 0x78 || obj->id == 0x7A || obj->id == 0x8A || obj->id == 0x8D || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0xB1) { // matching: repeated first test, as above
         type = 1;
-    } else if (arg0->id == 0 || arg0->id == 1 || arg0->id == 2 || arg0->id == 3 || arg0->id == 4 || arg0->id == 0x96 || arg0->id == 8 || arg0->id == 0xA || arg0->id == 0x11 || arg0->id == 0x14 || arg0->id == 0x16 || arg0->id == 0x1A || arg0->id == 0x21 || arg0->id == 0x22 || arg0->id == 0x26 || arg0->id == 0x27 || arg0->id == 0x31 || arg0->id == 0x36 || arg0->id == 0x3B || arg0->id == 0x3E || arg0->id == 0x50 || arg0->id == 0x53 || arg0->id == 0x54 || arg0->id == 0x58 || arg0->id == 0x5B || arg0->id == 0x64 || arg0->id == 0x69 || arg0->id == 0x71 || arg0->id == 0x6B || arg0->id == 0x72 || arg0->id == 0x76 || arg0->id == 0x79 || arg0->id == 0x80 || arg0->id == 0x86 || arg0->id == 0x87 || arg0->id == 0x88 || arg0->id == 0x90 || arg0->id == 0x97 || arg0->id == 0x98 || arg0->id == 0x9A || arg0->id == 0x9B || arg0->id == 0x9C || arg0->id == 0x9D || arg0->id == 0x9F || arg0->id == 0xA0 || arg0->id == 0xA2 || arg0->id == 0xA4 || arg0->id == 0xA5 || arg0->id == 0xA7 || arg0->id == 0xB0 || arg0->id == 0xB3 || arg0->id == 0xB5 || arg0->id == 0xB6) {
+    } else if (obj->id == 0 || obj->id == 1 || obj->id == 2 || obj->id == 3 || obj->id == 4 || obj->id == 0x96 || obj->id == 8 || obj->id == 0xA || obj->id == 0x11 || obj->id == 0x14 || obj->id == 0x16 || obj->id == 0x1A || obj->id == 0x21 || obj->id == 0x22 || obj->id == 0x26 || obj->id == 0x27 || obj->id == 0x31 || obj->id == 0x36 || obj->id == 0x3B || obj->id == 0x3E || obj->id == 0x50 || obj->id == 0x53 || obj->id == 0x54 || obj->id == 0x58 || obj->id == 0x5B || obj->id == 0x64 || obj->id == 0x69 || obj->id == 0x71 || obj->id == 0x6B || obj->id == 0x72 || obj->id == 0x76 || obj->id == 0x79 || obj->id == 0x80 || obj->id == 0x86 || obj->id == 0x87 || obj->id == 0x88 || obj->id == 0x90 || obj->id == 0x97 || obj->id == 0x98 || obj->id == 0x9A || obj->id == 0x9B || obj->id == 0x9C || obj->id == 0x9D || obj->id == 0x9F || obj->id == 0xA0 || obj->id == 0xA2 || obj->id == 0xA4 || obj->id == 0xA5 || obj->id == 0xA7 || obj->id == 0xB0 || obj->id == 0xB3 || obj->id == 0xB5 || obj->id == 0xB6) {
         type = 0;
-    } else if (arg0->id == 0x25 || arg0->id == 0x25 || arg0->id == 0x92 || arg0->id == 0x95) {
+    } else if (obj->id == 0x25 || obj->id == 0x25 || obj->id == 0x92 || obj->id == 0x95) {
         type = 2;
-    } else if (arg0->id == 0x3F) {
+    } else if (obj->id == 0x3F) {
         type = 6;
-    } else if (arg0->id == 0x93) {
+    } else if (obj->id == 0x93) {
         type = 5;
     } else {
         return;
     }
     if (arg1) {
-        func_151DC484(pos, scratch, type, arg2, arg3);
+        func_151DC484(pos, &ground, type, arg2, arg3);
         return;
     }
-    func_151DC260(pos, scratch, type, arg2, arg3);
+    func_151DC260(pos, &ground, type, arg2, arg3);
 }
 
 
-void func_151942B0(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0((struct127 *)arg1, 0, 0xFF, 1);
+void func_151942B0(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0((struct127 *)arg1, 1, 0xFF, 1);
+void func_151942E8(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15193CA0(other, TRUE, 0xFF, 1);
 }
-
-typedef struct Game1C1150Event {
-    u8 pad0[4];
-    u8 type;
-} Game1C1150Event;
 
 extern u8 D_800A8210;
 
-void func_15194320(void *arg0, Game1C1150Event *arg1, s32 arg2) {
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_1518D1C0((struct127 *)arg1, 0xA, 0, 1, 0xFF, 1, &D_800A8210);
-            break;
+void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, &D_800A8210);
+        break;
     }
 }
 
 extern u8 D_800A822C;
 
-void func_15194394(void *arg0, Game1C1150Event *arg1, s32 arg2) {
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_1518D1C0((struct127 *)arg1, 0xC, 0, 1, 0xFF, 1, &D_800A822C);
-            break;
-    }
-}
-
-typedef struct Game194408Packet {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    f32 position[3];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game194408Packet;
-
-extern void func_15153F18(s16 *, void *, s32, s32, s32);
-extern void *func_151AE7B0(void *, f32, s16, u8, s32);
-
-void func_15194408(s32 arg0, Game1C1150Event *arg1) {
-    struct {
-        u8 scratch[0x24];
-        Game194408Packet packet;
-    } locals;
-
-    switch (arg1->type) {
+void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
     case 0:
-        goto spawn;
     case 1:
-        goto spawn;
     case 2:
-        goto spawn;
     case 3:
-        goto spawn;
     case 4:
-        goto spawn;
+        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, &D_800A822C);
+        break;
     }
-    return;
-
-spawn:
-    func_151AE7B0(arg1, 0.6f, 0x5A, 0xFF, 1);
-    func_1504715C((f32 *)locals.scratch, (struct127 *)arg1);
-    locals.packet.position[0] = *(f32 *)((u8 *)arg1 + 0x14);
-    locals.packet.position[1] = *(f32 *)((u8 *)arg1 + 0x18) + 50.0f;
-    locals.packet.position[2] = *(f32 *)((u8 *)arg1 + 0x1C);
-    locals.packet.field14 = 6.0f;
-    locals.packet.field2C = 0xC;
-    locals.packet.field2E = 5;
-    locals.packet.field02 = 0xFF;
-    locals.packet.field04 = -0x3F;
-    locals.packet.field00 = 0;
-    locals.packet.field06 = 0x23;
-    locals.packet.field30 = 3;
-    locals.packet.field32 = 2;
-    locals.packet.field34 = 0x1E;
-    locals.packet.field36 = 0x1E;
-    locals.packet.field38 = 0x64;
-    locals.packet.field3A = 0x64;
-    locals.packet.field44 = 0x10;
-    locals.packet.field46 = 0xF;
-    locals.packet.field48 = 0;
-    locals.packet.field3C = 0;
-    locals.packet.field18 = 3.0f;
-    locals.packet.field1C = 0.21f;
-    locals.packet.field20 = 0.406f;
-    locals.packet.field24 = 13.0f;
-    locals.packet.field28 = 8.0f;
-    locals.packet.field40 = 0.3f;
-    func_15153F18(&locals.packet.field00, &locals.packet.position,
-                   (s32)locals.scratch, 0xFF, 1);
 }
 
-extern void func_150C7020(s32, s32, s32, s32);
-extern void func_15194408(s32, Game1C1150Event *);
+// Parameters for func_15153F18, which spawns a random number of effects flying out from a point.
+// Each xxxMin/xxxRange pair is picked as min + rand() % (range + 1) (or min + randf() * range).
+typedef struct BurstParams {
+    /* 0x00 */ s16 yawMin;
+    /* 0x02 */ s16 yawRange;
+    /* 0x04 */ s16 pitchMin;
+    /* 0x06 */ s16 pitchRange;
+    /* 0x08 */ Vec3f position;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 speedMin;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ s16 countMin;
+    /* 0x2E */ s16 countRange;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ u8 unk3C;
+    /* 0x40 */ f32 unk40Chance;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} BurstParams;
 
-void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
-    func_150C7020(arg0, 0x1F4, 0xFF, 1);
-    func_15194408(arg0, (Game1C1150Event *)arg1);
+
+extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
+extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
+
+// Spawns a burst of effects from other when its id is 0-4.
+void func_15194408(struct127 *self, struct127 *other) {
+    BurstParams burst;
+    GroundInfo ground;
+
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        break;
+    default:
+        return;
+    }
+
+    func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
+    func_1504715C(&ground, other);
+    burst.position.x = other->x_position;
+    burst.position.y = other->y_position + 50.0f;
+    burst.position.z = other->z_position;
+    burst.unk14 = 6.0f;
+    burst.countMin = 12;
+    burst.countRange = 5;
+    burst.yawRange = 0xFF;
+    burst.pitchMin = -0x3F;
+    burst.yawMin = 0;
+    burst.pitchRange = 0x23;
+    burst.unk30 = 3;
+    burst.unk32 = 2;
+    burst.unk34 = 30;
+    burst.unk36 = 30;
+    burst.unk38 = 100;
+    burst.unk3A = 100;
+    burst.unk44 = 16;
+    burst.unk46 = 15;
+    burst.unk48 = 0;
+    burst.unk3C = 0;
+    burst.unk18 = 3.0f;
+    burst.unk1C = 0.21f;
+    burst.unk20 = 0.406f;
+    burst.speedMin = 13.0f;
+    burst.speedRange = 8.0f;
+    burst.unk40Chance = 0.3f;
+    func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
 }
 
-typedef struct Game1945CCVec {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game1945CCVec;
+extern void func_150C7020(struct127 *obj, s32 arg1, u8 arg2, s32 arg3);
 
-typedef struct Game1945CCPacket {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    Game1945CCVec position;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game1945CCPacket;
+void func_15194588(struct127 *self, struct127 *other, u8 *arg2) {
+    func_150C7020(self, 500, 0xFF, 1);
+    func_15194408(self, other);
+}
 
 extern u8 D_800A3FE6[];
 extern s32 func_15134070(struct127 *);
-extern void func_151B4CD0(void *, s32, s32);
+extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
 
-void func_151945CC(void *arg0, void *arg1, s32 arg2) {
-    Game1945CCVec pos;
-    s16 shade;
-    Game1945CCPacket packet;
-    u8 scratch[0x24];
+// Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
+void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
+    Vec3f pos;
+    s16 facingYaw;
+    BurstParams burst;
+    GroundInfo ground;
 
-    shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) - 0x40;
-    pos.x = *(f32 *)((u8 *)arg1 + 0x14);
-    pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 270.0;
-    pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
+    facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
+    pos.x = other->x_position;
+    pos.y = other->y_position + 270.0;
+    pos.z = other->z_position;
     {
-    s32 kind;
-    s32 profile;
+        s32 kind;
+        s32 profile;
 
-    func_1504715C((f32 *)scratch, (struct127 *)arg1);
-    kind = func_15134070((struct127 *)arg1);
-    if (kind != 0x63) {
-        profile = D_800A3FE6[kind << 4];
-        if (profile != 2) {
-            packet.position = pos;
-            packet.field14 = 6.699999809f;
-            packet.field18 = 2.329999924f;
-            packet.field1C = 0.6800000072f;
-            packet.field20 = 0.0f;
-            packet.field24 = 4.400000095f;
-            packet.field2C = 0xF;
-            packet.field2E = 0xC;
-            packet.field00 = shade - 0x40;
-            packet.field02 = 0x80;
-            packet.field04 = -0xA0;
-            packet.field06 = 0x20;
-            packet.field30 = 3;
-            packet.field32 = 1;
-            packet.field34 = 0x1F;
-            packet.field36 = 0x13;
-            packet.field38 = 0x9B;
-            packet.field3A = 0x64;
-            packet.field44 = 0x10;
-            packet.field46 = 0xF;
-            packet.field48 = 0;
-            packet.field28 = 5.300000191f;
-            packet.field40 = 0.5f;
-            if (profile == 1) {
-                packet.field3C = 1;
-            } else {
-                packet.field3C = 0;
+        func_1504715C(&ground, other);
+        kind = func_15134070(other);
+        if (kind != 0x63) {
+            profile = D_800A3FE6[kind * 16]; // 16-byte records
+            if (profile != 2) {
+                burst.position = pos;
+                burst.unk14 = 6.699999809f;
+                burst.unk18 = 2.329999924f;
+                burst.unk1C = 0.6800000072f;
+                burst.unk20 = 0.0f;
+                burst.speedMin = 4.400000095f;
+                burst.countMin = 15;
+                burst.countRange = 12;
+                burst.yawMin = facingYaw - 0x40;
+                burst.yawRange = 0x80;
+                burst.pitchMin = -0xA0;
+                burst.pitchRange = 0x20;
+                burst.unk30 = 3;
+                burst.unk32 = 1;
+                burst.unk34 = 31;
+                burst.unk36 = 19;
+                burst.unk38 = 155;
+                burst.unk3A = 100;
+                burst.unk44 = 16;
+                burst.unk46 = 15;
+                burst.unk48 = 0;
+                burst.speedRange = 5.300000191f;
+                burst.unk40Chance = 0.5f;
+                if (profile == 1) {
+                    burst.unk3C = 1;
+                } else {
+                    burst.unk3C = 0;
+                }
+                func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+                func_151B4CD0(other, 0xFF, 1);
             }
-            func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
-            func_151B4CD0(arg1, 0xFF, 1);
         }
     }
+}
+
+void func_151B01B8(struct127 *self, struct127 *other);
+void func_151B09BC(struct127 *self, struct127 *other, s16 arg2, u8 arg3, s32 arg4);
+void *func_151AF270(struct127 *obj, u8 arg1, s32 arg2);
+
+void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
+    func_151B01B8(self, other);
+    func_151B09BC(self, other, 1000, 0xFF, 0);
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_151AF270(other, 0xFF, 1);
+        break;
     }
 }
 
-void func_151B01B8(s32, s32);
-void func_151B09BC(s32, s32, s32, s32, s32);
-void *func_151AF270();
+// For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
+void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
+    Vec3f pos;
+    BurstParams burst;
+    GroundInfo ground;
+    Struct15195738Small params;
 
-void func_15194794(s32 arg0, Game1C1150Event *arg1, s8 *arg2) {
-    func_151B01B8(arg0, (s32)arg1);
-    func_151B09BC(arg0, (s32)arg1, 0x3E8, 0xFF, 0);
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_151AF270(arg1, 0xFF, 1);
-            break;
-    }
-}
-
-typedef struct Vec3_15194810 {
-    f32 x, y, z;
-} Vec3_15194810;
-
-typedef struct Game194810Packet {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    Vec3_15194810 position;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game194810Packet;
-
-void func_15194810(s32 arg0, Game1C1150Event *arg1, s32 arg2) {
-    Vec3_15194810 pos;
-    Game194810Packet packet;
-    u8 scratch[0x24];
-    Struct15195738Small small;
-
-    switch (arg1->type) {
+    switch (other->id) {
     case 0:
     case 1:
     case 2:
     case 3:
     case 4:
     case 0x53:
-        pos.x = *(f32 *)((u8 *)arg1 + 0x14);
-        pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 95.0f;
-        pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
-    fence:
-        func_1504715C((f32 *)scratch, (struct127 *)arg1);
-        packet.position = pos;
-        packet.field14 = 10.0f;
-        packet.field2C = 0xF;
-        packet.field2E = 0xA;
-        packet.field02 = 0xFF;
-        packet.field04 = -0x3F;
-        packet.field00 = 0;
-        packet.field06 = 0x39;
-        packet.field30 = 3;
-        packet.field32 = 2;
-        packet.field34 = 0x46;
-        packet.field36 = 0x16;
-        packet.field38 = 0x9B;
-        packet.field3A = 0x64;
-        packet.field44 = 0x10;
-        packet.field46 = 0xF;
-        packet.field48 = 0;
-        packet.field3C = 0;
-        packet.field18 = 5.0f;
-        packet.field1C = 0.6750000119f;
-        packet.field20 = 0.2310000062f;
-        packet.field24 = 5.0f;
-        packet.field28 = 25.10000038f;
-        packet.field40 = 0.5f;
-        func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
-        small.unk0 = 1;
-        small.unk2 = (func_150ADA20() % 0xBU) + 0x14;
-        small.unk4 = 8;
-        small.unk6 = -1;
-        small.unk5 = 1;
-        func_151D8868(&small, 0, 0xFF, 0);
+        pos.x = other->x_position;
+        pos.y = other->y_position + 95.0f;
+        pos.z = other->z_position;
+    fence: // matching: this basic-block boundary keeps as1 from scheduling across it
+        func_1504715C(&ground, other);
+        burst.position = pos;
+        burst.unk14 = 10.0f;
+        burst.countMin = 15;
+        burst.countRange = 10;
+        burst.yawRange = 0xFF;
+        burst.pitchMin = -0x3F;
+        burst.yawMin = 0;
+        burst.pitchRange = 0x39;
+        burst.unk30 = 3;
+        burst.unk32 = 2;
+        burst.unk34 = 70;
+        burst.unk36 = 22;
+        burst.unk38 = 155;
+        burst.unk3A = 100;
+        burst.unk44 = 16;
+        burst.unk46 = 15;
+        burst.unk48 = 0;
+        burst.unk3C = 0;
+        burst.unk18 = 5.0f;
+        burst.unk1C = 0.6750000119f;
+        burst.unk20 = 0.2310000062f;
+        burst.speedMin = 5.0f;
+        burst.speedRange = 25.10000038f;
+        burst.unk40Chance = 0.5f;
+        func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+        params.unk0 = 1;
+        params.unk2 = (func_150ADA20() % 11U) + 20;
+        params.unk4 = 8;
+        params.unk6 = -1;
+        params.unk5 = 1;
+        func_151D8868(&params, 0, 0xFF, 0);
         break;
     }
 }
 
-void func_151949E0(s32 arg0, s32 arg1, s32 arg2) {
+void func_151949E0(struct127 *self, struct127 *other, u8 *arg2) {
 }
 
-extern void func_15104170(s32);
+extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
+extern void func_1507DE4C(struct127 *obj);
+extern void func_15138BC0(struct127 *obj, u8 arg1, s32 arg2);
 
-void func_151949F4(arg0, arg1) s32 arg0; struct127 *arg1; {
-    if (D_8008FD90 == 1) {
-        if (arg1->unk127 == 0) {
-            if (D_800E9D00 & 0x8) {
-                if (arg1->unk31C->unk1A0 == 0) {
-                    func_15104170(arg0);
-                    arg1->unk31C->unk1A0 = 0x4B0;
-                }
-            }
-        }
+// Calls func_15104170 when D_8008FD90 == 1 and self's unk31C->unk1A0 cooldown has run out, then restarts it.
+void func_151949F4(s32 arg0, struct127 *self, struct127 *other) {
+    if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
+        func_15104170(arg0, self, other);
+        self->unk31C->unk1A0 = 1200;
     }
 }
 
-extern void func_1507DE4C(s32);
-extern void func_15138BC0(s32, s32, s32);
-
-void func_15194A68(s32 arg0, s32 arg1, s32 arg2) {
-    func_1507DE4C(arg1);
-    func_15138BC0(arg1, 0xFF, 1);
-    func_151949F4(0, arg0, arg1);
+void func_15194A68(struct127 *self, struct127 *other, u8 *arg2) {
+    func_1507DE4C(other);
+    func_15138BC0(other, 0xFF, 1);
+    func_151949F4(0, self, other);
 }
 
-void func_15194AB4(struct127* arg0) {
-    s32 sp_a1;
+// Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
+void func_15194AB4(struct127 *obj) {
+    s32 anim;
 
-    arg0->unk9C |= 0xFFFE;
-    sp_a1 = -1;
-    switch (arg0->id) {
+    obj->unk9C |= 0xFFFE;
+    anim = -1;
+    switch (obj->id) {
     case 0x75:
-        sp_a1 = 0x73;
+        anim = 0x73;
         break;
     case 0x80:
-        sp_a1 = 0x72;
+        anim = 0x72;
         break;
     }
-    if (sp_a1 != -1) {
-        func_15083568(arg0, sp_a1, 1.0f, 0);
+    if (anim != -1) {
+        func_15083568(obj, anim, 1.0f, 0);
     }
 }
 
-extern s32 func_15134070(struct127*);
-extern void func_15138120(struct127*, s32, s32);
-extern void func_15136C3C(struct127*, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15138120(struct127 *obj, s32 kind, s32 arg2);
+extern void func_15136C3C(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
-void func_15194B1C(struct127* arg0) {
-    s32 temp;
+void func_15194B1C(struct127 *obj) {
+    s32 kind;
 
-    temp = func_15134070(arg0);
-    if (temp != 0x63) {
-        func_15138120(arg0, temp, 0);
+    kind = func_15134070(obj);
+    if (kind != 0x63) {
+        func_15138120(obj, kind, 0);
     }
-    func_15136C3C(arg0, 1, 1, 1, 1, 1, 0xFF, 1);
-    func_15194AB4(arg0);
+    func_15136C3C(obj, 1, 1, 1, 1, 1, 0xFF, 1);
+    func_15194AB4(obj);
 }
 
-void func_15194B94(s32 arg0, struct127* arg1, s32 arg2) {
-    struct127* temp;
-
-    temp = arg1;
-    if (temp->id == 0x53) {
-        func_151942B0(arg0, (s32)temp, arg2);
+void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->id == 0x53) {
+        func_151942B0(self, other, arg2);
         return;
     }
-    func_15194B1C(temp);
-    func_151949F4(1, arg0, temp);
+    func_15194B1C(other);
+    func_151949F4(1, self, other);
 }
 
-void func_15194BF0(s32 arg0, struct127 *arg1, u8 *arg2) {
-    s32 id;
-    struct126 *temp_v0;
-    struct127 *temp_t6;
-    s32 temp_v1;
+void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
+    case 0x16:
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        /* fallthrough */
+    case 0x7C:
+        if (other->unk65 != 0) {
+            s32 slot = other->unk65 - 1;
 
-    id = arg1->id;
-    if (id >= 0x3C) {
-        switch (id) {
-        case 0x58:
-        case 0x5A:
-        case 0x5B:
-        case 0x5F:
-        case 0x74:
-        case 0x75:
-        case 0x7A:
-        case 0x80:
-        case 0x87:
-        case 0x88:
-        case 0x90:
-        case 0x96:
-        case 0x98:
-        case 0x9C:
-        case 0x9D:
-        case 0x9F:
-        case 0xA0:
-        case 0xB0:
-        case 0xB1:
-        case 0xB2:
-        case 0xB4:
-            goto full_body;
-        case 0x7C:
-            goto cleanup_body;
+            D_800CC2D0[slot].unk232 = 10;
+            D_800CC2D0[slot].unk218 = NULL;
+            other->unk65 = 0;
         }
-    } else {
-        if (id >= 0x17) {
-            if (id != 0x3B) {
-                return;
-            }
-            goto full_body;
-        } else {
-            switch (id) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 0x11:
-            case 0x14:
-                goto full_body;
-            case 0x16:
-                goto stop_then_cleanup;
-            }
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 0x11:
+    case 0x14:
+    case 0x3B:
+    case 0x58:
+    case 0x5A:
+    case 0x5B:
+    case 0x5F:
+    case 0x74:
+    case 0x75:
+    case 0x7A:
+    case 0x80:
+    case 0x87:
+    case 0x88:
+    case 0x90:
+    case 0x96:
+    case 0x98:
+    case 0x9C:
+    case 0x9D:
+    case 0x9F:
+    case 0xA0:
+    case 0xB0:
+    case 0xB1:
+    case 0xB2:
+    case 0xB4:
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        func_1507CD64(other, 6);
+        if (other->unk31C != NULL && other->unk31C->unk19B != 0) {
+            func_15063B64(other);
         }
-    }
-    return;
-
-stop_then_cleanup:
-    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-    func_15145A50(arg1);
-
-cleanup_body:
-    if (arg1->unk65 != 0) {
-        temp_v1 = arg1->unk65 - 1;
-        temp_t6 = arg1;
-        D_800CC2D0[temp_v1].unk232 = 0xA;
-        D_800CC2D0[temp_v1].unk218 = NULL;
-        temp_t6->unk65 = 0;
-after_store_unk65:
-        return;
-    }
-    return;
-
-full_body:
-    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-    func_15145A50(arg1);
-    func_1507CD64(arg1, 6);
-    temp_v0 = arg1->unk31C;
-    if (temp_v0 != NULL) {
-        if (((u8 *) temp_v0)[0x19B] != 0) {
-            func_15063B64(arg1);
-        }
+        break;
     }
 }
 
-void func_15194FF4();
+void func_15194FF4(struct127 *self, struct127 *other, s32 arg2);
 
-s32 func_15194D80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_15194FF4(arg0, arg1, 0, arg3);
+void func_15194D80(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15194FF4(self, other, FALSE);
 }
 
-s32 func_15194DA4(arg0, arg1, arg2, arg3)
-s32 arg0;
-s32 arg1;
-s32 arg2;
-s32 arg3;
-{
-    func_15194FF4(arg0, arg1, 1, arg3);
+void func_15194DA4(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15194FF4(self, other, TRUE);
 }
 
-void func_15194DC8(s32 arg0, struct127 *arg1, s32 arg2) {
-    f32 sp2C[9];
+extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
+
+void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
+    GroundInfo ground;
 
     if (D_800BE616 != 0) {
-        func_15194DA4(arg0, (s32)arg1, arg2);
+        func_15194DA4(self, other, arg2);
     } else {
-        func_1518D1C0(arg1, 0xB, 0, 1, 0xFF, 1, D_800A8244);
+        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
     }
-    func_1504715C(sp2C, arg1);
-    func_1514B364(&arg1->x_position, sp2C, 0xFF, 1);
+    func_1504715C(&ground, other);
+    func_1514B364(&other->x_position, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(s32, s32, s32, s32);
+extern void func_150B06B0(struct127 *obj, struct127 *other, u8 arg2, s32 arg3);
 
-void func_15194E54(s32 arg0, s32 arg1, s32 arg2) {
-    if ((*(u8 *)(arg1 + 4) == 0x3E) || (*(u8 *)(arg1 + 4) == 0xA6)) {
-        func_150B06B0(arg1, arg0, 0xFF, 1);
+void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->id == 0x3E || other->id == 0xA6) {
+        func_150B06B0(other, self, 0xFF, 1);
     }
 }
 
-extern void func_15182670(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15194BF0(s32, struct127*, u8*);
+extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
-void func_15194EA8(s32 arg0, struct127* arg1, s32 arg2) {
-    u8 sp37;
-    u32 temp1;
-    u32 temp0;
+void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
+    u8 result;
+    u32 rand1;
+    u32 rand0;
 
-    sp37 = 0;
-    if (arg1->camera != 0) {
-        temp0 = func_150ADA20();
-        temp1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, temp1 % 0xB + 0x23, arg1->camera->unk23D, 0xFF, 1);
-        if (temp0) { }
+    result = 0;
+    if (other->camera != NULL) {
+        rand0 = func_150ADA20();
+        rand1 = func_150ADA20();
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->unk23D, 0xFF, 1);
+        if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
-    func_15194BF0(arg0, arg1, &sp37);
+    func_15194BF0(self, other, &result);
 }
 
-void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
-    f32 sp34[3];
+void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
+    f32 pos[3];
 
-    sp34[0] = arg1->x_position;
-    sp34[1] = arg1->y_position + 50.0f;
-    sp34[2] = arg1->z_position;
-    func_151C0098(sp34, arg1, 1, 0xFF, 1);
-    func_15136C3C(arg1, 0, 0, 1, 0, 0, 0xFF, 1);
-    func_15145A50(arg1);
-    func_1507CD64(arg1, 6);
+    pos[0] = other->x_position;
+    pos[1] = other->y_position + 50.0f;
+    pos[2] = other->z_position;
+    func_151C0098(pos, other, 1, 0xFF, 1);
+    func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
+    func_15145A50(other);
+    func_1507CD64(other, 6);
 }
 
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct127 *unk8;
+    struct127 *source;
 } Struct15194FF4;
 
-extern s32 func_1518F51C(void *arg0, u8 arg1, s32 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-extern void func_15190518(void *arg0);
+extern u8 *func_1518F51C(struct127 *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(struct127 *obj);
 
-void func_15194FF4(arg0, arg1, arg2)
-struct127 *arg0;
-struct127 *arg1;
+void func_15194FF4(self, other, arg2)
+struct127 *self;
+struct127 *other;
 u8 arg2;
 {
-    u8 *ret;
-    Struct15194FF4 sp48;
+    u8 *spawned;
+    Struct15194FF4 info;
 
-    func_15190518(arg1);
-    switch (arg1->id) {
-    case 0x0: case 0x1: case 0x2: case 0x3: case 0x4: case 0x11: case 0x14: case 0x16:
-    case 0x3b: case 0x50: case 0x53: case 0x58: case 0x5a: case 0x5f: case 0x70: case 0x74:
-    case 0x75: case 0x7a: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
-    case 0x99: case 0x9c: case 0x9d: case 0x9f: case 0xa0: case 0xb0: case 0xb1: case 0xb2:
-    case 0xb4:
+    func_15190518(other);
+    switch (other->id) {
+    case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x11: case 0x14: case 0x16:
+    case 0x3B: case 0x50: case 0x53: case 0x58: case 0x5A: case 0x5F: case 0x70: case 0x74:
+    case 0x75: case 0x7A: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
+    case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
+    case 0xB4:
         if (D_800BE616 != 0) {
-            sp48.unk0 = 0x7D;
-            sp48.unk4 = 5;
-            if ((arg0->id == 0xFF) && (arg0->unk124 != 0)) {
-                sp48.unk8 = &D_800CC2D0[arg0->unk124 - 1];
+            info.unk0 = 0x7D;
+            info.unk4 = 5;
+            if (self->id == 0xFF && self->unk124 != 0) { // an id-0xFF object names its owner by slot + 1
+                info.source = &D_800CC2D0[self->unk124 - 1];
             } else {
-                sp48.unk8 = arg0;
+                info.source = self;
             }
-            ret = (u8 *)func_1518F51C(arg1, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 0xC : 0, 0xFF, 1);
-            if ((ret != 0) && (arg2 != 0)) {
-                memcpy(ret + 0x90, &sp48, 0xC);
+            spawned = func_1518F51C(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
+            if (spawned != NULL && arg2 != 0) {
+                memcpy(spawned + 0x90, &info, sizeof(info));
                 {
-                    u8 *temp = (u8 *)arg1->unk31C;
-                    if (temp != NULL) {
-                        temp[0x1AC] = 1;
+                    u8 *ext = (u8 *)other->unk31C; // unk31C is longer than struct126 declares
+
+                    if (ext != NULL) {
+                        ext[0x1AC] = 1;
                     }
                 }
             }
         } else {
-            func_1518F51C(arg1, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
+            func_1518F51C(other, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
         }
         break;
     }
 }
 
 extern struct127 *func_1505ED34(void);
-extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
-extern void func_150D10E4(void *arg0, u8 arg1);
+extern s32 func_150838EC(struct127 *obj, s32 anim, s32 arg2, f32 speed);
+extern void func_150D10E4(struct127 *obj, u8 arg1);
 
+// struct127 declares these offsets as padding, so they are reached by offset.
 #define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
 #define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
 
-void func_151951E0(struct127 *arg0) {
-    struct127 *obj;
+// Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
+void func_151951E0(struct127 *obj) {
+    struct127 *copy;
 
-    arg0->health = 0;
-    func_1507CD64(arg0, 5);
-    func_15194AB4(arg0);
-    arg0->interaction_state = 0x28;
-    arg0->xz_velocity = -3.0f;
-    F32AT(arg0, 0xBC) = -10.0f - (func_150ADA20() % 5U);
-    arg0->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    arg0->y_velocity = 0.0f;
-    arg0->gravity = 0.0f;
-    obj = func_1505ED34();
+    obj->health = 0;
+    func_1507CD64(obj, 5);
+    func_15194AB4(obj);
     obj->interaction_state = 0x28;
-    obj->id = arg0->id;
-    obj->immune = 0xFF;
-    obj->stunned = 0xFF;
-    obj->x_position = arg0->x_position;
-    obj->y_position = arg0->y_position;
-    obj->z_position = arg0->z_position;
-    obj->unk40 = arg0->unk40;
-    obj->unk76 = arg0->unk76;
-    obj->unk7A = arg0->unk7A;
-    obj->unkB8 = arg0->unkB8;
-    obj->xz_scale = arg0->xz_scale;
-    obj->y_scale = arg0->y_scale;
-    obj->xz_velocity = 10.0f;
-    F32AT(obj, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    obj->xz_velocity = -3.0f;
+    F32AT(obj, 0xBC) = -10.0f - (func_150ADA20() % 5U);
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    U8AT(obj, 0x68) = U8AT(arg0, 0x68);
-    U8AT(obj, 0x69) = U8AT(arg0, 0x69);
-    U8AT(obj, 0x6A) = U8AT(arg0, 0x6A);
-    U8AT(obj, 0x6B) = U8AT(arg0, 0x6B);
-    U8AT(obj, 0x6C) = U8AT(arg0, 0x6C);
-    U8AT(obj, 0x6D) = U8AT(arg0, 0x6D);
-    obj->unk76 += (func_150ADA20() % 10922U) - 5461.33349609375f;
-    obj->unk40 = (arg0->unk76 + 0x4000) * 0.0054931640625f;
-    obj->unkF8 = arg0->unkF8;
-    obj->unk9C |= 0x0FFF0000;
-    func_150838EC(obj, arg0->unk84.uh, 0, arg0->animation_speed);
-    func_150D10E4(arg0, 0);
-    func_150D10E4(obj, 1);
+    obj->y_velocity = 0.0f;
+    obj->gravity = 0.0f;
+    copy = func_1505ED34();
+    copy->interaction_state = 0x28;
+    copy->id = obj->id;
+    copy->immune = 0xFF;
+    copy->stunned = 0xFF;
+    copy->x_position = obj->x_position;
+    copy->y_position = obj->y_position;
+    copy->z_position = obj->z_position;
+    copy->unk40 = obj->unk40;
+    copy->unk76 = obj->unk76;
+    copy->unk7A = obj->unk7A;
+    copy->unkB8 = obj->unkB8;
+    copy->xz_scale = obj->xz_scale;
+    copy->y_scale = obj->y_scale;
+    copy->xz_velocity = 10.0f;
+    F32AT(copy, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    U8AT(copy, 0x68) = U8AT(obj, 0x68);
+    U8AT(copy, 0x69) = U8AT(obj, 0x69);
+    U8AT(copy, 0x6A) = U8AT(obj, 0x6A);
+    U8AT(copy, 0x6B) = U8AT(obj, 0x6B);
+    U8AT(copy, 0x6C) = U8AT(obj, 0x6C);
+    U8AT(copy, 0x6D) = U8AT(obj, 0x6D);
+    copy->unk76 += (func_150ADA20() % 10922U) - 65536.0f / 12;
+    copy->unk40 = (obj->unk76 + 0x4000) * (360.0f / 65536);
+    copy->unkF8 = obj->unkF8;
+    copy->unk9C |= 0x0FFF0000;
+    func_150838EC(copy, obj->unk84.uh, 0, obj->animation_speed);
+    func_150D10E4(obj, 0);
+    func_150D10E4(copy, 1);
 }
 
-extern f32 D_800A8708;
-extern void func_1514373C(f32, f32, f32 *, f32 *);
-extern void func_15137610(struct127 *, f32 *, f32 *, f32 *, u8, s32);
+extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
+extern void func_15137610(struct127 *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
-void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
+// Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
+void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
     f32 angle;
     f32 from[3];
     f32 to[3];
@@ -740,57 +637,49 @@ void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
     f32 dx;
     f32 dz;
 
-    if (arg0 != NULL) {
-        angle = arg0->unk40 - 90.0f;
-    } else if (arg1 != NULL) {
-        angle = arg1->unk40 - 90.0f;
+    if (self != NULL) {
+        angle = self->unk40 - 90.0f;
+    } else if (other != NULL) {
+        angle = other->unk40 - 90.0f;
     } else {
         angle = func_150ADA68() * 360.0f;
     }
-    func_1514373C(angle * D_800A8708, 1.0f, &dir[0], &dir[2]);
+    func_1514373C(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
     dx = dir[0] * 20.0f;
-    from[0] = arg1->x_position + dx;
-    from[1] = arg1->y_position + 50.0f;
+    from[0] = other->x_position + dx;
+    from[1] = other->y_position + 50.0f;
     dz = dir[2] * 20.0f;
-    from[2] = arg1->z_position + dz;
-    to[0] = arg1->x_position - dx;
-    to[1] = arg1->y_position + 50.0f;
-    to[2] = arg1->z_position - dz;
-    func_15137610(arg1, from, to, dir, 0xFF, 1);
+    from[2] = other->z_position + dz;
+    to[0] = other->x_position - dx;
+    to[1] = other->y_position + 50.0f;
+    to[2] = other->z_position - dz;
+    func_15137610(other, from, to, dir, 0xFF, 1);
 }
 
-void func_151B01B8(s32, s32);
-void func_151B09BC(s32, s32, s32, s32, s32);
-
-void func_15195650(s32 arg0, s32 arg1, s32 arg2) {
-    func_151B01B8(arg0, arg1);
-    func_151B09BC(arg0, arg1, 0x3E8, 0xFF, 0);
+void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
+    func_151B01B8(self, other);
+    func_151B09BC(self, other, 1000, 0xFF, 0);
 }
 
-extern void func_15145A50(struct127 *arg0);
-extern void func_1507CD64(struct127 *arg0, s32 arg1);
-
-void func_15195698(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->health == 0) {
-        if (arg1->unk127 != 0xFF) {
-            func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(arg1);
-            func_1507CD64(arg1, 6);
-        }
+void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->health == 0 && other->unk127 != 0xFF) {
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        func_1507CD64(other, 6);
     }
-    if (arg0->id == 0x47) {
-        arg0->health = 0;
+    if (self->id == 0x47) {
+        self->health = 0;
     }
 }
 
-void func_15195738(s32 arg0, s32 arg1, s32 arg2) {
-    Struct15195738Small sp18;
+void func_15195738(struct127 *self, struct127 *other, u8 *arg2) {
+    Struct15195738Small params;
 
-    sp18.unk0 = 1;
-    sp18.unk2 = (func_150ADA20() % 0xBU) + 0x14;
-    sp18.unk4 = 8;
-    sp18.unk6 = -1;
-    sp18.unk5 = 1;
-    func_151D8868(&sp18, 0, 0xFF, 0);
+    params.unk0 = 1;
+    params.unk2 = (func_150ADA20() % 11U) + 20;
+    params.unk4 = 8;
+    params.unk6 = -1;
+    params.unk5 = 1;
+    func_151D8868(&params, 0, 0xFF, 0);
 }

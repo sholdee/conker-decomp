@@ -2,942 +2,595 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 pad_0x0[0x18];
-    s32 field_0x18;
-    s32 field_0x1C;
-    u8 pad_0x20[0x34];
-    f32 field_0x54;
-    f32 field_0x58;
-    f32 field_0x5C;
-    u8 pad_0x60[0x8];
-    s32 field_0x68;
-    s32 field_0x6C;
-    s32 field_0x70;
-    s32 field_0x74;
-    s32 field_0x78;
-    f32 field_0x7C[2][4][4];
-    s32 field_0xFC;
-    u8 field_0x100;
-    u8 pad_0x101[0x3];
-    s32 field_0x104[4];
-    s32 field_0x114;
-    s32 field_0x118;
-    u8 pad_0x11C[0x4];
-    f32 field_0x120[0xE];
-} struct15157010;
-
-extern struct15157010 *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_1503F62C(s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *);
-extern void func_1503F5B8(s32, s32, s32, f32, f32, s32);
-extern void guMtxIdentF(float mf[4][4]);
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
-extern void func_151539B4(void *, u8);
-extern void func_15130374(s32, u8, s32, u8, s32);
-extern s32 (*D_8008AD90[])(void *);
-extern s32 (*D_8008ADA0[])(void *);
-extern void func_1503F4B0(void *, void *, u8);
-
-#define LOW_U8_151568F8(arg) (*(u8 *)((u8 *)&(arg) + 3))
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} struct151568F8_0C;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} Color8;
 
+/*
+ * A streak particle: a camera-facing triangle from its tail point to a
+ * width-wide edge at its head. Head and tail move with separate velocities.
+ */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct151568F8_08;
+    /* 0x00 */ u8 header[0x10];
+    /* 0x10 */ vertex headPos;
+    /* 0x1C */ vertex headVel;
+    /* 0x28 */ vertex tailPos;
+    /* 0x34 */ vertex tailVel;
+    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
+    /* 0x42 */ s16 lifetime;
+    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
+    /* 0x48 */ f32 width;
+    /* 0x4C */ u8 alpha;
+    /* 0x4E */ s16 fadeStart;       // fade begins when lifetime drops below this
+    /* 0x50 */ s16 fadeRate;        // alpha = lifetime * fadeRate while fading
+    /* 0x52 */ u8 pad52[0x6];
+    /* 0x58 */ Vtx vtxTemplate[3];  // tail, head + side, head - side
+    /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
+} StreakParticle;
 
+/* Spawn parameters for a streak particle. */
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    s8 unk11;
-    s8 unk12;
-    u8 pad13[0x3];
-    s16 unk16;
-    u8 pad18[0x2B];
-    u8 unk43;
-    u8 pad44[0x20];
-    s16 unk64;
-    s16 unk66;
-    void *unk68;
-} struct151572D0;
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ vertex dir;
+    /* 0x18 */ f32 headSpeed;
+    /* 0x1C */ f32 tailSpeed;
+    /* 0x20 */ Color8 headColor;
+    /* 0x24 */ Color8 tailColor;
+    /* 0x28 */ u8 flags;
+    /* 0x2A */ s16 lifetime;
+    /* 0x2C */ u16 renderMode;
+    /* 0x30 */ f32 width;
+    /* 0x34 */ u8 alpha;
+    /* 0x36 */ s16 fadeStart;
+    /* 0x38 */ s16 fadeRate;
+} StreakParticleDesc;
 
-typedef struct {
-    struct151568F8_0C unk0;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-    u8 unk47;
-    u16 unk48;
-    u8 pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    u8 pad56[2];
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69[3];
-    struct151568F8_08 unk6C;
-    s16 unk74;
-    s16 unk76;
-    s16 unk78;
-    u8 pad7A[2];
-    f32 unk7C;
-    s32 unk80;
-    u8 unk84;
-    u8 unk85;
-    s8 unk86;
-    s8 unk87;
-    u8 unk88;
-} struct151568F8_src;
+/* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 owner, s32 arg4) {
+    StreakParticle *newParticle;
+    StreakParticle *particle;
+    s32 id;
+    vertex pos;
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    struct151568F8_0C unk4;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-} struct151568F8_first;
+    switch (kind) {
+        case 0:
+            id = 0x2C;
+            break;
+        case 1:
+            id = 0x53;
+            break;
+        default:
+            id = 0x2C;
+            break;
+    }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    struct151568F8_08 unk28;
-    struct151568F8_0C unk30;
-    u8 pad3C[0xC];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 pad64[0xC];
-} struct151568F8_second;
-
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u8 pad44[0x8];
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-} Struct151563B8;
-
-
-/* prior best attempt (old score 15); may be a good start */
-struct Obj15156190Vec {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Obj15156190Vec4 {
-    struct Obj15156190Vec unk0;
-    s32 padC;
-};
-
-struct Obj15156190Src {
-    struct Obj15156190Vec unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 pad29;
-    s16 unk2A;
-    u16 unk2C;
-    u8 pad2E[2];
-    f32 unk30;
-    u8 unk34;
-    u8 pad35;
-    s16 unk36;
-    s16 unk38;
-};
-
-struct Obj15156190Ret {
-    u8 pad0[0x10];
-    struct Obj15156190Vec unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct Obj15156190Vec unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-    u8 pad52[0xC];
-    s16 unk5E;
-    s16 unk60;
-    s16 unk62;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 pad68[6];
-    s16 unk6E;
-    u8 pad70[4];
-    u8 unk74;
-    u8 unk75;
-    u8 unk76;
-    u8 unk77;
-    u8 pad78[6];
-    s16 unk7E;
-    u8 pad80[4];
-    u8 unk84;
-    u8 unk85;
-    u8 unk86;
-    u8 unk87;
-    u8 unk88[0x10];
-};
-
-void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4)
-{
-  struct Obj15156190Ret *temp_v0;
-  struct Obj15156190Ret *sp44;
-  s32 id;
-  struct Obj15156190Vec sp30;
-  switch (arg1)
-  {
-    case 0:
-      id = 0x2C;
-      break;
-
-    case 1:
-      id = 0x53;
-      break;
-
-    default:
-      id = 0x2C;
-      break;
-
-  }
-
-  temp_v0 = (struct Obj15156190Ret *) func_15167A68(id, arg4, arg2 + 0x98, 1, (u8) arg3, 1);
-  if (temp_v0 == 0)
-  {
-    return 0;
-  }
-  sp44 = temp_v0;
-  sp44->unk5E = 0;
-  sp44->unk64 = arg0->unk24;
-  sp44->unk65 = arg0->unk25;
-  sp44->unk66 = arg0->unk26;
-  sp44->unk67 = arg0->unk27;
-  sp44->unk60 = 0;
-  sp44->unk62 = 0;
-  sp44->unk6E = 0;
-  sp44->unk74 = arg0->unk20;
-  sp44->unk75 = arg0->unk21;
- do { } while (0);
-  sp44->unk76 = arg0->unk22;
-  sp44->unk77 = arg0->unk23;
-  sp44->unk7E = 0;
-  sp44->unk84 = arg0->unk20;
-  sp44->unk85 = arg0->unk21;
-  sp44->unk86 = arg0->unk22;
-  sp44->unk87 = arg0->unk23;
-  sp30 = arg0->unk0;
-  sp44->unk28 = sp30;
-  sp44->unk10 = sp30;
-  sp44->unk1C = arg0->unkC * arg0->unk18;
-  sp44->unk20 = arg0->unk10 * arg0->unk18;
-  sp44->unk24 = arg0->unk14 * arg0->unk18;
-  sp44->unk34 = arg0->unkC * arg0->unk1C;
-  sp44->unk38 = arg0->unk10 * arg0->unk1C;
-  sp44->unk3C = arg0->unk14 * arg0->unk1C;
-  sp44->unk40 = arg0->unk28;
-  sp44->unk42 = arg0->unk2A;
-  sp44->unk44 = arg0->unk2C;
-  sp44->unk48 = arg0->unk30;
-  sp44->unk4C = arg0->unk34;
-  sp44->unk4E = arg0->unk36;
-  sp44->unk50 = arg0->unk38;
-  bzero(sp44->unk88, 0x10);
-  return sp44;
+    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, (u8)owner, 1);
+    if (newParticle == NULL) {
+        return NULL;
+    }
+    particle = newParticle; // matching: the second pointer local survives the call as v1
+    particle->vtxTemplate[0].v.flag = 0;
+    particle->vtxTemplate[0].v.cn[0] = desc->tailColor.red;
+    particle->vtxTemplate[0].v.cn[1] = desc->tailColor.green;
+    particle->vtxTemplate[0].v.cn[2] = desc->tailColor.blue;
+    particle->vtxTemplate[0].v.cn[3] = desc->tailColor.alpha;
+    particle->vtxTemplate[0].v.tc[0] = 0;
+    particle->vtxTemplate[0].v.tc[1] = 0;
+    particle->vtxTemplate[1].v.flag = 0;
+    particle->vtxTemplate[1].v.cn[0] = desc->headColor.red;
+    particle->vtxTemplate[1].v.cn[1] = desc->headColor.green;
+    do {} while (0); // matching: block boundary makes as1 keep the v1 copy of the pointer for the last stores
+    particle->vtxTemplate[1].v.cn[2] = desc->headColor.blue;
+    particle->vtxTemplate[1].v.cn[3] = desc->headColor.alpha;
+    particle->vtxTemplate[2].v.flag = 0;
+    particle->vtxTemplate[2].v.cn[0] = desc->headColor.red;
+    particle->vtxTemplate[2].v.cn[1] = desc->headColor.green;
+    particle->vtxTemplate[2].v.cn[2] = desc->headColor.blue;
+    particle->vtxTemplate[2].v.cn[3] = desc->headColor.alpha;
+    pos = desc->pos;
+    particle->tailPos = pos;
+    particle->headPos = pos;
+    particle->headVel.x = desc->dir.x * desc->headSpeed;
+    particle->headVel.y = desc->dir.y * desc->headSpeed;
+    particle->headVel.z = desc->dir.z * desc->headSpeed;
+    particle->tailVel.x = desc->dir.x * desc->tailSpeed;
+    particle->tailVel.y = desc->dir.y * desc->tailSpeed;
+    particle->tailVel.z = desc->dir.z * desc->tailSpeed;
+    particle->flags = desc->flags;
+    particle->lifetime = desc->lifetime;
+    particle->renderMode = desc->renderMode;
+    particle->width = desc->width;
+    particle->alpha = desc->alpha;
+    particle->fadeStart = desc->fadeStart;
+    particle->fadeRate = desc->fadeRate;
+    bzero(particle->vtxBuffers, sizeof(particle->vtxBuffers));
+    return particle;
 }
 
-
-extern void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-void func_15156388(void *arg0, u8 arg1, s32 arg2) {
-    func_15156190(arg0, arg1, arg2, 0xFF, 0);
+/* func_15156190 with owner 0xFF and arg4 0. */
+void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
+    func_15156190(desc, kind, extraSize, 0xFF, 0);
 }
 
-void func_151563B8(void *arg0) {
-    Struct151563B8 *self;
-    u8 done;
-    s16 temp;
+/* Per-frame update: count down the lifetime, move head and tail, fade out; frees the particle when expired. */
+void func_151563B8(StreakParticle *arg0) {
+    StreakParticle *particle;
+    u8 expired;
+    s16 fadedAlpha;
 
-    self = arg0;
-    done = 0;
-    if (self->unk40 & 1) {
-        self->unk42 -= D_800BE9E4;
-        if (self->unk42 < 0) {
-            done = 1;
+    // matching: copying the parameter to a local steers IDO's register choice
+    particle = arg0;
+    expired = FALSE;
+    if (particle->flags & 1) {
+        particle->lifetime -= D_800BE9E4;
+        if (particle->lifetime < 0) {
+            expired = TRUE;
         }
     }
-    if (!done) {
-        self->unk10 += self->unk1C * D_800BE9A4;
-        self->unk14 += self->unk20 * D_800BE9A4;
-        self->unk18 += self->unk24 * D_800BE9A4;
-        self->unk28 += self->unk34 * D_800BE9A4;
-        self->unk2C += self->unk38 * D_800BE9A4;
-        self->unk30 += self->unk3C * D_800BE9A4;
-        if (self->unk40 & 8) {
-            if (self->unk42 < self->unk4E) {
-                temp = self->unk42 * self->unk50;
-                if (temp < self->unk4C) {
-                    self->unk4C = temp;
+    if (!expired) {
+        particle->headPos.x += particle->headVel.x * D_800BE9A4;
+        particle->headPos.y += particle->headVel.y * D_800BE9A4;
+        particle->headPos.z += particle->headVel.z * D_800BE9A4;
+        particle->tailPos.x += particle->tailVel.x * D_800BE9A4;
+        particle->tailPos.y += particle->tailVel.y * D_800BE9A4;
+        particle->tailPos.z += particle->tailVel.z * D_800BE9A4;
+        if (particle->flags & 8) {
+            if (particle->lifetime < particle->fadeStart) {
+                fadedAlpha = particle->lifetime * particle->fadeRate;
+                if (fadedAlpha < particle->alpha) {
+                    particle->alpha = fadedAlpha;
                 }
             }
         }
     }
-    if (done) {
-        func_1516972C((struct102 *)self);
+    if (expired) {
+        func_1516972C((struct102 *)particle);
     }
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151564F8;
-
-typedef struct {
-    s16 x, y, z, flag;
-    u8 other[8];
-} Vtx_151564F8;
-
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0xC];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0xC];
-    u8 unk40;
-    u8 pad41[3];
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[0xB];
-    u8 vertexTemplate[0x30];
-    u8 *buffers[1];
-} Obj_151564F8;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
-} Struct15157420_mode;
+} RenderModePair;
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern Struct15157420_mode D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
+extern RenderModePair D_800A4AC8[];
+void func_151D5D60(Vtx **buffers, s16 viewIndex, s32 size, Vtx **vtx, u8 *fresh);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-Gfx *func_151564F8(Gfx *gfx, Obj_151564F8 *arg1, s16 arg2) {
-    Obj_151564F8 *p;
-    Vec3f_151564F8 d;
-    Vec3f_151564F8 v;
-    Vec3f_151564F8 n;
-    Vec3f_151564F8 *eye;
+/* Draws a streak particle for one view as a single triangle facing that view's eye. */
+Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
+    StreakParticle *p;
+    vertex axis;
+    vertex toEye;
+    vertex side;
+    vertex *eye;
     f32 lengthSquared;
-    u8 update;
-    s16 flags;
-    s32 modeFlags;
-    Vtx_151564F8 *vtx;
+    u8 needSync;
+    s16 cullFlags;
+    s32 geometryFlags;
+    Vtx *vtx;
     u8 mode;
-    u8 cyc;
+    u8 combiner;
     u8 fresh;
     f32 scale;
 
-    p = arg1;
-    func_151D5D60(arg1->buffers, arg2, 0x30, (void **)&vtx, &fresh);
-    if (fresh != 0) {
-        memcpy(arg1->buffers[arg2], arg1->vertexTemplate, 0x30);
-        memcpy(arg1->buffers[arg2] + 0x30, arg1->vertexTemplate, 0x30);
+    // matching: the p alias orders IDO's spill slots (expression ids follow first use)
+    p = particle;
+    func_151D5D60(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), &vtx, &fresh);
+    if (fresh) {
+        memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+        memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
     }
-    eye = (Vec3f_151564F8 *)&D_800DBFF0[arg2].unk2F8;
-    update = 1;
-    flags = arg1->unk40 & 6;
-    mode = arg1->unk44 & 0xFF;
-    cyc = (arg1->unk44 & 0xFF00) >> 8;
-    modeFlags = 0;
-    if (flags & 2) {
-        modeFlags = 0x200;
+    eye = (vertex *)&D_800DBFF0[viewIndex].unk2F8;
+    needSync = TRUE;
+    cullFlags = particle->flags & 6;
+    mode = particle->renderMode & 0xFF;
+    combiner = (particle->renderMode & 0xFF00) >> 8;
+    geometryFlags = 0;
+    if (cullFlags & 2) {
+        geometryFlags = G_CULL_FRONT;
     }
-    if (flags & 4) {
-        modeFlags |= 0x400;
+    if (cullFlags & 4) {
+        geometryFlags |= G_CULL_BACK;
     }
-    gfx = func_15142B7C(gfx, modeFlags | 1 | 4 | 0x200000, 0x1F0600);
-    gfx = func_15142C10(gfx, 0, 0, 0, arg1->unk4C, &update);
-    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-    gfx = func_1513F4E4(gfx, cyc, &update);
-    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
-    d.x = p->unk10 - p->unk28;
-    d.y = p->unk14 - p->unk2C;
-    d.z = p->unk18 - p->unk30;
-    v.x = p->unk10 - eye->x;
-    v.y = p->unk14 - eye->y;
-    v.z = p->unk18 - eye->z;
-    n.x = d.y * v.z - v.y * d.z;
-    n.y = d.z * v.x - v.z * d.x;
-    n.z = d.x * v.y - v.x * d.y;
-    lengthSquared = n.x * n.x + n.y * n.y + n.z * n.z;
+    gfx = func_15142B7C(gfx, geometryFlags | G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+                        G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
+    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &needSync);
+    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &needSync);
+    gfx = func_1513F4E4(gfx, combiner, &needSync);
+    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &needSync);
+    axis.x = p->headPos.x - p->tailPos.x;
+    axis.y = p->headPos.y - p->tailPos.y;
+    axis.z = p->headPos.z - p->tailPos.z;
+    toEye.x = p->headPos.x - eye->x;
+    toEye.y = p->headPos.y - eye->y;
+    toEye.z = p->headPos.z - eye->z;
+    side.x = axis.y * toEye.z - toEye.y * axis.z;
+    side.y = axis.z * toEye.x - toEye.z * axis.x;
+    side.z = axis.x * toEye.y - toEye.x * axis.y;
+    lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared == 0.0f) {
-        n.x = 0.0f;
-        n.y = 0.0f;
-        n.z = 0.0f;
+        side.x = 0.0f;
+        side.y = 0.0f;
+        side.z = 0.0f;
     } else {
-        scale = p->unk48 / sqrtf(lengthSquared);
-        n.x *= scale;
-        n.y *= scale;
-        n.z *= scale;
+        scale = p->width / sqrtf(lengthSquared);
+        side.x *= scale;
+        side.y *= scale;
+        side.z *= scale;
     }
-    vtx[0].x = p->unk28;
-    vtx[0].y = p->unk2C;
-    vtx[0].z = p->unk30;
-    vtx[1].x = p->unk10 + n.x;
-    vtx[1].y = p->unk14 + n.y;
-    vtx[1].z = p->unk18 + n.z;
-    vtx[2].x = p->unk10 - n.x;
-    vtx[2].y = p->unk14 - n.y;
-    vtx[2].z = p->unk18 - n.z;
+    vtx[0].v.ob[0] = p->tailPos.x;
+    vtx[0].v.ob[1] = p->tailPos.y;
+    vtx[0].v.ob[2] = p->tailPos.z;
+    vtx[1].v.ob[0] = p->headPos.x + side.x;
+    vtx[1].v.ob[1] = p->headPos.y + side.y;
+    vtx[1].v.ob[2] = p->headPos.z + side.z;
+    vtx[2].v.ob[0] = p->headPos.x - side.x;
+    vtx[2].v.ob[1] = p->headPos.y - side.y;
+    vtx[2].v.ob[2] = p->headPos.z - side.z;
     gSPVertex(gfx++, vtx, 3, 0);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     return gfx;
 }
 
-void func_151568F8(struct151568F8_src *arg0, s32 arg1) {
-    struct151568F8_first first;
-    struct151568F8_second second;
+/* A burst of streak particles (func_151539B4); same layout as struct Local151539B4Arg in game_17CAF0.c. */
+typedef struct {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ vertex pos;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+} StreakBurstDesc;
 
-    first.unk0 = arg0->unkC;
-    first.unk2 = arg0->unkE;
-    first.unk4 = arg0->unk0;
-    first.unk10 = arg0->unk10;
-    first.unk14 = arg0->unk14;
-    first.unk12 = arg0->unk12;
-    first.unk16 = arg0->unk16;
-    first.unk18 = arg0->unk18;
-    first.unk1C = arg0->unk1C;
-    first.unk20 = arg0->unk20;
-    first.unk24 = arg0->unk24;
-    first.unk28 = arg0->unk28;
-    first.unk29 = arg0->unk29;
-    first.unk2A = arg0->unk2A;
-    first.unk2B = arg0->unk2B;
-    first.unk2C = arg0->unk2C;
-    first.unk2D = arg0->unk2D;
-    first.unk2E = arg0->unk2E;
-    first.unk2F = arg0->unk2F;
-    first.unk30 = arg0->unk30;
-    first.unk32 = arg0->unk32;
-    first.unk34 = arg0->unk34;
-    first.unk36 = arg0->unk36;
-    first.unk38 = arg0->unk38;
-    first.unk3C = arg0->unk3C;
-    first.unk40 = arg0->unk40;
-    first.unk41 = arg0->unk41;
-    first.unk42 = arg0->unk42;
-    first.unk44 = arg0->unk44;
-    first.unk46 = arg0->unk46;
-    func_151539B4(&first, LOW_U8_151568F8(arg1));
+typedef struct {
+    f32 width;
+    f32 height;
+} ParticleSize;
 
-    second.unk1D = arg0->unk47;
-    second.unk8 = arg0->unk48;
-    second.unk4 = arg0->unk50;
-    second.unk0 = arg0->unk4C;
-    second.unkC = arg0->unk58;
-    second.unk10 = arg0->unk5C;
-    second.unk14 = arg0->unk60;
-    second.unk15 = arg0->unk61;
-    second.unk16 = arg0->unk62;
-    second.unk17 = arg0->unk63;
-    second.unk18 = arg0->unk64;
-    second.unk19 = arg0->unk65;
-    second.unk1A = arg0->unk66;
-    second.unk30 = arg0->unk0;
-    second.unk58 = arg0->unk80;
-    second.unk1B = arg0->unk67;
-    second.unk1C = arg0->unk68;
-    second.unk62 = arg0->unk86;
-    second.unk63 = arg0->unk87;
-    second.unk1E = arg0->unk74;
-    second.unk20 = arg0->unk76;
-    second.unk60 = arg0->unk84;
-    second.unk61 = arg0->unk85;
-    second.unk22 = arg0->unk78;
-    second.unk24 = arg0->unk7C;
-    second.unkA = arg0->unk54;
-    second.unk28 = arg0->unk6C;
-    second.unk48 = 0.0f;
-    second.unk4C = 0.0f;
-    second.unk50 = 0.0f;
-    second.unk54 = 0.0f;
-    func_15130374((s32)&second, arg0->unk88, 0, LOW_U8_151568F8(arg1), 0);
+/* Spawn parameters of a particle (func_15130374); same layout as ParticleDesc in game_15D730.c. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ ParticleSize size;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;
+    /* 0x63 */ s8 deathFunc;
+    /* 0x64 */ u8 pad64[0xC];
+} ParticleSpawnDesc;
+
+/* A streak burst plus one particle at the same point (func_151568F8). */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ s16 countBase;
+    /* 0x0E */ s16 countRange;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+    /* 0x47 */ u8 particleTexture;
+    /* 0x48 */ u16 particleRenderMode;
+    /* 0x4A */ u8 pad4A[2];
+    /* 0x4C */ s32 particleUnk0;
+    /* 0x50 */ s32 particleUnk4;
+    /* 0x54 */ s16 particleTimer;
+    /* 0x56 */ u8 pad56[2];
+    /* 0x58 */ s32 particleFrame;
+    /* 0x5C */ s32 particleFrameRate;
+    /* 0x60 */ Color8 particleColor;
+    /* 0x64 */ Color8 particleColor2;
+    /* 0x68 */ u8 particleBrightness;
+    /* 0x69 */ u8 pad69[3];
+    /* 0x6C */ ParticleSize particleSize;
+    /* 0x74 */ s16 particleFadeStart;
+    /* 0x76 */ s16 particleFadeRate;
+    /* 0x78 */ s16 particleScaleStart;
+    /* 0x7A */ u8 pad7A[2];
+    /* 0x7C */ f32 particleScaleRate;
+    /* 0x80 */ s32 particleFlags;
+    /* 0x84 */ u8 particlePrimColorMode;
+    /* 0x85 */ u8 particleEnvColorMode;
+    /* 0x86 */ s8 particleUpdateFunc;
+    /* 0x87 */ s8 particleDeathFunc;
+    /* 0x88 */ u8 particleKind;
+    /* 0x89 */ u8 unk89;
+    /* 0x8A */ u8 unk8A;
+    /* 0x8B */ u8 unk8B;
+    /* 0x8C */ u8 unk8C;
+} StreakBurstEffectDesc;
+
+extern void func_151539B4(StreakBurstDesc *, u8);
+extern void func_15130374(ParticleSpawnDesc *, u8, s32, u8, s32);
+
+/* Spawns the streak burst and the particle described by desc. */
+void func_151568F8(desc, owner)
+    StreakBurstEffectDesc *desc;
+    u8 owner;
+{
+    StreakBurstDesc burst;
+    ParticleSpawnDesc particle;
+
+    burst.countBase = desc->countBase;
+    burst.countRange = desc->countRange;
+    burst.pos = desc->pos;
+    burst.yawBase = desc->yawBase;
+    burst.yawRange = desc->yawRange;
+    burst.pitchBase = desc->pitchBase;
+    burst.pitchRange = desc->pitchRange;
+    burst.headSpeedBase = desc->headSpeedBase;
+    burst.headSpeedRange = desc->headSpeedRange;
+    burst.tailSpeedBase = desc->tailSpeedBase;
+    burst.tailSpeedRange = desc->tailSpeedRange;
+    burst.headColor.red = desc->headColor.red;
+    burst.headColor.green = desc->headColor.green;
+    burst.headColor.blue = desc->headColor.blue;
+    burst.headColor.alpha = desc->headColor.alpha;
+    burst.tailColor.red = desc->tailColor.red;
+    burst.tailColor.green = desc->tailColor.green;
+    burst.tailColor.blue = desc->tailColor.blue;
+    burst.tailColor.alpha = desc->tailColor.alpha;
+    burst.flags = desc->flags;
+    burst.lifetimeBase = desc->lifetimeBase;
+    burst.lifetimeRange = desc->lifetimeRange;
+    burst.renderMode = desc->renderMode;
+    burst.widthBase = desc->widthBase;
+    burst.widthRange = desc->widthRange;
+    burst.alphaBase = desc->alphaBase;
+    burst.alphaRange = desc->alphaRange;
+    burst.fadeStart = desc->fadeStart;
+    burst.fadeRate = desc->fadeRate;
+    burst.kind = desc->kind;
+    func_151539B4(&burst, owner);
+
+    particle.texture = desc->particleTexture;
+    particle.renderMode = desc->particleRenderMode;
+    particle.unk4 = desc->particleUnk4;
+    particle.unk0 = desc->particleUnk0;
+    particle.frame = desc->particleFrame;
+    particle.frameRate = desc->particleFrameRate;
+    particle.r = desc->particleColor.red;
+    particle.g = desc->particleColor.green;
+    particle.b = desc->particleColor.blue;
+    particle.a = desc->particleColor.alpha;
+    particle.r2 = desc->particleColor2.red;
+    particle.g2 = desc->particleColor2.green;
+    particle.b2 = desc->particleColor2.blue;
+    particle.pos = desc->pos;
+    particle.flags = desc->particleFlags;
+    particle.alpha = desc->particleColor2.alpha;
+    particle.brightness = desc->particleBrightness;
+    particle.updateFunc = desc->particleUpdateFunc;
+    particle.deathFunc = desc->particleDeathFunc;
+    particle.fadeStart = desc->particleFadeStart;
+    particle.fadeRate = desc->particleFadeRate;
+    particle.primColorMode = desc->particlePrimColorMode;
+    particle.envColorMode = desc->particleEnvColorMode;
+    particle.scaleStart = desc->particleScaleStart;
+    particle.scaleRate = desc->particleScaleRate;
+    particle.timer = desc->particleTimer;
+    particle.size = desc->particleSize;
+    particle.vel.x = 0.0f;
+    particle.vel.y = 0.0f;
+    particle.vel.z = 0.0f;
+    particle.gravity = 0.0f;
+    func_15130374(&particle, desc->particleKind, 0, owner, 0);
 }
 
+void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
+
+/* Common head of effect objects (same layout as Game113D60EffectHeader in game_113D60.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+} EffectHeader;
+
+/* A countdown restarted at base + rand() % (range + 1). */
 typedef struct {
     /* 0x00 */ s16 base;
     /* 0x02 */ s16 range;
-    /* 0x04 */ s16 timer;
-} struct15156B54_sub;
+    /* 0x04 */ s16 value;
+} RandomTimer;
 
+/* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ struct15156B54_sub sub;
-} struct15156B54;
+    /* 0x00 */ EffectHeader header;
+    /* 0x28 */ RandomTimer timer;
+} RandomBurstEffect;
 
 extern f32 D_800DCA30[3][10][4];
-void func_15156D24(void *arg0, u8 arg1);
+void func_15156D24(f32 *pos, u8 owner);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
-void func_15156B54(struct15156B54 *arg0) {
-    struct15156B54_sub *sub;
+/* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
+ * that has no zero coordinate, then restarts the timer at a random interval. */
+void func_15156B54(RandomBurstEffect *effect) {
+    RandomTimer *timer;
     u32 row;
     u32 col;
     Header header;
-    Header2 header2;
+    Header2 intPos;
 
-    arg0->sub.timer -= D_800BE9E4;
-    if (arg0->sub.timer < 0) {
+    effect->timer.value -= D_800BE9E4;
+    if (effect->timer.value < 0) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
-        if ((D_800DCA30[row][col][0] != 0.0f) && (D_800DCA30[row][col][1] != 0.0f) && (D_800DCA30[row][col][2] != 0.0f)) {
-            func_15156D24(D_800DCA30[row][col], arg0->unkC);
+        if (D_800DCA30[row][col][0] != 0.0f && D_800DCA30[row][col][1] != 0.0f && D_800DCA30[row][col][2] != 0.0f) {
+            func_15156D24(D_800DCA30[row][col], effect->header.owner);
             header.unk0 = 3;
             header.unk1 = -1;
             header.unk2 = (func_150ADA20() % 11U) + 5;
             header.unk4 = 0;
-            header2.unk0 = D_800DCA30[row][col][0];
-            header2.unk4 = D_800DCA30[row][col][1];
-            header2.unk8 = D_800DCA30[row][col][2];
-            func_151602C0(&header, &header2, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+            intPos.unk0 = D_800DCA30[row][col][0];
+            intPos.unk4 = D_800DCA30[row][col][1];
+            intPos.unk8 = D_800DCA30[row][col][2];
+            func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+                          effect->header.owner, effect->header.kind);
         }
-        sub = &arg0->sub;
-        sub->timer = (func_150ADA20() % (u32)(sub->range + 1)) + sub->base;
+        timer = &effect->timer;
+        timer->value = (func_150ADA20() % (u32)(timer->range + 1)) + timer->base;
     }
 }
 
-typedef struct {
-    struct151568F8_0C unk0;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-    u8 unk47;
-    u16 unk48;
-    u8 pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    u8 pad56[2];
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69[3];
-    f32 unk6C;
-    f32 unk70;
-    s16 unk74;
-    s16 unk76;
-    s16 unk78;
-    u8 pad7A[2];
-    f32 unk7C;
-    s32 unk80;
-    u8 unk84;
-    u8 unk85;
-    s8 unk86;
-    s8 unk87;
-    u8 unk88;
-    u8 unk89;
-    u8 unk8A;
-    u8 unk8B;
-    u8 unk8C;
-} struct15156D24;
+/* Spawns the burst effect used by func_15156B54 at pos (3 floats), with randomised particle size and flags. */
+void func_15156D24(f32 *pos, u8 owner) {
+    StreakBurstEffectDesc desc;
 
-extern f32 D_800A6040;
-extern f32 D_800A6044;
-extern f32 D_800A6048;
-extern f32 D_800A604C;
-extern f32 D_800A6050;
-
-void func_15156D24(void *arg0, u8 arg1) {
-    struct15156D24 s;
-
-    memcpy(&s.unk0, arg0, 0xC);
-    s.unkC = 0xA;
-    s.unkE = 0x1E;
-    s.unk12 = -0x3F;
-    s.unk14 = 0xFF;
-    s.unk16 = 0x80;
-    s.unk8A = s.unk28 = s.unk64 = 0xFF;
-    s.unk8B = s.unk29 = s.unk65 = 0xFF;
-    s.unk2A = s.unk66 = 0xFF;
-    s.unk8C = 0xFF;
-    s.unk2B = 0xFF;
-    s.unk2C = 0xFF;
-    s.unk2D = 0xFF;
-    s.unk2E = 0xFF;
-    s.unk2F = 0xFF;
-    s.unk30 = 9;
-    s.unk10 = 0;
-    s.unk32 = 5;
-    s.unk34 = 0xA;
-    s.unk36 = 0x1601;
-    s.unk40 = 0x64;
-    s.unk41 = 0x9B;
-    s.unk42 = 4;
-    s.unk44 = 0x3F;
-    s.unk46 = 0;
-    s.unk47 = 0x2B;
-    s.unk48 = 0x1A01;
-    s.unk4C = 0x200005;
-    s.unk50 = 0;
-    s.unk20 = s.unk24 = D_800A6040;
-    s.unk18 = D_800A6044;
-    s.unk1C = D_800A6048;
-    s.unk38 = D_800A604C;
-    s.unk3C = D_800A6050;
-    s.unk54 = (func_150ADA20() % 3U) + 7;
-    s.unk58 = 0;
-    s.unk5C = 0;
-    s.unk60 = 0xFF;
-    s.unk61 = 0xFF;
-    s.unk62 = 0xFF;
-    s.unk63 = 0xFF;
+    memcpy(&desc.pos, pos, sizeof(desc.pos));
+    desc.countBase = 10;
+    desc.countRange = 30;
+    desc.pitchBase = -63;
+    desc.yawRange = 255;
+    desc.pitchRange = 128;
+    desc.unk8A = desc.headColor.red = desc.particleColor2.red = 0xFF;
+    desc.unk8B = desc.headColor.green = desc.particleColor2.green = 0xFF;
+    desc.headColor.blue = desc.particleColor2.blue = 0xFF;
+    desc.unk8C = 0xFF;
+    desc.headColor.alpha = 0xFF;
+    desc.tailColor.red = 0xFF;
+    desc.tailColor.green = 0xFF;
+    desc.tailColor.blue = 0xFF;
+    desc.tailColor.alpha = 0xFF;
+    desc.flags = 9;
+    desc.yawBase = 0;
+    desc.lifetimeBase = 5;
+    desc.lifetimeRange = 10;
+    desc.renderMode = 0x1601;
+    desc.alphaBase = 100;
+    desc.alphaRange = 155;
+    desc.fadeStart = 4;
+    desc.fadeRate = 63;
+    desc.kind = 0;
+    desc.particleTexture = 43;
+    desc.particleRenderMode = 0x1A01;
+    desc.particleUnk0 = 0x200005;
+    desc.particleUnk4 = 0;
+    desc.tailSpeedRange = desc.tailSpeedBase = 1.6899999f;
+    desc.headSpeedBase = 6.97f;
+    desc.headSpeedRange = 3.37f;
+    desc.widthBase = 2.01f;
+    desc.widthRange = 3.02f;
+    desc.particleTimer = (func_150ADA20() % 3U) + 7;
+    desc.particleFrame = 0;
+    desc.particleFrameRate = 0;
+    desc.particleColor.red = 0xFF;
+    desc.particleColor.green = 0xFF;
+    desc.particleColor.blue = 0xFF;
+    desc.particleColor.alpha = 0xFF;
     func_150ADA20();
-    s.unk67 = 0xFF;
-    s.unk68 = 0xFF;
-    s.unk6C = s.unk70 = (func_150ADA68() * 150.0f) + 196.0f;
-    s.unk74 = 4;
-    s.unk76 = 0x3F;
-    s.unk78 = 0x16;
-    s.unk7C = 1.25f;
-    s.unk80 = 0xE01;
+    desc.particleColor2.alpha = 0xFF;
+    desc.particleBrightness = 0xFF;
+    desc.particleSize.width = desc.particleSize.height = (func_150ADA68() * 150.0f) + 196.0f;
+    desc.particleFadeStart = 4;
+    desc.particleFadeRate = 63;
+    desc.particleScaleStart = 22;
+    desc.particleScaleRate = 1.25f;
+    desc.particleFlags = 0xE01;
     if (func_150ADA20() & 1) {
-        s.unk80 |= 0x40;
+        desc.particleFlags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        s.unk80 |= 0x80;
+        desc.particleFlags |= 0x80;
     }
-    s.unk84 = 4;
-    s.unk85 = 4;
-    s.unk86 = -1;
-    s.unk87 = -1;
-    s.unk88 = 1;
-    s.unk89 = 1;
-    func_151568F8((struct151568F8_src *)&s, arg1);
+    desc.particlePrimColorMode = 4;
+    desc.particleEnvColorMode = 4;
+    desc.particleUpdateFunc = -1;
+    desc.particleDeathFunc = -1;
+    desc.particleKind = 1;
+    desc.unk89 = 1;
+    func_151568F8(&desc, owner);
 }
 
-extern void func_151D5E30(void *);
+extern void func_151D5E30(Vtx **);
 
-void func_15156F94(void *arg0) {
-    func_151D5E30((void *)((u8 *)arg0 + 0x88));
+/* Frees a streak particle's per-view vertex buffers. */
+void func_15156F94(StreakParticle *particle) {
+    func_151D5E30(particle->vtxBuffers);
 }
 
-void func_15156FB8(struct102 *arg0) {
-    func_15156F94(arg0);
-    func_15169804(arg0);
+void func_15156FB8(StreakParticle *particle) {
+    func_15156F94(particle);
+    func_15169804((struct102 *)particle);
 }
 
-void func_15156FE4(struct102 *arg0) {
-    func_15156F94(arg0);
-    func_15169824(arg0);
+void func_15156FE4(StreakParticle *particle) {
+    func_15156F94(particle);
+    func_15169824((struct102 *)particle);
 }
-struct15157010 *func_15157010(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
-
-void func_100043B4(s32 *arg0, u32 arg1);
-extern s32 D_80082FA0;
-void func_151571C4(void *arg0);
-
-extern void func_151571C4(void *);
-
-
-extern void func_151571C4(void *);
-extern void func_1518CA04(void *);
-extern void func_1503F7B8(void *);
-void func_15157248(u8 *arg0);
-void func_1515728C(u8 *arg0);
-void func_151572D0(struct151572D0 *ptr);
-
-typedef struct {
-    u8 pad0[0x2];
-    s16 unk2;
-} Struct15157420_60;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x2];
-    s8 unk13;
-    s8 unk14;
-    u8 pad15[0xB];
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    u8 pad30[0x3];
-    u8 unk33;
-    s32 unk34;
-    s32 unk38;
-    s8 unk3C;
-    s8 unk3D;
-    u8 pad3E[0x2];
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 pad48[0x4];
-    void *unk4C;
-    u8 unk50;
-    u8 unk51;
-    u8 pad52[0x2];
-    u8 unk54[0xC];
-    Struct15157420_60 *unk60;
-    u8 pad64[0x4];
-    s32 *unk68;
-    s32 *unk6C;
-    u8 unk70;
-    u8 pad71[0x3];
-    s32 unk74;
-    u8 pad78[0x84];
-    u8 unkFC[1];
-} Struct15157420;
-
-extern Gfx *(*D_8008ADBC[])(Gfx *, Struct15157420 *, s16, u8 *, u8 *);
-extern Gfx *(*D_8008ADCC[])(Gfx *, Struct15157420 *, s16, u8 *);
-extern u8 D_80083740[];
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
-extern u8 D_800BE9C0;
-
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
-Gfx *func_15157420(Gfx *gfx, Struct15157420 *arg1, s16 arg2);
-
-extern u8 D_800BE9C0;
-extern void guMtxIdentF(float mf[4][4]);
-s32 func_15157860(u8 *arg0);
-struct15157010 *func_15157898(u8 *arg0, void *arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
-s32 func_15157918(struct15157010 *arg0);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} MotionVec;
-
-typedef struct {
-    MotionVec rot;
-    f32 scale;
-    MotionVec vel;
-    MotionVec rotVel;
-    f32 gravity;
-    f32 drag;
-    u8 flags;
-} MotionState;
-
-typedef struct {
-    u8 pad_0x0[0x54];
-    f32 posX;
-    f32 posY;
-    f32 posZ;
-    u8 pad_0x60[0xC0];
-    MotionState motion;
-} struct15157AA8;
-s32 func_15157AA8(struct15157AA8 *arg0);
-void func_15157D88(s32 arg0, s32 arg1, u8 arg2);
-
-extern void func_15157DEC(struct15157010 *, f32 *);
-s32 func_15157DC8(struct15157010 *arg0);
-void func_15157DEC(struct15157010 *arg0, f32 *arg1);
-
-extern Mtx D_80089470;
-Gfx *func_15157F80(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3, u8 *arg4);
-
-#define WGFX15157FE8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-Gfx *func_15157FE8(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3);
-
-extern s32 D_800A6060;
-void func_15158078(s32 arg0, u8 arg1);

@@ -1,802 +1,389 @@
 #include <ultra64.h>
+// matching: functions.h declares func_1513D524 as void; it returns the spawned object here
 #define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
 
 extern void func_1510F800(s32);
-extern s32 func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
-extern void func_1513F680();
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern void func_1518CA80(void *, u8);
-extern void func_151D5D60();
+extern void *func_1513D524(void *spawn, u8, u8, u8, u8, u8, s32 extraSize, u8, s32);
+extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
+extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
+extern void func_1518CA80(void *effect, u8 mode);
+extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
 
-typedef s32 (*Func1514C2F0Callback)(s32, s16, f32, f32, f32, f32, f32, f32,
-                                    s32, s32, f32, s32, f32, s32, u8);
-extern Func1514C2F0Callback D_8008AA00[];
-
+/* Emitter description that func_15149550 turns into a spawned particle. */
 typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-} Struct15149550Arg;
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 maxA;
+    /* 0x10 */ f32 maxB;
+    /* 0x14 */ f32 minA;
+    /* 0x18 */ f32 minB;
+    /* 0x1C */ f32 altB;
+    /* 0x20 */ s16 maxC;
+    /* 0x22 */ s16 minC;
+    /* 0x24 */ s16 life;
+    /* 0x26 */ u8 color[4];
+    /* 0x2A */ u16 flags;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ s32 extraSize;
+    /* 0x34 */ u8 effect;
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ f32 maxHeight;
+    /* 0x40 */ f32 shrinkRate;
+    /* 0x44 */ f32 growRate;
+} ParticleEmitter;
 
+/* Spawn parameters passed to func_1513D524. */
 typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 pad46[2];
-    s32 unk48;
-    s32 pad4C;
-    s32 pad50;
-    s32 pad54;
-} Struct15149550Local;
+    /* 0x00 */ u8 kind;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 life;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[4];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ struct17 unk28;
+    /* 0x34 */ struct17 unk34;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 pad46[2];
+    /* 0x48 */ s32 unk48;              // func_1510FD20(x, z) when flag 0x01000000 is set
+    /* 0x4C */ s32 pad4C[3];
+} ParticleSpawn;
 
+/*
+ * Per-particle motion state, stored at +0x110 of the spawned object. Each channel (A, B, C)
+ * picks a new random target between its min and max whenever its timer runs out, and the
+ * particle field it drives eases towards that target by `rate` per frame.
+ */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    s16 unkC;
-    s16 unkE;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    f32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s16 unk38;
-    s16 unk3A;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    u8 unk48;
-    u8 pad49[3];
-    f32 unk4C;
-} Struct15149550Extra;
+    /* 0x00 */ f32 maxA;
+    /* 0x04 */ f32 minA;
+    /* 0x08 */ f32 targetA;
+    /* 0x0C */ s16 timerA;
+    /* 0x0E */ s16 periodA;
+    /* 0x10 */ f32 rateA;
+    /* 0x14 */ f32 maxB;
+    /* 0x18 */ f32 minB;
+    /* 0x1C */ f32 altB;
+    /* 0x20 */ f32 targetB;
+    /* 0x24 */ s16 timerB;
+    /* 0x26 */ s16 periodB;
+    /* 0x28 */ f32 rateB;
+    /* 0x2C */ s32 maxC;
+    /* 0x30 */ s32 minC;
+    /* 0x34 */ s32 targetC;
+    /* 0x38 */ s16 timerC;
+    /* 0x3A */ s16 periodC;
+    /* 0x3C */ f32 rateC;
+    /* 0x40 */ f32 shrinkRate;
+    /* 0x44 */ f32 growRate;
+    /* 0x48 */ u8 effect;
+    /* 0x49 */ u8 pad49[3];
+    /* 0x4C */ f32 maxHeight;
+} ParticleMotion;
 
-s32 func_15149550(Struct15149550Arg *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    s32 ret;
-    Struct15149550Local sp94;
-    Struct15149550Extra sp44;
-    s32 temp_v0;
+/* The object func_1513D524 spawns. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x01C */ s16 timer;
+    /* 0x01E */ u8 pad1E[6];
+    /* 0x024 */ s32 unk24;            // eased by motion channel C
+    /* 0x028 */ u8 pad28[4];
+    /* 0x02C */ f32 width;            // eased by motion channel A
+    /* 0x030 */ f32 height;           // eased by motion channel B
+    /* 0x034 */ struct17 pos;
+    /* 0x040 */ u8 pad40[0xC];
+    /* 0x04C */ f32 accelY;
+    /* 0x050 */ f32 velY;
+    /* 0x054 */ u8 pad54[4];
+    /* 0x058 */ s32 unk58;
+    /* 0x05C */ u8 pad5C[0x14];
+    /* 0x070 */ u8 unk70;
+    /* 0x071 */ u8 pad71;
+    /* 0x072 */ u8 unk72;
+    /* 0x073 */ u8 unk73;
+    /* 0x074 */ u8 growFlags;
+    /* 0x075 */ u8 pad75[0x4B];
+    /* 0x0C0 */ Vtx quadTemplate[4];
+    /* 0x100 */ Vtx *quadBuffers[4];    // each holds two copies of the quad (double-buffered)
+    /* 0x110 */ ParticleMotion motion;
+} Particle;
 
-    sp94.unk40 = arg0->unk2A | 0x40000000;
-    sp94.unk1C = arg0->unk0;
-    if (arg2 != 0) {
-        sp94.unk40 |= 0x01000000;
+/* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
+Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
+    Particle *particle;
+    ParticleSpawn spawn;
+    ParticleMotion motion;
+    s32 flip;
+
+    spawn.flags = emitter->flags | 0x40000000;
+    spawn.pos = emitter->pos;
+    if (arg2) {
+        spawn.flags |= 0x01000000;
         func_1510F800(0);
-        sp94.unk48 = func_1510FD20((s32)sp94.unk1C.unk0, (s32)sp94.unk1C.unk8);
+        spawn.unk48 = func_1510FD20(spawn.pos.unk0, spawn.pos.unk8);
     } else {
-        sp94.unk40 &= 0xFEFFFFFF;
-        sp94.unk48 = 0;
+        spawn.flags &= ~0x01000000;
+        spawn.unk48 = 0;
     }
 
-    switch ((u8)arg3) {
+    switch (kind) {
     case 1:
-        sp94.unk0 = 0x13;
+        spawn.kind = 0x13;
         break;
     case 2:
-        sp94.unk0 = 0x71;
+        spawn.kind = 0x71;
         break;
     case 0:
     default:
         if (func_150ADA20() & 1) {
-            sp94.unk0 = 0x13;
+            spawn.kind = 0x13;
         } else {
-            sp94.unk0 = 0x14;
+            spawn.kind = 0x14;
         }
         break;
     }
 
-    sp94.unk2 = 0x301;
-    sp94.unk4 = arg0->unk24;
-    sp94.unk10 = arg0->unk26;
-    sp94.unk11 = arg0->unk27;
-    sp94.unk12 = arg0->unk28;
-    sp94.unk13 = arg0->unk29;
-    sp94.unk44 = arg0->unk2C;
-    sp94.unk45 = arg0->unk2D;
-    sp94.unk28 = 0.0f;
-    sp94.unk2C = 0.0f;
-    sp94.unk30 = 0.0f;
-    sp94.unk34 = arg0->unk38;
-    sp94.unk38 = 0.0f;
-    sp94.unk3C = 1.0f;
+    spawn.unk2 = 0x301;
+    spawn.life = emitter->life;
+    spawn.color[0] = emitter->color[0];
+    spawn.color[1] = emitter->color[1];
+    spawn.color[2] = emitter->color[2];
+    spawn.color[3] = emitter->color[3];
+    spawn.unk44 = emitter->unk2C;
+    spawn.unk45 = emitter->unk2D;
+    spawn.unk28.unk0 = 0.0f;
+    spawn.unk28.unk4 = 0.0f;
+    spawn.unk28.unk8 = 0.0f;
+    spawn.unk34.unk0 = emitter->scale;
+    spawn.unk34.unk4 = 0.0f;
+    spawn.unk34.unk8 = 1.0f;
 
-    sp44.unk0 = arg0->unkC;
-    sp44.unk4 = arg0->unk14;
-    sp44.unkC = 0;
-    sp44.unkE = 6;
-    sp44.unk8 = (sp44.unk0 + sp44.unk4) * 0.5f;
-    sp44.unk10 = 0.186f;
-    sp44.unk14 = arg0->unk10;
-    sp44.unk18 = arg0->unk18;
-    sp44.unk1C = arg0->unk1C;
-    sp44.unk20 = (sp44.unk14 + sp44.unk18) * 0.5f;
-    sp44.unk24 = 0;
-    sp44.unk26 = 0x11;
-    sp44.unk28 = 0.359f;
-    sp44.unk2C = arg0->unk20;
-    sp44.unk30 = arg0->unk22;
-    sp44.unk34 = 0;
-    sp44.unk38 = 0;
-    sp44.unk3A = 0xF;
-    sp44.unk3C = 0.231f;
-    sp44.unk40 = arg0->unk40;
-    sp44.unk44 = arg0->unk44;
-    sp94.unk8 = 0;
-    sp94.unkC = (sp44.unk2C + sp44.unk30) >> 1;
-    sp94.unk14 = 0.0f;
-    sp94.unk18 = 0.0f;
-    sp44.unk48 = arg0->unk34;
-    sp44.unk4C = arg0->unk3C;
+    motion.maxA = emitter->maxA;
+    motion.minA = emitter->minA;
+    motion.timerA = 0;
+    motion.periodA = 6;
+    motion.targetA = (motion.maxA + motion.minA) * 0.5f;
+    motion.rateA = 0.186f;
+    motion.maxB = emitter->maxB;
+    motion.minB = emitter->minB;
+    motion.altB = emitter->altB;
+    motion.targetB = (motion.maxB + motion.minB) * 0.5f;
+    motion.timerB = 0;
+    motion.periodB = 17;
+    motion.rateB = 0.359f;
+    motion.maxC = emitter->maxC;
+    motion.minC = emitter->minC;
+    motion.targetC = 0;
+    motion.timerC = 0;
+    motion.periodC = 15;
+    motion.rateC = 0.231f;
+    motion.shrinkRate = emitter->shrinkRate;
+    motion.growRate = emitter->growRate;
+    spawn.unk8 = 0;
+    spawn.unkC = (motion.maxC + motion.minC) >> 1;
+    spawn.unk14 = 0.0f;
+    spawn.unk18 = 0.0f;
+    motion.effect = emitter->effect;
+    motion.maxHeight = emitter->maxHeight;
 
     if (func_150ADA20() & 1) {
-        temp_v0 = 1;
+        flip = 1;
     } else {
-        temp_v0 = 0;
+        flip = 0;
     }
-    arg0 = (Struct15149550Arg *) func_1513D524((s32)&sp94, arg0->unk2E, 0xE, arg0->unk2F, (u8)arg1, (u8)(temp_v0 | 2), arg0->unk30 + 0x50, (u8)arg4, arg5);
-    if (arg0 != 0) {
-        memcpy((u8 *)arg0 + 0x110, &sp44, sizeof(sp44));
+    particle = func_1513D524(&spawn, emitter->unk2E, 0xE, emitter->unk2F, arg1, flip | 2,
+                             emitter->extraSize + sizeof(ParticleMotion), arg4, arg5);
+    if (particle != NULL) {
+        memcpy(&particle->motion, &motion, sizeof(motion));
     }
-    return (s32)arg0;
+    return particle;
 }
 
-typedef struct {
-    char pad_0x0[0x1C];
-    s16 unk1C;
-    char pad_0x1E[0x6];
-    s32 unk24;
-    char pad_0x28[0x4];
-    f32 unk2C;
-    f32 unk30;
-    char pad_0x34[0x24];
-    s32 unk58;
-    char pad_0x5C[0x14];
-    u8 unk70;
-    char pad_0x71[0x1];
-    u8 unk72;
-    u8 unk73;
-    char pad_0x74[0x9C];
-    Struct15149550Extra unk110;
-} Struct15149838Obj;
+/* Per-frame update: re-rolls each motion channel's target when its timer expires and eases
+ * width, height and unk24 towards them. Returns 1 (keep alive). */
+s32 func_15149838(Particle *particle) {
+    ParticleMotion *motion = &particle->motion;
 
-s32 func_15149838(Struct15149838Obj *arg0) {
-    Struct15149550Extra *sub;
-    s32 temp_v0;
-
-    sub = (Struct15149550Extra *)((u8 *)arg0 + 0x110);
-    sub->unkC -= D_800BE9E4;
-    if (sub->unkC < 0) {
-        sub->unkC = func_150ADA20() % (u32)sub->unkE;
-        sub->unk8 = (func_150ADA68() * (sub->unk0 - sub->unk4)) + sub->unk4;
+    motion->timerA -= D_800BE9E4;
+    if (motion->timerA < 0) {
+        motion->timerA = func_150ADA20() % (u32)motion->periodA;
+        motion->targetA = func_150ADA68() * (motion->maxA - motion->minA) + motion->minA;
     }
-    arg0->unk2C = arg0->unk2C + ((sub->unk8 - arg0->unk2C) * sub->unk10);
-    sub->unk24 -= D_800BE9E4;
-    if (sub->unk24 < 0) {
-        sub->unk24 = func_150ADA20() % (u32)sub->unk26;
+    particle->width += (motion->targetA - particle->width) * motion->rateA;
+
+    motion->timerB -= D_800BE9E4;
+    if (motion->timerB < 0) {
+        motion->timerB = func_150ADA20() % (u32)motion->periodB;
         if (func_150ADA20() & 3) {
-            sub->unk20 = (func_150ADA68() * (sub->unk14 - sub->unk18)) + sub->unk18;
+            motion->targetB = func_150ADA68() * (motion->maxB - motion->minB) + motion->minB;
         } else {
-            sub->unk20 = (func_150ADA68() * (sub->unk1C - sub->unk14)) + sub->unk14;
+            motion->targetB = func_150ADA68() * (motion->altB - motion->maxB) + motion->maxB;
         }
     }
-    arg0->unk30 = arg0->unk30 + ((sub->unk20 - arg0->unk30) * sub->unk28);
-    sub->unk38 -= D_800BE9E4;
-    if (sub->unk38 < 0) {
-        sub->unk38 = func_150ADA20() % (u32)sub->unk3A;
-        sub->unk34 = (func_150ADA20() % (u32)((sub->unk2C - sub->unk30) + 1)) + sub->unk30;
+    particle->height += (motion->targetB - particle->height) * motion->rateB;
+
+    motion->timerC -= D_800BE9E4;
+    if (motion->timerC < 0) {
+        motion->timerC = func_150ADA20() % (u32)motion->periodC;
+        motion->targetC = func_150ADA20() % (u32)(motion->maxC - motion->minC + 1) + motion->minC;
     }
-    temp_v0 = arg0->unk24;
-    arg0->unk24 += (s32)(((f32)sub->unk34 - (f32)temp_v0) * sub->unk3C);
-    if (arg0->unk1C < 5) {
-        func_1513F680(arg0, arg0->unk70, sub->unk48, arg0->unk72, arg0->unk73);
-        arg0->unk1C = 0x12C;
-        arg0->unk58 &= -2;
+    particle->unk24 += (s32)(((f32)motion->targetC - (f32)particle->unk24) * motion->rateC);
+
+    if (particle->timer < 5) {
+        func_1513F680(particle, particle->unk70, motion->effect, particle->unk72, particle->unk73);
+        particle->timer = 300;
+        particle->unk58 &= ~1;
     }
     return 1;
 }
 
-typedef struct {
-    char pad_0x0[0x8];
-    f32 field_0x8;
-    char pad_0xC[0x14];
-    f32 field_0x20;
-    char pad_0x24[0x20];
-    f32 field_0x44;
-} Struct15149550ObjExtra;
+/* Grows width and height towards their targets; once both are within 95%, switches the
+ * particle to effect 0xD. Returns 1 (keep alive). */
+s32 func_15149A94(Particle *particle) {
+    ParticleMotion *motion = &particle->motion;
+    s32 flags = particle->growFlags;
+    s32 grown = TRUE;
 
-typedef struct {
-    char pad_0x0[0x1C];
-    s16 field_0x1C;
-    char pad_0x1E[0xE];
-    f32 field_0x2C;
-    f32 field_0x30;
-    char pad_0x34[0x24];
-    s32 field_0x58;
-    char pad_0x5C[0x14];
-    u8 field_0x70;
-    char pad_0x71[0x1];
-    u8 field_0x72;
-    u8 field_0x73;
-    u8 field_0x74;
-    char pad_0x75[0x9B];
-    Struct15149550ObjExtra field_0x110;
-    u8 field_0x158;
-} Struct15149550Obj;
-
-s32 func_15149A94(Struct15149550Obj *arg0) {
-    Struct15149550ObjExtra *temp_v0;
-    s32 var_v1;
-    s32 flags;
-
-    flags = arg0->field_0x74;
-    var_v1 = 1;
-    temp_v0 = &arg0->field_0x110;
     if (!(flags & 2)) {
-        arg0->field_0x2C += (temp_v0->field_0x8 - arg0->field_0x2C) * temp_v0->field_0x44;
-        if ((temp_v0->field_0x8 * 0.95f) < arg0->field_0x2C) {
-            arg0->field_0x74 |= 2;
-            flags = arg0->field_0x74;
+        particle->width += (motion->targetA - particle->width) * motion->growRate;
+        if (motion->targetA * 0.95f < particle->width) {
+            flags = particle->growFlags |= 2;
         } else {
-            var_v1 = 0;
-            flags = arg0->field_0x74;
+            grown = FALSE;
+            flags = particle->growFlags;
         }
     }
     if (!(flags & 8)) {
-        arg0->field_0x30 += (temp_v0->field_0x20 - arg0->field_0x30) * temp_v0->field_0x44;
-        if ((temp_v0->field_0x20 * 0.95f) < arg0->field_0x30) {
-            arg0->field_0x74 |= 8;
+        particle->height += (motion->targetB - particle->height) * motion->growRate;
+        if (motion->targetB * 0.95f < particle->height) {
+            particle->growFlags |= 8;
         } else {
-            var_v1 = 0;
+            grown = FALSE;
         }
     }
-    if (var_v1) {
-        func_1513F680(arg0, arg0->field_0x70, 0xD, arg0->field_0x72, arg0->field_0x73);
+    if (grown) {
+        func_1513F680(particle, particle->unk70, 0xD, particle->unk72, particle->unk73);
     }
-    if (arg0->field_0x1C < 5) {
-        func_1513F680(arg0, arg0->field_0x70, arg0->field_0x158, arg0->field_0x72, arg0->field_0x73);
-        arg0->field_0x1C = 0x64;
-        arg0->field_0x58 &= -2;
+    if (particle->timer < 5) {
+        func_1513F680(particle, particle->unk70, motion->effect, particle->unk72, particle->unk73);
+        particle->timer = 100;
+        particle->unk58 &= ~1;
     }
     return 1;
 }
 
-struct Foo15149BF4 {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x11C];
-    f32 unk150;
-};
-
-s32 func_15149BF4(struct Foo15149BF4 *arg0) {
-    s32 ret;
-
-    arg0->unk2C = arg0->unk2C - (arg0->unk2C * arg0->unk150);
-    arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk150);
-    if (arg0->unk2C < 2.0f) {
-        goto ret0;
-    }
-    ret = 1;
-    if (arg0->unk30 < 2.0f) {
-        ret0:
-        return 0;
-    }
-    return ret;
-}
-
-extern f32 D_800BE9A4;
-s32 func_15149C58(f32 *arg0) {
-    arg0[11] -= arg0[11] * arg0[84];
-    arg0[12] -= arg0[12] * arg0[84];
-    arg0[20] += arg0[19] * D_800BE9A4;
-    arg0[14] += arg0[20] * D_800BE9A4;
-    if (arg0[87] < arg0[14]) {
-        return 0;
-    }
-    if ((arg0[11] < 4.0f) || (arg0[12] < 4.0f)) {
+/* Shrinks the particle; returns 0 (kill) once either side is below 2 units. */
+s32 func_15149BF4(Particle *particle) {
+    particle->width -= particle->width * particle->motion.shrinkRate;
+    particle->height -= particle->height * particle->motion.shrinkRate;
+    if (particle->width < 2.0f || particle->height < 2.0f) {
         return 0;
     }
     return 1;
 }
 
-struct Foo15149D18 {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[1];
-};
+/* Shrinks the particle while it accelerates upwards; returns 0 (kill) once it rises past
+ * maxHeight or either side drops below 4 units. */
+s32 func_15149C58(Particle *particle) {
+    particle->width -= particle->width * particle->motion.shrinkRate;
+    particle->height -= particle->height * particle->motion.shrinkRate;
+    particle->velY += particle->accelY * D_800BE9A4;
+    particle->pos.unk4 += particle->velY * D_800BE9A4;
+    if (particle->motion.maxHeight < particle->pos.unk4) {
+        return 0;
+    }
+    if (particle->width < 4.0f || particle->height < 4.0f) {
+        return 0;
+    }
+    return 1;
+}
 
-s16 *func_15149D18(struct Foo15149D18 *arg0, s16 arg1) {
-    s16 *var_v0;
-    s16 *ret;
-    f32 temp_f2;
-    f32 temp_f12;
-    u8 sp37;
+/* Fetches this frame's vertex buffer for billboard quad `index` (initialising both halves from
+ * quadTemplate when newly allocated) and positions its four corners around the particle,
+ * rotated by the angle tables D_800DD1D8/D_800DD1E8. Returns NULL if no buffer is available. */
+Vtx *func_15149D18(Particle *particle, s16 index) {
+    Vtx *vtx;
+    Vtx *result; // matching: IDO keeps a spilled copy of vtx for the return
+    f32 dz;
+    f32 dx;
+    u8 fresh;
 
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp37);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp37) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(particle->quadBuffers, index, sizeof(particle->quadTemplate), &vtx, &fresh);
+    result = vtx;
+    if (vtx != NULL) {
+        if (fresh) {
+            memcpy(particle->quadBuffers[index], particle->quadTemplate, sizeof(particle->quadTemplate));
+            memcpy(particle->quadBuffers[index] + 4, particle->quadTemplate, sizeof(particle->quadTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    temp_f2 = D_800DD1D8[arg1] * arg0->unk2C;
-    temp_f12 = D_800DD1E8[arg1] * arg0->unk2C;
+    dz = D_800DD1D8[index] * particle->width;
+    dx = D_800DD1E8[index] * particle->width;
 
-    var_v0[0] = var_v0[0x18] = arg0->unk34 + temp_f12;
-    var_v0[1] = var_v0[9] = arg0->unk38;
-    var_v0[2] = var_v0[0x1A] = arg0->unk3C - temp_f2;
-    var_v0[8] = var_v0[0x10] = arg0->unk34 - temp_f12;
-    var_v0[0x11] = var_v0[0x19] = arg0->unk38 + arg0->unk30;
-    var_v0[0xA] = var_v0[0x12] = arg0->unk3C + temp_f2;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.unk0 + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.unk4;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.unk8 - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.unk0 - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.unk4 + particle->height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.unk8 + dz;
 
-    return ret;
+    return result;
 }
 
+/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
 typedef struct {
-    char pad0[0x34];
-    struct17 unk34;
-} Struct15149EC4Arg;
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ u8 padC[0xA];
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ u8 color1[3];
+    /* 0x2B */ u8 color2[3];
+    /* 0x2E */ u8 intensity;          // func_1518CA80 scales both colours by intensity / 256
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
+} ParticleEffect;
 
-typedef struct {
-    struct17 unk0;
-    char padC[0xA];
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-} Struct15149EC4Stack;
+/* Spawns a randomised func_1518CA80 effect at the particle's position. Returns 0. */
+s32 func_15149EC4(Particle *particle) {
+    ParticleEffect effect;
 
-s32 func_15149EC4(Struct15149EC4Arg *arg0) {
-    Struct15149EC4Stack sp1C;
-
-    sp1C.unk0 = arg0->unk34;
-    sp1C.unk16 = 0;
-    sp1C.unk18 = 0;
-    sp1C.unk1A = sp1C.unk1C = (func_150ADA20() % 6U) + 8;
-    sp1C.unk1E = 0;
-    sp1C.unk20 = 0;
-    sp1C.unk22 = (func_150ADA20() % 201U) + 0x64;
-    sp1C.unk24 = (func_150ADA20() % 5U) + 3;
-    sp1C.unk26 = 0x258;
-    func_151429E0(3, &sp1C.unk28, &sp1C.unk29, &sp1C.unk2A);
-    func_151429E0(4, &sp1C.unk2B, &sp1C.unk2C, &sp1C.unk2D);
-    sp1C.unk2E = 0xFF;
-    sp1C.unk2F = (func_150ADA20() % 65U) + 0x5C;
-    sp1C.unk30 = (func_150ADA20() % 3U) + 1;
-    sp1C.unk31 = 0;
-    func_1518CA80(&sp1C, 1);
+    effect.pos = particle->pos;
+    effect.unk16 = 0;
+    effect.unk18 = 0;
+    effect.unk1A = effect.unk1C = (func_150ADA20() % 6U) + 8;
+    effect.unk1E = 0;
+    effect.unk20 = 0;
+    effect.unk22 = (func_150ADA20() % 201U) + 100;
+    effect.unk24 = (func_150ADA20() % 5U) + 3;
+    effect.unk26 = 600;
+    func_151429E0(3, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
+    func_151429E0(4, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+    effect.intensity = 0xFF;
+    effect.unk2F = (func_150ADA20() % 65U) + 92;
+    effect.unk30 = (func_150ADA20() % 3U) + 1;
+    effect.unk31 = 0;
+    func_1518CA80(&effect, 1);
     return 0;
 }
-s16 *func_15149FD0(struct Foo15149D18 *arg0, s16 arg1);
-
-struct Foo1514A19CObj {
-    char pad0[0x24];
-    s32 unk24;
-    char pad28[0x4];
-    f32 unk2C;
-    f32 unk30;
-};
-
-struct Foo1514A19CSub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s16 unk1C;
-    s16 unk1E;
-    char pad20[0x18];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s16 unk44;
-};
-s32 func_1514A19C(struct Foo1514A19CObj *arg0);
-
-typedef struct {
-    char pad_0x0[0x8];
-    f32 field_0x8;
-    char pad_0xC[0xC];
-    f32 field_0x18;
-} Struct1514A380ObjExtra;
-
-typedef struct {
-    char pad_0x0[0x2C];
-    f32 field_0x2C;
-    f32 field_0x30;
-    char pad_0x34[0x3C];
-    u8 field_0x70;
-    char pad_0x71[0x1];
-    u8 field_0x72;
-    u8 field_0x73;
-    u8 field_0x74;
-    char pad_0x75[0x9B];
-    Struct1514A380ObjExtra field_0x110;
-} Struct1514A380Obj;
-s32 func_1514A380(Struct1514A380Obj *arg0);
-
-struct Foo1514A498 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0xE];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x28];
-    u8 unk5C;
-    char pad5D[0xE7];
-    f32 unk144;
-    char pad148[0xE];
-    s16 unk156;
-    s16 unk158;
-};
-s32 func_1514A498(struct Foo1514A498 *arg0);
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Struct1514A4ECVec;
-
-struct Foo1514A4EC {
-    char pad0[0x34];
-    Struct1514A4ECVec unk34;
-    Struct1514A4ECVec unk40;
-    char pad4C[0xE4];
-    f32 unk130;
-    f32 unk134;
-    f32 unk138;
-    f32 unk13C;
-    f32 unk140;
-};
-s32 func_1514A4EC(struct Foo1514A4EC *arg0);
-void func_1514AB5C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 arg10, u8 arg11);
-
-u8 func_150ADA20(void);
-f32 func_150ADA68(void);
-s32 func_15149550(Struct15149550Arg *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_1514AD9C(struct17 *arg0, u8 arg1, s32 arg2);
-
-
-extern f32 D_800BE9A4;
-s32 func_1514AF74(f32 *arg0);
-
-extern void func_15143874(s16, f32, f32 *, f32 *);
-void func_1514B034(struct17 *arg0, u8 arg1, s32 arg2);
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    s32 pad4C;
-    s32 pad50;
-    s16 unk54;
-    s16 unk56;
-} Struct1514B8E4Desc;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    struct17 unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s32 unk34;
-    s32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    u16 unk40;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-    u8 unk49;
-    u8 unk4A;
-    u8 unk4B;
-    u8 unk4C;
-    u8 unk4D;
-    u8 unk4E;
-    u8 unk4F;
-    u8 unk50;
-    u8 unk51;
-    u8 unk52;
-    u8 unk53;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    u8 unk57;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    s32 unk60;
-    s16 unk64;
-    s16 unk66;
-    s16 unk68;
-    u8 unk6A;
-    u8 pad6B[1];
-    f32 unk6C;
-    s8 unk70;
-    s8 unk71;
-    s8 unk72;
-    s8 unk73;
-} Struct1514B364Spawn;
-
-typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-} Struct1514B364Emit;
-
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[0x7];
-} Struct1514B364Hit;
-
-extern s32 func_15046C80(struct17 *, s32, f32, Struct1514B364Hit *);
-extern void func_15152B38(Struct1514B364Spawn *, u8, s32);
-extern void func_15152F70(Struct1514B364Emit *, u8);
-void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3);
-
-struct Foo1514B844 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x7A];
-    u8 *unk98;
-};
-s32 func_1514B844(struct Foo1514B844 *arg0);
-
-extern f32 D_800BE9A4;
-
-struct Foo1514B87C {
-    char pad2C[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x18];
-    f32 unk4C;
-};
-s32 func_1514B87C(struct Foo1514B87C *arg0);
-
-struct Foo1514B8B0 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x3E];
-    u8 unk5C;
-};
-s32 func_1514B8B0(struct Foo1514B8B0 *arg0);
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-} Struct1514B8E4Size;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    struct17 unk38;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-} Struct1514B8E4Extra;
-void *func_1514B8E4(struct17 *arg0, Struct1514B8E4Size *arg1, s16 arg2, u8 arg3, struct17 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11);
-
-struct Foo1514BC08Obj {
-    char pad0[0x24];
-    s32 unk24;
-    char pad28[0x4];
-    f32 unk2C;
-    f32 unk30;
-};
-
-struct Foo1514BC08Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-};
-s32 func_1514BC08(void *arg0, void *arg1);
-void func_1514BE00(u8 *arg0);
-void func_1514BF50(f32 *arg0);
-void func_1514BF7C(u8 *arg0);
-
-typedef struct {
-    char pad0[0x38];
-    struct17 unk38;
-    f32 unk44;
-    f32 unk48;
-} Struct1514BF9CSub;
-
-typedef struct {
-    char pad0[0x34];
-    struct17 unk34;
-    char pad40[0xD0];
-    Struct1514BF9CSub unk110;
-} Struct1514BF9CObj;
-void func_1514BF9C(Struct1514BF9CObj *arg0);
-
-extern void func_1514BE20(void *);
-s32 func_1514C258(void *arg0);
-s32 func_1514C288(void *arg0);
-
-struct Foo1514C2B8 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x3A];
-    s32 unk58;
-    char pad5C[0x15];
-    u8 unk71;
-    u8 unk72;
-    char pad73[0xE1];
-    f32 unk154;
-    char pad158[0x8];
-    f32 unk160;
-    s16 unk164;
-};
-s32 func_1514C2B8(struct Foo1514C2B8 *arg0);
-void func_1514C2F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, s8 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
-void func_1514C470(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, u8 arg7, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
-void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
-void func_1514C858(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, u8 arg8, s32 arg9, f32 argA, s32 argB, u8 argC);

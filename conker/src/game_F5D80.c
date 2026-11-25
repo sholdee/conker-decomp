@@ -88,153 +88,150 @@ s32 func_150C8730(Struct150C8730Arg0 *arg0, struct108 *arg1);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 typedef struct {
-    u8 pad0[0x14];
-    s32 count;
-    s16 unk18;
-    u8 pad1A[0x16];
-} Struct150C88D0Def; /* size 0x30 */
+    f32 x, y, z;
+} Vec3f;
+
+/* Spawn parameters for an expanding ring effect (copied into RadialEffect.def). */
+typedef struct {
+    Vec3f pos;
+    u8 flags;          /* 0x0C: bit 0 = expires when remaining runs out */
+    s8 checkCallback;  /* 0x0D: index into D_80088860, -1 = none */
+    f32 speed;         /* 0x10: radius growth per tick */
+    s32 count;         /* 0x14: ring segments */
+    s16 remaining;     /* 0x18: ticks left */
+    s16 growUntil;     /* 0x1A */
+    f32 growRate;      /* 0x1C */
+    s16 shrinkFrom;    /* 0x20 */
+    f32 shrinkRate;    /* 0x24 */
+    f32 emitRate;      /* 0x28: emissions per unit of circumference per tick */
+    s8 emitCallback;   /* 0x2C: index into D_80088858, -1 = none */
+    s8 updateCallback; /* 0x2D: index into D_80088864, -1 = none */
+} RadialEffectDef; /* size 0x30 */
 
 typedef struct {
-    u8 pad0[0x10];
-    Struct150C88D0Def def;
-    f32 unk40;
-    f32 unk44;
-    f32 step;
-    s16 unk4C;
-    f32 unk50;
-    u8 *unk54;
-    u8 *unk58;
-    u8 pad5C[0x360 - 0x5C];
-    f32 (*sincos)[2];
-    u8 *unk364;
-    u8 data[1];
-} Struct150C88D0;
+    f32 x; /* sin of the segment angle */
+    f32 z; /* cos of the segment angle */
+} RadialDir;
 
-Struct150C88D0 *func_150C88D0(Struct150C88D0Def *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Struct150C88D0 *ret;
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    RadialEffectDef def; /* 0x10 */
+    f32 size;            /* 0x40 */
+    f32 radius;          /* 0x44 */
+    f32 step;            /* 0x48: angle between segments */
+    s16 duration;        /* 0x4C: initial def.remaining */
+    f32 pending;         /* 0x50: emissions owed, see func_150C8A68 */
+    Vtx *vtx[2];         /* 0x54: double-buffered by D_800BE9C0 */
+    u8 pad5C[0x304];
+    RadialDir *dirs;     /* 0x360 */
+    u8 *unk364;
+    u8 data[1];          /* 0x368 */
+} RadialEffect;
+
+/*
+ * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
+ * (count + 1) * 5 Vtx each, then extraSize bytes at unk364.
+ */
+RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    RadialEffect *effect;
     s32 i;
 
-    ret = func_15167A68(0x31, arg3, (s32)&((f32 (*)[8])((u8 *)arg1 + arg0->count * 8 + 0x408))[arg0->count * 5], 1, arg2, 1);
-    if (ret == NULL) {
+    effect = func_15167A68(0x31, arg3, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, arg2, 1);
+    if (effect == NULL) {
         return NULL;
     }
-    memcpy(&ret->def, arg0, 0x30);
-    ret->sincos = (f32 (*)[2])ret->data;
-    ret->unk54 = (u8 *)((s32)ret + arg0->count * 8 + 0x368);
-    ret->unk58 = (u8 *)&((f32 (*)[4])((s32)ret + arg0->count * 8 + 0x3B8))[arg0->count * 5];
-    ret->unk364 = (u8 *)&((f32 (*)[8])((s32)ret + arg0->count * 8 + 0x408))[arg0->count * 5];
-    ret->unk40 = 0.0f;
-    ret->unk44 = 0.0f;
-    ret->step = 6.28318548f / ret->def.count;
-    ret->unk50 = 0.0f;
-    ret->unk4C = ret->def.unk18;
+    memcpy(&effect->def, def, sizeof(RadialEffectDef));
+    effect->dirs = (RadialDir *)effect->data;
+    effect->vtx[0] = (Vtx *)((u8 *)effect + def->count * 8 + 0x368);
+    effect->vtx[1] = (Vtx *)((u8 *)effect + def->count * 8 + 0x3B8) + def->count * 5;
+    effect->unk364 = (u8 *)((Vtx (*)[2])((u8 *)effect + def->count * 8 + 0x408) + def->count * 5);
+
+    effect->size = 0.0f;
+    effect->radius = 0.0f;
+    effect->step = 6.28318548f / effect->def.count;
+    effect->pending = 0.0f;
+    effect->duration = effect->def.remaining;
     i = 0;
     {
         f32 angle = 0.0f;
-        for (; i < ret->def.count; i++) {
-            ret->sincos[i][0] = sinf(angle);
-            ret->sincos[i][1] = cosf(angle);
-            angle += ret->step;
+        for (; i < effect->def.count; i++) {
+            effect->dirs[i].x = sinf(angle);
+            effect->dirs[i].z = cosf(angle);
+            angle += effect->step;
         }
     }
-    return ret;
+    return effect;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 unk1C;
-    s8 unk1D;
-    u8 pad1E[2];
-    f32 unk20;
-    u8 pad24[4];
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    s16 unk30;
-    u8 pad32[2];
-    f32 unk34;
-    f32 unk38;
-    s8 unk3C;
-    s8 unk3D;
-    u8 pad3E[2];
-    f32 unk40;
-    f32 unk44;
-    u8 pad48[4];
-    s16 unk4C;
-    u8 pad4E[2];
-    f32 unk50;
-} Struct150C8A68;
+extern void (*D_80088858[])(RadialEffect *, f32 *, u8, f32, f32);
+extern s32 (*D_80088860[])(RadialEffect *);
+extern void (*D_80088864[])(RadialEffect *, f32);
 
-extern void (*D_80088858[])(Struct150C8A68 *, f32 *, u8, f32, f32);
-extern s32 (*D_80088860[])(Struct150C8A68 *);
-extern void (*D_80088864[])(Struct150C8A68 *, f32);
-
-void func_150C8A68(Struct150C8A68 *arg0) {
-    s32 pad;
-    u8 done;
-    f32 oldScale;
-    f32 c;
-    f32 s;
-    s32 base;
-    f32 pos[3];
+/* Per-tick update of an expanding ring: ages it, grows its radius and emits along its edge. */
+void func_150C8A68(RadialEffect *effect) {
+    s32 pad; // matching: unused stack slot
+    u8 expired;
+    f32 oldRadius;
+    f32 cosine;
+    f32 sine;
+    s32 bias;
+    f32 emitPos[3];
     u8 angle;
 
-    done = 0;
-    if (arg0->unk1C & 1) {
-        arg0->unk28 -= D_800BE9E4;
-        if (arg0->unk28 < 0) {
-            done = 1;
+    expired = 0;
+    if (effect->def.flags & 1) {
+        effect->def.remaining -= D_800BE9E4;
+        if (effect->def.remaining < 0) {
+            expired = 1;
         }
     }
-    if (!done) {
-        s16 t;
-        s16 d;
-        oldScale = arg0->unk44;
-        arg0->unk44 += arg0->unk20 * D_800BE9A4;
-        if (arg0->unk2A < (t = arg0->unk28)) {
-            d = arg0->unk4C - t;
-            arg0->unk40 = d * arg0->unk2C;
+    if (!expired) {
+        s16 remaining;
+        s16 age;
+
+        oldRadius = effect->radius;
+        effect->radius += effect->def.speed * D_800BE9A4;
+        // matching: remaining must be loaded inside the condition, after growUntil
+        if (effect->def.growUntil < (remaining = effect->def.remaining)) {
+            age = effect->duration - remaining;
+            effect->size = age * effect->def.growRate;
         }
-        if (t < arg0->unk30) {
-            arg0->unk40 = t * arg0->unk34;
+        if (remaining < effect->def.shrinkFrom) {
+            effect->size = remaining * effect->def.shrinkRate;
         }
-        if (arg0->unk3C != -1) {
-            arg0->unk50 += arg0->unk38 * D_800BE9A4 * (6.283185482f * arg0->unk44);
-            while (arg0->unk50 > 1.0f) {
-                base = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
-                angle = (func_150ADA20() % 81U) + base - 40;
-                c = func_151423D8(angle - 64);
-                s = func_151423D8(angle);
-                pos[0] = arg0->x + c * arg0->unk44;
-                pos[1] = arg0->y;
-                pos[2] = arg0->z + s * arg0->unk44;
-                if (pos[2] * pos[2] + pos[0] * pos[0] < 10894295.0f) {
-                    D_80088858[arg0->unk3C](arg0, pos, angle, c, s);
+
+        if (effect->def.emitCallback != -1) {
+            effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
+            while (effect->pending > 1.0f) {
+                bias = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                angle = (func_150ADA20() % 81U) + bias - 40;
+                cosine = func_151423D8(angle - 64);
+                sine = func_151423D8(angle);
+                emitPos[0] = effect->def.pos.x + cosine * effect->radius;
+                emitPos[1] = effect->def.pos.y;
+                emitPos[2] = effect->def.pos.z + sine * effect->radius;
+                if (emitPos[2] * emitPos[2] + emitPos[0] * emitPos[0] < 10894295.0f) {
+                    D_80088858[effect->def.emitCallback](effect, emitPos, angle, cosine, sine);
                 }
-                arg0->unk50 -= 1.0f;
+                effect->pending -= 1.0f;
             }
         }
-        if (arg0->unk3D != -1) {
-            D_80088864[arg0->unk3D](arg0, oldScale);
+        if (effect->def.updateCallback != -1) {
+            D_80088864[effect->def.updateCallback](effect, oldRadius);
         }
-        if (arg0->unk1D != -1) {
-            if (D_80088860[arg0->unk1D](arg0) == 0) {
-                done = 1;
-            }
+        if (effect->def.checkCallback != -1 && D_80088860[effect->def.checkCallback](effect) == 0) {
+            expired = 1;
         }
+
     }
-    if (done) {
-        func_1516972C((struct102 *)arg0);
+    if (expired) {
+        func_1516972C((struct102 *)effect);
     }
 }
-
-typedef struct {
-    f32 x;
-    f32 z;
-} Dir150C8DB8;
 
 typedef struct {
     f32 r;
@@ -246,21 +243,6 @@ typedef struct {
     Pt150C8DB8 *pts;
 } Ring150C8DB8;
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x8];
-    s32 unk24;
-    u8 pad28[0x18];
-    f32 unk40;
-    f32 unk44;
-    u8 pad48[0xC];
-    Vtx *unk54[(0x360 - 0x54) / 4];
-    Dir150C8DB8 *unk360;
-} Obj150C8DB8;
-
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 extern Ring150C8DB8 D_80088820;
 extern s32 *D_80090E84;
@@ -271,187 +253,179 @@ Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-#define W150C8DB8(pkt, a, b)        \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
+/*
+ * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
+ * D_80088820 is swept out at the current radius into this frame's vertex buffer.
+ */
+Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
+    RadialEffect *first; // matching: a second, stack-homed copy of effect
 
-Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
-    Obj150C8DB8 *obj;
-
-    obj = arg1;
+    first = effect;
     {
     s32 palOffset;
     u8 flag;
-    s32 count;
-    s32 i;
-    s32 j;
-    s32 n;
-    s32 pad1;
+    s32 vtxCount;
+    s32 pt;
+    s32 seg;
+    s32 stripLen;
+    s32 pad1; // matching: frame padding
 
     flag = 1;
-    count = 0;
+    vtxCount = 0;
     gdl = func_15142B7C(gdl, 0x200205, 0x70400);
     gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_1513F4E4(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
     {
-    s32 tex;
-    tex = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
-    W150C8DB8(gdl++, 0xD7000002, 0xFFFFFFFF);
-    W150C8DB8(gdl++, 0xFD500000, tex);
-    W150C8DB8(gdl++, 0xF5500000, 0x07000000);
-    W150C8DB8(gdl++, 0xF3000000, 0x073EF000);
-    W150C8DB8(gdl++, 0xF5400400, 0x01018050);
-    W150C8DB8(gdl++, 0xF2402402, 0x0147E4FE);
-    W150C8DB8(gdl++, 0xF5400280, 0x02014441);
-    W150C8DB8(gdl++, 0xF2202202, 0x0223E27E);
-    W150C8DB8(gdl++, 0xF54002A0, 0x03010832);
-    W150C8DB8(gdl++, 0xF2102102, 0x0311E13E);
-    W150C8DB8(gdl++, 0xF54002B0, 0x0400CC23);
-    W150C8DB8(gdl++, 0xF2082082, 0x0408E09E);
-    W150C8DB8(gdl++, 0xF54002B8, 0x05009014);
-    W150C8DB8(gdl++, 0xF2042042, 0x0504604E);
-    W150C8DB8(gdl++, 0xF56004BC, 0x00017C5F);
-    W150C8DB8(gdl++, 0xF2802802, 0x0087E87E);
-    W150C8DB8(gdl++, 0xFD100000, palOffset + tex - 0x20);
-    W150C8DB8(gdl++, 0xF5600100, 0x06000000);
-    W150C8DB8(gdl++, 0xE6000000, 0);
-    W150C8DB8(gdl++, 0xF0000000, 0x0603C000);
-    W150C8DB8(gdl++, 0xD7002002, 0xFFFFFFFF);
+    s32 texAddr = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
+
+
+    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, texAddr);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0x0, G_TX_LOADTILE, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3EF, 0);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0x0, 1, 0, G_TX_WRAP, 6, G_TX_NOLOD, G_TX_WRAP, 5, G_TX_NOLOD);
+    gDPSetTileSize(gdl++, 1, 0x402, 0x402, 0x47E, 0x4FE);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x80, 2, 0, G_TX_WRAP, 5, 1, G_TX_WRAP, 4, 1);
+    gDPSetTileSize(gdl++, 2, 0x202, 0x202, 0x23E, 0x27E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xA0, 3, 0, G_TX_WRAP, 4, 2, G_TX_WRAP, 3, 2);
+    gDPSetTileSize(gdl++, 3, 0x102, 0x102, 0x11E, 0x13E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xB0, 4, 0, G_TX_WRAP, 3, 3, G_TX_WRAP, 2, 3);
+    gDPSetTileSize(gdl++, 4, 0x82, 0x82, 0x8E, 0x9E);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0xB8, 5, 0, G_TX_WRAP, 2, 4, G_TX_WRAP, 1, 4);
+    gDPSetTileSize(gdl++, 5, 0x42, 0x42, 0x46, 0x4E);
+    gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 2, 0xBC, G_TX_RENDERTILE, 0, G_TX_WRAP, 5, 15, G_TX_WRAP, 5, 15);
+    gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0x802, 0x802, 0x87E, 0x87E);
+    gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, palOffset + texAddr - 0x20);
+    gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 0, 0x100, 6, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPLoadSync(gdl++);
+    gDPLoadTLUTCmd(gdl++, 6, 15);
+    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 4, G_TX_RENDERTILE, G_ON);
     }
     {
         Vtx *vtxBase;
 
         {
-            f32 dx;
-            f32 dz;
+            f32 dirX;
+            f32 dirZ;
 
-            j = 0;
-            dx = obj->unk360[0].x;
-            dz = obj->unk360[0].z;
-            vtxBase = arg1->unk54[D_800BE9C0];
+            seg = 0;
+            dirX = first->dirs[0].x;
+            dirZ = first->dirs[0].z;
+            vtxBase = effect->vtx[D_800BE9C0];
             {
-                s32 inside;
-                f32 cx;
-                f32 cz;
-                s32 padA[6];
+                s32 inRange;
+                f32 centerX;
+                f32 centerZ;
+                s32 pad[6]; // matching: frame padding
 
-                cx = obj->unk10 + obj->unk44 * dx;
-                cz = obj->unk18 + obj->unk44 * dz;
-                if (cx * cx + cz * cz < 10894295.0f) {
-                    inside = 1;
+                centerX = first->def.pos.x + first->radius * dirX;
+                centerZ = first->def.pos.z + first->radius * dirZ;
+                if (centerX * centerX + centerZ * centerZ < 10894295.0f) {
+                    inRange = 1;
                 } else {
-                    inside = 0;
+                    inRange = 0;
                 }
-                for (i = 0; i < D_80088820.count; i++) {
-                    f32 rad;
-                    f32 h;
+                for (pt = 0; pt < D_80088820.count; pt++) {
+                    f32 dist;
                     f32 y;
+                    f32 pad; // matching: unused local keeps the frame layout
                     f32 x;
                     f32 z;
 
-                    rad = (D_80088820.pts + i)->r * arg1->unk40;
-                    h = (D_80088820.pts + i)->y * arg1->unk40;
-                    x = cx;
-                    x += rad * dx;
-                    h = (inside ? h : 0.0f) + arg1->unk14;
-                    z = cz;
-                    z += rad * dz;
-                    vtxBase[count].v.ob[0] = x;
-                    vtxBase[count].v.ob[1] = h;
-                    vtxBase[count].v.ob[2] = z;
-                    vtxBase[count].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
-                    vtxBase[count].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
+                    dist = (D_80088820.pts + pt)->r * effect->size;
+                    y = (D_80088820.pts + pt)->y * effect->size;
+                    // matching: x and z are built in two steps
+                    x = centerX;
+                    x += dist * dirX;
+                    y = (inRange ? y : 0.0f) + effect->def.pos.y;
+                    z = centerZ;
+                    z += dist * dirZ;
+                    vtxBase[vtxCount].v.ob[0] = x;
+                    vtxBase[vtxCount].v.ob[1] = y;
+                    vtxBase[vtxCount].v.ob[2] = z;
+                    vtxBase[vtxCount].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[vtxCount].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
                     {
                         f32 r;
                         f32 g;
                         f32 b;
 
                         func_150CCD90(z, &r, &g, &b);
-                        vtxBase[count].v.cn[0] = r;
-                        vtxBase[count].v.cn[1] = g;
-                        vtxBase[count].v.cn[2] = b;
+                        vtxBase[vtxCount].v.cn[0] = r;
+                        vtxBase[vtxCount].v.cn[1] = g;
+                        vtxBase[vtxCount].v.cn[2] = b;
                     }
-                    if (inside) {
-                        vtxBase[count].v.cn[3] = 0xFF;
-                    } else {
-                        vtxBase[count].v.cn[3] = 0;
-                    }
-                    count++;
+                    vtxBase[vtxCount].v.cn[3] = inRange ? 0xFF : 0;
+                    vtxCount++;
                 }
             }
         }
 
-        for (; j < obj->unk24; j++) {
-            s32 k;
-            f32 dx2;
-            f32 dz2;
+        for (; seg < first->def.count; seg++) {
+            s32 next;
+            f32 dirX;
+            f32 dirZ;
 
-            i = 0;
-            k = (j + 1 == arg1->unk24) ? 0 : j + 1;
-            dx2 = arg1->unk360[k].x;
-            dz2 = arg1->unk360[k].z;
+            pt = 0;
+            next = (seg + 1 == effect->def.count) ? 0 : seg + 1;
+            dirX = effect->dirs[next].x;
+            dirZ = effect->dirs[next].z;
             {
-                s32 inside2;
-                f32 cx2;
-                f32 cz2;
-                s32 padV2;
+                s32 inRange;
+                f32 centerX;
+                f32 centerZ;
+                s32 pad; // matching: frame padding
 
-                cx2 = arg1->unk10 + arg1->unk44 * dx2;
-                cz2 = arg1->unk18 + arg1->unk44 * dz2;
-                if (cx2 * cx2 + cz2 * cz2 < 10894295.0f) {
-                    inside2 = 1;
+                centerX = effect->def.pos.x + effect->radius * dirX;
+                centerZ = effect->def.pos.z + effect->radius * dirZ;
+                if (centerX * centerX + centerZ * centerZ < 10894295.0f) {
+                    inRange = 1;
                 } else {
-                    inside2 = 0;
+                    inRange = 0;
                 }
-                for (; i < D_80088820.count; i++) {
-                    f32 rad2;
-                    f32 h2;
-                    f32 y2;
-                    f32 x2;
-                    f32 z2;
+                for (; pt < D_80088820.count; pt++) {
+                    f32 dist;
+                    f32 y;
+                    f32 pad; // matching: unused local keeps the frame layout
+                    f32 x;
+                    f32 z;
 
-                    rad2 = (D_80088820.pts + i)->r * arg1->unk40;
-                    h2 = (D_80088820.pts + i)->y * arg1->unk40;
-                    x2 = cx2;
-                    x2 += rad2 * dx2;
-                    h2 = (inside2 ? h2 : 0.0f) + arg1->unk14;
-                    z2 = cz2;
-                    z2 += rad2 * dz2;
-                    vtxBase[count].v.ob[0] = x2;
-                    vtxBase[count].v.ob[1] = h2;
-                    vtxBase[count].v.ob[2] = z2;
-                    vtxBase[count].v.tc[0] = -((x2 * 0.0398866199f + z2 * 0.03713737056f + 110.2300644f) * 32.0f);
-                    vtxBase[count].v.tc[1] = -((x2 * 0.05412395298f + z2 * -0.05814454332f + 50.14429092f) * 32.0f);
+                    dist = (D_80088820.pts + pt)->r * effect->size;
+                    y = (D_80088820.pts + pt)->y * effect->size;
+                    // matching: x and z are built in two steps
+                    x = centerX;
+                    x += dist * dirX;
+                    y = (inRange ? y : 0.0f) + effect->def.pos.y;
+                    z = centerZ;
+                    z += dist * dirZ;
+                    vtxBase[vtxCount].v.ob[0] = x;
+                    vtxBase[vtxCount].v.ob[1] = y;
+                    vtxBase[vtxCount].v.ob[2] = z;
+                    vtxBase[vtxCount].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[vtxCount].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
                     {
-                        f32 r2;
-                        f32 g2;
-                        f32 b2;
+                        f32 r;
+                        f32 g;
+                        f32 b;
 
-                        func_150CCD90(z2, &r2, &g2, &b2);
-                        vtxBase[count].v.cn[0] = r2;
-                        vtxBase[count].v.cn[1] = g2;
-                        vtxBase[count].v.cn[2] = b2;
+                        func_150CCD90(z, &r, &g, &b);
+                        vtxBase[vtxCount].v.cn[0] = r;
+                        vtxBase[vtxCount].v.cn[1] = g;
+                        vtxBase[vtxCount].v.cn[2] = b;
                     }
-                    if (inside2) {
-                        vtxBase[count].v.cn[3] = 0xFF;
-                    } else {
-                        vtxBase[count].v.cn[3] = 0;
-                    }
-                    count++;
+                    vtxBase[vtxCount].v.cn[3] = inRange ? 0xFF : 0;
+                    vtxCount++;
                 }
             }
             {
-                s32 padB;
-                n = D_80088820.count * 2;
-                gSPVertex(gdl++, &arg1->unk54[D_800BE9C0][count - n], n, 0);
-                for (i = 0; i < D_80088820.count - 1; i++) {
-                    gSP1Triangle(gdl++, i, i + 1, i + D_80088820.count + 1, 0);
-                    gSP1Triangle(gdl++, i, i + D_80088820.count + 1, i + D_80088820.count, 0);
+                s32 pad; // matching: frame padding
+                stripLen = D_80088820.count * 2;
+                gSPVertex(gdl++, &effect->vtx[D_800BE9C0][vtxCount - stripLen], stripLen, 0);
+                for (pt = 0; pt < D_80088820.count - 1; pt++) {
+                    gSP1Triangle(gdl++, pt, pt + 1, pt + D_80088820.count + 1, 0);
+                    gSP1Triangle(gdl++, pt, pt + D_80088820.count + 1, pt + D_80088820.count, 0);
                 }
             }
         }
@@ -557,46 +531,38 @@ void func_150C99B4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     func_15130374(&stack.sp38, 1, 0, arg0->unkC, arg0->unk1);
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x28];
-    f32 unk44;
-} Struct150C9BDC;
-
 extern s32 func_1505D024(struct127 *, s32, u16, s32);
 
-void func_150C9BDC(Struct150C9BDC *arg0, s32 arg1) {
+/* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
+void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     s32 i;
-    struct127 *obj;
+    struct127 *actor;
     f32 dx;
     f32 dz;
     f32 dist;
-    f32 diff;
+    f32 behind;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
-        if ((obj->interaction_state != 0) && (obj->unk28 < 20.0f) && (obj->immune == 0) &&
-            ((obj->id == 0x53) || (obj->interaction_state == 1))) {
-            dx = obj->x_position - arg0->unk10;
-            dz = obj->z_position - arg0->unk18;
+        actor = &D_800CC2D0[i];
+        if ((actor->interaction_state != 0) && (actor->unk28 < 20.0f) && (actor->immune == 0) &&
+            ((actor->id == 0x53) || (actor->interaction_state == 1))) {
+            dx = actor->x_position - effect->def.pos.x;
+            dz = actor->z_position - effect->def.pos.z;
             dist = sqrtf((dx * dx) + (dz * dz)) - 100.0f;
-            if ((obj->id == 0x53) && (obj->unk13C == 0)) {
+            if ((actor->id == 0x53) && (actor->unk13C == 0)) {
                 dist -= 150.0f;
             }
-            diff = arg0->unk44 - dist;
-            if ((diff >= 0.0f) && (diff < 250.0f)) {
-                if (obj->id == 0x53) {
-                    obj->disable_run = 10;
-                    obj->unk218 = NULL;
-                    obj->unk232 = 0x13;
-                    if (D_800CC2D0[obj->unk124].unk65 != 0) {
-                        obj->unk232 = 0x14;
+            behind = effect->radius - dist;
+            if ((behind >= 0.0f) && (behind < 250.0f)) {
+                if (actor->id == 0x53) {
+                    actor->disable_run = 10;
+                    actor->unk218 = NULL;
+                    actor->unk232 = 0x13;
+                    if (D_800CC2D0[actor->unk124].unk65 != 0) {
+                        actor->unk232 = 0x14;
                     }
                 } else {
-                    func_1505D024(obj, 0x6000E, obj->unk7A, -1);
+                    func_1505D024(actor, 0x6000E, actor->unk7A, -1);
                 }
             }
         }
@@ -703,26 +669,30 @@ void func_150C9DC4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     func_15132A4C(&sp34, 3, 0xFF, 0, arg0->unkC, arg0->unk1);
 }
 
-extern f32 D_800BE9A4;
-s32 func_150CA07C(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+/* Spawned burst particle: the BurstPacket fields live at +0x10. */
+typedef struct {
+    u8 pad0[0x20];
+    f32 rotation[3]; /* 0x20 */
+    u8 pad2C[0xC];
+    f32 position[3]; /* 0x38 */
+    f32 velocity[3]; /* 0x44 */
+    f32 spin[3];     /* 0x50 */
+    f32 gravity;     /* 0x5C */
+} BurstParticle;
+
+/* Integrates a burst particle's position (with gravity) and rotation over one frame. */
+s32 func_150CA07C(BurstParticle *particle) {
+    particle->position[0] += particle->velocity[0] * D_800BE9A4;
+    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->position[2] += particle->velocity[2] * D_800BE9A4;
+    particle->velocity[1] += particle->gravity * D_800BE9A4;
+    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
+    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
+    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s32 unk8;
-} Struct150CA930;
-
-extern void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
-void func_150CA930(Struct150CA930 *arg0);
+extern void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16, s16, s16, u8, s32, f32, void *, u8);
 
 extern f32 D_800A05A0;
 extern f32 D_800A05A4;
@@ -733,12 +703,10 @@ void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 
-typedef struct {
-    f32 x, y, z;
-} V3_150CA150;
+void func_150CA930(Vec3f *pos);
 
 typedef struct {
-    V3_150CA150 pos;
+    Vec3f pos;
     u8 unkF0;
     s8 unkF1;
     f32 unkF4;
@@ -766,7 +734,7 @@ typedef struct {
 } Fx_150CA150;
 
 void func_150CA150(u8 *arg0) {
-    V3_150CA150 pos;
+    Vec3f pos;
     f32 r, g, b;
     u8 cr, cg, cb;
     f32 floor[9];
@@ -803,22 +771,24 @@ void func_150CA150(u8 *arg0) {
         cb = b;
         func_151D5404((struct17 *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
-            Def_150CA150 def;
+            RadialEffectDef def;
             u8 padB[0x14];
-        def.pos = pos;
-        def.unkF4 = 43.20000076f;
-        def.unkF0 = 1;
-        def.unkF1 = -1;
-        def.unkF8 = 0xD;
-        def.unkFC = 0x65;
-        def.unkFE = 0x58;
-        def.unk100 = 21.80000114f / (f32)(s16)def.unkF8;
-        def.unk104 = 0x13;
-        def.unk108 = 21.80000114f / (f32)def.unk104;
-        def.unk110 = 1;
-        def.unk111 = 0;
-        def.unk10C = 7.999999798e-05f;
-        func_150C88D0((Struct150C88D0Def *)&def, 0, 0xFF, 1);
+
+            def.pos = pos;
+            def.speed = 43.20000076f;
+            def.flags = 1;
+            def.checkCallback = -1;
+            def.count = 13;
+            def.remaining = 101;
+            def.growUntil = 88;
+            def.growRate = 21.80000114f / (def.remaining - def.growUntil);
+            def.shrinkFrom = 19;
+            def.shrinkRate = 21.80000114f / def.shrinkFrom;
+            def.emitCallback = 1;
+            def.updateCallback = 0;
+            def.emitRate = 7.999999798e-05f;
+            func_150C88D0(&def, 0, 0xFF, 1);
+
         }
         if (hit != 0) {
             Fx_150CA150 fx;
@@ -829,7 +799,7 @@ void func_150CA150(u8 *arg0) {
             f32 sinv, cosv;
             u8 padC[8];
             s16 col[4][5];
-            s16 life;
+            s16 randomArg;
             u8 spark[3];
 
             ang = -0x40 - (*(u16 *)(arg0 + 0x7A) >> 8);
@@ -878,39 +848,40 @@ void func_150CA150(u8 *arg0) {
             func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
             fx.unk6 = 0x54;
             func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
-            func_150CA930((Struct150CA930 *)&pos);
-            life = func_150ADA20() % 21U + 10;
+            func_150CA930(&pos);
+            randomArg = func_150ADA20() % 21U + 10;
             spark[0] = cr;
             spark[1] = cg;
             spark[2] = cb;
-            func_1514C678(pos.x, pos.y, *(s32 *)&pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, life, 0x14, 0, 0.0f, (s32)spark, 0xFF);
+            func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, randomArg, 0x14, 0, 0.0f, spark, 0xFF);
         }
     }
 }
 
 
-void func_150CA930(Struct150CA930 *arg0) {
-    s16 temp;
+void func_150CA930(Vec3f *pos) {
+    s16 randomArg;
 
-    temp = (func_150ADA20() % 21U) + 10;
-    func_1514C678(arg0->unk0, arg0->unk4, arg0->unk8,
-                  (func_150ADA68() * 59.0f) + 170.0f,
-                  0, 0xFF, temp, 0x13, 0, 0.0f, 0, 0xFF);
+    randomArg = (func_150ADA20() % 21U) + 10;
+    func_1514C678(pos->x, pos->y, pos->z, (func_150ADA68() * 59.0f) + 170.0f,
+                  0, 0xFF, randomArg, 0x13, 0, 0.0f, NULL, 0xFF);
 }
 
 typedef struct {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x28 - 0x1E];
-    u8 unk28;
+    u8 pad0[0x1C];
+    s16 timer;
+    u8 pad1E[0xA];
+    u8 alpha;
 } Struct150CA9D0;
 
+/* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
 s32 func_150CA9D0(Struct150CA9D0 *arg0) {
-    s32 v1;
-    if (arg0->unk1C < 0x20) {
-        v1 = arg0->unk1C << 3;
-        if (v1 < arg0->unk28) {
-            arg0->unk28 = v1;
+    s32 maxAlpha;
+
+    if (arg0->timer < 32) {
+        maxAlpha = arg0->timer * 8;
+        if (maxAlpha < arg0->alpha) {
+            arg0->alpha = maxAlpha;
         }
     }
     return 1;
@@ -1023,14 +994,24 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CAC28(f32 *arg0, s32 arg1) {
-    f32 *scale;
-    s32 i;
+typedef struct {
+    u8 pad0[0x58];
+    f32 unk58;
+    u8 pad5C[4];
+    f32 unk60;
+    u8 pad64[0x44];
+    f32 damping; /* 0xA8, written by func_150CAA04 */
+} Struct150CAC28;
 
-    scale = (f32 *)((u8 *)arg0 + 0xA8);
-    for (i = D_800BE9E4; i != 0; i--) {
-        arg0[22] *= *scale;
-        arg0[24] *= *scale;
+/* Applies the per-tick damping factor to unk58 and unk60 once per elapsed tick. */
+s32 func_150CAC28(Struct150CAC28 *arg0, s32 arg1) {
+    f32 *damping; // matching: reading arg0->damping directly changes the loop code
+    s32 ticks;
+
+    damping = &arg0->damping;
+    for (ticks = D_800BE9E4; ticks != 0; ticks--) {
+        arg0->unk58 *= *damping;
+        arg0->unk60 *= *damping;
     }
     return 1;
 }
@@ -1133,13 +1114,14 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CB008(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+/* Same per-frame integration as func_150CA07C. */
+s32 func_150CB008(BurstParticle *particle) {
+    particle->position[0] += particle->velocity[0] * D_800BE9A4;
+    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->position[2] += particle->velocity[2] * D_800BE9A4;
+    particle->velocity[1] += particle->gravity * D_800BE9A4;
+    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
+    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
+    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
     return 1;
 }

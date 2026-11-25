@@ -2,94 +2,81 @@
 /* include/functions.h declares func_15169260's first parameter as s32; func_150E8930 passes
  * a struct address that IDO must build directly in a0, which only a pointer parameter
  * produces.  The header declaration is renamed out of the way and a file-local prototype
- * is used instead (same approach as game_10CD70.c). */
+ * is used instead (same approach as game_10CD70.c).  Likewise func_150ADA20 returns the full
+ * 32-bit random value (callers take it modulo n), not the u8 functions.h declares, and the
+ * seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
 #define func_15169260 func_15169260_s32_decl_in_functions_h
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
 #undef func_150ADA20
+#undef func_15149130
 u32 func_150ADA20(void);
 void func_15169260(void *, s32, s32, s32);
+struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
 
 typedef struct {
-    /* 0x0 */ s32 unk0;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ s32 unk8;
-} Struct150E81A8Vec;
-
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ Struct150E81A8Vec unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Struct150E81A8;
-
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Struct150E81A8Small;
-
-extern Struct150E81A8Vec D_800A1290[];
-extern f32 *D_80088A3C;
-extern f32 *D_80088A40;
-extern f32 D_800A130C;
-extern f32 D_800A1354;
-extern f32 D_800A1358;
-extern f32 D_800A135C;
-extern f32 D_800A1360;
-extern f32 D_800A1364;
-extern f32 D_800A1310;
-extern f32 D_800A1314;
-extern f32 D_800A1318;
-extern f32 D_800A131C;
-extern f32 D_800A1320;
-extern void func_151D3FF4(Struct150E81A8Vec *arg0, u8 arg1, s32 arg2);
-extern void func_1514FCE8(Struct150E81A8 *arg0, u8 arg1, s32 arg2);
-extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s32 func_151337C0(f32 *arg0);
-
-
-typedef struct Vec3f150E68B0 {
     f32 x, y, z;
-} Vec3f150E68B0;
+} Vec3f;
+
+typedef struct {
+    /* 0x0 */ s8 type;
+    /* 0x1 */ u8 pad1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ u8 pad7;
+} Game113D60Event; // argument of func_151D8868
+
+/* Wrappers for small id tables in rodata that functions copy onto their stack: the original
+ * code used initialized local arrays, whose initializer data the asm rodata provides here. */
+typedef struct {
+    u8 ids[1];
+} Game113D60Ids1;
+
+typedef struct {
+    s32 ids[2];
+} Game113D60Ids2;
+
+typedef struct {
+    s32 ids[3];
+} Game113D60Ids3;
+
+extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct Game113D60Emission {
-    f32 x, y, amplitudeX, amplitudeY;
-    f32 phaseX, phaseY, speedX, speedY;
-    f32 time, rate, remaining;
-    Vec3f150E68B0 position;
-    f32 scale;
-    s16 duration, durationRange;
-    u8 color;
-} Game113D60Emission;
+    /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
+    /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
+    /* 0x20 */ f32 time, rate, remaining;
+    /* 0x2C */ Vec3f position;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ s16 duration, durationRange;
+    /* 0x40 */ u8 color;
+} Game113D60Emission; // size 0x44
+
+/* Common head of the effect objects this file updates; each effect's own data starts at 0x28. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+} Game113D60EffectHeader; // size 0x28
+
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ u8 data[1]; // effect-specific data
+} Game113D60AnyEffect;
+
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Emission emission;
+} Game113D60Effect;
 
 typedef struct Game113D60Source {
     f32 chance;
@@ -103,33 +90,32 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(Vec3f150E68B0 *, s32);
-typedef void (*Game113D60StartCallback)(Vec3f150E68B0 *);
-typedef void (*Game113D60MotionCallback)(Vec3f150E68B0 *, Vec3f150E68B0 *, Vec3f150E68B0 *, Game113D60Emission *);
+typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60StartCallback)(Vec3f *);
+typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
 void *memcpy(void *, const void *, u32);
 extern Game113D60StartCallback D_80088A20[];
 extern Game113D60EndCallback D_80088A2C[];
 extern Game113D60MotionCallback D_80088A34[];
 extern Game113D60Source D_800A1190[];
-extern f32 D_800A12F8;
-extern f32 D_800A12FC;
-extern f32 D_800A1300;
 extern u8 D_800C35E8;
 
-void func_150E68B0(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* Randomly starts an emission of the source effect `sourceIndex` from one of the start
+ * points towards `actor`. */
+void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Source *source;
-    Vec3f150E68B0 end;
-    Vec3f150E68B0 start;
-    Vec3f150E68B0 delta;
+    Vec3f end;
+    Vec3f start;
+    Vec3f delta;
     Game113D60Emission emission;
-    void *result;
+    Game113D60Effect *effect;
 
-    if ((arg0 != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
-        source = &D_800A1190[arg3];
+    if ((actor != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
+        source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {
-                D_80088A2C[source->end](&end, arg0);
+                D_80088A2C[source->end](&end, actor);
             } else {
                 end.x = 0.0f;
                 end.y = 0.0f;
@@ -156,302 +142,242 @@ void func_150E68B0(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
                     emission.amplitudeY = 0.0f;
                     emission.phaseY = 0.0f;
                 }
-                emission.rate = func_150ADA68() * D_800A12F8 + D_800A12FC;
+                emission.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
                 emission.remaining = 0.0f;
                 emission.position = start;
                 emission.time = 0.0f;
-                emission.scale = (func_150ADA68() * 100.0f + 150.0f) * D_800A1300;
+                emission.scale = (func_150ADA68() * 100.0f + 150.0f) * 0.1000000015f;
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
-                result = func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 0xF, 1, 0xB, 0x44, 0xFF, 1);
-                if (result != NULL) {
-                    memcpy((u8 *)result + 0x28, &emission, 0x44);
+                effect = (Game113D60Effect *)func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
+                                                           sizeof(Game113D60Emission), 0xFF, 1);
+                if (effect != NULL) {
+                    memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));
                 }
             }
         }
     }
 }
 
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 ampX;
-    /* 0x0C */ f32 ampY;
-    /* 0x10 */ f32 phaseX;
-    /* 0x14 */ f32 phaseY;
-    /* 0x18 */ f32 speedX;
-    /* 0x1C */ f32 speedY;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 count;
-    /* 0x2C */ u8 unk2C[0xC];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ u8 unk40;
-} Struct150E6B84Sub;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ u8 sub[0x24];
-    /* 0x4C */ f32 rate;
-    /* 0x50 */ f32 accum;
-} Struct150E6B84;
-
 extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, f32 *);
-extern s32 func_150E5FD0(void *, f32 *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern void func_151436B4(f32, f32, f32, Vec3f *);
+extern s32 func_150E5FD0(Vec3f *, Vec3f *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
 extern f32 func_15144528(f32, f32, f32);
 
-void func_150E6B84(Struct150E6B84 *arg0) {
-    Struct150E6B84Sub *sub;
-    f32 inv;
-    f32 y;
-    f32 step;
-    f32 pos[9];
+/* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
+void func_150E6B84(Game113D60Effect *effect) {
+    Game113D60Emission *emission;
+    f32 inverse;
+    f32 time;
+    f32 timeStep;
+    f32 phaseStepX;
+    f32 phaseStepY;
+    f32 speedX;
+    f32 speedY;
+    f32 factor;
+    f32 period;
+    Vec3f direction;
     f32 phaseX;
     f32 phaseY;
-    f32 vx;
-    f32 vy;
-    f32 s1;
-    f32 s2;
-    u32 rnd;
-    u32 rnd2;
+    f32 sineX;
+    f32 sineY;
+    f32 randomX;
+    f32 randomY;
+    u32 randomDuration;
+    u32 randomColor;
 
-    sub = (Struct150E6B84Sub *)arg0->sub;
-    arg0->accum += arg0->rate * D_800BE9A4;
-    if (arg0->accum > 1.0f) {
-        inv = 1.0f / sub->count;
-        y = sub->unk20 + D_800BE9A4;
-        step = y * inv;
-        phaseX = sub->phaseX;
-        phaseY = sub->phaseY;
-        vx = sub->speedX * D_800BE9A4;
-        vy = sub->speedY * D_800BE9A4;
+    emission = &effect->emission;
+    effect->emission.remaining += effect->emission.rate * D_800BE9A4;
+    if (effect->emission.remaining > 1.0f) {
+        inverse = 1.0f / emission->remaining;
+        factor = 0.1f;
+        time = emission->time + D_800BE9A4;
+        timeStep = time * inverse;
+        speedX = emission->speedX * D_800BE9A4;
+        speedY = emission->speedY * D_800BE9A4;
+        phaseX = emission->phaseX;
+        phaseY = emission->phaseY;
+        phaseStepX = speedX * inverse;
+        phaseStepY = speedY * inverse;
         do {
-            s1 = sinf(phaseX);
-            s2 = sinf(phaseY);
-            func_151436B4(sub->x + s1 * sub->ampX, sub->y + s2 * sub->ampY, 5.0f, pos);
-            s1 = func_150ADA68();
-            s2 = func_150ADA68();
-            rnd = func_150ADA20();
-            rnd2 = func_150ADA20();
-            func_150E5FD0(sub->unk2C, pos, sub->unk38, (s1 * 300.0f + 100.0f) * 0.1000000015f,
-                          (s2 * 700.0f + 300.0f) * 0.1000000015f, arg0->unkC, arg0->unk1, sub->unk40,
-                          rnd % 86 + 0xAA, rnd2 % (u32)(sub->unk3E + 1) + sub->unk3C, -1);
-            phaseX += vx * inv;
-            phaseY += vy * inv;
-            y -= step;
-            sub->count -= 1.0f;
-        } while (sub->count > 1.0f);
-        sub->phaseX = func_15144528(phaseX, 6.283185482f, 0.0f);
-        sub->phaseY = func_15144528(phaseY, 6.283185482f, 0.0f);
-        sub->unk20 = y;
+            sineX = sinf(phaseX);
+            sineY = sinf(phaseY);
+            func_151436B4(emission->x + sineX * emission->amplitudeX, emission->y + sineY * emission->amplitudeY, 5.0f,
+                          &direction);
+            randomX = func_150ADA68();
+            randomY = func_150ADA68();
+            randomColor = func_150ADA20();
+            randomDuration = func_150ADA20();
+            func_150E5FD0(&emission->position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
+                          (randomY * 700.0f + 300.0f) * factor, effect->header.owner, effect->header.kind,
+                          emission->color, randomColor % 86 + 170,
+                          randomDuration % (u32)(emission->durationRange + 1) + emission->duration, -1);
+            phaseX += phaseStepX;
+            phaseY += phaseStepY;
+            time -= timeStep;
+            emission->remaining -= 1.0f;
+        } while (emission->remaining > 1.0f);
+        period = 6.283185482f;
+        emission->phaseX = func_15144528(phaseX, period, 0.0f);
+        emission->phaseY = func_15144528(phaseY, period, 0.0f);
+        emission->time = time;
     }
-}
-
-void func_150E6E34(f32 *out) {
-    f32 *p;
-    f32 t;
-
-    if (func_150ADA68() < D_800A130C) {
-        p = D_80088A3C;
-    } else {
-        p = D_80088A40;
-    }
-    t = func_150ADA68();
-    out[0] = p[0] + (p[3] - p[0]) * t;
-    out[1] = p[1] + (p[4] - p[1]) * t;
-    out[2] = p[2] + (p[5] - p[2]) * t;
-}
-
-extern s32 func_1514470C(struct134 *, s32);
-
-void func_150E6ED8(s32 arg0) {
-    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], arg0);
-}
-
-extern f32 *D_80088A44[];
-
-void func_150E6F18(f32 *out) {
-    f32 *p;
-    f32 t;
-    p = D_80088A44[(u32)func_150ADA20() % 6];
-    t = func_150ADA68();
-    out[0] = p[0] + (p[3] - p[0]) * t;
-    out[1] = p[1] + (p[4] - p[1]) * t;
-    out[2] = p[2] + (p[5] - p[2]) * t;
 }
 
 typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
+    /* 0x00 */ Vec3f start;
+    /* 0x0C */ Vec3f end;
+} Game113D60Segment;
+
+extern Game113D60Segment *D_80088A3C;
+extern Game113D60Segment *D_80088A40;
+
+/* Start callback: a random point on one of two segments. */
+void func_150E6E34(Vec3f *out) {
+    Game113D60Segment *segment;
+    f32 t;
+
+    if (func_150ADA68() < 0.5632223487f) {
+        segment = D_80088A3C;
+    } else {
+        segment = D_80088A40;
+    }
+    t = func_150ADA68();
+    out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
+    out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
+    out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
+}
+
+extern void func_1514470C(struct134 *, void *);
+
+/* End callback: the position of one of the two entries of the D_800D9A20 table. */
+void func_150E6ED8(Vec3f *out) {
+    // D_800D9A20 is declared as a single pointer in variables.h but is a two-entry table here.
+    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], out);
+}
+
+extern Game113D60Segment *D_80088A44[];
+
+/* Start callback: a random point on one of six segments. */
+void func_150E6F18(Vec3f *out) {
+    Game113D60Segment *segment;
+    f32 t;
+
+    segment = D_80088A44[func_150ADA20() % 6];
+    t = func_150ADA68();
+    out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
+    out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
+    out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
+}
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
 typedef struct {
-    u8 pad0[0x10];
-    Bone150E6FAC *unk10;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Bone150E6FAC *unk10;
 } Node150E6FAC;
 
 typedef struct {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x2D4];
-    void *unk2F4;
-} Obj150E6FAC;
+    /* 0x000 */ u8 pad0[0x14];
+    /* 0x014 */ Vec3f position;
+    /* 0x020 */ u8 pad20[0x2D4];
+    /* 0x2F4 */ void *unk2F4;
+} Actor150E6FAC;
 
 s32 func_1514ECE0(void *, s16, void *);
 
-void func_150E6FAC(f32 *out, Obj150E6FAC *obj) {
+/* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
+ * position when the model has no such node. */
+void func_150E6FAC(Vec3f *out, Actor150E6FAC *actor) {
     Node150E6FAC *node;
-    f32 c;
+    f32 sine;
     f32 radius;
     s16 angle;
-    f32 s;
+    f32 cosine;
 
-    if (func_1514ECE0(obj->unk2F4, 0x16, &node) != 0) {
+    if (func_1514ECE0(actor->unk2F4, 0x16, &node) != 0) {
         Bone150E6FAC *bone;
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
         angle = func_150ADA20() & 0xFF;
-        s = func_151423D8(angle - 0x40);
-        c = func_151423D8(angle);
+        cosine = func_151423D8(angle - 0x40);
+        sine = func_151423D8(angle);
         bone = node->unk10;
-        out[0] = obj->x + (bone->unk38 * -80.0f) + (s * radius);
-        out[1] = obj->y + (bone->unk3C * -80.0f) + 100.0f;
-        out[2] = obj->z + (bone->unk40 * -80.0f) + (c * radius);
+        out->x = actor->position.x + (bone->unk38.x * -80.0f) + (cosine * radius);
+        out->y = actor->position.y + (bone->unk38.y * -80.0f) + 100.0f;
+        out->z = actor->position.z + (bone->unk38.z * -80.0f) + (sine * radius);
     } else {
-        out[0] = obj->x;
-        out[1] = obj->y;
-        out[2] = obj->z;
+        out->x = actor->position.x;
+        out->y = actor->position.y;
+        out->z = actor->position.z;
     }
 }
 
-void func_150E70CC(f32 *arg0, f32 *arg1) {
-    arg0[0] = arg1[5];
-    arg0[1] = arg1[6];
-    arg0[2] = arg1[7];
+/* End callback: the actor's position. */
+void func_150E70CC(Vec3f *out, Actor150E6FAC *actor) {
+    out->x = actor->position.x;
+    out->y = actor->position.y;
+    out->z = actor->position.z;
 }
 
-void func_150E70EC(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
-    f32 temp_f2;
-    f32 temp_f16;
+/* Motion callback: aims the emission along `delta` with a random wobble. */
+void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+    f32 dx;
+    f32 dz;
 
-    out[0] = func_150484A0(arg2[0], arg2[2]);
-    out[2] = func_150ADA68() * D_800A1310;
-    out[4] = func_150ADA68() * D_800A1314;
-    out[6] = func_150ADA68() * 0.5f;
-    temp_f2 = arg2[0];
-    temp_f16 = arg2[2];
-    out[1] = func_150484A0(sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16)), arg2[1]) - D_800A1318;
-    out[3] = func_150ADA68() * D_800A131C;
-    out[5] = func_150ADA68() * D_800A1320;
-    out[7] = func_150ADA68() * 0.5f;
+    emission->x = func_150484A0(delta->x, delta->z);
+    emission->amplitudeX = func_150ADA68() * 0.09000000358f;
+    emission->phaseX = func_150ADA68() * 6.283185482f;
+    emission->speedX = func_150ADA68() * 0.5f;
+    dx = delta->x;
+    dz = delta->z;
+    emission->y = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
+    emission->amplitudeY = func_150ADA68() * 0.0700000003f;
+    emission->phaseY = func_150ADA68() * 6.283185482f;
+    emission->speedY = func_150ADA68() * 0.5f;
 }
 
-extern f32 D_800A1324;
-extern f32 D_800A1328;
-extern f32 D_800A132C;
-extern f32 D_800A1330;
-extern f32 D_800A1334;
-extern f32 D_800A1338;
-extern f32 D_800A133C;
-
-void func_150E71E4(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
-    out[0] = func_150484A0(arg2[0], arg2[2]);
-    out[2] = D_800A1324;
-    out[4] = func_150ADA68() * D_800A1328;
-    out[6] = func_150ADA68() * D_800A132C;
-    out[1] = D_800A1330;
-    out[3] = D_800A1334;
-    out[5] = func_150ADA68() * D_800A1338;
-    out[7] = func_150ADA68() * D_800A133C;
+/* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
+void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+    emission->x = func_150484A0(delta->x, delta->z);
+    emission->amplitudeX = 0.471238941f;
+    emission->phaseX = func_150ADA68() * 6.283185482f;
+    emission->speedX = func_150ADA68() * 0.200000003f;
+    emission->y = -0.5654867291f;
+    emission->amplitudeY = 0.3141592741f;
+    emission->phaseY = func_150ADA68() * 6.283185482f;
+    emission->speedY = func_150ADA68() * 0.150000006f;
 }
 
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-} Struct150E75A0Pos;
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+} Vec2f;
 
 typedef struct {
-    /* 0x0 */ s32 unk0[2];
-} Struct150E7290Tbl;
-
-extern Struct150E7290Tbl D_80088A5C;
-void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
-                   s32 arg9, u8 argA, s32 argB);
-void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10);
-extern void func_15164F0C(u8, u8, void *, u8, s32);
-
-void func_150E7290(u8 arg0, u8 arg1, s32 arg2) {
-    Struct150E7290Tbl sp60;
-    Struct150E75A0Pos sp58;
-    Struct150E81A8Small sp50;
-    s32 sp4C;
-    u32 sp48;
-    u32 sp44;
-    u32 sp40;
-    f32 sp3C;
-
-    if (func_150ADA68() < 0.00419999985f) {
-        sp60 = D_80088A5C;
-        if (func_150ADA68() < 0.7500000596f) {
-            sp58.unk0 = (func_150ADA68() * 300.0f) + -150.0f;
-            sp58.unk4 = (func_150ADA68() * 200.0f) + -100.0f;
-            sp3C = func_150ADA68();
-            sp40 = func_150ADA20();
-            sp44 = (func_150ADA20() & 1) ? 2 : 0;
-            sp48 = (func_150ADA20() & 1) ? 4 : 0;
-            func_150E75A0(&sp58, ((sp3C * 150.0f) + 200.0f) * 0.1000000015f, (sp40 % 201) + 500, (u8)(sp48 | sp44) | 9,
-                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
-        } else {
-            sp3C = func_150ADA68();
-            sp48 = func_150ADA20();
-            func_150E76D0(((sp3C * 100.0f) + 150.0f) * 0.1000000015f, (sp48 % 201) + 500, 9,
-                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
-        }
-        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
-        func_15164F0C(1, arg0, NULL, arg1, arg2);
-        sp50.unk0 = 1;
-        sp50.unk2 = (func_150ADA20() % 26) + 25;
-        sp50.unk5 = 1;
-        sp50.unk4 = (func_150ADA20() % 6) + 3;
-        sp50.unk6 = -1;
-        func_151D8868(&sp50, 0, 0xFF, 0);
-    }
-}
-
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
+    /* 0x00 */ Vec2f position;
+    /* 0x08 */ f32 sizeX;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11;
     /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 unk14;
+    /* 0x14 */ u16 flags;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
@@ -459,117 +385,156 @@ typedef struct {
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 pad45[3];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ f32 unk58;
-} Struct150E76D0;
+} Struct1515548CArg; // first argument of func_1515548C
 
-typedef struct {
-    /* 0x0 */ s32 unk0[3];
-} Struct150E76D0Tbl;
+extern Game113D60Ids2 D_80088A5C;
+extern Game113D60Ids1 D_80088A64;
+extern Game113D60Ids3 D_80088A68;
+extern Game113D60Ids3 D_80088A74;
+extern void *func_1515548C(Struct1515548CArg *, s32, s32 *, s32, s32, u8, s32);
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+                   s32 idCount, u8 owner, s32 kind);
+void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+                   u8 owner, s32 kind);
 
-extern Struct150E76D0Tbl D_80088A68;
-extern Struct150E76D0Tbl D_80088A74;
-extern void *func_1515548C(Struct150E76D0 *, s32, s32, s32, s32, u8, s32);
+/* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
+void func_150E7290(u8 arg0, u8 owner, s32 kind) {
+    Game113D60Ids2 ids;
+    Vec2f position;
+    Game113D60Event event;
+    s32 pad; // matching: unused stack slot
+    u32 flip4;
+    u32 flip2;
+    u32 random;
+    f32 randomSize;
 
-typedef struct {
-    /* 0x0 */ u8 unk0[1];
-} Struct150E75A0Tbl;
-
-extern Struct150E75A0Tbl D_80088A64;
-
-void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
-                   s32 arg9, u8 argA, s32 argB) {
-    Struct150E76D0 sp2C;
-    Struct150E75A0Tbl sp28;
-
-    sp28 = D_80088A64;
-    *(Struct150E75A0Pos *)&sp2C.unk00 = *arg0;
-    sp2C.unk08 = arg1;
-    sp2C.unk0C = arg1;
-    sp2C.unk10 = sp28.unk0[0];
-    sp2C.unk12 = arg2;
-    sp2C.unk14 = arg3 | 0x40;
-    sp2C.unk16 = arg6;
-    sp2C.unk18 = arg7;
-    sp2C.unk1A = 4;
-    sp2C.unk1B = 0xFF;
-    sp2C.unk1C = 0xE6;
-    sp2C.unk1D = 0xBE;
-    sp2C.unk1E = arg4;
-    sp2C.unk1F = 0xFF;
-    sp2C.unk20 = 0xFF;
-    sp2C.unk21 = 0xFF;
-    sp2C.unk22 = 0xFF;
-    sp2C.unk23 = arg5;
-    sp2C.unk24 = 1;
-    sp2C.unk28 = 0;
-    sp2C.unk2C = 0;
-    sp2C.unk40 = 0;
-    sp2C.unk41 = 0xA;
-    sp2C.unk30 = 7;
-    sp2C.unk34 = 0x3C;
-    sp2C.unk38 = 0x80;
-    sp2C.unk3C = 0x20;
-    func_1515548C(&sp2C, 0, arg8, arg9, 0, argA, argB);
+    if (func_150ADA68() < 0.00419999985f) {
+        ids = D_80088A5C;
+        if (func_150ADA68() < 0.7500000596f) {
+            position.x = (func_150ADA68() * 300.0f) + -150.0f;
+            position.y = (func_150ADA68() * 200.0f) + -100.0f;
+            randomSize = func_150ADA68();
+            random = func_150ADA20();
+            flip2 = (func_150ADA20() & 1) ? 2 : 0;
+            flip4 = (func_150ADA20() & 1) ? 4 : 0;
+            func_150E75A0(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
+                          (u8)(flip4 | flip2) | 9, (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner,
+                          kind);
+        } else {
+            randomSize = func_150ADA68();
+            flip4 = func_150ADA20(); // matching: a separate variable here does not match
+            func_150E76D0(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner, kind);
+        }
+        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        func_15164F0C(1, arg0, NULL, owner, kind);
+        event.type = 1;
+        event.duration = (func_150ADA20() % 26) + 25;
+        event.unk5 = 1;
+        event.unk4 = (func_150ADA20() % 6) + 3;
+        event.unk6 = -1;
+        func_151D8868(&event, 0, 0xFF, 0);
+    }
 }
 
+/* Spawns a func_1515548C effect of the given size at `position`. */
+void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+                   s32 idCount, u8 owner, s32 kind) {
+    Struct1515548CArg arg;
+    Game113D60Ids1 id;
 
-void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10) {
-    Struct150E76D0 sp54;
-    u8 sp53;
+    id = D_80088A64;
+    arg.position = *position;
+    arg.sizeX = size;
+    arg.sizeY = size;
+    arg.unk10 = id.ids[0];
+    arg.unk12 = unk12;
+    arg.flags = flags | 0x40;
+    arg.unk16 = unk16;
+    arg.unk18 = unk18;
+    arg.unk1A = 4;
+    arg.unk1B = 0xFF;
+    arg.unk1C = 0xE6;
+    arg.unk1D = 0xBE;
+    arg.unk1E = unk1E;
+    arg.unk1F = 0xFF;
+    arg.unk20 = 0xFF;
+    arg.unk21 = 0xFF;
+    arg.unk22 = 0xFF;
+    arg.unk23 = unk23;
+    arg.unk24 = 1;
+    arg.unk28 = 0;
+    arg.unk2C = 0;
+    arg.unk40 = 0;
+    arg.unk41 = 10;
+    arg.unk30 = 7;
+    arg.unk34 = 60;
+    arg.unk38 = 0x80;
+    arg.unk3C = 0x20;
+    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
+}
 
-    sp53 = func_150ADA20() & 3;
+/* Like func_150E75A0, but placed at a random screen edge. */
+void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+                   u8 owner, s32 kind) {
+    Struct1515548CArg arg;
+    u8 edge;
 
-    sp54.unk12 = arg1;
-    sp54.unk14 = arg2 & 0xFFF9;
-    sp54.unk16 = arg5;
-    sp54.unk18 = arg6;
-    sp54.unk1A = 5;
-    sp54.unk1B = 0xFF;
-    sp54.unk1C = 0xE6;
-    sp54.unk1D = 0xBE;
-    sp54.unk1E = arg3;
-    sp54.unk1F = 0xFF;
-    sp54.unk20 = 0xFF;
-    sp54.unk21 = 0xFF;
-    sp54.unk22 = 0xFF;
-    sp54.unk23 = arg4;
-    sp54.unk24 = 1;
-    sp54.unk28 = 0;
-    sp54.unk2C = 0;
-    sp54.unk40 = 0;
-    sp54.unk41 = 0xA;
-    sp54.unk30 = 7;
-    sp54.unk34 = 0x3C;
-    sp54.unk38 = 0x80;
-    sp54.unk3C = 0x20;
-    sp54.unk0C = arg0;
-    sp54.unk08 = arg0;
+    edge = func_150ADA20() & 3;
 
-    switch (sp53) {
+    arg.unk12 = unk12;
+    arg.flags = flags & 0xFFF9;
+    arg.unk16 = unk16;
+    arg.unk18 = unk18;
+    arg.unk1A = 5;
+    arg.unk1B = 0xFF;
+    arg.unk1C = 0xE6;
+    arg.unk1D = 0xBE;
+    arg.unk1E = unk1E;
+    arg.unk1F = 0xFF;
+    arg.unk20 = 0xFF;
+    arg.unk21 = 0xFF;
+    arg.unk22 = 0xFF;
+    arg.unk23 = unk23;
+    arg.unk24 = 1;
+    arg.unk28 = 0;
+    arg.unk2C = 0;
+    arg.unk40 = 0;
+    arg.unk41 = 10;
+    arg.unk30 = 7;
+    arg.unk34 = 60;
+    arg.unk38 = 0x80;
+    arg.unk3C = 0x20;
+    arg.sizeY = size;
+    arg.sizeX = size;
+
+    switch (edge) {
     case 0:
     case 1:
         {
-            Struct150E76D0Tbl sp44;
+            Game113D60Ids3 sideIds;
 
-            sp44 = D_80088A68;
-            sp54.unk10 = sp44.unk0[(u32)func_150ADA20() % 3];
-            sp54.unk04 = (func_150ADA68() * 160.0f) + -80.0f;
-            switch (sp53) {
+            sideIds = D_80088A68;
+            arg.unk10 = sideIds.ids[func_150ADA20() % 3];
+            arg.position.y = (func_150ADA68() * 160.0f) + -80.0f;
+            switch (edge) {
             case 0:
-                sp54.unk14 |= 2;
-                sp54.unk00 = 145.0f - arg0;
+                arg.flags |= 2;
+                arg.position.x = 145.0f - size;
                 break;
             case 1:
-                sp54.unk00 = arg0 - 145.0f;
+                arg.position.x = size - 145.0f;
                 break;
             }
         }
@@ -577,143 +542,139 @@ void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 
     case 2:
     case 3:
         {
-            Struct150E76D0Tbl sp38;
+            Game113D60Ids3 topIds;
 
-            sp38 = D_80088A74;
-            sp54.unk10 = sp38.unk0[(u32)func_150ADA20() % 3];
-            sp54.unk00 = (func_150ADA68() * 260.0f) + -130.0f;
-            switch (sp53) {
+            topIds = D_80088A74;
+            arg.unk10 = topIds.ids[func_150ADA20() % 3];
+            arg.position.x = (func_150ADA68() * 260.0f) + -130.0f;
+            switch (edge) {
             case 2:
-                sp54.unk14 |= 4;
-                sp54.unk04 = 110.0f - arg0;
+                arg.flags |= 4;
+                arg.position.y = 110.0f - size;
                 break;
             case 3:
-                sp54.unk04 = arg0 - 110.0f;
+                arg.position.y = size - 110.0f;
                 break;
             }
         }
         break;
     }
 
-    func_1515548C(&sp54, 0, arg7, arg8, 0, arg9, arg10);
-}
-
-typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s16 unkA;
-} Struct150E7994;
-
-extern f32 func_15142A80(f32);
-extern f32 func_15142AC0(f32);
-extern f32 func_15142B04(f32);
-extern f32 func_15142B44(f32);
-
-struct260 *func_150E7994(s16 arg0, f32 arg1, u8 arg2, s32 arg3) {
-    struct260 *obj;
-    Struct150E7994 spB8;
-    Struct150E81A8Small spB0;
-    f32 sp90[8];
-    f32 *out;
-    f32 t;
-    f32 step;
-    s16 i;
-
-    if (arg0 < 2) {
-        return NULL;
-    }
-
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
-
-    spB0.unk0 = 1;
-    spB0.unk2 = (func_150ADA20() % 0xBU) + 0x1E;
-    spB0.unk4 = 8;
-    spB0.unk6 = -1;
-    spB0.unk5 = 1;
-    func_151D8868(&spB0, 0, 0xFF, 0);
-
-    spB8.unk0 = arg1;
-    spB8.unk4 = 0.0f;
-    spB8.unk8 = arg0;
-    spB8.unkA = 0;
-
-    obj = func_151491F4(0x12C, -1, 0x10, 1, 0xC, (arg0 * 8) + 0x10, arg2, arg3);
-    if (obj != NULL) {
-        memcpy((void *)((s32)obj + 0x28), &spB8, 0xC);
-
-        sp90[0] = -146.0f;
-        sp90[1] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[2] = -50.0f;
-        sp90[3] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[4] = 50.0f;
-        sp90[5] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[6] = 146.0f;
-        sp90[7] = (func_150ADA68() * 160.0f) - 80.0f;
-
-        t = -1.0f;
-        out = (f32 *)((s32)obj + 0x38);
-        step = 3.0f / (f32)(arg0 - 1);
-
-        for (i = 0; i < arg0; i++) {
-            out[i * 2] = (func_15142A80(t) * sp90[0]) + (func_15142AC0(t) * sp90[2]) + (func_15142B04(t) * sp90[4]) + (func_15142B44(t) * sp90[6]);
-            out[(i * 2) + 1] = (func_15142A80(t) * sp90[1]) + (func_15142AC0(t) * sp90[3]) + (func_15142B04(t) * sp90[5]) + (func_15142B44(t) * sp90[7]);
-            t += step;
-        }
-    }
-    return obj;
+    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 accum;
     /* 0x08 */ s16 count;
-    /* 0x0A */ s16 idx;
-    /* 0x0C */ s32 pad0C;
-    /* 0x10 */ Struct150E75A0Pos pts[1];
-} Struct150E7C9CData;
+    /* 0x0A */ s16 next;
+} Game113D60BurstHead;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ Struct150E7C9CData data;
-} Struct150E7C9C;
+    /* 0x00 */ Game113D60BurstHead head;
+    /* 0x0C */ s32 pad0C;
+    /* 0x10 */ f32 points[2]; // `head.count` interleaved x, y pairs
+} Game113D60Burst;
 
-void func_150E7C9C(Struct150E7C9C *arg0) {
-    s32 pad1;
-    s32 pad2;
-    Struct150E75A0Pos pos;
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Burst burst;
+} Game113D60BurstEffect;
+
+extern f32 func_15142A80(f32);
+extern f32 func_15142AC0(f32);
+extern f32 func_15142B04(f32);
+extern f32 func_15142B44(f32);
+
+/* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
+ * curve across the screen. */
+struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
+    struct260 *obj;
+    Game113D60BurstHead head;
+    Game113D60Event event;
+    Vec2f control[4];
+    f32 *points;
     f32 t;
-    s32 b2;
-    s32 b4;
-    Struct150E7C9CData *p;
+    f32 step;
+    s16 i;
 
-    p = &arg0->data;
-    p->accum += p->rate * D_800BE9A4;
-    while ((p->accum > 1.0f) && (p->idx != p->count)) {
-        pos.unk0 = ((f32*)p->pts)[p->idx * 2];
-        pos.unk4 = ((f32*)p->pts)[p->idx * 2 + 1];
-        t = func_150ADA68();
-        b4 = (func_150ADA20() & 1) ? 4 : 0;
-        b2 = (func_150ADA20() & 1) ? 2 : 0;
-        func_150E75A0(&pos, (t * 12.0f) + 30.0f, 0x12C, (u8)(b2 | b4), (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF,
-                      0, 0, arg0->unkC, arg0->unk1);
-        func_10010F30(0x360, 0x7FFF, (pos.unk0 * 0.4315068424f) + 64.0f, 0, 0);
-        p->idx++;
-        p->accum -= 1.0f;
+    if (count < 2) {
+        return NULL;
     }
-    if (p->idx >= p->count) {
-        arg0->unkE = -1;
+
+    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
+
+    event.type = 1;
+    event.duration = (func_150ADA20() % 11) + 30;
+    event.unk4 = 8;
+    event.unk6 = -1;
+    event.unk5 = 1;
+    func_151D8868(&event, 0, 0xFF, 0);
+
+    head.rate = rate;
+    head.accum = 0.0f;
+    head.count = count;
+    head.next = 0;
+
+    obj = func_151491F4(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, kind);
+    if (obj != NULL) {
+        memcpy(&((Game113D60BurstEffect *)obj)->burst.head, &head, sizeof(head));
+
+        control[0].x = -146.0f;
+        control[0].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[1].x = -50.0f;
+        control[1].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[2].x = 50.0f;
+        control[2].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[3].x = 146.0f;
+        control[3].y = (func_150ADA68() * 160.0f) - 80.0f;
+
+        t = -1.0f;
+        points = ((Game113D60BurstEffect *)obj)->burst.points;
+        step = 3.0f / (f32)(count - 1);
+
+        for (i = 0; i < count; i++) {
+            points[i * 2] = (func_15142A80(t) * control[0].x) + (func_15142AC0(t) * control[1].x) +
+                          (func_15142B04(t) * control[2].x) + (func_15142B44(t) * control[3].x);
+            points[(i * 2) + 1] = (func_15142A80(t) * control[0].y) + (func_15142AC0(t) * control[1].y) +
+                          (func_15142B04(t) * control[2].y) + (func_15142B44(t) * control[3].y);
+            t += step;
+        }
+    }
+    return obj;
+}
+
+/* Spawns the burst's next points, `rate` per frame, and ends the effect after the last one. */
+void func_150E7C9C(Game113D60BurstEffect *effect) {
+    s32 pad[2]; // matching: unused stack slots
+    Vec2f position;
+    f32 randomSize;
+    s32 flip2;
+    s32 flip4;
+    Game113D60Burst *burst;
+
+    burst = &effect->burst;
+    burst->head.accum += burst->head.rate * D_800BE9A4;
+    while ((burst->head.accum > 1.0f) && (burst->head.next != burst->head.count)) {
+        position.x = burst->points[burst->head.next * 2];
+        position.y = burst->points[burst->head.next * 2 + 1];
+        randomSize = func_150ADA68();
+        flip4 = (func_150ADA20() & 1) ? 4 : 0;
+        flip2 = (func_150ADA20() & 1) ? 2 : 0;
+        func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, (u8)(flip2 | flip4),
+                      (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->header.owner,
+                      effect->header.kind);
+        func_10010F30(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
+        burst->head.next++;
+        burst->head.accum -= 1.0f;
+    }
+    if (burst->head.next >= burst->head.count) {
+        effect->header.unkE = -1;
     }
 }
 
 typedef struct {
-    /* 0x00 */ s32 unk00;
+    /* 0x00 */ s32 flags;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ u8 unk06;
     /* 0x07 */ u8 unk07;
@@ -732,631 +693,677 @@ typedef struct {
     /* 0x20 */ s16 unk20;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ s16 unk24;
-} Struct150E7FEC;
+} Struct1513C650Arg; // first argument of func_1513C650 / func_1513C73C (passed as an s32)
 
-void func_150E7FEC(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
-    s32 pad;
-    Struct150E7FEC sp5C;
-    s32 sp58;
-    s32 sp54;
+/* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
+ * (-1: a fixed 300 frames without the timed flag). */
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind) {
+    s32 pad; // matching: unused stack slot
+    Struct1513C650Arg arg;
+    s32 argB;
+    s32 argC;
 
-    sp5C.unk22 = 0x14;
-    sp5C.unk24 = 0xC;
-    sp5C.unk06 = 0x4F;
-    sp5C.unk07 = 0;
-    sp5C.unk00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
-    sp5C.unk04 = (arg4 == -1) ? 0x12C : arg4 + 0x14;
-    sp5C.unk08 = 0;
-    sp5C.unk0C = 0;
-    sp5C.unk10 = arg1;
-    sp5C.unk11 = 0xFF;
-    sp5C.unk12 = arg7;
-    sp5C.unk13 = arg8;
-    sp5C.unk14 = arg9;
-    sp5C.unk15 = 0xFF;
-    sp5C.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
-    sp5C.unk16 = 0;
-    sp5C.unk17 = 6;
+    arg.unk22 = 20;
+    arg.unk24 = 12;
+    arg.unk06 = 0x4F;
+    arg.unk07 = 0;
+    arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
+    arg.unk04 = (duration == -1) ? 300 : duration + 20;
+    arg.unk08 = 0;
+    arg.unk0C = 0;
+    arg.unk10 = arg1;
+    arg.unk11 = 0xFF;
+    arg.unk12 = arg7;
+    arg.unk13 = arg8;
+    arg.unk14 = arg9;
+    arg.unk15 = 0xFF;
+    arg.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    arg.unk16 = 0;
+    arg.unk17 = 6;
     if (arg5 != 0) {
-        sp58 = 3;
-        sp54 = 0xFF;
+        argB = 3;
+        argC = 0xFF;
     } else {
-        sp58 = 0;
-        sp54 = 0;
+        argB = 0;
+        argC = 0;
     }
-    func_1513C650((s32)&sp5C, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp58, sp54, 0, argA, argB);
-}
-
-void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
-    Struct150E81A8Vec sp84;
-    Struct150E81A8 sp28;
-    Struct150E81A8Small sp20;
-
-    if (arg0 == 4 || arg0 == 5 || arg0 == 6 || arg0 == 7) {
-        sp84 = D_800A1290[arg0];
-        *(f32 *)&sp84.unk4 += 200.0f;
-        func_151D3FF4(&sp84, ((u8 *)&arg1)[3], arg2);
-
-        sp28.unk00 = 0;
-        sp28.unk02 = 0xFF;
-        sp28.unk04 = -0x40;
-        sp28.unk06 = 0x4D;
-        sp28.unk08 = 0xA;
-        sp28.unk0C = 5;
-        sp28.unk10 = sp84;
-        sp28.unk1C = 252.0f;
-        sp28.unk20 = 117.0f;
-        sp28.unk24 = 308.0f;
-        sp28.unk28 = 256.0f;
-        sp28.unk2C = D_800A1354;
-        sp28.unk30 = D_800A1358;
-        sp28.unk34 = 4;
-        sp28.unk38 = 7;
-        sp28.unk3C = 27.0f;
-        sp28.unk40 = D_800A135C;
-        sp28.unk44 = D_800A1360;
-        sp28.unk48 = D_800A1364;
-        sp28.unk4C = 25;
-        sp28.unk4E = 15;
-        sp28.unk50 = 100;
-        sp28.unk52 = 100;
-        sp28.unk54 = 12;
-        sp28.unk56 = 20;
-        sp28.unk58 = 0;
-
-        func_1514FCE8(&sp28, ((u8 *)&arg1)[3], arg2);
-
-        sp20.unk0 = 1;
-        sp20.unk2 = (func_150ADA20() % 0xBU) + 0x1E;
-        sp20.unk4 = 8;
-        sp20.unk6 = -1;
-        sp20.unk5 = 1;
-        func_151D8868(&sp20, 0, 0xFF, 0);
-    }
-}
-
-void func_150E83AC(struct127 *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    struct {
-        Struct150E81A8Vec unk0;
-        f32 unkC;
-    } sp40;
-    struct260 *temp_v0;
-
-    sp40.unk0 = *(Struct150E81A8Vec *)arg0;
-    sp40.unkC = 0.0f;
-
-    temp_v0 = func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x28, -1, (arg1 == -1) ? 0 : 1, 0, (struct37 *)0x10, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp40, 0x10);
-    }
+    func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Spawn150E8470;
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ Vec3f position;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C;
+    /* 0x4E */ s16 unk4E;
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+} Struct1514FCE8Arg; // first argument of func_1514FCE8
+
+extern Vec3f D_800A1290[];
+extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
+extern void func_1514FCE8(Struct1514FCE8Arg *arg0, u8 owner, s32 kind);
+
+/* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
+ * 200 units above the point, plus an event. */
+void func_150E81A8(index, owner, kind)
+    u8 index;
+    u8 owner;
+    s32 kind;
+{
+    Vec3f position;
+    Struct1514FCE8Arg arg;
+    Game113D60Event event;
+
+    if (index == 4 || index == 5 || index == 6 || index == 7) {
+        position = D_800A1290[index];
+        position.y += 200.0f;
+        func_151D3FF4(&position, owner, kind);
+
+        arg.unk00 = 0;
+        arg.unk02 = 0xFF;
+        arg.unk04 = -0x40;
+        arg.unk06 = 0x4D;
+        arg.unk08 = 10;
+        arg.unk0C = 5;
+        arg.position = position;
+        arg.unk1C = 252.0f;
+        arg.unk20 = 117.0f;
+        arg.unk24 = 308.0f;
+        arg.unk28 = 256.0f;
+        arg.unk2C = 699.0f;
+        arg.unk30 = 511.0f;
+        arg.unk34 = 4;
+        arg.unk38 = 7;
+        arg.unk3C = 27.0f;
+        arg.unk40 = 0.7820000648f;
+        arg.unk44 = -0.9300000668f;
+        arg.unk48 = 0.7300000191f;
+        arg.unk4C = 25;
+        arg.unk4E = 15;
+        arg.unk50 = 100;
+        arg.unk52 = 100;
+        arg.unk54 = 12;
+        arg.unk56 = 20;
+        arg.unk58 = 0;
+
+        func_1514FCE8(&arg, owner, kind);
+
+        event.type = 1;
+        event.duration = (func_150ADA20() % 11) + 30;
+        event.unk4 = 8;
+        event.unk6 = -1;
+        event.unk5 = 1;
+        func_151D8868(&event, 0, 0xFF, 0);
+    }
+}
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-} Extra150E8470;
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 unkC;
+} Game113D60PointData;
+
+/* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
+    Game113D60PointData data;
+    struct260 *effect;
+
+    data.position = *position;
+    data.unkC = 0.0f;
+
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
+                           owner, kind);
+    if (effect != NULL) {
+        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
+    }
+}
 
 typedef struct {
-    struct17 pos;
-    f32 accum;
-} Sub150E8470;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f unk48;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67[9];
+} Struct15130280Arg; // first argument of func_15130280
+
+/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle. */
+typedef struct {
+    /* 0x0 */ u8 unk0;
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ u8 unk2;
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ f32 unk8;
+} Game113D60ParticleExtra;
 
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub150E8470 unk28;
-} Obj150E8470;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ Game113D60ParticleExtra extra;
+} Game113D60Particle;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+typedef struct {
+    /* 0x0 */ Vec3f position;
+    /* 0xC */ f32 accum;
+} Game113D60Emitter;
 
-void func_150E8470(Obj150E8470 *arg0) {
-    Sub150E8470 *sub;
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Emitter emitter;
+} Game113D60EmitterEffect;
 
-    sub = &arg0->unk28;
-    sub->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
-    if (sub->accum > 1.0f) {
-        Spawn150E8470 spawn;
-        Extra150E8470 extra;
-        void *ret;
+extern Game113D60Particle *func_15130280(Struct15130280Arg *, u8, s32, s32, u8, s32);
 
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
-        spawn.unk0 = 0x200005;
-        spawn.unk1E = 0x73;
-        spawn.unk20 = 2;
-        spawn.unk58 = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x19;
-        spawn.unk63 = -1;
+/* Spawns a random number of particles per frame at the effect's position. */
+void func_150E8470(Game113D60EmitterEffect *effect) {
+    Game113D60Emitter *emitter;
+
+    emitter = &effect->emitter;
+    emitter->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
+    if (emitter->accum > 1.0f) {
+        Struct15130280Arg arg;
+        Game113D60ParticleExtra extra;
+        Game113D60Particle *particle;
+
+        arg.unk1D = 0x6C;
+        arg.unk8 = 0x5103;
+        arg.unk0 = 0x200005;
+        arg.unk1E = 0x73;
+        arg.unk20 = 2;
+        arg.flags = 0x80DE07;
+        arg.unk60 = 8;
+        arg.unk61 = 6;
+        arg.unk62 = 0x19;
+        arg.unk63 = -1;
         extra.unk0 = 0;
         extra.unk1 = 0;
-        spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 0x73;
-        spawn.unk14 = 0x24;
-        spawn.unk15 = 0x22;
-        spawn.unk16 = 0x11;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x7B;
-        spawn.unk19 = 0x93;
-        spawn.unk1A = 0xAA;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.022418022f;
-        spawn.unk30 = sub->pos;
-        spawn.unk3C.unk0 = 0.0f;
-        spawn.unk3C.unk4 = 0.0f;
-        spawn.unk3C.unk8 = 0.0f;
-        spawn.unk48.unk0 = 0.0f;
-        spawn.unk48.unk4 = 0.0f;
-        spawn.unk48.unk8 = 0.0f;
+        arg.unk4 = 0;
+        arg.unkC = 0;
+        arg.unk10 = 0;
+        arg.unk64 = -1;
+        arg.unk65 = 0;
+        arg.unk22 = 0x73;
+        arg.unk14 = 0x24;
+        arg.unk15 = 0x22;
+        arg.unk16 = 0x11;
+        arg.unk17 = 0xFF;
+        arg.unk18 = 0x7B;
+        arg.unk19 = 0x93;
+        arg.unk1A = 0xAA;
+        arg.unk1C = 0xFF;
+        arg.unk24 = 1.022418022f;
+        arg.position = emitter->position;
+        arg.unk3C.x = 0.0f;
+        arg.unk3C.y = 0.0f;
+        arg.unk3C.z = 0.0f;
+        arg.unk48.x = 0.0f;
+        arg.unk48.y = 0.0f;
+        arg.unk48.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
+            extra.unk2 = func_150ADA20() % 5 + 4;
+            extra.unk3 = func_150ADA20() % 5 + 4;
             extra.unk4 = func_150ADA68() * 13.0f;
             extra.unk8 = func_150ADA68() * 13.0f;
-            spawn.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
-            spawn.unk58 &= ~0xC0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 156U + 100;
-            spawn.unkA = func_150ADA20() % 34U + 0x8D;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 71.0f + 80.0f;
-            ret = func_15130280(&spawn, 1, 0, 0xC, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            arg.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
+            arg.flags &= ~0xC0;
+            arg.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            arg.unk1B = func_150ADA20() % 156 + 100;
+            arg.unkA = func_150ADA20() % 34 + 141;
+            arg.unk28 = arg.unk2C = func_150ADA68() * 71.0f + 80.0f;
+            particle = func_15130280(&arg, 1, 0, sizeof(extra), effect->header.owner, effect->header.kind);
+            if (particle != NULL) {
+                memcpy(&particle->extra, &extra, sizeof(extra));
             }
-            sub->accum -= 1.0f;
-        } while (sub->accum > 1.0f);
+            emitter->accum -= 1.0f;
+        } while (emitter->accum > 1.0f);
     }
 }
 
-extern s32 func_15131828(s32, s32, s32, s32);
+extern s32 func_15131828(Game113D60Particle *, f32 *, u8 *, u8 *);
 
-s32 func_150E8824(s32 arg0, s32 arg1) {
-    func_15131828(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
+/* Update callback of the particles func_150E8470 spawns. */
+s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
+    func_15131828(particle, &particle->extra.unk4, &particle->extra.unk0, &particle->extra.unk2);
     return 1;
 }
 
+/* Creates the timer effect (0x35) that func_150E88C0 updates. */
 void func_150E8854(void) {
-    struct260 *temp_v0;
-    f32 sp30;
+    struct260 *effect;
+    f32 timer;
 
-    sp30 = 10.0f;
+    timer = 10.0f;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0, 0, (struct37 *)0x4, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp30, 4);
+    effect = func_15149130(300, -1, 0x35, -1, 0, 0, sizeof(timer), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(((Game113D60AnyEffect *)effect)->data, &timer, sizeof(timer));
     }
 }
 
-extern f32 D_800A1378;
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ f32 timer;
+} Game113D60TimerEffect;
+
+// matching: unprototyped, since the call below also passes the effect (in a0) to this void function
 extern void func_150E8930();
 
-void func_150E88C0(void *arg0) {
-    *(f32 *)((u8 *)arg0 + 0x28) -= D_800BE9A4;
-    if (*(f32 *)((u8 *)arg0 + 0x28) < 0.0f) {
-        *(f32 *)((u8 *)arg0 + 0x28) = (func_150ADA68() * D_800A1378) + 201.0f;
-        func_150E8930(arg0);
+/* Counts the timer down and fires func_150E8930 each time it runs out (rearmed to 201-538). */
+void func_150E88C0(Game113D60TimerEffect *effect) {
+    effect->timer -= D_800BE9A4;
+    if (effect->timer < 0.0f) {
+        effect->timer = (func_150ADA68() * 337.0f) + 201.0f;
+        func_150E8930(effect);
     }
 }
 
-typedef struct Game115D70Pair {
-    s32 first;
-    s32 second;
-} Game115D70Pair;
-
-typedef struct Game115D70Spawn {
-    s8 active;
-    u8 pad1;
-    s16 duration;
-    s8 size;
-    s8 enabled;
-    s8 sentinel;
-    u8 pad7;
-} Game115D70Spawn;
-
-extern Game115D70Pair D_80088A80;
+extern Game113D60Ids2 D_80088A80;
 extern u8 D_800BE9EB;
-extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E8A80(void);
 void func_150E90DC(void);
 
+/* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
+ * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930(void) {
-    Game115D70Pair sp30;
-    Game115D70Spawn sp28;
-    s32 active;
+    Game113D60Ids2 ids;
+    Game113D60Event event;
 
-    sp30 = D_80088A80;
-    func_15169260(&sp30, 2, 0, 0x1B);
-    func_15164F0C(0, D_800BE9EB, 0, 0xFF, 1);
-    sp28.active = 1;
-    sp28.duration = (func_150ADA20() % 21U) + 0x14;
-    sp28.enabled = 1;
-    sp28.size = (func_150ADA20() % 6U) + 3;
-    sp28.sentinel = -1;
-    func_151D8868(&sp28, 0, 0xFF, 1);
-    active = D_800DCDC4;
-    if (active != 0) {
+    ids = D_80088A80;
+    func_15169260(&ids, 2, 0, 0x1B);
+    func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
+    event.type = 1;
+    event.duration = (func_150ADA20() % 21) + 20;
+    event.unk5 = 1;
+    event.unk4 = (func_150ADA20() % 6) + 3;
+    event.unk6 = -1;
+    func_151D8868(&event, 0, 0xFF, 1);
+    if (D_800DCDC4 != 0) {
         func_150E8A80();
-        active = D_800DCDC4;
     }
-    if (active != 0) {
+    if (D_800DCDC4 != 0) {
         func_150E90DC();
     }
-    func_10010F30(0x4C8, 0x7FFF, 0x40,
-                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
-    func_10010F30(0x4CD, 0x5DC0, 0x40,
-                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
+    func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+    func_10010F30(0x4CD, 0x5DC0, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
 }
 
-extern f32 D_800A137C;
-extern f32 D_800A1380;
+typedef struct {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ f32 unk8;
+} Game113D60Data8A80;
 
+/* Creates effect 0x33 for 30-70 frames. */
 void func_150E8A80(void) {
-    struct260 *temp_v0;
-    struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-    } sp38;
+    struct260 *effect;
+    Game113D60Data8A80 data;
 
-    sp38.unk0 = D_800A137C;
-    sp38.unk4 = D_800A1380;
-    sp38.unk8 = 0.0f;
+    data.unk0 = 1.199999957e-07f;
+    data.unk4 = 3.199999981e-07f;
+    data.unk8 = 0.0f;
 
-    temp_v0 = func_15149130((func_150ADA20() % 0x29U) + 0x1E, -1, 0x33, -1, 1, 0, (struct37 *)0xC, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0xC);
+    effect = func_15149130((func_150ADA20() % 41) + 30, -1, 0x33, -1, 1, 0, sizeof(data), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
-extern f32 *func_15144B34(s32);
+/* Node of the weighted region list at D_800DCDC4, whose weights add up to D_800DCD90. */
+typedef struct Game113D60WeightedNode {
+    /* 0x0 */ struct134 *region;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ f32 weight;
+    /* 0xC */ struct Game113D60WeightedNode *next;
+} Game113D60WeightedNode;
 
-typedef struct Node150E8B1C {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    struct Node150E8B1C *unkC;
-} Node150E8B1C;
+/* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
+typedef struct {
+    /* 0x0 */ f32 rate;
+    /* 0x4 */ f32 rateRange;
+    /* 0x8 */ f32 accum;
+} Game113D60Spawner;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct150E8B1C;
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Spawner spawner;
+} Game113D60RegionSpawnerEffect;
 
-void func_150E8B1C(Struct150E8B1C *arg0) {
-    f32 *pos;
-    f32 *p;
-    Node150E8B1C *node;
-    f32 r;
-    struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-    } sp;
-    f32 *v;
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} Game113D60Data8B1C;
+
+extern Vec3f *func_15144B34(s32);
+
+/* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
+ * position func_15144B34 returns. */
+void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
+    Vec3f *center;
+    Game113D60Spawner *spawner;
+    Game113D60WeightedNode *node;
+    f32 pick;
+    Game113D60Data8B1C data;
+    Game113D60Data8B1C *dataPtr;
     f32 dx;
     f32 dy;
     f32 dz;
 
-    v = (f32 *)&sp;
-    pos = func_15144B34(D_800BE9E8);
-    p = &arg0->unk28;
-    p[2] += (p[0] + (func_150ADA68() * p[1])) * D_800BE9A4 * D_800DCD90;
-    if (p[2] > 1.0f) {
+    dataPtr = &data; // matching: using &data directly at each use does not match
+    center = func_15144B34(D_800BE9E8);
+    spawner = &effect->spawner;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4 * D_800DCD90;
+    if (spawner->accum > 1.0f) {
         do {
-            r = func_150ADA68() * D_800DCD90;
-            node = (Node150E8B1C *)D_800DCDC4;
-            while (node->unk8 < r) {
-                r -= node->unk8;
-                node = node->unkC;
+            pick = func_150ADA68() * D_800DCD90;
+            node = (Game113D60WeightedNode *)D_800DCDC4;
+            while (node->weight < pick) {
+                pick -= node->weight;
+                node = node->next;
             }
-            func_1514470C((struct134 *)node->unk0, (s32)v);
-            dx = sp.unk00 - pos[0];
-            dy = sp.unk04 - pos[1];
-            dz = sp.unk08 - pos[2];
+            func_1514470C(node->region, dataPtr);
+            dx = data.position.x - center->x;
+            dy = data.position.y - center->y;
+            dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
-                struct260 *ret;
+                struct260 *child;
 
-                sp.unk0C = 0.3171199858f;
-                sp.unk10 = 1.046509981f;
-                sp.unk14 = 0.0f;
-                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x34, -1, 1, 0, (struct37 *)0x18, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((void *)((s32)ret + 0x28), v, 0x18);
+                data.unk0C = 0.3171199858f;
+                data.unk10 = 1.046509981f;
+                data.unk14 = 0.0f;
+                child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
+                                      effect->header.owner, effect->header.kind);
+                if (child != NULL) {
+                    memcpy(((Game113D60AnyEffect *)child)->data, dataPtr, sizeof(data));
                 }
             }
-            p[2] -= 1.0f;
-        } while (p[2] > 1.0f);
+            spawner->accum -= 1.0f;
+        } while (spawner->accum > 1.0f);
     }
 }
 
-struct260 *func_15130374(void *, u8, s32, u8, s32);
-void func_151436B4(f32, f32, f32, f32 *);
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+} Struct15130374Arg; // first argument of func_15130374
+
+/* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ f32 accum;
+} Game113D60PointSpawner;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-} Struct150E8D5C;
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60PointSpawner spawner;
+} Game113D60PointSpawnerEffect;
 
-void func_150E8D5C(Struct150E8D5C *arg0) {
-    f32 *p;
-    struct260 *ret;
-    s32 flag;
-    s32 flag2;
-    struct {
-        s32 unk00;
-        s32 unk04;
-        s16 unk08;
-        s16 unk0A;
-        s32 unk0C;
-        s32 unk10;
-        u8 unk14;
-        u8 unk15;
-        u8 unk16;
-        u8 unk17;
-        u8 unk18;
-        u8 unk19;
-        u8 unk1A;
-        u8 unk1B;
-        u8 unk1C;
-        u8 unk1D;
-        s16 unk1E;
-        s16 unk20;
-        s16 unk22;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-        s32 unk58;
-        u8 pad5C[4];
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        s8 unk63;
-    } sp94;
-    s32 pad90;
-    f32 sp8C;
-    f32 zero;
+struct260 *func_15130374(Struct15130374Arg *, u8, s32, u8, s32);
 
-    p = &arg0->unk28;
-    p[5] += (p[3] + (func_150ADA68() * p[4])) * D_800BE9A4;
-    if (p[5] > 1.0f) {
+/* Spawns func_15130374 particles within 20 units of the spawner's position. */
+void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
+    Game113D60PointSpawner *spawner;
+    struct260 *particle;
+    s32 flip80;
+    s32 flip40;
+    Struct15130374Arg arg;
+    s32 pad; // matching: unused stack slot
+    f32 extra;
+    f32 zero; // matching: writing 0.0f literals instead does not match
+
+    spawner = &effect->spawner;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4;
+    if (spawner->accum > 1.0f) {
         zero = 0.0f;
         {
-            f32 f;
+            f32 size;
 
-            sp94.unk1D = 0x16;
-            sp94.unk08 = 0xE01;
-            sp94.unk00 = 0x200005;
-            sp94.unk04 = 0;
-            sp94.unk0C = 0;
-            sp94.unk10 = 0;
-            sp94.unk58 = 0x801E05;
-            sp94.unk60 = 3;
-            sp94.unk61 = 3;
-            sp94.unk62 = 0x1A;
-            sp94.unk63 = -1;
-            sp94.unk3C = zero;
-            sp94.unk40 = zero;
-            sp94.unk44 = zero;
-            sp94.unk54 = zero;
-            sp94.unk17 = 0xFF;
-            sp94.unk1C = 0xFF;
-            sp94.unk1E = 0x1E;
-            sp94.unk20 = 8;
-            sp94.unk48 = zero;
-            sp94.unk50 = zero;
+            arg.unk1D = 0x16;
+            arg.unk08 = 0xE01;
+            arg.unk00 = 0x200005;
+            arg.unk04 = 0;
+            arg.unk0C = 0;
+            arg.unk10 = 0;
+            arg.flags = 0x801E05;
+            arg.unk60 = 3;
+            arg.unk61 = 3;
+            arg.unk62 = 0x1A;
+            arg.unk63 = -1;
+            arg.unk3C = zero;
+            arg.unk40 = zero;
+            arg.unk44 = zero;
+            arg.unk54 = zero;
+            arg.unk17 = 0xFF;
+            arg.unk1C = 0xFF;
+            arg.unk1E = 30;
+            arg.unk20 = 8;
+            arg.unk48 = zero;
+            arg.unk50 = zero;
             do {
-                sp8C = 0.9700999856f;
-                sp94.unk22 = sp94.unk0A = (func_150ADA20() & 0xF) + 0x28;
-                sp94.unk1B = (func_150ADA20() % 119U) + 100;
-                f = (func_150ADA68() * 59.0f) + 80.0f;
-                sp94.unk2C = sp94.unk28 = f;
-                sp94.unk24 = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
-                sp94.unk58 &= ~0xC0;
+                extra = 0.9700999856f;
+                arg.unk22 = arg.unk0A = (func_150ADA20() & 0xF) + 40;
+                arg.unk1B = (func_150ADA20() % 119) + 100;
+                size = (func_150ADA68() * 59.0f) + 80.0f;
+                arg.unk2C = arg.unk28 = size;
+                arg.unk24 = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
+                arg.flags &= ~0xC0;
                 if (func_150ADA20() & 1) {
-                    flag = 0x80;
+                    flip80 = 0x80;
                 } else {
-                    flag = 0;
+                    flip80 = 0;
                 }
                 if (func_150ADA20() & 1) {
-                    flag2 = 0x40;
+                    flip40 = 0x40;
                 } else {
-                    flag2 = 0;
+                    flip40 = 0;
                 }
-                sp94.unk58 |= (u32)(flag2 | flag);
-                sp94.unk18 = 0x44;
-                sp94.unk19 = 0x3C;
-                sp94.unk1A = 0x27;
-                sp94.unk14 = 0xF;
-                sp94.unk15 = 0x11;
-                sp94.unk16 = 5;
-                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f, &sp94.unk30);
-                sp94.unk30 += p[0];
-                sp94.unk34 += p[1];
-                sp94.unk38 += p[2];
-                sp94.unk4C = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
-                ret = func_15130374(&sp94, 0, 4, arg0->unkC, arg0->unk1);
-                if (ret != 0) {
-                    memcpy((u8 *)ret + 0xA8, &sp8C, 4);
+                arg.flags |= (u32)(flip40 | flip80);
+                arg.unk18 = 0x44;
+                arg.unk19 = 0x3C;
+                arg.unk1A = 0x27;
+                arg.unk14 = 0xF;
+                arg.unk15 = 0x11;
+                arg.unk16 = 5;
+                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f,
+                              &arg.position);
+                arg.position.x += spawner->position.x;
+                arg.position.y += spawner->position.y;
+                arg.position.z += spawner->position.z;
+                arg.unk4C = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
+                particle = func_15130374(&arg, 0, sizeof(extra), effect->header.owner, effect->header.kind);
+                if (particle != NULL) {
+                    memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
                 }
-                p[5] -= 1.0f;
-            } while (p[5] > 1.0f);
+                spawner->accum -= 1.0f;
+            } while (spawner->accum > 1.0f);
         }
     }
 }
 
-extern f32 D_800A13B0;
-extern f32 D_800A13B4;
+typedef struct {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ f32 unk8;
+} Game113D60Data90DC;
 
+/* Creates effect 0x36 for 5-30 frames. */
 void func_150E90DC(void) {
-    struct260 *temp_v0;
-    struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-    } sp38;
+    struct260 *effect;
+    Game113D60Data90DC data;
 
-    sp38.unk0 = D_800A13B0;
-    sp38.unk4 = D_800A13B4;
-    sp38.unk8 = 0.0f;
+    data.unk0 = 2.000000023e-07f;
+    data.unk4 = 1.500000053e-07f;
+    data.unk8 = 0.0f;
 
-    temp_v0 = func_15149130((func_150ADA20() % 0x1AU) + 0x5, -1, 0x36, -1, 1, 0, (struct37 *)0xC, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0xC);
+    effect = func_15149130((func_150ADA20() % 26) + 5, -1, 0x36, -1, 1, 0, sizeof(data), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
-extern f32 *func_15144B34(s32);
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ u8 pad1C[0x14];
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x38 */ s32 unk38;
+} Game113D60Data9178;
 
-typedef struct Node150E9178 {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-    struct Node150E9178 *unkC;
-} Node150E9178;
-
-void func_150E9178(Struct150E8D5C *arg0) {
-    f32 *pos;
-    f32 *p;
-    Node150E9178 *node;
-    f32 r;
-    struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        u8 pad1C[0x14];
-        s32 unk30;
-        u8 unk34;
-        u8 unk35;
-        s32 unk38;
-    } sp;
-    f32 *v;
+/* Like func_150E8B1C, but spawns effect 0x37 within 1400 units. */
+void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
+    Vec3f *center;
+    Game113D60Spawner *spawner;
+    Game113D60WeightedNode *node;
+    f32 pick;
+    Game113D60Data9178 data;
     f32 dx;
     f32 dy;
     f32 dz;
 
-    v = (f32 *)&sp;
-    pos = func_15144B34(D_800BE9E8);
-    p = &arg0->unk28;
-    p[2] += (p[0] + (func_150ADA68() * p[1])) * D_800BE9A4 * D_800DCD90;
-    if (p[2] > 1.0f) {
+    center = func_15144B34(D_800BE9E8);
+    spawner = &effect->spawner;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4 * D_800DCD90;
+    if (spawner->accum > 1.0f) {
         do {
-            r = func_150ADA68() * D_800DCD90;
-            node = (Node150E9178 *)D_800DCDC4;
-            while (node->unk8 < r) {
-                r -= node->unk8;
-                node = node->unkC;
+            pick = func_150ADA68() * D_800DCD90;
+            node = (Game113D60WeightedNode *)D_800DCDC4;
+            while (node->weight < pick) {
+                pick -= node->weight;
+                node = node->next;
             }
-            func_1514470C((struct134 *)node->unk0, (s32)v);
-            dx = sp.unk00 - pos[0];
-            dy = sp.unk04 - pos[1];
-            dz = sp.unk08 - pos[2];
+            func_1514470C(node->region, &data);
+            dx = data.position.x - center->x;
+            dy = data.position.y - center->y;
+            dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
-                struct260 *ret;
+                struct260 *child;
 
-                sp.unk0C = 0.1932400018f;
-                sp.unk10 = 0.3140099943f;
-                sp.unk14 = 0.0f;
-                sp.unk18 = 99999.89844f;
-                sp.unk30 = 0;
-                sp.unk34 = 0;
-                sp.unk35 = 0;
-                sp.unk38 = 0;
-                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x37, -1, 1, 0, (struct37 *)0x3C, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((void *)((s32)ret + 0x28), v, 0x3C);
+                data.unk0C = 0.1932400018f;
+                data.unk10 = 0.3140099943f;
+                data.unk14 = 0.0f;
+                data.unk18 = 99999.89844f;
+                data.unk30 = 0;
+                data.unk34 = 0;
+                data.unk35 = 0;
+                data.unk38 = 0;
+                child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
+                                      effect->header.owner, effect->header.kind);
+                if (child != NULL) {
+                    memcpy(((Game113D60AnyEffect *)child)->data, &data, sizeof(data));
                 }
             }
-            p[2] -= 1.0f;
-        } while (p[2] > 1.0f);
+            spawner->accum -= 1.0f;
+        } while (spawner->accum > 1.0f);
     }
 }
 
-extern u8 D_800A12F0[];
-extern f32 D_800A12F4[];
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
+/* Extra data of the particles func_150E93DC spawns, stored at 0x170 of each particle. */
+typedef struct {
+    /* 0x00 */ f32 floorY;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8[0x14];
+} Game113D60DebrisExtra;
+
+typedef struct {
+    /* 0x000 */ Game113D60EffectHeader header;
+    /* 0x028 */ u8 pad28[0x10];
+    /* 0x038 */ Vec3f position;
+    /* 0x044 */ u8 pad44[0x12C];
+    /* 0x170 */ Game113D60DebrisExtra extra;
+} Game113D60Debris;
 
 typedef struct {
     /* 0x00 */ f32 unk00;
@@ -1369,9 +1376,7 @@ typedef struct {
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
+    /* 0x28 */ Vec3f position;
     /* 0x34 */ f32 unk34;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
@@ -1399,105 +1404,116 @@ typedef struct {
     /* 0x70 */ u8 unk70;
     /* 0x72 */ s16 unk72;
     /* 0x74 */ s16 unk74;
-} Spawn150E93DC;
+} Struct15132A4CArg; // first argument of func_15132A4C
 
-void func_150E93DC(Struct150E8D5C *arg0) {
-    f32 *p;
-    s32 ret;
-    Spawn150E93DC sp;
+extern u8 D_800A12F0[];
+extern f32 D_800A12F4[];
+extern Game113D60Debris *func_15132A4C(Struct15132A4CArg *, s32, s32, s32, u8, s32);
+
+/* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
+ * spawner's position. */
+void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
+    Game113D60PointSpawner *spawner;
+    Game113D60Debris *debris;
+    Struct15132A4CArg arg;
     s32 i;
-    u8 extra[0x1C];
-    f32 zero;
+    Game113D60DebrisExtra extra; // copied into the particle uninitialized
 
-    p = &arg0->unk28;
-    p[5] += (p[3] + (func_150ADA68() * p[4])) * D_800BE9A4;
-    if (p[5] > 1.0f) {
-        zero = 0.0f;
+    spawner = &effect->spawner;
+    spawner->accum += (spawner->rate + (func_150ADA68() * spawner->rateRange)) * D_800BE9A4;
+    if (spawner->accum > 1.0f) {
         {
-            f32 f;
+            f32 pad; // matching: unused stack slot
 
-            sp.unk00 = zero;
-            sp.unk04 = 1.0f;
-            sp.unk1C = 1.0f;
-            sp.unk20 = 1.0f;
-            sp.unk24 = 1.0f;
-            sp.unk50 = 0x49E8;
-            sp.unk34 = zero;
-            sp.unk38 = zero;
-            sp.unk3C = zero;
-            sp.unk44 = zero;
-            sp.unk58 = 0;
-            sp.unk5C = 0;
-            sp.unk60 = 0xFF;
-            sp.unk62 = 0;
-            sp.unk63 = 0;
-            sp.unk64 = 0;
-            sp.unk65 = 0;
-            sp.unk66 = 0;
-            sp.unk67 = 0;
-            sp.unk68 = 2;
-            sp.unk6A = 2;
-            sp.unk6C = 0;
-            sp.unk70 = 0;
-            sp.unk72 = 1;
-            sp.unk74 = 0xFF;
+            arg.unk00 = 0.0f;
+            arg.unk04 = 1.0f;
+            arg.unk1C = 1.0f;
+            arg.unk20 = 1.0f;
+            arg.unk24 = 1.0f;
+            arg.unk50 = 0x49E8;
+            arg.unk34 = 0.0f;
+            arg.unk38 = 0.0f;
+            arg.unk3C = 0.0f;
+            arg.unk44 = 0.0f;
+            arg.unk58 = 0;
+            arg.unk5C = 0;
+            arg.unk60 = 0xFF;
+            arg.unk62 = 0;
+            arg.unk63 = 0;
+            arg.unk64 = 0;
+            arg.unk65 = 0;
+            arg.unk66 = 0;
+            arg.unk67 = 0;
+            arg.unk68 = 2;
+            arg.unk6A = 2;
+            arg.unk6C = 0;
+            arg.unk70 = 0;
+            arg.unk72 = 1;
+            arg.unk74 = 0xFF;
             do {
-                i = func_150ADA20() % 1U;
-                sp.unk56 = D_800A12F0[i];
-                sp.unk08 = sp.unk0C = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
-                sp.unk10 = func_150ADA68() * 360.0f;
-                sp.unk14 = func_150ADA68() * 360.0f;
-                sp.unk18 = func_150ADA68() * 360.0f;
-                sp.unk4C = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
-                sp.unk54 = (func_150ADA20() % 1U) + 100;
-                sp.unk40 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
-                sp.unk48 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
-                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f, &sp.unk28);
-                sp.unk28 += p[0];
-                sp.unk2C += p[1];
-                sp.unk30 += p[2];
-                sp.unk61 = 8;
-                ret = func_15132A4C(&sp, 3, 0xFF, 0x1C, arg0->unkC, arg0->unk1);
-                if (ret != 0) {
-                    memcpy((u8 *)ret + 0x170, extra, 0x1C);
+                i = func_150ADA20() % 1;
+                arg.unk56 = D_800A12F0[i];
+                arg.unk08 = arg.unk0C = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
+                arg.unk10 = func_150ADA68() * 360.0f;
+                arg.unk14 = func_150ADA68() * 360.0f;
+                arg.unk18 = func_150ADA68() * 360.0f;
+                arg.unk4C = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
+                arg.unk54 = (func_150ADA20() % 1) + 100;
+                arg.unk40 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                arg.unk48 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f,
+                              &arg.position);
+                arg.position.x += spawner->position.x;
+                arg.position.y += spawner->position.y;
+                arg.position.z += spawner->position.z;
+                arg.unk61 = 8;
+                debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->header.owner, effect->header.kind);
+                if (debris != NULL) {
+                    memcpy(&debris->extra, &extra, sizeof(extra));
                 }
-                p[5] -= 1.0f;
-            } while (p[5] > 1.0f);
+                spawner->accum -= 1.0f;
+            } while (spawner->accum > 1.0f);
         }
     }
 }
 
-s32 func_150E971C(f32 *arg0) {
-    f32 *temp_v1;
-    struct157 tmp[1];
+extern s32 func_151337C0(Game113D60Debris *);
 
-    func_151337C0(arg0);
-    temp_v1 = (f32 *)((u8 *)arg0 + 0x170);
-    if (arg0[15] < temp_v1[0]) {
-        if ((((s32 *)temp_v1)[1] & 0x1F) == 0xA) {
-            f32 temp_f2;
+/* Update callback of the debris particles: when a particle falls below its floor height it
+ * ends (returns 0), spawning a func_1513C73C splash first if its type is 0xA. */
+s32 func_150E971C(Game113D60Debris *debris) {
+    Game113D60DebrisExtra *extra;
+    Struct1513C650Arg splash;
 
-            temp_f2 = (func_150ADA68() * 20.0f) + 20.0f;
+    func_151337C0(debris);
+    extra = &debris->extra;
+    if (debris->position.y < extra->floorY) {
+        if ((extra->unk4 & 0x1F) == 0xA) {
+            f32 size;
 
-            tmp->unk6 = 0xB;
-            tmp->unk7 = 0;
-            tmp->unk0 = 0x9701;
-            tmp->unk4 = 0x64;
-            tmp->unk8 = 0;
-            tmp->unkC = 0;
-            *(u8 *)&tmp->unk10 = 0xFF;
-            *(u8 *)&tmp->unk11 = 0xFF;
-            *(u8 *)&tmp->unk12 = 0xFF;
-            *(u8 *)&tmp->unk13 = 0xFF;
-            *(u8 *)&tmp->unk14 = 0xFF;
-            *(u8 *)&tmp->unk15 = 0xFF;
-            tmp->unk18 = 0x3B0003;
-            tmp->unk16 = 0;
-            tmp->unk17 = 7;
-            tmp->unk22 = 0x14;
-            tmp->unk24 = 0xC;
+            size = (func_150ADA68() * 20.0f) + 20.0f;
 
-            func_1513C73C((s32)tmp, 0, 0, (s32)(temp_v1 + 2), arg0[14], temp_v1[0] + 5.0f, arg0[16], temp_f2, temp_f2, func_150ADA20() & 0xFF, 0, 0, *(u8 *)((u8 *)arg0 + 0xC), *(u8 *)((u8 *)arg0 + 1));
+            splash.unk06 = 0xB;
+            splash.unk07 = 0;
+            splash.flags = 0x9701;
+            splash.unk04 = 100;
+            splash.unk08 = 0;
+            splash.unk0C = 0;
+            splash.unk10 = 0xFF;
+            splash.unk11 = 0xFF;
+            splash.unk12 = 0xFF;
+            splash.unk13 = 0xFF;
+            splash.unk14 = 0xFF;
+            splash.unk15 = 0xFF;
+            splash.unk18 = 0x3B0003;
+            splash.unk16 = 0;
+            splash.unk17 = 7;
+            splash.unk22 = 20;
+            splash.unk24 = 12;
+
+            func_1513C73C((s32)&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
+                          debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->header.owner,
+                          debris->header.kind);
         }
         return 0;
     }

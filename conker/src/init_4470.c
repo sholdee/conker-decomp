@@ -4,12 +4,13 @@
 #include "variables.h"
 
 
+/* Starts the PI manager and creates the DMA message queues. */
 void func_10004470(void) {
-    int i;
-    osCreatePiManager(150, &D_800388B0, &D_800380E0, 0xC8);
+    s32 i;
 
-    for (i = 0; i < 3; i++)
-    {
+    osCreatePiManager(OS_PRIORITY_PIMGR, &D_800388B0, &D_800380E0, 200);
+
+    for (i = 0; i < 3; i++) {
         osCreateMesgQueue(&gMessageQueue[i], &gMessages[i], 1);
     }
 
@@ -18,249 +19,156 @@ void func_10004470(void) {
     D_8003A571 = 0;
 }
 
-void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
-    OSMesgQueue *msgQueue;
-    OSIoMesg tmpIoMsg;
+/*
+ * Reads size bytes of cartridge ROM at devAddr into dramAddr. A blocking read waits on the calling
+ * thread's queue; a non-blocking one takes the next slot of the 300-entry D_80038950 ring
+ * (D_8003A570 = next slot, D_8003A571 = reads in flight) and is collected by func_10004674.
+ * Both counters are u8, so the 299/300 limits below can never actually be reached.
+ */
+void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 blocking) {
+    OSMesgQueue *queue;
+    OSIoMesg localIoMsg;
     OSIoMesg *ioMsg;
-    s32 sp3c;
+    s32 threadIndex;
 
-    sp3c = __osRunningThread->id - 3;
-    if ((size < 0xC8U) && (sp3c == 0)) {
+    threadIndex = __osRunningThread->id - 3;
+    if (size < 200 && threadIndex == 0) {
         func_1000480C(devAddr, dramAddr, size);
         return;
     }
-    if ((sp3c >= 4) || ( sp3c < 0)) {
-        sp3c = 0;
+    if (threadIndex >= 4 || threadIndex < 0) {
+        threadIndex = 0;
     }
-    if (arg3 == 0) {
-        if (D_8003A571 != 300) { // messages waiting?
-            ioMsg = &D_80038950[D_8003A570];
-            msgQueue = &gMessageQueue0;
-            if (D_8003A570 == 299) { // number of message queues used?
-                D_8003A570 = 0;
-            } else {
-                D_8003A570 += 1U;
-            }
-            D_8003A571 += 1U;
-        } else {
+    if (!blocking) {
+        if (D_8003A571 == 300) {
             return;
         }
+        ioMsg = &D_80038950[D_8003A570];
+        queue = &gMessageQueue0;
+        if (D_8003A570 == 299) {
+            D_8003A570 = 0;
+        } else {
+            D_8003A570 += 1; // matching: ++ changes how size is spilled
+        }
+        D_8003A571 += 1;
     } else {
-        ioMsg = &tmpIoMsg;
-        msgQueue = &gMessageQueue[sp3c];
+        ioMsg = &localIoMsg;
+        queue = &gMessageQueue[threadIndex];
     }
     osInvalDCache(dramAddr, size);
-    osPiStartDma(ioMsg, 0, 0, devAddr, dramAddr, size, msgQueue);
+    osPiStartDma(ioMsg, OS_MESG_PRI_NORMAL, OS_READ, devAddr, dramAddr, size, queue);
 
-    if (arg3 != 0) {
-        osRecvMesg(msgQueue, 0, OS_MESG_BLOCK);
+    if (blocking) {
+        osRecvMesg(queue, NULL, OS_MESG_BLOCK);
     }
 }
 
+/* Waits for every non-blocking read started by func_10004514. */
 void func_10004674(void) {
-    int i;
-    for (i = 0; i < D_8003A571; i++)
-    {
-        osRecvMesg(&gMessageQueue0, 0, OS_MESG_BLOCK);
+    s32 i;
+
+    for (i = 0; i < D_8003A571; i++) {
+        osRecvMesg(&gMessageQueue0, NULL, OS_MESG_BLOCK);
     }
 
     D_8003A571 = 0;
 }
 
+/* Blocking ROM read of any size, split into DMAs of at most 0x14000 bytes on the thread's queue. */
 void func_100046E4(s32 devAddr, void *dramAddr, u32 size) {
-    s32 ioMsg[4];
+    OSIoMesg ioMsg;
     OSMesg recvMsg;
-    OSMesgQueue *msgQueue;
-    s32 threadId;
+    s32 threadIndex;
     u32 sent;
-    u32 transferSize;
+    u32 chunkSize;
 
     sent = 0;
-    threadId = __osRunningThread->id - 3;
-    if ((threadId >= 4) || (threadId < 0)) {
-        threadId = 0;
+    threadIndex = __osRunningThread->id - 3;
+    if (threadIndex >= 4 || threadIndex < 0) {
+        threadIndex = 0;
     }
 
     osInvalDCache(dramAddr, size);
-    if (size != 0) {
-        msgQueue = &gMessageQueue[threadId];
-        do {
-            transferSize = ((size - sent) < 0x14000U) ? (size - sent) : 0x14000;
-            osPiStartDma((OSIoMesg *)((u8 *)ioMsg - 8), 0, 0, devAddr, dramAddr, transferSize, msgQueue);
-            osRecvMesg(msgQueue, (OSMesg *)((u8 *)&recvMsg - 8), OS_MESG_BLOCK);
-            sent += transferSize;
-            devAddr += transferSize;
-            dramAddr = (void *)((u8 *)dramAddr + transferSize);
-        } while (sent < size);
+    while (sent < size) {
+        chunkSize = MIN(size - sent, 0x14000);
+        osPiStartDma(&ioMsg, OS_MESG_PRI_NORMAL, OS_READ, devAddr, dramAddr, chunkSize, &gMessageQueue[threadIndex]);
+        osRecvMesg(&gMessageQueue[threadIndex], &recvMsg, OS_MESG_BLOCK);
+        sent += chunkSize;
+        devAddr += chunkSize;
+        dramAddr = (u8 *)dramAddr + chunkSize;
     }
 }
 
 typedef union {
     s32 word;
     u16 half[2];
-} TransferWord;
+} RomWord;
 
-void func_1000480C(u32 source, void *destination, u32 size) {
+/*
+ * Copies size bytes (rounded up to even) from cartridge ROM offset romAddr to dest with uncached
+ * CPU reads instead of a DMA, once the PI is idle. A ROM address that is not word aligned has its
+ * first halfword taken from the low half of the preceding word.
+ */
+void func_1000480C(u32 romAddr, void *dest, u32 size) {
     u32 count;
-    TransferWord data;
+    RomWord data;
     u32 status;
     u32 offset;
-    u32 readAddress;
-    u8 *writeAddress;
+    u32 readAddr;
+    u8 *writeAddr;
 
-    *(volatile u8 *)&D_8003A572 = 1;
-    size = (size + 1) & ~1U;
-    while (*(volatile u8 *)&D_8003A573 != 0) {
+    // D_8003A572/3/5 are flags shared with other threads; variables.h declares them plain u8.
+    *(vu8 *)&D_8003A572 = 1;
+    size = (size + 1) & ~1;
+    while (*(vu8 *)&D_8003A573) {
     }
-    while ((status = *(volatile u32 *)0xA4600010) & 3) {
+    // matching: the status local is needed (IDO -g3 frame size)
+    while ((status = IO_READ(PI_STATUS_REG)) & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY)) {
     }
-    source |= D_80000308;
-    if (source & 2) {
+    romAddr |= D_80000308; // osRomBase
+    if (romAddr & 2) {
         size -= 2;
-        readAddress = source;
-        data.word = *(volatile u32 *)((readAddress - 2) | 0xA0000000);
+        readAddr = romAddr; // matching: reading through romAddr directly changes regalloc
+        data.word = IO_READ(readAddr - 2);
         count = size - 2;
         offset = 0;
-        *(u16 *)((void **)&destination)[0] = data.half[1];
+        *(u16 *)dest = data.half[1];
         if (count != 0) {
-            readAddress = source + 2;
-            writeAddress = ((void **)&destination)[0];
+            readAddr = romAddr + 2;
+            writeAddr = *(u8 **)&dest; // matching: forces dest to be reloaded from its stack home
             do {
-                data.word = *(volatile u32 *)((readAddress + offset) | 0xA0000000);
+                data.word = IO_READ(readAddr + offset);
                 offset += 4;
-                *(s16 *)(writeAddress + 2) = data.word >> 16;
-                writeAddress += 4;
-                *(u16 *)writeAddress = data.word & 0xFFFF;
+                *(u16 *)(writeAddr + 2) = data.word >> 16;
+                writeAddr += 4;
+                *(u16 *)writeAddr = data.word & 0xFFFF; // matching: mask makes IDO reload data.word
             } while (offset < count);
         }
         if (size & 2) {
-            data.word = *(volatile u32 *)((source + offset + 2) | 0xA0000000);
-            *(u16 *)((u8 *)((void **)&destination)[0] + offset + 2) = data.half[0];
+            data.word = IO_READ(romAddr + offset + 2);
+            *(u16 *)((u8 *)dest + offset + 2) = data.half[0];
         }
     } else {
         count = size - 2;
         offset = 0;
+        // matching: guarded do-while with cursors; for-loop forms change regalloc
         if (count != 0) {
-            readAddress = source;
-            writeAddress = ((void **)&destination)[0];
+            readAddr = romAddr;
+            writeAddr = dest;
             do {
-                *(u32 *)writeAddress = *(volatile u32 *)(readAddress | 0xA0000000);
+                *(u32 *)writeAddr = IO_READ(readAddr);
                 offset += 4;
-                readAddress += 4;
-                writeAddress += 4;
+                readAddr += 4;
+                writeAddr += 4;
             } while (offset < count);
         }
         if (size & 2) {
-            data.word = *(volatile u32 *)((offset + source) | 0xA0000000);
-            *(u16 *)((u8 *)((void **)&destination)[0] + offset) = data.half[0];
+            data.word = IO_READ(offset + romAddr);
+            *(u16 *)((u8 *)dest + offset) = data.half[0];
         }
     }
-    *(volatile u8 *)&D_8003A572 = 0;
-    if (*(volatile u8 *)&D_8003A575 != 0) {
-        osStartThread((OSThread *)&D_80035910);
+    *(vu8 *)&D_8003A572 = 0;
+    if (*(vu8 *)&D_8003A575) {
+        osStartThread((OSThread *)&D_80035910); // variables.h declares the thread as OSThread *
     }
 }
-// void func_1000480C(s32 devAddr, void *dramAddr, u32 size) {
-//     s32 sp38;
-//     s32 *temp_t0;
-//     s32 *temp_t0_2;
-//     s32 temp_a1;
-//     s32 temp_s0;
-//     s32 temp_s1;
-//     s32 temp_t4;
-//     s32 temp_t7;
-//     u32 temp_a0;
-//     u32 temp_a0_2;
-//     u32 temp_a2;
-//     u32 temp_a2_2;
-//     void *temp_v0;
-//     void *temp_v0_2;
-//     s32 phi_a1;
-//     void *phi_v0;
-//     u32 phi_a0;
-//     u32 phi_a0_2;
-//     s32 phi_v1;
-//     void *phi_v0_2;
-//     u32 phi_a0_3;
-//     u32 phi_a0_4;
-//     void *phi_a1_2;
-//     u32 phi_a2;
-//
-//     D_8003A572 = 1;
-//     size = (size + 1) & ~1;
-//     do {} while (D_8003A573 != 0);
-//
-//     temp_a2 = size - 2;
-//
-//     while ((IO_READ(PI_STATUS_REG) & (PI_STATUS_DMA_BUSY|PI_STATUS_IO_BUSY)) != 0) {};
-//
-//     temp_t0 = &sp38;
-//     devAddr = devAddr | D_80000308;
-//     if ((devAddr & 2) != 0) {
-//         temp_s0 = size - 2;
-//         sp38 = *((s32*)((devAddr - 2) | 0xA0000000));
-// //         temp_a2_2 = temp_s0 - 2;
-// //         *dramAddr = (u16) temp_t0->unk2;
-// //         phi_a0_2 = 0U;
-// //         phi_a1_2 = dramAddr;
-// //         // phi_return = (void *) *(void *)0xA4600010;
-// //         if (temp_a2_2 != 0) {
-// //             phi_a1 = devAddr + 2;
-// //             phi_v0 = dramAddr;
-// //             phi_a0 = 0U;
-// // loop_7:
-// //             temp_t4 = *(phi_a1 | 0xA0000000);
-// //             temp_a0 = phi_a0 + 4;
-// //             sp38 = temp_t4;
-// //             phi_v0->unk2 = (s16) (temp_t4 >> 0x10);
-// //             temp_a1 = phi_a1 + 4;
-// //             temp_v0 = phi_v0 + 4;
-// //             *temp_v0 = (s16) sp38;
-// //             phi_a1 = temp_a1;
-// //             phi_v0 = temp_v0;
-// //             phi_a0 = temp_a0;
-// //             phi_a0_2 = temp_a0;
-// //             phi_a1_2 = (void *) temp_a1;
-// //             if (temp_a0 < temp_a2_2) {
-// //                 goto loop_7;
-// //             }
-// //         }
-// //         phi_a2 = temp_a2_2;
-// //         if ((temp_s0 & 2) != 0) {
-// //             sp38 = *((devAddr + phi_a0_2 + 2) | 0xA0000000);
-// //             (dramAddr + phi_a0_2)->unk2 = (u16) temp_t0->unk0;
-// //             phi_a2 = temp_a2_2;
-// //         }
-//     } else {
-// //         phi_a0_4 = 0U;
-// //         if (temp_a2 != 0) {
-// //             phi_v1 = devAddr;
-// //             phi_v0_2 = dramAddr;
-// //             phi_a0_3 = 0U;
-// // loop_12:
-// //             temp_a0_2 = phi_a0_3 + 4;
-// //             temp_v0_2 = phi_v0_2 + 4;
-// //             temp_v0_2->unk-4 = (s32) *(phi_v1 | 0xA0000000);
-// //             phi_v1 = phi_v1 + 4;
-// //             phi_v0_2 = temp_v0_2;
-// //             phi_a0_3 = temp_a0_2;
-// //             phi_a0_4 = temp_a0_2;
-// //             if (temp_a0_2 < temp_a2) {
-// //                 goto loop_12;
-// //             }
-// //         }
-// //         phi_a1_2 = dramAddr;
-// //         phi_a2 = temp_a2;
-// //         if ((size & 2) != 0) {
-// //             temp_t0_2 = &sp38;
-// //             sp38 = *((phi_a0_4 + devAddr) | 0xA0000000);
-// //             *(dramAddr + phi_a0_4) = (u16) temp_t0_2->unk0;
-// //             phi_a1_2 = dramAddr;
-// //             phi_a2 = temp_a2;
-// //         }
-//     }
-//     D_8003A572 = (u8)0;
-//     if (D_8003A575 != 0) {
-//         osStartThread(&D_80035910); //, phi_a1_2, phi_a2, 0xA0000000);
-//     }
-// }

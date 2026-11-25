@@ -1,149 +1,179 @@
 #include <ultra64.h>
 #define func_1515D4D4 func_1515D4D4_prototype
+#define func_1515D6D0 func_1515D6D0_prototype
 #include "functions.h"
 #undef func_1515D4D4
+#undef func_1515D6D0
+#define D_800DCD20 D_800DCD20_hdr
+#define D_800DCD24 D_800DCD24_hdr
+#define D_800DCD30 D_800DCD30_hdr
+#define D_800DCD40 D_800DCD40_hdr
+#define D_800DCD78 D_800DCD78_hdr
+#define D_800DCD80 D_800DCD80_hdr
+#define D_800DCD84 D_800DCD84_hdr
 #include "variables.h"
+#undef D_800DCD20
+#undef D_800DCD24
+#undef D_800DCD30
+#undef D_800DCD40
+#undef D_800DCD78
+#undef D_800DCD80
+#undef D_800DCD84
 
+/*
+ * A dynamic point light (0x34 bytes). Every allocated light sits in the singly
+ * linked list D_800DCD78. struct226 in structs.h is a partial view of this.
+ */
+typedef struct PointLight {
+    /* 0x00 */ struct PointLight *next;
+    /* 0x04 */ u8 unk4;              // only lights with 0 get a position / distance
+    /* 0x05 */ u8 color[3];
+    /* 0x08 */ u8 unk8;              // matched against the caller's light mask; bit 0 = per-player
+    /* 0x09 */ u8 disabled;
+    /* 0x0A */ u8 unkA;              // per-player bit: hidden from that player
+    /* 0x0B */ u8 group;             // id used by func_1515F170
+    /* 0x0C */ u8 unkC;              // per-player bit, cleared every frame by func_1515D69C
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x;                // x == -0x8000: (y << 16 | z) is a pointer to an f32[3] position
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 viewPos[4][3];    // position transformed by player i's view matrix
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 radius;
+    /* 0x30 */ u8 viewPosValid;      // per-player bit: viewPos[i] is up to date
+} PointLight;
 
-s32 *allocate_memory(s32, s32, s32, s32);
-s32 func_150A1DA0(u8 *, struct178 *, s32);
+/* A point light as the microcode reads it (0x30 bytes, loaded with G_MV_LIGHT). */
+typedef struct {
+    /* 0x00 */ u8 col[3];
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ u8 colc[3];
+    /* 0x07 */ u8 pad7;
+    /* 0x08 */ s8 dir[3];
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x13];
+    /* 0x20 */ s16 pos[4];
+    /* 0x28 */ s16 pos2[4];
+} PointLightGfx;
+
+extern u8 D_800DCD20[3];            // ambient colour
+extern u8 D_800DCD24[3];
+extern u8 D_800DCD27;               // priority of the current ambient colour
+extern s8 D_800DCD30[4][3];         // per-player directional light direction
+extern PointLightGfx D_800DCD40;    // padding light for odd light counts
+extern PointLight *D_800DCD78;      // list of all point lights
+extern struct ZoneNode *D_800DCD80; // ambient colour zones
+extern struct ZoneNode *D_800DCD84; // tint zones
+
+void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
 void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
 extern void func_10004074(void *);
-extern f32 D_800A6530;
 
-struct Struct1515FBC4 {
+/* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
+struct ZoneLinkObj {
     u8 pad0[0x98];
     struct127 *unk98;
 };
 
-struct Struct1515FBC4 *func_15105C24(s32);
+struct ZoneLinkObj *func_15105C24(s32 owner);
 
-s32 *func_1515D440(void) {
-    s32 *temp;
+/* Allocates a zeroed 0x10-byte block. */
+void *func_1515D440(void) {
+    void *block;
 
-    temp = allocate_memory(0x10, 1, 2, 0);
-    bzero(temp, 0x10);
-    return temp;
+    block = allocate_memory(0x10, 1, 2, 0);
+    bzero(block, 0x10);
+    return block;
 }
 
-s32 *func_1515D480(s32 arg0) {
-    s32 *temp;
-    s32 size;
-    s32 *pp = &arg0;
+/* Allocates a zeroed array of count 0x60-byte entries. */
+void *func_1515D480(s32 count) {
+    void *block;
 
-    size = *pp * 0x60;
-    temp = allocate_memory(size, 1, 2, 0);
-    bzero(temp, size);
-    return temp;
+    block = allocate_memory(count * 0x60, 1, 2, 0);
+    bzero(block, count * 0x60);
+    return block;
 }
 
-extern u8 D_800DCD27;
-
-void func_1515D4D4(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
-    if (arg3 >= D_800DCD27) {
-        ((u8 *)&D_800DCD20)[0] = arg0;
-        ((u8 *)&D_800DCD20)[1] = arg1;
-        ((u8 *)&D_800DCD20)[2] = arg2;
+/* Sets the ambient colour unless a higher-priority one is already set. */
+void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority) {
+    if (priority >= D_800DCD27) {
+        D_800DCD20[0] = r;
+        D_800DCD20[1] = g;
+        D_800DCD20[2] = b;
         D_800DCD7C = 1;
-        D_800DCD27 = arg3;
+        D_800DCD27 = priority;
     }
 }
 
-struct Node1515D520 {
-    struct Node1515D520 *next;
-};
+/* Allocates a zeroed point light and appends it to the light list. */
+PointLight *func_1515D520(void) {
+    PointLight *light;
+    PointLight *tail;
+    PointLight *next;
 
-s32 *func_1515D520(void) {
-    struct Node1515D520 *node;
-    struct Node1515D520 *p;
-    struct Node1515D520 *q;
-
-    node = (struct Node1515D520 *)allocate_memory(0x34, 1, 2, 2);
-    if (node != 0) {
-        bzero(node, 0x34);
-        if (D_800DCD78 != 0) {
-            p = (struct Node1515D520 *)D_800DCD78;
-            q = p->next;
-            while (q != 0) {
-                p = q;
-                q = q->next;
+    light = allocate_memory(sizeof(PointLight), 1, 2, 2);
+    if (light != NULL) {
+        bzero(light, sizeof(PointLight));
+        if (D_800DCD78 != NULL) {
+            tail = D_800DCD78;
+            next = tail->next;
+            while (next != NULL) {
+                tail = next;
+                next = next->next;
             }
-            p->next = node;
+            tail->next = light;
         } else {
-            D_800DCD78 = (s32)node;
+            D_800DCD78 = light;
         }
-        node->next = 0;
+        light->next = NULL;
     }
-    return (s32 *)node;
+    return light;
 }
 
-s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
+PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
 
-s32 func_1515D5AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
-    return func_1515D5F8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+/* Wrapper for func_1515D5F8. */
+PointLight *func_1515D5AC(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
+    return func_1515D5F8(x, y, z, radius, r, g, b, arg7, disabled, group);
 }
 
-struct Obj1515D5F8 {
-    u8 pad0[4];
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    u8 unkB;
-    u8 padC[2];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    u8 pad14[0x2C - 0x14];
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-};
+/* Creates a point light at (x, y, z). */
+PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group) {
+    PointLight *light = func_1515D520();
 
-s32 func_1515D5F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u8 arg9) {
-    struct Obj1515D5F8 *obj = (struct Obj1515D5F8 *)func_1515D520();
-
-    if (obj != NULL) {
-        obj->unk4 = 0;
-        obj->unk5 = arg4;
-        obj->unk6 = arg5;
-        obj->unk7 = arg6;
-        obj->unk8 = arg7;
-        obj->unk9 = arg8;
-        obj->unkB = arg9;
-        obj->unkA = 0;
-        obj->unkE = arg0;
-        obj->unk10 = arg1;
-        obj->unk12 = arg2;
-        obj->unk2F = arg3;
-        obj->unk2C = 0x7F;
-        obj->unk2D = 0;
-        obj->unk2E = 0;
+    if (light != NULL) {
+        light->unk4 = 0;
+        light->color[0] = r;
+        light->color[1] = g;
+        light->color[2] = b;
+        light->unk8 = arg7;
+        light->disabled = disabled;
+        light->group = group;
+        light->unkA = 0;
+        light->x = x;
+        light->y = y;
+        light->z = z;
+        light->radius = radius;
+        light->unk2C = 0x7F;
+        light->unk2D = 0;
+        light->unk2E = 0;
     }
-    return (s32)obj;
+    return light;
 }
 
-
-struct Node1515D69C {
-    struct Node1515D69C *next;
-    char pad4[8];
-    s8 unkC;
-    char pad10[0x23];
-    s8 unk30;
-};
-
+/* Clears every light's per-frame player masks. */
 void func_1515D69C(void) {
-    struct Node1515D69C *p;
+    PointLight *light;
 
-    for (p = (struct Node1515D69C *)D_800DCD78; p != 0; p = p->next) {
-        p->unkC = 0;
-        p->unk30 = 0;
+    for (light = D_800DCD78; light != NULL; light = light->next) {
+        light->unkC = 0;
+        light->viewPosValid = 0;
     }
 }
 
@@ -151,873 +181,798 @@ void func_1515D6C8(void) {
 }
 
 extern s32 D_800DCD10[];
-void func_1515EF74(s16 *arg0);
+void func_1515EF74(s16 *mtx);
 
-#define MW1515D6D0(w0v, w1v) { Gfx *_g = (Gfx *)arg0; arg0 += 8; _g->words.w0 = (w0v); _g->words.w1 = (w1v); }
+/* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
+#define G_MW_LIGHTSCALE 0x10
 
-#define MWD(off, v) MW1515D6D0(0xDB100000 | (off), v)
-
-s32 func_1515D6D0(s32 arg0, s32 arg1) {
-    MW1515D6D0(0xDB020000, 0);
-    MW1515D6D0(0xD9FFFFFF, 0x20000);
-    func_1515EF74((s16 *)((u8 *)((struct259 *)D_800BE628 + arg1) + (D_800BE9C0 << 6) + 0x100));
-    MWD(0x00, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
-    MWD(0x08, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
-    MWD(0x04, (D_800DCD10[2] >> 16) << 16);
-    MWD(0x0C, (D_800DCD10[2] >> 16) << 16);
-    MWD(0x10, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
-    MWD(0x18, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
-    MWD(0x14, (D_800DCD10[2] & 0xFFFF) << 16);
-    MWD(0x1C, (D_800DCD10[2] & 0xFFFF) << 16);
-    MWD(0x20, 0);
-    MWD(0x24, D_800DCD10[3] << 16);
-    MWD(0x28, 0);
-    MWD(0x2C, D_800DCD10[3] << 16);
-    return arg0;
+/* Enables lighting and uploads the light-space scale matrix of player `player`. */
+Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
+    gMoveWd(gfx++, G_MW_NUMLIGHT, 0, 0);
+    gSPSetGeometryMode(gfx++, G_LIGHTING);
+    // each struct259 holds one Mtx per frame buffer at +0x100
+    func_1515EF74((s16 *)((Mtx *)((u8 *)((struct259 *)D_800BE628 + player) + 0x100) + D_800BE9C0));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x00, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x08, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x04, (D_800DCD10[2] >> 16) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x0C, (D_800DCD10[2] >> 16) << 16);
+    // matching: the doubled & 0xFFFF steers IDO's register choice for the low halves
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x10, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x18, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x14, (D_800DCD10[2] & 0xFFFF) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x1C, (D_800DCD10[2] & 0xFFFF) << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x20, 0);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x24, D_800DCD10[3] << 16);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x28, 0);
+    gMoveWd(gfx++, G_MW_LIGHTSCALE, 0x2C, D_800DCD10[3] << 16);
+    return gfx;
 }
 
-/*MWSTART*/
-#ifndef CMDDEF
-#define CMD(a, b) { Gfx *_g = arg0++; _g->words.w0 = (a); _g->words.w1 = (b); }
-#endif
-struct Obj1515EC78;
-struct Light1515EC78;
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6);
-void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-struct Node1515D914 {
-    struct Node1515D914 *next;
-    u8 unk4;
-    u8 pad5[3];
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    u8 padB;
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    u8 pad14[0x1B];
-    u8 unk2F;
-};
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
 
-Gfx *func_1515D914(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, s32 arg7, u8 *arg8, s8 *arg9, s32 argA, u8 *argB, s32 argC, s32 *argD) {
+/* Loads the 0x30-byte light at `l` into the microcode light table at byte offset `ofs` (point lights start at 0x60). */
+#define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
+
+/*
+ * Picks the (maxLights - 1) point lights nearest to (x, y, z) for player `player`, fills this
+ * frame's slice of lightBuf with them plus a directional light, and emits the commands that
+ * load them, followed by `ambient`.
+ */
+Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
+                   Ambient *ambient, s8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights) {
     s32 i;
     s32 j;
-    s32 cnt;
-    s32 special;
-    u8 *ent;
+    s32 count;
+    s32 padLight;
+    u8 *unused; // matching: stack slot
     s16 pos[3];
-    u8 colA[3];
-    u8 colB[3];
-    struct Node1515D914 *node;
-    struct Node1515D914 *lights[11];
-    s32 dists[11];
+    u8 color[3];
+    u8 dirColor[3];
+    PointLight *light;
+    PointLight *nearest[11];
+    s32 nearestDist[11];
     s32 dist;
-    u8 spB0[3];
-    u8 spAC[3];
-    u8 spAB;
-    u8 spAA;
-    f32 d;
-    f32 vec[3];
-    s32 lpos[3];
-    f32 *fp;
+    u8 colorA[3];
+    u8 colorB[3];
+    u8 amountA;
+    u8 amountB;
+    f32 scale;
+    f32 dir[3];
+    s32 lightPos[3];
+    f32 *posPtr;
 
-    func_1515E278(arg2, arg3, arg4, argA, colA, arg5, (u8 *)argC);
-    j = 1 << arg1;
-    if (argC & 2) {
-        func_1515E43C(arg2, arg3, arg4, argA, spB0, spAC, &spAB, &spAA);
+    func_1515E278(x, y, z, mask, color, arg5, flags);
+    j = 1 << player; // matching: dead store IDO still emits
+    if (flags & 2) {
+        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         for (i = 0; i < 3; i++) {
-            s32 k;
-            k = (u8)((((0xFF - colA[i]) * spAB) >> 8) + colA[i]);
-            colB[i] = (spB0[i] * k) >> 8;
-            k = (u8)((((0xFF - colA[i]) * spAA) >> 8) + colA[i]);
-            colA[i] = (spAC[i] * k) >> 8;
+            s32 level;
+            level = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
+            dirColor[i] = (colorA[i] * level) >> 8;
+            level = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
+            color[i] = (colorB[i] * level) >> 8;
         }
     }
     for (i = 0; i < 3; i++) {
-        if (argB != 0) {
-            if (!(argC & 8)) {
-                colA[i] = (colA[i] + argB[i] * 3) >> 2;
+        if (smoothColor != NULL) {
+            if (!(flags & 8)) {
+                color[i] = (color[i] + smoothColor[i] * 3) >> 2;
             }
-            argB[i] = colA[i];
+            smoothColor[i] = color[i];
         }
-        arg8[i] = arg8[i + 4] = colA[i];
-        continue;
+        ambient->l.col[i] = ambient->l.colc[i] = color[i];
+        continue; // matching: see G
     }
-    for (i = 0; i < arg7; i++) {
-        dists[i] = 0x7FFFFFFF;
+    for (i = 0; i < maxLights; i++) {
+        nearestDist[i] = 0x7FFFFFFF;
     }
-    if (!(argC & 1)) {
-        pos[0] = arg2;
-        pos[1] = arg3;
-        pos[2] = arg4;
+    if (!(flags & 1)) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
     } else {
-        vec[0] = D_800DBFF0[arg1].unk2BC - D_800DBFF0[arg1].unk2F8;
-        vec[1] = D_800DBFF0[arg1].unk2C0 - D_800DBFF0[arg1].unk2FC;
-        vec[2] = D_800DBFF0[arg1].unk2C4 - D_800DBFF0[arg1].unk300;
-        d = sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
-        if (d != 0.0f) {
-            d = 1000.0f / d;
-            pos[0] = vec[0] * d + (f32)arg2;
-            pos[1] = vec[1] * d + (f32)arg3;
-            pos[2] = vec[2] * d + (f32)arg4;
+        // sample 1000 units along the camera's view direction instead
+        dir[0] = D_800DBFF0[player].unk2BC - D_800DBFF0[player].unk2F8;
+        dir[1] = D_800DBFF0[player].unk2C0 - D_800DBFF0[player].unk2FC;
+        dir[2] = D_800DBFF0[player].unk2C4 - D_800DBFF0[player].unk300;
+        scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+        if (scale != 0.0f) {
+            scale = 1000.0f / scale;
+            pos[0] = dir[0] * scale + (f32)x;
+            pos[1] = dir[1] * scale + (f32)y;
+            pos[2] = dir[2] * scale + (f32)z;
         } else {
-            pos[0] = arg2;
-            pos[1] = arg3;
-            pos[2] = arg4;
+            pos[0] = x;
+            pos[1] = y;
+            pos[2] = z;
         }
     }
-    node = (struct Node1515D914 *)D_800DCD78;
-    cnt = 0;
-    if (node != 0) {
-        do {
-            if (((node->unkC & (1 << arg1)) || (argC & 0x20) || !(node->unk8 & 1)) && (node->unk8 & argA) && (node->unk9 == 0) && !(node->unkA & (1 << arg1))) {
-                if (node->unk4 == 0) {
-                G:
-                    lpos[0] = node->unkE;
-                    if (lpos[0] != -0x8000) {
-                        lpos[1] = node->unk10;
-                        lpos[2] = node->unk12;
-                    } else {
-                        fp = (f32 *)((node->unk12 & 0xFFFF) | (node->unk10 << 16));
-                        lpos[0] = fp[0];
-                        lpos[1] = fp[1];
-                        lpos[2] = fp[2];
-                    }
-                    dist = (pos[0] - lpos[0]) * (pos[0] - lpos[0]) + (pos[1] - lpos[1]) * (pos[1] - lpos[1]) + (pos[2] - lpos[2]) * (pos[2] - lpos[2]);
-                    if (!(argC & 4) && ((node->unk2F << 17) < dist)) {
-                        dist = 0x7FFFFFFF;
-                    }
+    count = 0;
+    for (light = D_800DCD78; light != NULL; light = light->next) {
+        if (((light->unkC & (1 << player)) || (flags & 0x20) || !(light->unk8 & 1)) && (light->unk8 & mask) &&
+            (light->disabled == 0) && !(light->unkA & (1 << player))) {
+            if (light->unk4 == 0) {
+            G: // matching: this unused label (like the if (1) and continues below) steers IDO's regalloc
+                lightPos[0] = light->x;
+                if (lightPos[0] != -0x8000) {
+                    lightPos[1] = light->y;
+                    lightPos[2] = light->z;
+                } else {
+                    posPtr = (f32 *)((light->z & 0xFFFF) | (light->y << 16));
+                    lightPos[0] = posPtr[0];
+                    lightPos[1] = posPtr[1];
+                    lightPos[2] = posPtr[2];
                 }
-                for (i = 0; i < arg7 - 1; i++) {
-                    if (dist < dists[i]) {
-                        for (j = arg7 - 2; j > i; j--) {
-                            dists[j] = dists[j - 1];
-                            lights[j] = lights[j - 1];
-                        }
-                        dists[i] = dist;
-                        lights[i] = node;
-                        if (cnt != arg7 - 1) {
-                            cnt++;
-                        }
-                        goto found;
-                    }
+                dist = (pos[0] - lightPos[0]) * (pos[0] - lightPos[0]) + (pos[1] - lightPos[1]) * (pos[1] - lightPos[1]) +
+                       (pos[2] - lightPos[2]) * (pos[2] - lightPos[2]);
+                if (!(flags & 4) && ((light->radius << 17) < dist)) {
+                    dist = 0x7FFFFFFF;
                 }
-            found:;
             }
-            node = node->next;
-        } while (node != 0);
+            // insert into the distance-sorted nearest list
+            for (i = 0; i < maxLights - 1; i++) {
+                if (dist < nearestDist[i]) {
+                    for (j = maxLights - 2; j > i; j--) {
+                        nearestDist[j] = nearestDist[j - 1];
+                        nearest[j] = nearest[j - 1];
+                    }
+                    nearestDist[i] = dist;
+                    nearest[i] = light;
+                    if (count != maxLights - 1) {
+                        count++;
+                    }
+                    break;
+                }
+            }
+            if (1) {} // matching: see G
+        }
     }
-    if (arg7 != 0) {
-        if (cnt & 1) {
-            special = 1;
-            if (argD != 0) {
-                argD[cnt] = 0;
+    if (maxLights != 0) {
+        // an odd light count is padded with the dummy light D_800DCD40
+        if (count & 1) {
+            padLight = 1;
+            if (outLights != NULL) {
+                outLights[count] = NULL;
             }
         } else {
-            special = 0;
+            padLight = 0;
         }
-        if (arg9 != 0) {
-            if (special != 0) {
-                *arg9 = (cnt + special + 1) | 0x80;
+        if (outCount != NULL) {
+            if (padLight) {
+                *outCount = (count + padLight + 1) | 0x80;
             } else {
-                *arg9 = cnt + special + 1;
+                *outCount = count + padLight + 1;
             }
         }
-        CMD(0xDB020000, (cnt + special) * 0x30 + 0x30);
+        gMoveWd(gfx++, G_MW_NUMLIGHT, 0, (count + padLight) * 0x30 + 0x30);
     } else {
-        if (arg9 != 0) {
-            *arg9 = cnt;
+        if (outCount != NULL) {
+            *outCount = count;
         }
-        CMD(0xDB020000, cnt * 0x30);
+        gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
     }
-    if (arg7 != 0) {
-        u8 *p;
-        p = arg6 + (D_800BE9C0 * arg7 + cnt) * 0x30;
-        p[8] = ((s8 *)&D_800DCD30)[arg1 * 3];
-        p[9] = ((s8 *)&D_800DCD30)[arg1 * 3 + 1];
-        p[0xA] = ((s8 *)&D_800DCD30)[arg1 * 3 + 2];
-        if (argC & 2) {
-            p[0] = p[4] = colB[0];
-            p[1] = p[5] = colB[1];
-            p[2] = p[6] = colB[2];
+    if (maxLights != 0) {
+        PointLightGfx *out;
+        // the slot after the point lights holds the directional light
+        out = &lightBuf[D_800BE9C0 * maxLights + count];
+        out->dir[0] = D_800DCD30[player][0];
+        out->dir[1] = D_800DCD30[player][1];
+        out->dir[2] = D_800DCD30[player][2];
+        if (flags & 2) {
+            out->col[0] = out->colc[0] = dirColor[0];
+            out->col[1] = out->colc[1] = dirColor[1];
+            out->col[2] = out->colc[2] = dirColor[2];
         } else {
-            p[0] = p[4] = 0;
-            p[1] = p[5] = 0;
-            p[2] = p[6] = 0;
+            out->col[0] = out->colc[0] = 0;
+            out->col[1] = out->colc[1] = 0;
+            out->col[2] = out->colc[2] = 0;
         }
-        p -= cnt * 0x30;
-        for (i = 0; i < cnt; i++, p += 0x30) {
-            node = lights[i];
-            if (argD != 0) {
-                argD[i] = (s32)node;
+        out -= count;
+        for (i = 0; i < count; i++, out++) {
+            light = nearest[i];
+            if (outLights != NULL) {
+                outLights[i] = light;
             }
-            if (argC & 0x20) {
-                node->unkC |= 1 << arg1;
+            if (flags & 0x20) {
+                light->unkC |= 1 << player;
             }
-            if (node->unk4 == 0) {
-                func_1515EC78((struct Obj1515EC78 *)node, arg1, (struct Light1515EC78 *)p, arg2, arg3, arg4, argC);
+            if (light->unk4 == 0) {
+                func_1515EC78(light, player, out, x, y, z, flags);
             }
-            CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)p);
-            continue;
+            gSPPointLight(gfx++, out, (i + 2) * 0x30U);
+            continue; // matching: see G
         }
-        if (special != 0) CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)&D_800DCD40);
-        CMD(((((u32)((i + special + 1) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, ((D_800BE9C0 * arg7 + i) * 0x30) + (s32)arg6);
-        CMD(((((u32)((i + special + 2) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)arg8);
+        if (padLight) {
+            gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
+        }
+        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
+        gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
     }
-    return arg0;
+    return gfx;
 }
 
 
-struct Node1515E43C {
-    char pad0[0x18];
-    u32 unk18;
-    u32 unk1C;
-};
+/* A zone record: struct178 with the fields this file reads named (structs.h has them as a blob). */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ u8 pad8[0xC];
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;     // >> 2 is the zone type
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u32 unk18;    // light zones: colour in the low 24 bits, mask in the top byte;
+                             // trigger zones: index into D_8008B090
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u8 pad20[0x14];
+} Zone;
 
-struct Node1515EB84 {
-    struct Node1515EB84 *next;
-    struct178 *unk4;
-};
+typedef struct ZoneNode {
+    struct ZoneNode *next;
+    Zone *zone;
+} ZoneNode;
 
-struct Node1515E43C *func_1515EB84(s32, s32, s32, s32, struct Node1515EB84 *);
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node);
 
-void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6) {
-    struct Node1515E43C *node;
+/*
+ * Ambient colour at (x, y, z): the colour of the first zone in D_800DCD80 containing the
+ * point, else the global ambient colour dimmed by bits 5-6 of arg5. With flags & 0x10 the
+ * D_800DCD84 tint is applied on top.
+ */
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags) {
+    Zone *zone;
     s32 i;
-    s32 t;
-    u8 sp50[3];
-    u8 sp4C[3];
-    u8 sp48[3];
-    u8 sp47;
-    u8 sp46;
-    s32 s;
-    u8 *dst;
+    s32 sum;
+    u8 tint[3];
+    u8 colorA[3];
+    u8 colorB[3];
+    u8 amountA;
+    u8 amountB;
+    s32 level;
+    u8 *out;
+    s32 scale;
+
+    zone = func_1515EB84(x, y, z, mask, D_800DCD80);
+    if (zone != NULL) {
+        color[0] = zone->unk18 & 0xFF;
+        color[1] = (zone->unk18 >> 8) & 0xFF;
+        color[2] = (zone->unk18 >> 16) & 0xFF;
+    } else {
+        scale = 0x100 - ((arg5 >> 5) & 3) * 0x40;
+        out = color;
+        for (i = 0; i < 3; i++) {
+            *out++ = (D_800DCD20[i] * scale) >> 8;
+        }
+    }
+    if (flags & 0x10) {
+        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
+        out = color;
+        for (i = 0; i < 3; i++) {
+            level = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
+            tint[i] = (colorA[i] * level) >> 8;
+            level = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
+            *out = (colorB[i] * level) >> 8;
+            sum = *out + ((tint[i] * 7) >> 3);
+            if (sum > 0xFF) {
+                sum = 255;
+            }
+            *out = sum;
+            out++;
+        }
+    }
+}
+
+
+/* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
+    Zone *zone;
+
+    zone = func_1515EB84(x, y, z, 0, D_800DCD84);
+    if (zone != NULL) {
+        colorA[0] = zone->unk18 & 0xFF;
+        colorA[1] = (zone->unk18 >> 8) & 0xFF;
+        colorA[2] = (zone->unk18 >> 16) & 0xFF;
+        colorB[0] = zone->unk1C & 0xFF;
+        colorB[1] = (zone->unk1C >> 8) & 0xFF;
+        colorB[2] = (zone->unk1C >> 16) & 0xFF;
+        *amountA = (zone->unk1C >> 24) & 0xFF;
+        *amountB = (zone->unk18 >> 24) & 0xFF;
+    } else {
+        colorA[0] = D_800DCD24[0];
+        colorA[1] = D_800DCD24[1];
+        colorA[2] = D_800DCD24[2];
+        colorB[0] = D_800DCD28[0];
+        colorB[1] = D_800DCD28[1];
+        colorB[2] = D_800DCD28[2];
+        *amountA = D_800DCD3C;
+        *amountB = D_800DCD3D;
+    }
+}
+
+/*
+ * Re-emits the light commands func_1515D914 built for this frame, from its light slice
+ * `lightBuf` and the count byte it stored (bit 7 = padded with the dummy light).
+ */
+Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte, Ambient *ambient) {
+    s32 count;
+    s32 padLight;
+    s32 i;
+
+    count = countByte & 0x7F;
+    if (count != countByte) {
+        padLight = 1;
+    } else {
+        padLight = 0;
+    }
+    gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
+    for (i = 0; i < count - padLight - 1; i++) {
+        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (i + 2) * 0x30U);
+    }
+    if (padLight) {
+        gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
+    }
+    gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
+    gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
+    return gfx;
+}
+
+extern u8 D_800D9E21;                // light count byte func_1515D914 stored for player 0
+extern PointLight *D_800D9E28[];     // the lights it picked
+
+/*
+ * Lit colour at (x, y, z): the zone ambient colour (func_1515E278) plus the contribution of
+ * each point light picked for this frame, falling off with squared distance.
+ */
+void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags) {
+    f32 distSq;
+    f32 range;
+    f32 pos[3];
+    f32 sum[3];
+    s32 i;
+    f32 *lightPos;
+    s32 count;
+    PointLight *light;
+    PointLight **lights;
+    f32 f;
     s32 v;
 
-    node = func_1515EB84(arg0, arg1, arg2, arg3, (struct Node1515EB84 *)D_800DCD80);
-    if (node != NULL) {
-        arg4[0] = node->unk18 & 0xFF;
-        arg4[1] = (node->unk18 >> 8) & 0xFF;
-        arg4[2] = (node->unk18 >> 16) & 0xFF;
-    } else {
-        v = (0x100 - (s32)((((u32)arg5 >> 5) & 3) << 6));
-        dst = arg4;
-        for (i = 0; i < 3; i++) {
-            *dst++ = ((*(u8 (*)[3])&D_800DCD20)[i] * v) >> 8;
-        }
-    }
-    if ((s32)arg6 & 0x10) {
-        func_1515E43C(arg0, arg1, arg2, arg3, sp4C, sp48, &sp47, &sp46);
-        dst = arg4;
-        for (i = 0; i < 3; i++) {
-            s = (u8)((((0xFF - *dst) * sp47) >> 8) + *dst);
-            sp50[i] = (sp4C[i] * s) >> 8;
-            s = (u8)((((0xFF - *dst) * sp46) >> 8) + *dst);
-            *dst = (sp48[i] * s) >> 8;
-            t = *dst + ((sp50[i] * 7) >> 3);
-            if (t > 0xFF) {
-                t = 0xFF;
-            }
-            *dst = t;
-            dst++;
-        }
-    }
-}
-
-
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
-    struct Node1515E43C *node;
-
-    node = func_1515EB84(arg0, arg1, arg2, 0, D_800DCD84);
-    if (node != NULL) {
-        arg4[0] = node->unk18 & 0xFF;
-        arg4[1] = (node->unk18 >> 8) & 0xFF;
-        arg4[2] = (node->unk18 >> 16) & 0xFF;
-        arg5[0] = node->unk1C & 0xFF;
-        arg5[1] = (node->unk1C >> 8) & 0xFF;
-        arg5[2] = (node->unk1C >> 16) & 0xFF;
-        arg6[0] = (node->unk1C >> 24) & 0xFF;
-        arg7[0] = (node->unk18 >> 24) & 0xFF;
-    } else {
-        arg4[0] = ((u8 *)D_800DCD24)[0];
-        arg4[1] = ((u8 *)D_800DCD24)[1];
-        arg4[2] = ((u8 *)D_800DCD24)[2];
-        arg5[0] = D_800DCD28[0];
-        arg5[1] = D_800DCD28[1];
-        arg5[2] = D_800DCD28[2];
-        arg6[0] = D_800DCD3C;
-        arg7[0] = D_800DCD3D;
-    }
-}
-
-u32 *func_1515E544(u32 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    s32 count;
-    s32 special;
-    s32 index;
-
-    count = arg3 & 0x7F;
-    if (count != arg3) {
-        special = 1;
-    } else {
-        special = 0;
-    }
-    { u32 *command = arg0; arg0 += 2; command[0] = 0xDB020000; command[1] = count * 0x30; }
-    for (index = 0; index < count - special - 1; index++) {
-        u32 *command = arg0; arg0 += 2; command[0] = ((((u32)(index * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = ((D_800BE9C0 * arg2 + index) * 0x30) + arg1;
-    }
-    if (special != 0) {
-        u32 *command = arg0; arg0 += 2; command[0] = ((((u32)(index * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = (u32)&D_800DCD40;
-    }
-    { u32 *command = arg0; arg0 += 2; command[0] = ((((u32)((index + special + 1) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = ((D_800BE9C0 * arg2 + index) * 0x30) + arg1; }
-    { u32 *command = arg0; arg0 += 2; command[0] = ((((u32)((index + special + 2) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA; command[1] = arg4; }
-    return arg0;
-}
-
-struct Light1515E888 {
-    u8 pad0[5];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 pad8[6];
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad14[0x1B];
-    u8 radius;
-};
-
-extern u8 D_800D9E21;
-extern struct Light1515E888 *D_800D9E28[];
-void func_1515E278(s32, s32, s32, s32, u8 *, u8 *, u8 *);
-
-void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7)
-{
-  f32 sq;
-  f32 dist;
-  f32 pos[3];
-  f32 color[3];
-  s32 i;
-  f32 *new_var;
-  s32 n;
-  struct Light1515E888 *light;
-  struct Light1515E888 **p;
-  f32 f;
-  s32 v;
-  func_1515E278(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-  color[0] = arg5[0];
-  color[1] = arg5[1];
-  color[2] = arg5[2];
-  v = D_800D9E21 & 0x7F;
-  n = v - 1;
-  i = 0;
-  if (n > 0)
-  {
-    p = D_800D9E28;
-    new_var = pos;
-    loop:
-    light = *p;
-
-    if (light != 0)
-    {
-      pos[0] = light->x;
-      pos[1] = light->y;
-      pos[2] = light->z;
-      dist = light->radius * 2048.0f;
-      sq = (((new_var[0] - arg1) * (new_var[0] - arg1)) + ((new_var[1] - arg2) * (new_var[1] - arg2))) + ((new_var[2] - arg3) * (new_var[2] - arg3));
-      f = dist / sq;
-      if (f > 1.0f)
-      {
-        f = 1.0f;
-      }
-      color[0] += f * light->r;
-      color[1] += f * light->g;
-      color[2] += f * light->b;
-    }
-    i++;
-    p++;
-    if (i != n)
-    {
-      goto loop;
-    }
-  }
-  v = color[0];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[0] = v;
-  v = color[1];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[1] = v;
-  v = color[2];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[2] = v;
-}
-
-struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struct Node1515EB84 *node) {
-    u8 sp34[0x32C];
-    struct178 *entry;
-
-    *(f32 *)&sp34[0x14] = (f32)arg0;
-    *(f32 *)&sp34[0x18] = (f32)arg1;
-    *(f32 *)&sp34[0x180] = (f32)arg1;
-    *(f32 *)&sp34[0x2C] = (f32)arg0;
-    *(f32 *)&sp34[0x30] = (f32)arg1;
-    *(f32 *)&sp34[0x1C] = (f32)arg2;
-    *(f32 *)&sp34[0x34] = (f32)arg2;
-
-    while (node != 0) {
-        entry = node->unk4;
-        if (entry->unk6[0xE] == 0) {
-            if ((arg3 == 0) || (((*(u32 *)&entry->unk6[0x12] >> 24) & arg3) != 0)) {
-                if ((0x18 == ((s32)entry->unk6[0xF] >> 2)) || ((*(u32 *)&entry->unk6[0x12] >> 31) == 0)) {
-                    if (func_150A1DA0(sp34, entry, 0) == 0) {
-                        return (struct Node1515E43C *)node->unk4;
-                    }
+    func_1515E278(x, y, z, mask, color, arg6, flags);
+    sum[0] = color[0];
+    sum[1] = color[1];
+    sum[2] = color[2];
+    v = D_800D9E21 & 0x7F;
+    count = v - 1;
+    i = 0;
+    if (count > 0) {
+        lights = D_800D9E28;
+        lightPos = pos; // matching: distances read pos through this alias
+        for (;;) { // matching: a do-while allocates color differently
+            light = *lights;
+            if (light != NULL) {
+                pos[0] = light->x;
+                pos[1] = light->y;
+                pos[2] = light->z;
+                range = light->radius * 2048.0f;
+                distSq = (lightPos[0] - x) * (lightPos[0] - x) + (lightPos[1] - y) * (lightPos[1] - y) +
+                     (lightPos[2] - z) * (lightPos[2] - z);
+                f = range / distSq;
+                if (f > 1.0f) {
+                    f = 1.0f;
                 }
+                sum[0] += f * light->color[0];
+                sum[1] += f * light->color[1];
+                sum[2] += f * light->color[2];
+            }
+            i++;
+            lights++;
+            if (i == count) {
+                break;
             }
         }
-        node = node->next;
     }
-    return 0;
+    v = sum[0];
+    if (v > 255) {
+        v = 255;
+    }
+    color[0] = v;
+    v = sum[1];
+    if (v > 255) {
+        v = 255;
+    }
+    color[1] = v;
+    v = sum[2];
+    if (v > 255) {
+        v = 255;
+    }
+    color[2] = v;
 }
 
-struct Light1515EC78 {
-    u8 col[3];
-    u8 pad3;
-    u8 colc[3];
-    u8 pad7;
-    s8 dir[3];
-    u8 padB;
-    u8 unkC;
-    u8 padD[0x13];
-    s16 unk20[4];
-    s16 unk28[4];
-};
+s32 func_150A1DA0(struct127 *obj, Zone *zone, s32);
 
-struct Obj1515EC78 {
-    u8 pad0[5];
-    u8 col[3];
-    u8 pad8[6];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14[4][3];
-    u8 pad2C[3];
-    u8 unk2F;
-    u8 unk30;
-};
+/* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
+Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
+    struct127 probe;
+    Zone *zone;
+
+    probe.x_position = x;
+    probe.y_position = y;
+    probe.unk180 = y;
+    probe.old_x_position = x;
+    probe.old_y_position = y;
+    probe.z_position = z;
+    probe.old_z_position = z;
+
+    for (; node != NULL; node = node->next) {
+        zone = node->zone;
+        if (zone->unk14 == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
+            ((zone->unk15 >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+            return node->zone;
+        }
+    }
+    return NULL;
+}
 
 extern f32 D_800D9C10[][4][4];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
-void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Fills the microcode light `out` from `light` as seen by player `player`: colour, direction
+ * towards the light from (x, y, z) when flags & 2, and the view-space position (cached per player).
+ */
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags) {
     s32 i;
-    f32 out[3];
+    f32 viewPos[3];
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 s;
-    s32 n[3];
+    f32 scale;
+    s32 dir[3];
     s32 pos[3];
-    f32 *p;
+    f32 *posPtr;
 
-    pos[0] = arg0->unkE;
+    pos[0] = light->x;
     if (pos[0] != -0x8000) {
-        pos[1] = arg0->unk10;
-        pos[2] = arg0->unk12;
+        pos[1] = light->y;
+        pos[2] = light->z;
     } else {
-        p = (f32 *)((arg0->unk12 & 0xFFFF) | (arg0->unk10 << 16));
-        pos[0] = p[0];
-        pos[1] = p[1];
-        pos[2] = p[2];
+        posPtr = (f32 *)((light->z & 0xFFFF) | (light->y << 16));
+        pos[0] = posPtr[0];
+        pos[1] = posPtr[1];
+        pos[2] = posPtr[2];
     }
-    if (arg6 & 2) {
-        dx = pos[0] - arg3;
-        dy = pos[1] - arg4;
-        dz = pos[2] - arg5;
-        s = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (s) {
-            s = 127.0f / s;
-            dx *= s;
-            dy *= s;
-            dz *= s;
+    if (flags & 2) {
+        dx = pos[0] - x;
+        dy = pos[1] - y;
+        dz = pos[2] - z;
+        scale = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (scale) {
+            scale = 127.0f / scale;
+            dx *= scale;
+            dy *= scale;
+            dz *= scale;
         } else {
             dz = dy = 0.0f;
             dx = 127.0f;
         }
-        n[0] = dx;
-        n[1] = dy;
-        n[2] = dz;
+        dir[0] = dx;
+        dir[1] = dy;
+        dir[2] = dz;
     } else {
-        n[0] = 0;
-        n[1] = 0;
-        n[2] = 0x7F;
+        dir[0] = 0;
+        dir[1] = 0;
+        dir[2] = 127;
     }
-        if (arg0->unk30 & (1 << arg1)) {
-        pos[0] = arg0->unk14[arg1][0];
-        pos[1] = arg0->unk14[arg1][1];
-        pos[2] = arg0->unk14[arg1][2];
+    if (light->viewPosValid & (1 << player)) {
+        pos[0] = light->viewPos[player][0];
+        pos[1] = light->viewPos[player][1];
+        pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(D_800D9C10[arg1][0], pos[0], pos[1], pos[2], &out[0], &out[1], &out[2]);
-        pos[0] = out[0];
-        pos[1] = out[1];
-        pos[2] = out[2];
-        arg0->unk14[arg1][0] = pos[0];
-        arg0->unk14[arg1][1] = pos[1];
-        arg0->unk14[arg1][2] = pos[2];
-        arg0->unk30 |= (1 << arg1);
+        func_150A7960(&D_800D9C10[player][0][0], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        pos[0] = viewPos[0];
+        pos[1] = viewPos[1];
+        pos[2] = viewPos[2];
+        light->viewPos[player][0] = pos[0];
+        light->viewPos[player][1] = pos[1];
+        light->viewPos[player][2] = pos[2];
+        light->viewPosValid |= (1 << player);
     }
     for (i = 0; i < 3; i++) {
-        arg2->col[i] = arg0->col[i];
-        arg2->colc[i] = arg0->col[i];
-        arg2->dir[i] = n[i];
-        arg2->unk20[i] = pos[i];
-        arg2->unk28[i] = pos[i];
+        out->col[i] = light->color[i];
+        out->colc[i] = light->color[i];
+        out->dir[i] = dir[i];
+        out->pos[i] = pos[i];
+        out->pos2[i] = pos[i];
     }
-    arg2->unkC = arg0->unk2F;
+    out->unkC = light->radius;
 }
 
-void func_1515EF74(s16 *arg0) {
-    func_1515F040(1.0f / func_1515F008(arg0, 0), 0);
-    func_1515F040(1.0f / func_1515F008(arg0, 5), 1);
-    func_1515F040(1.0f / func_1515F008(arg0, 0xA), 2);
-    func_1515F0AC(-func_1515F008(arg0, 0xE), 3);
+/*
+ * Stores the light-space scale for a fixed-point Mtx (viewed as halfwords: 16 integer parts,
+ * then 16 fraction parts): 1 / the diagonal as 16.16 in D_800DCD10[0..2], and -z translation
+ * in D_800DCD10[3].
+ */
+void func_1515EF74(s16 *mtx) {
+    func_1515F040(1.0f / func_1515F008(mtx, 0), 0);
+    func_1515F040(1.0f / func_1515F008(mtx, 5), 1);
+    func_1515F040(1.0f / func_1515F008(mtx, 10), 2);
+    func_1515F0AC(-func_1515F008(mtx, 14), 3);
 }
 
-f32 func_1515F008(s16 *arg0, s32 arg1) {
-    s32 hi = arg0[arg1];
-    hi = (hi << 16) | (u16)arg0[arg1 + 0x10];
-    return (f32)hi * 1.52587890625e-05f;
+/* Element `i` (0-15) of a fixed-point Mtx as a float. */
+f32 func_1515F008(s16 *mtx, s32 i) {
+    s32 value = mtx[i];
+    value = (value << 16) | (u16)mtx[i + 16];
+    return (f32)value * (1.0f / 65536.0f);
 }
 
-extern s32 D_800DCD10[];
-
-void func_1515F040(f32 arg0, s32 arg1) {
-    f32 var_fv0;
-
-    var_fv0 = 32767.0f;
-    if (var_fv0 <= arg0) {
-        arg0 = var_fv0;
-    } else if (arg0 < -32768.0f) {
-        arg0 = -32768.0f;
+/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as 16.16 fixed point. */
+void func_1515F040(f32 value, s32 i) {
+    if (value >= 32767.0f) {
+        value = 32767.0f;
+    } else if (value < -32768.0f) {
+        value = -32768.0f;
     }
-    arg0 *= 65536.0f;
-    D_800DCD10[arg1] = (s32) arg0;
+    value *= 65536.0f;
+    D_800DCD10[i] = (s32)value;
 }
 
-extern s32 D_800DCD10[];
-
-void func_1515F0AC(f32 arg0, s32 arg1) {
-    f32 var_fv0;
-
-    var_fv0 = 32767.0f;
-    if (arg0 >= var_fv0) {
-        arg0 = var_fv0;
-    } else if (arg0 < -32768.0f) {
-        arg0 = -32768.0f;
+/* Clamps `value` to the s16 range and stores it in D_800DCD10[i] as an integer. */
+void func_1515F0AC(f32 value, s32 i) {
+    if (value >= 32767.0f) {
+        value = 32767.0f;
+    } else if (value < -32768.0f) {
+        value = -32768.0f;
     }
-    D_800DCD10[arg1] = (s32) arg0;
+    D_800DCD10[i] = (s32)value;
 }
 
-struct Node1515F10C {
-    struct Node1515F10C *next;
-};
+/* Unlinks `light` from the light list and frees it. */
+void func_1515F10C(PointLight *light) {
+    PointLight *node;
+    PointLight *prev;
 
-void func_1515F10C(struct Node1515F10C *arg0) {
-    struct Node1515F10C *node;
-    struct Node1515F10C *prev;
-
-    node = (struct Node1515F10C *)D_800DCD78;
-    prev = 0;
-    if (node != arg0) {
-        do {
-            prev = node;
-            node = node->next;
-        } while (node != arg0);
+    prev = NULL;
+    for (node = D_800DCD78; node != light; node = node->next) {
+        prev = node;
     }
-    if (prev != 0) {
+    if (prev != NULL) {
         prev->next = node->next;
     } else {
-        D_800DCD78 = (s32)node->next;
+        D_800DCD78 = node->next;
     }
     func_10004074(node);
 }
 
-struct Node1515F170 {
-    struct Node1515F170 *next;
-    char pad4[5];
-    s8 unk9;
-    char padA[1];
-    u8 unkB;
-};
+/* Sets the disabled flag of every light in `group`. */
+void func_1515F170(s32 group, u8 disabled) {
+    PointLight *light;
 
-void func_1515F170(s32 arg0, u8 arg1) {
-    struct Node1515F170 *p;
-
-    for (p = (struct Node1515F170 *)D_800DCD78; p != 0; p = p->next) {
-        if (arg0 == p->unkB) {
-            p->unk9 = arg1;
+    for (light = D_800DCD78; light != NULL; light = light->next) {
+        if (group == light->group) {
+            light->disabled = disabled;
         }
     }
 }
 
-struct Node1515F1B0 {
-    s32 unk0;
-    f32 unk4;
-    f32 unk8;
-    s32 unkC;
-};
+/* A node of a list of spawn regions with their cached volume and area. */
+typedef struct RegionNode {
+    /* 0x00 */ struct134 *region;
+    /* 0x04 */ f32 volume;
+    /* 0x08 */ f32 area;
+    /* 0x0C */ struct RegionNode *next;
+} RegionNode;
 
-struct Node1515F1B0 *func_1515F1B0(s32 arg0) {
-    struct Node1515F1B0 *temp;
+RegionNode *func_1515F1B0(struct134 *region) {
+    RegionNode *node;
 
-    temp = (struct Node1515F1B0 *)func_10003C6C(0x10, 1, 2, 0, 1);
-    if (temp == 0) {
-        return 0;
+    node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    if (node == NULL) {
+        return NULL;
     }
-    temp->unk0 = arg0;
-    if (arg0 != 0) {
-        temp->unk4 = func_1514462C(arg0);
+    node->region = region;
+    if (region != NULL) {
+        node->volume = func_1514462C((s32)region);
     } else {
-        temp->unk4 = 0.0f;
+        node->volume = 0.0f;
     }
-    if (arg0 != 0) {
-        temp->unk8 = func_15144598((struct134 *)arg0);
+    if (region != NULL) {
+        node->area = func_15144598(region);
     } else {
-        temp->unk8 = 0.0f;
+        node->area = 0.0f;
     }
-    temp->unkC = 0;
-    return temp;
+    node->next = NULL;
+    return node;
 }
 
-void func_1515F25C(void **arg0, void *arg1) {
-    *(void **)((u8 *)arg1 + 0xC) = *arg0;
-    *arg0 = arg1;
+/* Pushes `node` onto the front of `list`. */
+void func_1515F25C(RegionNode **list, RegionNode *node) {
+    node->next = *list;
+    *list = node;
 }
 
-extern void (*D_8008B090[])(s32);
+typedef void (*ZoneHandler)(struct127 *obj, Zone *zone);
 
-void func_1515F270(s32 arg0, s32 *arg1) {
-    s32 idx = arg1[6];
+extern ZoneHandler D_8008B090[12];
+
+/* Runs zone handler zone->unk18 for `obj`. */
+void func_1515F270(struct127 *obj, Zone *zone) {
+    s32 idx = zone->unk18;
 
     if (idx >= 0 && idx < 12) {
-        if (D_8008B090[idx] != 0) {
-            D_8008B090[idx](arg0);
+        if (D_8008B090[idx] != NULL) {
+            D_8008B090[idx](obj, zone);
         }
     }
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
+s32 func_1505D024(struct127 *obj, s32 arg1, u16 arg2, s32 arg3);
 
-s32 func_1515F2B8(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x6001D, arg0->unk7A, -1);
+void func_1515F2B8(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x6001D, obj->unk7A, -1);
 }
 
-extern void (*D_8008B0C0[])(void);
+extern ZoneHandler D_8008B0C0[3];
 
-void func_1515F2E8(u8 *arg0, s32 *arg1) {
+/* Zone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
+void func_1515F2E8(struct127 *obj, Zone *zone) {
     s32 idx;
 
-    if (arg0[0x3B] == 1) {
-        idx = arg1[7];
+    if (obj->unique_id == 1) {
+        idx = zone->unk1C;
         if (idx >= 0 && idx < 3) {
-            D_8008B0C0[idx]();
+            D_8008B0C0[idx](obj, zone);
         }
     }
 }
 
-void func_1515F338(s32 arg0, s32 arg1) {
-    u8 temp_v1;
-    u8 temp_t0;
-    u8 temp_t1;
+/* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
+void func_1515F338(struct127 *obj, Zone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
 
-    temp_v1 = ((u8 *)&D_800DCD20)[0];
-    temp_t0 = ((u8 *)&D_800DCD20)[1];
-    temp_t1 = ((u8 *)&D_800DCD20)[2];
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
     if (D_800DCD94 != 97.0f) {
         D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
-        temp_v1 = (u8)(u32)D_800DCD94;
+        red = (u32)D_800DCD94;
     }
     if (D_800DCD98 != 96.0f) {
         D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
-        temp_t0 = (u8)(u32)D_800DCD98;
+        green = (u32)D_800DCD98;
     }
     if (D_800DCD9C != 98.0f) {
         D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
-        temp_t1 = (u8)(u32)D_800DCD9C;
+        blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(temp_v1, temp_t0, temp_t1, 0);
+    func_1515D4D4(red, green, blue, 0);
 }
 
-void func_1515F5C4(s32 arg0, s32 arg1) {
-    u8 temp_v1;
-    u8 temp_t0;
-    u8 temp_t1;
+/* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
+void func_1515F5C4(struct127 *obj, Zone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
 
-    temp_v1 = ((u8 *)&D_800DCD20)[0];
-    temp_t0 = ((u8 *)&D_800DCD20)[1];
-    temp_t1 = ((u8 *)&D_800DCD20)[2];
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
     if (D_800DCD94 != 229.0f) {
         D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
-        temp_v1 = (u8)(u32)D_800DCD94;
+        red = (u32)D_800DCD94;
     }
     if (D_800DCD98 != 253.0f) {
         D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
-        temp_t0 = (u8)(u32)D_800DCD98;
+        green = (u32)D_800DCD98;
     }
     if (D_800DCD9C != 160.0f) {
         D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
-        temp_t1 = (u8)(u32)D_800DCD9C;
+        blue = (u32)D_800DCD9C;
     }
-    func_1515D4D4(temp_v1, temp_t0, temp_t1, 0);
+    func_1515D4D4(red, green, blue, 0);
 }
 
-struct Stack1515F850 {
-    s32 pad14;
-    s32 pad18;
-    u8 sp1C;
-    u8 sp1D;
-    u8 sp1E;
-    u8 pad1F;
-    f32 sp20;
-    f32 sp24;
-    f32 sp28;
-};
+/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
+void func_1515F850(struct127 *obj, Zone *zone) {
+    f32 s;
+    f32 targetR;
+    f32 targetG;
+    f32 targetB;
+    u8 color[3];
 
-void func_1515F850(s32 arg0, s32 arg1) {
-    s32 pad;
-    struct Stack1515F850 stack;
-    f32 temp_f0;
-    f32 temp_f14;
-    f32 temp_f16;
-    f32 temp_f18;
-
-    stack.sp1C = ((u8 *)&D_800DCD20)[0];
-    stack.sp1D = ((u8 *)&D_800DCD20)[1];
-    stack.sp1E = ((u8 *)&D_800DCD20)[2];
-    temp_f0 = sinf(D_800DCDA0);
-    temp_f14 = (temp_f0 * 29.5f) + 127.5f;
-    temp_f16 = (temp_f0 * 71.0f) + 109.0f;
-    stack.sp28 = temp_f14;
-    stack.sp24 = temp_f16;
-    temp_f18 = (temp_f0 * 26.0f) + 26.0f;
-    stack.sp20 = temp_f18;
-    D_800DCDA0 += D_800A6530 * D_800BE9A4;
+    color[0] = D_800DCD20[0];
+    color[1] = D_800DCD20[1];
+    color[2] = D_800DCD20[2];
+    s = sinf(D_800DCDA0);
+    targetR = (s * 29.5f) + 127.5f;
+    targetG = (s * 71.0f) + 109.0f;
+    targetB = (s * 26.0f) + 26.0f;
+    D_800DCDA0 += 0.07100000232f * D_800BE9A4;
     D_800DCDA0 = func_15144B68(D_800DCDA0);
-    if (stack.sp28 != D_800DCD94) {
-        D_800DCD94 += (stack.sp28 - D_800DCD94) * 0.5f;
-        stack.sp1C = (u8)(u32)D_800DCD94;
+    if (targetR != D_800DCD94) {
+        D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
+        color[0] = (u32)D_800DCD94;
     }
-    if (stack.sp24 != D_800DCD98) {
-        D_800DCD98 += (stack.sp24 - D_800DCD98) * 0.5f;
-        stack.sp1D = (u8)(u32)D_800DCD98;
+    if (targetG != D_800DCD98) {
+        D_800DCD98 += (targetG - D_800DCD98) * 0.5f;
+        color[1] = (u32)D_800DCD98;
     }
-    if (stack.sp20 != D_800DCD9C) {
-        D_800DCD9C += (stack.sp20 - D_800DCD9C) * 0.5f;
-        stack.sp1E = (u8)(u32)D_800DCD9C;
+    if (targetB != D_800DCD9C) {
+        D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
+        color[2] = (u32)D_800DCD9C;
     }
-    func_1515D4D4(stack.sp1C, stack.sp1D, stack.sp1E, 0);
+    func_1515D4D4(color[0], color[1], color[2], 0);
 }
 
-long func_1515FB70(u8 *a0, u8 *a1)
-{
-  long offset;
-  s32 v0;
-  s32 *slot;
-  v0 = (*((u8 *) (a0 + 0x3B))) == 1;
-  if ((*((u8 *) (a0 + 0x3B))) == 1)
-  {
-    v0 = *((s32 *) (a1 + 0x1C));
-    if (v0 >= 0)
-    {
-      offset = 0x1C;
-      if (!v0)
-      {
-        slot = (s32 *) (a1 + offset);
-      }
+/* Zone handler: func_1515F2E8 for a handler table that is empty in this build. */
+void func_1515FB70(struct127 *obj, Zone *zone) {
+    s32 idx;
+
+    if (obj->unique_id == 1) {
+        idx = zone->unk1C;
+        if (idx >= 0 && idx < 0) {
+        }
     }
-  }
 }
 
-
-s32 func_1515FB94(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x6002D, arg0->unk7A, -1);
+void func_1515FB94(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x6002D, obj->unk7A, -1);
 }
 
-void func_1515FBC4(struct127 *arg0, s32 arg1) {
-    struct Struct1515FBC4 *temp_v0;
-    struct127 *temp_v1;
-    s32 temp_a3;
+/* Zone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
+void func_1515FBC4(struct127 *obj, Zone *zone) {
+    struct ZoneLinkObj *link;
+    struct127 *target;
+    s32 targetIndex;
 
-    temp_v1 = 0;
-    temp_v0 = func_15105C24(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = temp_v0->unk98;
+    target = NULL;
+    link = func_15105C24((s32)zone);
+    if (link != NULL) {
+        target = link->unk98;
     }
-    if (temp_v1 != 0) {
-        temp_a3 = ((s32)temp_v1 - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    if (target != NULL) {
+        targetIndex = target - D_800CC2D0;
     } else {
-        temp_a3 = -1;
+        targetIndex = -1;
     }
-    func_1505D024(arg0, 0x6002E, arg0->unk7A, temp_a3);
+    func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
-
-s32 func_1515FC34(struct127 *arg0, s32 arg1) {
-    return func_1505D024(arg0, 0x33, 0xC000, -1);
+void func_1515FC34(struct127 *obj, Zone *zone) {
+    func_1505D024(obj, 0x33, 0xC000, -1);
 }
 
-struct Struct1515FC60 {
-    s16 unk0;
-    u8 pad2[2];
-    s16 unk4;
-    s16 unk6;
-    u8 pad8[0x14];
-    u32 unk1C;
-};
-
-union Union1515FC60 {
-    f32 f;
-    f32 pad[2];
-};
-
-extern f32 D_800A6534;
 s32 func_150AD960(s32, s32, s32, s32);
 void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(struct127 *, s32);
 
-void func_1515FC60(struct127 *arg0, struct Struct1515FC60 *arg1) {
-    f32 temp_f0;
-    union Union1515FC60 temp_f18;
-    s32 temp_v0;
+/*
+ * Zone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
+ * is outside of, fires event 0x2F on `obj`.
+ */
+void func_1515FC60(struct127 *obj, Zone *zone) {
+    s32 pad; // matching: stack slot
+    f32 limit;
+    f32 scale;
+    s32 value;
 
-    if (arg0->unk31C != NULL) {
-        if (arg0->unk31C->unk120 == 0) {
-            temp_v0 = arg1->unk1C;
-            if (temp_v0 != 0) {
-                temp_f18.f = (f32)(u32)temp_v0 * D_800A6534;
-                temp_v0 = func_150AD960(arg1->unk0, arg1->unk4, (s32)arg0->x_position, (s32)arg0->z_position);
-                temp_f0 = ((f32)arg1->unk6 * temp_f18.f) - (f32)arg0->unkE4;
-                if (temp_f0 > (f32)temp_v0) {
-                    return;
-                }
+    if (obj->unk31C != NULL && obj->unk31C->unk120 == 0) {
+        value = zone->unk1C;
+        if (value != 0) {
+            scale = (f32)(u32)value * 0.009999999776f;
+            value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
+            limit = (zone->radius * scale) - obj->unkE4;
+            if (limit > value) {
+                return;
             }
-            func_1505D024(arg0, 0x2F, 0, -1);
-            func_15136C3C(arg0, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(arg0);
-            func_1507CD64(arg0, 6);
         }
+        func_1505D024(obj, 0x2F, 0, -1);
+        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(obj);
+        func_1507CD64(obj, 6);
     }
 }

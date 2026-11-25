@@ -1,291 +1,287 @@
 #include <ultra64.h>
+/* functions.h declares func_150ADA20 (random) as returning u8; this file needs the full u32 */
 #define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
 #undef func_150ADA20
 #include "variables.h"
 
 
-typedef struct Game174BF0Actor {
-    u8 pad0[0x90];
-    s8 group, phase;
-    s16 flags;
-    u8 *model;
-    f32 x, y, z;
-    s16 timer, enabled;
-    f32 pitch, yaw, roll, velocity, yawStep, fieldBC, scale;
-    u8 padC4[4];
-    f32 baseHeight;
-    u8 padCC[0x1C];
-    u32 surfaceFlags;
-    u8 brightness;
-    s8 modelIndex;
-    u16 sound;
-    s8 opacity, fieldF1;
-} Game174BF0Actor;
+/* A flying swarm member (bat/bird): spawned by func_15174BF0 / func_15174FA4 / func_15175390,
+ * updated by func_15175958 and friends, drawn by func_151770C8 / func_15176DF0. */
+typedef struct SwarmActor {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 pad1[0xF];
+    /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
+    /* 0x90 */ u8 group;             /* index into D_800DDF5C / D_800DDF60 */
+    /* 0x91 */ u8 state;
+    /* 0x92 */ s16 flags;
+    /* 0x94 */ Vtx *vertices;        /* bound to segment 1 when drawn */
+    /* 0x98 */ f32 x, y, z;
+    /* 0xA4 */ s16 speed;
+    /* 0xA6 */ s16 speedStep;
+    /* 0xA8 */ f32 pitch, yaw, roll;
+    /* 0xB4 */ f32 pitchStep, yawStep, rollStep;
+    /* 0xC0 */ f32 scale;
+    /* 0xC4 */ u8 padC4[4];
+    /* 0xC8 */ f32 groundHeight;
+    /* 0xCC */ f32 perchPitchStep;   /* head-bob pitch rate while perched (func_1517685C) */
+    /* 0xD0 */ s16 originX, originY, originZ;
+    /* 0xD6 */ s16 maxRadius, minRadius, heightRange;
+    /* 0xDC */ s16 turnTimer, hoverTimer;
+    /* 0xE0 */ f32 targetYaw;
+    /* 0xE4 */ f32 targetY;
+    /* 0xE8 */ u32 surfaceFlags;
+    /* 0xEC */ u8 brightness;
+    /* 0xED */ u8 modelIndex;        /* index into gSwarmModels / D_8008D0B0 */
+    /* 0xEE */ u16 sound;
+    /* 0xF0 */ u8 alpha;
+    /* 0xF1 */ u8 fadingOut;
+} SwarmActor;
 
-typedef struct Game174FA4Surface {
+/* Per-model data in D_800DDE80 (the shared header only names fields 0x0, 0xC and 0x10). */
+typedef struct SwarmModel {
+    /* 0x00 */ void *loaded;
+    /* 0x04 */ Vtx *unk4;
+    /* 0x08 */ Vtx *unk8;
+    /* 0x0C */ Gfx *displayList;
+    /* 0x10 */ void *unk10;
+} SwarmModel;
+#define gSwarmModels ((SwarmModel *)D_800DDE80)
+
+typedef struct HeightSample {
     s32 height;
     u8 pad04[0xC];
-} Game174FA4Surface;
+} HeightSample;
+#define gHeightSamples ((HeightSample *)&D_800D3300) /* filled by func_150A3A70 */
 
-void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u32 func_150ADA20(void);
+void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                    s32 argA);
 s32 func_1510F8D8(s32, s32, s32, s32 *);
 extern u8 D_800A7170[];
-extern s32 D_800DDE88[];
 
-void func_15174BF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                   f32 arg6, f32 arg7, s32 arg8) {
-    Game174BF0Actor *actor;
+/* Spawns `count` swarm actors of type 10 around (x, y, z), heading roughly away from player `player`. */
+void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
+                   f32 minScale, f32 scaleRange, s32 flags) {
+    SwarmActor *actor;
     f32 height;
-    s32 x;
-    s32 z;
+    s32 actorX;
+    s32 actorZ;
     s32 angle;
     s32 yaw;
-    s32 index;
-    s32 flag;
-    s32 sel;
-    s32 off;
+    s32 i;
+    s32 onGround;
+    s32 model;
+    s32 surfaceIndex;
     struct17 diff;
-    u32 sflags;
+    u32 surfaceFlags;
     s32 surface;
 
-    height = (f32)arg3;
-    diff.unk0 = (f32)arg2 - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x2F8);
-    diff.unk4 = height - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x2FC);
-    diff.unk8 = (f32)arg4 - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x300);
-    angle = (s32)func_15048FC8(&diff);
-    index = 0;
-    if (arg0 > 0) {
-        do {
-            actor = func_15167A68(0xA, 0, 0xF8, 1, 0xFF, 1);
-            if (actor == NULL) return;
-            flag = arg8 & 1;
-            x = (s32)(func_150ADA20() & 0x7F) + arg2 - 0x3F;
-            z = (s32)(func_150ADA20() & 0x7F) + arg4 - 0x3F;
-            actor->group = arg1;
-            actor->flags = 3;
-            actor->y = height;
-            actor->x = (f32)x;
-            actor->z = (f32)z;
-            actor->timer = func_150ADA20() % 15U + 0xA;
-            actor->enabled = 1;
-            yaw = (s32)(func_150ADA20() & 0x1F) + angle - 0xF;
-            if (yaw < 0) {
-                yaw += 360;
-            } else if (yaw >= 360) {
-                yaw -= 360;
-            }
-            actor->pitch = (f32)((s32)(func_150ADA20() & 0x1F) - 0xF);
-            actor->yaw = (f32)yaw;
-            actor->roll = 0.0f;
-            actor->velocity = -1.0f;
-            actor->yawStep = (f32)((s32)(func_150ADA20() & 0xFF) - 0x80) * 0.009999999776f;
-            actor->fieldBC = 0.0f;
-            actor->scale = (f32)(s32)(func_150ADA20() & 0xFFFF) * 0.000030517578125f * arg7 + arg6;
-            sel = func_150ADA20() & 1;
-            actor->model = (u8 *)*(s32 *)((u8 *)D_800DDE88 + sel * 20);
-            actor->modelIndex = sel;
-            if (index == 0) {
-                actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, x, arg3, z, 0x3E8, 0xFA0);
+    height = (f32)y;
+    diff.unk0 = x - D_800DBFF0[player].unk2F8;
+    diff.unk4 = height - D_800DBFF0[player].unk2FC;
+    diff.unk8 = z - D_800DBFF0[player].unk300;
+    angle = func_15048FC8(&diff);
+    for (i = 0; i < count; i++) {
+        actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
+        if (actor == NULL) return;
+        onGround = flags & 1;
+        actorX = (func_150ADA20() & 0x7F) + x - 63;
+        actorZ = (func_150ADA20() & 0x7F) + z - 63;
+        actor->group = group;
+        actor->flags = 3;
+        actor->y = height;
+        actor->x = actorX;
+        actor->z = actorZ;
+        actor->speed = func_150ADA20() % 15U + 10;
+        actor->speedStep = 1;
+        yaw = (func_150ADA20() & 0x1F) + angle - 15;
+        if (yaw < 0) {
+            yaw += 360;
+        } else if (yaw >= 360) {
+            yaw -= 360;
+        }
+        actor->pitch = (s32)(func_150ADA20() & 0x1F) - 15;
+        actor->yaw = yaw;
+        actor->roll = 0.0f;
+        actor->pitchStep = -1.0f;
+        actor->yawStep = ((s32)(func_150ADA20() & 0xFF) - 128) * 0.009999999776f;
+        actor->rollStep = 0.0f;
+        actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
+        model = func_150ADA20() & 1;
+        actor->vertices = gSwarmModels[model].unk8;
+        actor->modelIndex = model;
+        if (i == 0) {
+            actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, actorX, y, actorZ, 1000, 4000);
+        } else {
+            actor->sound = 0;
+        }
+        actor->surfaceFlags = 0;
+        if (onGround) {
+            actor->flags |= 0x80;
+            actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
+            if (surface != 0) {
+                surfaceIndex = (surface - D_800DBE3C) / 12;
+                surfaceFlags = ((u32 *)D_800DBE5C)[surfaceIndex];
             } else {
-                actor->sound = 0;
+                surfaceFlags = 0;
             }
-            actor->surfaceFlags = 0;
-            if (flag) {
-                actor->flags |= 0x80;
-                actor->baseHeight = (f32)func_1510F8D8(x, arg3, z, &surface);
-                if (surface != 0) {
-                    off = (surface - D_800DBE3C) / 12;
-                    sflags = ((u32 *)D_800DBE5C)[off];
-                } else {
-                    sflags = 0;
-                }
-                actor->surfaceFlags = sflags;
-                actor->brightness = D_800A7170[(sflags >> 5) & 3];
-            } else {
-                actor->brightness = 0;
-            }
-            actor->opacity = 0;
-            actor->fieldF1 = 0;
-            index++;
-        } while (index != arg0);
+            actor->surfaceFlags = surfaceFlags;
+            actor->brightness = D_800A7170[(surfaceFlags >> 5) & 3];
+        } else {
+            actor->brightness = 0;
+        }
+        actor->alpha = 0;
+        actor->fadingOut = 0;
     }
 }
 
-void *func_15167A68(s32, s32, s32, s32, u8, u8);
 s32 func_150A3A70(s32, s32);
 void func_1510F800(s32);
-extern s32 D_800DDF14;
-u32 func_150ADA20(void);
-#define SURF ((Game174FA4Surface *)&D_800D3300)
 
-void func_15174FA4(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   s32 arg4, s32 arg5, s32 arg6, s32 arg7,
-                   f32 arg8, f32 arg9) {
+/* Spawns `count` swarm actors of type 0x13 scattered over a `spread`-wide square around (x, z).
+ * With `airborne` clear they start just above the ground; otherwise they start 300+ units up. */
+void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 arg6, s32 airborne,
+                   f32 minScale, f32 scaleRange) {
     f32 height;
-    s32 initialX;
-    s32 initialHeight;
-    s32 x;
-    s32 z;
+    s32 spawnX;
+    s32 spawnY;
+    s32 actorX;
+    s32 actorZ;
     s32 radius;
-    s32 minimum;
-    s32 count;
+    s32 lowest;
+    s32 samples;
+    s32 j;
     s32 i;
-    s32 index;
-    Game174BF0Actor *actor;
+    SwarmActor *actor;
 
-    initialX = arg2;
-    initialHeight = arg3;
-    if (arg7 == 0) func_1510F800(0);
-    index = 0;
-    if (arg0 > 0) {
-        do {
-            actor = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
-            if (actor == NULL) return;
-            radius = arg5 >> 1;
-            height = (f32)initialHeight;
-            x = (func_150ADA20() % (u32)arg5) + initialX - radius;
-            z = (func_150ADA20() % (u32)arg5) + arg4 - radius;
-            actor->group = arg1;
-            actor->x = (f32)x;
-            actor->y = height;
-            actor->z = (f32)z;
-            actor->timer = func_150ADA20() % 3U + 4;
-            actor->enabled = 0;
-            actor->pitch = (f32)((s32)(func_150ADA20() & 0x1F) - 0xF);
-            actor->yaw = (f32)(func_150ADA20() % 360U);
-            actor->roll = (f32)((s32)(func_150ADA20() & 0x1F) - 0xF);
-            actor->velocity = 0.0f;
-            actor->fieldBC = 0.0f;
-            actor->yawStep = 3.0f;
-            actor->scale = (f32)(s32)(func_150ADA20() & 0xFFFF) * 0.000030517578125f * arg9 + arg8;
-            actor->model = (u8 *)D_800DDF14;
-            actor->modelIndex = 7;
-            count = func_150A3A70(x, z);
-            if (count == 0) {
-                func_1516979C((struct102 *)actor);
-            } else {
-                minimum = SURF[0].height;
-                for (i = 1; i < count; i++) {
-                    if (SURF[i].height < minimum) {
-                        minimum = SURF[i].height;
-                    }
+    // matching: IDO assigns x and y their callee-saved registers in copy order
+    spawnX = x;
+    spawnY = y;
+    if (airborne == 0) func_1510F800(0);
+    for (i = 0; i < count; i++) {
+        actor = func_15167A68(0x13, 0, 0xF8, 1, 0xFF, 1);
+        if (actor == NULL) return;
+        radius = spread >> 1;
+        height = spawnY;
+        actorX = (func_150ADA20() % (u32)spread) + spawnX - radius;
+        actorZ = (func_150ADA20() % (u32)spread) + z - radius;
+        actor->group = group;
+        actor->x = actorX;
+        actor->y = height;
+        actor->z = actorZ;
+        actor->speed = func_150ADA20() % 3U + 4;
+        actor->speedStep = 0;
+        actor->pitch = (s32)(func_150ADA20() & 0x1F) - 15;
+        actor->yaw = func_150ADA20() % 360U;
+        actor->roll = (s32)(func_150ADA20() & 0x1F) - 15;
+        actor->pitchStep = 0.0f;
+        actor->rollStep = 0.0f;
+        actor->yawStep = 3.0f;
+        actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
+        actor->vertices = gSwarmModels[7].unk8;
+        actor->modelIndex = 7;
+        samples = func_150A3A70(actorX, actorZ);
+        if (samples == 0) {
+            func_1516979C((struct102 *)actor);
+        } else {
+            lowest = gHeightSamples[0].height;
+            for (j = 1; j < samples; j++) {
+                if (gHeightSamples[j].height < lowest) {
+                    lowest = gHeightSamples[j].height;
                 }
-                minimum >>= 8;
-                actor->baseHeight = (f32)minimum;
-                if (arg7 == 0) {
-                    actor->phase = 0;
-                    actor->y = (f32)(minimum + 10);
-                    actor->flags = 1;
-                } else {
-                    actor->phase = 2;
-                    actor->flags = 4;
-                    *(f32 *)((u8 *)actor + 0xE4) = (f32)((s32)(func_150ADA20() & 0x7F) + minimum + 300);
-                    actor->y = (f32)((s32)(func_150ADA20() & 0x7F) + minimum + 300);
-                }
-                *(f32 *)((u8 *)actor + 0xCC) = 0;
-                *(s16 *)((u8 *)actor + 0xD0) = initialX;
-                *(s16 *)((u8 *)actor + 0xD4) = arg4;
-                *(s16 *)((u8 *)actor + 0xD6) = radius;
-                *(f32 *)((u8 *)actor + 0xE0) = 0;
-                *(s16 *)((u8 *)actor + 0xDC) = 0;
-                actor->surfaceFlags = 0;
-                actor->brightness = 0;
-                actor->opacity = 0;
-                actor->fieldF1 = 0;
             }
-            index++;
-        } while (index != arg0);
+            lowest >>= 8;
+            actor->groundHeight = lowest;
+            if (airborne == 0) {
+                actor->state = 0;
+                actor->y = lowest + 10;
+                actor->flags = 1;
+            } else {
+                actor->state = 2;
+                actor->flags = 4;
+                actor->targetY = (s32)(func_150ADA20() & 0x7F) + lowest + 300;
+                actor->y = (s32)(func_150ADA20() & 0x7F) + lowest + 300;
+            }
+            actor->perchPitchStep = 0;
+            actor->originX = spawnX;
+            actor->originZ = z;
+            actor->maxRadius = radius;
+            actor->targetYaw = 0;
+            actor->turnTimer = 0;
+            actor->surfaceFlags = 0;
+            actor->brightness = 0;
+            actor->alpha = 0;
+            actor->fadingOut = 0;
+        }
     }
 }
 
-typedef struct Game175390Actor {
-    u8 pad0[0x90];
-    s8 group, phase;
-    s16 flags;
-    u8 *model;
-    f32 x, y, z;
-    s16 timer, enabled;
-    f32 pitch, yaw, roll, velocity, yawStep, fieldBC, scale;
-    u8 padC4[4];
-    f32 baseHeight;
-    u8 padCC[4];
-    s16 originX, originY, originZ;
-    s16 range, minimum, spread;
-    s16 fieldDC, fieldDE;
-    f32 fieldE0;
-    u8 padE4[4];
-    u32 surfaceFlags;
-    u8 brightness;
-    s8 modelIndex;
-    u16 sound;
-    s8 opacity, fieldF1;
-} Game175390Actor;
-
-void func_15175390(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u32 argB,
-                   s32 argC, s32 argD, s32 argE, f32 argF, f32 arg10, s32 arg11) {
-    Game175390Actor *actor;
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 index;
+/* Spawns `count` swarm actors in a ring between minRadius and maxRadius around (x, z).
+ * flags becomes the actors' flags; 0x10000 aims them away from player `player`,
+ * 0x20000 gives them a random initial pitch. */
+void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
+                   s32 player, s32 heightRange, s32 minRadius, s32 flags, s32 baseType, u32 typeCount,
+                   s32 baseModel, s32 modelMask, s32 state, f32 minScale, f32 scaleRange, s32 spawnFlags) {
+    SwarmActor *actor;
+    s32 actorX;
+    s32 actorY;
+    s32 actorZ;
+    s32 i;
     s32 yaw;
     s32 angle;
-    s32 range;
-    s32 groundFlag;
+    s32 ringWidth;
+    s32 onGround;
     struct17 diff;
-    u32 sel;
+    u32 variant;
     s32 surface;
 
-    if ((arg9 & 0x40) && arg7 <= 0) {
+    if ((flags & 0x40) && heightRange <= 0) {
         return;
     }
-    if (arg9 & 0x10000) {
-        diff.unk0 = (f32)arg2 - *(f32 *)((u8 *)D_800DBFF0 + arg6 * 0x9A0 + 0x2F8);
-        diff.unk4 = (f32)arg3 - *(f32 *)((u8 *)D_800DBFF0 + arg6 * 0x9A0 + 0x2FC);
-        diff.unk8 = (f32)arg4 - *(f32 *)((u8 *)D_800DBFF0 + arg6 * 0x9A0 + 0x300);
-        angle = (s32)func_15048FC8(&diff);
+    if (flags & 0x10000) {
+        diff.unk0 = x - D_800DBFF0[player].unk2F8;
+        diff.unk4 = y - D_800DBFF0[player].unk2FC;
+        diff.unk8 = z - D_800DBFF0[player].unk300;
+        angle = func_15048FC8(&diff);
     }
-    for (index = 0; index < arg0; index++) {
-        if (argB != 0) {
-            sel = func_150ADA20() % argB;
+    for (i = 0; i < count; i++) {
+        if (typeCount != 0) {
+            variant = func_150ADA20() % typeCount;
         } else {
-            sel = 0;
+            variant = 0;
         }
-        actor = func_15167A68(argA + sel, 0, 0xF8, 1, 0xFF, 1);
+        actor = func_15167A68(baseType + variant, 0, 0xF8, 1, 0xFF, 1);
         if (actor == NULL) return;
-        range = arg5 - arg8;
-        groundFlag = arg11 & 1;
-        x = (s32)func_150ADA20() % range;
-        x = (x < 0) ? x - arg8 : x + arg8;
-        x += arg2;
-        y = arg3;
-        z = (s32)func_150ADA20() % range;
-        z = (z < 0) ? z - arg8 : z + arg8;
-        z += arg4;
-        if (argE == 0 || groundFlag) {
-            actor->baseHeight = (f32)func_1510F8D8(x, arg3, z, &surface);
+        ringWidth = maxRadius - minRadius;
+        onGround = spawnFlags & 1;
+        actorX = (s32)func_150ADA20() % ringWidth;
+        actorX = (actorX < 0) ? actorX - minRadius : actorX + minRadius;
+        actorX += x;
+        actorY = y;
+        actorZ = (s32)func_150ADA20() % ringWidth;
+        actorZ = (actorZ < 0) ? actorZ - minRadius : actorZ + minRadius;
+        actorZ += z;
+        if (state == 0 || onGround) {
+            actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
         }
-        if (argE == 0) {
-            y = (s32)actor->baseHeight;
-        } else if (arg7 != 0) {
-            y += func_150ADA20() % (u32)arg7;
+        if (state == 0) {
+            actorY = actor->groundHeight;
+        } else if (heightRange != 0) {
+            actorY += func_150ADA20() % (u32)heightRange;
         }
-        actor->group = arg1;
-        actor->flags = arg9;
-        actor->phase = argE;
-        actor->x = (f32)x;
-        actor->y = (f32)y;
-        actor->z = (f32)z;
-        actor->timer = func_150ADA20() % 15U + 0xA;
-        actor->enabled = 0;
-        if (arg9 & 0x10000) {
-            yaw = (s32)(func_150ADA20() & 0x1F) + angle - 0xF;
+        actor->group = group;
+        actor->flags = flags;
+        actor->state = state;
+        actor->x = actorX;
+        actor->y = actorY;
+        actor->z = actorZ;
+        actor->speed = func_150ADA20() % 15U + 10;
+        actor->speedStep = 0;
+        if (flags & 0x10000) {
+            yaw = (func_150ADA20() & 0x1F) + angle - 15;
             if (yaw < 0) {
                 yaw += 360;
             } else if (yaw >= 360) {
@@ -294,738 +290,638 @@ void func_15175390(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
         } else {
             yaw = func_150ADA20() % 360U;
         }
-        if (arg9 & 0x20000) {
-            actor->pitch = (f32)((s32)(func_150ADA20() & 0x1F) - 0xF);
-            actor->velocity = -1.0f;
+        if (flags & 0x20000) {
+            actor->pitch = (s32)(func_150ADA20() & 0x1F) - 15;
+            actor->pitchStep = -1.0f;
         } else {
             actor->pitch = 0.0f;
-            actor->velocity = 0.0f;
+            actor->pitchStep = 0.0f;
         }
         actor->roll = 0.0f;
-        actor->yaw = (f32)yaw;
-        actor->yawStep = (f32)((s32)(func_150ADA20() & 0xFF) - 0x80) * 0.009999999776f;
-        actor->fieldBC = 0.0f;
-        actor->scale = (f32)(s32)(func_150ADA20() & 0xFFFF) * 0.000030517578125f * arg10 + argF;
-        if (argD != -1) {
-            if (argD != 0) {
-                sel = func_150ADA20() & argD;
+        actor->yaw = yaw;
+        actor->yawStep = ((s32)(func_150ADA20() & 0xFF) - 128) * 0.009999999776f;
+        actor->rollStep = 0.0f;
+        actor->scale = (s32)(func_150ADA20() & 0xFFFF) * (1.0f / 32768.0f) * scaleRange + minScale;
+        if (modelMask != -1) {
+            if (modelMask != 0) {
+                variant = func_150ADA20() & modelMask;
             } else {
-                sel = 0;
+                variant = 0;
             }
         }
-        sel += argC;
-        actor->model = (u8 *)*(s32 *)((u8 *)D_800DDE88 + sel * 20);
-        actor->modelIndex = sel;
-        actor->originX = arg2;
-        actor->originY = arg3;
-        actor->originZ = arg4;
-        actor->range = arg5;
-        actor->minimum = arg8;
-        actor->spread = arg7;
-        actor->fieldDC = 0;
-        actor->fieldDE = 0;
+        variant += baseModel;
+        actor->vertices = gSwarmModels[variant].unk8;
+        actor->modelIndex = variant;
+        actor->originX = x;
+        actor->originY = y;
+        actor->originZ = z;
+        actor->maxRadius = maxRadius;
+        actor->minRadius = minRadius;
+        actor->heightRange = heightRange;
+        actor->turnTimer = 0;
+        actor->hoverTimer = 0;
         actor->surfaceFlags = 0;
-        actor->fieldE0 = 0;
-        if (index == 0) {
-            if (argA == 10) {
-                actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, x, y, z, 0x3E8, 0xFA0);
+        actor->targetYaw = 0;
+        if (i == 0) {
+            if (baseType == 10) {
+                actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, actorX, actorY, actorZ, 1000, 4000);
             }
         } else {
             actor->sound = 0;
         }
-        if (groundFlag) {
+        if (onGround) {
             actor->flags |= 0x80;
+            // matching: reusing ringWidth/onGround here keeps the original stack frame size
             if (surface != 0) {
-                range = (surface - D_800DBE3C) / 12;
-                groundFlag = ((u32 *)D_800DBE5C)[range];
+                ringWidth = (surface - D_800DBE3C) / 12;
+                onGround = ((u32 *)D_800DBE5C)[ringWidth];
             } else {
-                groundFlag = 0;
+                onGround = 0;
             }
-            actor->surfaceFlags = groundFlag;
-            actor->brightness = D_800A7170[((u32)groundFlag >> 5) & 3];
+            actor->surfaceFlags = onGround;
+            actor->brightness = D_800A7170[((u32)onGround >> 5) & 3];
         } else {
             actor->brightness = 0;
         }
-        actor->opacity = 0;
-        actor->fieldF1 = 0;
+        actor->alpha = 0;
+        actor->fadingOut = 0;
     }
 }
 
-typedef struct Wave1A20A0 {
-    u8 b0;
-    u8 b1;
-    u8 b2;
-    u8 b3;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[4];
-    f32 unk10;
-    u8 pad14[4];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8 pad2C[4];
-    f32 unk30;
-    f32 unk34;
-} Wave1A20A0;
+/* Per-model flight parameters, indexed like gSwarmModels. */
+typedef struct SwarmFlight {
+    /* 0x00 */ u8 maxSpeed;
+    /* 0x01 */ u8 minSpeed;
+    /* 0x02 */ u8 wanderTime;
+    /* 0x03 */ u8 turnTime;
+    /* 0x04 */ f32 maxRoll;
+    /* 0x08 */ f32 maxPitch;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ f32 maxYawStep;
+    /* 0x14 */ u8 pad14[4];
+    /* 0x18 */ f32 flapAngle;        /* flapAmplitude * sin(flapPhase) */
+    /* 0x1C */ f32 flapRate;
+    /* 0x20 */ f32 flapThreshold;
+    /* 0x24 */ f32 flapPhase;
+    /* 0x28 */ f32 flapAmplitude;
+    /* 0x2C */ u8 pad2C[4];
+    /* 0x30 */ f32 innerWingLength;
+    /* 0x34 */ f32 outerWingLength;
+} SwarmFlight;
 
-extern Wave1A20A0 D_8008D0B0[];
-typedef struct Obj15175958 {
-    u8 type;
-    u8 pad1[0x8F];
-    u8 unk90;
-    u8 unk91;
-    s16 unk92;
-    s32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    s16 unkA4;
-    s16 unkA6;
-    f32 unkA8;
-    f32 unkAC;
-    f32 unkB0;
-    f32 unkB4;
-    f32 unkB8;
-    f32 unkBC;
-    u8 padC0[8];
-    f32 unkC8;
-    u8 padCC[4];
-    s16 unkD0;
-    s16 unkD2;
-    s16 unkD4;
-    s16 unkD6;
-    s16 unkD8;
-    s16 unkDA;
-    s16 unkDC;
-    s16 unkDE;
-    f32 unkE0;
-    f32 unkE4;
-    s32 unkE8;
-    u8 padEC;
-    u8 unkED;
-    u16 unkEE;
-    u8 unkF0;
-    u8 unkF1;
-} Obj15175958;
-
-typedef struct Slot15175958 {
-    void *unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-} Slot15175958;
-
+extern SwarmFlight D_8008D0B0[];
 extern s32 D_800C35B0;
 extern u8 D_800C35E8;
-extern f32 D_800D9C50;
-extern u8 D_800D9C10[];
+extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
 extern f32 D_800D35E0;
-extern f32 D_800D35E8;
+extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
+#define D_800D35E4 ((&D_800D35E8)[-1])
 s32 func_150490A8(struct17 *arg0);
 s32 func_150AD960(s32, s32, s32, s32);
-s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 
-void func_15175958(Obj15175958 *arg0) {
-    s32 pad0;
+/* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
+ * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
+ * is unloaded, it has faded out, or it leaves the view. */
+void func_15175958(SwarmActor *actor) {
+    s32 pad0; // matching: unused stack slot
     f32 dir[3];
-    f32 ang[3];
-    f32 sa;
-    f32 sb;
-    f32 ca;
-    f32 cb;
-    s32 off;
+    f32 rad[3];
+    f32 sinPitch;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 cosYaw;
+    s32 surfaceIndex;
     f32 step;
-    f32 lim;
-    s32 sflags;
+    f32 threshold;
+    s32 surfaceFlags;
     s32 angle;
     s32 dist;
     struct17 vec;
     s32 surface;
-    Wave1A20A0 *wave;
-    Slot15175958 *slot;
-    s32 fade;
+    SwarmFlight *flight;
+    SwarmModel *model;
+    s32 alpha;
     f32 dx;
     f32 dz;
-    u16 snd;
+    u16 sound;
 
-    if (D_800DDE80[arg0->unkED].field0 == NULL || D_800DDF78[arg0->unkED] == 0) {
-        func_1516972C((struct102 *)arg0);
+    if (gSwarmModels[actor->modelIndex].loaded == NULL || D_800DDF78[actor->modelIndex] == 0) {
+        func_1516972C((struct102 *)actor);
         return;
     }
-    fade = arg0->unkF0;
-    if ((arg0->unkED == 8 || arg0->unkED == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C35E8 == 0xF) {
-        arg0->unk92 &= ~8;
+    alpha = actor->alpha;
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C35E8 == 0xF) {
+        actor->flags &= ~8;
         if (D_800C35EA == 0 || D_800C35E8 != 0xF) {
-            func_1516972C((struct102 *)arg0);
+            func_1516972C((struct102 *)actor);
             return;
         }
-        if (D_800C35B0 >= 60 && !(arg0->unk92 & 0x200)) {
-            arg0->unk92 = (arg0->unk92 & ~0x4C) | 0x200;
-            dx = arg0->unk98 - -3478.0f;
-            dz = arg0->unkA0 - 3858.0f;
-            arg0->unkB4 = 1.570796371f - func_150484A0(dx, dz);
-            arg0->unkB8 = 0.01150000002f;
-            arg0->unkBC = sqrtf(dx * dx + dz * dz);
+        /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
+         * hold the orbit angle, its angular speed and the orbit radius */
+        if (D_800C35B0 >= 60 && !(actor->flags & 0x200)) {
+            actor->flags = (actor->flags & ~0x4C) | 0x200;
+            dx = actor->x - -3478.0f;
+            dz = actor->z - 3858.0f;
+            actor->pitchStep = 1.570796371f - func_150484A0(dx, dz);
+            actor->yawStep = 0.01150000002f;
+            actor->rollStep = sqrtf(dx * dx + dz * dz);
         }
     }
-    if (arg0->unkF1 == 0) {
-        if ((arg0->unk92 & 8) && D_800DDF5C[arg0->unk90] == 0) {
-            arg0->unkF1 = 1;
-        } else if (fade != 0xFF) {
-            fade += D_800BE9E4 * 4;
-            if (fade >= 0x100) {
-                fade = 0xFF;
+    if (actor->fadingOut == 0) {
+        if ((actor->flags & 8) && D_800DDF5C[actor->group] == 0) {
+            actor->fadingOut = 1;
+        } else if (alpha != 255) {
+            alpha += D_800BE9E4 * 4;
+            if (alpha >= 256) {
+                alpha = 255;
             }
-            arg0->unkF0 = fade;
+            actor->alpha = alpha;
         }
     } else {
-        if (fade == 0) {
-            func_1516972C((struct102 *)arg0);
+        if (alpha == 0) {
+            func_1516972C((struct102 *)actor);
             return;
         }
-        fade -= D_800BE9E4 * 4;
-        if (fade < 0) {
-            fade = 0;
+        alpha -= D_800BE9E4 * 4;
+        if (alpha < 0) {
+            alpha = 0;
         }
-        arg0->unkF0 = fade;
+        actor->alpha = alpha;
     }
-    slot = (Slot15175958 *)&D_800DDE80[arg0->unkED];
-    wave = &D_8008D0B0[arg0->unkED];
-    D_800DDF68[arg0->unkED] = 1;
-    snd = arg0->unkEE;
-    if (snd != 0) {
-        if (func_1000F3D0(snd) != 0) {
-            func_1000F91C(arg0->unkEE, 0x7D00, 0, 0, 0, arg0->unk98, arg0->unk9C, arg0->unkA0, 1000, 4000);
+    // matching: index D_800DDE80 before the cast; &gSwarmModels[i] schedules differently
+    model = (SwarmModel *)&D_800DDE80[actor->modelIndex];
+    flight = &D_8008D0B0[actor->modelIndex];
+    D_800DDF68[actor->modelIndex] = 1;
+    sound = actor->sound;
+    if (sound != 0) {
+        if (func_1000F3D0(sound) != 0) {
+            func_1000F91C(actor->sound, 0x7D00, 0, 0, 0, actor->x, actor->y, actor->z, 1000, 4000);
         } else {
-            arg0->unkEE = 0;
+            actor->sound = 0;
         }
     }
-    if (arg0->unk92 & 4) {
-        s32 flag;
+    if (actor->flags & 4) {
+        s32 tooClose;
 
-        dist = func_150AD960((s32)arg0->unk98, (s32)arg0->unkA0, arg0->unkD0, arg0->unkD4);
-        flag = ((arg0->unk92 & 0x10) && dist < arg0->unkD8) ? 1 : 0;
-        if (arg0->unkD6 < dist || flag) {
-            vec.unk0 = arg0->unkD0 - arg0->unk98;
-            vec.unk8 = arg0->unkA0 - arg0->unkD4;
+        dist = func_150AD960((s32)actor->x, (s32)actor->z, actor->originX, actor->originZ);
+        tooClose = ((actor->flags & 0x10) && dist < actor->minRadius) ? TRUE : FALSE;
+        if (actor->maxRadius < dist || tooClose) {
+            vec.unk0 = actor->originX - actor->x;
+            vec.unk8 = actor->z - actor->originZ;
             angle = func_150490A8(&vec);
-            if (flag) {
+            if (tooClose) {
                 angle += 0x80;
             }
             if (angle >= 0x100) {
                 angle -= 0x100;
             }
-            arg0->unkE0 = angle * 1.40625f;
-            arg0->unkDC = wave->b3;
-            arg0->unk91 = 3;
+            actor->targetYaw = angle * 1.40625f;
+            actor->turnTimer = flight->turnTime;
+            actor->state = 3;
         }
-        if (arg0->unk91 == 3) {
+        if (actor->state == 3) {
             step = D_800BE9E4 * 0.5f;
-            if (arg0->unkE0 < arg0->unkAC) {
+            if (actor->targetYaw < actor->yaw) {
                 step = -step;
             }
-            if (fabsf(arg0->unkE0 - arg0->unkAC) >= 180.0f) {
+            if (fabsf(actor->targetYaw - actor->yaw) >= 180.0f) {
                 step = -step;
             }
-            if ((step > 0.0f && arg0->unkB8 < 0.0f) || (step < 0.0f && arg0->unkB8 > 0.0f)) {
-                arg0->unk91 = 2;
+            if ((step > 0.0f && actor->yawStep < 0.0f) || (step < 0.0f && actor->yawStep > 0.0f)) {
+                actor->state = 2;
             } else {
-                arg0->unkB8 += step;
+                actor->yawStep += step;
             }
         }
-        if (arg0->unk91 == 2) {
-            if (arg0->unkB8 != 0.0f) {
-                if (arg0->unkB8 > 0.0f) {
-                    arg0->unkB8 -= D_800BE9E4 * 0.5f;
-                    if (arg0->unkB8 < 0.0f) {
-                        arg0->unkB8 = 0.0f;
+        if (actor->state == 2) {
+            if (actor->yawStep != 0.0f) {
+                if (actor->yawStep > 0.0f) {
+                    actor->yawStep -= D_800BE9E4 * 0.5f;
+                    if (actor->yawStep < 0.0f) {
+                        actor->yawStep = 0.0f;
                     }
                 } else {
-                    arg0->unkB8 += D_800BE9E4 * 0.5f;
-                    if (arg0->unkB8 > 0.0f) {
-                        arg0->unkB8 = 0.0f;
+                    actor->yawStep += D_800BE9E4 * 0.5f;
+                    if (actor->yawStep > 0.0f) {
+                        actor->yawStep = 0.0f;
                     }
                 }
             }
-            arg0->unkDC -= D_800BE9E4;
-            if (arg0->unkDC <= 0) {
-                arg0->unkE0 = func_150ADA20() % 360;
-                arg0->unkDC = wave->b2;
-                arg0->unk91 = 3;
+            actor->turnTimer -= D_800BE9E4;
+            if (actor->turnTimer <= 0) {
+                actor->targetYaw = func_150ADA20() % 360;
+                actor->turnTimer = flight->wanderTime;
+                actor->state = 3;
             }
         }
-        if (wave->unk10 < fabsf(arg0->unkB8)) {
-            if (arg0->unkB8 > 0.0f) {
-                arg0->unkB8 = wave->unk10;
+        if (flight->maxYawStep < fabsf(actor->yawStep)) {
+            if (actor->yawStep > 0.0f) {
+                actor->yawStep = flight->maxYawStep;
             } else {
-                arg0->unkB8 = -wave->unk10;
+                actor->yawStep = -flight->maxYawStep;
             }
         }
     }
-    if (arg0->unk92 & 0x80) {
-        arg0->unkC8 = func_1510F8D8(arg0->unk98, arg0->unk9C, arg0->unkA0, &surface);
+    if (actor->flags & 0x80) {
+        actor->groundHeight = func_1510F8D8(actor->x, actor->y, actor->z, &surface);
         if (surface != 0) {
-            off = (surface - D_800DBE3C) / 12;
-            sflags = ((u32 *)D_800DBE5C)[off];
+            surfaceIndex = (surface - D_800DBE3C) / 12;
+            surfaceFlags = ((u32 *)D_800DBE5C)[surfaceIndex];
         } else {
-            sflags = 0;
+            surfaceFlags = 0;
         }
-        arg0->unkE8 = sflags;
+        actor->surfaceFlags = surfaceFlags;
     }
-    if (arg0->unk92 & 0x40) {
-        if (arg0->unkDE >= 0) {
-            arg0->unkDE -= D_800BE9E4;
-            if (arg0->unkDE <= 0) {
-                arg0->unkDE = -1;
-                arg0->unkE4 = (f32)(func_150ADA20() % arg0->unkDA) + arg0->unkD2;
-                if (arg0->unk9C < arg0->unkE4) {
-                    arg0->unkB4 = -1.0f;
+    if (actor->flags & 0x40) {
+        if (actor->hoverTimer >= 0) {
+            actor->hoverTimer -= D_800BE9E4;
+            if (actor->hoverTimer <= 0) {
+                actor->hoverTimer = -1;
+                actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
+                if (actor->y < actor->targetY) {
+                    actor->pitchStep = -1.0f;
                 } else {
-                    arg0->unkB4 = 1.0f;
+                    actor->pitchStep = 1.0f;
                 }
-            } else if (arg0->unkA8 > 0.0f) {
-                arg0->unkB4 = -1.0f;
-            } else if (arg0->unkA8 < 0.0f) {
-                arg0->unkB4 = 1.0f;
+            } else if (actor->pitch > 0.0f) {
+                actor->pitchStep = -1.0f;
+            } else if (actor->pitch < 0.0f) {
+                actor->pitchStep = 1.0f;
             }
-        } else if ((arg0->unkB4 > 0.0f && arg0->unk9C < arg0->unkE4) ||
-                   (arg0->unkB4 < 0.0f && arg0->unkE4 < arg0->unk9C)) {
-            arg0->unkDE = 120;
-            arg0->unkB4 = -arg0->unkB4;
+        } else if ((actor->pitchStep > 0.0f && actor->y < actor->targetY) ||
+                   (actor->pitchStep < 0.0f && actor->targetY < actor->y)) {
+            actor->hoverTimer = 120;
+            actor->pitchStep = -actor->pitchStep;
         }
     }
-    if (!(arg0->unk92 & 0x200)) {
-        arg0->unkA8 += arg0->unkB4;
-        arg0->unkA8 = (arg0->unkA8 < -wave->unk8) ? -wave->unk8 : ((wave->unk8 < arg0->unkA8) ? wave->unk8 : arg0->unkA8);
-        if (0.200000003f < fabsf(arg0->unkB8)) {
-            arg0->unkAC += arg0->unkB8;
-            if (arg0->unkAC < 0.0f) {
-                arg0->unkAC += 360.0f;
-            } else if (arg0->unkAC >= 360.0f) {
-                arg0->unkAC -= 360.0f;
+    if (!(actor->flags & 0x200)) {
+        actor->pitch += actor->pitchStep;
+        actor->pitch = (actor->pitch < -flight->maxPitch) ? -flight->maxPitch : ((flight->maxPitch < actor->pitch) ? flight->maxPitch : actor->pitch);
+        if (0.200000003f < fabsf(actor->yawStep)) {
+            actor->yaw += actor->yawStep;
+            if (actor->yaw < 0.0f) {
+                actor->yaw += 360.0f;
+            } else if (actor->yaw >= 360.0f) {
+                actor->yaw -= 360.0f;
             }
-            if (!(arg0->unk92 & 0x20)) {
-                arg0->unkBC = -arg0->unkB8;
-                arg0->unkB0 += arg0->unkBC;
-                arg0->unkB0 = (arg0->unkB0 < -wave->unk4) ? -wave->unk4 : ((wave->unk4 < arg0->unkB0) ? wave->unk4 : arg0->unkB0);
+            if (!(actor->flags & 0x20)) {
+                actor->rollStep = -actor->yawStep;
+                actor->roll += actor->rollStep;
+                actor->roll = (actor->roll < -flight->maxRoll) ? -flight->maxRoll : ((flight->maxRoll < actor->roll) ? flight->maxRoll : actor->roll);
             }
         } else {
-            if (arg0->unkB0 > 0) {
-                arg0->unkBC = -1.0f;
-            } else if (arg0->unkB0 < 0) {
-                arg0->unkBC = 1.0f;
+            if (actor->roll > 0) {
+                actor->rollStep = -1.0f;
+            } else if (actor->roll < 0) {
+                actor->rollStep = 1.0f;
             }
-            arg0->unkB0 += arg0->unkBC;
-            if (fabsf(arg0->unkB0) < 0.200000003f) {
-                arg0->unkB0 = 0;
+            actor->roll += actor->rollStep;
+            if (fabsf(actor->roll) < 0.200000003f) {
+                actor->roll = 0;
             }
         }
-        arg0->unkA4 += arg0->unkA6;
-        arg0->unkA4 = (arg0->unkA4 < wave->b1) ? wave->b1 : ((wave->b0 < arg0->unkA4) ? wave->b0 : arg0->unkA4);
+        actor->speed += actor->speedStep;
+        actor->speed = (actor->speed < flight->minSpeed) ? flight->minSpeed : ((flight->maxSpeed < actor->speed) ? flight->maxSpeed : actor->speed);
     }
-    if (!(arg0->unk92 & 1)) {
-        if (arg0->unkA8 >= 0) {
-            lim = wave->unk20;
-            if (arg0->unk94 == slot->unk4 && wave->unk18 < lim && -lim < wave->unk18) {
-                arg0->unk94 = slot->unk8;
+    if (!(actor->flags & 1)) {
+        if (actor->pitch >= 0) {
+            threshold = flight->flapThreshold;
+            if (actor->vertices == model->unk4 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+                actor->vertices = model->unk8;
             }
         } else {
-            lim = wave->unk20;
-            if (arg0->unk94 == slot->unk8 && wave->unk18 < lim && -lim < wave->unk18) {
-                arg0->unk94 = slot->unk4;
+            threshold = flight->flapThreshold;
+            if (actor->vertices == model->unk8 && flight->flapAngle < threshold && -threshold < flight->flapAngle) {
+                actor->vertices = model->unk4;
             }
         }
     } else {
+        // matching: an empty else block keeps the original branch layout
     }
-    if (arg0->unk92 & 0x200) {
+    if (actor->flags & 0x200) {
         f32 speed;
         speed = D_800BE9E4;
-        arg0->unkB4 += arg0->unkB8 * speed;
-        arg0->unkB8 += 0.005189999938f;
-        if (0.1499999911f < arg0->unkB8) {
-            arg0->unkB8 = 0.1499999911f;
+        actor->pitchStep += actor->yawStep * speed;
+        actor->yawStep += 0.005189999938f;
+        if (0.1499999911f < actor->yawStep) {
+            actor->yawStep = 0.1499999911f;
         }
-        arg0->unkBC -= 3.200000048f * speed;
-        if (arg0->unkBC < 60.0f) {
-            arg0->unkBC = 60.0f;
+        actor->rollStep -= 3.200000048f * speed;
+        if (actor->rollStep < 60.0f) {
+            actor->rollStep = 60.0f;
         }
-        sa = func_150AD78C(arg0->unkB4);
-        ca = func_150AD780(arg0->unkB4);
-        arg0->unk98 = arg0->unkBC * ca + -3478.0f;
-        arg0->unkA0 = arg0->unkBC * sa + 3858.0f;
-        arg0->unk9C -= 100.0f / (arg0->unkBC - 60.0f + 4.0f);
-        if (arg0->unk9C < -3100.0f || D_800C35EA == 0 || D_800C35E8 != 0xF) {
-            func_1516972C((struct102 *)arg0);
+        sinPitch = func_150AD78C(actor->pitchStep);
+        cosPitch = func_150AD780(actor->pitchStep);
+        actor->x = actor->rollStep * cosPitch + -3478.0f;
+        actor->z = actor->rollStep * sinPitch + 3858.0f;
+        actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
+        if (actor->y < -3100.0f || D_800C35EA == 0 || D_800C35E8 != 0xF) {
+            func_1516972C((struct102 *)actor);
             return;
         }
     } else {
         s32 speed;
-        ang[0] = arg0->unkA8 * 0.01745329238f;
-        ang[1] = arg0->unkAC * 0.01745329238f;
-        ang[2] = arg0->unkB0 * 0.01745329238f;
-        sa = func_150AD78C(ang[0]);
-        sb = func_150AD78C(ang[1]);
-        ca = func_150AD780(ang[0]);
-        cb = func_150AD780(ang[1]);
-        dir[0] = ca * sb;
-        dir[1] = -sa;
-        dir[2] = ca * cb;
-        speed = arg0->unkA4 * D_800BE9E4;
-        arg0->unk98 += dir[0] * speed;
-        arg0->unk9C += dir[1] * speed;
-        arg0->unkA0 += dir[2] * speed;
+        rad[0] = actor->pitch * 0.01745329238f;
+        rad[1] = actor->yaw * 0.01745329238f;
+        rad[2] = actor->roll * 0.01745329238f;
+        sinPitch = func_150AD78C(rad[0]);
+        sinYaw = func_150AD78C(rad[1]);
+        cosPitch = func_150AD780(rad[0]);
+        cosYaw = func_150AD780(rad[1]);
+        dir[0] = cosPitch * sinYaw;
+        dir[1] = -sinPitch;
+        dir[2] = cosPitch * cosYaw;
+        speed = actor->speed * D_800BE9E4;
+        actor->x += dir[0] * speed;
+        actor->y += dir[1] * speed;
+        actor->z += dir[2] * speed;
     }
-    if (arg0->type == 0x13 && D_800DDF60[arg0->unk90] == 0) {
-        func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, arg0->unk98, arg0->unk9C, arg0->unkA0, 500, 4000);
-        D_800DDF60[arg0->unk90] = (func_150ADA20() & 0x3F) + 30;
+    if (actor->type == 0x13 && D_800DDF60[actor->group] == 0) {
+        func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, actor->x, actor->y, actor->z, 500, 4000);
+        D_800DDF60[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
-    if ((arg0->unk92 & 2) &&
-        func_1510AEE0((f32 *)D_800D9C10, arg0->unk98, arg0->unk9C, arg0->unkA0, D_800D9B20, D_800D9B1C, D_800D35E0, (&D_800D35E8)[-1], NULL, NULL) != 0 &&
+    if ((actor->flags & 2) &&
+        func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (D_800D2138 != 1 ||
-         func_1510AEE0(&D_800D9C50, arg0->unk98, arg0->unk9C, arg0->unkA0, D_800D9B20, D_800D9B1C, D_800D35E0, (&D_800D35E8)[-1], NULL, NULL) != 0)) {
-        func_1516972C((struct102 *)arg0);
+         func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
+        func_1516972C((struct102 *)actor);
     }
 }
 
-typedef struct {
-    u8 pad0[0x90];
-    u8 unk90;
-    u8 unk91;
-    s16 unk92;
-    u8 pad94[4];
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    u8 padA4[4];
-    f32 unkA8;
-    f32 unkAC;
-    u8 padB0[4];
-    f32 unkB4;
-    f32 unkB8;
-    u8 padBC[0xC];
-    f32 unkC8;
-    f32 unkCC;
-    u8 padD0[0x14];
-    f32 unkE4;
-    u8 padE8[5];
-    u8 unkED;
-} struct1517685C;
-
-s32 func_150AD960(s32, s32, s32, s32);
-void func_15175958();
-u32 func_150ADA20(void);
-
-void func_1517685C(struct1517685C *arg0) {
+/* Update for a perching swarm actor (bat): while perched (state 0) it bobs its head and
+ * yaws a little, takes off when the player comes within 400 units (state 1), and once
+ * 300 units above its perch it flies normally (states 2/3). */
+void func_1517685C(SwarmActor *actor) {
     s32 r;
-    f32 cc;
-    s32 t;
 
-    if (D_800DDF5C[arg0->unk90] != 0) {
-        D_800DDF68[arg0->unkED] = 1;
-        switch (arg0->unk91) {
+    if (D_800DDF5C[actor->group] != 0) {
+        D_800DDF68[actor->modelIndex] = 1;
+        switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)D_800CC2D0->x_position, (s32)D_800CC2D0->z_position, (s32)arg0->unk98, (s32)arg0->unkA0) < 400) {
-                arg0->unk91 = 1;
-                arg0->unkB4 = -1 - (s32)(func_150ADA20() & 3); arg0->unkA8 = -8.0f;
+            if (func_150AD960((s32)D_800CC2D0->x_position, (s32)D_800CC2D0->z_position, (s32)actor->x, (s32)actor->z) < 400) {
+                actor->state = 1;
+                actor->pitchStep = -1 - (s32)(func_150ADA20() & 3);
+                actor->pitch = -8.0f;
                 return;
             }
             {
-                f32 a8;
+                f32 pitch;
 
-                if (arg0->unkCC != 0.0f) {
-                    arg0->unkA8 = arg0->unkA8 + arg0->unkCC;
-                    if (arg0->unkCC < 0.0f) {
-                        arg0->unkAC = arg0->unkAC + arg0->unkB8;
+                if (actor->perchPitchStep != 0.0f) {
+                    actor->pitch = actor->pitch + actor->perchPitchStep;
+                    if (actor->perchPitchStep < 0.0f) {
+                        actor->yaw = actor->yaw + actor->yawStep;
                     }
-                    a8 = arg0->unkA8;
-                    if (a8 > 45.0f) {
-                        arg0->unkCC = -5.0f;
-                    } else if ((arg0->unkCC < 0) && (a8 > 25.0f)) {
+                    pitch = actor->pitch;
+                    if (pitch > 45.0f) {
+                        actor->perchPitchStep = -5.0f;
+                    } else if ((actor->perchPitchStep < 0) && (pitch > 25.0f)) {
                         r = func_150ADA20() & 0xFF;
-                        if (r < 0x33) {
-                            arg0->unkCC = 5.0f;
+                        if (r < 51) {
+                            actor->perchPitchStep = 5.0f;
                         }
                     }
-                    if (arg0->unkA8 <= 10.0f) {
-                        arg0->unkCC = 0.0f;
+                    if (actor->pitch <= 10.0f) {
+                        actor->perchPitchStep = 0.0f;
                         return;
                     }
                 } else {
                     r = func_150ADA20() & 0xFF;
-                    if (r < 0x19) {
-                        arg0->unkCC = 5.0f;
-                        if (r < 0xD) {
-                            arg0->unkB8 = (s32)(func_150ADA20() % 6U) - 3;
+                    if (r < 25) {
+                        actor->perchPitchStep = 5.0f;
+                        if (r < 13) {
+                            actor->yawStep = (s32)(func_150ADA20() % 6U) - 3;
                             return;
                         }
-                        arg0->unkB8 = 0.0f;
-                    lbl1:
+                        actor->yawStep = 0.0f;
+                    // matching: an unused label stops IDO from merging this return's branch
+                    unmerged:
                         return;
                     }
                 }
             }
             break;
         case 1:
-        lbl2:
-            if (arg0->unk9C >= (300.0f + arg0->unkC8)) {
-                arg0->unk91 = 2;
-                arg0->unk92 &= ~1;
-                arg0->unk92 |= 4;
-                arg0->unkE4 = (s32)(func_150ADA20() & 0x7F) + (300.0f + arg0->unkC8);
+            if (actor->y >= (300.0f + actor->groundHeight)) {
+                actor->state = 2;
+                actor->flags &= ~1;
+                actor->flags |= 4;
+                actor->targetY = (s32)(func_150ADA20() & 0x7F) + (300.0f + actor->groundHeight);
             }
-            func_15175958(arg0);
+            func_15175958(actor);
             return;
         default:
         case 2:
         case 3:
-            if (arg0->unk9C < arg0->unkE4) {
-                arg0->unkB4 = -1.5f;
-            } else if (arg0->unkA8 < 0) {
-                arg0->unkB4 = 1.5f;
+            if (actor->y < actor->targetY) {
+                actor->pitchStep = -1.5f;
+            } else if (actor->pitch < 0) {
+                actor->pitchStep = 1.5f;
             }
-            func_15175958(arg0);
+            func_15175958(actor);
             return;
         }
     } else {
-        func_1516972C((struct102 *)arg0);
+        func_1516972C((struct102 *)actor);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-} Struct15176B84;
+/* Update for a hovering swarm actor: fades in/out with its group, waits (state 0) until the
+ * player is within 200 units, then flies off towards a random height; in state 4 it is freed
+ * once it drops below its ground height. */
+void func_15176B84(SwarmActor *actor) {
+    s32 alpha;
 
-typedef struct {
-    u8  pad0[0x90];
-    u8  unk90;
-    u8  unk91;
-    u8  pad92[0x2];
-    s32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    u8  padA4[0x24];
-    f32 unkC8;
-    u8  padCC[0x6];
-    s16 unkD2;
-    u8  padD4[0x6];
-    s16 unkDA;
-    u8  padDC[0x8];
-    f32 unkE4;
-    u8  padE8[0x5];
-    u8  unkED;
-    u8  padEE[0x2];
-    u8  unkF0;
-    u8  unkF1;
-} Obj15176B84;
-
-s32 func_150AD960(s32, s32, s32, s32);
-void func_15175958();
-
-void func_15176B84(Obj15176B84 *obj) {
-    s32 fade;
-
-    if ((((Struct15176B84 *)D_800DDE80)[obj->unkED].unk0 == 0) || (D_800DDF78[obj->unkED] == 0)) {
-        func_1516972C((struct102 *)obj);
+    if ((gSwarmModels[actor->modelIndex].loaded == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
+        func_1516972C((struct102 *)actor);
         return;
     }
 
-    fade = obj->unkF0;
-    if (obj->unkF1 == 0) {
-        if (D_800DDF5C[obj->unk90] == 0) {
-            obj->unkF1 = 1;
-        } else if (fade != 0xFF) {
-            fade += D_800BE9E4 * 4;
-            if (fade >= 0x100) {
-                fade = 0xFF;
+    alpha = actor->alpha;
+    if (actor->fadingOut == 0) {
+        if (D_800DDF5C[actor->group] == 0) {
+            actor->fadingOut = 1;
+        } else if (alpha != 255) {
+            alpha += D_800BE9E4 * 4;
+            if (alpha >= 256) {
+                alpha = 255;
             }
-            obj->unkF0 = fade;
+            actor->alpha = alpha;
         }
     } else {
-        if (fade == 0) {
-            func_1516972C((struct102 *)obj);
+        if (alpha == 0) {
+            func_1516972C((struct102 *)actor);
             return;
         }
-        fade -= D_800BE9E4 * 4;
-        if (fade < 0) {
-            fade = 0;
+        alpha -= D_800BE9E4 * 4;
+        if (alpha < 0) {
+            alpha = 0;
         }
-        obj->unkF0 = fade;
+        actor->alpha = alpha;
     }
 
-    D_800DDF68[obj->unkED] = 1;
+    D_800DDF68[actor->modelIndex] = 1;
 
-    switch (obj->unk91) {
+    switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)D_800CC2D0[0].x_position, (s32)D_800CC2D0[0].z_position, (s32)obj->unk98,
-                              (s32)obj->unkA0) < 0xC8) {
-                obj->unk91 = 2;
-                obj->unkE4 = (f32)((u32)func_150ADA20() % obj->unkDA) + obj->unkD2;
-                obj->unk94 = ((Struct15176B84 *)D_800DDE80)[obj->unkED].unk8;
+            if (func_150AD960((s32)D_800CC2D0[0].x_position, (s32)D_800CC2D0[0].z_position, (s32)actor->x,
+                              (s32)actor->z) < 200) {
+                actor->state = 2;
+                actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;
+                actor->vertices = gSwarmModels[actor->modelIndex].unk8;
             } else {
-                obj->unk94 = ((Struct15176B84 *)D_800DDE80)[obj->unkED].unk4;
+                actor->vertices = gSwarmModels[actor->modelIndex].unk4;
             }
             return;
         case 2:
         case 3:
             break;
         case 4:
-            if (obj->unk9C < obj->unkC8) {
-                func_1516972C((struct102 *)obj);
+            if (actor->y < actor->groundHeight) {
+                func_1516972C((struct102 *)actor);
                 return;
             }
             break;
     }
-    func_15175958(obj);
+    func_15175958(actor);
 }
 
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-void *func_15176DF0(Gfx *gdl, u8 *arg1, s16 arg2) {
-    s32 pad;
+/* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
+ * the lighting of the surface below it, and draws its model with that colour and its alpha. */
+Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
+    s32 pad; // matching: unused stack slot
     f32 rot[4][4];
     f32 mtx[4][4];
     s32 col[3];
-    s32 fade;
+    s32 brightness;
     s32 target;
 
-    if ((D_800DDE80[arg1[0xED]].field0 == NULL) || (D_800DDF78[arg1[0xED]] == 0)) {
+    if ((gSwarmModels[actor->modelIndex].loaded == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
         return gdl;
     }
-    func_150A8050(mtx, 0.0f, *(f32 *)(arg1 + 0xAC), 0.0f);
-    func_150A8050(rot, *(f32 *)(arg1 + 0xA8), 0.0f, *(f32 *)(arg1 + 0xB0));
+    func_150A8050(mtx, 0.0f, actor->yaw, 0.0f);
+    func_150A8050(rot, actor->pitch, 0.0f, actor->roll);
     func_150A7A48(rot, mtx, mtx);
-    mtx[3][0] = *(f32 *)(arg1 + 0x98);
-    mtx[3][1] = *(f32 *)(arg1 + 0x9C);
-    mtx[3][2] = *(f32 *)(arg1 + 0xA0);
-    mtx[0][0] *= *(f32 *)(arg1 + 0xC0);
-    mtx[0][1] *= *(f32 *)(arg1 + 0xC0);
-    mtx[0][2] *= *(f32 *)(arg1 + 0xC0);
-    mtx[1][0] *= *(f32 *)(arg1 + 0xC0);
-    mtx[1][1] *= *(f32 *)(arg1 + 0xC0);
-    mtx[1][2] *= *(f32 *)(arg1 + 0xC0);
-    mtx[2][0] *= *(f32 *)(arg1 + 0xC0);
-    mtx[2][1] *= *(f32 *)(arg1 + 0xC0);
-    mtx[2][2] *= *(f32 *)(arg1 + 0xC0);
-    guMtxF2L(mtx, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)));
-    gSPMatrix(gdl++, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPSegment(gdl++, 1, *(u32 *)(arg1 + 0x94));
+    mtx[3][0] = actor->x;
+    mtx[3][1] = actor->y;
+    mtx[3][2] = actor->z;
+    mtx[0][0] *= actor->scale;
+    mtx[0][1] *= actor->scale;
+    mtx[0][2] *= actor->scale;
+    mtx[1][0] *= actor->scale;
+    mtx[1][1] *= actor->scale;
+    mtx[1][2] *= actor->scale;
+    mtx[2][0] *= actor->scale;
+    mtx[2][1] *= actor->scale;
+    mtx[2][2] *= actor->scale;
+    guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
+    gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSegment(gdl++, 1, actor->vertices);
     gDPPipeSync(gdl++);
-    fade = arg1[0xEC];
-    target = D_800A7170[(*(u32 *)(arg1 + 0xE8) >> 5) & 3];
-    if (fade != target) {
-        if (fade < target) {
-            fade += D_800BE9E4 * 4;
-            if (target < fade) {
-                fade = target;
+    brightness = actor->brightness;
+    target = D_800A7170[(actor->surfaceFlags >> 5) & 3];
+    if (brightness != target) {
+        if (brightness < target) {
+            brightness += D_800BE9E4 * 4;
+            if (target < brightness) {
+                brightness = target;
             }
         } else {
-            fade -= D_800BE9E4 * 4;
-            if (fade < 0) {
-                fade = 0;
+            brightness -= D_800BE9E4 * 4;
+            if (brightness < 0) {
+                brightness = 0;
             }
         }
-        arg1[0xEC] = fade;
+        actor->brightness = brightness;
     }
-    col[0] = col[1] = col[2] = fade;
+    col[0] = col[1] = col[2] = brightness;
     {
-    u8 update;
-    update = 0;
-    gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
-    gdl->words.w0 = 0xFB000000; gdl->words.w1 = ((col[0] & 0xFF) << 24) | ((col[1] & 0xFF) << 16) | (arg1[0xF0] & 0xFF) | ((col[2] & 0xFF) << 8); gdl++;
-    gSPDisplayList(gdl++, D_800DDE80[arg1[0xED]].fieldC);
+        u8 update;
+
+        update = 0;
+        gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
+        gDPSetEnvColor(gdl++, col[0], col[1], col[2], actor->alpha);
+        gSPDisplayList(gdl++, gSwarmModels[actor->modelIndex].displayList);
     }
     return gdl;
 }
 
-typedef struct Game1770C8Packet {
-    f32 m[4][4];
-} Game1770C8Packet;
-
-s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
-extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* (&D_800D35E8)[-1] == 0x800D35E4, which has no symbol of its own */
-extern u8 D_800D9C10[];
-
-void *func_151770C8(u32 *gdl, u8 *arg1, s16 arg2) {
-    Game1770C8Packet packet;
+/* Draws a swarm actor for camera `camera`, unless it is outside that camera's view.
+ * Perched actors (state 0) use model 10's resting pose; the rest go through func_15176DF0. */
+Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
+    f32 mtx[4][4];
     s32 culled;
 
-    culled = func_1510AEE0((f32 *)(D_800D9C10 + (arg2 << 6)),
-                      *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0),
-                      D_800D9B20, 4000.0f, D_800D35E0, (&D_800D35E8)[-1], 0, 0);
+    culled = func_1510AEE0(D_800D9C10[camera], actor->x, actor->y, actor->z,
+                           D_800D9B20, 4000.0f, D_800D35E0, D_800D35E4, NULL, NULL);
     if (culled == 0) {
-        switch (arg1[0x91]) {
+        switch (actor->state) {
         case 0:
-            func_150A8050(packet.m, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));
-            packet.m[3][0] = *(f32 *)(arg1 + 0x98);
-            packet.m[3][1] = *(f32 *)(arg1 + 0x9C);
-            packet.m[3][2] = *(f32 *)(arg1 + 0xA0);
-            guMtxF2L(packet.m, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)));
-            { u32 *g = gdl; gdl += 2; g[0] = 0xDA380003; g[1] = (u32)((arg1 + 0x10) + (D_800BE9C0 << 6)); }
-            { u32 *g = gdl; gdl += 2; g[0] = 0xDB060004; g[1] = *(u32 *)((u8 *)D_800DDE80 + 0xCC); }
-            { u32 *g = gdl; gdl += 2; g[0] = 0xDE000000; g[1] = *(u32 *)((u8 *)D_800DDE80 + 0xD4); }
+            func_150A8050(mtx, actor->pitch, actor->yaw, actor->roll);
+            mtx[3][0] = actor->x;
+            mtx[3][1] = actor->y;
+            mtx[3][2] = actor->z;
+            guMtxF2L(mtx, &actor->mtx[D_800BE9C0]);
+            gSPMatrix(gdl++, &actor->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPSegment(gdl++, 1, gSwarmModels[10].unk4);
+            gSPDisplayList(gdl++, gSwarmModels[10].displayList);
             break;
         case 1:
         case 2:
         case 3:
         default:
-            gdl = func_15176DF0(gdl, arg1, arg2);
+            gdl = func_15176DF0(gdl, actor, camera);
             break;
         }
     }
     return gdl;
 }
 
-
-void func_1517725C(u8 arg0) {
-    f32 a;
-    f32 s;
+/* Flaps model `index`'s wings: updates flapAngle from the flap phase and rotates the inner
+ * wing vertices by it and the outer ones by the angle 30 degrees of phase earlier. */
+void func_1517725C(u8 index) {
+    f32 angle;
+    f32 sinAngle;
     s16 x;
     s16 y;
-    Wave1A20A0 *w;
-    s16 *v;
-    f32 c;
+    SwarmFlight *flight;
+    Vtx *vtx;
+    f32 cosAngle;
 
-    w = &D_8008D0B0[arg0];
-    v = *(s16 **)((u8 *)D_800DDE88 + arg0 * 20);
-    a = w->unk24 * 0.01745329238f;
-    w->unk18 = func_150AD78C(a) * w->unk28;
-    a = w->unk18 * 0.01745329238f;
-    s = func_150AD78C(a);
-    c = func_150AD780(a);
-    x = w->unk30 * c;
-    y = w->unk30 * s;
-    v[0xA0 / 2] = -x;
-    v[0xB0 / 2] = -x;
-    v[0x110 / 2] = x;
-    v[0x120 / 2] = x;
-    v[0x112 / 2] = y;
-    v[0x122 / 2] = y;
-    v[0xA2 / 2] = y;
-    v[0xB2 / 2] = y;
-    a = (w->unk24 - 30.0f) * 0.01745329238f;
-    w->unk18 = func_150AD78C(a) * w->unk28;
-    a = w->unk18 * 0.01745329238f;
-    s = func_150AD78C(a);
-    c = func_150AD780(a);
-    x = w->unk34 * c;
-    y = w->unk34 * s;
-    v[0xE0 / 2] = -x;
-    v[0x130 / 2] = x;
-    v[0xE2 / 2] = y;
-    v[0x132 / 2] = y;
-    w->unk24 += w->unk1C;
-    if (w->unk24 >= 360.0f) {
-        w->unk24 -= 360.0f;
+    flight = &D_8008D0B0[index];
+    vtx = gSwarmModels[index].unk8;
+    angle = flight->flapPhase * 0.01745329238f;
+    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
+    angle = flight->flapAngle * 0.01745329238f;
+    sinAngle = func_150AD78C(angle);
+    cosAngle = func_150AD780(angle);
+    x = flight->innerWingLength * cosAngle;
+    y = flight->innerWingLength * sinAngle;
+    vtx[10].v.ob[0] = -x;
+    vtx[11].v.ob[0] = -x;
+    vtx[17].v.ob[0] = x;
+    vtx[18].v.ob[0] = x;
+    vtx[17].v.ob[1] = y;
+    vtx[18].v.ob[1] = y;
+    vtx[10].v.ob[1] = y;
+    vtx[11].v.ob[1] = y;
+    angle = (flight->flapPhase - 30.0f) * 0.01745329238f;
+    flight->flapAngle = func_150AD78C(angle) * flight->flapAmplitude;
+    angle = flight->flapAngle * 0.01745329238f;
+    sinAngle = func_150AD78C(angle);
+    cosAngle = func_150AD780(angle);
+    x = flight->outerWingLength * cosAngle;
+    y = flight->outerWingLength * sinAngle;
+    vtx[14].v.ob[0] = -x;
+    vtx[19].v.ob[0] = x;
+    vtx[14].v.ob[1] = y;
+    vtx[19].v.ob[1] = y;
+    flight->flapPhase += flight->flapRate;
+    if (flight->flapPhase >= 360.0f) {
+        flight->flapPhase -= 360.0f;
     }
 }

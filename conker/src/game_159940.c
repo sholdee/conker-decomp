@@ -7,440 +7,400 @@ extern void guMtxF2L(float mf[4][4], Mtx *m);
 extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
 f32 func_150AD780(f32);
 f32 func_150AD78C(f32);
-extern u8 D_800BE9C0;
-extern s32 D_800BE9E4;
-extern struct10 *D_800DC2A0;
-extern f32 D_800A36C0;
-extern f32 D_800A36C4;
-extern f32 D_800A36C8;
-extern f32 D_800A36CC;
-extern f32 D_800A36D0;
-extern f32 D_800A36D4;
-extern f32 D_800A36D8;
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-
-typedef struct Func1512D070Object {
-    u8 pad0[0x2C];
-    s32 unk2C;
-    u8 pad30[0x23C - 0x30];
-    u8 unk23C;
-    u8 unk23D;
-    u8 pad23E[0x298 - 0x23E];
-    s16 unk298;
-    u8 pad29A[0x5F0 - 0x29A];
-    s32 unk5F0;
-    u8 pad5F4[0x7B0 - 0x5F4];
-    f32 unk7B0;
-    f32 unk7B4;
-    u8 pad7B8[0x7D8 - 0x7B8];
-    f32 unk7D8;
-    f32 unk7DC;
-} Func1512D070Object;
-
+void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 stiffness, f32 damping, f32 dt);
+void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+                   f32 zUp);
+void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degrees
+void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
+s32 func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct {
     f32 x;
     f32 y;
     f32 z;
-} Vec3_1512C490;
+} CamVec3f;
+
+/* A translation plus a rotation (degrees) applied on top of a camera's view matrix. */
+typedef struct {
+    /* 0x00 */ CamVec3f pos;
+    /* 0x0C */ CamVec3f rot;
+} CamOffset;
+
+/* Player extension block (struct127.unk31C), as in game_14FF90.c. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x120];
+    /* 0x120 */ u8 unk120;
+    /* 0x121 */ u8 pad121[0xF];
+    /* 0x130 */ CamVec3f aimDir;
+    /* 0x13C */ CamVec3f aimEye;
+    /* 0x148 */ CamVec3f aimTarget;
+    /* 0x154 */ u8 pad154[0x43];
+    /* 0x197 */ u8 aimState;
+} CamPlayerExt;
+
+/* Partial view of the per-player camera (struct108); field names follow game_14FF90.c's Camera. */
+typedef struct Camera {
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ s32 mode; /* one-hot mode bit */
+    /* 0x030 */ u8 pad30[0x15C];
+    /* 0x18C */ f32 lift;       /* vertical offset of eye and target */
+    /* 0x190 */ f32 liftTarget;
+    /* 0x194 */ f32 side;       /* sideways offset of eye and target */
+    /* 0x198 */ f32 sideTarget;
+    /* 0x19C */ u8 pad19C[0xA0];
+    /* 0x23C */ u8 snap; /* nonzero: jump to targets instead of easing */
+    /* 0x23D */ u8 playerIndex;
+    /* 0x23E */ u8 zone;
+    /* 0x23F */ u8 pad23F[0x25];
+    /* 0x264 */ f32 swayVel;
+    /* 0x268 */ u8 pad268[0x30];
+    /* 0x298 */ s16 playerMoved;
+    /* 0x29A */ u8 pad29A[0xA];
+    /* 0x2A4 */ CamVec3f focus;
+    /* 0x2B0 */ u8 pad2B0[0xC];
+    /* 0x2BC */ CamVec3f target; /* look-at point */
+    /* 0x2C8 */ u8 pad2C8[0x18];
+    /* 0x2E0 */ CamVec3f savedTarget;
+    /* 0x2EC */ CamVec3f savedEye;
+    /* 0x2F8 */ CamVec3f eye;
+    /* 0x304 */ u8 pad304[0x84];
+    /* 0x388 */ f32 pitch; /* degrees */
+    /* 0x38C */ f32 unk38C;
+    /* 0x390 */ u8 pad390[0x8];
+    /* 0x398 */ f32 pitchRad;
+    /* 0x39C */ u8 pad39C[0x4];
+    /* 0x3A0 */ f32 unk3A0; /* yaw in radians */
+    /* 0x3A4 */ u8 pad3A4[0x4];
+    /* 0x3A8 */ f32 unk3A8;
+    /* 0x3AC */ u8 pad3AC[0x24];
+    /* 0x3D0 */ struct127 *player;
+    /* 0x3D4 */ CamPlayerExt *playerExt;
+    /* 0x3D8 */ u8 pad3D8[0x1F8];
+    /* 0x5D0 */ f32 unk5D0;
+    /* 0x5D4 */ u8 pad5D4[0x14];
+    /* 0x5E8 */ f32 unk5E8;
+    /* 0x5EC */ f32 swayAmount; /* roll, degrees */
+    /* 0x5F0 */ s32 status;
+    /* 0x5F4 */ u8 pad5F4[0x158];
+    /* 0x74C */ f32 unk74C;
+    /* 0x750 */ u8 pad750[0x4];
+    /* 0x754 */ f32 unk754;
+    /* 0x758 */ u8 pad758[0x58];
+    /* 0x7B0 */ f32 wobblePhase;
+    /* 0x7B4 */ f32 dt; /* frame time scale */
+    /* 0x7B8 */ u8 pad7B8[0x18];
+    /* 0x7D0 */ f32 sideVel;
+    /* 0x7D4 */ f32 liftVel;
+    /* 0x7D8 */ f32 wobbleVel;
+    /* 0x7DC */ f32 wobbleAmount;
+    /* 0x7E0 */ u8 pad7E0[0x6D];
+    /* 0x84D */ u8 shakeState; /* 0 idle, 1 start requested, 2 playing */
+    /* 0x84E */ u8 shakeFrame;
+    /* 0x84F */ u8 pad84F;
+    /* 0x850 */ s32 shakeIndex; /* which D_800DC280 table */
+    /* 0x854 */ CamVec3f shakeRot;
+    /* 0x860 */ CamVec3f shakePos;
+} Camera;
+
+/* Per-player view record (0x180 bytes) in the array D_800BE628 points to. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x84];
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ u8 pad88[0xF8];
+} CamView;
 
 typedef struct {
-    u8 pad0[0xC4];
-    f32 unkC4;
-    u8 padC8[0x102 - 0xC8];
-    u8 unk102;
-} Obj3D0_1512C490;
-
-typedef struct {
-    u8 pad0[0x120];
-    u8 unk120;
-    u8 pad121[0x130 - 0x121];
-    Vec3_1512C490 unk130;
-    Vec3_1512C490 unk13C;
-    Vec3_1512C490 unk148;
-    u8 pad154[0x197 - 0x154];
-    u8 unk197;
-} Obj3D4_1512C490;
-
-typedef struct {
-    u8 pad0[0x2C];
-    s32 unk2C;
-    u8 pad30[0x18C - 0x30];
-    f32 unk18C;
-    f32 unk190;
-    f32 unk194;
-    f32 unk198;
-    u8 pad19C[0x23C - 0x19C];
-    u8 unk23C;
-    u8 unk23D;
-    u8 unk23E;
-    u8 pad23F[0x264 - 0x23F];
-    f32 unk264;
-    u8 pad268[0x298 - 0x268];
-    s16 unk298;
-    u8 pad29A[0x2A4 - 0x29A];
-    Vec3_1512C490 unk2A4;
-    u8 pad2B0[0x2BC - 0x2B0];
-    Vec3_1512C490 unk2BC;
-    u8 pad2C8[0x2E0 - 0x2C8];
-    Vec3_1512C490 unk2E0;
-    Vec3_1512C490 unk2EC;
-    Vec3_1512C490 unk2F8;
-    u8 pad304[0x388 - 0x304];
-    f32 unk388;
-    f32 unk38C;
-    u8 pad390[0x398 - 0x390];
-    f32 unk398;
-    u8 pad39C[0x3A0 - 0x39C];
-    f32 unk3A0;
-    u8 pad3A4[0x3A8 - 0x3A4];
-    f32 unk3A8;
-    u8 pad3AC[0x3D0 - 0x3AC];
-    Obj3D0_1512C490 *unk3D0;
-    Obj3D4_1512C490 *unk3D4;
-    u8 pad3D8[0x5D0 - 0x3D8];
-    f32 unk5D0;
-    u8 pad5D4[0x5E8 - 0x5D4];
-    f32 unk5E8;
-    f32 unk5EC;
-    s32 unk5F0;
-    u8 pad5F4[0x74C - 0x5F4];
-    f32 unk74C;
-    u8 pad750[0x754 - 0x750];
-    f32 unk754;
-    u8 pad758[0x7B4 - 0x758];
-    f32 unk7B4;
-    u8 pad7B8[0x7D0 - 0x7B8];
-    f32 unk7D0;
-    f32 unk7D4;
-    u8 pad7D8[0x84D - 0x7D8];
-    u8 unk84D;
-    u8 unk84E;
-    u8 pad84F;
-    s32 unk850;
-    f32 unk854;
-    f32 unk858;
-    f32 unk85C;
-    f32 unk860;
-    f32 unk864;
-    f32 unk868;
-} Obj1512C490;
-
-typedef struct {
-    u8 pad0[0x84];
-    f32 unk84;
-    u8 pad88[0x180 - 0x88];
-} Struct180_1512C490;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} Entry1512C490;
-
-typedef struct {
-    u8 pad0[0x54];
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    u8 pad60[0x68 - 0x60];
+    /* 0x00 */ u8 pad0[0x54];
+    /* 0x54 */ CamVec3f unk54;
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ u8 pad64[0x4];
 } Entry800DC2C0;
 
-extern s32 D_800DC280[];
-extern Entry1512C490 D_800DCDE0[];
+extern u8 D_800BE9C0; // which of the two matrix buffers is being built this frame
+extern s32 D_800BE9E4; // frames elapsed this update
+extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
+extern s32 D_800DC290[4];        // their lengths in frames
+extern CamOffset D_800DCDE0[];
 extern Entry800DC2C0 D_800DC2C0[];
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x64];
-} Entry800DC320;
-extern Entry800DC320 D_800DC320[];
 extern LookAt D_800D9B90[];
-void func_15047B80(Mtx *arg0, LookAt *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10);
-void func_150A7DF0(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3);
-void func_150A7D00(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3);
-void func_1512D070(Func1512D070Object *arg0);
-void func_1512D368(s32 arg0);
-struct Game159940Object;
-void func_1512D2F8(struct Game159940Object *arg0);
 
-#define CUR_MTX(i) (&((Mtx *) ((s32 *) (&D_800DC2A0))[D_800BE9C0])[i])
+/* variables.h declares D_800DC2A0 as struct10 *, but it is Mtx *[2]: double-buffered per-player view matrices. */
+#define VIEW_MTX(player) (&((Mtx **)&D_800DC2A0)[D_800BE9C0][player])
 
-void func_1512C490(Obj1512C490 *arg0) {
-    Mtx sp158;
-    Mtx sp118;
-    s32 pad114;
-    f32 sp110;
-    f32 sp10C;
-    f32 sp108;
-    f32 sp104;
-    s32 pad100;
-    f32 spFC;
-    f32 spF8;
-    Vec3_1512C490 spEC;
-    Vec3_1512C490 spE0;
-    Vec3_1512C490 spD4;
-    Vec3_1512C490 spC8;
-    f32 spC4;
-    Vec3_1512C490 spB8;
-    f32 var_f0;
-    f32 var_f2;
-    f32 spAC;
-    f32 spA8;
-    f32 spA4;
-    f32 sp64[4][4];
-    f32 sp60;
+void func_1512D070(Camera *camera);
+void func_1512D2F8(Camera *camera);
+void func_1512D368(Camera *camera);
 
-    spC4 = ((Struct180_1512C490 *)D_800BE628)[arg0->unk23D].unk84;
-    spC4 = (1.0f - spC4) * 0.5f + spC4;
-    if (arg0->unk3D4->unk120 != 0) {
-        arg0->unk198 = 0.0f;
-        arg0->unk190 = 0.0f;
-        arg0->unk74C = 0.0f;
-        arg0->unk754 = 0.0f;
+/*
+ * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,
+ * then stacks the shake, sway roll, per-player offsets (D_800DCDE0) and the breathing wobble on top.
+ */
+void func_1512C490(Camera *camera) {
+    Mtx rotMtx;
+    Mtx transMtx;
+    s32 pad114; // matching: unused stack slot in the original frame
+    f32 side;
+    f32 lift;
+    f32 shiftX;
+    f32 shiftZ;
+    s32 pad100; // matching: unused stack slot in the original frame
+    f32 sideZ;
+    f32 sideX;
+    CamVec3f eye;
+    CamVec3f at;
+    CamVec3f prevEye;
+    CamVec3f prevTarget;
+    f32 shakeScale;
+    CamVec3f dir;
+    f32 stiffness;
+    f32 damping;
+    f32 dirZ;
+    f32 dirY;
+    f32 dirX;
+    f32 dirMtx[4][4];
+    f32 yaw;
+
+    shakeScale = ((CamView *)D_800BE628)[camera->playerIndex].unk84;
+    shakeScale = (1.0f - shakeScale) * 0.5f + shakeScale;
+    if (camera->playerExt->unk120 != 0) {
+        camera->sideTarget = 0.0f;
+        camera->liftTarget = 0.0f;
+        camera->unk74C = 0.0f;
+        camera->unk754 = 0.0f;
     }
-    if (arg0->unk23C != 0) {
-        arg0->unk7D0 = 0.0f;
-        arg0->unk7D4 = 0.0f;
-        arg0->unk194 = arg0->unk198;
-        arg0->unk18C = arg0->unk190;
-    } else if ((arg0->unk2C == 0x100) || (arg0->unk23E != 0)) {
-        func_150495B0(&arg0->unk194, arg0->unk198, &arg0->unk7D0, 4.0f, 6.0f, arg0->unk7B4);
-        func_150495B0(&arg0->unk18C, arg0->unk190, &arg0->unk7D4, 4.0f, 6.0f, arg0->unk7B4);
+    if (camera->snap != 0) {
+        camera->sideVel = 0.0f;
+        camera->liftVel = 0.0f;
+        camera->side = camera->sideTarget;
+        camera->lift = camera->liftTarget;
+    } else if (camera->mode == 0x100 || camera->zone != 0) {
+        func_150495B0(&camera->side, camera->sideTarget, &camera->sideVel, 4.0f, 6.0f, camera->dt);
+        func_150495B0(&camera->lift, camera->liftTarget, &camera->liftVel, 4.0f, 6.0f, camera->dt);
     } else {
-        func_150495B0(&arg0->unk194, arg0->unk198, &arg0->unk7D0, 0.75f, 1.10000002f, arg0->unk7B4);
-        func_150495B0(&arg0->unk18C, arg0->unk190, &arg0->unk7D4, 0.75f, 1.10000002f, arg0->unk7B4);
+        func_150495B0(&camera->side, camera->sideTarget, &camera->sideVel, 0.75f, 1.1f, camera->dt);
+        func_150495B0(&camera->lift, camera->liftTarget, &camera->liftVel, 0.75f, 1.1f, camera->dt);
     }
-    arg0->unk2E0 = arg0->unk2BC;
-    arg0->unk2EC = arg0->unk2F8;
-    if ((arg0->unk2C & 0x40000) || (arg0->unk2C & 0x20)) {
-        spEC = arg0->unk2F8;
-        spE0 = arg0->unk2A4;
-    } else if (arg0->unk3D4->unk197 != 0) {
-        spEC = arg0->unk2F8;
-        spE0 = arg0->unk2BC;
-        func_1512523C((struct108 *)arg0);
-        func_15125594((struct108 *)arg0);
+    camera->savedTarget = camera->target;
+    camera->savedEye = camera->eye;
+    if ((camera->mode & 0x40000) || (camera->mode & 0x20)) {
+        eye = camera->eye;
+        at = camera->focus;
+    } else if (camera->playerExt->aimState != 0) {
+        eye = camera->eye;
+        at = camera->target;
+        func_1512523C((struct108 *)camera);
+        func_15125594((struct108 *)camera);
     } else {
-        sp110 = arg0->unk194;
-        sp10C = arg0->unk18C;
-        sp108 = arg0->unk74C;
-        sp104 = arg0->unk754;
-        spF8 = sinf(arg0->unk3A0 - 1.57079637f) * sp110;
-        spFC = cosf(arg0->unk3A0 - 1.57079637f) * sp110;
-        spEC.x = arg0->unk2F8.x + sp108 + spF8;
-        spEC.y = arg0->unk2F8.y + sp10C;
-        spEC.z = arg0->unk2F8.z + sp104 + spFC;
-        spE0.x = arg0->unk2BC.x + sp108 + spF8;
-        spE0.y = arg0->unk2BC.y + sp10C;
-        spE0.z = arg0->unk2BC.z + sp104 + spFC;
-        spD4 = arg0->unk2F8;
-        spC8 = arg0->unk2BC;
-        arg0->unk2F8 = spEC;
-        arg0->unk2BC = spE0;
-        func_1512523C((struct108 *)arg0);
-        func_15125594((struct108 *)arg0);
+        side = camera->side;
+        lift = camera->lift;
+        shiftX = camera->unk74C;
+        shiftZ = camera->unk754;
+        sideX = sinf(camera->unk3A0 - 1.57079637f) * side; // yaw - pi/2: perpendicular to the view
+        sideZ = cosf(camera->unk3A0 - 1.57079637f) * side;
+        eye.x = camera->eye.x + shiftX + sideX;
+        eye.y = camera->eye.y + lift;
+        eye.z = camera->eye.z + shiftZ + sideZ;
+        at.x = camera->target.x + shiftX + sideX;
+        at.y = camera->target.y + lift;
+        at.z = camera->target.z + shiftZ + sideZ;
+        // matching: these copies are never read, but the original makes them
+        prevEye = camera->eye;
+        prevTarget = camera->target;
+        camera->eye = eye;
+        camera->target = at;
+        func_1512523C((struct108 *)camera);
+        func_15125594((struct108 *)camera);
     }
-    func_150491EC((struct17 *)&spEC, (struct17 *)&spE0, (struct17 *)&spB8);
-    arg0->unk3D4->unk148 = spE0;
-    arg0->unk3D4->unk13C = spEC;
-    arg0->unk3D4->unk130 = spB8;
+    func_150491EC((struct17 *)&eye, (struct17 *)&at, (struct17 *)&dir);
+    camera->playerExt->aimTarget = at;
+    camera->playerExt->aimEye = eye;
+    camera->playerExt->aimDir = dir;
     {
-    f32 var_f12;
+        f32 swayTarget;
 
-    func_15047B80(CUR_MTX(arg0->unk23D), &D_800D9B90[D_800BE9C0], spEC.x, spEC.y, spEC.z, spE0.x, spE0.y, spE0.z, 0.0f, 1.0f, 0.0f);
-    if (arg0->unk2C & 0x80000) {
-        func_1512D070((Func1512D070Object *)arg0);
-        func_1512D368((s32)arg0);
-        return;
-    }
-    if (arg0->unk2C == 0x40000) {
-        func_150A7DF0(&sp158, 0.0f, 0.0f, arg0->unk5EC);
-        guMtxCatL(CUR_MTX(arg0->unk23D), &sp158, CUR_MTX(arg0->unk23D));
-        func_1512D070((Func1512D070Object *)arg0);
-        return;
-    }
-    if (arg0->unk3D4->unk197 != 0) {
-        if (arg0->unk84D == 2) {
-            Entry1512C490 *tbl;
+        func_15047B80(VIEW_MTX(camera->playerIndex), &D_800D9B90[D_800BE9C0], eye.x, eye.y, eye.z, at.x, at.y, at.z,
+                      0.0f, 1.0f, 0.0f);
+        if (camera->mode & 0x80000) {
+            func_1512D070(camera);
+            func_1512D368(camera);
+            return;
+        }
+        if (camera->mode == 0x40000) {
+            func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->swayAmount);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+            func_1512D070(camera);
+            return;
+        }
+        if (camera->playerExt->aimState != 0) {
+            if (camera->shakeState == 2) {
+                CamOffset *tbl;
 
-            tbl = (Entry1512C490 *)D_800DC280[arg0->unk850];
-            arg0->unk854 += (arg0->unk84E + tbl)->unkC;
-            arg0->unk858 += (arg0->unk84E + tbl)->unk10;
-            arg0->unk85C += (arg0->unk84E + tbl)->unk14;
-            arg0->unk860 += (arg0->unk84E + tbl)->unk0;
-            arg0->unk864 += (arg0->unk84E + tbl)->unk4;
-            arg0->unk868 += (arg0->unk84E + tbl)->unk8;
+                tbl = D_800DC280[camera->shakeIndex];
+                // matching: index-first addition orders the addu operands as the original (tbl[i] swaps them)
+                camera->shakeRot.x += (camera->shakeFrame + tbl)->rot.x;
+                camera->shakeRot.y += (camera->shakeFrame + tbl)->rot.y;
+                camera->shakeRot.z += (camera->shakeFrame + tbl)->rot.z;
+                camera->shakePos.x += (camera->shakeFrame + tbl)->pos.x;
+                camera->shakePos.y += (camera->shakeFrame + tbl)->pos.y;
+                camera->shakePos.z += (camera->shakeFrame + tbl)->pos.z;
+            } else {
+                camera->shakeRot.x -= camera->shakeRot.x * 0.08f;
+                camera->shakeRot.y -= camera->shakeRot.y * 0.08f;
+                camera->shakeRot.z -= camera->shakeRot.z * 0.08f;
+                camera->shakePos.x -= camera->shakePos.x * 0.08f;
+                camera->shakePos.y -= camera->shakePos.y * 0.08f;
+                camera->shakePos.z -= camera->shakePos.z * 0.08f;
+            }
+            func_1512D2F8(camera);
         } else {
-            arg0->unk854 -= arg0->unk854 * 0.0799999982f;
-            arg0->unk858 -= arg0->unk858 * 0.0799999982f;
-            arg0->unk85C -= arg0->unk85C * 0.0799999982f;
-            arg0->unk860 -= arg0->unk860 * 0.0799999982f;
-            arg0->unk864 -= arg0->unk864 * 0.0799999982f;
-            arg0->unk868 -= arg0->unk868 * 0.0799999982f;
+            camera->shakeRot.x -= camera->shakeRot.x * 0.08f;
+            camera->shakeRot.y -= camera->shakeRot.y * 0.08f;
+            camera->shakeRot.z -= camera->shakeRot.z * 0.08f;
+            camera->shakePos.x -= camera->shakePos.x * 0.08f;
+            camera->shakePos.y -= camera->shakePos.y * 0.08f;
+            camera->shakePos.z -= camera->shakePos.z * 0.08f;
         }
-        func_1512D2F8((struct Game159940Object *)arg0);
-    } else {
-        arg0->unk854 -= arg0->unk854 * 0.0799999982f;
-        arg0->unk858 -= arg0->unk858 * 0.0799999982f;
-        arg0->unk85C -= arg0->unk85C * 0.0799999982f;
-        arg0->unk860 -= arg0->unk860 * 0.0799999982f;
-        arg0->unk864 -= arg0->unk864 * 0.0799999982f;
-        arg0->unk868 -= arg0->unk868 * 0.0799999982f;
-    }
-    arg0->unk5EC += arg0->unk854 * spC4;
-    func_150A7DF0(&sp158, -arg0->unk858 * spC4, arg0->unk85C * spC4, arg0->unk854 * spC4);
-    guMtxCatL(CUR_MTX(arg0->unk23D), &sp158, CUR_MTX(arg0->unk23D));
-    if (arg0->unk3D4 != NULL) {
-        sp60 = func_15048FC8((struct17 *)&arg0->unk3D4->unk130) - 180.0f;
-        func_150A8050(sp64,
-                      -func_150484A0(arg0->unk3D4->unk130.y, sqrtf(arg0->unk3D4->unk130.x * arg0->unk3D4->unk130.x + arg0->unk3D4->unk130.z * arg0->unk3D4->unk130.z)) * 57.2957764f - arg0->unk858 * spC4,
-                      sp60 - arg0->unk85C * spC4, 0.0f);
-        guMtxXFMF(sp64, 0.0f, 0.0f, 1.0f, &spA4, &spA8, &spAC);
-        arg0->unk3D4->unk130.x = spA4;
-        arg0->unk3D4->unk130.y = spA8;
-        arg0->unk3D4->unk130.z = spAC;
-    }
-    if (arg0->unk3D4->unk197 != 0) {
-        func_150A7DF0(&sp158, D_800DCDE0[arg0->unk23D].unkC, D_800DCDE0[arg0->unk23D].unk10, D_800DCDE0[arg0->unk23D].unk14);
-        func_150A7D00(&sp118, D_800DCDE0[arg0->unk23D].unk0, D_800DCDE0[arg0->unk23D].unk4, D_800DCDE0[arg0->unk23D].unk8);
-        guMtxCatL(&sp158, &sp118, &sp158);
-        guMtxCatL(CUR_MTX(arg0->unk23D), &sp158, CUR_MTX(arg0->unk23D));
-        return;
-    }
-    if (((arg0->unk2C & 0x80) || (arg0->unk3D0->unk102 != 0)) && (arg0->unk298 != 0)) {
-        var_f12 = arg0->unk3D0->unkC4 * 0.25f;
-    } else if ((arg0->unk5F0 & 0x80) && (arg0->unk2C != 0x40)) {
-        var_f12 = arg0->unk3D0->unkC4 * 0.5f;
-    } else {
-        var_f12 = 0.0f;
-    }
-    if (!(arg0->unk2C & 0x40000)) {
-        if ((arg0->unk5F0 & 0x80) || (arg0->unk3D0->unk102 != 0)) {
-            var_f0 = 2.0f;
-            var_f2 = 4.0f;
+        camera->swayAmount += camera->shakeRot.x * shakeScale;
+        func_150A7DF0(&rotMtx, -camera->shakeRot.y * shakeScale, camera->shakeRot.z * shakeScale, camera->shakeRot.x * shakeScale);
+        guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+        if (camera->playerExt != NULL) {
+            yaw = func_15048FC8((struct17 *)&camera->playerExt->aimDir) - 180.0f;
+            func_150A8050(dirMtx,
+                          -func_150484A0(camera->playerExt->aimDir.y,
+                                         sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x +
+                                               camera->playerExt->aimDir.z * camera->playerExt->aimDir.z)) *
+                                  57.2957764f - // 180/pi
+                              camera->shakeRot.y * shakeScale,
+                          yaw - camera->shakeRot.z * shakeScale, 0.0f);
+            guMtxXFMF(dirMtx, 0.0f, 0.0f, 1.0f, &dirX, &dirY, &dirZ);
+            camera->playerExt->aimDir.x = dirX;
+            camera->playerExt->aimDir.y = dirY;
+            camera->playerExt->aimDir.z = dirZ;
+        }
+        if (camera->playerExt->aimState != 0) {
+            func_150A7DF0(&rotMtx, D_800DCDE0[camera->playerIndex].rot.x, D_800DCDE0[camera->playerIndex].rot.y,
+                          D_800DCDE0[camera->playerIndex].rot.z);
+            func_150A7D00(&transMtx, D_800DCDE0[camera->playerIndex].pos.x, D_800DCDE0[camera->playerIndex].pos.y,
+                          D_800DCDE0[camera->playerIndex].pos.z);
+            guMtxCatL(&rotMtx, &transMtx, &rotMtx);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+            return;
+        }
+        if (((camera->mode & 0x80) || camera->player->unk102 != 0) && camera->playerMoved != 0) {
+            swayTarget = camera->player->unkC4 * 0.25f;
+        } else if ((camera->status & 0x80) && camera->mode != 0x40) {
+            swayTarget = camera->player->unkC4 * 0.5f;
         } else {
-            var_f0 = 4.0f;
-            var_f2 = 8.0f;
+            swayTarget = 0.0f;
         }
-        func_150495B0(&arg0->unk5EC, var_f12, &arg0->unk264, var_f0, var_f2, arg0->unk7B4);
-    }
-    func_1512D368((s32)arg0);
-    if (arg0->unk2C != 0x8000) {
-        if (arg0->unk2C == 1) {
-            arg0->unk388 -= arg0->unk5D0;
-            arg0->unk398 = arg0->unk388 * 0.0174532924f;
+        if (!(camera->mode & 0x40000)) {
+            if ((camera->status & 0x80) || camera->player->unk102 != 0) {
+                stiffness = 2.0f;
+                damping = 4.0f;
+            } else {
+                stiffness = 4.0f;
+                damping = 8.0f;
+            }
+            func_150495B0(&camera->swayAmount, swayTarget, &camera->swayVel, stiffness, damping, camera->dt);
         }
-        func_150A7DF0(&sp158, D_800DCDE0[arg0->unk23D].unkC + (arg0->unk5D0 + arg0->unk3A8 + arg0->unk38C),
-                      D_800DCDE0[arg0->unk23D].unk10 + arg0->unk5E8,
-                      (arg0->unk5EC + D_800DC320[arg0->unk23D].unk0 * 0.5f) + D_800DCDE0[arg0->unk23D].unk14);
-        if (arg0->unk2C == 0x40000) {
-            func_150A7DF0(&sp158, 0.0f, 0.0f, arg0->unk5EC);
+        func_1512D368(camera);
+        if (camera->mode != 0x8000) {
+            if (camera->mode == 1) {
+                camera->pitch -= camera->unk5D0;
+                camera->pitchRad = camera->pitch * 0.0174532924f; // pi/180
+            }
+            func_150A7DF0(&rotMtx,
+                          D_800DCDE0[camera->playerIndex].rot.x + (camera->unk5D0 + camera->unk3A8 + camera->unk38C),
+                          D_800DCDE0[camera->playerIndex].rot.y + camera->unk5E8,
+                          camera->swayAmount + D_800DC2C0[camera->playerIndex].unk60 * 0.5f +
+                              D_800DCDE0[camera->playerIndex].rot.z);
+            if (camera->mode == 0x40000) {
+                func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->swayAmount);
+            }
         }
-    }
-    guMtxCatL(CUR_MTX(arg0->unk23D), &sp158, CUR_MTX(arg0->unk23D));
-    func_1512D070((Func1512D070Object *)arg0);
-    if (!(arg0->unk2C & 0x40000)) {
-        func_150A7D00(&sp118, D_800DC2C0[arg0->unk23D].unk54 + D_800DCDE0[arg0->unk23D].unk0, D_800DC2C0[arg0->unk23D].unk58 + D_800DCDE0[arg0->unk23D].unk4, D_800DC2C0[arg0->unk23D].unk5C + D_800DCDE0[arg0->unk23D].unk8);
-        guMtxCatL(CUR_MTX(arg0->unk23D), &sp118, CUR_MTX(arg0->unk23D));
-    }
+        guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
+        func_1512D070(camera);
+        if (!(camera->mode & 0x40000)) {
+            func_150A7D00(&transMtx, D_800DC2C0[camera->playerIndex].unk54.x + D_800DCDE0[camera->playerIndex].pos.x,
+                          D_800DC2C0[camera->playerIndex].unk54.y + D_800DCDE0[camera->playerIndex].pos.y,
+                          D_800DC2C0[camera->playerIndex].unk54.z + D_800DCDE0[camera->playerIndex].pos.z);
+            guMtxCatL(VIEW_MTX(camera->playerIndex), &transMtx, VIEW_MTX(camera->playerIndex));
+        }
     }
 }
 
-void func_1512D070(Func1512D070Object *arg0) {
-    s32 mtx[16];
+/* Applies the camera's breathing wobble: a scale on x and y that oscillates with wobblePhase. */
+void func_1512D070(Camera *camera) {
+    Mtx mtx;
     f32 mf[4][4];
+    f32 amount;
 
-    {
-    f32 var_f2;
-
-    if ((arg0->unk2C & 0x80000) != 0) {
-        var_f2 = D_800A36C0;
-    } else if (arg0->unk298 != 0) {
-        var_f2 = D_800A36C4;
+    if (camera->mode & 0x80000) {
+        amount = 0.003000000026f;
+    } else if (camera->playerMoved != 0) {
+        amount = 0.03999999911f;
     } else {
-        var_f2 = D_800A36C8;
+        amount = 0.02999999933f;
     }
 
-    if (((arg0->unk2C & 0x80000) != 0) || (arg0->unk5F0 & 1) || ((arg0->unk2C != 0x40000) && (arg0->unk5F0 & 8))) {
-        arg0->unk7B0 += D_800A36CC * ((f32) D_800BE9E4);
-        if (D_800A36D0 < arg0->unk7B0) {
-            arg0->unk7B0 -= D_800A36D4;
+    if ((camera->mode & 0x80000) || (camera->status & 1) || (camera->mode != 0x40000 && (camera->status & 8))) {
+        camera->wobblePhase += 0.04363323003f * (f32)D_800BE9E4; // 2.5 degrees per frame
+        if (camera->wobblePhase > 3.141592741f) {
+            camera->wobblePhase -= 6.283185482f;
         }
     } else {
-        var_f2 = 0.0f;
+        amount = 0.0f;
     }
 
-    if ((arg0->unk23C != 0) || (arg0->unk5F0 & 4)) {
-        arg0->unk7DC = var_f2;
+    if (camera->snap != 0 || (camera->status & 4)) {
+        camera->wobbleAmount = amount;
     } else {
-        func_150495B0(&arg0->unk7DC, var_f2, &arg0->unk7D8, 0.200000003f, D_800A36D8, arg0->unk7B4);
+        func_150495B0(&camera->wobbleAmount, amount, &camera->wobbleVel, 0.2f, 0.400000006f, camera->dt);
     }
 
     guMtxIdentF(mf);
-    mf[0][0] = ((func_150AD78C(arg0->unk7B0) * arg0->unk7DC) * 2.0f) + (arg0->unk7DC + arg0->unk7DC) + 1.0f;
-    mf[1][1] = ((func_150AD780(arg0->unk7B0) * arg0->unk7DC) + arg0->unk7DC) + 1.0f;
-    guMtxF2L(mf, (Mtx *)mtx);
-    guMtxCatL(&((Mtx *) ((s32 *) (&D_800DC2A0))[D_800BE9C0])[arg0->unk23D],
-              (Mtx *)mtx,
-              &((Mtx *) ((s32 *) (&D_800DC2A0))[D_800BE9C0])[arg0->unk23D]);
-    }
+    mf[0][0] = func_150AD78C(camera->wobblePhase) * camera->wobbleAmount * 2.0f + (camera->wobbleAmount + camera->wobbleAmount) + 1.0f;
+    mf[1][1] = func_150AD780(camera->wobblePhase) * camera->wobbleAmount + camera->wobbleAmount + 1.0f;
+    guMtxF2L(mf, &mtx);
+    guMtxCatL(VIEW_MTX(camera->playerIndex), &mtx, VIEW_MTX(camera->playerIndex));
 }
 
-extern s32 D_800DC280[];
-extern s32 D_800DC290[];
-s32 func_1502B5C8(s32 *, s32, s32, s32);
-
-typedef struct Game159940Object {
-    char pad_0[0x84D];
-    u8 field_0x84D;
-    u8 field_0x84E;
-    char pad_0x84F[0x1];
-    s32 field_0x850;
-} Game159940Object;
-
+/* Loads the four camera shake tables. */
 void func_1512D238(void) {
-    u32 sp3C;
+    u32 size;
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_800DC280[i] = func_1502B5C8((s32 *)&sp3C, 2, 0x1B, i);
-        D_800DC290[i] = sp3C / 0x18;
+        D_800DC280[i] = (CamOffset *)func_1502B5C8((s32 *)&size, 2, 0x1B, i);
+        D_800DC290[i] = size / sizeof(CamOffset);
     }
 }
 
-typedef struct {
-    u8 pad0[0x84D];
-    /* 0x84D */ u8 unk84D;
-    u8 pad84E[0x2];
-    /* 0x850 */ s32 unk850;
-} S1512D2E4;
-
-void func_1512D2E4(S1512D2E4 *arg0, s32 arg1) {
-    arg0->unk850 = arg1;
-    arg0->unk84D = 0x1;
+/* Starts camera shake number `index`. */
+void func_1512D2E4(Camera *camera, s32 index) {
+    camera->shakeIndex = index;
+    camera->shakeState = 1;
 }
 
-void func_1512D2F8(Game159940Object *arg0) {
-    u8 temp;
+/* Advances the camera shake by the frames elapsed, stopping at the end of its table. */
+void func_1512D2F8(Camera *camera) {
+    u8 frame;
 
-    switch (arg0->field_0x84D) {
+    switch (camera->shakeState) {
     case 1:
-        arg0->field_0x84E = 0;
-        arg0->field_0x84D = 2;
+        camera->shakeFrame = 0;
+        camera->shakeState = 2;
         break;
     case 2:
-        temp = arg0->field_0x84E + D_800BE9E4;
-        arg0->field_0x84E = temp;
-        if ((s32)(temp & 0xFF) >= D_800DC290[arg0->field_0x850]) {
-            arg0->field_0x84D = 0;
+        frame = camera->shakeFrame + D_800BE9E4;
+        camera->shakeFrame = frame;
+        // matching: the explicit mask makes IDO store the unmasked sum and re-mask a copy
+        if ((frame & 0xFF) >= D_800DC290[camera->shakeIndex]) {
+            camera->shakeState = 0;
         }
         break;
     }
 }
 
-void func_1512D368(s32 arg0) {
-    arg0 = arg0;
+void func_1512D368(Camera *camera) {
 }

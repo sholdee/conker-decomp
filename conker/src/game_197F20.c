@@ -2,661 +2,607 @@
 #include "functions.h"
 #include "variables.h"
 
+#define OBJTYPE_TEXTBOX 0x51
+
+/* TextBoxConfig.flags */
+#define TEXTBOX_BUBBLES         0x2     /* body drawn with D_8009056C plus three fading D_8009058C circles */
+#define TEXTBOX_DARK            0x4     /* translucent black body, no drop shadow */
+#define TEXTBOX_ALT_TAIL        0x8     /* tail drawn with D_8009059C */
+#define TEXTBOX_INPUT           0x10    /* A/B buttons advance or close the box */
+#define TEXTBOX_INPUT_CHECK     0x20    /* ... but only while func_151F2CDC() returns 0 */
+#define TEXTBOX_NO_B_SKIP       0x40    /* B does not skip to the end */
+#define TEXTBOX_B_RESTARTS      0x80    /* B on the last page restarts from the first */
+#define TEXTBOX_CLOSE           0x100   /* request: close after the current page */
+#define TEXTBOX_HOLD            0x200   /* keep the current page open */
+#define TEXTBOX_SKIP_ANIM       0x400   /* skip every timed transition */
+#define TEXTBOX_CB_CLOSED       0x1000  /* set while the callback runs: box closed */
+#define TEXTBOX_CB_PAGE_ENDED   0x2000  /* set while the callback runs: a page was left */
+#define TEXTBOX_CB_PAGE_SHOWN   0x4000  /* set while the callback runs: a page is fully shown */
+#define TEXTBOX_SCREEN_POS      0x8000  /* positioned by screen percentages instead of a world point */
+#define TEXTBOX_CLAMP           0x10000 /* keep a screen-positioned box inside the view bounds */
+#define TEXTBOX_CENTERED        0x20000 /* centre each text line */
+#define TEXTBOX_WHITE_TEXT      0x40000
+
+/* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
-    u8 *unk0;
+    u8 *data;
     s32 unk4;
-} struct_game_197C20_0;
+} MessageEntry;
 
+/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
+typedef struct TextBoxConfig {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
+    /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
+    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
+    /* 0x10 */ f32 worldY;
+    /* 0x14 */ f32 worldZ;
+    /* 0x18 */ f32 *screenXPercent; /* TEXTBOX_SCREEN_POS placement */
+    /* 0x1C */ f32 *screenYPercent;
+    /* 0x20 */ f32 *anglePercent;
+    /* 0x24 */ u8 pad24[2];
+    /* 0x26 */ u16 duration;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
+    /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
+} TextBoxConfig;
+
+/* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct_game_197C20_1;
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 pad1[0xC];
+    /* 0x0D */ u8 source;           /* 0: D_800DD254 text, 1: D_800DD258 text, 2: caller string */
+    /* 0x0E */ u8 visible;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ TextBoxConfig *config;
+    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
+    /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ s16 fadeTimer;
+    /* 0x1A */ u8 textAlpha;
+    /* 0x1B */ u8 bubbleAlpha[3];
+    /* 0x1E */ u8 bubbleIndex;
+    /* 0x1F */ u8 placed;           /* screen position taken from the world point */
+    /* 0x20 */ s8 page;
+    /* 0x21 */ u8 pad21[3];
+    /* 0x24 */ u8 *text;            /* current page */
+    /* 0x28 */ f32 scale;
+    /* 0x2C */ f32 scaleSpeed;
+    /* 0x30 */ f32 halfTextWidth;
+    /* 0x34 */ f32 halfTextHeight;
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 height;
+    /* 0x40 */ f32 x;               /* anchor (tip of the tail) */
+    /* 0x44 */ f32 y;
+    /* 0x48 */ f32 bodyX;           /* scaled body position */
+    /* 0x4C */ f32 bodyY;
+    /* 0x50 */ f32 centerX;         /* unscaled body position: the text origin */
+    /* 0x54 */ f32 centerY;
+    /* 0x58 */ f32 angle;           /* direction from the anchor to the body, radians */
+    /* 0x5C */ f32 anchorX;
+    /* 0x60 */ f32 anchorY;
+    /* 0x64 */ f32 baseX;
+    /* 0x68 */ f32 baseY;
+    /* 0x6C */ f32 yaw;             /* object heading relative to the camera, degrees */
+    /* 0x70 */ f32 bubbleX;
+} TextBox;
 
-typedef struct {
-    s32 field_0x0;
-    char pad_0[0x4];
-    u8 field_0x8;
-} struct_game_197C20_2;
+/* TextBox.state */
+#define TEXTBOX_STATE_INIT      0x1
+#define TEXTBOX_STATE_GROW      0x2
+#define TEXTBOX_STATE_SETTLE    0x4
+#define TEXTBOX_STATE_BUBBLES   0x8
+#define TEXTBOX_STATE_TEXT_IN   0x10
+#define TEXTBOX_STATE_SHOW      0x20
+#define TEXTBOX_STATE_TEXT_OUT  0x40
+#define TEXTBOX_STATE_SHRINK    0x80
 
-typedef struct {
-    u8 field_0x0;
-    char pad_0[0xF];
-    struct_game_197C20_2 *field_0x10;
-    char pad_1[0x1];
-    u8 field_0x15;
-    char pad_2[0xA];
-    u8 field_0x20;
-} struct_game_197C20_3;
+extern MessageEntry *D_800DD254;
+extern MessageEntry *D_800DD258;
 
-extern struct_game_197C20_0 *D_800DD254;
-extern struct_game_197C20_0 *D_800DD258;
-s32 func_1516A770(u8 *arg0);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    char padB[0x26 - 0xB];
-    u16 unk26;
-    char pad28[4];
-    s32 unk2C;
-} Struct1516A7B0_Data;
-
-typedef struct {
-    char pad0[0xD];
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    Struct1516A7B0_Data *unk10;
-    u8 unk14;
-    u8 unk15;
-    u16 unk16;
-    u16 unk18;
-    u8 unk1A;
-    char pad1B[4];
-    u8 unk1F;
-    u8 unk20;
-    char pad21[3];
-    u8 *unk24;
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-} Struct1516A7B0;
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
-u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2);
-Struct1516A7B0 *func_1516A7B0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, Struct1516A7B0_Data *arg4, s32 arg5);
+u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    char padA[0x26 - 0xA];
-    u16 unk26;
-    char pad28[3];
-    u8 unk2B;
-    void (*unk2C)(void *, s32, s32);
-} Struct1516AA70_Data;
-
-typedef struct {
-    char pad0[0xD];
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    Struct1516AA70_Data *unk10;
-    u8 unk14;
-    u8 unk15;
-    s16 unk16;
-    s16 unk18;
-    u8 unk1A;
-    u8 unk1B[3];
-    u8 unk1E;
-    u8 unk1F;
-    s8 unk20;
-    char pad21[3];
-    u8 *unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    char pad38[8];
-    f32 unk40;
-    f32 unk44;
-    char pad48[0x14];
-    f32 unk5C;
-    f32 unk60;
-    char pad64[0xC];
-    f32 unk70;
-} Struct1516AA70;
-
-extern u8 D_800CC4B3[][0x32C];
+extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object, set by func_1516A7B0 */
 s32 func_151F2CDC(void);
-void func_1516CC58();
+void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's register allocation)
 
-void func_1516AA70(Struct1516AA70 *arg0) {
-    Struct1516AA70_Data *data;
-    struct108 *sp48;
-    s32 sp44;
-    s32 sp40;
-    s32 sp3C;
-    s32 flag;
-    s32 done;
+/* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
+void func_1516AA70(TextBox *box) {
+    s32 unused; // matching: unused local, needed for the original stack frame
+    struct108 *player;
+    s32 width;
+    s32 height;
+    s32 advance;
+    s32 skip;
+    s32 advancePage;
 
-    sp48 = D_800DBFF0;
-    flag = arg0->unk10->unk0 & 0x400;
-    if (arg0->unk10->unk2B != 0 && D_800C35EA != 1) {
-        arg0->unk10->unk8 = 0;
-        func_1516972C((struct102 *)arg0);
+    player = D_800DBFF0;
+    skip = box->config->flags & TEXTBOX_SKIP_ANIM;
+    if (box->config->unk2B != 0 && D_800C35EA != 1) {
+        box->config->numPages = 0;
+        func_1516972C((struct102 *)box);
         return;
     }
-    arg0->unk40 = arg0->unk5C;
-    arg0->unk44 = arg0->unk60;
-    switch (arg0->unk15) {
-    case 0x1:
-        arg0->unk16 = 0;
-        arg0->unk18 = 0;
-        if (flag) {
-            arg0->unk2C = 1.0f;
+    box->x = box->anchorX;
+    box->y = box->anchorY;
+    switch (box->state) {
+    case TEXTBOX_STATE_INIT:
+        box->timer = 0;
+        box->fadeTimer = 0;
+        if (skip) {
+            box->scaleSpeed = 1.0f;
         } else {
-            arg0->unk2C = 0.3333333433f;
+            box->scaleSpeed = 0.333333343f;
         }
-        if (arg0->unk10->unk0 & 2) {
-            arg0->unk1B[2] = 0;
-            arg0->unk1B[1] = 0;
-            arg0->unk1B[0] = 0;
-            arg0->unk1E = 2;
-            arg0->unk16 = 4;
-            arg0->unk18 = 10;
-            arg0->unk15 = 8;
-            arg0->unk28 = 1.0f;
-            func_1516CC58(arg0);
-            arg0->unkE = 1;
-            arg0->unk70 = arg0->unk5C;
+        if (box->config->flags & TEXTBOX_BUBBLES) {
+            box->bubbleAlpha[2] = 0;
+            box->bubbleAlpha[1] = 0;
+            box->bubbleAlpha[0] = 0;
+            box->bubbleIndex = 2;
+            box->timer = 4;
+            box->fadeTimer = 10;
+            box->state = TEXTBOX_STATE_BUBBLES;
+            box->scale = 1.0f;
+            func_1516CC58(box);
+            box->visible = TRUE;
+            box->bubbleX = box->anchorX;
         } else {
-            arg0->unk15 = 2;
+            box->state = TEXTBOX_STATE_GROW;
         }
-        arg0->unk30 = 1.0f;
-        arg0->unk34 = 1.0f;
-        arg0->unk1A = 0;
+        box->halfTextWidth = 1.0f;
+        box->halfTextHeight = 1.0f;
+        box->textAlpha = 0;
         break;
-    case 0x2:
-        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
-        arg0->unk30 = sp44 >> 1;
-        arg0->unk34 = sp40 >> 1;
-        arg0->unk28 += arg0->unk2C * D_800BE9A4;
-        if (flag) {
-            arg0->unk18 = 0;
+    case TEXTBOX_STATE_GROW:
+        func_150428D4(box->text, &width, &height, &advance);
+        box->halfTextWidth = width >> 1;
+        box->halfTextHeight = height >> 1;
+        box->scale += box->scaleSpeed * D_800BE9A4;
+        if (skip) {
+            box->fadeTimer = 0;
         }
-        if (arg0->unk28 > 0.75f && arg0->unk18 == 0) {
-            arg0->unk18 = 10;
+        if (box->scale > 0.75f && box->fadeTimer == 0) {
+            box->fadeTimer = 10;
         }
-        if (arg0->unk18 != 0) {
-            arg0->unk18 -= D_800BE9A0;
-            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-            arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
+        if (box->fadeTimer != 0) {
+            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+            box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
         }
-        if (arg0->unk28 > 1.0f) {
-            arg0->unk28 = 1.0f;
-            arg0->unk15 = 4;
-            arg0->unk16 = 180;
+        if (box->scale > 1.0f) {
+            box->scale = 1.0f;
+            box->state = TEXTBOX_STATE_SETTLE;
+            box->timer = 180;
         }
-        arg0->unkE = 1;
+        box->visible = TRUE;
         break;
-    case 0x4:
-        if (flag) {
-            arg0->unk16 = 0;
+    case TEXTBOX_STATE_SETTLE:
+        if (skip) {
+            box->timer = 0;
         }
-        arg0->unk16 -= D_800BE9A0 * 45;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        arg0->unk18 -= D_800BE9A0;
-        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
-        if (arg0->unk16 == 0) {
-            arg0->unk15 = 0x10;
+        box->timer -= D_800BE9A0 * 45;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+        box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
+        if (box->timer == 0) {
+            box->state = TEXTBOX_STATE_TEXT_IN;
         }
         break;
-    case 0x8:
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        arg0->unk1B[arg0->unk1E] = (4 - (f32)arg0->unk16) / 4 * 170.0f;
-        if (arg0->unk16 == 0) {
-            if (--arg0->unk1E > 100) {
-                arg0->unk15 = 0x10;
-                arg0->unk18 = 10;
+    case TEXTBOX_STATE_BUBBLES:
+        /* fade the circles in one at a time, from the anchor outwards */
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        box->bubbleAlpha[box->bubbleIndex] = (4 - (f32)box->timer) / 4 * 170.0f;
+        if (box->timer == 0) {
+            if (--box->bubbleIndex > 100) {
+                box->state = TEXTBOX_STATE_TEXT_IN;
+                box->fadeTimer = 10;
             } else {
-                arg0->unk16 = 4;
+                box->timer = 4;
             }
         }
         break;
-    case 0x40:
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        if (flag) {
-            arg0->unk16 = 0;
+    case TEXTBOX_STATE_TEXT_OUT:
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        if (skip) {
+            box->timer = 0;
         }
-        arg0->unk1A = arg0->unk16 / 10.0f * 255.0f;
-        if (arg0->unk16 == 0) {
-            arg0->unk20++;
-            if (arg0->unk20 < arg0->unk10->unk8) {
-                arg0->unk24 = func_1516C878((struct_game_197C20_1 *)arg0->unk10, arg0->unk20, arg0->unkD);
-                arg0->unk18 = 10;
-                arg0->unk15 = 0x10;
-                arg0->unk10->unk0 |= 0x2000;
-                if (arg0->unk10->unk2C != NULL) {
-                    arg0->unk10->unk2C(arg0->unk10, arg0->unk20 - 1, arg0->unk15);
+        box->textAlpha = box->timer / 10.0f * 255.0f;
+        if (box->timer == 0) {
+            box->page++;
+            if (box->page < box->config->numPages) {
+                box->text = func_1516C878(box->config, box->page, box->source);
+                box->fadeTimer = 10;
+                box->state = TEXTBOX_STATE_TEXT_IN;
+                box->config->flags |= TEXTBOX_CB_PAGE_ENDED;
+                if (box->config->callback != NULL) {
+                    box->config->callback(box->config, box->page - 1, box->state);
                 }
-                arg0->unk10->unk0 &= ~0x2000;
+                box->config->flags &= ~TEXTBOX_CB_PAGE_ENDED;
             } else {
-                arg0->unk18 = 5;
-                arg0->unk15 = 0x80;
-                arg0->unk28 = 1.0f;
-                arg0->unk2C = 0.25f;
+                box->fadeTimer = 5;
+                box->state = TEXTBOX_STATE_SHRINK;
+                box->scale = 1.0f;
+                box->scaleSpeed = 0.25f;
             }
         }
-        if (!flag) {
+        if (!skip) {
             break;
         }
-    case 0x10:
-        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
-        arg0->unk30 = sp44 >> 1;
-        arg0->unk34 = sp40 >> 1;
-        arg0->unk18 -= D_800BE9A0;
-        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-        if (flag) {
-            arg0->unk18 = 0;
+        /* fallthrough */
+    case TEXTBOX_STATE_TEXT_IN:
+        func_150428D4(box->text, &width, &height, &advance);
+        box->halfTextWidth = width >> 1;
+        box->halfTextHeight = height >> 1;
+        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+        if (skip) {
+            box->fadeTimer = 0;
         }
-        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
-        if (arg0->unk18 == 0) {
-            arg0->unk16 = arg0->unk10->unk26;
-            arg0->unk15 = 0x20;
-            arg0->unk10->unk0 |= 0x4000;
+        box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
+        if (box->fadeTimer == 0) {
+            box->timer = box->config->duration;
+            box->state = TEXTBOX_STATE_SHOW;
+            box->config->flags |= TEXTBOX_CB_PAGE_SHOWN;
         }
-        if (!flag) {
+        if (!skip) {
             break;
         }
-    case 0x20: {
+        /* fallthrough */
+    case TEXTBOX_STATE_SHOW: {
         s32 bits;
-        done = 0;
-        if ((u16)(arg0->unk10->unk0 & 0x4000)) {
-            if (arg0->unk10->unk2C != NULL) {
-                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+
+        advancePage = FALSE;
+        // matching: the (u16) casts on these two flag tests each take one ugen temp register
+        if ((u16)(box->config->flags & TEXTBOX_CB_PAGE_SHOWN)) {
+            if (box->config->callback != NULL) {
+                box->config->callback(box->config, box->page, box->state);
             }
-            arg0->unk10->unk0 &= ~0x4000;
+            box->config->flags &= ~TEXTBOX_CB_PAGE_SHOWN;
         }
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        if ((u16)(arg0->unk10->unk0 & 0x10) && arg0->unk14 == 0) {
-            if (!(arg0->unk10->unk0 & 0x20) || func_151F2CDC() == 0) {
-                if ((arg0->unk10->unk0 & 0x80) && arg0->unk20 + 1 == arg0->unk10->unk8) {
-                    if (D_800BE710[0] & 0x4000) {
-                        arg0->unk20 = -1;
-                        done = 1;
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->unk14 == 0) {
+            if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
+                if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
+                    if (D_800BE710[0] & B_BUTTON) {
+                        box->page = -1;
+                        advancePage = TRUE;
                         D_800D1994 = 0;
-                    } else if (D_800BE710[0] & 0x8000) {
-                        done = 1;
+                    } else if (D_800BE710[0] & A_BUTTON) {
+                        advancePage = TRUE;
                     }
-                } else if (D_800BE710[0] & 0x8000) {
-                    done = 1;
-                } else if (!(arg0->unk10->unk0 & 0x40) && (D_800BE710[0] & 0x4000)) {
-                    done = 1;
-                    arg0->unk20 = arg0->unk10->unk8;
+                } else if (D_800BE710[0] & A_BUTTON) {
+                    advancePage = TRUE;
+                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (D_800BE710[0] & B_BUTTON)) {
+                    advancePage = TRUE;
+                    box->page = box->config->numPages;
                 }
             }
         }
-        bits = arg0->unk10->unk0 & 0xF00;
-        if (bits & 0x100) {
-            arg0->unk10->unk0 &= ~0x100;
-            done = 1;
-            bits = arg0->unk10->unk0 & 0xF00;
+        bits = box->config->flags & 0xF00;
+        if (bits & TEXTBOX_CLOSE) {
+            box->config->flags &= ~TEXTBOX_CLOSE;
+            advancePage = TRUE;
+            bits = box->config->flags & 0xF00;
         }
-        if (!(bits & 0x200) && done) {
-            arg0->unk16 = 10;
-            arg0->unk15 = 0x40;
+        if (!(bits & TEXTBOX_HOLD) && advancePage) {
+            box->timer = 10;
+            box->state = TEXTBOX_STATE_TEXT_OUT;
         }
     }
         break;
-    case 0x80:
-        if (arg0->unk10->unk0 & 2) {
-            arg0->unk18 -= D_800BE9A0;
-            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-            arg0->unk1B[0] = arg0->unk18 / 5.0f * 85.0f;
-            arg0->unk1B[1] = arg0->unk1B[0];
-            arg0->unk1B[2] = arg0->unk1B[0];
+    case TEXTBOX_STATE_SHRINK:
+        if (box->config->flags & TEXTBOX_BUBBLES) {
+            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+            box->bubbleAlpha[0] = box->fadeTimer / 5.0f * 85.0f;
+            box->bubbleAlpha[1] = box->bubbleAlpha[0];
+            box->bubbleAlpha[2] = box->bubbleAlpha[0];
         } else {
-            arg0->unk28 -= arg0->unk2C * D_800BE9A4;
+            box->scale -= box->scaleSpeed * D_800BE9A4;
         }
-        if (arg0->unk28 < 0.0f || arg0->unk18 == 0) {
-            arg0->unk28 = 0.0f;
-            arg0->unk15 = 0;
-            arg0->unk20 = 0;
-            arg0->unk10->unk0 |= 0x1000;
-            if (arg0->unk10->unk2C != NULL) {
-                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+        if (box->scale < 0.0f || box->fadeTimer == 0) {
+            box->scale = 0.0f;
+            box->state = 0;
+            box->page = 0;
+            box->config->flags |= TEXTBOX_CB_CLOSED;
+            if (box->config->callback != NULL) {
+                box->config->callback(box->config, box->page, box->state);
             }
-            arg0->unk10->unk0 &= ~0x1000;
-            D_800CC4B3[arg0->unk10->unk9][0] = 0;
-            *(s16 *)((u8 *)sp48 + 0x6CC) = 0;
-            arg0->unk10->unk8 = 0;
-            func_1516972C((struct102 *)arg0);
+            box->config->flags &= ~TEXTBOX_CB_CLOSED;
+            D_800CC4B3[box->config->objIndex][0] = 0;
+            *(s16 *)((u8 *)player + 0x6CC) = 0; /* struct108 has no field here yet */
+            box->config->numPages = 0;
+            func_1516972C((struct102 *)box);
         }
         break;
     }
-    func_1516CC58(arg0);
+    func_1516CC58(box);
 }
 
+/* Sprite parameters passed to func_15094F70 / func_15095A48. */
 typedef struct {
-    u8 pad0[6];
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 r;
-    u8 g;
-    u8 flags;
-    u8 padE[2];
-    void *tex;
-} Sprite_1516B6BC;
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ s16 w;
+    /* 0x08 */ s16 h;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags; /* SPRITE_FLIP_* */
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ void *tex;
+} TextBoxSprite;
 
-typedef struct {
-    s32 unk0;
-    char pad4[0x24];
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-} Data_1516B6BC;
+#define SPRITE_FLIP_X 1 /* set while the body is left of the anchor */
+#define SPRITE_FLIP_Y 2 /* set while the body is below the anchor */
 
+/* Sprite texture header (D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
+ * D_8009058C bubble circle). */
 typedef struct {
-    char pad0[0xE];
-    u8 unkE;
-    char padF;
-    Data_1516B6BC *unk10;
-    char pad14;
-    u8 unk15;
-    char pad16[4];
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    char pad1E[0xA];
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    char pad50[8];
-    f32 unk58;
-    f32 unk5C;
-    char pad60[0x10];
-    f32 unk70;
-} Obj_1516B6BC;
-typedef struct {
-    char pad0[6];
-    u16 unk6;
-    u16 unk8;
-} Struct1516CC58_Vp;
+    /* 0x0 */ u8 pad0[6];
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+} TextBoxTexture;
 
-extern Struct1516CC58_Vp D_8009055C;
-extern Struct1516CC58_Vp D_8009057C;
-#define WGFX1516B6BC(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
-extern Struct1516CC58_Vp D_8009056C;
-extern Struct1516CC58_Vp D_8009058C;
-extern Struct1516CC58_Vp D_8009059C;
-extern u16 D_80090564;
-extern s32 D_800A4AC8[][2];
-extern s32 D_800A4B90;
-extern s32 D_800A4B94;
-extern s32 D_800BE9C8[];
+extern TextBoxTexture D_8009055C;
+extern TextBoxTexture D_8009057C;
+extern TextBoxTexture D_8009056C;
+extern TextBoxTexture D_8009058C;
+extern TextBoxTexture D_8009059C;
+/* Render mode pairs: cycle 1 and cycle 2 blender settings. */
+extern struct {
+    u32 cycle1;
+    u32 cycle2;
+} D_800A4AC8[];
+extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8 D_800E0BDC;
-Gfx *func_15094F70(Gfx *, Struct1516CC58_Vp *, s32, Sprite_1516B6BC *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, Sprite_1516B6BC *, f32, f32);
-Gfx *func_1516C934(Gfx *, Obj_1516B6BC *, s32, s32, s32, s32);
+Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
+Gfx *func_1516C934(Gfx *, TextBox *, s32, s32, s32, s32);
 
-Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
-    Sprite_1516B6BC sprite;
-    s32 pad80;
+/* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
+ * Returns gfx unchanged if the display list would overflow. */
+Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
+    TextBoxSprite sprite;
+    s32 pad; // matching: unused stack slot
     f32 xoff;
     f32 yoff;
-    s32 flag;
-    s32 scale;
+    s32 dark;
+    s32 fade;
     s32 overflow;
     Gfx *start;
-    f32 tw;
-    f32 th;
+    f32 texW; // matching: dead copies; converting the texture size first orders the FP registers
+    f32 texH;
 
     start = gfx;
-    if (obj->unk10->unk0 & 4) {
-        flag = 1;
+    if (box->config->flags & TEXTBOX_DARK) {
+        dark = TRUE;
     } else {
-        flag = 0;
+        dark = FALSE;
     }
-    if (obj->unkE == 0) {
+    if (!box->visible) {
         return gfx;
     }
     if (D_800E0BDC == 0) {
         return gfx;
     }
-    D_800D2DAA = 0;
-    D_800D2DA9 = D_800D2DAA;
-    D_800D2DA8 = D_800D2DA9;
-    scale = D_800E0BDC + 1;
+    D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
+    fade = D_800E0BDC + 1;
     sprite.flags = 0;
-    sprite.alpha = (64 * scale) >> 8;
-    tw = (f32)D_8009055C.unk6;
-    th = (f32)D_8009055C.unk8;
-    sprite.w = (2.0f * obj->unk38 + 1.0f) / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = (obj->unk3C + 1.0f) / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
-    xoff = obj->unk38 / (f32)D_8009055C.unk6 * (f32)D_8009057C.unk6 * 0.25f * obj->unk28;
-    yoff = obj->unk3C / (f32)D_8009055C.unk8 * (f32)D_8009057C.unk8 * 0.5f * obj->unk28;
-    obj->unk48 = cosf(obj->unk58 + 3.14159274101f) * (obj->unk38 * 0.5f) * 1.14999997616f * obj->unk28 + obj->unk40 - xoff;
-    obj->unk4C = sinf(obj->unk58 + 3.14159274101f) * (obj->unk3C * 0.5f) * 1.03999996185f * obj->unk28 + obj->unk44 - yoff;
-    WGFX1516B6BC(gfx++, 0xE7000000, 0);
-    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
-    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
-    if (obj->unk10->unk0 & 2) {
-        sprite.alpha = (f32)obj->unk1B * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+    sprite.alpha = (64 * fade) >> 8;
+    texW = D_8009055C.width;
+    texH = D_8009055C.height;
+    sprite.w = (2.0f * box->width + 1.0f) / D_8009055C.width * 2355.2f * box->scale;
+    sprite.h = (box->height + 1.0f) / D_8009055C.height * 4259.84f * box->scale;
+    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
+    yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f * box->scale;
+    box->bodyX = cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale + box->x - xoff;
+    box->bodyY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f * box->scale + box->y - yoff;
+    /* shadow pass */
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        sprite.alpha = box->bubbleAlpha[0] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
         gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
-    if (!flag) {
-        gfx = func_15095A48(gfx, &sprite, obj->unk48 + 5.0f, obj->unk4C + -5.0f);
+    if (!dark) {
+        gfx = func_15095A48(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
     }
-    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
-        sprite.flags &= ~2;
+    if (box->angle > 0.0f && box->angle < 3.1415927f) {
+        sprite.flags &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= 2;
+        sprite.flags |= SPRITE_FLIP_Y;
     }
-    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
-        sprite.flags |= 1;
+    if (box->angle > 1.5707964f && box->angle < 4.712389f) {
+        sprite.flags |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~1;
+        sprite.flags &= ~SPRITE_FLIP_X;
     }
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    if (obj->unk10->unk0 & 2) {
-        if (obj->unk15 == 1) {
-            obj->unk70 = obj->unk5C;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        if (box->state == TEXTBOX_STATE_INIT) {
+            box->bubbleX = box->anchorX;
         }
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = (f32)obj->unk1C * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        if (obj->unk58 > 1.5707963705f) {
-            obj->unk70 = obj->unk70 + ((obj->unk40 + xoff) - obj->unk70) * 0.300000011921f;
-            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        sprite.alpha = box->bubbleAlpha[1] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        if (box->angle > 1.5707964f) {
+            box->bubbleX += (box->x + xoff - box->bubbleX) * 0.3f;
+            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         } else {
-            obj->unk70 = obj->unk70 + ((obj->unk40 - xoff) - obj->unk70) * 0.300000011921f;
-            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+            box->bubbleX += (box->x - xoff - box->bubbleX) * 0.3f;
+            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         }
         sprite.w /= 2;
         sprite.h /= 2;
-        sprite.alpha = (f32)obj->unk1D * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+        sprite.alpha = box->bubbleAlpha[2] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - 2.5f, obj->unk44 + -2.5f);
+        if (box->angle > 1.5707964f) {
+            gfx = func_15095A48(gfx, &sprite, box->x - 2.5f, box->y + -2.5f);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + 2.5f, obj->unk44 + -2.5f);
+            gfx = func_15095A48(gfx, &sprite, box->x + 2.5f, box->y + -2.5f);
         }
     } else {
         gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (!flag) {
-            if (obj->unk58 > 1.5707963705f) {
-                gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff - 2.5f, obj->unk44 - yoff + -2.5f);
+        if (!dark) {
+            if (box->angle > 1.5707964f) {
+                gfx = func_15095A48(gfx, &sprite, box->x + xoff - 2.5f, box->y - yoff + -2.5f);
             } else {
-                gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff + 2.5f, obj->unk44 - yoff + -2.5f);
+                gfx = func_15095A48(gfx, &sprite, box->x - xoff + 2.5f, box->y - yoff + -2.5f);
             }
         }
     }
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    if (flag) {
+    /* the box itself, tinted with the config's colour */
+    if (dark) {
         D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
     } else {
-        D_800D2DA8 = obj->unk10->unk28;
-        D_800D2DA9 = obj->unk10->unk29;
-        D_800D2DAA = obj->unk10->unk2A;
+        D_800D2DA8 = box->config->r;
+        D_800D2DA9 = box->config->g;
+        D_800D2DAA = box->config->b;
     }
     sprite.flags = 0;
-    if (flag) {
+    if (dark) {
         sprite.alpha = 0x55;
     } else {
         sprite.alpha = 0xFF;
     }
-    sprite.alpha = (sprite.alpha * scale) >> 8;
-    WGFX1516B6BC(gfx++, 0xE7000000, 0);
-    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
-    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
-    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
-        sprite.flags &= ~2;
+    sprite.alpha = (sprite.alpha * fade) >> 8;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    if (box->angle > 0.0f && box->angle < 3.1415927f) {
+        sprite.flags &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= 2;
+        sprite.flags |= SPRITE_FLIP_Y;
     }
-    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
-        sprite.flags |= 1;
+    if (box->angle > 1.5707964f && box->angle < 4.712389f) {
+        sprite.flags |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~1;
+        sprite.flags &= ~SPRITE_FLIP_X;
     }
-    sprite.w = obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
-    if (obj->unk10->unk0 & 2) {
+    sprite.w = box->width / D_8009055C.width * 2355.2f * box->scale;
+    sprite.h = box->height / D_8009055C.height * 4259.84f * box->scale;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = obj->unk1C;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        sprite.alpha = box->bubbleAlpha[1];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         sprite.w /= 2;
         sprite.h /= 2;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = obj->unk1D;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+        sprite.alpha = box->bubbleAlpha[2];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        if (box->angle > 1.5707964f) {
+            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
         }
-    } else if (obj->unk10->unk0 & 8) {
+    } else if (box->config->flags & TEXTBOX_ALT_TAIL) {
         gfx = func_15094F70(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        if (box->angle > 1.5707964f) {
+            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     } else {
         gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        if (box->angle > 1.5707964f) {
+            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     }
-    sprite.w = 2.0f * obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
-    if (obj->unk10->unk0 & 2) {
-        sprite.alpha = obj->unk1B;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+    sprite.w = 2.0f * box->width / D_8009055C.width * 2355.2f * box->scale;
+    sprite.h = box->height / D_8009055C.height * 4259.84f * box->scale;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        sprite.alpha = box->bubbleAlpha[0];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
         gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
-    gfx = func_15095A48(gfx, &sprite, (s32)obj->unk48, (s32)obj->unk4C);
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    gfx = func_15095A48(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    return func_1516C934(gfx, obj, 0, 0, 0, (obj->unk1A * scale) >> 8);
+    return func_1516C934(gfx, box, 0, 0, 0, (box->textAlpha * fade) >> 8);
 }
 
-u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2) {
-    u8 *temp_v1;
-    u8 *sp0;
-    s32 temp_v0;
-    s32 temp_a0;
+/* Returns the start of page `index` of a config's text: pages are separated by runs of NULs. */
+u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
+    u8 *str;
+    u8 *uninit;
+    s32 i;
 
-    switch (arg2) {
+    switch (source) {
     case 0:
-        temp_v1 = D_800DD254[arg0->unk4].unk0;
+        str = D_800DD254[config->text].data;
         break;
     case 1:
-        temp_v1 = D_800DD258[arg0->unk4].unk0;
+        str = D_800DD258[config->text].data;
         break;
     case 2:
-        temp_v1 = (u8 *)arg0->unk4;
+        str = (u8 *)config->text;
         break;
     default:
-        temp_v1 = sp0;
+        str = uninit; // matching: the original reads an uninitialised stack local here
         break;
     }
-
-    temp_v0 = 0;
-    if (arg1 > 0) {
-        temp_a0 = temp_v1[0];
-        do {
-            temp_v0++;
-            if (temp_a0 != 0) {
-                do {
-                    temp_a0 = temp_v1[1];
-                    temp_v1++;
-                } while (temp_a0 != 0);
-            }
-            if (temp_a0 == 0) {
-                do {
-                    temp_a0 = temp_v1[1];
-                    temp_v1++;
-                } while (temp_a0 == 0);
-            }
-        } while (temp_v0 != arg1);
+    for (i = 0; i < index; i++) {
+        while (*str != 0) {
+            str++;
+        }
+        while (*str == 0) {
+            str++;
+        }
     }
-
-    return temp_v1;
+    return str;
 }
-
-typedef struct {
-    u32 flags;
-} Struct1516C934Font;
-
-typedef struct {
-    u8 pad0[0x10];
-    Struct1516C934Font *unk10;
-    u8 pad14[0x10];
-    u8 *unk24;
-    u8 pad28[0x8];
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x18];
-    f32 unk50;
-    f32 unk54;
-} Struct1516C934;
 
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
 extern u8 D_800859A0[];
 
-Gfx *func_1516C934(gfx, arg1, r, g, b, a)
+/* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
+ * Returns gfx unchanged if the display list would overflow. */
+Gfx *func_1516C934(gfx, box, r, g, b, a)
     Gfx *gfx;
-    Obj_1516B6BC *arg1;
+    TextBox *box;
     u8 r;
     u8 g;
     u8 b;
     u8 a;
 {
-#define ARG1 ((Struct1516C934 *)arg1)
     Gfx *original;
     u8 line[84];
-    Struct1516C934 *text;
+    TextBox *self; // matching: a second copy of box; IDO allocates the two differently
     f32 offset;
     s32 i;
     s32 n;
@@ -664,27 +610,27 @@ Gfx *func_1516C934(gfx, arg1, r, g, b, a)
 
     i = 0;
     n = 0;
-    text = ARG1;
+    self = box;
     original = gfx;
-lbl:
+lbl: // matching: unused label; with the block below it sets IDO's register priorities for box/i
     {
         f32 x;
         f32 y;
 
-        x = ARG1->unk50 - ARG1->unk30;
-        y = ARG1->unk54 - ARG1->unk34;
+        x = box->centerX - box->halfTextWidth;
+        y = box->centerY - box->halfTextHeight;
         gSPDisplayList(gfx++, D_800859A0);
-        first = 1;
-        while (text->unk24[i] == '\n') {
+        first = TRUE;
+        while (self->text[i] == '\n') {
             i++;
         }
         do {
-            if ((D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) ? 1 : 0) != 0) {
+            if ((gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) { // matching: inline flag form
                 return original;
             }
-            if (1) {
+            if (1) { // matching: empty block shifts IDO's temp-register assignment
             }
-            line[n] = text->unk24[i];
+            line[n] = self->text[i];
             if (line[n] == '\n') {
                 line[n] = 0;
             }
@@ -695,230 +641,185 @@ lbl:
 
                 func_150428D4(line, &width, &height, &advance);
                 if (!first) {
-                    y += (f32)height;
+                    y += height;
                 } else {
-                    first = 0;
+                    first = FALSE;
                 }
-                if (text->unk10->flags & 0x20000) {
-                    offset = ARG1->unk30 - (f32)(width >> 1) - 1.0f;
+                if (self->config->flags & TEXTBOX_CENTERED) {
+                    offset = box->halfTextWidth - (width >> 1) - 1.0f;
                 } else {
                     offset = 0.0f;
                 }
-                if (text->unk10->flags & 0x40000) {
+                if (self->config->flags & TEXTBOX_WHITE_TEXT) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
                     n = 0;
-                } else if (!(text->unk10->flags & 4)) {
+                } else if (!(self->config->flags & TEXTBOX_DARK)) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 } else {
                     gfx = func_150417AC(gfx, x + offset, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 }
-                y += (f32)advance;
+                y += advance;
             } else {
                 n++;
             }
-        } while (ARG1->unk24[i++] != 0);
+        } while (box->text[i++] != 0);
     }
     return gfx;
-#undef ARG1
 }
 
+/* What D_800BE628 points to. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    char padA[2];
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 *unk18;
-    f32 *unk1C;
-    f32 *unk20;
-} Struct1516CC58_10;
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 width;
+    /* 0x08 */ f32 height;
+    /* 0x0C */ u8 padC[0x18];
+    /* 0x24 */ f32 minY;
+    /* 0x28 */ f32 maxY;
+    /* 0x2C */ f32 minX;
+    /* 0x30 */ f32 maxX;
+} TextBoxView;
 
-typedef struct {
-    char pad0[0x10];
-    Struct1516CC58_10 *unk10;
-    char pad14[0xB];
-    u8 unk1F;
-    char pad20[8];
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    char pad48[8];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-} Struct1516CC58;
+#define VIEW ((TextBoxView *)D_800BE628)
 
-typedef struct {
-    char pad0[4];
-    f32 unk4;
-    f32 unk8;
-} Struct1516CC58_BE628;
+void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
+void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
-typedef struct {
-    f32 unk0;
-    char pad4[0x328];
-} Struct1516CC58_CC310;
+/* Places a text box: its anchor comes from screen percentages or from its object's projected position,
+ * and the body is set at an angle derived from the object's heading. */
+void func_1516CC58(TextBox *box) {
+    f32 screenX;
+    f32 screenY;
+    f32 screenZ;
+    TextBoxConfig *config;
+    s32 xoff;
+    s32 yoff;
+    f32 scale;
+    f32 angle;
 
-extern Struct1516CC58_CC310 D_800CC310[];
-extern f32 cosf(f32);
-extern u16 D_80090562;
-extern u16 D_80090582;
-extern f32 sinf(f32);
-void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
-void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
-
-void func_1516CC58(Struct1516CC58 *arg0) {
-    f32 sp54;
-    f32 sp50;
-    f32 sp4C;
-    Struct1516CC58_10 *temp_v0;
-    s32 sp44;
-    s32 sp40;
-    f32 temp_f0;
-    f32 temp_f2;
-    f32 var_f0_2;
-
-    temp_v0 = arg0->unk10;
-    if (temp_v0->unk0 & 0x8000) {
-        temp_f2 = *temp_v0->unk18 * 0.00999999977648f;
-        arg0->unk5C = (*(Struct1516CC58_BE628 **)&D_800BE628)->unk4 * temp_f2;
-        temp_f2 = *temp_v0->unk1C * 0.00999999977648f;
-        temp_f2 = 1.0f - temp_f2;
-        arg0->unk60 = (*(Struct1516CC58_BE628 **)&D_800BE628)->unk8 * temp_f2;
-        var_f0_2 = *temp_v0->unk20 * 0.00999999977648f;
-        var_f0_2 = (var_f0_2 < 0.0f) ? 0.0f : ((var_f0_2 > 1.0f) ? 1.0f : var_f0_2);
-        var_f0_2 = (70.0f * var_f0_2) + 55.0f;
-        var_f0_2 = var_f0_2 * 0.0174532923847f;
-        arg0->unk58 = var_f0_2;
-        if (temp_v0->unk0 & 0x10000) {
-            func_1516D0CC(arg0, &arg0->unk5C, &arg0->unk60, &arg0->unk58);
+    config = box->config;
+    if (config->flags & TEXTBOX_SCREEN_POS) {
+        scale = *config->screenXPercent * 0.01f;
+        box->anchorX = VIEW->width * scale;
+        scale = *config->screenYPercent * 0.01f;
+        scale = 1.0f - scale;
+        box->anchorY = VIEW->height * scale;
+        angle = *config->anglePercent * 0.01f;
+        angle = (angle < 0.0f) ? 0.0f : ((angle > 1.0f) ? 1.0f : angle);
+        angle = 70.0f * angle + 55.0f;
+        angle *= 0.017453292f;
+        box->angle = angle;
+        if (config->flags & TEXTBOX_CLAMP) {
+            func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
         }
     } else {
-        func_1501A764(0, temp_v0->unkC, temp_v0->unk10, temp_v0->unk14, &sp54, &sp50, &sp4C);
-        if (arg0->unk1F == 0) {
-            arg0->unk64 = sp54;
-            arg0->unk68 = sp50;
-            arg0->unk6C = (D_800CC310[arg0->unk10->unk9].unk0 - D_800DBFF0->unk37C) - 180.0f;
-            arg0->unk1F = 1;
+        func_1501A764(0, config->worldX, config->worldY, config->worldZ, &screenX, &screenY, &screenZ);
+        if (box->placed == 0) {
+            box->baseX = screenX;
+            box->baseY = screenY;
+            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->unk37C - 180.0f;
+            box->placed = 1;
         }
-        var_f0_2 = arg0->unk6C;
-        arg0->unk5C = arg0->unk64;
-        arg0->unk60 = arg0->unk68;
-        if (var_f0_2 < 0.0f) {
-            var_f0_2 += 360.0f;
+        angle = box->yaw;
+        box->anchorX = box->baseX;
+        box->anchorY = box->baseY;
+        if (angle < 0.0f) {
+            angle += 360.0f;
         }
-        if (var_f0_2 > 180.0f) {
-            var_f0_2 -= 360.0f;
+        if (angle > 180.0f) {
+            angle -= 360.0f;
         }
-        if (var_f0_2 > 90.0f) {
-            var_f0_2 = 180.0f - var_f0_2;
-        } else if (var_f0_2 < -90.0) {
-            var_f0_2 = -180.0f - var_f0_2;
+        if (angle > 90.0f) {
+            angle = 180.0f - angle;
+        } else if (angle < -90.0) {
+            angle = -180.0f - angle;
         }
-        var_f0_2 = (var_f0_2 / -180.0f) + 0.5f;
-        var_f0_2 = (70.0f * var_f0_2) + 55.0f;
-        var_f0_2 = var_f0_2 * 0.0174532923847f;
-        arg0->unk58 = var_f0_2;
-        func_1516D0CC(arg0, &arg0->unk5C, &arg0->unk60, &arg0->unk58);
+        angle = angle / -180.0f + 0.5f;
+        angle = 70.0f * angle + 55.0f;
+        angle *= 0.017453292f;
+        box->angle = angle;
+        func_1516D0CC(box, &box->anchorX, &box->anchorY, &box->angle);
     }
-    arg0->unk40 = arg0->unk5C;
-    arg0->unk44 = arg0->unk60;
-    sp44 = (arg0->unk38 / (f32)(u32)D_8009055C.unk6) * (f32)(u32)D_8009057C.unk6 * 0.25f;
-    sp40 = (arg0->unk3C / (f32)(u32)D_8009055C.unk8) * (f32)(u32)D_8009057C.unk8 * 0.5f;
-    arg0->unk50 = (s32)(((cosf(arg0->unk58 + 3.14159274101f) * (arg0->unk38 * 0.5f) * 1.14999997616f) + arg0->unk5C) - (f32)sp44);
-    arg0->unk54 = ((sinf(arg0->unk58 + 3.14159274101f) * (arg0->unk3C * 0.5f) * 1.03999996185f) + arg0->unk60) - (f32)sp40;
+    box->x = box->anchorX;
+    box->y = box->anchorY;
+    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f;
+    yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f;
+    box->centerX = (s32)(cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f + box->anchorX - xoff);
+    box->centerY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f + box->anchorY - yoff;
 }
 
-typedef struct {
-    char pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct1516D0CC_BE628;
-
-void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* Moves a box's anchor so the whole box stays inside the view bounds, then snaps it to whole pixels. */
+void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     f32 top;
-    f32 y;
+    f32 anchorY;
     f32 left;
     f32 right;
     f32 xoff;
     f32 halfW;
     f32 h;
-    f32 x;
+    f32 bodyX;
 
-    xoff = (arg0->unk38 / (f32)(u32)D_80090562) * (f32)(u32)D_80090582 * 0.25f * arg0->unk28;
-    x = (*arg1 + (cosf(arg0->unk58 + 3.14159274101f) * (arg0->unk38 * 0.5f) * 1.14999997616f * arg0->unk28)) - xoff;
-    halfW = arg0->unk38 * 0.5f;
-    h = arg0->unk3C;
-    y = *arg2;
-    top = *arg2 - h;
-    left = x - halfW;
-    right = halfW + x;
-    if (arg0 != NULL) {
-        if (top < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24) {
-            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24 + h;
-        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28 < y) {
-            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28;
+    xoff = box->width / D_8009055C.width * D_8009057C.width * 0.25f * box->scale;
+    bodyX = *x + cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale - xoff;
+    halfW = box->width * 0.5f;
+    h = box->height;
+    anchorY = *y;
+    top = *y - h;
+    left = bodyX - halfW;
+    right = halfW + bodyX;
+    if (box != NULL) {
+        if (top < VIEW->minY) {
+            *y = VIEW->minY + h;
+        } else if (VIEW->maxY < anchorY) {
+            *y = VIEW->maxY;
         }
-        if (left < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C) {
-            *arg1 -= left - (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C;
-        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 < right) {
-            *arg1 += (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 - right;
+        if (left < VIEW->minX) {
+            *x -= left - VIEW->minX;
+        } else if (VIEW->maxX < right) {
+            *x += VIEW->maxX - right;
         }
-        *arg1 = (s32)*arg1;
-        *arg2 = (s32)*arg2;
+        *x = (s32)*x;
+        *y = (s32)*y;
     }
 }
 
 void func_1516D2D8(void) {
 }
 
-void func_1516D2E0(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x8 = 0;
-        func_1516972C((struct102 *)arg0);
-        arg0->field_0x15 = 0;
+/* Removes a text box object immediately. */
+void func_1516D2E0(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->numPages = 0;
+        func_1516972C((struct102 *)box);
+        box->state = 0;
     }
 }
 
-void func_1516D328(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x0 |= 0x100;
-        arg0->field_0x10->field_0x0 &= ~0x400;
-        arg0->field_0x20 = arg0->field_0x10->field_0x8;
+/* Asks a text box to close, skipping its remaining pages. */
+void func_1516D328(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE;
+        box->config->flags &= ~TEXTBOX_SKIP_ANIM;
+        box->page = box->config->numPages;
     }
 }
 
-u8 *func_1516D378(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x0 |= 0x100;
-        arg0->field_0x10->field_0x0 &= ~0x400;
-        return (u8 *)arg0;
+/* Asks a text box to close after its current page; returns it, or NULL if it isn't one. */
+TextBox *func_1516D378(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE;
+        box->config->flags &= ~TEXTBOX_SKIP_ANIM;
+        return box;
     }
-    return 0;
+    return NULL;
 }
 
-s32 func_1516D3C4(u8 *arg0) {
-    s32 *temp;
-
-    if ((arg0 != 0) && (*arg0 == 0x51)) {
-        temp = *(s32 **)(arg0 + 0x10);
-        *temp |= 0x500;
-        return (s32)arg0;
+/* Asks a text box to close at once; returns it, or NULL if it isn't one. */
+TextBox *func_1516D3C4(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE | TEXTBOX_SKIP_ANIM;
+        return box;
     }
-    return 0;
+    return NULL;
 }

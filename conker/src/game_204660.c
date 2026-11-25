@@ -2,639 +2,582 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Bone trails: an emitter object (a struct260 made by func_151D71B0) follows a point on an actor's
+ * bone and drags a trail object (made by func_15147A80) behind it. The trail keeps a ring buffer of
+ * points that it renders as a textured ribbon.
+ */
 
-struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 arg2, f32 arg3, void *arg4, u8 arg5, s32 arg6) {
-    struct260 *temp_v0;
-    struct {
-        s32 unk0;
-        u8 unk4;
-        u8 unk5;
-        u8 pad6;
-        u8 pad7;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-    } sp34;
+struct Trail;
 
-    sp34.unk0 = 0;
-    sp34.unk4 = arg2;
-    sp34.unk5 = 0;
-    sp34.unk8 = 0.0f;
-    sp34.unkC = 0.0f;
-    sp34.unk10 = 0.0f;
-    sp34.unk14 = arg3;
-
-    temp_v0 = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (struct37 *)((s32)arg4 + 0x18), arg5, arg6);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x18);
-    }
-    return temp_v0;
-}
-
-typedef struct Sub151D7264 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
+/* Emitter data at 0x28: where the trail is anchored this frame. */
+typedef struct {
+    /* 0x00 */ struct Trail *trail; /* attached trail, or NULL */
+    /* 0x04 */ u8 anchorType;       /* index into D_8008FCA0 (update) and D_8008FCA4 (message handler) */
+    /* 0x05 */ u8 flags;            /* bit 0: pos is valid this frame */
     /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ struct17 unk8;
-    /* 0x14 */ f32 unk14;
-} Sub151D7264;
+    /* 0x08 */ vertex pos;
+    /* 0x14 */ f32 maxStep; /* moving further than this in one frame detaches the trail */
+} TrailAnchor;
 
-typedef struct Obj151D7264 {
-    /* 0x00 */ u8 pad0[0xD];
-    /* 0x0D */ u8 unkD;
+/* Emitter data at 0x40 for anchor type 0: a point on an actor's bone. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
+    /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
+} TrailBoneLink;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD; /* bit 0: remove */
     /* 0x0E */ s16 unkE;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ Sub151D7264 unk28;
-} Obj151D7264;
+    /* 0x28 */ TrailAnchor anchor;
+    /* 0x40 */ TrailBoneLink link;
+} TrailEmitter;
 
-extern s32 (*D_8008FCA0[])(Obj151D7264 *);
-extern f32 func_15143E64(struct17 *);
-void func_151D77C8();
-void func_151D7830(s32 *arg0);
-
-void func_151D7264(Obj151D7264 *arg0) {
-    Sub151D7264 *p;
-    struct17 pos;
-    u8 flag;
-    struct17 d;
-
-    p = &arg0->unk28;
-    pos = p->unk8;
-    flag = p->unk5 & 1;
-    if (D_8008FCA0[p->unk4](arg0) == 0) {
-        arg0->unkE = -1;
-        arg0->unkD |= 1;
-        return;
-    }
-    if (p->unk5 & 1) {
-        if (flag) {
-            d.unk0 = p->unk8.unk0 - pos.unk0;
-            d.unk4 = p->unk8.unk4 - pos.unk4;
-            d.unk8 = p->unk8.unk8 - pos.unk8;
-            if (func_15143E64(&d) < p->unk14) {
-                if (p->unk0 == 0) {
-                    func_151D7830((s32 *)arg0);
-                }
-            } else {
-                func_151D77C8((s32 *)arg0);
-            }
-        } else {
-            func_151D77C8((s32 *)arg0);
-        }
-    } else {
-        func_151D77C8((s32 *)arg0);
-    }
-}
-
-extern void (*D_8008FCA4[])(s32 *, s32, u8);
-
-void func_151D73A8(s32 *arg0, s32 arg1, u8 arg2) {
-    if (D_8008FCA4[*(u8 *)((s32)arg0 + 0x2C)] != 0) {
-        D_8008FCA4[*(volatile u8 *)((s32)arg0 + 0x2C)](arg0, arg1, arg2);
-    }
-}
-
-void func_151D77C8();
-
-void func_151D7404() {
-    func_151D77C8();
-}
-
-void func_151D7424(struct260 *arg0) {
-    func_151D7404(arg0);
-    func_1514933C(arg0);
-}
-
-void func_151D7450(struct260 *arg0) {
-    func_151D7404(arg0);
-    func_15149368(arg0);
-}
-
-void func_151D747C(struct struct127 *arg0) {
-    struct {
-        s32 unk0;
-        u8 unk4;
-    } sp18;
-
-    sp18.unk0 = (s32)arg0;
-    sp18.unk4 = arg0->unique_id;
-    func_151494E0((s32)&sp18, 0x3D);
-}
-
-void func_151D74B0(struct struct127 *arg0, u8 arg1, s8 arg2, u8 arg3, void *arg4) {
-    struct {
-        s32 unk0;
-        u8 unk4;
-        u8 unk5;
-        u8 unk6;
-    } sp30;
-    struct260 *temp_v0;
-
-    sp30.unk0 = (s32)arg0;
-    sp30.unk4 = arg0->unique_id;
-    sp30.unk5 = arg1;
-    sp30.unk6 = arg2;
-
-    temp_v0 = func_151D71B0(0x12C, 0, 0, 12.0f, (void *)8, arg3, (s32)arg4);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x40), &sp30, 8);
-    }
-}
-
-void func_151D7538(s32 arg0, s32 arg1, u8 arg2) {
-    s32 *p = &arg0;
-    s32 q;
-    if (arg2 == 0x3D) {
-        q = *p + 0x40;
-        if ((*(s32 *)q == *(s32 *)arg1) || (*(u8 *)(q + 4) == *(u8 *)(*(s32 *)&arg1 + 4))) {
-            func_1516972C((struct102 *)*p);
-        }
-    } else {
-        q = *p + 0x40;
-        func_15149514(arg1, arg2, q, q + 4, *p);
-    }
-}
-
-typedef struct Link151D75C4 {
-    /* 0x00 */ struct struct127 *actor;
-    /* 0x04 */ u8 id;
-    /* 0x05 */ u8 bone;
-    /* 0x06 */ s8 handler;
-} Link151D75C4;
-
-typedef struct Obj151D75C4 {
-    /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ Sub151D7264 unk28;
-    /* 0x40 */ Link151D75C4 link;
-} Obj151D75C4;
-
-typedef struct Rider151D75C4 {
-    u8 pad0[0x197];
-    u8 active;
+/* The part of struct127.unk31C read here (struct126 stops short of it). */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x197];
+    /* 0x197 */ u8 active;
 } Rider151D75C4;
 
+extern s32 (*D_8008FCA0[])(TrailEmitter *);
+extern void (*D_8008FCA4[])(TrailEmitter *, TrailBoneLink *, u8);
+extern s32 (*D_8008FCA8[])(TrailEmitter *);
 extern struct17 D_800AB280[];
 extern u8 D_800AB2D4[];
-extern s32 (*D_8008FCA8[])(Obj151D75C4 *);
-void func_15143134(void *, void *, s32);
 
-s32 func_151D75C4(Obj151D75C4 *arg0) {
-    Link151D75C4 *link;
-    struct struct127 *actor;
-    Sub151D7264 *p;
+extern f32 func_15143E64(struct17 *);
+void func_15143134(struct17 *offset, f32 *out, Mtx *mtx);
+void func_151D77C8(TrailEmitter *emitter);
+void func_151D7830(TrailEmitter *emitter);
 
-    p = &arg0->unk28;
-    link = &arg0->link;
+/* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
+struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
+    struct260 *emitter;
+    TrailAnchor anchor;
+
+    anchor.trail = NULL;
+    anchor.anchorType = anchorType;
+    anchor.flags = 0;
+    anchor.pos.x = 0.0f;
+    anchor.pos.y = 0.0f;
+    anchor.pos.z = 0.0f;
+    anchor.maxStep = maxStep;
+
+    emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (struct37 *)(extraSize + sizeof(TrailAnchor)), arg5, arg6);
+    if (emitter != NULL) {
+        memcpy(&((TrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
+    }
+    return emitter;
+}
+
+/*
+ * Emitter update: moves the anchor, and removes the emitter once its anchor is gone. A trail is attached
+ * while the anchor stays valid and moves less than maxStep per frame, and detached otherwise.
+ */
+void func_151D7264(TrailEmitter *emitter) {
+    TrailAnchor *anchor;
+    vertex prevPos;
+    u8 wasValid;
+    struct17 step;
+
+    anchor = &emitter->anchor;
+    prevPos = anchor->pos;
+    wasValid = anchor->flags & 1;
+    if (D_8008FCA0[anchor->anchorType](emitter) == 0) {
+        emitter->unkE = -1;
+        emitter->unkD |= 1;
+        return;
+    }
+    if (anchor->flags & 1) {
+        if (wasValid) {
+            step.unk0 = anchor->pos.x - prevPos.x;
+            step.unk4 = anchor->pos.y - prevPos.y;
+            step.unk8 = anchor->pos.z - prevPos.z;
+            if (func_15143E64(&step) < anchor->maxStep) {
+                if (anchor->trail == NULL) {
+                    func_151D7830(emitter);
+                }
+            } else {
+                func_151D77C8(emitter);
+            }
+        } else {
+            func_151D77C8(emitter);
+        }
+    } else {
+        func_151D77C8(emitter);
+    }
+}
+
+/* Emitter message handler: forwards to the anchor type's handler. */
+void func_151D73A8(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+    if (D_8008FCA4[emitter->anchor.anchorType] != NULL) {
+        // matching: the original reloads anchorType for the call; IDO would reuse the first load
+        D_8008FCA4[*(volatile u8 *)&emitter->anchor.anchorType](emitter, msg, msgType);
+    }
+}
+
+void func_151D7404(TrailEmitter *emitter) {
+    func_151D77C8(emitter);
+}
+
+void func_151D7424(struct260 *emitter) {
+    func_151D7404(emitter);
+    func_1514933C(emitter);
+}
+
+void func_151D7450(struct260 *emitter) {
+    func_151D7404(emitter);
+    func_15149368(emitter);
+}
+
+/* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
+void func_151D747C(struct127 *actor) {
+    struct {
+        struct127 *actor;
+        u8 actorId;
+    } msg;
+
+    msg.actor = actor;
+    msg.actorId = actor->unique_id;
+    func_151494E0((s32)&msg, 0x3D);
+}
+
+/* Attaches a trail to `bone` of `actor`; `condition` picks an extra D_8008FCA8 check (-1 for none). */
+void func_151D74B0(struct127 *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
+    TrailBoneLink link;
+    struct260 *emitter;
+
+    link.actor = actor;
+    link.actorId = actor->unique_id;
+    link.bone = bone;
+    link.condition = condition;
+
+    emitter = func_151D71B0(0x12C, 0, 0, 12.0f, sizeof(TrailBoneLink), arg3, arg4);
+    if (emitter != NULL) {
+        memcpy(&((TrailEmitter *)emitter)->link, &link, sizeof(TrailBoneLink));
+    }
+}
+
+/* Anchor type 0 message handler: removes the emitter when its actor goes away (message 0x3D). */
+void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
+    // matching: the original reloads emitter and msg from their stack slots (address taken / int reload)
+    TrailEmitter **pEmitter = &emitter;
+    TrailBoneLink *link;
+
+    if (msgType == 0x3D) {
+        link = &(*pEmitter)->link;
+        if ((msg->actor == link->actor) || (((TrailBoneLink *)*(s32 *)&msg)->actorId == link->actorId)) {
+            func_1516972C((struct102 *)*pEmitter);
+        }
+    } else {
+        link = &(*pEmitter)->link;
+        func_15149514((s32)msg, msgType, (s32)&link->actor, (s32)&link->actorId, (s32)*pEmitter);
+    }
+}
+
+/*
+ * Anchor type 0 update: puts the anchor on the actor's bone. Fails (0) once the actor is gone; the
+ * anchor is invalid while the actor has no bone matrices, rides something with a camera, or has
+ * unk7 set.
+ */
+s32 func_151D75C4(TrailEmitter *emitter) {
+    TrailBoneLink *link;
+    struct127 *actor;
+    TrailAnchor *anchor;
+
+    anchor = &emitter->anchor;
+    link = &emitter->link;
     actor = link->actor;
-    if ((actor->interaction_state == 0) || (actor->unique_id != link->id)) {
+    if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
         return 0;
     }
     if (actor->unk1D4 == NULL) {
-        p->unk5 &= ~1;
+        anchor->flags &= ~1;
         return 1;
     }
     if ((actor->unk31C != NULL) && (((Rider151D75C4 *)actor->unk31C)->active != 0) && (actor->camera != NULL)) {
-        p->unk5 &= ~1;
+        anchor->flags &= ~1;
         return 1;
     }
     if (actor->unk7 != 0xFF) {
-        p->unk5 &= ~1;
+        anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&D_800AB280[link->bone], &p->unk8, (s32)actor->unk1D4 + (D_800AB2D4[link->bone] << 6));
-    p->unk5 |= 1;
-    if (link->handler != -1) {
-        return D_8008FCA8[link->handler](arg0);
+    func_15143134(&D_800AB280[link->bone], &anchor->pos.x, (Mtx *)actor->unk1D4 + D_800AB2D4[link->bone]);
+    anchor->flags |= 1;
+    if (link->condition != -1) {
+        return D_8008FCA8[link->condition](emitter);
     }
     return 1;
 }
 
-s32 func_151D7724(s32 *arg0) {
-    s32 *v0 = (s32 *)arg0[0x40 / 4];
-    u8 *p = (u8 *)arg0 + 0x28;
-    u16 type;
+/* Condition 0: the anchor is invalid while unk94 bit 1 is set or unk84 is 4, 10 or 12. */
+s32 func_151D7724(TrailEmitter *emitter) {
+    struct127 *actor = emitter->link.actor;
+    TrailAnchor *anchor = &emitter->anchor;
 
-    if (!(v0[0x94 / 4] & 2)) {
-        type = *(u16 *)((u8 *)v0 + 0x84);
-        if (type != 4 && type != 0xA && type != 0xC) {
-            goto done;
-        }
-    }
-    p[5] &= ~1;
-done:
-    return 1;
-}
-
-s32 func_151D7770(s32 *arg0) {
-    u8 *p = (u8 *)arg0 + 0x28;
-    s32 *v = (s32 *)arg0[0x40 / 4];
-    if (*(u16 *)((u8 *)v + 0x84) == 0) {
-        p[5] &= ~1;
+    if ((actor->unk94 & 2) || actor->unk84.uh == 4 || actor->unk84.uh == 10 || actor->unk84.uh == 12) {
+        anchor->flags &= ~1;
     }
     return 1;
 }
 
-s32 func_151D779C(s32 *arg0) {
-    u8 *p = (u8 *)arg0 + 0x28;
-    s32 *v = (s32 *)arg0[0x40 / 4];
+/* Condition 1: the anchor is invalid while the actor's unk84 is 0. */
+s32 func_151D7770(TrailEmitter *emitter) {
+    TrailAnchor *anchor = &emitter->anchor;
+    struct127 *actor = emitter->link.actor;
 
-    if (*(u8 *)((u8 *)v + 0xAD) != 0) {
-        p[5] &= ~1;
+    if (actor->unk84.uh == 0) {
+        anchor->flags &= ~1;
     }
     return 1;
 }
 
-void func_151D77C8(s32 *arg0) {
-    s32 **p = (s32 **)((u8 *)arg0 + 0x28);
+/* Condition 2: the anchor is invalid while the actor is in water. */
+s32 func_151D779C(TrailEmitter *emitter) {
+    TrailAnchor *anchor = &emitter->anchor;
+    struct127 *actor = emitter->link.actor;
 
-    if (*p != 0) {
-        s32 *v1 = (s32 *)(*p)[0x98 / 4];
-        *(u8 *)((u8 *)*p + 0x30) = 0;
-        *(u16 *)((u8 *)*p + 0x1E) &= ~2;
-        *(u16 *)((u8 *)*p + 0x1E) |= 8;
-        *(u16 *)((u8 *)*p + 0x1E) |= 1;
-        *(u16 *)((u8 *)*p + 0x1C) = 0x14;
-        *v1 = 0;
-        *p = 0;
+    if (actor->in_water) {
+        anchor->flags &= ~1;
+    }
+    return 1;
+}
+
+/* A trail point. */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ f32 velY;
+    /* 0x10 */ f32 length; /* distance to the next newer point */
+    /* 0x14 */ u8 alpha;
+    /* 0x18 */ f32 texU;
+} TrailPoint;
+
+/* Trail data at 0x98. */
+typedef struct {
+    /* 0x00 */ TrailEmitter *emitter; /* NULL once detached */
+    /* 0x04 */ vertex lastPos;        /* where the last point was emitted */
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 spawnAccum;
+    /* 0x18 */ f32 texPhase;
+} TrailData;
+
+/* The header func_15147A80 copies to 0x10 of the new trail. */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ s16 timer;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 capacity;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} TrailHeader;
+
+typedef struct Trail {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ vertex pos; /* head of the trail */
+    /* 0x1C */ s16 timer;  /* while fading: alpha is timer * 12 */
+    /* 0x1E */ u16 flags;  /* bit 1: the head follows the emitter; bit 3: fading */
+    /* 0x20 */ u8 pad20[5];
+    /* 0x25 */ u8 capacity; /* size of the points ring buffer */
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail; /* oldest point */
+    /* 0x2E */ s8 head; /* next point to write */
+    /* 0x2F */ u8 pad2F;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[0x23];
+    /* 0x54 */ vertex tailPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailData *data;
+} Trail;
+
+extern Trail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+/* Detaches the emitter's trail, which then fades out. */
+void func_151D77C8(TrailEmitter *emitter) {
+    TrailAnchor *anchor = &emitter->anchor;
+
+    if (anchor->trail != NULL) {
+        TrailData *data = anchor->trail->data;
+
+        anchor->trail->unk30 = 0;
+        anchor->trail->flags &= ~2;
+        anchor->trail->flags |= 8;
+        anchor->trail->flags |= 1;
+        anchor->trail->timer = 20;
+        data->emitter = NULL;
+        anchor->trail = NULL;
     }
 }
 
-struct blk12_D7830 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
+/* Spawns a 25-point trail at the anchor and attaches it to the emitter. */
+void func_151D7830(TrailEmitter *emitter) {
+    Trail *trail;
+    TrailData data;
+    TrailHeader header;
+    // matching: frame size (compiler temps below header)
+    s32 pad;
 
-extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+    data.emitter = emitter;
+    data.lastPos = emitter->anchor.pos;
+    data.unk10 = 0.0f;
+    data.spawnAccum = 0.0f;
+    data.texPhase = 0.0f;
+    header.capacity = 25;
 
-void func_151D7830(s32 *arg0) {
-    s32 *temp_v0;
-    struct {
-        s32 unk0;
-        struct blk12_D7830 unk4;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-    } sp68;
-    struct {
-        struct blk12_D7830 unk0;
-        s16 unkC;
-        s16 unkE;
-        s32 unk10;
-        u8 unk14;
-        u8 unk15;
-        u8 pad16[2];
-        s32 unk18;
-    } sp4C;
-    /* NOT a struct-size artefact -- deliberately LEFT IN PLACE.  Both aggregates
-     * above are proven to be exactly 0x1C: the header sp4C by func_15147A80's own
-     * memcpy((u8 *)temp_v0 + 0x10, arg0, 0x1C) (game_174BF0.c:169) and by its
-     * member offsets, and sp68 by its members plus memcpy(..., &sp68, 0x1C).
-     * Golden pins BOTH bases with `addiu a0,sp,0x4C` and `addiu a1,sp,0x68`, so
-     * neither can carry leading padding, and nothing is declared below sp4C for
-     * trailing padding to belong to.  The gap is compiler-TEMP space at
-     * sp+[0x44,0x4C) and is dead in our object.  Measured: deleting it gives
-     * frame 0x80 (breaks the match); a 4-byte `s32 pad_dummy;` gives frame 0x88
-     * with .text byte-identical, so the true shortfall is 4 bytes, not 8. */
-    s32 pad_dummy[2];
+    header.pos = emitter->anchor.pos;
+    header.timer = 300;
+    header.flags = 0x76;
+    header.unk10 = 0x12;
+    header.unk14 = 4;
+    header.unk18 = 0;
 
-    sp68.unk0 = (s32)arg0;
-    sp68.unk4 = *(struct blk12_D7830 *)((u8 *)arg0 + 0x30);
-    sp68.unk10 = 0.0f;
-    sp68.unk14 = 0.0f;
-    sp68.unk18 = 0.0f;
-    sp4C.unk15 = 0x19;
-
-    sp4C.unk0 = *(struct blk12_D7830 *)((u8 *)arg0 + 0x30);
-    sp4C.unkC = 0x12C;
-    sp4C.unkE = 0x76;
-    sp4C.unk10 = 0x12;
-    sp4C.unk14 = 4;
-    sp4C.unk18 = 0;
-
-    temp_v0 = (s32 *)func_15147A80(&sp4C, 0x20, 0x1C, 0xD, 0x10, 0x10, 0, 0, 0,
-                                   *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 0x1));
-    if (temp_v0 != NULL) {
-        memcpy((void *)temp_v0[0x98 / 4], &sp68, 0x1C);
-        arg0[0x28 / 4] = (s32)temp_v0;
+    trail = func_15147A80(&header, 0x20, sizeof(TrailData), 0xD, 0x10, 0x10, 0, 0, 0, emitter->unkC, emitter->unk1);
+    if (trail != NULL) {
+        memcpy(trail->data, &data, sizeof(TrailData));
+        emitter->anchor.trail = trail;
     }
 }
 
 extern f32 D_800BE9A4;
-struct func_151D792C_vec
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-};
-struct func_151D792C_entry
-{
-  struct func_151D792C_vec unk0;
-  f32 unkC;
-  f32 unk10;
-  f32 unk14;
-  s32 unk18;
-};
-struct func_151D792C_obj
-{
-  u8 pad0[0x1E];
-  u16 unk1E;
-  u8 pad20[5];
-  u8 unk25;
-  u8 pad26[6];
-  s8 unk2C;
-  s8 unk2D;
-  s8 unk2E;
-  u8 pad2F[0x25];
-  f32 unk54;
-  f32 unk58;
-  f32 unk5C;
-  u8 pad60[0x34];
-  struct func_151D792C_entry *unk94;
-};
-void func_151D8718(f32 *arg0, f32 *arg1, f32 arg2);
-s32 func_151D792C(struct func_151D792C_obj *arg0)
-{
-  struct func_151D792C_entry *base;
-  struct func_151D792C_entry *entry;
-  s32 i;
-  s32 stride;
-  base = arg0->unk94;
-  if ((arg0->unk2C < 2) && (arg0->unk1E & 8))
-  {
-    return 0;
-  }
-  i = arg0->unk2E;
-  if (i != arg0->unk2D)
-  {
-    do
-    {
-      i -= 1;
-      if (i < 0)
-      {
-        i = arg0->unk25 - 1;
-      }
-      entry = &base[i];
-      func_151D8718((f32 *) entry, &entry->unkC, D_800BE9A4);
-    }
-    while (i != arg0->unk2D);
-  }
-  stride = sizeof(struct func_151D792C_entry);
-  stride_set:
-  if (arg0->unk2C <= 0)
-  {
-    goto zero;
-  }
 
-  ;
-  *((struct func_151D792C_vec *) (&arg0->unk54)) = ((struct func_151D792C_entry *) (((u8 *) base) + (arg0->unk2D * stride)))->unk0;
-  goto done;
-  zero:
-  arg0->unk54 = 0.0f;
+void func_151D8718(vertex *pos, f32 *velY, f32 dt);
 
-  arg0->unk58 = 0.0f;
-  arg0->unk5C = 0.0f;
-  done:
-  return 1;
+/* Detached trail update: the points keep falling and the tail position follows the oldest point. */
+s32 func_151D792C(Trail *trail) {
+    TrailPoint *points;
+    s32 i;
 
-}
-
-void func_151D8718(f32 *arg0, f32 *arg1, f32 arg2);
-
-
-typedef struct Vec151D7A38 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec151D7A38;
-
-typedef struct Entry151D7A38 {
-    /* 0x00 */ Vec151D7A38 pos;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x18 */ f32 unk18;
-} Entry151D7A38;
-
-typedef struct Src151D7A38 {
-    /* 0x00 */ u8 pad0[0x2D];
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ Vec151D7A38 pos;
-} Src151D7A38;
-
-typedef struct Sub151D7A38 {
-    /* 0x00 */ Src151D7A38 *src;
-    /* 0x04 */ Vec151D7A38 pos;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-} Sub151D7A38;
-
-typedef struct Obj151D7A38 {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec151D7A38 pos;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u16 unk1E;
-    /* 0x20 */ u8 pad20[5];
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ s8 unk2D;
-    /* 0x2E */ s8 unk2E;
-    /* 0x2F */ u8 pad2F[0x55];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ Entry151D7A38 *entries;
-    /* 0x98 */ Sub151D7A38 *sub;
-} Obj151D7A38;
-
-s32 func_151D7A38(Obj151D7A38 *arg0) {
-    Sub151D7A38 *sub;
-    Entry151D7A38 *entries;
-    Vec151D7A38 target;
-    Src151D7A38 *src;
-    Entry151D7A38 *entry;
-    f32 inv;
-    f32 t;
-    f32 dt;
-    f32 diffx;
-    f32 diffy;
-    f32 diffz;
-    Vec151D7A38 cur;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-
-    sub = arg0->sub;
-    entries = arg0->entries;
-    src = sub->src;
-    if (!(src->unk2D & 1)) {
+    points = trail->points;
+    if ((trail->count < 2) && (trail->flags & 8)) {
         return 0;
     }
-    target = src->pos;
-    arg0->pos = target;
-    sub->unk14 += 0.25f * D_800BE9A4;
-    if (sub->unk14 > 1.0f) {
-        inv = 1.0f / sub->unk14;
-        t = sub->unk10 + D_800BE9A4;
-        cur = sub->pos;
-        diffx = target.x - sub->pos.x;
-        diffy = target.y - sub->pos.y;
-        diffz = target.z - sub->pos.z;
-        dt = t * inv;
-        dx = diffx * inv;
-        dy = diffy * inv;
-        dz = diffz * inv;
-        do {
-            s32 pad;
+    i = trail->head;
+    while (i != trail->tail) {
+        i--;
+        if (i < 0) {
+            i = trail->capacity - 1;
+        }
+        func_151D8718(&points[i].pos, &points[i].velY, D_800BE9A4);
+    }
+// matching: an (unused) label here makes IDO start a new block for the tail update
+tail:
+    if (trail->count > 0) {
+        trail->tailPos = points[trail->tail].pos;
+    } else {
+        trail->tailPos.x = 0.0f;
+        trail->tailPos.y = 0.0f;
+        trail->tailPos.z = 0.0f;
+    }
+    return 1;
+}
 
-            entry = &entries[arg0->unk2E];
-            entry->pos = cur;
-            entry->unkC = 0.0f;
-            entry->unk10 = 0.0f;
-            entry->unk14 = 0;
-            entry->unk18 = 0.0f;
-            func_151D8718((f32 *)entry, &entry->unkC, t);
-            arg0->unk2E++;
-            t -= dt;
-            if (arg0->unk2E == arg0->unk25) {
-                arg0->unk2E = 0;
+/*
+ * Attached trail update: the head follows the emitter, and points are emitted (4 per second of
+ * D_800BE9A4) along the way from the last emitted point, each pre-aged by the time since it was due.
+ */
+s32 func_151D7A38(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
+    vertex anchorPos;
+    TrailEmitter *emitter;
+    TrailPoint *point;
+    f32 invCount;
+    f32 age;
+    f32 ageStep;
+    f32 diffX;
+    f32 diffY;
+    f32 diffZ;
+    vertex pos;
+    f32 stepX;
+    f32 stepY;
+    f32 stepZ;
+
+    data = trail->data;
+    points = trail->points;
+    emitter = data->emitter;
+    if (!(emitter->anchor.flags & 1)) {
+        return 0;
+    }
+    anchorPos = emitter->anchor.pos;
+    trail->pos = anchorPos;
+    data->spawnAccum += 0.25f * D_800BE9A4;
+    if (data->spawnAccum > 1.0f) {
+        invCount = 1.0f / data->spawnAccum;
+        age = data->unk10 + D_800BE9A4;
+        pos = data->lastPos;
+        diffX = anchorPos.x - data->lastPos.x;
+        diffY = anchorPos.y - data->lastPos.y;
+        diffZ = anchorPos.z - data->lastPos.z;
+        ageStep = age * invCount;
+        stepX = diffX * invCount;
+        stepY = diffY * invCount;
+        stepZ = diffZ * invCount;
+        do {
+            s32 pad; // matching: stack layout
+
+            point = &points[trail->head];
+            point->pos = pos;
+            point->velY = 0.0f;
+            point->length = 0.0f;
+            point->alpha = 0;
+            point->texU = 0.0f;
+            func_151D8718(&point->pos, &point->velY, age);
+            trail->head++;
+            age -= ageStep;
+            if (trail->head == trail->capacity) {
+                trail->head = 0;
             }
-            arg0->unk2C++;
-            if (arg0->unk2E == arg0->unk2D) {
-                arg0->unk2D++;
-                if (arg0->unk2D == arg0->unk25) {
-                    arg0->unk2D = 0;
+            trail->count++;
+            if (trail->head == trail->tail) {
+                /* full: drop the oldest point */
+                trail->tail++;
+                if (trail->tail == trail->capacity) {
+                    trail->tail = 0;
                 }
-                arg0->unk2C--;
+                trail->count--;
             }
-            cur.x += dx;
-            cur.y += dy;
-            cur.z += dz;
-            sub->unk14 -= 1.0f;
-        } while (sub->unk14 > 1.0f);
-        sub->pos = cur;
-        sub->unk10 = t;
+            pos.x += stepX;
+            pos.y += stepY;
+            pos.z += stepZ;
+            data->spawnAccum -= 1.0f;
+        } while (data->spawnAccum > 1.0f);
+        data->lastPos = pos;
+        data->unk10 = age;
     }
     return 1;
 }
 
 extern f32 func_15144528(f32, f32, f32);
 
-s32 func_151D7CD0(Obj151D7A38 *arg0) {
-    Sub151D7A38 *sub;
-    Entry151D7A38 *entries;
-    f32 len;
-    Entry151D7A38 *entry;
-    Vec151D7A38 *prev;
-    struct17 d;
+/*
+ * Shapes the trail, walking from the newest point to the oldest: limits its length to 80 (shortening
+ * the last segment and dropping older points), scrolls the texture along it, and fades the alpha out
+ * over the oldest 70%.
+ */
+s32 func_151D7CD0(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
+    f32 totalLength;
+    TrailPoint *point;
+    vertex *newerPos;
+    struct17 delta;
     s32 i;
-    f32 t;
-    f32 c;
-    f32 inv1;
+    f32 cut;
+    f32 pad; // matching: an unused local IDO still gives a stack slot
+    f32 invLength;
     s32 j;
-    Entry151D7A38 *e2;
-    f32 sum2;
+    TrailPoint *texPoint;
+    f32 distance;
     s32 k;
-    Entry151D7A38 *e3;
-    f32 sum;
-    f32 a;
-    f32 b;
-    f32 inv;
+    TrailPoint *fadePoint;
+    f32 fadeDist;
+    f32 opaqueLength;
+    f32 fadeLength;
+    f32 invFadeLength;
 
-    sub = arg0->sub;
-    entries = arg0->entries;
-    if (arg0->unk2C >= 2) {
-        len = 0;
-        i = arg0->unk2E;
-        if (arg0->unk1E & 2) {
-            prev = &arg0->pos;
+    data = trail->data;
+    points = trail->points;
+    if (trail->count >= 2) {
+        totalLength = 0;
+        i = trail->head;
+        if (trail->flags & 2) {
+            newerPos = &trail->pos;
         } else {
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = trail->capacity - 1;
             }
-            prev = &entries[i].pos;
+            newerPos = &points[i].pos;
         }
         do {
-            f32 dist;
+            f32 length;
 
             i--;
             if (i < 0) {
-                i = arg0->unk25 - 1;
+                i = trail->capacity - 1;
             }
-            entry = &entries[i];
-            d.unk0 = entry->pos.x - prev->x;
-            d.unk4 = entry->pos.y - prev->y;
-            d.unk8 = entry->pos.z - prev->z;
-            dist = func_15143E64(&d);
-            len += dist;
-            entry->unk10 = dist;
-            if (len > 80.0f) {
-                if (entry->unk10 != 0.0f) {
-                    inv1 = 1.0f / entry->unk10;
-                    t = (len - 80.0f) * inv1;
-                    entry->pos.x -= d.unk0 * t;
-                    entry->pos.y -= d.unk4 * t;
-                    entry->pos.z -= d.unk8 * t;
-                    entry->unk10 = entry->unk10 * (1.0f - t);
+            point = &points[i];
+            delta.unk0 = point->pos.x - newerPos->x;
+            delta.unk4 = point->pos.y - newerPos->y;
+            delta.unk8 = point->pos.z - newerPos->z;
+            length = func_15143E64(&delta);
+            totalLength += length;
+            point->length = length;
+            if (totalLength > 80.0f) {
+                if (point->length != 0.0f) {
+                    invLength = 1.0f / point->length;
+                    cut = (totalLength - 80.0f) * invLength;
+                    point->pos.x -= delta.unk0 * cut;
+                    point->pos.y -= delta.unk4 * cut;
+                    point->pos.z -= delta.unk8 * cut;
+                    point->length = point->length * (1.0f - cut);
                 }
-                len = 80.0f;
-                while (i != arg0->unk2D) {
-                    arg0->unk2D++;
-                    if (arg0->unk2D == arg0->unk25) {
-                        arg0->unk2D = 0;
+                totalLength = 80.0f;
+                while (i != trail->tail) {
+                    trail->tail++;
+                    if (trail->tail == trail->capacity) {
+                        trail->tail = 0;
                     }
-                    arg0->unk2C--;
+                    trail->count--;
                 }
             }
-            prev = &entry->pos;
-        } while (i != arg0->unk2D);
+            newerPos = &point->pos;
+        } while (i != trail->tail);
     }
-    if (arg0->unk2C >= 2) {
-        sub->unk18 += -41.0f * D_800BE9A4;
-        sub->unk18 = func_15144528(sub->unk18, 16383.0f, -16384.0f);
-        sum2 = 0;
-        j = arg0->unk2E;
+    if (trail->count >= 2) {
+        data->texPhase += -41.0f * D_800BE9A4;
+        data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
+        distance = 0;
+        j = trail->head;
         do {
             j--;
             if (j < 0) {
-                j = arg0->unk25 - 1;
+                j = trail->capacity - 1;
             }
-            e2 = &entries[j];
-            sum2 += e2->unk10;
-            e2->unk18 = func_15144528(sub->unk18 + sum2 * 46.87999725f, 16383.0f, -16384.0f);
-        } while (j != arg0->unk2D);
+            texPoint = &points[j];
+            distance += texPoint->length;
+            texPoint->texU = func_15144528(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
+        } while (j != trail->tail);
     }
-    if (arg0->unk2C >= 2) {
-        sum = 0;
-        a = len * 0.2990000248f;
-        b = len - a;
-        inv = 1.0f / b;
-        k = arg0->unk2E;
+    if (trail->count >= 2) {
+        fadeDist = 0;
+        opaqueLength = totalLength * 0.2990000248f;
+        fadeLength = totalLength - opaqueLength;
+        invFadeLength = 1.0f / fadeLength;
+        k = trail->head;
         do {
-            f32 c3;
+            f32 into;
 
             k--;
             if (k < 0) {
-                k = arg0->unk25 - 1;
+                k = trail->capacity - 1;
             }
-            e3 = &entries[k];
-            if (a < sum) {
-                s32 pad;
+            fadePoint = &points[k];
+            if (opaqueLength < fadeDist) {
+                s32 pad; // matching: stack layout
 
-                c3 = sum - a;
-                if (b < c3) {
-                    c3 = b;
+                into = fadeDist - opaqueLength;
+                if (fadeLength < into) {
+                    into = fadeLength;
                 }
-                e3->unk14 = (b - c3) * inv * 60.0f;
+                fadePoint->alpha = (fadeLength - into) * invFadeLength * 60.0f;
             } else {
-                e3->unk14 = 60;
+                fadePoint->alpha = 60;
             }
-            sum += e3->unk10;
-        } while (k != arg0->unk2D);
+            fadeDist += fadePoint->length;
+        } while (k != trail->tail);
     }
     return 1;
 }
@@ -643,183 +586,185 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } Mode151D80C4;
-typedef struct {
-    u8 pad0[0xC];
-} Tex151D80C4;
-extern Tex151D80C4 D_80090B60[];
 extern Mode151D80C4 D_800A4AC8[];
 extern s32 D_800D2C9C;
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 extern u8 D_80090CD4[];
 
-Gfx *func_151D80C4(Obj151D7A38 *arg0, Gfx *gfx, s16 arg2) {
-    Sub151D7A38 *sub;
-    Vec151D7A38 cur;
-    Vec151D7A38 prev;
+/*
+ * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
+ * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
+ */
+Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
+    TrailData *data;
+    vertex pos;
+    vertex newerPos;
     s32 i;
-    s32 j;
-    Entry151D7A38 *entries;
-    u8 update;
-    u8 prevA;
-    u8 curA;
+    s32 newest;
+    TrailPoint *points;
+    u8 needSync;
+    u8 newerAlpha;
     u8 alpha;
-    s32 last;
-    Entry151D7A38 *p;
-    f32 prevU;
-    f32 curU;
-    f32 dx;
+    u8 fade;
+    s32 newer;
+    TrailPoint *point;
+    f32 newerU;
+    f32 u;
+    f32 sideX;
     Vtx *vtx;
-    f32 dz;
+    f32 sideZ;
 
-    if (arg0->unk2C < 2) {
+    if (trail->count < 2) {
         return gfx;
     }
-    sub = arg0->sub;
-    entries = arg0->entries;
-    func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    data = trail->data;
+    points = trail->points;
+    func_151D5D60(trail->unk84, view, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }
-    update = 1;
-    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 0x3E);
+    needSync = 1;
+    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &update);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &update);
-    if (arg0->unk1E & 2) {
-        i = arg0->unk2E - 1;
+    gfx = func_1513F4E4(gfx, 0x4C, &needSync);
+    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);
+    if (trail->flags & 2) {
+        i = trail->head - 1;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = trail->capacity - 1;
         }
-        prev = arg0->pos;
-        prevA = 0;
-        prevU = sub->unk18;
+        newerPos = trail->pos;
+        newerAlpha = 0;
+        newerU = data->texPhase;
     } else {
-        j = arg0->unk2E - 1;
-        if (j < 0) {
-            j = arg0->unk25 - 1;
+        newest = trail->head - 1;
+        if (newest < 0) {
+            newest = trail->capacity - 1;
         }
-        i = j - 1;
+        i = newest - 1;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = trail->capacity - 1;
         }
-        prev = entries[j].pos;
-        prevA = entries[j].unk14;
-        prevU = entries[j].unk18;
+        newerPos = points[newest].pos;
+        newerAlpha = points[newest].alpha;
+        newerU = points[newest].texU;
     }
-    p = (Entry151D7A38 *)((u8 *)entries + i * sizeof(Entry151D7A38));
-    cur = p->pos;
-    dx = D_800DD1E8[arg2] * 5.5f;
-    curA = p->unk14;
-    dz = D_800DD1D8[arg2] * 5.5f;
-    curU = p->unk18;
-    if (arg0->unk1E & 8) {
-        alpha = arg0->unk1C * 12;
+    point = (TrailPoint *)((u8 *)points + i * sizeof(TrailPoint)); // matching: byte offset puts points first in the addu
+    pos = point->pos;
+    sideX = D_800DD1E8[view] * 5.5f;
+    alpha = point->alpha;
+    sideZ = D_800DD1D8[view] * 5.5f;
+    u = point->texU;
+    if (trail->flags & 8) {
+        fade = trail->timer * 12;
     } else {
-        alpha = 0xFF;
+        fade = 0xFF;
     }
-    prevA = (prevA * alpha) >> 8;
-    vtx->v.ob[0] = prev.x + dx;
-    vtx->v.ob[1] = prev.y;
-    vtx->v.ob[2] = prev.z - dz;
-    vtx->v.tc[0] = prevU;
+    newerAlpha = (newerAlpha * fade) >> 8;
+    vtx->v.ob[0] = newerPos.x + sideX;
+    vtx->v.ob[1] = newerPos.y;
+    vtx->v.ob[2] = newerPos.z - sideZ;
+    vtx->v.tc[0] = newerU;
     vtx->v.tc[1] = 0x800;
     vtx->v.cn[0] = 0xFF;
     vtx->v.cn[1] = 0xFF;
     vtx->v.cn[2] = 0xFF;
-    vtx->v.cn[3] = prevA;
+    vtx->v.cn[3] = newerAlpha;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = prev.x - dx;
-    vtx->v.ob[1] = prev.y;
-    vtx->v.ob[2] = prev.z + dz;
-    vtx->v.tc[0] = prevU;
+    vtx->v.ob[0] = newerPos.x - sideX;
+    vtx->v.ob[1] = newerPos.y;
+    vtx->v.ob[2] = newerPos.z + sideZ;
+    vtx->v.tc[0] = newerU;
     vtx->v.tc[1] = 0;
     vtx->v.cn[0] = 0xFF;
     vtx->v.cn[1] = 0xFF;
     vtx->v.cn[2] = 0xFF;
-    vtx->v.cn[3] = prevA;
+    vtx->v.cn[3] = newerAlpha;
     vtx->v.flag = 0;
     vtx++;
     do {
-        curA = (curA * alpha) >> 8;
-        vtx->v.ob[0] = cur.x + dx;
-        vtx->v.ob[1] = cur.y;
-        vtx->v.ob[2] = cur.z - dz;
-        vtx->v.tc[0] = curU;
+        alpha = (alpha * fade) >> 8;
+        vtx->v.ob[0] = pos.x + sideX;
+        vtx->v.ob[1] = pos.y;
+        vtx->v.ob[2] = pos.z - sideZ;
+        vtx->v.tc[0] = u;
         vtx->v.tc[1] = 0x800;
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
-        vtx->v.cn[3] = curA;
+        vtx->v.cn[3] = alpha;
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = cur.x - dx;
-        vtx->v.ob[1] = cur.y;
-        vtx->v.ob[2] = cur.z + dz;
-        vtx->v.tc[0] = curU;
+        vtx->v.ob[0] = pos.x - sideX;
+        vtx->v.ob[1] = pos.y;
+        vtx->v.ob[2] = pos.z + sideZ;
+        vtx->v.tc[0] = u;
         vtx->v.tc[1] = 0;
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
-        vtx->v.cn[3] = curA;
+        vtx->v.cn[3] = alpha;
         vtx->v.flag = 0;
         vtx++;
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 1, 3, 2, 0);
-        if (curU < prevU) {
+        if (u < newerU) {
+            /* texU wrapped around: restart the strip from copies of the last two vertices, one period back */
             memcpy(vtx, vtx - 2, sizeof(Vtx) * 2);
             vtx[-2].v.tc[0] -= 0x8000;
             vtx++;
             vtx[-2].v.tc[0] -= 0x8000;
             vtx++;
         }
-        last = i;
+        newer = i;
         i--;
         if (i < 0) {
-            i = arg0->unk25 - 1;
+            i = trail->capacity - 1;
         }
-                p = (Entry151D7A38 *)((u8 *)entries + i * sizeof(Entry151D7A38));
-        cur = p->pos;
-        curA = p->unk14;
-        prevU = entries[last].unk18;
-        curU = p->unk18;
-    } while (last != arg0->unk2D);
+        point = &points[i];
+        pos = point->pos;
+        alpha = point->alpha;
+        newerU = points[newer].texU;
+        u = point->texU;
+    } while (newer != trail->tail);
     return gfx;
 }
 
-extern f32 D_800AB2EC;
-extern f32 D_800AB2F0;
+/* Lets a point fall for dt: integrates velY under gravity and moves pos->y. */
+void func_151D8718(vertex *pos, f32 *velY, f32 dt) {
+    f32 v = *velY;
 
-void func_151D8718(f32 *arg0, f32 *arg1, f32 arg2) {
-    f32 v = arg1[0];
-    arg1[0] += D_800AB2EC * arg2;
-    arg0[1] += v * arg2 + D_800AB2F0 * (arg2 * arg2);
+    *velY += 0.2340000123f * dt;
+    pos->y += v * dt + 0.1170000061f * (dt * dt);
 }
 
-void func_151D8764(s32 *arg0) {
-    s32 *temp = (s32 *)arg0[0x98 / 4];
-    s32 *temp2 = (s32 *)temp[0];
-    if (temp2 != 0) {
-        temp2[0x28 / 4] = 0;
+/* Detaches the trail from its emitter. */
+void func_151D8764(Trail *trail) {
+    TrailData *data = trail->data;
+    TrailEmitter *emitter = data->emitter;
+
+    if (emitter != NULL) {
+        emitter->anchor.trail = NULL;
     }
 }
 
-extern void func_151478F4(s32 *arg0);
+extern void func_151478F4(Trail *trail);
 
-void func_151D8780(s32 *arg0) {
-    func_151D8764(arg0);
-    func_151478F4(arg0);
+void func_151D8780(Trail *trail) {
+    func_151D8764(trail);
+    func_151478F4(trail);
 }
 
-extern void func_15147928(s32 *arg0);
+extern void func_15147928(Trail *trail);
 
-void func_151D87AC(s32 *arg0) {
-    func_151D8764(arg0);
-    func_15147928(arg0);
+void func_151D87AC(Trail *trail) {
+    func_151D8764(trail);
+    func_15147928(trail);
 }

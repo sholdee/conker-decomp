@@ -1,153 +1,510 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_u8_proto
-#define func_15083E90 func_15083E90_s32_proto
-#define func_15083568 func_15083568_void_proto
+
+// functions.h and variables.h declare several of the symbols below with types that do not fit how
+// this file uses them (struct127 lacks or mistypes many object fields, model tables are declared as
+// plain s32, ...). Their header declarations are renamed out of the way and redeclared further down.
+#define func_150ADA20 func_150ADA20_hdr
+#define func_15083E90 func_15083E90_hdr
+#define func_15083568 func_15083568_hdr
+#define func_1505E650 func_1505E650_hdr
+#define func_1505F0AC func_1505F0AC_hdr
+#define func_15060F28 func_15060F28_hdr
+#define func_150615DC func_150615DC_hdr
+#define func_1506160C func_1506160C_hdr
+#define func_15062BDC func_15062BDC_hdr
 #include "functions.h"
-#undef func_15083568
-#undef func_15083E90
 #undef func_150ADA20
+#undef func_15083E90
+#undef func_15083568
+#undef func_1505E650
+#undef func_1505F0AC
+#undef func_15060F28
+#undef func_150615DC
+#undef func_1506160C
+#undef func_15062BDC
+
+#define D_800CC2D0 D_800CC2D0_hdr
+#define D_800C5A90 D_800C5A90_hdr
+#define D_800D19A0 D_800D19A0_hdr
+#define D_800D1C90 D_800D1C90_hdr
+#define D_800D1F80 D_800D1F80_hdr
+#define D_800D2040 D_800D2040_hdr
+#define D_800D20FC D_800D20FC_hdr
+#define D_800D2110 D_800D2110_hdr
+#define D_800D2138 D_800D2138_hdr
+#define D_800BE628 D_800BE628_hdr
+#define D_800D2132 D_800D2132_hdr
 #include "variables.h"
+#undef D_800CC2D0
+#undef D_800C5A90
+#undef D_800D19A0
+#undef D_800D1C90
+#undef D_800D1F80
+#undef D_800D2040
+#undef D_800D20FC
+#undef D_800D2110
+#undef D_800D2138
+#undef D_800BE628
+#undef D_800D2132
 
-extern s32 func_150ADA20(void);
-extern struct127 *func_15083E90(u8);
-extern struct172 D_80086CC4[];
-extern void func_150302F0(struct127 *arg0, s32 arg1);
-extern s32 D_80086CAC[];
-extern void func_15036C70(struct127 *arg0);
-/* Returns 0 from every early-exit path (`or v0,zero,zero` before the epilogue in
-   golden) and tail-returns func_15082A44's result, so the symbol is s32-valued;
-   func_1508295C below simply discards the value. */
-extern s32 func_150825C0(s32 arg0, s32 arg1);
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern u8 D_800BE590;
-extern u16 D_800BE598[];
-extern s32 func_1503D660(s32 arg0, s32 arg1);
-extern s32 func_1503D774(s32 arg0, s32 arg1);
+// File-local view of the 0x31C extension block of a game object (header struct126, 0x1C0 bytes).
+typedef struct GameObjExt {
+    /* 0x000 */ u8 pad0[0x56];
+    /* 0x056 */ u8 unk56;
+    /* 0x057 */ u8 pad57[0x2D];
+    /* 0x084 */ u8 unk84;
+    /* 0x085 */ u8 pad85[0x115];
+    /* 0x19A */ u8 grenade_count;
+    /* 0x19B */ u8 pad19B[0xF];
+    /* 0x1AA */ s16 unk1AA;
+    /* 0x1AC */ u8 pad1AC;
+    /* 0x1AD */ u8 unk1AD;
+    /* 0x1AE */ u8 pad1AE;
+    /* 0x1AF */ u8 unk1AF;
+    /* 0x1B0 */ s8 unk1B0;
+    /* 0x1B1 */ u8 pad1B1;
+    /* 0x1B2 */ u8 unk1B2;
+    /* 0x1B3 */ u8 pad1B3[0x5];
+    /* 0x1B8 */ f32 unk1B8;
+    /* 0x1BC */ u8 pad1BC[0x4];
+} GameObjExt; // size 0x1C0
 
-typedef struct {
-    u8 pad0[0x2];
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[0xC];
-    u8 unk12;
-    u8 pad13[0x16];
-    u8 unk29;
-    u16 unk2A;
-    u8 pad2C[0x7];
-    s8 unk33;
-    s32 unk34;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A;
-    u8 unk3B;
-    u8 unk3C;
-} GameAEB40Def;
+// One 0x30-byte entry of the level's spawn table D_800D20FC.
+typedef struct SpawnRecord {
+    /* 0x00 */ u16 flags;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 interaction_state;
+    /* 0x04 */ u8 type;         // model id, 0xFF for none
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8 angle;        // high byte of the facing angle
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 pad16[0x2];
+    /* 0x18 */ s32 objFlags;    // copied to the object's unkF8
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 pad1E[0x2];
+    /* 0x20 */ f32 xz_scale;
+    /* 0x24 */ f32 y_scale;
+    /* 0x28 */ u8 unique_id;
+    /* 0x29 */ u8 partSet;      // 1-based index into D_80086CC4, 0 for none
+    /* 0x2A */ u8 pad2A[0x2];
+    /* 0x2C */ u16 unk2C;
+    /* 0x2E */ u8 unk2E;
+    /* 0x2F */ u8 unk2F;
+} SpawnRecord; // size 0x30
 
-typedef struct {
-    u8 pad_0[0x2F];
-    u8 field_0x2F;
-} GameAEB40AnimationData;
+// The 0xC-byte block a game object keeps at 0x260 for some models.
+typedef struct ObjAlloc260 {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ u8 unk8;
+    /* 0x9 */ u8 unk9;
+} ObjAlloc260;
 
-typedef struct {
-    u8 pad_0[0x300];
-    s32 field_0x300;
-    s32 field_0x304[4];
-    s32 *field_0x314;
-} GameAEB40ActorSlots;
+// File-local view of a game object (struct127, the 0x32C-byte entries of D_800CC2D0).
+// include/structs.h lacks or mistypes several fields used here (0x10 is a u16, 0x38 an s16, 0x140 a
+// u8, 0x2C4 a pointer, ...); fold them in during the central pass.
+typedef struct GameObj {
+    /* 0x000 */ s32 interaction_state;
+    /* 0x004 */ u8 id;
+    /* 0x005 */ u8 unk5;
+    /* 0x006 */ u8 unk6;
+    /* 0x007 */ u8 pad7[0x9];
+    /* 0x010 */ u16 unk10;
+    /* 0x012 */ u8 pad12[0x2];
+    /* 0x014 */ f32 x_position;
+    /* 0x018 */ f32 y_position;
+    /* 0x01C */ f32 z_position;
+    /* 0x020 */ f32 y_velocity;
+    /* 0x024 */ f32 gravity;
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ f32 old_x_position;
+    /* 0x030 */ f32 old_y_position;
+    /* 0x034 */ f32 old_z_position;
+    /* 0x038 */ s16 unk38;
+    /* 0x03A */ u8 pad3A;
+    /* 0x03B */ u8 unique_id;
+    /* 0x03C */ f32 xz_velocity;
+    /* 0x040 */ f32 unk40;
+    /* 0x044 */ u8 pad44[0x14];
+    /* 0x058 */ s32 unk58;
+    /* 0x05C */ s32 unk5C;
+    /* 0x060 */ u8 pad60[0x5];
+    /* 0x065 */ u8 unk65;       // 1-based index of the owning object, 0 for none
+    /* 0x066 */ u8 unk66;
+    /* 0x067 */ u8 pad67;
+    /* 0x068 */ u8 unk68;
+    /* 0x069 */ u8 unk69;
+    /* 0x06A */ u8 pad6A[0xC];
+    /* 0x076 */ u16 unk76;
+    /* 0x078 */ u16 unk78;
+    /* 0x07A */ u16 unk7A;
+    /* 0x07C */ u8 pad7C[0x14];
+    /* 0x090 */ u16 unk90;
+    /* 0x092 */ u16 unk92;
+    /* 0x094 */ s32 unk94;
+    /* 0x098 */ u8 pad98[0x13];
+    /* 0x0AB */ u8 unkAB;
+    /* 0x0AC */ u8 unkAC;
+    /* 0x0AD */ u8 padAD[0x5];
+    /* 0x0B2 */ u16 unkB2;
+    /* 0x0B4 */ u8 padB4[0x4];
+    /* 0x0B8 */ f32 unkB8;
+    /* 0x0BC */ u8 padBC[0x8];
+    /* 0x0C4 */ f32 unkC4;
+    /* 0x0C8 */ f32 unkC8;
+    /* 0x0CC */ u8 padCC[0x6];
+    /* 0x0D2 */ s16 unkD2;
+    /* 0x0D4 */ s16 unkD4;
+    /* 0x0D6 */ s16 unkD6;
+    /* 0x0D8 */ u8 padD8[0x4];
+    /* 0x0DC */ f32 unkDC;
+    /* 0x0E0 */ f32 unkE0;
+    /* 0x0E4 */ s16 unkE4;
+    /* 0x0E6 */ s16 unkE6;
+    /* 0x0E8 */ u16 unkE8;
+    /* 0x0EA */ u8 padEA[0xE];
+    /* 0x0F8 */ s32 unkF8;
+    /* 0x0FC */ u8 padFC[0x5];
+    /* 0x101 */ u8 unk101;
+    /* 0x102 */ u8 pad102[0x2];
+    /* 0x104 */ u8 stunned;
+    /* 0x105 */ u8 pad105[0x1E];
+    /* 0x123 */ u8 unk123;
+    /* 0x124 */ u8 unk124;
+    /* 0x125 */ u8 immune;
+    /* 0x126 */ u8 pad126;
+    /* 0x127 */ u8 unk127;
+    /* 0x128 */ u8 unk128;
+    /* 0x129 */ u8 pad129[0x12];
+    /* 0x13B */ u8 unk13B;
+    /* 0x13C */ u8 pad13C[0x3];
+    /* 0x13F */ u8 unk13F;      // index of the spawn record this object came from
+    /* 0x140 */ u8 unk140;
+    /* 0x141 */ u8 pad141[0x3];
+    /* 0x144 */ SpawnRecord *spawn;
+    /* 0x148 */ u8 pad148[0x4];
+    /* 0x14C */ f32 xz_scale;
+    /* 0x150 */ f32 y_scale;
+    /* 0x154 */ f32 unk154;
+    /* 0x158 */ f32 unk158;
+    /* 0x15C */ u8 pad15C[0x4];
+    /* 0x160 */ s16 unk160;
+    /* 0x162 */ u8 pad162[0x67];
+    /* 0x1C9 */ u8 unk1C9;
+    /* 0x1CA */ u8 health;
+    /* 0x1CB */ u8 pad1CB;
+    /* 0x1CC */ f32 unk1CC;
+    /* 0x1D0 */ s8 unk1D0;
+    /* 0x1D1 */ u8 pad1D1[0xC];
+    /* 0x1DD */ u8 unk1DD[3];
+    /* 0x1E0 */ u8 unk1E0[3];
+    /* 0x1E3 */ u8 pad1E3;
+    /* 0x1E4 */ u8 unk1E4;
+    /* 0x1E5 */ u8 unk1E5;
+    /* 0x1E6 */ u8 unk1E6;
+    /* 0x1E7 */ u8 pad1E7[0x15];
+    /* 0x1FC */ u8 unk1FC;
+    /* 0x1FD */ u8 pad1FD[0x12];
+    /* 0x20F */ u8 unk20F;
+    /* 0x210 */ u8 unk210;
+    /* 0x211 */ u8 unk211;
+    /* 0x212 */ u8 unk212;
+    /* 0x213 */ u8 pad213[0xE];
+    /* 0x221 */ s8 unk221;
+    /* 0x222 */ u8 pad222[0x2];
+    /* 0x224 */ s16 unk224;
+    /* 0x226 */ u8 pad226[0xC];
+    /* 0x232 */ u8 unk232;
+    /* 0x233 */ u8 pad233[0x9];
+    /* 0x23C */ u8 unk23C;
+    /* 0x23D */ u8 unk23D;
+    /* 0x23E */ u8 unk23E;
+    /* 0x23F */ u8 pad23F[0x7];
+    /* 0x246 */ u8 unk246;
+    /* 0x247 */ u8 unk247;
+    /* 0x248 */ u8 unk248;
+    /* 0x249 */ u8 pad249[0x17];
+    /* 0x260 */ ObjAlloc260 *unk260;
+    /* 0x264 */ u8 pad264[0xC];
+    /* 0x270 */ f32 unk270;
+    /* 0x274 */ u8 pad274[0x14];
+    /* 0x288 */ u8 unk288;
+    /* 0x289 */ u8 pad289[0x3];
+    /* 0x28C */ u8 *modelData[7][2];  // per model in modelIds: shared or private copies of D_800D19A0[id]
+    /* 0x2C4 */ u8 *modelIds;
+    /* 0x2C8 */ u8 unk2C8;
+    /* 0x2C9 */ u8 modelCount;
+    /* 0x2CA */ u8 pad2CA;
+    /* 0x2CB */ s8 unk2CB;
+    /* 0x2CC */ s32 unk2CC;
+    /* 0x2D0 */ struct197 *unk2D0;
+    /* 0x2D4 */ u8 pad2D4[0x18];
+    /* 0x2EC */ s32 unk2EC;
+    /* 0x2F0 */ u8 pad2F0[0x10];
+    /* 0x300 */ u8 unk300;
+    /* 0x301 */ u8 unk301;
+    /* 0x302 */ u8 pad302[0x2];
+    /* 0x304 */ s32 unk304[4];      // one per player
+    /* 0x314 */ s32 *unk314;
+    /* 0x318 */ struct108 *camera;
+    /* 0x31C */ GameObjExt *unk31C;
+    /* 0x320 */ u8 pad320[0xC];
+} GameObj; // size 0x32C
 
+// One entry of a model's definition table D_800D1C90 (header struct124).
+typedef struct ModelDef {
+    /* 0x00 */ u8 pad0[0x2];
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 subModelCount;
+    /* 0x05 */ u8 subModelList;     // index into D_80086CAC
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 pad8[0x6];
+    /* 0x0E */ u16 unkE;
+    /* 0x10 */ u8 pad10[0x2];
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 pad13[0x16];
+    /* 0x29 */ u8 unk29;
+    /* 0x2A */ u16 unk2A;
+    /* 0x2C */ u8 pad2C[0x7];
+    /* 0x33 */ s8 unk33;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8 extraModelCount;
+    /* 0x39 */ u8 unk39;
+    /* 0x3A */ u8 pad3A;
+    /* 0x3B */ u8 unk3B;
+    /* 0x3C */ u8 unk3C;
+} ModelDef;
 
-typedef struct {
-    /* 0x00 */ struct127 *obj;
+// One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
+typedef struct PartDef {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 type;     // 0: child object (func_15083AC8), otherwise func_15030AF4
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ u8 data[6];
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+} PartDef;
+
+typedef struct PartSet {
+    /* 0x0 */ PartDef *parts;
+    /* 0x4 */ u8 count;
+} PartSet;
+
+// Result of a ray cast (func_15081690), consumed by func_15081E78.
+typedef struct RayHit {
+    /* 0x00 */ GameObj *obj;
     /* 0x04 */ f32 dist;
     /* 0x08 */ struct17 hit;
     /* 0x14 */ struct17 centre;
     /* 0x20 */ struct17 far;
-    /* 0x2C */ struct17 start;
-    /* 0x38 */ struct17 end;
+    /* 0x2C */ struct17 origin;
+    /* 0x38 */ struct17 dir;
     /* 0x44 */ u8 unk44[0x12];
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-    /* 0x59 */ u8 unk59;
-    /* 0x5A */ s8 unk5A;
-    /* 0x5C */ struct131 *unk5C;
+    /* 0x56 */ u16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 hitType;      // 0 none, 1 world, 2 object cylinder, 3 object model
+    /* 0x5A */ u8 unk5A;
+    /* 0x5C */ struct131 *surface;
     /* 0x60 */ s32 unk60;
-} GameAEB40RayHit;
+} RayHit;
 
+typedef struct {
+    /* 0x0 */ u32 unk0;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ s32 unk8;
+} ModelReloc;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x208];
+    /* 0x208 */ u16 unk208;     // bit per player
+} Struct800D2138;
+
+extern GameObj D_800CC2D0[26];
+extern u16 D_800C5A90[187];
+extern u8 *D_800D19A0[187];
+extern ModelDef *D_800D1C90[187];
+extern u8 D_800D1F80[187];
+extern u8 D_800D2040[187];
+extern SpawnRecord *D_800D20FC;
+extern u16 *D_800D2110;
+extern Struct800D2138 D_800D2138;
+extern u8 (*D_800BE628)[0x180];   // one 0x180-byte entry per player
+extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
+extern u8 *D_800D210C;
+extern s16 D_800D2132;
+extern u8 D_800D2100;
+extern u8 D_800D2101;
+extern s8 D_800D2130;
+extern u8 *D_80086CAC[];
+extern PartSet D_80086CC4[];
+extern s32 (*D_80086C90[])(GameObj *, GameObj *, s32);
+extern s8 D_8008FE44[];
+extern u8 D_80099AC4[];
+extern u8 D_800A7230[][8];
+extern u8 D_800BE590;
+extern u16 D_800BE598[];
+extern ModelReloc *D_800C5338[];
+extern u16 D_800C5628[];
+extern u16 D_800C57A0[];
+extern f32 D_800D9C10[][4][4];
+
+// func_150ADA20 returns a full-width random value here (functions.h has it as u8).
+extern s32 func_150ADA20(void);
+extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
+extern GameObj *func_1505F0AC(s32);
+extern void func_15060F28(GameObj *obj, s32 arg1);
+extern void func_150615DC(GameObj *obj);
+extern void func_1506160C(GameObj *obj, s32, u8, u8, s32);
+extern void func_15062BDC(GameObj *obj, f32 arg1, f32 arg2);
+extern void *allocate_memory(s32 size, s32, s32, s32);
+extern s32 func_10004074(void *);
+extern void func_100043B4(s32 *arg0, u32 arg1);
+extern s32 func_1502B020(s32, s32, s32, s32);
+extern void func_150302F0(GameObj *obj, s32 setId);
+extern GameObj *func_15030AF4(GameObj *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+extern void func_150335C8(GameObj *, GameObj *, s32, s32, s32, s32);
+extern void func_15036C70(GameObj *obj);
+extern s32 func_1503D660(s32 modelId, s32 arg1);
+extern s32 func_1503D774(s32 modelId, s32 arg1);
+extern s32 func_1503DA9C(GameObj *, s32, s32, s32);
+extern s32 func_1505D024(GameObj *, s32, u16, s32);
+extern GameObj *func_1505ED34(void);
+extern GameObj *func_1505EEF4(void);
+extern void func_1505F188(GameObj *obj);
+extern void func_15060A30(s32, GameObj *);
+extern void func_15060A9C(s32, GameObj *);
+extern void func_1506AC8C(GameObj *, s32, s32);
+extern void func_1507DE4C(GameObj *);
+extern void func_1507DF10(GameObj *obj, s32 arg1);
+extern s32 func_1508114C(GameObj *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
+extern s32 func_15084D00(GameObj *);
+extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-extern s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
-s32 func_15081C20(struct17 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6);
-extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
+extern void func_150B5C38(void *, u8, s32);
+extern void func_150B6754(u8, s32);
+extern void func_150D7120(void *, u8, s32);
+extern void func_150D728C(void *, void *, void *, u8, s32);
+extern void func_150EB484(f32 *, f32 *, f32 *);
+extern void func_15104608(f32, f32, f32, s32);
+extern void func_1510D720(s32 arg0);
+extern void func_15137610(GameObj *, void *, void *, void *, u8, s32);
+extern void func_15138C80(GameObj *, s32, s32);
+extern f32 func_15143E64(struct17 *);
+extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+extern void func_15145974(void *, f32 *, f32 *);
+extern s32 func_1514D15C(GameObj *obj);
+extern s32 *func_1515D440(void);
+extern s32 func_1515D480(s32);
+extern s32 func_151D3480(void *, void *, void *, u8, u8, s32);
+extern s32 func_151E5F64(s32 arg0);
 
-void func_15081690(struct127 *arg0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, GameAEB40RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipBones, s8 filter, s32 filterArg, s32 ignoreMask) {
+s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist);
+void func_15081E0C(GameObj *obj, u16 part, u8 skip);
+s32 func_150825C0(s32 spawnIdx, s32 arg1);
+s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
+void func_150829D8(GameObj *obj);
+void func_150832AC(GameObj *obj);
+void func_15083384(GameObj *obj, s32 arg1);
+GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3);
+void func_150837D4(s32 objIdx, s32 modelId, s32 arg2);
+s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3);
+void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn);
+GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8);
+GameObj *func_15083E90(u8 id);
+void func_150843AC(GameObj *obj, s32 model);
+void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2);
+u8 func_150849A0(GameObj *obj);
+void func_15084C30(GameObj *obj);
+s32 func_15084CB0(s32 modelId);
+
+/* Casts a ray from origin along dir against the world and every active object (except self and those in
+   ignoreMask or rejected by filter), recording the nearest hit closer than maxDist in out. */
+void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dirX, f32 dirY, f32 dirZ, RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipModels, s8 filter, s32 filterArg, s32 ignoreMask) {
     s32 surf;
     f32 hitX;
     f32 hitY;
     f32 hitZ;
     f32 dist;
-    f32 dist2;
+    f32 farDist;
     s32 part;
     s32 bone;
     s16 offset[4];
     s32 i;
-    struct127 *obj;
+    GameObj *obj;
     s32 best;
     s32 skip;
     s32 ret;
-    u8 slots[25];
+    u8 childSlot[25];
     struct17 near;
     struct17 far;
     struct17 centre;
-    struct17 start;
-    struct17 end;
+    struct17 origin;
+    struct17 dir;
     s32 index;
     s32 surfIdx;
 
-    start.unk0 = x1;
-    start.unk4 = y1;
-    start.unk8 = z1;
-    end.unk0 = x2;
-    end.unk4 = y2;
-    end.unk8 = z2;
+    origin.unk0 = originX;
+    origin.unk4 = originY;
+    origin.unk8 = originZ;
+    dir.unk0 = dirX;
+    dir.unk4 = dirY;
+    dir.unk8 = dirZ;
     out->dist = -1.0f;
     out->obj = NULL;
-    out->unk59 = 0;
-    out->start = start;
+    out->hitType = 0;
+    out->origin = origin;
     best = -1;
-    out->end = end;
-    out->unk5C = NULL;
+    out->dir = dir;
+    out->surface = NULL;
     out->unk60 = 0;
     if (maxDist == 0.0f) {
         maxDist = 9999999.0f;
     }
-    if (arg0 != NULL) {
-        skip = arg0->unk124 - 1;
+    if (self != NULL) {
+        skip = self->unk124 - 1;
     } else {
         skip = -1;
     }
-    bzero(slots, sizeof(slots));
+    // childSlot[owner] = 1-based slot of an object owned by owner
+    bzero(childSlot, sizeof(childSlot));
     for (i = 0; i < 25; i++) {
         if (D_800CC2D0[i].interaction_state == 0) {
             continue;
         }
         if (D_800CC2D0[i].unk65 != 0) {
-            slots[D_800CC2D0[i].unk65 - 1] = i + 1;
+            childSlot[D_800CC2D0[i].unk65 - 1] = i + 1;
         }
     }
     if (skipWorld == 0 &&
-        func_150AC9C0(x1, y1, z1, x2, y2, z2, &surf, out->unk44, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->unk60, 0.0f) != 0 &&
+        func_150AC9C0(originX, originY, originZ, dirX, dirY, dirZ, &surf, out->unk44, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->unk60, 0.0f) != 0 &&
         dist < maxDist) {
         out->dist = dist;
-        out->unk59 = 1;
+        out->hitType = 1;
         out->hit.unk0 = hitX;
         out->hit.unk4 = hitY;
         out->hit.unk8 = hitZ;
         out->far = out->hit;
         if (surfIdx != -1) {
-            out->unk5C = &D_800DBEF4[surfIdx];
+            out->surface = &D_800DBEF4[surfIdx];
         } else {
-            out->unk5C = NULL;
+            out->surface = NULL;
         }
     }
     if (skipObjs == 0) {
@@ -165,18 +522,18 @@ void func_15081690(struct127 *arg0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 
             if (obj->unk5 == 3) {
                 continue;
             }
-            if (obj == arg0) {
+            if (obj == self) {
                 continue;
             }
             if (!(obj->unkF8 & 0x40)) {
                 continue;
             }
-            if (filter != -1 && D_80086C90[filter](obj, arg0, filterArg) == 0) {
+            if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) {
                 continue;
             }
-            if (skipBones == 0) {
-                ret = func_1508114C(obj, &start, &end, &near, &far, &centre, &dist, &index, &bone, &part, offset);
-                if (ret > 0 && dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != slots[i]) {
+            if (skipModels == 0) {
+                ret = func_1508114C(obj, &origin, &dir, &near, &far, &centre, &dist, &index, &bone, &part, offset);
+                if (ret > 0 && dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != childSlot[i]) {
                     out->dist = dist;
                     out->obj = obj;
                     best = i + 1;
@@ -186,398 +543,316 @@ void func_15081690(struct127 *arg0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 
                     out->centre = centre;
                     out->unk5A = index;
                     out->far = far;
-                    out->unk59 = 3;
+                    out->hitType = 3;
                 }
                 if (ret != -1) {
                     continue;
                 }
             }
-            if (func_15081C20(&start, &end, (u8 *)obj, &near, &far, &dist, &dist2) != 0 &&
-                dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != slots[i]) {
+            if (func_15081C20(&origin, &dir, obj, &near, &far, &dist, &farDist) != 0 &&
+                dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != childSlot[i]) {
                 out->dist = dist;
                 out->obj = obj;
                 best = i + 1;
                 out->hit = near;
                 out->far = far;
-                out->unk59 = 2;
+                out->hitType = 2;
             }
         }
     }
 }
 
-extern f32 func_15143E64(struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
-
-s32 func_15081C20(struct17 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6) {
+/* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
+   unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
+s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist) {
     struct17 pos;
 
-    pos.unk0 = *(f32 *)(arg2 + 0x14);
-    pos.unk4 = *(s16 *)(arg2 + 0xD6) + *(f32 *)(arg2 + 0x18);
-    pos.unk8 = *(f32 *)(arg2 + 0x1C);
+    pos.unk0 = obj->x_position;
+    pos.unk4 = obj->y_position + obj->unkD6;
+    pos.unk8 = obj->z_position;
     {
         struct17 start;
-        struct17 dir;
+        struct17 unitDir;
         struct17 center;
-        f32 scale;
-        f32 scale2;
+        f32 yScale;
+        f32 yUnscale;
 
-        scale = *(f32 *)(arg2 + 0xDC);
-        scale2 = *(f32 *)(arg2 + 0xE0);
-        start.unk0 = arg0->unk0;
-        start.unk4 = arg0->unk4 * scale;
-        start.unk8 = arg0->unk8;
-        dir.unk0 = arg1->unk0;
-        dir.unk4 = arg1->unk4 * scale;
-        dir.unk8 = arg1->unk8;
-        if (func_15145128(&dir, &dir, NULL, NULL) == 0) {
+        yScale = obj->unkDC;
+        yUnscale = obj->unkE0;
+        start.unk0 = origin->unk0;
+        start.unk4 = origin->unk4 * yScale;
+        start.unk8 = origin->unk8;
+        unitDir.unk0 = dir->unk0;
+        unitDir.unk4 = dir->unk4 * yScale;
+        unitDir.unk8 = dir->unk8;
+        if (func_15145128(&unitDir, &unitDir, NULL, NULL) == 0) {
             return 0;
         }
         center.unk0 = pos.unk0;
-        center.unk4 = pos.unk4 * scale;
+        center.unk4 = pos.unk4 * yScale;
         center.unk8 = pos.unk8;
-        if (func_151452C4(&start, &dir, &center, *(s16 *)(arg2 + 0xD2), arg3, arg4, arg5, arg6) == 0) {
+        if (func_151452C4(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
-        arg3->unk4 *= scale2;
-        arg4->unk4 *= scale2;
+        outNear->unk4 *= yUnscale;
+        outFar->unk4 *= yUnscale;
         {
             struct17 diff;
 
-            diff.unk0 = arg3->unk0 - arg0->unk0;
-            diff.unk4 = arg3->unk4 - arg0->unk4;
-            diff.unk8 = arg3->unk8 - arg0->unk8;
-            *arg5 = func_15143E64(&diff);
-            diff.unk0 = arg4->unk0 - arg0->unk0;
-            diff.unk4 = arg4->unk4 - arg0->unk4;
-            diff.unk8 = arg4->unk8 - arg0->unk8;
-            *arg6 = func_15143E64(&diff);
+            diff.unk0 = outNear->unk0 - origin->unk0;
+            diff.unk4 = outNear->unk4 - origin->unk4;
+            diff.unk8 = outNear->unk8 - origin->unk8;
+            *outNearDist = func_15143E64(&diff);
+            diff.unk0 = outFar->unk0 - origin->unk0;
+            diff.unk4 = outFar->unk4 - origin->unk4;
+            diff.unk8 = outFar->unk8 - origin->unk8;
+            *outFarDist = func_15143E64(&diff);
         }
     }
     return 1;
 }
 
-extern void func_1507DF10(struct127 *arg0, s32 arg1);
-
-void func_15081E0C(struct127 *arg0, u16 arg1, u8 arg2) {
+void func_15081E0C(GameObj *obj, u16 part, u8 skip) {
     if (D_800BE616 == 0) {
-        if (arg0->health != 0) {
-            arg0->health = 7;
+        if (obj->health != 0) {
+            obj->health = 7;
         }
-        if ((arg2 == 0) || (arg1 != 0xA)) {
-            func_1507DF10(arg0, arg1);
+        if ((skip == 0) || (part != 10)) {
+            func_1507DF10(obj, part);
         }
     }
 }
 
-typedef struct {
-    struct127 *obj;
-    f32 unk4;
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad14[4];
-    f32 unk18;
-    u8 pad1C[4];
-    f32 unk20;
-    u8 pad24[0x14];
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    u8 pad44[0x12];
-    u16 unk56;
-    u8 unk58;
-    u8 unk59;
-    u8 unk5A;
-} F81E78Arg;
-
-#define F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
-
-extern u8 D_80099AC4[];
-extern u8 D_80099AD1;
-extern f32 D_8009CC28;
-extern void func_150D728C(void *, void *, void *, u8, s32);
-extern void func_150EB484(f32 *, f32 *, f32 *);
-extern void func_15104608(f32, f32, s32, s32);
-extern void func_1506AC8C(struct127 *, s32, s32);
-extern void func_151D3480(void *, void *, void *, u8, u8, s32);
-extern void func_15145974(void *, f32 *, f32 *);
-extern void func_150B5C38(void *, u8, s32);
-extern void func_150B6754(u8, s32);
-extern void func_1507DE4C(struct127 *);
-extern void func_15060A9C(s32, struct127 *);
-extern void func_15138C80(struct127 *, s32, s32);
-extern void func_15060A30(s32, struct127 *);
-extern void func_15081E0C(struct127 *, u16, u8);
-extern void func_150335C8(void *, struct127 *, s32, s32, s32, s32);
-extern void func_15137610(struct127 *, void *, void *, void *, u8, s32);
-extern void func_150D7120(void *, u8, s32);
-extern s32 func_1505D024(struct127 *, s32, u16, s32);
-
-#define B8(p, o) (*(u8 *)((u8 *)(p) + (o)))
-
-s32 func_15081E78(struct127 *arg0, F81E78Arg *arg1, s32 arg2) {
-    s32 snd;
-    f32 sp3A8;
-    f32 sp3A4;
-    u8 sp3A3;
-    struct127 *obj;
-    struct126 *x;
-    volatile s32 flag;
-    s32 v1;
-    s32 res;
-    s32 a2;
+/* Applies the effects of a ray hit of the given kind fired by self: world impact effects for a world
+   hit, otherwise hit reactions, sounds and effects on the object that was hit. Returns 0 for no hit,
+   1 for a world hit and 2 for an object hit. */
+s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
+    s32 sound;
+    f32 yaw;
+    f32 pitch;
+    u8 playImpact;
+    GameObj *obj;
+    GameObjExt *ext;
+    // matching: volatile keeps IDO from hoisting the li/lw of noHealth out of the if/else
+    volatile s32 noHealth;
+    s32 longShot;
+    s32 effect;
+    s32 spawnEffect;
     s32 pad;
 
-    sp3A3 = 1;
-    x = arg0->unk31C;
-    if (x != 0) {
-        (*(s16 *)((u8 *)x + 0x1AA))++;
+    playImpact = 1;
+    ext = self->unk31C;
+    if (ext != NULL) {
+        ext->unk1AA++;
     }
-    if (arg1->unk59 == 0) {
+    if (hit->hitType == 0) {
         return 0;
     }
-    if (arg1->unk59 == 1) {
-        switch (arg2) {
+    if (hit->hitType == 1) {
+        switch (kind) {
         case 18:
-            res = 4;
+            effect = 4;
             break;
         case 6:
-            res = 0;
+            effect = 0;
             break;
         case 2:
-            res = 1;
+            effect = 1;
             break;
         case 7:
-            res = 5;
+            effect = 5;
             break;
         case 11:
-            res = 3;
+            effect = 3;
             break;
         case 12:
-            res = 2;
+            effect = 2;
             break;
         case 13:
-            res = -1;
-            func_150D728C((u8 *)arg1 + 0x44, &arg1->x, &arg1->vx, 0xFF, 1);
+            effect = -1;
+            func_150D728C(hit->unk44, &hit->hit, &hit->dir, 0xFF, 1);
             break;
         case 5:
             if (D_800BE9F0 == 14) {
                 f32 vc;
-                f32 va[3];
-                f32 vb[3];
-                va[0] = arg1->x + arg1->vx * 5.0f;
-                va[1] = arg1->y + arg1->vy * 5.0f;
-                va[2] = arg1->z + arg1->vz * 5.0f;
-                vb[0] = arg1->x - arg1->vx * 5.0f;
-                vb[1] = arg1->y - arg1->vy * 5.0f;
-                vb[2] = arg1->z - arg1->vz * 5.0f;
-                func_150EB484(va, vb, &vc);
+                f32 front[3];
+                f32 back[3];
+
+                front[0] = hit->hit.unk0 + hit->dir.unk0 * 5.0f;
+                front[1] = hit->hit.unk4 + hit->dir.unk4 * 5.0f;
+                front[2] = hit->hit.unk8 + hit->dir.unk8 * 5.0f;
+                back[0] = hit->hit.unk0 - hit->dir.unk0 * 5.0f;
+                back[1] = hit->hit.unk4 - hit->dir.unk4 * 5.0f;
+                back[2] = hit->hit.unk8 - hit->dir.unk8 * 5.0f;
+                func_150EB484(front, back, &vc);
             }
+            // fallthrough
         case 9:
         case 10:
-            res = -1;
-            func_15104608(arg1->x, arg1->y, *(s32 *)&arg1->z, B8(arg0, 0x124));
-            func_1506AC8C(arg0, 2, 0);
+            effect = -1;
+            func_15104608(hit->hit.unk0, hit->hit.unk4, hit->hit.unk8, self->unk124);
+            func_1506AC8C(self, 2, 0);
             break;
         default:
-            res = 5;
+            effect = 5;
             break;
         }
-        if (res != -1) {
-            func_151D3480(&arg1->x, &arg1->vx, (u8 *)arg1 + 0x44, res, 0xFF, 1);
+        if (effect != -1) {
+            func_151D3480(&hit->hit, &hit->dir, hit->unk44, effect, 0xFF, 1);
         }
         return 1;
     }
-    obj = arg1->obj;
-    if (arg2 == 5 || arg2 == 9 || arg2 == 10) {
-        func_1506AC8C(arg0, 3, 0);
+    obj = hit->obj;
+    if (kind == 5 || kind == 9 || kind == 10) {
+        func_1506AC8C(self, 3, 0);
     }
-    if (B8(obj, 0x1CA) == 0) {
-    lbl0:
-        flag = 1;
+    if (obj->health == 0) {
+    // matching: an (unused) label here stops IDO hoisting the store out of the then-block
+    noHealthLabel:
+        noHealth = 1;
     } else {
-        flag = 0;
+        noHealth = 0;
     }
-    if ((B8(obj, 0x125) != 0 || B8(obj, 0x104) != 0) && flag == 0) {
+    if ((obj->immune != 0 || obj->stunned != 0) && noHealth == 0) {
         return 2;
     }
-    v1 = 0;
-    snd = D_80099AC4[arg2];
-    if (arg2 == 7) {
-        if (D_800BE9F0 == 0x2B) {
-            snd = 0x27;
+    longShot = 0;
+    sound = D_80099AC4[kind];
+    if (kind == 7) {
+        if (D_800BE9F0 == 43) {
+            sound = 0x27;
         }
     }
-    func_15145974(&arg1->vx, &sp3A8, &sp3A4);
-    if (arg1->unk59 == 2) {
-        if (B8(obj, 4) == 0x94) {
-            sp3A3 = 0;
-            func_150B5C38(&arg1->x, 0xFF, 1);
+    func_15145974(&hit->dir, &yaw, &pitch);
+    if (hit->hitType == 2) {
+        if (obj->id == 0x94) {
+            playImpact = 0;
+            func_150B5C38(&hit->hit, 0xFF, 1);
             func_150B6754(0xFF, 1);
         }
-    } else if (arg1->unk59 == 3) {
+    } else if (hit->hitType == 3) {
         if (D_800BE616 == 0) {
-            if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
-                if (1000.0f < arg1->unk4) {
-                    v1 = 1;
+            if (obj->id == 0x9F || obj->id == 0xA0) {
+                if (1000.0f < hit->dist) {
+                    longShot = 1;
                 }
             }
         }
-        if (arg1->unk58 == 10 && (obj->unk31C == 0 || B8(obj->unk31C, 0x1AD) == 0) && v1 == 0) {
-            if ((u32)arg2 != 2 && (u32)arg2 != 0x12 && (u32)arg2 != 0xB && (u32)arg2 != 0xC) {
+        if (hit->unk58 == 10 && (obj->unk31C == NULL || obj->unk31C->unk1AD == 0) && longShot == 0) {
+            // matching: unsigned compares keep the constants as immediates
+            if ((u32)kind != 2 && (u32)kind != 18 && (u32)kind != 11 && (u32)kind != 12) {
                 func_1507DE4C(obj);
-                if (obj->unk31C != 0) {
-                    B8(obj->unk31C, 0x1AD) = 1;
+                if (obj->unk31C != NULL) {
+                    obj->unk31C->unk1AD = 1;
                 }
-                if (B8(obj, 4) == 0x80 && arg1->unk5A == 0 && arg1->y - 5.5f > arg1->unk18) {
+                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.unk4 - 5.5f > hit->centre.unk4) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
-                snd = 0x20;
-                if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
+                sound = 0x20;
+                if (obj->id == 0x9F || obj->id == 0xA0) {
                     if (obj->unk2EC != 0) {
-                        snd = 0x3D;
+                        sound = 0x3D;
                     }
                 }
                 func_15060A30(0xAA, obj);
             } else {
                 func_15060A30(0x107, obj);
             }
-            if (arg2 != 0xB && arg2 != 0xC && B8(obj, 0x1CA) != 0) {
-                B8(obj, 0x1CA) = 1;
+            if (kind != 11 && kind != 12 && obj->health != 0) {
+                obj->health = 1;
             }
-        } else if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
-            func_15081E0C(obj, arg1->unk58, v1);
+        } else if (obj->id == 0x9F || obj->id == 0xA0) {
+            func_15081E0C(obj, hit->unk58, longShot);
         }
-        switch (arg2) {
+        switch (kind) {
         case 2:
-            a2 = 0x2A;
+            spawnEffect = 0x2A;
             break;
-        case 0x12:
-            a2 = 0x22;
+        case 18:
+            spawnEffect = 0x22;
             break;
-        case 0xC:
-            a2 = 0x6B;
+        case 12:
+            spawnEffect = 0x6B;
             break;
-        case 0xB:
-            a2 = 0x6D;
+        case 11:
+            spawnEffect = 0x6D;
             break;
         default:
-            a2 = 0;
+            spawnEffect = 0;
             break;
         }
-        if (a2 != 0 && B8(obj, 0x1CA) < 2) {
-            struct127 big;
+        if (spawnEffect != 0 && obj->health < 2) {
+            GameObj source;
 
-            F32(&big, 0x14) = arg1->x;
-            F32(&big, 0x18) = arg1->y;
-            F32(&big, 0x1C) = arg1->z;
-            F32(&big, 0xB8) = sp3A4;
-            F32(&big, 0x40) = sp3A8 + 180.0f;
-            F32(&big, 0xC4) = 0.0f;
-            F32(&big, 0x14C) = *(f32 *)((u8 *)obj + 0x14C);
-            F32(&big, 0x150) = *(f32 *)((u8 *)obj + 0x150);
-            func_150335C8(&big, obj, a2, arg1->unk56, 1, 0);
-            if (arg1->unk58 == 10) {
-                snd = 0x20;
+            source.x_position = hit->hit.unk0;
+            source.y_position = hit->hit.unk4;
+            source.z_position = hit->hit.unk8;
+            source.unkB8 = pitch;
+            source.unk40 = yaw + 180.0f;
+            source.unkC4 = 0.0f;
+            source.xz_scale = obj->xz_scale;
+            source.y_scale = obj->y_scale;
+            func_150335C8(&source, obj, spawnEffect, hit->unk56, 1, 0);
+            if (hit->unk58 == 10) {
+                sound = 0x20;
             }
         }
     }
-    if (sp3A3 != 0) {
-        func_15137610((struct127 *)arg1->obj, &arg1->x, &arg1->unk20, &arg1->vx, 0xFF, 1);
+    if (playImpact) {
+        func_15137610(hit->obj, &hit->hit, &hit->far, &hit->dir, 0xFF, 1);
     }
-    if (&D_80099AD1 == &D_80099AC4[arg2]) {
-        func_150D7120(&arg1->x, 0xFF, 1);
+    if (kind == 13) {
+        func_150D7120(&hit->hit, 0xFF, 1);
     }
-    if (flag == 0) {
-        func_1505D024(obj, snd | 0x80000, (sp3A8 - 90.0f) * D_8009CC28, arg0 - D_800CC2D0);
+    if (noHealth == 0) {
+        func_1505D024(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - D_800CC2D0);
     }
     return 2;
 }
 
-
-/* --- func_150825C0 -------------------------------------------------- */
-
-/* structs.h's struct258 describes the same table but is only 0x10 bytes and has
-   no members below 0x4; golden indexes D_800D20FC with a 0x30 (48) byte stride
-   (`sll t4,s2,2; subu t4,t4,s2; sll s2,t4,4`) and reads u8 fields at +1/+2, so
-   this file uses a local 0x30-byte view instead of retyping the shared header. */
-typedef struct {
-    u8  unk0;
-    u8  unk1;
-    u8  unk2;
-    u8  unk3;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8  padC[0x24];
-} GameAEB40Spawn;
-
-extern u8 *D_800D210C;
-extern f32 D_8009CC30;
-extern f32 D_8009CC34;
-extern f32 D_8009CC38;
-extern f32 D_8009CC3C;
-extern f32 D_800D9C10[][4][4];
-extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4,
-                         f32 arg5, f32 arg6, f32 arg7);
-extern s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-/* The two squared component distances are NAMED f32 LOCALS with a self-assigning
-   square, not one inline expression.  That is what makes IDO emit golden's
-   `mul.s $f0,$f0,$f0' / `mul.s $f2,$f2,$f2': an inline `(a-b)*(a-b)' allocates a
-   FRESH fp temp for the product, an in-place `d = d * d' on a local reuses the
-   operand's register.  The two forms are visible side by side in already-matched
-   code -- game_83300's func_1505A6F8 (`x = ...; x *= x;' -> mul.s $f2,$f2,$f2)
-   versus func_1505693C (`(temp_f2 * temp_f2)' -> mul.s $f6,$f2,$f2).  Written
-   inline here the function scores 30 with the identical instruction stream and
-   only those two products plus their sum landing in fresh registers. */
-s32 func_150825C0(s32 arg0, s32 arg1) {
-    f32 rad;
+/* Spawns the object for spawn record spawnIdx once it is due: skips records that are in use,
+   disabled (x == 0x7FFF) or still counting down their D_800D2110 delay, and records whose flags
+   ask for no player nearby (radius by flags & 6) or for being off-screen (flags & 8). */
+s32 func_150825C0(s32 spawnIdx, s32 arg1) {
+    f32 radiusSq;
     s32 i;
-    u16 t;
-    u8 ok;
+    u16 range;
+    u8 clear;
     u8 flags;
     s32 j;
     f32 dx;
     f32 dz;
 
-    if (D_800D210C[arg0] != 0) {
+    if (D_800D210C[spawnIdx] != 0) {
         return 0;
     }
-    if (((GameAEB40Spawn *)D_800D20FC)[arg0].unk2 == 1) {
+    if (D_800D20FC[spawnIdx].unk2 == 1) {
         return 0;
     }
-    if (((GameAEB40Spawn *)D_800D20FC)[arg0].unk6 == 0x7FFF) {
+    if (D_800D20FC[spawnIdx].x == 0x7FFF) {
         return 0;
     }
-    /* arg1 is dead on entry -- this block returns on every path -- so it is the
-       function's only spare int-width storage, and it is homed in the caller's
-       arg slot (`sw a1,0x54(sp)'), which is why golden's copy of D_800BE9A0 into
-       it (`or a1,v1,zero' feeding `subu t4,a1,a0') costs no frame bytes. */
-    if ((*(u16 **)&D_800D2110)[arg0]) {
-        arg1 = D_800BE9A0;
-        if ((*(u16 **)&D_800D2110)[arg0] <= arg1) {
-            (*(u16 **)&D_800D2110)[arg0] = 0;
+    if (D_800D2110[spawnIdx]) {
+        if (D_800D2110[spawnIdx] <= D_800BE9A0) {
+            D_800D2110[spawnIdx] = 0;
         } else {
-            (*(u16 **)&D_800D2110)[arg0] = (*(u16 **)&D_800D2110)[arg0] - arg1;
+            D_800D2110[spawnIdx] -= D_800BE9A0;
         }
         return 0;
     }
-    flags = ((GameAEB40Spawn *)D_800D20FC)[arg0].unk1;
-    if (arg0 >= 5) {
-        t = flags & 6;
-        if (t != 0) {
-            if (t == 2) {
-                rad = D_8009CC30;
-            } else if (t == 4) {
-                rad = D_8009CC34;
+    flags = D_800D20FC[spawnIdx].flags;
+    if (spawnIdx >= 5) {
+        range = flags & 6;
+        if (range != 0) {
+            if (range == 2) {
+                radiusSq = 422500.0f;
+            } else if (range == 4) {
+                radiusSq = 1690000.0f;
             } else {
-                rad = D_8009CC38;
+                radiusSq = 7562500.0f;
             }
-            ok = 1;
+            clear = 1;
             for (j = 0; j < D_8008FD8C; j++) {
                 if (D_800CC2D0[j].interaction_state == 0) {
                     continue;
@@ -585,47 +860,50 @@ s32 func_150825C0(s32 arg0, s32 arg1) {
                 if (D_800CC2D0[j].unk127 == 0xFF) {
                     continue;
                 }
-                if (*(u16 *)((u8 *)&D_800D2138 + 0x208) &
-                    (1 << D_800CC2D0[j].unk127)) {
-                    dx = D_800CC2D0[j].x_position - ((GameAEB40Spawn *)D_800D20FC)[arg0].unk6;
+                if (D_800D2138.unk208 & (1 << D_800CC2D0[j].unk127)) {
+                    // matching: squaring in place (d = d * d) reuses the operand's register
+                    dx = D_800CC2D0[j].x_position - D_800D20FC[spawnIdx].x;
                     dx = dx * dx;
-                    dz = D_800CC2D0[j].z_position - ((GameAEB40Spawn *)D_800D20FC)[arg0].unkA;
+                    dz = D_800CC2D0[j].z_position - D_800D20FC[spawnIdx].z;
                     dz = dz * dz;
-                    if (dx + dz <= rad) {
-                        ok = 0;
+                    if (dx + dz <= radiusSq) {
+                        clear = 0;
                         break;
                     }
                 }
             }
-            if (ok != 0) {
+            if (clear) {
                 return 0;
             }
         }
     }
     if (flags & 8) {
-        ok = 1;
+        clear = 1;
         for (i = 0; i <= D_80082FA0; i++) {
-            if (func_150A6360((void *)((i * 0x180) + D_800BE628), D_800D9C10[i],
-                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unk6,
-                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unk8 + 150,
-                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unkA,
+            // matching: offset + base operand order
+            if (func_150A6360(i + D_800BE628, D_800D9C10[i],
+                              D_800D20FC[spawnIdx].x,
+                              D_800D20FC[spawnIdx].y + 150,
+                              D_800D20FC[spawnIdx].z,
                               150.0f, 150.0f, D_8009CC3C) != 0) {
-                ok = 0;
+                clear = 0;
             }
         }
-        if (ok == 0) {
+        if (!clear) {
             return 0;
         }
     }
-    return func_15082A44((GameAEB40Spawn *)((arg0 * 0x30) + (s32)D_800D20FC), arg0, 0, 0, 0);
+    return func_15082A44(&D_800D20FC[spawnIdx], spawnIdx, 0, 0, 0);
 }
 
-void func_1508295C(s32 arg0, s32 arg1, s32 arg2) {
+/* Runs func_150825C0 over the spawn records: [0, D_800D2101) when firstRange is set, else
+   [D_800D2101, D_800D2100). */
+void func_1508295C(s32 arg0, s32 arg1, s32 firstRange) {
     s32 start;
     s32 end;
     s32 i;
 
-    if (arg2 != 0) {
+    if (firstRange != 0) {
         start = 0;
         end = D_800D2101;
     } else {
@@ -633,242 +911,167 @@ void func_1508295C(s32 arg0, s32 arg1, s32 arg2) {
         end = D_800D2100;
     }
 
-    i = start;
-    if (start < end) {
-        do {
-            func_150825C0(i, arg1);
-            i++;
-        } while (i != end);
+    for (i = start; i < end; i++) {
+        func_150825C0(i, arg1);
     }
 }
 
-typedef struct Nested150829D8 {
-    u8 pad0[0x56];
-    u8 field_56;
-} Nested150829D8;
-
-typedef struct State150829D8 {
-    u8 pad0[0xF8];
-    u32 flags_F8;
-    u8 padFC[0x220];
-    Nested150829D8 *nested_31C;
-} State150829D8;
-
-void func_150829D8(State150829D8 *arg0) {
-    arg0->flags_F8 &= 0xF7FFFFFD;
-    arg0->flags_F8 |= 4;
-    if ((arg0->nested_31C != 0) && (arg0->nested_31C->field_56 == 0)) {
+void func_150829D8(GameObj *obj) {
+    obj->unkF8 &= 0xF7FFFFFD;
+    obj->unkF8 |= 4;
+    if ((obj->unk31C != NULL) && (obj->unk31C->unk56 == 0)) {
         switch (D_800BE9F0) {
-            case 0:
-            case 10:
-            case 14:
-            case 18:
-            case 19:
-            case 25:
-            case 27:
-            case 44:
-            case 60:
-            case 61:
-            case 66:
-            case 67:
-            case 68:
-                break;
-            default:
-                arg0->flags_F8 |= 2;
-                break;
+        case 0:
+        case 10:
+        case 14:
+        case 18:
+        case 19:
+        case 25:
+        case 27:
+        case 44:
+        case 60:
+        case 61:
+        case 66:
+        case 67:
+        case 68:
+            break;
+        default:
+            obj->unkF8 |= 2;
+            break;
         }
     }
 }
 
-typedef struct {
-    u16 flags;      /* 0x00 */
-    u8  unk2;
-    u8  unk3;
-    u8  type;       /* 0x04 */
-    u8  unk5;
-    s16 x;          /* 0x06 */
-    s16 y;          /* 0x08 */
-    s16 z;          /* 0x0A */
-    u8  angle;      /* 0x0C */
-    u8  unkD;
-    u8  unkE;
-    u8  unkF;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    s16 unk14;
-    s16 pad16;
-    s32 unk18;
-    u8  unk1C;
-    u8  unk1D;
-    u8  pad1E[2];
-    f32 unk20;
-    f32 unk24;
-    u8  unk28;
-    u8  unk29;
-    u8  pad2A[4];
-    u8  unk2E;
-    u8  pad2F;
-} Spawn82A44;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  unk8;
-    u8  unk9;
-} Alloc82A44;
-
-extern void func_1505F188(struct127 *arg0);
-extern struct127 *func_1505ED34(void);
-extern s32 func_151E5F64(s32 arg0);
-extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
-extern s32 func_1514D15C(struct127 *arg0);
-extern void func_15084488(u8 *arg0, s32 arg1, s32 arg2);
-extern void func_150839B8(struct127 *arg0, s32 arg1, void *arg2);
-extern void func_150837D4(s32 arg0, s32 arg1, s32 arg2);
-extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
-extern s32 func_15084CB0(s32 arg0);
-struct GameAEB40Struct_s;
-extern u8 func_150849A0();
-extern void func_15084C30(struct127 *arg0);
-struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
-extern void func_150832AC(struct127 *arg0);
-extern void func_15083384(struct127 *arg0, s32 arg1);
-extern s32 allocate_memory(s32, s32, s32, s32);
-extern s8 D_8008FE44[];
-extern s8 D_800D2130;
-extern u8 D_800A7230[][8];
-
-#define SPAWN ((Spawn82A44 *)arg0)
-#define OBJ(T, off) (*(T *)((u8 *)obj + (off)))
-
-s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* Creates and initialises a game object from spawn record spawnIdx (slot: 1-based object slot to
+   reuse, 0 for the default). Returns the 1-based slot, or 0 on failure. */
+s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot) {
     s32 type;
-    struct127 *obj;
+    GameObj *obj;
     s32 idx;
     s32 ret;
     s32 t;
     s32 i;
     s32 found;
-    u32 r;
-    Alloc82A44 *mem;
-    u16 a;
+    u32 model;
+    ObjAlloc260 *mem;
+    u16 angle;
 
-    if (D_800D210C[arg1] & ~0x80) {
+    if (D_800D210C[spawnIdx] & ~0x80) {
         return 0;
     }
-    type = SPAWN->type;
-    if (arg4 != 0) {
-        obj = &D_800CC2D0[arg4 - 1];
+    type = spawn->type;
+    if (slot != 0) {
+        obj = &D_800CC2D0[slot - 1];
         func_1505F188(obj);
-    } else if ((arg1 != -1) && (arg1 < D_8008FD8C)) {
-        obj = &D_800CC2D0[arg1];
+    } else if ((spawnIdx != -1) && (spawnIdx < D_8008FD8C)) {
+        obj = &D_800CC2D0[spawnIdx];
         func_1505F188(obj);
     } else {
         obj = func_1505ED34();
     }
     idx = obj - D_800CC2D0;
-    if (idx == 0x19) {
+    if (idx == 25) {
         return 0;
     }
-    if (arg1 != -1) {
-        if (SPAWN->flags & 0x21) {
-            D_800D210C[arg1] = idx + 1;
+    if (spawnIdx != -1) {
+        if (spawn->flags & 0x21) {
+            D_800D210C[spawnIdx] = idx + 1;
         } else {
-            D_800D210C[arg1] = idx + 0x81;
+            D_800D210C[spawnIdx] = idx + 0x81;
         }
-        obj->unk13F = arg1;
-        if (arg1 < D_8008FD8C) {
-            obj->unk127 = arg1;
+        obj->unk13F = spawnIdx;
+        if (spawnIdx < D_8008FD8C) {
+            obj->unk127 = spawnIdx;
         } else {
             obj->unk127 = 0xFF;
         }
     }
-    obj->unk144 = (struct129 *)arg0;
+    obj->spawn = spawn;
     ret = idx + 1;
-    func_15084488((u8 *)arg0, obj->unk13F, arg3);
+    func_15084488(spawn, obj->unk13F, arg3);
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
-        obj->unk31C = (struct126 *)allocate_memory(0x1C0, 1, 0, 0);
-        bzero(obj->unk31C, 0x1C0);
-        *(f32 *)((u8 *)obj->unk31C + 0x1B8) = 5.0f;
+        obj->unk31C = allocate_memory(sizeof(GameObjExt), 1, 0, 0);
+        bzero(obj->unk31C, sizeof(GameObjExt));
+        obj->unk31C->unk1B8 = 5.0f;
     }
-    obj->unique_id = SPAWN->unk28;
+    obj->unique_id = spawn->unique_id;
     obj->unk1D0 = 2;
-    obj->xz_scale = SPAWN->unk20;
-    obj->y_scale = SPAWN->unk24;
-    obj->unk154 = SPAWN->unk20;
-    obj->unk158 = SPAWN->unk24;
-    obj->interaction_state = SPAWN->unk3;
-    obj->x_position = SPAWN->x;
-    obj->y_position = SPAWN->y;
-    obj->z_position = SPAWN->z;
-    obj->unk212[0] = 0xFF;
+    obj->xz_scale = spawn->xz_scale;
+    obj->y_scale = spawn->y_scale;
+    obj->unk154 = spawn->xz_scale;
+    obj->unk158 = spawn->y_scale;
+    obj->interaction_state = spawn->interaction_state;
+    obj->x_position = spawn->x;
+    obj->y_position = spawn->y;
+    obj->z_position = spawn->z;
+    obj->unk212 = 0xFF;
     obj->unk20F = 0xFF;
-    obj->pad210 = 0xFF;
+    obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
-    OBJ(u8, 0x128) = 0xFF;
+    obj->unk128 = 0xFF;
     obj->old_x_position = obj->x_position;
     obj->old_y_position = obj->y_position;
     obj->unk1CC = obj->y_position;
     obj->old_z_position = obj->z_position;
-    if ((SPAWN->flags & 6) || (SPAWN->flags & 4) || (SPAWN->flags & 2)) {
+    if ((spawn->flags & 6) || (spawn->flags & 4) || (spawn->flags & 2)) {
         func_1506160C(obj, 4, 0, 0, 0);
     }
-    obj->unk232 = SPAWN->unkD;
-    if ((arg1 < D_8008FD8C) && (D_8008FE44[arg1] == -2)) {
-        *((u8 *)obj->unk31C + 0x84) = 1;
+    obj->unk232 = spawn->unkD;
+    if ((spawnIdx < D_8008FD8C) && (D_8008FE44[spawnIdx] == -2)) {
+        obj->unk31C->unk84 = 1;
         obj->unk232 = 1;
     }
     {
-    u8 pad;
-    if (obj->unk127 != 0xFF) {
-        OBJ(u8, 0x128) = func_151E5F64(obj->unk127);
-        *((s8 *)obj->unk31C + 0x19A) = D_800D2130;
-        *((u8 *)obj->unk31C + 0x1AF) = 0x40;
-        *((s8 *)obj->unk31C + 0x1B0) = -1;
+        // matching: unused stack slot
+        u8 pad;
+
+        if (obj->unk127 != 0xFF) {
+            obj->unk128 = func_151E5F64(obj->unk127);
+            obj->unk31C->grenade_count = D_800D2130;
+            obj->unk31C->unk1AF = 0x40;
+            obj->unk31C->unk1B0 = -1;
+        }
     }
-    }
-    obj->health = SPAWN->unkE & 0xF;
-    obj->unk1E5 = SPAWN->unkF;
+    obj->health = spawn->unkE & 0xF;
+    obj->unk1E5 = spawn->unkF;
     obj->unk1E6 = obj->unk1E5;
     obj->unk221 = 1;
-    obj->pad23C = SPAWN->unk1C;
-    obj->unk23D = SPAWN->unk1D;
-    obj->unk76 = SPAWN->angle << 8;
-    a = obj->unk76;
-    obj->unk7A = a;
-    obj->unk78 = a;
-    obj->unk40 = (a + 0x4000) * 0.0054931640625f;
-    OBJ(u8, 0x140) = arg2;
+    obj->unk23C = spawn->unk1C;
+    obj->unk23D = spawn->unk1D;
+    obj->unk76 = spawn->angle << 8;
+    angle = obj->unk76;
+    obj->unk7A = angle;
+    obj->unk78 = angle;
+    obj->unk40 = (angle + 0x4000) * (360.0f / 65536.0f);
+    obj->unk140 = arg2;
     obj->gravity = 6.0f;
-    obj->unkF8 = SPAWN->unk18;
+    obj->unkF8 = spawn->objFlags;
     if (obj->unkF8 & 0x200000) {
-        OBJ(s16, 0x224) = obj->y_position;
+        obj->unk224 = obj->y_position;
     }
     if (obj->unkF8 & 0x10000000) {
-        OBJ(s16, 0x38) = obj->y_position - 500.0f;
+        obj->unk38 = obj->y_position - 500.0f;
     }
     if (obj->unkF8 & 0x800000) {
         D_800C67F0 = 1;
     }
-    obj->unk1E4 = SPAWN->unk11;
-    obj->pad66 = SPAWN->unk10;
-    OBJ(u8, 0x1DD) = 0x78;
-    OBJ(u8, 0x1DE) = 0x78;
-    OBJ(u8, 0x1DF) = 0x78;
-    OBJ(u8, 0x1E0) = 0xFF;
-    OBJ(u8, 0x1E1) = 0xFF;
-    OBJ(u8, 0x1E2) = 0xFF;
+    obj->unk1E4 = spawn->unk11;
+    obj->unk66 = spawn->unk10;
+    obj->unk1DD[0] = 120;
+    obj->unk1DD[1] = 120;
+    obj->unk1DD[2] = 120;
+    obj->unk1E0[0] = 255;
+    obj->unk1E0[1] = 255;
+    obj->unk1E0[2] = 255;
     obj->unk23E = 4;
     obj->unk246 = 1;
-    obj->unk247 = 0x64;
-    obj->unk248 = 0x64;
+    obj->unk247 = 100;
+    obj->unk248 = 100;
     obj->unk1FC |= 2;
-    func_150839B8(obj, type, arg0);
-    t = SPAWN->unk13 & 0x7F;
-    obj->unk92 = ((SPAWN->unk13 & 0x80) << 8) | t;
-    obj->unk90 = SPAWN->unk14;
+    func_150839B8(obj, type, spawn);
+    t = spawn->unk13 & 0x7F;
+    obj->unk92 = ((spawn->unk13 & 0x80) << 8) | t;
+    obj->unk90 = spawn->unk14;
     func_150837D4(idx, type, 1);
     if (type != 0xFF) {
         func_150838EC(obj, 0, 0, 1.0f);
@@ -878,56 +1081,56 @@ s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) 
     if (obj->unkF8 & 0x4000) {
         func_1503DA9C(obj, obj->id, 0, 0);
     }
-    if (SPAWN->unk29) {
-        func_15083568(obj, SPAWN->unk29, 1.0f, 0);
+    if (spawn->partSet) {
+        func_15083568(obj, spawn->partSet, 1.0f, 0);
     }
     if (obj->unk127 != 0xFF) {
         obj->health = func_150859AC(obj->unk127, 4);
-        obj->unkB2 = *(s16 *)&D_800D2132;
-        func_150829D8((State150829D8 *)obj);
+        obj->unkB2 = D_800D2132;
+        func_150829D8(obj);
         func_15083384(obj, func_150859AC(idx, 1));
     }
-    if (((obj->pad66 & 0xC) == 8) || ((obj->pad66 & 0xC) == 0xC)) {
+    if (((obj->unk66 & 0xC) == 8) || ((obj->unk66 & 0xC) == 0xC)) {
         func_150832AC(obj);
     } else {
-        OBJ(s32, 0x314) = 0;
+        obj->unk314 = NULL;
     }
-    obj->pad288[0] = func_15084CB0(type);
+    obj->unk288 = func_15084CB0(type);
     if (D_800BE616 != 0) {
         t = func_151E5F64(obj->unk127);
         if (t >= 4) {
             t = 3;
         }
         if (type == 0x3B) {
-            OBJ(u8, 0x68) = t + 1;
+            obj->unk68 = t + 1;
         } else if (type == 0x77) {
-            OBJ(u8, 0x68) = t + 0x10;
+            obj->unk68 = t + 0x10;
         }
     }
-    if ((D_80038080 == 0) && (D_800BE9F0 != 0x1D) && (SPAWN->unk2E == 0xFF)) {
-        found = obj->unk2C9;
+    if ((D_80038080 == 0) && (D_800BE9F0 != 29) && (spawn->unk2E == 0xFF)) {
+        found = obj->modelCount;
         if (found == 0) {
             found = 1;
         }
         for (i = 0; i < found; i++) {
-            ((u8 *)D_800D2040)[(*(u8 **)((u8 *)obj + 0x2C4))[i]] = 0xFF;
+            D_800D2040[obj->modelIds[i]] = 0xFF;
         }
     }
-    if (D_800BE9F0 == 0x1D) {
-        obj->pad66 &= ~0x20;
+    if (D_800BE9F0 == 29) {
+        obj->unk66 &= ~0x20;
     }
     func_1514D15C(obj);
-    r = func_150849A0((struct GameAEB40Struct_s *)obj);
+    model = func_150849A0(obj);
     found = 0;
     for (i = 0; i < 2; i++) {
-        if (r == D_800A7230[i][0]) {
+        if (model == D_800A7230[i][0]) {
             found = 1;
             break;
         }
     }
     if (found) {
-        mem = (Alloc82A44 *)allocate_memory(0xC, 1, 0, 2);
-        OBJ(Alloc82A44 *, 0x260) = mem;
+        mem = allocate_memory(sizeof(ObjAlloc260), 1, 0, 2);
+        obj->unk260 = mem;
         if (mem != NULL) {
             mem->unk8 = 0;
             mem->unk9 = 0xFF;
@@ -939,334 +1142,308 @@ s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) 
     return ret;
 }
 
-void func_150832AC(struct127 *arg0) {
-    GameAEB40AnimationData *temp_v1;
-    u8 temp_a0;
-    GameAEB40ActorSlots *temp_s0;
+void func_150832AC(GameObj *obj) {
+    SpawnRecord *spawn;
+    u8 n;
     s32 i;
-    s32 temp_s3;
+    s32 count;
 
-    temp_v1 = (GameAEB40AnimationData *)arg0->unk144;
-    if (temp_v1 != 0) {
-        temp_a0 = temp_v1->field_0x2F;
-        temp_s0 = (GameAEB40ActorSlots *)arg0;
-        if (temp_a0 == 0) {
-            if (arg0->unk127 == 0) {
-                temp_s3 = 5;
+    spawn = obj->spawn;
+    if (spawn != NULL) {
+        n = spawn->unk2F;
+        if (n == 0) {
+            if (obj->unk127 == 0) {
+                count = 5;
             } else {
-                temp_s3 = 3;
+                count = 3;
             }
         } else {
-            temp_s3 = temp_a0;
+            count = n;
         }
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_s0->field_0x304[i] = (s32)func_1515D480(temp_s3);
+            obj->unk304[i] = func_1515D480(count);
         }
-        if ((&temp_s0->field_0x300)[i] != 0) {
-            arg0->unk301[0] = temp_s3;
+        if (obj->unk304[i - 1] != 0) {
+            obj->unk301 = count;
         }
-        temp_s0->field_0x314 = func_1515D440();
+        obj->unk314 = func_1515D440();
     }
 }
 
-struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
+void func_15083384(GameObj *obj, s32 arg1) {
+    s32 partSet;
+    s32 group;
+    GameObjExt *ext;
 
-void func_15083384(struct127 *arg0, s32 arg1) {
-    s32 sp1C;
-    s32 temp_v1;
-    u8 *temp_v0;
-
-    sp1C = -1;
+    partSet = -1;
     switch (arg1) {
     case 37:
     case 38:
-        temp_v0 = (u8 *)arg0->unk31C;
-        if (temp_v0 != NULL) {
-            temp_v0[0x1B2] = 1;
+        ext = obj->unk31C;
+        if (ext != NULL) {
+            ext->unk1B2 = 1;
         }
         break;
     case 9:
-        arg0->unk94 |= 2;
+        obj->unk94 |= 2;
         break;
     case 13:
-        sp1C = 0x76;
+        partSet = 0x76;
         break;
     case 14:
-        sp1C = 0x78;
+        partSet = 0x78;
         break;
     case 15:
-        sp1C = 0x77;
-        arg0->unk94 |= 2;
+        partSet = 0x77;
+        obj->unk94 |= 2;
         break;
     case 29:
     case 30:
     case 31:
     case 32:
         {
-        s32 temp;
-        temp = arg1 - 29;
-        arg0->unk94 = 0x1E;
-        if (temp < 2) {
-            arg0->unk94 &= ~0x14;
-        } else {
-            arg0->unk94 &= ~8;
-        }
-        if (temp >> 1) {
-            arg0->unk94 &= ~2;
-        }
+            s32 n;
+
+            n = arg1 - 29;
+            obj->unk94 = 0x1E;
+            if (n < 2) {
+                obj->unk94 &= ~0x14;
+            } else {
+                obj->unk94 &= ~8;
+            }
+            if (n >> 1) {
+                obj->unk94 &= ~2;
+            }
         }
         break;
     case 17: case 18: case 19: case 20: case 21: case 22:
     case 23: case 24: case 25: case 26: case 27: case 28:
-        temp_v1 = (arg1 - 17) >> 2;
-        arg0->unk94 = 0x3E;
-        switch (temp_v1) {
+        group = (arg1 - 17) >> 2;
+        obj->unk94 = 0x3E;
+        switch (group) {
         case 0:
-            arg0->unk94 &= ~4;
+            obj->unk94 &= ~4;
             break;
         case 1:
-            arg0->unk94 &= ~8;
+            obj->unk94 &= ~8;
             break;
         case 2:
-            arg0->unk94 &= ~0x10;
+            obj->unk94 &= ~0x10;
             break;
         }
-        switch (arg1 - temp_v1 * 4 - 17) {
+        switch (arg1 - group * 4 - 17) {
         case 1:
-            arg0->unk94 &= ~2;
+            obj->unk94 &= ~2;
             break;
         case 2:
-            arg0->unk94 &= ~0x20;
+            obj->unk94 &= ~0x20;
             break;
         case 3:
-            arg0->unk94 &= ~0x22;
+            obj->unk94 &= ~0x22;
             break;
         }
         break;
     }
-    if (sp1C != -1) {
-        func_15083568(arg0, sp1C, 0.0f, 0);
+    if (partSet != -1) {
+        func_15083568(obj, partSet, 0.0f, 0);
     }
 }
 
-typedef struct Part15083568 {
-    /* 0x00 */ u8 b0;
-    /* 0x01 */ u8 b1;
-    /* 0x02 */ u8 b2;
-    /* 0x03 */ u8 type;
-    /* 0x04 */ u8 b4;
-    /* 0x05 */ u8 b5;
-    /* 0x06 */ u8 b6;
-    /* 0x07 */ u8 b7;
-    /* 0x08 */ u8 data[6];
-    /* 0x0E */ u8 bE;
-    /* 0x0F */ u8 bF;
-} Part15083568;
-
-struct127 *func_15083AC8(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8);
-extern struct127 *func_15030AF4(struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-
-struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
-    Part15083568 *parts;
-    struct127 *ret;
+/* Creates every part of part set setId (1-based) on parent; returns the last part created. */
+GameObj *func_15083568(GameObj *parent, s32 setId, f32 arg2, s32 arg3) {
+    PartDef *parts;
+    GameObj *ret;
     s32 i;
 
-    /* arg1 is a 1-based set id; decremented in place as in func_150836CC */
-    arg1--;
+    setId--;
     ret = NULL;
-    parts = (Part15083568 *)D_80086CC4[arg1].unk0;
-    for (i = 0; i < D_80086CC4[arg1].unk4; i++) {
+    parts = D_80086CC4[setId].parts;
+    for (i = 0; i < D_80086CC4[setId].count; i++) {
         if (parts[i].type == 0) {
-            ret = func_15083AC8(arg0, parts[i].b1, parts[i].b0, 0, parts[i].b2, parts[i].b4, parts[i].b5, parts[i].b6, arg2);
+            ret = func_15083AC8(parent, parts[i].unk1, parts[i].unk0, 0, parts[i].unk2, parts[i].unk4, parts[i].unk5, parts[i].unk6, arg2);
         } else {
-            ret = func_15030AF4(arg0, parts[i].b0, parts[i].b1, parts[i].b7, parts[i].b4, parts[i].b5, arg3, arg1 + 1, parts[i].b2,
-                                parts[i].data, (parts[i].type == 2) ? parts[i].b6 : -1, parts[i].bE, parts[i].bF);
+            ret = func_15030AF4(parent, parts[i].unk0, parts[i].unk1, parts[i].unk7, parts[i].unk4, parts[i].unk5, arg3, setId + 1, parts[i].unk2,
+                                parts[i].data, (parts[i].type == 2) ? parts[i].unk6 : -1, parts[i].unkE, parts[i].unkF);
         }
     }
     return ret;
-
 }
 
-void func_150836CC(struct127 *arg0, s32 arg1) {
-    struct172 *temp_s2;
+/* Removes the child objects of part set setId (1-based) that belong to parent. */
+void func_150836CC(GameObj *parent, s32 setId) {
+    PartSet *set;
     s32 i;
-    u8 *temp_v1;
+    PartDef *parts;
 
-    func_150302F0(arg0, arg1);
-    arg1--;
-    temp_s2 = &D_80086CC4[arg1];
-    i = 0;
-    temp_v1 = (u8 *)*(s32 *)temp_s2;
-    if (i < temp_s2->unk4) {
-        u8 *temp_s0;
-        struct127 *temp_v0;
+    func_150302F0(parent, setId);
+    setId--;
+    set = &D_80086CC4[setId];
+    parts = set->parts;
+    for (i = 0; i < set->count; i++) {
+        GameObj *child;
 
-        temp_s0 = temp_v1;
-        do {
-            if (temp_s0[3] == 0) {
-                temp_v0 = func_1505F0AC(temp_s0[0]);
-                if (temp_v0 != 0) {
-                    if (temp_v0->unk65 == ((arg0 - D_800CC2D0) + 1)) {
-                        func_15060F28(temp_v0, 0);
-                    }
+        if (parts[i].type == 0) {
+            child = func_1505F0AC(parts[i].unk0);
+            if (child != NULL) {
+                if (child->unk65 == ((parent - D_800CC2D0) + 1)) {
+                    func_15060F28(child, 0);
                 }
             }
-            i++;
-            temp_s0 += 0x10;
-        } while (i < temp_s2->unk4);
+        }
     }
 }
 
-void func_150837D4(s32 arg0, s32 arg1, s32 arg2) {
-    struct127 *obj = &D_800CC2D0[arg0];
-    GameAEB40Def *def;
+/* Sets object objIdx's model to modelId (0xFF for none) and loads its per-model state. */
+void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
+    GameObj *obj = &D_800CC2D0[objIdx];
+    ModelDef *def;
 
-    obj->id = arg1;
-    if (arg1 == 0xFF) {
+    obj->id = modelId;
+    if (modelId == 0xFF) {
         obj->unkE4 = 0;
         obj->unkE6 = 0;
         obj->unkE8 = 0;
         obj->unkD2 = 70;
         obj->unkD4 = 70;
         obj->unkD6 = 0;
-        *(s16 *)((u8 *)obj + 0x160) = 0;
-        *(f32 *)((u8 *)obj + 0xC8) = 0.0f;
+        obj->unk160 = 0;
+        obj->unkC8 = 0.0f;
     } else {
-        *(f32 *)((u8 *)obj + 0xC8) = *(s16 *)((u8 *)D_800D1C90[arg1] + 6);
+        obj->unkC8 = D_800D1C90[modelId]->unk6;
         func_15062BDC(obj, obj->xz_scale, obj->y_scale);
-        def = (GameAEB40Def *)D_800D1C90[arg1];
+        def = D_800D1C90[modelId];
         obj->unk5 = def->unk12;
     }
     obj->unk6 = func_15084D00(obj);
-    if (((u16 *)D_800C5A90)[obj->unk6] != 0) {
-        *(s32 *)((u8 *)obj + 0x58) = func_1502B020(0, 2, 2, obj->unk6);
+    if (D_800C5A90[obj->unk6] != 0) {
+        obj->unk58 = func_1502B020(0, 2, 2, obj->unk6);
     }
 }
 
-extern s32 allocate_memory(s32, s32, s32, s32);
+/* Allocates the animation state block of obj's model. Returns 1 only if the allocation fails. */
+s32 func_150838EC(GameObj *obj, s32 arg1, s32 arg2, f32 arg3) {
+    s32 modelId;
 
-s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
-    s32 idx;
-
-    idx = arg0->id;
-    if (D_800D1588[idx] == 0) {
+    modelId = obj->id;
+    if (D_800D1588[modelId] == 0) {
         return 0;
     }
-    if (((u16 *)D_800C5A90)[idx] == 0) {
+    if (D_800C5A90[modelId] == 0) {
         return 0;
     }
-    *(s32 *)((s32)arg0 + 0x2D0) = allocate_memory(0x3E0, 1, 2, 0);
-    if (*(s32 *)((s32)arg0 + 0x2D0) == 0) {
+    obj->unk2D0 = allocate_memory(0x3E0, 1, 2, 0);
+    if (obj->unk2D0 == NULL) {
         return 1;
     }
-    bzero(*(s32 *)((s32)arg0 + 0x2D0), 0x40);
-    func_1505E650(arg0, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
+    bzero(obj->unk2D0, 0x40);
+    func_1505E650(obj, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
     return 0;
 }
 
-void func_150839B8(struct127 *arg0, s32 arg1, void *arg2) {
-    GameAEB40Def *temp_v0;
-    u16 temp_v1;
+/* Copies model modelId's defaults from its ModelDef into obj; spawn (may be NULL) overrides unk10. */
+void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
+    ModelDef *def;
+    u16 override;
 
-    if (arg1 != 0xFF) {
-        temp_v0 = (GameAEB40Def *)D_800D1C90[arg1];
-        if (arg2 != 0) {
-            temp_v1 = *(u16 *)((u8 *)arg2 + 0x2C);
-            if (temp_v1 == 0) {
-                *(u16 *)((u8 *)arg0 + 0x10) = temp_v0->unk2A;
+    if (modelId != 0xFF) {
+        def = D_800D1C90[modelId];
+        if (spawn != NULL) {
+            override = spawn->unk2C;
+            if (override == 0) {
+                obj->unk10 = def->unk2A;
             } else {
-                if (temp_v1 == 1) {
-                    *(u16 *)((u8 *)arg0 + 0x10) = 0;
+                if (override == 1) {
+                    obj->unk10 = 0;
                 } else {
-                    *(u16 *)((u8 *)arg0 + 0x10) = temp_v1;
+                    obj->unk10 = override;
                 }
             }
-            if (D_800BE9F0 == 0x1D) {
-                *(u16 *)((u8 *)arg0 + 0x10) = 0x3E8;
+            if (D_800BE9F0 == 29) {
+                obj->unk10 = 1000;
             }
         } else {
-            *(u16 *)((u8 *)arg0 + 0x10) = 0;
+            obj->unk10 = 0;
         }
-        *((u8 *)arg0 + 0x13B) = temp_v0->unk39;
-        arg0->unk2CB = temp_v0->unk33;
-        arg0->unk2CC = temp_v0->unk34;
-        arg0->unk5 = temp_v0->unk12;
-        *((u8 *)arg0 + 0x68) = temp_v0->unk3B;
-        *((u8 *)arg0 + 0x69) = temp_v0->unk3C;
-        *(s16 *)((u8 *)arg0 + 0x160) = temp_v0->unk2;
-        if (temp_v0->unk4 != 0) {
-            *(s32 *)((u8 *)arg0 + 0x2C4) = D_80086CAC[temp_v0->unk5];
-            *((u8 *)arg0 + 0x2C8) = temp_v0->unk4;
+        obj->unk13B = def->unk39;
+        obj->unk2CB = def->unk33;
+        obj->unk2CC = def->unk34;
+        obj->unk5 = def->unk12;
+        obj->unk68 = def->unk3B;
+        obj->unk69 = def->unk3C;
+        obj->unk160 = def->unk2;
+        if (def->subModelCount != 0) {
+            obj->modelIds = D_80086CAC[def->subModelList];
+            obj->unk2C8 = def->subModelCount;
         }
-        arg0->unk2C9 = *((u8 *)arg0 + 0x2C8) + temp_v0->unk38;
-        if (temp_v0->unk29 != 0) {
-            func_15036C70(arg0);
+        obj->modelCount = obj->unk2C8 + def->extraModelCount;
+        if (def->unk29 != 0) {
+            func_15036C70(obj);
         }
     }
 }
 
-extern struct127 *func_1505ED34(void);
-
-struct127 *func_15083AC8(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
-    struct127 *obj;
-    GameAEB40ActorSlots *slots;
-    s32 paused;
+/* Creates a child object of parent with model modelId (a part from func_15083568). */
+GameObj *func_15083AC8(GameObj *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, s32 arg5, s32 inheritScale, s32 arg7, f32 arg8) {
+    GameObj *obj;
+    // matching: unused stack slot
+    s32 pad;
+    s32 animFlag;
     s32 blocked;
     s32 i;
 
-    func_1503D774(arg2, 0);
-    func_1503D660(arg2, 0);
+    func_1503D774(modelId, 0);
+    func_1503D660(modelId, 0);
     obj = func_1505ED34();
     obj->unique_id = 0xFF - (obj - D_800CC2D0);
     obj->unkAB = arg3;
-    obj->interaction_state = arg4;
+    obj->interaction_state = state;
     func_150615DC(obj);
     obj->unk232 = 1;
     obj->health = 1;
     obj->immune = 0xFF;
-    obj->unk65 = (arg0 - D_800CC2D0) + 1;
+    obj->unk65 = (parent - D_800CC2D0) + 1;
     obj->unk5C = arg1;
     obj->unk123 = 1;
-    obj->id = arg2;
-    obj->pad66 = arg0->pad66;
-    obj->pad66 &= ~0x10;
-    obj->pad66 |= 0;
-    *((u8 *)obj + 0x1DD) = *((u8 *)arg0 + 0x1DD);
-    *((u8 *)obj + 0x1DE) = *((u8 *)arg0 + 0x1DE);
-    *((u8 *)obj + 0x1DF) = *((u8 *)arg0 + 0x1DE);
-    *((u8 *)obj + 0x1E0) = *((u8 *)arg0 + 0x1E0);
-    *((u8 *)obj + 0x1E1) = *((u8 *)arg0 + 0x1E1);
-    *((u8 *)obj + 0x1E2) = *((u8 *)arg0 + 0x1E2);
-    if (arg6 == 0) {
+    obj->id = modelId;
+    obj->unk66 = parent->unk66;
+    obj->unk66 &= ~0x10;
+    // matching: a no-op |= 0 (a constant flag field upstream) keeps the reload of unk66
+    obj->unk66 |= 0;
+    obj->unk1DD[0] = parent->unk1DD[0];
+    obj->unk1DD[1] = parent->unk1DD[1];
+    obj->unk1DD[2] = parent->unk1DD[1];
+    obj->unk1E0[0] = parent->unk1E0[0];
+    obj->unk1E0[1] = parent->unk1E0[1];
+    obj->unk1E0[2] = parent->unk1E0[2];
+    if (inheritScale == 0) {
         obj->xz_scale = 1.0f;
         obj->y_scale = 1.0f;
         obj->unk154 = 1.0f;
         obj->unk158 = 1.0f;
     } else {
-        obj->xz_scale = arg0->xz_scale;
-        obj->y_scale = arg0->y_scale;
-        obj->unk154 = arg0->unk154;
-        obj->unk158 = arg0->unk158;
+        obj->xz_scale = parent->xz_scale;
+        obj->y_scale = parent->y_scale;
+        obj->unk154 = parent->unk154;
+        obj->unk158 = parent->unk158;
     }
-    obj->unk101 = arg6;
-    obj->padAC = arg5;
-    func_1503D774(arg2, 0);
+    obj->unk101 = inheritScale;
+    obj->unkAC = arg5;
+    func_1503D774(modelId, 0);
     if (arg5 & 1) {
         obj->unkF8 |= 0x4000;
-        *(f32 *)((u8 *)obj + 0x270) = (f32)(u32)*(u16 *)((u8 *)D_800D1C90[arg2] + 0xE) * obj->xz_scale;
+        obj->unk270 = D_800D1C90[modelId]->unkE * obj->xz_scale;
     }
-    paused = 0;
+    animFlag = 0;
     if (arg5 & 2) {
-        paused = 1;
+        animFlag = 1;
     }
-    slots = (GameAEB40ActorSlots *)obj;
     for (i = 0; i <= D_80082FA0; i++) {
-        slots->field_0x304[i] = (s32)func_1515D480(1);
+        obj->unk304[i] = func_1515D480(1);
     }
-    if ((&slots->field_0x300)[i] != 0) {
-        obj->unk301[0] = 1;
+    if (obj->unk304[i - 1] != 0) {
+        obj->unk301 = 1;
     }
-    slots->field_0x314 = func_1515D440();
+    obj->unk314 = func_1515D440();
     if (D_800C35EA == 1) {
         blocked = 1;
     } else {
@@ -1275,35 +1452,26 @@ struct127 *func_15083AC8(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
     if (blocked) {
         D_800C3638 = 0;
     }
-    func_150839B8(obj, arg2, NULL);
-    func_150837D4(obj - D_800CC2D0, arg2, 1);
-    func_150838EC(obj, arg7, paused, arg8);
+    func_150839B8(obj, modelId, NULL);
+    func_150837D4(obj - D_800CC2D0, modelId, 1);
+    func_150838EC(obj, arg7, animFlag, arg8);
     if (blocked) {
         D_800C3638 = 1;
     }
     return obj;
 }
 
-extern u8 D_800D2100;
-
-struct struct258b {
-    u8 pad0[0x28];
-    u8 unk28;
-    u8 pad29[0x7];
-};
-
+/* Returns the lowest unique id (1..255) that no spawn record uses. */
 s32 func_15083DA0(void) {
     s32 id;
     s32 i;
 
     id = 1;
-    i = 0;
-    while (i < (s32)D_800D2100) {
-        if (id == ((struct struct258b *)D_800D20FC)[i].unk28) {
+    for (i = 0; i < D_800D2100; i++) {
+        if (id == D_800D20FC[i].unique_id) {
             id++;
             i = 0;
         }
-        i++;
     }
     if (id >= 0x100) {
         id = 0xFF;
@@ -1311,77 +1479,65 @@ s32 func_15083DA0(void) {
     return id;
 }
 
+/* Returns the index of the spawn record with unique id id, or -1. */
 s32 func_15083E0C(u8 id) {
     s32 i;
-    s32 offset;
-    struct struct258b *base;
-    struct struct258b *ptr;
 
     if (id == 0) {
         return -1;
     }
-
-    i = 0;
-    if ((s32)D_800D2100 > 0) {
-        base = (struct struct258b *)D_800D20FC;
-        offset = 0;
-        ptr = base;
-        do {
-            i++;
-            if (ptr->unk28 == id) {
-                return ((s32)((u8 *)offset + (s32)base) - (s32)base) / 0x30;
-            }
-            offset += sizeof(struct struct258b);
-            ptr++;
-        } while (i < (s32)D_800D2100);
+    for (i = 0; i < D_800D2100; i++) {
+        if (D_800D20FC[i].unique_id == id) {
+            return &D_800D20FC[i] - D_800D20FC;
+        }
     }
     return -1;
 }
 
-struct127 *func_15083E90(u8 arg0) {
-    struct127 *p;
+/* Returns the active object with unique id id, or NULL. */
+GameObj *func_15083E90(u8 id) {
+    GameObj *obj;
     s32 i;
 
-    if (arg0 == 0) {
+    if (id == 0) {
         return NULL;
     }
-    p = D_800CC2D0;
+    // matching: a walking pointer; indexing D_800CC2D0[i] makes IDO unroll the loop differently
+    obj = D_800CC2D0;
     for (i = 0; i < 26; i++) {
-        if (p->interaction_state != 0 && p->unique_id == arg0) {
-            return p;
+        if (obj->interaction_state != 0 && obj->unique_id == id) {
+            return obj;
         }
-        p++;
+        obj++;
     }
     return NULL;
 }
 
-s32 func_15083FB0(u8 arg0) {
-    struct127 *temp;
+/* Returns the slot of the active object with unique id id, or -1. */
+s32 func_15083FB0(u8 id) {
+    GameObj *obj;
 
-    temp = func_15083E90(arg0);
-    if (temp != 0) {
-        return temp - D_800CC2D0;
+    obj = func_15083E90(id);
+    if (obj != NULL) {
+        return obj - D_800CC2D0;
     }
     return -1;
 }
-
-extern struct127 *func_1505EEF4(void);
 
 s32 func_15084000(void) {
-    struct127 *temp = func_1505EEF4();
+    GameObj *obj = func_1505EEF4();
 
-    if (temp != 0) {
-        return temp - D_800CC2D0;
+    if (obj != NULL) {
+        return obj - D_800CC2D0;
     }
     return -1;
 }
 
-extern u16 D_800C57A0[];
-extern s32 func_10004074(void *);
-
-s32 func_15084044(u8 *arg0, s32 arg1) {
+/* Sets up obj's two data pointers for its model'th model: shared with D_800D19A0[id] or private
+   copies, depending on the owning spawn record's mode (unk10 & 3). Returns 1 if an allocation failed. */
+s32 func_15084044(GameObj *obj, s32 model) {
     u8 *slot;
-    u8 *obj;
+    SpawnRecord *spawn;
     s32 mode;
     u8 id;
     s32 val;
@@ -1389,75 +1545,77 @@ s32 func_15084044(u8 *arg0, s32 arg1) {
     s32 i;
     s32 size;
 
-    slot = (u8 *)((s32)arg0 + arg1 * 8);
-    if (arg0[0x65] != 0) {
-        obj = *(u8 **)((u8 *)&D_800CC2D0[arg0[0x65] - 1] + 0x144);
+    // matching: every access to modelData[model] goes through this byte pointer (slot + 0x28C/0x290) or
+    // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the func_15084044 ledger)
+    slot = (u8 *)((s32)obj + model * 8);
+    if (obj->unk65 != 0) {
+        spawn = D_800CC2D0[obj->unk65 - 1].spawn;
     } else {
-        obj = *(u8 **)(arg0 + 0x144);
+        spawn = obj->spawn;
     }
-    id = (*(u8 **)(arg0 + 0x2C4))[arg1];
-    mode = (obj != NULL) ? (obj[0x10] & 3) : 0;
+    id = obj->modelIds[model];
+    mode = (spawn != NULL) ? (spawn->unk10 & 3) : 0;
     if (id == 0) {
         mode = 2;
     }
     if (*(s32 *)(slot + 0x28C) != 0 && *(s32 *)(slot + 0x290) != 0) {
         return 0;
     }
-    val = (&D_800D19A0)[id];
-    if ((&D_800D19A0)[id] == 0) {
+    val = (s32)D_800D19A0[id];
+    if ((s32)D_800D19A0[id] == 0) {
         return 0;
     }
     ret = 0;
     if (mode == 0) {
-        val = (&D_800D19A0)[id];
+        val = (s32)D_800D19A0[id];
         *(s32 *)(slot + 0x290) = val;
         *(s32 *)(slot + 0x28C) = val;
-        ((u8 *)D_800D1F80)[id] += 2;
+        D_800D1F80[id] += 2;
     } else if (mode == 1) {
-        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (&D_800D19A0)[id]) {
-            if (((u8 *)D_800D1F80)[id] != 0) {
+        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (s32)D_800D19A0[id]) {
+            if (D_800D1F80[id] != 0) {
                 size = D_800C57A0[id] * 16;
-                *(s32 *)(slot + 0x28C) = allocate_memory(size, 1, 2, 2);
+                *(s32 *)(slot + 0x28C) = (s32)allocate_memory(size, 1, 2, 2);
                 if (*(s32 *)(slot + 0x28C) == 0) {
                     ret = 1;
                 } else if (*(s32 *)(slot + 0x28C) != 0) {
-                    bcopy((void *)(&D_800D19A0)[id], (void *)*(s32 *)(slot + 0x28C), size);
+                    bcopy((void *)(s32)D_800D19A0[id], (void *)*(s32 *)(slot + 0x28C), size);
                 } else {
-                    *(s32 *)(slot + 0x28C) = (&D_800D19A0)[id];
+                    *(s32 *)(slot + 0x28C) = (s32)D_800D19A0[id];
                 }
             } else {
-                val = (&D_800D19A0)[id];
-        *(s32 *)(slot + 0x290) = val;
-        *(s32 *)(slot + 0x28C) = val;
-                ((u8 *)D_800D1F80)[id] += 2;
+                val = (s32)D_800D19A0[id];
+                *(s32 *)(slot + 0x290) = val;
+                *(s32 *)(slot + 0x28C) = val;
+                D_800D1F80[id] += 2;
             }
         }
         *(s32 *)(slot + 0x290) = *(s32 *)(slot + 0x28C);
     } else if (mode == 2) {
         for (i = 0; i < 2; i++) {
-            if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0 || ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == (&D_800D19A0)[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
-                if (((u8 *)D_800D1F80)[id] != 0) {
+            if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0 || ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == (s32)D_800D19A0[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
+                if (D_800D1F80[id] != 0) {
                     size = D_800C57A0[id] * 16;
-                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = allocate_memory(size, 1, 2, 2);
-                    if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0) {
+                    ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)allocate_memory(size, 1, 2, 2);
+                    if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] == 0) {
                         ret = 1;
                         if (i == 1) {
-                            if (*(s32 *)(slot + 0x28C) != (&D_800D19A0)[id]) {
+                            if (*(s32 *)(slot + 0x28C) != (s32)D_800D19A0[id]) {
                                 func_10004074((void *)*(s32 *)(slot + 0x28C));
                             } else {
-                                ((u8 *)D_800D1F80)[id] -= 1;
+                                D_800D1F80[id] -= 1;
                             }
                             *(s32 *)(slot + 0x28C) = 0;
                         }
                         break;
-                    } else if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] != 0) {
-                        bcopy((void *)(&D_800D19A0)[id], (void *)((s32 (*)[2])(arg0 + 0x28C))[arg1][i], size);
+                    } else if (((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] != 0) {
+                        bcopy((void *)(s32)D_800D19A0[id], (void *)((s32 (*)[2])((u8 *)obj + 0x28C))[model][i], size);
                     } else {
-                        ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
+                        ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)D_800D19A0[id];
                     }
                 } else {
-                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
-                    ((u8 *)D_800D1F80)[id] += 1;
+                    ((s32 (*)[2])((u8 *)obj + 0x28C))[model][i] = (s32)D_800D19A0[id];
+                    D_800D1F80[id] += 1;
                 }
             }
         }
@@ -1465,171 +1623,159 @@ s32 func_15084044(u8 *arg0, s32 arg1) {
     return ret;
 }
 
-extern void func_150843AC(void *arg0, s32 arg1);
-
-void func_1508434C(u8 *arg0) {
+/* Releases the data pointers of all of obj's models. */
+void func_1508434C(GameObj *obj) {
     s32 count;
     s32 i;
 
-    count = arg0[0x2C9];
+    count = obj->modelCount;
     if (count == 0) {
         count = 1;
     }
     for (i = 0; i < count; i++) {
-        func_150843AC(arg0, i);
+        func_150843AC(obj, i);
     }
 }
 
-void func_100043B4(s32 *arg0, u32 arg1);
-extern s32 D_800D19A0;
-extern s32 D_800D1F80[187];
-extern void func_150843AC(void *arg0, s32 arg1);
-void func_150843AC(void *arg0, s32 arg1)
-{
-  unsigned char limit;
-  s32 *p;
-  s32 i;
-  u8 idx;
-  if (((*((s32 *) ((((u8 *) arg0) + (arg1 * 8)) + 0x28C))) == 0) && ((*((s32 *) ((((u8 *) arg0) + (arg1 * 8)) + 0x290))) == 0))
-  {
-    return;
-  }
-  limit = 8;
-  idx = ((u8 *) (*((s32 *) (((u8 *) arg0) + 0x2C4))))[arg1];
-  for (p = (s32 *) (((s8 *) arg0) + (arg1 << 3)), i = 0; i != limit; p++, i += 4)
-  {
-    s32 cur = *((s32 *) (((u8 *) p) + 0x28C));
-    if (cur != 0)
-    {
-      if (cur != (&D_800D19A0)[idx])
-      {
-        func_100043B4((s32 *) cur, 3);
-      }
-      else
-      {
-        ((u8 *) D_800D1F80)[idx] -= 1;
-      }
-      *((s32 *) (((u8 *) p) + 0x28C)) = 0;
-    }
-  }
+/* Releases the data pointers of obj's model'th model: frees private copies, drops the
+   reference count of shared ones. */
+void func_150843AC(GameObj *obj, s32 model) {
+    // matching: a named trip count takes its saved register before the D_800D19A0 base
+    u8 limit;
+    u8 *data;
+    s32 i;
+    u8 id;
 
+    if (obj->modelData[model][0] == NULL && obj->modelData[model][1] == NULL) {
+        return;
+    }
+    limit = 2;
+    id = obj->modelIds[model];
+    for (i = 0; i != limit; i++) {
+        data = obj->modelData[model][i];
+        if (data != NULL) {
+            if (data != D_800D19A0[id]) {
+                func_100043B4((s32 *)data, 3);
+            } else {
+                D_800D1F80[id] -= 1;
+            }
+            obj->modelData[model][i] = NULL;
+        }
+    }
 }
 
-
-void func_15084488(u8 *arg0, s32 arg1, s32 arg2) {
+/* Loads model spawn->type and all of its sub-models. */
+void func_15084488(SpawnRecord *spawn, s32 arg1, s32 arg2) {
     s32 count;
     s32 i;
-    GameAEB40Def *temp_v0;
-    u8 *ptr;
+    ModelDef *def;
     u8 *list;
-    s32 idx;
+    s32 modelId;
 
-    idx = arg0[4];
-    if (idx != 0xFF) {
-        func_1503D774(idx, arg2);
-        temp_v0 = (GameAEB40Def *)D_800D1C90[idx];
-        list = arg0 + 4;
-        count = temp_v0->unk4;
+    modelId = spawn->type;
+    if (modelId != 0xFF) {
+        func_1503D774(modelId, arg2);
+        def = D_800D1C90[modelId];
+        list = &spawn->type;
+        count = def->subModelCount;
         if (count == 0) {
             count = 1;
         } else {
-            list = (u8 *)D_80086CAC[temp_v0->unk5];
+            list = D_80086CAC[def->subModelList];
         }
-        i = 0;
-        ptr = list;
-        count += temp_v0->unk38;
-        if (count > 0) {
-            do {
-                func_1503D774(*ptr, arg2);
-                func_1503D660(*ptr, arg2);
-                i++;
-                ptr++;
-            } while (i != count);
+        count += def->extraModelCount;
+        for (i = 0; i < count; i++) {
+            func_1503D774(list[i], arg2);
+            func_1503D660(list[i], arg2);
         }
     }
 }
 
-void func_15084558(u8 *arg0) {
+/* Releases obj's model data, and frees each of its models (and their tables) that no other
+   active object still uses. */
+void func_15084558(GameObj *self) {
     s32 id;
     u8 *list;
     s32 i;
     s32 j;
     s32 count;
     s32 k;
-    s32 uniq;
-    s32 freeA;
-    s32 freeB;
-    struct127 *obj;
-    u8 ocount;
-    u8 *olist;
-    s32 c;
-    s32 a;
-    s32 p;
-    s32 q;
+    s32 unique;
+    s32 freeData;
+    s32 freeDef;
+    GameObj *obj;
+    u8 otherCount;
+    u8 *otherList;
+    // matching: unused stack slot
+    s32 pad;
+    s32 data;
+    u8 *block;
+    s32 table;
 
-    id = arg0[4];
-    if (id != 0xFF && (&D_800D19A0)[id] != 0) {
-        count = arg0[0x2C9];
-        list = *(u8 **)(arg0 + 0x2C4);
-        func_1508434C(arg0);
+    id = self->id;
+    if (id != 0xFF && D_800D19A0[id] != NULL) {
+        count = self->modelCount;
+        list = self->modelIds;
+        func_1508434C(self);
         for (i = 0; i < count; i++) {
-            uniq = 1;
-            freeA = 1;
-            freeB = 1;
+            unique = 1;
+            freeData = 1;
+            freeDef = 1;
+            // matching: IDO emits this empty duplicate scan; it must stay
             for (j = 0; j < i; j++) {
                 if (list[j] == list[i]) {
                 }
             }
             for (j = 0; j < 25; j++) {
-                if (j != ((struct127 *)arg0 - D_800CC2D0)) {
+                if (j != (self - D_800CC2D0)) {
                     obj = &D_800CC2D0[j];
                     if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk5 != 2) {
-                        ocount = obj->unk2C9;
-                        olist = *(u8 **)((u8 *)obj + 0x2C4);
-                        for (k = 0; k < ocount; k++) {
-                            if (olist[k] == list[i]) {
-                                uniq = 0;
+                        otherCount = obj->modelCount;
+                        otherList = obj->modelIds;
+                        for (k = 0; k < otherCount; k++) {
+                            if (otherList[k] == list[i]) {
+                                unique = 0;
                             }
-                            if (D_800D1588[olist[k]] == D_800D1588[list[i]] && D_800D1588[olist[k]] != 0) {
-                                freeA = 0;
+                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != 0) {
+                                freeData = 0;
                             }
-                            if (D_800D1C90[olist[k]] == D_800D1C90[list[i]] && D_800D1C90[olist[k]] != NULL) {
-                                freeB = 0;
+                            if (D_800D1C90[otherList[k]] == D_800D1C90[list[i]] && D_800D1C90[otherList[k]] != NULL) {
+                                freeDef = 0;
                             }
                         }
                     }
                 }
             }
-            if (freeA && D_800D1588[list[i]] != 0) {
-                a = D_800D1588[list[i]];
+            if (freeData && D_800D1588[list[i]] != 0) {
+                data = D_800D1588[list[i]];
                 {
-                    func_100043B4((s32 *)(a - 0x10), 3);
+                    func_100043B4((s32 *)(data - 0x10), 3);
                     for (k = 0; k < 187; k++) {
-                        if (a == D_800D1588[k]) {
+                        if (data == D_800D1588[k]) {
                             D_800D1588[k] = 0;
                         }
                     }
                 }
             }
-            if (freeB) {
-                p = ((s32 *)D_800D1C90)[list[i]];
-                if (p != 0) {
-                    p -= 0x10;
-                    func_100043B4((s32 *)p, 3);
+            if (freeDef) {
+                block = (u8 *)D_800D1C90[list[i]];
+                if (block != NULL) {
+                    block -= 0x10;  // the allocation starts 0x10 bytes before the data
+                    func_100043B4((s32 *)block, 3);
                     D_800D1C90[list[i]] = NULL;
                 }
             }
-            if (uniq) {
-                if ((&D_800D19A0)[list[i]] != 0) {
+            if (unique) {
+                if (D_800D19A0[list[i]] != NULL) {
                     if (D_800C5C08[id] != 0) {
                         func_10004074((void *)D_800C5C08[id]);
                         D_800C5C08[id] = 0;
                         func_10004074((void *)D_800C6070[id]);
                         D_800C6070[id] = 0;
                     }
-                    q = D_800C6360[id];
-                    if (q != 0) {
-                        func_10004074((void *)q);
+                    table = D_800C6360[id];
+                    if (table != 0) {
+                        func_10004074((void *)table);
                         D_800C6360[id] = 0;
                     }
                 }
@@ -1638,120 +1784,108 @@ void func_15084558(u8 *arg0) {
     }
 }
 
-typedef struct {
-    u8 pad[0x1C9];
-    u8 unk1C9;
-    u8 pad2[0x2C4 - 0x1CA];
-    u8 *unk2C4;
-    u8 unk2C8;
-} GameAEB40Struct;
+/* Returns obj's current model id (modelIds[unk1C9 - 1], or the first). */
+u8 func_150849A0(GameObj *obj) {
+    s32 current = obj->unk1C9;
 
-u8 func_150849A0(GameAEB40Struct *a0) {
-    s32 v1 = a0->unk1C9;
-    if (v1 != 0) {
-        return a0->unk2C4[v1 - 1];
+    if (current != 0) {
+        return obj->modelIds[current - 1];
     }
-    return a0->unk2C4[0];
+    return obj->modelIds[0];
 }
 
-u8 func_150849CC(GameAEB40Struct *a0, s32 *a1) {
-    s32 v1;
-    s32 v0;
-    v0 = a0->unk1C9;
-    if (v0 != 0) {
-        v1 = v0 - 1;
+/* Like func_150849A0, falling back to modelIds[unk2C8 - 1]; stores the index in *outIndex. */
+u8 func_150849CC(GameObj *obj, s32 *outIndex) {
+    s32 index;
+    s32 n;
+
+    n = obj->unk1C9;
+    if (n != 0) {
+        index = n - 1;
     } else {
-        v0 = a0->unk2C8;
-        if (v0 != 0) {
-            v1 = v0 - 1;
+        n = obj->unk2C8;
+        if (n != 0) {
+            index = n - 1;
         } else {
-            v1 = 0;
+            index = 0;
         }
     }
-    if (a1 != 0) {
-        *a1 = v1;
+    if (outIndex != NULL) {
+        *outIndex = index;
     }
-    return a0->unk2C4[v1];
+    return obj->modelIds[index];
 }
 
-extern s32 D_800C5C08[187];
-extern u16 D_800C5628[];
-extern void *D_800C5338[];
-extern void func_1510D720(s32 arg0);
-extern s32 func_10004074(void *);
-
+/* Ticks the D_800D2040 countdowns; a model whose countdown expires while it has no D_800C5C08
+   table is unloaded and every object's references to it are dropped. */
 void func_15084A18(void) {
     s32 i;
     s32 m;
-    struct127 *obj;
+    GameObj *obj;
     s32 j;
     s32 k;
-    s32 *e;
-    u8 *p;
+    ModelReloc *relocs;
+    u8 *timer;
 
-    p = (u8 *)D_800D2040;
-    for (i = 0; i < 187; i++, p++) {
-        if (*p == 0xFF || *p == 0) {
+    timer = D_800D2040;
+    for (i = 0; i < 187; i++, timer++) {
+        if (*timer == 0xFF || *timer == 0) {
             continue;
         }
-        if (*p == 1) {
-            if (((s32 *)&D_800D19A0)[i] != 0 && D_800C5C08[i] == 0) {
+        if (*timer == 1) {
+            if (D_800D19A0[i] != NULL && D_800C5C08[i] == 0) {
                 for (m = 0; m < 25; m++) {
                     obj = &D_800CC2D0[m];
                     if (obj->interaction_state != 0) {
-                        for (j = 0; j < obj->unk2C9; j++) {
+                        for (j = 0; j < obj->modelCount; j++) {
                             for (k = 0; k < 2; k++) {
-                                if (((s32 (*)[2])((u8 *)obj + 0x28C))[j][k] == ((s32 *)&D_800D19A0)[i]) {
-                                    ((s32 (*)[2])((u8 *)obj + 0x28C))[j][k] = 0;
+                                if (obj->modelData[j][k] == D_800D19A0[i]) {
+                                    obj->modelData[j][k] = NULL;
                                 }
                             }
-                            if (i == (*(u8 **)((u8 *)obj + 0x2C4))[j]) {
+                            if (i == obj->modelIds[j]) {
                                 func_150843AC(obj, j);
                             }
                         }
                     }
                 }
-                e = D_800C5338[i];
+                relocs = D_800C5338[i];
                 for (k = 0; k < D_800C5628[i]; k++) {
-                    if ((u32)e[k * 3] >= 0x10000000U) {
-                        func_1510D720(e[k * 3 + 1]);
+                    if (relocs[k].unk0 >= 0x10000000U) {
+                        func_1510D720(relocs[k].unk4);
                     }
                 }
-                func_10004074((void *)(((s32 *)&D_800D19A0)[i] - 0x38));
-                ((u8 *)D_800D1F80)[i * 1] = 0;
-                ((s32 *)&D_800D19A0)[i] = 0;
+                func_10004074(D_800D19A0[i] - 0x38);
+                D_800D1F80[i] = 0;
+                D_800D19A0[i] = NULL;
             }
         }
-        (*p)--;
+        (*timer)--;
     }
 }
 
-void func_15084C30(struct127 *arg0) {
-    struct197 *sp1C;
-    f32 temp_f0;
+void func_15084C30(GameObj *obj) {
+    struct197 *anim;
+    f32 phase;
 
-    if (arg0->id == 0x94) {
-        sp1C = arg0->unk2D0;
-        temp_f0 = (f32)((u32)func_150ADA20() % (u32)(s32)sp1C->unk18);
-        sp1C->unk8 = temp_f0;
+    if (obj->id == 0x94) {
+        anim = obj->unk2D0;
+        phase = (u32)func_150ADA20() % (s32)anim->unk18;
+        anim->unk8 = phase;
     }
 }
 
-
-s32 func_15084CB0(s32 arg0) {
+/* Returns the index of modelId in D_800BE598, or 0. */
+s32 func_15084CB0(s32 modelId) {
     s32 ret;
     s32 i;
 
     ret = 0;
-    i = 0;
-    if ((s32)D_800BE590 > 0) {
-        do {
-            if (arg0 == D_800BE598[i]) {
-                ret = i;
-                break;
-            }
-            i++;
-        } while (i < (s32)D_800BE590);
+    for (i = 0; i < D_800BE590; i++) {
+        if (modelId == D_800BE598[i]) {
+            ret = i;
+            break;
+        }
     }
     return ret;
 }

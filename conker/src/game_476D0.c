@@ -3,75 +3,90 @@
 #include "functions.h"
 #include "variables.h"
 
-struct struct1501A764Sub {
-    u8 pad0[4];
-    s16 unk4;
-    u8 pad6[6];
-    s16 unkC;
-    u8 padE[2];
-};
+/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these. */
+typedef struct RenderView {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 onScreen;
+    /* 0x002 */ u8 pad2[2];
+    /* 0x004 */ f32 width;
+    /* 0x008 */ f32 height;
+    /* 0x00C */ f32 halfWidth;
+    /* 0x010 */ f32 halfHeight;
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ u8 pad1C[8];
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ f32 centerX;
+    /* 0x038 */ f32 centerY;
+    /* 0x03C */ u8 pad3C[4];
+    /* 0x040 */ Vp viewports[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x060 */ f32 aspect;
+    /* 0x064 */ f32 unk64;
+    /* 0x068 */ f32 unk68;
+    /* 0x06C */ f32 fovX; // degrees
+    /* 0x070 */ f32 fovY; // degrees
+    /* 0x074 */ f32 frustumFovX;
+    /* 0x078 */ f32 frustumFovY;
+    /* 0x07C */ f32 pixelTanX; // tan(fovX / 2) / halfWidth
+    /* 0x080 */ f32 pixelTanY; // tan(fovY / 2) / halfHeight
+    /* 0x084 */ f32 unk84;
+    /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
+    /* 0x0B8 */ u8 padB8[0xC8];
+} RenderView; // size 0x180
 
-struct struct1501A764 {
-    u8 pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0x144];
-};
+/* variables.h types these as s32: D_800BE628 and D_800BE62C point at the per-view RenderViews and Vps, and
+ * D_800D9D10 holds the per-view 4x4 matrices. */
+#define RENDER_VIEWS ((RenderView *)D_800BE628)
+#define VIEWPORTS ((Vp *)D_800BE62C)
+#define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
 
-struct struct1501A764c {
-    u8 pad0[0x40];
-    struct struct1501A764Sub unk40[1];
-    u8 pad50[0x130];
-};
+/* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
+#define VIEW_WIDTHS (&D_800BE638)
 
-void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3);
-s32 func_1501AE94(s32 arg0);
-void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
+s32 func_1501AE94(s32 viewIndex);
+void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 
-void func_1501A220(s32 arg0, s32 arg1) {
-    s32 phi_s0;
+/* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
+ * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
+void func_1501A220(s32 numPlayers, s32 arg1) {
+    s32 numViews;
     s32 i;
-    s32 var_s1;
-    f32 temp_f0;
-    f32 temp_f2;
-    s32 temp_f16;
+    s32 layout;
+    f32 width;
+    f32 scaled;
+    s32 scaledWidth;
 
-    D_80082FA0 = arg0;
-    var_s1 = D_80082FA0;
+    D_80082FA0 = numPlayers;
+    layout = D_80082FA0;
 
-    if (var_s1 == 0) {
-        phi_s0 = 1;
+    if (layout == 0) {
+        numViews = 1;
     } else {
-        phi_s0 = var_s1 + 2;
+        numViews = layout + 2;
     }
 
-    D_800BE628 = allocate_memory(phi_s0 * 0x180, 1, 1, 0);
-    D_800BE62C = allocate_memory(phi_s0 * 16, 1, 1, 0);
+    D_800BE628 = allocate_memory(numViews * sizeof(RenderView), 1, 1, 0);
+    D_800BE62C = allocate_memory(numViews * sizeof(Vp), 1, 1, 0);
 
     if (D_80082FA0 == 1) {
-        temp_f0 = (f32)D_800BE63C[0] - 2.0f;
-        temp_f2 = temp_f0;
-        temp_f2 *= *(f32 *)&D_800968E0;
-        temp_f16 = temp_f2;
-        D_800BE6B8 = (f32)(temp_f16 - (temp_f16 % 4)) / temp_f0;
+        width = (f32)VIEW_WIDTHS[1] - 2.0f;
+        scaled = width;
+        scaled *= *(f32 *)&D_800968E0; // matching: 0.8f; the rodata load and in-place multiply pick IDO's FP regs
+        scaledWidth = scaled;
+        D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
     }
 
     func_150006E0(D_800BE9F0);
 
-    var_s1 = D_80082FA0;
-    i = 0;
-    if (var_s1 >= 0) {
-        do {
-            func_1501A8C0(i, var_s1, 1023, 0);
-            var_s1 = D_80082FA0;
-            i++;
-        } while (i <= var_s1);
+    for (i = 0; i <= (layout = D_80082FA0); i++) {
+        func_1501A8C0(i, layout, 1023, 0);
     }
 
-    if (var_s1 != 0) {
+    if (layout != 0) {
         func_1501A8C0(i, 0, 1023, 0);
     }
 
@@ -80,381 +95,270 @@ void func_1501A220(s32 arg0, s32 arg1) {
     D_800BE635 = 0;
     func_1510B070(arg1);
 }
-// NON-MATCHING: 80% there
-// void func_1501A220(s32 arg0, s32 arg1) {
-//     s32 phi_s0;
-//     s32 i;
-//
-//     f32 temp_f0;
-//     s32 temp_f16;
-//
-//     D_80082FA0 = arg0;
-//
-//     if (arg0 == 0) {
-//         phi_s0 = 1;
-//     } else {
-//         phi_s0 = arg0 + 2;
-//     }
-//     D_800BE628 = allocate_memory((phi_s0 * 3) << 7, 1, 1, 0);
-//     D_800BE62C = allocate_memory(phi_s0 * 16, 1, 1, 0);
-//     if (D_80082FA0 == 1) {
-//         temp_f0 = D_800BE63C - 2.0f;
-//         temp_f16 = temp_f0 * D_800968E0;
-//         phi_s0 = temp_f16 & 3;
-//         if ((temp_f16 < 0) && ((temp_f16 & 3) != 0)) {
-//             phi_s0 -= 4;
-//         }
-//         D_800BE6B8 = (temp_f16 - phi_s0) / temp_f0;
-//     }
-//
-//     func_150006E0(D_800BE9F0);
-//
-//     for(i = 0; i <= D_80082FA0; i++) {
-//         func_1501A8C0(i, D_80082FA0, 1023, 0);
-//     }
-//     if (D_80082FA0 != 0) {
-//         func_1501A8C0(i, 0, 1023, 0);
-//     }
-//
-//     D_800BE617 = 1;
-//     D_800BE614 = 1;
-//     D_800BE635 = 0;
-//     func_1510B070(arg1);
-// }
 
-typedef union Game476D0DisplayCommandA {
-    struct {
-        u32 word0;
-        u32 word1;
-    } words;
-    u64 alignment;
-} Game476D0DisplayCommandA;
+extern Gfx D_8002C930[];
+extern Gfx *D_800BE9C8[];
 
-typedef struct Game476D0RenderView {
-    u8 unknown00[0x40];
-    Vp viewports[2];
-    u8 unknown60[0x120];
-} Game476D0RenderView;
-
-extern u8 D_8002C930;
-extern Game476D0DisplayCommandA *D_800BE9C8[];
-
+/* Writes the start of each framebuffer's display list (segment 0, the setup list D_8002C930, the depth image
+ * and view 0's viewport for that framebuffer) and stores where each one ends in D_800BE9D8. */
 void func_1501A39C(void) {
     s32 i;
-    Game476D0DisplayCommandA *gdl;
+    Gfx *gfx;
 
     for (i = 0; i < 2; i++) {
-        gdl = D_800BE9C8[i];
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDE000000; command->words.word1 = (u32)&D_8002C930; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xFE000000; command->words.word1 = D_800BE9C4; }
-        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDC080008; command->words.word1 = (u32)&((Game476D0RenderView *)D_800BE628)[0].viewports[i]; }
-        D_800BE9D8[i] = (s32)gdl;
+        gfx = D_800BE9C8[i];
+        gSPSegment(gfx++, 0, 0);
+        gSPSegment(gfx++, 0, 0);
+        gSPDisplayList(gfx++, D_8002C930);
+        gDPSetDepthImage(gfx++, D_800BE9C4);
+        gSPViewport(gfx++, &RENDER_VIEWS[0].viewports[i]);
+        D_800BE9D8[i] = (s32)gfx;
     }
 }
-// NON-MATCHING: something along these lines
-// extern Gfx* D_800BE9C8;
-// extern s32 D_8002C930;
-// Gfx *func_1501A39C(void) {
-//     s32 i;
-//     Gfx *tmp = D_800BE9C8;
-//     for (i = 0; i < 3; i++) {
-//         gSPSegment(tmp++, 0x00, 0x00000000);
-//         gSPSegment(tmp++, 0x00, 0x00000000);
-//         gSPDisplayList(tmp++, D_8002C930);
-//         gDPSetDepthImage(tmp++, D_800BE9C4);
-//         gSPViewport(tmp++, D_800BE628 + i + 0x40);
-//     }
-//     return tmp;
-// }
 
-typedef union Game476D0DisplayCommand {
-    struct {
-        u32 word0;
-        u32 word1;
-    } words;
-    u64 alignment;
-} Game476D0DisplayCommand;
-
-void func_1501AF44(f32 *, f32 *, f32 *, f32 *);
-
-s32 func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = 0xE7000000; command->words.word1 = 0; }
-    if (arg1 == 0xFF) {
-        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(0) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(D_800BE624) * 4.0f), 0, 12); }
+/* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
+ * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
+// matching: functions.h types the display list as s32 and IDO's -g3 frame only fits one Gfx * per command,
+// so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
+// on one line: -g3 line numbers steer the scheduler).
+s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {
+    { Gfx *cmd = (Gfx *)gfx; gfx += sizeof(Gfx); cmd->words.w0 = _SHIFTL(G_RDPPIPESYNC, 24, 8); cmd->words.w1 = 0; }
+    if (viewIndex == 0xFF) {
+        Gfx *cmd = (Gfx *)gfx;
+        gfx += sizeof(Gfx);
+        cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL(2 * 4, 12, 12) | _SHIFTL(0 * 4, 0, 12);
+        cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) |
+                        _SHIFTL((s32)((f32)D_800BE624 * 4.0f), 0, 12);
     } else {
-        f32 ulx;
-        f32 lrx;
-        f32 uly;
-        f32 lry;
-        u8 *record;
+        f32 left;
+        f32 right;
+        f32 top;
+        f32 bottom;
+        RenderView *view;
 
-        record = (u8 *)D_800BE628 + arg1 * 0x180;
-        ulx = *(f32 *)(record + 0x2C);
-        lrx = *(f32 *)(record + 0x30);
-        uly = *(f32 *)(record + 0x24);
-        if (arg4 != 0) {
-            if ((f32)arg4 < *(f32 *)(record + 0x28)) {
-                lry = (f32)arg4;
+        view = &RENDER_VIEWS[viewIndex];
+        left = view->left;
+        right = view->right;
+        top = view->top;
+        if (maxBottom != 0) {
+            if ((f32)maxBottom < view->bottom) {
+                bottom = (f32)maxBottom;
             } else {
-                lry = *(f32 *)(record + 0x28);
+                bottom = view->bottom;
             }
         } else {
-            lry = *(f32 *)(record + 0x28);
+            bottom = view->bottom;
         }
-        func_1501AF44(&ulx, &uly, &lrx, &lry);
-        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(ulx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(uly) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(lrx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(lry) * 4.0f), 0, 12); }
+        func_1501AF44(&left, &top, &right, &bottom);
+        {
+            Gfx *cmd = (Gfx *)gfx;
+            gfx += sizeof(Gfx);
+            cmd->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) | _SHIFTL((s32)(left * 4.0f), 12, 12) |
+                            _SHIFTL((s32)(top * 4.0f), 0, 12);
+            cmd->words.w1 = _SHIFTL(mode, 24, 2) | _SHIFTL((s32)(right * 4.0f), 12, 12) |
+                            _SHIFTL((s32)(bottom * 4.0f), 0, 12);
+        }
     }
-    return arg0;
+    return gfx;
 }
 
-Gfx *func_1501A680(Gfx *arg0) {
-    gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
-    return arg0;
+/* Sets the color image to the current framebuffer. */
+Gfx *func_1501A680(Gfx *gfx) {
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
+    return gfx;
 }
 
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d) {
-    if (a < 3) {
-        a = 2;
+/* Fills a rectangle clamped to the drawable framebuffer area. */
+Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry) {
+    if (ulx < 3) {
+        ulx = 2;
     }
-    if (b <= 0) {
-        b = 0;
+    if (uly <= 0) {
+        uly = 0;
     }
-    if (c >= (D_800BE620 - 2)) {
-        c = D_800BE620 - 2;
+    if (lrx >= D_800BE620 - 2) {
+        lrx = D_800BE620 - 2;
     }
-    if (d >= D_800BE624) {
-        d = D_800BE624;
+    if (lry >= D_800BE624) {
+        lry = D_800BE624;
     }
 
-    gDPFillRectangle(arg0++, a, b, c, d);
-    return arg0;
+    gDPFillRectangle(gfx++, ulx, uly, lrx, lry);
+    return gfx;
 }
 
-void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32* arg4, f32* arg5, f32* arg6, f32* arg7);
-void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6) {
-    f32 sp34;
-    f32 sp30;
-    f32 sp2C;
-    f32 sp28;
+void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
-    func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg0 << 6)), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
-    sp28 = 1.0f / sp28;
-    *arg4 = (((struct struct1501A764 *)D_800BE628)[arg0].unk34 + (((struct struct1501A764 *)D_800BE628)[arg0].unkC + 5.0f) * sp34 * sp28);
-    *arg5 = (((struct struct1501A764 *)D_800BE628)[arg0].unk38 - ((((struct struct1501A764 *)D_800BE628)[arg0].unk10 + 5.0f) * sp30 * sp28));
-    *arg6 = (((sp2C * sp28) * (f32)((struct struct1501A764c *)D_800BE628)[arg0].unk40[D_800BE9C0].unk4) + (f32)((struct struct1501A764c *)D_800BE628)[arg0].unk40[D_800BE9C0].unkC) * 32.0f;
+/* Projects a world point through view's matrix to screen x, y and a depth value. */
+void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
+    f32 projX;
+    f32 projY;
+    f32 projZ;
+    f32 invW;
+
+    func_150A7A00(VIEW_MATRICES[view], x, y, z, &projX, &projY, &projZ, &invW);
+    invW = 1.0f / invW;
+    *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
+    *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;
+    *depth = (projZ * invW * RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vscale[2] +
+              RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f;
 }
-// void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6) {
-//     f32 sp34;
-//     f32 sp30;
-//     f32 sp2C;
-//     f32 sp28;
-//     struct140 *temp_v0_2;
-//
-//     func_150A7A00(arg1, arg2, &D_800D9D10 + (arg0 << 6), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
-//     sp28 = 1.0f / sp28;
-//     // temp_v1 = arg0 * 0x180;
-//     temp_v0_2 = &D_800BE628[arg0];
-//     // sp28 = temp_f8;
-//     *arg4 = (((temp_v0_2->unkC + 5.0f) * sp34 * sp28) + temp_v0_2->unk34);
-//     temp_v0_2 = &D_800BE628 [arg0];
-//     *arg5 = (temp_v0_2->unk38 - ((temp_v0_2->unk10 + 5.0f) * sp30 * sp28));
-//     temp_v0_2 = &D_800BE628[arg0].unk50[D_800BE9C0];  // (D_800BE9C0 * 0x10);
-//     *arg6 = (((f32) temp_v0_2->unk4C + (sp2C * sp28 * (f32) temp_v0_2->unk44)) * 32.0f);
-// }
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[2];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[4];
-    Vp unk40[2];
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    u8 pad88[0xF8];
-} struct1501A8C0;
 
 extern f32 D_80082FA8[];
 extern s16 D_800BE668[][5][2];
 extern u8 D_800BE630[];
-void func_1501B0A0(s32 arg0, s32 arg1);
+void func_1501B0A0(s32 view, s32 layout);
 
-void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    f32 sp38;
-    f32 sp34;
-    f32 temp_f20;
-    f32 temp_f2;
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 t;
-    f32 t2;
-    s16 *tbl;
+/* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
+ * projection and viewport, with depth range zRange. */
+void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
+    f32 pad[3]; // matching: unused locals that size the -g3 stack frame
+    f32 halfFov;
+    f32 sine;
+    f32 fullWidth;
+    f32 fullAspect;
+    f32 aspect;
+    f32 vpWidth;
+    f32 vpHeight;
+    s16 *center;
 
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk4 = (&D_800BE638)[arg1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk8 = ((s32 *)&D_800BE650)[arg1];
-    if (arg1 != 0) {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 -= 2.0f;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk8 -= 2.0f;
+    RENDER_VIEWS[view].width = VIEW_WIDTHS[layout];
+    RENDER_VIEWS[view].height = D_800BE650[layout];
+    if (layout != 0) {
+        RENDER_VIEWS[view].width -= 2.0f;
+        RENDER_VIEWS[view].height -= 2.0f;
     }
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk64 = D_80082FA8[arg1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk68 = 2.0f;
-    if (arg1 == 1) {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 *= D_800BE6B8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 103.0199966f * D_800BE6B8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+    RENDER_VIEWS[view].unk64 = D_80082FA8[layout];
+    RENDER_VIEWS[view].unk68 = 2.0f;
+    if (layout == 1) {
+        RENDER_VIEWS[view].width *= D_800BE6B8;
+        RENDER_VIEWS[view].fovX = 103.02f * D_800BE6B8;
+        RENDER_VIEWS[view].fovY = 50.0f;
     } else {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 60.59999847f;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+        RENDER_VIEWS[view].fovX = 60.6f;
+        RENDER_VIEWS[view].fovY = 50.0f;
     }
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk74 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk78 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70;
-    tbl = D_800BE668[arg1][arg0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk60 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unkC = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 * 0.5f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk10 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 * 0.5f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk34 = tbl[0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk38 = tbl[1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk2C = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 - ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk24 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 - ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk30 = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 + ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk28 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 + ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
+    RENDER_VIEWS[view].frustumFovX = RENDER_VIEWS[view].fovX;
+    RENDER_VIEWS[view].frustumFovY = RENDER_VIEWS[view].fovY;
+    center = D_800BE668[layout][view];
+    RENDER_VIEWS[view].aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
+    RENDER_VIEWS[view].halfWidth = RENDER_VIEWS[view].width * 0.5f;
+    RENDER_VIEWS[view].halfHeight = RENDER_VIEWS[view].height * 0.5f;
+    RENDER_VIEWS[view].centerX = center[0];
+    RENDER_VIEWS[view].centerY = center[1];
+    RENDER_VIEWS[view].left = RENDER_VIEWS[view].centerX - RENDER_VIEWS[view].halfWidth;
+    RENDER_VIEWS[view].top = RENDER_VIEWS[view].centerY - RENDER_VIEWS[view].halfHeight;
+    RENDER_VIEWS[view].right = RENDER_VIEWS[view].centerX + RENDER_VIEWS[view].halfWidth;
+    RENDER_VIEWS[view].bottom = RENDER_VIEWS[view].centerY + RENDER_VIEWS[view].halfHeight;
     if (arg3 != 0) {
-        func_1501B0A0(arg0, arg1);
+        func_1501B0A0(view, layout);
     } else {
-        temp_f2 = D_800BE638;
-        temp_f12 = temp_f2 / (f32)((s32 *)&D_800BE650)[0];
-        temp_f14 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk14 = (((struct1501A8C0 *)D_800BE628)[arg0].unk4 / temp_f2) * (temp_f12 / temp_f14);
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk18 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 / (f32)((s32 *)&D_800BE650)[0];
+        fullWidth = VIEW_WIDTHS[0];
+        fullAspect = fullWidth / (f32)D_800BE650[0];
+        aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
+        RENDER_VIEWS[view].unk14 = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
+        RENDER_VIEWS[view].unk18 = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
     }
-    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.5f * 0.01745329238f;
-    sp34 = sinf(temp_f20);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk7C = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unkC);
-    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.5f * 0.01745329238f;
-    sp34 = sinf(temp_f20);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk80 = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unk10);
-    t = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 + 10.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[0] = t + t;
-    t2 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 + 10.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[1] = t2 + t2;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[2] = arg2 >> 1;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[3] = 0;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 * 4.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[1] = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 * 4.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[2] = arg2 >> 1;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[3] = 0;
-    do {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0] = ((Vp *)D_800BE62C)[arg0];
+    halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
+    sine = sinf(halfFov);
+    RENDER_VIEWS[view].pixelTanX = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfWidth);
+    halfFov = RENDER_VIEWS[view].fovY * 0.5f * 0.01745329238f;
+    sine = sinf(halfFov);
+    RENDER_VIEWS[view].pixelTanY = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfHeight);
+    vpWidth = RENDER_VIEWS[view].width + 10.0f;
+    VIEWPORTS[view].vp.vscale[0] = vpWidth + vpWidth;
+    vpHeight = RENDER_VIEWS[view].height + 10.0f;
+    VIEWPORTS[view].vp.vscale[1] = vpHeight + vpHeight;
+    VIEWPORTS[view].vp.vscale[2] = zRange >> 1;
+    VIEWPORTS[view].vp.vscale[3] = 0;
+    VIEWPORTS[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
+    VIEWPORTS[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
+    VIEWPORTS[view].vp.vtrans[2] = zRange >> 1;
+    VIEWPORTS[view].vp.vtrans[3] = 0;
+    do { // matching: the loop scope changes IDO's register allocation for the copies below
+        RENDER_VIEWS[view].viewports[D_800BE9C0] = VIEWPORTS[view];
     } while (0);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk40[!D_800BE9C0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk84 = 1.0f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk1 = func_1501AE94(arg0);
-    func_1501AF44(&((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk2C, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk24,
-                  &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk30, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk28);
-    func_1510B32C(arg0, 0.0f, 0.0f, ((struct1501A8C0 *)D_800BE628)[arg0].unk84);
-    D_800BE630[arg0] = arg0;
+    RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
+    RENDER_VIEWS[view].unk84 = 1.0f;
+    RENDER_VIEWS[view].onScreen = func_1501AE94(view);
+    // matching: index + base (not RENDER_VIEWS[view]) sets IDO's addu operand order
+    func_1501AF44(&(view + RENDER_VIEWS)->left, &(view + RENDER_VIEWS)->top, &(view + RENDER_VIEWS)->right,
+                  &(view + RENDER_VIEWS)->bottom);
+    func_1510B32C(view, 0.0f, 0.0f, RENDER_VIEWS[view].unk84);
+    D_800BE630[view] = view;
 }
 
-s32 func_1501AE94(s32 arg0) {
-    f32 a = (f32)D_800BE620 - 2.0f;
-    f32 b = (f32)D_800BE624;
-    struct259 *p = &((struct259 *)D_800BE628)[arg0];
-    if (*(f32 *)((u8 *)p + 0x2C) < 2.0f) {
-        goto block1;
+/* Returns whether view's rectangle lies entirely inside the drawable framebuffer area. */
+s32 func_1501AE94(s32 viewIndex) {
+    f32 maxX = (f32)D_800BE620 - 2.0f;
+    f32 maxY = (f32)D_800BE624;
+    RenderView *view = &RENDER_VIEWS[viewIndex];
+
+    if (view->left < 2.0f || maxX < view->right) {
+        return FALSE;
     }
-    if (a < *(f32 *)((u8 *)p + 0x30)) {
-    block1:
-        return 0;
+    if (view->top < 0.0f || maxY < view->bottom) {
+        return FALSE;
     }
-    if (*(f32 *)((u8 *)p + 0x24) < 0.0f) {
-        goto block2;
-    }
-    if (b < *(f32 *)((u8 *)p + 0x28)) {
-    block2:
-        return 0;
-    }
-    return 1;
+    return TRUE;
 }
 
-void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    f32 t;
+/* Clamps a rectangle to the drawable framebuffer area (x in [2, width - 2], y in [0, height]). */
+void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
+    f32 clamped;
 
-    if (*arg0 < 2.0f) {
-        *arg0 = 2.0f;
+    if (*left < 2.0f) {
+        *left = 2.0f;
     } else {
-        if (((f32)D_800BE620 - 2.0f) < *arg0) {
-            t = (f32)D_800BE620 - 2.0f;
+        if ((f32)D_800BE620 - 2.0f < *left) {
+            clamped = (f32)D_800BE620 - 2.0f;
         } else {
-            t = *arg0;
+            clamped = *left;
         }
-        *arg0 = t;
+        *left = clamped;
     }
 
-    if (*arg2 < 2.0f) {
-        *arg2 = 2.0f;
+    if (*right < 2.0f) {
+        *right = 2.0f;
     } else {
-        if (((f32)D_800BE620 - 2.0f) < *arg2) {
-            t = (f32)D_800BE620 - 2.0f;
+        if ((f32)D_800BE620 - 2.0f < *right) {
+            clamped = (f32)D_800BE620 - 2.0f;
         } else {
-            t = *arg2;
+            clamped = *right;
         }
-        *arg2 = t;
+        *right = clamped;
     }
 
-    if (*arg1 < 0.0f) {
-        *arg1 = 0.0f;
+    if (*top < 0.0f) {
+        *top = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *arg1) {
-            t = (f32)D_800BE624;
+        if ((f32)D_800BE624 < *top) {
+            clamped = (f32)D_800BE624;
         } else {
-            t = *arg1;
+            clamped = *top;
         }
-        *arg1 = t;
+        *top = clamped;
     }
 
-    if (*arg3 < 0.0f) {
-        *arg3 = 0.0f;
+    if (*bottom < 0.0f) {
+        *bottom = 0.0f;
     } else {
-        if ((f32)D_800BE624 < *arg3) {
-            t = (f32)D_800BE624;
+        if ((f32)D_800BE624 < *bottom) {
+            clamped = (f32)D_800BE624;
         } else {
-            t = *arg3;
+            clamped = *bottom;
         }
-        *arg3 = t;
+        *bottom = clamped;
     }
 }
 
 void func_1510B128(s32, f32, f32, f32, f32);
 
-void func_1501B0A0(s32 arg0, s32 arg1) {
-    f32 angleX;
-    f32 angleY;
+/* Passes func_1510B128 the angles (degrees) that view's half-size subtends at the distance where the layout's
+ * full width/height fills view's fov, less the fov of view `layout`. */
+void func_1501B0A0(s32 view, s32 layout) {
+    f32 halfFovX;
+    f32 halfFovY;
     f32 tanX;
     f32 tanY;
     f32 distX;
@@ -462,83 +366,45 @@ void func_1501B0A0(s32 arg0, s32 arg1) {
     f32 x;
     f32 y;
 
-    angleX = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.008726646f;
-    angleY = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.008726646f;
-    tanX = sinf(angleX) / cosf(angleX);
-    tanY = sinf(angleY) / cosf(angleY);
-    distX = (f32)(&D_800BE638)[arg1] / (2.0f * tanX);
-    distY = (f32)D_800BE650[arg1] / (2.0f * tanY);
-    x = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unkC, distX) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk6C;
-    y = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unk10, distY) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk70;
-    func_1510B128(arg0, x, y, 1.0f, 0.0f);
+    halfFovX = RENDER_VIEWS[view].fovX * 0.008726646f;
+    halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
+    tanX = sinf(halfFovX) / cosf(halfFovX);
+    tanY = sinf(halfFovY) / cosf(halfFovY);
+    distX = (f32)VIEW_WIDTHS[layout] / (2.0f * tanX);
+    distY = (f32)D_800BE650[layout] / (2.0f * tanY);
+    x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
+    y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
+    func_1510B128(view, x, y, 1.0f, 0.0f);
 }
 
-void func_1501B22C(s32 arg0) {
+/* Builds the four side-plane normals of view's frustum from its frustum fov. */
+void func_1501B22C(s32 viewIndex) {
     f32 s;
     f32 n;
     f32 c;
-    f32 hx;
-    struct1501A8C0 *view;
-    f32 hy;
+    f32 halfFovX;
+    RenderView *view;
+    f32 halfFovY;
 
-    view = (struct1501A8C0 *)(D_800BE628 + arg0 * 0x180);
-    hx = view->unk74 * 0.5f;
-    hy = view->unk78 * 0.5f;
-    c = cosf(-hx * 0.017453292f);
-    s = sinf(-hx * 0.017453292f);
+    view = viewIndex + RENDER_VIEWS; // matching: index + base sets IDO's register order
+    halfFovX = view->frustumFovX * 0.5f;
+    halfFovY = view->frustumFovY * 0.5f;
+    c = cosf(-halfFovX * 0.017453292f);
+    s = sinf(-halfFovX * 0.017453292f);
     n = -c;
-    *(f32 *)((u8 *)view + 0x88) = -n;
-    *(f32 *)((u8 *)view + 0x94) = n;
-    *(f32 *)((u8 *)view + 0x9C) = s;
-    *(f32 *)((u8 *)view + 0x90) = s;
-    *(f32 *)((u8 *)view + 0x98) = 0.0f;
-    *(f32 *)((u8 *)view + 0x8C) = 0.0f;
-    c = cosf(hy * 0.017453292f);
-    s = -sinf(hy * 0.017453292f);
+    view->frustumPlanes[0][0] = -n;
+    view->frustumPlanes[1][0] = n;
+    view->frustumPlanes[1][2] = s;
+    view->frustumPlanes[0][2] = s;
+    view->frustumPlanes[1][1] = 0.0f;
+    view->frustumPlanes[0][1] = 0.0f;
+    c = cosf(halfFovY * 0.017453292f);
+    s = -sinf(halfFovY * 0.017453292f);
     n = -c;
-    *(f32 *)((u8 *)view + 0xA0) = 0.0f;
-    *(f32 *)((u8 *)view + 0xA4) = n;
-    *(f32 *)((u8 *)view + 0xA8) = s;
-    *(f32 *)((u8 *)view + 0xAC) = 0.0f;
-    *(f32 *)((u8 *)view + 0xB0) = -n;
-    *(f32 *)((u8 *)view + 0xB4) = s;
+    view->frustumPlanes[2][0] = 0.0f;
+    view->frustumPlanes[2][1] = n;
+    view->frustumPlanes[2][2] = s;
+    view->frustumPlanes[3][0] = 0.0f;
+    view->frustumPlanes[3][1] = -n;
+    view->frustumPlanes[3][2] = s;
 }
-// JUSTREG: I think?
-// void func_1501B22C(s32 arg0) {
-//     f32 tmp0;
-//     f32 tmp1;
-//     f32 tmp2;
-//     f32 tmp3;
-//     f32 tmp4;
-//     f32 tmp5;
-//     f32 tmp6;
-//     f32 tmp7;
-//
-//     struct259 *temp_s0;
-//
-//     temp_s0 = D_800BE628 + (arg0 * 0x180);
-//     tmp0 = temp_s0->unk74 * 0.5f;
-//     tmp7 = -tmp0;
-//     tmp5 = temp_s0->unk78 * 0.5f;
-//     tmp7 *= D_80096900;
-//     tmp3 = cosf(tmp7);
-//     tmp7 = sinf(tmp7);
-//     temp_s0->unk9C = tmp7;
-//     temp_s0->unk90 = tmp7;
-//     tmp3 = -tmp3;
-//     temp_s0->unk88 = -tmp3;
-//     temp_s0->unk94 = tmp3;
-//     temp_s0->unk98 = 0.0f;
-//     temp_s0->unk8C = 0.0f;
-//     tmp6 = tmp5 * D_80096904;
-//     tmp2 = cosf(tmp6);
-//     tmp0 = sinf(tmp6);
-//     tmp4 = -tmp2;
-//     tmp0 = -tmp0;
-//     temp_s0->unkA0 = 0.0f;
-//     temp_s0->unkB0 = -tmp4;
-//     temp_s0->unkA8 = tmp0;
-//     temp_s0->unkB4 = tmp0;
-//     temp_s0->unkAC = 0.0f;
-//     temp_s0->unkA4 = tmp4;
-// }

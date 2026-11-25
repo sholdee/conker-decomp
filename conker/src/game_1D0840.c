@@ -1,1306 +1,1094 @@
 #include <ultra64.h>
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
-
-
-extern f32 D_800A8D50;
-extern f32 D_800A8D54;
-extern f32 D_800A8D5C;
-extern f32 D_800A8D60;
-
-struct Data151A561C {
-    s32 unk0;
-};
-
-extern struct Data151A561C D_800A8D70;
-void func_15169260(struct Data151A561C *, s32, s32, u8);
-
-struct vec151A3504 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct frame151A3504 {
-    void *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[0x2];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u8 pad1E[0x2];
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x3];
-    struct vec151A3504 unk34;
-    f32 unk40;
-    u8 unk44;
-    u8 pad45[0x3];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[0x3];
-};
-
-struct header151A3504 {
-    struct vec151A3504 unk0;
-    s16 unkC;
-    u16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[0x2];
-    s32 unk18;
-};
-
-struct260 *func_151A3504(struct frame151A3504 *, u8);
-void func_151A4590(s32, u8);
-void func_151A499C(void *, u8);
-void *func_1513418C(void *, s32, u8, s32);
-struct260 *func_15130374(void *, u8, s32, u8, s32);
-u16 func_10010154(u16, void *, s32, s16, u16);
-s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-struct struct151A4E34;
-s32 func_151A4E34(struct struct151A4E34 **arg0, s32 arg1);
-
-struct frame151A3390 {
-    s32 unk0;
-    u8 unk4;
-    u8 unk5;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-};
-
-void func_151A3390(void *arg0, u8 arg1) {
-    struct frame151A3390 sp68;
-    f32 sp5C[3];
-
-    sp68.unk0 = (s32)arg0;
-    sp68.unk4 = *((u8 *)arg0 + 0x3B);
-    sp68.unk5 = 1;
-    sp68.unk8 = 0.0f;
-    sp68.unkC = 0.0f;
-    sp68.unk10 = 0.0f;
-    sp68.unk2B = 1;
-    sp68.unk2C = 0xFF;
-    sp68.unk2D = 8;
-    sp68.unk2E = 0x1F;
-    sp68.unk18 = 0xAA;
-    sp68.unk1A = 0x28;
-    sp68.unk1C = 7;
-    sp68.unk28 = 2;
-    sp68.unk29 = 4;
-    sp68.unk2A = 1;
-    sp68.unk14 = D_800A8D50;
-    sp68.unk20 = 30.0f;
-    sp68.unk24 = D_800A8D54;
-    func_151A3504(&sp68, arg1);
-    func_151A4590(arg0, arg1);
-    func_151A499C(arg0, arg1);
-    func_10010154(0x1AA, arg0, 0x55F0, 0x3E8, 0xFA0);
-    sp5C[0] = 0.0f;
-    sp5C[1] = 0.0f;
-    sp5C[2] = 0.0f;
-    func_15160A58(arg0, 1, sp5C, 2, 0x12C, 0x50, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
-}
-
-struct260 *func_151A3504(struct frame151A3504 *arg0, u8 arg1) {
-    struct header151A3504 sp8C;
-    struct frame151A3504 sp3C;
-    struct260 *temp_v0;
-
-    if (arg0->unk0 == NULL) {
-        return NULL;
-    }
-
-    memcpy(&sp3C, arg0, 0x30);
-    sp3C.unk44 = 0;
-    sp8C.unk15 = 0x32;
-    sp8C.unkE = 2;
-    sp8C.unkC = 0x3E8;
-    sp3C.unk30 = 6;
-    sp3C.unk4C = 0;
-    sp3C.unk40 = 0.0f;
-    sp3C.unk48 = 0.0f;
-
-    if (func_151A4E34((struct struct151A4E34 **)&sp3C, (s32)&sp8C) != 0) {
-        sp3C.unk34 = sp8C.unk0;
-        sp8C.unkE |= 4;
-    }
-
-    sp8C.unk10 = 8;
-    temp_v0 = (struct260 *)func_15147A80(&sp8C, 0x50, 0x18, 6, 6, 6, 0, 0, 0, arg1, 0);
-    if (temp_v0 != NULL) {
-        memcpy((void *)*(s32 *)((u8 *)temp_v0 + 0x98), &sp3C, 0x50);
-    }
-    return temp_v0;
-}
-
-typedef struct TimedVec151A361C {
-    f32 x;
-    f32 y;
-    f32 z;
-} TimedVec151A361C;
-
-typedef struct TimedEntry151A361C {
-    TimedVec151A361C value0;
-    f32 fieldC;
-    s16 field10;
-    s16 field12;
-    u8 field14;
-    u8 field15;
-    u8 pad16[2];
-} TimedEntry151A361C;
-
-typedef struct TimedState151A361C {
-    u8 *owner;
-    u8 identity;
-    u8 transformIndex;
-    u8 pad06[2];
-    TimedVec151A361C input08;
-    f32 field14;
-    s16 field18;
-    s16 field1A;
-    s16 field1C;
-    u8 pad1E[2];
-    f32 field20;
-    f32 field24;
-    u8 field28;
-    u8 field29;
-    s8 field2A;
-    u8 pad2B[5];
-    u8 flags30;
-    u8 pad31[3];
-    TimedVec151A361C previous34;
-    f32 field40;
-    u8 field44;
-    u8 pad45[3];
-    f32 field48;
-    u8 field4C;
-} TimedState151A361C;
-
-typedef struct TimedObject151A361C {
-    u8 pad0[0xC];
-    u8 fieldC;
-    u8 pad0D[3];
-    TimedVec151A361C position10;
-    u8 pad1C[2];
-    u16 flags1E;
-    u8 pad20[5];
-    u8 field25;
-    u8 pad26[6];
-    s8 field2C;
-    s8 field2D;
-    s8 field2E;
-    u8 pad2F[0x25];
-    TimedVec151A361C output54;
-    u8 pad60[0x34];
-    TimedEntry151A361C *entries94;
-    TimedState151A361C *state98;
-} TimedObject151A361C;
-
-s32 func_151A361C(TimedObject151A361C *arg0) {
-    TimedState151A361C *state = arg0->state98;
-    TimedEntry151A361C *entries = arg0->entries94;
-    TimedEntry151A361C *entry;
-    s32 index;
-
-    if (arg0->field2C < 2 && (state->flags30 & 1)) {
-        return 0;
-    }
-    state->field4C = (u32)state->field4C + (u32)(s32)state->field2A * (u32)D_800BE9E4;
-    index = arg0->field2E;
-    if (index != arg0->field2D) {
-        do {
-            index--;
-            if (index < 0) {
-                index = arg0->field25 - 1;
-            }
-            entry = &entries[index];
-            if (entry->field12 > 0) {
-                entry->field12 = (u32)(s32)entry->field12 - (u32)D_800BE9E4;
-            } else {
-                entry->field10 = (u32)(s32)entry->field10 - (u32)D_800BE9E4 * (u32)(s32)state->field1C;
-            }
-            entry->field14 = 0xFF;
-            entry->fieldC += D_800BE9A4 * state->field24;
-            if (entry->field10 < 0) {
-                state->flags30 &= ~2;
-                while (index != arg0->field2D) {
-                    arg0->field2D++;
-                    if (arg0->field2D == arg0->field25) {
-                        arg0->field2D = 0;
-                    }
-                    arg0->field2C--;
-                }
-                entries[arg0->field2D].field10 = 0;
-            }
-        } while (index != arg0->field2D);
-    }
-    if (arg0->field2C > 0) {
-        arg0->output54 = entries[arg0->field2D].value0;
-    } else {
-        arg0->output54.x = 0.0f;
-        arg0->output54.y = 0.0f;
-        arg0->output54.z = 0.0f;
-    }
-    return 1;
-}
-
-void func_151A4E9C(void *arg0);
-
-s32 func_151A37C0(TimedObject151A361C *arg0) {
-    TimedState151A361C *state = arg0->state98;
-    TimedEntry151A361C *entries = arg0->entries94;
-    u8 *owner;
-    TimedVec151A361C delta;
-    s32 found;
-    u8 buf[0x30];
-
-    owner = state->owner;
-    if (*(s32 *)owner == 0) {
-        return 0;
-    }
-    if (state->identity != owner[0x3B]) {
-        return 0;
-    }
-    found = 0;
-    if (!(arg0->flags1E & 4)) {
-        if (func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) != 0) {
-            found = 1;
-            state->previous34 = arg0->position10;
-            arg0->flags1E |= 4;
-        } else {
-            return 1;
-        }
-    }
-    if (!found && func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) == 0) {
-        func_151A4E9C(arg0);
-        memcpy(buf, state, 0x30);
-        {
-            struct260 *ret = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, arg0->fieldC, 0);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0x28, buf, 0x30);
-            }
-        }
-        return 1;
-    }
-    delta.x = arg0->position10.x - state->previous34.x;
-    delta.y = arg0->position10.y - state->previous34.y;
-    delta.z = arg0->position10.z - state->previous34.z;
-    if (fabsf(delta.x) > 0.0001f || fabsf(delta.y) > 0.0001f || fabsf(delta.z) > 0.0001f) {
-        state->field40 += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->field14;
-    }
-    if (state->field40 > 1.0f) {
-        f32 inv;
-        f32 val48;
-        f32 step48;
-        f32 path;
-        TimedVec151A361C cur;
-        f32 sx;
-        f32 sy;
-        f32 diff;
-        f32 sz;
-        f32 pathStep;
-
-        inv = 1.0f / state->field40;
-        val48 = state->field48 + D_800BE9A4;
-        cur = state->previous34;
-        step48 = val48 * inv;
-        path = state->field20 + state->field24 * val48;
-        sx = delta.x * inv;
-        sy = delta.y * inv;
-        sz = delta.z * inv;
-        diff = state->field20 - path;
-        pathStep = diff * inv;
-        do {
-            TimedEntry151A361C *entry = &entries[arg0->field2E];
-            entry->value0 = cur;
-            entry->fieldC = path;
-            entry->field10 = state->field18;
-            entry->field12 = state->field1A;
-            entry->field15 = state->field44;
-            found = func_150ADA20(); state->field44 += state->field28 + (u32)found % (u32)(state->field29 + 1);
-            entry->field14 = 0xFF;
-            arg0->field2E++;
-            if (arg0->field2E == arg0->field25) {
-                arg0->field2E = 0;
-            }
-            arg0->field2C++;
-            if (arg0->field2E == arg0->field2D) {
-                arg0->field2D++;
-                if (arg0->field2D == arg0->field25) {
-                    arg0->field2D = 0;
-                }
-                arg0->field2C--;
-            }
-            path += pathStep;
-            cur.x += sx;
-            cur.y += sy;
-            cur.z += sz;
-            val48 -= step48;
-            state->field40 -= 1.0f;
-        } while (state->field40 > 1.0f);
-        state->previous34 = cur;
-        state->field48 = val48;
-    }
-    {
-        typedef s32 T0;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x40); state = state;
-    }
-    {
-        typedef s32 T1;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x44); state = state;
-    }
-    {
-        typedef s32 T2;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x48); state = state;
-    }
-    {
-        typedef s32 T3;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x4C); state = state;
-    }
-    {
-        typedef s32 T4;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x50); state = state;
-    }
-    {
-        typedef s32 T5;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x54); state = state;
-    }
-    {
-        typedef s32 T6;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x58); state = state;
-    }
-    {
-        typedef s32 T7;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x5C); state = state;
-    }
-    {
-        typedef s32 T8;
-        state = *(TimedState151A361C **)((u8 *)arg0 + 0x60); state = state;
-    }
-    return 1;
-}
 
 typedef struct {
     f32 x, y, z;
-} Vec3f_151A3BE4;
+} Vec3f;
+
+/*
+ * Creation parameters of a trail (a ribbon of points that follows a point
+ * on one of an actor's bones). The same 0x30 bytes start TrailState.
+ */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
+    /* 0x05 */ u8 bone;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ Vec3f offset;        /* attachment point in bone space */
+    /* 0x14 */ f32 pointsPerUnit;   /* points emitted per unit travelled */
+    /* 0x18 */ s16 intensity;       /* initial TrailPoint.intensity */
+    /* 0x1A */ s16 holdTime;        /* initial TrailPoint.holdTime */
+    /* 0x1C */ s16 fadeRate;        /* intensity lost per tick after holdTime */
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ f32 width;           /* width of a new point */
+    /* 0x24 */ f32 widthGrowth;     /* width gained per second */
+    /* 0x28 */ u8 texStep;          /* texture coordinate advance per point... */
+    /* 0x29 */ u8 texStepRandom;    /* ...plus a random 0..texStepRandom */
+    /* 0x2A */ s8 texScroll;        /* texture offset scroll per tick */
+    /* 0x2B */ u8 tailFadeCount;
+    /* 0x2C */ u8 tailFadeStep;
+    /* 0x2D */ u8 headFadeCount;
+    /* 0x2E */ u8 headFadeStep;
+    /* 0x2F */ u8 pad2F;
+} TrailParams;
+
+#define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
+#define TRAIL_FADE_TAIL 2
+#define TRAIL_FADE_HEAD 4
+
+/* Per-trail state, stored at TrailEffect.state. */
+typedef struct {
+    /* 0x00 */ TrailParams params;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
+    /* 0x40 */ f32 pending;         /* fractional points not yet emitted */
+    /* 0x44 */ u8 texCoord;
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 age;
+    /* 0x4C */ u8 texOffset;
+    /* 0x4D */ u8 pad4D[3];
+} TrailState;
+
+/* Leading fields of a new effect object, passed to func_15147A80 (they land at its 0x10). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} EffectSpawnInfo;
+
+/* One point of a trail. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 width;
+    /* 0x10 */ s16 intensity;       /* alpha scale; the point dies when it drops below 0 */
+    /* 0x12 */ s16 holdTime;        /* ticks before intensity starts to fall */
+    /* 0x14 */ u8 alpha;
+    /* 0x15 */ u8 texCoord;
+    /* 0x16 */ u8 pad16[2];
+} TrailPoint;
+
+#define TRAIL_EFFECT_ATTACHED 2     /* the head follows the owner's bone */
+#define TRAIL_EFFECT_STARTED  4     /* state.lastPos is valid */
+
+/* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 pad0D[3];
+    /* 0x10 */ Vec3f headPos;
+    /* 0x1C */ u8 pad1C[2];
+    /* 0x1E */ u16 flags;
+    /* 0x20 */ u8 pad20[5];
+    /* 0x25 */ u8 capacity;
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail;             /* oldest point */
+    /* 0x2E */ s8 head;             /* slot the next point goes in */
+    /* 0x2F */ u8 pad2F;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[0x23];
+    /* 0x54 */ Vec3f tailPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailState *state;
+} TrailEffect;
+
+/* Parameters for func_1513418C, laid out like the other bone-attached effects here. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 ownerId;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} BoneEffectParams151A4590;
+
+/* Leading fields shared by the effect and task objects in this file. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s16 unkE;
+} EffectHeader;
+
+/* Particle emitter description passed to func_15130374. */
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ u8 pad3C[0xC];
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ u8 pad64[0xC];
+} ParticleSpawn151A4638;
+
+/* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
+typedef struct {
+    /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
+    /* 0x2 */ s16 mul2C;
+    /* 0x4 */ s16 limit2B;          /* below this age, unk2B = age * mul2B */
+    /* 0x6 */ s16 mul2B;
+    /* 0x8 */ s16 limitSize;        /* below this age, sizes change by sizeRate per tick */
+    /* 0xA */ s16 sizeRate;
+} ParticleAgeParams;
+
+/* A particle created by func_15130374. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 age;             /* counts down */
+    /* 0x1C */ u8 pad1C[0xF];
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 pad2D[0xB];
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u8 pad40[0x30];
+    /* 0x70 */ u8 unk70;
+    /* 0x71 */ u8 unk71;
+    /* 0x72 */ u8 unk72;
+    /* 0x73 */ u8 pad73[0x35];
+    /* 0xA8 */ ParticleAgeParams ageParams;
+} Particle;
+
+/* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 rate;            /* emissions per second */
+    /* 0x0C */ f32 pending;         /* emissions accumulated, not yet spawned */
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;        /* emission point in bone space */
+} BoneEmitter;
 
 typedef struct {
-    Vec3f_151A3BE4 pos;
-    f32 width;
-    s16 unk10;
-    u8 pad12[2];
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-} Point151A3BE4;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ BoneEmitter emitter;
+} BoneEmitterTask;
 
+/* Particle emitter description passed to func_15153634. */
 typedef struct {
-    u8 pad0[0x2B];
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x4C - 0x31];
-    u8 unk4C;
-} Style151A3BE4;
+    /* 0x00 */ s16 count;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 flags;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 unk68;
+} ParticleSpawn151A4A38;
 
+/* Message sent to effects about their owner actor. */
+typedef union {
+    struct {
+        struct127 *actor;
+        u8 actorId;
+    } removed;                      /* type 0: the actor (or any actor with this id) is gone */
+    struct {
+        struct127 *actorA;
+        struct127 *actorB;
+        u8 idA;
+        u8 idB;
+    } swap;                         /* type 0x2D: the two actors trade places */
+} ActorMessage;
+
+/* A func_151491F4 task that retries creating a trail until its owner can carry it. */
 typedef struct {
-    u8 pad0[0x10];
-    Vec3f_151A3BE4 pos;
-    u8 pad1C[2];
-    u16 unk1E;
-    u8 pad20[5];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x84 - 0x2F];
-    u8 unk84[0x10];
-    Point151A3BE4 *points;
-    Style151A3BE4 *style;
-} Owner151A3BE4;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ TrailParams trail;
+} TrailRetryTask;
 
 extern s32 D_800D2C9C;
 extern u8 D_80090CD4[];
+
+void *func_1513418C(void *, s32, u8, s32);
+void *func_15130374(void *spawn, u8, s32, u8, s32);
+s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15147A80(EffectSpawnInfo *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
+TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
+void func_151A4590(struct127 *owner, u8 arg1);
+void func_151A499C(struct127 *owner, u8 arg1);
+s32 func_151A4E34(TrailParams *params, Vec3f *out);
+void func_151A4E9C(TrailEffect *effect);
 
-Gfx *func_151A3BE4(Owner151A3BE4 *arg0, Gfx *gfx, s16 arg2) {
-    Vtx *vtx;
-    f32 dx, dy, dz, ex, ey, ez;
-    f32 nx, ny, nz, len, sc;
-    u8 k;
-    s32 idx;
-    Vec3f_151A3BE4 b;
-    Vec3f_151A3BE4 a;
-    s32 j;
+/* Spawns the effects attached to an actor: a trail and two more effects. */
+void func_151A3390(struct127 *owner, u8 arg1) {
+    TrailParams params;
+    f32 origin[3];
+
+    params.owner = owner;
+    params.ownerId = owner->unique_id;
+    params.bone = 1;
+    params.offset.x = 0.0f;
+    params.offset.y = 0.0f;
+    params.offset.z = 0.0f;
+    params.tailFadeCount = 1;
+    params.tailFadeStep = 0xFF;
+    params.headFadeCount = 8;
+    params.headFadeStep = 0x1F;
+    params.intensity = 170;
+    params.holdTime = 40;
+    params.fadeRate = 7;
+    params.texStep = 2;
+    params.texStepRandom = 4;
+    params.texScroll = 1;
+    params.pointsPerUnit = 0.01800000109f;
+    params.width = 30.0f;
+    params.widthGrowth = 0.9810000658f;
+    func_151A3504(&params, arg1);
+    func_151A4590(owner, arg1);
+    func_151A499C(owner, arg1);
+    func_10010154(0x1AA, owner, 0x55F0, 1000, 4000);
+    origin[0] = 0.0f;
+    origin[1] = 0.0f;
+    origin[2] = 0.0f;
+    func_15160A58(owner, 1, origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+}
+
+/* Creates a trail effect object from params. Returns NULL if there is no owner. */
+TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
+    EffectSpawnInfo info;
+    TrailState state;
+    TrailEffect *effect;
+
+    if (params->owner == NULL) {
+        return NULL;
+    }
+
+    memcpy(&state, params, sizeof(TrailParams));
+    state.texCoord = 0;
+    info.unk15 = 50;
+    info.flags = TRAIL_EFFECT_ATTACHED;
+    info.unkC = 1000;
+    state.flags = TRAIL_FADE_TAIL | TRAIL_FADE_HEAD;
+    state.texOffset = 0;
+    state.pending = 0.0f;
+    state.age = 0.0f;
+
+    if (func_151A4E34(&state.params, &info.pos) != 0) {
+        state.lastPos = info.pos;
+        info.flags |= TRAIL_EFFECT_STARTED;
+    }
+
+    info.unk10 = 8;
+    effect = func_15147A80(&info, sizeof(TrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    if (effect != NULL) {
+        memcpy(effect->state, &state, sizeof(TrailState));
+    }
+    return effect;
+}
+
+/*
+ * Per-tick update of a trail's points: ages and fades them, drops dead ones from
+ * the tail and publishes the tail position. Returns 0 to kill a detached trail.
+ */
+s32 func_151A361C(TrailEffect *effect) {
+    TrailState *state = effect->state;
+    TrailPoint *points = effect->points;
+    TrailPoint *point;
     s32 i;
-    u8 prev;
-    u8 lvl;
-    u8 alphaPrev;
-    u8 alpha;
-    u8 update;
-    f32 *cam;
-    Point151A3BE4 *points;
-    Style151A3BE4 *style;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 + 5) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+    if (effect->count < 2 && (state->flags & TRAIL_DETACHED)) {
+        return 0;
+    }
+    state->texOffset += state->params.texScroll * D_800BE9E4;
+    i = effect->head;
+    while (i != effect->tail) {
+        i--;
+        if (i < 0) {
+            i = effect->capacity - 1;
+        }
+        point = &points[i];
+        if (point->holdTime > 0) {
+            point->holdTime -= D_800BE9E4;
+        } else {
+            point->intensity -= D_800BE9E4 * state->params.fadeRate;
+        }
+        point->alpha = 0xFF;
+        point->width += D_800BE9A4 * state->params.widthGrowth;
+        if (point->intensity < 0) {
+            state->flags &= ~TRAIL_FADE_TAIL;
+            while (i != effect->tail) {
+                effect->tail++;
+                if (effect->tail == effect->capacity) {
+                    effect->tail = 0;
+                }
+                effect->count--;
+            }
+            points[effect->tail].intensity = 0;
+        }
+    }
+    if (effect->count > 0) {
+        effect->tailPos = points[effect->tail].pos;
+    } else {
+        effect->tailPos.x = 0.0f;
+        effect->tailPos.y = 0.0f;
+        effect->tailPos.z = 0.0f;
+    }
+    return 1;
+}
+
+/*
+ * Per-tick update of a trail's head: follows the owner's bone and emits points
+ * along the path travelled. If the bone can no longer be found, the trail is
+ * detached and a TrailRetryTask is started to re-create it later.
+ */
+s32 func_151A37C0(TrailEffect *effect) {
+    TrailState *state = effect->state;
+    TrailPoint *points = effect->points;
+    struct127 *owner;
+    Vec3f delta;
+    s32 started;
+    TrailParams retry;
+
+    owner = state->params.owner;
+    if (owner->interaction_state == 0) {
+        return 0;
+    }
+    if (owner->unique_id != state->params.ownerId) {
+        return 0;
+    }
+    started = 0;
+    if (!(effect->flags & TRAIL_EFFECT_STARTED)) {
+        if (func_151A4E34(&state->params, &effect->headPos) != 0) {
+            started = 1;
+            state->lastPos = effect->headPos;
+            effect->flags |= TRAIL_EFFECT_STARTED;
+        } else {
+            return 1;
+        }
+    }
+    if (!started && func_151A4E34(&state->params, &effect->headPos) == 0) {
+        func_151A4E9C(effect);
+        memcpy(&retry, state, sizeof(TrailParams));
+        {
+            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(TrailParams), effect->unkC, 0);
+            if (task != NULL) {
+                memcpy(&task->trail, &retry, sizeof(TrailParams));
+            }
+        }
+        return 1;
+    }
+    delta.x = effect->headPos.x - state->lastPos.x;
+    delta.y = effect->headPos.y - state->lastPos.y;
+    delta.z = effect->headPos.z - state->lastPos.z;
+    if (fabsf(delta.x) > 0.0001f || fabsf(delta.y) > 0.0001f || fabsf(delta.z) > 0.0001f) {
+        state->pending += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->params.pointsPerUnit;
+    }
+    if (state->pending > 1.0f) {
+        f32 invPending;
+        f32 age;
+        f32 ageStep;
+        f32 width;
+        Vec3f pos;
+        f32 stepX;
+        f32 stepY;
+        f32 widthLeft;
+        f32 stepZ;
+        f32 widthStep;
+
+        invPending = 1.0f / state->pending;
+        age = state->age + D_800BE9A4;
+        pos = state->lastPos;
+        ageStep = age * invPending;
+        width = state->params.width + state->params.widthGrowth * age;
+        stepX = delta.x * invPending;
+        stepY = delta.y * invPending;
+        stepZ = delta.z * invPending;
+        widthLeft = state->params.width - width;
+        widthStep = widthLeft * invPending;
+        do {
+            TrailPoint *point = &points[effect->head];
+            point->pos = pos;
+            point->width = width;
+            point->intensity = state->params.intensity;
+            point->holdTime = state->params.holdTime;
+            point->texCoord = state->texCoord;
+            // matching: reusing "started" for the random value (on one line) sets the frame layout
+            started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (u32)(state->params.texStepRandom + 1);
+            point->alpha = 0xFF;
+            effect->head++;
+            if (effect->head == effect->capacity) {
+                effect->head = 0;
+            }
+            effect->count++;
+            if (effect->head == effect->tail) {
+                effect->tail++;
+                if (effect->tail == effect->capacity) {
+                    effect->tail = 0;
+                }
+                effect->count--;
+            }
+            width += widthStep;
+            pos.x += stepX;
+            pos.y += stepY;
+            pos.z += stepZ;
+            age -= ageStep;
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
+        state->lastPos = pos;
+        state->age = age;
+    }
+    /*
+     * matching: nine scopes holding a kept dead load each give as1 enough extra
+     * basic blocks to stop it hoisting an addiu into the 'pending > 1.0f' branch
+     * (ledger: ~/conker-ws/func_151A37C0/notes.md, pass6).
+     */
+    { typedef s32 T0; state = *(TrailState **)((u8 *)effect + 0x40); state = state; }
+    { typedef s32 T1; state = *(TrailState **)((u8 *)effect + 0x44); state = state; }
+    { typedef s32 T2; state = *(TrailState **)((u8 *)effect + 0x48); state = state; }
+    { typedef s32 T3; state = *(TrailState **)((u8 *)effect + 0x4C); state = state; }
+    { typedef s32 T4; state = *(TrailState **)((u8 *)effect + 0x50); state = state; }
+    { typedef s32 T5; state = *(TrailState **)((u8 *)effect + 0x54); state = state; }
+    { typedef s32 T6; state = *(TrailState **)((u8 *)effect + 0x58); state = state; }
+    { typedef s32 T7; state = *(TrailState **)((u8 *)effect + 0x5C); state = state; }
+    { typedef s32 T8; state = *(TrailState **)((u8 *)effect + 0x60); state = state; }
+    return 1;
+}
+
+/*
+ * Draws a trail as a camera-facing ribbon: one quad per pair of neighbouring
+ * points, from the head back to the tail. Needs at least two points.
+ */
+Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
+    Vtx *vtx;
+    f32 camX, camY, camZ, segX, segY, segZ;
+    f32 sideX, sideY, sideZ, lenSq, scale;
+    u8 pad; // matching: unused local keeps the frame layout
+    s32 idx;
+    Vec3f next;
+    Vec3f cur;
+    s32 nextIdx;
+    s32 curIdx;
+    u8 nextTex;
+    u8 curTex;
+    u8 nextAlpha;
+    u8 curAlpha;
+    u8 stateFlag;
+    f32 *camPos;
+    TrailPoint *points;
+    TrailState *state;
+
+    if (effect->count >= 2) {
+        func_151D5D60(effect->unk84, view, (effect->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            style = arg0->style;
-            cam = &D_800DBFF0[arg2].unk2F8;
-            points = arg0->points;
-            update = 1;
-        fence:;
-            if (style->unk30 & 2) {
-                u8 k;
-                s16 n;
+            state = effect->state;
+            camPos = &D_800DBFF0[view].unk2F8;
+            points = effect->points;
+            stateFlag = 1;
+        fence:; // matching: a label here is a uopt barrier before the fade loops
+            if (state->flags & TRAIL_FADE_TAIL) {
+                u8 fade;
+                s16 remaining;
 
-                k = 0;
-                n = style->unk2B;
-                idx = arg0->unk2D;
+                fade = 0;
+                remaining = state->params.tailFadeCount;
+                idx = effect->tail;
                 do {
-                    points[idx].unk14 = k;
+                    points[idx].alpha = fade;
                     idx++;
-                    k += style->unk2C;
-                    if (idx == arg0->unk25) {
+                    fade += state->params.tailFadeStep;
+                    if (idx == effect->capacity) {
                         idx = 0;
                     }
-                    n--;
-                } while (n != 0 && idx != arg0->unk2E);
+                    remaining--;
+                } while (remaining != 0 && idx != effect->head);
             }
-            if (style->unk30 & 4) {
-                u8 m;
-                s16 n2;
+            if (state->flags & TRAIL_FADE_HEAD) {
+                u8 fade;
+                s16 remaining;
 
-                m = 0;
-                n2 = style->unk2D;
-                idx = arg0->unk2E - 1;
+                fade = 0;
+                remaining = state->params.headFadeCount;
+                idx = effect->head - 1;
                 if (idx < 0) {
-                    idx = arg0->unk25 - 1;
+                    idx = effect->capacity - 1;
                 }
                 do {
-                    points[idx].unk14 = (points[idx].unk14 * m) >> 8;
+                    points[idx].alpha = (points[idx].alpha * fade) >> 8;
                     idx--;
-                    m += style->unk2E;
-                    n2 = n2 - 1;
+                    fade += state->params.headFadeStep;
+                    remaining--;
                     if (idx < 0) {
-                        idx = arg0->unk25 - 1;
+                        idx = effect->capacity - 1;
                     }
-                } while (n2 != 0 && idx != arg0->unk2E);
+                } while (remaining != 0 && idx != effect->head);
             }
-            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
-            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
-            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-            gfx = func_1513F4E4(gfx, 6, &update);
-            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
-            if (arg0->unk1E & 2) {
-                j = arg0->unk2E - 1;
-                if (j < 0) {
-                    j = arg0->unk25 - 1;
+            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &stateFlag);
+            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
+            gfx = func_1513F4E4(gfx, 6, &stateFlag);
+            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
+            if (effect->flags & TRAIL_EFFECT_ATTACHED) {
+                nextIdx = effect->head - 1;
+                if (nextIdx < 0) {
+                    nextIdx = effect->capacity - 1;
                 }
-                a = arg0->pos;
-                lvl = (points[j].unk15 + style->unk4C);
-                alpha = (points[j].unk10 * points[j].unk14) >> 8;
+                cur = effect->headPos;
+                curTex = points[nextIdx].texCoord + state->texOffset;
+                curAlpha = (points[nextIdx].intensity * points[nextIdx].alpha) >> 8;
             } else {
-                i = arg0->unk2E - 1;
-                if (i < 0) {
-                    i = arg0->unk25 - 1;
+                curIdx = effect->head - 1;
+                if (curIdx < 0) {
+                    curIdx = effect->capacity - 1;
                 }
-                j = i - 1;
-                if (j < 0) {
-                    j = arg0->unk25 - 1;
+                nextIdx = curIdx - 1;
+                if (nextIdx < 0) {
+                    nextIdx = effect->capacity - 1;
                 }
-                a = points[i].pos;
-                lvl = (points[i].unk15 + style->unk4C);
-                alpha = (points[i].unk10 * points[i].unk14) >> 8;
+                cur = points[curIdx].pos;
+                curTex = points[curIdx].texCoord + state->texOffset;
+                curAlpha = (points[curIdx].intensity * points[curIdx].alpha) >> 8;
             }
-            b = points[j].pos;
-            prev = (points[j].unk15 + style->unk4C);
-            alphaPrev = (points[j].unk10 * points[j].unk14) >> 8;
-            ex = a.x - b.x;
-            ey = a.y - b.y;
-            ez = a.z - b.z;
-            dx = a.x - cam[0];
-            dy = a.y - cam[1];
-            dz = a.z - cam[2];
-            nx = ey * dz - dy * ez;
-            ny = ez * dx - dz * ex;
-            nz = ex * dy - dx * ey;
-            len = nx * nx + ny * ny + nz * nz;
-            if (len == 0.0f) {
-                nz = ny = nx = 0.0f;
+            next = points[nextIdx].pos;
+            nextTex = points[nextIdx].texCoord + state->texOffset;
+            nextAlpha = (points[nextIdx].intensity * points[nextIdx].alpha) >> 8;
+            segX = cur.x - next.x;
+            segY = cur.y - next.y;
+            segZ = cur.z - next.z;
+            camX = cur.x - camPos[0];
+            camY = cur.y - camPos[1];
+            camZ = cur.z - camPos[2];
+            sideX = segY * camZ - camY * segZ;
+            sideY = segZ * camX - camZ * segX;
+            sideZ = segX * camY - camX * segY;
+            lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+            if (lenSq == 0.0f) {
+                sideZ = sideY = sideX = 0.0f;
             } else {
-                sc = points[j].width / sqrtf(len);
-                nx = nx * sc;
-                ny = ny * sc;
-                nz = nz * sc;
+                scale = points[nextIdx].width / sqrtf(lenSq);
+                sideX *= scale;
+                sideY *= scale;
+                sideZ *= scale;
             }
-            *(s16 *)((u8 *)vtx + 0) = (s32)(a.x + nx);
-            *(s16 *)((u8 *)vtx + 2) = (s32)(a.y + ny);
-            *(s16 *)((u8 *)vtx + 4) = (s32)(a.z + nz);
-            *(s16 *)((u8 *)vtx + 8) = lvl << 6;
-            *(s16 *)((u8 *)vtx + 0xA) = 0x7C0;
-            *((u8 *)vtx + 0xC) = 0xFF;
-            *((u8 *)vtx + 0xD) = 0xFF;
-            *((u8 *)vtx + 0xE) = 0xFF;
-            *((u8 *)vtx + 0xF) = alpha;
-            *(s16 *)((u8 *)vtx + 6) = 0;
+            vtx->v.ob[0] = cur.x + sideX;
+            vtx->v.ob[1] = cur.y + sideY;
+            vtx->v.ob[2] = cur.z + sideZ;
+            vtx->v.tc[0] = curTex << 6;
+            vtx->v.tc[1] = 0x7C0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = curAlpha;
+            vtx->v.flag = 0;
             vtx++;
-            *(s16 *)((u8 *)vtx + 0) = (s32)(a.x - nx);
-            *(s16 *)((u8 *)vtx + 2) = (s32)(a.y - ny);
-            *(s16 *)((u8 *)vtx + 4) = (s32)(a.z - nz);
-            *(s16 *)((u8 *)vtx + 8) = lvl << 6;
-            *(s16 *)((u8 *)vtx + 0xA) = 0;
-            *((u8 *)vtx + 0xC) = 0xFF;
-            *((u8 *)vtx + 0xD) = 0xFF;
-            *((u8 *)vtx + 0xE) = 0xFF;
-            *((u8 *)vtx + 0xF) = alpha;
-            *(s16 *)((u8 *)vtx + 6) = 0;
+            vtx->v.ob[0] = cur.x - sideX;
+            vtx->v.ob[1] = cur.y - sideY;
+            vtx->v.ob[2] = cur.z - sideZ;
+            vtx->v.tc[0] = curTex << 6;
+            vtx->v.tc[1] = 0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = curAlpha;
+            vtx->v.flag = 0;
             vtx++;
             do {
-                ex = a.x - b.x;
-                ey = a.y - b.y;
-                ez = a.z - b.z;
-                dx = b.x - cam[0];
-                dy = b.y - cam[1];
-                dz = b.z - cam[2];
-                nx = ey * dz - dy * ez;
-                ny = ez * dx - dz * ex;
-                nz = ex * dy - dx * ey;
-                len = nx * nx + ny * ny + nz * nz;
-                if (len == 0.0f) {
-                    nz = ny = nx = 0.0f;
+                segX = cur.x - next.x;
+                segY = cur.y - next.y;
+                segZ = cur.z - next.z;
+                camX = next.x - camPos[0];
+                camY = next.y - camPos[1];
+                camZ = next.z - camPos[2];
+                sideX = segY * camZ - camY * segZ;
+                sideY = segZ * camX - camZ * segX;
+                sideZ = segX * camY - camX * segY;
+                lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+                if (lenSq == 0.0f) {
+                    sideZ = sideY = sideX = 0.0f;
                 } else {
-                    sc = points[j].width / sqrtf(len);
-                    nx = nx * sc;
-                    ny = ny * sc;
-                    nz = nz * sc;
+                    scale = points[nextIdx].width / sqrtf(lenSq);
+                    sideX *= scale;
+                    sideY *= scale;
+                    sideZ *= scale;
                 }
-                *(s16 *)((u8 *)vtx + 0) = (s32)(b.x + nx);
-                *(s16 *)((u8 *)vtx + 2) = (s32)(b.y + ny);
-                *(s16 *)((u8 *)vtx + 4) = (s32)(b.z + nz);
-                *(s16 *)((u8 *)vtx + 8) = prev << 6;
-                *(s16 *)((u8 *)vtx + 0xA) = 0x7C0;
-                *((u8 *)vtx + 0xC) = 0xFF;
-                *((u8 *)vtx + 0xD) = 0xFF;
-                *((u8 *)vtx + 0xE) = 0xFF;
-                *((u8 *)vtx + 0xF) = alphaPrev;
-                *(s16 *)((u8 *)vtx + 6) = 0;
+                vtx->v.ob[0] = next.x + sideX;
+                vtx->v.ob[1] = next.y + sideY;
+                vtx->v.ob[2] = next.z + sideZ;
+                vtx->v.tc[0] = nextTex << 6;
+                vtx->v.tc[1] = 0x7C0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = nextAlpha;
+                vtx->v.flag = 0;
                 vtx++;
-                *(s16 *)((u8 *)vtx + 0) = (s32)(b.x - nx);
-                *(s16 *)((u8 *)vtx + 2) = (s32)(b.y - ny);
-                *(s16 *)((u8 *)vtx + 4) = (s32)(b.z - nz);
-                *(s16 *)((u8 *)vtx + 8) = prev << 6;
-                *(s16 *)((u8 *)vtx + 0xA) = 0;
-                *((u8 *)vtx + 0xC) = 0xFF;
-                *((u8 *)vtx + 0xD) = 0xFF;
-                *((u8 *)vtx + 0xE) = 0xFF;
-                *((u8 *)vtx + 0xF) = alphaPrev;
-                *(s16 *)((u8 *)vtx + 6) = 0;
+                vtx->v.ob[0] = next.x - sideX;
+                vtx->v.ob[1] = next.y - sideY;
+                vtx->v.ob[2] = next.z - sideZ;
+                vtx->v.tc[0] = nextTex << 6;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = nextAlpha;
+                vtx->v.flag = 0;
                 vtx++;
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
-                if (lvl < prev) {
-                    memcpy(vtx, vtx - 2, 0x20);
-                    *(s16 *)((u8 *)vtx - 0x18) -= 0x4000;
+                if (curTex < nextTex) {
+                    memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
+                    vtx[-2].v.tc[0] -= 0x4000;
                     vtx++;
-                    *(s16 *)((u8 *)vtx - 0x18) -= 0x4000;
+                    vtx[-2].v.tc[0] -= 0x4000;
                     vtx++;
                 }
-                i = j;
-                j--;
-                if (j < 0) {
-                    j = arg0->unk25 - 1;
+                curIdx = nextIdx;
+                nextIdx--;
+                if (nextIdx < 0) {
+                    nextIdx = effect->capacity - 1;
                 }
-                if (i != arg0->unk2D) {
-                    lvl = prev;
-                    a = b;
-                    b = points[j].pos;
-                    prev = (points[j].unk15 + style->unk4C);
-                    alphaPrev = (points[j].unk10 * points[j].unk14) >> 8;
+                if (curIdx != effect->tail) {
+                    curTex = nextTex;
+                    cur = next;
+                    next = points[nextIdx].pos;
+                    nextTex = points[nextIdx].texCoord + state->texOffset;
+                    nextAlpha = (points[nextIdx].intensity * points[nextIdx].alpha) >> 8;
                 }
-            } while (i != arg0->unk2D);
+            } while (curIdx != effect->tail);
         }
     }
     return gfx;
 }
 
-struct frame151A4590 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 pad9[3];
-    void *unkC;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    s8 unk2C;
-    u8 unk2D;
-};
+void func_151A4590(struct127 *owner, u8 arg1) {
+    BoneEffectParams151A4590 params;
 
-void func_151A4590(s32 arg0, u8 arg1) {
-    struct frame151A4590 sp18;
-
-    if (arg0 != 0) {
-        sp18.unk0 = 0;
-        sp18.unk4 = 0;
-        sp18.unk8 = *((u8 *)arg0 + 0x3B);
-        sp18.unk10 = 1;
-        sp18.unk14 = 0.0f;
-        sp18.unk18 = 0.0f;
-        sp18.unk1C = 0.0f;
-        sp18.unk20 = D_800A8D5C;
-        sp18.unk24 = 3.0f;
-        sp18.unk28 = 0x64;
-        sp18.unk2A = 0xA;
-        sp18.unk2B = 1;
-        sp18.unk2C = -1;
-        sp18.unk2D = 0;
-        sp18.unkC = (void *)arg0;
-        func_1513418C(&sp18, 0, arg1, 0);
+    // matching: an integer test makes IDO reload owner from its arg slot
+    if ((s32)owner != 0) {
+        params.unk0 = 0;
+        params.unk4 = 0;
+        params.ownerId = owner->unique_id;
+        params.bone = 1;
+        params.offset.x = 0.0f;
+        params.offset.y = 0.0f;
+        params.offset.z = 0.0f;
+        params.unk20 = 14.69999981f;
+        params.unk24 = 3.0f;
+        params.unk28 = 100;
+        params.unk2A = 10;
+        params.unk2B = 1;
+        params.unk2C = -1;
+        params.unk2D = 0;
+        params.owner = owner;
+        func_1513418C(&params, 0, arg1, 0);
     }
 }
 
-void func_151A4638(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, void *arg6) {
-    struct260 *ret;
-    struct {
-        s16 sp28[6];
-        u8 pad34[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            u8 pad3C[0xC];
-            f32 unk48;
-            f32 unk4C;
-            f32 unk50;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            s8 unk63;
-        } sp38;
-        u8 pad9C[8];
-    } stack;
+/* Emits a particle burst at (x, y, z), moving against the given direction. */
+void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent) {
+    ParticleSpawn151A4638 spawn;
+    f32 scale;
+    s16 params[6];
+    Particle *particles;
 
-    stack.sp38.unk1D = 0x27;
-    stack.sp38.unk08 = 0x1401;
-    stack.sp38.unk00 = 0x200005;
-    stack.sp38.unk04 = 0;
-    stack.sp38.unk0A = (func_150ADA20() % 5U) + 0xF;
-    stack.sp38.unk0C = 0;
-    stack.sp38.unk10 = 0;
-    stack.sp38.unk14 = 0x8A;
-    stack.sp38.unk15 = 0;
-    stack.sp38.unk16 = 0;
-    stack.sp38.unk17 = 0xFF;
-    stack.sp38.unk18 = 0;
-    stack.sp38.unk19 = 0;
-    stack.sp38.unk1A = 0;
-    stack.sp38.unk1E = 1;
-    stack.sp38.unk20 = 0xFF;
-    stack.sp38.unk22 = 1;
-    stack.sp38.unk24 = 1.0f;
+    spawn.unk1D = 0x27;
+    spawn.unk08 = 0x1401;
+    spawn.unk00 = 0x200005;
+    spawn.unk04 = 0;
+    spawn.unk0A = (func_150ADA20() % 5U) + 15;
+    spawn.unk0C = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0x8A;
+    spawn.unk15 = 0;
+    spawn.unk16 = 0;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0;
+    spawn.unk19 = 0;
+    spawn.unk1A = 0;
+    spawn.unk1E = 1;
+    spawn.unk20 = 0xFF;
+    spawn.unk22 = 1;
+    spawn.unk24 = 1.0f;
 
-    stack.sp38.unk28 = stack.sp38.unk2C = (func_150ADA68() * 50.0f) + 500.0f;
-    stack.sp38.unk30 = arg0;
-    stack.sp38.unk34 = arg1;
-    stack.sp38.unk38 = arg2;
-    stack.sp38.unk48 = -arg3 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk4C = -arg4 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk50 = -arg5 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk58 = 0xD;
-    stack.sp38.unk60 = 1;
-    stack.sp38.unk61 = 1;
-    stack.sp38.unk54 = 0.0f;
+    spawn.unk28 = spawn.unk2C = func_150ADA68() * 50.0f + 500.0f;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.pos.z = z;
+    scale = 0.0869999975f * D_800BE9A8;
+    spawn.vel.x = -dirX * scale;
+    spawn.vel.y = -dirY * scale;
+    spawn.vel.z = -dirZ * scale;
+    spawn.flags = 0xD;
+    spawn.unk60 = 1;
+    spawn.unk61 = 1;
+    spawn.unk54 = 0.0f;
 
     if (func_150ADA20() & 1) {
-        stack.sp38.unk58 |= 0x40;
+        spawn.flags |= 0x40;
     }
 
     if (func_150ADA20() & 1) {
-        stack.sp38.unk58 |= 0x80;
+        spawn.flags |= 0x80;
     }
 
-    stack.sp38.unk1B = 0xFF;
-    stack.sp38.unk1C = 0xFF;
-    stack.sp38.unk62 = 0;
-    stack.sp38.unk63 = -1;
-    stack.sp28[0] = 0x10;
-    stack.sp28[1] = 0xF;
-    stack.sp28[2] = 0xD;
-    stack.sp28[3] = 0x13;
-    stack.sp28[4] = 0x11;
-    stack.sp28[5] = -0x18;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk62 = 0;
+    spawn.unk63 = -1;
+    params[0] = 16;
+    params[1] = 15;
+    params[2] = 13;
+    params[3] = 19;
+    params[4] = 17;
+    params[5] = -24;
 
-    ret = func_15130374(&stack.sp38, 0, 0xC, *((u8 *)arg6 + 0xC), 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, stack.sp28, 0xC);
+    particles = func_15130374(&spawn, 0, 12, parent->unkC, 1);
+    if (particles != NULL) {
+        memcpy(&particles->ageParams, params, sizeof(params));
     }
 }
 
-struct Sub151A483C {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-};
+/* Particle update for func_151A4638's bursts: fades and resizes by age. */
+s32 func_151A483C(Particle *particle, u8 arg1) {
+    s16 age;
+    ParticleAgeParams *params;
 
-struct Obj151A483C {
-    u8 pad0[0x18];
-    s16 unk18;
-    s16 unk1A;
-    u8 pad1C[0x2B - 0x1C];
-    u8 unk2B;
-    u8 unk2C;
-    u8 pad2D[0x38 - 0x2D];
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[0x70 - 0x40];
-    u8 unk70;
-    u8 unk71;
-    u8 unk72;
-    u8 pad73[0xA8 - 0x73];
-    struct Sub151A483C unkA8;
-};
-
-s32 func_151A483C(struct Obj151A483C *arg0, u8 arg1) {
-    s16 temp_v1;
-    struct Sub151A483C *temp_v0;
-    f32 temp_f0;
-
-    temp_v0 = &arg0->unkA8;
-    temp_v1 = arg0->unk1A;
-    if (temp_v1 < temp_v0->unk4) {
-        arg0->unk2B = (u32)temp_v1 * (u32)temp_v0->unk6;
+    params = &particle->ageParams;
+    age = particle->age;
+    if (age < params->limit2B) {
+        particle->unk2B = age * params->mul2B;
     }
-    if (temp_v1 < temp_v0->unk8) {
-        temp_f0 = (f32)(temp_v0->unkA * D_800BE9E4);
-        *(volatile f32 *)&arg0->unk38 = arg0->unk38 + temp_f0;
-        *(volatile f32 *)&arg0->unk3C = arg0->unk3C + temp_f0;
-        temp_v1 = *(volatile s16 *)&arg0->unk1A;
-    }
-    if (temp_v1 < temp_v0->unk0) {
-        arg0->unk72 = 1;
-        arg0->unk70 = 2;
-        arg0->unk71 = 2;
-        arg0->unk2C = (u32)temp_v1 * (u32)temp_v0->unk2;
-        arg0->unk18 = 0x5203;
-    }
-    return 1;
-}
-
-s32 func_151A4900(struct Obj151A483C *arg0, u8 arg1) {
-    s16 temp_v1;
-    struct Sub151A483C *temp_v0;
-
-    temp_v0 = &arg0->unkA8;
-    temp_v1 = arg0->unk1A;
-    if (temp_v1 < temp_v0->unk4) {
-        arg0->unk2B = (u32)temp_v1 * (u32)temp_v0->unk6;
-    }
-    if (temp_v1 < temp_v0->unk8) {
+    if (age < params->limitSize) {
         {
-            f32 temp_f0 = (f32)(temp_v0->unkA * D_800BE9E4);
+            f32 sizeStep = params->sizeRate * D_800BE9E4;
 
-            arg0->unk38 = arg0->unk38 + temp_f0;
-            arg0->unk3C = arg0->unk3C + temp_f0;
+            particle->unk38 += sizeStep;
+            particle->unk3C += sizeStep;
         }
-        temp_v1 = arg0->unk1A;
+        age = particle->age;
     }
-    arg0->unk2C = (u32)temp_v1 * (u32)temp_v0->unk2;
+    if (age < params->limit2C) {
+        particle->unk72 = 1;
+        particle->unk70 = 2;
+        particle->unk71 = 2;
+        particle->unk2C = age * params->mul2C;
+        particle->unk18 = 0x5203;
+    }
     return 1;
 }
 
+/* Like func_151A483C, but always sets unk2C from the age. */
+s32 func_151A4900(Particle *particle, u8 arg1) {
+    s16 age;
+    ParticleAgeParams *params;
 
-extern f32 D_800A8D64;
+    params = &particle->ageParams;
+    age = particle->age;
+    if (age < params->limit2B) {
+        particle->unk2B = age * params->mul2B;
+    }
+    if (age < params->limitSize) {
+        {
+            f32 sizeStep = params->sizeRate * D_800BE9E4;
 
-struct frame151A499C {
-    void *unk0;
-    u8 unk4;
-    f32 unk8;
-    f32 unkC;
-    u8 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
+            particle->unk38 += sizeStep;
+            particle->unk3C += sizeStep;
+        }
+        age = particle->age;
+    }
+    particle->unk2C = age * params->mul2C;
+    return 1;
+}
 
-void func_151A499C(void *arg0, u8 arg1) {
-    struct260 *ret;
-    struct frame151A499C sp2C;
+/* Starts a BoneEmitterTask on the owner's bone 1. */
+void func_151A499C(struct127 *owner, u8 arg1) {
+    BoneEmitterTask *task;
+    BoneEmitter emitter;
 
-    sp2C.unk0 = arg0;
-    sp2C.unk4 = *((u8 *)arg0 + 0x3B);
-    sp2C.unkC = 0.0f;
-    sp2C.unk10 = 1;
-    sp2C.unk14 = 0.0f;
-    sp2C.unk18 = 0.0f;
-    sp2C.unk1C = 0.0f;
-    sp2C.unk8 = D_800A8D64;
-    ret = func_151491F4(0x12C, -1, 5, 0, 1, 0x20, arg1, 0);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0x28, &sp2C, 0x20);
+    emitter.owner = owner;
+    emitter.ownerId = owner->unique_id;
+    emitter.pending = 0.0f;
+    emitter.bone = 1;
+    emitter.offset.x = 0.0f;
+    emitter.offset.y = 0.0f;
+    emitter.offset.z = 0.0f;
+    emitter.rate = 0.7220000029f;
+    task = (BoneEmitterTask *)func_151491F4(300, -1, 5, 0, 1, sizeof(BoneEmitter), arg1, 0);
+    if (task != NULL) {
+        memcpy(&task->emitter, &emitter, sizeof(BoneEmitter));
     }
 }
 
-struct Obj151A4A38 {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[1];
-    u16 unk76;
-    u8 pad78[0x15C];
-    s32 unk1D4;
-};
+/*
+ * Per-tick update of a BoneEmitterTask: ends when the owner is gone, otherwise
+ * spawns the particles that have accumulated at the bone's current position.
+ */
+void func_151A4A38(BoneEmitterTask *task) {
+    BoneEmitter *emitter;
+    Vec3f pos;
+    ParticleSpawn151A4A38 spawn;
+    s16 angle;
 
-struct Sub151A4A38 {
-    struct Obj151A4A38 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    f32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
-
-struct Ent151A4A38 {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 unkD;
-    s16 unkE;
-    u8 pad10[0x18];
-    struct Sub151A4A38 unk28;
-};
-
-struct Block151A4A38 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Arg151A4A38 {
-    s16 unk0;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    struct Block151A4A38 unk38;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    s8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 unk68;
-};
-
-void func_15143134(void *, s32, s32);
-void func_15153634(void *, s32, s32, s32);
-
-void func_151A4A38(struct Ent151A4A38 *arg0) {
-    struct Sub151A4A38 *sub;
-    struct Block151A4A38 sp98;
-    struct Arg151A4A38 sp2C;
-    s16 sp2A;
-
-    sub = &arg0->unk28;
-    if ((arg0->unk28.unk0->unk0 == 0) || (sub->unk0->unk0 == 8) || (sub->unk0->unk3B != sub->unk4)) {
-        arg0->unkE = -1;
-        arg0->unkD |= 1;
+    emitter = &task->emitter;
+    if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
+        || (emitter->owner->unique_id != emitter->ownerId)) {
+        task->header.unkE = -1;
+        task->header.unkD |= 1;
         return;
     }
 
-    if (sub->unk0->unk1D4 == 0) {
+    if (emitter->owner->unk1D4 == NULL) {
         return;
     }
-    if ((sub->unk0->unk74 & 0xF) == 0xF) {
+    if ((emitter->owner->unk74 & 0xF) == 0xF) {
         return;
     }
 
-    sub->unkC += sub->unk8 * D_800BE9A4;
-    if (sub->unkC > 1.0f) {
-        sp2A = (sub->unk0->unk76 >> 8) - 0x40;
-        func_15143134(&sub->unk14, (s32)&sp98, sub->unk0->unk1D4 + (sub->unk10 << 6));
+    emitter->pending += emitter->rate * D_800BE9A4;
+    if (emitter->pending > 1.0f) {
+        angle = (emitter->owner->unk76 >> 8) - 0x40;
+        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->unk1D4 + emitter->bone * sizeof(Mtx));
 
-        sp2C.unk0 = (s16)sub->unkC;
-        sp2C.unk2 = 0;
-        sub->unkC -= (f32)sp2C.unk0;
-        sp2C.unk4 = 0x28;
-        sp2C.unk6 = 0xC01;
-        sp2C.unk8 = 0x200005;
-        sp2C.unkC = 0;
-        sp2C.unk10 = 0x17;
-        sp2C.unk12 = 0xD;
-        sp2C.unk14 = 0;
-        sp2C.unk18 = 0;
-        sp2C.unk1C = 0;
-        sp2C.unk1D = 0;
-        sp2C.unk1E = 0;
-        sp2C.unk1F = 0xFF;
-        sp2C.unk20 = 0;
-        sp2C.unk21 = 0;
-        sp2C.unk22 = 0;
-        sp2C.unk30 = 300.0f;
-        sp2C.unk34 = 400.0f;
-        sp2C.unk38 = sp98;
-        sp2C.unk26 = 1;
-        sp2C.unk28 = 0;
-        sp2C.unk2A = 1;
-        sp2C.unk2C = 1.0f;
-        sp2C.unk64 = 0;
-        sp2C.unk44 = sp2A - 0x19;
-        sp2C.unk46 = -0x2C;
-        sp2C.unk48 = 0x32;
-        sp2C.unk4A = 0x32;
-        sp2C.unk4C = 0.0f;
-        sp2C.unk50 = 15.0f;
-        sp2C.unk54 = -0.5f;
-        sp2C.unk58 = -0.5f;
-        sp2C.unk5C = 7;
-        sp2C.unk62 = 1;
-        sp2C.unk63 = 0;
+        spawn.count = emitter->pending;
+        spawn.unk2 = 0;
+        emitter->pending -= spawn.count;
+        spawn.unk4 = 0x28;
+        spawn.unk6 = 0xC01;
+        spawn.unk8 = 0x200005;
+        spawn.unkC = 0;
+        spawn.unk10 = 23;
+        spawn.unk12 = 13;
+        spawn.unk14 = 0;
+        spawn.unk18 = 0;
+        spawn.unk1C = 0;
+        spawn.unk1D = 0;
+        spawn.unk1E = 0;
+        spawn.unk1F = 0xFF;
+        spawn.unk20 = 0;
+        spawn.unk21 = 0;
+        spawn.unk22 = 0;
+        spawn.unk30 = 300.0f;
+        spawn.unk34 = 400.0f;
+        spawn.pos = pos;
+        spawn.unk26 = 1;
+        spawn.unk28 = 0;
+        spawn.unk2A = 1;
+        spawn.unk2C = 1.0f;
+        spawn.unk64 = 0;
+        spawn.unk44 = angle - 25;
+        spawn.unk46 = -44;
+        spawn.unk48 = 50;
+        spawn.unk4A = 50;
+        spawn.unk4C = 0.0f;
+        spawn.unk50 = 15.0f;
+        spawn.unk54 = -0.5f;
+        spawn.unk58 = -0.5f;
+        spawn.flags = 7;
+        spawn.unk62 = 1;
+        spawn.unk63 = 0;
 
         if (func_150ADA20() & 1) {
-            sp2C.unk5C |= 0x40;
+            spawn.flags |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            sp2C.unk5C |= 0x80;
+            spawn.flags |= 0x80;
         }
 
-        sp2C.unk23 = 0xFF;
-        sp2C.unk24 = 0;
-        sp2C.unk25 = 0xFF;
-        sp2C.unk60 = -1;
-        sp2C.unk61 = -1;
-        func_15153634(&sp2C, 0xFF, arg0->unkC, arg0->unk1);
+        spawn.unk23 = 0xFF;
+        spawn.unk24 = 0;
+        spawn.unk25 = 0xFF;
+        spawn.unk60 = -1;
+        spawn.unk61 = -1;
+        func_15153634(&spawn, 0xFF, task->header.unkC, task->header.unk1);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_151A4CE0;
+/* Message handler of a trail: detach on owner removal, follow an owner swap. */
+void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
+    TrailParams *trail = &effect->state->params;
 
-typedef struct {
-    s32 unk0;
-    union {
-        u8 b4;
-        s32 w4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_151A4CE0;
-
-void func_151A4E9C(void *arg0);
-
-void func_151A4CE0(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151A4CE0 *temp_v0 = *(SubA_151A4CE0 **)((u8 *)arg0 + 0x98);
-    ArgB_151A4CE0 *b = (ArgB_151A4CE0 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_151A4E9C(arg0);
+    if (type == 0) {
+        if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
+            func_151A4E9C(effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (trail->owner == msg->swap.actorA) {
+            trail->owner = msg->swap.actorB;
+            trail->ownerId = msg->swap.idB;
+        } else if (trail->owner == msg->swap.actorB) {
+            trail->owner = msg->swap.actorA;
+            trail->ownerId = msg->swap.idA;
         }
     }
 }
 
-void func_1516972C(struct102 *arg0);
+/* Message handler of a BoneEmitterTask: end on owner removal, follow an owner swap. */
+void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
+    BoneEmitter *emitter = &task->emitter;
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_151A4D88;
-
-typedef struct {
-    s32 unk0;
-    union {
-        u8 b4;
-        s32 w4;
-    } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_151A4D88;
-
-void func_151A4D88(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151A4D88 *temp_v0 = (SubA_151A4D88 *)((u8 *)arg0 + 0x28);
-    ArgB_151A4D88 *b = (ArgB_151A4D88 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0) {
+        if ((msg->removed.actor == emitter->owner) || (msg->removed.actorId == emitter->ownerId)) {
+            func_1516972C((struct102 *)task);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (emitter->owner == msg->swap.actorA) {
+            emitter->owner = msg->swap.actorB;
+            emitter->ownerId = msg->swap.idB;
+        } else if (emitter->owner == msg->swap.actorB) {
+            emitter->owner = msg->swap.actorA;
+            emitter->ownerId = msg->swap.idA;
         }
     }
 }
 
-void func_15143134(void *, s32, s32);
-struct struct151A4E34
-{
-  u8 pad0[0x74];
-  u8 unk74;
-  u8 pad75[0x1D4 - 0x75];
-  struct elem151A4E34 *unk1D4;
-};
-s32 func_151A4E34(struct struct151A4E34 **arg0, s32 arg1)
-{
-  struct struct151A4E34 *v0 = arg0[0];
-  u32 offset;
-  s32 v1 = (s32) v0->unk1D4;
-  if (v1 == 0)
-  {
-    return 0;
-  }
-  if ((v0->unk74 & 0xF) == 0xF)
-  {
-    return 0;
-  }
-  offset = ((*(((u8 *) arg0) + 5)) << 4) << 2;
-  func_15143134(((u8 *) arg0) + 8, arg1, v1 + offset);
-  return 1;
+/*
+ * Transforms the trail's attachment offset by its owner's bone matrix into out.
+ * Returns 0 if the owner has no bone matrices or is not being drawn.
+ */
+s32 func_151A4E34(TrailParams *params, Vec3f *out) {
+    struct127 *owner = params->owner;
+    u8 *bones = (u8 *)owner->unk1D4;
+
+    if (bones == NULL) {
+        return 0;
+    }
+    if ((owner->unk74 & 0xF) == 0xF) {
+        return 0;
+    }
+    func_15143134(&params->offset, out, (s32)bones + params->bone * sizeof(Mtx));
+    return 1;
 }
 
+/* Detaches a trail from its owner: the head stops following and fades out. */
+void func_151A4E9C(TrailEffect *effect) {
+    TrailState *state = effect->state;
 
-void func_151A4E9C(void *arg0)
-{
-  u8 *p;
-  u8 v;
-  int mask;
-  *((u8 *) (((u8 *) arg0) + 0x30)) = 0;
-  *((u16 *) (((u8 *) arg0) + 0x1E)) &= 0xFFFD;
- mask = 0xFFu; do { p = *((u8 **) (((u8 *) arg0) + 0x98)); v = (p[0x30] & mask) | 1; *(p + 0x30) = v; *((volatile u8 *) (p + 0x30)) = v | 4; } while (0);
+    effect->unk30 = 0;
+    effect->flags &= ~TRAIL_EFFECT_ATTACHED;
+    state->flags |= TRAIL_DETACHED;
+    state->flags |= TRAIL_FADE_HEAD;
 }
 
+/*
+ * Per-tick update of a TrailRetryTask: the task ends when the owner is gone or
+ * once the trail has been re-created on the owner's bone.
+ */
+void func_151A4ECC(TrailRetryTask *task) {
+    TrailParams *trail;
+    u8 done;
 
-typedef struct Tgt151A4ECC {
-    s32 unk0;
-    char pad4[0x37];
-    u8 unk3B;
-    char pad3C[0x38];
-    u8 unk74;
-    char pad75[0x15F];
-    s32 unk1D4;
-} Tgt151A4ECC;
-
-typedef struct Obj151A4ECC {
-    char pad0[0xC];
-    u8 unkC;
-    u8 unkD;
-    s16 unkE;
-    char pad10[0x18];
-    struct frame151A3504 unk28;
-} Obj151A4ECC;
-
-void func_151A4ECC(Obj151A4ECC *arg0) {
-    struct frame151A3504 *f;
-    u8 flag;
-
-    flag = 0;
-    f = &arg0->unk28;
-    if (((Tgt151A4ECC *)f->unk0)->unk0 == 0) {
-        flag = 1;
+    done = 0;
+    trail = &task->trail;
+    if (trail->owner->interaction_state == 0) {
+        done = 1;
     }
-    if (((Tgt151A4ECC *)f->unk0)->unk3B != f->unk4) {
-        flag = 1;
+    if (trail->owner->unique_id != trail->ownerId) {
+        done = 1;
     }
-    if (!flag) {
-        if (((Tgt151A4ECC *)f->unk0)->unk1D4 != 0) {
-            if ((((Tgt151A4ECC *)f->unk0)->unk74 & 0xF) != 0xF) {
-                func_151A3504(f, arg0->unkC);
-                flag = 1;
-            }
-        }
+    if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
+        func_151A3504(trail, task->header.unkC);
+        done = 1;
     }
-    if (flag) {
-        arg0->unkE = -1;
-        arg0->unkD = arg0->unkD | 1;
+    if (done) {
+        task->header.unkE = -1;
+        task->header.unkD |= 1;
     }
 }
 
-void func_1516972C(struct102 *arg0);
+/* Message handler of a TrailRetryTask: end when the owner is removed. */
+void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
+    TrailParams *trail = &task->trail;
 
-struct struct151A4F7C {
-    s32 unk0;
-    u8 unk4;
-};
-
-void func_151A4F7C(struct102 *arg0, struct102 *arg1, u8 arg2)
-{
-    struct struct151A4F7C *p = (struct struct151A4F7C *)((u8 *)arg0 + 0x28);
-    struct struct151A4F7C *q = (struct struct151A4F7C *)arg1;
-    if (!arg2) {
-        if (q->unk0 == p->unk0 || q->unk4 == p->unk4) {
-            func_1516972C(arg0);
+    if (type == 0) {
+        if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {
+            func_1516972C((struct102 *)task);
         }
     }
 }
-
-struct Obj151A4FD0 {
-    char pad0[0x10];
-    s32 unk10;
-    u8  unk14;
-    u8  unk15;
-    u8  unk16;
-    u8  unk17;
-    u8  unk18;
-    u8  unk19;
-    u8  unk1A;
-};
-
-extern struct Obj151A4FD0 *func_15167A68(s32, s32, s32, s32, s32, s32);
-struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
-void func_151A5070(struct Obj151A4FD0 *arg0);
-
-extern void (*D_8008F900[])(void *, void *, s16);
-void func_151A5130(void *arg0, void *arg1, s16 arg2);
-
-/* Viewport/screen descriptor: D_800BE628 is an array of these, 0x180 bytes each. */
-struct Scr151A5170 {
-    u8  pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    u8  padC[0x18];
-    f32 unk24;
-    u8  pad28[0x4];
-    f32 unk2C;
-    u8  pad30[0x150];
-};
-
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
-#define SCR151A5170(obj) (&((struct Scr151A5170 *)D_800BE628)[(obj)->unk1A])
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *arg1, s32 arg2);
-
-extern void (*D_8008F904[])(void *, void *, u8);
-void func_151A55D4(void *arg0, void *arg1, u8 arg2);
-void func_151A561C(s32 arg0, u8 arg1);

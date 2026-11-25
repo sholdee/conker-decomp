@@ -1,6 +1,7 @@
 #define D_8003B234 D_8003B234_hdr
 #define D_8003A5C8 D_8003A5C8_hdr
 #define D_8003B240 D_8003B240_hdr
+#define D_8003A588 D_8003A588_hdr
 #define D_8003A580 D_8003A580_hdr
 #include <ultra64.h>
 
@@ -9,49 +10,53 @@
 #undef D_8003B234
 #undef D_8003A5C8
 #undef D_8003B240
+#undef D_8003A588
 #undef D_8003A580
 
-void func_10004F00(void);
-void func_10004FE0(void);
+/* Messages received on the scheduler's interrupt queue D_8003B218. */
+#define SCHED_MESG_RETRACE     0 /* VI retrace (osViSetEvent) */
+#define SCHED_MESG_RDP_DONE    1 /* OS_EVENT_DP */
+#define SCHED_MESG_SP_DONE     2 /* OS_EVENT_SP */
+#define SCHED_MESG_AUDIO_TIMER 3 /* delay before starting the pending audio task */
+#define SCHED_MESG_CONT_READ   6 /* timer set in game_48FD0.c: start a controller read */
 
-
-// contains jr
+/* A thread that receives the retrace message; linked in by func_100051C8. */
 typedef struct SchedulerClient_49E0 {
     struct SchedulerClient_49E0 *next;
-    OSMesgQueue *queue;
-    u32 flags;
+    OSMesgQueue *msgQ;
+    u32 flags; /* bit 0: don't send retrace messages */
 } SchedulerClient_49E0;
 
-extern SchedulerClient_49E0 *D_8003B234;
-extern u16 D_8003A5C8;
-extern u8 D_8003B240[];
-extern s8 D_8003A580;
+extern SchedulerClient_49E0 *D_8003B234; /* client list */
+extern OSScMsg D_8003A5C8;               /* pre-NMI message */
+extern OSScMsg D_8003B240;               /* retrace message */
+extern OSTimer D_8003A588;               /* audio start timer */
+extern s8 D_8003A580; // matching: signed (the header's u8 changes how IDO shares the constant 1)
 
 void func_10004DB0(void);
 
-void func_100049E0(void *arg0) {
-    void *message;
+/* Scheduler thread: dispatches VI retrace, RSP/RDP completion and timer messages. */
+void func_100049E0(void *arg) {
+    OSMesg msg;
     SchedulerClient_49E0 *client;
-    u64 delay;
+    OSTime delay;
 
     D_8003A581 = 0;
     D_8003A582 = 0;
     D_8003A584 = 1;
     D_8003A583 = 0;
-    *(s16 *)D_8003B240 = 1;
-    message = 0;
-    arg0 = 0;
-    D_8003A5C8 = 4;
-    while (1) {
-        osRecvMesg(&D_8003B218, &message, 1);
-        switch ((s32)message) {
-        case 0:
-            client = D_8003B234;
-            while (client != 0) {
-                if ((client->flags & 1) == 0) {
-                    osSendMesg(client->queue, D_8003B240, 0);
+    D_8003B240.type = OS_SC_RETRACE_MSG;
+    msg = NULL;
+    arg = NULL; // matching: the thread argument is reused as a scratch variable (here and below)
+    D_8003A5C8.type = OS_SC_PRE_NMI_MSG;
+    while (TRUE) {
+        osRecvMesg(&D_8003B218, &msg, OS_MESG_BLOCK);
+        switch ((s32)msg) {
+        case SCHED_MESG_RETRACE:
+            for (client = D_8003B234; client != NULL; client = client->next) {
+                if (!(client->flags & 1)) {
+                    osSendMesg(client->msgQ, &D_8003B240, OS_MESG_NOBLOCK);
                 }
-                client = client->next;
             }
             if ((D_8003B238 != 0xFF) && (D_8003B238 < 0xFF)) {
                 D_8003B238++;
@@ -59,23 +64,23 @@ void func_100049E0(void *arg0) {
             if (D_8003B23A != 0) {
                 D_8003B23A--;
             }
-            arg0 = (void *)(u32)D_8003A581;
-            if ((arg0 == 0) && (D_8002AC6C == 0)) {
-                if (osRecvMesg(&D_8003B200, (OSMesg *)&D_8002AC54, 0) == 0) {
+            arg = (void *)D_8003A581;
+            if ((arg == NULL) && (D_8002AC6C == 0)) {
+                if (osRecvMesg(&D_8003B200, (OSMesg *)&D_8002AC54, OS_MESG_NOBLOCK) == 0) {
                     delay = 200000;
-                    if ((D_8003A582 != 0) || ((osAiGetStatus() & 0x80000000U) == 0)) {
+                    if ((D_8003A582 != 0) || !(osAiGetStatus() & AI_STATUS_FIFO_FULL)) {
                         delay = 20000;
                     }
-                    osSetTimer((OSTimer *)&D_8003A588, delay, 0, &D_8003B218, (void *)3);
+                    osSetTimer(&D_8003A588, delay, 0, &D_8003B218, (OSMesg)SCHED_MESG_AUDIO_TIMER);
                     D_8002AC6C = 1;
                 }
             }
             if (D_8003A581 == 0) {
                 func_10004DB0();
             }
-            arg0 = 0;
+            arg = NULL;
             break;
-        case 2:
+        case SCHED_MESG_SP_DONE:
             if (D_8003A582 == 3) {
                 if (osSpTaskYielded(&D_8002AC50->list) == 1) {
                     osSpTaskLoad(&D_8002AC54->list);
@@ -90,7 +95,7 @@ void func_100049E0(void *arg0) {
                     D_8003A583 = 0;
                 }
             } else if (D_8003A581 != 0) {
-                osSendMesg(D_8002AC54->msgQ, D_8002AC54->msg, 1);
+                osSendMesg(D_8002AC54->msgQ, D_8002AC54->msg, OS_MESG_BLOCK);
                 D_8003A581 = 0;
                 if (D_8003A582 == 4) {
                     osSpTaskLoad(&D_8002AC50->list);
@@ -105,14 +110,14 @@ void func_100049E0(void *arg0) {
                 }
             }
             break;
-        case 1:
+        case SCHED_MESG_RDP_DONE:
             D_8003A584 = 1;
             if (D_8003A583 == 0) {
                 func_10004FE0();
             }
             break;
-        case 3:
-            D_8002AC6C = (s32)arg0;
+        case SCHED_MESG_AUDIO_TIMER:
+            D_8002AC6C = (s32)arg;
             if (D_8003A583 != 0) {
                 osSpTaskYield();
                 D_8003A582 = 3;
@@ -122,7 +127,7 @@ void func_100049E0(void *arg0) {
                 D_8003A581 = 1;
             }
             break;
-        case 6:
+        case SCHED_MESG_CONT_READ:
             if (D_8002AC5C == 0) {
                 osContStartReadData(&D_800BE900);
             }
@@ -130,130 +135,11 @@ void func_100049E0(void *arg0) {
         }
     }
 }
-// void func_100049E0(s32 arg0) {
-//     u32 sp64;
-//     s32 sp5C;
-//     s32 sp58;
-//     u8 temp_v0;
-//     u8 temp_v0_2;
-//     void *temp_s0;
-//     void *temp_s0_2;
-//     void *temp_v0_3;
-//     void *phi_s0;
-//
-//     D_8003A581 = (u8)0U;
-//     D_8003A582 = (u8)0U;
-//     D_8003A584 = (u8)1U;
-//     D_8003A583 = (u8)0U;
-//     D_8003B240 = (u16)1;
-//     sp64 = 0;
-//     D_8003A5C8 = (u16)4;
-// default:
-// loop_1:
-//     osRecvMesg(&D_8003B218, &sp64, (u16)1);
-//     if (sp64 >= 7U) {
-//         goto loop_1;
-//     }
-//     goto **(&jtbl_8002C0A0 + (sp64 * 4));
-// case 0:
-//     temp_s0 = D_8003B234;
-//     phi_s0 = temp_s0;
-//     if (temp_s0 != 0) {
-// loop_4:
-//         if ((phi_s0->unk8 & 1) == 0) {
-//             osSendMesg(phi_s0->unk4, D_8003B240, 0);
-//         }
-//         temp_s0_2 = phi_s0->unk0;
-//         phi_s0 = temp_s0_2;
-//         if (temp_s0_2 != 0) {
-//             goto loop_4;
-//         }
-//     }
-//     temp_v0 = D_8003B238;
-//     if ((temp_v0 != 0xFF) && ((s32) temp_v0 < 0xFF)) {
-//         D_8003B238 = (s8) (temp_v0 + 1);
-//     }
-//     temp_v0_2 = D_8003B23A;
-//     if (temp_v0_2 != 0) {
-//         D_8003B23A = (s8) (temp_v0_2 - 1);
-//     }
-//     if ((D_8003A581 == 0) && (D_8002AC6C == 0) && (osRecvMesg(&D_8003B200, &D_8002AC54, 0) == 0)) {
-//         sp5C = 0x30D40;
-//         sp58 = 0;
-//         if ((D_8003A582 != 0) || ((osAiGetStatus() << 0) >= 0)) {
-//             sp5C = 20000;
-//             sp58 = 0;
-//         }
-//         osSetTimer(&D_8003A588, 0, 0, &D_8003B218, 3);
-//         D_8002AC6C = (s8) (u16)1;
-//     }
-//     if (D_8003A581 != 0) {
-//         goto loop_1;
-//     }
-//     func_10004DB0();
-//     goto loop_1;
-// case 2:
-//     if (D_8003A582 == 3) {
-//         if (osSpTaskYielded(D_8002AC50->osTask) == (u8)1U) {
-//             osSpTaskLoad(D_8002AC54->list);
-//             osSpTaskStartGo(D_8002AC54->list);
-//             D_8003A581 = (u8)1U;
-//             D_8003A582 = (u8)4U;
-//         } else {
-//             D_8003A582 = (u8)1U;
-//             osSpTaskLoad(D_8002AC54->list);
-//             osSpTaskStartGo(D_8002AC54->list);
-//             D_8003A581 = (u8)1U;
-//             D_8003A583 = (u8)0U;
-//         }
-//     } else if (D_8003A581 != 0) {
-//         temp_v0_3 = D_8002AC54;
-//         osSendMesg(temp_v0_3->unk58, temp_v0_3->unk5C, (u16)1);
-//         D_8003A581 = (u8)0U;
-//         if (D_8003A582 != 4) {
-//             goto loop_1;
-//         }
-//         osSpTaskLoad(D_8002AC50->osTask);
-//         osSpTaskStartGo(D_8002AC50->osTask);
-//         D_8003A580 = (s8) (u16)1;
-//         D_8003A582 = (u8)1U;
-//     } else {
-//         D_8003A583 = (u8)0U;
-//         if ((u16)1 != D_8003A584) {
-//             goto loop_1;
-//         }
-//         func_10004FE0();
-//         goto loop_1;
-//     case 1:
-//         D_8003A584 = (u8)1U;
-//         if (D_8003A583 != 0) {
-//             goto loop_1;
-//         }
-//         func_10004FE0();
-//         goto loop_1;
-//     case 3:
-//         D_8002AC6C = (u8)0;
-//         if (D_8003A583 != 0) {
-//             osSpTaskYield();
-//             D_8003A582 = (u8)3U;
-//         } else {
-//             osSpTaskLoad(D_8002AC54->list);
-//             osSpTaskStartGo(D_8002AC54->list);
-//             D_8003A581 = (u8)1U;
-//             goto loop_1;
-//         case 6:
-//             if (D_8002AC5C != 0) {
-//                 goto loop_1;
-//             }
-//             osContStartReadData(&D_800BE900);
-//         }
-//     }
-//     goto loop_1;
-// }
 
+/* Advances the graphics task state machine (D_8003A582) on a retrace while no audio task runs. */
 void func_10004DB0(void) {
     if (D_8003A582 == 0) {
-        if (osRecvMesg(&D_8003B1E8, &D_8002AC50, 0) == 0) {
+        if (osRecvMesg(&D_8003B1E8, (OSMesg *)&D_8002AC50, OS_MESG_NOBLOCK) == 0) {
             if ((osViGetCurrentFramebuffer() != D_8002AC50->framebuffer) &&
                 (osViGetNextFramebuffer() != D_8002AC50->framebuffer) &&
                 ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239))) {
@@ -274,32 +160,7 @@ void func_10004DB0(void) {
         func_10004FE0();
     }
 }
-// NON-MATCHING: branching is not right
-// void func_10004DB0(void) {
-//     if (D_8003A582 == 0) {
-//         if (osRecvMesg(&D_8003B1E8, &D_8002AC50, 0) == 0) {
-//             if ((osViGetCurrentFramebuffer() == D_8002AC50->framebuffer) ||
-//                 (osViGetNextFramebuffer() == D_8002AC50->framebuffer) ||
-//                 ((D_8003B23A != 0) && (D_8003B238 < D_8003B239))) {
-//                 D_8003A582 = 2;
-//             } else {
-//                 if (D_8003B238 != 255) {
-//                     if ((D_8003B238 >= D_8003B239) || (D_8003B23A == 0)) {
-//                         D_8003B239 = D_8003B238;
-//                     }
-//                 }
-//                 func_10004F00();
-//             }
-//         }
-//     } else if (D_8003A582 == 2) {
-//         if ((D_8003B23A == 0) || ( D_8003B238 >= D_8003B239)) {
-//             func_10004F00();
-//         }
-//     } else if (D_8003A582 == 6) {
-//         func_10004FE0();
-//     }
-// }
-
+/* Starts the current graphics task D_8002AC50 on the RSP unless a reset is pending. */
 void func_10004F00(void) {
     if (D_8002AC5C == 0) {
         osSpTaskLoad(&D_8002AC50->list);
@@ -313,12 +174,13 @@ void func_10004F00(void) {
             D_8003B238 = 2;
         }
         D_800BE9E4 = D_8003B238;
-        D_8003B238 = 0 ;
+        D_8003B238 = 0;
         D_8003A582 = 1;
-        osSendMesg(D_8003B230, &D_8003B240, 0);
+        osSendMesg(D_8003B230, &D_8003B240, OS_MESG_NOBLOCK);
     }
 }
 
+/* Swaps in the finished frame, or waits (state 6) until at least one retrace has passed. */
 void func_10004FE0(void) {
     if (D_8003B238 <= 0) {
         D_8003A582 = 6;
@@ -327,14 +189,15 @@ void func_10004FE0(void) {
     }
 }
 
+/* Finishes the current graphics task: swaps its framebuffer if requested and notifies its owner. */
 void func_10005020(void) {
-    void *fb;
+    void *framebuffer;
 
     D_8003A582 = 0;
-    fb = D_8002AC50->framebuffer;
+    framebuffer = D_8002AC50->framebuffer;
     if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
-        func_1515FDA0(fb);
-        osViSwapBuffer(fb);
+        func_1515FDA0(framebuffer);
+        osViSwapBuffer(framebuffer);
     }
-    osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, 1);
+    osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, OS_MESG_BLOCK);
 }

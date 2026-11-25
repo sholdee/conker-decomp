@@ -1,758 +1,135 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_void_unused
-#define func_10010F88 func_10010F88_void_decl_in_functions_h
+// functions.h declares func_15048A40 as returning void; it returns the cosine table value.
+#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
 #undef func_15048A40
-#undef func_10010F88
-s32 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 #include "variables.h"
+
+/*
+ * Per-type update routines for 0xA0-byte level objects (the D_800DBEF4 array, struct131).
+ * Shared layout: rotation f32[3] at 0x0, position s16[3] at 0x10, vertex count at 0x16,
+ * vertex buffers at 0x20 (double-buffered by D_800BE9C0) and 0x28 (source), packed param at
+ * 0x3C, mode in the low two bits of 0x73 (0 closed, 1 closing, 2 opening, 3 open), alpha at
+ * 0x8A, and per-type state at 0x7C-0x87. Each routine views the object through its own struct.
+ */
+
 extern f32 func_15048A40(u8);
-extern void func_15188010(s32, f32 *);
-extern s32 func_151149AC(u32);
-extern f32 D_800A2F8C;
-extern void *allocate_memory(s32, s32, s32, s32);
-extern f32 D_800A3210;
-extern f32 D_800A3214;
-extern f32 D_800A2FF4;
-extern f32 D_800A2FF8;
-extern f32 D_800A2FFC;
-extern f32 D_800A2FB0;
-extern f32 D_800A2FB4;
-
-struct Struct1511F31CArg {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x28];
-    u16 unk3E;
-    u8 pad40[0x14];
-    u16 unk54;
-};
-
-extern void func_1511F31C(struct Struct1511F31CArg *arg0);
-
-struct Struct1511490C {
-    char pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    char pad16[2];
-    f32 unk18;
-    char pad1C[0x10];
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-};
-
-extern void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1);
-extern void func_150A7960(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
-
-struct Obj151151FC {
-    f32 unk0;
-    u8 pad4[0x38];
-    s32 unk3C;
-    u8 pad40[0x20];
-    f32 unk60;
-};
-
-struct Obj151150BC {
-    u8 pad0[0x8];
-    f32 unk8;
-    u8 padC[0x30];
-    s32 unk3C;
-    u8 pad40[0x28];
-    f32 unk68;
-};
-
-struct Obj1511515C {
-    u8 pad0[0x4];
-    f32 unk4;
-    u8 pad8[0x34];
-    s32 unk3C;
-    u8 pad40[0x24];
-    f32 unk64;
-};
-
-struct Obj151152A8 {
-    char pad_0x0[0x12];
-    s16 field_0x12;
-    char pad_0x14[0x28];
-    s32 field_0x3C;
-    char pad_0x40[0xF];
-    u8 field_0x4F;
-    char pad_0x50[0x23];
-    u8 field_0x73;
-    char pad_0x74[0x8];
-    s32 field_0x7C;
-};
-void func_151150B0(s32 arg0);
-void func_151150BC(struct Obj151150BC *arg0);
-void func_1511515C(struct Obj1511515C *arg0);
-void func_151151FC(struct Obj151151FC *arg0);
-void func_1511529C(s32 arg0);
-void func_151152A8(struct Obj151152A8 *arg0);
-void func_151155C0(void *arg0);
-
-struct Obj1511575C {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x3C - 0x16];
-    s32 unk3C;
-    u8 pad40[0xF];
-    u8 unk4F;
-    u8 pad50[0xA];
-    s16 unk5A;
-    s16 unk5C;
-    s16 unk5E;
-    u8 pad60[0x1C];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-extern s32 func_10010E78(u16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1511575C(struct Obj1511575C *arg0);
-
-extern f32 D_800A2FA0;
-extern f32 D_800A2FA4;
-
-struct S_15115EDC { u8 pad[0x7C]; f32 unk7C; f32 unk80; };
-struct A_15115EDC { u8 pad[0x84]; u16 unk84; };
-
-struct B_15115E0C {
-    u8 pad0[0x4];
-    f32 unk4;
-    u8 pad8[0x8];
-    s16 unk10;
-    u8 pad12[0x2];
-    s16 unk14;
-    u8 pad16[0x39];
-    u8 unk4F;
-    u8 pad50[0x2C];
-    f32 unk7C;
-    f32 unk80;
-};
-
-struct C_15115E0C {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[0x4];
-    f32 unk1C;
-};
-
-struct Obj151163C0 {
-    f32 unk0;
-    u8 pad4[0xE];
-    s16 unk12;
-    u8 pad14[0x4];
-    f32 unk18;
-    u8 pad1C[0x20];
-    s32 unk3C;
-    u8 pad40[0x1C];
-    s16 unk5C;
-    u8 pad5E[0x2];
-    f32 unk60;
-    u8 pad64[0x18];
-    s32 unk7C;
-    s32 unk80;
-};
-void func_15115E0C(struct B_15115E0C *arg0, struct C_15115E0C *arg1);
-void func_15115EDC(struct S_15115EDC *arg0, struct A_15115EDC *arg1);
-
-struct Obj1511617C {
-    u8 pad0[0x10];
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad16[0x26];
-    s32 vel;
-    u8 pad40[0xF];
-    u8 flags;
-    u8 pad50[0xC];
-    s16 dy;
-    u8 pad5E[0x1E];
-    f32 ground;
-};
-
-extern u16 D_800CC354;
-extern f32 D_800A2FA8;
-extern f32 D_800A2FAC;
-extern f32 func_1510F648(f32, f32, f32);
-void func_1511617C(struct Obj1511617C *arg0);
-void func_151162D4(void *arg0);
-void func_151163C0(struct Obj151163C0 *arg0);
-
-struct Obj1511650C {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x26];
-    s32 unk3C;
-    u8 pad40[0xF];
-    u8 unk4F;
-    u8 pad50[0x14];
-    f32 unk64;
-    u8 pad68[0xC];
-    u16 unk74;
-    u8 pad76[0x6];
-    s32 unk7C;
-    s32 unk80;
-};
-
-struct Obj15116888;
-s32 func_15116888(s32 arg0, s32 arg1, s32 arg2, struct Obj15116888 *arg3);
-void func_1511650C(struct Obj1511650C *arg0, s32 arg1, s32 arg2, f32 arg3);
-
-struct Obj15116888 {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[0x4];
-    f32 unk1C;
-    u8 pad20[0x1C];
-    f32 unk3C;
-    u8 pad40[0x36];
-    u16 unk76;
-};
-
-struct Vec15116888 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[0x4];
-};
-
-s32 func_150490A8(struct17 *arg0);
-s32 func_15116888(s32 arg0, s32 arg1, s32 arg2, struct Obj15116888 *arg3);
-void func_15116924(s32 arg0);
-void func_15116930(u8 *arg0, u8 *arg1);
-
-struct Obj15116BAC {
-    u8 pad0[0x10];
-    s16 unk10[3];
-    u8 pad16[0x26];
-    s32 unk3C;
-    u8 pad40[0x1A];
-    s16 unk5A[3];
-    u8 pad60[0x14];
-    u16 unk74;
-    u8 pad76[0x6];
-    s32 unk7C[3];
-};
-
-struct SoundEntry15116BAC {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-};
-
-extern struct SoundEntry15116BAC D_80089260[];
-extern struct SoundEntry15116BAC D_80089264[];
-extern struct SoundEntry15116BAC D_80089268[];
-extern void func_15114D24(struct Obj15116BAC *, s32, s32, s32, s32, s32);
-extern void func_151169B4(struct Obj15116BAC *arg0);
-extern void func_15116BAC(struct Obj15116BAC *arg0);
-void func_15116984(u8 *arg0);
-void func_151169B4(struct Obj15116BAC *arg0);
-void func_15116BAC(struct Obj15116BAC *arg0);
-
-struct Obj15116D7C {
-    f32 unk0[3];
-    u8 padC[0x30];
-    s32 unk3C;
-    u8 pad40[0x20];
-    f32 unk60[3];
-    u8 pad6C[0x10];
-    f32 unk7C[3];
-};
-void func_15116D7C(struct Obj15116D7C *arg0);
-
-typedef struct {
-    u8 frames;
-    u8 count;
-} Anim15116EA4;
-
-typedef struct {
-    s32 start;
-    s32 end;
-} Rom15116EA4;
-
-extern Anim15116EA4 D_80089320[];
-extern Rom15116EA4 D_8002AAD0[];
-
-struct Obj15116EA4 {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0xA];
-    Vtx *unk20[2];
-    u8 pad28[0x14];
-    s32 unk3C;
-    u8 pad40[0x3C];
-    s32 unk7C;
-    s16 *unk80;
-    s32 unk84;
-};
-void func_15116EA4(struct Obj15116EA4 *arg0);
-
-typedef struct Motion151172D8 {
-    u8 pad0[0x3C];
-    s32 packedTarget;
-    u8 pad40[0x3C];
-    f32 damping;
-    f32 acceleration;
-    f32 velocity;
-} Motion151172D8;
-
-extern f32 D_800A2FD8;
-f32 func_151172D8(Motion151172D8 *arg0, f32 angle);
-
-struct Obj151174A0 {
-    char pad0[0x8];
-    f32 unk8;
-};
-void func_151174A0(struct Obj151174A0 *arg0);
-
-struct Obj151174C8 {
-    char pad0[0x4];
-    f32 unk4;
-};
-void func_151174C8(struct Obj151174C8 *arg0);
-
-struct Obj151174F0 {
-    f32 unk0;
-};
-void func_151174F0(struct Obj151174F0 *arg0);
-f32 func_15117518(struct Obj151174F0 *arg0, f32 current);
-
-extern f32 func_15117518(struct Obj151174F0 *, f32);
-void func_15117770(struct Obj151174F0 *arg0);
-
-struct Obj15117798 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-};
-
-struct Obj15117DA4 {
-    f32 unk0;
-    f32 unk4;
-    u8 pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x28];
-    u16 unk3E;
-    u8 pad40[0x14];
-    u16 unk54;
-};
-void func_15117798(struct Obj15117798 *arg0);
-
-s32 func_150AD9A0(s32, s32, s32);
-extern f32 D_800A2FDC;
-extern f32 D_800A2FE0;
-extern f32 D_800A2FE4;
-extern f32 D_800A2FE8;
-extern f32 D_800A2FEC;
-extern f32 D_800A2FF0;
-void func_151179BC(void *arg0);
-void func_15117D3C(struct Obj151152A8 *arg0, struct127 *arg1);
-void func_15117DA4(struct Obj15117DA4 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4);
-
-struct F7Cw {
-    u8 p0[0x17];
-    u8 unk17;
-    u8 p18[0xF];
-    u8 unk27;
-    u8 p28[0x43];
-    u8 unk6B;
-    s16 unk6C;
-    s16 unk6E;
-    s16 unk70;
-};
-
-struct F7Tg {
-    s32 p0;
-    u8 p4[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 p20[0x45];
-    u8 unk65;
-    u8 p66[0x80];
-    s16 unkE6;
-    u8 pE8[0x1C];
-    u8 unk104;
-    u8 p105[0x216];
-    struct F7Cw *w;
-    u8 p320[0xC];
-};
-
-struct F7O {
-    f32 unk0;
-    u8 p4[0x28];
-    f32 ox;
-    f32 oy;
-    f32 oz;
-    u8 p38[0x17];
-    u8 unk4F;
-    u8 p50[0x23];
-    u8 unk73;
-    u16 unk74;
-    u8 p76[6];
-    s32 unk7C;
-    f32 unk80;
-    f32 unk84;
-};
-
-extern void func_15060A30(s32, void *);
-void func_15117F3C(struct F7O *o);
-
-s32 func_151189AC(void *arg0, s32 arg1);
-s32 func_1511896C(void *arg0);
-s32 func_1511898C(void *arg0);
-
-extern void func_15173C60(s32, s32);
-extern void func_15173C90(s32, s32, s32);
-extern void func_1518804C(s32, f32);
-extern void func_1511F990(void *, s32);
-extern s32 func_15022B08(s32, s32);
-extern struct SoundEntry15116BAC D_80089262[];
-extern f32 D_800A3138;
-extern f32 D_800A313C;
-extern f32 D_800A3140;
-extern f32 D_800A3144;
-s32 func_151189AC(void *arg0, s32 arg1);
-
-extern void func_1511F990(void *, s32);
-extern void func_15173C60(s32, s32);
-extern void func_1518804C(s32, f32);
-extern void func_151669A0(s32, s32, s32, f32, u8, s32);
-extern f32 D_800A3148;
-extern f32 D_800A314C;
-extern f32 D_800A3150;
-extern f32 D_800A3154;
-extern f32 D_800A3158;
-void func_15118F24(u8 *arg0);
-
-struct Obj151193AC_0 {
-    char pad0[0x73];
-    u8 unk73;
-};
-
-struct Obj151193AC_1 {
-    s32 unk0;
-    char pad4[0x61];
-    u8 unk65;
-};
-void func_151193AC(struct Obj151193AC_0 *arg0, struct Obj151193AC_1 *arg1);
-
-struct Obj151193F4 {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x28];
-    s32 unk3C;
-    u8 pad40[0x33];
-    u8 unk73;
-    u8 pad74[0x8];
-    s32 unk7C;
-    u32 unk80;
-    s32 unk84;
-};
-void func_151193F4(struct Obj151193F4 *arg0);
-
-
-struct Obj151194D4Node {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u16 unk6;
-    char pad8[8];
-};
-
-struct Obj151194D4Cmd {
-    s8 unk0;
-    char pad1[3];
-    u32 unk4;
-};
-
-struct Obj151194D4 {
-    char pad0[0x16];
-    u16 unk16;
-    char pad18[4];
-    struct Obj151194D4Cmd *unk1C;
-    char pad20[8];
-    struct Obj151194D4Node *unk28;
-    char pad2C[0x28];
-    u16 unk54;
-    char pad56[0x2E];
-    s32 unk84;
-};
-void func_151194D4(struct Obj151194D4 *arg0, struct Obj151194D4Node *arg1, s32 arg2, s32 arg3);
-
 extern f32 func_150489B0(u8);
-extern f32 D_800A315C;
-void func_151196D4(struct Obj151194D4 *arg0);
-
-typedef struct {
-    s16 x, y, z;
-    u16 group;
-    u8 pad8[8];
-} Game144C70Vertex;
-
-typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-    u8 pad8[8];
-    s16 x, y, z;
-    u16 count;
-    u8 pad18[8];
-    Game144C70Vertex *outputs[2];
-    Game144C70Vertex *vertices;
-    f32 scaleX, scaleY, scaleZ;
-    u8 pad38[0x1C];
-    u16 kind;
-    u8 pad56[0x26];
-    s32 timer;
-    f32 phase;
-    s32 active;
-} Game144C70VertexState;
-
-extern s32 func_151EF610(void);
-struct127 *func_1505EFD0(s32);
-extern f32 D_800A3160;
-extern f32 D_800A3164;
-extern f32 D_800A3168;
-extern f32 D_800A316C;
-void func_15119938(Game144C70VertexState *arg0);
-
-typedef struct Obj15119FC0 {
-    f32 x, y, z;
-    u8 pad0C[4];
-    s16 position[3];
-    u8 pad16[0x26];
-    s32 flags;
-    u8 pad40[0xF];
-    s8 state;
-    u8 pad50[0x1E];
-    s8 removed;
-    u8 pad6F;
-    u8 flags70;
-    u8 pad71[0xB];
-    f32 phase;
-    s32 baseHeight;
-    s32 timer;
-    u8 pad88[2];
-    u8 alpha;
-} Obj15119FC0;
-
-
-extern s32 func_15060BA4(void *, s32);
-extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_1508EE0C(s32, s32);
-extern void func_151D69B4(void *, void *);
-void func_15119FC0(Obj15119FC0 *arg0);
-
-typedef struct {
-    s32 *unk0;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 pad9[3];
-} Struct1511A494Entry;
-
-typedef struct {
-    u8 pad0[0x1C];
-    s32 unk1C;
-    u8 pad20[0x34];
-    u16 unk54;
-} Struct1511A494Arg;
-
-extern Struct1511A494Entry D_80089324[];
-extern s32 func_1511A410(s32, s32 *);
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(void *, s32, s32, s32, s32);
-void func_1511A494(Struct1511A494Arg *arg0, s32 *arg1, s32 *arg2);
-
-extern void func_15116110(void *);
-void func_1511A6FC(s32 *arg0);
-
-extern u8 D_800C35EA;
-extern struct131 *D_800DBEF4;
+extern void *allocate_memory(s32, s32, s32, s32);
+extern void *func_151149AC(u32);
+extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
-extern void func_151162D4(void *);
-void func_1511A738(struct131 *arg0);
-
-struct S_1511A7C0 {
-    u8 pad0[0x4];
-    f32 *unk4;
-    u8 pad8[0x8];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-};
-struct A_1511A7C0 {
-    u8 pad0[0x16];
-    u16 unk16;
-    u8 pad18[0x68];
-    struct S_1511A7C0 *unk80;
-};
-void func_1511A7C0(struct A_1511A7C0 *arg0);
-
-typedef struct {
-    u8 *bytes;
-    f32 *values;
-    f32 *rates;
-    f32 *scales;
-    f32 field_10;
-    f32 field_14;
-    f32 field_18;
-    u8 field_1C;
-    u8 field_1D;
-    u8 field_1E;
-    s32 field_20;
-    s32 field_24;
-} Game147C70Output;
-
-typedef struct {
-    u8 pad0[0x16];
-    u16 value_count;
-    u8 pad18[8];
-    Vtx_t *lists[2];
-    Vtx_t *vertices;
-    u8 pad2C[0x10];
-    s32 packed3C;
-    u8 pad40[0x33];
-    u8 flags73;
-    u8 pad74[0xC];
-    Game147C70Output *output;
-    s32 packed84;
-} Game147C70State;
-
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-void func_1511A838(Game147C70State *arg0);
+extern void func_1511F990(void *, s32);
+extern void func_15114D24(void *, s32, s32, s32, s32, s32);
+extern void func_1518804C(s32, f32);
+extern void func_15173C60(s32, s32);
+extern void func_15060A30(s32, void *);
+extern void func_1511A494(void *, s32 *, s32 *);
 
 struct Obj1511AF30 {
-    f32 pos;
+    f32 rotX;
     u8 pad4[0x38];
     s32 level;
     u8 pad40[0x3C];
-    f32 base;
+    f32 tilt;
     f32 wobble;
     f32 wobbleTarget;
 };
 
-extern f32 D_800A3188;
-extern f32 D_800A318C;
-extern f32 D_800A3190;
-extern f32 D_800A3194;
-
-void func_1511AF30(struct Obj1511AF30 *arg0) {
+/* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
+void func_1511AF30(struct Obj1511AF30 *obj) {
     f32 level;
     f32 target;
     f32 diff;
-    s32 r;
+    s32 roll;
 
-    level = arg0->level;
-    target = 75.0f * level * D_800A3188;
-    if (target != arg0->base) {
-        diff = target - arg0->base;
+    level = obj->level;
+    target = 75.0f * level * 0.009999999776f;
+    if (target != obj->tilt) {
+        diff = target - obj->tilt;
         if (fabsf(diff) < 1.0f) {
-            arg0->base = target;
+            obj->tilt = target;
         } else {
-            arg0->base += (diff < 0.0f) ? -1 : 1;
+            obj->tilt += (diff < 0.0f) ? -1 : 1;
         }
-        arg0->wobble = 0.0f;
+        obj->wobble = 0.0f;
     } else {
-        r = (u32)func_150ADA20() % 1000;
-        if (r < 500) {
-            arg0->wobbleTarget = r * 5.0f * level * D_800A318C * D_800A3190;
+        roll = (u32)func_150ADA20() % 1000;
+        if (roll < 500) {
+            obj->wobbleTarget = roll * 5.0f * level * 0.002000000095f * 0.009999999776f;
         }
-        diff = arg0->wobbleTarget - arg0->wobble;
-        arg0->wobble += diff * D_800A3194;
+        diff = obj->wobbleTarget - obj->wobble;
+        obj->wobble += diff * 0.400000006f;
     }
-    arg0->pos = arg0->base + arg0->wobble;
-
+    obj->rotX = obj->tilt + obj->wobble;
 }
 
 struct Obj1511B07C {
     u8 pad0[0x10];
-    s16 unk10;
+    s16 x;
     u8 pad12[0x2];
-    s16 unk14;
+    s16 z;
     u8 pad16[0x26];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x33];
-    u8 unk73;
-    u16 unk74;
+    u8 flags;
+    u16 soundHandle;
     u8 pad76[0x6];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
+    s32 homeX;
+    s32 homeZ;
+    f32 speed;
 };
 
-void func_1511B07C(struct Obj1511B07C *arg0) {
-    f32 cur;
+/* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
+void func_1511B07C(struct Obj1511B07C *obj) {
     f32 speed;
+    f32 maxSpeed;
     s32 mode;
     s32 state;
     s32 targetX;
     s32 targetZ;
-    s32 d;
+    s32 step;
     s32 moveX;
     s32 moveZ;
     s32 sound;
 
-    speed = 7.0f;
+    maxSpeed = 7.0f;
     moveX = 0;
     moveZ = 0;
     sound = 0;
     if (D_800C35EA == 1) {
-        if (func_15022B08((struct131 *)arg0 - D_800DBEF4, 0) != 0) {
+        if (func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
             return;
         }
     }
-    if (arg0->unk7C == 0) {
-        arg0->unk7C = arg0->unk10 | 0x80000000;
-        arg0->unk80 = arg0->unk14;
+    if (obj->homeX == 0) {
+        obj->homeX = obj->x | 0x80000000;
+        obj->homeZ = obj->z;
     }
-    targetX = (s16)arg0->unk7C;
-    targetZ = arg0->unk80;
-    state = arg0->unk3C & 0x3FF;
+    targetX = (s16)obj->homeX;
+    targetZ = obj->homeZ;
+    state = obj->param & 0x3FF;
     if (state >= 4 && state < 7) {
-        func_1511F990(arg0, 1);
+        func_1511F990(obj, 1);
     }
-    mode = arg0->unk73 & 3;
+    mode = obj->flags & 3;
     if (mode == 3 || mode == 2) {
         switch (state) {
         case 0:
-            targetX = -0x45;
-            targetZ = -0x78;
+            targetX = -69;
+            targetZ = -120;
             if (mode == 2) {
                 sound = 0x4E;
             }
             moveX = 1;
             break;
         case 1:
-            targetX = -0x45;
-            targetZ = 0x78;
+            targetX = -69;
+            targetZ = 120;
             moveX = 1;
             break;
         case 2:
-            targetX = 0x64;
+            targetX = 100;
             if (mode == 2) {
                 sound = 0x4E;
             }
@@ -761,27 +138,27 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
             targetX = 0;
             break;
         case 4:
-            speed = 15.0f;
-            targetX = 0x10E;
-            targetZ = -0x756;
+            maxSpeed = 15.0f;
+            targetX = 270;
+            targetZ = -1878;
             moveZ = 1;
             if (mode == 2) {
                 sound = 0x4E;
             }
             break;
         case 5:
-            targetZ = 0x8C;
+            targetZ = 140;
             if (mode == 2) {
                 sound = 0x4C1;
             }
             break;
         case 6:
-            targetZ = -0x8C;
+            targetZ = -140;
             break;
         case 7:
-            speed = 15.0f;
-            targetX = -0x1004;
-            targetZ = 0x1A6;
+            maxSpeed = 15.0f;
+            targetX = -4100;
+            targetZ = 422;
             moveX = 1;
             if (mode == 2) {
                 sound = 0x4E;
@@ -791,14 +168,14 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
     } else {
         switch (state) {
         case 4:
-            speed = 15.0f;
+            maxSpeed = 15.0f;
             moveX = 1;
             if (mode == 1) {
                 sound = 0x4E;
             }
             break;
         case 7:
-            speed = 15.0f;
+            maxSpeed = 15.0f;
             moveZ = 1;
             if (mode == 1) {
                 sound = 0x4E;
@@ -807,104 +184,112 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
         }
     }
     if (sound != 0) {
-        func_15114D24(arg0, sound, 0x7D00, 0x64, 0x9C4, 1);
+        func_15114D24(obj, sound, 0x7D00, 100, 2500, 1);
     }
-    cur = arg0->unk84;
+    speed = obj->speed;
     if (mode == 0 || mode == 3) {
-        cur = 0.0f;
-        arg0->unk10 = targetX;
-        arg0->unk14 = targetZ;
+        speed = 0.0f;
+        obj->x = targetX;
+        obj->z = targetZ;
     }
-    if (cur < speed) {
-        cur += (speed - cur) * 0.02999999933f;
+    if (speed < maxSpeed) {
+        speed += (maxSpeed - speed) * 0.02999999933f;
     }
-    if ((moveX != 0 || targetZ == arg0->unk14) && targetX != arg0->unk10 && (moveZ == 0 || targetZ == arg0->unk14)) {
-        d = targetX - arg0->unk10;
-        if (d < -cur) {
-            d = -cur;
-        } else if (cur < d) {
-            d = cur;
+    if ((moveX != 0 || targetZ == obj->z) && targetX != obj->x && (moveZ == 0 || targetZ == obj->z)) {
+        step = targetX - obj->x;
+        if (step < -speed) {
+            step = -speed;
+        } else if (speed < step) {
+            step = speed;
         }
-        arg0->unk10 += d;
-        if (targetX == arg0->unk10) {
-            cur = 0.0f;
+        obj->x += step;
+        if (targetX == obj->x) {
+            speed = 0.0f;
             if (state == 0) {
-                func_15114D24(arg0, 0x4E, 0x7D00, 0x64, 0x9C4, 1);
+                func_15114D24(obj, 0x4E, 0x7D00, 100, 2500, 1);
             }
         }
-    } else if (targetZ != arg0->unk14) {
-        d = targetZ - arg0->unk14;
-        if (d < -cur) {
-            d = -cur;
-        } else if (cur < d) {
-            d = cur;
+    } else if (targetZ != obj->z) {
+        step = targetZ - obj->z;
+        if (step < -speed) {
+            step = -speed;
+        } else if (speed < step) {
+            step = speed;
         }
-        arg0->unk14 += d;
+        obj->z += step;
     } else if (mode == 2 || mode == 1) {
-        arg0->unk73 = ((mode == 2) ? 3 : 0) | (arg0->unk73 &= ~3);
-        if (arg0->unk74 != 0) {
-            func_100111C8(arg0->unk74);
-            arg0->unk74 = 0;
-            func_15114D24(arg0, 0x4C8, 0x7D00, 0x64, 0x9C4, 1);
+        // matching: the embedded &= makes IDO store the cleared flags before merging
+        obj->flags = ((mode == 2) ? 3 : 0) | (obj->flags &= ~3);
+        if (obj->soundHandle != 0) {
+            func_100111C8(obj->soundHandle);
+            obj->soundHandle = 0;
+            func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
-    arg0->unk84 = cur;
+    obj->speed = speed;
 }
 
 
 struct Obj1511B51C {
     u8 pad0[0x8];
-    f32 unk8;
+    f32 angle;
     u8 padC[0x30];
-    s32 unk3C;
+    union {
+        s32 word;
+        struct {
+            s16 hi;
+            s16 targetAngle;
+        } half;
+    } param;
     u8 pad40[0x33];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
+    f32 restitution;
+    f32 maxSpeed;
+    f32 velocity;
 };
 
-void func_1511B51C(struct Obj1511B51C *arg0) {
-    f32 vel;
+/* Swings the angle toward its open/closed target with a damped bounce, driving a sound by it. */
+void func_1511B51C(struct Obj1511B51C *obj) {
+    f32 velocity;
     f32 target;
     f32 angle;
     f32 diff;
-    f32 damp;
-    f32 maxv;
+    f32 restitution;
+    f32 maxSpeed;
     s32 mode;
-    s32 idx;
-    s32 raw;
+    s32 sound;
+    s32 openAngle;
     f32 ratio;
 
-    raw = ((s16 *)arg0)[0x3E / 2];
-    mode = arg0->unk73 & 3;
-    target = raw;
-    angle = arg0->unk8;
-    vel = arg0->unk84;
+    openAngle = obj->param.half.targetAngle;
+    mode = obj->flags & 3;
+    target = openAngle;
+    angle = obj->angle;
+    velocity = obj->velocity;
     if (mode == 0 || mode == 1) {
         target = 0.0f;
     }
     if (mode == 0 || mode == 3) {
         angle = target;
-        vel = 0.0f;
+        velocity = 0.0f;
     }
-    if (angle != target || vel != 0.0f) {
-        damp = arg0->unk7C;
-        if (damp == 0.0f) {
-            damp = 0.4499999881f;
+    if (angle != target || velocity != 0.0f) {
+        restitution = obj->restitution;
+        if (restitution == 0.0f) {
+            restitution = 0.4499999881f;
         }
-        maxv = arg0->unk80;
-        if (maxv == 0.0f) {
-            maxv = 0.5f;
+        maxSpeed = obj->maxSpeed;
+        if (maxSpeed == 0.0f) {
+            maxSpeed = 0.5f;
         }
-        angle += vel;
-        if (angle != 0.0f) {}
+        angle += velocity;
+        if (angle != 0.0f) {} // matching: no-op use of angle steers IDO's FP register choice
         diff = func_15048A70(angle, target);
-        if (fabsf(diff) < fabsf(vel)) {
-            vel = -vel * damp;
-            if (fabsf(vel) < maxv * 0.05000000075f) {
-                vel = 0.0f;
+        if (fabsf(diff) < fabsf(velocity)) {
+            velocity = -velocity * restitution;
+            if (fabsf(velocity) < maxSpeed * 0.05000000075f) {
+                velocity = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
                     mode = 0;
@@ -913,110 +298,104 @@ void func_1511B51C(struct Obj1511B51C *arg0) {
                 }
             }
         } else if (diff > 0.0f) {
-            vel += (maxv - vel) * 0.009999999776f;
+            velocity += (maxSpeed - velocity) * 0.009999999776f;
         } else {
-            vel -= (maxv + vel) * 0.009999999776f;
+            velocity -= (maxSpeed + velocity) * 0.009999999776f;
         }
         if (angle < 0.0f) {
             angle += 360.0f;
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        arg0->unk73 &= ~3;
-        arg0->unk73 |= mode;
+        obj->flags &= ~3;
+        obj->flags |= mode;
     }
-    arg0->unk84 = vel;
-    if (D_800BE9B4 != 0 || angle != arg0->unk8) {
-        arg0->unk8 = angle;
-        idx = (arg0->unk3C >> 24) & 0xFF;
-        if (idx != 0 && raw != 0) {
-            ratio = fabsf((angle - raw) / raw);
-            func_1518804C(idx - 1, ratio);
-            func_15173C60((s32)((1.0f - ratio) * 255.0f), idx - 1);
+    obj->velocity = velocity;
+    if (D_800BE9B4 != 0 || angle != obj->angle) {
+        obj->angle = angle;
+        sound = (obj->param.word >> 24) & 0xFF;
+        if (sound != 0 && openAngle != 0) {
+            ratio = fabsf((angle - openAngle) / openAngle);
+            func_1518804C(sound - 1, ratio);
+            func_15173C60((s32)((1.0f - ratio) * 255.0f), sound - 1);
         }
     }
 }
 
-struct Vtx1511B7D4 {
+struct Obj1511B7D4 {
+    u8 pad0[0x8];
+    f32 angle;
+    u8 padC[0x4];
     s16 x;
     s16 y;
     s16 z;
-    u8 pad6[0xA];
-};
-
-struct Obj1511B7D4 {
-    u8 pad0[0x8];
-    f32 unk8;
-    u8 padC[0x4];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
     u8 pad16[0xA];
-    struct Vtx1511B7D4 *unk20[2];
-    struct Vtx1511B7D4 *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x3C];
-    s32 unk7C;
-    f32 unk80;
-    f32 unk84;
+    s32 updates;
+    f32 prevAngle[2];
     u8 pad88[0x18];
 };
 
+/* (vertex, pivot) index pairs: vertices that follow the rotation of a preceding object. */
 extern u8 D_800A2F70;
 extern u8 D_800A2F71[];
 
-void func_1511B7D4(struct Obj1511B7D4 *arg0) {
-    u8 *table;
+/* Rotates the listed vertices about the pivot objects just before this one in the object array. */
+void func_1511B7D4(struct Obj1511B7D4 *obj) {
+    u8 *pair;
     s32 count;
     s32 dx;
     s32 dy;
     f32 angle;
-    f32 s;
-    f32 c;
+    f32 sine;
+    f32 cosine;
     s32 x;
     s32 y;
     s32 z;
-    s32 tmp;
-    struct Obj1511B7D4 *objs[2];
+    s32 rotatedY;
+    struct Obj1511B7D4 *pivots[2];
 
     count = 0;
-    if (arg0->unk3C == 0) {
-        table = D_800A2F71;
+    if (obj->param == 0) {
+        pair = D_800A2F71;
         count = D_800A2F70;
-        objs[0] = arg0 - 1;
-        objs[1] = arg0 - 2;
+        pivots[0] = obj - 1;
+        pivots[1] = obj - 2;
     }
-    if (arg0->unk80 != objs[0]->unk8 || arg0->unk84 != objs[1]->unk8) {
-        arg0->unk80 = objs[0]->unk8;
-        arg0->unk84 = objs[1]->unk8;
-        arg0->unk7C = 2;
+    if (obj->prevAngle[0] != pivots[0]->angle || obj->prevAngle[1] != pivots[1]->angle) {
+        obj->prevAngle[0] = pivots[0]->angle;
+        obj->prevAngle[1] = pivots[1]->angle;
+        obj->updates = 2;
     }
-    if (arg0->unk7C != 0) {
-        arg0->unk7C--;
+    if (obj->updates != 0) {
+        obj->updates--;
         while (count--) {
-            dx = objs[table[1]]->unk10 - arg0->unk10;
-            angle = -objs[table[1]]->unk8 * 0.01745329238f;
-            dy = objs[table[1]]->unk12 - arg0->unk12;
-            s = sinf(angle);
-            c = cosf(angle);
-            y = arg0->unk28[table[0]].y;
-            x = arg0->unk28[table[0]].x;
-            z = arg0->unk28[table[0]].z;
+            dx = pivots[pair[1]]->x - obj->x;
+            angle = -pivots[pair[1]]->angle * 0.01745329238f;
+            dy = pivots[pair[1]]->y - obj->y;
+            sine = sinf(angle);
+            cosine = cosf(angle);
+            y = obj->source[pair[0]].v.ob[1];
+            x = obj->source[pair[0]].v.ob[0];
+            z = obj->source[pair[0]].v.ob[2];
             y -= dy;
             x -= dx;
-            tmp = (s32)(y * c - x * s);
-            x = (s32)(y * s + x * c);
-            y = tmp;
+            rotatedY = (s32)(y * cosine - x * sine);
+            x = (s32)(y * sine + x * cosine);
+            y = rotatedY;
             x += dx;
             y += dy;
-            x += arg0->unk10;
-            y += arg0->unk12;
-            z += arg0->unk14;
-            arg0->unk20[D_800BE9C0][table[0]].x = x;
-            arg0->unk20[D_800BE9C0][table[0]].y = y;
-            arg0->unk20[D_800BE9C0][table[0]].z = z;
-            table += 2;
+            x += obj->x;
+            y += obj->y;
+            z += obj->z;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[0] = x;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[1] = y;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[2] = z;
+            pair += 2;
         }
     }
 }
@@ -1024,19 +403,20 @@ void func_1511B7D4(struct Obj1511B7D4 *arg0) {
 
 struct Obj1511BA24 {
     u8 pad0[0x3C];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x4A];
-    u8 unk8A;
+    u8 alpha;
 };
 
-void func_1511BA24(struct Obj1511BA24 *arg0) {
-    f32 sp1C;
+/* Sets the alpha from a 0..1 level looked up by the param, never fully transparent. */
+void func_1511BA24(struct Obj1511BA24 *obj) {
+    f32 level;
 
-    sp1C = 0.0f;
-    func_15188010(arg0->unk3C, &sp1C);
-    arg0->unk8A = sp1C * 255.0f;
-    if (arg0->unk8A == 0) {
-        arg0->unk8A = 1;
+    level = 0.0f;
+    func_15188010(obj->param, &level);
+    obj->alpha = level * 255.0f;
+    if (obj->alpha == 0) {
+        obj->alpha = 1;
     }
 }
 
@@ -1062,16 +442,17 @@ typedef struct Game1483E0State {
     u8 reference_id;
     u8 unknown40[0x3C];
     Game1483E0UvPair *coords;
-    void *reference;
+    struct127 *reference;
 } Game1483E0State;
 
 extern f32 D_800A31D0;
 extern f32 D_800A31D4;
-extern f32 D_800A31D8;
-extern f32 D_800A31DC;
 
-void func_1511BB04(Game1483E0State *arg0, f32 arg1, f32 arg2,
-                   f32 arg3, f32 arg4) {
+/*
+ * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
+ * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
+ */
+void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
     Game1483E0UvPair *coords;
     s32 i;
     f32 s_offset;
@@ -1079,116 +460,127 @@ void func_1511BB04(Game1483E0State *arg0, f32 arg1, f32 arg2,
     f32 s_scale;
     f32 t_scale;
 
-    if (arg0->coords == 0) {
-        coords = allocate_memory(arg0->count * 4, 1, 0, 0);
-        arg0->coords = coords;
-        for (i = 0; i < arg0->count; i++) {
-            coords[i].s = arg0->source[i].s;
-            coords[i].t = arg0->source[i].t;
-            arg0->buffers[0][i] = arg0->source[i];
-            arg0->buffers[1][i] = arg0->source[i];
-            arg0->buffers[0][i].x += arg0->x;
-            arg0->buffers[0][i].y += arg0->y;
-            arg0->buffers[0][i].z += arg0->z;
-            arg0->buffers[1][i].x += arg0->x;
-            arg0->buffers[1][i].y += arg0->y;
-            arg0->buffers[1][i].z += arg0->z;
+    if (obj->coords == NULL) {
+        coords = allocate_memory(obj->count * sizeof(Game1483E0UvPair), 1, 0, 0);
+        obj->coords = coords;
+        for (i = 0; i < obj->count; i++) {
+            coords[i].s = obj->source[i].s;
+            coords[i].t = obj->source[i].t;
+            obj->buffers[0][i] = obj->source[i];
+            obj->buffers[1][i] = obj->source[i];
+            obj->buffers[0][i].x += obj->x;
+            obj->buffers[0][i].y += obj->y;
+            obj->buffers[0][i].z += obj->z;
+            obj->buffers[1][i].x += obj->x;
+            obj->buffers[1][i].y += obj->y;
+            obj->buffers[1][i].z += obj->z;
         }
     }
 
-    coords = arg0->coords;
-    s_offset = arg1 - ((f32)arg0->x + D_800A31D0);
-    t_offset = arg2 - ((f32)arg0->z + D_800A31D4);
+    coords = obj->coords;
+    s_offset = refX - ((f32)obj->x + D_800A31D0);
+    t_offset = refZ - ((f32)obj->z + D_800A31D4);
     s_offset = -s_offset;
-    s_offset *= D_800A31D8;
-    t_offset *= D_800A31DC;
+    s_offset *= 4.300000191f;
+    t_offset *= 4.300000191f;
     s_offset -= 1024.0f;
     t_offset -= 1024.0f;
     s_scale = 1.0f;
     t_scale = 1.0f;
-    if (arg3 != 1.0f) {
-        s_scale = 1.0f / arg3;
+    if (scaleS != 1.0f) {
+        s_scale = 1.0f / scaleS;
     }
-    if (arg4 != 1.0f) {
-        t_scale = 1.0f / arg4;
+    if (scaleT != 1.0f) {
+        t_scale = 1.0f / scaleT;
     }
-    for (i = 0; i < arg0->count; i++) {
-        arg0->buffers[D_800BE9C0][i].s =
-            (s16)(((f32)coords[i].s + s_offset) * s_scale + 1024.0f);
-        arg0->buffers[D_800BE9C0][i].t =
-            (s16)(((f32)coords[i].t + t_offset) * t_scale + 1024.0f);
+    for (i = 0; i < obj->count; i++) {
+        obj->buffers[D_800BE9C0][i].s = (s16)(((f32)coords[i].s + s_offset) * s_scale + 1024.0f);
+        obj->buffers[D_800BE9C0][i].t = (s16)(((f32)coords[i].t + t_offset) * t_scale + 1024.0f);
     }
 }
 
-struct Obj1511BDF4 {
-    u8  pad0[0x3F];
-    u8  unk3F;
-    u8  pad40[0x40];
-    struct127 *unk80;
-};
+/* Projects the mesh texture under its reference object (or the object numbered reference_id). */
+void func_1511BDF4(Game1483E0State *obj) {
+    struct127 *reference;
 
-extern void func_1511BB04(Game1483E0State *, f32, f32, f32, f32);
-
-void func_1511BDF4(struct Obj1511BDF4 *arg0) {
-    struct127 *temp;
-    struct127 *sp;
-
-    temp = arg0->unk80;
-    if (temp != 0) {
-        sp = temp;
+    if (obj->reference != NULL) {
+        reference = obj->reference;
     } else {
-        sp = func_15083E90(arg0->unk3F);
+        reference = func_15083E90(obj->reference_id);
     }
-    if (sp != 0) {
-        func_1511BB04((Game1483E0State *)arg0, sp->x_position, sp->z_position, 1.0f, 1.0f);
+    if (reference != NULL) {
+        func_1511BB04(obj, reference->x_position, reference->z_position, 1.0f, 1.0f);
     }
 }
 
 struct Obj1511BE5C {
     u8  pad0[0x4];
-    f32 unk4;
+    f32 rotY;
     u8  pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
 };
 
-extern f32 D_800A31E0;
-
-void func_1511BE5C(struct Obj1511BE5C *arg0) {
-    arg0->unk4 = func_150484A0((f32)arg0->unk10 - D_800DBFF0->unk2F8, (f32)arg0->unk14 - D_800DBFF0->unk300) * D_800A31E0;
+/* Turns the object to face the camera (yaw in degrees). */
+void func_1511BE5C(struct Obj1511BE5C *obj) {
+    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->unk2F8, (f32)obj->z - D_800DBFF0->unk300) * 57.29577637f;
 }
 
 struct Obj1511BEBC {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
     u8 pad16[0x1E];
-    f32 unk34;
+    f32 scaleZ;
     u8 pad38[0x3B];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
+    s32 restAndTimer; /* low 16 bits: rest height, high 16 bits: timer */
+    s32 triggered;
+    f32 velocity;
 };
 
-struct Pl1511BEBC {
+/* Per-character trap state that func_1511BEBC drives while a character is caught. */
+struct CharacterTrap {
+    u8 pad0[0x6B];
+    u8 state;
+    s16 x;
+    s16 y;
+    s16 z;
+};
+
+/* The 0x32C-byte character object (struct127) as func_1511BEBC sees it. */
+struct TrapCharacter {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0xC6];
+    s16 height;
+    u8 padE8[0x234];
+    struct CharacterTrap *trap;
+    u8 pad320[0xC];
+};
+
+/* The 0x9A0-byte player (struct108) as func_1511BEBC sees it. */
+struct TrapPlayer {
     u8 pad0[0x3D0];
-    struct F7Tg *unk3D0;
-    struct F7Cw *unk3D4;
+    struct TrapCharacter *character;
+    struct CharacterTrap *trap;
     u8 pad3D8[0x9A0 - 0x3D8];
 };
 
 extern void func_150DDED0(void *);
 
-void func_1511BEBC(struct Obj1511BEBC *o) {
+/* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
+void func_1511BEBC(struct Obj1511BEBC *obj) {
     f32 pos[3];
-    s16 limit;
-    struct F7Tg *target;
-    struct F7Tg *p;
-    struct Pl1511BEBC *e;
+    s16 restY;
+    struct TrapCharacter *target;
+    struct TrapCharacter *character;
+    struct TrapPlayer *player;
     s32 i;
     s32 mode;
     s32 flag8;
@@ -1196,87 +588,86 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
     f32 dy;
     f32 dz;
     s32 timer;
-    f32 thr;
+    f32 radiusSq;
     s32 flag4;
-    s32 t1;
-    f32 f84;
-    struct F7Cw *w;
+    s32 triggered;
+    f32 velocity;
+    struct CharacterTrap *trap;
     f32 dist;
-    void (*cb)(void *);
+    void (*onTrigger)(void *);
 
-    cb = func_150DDED0;
-    func_1511BE5C((struct Obj1511BE5C *)o);
-    mode = o->unk73 & 3;
-    flag4 = o->unk73 & 4;
-    flag8 = o->unk73 & 8;
-    t1 = o->unk80;
-    f84 = o->unk84;
+    onTrigger = func_150DDED0;
+    func_1511BE5C((struct Obj1511BE5C *)obj);
+    mode = obj->flags & 3;
+    flag4 = obj->flags & 4;
+    flag8 = obj->flags & 8;
+    triggered = obj->triggered;
+    velocity = obj->velocity;
     if (D_800BE9F0 == 10) {
-        thr = (o->unk34 * 100.0f) * (o->unk34 * 100.0f);
-        if (o->unk7C == 0) {
-            if (o->unk12 == 0) {
-                o->unk12 = 1;
+        radiusSq = (obj->scaleZ * 100.0f) * (obj->scaleZ * 100.0f);
+        if (obj->restAndTimer == 0) {
+            if (obj->y == 0) {
+                obj->y = 1;
             }
-            o->unk7C = (u16)o->unk12;
-            limit = o->unk12;
+            obj->restAndTimer = (u16)obj->y;
+            restY = obj->y;
             if (mode == 3) {
-                o->unk12 = limit;
+                obj->y = restY;
             }
         }
-        limit = (s16)(o->unk7C & 0xFFFF);
-        timer = o->unk7C >> 16;
-        target = 0;
-        pos[0] = o->unk10;
-        pos[1] = o->unk12 + -729.0f;
-        pos[2] = o->unk14;
+        restY = (s16)(obj->restAndTimer & 0xFFFF);
+        timer = obj->restAndTimer >> 16;
+        target = NULL;
+        pos[0] = obj->x;
+        pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
+        pos[2] = obj->z;
         if (mode != 3 && mode != 1) {
             for (i = 0; i < D_8008FD8C; i++) {
-                e = &((struct Pl1511BEBC *)D_800DBFF0)[i];
-                if (e->unk3D4->unk6B >= 4) {
+                player = &((struct TrapPlayer *)D_800DBFF0)[i];
+                if (player->trap->state >= 4) {
                     continue;
                 }
-                p = e->unk3D0;
-                if (p->y + 40.0f < pos[1]) {
-                    dy = (p->y + (f32)p->unkE6) - pos[1];
-                    dz = p->z - pos[2];
-                    dx = p->x - pos[0];
+                character = player->character;
+                if (character->y + 40.0f < pos[1]) {
+                    dy = (character->y + (f32)character->height) - pos[1];
+                    dz = character->z - pos[2];
+                    dx = character->x - pos[0];
                     dist = dz * dz + (dx * dx + dy * dy);
-                    if (dist != dist) {
-                    }
-                    if (dist < thr) {
-                        target = p;
+                    if (dist != dist) {} // matching: no-op NaN self-test steers IDO's FP scheduling
+                    if (dist < radiusSq) {
+                        target = character;
                         break;
                     }
                 }
             }
         }
-        if (target == 0 && (mode == 2 || mode == 1)) {
+        if (target == NULL && (mode == 2 || mode == 1)) {
             for (i = 0; i < D_8008FD8C; i++) {
-                p = &((struct F7Tg *)D_800CC2D0)[i];
-                if (p->w->unk6B != 0) {
-                    target = p;
+                character = &((struct TrapCharacter *)D_800CC2D0)[i];
+                if (character->trap->state != 0) {
+                    target = character;
                     break;
                 }
             }
         }
-        if (target != 0 || mode == 2) {
-            if (target != 0 && t1 == 0) {
+        if (target != NULL || mode == 2) {
+            if (target != NULL && triggered == 0) {
                 func_15060A30(0x16B, target);
             }
             if (flag4 == 0) {
                 mode = 2;
-                if (t1 == 0) {
-                    timer = 0x32;
-                    t1++;
-                    if (cb != 0) {
-                        cb(o);
+                if (triggered == 0) {
+                    timer = 50;
+                    triggered++;
+                    if (onTrigger != NULL) {
+                        onTrigger(obj);
                     }
                 }
-                if (target != 0) {
+                if (target != NULL) {
                     if (timer != 0) {
-                        target->w->unk6B = 1;
+                        target->trap->state = 1;
                     } else {
-                        target->w->unk6B = 2;
+                        target->trap->state = 2;
                     }
                 }
                 if (timer != 0) {
@@ -1284,38 +675,38 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
                         timer -= D_800BE9E4;
                     } else {
                         timer = 0;
-                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 } else {
-                    f84 += 1.0f;
-                    o->unk12 = o->unk12 - f84;
-                    if (o->unk12 <= limit - 300.0f) {
-                        o->unk12 = limit - 300.0f;
+                    velocity += 1.0f;
+                    obj->y = obj->y - velocity;
+                    if (obj->y <= restY - 300.0f) {
+                        obj->y = restY - 300.0f;
                         mode = 3;
-                        t1 = 0;
-                        f84 = 0.0f;
-                        if (target != 0) {
-                            target->w->unk6B = 0;
+                        triggered = 0;
+                        velocity = 0.0f;
+                        if (target != NULL) {
+                            target->trap->state = 0;
                         }
-                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
-                if (target != 0) {
-                    target->w->unk6C = pos[0];
-                    target->w->unk6E = pos[1];
-                    target->w->unk70 = pos[2];
+                if (target != NULL) {
+                    target->trap->x = pos[0];
+                    target->trap->y = pos[1];
+                    target->trap->z = pos[2];
                 }
-            } else if (target != 0) {
-                if (t1 == 0 && target->w->unk6B == 0) {
-                    timer = 0x32;
-                    t1++;
+            } else if (target != NULL) {
+                if (triggered == 0 && target->trap->state == 0) {
+                    timer = 50;
+                    triggered++;
                 }
-                w = target->w;
+                trap = target->trap;
                 if (timer != 0) {
-                    w->unk6B = 3;
-                } else if (w->unk6B == 3) {
-                    w->unk6B = 4;
-                    t1 = 0;
+                    trap->state = 3;
+                } else if (trap->state == 3) {
+                    trap->state = 4;
+                    triggered = 0;
                 }
                 if (timer != 0) {
                     if (D_800BE9E4 < timer) {
@@ -1325,93 +716,92 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
                     }
                 }
             }
-            if (target != 0) {
-                target->w->unk6C = pos[0];
-                target->w->unk6E = pos[1];
-                target->w->unk70 = pos[2];
+            if (target != NULL) {
+                target->trap->x = pos[0];
+                target->trap->y = pos[1];
+                target->trap->z = pos[2];
             }
         } else if (flag8 == 0 || mode == 1) {
-            if (o->unk12 < limit) {
-                if (t1 == 0) {
-                    t1++;
+            if (obj->y < restY) {
+                if (triggered == 0) {
+                    triggered++;
                 }
                 mode = 1;
-                f84 += 1.299999952f;
-                o->unk12 = o->unk12 + f84;
-                if (o->unk12 >= limit) {
-                    o->unk12 = limit;
-                    t1 = 0;
+                velocity += 1.299999952f;
+                obj->y = obj->y + velocity;
+                if (obj->y >= restY) {
+                    obj->y = restY;
+                    triggered = 0;
                     mode = 0;
-                    f84 = 0.0f;
+                    velocity = 0.0f;
                 }
             }
-            if (target != 0) {
-                target->w->unk6B = 0;
+            if (target != NULL) {
+                target->trap->state = 0;
             }
         }
-        o->unk80 = t1;
-        o->unk73 &= ~3;
-        o->unk73 |= mode;
-        o->unk7C &= 0xFFFF;
-        o->unk7C |= timer << 16;
-        o->unk84 = f84;
+        obj->triggered = triggered;
+        obj->flags &= ~3;
+        obj->flags |= mode;
+        obj->restAndTimer &= 0xFFFF;
+        obj->restAndTimer |= timer << 16;
+        obj->velocity = velocity;
     }
 }
 
+/* Update routine for objects that need none. */
 void func_1511C540(void) {
 }
 
 struct Obj1511C548 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
     u8 padC[0x74];
-    f32 unk80;
-    f32 unk84;
+    f32 phaseX;
+    f32 phaseZ;
 };
 
-extern f32 D_800A31EC;
-extern f32 D_800A31F0;
+/* Sways the object around its X and Z axes by up to 16 degrees. */
+void func_1511C548(struct Obj1511C548 *obj) {
+    f32 swayZ;
+    f32 swayX;
 
-void func_1511C548(struct Obj1511C548 *arg0) {
-    f32 z;
-    f32 x;
-
-    x = sinf(arg0->unk80);
-    z = sinf(arg0->unk84);
-    arg0->unk0 = x * 16.0f;
-    arg0->unk8 = z * 16.0f;
-    arg0->unk80 += D_800A31EC * D_800BE9A4;
-    arg0->unk84 += D_800A31F0 * D_800BE9A4;
-    arg0->unk80 = func_15144B68(arg0->unk80);
+    swayX = sinf(obj->phaseX);
+    swayZ = sinf(obj->phaseZ);
+    obj->rotX = swayX * 16.0f;
+    obj->rotZ = swayZ * 16.0f;
+    obj->phaseX += 0.07299999893f * D_800BE9A4;
+    obj->phaseZ += 0.06499999762f * D_800BE9A4;
+    obj->phaseX = func_15144B68(obj->phaseX);
     {
-        extern f32 func_15144B68(f32);
+        f32 wrapped = func_15144B68(obj->phaseZ);
 
-        arg0->unk84 = func_15144B68(arg0->unk84);
+        obj->phaseZ = wrapped;
     }
-    if (arg0->unk8 == 0.0f && arg0->unk84 == 0.0f) {
-        arg0->unk0 = 7.5f;
-        arg0->unk8 = 8.0f;
+    if (obj->rotZ == 0.0f && obj->phaseZ == 0.0f) {
+        obj->rotX = 7.5f;
+        obj->rotZ = 8.0f;
     }
 }
 
 
 struct Obj1511C638 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
     u8 pad16[0x26];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x2E];
     u8 unk6E;
     u8 pad6F[4];
-    u8 unk73;
+    u8 flags;
     u8 pad74[8];
-    s32 unk7C;
-    s32 unk80;
+    s32 delay;
+    s32 fade;
     u8 pad84[6];
-    u8 unk8A;
+    u8 alpha;
     u8 pad8B[0x15];
 };
 
@@ -1419,109 +809,114 @@ extern void func_15170F4C(struct Obj1511C638 *, u8, s32);
 extern void func_150B2740(u8, u8);
 extern s32 func_1000EC24();
 
-void func_1511C638(struct Obj1511C638 *arg0) {
-    s32 state;
-    struct Obj1511C638 *sub;
-    struct Obj1511C638 *other;
+/*
+ * Fades the object (and the one or two objects after it) in when triggered, playing the
+ * effect chosen by the next object's param; turns them off again when reset.
+ */
+void func_1511C638(struct Obj1511C638 *obj) {
+    s32 mode;
+    struct Obj1511C638 *next;
+    struct Obj1511C638 *third;
 
-    sub = &arg0[1];
-    state = arg0->unk73 & 3;
+    next = &obj[1];
+    mode = obj->flags & 3;
     if (D_800BE9F0 == 4) {
-        other = &arg0[2];
+        third = &obj[2];
     } else {
-        other = NULL;
+        third = NULL;
     }
-    if (state == 1) {
-        state = 0;
-        arg0->unk8A = 0;
-        sub->unk6E = 0;
-        if (other != NULL) {
-            other->unk6E = 0;
+    if (mode == 1) {
+        mode = 0;
+        obj->alpha = 0;
+        next->unk6E = 0;
+        if (third != NULL) {
+            third->unk6E = 0;
         }
-        if (arg0->unk3C != 0xFF) {
-            func_15173C60(0, arg0->unk3C);
+        if (obj->param != 0xFF) {
+            func_15173C60(0, obj->param);
         }
     }
     if (D_800BE9B4 != 0) {
-        if (state == 3) {
-            arg0->unk8A = 0xFF;
-            sub->unk6E = 1;
-            if (other != NULL) {
-                other->unk6E = 1;
+        if (mode == 3) {
+            obj->alpha = 0xFF;
+            next->unk6E = 1;
+            if (third != NULL) {
+                third->unk6E = 1;
             }
         } else {
-            arg0->unk8A = 0;
-            sub->unk6E = 0;
-            if (other != NULL) {
-                other->unk6E = 0;
+            obj->alpha = 0;
+            next->unk6E = 0;
+            if (third != NULL) {
+                third->unk6E = 0;
             }
         }
     }
-    if (state == 2) {
-        if (arg0->unk7C < 0) {
-            arg0->unk7C += D_800BE9E4;
+    if (mode == 2) {
+        if (obj->delay < 0) {
+            obj->delay += D_800BE9E4;
         } else {
-            if (arg0->unk80 == 0) {
-                switch (sub->unk3C & 0xFF) {
+            if (obj->fade == 0) {
+                switch (next->param & 0xFF) {
                 case 1:
-                    func_15170F4C(sub, 0xFF, 0);
-                    func_10010F30(0x2BE, 0x7FFF, 0x40, 0, 0);
+                    func_15170F4C(next, 0xFF, 0);
+                    func_10010F30(0x2BE, 0x7FFF, 64, 0, 0);
                     break;
                 case 0: {
-                    u16 sp5A = func_150ADA20() % 3U;
-                    u16 sp58;
+                    u16 first = func_150ADA20() % 3U;
+                    u16 second;
                     const u16 sounds[3] = { 0x2B6, 0x2BD, 0x2BE };
 
-                    sp58 = ((func_150ADA20() & 1) + sp5A + 1) % 3U;
-                    sp5A = sounds[sp5A];
-                    sp58 = sounds[sp58];
-                    func_10010F30(0x2B7, 0x7FFF, 0x40, 0, 0);
-                    func_10010F30(sp5A, 0x7FFF, 10, 0, 0);
-                    func_10010F30(sp58, 0x7FFF, 0x36, 0, 0);
-                    sp5A = func_150ADA20() % 5U;
-                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
-                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
-                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0, 0);
-                    sp5A = func_150ADA20() % 5U;
-                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
-                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x300, 0);
-                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x100, 0);
+                    second = ((func_150ADA20() & 1) + first + 1) % 3U;
+                    first = sounds[first];
+                    second = sounds[second];
+                    func_10010F30(0x2B7, 0x7FFF, 64, 0, 0);
+                    func_10010F30(first, 0x7FFF, 10, 0, 0);
+                    func_10010F30(second, 0x7FFF, 54, 0, 0);
+                    first = func_150ADA20() % 5U;
+                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)0x1001E, 0, 0, 0);
+                    first = func_150ADA20() % 5U;
+                    second = ((func_150ADA20() & 3) + first + 1) % 5U;
+                    func_1000FA64(first + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x300, 0);
+                    func_1000FA64(second + 0x2B1, obj->x, obj->y, obj->z, 0x4000, 10001, 10000, (s32)func_1000EC24, (void *)60, 0, 0x100, 0);
                 }
-                    break;
+                break;
                 case 2:
                     break;
                 case 3:
-                    func_150B2740(sub->unk3C >> 8, 0xFF);
+                    func_150B2740(next->param >> 8, 0xFF);
                     break;
                 }
             }
-            arg0->unk8A = 0xFF;
-            sub->unk6E = 1;
-            if (other != NULL) {
-                other->unk6E = 1;
+            obj->alpha = 0xFF;
+            next->unk6E = 1;
+            if (third != NULL) {
+                third->unk6E = 1;
             }
-            arg0->unk80 += D_800BE9E4 * 30;
-            if (arg0->unk80 >= 0xFF) {
-                arg0->unk80 = 0xFF;
-                state = 3;
+            obj->fade += D_800BE9E4 * 30;
+            if (obj->fade >= 0xFF) {
+                obj->fade = 0xFF;
+                mode = 3;
             }
-            if (arg0->unk3C != 0xFF) {
-                func_15173C60(arg0->unk80, arg0->unk3C);
+            if (obj->param != 0xFF) {
+                func_15173C60(obj->fade, obj->param);
             }
-            if (state == 3) {
-                arg0->unk7C = 0;
-                arg0->unk80 = 0;
+            if (mode == 3) {
+                obj->delay = 0;
+                obj->fade = 0;
             }
         }
     }
-    arg0->unk73 &= ~3;
-    arg0->unk73 |= state;
+    obj->flags &= ~3;
+    obj->flags |= mode;
 }
 
 extern f32 D_800A31F4;
 
-void func_1511CB2C(s32 arg0, f32 *arg1) {
-    *arg1 = D_800A31F4;
+/* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
+void func_1511CB2C(s32 obj, f32 *originZ) {
+    *originZ = D_800A31F4;
 }
 
 struct Wave1511CB44 {
@@ -1530,213 +925,217 @@ struct Wave1511CB44 {
     u16 speed;
     f32 amp;
     s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 angle;
+    u8 alphaPhase;
+    u8 alphaPhaseOffset;
+    u8 pulseAlpha;
+    u8 speedPhaseOffset;
+    f32 uvAngle;
     s16 (*uv)[2];
 };
 
 struct Obj1511CB44 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x46];
-    u8 unk72;
+    u8 variant;
     u8 pad73[0x9];
-    struct Wave1511CB44 *unk7C;
+    struct Wave1511CB44 *wave;
     u8 pad80[0xA];
-    u8 unk8A;
+    u8 alpha;
 };
 
 extern s32 D_800902D8;
 extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
-extern f32 func_150489B0(u8);
 extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
-void func_1511CB44(struct Obj1511CB44 *arg0) {
+/*
+ * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,
+ * shading and alpha pulse with it, and (variant 0xFE) the texture coordinates rotate.
+ */
+void func_1511CB44(struct Obj1511CB44 *obj) {
     Vtx *dst;
     Vtx *src;
-    s32 pad9C;
+    s32 pad9C; // matching: unused stack slots keep the original frame layout
     s32 pad98;
     s32 pad94;
-    f32 base;
+    f32 originZ;
     s32 pad8C;
     s32 created;
-    struct Wave1511CB44 *st;
+    struct Wave1511CB44 *wave;
     s32 i;
     f32 scale;
-    f32 w;
-    f32 s;
+    f32 height;
+    f32 tmp;
     f32 z;
     f32 y;
-    u32 half;
+    u32 halfSpeed;
     u16 speed;
-    u8 c;
-    u8 off;
+    u8 shade;
+    u8 phase;
     s32 mode;
     s32 pad5C;
-    f32 rate;
-    s32 p1;
-    s32 p2;
+    f32 uvRate;
+    s32 uvArg4;
+    s32 uvArg5;
 
-    rate = 0.0f;
+    uvRate = 0.0f;
     if (D_800BE9F0 == 4) {
         mode = 0;
-    } else if (D_800BE9F0 == 0x13) {
+    } else if (D_800BE9F0 == 19) {
         mode = 1;
-        if (arg0->unk72 == 0xFE) {
-            rate = 0.4530000091f;
-            p1 = 0x20;
-            p2 = 0x20;
+        if (obj->variant == 0xFE) {
+            uvRate = 0.4530000091f;
+            uvArg4 = 32;
+            uvArg5 = 32;
         }
     } else {
         return;
     }
-    func_1511CB2C((s32)arg0, &base);
-    base -= arg0->unk14;
-    if (arg0->unk7C == NULL) {
-        created = 1;
-        arg0->unk7C = allocate_memory(0x1C, 1, 0, 0);
-        st = arg0->unk7C;
-        st->phases = allocate_memory(arg0->unk16, 1, 0, 0);
-        if (rate != 0.0f) {
-            st->uv = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
-            for (i = 0; i < arg0->unk16; i++) {
-                st->uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
-                st->uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+    func_1511CB2C((s32)obj, &originZ);
+    originZ -= obj->z;
+    if (obj->wave == NULL) {
+        created = TRUE;
+        obj->wave = allocate_memory(sizeof(struct Wave1511CB44), 1, 0, 0);
+        wave = obj->wave;
+        wave->phases = allocate_memory(obj->count, 1, 0, 0);
+        if (uvRate != 0.0f) {
+            wave->uv = allocate_memory(obj->count * 4, 1, 0, 0);
+            for (i = 0; i < obj->count; i++) {
+                wave->uv[i][0] = obj->source[i].v.tc[0] - 0x2000;
+                wave->uv[i][1] = obj->source[i].v.tc[1] - 0x2000;
             }
-            st->angle = 0.0f;
+            wave->uvAngle = 0.0f;
         }
     } else {
-        created = 0;
+        created = FALSE;
     }
-    st = arg0->unk7C;
+    wave = obj->wave;
     if (created) {
         if (mode == 0) {
-            st->speed = 0x1DA;
-            st->unk13 = 0x6D;
-            st->amp = 100.0f;
+            wave->speed = 474;
+            wave->speedPhaseOffset = 109;
+            wave->amp = 100.0f;
             scale = 0.1000000015f;
         } else {
             scale = 1.0f;
-            st->speed = 0x259;
-            st->unk13 = 0x6D;
-            st->amp = 36.0f;
+            wave->speed = 601;
+            wave->speedPhaseOffset = 109;
+            wave->amp = 36.0f;
         }
-        st->phase = 0;
-        dst = arg0->unk20[D_800BE9C0];
-        src = arg0->unk28;
-        for (i = 0; i < arg0->unk16; i++) {
-            s = base - arg0->unk28[i].v.ob[2];
-            st->phases[i] = s * scale;
-            dst->v.ob[0] = src->v.ob[0] + arg0->unk10;
-            dst->v.ob[2] = src->v.ob[2] + arg0->unk14;
+        wave->phase = 0;
+        dst = obj->buffers[D_800BE9C0];
+        src = obj->source;
+        for (i = 0; i < obj->count; i++) {
+            tmp = originZ - obj->source[i].v.ob[2];
+            wave->phases[i] = tmp * scale;
+            dst->v.ob[0] = src->v.ob[0] + obj->x;
+            dst->v.ob[2] = src->v.ob[2] + obj->z;
             dst++;
             src++;
         }
-        st->unk12 = 0;
-        st->unk10 = 0;
+        wave->pulseAlpha = 0;
+        wave->alphaPhase = 0;
         if (D_800BE9F0 == 4) {
-            if (arg0->unk72 != 0xF2) {
-                if (arg0->unk72 == 0xF1) {
-                    st->unk11 = 0;
+            if (obj->variant != 0xF2) {
+                if (obj->variant == 0xF1) {
+                    wave->alphaPhaseOffset = 0;
                 } else {
-                    st->unk11 = 0x80;
+                    wave->alphaPhaseOffset = 0x80;
                 }
-                st->unk12 = 1;
+                wave->pulseAlpha = 1;
             }
         }
         if (mode == 1) {
-            st->unkC = func_15195FB0(arg0, D_800902D8, 0, 0, 0, 0, 8);
+            wave->unkC = func_15195FB0(obj, D_800902D8, 0, 0, 0, 0, 8);
         }
     }
-    dst = arg0->unk20[D_800BE9C0];
-    src = arg0->unk28;
-    off = st->phase >> 8;
+    dst = obj->buffers[D_800BE9C0];
+    src = obj->source;
+    phase = wave->phase >> 8;
     scale = 0.8100000024f;
-    for (i = 0; i < arg0->unk16; i++) {
-        w = func_150489B0(st->phases[i] + off);
-        y = (f32)(src->v.ob[1] + arg0->unk12) + w * st->amp;
+    for (i = 0; i < obj->count; i++) {
+        height = func_150489B0(wave->phases[i] + phase);
+        y = (f32)(src->v.ob[1] + obj->y) + height * wave->amp;
         if (mode == 0) {
-            z = src->v.ob[2] + arg0->unk14;
+            z = src->v.ob[2] + obj->z;
             if (z < 12000.0f) {
-                w += 1.0f;
-                w *= 0.5f;
-                s = (z - 12000.0f) * ((1.0f - scale) * w + scale);
-                z = 12000.0f + s;
+                height += 1.0f;
+                height *= 0.5f;
+                tmp = (z - 12000.0f) * ((1.0f - scale) * height + scale);
+                z = 12000.0f + tmp;
                 dst->v.ob[2] = z;
             }
         }
         dst->v.ob[1] = y;
-        if (st->unk12 == 0) {
-            w += 1.0f;
-            c = 32.5f * w + 190.0f;
-            dst->v.cn[0] = c;
-            dst->v.cn[1] = c;
-            dst->v.cn[2] = c;
+        if (wave->pulseAlpha == 0) {
+            height += 1.0f;
+            shade = 32.5f * height + 190.0f;
+            dst->v.cn[0] = shade;
+            dst->v.cn[1] = shade;
+            dst->v.cn[2] = shade;
         }
         dst++;
         src++;
     }
-    speed = st->speed;
+    speed = wave->speed;
     if (mode == 0) {
-        half = (u16)(st->speed >> 1);
-        c = st->unk13;
-        s = (func_150489B0((st->phase >> 8) + c) + 1.0f) * 0.5f * half;
-        speed = half + s;
+        halfSpeed = (u16)(wave->speed >> 1);
+        shade = wave->speedPhaseOffset;
+        tmp = (func_150489B0((wave->phase >> 8) + shade) + 1.0f) * 0.5f * halfSpeed;
+        speed = halfSpeed + tmp;
     }
-    st->phase -= speed * D_800BE9E4;
-    if (st->unk12) {
-        st->unk10 += D_800BE9E4 * 2;
-        arg0->unk8A = (func_150489B0(st->unk10 + st->unk11) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    wave->phase -= speed * D_800BE9E4;
+    if (wave->pulseAlpha) {
+        wave->alphaPhase += D_800BE9E4 * 2;
+        obj->alpha = (func_150489B0(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
-    if (rate != 0.0f) {
-        func_15094AB8(arg0->unk20[D_800BE9C0], st->uv, arg0->unk16, st->angle, p1, p2);
-        st->angle += rate;
-        if (st->angle >= 360.0f) {
-            st->angle -= 360.0f;
-        } else if (st->angle < 0.0f) {
-            st->angle += 360.0f;
+    if (uvRate != 0.0f) {
+        func_15094AB8(obj->buffers[D_800BE9C0], wave->uv, obj->count, wave->uvAngle, uvArg4, uvArg5);
+        wave->uvAngle += uvRate;
+        if (wave->uvAngle >= 360.0f) {
+            wave->uvAngle -= 360.0f;
+        } else if (wave->uvAngle < 0.0f) {
+            wave->uvAngle += 360.0f;
         }
     }
 }
 
 struct Entry1511D394 {
-    f32 unk0;
-    f32 unk4;
-    u16 unk8;
-    u16 unkA;
-    u8 unkC;
+    f32 followRate;
+    f32 accel;
+    u16 baseS;
+    u16 rangeS;
+    u8 phaseOffset;
     u8 padD;
-    u16 unkE;
-    u8 unk10;
-    u8 unk11;
+    u16 amplitudeT;
+    u8 alphaPhaseOffset;
+    u8 alphaPhase;
     u8 pad12[2];
 };
 
+/* Texture-scroll settings, indexed by bits 8..15 of the object's param. */
 extern struct Entry1511D394 D_80089444[];
 
 struct Obj1511D394 {
     u8 pad0[0x16];
-    u16 unk16;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x3C];
-    s16 *unk7C;
-    f32 unk80;
-    f32 unk84;
+    s16 *baseS;
+    f32 velocity;
+    f32 level;
     u8 pad88[2];
-    u8 unk8A;
+    u8 alpha;
 };
 
 struct Owner1511D394 {
@@ -1744,89 +1143,92 @@ struct Owner1511D394 {
     u16 *unk7C;
 };
 
-void func_1511D394(struct Obj1511D394 *arg0) {
-    u16 *src;
+/*
+ * Scrolls the mesh texture with the wave phase of the owner object (numbered by the low param
+ * byte): S eases toward the wave level, T drifts by a cosine amount, and the alpha pulses.
+ */
+void func_1511D394(struct Obj1511D394 *obj) {
+    u16 *ownerWave;
     struct Owner1511D394 *owner;
-    s32 dx;
-    u8 phase;
-    s32 dy;
-    f32 s;
-    f32 c;
+    s32 pad; // matching: unused stack slot keeps the original frame layout
+    u8 phaseOffset;
+    s32 offsetS;
+    f32 sine;
+    f32 cosine;
     f32 diff;
-    s32 offY;
-    s32 baseY;
-    s32 amp;
+    s32 rangeS;
+    s32 baseS;
+    s32 offsetT;
     s32 i;
-    s16 *buf;
-    struct Entry1511D394 *e;
-    f32 rate;
+    s16 *savedS;
+    struct Entry1511D394 *entry;
+    f32 followRate;
     s32 init;
     s32 id;
-    f32 step;
-    s32 idx;
+    f32 accel;
+    s32 wavePhase;
 
-    id = arg0->unk3C & 0xFF;
-    owner = (struct Owner1511D394 *)func_151149AC((u8)id);
+    id = obj->param & 0xFF;
+    owner = func_151149AC((u8)id);
     if (owner == NULL) {
         return;
     }
-    src = owner->unk7C;
-    if (src == NULL) {
+    ownerWave = owner->unk7C;
+    if (ownerWave == NULL) {
         return;
     }
-    e = &D_80089444[(arg0->unk3C >> 8) & 0xFF];
-    offY = e->unkA;
-    baseY = e->unk8;
-    phase = e->unkC;
-    rate = e->unk0;
-    step = e->unk4;
-    amp = e->unkE;
-    if (arg0->unk7C == NULL) {
-        arg0->unk7C = allocate_memory(arg0->unk16 * 2, 1, 0, 0);
-        buf = arg0->unk7C;
-        for (i = 0; i < arg0->unk16; i++) {
-            buf[i] = arg0->unk28[i].v.tc[0];
+    entry = &D_80089444[(obj->param >> 8) & 0xFF];
+    rangeS = entry->rangeS;
+    baseS = entry->baseS;
+    phaseOffset = entry->phaseOffset;
+    followRate = entry->followRate;
+    accel = entry->accel;
+    offsetT = entry->amplitudeT;
+    if (obj->baseS == NULL) {
+        obj->baseS = allocate_memory(obj->count * sizeof(s16), 1, 0, 0);
+        savedS = obj->baseS;
+        for (i = 0; i < obj->count; i++) {
+            savedS[i] = obj->source[i].v.tc[0];
         }
-        e->unk11 = 0;
-        init = 1;
+        entry->alphaPhase = 0;
+        init = TRUE;
     } else {
-        init = 0;
-        buf = arg0->unk7C;
+        init = FALSE;
+        savedS = obj->baseS;
     }
-    i = 0;
-    idx = src[2];
-    s = (func_150489B0(((idx >> 8) & 0xFF) + phase) + 1.0f) * 0.5f;
-    c = (func_15048A40(((idx >> 8) & 0xFF) + phase) + 0.5f) * 0.5f;
+    wavePhase = ownerWave[2];
+    sine = (func_150489B0(((wavePhase >> 8) & 0xFF) + phaseOffset) + 1.0f) * 0.5f;
+    cosine = (func_15048A40(((wavePhase >> 8) & 0xFF) + phaseOffset) + 0.5f) * 0.5f;
     if (init) {
-        arg0->unk84 = s;
-        arg0->unk80 = 0.0f;
+        obj->level = sine;
+        obj->velocity = 0.0f;
     } else {
-        diff = (s - arg0->unk84) * rate;
+        diff = (sine - obj->level) * followRate;
         if (diff > 0.0f) {
-            arg0->unk80 += step;
-            if (diff < arg0->unk80) {
-                arg0->unk80 = diff;
+            obj->velocity += accel;
+            if (diff < obj->velocity) {
+                obj->velocity = diff;
             }
         } else {
-            arg0->unk80 -= step;
-            if (arg0->unk80 < diff) {
-                arg0->unk80 = diff;
+            obj->velocity -= accel;
+            if (obj->velocity < diff) {
+                obj->velocity = diff;
             }
         }
-        arg0->unk84 += arg0->unk80;
+        obj->level += obj->velocity;
     }
-    dy = arg0->unk84 * offY;
-    dy += baseY;
-    amp = amp * c;
-    if (arg0->unk20[D_800BE9C0][0].v.tc[1] > 0x800) {
-        amp -= 0x800;
+    offsetS = obj->level * rangeS;
+    offsetS += baseS;
+    offsetT = offsetT * cosine;
+    if (obj->buffers[D_800BE9C0][0].v.tc[1] > 0x800) {
+        offsetT -= 0x800;
     }
-    for (i = 0; i < arg0->unk16; i++) {
-        arg0->unk20[D_800BE9C0][i].v.tc[0] = buf[i] - dy;
-        arg0->unk20[D_800BE9C0][i].v.tc[1] = arg0->unk20[!D_800BE9C0][i].v.tc[1] + amp;
+    for (i = 0; i < obj->count; i++) {
+        obj->buffers[D_800BE9C0][i].v.tc[0] = savedS[i] - offsetS;
+        obj->buffers[D_800BE9C0][i].v.tc[1] = obj->buffers[!D_800BE9C0][i].v.tc[1] + offsetT;
     }
-    e->unk11 += D_800BE9E4 * 2;
-    arg0->unk8A = (func_150489B0(e->unk11 + e->unk10) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    entry->alphaPhase += D_800BE9E4 * 2;
+    obj->alpha = (func_150489B0(entry->alphaPhase + entry->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
 }
 
 typedef struct Game1483E0WaveState {
@@ -1842,13 +1244,14 @@ typedef struct Game1483E0WaveMesh {
     Game1483E0UvVertex *buffers[2];
     Game1483E0UvVertex *source;
     u8 pad2C[0x10];
-    s32 flags;
+    s32 flags; /* bits 0-11: S amplitude, 12-23: T amplitude, 24-31: speed */
     u8 pad40[0x3C];
     Game1483E0WaveState *wave;
     s32 phase;
 } Game1483E0WaveMesh;
 
-void func_1511D7BC(Game1483E0WaveMesh *arg0) {
+/* Wobbles the mesh texture coordinates in a circle whose S/T amplitudes and speed come from the flags. */
+void func_1511D7BC(Game1483E0WaveMesh *mesh) {
     f32 sine;
     s32 index;
     Game1483E0UvPair *coords;
@@ -1856,183 +1259,229 @@ void func_1511D7BC(Game1483E0WaveMesh *arg0) {
         s32 speed;
         s32 amplitude_t;
         s32 amplitude_s;
-    } parameters;
+    } parameters; // matching: grouped in a struct for the original stack layout
     s16 s_delta;
     s16 t_delta;
     f32 cosine;
     u8 angle;
     Game1483E0WaveState *state;
 
-    state = arg0->wave;
+    state = mesh->wave;
     if (state == NULL) {
-        state = allocate_memory(0xC, 1, 0, 0);
-        arg0->wave = state;
+        state = allocate_memory(sizeof(Game1483E0WaveState), 1, 0, 0);
+        mesh->wave = state;
         state->field4 = 0;
         state->field8 = 0;
-        coords = allocate_memory(arg0->count * 4, 1, 0, 0);
+        coords = allocate_memory(mesh->count * sizeof(Game1483E0UvPair), 1, 0, 0);
         state->coords = coords;
-        for (index = 0; index < arg0->count; index++) {
-            coords[index].s = arg0->source[index].s;
-            coords[index].t = arg0->source[index].t;
+        for (index = 0; index < mesh->count; index++) {
+            coords[index].s = mesh->source[index].s;
+            coords[index].t = mesh->source[index].t;
         }
     } else {
-        coords = arg0->wave->coords;
+        coords = mesh->wave->coords;
     }
-    parameters.amplitude_s = arg0->flags & 0xFFF;
-    parameters.amplitude_t = (arg0->flags >> 12) & 0xFFF;
-    parameters.speed = (arg0->flags >> 24) & 0xFF;
-    angle = arg0->phase >> 4;
+    parameters.amplitude_s = mesh->flags & 0xFFF;
+    parameters.amplitude_t = (mesh->flags >> 12) & 0xFFF;
+    parameters.speed = (mesh->flags >> 24) & 0xFF;
+    angle = mesh->phase >> 4;
     cosine = func_15048A40(angle);
     sine = func_150489B0(angle);
-    arg0->phase += parameters.speed * D_800BE9E4;
+    mesh->phase += parameters.speed * D_800BE9E4;
     s_delta = (f32)parameters.amplitude_s * sine;
     t_delta = (f32)parameters.amplitude_t * cosine;
-    for (index = 0; index < arg0->count; index++) {
-        arg0->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
-        arg0->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
+    for (index = 0; index < mesh->count; index++) {
+        mesh->buffers[D_800BE9C0][index].s = coords[index].s + s_delta;
+        mesh->buffers[D_800BE9C0][index].t = coords[index].t + t_delta;
     }
-    func_1511A494((Struct1511A494Arg *)arg0, &state->field4, &state->field8);
+    func_1511A494(mesh, &state->field4, &state->field8);
 }
 
 struct Obj1511D9E4 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param; /* bits 24-31, 16-23: rotation args; bits 0-15: speed in 1/100 degree */
     u8 pad40[0x3C];
-    s16 (*unk7C)[2];
-    f32 unk80;
+    s16 (*uv)[2];
+    f32 uvAngle;
 };
 
-extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
-
-void func_1511D9E4(struct Obj1511D9E4 *arg0) {
+/* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
+void func_1511D9E4(struct Obj1511D9E4 *obj) {
     s16 (*uv)[2];
-    s32 hi;
-    s32 mid;
+    s32 uvArg4;
+    s32 uvArg5;
     s32 i;
     f32 speed;
 
-    if (arg0->unk7C == NULL) {
-        uv = arg0->unk7C = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
-        for (i = 0; i < arg0->unk16; i++) {
-            uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
-            uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+    if (obj->uv == NULL) {
+        uv = obj->uv = allocate_memory(obj->count * 4, 1, 0, 0);
+        for (i = 0; i < obj->count; i++) {
+            uv[i][0] = obj->source[i].v.tc[0] - 0x2000;
+            uv[i][1] = obj->source[i].v.tc[1] - 0x2000;
         }
-        for (i = 0; i < arg0->unk16; i++) {
-            arg0->unk20[0][i].v.ob[0] = arg0->unk20[1][i].v.ob[0] = arg0->unk28[i].v.ob[0] + arg0->unk10;
-            arg0->unk20[0][i].v.ob[1] = arg0->unk20[1][i].v.ob[1] = arg0->unk28[i].v.ob[1] + arg0->unk12;
-            arg0->unk20[0][i].v.ob[2] = arg0->unk20[1][i].v.ob[2] = arg0->unk28[i].v.ob[2] + arg0->unk14;
+        for (i = 0; i < obj->count; i++) {
+            obj->buffers[0][i].v.ob[0] = obj->buffers[1][i].v.ob[0] = obj->source[i].v.ob[0] + obj->x;
+            obj->buffers[0][i].v.ob[1] = obj->buffers[1][i].v.ob[1] = obj->source[i].v.ob[1] + obj->y;
+            obj->buffers[0][i].v.ob[2] = obj->buffers[1][i].v.ob[2] = obj->source[i].v.ob[2] + obj->z;
         }
     } else {
-        uv = arg0->unk7C;
+        uv = obj->uv;
     }
-    hi = arg0->unk3C >> 24;
-    mid = (arg0->unk3C >> 16) & 0xFF;
-    speed = (f32)(s16)(arg0->unk3C & 0xFFFF) * 0.01;
-    arg0->unk80 += speed * D_800BE9E4;
-    func_15094AB8(arg0->unk20[D_800BE9C0], uv, arg0->unk16, arg0->unk80, hi, mid);
+    uvArg4 = obj->param >> 24;
+    uvArg5 = (obj->param >> 16) & 0xFF;
+    speed = (f32)(s16)(obj->param & 0xFFFF) * 0.01;
+    obj->uvAngle += speed * D_800BE9E4;
+    func_15094AB8(obj->buffers[D_800BE9C0], uv, obj->count, obj->uvAngle, uvArg4, uvArg5);
 }
 
-struct Obj1511DBC4Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+struct Swing1511DBC4 {
+    f32 time;
+    f32 velocity;
+    f32 accel;
+    f32 jerk;
 };
 
 struct Obj1511DBC4 {
     u8 pad0[0x8];
-    f32 unk8;
+    f32 angle;
     u8 padC[0x67];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    struct Obj1511DBC4Sub *unk7C;
+    struct Swing1511DBC4 *swing;
 };
 
-void func_1511DBC4(struct Obj1511DBC4 *arg0) {
-    s32 state;
-    struct Obj1511DBC4Sub *temp;
-    f32 ftemp;
+/*
+ * Opens the object to 90 degrees with ever-increasing acceleration, wobbles slightly while open,
+ * and closes one degree per frame.
+ */
+void func_1511DBC4(struct Obj1511DBC4 *obj) {
+    s32 mode;
+    struct Swing1511DBC4 *swing;
+    f32 wobble;
 
-    if (arg0->unk7C == NULL) {
-        temp = allocate_memory(0x10, 1, 0, 0);
-        arg0->unk7C = temp;
-        temp->unk0 = 0.0f;
-        temp->unk4 = 0.0f;
-        temp->unk8 = 0.0f;
-        temp->unkC = D_800A3210;
+    if (obj->swing == NULL) {
+        swing = allocate_memory(sizeof(struct Swing1511DBC4), 1, 0, 0);
+        obj->swing = swing;
+        swing->time = 0.0f;
+        swing->velocity = 0.0f;
+        swing->accel = 0.0f;
+        swing->jerk = 0.02500000037f;
     } else {
-        temp = arg0->unk7C;
+        swing = obj->swing;
     }
 
-    state = arg0->unk73 & 3;
-    if (state == 0) {
-        arg0->unk8 = 0.0f;
-    } else if (state == 3) {
-        arg0->unk8 = 90.0f;
-        ftemp = cosf(temp->unk0 * D_800A3214);
-        ftemp = ftemp * 0.5f;
-        arg0->unk8 = arg0->unk8 + ftemp;
-        temp->unk0 = temp->unk0 + (3.0f * (f32)D_800BE9E4);
-    } else if (state == 2) {
-        if (arg0->unk8 == 0.0f) {
-            temp->unk4 = 0.0f;
-            temp->unk8 = 0.0f;
+    mode = obj->flags & 3;
+    if (mode == 0) {
+        obj->angle = 0.0f;
+    } else if (mode == 3) {
+        obj->angle = 90.0f;
+        wobble = cosf(swing->time * 0.01745329238f);
+        wobble *= 0.5f;
+        obj->angle += wobble;
+        swing->time += 3.0f * (f32)D_800BE9E4;
+    } else if (mode == 2) {
+        if (obj->angle == 0.0f) {
+            swing->velocity = 0.0f;
+            swing->accel = 0.0f;
         }
-        temp->unk8 = temp->unk8 + temp->unkC;
-        temp->unk4 = temp->unk4 + temp->unk8;
-        arg0->unk8 = arg0->unk8 + temp->unk4;
-        if (arg0->unk8 >= 90.0f) {
-            state = 3;
-            arg0->unk8 = 90.0f;
+        swing->accel += swing->jerk;
+        swing->velocity += swing->accel;
+        obj->angle += swing->velocity;
+        if (obj->angle >= 90.0f) {
+            mode = 3;
+            obj->angle = 90.0f;
         }
     } else {
-        if ((f32)D_800BE9E4 < arg0->unk8) {
-            arg0->unk8 = arg0->unk8 - (f32)D_800BE9E4;
+        if ((f32)D_800BE9E4 < obj->angle) {
+            obj->angle -= (f32)D_800BE9E4;
         } else {
-            arg0->unk8 = 0.0f;
-            state = 0;
+            obj->angle = 0.0f;
+            mode = 0;
         }
     }
 
-    arg0->unk73 &= 0xFFFC;
-    arg0->unk73 |= state;
+    obj->flags &= ~3;
+    obj->flags |= mode;
 }
 
-void func_10010558(u16, void *, s32, s32, s32, s32);
-void func_1511DD98(u8 *arg0, u8 *arg1) {
+struct Pulse1511DF6C {
+    u16 phaseX;
+    u16 phaseZ;
+    u16 state;
+    u16 bouncePhase;
+    f32 bounce;
+    f32 fullScale;
+};
+
+struct Obj1511DF6C {
+    f32 rotX;
+    f32 rotY;
+    u8 pad8[0x8];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad16[0x2];
+    f32 unk18;
+    u8 pad1C[0x10];
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
+    u8 pad38[0x1C];
+    u16 type;
+    u8 pad56[0x18];
+    u8 unk6E;
+    u8 pad6F[0xD];
+    struct Pulse1511DF6C *pulse;
+    s32 lastCharacter;
+    s32 filter;
+};
+
+/* The object returned by func_1509B570(0xBA). */
+struct Owner1511DF6C {
+    u8 pad0[0x1FE4];
+    s32 unk1FE4;
+};
+
+extern void func_10010558(u16, void *, s32, s32, s32, s32);
+extern void *func_1509B570(s32);
+extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
+
+/* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
+void func_1511DD98(struct Obj1511DF6C *obj, struct127 *character) {
     s32 sound;
     s32 volume;
-    s32 type_3B;
-    s32 type_80;
+    s32 isChar3B;
+    s32 isChar80;
 
-    volume = 0x6590;
-    type_3B = arg1[4] == 0x3B;
-    type_80 = arg1[4] == 0x80;
+    volume = 26000;
+    isChar3B = character->id == 0x3B;
+    isChar80 = character->id == 0x80;
     sound = 0;
-    switch (*(u16 *)(arg0 + 0x54)) {
+    switch (obj->type) {
     case 0x39:
     case 0x5C:
     case 0x5D:
     case 0x5E:
-        if (type_3B) {
-            func_10010630(0x542, (struct127 *)arg1, 0x6590, 100, 1000);
-        } else if (type_80) {
-            func_10010630(0x567, (struct127 *)arg1, 0x6590, 100, 1000);
+        if (isChar3B) {
+            func_10010630(0x542, character, 26000, 100, 1000);
+        } else if (isChar80) {
+            func_10010630(0x567, character, 26000, 100, 1000);
         }
         sound = 0x2B0;
         break;
     case 0x3A:
-        if (type_3B) {
+        if (isChar3B) {
             sound = (func_150ADA20() & 1) + 0x53E;
-        } else if (type_80) {
+        } else if (isChar80) {
             sound = 0x567;
         } else {
             sound = 0x60A;
@@ -2069,13 +1518,13 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
         break;
     case 0x53:
         sound = 0x2AF;
-        if (type_80) {
-            func_10010558(0x567, (struct127 *)arg1, 0x7D00, 100, 1000, 30);
+        if (isChar80) {
+            func_10010558(0x567, character, 32000, 100, 1000, 30);
         }
         break;
     case 0x56:
-        if (type_80) {
-            func_10010630(0x567, (struct127 *)arg1, 0x6590, 100, 1000);
+        if (isChar80) {
+            func_10010630(0x567, character, 26000, 100, 1000);
         }
         sound = 0x5AE;
         break;
@@ -2083,7 +1532,7 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
     case 0x6D:
     case 0x6E:
         sound = 0x51;
-        volume = 0x2328;
+        volume = 9000;
         break;
     case 0x64:
     case 0x65:
@@ -2092,249 +1541,130 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
         break;
     }
     if (sound != 0) {
-        func_10010630(sound, (struct127 *)arg1, volume, 100, 1000);
+        func_10010630(sound, character, volume, 100, 1000);
     }
 }
 
-struct Obj1511DF6CSub {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    f32 unk8;
-    f32 unkC;
-};
-
-struct Obj1511DF6C {
-    f32 unk0;
-    f32 unk4;
-    u8 pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x2];
-    f32 unk18;
-    u8 pad1C[0x10];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x1C];
-    u16 unk54;
-    u8 pad56[0x18];
-    u8 unk6E;
-    u8 pad6F[0xD];
-    struct Obj1511DF6CSub *unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-extern void *func_1509B570(s32);
-extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
-
-void func_1511DF6C(struct Obj1511DF6C *arg0) {
+/*
+ * Pulses the object's scale and wobbles it; when a character (filtered by the "filter" field)
+ * touches it, plays the impact sound, notifies func_151D6970 and shrinks it away.
+ */
+void func_1511DF6C(struct Obj1511DF6C *obj) {
     f32 dist;
-    s32 hp;
+    s32 hp; // matching: the stored copy of unk1FE4 steers register allocation
     f32 radius;
     f32 scale;
     s16 height;
-    s16 sp64;
-    s16 sp62;
-    struct Obj1511DF6CSub *sub;
+    s16 unused1;
+    s16 unused2;
+    struct Pulse1511DF6C *pulse;
     s32 skip;
     s32 anim;
     s32 i;
-    struct127 *obj;
-    u8 *res;
+    struct127 *character;
+    u8 *data; // matching: one pointer for both lookups; a second local grows the frame
     f32 y;
 
-    if (arg0->unk7C == NULL) {
-        arg0->unk7C = allocate_memory(0x10, 1, 0, 0);
-        sub = arg0->unk7C;
-        bzero(sub, 0x10);
-        sub->unkC = arg0->unk2C;
-        arg0->unk34 = 0.0f;
-        arg0->unk30 = 0.0f;
-        arg0->unk2C = 0.0f;
+    if (obj->pulse == NULL) {
+        obj->pulse = allocate_memory(sizeof(struct Pulse1511DF6C), 1, 0, 0);
+        pulse = obj->pulse;
+        bzero(pulse, sizeof(struct Pulse1511DF6C));
+        pulse->fullScale = obj->scaleX;
+        obj->scaleZ = 0.0f;
+        obj->scaleY = 0.0f;
+        obj->scaleX = 0.0f;
     } else {
-        sub = arg0->unk7C;
+        pulse = obj->pulse;
     }
-    skip = 0;
+    skip = FALSE;
     anim = -1;
-    switch (arg0->unk54) {
+    switch (obj->type) {
     case 0x59:
     case 0x5A:
         break;
     case 0x54:
         anim = 0x17;
-        if (D_800BE9F0 == 0x2D) {
-            res = func_1509B570(0xBA);
-            if (res != NULL && (hp = *(s32 *)(res + 0x1FE4)) <= 0) {
-                skip = 1;
+        if (D_800BE9F0 == 45) {
+            data = func_1509B570(0xBA);
+            if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
+                skip = TRUE;
             }
         }
+        /* fallthrough */
     default:
-        arg0->unk4 += (f32)D_800BE9E4 * 1.519999981f;
-        dist = cosf(sub->unk0 * 9.587380191e-05f);
-        arg0->unk0 = 8.0f * dist;
-        dist = cosf(sub->unk2 * 9.587380191e-05f);
-        arg0->unk18 = 12.0f * dist;
-        sub->unk0 += (f32)D_800BE9E4 * 507.0f;
-        sub->unk2 += (f32)D_800BE9E4 * 419.0f;
+        obj->rotY += (f32)D_800BE9E4 * 1.519999981f;
+        dist = cosf(pulse->phaseX * 9.587380191e-05f);
+        obj->rotX = 8.0f * dist;
+        dist = cosf(pulse->phaseZ * 9.587380191e-05f);
+        obj->unk18 = 12.0f * dist;
+        pulse->phaseX += (f32)D_800BE9E4 * 507.0f;
+        pulse->phaseZ += (f32)D_800BE9E4 * 419.0f;
         break;
     }
-    if (sub->unk4 < 3 && skip == 0) {
+    if (pulse->state < 3 && !skip) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
-            if (obj->interaction_state == 0 || obj->health <= 0 || obj->unk127 == 0xFF) {
+            character = &D_800CC2D0[i];
+            if (character->interaction_state == 0 || character->health <= 0 || character->unk127 == 0xFF) {
                 continue;
             }
-            if (obj->unk300 == 0) {
+            if (character->unk300 == 0) {
                 continue;
             }
-            if ((arg0->unk84 == 1 && *(u8 *)&obj->pad128 != 0) || (arg0->unk84 == 2 && *(u8 *)&obj->pad128 == 0) ||
-                (arg0->unk84 == 3 && (*(u8 *)&obj->pad128 & 1))) {
+            if ((obj->filter == 1 && *(u8 *)&character->pad128 != 0) || (obj->filter == 2 && *(u8 *)&character->pad128 == 0) || (obj->filter == 3 && (*(u8 *)&character->pad128 & 1))) {
                 continue;
             }
-            if (anim != -1 && func_1503195C(obj, anim, 0) != NULL) {
+            if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
                 continue;
             }
-            dist = ((f32)arg0->unk10 - obj->x_position) * ((f32)arg0->unk10 - obj->x_position) + ((f32)arg0->unk14 - obj->z_position) * ((f32)arg0->unk14 - obj->z_position);
-            res = (u8 *)obj->unk31C;
+            dist = ((f32)obj->x - character->x_position) * ((f32)obj->x - character->x_position) + ((f32)obj->z - character->z_position) * ((f32)obj->z - character->z_position);
+            data = (u8 *)character->unk31C;
             radius = 100.0f;
-            scale = (f32)(*(s8 *)(res + 0x1AF) & 0xFF) * 0.015625f;
-            if (res[0x84] != 0) {
+            scale = (f32)(*(s8 *)(data + 0x1AF) & 0xFF) * 0.015625f;
+            if (data[0x84] != 0) {
                 scale *= 1.399999976f;
             }
             radius *= scale;
             if (dist < radius * radius) {
-                func_1507C3E0(obj, &height, &sp64, &sp62);
-                y = (f32)arg0->unk12;
-                if (y < *(f32 *)&obj->pad17C && obj->y_position < y + radius &&
-                    y - radius < obj->y_position + height) {
-                    arg0->unk80 = obj->unique_id;
-                    sub->unk4 = 3;
-                    func_1511DD98((u8 *)arg0, (u8 *)obj);
-                    func_151D6970(obj, arg0);
+                func_1507C3E0(character, &height, &unused1, &unused2);
+                y = (f32)obj->y;
+                if (y < *(f32 *)&character->pad17C && character->y_position < y + radius && y - radius < character->y_position + height) {
+                    obj->lastCharacter = character->unique_id;
+                    pulse->state = 3;
+                    func_1511DD98(obj, character);
+                    func_151D6970(character, obj);
                     break;
                 }
             }
         }
     }
-    if (sub->unk4 == 0) {
-        arg0->unk34 += 0.2599999905f * sub->unkC;
-        if (sub->unkC <= arg0->unk34) {
-            arg0->unk34 = sub->unkC;
-            sub->unk6 = 0;
-            sub->unk4++;
-            sub->unk8 = 0.3000000119f;
+    if (pulse->state == 0) {
+        obj->scaleZ += 0.2599999905f * pulse->fullScale;
+        if (pulse->fullScale <= obj->scaleZ) {
+            obj->scaleZ = pulse->fullScale;
+            pulse->bouncePhase = 0;
+            pulse->state++;
+            pulse->bounce = 0.3000000119f;
         }
-        arg0->unk30 = arg0->unk34;
-        arg0->unk2C = arg0->unk34;
-    } else if (sub->unk4 == 1) {
-        sub->unk8 -= 0.01999999955f * sub->unkC;
-        if (sub->unk8 <= 0.0f) {
-            sub->unk4++;
-            sub->unk8 = 0.0f;
+        obj->scaleY = obj->scaleZ;
+        obj->scaleX = obj->scaleZ;
+    } else if (pulse->state == 1) {
+        pulse->bounce -= 0.01999999955f * pulse->fullScale;
+        if (pulse->bounce <= 0.0f) {
+            pulse->state++;
+            pulse->bounce = 0.0f;
         }
-        arg0->unk34 = cosf(sub->unk6 * 9.587380191e-05f) * sub->unk8 + sub->unkC;
-        arg0->unk2C = arg0->unk30 = arg0->unk34;
-        sub->unk6 += D_800BE9E4 * 0x1613;
-    } else if (sub->unk4 == 2) {
-    } else if (sub->unk4 == 3) {
-        arg0->unk34 -= 0.2599999905f * sub->unkC;
-        if (arg0->unk34 <= 0.0f) {
-            sub->unk4 = 0;
-            arg0->unk6E = 1;
-            arg0->unk34 = 0.0f;
+        obj->scaleZ = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
+        obj->scaleX = obj->scaleY = obj->scaleZ;
+        pulse->bouncePhase += D_800BE9E4 * 0x1613;
+    } else if (pulse->state == 2) {
+    } else if (pulse->state == 3) {
+        obj->scaleZ -= 0.2599999905f * pulse->fullScale;
+        if (obj->scaleZ <= 0.0f) {
+            pulse->state = 0;
+            obj->unk6E = 1;
+            obj->scaleZ = 0.0f;
         }
-        arg0->unk30 = arg0->unk34;
-        arg0->unk2C = arg0->unk34;
+        obj->scaleY = obj->scaleZ;
+        obj->scaleX = obj->scaleZ;
     }
 }
-
-struct Obj1511EC50 {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x28];
-    s32 unk3C;
-    u8 pad40[0x2E];
-    s8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
-};
-
-struct Obj1511ED84 {
-    u8 pad0[0x14];
-    s16 unk14;
-    u8 pad16[0x5C];
-    u8 unk72;
-    u8 pad73[0x9];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
-};
-void func_1511EC50(struct Obj1511EC50 *arg0);
-void func_1511ED84(struct Obj1511ED84 *arg0);
-
-typedef struct {
-    f32 x, y, z, radius, angle, dx, dz;
-    s16 timer;
-    u8 pad1E[6];
-} Game11EF40Motion;
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f_1511EF40;
-
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
-extern f32 D_800A3378;
-void func_1511EF40(u8 *arg0);
-void func_1511F31C(struct Struct1511F31CArg *arg0);
-
-struct Obj1511F3E8 {
-    u8 pad0[0x3C];
-    s32 unk3C;
-    u8 pad40[0x2E];
-    u8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-    u8 pad88[2];
-    u8 unk8A;
-};
-void func_1511F3E8(struct Obj1511F3E8 *arg0);
-void func_1511F768(s32 *arg0, s32 arg1);
-
-struct Obj1511F788 {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x4];
-    f32 unk18;
-    u8 pad1C[0x20];
-    s32 unk3C;
-    u8 pad40[0x1C];
-    s16 unk5C;
-    u8 pad5E[0x10];
-    s8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-union Temp1511F788 {
-    struct {
-        f32 pad;
-        s32 w;
-    } s;
-    f64 d;
-};
-void func_1511F788(struct Obj1511F788 *arg0);
-
-extern s32 func_151149AC(u32);
-void func_1511F92C(s16 *arg0);

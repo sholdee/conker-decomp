@@ -1,468 +1,390 @@
 #include <ultra64.h>
 
+// functions.h declares func_15169260's first parameter as s32; this file passes a pointer.
 #define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_15169260
 #include "variables.h"
 
-void func_151D3354(struct224 *arg0);
-void func_151D3308(struct224 *arg0);
-void func_151D33FC();
-void func_15143134(void *, void *, void *);
-s32 func_15167A68(s32, s32, s32, s32, s32, s32);
-
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Func151D2C40Data;
+    f32 x, y, z;
+} Vec3f;
 
-typedef u8 Func151D2C40Frame[0x40];
+typedef f32 BoneMatrix[4][4];
 
-extern s32 (*D_8008FC40[])(struct224 *, Func151D2C40Data *);
-extern void (*D_8008FC48[])(struct224 *, Func151D2C40Data *);
-extern void (*D_8008FC64[])(struct224 *, struct223 *, u8);
+typedef struct BoneFollower BoneFollower;
+typedef struct ActorFollowerGroup ActorFollowerGroup;
 
-typedef struct {
-    s32 unk0;
-} Func151D343CData;
+/* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
+struct BoneFollower {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ struct127 *actor;
+    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
+    /* 0x15 */ u8 pad15[3];
+    /* 0x18 */ Vec3f offset;        // point in bone space
+    /* 0x24 */ u8 bone;             // index into actor->unk1D4
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ s16 timer;
+    /* 0x28 */ u8 flags;            // bit 0: timer counts down
+    /* 0x29 */ s8 updateFn;         // index into D_8008FC40, -1 for none
+    /* 0x2A */ s8 expireFn;         // index into D_8008FC48, -1 for none
+    /* 0x2B */ u8 pad2B;
+    /* 0x2C */ s32 attached;        // struct102 * destroyed with this one; matching: s32, a pointer changes regalloc
+    /* 0x30 */ ActorFollowerGroup *group;
+    /* 0x34 */ Vec3f position;      // offset transformed by the bone matrix
+    /* 0x40 */ BoneFollower *next;
+    /* 0x44 */ BoneFollower *prev;
+}; // size 0x48
 
-typedef struct {
-    u8 pad_0[0x10];
-    u8 field_0x10[0x8];
-    u8 field_0x18;
-    u8 pad_0x19[0x7];
-    s16 field_0x20;
-    u8 pad_0x22[0x2];
-    s32 field_0x24;
-    s32 field_0x28;
-} Game1FFF60ObjectNode;
+/* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
+struct ActorFollowerGroup {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ struct127 *actor;
+    /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
+    /* 0x15 */ u8 pad15;
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ u8 flags;            // bit 0: timer counts down; bit 1: actor is trackable (has bone matrices, (unk74 & 0xF) != 0xF)
+    /* 0x19 */ s8 updateFn;         // index into D_8008FC4C, -1 for none
+    /* 0x1A */ s8 trackFn;          // index into D_8008FC50, called when bit 1 of flags sets
+    /* 0x1B */ s8 untrackFn;        // index into D_8008FC54, called when bit 1 of flags clears
+    /* 0x1C */ s8 expireFn;         // index into D_8008FC58, -1 for none
+    /* 0x1D */ u8 kind;             // index into D_8008FC5C and D_8008FC64
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s16 count;
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ BoneFollower *head;
+    /* 0x28 */ BoneFollower *tail;
+    /* 0x2C */ u8 pad2C[4];
+}; // size 0x30
 
-void func_15169260(Func151D343CData *, s32, s32, u8);
+void *func_15167A68(s32, s32, s32, s32, s32, s32);
+void func_15143134(Vec3f *in, Vec3f *out, BoneMatrix *mtx);
+void func_1514EDF0(ActorFollowerGroup *, struct127 *);
+void func_15169260(s32 *, s32, s32, u8);
 
-void func_151D2AB0(s32 arg0) {
-    u32 tmp;
+void func_151D3308(BoneFollower *follower);
+void func_151D3354(BoneFollower *follower);
+void func_151D33FC(ActorFollowerGroup *group, struct223 *msg);
 
-    (&D_800E0950)[arg0] = (&D_800E0950)[arg0] + 1;
+extern s32 (*D_8008FC40[])(BoneFollower *, Vec3f *);
+extern void (*D_8008FC48[])(BoneFollower *, Vec3f *);
+extern s32 (*D_8008FC4C[])(ActorFollowerGroup *);
+extern void (*D_8008FC50[])(ActorFollowerGroup *);
+extern void (*D_8008FC54[])(ActorFollowerGroup *);
+extern void (*D_8008FC58[])(ActorFollowerGroup *);
+extern void (*D_8008FC5C[])(ActorFollowerGroup *);
+extern void (*D_8008FC64[])(ActorFollowerGroup *, struct223 *, u8);
 
-    if ((&D_800E0950)[arg0] < 2) {
-        D_800E0990[arg0] = func_1502B5C8(&tmp, 2, 9, D_800AB140[arg0]);
-        D_800E0968[arg0] = tmp >> 4;
+// D_800E0950 is a u8 array of reference counts; variables.h declares it as a scalar.
+
+/* Takes a reference on shared resource `index`, loading it on the first reference. */
+void func_151D2AB0(s32 index) {
+    u32 loadInfo;
+
+    (&D_800E0950)[index]++;
+    if ((&D_800E0950)[index] < 2) {
+        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+        D_800E0968[index] = loadInfo >> 4;
     }
 }
 
-void func_151D2B4C(s32 arg0) {
-    if ((&D_800E0950)[arg0] != 0) {
-        (&D_800E0950)[arg0] = (&D_800E0950)[arg0] - 1;
-        if ((&D_800E0950)[arg0] == 0) {
-            func_100043B4(D_800E0990[arg0], 4);
+/* Drops a reference on shared resource `index`, freeing it with the last reference. */
+void func_151D2B4C(s32 index) {
+    if ((&D_800E0950)[index] != 0) {
+        (&D_800E0950)[index]--;
+        if ((&D_800E0950)[index] == 0) {
+            func_100043B4(D_800E0990[index], 4);
         }
     }
 }
 
-struct224 *func_151D2BA4(s32 arg0, struct00 *arg1, s32 arg2, u8 arg3, s32 arg4) {
-    struct224 *tmp;
-    struct224 *sp24;
+/* Spawns a BoneFollower from `params` (0x24 bytes from +0x10) and links it into its group. */
+BoneFollower *func_151D2BA4(void *params, Vec3f *position, s32 extraSize, u8 arg3, s32 arg4) {
+    BoneFollower *follower = func_15167A68(0x3D, arg4, extraSize + sizeof(BoneFollower), 1, arg3, 1);
 
-    tmp = (struct224 *)func_15167A68(0x3D, arg4, arg2 + 0x48, 1, arg3, 1);
-    if (tmp == 0) {
+    if (follower == NULL) {
         return NULL;
     }
-
-    sp24 = tmp;
-    memcpy(&tmp->unk10, arg0, 36);
-    *(Func151D2C40Data *)&tmp->unk34 = *(Func151D2C40Data *)arg1;
-
-    func_151D3308(tmp);
-    return sp24;
+    memcpy(&follower->actor, params, 0x24);
+    follower->position = *position;
+    func_151D3308(follower);
+    return follower;
 }
-// s32 func_15167A68(s32, s32, s32, s32, s32, s32);
-// NON-MATCHING: JUSTREG
-// struct224 *func_151D2BA4(s32 arg0, struct00 *arg1, s32 arg2, u8 arg3, s32 arg4) {
-//     struct224 *tmp = func_15167A68(0x3D, arg4, arg2 + 0x48, 1, arg3, 1);
-//
-//     if (tmp == 0) {
-//         return NULL;
-//     }
-//
-//     memcpy(&tmp->unk10, arg0, 36);
-//     tmp->unk34 = arg1->unk0;
-//     tmp->unk38 = arg1->unk4;
-//     tmp->unk3C = arg1->unk8;
-//
-//     func_151D3308(tmp);
-//     return tmp;
-// }
 
-void func_151D2C40(register struct224 *arg0) {
-    struct127 *obj;
-    struct255 *frames;
-    Func151D2C40Data sp28;
-    s8 index;
+/* Per-frame update: tracks the bone, runs the timer and the update callback. */
+void func_151D2C40(BoneFollower *follower) {
+    struct127 *actor;
+    Vec3f position;
 
-    obj = (struct127 *)arg0->unk10;
-    if ((obj->interaction_state == 0) || (obj->id == 0xFF) || (obj->unique_id != arg0->unk14) ||
-        ((frames = obj->unk1D4) == 0) || ((obj->unk74 & 0xF) == 0xF)) {
-        func_1516972C((struct102 *)arg0);
+    actor = follower->actor;
+    if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != follower->actorUid ||
+        actor->unk1D4 == NULL || (actor->unk74 & 0xF) == 0xF) {
+        func_1516972C((struct102 *)follower);
         return;
     }
 
-    func_15143134((u8 *)arg0 + 0x18, (u8 *)&sp28 + 4, ((Func151D2C40Frame *)frames)[*(u8 *)((u8 *)arg0 + 0x24)]);
+    func_15143134(&follower->offset, &position, &((BoneMatrix *)actor->unk1D4)[follower->bone]);
 
-    if (*(u8 *)((u8 *)arg0 + 0x28) & 1) {
-        *(s16 *)((u8 *)arg0 + 0x26) = *(s16 *)((u8 *)arg0 + 0x26) - D_800BE9E4;
-        if (*(s16 *)((u8 *)arg0 + 0x26) < 0) {
-            index = *(s8 *)((u8 *)arg0 + 0x2A);
-            if (index != -1) {
-                D_8008FC48[index](arg0, (Func151D2C40Data *)((u8 *)&sp28 + 4));
+    if (follower->flags & 1) {
+        follower->timer -= D_800BE9E4;
+        if (follower->timer < 0) {
+            if (follower->expireFn != -1) {
+                D_8008FC48[follower->expireFn](follower, &position);
             }
-            *(s32 *)((u8 *)arg0 + 0x2C) = 0;
-            func_1516972C((struct102 *)arg0);
+            follower->attached = 0;
+            func_1516972C((struct102 *)follower);
             return;
         }
     }
 
-    index = *(s8 *)((u8 *)arg0 + 0x29);
-    if (index != -1) {
-        if (D_8008FC40[index](arg0, (Func151D2C40Data *)((u8 *)&sp28 + 4)) == 0) {
-            func_1516972C((struct102 *)arg0);
+    if (follower->updateFn != -1 && D_8008FC40[follower->updateFn](follower, &position) == 0) {
+        func_1516972C((struct102 *)follower);
+        return;
+    }
+
+    follower->position = position;
+}
+
+void func_151D2DAC(BoneFollower *follower) {
+    func_151D3354(follower);
+}
+
+void func_151D2DCC(BoneFollower *arg0) {
+    BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
+
+    func_151D2DAC(follower);
+    if (follower->attached != 0) {
+        func_1516972C((struct102 *)follower->attached);
+    }
+    func_15169804((struct102 *)follower);
+}
+
+void func_151D2E14(BoneFollower *arg0) {
+    BoneFollower *follower = arg0; // matching: IDO keeps the pointer in a1 only via a local copy
+
+    func_151D2DAC(follower);
+    if (follower->attached != 0) {
+        func_1516979C((struct102 *)follower->attached);
+    }
+    func_15169824((struct102 *)follower);
+}
+
+/* Message handler: 0 destroys followers of the given actor; 0x2D swaps two actors. */
+void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
+    s32 actor;
+    s32 otherActor;
+    s32 actorUid;
+    s32 msgUid;
+
+    if (type == 0) {
+        actor = (s32)follower->actor;
+        otherActor = msg->unk0;
+        actorUid = follower->actorUid;
+        msgUid = msg->unk4.ub;
+        if (actor == otherActor || msgUid == actorUid) {
+            func_1516972C((struct102 *)follower);
+        }
+    } else if (type == 0x2D) {
+        actor = msg->unk0;
+        if (actor == (s32)follower->actor) {
+            follower->actor = (struct127 *)msg->unk4.w;
+            follower->actorUid = msg->unk9;
+        } else if ((s32)follower->actor == msg->unk4.w) {
+            follower->actor = (struct127 *)actor;
+            follower->actorUid = msg->unk8;
+        }
+    }
+}
+
+/* Spawns an ActorFollowerGroup from `params` (0x10 bytes from +0x10) with an empty list. */
+ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3) {
+    ActorFollowerGroup *group = func_15167A68(0x3E, arg3, extraSize + sizeof(ActorFollowerGroup), 1, arg2, 1);
+
+    if (group == NULL) {
+        return NULL;
+    }
+    memcpy(&group->actor, params, 0x10);
+    group->count = 0;
+    group->head = NULL;
+    group->tail = NULL;
+    group->flags &= ~2;
+    return group;
+}
+
+/* Per-frame update: refreshes the trackable flag, runs the timer and the callbacks. */
+void func_151D2F90(ActorFollowerGroup *group) {
+    struct127 *actor;
+    u8 wasTrackable;
+    u8 isTrackable;
+
+    actor = group->actor;
+    wasTrackable = group->flags & 2;
+    if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != group->actorUid) {
+        func_1516972C((struct102 *)group);
+        return;
+    }
+    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+        group->flags |= 2;
+    } else {
+        group->flags &= ~2;
+    }
+    if (group->flags & 1) {
+        group->timer -= D_800BE9E4;
+        if (group->timer < 0) {
+            if (group->expireFn != -1) {
+                D_8008FC58[group->expireFn](group);
+            }
+            func_1516972C((struct102 *)group);
             return;
         }
     }
-
-    *(Func151D2C40Data *)&arg0->unk34 = *(Func151D2C40Data *)((u8 *)&sp28 + 4);
+    isTrackable = group->flags & 2;
+    if (wasTrackable != isTrackable) {
+        if (isTrackable) {
+            D_8008FC50[group->trackFn](group);
+        } else {
+            D_8008FC54[group->untrackFn](group);
+        }
+    }
+    if (group->updateFn != -1 && D_8008FC4C[group->updateFn](group) == 0) {
+        func_1516972C((struct102 *)group);
+    }
 }
 
-void func_151D2DAC(struct102 *arg0) {
-    func_151D3354(arg0);
+/* Destroys every follower in the group (running their expire callbacks) and releases the actor. */
+void func_151D3130(ActorFollowerGroup *group) {
+    void (*onDestroy)(ActorFollowerGroup *);
+    BoneFollower *follower;
+    BoneFollower *next;
+
+    onDestroy = D_8008FC5C[group->kind];
+    if (onDestroy != NULL) {
+        onDestroy(group);
+    }
+    follower = group->head;
+    if (follower != NULL) {
+        do {
+            next = follower->next;
+            if (follower->expireFn != -1) {
+                D_8008FC48[follower->expireFn](follower, &follower->position);
+            }
+            follower->attached = 0;
+            func_1516972C((struct102 *)follower);
+            follower = next;
+        latch: // matching: the label ends the block so as1 fills the branch delay slot from the loop top
+            ;
+        } while (next != NULL);
+    }
+    func_1514EDF0(group, group->actor);
 }
 
-void func_151D2DCC(struct102 *arg0) {
-    struct102 *tmp = arg0;
-
-    func_151D2DAC(tmp);
-
-    if (tmp->unk2C != 0) {
-        func_1516972C(tmp->unk2C);
-    }
-    func_15169804(tmp);
+void func_151D31F4(ActorFollowerGroup *group) {
+    func_151D3130(group);
+    func_15169804((struct102 *)group);
 }
 
-void func_151D2E14(struct102 *arg0) {
-    struct102 *tmp = arg0;
-
-    func_151D2DAC(tmp);
-
-    if (tmp->unk2C != 0) {
-        func_1516979C(tmp->unk2C);
-    }
-    func_15169824(tmp);
+void func_151D3220(ActorFollowerGroup *group) {
+    func_151D3130(group);
+    func_15169824((struct102 *)group);
 }
 
-void func_1516972C(struct102 *arg0);
-void func_151D2E5C(struct16 *arg0, struct223 *arg1, u8 arg2)
-{
-  s32 temp_v0;
-  s32 temp_v1;
-  u8 temp_a2;
-  u8 temp_a3;
-  if (arg2 == 0)
-  {
-    temp_v0 = arg0->unk10;
-    temp_v1 = arg1->unk0;
-    temp_a2 = arg0->unk14;
-    temp_a3 = arg1->unk4.ub;
-    if ((temp_v0 == temp_v1) || (temp_a2 == temp_a3))
-    {
-      func_1516972C((struct102 *) arg0);
+/* Message handler: like func_151D2E5C, then forwards the message to the group kind's handler. */
+void func_151D324C(ActorFollowerGroup *group, struct223 *msg, u8 type) {
+    void (*onMessage)(ActorFollowerGroup *, struct223 *, u8);
+
+    s32 otherActor;
+
+    if (type == 0) {
+        func_151D33FC(group, msg);
+    done: // matching: the label splits the block so the reload of type stays out of the delay slot
+        ;
+    } else if (type == 0x2D) {
+        otherActor = msg->unk0;
+        if ((s32)group->actor == otherActor) {
+            group->actor = (struct127 *)msg->unk4.w;
+            group->actorUid = msg->unk9;
+        } else if ((s32)group->actor == msg->unk4.w) {
+            group->actor = (struct127 *)otherActor;
+            group->actorUid = msg->unk8;
+        }
     }
-  }
-  else
-    if (arg2 == 0x2D)
-  {
-    temp_v0 = arg1->unk0;
-    temp_v1 = arg0->unk10;
-    if (temp_v0 == temp_v1)
-    {
-      arg0->unk10 = arg1->unk4.w;
-      arg0->unk14 = arg1->unk9;
+
+    onMessage = D_8008FC64[group->kind];
+    if (onMessage != NULL) {
+        onMessage(group, msg, type);
     }
-    else
-      if ((temp_v1 ^ 0) == arg1->unk4.w)
-    {
-      arg0->unk10 = temp_v0;
-      arg0->unk14 = arg1->unk8;
-    }
-  }
 }
 
-// NON-MATCHING: JUSTREG (mostly)
-// s32 func_151D2E5C(struct16 *arg0, struct223 *arg1, u8 arg2) {
-//     s32 temp_v0;
-//     u8 temp_a2;
-//     u8 temp_a3;
-//
-//     if (arg2 == 0) {
-//         temp_v0 = arg0->unk10;
-//         temp_a2 = arg0->unk14;
-//         temp_a3 = arg1->unk4.ub;
-//         if ((temp_v0 == arg1->unk0) || (temp_a3 == temp_a2)) {
-//             func_1516972C(temp_a2);
-//         }
-//     } else if (arg2 == 0x2D) {
-//         temp_v0 = arg1->unk0;
-//         if (temp_v0 == arg0->unk10) {
-//             arg0->unk10 = arg1->unk4.w;
-//             arg0->unk14 = arg1->unk9;
-//         } else if (arg1->unk4.w == arg0->unk10) {
-//             arg0->unk10 = temp_v0;
-//             arg0->unk14 = arg1->unk8;
-//         }
-//     }
-// }
+/* Pushes the follower onto the front of its group's list. */
+void func_151D3308(BoneFollower *follower) {
+    ActorFollowerGroup *group = follower->group;
+    BoneFollower *head;
 
-s32 func_15167A68(s32, s32, s32, s32, s32, s32);
-
-s32 func_151D2F00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    Game1FFF60ObjectNode *tmp = (Game1FFF60ObjectNode *)func_15167A68(0x3E, arg3, arg1 + 0x30, 1, (u8)arg2, 1);
-
-    if (tmp == 0) {
-        return 0;
+    if (group != NULL) {
+        follower->next = group->head;
+        head = group->head;
+        if (head != NULL) {
+            head->prev = follower;
+        } else {
+            group->tail = follower;
+        }
+        follower->prev = NULL;
+        group->head = follower;
+        group->count++;
+        follower->group = group;
     }
+}
 
-    memcpy(tmp->field_0x10, arg0, 0x10);
-    tmp->field_0x20 = 0;
-    tmp->field_0x24 = 0;
-    tmp->field_0x28 = 0;
-    tmp->field_0x18 = tmp->field_0x18 & 0xFFFD;
+/* Unlinks the follower from its group's list. */
+void func_151D3354(BoneFollower *follower) {
+    ActorFollowerGroup *group;
 
-    return (s32)tmp;
+    if (follower->group != NULL) {
+        group = follower->group;
+        if (follower->prev != NULL) {
+            follower->prev->next = follower->next;
+        } else {
+            group->head = follower->next;
+        }
+        if (follower->next != NULL) {
+            follower->next->prev = follower->prev;
+        } else {
+            group->tail = follower->prev;
+        }
+        group->count--;
+    }
+}
+
+/* Destroys every follower in the group. */
+void func_151D33B8(ActorFollowerGroup *group) {
+    while (group->count > 0) {
+        func_1516972C((struct102 *)group->head);
+    }
+}
+
+/* Destroys the group when message type 0 names its actor. */
+void func_151D33FC(ActorFollowerGroup *group, struct223 *msg) {
+    s32 actor;
+    s32 actorUid;
+    s32 msgUid;
+    s32 otherActor;
+
+    actor = (s32)group->actor;
+    actorUid = group->actorUid;
+    msgUid = msg->unk4.ub;
+    otherActor = msg->unk0;
+    if (actor == otherActor || msgUid == actorUid) {
+        func_1516972C((struct102 *)group);
+    }
 }
 
 typedef struct {
     s32 unk0;
-    u8 unk4;
-    u8 pad5[0x3B - 0x5];
-    u8 unk3B;
-    u8 pad3C[0x74 - 0x3C];
-    u8 unk74;
-    u8 pad75[0x1D4 - 0x75];
-    s32 unk1D4;
-} Func151D2F90Obj;
-
-typedef struct {
-    u8 pad0[0x10];
-    Func151D2F90Obj *unk10;
-    u8 unk14;
-    u8 pad15;
-    s16 unk16;
-    u8 unk18;
-    s8 unk19;
-    s8 unk1A;
-    s8 unk1B;
-    s8 unk1C;
-} Func151D2F90Inst;
-
-extern s32 (*D_8008FC4C[])(Func151D2F90Inst *);
-extern void (*D_8008FC50[])(Func151D2F90Inst *);
-extern void (*D_8008FC54[])(Func151D2F90Inst *);
-extern void (*D_8008FC58[])(Func151D2F90Inst *);
-
-void func_151D2F90(Func151D2F90Inst *arg0) {
-    Func151D2F90Obj *obj;
-    u8 flags;
-    u8 old;
-    u8 cur;
-
-    obj = arg0->unk10;
-    old = (arg0->unk18 & 2);
-    if ((obj->unk0 == 0) || (obj->unk4 == 0xFF) || (obj->unk3B != arg0->unk14)) {
-        func_1516972C((struct102 *)arg0);
-        return;
-    }
-    if ((obj->unk1D4 != 0) && ((obj->unk74 & 0xF) != 0xF)) {
-        arg0->unk18 |= 2;
-    } else {
-        arg0->unk18 &= ~2;
-    }
-    if (arg0->unk18 & 1) {
-        arg0->unk16 -= D_800BE9E4;
-        if (arg0->unk16 < 0) {
-            if (arg0->unk1C != -1) {
-                D_8008FC58[arg0->unk1C](arg0);
-            }
-            func_1516972C((struct102 *)arg0);
-            return;
-        }
-    }
-    cur = arg0->unk18 & 2;
-    if (old != cur) {
-        if (cur) {
-            D_8008FC50[arg0->unk1A](arg0);
-        } else {
-            D_8008FC54[arg0->unk1B](arg0);
-        }
-    }
-    if ((arg0->unk19 != -1) && (D_8008FC4C[arg0->unk19](arg0) == 0)) {
-        func_1516972C((struct102 *)arg0);
-    }
-}
-
-void func_1516972C(struct102 *arg0);
-extern void (*D_8008FC48[])(struct224 *, Func151D2C40Data *);
-extern void (*D_8008FC5C[])(struct224 *);
-void func_1514EDF0(struct224 *, s32);
-void func_1516972C(struct102 *arg0);
-void func_151D3130(struct224 *arg0)
-{
-  void (*temp_v0)(struct224 *);
-  struct224 *var_s0;
-  struct224 *temp_s1;
-  s8 temp_v0_2;
-  unsigned int new_var;
-  temp_v0 = D_8008FC5C[*((u8 *) (((u8 *) arg0) + 0x1D))];
-  if (temp_v0 != 0)
-  {
-    temp_v0(arg0);
-  }
-  var_s0 = (struct224 *) arg0->unk24;
-  if (var_s0 != 0)
-  {
-    do
-    {
-      temp_v0_2 = *((s8 *) (((u8 *) var_s0) + 0x2A));
-      new_var = 1;
-      temp_s1 = (struct224 *) var_s0->unk40;
-      if (temp_v0_2 != (-new_var))
-      {
-        D_8008FC48[temp_v0_2](var_s0, (Func151D2C40Data *) (&var_s0->unk34));
- { }
-      }
-      *((s32 *) var_s0->unk2C) = 0;
-      func_1516972C((struct102 *) var_s0);
-      var_s0 = temp_s1;
-      latch_151D3130:
-      ;
-
-      ;
-      ;
-    }
-    while (temp_s1 != 0);
-  }
-  func_1514EDF0(arg0, arg0->unk10);
-}
-
-
-void func_151D31F4(struct102 *arg0) {
-    func_151D3130(arg0);
-    func_15169804(arg0);
-}
-
-void func_151D3220(struct102 *arg0) {
-    func_151D3130(arg0);
-    func_15169824(arg0);
-}
-
-void func_151D324C(struct224 *arg0, struct223 *arg1, u8 arg2) {
-    void (*temp_v0)(struct224 *, struct223 *, u8);
-    s32 temp_v1;
-    s32 temp_v0_2;
-    u8 temp_a2;
-
-    temp_a2 = arg2;
-    if (temp_a2 == 0) {
-        func_151D33FC(arg0, arg1);
-        temp_a2 = arg2;
-    zero_label_151D324C:
-        ;
-    } else if (temp_a2 == 0x2D) {
-        temp_v0_2 = arg1->unk0;
-        if (arg0->unk10 == temp_v0_2) {
-            arg0->unk10 = arg1->unk4.w;
-            arg0->unk14 = arg1->unk9;
-        } else {
-            if (arg0->unk10 == arg1->unk4.w) {
-                arg0->unk10 = temp_v0_2;
-                arg0->unk14 = arg1->unk8;
-            }
-        trailing_label_151D324C:
-            ;
-        }
-    }
-
-    temp_v0 = D_8008FC64[*(u8 *)((u8 *)arg0 + 0x1D)];
-    if (temp_v0 != NULL) {
-        temp_v0(arg0, arg1, temp_a2);
-    }
-}
-
-void func_151D3308(struct224 *arg0) {
-    struct224 *temp_v0;
-    struct224 *temp_v1;
-
-    temp_v0 = arg0->unk30;
-    if (temp_v0 != 0) {
-        arg0->unk40 = temp_v0->unk24;
-        temp_v1 = temp_v0->unk24;
-        if (temp_v1 != 0) {
-            temp_v1->unk44 = arg0;
-        } else {
-            temp_v0->unk28 = arg0;
-        }
-        arg0->unk44 = 0;
-        temp_v0->unk24 = arg0;
-        temp_v0->unk20 += 1;
-        arg0->unk30 = temp_v0;
-    }
-}
-
-void func_151D3354(struct224 *arg0) {
-    struct224 *temp_v0;
-    struct224 *temp_v1;
-    struct224 *temp_v2;
-
-    if (arg0->unk30) {
-        temp_v0 = arg0->unk30;
-        if (temp_v1 = arg0->unk44) {
-            temp_v1->unk40 = arg0->unk40;
-        } else {
-            temp_v0->unk24 = arg0->unk40;
-        }
-
-        if (temp_v2 = arg0->unk40) {
-            temp_v2->unk44 = arg0->unk44;
-        } else {
-            temp_v0->unk28 = arg0->unk44;
-        }
-
-        temp_v0->unk20 -= 1;
-    }
-}
-
-void func_151D33B8(struct224 *arg0) {
-    while (arg0->unk20 > 0) {
-        func_1516972C(arg0->unk24);
-    };
-}
-
-void func_151D33FC(struct224 *arg0, struct223 *arg1) {
-    s32 tmp0;
-    s32 tmp1;
-    s32 tmp2;
-    s32 tmp3;
-
-    tmp0 = arg0->unk10;
-    tmp1 = arg0->unk14;
-    tmp2 = arg1->unk4.ub;
-    tmp3 = arg1->unk0;
-    if ((tmp0 == tmp3) || (tmp2 == tmp1)) {
-        func_1516972C(arg0);
-    }
-}
+} Func151D343CArgs;
 
 void func_151D343C(s32 arg0, u8 arg1) {
-    Func151D343CData sp1C;
+    Func151D343CArgs args;
 
-    sp1C = *(Func151D343CData *)D_800AB168;
-    func_15169260(&sp1C, 1, arg0, arg1);
+    args = *(Func151D343CArgs *)D_800AB168; // matching: a struct copy, not an s32 load
+    func_15169260(&args.unk0, 1, arg0, arg1);
 }

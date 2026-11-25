@@ -1,658 +1,637 @@
 #include <ultra64.h>
 #define func_15048A40 func_15048A40_hdr
+#define func_15149130 func_15149130_hdr
 #include "functions.h"
 #undef func_15048A40
+#undef func_15149130
+#define D_800DDDAC D_800DDDAC_hdr
+#define D_800DDDB0 D_800DDDB0_hdr
 #define D_800DDDC8 D_800DDDC8_hdr
 #define D_800DDDD8 D_800DDDD8_hdr
+#define D_800DDE18 D_800DDE18_hdr
+#define D_800DDE1C D_800DDE1C_hdr
 #define D_800DDE20 D_800DDE20_hdr
+#define D_800DDE28 D_800DDE28_hdr
 #define D_800DDE3C D_800DDE3C_hdr
+#define D_800D9D10 D_800D9D10_hdr
+#define D_800CC2D0 D_800CC2D0_hdr
 #include "variables.h"
+#undef D_800DDDAC
+#undef D_800DDDB0
 #undef D_800DDDC8
 #undef D_800DDDD8
+#undef D_800DDE18
+#undef D_800DDE1C
 #undef D_800DDE20
+#undef D_800DDE28
 #undef D_800DDE3C
-extern f32 D_800DDDC8[];
-extern f32 D_800DDDD8[];
-extern u8 D_800DDE20[];
-extern u8 D_800DDE3C[];
+#undef D_800D9D10
+#undef D_800CC2D0
 
-extern f32 func_15048A40(u8 arg0);
+/* Per-view screen effects: a colour fade, a colour flash, a global tint, an iris wipe and the
+ * cutscene letterbox. Per-view arrays are indexed by view (0..D_80082FA0). */
 
-
-extern u8 D_800DDDA0[];
-extern u8 D_800DDDC0;
+/* One record per view (stride 0x180); field names as in game_476D0.c. */
+typedef struct RenderView {
+    /* 0x000 */ u8 pad0[4];
+    /* 0x004 */ f32 width;
+    /* 0x008 */ f32 height;
+    /* 0x00C */ f32 halfWidth;
+    /* 0x010 */ f32 halfHeight;
+    /* 0x014 */ u8 pad14[0x10];
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ u8 pad34[0x14C];
+} RenderView; // size 0x180
 
 typedef struct {
-    char pad_0x00[0xE];
-    s16 field_0x0E;
-    char pad_0x10[0x1B];
-    u8 field_0x2B;
-    char pad_0x2C[0x2];
-    s16 field_0x2E;
-} ColorBlendTask;
+    u8 r;
+    u8 g;
+    u8 b;
+} FadeColor;
 
-void func_1517EE40(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s8 arg4, s32 arg5) {
-    u8 *p;
+/* D_800BE628 (s32 in variables.h) points to the RenderView array. */
+// matching: indexing through a cast of the s32 orders the address addu as the original does
+#define gRenderViews ((RenderView *)D_800BE628)
+extern f32 D_800D9D10[][4][4]; // per-view projection matrices
 
-    if ((s8)arg4 == ((s8 *)&D_800DDDAC)[arg5]) {
-        if ((&D_800DDDB0)[arg5] >= (&D_800DDE28)[arg5]) {
-            if (((u8 *)&D_800DDDC0)[arg5] == 0) {
-                return;
-            }
+f32 func_15048A40(u8 angle); // -1..1 wave over a 256-step angle (used as a sine)
+
+/* Colour fade (func_1517EE40) */
+extern FadeColor D_800DDDA0[]; // colour
+extern s8 D_800DDDAC[];        // nonzero: fading to the colour, 0: fading from it
+extern s32 D_800DDDB0[];       // elapsed frames
+extern u8 D_800DDDC0[];        // fixed alpha that overrides the timer when nonzero
+extern s32 D_800DDE28[];       // duration in frames
+
+/* Colour flash (func_1517F488) */
+extern FadeColor D_800DDD90[];
+extern u8 D_800DDD9C[];  // alpha
+extern u16 D_800DDE10[]; // frames left
+
+/* Pulsing full-screen tint (func_1517F720), view 0 only */
+extern u16 D_800DDE08; // frames left
+extern u8 D_800DDD88;  // pulse speed (angle step per frame)
+extern u8 D_800DDD89;  // pulse angle
+extern u8 D_800DDD8A;  // colour pair index into D_8008D010
+extern u8 D_800DDD8B;  // alpha
+extern u8 D_800DDD8C;  // nonzero: alpha pulses
+extern u8 D_8008D010[][6]; // two RGB colours per entry
+
+/* Iris wipe */
+extern f32 D_800DDDC8[];     // closure: 0 open .. 1 closed
+extern f32 D_800DDDD8[];     // closure change per frame
+extern f32 D_800DDDE8[][2];  // hole centre, relative to the view centre
+extern u8 D_800DDE1C[];      // style: 0 plain, 1 with sight marks, 2 with an animated overlay
+extern u8 D_800DDE20[];      // nonzero: scripted iris driven by the player's mode state
+extern u8 D_800DDE3C[];      // nonzero: iris tracking the player (state 1..4)
+extern u8 D_800DDD70[];      // wobble frames left
+extern u8 D_800DDD74[];      // wobble angle
+extern u8 D_800DDD78[];      // overlay animation frame
+extern u16 D_800DDD80[];     // hold frames left
+
+/* Letterbox */
+extern f32 *D_800DDE18; // bar amount in percent, or NULL when off
+
+extern s32 D_800BE9E4; // frames elapsed this update
+
+/* Starts a fade of `view` to (toColor) or from the colour r,g,b over `duration` frames,
+ * unless that same fade has already run to completion. */
+void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view) {
+    FadeColor *color;
+
+    if (toColor == D_800DDDAC[view] && D_800DDDB0[view] >= D_800DDE28[view] && D_800DDDC0[view] == 0) {
+        return;
+    }
+
+    color = &D_800DDDA0[view];
+    color->g = g;
+    color->b = b;
+    color->r = r;
+    D_800DDE28[view] = duration;
+    D_800DDDB0[view] = 0;
+    D_800DDDAC[view] = toColor;
+    D_800DDDC0[view] = 0;
+}
+
+/* Returns the current fade alpha (0..255) of `view`. */
+s32 func_1517EF00(s32 view) {
+    s32 alpha;
+
+    if (D_800DDDC0[view] != 0) {
+        alpha = D_800DDDC0[view];
+    } else {
+        if (D_800DDE28[view] != 0) {
+            alpha = (D_800DDDB0[view] * 255) / D_800DDE28[view];
+            alpha = (alpha < 256) ? alpha : 255;
+        } else {
+            alpha = 255;
+        }
+        if (D_800DDDAC[view] == 0) {
+            alpha = 255 - alpha;
         }
     }
-
-    p = &D_800DDDA0[arg5 * 3];
-    p[1] = arg1;
-    p[2] = arg2;
-    p[0] = arg0;
-    (&D_800DDE28)[arg5] = arg3;
-    (&D_800DDDB0)[arg5] = 0;
-    ((s8 *)&D_800DDDAC)[arg5] = (s8)arg4;
-    ((u8 *)&D_800DDDC0)[arg5] = 0;
+    return alpha;
 }
 
-extern u8 D_800DDDAC;
-extern s32 D_800DDDB0;
-extern s32 D_800DDE28;
-extern u8 D_800DDDC0;
-s32 func_1517EF00(s32 arg0)
-{
-  s32 v1;
-  s32 a1;
-  v1 = ((&D_800DDDB0)[arg0] * 255) / a1;
-  if ((&D_800DDDC0)[arg0] != 0)
-  {
-    v1 = (&D_800DDDC0)[arg0];
-  }
-  else
-  {
-    a1 = (&D_800DDE28)[arg0];
-    if (a1 != 0)
-    {
-      v1 = ((&D_800DDDB0)[arg0] * 255) / a1;
-      if (v1 >= 0x100)
-      {
-        v1 = 0xFF;
-      }
-    }
-    else
-    {
-      v1 = 0xFF;
-    }
-    if (((s8 *) (&D_800DDDAC))[arg0] == 0)
-    {
-      v1 = 255 - v1;
-    }
-  }
-  return v1;
-}
-
-extern s32 func_1517EF00(s32);
-
-
-extern s32 func_1517EF00(s32);
-
-s32 func_1517EFAC(s32 arg0) {
-    if (func_1517EF00(arg0) == 0xFF) {
+/* Returns whether `view` is fully faded to its colour. */
+s32 func_1517EFAC(s32 view) {
+    if (func_1517EF00(view) == 255) {
         return 1;
     }
     return 0;
 }
 
+/* Returns whether every view is at least partly covered by a fade or an iris. */
 s32 func_1517EFDC(void) {
-    s32 s1 = -1;
-    s32 s0;
-    s32 v0;
-    for (s0 = 0; s0 <= D_80082FA0; s0++) {
-        if ((func_1517EF00(s0) > 0) || (0.0f < D_800DDDC8[s0])) {
-            s1++;
+    s32 covered = -1;
+    s32 view;
+
+    for (view = 0; view <= D_80082FA0; view++) {
+        if (func_1517EF00(view) > 0 || D_800DDDC8[view] > 0.0f) {
+            covered++;
         }
     }
-    v0 = D_80082FA0;
-    if (s1 == v0) {
+    if (covered == D_80082FA0) {
         return 1;
     }
     return 0;
 }
 
-#define WGFX1517F08C(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
+/* Fills the whole of `view` with colour r,g,b at `alpha`. */
+Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view) {
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, r, g, b, alpha);
+    gDPSetOtherMode(gfx++, 0x002CFF, 0x504344);
+    gDPFillRectangle(gfx++, gRenderViews[view].left, gRenderViews[view].top, gRenderViews[view].right,
+                     gRenderViews[view].bottom);
+    return gfx;
 }
 
-Gfx *func_1517F08C(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    typedef struct {
-        char pad0[0x24];
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        char pad34[0x14C];
-    } Struct1517F08C;
-    WGFX1517F08C(arg0++, 0xE7000000, 0);
-    WGFX1517F08C(arg0++, 0xFCFFFFFF, 0xFFFDF6FB);
-    gDPSetPrimColor(arg0++, 0, 0, arg2, arg3, arg4, arg1);
-    WGFX1517F08C(arg0++, 0xEF002CFF, 0x504344);
+/* Draws the colour fade of `view`, if it is visible. */
+Gfx *func_1517F3A0(Gfx *gfx, s32 view) {
+    s32 alpha = func_1517EF00(view);
+    FadeColor *color;
 
-    gDPFillRectangle(arg0++,
-        ((Struct1517F08C *)D_800BE628)[arg5].unk2C,
-        ((Struct1517F08C *)D_800BE628)[arg5].unk24,
-        ((Struct1517F08C *)D_800BE628)[arg5].unk30,
-        ((Struct1517F08C *)D_800BE628)[arg5].unk28);
-
-    return arg0;
-}
-
-extern u8 D_800DDDA0[];
-Gfx *func_1517F08C(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-
-s32 func_1517F3A0(s32 arg0, s32 arg1) {
-    s32 v0 = func_1517EF00(arg1);
-    u8 *p;
-    if (v0 == 0) {
-        return arg0;
+    if (alpha == 0) {
+        return gfx;
     }
-    p = &D_800DDDA0[arg1 * 3];
-    return func_1517F08C(arg0, v0, p[0], p[1], p[2], arg1);
+    color = &D_800DDDA0[view];
+    return func_1517F08C(gfx, alpha, color->r, color->g, color->b, view);
 }
 
-s32 func_1517F40C(s32 arg0) {
-    if ((&D_800DDDB0)[arg0] >= (&D_800DDE28)[arg0]) {
+/* Returns whether the colour fade of `view` has run its full duration. */
+s32 func_1517F40C(s32 view) {
+    if (D_800DDDB0[view] >= D_800DDE28[view]) {
         return 1;
     }
     return 0;
 }
 
-void func_1517F448(s32 arg0) {
-    if ((&D_800DDDB0)[arg0] != (&D_800DDE28)[arg0]) {
-        (&D_800DDDB0)[arg0] += D_800BE9E4;
+/* Advances the colour fade timer of `view`. */
+void func_1517F448(s32 view) {
+    if (D_800DDDB0[view] != D_800DDE28[view]) {
+        D_800DDDB0[view] += D_800BE9E4;
     }
 }
 
-extern u8 D_800DDD90[];
-extern u8 D_800DDD9C[];
-extern s16 D_800DDE10[];
+/* Flashes `view` with colour r,g,b at `alpha` for `duration` frames. */
+void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view) {
+    FadeColor *color = &D_800DDD90[view];
 
-void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    u8 *p = &D_800DDD90[arg5 * 3];
-    p[0] = arg0;
-    p[1] = arg1;
-    p[2] = arg2;
-    D_800DDD9C[arg5] = arg3;
-    D_800DDE10[arg5] = arg4;
+    color->r = r;
+    color->g = g;
+    color->b = b;
+    D_800DDD9C[view] = alpha;
+    D_800DDE10[view] = duration;
 }
 
-s32 func_1517F4D8(s32 arg0, s32 arg1) {
-    u8 *p;
+/* Draws the colour flash of `view`, if one is active. */
+Gfx *func_1517F4D8(Gfx *gfx, s32 view) {
+    FadeColor *color;
 
-    if (((u16 *)D_800DDE10)[arg1] == 0) {
-        return arg0;
+    if (D_800DDE10[view] == 0) {
+        return gfx;
     }
-
-    if (D_800DDD9C[arg1] == 0) {
-        return arg0;
+    if (D_800DDD9C[view] == 0) {
+        return gfx;
     }
-
-    p = &D_800DDD90[arg1 * 3];
-    return func_1517F08C(arg0, D_800DDD9C[arg1], p[0], p[1], p[2], arg1);
+    color = &D_800DDD90[view];
+    return func_1517F08C(gfx, D_800DDD9C[view], color->r, color->g, color->b, view);
 }
 
-extern u8 D_8008D010[];
-extern u8 D_800DDD88;
-extern u8 D_800DDD89;
-extern u8 D_800DDD8A;
-extern u8 D_800DDD8B;
-extern u8 D_800DDD8C;
-
-s32 func_1517F564(s32 arg0) {
-    f32 temp_f2[4];
-    f32 sp20;
-    f32 fade;
-    u8 *p;
-    s32 v0;
-    s32 a1;
-    s32 red;
-    s32 green;
-    s32 blue;
+/* Draws the full-screen tint over view 0, pulsing its alpha when enabled. */
+Gfx *func_1517F564(Gfx *gfx) {
+    f32 stack[4]; // matching: the original reads an uninitialized stack slot as the fraction
+    f32 fraction;
+    f32 pulse;
+    u8 *colors;
+    s32 baseAlpha;
+    s32 alpha;
+    s32 r;
+    s32 g;
+    s32 b;
 
     if (D_800DDE08 == 0) {
-        return arg0;
+        return gfx;
     }
-
-    v0 = D_800DDD8B;
-    if (v0 == 0) {
-        return arg0;
+    baseAlpha = D_800DDD8B;
+    if (baseAlpha == 0) {
+        return gfx;
     }
-
     if (D_800DDD8C != 0) {
-        fade = (func_15048A40(D_800DDD89) + 1.0f) * 0.5f;
-        a1 = (s32)((f32)D_800DDD8B * fade);
-        sp20 = 0.0f;
+        pulse = (func_15048A40(D_800DDD89) + 1.0f) * 0.5f;
+        alpha = D_800DDD8B * pulse;
+        fraction = 0.0f;
     } else {
-        a1 = v0;
-        sp20 = temp_f2[0];
+        alpha = baseAlpha;
+        fraction = stack[0];
     }
 
-    p = &D_8008D010[D_800DDD8A * 6];
-    red = (s32)((f32)p[0] + ((f32)(p[3] - p[0]) * sp20));
-    green = (s32)((f32)p[1] + ((f32)(p[4] - p[1]) * sp20));
-    blue = (s32)((f32)p[2] + ((f32)(p[5] - p[2]) * sp20));
-    return func_1517F08C(arg0, a1, red, green, blue, 0);
+    colors = D_8008D010[D_800DDD8A];
+    r = colors[0] + (colors[3] - colors[0]) * fraction;
+    g = colors[1] + (colors[4] - colors[1]) * fraction;
+    b = colors[2] + (colors[5] - colors[2]) * fraction;
+    return func_1517F08C(gfx, alpha, r, g, b, 0);
 }
 
-void func_1517F720(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    D_800DDE08 = arg1;
-    D_800DDD88 = arg2;
+/* Starts the full-screen tint: colour pair `colorIndex` at `alpha` for `duration` frames,
+ * pulsing at `speed` when `pulse` is set. */
+void func_1517F720(s32 colorIndex, s32 duration, s32 speed, s32 alpha, s32 pulse) {
+    D_800DDE08 = duration;
+    D_800DDD88 = speed;
     D_800DDD89 = 0;
-    D_800DDD8A = arg0;
-    D_800DDD8B = arg3;
-    D_800DDD8C = arg4;
+    D_800DDD8A = colorIndex;
+    D_800DDD8B = alpha;
+    D_800DDD8C = pulse;
 }
 
-extern s32 D_800BE9E4;
-
+/* Counts down the colour flash timers of every view. */
 void func_1517F75C(void) {
-    s32 i;
+    s32 view;
 
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (D_800BE9E4 < ((u16 *)D_800DDE10)[i]) {
-            ((u16 *)D_800DDE10)[i] -= D_800BE9E4;
+    for (view = 0; view <= D_80082FA0; view++) {
+        if (D_800BE9E4 < D_800DDE10[view]) {
+            D_800DDE10[view] -= D_800BE9E4;
         } else {
-            ((u16 *)D_800DDE10)[i] = 0;
+            D_800DDE10[view] = 0;
         }
     }
 }
 
-
-extern s32 D_800BE9E4;
-extern u16 D_800DDE08;
-extern u8 D_800DDD88;
-extern u8 D_800DDD89;
-void func_1517F7B4(void)
-{
-  if (D_800DDE08)
-  {
-    if (D_800BE9E4 < D_800DDE08)
-    {
-      D_800DDE08 -= D_800BE9E4;
+/* Counts down the tint timer and advances its pulse. */
+void func_1517F7B4(void) {
+    if (D_800DDE08) {
+        if (D_800BE9E4 < D_800DDE08) {
+            D_800DDE08 -= D_800BE9E4;
+        } else {
+            D_800DDE08 = 0;
+        }
+        D_800DDD89 += D_800DDD88 * D_800BE9E4;
     }
-    else
-    {
-      D_800DDE08 = 0;
-    }
-    D_800DDD89 += D_800DDD88 * D_800BE9E4;
-  }
 }
 
+void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
-typedef struct {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x10];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    char pad30[0x150];
-} Struct1517F814;
-extern f32 D_800DDDE8[][2];
-void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
+/* Moves the iris hole of `view` to the screen position x,y (`onScreen`) or to the projection
+ * of the world point x,y,z, clamped to +-10000. */
+void func_1517F814(s32 onScreen, f32 x, f32 y, f32 z, s32 view) {
+    f32 screenX;
+    f32 screenY;
+    f32 screenZ;
+    f32 screenW;
+    RenderView *rv;
 
-void func_1517F814(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4) {
-    f32 sp3C;
-    f32 sp38;
-    f32 sp34;
-    f32 sp30;
-    Struct1517F814 *v1;
-
-    if (arg0 == 0) {
-        func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg4 << 6)), arg1, arg2, arg3, &sp3C, &sp38, &sp34, &sp30);
-        if (sp30 == 0.0f) {
-            sp30 = 1.0f;
+    if (onScreen == 0) {
+        func_150A7A00(D_800D9D10[view], x, y, z, &screenX, &screenY, &screenZ, &screenW);
+        if (screenW == 0.0f) {
+            screenW = 1.0f;
         }
-        v1 = &((Struct1517F814 *)D_800BE628)[arg4];
-        sp3C = (v1->unkC * sp3C) / sp30;
-        sp38 = (v1->unk10 * sp38) / sp30;
-        sp3C += v1->unkC;
-        sp38 = v1->unk10 - sp38;
-        sp3C += v1->unk2C;
-        sp38 += v1->unk24;
+        rv = &gRenderViews[view];
+        screenX = (rv->halfWidth * screenX) / screenW;
+        screenY = (rv->halfHeight * screenY) / screenW;
+        screenX += rv->halfWidth;
+        screenY = rv->halfHeight - screenY;
+        screenX += rv->left;
+        screenY += rv->top;
     } else {
-        sp3C = arg1;
-        sp38 = arg2;
-        v1 = &((Struct1517F814 *)D_800BE628)[arg4];
+        screenX = x;
+        screenY = y;
+        rv = &gRenderViews[view];
     }
-    if (sp3C > 10000.0f) {
-        sp3C = 10000.0f;
-    } else if (sp3C < -10000.0f) {
-        sp3C = -10000.0f;
+    if (screenX > 10000.0f) {
+        screenX = 10000.0f;
+    } else if (screenX < -10000.0f) {
+        screenX = -10000.0f;
     }
-    if (sp38 > 10000.0f) {
-        sp38 = 10000.0f;
-    } else if (sp38 < -10000.0f) {
-        sp38 = -10000.0f;
+    if (screenY > 10000.0f) {
+        screenY = 10000.0f;
+    } else if (screenY < -10000.0f) {
+        screenY = -10000.0f;
     }
-    D_800DDDE8[arg4][0] = sp3C - v1->unkC;
-    D_800DDDE8[arg4][1] = sp38 - v1->unk10;
+    D_800DDDE8[view][0] = screenX - rv->halfWidth;
+    D_800DDDE8[view][1] = screenY - rv->halfHeight;
 }
 
-Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 arg5) {
-    typedef struct {
-        char pad0[0x24];
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        char pad34[0x14C];
-    } Struct1517F9F4;
-    Struct1517F9F4 *vp;
-    s32 temp;
+/* Fills the rectangle (ulx,uly)-(lrx,lry), in either corner order, clipped to `view`. */
+Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view) {
+    RenderView *rv;
+    s32 left;
     s32 clipped;
     s32 top;
     s32 bottom;
     s32 right;
-    s32 t;
 
     if (lrx < ulx) {
-        temp = ulx;
+        left = ulx;
         ulx = lrx;
-        lrx = temp;
+        lrx = left;
     }
     if (lry < uly) {
-        temp = uly;
+        left = uly;
         uly = lry;
-        lry = temp;
+        lry = left;
     }
-    vp = &((Struct1517F9F4 *)D_800BE628)[arg5];
-    temp = vp->unk2C;
-    top = vp->unk24;
-    right = vp->unk30;
-    bottom = vp->unk28;
-    if (!((uly < bottom) && (top < lry) && (ulx < right) && (temp < lrx))) {
+    rv = &gRenderViews[view];
+    left = rv->left;
+    top = rv->top;
+    right = rv->right;
+    bottom = rv->bottom;
+    if (uly >= bottom || top >= lry || ulx >= right || left >= lrx) {
         return gfx;
     }
 
-    if (ulx < temp) { clipped = temp; } else { if (right < ulx) { t = right; } else { t = ulx; } clipped = t; }
+    clipped = (ulx < left) ? left : ((right < ulx) ? right : ulx);
     ulx = clipped;
-    if (uly < top) { clipped = top; } else { if (bottom < uly) { t = bottom; } else { t = uly; } clipped = t; }
+    clipped = (uly < top) ? top : ((bottom < uly) ? bottom : uly);
     uly = clipped;
-    if (lrx < temp) { clipped = temp; } else { if (right < lrx) { t = right; } else { t = lrx; } clipped = t; }
+    clipped = (lrx < left) ? left : ((right < lrx) ? right : lrx);
     lrx = clipped;
-    if (lry < top) { clipped = top; } else { if (bottom < lry) { t = bottom; } else { t = lry; } clipped = t; }
+    clipped = (lry < top) ? top : ((bottom < lry) ? bottom : lry);
     lry = clipped;
     gDPFillRectangle(gfx++, ulx, uly, lrx, lry);
     return gfx;
 }
 
-typedef struct {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x16C];
-} Struct1517FB9C;
-
-Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 tex, f32 dx, f32 dy, s32 arg5) {
-    s32 va;
-    s32 vb;
-    f32 cx;
-    f32 cy;
-    f32 y0;
-    f32 x1;
-    f32 y1;
+/* Draws a `size`-pixel texture four times around the iris hole of `view`, mirrored into each
+ * quadrant and pushed out by dx,dy; `texSize` is the texture's width in texels. */
+Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
+    s32 tmpA;
+    s32 tmpB;
+    f32 centerX;
+    f32 centerY;
+    f32 lowerY;
+    f32 leftX;
+    f32 upperY;
     f32 fsize;
-    s32 f[2];
+    s32 frac[2]; // texel fractions
 
-    cx = D_800DDDE8[arg5][0] + ((Struct1517FB9C *)D_800BE628)[arg5].unkC;
-    cy = D_800DDDE8[arg5][1] + ((Struct1517FB9C *)D_800BE628)[arg5].unk10;
-    y0 = cy + dy;
+    // matching: the dead stores to tmpA/tmpB and the reuse of `view` as a temporary steer
+    // IDO's spill-slot assignment; the cleaner forms tried all move the stack slots
+    centerX = D_800DDDE8[view][0] + gRenderViews[view].halfWidth;
+    centerY = D_800DDDE8[view][1] + gRenderViews[view].halfHeight;
+    lowerY = centerY + dy;
     fsize = size;
-    va = (s32)(cx + dx) << 2;
-    vb = (s32)((cx + dx) * 32.0f) & 0x1F;
+    tmpA = (s32)(centerX + dx) << 2;
+    tmpB = (s32)((centerX + dx) * 32.0f) & 0x1F;
     gSPScisTextureRectangle(gfx++,
-        va, (s32)y0 << 2,
-        (s32)((cx + dx) + fsize) << 2, (s32)(y0 + fsize) << 2,
+        tmpA, (s32)lowerY << 2,
+        (s32)((centerX + dx) + fsize) << 2, (s32)(lowerY + fsize) << 2,
         G_TX_RENDERTILE,
-        ((s32)((cx + dx) * 32.0f) & 0x1F) + (tex << 5),
-        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
-        -(u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
-    y1 = cy - dy;
-    x1 = cx - dx;
-    va = (s32)((cy - dy) - (f32)size);
-    vb = (s32)((cx - dx) - (f32)size);
-    f[1] = (s32)((x1 - fsize) * 32.0f) & 0x1F;
-    f[0] = (s32)((y1 - fsize) * 32.0f) & 0x1F;
+        ((s32)((centerX + dx) * 32.0f) & 0x1F) + (texSize << 5),
+        ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
+        -(u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
+    upperY = centerY - dy;
+    leftX = centerX - dx;
+    tmpA = (s32)((centerY - dy) - (f32)size);
+    tmpB = (s32)((centerX - dx) - (f32)size);
+    frac[1] = (s32)((leftX - fsize) * 32.0f) & 0x1F;
+    frac[0] = (s32)((upperY - fsize) * 32.0f) & 0x1F;
     gSPScisTextureRectangle(gfx++,
-        (s32)(x1 - fsize) << 2, (s32)(y1 - fsize) << 2,
-        (s32)(cx - dx) << 2, (s32)y1 << 2,
+        (s32)(leftX - fsize) << 2, (s32)(upperY - fsize) << 2,
+        (s32)(centerX - dx) << 2, (s32)upperY << 2,
         G_TX_RENDERTILE,
-        0x1F - f[1],
-        0x1F - f[0],
-        (u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
-    y1 = (cy - dy) - (f32)size;
-    f[1] = (s32)((cx + dx) * 32.0f) & 0x1F;
-    va = (s32)(cx + dx) << 2;
-    vb = (s32)((cy - dy) - fsize) << 2;
-    arg5 = (s32)(cy - dy) << 2;
+        0x1F - frac[1],
+        0x1F - frac[0],
+        (u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
+    upperY = (centerY - dy) - (f32)size;
+    frac[1] = (s32)((centerX + dx) * 32.0f) & 0x1F;
+    tmpA = (s32)(centerX + dx) << 2;
+    tmpB = (s32)((centerY - dy) - fsize) << 2;
+    view = (s32)(centerY - dy) << 2;
     gSPScisTextureRectangle(gfx++,
-        va, vb,
-        (s32)((cx + dx) + fsize) << 2, arg5,
+        tmpA, tmpB,
+        (s32)((centerX + dx) + fsize) << 2, view,
         G_TX_RENDERTILE,
-        f[1] + (tex << 5),
-        0x1F - f[0],
-        -(u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
-    arg5 = 0x1F - ((s32)(((cx - dx) - fsize) * 32.0f) & 0x1F);
-    vb = (s32)(cx - dx) << 2;
-    va = (s32)((cx - dx) - (f32)size) << 2;
+        frac[1] + (texSize << 5),
+        0x1F - frac[0],
+        -(u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
+    view = 0x1F - ((s32)(((centerX - dx) - fsize) * 32.0f) & 0x1F);
+    tmpB = (s32)(centerX - dx) << 2;
+    tmpA = (s32)((centerX - dx) - (f32)size) << 2;
     gSPScisTextureRectangle(gfx++,
-        va, (s32)y0 << 2,
-        vb, (s32)(y0 + fsize) << 2,
+        tmpA, (s32)lowerY << 2,
+        tmpB, (s32)(lowerY + fsize) << 2,
         G_TX_RENDERTILE,
-        arg5,
-        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
-        (u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
+        view,
+        ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
+        (u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
     return gfx;
 }
 
-typedef struct {
-    char pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x10];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x14C];
-} Struct15180580;
-extern f32 *D_800DDE44;
-extern f32 *D_800DDE48;
-extern f32 *D_800DDE4C;
-extern u8 D_800DDD78[];
-extern u8 D_8008D018[];
-extern s32 D_80090298[];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-Gfx *func_1517FB9C(Gfx *gfx, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 arg5);
+extern u8 D_800DDE40;    // nonzero: iris driven by the cutscene tracks below
+extern f32 *D_800DDE44; // closure, percent
+extern f32 *D_800DDE48; // hole x, percent of the view width
+extern f32 *D_800DDE4C; // hole y, percent of the view height
+extern Gfx D_8008D018[];
+extern s32 D_80090298[]; // texture ids
+extern s32 func_1510D0EC(s32, s32 *, s32, s32); // texture address of a texture id
 
-#define VP15180580 (((Struct15180580 *)D_800BE628)[arg1])
-
-Gfx *func_15180580(Gfx *gfx, s32 arg1) {
-    f32 v;
+/* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
+Gfx *func_15180580(Gfx *gfx, s32 view) {
+    f32 closure;
 
     if (D_800DDE40 != 0) {
         if (D_800C35EA == 1) {
-            f32 sc;
+            f32 scale;
 
-            v = *D_800DDE44 * 0.01f;
-            if (v > 1.0f) {
-                v = 1.0f;
-            } else if (v < 0.0f) {
-                v = 0.0f;
+            closure = *D_800DDE44 * 0.01f;
+            if (closure > 1.0f) {
+                closure = 1.0f;
+            } else if (closure < 0.0f) {
+                closure = 0.0f;
             }
-            sc = *D_800DDE48 * 0.01f;
-            D_800DDDE8[arg1][0] = ((Struct15180580 *)D_800BE628)->unk4 * sc;
-            sc = -(*D_800DDE4C * 0.01f);
-            D_800DDDE8[arg1][1] = ((Struct15180580 *)D_800BE628)->unk8 * sc;
+            scale = *D_800DDE48 * 0.01f;
+            D_800DDDE8[view][0] = gRenderViews->width * scale;
+            scale = -(*D_800DDE4C * 0.01f);
+            D_800DDDE8[view][1] = gRenderViews->height * scale;
         } else {
-            v = 1.0f;
+            closure = 1.0f;
         }
     } else {
-        v = D_800DDDC8[arg1];
+        closure = D_800DDDC8[view];
     }
-    if (v == 0.0f) {
+    if (closure == 0.0f) {
         return gfx;
     }
-    WGFX1517F08C(gfx++, 0xDE000000, D_8008D018);
-    WGFX1517F08C(gfx++, 0xE7000000, 0);
-    WGFX1517F08C(gfx++, 0xF7000000, 0x10001);
-    WGFX1517F08C(gfx++, 0xFA000000, 0xFF);
-    WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFDF6FB);
-    WGFX1517F08C(gfx++, 0xEF000CFF, 0x0F0A4004);
-    WGFX1517F08C(gfx++, 0xD9E0FFFE, 0);
-    WGFX1517F08C(gfx++, 0xD9FFFFFF, 0x200004);
-    if (v < 1.0f) {
+    gSPDisplayList(gfx++, D_8008D018);
+    gDPPipeSync(gfx++);
+    gDPSetFillColor(gfx++, 0x10001);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetOtherMode(gfx++, 0x000CFF, 0x0F0A4004);
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    if (closure < 1.0f) {
         s32 i;
         s16 ulx;
         s16 uly;
         s16 lrx;
         s16 lry;
-        s16 size;
+        s16 size; // hole radius
         s16 top;
         s16 left;
         s16 bottom;
         s16 right;
 
-        top = VP15180580.unk24;
-        left = VP15180580.unk2C;
-        bottom = VP15180580.unk28;
-        right = VP15180580.unk30;
-        size = (s32)(-399.0f * v + 400.0f);
+        top = gRenderViews[view].top;
+        left = gRenderViews[view].left;
+        bottom = gRenderViews[view].bottom;
+        right = gRenderViews[view].right;
+        size = (s32)(-399.0f * closure + 400.0f);
+        // black bands above, below, left and right of the hole
         uly = top;
         ulx = left;
-        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
+        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
-        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
+        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
         ulx = left;
         lry = bottom;
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
-        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
+        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
         ulx = left;
-        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
-        lrx = (s32)((D_800DDDE8[arg1][0] + VP15180580.unkC) - size);
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
-        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
-        ulx = (s32)((D_800DDDE8[arg1][0] + VP15180580.unkC) + size);
-        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
+        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
+        lrx = (s32)((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) - size);
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
+        uly = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
+        ulx = (s32)((D_800DDDE8[view][0] + gRenderViews[view].halfWidth) + size);
+        lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) + size);
         lrx = right;
-        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
-        if ((&D_800DDE1C)[arg1] != 0) {
-            WGFX1517F08C(gfx++, 0xE7000000, 0);
-            WGFX1517F08C(gfx++, 0xEF002C0F, 0x0F0A4004);
-            WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFDF6FB);
-            WGFX1517F08C(gfx++, 0xFA000000, 0xFF);
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, view);
+        if (D_800DDE1C[view] != 0) {
+            gDPPipeSync(gfx++);
+            gDPSetOtherMode(gfx++, 0x002C0F, 0x0F0A4004);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+            // crosshair (and corner marks), first as a 1-pixel-wider outline, then on top
             for (i = 0; i < 2; i++) {
-                uly = (s32)(VP15180580.unk10 - 1);
-                lry = (s32)(VP15180580.unk10 + 1);
-                gfx = func_1517F9F4(gfx, left - i, uly - i, right + i, lry + i, arg1);
-                ulx = (s32)(VP15180580.unkC - 1);
-                lrx = (s32)(VP15180580.unkC + 1);
-                gfx = func_1517F9F4(gfx, ulx - i, top - i, lrx + i, bottom + i, arg1);
-                if ((&D_800DDE1C)[arg1] == 1) {
-                    s32 pos[2];
+                uly = (s32)(gRenderViews[view].halfHeight - 1);
+                lry = (s32)(gRenderViews[view].halfHeight + 1);
+                gfx = func_1517F9F4(gfx, left - i, uly - i, right + i, lry + i, view);
+                ulx = (s32)(gRenderViews[view].halfWidth - 1);
+                lrx = (s32)(gRenderViews[view].halfWidth + 1);
+                gfx = func_1517F9F4(gfx, ulx - i, top - i, lrx + i, bottom + i, view);
+                if (D_800DDE1C[view] == 1) {
+                    s32 center[2];
 
-                    pos[0] = D_800DDDE8[arg1][0] + VP15180580.unkC;
-                    pos[1] = D_800DDDE8[arg1][1] + VP15180580.unk10;
-                    uly = pos[1] - 60;
-                    ulx = pos[0] - 60;
-                    lry = pos[1] - 58;
-                    lrx = pos[0] - 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] - 60;
-                    ulx = pos[0] - 60;
-                    lry = pos[1] - 30;
-                    lrx = pos[0] - 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] - 30;
-                    ulx = pos[0] + 58;
-                    lry = pos[1] - 60;
-                    lrx = pos[0] + 60;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] - 58;
-                    ulx = pos[0] + 30;
-                    lry = pos[1] - 60;
-                    lrx = pos[0] + 60;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] + 60;
-                    ulx = pos[0] + 60;
-                    lry = pos[1] + 30;
-                    lrx = pos[0] + 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] + 60;
-                    ulx = pos[0] + 60;
-                    lry = pos[1] + 58;
-                    lrx = pos[0] + 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] + 60;
-                    ulx = pos[0] - 60;
-                    lry = pos[1] + 30;
-                    lrx = pos[0] - 58;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
-                    uly = pos[1] + 60;
-                    ulx = pos[0] - 60;
-                    lry = pos[1] + 58;
-                    lrx = pos[0] - 30;
-                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    center[0] = D_800DDDE8[view][0] + gRenderViews[view].halfWidth;
+                    center[1] = D_800DDDE8[view][1] + gRenderViews[view].halfHeight;
+                    uly = center[1] - 60;
+                    ulx = center[0] - 60;
+                    lry = center[1] - 58;
+                    lrx = center[0] - 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] - 60;
+                    ulx = center[0] - 60;
+                    lry = center[1] - 30;
+                    lrx = center[0] - 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] - 30;
+                    ulx = center[0] + 58;
+                    lry = center[1] - 60;
+                    lrx = center[0] + 60;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] - 58;
+                    ulx = center[0] + 30;
+                    lry = center[1] - 60;
+                    lrx = center[0] + 60;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] + 60;
+                    ulx = center[0] + 60;
+                    lry = center[1] + 30;
+                    lrx = center[0] + 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] + 60;
+                    ulx = center[0] + 60;
+                    lry = center[1] + 58;
+                    lrx = center[0] + 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] + 60;
+                    ulx = center[0] - 60;
+                    lry = center[1] + 30;
+                    lrx = center[0] - 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
+                    uly = center[1] + 60;
+                    ulx = center[0] - 60;
+                    lry = center[1] + 58;
+                    lrx = center[0] - 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, view);
                 }
                 if (i == 0) {
-                    WGFX1517F08C(gfx++, 0xE7000000, 0);
-                    WGFX1517F08C(gfx++, 0xEF002C0F, 0x00504244);
-                    WGFX1517F08C(gfx++, 0xF7000000, 0);
-                    WGFX1517F08C(gfx++, 0xFA000000, 0xFFFFFF00);
+                    gDPPipeSync(gfx++);
+                    gDPSetOtherMode(gfx++, 0x002C0F, 0x00504244);
+                    gDPSetFillColor(gfx++, 0);
+                    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 0);
                 }
             }
         }
-        WGFX1517F08C(gfx++, 0xE7000000, 0);
-        WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFFF3F9);
-        WGFX1517F08C(gfx++, 0xD7000002, 0xFFFFFFFF);
-        WGFX1517F08C(gfx++, 0xFD900000, func_1510D0EC(D_80090298[1], NULL, 3, 0));
-        WGFX1517F08C(gfx++, 0xF5900000, 0x07000000);
-        WGFX1517F08C(gfx++, 0xF3000000, 0x077FF000);
-        WGFX1517F08C(gfx++, 0xF5881000, 0x00098260);
-        WGFX1517F08C(gfx++, 0xF2002002, 0x000FE0FE);
-        WGFX1517F08C(gfx++, 0xEF002CFF, 0x005011C4);
-        gfx = func_1517FB9C(gfx, size, 0x40, 0, 0, arg1);
-        if ((&D_800DDE1C)[arg1] != 0) {
-            WGFX1517F08C(gfx++, 0xE7000000, 0);
-            WGFX1517F08C(gfx++, 0xFD700000, func_1510D0EC(D_80090298[2], NULL, 3, 0));
-            WGFX1517F08C(gfx++, 0xF5700000, 0x07000000);
-            WGFX1517F08C(gfx++, 0xF3000000, 0x077FF000);
-            WGFX1517F08C(gfx++, 0xF5681000, 0x00098260);
-            gfx = func_1517FB9C(gfx, size / 2, 0x40, 0, 0, arg1);
-            if ((&D_800DDE1C)[arg1] == 2) {
-                WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFCF279);
-                WGFX1517F08C(gfx++, 0xFD100000, func_1510D0EC(D_80090298[D_800DDD78[arg1] + 3], NULL, 3, 0));
-                WGFX1517F08C(gfx++, 0xF5100000, 0x07000000);
-                WGFX1517F08C(gfx++, 0xF3000000, 0x073FF000);
-                WGFX1517F08C(gfx++, 0xF5101000, 0x00094250);
-                gfx = func_1517FB9C(gfx, size / 4, 0x20, 32.0f, 28.0f, arg1);
-                gfx = func_1517FB9C(gfx, size / 4, 0x20, 28.0f, 32.0f, arg1);
-                if (D_800DDD78[arg1] < 2) {
-                    D_800DDD78[arg1]++;
+        gDPPipeSync(gfx++);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, TEXEL0, 0, 0, 0, 0, 0, 0, 0, TEXEL0);
+        gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+        gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[1], NULL, 3, 0));
+        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
+        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP, 6,
+                   G_TX_NOLOD);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0xFE, 0xFE);
+        gDPSetOtherMode(gfx++, 0x002CFF, 0x005011C4);
+        // matching: integer 0 offsets; 0.0f literals change the float register allocation
+        gfx = func_1517FB9C(gfx, size, 64, 0, 0, view);
+        if (D_800DDE1C[view] != 0) {
+            gDPPipeSync(gfx++);
+            gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[2], NULL, 3, 0));
+            gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
+            gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP,
+                       6, G_TX_NOLOD);
+            gfx = func_1517FB9C(gfx, size / 2, 64, 0, 0, view);
+            if (D_800DDE1C[view] == 2) {
+                gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
+                                   func_1510D0EC(D_80090298[D_800DDD78[view] + 3], NULL, 3, 0));
+                gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+                gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
+                gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD,
+                           G_TX_CLAMP, 5, G_TX_NOLOD);
+                gfx = func_1517FB9C(gfx, size / 4, 32, 32.0f, 28.0f, view);
+                gfx = func_1517FB9C(gfx, size / 4, 32, 28.0f, 32.0f, view);
+                if (D_800DDD78[view] < 2) {
+                    D_800DDD78[view]++;
                 } else {
-                    D_800DDD78[arg1] = 0;
+                    D_800DDD78[view] = 0;
                 }
             }
         }
     } else {
-        gDPFillRectangle(gfx++, VP15180580.unk2C, VP15180580.unk24, VP15180580.unk30, VP15180580.unk28);
+        gDPFillRectangle(gfx++, gRenderViews[view].left, gRenderViews[view].top, gRenderViews[view].right,
+                         gRenderViews[view].bottom);
     }
-    WGFX1517F08C(gfx++, 0xD9FFFFFF, 1);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER);
     return gfx;
 }
 
@@ -678,12 +657,13 @@ typedef struct Game1AC2F0Player {
     u8 unknown320[0xC];
 } Game1AC2F0Player;
 
-void func_150A7960(void *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern f32 D_800A7260[];
-extern f32 D_800A7270[];
-extern u8 D_800DDD70[];
-extern u8 D_800DDD74[];
-extern u16 D_800DDD80[];
+extern Game1AC2F0Player D_800CC2D0[];
+void func_150A7960(void *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
+extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
+
+/* Updates the iris of every view: scripted irises step through the player's mode states,
+ * tracking irises follow the player, and free irises run at their speed until open or closed. */
 void func_151814FC(void) {
     s32 i;
     Game1AC2F0Player *player;
@@ -691,7 +671,7 @@ void func_151814FC(void) {
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800DDE20[i] != 0) {
 
-            player = &((Game1AC2F0Player *)D_800CC2D0)[i];
+            player = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
             if (player->mode == NULL) {
                 D_800DDDC8[i] = 1.0f;
@@ -751,7 +731,7 @@ void func_151814FC(void) {
             f32 step;
             s32 sign;
 
-            actor = &((Game1AC2F0Player *)D_800CC2D0)[i];
+            actor = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
             if (actor->model != NULL) {
                 u8 *model;
@@ -768,11 +748,11 @@ void func_151814FC(void) {
                 y = actor->y;
                 z = actor->z;
             }
-            prevX = ((f32 *)((u8 *)D_800DDDE8 + i * 8))[0];
-            prevY = ((f32 *)((u8 *)D_800DDDE8 + i * 8))[1];
+            prevX = D_800DDDE8[i][0];
+            prevY = D_800DDDE8[i][1];
             func_1517F814(0, x, y, z, i);
-            x = ((f32 *)((u8 *)D_800DDDE8 + i * 8))[0];
-            y = ((f32 *)((u8 *)D_800DDDE8 + i * 8))[1];
+            x = D_800DDDE8[i][0];
+            y = D_800DDDE8[i][1];
             if (D_800BE9B4 != 0) {
                 rate = 1.0f;
             } else {
@@ -796,8 +776,8 @@ void func_151814FC(void) {
             }
             step *= rate;
             prevY += step;
-            ((f32 *)((u8 *)D_800DDDE8 + i * 8))[0] = prevX;
-            ((f32 *)((u8 *)D_800DDDE8 + i * 8))[1] = prevY;
+            D_800DDDE8[i][0] = prevX;
+            D_800DDDE8[i][1] = prevY;
             if (D_800DDE3C[i] == 1) {
                 if (D_800DDDC8[i] <= 0.9f) {
                     D_800DDD70[i] = 30;
@@ -856,194 +836,217 @@ void func_151814FC(void) {
 }
 
 
-s32 func_15181CC8(s32 arg0) {
-    if (D_800DDDC8[arg0] == 0.0f) {
+/* Returns whether the iris of `view` is fully open. */
+s32 func_15181CC8(s32 view) {
+    if (D_800DDDC8[view] == 0.0f) {
         return 1;
     }
     return 0;
 }
 
-extern f32 D_800A72AC;
-extern f32 D_800DDDE8[][2];
-
-void func_15181D00(s32 arg0, s32 arg1) {
-    if (arg1 == 0) {
-        D_800DDDC8[arg0] = 0.0f;
+/* Sets the iris style of `view`; any style but 0 also closes it to 0.73 around the view centre. */
+void func_15181D00(s32 view, s32 style) {
+    if (style == 0) {
+        D_800DDDC8[view] = 0.0f;
     } else {
-        D_800DDDD8[arg0] = 0.0f;
-        D_800DDDC8[arg0] = D_800A72AC;
-        D_800DDDE8[arg0][0] = 0.0f;
-        D_800DDDE8[arg0][1] = 0.0f;
+        D_800DDDD8[view] = 0.0f;
+        D_800DDDC8[view] = 0.7300000191f;
+        D_800DDDE8[view][0] = 0.0f;
+        D_800DDDE8[view][1] = 0.0f;
     }
-    (&D_800DDE1C)[arg0] = arg1;
+    D_800DDE1C[view] = style;
 }
 
-extern f32 D_800A72B0;
-extern f32 D_800A72B4;
-
-void func_15181D70(s32 arg0) {
-    D_800DDDD8[arg0] = D_800A72B0;
-    D_800DDDC8[arg0] = 0.0f;
-    D_800DDDE8[arg0][0] = 0.0f;
-    D_800DDDE8[arg0][1] = 0.0f;
-    D_800DDE20[arg0] = 1;
+/* Starts closing the scripted iris of `view` from fully open. */
+void func_15181D70(s32 view) {
+    D_800DDDD8[view] = 0.009999999776f;
+    D_800DDDC8[view] = 0.0f;
+    D_800DDDE8[view][0] = 0.0f;
+    D_800DDDE8[view][1] = 0.0f;
+    D_800DDE20[view] = 1;
 }
 
-void func_15181DC8(s32 arg0) {
-    D_800DDDD8[arg0] = 0;
-    D_800DDDC8[arg0] = 0.0f;
-    D_800DDDE8[arg0][0] = 0.0f;
-    D_800DDDE8[arg0][1] = 0.0f;
-    D_800DDE20[arg0] = 0;
+/* Opens and stops the scripted iris of `view`. */
+void func_15181DC8(s32 view) {
+    D_800DDDD8[view] = 0; // matching: an integer 0 gets its own mtc1
+
+    D_800DDDC8[view] = 0.0f;
+    D_800DDDE8[view][0] = 0.0f;
+    D_800DDDE8[view][1] = 0.0f;
+    D_800DDE20[view] = 0;
 }
 
-void func_15181E18(s32 arg0) {
-    u8 *p;
+/* Starts the opening effect of `view`: a fade from black when D_800BE616 is set, otherwise an
+ * iris that tracks the player while it opens. */
+void func_15181E18(s32 view) {
+    FadeColor *color;
 
     if (D_800BE616 != 0) {
-        p = &D_800DDDA0[arg0 * 3];
-        p[0] = 0;
-        p[1] = 0;
-        p[2] = 0;
-        (&D_800DDE28)[arg0] = 0x19;
-        (&D_800DDDB0)[arg0] = 0;
-        ((u8 *)&D_800DDDAC)[arg0] = 0;
-        ((u8 *)&D_800DDDC0)[arg0] = 0;
+        color = &D_800DDDA0[view];
+        color->r = 0;
+        color->g = 0;
+        color->b = 0;
+        D_800DDE28[view] = 25;
+        D_800DDDB0[view] = 0;
+        D_800DDDAC[view] = 0;
+        D_800DDDC0[view] = 0;
     } else {
-        D_800DDE3C[arg0] = 1;
-        D_800DDDC8[arg0] = 1.0f;
-        D_800DDDE8[arg0][0] = 0.0f;
-        D_800DDDE8[arg0][1] = 0.0f;
-        D_800DDDD8[arg0] = D_800A72B4;
+        D_800DDE3C[view] = 1;
+        D_800DDDC8[view] = 1.0f;
+        D_800DDDE8[view][0] = 0.0f;
+        D_800DDDE8[view][1] = 0.0f;
+        D_800DDDD8[view] = -0.00400000019f;
     }
 }
 
-typedef struct {
-    char pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    char padC[0x18];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x14C];
-} Struct15181EE0;
-
+extern s32 D_800902C8; // texture id: top bar edge
+extern s32 D_800902CC; // texture id: bottom bar edge
+// matching: 0.7f read from rodata; a literal would let IDO fold 1.0f - 0.7f
 extern f32 D_800A72C0;
-extern s32 D_800902C8;
-extern s32 D_800902CC;
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
+/* Draws the cutscene letterbox over view 0: black bars that slide in from the top and bottom by
+ * *D_800DDE18 percent, with soft textured inner edges. */
 Gfx *func_15181EE0(Gfx *gfx) {
     s16 yl;
     s16 yh;
-    s32 pad1;
+    s32 pad; // matching: unused stack slot
     s16 top;
     s16 left;
     s16 bottom;
     s16 right;
-    s32 y1;
-    s32 y2;
+    s32 topBarEnd;
+    s32 bottomBarStart;
     s32 xl;
     s32 xh;
     s32 dsdx;
     s32 dtdy;
-    f32 t;
-    f32 alpha;
+    f32 travel;
+    f32 amount;
 
-    if (D_800DDE18 == 0) {
+    if (D_800DDE18 == NULL) {
         return gfx;
     }
-    alpha = *(f32 *)D_800DDE18;
-    alpha *= 0.009999999776f;
-    alpha = (alpha < 0.0f) ? 0.0f : ((alpha > 1.0f) ? 1 : alpha);
-    if (alpha == 0.0f) {
+    amount = *D_800DDE18;
+    amount *= 0.009999999776f;
+    // matching: an integer 1 (not 1.0f) in the clamp keeps 1.0f out of a register
+    amount = (amount < 0.0f) ? 0.0f : ((amount > 1.0f) ? 1 : amount);
+    if (amount == 0.0f) {
         return gfx;
     }
     gDPPipeSync(gfx++);
     gDPSetFillColor(gfx++, 0x10001);
-    gSPClearGeometryMode(gfx++, 0x1F0001);
-    gSPSetGeometryMode(gfx++, 0x200004);
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPSetOtherMode(gfx++, 0x302C0F, 4);
-    top = ((Struct15181EE0 *)D_800BE628)->unk24;
-    left = ((Struct15181EE0 *)D_800BE628)->unk2C;
-    bottom = ((Struct15181EE0 *)D_800BE628)->unk28;
-    right = ((Struct15181EE0 *)D_800BE628)->unk30;
-    t = ((Struct15181EE0 *)D_800BE628)->unk8 * 0.6999999881f;
-    t += 30.0f;
-    t *= alpha;
-    y1 = (((Struct15181EE0 *)D_800BE628)->unk24 - 30.0f) + t;
-    gfx = func_1517F9F4(gfx, left, top, right, (s16)y1, 0);
-    t = ((Struct15181EE0 *)D_800BE628)->unk8 * (1.0f - D_800A72C0);
-    t += 30.0f;
-    t *= alpha;
-    y2 = (((Struct15181EE0 *)D_800BE628)->unk28 + 30.0f) - t;
-    gfx = func_1517F9F4(gfx, left, (s16)y2, right, bottom, 0);
+    top = gRenderViews->top;
+    left = gRenderViews->left;
+    bottom = gRenderViews->bottom;
+    right = gRenderViews->right;
+    travel = gRenderViews->height * 0.6999999881f;
+    travel += 30.0f;
+    travel *= amount;
+    topBarEnd = (gRenderViews->top - 30.0f) + travel;
+    gfx = func_1517F9F4(gfx, left, top, right, (s16)topBarEnd, 0);
+    travel = gRenderViews->height * (1.0f - D_800A72C0);
+    travel += 30.0f;
+    travel *= amount;
+    bottomBarStart = (gRenderViews->bottom + 30.0f) - travel;
+    gfx = func_1517F9F4(gfx, left, (s16)bottomBarStart, right, bottom, 0);
+
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, 0, G_ON);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPSetOtherMode(gfx++, 0x002CFF, 0x5011C4);
-    gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFFF3F9);
-    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902C8, 0, 3, 0));
+    gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, TEXEL0, 0, 0, 0, 0, 0, 0, 0, TEXEL0);
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902C8, NULL, 3, 0));
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
-    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, 0, G_TX_CLAMP, 7, 0);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, G_TX_NOLOD, G_TX_CLAMP, 7,
+               G_TX_NOLOD);
     gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0x1FE, 0xFE);
     dtdy = 0x222;
-    dsdx = (128.0f / ((Struct15181EE0 *)D_800BE628)->unk4) * 1024.0f;
-    yl = y1;
-    yh = y1 + 30;
+    dsdx = (128.0f / gRenderViews->width) * 1024.0f;
+    yl = topBarEnd;
+    yh = topBarEnd + 30;
     xl = left;
     xh = right;
     gSPScisTextureRectangle(gfx++, xl << 2, yl << 2, xh << 2, yh << 2, G_TX_RENDERTILE, 0, 0, dsdx, dtdy);
-    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902CC, 0, 3, 0));
+
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902CC, NULL, 3, 0));
     gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
-    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, 0, G_TX_CLAMP, 7, 0);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, G_TX_NOLOD, G_TX_CLAMP, 7,
+               G_TX_NOLOD);
     gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0x1FE, 0xFE);
-    yl = y2 - 30;
-    yh = y2;
+    yl = bottomBarStart - 30;
+    yh = bottomBarStart;
     gSPScisTextureRectangle(gfx++, xl << 2, yl << 2, xh << 2, yh << 2, G_TX_RENDERTILE, 0, 0, dsdx, dtdy);
-    gSPSetGeometryMode(gfx++, 1);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER);
     return gfx;
 }
 
-void func_15182670(s32 arg0, s32 arg1, s32 arg2, s32 arg3, volatile s16 arg4, u8 arg5, u8 arg6, s32 arg7) {
-    struct {
-        u8 unk0;
-        u8 unk1;
-        u8 unk2;
-        u8 unk3;
-        u8 unk4;
-        u8 pad5;
-        s16 unk6;
-        s32 pad8;
-    } sp34;
-    struct260 *temp_v0;
+/* Effect data of a colour flash spawned by func_15182670. */
+typedef struct {
+    /* 0x0 */ u8 r;
+    /* 0x1 */ u8 g;
+    /* 0x2 */ u8 b;
+    /* 0x3 */ u8 alpha;
+    /* 0x4 */ u8 view;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ s16 alphaStep; // alpha per remaining frame
+} FlashData;
 
-    if (arg4 > 0) {
-        sp34.unk0 = ((u8 *)&arg0)[3];
-        sp34.unk1 = ((u8 *)&arg1)[3];
-        sp34.unk2 = ((u8 *)&arg2)[3];
-        sp34.unk3 = ((u8 *)&arg3)[3];
-        sp34.unk4 = arg5;
-        sp34.unk6 = ((u8 *)&arg3)[3] / arg4;
+typedef struct {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 timer; // frames left
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ FlashData data;
+} FlashEffect;
 
-        temp_v0 = func_15149130(arg4, -1, 0x39, 3, 1, 0, (struct37 *)0x8, arg6, arg7);
-        if (temp_v0 != NULL) {
-            memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 8);
+void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
+void *memcpy(void *, const void *, u32);
+
+/* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over
+ * `duration` frames. */
+void func_15182670(r, g, b, alpha, duration, view, owner, kind)
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 alpha;
+    volatile s16 duration; // matching: the original reloads duration from its stack slot
+    u8 view;
+    u8 owner;
+    s32 kind;
+{
+    s32 pad; // matching: unused stack slot
+    FlashData data;
+    FlashEffect *effect;
+
+    if (duration > 0) {
+        data.r = r;
+        data.g = g;
+        data.b = b;
+        data.alpha = alpha;
+        data.view = view;
+        data.alphaStep = alpha / duration;
+
+        effect = func_15149130(duration, -1, 0x39, 3, 1, 0, sizeof(FlashData), owner, kind);
+        if (effect != NULL) {
+            memcpy(&effect->data, &data, sizeof(FlashData));
         }
     }
 }
 
-void func_15182748(ColorBlendTask *arg0) {
-    arg0->field_0x2B = arg0->field_0x2E * arg0->field_0x0E;
+/* Effect update: the flash alpha falls with the remaining time. */
+void func_15182748(FlashEffect *effect) {
+    effect->data.alpha = effect->data.alphaStep * effect->timer;
 }
 
-s32 func_15182768(s32 arg0, s32 arg1, s16 arg2) {
-    u8 *p = (u8 *)(*(s32 *)&arg1 + 0x28);
-    if (arg2 == *(u8 *)(*(s32 *)&arg1 + 0x2C)) {
-        arg0 = func_1517F08C(arg0, p[3], p[0], p[1], p[2], p[4]);
+/* Effect draw: fills the flash's view. */
+Gfx *func_15182768(Gfx *gfx, FlashEffect *effect, s16 view) {
+    FlashData *data = &effect->data;
+
+    if (view == data->view) {
+        gfx = func_1517F08C(gfx, data->alpha, data->r, data->g, data->b, data->view);
     }
-    return arg0;
+    return gfx;
 }

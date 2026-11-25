@@ -7,9 +7,7 @@
 #include "variables.h"
 #undef D_800D3098
 
-extern f32 D_800A5698;
-extern f32 D_800A5694;
-extern f32 D_800A569C;
+/* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern s16 D_800DD1C0;
 extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
@@ -30,7 +28,8 @@ extern s32 D_800DD214;
 extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern u8 D_800C3E90;
-extern u8 D_8008A160[];
+extern u8 D_8008A160[]; /* palettes of four RGB triples */
+/* Debug breadcrumbs of func_15143134. */
 extern s32 D_800DCA00;
 extern Mtx *D_800DCA04;
 extern f32 D_800DCA08;
@@ -41,20 +40,7 @@ struct127 *func_15083E90();
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_15142314(Mtx *, s32, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1514306C(s32, s32, s32, u8);
-
-struct unk151420F8 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-};
-
-extern struct unk151420F8 D_800A5200;
-s32 func_150A2AEC(s32, s32, struct unk151420F8 *, s32);
-
+s32 func_1514306C(s32 *, s32, s32, u8);
 
 void func_15141970(struct37 *arg0) {
     func_1514EDF0(arg0, arg0->unk2C);
@@ -68,87 +54,124 @@ void func_151419B0(void *arg0) {
     func_15141970(arg0);
 }
 
-struct A1_151419D0 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-};
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ union {
+        s32 w;
+        u8 b;
+    } unk4;
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 unk9;
+} Msg151419D0;
 
-struct B_151419D0 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-};
+/* The block at 0x28 of the receiving object. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8;
+} Link151419D0;
 
 void func_1516972C(struct102 *arg0);
 
-void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
-    struct B_151419D0 *p = (struct B_151419D0 *)((u8 *)arg0 + 0x28);
-    s32 v;
-    if (arg2 == 0) {
-        v = arg1->unk0;
-        if ((v == p->unk4) ||
-            (p->unk8 == *(u8*)&arg1->unk4)) {
-            func_1516972C(arg0);
+/* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
+void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
+    Link151419D0 *link = (Link151419D0 *)&obj->unk28;
+    s32 first;
+
+    if (msgType == 0) {
+        first = msg->unk0;
+        if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
+            func_1516972C(obj);
         }
-    } else if (arg2 == 0x2D) {
-        if (p->unk4 == arg1->unk0) {
-            p->unk4 = arg1->unk4;
-            p->unk8 = arg1->unk9;
-        } else if (p->unk4 == arg1->unk4) {
-            p->unk4 = arg1->unk0;
-            p->unk8 = arg1->unk8;
+    } else if (msgType == 0x2D) {
+        if (link->unk4 == msg->unk0) {
+            link->unk4 = msg->unk4.w;
+            link->unk8 = msg->unk9;
+        } else if (link->unk4 == msg->unk4.w) {
+            link->unk4 = msg->unk0;
+            link->unk8 = msg->unk8;
         }
     }
 }
-s32 func_15141C0C(void *actor);
+
+/* Payload copied into an attached effect (see func_15141E38). */
+typedef struct {
+    /* 0x00 */ s32 handler;    /* index into D_8008A0B4 */
+    /* 0x04 */ struct127 *owner;
+    /* 0x08 */ u8 ownerId;     /* owner->unique_id */
+} EffectInfo;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 duration;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EffectInfo info;
+} AttachedEffect;
+
+/* Node of the list an actor keeps at 0x2F4 (see func_1514EC1C / func_1514ECE0). */
+typedef struct AttachNode {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ AttachedEffect *effect;
+    /* 0x14 */ struct AttachNode *next;
+} AttachNode;
+
+/* struct127 (shared header) leaves the attachment list head at 0x2F4 inside pad2F0. */
+#define ACTOR_ATTACHMENTS(actor) (*(AttachNode **)&(actor)->pad2F0[4])
+
+/* List tag of the attached timed effects. */
+#define ATTACH_TIMED_EFFECT 0x1A
+
+typedef s32 (*EffectSelector)(s32, struct127 *);
+typedef void (*EffectHandler)(struct127 *, s32, s32);
+
+s32 func_15141C0C(struct127 *actor);
 s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
-void func_15141E38(void *arg0, s32 arg1);
-s32 func_1514ECE0(void *, s16, void *);
+void func_15141E38(struct127 *actor, s32 handler);
+s32 func_1514ECE0(AttachNode *, s16, AttachNode **);
 
-typedef void (*Fn15141A7C)(void *, s32, s32);
-
-void func_15141A7C(void *arg0, s32 arg1) {
-    s32 kind;
-    s32 idx;
+/* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
+void func_15141A7C(struct127 *actor, s32 arg1) {
+    s32 selector;
+    s32 handler;
 
     if (D_800BE616 == 0) {
-        kind = func_15141C0C(arg0);
-        if (D_8008A084[kind] != 0) {
-            idx = ((s32 (*)(s32, void *))D_8008A084[kind])(func_15141CC0(func_1510F8CC(*(s32 *)((u8 *)arg0 + 0x184))), arg0);
-            if (idx != -1) {
-                if (D_8008A0B4[idx].unk0 != 0) {
-                    if (D_8008A0B4[idx].unk4 > 0) {
-                        func_15141E38(arg0, idx);
+        selector = func_15141C0C(actor);
+        if (D_8008A084[selector] != 0) {
+            handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->unk184)), actor);
+            if (handler != -1) {
+                if (D_8008A0B4[handler].unk0 != 0) {
+                    if (D_8008A0B4[handler].unk4 > 0) {
+                        func_15141E38(actor, handler);
                     } else {
-                        (*(Fn15141A7C *)&D_8008A0B4[idx].unk0)(arg0, arg1, 0);
+                        ((EffectHandler)D_8008A0B4[handler].unk0)(actor, arg1, 0);
                     }
                 }
             }
         }
         {
-        void *node;
-        node = *(void **)((u8 *)arg0 + 0x2F4);
-        if (func_1514ECE0(node, 0x1A, &node) != 0) {
+        AttachNode *node;
+        node = ACTOR_ATTACHMENTS(actor);
+        if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
-                void *sub;
-                sub = *(void **)((u8 *)node + 0x10);
-                if (D_8008A0B4[*(s32 *)((u8 *)sub + 0x28)].unk0 != 0) {
-                    (*(Fn15141A7C *)&D_8008A0B4[*(u32 *)((u8 *)sub + 0x28)].unk0)(arg0, arg1, *(s16 *)((u8 *)sub + 0xE));
+                AttachedEffect *effect;
+                effect = node->effect;
+                if (D_8008A0B4[effect->info.handler].unk0 != 0) {
+                    // matching: the u32 view makes IDO reload the index instead of reusing it
+                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->duration);
                 }
-                node = *(void **)((u8 *)node + 0x14);
-            } while (func_1514ECE0(node, 0x1A, &node) != 0);
+                node = node->next;
+            } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
         }
         }
     }
 }
-// requires jump table
-s32 func_15141C0C(void *actor) {
-    switch (*(u8 *)((u8 *)actor + 4)) {
+
+/* Maps an actor's model id to its effect selector index (11: none). */
+s32 func_15141C0C(struct127 *actor) {
+    switch (actor->id) {
     case 121:
-        return 0xA;
+        return 10;
     case 33:
         return 9;
     case 123:
@@ -178,10 +201,11 @@ s32 func_15141C0C(void *actor) {
     case 75:
         return 4;
     default:
-        return 0xB;
+        return 11;
     }
 }
-s32 func_15141CC0(u32 arg0) {
+/* Picks an effect variant from the current world (D_800BE9F0) and the given type. */
+s32 func_15141CC0(u32 type) {
     if (D_800BE9F0 == 0x2F) {
         return 6;
     }
@@ -194,7 +218,7 @@ s32 func_15141CC0(u32 arg0) {
     if (D_800BE9F0 == 0x19) {
         return 5;
     }
-    switch (arg0) {
+    switch (type) {
     case 10:
         return 0;
     case 7:
@@ -222,152 +246,144 @@ s32 func_15141CC0(u32 arg0) {
     }
 }
 
-void func_15141E38(void *arg0, s32 arg1);
-
-void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
-    if ((arg1 < 12) && (arg1 >= 0) &&
-        (arg2 < 20) && (arg2 >= 0) &&
+/* Attaches timed effect `handler` to the actor when both indices are valid and it has a duration. */
+void func_15141DA4(void *actor, s32 selector, s32 handler) {
+    if ((selector < 12) && (selector >= 0) &&
+        (handler < 20) && (handler >= 0) &&
         (D_800BE616 == 0) &&
-        (D_8008A084[arg1] != 0) && (arg2 != -1)) {
-        if ((D_8008A0B4[arg2].unk0 != 0) && (D_8008A0B4[arg2].unk4 > 0)) {
-            func_15141E38(arg0, arg2);
+        (D_8008A084[selector] != 0) && (handler != -1)) {
+        if ((D_8008A0B4[handler].unk0 != 0) && (D_8008A0B4[handler].unk4 > 0)) {
+            func_15141E38(actor, handler);
         }
     }
 }
 
-typedef struct {
-    s32 id;
-    void *obj;
-    u8 b;
-} Info15141E38;
-
-s32 func_1514ECE0(void *, s16, void *);
 s32 func_1514EC1C(s32, s32, s16);
 void *memcpy(void *, const void *, u32);
 
-void func_15141E38(void *arg0, s32 arg1) {
-    void *found;
-    void *node;
-    s32 i;
+/* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
+void func_15141E38(struct127 *actor, s32 handler) {
+    AttachNode *found;
+    AttachNode *node;
+    s32 pad; // matching: unused stack slot (keeps `info` at sp+0x40)
 
     found = NULL;
-    node = *(void **)((u8 *)arg0 + 0x2F4);
-    if (func_1514ECE0(node, 0x1A, &node) != 0) {
+    node = ACTOR_ATTACHMENTS(actor);
+    if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
-            void *sub;
-            sub = *(void **)((u8 *)node + 0x10);
-            if (arg1 == *(s32 *)((u8 *)sub + 0x28)) {
+            AttachedEffect *effect;
+            effect = node->effect;
+            if (handler == effect->info.handler) {
                 found = node;
-                *(s16 *)((u8 *)sub + 0xE) = D_8008A0B4[arg1].unk4;
+                effect->duration = D_8008A0B4[handler].unk4;
             }
-            node = *(void **)((u8 *)node + 0x14);
-        } while (func_1514ECE0(node, 0x1A, &node) != 0);
+            node = node->next;
+        } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
     }
     if (found == NULL) {
-        struct260 *ret;
-        Info15141E38 info;
-        info.id = arg1;
-        info.obj = arg0;
-        info.b = *(u8 *)((u8 *)arg0 + 0x3B);
-        ret = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, (struct37 *)0xC, 0xFF, 1);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x28, &info, sizeof(info));
-            func_1514EC1C((s32)ret, (s32)arg0, 0x1A);
+        AttachedEffect *effect;
+        EffectInfo info;
+        info.handler = handler;
+        info.owner = actor;
+        info.ownerId = actor->unique_id;
+        effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].unk4, -1, -1, -1, 1, 50, (struct37 *)0xC, 0xFF, 1);
+        if (effect != NULL) {
+            memcpy(&effect->info, &info, sizeof(info));
+            func_1514EC1C((s32)effect, (s32)actor, ATTACH_TIMED_EFFECT);
         }
     }
 }
-void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, u8 arg3, struct157 *arg4, u8 arg5) {
-    struct157 tmp;
-    f32 temp_f2;
-    s32 phi_v0;
 
-    tmp.unk6 = arg0;
-    tmp.unk7 = 0;
-    tmp.unk0 = 0x6F701;
-    tmp.unk4 = (func_150ADA20() % 61U) + 100;
-    tmp.unk8 = 0;
-    tmp.unkC = 0;
-    tmp.unk10 = (func_150ADA20() & 0x7F) + 128;
-    *(u8 *)&tmp.unk11 = 0xFF;
-    *(u8 *)&tmp.unk12 = 0xFF;
-    *(u8 *)&tmp.unk13 = 0xFF;
-    *(u8 *)&tmp.unk14 = 0xFF;
-    *(u8 *)&tmp.unk15 = 0xFF;
-    tmp.unk18 = 0x3B0002;
-    tmp.unk16 = 0;
-    tmp.unk17 = 7;
-    *(u8 *)&tmp.unk20 = 0xFF;
-    tmp.unk1C = arg1->unk18;
-    tmp.unk22 = 0x28;
-    tmp.unk24 = 6;
+/* Particle spawn packet for func_1513C650 (struct157 layout with unsigned colour bytes). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[6];
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Packet15141F78;
 
-    temp_f2 = ((func_150ADA68() * 5.0f) + 10.0f) * arg2;
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ u8 unk4[0x14];
+    /* 0x18 */ s32 unk18;
+} Source15141F78;
+
+/* Spawns a burst of particles of the given kind, sized by `scale`. */
+void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, struct17 *pos, u8 arg5) {
+    Packet15141F78 packet;
+    f32 size;
+    s32 flag;
+
+    packet.unk6 = kind;
+    packet.unk7 = 0;
+    packet.unk0 = 0x6F701;
+    packet.unk4 = (func_150ADA20() % 61U) + 100;
+    packet.unk8 = 0;
+    packet.unkC = 0;
+    packet.color[0] = (func_150ADA20() & 0x7F) + 128;
+    packet.color[1] = 0xFF;
+    packet.color[2] = 0xFF;
+    packet.color[3] = 0xFF;
+    packet.color[4] = 0xFF;
+    packet.color[5] = 0xFF;
+    packet.unk18 = 0x3B0002;
+    packet.unk16 = 0;
+    packet.unk17 = 7;
+    packet.unk20 = 0xFF;
+    packet.unk1C = src->unk18;
+    packet.unk22 = 40;
+    packet.unk24 = 6;
+
+    size = ((func_150ADA68() * 5.0f) + 10.0f) * scale;
     if (arg5 == 2) {
-        phi_v0 = 1;
+        flag = 1;
     } else {
-        phi_v0 = 0;
+        flag = 0;
     }
 
-    func_1513C650((s32)&tmp, 0, 0, (s32)&arg1->unk4, *(f32 *)&arg4->unk0, *(f32 *)&arg1->unk0, *(f32 *)&arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
+    func_1513C650((s32)&packet, 0, 0, (s32)src->unk4, pos->unk0, src->unk0, pos->unk8, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
-// NON-MATCHING: need to determine arguments
-// void func_1513C650(s32, s32, s32, u16, s32, s32, s32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
-// s32 func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
-// void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, s32 arg3, struct157 *arg4, u8 arg5) {
-//     struct157 tmp;
-//     f32 temp_f2;
-//     s32 phi_v0;
-//
-//     tmp.unk6 = arg0;
-//     tmp.unk7 = 0;
-//     tmp.unk0 = 0x6F701;
-//     tmp.unk4 = (func_150ADA20() % 61U) + 100;
-//     tmp.unk8 = 0;
-//     tmp.unkC = 0;
-//     tmp.unk10 = (func_150ADA20() & 0x7F) + 128;
-//     tmp.unk11 = 0xFF;
-//     tmp.unk12 = 0xFF;
-//     tmp.unk13 = 0xFF;
-//     tmp.unk14 = 0xFF;
-//     tmp.unk15 = 0xFF;
-//     tmp.unk18 = 0x3B0002;
-//     tmp.unk16 = 0;
-//     tmp.unk17 = 7;
-//     tmp.unk20 = 0xFF;
-//     tmp.unk1C = arg1->unk18;
-//     tmp.unk22 = 0x28;
-//     tmp.unk24 = 6;
-//     temp_f2 = ((func_150ADA68() * 5.0f) + 10.0f) * arg2;
-//     // --- matching to here ---
-//     if (arg5 == 2) {
-//         phi_v0 = 1;
-//     } else {
-//         phi_v0 = 0;
-//     }
-//     func_1513C650(&tmp, 0, 0, arg1->unk4, arg4->unk0, arg1->unk0, arg4->unk8, temp_f2, temp_f2, arg3, phi_v0, 3, 1, 0, 0xFF, 1);
-// }
 
-s32 func_151420F8(s32 arg0) {
-    struct unk151420F8 sp18;
+/* Template copied onto the stack for func_150A2AEC. */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+} Args151420F8;
 
-    sp18 = D_800A5200;
-    if (func_150A2AEC((arg0 - (s32)D_800CC2D0) / (s32)sizeof(struct127), 6, &sp18, arg0) == -1) {
+extern Args151420F8 D_800A5200;
+s32 func_150A2AEC(s32, s32, Args151420F8 *, s32);
+
+s32 func_151420F8(s32 actor) {
+    Args151420F8 args;
+
+    args = D_800A5200;
+    if (func_150A2AEC((actor - (s32)D_800CC2D0) / (s32)sizeof(struct127), 6, &args, actor) == -1) {
         return 0;
     }
     return 1;
 }
-struct vec15142180 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-};
-
-struct conker15142180 {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ struct vec15142180 unk08;
+/* Parameter block for func_15153F18. */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ struct17 pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -387,43 +403,43 @@ struct conker15142180 {
     /* 0x44 */ s16 unk44;
     /* 0x46 */ s16 unk46;
     /* 0x48 */ s32 unk48;
-};
+} Params15153F18;
 
-extern f32 D_800A5470;
-extern f32 D_800A5474;
 
-void func_15153F18(struct conker15142180 *a0, struct vec15142180 *a1, s32 a2, s32 a3, s32 a4);
+void func_15153F18(Params15153F18 *params, struct17 *pos, s32, s32, s32);
 
-void func_15142180(u8 arg0, struct vec15142180 *arg1, s32 arg2, f32 arg3, f32 arg4) {
-    struct conker15142180 sp24;
+/* Spawns the func_15153F18 effect of the given kind at `pos`. */
+void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
+    Params15153F18 params;
 
-    sp24.unk08 = *arg1;
-    sp24.unk2C = 3;
-    sp24.unk2E = 3;
-    sp24.unk02 = 0xFF;
-    sp24.unk04 = -0x19;
-    sp24.unk06 = 0xA;
-    sp24.unk14 = 2.5f * arg3;
-    sp24.unk18 = (1.0f + 1.0f) * arg3;
-    sp24.unk1C = D_800A5470;
-    sp24.unk20 = D_800A5474;
-    sp24.unk24 = 3.0f * arg4;
-    sp24.unk28 = 3.5f * arg4;
-    sp24.unk00 = 0;
-    sp24.unk30 = 3;
-    sp24.unk32 = 1;
-    sp24.unk34 = 9;
-    sp24.unk36 = 0xF;
-    sp24.unk38 = 0xB4;
-    sp24.unk3A = 0x4B;
-    sp24.unk40 = 0.0f;
-    sp24.unk44 = 0xC;
-    sp24.unk46 = 0x15;
-    sp24.unk48 = arg2;
-    sp24.unk3C = arg0;
-    func_15153F18(&sp24, &sp24.unk08, 0, 0xFF, 1);
+    params.pos = *pos;
+    params.unk2C = 3;
+    params.unk2E = 3;
+    params.unk2 = 255;
+    params.unk4 = -25;
+    params.unk6 = 10;
+    params.unk14 = 2.5f * scaleA;
+    params.unk18 = (1.0f + 1.0f) * scaleA; // matching: folds to 2.0f but avoids IDO turning 2.0f * x into x + x
+    params.unk1C = 0.1080000028f;
+    params.unk20 = 0.2050000131f;
+    params.unk24 = 3.0f * scaleB;
+    params.unk28 = 3.5f * scaleB;
+    params.unk0 = 0;
+    params.unk30 = 3;
+    params.unk32 = 1;
+    params.unk34 = 9;
+    params.unk36 = 15;
+    params.unk38 = 180;
+    params.unk3A = 75;
+    params.unk40 = 0.0f;
+    params.unk44 = 12;
+    params.unk46 = 21;
+    params.unk48 = arg2;
+    params.unk3C = kind;
+    func_15153F18(&params, &params.pos, 0, 0xFF, 1);
 }
 
+/* Interpolation callbacks: the midpoint of arg2/arg3, or arg4 unchanged. */
 s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return (arg3 + arg2) >> 1;
 }
@@ -436,94 +452,122 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-void func_15142314(Mtx *arg0, s32 arg1, f32 *arg2) {
-    u8 *p;
+/* Fixed-point Mtx: integer halves of all elements, then the fraction halves. */
+typedef struct {
+    s16 whole[4][4];
+    s16 frac[4][4];
+} MtxFixed;
 
-    p = ((u8 *)arg0) + (arg1 << 6);
+/* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
+typedef union {
+    MtxFixed fx;
+    f32 mf[4][4];
+} MtxView;
+
+/* Copies the translation of mtx[index] to out (fixed-point when D_800C3E90 is set). */
+void func_15142314(Mtx *mtx, s32 index, f32 *out) {
+    MtxView *m;
+
+    // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
+    m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
     if (D_800C3E90 != 0) {
-        p = ((u8 *)arg0) + (arg1 << 6);
-        do {
-            f32 scale = 0.000015258789f;
-            arg2[0] = (((f32)((*((s16 *)(p + 0x18))) << 0x10)) + ((f32)(*((s16 *)(p + 0x38))))) * scale;
-            arg2[1] = (((f32)((*((s16 *)(p + 0x1A))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3A))))) * scale;
-            arg2[2] = (((f32)((*((s16 *)(p + 0x1C))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3C))))) * scale;
-        } while (0);
+        // matching: the original recomputes m here; IDO keeps both computations
+        m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
+        {
+            f32 scale = 1.0f / 65536.0f;
+            out[0] = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
+            out[1] = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
+            out[2] = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
+        }
         return;
     }
-    arg2[0] = *((f32 *)(p + 0x30));
-    arg2[1] = *((f32 *)(p + 0x34));
-    arg2[2] = *((f32 *)(p + 0x38));
+    out[0] = m->mf[3][0];
+    out[1] = m->mf[3][1];
+    out[2] = m->mf[3][2];
 }
-f32 func_151423D8(u8 arg0) {
-    s32 temp_v1;
-    s32 temp_v0 = arg0;
-    u16 temp_t0;
-    if (temp_v0 & 0x40) {
-        temp_v1 = 0x40 - (temp_v0 & 0x3F);
+
+/* Cosine of a binary angle (256 steps per turn), from the quarter-wave table D_8009A220. */
+f32 func_151423D8(u8 angle) {
+    s32 index;
+    s32 a = angle;
+    u16 quadrant;
+
+    if (a & 0x40) {
+        index = 0x40 - (a & 0x3F);
     } else {
-        temp_v1 = temp_v0 & 0x3F;
+        index = a & 0x3F;
     }
-    temp_t0 = temp_v0 & 0xC0;
-    if ((temp_t0 == 0) || (temp_t0 == 0xC0)) {
-        return D_8009A220[temp_v1];
+    quadrant = a & 0xC0;
+    if ((quadrant == 0) || (quadrant == 0xC0)) {
+        return D_8009A220[index];
     }
-    return -D_8009A220[temp_v1];
+    return -D_8009A220[index];
 }
-struct127 *func_15142444(u8 arg0, struct127 *arg1) {
-    s32 temp_v0;
-    struct127 *ret;
 
-    temp_v0 = arg0;
-    if (temp_v0 == 0xFF) {
-        if (arg1->unk1D4 != NULL) {
-            return arg1;
+/* Resolves an actor unique id (0xFF: `self`) to an actor with a model (unk1D4), or NULL. */
+struct127 *func_15142444(u8 uniqueId, struct127 *self) {
+    s32 id;
+    struct127 *actor;
+
+    id = uniqueId;
+    if (id == 0xFF) {
+        if (self->unk1D4 != NULL) {
+            return self;
         }
         return NULL;
     }
 
-    if ((arg1 != NULL) && (arg1->interaction_state != 0) && (temp_v0 == arg1->unique_id)) {
-        if (arg1->unk1D4 != NULL) {
-            return arg1;
+    if ((self != NULL) && (self->interaction_state != 0) && (id == self->unique_id)) {
+        if (self->unk1D4 != NULL) {
+            return self;
         }
         return NULL;
     }
 
-    ret = func_15083E90();
-    if ((ret != NULL) && (ret->unk1D4 != NULL)) {
-        return ret;
+    actor = func_15083E90();
+    if ((actor != NULL) && (actor->unk1D4 != NULL)) {
+        return actor;
     }
     return NULL;
 }
 void func_150A8050(f32 (*)[4], f32, f32, f32);
 
-void func_151424F4(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
-    f32 sp28[4][4];
+/*
+ * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled
+ * by scaleXZ and row 1 by scaleY, columns by (sx, sy, sz).
+ */
+void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
+                   f32 x, f32 y, f32 z) {
+    f32 mf[4][4];
 
-    func_150A8050(&sp28, arg3, arg4, arg5);
-    sp28[3][0] = arg9;
-    sp28[3][1] = arg10;
-    sp28[3][2] = arg11;
-    sp28[0][0] *= arg6 * arg1;
-    sp28[0][1] *= arg7 * arg1;
-    sp28[0][2] *= arg8 * arg1;
-    sp28[1][0] *= arg6 * arg2;
-    sp28[1][1] *= arg7 * arg2;
-    sp28[1][2] *= arg8 * arg2;
-    sp28[2][0] *= arg6 * arg1;
-    sp28[2][1] *= arg7 * arg1;
-    sp28[2][2] *= arg8 * arg1;
-    guMtxF2L(&sp28, arg0);
+    func_150A8050(&mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= sx * scaleXZ;
+    mf[0][1] *= sy * scaleXZ;
+    mf[0][2] *= sz * scaleXZ;
+    mf[1][0] *= sx * scaleY;
+    mf[1][1] *= sy * scaleY;
+    mf[1][2] *= sz * scaleY;
+    mf[2][0] *= sx * scaleXZ;
+    mf[2][1] *= sy * scaleXZ;
+    mf[2][2] *= sz * scaleXZ;
+    guMtxF2L(&mf, out);
 }
-void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
+
+/* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
+void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
+                   f32 atX, f32 atY, f32 atZ) {
     f32 mf[4][4];
     f32 inv;
     f32 fx, fy, fz;
     f32 ux, uy, uz;
     f32 rx, rz;
 
-    fx = arg9 - arg6;
-    fy = arg10 - arg7;
-    fz = arg11 - arg8;
+    fx = atX - x;
+    fy = atY - y;
+    fz = atZ - z;
     inv = 1.0f / sqrtf(fx * fx + fy * fy + fz * fz);
     fx *= inv;
     fy *= inv;
@@ -537,175 +581,202 @@ void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     uy = fz * rx - fx * rz;
     uz = -fy * rx;
     inv = 1.0f / sqrtf(ux * ux + uy * uy + uz * uz);
-    mf[0][0] = rx * arg3 * arg1;
-    mf[1][0] = ux * inv * arg3 * arg2;
-    mf[2][0] = fx * arg3 * arg1;
-    mf[3][0] = arg6;
+    mf[0][0] = rx * sx * scaleXZ;
+    mf[1][0] = ux * inv * sx * scaleY;
+    mf[2][0] = fx * sx * scaleXZ;
+    mf[3][0] = x;
     mf[0][1] = 0.0f;
-    mf[1][1] = uy * inv * arg4 * arg2;
-    mf[2][1] = fy * arg4 * arg1;
-    mf[3][1] = arg7;
-    mf[0][2] = rz * arg5 * arg1;
-    mf[1][2] = uz * inv * arg5 * arg2;
-    mf[2][2] = fz * arg5 * arg1;
-    mf[3][2] = arg8;
+    mf[1][1] = uy * inv * sy * scaleY;
+    mf[2][1] = fy * sy * scaleXZ;
+    mf[3][1] = y;
+    mf[0][2] = rz * sz * scaleXZ;
+    mf[1][2] = uz * inv * sz * scaleY;
+    mf[2][2] = fz * sz * scaleXZ;
+    mf[3][2] = z;
     mf[0][3] = 0.0f;
     mf[1][3] = 0.0f;
     mf[2][3] = 0.0f;
     mf[3][3] = 1.0f;
-    guMtxF2L(mf, arg0);
+    guMtxF2L(mf, out);
 }
-void func_15142838(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
-    f32 mtx[4][4];
 
-    func_150A8050(mtx, arg3, arg4, arg5);
-    mtx[3][0] = arg6;
-    mtx[3][1] = arg7;
-    mtx[3][2] = arg8;
-    mtx[0][0] *= arg1;
-    mtx[0][1] *= arg1;
-    mtx[0][2] *= arg1;
-    mtx[1][0] *= arg2;
-    mtx[1][1] *= arg2;
-    mtx[1][2] *= arg2;
-    mtx[2][0] *= arg1;
-    mtx[2][1] *= arg1;
-    mtx[2][2] *= arg1;
-    guMtxF2L(mtx, arg0);
-}
-void func_15142914(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
-    func_150A8050(mtx, arg3, arg4, arg5);
-    mtx[3][0] = arg6;
-    mtx[3][1] = arg7;
-    mtx[3][2] = arg8;
-    mtx[0][0] *= arg1;
-    mtx[0][1] *= arg1;
-    mtx[0][2] *= arg1;
-    mtx[1][0] *= arg2;
-    mtx[1][1] *= arg2;
-    mtx[1][2] *= arg2;
-    mtx[2][0] *= arg1;
-    mtx[2][1] *= arg1;
-    mtx[2][2] *= arg1;
-}
-void func_151429E0(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
-    u8 *temp_v1;
+/* Builds a rotation matrix at (x, y, z), rows 0/2 scaled by scaleXZ and row 1 by scaleY. */
+void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+    f32 mf[4][4];
 
-    temp_v1 = &D_8008A160[((func_150ADA20() & 3) * 3) + (arg0 * 0xC)];
-    *arg1 = temp_v1[0];
-    *arg2 = temp_v1[1];
-    *arg3 = temp_v1[2];
+    func_150A8050(mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= scaleXZ;
+    mf[0][1] *= scaleXZ;
+    mf[0][2] *= scaleXZ;
+    mf[1][0] *= scaleY;
+    mf[1][1] *= scaleY;
+    mf[1][2] *= scaleY;
+    mf[2][0] *= scaleXZ;
+    mf[2][1] *= scaleXZ;
+    mf[2][2] *= scaleXZ;
+    guMtxF2L(mf, out);
 }
-s32 func_15142A5C(struct127 *arg0) {
-    void *temp_v0 = arg0->unk2D0;
+
+/* Float version of func_15142838. */
+void func_15142914(f32 mf[4][4], f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+    func_150A8050(mf, rotX, rotY, rotZ);
+    mf[3][0] = x;
+    mf[3][1] = y;
+    mf[3][2] = z;
+    mf[0][0] *= scaleXZ;
+    mf[0][1] *= scaleXZ;
+    mf[0][2] *= scaleXZ;
+    mf[1][0] *= scaleY;
+    mf[1][1] *= scaleY;
+    mf[1][2] *= scaleY;
+    mf[2][0] *= scaleXZ;
+    mf[2][1] *= scaleXZ;
+    mf[2][2] *= scaleXZ;
+}
+
+/* Picks one of the four RGB colours of palette `palette` at random. */
+void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b) {
+    u8 *color;
+
+    color = &D_8008A160[(func_150ADA20() & 3) * 3 + palette * 12];
+    *r = color[0];
+    *g = color[1];
+    *b = color[2];
+}
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x3C];
+    /* 0x3C */ s16 unk3C;
+} Unk2D0View;
+
+s32 func_15142A5C(struct127 *actor) {
+    Unk2D0View *unk2D0 = (Unk2D0View *)actor->unk2D0;
     s32 ret = 0;
 
-    if (*(s16 *)((s32)temp_v0 + 0x3C) > 0) {
+    if (unk2D0->unk3C > 0) {
         return 1;
     }
     return ret;
 }
-f32 func_15142A80(f32 arg0) {
-    return ((1.0f - arg0) * (arg0 - 2.0f) * arg0) * D_800A5624;
+
+/* Cubic Lagrange interpolation weights for samples at -1, 0, 1, 2 (t in [0, 1]). */
+f32 func_15142A80(f32 t) {
+    return ((1.0f - t) * (t - 2.0f) * t) * (1.0f / 6.0f);
 }
-f32 func_15142AC0(f32 arg0) {
-    return ((arg0 + 1.0f) * (arg0 - 1.0f) * (arg0 - 2.0f)) * 0.5f;
+f32 func_15142AC0(f32 t) {
+    return ((t + 1.0f) * (t - 1.0f) * (t - 2.0f)) * 0.5f;
 }
-f32 func_15142B04(f32 arg0) {
-    return ((2.0f - arg0) * (arg0 + 1.0f) * arg0) * 0.5f;
+f32 func_15142B04(f32 t) {
+    return ((2.0f - t) * (t + 1.0f) * t) * 0.5f;
 }
-f32 func_15142B44(f32 arg0) {
-    return ((arg0 + 1.0f) * (arg0 - 1.0f) * arg0) * D_800A5628;
+f32 func_15142B44(f32 t) {
+    return ((t + 1.0f) * (t - 1.0f) * t) * (1.0f / 6.0f);
 }
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2) {
-    if (~D_800DD200 & arg2) {
-        gSPClearGeometryMode(gfx++, arg2);
-        D_800DD200 |= arg2;
+/* Emits geometry-mode changes, skipping bits already in the cached state. */
+Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits) {
+    if (~D_800DD200 & clearBits) {
+        gSPClearGeometryMode(gfx++, clearBits);
+        D_800DD200 |= clearBits;
     }
 
-    if (~D_800DD1FC & arg1) {
-        gSPSetGeometryMode(gfx++, arg1);
-        D_800DD1FC |= arg1;
+    if (~D_800DD1FC & setBits) {
+        gSPSetGeometryMode(gfx++, setBits);
+        D_800DD1FC |= setBits;
     }
 
     return gfx;
 }
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5) {
-    if ((arg1 != (&D_800DD1C8)[0]) || (arg2 != D_800DD1CA) || (arg3 != D_800DD1CC) ||
-        (arg4 != D_800DD1CE)) {
-        if (*arg5 == 1) {
+
+/* Sets the env colour unless it is already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+    if ((r != D_800DD1C8) || (g != D_800DD1CA) || (b != D_800DD1CC) || (a != D_800DD1CE)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg5 = 0;
+            *needSync = 0;
         }
 
-        gDPSetEnvColor(gfx++, arg1, arg2, arg3, arg4);
+        gDPSetEnvColor(gfx++, r, g, b, a);
 
-        (&D_800DD1C8)[0] = arg1;
-        D_800DD1CA = arg2;
-        D_800DD1CC = arg3;
-        D_800DD1CE = arg4;
+        D_800DD1C8 = r;
+        D_800DD1CA = g;
+        D_800DD1CC = b;
+        D_800DD1CE = a;
     }
 
     return gfx;
 }
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7) {
-    if ((arg1 != (&D_800DD204)[0]) || (arg2 != D_800DD206) || (arg3 != D_800DD1C0) ||
-        (arg4 != D_800DD1C2) || (arg5 != D_800DD1C4) || (arg6 != D_800DD1C6)) {
-        if (*arg7 == 1) {
+
+/* Sets the prim colour unless it is already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+    if ((minLevel != D_800DD204) || (lodFrac != D_800DD206) || (r != D_800DD1C0) ||
+        (g != D_800DD1C2) || (b != D_800DD1C4) || (a != D_800DD1C6)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg7 = 0;
+            *needSync = 0;
         }
 
-        gDPSetPrimColor(gfx++, arg1, arg2, arg3, arg4, arg5, arg6);
+        gDPSetPrimColor(gfx++, minLevel, lodFrac, r, g, b, a);
 
-        (&D_800DD204)[0] = arg1;
-        D_800DD206 = arg2;
-        D_800DD1C0 = arg3;
-        D_800DD1C2 = arg4;
-        D_800DD1C4 = arg5;
-        D_800DD1C6 = arg6;
+        D_800DD204 = minLevel;
+        D_800DD206 = lodFrac;
+        D_800DD1C0 = r;
+        D_800DD1C2 = g;
+        D_800DD1C4 = b;
+        D_800DD1C6 = a;
     }
 
     return gfx;
 }
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
-    s32 temp_v0;
 
-    temp_v0 = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
-    if ((temp_v0 != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) || (arg8 != D_800DD214)) {
-        if (*arg9 == 1) {
-            *arg9 = 0;
+/* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+                   u8 *needSync, s32 argA) {
+    s32 texture;
+
+    texture = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
+    if ((texture != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) ||
+        (arg8 != D_800DD214)) {
+        if (*needSync == 1) {
+            *needSync = 0;
         }
-        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) || (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
+        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) ||
+            (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        arg0 = func_15094FE8(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
-        D_800DD1B0 = temp_v0;
+        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        D_800DD1B0 = texture;
         D_800DD208 = arg3;
         D_800DD20C = arg4;
         D_800DD210 = arg5;
-        D_800DD214 = D_800DD214;
+        D_800DD214 = D_800DD214; /* sic: arg8 is never cached */
     }
-    return arg0;
+    return gfx;
 }
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
-    if ((arg1 != D_800DD218) || (arg2 != D_800DD21C)) {
-        if (*arg3 == 1) {
+
+/* Sets the other-mode words unless already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
+    if ((modeH != D_800DD218) || (modeL != D_800DD21C)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg3 = 0;
+            *needSync = 0;
         }
 
-        gDPSetOtherMode(gfx++, arg1 | 0xF, arg2);
+        gDPSetOtherMode(gfx++, modeH | 0xF, modeL);
 
-        D_800DD218 = arg1;
-        D_800DD21C = arg2;
+        D_800DD218 = modeH;
+        D_800DD21C = modeL;
     }
 
     return gfx;
 }
+
 s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
+
 typedef struct {
     s32 *unk0;
     s32 unk4;
@@ -716,10 +787,11 @@ extern s32 D_80091564[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 
-s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* Resolves the texture word for func_15142E24 according to `mode`. */
+s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
     s32 ret;
 
-    switch (arg3) {
+    switch (mode) {
         case 4:
             ret = D_800915B0;
             break;
@@ -736,9 +808,10 @@ s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
             ret = arg1;
             break;
         case 6:
-            arg1 = *(s32 *)arg0;
-            if ((u32)*(s32 *)arg0 >= 0x10000000) {
-                ret = ((s32 *)*(s32 *)arg0)[arg2];
+            /* *arg0 is either a pointer (KSEG addresses) to a table, or the value itself */
+            arg1 = *arg0;
+            if ((u32)*arg0 >= 0x10000000) {
+                ret = ((s32 *)*arg0)[arg2];
             } else {
                 ret = arg1;
             }
@@ -749,225 +822,196 @@ s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     }
     return ret;
 }
-void func_15143134(struct17 *arg0, f32 *arg1, Mtx *arg2) {
-    f32 sp38[4][4];
+/*
+ * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
+ * D_800DCA00 records the progress through the function (a debug breadcrumb).
+ */
+void func_15143134(struct17 *offset, f32 *out, Mtx *mtx) {
+    f32 mf[4][4];
 
     D_800DCA00 = 1;
-    if ((arg0 != NULL) && ((arg0->unk0 != 0.0f) || (arg0->unk4 != 0.0f) || (arg0->unk8 != 0.0f))) {
+    if ((offset != NULL) && ((offset->unk0 != 0.0f) || (offset->unk4 != 0.0f) || (offset->unk8 != 0.0f))) {
         D_800DCA00 = 2;
-        D_800DCA08 = arg0->unk0;
-        D_800DCA0C = arg0->unk4;
-        D_800DCA10 = arg0->unk8;
+        D_800DCA08 = offset->unk0;
+        D_800DCA0C = offset->unk4;
+        D_800DCA10 = offset->unk8;
         if (D_800C3E90) {
             D_800DCA00 = 3;
-            D_800DCA04 = arg2;
-            guMtxL2F(sp38, arg2);
-            func_150A7960(sp38[0], arg0->unk0, arg0->unk4, arg0->unk8, arg1, arg1 + 1, arg1 + 2);
+            D_800DCA04 = mtx;
+            guMtxL2F(mf, mtx);
+            func_150A7960(mf[0], offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
             D_800DCA00 = 4;
-        state4_done:
-            ;
+        // matching: an (unused) label here changes how IDO lays out the branch to the final store
+        state4_done:;
         } else {
             D_800DCA00 = 5;
-            D_800DCA04 = arg2;
-            func_150A7960((f32 *)arg2, arg0->unk0, arg0->unk4, arg0->unk8, arg1, arg1 + 1, arg1 + 2);
+            D_800DCA04 = mtx;
+            func_150A7960((f32 *)mtx, offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
             D_800DCA00 = 6;
         }
     } else {
         D_800DCA00 = 7;
-        func_15142314(arg2, 0, arg1);
+        func_15142314(mtx, 0, out);
         D_800DCA00 = 8;
     }
     D_800DCA00 = 0;
 }
 
-typedef struct Game16EE20Emitter {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 radiusX;
-    s16 height;
-    s16 radiusZ;
-    u8 padC[4];
-    f32 rotation;
-    u8 pad14;
-    u8 flags;
-} Game16EE20Emitter;
+/* A spawn region around (x, y, z): a disc, cylinder, sphere or (rotated) box, by flags & 3. */
+typedef struct SpawnRegion {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radiusX;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 radiusZ;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ f32 rotation; /* degrees */
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 flags; /* bits 0-1: shape */
+    /* 0x16 */ u8 pad16[0xE];
+    /* 0x24 */ f32 cosineX;
+    /* 0x28 */ f32 sineX;
+    /* 0x2C */ f32 sineZ;
+    /* 0x30 */ f32 cosineZ;
+} SpawnRegion;
 
-
-void func_151432BC(Game16EE20Emitter *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
-    switch (arg0->flags & 3) {
+/* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
+void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    switch (region->flags & 3) {
     default:
-        *arg1 = arg0->x;
-        *arg2 = arg0->z;
-        *arg3 = arg0->y + arg0->height;
-        *arg4 = arg0->y - arg0->height;
+        *x = region->x;
+        *z = region->z;
+        *top = region->y + region->height;
+        *bottom = region->y - region->height;
         return;
     case 2:
+        /* rotated box */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 offsetX;
             f32 offsetZ;
 
-            angle = arg0->rotation * D_800A5644;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * arg0->radiusX) + -arg0->radiusX;
-            offsetZ = func_150ADA68() * (2.0f * arg0->radiusZ) + -arg0->radiusZ;
-            *arg1 = arg0->x + (offsetX * sine + offsetZ * cosine);
-            *arg2 = arg0->z + (offsetZ * sine - offsetX * cosine);
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y;
+            angle = region->rotation * (256.0f / 360.0f);
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            offsetX = func_150ADA68() * (2.0f * region->radiusX) + -region->radiusX;
+            offsetZ = func_150ADA68() * (2.0f * region->radiusZ) + -region->radiusZ;
+            *x = region->x + (offsetX * cosine + offsetZ * sine);
+            *z = region->z + (offsetZ * cosine - offsetX * sine);
+            *top = region->y + region->height;
+            *bottom = region->y;
         }
         return;
     case 0:
+        /* disc, from the base up */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            radius = func_150ADA68() * arg0->radiusX;
-            *arg1 = arg0->x + radius * sine;
-            *arg2 = arg0->z - radius * cosine;
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y;
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            radius = func_150ADA68() * region->radiusX;
+            *x = region->x + radius * cosine;
+            *z = region->z - radius * sine;
+            *top = region->y + region->height;
+            *bottom = region->y;
         }
         return;
     case 1:
+        /* disc, centred vertically */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            radius = func_150ADA68() * arg0->radiusX;
-            *arg1 = arg0->x + radius * sine;
-            *arg2 = arg0->z - radius * cosine;
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y - arg0->height;
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            radius = func_150ADA68() * region->radiusX;
+            *x = region->x + radius * cosine;
+            *z = region->z - radius * sine;
+            *top = region->y + region->height;
+            *bottom = region->y - region->height;
         }
         return;
     }
 }
 
-// void func_151432BC(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
-//     struct209 tmp;
-//     f32 temp_f2;
-//     f32 temp_f6;
-//     f32 temp_ret;
-//     s32 temp_t6;
-//     u8 temp_a0;
-//
-//     temp_t6 = (arg0->unk15) & 3;
-//     if (temp_t6 == 0) {
-//         tmp.unk1B = func_150ADA20();
-//         tmp.unk14 = func_151423D8((tmp.unk1B - 64) & 0xFF);
-//         tmp.unk10 = func_151423D8(tmp.unk1B);
-//         temp_ret = func_150ADA68();
-//         temp_f2 = temp_ret * arg0->unk6;
-//         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk10));
-//         *arg2 = (arg0->unk4 - (temp_f2 * tmp.unk14));
-//         *arg3 = (arg0->unk2 + arg0->unk8);
-//         *arg4 = arg0->unk2;
-//     } else if (temp_t6 != 1) {
-//         if (temp_t6 == 2) {
-//             tmp.unk2F = (u32) (arg0->unk10 * D_800A5644); // 0.7111111283302307
-//             tmp.unk28 = func_151423D8((tmp.unk2F - 64));
-//             tmp.unk24 = func_151423D8(tmp.unk2F);
-//             tmp.unk20 = (func_150ADA68() * (2.0f * (f32) arg0->unk6)) + (f32) -(s32) arg0->unk6;
-//             temp_f2 = (func_150ADA68() * (2.0f * (f32) arg0->unkA)) + (f32) -(s32) arg0->unkA;
-//             temp_f6 = temp_f2 * tmp.unk24;
-//             *arg1 = (arg0->unk0 + ((tmp.unk20 * tmp.unk24) + (temp_f2 * tmp.unk28)));
-//             *arg2 = (arg0->unk4 + (temp_f6 - (tmp.unk20 * tmp.unk28)));
-//             *arg3 = (arg0->unk2 + arg0->unk8);
-//             *arg4 = arg0->unk2;
-//         } else {
-//             *arg1 = arg0->unk0;
-//             *arg2 = arg0->unk4;
-//             *arg3 = (arg0->unk2 + arg0->unk8);
-//             *arg4 = (arg0->unk2 - arg0->unk8);
-//         }
-//     } else {
-//         tmp.unkB = func_150ADA20();
-//         tmp.unk4 = func_151423D8((tmp.unkB - 64));
-//         tmp.unk0 = func_151423D8(tmp.unkB);
-//         temp_ret = func_150ADA68();
-//         temp_f2 = temp_ret * (f32) arg0->unk6;
-//         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk0));
-//         *arg2 = (arg0->unk4 - (temp_f2 * tmp.unk4));
-//         *arg3 = (arg0->unk2 + arg0->unk8);
-//         *arg4 = (arg0->unk2 - arg0->unk8);
-//     }
-// }
+/* Direction (yaw, pitch in radians) scaled by length, into out[3]. */
+void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 sinPitch;
+    f32 horizontal;
 
-
-void func_151436B4(f32 arg0, f32 arg1, f32 arg2, f32 *arg3) {
-    f32 cos0;
-    f32 sin0;
-    f32 cos1;
-    f32 sin1;
-    f32 temp;
-
-    cos0 = cosf(arg0);
-    sin0 = sinf(arg0);
-    cos1 = cosf(arg1);
-    sin1 = sinf(arg1);
-    temp = arg2 * cos1;
-    arg3[0] = temp * sin0;
-    arg3[1] = -arg2 * sin1;
-    arg3[2] = temp * cos0;
+    cosYaw = cosf(yaw);
+    sinYaw = sinf(yaw);
+    cosPitch = cosf(pitch);
+    sinPitch = sinf(pitch);
+    horizontal = length * cosPitch;
+    out[0] = horizontal * sinYaw;
+    out[1] = -length * sinPitch;
+    out[2] = horizontal * cosYaw;
 }
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
+
+/* Planar direction (angle in radians) scaled by length. */
+void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
 
-    c = cosf(arg0);
-    s = sinf(arg0);
-    *arg2 = arg1 * s;
-    *arg3 = arg1 * c;
+    c = cosf(angle);
+    s = sinf(angle);
+    *x = length * s;
+    *z = length * c;
 }
-void func_15143794(s32 arg0, s32 arg1, f32 arg2, f32 *arg3) {
-    f32 cos0;
-    f32 sin0;
-    f32 cos1;
-    f32 sin1;
-    u8 idx0;
-    u8 idx1;
-    f32 temp;
 
-    cos0 = func_151423D8((u8) arg0);
-    idx0 = (s16) arg0 - 0x40;
-    sin0 = func_151423D8(idx0);
-    cos1 = func_151423D8((u8) arg1);
-    idx1 = (s16) arg1 - 0x40;
-    sin1 = func_151423D8(idx1);
-    temp = arg2 * cos1;
-    arg3[0] = temp * sin0;
-    arg3[1] = -arg2 * sin1;
-    arg3[2] = temp * cos0;
-}
-void func_15143834(s16 arg0, s16 arg1, f32 arg2, f32 *arg3) {
-    func_15143794(arg0, arg1, arg2, arg3);
-}
-void func_15143874(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
-    f32 temp;
-    f32 temp2;
-    u8 idx;
+/* Binary-angle (256 per turn) version of func_151436B4. */
+void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out) {
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 sinPitch;
+    u8 quarterYaw;
+    u8 quarterPitch;
+    f32 horizontal;
 
-    temp = func_151423D8((u8) arg0);
-    idx = (s16) arg0 - 0x40;
-    temp2 = func_151423D8(idx);
-    *arg2 = arg1 * temp2;
-    *arg3 = arg1 * temp;
+    cosYaw = func_151423D8((u8)yaw);
+    quarterYaw = (s16)yaw - 0x40;
+    sinYaw = func_151423D8(quarterYaw);
+    cosPitch = func_151423D8((u8)pitch);
+    quarterPitch = (s16)pitch - 0x40;
+    sinPitch = func_151423D8(quarterPitch);
+    horizontal = length * cosPitch;
+    out[0] = horizontal * sinYaw;
+    out[1] = -length * sinPitch;
+    out[2] = horizontal * cosYaw;
 }
+
+void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
+    func_15143794(yaw, pitch, length, out);
+}
+
+/* Binary-angle version of func_1514373C. */
+void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
+    f32 c;
+    f32 s;
+    u8 quarter;
+
+    c = func_151423D8((u8)angle);
+    quarter = (s16)angle - 0x40;
+    s = func_151423D8(quarter);
+    *x = length * s;
+    *z = length * c;
+}
+
 /* File-local shadow of struct178: the shared header types 0x06..0x33 as one u8 blob,
    which cannot express the s16/f32/u8/s32 members this search compares. */
 typedef struct {
@@ -991,184 +1035,193 @@ typedef struct {
 
 /* variables.h declares D_800D3098 as struct178[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
 extern ObjRec *D_800D3098;
-#define OBJTBL D_800D3098
 
-void func_15143D18(s32 *, s32 *, s32, s32);
+void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
-ObjRec *func_151438D8(s32 arg0, s32 arg1, u16 arg2, ObjRec *arg3) {
+/*
+ * Searches D_800D3098[start..end) for a record equal to `key` in the fields selected by `fields`.
+ * With bit 0x1000 every selected field must match, otherwise any one of them; the last hit wins.
+ */
+ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
     s32 i;
     ObjRec *result;
     u16 checked;
     u16 matched;
 
     result = NULL;
-    if (arg3 == NULL) {
+    if (key == NULL) {
         return NULL;
     }
-    func_15143D18(&arg0, &arg1, 0, D_800D3094);
-    for (i = arg0; i < arg1; i++) {
+    func_15143D18(&start, &end, 0, D_800D3094);
+    for (i = start; i < end; i++) {
         checked = 0;
         matched = 0;
-        if (arg2 & 0x1) {
-            if ((arg3->unk0 == OBJTBL[i].unk0) && (arg3->unk2 == OBJTBL[i].unk2) && (arg3->unk4 == OBJTBL[i].unk4)) {
-                checked |= 0x1;
-                matched |= 0x1;
+        if (fields & 1) {
+            if ((key->unk0 == D_800D3098[i].unk0) && (key->unk2 == D_800D3098[i].unk2) && (key->unk4 == D_800D3098[i].unk4)) {
+                checked |= 1;
+                matched |= 1;
             }
         } else {
-            checked |= 0x1;
+            checked |= 1;
         }
-        if (arg2 & 0x2) {
-            if ((arg3->unk6 == OBJTBL[i].unk6) && (arg3->unk8 == OBJTBL[i].unk8) && (arg3->unkA == OBJTBL[i].unkA)) {
+        if (fields & 0x2) {
+            if ((key->unk6 == D_800D3098[i].unk6) && (key->unk8 == D_800D3098[i].unk8) && (key->unkA == D_800D3098[i].unkA)) {
                 checked |= 0x2;
                 matched |= 0x2;
             }
         } else {
             checked |= 0x2;
         }
-        if (arg2 & 0x4) {
-            if (arg3->unkC == OBJTBL[i].unkC) {
+        if (fields & 0x4) {
+            if (key->unkC == D_800D3098[i].unkC) {
                 checked |= 0x4;
                 matched |= 0x4;
             }
         } else {
             checked |= 0x4;
         }
-        if (arg2 & 0x8) {
-            if (arg3->unk10 == OBJTBL[i].unk10) {
+        if (fields & 0x8) {
+            if (key->unk10 == D_800D3098[i].unk10) {
                 checked |= 0x8;
                 matched |= 0x8;
             }
         } else {
             checked |= 0x8;
         }
-        if (arg2 & 0x10) {
-            if (arg3->unk14 == OBJTBL[i].unk14) {
+        if (fields & 0x10) {
+            if (key->unk14 == D_800D3098[i].unk14) {
                 checked |= 0x10;
                 matched |= 0x10;
             }
         } else {
             checked |= 0x10;
         }
-        if (arg2 & 0x20) {
-            if (arg3->unk15 == (OBJTBL[i].unk15 >> 2)) {
+        if (fields & 0x20) {
+            if (key->unk15 == (D_800D3098[i].unk15 >> 2)) {
                 checked |= 0x20;
                 matched |= 0x20;
             }
         } else {
             checked |= 0x20;
         }
-        if (arg2 & 0x40) {
-            if (arg3->unk16 == OBJTBL[i].unk16) {
+        if (fields & 0x40) {
+            if (key->unk16 == D_800D3098[i].unk16) {
                 checked |= 0x40;
                 matched |= 0x40;
             }
         } else {
             checked |= 0x40;
         }
-        if (arg2 & 0x80) {
-            if (arg3->unk17 == OBJTBL[i].unk17) {
+        if (fields & 0x80) {
+            if (key->unk17 == D_800D3098[i].unk17) {
                 checked |= 0x80;
                 matched |= 0x80;
             }
         } else {
             checked |= 0x80;
         }
-        if (arg2 & 0x100) {
-            if (arg3->unk18 == OBJTBL[i].unk18) {
+        if (fields & 0x100) {
+            if (key->unk18 == D_800D3098[i].unk18) {
                 checked |= 0x100;
                 matched |= 0x100;
             }
         } else {
             checked |= 0x100;
         }
-        if (arg2 & 0x200) {
-            if (arg3->unk1C == OBJTBL[i].unk1C) {
+        if (fields & 0x200) {
+            if (key->unk1C == D_800D3098[i].unk1C) {
                 checked |= 0x200;
                 matched |= 0x200;
             }
         } else {
             checked |= 0x200;
         }
-        if (arg2 & 0x400) {
-            if (arg3->unk20 == OBJTBL[i].unk20) {
+        if (fields & 0x400) {
+            if (key->unk20 == D_800D3098[i].unk20) {
                 checked |= 0x400;
                 matched |= 0x400;
             }
         } else {
             checked |= 0x400;
         }
-        if (arg2 & 0x1000) {
+        if (fields & 0x1000) {
             if (checked == 0x7FF) {
-                result = &OBJTBL[i];
+                result = &D_800D3098[i];
             }
         } else {
             if (matched != 0) {
-                result = &OBJTBL[i];
+                result = &D_800D3098[i];
             }
         }
     }
     return result;
 }
-void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
+/* Orders the bounds lo/hi, then orders *start/*end and clamps them into [lo, hi]. XOR swaps. */
+void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
 
-    if (arg3 < arg2) {
-        t = arg2 ^ arg3;
-        t2 = arg3 ^ t;
-        arg3 = t2;
-        arg2 = t ^ t2;
+    if (hi < lo) {
+        t = lo ^ hi;
+        t2 = hi ^ t;
+        hi = t2;
+        lo = t ^ t2;
     }
-    if (*arg1 < *arg0) {
-        t = *arg1 ^ *arg0;
-        *arg0 = t;
-        t2 = *arg1 ^ t;
-        *arg1 = t2;
-        *arg0 = *arg0 ^ t2;
+    if (*end < *start) {
+        t = *end ^ *start;
+        *start = t;
+        t2 = *end ^ t;
+        *end = t2;
+        *start = *start ^ t2;
     }
-    if (*arg0 < arg2) {
-        *arg0 = arg2;
+    if (*start < lo) {
+        *start = lo;
     }
-    if (arg3 < *arg1) {
-        *arg1 = arg3;
+    if (hi < *end) {
+        *end = hi;
     }
 }
-s32 func_15143DA8(s32 *arg0, s32 arg1, s32 arg2) {
-    s32 **pp = &arg0;
+
+/* Clamps *value into [lo, hi] (bounds in either order); returns 1 if raised, 2 if lowered, else 0. */
+s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
-    if (arg2 < arg1) {
-        t = arg1 ^ arg2;
-        t2 = arg2 ^ t;
-        arg2 = t2;
-        arg1 = t ^ t2;
+
+    if (hi < lo) {
+        t = lo ^ hi;
+        t2 = hi ^ t;
+        hi = t2;
+        lo = t ^ t2;
     }
-    if (**pp < arg1) {
-        **pp = arg1;
+    if (*value < lo) {
+        *value = lo;
         return 1;
     }
-    if (arg2 < **pp) {
-        **pp = arg2;
+    if (hi < *value) {
+        *value = hi;
         return 2;
     }
     return 0;
 }
 
-s32 func_15143E08(struct127 *arg0) {
-    return (((s32) arg0->unk7A >> 8) + 64) & 0xFF;
+/* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
+s32 func_15143E08(struct127 *actor) {
+    return (((s32)actor->unk7A >> 8) + 64) & 0xFF;
 }
 
-s32 func_15143E24(struct127 *arg0) {
-    struct126 *temp_v1 = arg0->unk31C;
-    if (temp_v1 != NULL) {
-        return (s16)((arg0->unk7A - temp_v1->unk12) >> 8);
+/* The actor's facing angle in 256ths of a turn, relative to unk31C's angle when it has one. */
+s32 func_15143E24(struct127 *actor) {
+    struct126 *ref = actor->unk31C;
+    if (ref != NULL) {
+        return (s16)((actor->unk7A - ref->unk12) >> 8);
     }
-    return (s16)(arg0->unk7A >> 8);
+    return (s16)(actor->unk7A >> 8);
 }
-f32 func_15143E64(struct17 *arg0) {
-    f32 x = arg0->unk0;
-    f32 y = arg0->unk4;
-    f32 z = arg0->unk8;
+/* Length of a vector. */
+f32 func_15143E64(struct17 *v) {
+    f32 x = v->unk0;
+    f32 y = v->unk4;
+    f32 z = v->unk8;
 
     return sqrtf(x * x + y * y + z * z);
 }
@@ -1183,6 +1236,10 @@ typedef struct Func15143E94Spawn {
 } Func15143E94Spawn;
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
+/*
+ * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748
+ * and spawns a short random func_151D8868 effect. Returns whether it did.
+ */
 u8 func_15143E94(s32 arg0, s32 arg1) {
     u8 ret;
     s8 i;
@@ -1192,6 +1249,7 @@ u8 func_15143E94(s32 arg0, s32 arg1) {
     Func15143E94Spawn spawn;
 
     ret = 0;
+// matching: an unused label here splits the block, changing IDO's scheduling of the setup
 start:
     count = D_80082FA0 + 1;
     i = 0;
@@ -1232,282 +1290,247 @@ typedef struct {
 } Unk80090B64;
 extern Unk80090B64 D_80090B64[];
 
-s32 func_1514401C(u8 arg0, u32 *arg1, s32 *arg2, u8 arg3) {
+/*
+ * Advances a 16.16 position through sequence `id` (D_80090B64[id].unk0 steps long) by speed * D_800BE9E4.
+ * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
+ */
+s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 max;
     s32 ret;
     s32 n;
 
     ret = 0;
-    n = D_80090B64[arg0].unk0;
+    n = D_80090B64[id].unk0;
     max = (n << 16) - 1;
-    *arg2 += *arg1 * D_800BE9E4;
-    if (max < *arg2) {
-        if (arg3 & 1) {
+    *pos += *speed * D_800BE9E4;
+    if (max < *pos) {
+        if (flags & 1) {
             ret = 1;
-        } else if (arg3 & 2) {
-            *arg1 = 0;
-            *arg2 = max;
-        } else if (arg3 & 4) {
-            *arg2 = max - (*arg2 % max);
-            *arg1 = -*arg1;
+        } else if (flags & 2) {
+            *speed = 0;
+            *pos = max;
+        } else if (flags & 4) {
+            *pos = max - (*pos % max);
+            *speed = -*speed;
         } else {
             do {
-                *arg2 -= max;
-            } while (max < *arg2);
+                *pos -= max;
+            } while (max < *pos);
         }
-    } else if ((*arg2 < 0) && !(arg3 & 8)) {
-        if (arg3 & 0x10) {
-            *arg1 = 0;
-            *arg2 = 0;
-        } else if (arg3 & 4) {
-            *arg2 = -*arg2 % max;
-            *arg1 = -*arg1;
+    } else if ((*pos < 0) && !(flags & 8)) {
+        if (flags & 0x10) {
+            *speed = 0;
+            *pos = 0;
+        } else if (flags & 4) {
+            *pos = -*pos % max;
+            *speed = -*speed;
         } else {
             do {
-                *arg2 += max;
-            } while (*arg2 < 0);
+                *pos += max;
+            } while (*pos < 0);
         }
     }
     return ret;
 }
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
-    s16 temp_v0;
-    s16 temp_v0_2;
-
-    switch (arg13) {
+/* Colour-combiner style blend: picks the output RGBA from colour 0, colour 1 and `level` per `mode`. */
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+    switch (mode) {
     case 2:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg11;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a1;
         return;
     case 0:
-        *arg3 = 0;
-        temp_v0 = *arg3;
-        *arg2 = temp_v0;
-        *arg1 = temp_v0;
-        *arg0 = temp_v0;
+        *outR = *outG = *outB = *outA = 0;
         return;
     case 1:
-        *arg2 = 0;
-        temp_v0_2 = *arg2;
-        *arg1 = temp_v0_2;
-        *arg0 = temp_v0_2;
-        *arg3 = (s16) arg11;
+        *outR = *outG = *outB = 0;
+        *outA = a1;
         return;
     case 3:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     case 4:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     default:
-        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
-        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
-        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
-        *arg3 = 0;
+        *outR = (r0 * level) >> 8;
+        *outG = (g0 * level) >> 8;
+        *outB = (b0 * level) >> 8;
+        *outA = 0;
         return;
     }
 }
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
-    s16 temp_v0;
-    s16 temp_v0_2;
-    s16 temp_v0_3;
-
-    switch (arg13) {
+/* Second-cycle variant of func_151441A4. */
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1, u8 level, u8 mode) {
+    switch (mode) {
     case 2:
     case 3:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = (s16) arg7;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = a0;
         return;
     case 13:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = 0;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = 0;
         return;
     case 0:
-        *arg3 = 0;
-        temp_v0 = *arg3;
-        *arg2 = temp_v0;
-        *arg1 = temp_v0;
-        *arg0 = temp_v0;
+        *outR = *outG = *outB = *outA = 0;
         return;
     case 1:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = 0;
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = 0;
         return;
     case 7:
     case 12:
-        *arg2 = 0;
-        temp_v0_2 = *arg2;
-        *arg1 = temp_v0_2;
-        *arg0 = temp_v0_2;
-        *arg3 = (s16) arg11;
+        *outR = *outG = *outB = 0;
+        *outA = a1;
         return;
     case 8:
-        *arg2 = 0;
-        temp_v0_3 = *arg2;
-        *arg1 = temp_v0_3;
-        *arg0 = temp_v0_3;
-        *arg3 = (s16) arg7;
+        *outR = *outG = *outB = 0;
+        *outA = a0;
         return;
     case 4:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     case 5:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     case 6:
-        *arg0 = (s16) arg4;
-        *arg1 = (s16) arg5;
-        *arg2 = (s16) arg6;
-        *arg3 = (s16) arg11;
+        *outR = r0;
+        *outG = g0;
+        *outB = b0;
+        *outA = a1;
         return;
     case 10:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg11;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a1;
         return;
     case 11:
-        *arg0 = (s16) arg8;
-        *arg1 = (s16) arg9;
-        *arg2 = (s16) arg10;
-        *arg3 = (s16) arg7;
+        *outR = r1;
+        *outG = g1;
+        *outB = b1;
+        *outA = a0;
         return;
     case 9:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) arg11;
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = a1;
         return;
     default:
-        *arg2 = (s16) arg12;
-        *arg1 = (s16) arg12;
-        *arg0 = (s16) arg12;
-        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        *outB = level;
+        *outG = level;
+        *outR = level;
+        *outA = (a0 * a1) >> 8;
         return;
     }
 }
-s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
+/* Wraps value into [lo, hi] (integer steps of hi - lo + 1). */
+s32 func_151444DC(s32 value, s32 hi, s32 lo) {
     s32 range;
-    if (arg1 < arg0) {
-        range = arg1 - arg2 + 1;
+    if (hi < value) {
+        range = hi - lo + 1;
         do {
-            arg0 -= range;
-        } while (arg1 < arg0);
+            value -= range;
+        } while (hi < value);
     }
-    if (arg0 < arg2) {
-        range = arg1 - arg2 + 1;
+    if (value < lo) {
+        range = hi - lo + 1;
         do {
-            arg0 += range;
-        } while (arg0 < arg2);
+            value += range;
+        } while (value < lo);
     }
-    return arg0;
+    return value;
 }
-f32 func_15144528(f32 arg0, f32 arg1, f32 arg2) {
-    f32 temp;
 
-    if (arg1 < arg0) {
-        temp = arg1 - arg2;
+/* Wraps value into [lo, hi]. */
+f32 func_15144528(f32 value, f32 hi, f32 lo) {
+    f32 range;
+
+    if (hi < value) {
+        range = hi - lo;
         do {
-            arg0 -= temp;
-        } while (arg1 < arg0);
+            value -= range;
+        } while (hi < value);
     }
-    if (arg0 < arg2) {
-        temp = arg1 - arg2;
+    if (value < lo) {
+        range = hi - lo;
         do {
-            arg0 += temp;
-        } while (arg0 < arg2);
+            value += range;
+        } while (value < lo);
     }
-    return arg0;
+    return value;
 }
+
+/* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
 f32 func_15144598(struct134 *arg0) {
-    f32 temp_f2;
-    s16 temp_v0;
-    s32 temp_t6;
+    SpawnRegion *region = (SpawnRegion *)arg0;
+    f32 area;
+    s16 radius;
 
-    temp_t6 = *((u8 *)arg0 + 0x15) & 3;
-    switch (temp_t6) {
+    switch (region->flags & 3) {
     default:
-        temp_f2 = 1.0f;
+        area = 1.0f;
         break;
     case 2:
-        temp_f2 = (f32)((s16)arg0->unk6 * (s16)arg0->unkA) * 4.0f;
+        area = (f32)(region->radiusX * region->radiusZ) * 4.0f;
         break;
     case 0:
     case 1:
-        temp_v0 = (s16)arg0->unk6;
-        temp_f2 = (f32)(temp_v0 * temp_v0) * D_800A5694;
+        radius = region->radiusX;
+        area = (f32)(radius * radius) * 3.1415927f;
         break;
     }
-    return temp_f2;
+    return area;
 }
+
+/* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
 f32 func_1514462C(s32 arg0) {
-    struct169 *temp_a0;
-    s32 temp_t6;
-    f32 temp_f2;
-    f32 temp_f0;
+    SpawnRegion *region = (SpawnRegion *)arg0;
+    f32 volume;
+    f32 radius;
 
-    temp_a0 = (struct169 *)arg0;
-    temp_t6 = temp_a0->unk15 & 3;
-    switch (temp_t6) {
+    switch (region->flags & 3) {
     default:
-        temp_f2 = 1.0f;
+        volume = 1.0f;
         break;
     case 2:
-        temp_f2 = (f32)(temp_a0->unk6 * temp_a0->unk8 * temp_a0->unkA);
+        volume = (f32)(region->radiusX * region->height * region->radiusZ);
         break;
     case 0:
-        temp_f2 = (f32)(temp_a0->unk6 * temp_a0->unk6) * D_800A5698 * (f32)temp_a0->unk8;
+        volume = (f32)(region->radiusX * region->radiusX) * 3.1415927f * (f32)region->height;
         break;
     case 1:
-        temp_f0 = (f32)temp_a0->unk6;
-        temp_f2 = ((temp_f0 * D_800A569C) * temp_f0) * temp_f0;
+        radius = (f32)region->radiusX;
+        volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
-    return temp_f2;
+    return volume;
 }
-typedef struct Game16EE20SampleRegion {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 radiusX;
-    s16 height;
-    s16 radiusZ;
-    u8 padC[9];
-    u8 flags;
-    u8 pad16[0xE];
-    f32 cosineX;
-    f32 sineX;
-    f32 sineZ;
-    f32 cosineZ;
-} Game16EE20SampleRegion;
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Func1514470C_Vec3f;
-
-void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
+/* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
+void func_1514470C(SpawnRegion *region, f32 *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
@@ -1517,19 +1540,19 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
     f32 cosineZ;
     s32 mode;
 
-    radiusX = arg0->radiusX;
-    height = arg0->height;
-    radiusZ = arg0->radiusZ;
-    cosineX = arg0->cosineX;
-    sineX = arg0->sineX;
-    sineZ = arg0->sineZ;
-    cosineZ = arg0->cosineZ;
-    mode = arg0->flags & 3;
+    radiusX = region->radiusX;
+    height = region->height;
+    radiusZ = region->radiusZ;
+    cosineX = region->cosineX;
+    sineX = region->sineX;
+    sineZ = region->sineZ;
+    cosineZ = region->cosineZ;
+    mode = region->flags & 3;
     switch (mode) {
     default:
-        arg1[0] = arg0->x;
-        arg1[1] = arg0->y;
-        arg1[2] = arg0->z;
+        out[0] = region->x;
+        out[1] = region->y;
+        out[2] = region->z;
         return;
     case 2:
         {
@@ -1547,10 +1570,10 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
             mixed = y * cosineX + z * sineX;
             x = x * cosineZ + mixed * sineZ;
             y = y * sineX - z * cosineX;
-            arg1[0] = arg0->x + x;
-            arg1[1] = arg0->y + y;
+            out[0] = region->x + x;
+            out[1] = region->y + y;
             rotatedZ = mixed * cosineZ - savedX * sineZ;
-            arg1[2] = arg0->z + rotatedZ;
+            out[2] = region->z + rotatedZ;
         }
         return;
     case 0:
@@ -1572,75 +1595,32 @@ void func_1514470C(Game16EE20SampleRegion *arg0, f32 *arg1) {
             mixed = y * cosineX + z * sineX;
             x = x * cosineZ + mixed * sineZ;
             y = y * sineX - z * cosineX;
-            arg1[0] = arg0->x + x;
-            arg1[1] = arg0->y + y;
-            arg1[2] = arg0->z + (mixed * cosineZ - savedX * sineZ);
+            out[0] = region->x + x;
+            out[1] = region->y + y;
+            out[2] = region->z + (mixed * cosineZ - savedX * sineZ);
         }
         return;
     case 1:
         {
-            Func1514470C_Vec3f offset;
+            struct17 offset;
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset.x);
-            arg1[0] = arg0->x + offset.x;
-            arg1[1] = arg0->y + offset.y;
-            arg1[2] = arg0->z + offset.z;
+                          func_150ADA68() * radiusX, &offset.unk0);
+            out[0] = region->x + offset.unk0;
+            out[1] = region->y + offset.unk4;
+            out[2] = region->z + offset.unk8;
         }
         return;
     }
 }
-f32 func_15144A74(struct17 *arg0, struct17 *arg1) {
-    return arg0->unk0 * arg1->unk0 + arg0->unk4 * arg1->unk4 + arg0->unk8 * arg1->unk8;
-}
-f32 func_15144AA8(s32 arg0) {
-    f32 v = D_800DBFF0[arg0].unk380;
-    if (360.0f < v) {
-        do {
-            v -= 360.0f;
-        } while (360.0f < v);
-    }
-    if (v < 0.0f) {
-        do {
-            v += 360.0f;
-        } while (v < 0.0f);
-    }
-    return v;
-}
-struct17 *func_15144B34(s32 arg0) {
-    return (struct17 *)&D_800DBFF0[arg0].unk2F8;
-}
-f32 func_15144B68(f32 arg0);
-extern f32 D_800A56A4;
-f32 func_15144B68(f32 arg0)
-{
-  f32 new_var;
-  new_var = D_800A56A4;
-  if (1)
-  {
-    f32 v = arg0;
-    if (new_var < v)
-    {
-      do
-      {
-        v -= new_var;
-      }
-      while (new_var < v);
-    }
-    if (v < 0.0f)
-    {
-      do
-      {
-        v += new_var;
-      }
-      while (v < 0.0f);
-    }
-    return v;
-  }
+/* Dot product. */
+f32 func_15144A74(struct17 *a, struct17 *b) {
+    return a->unk0 * b->unk0 + a->unk4 * b->unk4 + a->unk8 * b->unk8;
 }
 
-f32 func_15144BC8(f32 arg0) {
-    f32 v = arg0;
+/* D_800DBFF0[index].unk380 wrapped into [0, 360] degrees. */
+f32 func_15144AA8(s32 index) {
+    f32 v = D_800DBFF0[index].unk380;
     if (360.0f < v) {
         do {
             v -= 360.0f;
@@ -1654,191 +1634,246 @@ f32 func_15144BC8(f32 arg0) {
     return v;
 }
 
-s32 func_15144C2C(s16 arg0) {
-    s16 tmp1 = arg0;
-
-    while (tmp1 >= 256)
-    {
-        tmp1 -= 255;
-    }
-    while (tmp1 < 0)
-    {
-        tmp1 += 255;
-    }
-
-    return tmp1;
+/* Position (unk2F8) of D_800DBFF0[index]. */
+struct17 *func_15144B34(s32 index) {
+    return (struct17 *)&D_800DBFF0[index].unk2F8;
 }
 
-f32 func_15144C8C(f32 arg0, f32 arg1) {
-    f32 tmp;
-
-    arg0 = func_15144B68(arg0);
-    tmp = fabsf(arg0 - func_15144B68(arg1));
-    if (D_800A56A8 < tmp) {
-        tmp = D_800A56AC - tmp;
+/* Wraps an angle into [0, 2 pi] radians. */
+f32 func_15144B68(f32 angle) {
+    f32 v = angle;
+    if (6.2831855f < v) {
+        do {
+            v -= 6.2831855f;
+        } while (6.2831855f < v);
     }
-    return tmp;
+    if (v < 0.0f) {
+        do {
+            v += 6.2831855f;
+        } while (v < 0.0f);
+    }
+    return v;
 }
 
+/* Wraps an angle into [0, 360] degrees. */
+f32 func_15144BC8(f32 angle) {
+    f32 v = angle;
+    if (360.0f < v) {
+        do {
+            v -= 360.0f;
+        } while (360.0f < v);
+    }
+    if (v < 0.0f) {
+        do {
+            v += 360.0f;
+        } while (v < 0.0f);
+    }
+    return v;
+}
+
+/* Wraps a value into [0, 255] in steps of 255. */
+s32 func_15144C2C(s16 value) {
+    s16 v = value;
+
+    while (v >= 256) {
+        v -= 255;
+    }
+    while (v < 0) {
+        v += 255;
+    }
+
+    return v;
+}
+
+/* Unsigned angular distance between two angles in radians, in [0, pi]. */
+f32 func_15144C8C(f32 a, f32 b) {
+    f32 diff;
+
+    a = func_15144B68(a);
+    diff = fabsf(a - func_15144B68(b));
+    if (3.1415927f < diff) {
+        diff = 6.2831855f - diff;
+    }
+    return diff;
+}
+
+/* Per-viewport record (0x180 bytes) of the table D_800BE628 points to. */
 typedef struct {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    char pad3C[0x144];
-} Struct15144CEC;
+    /* 0x000 */ char pad0[0xC];
+    /* 0x00C */ f32 unkC;  /* half width? */
+    /* 0x010 */ f32 unk10; /* half height? */
+    /* 0x014 */ char pad14[0x20];
+    /* 0x034 */ f32 unk34; /* screen centre x */
+    /* 0x038 */ f32 unk38; /* screen centre y */
+    /* 0x03C */ char pad3C[0x144];
+} Viewport15144CEC;
+
 void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
 
-s32 func_15144CEC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, u8 arg5) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
+/*
+ * Projects world point pos through viewport's matrix (D_800D9D10) to screen coordinates in screen[2].
+ * Returns 0 when the depth is outside (D_800D9B20, 6000). The optional outputs get the projection's
+ * remaining terms and 1 / depth.
+ */
+s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport) {
+    f32 a;
+    f32 depth;
+    f32 invDepth;
     f32 x;
     f32 y;
 
-    if (arg2 == NULL) {
-        arg2 = &sp44;
+    if (outA == NULL) {
+        outA = &a;
     }
-    if (arg3 == NULL) {
-        arg3 = &sp40;
+    if (outDepth == NULL) {
+        outDepth = &depth;
     }
-    if (arg4 == NULL) {
-        arg4 = &sp3C;
+    if (outInvDepth == NULL) {
+        outInvDepth = &invDepth;
     }
-    func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg5 << 6)), arg0[0], arg0[1], arg0[2], arg1, arg1 + 1, arg2, arg3);
-    if ((6000.0f <= *arg3) || (*arg3 <= D_800D9B20)) {
+    func_150A7A00((s32)((u8 *)D_800D9D10 + viewport * sizeof(Mtx)), pos[0], pos[1], pos[2], screen, screen + 1,
+                  outA, outDepth);
+    if ((6000.0f <= *outDepth) || (*outDepth <= D_800D9B20)) {
         return 0;
     }
-    if (*arg3 != 0.0f) {
-        *arg4 = 1.0f / *arg3;
+    if (*outDepth != 0.0f) {
+        *outInvDepth = 1.0f / *outDepth;
     } else {
         return 0;
     }
-    x = ((Struct15144CEC *)D_800BE628)[arg5].unkC;
-    y = ((Struct15144CEC *)D_800BE628)[arg5].unk10;
-    arg1[0] = ((Struct15144CEC *)D_800BE628)[arg5].unk34 + (arg1[0] * (x + 5.0f)) * *arg4;
-    arg1[1] = ((Struct15144CEC *)D_800BE628)[arg5].unk38 - (arg1[1] * (y + 5.0f)) * *arg4;
-    return 1;
-}
-struct struct_15144E80 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-};
-
-s32 func_15144E80(struct struct_15144E80 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3) {
-    struct17 sp54;
-    struct17 sp48;
-    struct17 sp3C;
-    struct17 sp30;
-    struct17 sp24;
-    struct17 sp18;
-
-    if (arg3 != NULL) {
-    } else {
-        arg3 = &sp30;
-    }
-
-    ((struct17 *)&sp3C)->unk0 = (f32)arg0->unk0;
-    ((struct17 *)&sp3C)->unk4 = (f32)arg0->unk2;
-    ((struct17 *)&sp3C)->unk8 = (f32)arg0->unk4;
-    ((struct17 *)&sp48)->unk0 = (f32)arg0->unk6;
-    ((struct17 *)&sp48)->unk4 = (f32)arg0->unk8;
-    ((struct17 *)&sp48)->unk8 = (f32)arg0->unkA;
-    ((struct17 *)&sp54)->unk0 = (f32)arg0->unkC;
-    ((struct17 *)&sp54)->unk4 = (f32)arg0->unkE;
-    ((struct17 *)&sp54)->unk8 = (f32)arg0->unk10;
-
-    if ((((struct17 *)&sp48)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp48)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp48)->unk8 == ((struct17 *)&sp3C)->unk8)) {
-        return 0;
-    }
-    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp3C)->unk8)) {
-        return 0;
-    }
-    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp48)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp48)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp48)->unk8)) {
-        return 0;
-    }
-
-    sp24.unk0 = ((struct17 *)&sp3C)->unk0 - ((struct17 *)&sp48)->unk0;
-    sp24.unk4 = ((struct17 *)&sp3C)->unk4 - ((struct17 *)&sp48)->unk4;
-    sp24.unk8 = ((struct17 *)&sp3C)->unk8 - ((struct17 *)&sp48)->unk8;
-    sp18.unk0 = ((struct17 *)&sp54)->unk0 - ((struct17 *)&sp48)->unk0;
-    sp18.unk4 = ((struct17 *)&sp54)->unk4 - ((struct17 *)&sp48)->unk4;
-    sp18.unk8 = ((struct17 *)&sp54)->unk8 - ((struct17 *)&sp48)->unk8;
-
-    func_151450B4(&sp24, &sp18, arg3);
-    func_151450B4(&sp24, arg3, arg1);
-    *arg2 = sp24;
+    x = ((Viewport15144CEC *)D_800BE628)[viewport].unkC;
+    y = ((Viewport15144CEC *)D_800BE628)[viewport].unk10;
+    screen[0] = ((Viewport15144CEC *)D_800BE628)[viewport].unk34 + (screen[0] * (x + 5.0f)) * *outInvDepth;
+    screen[1] = ((Viewport15144CEC *)D_800BE628)[viewport].unk38 - (screen[1] * (y + 5.0f)) * *outInvDepth;
     return 1;
 }
 
-void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
-    arg2->unk4 = arg0->unk8 * arg1->unk0 - arg0->unk0 * arg1->unk8;
-    arg2->unk8 = arg0->unk0 * arg1->unk4 - arg0->unk4 * arg1->unk0;
+/* A triangle as three s16 vertices. */
+typedef struct {
+    s16 v0[3];
+    s16 v1[3];
+    s16 v2[3];
+} Tri15144E80;
+
+/*
+ * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
+ * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
+ */
+s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struct17 *normal) {
+    f32 c[3];
+    f32 b[3];
+    f32 a[3];
+    struct17 normalBuf;
+    struct17 edge0;
+    struct17 edge1;
+
+    if (normal == NULL) {
+        normal = &normalBuf;
+    }
+
+    a[0] = tri->v0[0];
+    a[1] = tri->v0[1];
+    a[2] = tri->v0[2];
+    b[0] = tri->v1[0];
+    b[1] = tri->v1[1];
+    b[2] = tri->v1[2];
+    c[0] = tri->v2[0];
+    c[1] = tri->v2[1];
+    c[2] = tri->v2[2];
+
+    if ((a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2])) {
+        return 0;
+    }
+    if ((a[0] == c[0]) && (a[1] == c[1]) && (a[2] == c[2])) {
+        return 0;
+    }
+    if ((b[0] == c[0]) && (b[1] == c[1]) && (b[2] == c[2])) {
+        return 0;
+    }
+
+    edge0.unk0 = a[0] - b[0];
+    edge0.unk4 = a[1] - b[1];
+    edge0.unk8 = a[2] - b[2];
+    edge1.unk0 = c[0] - b[0];
+    edge1.unk4 = c[1] - b[1];
+    edge1.unk8 = c[2] - b[2];
+
+    func_151450B4(&edge0, &edge1, normal);
+    func_151450B4(&edge0, normal, binormal);
+    *edgeOut = edge0;
+    return 1;
 }
 
-s32 func_15145128(struct17 *arg0, struct17 *arg1, f32 *arg2, f32 *arg3) {
+/* Cross product out = a x b. */
+void func_151450B4(struct17 *a, struct17 *b, struct17 *out) {
+    out->unk0 = a->unk4 * b->unk8 - a->unk8 * b->unk4;
+    out->unk4 = a->unk8 * b->unk0 - a->unk0 * b->unk8;
+    out->unk8 = a->unk0 * b->unk4 - a->unk4 * b->unk0;
+}
+
+/* Normalizes v into out; returns 0 for a zero vector. length and invLength are optional outputs. */
+s32 func_15145128(struct17 *v, struct17 *out, f32 *length, f32 *invLength) {
     f32 sq;
-    f32 sp0;
+    f32 invBuf;
 
-    if (arg3 != 0) {
-    } else {
-        arg3 = &sp0;
+    if (invLength == NULL) {
+        invLength = &invBuf;
     }
-    sq = arg0->unk0 * arg0->unk0 + arg0->unk4 * arg0->unk4 + arg0->unk8 * arg0->unk8;
+    sq = v->unk0 * v->unk0 + v->unk4 * v->unk4 + v->unk8 * v->unk8;
     if (sq == 0.0f) {
         return 0;
     }
-    if (arg2 != 0) {
-        *arg2 = sqrtf(sq);
-        *arg3 = 1.0f / sqrtf(sq);
+    if (length != NULL) {
+        *length = sqrtf(sq);
+        *invLength = 1.0f / sqrtf(sq);
     } else {
-        *arg3 = 1.0f / sqrtf(sq);
+        *invLength = 1.0f / sqrtf(sq);
     }
-    arg1->unk0 = *arg3 * arg0->unk0;
-    arg1->unk4 = *arg3 * arg0->unk4;
-    arg1->unk8 = *arg3 * arg0->unk8;
+    out->unk0 = *invLength * v->unk0;
+    out->unk4 = *invLength * v->unk4;
+    out->unk8 = *invLength * v->unk8;
     return 1;
 }
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
 
-s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 arg4, struct17 *arg5, struct17 *arg6, f32 *arg7, f32 *arg8) {
-    f32 temp_f0;
+s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar);
 
-    if (func_151452C4(arg0, arg1, arg2, arg3, arg5, arg6, arg7, arg8) != 0) {
-        temp_f0 = *arg7;
-        if (temp_f0 < 0.0f) {
-            if (*arg8 < 0.0f) {
+/* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
+s32 func_151451F0(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, f32 maxDist, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
+    f32 t;
+
+    if (func_151452C4(origin, dir, center, radius, hitNear, hitFar, tNear, tFar) != 0) {
+        t = *tNear;
+        if (t < 0.0f) {
+            if (*tFar < 0.0f) {
                 return 0;
             }
         }
-        if (0.0f <= temp_f0) {
-            if (*arg8 < 0.0f) {
+        if (0.0f <= t) {
+            if (*tFar < 0.0f) {
                 return 1;
             }
         }
-        if (temp_f0 < arg4) {
+        if (t < maxDist) {
             return 1;
         }
         return 0;
     }
     return 0;
 }
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7) {
+
+/*
+ * Intersects the ray origin + t * dir (dir normalized) with a sphere. Writes both intersection points
+ * and their t; returns 0 on a miss or when the near point is behind the origin.
+ */
+s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
     f32 dx;
     f32 dy;
     f32 dz;
-    struct17 dir;
-    struct17 org;
+    struct17 d;
+    struct17 o;
     f32 proj;
     f32 rr;
     f32 root;
@@ -1846,14 +1881,14 @@ s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, stru
     f32 t1;
     f32 dd;
 
-    dx = arg2->unk0 - arg0->unk0;
-    dy = arg2->unk4 - arg0->unk4;
-    dz = arg2->unk8 - arg0->unk8;
-    dir = *arg1;
-    org = *arg0;
+    dx = center->unk0 - origin->unk0;
+    dy = center->unk4 - origin->unk4;
+    dz = center->unk8 - origin->unk8;
+    d = *dir;
+    o = *origin;
     dd = (dx * dx) + (dy * dy) + (dz * dz);
-    proj = (dx * dir.unk0) + (dy * dir.unk4) + (dz * dir.unk8);
-    rr = arg3 * arg3;
+    proj = (dx * d.unk0) + (dy * d.unk4) + (dz * d.unk8);
+    rr = radius * radius;
     if (rr < dd - (proj * proj)) {
         return 0;
     }
@@ -1863,360 +1898,350 @@ s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, stru
     }
     t0 = proj - root;
     t1 = proj + root;
-    arg4->unk0 = (t0 * dir.unk0) + org.unk0;
-    arg4->unk4 = (t0 * dir.unk4) + org.unk4;
-    arg4->unk8 = (t0 * dir.unk8) + org.unk8;
-    *arg6 = t0;
-    arg5->unk0 = (t1 * dir.unk0) + org.unk0;
-    arg5->unk4 = (t1 * dir.unk4) + org.unk4;
-    arg5->unk8 = (t1 * dir.unk8) + org.unk8;
-    *arg7 = t1;
+    hitNear->unk0 = (t0 * d.unk0) + o.unk0;
+    hitNear->unk4 = (t0 * d.unk4) + o.unk4;
+    hitNear->unk8 = (t0 * d.unk8) + o.unk8;
+    *tNear = t0;
+    hitFar->unk0 = (t1 * d.unk0) + o.unk0;
+    hitFar->unk4 = (t1 * d.unk4) + o.unk4;
+    hitFar->unk8 = (t1 * d.unk8) + o.unk8;
+    *tFar = t1;
     {
         struct17 diff;
 
-        diff.unk0 = arg4->unk0 - arg0->unk0;
-        diff.unk4 = arg4->unk4 - arg0->unk4;
-        diff.unk8 = arg4->unk8 - arg0->unk8;
-        if (func_15144A74(&diff, arg1) < 0.0f) {
+        diff.unk0 = hitNear->unk0 - origin->unk0;
+        diff.unk4 = hitNear->unk4 - origin->unk4;
+        diff.unk8 = hitNear->unk8 - origin->unk8;
+        if (func_15144A74(&diff, dir) < 0.0f) {
             return 0;
         }
         return 1;
     }
 }
 
-s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
-    f32 tmp1;
-    f32 tmp2;
-    f32 tmp3;
-    struct17 *temp_v0;
+/* Whether point lies within radius of D_800DBFF0[index]'s position (unk2F8). */
+s32 func_151454BC(u8 index, f32 radius, struct17 *point) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    struct17 *pos;
 
-    temp_v0 = func_15144B34(arg0);
-    tmp1 = arg2->unk0 - temp_v0->unk0;
-    tmp2 = arg2->unk4 - temp_v0->unk4;
-    tmp3 = arg2->unk8 - temp_v0->unk8;
+    pos = func_15144B34(index);
+    dx = point->unk0 - pos->unk0;
+    dy = point->unk4 - pos->unk4;
+    dz = point->unk8 - pos->unk8;
 
-    if ((arg1 * arg1) < ((tmp1 * tmp1) + (tmp2 * tmp2) + (tmp3 * tmp3))) {
+    if ((radius * radius) < ((dx * dx) + (dy * dy) + (dz * dz))) {
         return 0;
     }
     return 1;
 }
 
-s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t);
 
-void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
-    f32 sp0;
+/* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
+void func_15145548(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+    f32 tBuf;
 
-    if (arg4 != 0) {
-    } else {
-        arg4 = &sp0;
+    if (t == NULL) {
+        t = &tBuf;
     }
-    if (func_1514563C(arg0, arg1, arg2, arg3, arg4) != 0) {
-        if (*arg4 < 0.0f) {
-            *arg3 = *arg0;
-        } else if (1.0f < *arg4) {
-            arg3->unk0 = arg0->unk0 + arg1->unk0;
-            arg3->unk4 = arg0->unk4 + arg1->unk4;
-            arg3->unk8 = arg0->unk8 + arg1->unk8;
+    if (func_1514563C(start, dir, point, out, t) != 0) {
+        if (*t < 0.0f) {
+            *out = *start;
+        } else if (1.0f < *t) {
+            out->unk0 = start->unk0 + dir->unk0;
+            out->unk4 = start->unk4 + dir->unk4;
+            out->unk8 = start->unk8 + dir->unk8;
         }
     } else {
-        *arg3 = *arg0;
+        *out = *start;
     }
 }
-s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
-    f32 sp1C[1];
+
+/* Closest point to `point` on the line start + t * dir, into out; returns 0 when dir is zero. */
+s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+    f32 tBuf[1];
     f32 denom;
     f32 dot0;
     f32 dot1;
 
-    if (arg4 == NULL) {
-        arg4 = &sp1C[-3];
+    if (t == NULL) {
+        // matching: the fallback slot is 3 words below the buffer (sp+0x10); no declaration places it there
+        t = &tBuf[-3];
     }
-    denom = (arg1->unk0 * arg1->unk0) + (arg1->unk4 * arg1->unk4) + (arg1->unk8 * arg1->unk8);
+    denom = (dir->unk0 * dir->unk0) + (dir->unk4 * dir->unk4) + (dir->unk8 * dir->unk8);
     if (denom == 0.0f) {
         return 0;
     }
-    dot0 = (arg1->unk0 * arg0->unk0) + (arg1->unk4 * arg0->unk4) + (arg1->unk8 * arg0->unk8);
-    dot1 = (arg1->unk0 * arg2->unk0) + (arg1->unk4 * arg2->unk4) + (arg1->unk8 * arg2->unk8);
-    *arg4 = (dot1 - dot0) / denom;
-    arg3->unk0 = arg0->unk0 + (*arg4 * arg1->unk0);
-    arg3->unk4 = arg0->unk4 + (*arg4 * arg1->unk4);
-    arg3->unk8 = arg0->unk8 + (*arg4 * arg1->unk8);
+    dot0 = (dir->unk0 * start->unk0) + (dir->unk4 * start->unk4) + (dir->unk8 * start->unk8);
+    dot1 = (dir->unk0 * point->unk0) + (dir->unk4 * point->unk4) + (dir->unk8 * point->unk8);
+    *t = (dot1 - dot0) / denom;
+    out->unk0 = start->unk0 + (*t * dir->unk0);
+    out->unk4 = start->unk4 + (*t * dir->unk4);
+    out->unk8 = start->unk8 + (*t * dir->unk8);
     return 1;
 }
 
-void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
-    s16 phi_t0;
-    s16 phi_v1;
+/*
+ * Aim of an actor (or of the vehicle it rides, model 150 with matrix physics): writes the point
+ * 2000 units along its yaw/pitch to target and, optionally, unit-1000 direction vectors for the
+ * pitch and for the pitch plus pitchOffset (radians).
+ */
+void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset) {
+    s16 yaw;
+    s16 pitch;
     volatile f32 angle;
-    f32 spC;
-    f32 sp8[1];
-    f32 cpy;
+    f32 offsetPitchRad;
+    f32 horizontal[1];
+    f32 pitchDeg;
     f32 temp;
-    f32 sp4[1];
-    f32 sp0[1];
+    f32 yawRad[1];
+    f32 pitchRad[1];
 
-    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
-        phi_t0 = arg0->unk7A + arg0->unk31C->unk80;
-    } else if (arg0->unk31C != NULL) {
-        phi_t0 = arg0->unk7A - arg0->unk31C->unk12;
+    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
+        yaw = actor->unk7A + actor->unk31C->unk80;
+    } else if (actor->unk31C != NULL) {
+        yaw = actor->unk7A - actor->unk31C->unk12;
     } else {
-        phi_t0 = arg0->unk7A;
+        yaw = actor->unk7A;
     }
-    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
-        phi_v1 = arg0->unk31C->unk82 + 1024;
+    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
+        pitch = actor->unk31C->unk82 + 1024;
     } else {
-        phi_v1 = arg0->unk1D1 * 200;
+        pitch = actor->unk1D1 * 200;
     }
-    /* -g3 scope = uopt block boundary; the dead phi_v1 store keeps cpy from being copy-propagated */
+    // matching: this scope with its unused pad is a uopt block boundary, and the dead store to
+    // pitch keeps pitchDeg from being copy-propagated
     {
         s32 pad0;
 
-        cpy = phi_v1 * 0.005493164f;
-        phi_v1 = 0;
+        pitchDeg = pitch * (360.0f / 65536.0f);
+        pitch = 0;
     }
-    angle = cpy;
+    // matching: the volatile round trip and the pitchDeg/temp copies steer IDO's FP register colouring
+    angle = pitchDeg;
     temp = angle;
-    cpy = temp;
-    temp = temp * 0.01745329238f;
-    sp0[0] = temp;
-    func_1505A184(phi_t0, 2000.0f, cpy, &arg1->unk0, &arg1->unk8, &arg1->unk4);
-    if (arg2 != NULL) {
-        arg2->unk4 = cosf(sp0[0]) * 1000.0f;
-        sp8[0] = sinf(sp0[0]) * 1000.0f;
-        sp4[0] = phi_t0 * 9.587380191e-05f;
-        arg2->unk0 = sp8[0] * cosf(sp4[0]);
-        arg2->unk8 = -sp8[0] * sinf(sp4[0]);
-        if (arg3 != NULL) {
-            spC = sp0[0] + arg4;
-            arg3->unk4 = cosf(spC) * 1000.0f;
-            sp8[0] = sinf(spC) * 1000.0f;
-            arg3->unk0 = sp8[0] * cosf(sp4[0]);
-            arg3->unk8 = -sp8[0] * sinf(sp4[0]);
+    pitchDeg = temp;
+    temp = temp * 0.01745329238f; /* degrees to radians */
+    pitchRad[0] = temp;
+    func_1505A184(yaw, 2000.0f, pitchDeg, &target->unk0, &target->unk8, &target->unk4);
+    if (dir != NULL) {
+        dir->unk4 = cosf(pitchRad[0]) * 1000.0f;
+        horizontal[0] = sinf(pitchRad[0]) * 1000.0f;
+        yawRad[0] = yaw * 9.587380191e-05f; /* 2 pi / 65536 */
+        dir->unk0 = horizontal[0] * cosf(yawRad[0]);
+        dir->unk8 = -horizontal[0] * sinf(yawRad[0]);
+        if (offsetDir != NULL) {
+            offsetPitchRad = pitchRad[0] + pitchOffset;
+            offsetDir->unk4 = cosf(offsetPitchRad) * 1000.0f;
+            horizontal[0] = sinf(offsetPitchRad) * 1000.0f;
+            offsetDir->unk0 = horizontal[0] * cosf(yawRad[0]);
+            offsetDir->unk8 = -horizontal[0] * sinf(yawRad[0]);
         }
     }
 }
-// NON-MATCHING: 90% there
-// void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
-//     struct194 tmp;
-//     f32 temp_f6;
-//     s16 phi_v1;
-//     s16 phi_t0;
-//
-//     if ((arg0->unk4 == 0x96) && ((arg0->unk31C->unk7D != 0))) {
-//         phi_t0 = arg0->unk7A + arg0->unk31C->unk80;
-//     } else {
-//         if (arg0->unk31C != 0) {
-//             phi_t0 = arg0->unk7A - arg0->unk31C->unk12;
-//         } else {
-//             phi_t0 = arg0->unk7A;
-//         }
-//     }
-//     if ((arg0->unk4 == 0x96) && (arg0->unk31C->unk7D != 0)) {
-//         phi_v1 = arg0->unk31C->unk82 + 1024;
-//     } else {
-//         phi_v1 = arg0->unk1D1 * 200;
-//     }
-//     tmp.unk14 = phi_t0;
-//     tmp.unk10 = phi_v1 * 0.005493164f;
-//     tmp.unk0 = tmp.unk10 * D_800A56B4;
-//     func_1505A184(phi_t0, 2000.0f, tmp.unk10, &arg1->unk0, &arg1->unk8, &arg1->unk4);
-//     if (arg2 != 0) {
-//         arg2->unk4 = cosf(tmp.unk0) * 1000.0f;
-//         temp_f6 = sinf(tmp.unk0) * 1000.0f;
-//         tmp.unk8 = temp_f6;
-//         tmp.unk4 = phi_t0 * D_800A56B8;
-//         arg2->unk0 = cosf(tmp.unk4) * tmp.unk8;
-//         arg2->unk8 = sinf(tmp.unk4) * -temp_f6;
-//         if (arg3 != 0) {
-//             tmp.unkC = tmp.unk0 + arg4;
-//             arg3->unk4 = cosf(tmp.unkC) * 1000.0f;
-//             tmp.unk8 = sinf(tmp.unkC) * 1000.0f;
-//             arg3->unk0 = cosf(tmp.unk4) * tmp.unk8;
-//             arg3->unk8 = sinf(tmp.unk4) * -tmp.unk8;
-//         }
-//     }
-// }
 
-void func_15145974(struct17 *arg0, f32 *arg1, f32 *arg2) {
-    *arg1 = func_150484A0(arg0->unk0, arg0->unk8) * D_800A56BC;
-    if (arg2 != NULL) {
-        *arg2 = (func_150484A0(sqrtf(arg0->unk0 * arg0->unk0 + arg0->unk8 * arg0->unk8), arg0->unk4) * D_800A56C0) - 90.0f;
+/* Heading (and optionally elevation, from -90) in degrees of a vector; func_150484A0 is atan2. */
+void func_15145974(struct17 *v, f32 *heading, f32 *elevation) {
+    *heading = func_150484A0(v->unk0, v->unk8) * 57.29577637f;
+    if (elevation != NULL) {
+        *elevation = (func_150484A0(sqrtf(v->unk0 * v->unk0 + v->unk8 * v->unk8), v->unk4) * 57.29577637f) - 90.0f;
     }
 }
 
-f32 func_15145A0C(f32 arg0, f32 arg1, f32 arg2) {
-    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * arg1;
+f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
+    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * scale;
 }
 
-
-void func_15145A50(struct127 *arg0) {
-    arg0->unk5 = 3;
+void func_15145A50(struct127 *actor) {
+    actor->unk5 = 3;
     if (D_800BE9F0 != 51) {
-        if ((D_800BE616 != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
-            arg0->interaction_state = 5;
-            if (arg0->unk31C != NULL) {
-                arg0->unk31C->unk78 = 0;
+        if ((D_800BE616 != 0) || (actor->interaction_state == 5) || (actor->interaction_state == 1) ||
+            (actor->interaction_state == 21)) {
+            actor->interaction_state = 5;
+            if (actor->unk31C != NULL) {
+                actor->unk31C->unk78 = 0;
             }
         } else {
-            func_15053694(arg0);
+            func_15053694(actor);
         }
     }
 }
 
 void func_1515C1A0(void *, struct17 *, f32 *, f32 *);
 
-s32 func_15145AD8(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6, struct17 *arg7) {
-    struct17 sp7C;
-    f32 sp78;
-    f32 sp74;
-    struct17 sp68;
-    struct17 sp5C;
-    struct17 sp50;
+/*
+ * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
+ * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
+ */
+s32 func_15145AD8(struct17 *start, struct17 *dir, struct127 *actor, struct17 *hitNear, struct17 *hitFar,
+                  f32 *radius, f32 *arg6, struct17 *center) {
+    struct17 centerBuf;
+    f32 radiusBuf;
+    f32 arg6Buf;
+    struct17 s;
+    struct17 d;
+    struct17 c;
 
-    if (arg5 != NULL) {
-        arg5 = &sp78;
+    /* sic: the fallbacks replace the caller's pointers when they are given */
+    if (radius != NULL) {
+        radius = &radiusBuf;
     }
     if (arg6 != NULL) {
-        arg6 = &sp74;
+        arg6 = &arg6Buf;
     }
-    if (arg7 != NULL) {
-        arg7 = &sp7C;
+    if (center != NULL) {
+        center = &centerBuf;
     }
-    func_1515C1A0(arg2, arg7, arg5, arg6);
+    func_1515C1A0(actor, center, radius, arg6);
     if (*arg6 == 0.0f) {
         return 0;
     }
-    if (*arg5 == 0.0f) {
+    if (*radius == 0.0f) {
         return 0;
     }
     {
-    f32 sp4C;
-    f32 sp48;
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    sp40 = arg2->unkDC;
-    sp3C = arg2->unkE0;
-    sp68.unk0 = arg0->unk0;
-    sp68.unk4 = arg0->unk4 * sp40;
-    sp68.unk8 = arg0->unk8;
-    sp5C.unk0 = arg1->unk0;
-    sp5C.unk4 = arg1->unk4 * sp40;
-    sp5C.unk8 = arg1->unk8;
+    f32 length;
+    f32 tNear;
+    f32 tFar;
+    f32 squash;
+    f32 unsquash;
+    squash = actor->unkDC;
+    unsquash = actor->unkE0;
+    s.unk0 = start->unk0;
+    s.unk4 = start->unk4 * squash;
+    s.unk8 = start->unk8;
+    d.unk0 = dir->unk0;
+    d.unk4 = dir->unk4 * squash;
+    d.unk8 = dir->unk8;
     {
-    f32 sp38;
-    if (func_15145128(&sp5C, &sp5C, &sp4C, &sp38) == 0) {
+    f32 invLength;
+    if (func_15145128(&d, &d, &length, &invLength) == 0) {
         return 0;
     }
-    sp50.unk0 = arg7->unk0;
-    sp50.unk4 = arg7->unk4 * sp40;
-    sp50.unk8 = arg7->unk8;
-    if (func_151451F0(&sp68, &sp5C, &sp50, *arg5, sp4C, arg3, arg4, &sp48, &sp44) == 0) {
+    c.unk0 = center->unk0;
+    c.unk4 = center->unk4 * squash;
+    c.unk8 = center->unk8;
+    if (func_151451F0(&s, &d, &c, *radius, length, hitNear, hitFar, &tNear, &tFar) == 0) {
         return 0;
     }
-    arg3->unk4 *= sp3C;
-    arg4->unk4 *= sp3C;
+    hitNear->unk4 *= unsquash;
+    hitFar->unk4 *= unsquash;
     }
     }
     return 1;
 }
 
-u8 func_15145C90(s32 arg0) {
-    if (arg0 < 0) {
+/* Whether entry `index` of D_800DBEF4 has flag 0x80 in unk6F (true for a negative index). */
+u8 func_15145C90(s32 index) {
+    if (index < 0) {
         return 1;
     } else {
-        return (D_800DBEF4[arg0].unk6F & 0x80) == 0x80;
+        return (D_800DBEF4[index].unk6F & 0x80) == 0x80;
     }
 }
 
-void func_15145CD0(u8 *arg0, f32 **arg1, f32 **arg2, s32 arg3) {
-    f32 matrix[4][4];
+/* A rotation (as passed to func_150A8050) and an integer position. */
+typedef struct {
+    /* 0x00 */ f32 rot[3];
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ s16 pos[3];
+} Placement;
+
+/* Transforms `count` points (given by pointer) by the placement. */
+void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
+    f32 mf[4][4];
     f32 **src;
     f32 **dst;
-    f32 *in;
-    f32 *out;
+    f32 *p;
+    f32 *q;
 
-    func_150A8050(matrix, *(f32 *)(arg0 + 0), *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8));
-    matrix[3][0] = *(s16 *)(arg0 + 0x10);
-    matrix[3][1] = *(s16 *)(arg0 + 0x12);
-    matrix[3][2] = *(s16 *)(arg0 + 0x14);
-    if (arg3 <= 0) {
+    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
+    mf[3][0] = placement->pos[0];
+    mf[3][1] = placement->pos[1];
+    mf[3][2] = placement->pos[2];
+    if (count <= 0) {
         return;
     }
-    src = arg1;
-    dst = arg2;
+    src = in;
+    dst = out;
     do {
-        in = *src;
-        out = *dst;
-        func_150A7960(matrix[0], in[0], in[1], in[2], out, out + 1, out + 2);
-        arg3--;
+        p = *src;
+        q = *dst;
+        func_150A7960(mf[0], p[0], p[1], p[2], q, q + 1, q + 2);
+        count--;
         src++;
         dst++;
-    } while (arg3 > 0);
+    } while (count > 0);
 }
-typedef struct {
-    f32 x, y, z;
-} Func15145DB4_Vec3f;
 
-void func_15145DB4(u8 *arg0, Func15145DB4_Vec3f *arg1, Func15145DB4_Vec3f *arg2, s32 arg3) {
-    f32 matrix[4][4];
+/* Transforms the `count` points in[] by the placement into out[]. */
+void func_15145DB4(Placement *placement, struct17 *in, struct17 *out, s32 count) {
+    f32 mf[4][4];
     s32 i;
 
-    func_150A8050(matrix, *(f32 *)(arg0 + 0), *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8));
-    matrix[3][0] = *(s16 *)(arg0 + 0x10);
-    matrix[3][1] = *(s16 *)(arg0 + 0x12);
-    matrix[3][2] = *(s16 *)(arg0 + 0x14);
-    for (i = 0; arg3 > 0; i++) {
-        func_150A7960(matrix[0], arg1[i].x, arg1[i].y, arg1[i].z, &arg2[i].x, &arg2[i].y, &arg2[i].z);
-        arg3--;
+    func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
+    mf[3][0] = placement->pos[0];
+    mf[3][1] = placement->pos[1];
+    mf[3][2] = placement->pos[2];
+    for (i = 0; count > 0; i++) {
+        func_150A7960(mf[0], in[i].unk0, in[i].unk4, in[i].unk8, &out[i].unk0, &out[i].unk4, &out[i].unk8);
+        count--;
     }
 }
-void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
+
+/* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
+void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
     f32 *input;
-    f32 transform[4][4];
+    f32 mf[4][4];
     f32 *output;
     f32 **outputs;
 
     if (D_800C3E90 != 0) {
-        guMtxL2F(transform, arg2);
-        if (arg3 > 0) {
-            f32 **inputs = arg0;
+        guMtxL2F(mf, mtx);
+        if (count > 0) {
+            f32 **inputs = offsets;
 
-            outputs = arg1;
+            outputs = results;
             do {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960(transform[0], input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960(mf[0], input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
-                    func_15142314(arg2, 0, *outputs);
+                    func_15142314(mtx, 0, *outputs);
                 }
-                arg3--;
+                count--;
                 inputs++;
                 outputs++;
-            } while (arg3 > 0);
+            } while (count > 0);
         }
     } else {
-        if (arg3 > 0) {
-            f32 **inputs = arg0;
+        if (count > 0) {
+            f32 **inputs = offsets;
 
-            outputs = arg1;
+            outputs = results;
             do {
                 input = *inputs;
                 if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
                     output = *outputs;
-                    func_150A7960((f32 *)arg2, input[0], input[1], input[2], output, output + 1, output + 2);
+                    func_150A7960((f32 *)mtx, input[0], input[1], input[2], output, output + 1, output + 2);
                 } else {
-                    func_15142314(arg2, 0, *outputs);
+                    func_15142314(mtx, 0, *outputs);
                 }
-                arg3--;
+                count--;
                 inputs++;
                 outputs++;
-            } while (arg3 > 0);
+            } while (count > 0);
         }
     }
 }
-s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/*
+ * Builds two unit vectors u, v perpendicular to n (axis-aligned when n lies along an axis).
+ * Returns 0 for a zero n.
+ */
+s32 func_15146078(struct17 *n, struct17 *u, struct17 *v) {
     u8 count;
     u8 axis;
     u8 zeroAxis;
@@ -2226,55 +2251,56 @@ s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     f32 len;
     f32 invLen;
 
-    if ((arg0->unk0 == 0.0f) && (arg0->unk4 == 0.0f) && (arg0->unk8 == 0.0f)) {
+    if ((n->unk0 == 0.0f) && (n->unk4 == 0.0f) && (n->unk8 == 0.0f)) {
         return 0;
     }
 
     count = 0;
-    if (arg0->unk0 == 0.0f) {
+    if (n->unk0 == 0.0f) {
         count++;
         zeroAxis = 0;
     } else {
         axis = 0;
     }
-    if (arg0->unk4 == 0.0f) {
+    if (n->unk4 == 0.0f) {
         count++;
         zeroAxis = 1;
     } else {
         axis = 1;
     }
-    if (arg0->unk8 == 0.0f) {
+    if (n->unk8 == 0.0f) {
         count++;
         zeroAxis = 2;
     } else {
         axis = 2;
     }
 
+    // matching: double literals (0.0 / 1.0) here; f32 ones change IDO's FP register choice
     if (count == 2) {
         switch (axis) {
         case 0:
-            arg1->unk0 = 0.0;
-            arg1->unk4 = 1.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 0.0;
-            arg2->unk8 = 1.0;
+            u->unk0 = 0.0;
+            u->unk4 = 1.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 0.0;
+            v->unk8 = 1.0;
             break;
         case 1:
-            arg1->unk0 = 1.0;
-            arg1->unk4 = 0.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 0.0;
-            arg2->unk8 = 1.0;
+            u->unk0 = 1.0;
+            u->unk4 = 0.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 0.0;
+            v->unk8 = 1.0;
             break;
         case 2:
-            arg1->unk0 = 1.0;
-            arg1->unk4 = 0.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 1.0;
-            arg2->unk8 = 0.0;
+            u->unk0 = 1.0;
+            u->unk4 = 0.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 1.0;
+            v->unk8 = 0.0;
             break;
         }
         return 1;
@@ -2287,13 +2313,13 @@ s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
         j = 2;
         k = 1;
     }
-    ((f32 *)arg1)[i] = 1.0;
-    ((f32 *)arg1)[j] = 1.0;
-    ((f32 *)arg1)[k] = -((f32 *)arg0)[i] - (((f32 *)arg0)[j] / ((f32 *)arg0)[k]);
-    func_151450B4(arg1, arg0, arg2);
-    func_151450B4(arg2, arg0, arg1);
-    func_15145128(arg1, arg1, &len, &invLen);
-    func_15145128(arg2, arg2, &len, &invLen);
+    ((f32 *)u)[i] = 1.0;
+    ((f32 *)u)[j] = 1.0;
+    ((f32 *)u)[k] = -((f32 *)n)[i] - (((f32 *)n)[j] / ((f32 *)n)[k]);
+    func_151450B4(u, n, v);
+    func_151450B4(v, n, u);
+    func_15145128(u, u, &len, &invLen);
+    func_15145128(v, v, &len, &invLen);
     return 1;
 }
 extern u8 D_800BE9C0;
@@ -2303,33 +2329,67 @@ extern u8 D_800D9E20;
 extern u8 D_800D9E21;
 void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
 void *func_1515E544(void *, s32, u8, u8, void *);
-void *func_151462C8(void *arg0, s32 *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, struct17 *arg6, u8 arg7, s32 arg8)
-{
-  s32 temp_t1;
-  s32 temp_t2;
-  s32 temp_v1;
-  s16 temp_a1;
-  s32 var_t0;
-  s32 var_v1;
-  temp_v1 = arg5 * 4;
-  temp_t1 = *((s32 *) ((((u8 *) arg1) + temp_v1) + 8));
-  if (temp_t1 != 0)
-  {
-    temp_t2 = arg1[6];
-    if (temp_t2 != 0)
-    {
- do { if (arg2 == 1) { if (arg3 != 0) { if (((((*((s32 *) (((u8 *) arg3) + 0))) == 0) || (arg4 != (*(((u8 *) arg3) + 0x3B)))) || ((*(((u8 *) arg3) + 4)) == 0xFF)) || ((*(((u8 *) arg3) + 0x302)) == 0)) { arg2 = 2; } } else { arg2 = 0; } } switch (arg2) { case 1: arg0 = func_1515E544(arg0, *((s32 *) ((((u8 *) arg3) + temp_v1) + 0x304)), *(((u8 *) arg3) + 0x301), *(((u8 *) arg3) + 0x302), *((void **) (((u8 *) arg3) + 0x314))); break; case 2: arg0 = func_1515E544(arg0, D_800D9E10[arg5], D_800D9E20, D_800D9E21, D_800D9BD0[arg5][D_800BE9C0]); break; do { } while (0); case 0: default: temp_a1 = arg5; var_t0 = (arg7 & 1) ? (2) : (0); if (arg7 & 2) { var_v1 = 0x10; } else { var_v1 = 0; } arg0 = func_1515D914(arg0, temp_a1, (s32) arg6->unk0, (s32) arg6->unk4, (s32) arg6->unk8, arg8, temp_t1, arg1[0], temp_t2, arg1 + 1, arg1[7], 0, (var_v1 | 8) | var_t0, 0); break; } } while (0);
+/* Per-slot texture overrides an actor carries in its tail (struct127 has these in unk301[]). */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x301];
+    /* 0x301 */ u8 unk301;
+    /* 0x302 */ u8 unk302;
+    /* 0x303 */ u8 pad303;
+    /* 0x304 */ s32 unk304[4];
+    /* 0x314 */ void *unk314;
+} ActorTail;
+
+/*
+ * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
+ * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
+ */
+void *func_151462C8(void *gfx, s32 *model, u8 mode, struct127 *actor, u8 uniqueId, s16 slot, struct17 *pos,
+                    u8 flags, s32 arg8) {
+    ActorTail *tail = (ActorTail *)actor;
+    s32 tex;
+    s32 unk18;
+
+    tex = model[slot + 2];
+    if (tex != 0) {
+        unk18 = model[6];
+        if (unk18 != 0) {
+            if (mode == 1) {
+                if (actor != NULL) {
+                    if ((actor->interaction_state == 0) || (actor->unique_id != uniqueId) ||
+                        (actor->id == 0xFF) || (tail->unk302 == 0)) {
+                        mode = 2;
+                    }
+                } else {
+                    mode = 0;
+                }
+            }
+            switch (mode) {
+            case 1:
+                gfx = func_1515E544(gfx, tail->unk304[slot],
+                                    tail->unk301, tail->unk302,
+                                    tail->unk314);
+                break;
+            case 2:
+                gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, D_800D9BD0[slot][D_800BE9C0]);
+                break;
+            case 0:
+            default:
+                gfx = func_1515D914(gfx, slot, (s32)pos->unk0, (s32)pos->unk4, (s32)pos->unk8, arg8, tex, model[0],
+                                    unk18, model + 1, model[7], 0,
+                                    ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
+                break;
+            }
+        }
     }
-  }
-  return arg0;
+    return gfx;
 }
 
 extern s32 D_80082FA0;
 
-u8 func_151464B8(s16 *arg0) {
+/* Whether none of the players' bits (0 .. D_80082FA0) are set in flags[1]. */
+u8 func_151464B8(s16 *flags) {
     s32 i;
     s16 mask;
-    s16 field;
     s32 ret;
 
     i = 0;
@@ -2337,83 +2397,91 @@ u8 func_151464B8(s16 *arg0) {
     for (; i <= D_80082FA0; i++) {
         mask |= 1 << i;
     }
-    ret = (arg0[1] & mask) == 0;
-    field = arg0[1];
+    ret = (flags[1] & mask) == 0;
     return ret;
 }
 
-void func_15146508(struct127 *arg0, struct127 *arg1) {
-    struct193 tmp;
+/* Broadcasts message 45 (see func_151419D0) linking actors a and b. */
+void func_15146508(struct127 *a, struct127 *b) {
+    struct193 msg;
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = arg1;
-    tmp.unk8 = arg0->unique_id;
-    tmp.unk9 = arg1->unique_id;
-    func_15169040(&tmp, 45, arg0, arg1);
+    msg.unk0 = a;
+    msg.unk4 = b;
+    msg.unk8 = a->unique_id;
+    msg.unk9 = b->unique_id;
+    func_15169040(&msg, 45, a, b);
 }
 
 typedef struct {
-    u8 pad0[0x3E8];
-    Mtx *unk3E8[3];
-    u8 pad3F4[2];
-    u8 unk3F6;
-} Func1514654C_Sub48;
+    /* 0x000 */ u8 pad0[0x3E8];
+    /* 0x3E8 */ Mtx *mtx[3]; /* per frame buffer (D_800BE9C0) */
+    /* 0x3F4 */ u8 pad3F4[2];
+    /* 0x3F6 */ u8 ready;
+} AttachModel;
 
+/* Where an attachment point's matrix comes from (see func_1514654C). */
 typedef struct {
-    u8 pad0[2];
-    u8 unk2;
-    u8 pad3[0x1B];
-    u16 unk1E;
-    u16 unk20;
-    u8 pad22[0x12];
-    Mtx *unk34;
-    u8 pad38[0x10];
-    Func1514654C_Sub48 *unk48;
-} Func1514654C_Arg1;
+    /* 0x00 */ u8 pad0[2];
+    /* 0x02 */ u8 bone;      /* index into the actor's own matrices (unk1D4) */
+    /* 0x03 */ u8 pad3[0x1B];
+    /* 0x1E */ u16 partId;   /* part looked up with func_1503195C */
+    /* 0x20 */ u16 partBone;
+    /* 0x22 */ u8 pad22[0x12];
+    /* 0x34 */ Mtx *mtx;     /* per frame buffer */
+    /* 0x38 */ u8 pad38[0x10];
+    /* 0x48 */ AttachModel *model;
+} AttachPoint;
 
 s32 func_15031070(struct126 *, struct127 *, Mtx **, s32 *);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
-s32 func_1514654C(struct127 *arg0, Func1514654C_Arg1 *arg1, s32 arg2, f32 **arg3, f32 **arg4, s32 arg5) {
+/*
+ * Transforms `count` offsets by the matrix of an attachment point on the actor: a model's matrix,
+ * a part's bone, a fixed matrix, or else one of the actor's bones. Returns 0 if it is unavailable.
+ */
+s32 func_1514654C(struct127 *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
     s32 i;
     Mtx *mtx;
-    struct126 *obj;
-    Mtx *sp90;
-    s32 sp8C;
+    struct126 *part;
+    Mtx *partMtx;
+    s32 partCount;
     f32 mf[4][4];
 
-    if ((arg0 == NULL) || (arg1 == NULL) || (arg0->unk1D4 == NULL)) {
+    if ((actor == NULL) || (point == NULL) || (actor->unk1D4 == NULL)) {
         return 0;
     }
-    if (arg1->unk48 != NULL) {
-        if (arg1->unk48->unk3F6 == 0) {
+    if (point->model != NULL) {
+        if (point->model->ready == 0) {
             return 0;
         }
-        mtx = arg1->unk48->unk3E8[D_800BE9C0] + arg2;
-    } else if (arg1->unk1E) {
-        obj = func_1503195C(arg0, arg1->unk1E, 0);
-        if (obj == NULL) {
+        mtx = point->model->mtx[D_800BE9C0] + index;
+    } else if (point->partId) {
+        part = func_1503195C(actor, point->partId, 0);
+        if (part == NULL) {
             return 0;
         }
-        if (func_15031070(obj, arg0, &sp90, &sp8C) == 0) {
+        if (func_15031070(part, actor, &partMtx, &partCount) == 0) {
             return 0;
         }
-        if (*(s32 *)((u8 *)obj + 0x48) != 0) {
-            mtx = &sp90[arg1->unk20];
+        /* struct126 (shared header) has no field for the word at 0x48 */
+        if (*(s32 *)((u8 *)part + 0x48) != 0) {
+            mtx = &partMtx[point->partBone];
         } else {
-            mtx = sp90;
+            mtx = partMtx;
         }
+    // matching: an unused label ends this branch's block, changing IDO's branch layout
     end:;
-    } else if (arg1->unk34 != NULL) {
-        mtx = arg1->unk34 + D_800BE9C0;
+    } else if (point->mtx != NULL) {
+        mtx = point->mtx + D_800BE9C0;
     } else {
-        func_15145EA4(arg3, arg4, (Mtx *)arg0->unk1D4 + arg1->unk2, arg5);
+        func_15145EA4(offsets, results, (Mtx *)actor->unk1D4 + point->bone, count);
         return 1;
     }
     if (mtx != NULL) {
         guMtxL2F(mf, mtx);
-        for (i = 0; i < arg5; i++) {
-            func_150A7960(mf[0], arg3[i][0], arg3[i][1], arg3[i][2], arg4[i], arg4[i] + 1, arg4[i] + 2);
+        for (i = 0; i < count; i++) {
+            func_150A7960(mf[0], offsets[i][0], offsets[i][1], offsets[i][2], results[i], results[i] + 1,
+                          results[i] + 2);
         }
     } else {
         return 0;
@@ -2421,35 +2489,31 @@ s32 func_1514654C(struct127 *arg0, Func1514654C_Arg1 *arg1, s32 arg2, f32 **arg3
     return 1;
 }
 
-s32 func_1514672C(struct17 *arg0) {
-    f32 temp_f2;
-    f32 temp_f0;
+/* Whether a position lies inside the world bounds (|x|, |z| <= 19500 and -9500 <= y <= 19500). */
+s32 func_1514672C(struct17 *pos) {
+    f32 limit;
+    f32 y;
 
-    temp_f2 = D_800A56C4;
-block_1514672C:
-    if ((temp_f2 < fabsf(arg0->unk0)) || (temp_f2 < fabsf(arg0->unk8)) || (temp_f0 = arg0->unk4, (temp_f2 < temp_f0)) || (temp_f0 < D_800A56C8)) {
+    limit = 19500.0f;
+    if ((limit < fabsf(pos->unk0)) || (limit < fabsf(pos->unk8)) || (y = pos->unk4, (limit < y)) || (y < -9500.0f)) {
         return 0;
     }
     return 1;
 }
-// NON-MATCHING: JUSTREG: first 3 statements are out of order
-// s32 func_1514672C(struct17 *arg0) {
-//     if ((D_800A56C4 < fabsf(arg0->unk0)) || (D_800A56C4 < fabsf(arg0->unk8)) || (D_800A56C4 < arg0->unk4) || (arg0->unk4 < D_800A56C8)) {
-//         return 0;
-//     } else {
-//         return 1;
-//     }
-// }
 
-void func_151467A4(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7) {
-    *arg0 = *arg0 - D_800BE9A4;
-    if (*arg0 < 0.0f) {
-        *arg0 = func_150ADA68() * arg1;
+/*
+ * Random drift: when the timer runs out it restarts at a random time below maxTime and picks a new
+ * target in [lo, mid) (3 in 4) or [mid, hi); value then eases towards the target by rate.
+ */
+void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
+    *timer = *timer - D_800BE9A4;
+    if (*timer < 0.0f) {
+        *timer = func_150ADA68() * maxTime;
         if ((func_150ADA20() & 3) != 0) {
-            *arg2 = (func_150ADA68() * (arg4 - arg3)) + arg3;
+            *target = (func_150ADA68() * (mid - lo)) + lo;
         } else {
-            *arg2 = (func_150ADA68() * (arg5 - arg4)) + arg4;
+            *target = (func_150ADA68() * (hi - mid)) + mid;
         }
     }
-    *arg7 = ((*arg2 - *arg7) * arg6) + *arg7;
+    *value = ((*target - *value) * rate) + *value;
 }

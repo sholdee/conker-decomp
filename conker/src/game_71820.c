@@ -1,122 +1,124 @@
 #include <ultra64.h>
+// The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
 #define func_15048A40 func_15048A40_hdr
 #include "functions.h"
 #undef func_15048A40
 #define D_800CBE00 D_800CBE00_s32
 #define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
+#define D_800DBE5C D_800DBE5C_hdr
 #define D_800DBEF4 D_800DBEF4_hdr
 #include "variables.h"
 #undef D_800CBE00
 #undef D_800D3300
 #undef D_800DBE3C
+#undef D_800DBE5C
 #undef D_800DBEF4
 
 
-struct conker15044A28 {
-    struct conker15044A28 *next;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-};
+/* A timed node in the D_800CBE00 list, allocated by func_15044964. */
+typedef struct TriggerNode {
+    /* 0x00 */ struct TriggerNode *next;
+    /* 0x04 */ s16 lifetime; // frames left; -1 = never expires
+    /* 0x06 */ s16 x;
+    /* 0x08 */ s16 y;
+    /* 0x0A */ s16 z;
+    /* 0x0C */ u8 check;     // index into D_80085E80
+    /* 0x0D */ u8 action;    // index into D_80085E8C, run when check passes
+    /* 0x0E */ u8 delay;     // frames before check starts running
+    /* 0x0F */ u8 padF;
+} TriggerNode;
 
-extern struct conker15044A28 *D_800CBE00[];
-extern s32 (*D_80085E80[])(struct conker15044A28 *);
+/* A TriggerNode with a box volume (func_150448D0). */
+typedef struct TriggerVolume {
+    /* 0x00 */ TriggerNode node;
+    /* 0x10 */ s16 depth;
+    /* 0x12 */ s16 width;
+    /* 0x14 */ s16 height;
+    /* 0x16 */ u8 angle;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s16 *position;
+    /* 0x1C */ s16 *size;
+} TriggerVolume;
+
+extern TriggerNode *D_800CBE00;
+extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
-extern f32 D_80098D60;
-extern f32 D_80098D64;
-extern f32 D_80098D68;
 extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
 extern s32 func_15145C90(s32);
-s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+extern void *allocate_memory(s32, s32, s32, s32);
+TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
 
 #pragma function sqrtf
 
+/* Clears D_800CBD9C. */
 void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-typedef struct conker15044380Obj {
-    u8 pad0[0xF8];
-    u32 flagsF8;
-    u8 padFC[0x179];
-    u8 status275;
-} conker15044380Obj;
-
-extern u8 D_80089120;
-extern u8 D_80089123;
+extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern u8 D_800CBDD3;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 void func_1510F800(s32);
-void func_15044660(conker15044380Obj *, f32, f32, f32);
-s32 func_150AB1F0(f32, f32, f32, conker15044380Obj *, s32);
-void func_150AC3E4(f32, f32, f32, conker15044380Obj *, s32);
+void func_15044660(struct127 *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, struct127 *, s32);
+void func_150AC3E4(f32, f32, f32, struct127 *, s32);
 
-s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, conker15044380Obj *arg3, s32 arg4, s32 arg5) {
-    s32 index;
+/*
+ * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
+ * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
+ */
+s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass) {
+    s32 i;
     s32 total;
     s32 saved_mode;
-    u8 *active;
 
     D_800CBDF4 = -32768.0f;
     D_800CBDF8 = -32768.0f;
     total = 0;
-    arg3->status275 = 0;
-    func_15044660(arg3, arg0, arg1, arg2);
+    obj->pad275 = 0;
+    func_15044660(obj, x, y, z);
     saved_mode = D_800CBDD3;
-    for (active = &D_80089123, index = 3; index >= 0; index--, active--) {
-        if (*active == 1 && (index != 3 || !(arg3->flagsF8 & 0x200))) {
-            func_1510F800(index);
+    for (i = 3; i >= 0; i--) {
+        if (D_80089120[i] == 1 && (i != 3 || !(obj->unkF8 & 0x200))) {
+            func_1510F800(i);
             if (D_800DBE62 == 0) continue;
-            total += func_150AB1F0(arg0, arg1, arg2, arg3, arg4);
+            total += func_150AB1F0(x, y, z, obj, arg4);
         }
     }
-    active = &D_80089120;
-    index = 0;
-    if (arg5 != 0) {
-        do {
-            if (*active == 1) {
-                func_1510F800(index);
+    if (secondPass) {
+        for (i = 0; i < 3; i++) {
+            if (D_80089120[i] == 1) {
+                func_1510F800(i);
                 if (D_800DBE62 != 0) {
-                    func_150AC3E4(arg0, arg1, arg2, arg3, 0);
+                    func_150AC3E4(x, y, z, obj, 0);
                 }
             }
-            index++;
-            active++;
-        } while (index != 3);
+        }
     }
     func_1510F800(0);
     D_800CBDD3 = saved_mode;
     return total;
 }
 
-void func_1504452C(s16 **arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
-    s16 **src;
-    struct17 *dst;
+/* Copies a triangle's three s16 vertices into out, relative to (ox, oy, oz) and rotated about Y. */
+void func_1504452C(s16 **vertices, struct17 *out, f32 sinY, f32 cosY, f32 ox, f32 oy, f32 oz, s32 offset) {
     s16 *vtx;
     f32 x;
     f32 y;
     f32 z;
-    s32 offset;
+    s32 i;
 
-    vtx = (s16 *)arg1;
-    src = arg0;
-    for (offset = 0, dst = (struct17 *)vtx; offset != 0x24; offset += sizeof(struct17)) {
-        vtx = (s16 *)((u8 *)*src + arg7);
-        x = vtx[0] - arg4;
-        y = vtx[1] - arg5;
-        z = vtx[2] - arg6;
-        dst->unk0 = (x * arg3) + (z * arg2);
-        dst->unk4 = y;
-        dst->unk8 = (z * arg3) - (x * arg2);
-        src++;
-        dst++;
+    for (i = 0; i < 3; i++) {
+        vtx = (s16 *)((u8 *)vertices[i] + offset);
+        x = vtx[0] - ox;
+        y = vtx[1] - oy;
+        z = vtx[2] - oz;
+        out[i].unk0 = (x * cosY) + (z * sinY);
+        out[i].unk4 = y;
+        out[i].unk8 = (z * cosY) - (x * sinY);
     }
 }
 
@@ -125,50 +127,51 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(conker15044380Obj *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+void func_1507C3E0(struct127 *obj, s16 *height, s16 *arg2, s16 *arg3);
 
-void func_15044660(conker15044380Obj *arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
+void func_15044660(struct127 *obj, f32 x, f32 y, f32 z) {
     s16 height;
     s16 unk2C;
     s16 unk2A;
     s32 half;
     s32 index;
 
-    func_1507C3E0(arg0, &height, &unk2C, &unk2A);
-    if (*(s32 *)arg0 == 0x2D || *(s32 *)arg0 == 0x2E || *(s32 *)arg0 == 0x2C) {
+    func_1507C3E0(obj, &height, &unk2C, &unk2A);
+    if (obj->interaction_state == 0x2D || obj->interaction_state == 0x2E || obj->interaction_state == 0x2C) {
         D_800CBDDC = 0.0f;
         D_800CBDD8 = height;
     } else {
-        height += fabsf(arg2 - *(f32 *)(arg0->pad0 + 0x18));
-        index = (struct127 *)arg0 - D_800CC2D0;
+        height += fabsf(y - obj->y_position);
+        index = obj - D_800CC2D0;
     }
-    if (arg0->pad0[5] == 5) {
+    if (obj->unk5 == 5) {
         D_800CBDDC = 0.0f;
         D_800CBDD8 = height;
         return;
     }
-    if (arg0->pad0[0xAD] != 0) {
+    if (obj->in_water != 0) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x53) {
+    if (obj->id == 0x53) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x28) {
+    if (obj->id == 0x28) {
         half = 20;
         D_800CBDD8 = height - half;
         D_800CBDDC = half + D_800CBDD8 * 0.5f;
         return;
     }
-    if (index >= 0 && index < D_8008FD8C && *(f32 *)(arg0->pad0 + 0x28) != 0.0f) {
+    if (index >= 0 && index < D_8008FD8C && obj->unk28 != 0.0f) {
         D_800CBDD8 = height;
         D_800CBDDC = height >> 1;
         return;
     }
-    if (arg0->pad0[4] == 0x25) {
+    if (obj->id == 0x25) {
         half = height / 2;
         D_800CBDD8 = height - half;
         D_800CBDDC = half + D_800CBDD8 * 0.5f;
@@ -178,226 +181,169 @@ void func_15044660(conker15044380Obj *arg0, f32 arg1, f32 arg2, f32 arg3) {
     D_800CBDDC = height >> 1;
 }
 
-struct conker150448D0 {
-    struct conker150448D0 *next;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 padF;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 unk16;
-    u8 pad17;
-    s32 unk18;
-    s32 unk1C;
-};
+/* Adds a box trigger volume whose position and size are read from the given s16 pointers. */
+TriggerVolume *func_150448D0(s32 lifetime, s32 delay, s32 action, s32 depth, s32 width, s32 height, s32 angle,
+                             s16 *position, s16 *size) {
+    TriggerVolume *volume;
 
-struct conker150448D0 *func_150448D0(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8
-) {
-    struct conker150448D0 *ret;
-
-    ret = (struct conker150448D0 *)func_15044964(0x20, 1, arg0, arg1, arg2, 0, 0, 0);
-    if (ret == 0) {
-        return 0;
+    volume = (TriggerVolume *)func_15044964(sizeof(TriggerVolume), 1, lifetime, delay, action, 0, 0, 0);
+    if (volume == NULL) {
+        return NULL;
     }
-    ret->unk10 = arg3;
-    ret->unk12 = arg4;
-    ret->unk14 = arg5;
-    ret->unk16 = arg6;
-    ret->unk18 = arg7;
-    ret->unk1C = arg8;
-    return ret;
+    volume->depth = depth;
+    volume->width = width;
+    volume->height = height;
+    volume->angle = angle;
+    volume->position = position;
+    volume->size = size;
+    return volume;
 }
 
-s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    struct conker15044A28 *node;
-    struct conker15044A28 *head;
-    struct conker15044A28 *tail;
-    struct conker15044A28 *next;
-    s32 ret;
+/* Allocates a trigger node and appends it to the D_800CBE00 list. */
+TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z) {
+    TriggerNode *node;
+    TriggerNode *tail;
 
-    ret = allocate_memory(arg0, 1, 0, 0);
-    if (ret == 0) {
-        return 0;
+    node = allocate_memory(size, 1, 0, 0);
+    if (node == NULL) {
+        return NULL;
     }
 
-    node = (struct conker15044A28 *)ret;
-    node->next = 0;
-    node->unk4 = arg2;
-    node->unkC = arg1;
-    node->unkD = arg4;
-    node->unkE = arg3;
-    node->unk6 = arg5;
-    node->unk8 = arg6;
-    node->unkA = arg7;
+    node->next = NULL;
+    node->lifetime = lifetime;
+    node->check = check;
+    node->action = action;
+    node->delay = delay;
+    node->x = x;
+    node->y = y;
+    node->z = z;
 
-    head = D_800CBE00[0];
-    if (head == 0) {
-        D_800CBE00[0] = node;
+    if (D_800CBE00 == NULL) {
+        D_800CBE00 = node;
     } else {
-        next = head->next;
-        tail = head;
-        if (next != 0) {
-            do {
-                tail = next;
-                next = next->next;
-            } while (next != 0);
+        for (tail = D_800CBE00; tail->next != NULL; tail = tail->next) {
         }
         tail->next = node;
     }
 
-    return ret;
+    return node;
 }
 
+/* Per frame: runs each node's check (and its action when the check passes), then ages and frees expired nodes. */
 void func_15044A28(void) {
-    struct conker15044A28 *node;
-    struct conker15044A28 *prev;
-    struct conker15044A28 *next;
-    s32 (**funcs0)(struct conker15044A28 *);
-    void (**funcs1)(void);
-    s32 timer;
-    s32 type;
+    TriggerNode *node;
+    TriggerNode *prev;
+    TriggerNode *next;
+    s32 check;
     s32 countdown;
+    s32 lifetime;
     s32 delay;
-    s32 minusOne;
 
-    node = D_800CBE00[0];
-    prev = 0;
-    minusOne = -1;
-    if (node != 0) {
-        funcs0 = D_80085E80;
-        funcs1 = D_80085E8C;
-        do {
-            countdown = node->unkE;
-            type = node->unkC;
-            next = node->next;
-            if (countdown == 0) {
-                if (funcs0[type](node) != 0) {
-                    funcs1[node->unkD]();
-                }
-            } else {
-                delay = countdown - D_800BE9E4;
-                if (delay < 0) {
-                    delay = 0;
-                }
-                node->unkE = delay;
+    prev = NULL;
+    for (node = D_800CBE00; node != NULL; node = next) {
+        countdown = node->delay;
+        check = node->check;
+        next = node->next;
+        if (countdown == 0) {
+            if (D_80085E80[check](node) != 0) {
+                D_80085E8C[node->action]();
             }
-            timer = node->unk4;
-            if (timer != minusOne) {
-                timer -= D_800BE9E4;
-                if (timer <= 0) {
-                    if (prev == 0) {
-                        D_800CBE00[0] = node->next;
-                    } else {
-                        prev->next = node->next;
-                    }
-                    func_100043B4((s32 *)node, 2);
+        } else {
+            delay = countdown - D_800BE9E4;
+            if (delay < 0) {
+                delay = 0;
+            }
+            node->delay = delay;
+        }
+        lifetime = node->lifetime;
+        if (lifetime != -1) {
+            lifetime -= D_800BE9E4;
+            if (lifetime <= 0) {
+                if (prev == NULL) {
+                    D_800CBE00 = node->next;
                 } else {
-                    node->unk4 = timer;
-                    prev = node;
+                    prev->next = node->next;
                 }
+                func_100043B4((s32 *)node, 2);
             } else {
+                node->lifetime = lifetime;
                 prev = node;
             }
-            node = next;
-        } while (node != 0);
+        } else {
+            prev = node;
+        }
     }
 }
 
-struct conker15044CE4 {
-    char pad0[6];
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    char padC[4];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 unk16;
-    char pad17;
-    s16 *unk18;
-    s16 *unk1C;
-};
+extern f32 func_15048A40(u8); // sine of a 256-step angle (header declares it void)
+extern f32 func_150489B0(u8); // cosine of a 256-step angle
 
+/* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */
+s32 func_15044B78(TriggerVolume *volume) {
+    f32 cosA;
+    f32 sinA;
+    f32 dzRot;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 pad[3]; // matching: unused stack slots
+    s32 playerHalfHeight;
+    s32 playerWidth;
+    s32 playerDepth;
 
-extern f32 func_15048A40(u8);
-extern f32 func_150489B0(u8);
-
-s32 func_15044B78(struct conker15044CE4 *arg0) {
-    f32 s;
-    f32 c;
-    f32 rx;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 pad2c;
-    f32 pad28;
-    f32 pad24;
-    s32 half;
-    s32 h116;
-    s32 h118;
-
-    half = (s16)D_800CC2D0[0].unk31C->unk114 >> 1;
-    h116 = (s16)D_800CC2D0[0].unk31C->unk116;
-    h118 = (s16)D_800CC2D0[0].unk31C->unk118;
-    x = D_800CC2D0[0].x_position - arg0->unk6;
-    y = (D_800CC2D0[0].y_position - arg0->unk8) + half;
-    z = D_800CC2D0[0].z_position - arg0->unkA;
-    c = func_15048A40(arg0->unk16);
-    s = func_150489B0(arg0->unk16);
-    rx = z * s + x * c;
-    x = x * s - z * c;
-    if (fabsf(y) < arg0->unk14 + half && fabsf(x) < arg0->unk12 + h116 && fabsf(rx) < arg0->unk10 + h118) {
-        return 1;
+    playerHalfHeight = (s16)D_800CC2D0[0].unk31C->unk114 >> 1;
+    playerWidth = (s16)D_800CC2D0[0].unk31C->unk116;
+    playerDepth = (s16)D_800CC2D0[0].unk31C->unk118;
+    dx = D_800CC2D0[0].x_position - volume->node.x;
+    dy = (D_800CC2D0[0].y_position - volume->node.y) + playerHalfHeight;
+    dz = D_800CC2D0[0].z_position - volume->node.z;
+    sinA = func_15048A40(volume->angle);
+    cosA = func_150489B0(volume->angle);
+    dzRot = dz * cosA + dx * sinA;
+    dx = dx * cosA - dz * sinA;
+    if (fabsf(dy) < volume->height + playerHalfHeight && fabsf(dx) < volume->width + playerWidth &&
+        fabsf(dzRot) < volume->depth + playerDepth) {
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
+/* Check 1: refreshes the volume's position and size from its source pointers, then runs check 0. */
+s32 func_15044CE4(TriggerVolume *volume) {
+    s16 *position = volume->position;
+    s32 extent;
 
-void func_15044CE4(struct conker15044CE4 *arg0) {
-    s16 *sp18 = arg0->unk18;
-    s32 temp;
-
-    arg0->unk6 = sp18[0];
-    arg0->unk8 = sp18[1];
-    arg0->unkA = sp18[2];
-    temp = arg0->unk1C[0] / 32;
-    arg0->unk10 = temp;
-    arg0->unk12 = temp;
-    arg0->unk14 = temp;
-    func_15044B78(arg0);
+    volume->node.x = position[0];
+    volume->node.y = position[1];
+    volume->node.z = position[2];
+    extent = volume->size[0] / 32;
+    volume->depth = extent;
+    volume->width = extent;
+    volume->height = extent;
+    return func_15044B78(volume);
 }
 
 extern s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
 
-s32 func_15044D40(struct conker15044CE4 *arg0) {
-    func_1505D1C4(arg0->unk6, arg0->unk8, arg0->unkA, arg0->unk10, 0xFF, 0, 0, 0);
-    return 0;
+/* Check 2: calls func_1505D1C4 at the node's position with its depth; never fires. */
+s32 func_15044D40(TriggerVolume *volume) {
+    func_1505D1C4(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
+    return FALSE;
 }
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
+s32 func_1505D024(struct127 *obj, s32 type, u16 angle, s32 arg3);
+
+/* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 
 void func_15044DA0(void) {
-    if (D_800CC2D0[0].stunned != 0) {
-        return;
-    }
-    if (D_800CC2D0[0].immune != 0) {
+    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
     func_1505D024(&D_800CC2D0[0], 5, D_800CC2D0[0].unk7A, -1);
 }
 
 void func_15044DE8(void) {
-    if (D_800CC2D0[0].stunned != 0) {
-        return;
-    }
-    if (D_800CC2D0[0].immune != 0) {
+    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
     if (D_800C35EA != 1) {
@@ -406,1006 +352,861 @@ void func_15044DE8(void) {
 }
 
 void func_15044E40(void) {
-    if (D_800CC2D0[0].stunned != 0) {
-        return;
-    }
-    if (D_800CC2D0[0].immune != 0) {
+    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
     func_1505D024(&D_800CC2D0[0], 0x40, D_800CC2D0[0].unk7A, -1);
 }
 
 void func_15044E88(void) {
-    if (D_800CC2D0[0].stunned != 0) {
-        return;
-    }
-    if (D_800CC2D0[0].immune != 0) {
+    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-struct conker15045714 {
-    f32 field_0x00;
-    f32 field_0x04;
-    f32 field_0x08;
-};
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+} Vec3s_71820;
 
-struct conker150472C0_sub
-{
-  u8 field_0x00[0x10];
-  u16 field_0x10;
-};
-struct conker150472C0_dst
-{
-  f32 field_0x00;
-  struct conker150472C0_sub field_0x04;
-  u8 pad16[2];
-  s32 field_0x18;
-  u8 field_0x1C;
-  u8 field_0x1D;
-  u8 pad1E[2];
-  s32 field_0x20;
-};
+typedef struct {
+    Vec3s_71820 v[3];
+} CollisionTri;
 
+/* Surface record in the D_800DBEF4 array (same 0xA0 layout as struct131, whose header copy lacks 0x40/0x44). */
+typedef struct Game71820Surface {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ s32 default_material;
+    /* 0x44 */ s32 *materials;     // per-triangle, indexed from first_triangle
+    /* 0x48 */ u8 pad48[0x10];
+    /* 0x58 */ u16 first_triangle;
+    /* 0x5A */ u8 pad5A[0x15];
+    /* 0x6F */ u8 flags;
+    /* 0x70 */ u8 pad70[0x30];
+} Game71820Surface;
+
+/* Result of a floor/ceiling probe. */
+typedef struct CollisionHit {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ CollisionTri tri;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 material;
+    /* 0x1C */ u8 flags;           // 2: height within the probe's limit, 4: tri is valid (fast path re-tests it)
+    /* 0x1D */ u8 source;          // which collision set produced the hit (1-4)
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ Game71820Surface *surface;
+} CollisionHit;
+
+/* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 typedef struct Game71820Candidate {
-    s32 height;
-    s32 *sources;
-    s32 index;
-    s32 padC;
+    /* 0x00 */ s32 height;         // 24.8 fixed point
+    /* 0x04 */ s32 *vertices;      // entry in the D_800DBE3C triangle table: three vertex-array bases
+    /* 0x08 */ s32 index;          // vertex index (or byte offset) into each base
+    /* 0x0C */ s32 surface;        // index into D_800DBEF4
 } Game71820Candidate;
 
-void func_1510F800(s32);
 s32 func_150A3A70(s32, s32);
-extern f32 D_80098D40;
+s32 func_150A4FA0(s32, s32);
+s32 func_150A43E0(s32, s32, s32, void *);
+void func_150A44F0(s32, void *, s32);
+s32 func_150A6500(s16, s16, s32 *, u16);
+s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern u8 *D_800DBE3C;
+extern s32 *D_800DBE5C;
 extern Game71820Candidate D_800D3300[];
-
-s32 func_15044ED0(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
-    s32 count;
-    s32 best;
-    s32 scan_index;
-    f32 height;
-
-    if (arg1 < arg0->field_0x04) {
-        arg2->field_0x1C &= ~2;
-        return 0;
-    }
-    arg2->field_0x00 = D_80098D40;
-    best = -1;
-    func_1510F800(0);
-    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((arg0->field_0x04 <= height) && (height < arg2->field_0x00)) {
-                best = scan_index;
-                arg2->field_0x00 = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
-    }
-    if (best != -1) {
-        Game71820Candidate *candidate;
-        s32 *source;
-        u32 copy_index;
-        u8 *output;
-        s32 offset;
-
-        candidate = &D_800D3300[best];
-        source = candidate->sources;
-        offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg2;
-        for (; copy_index != 3; copy_index++, output += 6) {
-            s16 *point = (s16 *)(source[copy_index] + offset * 16);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
-        }
-        { s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12; arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx]; }
-        arg2->field_0x1C |= 5;
-        arg2->field_0x1D = 1;
-        arg2->field_0x20 = 0;
-        if (arg2->field_0x00 <= arg1) {
-            arg2->field_0x1C |= 2;
-            return 1;
-        }
-        return 0;
-    }
-    arg2->field_0x1C &= ~2;
-    return 0;
-}
-
-extern f32 D_80098D44;
+extern Game71820Surface *D_800DBEF4;
+extern u8 D_800D37E0[];
+extern u8 D_800D3830[];
 extern f32 D_800DBE68;
 extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
 extern f32 D_800DBE74;
 
-s32 func_150450CC(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+/* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */
+s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    if (arg0->field_0x04 < arg1) {
-        arg2->field_0x1C &= ~2;
-        return 0;
+    if (top < pos->unk4) {
+        hit->flags &= ~2;
+        return FALSE;
     }
-    arg2->field_0x00 = D_80098D44;
+    hit->height = 99999.8984375f;
     best = -1;
     func_1510F800(0);
-    D_800DBE68 = arg0->field_0x00;
-    D_800DBE6C = arg0->field_0x04;
-    D_800DBE70 = arg0->field_0x08;
-    D_800DBE74 = arg1;
-    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
-                best = scan_index;
-                arg2->field_0x00 = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    count = func_150A3A70(pos->unk0, pos->unk8);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (pos->unk4 <= height && height < hit->height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        u32 copy_index;
-        u8 *output;
-        s32 offset;
+        s32 *vertices;
+        u32 j;
+        s32 index;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
-        offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg2;
-        for (; copy_index != 3; copy_index++, output += 6) {
-            s16 *point = (s16 *)(source[copy_index] + offset * 16);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        vertices = candidate->vertices;
+        index = candidate->index;
+        for (j = 0; j != 3; j++) {
+            Vtx *vtx = (Vtx *)vertices[j] + index;
+            hit->tri.v[j].x = vtx->v.ob[0];
+            hit->tri.v[j].y = vtx->v.ob[1];
+            hit->tri.v[j].z = vtx->v.ob[2];
         }
-        if (D_800DBE5C != 0) {
-            s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12;
-            arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx];
+        {
+            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            hit->material = D_800DBE5C[triangle];
+        }
+        hit->flags |= 5;
+        hit->source = 1;
+        hit->surface = NULL;
+        if (hit->height <= top) {
+            hit->flags |= 2;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    hit->flags &= ~2;
+    return FALSE;
+}
+
+/* Floor probe against collision set 0: highest triangle between bottom and pos.y. */
+s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
+    s32 count;
+    s32 best;
+    s32 i;
+    f32 height;
+
+    if (pos->unk4 < bottom) {
+        hit->flags &= ~2;
+        return FALSE;
+    }
+    hit->height = -10000.0f;
+    best = -1;
+    func_1510F800(0);
+    D_800DBE68 = pos->unk0;
+    D_800DBE6C = pos->unk4;
+    D_800DBE70 = pos->unk8;
+    D_800DBE74 = bottom;
+    count = func_150A3A70(pos->unk0, pos->unk8);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (height <= pos->unk4 && hit->height < height) {
+            best = i;
+            hit->height = height;
+        }
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *vertices;
+        u32 j;
+        s32 index;
+
+        candidate = &D_800D3300[best];
+        vertices = candidate->vertices;
+        index = candidate->index;
+        for (j = 0; j != 3; j++) {
+            Vtx *vtx = (Vtx *)vertices[j] + index;
+            hit->tri.v[j].x = vtx->v.ob[0];
+            hit->tri.v[j].y = vtx->v.ob[1];
+            hit->tri.v[j].z = vtx->v.ob[2];
+        }
+        if (D_800DBE5C != NULL) {
+            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            hit->material = D_800DBE5C[triangle];
         } else {
-            arg2->field_0x18 = 0;
+            hit->material = 0;
         }
-        arg2->field_0x1C |= 7;
-        arg2->field_0x1D = 1;
-        arg2->field_0x20 = 0;
-        if (arg1 <= arg2->field_0x00) {
-            arg2->field_0x1C |= 2;
-            return 1;
+        hit->flags |= 7;
+        hit->source = 1;
+        hit->surface = NULL;
+        if (bottom <= hit->height) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        return 0;
+        return FALSE;
     }
-    arg2->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-struct conker15045714;
-struct conker150472C0_dst;
+s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit);
 
-s32 func_15044ED0(struct conker15045714 *, f32, struct conker150472C0_dst *);
-s32 func_150470B0(struct conker15045714 *, s32, struct conker150472C0_dst *);
-
-s32 func_1504530C(s32 arg0, s32 arg1, s32 arg2) {
-    switch (func_150470B0((struct conker15045714 *)arg0, arg1, (struct conker150472C0_dst *)arg2)) {
+/* Ceiling probe: re-tests the cached triangle first, then searches collision set 0. */
+s32 func_1504530C(struct17 *pos, f32 top, CollisionHit *hit) {
+    switch (func_150470B0(pos, top, hit)) {
     case 0:
-        return func_15044ED0((struct conker15045714 *)arg0, *(f32 *)&arg1, (struct conker150472C0_dst *)arg2);
+        return func_15044ED0(pos, top, hit);
     case 1:
-        return 0;
+        return FALSE;
     case 2:
-        return 1;
-    default:
-        break;
+        return TRUE;
     }
 }
 
-void func_1510F800(s32);
-typedef struct Vec3f_15045D48 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_15045D48;
-
-typedef struct Game71820Hit {
-    f32 height;
-    s16 points[9];
-    s32 object;
-    u8 flags;
-    u8 active;
-    u8 pad1E[2];
-    s32 field20;
-} Game71820Hit;
-
-s32 func_150A4FA0(s32, s32);
-extern f32 D_80098D48;
-
-s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
+/* Ceiling probe against collision set 3. */
+s32 func_15045384(struct17 *pos, f32 top, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    if (arg1 < arg0->y) {
-        arg2->flags &= ~2;
-        return 0;
+    if (top < pos->unk4) {
+        hit->flags &= ~2;
+        return FALSE;
     }
-    arg2->height = D_80098D48;
+    hit->height = 99999.8984375f;
     best = -1;
     func_1510F800(3);
-    count = func_150A4FA0((s32)arg0->x, (s32)arg0->z);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((arg0->y <= height) && (height < arg2->height)) {
-                best = scan_index;
-                arg2->height = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    count = func_150A4FA0(pos->unk0, pos->unk8);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (pos->unk4 <= height && height < hit->height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        u32 copy_index;
-        u8 *output;
+        s32 *vertices;
+        u32 j;
         s32 offset;
-        s32 flags;
-        s32 updated_flags;
-        s32 active;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg2;
-        for (; copy_index != 3; copy_index++, output += 6) {
-            s16 *point = (s16 *)(source[copy_index] + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        arg2->object = 0;
-        arg2->flags |= 6;
-        arg2->active = 4;
-        arg2->field20 = 0;
-        if (arg2->height <= arg1) {
-            arg2->flags |= 2;
-            return 1;
+        hit->material = 0;
+        hit->flags |= 6;
+        hit->source = 4;
+        hit->surface = NULL;
+        if (hit->height <= top) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        return 0;
+        return FALSE;
     }
-    arg2->flags &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-
-extern void func_1510F800(s32);
-extern s32 func_150A6500(s16, s16, s32, u16);
-
-struct conker150472C0_src
-{
-  u8 pad0[0xC];
-  f32 unkC;
-  u8 pad10[0x34];
-  struct conker150472C0_sub unk44;
-  u8 pad56[3];
-  u8 unk59;
-  u8 pad5A[2];
-  s32 unk5C;
-  s32 unk60;
-};
-
-extern f32 D_80098D4C;
-
-s32 func_1504554C(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+/* Floor probe against collision set 3. */
+s32 func_1504554C(struct17 *pos, f32 bottom, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    if (arg0->field_0x04 < arg1) {
-        arg2->field_0x1C &= ~2;
-        return 0;
+    if (pos->unk4 < bottom) {
+        hit->flags &= ~2;
+        return FALSE;
     }
-    arg2->field_0x00 = D_80098D4C;
+    hit->height = -10000.0f;
     best = -1;
     func_1510F800(3);
-    count = func_150A4FA0((s32)arg0->field_0x00, (s32)arg0->field_0x08);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
-                best = scan_index;
-                arg2->field_0x00 = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    count = func_150A4FA0(pos->unk0, pos->unk8);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (height <= pos->unk4 && hit->height < height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        u32 copy_index;
-        u8 *output;
+        s32 *vertices;
+        u32 j;
         s32 offset;
-        s32 flags;
-        s32 updated_flags;
-        s32 active;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg2;
-        for (; copy_index != 3; copy_index++, output += 6) {
-            s16 *point = (s16 *)(source[copy_index] + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        arg2->field_0x18 = 0;
-        arg2->field_0x1C |= 6;
-        arg2->field_0x1D = 4;
-        arg2->field_0x20 = 0;
-        if (arg1 <= arg2->field_0x00) {
-            arg2->field_0x1C |= 2;
-            return 1;
+        hit->material = 0;
+        hit->flags |= 6;
+        hit->source = 4;
+        hit->surface = NULL;
+        if (bottom <= hit->height) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        return 0;
+        return FALSE;
     }
-    arg2->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-void func_15045714(struct conker15045714 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
+/* Selects the two surface sets (collision set 2) under pos for the func_15045880-style probes. */
+void func_15045714(struct17 *pos, u16 mask, s32 *setA, s32 *setB) {
     func_1510F800(2);
-    *arg2 = func_150A6500((s16)arg0->field_0x00, (s16)arg0->field_0x08, arg3, arg1);
+    *setA = func_150A6500(pos->unk0, pos->unk8, setB, mask);
 }
 
-struct Game71820Hit;
-s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, struct Game71820Hit *arg3);
+s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit);
 
-s32 func_15045780(struct conker15045714 *arg0, u16 arg1, f32 arg2, s32 arg3) {
-    s32 sp1C;
-    s32 sp18;
+/* Floor probe against surface set B only. */
+s32 func_15045780(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    s32 setA;
+    s32 setB;
 
-    if (arg0->field_0x04 < arg2) {
-        *((u8 *)arg3 + 0x1C) &= ~2;
-        return 0;
+    if (pos->unk4 < bottom) {
+        hit->flags &= ~2;
+        return FALSE;
     }
-    func_15045714(arg0, arg1, &sp1C, (s32)&sp18);
-    return func_15045F8C(arg0, arg2, &sp18, (struct Game71820Hit *)arg3);
+    func_15045714(pos, mask, &setA, &setB);
+    return func_15045F8C(pos, bottom, &setB, hit);
 }
 
-extern s32 func_15047004(struct conker15045714 *, s32, struct conker150472C0_dst *);
-extern s32 func_15045780(struct conker15045714 *, u16, f32, s32);
+s32 func_15047004(struct17 *pos, f32 bottom, CollisionHit *hit);
 
-s32 func_15045800(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    switch (func_15047004((struct conker15045714 *)arg0, arg2, (struct conker150472C0_dst *)arg3)) {
+/* Floor probe: re-tests the cached triangle first, then func_15045780. */
+s32 func_15045800(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (func_15047004(pos, bottom, hit)) {
     case 0:
-        return func_15045780((struct conker15045714 *)arg0, (u16)arg1, *(f32 *)&arg2, arg3);
+        return func_15045780(pos, mask, bottom, hit);
     case 1:
-        return 0;
+        return FALSE;
     case 2:
-        return 1;
-    default:
-        break;
+        return TRUE;
     }
 }
 
-typedef struct Game71820Surface {
-    u8 pad0[0x40];
-    s32 default_material;
-    s32 *materials;
-    u8 pad48[0x10];
-    u16 first_triangle;
-    u8 pad5A[0x15];
-    u8 flags;
-    u8 pad70[0x30];
-} Game71820Surface;
-extern u8 *D_800DBE3C;
-s32 func_150A43E0(s32, s32, s32, void *);
-void func_150A44F0(s32, void *, s32);
-extern f32 D_80098D50;
-extern u8 D_800D37E0[];
-extern s32 D_800DBEF4;
-
-s32 func_15045880(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+/* Ceiling probe against surface set A. */
+s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    arg3->height = D_80098D50;
+    hit->height = 99999.8984375f;
     best = -1;
-    func_150A44F0(*arg2, D_800D37E0, 0);
-    count = func_150A43E0((s32)arg0->x, (s32)arg0->z, *arg2, D_800D37E0);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((arg0->y <= height) && (height < arg3->height)) {
-                best = scan_index;
-                arg3->height = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    func_150A44F0(*set, D_800D37E0, 0);
+    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D37E0);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (pos->unk4 <= height && height < hit->height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        s32 copy_index;
-        s32 *copy_source;
-        u32 surface_index;
-        u8 *output;
+        s32 *vertices;
+        s32 j;
         s32 offset;
         s32 *materials;
+        u32 surface;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg3;
-        copy_source = source;
-        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
-            s16 *point = (s16 *)(*copy_source + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        surface_index = candidate->padC;
-        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
-        materials = ((Game71820Surface *)arg3->field20)->materials;
-        if (materials != 0) {
-            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
-            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        surface = candidate->surface;
+        hit->surface = &D_800DBEF4[surface];
+        materials = hit->surface->materials;
+        if (materials != NULL) {
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            hit->material = materials[triangle];
         } else {
-            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+            hit->material = hit->surface->default_material;
         }
-        arg3->flags |= 6;
-        { s32 unused;
-        if ((((Game71820Surface *)D_800DBEF4)[surface_index = candidate->padC].flags & 0x80) == 0x80) {
-            Game71820Hit *h = arg3;
-            h->flags |= 1;
+        hit->flags |= 6;
+        {
+            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+
+            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+                alias = hit;
+                alias->flags |= 1;
+            }
         }
+        hit->source = 2;
+        if (hit->height <= top) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        arg3->active = 2;
-        if (arg3->height <= arg1) {
-            arg3->flags |= 2;
-            return 1;
-        }
-        return 0;
+        return FALSE;
     }
-    arg3->flags &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-
-extern f32 D_80098D54;
-
-s32 func_15045AE4(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+/* Floor probe against surface set A. */
+s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    arg3->height = D_80098D54;
+    hit->height = -10000.0f;
     best = -1;
-    func_150A44F0(*arg2, D_800D37E0, 0);
-    count = func_150A43E0((s32)arg0->x, (s32)arg0->z, *arg2, D_800D37E0);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((height <= arg0->y) && (arg3->height < height)) {
-                best = scan_index;
-                arg3->height = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    func_150A44F0(*set, D_800D37E0, 0);
+    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D37E0);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (height <= pos->unk4 && hit->height < height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        s32 copy_index;
-        s32 *copy_source;
-        u32 surface_index;
-        u8 *output;
+        s32 *vertices;
+        s32 j;
         s32 offset;
         s32 *materials;
+        u32 surface;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg3;
-        copy_source = source;
-        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
-            s16 *point = (s16 *)(*copy_source + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        surface_index = candidate->padC;
-        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
-        materials = ((Game71820Surface *)arg3->field20)->materials;
-        if (materials != 0) {
-            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
-            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        surface = candidate->surface;
+        hit->surface = &D_800DBEF4[surface];
+        materials = hit->surface->materials;
+        if (materials != NULL) {
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            hit->material = materials[triangle];
         } else {
-            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+            hit->material = hit->surface->default_material;
         }
-        arg3->flags |= 6;
-        { s32 unused;
-        if ((((Game71820Surface *)D_800DBEF4)[surface_index = candidate->padC].flags & 0x80) == 0x80) {
-            Game71820Hit *h = arg3;
-            h->flags |= 1;
+        hit->flags |= 6;
+        {
+            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+
+            if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
+                alias = hit;
+                alias->flags |= 1;
+            }
         }
+        hit->source = 2;
+        if (bottom <= hit->height) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        arg3->active = 2;
-        if (arg1 <= arg3->height) {
-            arg3->flags |= 2;
-            return 1;
-        }
-        return 0;
+        return FALSE;
     }
-    arg3->flags &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-
-extern Game71820Candidate D_800D3300[];
-extern u8 *D_800DBE3C;
-s32 func_150A43E0(s32, s32, s32, void *);
-void func_150A44F0(s32, void *, s32);
-extern f32 D_80098D58;
-extern u8 D_800D3830[];
-extern s32 D_800DBEF4;
-
-s32 func_15045D48(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+/* Ceiling probe against surface set B. */
+s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    arg3->height = D_80098D58;
+    hit->height = 99999.8984375f;
     best = -1;
-    func_150A44F0(*arg2, D_800D3830, 0);
-    count = func_150A43E0((s32)arg0->x, (s32)arg0->z, *arg2, D_800D3830);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((arg0->y <= height) && (height < arg3->height)) {
-                best = scan_index;
-                arg3->height = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    func_150A44F0(*set, D_800D3830, 0);
+    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D3830);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (pos->unk4 <= height && height < hit->height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        s32 copy_index;
-        s32 *copy_source;
-        s32 surface_index;
-        u8 *output;
+        s32 *vertices;
+        s32 j;
         s32 offset;
         s32 *materials;
+        s32 surface;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg3;
-        copy_source = source;
-        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
-            s16 *point = (s16 *)(*copy_source + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        surface_index = candidate->padC;
-        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
-        materials = ((Game71820Surface *)arg3->field20)->materials;
-        if (materials != 0) {
-            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
-            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        surface = candidate->surface;
+        hit->surface = &D_800DBEF4[surface];
+        materials = hit->surface->materials;
+        if (materials != NULL) {
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            hit->material = materials[triangle];
         } else {
-            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+            hit->material = hit->surface->default_material;
         }
-        arg3->flags |= 6;
-        if ((((Game71820Surface *)arg3->field20)->flags & 0x80) == 0x80) {
-            arg3->flags |= 1;
+        hit->flags |= 6;
+        if ((hit->surface->flags & 0x80) == 0x80) {
+            hit->flags |= 1;
         }
-        arg3->active = 3;
-        if (arg3->height <= arg1) {
-            arg3->flags |= 2;
-            return 1;
+        hit->source = 3;
+        if (hit->height <= top) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        return 0;
+        return FALSE;
     }
-    arg3->flags &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-extern f32 D_80098D5C;
-
-s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+/* Floor probe against surface set B. */
+s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
     s32 count;
     s32 best;
-    s32 scan_index;
+    s32 i;
     f32 height;
 
-    arg3->height = D_80098D5C;
+    hit->height = -10000.0f;
     best = -1;
-    func_150A44F0(*(s32 *)arg2, D_800D3830, 0);
-    count = func_150A43E0((s32)arg0->field_0x00, (s32)arg0->field_0x08, *(s32 *)arg2, D_800D3830);
-    scan_index = 0;
-    if (count > 0) {
-        Game71820Candidate *scan = D_800D3300;
-        do {
-            height = (f32)scan->height * 0.00390625f;
-            if ((height <= arg0->field_0x04) && (arg3->height < height)) {
-                best = scan_index;
-                arg3->height = height;
-            }
-            scan_index++;
-            scan++;
-        } while (scan_index < count);
+    func_150A44F0(*set, D_800D3830, 0);
+    count = func_150A43E0(pos->unk0, pos->unk8, *set, D_800D3830);
+    for (i = 0; i < count; i++) {
+        height = D_800D3300[i].height * 0.00390625f;
+        if (height <= pos->unk4 && hit->height < height) {
+            best = i;
+            hit->height = height;
+        }
     }
     if (best != -1) {
         Game71820Candidate *candidate;
-        s32 *source;
-        s32 copy_index;
-        s32 *copy_source;
-        s32 surface_index;
-        u8 *output;
+        s32 *vertices;
+        s32 j;
         s32 offset;
         s32 *materials;
+        s32 surface;
 
         candidate = &D_800D3300[best];
-        source = candidate->sources;
+        vertices = candidate->vertices;
         offset = candidate->index;
-        copy_index = 0;
-        output = (u8 *)arg3;
-        copy_source = source;
-        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
-            s16 *point = (s16 *)(*copy_source + offset);
-            *(s16 *)(output + 4) = point[0];
-            *(s16 *)(output + 6) = point[1];
-            *(s16 *)(output + 8) = point[2];
+        for (j = 0; j != 3; j++) {
+            s16 *point = (s16 *)(vertices[j] + offset);
+            hit->tri.v[j].x = point[0];
+            hit->tri.v[j].y = point[1];
+            hit->tri.v[j].z = point[2];
         }
-        surface_index = candidate->padC;
-        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
-        materials = ((Game71820Surface *)arg3->field20)->materials;
-        if (materials != 0) {
-            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
-            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        surface = candidate->surface;
+        hit->surface = &D_800DBEF4[surface];
+        materials = hit->surface->materials;
+        if (materials != NULL) {
+            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->first_triangle;
+            hit->material = materials[triangle];
         } else {
-            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+            hit->material = hit->surface->default_material;
         }
-        arg3->flags |= 6;
-        if ((((Game71820Surface *)arg3->field20)->flags & 0x80) == 0x80) {
-            arg3->flags |= 1;
+        hit->flags |= 6;
+        if ((hit->surface->flags & 0x80) == 0x80) {
+            hit->flags |= 1;
         }
-        arg3->active = 3;
-        if (arg1 <= arg3->height) {
-            arg3->flags |= 2;
-            return 1;
+        hit->source = 3;
+        if (bottom <= hit->height) {
+            hit->flags |= 2;
+            return TRUE;
         }
-        return 0;
+        return FALSE;
     }
-    arg3->flags &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_150461D0(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
-    s32 sp74;
-    s32 sp70;
-    struct conker150472C0_dst sp4C;
-    struct conker150472C0_dst sp28;
-    u8 sp27;
+/* Ceiling probe: the nearer of surface sets A and B. */
+s32 func_150461D0(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+    s32 setA;
+    s32 setB;
+    CollisionHit hitA;
+    CollisionHit hitB;
+    u8 foundA;
+    u8 foundB;
 
-    if (arg2 < arg0->field_0x04) {
-        arg3->field_0x1C &= ~2;
-        return 0;
+    if (top < pos->unk4) {
+        hit->flags &= ~2;
+        return FALSE;
     }
-    sp4C = *arg3;
-    sp28 = *arg3;
-    func_15045714(arg0, arg1, &sp74, (s32)&sp70);
-    sp27 = func_15045880((Vec3f_15045D48 *)arg0, arg2, &sp74, (Game71820Hit *)&sp4C);
-    arg0 = (struct conker15045714 *)func_15045D48((Vec3f_15045D48 *)arg0, arg2, &sp70, (Game71820Hit *)&sp28);
-
-    if (sp27 && ((s32)arg0 & 0xFF) != 0) {
-        if (sp4C.field_0x00 < sp28.field_0x00) {
-            *arg3 = sp4C;
+    hitA = *hit;
+    hitB = *hit;
+    func_15045714(pos, mask, &setA, &setB);
+    foundA = func_15045880(pos, top, &setA, &hitA);
+    foundB = func_15045D48(pos, top, &setB, &hitB);
+    if (foundA && foundB) {
+        if (hitA.height < hitB.height) {
+            *hit = hitA;
         } else {
-            *arg3 = sp28;
+            *hit = hitB;
         }
-        return 1;
+        return TRUE;
     }
-    if (sp27) {
-        *arg3 = sp4C;
-        return 1;
+    if (foundA) {
+        *hit = hitA;
+        return TRUE;
     }
-    if (((s32)arg0 & 0xFF) != 0) {
-        *arg3 = sp28;
-        return 1;
+    if (foundB) {
+        *hit = hitB;
+        return TRUE;
     }
-    if (sp4C.field_0x00 < sp28.field_0x00) {
-        *arg3 = sp4C;
+    if (hitA.height < hitB.height) {
+        *hit = hitA;
     } else {
-        *arg3 = sp28;
+        *hit = hitB;
     }
-    arg3->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_15046460(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
-    s32 first_set;
-    s32 second_set;
-    struct conker150472C0_dst first_hit;
-    struct conker150472C0_dst second_hit;
-    u8 first_result;
-    u8 second_result;
+/* Floor probe: the nearer of surface sets A and B. */
+s32 func_15046460(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    s32 setA;
+    s32 setB;
+    CollisionHit hitA;
+    CollisionHit hitB;
+    u8 foundA;
+    u8 foundB;
 
-    if (arg0->field_0x04 < arg2) {
-        arg3->field_0x1D = 0;
-        arg3->field_0x20 = 0;
-        arg3->field_0x1C &= ~2;
-        return 0;
+    if (pos->unk4 < bottom) {
+        hit->source = 0;
+        hit->surface = NULL;
+        hit->flags &= ~2;
+        return FALSE;
     }
-    first_hit = *arg3;
-    second_hit = *arg3;
-    func_15045714(arg0, arg1, &first_set, (s32)&second_set);
-    first_result = func_15045AE4((Vec3f_15045D48 *)arg0, arg2, &first_set, (Game71820Hit *)&first_hit);
-    second_result = func_15045F8C(arg0, arg2, &second_set, (Game71820Hit *)&second_hit);
-    if (first_result && second_result) {
-        if (second_hit.field_0x00 < first_hit.field_0x00) {
-            *arg3 = first_hit;
-            return 1;
+    hitA = *hit;
+    hitB = *hit;
+    func_15045714(pos, mask, &setA, &setB);
+    foundA = func_15045AE4(pos, bottom, &setA, &hitA);
+    foundB = func_15045F8C(pos, bottom, &setB, &hitB);
+    if (foundA && foundB) {
+        if (hitB.height < hitA.height) {
+            *hit = hitA;
+            return TRUE;
         }
-        *arg3 = second_hit;
-        return 1;
+        *hit = hitB;
+        return TRUE;
     }
-    if (first_result != 0) {
-        *arg3 = first_hit;
-        return 1;
+    if (foundA) {
+        *hit = hitA;
+        return TRUE;
     }
-    if (second_result != 0) {
-        *arg3 = second_hit;
-        return 1;
+    if (foundB) {
+        *hit = hitB;
+        return TRUE;
     }
-    if (second_hit.field_0x00 < first_hit.field_0x00) {
-        *arg3 = first_hit;
+    if (hitB.height < hitA.height) {
+        *hit = hitA;
     } else {
-        *arg3 = second_hit;
+        *hit = hitB;
     }
-    arg3->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_150461D0(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
-s32 func_15046460(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
-s32 func_150450CC(struct conker15045714 *, f32, struct conker150472C0_dst *);
-s32 func_1504554C(struct conker15045714 *, f32, struct conker150472C0_dst *);
+/* Ceiling probe: the nearer of surface sets A/B and collision set 0. */
+s32 func_150466F8(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+    CollisionHit hitA;
+    CollisionHit hitB;
+    u8 foundA;
+    u8 foundB;
 
-s32 func_150466F8(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
-    struct conker150472C0_dst sp4C;
-    struct conker150472C0_dst sp28;
-    u8 sp27;
-
-    if (arg2 < arg0->field_0x04) {
-        arg3->field_0x1C &= ~2;
-        return 0;
+    if (top < pos->unk4) {
+        hit->flags &= ~2;
+        return FALSE;
     }
 
-    sp4C = *arg3;
-    sp28 = *arg3;
-    sp27 = func_150461D0(arg0, arg1, arg2, &sp4C);
-    arg0 = (struct conker15045714 *)func_15044ED0(arg0, arg2, &sp28);
+    hitA = *hit;
+    hitB = *hit;
+    foundA = func_150461D0(pos, mask, top, &hitA);
+    foundB = func_15044ED0(pos, top, &hitB);
 
-    if (sp27 != 0 && ((s32)arg0 & 0xFF) != 0) {
-        if (sp4C.field_0x00 < sp28.field_0x00) {
-            *arg3 = sp4C;
+    if (foundA && foundB) {
+        if (hitA.height < hitB.height) {
+            *hit = hitA;
         } else {
-            *arg3 = sp28;
+            *hit = hitB;
         }
-        return 1;
+        return TRUE;
     }
 
-    if (sp27 != 0) {
-        *arg3 = sp4C;
-        return 1;
+    if (foundA) {
+        *hit = hitA;
+        return TRUE;
     }
 
-    if (((s32)arg0 & 0xFF) != 0) {
-        *arg3 = sp28;
-        return 1;
+    if (foundB) {
+        *hit = hitB;
+        return TRUE;
     }
 
-    if (sp4C.field_0x00 < sp28.field_0x00) {
-        *arg3 = sp4C;
+    if (hitA.height < hitB.height) {
+        *hit = hitA;
     } else {
-        *arg3 = sp28;
+        *hit = hitB;
     }
-    arg3->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_1504697C(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
-    struct conker150472C0_dst sp4C;
-    struct conker150472C0_dst sp28;
-    u8 sp27;
+/* Floor probe: the nearer of surface sets A/B and collision set 0. */
+s32 func_1504697C(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    CollisionHit hitA;
+    CollisionHit hitB;
+    u8 foundA;
+    u8 foundB;
 
-    if (arg0->field_0x04 < arg2) {
-        arg3->field_0x1C &= ~2;
-        return 0;
+    if (pos->unk4 < bottom) {
+        hit->flags &= ~2;
+        return FALSE;
     }
 
-    sp4C = *arg3;
-    sp28 = *arg3;
-    sp27 = func_15046460(arg0, arg1, arg2, &sp4C);
-    arg0 = (struct conker15045714 *)func_150450CC(arg0, arg2, &sp28);
+    hitA = *hit;
+    hitB = *hit;
+    foundA = func_15046460(pos, mask, bottom, &hitA);
+    foundB = func_150450CC(pos, bottom, &hitB);
 
-    if (sp27 != 0 && ((s32)arg0 & 0xFF) != 0) {
-        if (sp28.field_0x00 < sp4C.field_0x00) {
-            *arg3 = sp4C;
+    if (foundA && foundB) {
+        if (hitB.height < hitA.height) {
+            *hit = hitA;
         } else {
-            *arg3 = sp28;
+            *hit = hitB;
         }
-        return 1;
+        return TRUE;
     }
 
-    if (sp27 != 0) {
-        *arg3 = sp4C;
-        return 1;
+    if (foundA) {
+        *hit = hitA;
+        return TRUE;
     }
 
-    if (((s32)arg0 & 0xFF) != 0) {
-        *arg3 = sp28;
-        return 1;
+    if (foundB) {
+        *hit = hitB;
+        return TRUE;
     }
 
-    if (sp28.field_0x00 < sp4C.field_0x00) {
-        *arg3 = sp4C;
+    if (hitB.height < hitA.height) {
+        *hit = hitA;
     } else {
-        *arg3 = sp28;
+        *hit = hitB;
     }
-    arg3->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_150470B0(struct conker15045714 *, s32, struct conker150472C0_dst *);
-s32 func_150466F8(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
-
-s32 func_15046C00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    switch (func_150470B0((struct conker15045714 *)arg0, arg2, (struct conker150472C0_dst *)arg3)) {
+/* Ceiling probe with the cached-triangle fast path (func_150466F8). */
+s32 func_15046C00(struct17 *pos, u16 mask, f32 top, CollisionHit *hit) {
+    switch (func_150470B0(pos, top, hit)) {
     case 0:
-        return func_150466F8((struct conker15045714 *)arg0, (u16)arg1, *(f32 *)&arg2, (struct conker150472C0_dst *)arg3);
+        return func_150466F8(pos, mask, top, hit);
     case 1:
-        return 0;
+        return FALSE;
     case 2:
-        return 1;
-    default:
-        break;
+        return TRUE;
     }
 }
 
-s32 func_1504697C(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
-
-s32 func_15046C80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    switch (func_15047004((struct conker15045714 *)arg0, arg2, (struct conker150472C0_dst *)arg3)) {
+/* Floor probe with the cached-triangle fast path (func_1504697C). */
+s32 func_15046C80(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (func_15047004(pos, bottom, hit)) {
     case 0:
-        return func_1504697C((struct conker15045714 *)arg0, (u16)arg1, *(f32 *)&arg2, (struct conker150472C0_dst *)arg3);
+        return func_1504697C(pos, mask, bottom, hit);
     case 1:
-        return 0;
+        return FALSE;
     case 2:
-        return 1;
-    default:
-        break;
+        return TRUE;
     }
 }
 
-s32 func_15046D00(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
-    struct conker150472C0_dst sp4C;
-    struct conker150472C0_dst sp28;
-    u8 sp27;
+/* Floor probe: func_1504697C or collision set 3, whichever is nearer. */
+s32 func_15046D00(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    CollisionHit hitA;
+    CollisionHit hitB;
+    u8 foundA;
+    u8 foundB;
 
-    if (arg0->field_0x04 < arg2) {
-        arg3->field_0x1C &= ~2;
-        return 0;
+    if (pos->unk4 < bottom) {
+        hit->flags &= ~2;
+        return FALSE;
     }
 
-    sp4C = *arg3;
-    sp28 = *arg3;
-    sp27 = func_1504697C(arg0, arg1, arg2, &sp4C);
-    arg0 = (struct conker15045714 *)func_1504554C(arg0, arg2, &sp28);
+    hitA = *hit;
+    hitB = *hit;
+    foundA = func_1504697C(pos, mask, bottom, &hitA);
+    foundB = func_1504554C(pos, bottom, &hitB);
 
-    if (sp27 != 0 && ((s32)arg0 & 0xFF) != 0) {
-        if (sp28.field_0x00 < sp4C.field_0x00) {
-            *arg3 = sp4C;
+    if (foundA && foundB) {
+        if (hitB.height < hitA.height) {
+            *hit = hitA;
         } else {
-            *arg3 = sp28;
+            *hit = hitB;
         }
-        return 1;
+        return TRUE;
     }
 
-    if (sp27 != 0) {
-        *arg3 = sp4C;
-        return 1;
+    if (foundA) {
+        *hit = hitA;
+        return TRUE;
     }
 
-    if (((s32)arg0 & 0xFF) != 0) {
-        *arg3 = sp28;
-        return 1;
+    if (foundB) {
+        *hit = hitB;
+        return TRUE;
     }
 
-    if (sp28.field_0x00 < sp4C.field_0x00) {
-        *arg3 = sp4C;
+    if (hitB.height < hitA.height) {
+        *hit = hitA;
     } else {
-        *arg3 = sp28;
+        *hit = hitB;
     }
-    arg3->field_0x1C &= ~2;
-    return 0;
+    hit->flags &= ~2;
+    return FALSE;
 }
 
-s32 func_15046D00(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
-
-s32 func_15046F84(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    switch (func_15047004((struct conker15045714 *)arg0, arg2, (struct conker150472C0_dst *)arg3)) {
+/* Floor probe with the cached-triangle fast path (func_15046D00). */
+s32 func_15046F84(struct17 *pos, u16 mask, f32 bottom, CollisionHit *hit) {
+    switch (func_15047004(pos, bottom, hit)) {
     case 0:
-        return func_15046D00((struct conker15045714 *)arg0, (u16)arg1, *(f32 *)&arg2, (struct conker150472C0_dst *)arg3);
+        return func_15046D00(pos, mask, bottom, hit);
     case 1:
-        return 0;
+        return FALSE;
     case 2:
-        return 1;
-    default:
-        break;
+        return TRUE;
     }
 }
 
-extern s32 func_150A3FC4(f32, f32, s32, s32, s32);
+/*
+ * Fast path for floor probes: if hit->tri is still valid and pos lies over it, re-measure its height.
+ * Returns 0 when not over the cached triangle, 1 when over it but outside [bottom, pos.y], 2 on a hit.
+ */
+s32 func_15047004(struct17 *pos, f32 bottom, CollisionHit *hit) {
+    f32 height;
 
-s32 func_15047004(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *a2) {
-    f32 sp24;
-
-    if (a2->field_0x1C & 0x4) {
-        if (func_150A3FC4(a0->field_0x00, a0->field_0x08, 0, (s32)&a2->field_0x04, (s32)&sp24)) {
-            if (*(f32 *)&a1 <= sp24) {
-                if (sp24 <= a0->field_0x04) {
-                    a2->field_0x00 = sp24;
-                    a2->field_0x1C |= 0x2;
+    if (hit->flags & 4) {
+        if (func_150A3FC4(pos->unk0, pos->unk8, 0, &hit->tri, &height)) {
+            if (bottom <= height) {
+                if (height <= pos->unk4) {
+                    hit->height = height;
+                    hit->flags |= 2;
                     return 2;
                 }
             }
@@ -1415,15 +1216,16 @@ s32 func_15047004(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *
     return 0;
 }
 
-s32 func_150470B0(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *a2) {
-    f32 sp24;
+/* Ceiling counterpart of func_15047004: a hit lies in [pos.y, top]. */
+s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit) {
+    f32 height;
 
-    if (a2->field_0x1C & 0x4) {
-        if (func_150A3FC4(a0->field_0x00, a0->field_0x08, 0, (s32)&a2->field_0x04, (s32)&sp24)) {
-            if (sp24 <= *(f32 *)&a1) {
-                if (a0->field_0x04 <= sp24) {
-                    a2->field_0x00 = sp24;
-                    a2->field_0x1C |= 0x2;
+    if (hit->flags & 4) {
+        if (func_150A3FC4(pos->unk0, pos->unk8, 0, &hit->tri, &height)) {
+            if (height <= top) {
+                if (pos->unk4 <= height) {
+                    hit->height = height;
+                    hit->flags |= 2;
                     return 2;
                 }
             }
@@ -1433,188 +1235,186 @@ s32 func_150470B0(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *
     return 0;
 }
 
-typedef struct { s16 x, y, z; } Vec3s_1504715C;
-typedef struct { Vec3s_1504715C v[3]; } Tri_1504715C;
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ Tri_1504715C tri;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} Out1504715C;
-
-typedef struct {
+/* Floor state an object keeps (overlays struct127, whose header copy lacks these fields). */
+typedef struct ObjFloorState {
     /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
+    /* 0x014 */ f32 x;
+    /* 0x018 */ f32 y;
+    /* 0x01C */ f32 z;
     /* 0x020 */ u8 pad20[0xD8];
-    /* 0x0F8 */ u32 unkF8;
+    /* 0x0F8 */ u32 flags;
     /* 0x0FC */ u8 padFC[0x84];
-    /* 0x180 */ f32 unk180;
-    /* 0x184 */ s32 unk184;
+    /* 0x180 */ f32 floor_height;
+    /* 0x184 */ s32 floor_material;
     /* 0x188 */ u8 pad188[4];
-    /* 0x18C */ Tri_1504715C tri;
+    /* 0x18C */ CollisionTri floor_tri;
     /* 0x19E */ u8 pad19E[2];
-    /* 0x1A0 */ u16 unk1A0;
-} In1504715C;
+    /* 0x1A0 */ u16 floor_surface; // 1-based index into D_800DBEF4; 0 = none
+} ObjFloorState;
 
+/* Seeds a CollisionHit from the floor an object last stood on (a flat triangle if flag 0x200000 is set). */
+void func_1504715C(CollisionHit *hit, ObjFloorState *obj) {
+    s32 surface;
+    s32 flag;
 
-
-void func_1504715C(Out1504715C *arg0, In1504715C *arg1) {
-    s32 idx;
-    s32 v;
-
-    arg0->unk0 = arg1->unk180;
-    if (arg1->unkF8 & 0x200000) {
+    hit->height = obj->floor_height;
+    if (obj->flags & 0x200000) {
         s16 x;
         s16 y;
         s16 z;
 
-        x = arg1->unk14;
-        y = arg1->unk180;
-        z = arg1->unk1C;
-        arg0->tri.v[0].x = x + 1000;
-        arg0->tri.v[0].y = y;
-        arg0->tri.v[0].z = z + 1000;
-        arg0->tri.v[1].x = x - 1000;
-        arg0->tri.v[1].y = y;
-        arg0->tri.v[1].z = z;
-        arg0->tri.v[2].x = x + 1000;
-        arg0->tri.v[2].y = y;
-        arg0->tri.v[2].z = z - 1000;
+        x = obj->x;
+        y = obj->floor_height;
+        z = obj->z;
+        hit->tri.v[0].x = x + 1000;
+        hit->tri.v[0].y = y;
+        hit->tri.v[0].z = z + 1000;
+        hit->tri.v[1].x = x - 1000;
+        hit->tri.v[1].y = y;
+        hit->tri.v[1].z = z;
+        hit->tri.v[2].x = x + 1000;
+        hit->tri.v[2].y = y;
+        hit->tri.v[2].z = z - 1000;
     } else {
-        arg0->tri = arg1->tri;
+        hit->tri = obj->floor_tri;
     }
-    arg0->unk18 = arg1->unk184;
-    arg0->unk1C = 6;
-    if (arg1->unk1A0 != 0) {
-        idx = arg1->unk1A0 - 1;
-        arg0->unk1D = 2;
-        arg0->unk20 = idx * 0xA0 + D_800DBEF4;
-        if (func_15145C90(idx) != 0) {
-            v = 1;
+    hit->material = obj->floor_material;
+    hit->flags = 6;
+    if (obj->floor_surface != 0) {
+        surface = obj->floor_surface - 1;
+        hit->source = 2;
+        hit->surface = &D_800DBEF4[surface];
+        if (func_15145C90(surface) != 0) {
+            flag = 1;
         } else {
-            v = 0;
+            flag = 0;
         }
-        arg0->unk1C |= v;
-    lab: ;
+        hit->flags |= flag;
+    lab: ; // matching: an empty labelled statement keeps the flags store out of the branch delay slot
     } else {
-        arg0->unk1D = 1;
-        arg0->unk20 = 0;
-        arg0->unk1C |= 1;
+        hit->source = 1;
+        hit->surface = NULL;
+        hit->flags |= 1;
     }
 }
 
-void func_150472C0(struct conker150472C0_dst *arg0, struct conker150472C0_src *arg1)
-{
-  s32 one;
-  s32 temp_v0;
-  s32 temp_v1;
-  s32 temp_a2;
-  u8 temp_t2;
-  one = 1;
-  arg0->field_0x00 = arg1->unkC;
-  arg0->field_0x04 = (0, arg1->unk44);
-  arg0->field_0x18 = arg1->unk60;
-  temp_v0 = arg1->unk59;
-  temp_v1 = (1 == (temp_v0 ^ 0)) ? (2) : (0);
-  temp_t2 = 1;
-  temp_a2 = (one == temp_v0) ? (one) : (0);
-  temp_v0 = (one == temp_v0) ? (4) : (0);
-  arg0->field_0x1C = (temp_v0 | temp_a2) | temp_v1;
-  if (arg1->unk59 == one)
-  {
-    arg0->field_0x1D = temp_t2;
-  }
-  else
-  {
-    arg0->field_0x1D = 0;
-  }
-  arg0->field_0x20 = arg1->unk5C;
+/* Source of func_150472C0 (layout only as far as used). */
+typedef struct Game71820FloorSrc {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ f32 height;
+    /* 0x10 */ u8 pad10[0x34];
+    /* 0x44 */ CollisionTri tri;
+    /* 0x56 */ u8 pad56[3];
+    /* 0x59 */ u8 unk59;
+    /* 0x5A */ u8 pad5A[2];
+    /* 0x5C */ Game71820Surface *surface;
+    /* 0x60 */ s32 material;
+} Game71820FloorSrc;
+
+/* Fills a CollisionHit from a Game71820FloorSrc; unk59 == 1 marks it valid (flags 7, source 1). */
+void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
+    s32 one;
+    s32 inRange;
+    s32 flag1;
+    s32 valid;
+    s32 hasTri;
+
+    one = 1; // matching: keeps the constant 1 in a register for every compare
+    hit->height = src->height;
+    hit->tri = src->tri;
+    hit->material = src->material;
+    valid = src->unk59;
+    inRange = (1 == (valid ^ 0)) ? 2 : 0; // matching: the ^ 0 keeps IDO from swapping the compare operands
+    flag1 = (one == valid) ? one : 0;
+    hasTri = (one == valid) ? 4 : 0;
+    hit->flags = hasTri | flag1 | inRange;
+    if (src->unk59 == one) {
+        hit->source = 1;
+    } else {
+        hit->source = 0;
+    }
+    hit->surface = src->surface;
 }
 
-
-void func_15047390(f32 mf[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 temp_f0;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
-    f32 temp_f28;
-    f32 temp_f30;
-    f32 temp_f18;
+/* guLookAtF equivalent: view matrix from eye, target and up vector (sqrtf called out of line). */
+void func_15047390(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 scale;
+    f32 xRight;
+    f32 yRight;
+    f32 zRight;
+    f32 xLook;
+    f32 yLook;
+    f32 zLook;
+    f32 len;
 
     guMtxIdentF(mf);
 
-    temp_f26 = arg4 - arg1;
-    temp_f28 = arg5 - arg2;
-    temp_f30 = arg6 - arg3;
-    temp_f18 = sqrtf((temp_f26 * temp_f26) + (temp_f28 * temp_f28) + (temp_f30 * temp_f30));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D60;
+    xLook = xAt - xEye;
+    yLook = yAt - yEye;
+    zLook = zAt - zEye;
+    len = sqrtf((xLook * xLook) + (yLook * yLook) + (zLook * zLook));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = -1.0f / temp_f18;
-    temp_f26 *= temp_f0;
-    temp_f28 *= temp_f0;
-    temp_f30 *= temp_f0;
+    scale = -1.0f / len;
+    xLook *= scale;
+    yLook *= scale;
+    zLook *= scale;
 
-    temp_f20 = (arg8 * temp_f30) - (arg9 * temp_f28);
-    temp_f22 = (arg9 * temp_f26) - (arg7 * temp_f30);
-    temp_f24 = (arg7 * temp_f28) - (arg8 * temp_f26);
-    temp_f18 = sqrtf((temp_f20 * temp_f20) + (temp_f22 * temp_f22) + (temp_f24 * temp_f24));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D64;
+    xRight = (yUp * zLook) - (zUp * yLook);
+    yRight = (zUp * xLook) - (xUp * zLook);
+    zRight = (xUp * yLook) - (yUp * xLook);
+    len = sqrtf((xRight * xRight) + (yRight * yRight) + (zRight * zRight));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = 1.0f / temp_f18;
-    temp_f20 *= temp_f0;
-    temp_f22 *= temp_f0;
-    temp_f24 *= temp_f0;
+    scale = 1.0f / len;
+    xRight *= scale;
+    yRight *= scale;
+    zRight *= scale;
 
-    arg7 = (temp_f28 * temp_f24) - (temp_f30 * temp_f22);
-    arg8 = (temp_f30 * temp_f20) - (temp_f26 * temp_f24);
-    arg9 = (temp_f26 * temp_f22) - (temp_f28 * temp_f20);
-    temp_f18 = sqrtf((arg7 * arg7) + (arg8 * arg8) + (arg9 * arg9));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D68;
+    xUp = (yLook * zRight) - (zLook * yRight);
+    yUp = (zLook * xRight) - (xLook * zRight);
+    zUp = (xLook * yRight) - (yLook * xRight);
+    len = sqrtf((xUp * xUp) + (yUp * yUp) + (zUp * zUp));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = 1.0f / temp_f18;
-    arg7 *= temp_f0;
-    arg8 *= temp_f0;
-    arg9 *= temp_f0;
+    scale = 1.0f / len;
+    xUp *= scale;
+    yUp *= scale;
+    zUp *= scale;
 
-    mf[0][0] = temp_f20;
-    mf[1][0] = temp_f22;
-    mf[2][0] = temp_f24;
-    mf[3][0] = -((arg1 * temp_f20) + (arg2 * temp_f22) + (arg3 * temp_f24));
-    mf[0][1] = arg7;
-    mf[1][1] = arg8;
-    mf[2][1] = arg9;
-    mf[3][1] = -((arg1 * arg7) + (arg2 * arg8) + (arg3 * arg9));
-    mf[0][2] = temp_f26;
-    mf[1][2] = temp_f28;
-    mf[2][2] = temp_f30;
-    mf[3][2] = -((arg1 * temp_f26) + (arg2 * temp_f28) + (arg3 * temp_f30));
+    mf[0][0] = xRight;
+    mf[1][0] = yRight;
+    mf[2][0] = zRight;
+    mf[3][0] = -((xEye * xRight) + (yEye * yRight) + (zEye * zRight));
+    mf[0][1] = xUp;
+    mf[1][1] = yUp;
+    mf[2][1] = zUp;
+    mf[3][1] = -((xEye * xUp) + (yEye * yUp) + (zEye * zUp));
+    mf[0][2] = xLook;
+    mf[1][2] = yLook;
+    mf[2][2] = zLook;
+    mf[3][2] = -((xEye * xLook) + (yEye * yLook) + (zEye * zLook));
     mf[3][3] = 1.0f;
     mf[0][3] = 0.0f;
     mf[1][3] = 0.0f;
     mf[2][3] = 0.0f;
 }
 
-void func_15047688(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 sp30[4][4];
+/* guLookAt equivalent: func_15047390 converted to a fixed-point Mtx. */
+void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 mf[4][4];
 
-    func_15047390(&sp30, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
-    guMtxF2L(&sp30, arg0);
+    func_15047390(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guMtxF2L(mf, m);
 }
 
 #pragma intrinsic(sqrtf)
 
-void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
+void func_15047700(f32 mf[4][4], LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
     f32 yLook;
@@ -1669,29 +1469,29 @@ void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt
         zUp = 0.0f;
     }
 
-    ((LookAt *)arg1)->l[0].l.dir[0] = (s32)((xRight * 128.0f) < 127.0f ? (xRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[0].l.dir[1] = (s32)((yRight * 128.0f) < 127.0f ? (yRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[0].l.dir[2] = (s32)((zRight * 128.0f) < 127.0f ? (zRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[0] = (s32)((xUp * 128.0f) < 127.0f ? (xUp * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[1] = (s32)((yUp * 128.0f) < 127.0f ? (yUp * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[2] = (s32)((zUp * 128.0f) < 127.0f ? (zUp * 128.0f) : 127.0f) & 0xFF;
+    l->l[0].l.dir[0] = FTOFRAC8(xRight);
+    l->l[0].l.dir[1] = FTOFRAC8(yRight);
+    l->l[0].l.dir[2] = FTOFRAC8(zRight);
+    l->l[1].l.dir[0] = FTOFRAC8(xUp);
+    l->l[1].l.dir[1] = FTOFRAC8(yUp);
+    l->l[1].l.dir[2] = FTOFRAC8(zUp);
 
-    ((LookAt *)arg1)->l[0].l.col[0] = 0;
-    ((LookAt *)arg1)->l[0].l.col[1] = 0;
-    ((LookAt *)arg1)->l[0].l.col[2] = 0;
-    ((LookAt *)arg1)->l[0].l.pad1 = 0;
-    ((LookAt *)arg1)->l[0].l.colc[0] = 0;
-    ((LookAt *)arg1)->l[0].l.colc[1] = 0;
-    ((LookAt *)arg1)->l[0].l.colc[2] = 0;
-    ((LookAt *)arg1)->l[0].l.pad2 = 0;
-    ((LookAt *)arg1)->l[1].l.col[0] = 0;
-    ((LookAt *)arg1)->l[1].l.col[1] = 0x80;
-    ((LookAt *)arg1)->l[1].l.col[2] = 0;
-    ((LookAt *)arg1)->l[1].l.pad1 = 0;
-    ((LookAt *)arg1)->l[1].l.colc[0] = 0;
-    ((LookAt *)arg1)->l[1].l.colc[1] = 0x80;
-    ((LookAt *)arg1)->l[1].l.colc[2] = 0;
-    ((LookAt *)arg1)->l[1].l.pad2 = 0;
+    l->l[0].l.col[0] = 0;
+    l->l[0].l.col[1] = 0;
+    l->l[0].l.col[2] = 0;
+    l->l[0].l.pad1 = 0;
+    l->l[0].l.colc[0] = 0;
+    l->l[0].l.colc[1] = 0;
+    l->l[0].l.colc[2] = 0;
+    l->l[0].l.pad2 = 0;
+    l->l[1].l.col[0] = 0;
+    l->l[1].l.col[1] = 0x80;
+    l->l[1].l.col[2] = 0;
+    l->l[1].l.pad1 = 0;
+    l->l[1].l.colc[0] = 0;
+    l->l[1].l.colc[1] = 0x80;
+    l->l[1].l.colc[2] = 0;
+    l->l[1].l.pad2 = 0;
 
     mf[0][0] = xRight;
     mf[1][0] = yRight;
@@ -1714,11 +1514,11 @@ void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt
     mf[3][3] = 1.0f;
 }
 
-void func_15047700(f32 mf[4][4], s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+/* guLookAtReflect equivalent: func_15047700 converted to a fixed-point Mtx. */
+void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+                   f32 zUp) {
+    f32 mf[4][4];
 
-void func_15047B80(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10) {
-    f32 sp38[4][4];
-
-    func_15047700(&sp38, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-    guMtxF2L(&sp38, arg0);
+    func_15047700(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guMtxF2L(mf, m);
 }

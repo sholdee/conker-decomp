@@ -48,6 +48,20 @@ python3 ~/conker/tools/cw.py land  clean.<name> -m "what you cleaned"   # merge 
      behaviour it steers, e.g. `// matching: IDO keeps 0x82 in a register only with a 2nd use`.
    - Block scopes, declaration order and `register` placement are normal IDO idioms; they need no comment.
 
+## Lessons from earlier waves (use them)
+- **K&R definitions.** Callers sometimes pass a u8/s16 parameter that the function reloads from the stack and
+  narrows (`lbu`/`lh` from the arg slot). That is an old-style K&R definition, `void f(a) u8 a; {...}`, followed by
+  the prototype callers use. It replaces fake LOW_U8/LOW_S16 macros and byte-split hacks.
+- **Rodata float externs** such as `extern f32 D_800994C0;` used as a constant usually become the plain literal
+  (full precision) with identical bytes. Check after each one.
+- **Files compiled with `-g`** (see the Makefile's per-file OPT_FLAGS) keep every local in its own stack slot.
+  Renaming and re-typing locals is free there; only statement shape matters.
+- **Leftovers from file splits** can be deleted when `check` still matches: unused typedefs, prototypes and
+  externs for other files' functions, and commented-out old drafts.
+- **Unused stack-slot pads** (`s32 pad;`) and argument copies are normal in matched IDO code. Keep them with a
+  short `// matching:` comment when every alternative mismatches; don't spend many checks on them.
+- Give each function a one-line doc comment when its purpose is clear from the code.
+
 ## Out of scope for wave 1 (don't do these)
 - Renaming exported symbols (`func_XXXXXXXX`, `D_XXXXXXXX`, anything declared in `include/` or used by other
   files). `tools/rodata_extern.py` derives addresses from `D_<8 hex>` names. A later central pass will apply

@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+// functions.h declares func_1502B7F0 with five parameters; this file calls it with four.
 #define func_1502B7F0 func_1502B7F0__proto
 #include "functions.h"
 #undef func_1502B7F0
@@ -7,52 +8,49 @@
 
 #include "macros.h"
 
-typedef struct func_15002560_node {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-} func_15002560_node;
+// Quadtree node, built into the D_800B0DDC buffer. Links are byte offsets from the node itself.
+typedef struct QuadNode {
+    /* 0x0 */ s16 minY;
+    /* 0x2 */ s16 maxY;
+    /* 0x4 */ s16 next;     // next sibling (0: none)
+    /* 0x6 */ u16 halfSize;
+    /* 0x8 */ s16 x;        // centre
+    /* 0xA */ s16 z;
+    /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
+} QuadNode;
 
-typedef struct Point16 {
-    s16 x;
-    s16 y;
-    s16 z;
-} Point16;
+// One entry of the triangle table D_800DBE3C: the triangle's three vertices.
+typedef struct MeshTri {
+    Vtx *verts[3];
+} MeshTri;
 
-typedef struct Face16 {
-    Point16 *pts[3];
-} Face16;
-
-typedef struct Point32 {
+typedef struct Vec3f {
     f32 x;
     f32 y;
     f32 z;
-} Point32;
+} Vec3f;
 
-typedef struct Face32 {
-    Point32 pts[3];
-} Face32;
+// A triangle's vertex positions, passed by value to the box test func_15049260.
+typedef struct Tri3f {
+    Vec3f pts[3];
+} Tri3f;
 
 typedef struct YRange {
     s16 min;
     s16 max;
 } YRange;
 
-extern s32 D_800DBE44;
+extern YRange *D_800DBE44;
 
-void func_15002560(u16 *arg0, u16 *arg1);
-void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4);
-s32 func_15049260(Face32 arg0);
+void func_15002560(QuadNode *node, QuadNode *parentNext);
+void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
+s32 func_15049260(Tri3f tri);
+s32 func_150027F8(Gfx *dl);
 
 void func_15000AC0(void) {
-    D_800D9E64 = (u8)0;
+    D_800D9E64 = 0;
 }
 
-// jump table
 extern u8 D_800DBEA8[];
 extern Vtx *D_800DBE88[][2];
 extern s32 *D_800DBE80;
@@ -64,10 +62,15 @@ s32 func_1502B7F0();
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 
+/**
+ * Sets up the current map's background according to D_800B0DF0->unk8:
+ * mode 4 allocates two vertex buffers per view (D_80082FA0 + 1 views), mode 2 builds a
+ * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
+ */
 void func_15000AD0(s32 arg0) {
     s32 i;
     s32 j;
-    s32 n;
+    s32 end; // one past the last gradient entry of the current band
     s32 start;
     s32 size;
     s32 from[3];
@@ -86,13 +89,13 @@ void func_15000AD0(s32 arg0) {
     if (D_800B0DF0->unk8 == 4) {
         size = (D_80082FA0 != 1) ? 0x130 : 0x1C0;
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(size * 32, 1, 2, 0);
+            vtx = (Vtx *)allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
         }
         func_1502B7F0(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
         if (D_80038080 != 0) {
-            for (i = 0; i != 0x168; i++) {
+            for (i = 0; i < 360; i++) {
                 func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
@@ -113,7 +116,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0xBF;
-                n = 0xA7;
+                end = 0xA7;
                 to[0] = 0xD0;
                 to[1] = 0xD5;
                 to[2] = 0xFF;
@@ -122,7 +125,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
-                n = 0x85;
+                end = 0x85;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0x5D;
@@ -131,7 +134,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
-                n = 0x7B;
+                end = 0x7B;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0x1F;
@@ -140,15 +143,15 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0x67;
                 from[2] = 0x38;
-                n = 0x23;
+                end = 0x23;
                 to[0] = 0xC8;
                 to[1] = 0xD5;
                 to[2] = 0x2E;
                 break;
         }
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * i / n + from[j];
+                cur[j] = (to[j] - from[j]) * i / end + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -164,8 +167,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB1;
+                start = end;
+                end = 0xB1;
                 to[0] = 0x12;
                 to[1] = 0x4E;
                 to[2] = 0x19;
@@ -174,8 +177,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0x9C;
+                start = end;
+                end = 0x9C;
                 to[0] = 0x1C;
                 to[1] = 0x15;
                 to[2] = 0x93;
@@ -184,8 +187,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xA2;
+                start = end;
+                end = 0xA2;
                 to[0] = 0x3;
                 to[1] = 0x1C;
                 to[2] = 0x36;
@@ -194,16 +197,16 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0x63;
+                start = end;
+                end = 0x63;
                 to[0] = 0xFF;
                 to[1] = 0x3E;
                 to[2] = 0x12;
                 break;
         }
-        for (i = start; i < n; i++) {
+        for (i = start; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * (i - start) / (n - start) + from[j];
+                cur[j] = (to[j] - from[j]) * (i - start) / (end - start) + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -219,8 +222,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xDD;
+                start = end;
+                end = 0xDD;
                 to[0] = 0;
                 to[1] = 0xC7;
                 to[2] = 0;
@@ -229,8 +232,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB4;
+                start = end;
+                end = 0xB4;
                 to[0] = 0xA;
                 to[1] = 0x22;
                 to[2] = 0xFF;
@@ -239,8 +242,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB7;
+                start = end;
+                end = 0xB7;
                 to[0] = 0x21;
                 to[1] = 0x24;
                 to[2] = 0x31;
@@ -249,16 +252,16 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xC8;
+                start = end;
+                end = 0xC8;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0;
                 break;
         }
-        for (i = start; i < n; i++) {
+        for (i = start; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * (i - start) / (n - start) + from[j];
+                cur[j] = (to[j] - from[j]) * (i - start) / (end - start) + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -266,7 +269,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        for (i = n; i < 0x100; i++) {
+        for (i = end; i < 0x100; i++) {
             for (j = 0; j < 3; j++) {
                 cur[j] = to[j];
             }
@@ -278,27 +281,27 @@ void func_15000AD0(s32 arg0) {
         }
         D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(0x80, 1, 1, 0);
+            vtx = (Vtx *)allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = vtx + 4;
             for (j = 0; j < 2; j++) {
-                D_800DBE88[i][j][0].v.ob[0] = -0x6D6;
-                D_800DBE88[i][j][0].v.ob[1] = 0x6D6;
+                D_800DBE88[i][j][0].v.ob[0] = -1750;
+                D_800DBE88[i][j][0].v.ob[1] = 1750;
                 D_800DBE88[i][j][0].v.ob[2] = -1000;
                 D_800DBE88[i][j][0].v.flag = 0;
                 D_800DBE88[i][j][0].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][1].v.ob[0] = 0x6D6;
-                D_800DBE88[i][j][1].v.ob[1] = 0x6D6;
+                D_800DBE88[i][j][1].v.ob[0] = 1750;
+                D_800DBE88[i][j][1].v.ob[1] = 1750;
                 D_800DBE88[i][j][1].v.ob[2] = -1000;
                 D_800DBE88[i][j][1].v.flag = 0;
                 D_800DBE88[i][j][1].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][2].v.ob[0] = 0x6D6;
-                D_800DBE88[i][j][2].v.ob[1] = -0x6D6;
+                D_800DBE88[i][j][2].v.ob[0] = 1750;
+                D_800DBE88[i][j][2].v.ob[1] = -1750;
                 D_800DBE88[i][j][2].v.ob[2] = -1000;
                 D_800DBE88[i][j][2].v.flag = 0;
                 D_800DBE88[i][j][2].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][3].v.ob[0] = -0x6D6;
-                D_800DBE88[i][j][3].v.ob[1] = -0x6D6;
+                D_800DBE88[i][j][3].v.ob[0] = -1750;
+                D_800DBE88[i][j][3].v.ob[1] = -1750;
                 D_800DBE88[i][j][3].v.ob[2] = -1000;
                 D_800DBE88[i][j][3].v.flag = 0;
                 D_800DBE88[i][j][3].v.tc[0] = 0x2000;
@@ -313,7 +316,6 @@ void func_15000AD0(s32 arg0) {
         D_800DBEAC = 0;
     }
 }
-// loops!
 typedef struct XZRange {
     s16 minx;
     s16 minz;
@@ -321,181 +323,148 @@ typedef struct XZRange {
     s16 maxz;
 } XZRange;
 
-typedef struct GfxW {
-    u32 w0;
-    u32 w1;
-} GfxW;
+extern XZRange *D_800DBE40;
 
-extern s32 D_800DBE40;
+/**
+ * Appends every triangle drawn by display list `dl` to the triangle table D_800DBE3C
+ * and records its bounding box: x/z in D_800DBE40, y in D_800DBE44.
+ */
+void func_15001460(Gfx *dl) {
+    s32 i;
+    Gfx *gfx;
+    s32 opcode;
+    s32 count;
+    s32 t;
+    s32 numTris;
+    s32 j;
+    s32 k;
+    u32 addr;
+    s32 m;
+    Vtx *verts[31];
+    s16 numVerts;
+    s16 first;
+    s16 tris[4][3];
+    s16 min[3];
+    s16 max[3];
 
-void func_15001460(GfxW *arg0)
-{
-  s32 i;
-  GfxW *gfx;
-  s32 cmd;
-  s32 cnt;
-  s32 s;
-  s32 n;
-  s32 j;
-  s32 k;
-  u32 addr;
-  s32 m;
-  Point16 *vtx[31];
-  s16 num;
-  s16 start;
-  s16 tris[4][3];
-  s16 min[3];
-  s16 max[3];
-  if (arg0 == 0)
-  {
-    return;
-  }
-  {
-    cnt = D_800DBE38;
-    for (i = 0; (*((s8 *) (&arg0[i]))) != (-0x21); i++)
-    {
-      gfx = &arg0[i];
-      n = 0;
-      cmd = *((s8 *) gfx);
-      s = 0;
-      if ((cmd >> 4) == 1)
-      {
-        tris[0][0] = (gfx->w1 >> 25) & 0x1F;
-        tris[0][1] = (gfx->w1 >> 20) & 0x1F;
-        tris[0][2] = (gfx->w1 >> 15) & 0x1F;
-        tris[1][0] = (gfx->w1 >> 10) & 0x1F;
-        tris[1][1] = (gfx->w1 >> 5) & 0x1F;
-        tris[1][2] = gfx->w1 & 0x1F;
-        tris[2][0] = (gfx->w0 >> 10) & 0x1F;
-        tris[2][1] = (gfx->w0 >> 5) & 0x1F;
-        tris[2][2] = gfx->w0 & 0x1F;
-        tris[3][0] = (gfx->w0 >> 23) & 0x1F;
-        tris[3][1] = (gfx->w0 >> 18) & 0x1F;
-        tris[3][2] = ((gfx->w1 >> 30) & 3) | ((gfx->w0 >> 13) & 0x1C);
-        n = 4;
-      }
-      else
-        if (cmd == 6)
-      {
-        tris[0][0] = (gfx->w0 >> 17) & 0x1F;
-        tris[0][1] = (gfx->w0 >> 9) & 0x1F;
-        tris[0][2] = (gfx->w0 >> 1) & 0x1F;
-        tris[1][0] = (gfx->w1 >> 17) & 0x1F;
-        tris[1][1] = (gfx->w1 >> 9) & 0x1F;
-        tris[1][2] = (gfx->w1 >> 1) & 0x1F;
-        n = 2;
-      }
-      else
-        if (cmd == 1)
-      {
-        addr = gfx->w1;
-        if ((addr >> 24) & 0xF)
-        {
-          addr = ((&D_800D2C28)[(addr >> 24) & 0xF] + addr) - (D_800D2C68 << 24);
-        }
-        num = (((s32) gfx->w0) >> 12) & 0xFF;
-        start = (((s32) gfx->w0) >> 1) & 0x7F;
-        start -= num;
-        for (m = start; m < num; m++)
-        {
-          vtx[m] = (Point16 *) addr;
-          addr += 16;
-        }
-
-      }
-      else
-        if (cmd == 5)
-      {
-        for (k = 0; k < 3; k++)
-        {
-          tris[0][k] = ((u8 *) gfx)[k + 1] >> 1;
-        }
-
-        n = 1;
-      }
-      for (s = 0; s < n; s++)
-      {
-        if (((u32) vtx[0]) > 0x100000)
-        {
-          for (cmd = 0; cmd < 3; cmd++)
-          {
-            if (D_800DBE63 == 0)
-            {
-              min[cmd] = (max[cmd] = (&vtx[tris[s][0]]->x)[cmd]);
-              for (k = 1; k < 3; k++)
-              {
-                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
-                {
-                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                else
-                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
-                {
-                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
-                {
-                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                else
-                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
-                {
-                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-              }
-
-            }
-            else
-            {
-              min[cmd] = -0x8000;
-              max[cmd] = 0x7FFF;
-            }
-          }
-
-        }
-        for (j = 0; j < 3; j++)
-        {
-          ((Face16 *) D_800DBE3C)[cnt].pts[j] = vtx[tris[s][j]];
-        }
-
-        ((XZRange *) D_800DBE40)[cnt].minx = min[0];
-        ((XZRange *) D_800DBE40)[cnt].maxx = max[0];
-        ((XZRange *) D_800DBE40)[cnt].minz = min[2];
-        ((XZRange *) D_800DBE40)[cnt].maxz = max[2];
-        ((YRange *) D_800DBE44)[cnt].min = min[1];
-        ((YRange *) D_800DBE44)[cnt].max = max[1];
-        cnt++;
-      }
-
+    if (dl == NULL) {
+        return;
     }
-
-    D_800DBE38 = cnt;
-  }
+    count = D_800DBE38;
+    for (i = 0; *(s8 *)&dl[i] != (s8)G_ENDDL; i++) {
+        gfx = &dl[i];
+        numTris = 0;
+        opcode = *(s8 *)gfx;
+        if ((opcode >> 4) == 1) {
+            // Conker's G_TRI4 (opcodes 0x10-0x1F): four triangles, 5-bit vertex indices
+            tris[0][0] = (gfx->words.w1 >> 25) & 0x1F;
+            tris[0][1] = (gfx->words.w1 >> 20) & 0x1F;
+            tris[0][2] = (gfx->words.w1 >> 15) & 0x1F;
+            tris[1][0] = (gfx->words.w1 >> 10) & 0x1F;
+            tris[1][1] = (gfx->words.w1 >> 5) & 0x1F;
+            tris[1][2] = gfx->words.w1 & 0x1F;
+            tris[2][0] = (gfx->words.w0 >> 10) & 0x1F;
+            tris[2][1] = (gfx->words.w0 >> 5) & 0x1F;
+            tris[2][2] = gfx->words.w0 & 0x1F;
+            tris[3][0] = (gfx->words.w0 >> 23) & 0x1F;
+            tris[3][1] = (gfx->words.w0 >> 18) & 0x1F;
+            tris[3][2] = ((gfx->words.w1 >> 30) & 3) | ((gfx->words.w0 >> 13) & 0x1C);
+            numTris = 4;
+        } else if (opcode == G_TRI2) {
+            tris[0][0] = (gfx->words.w0 >> 17) & 0x1F;
+            tris[0][1] = (gfx->words.w0 >> 9) & 0x1F;
+            tris[0][2] = (gfx->words.w0 >> 1) & 0x1F;
+            tris[1][0] = (gfx->words.w1 >> 17) & 0x1F;
+            tris[1][1] = (gfx->words.w1 >> 9) & 0x1F;
+            tris[1][2] = (gfx->words.w1 >> 1) & 0x1F;
+            numTris = 2;
+        } else if (opcode == G_VTX) {
+            addr = gfx->words.w1;
+            if ((addr >> 24) & 0xF) {
+                // segmented address: rebase through the segment table
+                addr = (&D_800D2C28)[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+            }
+            numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
+            first = ((s32)gfx->words.w0 >> 1) & 0x7F;
+            first -= numVerts;
+            // (sic) the bound is the vertex count, not first + count
+            for (m = first; m < numVerts; m++) {
+                verts[m] = (Vtx *)addr;
+                addr += sizeof(Vtx);
+            }
+        } else if (opcode == G_TRI1) {
+            for (k = 0; k < 3; k++) {
+                tris[0][k] = ((u8 *)gfx)[k + 1] >> 1;
+            }
+            numTris = 1;
+        }
+        for (t = 0; t < numTris; t++) {
+            if ((u32)verts[0] > 0x100000) {
+                // matching: `opcode` doubles as the axis counter; a separate local reallocates registers
+                for (opcode = 0; opcode < 3; opcode++) {
+                    if (D_800DBE63 == 0) {
+                        min[opcode] = max[opcode] = verts[tris[t][0]]->v.ob[opcode];
+                        for (k = 1; k < 3; k++) {
+                            if (verts[tris[t][k]]->v.ob[opcode] < min[opcode]) {
+                                min[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            } else if (max[opcode] < verts[tris[t][k]]->v.ob[opcode]) {
+                                max[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            }
+                            if (verts[tris[t][k]]->v.ob[opcode] < min[opcode]) {
+                                min[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            } else if (max[opcode] < verts[tris[t][k]]->v.ob[opcode]) {
+                                max[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            }
+                        }
+                    } else {
+                        min[opcode] = -0x8000;
+                        max[opcode] = 0x7FFF;
+                    }
+                }
+            }
+            for (j = 0; j < 3; j++) {
+                ((MeshTri *)D_800DBE3C)[count].verts[j] = verts[tris[t][j]];
+            }
+            D_800DBE40[count].minx = min[0];
+            D_800DBE40[count].maxx = max[0];
+            D_800DBE40[count].minz = min[2];
+            D_800DBE40[count].maxz = max[2];
+            D_800DBE44[count].min = min[1];
+            D_800DBE44[count].max = max[1];
+            count++;
+        }
+    }
+    D_800DBE38 = count;
 }
 
+/** Resets the triangle counters and allocates this map's triangle-data arena (D_800B0DC0..D_800B0DC8). */
 void func_15001970(void) {
-    s32 pad;
-    s32 tmp;
+    s32 pad; // matching: unused stack slot keeps the original frame size
+    s32 size;
 
     D_800B0DE4 = 0;
     D_800DBE63 = 0;
-    *D_800DBE18 = 0;
-    *D_800DBE1C = 0;
+    D_800DBE18[0] = 0;
+    D_800DBE1C[0] = 0;
     D_800DBE20 = 0;
-    tmp = D_80091C04[D_800BE9F0];
+    size = D_80091C04[D_800BE9F0];
     D_800DBE24 = 0;
-    D_800B0DC0 = allocate_memory(tmp, 1, 0, 0);
-    D_800B0DC8 = tmp + D_800B0DC0;
+    D_800B0DC0 = allocate_memory(size, 1, 0, 0);
+    D_800B0DC8 = size + D_800B0DC0;
     D_800B0DC4 = D_800B0DC0;
 }
 
 void __osPiGetAccess(void);
 void __osPiRelAccess(void);
 
+/**
+ * Allocates the quadtree buffer for the current map (D_800B0DDC) and resets the node counters.
+ * The buffer is doubled when the cartridge word at ROM offset 0xD24 is not the expected one.
+ */
 void func_15001A08(void) {
     s32 size;
     u32 stat;
-    s32 id;
+    s32 romWord;
 
     size = D_80091AF0[D_800BE9F0];
 
@@ -504,10 +473,10 @@ void func_15001A08(void) {
     while (stat & (PI_STATUS_IO_BUSY | PI_STATUS_DMA_BUSY)) {
         stat = IO_READ(PI_STATUS_REG);
     }
-    id = IO_READ(D_80000308 | 0xB0000D24);
+    romWord = IO_READ(D_80000308 | 0xB0000D24);
     __osPiRelAccess();
 
-    if (id != 0x98CCE31A) {
+    if (romWord != 0x98CCE31A) {
         size <<= 1;
     }
 
@@ -524,258 +493,281 @@ void func_15001A08(void) {
 void func_15001B08(void) {
 }
 
-u16* func_15001B10(void) {
-    u16 *temp_v0;
+/** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
+u16 *func_15001B10(void) {
+    QuadNode *node;
 
     D_800B0DE0 = ALIGN4(D_800B0DE0);
-    D_800B0DCC += 1;
+    D_800B0DCC++;
 
-    temp_v0 = (u16*)D_800B0DE0;
-    temp_v0[6] = 0;
-    temp_v0[2] = 0;
+    node = (QuadNode *)D_800B0DE0;
+    node->child = 0;
+    node->next = 0;
 
-    D_800B0DE0 += 14;
-    return temp_v0;
+    D_800B0DE0 += sizeof(QuadNode);
+    return (u16 *)node;
 }
 
-void func_15001B5C(u8 arg0) {
-    *D_800B0DE0++ = arg0;
+/** Appends one byte to the quadtree buffer. */
+void func_15001B5C(u8 value) {
+    *D_800B0DE0++ = value;
 }
 
-void func_15001B8C(u16 arg0) {
-   D_800B0DE0[0] = (arg0 >> 8);
-   D_800B0DE0[1] = arg0 & 0xFF;
-   D_800B0DE0 += 2;
+/** Appends a big-endian halfword to the quadtree buffer. */
+void func_15001B8C(u16 value) {
+    D_800B0DE0[0] = value >> 8;
+    D_800B0DE0[1] = value & 0xFF;
+    D_800B0DE0 += 2;
 }
 
-void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
-    u16 *tmp;
-    s16 *sp20;
+/**
+ * Builds the quadtree of map `map` over its D_800DBE4C triangles and stores the root in
+ * D_800DBE08[map]. Optionally returns the total node count and the leaf count.
+ */
+void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
+    u16 *root;
+    s16 *triList;
     s32 i;
 
-    func_1510F800(arg0);
+    func_1510F800(map);
     D_800B0DD8 = 10;
     D_800B0DD4 = 512;
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
+    triList[0] = D_800DBE4C;
     for (i = 0; i < D_800DBE4C; i++) {
-        sp20[i + 1] = i;
+        triList[i + 1] = i;
     }
 
-    tmp = func_15001DE0(0, 0, 32768, 32768, 0, sp20);
-    D_800DBE08[arg0] = tmp;
-    func_15002560(tmp, 0);
-    func_10004074(sp20);
+    root = func_15001DE0(0, 0, 0x8000, 0x8000, 0, triList);
+    D_800DBE08[map] = root;
+    func_15002560((QuadNode *)root, NULL);
+    func_10004074(triList);
 
-    // regalloc fix:
-    if (1) { }
+    if (1) { } // matching: IDO's register allocation for the out-params needs this empty block
 
-    if (arg1 != 0) {
-        *arg1 = D_800B0DCC;
+    if (nodeCount != NULL) {
+        *nodeCount = D_800B0DCC;
     }
-    if (arg2 != 0) {
-        *arg2 = D_800B0DD0;
+    if (leafCount != NULL) {
+        *leafCount = D_800B0DD0;
     }
 }
 
-void func_15001CEC(s32 arg0) {
-    u16 *temp_v0;
-    s16 *sp20;
+/** Gives map `map` a single-leaf quadtree that covers the whole map and holds all its triangles. */
+void func_15001CEC(s32 map) {
+    QuadNode *root;
+    s16 *triList;
     s32 i;
 
-    func_1510F800(arg0);
-    temp_v0 = func_15001B10();
+    func_1510F800(map);
+    root = (QuadNode *)func_15001B10();
 
-    D_800DBE08[arg0] = temp_v0;
+    D_800DBE08[map] = (u16 *)root;
 
-    *((s16*)temp_v0 + 0) = 32768;
-    temp_v0[1] = 32767;
-    temp_v0[2] = 0;
-    temp_v0[3] = -32768;
-    temp_v0[4] = 0;
-    temp_v0[5] = 0;
-    temp_v0[6] = 0;
+    root->minY = -0x8000;
+    root->maxY = 0x7FFF;
+    root->next = 0;
+    root->halfSize = 0x8000;
+    root->x = 0;
+    root->z = 0;
+    root->child = 0;
 
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
+    triList[0] = D_800DBE4C;
     for (i = 0; i < D_800DBE4C; i++) {
-        sp20[i + 1] = i;
+        triList[i + 1] = i;
     }
 
-    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, sp20);
-    func_10004074(sp20);
+    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, triList);
+    func_10004074(triList);
 }
 
-u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    u16 *temp_v0;
-    u16 *temp_v0_2;
-    u16 *temp_v0_3;
-    u16 *temp_v0_4;
+/**
+ * Recursively builds the quadtree node centred on (x, z) with half-extents (halfX, halfZ) from the
+ * triangles in `triList` (a count followed by triangle indices). A node becomes a leaf, followed in
+ * the buffer by its triangle stream, when it overlaps fewer than D_800B0DD8 triangles or is narrower
+ * than D_800B0DD4; otherwise it gets four children, chained through their `next` offsets.
+ */
+u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
+    QuadNode *node;
+    QuadNode *child0;
+    QuadNode *child1;
+    QuadNode *child2;
 
-    s32 sp7C;
-    s32 sp78;
+    s32 minY;
+    s32 maxY;
 
-    s32 tmp0;
-    s32 tmp1;
+    s32 minTris;
+    s32 minSize;
 
-    s32 sp44;
-    s32 sp48;
-    s32 sp4C;
-    s32 sp50;
-    s32 sp54;
-    s32 sp58;
+    s32 pad; // matching: unused stack slot keeps the original frame layout
+    s32 maxZ;
+    s32 minZ;
+    s32 maxX;
+    s32 minX;
+    u16 *subList;
 
-    tmp0 = D_800B0DD8;
-    tmp1 = D_800B0DD4;
+    minTris = D_800B0DD8;
+    minSize = D_800B0DD4;
 
-    sp54 = arg0 - arg2;
-    sp50 = arg0 + arg2;
-    sp4C = arg1 - arg3;
-    sp48 = arg1 + arg3;
+    minX = x - halfX;
+    maxX = x + halfX;
+    minZ = z - halfZ;
+    maxZ = z + halfZ;
 
-    if ((func_15002248(sp54, sp50, sp4C, sp48, &sp7C, &sp78, arg5, &sp58) < tmp0) || (arg2 < tmp1)) {
-        temp_v0 = func_15001B10();
-        D_800B0DD0 = (D_800B0DD0 + 1);
-        temp_v0[0] = sp7C;
-        temp_v0[1] = sp78;
-        temp_v0[3] = arg2;
-        temp_v0[4] = arg0;
-        temp_v0[5] = arg1;
-        temp_v0[2] = 0;
-        temp_v0[6] = 0;
-        func_15002008(sp54, sp50, sp4C, sp48, sp58);
+    if ((func_15002248(minX, maxX, minZ, maxZ, &minY, &maxY, triList, &subList) < minTris) || (halfX < minSize)) {
+        node = (QuadNode *)func_15001B10();
+        D_800B0DD0++;
+        node->minY = minY;
+        node->maxY = maxY;
+        node->halfSize = halfX;
+        node->x = x;
+        node->z = z;
+        node->next = 0;
+        node->child = 0;
+        func_15002008(minX, maxX, minZ, maxZ, subList);
     } else {
-        temp_v0 = func_15001B10();
-        temp_v0[0] = sp7C;
-        temp_v0[1] = sp78;
-        temp_v0[3] = arg2;
-        temp_v0[4] = arg0;
-        temp_v0[5] = arg1;
-        temp_v0[2] = 0;
+        node = (QuadNode *)func_15001B10();
+        node->minY = minY;
+        node->maxY = maxY;
+        node->halfSize = halfX;
+        node->x = x;
+        node->z = z;
+        node->next = 0;
 
-        temp_v0_2 = func_15001DE0(arg0 - (arg2 >> 1), arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0[6] = (s32)temp_v0_2 - (s32)temp_v0;
-        temp_v0_3 = func_15001DE0(arg0 - (arg2 >> 1), (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0_2[2] = (s32)temp_v0_3 - (s32)temp_v0_2;
-        temp_v0_4 = func_15001DE0((arg2 >> 1) + arg0, arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0_3[2] = (s32)temp_v0_4 - (s32)temp_v0_3;
-        temp_v0_4[2] = (s32)func_15001DE0((arg2 >> 1) + arg0, (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58) - (s32)temp_v0_4;
+        child0 = (QuadNode *)func_15001DE0(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        node->child = (u8 *)child0 - (u8 *)node;
+        child1 = (QuadNode *)func_15001DE0(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
+        child0->next = (u8 *)child1 - (u8 *)child0;
+        child2 = (QuadNode *)func_15001DE0((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child1->next = (u8 *)child2 - (u8 *)child1;
+        child2->next = (u8 *)func_15001DE0((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
     }
-    func_10004074(sp58);
-    return temp_v0;
+    func_10004074(subList);
+    return (u16 *)node;
 }
 
-void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4) {
-    Face16 *face;
+/**
+ * Appends to the quadtree buffer the triangles of `triList` that overlap the box
+ * [minX, maxX] x [minZ, maxZ], as a stream of index deltas: a byte for a delta below 0x80,
+ * otherwise a big-endian halfword index with bit 15 set. The stream ends with a 0 byte.
+ */
+void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
+    MeshTri *tri;
     s32 count;
-    s32 idx;
-    s32 last;
-    s32 diff;
+    s32 index;
+    s32 prev;
+    s32 delta;
     s32 i;
     s32 j;
-    Face32 sp78;
+    Tri3f pos;
 
-    last = -1;
-    count = arg4[0];
+    prev = -1;
+    count = triList[0];
 
-    func_150492CC((f32)(arg1 - arg0), 32000.0f, (f32)(arg3 - arg2));
+    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
 
     for (i = 1; i <= count; i++) {
-        idx = arg4[i];
-        face = &((Face16 *)D_800DBE3C)[idx];
+        index = triList[i];
+        tri = &((MeshTri *)D_800DBE3C)[index];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->pts[j] > 0x80000000) {
-                sp78.pts[j].x = (f32)(face->pts[j]->x - (arg0 + arg1) / 2);
-                sp78.pts[j].y = (f32)face->pts[j]->y;
-                sp78.pts[j].z = (f32)(face->pts[j]->z - (arg2 + arg3) / 2);
+            if ((u32)tri->verts[j] > 0x80000000) {
+                pos.pts[j].x = tri->verts[j]->v.ob[0] - (minX + maxX) / 2;
+                pos.pts[j].y = tri->verts[j]->v.ob[1];
+                pos.pts[j].z = tri->verts[j]->v.ob[2] - (minZ + maxZ) / 2;
             } else {
-                sp78.pts[j].x = 0.0f;
-                sp78.pts[j].y = 0.0f;
-                sp78.pts[j].z = 0.0f;
+                pos.pts[j].x = 0.0f;
+                pos.pts[j].y = 0.0f;
+                pos.pts[j].z = 0.0f;
             }
         }
 
-        if (func_15049260(sp78) == 0) {
-            diff = idx - last;
-            if (last == -1) {
-                func_15001B8C(idx | 0x8000);
-            } else if (diff < 0x80) {
-                func_15001B5C(diff);
+        if (func_15049260(pos) == 0) {
+            delta = index - prev;
+            if (prev == -1) {
+                func_15001B8C(index | 0x8000);
+            } else if (delta < 0x80) {
+                func_15001B5C(delta);
             } else {
-                func_15001B8C(idx | 0x8000);
+                func_15001B8C(index | 0x8000);
             }
-            last = idx;
+            prev = index;
         }
     }
 
     func_15001B5C(0);
 }
 
-int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, u16 *arg6, u16 **arg7) {
+/**
+ * Collects into a new list (*subList: count, then indices) the triangles of `triList` that
+ * overlap the box [minX, maxX] x [minZ, maxZ], and returns their combined y range in
+ * *minY / *maxY, widened to a multiple of 2 << D_80082FA0. Returns the count.
+ */
+int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList) {
     s32 i;
     s32 j;
     s32 count;
     s32 total;
-    s32 idx;
+    s32 index;
     u16 *out;
-    Face16 *face;
-    s32 temp;
-    s32 flag;
-    s32 res;
-    s32 pad;
-    s32 mask;
-    Face32 sp74;
+    MeshTri *tri;
+    s32 bound;
+    s32 haveRange;
+    s32 result;
+    s32 lowBits;
+    s32 highBits;
+    Tri3f pos;
 
-    pad = (1 << (D_80082FA0 + 1)) - 1;
-    mask = -(1 << (D_80082FA0 + 1));
+    lowBits = (1 << (D_80082FA0 + 1)) - 1;
+    highBits = -(1 << (D_80082FA0 + 1));
 
-    func_150492CC((f32)(arg1 - arg0), 32000.0f, (f32)(arg3 - arg2));
+    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
 
-    total = arg6[0] + 1;
+    total = triList[0] + 1;
     count = 0;
     out = allocate_memory(total << 1, 1, 0, 0);
-    *arg7 = out;
-    *arg4 = 0;
-    *arg5 = 0;
-    flag = 0;
+    *subList = out;
+    *minY = 0;
+    *maxY = 0;
+    haveRange = FALSE;
 
     for (i = 1; i < total; i++) {
-        idx = arg6[i];
-        face = &((Face16 *)D_800DBE3C)[idx];
+        index = triList[i];
+        tri = &((MeshTri *)D_800DBE3C)[index];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->pts[j] > 0x80000000) {
-                sp74.pts[j].x = (f32)(face->pts[j]->x - ((arg0 + arg1) >> 1));
-                sp74.pts[j].y = (f32)face->pts[j]->y;
-                sp74.pts[j].z = (f32)(face->pts[j]->z - ((arg2 + arg3) >> 1));
+            if ((u32)tri->verts[j] > 0x80000000) {
+                pos.pts[j].x = tri->verts[j]->v.ob[0] - ((minX + maxX) >> 1);
+                pos.pts[j].y = tri->verts[j]->v.ob[1];
+                pos.pts[j].z = tri->verts[j]->v.ob[2] - ((minZ + maxZ) >> 1);
             } else {
-                sp74.pts[j].x = 0.0f;
-                sp74.pts[j].y = 0.0f;
-                sp74.pts[j].z = 0.0f;
+                pos.pts[j].x = 0.0f;
+                pos.pts[j].y = 0.0f;
+                pos.pts[j].z = 0.0f;
             }
         }
 
-        res = func_15049260(sp74);
-        if (res == 0) {
+        result = func_15049260(pos);
+        if (result == 0) {
             count++;
-            out[count] = idx;
+            out[count] = index;
 
-            if (flag) {
-                temp = (((YRange *)D_800DBE44)[idx].min - pad) & mask;
-                if (temp < *arg4) {
-                    *arg4 = temp;
+            if (haveRange) {
+                bound = (D_800DBE44[index].min - lowBits) & highBits;
+                if (bound < *minY) {
+                    *minY = bound;
                 }
-                temp = ((((YRange *)D_800DBE44)[idx].max + pad) & mask) + pad;
-                if (*arg5 < temp) {
-                    *arg5 = temp;
+                bound = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
+                if (*maxY < bound) {
+                    *maxY = bound;
                 }
             } else {
-                flag = 1;
-                *arg4 = (((YRange *)D_800DBE44)[idx].min - pad) & mask;
-                *arg5 = ((((YRange *)D_800DBE44)[idx].max + pad) & mask) + pad;
+                haveRange = TRUE;
+                *minY = (D_800DBE44[index].min - lowBits) & highBits;
+                *maxY = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
             }
         }
     }
@@ -784,354 +776,386 @@ int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, 
     return count;
 }
 
-void func_15002560(u16 *arg0, u16 *arg1) {
-    s32 temp_v0;
-    func_15002560_node *temp_s0;
-    func_15002560_node *var_s1;
+/**
+ * Threads the quadtree for traversal: every node without a sibling gets its `next` link pointed
+ * at `parentNext`, the node that follows its parent (none at the root).
+ */
+void func_15002560(QuadNode *node, QuadNode *parentNext) {
+    s32 offset;
+    QuadNode *next;
+    QuadNode *child;
 
-loop:
-    if (arg0 != 0) {
-        if (((func_15002560_node *)arg0)->unk4 == 0) {
-            if (arg1 != 0) {
-                temp_v0 = (s32)arg1 - (s32)arg0;
-            } else {
-                temp_v0 = 0;
-            }
-            ((func_15002560_node *)arg0)->unk4 = temp_v0;
-        }
-        temp_v0 = ((func_15002560_node *)arg0)->unkC;
-        if (temp_v0 == 0) {
+    // matching: for (;;) keeps the null test at the loop top; IDO rotates a plain while
+    for (;;) {
+        if (node == NULL) {
             return;
         }
-        var_s1 = (func_15002560_node *)((u8 *)arg0 + temp_v0);
-        if (var_s1->unk4 != 0) {
-            do {
-                temp_s0 = (func_15002560_node *)((u8 *)var_s1 + var_s1->unk4);
-                func_15002560((u16 *)var_s1, (u16 *)temp_s0);
-                var_s1 = temp_s0;
-            } while (temp_s0->unk4 != 0);
+        if (node->next == 0) {
+            if (parentNext != NULL) {
+                offset = (u8 *)parentNext - (u8 *)node;
+            } else {
+                offset = 0;
+            }
+            node->next = offset;
         }
-        arg0 = (u16 *)var_s1;
-        goto loop;
+        offset = node->child;
+        if (offset == 0) {
+            return;
+        }
+        child = (QuadNode *)((u8 *)node + offset);
+        while (child->next != 0) {
+            next = (QuadNode *)((u8 *)child + child->next);
+            func_15002560(child, next);
+            child = next;
+        }
+        // the last child inherits this node's parentNext
+        node = child;
     }
 }
 
+/**
+ * Loads this map's two resources (2 * map and 2 * map + 1 of resource table 5) and hands them to
+ * func_150183D0 with a row stride of ceil(D_800DBE2A / 8) bytes, rounded up to 16. Clears
+ * D_800BE5D0 when the map has no such resource.
+ */
 void func_150025FC(void) {
-    s32 tmp0;
-    s32 tmp1;
-    s32 tmp2;
-    s32 tmp3;
+    s32 width;
+    s32 height;
+    s32 res0;
+    s32 res1;
 
-    tmp0 = D_800DBE2A;
-    tmp1 = D_800DBE2C;
+    width = D_800DBE2A;
+    height = D_800DBE2C;
 
-    D_800DBE28 = (((tmp0 + 7) / 8) + 0xF) & 0xFFF0;
-    tmp2 = func_1502B5C8(0, 2, 5, D_800BE9F0 << 1);
-    tmp3 = func_1502B5C8(0, 2, 5, (D_800BE9F0 << 1) + 1);
-    if (tmp2 == 0) {
+    D_800DBE28 = (((width + 7) / 8) + 15) & 0xFFF0;
+    res0 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2);
+    res1 = func_1502B5C8(NULL, 2, 5, D_800BE9F0 * 2 + 1);
+    if (res0 == 0) {
         D_800BE5D0 = 0;
     } else {
-        func_150183D0(D_800DBE28, tmp1, tmp2, tmp3);
-        func_10004074(tmp3);
+        func_150183D0(D_800DBE28, height, res0, res1);
+        func_10004074(res1);
     }
 }
 
-void func_150026C4(s32 arg0) {
+/** Starts collecting the triangles of map `map`. */
+void func_150026C4(s32 map) {
     D_800DBE38 = 0;
-    func_1510F800(arg0);
+    func_1510F800(map);
 }
 
-void func_150026E8(s32 arg0) {
-    D_800DBE18[arg0] = D_800DBE38;
+/** Records the number of triangles collected for map `map`. */
+void func_150026E8(s32 map) {
+    D_800DBE18[map] = D_800DBE38;
     D_800DBE4C = D_800DBE38;
     D_800B0DE4 += D_800DBE38;
 }
 
-void func_15002724(s32 arg0) {
-    D_800DBE38 += func_150027F8(arg0);
+/** Adds the triangle count of display list `dl` to the running count. */
+void func_15002724(s32 dl) {
+    D_800DBE38 += func_150027F8((Gfx *)dl);
 }
 
+/**
+ * Carves the current map's triangle table (D_800DBDD8), x/z bounds (D_800DBDE8) and
+ * y bounds (D_800DBDF8) out of the triangle-data arena, sized for the counted triangles.
+ */
 void func_15002754(void) {
     s32 count;
-    s32 idx;
+    s32 map;
 
     D_800DBDD8[D_800DBE50] = D_800B0DC0 = ALIGN4(D_800B0DC0);
     count = D_800DBE38;
-    idx = D_800DBE50;
-    D_800B0DC0 += count * 12;
-    D_800DBDE8[idx] = D_800B0DC0;
-    D_800B0DC0 += count * 8;
-    D_800DBDF8[idx] = D_800B0DC0;
-    D_800B0DC0 += count * 4;
-    func_1510F800(idx);
+    map = D_800DBE50;
+    D_800B0DC0 += count * sizeof(MeshTri);
+    D_800DBDE8[map] = D_800B0DC0;
+    D_800B0DC0 += count * sizeof(XZRange);
+    D_800DBDF8[map] = D_800B0DC0;
+    D_800B0DC0 += count * sizeof(YRange);
+    func_1510F800(map);
     D_800DBE38 = 0;
 }
 
+/** Returns the number of triangles drawn by display list `dl` (G_TRI1, G_TRI2 and Conker's G_TRI4). */
+s32 func_150027F8(Gfx *dl) {
+    s32 i;
+    s32 numTris;
+    s32 opcode;
 
-int func_150027F8(s32 arg0) {
-    s32 var_v0;
-    s32 var_v1;
-    s32 temp_a1;
-    if (arg0 != 0) {
-        goto non_null;
+    if (dl == NULL) {
+        return 0;
     }
-    return 0;
-non_null:
-    var_v0 = 0;
-    var_v1 = 0;
-    temp_a1 = *(s8 *)arg0;
-    if (temp_a1 != -0x21) {
-        do {
-            var_v0++;
-            if ((temp_a1 >> 4) == 1) {
-                var_v1 += 4;
-            } else if (temp_a1 == 6) {
-                var_v1 += 2;
-            } else if (temp_a1 == 5) {
-                var_v1 += 1;
-            }
-            temp_a1 = *(s8 *)(arg0 + (var_v0 << 3));
-        } while (temp_a1 != -0x21);
+    i = 0;
+    numTris = 0;
+    for (opcode = *(s8 *)dl; opcode != (s8)G_ENDDL; opcode = *(s8 *)&dl[i]) {
+        i++;
+        if ((opcode >> 4) == 1) {
+            numTris += 4;
+        } else if (opcode == G_TRI2) {
+            numTris += 2;
+        } else if (opcode == G_TRI1) {
+            numTris += 1;
+        }
     }
-    return var_v1;
+    return numTris;
 }
 
+/** Returns the largest per-map triangle count (D_800DBE18[0..3]). */
 s32 func_15002878(void) {
     s32 i;
-    s32 tmp;
+    s32 count;
     s32 highest;
 
-    highest = *D_800DBE18;
+    highest = D_800DBE18[0];
 
     for (i = 0; i < 3; i++) {
-        tmp = D_800DBE1C[i];
-        if (highest < tmp) {
-            highest = tmp;
+        count = D_800DBE1C[i];
+        if (highest < count) {
+            highest = count;
         }
     }
 
     return highest;
 }
 
-// 12 loops!
-typedef struct F28BC_Ent {
+// A run of consecutive vertices loaded under one matrix.
+typedef struct VtxRun {
     u32 addr;
     s32 count;
-    u32 extra;
-} F28BC_Ent;
+    u32 mtxIndex;
+} VtxRun;
 
-typedef struct F28BC_Tri {
+// A triangle as the offsets of its three vertices in the map's vertex data.
+typedef struct VtxTri {
     s32 v[3];
-} F28BC_Tri;
+} VtxTri;
 
 extern u16 D_800C5918[];
 extern u16 D_800C5EF8[];
 extern s8 **D_800C4488[];
 
-#define CMD (ncmd + (j << 3))
+// matching: these stay macros; naming them as locals changes the frame and register allocation
+#define CMD (dl + (j << 3)) // command j of the display list, as bytes
+#define W0 (*(s32 *)CMD)
+#define W1 (*(s32 *)(CMD + 4))
+#define RUNS ((VtxRun **)&D_800C5C08[map])
+#define TRIS ((VtxTri **)&D_800C6070[map])
 
-#define PE ((F28BC_Ent **)&D_800C5C08[arg0])
-#define PT ((F28BC_Tri **)&D_800C6070[arg0])
-s32 func_150028BC(s32 arg0) {
-    F28BC_Ent *e;
+/**
+ * Builds map `map`'s vertex runs (D_800C5C08[map], D_800C5EF8[map] of them, sorted by address)
+ * and triangle list (D_800C6070[map]) by walking its display list. Returns 1 when out of memory.
+ */
+s32 func_150028BC(s32 map) {
+    VtxRun *run;
     s32 vaddr;
-    s32 n;
-    u32 c;
+    s32 numLists;
+    u32 vtxIndex;
     s32 i;
     s32 j;
     s32 k;
     s32 m;
-    s32 cnt;
-    s32 nent;
-    s32 nout;
-    u32 attr;
-    s8 *ncmd;
+    s32 count;
+    s32 numRuns;
+    s32 numTris;
+    u32 mtxIndex;
+    s8 *dl;
     s32 base;
     s32 verts[32];
-    s8 *cmd;
-    s32 x;
-    s32 start;
-    s32 idx[3];
-    F28BC_Ent tmp;
+    s8 *list;
+    s32 opcode;
+    s32 first;
+    s32 tri[3];
+    VtxRun swap;
 
-    attr = 0;
-    if (*PE != NULL) {
+    mtxIndex = 0;
+    if (*RUNS != NULL) {
         return 0;
     }
-    n = 1;
-    cnt = 0;
-    for (i = 0; i < n; i++) {
-        cmd = D_800C4488[arg0][i];
+    numLists = 1;
+    count = 0;
+    for (i = 0; i < numLists; i++) {
+        list = D_800C4488[map][i];
         j = 0;
-        while (cmd[j << 3] != -0x21) {
-            if (cmd[j << 3] == 1) {
-                cnt++;
+        while (list[j << 3] != (s8)G_ENDDL) {
+            if (list[j << 3] == G_VTX) {
+                count++;
             }
             j++;
         }
     }
-    *PE = (F28BC_Ent *)allocate_memory(cnt * sizeof(F28BC_Ent), 1, 0, 2);
-    if (*PE == NULL) {
+    *RUNS = (VtxRun *)allocate_memory(count * sizeof(VtxRun), 1, 0, 2);
+    if (*RUNS == NULL) {
         return 1;
     }
-    *PT = (F28BC_Tri *)allocate_memory(D_800C5918[arg0] * sizeof(F28BC_Tri), 1, 0, 2);
-    if (*PT == NULL) {
-        func_10004074((s32)*PE);
-        *PE = NULL;
+    *TRIS = (VtxTri *)allocate_memory(D_800C5918[map] * sizeof(VtxTri), 1, 0, 2);
+    if (*TRIS == NULL) {
+        func_10004074(*RUNS);
+        *RUNS = NULL;
         return 1;
     }
-    nent = 0;
-    nout = 0;
-    base = (&D_800D19A0)[arg0];
-    for (i = 0; i < n; i++) {
-        ncmd = D_800C4488[arg0][i];
+    numRuns = 0;
+    numTris = 0;
+    base = (&D_800D19A0)[map];
+    for (i = 0; i < numLists; i++) {
+        dl = D_800C4488[map][i];
         j = 0;
-        while (*CMD != -0x21) {
-            x = *(u8 *)CMD;
+        while (*CMD != (s8)G_ENDDL) {
+            opcode = *(u8 *)CMD;
             k = 0;
-            if (x == 1) {
-                {
+            if (opcode == G_VTX) {
+                { // matching: this block (its extern takes no stack slot) steers IDO's frame layout
                     extern u16 D_800C5918[];
 
-                    cnt = (*(s32 *)CMD >> 12) & 0xFF;
-                    start = (*(s32 *)CMD >> 1) & 0x7F;
-                    start -= cnt;
-                    vaddr = (*(s32 *)(CMD + 4) & 0xFFFFFF) - 0x38;
-                    c = (u32)((*(s32 *)(CMD + 4) - 0x38) & 0xFFFFFF) >> 4;
-                    for (k = 0; k < cnt; k++) {
-                        verts[k + start] = (k << 4) + vaddr;
+                    count = (W0 >> 12) & 0xFF;
+                    first = (W0 >> 1) & 0x7F;
+                    first -= count;
+                    vaddr = (W1 & 0xFFFFFF) - 0x38;
+                    vtxIndex = (u32)((W1 - 0x38) & 0xFFFFFF) >> 4;
+                    for (k = 0; k < count; k++) {
+                        verts[k + first] = (k << 4) + vaddr;
                     }
-                    if (nent != 0 && base + c * 16 == (*PE)[nent - 1].addr + (*PE)[nent - 1].count * 16 &&
-                        attr == (*PE)[nent - 1].extra) {
-                        (*PE)[nent - 1].count += cnt;
+                    if (numRuns != 0 && base + vtxIndex * 16 == (*RUNS)[numRuns - 1].addr + (*RUNS)[numRuns - 1].count * 16 &&
+                        mtxIndex == (*RUNS)[numRuns - 1].mtxIndex) {
+                        (*RUNS)[numRuns - 1].count += count;
                     } else {
-                        (*PE)[nent].addr = c * 16 + base;
-                        (*PE)[nent].extra = attr;
-                        (*PE)[nent].count = cnt;
-                        nent++;
+                        (*RUNS)[numRuns].addr = vtxIndex * 16 + base;
+                        (*RUNS)[numRuns].mtxIndex = mtxIndex;
+                        (*RUNS)[numRuns].count = count;
+                        numRuns++;
                     }
                 }
-            } else if (x == 0xDA) {
-                attr = *(u32 *)(CMD + 4) & 0xFFFFFF;
-                attr >>= 6;
-            } else if (x == 5) {
+            } else if (opcode == G_MTX) {
+                mtxIndex = (u32)W1 & 0xFFFFFF;
+                mtxIndex >>= 6;
+            } else if (opcode == G_TRI1) {
                 for (k = 0; k < 3; k++) {
-                    vaddr = *(u8 *)(CMD + k + 1);
-                    (*PT)[nout].v[k] = verts[vaddr >> 1];
+                    vaddr = *(u8 *)(CMD + k + 1); // matching: vertex index byte reuses vaddr
+                    (*TRIS)[numTris].v[k] = verts[vaddr >> 1];
                 }
-                nout++;
-            } else if (x == 6) {
+                numTris++;
+            } else if (opcode == G_TRI2) {
                 for (m = 0; m < 2; m++) {
                     for (k = 0; k < 3; k++) {
                         vaddr = *(u8 *)(CMD + m * 4 + k + 1);
-                        (*PT)[nout].v[k] = verts[vaddr >> 1];
+                        (*TRIS)[numTris].v[k] = verts[vaddr >> 1];
                     }
-                    nout++;
+                    numTris++;
                 }
-            } else if ((x >> 4) == 1) {
+            } else if ((opcode >> 4) == 1) {
                 for (m = 0; m < 4; m++) {
                     if (m == 0) {
-                        idx[0] = (*(s32 *)(CMD + 4) >> 25) & 0x1F;
-                        idx[1] = (*(s32 *)(CMD + 4) >> 20) & 0x1F;
-                        idx[2] = (*(s32 *)(CMD + 4) >> 15) & 0x1F;
+                        tri[0] = (W1 >> 25) & 0x1F;
+                        tri[1] = (W1 >> 20) & 0x1F;
+                        tri[2] = (W1 >> 15) & 0x1F;
                     } else if (m == 1) {
-                        idx[0] = (*(s32 *)(CMD + 4) >> 10) & 0x1F;
-                        idx[1] = (*(s32 *)(CMD + 4) >> 5) & 0x1F;
-                        idx[2] = *(s32 *)(CMD + 4) & 0x1F;
+                        tri[0] = (W1 >> 10) & 0x1F;
+                        tri[1] = (W1 >> 5) & 0x1F;
+                        tri[2] = W1 & 0x1F;
                     } else if (m == 2) {
-                        idx[0] = (*(s32 *)CMD >> 10) & 0x1F;
-                        idx[1] = (*(s32 *)CMD >> 5) & 0x1F;
-                        idx[2] = *(s32 *)CMD & 0x1F;
+                        tri[0] = (W0 >> 10) & 0x1F;
+                        tri[1] = (W0 >> 5) & 0x1F;
+                        tri[2] = W0 & 0x1F;
                     } else {
-                        idx[0] = (*(s32 *)CMD >> 23) & 0x1F;
-                        idx[1] = (*(s32 *)CMD >> 18) & 0x1F;
-                        idx[2] = ((*(s32 *)CMD >> 13) & 0x1C) | ((*(s32 *)(CMD + 4) >> 30) & 3);
+                        tri[0] = (W0 >> 23) & 0x1F;
+                        tri[1] = (W0 >> 18) & 0x1F;
+                        tri[2] = ((W0 >> 13) & 0x1C) | ((W1 >> 30) & 3);
                     }
                     for (k = 0; k < 3; k++) {
-                        (*PT)[nout].v[k] = verts[idx[k]];
+                        (*TRIS)[numTris].v[k] = verts[tri[k]];
                     }
-                    nout++;
+                    numTris++;
                 }
             }
             j++;
         }
     }
-    D_800C5EF8[arg0] = nent;
+    D_800C5EF8[map] = numRuns;
+    // gnome sort of the runs by address
+    // matching: for (;;) + break keeps the test at the loop top; IDO rotates a plain while
     j = 1;
-loop:
-    if (j < D_800C5EF8[arg0]) {
-        e = &(*PE)[j];
-        if (e->addr < e[-1].addr) {
-            tmp = *e;
-            *e = e[-1];
-            (*PE)[j - 1] = tmp;
+    for (;;) {
+        if (j >= D_800C5EF8[map]) {
+            break;
+        }
+        run = &(*RUNS)[j];
+        if (run->addr < run[-1].addr) {
+            swap = *run;
+            *run = run[-1];
+            (*RUNS)[j - 1] = swap;
             if (j >= 2) {
                 j--;
             }
         } else {
             j++;
         }
-        goto loop;
     }
     return 0;
 }
-#undef PE
-#undef PT
+#undef RUNS
+#undef TRIS
+#undef W1
+#undef W0
 #undef CMD
 
-void func_15002F40(s32 arg0) {
-    if (arg0 == 50 || arg0 == 51) {
+/** Sets D_800DBE64 for map `map`: 150 on maps 50 and 51, otherwise 85 when D_800BE616 is set, else 50. */
+void func_15002F40(s32 map) {
+    if (map == 50 || map == 51) {
         D_800DBE64 = 150.0f;
-        return;
-    }
-    if (D_800BE616) {
+    } else if (D_800BE616) {
         D_800DBE64 = 85.0f;
-        return;
-    }
-    D_800DBE64 = 50.0f;
-}
-
-s32 func_15002FA0(s32 arg0) {
-    return arg0 ^ 0xF0F0F0F0;
-}
-
-void func_15002FB4(s32 arg0) {
-    struct00 *sp3C; // TBD
-    s32 sp38;
-    s32 sp34;
-    struct104 *temp_v0;
-    s32 sp2C;
-
-    sp3C = func_1502B6BC(&sp34, 0, &sp38, 2, 21, arg0);
-    if ((sp38 != 0) && ((sp3C->unk4 << 8) != 0)) {
-        D_800B0DF0 = sp3C->unk0;
-        if (sp34 == 0) {
-            D_8003C8E0 = 0xC000037;
-            func_150AD770();
-        }
-        if (D_800B0DF0 == 0) {
-            D_8003C8E0 = 0xC000037;
-            func_150AD770();
-        }
-    }
-    func_151EF040(func_15002FA0(0x40F0FAAC), &sp2C);
-    sp2C = func_15002FA0(sp2C);
-    if (sp2C != 0xE7B00F09) {
-        temp_v0 = D_800B0DF0;
-        temp_v0->unk12 >>= 1;
-    }
-
-    temp_v0 = D_800B0DF0;
-    if (temp_v0->unk12 != 0) {
-        D_800D2F3C = temp_v0->unk12;
-        D_800D2F40 = sp3C->unk8;
     } else {
-        D_800D2F3C = 0U;
-        D_800D2F40 = 0;
+        D_800DBE64 = 50.0f;
+    }
+}
+
+/** XOR (un)scrambling for the constants of the ROM check below. */
+s32 func_15002FA0(s32 value) {
+    return value ^ 0xF0F0F0F0;
+}
+
+/**
+ * Loads map `map`'s settings resource into D_800B0DF0 (fatal error if it is missing) and
+ * publishes its D_800D2F3C/D_800D2F40 table. If the cartridge word at 0xB0000A5C is not the
+ * expected one, the table length unk12 is halved.
+ */
+void func_15002FB4(s32 map) {
+    struct00 *res; // TBD
+    s32 count;
+    s32 loaded;
+    struct104 *info;
+    s32 romWord;
+
+    res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
+    if (count != 0 && (res->unk4 << 8) != 0) {
+        D_800B0DF0 = res->unk0;
+        if (loaded == 0) {
+            D_8003C8E0 = 0xC000037;
+            func_150AD770();
+        }
+        if (D_800B0DF0 == NULL) {
+            D_8003C8E0 = 0xC000037;
+            func_150AD770();
+        }
+    }
+    // func_15002FA0(0x40F0FAAC) == 0xB0000A5C, func_15002FA0(0xE7B00F09) == 0x1740FFF9
+    func_151EF040(func_15002FA0(0x40F0FAAC), &romWord);
+    romWord = func_15002FA0(romWord);
+    if (romWord != 0xE7B00F09) {
+        info = D_800B0DF0;
+        info->unk12 >>= 1;
     }
 
-    if ((D_8008FD90 >= 2) && (temp_v0->unk8 == 4)) {
-        temp_v0->unk8 = 2U;
+    info = D_800B0DF0;
+    if (info->unk12 != 0) {
+        D_800D2F3C = info->unk12;
+        D_800D2F40 = res->unk8;
+    } else {
+        D_800D2F3C = 0;
+        D_800D2F40 = NULL;
+    }
+
+    if (D_8008FD90 >= 2 && info->unk8 == 4) {
+        info->unk8 = 2;
     }
 }
 

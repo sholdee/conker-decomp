@@ -2,102 +2,92 @@
 #include "functions.h"
 #include "variables.h"
 
-
+/* Ground contact found by func_15046C80 below a probe point (as ParticleFloor in game_15F680.c). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s32 unk8;
-} Struct15147040;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 surface[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 type;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} GroundHit; // size 0x24
 
+/* Burst config for func_15150F90 (same layout as in game_17CAF0.c and game_1EC390.c). */
 typedef struct {
-    s32 pad0;
-    struct17 vec;
-} Struct15146E84Vec;
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ vertex position;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
+    /* 0x1C */ s16 yawBase;
+    /* 0x1E */ s16 yawRange;
+    /* 0x20 */ s16 pitchBase;
+    /* 0x22 */ s16 pitchRange;
+    /* 0x24 */ f32 directionBase;
+    /* 0x28 */ f32 directionRange;
+    /* 0x2C */ f32 jitter;
+    /* 0x30 */ f32 sizeBase;
+    /* 0x34 */ f32 sizeRange;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ u8  kind;
+    /* 0x3D */ u8  pad3D;
+    /* 0x3E */ s16 lifeBase;
+    /* 0x40 */ s16 lifeRange;
+} Game150F90Config;
 
-typedef struct {
-    s32 values[8];
-    s32 pad20;
-} Struct15146E84Buffer;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Struct15147040 unk8;
-    f32 unk14;
-    f32 unk18;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    s8 unk3C;
-    u8 pad3D;
-    s16 unk3E;
-    s16 unk40;
-} Struct15146A98;
-
-typedef struct {
-    char pad_0[0x40];
-    f32 field_0x40;
-    char pad_1[0x190];
-    s32 field_0x1D4;
-} ActorFields;
-
-extern s32 func_15142314(s32, s32, Struct15147040 *);
-extern void func_1504715C(s32, s32);
-extern s32 func_15046C80(f32 *, s32, f32, s32);
-extern void func_15141F78(u8, struct157 *, f32, u8, struct157 *, u8);
-extern void func_15142180(u8, Struct15147040 *, s32, f32, f32);
-extern u8 func_151D8E20(void);
-extern void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, u8);
+void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_1504715C(GroundHit *hit, struct127 *actor);
+s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
+void func_15142180(u8, vertex *, s32, f32, f32);
+u8 func_151D8E20(void);
+void func_151DAB58(u8, f32, u8, vertex *, s32, u8, u8);
 extern u8 (*D_8008FD04)(void);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
-extern void func_15150F90(void *, s32, s32, s32);
-void func_15143794(s32, s32, f32, f32 *);
+void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 
-s32 func_15146890(Struct15147040 *arg0, ActorFields *arg1, s32 arg2, u8 arg3) {
-    f32 sp2C[3];
-    s32 temp_a1;
+/* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
+   fails with 0).  With a `hit` buffer, also look for the ground below that point and return
+   func_15046C80's result. */
+s32 func_15146890(vertex *pos, struct127 *actor, GroundHit *hit, u8 side) {
+    vertex probe;
+    s32 bone;
 
-    if ((arg3 != 1) && (arg3 != 2)) {
+    if ((side != 1) && (side != 2)) {
         return 0;
     }
 
-    if (arg3 == 1) {
-        temp_a1 = 0x13;
+    if (side == 1) {
+        bone = 0x13;
     } else {
-        temp_a1 = 0x17;
+        bone = 0x17;
     }
 
-    func_15142314(arg1->field_0x1D4, temp_a1, arg0);
-    if (arg2 == 0) {
+    func_15142314(actor->unk1D4, bone, pos);
+    if (hit == NULL) {
         return 1;
     }
 
-    sp2C[0] = arg0->unk0;
-    sp2C[1] = arg0->unk4 + 10.0f;
-    sp2C[2] = *(f32 *)&arg0->unk8;
-    func_1504715C(arg2, (s32)arg1);
-    return func_15046C80(sp2C, 0, arg0->unk4 - 50.0f, arg2);
+    probe.x = pos->x;
+    probe.y = pos->y + 10.0f;
+    probe.z = pos->z;
+    func_1504715C(hit, actor);
+    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
 
-extern s32 func_151420F8(s32);
-extern s32 func_150A2AEC(s32, s32, const s32 *, s32);
+s32 func_151420F8(struct127 *actor);
+s32 func_150A2AEC(s32 index, s32 count, const s32 *list, struct127 *actor);
 
-/* Map an actor's damage/effect kind (arg0) onto the particle-effect id used for it,
-   for the actor `arg1`.  Most kinds are a fixed id; kind 1 depends on the current
-   world (D_800BE9F0) and, in world 4, on whether func_151420F8 accepts the actor;
-   kind 6 first has to register a five-entry effect list against the actor's index in
-   D_800CC2D0, and reports -1 if that fails.  Anything from 9 up is unmapped. */
-s32 func_15146970(s32 arg0, s32 arg1) {
-    switch (arg0) {
+/* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
+   fixed id; kind 1 depends on the current world (D_800BE9F0) and, in world 4, on whether
+   func_151420F8 accepts the actor; kind 6 first has to register a five-entry effect list against
+   the actor's index in D_800CC2D0, and reports -1 if that fails.  Anything from 9 up is unmapped. */
+s32 func_15146970(s32 kind, struct127 *actor) {
+    switch (kind) {
     case 8: return 0x10;
     case 7: return 0xF;
     case 5: return 5;
@@ -105,7 +95,7 @@ s32 func_15146970(s32 arg0, s32 arg1) {
     case 0: return 0;
     case 1:
         if (D_800BE9F0 == 4) {
-            if (func_151420F8(arg1) != 0) {
+            if (func_151420F8(actor) != 0) {
                 return 6;
             }
             return 3;
@@ -117,8 +107,7 @@ s32 func_15146970(s32 arg0, s32 arg1) {
         {
             const s32 list[5] = { 0x401D, 0x401E, 0x401F, 0x4020, 0x4021 };
 
-            if (func_150A2AEC((arg1 - (s32)D_800CC2D0) / (s32)sizeof(struct127), 5, list,
-                              arg1) == -1) {
+            if (func_150A2AEC(actor - D_800CC2D0, 5, list, actor) == -1) {
                 return -1;
             }
         }
@@ -127,276 +116,271 @@ s32 func_15146970(s32 arg0, s32 arg1) {
     return -1;
 }
 
-void func_15146A98(s32 arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp5C;
-    Struct15146A98 sp18;
+/* The effect callbacks below take an actor (struct127) and a bone selector `side` for
+   func_15146890, plus a strength. */
 
-    if (((ActorFields *)arg0)->field_0x1D4 != 0) {
-        func_15146890(&sp5C, (ActorFields *)arg0, 0, (u8)arg1);
-        sp18.unk0 = 5;
-        sp18.unk4 = 0x16;
-        sp18.unk8 = sp5C;
-        sp18.unk14 = 0.024999999f;
-        sp18.unk18 = 0.0199f;
-        sp18.unk1C = 0;
-        sp18.unk1E = 0xFF;
-        sp18.unk20 = -0x14;
-        sp18.unk22 = 0xE;
-        sp18.unk24 = 6.0f;
-        sp18.unk28 = 3.0f;
-        sp18.unk2C = 7.9760003f;
-        sp18.unk30 = -0.40300003f;
-        sp18.unk34 = 0.284f;
-        sp18.unk38 = 0.95355f;
-        sp18.unk3C = 3;
-        sp18.unk3E = 0x19;
-        sp18.unk40 = 0x19;
-        func_15150F90(&sp18, 0, 0xFF, 1);
+// matching: `actor` is an int cast at each use; with a pointer parameter IDO merges the two
+// loads of it that the original makes (lw t6 / lw a1 from the arg slot).
+
+/* Burst of func_15150F90 pieces from the actor's bone on `side`. */
+void func_15146A98(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    Game150F90Config burst;
+
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        func_15146890(&pos, (struct127 *)actor, NULL, side);
+        burst.countBase = 5;
+        burst.countRange = 22;
+        burst.position = pos;
+        burst.speedBase = 0.024999999f;
+        burst.speedRange = 0.0199f;
+        burst.yawBase = 0;
+        burst.yawRange = 255;
+        burst.pitchBase = -20;
+        burst.pitchRange = 14;
+        burst.directionBase = 6.0f;
+        burst.directionRange = 3.0f;
+        burst.jitter = 7.9760003f;
+        burst.sizeBase = -0.40300003f;
+        burst.sizeRange = 0.284f;
+        burst.scale = 0.95355f;
+        burst.kind = 3;
+        burst.lifeBase = 25;
+        burst.lifeRange = 25;
+        func_15150F90(&burst, 0, 0xFF, 1);
     }
 }
 
-void func_15146BF8(ActorFields *, s32, s32, s32);
+void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt);
 
-void func_15146BB8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15146BF8((ActorFields *)arg0, arg1, arg2, 0);
+void func_15146BB8(s32 actor, s32 side, s32 strength) {
+    func_15146BF8(actor, side, strength, 0);
 }
 
-void func_15146BD8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15146BF8((ActorFields *)arg0, arg1, arg2, 1);
+void func_15146BD8(s32 actor, s32 side, s32 strength) {
+    func_15146BF8(actor, side, strength, 1);
 }
 
-void func_15146BF8(ActorFields *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    Struct15147040 sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
-    s32 temp_v0;
+/* Effect 0xB (or 0xC when `alt`) at the ground below the actor's bone on `side`, plus effect 2
+   there when strength is at least 115. */
+void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp4C, (ActorFields *)*(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            temp_v0 = ((u8)arg3 != 0) ? 0xC : 0xB;
-            func_15141F78((u8)temp_v0, (struct157 *)&sp2C[-1], (f32)arg2 * 0.0076923077f,
-                          (u8)(u32)(arg0->field_0x40 * 0.7111111f),
-                          (struct157 *)&sp4C, temp_a3);
-            if (arg2 >= 0x73) {
-                func_15142180(2, &sp4C, sp2C[5], 1.0f, 1.0f);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78((u8)alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+            if (strength >= 115) {
+                func_15142180(2, &pos, hit.unk18, 1.0f, 1.0f);
             }
         }
     }
 }
 
-void func_15146D60(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Effect 0xA at the ground below the actor's bone on `side`. */
+void func_15146D60(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp4C, (ActorFields *)*(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            func_15141F78(0xA, (struct157 *)&sp2C[-1], (f32)arg2 * 0.011764706f,
-                          (u8)(u32)(arg0->field_0x40 * 0.7111111f),
-                          (struct157 *)&sp4C, temp_a3);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78(0xA, &hit, strength * (1.0f / 85.0f),
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
         }
     }
 }
 
-void func_15146E84(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp7C;
-    Struct15146E84Buffer sp58;
-    u8 temp_color;
-    Struct15146E84Vec sp44;
-    s32 temp_rand;
-    f32 temp_f0;
+/* Effect func_151D8E20() at the ground below the actor's bone on `side` (only when strength is at
+   least 71), and a randomly sized func_151D9B8C or func_151DAB58 particle at ground height. */
+void func_15146E84(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
+    u8 kind;
+    vertex spot;
+    s32 pad; // matching: an unused stack slot sits between spot and random
+    s32 random;
+    f32 size;
 
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp7C, (ActorFields *)*(s32 *)&arg0, (s32)sp58.values, (u8)arg1) != 0) {
-            temp_color = func_151D8E20();
-            if (arg2 >= 0x47) {
-                func_15142180(temp_color, &sp7C, sp58.values[6], 1.0f, 1.0f);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            kind = func_151D8E20();
+            if (strength >= 71) {
+                func_15142180(kind, &pos, hit.unk18, 1.0f, 1.0f);
             }
 
-            sp44.vec.unk0 = sp7C.unk0;
-            sp44.vec.unk4 = *(f32 *)&sp58.values[0];
-            sp44.vec.unk8 = *(f32 *)&sp7C.unk8;
+            spot.x = pos.x;
+            spot.y = hit.height;
+            spot.z = pos.z;
 
             if (func_150ADA20() & 1) {
-                temp_f0 = func_150ADA68();
-                temp_rand = func_150ADA20();
-                func_151D9B8C(temp_color, (temp_f0 * 10.0f) + 10.0f,
-                              (u8)((temp_rand % 0x65U) + 0x64), (s32)&sp58.values[1], &sp44.vec,
-                              (func_150ADA20() % 0x29U) + 0x50, 1, 1, 0, 0xFF, 1);
+                size = func_150ADA68();
+                random = func_150ADA20();
+                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, (s32)hit.surface,
+                              &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
-                temp_f0 = func_150ADA68();
-                func_151DAB58(temp_color, (temp_f0 * 8.0f) + 5.0f,
-                              (u8)((func_150ADA20() % 0x65U) + 0x64), &sp44.vec, 1, 0xFF, 1);
+                size = func_150ADA68();
+                func_151DAB58(kind, size * 8.0f + 5.0f, (func_150ADA20() % 101U) + 100, &spot, 1,
+                              0xFF, 1);
             }
         }
     }
 }
 
-extern s32 func_15146890(Struct15147040 *, ActorFields *, s32, u8);
-extern void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
+                   f32 arg9, s32 argA, u8 argB);
 
-void func_15147040(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp44;
-    s16 temp;
+/* func_1514C678 at the actor's bone on `side`, with a random radius below 11. */
+void func_15147040(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    s16 roll;
 
-    if (arg0->field_0x1D4 != 0) {
-        func_15146890(&sp44, (ActorFields *)*(s32 *)&arg0, 0, (u8)arg1);
-        temp = (func_150ADA20() % 11U) + 5;
-        func_1514C678(sp44.unk0, sp44.unk4, sp44.unk8,
-                      func_150ADA68() * 11.0f,
-                      0, 0xFF, temp, 0x16, 0, 0.0f, 0, 0xFF);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        func_15146890(&pos, (struct127 *)actor, NULL, side);
+        roll = (func_150ADA20() % 11U) + 5;
+        func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
+                      0xFF);
     }
 }
 
-s32 func_151470FC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    struct260 *ret;
-    struct {
-        f32 sp28;
-        u8 pad2C[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            u8 pad3C[0xC];
-            f32 unk48;
-            f32 unk4C;
-            f32 unk50;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            s8 unk63;
-        } sp30;
-        u8 pad94[8];
-    } stack;
+/* Particle descriptor for func_15130374 (as Struct15130374Arg in game_113D60.c). */
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ vertex position;
+    /* 0x3C */ u8 pad3C[0xC];
+    /* 0x48 */ vertex direction;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ u8 pad64[0xC];
+} Struct15130374Arg;
 
-    stack.sp30.unk1D = 0x29;
-    stack.sp30.unk08 = 0xE03;
-    stack.sp30.unk00 = 0x200005;
-    stack.sp30.unk04 = 0;
-    stack.sp30.unk0A = (func_150ADA20() & 0xF) + 0x14;
-    stack.sp30.unk0C = 0;
-    stack.sp30.unk10 = 0;
-    stack.sp30.unk18 = 0xB0;
-    stack.sp30.unk19 = 0xA0;
-    stack.sp30.unk1A = 0x2A;
-    stack.sp30.unk14 = 0x40;
-    stack.sp30.unk15 = 0xB;
-    stack.sp30.unk16 = 0x6A;
-    stack.sp30.unk17 = 0xFF;
-    stack.sp30.unk1B = (func_150ADA20() % 0x65U) + 0x64;
-    stack.sp30.unk1C = 0xFF;
-    stack.sp30.unk60 = 3;
-    stack.sp30.unk61 = 3;
+/* Spawn one func_15130374 particle at (x, y, z), flying off at a random pitch along `yaw`. */
+s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw,
+                  s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    Struct15130374Arg desc;
+    struct260 *particle;
+    f32 extra;
+    f32 speed;
+    u32 random;
 
-    stack.sp30.unk28 = stack.sp30.unk2C = (func_150ADA68() * 95.0f) + 101.0f;
-    stack.sp30.unk30 = arg2;
-    stack.sp30.unk34 = arg3;
-    stack.sp30.unk38 = arg4;
-    ((s32 *)&stack.sp28)[-2] = func_150ADA20();
-    func_15143794(arg8, (s16)((((s32 *)&stack.sp28)[-2] % 0xBU) - 0xB),
-                  ((func_150ADA68() * 396.0f) + 202.0f) * 0.01f, &stack.sp30.unk48);
-    stack.sp30.unk54 = 0.0f;
-    stack.sp30.unk58 = 0xE05;
+    desc.unk1D = 0x29;
+    desc.unk08 = 0xE03;
+    desc.unk00 = 0x200005;
+    desc.unk04 = 0;
+    desc.unk0A = (func_150ADA20() & 0xF) + 20;
+    desc.unk0C = 0;
+    desc.unk10 = 0;
+    desc.color1[0] = 0xB0;
+    desc.color1[1] = 0xA0;
+    desc.color1[2] = 0x2A;
+    desc.color0[0] = 0x40;
+    desc.color0[1] = 0xB;
+    desc.color0[2] = 0x6A;
+    desc.color0[3] = 0xFF;
+    desc.color1[3] = (func_150ADA20() % 101U) + 100;
+    desc.unk1C = 0xFF;
+    desc.unk60 = 3;
+    desc.unk61 = 3;
+
+    desc.unk28 = desc.unk2C = func_150ADA68() * 95.0f + 101.0f;
+    desc.position.x = x;
+    desc.position.y = y;
+    desc.position.z = z;
+    random = func_150ADA20();
+    speed = func_150ADA68();
+    func_15143794(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.direction.x);
+    desc.unk54 = 0.0f;
+    desc.flags = 0xE05;
 
     if (func_150ADA20() & 1) {
-        stack.sp30.unk58 |= 0x40;
+        desc.flags |= 0x40;
     }
 
     if (func_150ADA20() & 1) {
-        stack.sp30.unk58 |= 0x80;
+        desc.flags |= 0x80;
     }
 
-    stack.sp30.unk62 = 0xA;
-    stack.sp30.unk24 = 1.02f;
-    stack.sp28 = 0.94000006f;
-    stack.sp30.unk63 = -1;
-    stack.sp30.unk1E = 0x14;
-    stack.sp30.unk20 = 0xC;
-    stack.sp30.unk22 = 0x1B;
+    desc.unk62 = 10;
+    desc.unk24 = 1.02f;
+    extra = 0.94000006f;
+    desc.unk63 = -1;
+    desc.unk1E = 20;
+    desc.unk20 = 12;
+    desc.unk22 = 27;
 
-    ret = func_15130374(&stack.sp30, 1, 4, argE, 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, &stack.sp28, 4);
+    particle = func_15130374(&desc, 1, 4, argE, 1);
+    if (particle != NULL) {
+        memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
     }
     return 1;
 }
 
-void func_15147318(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Effect 0 at the ground below the actor's bone on `side` when strength is at least 115, then
+   effect D_8008FD04() there. */
+void func_15147318(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp4C, (ActorFields *)*(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            if (arg2 >= 0x73) {
-                func_15142180(0, &sp4C, sp2C[5], 1.0f, 1.0f);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            if (strength >= 115) {
+                func_15142180(0, &pos, hit.unk18, 1.0f, 1.0f);
             }
-            func_15141F78((u8)D_8008FD04(), (struct157 *)&sp2C[-1], (f32)arg2 * 0.0076923077f,
-                          (u8)(u32)(arg0->field_0x40 * 0.7111111f),
-                          (struct157 *)&sp4C, temp_a3);
+            func_15141F78(D_8008FD04(), &hit, strength * (1.0f / 130.0f),
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
         }
     }
 }
 
-void func_15147478(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Effect D_8008FD1C() at the ground below the actor's bone on `side`, plus effect 6 there when
+   strength is at least 115. */
+void func_15147478(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp4C, (ActorFields *)*(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            func_15141F78((u8)D_8008FD1C(), (struct157 *)&sp2C[-1], (f32)arg2 * 0.0076923077f,
-                          (u8)(u32)(arg0->field_0x40 * 0.7111111f),
-                          (struct157 *)&sp4C, temp_a3);
-            if (arg2 >= 0x73) {
-                func_15142180(6, &sp4C, sp2C[5], 1.0f, 1.0f);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78(D_8008FD1C(), &hit, strength * (1.0f / 130.0f),
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+            if (strength >= 115) {
+                func_15142180(6, &pos, hit.unk18, 1.0f, 1.0f);
             }
         }
     }
 }
 
-void func_151475D8(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct15147040 sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Effect D_8008FD30() at the ground below the actor's bone on `side`, plus effect 0xB there when
+   strength is at least 115. */
+void func_151475D8(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_15146890(&sp4C, (ActorFields *)*(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            func_15141F78((u8)D_8008FD30(), (struct157 *)&sp2C[-1], (f32)arg2 * 0.0076923077f,
-                          (u8)(u32)(arg0->field_0x40 * 0.7111111f),
-                          (struct157 *)&sp4C, temp_a3);
-            if (arg2 >= 0x73) {
-                func_15142180(0xB, &sp4C, sp2C[5], 1.0f, 1.0f);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_15146890(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78(D_8008FD30(), &hit, strength * (1.0f / 130.0f),
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+            if (strength >= 115) {
+                func_15142180(0xB, &pos, hit.unk18, 1.0f, 1.0f);
             }
         }
     }
