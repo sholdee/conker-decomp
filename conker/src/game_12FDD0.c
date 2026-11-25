@@ -149,7 +149,7 @@ void func_15102D50(Particle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
 }
 
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, void *, void *, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, void *, void *, s32);
 extern void func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Beam update: moves the beam's end points with its target's bone or model node.
@@ -174,7 +174,7 @@ s32 func_15102D90(Particle *particle) {
     dst[0] = &beam->start;
     dst[1] = &beam->end;
     if (beam->node != -1) {
-        ActorCtl *node;
+        ModelAttachment *node;
 
         node = func_1503195C(target, beam->node, 0);
         if (node == NULL) {

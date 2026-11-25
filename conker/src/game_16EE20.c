@@ -2275,60 +2275,40 @@ void func_15146508(Actor *a, Actor *b) {
     func_15169040(&msg, 45, a, b);
 }
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E8];
-    /* 0x3E8 */ Mtx *mtx[3]; /* per frame buffer (D_800BE9C0) */
-    /* 0x3F4 */ u8 pad3F4[2];
-    /* 0x3F6 */ u8 ready;
-} AttachModel;
-
-/* Where an attachment point's matrix comes from (see func_1514654C). */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ u8 bone;      /* index into the actor's own matrices (unk1D4) */
-    /* 0x03 */ u8 pad3[0x1B];
-    /* 0x1E */ u16 partId;   /* part looked up with func_1503195C */
-    /* 0x20 */ u16 partBone;
-    /* 0x22 */ u8 pad22[0x12];
-    /* 0x34 */ Mtx *mtx;     /* per frame buffer */
-    /* 0x38 */ u8 pad38[0x10];
-    /* 0x48 */ AttachModel *model;
-} AttachPoint;
-
-s32 func_15031070(ActorCtl *, Actor *, Mtx **, s32 *);
+s32 func_15031070(ModelAttachment *, Actor *, Mtx **, Mtx **);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*
- * Transforms `count` offsets by the matrix of an attachment point on the actor: a model's matrix,
- * a part's bone, a fixed matrix, or else one of the actor's bones. Returns 0 if it is unavailable.
+ * Transforms `count` offsets by the matrix of a model attachment on the actor: its animation's part
+ * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
+ * if it is unavailable.
  */
-s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count) {
     s32 i;
     Mtx *mtx;
-    ActorCtl *part;
+    ModelAttachment *part;
     Mtx *partMtx;
-    s32 partCount;
+    Mtx *partBoneMtx;
     MtxF mf;
 
     if ((actor == NULL) || (point == NULL) || (actor->unk1D4 == NULL)) {
         return 0;
     }
-    if (point->model != NULL) {
-        if (point->model->ready == 0) {
+    if (point->anim != NULL) {
+        if (point->anim->unk3F6 == 0) {
             return 0;
         }
-        mtx = point->model->mtx[D_800BE9C0] + index;
-    } else if (point->partId) {
-        part = func_1503195C(actor, point->partId, 0);
+        mtx = point->anim->partMtx[D_800BE9C0] + index;
+    } else if (point->parentSet) {
+        part = func_1503195C(actor, point->parentSet, 0);
         if (part == NULL) {
             return 0;
         }
-        if (func_15031070(part, actor, &partMtx, &partCount) == 0) {
+        if (func_15031070(part, actor, &partMtx, &partBoneMtx) == 0) {
             return 0;
         }
-        /* func_1503195C returns a part object, not an ActorCtl (functions.h types it ActorCtl *) */
-        if (*(s32 *)((u8 *)part + 0x48) != 0) {
-            mtx = &partMtx[point->partBone];
+        if (part->anim != NULL) {
+            mtx = &partMtx[point->parentMtx];
         } else {
             mtx = partMtx;
         }

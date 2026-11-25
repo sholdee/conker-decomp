@@ -628,7 +628,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         *mtx = &att->mtx[D_800BE9C0];
         *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
     } else if (att->parentSet) {
-        parent = (ModelAttachment *)func_1503195C(owner, att->parentSet, 0);
+        parent = func_1503195C(owner, att->parentSet, 0);
         if (parent == NULL) {
             return 0;
         }
@@ -794,14 +794,14 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
 void func_1503192C(Actor *owner, s32 setId, s32 alpha, s32 index) {
     ModelAttachment *att;
 
-    att = (ModelAttachment *)func_1503195C(owner, setId, index);
+    att = func_1503195C(owner, setId, index);
     if (att != NULL) {
         att->alpha = alpha;
     }
 }
 
 /* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
-ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
+ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index) {
     s32 ownerId;
     ModelAttachment *att;
     ModelAttachment *next;
@@ -819,7 +819,7 @@ ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
                 index--;
                 att = next;
             } else {
-                return (ActorCtl *)att;
+                return att;
             }
         } else {
             att = next;

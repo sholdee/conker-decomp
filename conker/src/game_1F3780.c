@@ -27,7 +27,7 @@ s32 func_151C229C(Vec3f *pos, Vec3f *dir, Vec3f *arg2, Vec3f *arg3, s32 arg4, s3
                   s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
                   s32 arg25, s32 arg26);
 void func_15145740(Actor *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 arg4);
-s32 func_1514654C(Actor *, s32, s32, Vec3f **points, Vec3f **results, s32 count);
+s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **points, Vec3f **results, s32 count);
 void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
                    Vec3f **, Vec3f *);
 void *func_151D8868(EffectEvent *event, s32 arg1, s32 arg2, s32 arg3);
@@ -40,7 +40,7 @@ void func_151C6D70(Actor *, u8, Vec3f *, s16, u8, s32);
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
-s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s32 arg6) {
+s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6) {
     Vec3f origin;
     Vec3f aim;
     Vec3f shotPos;
@@ -93,8 +93,8 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s3
         points[2] = &D_800AAB50[side];
         points[3] = &D_800AAB68[side];
         points[4] = &D_800AAB20[side];
-        if (arg3 != 0) {
-            if (func_1514654C(arg0, arg3, 0, points, results, arg2 ? 5 : 4) == 0) {
+        if (attachment != NULL) {
+            if (func_1514654C(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
                 return 0;
             }
         } else {

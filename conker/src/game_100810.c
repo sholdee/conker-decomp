@@ -33,7 +33,7 @@ typedef struct {
     u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
-    ActorCtl *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
+    ModelAttachment *attachment; // func_1503195C(owner, 0x79 / 0x7A): the trail runs between two of its points
     Particle *effects[2];
     f32 width;          // trail width at the head, eased toward targetWidth each frame
     f32 targetWidth;
@@ -82,7 +82,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
                   s32 arg5, u16 *playing);
 
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3);
+s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
 Particle *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -90,7 +90,7 @@ TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     EffectTemplate spawn;
     TrailState init;
-    ActorCtl *s126;
+    ModelAttachment *attachment;
     Vec3f end;
     TrailState *state;
 
@@ -106,12 +106,12 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     init.effects[1] = NULL;
     init.owner = owner;
     init.ownerId = owner->unique_id;
-    s126 = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
-    if (s126 == NULL) {
+    attachment = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
+    if (attachment == NULL) {
         return;
     }
-    // matching: the store to init.unk8 must be scheduled inside the call's argument setup
-    if (func_150D4AE0(&spawn.pos, &end, owner, (init.unk8 = s126)) != 0) {
+    // matching: the store to init.attachment must be scheduled inside the call's argument setup
+    if (func_150D4AE0(&spawn.pos, &end, owner, (init.attachment = attachment)) != 0) {
         spawn.flags |= 4;
     } else {
         spawn.pos.x = 0.0f;
@@ -271,7 +271,7 @@ s32 func_150D3A68(TrailActor *actor) {
     TrailState *state;
     TrailPoint *points;
     Actor *owner;
-    ActorCtl *s126;
+    ModelAttachment *attachment;
     Vec3f prevPos;
     Vec3f delta;
     f32 dist;
@@ -283,13 +283,13 @@ s32 func_150D3A68(TrailActor *actor) {
     state = actor->state;
     points = actor->points;
     owner = state->owner;
-    s126 = state->unk8;
+    attachment = state->attachment;
     if (owner->interaction_state == 0 || owner->unique_id != state->ownerId) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
         prevPos = actor->spawn.pos;
-        switch (func_150D4AE0(&actor->spawn.pos, &end, owner, s126)) {
+        switch (func_150D4AE0(&actor->spawn.pos, &end, owner, attachment)) {
         case 0:
             if (state->effects[0] != NULL) {
                 state->effects[0]->head.def.flags &= ~2;
@@ -751,24 +751,24 @@ void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
         if (state->owner == msg->swap.objA) {
             state->owner = msg->swap.objB;
             state->ownerId = msg->swap.uniqueIdB;
-            state->unk8 = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
         } else if (state->owner == msg->swap.objB) {
             state->owner = msg->swap.objA;
             state->ownerId = msg->swap.uniqueIdA;
-            state->unk8 = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
         }
     }
 }
 
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern Vec3f D_800A09D0;
 extern Vec3f D_800A09DC;
 
 /*
- * Computes the trail's start and end points: the owner's model points D_800A09D0 / D_800A09DC
+ * Computes the trail's start and end points: the points D_800A09D0 / D_800A09DC of `attachment`
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
-s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3) {
+s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment) {
     Vec3f *modelPoints[2];
     Vec3f *out[2];
 
@@ -777,7 +777,7 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3) {
         modelPoints[1] = &D_800A09DC;
         out[0] = start;
         out[1] = end;
-        if (func_1514654C(owner, arg3, 0, modelPoints, out, 2) != 0) {
+        if (func_1514654C(owner, attachment, 0, modelPoints, out, 2) != 0) {
             return 1;
         }
         return 0;

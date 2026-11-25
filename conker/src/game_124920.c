@@ -335,8 +335,8 @@ void func_150F7F58(struct210 *obj, s16 arg1) {
 
 void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(Vec3f *pos, u8, s32);
-ActorCtl *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ActorCtl *);
+ModelAttachment *func_150FF288(Actor *);
+s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
 void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
@@ -956,13 +956,13 @@ s32 arg2;
     Vec3f hit;
     Vec3f normal;
     Vec3f unk30;
-    ActorCtl *gun;
+    ModelAttachment *gun;
 
     gun = func_150FF288(obj);
     if (gun != NULL) {
         if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->unk1D4[((u8 *)gun)[2]], obj, 1.0f, arg1, arg2);
+            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f, arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
     }

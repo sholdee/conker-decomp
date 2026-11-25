@@ -1278,12 +1278,12 @@ extern void func_151090DC(void);
 extern void func_150FB324(Actor *, u8, s32);
 extern void func_150F97EC(Actor *, u8, s32);
 extern void func_150F9950(Actor *, u8, s32);
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, f32 **, f32 **, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, f32 **, f32 **, s32);
 extern void func_151C5588(Actor *, f32 *, s32, u8, s32);
 extern void func_151C56A4(f32 *, u8, s32);
 extern void func_150E06D8(Actor *, u8, u8, s32);
 extern void func_151CFA4C(Actor *, u8, s32);
-extern void func_151C62D0(Actor *, u8, s32, ActorCtl *, s32, s32, s32);
+extern void func_151C62D0(Actor *, u8, s32, ModelAttachment *, s32, s32, s32);
 extern void func_150BAA14(Actor *, s32, s32);
 extern void func_150E0870(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
@@ -1952,7 +1952,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151090DC();
                     break;
                 case 2: {
-                    ActorCtl *bone;
+                    ModelAttachment *attachment;
                     f32 vec[3];
 
                     if (obj != NULL) {
@@ -1961,14 +1961,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             case 0x74:
                             case 0x75:
                             case 0x7A:
-                                bone = func_1503195C(obj, 0x46, 0);
-                                if (bone != NULL) {
+                                attachment = func_1503195C(obj, 0x46, 0);
+                                if (attachment != NULL) {
                                     f32 *p1;
                                     f32 *p2;
 
                                     p1 = &D_800AAA90.x;
                                     p2 = vec;
-                                    if (func_1514654C(obj, bone, 0, &p1, &p2, 1) != 0) {
+                                    if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, vec, 0x46, sceneTag, 1);
                                         func_151C56A4(vec, sceneTag, 1);
                                     }
@@ -2004,13 +2004,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 5:
                     if (obj != NULL) {
-                        ActorCtl *bone;
+                        ModelAttachment *attachment;
 
-                        bone = NULL;
+                        attachment = NULL;
                         if (event->unk6 != 0) {
-                            bone = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
+                            attachment = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
                         }
-                        func_151C62D0(obj, event->unk5, 1, bone, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
+                        func_151C62D0(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
                     }
                     break;
                 case 6:

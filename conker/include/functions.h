@@ -1060,7 +1060,7 @@ void func_1501748C(s16 arg0);
 
 Gfx *func_1501A490(Gfx *dl, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
 u32 func_1502B7F0(void **data, s32 depth, ...);
-ActorCtl *func_1503195C(Actor *, s32, s32);
+ModelAttachment *func_1503195C(Actor *, s32, s32);
 void func_150403C8(void *arg0, u32 arg1, s32 arg2);
 s32 func_15043BB8(struct105 *ring, u8 *message, s32 size);
 f32  func_15047C00(f32 arg0);

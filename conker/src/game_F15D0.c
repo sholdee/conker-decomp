@@ -136,7 +136,7 @@ typedef struct {
 } GroundHit; /* size 0x24 */
 
 extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
@@ -160,7 +160,7 @@ void func_150C44A4(Effect *effect) {
     GroundHit ground;
     Vec3f *offsetPtr;
     Vec3f *posPtr;
-    ActorCtl *bone;
+    ModelAttachment *attachment;
     s32 emit;
     Vec3f *wind;
     Vec3f vel;
@@ -186,8 +186,8 @@ void func_150C44A4(Effect *effect) {
         data->unk18 = func_10010154(150, owner, 0x36B0, 400, 0x4268);
     }
     if (data->flags & 1) {
-        bone = func_1503195C(owner, data->unk14, 0);
-        if (bone == NULL) {
+        attachment = func_1503195C(owner, data->unk14, 0);
+        if (attachment == NULL) {
             return;
         }
         if (owner->unk2EC != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
@@ -205,7 +205,7 @@ void func_150C44A4(Effect *effect) {
         offset.z = D_800A0378[i].z * t;
         offsetPtr = &offset;
         posPtr = &pos;
-        if (func_1514654C(owner, bone, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
+        if (func_1514654C(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
             pos.x = owner->x_position;
             pos.y = owner->y_position + 800.0f;
             pos.z = owner->z_position;
