@@ -122,11 +122,6 @@ typedef struct {
     Mtx mtx[2];       /* [frame] */
 } Obj151BA084;
 
-typedef struct {
-    u8 pad0[0x197];
-    u8 unk197;
-} Obj31C_151BA084;
-
 extern u8 D_800C3E90;
 void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
@@ -167,13 +162,13 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     }
     if (D_800BE616 != 0) {
         if (owner->camera != NULL && owner->unk31C != NULL &&
-            ((Obj31C_151BA084 *)owner->unk31C)->unk197 != 0 && viewport == owner->camera->playerIndex) {
+            owner->unk31C->aimState != 0 && viewport == owner->camera->playerIndex) {
             return 0;
         }
     } else {
         player = &D_800CC2D0[0];
         if (player->camera != NULL && player->unk31C != NULL &&
-            ((Obj31C_151BA084 *)player->unk31C)->unk197 != 0 && viewport == player->camera->playerIndex) {
+            player->unk31C->aimState != 0 && viewport == player->camera->playerIndex) {
             return 0;
         }
     }

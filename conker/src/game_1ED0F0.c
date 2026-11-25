@@ -356,15 +356,6 @@ typedef struct {
     /* 0x60 */ s32 unk60;
 } RayHit;
 
-/* struct127.unk31C as used here (ActorCtl in structs.h does not declare these fields). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x130];
-    /* 0x130 */ vertex aimDir;
-    /* 0x13C */ vertex aimPos;
-    /* 0x148 */ u8 pad148[0x4F];
-    /* 0x197 */ u8 aiming;
-} AimState;
-
 /* Objects the bullet trace ignores (see func_151C1940). */
 typedef struct {
     /* 0x00 */ s32 count;
@@ -483,7 +474,7 @@ void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 
             pos.z = shooter->z_position;
         }
     } else {
-        src = &((AimState *)shooter->unk31C)->aimPos;
+        src = &shooter->unk31C->aimEye;
         obj = shooter->camera;
         if (obj != NULL) {
             if (shooter->unk65 != 0) {
@@ -491,7 +482,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 pos.x = src->x;
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
-            } else if (((AimState *)shooter->unk31C)->aiming != 0) {
+            } else if (shooter->unk31C->aimState != 0) {
                 extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
                 angle = func_15144AA8(((Camera *)obj)->playerIndex, obj) * 0.01745329238f;
@@ -514,17 +505,17 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         }
     }
 
-    if ((shooter->unk31C != NULL && ((AimState *)shooter->unk31C)->aiming != 0) || aimer != NULL) {
+    if ((shooter->unk31C != NULL && shooter->unk31C->aimState != 0) || aimer != NULL) {
         extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
         who = (aimer != NULL) ? aimer : shooter;
 
         useAim = TRUE;
-        src = &((AimState *)who->unk31C)->aimPos;
+        src = &who->unk31C->aimEye;
         aimPos = *src;
-        aimDir.x = ((AimState *)who->unk31C)->aimDir.x;
-        aimDir.y = ((AimState *)who->unk31C)->aimDir.y;
-        aimDir.z = ((AimState *)who->unk31C)->aimDir.z;
+        aimDir.x = who->unk31C->aimDir.x;
+        aimDir.y = who->unk31C->aimDir.y;
+        aimDir.z = who->unk31C->aimDir.z;
     } else {
         func_15145740(shooter, &dir, scratch, 0, 0.0f);
         useAim = FALSE;

@@ -10,30 +10,6 @@ extern void func_151254F4(Camera *camera, s32 index);
 extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
-/* File-local view of struct127.unk31C; structs.h's ActorCtl stops at 0x1AC, before the aim angles. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x75];
-    /* 0x075 */ u8 unk75;
-    /* 0x076 */ u8 pad76[2];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0xB];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0x9B];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[7];
-    /* 0x128 */ u8 flags;
-    /* 0x129 */ s8 target;   /* index into D_800CC2D0, or -1 */
-    /* 0x12A */ s8 unk12A;
-    /* 0x12B */ u8 pad12B;
-    /* 0x12C */ u16 timer;   /* counts down by D_800BE9E4 */
-    /* 0x12E */ u8 pad12E[0x69];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 pad198[0x20];
-    /* 0x1B8 */ f32 aimPitch; /* degrees, clamped to [-20, 80] */
-    /* 0x1BC */ f32 aimYaw;   /* degrees, wrapped to [0, 360) */
-} ObjState;
-
-#define STATE(obj) ((ObjState *)(obj)->unk31C)
 
 /* variables.h declares these as plain arrays: D_800BE748 is the OSContPad array and
    D_800BE728 holds a pointer to the per-controller OSContPad pointers. */
@@ -154,7 +130,7 @@ void func_150ED578(struct127 *obj) {
         player = D_800BE616 ? obj->unk127 : obj->unk124;
         if (CONT_PADS[player]->button & R_TRIG) {
             owner = &D_800CC2D0[player];
-            if (STATE(owner)->unk197 != 0) {
+            if (owner->unk31C->aimState != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
                     obj->pad2FC[0] |= 1 << camera->playerIndex;
@@ -300,18 +276,18 @@ void func_150ED748(struct127 *obj) {
             }
             driver = &D_800CC2D0[player];
             if (driver->health != 0) {
-                if (STATE(driver)->flags & 0x80) {
-                    if (STATE(driver)->timer != 0) {
+                if (driver->unk31C->unk128 & 0x80) {
+                    if (driver->unk31C->unk12C != 0) {
                         obj->immune = 0xFF;
-                        if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
-                            STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
+                        if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
+                            D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
                         } else {
-                            STATE(&D_800CC2D0[player])->timer = 0;
+                            D_800CC2D0[player].unk31C->unk12C = 0;
                             func_1508DAEC(player, 0);
                             obj->immune = 0;
                         }
                     }
-                } else if ((STATE(driver)->flags & 0x10) && (STATE(driver)->timer == 0)) {
+                } else if ((driver->unk31C->unk128 & 0x10) && (driver->unk31C->unk12C == 0)) {
                     func_1508DAEC(player, 0);
                 }
             }
@@ -328,16 +304,16 @@ void func_150ED748(struct127 *obj) {
             obj->unk247 = 50;
             obj->unk248 = 50;
             throttleScale = 0.6399999857f;
-            stateFlags = STATE(&D_800CC2D0[player])->flags;
-            if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (STATE(&D_800CC2D0[player])->timer != 0)) {
+            stateFlags = D_800CC2D0[player].unk31C->unk128;
+            if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (D_800CC2D0[player].unk31C->unk12C != 0)) {
                 obj->unk247 = 28;
                 obj->unk248 = 28;
                 PADS[player].stick_y = 80;
                 throttleScale += throttleScale;
-                if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
-                    STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
+                if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
+                    D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
                 } else {
-                    STATE(&D_800CC2D0[player])->timer = 0;
+                    D_800CC2D0[player].unk31C->unk12C = 0;
                     func_1508DAEC(player, 0);
                 }
             }
@@ -346,7 +322,7 @@ void func_150ED748(struct127 *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((CONT_PADS[player]->button & R_TRIG) && ((STATE(&D_800CC2D0[player])->flags & 2) || (D_800BE616 == 0))) {
+            if ((CONT_PADS[player]->button & R_TRIG) && ((D_800CC2D0[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -380,8 +356,8 @@ void func_150ED748(struct127 *obj) {
             obj->disable_run--;
         }
         obj->unk44 = PADS[player].stick_y * throttleScale;
-        STATE(&D_800CC2D0[player])->unk75 = lockFlags;
-        STATE(&D_800CC2D0[player])->unk78 = lockFlags;
+        D_800CC2D0[player].unk31C->unk75 = lockFlags;
+        D_800CC2D0[player].unk31C->unk78 = lockFlags;
     } else if (D_800C3E78 < D_8008FD8C) {
         func_1504C854(obj);
         if ((player < 4) && (CONT_PADS[player]->button & Z_TRIG)) {
@@ -393,7 +369,7 @@ void func_150ED748(struct127 *obj) {
     }
     obj->unk247 = 50;
     obj->unk248 = 50;
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (STATE(obj)->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
         func_15052590(obj);
     }
     if (obj->interaction_state != 0) {
@@ -401,7 +377,7 @@ void func_150ED748(struct127 *obj) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
             subject = &D_800CC2D0[obj->unk124];
-            if ((subject->unk65 == 0) && (STATE(subject)->unk78 == 0) && (obj->unk25C & 0x400)) {
+            if ((subject->unk65 == 0) && (subject->unk31C->unk78 == 0) && (obj->unk25C & 0x400)) {
                 if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
                 } else if ((subject->disable_run == 0) && (subject->unk28 > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
@@ -448,10 +424,10 @@ void func_150ED748(struct127 *obj) {
         }
         /* Gun aim. */
         if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
-            if (STATE(obj)->target >= 0) {
+            if (obj->unk31C->unk129 >= 0) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
-                target = &D_800CC2D0[STATE(obj)->target];
+                target = &D_800CC2D0[obj->unk31C->unk129];
                 offset = target->x_position - obj->x_position;
                 score = target->z_position - obj->z_position;
                 lead = sqrtf(offset * offset + score * score) / 200.0f;
@@ -465,14 +441,14 @@ void func_150ED748(struct127 *obj) {
                 dirX = sinf(bearing) * cosf(obj->unkC4 * 0.01745329238f);
                 dirZ = cosf(bearing) * cosf(obj->unkB8 * 0.01745329238f);
                 angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
-                aimOffset = STATE(obj)->unk12A * 400.0f;
-                STATE(obj)->aimYaw -= func_150ED1D0(angle * 57.29577637f + STATE(obj)->unk12A * 10.0f, STATE(obj)->aimYaw) * 0.125f;
-                STATE(obj)->aimPitch += func_150ED298(obj, STATE(obj)->aimPitch - obj->unkB8, target->x_position, target->y_position, target->z_position, aimOffset) * 0.001000000047f;
+                aimOffset = obj->unk31C->unk12A * 400.0f;
+                obj->unk31C->unk1BC -= func_150ED1D0(angle * 57.29577637f + obj->unk31C->unk12A * 10.0f, obj->unk31C->unk1BC) * 0.125f;
+                obj->unk31C->unk1B8 += func_150ED298(obj, obj->unk31C->unk1B8 - obj->unkB8, target->x_position, target->y_position, target->z_position, aimOffset) * 0.001000000047f;
                 target->x_position -= leadX;
                 target->z_position -= leadZ;
             } else {
-                STATE(obj)->aimYaw *= 0.8999999762f;
-                STATE(obj)->aimPitch *= 0.8999999762f;
+                obj->unk31C->unk1BC *= 0.8999999762f;
+                obj->unk31C->unk1B8 *= 0.8999999762f;
             }
         } else if (controlled && health) {
             typedef s32 scope; // matching: as above
@@ -486,13 +462,13 @@ void func_150ED748(struct127 *obj) {
             } else {
                 pad = &PADS[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
-                    STATE(obj)->aimYaw += yawStep;
+                    obj->unk31C->unk1BC += yawStep;
                 }
                 if (pad->button & L_CBUTTONS) {
-                    STATE(obj)->aimYaw -= yawStep;
+                    obj->unk31C->unk1BC -= yawStep;
                 }
             }
-            if (STATE(&D_800CC2D0[player])->unk197 != 0) {
+            if (D_800CC2D0[player].unk31C->aimState != 0) {
                 camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
@@ -506,7 +482,7 @@ void func_150ED748(struct127 *obj) {
                         if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
-                        offset = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
+                        offset = func_150ED1D0(func_150ED234(obj, other), obj->unk31C->unk1BC);
                         score = offset;
                         if (offset < 0.0f) {
                             score = -offset;
@@ -548,9 +524,9 @@ void func_150ED748(struct127 *obj) {
                     if (deltaZ < -limit) {
                         deltaZ = -limit;
                     }
-                    STATE(obj)->aimPitch += deltaZ;
+                    obj->unk31C->unk1B8 += deltaZ;
                 } else {
-                    STATE(obj)->aimPitch *= 0.8999999762f;
+                    obj->unk31C->unk1B8 *= 0.8999999762f;
                 }
             } else {
                 camera = &D_800DBFF0[camSlot - 1];
@@ -575,8 +551,8 @@ void func_150ED748(struct127 *obj) {
                     while (angle2 < -180.0f) {
                         angle2 += 360.0f;
                     }
-                    STATE(obj)->aimPitch = angle;
-                    STATE(obj)->aimYaw = angle2;
+                    obj->unk31C->unk1B8 = angle;
+                    obj->unk31C->unk1BC = angle2;
                 } else {
                     /* Aim at what the camera's look ray hits: level geometry or another object. */
                     dir[0] = camera->target.x - camera->eye.x;
@@ -611,27 +587,27 @@ void func_150ED748(struct127 *obj) {
                         hitX = dir[0] * dist + camera->eye.x;
                         hitY = dir[1] * dist + camera->eye.y;
                         hitZ = dir[2] * dist + camera->eye.z;
-                        STATE(obj)->aimPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
+                        obj->unk31C->unk1B8 += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
-                        STATE(obj)->aimPitch *= 0.8999999762f;
+                        obj->unk31C->unk1B8 *= 0.8999999762f;
                     }
                 }
             }
         }
-        if (STATE(obj)->aimPitch < -20.0f) {
-            STATE(obj)->aimPitch = -20.0f;
+        if (obj->unk31C->unk1B8 < -20.0f) {
+            obj->unk31C->unk1B8 = -20.0f;
         }
-        if (STATE(obj)->aimPitch > 80.0f) {
-            STATE(obj)->aimPitch = 80.0f;
+        if (obj->unk31C->unk1B8 > 80.0f) {
+            obj->unk31C->unk1B8 = 80.0f;
         }
-        if (STATE(obj)->aimYaw > 360.0f) {
-            STATE(obj)->aimYaw -= 360.0f;
+        if (obj->unk31C->unk1BC > 360.0f) {
+            obj->unk31C->unk1BC -= 360.0f;
         }
-        if (STATE(obj)->aimYaw < 0.0f) {
-            STATE(obj)->aimYaw += 360.0f;
+        if (obj->unk31C->unk1BC < 0.0f) {
+            obj->unk31C->unk1BC += 360.0f;
         }
-        ((s16 *)&obj->unk2E4)[0] = STATE(obj)->aimYaw * 50.0f;
-        ((s16 *)&obj->unk2E4)[1] = -(s16)(STATE(obj)->aimPitch * 50.0f);
+        ((s16 *)&obj->unk2E4)[0] = obj->unk31C->unk1BC * 50.0f;
+        ((s16 *)&obj->unk2E4)[1] = -(s16)(obj->unk31C->unk1B8 * 50.0f);
     }
 }
 

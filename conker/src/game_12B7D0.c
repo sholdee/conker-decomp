@@ -106,8 +106,7 @@ void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3) {
             motion[1] = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
             motion[0] = func_150ADA68() * 15.0f + 35.0f;
 
-            // byte 0x197 of unk31C is padding in the shared ActorCtl declaration
-            if ((obj->unk31C != NULL) && (((u8 *)obj->unk31C)[0x197] != 0) && (obj->camera != NULL)) {
+            if ((obj->unk31C != NULL) && (obj->unk31C->aimState != 0) && (obj->camera != NULL)) {
                 mask = ~(1 << obj->camera->playerIndex) & 0xFF;
             } else {
                 mask = 0xFF;

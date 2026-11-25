@@ -59,18 +59,6 @@ typedef struct {
 
 extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
 
-/* The fields of struct127.unk31C that func_150FB8C0 reads (ActorCtl only declares them as padding). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x130];
-    /* 0x130 */ f32 lineDirX;
-    /* 0x134 */ f32 lineDirY;
-    /* 0x138 */ f32 lineDirZ;
-    /* 0x13C */ f32 linePoint[3];
-    /* 0x148 */ u8 pad148[0x4F];
-    /* 0x197 */ u8 unk197;
-} TargetState_150FB8C0;
-
-#define TARGET_STATE(obj) ((TargetState_150FB8C0 *)(obj)->unk31C)
 
 /* First argument of func_1515548C (same layout as game_113D60.c's Struct1515548CArg). */
 typedef struct {
@@ -156,7 +144,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 *linePoint;
+    vertex *linePoint;
     u8 cameraMask;
     s8 variant;
     SparkArg_150FB8C0 spark;
@@ -178,10 +166,10 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         if (target == NULL) {
             return;
         }
-        if (TARGET_STATE(target) == NULL) {
+        if (target->unk31C == NULL) {
             return;
         }
-        if (TARGET_STATE(target)->unk197 != 0) {
+        if (target->unk31C->aimState != 0) {
             useTarget = 1;
         } else {
             useTarget = 0;
@@ -220,7 +208,7 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
         extern void func_151450B4(struct17 *, struct17 *, struct17 *);
 
-        linePoint = TARGET_STATE(target)->linePoint;
+        linePoint = &target->unk31C->aimEye;
         edgeA[0] -= origin[0];
         edgeA[1] -= origin[1];
         edgeA[2] -= origin[2];
@@ -228,17 +216,17 @@ void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 ar
         edgeB[1] -= origin[1];
         edgeB[2] -= origin[2];
         func_151450B4((struct17 *)edgeA, (struct17 *)edgeB, &normal);
-        dx = origin[0] - linePoint[0];
-        dy = origin[1] - linePoint[1];
-        dz = origin[2] - linePoint[2];
+        dx = origin[0] - linePoint->x;
+        dy = origin[1] - linePoint->y;
+        dz = origin[2] - linePoint->z;
         t = ((normal.unk0 * dx) + (normal.unk4 * dy) + (normal.unk8 * dz)) /
-            ((normal.unk0 * TARGET_STATE(target)->lineDirX) + (normal.unk4 * TARGET_STATE(target)->lineDirY) + (normal.unk8 * TARGET_STATE(target)->lineDirZ));
-        hitPoint[0] = linePoint[0] + (t * TARGET_STATE(target)->lineDirX);
-        hitPoint[1] = linePoint[1] + (t * TARGET_STATE(target)->lineDirY);
-        hitPoint[2] = linePoint[2] + (t * TARGET_STATE(target)->lineDirZ);
-        lineDir[0] = TARGET_STATE(target)->lineDirX;
-        lineDir[1] = TARGET_STATE(target)->lineDirY;
-        lineDir[2] = TARGET_STATE(target)->lineDirZ;
+            ((normal.unk0 * target->unk31C->aimDir.x) + (normal.unk4 * target->unk31C->aimDir.y) + (normal.unk8 * target->unk31C->aimDir.z));
+        hitPoint[0] = linePoint->x + (t * target->unk31C->aimDir.x);
+        hitPoint[1] = linePoint->y + (t * target->unk31C->aimDir.y);
+        hitPoint[2] = linePoint->z + (t * target->unk31C->aimDir.z);
+        lineDir[0] = target->unk31C->aimDir.x;
+        lineDir[1] = target->unk31C->aimDir.y;
+        lineDir[2] = target->unk31C->aimDir.z;
     } else {
         dir[0] -= origin[0];
         dir[1] -= origin[1];

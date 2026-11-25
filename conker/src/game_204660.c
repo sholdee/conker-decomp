@@ -40,12 +40,6 @@ typedef struct {
     /* 0x40 */ TrailBoneLink link;
 } TrailEmitter;
 
-/* The part of struct127.unk31C read here (ActorCtl stops short of it). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x197];
-    /* 0x197 */ u8 active;
-} Rider151D75C4;
-
 extern s32 (*D_8008FCA0[])(TrailEmitter *);
 extern void (*D_8008FCA4[])(TrailEmitter *, TrailBoneLink *, u8);
 extern s32 (*D_8008FCA8[])(TrailEmitter *);
@@ -202,7 +196,7 @@ s32 func_151D75C4(TrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    if ((actor->unk31C != NULL) && (((Rider151D75C4 *)actor->unk31C)->active != 0) && (actor->camera != NULL)) {
+    if ((actor->unk31C != NULL) && (actor->unk31C->aimState != 0) && (actor->camera != NULL)) {
         anchor->flags &= ~1;
         return 1;
     }

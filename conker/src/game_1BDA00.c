@@ -25,18 +25,9 @@ void func_15190550(HandlerObject *obj, s32 arg1, u8 event) {
     }
 }
 
-typedef struct LinkedState {
-    /* 0x000 */ u8 pad0[0x46];
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ u8 pad48[0x3C];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0x127];
-    /* 0x1AC */ u8 unk1AC;
-} LinkedState;
-
 typedef struct LinkedObject {
     /* 0x000 */ u8 pad0[0x31C];
-    /* 0x31C */ LinkedState *state;
+    /* 0x31C */ ActorCtl *state;
 } LinkedObject;
 
 typedef struct PeriodicTrigger {
@@ -60,7 +51,7 @@ extern s32 func_1505D024(void *, s32, u16, s32);
  */
 s32 func_151905BC(PeriodicObject *obj) {
     PeriodicTrigger *trigger;
-    LinkedState *state;
+    ActorCtl *state;
 
     obj->trigger.elapsed += D_800BE9E4;
     trigger = &obj->trigger;
@@ -77,7 +68,7 @@ s32 func_151905BC(PeriodicObject *obj) {
 
 /* Clears unk1AC of the linked object's state, if it has one. */
 void func_151906C4(PeriodicObject *obj) {
-    LinkedState *state = obj->linked->state;
+    ActorCtl *state = obj->linked->state;
 
     if (state != NULL) {
         state->unk1AC = 0;

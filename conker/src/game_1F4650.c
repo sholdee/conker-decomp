@@ -2245,12 +2245,6 @@ void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5) 
     }
 }
 
-/* The part of the ActorCtl at struct127.unk31C read here (ActorCtl does not declare it). */
-typedef struct {
-    u8 pad0[0x130];
-    vertex aimDir;
-} SightAimer;
-
 /* Cross-bar update: shifts the bar sideways (texture 0x9A) or vertically by the aim angles. */
 s32 func_151CC77C(SightSprite *sprite) {
     // matching: the angle pointers are taken (in registers) before the NULL check
@@ -2261,16 +2255,16 @@ s32 func_151CC77C(SightSprite *sprite) {
         f32 pitch;
         s32 pad[2];
     } angles;
-    SightAimer *aimer;
+    ActorCtl *aimer;
     struct127 *state;
 
     // matching: one variable first holds the player, then the aimer (as IDO allocated it)
-    aimer = (SightAimer *)sprite->payload.player;
+    aimer = (ActorCtl *)sprite->payload.player;
     state = ((Camera *)aimer)->player;
     if (state == NULL) {
         return 0;
     }
-    aimer = (SightAimer *)state->unk31C;
+    aimer = state->unk31C;
     pitchp = &angles.pitch;
     yawp = &angles.yaw;
     if (aimer == NULL) {

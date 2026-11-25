@@ -125,7 +125,7 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
         params[1] = func_150ADA68() * 1.5f + 2.0f;
         params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
 
-        if (obj->unk31C != NULL && ((struct127 *)obj->unk31C)->unk197 != 0 && obj->camera != NULL) {
+        if (obj->unk31C != NULL && obj->unk31C->aimState != 0 && obj->camera != NULL) {
             cameraMask = ~(1 << obj->camera->playerIndex) & 0xFF;
         } else {
             cameraMask = 0xFF;

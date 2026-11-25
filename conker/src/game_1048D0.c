@@ -136,17 +136,6 @@ Gfx *func_150D765C(Gfx *gdl) {
     return gdl;
 }
 
-/* The fields of struct127.unk31C (a ActorCtl) that ActorCtl doesn't name; it also stops short of 0x1AE. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x4F];
-    /* 0x04F */ u8 unk4F;
-    /* 0x050 */ u8 pad50[0xDC];
-    /* 0x12C */ s16 unk12C;
-    /* 0x12E */ u8 pad12E[0x80];
-    /* 0x1AE */ s8 unk1AE; /* uses left: each attack below spends one */
-} Obj31C;
-
-#define O31C(obj) ((Obj31C *)(obj)->unk31C)
 
 s32 func_1508855C(struct127 *obj);
 void func_150885EC(s32 src, s32 dst);
@@ -162,15 +151,15 @@ void func_150D7790(struct127 *obj, s32 action) {
     struct127 *projectile;
 
     variant = 0;
-    if (obj->unk31C != NULL && O31C(obj)->unk1AE <= 0) {
+    if (obj->unk31C != NULL && obj->unk31C->unk1AE <= 0) {
         return;
     }
     switch (action) {
     case 0x30:
     case 0x31:
         if (obj->unk31C != NULL) {
-            O31C(obj)->unk12C = 120;
-            O31C(obj)->unk1AE -= 1;
+            obj->unk31C->unk12C = 120;
+            obj->unk31C->unk1AE -= 1;
             func_10010154(0x628, obj, 0x7FFF, 500, 1000);
         }
         return;
@@ -197,7 +186,7 @@ void func_150D7790(struct127 *obj, s32 action) {
         }
     }
     if (obj->unk31C != NULL) {
-        O31C(obj)->unk1AE -= 1;
+        obj->unk31C->unk1AE -= 1;
     }
 }
 
@@ -272,7 +261,7 @@ void func_150D7928(struct127 *obj) {
             obj->x_position += (player->x_position - obj->x_position) * 0.5f;
             obj->z_position += (player->z_position - obj->z_position) * 0.5f;
             player->disable_jump = 10;
-            if (O31C(player)->unk4F == 2) {
+            if (player->unk31C->unk4F == 2) {
                 if (speed < player->unk44 * 1.35f) {
                     speed = player->unk44 * 1.35f;
                 }
@@ -362,7 +351,7 @@ void func_150D7928(struct127 *obj) {
             }
         }
         if (timer > 10 && ((player = &D_800CC2D0[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
-                            (obj->unk124 != 0 && O31C(player)->unk4F == 2))) {
+                            (obj->unk124 != 0 && player->unk31C->unk4F == 2))) {
             if (obj->unk13C != 0) {
                 D_800CC2D0[obj->unk124].unkCC = 0;
                 D_800CC2D0[obj->unk124].unk31C->unk4E = 0;
