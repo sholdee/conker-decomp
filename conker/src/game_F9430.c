@@ -277,47 +277,43 @@ lbl2:
 
 extern f32 D_800BE9A4;
 
+/* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
-    s16 unk0;
-    f32 unk4;
-} CC638Sub;
-
-typedef struct {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x2C - 0x1E];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x58 - 0x34];
-    s32 unk58;
-    u8 unk5C;
-    char pad5D[0x128 - 0x5D];
-    CC638Sub unk128;
-} CC638Struct;
+    /* 0x0 */ s16 growDelay; /* age after which the particle starts growing */
+    /* 0x4 */ f32 growRate;
+} GrowParticleExtra;
 
 typedef struct {
-    char pad_0[0x58];
-    f32 field_0x58;
-    char pad_0x5C[0x60 - 0x5C];
-    f32 field_0x60;
-    char pad_0x64[0xA8 - 0x64];
-    f32 field_0xA8;
-} EffectScaleState;
+    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x01C */ s16 age;
+    /* 0x01E */ u8 pad1E[0x2C - 0x1E];
+    /* 0x02C */ f32 size0;
+    /* 0x030 */ f32 size1;
+    /* 0x034 */ u8 pad34[0x58 - 0x34];
+    /* 0x058 */ s32 flags;
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0x128 - 0x5D];
+    /* 0x128 */ GrowParticleExtra extra;
+} GrowParticle;
 
-s32 func_150CC638(CC638Struct *arg0) {
-    CC638Sub *sub;
+/* Particle update: fades in over its first 32 ticks, then grows once past its delay. */
+s32 func_150CC638(GrowParticle *p) {
+    GrowParticleExtra *extra;
 
-    if (arg0->unk58 & 1) {
-        sub = &arg0->unk128;
-        if (arg0->unk1C < 0x20) {
-            if ((arg0->unk1C << 3) < arg0->unk5C) {
-                *(u8*)((u8*)sub - 0xCC) = arg0->unk1C << 3;
+    if (p->flags & 1) {
+        extra = &p->extra;
+        if (p->age < 32) {
+            s32 fadeAlpha = p->age * 8;
+
+            if (fadeAlpha < p->alpha) {
+                p->alpha = fadeAlpha;
             }
         }
-        if (sub->unk0 < arg0->unk1C) {
-            f32 v = sub->unk4 * D_800BE9A4;
-            arg0->unk2C = arg0->unk2C + v;
-            arg0->unk30 = arg0->unk30 + v;
+        if (extra->growDelay < p->age) {
+            f32 growth = extra->growRate * D_800BE9A4;
+
+            p->size0 += growth;
+            p->size1 += growth;
         }
     }
     return 1;
@@ -430,14 +426,24 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CC8D4(EffectScaleState *arg0, s32 arg1) {
-    f32 *scale;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ u8 pad64[0xA8 - 0x64];
+    /* 0xA8 */ f32 decay; /* set by func_150CC6B8 */
+} DecayParticle;
+
+/* Particle update: scales unk58 and unk60 by the decay factor once per elapsed tick. */
+s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
+    f32 *decay;
     s32 i;
 
-    scale = &arg0->field_0xA8;
+    decay = &p->decay;
     for (i = D_800BE9E4; i != 0; i--) {
-        arg0->field_0x58 *= *scale;
-        arg0->field_0x60 *= *scale;
+        p->unk58 *= *decay;
+        p->unk60 *= *decay;
     }
     return 1;
 }
@@ -541,13 +547,24 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-s32 func_150CCCB4(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ f32 rotation[3];
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ f32 position[3];
+    /* 0x44 */ f32 velocity[3];
+    /* 0x50 */ f32 rotationVel[3];
+    /* 0x5C */ f32 gravity;
+} TumbleParticle;
+
+/* Integrates a tumbling particle's position (with gravity) and rotation over one frame step. */
+s32 func_150CCCB4(TumbleParticle *p) {
+    p->position[0] += p->velocity[0] * D_800BE9A4;
+    p->position[1] += p->velocity[1] * D_800BE9A4 + p->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    p->position[2] += p->velocity[2] * D_800BE9A4;
+    p->velocity[1] += p->gravity * D_800BE9A4;
+    p->rotation[0] += p->rotationVel[0] * D_800BE9A4;
+    p->rotation[1] += p->rotationVel[1] * D_800BE9A4;
+    p->rotation[2] += p->rotationVel[2] * D_800BE9A4;
     return 1;
 }
