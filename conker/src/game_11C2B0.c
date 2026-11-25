@@ -974,156 +974,123 @@ void func_150F03E8(Flash *flash) {
     beam->link.flash = NULL;
 }
 
-typedef struct {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-    u8 pad1D8[0x114];
-    s32 unk2EC;
-} Struct150F03F8;
-
 extern f32 D_800A1640[][3];
 extern f32 D_800A1658[][3];
 extern u8 D_800A1670[];
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern void func_15102B38(Struct150F03F8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Struct150F03F8 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
+extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 
-s32 func_150F03F8(Struct150F03F8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* Fires a shot from gun slot `slot` of `actor` (only once actor->unk2EC reaches 90),
+ * with a spark burst and a trail at the muzzle. */
+s32 func_150F03F8(actor, slot, arg2, arg3)
+    struct127 *actor;
+    u8 slot;
+    u8 arg2;
+    s32 arg3;
+{
     s32 ret;
-    struct17 pos;
+    struct17 muzzle;
     struct17 dir;
-    s32 srcs[2];
-    s32 dsts[2];
+    f32 *src[2];
+    f32 *dst[2];
     Header hdr;
-    Header2 hdr2;
-    f32 sp98[2];
-    s32 sp94;
+    Header2 origin;
+    f32 params[2];
+    s32 randB;
     f32 rand1;
     f32 rand0;
-    s32 sp88;
-    u8 *sp84;
+    s32 randA;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return 0;
     }
-    if (((u8 *)&arg1)[3] >= 2) {
+    if (slot >= 2) {
         return 0;
     }
-    if (arg0->unk1D4 == 0) {
+    if (actor->unk1D4 == NULL) {
         return 0;
     }
-    if (arg0->unk2EC < 0x5A) {
+    if (actor->unk2EC < 90) {
         return 0;
     }
-    srcs[0] = (s32)D_800A1640[((u8 *)&arg1)[3]];
-    srcs[1] = (s32)D_800A1658[((u8 *)&arg1)[3]];
-    dsts[0] = (s32)&pos;
-    dsts[1] = (s32)&dir;
-    sp88 = (D_800A1670[((u8 *)&arg1)[3]] << 6) + arg0->unk1D4;
-    sp84 = &D_800A1670[((u8 *)&arg1)[3]];
-    func_15145EA4(srcs, dsts, sp88, 2);
-    dir.unk0 -= pos.unk0;
-    dir.unk4 -= pos.unk4;
-    dir.unk8 -= pos.unk8;
+    src[0] = D_800A1640[slot];
+    src[1] = D_800A1658[slot];
+    dst[0] = &muzzle.unk0;
+    dst[1] = &dir.unk0;
+    func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A1670[slot], 2);
+    dir.unk0 -= muzzle.unk0;
+    dir.unk4 -= muzzle.unk4;
+    dir.unk8 -= muzzle.unk8;
     {
-        f32 func_150ADA68(void);
+        f32 func_150ADA68(void); // matching: this block's extra line steers as1 scheduling
 
         rand0 = func_150ADA68();
         rand1 = func_150ADA68();
         func_150ADA20();
-        ret = func_151C229C(&pos, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
-                            rand1 * 363.0f + 149.0f, 50.0f, 0xFF, arg0, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
-                            0xFF, -1, 0, ((u8 *)&arg2)[3], arg3);
+        ret = func_151C229C(&muzzle, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
+                            rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
+                            0xFF, -1, 0, arg2, arg3);
     }
     hdr.unk0 = 3;
     hdr.unk1 = -1;
     hdr.unk2 = (func_150ADA20() % 5U) + 4;
     hdr.unk4 = 0;
-    hdr2.unk0 = pos.unk0;
-    hdr2.unk4 = pos.unk4;
-    hdr2.unk8 = pos.unk8;
-    sp88 = (func_150ADA20() % 51U) + 0x50;
-    func_151602C0(&hdr, &hdr2, sp88, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
-                  ((u8 *)&arg2)[3], arg3);
-    sp98[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
-    sp98[0] = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
-    sp88 = func_150ADA20();
-    sp94 = func_150ADA20();
+    origin.unk0 = muzzle.unk0;
+    origin.unk4 = muzzle.unk4;
+    origin.unk8 = muzzle.unk8;
+    randA = (func_150ADA20() % 51U) + 80;
+    func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
+    params[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
+    params[0] = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
+    randA = func_150ADA20();
+    randB = func_150ADA20();
     rand0 = func_150ADA68() * 2000.0f + 2000.0f;
-    func_15102B38(arg0, *sp84, D_800A1640[((u8 *)&arg1)[3]], D_800A1658[((u8 *)&arg1)[3]], sp98,
-                  (sp88 % 3U) + 8, (sp94 % 1U) + 0xFF, rand0, &pos, 0xFF, 0, -1,
-                  ((u8 *)&arg2)[3], arg3);
+    func_15102B38(actor, D_800A1670[slot], D_800A1640[slot], D_800A1658[slot], params,
+                  (randA % 3U) + 8, (randB % 1U) + 0xFF, rand0, &muzzle, 0xFF, 0, -1, arg2, arg3);
     return ret;
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_F07E4;
+/* Message handler of a beam spark: releases it when its actor goes away (type 0)
+ * and follows its actor through an identity swap (type 0x2D). */
+void func_150F07E4(Spark *spark, s32 data, u8 type) {
+    SparkLink *link = spark->link;
+    ActorMsg *msg = (ActorMsg *)data;
+    struct127 *msgActor;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_F07E4;
-
-void func_150F07E4(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_F07E4 *temp_v0 = *(SubA_F07E4 **)((u8 *)arg0 + 0x60);
-    ArgB_F07E4 *b = (ArgB_F07E4 *)arg1;
-    s32 b0;
-
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0) {
+        msgActor = msg->ref.actor;
+        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+            func_1516972C((struct102 *)spark);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (link->actor == msg->swap.actorA) {
+            link->actor = msg->swap.actorB;
+            link->actorId = msg->swap.idB;
+        } else if (link->actor == msg->swap.actorB) {
+            link->actor = msg->swap.actorA;
+            link->actorId = msg->swap.idA;
         }
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_F088C;
+/* Message handler of a beam glow; same as func_150F07E4. */
+void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
+    GlowLink *link = &glow->link;
+    struct127 *msgActor;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_F088C;
-
-void func_150F088C(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_F088C *temp_v0 = (SubA_F088C *)((u8 *)arg0 + 0x170);
-    ArgB_F088C *b = (ArgB_F088C *)arg1;
-    s32 b0;
-
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0) {
+        msgActor = msg->ref.actor;
+        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+            func_1516972C((struct102 *)glow);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (link->actor == msg->swap.actorA) {
+            link->actor = msg->swap.actorB;
+            link->actorId = msg->swap.idB;
+        } else if (link->actor == msg->swap.actorB) {
+            link->actor = msg->swap.actorA;
+            link->actorId = msg->swap.idA;
         }
     }
 }
@@ -1133,11 +1100,10 @@ void func_150F0938(s32 arg0) {
     func_15160A58(arg0, 2, &D_800A1680, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-typedef struct { f32 x, y, z; } Vec3f_150F0A24;
-typedef struct Game11D830EffectPacket {
+typedef struct {
     s32 field_0;
     s32 field_4;
-    Vec3f_150F0A24 position;
+    Vec3f position;
     f32 field_14;
     f32 field_18;
     f32 field_1C;
@@ -1153,7 +1119,7 @@ typedef struct Game11D830EffectPacket {
     s16 field_3C;
     s16 field_3E;
     s16 field_40;
-    u8 bytes_42[0x17];
+    u8 bytes_42[23];
     u8 pad59[3];
     s32 field_5C;
     s32 field_60;
@@ -1167,32 +1133,31 @@ typedef struct Game11D830EffectPacket {
     s8 field_71;
     s8 field_72;
     s8 field_73;
-} Game11D830EffectPacket;
+} EffectPacket;
 
 void func_15152B38(void *, s32, s32, void *);
-extern f32 D_800A1858;
-extern f32 D_800A185C;
 
-void func_150F0A24(f32 *arg0) {
-    Game11D830EffectPacket packet;
+/* Spawns a particle effect (func_15152B38) at `pos`; func_150EEE00 uses it at the muzzle. */
+void func_150F0A24(f32 *pos) {
+    EffectPacket packet;
 
     packet.field_0 = 9;
     packet.field_4 = 6;
-    packet.position = *(Vec3f_150F0A24 *)arg0;
+    packet.position = *(Vec3f *)pos;
     packet.field_14 = 14.88f;
     packet.field_18 = 14.88f;
-    packet.field_1C = D_800A1858;
-    packet.field_20 = D_800A185C;
+    packet.field_1C = -1.353000045f;
+    packet.field_20 = 0.7180000544f;
     packet.field_24 = 39.0f;
     packet.field_28 = 35.0f;
     packet.field_2C = 0;
     packet.field_2E = 0xFF;
-    packet.field_30 = -0x1F;
-    packet.field_32 = 0x50;
+    packet.field_30 = -31;
+    packet.field_32 = 80;
     packet.field_34 = 3;
     packet.field_38 = 4;
-    packet.field_3C = 0x14;
-    packet.field_3E = 0x1E;
+    packet.field_3C = 20;
+    packet.field_3E = 30;
     packet.field_40 = 1;
     packet.bytes_42[0] = 4;
     packet.bytes_42[1] = 2;
@@ -1204,23 +1169,23 @@ void func_150F0A24(f32 *arg0) {
     packet.bytes_42[7] = 0;
     packet.bytes_42[8] = 0;
     packet.bytes_42[9] = 0;
-    packet.bytes_42[0xA] = 0;
-    packet.bytes_42[0xB] = 0xFF;
-    packet.bytes_42[0xC] = 0xFF;
-    packet.bytes_42[0xD] = 0xFF;
-    packet.bytes_42[0xE] = 0xFF;
-    packet.bytes_42[0xF] = 0;
-    packet.bytes_42[0x10] = 0;
-    packet.bytes_42[0x11] = 0;
-    packet.bytes_42[0x12] = 0;
-    packet.bytes_42[0x13] = 0xFF;
-    packet.bytes_42[0x14] = 0;
-    packet.bytes_42[0x15] = 3;
-    packet.bytes_42[0x16] = 0x24;
+    packet.bytes_42[10] = 0;
+    packet.bytes_42[11] = 0xFF;
+    packet.bytes_42[12] = 0xFF;
+    packet.bytes_42[13] = 0xFF;
+    packet.bytes_42[14] = 0xFF;
+    packet.bytes_42[15] = 0;
+    packet.bytes_42[16] = 0;
+    packet.bytes_42[17] = 0;
+    packet.bytes_42[18] = 0;
+    packet.bytes_42[19] = 0xFF;
+    packet.bytes_42[20] = 0;
+    packet.bytes_42[21] = 3;
+    packet.bytes_42[22] = 0x24;
     packet.field_5C = 0x200005;
     packet.field_60 = 0x60600;
     packet.field_64 = 8;
-    packet.field_66 = 0x1F;
+    packet.field_66 = 31;
     packet.field_68 = 1;
     packet.field_6A = 0;
     packet.field_6C = 1.0f;
@@ -1228,7 +1193,7 @@ void func_150F0A24(f32 *arg0) {
     packet.field_71 = 0;
     packet.field_72 = -1;
     packet.field_73 = -1;
-    func_15152B38(&packet, 0xFF, 1, arg0);
+    func_15152B38(&packet, 0xFF, 1, pos);
 }
 
 typedef struct {
@@ -1655,7 +1620,7 @@ void func_150F16DC(Struct150F16DC *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
         sp50 = func_150ADA20();
         sp58 = func_150ADA20();
         rand0 = func_150ADA68() * 1877.0f + 2414.0f;
-        func_15102B38((Struct150F03F8 *)arg0, *sp48, sp4C[((u8 *)&arg1)[3]],
+        func_15102B38((struct127 *)arg0, *sp48, sp4C[((u8 *)&arg1)[3]],
                       D_800A174C[idx][((u8 *)&arg2)[3]][((u8 *)&arg1)[3]], sp5C,
                       (sp50 % 6U) + 8, (sp58 % 1U) + 0xFF, rand0, &pos, 0xFF, 0, -1,
                       ((u8 *)&arg3)[3], arg4);
