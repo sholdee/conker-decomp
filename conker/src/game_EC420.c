@@ -471,28 +471,17 @@ void func_150BF760(Struct150BF760 *obj) {
     }
 }
 
-/* A 0xA0-byte entry of D_800DBEF4 (structs.h types it as WorldObject): one of a pair of platforms that
- * shakes and sinks. The partner entry follows it. */
+/*
+ * Behaviour scratch state (WorldObject.work) of a platform that shakes (rotX/rotZ) and sinks, one of a
+ * pair whose partner entry follows it. param high half: kind; behaviorState bits 0-1: state, bit 2: held down.
+ */
 typedef struct {
-    /* 0x00 */ f32 shakeX;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 shakeZ;
-    /* 0x0C */ u8 padC[0x6];
-    /* 0x12 */ s16 height;
-    /* 0x14 */ u8 pad14[0x28];
-    /* 0x3C */ s32 unk3C; /* high half: kind */
-    /* 0x40 */ u8 pad40[0xF];
-    /* 0x4F */ u8 unk4F;
-    /* 0x50 */ u8 pad50[0x1E];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[0x4];
-    /* 0x73 */ u8 flags; /* bits 0-1: state, bit 2: held down */
-    /* 0x74 */ u8 pad74[0x8];
-    /* 0x7C */ s32 home; /* low half: rest height; bit 31: initialised */
+    /* 0x7C */ s32 home;  /* low half: rest height; bit 31: initialised */
     /* 0x80 */ s32 unk80; /* sinking timer; on the partner, its offset from the lowered height */
     /* 0x84 */ s32 unk84;
-    /* 0x88 */ u8 pad88[0x18];
-} Platform150BFA7C; /* size 0xA0 */
+} PlatformWork;
+
+#define WORK(obj) ((PlatformWork *)&(obj)->work)
 
 typedef struct {
     /* 0x0 */ u8 unk0;
@@ -506,13 +495,13 @@ extern u8 D_800BE9EB;
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 extern void func_1518B6B0(f32, f32, f32, s32, s32);
-extern void func_1518CD20(Platform150BFA7C *, s32, s32);
+extern void func_1518CD20(WorldObject *, s32, s32);
 extern void *func_151D8868(Fx151D8868 *, s32, s32, s32);
 extern s32 func_151EF610(void);
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
  * and 1 rises back. Kind 1 platforms just follow their partner's offset. */
-void func_150BFA7C(Platform150BFA7C *platform) {
+void func_150BFA7C(WorldObject *platform) {
     s16 lowered;
     s16 top;
     s16 bottom;
@@ -525,8 +514,8 @@ void func_150BFA7C(Platform150BFA7C *platform) {
     Fx151D8868 fx;
 
     step = 0x10;
-    kind = (platform->unk3C >> 16) & 0xFFFF;
-    state = platform->flags & 3;
+    kind = (platform->param.word >> 16) & 0xFFFF;
+    state = platform->behaviorState & 3;
     travel = 0;
     if (kind == 0) {
         travel = 0x82;
@@ -534,20 +523,20 @@ void func_150BFA7C(Platform150BFA7C *platform) {
         travel = 0x622;
         step = 0x30;
     }
-    if (platform->home == 0) {
-        platform->home = platform->height | 0x80000000;
+    if (WORK(platform)->home == 0) {
+        WORK(platform)->home = platform->y | 0x80000000;
     }
-    top = (s16)(platform->home & 0xFFFF);
+    top = (s16)(WORK(platform)->home & 0xFFFF);
     lowered = top - 0x50;
     bottom = lowered - travel;
     if (kind == 1) {
-        diff = top - platform->height;
-        if (diff != platform->unk80) {
-            platform->height = top + platform->unk80;
+        diff = top - platform->y;
+        if (diff != WORK(platform)->unk80) {
+            platform->y = top + WORK(platform)->unk80;
         }
         return;
     }
-    if ((platform->unk4F & 4) && D_800CC2D0[0].unk31C->unk57 == 1) {
+    if ((platform->flags & 4) && D_800CC2D0[0].unk31C->unk57 == 1) {
         func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
         if (state == 0) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
@@ -560,77 +549,77 @@ void func_150BFA7C(Platform150BFA7C *platform) {
         }
     }
     if (state == 3) {
-        if (lowered != platform->height) {
-            platform->height = lowered;
+        if (lowered != platform->y) {
+            platform->y = lowered;
         }
-        if (!(platform->unk4F & 4) && !(platform->flags & 4)) {
+        if (!(platform->flags & 4) && !(platform->behaviorState & 4)) {
             state = 1;
         }
     } else if (state == 0) {
-        if (top != platform->height) {
-            platform->height = top;
+        if (top != platform->y) {
+            platform->y = top;
         }
     } else if (state == 2) {
-        platform->unk80 += D_800BE9E4;
-        if (platform->unk80 < 0) {
-            platform->shakeX = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
-            platform->shakeZ = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+        WORK(platform)->unk80 += D_800BE9E4;
+        if (WORK(platform)->unk80 < 0) {
+            platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
         } else {
-            if (platform->unk80 < 40) {
-                platform->shakeX = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
-                platform->shakeZ = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+            if (WORK(platform)->unk80 < 40) {
+                platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
             } else {
-                platform->shakeZ = 0.0f;
-                platform->shakeX = 0.0f;
+                platform->rotZ = 0.0f;
+                platform->rotX = 0.0f;
             }
-            if (platform->height < lowered) {
+            if (platform->y < lowered) {
                 if (kind == 0) {
-                    step = ((platform->height - bottom + 0x10) * step) / travel;
-                    if (platform->unk84 == 0) {
+                    step = ((platform->y - bottom + 0x10) * step) / travel;
+                    if (WORK(platform)->unk84 == 0) {
                         func_1518CD20(platform, 0xFF, 0);
-                        platform->unk84 = 1;
+                        WORK(platform)->unk84 = 1;
                     }
                 }
-                platform->height -= step;
-                platform[1].unk80 = platform->height - lowered;
+                platform->y -= step;
+                WORK(&platform[1])->unk80 = platform->y - lowered;
             } else {
-                platform->height -= step;
-                platform->unk84 = 0;
+                platform->y -= step;
+                WORK(platform)->unk84 = 0;
             }
-            if (platform->height <= bottom || step == 0) {
-                platform->height = bottom;
+            if (platform->y <= bottom || step == 0) {
+                platform->y = bottom;
                 diff = bottom - lowered;
                 top += diff;
-                platform->home += diff;
-                platform->home |= 0x80000000;
-                platform->unk80 = 0;
-                platform[1].home += diff;
-                platform[1].home |= 0x80000000;
-                platform[1].unk80 = 0;
+                WORK(platform)->home += diff;
+                WORK(platform)->home |= 0x80000000;
+                WORK(platform)->unk80 = 0;
+                WORK(&platform[1])->home += diff;
+                WORK(&platform[1])->home |= 0x80000000;
+                WORK(&platform[1])->unk80 = 0;
                 if (kind == 4 && state != 3) {
                     func_1518CD20(platform, 0xFF, 0);
                 }
                 state = 3;
-                platform->shakeZ = 0.0f;
-                platform->shakeX = 0.0f;
+                platform->rotZ = 0.0f;
+                platform->rotX = 0.0f;
                 if (kind == 2) {
-                    platform->unk6E = 1;
-                    platform[1].unk6E = 1;
-                    func_1508EE0C(2, (u16)(platform - (Platform150BFA7C *)D_800DBEF4));
-                    func_1508EE0C(2, (u16)(&platform[1] - (Platform150BFA7C *)D_800DBEF4));
+                    platform->inactive = 1;
+                    platform[1].inactive = 1;
+                    func_1508EE0C(2, (u16)(platform - D_800DBEF4));
+                    func_1508EE0C(2, (u16)(&platform[1] - D_800DBEF4));
                 }
             }
         }
     } else if (state == 1) {
         state = 1; // matching: redundant store steers register allocation
-        platform->height += 3;
-        if (platform->height >= top) {
-            platform->height = top;
+        platform->y += 3;
+        if (platform->y >= top) {
+            platform->y = top;
             state = 0;
         }
     }
-    platform->flags &= ~3;
-    platform->flags |= state;
+    platform->behaviorState &= ~3;
+    platform->behaviorState |= state;
 }
 
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
