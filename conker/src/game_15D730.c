@@ -11,13 +11,6 @@ typedef struct ParticleViewMask {
     s16 views;
 } ParticleViewMask;
 
-typedef struct ParticleAttach {
-    s32 unk0[7];
-    u8 unk1C;
-    u8 pad1D[3];
-    s32 unk20;
-} ParticleAttach; /* size 0x24 */
-
 /* Per-particle data for the floor-collision update funcs (func_151319C4). */
 typedef struct ParticleBounce {
     u8 flags;
@@ -38,10 +31,7 @@ typedef struct ParticleFlash {
 typedef struct Particle {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ union {
-        ParticleAttach attach;
-        CollisionHit floor;
-    } unk80;
+    /* 0x80 */ CollisionHit floor;  /* copied from the spawner's template (flags cleared), or the particle's own probe */
     /* 0xA4 */ u8 padA4[4];
     /* 0xA8 */ union {              /* caller-sized, see func_15130280 */
         f32 drag;
@@ -61,7 +51,7 @@ extern IdList3 D_800A37F0;
 
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-Particle *func_15130280(ParticleDesc *desc, u8 kind, ParticleAttach *attach, s32 dataSize, u8 arg4, s32 arg5) {
+Particle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
     Particle *particle;
     s32 type;
 
@@ -87,10 +77,10 @@ Particle *func_15130280(ParticleDesc *desc, u8 kind, ParticleAttach *attach, s32
 
     memcpy(&particle->desc, desc, sizeof(ParticleDesc));
 
-    if (attach != NULL) {
-        particle->unk80.attach = *attach;
+    if (ground != NULL) {
+        particle->floor = *ground;
     } else {
-        particle->unk80.attach.unk1C = 0;
+        particle->floor.flags = 0;
     }
 
     return particle;
@@ -614,11 +604,11 @@ s32 func_151319C4(Particle *p, Vec3f *prevPos, ParticleBounce *bounce) {
         if (func_1514672C(&probe) == 0) {
             return FALSE;
         }
-        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->unk80.floor) != 0) {
+        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->floor) != 0) {
             f32 hit[3];
 
             hit[0] = probe.x;
-            hit[1] = p->unk80.floor.height;
+            hit[1] = p->floor.height;
             hit[2] = probe.z;
             alive = D_80089874[bounce->hitFunc](p, prevPos, hit, bounce);
         }

@@ -2102,7 +2102,7 @@ typedef struct BurstGlow {
 typedef struct DescParticleHead {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 unk80[0x24];      /* attach data / floor height of the particle types that use them */
+    /* 0x80 */ CollisionHit floor;  /* the spawner's floor template (flags cleared), or the particle's own probe */
     /* 0xA4 */ u8 padA4[4];
 } DescParticleHead; /* size 0xA8 */
 
