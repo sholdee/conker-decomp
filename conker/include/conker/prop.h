@@ -202,7 +202,8 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
 void func_1510AA20(s32 arg0);
 void func_1510AA44(WorldObject *minuteHand);
 void func_1510ADD8(WorldObject *obj);
-s32 func_1510AEE0(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY, f32 *marginX, f32 *marginY);
+s32 func_1510AEE0(MtxF mtx, f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY, f32 *marginX,
+                  f32 *marginY);
 
 /* game_142560.c */
 void func_151150B0(WorldObject *obj);
@@ -324,7 +325,8 @@ Gfx *func_1511FC2C(Gfx *gfx, f32 x, f32 y, f32 z, f32 rot, s32 view);
 Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 
 /* game_1A48C0.c */
-void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude, s8 speed, s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
+void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude, s8 speed,
+                   s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 void func_15177A94(void);
 
 /* game_1AFC80.c */

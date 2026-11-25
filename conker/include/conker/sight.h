@@ -56,7 +56,10 @@ typedef struct {
 
 /* game_1F4650.c */
 s32 func_151C71A0(SightBeamParams *beam);
-s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam,
+                  SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime,
+                  s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11,
+                  u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 void *func_151C7E98(SightBeamObject *obj, s16 view);
 s32 func_151C82D0(SightBeamObject *obj);
 void func_151C8674(s32 actor, s32 source);
@@ -64,8 +67,10 @@ void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
 void func_151C899C(Actor *actor, SightBeamObject *obj);
-SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
+SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue,
+                              SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
+void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone,
+                   u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
 void func_151C94D4(SightBeamObject *obj);
 void func_151C95D8(SightBeamObject *obj);
 s32 func_151C96DC(SightExtension *effect, s32 arg1);

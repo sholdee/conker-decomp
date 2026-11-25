@@ -195,11 +195,13 @@ void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message);
 void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message);
 s32 func_15135658(BloodStrip *strip);
 f32 func_15135670(BloodStrip *strip);
-void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime, s16 duration, s16 period, u8 arg10, s32 arg11);
+void *func_151356D4(Vec2f *position, f32 size, f32 gravity, f32 spread, u8 alpha, u8 endAlpha, s16 delay, s16 lifetime,
+                    s16 duration, s16 period, u8 arg10, s32 arg11);
 s32 func_15135BF8(BloodSplat *splat);
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4);
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3);
-s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10);
+s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8,
+                  u8 arg9, s32 arg10);
 s32 func_151368A8(GrowingBloodParticle *particle);
 void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8);
 s32 func_15136A1C(DefParticleHead *particle);
@@ -209,10 +211,12 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8
 void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s32 arg5);
 void func_15137610(Actor *actor, Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg4, s32 arg5);
 void func_1513783C(Actor *actor, u8 arg1, s32 arg2);
-s32 func_15137C64(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side, Vec3f *up, Vec3f *from, Vec3f *to, Vec3f *direction);
+s32 func_15137C64(Vec3f *start, Vec3f *end, Vec3f *dir, Vec3f *side, Vec3f *up, Vec3f *from, Vec3f *to,
+                  Vec3f *direction);
 s32 func_15137E10(BloodStrip *strip);
 void func_15137E60(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip);
-void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip, Vec3f *start, Vec3f *end, Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
+void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *velocityB, f32 time, BloodStrip *strip,
+                   Vec3f *start, Vec3f *end, Vec3f *velocity, f32 *arg3, s16 *arg4, u8 *arg5, f32 *arg6);
 s32 func_151380B4(Actor *actor, s32 kind, f32 *out);
 void func_15138120(Actor *actor, s32 kind, u8 arg2);
 void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4);
@@ -224,7 +228,8 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
 s32 func_15139578(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, s32 surface);
 void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5);
 void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4);
-void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA);
+void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor,
+                   void *hit, u8 arg9, s32 argA);
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2);
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4);
 void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2);

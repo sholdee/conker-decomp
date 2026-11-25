@@ -69,7 +69,8 @@ Gfx *func_1502C408(Gfx *gdl, s32 index);
 void func_1502C608(s32 index);
 void func_1502C6E8(s32 index, s16 player, s32 mode);
 Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
-void func_1502CC34(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB, s32 *envR, s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA);
+void func_1502CC34(Actor *obj, s32 player, s32 alpha, s32 *colour, s32 *primR, s32 *primG, s32 *primB, s32 *envR,
+                   s32 *envG, s32 *envB, s32 *fogR, s32 *fogG, s32 *fogB, s32 *fogA);
 Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
 void func_1502D54C(s32 index, s32 *colour);
 void func_1502D630(Actor *obj, s32 *colour, s32 player);
@@ -141,7 +142,8 @@ void func_150528C8(Actor *obj);
 /* game_803A0.c */
 void func_15052EF0(Actor *obj);
 Actor *func_15052F58(s32 index, s32 arg1);
-void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force,
+                   s32 arg9);
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 
 /* game_808E0.c */
@@ -202,24 +204,28 @@ f32 func_1505A72C(Actor *a, Actor *b);
 void func_1505A770(Actor *actor);
 void func_1505A9AC(Actor *actor, f32 floorY);
 void func_1505B5F8(Actor *actor, f32 floorY);
-void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index, s32 victimSlot, u8 damageMask);
+void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index, s32 victimSlot,
+                   u8 damageMask);
 s16 func_1505C140(Actor *attacker, Actor *victim);
 HitReaction *func_1505C1A4(Actor *actor);
-s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask);
+s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask,
+                  s32 damageMask);
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot);
 s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot);
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin);
 void func_1505D2B8(Actor *actor, u8 entryIdx);
 f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ);
 void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot);
-void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot, f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB);
+void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
+                   f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB);
 void func_1505D6F0(Actor *actor, s32 selfIdx);
 u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone);
 s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time);
 f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused);
 void func_1505DFDC(Actor *actor);
 void func_1505E060(struct AnimPlaybackState *state);
-void func_1505E0C4(Actor *actor, u16 *animEntry, struct AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim, s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
+void func_1505E0C4(Actor *actor, u16 *animEntry, struct AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+                   s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
 void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000);
 u32 func_1505E7CC(s32 kind, Actor *actor);
 void func_1505E874(s32 sourceIdx, Actor *actor);
@@ -284,7 +290,8 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB);
 void func_150649A0(s32 srcIndex, s32 dstIndex);
 void func_15064A14(Actor *arg0);
 s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4);
-s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8);
+s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7,
+                  s32 arg8);
 
 /* game_97AA0.c */
 void func_1506A5F0(Actor *obj, s32 arg1);
