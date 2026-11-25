@@ -102,7 +102,6 @@ s32 func_151938E4(SegmentEmitter *emitter) {
 }
 
 s32 func_1515C0F8(Actor *actor, Vec3f **motion);
-void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
 /*
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity

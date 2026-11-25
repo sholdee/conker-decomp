@@ -261,8 +261,6 @@ void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     }
 }
 
-s32 func_15159370(Actor *chr, u8 *mode);
-
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
 CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     CharacterWatcher *watcher;
@@ -308,17 +306,11 @@ void func_15158D00(CharacterWatcher *watcher) {
     func_15169824(&watcher->header);
 }
 
-s32 func_15159084(Actor *chr, u8 mode);
-s32 func_15159120(Actor *chr, u8 mode);
-s32 func_15159184(Actor *chr, u8 mode);
-s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState);
-s32 func_151592B8(Actor *chr, u8 mode);
-
 /* A state-change rule: both masks are unions of STATE_BITS values. */
-typedef struct {
+struct StateRule {
     s32 from;
     s32 to;
-} StateRule;
+};
 
 /* Packs the five state fields into one bitfield, three bits per field. */
 #define STATE_BITS(a, b, c, d, e)                                              \
@@ -736,22 +728,21 @@ typedef struct {
 #define GROUND_UNKNOWN -99999.8984375f
 
 /* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
-typedef struct {
+struct EffectMotionParticle {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         RiseMotion rise;
         OscillateMotion oscillate;
         ParticleDriftMotion drift;
     } motion;
-} EffectMotionParticle;
+};
 
 /* Second argument of the particle update callbacks; only unk4 is read here. */
-typedef struct {
+struct ParticleUpdateArg {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ f32 unk4;
-} ParticleUpdateArg;
+};
 
-s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
 s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
 
@@ -925,10 +916,10 @@ typedef struct {
     /* 0x30 */ f32 rateRandom;
 } DiskEmitter;
 
-typedef struct {
+struct DiskEmitterObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiskEmitter emitter;
-} DiskEmitterObject;
+};
 
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
@@ -1256,30 +1247,30 @@ typedef struct {
 } SpawnerData;
 
 /* Spawner object created by func_151A8B20 (func_1515A974). */
-typedef struct {
+struct Spawner {
     /* 0x00 */ u8 pad0[0x1];
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x73];
     /* 0x80 */ SpawnerData data;
-} Spawner;
+};
 
-typedef struct {
+struct SpawnerTemplate {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ SpawnerData data;
-} SpawnerTemplate;
+};
 
 const SpawnerTemplate D_800A636C[1] = {
     { 3.7e-07f, 1.12e-06f,
       { { 20, 90 }, { 0.15f, 0.37f, 60.0f, 88.0f, 0.079f, 0.12900001f, 7.0f, 0.14285715f, 0x3C, 0x8C, { 0xA3, 0xD8, 0x00 } } } },
 };
 
-typedef struct {
+struct SpawnerSource {
     /* 0x00 */ u8 pad0[0x1F];
     /* 0x1F */ u8 variant; /* index into D_800A636C */
-} SpawnerSource;
+};
 
 Spawner *func_151A8B20(EmitterDef *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
@@ -1323,10 +1314,10 @@ typedef struct {
     /* 0x14 */ EmitterSettings settings;
 } RiseEmitter;
 
-typedef struct {
+struct RiseEmitterObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ RiseEmitter emitter;
-} RiseEmitterObject;
+};
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
 void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {

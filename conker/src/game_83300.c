@@ -4525,7 +4525,6 @@ void func_15060D54(Actor *actor) {
         }
     }
 }
-extern s32 func_1514D310(Actor *);
 extern void func_151695F0(Actor *, s32);
 extern void func_15084558(Actor *);
 extern void func_1504AF10(Actor *, s32, s32);

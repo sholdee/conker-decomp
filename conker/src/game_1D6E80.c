@@ -275,7 +275,6 @@ typedef struct {
     /* 0x04 */ u8 unk4;
 } Msg151AA17C;
 
-extern void func_15147D64(s32, s32);
 extern void func_1519F3B8(Task151AA17C *);
 extern void func_1519F400(void);
 
@@ -344,9 +343,6 @@ typedef struct {
     /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ Actor *actor;
 } Task151AA30C;
-
-extern s32 func_1515A920(Actor *actor, CollisionHit **out);
-extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, CollisionHit *, f32, s32, s32, s32, s32, s32);
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {

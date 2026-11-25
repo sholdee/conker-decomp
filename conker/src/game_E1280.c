@@ -68,8 +68,6 @@ typedef struct {
     /* 0x98 */ ScatterTrailState *state;
 } ScatterTrail;
 
-extern void func_15147D64(s32, s32);
-
 void func_150B3DD0(void) {
     u8 msg[4];
 
@@ -89,21 +87,16 @@ void func_150B3DD0(void) {
 }
 
 extern void func_1000FC18(s32, s16, s16, s16, s32);
-extern void func_151478F4(void *);
 
 void func_150B3E74(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_151478F4(trail);
 }
 
-extern void func_15147928(void *);
-
 void func_150B3EE8(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);
     func_15147928(trail);
 }
-
-extern void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
 ScatterTrail *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity) {

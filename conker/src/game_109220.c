@@ -136,7 +136,6 @@ struct StreamActor {
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);
-StreamActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);

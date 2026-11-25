@@ -50,7 +50,6 @@ typedef struct {
     /* 0x98 */ PissTrailData *data;
 } PissTrail;
 
-extern PissTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 
 /* Trail anchor point: 20 units above the actor. */
@@ -681,14 +680,10 @@ void func_150DA484(PissTrail *trail) {
     }
 }
 
-void func_151478F4(PissTrail *);
-
 void func_150DA4B4(PissTrail *trail) {
     func_150DA484(trail);
     func_151478F4(trail);
 }
-
-void func_15147928(PissTrail *);
 
 void func_150DA4E0(PissTrail *trail) {
     func_150DA484(trail);
@@ -738,8 +733,6 @@ void func_150DA50C(PissTrail *trail, TrailMessage *msg, u8 type) {
         }
     }
 }
-
-extern void func_15147D64(TrailMessage *, s32);
 
 /* Sets the speed scale of every trail owned by the actor. */
 void func_150DA5EC(Actor *actor, f32 speedScale) {

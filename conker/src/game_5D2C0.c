@@ -887,7 +887,6 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 }
 
 void light_sendEvent(u8, u8, ActorRef *);
-void func_15147D64(ActorRef *, s32);
 void func_151D4668(Actor *);
 void func_151D747C(Actor *);
 

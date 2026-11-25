@@ -261,8 +261,6 @@ typedef struct AnchoredTrail {
     /* 0x98 */ AnchoredTrailData *data;
 } AnchoredTrail;
 
-extern AnchoredTrail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Detaches the emitter's trail, which then fades out. */
 void func_151D77C8(AnchoredTrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
@@ -704,14 +702,10 @@ void func_151D8764(AnchoredTrail *trail) {
     }
 }
 
-extern void func_151478F4(AnchoredTrail *trail);
-
 void func_151D8780(AnchoredTrail *trail) {
     func_151D8764(trail);
     func_151478F4(trail);
 }
-
-extern void func_15147928(AnchoredTrail *trail);
 
 void func_151D87AC(AnchoredTrail *trail) {
     func_151D8764(trail);

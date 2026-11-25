@@ -19,7 +19,6 @@ extern f32 D_80088960[3];
 extern f32 D_8008896C[3];
 
 void *memcpy(void *, const void *, u32);
-void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D3FF4(Vec3f *, u8, s32);

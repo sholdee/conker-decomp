@@ -9,8 +9,6 @@ u8 func_150ADA20(void);
 
 
 
-void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8);
-
 /* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
  * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
  * mean scale. */

@@ -70,7 +70,6 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attachment);
-CharacterTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
@@ -761,8 +760,6 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
 }
 
 void func_150D4C2C(CharacterTrail *actor);
-extern void func_151478F4(CharacterTrail *);
-extern void func_15147928(CharacterTrail *);
 
 void func_150D4BD4(CharacterTrail *actor) {
     func_150D4C2C(actor);

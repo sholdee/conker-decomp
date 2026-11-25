@@ -571,9 +571,6 @@ void (*D_8008F894[])(void *) = { (void (*)(void *))func_15198C90 };
 void (*D_8008F898[])(void *) = { (void (*)(void *))func_15198D40 };
 void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
 
-void func_151478F4(void *);
-void func_15147928(void *);
-
 /* Runs a jet's destroy callbacks, then func_151478F4. */
 void func_15196330(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
@@ -647,8 +644,6 @@ const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
     { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
     { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
 };
-
-void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
 CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
@@ -1173,8 +1168,6 @@ f32 func_15197A0C(CharacterFlamethrowerActor *actor) {
 f32 func_15197A68(CharacterFlamethrowerActor *actor) {
     return 10.9f;
 }
-
-extern void func_15147D64(ActorRef *, s32);
 
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
 void func_15197A7C(Actor *owner) {

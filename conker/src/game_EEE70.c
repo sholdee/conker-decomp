@@ -31,8 +31,6 @@ s32 func_150C1A2C(s32 arg0, s32 arg1) {
 }
 
 
-void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, s32 arg7, s32 arg8);
-
 /*
  * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.

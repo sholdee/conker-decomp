@@ -96,7 +96,6 @@ typedef struct {
 
 
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);

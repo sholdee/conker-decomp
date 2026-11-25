@@ -88,8 +88,6 @@ typedef struct {
 /* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
 LevelStream *func_151CD4C0();
 void func_151CE47C(LevelStream *emitter);
-LevelStream *func_15147A80(EffectTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
-                       s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
 
 /* Creates the spawner task for a stream source. */
 StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
@@ -520,9 +518,6 @@ void func_151CE47C(LevelStream *emitter) {
     emitter->head.tmpl.flags &= ~EMITTER_FLAG_EMITTING;
     emitter->head.tmpl.flags |= EMITTER_FLAG_STOPPED;
 }
-
-extern void func_151478F4(void *);
-extern void func_15147928(void *);
 
 /* Destroy callbacks: tell the spawner its stream ended, then free the emitter. */
 void func_151CE49C(LevelStream *emitter) {

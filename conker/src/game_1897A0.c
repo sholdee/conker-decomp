@@ -19,8 +19,6 @@ typedef struct FallingTrail {
     /* 0x98 */ TrailBurstParams *data;
 } FallingTrail;
 
-extern FallingTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
-
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
 FallingTrail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailBurstParams *data, void *arg3, u8 arg4, s32 arg5) {
     FallingTrail *trail;

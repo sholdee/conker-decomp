@@ -377,23 +377,7 @@ void func_15128774(Camera *arg0, Actor *arg1);
 void func_1512D380(s32 arg0);
 struct DefParticleHead;
 
-TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet, s32 dataSize, u8 owner, s32 list);
-TimedEffect *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize, u8 owner, s32 list);
-void func_15149318(TimedEffect *arg0);
-void func_1514933C(TimedEffect *arg0);
-void func_15149368(TimedEffect *arg0);
-void func_15149394(TimedEffect *arg0);
-void func_151493E4(TimedEffect *arg0);
-void func_15149434(TimedEffect *arg0, s32 arg1, u8 arg2);
-s32  func_15149490(s32 arg0, TimedEffect *arg1, s16 arg2);
-void func_151494E0(s32 arg0, u8 arg1);
-void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 /* Actor attachment lists (Actor.attachments, game_179F30): `handle` is the attached effect or object. */
-Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type);
-s32  func_1514ECE0(Attachment *list, s16 type, Attachment **out);
-s32  func_1514ED3C(Attachment *list, void *handle, Attachment **out);
-void func_1514EDF0(void *handle, Actor *owner);
-void func_15165F70(void);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void func_1516972C(EffectHeader *obj);
 void func_1516979C(EffectHeader *obj);
@@ -578,7 +562,6 @@ s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness,
 s32  func_151239CC(Camera *camera, CameraMode slot);
 void func_15127EB8(Camera *arg0);
 void func_1512D748(Camera*, s32, s32);
-s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
 void func_15169260(void *types, s32 count, s32 event, u8 eventType);

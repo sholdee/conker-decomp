@@ -873,8 +873,6 @@ void func_151D13E0(TrackerEffect *effect) {
     }
 }
 
-extern TrackerTrail *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 /* Spawns the trail that follows the tracker effect. */
 void func_151D1448(TrackerEffect *effect) {
     TrackerData *data;

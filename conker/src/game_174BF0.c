@@ -66,8 +66,6 @@ void func_151478D0(EffectObj *obj) {
     func_151D5E30(obj->buffers);
 }
 
-extern void func_1514795C(EffectObj *);
-
 /* Frees the object's buffers, then hands it to func_15169804. */
 void func_151478F4(EffectObj *obj) {
     func_151478D0(obj);

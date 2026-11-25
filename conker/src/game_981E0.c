@@ -13,7 +13,6 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 
 s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 D_800D187C;
-extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_151942E8();
 void func_151C0698(Actor *arg0, Actor *arg1, IgnoreList *arg2, u8 arg3, s32 arg4, s32 arg5);
 
@@ -197,7 +196,6 @@ extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
-extern void *func_15158BD0(Actor *, s32, s32);
 extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
 void func_1516F1C0(s32, s32, u8, s32);

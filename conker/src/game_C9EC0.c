@@ -277,7 +277,6 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
 }
 
 extern Actor *func_1505EEF4(s32);
-extern void func_151557FC(s32, s32, f32);
 extern void *func_150F6DE4(Actor *);
 extern s32 func_15046C80(f32 *, s32, f32, void *);
 extern void func_151BFE84(void *, void *, void *, s32, s32, s32);

@@ -33,18 +33,10 @@ const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
 const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
 const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
-/* This file. */
-s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
-s32 func_1514D4B8(s16 root, s16 type);
-void func_1514F194(Actor *obj);
-
 /* Elsewhere. */
 void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
 s32 func_15083FB0(u8 uniqueId);
 void *func_150C5370(void *desc, s32 payloadSize);
-void *func_15155780(s32 slot, s32 arg1);
-EffectHeader *func_15155FD4(s32 slot);
-void *func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
 void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -767,8 +759,8 @@ void func_1514DAA4(Actor *obj) {
     payload[0] = 0;
     payload[1] = 0;
     {
-        // matching: an unprototyped call here changes how as1 schedules the argument setup
-        extern void *func_15158BD0();
+        // matching: a declaration here opens a scope block, which changes how as1 schedules the argument setup
+        extern CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize);
 
         if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != NULL) {
             memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
@@ -1150,12 +1142,12 @@ void func_1514E87C(void *handle) {
 
 /* Attachment message handlers (D_8008AB64 entries). Each returns 1 if it handled `msg`. */
 
-typedef struct ToggleTarget {
+struct ToggleTarget {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ s32 flags;
     /* 0x014 */ u8 pad14[0xFC];
     /* 0x110 */ GlowShape emitter;    // for objects spawned by func_15189FF0
-} ToggleTarget;
+};
 
 /** Messages 0, 1 and 2 toggle, set and clear bit 0 of the handle's flags. */
 s32 func_1514E89C(ToggleTarget *target, s32 msg, s32 arg) {
@@ -1228,10 +1220,10 @@ void func_1514E9FC(ToggleTarget *target, s32 msg, s32 arg) {
     func_1514E89C(target, msg, arg);
 }
 
-typedef struct ModeTarget {
+struct ModeTarget {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ u8 mode;                 // set through func_1518E37C
-} ModeTarget;
+};
 
 void func_1518E37C(ModeTarget *, u8 mode);
 

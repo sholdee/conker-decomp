@@ -387,7 +387,6 @@ extern void func_150C5C74(Actor *);
 extern void func_150C5C9C(Actor *);
 extern void func_150F5420(s32, s32, s32, s32);
 extern void func_1510A930(s32, s32, s32);
-extern void func_15147D64(ActorRef *, s32);
 extern void func_1515F170(s32, u8);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
@@ -1170,7 +1169,6 @@ extern void func_1516E778(f32 *, s32, s8, u8, s32);
 extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_151A3390(Actor *, u8);
-extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
@@ -1186,7 +1184,6 @@ extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
-extern s32 func_1514D4B8(s16, s16);
 extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
 extern void func_1516F1C0(s32, s32, u8, s32);
@@ -2373,8 +2370,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-extern void func_151557FC(s32, s32, f32);
-extern void func_15155F90(void);
 extern void func_15178EFC(s32);
 extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);

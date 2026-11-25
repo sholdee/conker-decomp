@@ -7,7 +7,7 @@
  * (*D_800E03E0) that bob 160 units above the player.
  * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
-typedef struct PlayerMarker {
+struct PlayerMarker {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 playerId;
     /* 0x11 */ u8 state;
@@ -16,11 +16,9 @@ typedef struct PlayerMarker {
     /* 0x14 */ PointLight *light;
     /* 0x18 */ Mtx mtx[2];
     /* 0x98 */ f32 heightOffset;
-} PlayerMarker;
+};
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
-
-PlayerMarker *func_15155FD4(s32 playerId);
 
 /* Allocates a marker object (object list 0) for player `playerId`. */
 PlayerMarker *func_15155780(s32 playerId, s32 owner) {

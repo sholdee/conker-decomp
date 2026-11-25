@@ -16,7 +16,6 @@ typedef struct {
     /* 0x50 */ f32 fade;
 } TrailScalarMotion;
 
-extern WaveTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_151CEC10(Vec3f *pos, Actor *owner, DescParticleHead *anchor);
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */

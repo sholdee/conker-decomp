@@ -13,9 +13,6 @@ typedef struct Effect1E5820 {
     /* 0x98 */ EffectUserData1E5820 *userData;
 } Effect1E5820;
 
-extern void func_151478F4(Effect1E5820 *);
-extern void func_15147928(Effect1E5820 *);
-
 /* Destroys the object owned by this effect, if any. */
 void func_151B8370(Effect1E5820 *effect) {
     EffectUserData1E5820 *userData = effect->userData;

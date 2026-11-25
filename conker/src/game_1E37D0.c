@@ -44,7 +44,6 @@ typedef struct TargetTrailPoint {
 } TargetTrailPoint;
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern EffectObj *func_15147A80(EffectTemplate18 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail effect that follows target. */
 void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {

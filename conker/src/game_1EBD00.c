@@ -11,8 +11,6 @@ typedef struct {
 } Extra151BE850;
 
 extern void func_1510F800(s32);
-extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
-                           u8 owner, s32 list);
 
 /*
  * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,

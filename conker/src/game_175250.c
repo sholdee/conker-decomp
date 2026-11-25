@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern MotionTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Creates a trail object from a spawn description, motion block and render settings. */
 MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
                            s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
@@ -516,8 +514,7 @@ s32 func_151490C8(MotionTrail *trail) {
     return 1;
 }
 
-void func_151478F4(void);
-
-void func_15149104(void) {
-    func_151478F4();
+/* Hands the trail to func_151478F4. */
+void func_15149104(EffectObj *obj) {
+    func_151478F4(obj);
 }

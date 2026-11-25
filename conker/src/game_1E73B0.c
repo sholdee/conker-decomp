@@ -792,7 +792,6 @@ typedef struct {
     /* 0x98 */ Data15147A80 *data;
 } Fx15147A80;
 
-Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 LightEffect *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*

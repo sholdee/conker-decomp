@@ -112,8 +112,6 @@ void func_15146A98(s32 actor, s32 side, s32 strength) {
     }
 }
 
-void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt);
-
 void func_15146BB8(s32 actor, s32 side, s32 strength) {
     func_15146BF8(actor, side, strength, 0);
 }

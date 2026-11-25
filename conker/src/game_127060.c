@@ -521,7 +521,6 @@ typedef struct {
     /* 0x70 */ s16 tag;
 } TaggedSprite;
 
-extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
 extern TaggedSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /*
@@ -636,8 +635,6 @@ typedef struct Func150FB188Transform {
     f32 field10;
 } Func150FB188Transform;
 
-void func_15157DEC(Func150FB188State *, Func150FB188Transform *);
-
 /* Sets obj->field54..5C to (-95, -80, 0) and calls func_15157DEC with {0, 0, 0, 0.3, 0.3}. */
 s32 func_150FB188(Func150FB188State *obj) {
     Func150FB188Transform transform;
@@ -655,7 +652,6 @@ s32 func_150FB188(Func150FB188State *obj) {
 }
 
 extern s32 func_151D710C(s32, s32, s32, s32, s32);
-extern void func_15157F80(s32, s32, s32, s32, s32);
 
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
 void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {

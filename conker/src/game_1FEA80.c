@@ -16,8 +16,6 @@ typedef struct TrackerTrailPoint {
 
 void *memcpy(void *, const void *, u32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-extern void func_151478F4(void *);
-extern void func_15147928(void *);
 extern u8 D_80091430[];
 extern s32 D_800A4AC8[][2];
 

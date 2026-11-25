@@ -156,8 +156,6 @@ s32 func_1519EF90(config, side, out)
     return 1;
 }
 
-void func_151478F4(SurfaceTrail *);
-
 /* Clears the owner's reference to this trail, then hands it to func_151478F4. */
 void func_1519F108(SurfaceTrail *trail) {
     SurfaceTrailConfig *config = trail->config;
@@ -174,8 +172,6 @@ void func_1519F108(SurfaceTrail *trail) {
     }
     func_151478F4(trail);
 }
-
-void func_15147928(SurfaceTrail *);
 
 /* Clears the owner's reference to this trail, then hands it to func_15147928. */
 void func_1519F168(SurfaceTrail *trail) {
@@ -195,7 +191,6 @@ void func_1519F168(SurfaceTrail *trail) {
 }
 
 u8 func_151D8E20(void);
-SurfaceTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Creates the trail for `side` behind the owner's actor. */
 SurfaceTrail *func_1519F1C8(owner, side)

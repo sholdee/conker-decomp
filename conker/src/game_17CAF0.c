@@ -794,8 +794,6 @@ void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32
     }
 }
 
-extern void func_15157898(EffectParams *, EffectMotion *, s32, f32, s32, s32, s32, u8, s32);
-
 void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     EffectParams params;

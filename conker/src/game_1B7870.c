@@ -5,7 +5,6 @@
 
 extern s32 D_8008D5B0[];
 extern s32 D_8008D5B8[];
-extern EffectActor *func_151580B0(EffectActorTemplate *, s32, s32, u8, s32, u8, s32);
 
 /*
  * Spawns a tumbling piece at position with the given motion; it fades out over its last 12 frames.
@@ -70,8 +69,6 @@ EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velo
     memcpy(&actor->data.piece.motion, &motion, sizeof(motion));
     return actor;
 }
-
-s32 func_15158AFC(EffectActor *);
 
 /*
  * Update callback: fades the actor out, applies gravity and per-frame damping to the velocity,

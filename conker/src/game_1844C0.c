@@ -280,8 +280,6 @@ void func_15157D88(ModelEffect *fx, s32 event, u8 eventType) {
     func_15169850(event, eventType, &fx->params.owner, &fx->params.ownerId, fx);
 }
 
-void func_15157DEC(ModelEffect *fx, f32 *xform);
-
 /* Update callback (D_8008ADA8[3]): root matrix from the extension, see func_15157DEC. */
 s32 func_15157DC8(ModelEffect *fx) {
     func_15157DEC(fx, fx->extra.raw);

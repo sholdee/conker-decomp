@@ -119,12 +119,10 @@ typedef union TrailEvent {
     ActorSwapMsg swap;  /* event 0x2D: owners actorA and actorB trade places */
 } TrailEvent;
 
-extern void func_15147D64(void *event, u8 eventId);
 extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
 void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
 extern MatrixTrail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
-extern MatrixTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_1519E304(MatrixTrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
 /* Stops every trail of kind specIndex (event 6). */
@@ -146,8 +144,6 @@ void func_1519CFA0(MatrixTrail *trail) {
     data->flags |= 4;
 }
 
-extern void func_151478F4(MatrixTrail *);
-
 /* Trail teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519CFD0(MatrixTrail *trail) {
     MatrixTrailData *data;
@@ -156,8 +152,6 @@ void func_1519CFD0(MatrixTrail *trail) {
     func_1514EDF0(trail, data->owner);
     func_151478F4(trail);
 }
-
-extern void func_15147928(MatrixTrail *);
 
 void func_1519D000(MatrixTrail *trail) {
     MatrixTrailData *data;

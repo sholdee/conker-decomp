@@ -138,8 +138,6 @@ void func_151BF0C8(Vec3f *pos) {
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
-extern CounterPanel *func_15157010(EffectParams *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
-                                   s32 kind);
 extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
                                    s32 kind);
 
