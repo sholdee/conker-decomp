@@ -2,8 +2,6 @@
 #include <n_libaudio.h>
 #include "variables.h"
 
-extern s32  D_800E0E00;
-extern s32  D_800E0E04;
 extern s32  D_800E0E08;
 extern s32  D_800E0E10;
 extern s16  D_800E0E14;
@@ -18,7 +16,6 @@ extern s32  D_800E0DE0;
 extern s32  D_800E0DE4;
 extern s32  D_800E0DFC;
 
-extern s32  D_800BE9F0;
 extern s32  D_800E0D84;
 extern s32  D_800E0D88;
 extern s16  D_800E0D8C;
@@ -61,10 +58,6 @@ typedef struct {
     /* 0x24 */ ALDMANew dmaNew;
 } StreamSynth;
 
-extern s16 D_8002BC10[];
-extern s16 D_8002BD0E[];
-extern u8  D_800428C1;
-extern u8  D_800428C2;
 extern s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
 
 void func_151F2960(s32 arg0, s32 arg1) {
@@ -468,8 +461,8 @@ void func_151F39E4(StreamVoice *v) {
     }
 }
 
-void func_151F3C1C(s32 arg0) {
-    D_800E0E00 = arg0;
+void func_151F3C1C(void (*callback)(s32, void *, s32)) {
+    D_800E0E00 = callback;
 }
 
 void func_151F3C34(s32 arg0) {
