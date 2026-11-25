@@ -2266,6 +2266,30 @@ typedef struct RiseParticle {
     /* 0xA8 */ RiseMotion motion;
 } RiseParticle; /* size 0xD0 */
 
+/* Particle data at 0x110 of a DefParticleHead particle animated by func_1514BC08 (written by func_1514B8E4,
+ * game_177B50.c): def.width, def.height and def.frameSpeed each ease toward a random target that is re-picked
+ * when its countdown (in frames) runs out. */
+typedef struct ParticleJitter {
+    /* 0x00 */ f32 widthBase;
+    /* 0x04 */ f32 heightBase;
+    /* 0x08 */ f32 widthRange;
+    /* 0x0C */ f32 heightRangeA;   /* one of the two height ranges is picked at random */
+    /* 0x10 */ f32 widthTarget;
+    /* 0x14 */ f32 heightTarget;
+    /* 0x18 */ f32 heightRangeB;
+    /* 0x1C */ f32 widthTimer;
+    /* 0x20 */ f32 heightTimer;
+    /* 0x24 */ f32 speedBase;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ f32 speedTarget;
+    /* 0x30 */ f32 speedTimer;
+    /* 0x34 */ f32 speed;          /* eased value copied to def.frameSpeed */
+    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see game_179400.c's update) */
+    /* 0x44 */ f32 gravity;
+    /* 0x48 */ f32 drag;           /* velocity scale per tick */
+    /* 0x4C */ f32 unk4C;
+} ParticleJitter; /* size 0x50 */
+
 /* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
  * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */
 typedef struct ActorEmitterParams {
