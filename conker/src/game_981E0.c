@@ -2853,16 +2853,16 @@ void func_15071A64(s32 cmd) {
 
 void func_15071B18(s32 cmd) {
     Vec3f point;
-    u8 collision[0x24];
+    CollisionHit collision;
 
     if (D_800D154C->unk1D4 != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
         func_15143134(D_80099BC8[func_150ADA20() % 3U], &point.x, (s32)((Mtx *)D_800D154C->unk1D4 + 7));
-        func_1504715C(collision, D_800D154C);
+        func_1504715C(&collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(&point.x, collision, 0, 0xFF, 1);
+                func_151DC260(&point.x, &collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(&point.x, (struct199 *)collision, 0, 0xFF, 1);
+                func_151DC484(&point.x, (struct199 *)&collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {

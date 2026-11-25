@@ -529,7 +529,7 @@ void func_150CA150(Actor *actor) {
     Vec3f pos;
     f32 r, g, b;
     u8 red, green, blue;
-    f32 floorInfo[9];
+    CollisionHit floorInfo;
     u8 onGround;
     u32 end;
     u32 addr;
@@ -538,14 +538,14 @@ void func_150CA150(Actor *actor) {
 
     onGround = 0;
     if (actor != NULL) {
-        func_1504715C(floorInfo, actor);
+        func_1504715C(&floorInfo, actor);
         func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
         pos.x = actor->x_position;
         pos.y = actor->y_position + 100.0f;
         pos.z = actor->z_position;
-        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, floorInfo) != 0) {
+        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, &floorInfo) != 0) {
             onGround = 1;
-            pos.y = floorInfo[0];
+            pos.y = floorInfo.height;
         } else {
             pos.y = actor->floorY;
         }

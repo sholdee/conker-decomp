@@ -298,21 +298,6 @@ typedef struct ScriptCmd {
     /* 0x04 */ CmdArg args[8];
 } ScriptCmd;
 
-/* Result of a floor probe (func_15046C80). */
-typedef struct FloorHit {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ s32 pad8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 pad24[2];
-} FloorHit; // size = 0x2C; the real size is unknown, 0x2C fits the caller's stack frame
-
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
 
@@ -406,14 +391,15 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 34:
             {
-                FloorHit floor;
+                s32 pad[2]; // matching: unused, keeps the frame size and floor's stack offset
+                CollisionHit floor;
                 f32 pos[3];
 
                 floor.height = -10000.0f;
-                floor.unk18 = 0;
-                floor.unk1C = 0;
-                floor.unk1D = 0;
-                floor.unk20 = 0;
+                floor.material = 0;
+                floor.flags = 0;
+                floor.source = 0;
+                floor.surface = NULL;
                 pos[0] = cmd->args[0].w;
                 pos[1] = 20000.0f;
                 pos[2] = cmd->args[1].w;
@@ -425,7 +411,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
                         dir[0] = 0.0f;
                         dir[2] = 0.0f;
                         dir[1] = -1.0f;
-                        func_151BFE84(&floor.unk4, pos, dir, 1, 0xFF, 1);
+                        func_151BFE84(&floor.tri, pos, dir, 1, 0xFF, 1);
                     }
                 }
             }
