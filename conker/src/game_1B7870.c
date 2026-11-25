@@ -2,202 +2,192 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Vec3F1518A3C0 {
+typedef struct {
     f32 x;
     f32 y;
     f32 z;
-};
+} Vec3f;
+
+/* Orientation, scale and simple ballistic motion of a tumbling piece. */
+typedef struct {
+    /* 0x00 */ Vec3f angle;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ Vec3f velocity;
+    /* 0x1C */ Vec3f angularVelocity;
+    /* 0x28 */ f32 gravity;
+    /* 0x2C */ f32 damping;
+} EffectMotion;
+
+/* Alpha fade-out read by func_15158AFC once the lifetime drops below duration. */
+typedef struct {
+    /* 0x00 */ s16 duration;
+    /* 0x04 */ s32 alphaPerTick;
+} EffectFade;
+
+/* 0x44-byte template that func_151580B0 copies into EffectActor bytes 0x10..0x53. */
+typedef struct {
+    /* 0x00 */ u8 flags; /* 1: lifetime counts down, 2: attached to owner, 4: attach option */
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ s8 updateCallback; /* index into D_8008AE00 */
+    /* 0x03 */ s8 drawCallback;   /* index into D_8008AE0C */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 displayList;    /* index into D_8008AFB8 */
+    /* 0x07 */ u8 pad07;
+    /* 0x08 */ s32 otherModeH;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 renderPreset;  /* index into D_800A4AC8 */
+    /* 0x18 */ s32 unk18;         /* low byte lands in the actor's combineMode */
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s8 primColorMode;
+    /* 0x25 */ s8 envColorMode;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ u8 color0[4]; /* [3] is alpha */
+    /* 0x2C */ u8 color1[4];
+    /* 0x30 */ void *owner;
+    /* 0x34 */ u8 ownerId;
+    /* 0x35 */ u8 attachMode;
+    /* 0x36 */ u8 pad36[2];
+    /* 0x38 */ Vec3f position;
+} EffectTemplate;
+
+/* Effect actor (see game_185560.c) with this file's type-specific data after the 0xF8-byte header. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x48];
+    /* 0x048 */ Vec3f position;
+    /* 0x054 */ u8 pad54[0xF8 - 0x54];
+    /* 0x0F8 */ EffectFade fade;
+    /* 0x100 */ EffectMotion motion;
+} EffectActor;
 
 extern s32 D_8008D5B0[];
 extern s32 D_8008D5B8[];
-extern void *func_151580B0(void *, s32, s32, u8, s32, u8, s32);
+extern EffectActor *func_151580B0(EffectTemplate *, s32, s32, u8, s32, u8, s32);
 
-void *func_1518A3C0(struct Vec3F1518A3C0 *arg0, struct Vec3F1518A3C0 *arg1, f32 arg2, struct Vec3F1518A3C0 *arg3, struct Vec3F1518A3C0 *arg4, f32 arg5, f32 arg6, u8 arg7, s16 arg8, u8 arg9, s32 argA, u8 argB, s32 argC) {
-    void *ret;
-    struct {
-        u8 unk00[1];
-        u8 unk01[1];
-        u8 unk02[1];
-        u8 unk03[1];
-        s16 unk04;
-        u8 unk06;
-        u8 pad07;
-        s32 unk08;
-        s32 unk0C;
-        s32 unk10;
-        s32 unk14;
-        s32 unk18;
-        s32 unk1C;
-        s32 unk20;
-        u8 unk24;
-        u8 unk25;
-        u8 pad26[2];
-        u8 unk28;
-        u8 unk29;
-        u8 unk2A;
-        u8 unk2B;
-        u8 unk2C;
-        u8 unk2D;
-        u8 unk2E;
-        u8 unk2F;
-        s32 unk30;
-        u8 unk34;
-        u8 unk35;
-        u8 pad36[2];
-        struct Vec3F1518A3C0 unk38;
-    } sp68;
-    struct {
-        struct Vec3F1518A3C0 unk00;
-        f32 unk0C;
-        struct Vec3F1518A3C0 unk10;
-        struct Vec3F1518A3C0 unk1C;
-        f32 unk28;
-        f32 unk2C;
-    } sp38;
-    struct {
-        s16 unk00;
-        u8 pad02[2];
-        s32 unk04;
-    } sp30;
+/*
+ * Spawns a tumbling piece at position with the given motion; it fades out over its last 12 frames.
+ * altDisplayList picks the display list table (D_8008D5B8 instead of D_8008D5B0).
+ */
+EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velocity, Vec3f *angularVelocity,
+                           f32 gravity, f32 damping, u8 flags, s16 lifetime, u8 altDisplayList, s32 extraSize,
+                           u8 arg11, s32 arg12) {
+    EffectActor *actor;
+    EffectTemplate template;
+    EffectMotion motion;
+    EffectFade fade;
 
-    sp38.unk00 = *arg1;
-    sp38.unk10 = *arg3;
-    sp38.unk1C = *arg4;
-    sp38.unk0C = arg2;
-    sp38.unk28 = arg5;
-    sp38.unk2C = arg6;
-    sp68.unk00[0] = arg7;
-    sp68.unk02[0] = 1;
-    sp68.unk03[0] = 1;
-    sp68.unk04 = arg8;
+    motion.angle = *angle;
+    motion.velocity = *velocity;
+    motion.angularVelocity = *angularVelocity;
+    motion.scale = scale;
+    motion.gravity = gravity;
+    motion.damping = damping;
+    template.flags = flags;
+    template.updateCallback = 1;
+    template.drawCallback = 1;
+    template.lifetime = lifetime;
 
-    if (arg9) {
-        sp68.unk06 = D_8008D5B8[func_150ADA20() & 1];
+    if (altDisplayList) {
+        template.displayList = D_8008D5B8[func_150ADA20() & 1];
     } else {
-        sp68.unk06 = D_8008D5B0[func_150ADA20() & 1];
+        template.displayList = D_8008D5B0[func_150ADA20() & 1];
     }
 
-    sp68.unk0C = 0x220205;
-    sp68.unk10 = 0x40600;
-    sp68.unk25 = 7;
-    sp68.unk14 = 1;
-    sp68.unk18 = 0x4A;
-    sp68.unk1C = 0x80;
-    sp68.unk20 = 0x20;
-    sp68.unk08 = 0;
-    sp68.unk24 = 0;
-    sp68.unk01[0] = 1;
-    sp68.unk28 = 0xFF;
-    sp68.unk29 = 0xFF;
-    sp68.unk2A = 0xFF;
-    sp68.unk2B = 0xFF;
-    sp68.unk2C = 0xFF;
-    sp68.unk2D = 0xFF;
-    sp68.unk2E = 0xFF;
-    sp68.unk2F = 0xFF;
-    sp68.unk30 = 0;
-    sp68.unk34 = 0;
-    sp68.unk35 = 2;
-    sp68.unk38 = *arg0;
+    template.unk0C = 0x220205;
+    template.unk10 = 0x40600;
+    template.envColorMode = 7;
+    template.renderPreset = 1;
+    template.unk18 = 0x4A;
+    template.unk1C = 0x80;
+    template.unk20 = 0x20;
+    template.otherModeH = 0;
+    template.primColorMode = 0;
+    template.unk01 = 1;
+    template.color0[0] = 255;
+    template.color0[1] = 255;
+    template.color0[2] = 255;
+    template.color0[3] = 255;
+    template.color1[0] = 255;
+    template.color1[1] = 255;
+    template.color1[2] = 255;
+    template.color1[3] = 255;
+    template.owner = NULL;
+    template.ownerId = 0;
+    template.attachMode = 2;
+    template.position = *position;
 
-    sp30.unk00 = 0xC;
-    sp30.unk04 = 0x15;
+    fade.duration = 12;
+    fade.alphaPerTick = 21;
 
-    ret = func_151580B0(&sp68, 3, 0xFF, 1, argA + 0x38, argB, argC);
-    if (ret == 0) {
-        return 0;
+    actor = func_151580B0(&template, 3, 255, 1, extraSize + 0x38, arg11, arg12);
+    if (actor == NULL) {
+        return NULL;
     }
-    memcpy((u8 *)ret + 0xF8, &sp30, 8);
-    memcpy((u8 *)ret + 0x100, &sp38, 0x30);
-    return ret;
+    memcpy(&actor->fade, &fade, sizeof(fade));
+    memcpy(&actor->motion, &motion, sizeof(motion));
+    return actor;
 }
 
-struct Sub1518A5F4 {
-    /* 0x00 */ struct Vec3F1518A3C0 pos;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ struct Vec3F1518A3C0 vel;
-    /* 0x1C */ struct Vec3F1518A3C0 unk1C;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-};
+s32 func_15158AFC(EffectActor *);
 
-struct Obj1518A5F4 {
-    char pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    char pad54[0x100 - 0x54];
-    /* 0x100 */ struct Sub1518A5F4 unk100;
-};
+/*
+ * Update callback: fades the actor out, applies gravity and per-frame damping to the velocity,
+ * moves the position with the average velocity over the step and spins the angle.
+ */
+s32 func_1518A5F4(EffectActor *actor) {
+    EffectMotion *motion = &actor->motion;
 
-s32 func_15158AFC(void *);
-
-s32 func_1518A5F4(struct Obj1518A5F4 *arg0) {
-    struct Sub1518A5F4 *p = &arg0->unk100;
-
-    func_15158AFC(arg0);
+    func_15158AFC(actor);
 
     {
-    struct Vec3F1518A3C0 old;
-    s32 i;
-    old = p->vel;
-    p->vel.y += p->unk28 * D_800BE9A4;
-    for (i = D_800BE9E4; i != 0; i--) {
-        p->vel.x *= p->unk2C;
-        p->vel.y *= p->unk2C;
-        p->vel.z *= p->unk2C;
+        Vec3f prevVel;
+        s32 i;
+
+        prevVel = motion->velocity;
+        motion->velocity.y += motion->gravity * D_800BE9A4;
+        for (i = D_800BE9E4; i != 0; i--) {
+            motion->velocity.x *= motion->damping;
+            motion->velocity.y *= motion->damping;
+            motion->velocity.z *= motion->damping;
+        }
+        {
+            f32 accelX;
+            f32 accelY;
+            f32 accelZ;
+
+            accelX = (motion->velocity.x - prevVel.x) * D_800BE9A8;
+            accelY = (motion->velocity.y - prevVel.y) * D_800BE9A8;
+            accelZ = (motion->velocity.z - prevVel.z) * D_800BE9A8;
+            actor->position.x += (prevVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+            actor->position.y += (prevVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+            actor->position.z += (prevVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        }
     }
-    {
-    f32 ax;
-    f32 ay;
-    f32 az;
-    ax = (p->vel.x - old.x) * D_800BE9A8;
-    ay = (p->vel.y - old.y) * D_800BE9A8;
-    az = (p->vel.z - old.z) * D_800BE9A8;
-    arg0->unk48 += (old.x + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
-    arg0->unk4C += (old.y + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
-    arg0->unk50 += (old.z + 0.5f * az * D_800BE9A4) * D_800BE9A4;
-    }
-    }
-    p->pos.x += p->unk1C.x * D_800BE9A4;
-    p->pos.y += p->unk1C.y * D_800BE9A4;
-    p->pos.z += p->unk1C.z * D_800BE9A4;
+    motion->angle.x += motion->angularVelocity.x * D_800BE9A4;
+    motion->angle.y += motion->angularVelocity.y * D_800BE9A4;
+    motion->angle.z += motion->angularVelocity.z * D_800BE9A4;
     return 1;
 }
 
-struct Sub1518A914 {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-};
+/* Draw callback: builds the actor's model matrix from its angle, scale and position. */
+s32 func_1518A914(Mtx *mtx, EffectActor *actor) {
+    EffectMotion *motion = &actor->motion;
+    f32 mf[4][4];
 
-struct Foo1518A914 {
-    char pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    char pad54[0x100 - 0x54];
-    /* 0x100 */ struct Sub1518A914 unk100;
-};
-
-s32 func_1518A914(Mtx *arg0, struct Foo1518A914 *arg1) {
-    struct Sub1518A914 *p = &arg1->unk100;
-    f32 sp24[4][4];
-
-    func_150A8050(sp24, p->unk0, p->unk4, p->unk8);
-    sp24[3][0] = arg1->unk48;
-    sp24[3][1] = arg1->unk4C;
-    sp24[3][2] = arg1->unk50;
-    sp24[0][0] *= p->unkC;
-    sp24[0][1] *= p->unkC;
-    sp24[0][2] *= p->unkC;
-    sp24[1][0] *= p->unkC;
-    sp24[1][1] *= p->unkC;
-    sp24[1][2] *= p->unkC;
-    sp24[2][0] *= p->unkC;
-    sp24[2][1] *= p->unkC;
-    sp24[2][2] *= p->unkC;
-    guMtxF2L(sp24, arg0);
+    func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
+    mf[3][0] = actor->position.x;
+    mf[3][1] = actor->position.y;
+    mf[3][2] = actor->position.z;
+    mf[0][0] *= motion->scale;
+    mf[0][1] *= motion->scale;
+    mf[0][2] *= motion->scale;
+    mf[1][0] *= motion->scale;
+    mf[1][1] *= motion->scale;
+    mf[1][2] *= motion->scale;
+    mf[2][0] *= motion->scale;
+    mf[2][1] *= motion->scale;
+    mf[2][2] *= motion->scale;
+    guMtxF2L(mf, mtx);
     return 1;
 }
