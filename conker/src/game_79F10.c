@@ -107,7 +107,6 @@ s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
 void func_15121490(Actor *, OSContPad *);
 void func_151279A0(Actor *, OSContPad *);
-void func_151AE264(Actor *);
 
 // matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
 // symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.

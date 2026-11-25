@@ -1,62 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
-/* A point fixed relative to one of an object's bones. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId; // target->unique_id when attached
-    /* 0x05 */ u8 bone;     // index into the Mtx array at target->ob_matrix_ptr
-    /* 0x08 */ Vec3f offset;
-} RopeAnchor;
-
-typedef struct TiedRope TiedRope;
-typedef struct RopeLine RopeLine;
-
-/* Data at 0x28 of the effect that ties obj0 to obj1 with ropes. */
-typedef struct {
-    /* 0x00 */ Actor *obj0;
-    /* 0x04 */ u8 obj0Id;   // obj0->unique_id when attached
-    /* 0x08 */ Actor *obj1;
-    /* 0x0C */ u8 obj1Id;
-    /* 0x0D */ u8 state;    // last func_151B22F4 result, 0 before the first update
-    /* 0x10 */ TiedRope *ropes[3];
-    /* 0x1C */ RopeLine *line;
-} RopeTieData;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ RopeTieData tie;
-} RopeTie;
-
-/* Data at 0x150 of each rope a RopeTie owns. */
-typedef struct {
-    /* 0x00 */ RopeAnchor start;
-    /* 0x14 */ RopeAnchor end;
-    /* 0x28 */ RopeTie *owner;
-    /* 0x2C */ u8 slot; // index in owner->tie.ropes
-} RopeTieLink;
-
-struct TiedRope {
-    /* 0x000 */ u8 pad0[0x150]; // HoltenRopeEffect
-    /* 0x150 */ RopeTieLink link;
-};
-
-/* Data at 0x28 of the straight line effect a RopeTie owns. */
-typedef struct {
-    /* 0x00 */ RopeAnchor anchor; // anchor.offset is the start point
-    /* 0x14 */ Vec3f endOffset;
-    /* 0x20 */ f32 halfWidth;
-    /* 0x24 */ RopeTie *owner;
-} RopeLineData;
-
-struct RopeLine {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ RopeLineData line;
-};
-
-TiedRope *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
 extern Vec3f D_800AA320;
 extern Vec3f D_800AA32C;
 extern Vec3f D_800AA338;
@@ -65,12 +10,6 @@ extern Vec3f D_800AA350;
 extern Vec3f D_800AA35C;
 extern Vec3f D_800AA368;
 extern Vec3f D_800AA374;
-
-s32 func_151B22F4(RopeTie *self);
-void func_151B222C(RopeTie *self);
-void func_151B2348(RopeTie *self);
-void func_151B2690(RopeTie *self);
-void func_151B47D8(TiedRope *rope, RopeTieLink *link, s32 arg2, u8 event);
 
 /* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
 void func_151B2060(Actor *obj) {
@@ -206,7 +145,7 @@ void func_151B2348(RopeTie *self) {
     desc.accelScale = -0.01999999955f;
     desc.lagScale = 0.7000000477f;
     tie = &self->tie;
-    tie->ropes[2] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[2] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[2] != NULL) {
         memcpy(&tie->ropes[2]->link, &link, sizeof(link));
     }
@@ -228,7 +167,7 @@ void func_151B2348(RopeTie *self) {
     desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
     desc.length = 170.0f;
-    tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[1] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[1] != NULL) {
         memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
@@ -249,7 +188,7 @@ void func_151B2348(RopeTie *self) {
     desc.end.y = obj1->ypos;
     desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
-    tie->ropes[0] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[0] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[0] != NULL) {
         memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
@@ -294,7 +233,7 @@ void func_151B2690(RopeTie *self) {
     desc.lagScale = 0.7130000591f;
 
     tie = &self->tie;
-    tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[1] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[1] != NULL) {
         memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
@@ -303,7 +242,7 @@ void func_151B2690(RopeTie *self) {
     link.start.offset = D_800AA32C;
     link.end.offset = D_800AA374;
     desc.drawStyle = 1;
-    tie->ropes[0] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    tie->ropes[0] = (TiedRope *)func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[0] != NULL) {
         memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
@@ -469,8 +408,8 @@ void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
 }
 
 /* Rope event handler: passes the link to func_151B47D8. */
-void func_151B2FA0(TiedRope *self, s32 arg1, u8 event) {
-    func_151B47D8(self, &self->link, arg1, event);
+void func_151B2FA0(TiedRope *self, Vec3f *pos, u8 isStart) {
+    func_151B47D8((HoltenRopeEffect *)self, (HoltenRopeBoneAnchors *)&self->link, pos, isStart);
 }
 
 /* Line teardown: clears the owner's reference to this line. */

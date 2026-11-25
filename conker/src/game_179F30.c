@@ -52,8 +52,6 @@ void *func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attac
 void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
-void *func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
-void func_151B2060(Actor *obj);
 void func_151B9F00(Actor *obj, s32, s32);
 void func_151BB044(Actor *obj);
 void func_151BC074(Actor *obj);

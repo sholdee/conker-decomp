@@ -2274,7 +2274,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
     }
 }
 
-void func_151AE264(Actor *);
 void func_151E5FF4(void *, Actor *, u8);
 void func_15169070(s32, s32, void *, s32);
 
@@ -3867,7 +3866,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].z = 0;
 }
 void func_1000EFB4();
-void func_151AE264(Actor *arg0);
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
