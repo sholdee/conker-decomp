@@ -203,7 +203,7 @@ void func_1507CD64(struct127 *obj, s32 cause) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
-        if ((D_8008FDBC & 0x20) && *(u8 *)&obj->pad128 == 0) {
+        if ((D_8008FDBC & 0x20) && *(u8 *)&obj->pad128 == 0) { // byte at 0x128 (struct127 has a u32 pad there)
             func_15085710(1, 10, 1);
         }
     }
@@ -474,6 +474,7 @@ void func_1507D4F8(s32 slot) {
     D_800BE618--;
 }
 
+/* Object returned by func_151149AC (struct131 in game_11FF10.c is a narrower view of the same 0xA0 bytes). */
 typedef struct D754Obj {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
