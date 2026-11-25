@@ -5,36 +5,7 @@
 
 extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
 
-/* Particle spawn descriptor passed to func_15149550. */
-typedef struct {
-    Vec3f pos;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-} Struct15149550Arg;
-
-s32 func_15149550(Struct15149550Arg *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
@@ -160,7 +131,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
 /* Spawns `count` particles at random points within `radius` of (x, y, z). */
 void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32 sizeRange,
                    f32 heightBase, f32 heightRange, s16 lifeBase, s16 lifeRange, u8 arg11) {
-    Struct15149550Arg particle;
+    ParticleEmitterDesc particle;
     u8 angle;
     f32 sin;
     f32 cos;
@@ -170,21 +141,21 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 
     if (count > 0) {
         // matching: both stores on one line (-g3 line numbers steer as1 scheduling)
-        particle.unk20 = 0x6231; particle.unk22 = 0x1A4D;
-        particle.unk26 = 0;
-        particle.unk27 = 0;
-        particle.unk28 = 0;
-        particle.unk29 = 0xFF;
-        particle.unk2A = 1;
+        particle.maxC = 0x6231; particle.minC = 0x1A4D;
+        particle.color[0] = 0;
+        particle.color[1] = 0;
+        particle.color[2] = 0;
+        particle.color[3] = 0xFF;
+        particle.flags = 1;
         particle.unk2C = 0xFF;
         particle.unk2D = 0xFF;
         particle.unk2F = arg11;
-        particle.unk38 = 0.0f;
-        particle.unk40 = 0.045f;
-        particle.unk44 = 0.7f;
-        particle.unk30 = 0;
+        particle.scale = 0.0f;
+        particle.shrinkRate = 0.045f;
+        particle.growRate = 0.7f;
+        particle.extraSize = 0;
         particle.unk2E = 0;
-        particle.unk34 = 15;
+        particle.effect = 15;
         particle.pos.y = y;
 
         do {
@@ -197,12 +168,12 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             height = func_150ADA68() * heightRange + heightBase;
             particle.pos.x = dist * sin + x;
             particle.pos.z = dist * cos + z;
-            particle.unkC = 22.6f * size;
-            particle.unk14 = 13.786f * size;
-            particle.unk10 = 57.969f * height;
-            particle.unk18 = 42.714f * height;
-            particle.unk1C = 118.763f * height;
-            particle.unk24 = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
+            particle.maxA = 22.6f * size;
+            particle.minA = 13.786f * size;
+            particle.maxB = 57.969f * height;
+            particle.minB = 42.714f * height;
+            particle.altB = 118.763f * height;
+            particle.life = func_150ADA20() % (u32)(lifeRange + 1) + lifeBase;
             func_15149550(&particle, 10, 0, 0, 0xFF, 1);
             count--;
         } while (count != 0);
@@ -211,35 +182,35 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 
 /* Spawns one particle at `pos` with randomized size, lifetime and fade. */
 void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
-    Struct15149550Arg particle;
+    ParticleEmitterDesc particle;
     f32 size;
     f32 height;
 
     // matching: both stores on one line (-g3 line numbers steer as1 scheduling)
-    particle.unk20 = 0x6231; particle.unk22 = 0x1A4D; particle.pos = *pos;
-    particle.unk26 = 0;
-    particle.unk27 = 0;
-    particle.unk28 = 0;
-    particle.unk29 = 0xFF;
+    particle.maxC = 0x6231; particle.minC = 0x1A4D; particle.pos = *pos;
+    particle.color[0] = 0;
+    particle.color[1] = 0;
+    particle.color[2] = 0;
+    particle.color[3] = 0xFF;
     particle.unk2D = 0xFF;
     particle.unk2E = 0;
     particle.unk2F = 1;
-    particle.unk30 = 0;
-    particle.unk2A = 1;
-    particle.unk34 = 28;
-    particle.unk3C = 0.0f;
-    particle.unk40 = 0.080000006f;
-    particle.unk44 = 0.4f;
+    particle.extraSize = 0;
+    particle.flags = 1;
+    particle.effect = 28;
+    particle.maxHeight = 0.0f;
+    particle.shrinkRate = 0.080000006f;
+    particle.growRate = 0.4f;
     size = (func_150ADA68() * 501.0f + 999.0f) * 0.001f;
     height = func_150ADA68();
-    particle.unkC = 22.6f * size;
-    particle.unk14 = 13.786f * size;
+    particle.maxA = 22.6f * size;
+    particle.minA = 13.786f * size;
     height = (height * 1007.0f + 1505.0f) * 0.001f;
-    particle.unk10 = 57.969f * height;
-    particle.unk18 = 42.714f * height;
-    particle.unk1C = 118.763f * height;
-    particle.unk24 = func_150ADA20() % 17U + 16;
-    particle.unk38 = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
+    particle.maxB = 57.969f * height;
+    particle.minB = 42.714f * height;
+    particle.altB = 118.763f * height;
+    particle.life = func_150ADA20() % 17U + 16;
+    particle.scale = (func_150ADA68() * 347.0f + 50.0f) * 0.001f;
     particle.unk2C = func_150ADA20() % 156U + 100;
     func_15149550(&particle, 10, 0, 0, arg1, arg2);
 }
@@ -286,43 +257,43 @@ extern void func_15143874(s16, f32, f32 *, f32 *);
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
 void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 count;
-    Struct15149550Arg particle;
+    ParticleEmitterDesc particle;
     s32 angle;
     f32 size;
     f32 height;
 
     count = (func_150ADA68() * 20.0f + 29.0f) * 0.0001f * 5541.7695f;
     if (count > 1.0f) {
-        particle.unk20 = 0x6231;
-        particle.unk22 = 0x1A4D;
+        particle.maxC = 0x6231;
+        particle.minC = 0x1A4D;
         particle.pos.y = pos->y;
-        particle.unk26 = 0;
-        particle.unk27 = 0;
-        particle.unk28 = 0;
-        particle.unk29 = 0xFF;
+        particle.color[0] = 0;
+        particle.color[1] = 0;
+        particle.color[2] = 0;
+        particle.color[3] = 0xFF;
         particle.unk2D = 0xFF;
         particle.unk2E = 0;
         particle.unk2F = 1;
-        particle.unk30 = 0;
-        particle.unk2A = 1;
-        particle.unk34 = 28;
-        particle.unk3C = 0.0f;
+        particle.extraSize = 0;
+        particle.flags = 1;
+        particle.effect = 28;
+        particle.maxHeight = 0.0f;
         do {
             angle = func_150ADA20();
             func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
             particle.pos.x += pos->x;
             particle.pos.z += pos->z;
-            particle.unk40 = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
-            particle.unk44 = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
+            particle.shrinkRate = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
+            particle.growRate = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
             size = (func_150ADA68() * 1205.0f + 304.0f) * 0.001f;
             height = (func_150ADA68() * 1006.0f + 504.0f) * 0.001f;
-            particle.unkC = 22.6f * size;
-            particle.unk14 = 13.786f * size;
-            particle.unk10 = 57.969f * height;
-            particle.unk18 = 42.714f * height;
-            particle.unk1C = 118.763f * height;
-            particle.unk24 = func_150ADA20() % 31U + 20;
-            particle.unk38 = func_150ADA68() * 497.0f * 0.001f;
+            particle.maxA = 22.6f * size;
+            particle.minA = 13.786f * size;
+            particle.maxB = 57.969f * height;
+            particle.minB = 42.714f * height;
+            particle.altB = 118.763f * height;
+            particle.life = func_150ADA20() % 31U + 20;
+            particle.scale = func_150ADA68() * 497.0f * 0.001f;
             particle.unk2C = func_150ADA20() % 156U + 100;
             func_15149550(&particle, 10, 0, 0, arg1, arg2);
             count -= 1.0f;

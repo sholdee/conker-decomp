@@ -182,38 +182,12 @@ void func_150DF334(PointEffect *effect) {
                   effect->kind);
 }
 
-/* Particle emitter description passed to func_15149550. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 maxA;
-    /* 0x10 */ f32 maxB;
-    /* 0x14 */ f32 minA;
-    /* 0x18 */ f32 minB;
-    /* 0x1C */ f32 altB;
-    /* 0x20 */ s16 maxC;
-    /* 0x22 */ s16 minC;
-    /* 0x24 */ s16 life;
-    /* 0x26 */ u8 color[4];
-    /* 0x2A */ u16 flags;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s32 extraSize;
-    /* 0x34 */ u8 effect;
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ f32 maxHeight;
-    /* 0x40 */ f32 shrinkRate;
-    /* 0x44 */ f32 growRate;
-} ParticleEmitter;
-
-void *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
+void *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */
 void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
-    ParticleEmitter emitter;
+    ParticleEmitterDesc emitter;
     f32 scaleA;
     f32 scaleB;
     s32 count;

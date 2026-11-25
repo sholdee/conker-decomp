@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Spawn region an emitter scatters its particles over. */
 typedef struct {
@@ -53,36 +54,9 @@ typedef struct {
     /* 0x6C */ s32 unk6C;
 } ParticleEmitter;
 
-/* Particle description passed to func_15149550. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ u8 color[4];
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ u8 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-} EmitterParticle;
-
 extern s32 func_151464B8(s32);
 extern s32 func_15046C80(f32 *, s32, f32, GroundHit *);
-extern void func_15149550(EmitterParticle *, s32, s32, s32, s32, s32);
+extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
 
 /*
  * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
@@ -90,7 +64,7 @@ extern void func_15149550(EmitterParticle *, s32, s32, s32, s32, s32);
  */
 void func_151A5660(u8 *effect) {
     ParticleEmitter *emitter;
-    EmitterParticle particle;
+    ParticleEmitterDesc particle;
     f32 low;
     f32 high;
     f32 xScale;
@@ -109,19 +83,19 @@ void func_151A5660(u8 *effect) {
     }
     emitter->pending += emitter->scale * emitter->rate * D_800BE9A4;
     if (emitter->pending > 1.0f) {
-        particle.unk20 = 0x6231;
-        particle.unk22 = 0x1A4D;
+        particle.maxC = 0x6231;
+        particle.minC = 0x1A4D;
         particle.color[0] = 0;
         particle.color[1] = 0;
         particle.color[2] = 0;
         particle.color[3] = 0xFF;
-        particle.unk2A = 1;
+        particle.flags = 1;
         particle.unk2D = 0xFF;
-        particle.unk30 = 0;
+        particle.extraSize = 0;
         particle.unk2E = 0;
         particle.unk2F = 0;
-        particle.unk34 = 0x10;
-        particle.unk3C = emitter->unk10;
+        particle.effect = 0x10;
+        particle.maxHeight = emitter->unk10;
         do {
             switch (emitter->region->flags & 3) {
             case 2: {
@@ -136,8 +110,8 @@ void func_151A5660(u8 *effect) {
                 sine = func_151423D8(angle);
                 x = func_150ADA68() * (2.0f * emitter->region->radiusX) + -emitter->region->radiusX;
                 z = func_150ADA68() * (2.0f * emitter->region->radiusZ) + -emitter->region->radiusZ;
-                particle.x = emitter->region->x + (x * sine + z * cosine);
-                particle.z = emitter->region->z + (z * sine - x * cosine);
+                particle.pos.x = emitter->region->x + (x * sine + z * cosine);
+                particle.pos.z = emitter->region->z + (z * sine - x * cosine);
                 high = emitter->region->y + emitter->region->height;
                 low = emitter->region->y - emitter->region->height;
             } break;
@@ -151,8 +125,8 @@ void func_151A5660(u8 *effect) {
                 cosine = func_151423D8(angle - 0x40);
                 sine = func_151423D8(angle);
                 x = func_150ADA68() * emitter->region->radiusX;
-                particle.x = emitter->region->x + x * sine;
-                particle.z = emitter->region->z - x * cosine;
+                particle.pos.x = emitter->region->x + x * sine;
+                particle.pos.z = emitter->region->z - x * cosine;
                 high = emitter->region->y + emitter->region->height;
                 low = emitter->region->y;
             } break;
@@ -166,14 +140,14 @@ void func_151A5660(u8 *effect) {
                 cosine = func_151423D8(angle - 0x40);
                 sine = func_151423D8(angle);
                 x = func_150ADA68() * emitter->region->radiusX;
-                particle.x = emitter->region->x + x * sine;
-                particle.z = emitter->region->z - x * cosine;
+                particle.pos.x = emitter->region->x + x * sine;
+                particle.pos.z = emitter->region->z - x * cosine;
                 high = emitter->region->y + emitter->region->height;
                 low = emitter->region->y - emitter->region->height;
             } break;
             default:
-                particle.x = emitter->region->x;
-                particle.z = emitter->region->z;
+                particle.pos.x = emitter->region->x;
+                particle.pos.z = emitter->region->z;
                 high = emitter->region->y + emitter->region->height;
                 low = emitter->region->y - emitter->region->height;
                 break;
@@ -181,28 +155,28 @@ void func_151A5660(u8 *effect) {
             if (emitter->useGround != 0) {
                 f32 probe[3];
 
-                probe[0] = particle.x;
+                probe[0] = particle.pos.x;
                 probe[1] = high;
-                probe[2] = particle.z;
+                probe[2] = particle.pos.z;
                 if (func_15046C80(probe, 0, low, &emitter->ground) != 0) {
-                    particle.y = emitter->ground.height;
+                    particle.pos.y = emitter->ground.height;
                 } else {
-                    particle.y = low;
+                    particle.pos.y = low;
                 }
             } else {
-                particle.y = low;
+                particle.pos.y = low;
             }
             xScale = func_150ADA68() * emitter->xScaleRange + emitter->xScaleBase;
             yScale = func_150ADA68() * emitter->yScaleRange + emitter->yScaleBase;
-            particle.unkC = 22.6f * xScale;
-            particle.unk14 = 13.786f * xScale;
-            particle.unk10 = 57.969f * yScale;
-            particle.unk18 = 42.714f * yScale;
-            particle.unk1C = 118.763f * yScale;
-            particle.unk24 = func_150ADA20() % (emitter->unk24Range + 1) + emitter->unk24Base;
-            particle.unk38 = func_150ADA68() * emitter->unk38Range + emitter->unk38Base;
-            particle.unk40 = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
-            particle.unk44 = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
+            particle.maxA = 22.6f * xScale;
+            particle.minA = 13.786f * xScale;
+            particle.maxB = 57.969f * yScale;
+            particle.minB = 42.714f * yScale;
+            particle.altB = 118.763f * yScale;
+            particle.life = func_150ADA20() % (emitter->unk24Range + 1) + emitter->unk24Base;
+            particle.scale = func_150ADA68() * emitter->unk38Range + emitter->unk38Base;
+            particle.shrinkRate = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
+            particle.growRate = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
             particle.unk2C = func_150ADA20() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
             func_15149550(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;

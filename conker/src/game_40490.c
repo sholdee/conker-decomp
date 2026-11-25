@@ -81,35 +81,6 @@ typedef struct {
 
 extern Struct150139ACEntry D_80095FA0[];
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    s16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-    u8 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-} Struct15013DE8;
-
 
 void func_15012FE0(void) {
     D_800BE570 = 0;
@@ -503,7 +474,7 @@ s32 func_15013D38(TriggerZone *obj) {
 
 /** Emits particles from the object's position, scaled by its sizeX and sizeY. */
 s32 func_15013DE8(TriggerZone *obj) {
-    Struct15013DE8 params;
+    ParticleEmitterDesc params;
     f32 scaleX;
     f32 scaleY;
 
@@ -512,34 +483,34 @@ s32 func_15013DE8(TriggerZone *obj) {
     scaleX = obj->radius * 0.05000000075f;
     scaleY = obj->height * 0.01999999955f;
 
-    params.unk20 = 0x6231; params.unk22 = 0x1A4D; // matching: on one line, as1 keeps these stores in this order
-    params.unk26 = 0;
-    params.unk27 = 0;
-    params.unk28 = 0;
-    params.unk29 = 0xFF;
-    params.unk2A = 0;
+    params.maxC = 0x6231; params.minC = 0x1A4D; // matching: on one line, as1 keeps these stores in this order
+    params.color[0] = 0;
+    params.color[1] = 0;
+    params.color[2] = 0;
+    params.color[3] = 0xFF;
+    params.flags = 0;
     params.unk2D = 0xFF;
-    params.unk30 = 0;
+    params.extraSize = 0;
     params.unk2E = 0;
     params.unk2F = 0;
-    params.unk34 = 0;
-    params.unk3C = 99999.89844f;
+    params.effect = 0;
+    params.maxHeight = 99999.89844f;
 
-    params.unk0 = obj->x;
-    params.unk4 = obj->y;
-    params.unk8 = obj->z;
+    params.pos.x = obj->x;
+    params.pos.y = obj->y;
+    params.pos.z = obj->z;
 
-    params.unk24 = 300;
-    params.unk38 = 0.0f;
-    params.unk40 = 0.04500000179f;
-    params.unk44 = 0.6999999881f;
+    params.life = 300;
+    params.scale = 0.0f;
+    params.shrinkRate = 0.04500000179f;
+    params.growRate = 0.6999999881f;
 
     params.unk2C = (func_150ADA20() % 56U) + 200;
 
-    params.unkC = 22.60000038f * scaleX;
-    params.unk14 = 13.78600025f * scaleX;
-    params.unk10 = 57.96900177f * scaleY; params.unk18 = 42.7140007f * scaleY; // matching: on one line, as1 keeps these stores in this order
-    params.unk1C = 118.7630005f * scaleY;
+    params.maxA = 22.60000038f * scaleX;
+    params.minA = 13.78600025f * scaleX;
+    params.maxB = 57.96900177f * scaleY; params.minB = 42.7140007f * scaleY; // matching: on one line, as1 keeps these stores in this order
+    params.altB = 118.7630005f * scaleY;
 
     func_15149550(&params, 10, 1, obj->unk18 ? 2 : 1, 0xFF, 1);
     return 1;

@@ -371,39 +371,12 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
                     emitter->unkC, emitter->unk1);
 }
-typedef struct {
-    Vec3f unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s32 unk30;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-} Struct15149550Arg_EF410;
 
-Particle_EF410 *func_15149550(Struct15149550Arg_EF410 *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
+Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 void func_150C29F0(Struct150C29F0 *emitter) {
     PosSub *pos;
-    Struct15149550Arg_EF410 particle;
+    ParticleEmitterDesc particle;
     f32 scaleA;
     f32 scaleB;
     u8 angle;
@@ -416,33 +389,33 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     sine = func_151423D8(angle);
     pos = &emitter->unk28;
     radius = func_150ADA68() * pos->scale;
-    particle.unk20 = 0x6231; particle.unk22 = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
-    particle.unk26 = 0;
-    particle.unk27 = 0;
-    particle.unk28 = 0;
-    particle.unk29 = 0xFF;
+    particle.maxC = 0x6231; particle.minC = 0x1A4D; // matching: one source line (-g3 line numbers steer as1 scheduling)
+    particle.color[0] = 0;
+    particle.color[1] = 0;
+    particle.color[2] = 0;
+    particle.color[3] = 0xFF;
     particle.unk2C = 0xFF;
     particle.unk2D = 0xFF;
-    particle.unk30 = 0;
-    particle.unk2A = 1;
+    particle.extraSize = 0;
+    particle.flags = 1;
     particle.unk2E = 0;
     particle.unk2F = 1;
-    particle.unk24 = (func_150ADA20() % 201U) + 100;
-    particle.unk34 = 0xF;
-    particle.unk38 = 0.0f;
-    particle.unk40 = 0.045f;
-    particle.unk44 = 0.7f;
-    particle.unk0.x = pos->x + radius * cosine;
-    particle.unk0.y = pos->y;
-    particle.unk0.z = pos->z + radius * sine;
-    particle.unk3C = 10000.0f;
+    particle.life = (func_150ADA20() % 201U) + 100;
+    particle.effect = 0xF;
+    particle.scale = 0.0f;
+    particle.shrinkRate = 0.045f;
+    particle.growRate = 0.7f;
+    particle.pos.x = pos->x + radius * cosine;
+    particle.pos.y = pos->y;
+    particle.pos.z = pos->z + radius * sine;
+    particle.maxHeight = 10000.0f;
     scaleA = (func_150ADA68() * 0.5f) + 1.0f;
     scaleB = (func_150ADA68() * 0.5f) + 1.0f;
-    particle.unkC = 22.6f * scaleA;
-    particle.unk14 = 13.786f * scaleA;
-    particle.unk10 = 57.969f * scaleB;
-    particle.unk18 = 42.714f * scaleB;
-    particle.unk1C = 118.763f * scaleB;
+    particle.maxA = 22.6f * scaleA;
+    particle.minA = 13.786f * scaleA;
+    particle.maxB = 57.969f * scaleB;
+    particle.minB = 42.714f * scaleB;
+    particle.altB = 118.763f * scaleB;
     func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
     emitter->unkE = (func_150ADA20() % 51U) + 25;
 }
@@ -454,7 +427,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     f32 *timer;
     f32 *pos;
     f32 distSq;
-    Struct15149550Arg_EF410 particle;
+    ParticleEmitterDesc particle;
     f32 scaleA;
     f32 angle;
     f32 scaleB;
@@ -467,35 +440,35 @@ void func_150C2C00(Struct150C29F0 *emitter) {
             pos = (f32 *)func_15144B34(D_80082FA4);
             distSq = (pos[2] * pos[2]) + (pos[0] * pos[0]);
             if (2500000.0f < distSq) {
-                particle.unk20 = 0x6231;
-                particle.unk22 = 0x1A4D;
-                particle.unk0.y = -390.0f;
-                particle.unk26 = 0;
-                particle.unk27 = 0;
-                particle.unk28 = 0;
-                particle.unk29 = 0xFF;
+                particle.maxC = 0x6231;
+                particle.minC = 0x1A4D;
+                particle.pos.y = -390.0f;
+                particle.color[0] = 0;
+                particle.color[1] = 0;
+                particle.color[2] = 0;
+                particle.color[3] = 0xFF;
                 particle.unk2D = 0xFF;
                 particle.unk2E = 20;
                 particle.unk2F = 1;
-                particle.unk30 = 4;
-                particle.unk2A = 1;
-                particle.unk34 = 25;
-                particle.unk3C = 0.0f;
-                particle.unk40 = 0.045f;
-                particle.unk44 = 0.7f;
+                particle.extraSize = 4;
+                particle.flags = 1;
+                particle.effect = 25;
+                particle.maxHeight = 0.0f;
+                particle.shrinkRate = 0.045f;
+                particle.growRate = 0.7f;
                 do {
                     angle = (func_150ADA68() * 5.8659425f) + 0.957204f;
                     if (func_15144C8C(func_150484A0(pos[0], pos[2]), angle) < 0.4f) {
-                        func_1514373C(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.unk0.x, &particle.unk0.z);
+                        func_1514373C(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.pos.x, &particle.pos.z);
                         scaleA = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.001f;
                         scaleB = ((func_150ADA68() * 1493.0f) + 3000.0f) * 0.001f;
-                        particle.unkC = 22.6f * scaleA;
-                        particle.unk14 = 13.786f * scaleA;
-                        particle.unk10 = 57.969f * scaleB;
-                        particle.unk18 = 42.714f * scaleB;
-                        particle.unk1C = 118.763f * scaleB;
-                        particle.unk24 = (func_150ADA20() % 151U) + 50;
-                        particle.unk38 = (func_150ADA68() * 500.0f) * 0.001f;
+                        particle.maxA = 22.6f * scaleA;
+                        particle.minA = 13.786f * scaleA;
+                        particle.maxB = 57.969f * scaleB;
+                        particle.minB = 42.714f * scaleB;
+                        particle.altB = 118.763f * scaleB;
+                        particle.life = (func_150ADA20() % 151U) + 50;
+                        particle.scale = (func_150ADA68() * 500.0f) * 0.001f;
                         particle.unk2C = (func_150ADA20() % 156U) + 100;
                         created = func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
                         if (created != NULL) {

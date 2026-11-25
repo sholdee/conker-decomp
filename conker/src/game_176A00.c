@@ -9,32 +9,6 @@ extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
 extern void func_1518CA80(void *effect, u8 mode);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
 
-/* Emitter description that func_15149550 turns into a spawned particle. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 maxA;
-    /* 0x10 */ f32 maxB;
-    /* 0x14 */ f32 minA;
-    /* 0x18 */ f32 minB;
-    /* 0x1C */ f32 altB;
-    /* 0x20 */ s16 maxC;
-    /* 0x22 */ s16 minC;
-    /* 0x24 */ s16 life;
-    /* 0x26 */ u8 color[4];
-    /* 0x2A */ u16 flags;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s32 extraSize;
-    /* 0x34 */ u8 effect;
-    /* 0x35 */ u8 pad35[3];
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ f32 maxHeight;
-    /* 0x40 */ f32 shrinkRate;
-    /* 0x44 */ f32 growRate;
-} ParticleEmitter;
-
 /*
  * Per-particle motion state, stored at +0x110 of the spawned object. Each channel (A, B, C)
  * picks a new random target between its min and max whenever its timer runs out, and the
@@ -95,7 +69,7 @@ typedef struct {
 } Particle;
 
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
-Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
+Particle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
     Particle *particle;
     ParticleDef spawn;
     ParticleMotion motion;
