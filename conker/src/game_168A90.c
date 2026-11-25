@@ -5,21 +5,6 @@
 #include "effects.h"
 #include <libc/stddef.h>
 
-/*
- * A model whose vertices are copied into per-frame, per-viewport buffers so they can be
- * modified each frame. The buffers follow the header, then `userDataSize` bytes of user data.
- */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ DynModelDesc desc;
-    /* 0x4C */ ModelAsset *asset;
-    /* 0x50 */ s32 buffersSize;  // size of all vertex buffers, i.e. the offset of the user data
-    /* 0x54 */ Gfx *displayList;
-    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
-    /* 0x78 */ Mtx mtx[2];          // [frame]
-    /* 0xF8 */ u8 buffers[1];
-} DynModel;
-
 /* User data of the model spawned by func_1513BAE8. */
 typedef struct {
     /* 0x00 */ f32 scrollS;

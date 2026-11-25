@@ -2397,6 +2397,24 @@ typedef struct DynModelDesc {
     /* 0x3A */ u8 pad3A[2];
 } DynModelDesc; /* size 0x3C */
 
+/*
+ * A model whose vertices are copied into per-frame, per-viewport buffers so they can be modified each frame
+ * (func_1513B5E0, game_168A90.c). The buffers follow the header, then `userDataSize` bytes of user data.
+ */
+typedef struct DynModel {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ DynModelDesc desc;
+    /* 0x4C */ ModelAsset *asset;
+    /* 0x50 */ s32 buffersSize;     /* size of all vertex buffers, i.e. the offset of the user data */
+    /* 0x54 */ Gfx *displayList;
+    /* 0x58 */ Vtx *vertices[2][4]; /* [frame][viewport] */
+    /* 0x78 */ Mtx mtx[2];          /* [frame] */
+    /* 0xF8 */ u8 buffers[1];
+} DynModel;
+
+/* The user data after a DynModel's vertex buffers. matching: s32 arithmetic (a u8 * sum schedules differently) */
+#define DYNMODEL_USERDATA(model) ((void *)((s32)(model) + (model)->buffersSize + 0xF8))
+
 /* One point of a func_15147DA0 trail (game_175250.c); the points form the object's ring buffer. */
 typedef struct MotionTrailPoint {
     /* 0x00 */ Vec3f pos;

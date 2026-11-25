@@ -3,18 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* A model with per-frame, per-viewport vertex buffers, followed by user data (see game_168A90.c). */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ DynModelDesc desc;
-    /* 0x4C */ void *asset;
-    /* 0x50 */ s32 buffersSize;     // size of all vertex buffers, i.e. the offset of the user data
-    /* 0x54 */ Gfx *displayList;
-    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
-    /* 0x78 */ Mtx mtx[2];          // [frame]
-    /* 0xF8 */ u8 buffers[1];
-} DynModel;
-
 #define TRACK_NONE 999
 
 /* User data of the two swinging lamp models (DynModel kind 1). */
@@ -32,7 +20,7 @@ typedef struct {
     /* 0x21 */ u8 pad21[3];
 } LampData; // size 0x24
 
-#define LAMP_DATA(model) ((LampData *)((s32)(model) + (model)->buffersSize + 0xF8))
+#define LAMP_DATA(model) ((LampData *)DYNMODEL_USERDATA(model))
 
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
 LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);

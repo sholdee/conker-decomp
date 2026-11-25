@@ -8,20 +8,13 @@ void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s
 
 void func_1504715C(CollisionHit *, Actor *);
 
-/* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
-typedef struct {
-    u8 pad0[0x50];
-    s32 extraOffset;
-} EffectObject;
-
-#define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))  // matching: s32 arithmetic; a u8 * sum schedules func_151BA084 differently
 
 
-void *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
+DynModel *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
-    void *effect;
+    DynModel *effect;
     DynModelDesc desc;
     ActorRef ref;
 
@@ -64,18 +57,11 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     desc.kind = 2;
     effect = func_1513B5E0(&desc, 1, 8, arg1, arg2);
     if (effect != NULL) {
-        memcpy(EFFECT_EXTRA(effect), &ref, sizeof(ref));
+        memcpy(DYNMODEL_USERDATA(effect), &ref, sizeof(ref));
     }
     return effect;
 }
 
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x48];
-    Vtx *verts[2][4]; /* [frame][viewport], 20 vertices each */
-    Mtx mtx[2];       /* [frame] */
-} Obj151BA084;
 
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
@@ -84,7 +70,7 @@ void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
  * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
  * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
  */
-s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
+s32 func_151BA084(DynModel *effect, s16 viewport) {
     ActorRef *ref;
     Actor *owner;
     u8 *model;
@@ -102,7 +88,7 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     f32 world[3];
     f32 proj[3];
 
-    ref = EFFECT_EXTRA(effect);
+    ref = DYNMODEL_USERDATA(effect);
     owner = ref->actor;
     if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
         func_1516972C(&effect->header);
@@ -156,7 +142,7 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
         s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
 
         for (i = 0; i < 20; i++) {
-            Vtx_t *vtx = &effect->verts[D_800BE9C0][viewport][i].v;
+            Vtx_t *vtx = &effect->vertices[D_800BE9C0][viewport][i].v;
 
             x = vtx->ob[0];
             y = vtx->ob[1];
@@ -173,8 +159,8 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
 }
 
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
-void func_151BA468(TimedEffect *effect, ActorMsg *msg, u8 msgType) {
-    ActorRef *ref = EFFECT_EXTRA(effect);
+void func_151BA468(DynModel *effect, ActorMsg *msg, u8 msgType) {
+    ActorRef *ref = DYNMODEL_USERDATA(effect);
     Actor *owner = ref->actor;
 
     if (msgType == 0) {

@@ -28,15 +28,10 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
 
-typedef struct {
-    u8 pad0[0x50];
-    s32 unk50;
-} Obj3DF10;
-
 extern void func_150E8854(void);
 extern void func_1510F800(s32);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern Obj3DF10 *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
+extern DynModel *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 
@@ -51,7 +46,7 @@ void func_15010A60(void) {
     Struct3DF10Tail tail;
     f32 sp[6];
     f32 rnd;
-    Obj3DF10 *ent;
+    DynModel *ent;
     LightEffectHeader header;
     Vec3i header2;
     void *payload;
@@ -153,7 +148,7 @@ void func_15010A60(void) {
         if (D_80096498[i] != 0) {
             ent = func_1513B5E0(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
-                memcpy((u8 *)ent + ent->unk50 + 0xF8, &tail, 0x2C);
+                memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
             }
             header2.x = (s32)D_80096450[i].x;
             header2.y = (s32)D_80096450[i].y;
