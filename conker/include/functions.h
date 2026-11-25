@@ -180,14 +180,14 @@ void func_1001A9DC(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_1001AA08(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
 s32  __n_vsDelta(struct07 *arg0, s32 arg1);
 void func_1001B620(struct26 *arg0, s32 arg1);
-void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, Vec3f *arg3, Vec3f *arg4);
+void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
 void func_1001CD54(struct125 *arg0);
 f32  func_1001CEA4(s32 arg0);
 void func_1001D6E8(struct42 *arg0, s32 (*arg1)(s32 arg), struct15 *arg2);
 s32  func_1001D9B0(s16 arg0);
 s32  func_1001DA28(s16 arg0);
 void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
-void func_1001DAE4(struct139 *arg0, s16 arg1, s32 *arg2);
+void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
 // void func_1001E170(struct22 *arg0, s32 *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 arg9);
 // void func_1001E400(struct26 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
@@ -1008,8 +1008,8 @@ s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 //func_10012020
 //func_1001263C
 // void func_10017870(u8 arg0);
-void func_100186DC(void *arg0, void *arg1);
-void func_10018790(void *arg0, s32 arg1, u32 arg2, u32 arg3);
+void func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);
+void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
 // void func_10019D98(struct26 *arg0, u8 arg1);
 // void func_1001A030(struct26 *arg0, s32 arg1, s32 arg2, u32 arg3);
 // void func_1001A508(struct26 *arg0, struct25 *arg1, s32 arg2, s32 arg3);
@@ -1020,7 +1020,7 @@ void func_10018790(void *arg0, s32 arg1, u32 arg2, u32 arg3);
 //func_1001B200
 // s32  func_1001B310(void *arg0, void *arg1);
 // u8   func_1001B450(void *arg0, void *arg1);
-void func_1001E530(s32 arg0, void *arg1, s32 arg2);
+Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_1019EA88
 //func_1019EAB0
 //func_1019EAE0
