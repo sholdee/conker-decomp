@@ -447,25 +447,6 @@ void func_1507D4F8(s32 slot) {
     D_800BE618--;
 }
 
-/* Object returned by func_151149AC (WorldObject in game_11FF10.c is a narrower view of the same 0xA0 bytes). */
-typedef struct D754Obj {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 pad16[0x58];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[0xD];
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ s32 unk84;
-    /* 0x88 */ u8 pad88[2];
-    /* 0x8A */ u8 unk8A;
-} D754Obj;
-
 extern void func_150B0348(Actor *, s32, s32);
 extern void func_150BFFE0(Actor *);
 extern void func_150D85AC(Actor *);
@@ -475,7 +456,7 @@ extern void func_151CFA4C(Actor *, s32, s32);
 extern void func_150BE494(Actor *, s32, s32);
 extern void func_150AEB9C(Actor *);
 extern void func_151BA518(Actor *, s32, s32);
-extern D754Obj *func_151149AC(s32);
+extern WorldObject *func_151149AC(s32);
 extern void *func_1507515C(Actor *);
 extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150B7B40(Actor *, s32, s32);
@@ -490,7 +471,7 @@ void func_1507DB44(Actor *obj, s32 arg1);
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
 s32 func_1507D754(Actor *obj) {
-    D754Obj *spawned;
+    WorldObject *spawned;
     void *handle;
 
     switch (obj->id) {
@@ -558,17 +539,17 @@ s32 func_1507D754(Actor *obj) {
             }
         }
         if (spawned != NULL) {
-            spawned->unk6E = 0;
-            spawned->unk10 = obj->x_position;
-            spawned->unk12 = obj->y_position;
-            spawned->unk14 = obj->z_position;
-            spawned->unk0 = obj->unkB8;
-            spawned->unk4 = obj->unk40;
-            spawned->unk8 = obj->unkC4;
-            spawned->unk8A = 0xFF;
-            spawned->unk7C = 0;
-            spawned->unk80 = 0;
-            spawned->unk84 = 0;
+            spawned->inactive = 0;
+            spawned->x = obj->x_position;
+            spawned->y = obj->y_position;
+            spawned->z = obj->z_position;
+            spawned->rotX = obj->unkB8;
+            spawned->rotY = obj->unk40;
+            spawned->rotZ = obj->unkC4;
+            spawned->alpha = 0xFF;
+            spawned->work.words[0] = 0;
+            spawned->work.words[1] = 0;
+            spawned->work.words[2] = 0;
         }
         if (D_800BE616 != 0) {
             return 2;
