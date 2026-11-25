@@ -9,7 +9,6 @@ extern f32 D_800C3FD0[];
 
 
 extern f32 D_80098250;
-extern f32 D_8009862C;
 extern s16 D_800C3FF4[];
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
@@ -494,40 +493,45 @@ void func_15036F34(void) {
 
 void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 
-s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 arg8, s32 arg9) {
-    f32 (*src)[4];
-    f32 (*dst)[4];
+/*
+ * Tests whether world point (x, y, z) lies within +-range degrees of yaw as seen from object
+ * objIndex's bone matrix `bone` (relative to `refBone`). On success copies the point to out.
+ */
+s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 noCheck,
+                  s32 axisMode) {
+    f32 (*refMtx)[4];
+    f32 (*mtx)[4];
     f32 delta[3];
-    f32 pos[3];
-    f32 rx;
-    f32 ry;
-    f32 rz;
+    f32 unused[3];
+    f32 localX;
+    f32 localY;
+    f32 localZ;
     f32 yaw;
     f32 pitch;
 
-    if (arg8 != 0) {
+    if (noCheck) {
         out[0] = x;
         out[1] = y;
         out[2] = z;
         return 1;
     }
-    src = ((f32 (*)[4][4])D_800CC2D0[arg0].unk1D4)[arg1];
-    if (D_800CC2D0[arg0].unk1D4 == NULL) {
+    refMtx = ((f32 (*)[4][4])D_800CC2D0[objIndex].unk1D4)[refBone];
+    if (D_800CC2D0[objIndex].unk1D4 == NULL) {
         return 0;
     }
-    dst = ((f32 (*)[4][4])D_800CC2D0[arg0].unk1D4)[arg2];
-    src[0][3] = src[1][3] = src[2][3] = dst[0][3] = dst[1][3] = dst[2][3] = 0.0f;
-    src[3][3] = dst[3][3] = 1.0f;
-    pos[0] = src[1][0];
-    pos[1] = src[1][1];
-    pos[2] = src[1][2];
-    delta[0] = x - src[3][0];
-    delta[1] = y - src[3][1];
-    delta[2] = z - src[3][2];
-    rx = delta[0] * dst[0][0] + delta[1] * dst[0][1] + delta[2] * dst[0][2];
-    ry = delta[0] * dst[1][0] + delta[1] * dst[1][1] + delta[2] * dst[1][2];
-    rz = delta[0] * dst[2][0] + delta[1] * dst[2][1] + delta[2] * dst[2][2];
-    func_15038468(&yaw, &pitch, rx, ry, rz, arg9);
+    mtx = ((f32 (*)[4][4])D_800CC2D0[objIndex].unk1D4)[bone];
+    refMtx[0][3] = refMtx[1][3] = refMtx[2][3] = mtx[0][3] = mtx[1][3] = mtx[2][3] = 0.0f;
+    refMtx[3][3] = mtx[3][3] = 1.0f;
+    unused[0] = refMtx[1][0]; // matching: dead stores IDO keeps (stack array); removing them changes the code
+    unused[1] = refMtx[1][1];
+    unused[2] = refMtx[1][2];
+    delta[0] = x - refMtx[3][0];
+    delta[1] = y - refMtx[3][1];
+    delta[2] = z - refMtx[3][2];
+    localX = delta[0] * mtx[0][0] + delta[1] * mtx[0][1] + delta[2] * mtx[0][2];
+    localY = delta[0] * mtx[1][0] + delta[1] * mtx[1][1] + delta[2] * mtx[1][2];
+    localZ = delta[0] * mtx[2][0] + delta[1] * mtx[2][1] + delta[2] * mtx[2][2];
+    func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
     if (yaw < range && -range < yaw) {
         out[0] = x;
         out[1] = y;
@@ -537,34 +541,39 @@ s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f
     return 0;
 }
 
-s32 func_15037880(s32 arg0, f32 *arg1) {
+/*
+ * Handles the fixed target modes in an object's unk2F8 low bits: 1 aims at D_800DBFF0's point,
+ * 2 at the point in D_800C3FF4 (unless a type-4 object is more than 250 units away), 3 holds.
+ * Returns 1 when one of these applied.
+ */
+s32 func_15037880(s32 objIndex, f32 *out) {
     struct127 *obj;
-    s32 temp;
+    s32 mode;
     f32 dx;
     f32 dz;
 
-    obj = &D_800CC2D0[arg0];
-    temp = obj->unk2F8 & 7;
-    if (temp == 1) {
-        arg1[0] = D_800DBFF0->unk2F8;
-        arg1[1] = D_800DBFF0->unk2FC;
-        arg1[2] = D_800DBFF0->unk300;
+    obj = &D_800CC2D0[objIndex];
+    mode = obj->unk2F8 & 7;
+    if (mode == 1) {
+        out[0] = D_800DBFF0->unk2F8;
+        out[1] = D_800DBFF0->unk2FC;
+        out[2] = D_800DBFF0->unk300;
         return 1;
     }
-    if (temp == 2) {
+    if (mode == 2) {
         if (obj->unk5 == 4) {
             dx = obj->x_position - (f32)D_800C3FF4[0];
             dz = obj->z_position - (f32)D_800C3FF4[2];
-            if (D_8009862C < (dx * dx) + (dz * dz)) {
+            if (62500.0f < dx * dx + dz * dz) {
                 return 1;
             }
         }
-        arg1[0] = D_800C3FF4[0];
-        arg1[1] = D_800C3FF4[1];
-        arg1[2] = D_800C3FF4[2];
+        out[0] = D_800C3FF4[0];
+        out[1] = D_800C3FF4[1];
+        out[2] = D_800C3FF4[2];
         return 1;
     }
-    if (temp == 3) {
+    if (mode == 3) {
         return 1;
     }
     return 0;
@@ -572,213 +581,231 @@ s32 func_15037880(s32 arg0, f32 *arg1) {
 
 typedef struct {
     f32 x, y, z;
-} Vec3_150379DC;
+} Vec3f;
+
+/* The eight node types func_150379DC scans for aim targets. */
+typedef struct {
+    s32 types[8];
+} AimNodeTypes;
+
+/* Entries of the D_800DCE50 per-type lists. */
+typedef struct AimNode {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct AimNode *next;
+    /* 0x0C */ u8 padC[0x2C];
+    /* 0x38 */ f32 unk38; /* position used by node types 25 and 72 */
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ u8 pad44[0x22];
+    /* 0x66 */ u16 unk66; /* types 25/72 are skipped while non-zero */
+    /* 0x68 */ u8 pad68[0x30];
+    /* 0x98 */ f32 unk98; /* position used by every other type */
+    /* 0x9C */ f32 unk9C;
+    /* 0xA0 */ f32 unkA0;
+} AimNode;
 
 typedef struct {
-    s32 v[8];
-} Ids_150379DC;
+    /* 0x000 */ u8 pad0[0x3E8];
+    /* 0x3E8 */ struct113 *unk3E8[2]; /* indexed by D_800BE9C0 */
+    /* 0x3F0 */ u8 pad3F0[6];
+    /* 0x3F6 */ u8 unk3F6;
+} AimHolderData;
 
-typedef struct Node_150379DC {
-    u8 pad0[8];
-    struct Node_150379DC *next;
-    u8 padC[0x2C];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[0x22];
-    u16 unk66;
-    u8 pad68[0x30];
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-} Node_150379DC;
-
+/* What func_150319CC returns (see game_5D2C0.c); only the fields used here. */
 typedef struct {
-    u8 unk0;
-    u8 pad1[0x47];
-    u8 *unk48;
-} S150319CC_150379DC;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 pad1[0x47];
+    /* 0x48 */ AimHolderData *unk48;
+} AimHolder;
 
-extern Ids_150379DC D_800843E0;
-extern u32 D_80084400;
+/* D_800C6650 holds a pointer to D_800C6654 struct160 aim points (variables.h declares it as an array). */
+#define AIM_POINTS (*(struct160 **)D_800C6650)
+
+extern AimNodeTypes D_800843E0;
 extern u8 D_80084404[];
-extern Node_150379DC *D_800DCE50[2][104];
-S150319CC_150379DC *func_150319CC(s32, struct127 *);
+extern AimNode *D_800DCE50[2][104];
+AimHolder *func_150319CC(s32, struct127 *);
 void func_1507E9E8(struct127 *, s32);
 
-void func_150379DC(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):
+ * its camera's target, a fixed target mode, the held object for anim 0x81, the nearest other object,
+ * the nearest struct160 aim point, or the nearest node from the D_800DCE50 lists, each within +-range degrees.
+ */
+void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, s32 axisMode) {
     struct127 *obj;
-    s32 result;
-    s32 found;
-    s16 x;
+    s32 hitObj;
+    s32 foundKind;
+    s16 objX;
     u32 idx;
-    struct160 *e;
-    f32 maxDist;
-    f32 ex;
-    f32 ey;
-    s32 p;
+    struct160 *point;
+    f32 radiusSq;
+    f32 px;
+    f32 py;
+    s32 list;
     s32 i;
     u32 bestIdx;
     f32 bestDist;
-    f32 ez;
-    f32 d;
-    static u32 D_80084400;
+    f32 pz;
+    f32 distSq;
+    static u32 D_80084400; /* aim point the next scan starts from */
 
-    arg0[0] = -99999.0f;
-    arg0[1] = -99999.0f;
-    arg0[2] = -99999.0f;
+    out[0] = -99999.0f;
+    out[1] = -99999.0f;
+    out[2] = -99999.0f;
     D_800C3FD0[0] = -99999.0f;
     D_800C3FD0[1] = -99999.0f;
     D_800C3FD0[2] = -99999.0f;
     if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
         return;
     }
-    obj = &D_800CC2D0[arg3];
+    obj = &D_800CC2D0[objIndex];
     if (obj->camera != NULL && obj->camera->unk2C == 0x100 && obj->camera->unk73C != 0) {
-        Vec3_150379DC camPos;
+        Vec3f camTarget;
 
-        camPos = *(Vec3_150379DC *)((u8 *)obj->camera + 0x740);
-        arg0[0] = camPos.x;
-        arg0[1] = camPos.y;
-        arg0[2] = camPos.z;
+        camTarget = *(Vec3f *)&obj->camera->pad73E[2]; /* struct108 +0x740 */
+        out[0] = camTarget.x;
+        out[1] = camTarget.y;
+        out[2] = camTarget.z;
         return;
     }
-    if (func_15037880(arg3, arg0) != 0) {
+    if (func_15037880(objIndex, out)) {
         return;
     }
-    if (arg3 == 0 && obj->unk84.uh == 0x81) {
-        S150319CC_150379DC *s;
-        u8 *sub;
-        struct113 *v;
-        Vec3_150379DC tgt;
-        struct127 *o;
+    if (objIndex == 0 && obj->unk84.uh == 0x81) {
+        AimHolder *holder;
+        AimHolderData *holderData;
+        struct113 *model;
+        Vec3f target;
+        struct127 *held;
 
-        if ((s = func_150319CC(0x1F, obj)) != NULL && (sub = s->unk48) != NULL && sub[0x3F6] != 0 &&
-            (v = ((struct113 **)(sub + 0x3E8))[D_800BE9C0]) != NULL &&
-            (o = func_15083E90(s->unk0)) != NULL) {
-            if (o->unk5 == 5) {
-                tgt.x = o->x_position;
-                tgt.y = o->y_position;
-                tgt.z = o->z_position;
+        if ((holder = func_150319CC(0x1F, obj)) != NULL && (holderData = holder->unk48) != NULL &&
+            holderData->unk3F6 != 0 && (model = holderData->unk3E8[D_800BE9C0]) != NULL &&
+            (held = func_15083E90(holder->unk0)) != NULL) {
+            if (held->unk5 == 5) {
+                target.x = held->x_position;
+                target.y = held->y_position;
+                target.z = held->z_position;
             } else {
-                func_15043FF0((vertex *)&tgt, v);
+                func_15043FF0((vertex *)&target, model);
             }
-            if (func_15037698(arg3, arg1, arg2, tgt.x, tgt.y, tgt.z, arg0, arg4, 0, arg6) != 0) {
+            if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
             }
         }
     }
-    found = 0;
-    x = (s32)D_800CC2D0[arg3].x_position;
+    foundKind = 0;
+    objX = (s32)D_800CC2D0[objIndex].x_position;
     bestDist = 1600000000.0f;
-    result = func_150380C0(arg0, arg1, arg2, arg3, arg4, arg5, &bestDist, 0, 0, 0, arg6);
-    if (result != 0 && bestDist != 1600000000.0f) {
-        found = 1;
+    hitObj = func_150380C0(out, refBone, bone, objIndex, range, preferId, &bestDist, 0, 0, 0, axisMode);
+    if (hitObj != 0 && bestDist != 1600000000.0f) {
+        foundKind = 1;
     }
     {
         f32 pos[3];
-        f32 range;
-        Ids_150379DC ids;
-        s32 ok;
+        f32 maxDist;
+        AimNodeTypes types;
+        s32 usable;
         s32 type;
-        Node_150379DC *node;
+        AimNode *node;
         f32 dx;
         f32 dy;
         f32 dz;
 
-    if (D_80084400 >= D_800C6654) {
-        D_80084400 = 0;
-    }
-    if (D_800C6654 != 0) {
-        idx = D_80084400;
-        bestIdx = -1;
-        do {
-            e = &(*(struct160 **)D_800C6650)[idx];
-            if (x < e->unkE && e->unk10 < x && (u16)e->unk6 == 0) {
-                maxDist = e->unk8;
-                ex = e->unk0;
-                ey = e->unk2;
-                ez = e->unk4;
-                dz = obj->z_position - ez;
-                dy = obj->y_position - ey;
-                dz *= dz;
-                dx = x - ex;
-                dy *= dy;
-                d = dx * dx + dz + dy;
-                if (d < maxDist && d < bestDist &&
-                    func_15037698(arg3, arg1, arg2, ex, ey + 50.0f, ez, arg0, arg4, 0, arg6) != 0) {
-                    bestIdx = idx;
-                    bestDist = d;
-                }
-            }
-            idx++;
-            if (idx == D_800C6654) {
-                idx = 0;
-            }
-        } while (idx != D_80084400);
-        if (bestIdx != -1) {
-            D_80084400 = bestIdx;
-            found = 2;
+        if (D_80084400 >= D_800C6654) {
+            D_80084400 = 0;
         }
-    }
-
-    ids = D_800843E0;
-    for (p = 0; p < 2; p++) {
-        for (i = 0; i < 8; i++) {
-            type = ids.v[i];
-            node = D_800DCE50[p][type];
-            while (node != NULL) {
-                if (type == 25 || type == 72) {
-                    extern s32 D_800C6654;
-                    if (node->unk66 == 0) {
-                        range = 250000.0f;
-                        ok = 1;
-                        pos[0] = node->unk38;
-                        pos[1] = node->unk3C;
-                        pos[2] = node->unk40;
-                    } else {
-                        ok = 0;
-                    }
-                } else {
-                    range = 250000.0f;
-                    ok = 1;
-                    pos[0] = node->unk98;
-                    pos[1] = node->unk9C;
-                    pos[2] = node->unkA0;
-                }
-                if (ok) {
-                    ez = pos[2];
-                    ey = pos[1];
-                    ex = pos[0];
-                    dz = obj->z_position - ez;
-                    dy = obj->y_position - ey;
+        if (D_800C6654 != 0) {
+            idx = D_80084400;
+            bestIdx = -1;
+            do {
+                point = &AIM_POINTS[idx];
+                if (objX < point->unkE && point->unk10 < objX && (u16)point->unk6 == 0) {
+                    radiusSq = point->unk8;
+                    px = point->unk0;
+                    py = point->unk2;
+                    pz = point->unk4;
+                    dz = obj->z_position - pz;
+                    dy = obj->y_position - py;
                     dz *= dz;
-                    dx = x - ex;
+                    dx = objX - px;
                     dy *= dy;
-                    d = dx * dx + dz + dy;
-                    if (d < range) {
-                        dx = x - pos[0];
-                        if (dx * dx + dz + dy < bestDist &&
-                            func_15037698(arg3, arg1, arg2, ex, ey, ez, arg0, arg4, 0, arg6) != 0) {
-                            found = 3;
-                            bestDist = d;
+                    distSq = dx * dx + dz + dy;
+                    if (distSq < radiusSq && distSq < bestDist &&
+                        func_15037698(objIndex, refBone, bone, px, py + 50.0f, pz, out, range, 0, axisMode)) {
+                        bestIdx = idx;
+                        bestDist = distSq;
+                    }
+                }
+                idx++;
+                if (idx == D_800C6654) {
+                    idx = 0;
+                }
+            } while (idx != D_80084400);
+            if (bestIdx != -1) {
+                D_80084400 = bestIdx;
+                foundKind = 2;
+            }
+        }
+
+        types = D_800843E0;
+        for (list = 0; list < 2; list++) {
+            for (i = 0; i < 8; i++) {
+                type = types.types[i];
+                node = D_800DCE50[list][type];
+                while (node != NULL) {
+                    if (type == 25 || type == 72) {
+                        extern s32 D_800C6654; // matching: this redeclaration shifts IDO's scheduling of the loop
+                        if (node->unk66 == 0) {
+                            maxDist = 250000.0f;
+                            usable = 1;
+                            pos[0] = node->unk38;
+                            pos[1] = node->unk3C;
+                            pos[2] = node->unk40;
+                        } else {
+                            usable = 0;
+                        }
+                    } else {
+                        maxDist = 250000.0f;
+                        usable = 1;
+                        pos[0] = node->unk98;
+                        pos[1] = node->unk9C;
+                        pos[2] = node->unkA0;
+                    }
+                    if (usable) {
+                        pz = pos[2];
+                        py = pos[1];
+                        px = pos[0];
+                        dz = obj->z_position - pz;
+                        dy = obj->y_position - py;
+                        dz *= dz;
+                        dx = objX - px;
+                        dy *= dy;
+                        distSq = dx * dx + dz + dy;
+                        if (distSq < maxDist) {
+                            dx = objX - pos[0];
+                            if (dx * dx + dz + dy < bestDist &&
+                                func_15037698(objIndex, refBone, bone, px, py, pz, out, range, 0, axisMode)) {
+                                foundKind = 3;
+                                bestDist = distSq;
+                            }
                         }
                     }
+                    node = node->next;
                 }
-                node = node->next;
             }
         }
     }
-    }
-    if (found == 1) {
-        func_1507E9E8(obj, result - 1);
+    if (foundKind == 1) {
+        func_1507E9E8(obj, hitObj - 1);
         return;
     }
-    if (found == 2) {
-        if ((*(struct160 **)D_800C6650)[bestIdx].unk12 != 0) {
-            func_1507E9E8(obj, (*(struct160 **)D_800C6650)[bestIdx].unk12 - 1);
+    if (foundKind == 2) {
+        if (AIM_POINTS[bestIdx].unk12 != 0) {
+            func_1507E9E8(obj, AIM_POINTS[bestIdx].unk12 - 1);
         }
-    } else if (found == 3) {
+    } else if (foundKind == 3) {
+        // matching: the empty branch keeps the shared epilogue branch IDO emits
     }
 }
 
