@@ -1741,7 +1741,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             arg0->unk83 = 8;
                             if ((arg0->unk84.uh != 0x7C) && (arg0->unk84.uh != 0x20D) && (arg0->unk84.uh != 0x238)) {
                                 func_151D4668(arg0);
-                                func_1000FA64(0x2CF, arg0->x_position, arg0->y_position, arg0->z_position, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0);
+                                func_1000FA64(0x2CF, arg0->x_position, arg0->y_position, arg0->z_position, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C0, 0, 0); // matching: the (s32) casts on these tables steer IDO; a plain pointer reschedules
                                 if (((arg0->id == 0x3BU) || (arg0->id == 0x80)) && !(func_150ADA20() & 3)) {
                                     s32 sound;
 
@@ -2658,8 +2658,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
 
             ok = 1;
             if (CTL(arg0)->unk7A != 0) {
-                angle = func_15048A70(GATES[(s32)CTL(arg0)->unk7A].unk10, arg0->unk40);
-                if ((GATES[(s32)CTL(arg0)->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+                angle = func_15048A70(GATES[CTL(arg0)->unk7A].unk10, arg0->unk40);
+                if ((GATES[CTL(arg0)->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
@@ -2668,7 +2668,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 arg0->unk83 = 0xFF;
                 CTL(arg0)->action = 0x17;
                 anim = 0x8E;
-                arg0->unk76 = (u32)(GATES[(s32)CTL(arg0)->unk7A].unk10 * 182.0444489f) - 0x4000;
+                arg0->unk76 = (u32)(GATES[CTL(arg0)->unk7A].unk10 * 182.0444489f) - 0x4000;
             }
         }
         break;
@@ -2734,7 +2734,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             if ((s8)arg0->unk284 == 0) {
                 arg0->unk278 = (u16)arg0->unk278 + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->unk278) {
-                    func_1507E7E4(arg0, (u8)sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
+                    func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
                     arg0->unk278 = 0;
                     arg0->unk284 = 1;
                 }
@@ -2969,7 +2969,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         f32 dist;
 
                         obj->unk65 = 0;
-                        dist = ((f32)(0xF0 - obj->unk2E4) * 210.0f) / 240.0f;
+                        dist = ((240 - obj->unk2E4) * 210.0f) / 240.0f;
                         dist += 40.0f;
                         if (CTL(arg0)->unk198 != 0) {
                             pitch = (30.0f - CTL(arg0)->unk170) * 182.0444489f;
