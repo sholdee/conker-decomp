@@ -675,19 +675,20 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
     }
 }
 
+/* A screen fade colour for func_1517EE40 (r, g, b, ticks, direction, layer; see game_1AC2F0.c). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-} struct_game49D30_4;
+    u8 r;
+    u8 g;
+    u8 b;
+} FadeColor;
 
 extern u8 D_800C35A9;
-extern struct_game49D30_4 D_80084110[];
+extern FadeColor D_80084110[];
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 
 /* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
-   flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and pass
-   the D_80084110 entry named by the earliest type-1 value-1 event to func_1517EE40. */
+   flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and start
+   the screen fade (func_1517EE40) to the D_80084110 colour named by the earliest type-1 value-1 event. */
 void func_1501DAAC(s32 scene) {
     s32 i;
     s32 best;
@@ -741,9 +742,9 @@ void func_1501DAAC(s32 scene) {
                 if ((best == -1) || (score < best)) {
                     best = score;
                     if (found->unk6 == 1) {
-                        func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 1, 0);
+                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 1, 0);
                     } else {
-                        func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 0, 0);
+                        func_1517EE40(D_80084110[found->unk5].r, D_80084110[found->unk5].g, D_80084110[found->unk5].b, 0, 0, 0);
                     }
                 }
             }
@@ -1412,7 +1413,7 @@ typedef struct {
     f32 x;
     f32 y;
     f32 z;
-} Vec3f_1501F72C;
+} SeqVec3f;
 void func_15020878(s32 track, s32 segment, s32 slot);
 
 /* Find the path segment containing distance `dist` along track `track` and write two points to
@@ -1423,7 +1424,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
     s32 lo;
     s32 hi;
     s32 sample;
-    Vec3f_1501F72C points[4];
+    SeqVec3f points[4];
     f32 *distances;
     s32 i;
     u8 j;
@@ -1470,9 +1471,9 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
         j = 0;
         for (i = 0; i < 2; i++) {
             t = (f32)(sample + i) * 0.01f;
-            ((Vec3f_1501F72C *)out)[j].x = ((D_800C3A50[slot][track].coef3[0] * t + D_800C3A50[slot][track].coef2[0]) * t + D_800C3A50[slot][track].coef1[0]) * t + D_800C3A50[slot][track].coef0[0];
-            ((Vec3f_1501F72C *)out)[j].y = ((D_800C3A50[slot][track].coef3[1] * t + D_800C3A50[slot][track].coef2[1]) * t + D_800C3A50[slot][track].coef1[1]) * t + D_800C3A50[slot][track].coef0[1];
-            ((Vec3f_1501F72C *)out)[j].z = ((D_800C3A50[slot][track].coef3[2] * t + D_800C3A50[slot][track].coef2[2]) * t + D_800C3A50[slot][track].coef1[2]) * t + D_800C3A50[slot][track].coef0[2];
+            ((SeqVec3f *)out)[j].x = ((D_800C3A50[slot][track].coef3[0] * t + D_800C3A50[slot][track].coef2[0]) * t + D_800C3A50[slot][track].coef1[0]) * t + D_800C3A50[slot][track].coef0[0];
+            ((SeqVec3f *)out)[j].y = ((D_800C3A50[slot][track].coef3[1] * t + D_800C3A50[slot][track].coef2[1]) * t + D_800C3A50[slot][track].coef1[1]) * t + D_800C3A50[slot][track].coef0[1];
+            ((SeqVec3f *)out)[j].z = ((D_800C3A50[slot][track].coef3[2] * t + D_800C3A50[slot][track].coef2[2]) * t + D_800C3A50[slot][track].coef1[2]) * t + D_800C3A50[slot][track].coef0[2];
             j ^= 1;
         }
     } else {
@@ -1485,9 +1486,9 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
         }
         j = 0;
         for (i = 0; i < 2; i++) {
-            ((Vec3f_1501F72C *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
-            ((Vec3f_1501F72C *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
-            ((Vec3f_1501F72C *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
+            ((SeqVec3f *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
+            ((SeqVec3f *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
+            ((SeqVec3f *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
             j ^= 1;
         }
     }
@@ -1597,9 +1598,9 @@ void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
     }
 
     for (i = start; i < start + count; outIdx++, i++) {
-        ((Vec3f_1501F72C *)out)[outIdx].x = keys[i].x;
-        ((Vec3f_1501F72C *)out)[outIdx].y = keys[i].y;
-        ((Vec3f_1501F72C *)out)[outIdx].z = keys[i].z;
+        ((SeqVec3f *)out)[outIdx].x = keys[i].x;
+        ((SeqVec3f *)out)[outIdx].y = keys[i].y;
+        ((SeqVec3f *)out)[outIdx].z = keys[i].z;
     }
 
     if (!(flags & 1)) {
@@ -1780,8 +1781,7 @@ typedef struct {
     u8 unk8A;
 } SeqActor; // struct131 with the fields this file uses (include/structs.h still pads them)
 
-typedef struct { f32 x, y, z; } V3f15020EC4;
-V3f15020EC4 D_800C3620;
+SeqVec3f D_800C3620;
 extern void func_15128CB0(struct108 *);
 extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
