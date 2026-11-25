@@ -9,9 +9,9 @@ typedef struct {
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
     /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ f32 zero;
-    /* 0x14 */ f32 ground;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
 /* Result of a floor probe (CollisionHit in game_71820.c). */
@@ -29,8 +29,9 @@ typedef struct {
 s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
 
 /*
- * With a 1-in-16 chance, spawns a particle (func_151491F4) on the ground 107-2010 units from
- * the player's camera, at an angle within 20 units of its yaw (unk380, converted from degrees).
+ * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
+ * at an angle within 20 units of its yaw (unk380, converted from degrees). The spot needs a floor
+ * above the eye; the particle sits on the floor at most 250 units below the eye (else at that depth).
  */
 void func_1515AF90(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
@@ -71,7 +72,7 @@ void func_1515AF90(s16 player) {
         probe.z = effect.position.z;
         hit.height = -10000.0f;
         if (func_1504697C(&probe, 0, eye->y, &hit)) {
-            effect.ground = hit.height;
+            effect.upperFloorY = hit.height;
         } else {
             valid = FALSE;
         }
@@ -91,11 +92,10 @@ void func_1515AF90(s16 player) {
                 effect.position.y = bottom;
             }
         }
-        effect.scale = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
-        effect.zero = 0.0f;
+        effect.unkC = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
+        effect.unk10 = 0.0f;
         if (valid) {
-            angle = (func_150ADA20() % 61U) + 5;
-            particle = func_151491F4(angle, -1, 12, 1, 7, 0x18, 0xFF, 0);
+            particle = func_151491F4((func_150ADA20() % 61U) + 5, -1, 12, 1, 7, 0x18, 0xFF, 0);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0x28, &effect, sizeof(effect));
             }
@@ -128,7 +128,7 @@ typedef struct {
     /* 0x58 */ s32 unk58;
     /* 0x5C */ u8 pad5C[4];
     /* 0x60 */ s8 unk60[4];
-    /* 0x64 */ u8 pad64[8];
+    /* 0x64 */ u8 pad64[8]; // matching: game_117490.c has 0xC here; this frame needs a 0x6C-byte desc
 } ParticleDesc;
 
 /* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
@@ -154,10 +154,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 pad0[0x28];
     /* 0x28 */ ParticleEmitter emitter;
-    /* 0x40 */ u8 pad40[4];
 } EmitterObject;
 
-extern f32 D_800BE9A4;
 void *func_151303BC(ParticleDesc *, s32, s32);
 
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
