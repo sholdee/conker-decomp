@@ -28,7 +28,8 @@ void func_1500C2A0(void) {
 typedef struct {
     /* 0x00 */ f32 unk00;
     /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 scale[2];
+    /* 0x08 */ f32 scaleX;
+    /* 0x0C */ f32 scaleY;
     /* 0x10 */ f32 rot[3]; /* degrees */
     /* 0x1C */ f32 unk1C[3];
     /* 0x28 */ f32 posX;
@@ -105,7 +106,7 @@ void func_1500C2F0(s32 region, f32 density) {
             const u16 types[9] = { 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4E, 0x4F, 0x50, 0x51 };
             f32 range; // matching: reused for the distance to the nearer bound (frame size)
             f32 y;
-            f32 temp;
+            f32 below;
 
             func_15008340(region, &part.posX, &part.posZ, &top, &bottom);
             range = top - bottom;
@@ -116,8 +117,8 @@ void func_1500C2F0(s32 region, f32 density) {
 
                 above = fabsf(y - top);
                 part.posY = y;
-                temp = fabsf(y - bottom);
-                range = (temp < above) ? temp : above;
+                below = fabsf(y - bottom);
+                range = (below < above) ? below : above;
                 part.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
             }
             part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
@@ -130,13 +131,9 @@ void func_1500C2F0(s32 region, f32 density) {
             part.type = types[RANDOM() % 9];
             if (part.type == 0x4B || part.type == 0x48 || part.type == 0x4E || part.type == 0x4F ||
                 part.type == 0x50 || part.type == 0x51) {
-                temp = RANDOM_U16() * inv65535 * 0.25f + 0.5f;
-                part.scale[0] = temp;
-                part.scale[1] = temp;
+                part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 0.5f;
             } else {
-                temp = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
-                part.scale[0] = temp;
-                part.scale[1] = temp;
+                part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             func_1510F800(0);
             part.unk5C = func_1510FD20(part.posX, part.posZ);
@@ -477,242 +474,150 @@ void func_1500CE4C(s32 arg0, f32 arg1) {
     }
 }
 
-void func_1500D3AC(s32 arg0, f32 arg1) {
-    f32 phi_f30;
-    s32 pad;
+/* Like func_1500C2F0, at a tenth of the density and always with particle type 0x53. */
+void func_1500D3AC(s32 region, f32 density) {
+    f32 count;
+    s32 pad; // matching: stack slot
 
-    phi_f30 = func_1514462C(arg0) * arg1 * 2.000000023e-07f;
-    if (phi_f30 > 1.0f) {
-        f32 temp_f22;
-        Part_1500D3AC part;
-        f32 sp90;
-        f32 sp8C;
-        f32 phi_f20;
-        f32 temp_f2;
-        f32 temp_f0;
+    count = func_1514462C(region) * density * 2.000000023e-07f;
+    if (count > 1.0f) {
+        f32 inv65535;
+        Particle part;
+        f32 top;
+        f32 bottom;
+        f32 range; // matching: reused for the distance to the nearer bound
+        f32 y;
+        f32 below;
 
         part.unk00 = 1.0f;
         part.unk04 = 1.0f;
-        part.unk1C = 1.0f;
-        part.unk20 = 1.0f;
-        part.unk24 = 1.0f;
-        part.unk50 = 0x4D40;
-        part.unk54 = 0x12C;
+        part.unk1C[0] = 1.0f;
+        part.unk1C[1] = 1.0f;
+        part.unk1C[2] = 1.0f;
+        part.flags = 0x4D40;
+        part.unk54 = 300;
         part.unk58 = 0;
-        part.unk60 = 0xFF;
-        part.unk61 = 0xE;
-        part.unk62 = 0;
-        part.unk63 = 0;
-        part.unk64 = 0;
-        part.unk65 = 0;
-        part.unk66 = 0;
-        part.unk67 = 0;
-        part.unk68 = 2;
+        part.unk60[0] = 0xFF;
+        part.unk60[1] = 14;
+        part.unk60[2] = 0;
+        part.unk60[3] = 0;
+        part.unk60[4] = 0;
+        part.unk60[5] = 0;
+        part.unk60[6] = 0;
+        part.unk60[7] = 0;
+        part.unk60[8] = 2;
         part.unk6A = 0;
         part.unk6C = 0;
         part.unk70 = 0;
         part.unk72 = 1;
         part.unk74 = 0xFF;
-        part.unk56 = 0x53;
-        temp_f22 = 1.525902189e-05f;
+        part.type = 0x53;
+        inv65535 = 1.525902189e-05f;
         part.unk44 = 0.0f;
         do {
-            func_15008340(arg0, &part.unk28, &part.unk30, &sp90, &sp8C);
-            phi_f20 = sp90 - sp8C;
-            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp8C + (phi_f20 * 0.25f));
-            part.unk38 = temp_f2;
+            func_15008340(region, &part.posX, &part.posZ, &top, &bottom);
+            range = top - bottom;
+            y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
+            part.centerY = y;
             {
-            f32 temp_f12;
-            temp_f12 = fabsf(temp_f2 - sp90);
-            part.unk2C = temp_f2;
-            temp_f0 = fabsf(temp_f2 - sp8C);
-            if (temp_f0 < temp_f12) {
-                phi_f20 = temp_f0;
-            } else {
-                phi_f20 = temp_f12;
+                f32 above;
+
+                above = fabsf(y - top);
+                part.posY = y;
+                below = fabsf(y - bottom);
+                range = (below < above) ? below : above;
+                part.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
             }
-            part.unk4C = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
-            }
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            part.unk34 = (temp_f0 + temp_f0) * 3.141592741f;
-            part.unk3C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
-            part.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk14 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk40 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            part.unk48 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 1.0f;
-            part.unk08 = temp_f0;
-            part.unk0C = temp_f0;
+            part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
+            part.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
+            part.rot[0] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[1] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[2] = RANDOM_U16() * inv65535 * 360.0f;
+            part.unk40 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.unk48 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.unk28, part.unk30);
+            part.unk5C = func_1510FD20(part.posX, part.posZ);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
-            phi_f30 -= 1.0f;
-        } while (phi_f30 > 1.0f);
+            count -= 1.0f;
+        } while (count > 1.0f);
     }
 }
-// void func_1500D3AC(s32 arg0, f32 arg1) {
-//
-//     f32 temp_f0;
-//     struct171 tmp;
-//     f32 temp_f12;
-//     f32 phi_f18;
-//     f32 phi_f30; // main tmp
-//
-//
-//     phi_f30 = func_1514462C(arg0) * arg1 * D_8009616C;
-//
-//     if (phi_f30 > 1.0f) {
-//         tmp.unk8 = 1.0f;
-//         tmp.unkC = 1.0f;
-//         tmp.unk24 = 1.0f;
-//         tmp.unk28 = 1.0f;
-//         tmp.unk2C = 1.0f;
-//         tmp.unk58 = 19776;
-//         tmp.unk5C = 300;
-//         tmp.unk60 = 0;
-//         tmp.unk68 = 255;
-//         tmp.unk69 = 14;
-//         tmp.unk6A = 0;
-//         tmp.unk6B = 0;
-//         tmp.unk6C = 0;
-//         tmp.unk6D = 0;
-//         tmp.unk6E = 0;
-//         tmp.unk6F = 0;
-//         tmp.unk70 = 2;
-//         tmp.unk72 = 0;
-//         tmp.unk74 = 0;
-//         tmp.unk78 = 0;
-//         tmp.unk7A = 1;
-//         tmp.unk7C = 0xFF;
-//         tmp.unk5E = 0x53;
-//         tmp.unk4C = 0.0f;
-//
-//         do {
-//             func_15008340(arg0, &tmp.unk30, &tmp.unk38, &tmp.unk4, &tmp.unk0);
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk34 = tmp.unk40 = (phi_f18 * D_80096170 * ((tmp.unk4 - tmp.unk0) * 0.5f)) + (tmp.unk0 + ((tmp.unk4 - tmp.unk0) * 0.25f));
-//
-//             temp_f12 = fabsf(tmp.unk40 - tmp.unk4);
-//             temp_f0 = fabsf(tmp.unk40 - tmp.unk0);
-//
-//             if (temp_f0 < temp_f12) {
-//                 temp_f0 = temp_f0;
-//             } else {
-//                 temp_f0 = temp_f12;
-//             }
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk54 = ((phi_f18 * D_80096170 * 0.75f) + 0.25f) * temp_f0;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk3C = ((phi_f18 * D_80096170) + (phi_f18 * D_80096170)) * D_80096174;
-//
-//             phi_f18 = (u16)(osGetCount() * func_150ADA20());
-//             tmp.unk44 = (phi_f18 * D_80096170 * D_80096178) + D_8009617C;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk18 = phi_f18 * D_80096170 * 360.0f;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk1C = phi_f18 * D_80096170 * 360.0f;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk20 = phi_f18 * D_80096170 * 360.0f;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk48 = phi_f18 * D_80096170 * D_80096180;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk50 = phi_f18 * D_80096170 * D_80096184;
-//
-//             phi_f18 = (u16) (osGetCount() * func_150ADA20());
-//             tmp.unk10 = tmp.unk14 = (phi_f18 * D_80096170 * 0.25f) + 1.0f;
-//
-//             func_1510F800(0);
-//             tmp.unk64 = func_1510FD20(tmp.unk30, tmp.unk38);
-//             func_15132A4C(&tmp, 3, 0xFF, 0, 0xFF, 1);
-//
-//         } while ((phi_f30 -= 1.0f) > 1.0f);
-//     }
-// }
 
-void func_1500D8C8(s32 arg0, f32 arg1) {
-    f32 phi_f30;
-    s32 pad;
+/* Like func_1500C2F0 with another particle type list; type 0x39 is drawn at 35% scale. */
+void func_1500D8C8(s32 region, f32 density) {
+    f32 count;
+    s32 pad; // matching: stack slot
 
-    phi_f30 = func_1514462C(arg0) * arg1 * 1.999999995e-06f;
-    if (phi_f30 > 1.0f) {
-        f32 temp_f22;
-        Part_1500D3AC part;
-        f32 sp90;
-        f32 sp8C;
+    count = func_1514462C(region) * density * 1.999999995e-06f;
+    if (count > 1.0f) {
+        f32 inv65535;
+        Particle part;
+        f32 top;
+        f32 bottom;
 
         part.unk00 = 1.0f;
         part.unk04 = 1.0f;
-        part.unk1C = 1.0f;
-        part.unk20 = 1.0f;
-        part.unk24 = 1.0f;
-        part.unk50 = 0x4D40;
-        part.unk54 = 0x12C;
+        part.unk1C[0] = 1.0f;
+        part.unk1C[1] = 1.0f;
+        part.unk1C[2] = 1.0f;
+        part.flags = 0x4D40;
+        part.unk54 = 300;
         part.unk58 = 0;
-        part.unk60 = 0xFF;
-        part.unk61 = 0xE;
-        part.unk62 = 0;
-        part.unk63 = 0;
-        part.unk64 = 0;
-        part.unk65 = 0;
-        part.unk66 = 0;
-        part.unk67 = 0;
-        part.unk68 = 2;
+        part.unk60[0] = 0xFF;
+        part.unk60[1] = 14;
+        part.unk60[2] = 0;
+        part.unk60[3] = 0;
+        part.unk60[4] = 0;
+        part.unk60[5] = 0;
+        part.unk60[6] = 0;
+        part.unk60[7] = 0;
+        part.unk60[8] = 2;
         part.unk6A = 0;
         part.unk6C = 0;
         part.unk70 = 0;
         part.unk72 = 1;
         part.unk74 = 0xFF;
-        temp_f22 = 1.525902189e-05f;
+        inv65535 = 1.525902189e-05f;
         part.unk44 = 0.0f;
         do {
-                        s32 pad2;
+            s32 pad2; // matching: stack slot
             const u16 types[14] = { 0x76, 0x77, 0x78, 0x79, 0x53, 0x3E, 0x3D, 0x39, 0x02, 0x03, 0x4E, 0x4F, 0x50, 0x51 };
-            f32 phi_f20;
-            f32 temp_f2;
-            f32 temp_f0;
+            f32 range; // matching: reused for the distance to the nearer bound
+            f32 y;
+            f32 below;
 
-            func_15008340(arg0, &part.unk28, &part.unk30, &sp90, &sp8C);
-            phi_f20 = sp90 - sp8C;
-            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp8C + (phi_f20 * 0.25f));
-            part.unk38 = temp_f2;
+            func_15008340(region, &part.posX, &part.posZ, &top, &bottom);
+            range = top - bottom;
+            y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
+            part.centerY = y;
             {
-            f32 temp_f12;
-            temp_f12 = fabsf(temp_f2 - sp90);
-            part.unk2C = temp_f2;
-            temp_f0 = fabsf(temp_f2 - sp8C);
-            if (temp_f0 < temp_f12) {
-                phi_f20 = temp_f0;
-            } else {
-                phi_f20 = temp_f12;
+                f32 above;
+
+                above = fabsf(y - top);
+                part.posY = y;
+                below = fabsf(y - bottom);
+                range = (below < above) ? below : above;
+                part.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
             }
-            part.unk4C = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
-            }
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            part.unk34 = (temp_f0 + temp_f0) * 3.141592741f;
-            part.unk3C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
-            part.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk14 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            part.unk40 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            part.unk48 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
-            part.unk56 = types[(osGetCount() * func_150ADA20()) % 14U];
-            part.unk08 = part.unk0C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 0.5f;
-            if (part.unk56 == 0x39) {
-                part.unk08 *= 0.349999994f;
-                part.unk0C *= 0.349999994f;
+            part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
+            part.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
+            part.rot[0] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[1] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[2] = RANDOM_U16() * inv65535 * 360.0f;
+            part.unk40 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.unk48 = RANDOM_U16() * inv65535 * 1.600000024f;
+            part.type = types[RANDOM() % 14];
+            part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 0.5f;
+            if (part.type == 0x39) {
+                part.scaleX *= 0.349999994f;
+                part.scaleY *= 0.349999994f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.unk28, part.unk30);
+            part.unk5C = func_1510FD20(part.posX, part.posZ);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
-            phi_f30 -= 1.0f;
-        } while (phi_f30 > 1.0f);
+            count -= 1.0f;
+        } while (count > 1.0f);
     }
 }
 
