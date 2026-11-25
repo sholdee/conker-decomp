@@ -143,6 +143,14 @@ typedef struct {
     s32 loaded;
 } LevelModelEntry;
 
+/* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
+typedef struct {
+    /* 0x0 */ s8 opcode;
+    /* 0x1 */ u8 pad1[2];
+    /* 0x3 */ u8 index;
+    /* 0x4 */ u32 addr;
+} DlCommand;
+
 #define HANDLES (*(s32 **)D_800DBEF8)      // per object: handle released with func_10004074
 #define RELEASE_DELAY (*(u8 **)D_800DBEFC) // per object: frames to keep the handle once hidden
 
@@ -162,8 +170,8 @@ extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;
 void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn);
-s32 func_15004BF0(s32 grouped);
-void func_15004CE0();
+s32 func_15004BF0(s32 fromTop);
+void func_15004CE0(DlCommand *dl, u32 base);
 
 /* Creates the level's objects (D_800DBEF4) from its two placement lists and allocates per-object buffers. */
 void func_150039E0(s32 level, s32 arg1) {
@@ -375,7 +383,7 @@ void func_150039E0(s32 level, s32 arg1) {
         }
         if (!found) {
             func_1510CE60(obj->displayList, 0, 1, 0x3F, 0);
-            func_15004CE0(obj->displayList, model);
+            func_15004CE0((DlCommand *)obj->displayList, (u32)model);
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
@@ -507,14 +515,6 @@ void func_150045C4(s32 arg0) {
         }
     }
 }
-/* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
-typedef struct {
-    /* 0x0 */ s8 opcode;
-    /* 0x1 */ u8 pad1[2];
-    /* 0x3 */ u8 index;
-    /* 0x4 */ u32 addr;
-} DlCommand;
-
 /*
  * Relocates a display list: adds `offset` to the address of each G_VTX (and G_DL) command and
  * `matrixOffset` to the address of each G_MOVEMEM of a matrix.
@@ -619,60 +619,60 @@ void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn) {
     }
 }
 
-s32 func_15004BF0(s32 arg0) {
-    typedef struct { u8 before[0x72]; u8 objectId; u8 after[0x2D]; } Entry;
-    s32 objectIndex;
-    s32 candidateObjectId;
+/*
+ * Returns an object id that no object uses yet. With `fromTop` 0, counts up from 1 over the grouped
+ * objects (0xFF if all are taken); otherwise counts down from 0xFF - D_800DBF00 over all objects.
+ */
+s32 func_15004BF0(s32 fromTop) {
+    s32 i;
+    s32 id;
 
-    if (arg0 == 0) {
-        candidateObjectId = 1;
-        for (objectIndex = (arg0 = D_800DBF00); objectIndex < D_800DBEF0; objectIndex++) {
-            if (candidateObjectId == ((Entry *)D_800DBEF4)[objectIndex].objectId) {
-                candidateObjectId++;
-                objectIndex = arg0 - 1;
+    // matching: the parameter doubles as the start value so that IDO keeps it in a0
+    if (fromTop == 0) {
+        id = 1;
+        for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
+            if (id == OBJECTS[i].id) {
+                id++;
+                i = fromTop - 1; // rescan with the next id
             }
-            if (candidateObjectId >= 0x100) {
-                candidateObjectId = 0xFF;
+            if (id >= 0x100) {
+                id = 0xFF;
                 break;
             }
         }
     } else {
-        arg0 = 0xFF - D_800DBF00;
-        candidateObjectId = arg0;
-        for (objectIndex = 0; objectIndex < D_800DBEF0; objectIndex++) {
-            if (candidateObjectId == ((Entry *)D_800DBEF4)[objectIndex].objectId) {
-                candidateObjectId--;
-                objectIndex = -1;
+        fromTop = 0xFF - D_800DBF00;
+        id = fromTop;
+        for (i = 0; i < D_800DBEF0; i++) {
+            if (id == OBJECTS[i].id) {
+                id--;
+                i = -1; // rescan with the next id
             }
-            if (candidateObjectId <= 0) {
-                candidateObjectId = arg0;
+            if (id <= 0) {
+                id = fromTop;
                 break;
             }
         }
     }
-    return candidateObjectId;
+    return id;
 }
-typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15004CE0;
-
-void func_15004CE0(Struct15004CE0 *arg0, u32 arg1) {
+/* Rebases the segment-relative (below 0x80000000) matrix addresses of a display list's G_MOVEMEMs by `base`. */
+void func_15004CE0(DlCommand *dl, u32 base) {
     s32 i = 0;
-    Struct15004CE0 *p = arg0;
-    s8 tag;
-    if (arg0->unk0 == (-0x21)) {
+    DlCommand *p = dl;
+    s8 cmd;
+
+    if (dl->opcode == (s8)G_ENDDL) {
         return;
     }
-    p = &arg0[i];
-    tag = p->unk0;
+    p = &dl[i];
+    cmd = p->opcode;
     do {
         i++;
-        if (p->unk0 == (-0x24)) {
-            if (p->unk3 == 0xE) {
-                if (p->unk4 < 0x80000000) {
-                    p->unk4 += arg1;
-                }
-            }
+        if (p->opcode == (s8)G_MOVEMEM && p->index == G_MV_MATRIX && p->addr < 0x80000000) {
+            p->addr += base;
         }
-        p = &arg0[i];
-        do { tag = p->unk0; } while (0);
-    } while (p->unk0 != (-0x21));
+        p = &dl[i];
+        do { cmd = p->opcode; } while (0); // matching: the wrapper keeps this dead reload, as in the original
+    } while (p->opcode != (s8)G_ENDDL);
 }
