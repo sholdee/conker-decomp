@@ -395,9 +395,9 @@ typedef struct {
     /* 0x38 */ u8 burstPreset;
     /* 0x39 */ u8 pad39[3];
     /* 0x3C */ f32 burstRate;
-} TrailParams; /* size 0x40 */
+} TrailStateParams; /* size 0x40 */
 
-extern void *func_150B3F5C(TrailParams *params, Vec3f *pos, s16 capacity);
+extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Per-variant trail settings used by func_150B648C. */
@@ -410,7 +410,7 @@ extern s16 D_8009FC8E[][2];   /* capacity */
 
 /** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
 void func_150B648C(u8 variant) {
-    TrailParams params;
+    TrailStateParams params;
     Vec3f pos;
 
     if (variant == 0) {

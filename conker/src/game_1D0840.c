@@ -28,7 +28,7 @@ typedef struct {
     /* 0x2D */ u8 headFadeCount;
     /* 0x2E */ u8 headFadeStep;
     /* 0x2F */ u8 pad2F;
-} TrailParams;
+} BoneTrailParams;
 
 #define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
 #define TRAIL_FADE_TAIL 2
@@ -36,7 +36,7 @@ typedef struct {
 
 /* Per-trail state, stored at TrailEffect.state. */
 typedef struct {
-    /* 0x00 */ TrailParams params;
+    /* 0x00 */ BoneTrailParams params;
     /* 0x30 */ u8 flags;
     /* 0x31 */ u8 pad31[3];
     /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
@@ -151,7 +151,7 @@ typedef union {
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ TrailParams trail;
+    /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
 extern s32 D_800D2C9C;
@@ -170,15 +170,15 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 void func_15153634(SpriteBurst *, s32, s32, s32);
-TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
+TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);
 void func_151A499C(Actor *owner, u8 arg1);
-s32 func_151A4E34(TrailParams *params, Vec3f *out);
+s32 func_151A4E34(BoneTrailParams *params, Vec3f *out);
 void func_151A4E9C(TrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
 void func_151A3390(Actor *owner, u8 arg1) {
-    TrailParams params;
+    BoneTrailParams params;
     f32 origin[3];
 
     params.owner = owner;
@@ -211,7 +211,7 @@ void func_151A3390(Actor *owner, u8 arg1) {
 }
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
-TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
+TrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1) {
     EffectTemplate info;
     TrailState state;
     TrailEffect *effect;
@@ -220,7 +220,7 @@ TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
         return NULL;
     }
 
-    memcpy(&state, params, sizeof(TrailParams));
+    memcpy(&state, params, sizeof(BoneTrailParams));
     state.texCoord = 0;
     info.itemCount = 50;
     info.flags = TRAIL_EFFECT_ATTACHED;
@@ -304,7 +304,7 @@ s32 func_151A37C0(TrailEffect *effect) {
     Actor *owner;
     Vec3f delta;
     s32 started;
-    TrailParams retry;
+    BoneTrailParams retry;
 
     owner = state->params.owner;
     if (owner->interaction_state == 0) {
@@ -325,11 +325,11 @@ s32 func_151A37C0(TrailEffect *effect) {
     }
     if (!started && func_151A4E34(&state->params, &effect->headPos) == 0) {
         func_151A4E9C(effect);
-        memcpy(&retry, state, sizeof(TrailParams));
+        memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(TrailParams), effect->unkC, 0);
+            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->unkC, 0);
             if (task != NULL) {
-                memcpy(&task->trail, &retry, sizeof(TrailParams));
+                memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
         }
         return 1;
@@ -863,7 +863,7 @@ void func_151A4A38(BoneEmitterTask *task) {
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
 void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
-    TrailParams *trail = &effect->state->params;
+    BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
         if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
@@ -903,7 +903,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
  * Transforms the trail's attachment offset by its owner's bone matrix into out.
  * Returns 0 if the owner has no bone matrices or is not being drawn.
  */
-s32 func_151A4E34(TrailParams *params, Vec3f *out) {
+s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
     u8 *bones = (u8 *)owner->unk1D4;
 
@@ -932,7 +932,7 @@ void func_151A4E9C(TrailEffect *effect) {
  * once the trail has been re-created on the owner's bone.
  */
 void func_151A4ECC(TrailRetryTask *task) {
-    TrailParams *trail;
+    BoneTrailParams *trail;
     u8 done;
 
     done = 0;
@@ -955,7 +955,7 @@ void func_151A4ECC(TrailRetryTask *task) {
 
 /* Message handler of a TrailRetryTask: end when the owner is removed. */
 void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
-    TrailParams *trail = &task->trail;
+    BoneTrailParams *trail = &task->trail;
 
     if (type == 0) {
         if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {

@@ -1640,6 +1640,59 @@ typedef struct AnchorEmitter {
     /* 0x30 */ AnchorEmitterParams params;
 } AnchorEmitter; /* size 0x8C */
 
+/* func_15147DA0 (game_175250.c): motion and appearance block copied from its second argument (some
+ * handlers read these words differently, e.g. game_17CAF0.c's puffs). */
+typedef struct TrailMotion {
+    /* 0x00 */ f32 halfWidth;
+    /* 0x04 */ Vec3f velocity;
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 flags;
+    /* 0x19 */ u8 texture;          /* index into D_80091564 */
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;            /* alpha; faded by func_150C1978 */
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+} TrailMotion; /* size 0x20 */
+
+/* User data of a func_15147DA0 trail (Trail.params). */
+typedef struct TrailParams {
+    /* 0x00 */ TrailMotion motion;
+    /* 0x20 */ u8 state;            /* handler index into D_8008A3E0 */
+    /* 0x21 */ u8 unk21;            /* handler index into D_8008A3F8 */
+    /* 0x22 */ u8 finishFn;         /* handler index into D_8008A42C */
+    /* 0x23 */ u8 hitFn;            /* handler index into D_8008A430 */
+    /* 0x24 */ u8 hitKind3Fn;       /* handler index into D_8008A450 */
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ TrailRender render;
+} TrailParams; /* size 0x48 */
+
+/* matching: the first 0x18 bytes of EffectTemplate (func_15147DA0's first argument); a full EffectTemplate
+ * on the stack changes the frame. */
+typedef struct EffectTemplate18 {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 life;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 kind;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ u8 itemCount;
+    /* 0x16 */ u8 pad16[2];
+} EffectTemplate18;
+
+/* matching: EffectTemplate plus 4 bytes; the stack frame needs the larger size. */
+typedef struct EffectTemplate20 {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 life;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 kind;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ u8 itemCount;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ void *unk18;
+    /* 0x1C */ u8 pad1C[4];
+} EffectTemplate20;
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

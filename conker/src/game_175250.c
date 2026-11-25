@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 unk15;
-} TrailSpawn;
-
 /* One point of a trail; the points form a ring buffer (0x14 bytes each). */
 typedef struct {
     Vec3f pos;
@@ -20,32 +10,6 @@ typedef struct {
     u16 phase; /* texture coordinate along the trail */
     u8 pad12[2];
 } TrailPoint;
-
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    u8 pad14[4];
-    u8 flags;
-    u8 texture; /* index into D_80091564 */
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state;      /* 0x20: handler index into D_8008A3E0 */
-    u8 unk21;      /* handler index into D_8008A3F8 */
-    u8 finishFn;   /* handler index into D_8008A42C */
-    u8 hitFn;      /* handler index into D_8008A430 */
-    u8 hitKind3Fn; /* handler index into D_8008A450 */
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
 
 /* Result block filled by func_15046C80. */
 typedef struct {
@@ -73,16 +37,16 @@ typedef struct {
     TrailParams *params;      /* 0x98 */
 } Trail;
 
-extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Creates a trail object from a spawn description, motion block and render settings. */
-Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+Trail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
                      s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
                      s32 arg12, u8 arg13, s32 arg14) {
     Trail *trail;
     TrailParams *params;
 
-    spawn->unk10 = 1;
+    spawn->kind = 1;
     trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(TrailPoint), 1, 0, 1, arg9, arg10,
                           arg12, arg13, arg14);
     if (trail == NULL) {
@@ -533,7 +497,7 @@ s32 func_15148EF8(Trail *trail, s32 arg1, s32 arg2, s32 arg3) {
 void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch, f32 speed, s16 arg8,
                    f32 halfWidth, f32 gravity, u8 arg11) {
     f32 yawWaveQ;
-    TrailSpawn spawn;
+    EffectTemplate18 spawn;
     f32 horizontal;
     struct {
         f32 halfWidth;
@@ -557,8 +521,8 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     yawWave = func_151423D8((u8)yaw);
     yawWaveQ = func_151423D8((u8)(yaw - 0x40));
 
-    spawn.unk10 = 1;
-    spawn.unkE = 1;
+    spawn.kind = 1;
+    spawn.flags = 1;
     motion.unk1A = 0xFF;
     motion.flags = 8;
     tex = texture; // matching: the u8 copy owns the stack slot above render
@@ -577,8 +541,8 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     motion.velocity.y = -speed * pitchWaveQ;
     motion.velocity.z = horizontal * yawWave;
     motion.unk1B = 0xFF;
-    spawn.unk15 = arg4 + 3;
-    spawn.unkC = arg8;
+    spawn.itemCount = arg4 + 3;
+    spawn.life = arg8;
 
     render.unk0 = 0;
     render.setGeometryMode = 1;
@@ -589,7 +553,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     render.unk18 = 0x20;
     render.primMode = 0;
     render.envMode = 9;
-    func_15147DA0(&spawn, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
+    func_15147DA0((EffectTemplate *)&spawn /* matching: an 0x18-byte view */, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */

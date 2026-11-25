@@ -5,32 +5,6 @@
 
 /* Trail types (see game_175250.c). */
 
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    f32 unk14;
-    u8 flags;
-    u8 texture;
-    u8 unk1A;
-    u8 unk1B; /* alpha */
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state; /* 0x20: handler index into D_8008A3E0 */
-    u8 unk21; /* handler index into D_8008A3F8 */
-    u8 finishFn;
-    u8 hitFn;
-    u8 hitKind3Fn;
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ Vec3f position;

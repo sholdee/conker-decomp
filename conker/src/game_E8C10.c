@@ -816,30 +816,7 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-/* Trail spawn structs; same layout as the ones in game_175250.c. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[0xA];
-} TrailSpawn;
-
-typedef struct {
-    /* 0x00 */ f32 halfWidth;
-    /* 0x04 */ Vec3f velocity;
-    /* 0x10 */ f32 gravity;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 flags;
-    /* 0x19 */ u8 texture;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 pad1C[4];
-} TrailMotion; /* size 0x20 */
-
-s32 func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+s32 func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
                   s32 arg12, u8 arg13, s32 arg14);
 
@@ -847,7 +824,7 @@ s32 func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s3
 s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, f32 *dir, u8 arg14) {
-    TrailSpawn spawn;
+    EffectTemplate20 spawn;
     TrailMotion motion;
     f32 speed;
     TrailRender render;
@@ -861,8 +838,8 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     render.unk18 = 0x20;
     render.primMode = 0;
     render.envMode = 9;
-    spawn.unk10 = 1;
-    spawn.unkE = 1;
+    spawn.kind = 1;
+    spawn.flags = 1;
     spawn.pos.x = x;
     spawn.pos.y = y;
     motion.unk14 = y;
@@ -876,8 +853,8 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     motion.velocity.y = dir[1] * speed;
     motion.velocity.z = dir[2] * speed;
     motion.unk1B = func_150ADA20() % 86U + 180;
-    spawn.unk15 = (func_150ADA20() & 3) + 3;
-    spawn.unkC = func_150ADA20() % 31U + 39;
+    spawn.itemCount = (func_150ADA20() & 3) + 3;
+    spawn.life = func_150ADA20() % 31U + 39;
     motion.halfWidth = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
     motion.gravity = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
     func_15147DA0(&spawn, &motion, 0, 1, 11, 0, 0, 0, 0, 0, 0, &render, 0, arg14, 1);

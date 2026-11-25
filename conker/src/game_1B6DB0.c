@@ -15,17 +15,6 @@ typedef struct ObjLink {
 
 /* Trail types (see game_175250.c). */
 
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 pointCount;
-    u8 pad16[0xA];
-} TrailSpawn;
-
 /* One point of a trail; the points form a ring buffer. */
 typedef struct {
     Vec3f pos;
@@ -33,32 +22,6 @@ typedef struct {
     u16 phase; /* texture coordinate along the trail */
     u8 pad12[2];
 } TrailPoint;
-
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    f32 unk14;
-    u8 flags;
-    u8 texture;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state; /* 0x20: handler index */
-    u8 unk21;
-    u8 finishFn;
-    u8 hitFn;
-    u8 hitKind3Fn;
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
 
 /* Params of a trail spawned by a SprayEmitter: the TrailParams, then the floor height. */
 typedef struct {
@@ -94,7 +57,7 @@ typedef struct {
     /* 0x3A */ s16 unk1BRange;
     /* 0x3C */ f32 gravity;
     /* 0x40 */ f32 gravityRange;
-    /* 0x44 */ s16 unkC; /* TrailSpawn.unkC */
+    /* 0x44 */ s16 unkC; /* EffectTemplate20.unkC */
     /* 0x46 */ s16 unkCRange;
     /* 0x48 */ s32 pointCount;
     /* 0x4C */ s32 pointCountRange;
@@ -115,7 +78,7 @@ typedef struct {
 extern SprayEmitter *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510F800(s32);
 extern s32 func_151464B8(s32);
-extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 extern u8 D_800BE630[];
@@ -158,7 +121,7 @@ void func_15189A00(SprayEmitter *emitter) {
     f32 dy;
     f32 dz;
     s32 player;
-    TrailSpawn spawn;
+    EffectTemplate20 spawn;
     TrailMotion motion;
     f32 floorY;
     TrailRender render;
@@ -190,8 +153,8 @@ void func_15189A00(SprayEmitter *emitter) {
     emitter->pending += (emitter->desc.rate + (func_150ADA68() * emitter->desc.rateRange)) * D_800BE9A4;
     if (emitter->pending > 1.0f) {
         floorY = emitter->floorY;
-        spawn.unk10 = 1;
-        spawn.unkE = 5;
+        spawn.kind = 1;
+        spawn.flags = 5;
         motion.unk1C = 16;
         motion.unk1E = 15;
         motion.unk14 = -10000.0f;
@@ -208,7 +171,7 @@ void func_15189A00(SprayEmitter *emitter) {
         render.primMode = 0;
         render.envMode = 7;
         do {
-            spawn.pointCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
+            spawn.itemCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {
                 f32 t;
                 t = func_150ADA68();
@@ -239,7 +202,7 @@ void func_15189A00(SprayEmitter *emitter) {
             }
             motion.gravity = (func_150ADA68() * emitter->desc.gravityRange) + emitter->desc.gravity;
             motion.unk1B = (func_150ADA20() % (u32)(emitter->desc.unk1BRange + 1)) + emitter->desc.unk1B;
-            spawn.unkC = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
+            spawn.life = (func_150ADA20() % (u32)(emitter->desc.unkCRange + 1)) + emitter->desc.unkC;
             trail = func_15147DA0(&spawn, &motion, 8, 1, (emitter->flags & 1) ? 10 : 0, 0, 0, 0, 0, 0, 0, &render, 0,
                                   emitter->link.owner, emitter->link.list);
             if (trail != NULL) {

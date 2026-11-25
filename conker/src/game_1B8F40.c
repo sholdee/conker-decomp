@@ -144,16 +144,6 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
 
 /* Trail types (see game_175250.c). */
 
-/* Spawn description passed to func_15147DA0 (first argument). */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 pointCount;
-} TrailSpawn;
-
 /* One point of a trail; the points form a ring buffer. */
 typedef struct {
     Vec3f pos;
@@ -161,32 +151,6 @@ typedef struct {
     u16 phase; /* texture coordinate along the trail */
     u8 pad12[2];
 } TrailPoint;
-
-/* Motion and appearance block that func_15147DA0 copies from its second argument. */
-typedef struct {
-    f32 halfWidth;
-    Vec3f velocity;
-    f32 gravity;
-    u8 pad14[4];
-    u8 flags;
-    u8 texture;
-    u8 unk1A;
-    u8 unk1B;
-    s16 unk1C;
-    s16 unk1E;
-} TrailMotion; /* size 0x20 */
-
-typedef struct {
-    TrailMotion motion;
-    u8 state;      /* 0x20: handler index */
-    u8 unk21;
-    u8 finishFn;
-    u8 hitFn;
-    u8 hitKind3Fn;
-    u8 unk25;
-    u8 pad26[2];
-    TrailRender render; /* 0x28 */
-} TrailParams; /* size 0x48 */
 
 typedef struct {
     /* 0x00 */ ObjLink link;
@@ -215,7 +179,7 @@ typedef struct {
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
 
-extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+extern Trail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
@@ -224,7 +188,7 @@ void func_1518BD60(TrailEmitter *emitter) {
     u8 i;
     s32 point;
     Trail *trail;
-    TrailSpawn spawn;
+    EffectTemplate18 spawn;
     TrailMotion motion;
     s32 pad; // matching: stack slot between motion and render
     TrailRender render;
@@ -257,10 +221,10 @@ void func_1518BD60(TrailEmitter *emitter) {
                 render.unk18 = 0x20;
                 render.primMode = 0;
                 render.envMode = 9;
-                spawn.pointCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
-                spawn.unk10 = 1;
-                spawn.unkE = 1;
-                spawn.unkC = func_150ADA20() % 21U + 80;
+                spawn.itemCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
+                spawn.kind = 1;
+                spawn.flags = 1;
+                spawn.life = func_150ADA20() % 21U + 80;
                 motion.texture = emitter->params.texture;
                 motion.halfWidth = func_150ADA68() * emitter->params.halfWidthRange + emitter->params.halfWidthMin;
                 motion.velocity.y = 0.0f;
@@ -270,7 +234,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.flags = emitter->params.flags | 8;
                 motion.unk1A = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
                 motion.unk1B = 0xFF;
-                trail = func_15147DA0(&spawn, &motion, spawn.pointCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.list);
                 if (trail != NULL) {
                     link = &((EmitterTrailParams *)trail->params)->link;
