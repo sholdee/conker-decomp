@@ -69,7 +69,6 @@ void func_15179DB0(u8 slot) {
     s32 i;
     s32 j;
     s16 height;
-    {
     Vtx *vtx[2];
     f32 *angle[2];
     f32 *rate[2];
@@ -94,7 +93,6 @@ void func_15179DB0(u8 slot) {
         if (*angle[i] >= 360.0f) {
             *angle[i] -= 360.0f;
         }
-    }
     }
 }
 
@@ -137,8 +135,6 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
 /* Update callback for particles from func_15179FE0: move, spin, slow down, then fade out once the timer runs
  * out. Frees the particle when it is invisible or has left every view it was drawn in. */
 void func_1517A1EC(Particle *particle) {
-    s32 sign;
-    u32 drag;
     s32 timer;
 
     particle->x += particle->velX;
@@ -151,7 +147,9 @@ void func_1517A1EC(Particle *particle) {
         particle->velY++;
     }
     if (particle->timer < particle->unkAC) {
-        s32 pad;
+        s32 sign;
+        u32 drag;
+
         drag = (u32)func_150ADA20() % particle->dragRange;
         sign = (particle->velX < 0) ? -1 : 1;
         particle->velX += -sign * drag;
@@ -219,7 +217,7 @@ Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
         ((s16 *)D_800DD460)[-8] = particle->alpha;
     }
     {
-        s32 pad;
+        s32 pad; // matching: unused stack slot (needSync lands at sp+0x43)
         s32 modeL;
         u8 needSync;
         needSync = 0;
@@ -237,8 +235,8 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
     Particle *particle;
     s32 range;
     f32 groundY;
+    s32 rnd;
     s32 half;
-    s32 pad;
 
     range = size;
     if (range != 0) {
@@ -254,10 +252,12 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
             particle->velX = 0;
             particle->velZ = 0;
             particle->texture = texture;
-            particle->scale = (s32)(((u32)func_150ADA20() % 80) + 100) * 0.01f;
+            rnd = ((u32)func_150ADA20() % 80) + 100;
+            particle->scale = rnd * 0.01f;
             particle->velY = size * 0.4f;
+            rnd = (u32)func_150ADA20() % (u32)range;
             half = size * 0.5f;
-            particle->spinX = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->spinX = rnd - half;
             particle->spinY = ((u32)func_150ADA20() % (u32)range) - half;
             particle->spinZ = ((u32)func_150ADA20() % (u32)range) - half;
             particle->timer = 0;
@@ -269,24 +269,26 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
 /* Update callback for func_1517A644 chunks: fly up, fall back to the ground, then lie flat and fade out over
  * 60 frames before being freed. */
 void func_1517A84C(Particle *particle) {
-    s32 value;
+    s32 timer;
+    s32 velY;
     s32 groundY;
+    s32 height;
 
-    value = particle->timer;
-    if (value == 0) {
+    timer = particle->timer;
+    if (timer == 0) {
         particle->x += particle->velX;
-        value = particle->velY;
-        particle->y += value;
+        velY = particle->velY;
+        particle->y += velY;
         particle->z += particle->velZ;
-        if (value > 0) {
-            particle->velY = value - 1;
+        if (velY > 0) {
+            particle->velY = velY - 1;
             if (particle->velY <= 0) {
                 particle->velY = -3;
             }
         }
         groundY = particle->groundY;
-        value = particle->y - groundY;
-        if (value <= 0) {
+        height = particle->y - groundY;
+        if (height <= 0) {
             particle->rotX = 90;
             particle->rotZ = 0;
             particle->timer = 60;
@@ -297,10 +299,10 @@ void func_1517A84C(Particle *particle) {
             particle->rotZ += particle->spinZ;
         }
     } else {
-        value -= D_800BE9E4;
-        if (value > 0) {
-            particle->timer = value;
-            particle->alpha = (value << 8) / 60;
+        timer -= D_800BE9E4;
+        if (timer > 0) {
+            particle->timer = timer;
+            particle->alpha = (timer << 8) / 60;
         } else {
             func_1516972C((struct102 *)particle);
         }
