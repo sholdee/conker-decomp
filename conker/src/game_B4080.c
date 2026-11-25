@@ -1361,4 +1361,3 @@ void func_1508EB90(s32 player, s32 id, s32 param);
 void func_1508EBF8(s32 player, s32 param);
 void func_1508EC5C(s32 player, s32 param);
 
-void aim_removePoint(s32);

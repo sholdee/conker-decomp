@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-s32 aim_loadPoints(s32 levelId);
 void func_1500AC14(void);
 void func_1500BEC0(void);
 void func_1500E5C0(void);

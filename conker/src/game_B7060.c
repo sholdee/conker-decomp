@@ -2108,7 +2108,6 @@ void func_1508EDBC(s32 index) {
     }
 }
 
-void aim_removePoint(s32);
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
 void func_1508EE0C(u16 type, u16 id) {

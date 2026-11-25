@@ -792,8 +792,6 @@ extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
-extern s16 D_800C3FF4[3];
-extern u8 D_800C3FFA; /* aim pass / slot counter */
 extern u8  D_800C4000;
 
 extern s32 * D_800C4020[]; // per-id first vertex of each part

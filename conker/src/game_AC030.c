@@ -725,8 +725,6 @@ typedef struct {
     s32 type[3];
 } ObjTypeList;
 
-extern s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range,
-                         s32 noCheck, s32 axisMode);
 extern s32 zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z);
 extern ObjTypeList D_80086C50;
 

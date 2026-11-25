@@ -88,8 +88,6 @@ void func_15030468(void);
 Gfx *func_15030E08(Gfx *gdl, s32 player, s32 arg2);
 Gfx *func_15030F94(Gfx *, Actor *, s32, s32);
 Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
-void func_1503A08C(Actor *);
-void func_1503A830(Actor *);
 s32 func_1503CF20(s32, s32, void *, s32, s32);
 s32 func_1503DA9C(Actor *, s32, s32, s32);
 void func_1503DF48(s32);

@@ -1,4 +1,14 @@
 #include <ultra64.h>
+// This file's .bss, defined before functions.h and variables.h declare the globals (conker/aim.h): IDO lays
+// out .bss in the order it first sees each name, and D_800C3FE8 is static.
+f32 D_800C3FD0[3];
+u8 D_800C3FDC;
+f32 D_800C3FE0;
+f32 D_800C3FE4;
+static f32 D_800C3FE8[3]; /* current aim target */
+s16 D_800C3FF4[3];
+u8 D_800C3FFA; /* aim pass / slot counter */
+
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
@@ -9,40 +19,25 @@
 void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
 #undef func_150ADA20
 u8 func_150ADA20(void);
-
-// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
-// it first sees each name.
-f32 D_800C3FD0[3];
-u8 D_800C3FDC;
-f32 D_800C3FE0;
-f32 D_800C3FE4;
-static f32 D_800C3FE8[3]; /* current aim target */
-s16 D_800C3FF4[3];
-u8 D_800C3FFA; /* aim pass / slot counter */
-
 #include "variables.h"
 
-s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
 
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
 extern u8 D_80098050[];
 
-void func_15039A78(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
 /* Yaw/pitch window an aim may turn within; beyond max + margin (or min - margin) it gives up. */
-typedef struct {
+struct AimLimits {
     /* 0x00 */ f32 yawMax;
     /* 0x04 */ f32 yawMin;
     /* 0x08 */ f32 pitchMax;
     /* 0x0C */ f32 pitchMin;
     /* 0x10 */ f32 yawMargin;
     /* 0x14 */ f32 pitchMargin;
-} AimLimits;
+};
 
 extern AimLimits D_80098068[];
-void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range,
-                   s32 preferId, f32 *bestDist, s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode);
 
 /* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, D_800C3FFA). */
 typedef struct CamData {
@@ -73,8 +68,6 @@ void func_15036C70(Actor *obj) {
     }
 }
 
-void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
-void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Aim update for the current object (dc_glbl_CharNum): the first pass (D_800C3FFA == 0) turns bone 7, later passes
@@ -512,7 +505,6 @@ void func_15036F34(void) {
     D_800C3FFA++;
 }
 
-void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode);
 
 /*
  * Tests whether world point (x, y, z) lies within +-range degrees of yaw as seen from object
@@ -959,8 +951,6 @@ typedef struct {
     /* 0x30 */ s32 unk30;
 } GameStruct_800BE9B4;
 
-void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
-                   f32 fallbackPitch, s32 objIndex, s32 slot);
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
