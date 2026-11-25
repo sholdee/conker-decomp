@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// matching: this file needs func_150ADA20 to return s32; the u8 declaration in functions.h changes codegen
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
@@ -49,6 +50,7 @@ typedef struct GameE8C10Particle {
 
 void *func_15132A4C(GameE8C10Particle *, s32, s32, s32, u8, s32);
 
+/* Actor id 0x20 with a unk1D4 model: spawns one 0x29E9 particle near it with the actor as owner. */
 s32 func_150BB760(struct127 *actor) {
     GameE8C10Particle particle;
     f32 width;
@@ -144,21 +146,21 @@ s32 func_150BB760(struct127 *actor) {
 
 typedef struct GameE8C10SpawnRequest {
     u8 pad0[0x80];
-    s32 field80;
+    s32 unk80;
     u8 pad84[0x4];
-    s16 field88;
-    s16 field8A;
-    s16 field8C;
-    s16 field8E;
-    s16 field90;
-    s16 field92;
-    s16 field94;
-    s16 field96;
-    s16 field98;
+    s16 unk88;
+    s16 unk8A;
+    s16 unk8C;
+    s16 unk8E;
+    s16 unk90;
+    s16 unk92;
+    s16 unk94;
+    s16 unk96;
+    s16 unk98;
     u8 pad9A[0x6];
-    s8 fieldA0;
-    s8 fieldA1;
-    s8 fieldA2;
+    s8 unkA0;
+    s8 unkA1;
+    s8 unkA2;
     u8 padA3[0x5];
 } GameE8C10SpawnRequest;
 
@@ -167,6 +169,8 @@ s32 func_15168800(void *arg0, s32 arg1, s32 arg2);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
+/* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
+ * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
 s32 func_150BBB5C(struct127 *actor) {
     GameE8C10Particle particle;
     s8 i;
@@ -195,19 +199,19 @@ s32 func_150BBB5C(struct127 *actor) {
         offsetZ = actor->xz_velocity * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
         alpha = (actor->unk1D4 != NULL) ? 0xFF - ((((u32)actor->unk184 >> 5) & 0x7FFFFFF) << 6) : 0xFF;
-        request.field8A = 0x80;
-        request.field88 = 0;
-        request.field8C = actor->x_position;
-        request.field8E = actor->unk180 + 60.0f;
-        request.field90 = actor->z_position;
-        request.field92 = width;
-        request.field94 = height;
-        request.field96 = actor->unk180;
-        request.fieldA2 = -1;
-        request.fieldA0 = 0x2E;
-        request.field98 = 0x34;
-        request.field80 = alpha;
-        request.fieldA1 = 0;
+        request.unk8A = 0x80;
+        request.unk88 = 0;
+        request.unk8C = actor->x_position;
+        request.unk8E = actor->unk180 + 60.0f;
+        request.unk90 = actor->z_position;
+        request.unk92 = width;
+        request.unk94 = height;
+        request.unk96 = actor->unk180;
+        request.unkA2 = -1;
+        request.unkA0 = 0x2E;
+        request.unk98 = 0x34;
+        request.unk80 = alpha;
+        request.unkA1 = 0;
         func_1516865C(&request, 0xFF, 0xFF, 0xFF, 0xFF);
         func_15168800(&request, 0xFF, 0);
         particle.unk56 = 1;
@@ -371,6 +375,7 @@ s32 func_150BBB5C(struct127 *actor) {
     }
 }
 
+/* Actor id 0x20: like func_150BBB5C but smaller, with no request; stops early if spawning fails. */
 s32 func_150BC488(struct127 *actor) {
     f32 width;
     s32 count;
@@ -462,31 +467,28 @@ s32 func_150BC488(struct127 *actor) {
             }
             count--;
         }
-        {
-            n = (func_150ADA20() & 3) + 2;
-            for (; n > 0; n--) {
-                f32 position[3];
-                f32 velocity[3];
-                f32 speed;
-                s16 angle;
-                f32 sine;
-                f32 cosine;
+        for (n = (func_150ADA20() & 3) + 2; n > 0; n--) {
+            f32 position[3];
+            f32 velocity[3];
+            f32 speed;
+            s16 angle;
+            f32 sine;
+            f32 cosine;
 
-                speed = func_150ADA68() * 7.0f + 7.0f;
-                angle = func_150ADA20() & 0xFF;
-                sine = func_151423D8(angle);
-                cosine = func_151423D8(angle - 0x40);
-                position[0] = actor->x_position;
-                position[1] = actor->y_position + func_150ADA68() * 5.0f;
-                position[2] = actor->z_position;
-                velocity[0] = cosine * speed;
-                velocity[1] = 0.0f;
-                velocity[2] = sine * speed;
-                func_151DA6F8(position, velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
-                              (func_150ADA20() & 0x7F) + 0x80,
-                              func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
-                              1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
-            }
+            speed = func_150ADA68() * 7.0f + 7.0f;
+            angle = func_150ADA20() & 0xFF;
+            sine = func_151423D8(angle);
+            cosine = func_151423D8(angle - 0x40);
+            position[0] = actor->x_position;
+            position[1] = actor->y_position + func_150ADA68() * 5.0f;
+            position[2] = actor->z_position;
+            velocity[0] = cosine * speed;
+            velocity[1] = 0.0f;
+            velocity[2] = sine * speed;
+            func_151DA6F8(position, velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
+                          (func_150ADA20() & 0x7F) + 0x80,
+                          func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
+                          1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
         }
         total = (func_150ADA20() & 1) + (func_150ADA20() & 1);
         if (total != 0) {
@@ -538,6 +540,7 @@ s32 func_150BC488(struct127 *actor) {
 
                 speed = func_150ADA68() * 5.0f + 8.0f;
                 heading = func_150ADA20() & 0x7F;
+                // matching: the (u32) cast is needed
                 pitch = 0x20 - ((u32)func_150ADA20() & 0x3F);
                 headingSine = func_151423D8(heading);
                 headingCosine = func_151423D8(heading - 0x40);
@@ -555,6 +558,7 @@ s32 func_150BC488(struct127 *actor) {
     }
 }
 
+/* Actor id 0x20: sometimes spawns one 0x29E9 particle moving forward or backward along unk76. */
 s32 func_150BCBBC(struct127 *actor) {
     f32 width;
     f32 height;
@@ -618,6 +622,7 @@ s32 func_150BCBBC(struct127 *actor) {
             spreadZ = -spreadCosine * distance;
             distance = func_150ADA68() * 0.03f + 0.01f;
             sizeA = func_150ADA68() * 0.03f + 0.01f;
+            // matching: the unsigned offset and the casts are needed as written
             if (func_150ADA20() & 1) {
                 heading = (u8)((actor->unk76 >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)));
             } else {
