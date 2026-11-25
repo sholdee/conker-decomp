@@ -226,10 +226,10 @@ void func_150D7928(struct127 *obj) {
     s16 *src;
     s32 i;
     s32 timer;
-    f32 pad2;
+    f32 pad; // matching: unused stack slot keeps the frame size
     u8 id;
     u16 angle;
-    f32 savedSpeed;
+    f32 scratch; /* obj's speed across func_15059140, later the rounded size stored in padC8 */
     s32 n; /* the rider's target angle, later the player loop index */
     f32 offset;
 
@@ -243,7 +243,7 @@ void func_150D7928(struct127 *obj) {
             linkType = player->unk6;
         }
     }
-    obj->unkB0 = 0x19;
+    obj->unkB0 = 25;
     if (obj->unkE4 != 0) {
         obj->unk90 = obj->unkE4;
     }
@@ -252,6 +252,7 @@ void func_150D7928(struct127 *obj) {
         obj->unkE4 = 0;
         obj->unk180 = player->unk180;
         obj->unk184 = player->unk184;
+        /* copy the nine halfwords at 0x18C from the player */
         dst = (s16 *)&obj->unk18C;
         src = (s16 *)&player->unk18C;
         for (i = 0; i < 9; i++) {
@@ -261,18 +262,18 @@ void func_150D7928(struct127 *obj) {
         angleOffset = *(f32 *)&player->pad54 * 0.45f;
         obj->unk44 = player->unkC4;
         if (id == 0x7F) {
-            player->immune = 0x14;
+            player->immune = 20;
             player->unk184 &= ~0x1F;
             player->unk184 |= 4;
             obj->y_position = player->y_position;
             obj->x_position = obj->x_position + ((player->x_position - obj->x_position) * 0.5f);
             obj->z_position = obj->z_position + ((player->z_position - obj->z_position) * 0.5f);
-            player->disable_jump = 0xA;
+            player->disable_jump = 10;
             if (O31C(player)->unk4F == 2) {
                 if (speed < player->unk44 * 1.35f) {
                     speed = player->unk44 * 1.35f;
                 }
-                player->unkAA = 0x46;
+                player->unkAA = 70;
             }
         } else {
             obj->y_velocity = 0.0f;
@@ -296,12 +297,13 @@ void func_150D7928(struct127 *obj) {
         }
         playerIndex = D_800C3E78;
         obj->unk65 = 0;
+        // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
         obj->unkE4 = *(s16 *)&obj->unk90;
         func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
-        savedSpeed = obj->xz_velocity;
-        obj->stunned = 0x1E;
+        scratch = obj->xz_velocity;
+        obj->stunned = 30;
         func_15059140(obj);
-        obj->xz_velocity = savedSpeed;
+        obj->xz_velocity = scratch;
         angleOffset = (obj->unkC4 - obj->unk44) * 0.8f;
         if (obj->unk232 == 4) {
             if (id == 0x48) {
@@ -338,24 +340,24 @@ void func_150D7928(struct127 *obj) {
                 D_800CC2D0[obj->unk124].unkCC = 30;
             }
             obj->unkC4 = -obj->y_velocity;
-            obj->unk40 = (f32)obj->unk7A * 0.005493164f;
+            obj->unk40 = obj->unk7A * (360.0f / 65536.0f);
         }
     } else {
         s32 volume;
-        s32 pad4;
+        s32 pad; // matching: unused stack slot keeps the frame layout
         func_1506B100(0, 2.0f, 4.0f);
         if (obj->unk28 > 75.0f) {
             timer = obj->unk102;
-            if (timer < 0x1E) {
+            if (timer < 30) {
                 timer = ++obj->unk102;
             }
         } else {
             timer = obj->unk102;
-            if (timer < 0xA) {
+            if (timer < 10) {
                 timer = obj->unk102 = 0;
             }
         }
-        if ((timer >= 0xB) && ((player = &D_800CC2D0[playerIndex], (player->unk28 == 0.0f)) || (obj->in_water != 0) || ((obj->unk124 != 0) && (O31C(player)->unk4F == 2)))) {
+        if ((timer > 10) && ((player = &D_800CC2D0[playerIndex])->unk28 == 0.0f || (obj->in_water != 0) || ((obj->unk124 != 0) && (O31C(player)->unk4F == 2)))) {
             if (obj->unk13C != 0) {
                 D_800CC2D0[obj->unk124].unkCC = 0;
                 D_800CC2D0[obj->unk124].unk31C->unk4E = 0;
@@ -384,19 +386,19 @@ void func_150D7928(struct127 *obj) {
             }
         }
         if (obj->unk13C != 0) {
-            savedSpeed = (f32)(s16)(s32)(fabsf(obj->unkC4 * 0.7f) + 44.0f);
-            *(f32 *)&obj->padC8 = savedSpeed;
-            D_800CC2D0[obj->unk124].unkCC = (s16)(s32)((f32)(s16)(s32)(savedSpeed + 44) * obj->y_scale);
+            scratch = (s16)(fabsf(obj->unkC4 * 0.7f) + 44.0f);
+            *(f32 *)&obj->padC8 = scratch;
+            D_800CC2D0[obj->unk124].unkCC = (s16)(scratch + 44) * obj->y_scale;
         } else {
             *(f32 *)&obj->padC8 = 44.0f;
         }
         if ((0.2f < speed) && (obj->unk28 < 10.0f) && (obj->health != 0) && (D_800C35EA != 1)) {
             volume = (s32)(1000.0f * speed);
-            if (volume >= 0x4651) {
-                volume = 0x4650;
+            if (volume > 18000) {
+                volume = 18000;
             }
             if (func_100107F8(obj) == 0) {
-                func_10010154(0x678, obj, volume, 0x3E8, 0x7D0);
+                func_10010154(0x678, obj, volume, 1000, 2000);
             } else {
                 func_1001091C(obj, volume);
             }
