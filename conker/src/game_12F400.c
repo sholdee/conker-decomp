@@ -6,43 +6,6 @@ extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *isN
 extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 
-typedef struct {
-    char pad_0[0x197];
-    u8 field_0x197;
-} ObjectState197;
-
-typedef struct {
-    char pad_0[0x31C];
-    ObjectState197 *field_0x31C;
-} ObjectWithState197;
-
-typedef struct {
-    ObjectWithState197 *field_0x0;
-    char pad_0[0x1E];
-    u8 field_0x22;
-    char pad_1[0x1];
-    s32 field_0x24;
-    s32 field_0x28;
-    s32 field_0x2C;
-    s32 field_0x30;
-    s32 field_0x34;
-} Field124ChildBlock;
-
-typedef struct {
-    char pad_0[0x18];
-    s32 field_0x18;
-    char pad_1[0x8C];
-    s32 field_0xA8;
-    char pad_2[0x24];
-    s32 field_0xD0;
-    u8 field_0xD4;
-    char pad_3[0x4F];
-    s32 field_0x124;
-    char pad_4[0x48];
-    s32 field_0x170;
-    u8 field_0x174;
-} Field124Owner;
-
 /* A camera-facing quad: four vertices around `center`, spanned by two axes scaled by scaleU/scaleV. */
 typedef struct {
     char pad0[0x2C];
@@ -301,58 +264,94 @@ s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5)
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 
-void func_151027E8(struct210 *arg0) {
-    s8 sp18[5];
+/* Message payload: an actor reference. */
+typedef struct {
+    struct127 *actor;
+    u8 actorId;
+} ActorRefMsg;
 
-    *(struct210 **)&sp18[0] = arg0;
-    sp18[4] = *(u8 *)((s32)arg0 + 0x3B);
-    func_151403A8(&sp18, 0x1A);
+/* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
+void func_151027E8(struct127 *actor) {
+    ActorRefMsg msg;
+
+    msg.actor = actor;
+    msg.actorId = actor->unique_id;
+    func_151403A8((s32)&msg, 0x1A);
 }
 
-s32 func_1510281C(Field124Owner *arg0, s16 arg1) {
-    Field124ChildBlock *p = (Field124ChildBlock *)(arg0->field_0xD0 + 0x110);
-    ObjectWithState197 *v1;
+typedef struct {
+    u8 pad0[0x197];
+    u8 unk197;
+} LinkedState1510281C;
 
-    if (arg1 != p->field_0x22) {
-        goto tail;
-    }
-    v1 = p->field_0x0;
-    if (v1 != 0) {
-        if (v1->field_0x31C->field_0x197 == 0) {
-            goto tail;
+typedef struct {
+    u8 pad0[0x31C];
+    LinkedState1510281C *unk31C;
+} LinkedObj1510281C;
+
+/* State block at +0x110 of the objects referenced by Owner1510281C. */
+typedef struct {
+    LinkedObj1510281C *linked;
+    u8 pad4[0x1E];
+    u8 unk22;
+} Block1510281C;
+
+typedef struct {
+    u8 pad0[0x110];
+    Block1510281C block;
+} Obj1510281C;
+
+typedef struct {
+    u8 pad0[0xD0];
+    Obj1510281C *unkD0;
+    u8 unkD4;
+    u8 padD5[0x9B];
+    Obj1510281C *unk170;
+    u8 unk174;
+} Owner1510281C;
+
+/* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
+s32 func_1510281C(Owner1510281C *owner, s16 key) {
+    Block1510281C *block = &owner->unkD0->block;
+    LinkedObj1510281C *linked;
+
+    if (key == block->unk22) {
+        linked = block->linked;
+        if (linked == NULL || linked->unk31C->unk197 != 0) {
+            return 0;
         }
     }
-    return 0;
-tail:
-    if (!(arg0->field_0xD4 & 1)) {
+    if (!(owner->unkD4 & 1)) {
         return 0;
     }
     return 1;
 }
 
-s32 func_15102884(struct210 *arg0, s32 arg1) {
-    if (!(*(u8 *)((s32)arg0 + 0xAC) & 1)) {
+typedef struct {
+    u8 pad0[0xAC];
+    u8 unkAC;
+} Obj15102884;
+
+/* Returns bit 0 of obj->unkAC. */
+s32 func_15102884(Obj15102884 *obj, s32 arg1) {
+    if (!(obj->unkAC & 1)) {
         return 0;
     }
     return 1;
 }
 
-s32 func_151028AC(Field124Owner *arg0, s16 arg1) {
-    Field124ChildBlock *p = (Field124ChildBlock *)(arg0->field_0x170 + 0x110);
-    ObjectWithState197 *v1;
+/* Same test as func_1510281C, on unk170 and unk174. */
+s32 func_151028AC(Owner1510281C *owner, s16 key) {
+    Block1510281C *block = &owner->unk170->block;
+    LinkedObj1510281C *linked;
 
-    if (arg1 != p->field_0x22) {
-        goto tail;
-    }
-    v1 = p->field_0x0;
-    if (v1 != 0) {
-        if (v1->field_0x31C->field_0x197 == 0) {
-            goto tail;
+    if (key == block->unk22) {
+        linked = block->linked;
+        if (linked == NULL || linked->unk31C->unk197 != 0) {
+            return 0;
         }
     }
-    return 0;
-tail:
-    if (!(arg0->field_0x174 & 1)) {
+    if (!(owner->unk174 & 1)) {
         return 0;
     }
     return 1;
