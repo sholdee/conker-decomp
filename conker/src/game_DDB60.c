@@ -4,16 +4,11 @@
 #include "effects.h"
 
 
-/* Filled in by func_1504715C for an actor; only passed on to func_15153F18 here. */
-typedef struct {
-    u8 pad[0x24];
-} Floor150B06B0;
-
 extern s32 func_15143E24(Actor *);
-extern void func_1504715C(Floor150B06B0 *, Actor *);
+extern void func_1504715C(CollisionHit *, Actor *);
 extern void func_151C329C(void *, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-extern void func_15153F18(AngleRange *, SplashSpray *, Floor150B06B0 *, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 extern const s32 D_8009F810[1];
 extern const f32 D_8009F814[1];
@@ -28,7 +23,7 @@ extern const f32 D_8009F81C[1];
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     Vec3f pos;
     s8 angle;
-    Floor150B06B0 floor;
+    CollisionHit floor;
 
     pos.x = actor->x_position;
     pos.y = actor->y_position;

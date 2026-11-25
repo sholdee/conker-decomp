@@ -225,11 +225,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     }
 }
 
-/* What lies under an object, filled in by func_1504715C. */
-typedef struct {
-    u8 unk0[0x24];
-} FloorInfo;
-
 extern Vec3f D_800AAEEC[];
 // matching: the model goes in as s32; a pointer argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
@@ -237,9 +232,9 @@ void func_15143134(Vec3f *, Vec3f *, Mtx *);
 void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(DecalSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
 void func_15151A38(PuffSpray84 *, u8, s32);
-void func_1504715C(FloorInfo *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
@@ -367,7 +362,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             func_15150D1C(&cfg2, arg1, arg2);
         }
         {
-            FloorInfo floor;
+            CollisionHit floor;
             s8 flag;
             s32 pad; // matching: unused stack slot in the original frame
 
@@ -620,8 +615,8 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
-extern void func_1514FF44(ConeBasis *, DropSpray *, FloorInfo *, u8, s32);
-extern void func_15153CCC(ConeBasis *, SplashSpray *, FloorInfo *, u8, s32);
+extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
+extern void func_15153CCC(ConeBasis *, SplashSpray *, CollisionHit *, u8, s32);
 extern s32 func_1514F6E8(ConeBasis *);
 extern void func_1514F808(ConeBasis *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
@@ -637,7 +632,7 @@ extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f dir;
-    FloorInfo floor;
+    CollisionHit floor;
     ConeBasis shape;
 
     if (obj->unk1D4 != NULL) {

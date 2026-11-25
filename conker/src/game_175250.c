@@ -11,17 +11,9 @@ typedef struct {
     u8 pad12[2];
 } TrailPoint;
 
-/* Result block filled by func_15046C80. */
-typedef struct {
-    f32 height;
-    u8 data[0x19];
-    u8 kind;
-    u8 pad1E[6];
-} TrailCollision; /* size 0x24 */
-
 typedef struct {
     /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ TrailCollision collision;
+    /* 0x60 */ CollisionHit collision;
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ TrailPoint *points;
     /* 0x98 */ TrailParams *params;
@@ -379,7 +371,7 @@ s32 func_15148AF4(Trail *trail) {
 typedef s32 (*TrailHitFunc)(Trail *, f32, f32, f32, f32, void *);
 extern TrailHitFunc D_8008A430[];
 extern TrailHitFunc D_8008A450[];
-s32 func_15046C80(f32 *, u16, f32, TrailCollision *);
+s32 func_15046C80(f32 *, u16, f32, CollisionHit *);
 
 /* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
 s32 func_15148BA4(Trail *trail) {
@@ -413,12 +405,12 @@ s32 func_15148BA4(Trail *trail) {
             position.z = points[trail->head.start].pos.z;
             if (func_15046C80(&position.x, 0, points[trail->head.start].pos.y,
                               &trail->collision) != 0) {
-                if (trail->collision.kind == 3) {
+                if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;
                     if (callback != 0 &&
                         D_8008A450[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
-                                             trail->collision.data) == 0) {
+                                             &trail->collision.tri) == 0) {
                         return 0;
                     }
                 } else {
@@ -426,7 +418,7 @@ s32 func_15148BA4(Trail *trail) {
                     if (callback != 0 &&
                         D_8008A430[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
-                                             trail->collision.data) == 0) {
+                                             &trail->collision.tri) == 0) {
                         return 0;
                     }
                 }

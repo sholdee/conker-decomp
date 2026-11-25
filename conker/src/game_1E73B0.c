@@ -6,14 +6,7 @@
 s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-/* Floor below a point, from func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ CollisionTri surf;
-    /* 0x16 */ u8 pad16[0x24 - 0x16];
-} FloorInfo;
-
-void func_1504715C(FloorInfo *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 
 /* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
 typedef struct {
@@ -228,7 +221,7 @@ extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[],
 extern f32 D_800AA708[];
 void func_1514FCE8(JetSpraySpec *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(ParticleSpawn80 *, s32, s32, FloorInfo *, s32, u8, s32);
+extern void func_1513264C(ParticleSpawn80 *, s32, s32, CollisionHit *, s32, u8, s32);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
@@ -237,7 +230,7 @@ extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
  */
 void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
-    FloorInfo floor;
+    CollisionHit floor;
     Vec3f objPos;
     ParticleSpawn80 part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
@@ -680,7 +673,7 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
 }
 
 void func_15152190(DebrisBurst *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
-s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
+s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
 
@@ -691,7 +684,7 @@ extern Vec3f D_8008FBAC;
 void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     Vec3f center;
     JetSpraySpec burst;
-    FloorInfo floor;
+    CollisionHit floor;
     Vec3f probe;
     Vec3f hit;
     Vec3f edgeA;
@@ -746,8 +739,8 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
-            func_151BBFBC(&floor.surf, &hit, arg3, arg4);
-            if (func_15144E80(&floor.surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
+            func_151BBFBC(&floor.tri, &hit, arg3, arg4);
+            if (func_15144E80(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
         }

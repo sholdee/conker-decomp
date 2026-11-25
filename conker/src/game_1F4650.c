@@ -14,16 +14,8 @@ extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 
-/* Collision query context: set up from an actor by func_1504715C, filled in by func_15046C80. */
-typedef struct {
-    f32 hitY;
-    CollisionTri triangle;
-    u8 pad16[6];
-    u8 surfaceFlags;
-    u8 pad1D[7];
-} SightCollision;
-extern void func_1504715C(SightCollision *, Actor *);
-extern s32 func_151ABE40(f32 *, SightCollision *, s32, u8, s32);
+extern void func_1504715C(CollisionHit *, Actor *);
+extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
 
 /* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
 typedef struct {
@@ -1042,7 +1034,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     u8 hit;
     u8 airborne;
     Vec3f query;
-    SightCollision collision;
+    CollisionHit collision;
 
     if (actor == NULL) {
         return;
@@ -1057,13 +1049,13 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
         query.y = origin.y;
         query.z = origin.z;
         func_1504715C(&collision, actor);
-        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.surfaceFlags & 1)) {
+        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
             impact.x = query.x;
             hit = 1;
-            impact.y = collision.hitY;
+            impact.y = collision.height;
             impact.z = query.z;
             func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
-                          &collision.triangle, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+                          &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
     func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
@@ -1086,7 +1078,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
 /* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     f32 pos[3];
-    SightCollision collision;
+    CollisionHit collision;
 
     pos[0] = actor->x_position;
     pos[1] = actor->floorY + 2.0f;

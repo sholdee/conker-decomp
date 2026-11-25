@@ -1144,15 +1144,6 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-/* Result of a func_15046C80 ground probe. */
-typedef struct {
-    /* 0x00 */ f32 y; /* height of the ground that was hit */
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x15];
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[6];
-} EvFloor;
-
 typedef struct {
     s32 unk0;
     s16 unk4;
@@ -1233,7 +1224,7 @@ extern void func_150CF680(s16, u8, s32);
 extern void func_151925C4(Actor *, s16, u8, s32);
 extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150FAE18(s16, u8, s32);
-extern s32 func_15046C80(f32 *, s32, f32, EvFloor *);
+extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
 extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
@@ -1251,7 +1242,7 @@ extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
 extern void func_1516F1C0(s32, s32, u8, s32);
 extern void func_15136404(Actor *, f32, u8, s32);
-extern void func_1504715C(EvFloor *, Actor *);
+extern void func_1504715C(CollisionHit *, Actor *);
 extern void func_150CA930(f32 *);
 extern void func_151090DC(void);
 extern void func_150FB324(Actor *, u8, s32);
@@ -1689,7 +1680,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     case 24: {
                         f32 point[3];
                         f32 probe[3];
-                        EvFloor floor;
+                        CollisionHit floor;
                         s32 hit;
 
                         point[0] = D_800C3958[scene][track].x;
@@ -1699,9 +1690,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         probe[1] = point[1] + 100.0f;
                         probe[2] = point[2];
                         if (func_15046C80(probe, 0, point[1] - 1000.0f, &floor) != 0) {
-                            if (floor.unk1D != 3) {
+                            if (floor.source != 3) {
                                 hit = 1;
-                                point[1] = floor.y;
+                                point[1] = floor.height;
                             } else {
                                 hit = 0;
                             }
@@ -1711,7 +1702,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (hit) {
                             func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
                                           (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
-                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.unk4, point,
+                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, point,
                                           !event->unk6, 1, sceneTag, 1);
                         }
                         break;
@@ -1912,7 +1903,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 case 0:
                     if (obj != NULL) {
                         f32 pos[3];
-                        EvFloor floor;
+                        CollisionHit floor;
                         f32 out[3];
 
                         func_1504715C(&floor, obj);
@@ -1921,7 +1912,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         pos[2] = obj->z_position;
                         if (func_15046C80(pos, 0, obj->y_position - 300.0f, &floor) != 0) {
                             out[0] = pos[0];
-                            out[1] = floor.y;
+                            out[1] = floor.height;
                             out[2] = pos[2];
                             func_150CA930(out);
                         }

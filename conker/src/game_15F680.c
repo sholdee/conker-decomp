@@ -12,17 +12,6 @@ s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5)
 s32 func_1510CE60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4);
 void func_15168E54(s32 arg0, s32 arg1);
 
-/* Ground contact written by func_15046C80 (copied whole from the spawner's optional template). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ CollisionTri surface;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ u8 *unk20;
-} ParticleFloor; // size 0x24
-
 /* A pooled physics particle (at most 300 live, see D_800DC63C). Bytes 0x10..0x8B are copied from the
  * spawn template passed to func_1513264C; the u8 callback fields index the D_8008xxxx handler tables. */
 typedef struct Particle {
@@ -63,7 +52,7 @@ typedef struct Particle {
     /* 0x086 */ u8 pad86[6];
     /* 0x08C */ struct ParticleNode *node;
     /* 0x090 */ Mtx mtx[2];
-    /* 0x110 */ ParticleFloor floor;
+    /* 0x110 */ CollisionHit floor;
     /* 0x134 */ Vec3f squashOrigin;
     /* 0x140 */ f32 speed;
     /* 0x144 */ f32 invSpeed;
@@ -81,7 +70,7 @@ typedef struct Particle {
     /* 0x170 */ u8 extra[1]; // per-kind data, size passed to func_1513264C
 } Particle;
 
-s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
+s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, CollisionHit *floor);
 s32 func_15044380(f32 x, f32 y, f32 z, Actor *probe, s32 arg4, s32 arg5);
 
 /* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
@@ -251,7 +240,7 @@ s32 func_151336A8(s32 model, ParticleNode *node, Particle *particle);
 
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
-Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, ParticleFloor *floor, s32 extraSize, u8 arg5,
+Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
                         s32 arg6) {
     Particle *particle;
     ParticleNode *node;
@@ -331,10 +320,10 @@ Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, ParticleFloor 
         particle->floor = *floor;
     } else {
         particle->floor.height = -10000.0f;
-        particle->floor.unk20 = NULL;
-        particle->floor.type = 0;
-        particle->floor.unk1C = 0;
-        particle->floor.unk18 = 0;
+        particle->floor.surface = NULL;
+        particle->floor.source = 0;
+        particle->floor.flags = 0;
+        particle->floor.material = 0;
     }
     D_800DC63C++;
     particle->unk150 = 0;
@@ -439,7 +428,7 @@ Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
                             G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
         gfx = func_151462C8(gfx, &particle->unk14C, particle->unk7A, particle->owner, particle->ownerId, arg2,
-                            &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.unk18);
+                            &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.material);
     }
     gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(gfx++, *particle->node->resource);
@@ -481,7 +470,7 @@ s32 func_15132DDC(Particle *particle) {
         test.z = particle->pos.z;
 
         if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
-            if (particle->floor.type == 1 || (particle->floor.type == 2 && (particle->floor.unk1C & 1))) {
+            if (particle->floor.source == 1 || (particle->floor.source == 2 && (particle->floor.flags & 1))) {
                 particle->hitFlags |= 1;
                 if (particle->flags & 0x10) {
                     speed = sqrtf(particle->vel.x * particle->vel.x + particle->vel.y * particle->vel.y +
@@ -495,7 +484,7 @@ s32 func_15132DDC(Particle *particle) {
 
                 if (particle->floorHitFn != 0) {
                     if (D_80089934[particle->floorHitFn](particle, prev.x, prev.y, prev.z, particle->floor.height,
-                                                         &particle->floor.surface) == 0) {
+                                                         &particle->floor.tri) == 0) {
                         return 0;
                     }
                 }
@@ -505,7 +494,7 @@ s32 func_15132DDC(Particle *particle) {
                 }
             }
 
-            if (particle->floor.type == 3) {
+            if (particle->floor.source == 3) {
                 particle->hitFlags |= 2;
                 if (particle->floorType3Fn != 0) {
                     if (D_80089970[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
@@ -522,13 +511,13 @@ s32 func_15132DDC(Particle *particle) {
             probe.y_position = particle->pos.y;
             probe.z_position = particle->pos.z;
             probe.unk188 = 0;
-            probe.floorTri = particle->floor.surface;
+            probe.floorTri = particle->floor.tri;
             probe.unk28 = 1.0f;
             probe.xz_scale = 1.0f;
             probe.bodyRadius = particle->radius;
             probe.y_scale = 1.0f;
             probe.bodyHeight = particle->radius;
-            if (particle->floor.unk1C & 2) {
+            if (particle->floor.flags & 2) {
                 probe.floorY = particle->floor.height;
             } else {
                 probe.floorY = -10000.0f;
@@ -699,13 +688,13 @@ s32 func_151337C0(Particle *particle) {
     return 1;
 }
 
-/* Ballistic update with floor collision only while falling; the floor handler runs unless the floor's
- * unk20 record is flagged (bits 0x60 of byte 0x4F == 0x40). */
+/* Ballistic update with floor collision only while falling; the floor handler runs unless the floor is an
+ * object surface flagged (flags & 0x60) == 0x40. */
 s32 func_15133894(Particle *particle) {
     s8 result;
     Vec3f prev;
     Vec3f test;
-    u8 *unk20;
+    WorldObject *surface;
     s32 skip;
 
     result = 1;
@@ -717,15 +706,15 @@ s32 func_15133894(Particle *particle) {
         test.z = particle->pos.z;
         if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
             skip = FALSE;
-            if (particle->floor.unk20 != NULL) {
-                unk20 = particle->floor.unk20;
-                if ((unk20[0x4F] & 0x60) == 0x40) {
+            if (particle->floor.surface != NULL) {
+                surface = particle->floor.surface;
+                if ((surface->flags & 0x60) == 0x40) {
                     skip = TRUE;
                 }
             }
             if (!skip) {
                 result = D_80089934[particle->floorHitFn](particle, prev.x, prev.y, prev.z, particle->floor.height,
-                                                          &particle->floor.surface);
+                                                          &particle->floor.tri);
             }
         }
     }
