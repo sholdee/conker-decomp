@@ -415,25 +415,26 @@ void func_150242F8(s32 mode, s32 scene) {
     }
 }
 
+/* A subtitle slot (see func_150234A4); from `flags` on it is the parameter block passed to func_1516A7B0. */
 typedef struct {
-    s16 active;
-    u8 pad2[2];
-    s32 flags;
-    u8 *text;
-    u8 flagC;
-    u8 padD[0xF];
-    f32 *unk1C;
-    f32 *unk20;
-    f32 *unk24;
-    s16 unk28;
-    s16 unk2A;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 pad30[4];
-    s32 handle;
-} Rec1502460C;
+    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 flags;
+    /* 0x08 */ u8 *text;
+    /* 0x0C */ u8 isOpen;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ f32 *unk1C;
+    /* 0x20 */ f32 *unk20;
+    /* 0x24 */ f32 *unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ u8 r;
+    /* 0x2D */ u8 g;
+    /* 0x2E */ u8 b;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 pad30[4];
+    /* 0x34 */ s32 handle;
+} SeqSubtitle;
 
 typedef struct {
     struct127 *obj;
@@ -482,8 +483,8 @@ extern s16 D_800C3C9E;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
 extern s32 func_1514D3B0(void *, s16, s32, s32);
-extern void func_15023440(Rec1502460C *, s32);
-extern Rec1502460C *func_150234A4(s32, s32);
+extern void func_15023440(SeqSubtitle *, s32);
+extern SeqSubtitle *func_150234A4(s32, s32);
 extern s32 func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_15053430(struct127 *);
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
@@ -532,11 +533,16 @@ extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
 extern void func_151E53E8(s32);
 
+/*
+ * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
+ * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
+ * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
+ */
 s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag) {
 
     if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
-        s32 flag;
-        Rec1502460C *rec;
+        s32 opening;
+        SeqSubtitle *sub;
         u8 *text;
         u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xA0 }, { 0x3C, 0x3C, 0x3C } };
 
@@ -545,74 +551,74 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             (event->type == 0x12 && D_800BEAAB != 1)) {
             return 1;
         }
-        flag = event->unk4 == 0 ? 1 : 0;
-        rec = func_150234A4(track, flag);
-        if (rec != NULL) {
+        opening = event->unk4 == 0 ? 1 : 0;
+        sub = func_150234A4(track, opening);
+        if (sub != NULL) {
             if (event->unk4 == 0) {
-                if (rec->flagC != 0) {
-                    func_1516D2E0(rec->handle);
+                if (sub->isOpen != 0) {
+                    func_1516D2E0(sub->handle);
                 }
                 text = D_800C35E0[scene][event->value];
                 if (*text == 0xBE) {
-                    rec->flags = 0x8013;
+                    sub->flags = 0x8013;
                     text++;
                 } else if (*text == 0xBF) {
-                    rec->flags = 0x8019;
+                    sub->flags = 0x8019;
                     text++;
                 } else {
-                    rec->flags = 0x8011;
+                    sub->flags = 0x8011;
                 }
-                rec->text = text;
-                rec->unk2A = 100;
-                rec->flagC = 1;
-                rec->unk28 = 0;
-                rec->unk1C = &D_800C3958[scene][track].unkC;
-                rec->unk20 = &D_800C3958[scene][track].unk10;
-                rec->unk2F = 1;
-                rec->unk24 = &D_800C3958[scene][track].unk14;
-                rec->unk2C = colors[event->unk5][0];
-                rec->unk2D = colors[event->unk5][1];
-                rec->unk2E = colors[event->unk5][2];
+                sub->text = text;
+                sub->unk2A = 100;
+                sub->isOpen = 1;
+                sub->unk28 = 0;
+                sub->unk1C = &D_800C3958[scene][track].unkC;
+                sub->unk20 = &D_800C3958[scene][track].unk10;
+                sub->unk2F = 1;
+                sub->unk24 = &D_800C3958[scene][track].unk14;
+                sub->r = colors[event->unk5][0];
+                sub->g = colors[event->unk5][1];
+                sub->b = colors[event->unk5][2];
                 if (event->unk5 == 2) {
-                    rec->flags |= 0x40000;
+                    sub->flags |= 0x40000;
                 }
-                rec->handle = func_1516A7B0(0, 0, 0, 0, &rec->flags, sceneTag);
+                sub->handle = func_1516A7B0(0, 0, 0, 0, &sub->flags, sceneTag);
             } else if (event->unk4 == 1) {
-                func_15023440(rec, event->unk5);
+                func_15023440(sub, event->unk5);
             } else {
                 if (event->unk5 == 0) {
-                    rec->handle = func_1516D378(rec->handle);
+                    sub->handle = func_1516D378(sub->handle);
                 } else {
-                    rec->handle = func_1516D3C4(rec->handle);
+                    sub->handle = func_1516D3C4(sub->handle);
                 }
                 if (event->unk6 != 0) {
-                    s32 idx = event->unk6 - 1;
+                    s32 color = event->unk6 - 1;
 
-                    rec->unk2C = colors[idx][0];
-                    rec->unk2D = colors[idx][1];
-                    rec->unk2E = colors[idx][2];
-                    if (idx == 2) {
-                        rec->flags |= 0x40000;
+                    sub->r = colors[color][0];
+                    sub->g = colors[color][1];
+                    sub->b = colors[color][2];
+                    if (color == 2) {
+                        sub->flags |= 0x40000;
                     } else {
-                        rec->flags &= ~0x40000;
+                        sub->flags &= ~0x40000;
                     }
                 }
             }
         }
     } else if (event->type == 0xC) {
-        SeqEvent *p;
-        s32 val;
+        SeqEvent *found;
+        s32 duration;
 
         if (event->value != 0) {
             if (event->unk6 != 0) {
                 func_1507EB4C(obj, event->value);
             } else {
                 if (event->unk5 != 0) {
-                    val = 0xFFFF;
+                    duration = 0xFFFF;
                 } else {
-                    val = func_15023BB0(event, event->type, track, &p, 0, 0, 0, 0, 0, 0, scene) - eventTime;
+                    duration = func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
                 }
-                func_1507E7E4(obj, event->value & 0xFF, 3, val & 0xFFFF, event->unk4);
+                func_1507E7E4(obj, event->value & 0xFF, 3, duration & 0xFFFF, event->unk4);
             }
         }
     } else if (event->type == 0xD) {
@@ -636,21 +642,21 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         }
     } else if (event->type == 4) {
-        SeqEvent *p;
-        s32 val;
+        SeqEvent *found;
+        s32 duration;
 
         if (obj == NULL) {
             return 1;
         }
-        val = (func_15023BB0(event, event->type, track, &p, 0, 0, 0, 0, 0, 0, scene) - eventTime) / 2;
-        if (val >= 0x100) {
-            val = 0xFF;
-        } else if (val == 0) {
-            val = 1;
+        duration = (func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime) / 2;
+        if (duration >= 0x100) {
+            duration = 0xFF;
+        } else if (duration == 0) {
+            duration = 1;
         }
         if (event->unk4 == 0) {
             FU8(obj, 0x134) = event->value;
-            FU8(obj, 0x135) = val;
+            FU8(obj, 0x135) = duration;
         }
     } else if (event->type == 3) {
         if (event->value >= D_800C363A[scene]) {
@@ -897,8 +903,8 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 5) {
             s32 idx;
-            SeqEvent *p;
-            s32 val;
+            SeqEvent *found;
+            s32 duration;
             s32 ids[4] = { 0xD, 0xE, 0xF, 0x10 };
             u8 c;
 
@@ -907,14 +913,14 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (idx >= 4) {
                     idx = 3;
                 }
-                val = func_15023BB0(event, event->type, track, &p, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
                 if (event->unk6 != 0) {
-                    val = 999;
+                    duration = 999;
                     c = 0xFF;
                 } else {
                     c = sceneTag;
                 }
-                func_1518D1C0(obj, ids[idx], val, 0, c, 0, "Cutscene 1");
+                func_1518D1C0(obj, ids[idx], duration, 0, c, 0, "Cutscene 1");
             }
         } else if (event->value == 0x36) {
             if (event->unk4 == 0) {
@@ -1023,20 +1029,20 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 D_800D9890 = 10;
             }
         } else if (event->value == 0x43) {
-            s32 time;
-            SeqEvent *p;
+            s32 duration;
+            SeqEvent *found;
 
             if (event->unk4 == 0) {
-                time = func_15023BB0(event, event->type, track, &p, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150B7220(D_800C3958[scene][track].unk24, D_800C3958[scene][track].unk28, time, sceneTag);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_150B7220(D_800C3958[scene][track].unk24, D_800C3958[scene][track].unk28, duration, sceneTag);
             }
         } else if (event->value == 0x45) {
-            s32 time;
-            SeqEvent *p;
+            s32 duration;
+            SeqEvent *found;
 
             if (event->unk4 == 0) {
-                time = func_15023BB0(event, event->type, track, &p, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151A4FD0(0, time, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_151A4FD0(0, duration, 0xFF, 0, 0, D_800BE9E8, 0, 0);
             }
         } else if (event->value == 0x49) {
             if (obj != NULL && event->unk4 < 3) {
@@ -1080,44 +1086,44 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 obj->unk13C = 0;
             }
         } else if (event->value == 0x37) {
-            s32 val;
-            SeqEvent *p;
+            s32 duration;
+            SeqEvent *found;
             s32 v;
             u8 colors[3][3] = { { 0xFF, 0, 0 }, { 0, 0x35, 0x46 }, { 0xFF, 0xFF, 0xFF } };
 
-            val = func_15023BB0(event, event->type, track, &p, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-v = event->unk6 != 0 ? event->unk6 : 0x7F;
-                func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, val, 0);
+                v = event->unk6 != 0 ? event->unk6 : 0x7F;
+                func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, duration, 0);
             } else {
                 D_800DDE10 = 0;
             }
         } else if (event->value == 0x38) {
-            s32 val;
-            SeqEvent *p;
+            s32 duration;
+            SeqEvent *found;
             s32 v;
 
-            val = func_15023BB0(event, event->type, track, &p, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-v = event->unk6 != 0 ? event->unk6 : 4;
-                func_1517F720(event->unk5, val, v, 0x7F, 1);
+                v = event->unk6 != 0 ? event->unk6 : 4;
+                func_1517F720(event->unk5, duration, v, 0x7F, 1);
             } else {
                 D_800DDE08 = 0;
             }
         } else if (event->value == 0x5C) {
-            SeqEvent *p;
+            SeqEvent *found;
             s32 total;
             s32 start;
             s32 end;
 
             if (event->unk4 == 0) {
-                total = func_15023BB0(event, event->type, track, &p, 1, event->value, 1, 1, 1, event->unk5, scene);
-                start = func_15023BB0(event, event->type, track, &p, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
-                if (p == NULL) {
+                total = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene);
+                start = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
+                if (found == NULL) {
                     start = 0;
                 }
-                end = total - func_15023BB0(event, event->type, track, &p, 1, event->value, 1, 3, 1, event->unk5, scene);
-                if (p == NULL) {
+                end = total - func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->unk5, scene);
+                if (found == NULL) {
                     end = 0;
                 }
                 if (D_800BE9F0 == 0x18) {
@@ -1146,7 +1152,7 @@ v = event->unk6 != 0 ? event->unk6 : 4;
                 D_800DDE40 = 0;
             }
         } else if (event->value == 0x66) {
-            if (event->unk4 == 0) {
+            if (event->unk4 == 0) { // matching: empty, but it still shapes the code
             }
         } else if (event->value == 0x67) {
             func_151DE7D4();
@@ -2559,7 +2565,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             s32 pad[7];
 
             func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
-            if (event->unk4 == 0) {
+            if (event->unk4 == 0) { // matching: empty, but it still shapes the code
             }
         } else if (event->value == 0x2F) {
             s32 delay;
@@ -2870,7 +2876,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (actor != NULL) {
                 if (event->unk4 == 0) {
                     func_1518894C(actor, duration, event->unk5);
-                } else if (skipping != 0) {
+                } else if (skipping != 0) { // matching: empty, but it still shapes the code
                 }
             } else if (obj != NULL) {
                 if (event->unk4 == 0) {
