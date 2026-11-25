@@ -6,7 +6,7 @@
 #include "effects.h"
 
 s32 func_1514672C(Vec3f *arg0);
-s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, f32 *floorY);
+s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, CollisionHit *hit);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(Vec3f *vel, f32 scale);
@@ -150,18 +150,8 @@ typedef struct {
 
 /* A live sprite particle as returned by func_15130280. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    ParticleDesc desc;
-    f32 floorY;
-    Vec3f unk84;
-    u8 pad90[0xD];
-    u8 unk9D;
-    u8 pad9E[0xA];
-    union {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {
         ParticleWobble wobble;
         ParticleSpin spin;
     } data;
@@ -270,8 +260,8 @@ s32 func_151D9450(Particle *particle, Vec3f *arg1) {
     }
     wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
     wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
-    particle->desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
-    particle->desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
+    particle->head.desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
+    particle->head.desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
     return 1;
 }
 
@@ -286,41 +276,41 @@ u8 func_151D9534(Particle *particle, Vec3f *arg1) {
     f32 avgScale;
 
     alive = 1;
-    if (particle->desc.pos.y < arg1->y) {
-        point.x = particle->desc.pos.x;
+    if (particle->head.desc.pos.y < arg1->y) {
+        point.x = particle->head.desc.pos.x;
         point.y = arg1->y;
-        point.z = particle->desc.pos.z;
+        point.z = particle->head.desc.pos.z;
         if (func_1514672C(&point) == 0) {
             return 0;
         }
         if (func_15046C80(&point, 0,
- particle->desc.pos.y, &particle->floorY) != 0) {
-            point.y = particle->floorY + 2.0f;
+ particle->head.desc.pos.y, &particle->head.floor) != 0) {
+            point.y = particle->head.floor.height + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
-                particle->desc.pos.y = (particle->desc.height * 0.060000002f) + point.y;
-                particle->desc.vel.x *= 0.39900002f;
-                particle->desc.vel.y *= -0.39900002f;
-                particle->desc.vel.z *= 0.39900002f;
-                if (fabsf(particle->desc.vel.y) < 0.326f) {
-                    particle->desc.vel.x = 0.0f;
-                    particle->desc.flags &= ~6;
-                    particle->desc.vel.y = 0.0f;
-                    particle->desc.vel.z = 0.0f;
-                    particle->desc.gravity = 0.0f;
+                particle->head.desc.pos.y = (particle->head.desc.height * 0.060000002f) + point.y;
+                particle->head.desc.vel.x *= 0.39900002f;
+                particle->head.desc.vel.y *= -0.39900002f;
+                particle->head.desc.vel.z *= 0.39900002f;
+                if (fabsf(particle->head.desc.vel.y) < 0.326f) {
+                    particle->head.desc.vel.x = 0.0f;
+                    particle->head.desc.flags &= ~6;
+                    particle->head.desc.vel.y = 0.0f;
+                    particle->head.desc.vel.z = 0.0f;
+                    particle->head.desc.gravity = 0.0f;
                 }
             } else {
                 alive = 0;
                 wobble = &particle->data.wobble;
-                avgScale = (particle->desc.width + particle->desc.height) * 0.5f;
-                if (particle->unk9D == 3) {
-                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.alpha,
-                                  (s32)&particle->unk84, &point, particle->unkC, particle->unk1);
+                avgScale = (particle->head.desc.width + particle->head.desc.height) * 0.5f;
+                if (particle->head.floor.source == 3) {
+                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->head.desc.alpha,
+                                  (s32)&particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
                 } else if (func_150ADA20() & 1) {
-                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.alpha,
-                                  (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
+                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
+                                  (s32)&particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
                 } else {
-                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->desc.alpha, &point,
-                                  1, particle->unkC, particle->unk1);
+                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->head.desc.alpha, &point,
+                                  1, particle->head.header.owner, particle->head.header.kind);
                 }
             }
         }
@@ -1126,7 +1116,7 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
 
     spin = &particle->data.spin;
     if (spin->flags & SPIN_FLAG_DRAG) {
-        func_15131918(&particle->desc.vel, spin->drag);
+        func_15131918(&particle->head.desc.vel, spin->drag);
     }
     if (spin->flags & SPIN_FLAG_SPIN) {
         spin->angleX = spin->angleX + (spin->stepX * D_800BE9E4);
@@ -1139,9 +1129,9 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
             f32 waveZ;
 
             waveZ = func_151423D8((u8)(spin->angleZ - 0x40));
-            particle->desc.offset.x = spin->amplitude.x * waveX;
-            particle->desc.offset.y = spin->amplitude.y * waveY;
-            particle->desc.offset.z = spin->amplitude.z * waveZ;
+            particle->head.desc.offset.x = spin->amplitude.x * waveX;
+            particle->head.desc.offset.y = spin->amplitude.y * waveY;
+            particle->head.desc.offset.z = spin->amplitude.z * waveZ;
         }
     }
     return 1;
