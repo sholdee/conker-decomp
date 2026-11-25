@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 // File-local views of a game object (struct127, the 0x32C-byte entries of D_800CC2D0) and of the
 // extension block it points to at 0x31C (struct126). include/structs.h lacks or mistypes several
 // fields used here (0x12 is a u16, 0x38 an s16, 0xBC an f32, ...); fold them in during the central pass.
@@ -169,7 +168,7 @@ extern u16 D_800CBDA0[];
 extern s32 *D_800DBF94;
 void func_1508295C(s32, s32, s32);
 void func_1507D4F8(s32);
-s32 func_1504C8BC(void *);
+s32 func_1504C8BC(GameObj *);
 void func_150A11C4(void *);
 void func_150A278C(void *);
 void func_1507E73C(void *);
@@ -778,8 +777,6 @@ void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     }
 }
 
-
-
 s32 func_1504C078(void) {
     if (D_800D154C->unk31C->unk58 != 1) {
         D_800D154C->unk31C->unk59 = 0;
@@ -808,8 +805,6 @@ extern f32 D_800991F8;
 extern f32 D_800991FC;
 extern f32 D_80099200;
 extern u8 D_800CC2B1;
-extern u16 D_800CC2B2;
-extern f32 D_800CC2B4;
 
 void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     f32 blend;
@@ -819,16 +814,16 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     f32 speed;
     s32 anim;
     GameObjExt *ext;
-
     f32 diff;
 
-    if ((s16)D_800CC2B2 == 0 && (ext = obj->unk31C, ext->unk12 >= -29) && ext->unk12 < 30) {
+    if ((s16)D_800CC2B2 == 0 && (ext = obj->unk31C)->unk12 >= -29 && ext->unk12 < 30) {
         ext->unk12 = 0;
     } else {
         ext = obj->unk31C;
+        // matching: computed in two statements to keep the target's float register order
         diff = (s16)D_800CC2B2 - ext->unk12;
         diff = (D_800D1550[0] / D_800CC2B4) * diff;
-        ext->unk12 += (s16)(s32)diff;
+        ext->unk12 += (s16)diff;
     }
     ext = obj->unk31C;
     if (ext->unk6B != 0) {
@@ -863,7 +858,7 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
                     ext->unk37 = 0;
                     ext = obj->unk31C;
                 }
-                pressed = ext->unk4E;
+                pressed = ext->unk4E; // matching: reusing pressed for this value sets the register allocation
                 if ((ext->unk4E == 1 || pressed == 0x81) && vel > 1.0f) {
                     arg2 = 10.0f;
                     anim = 0x302;
@@ -935,77 +930,72 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     }
 }
 
-void func_1504C854(struct127 *arg0) {
-    D_800CC288 = arg0->unk31C->unk8C;
-
-    if (arg0->unk31C->unk8E > 0) {
-        arg0->unk31C->unk8E -= D_800BE9A0;
+void func_1504C854(struct127 *obj) {
+    D_800CC288 = obj->unk31C->unk8C;
+    if (obj->unk31C->unk8E > 0) {
+        obj->unk31C->unk8E -= D_800BE9A0;
     } else {
-        arg0->unk31C->unk8A = 0;
+        obj->unk31C->unk8A = 0;
     }
-    if (arg0->unk31C->unk8F > 0) {
-        arg0->unk31C->unk8F -= D_800BE9A0;
+    if (obj->unk31C->unk8F > 0) {
+        obj->unk31C->unk8F -= D_800BE9A0;
     } else {
-        arg0->unk31C->unk8C = 0;
+        obj->unk31C->unk8C = 0;
     }
 }
 
-s32 func_1504C8BC(void *arg0) {
-    void *temp_v1;
+s32 func_1504C8BC(GameObj *obj) {
+    GameObjExt *ext;
 
-    temp_v1 = *(void **)((u8 *)arg0 + 0x31C);
-    if (temp_v1 == 0) {
+    ext = obj->unk31C;
+    if (ext == NULL) {
         return 1;
     }
-    if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0 || D_800BE9F0 == 0x33 || *(s32 *)arg0 == 0x25) {
-        *((u8 *)temp_v1 + 0x1A8) = 0;
+    if (obj->unk1D4 != 0 || D_800BE9F0 == 0x33 || obj->interaction_state == 0x25) {
+        ext->unk1A8 = 0;
         return 1;
     }
-    if (D_800CC2B8 == (*((u8 *)arg0 + 0x127) & 1)) {
-        if (*((u8 *)temp_v1 + 0x1A8) != 0) {
-            *(s16 *)&D_800CC2BA = (s16)D_800BE9E4;
-            D_800BE9E4 += (u32)*((u8 *)*(void **)((u8 *)arg0 + 0x31C) + 0x1A8);
-            D_800BE9A4 = (f32)D_800BE9E4 * 0.5f;
+    if ((obj->unk127 & 1) == D_800CC2B8) {
+        if (ext->unk1A8 != 0) {
+            *(s16 *)&D_800CC2BA = D_800BE9E4;
+            D_800BE9E4 += obj->unk31C->unk1A8;
+            D_800BE9A4 = D_800BE9E4 * 0.5f;
             if (D_800BE9A4 != 0.0f) {
                 D_800BE9A8 = 1.0f / D_800BE9A4;
             } else {
                 D_800BE9A8 = 0.0f;
             }
-            *((u8 *)*(void **)((u8 *)arg0 + 0x31C) + 0x1A8) = 0;
+            obj->unk31C->unk1A8 = 0;
             return 2;
         }
         return 1;
     }
-    *((u8 *)temp_v1 + 0x1A8) += (u32)D_800BE9E4;
+    ext->unk1A8 += D_800BE9E4;
     return 0;
 }
 
-void func_1504C9E4(struct127 *arg0, s8 arg1, u8 arg2) {
-    u8 phi_a2;
-    s32 tmp0;
-    s32 tmp1;
+void func_1504C9E4(struct127 *obj, s8 target, u8 mode) {
+    u8 step;
+    s32 delta;
+    s32 saved;
 
-    tmp0 = (u8)(arg0->unk1D1 - arg1);
-
-    if (tmp0) {
-        phi_a2 = 3;
-        if (arg2 == 16) {
-            phi_a2 = 6;
+    delta = (u8)(obj->unk1D1 - target);
+    if (delta != 0) {
+        step = 3;
+        if (mode == 16) {
+            step = 6;
         }
-
-        tmp1 = tmp0;
-        if (tmp0 >= 128) {
-            arg0->unk1D1 += phi_a2;
+        saved = delta;
+        if (delta >= 128) {
+            obj->unk1D1 += step;
+        } else {
+            obj->unk1D1 -= step;
         }
-        else {
-            arg0->unk1D1 -= phi_a2;
-        }
-
-        tmp0 = tmp1;
-        tmp0 ^= arg0->unk1D1 - arg1;
-        if ((u8)tmp0 & 0x80)
-        {
-            arg0->unk1D1 = arg1;
+        // stop at the target once the difference changes sign
+        delta = saved; // matching: the round trip through saved keeps a separate copy of delta in a3
+        delta ^= obj->unk1D1 - target;
+        if ((u8)delta & 0x80) {
+            obj->unk1D1 = target;
         }
     }
 }
