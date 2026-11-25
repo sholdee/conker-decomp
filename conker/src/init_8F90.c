@@ -226,7 +226,6 @@ extern OSMesgQueue D_8003E608;
 extern OSMesg D_8003E620[8];
 extern BankState D_800406A0;
 /* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
-/* matching: some stores to D_800406A0.loadedList/releaseList go through these aliases (no shared base register) */
 extern BankRecord *D_800406A4; /* D_800406A0.loadedList */
 extern BankRecord *D_800406B0; /* D_800406A0.releaseList */
 extern DMABuffer D_800406B8[NUM_DMA_BUFFERS];
