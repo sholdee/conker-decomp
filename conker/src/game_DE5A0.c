@@ -67,7 +67,7 @@ void func_150B10F0(struct127 *obj) {
     if (func_1505A6F8(D_800CC2D0, obj) < 1100.0f) {
         dist = func_1505A6F8(obj, D_800CC2D0);
         distCopy = dist;
-        range = obj->y_position - D_800CC2D0[0].y_position;
+        range = obj->y_position - D_800CC2D0[0].y_position; // matching: height above the player reuses `range`
         if (range < 0.0f) {
             range = 1000.0f;
         } else {
@@ -125,9 +125,9 @@ void func_150B12FC(struct127 *obj) {
 
 /* D_800D20FC is a table of 0x30-byte spawn records. */
 typedef struct {
-    char pad_0[0x8];
-    s16  y;
-    char pad_A[0x26];
+    u8 pad0[0x8];
+    s16 y;
+    u8 padA[0x26];
 } SpawnRecord;
 
 /*
@@ -279,7 +279,7 @@ typedef struct {
 } ParticleSpawn;
 
 /*
- * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when on a track with unk21C >= 9
+ * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, unk21C >= 9
  * and D_800B86A4's row clear or D_800CC250 bit 2 set), and
  * now and then emits a particle at a random point around it that drifts with the player's motion.
  */
