@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern TimedEffect *func_15164780(CamWobbleDef *, s32, u8, s32);
-
 
 
 /* First argument of func_1515572C. */

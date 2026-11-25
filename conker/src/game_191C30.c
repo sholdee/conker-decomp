@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Camera wobble effects: up to six sine waves (position xyz, rotation xyz) that are summed into a
@@ -13,7 +12,7 @@ typedef struct {
     u8 v[3];
 } CamWobbleHalves;
 
-typedef struct {
+typedef struct CamWobble {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ CamWobbleDef def;
     /* 0x48 */ f32 phase[6];
@@ -137,7 +136,7 @@ typedef struct {
 } CamWobbleShape;
 
 /* A wobble that ramps up to peak over riseTime, holds it for holdTime and ramps down over fallTime. */
-typedef struct {
+typedef struct CamWobblePreset {
     /* 0x00 */ CamWobbleShape peak;
     /* 0x30 */ f32 riseTime;
     /* 0x34 */ f32 holdTime;
@@ -155,7 +154,7 @@ typedef struct {
 } CamWobbleEnvelope; // size 0xA0
 
 /* Distance falloff used by scaleFn 1 (func_15165B80). */
-typedef struct {
+typedef struct CamWobbleFalloff {
     /* 0x00 */ Vec3f origin;
     /* 0x0C */ f32 radius;       // full strength within this distance of origin
     /* 0x10 */ f32 fadeRange;    // then fades to nothing over this distance
@@ -163,7 +162,7 @@ typedef struct {
 } CamWobbleFalloff; // size 0x18
 
 /* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
-typedef struct {
+typedef struct CamWobbleEnv {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x8];
     /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
@@ -171,8 +170,6 @@ typedef struct {
     /* 0x068 */ CamWobbleEnvelope envelope;
     /* 0x108 */ CamWobbleFalloff falloff; // only with extraSize 24
 } CamWobbleEnv;
-
-CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
 
 /*
  * Starts one of the preset wobbles for a player. Presets 5 and 6 fade with distance from falloff->origin;
@@ -474,8 +471,6 @@ s32 func_151658DC(CamWobbleEnv *wobble) {
     }
     return active;
 }
-
-f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
 
 /* Scale callback 1: fades the wobble with the player's distance from its falloff origin. */
 f32 func_15165B80(CamWobbleEnv *wobble) {

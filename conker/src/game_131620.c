@@ -19,8 +19,6 @@ void func_15104170(s32 mode, Actor *owner, Actor *source) {
     }
 }
 
-void func_151254F4(Camera *camera, s32 arg1);
-
 /* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
 void func_151041E4(FadeEffect *effect) {
     s32 triggered;

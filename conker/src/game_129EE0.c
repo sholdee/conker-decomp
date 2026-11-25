@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
@@ -97,8 +95,6 @@ void func_150FCBC0(u8 index) {
         } while (count > 0);
     }
 }
-
-extern f32 func_15165BB0(void *arg0, Vec3f *pos, f32 arg2, f32 arg3, f32 arg4);
 
 /* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {

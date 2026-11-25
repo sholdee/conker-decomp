@@ -5,8 +5,6 @@
 #include "variables.h"
 #undef func_15062FC0
 
-extern void func_151254F4(Camera *camera, s32 index);
-
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
 

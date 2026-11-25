@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151254F4(Camera *camera, s32 index);
 extern s32 D_80088710;
 
 /*

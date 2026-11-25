@@ -160,8 +160,6 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
     }
 }
 
-extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
  * rumble per step), and emits effects on an arc of radius unk48 around (unk40, unk44).

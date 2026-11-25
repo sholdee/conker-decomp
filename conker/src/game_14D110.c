@@ -16,11 +16,6 @@
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
 
-void func_151216F8(Camera *camera);
-void func_151218C4(Camera *camera);
-void func_15123A54(Camera *camera);
-void func_1512E140(Camera *camera);
-
 /* Enters aim mode: saves the current view and picks the aim yaw, pitch and distance for the zone. */
 void func_1511FC60(Camera *camera) {
     CamAim *aim;

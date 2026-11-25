@@ -287,8 +287,6 @@ typedef struct {
 
 #define WORK(obj) ((PlatformWork *)&(obj)->touch)
 
-extern void func_15164F0C(u8, u8, void *, u8, s32);
-
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
  * and 1 rises back. Kind 1 platforms just follow their partner's offset. */
 void func_150BFA7C(WorldObject *platform) {

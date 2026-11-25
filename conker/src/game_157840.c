@@ -11,7 +11,7 @@ typedef struct {
 } ZScanParams;
 
 /* State of one z-buffer occlusion scan (see func_1512B630). */
-typedef struct {
+typedef struct ZScan {
     u8 unk0;
     u8 unk1;
     u8 unk2;
@@ -31,11 +31,7 @@ extern ZScanSet D_800DC0C0[4];
 extern ZScanParams D_80089590[4];
 extern ZScanParams D_800DC200[4][4];
 
-void func_15123A54(Camera *arg0);
-
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
-void func_151236D0(void *);
-s32 func_15125490(void *);
 
 /* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
  * (unk354), with special cases for the camera modes and the tracked objects. */
@@ -218,10 +214,6 @@ extern f32 D_800DC1F0;
 extern f32 D_800DC1F4;
 extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
-void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
-s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
-void func_1512C150(Camera *arg0);
-s32 func_1512B53C(Camera *arg0);
 
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (func_1512B730's correction, smoothed). */
@@ -305,8 +297,6 @@ void func_1512B100(Camera *arg0) {
         arg0->unk5FE = 60;
     }
 }
-
-s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 
 /* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
  * with the target's depth; the first occluder on each side is recorded in that side's ZScan. */
@@ -694,7 +684,7 @@ void func_1512C150(Camera *arg0) {
     }
 }
 
-void func_1512C200(s32 arg0) {
+void func_1512C200(Camera *camera) {
 }
 
 #define SQ(x) ((x) * (x))

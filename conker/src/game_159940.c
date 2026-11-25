@@ -10,10 +10,6 @@ extern s32 D_800DC290[4];        // their lengths in frames
 
 #define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
 
-void func_1512D070(Camera *camera);
-void func_1512D2F8(Camera *camera);
-void func_1512D368(Camera *camera);
-
 /*
  * Builds the player's view matrix for this frame: eases the side/lift offsets, places eye and target,
  * then stacks the shake, sway roll, per-player offsets (D_800DCDE0) and the breathing wobble on top.

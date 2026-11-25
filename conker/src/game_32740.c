@@ -1,14 +1,12 @@
 #include <ultra64.h>
 
+// matching: func_15005290 passes the actor as a third argument to func_151298C0 (which takes two); the
+// argument changes the register allocation, so the header's prototype is hidden here
+#define func_151298C0 func_151298C0_header
 #include "functions.h"
+#undef func_151298C0
+void func_151298C0(Camera *cam, s32 arg1, Actor *actor);
 #include "variables.h"
-
-void func_15123070(Camera *);
-void func_1512D560(Camera *, s32, CamShot *);
-
-extern void func_1512ABF8(void);
-extern void func_1512D238(void);
-void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode);
 
 /**
  * Loads the resource's data and allocates and initialises the D_80082FA0 + 1 view (Camera) states.
@@ -41,11 +39,6 @@ void func_15005290(s32 resource, s32 mode) {
     D_800894B0 = 0;
     D_800DC010 = allocate_memory(D_80082FA0 * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
 }
-
-void func_1512D66C(Camera *arg0);
-void func_1512D6F0(Camera *arg0);
-void func_15125924(Camera *arg0);
-void func_151298C0(Camera *arg0, s32 arg1, Actor *arg2);
 
 /**
  * Resets view state `index` and attaches it, as camera, to actor movement_obj[index].

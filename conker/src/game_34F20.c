@@ -29,8 +29,6 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
     D_800BE9ED = 0;
 }
 
-void func_15005290(s32, s32);
-
 
 
 

@@ -520,7 +520,6 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
 const s32 D_800AAC30[] = { 0x17, 0x18 };
 // matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15164F0C(s32, u8, s32, u8, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
 void func_151C899C(Actor *actor, SightBeamObject *obj) {

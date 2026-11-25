@@ -1086,8 +1086,6 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 param) {
 }
 
 
-void func_1512D560();
-
 /* Race-over camera: follows the actor along the type-5 camera nodes, looking at it. */
 void func_150891E8(Racer *racer, Actor *obj) {
     f32 dx;
@@ -1231,7 +1229,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
         p->unk10 = 120;
         p->unkC = 999.0f;
         func_1512D560(obj->CameraPtr, 10, p);
-        func_1512D560(obj->CameraPtr, 6, cam->CNumber);
+        func_1512D560(obj->CameraPtr, 6, (void *)cam->CNumber);
         racer->camState = 0;
         return;
     }
@@ -1251,7 +1249,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
         racer->camY = obj->ypos;
         racer->camZ = obj->zpos;
         racer->camT = 0.0f;
-        func_1512D560(obj->CameraPtr, 5, cam->CNumber);
+        func_1512D560(obj->CameraPtr, 5, (void *)cam->CNumber);
         racer->camState = 1;
     }
     racer->camT += 0.01700000092f * D_800BE9E4;

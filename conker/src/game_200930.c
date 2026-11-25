@@ -684,8 +684,6 @@ typedef struct {
     /* 0x14 */ f32 unk14;
 } Params151D5334;
 
-extern void func_15164F0C(u8, u8, s32, u8, s32);
-
 /* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
 void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
@@ -697,7 +695,8 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     params.unk14 = arg3;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        func_15164F0C(arg4, i, (s32)&params, arg5, arg6);
+        // matching: &params goes through an int (a plain pointer changes the register allocation)
+        func_15164F0C(arg4, i, (void *)(s32)&params, arg5, arg6);
     }
 }
 

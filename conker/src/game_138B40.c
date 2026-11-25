@@ -13,7 +13,6 @@ extern Gfx *D_800B0E08;
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 Gfx *func_150A5378(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF viewMtx, s32 arg3, s32 arg4, s32 viewMask);
-Gfx *func_1512E5F0(Gfx *gfx, Camera *camera);
 
 /* Rebuilds every view's float view matrix and its view * projection product for this frame. */
 void func_1510B690(void) {

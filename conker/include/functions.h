@@ -23,61 +23,12 @@ void n_alInit(void *globals, void *config);
 void n_alClose(s32 arg0);
 f32  alCents2Ratio(s32 arg0);
 /* chunk0 */
-void func_15005A60(Camera *arg0, s32 arg1);
-void func_15005AB0(Camera *arg0);
-void func_15005AF0(s32 arg0);
-void func_15005B00(s32 arg0);
-void func_15005B10(Camera *arg0);
-void func_15005B50(s32 arg0);
-void func_15005B60(s32 arg0);
-void func_15005B70(s32 arg0);
-void func_15005BD0(Camera *arg0);
-void func_15005C30(Camera *arg0);
-void func_15005C80(Camera *arg0);
-void func_15005CF0(s32 arg0);
-void func_15005D00(Camera *arg0);
-void func_15005D60(Camera *arg0);
-void func_15005DB0(Camera *arg0);
-void func_15005E30(Camera *arg0);
-void func_15005E70(Camera *arg0);
-void func_15005EA0(Camera *arg0);
-void func_15005EE0(Camera *arg0);
-void func_15005F20(Camera *arg0);
-void func_15005F60(Camera *arg0);
-void func_15005FA0(s32 arg0);
-void func_15005FB0(Camera *arg0);
-void func_15006010(Camera *arg0);
-void func_15006140(Camera *arg0);
-void func_15006170(Camera *arg0);
 
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 f32  func_1504A5E0(f32 arg0);
 
 
-void func_150CEF10(Camera *arg0);
-
-void func_150EC4B0(Camera *arg0);
-void func_150FCA00(Camera *arg0);
-
-void func_15122AE0(void);
-void func_15124B18(Camera *arg0);
-void func_15123508(Camera *arg0);
-void func_15124770(Camera *arg0, s32 arg1);
-void func_15124AB4(Camera *arg0);
-void func_1512523C(Camera *arg0);
-void func_15125330(Camera *arg0);
-void func_15125394(Camera *arg0);
-s32  func_151253CC(Camera *arg0);
-void func_15125594(Camera *arg0);
-void func_15125608(Camera *arg0);
-void func_15125690(Camera *arg0, s32 arg1);
-void func_15126138(Camera *arg0);
-void func_15127FEC(Camera *arg0, s32 arg1, s32 arg2);
-void func_15128680(Camera *arg0);
-void func_1512868C(Camera *arg0);
-void func_15128774(Camera *arg0, Actor *arg1);
-void func_1512D380(s32 arg0);
 struct DefParticleHead;
 
 void func_151F0080(MtxF arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -159,10 +110,6 @@ f32  func_150AD900(f32 *arg0, f32 *arg1);
 f32  func_150AD930(f32 *arg0);
 u32  func_150ADA20(void);
 f32  func_150ADA68(void);
-s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot);
-s32  func_151239CC(Camera *camera, CameraMode slot);
-void func_15127EB8(Camera *arg0);
-void func_1512D748(Camera*, s32, s32);
 void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far, f32 scale); // guOrtho: builds the float matrix (func_151EF800) and converts it with guMtxF2L2
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);

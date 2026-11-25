@@ -36,50 +36,8 @@ const f32 D_800A34B0[4][2] = {
 };
 extern u16 D_800894E0[2][3];
 
-void func_15120158(Camera *camera);
-void func_15122C5C(Camera *camera);
-void func_15121C80(Camera *camera, f32 arg1);
-void func_151220D0(Camera *camera);
-void func_15122170(Camera *camera);
-void func_15122440(Camera *camera);
-void func_15122980(Camera *camera);
-void func_151219D0(Camera *camera);
-void func_151236D0(Camera *camera);
-void func_151256BC(Camera *camera);
-s32 func_15126378(Camera *camera);
-s32 func_15128030(Camera *camera);
-void func_15129934(Camera *camera);
-void func_1512A360(Camera *camera);
-void func_1512E4B0(Camera *camera);
-void func_1512DEA4(Camera *camera);
-void func_15125A6C(Camera *camera);
-void func_15128CB0(Camera *camera);
-void func_15125DB4(Camera *camera);
-void func_1512E8E0(Camera *camera);
-void func_15125C40(Camera *camera);
-void func_1512317C(Camera *camera);
-void func_15123568(Camera *camera);
-void func_1512C200(Camera *camera);
-void func_15125924(Camera *camera);
-void func_151283B8(Camera *camera);
-void func_15123070(Camera *camera);
-void func_1512D390(Camera *camera);
-void func_1512D980(Camera *camera);
-void func_1512C068(Camera *camera);
-void func_1512B100(Camera *camera);
-void func_1512C20C(Camera *camera);
-void func_1512BB10(Camera *camera);
-void func_1512C150(Camera *camera);
-void func_151284C4(Camera *camera);
-s32 func_15128540(Camera *camera);
-void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8);
-void func_1511FC60(Camera *camera);
-s32 func_15125490(Camera *camera);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 void func_150AD8B0(Vec3f *, Vec3f *, Vec3f *);
-void func_1512D560(void *, s32, s32);
-s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
-s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
 
 /* Per-frame update of every active player camera. */
 void func_15122AE0(void) {
@@ -1187,7 +1145,7 @@ void func_15125A6C(Camera *camera) {
         gCamShot.unk8 = 0.0f;
         gCamShot.at.angles.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
-        func_1512D560(camera, 7, (s32)&gCamShot);
+        func_1512D560(camera, 7, &gCamShot);
         return;
     }
     if (camera->DoingSpecialContextCase != 0) {
@@ -1852,7 +1810,7 @@ void func_15127FEC(Camera *camera, s32 arg1, s32 arg2) {
     camera->transition.startTarget.x = camera->focus.x;
     camera->transition.startTarget.y = camera->focus.y;
     camera->transition.startTarget.z = camera->focus.z;
-    func_1512A390();
+    func_1512A390(camera);
 }
 
 /* Runs the camera transition started by func_15127FEC: eases target, yaw, distance (D_800DC000) and

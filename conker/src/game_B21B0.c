@@ -177,8 +177,6 @@ u8 func_15085420(Actor *obj) {
     return obj->mv->spawnIndex;
 }
 
-extern void func_15005818(Camera *, Actor *, f32 *);
-
 /* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
 void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {

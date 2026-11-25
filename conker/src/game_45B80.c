@@ -75,7 +75,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-void func_15125628(void);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
