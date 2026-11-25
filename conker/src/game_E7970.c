@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FE64;
+extern f32 D_8009FE64; // 256/360 (degrees to 256-step angle); matching: the literal 0.7111111283f changes regalloc
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
@@ -137,10 +137,12 @@ s32 func_150BA930(struct17 *pos, struct127 *obj, GroundHit *hit, s32 arg3) {
     return func_15046C80(&probe, 0, pos->unk4 - 100.0f, hit);
 }
 
+/* Constant handler; always returns 9. */
 s32 func_150BAA00(s32 arg0, s32 arg1) {
     return 9;
 }
 
+/* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
 void func_150BAA14(struct127 *obj, s32 arg1, s32 arg2) {
     struct17 pos;
     GroundHit hit;
