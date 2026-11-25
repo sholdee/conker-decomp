@@ -263,7 +263,7 @@ void func_1510608C(BoltObj *bolt) {
     bolt->rejitterTimer -= D_800BE9E4;
     if (bolt->rejitterTimer < 0) {
         func_15106610(bolt);
-        bolt->rejitterTimer = (func_150ADA20() % (u32)(bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
+        bolt->rejitterTimer = (func_150ADA20() % (bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
     }
 
     flare = bolt->flares[0];
@@ -407,7 +407,7 @@ void func_15106610(BoltObj *bolt) {
         BoltSample *sample = &samples[j];
         f32 offset1;
         f32 offset0;
-        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
+        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
         point->x = sample->normal.x * offset0 + sample->binormal.x * offset1 + sample->pos.x;
         point->y = sample->normal.y * offset0 + sample->binormal.y * offset1 + sample->pos.y;
         point->z = sample->normal.z * offset0 + sample->binormal.z * offset1 + sample->pos.z;
@@ -613,7 +613,7 @@ BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig
         data->points = (Vec3f *)((u8 *)data + 0x48); // matching: = obj->points, but computed from data
         data->points[0] = *start;
         data->points[chain.count - 1] = *end;
-        func_151070F8(obj, 0, (s16)(chain.count - 1), spread);
+        func_151070F8(obj, 0, chain.count - 1, spread);
     }
     return obj;
 }
@@ -670,13 +670,13 @@ void func_151072BC(BoltChainObj *obj) {
         desc.ctrl[0] = chain->points[chain->index];
         desc.ctrl[3] = chain->points[chain->index + 1];
         func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+            (s16)(func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
         desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
         desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
         func_15143794((s16)(func_150ADA20() & 0xFF),
-            (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
+            (s16)(func_150ADA20() % (config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
             func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
@@ -684,10 +684,10 @@ void func_151072BC(BoltChainObj *obj) {
         desc.color.r = config->r;
         desc.color.g = config->g;
         desc.color.b = config->b;
-        desc.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
-        desc.color.a = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
+        desc.life = func_150ADA20() % (config->lifeRange + 1) + config->lifeBase;
+        desc.color.a = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
-        desc.segments = func_150ADA20() % (u32)(config->segmentsRange + 1) + config->segmentsBase;
+        desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
         chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
         if (chain->link != NULL) {
             memcpy(chain->link->userData, &owner, sizeof(owner));
