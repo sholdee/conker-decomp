@@ -395,396 +395,326 @@ void func_1504AF10(struct127 *obj, s32 force, s32 release) {
     }
 }
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ u8 unk20;
-    /* 0x021 */ u8 unk21;
-    /* 0x022 */ s8 unk22;
-    /* 0x023 */ u8 pad23[0x45];
-    /* 0x068 */ s16 unk68;
-    /* 0x06A */ u8 pad6A[0x2B];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x8A];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0x77];
-    /* 0x198 */ u8 unk198;
-} Sub1504B0FC;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 unk24;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ u8 pad34[0x8];
-    /* 0x03C */ f32 unk3C;
-    /* 0x040 */ u8 pad40[0x36];
-    /* 0x076 */ u16 unk76;
-    /* 0x078 */ u8 pad78[0x6];
-    /* 0x07E */ u8 unk7E;
-    /* 0x07F */ u8 unk7F;
-    /* 0x080 */ u8 unk80;
-    /* 0x081 */ u8 pad81[0x3];
-    /* 0x084 */ u16 unk84;
-    /* 0x086 */ u8 pad86[0x27];
-    /* 0x0AD */ u8 unkAD;
-    /* 0x0AE */ u8 padAE[0x4];
-    /* 0x0B2 */ u16 unkB2;
-    /* 0x0B4 */ u8 padB4[0x4];
-    /* 0x0B8 */ f32 unkB8;
-    /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 unkC0;
-    /* 0x0C4 */ u8 padC4[0x40];
-    /* 0x104 */ u8 unk104;
-    /* 0x105 */ u8 pad105[0xB];
-    /* 0x110 */ u8 unk110;
-    /* 0x111 */ u8 pad111[0x7];
-    /* 0x118 */ f32 unk118;
-    /* 0x11C */ u8 pad11C[0x6C];
-    /* 0x188 */ void *unk188;
-    /* 0x18C */ f32 unk18C;
-    /* 0x190 */ u8 pad190[0x16];
-    /* 0x1A6 */ s16 unk1A6;
-    /* 0x1A8 */ u8 pad1A8[0x22];
-    /* 0x1CA */ u8 unk1CA;
-    /* 0x1CB */ u8 pad1CB;
-    /* 0x1CC */ f32 unk1CC;
-    /* 0x1D0 */ u8 pad1D0[0x14C];
-    /* 0x31C */ Sub1504B0FC *unk31C;
-} Obj1504B0FC;
-
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
 f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 
-f32 func_1504B0FC(Obj1504B0FC *arg0, f32 arg1) {
-    s32 cond;
-    f32 sp70;
-    f32 diff;
+f32 func_1504B0FC(GameObj *obj, f32 arg1) {
+    s32 belowLevel;
+    f32 targetPitch;
+    f32 delta;
     f32 result;
-    s8 sp67;
-    s32 var_a0;
+    s8 stickX;
+    s32 stickY;
     f32 step;
-    f32 sp58;
-    f32 sp54;
-    f32 sp50;
-    f32 sp4C;
-    f32 sp48;
-    f32 over;
+    f32 out0;
+    f32 out1;
+    f32 out2;
+    f32 out3;
+    f32 out4;
+    f32 excess;
 
     result = 0.0f;
-    arg0->unk31C->unk68 = 0;
-    arg0->unk110 = 0;
-    if (arg0->unk104 == 0 && arg0->unk1CA != 0 && arg0->unk31C->unk198 == 0) {
-        sp67 = (*(s8 **)&D_800CC284)[2];
-        var_a0 = (*(s8 **)&D_800CC284)[3];
+    obj->unk31C->unk68 = 0;
+    obj->unk110 = 0;
+    if (obj->stunned == 0 && obj->health != 0 && obj->unk31C->unk198 == 0) {
+        stickX = (*(OSContPad **)&D_800CC284)->stick_x;
+        stickY = (*(OSContPad **)&D_800CC284)->stick_y;
     } else {
-        sp67 = 0;
-        var_a0 = 0;
+        stickX = 0;
+        stickY = 0;
     }
-    if (arg0->unk31C->unk22 > 100) {
-        var_a0 = 0x50;
+    if (obj->unk31C->unk22 > 100) {
+        stickY = 80;
     }
-    diff = (arg0->unk18 - ((arg0->unk118 - 60.0f) - 170.0f)) * 2.0f;
-    if ((arg0->unk31C->unk20 & 1) || arg0->unk31C->unk21 != 0) {
-        arg0->unkB2 = 0;
-        if (diff < 400.0f) {
-            step = 8.0f; step *= D_800D1550[0];
-            if (var_a0 > 10) {
-                var_a0 = 10;
+    delta = (obj->y_position - ((obj->unk118 - 60.0f) - 170.0f)) * 2.0f;
+    if ((obj->unk31C->unk20 & 1) || obj->unk31C->unk21 != 0) {
+        obj->unkB2 = 0;
+        if (delta < 400.0f) {
+            // matching: loading 8.0f into step first gives the target's mul.s operand order
+            step = 8.0f;
+            step *= D_800D1550[0];
+            if (stickY > 10) {
+                stickY = 10;
             }
-            if (diff + step > 400.0f) {
-                step = 400.0f - diff;
+            if (delta + step > 400.0f) {
+                step = 400.0f - delta;
             }
-            arg0->unk18 += step;
+            obj->y_position += step;
         }
     }
-    if (arg0->unkAD == 1) {
-        arg0->unk1CC = arg0->unk18;
-        if (arg0->unk118 == -10000.0f) {
-            func_15052408((struct127 *)arg0);
+    if (obj->in_water == 1) {
+        obj->unk1CC = obj->y_position;
+        if (obj->unk118 == -10000.0f) {
+            func_15052408((struct127 *)obj);
             return 0.0f;
         }
-        if (var_a0 != 0 || ((arg0->unk118 - 60.0f) - 175.0f) < arg0->unk18) {
-            sp70 = var_a0 * 2.25f;
+        if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->y_position) {
+            targetPitch = stickY * 2.25f;
         } else {
-            sp70 = arg0->unkB8;
+            targetPitch = obj->unkB8;
         }
-        if (arg0->unk31C->unk21 != 0) {
-            sp70 = 0.0f;
+        if (obj->unk31C->unk21 != 0) {
+            targetPitch = 0.0f;
         }
-        func_15059444((struct127 *)arg0);
-        if ((arg0->unk104 != 0 && (arg0->unk1CA != 0 || arg0->unk20 >= 60.0f)) || arg0->unk84 == 0x262) {
+        func_15059444((struct127 *)obj);
+        if ((obj->stunned != 0 && (obj->health != 0 || obj->y_velocity >= 60.0f)) || obj->unk84 == 0x262) {
             return 0.0f;
         }
-        if (diff > 0.0f && arg0->unk84 != 0x22) {
-            if (diff > 300.0f) {
-                diff = 300.0f;
+        if (delta > 0.0f && obj->unk84 != 0x22) {
+            if (delta > 300.0f) {
+                delta = 300.0f;
             }
-            arg0->unk18 += diff * arg1 * 0.002997000003f;
+            obj->y_position += delta * arg1 * 0.002997f;
         }
-    } else if ((arg0->unk24 < 0.0f && arg0->unk20 > 0.0f) || (arg0->unk24 > 0.0f && arg0->unk20 < 0.0f)) {
-        arg0->unk24 = 0.0f;
-        arg0->unk20 = 0.0f;
+    } else if ((obj->gravity < 0.0f && obj->y_velocity > 0.0f) || (obj->gravity > 0.0f && obj->y_velocity < 0.0f)) {
+        obj->gravity = 0.0f;
+        obj->y_velocity = 0.0f;
     }
-    if (arg0->unkAD != 1 || arg0->unk28 >= 10.0f || arg0->unk18 < (arg0->unk118 - 60.0f) + 20.0f) {
-        if (arg0->unkAD == 1) {
-            if ((arg0->unk118 - 50.0f < arg0->unk1A6 || (arg0->unk31C->unk20 & 1)) && arg0->unk1CA != 0) {
-                if (arg0->unkB2 > 30) {
-                    if (arg0->unkB2 > 1500) {
-                        func_15060A30(0x1A7, arg0);
-                    } else if (arg0->unkB2 > 720) {
-                        func_15060A30(0x168, arg0);
+    if (obj->in_water != 1 || obj->unk28 >= 10.0f || obj->y_position < (obj->unk118 - 60.0f) + 20.0f) {
+        if (obj->in_water == 1) {
+            if ((obj->unk118 - 50.0f < obj->unk1A6 || (obj->unk31C->unk20 & 1)) && obj->health != 0) {
+                if (obj->unkB2 > 30) {
+                    if (obj->unkB2 > 1500) {
+                        func_15060A30(0x1A7, obj);
+                    } else if (obj->unkB2 > 720) {
+                        func_15060A30(0x168, obj);
                     }
                 }
-                arg0->unkB2 = 0;
+                obj->unkB2 = 0;
             } else {
-                arg0->unkB2 += D_800BE9E4;
-                if (arg0->unkB2 > 1560 || (arg0->unk1CA == 0 && arg0->unk31C->unk120 == 0)) {
-                    arg0->unkB2 -= 60;
-                    if (arg0->unk1CA >= 2) {
-                        if (arg0->unk1CA == 4) {
-                            func_15060A30(0x499, arg0);
+                obj->unkB2 += D_800BE9E4;
+                if (obj->unkB2 > 1560 || (obj->health == 0 && obj->unk31C->unk120 == 0)) {
+                    obj->unkB2 -= 60;
+                    if (obj->health >= 2) {
+                        if (obj->health == 4) {
+                            func_15060A30(0x499, obj);
                         }
-                        arg0->unk1CA--;
+                        obj->health--;
                     } else {
-                        arg0->unk1CA = 0;
-                        if (arg0->unk104 != 0) {
-                            arg0->unk24 = 0.0f;
-                            func_1507CD64(arg0, 4);
+                        obj->health = 0;
+                        if (obj->stunned != 0) {
+                            obj->gravity = 0.0f;
+                            func_1507CD64(obj, 4);
                         } else {
-                            func_1507CD64(arg0, 3);
+                            func_1507CD64(obj, 3);
                         }
                     }
-                } else if (arg0->unkB2 > 1440 && arg0->unkB2 < 1500) {
-                    arg0->unkB2 += 120;
-                    if (arg0->unk1CA < 4) {
-                        func_15060A30(0x499, arg0);
+                } else if (obj->unkB2 > 1440 && obj->unkB2 < 1500) {
+                    obj->unkB2 += 120;
+                    if (obj->health < 4) {
+                        func_15060A30(0x499, obj);
                     }
                 }
             }
-            if ((arg0->unk20 != 0.0f || arg0->unk24 != 0.0f) && arg0->unk24 < 0.0f && arg0->unk20 > 0.0f) {
-                arg0->unk24 = 0.0f;
-                arg0->unk20 = 0.0f;
+            if ((obj->y_velocity != 0.0f || obj->gravity != 0.0f) && obj->gravity < 0.0f && obj->y_velocity > 0.0f) {
+                obj->gravity = 0.0f;
+                obj->y_velocity = 0.0f;
             }
-            if (((arg0->unk118 - 60.0f) - 175.0f) < arg0->unk18 && arg0->unk84 != 0x28) {
-                if (arg0->unk31C->unk1C < 2.5f) {
-                    arg0->unk31C->unk1C += 0.05000000075f;
+            if (((obj->unk118 - 60.0f) - 175.0f) < obj->y_position && obj->unk84 != 0x28) {
+                if (obj->unk31C->unk1C < 2.5f) {
+                    obj->unk31C->unk1C += 0.05f;
                 }
             } else {
-                arg0->unk31C->unk1C = 0.0f;
+                obj->unk31C->unk1C = 0.0f;
             }
-            arg0->unk18 += arg0->unk31C->unk1C * D_800D1550[0];
-            over = arg0->unk18 - ((arg0->unk118 - 60.0f) + 14.0f);
-            if (over > 0.0f) {
-                over *= 0.6499999762f;
-                arg0->unk18 -= over;
-                arg0->unk31C->unk1C = 0.0f;
+            obj->y_position += obj->unk31C->unk1C * D_800D1550[0];
+            excess = obj->y_position - ((obj->unk118 - 60.0f) + 14.0f);
+            if (excess > 0.0f) {
+                excess *= 0.65f;
+                obj->y_position -= excess;
+                obj->unk31C->unk1C = 0.0f;
             }
-            if (((arg0->unk118 - 60.0f) - 75.0f) < arg0->unk18) {
-                sp70 -= 30.0f;
-            }
-        }
-        if (arg0->unk84 == 0x22 && sp70 < -20.0f) {
-            sp70 = -20.0f;
-        }
-        if (arg0->unk28 < 40.0f) {
-            func_1510F820(arg0->unk188, &arg0->unk18C, &sp58, &sp54, &sp50, &sp4C, &sp48);
-            sp4C = func_1505210C((struct127 *)arg0, sp4C, sp48, &sp48, 180.0f);
-            if (sp48 < arg0->unkB8) {
-                arg0->unkB8 += (sp48 - arg0->unkB8) * 0.200000003f;
+            if (((obj->unk118 - 60.0f) - 75.0f) < obj->y_position) {
+                targetPitch -= 30.0f;
             }
         }
-        arg0->unkBC = sp70 - arg0->unkB8;
-        if (2.700000048f * D_800D1550[0] > fabsf(arg0->unkBC)) {
-            arg0->unkB8 = sp70;
+        if (obj->unk84 == 0x22 && targetPitch < -20.0f) {
+            targetPitch = -20.0f;
+        }
+        if (obj->unk28 < 40.0f) {
+            func_1510F820(obj->unk188, &obj->unk18C, &out0, &out1, &out2, &out3, &out4);
+            out3 = func_1505210C((struct127 *)obj, out3, out4, &out4, 180.0f);
+            if (out4 < obj->unkB8) {
+                obj->unkB8 += (out4 - obj->unkB8) * 0.2f;
+            }
+        }
+        obj->unkBC = targetPitch - obj->unkB8;
+        if (2.7f * D_800D1550[0] > fabsf(obj->unkBC)) {
+            obj->unkB8 = targetPitch;
         } else {
-            if (arg0->unkBC > 2.700000048f) {
-                arg0->unkBC = 2.700000048f;
+            if (obj->unkBC > 2.7f) {
+                obj->unkBC = 2.7f;
             }
-            if (arg0->unkBC < -2.700000048f) {
-                arg0->unkBC = -2.700000048f;
+            if (obj->unkBC < -2.7f) {
+                obj->unkBC = -2.7f;
             }
-            arg0->unkB8 += arg0->unkBC * D_800D1550[0];
+            obj->unkB8 += obj->unkBC * D_800D1550[0];
         }
-        if (arg0->unkB8 < -90.0f) {
-            arg0->unkB8 = -90.0f;
+        if (obj->unkB8 < -90.0f) {
+            obj->unkB8 = -90.0f;
         }
-        if (arg0->unkB8 > 90.0f) {
-            arg0->unkB8 = 90.0f;
+        if (obj->unkB8 > 90.0f) {
+            obj->unkB8 = 90.0f;
         }
-        if (arg0->unk31C->unk21 == 0) {
-            if ((sp67 + 8) / 18 != 0) {
-                arg0->unk76 -= ((((sp67 + 8) / 18) * D_800CC264) << 8) / 100;
-                arg0->unk7E = 0x17;
+        if (obj->unk31C->unk21 == 0) {
+            if ((stickX + 8) / 18 != 0) {
+                obj->unk76 -= ((((stickX + 8) / 18) * D_800CC264) << 8) / 100;
+                obj->unk7E = 0x17;
             }
-            result = arg0->unkC0;
+            result = obj->target_speed;
         }
-        arg0->unk80 = 1;
+        obj->unk80 = 1;
     } else {
-        func_15052408((struct127 *)arg0);
-        if (arg0->unk3C > 16.0f) {
-            arg0->unk3C = 16.0f;
+        func_15052408((struct127 *)obj);
+        if (obj->xz_velocity > 16.0f) {
+            obj->xz_velocity = 16.0f;
         }
-        result = arg0->unk3C;
+        result = obj->xz_velocity;
     }
-    if (arg0->unk31C->unk95 != 0) {
-        arg0->unk18 = arg0->unk30;
-        cond = arg0->unk118 != -10000.0f && arg0->unk18 < arg0->unk118 - 60.0f;
-        if (!cond) {
-            arg0->unkAD = 0;
+    if (obj->unk31C->unk95 != 0) {
+        obj->y_position = obj->old_y_position;
+        belowLevel = obj->unk118 != -10000.0f && obj->y_position < obj->unk118 - 60.0f;
+        if (!belowLevel) {
+            obj->in_water = 0;
         }
     }
     return result;
 }
-extern s8 D_80099140[];
-extern f32 D_800991D4;
-void func_1504BA38(struct127 *arg0)
-{
-  struct temp1504BA38
-  {
+// 3-byte entries of D_80099140
+typedef struct {
     s8 unk0;
     s8 unk1;
     s8 unk2;
-  };
-  struct temp1504BA38 *temp_v1;
-  s8 temp_a1;
-  int temp_v0;
-  if (arg0->unk28 > 10.0f)
-  {
-    arg0->unkCE = 0;
-    temp_v0 = temp_v1->unk1;
-    return;
-  }
-  temp_v1 = &((struct temp1504BA38 *) D_80099140)[arg0->unk184 & 0x1F];
-  temp_a1 = temp_v1->unk2;
-  if ((temp_a1 != 0) && (arg0->unkAA == 0))
-  {
-    arg0->unkAA = temp_a1;
-  }
-  temp_v0 = temp_v1->unk1;
-  if (temp_v0 == 0)
-  {
-    arg0->unkCE = temp_v1->unk0;
-    return;
-  }
-  arg0->unkCE = (s16) ((s32) ((((f32) temp_v0) * D_800991D4) * (((f32) temp_v1->unk0) - arg0->xz_velocity)));
-  if (!temp_a1)
-  {
-  }
+} Struct80099140;
+
+void func_1504BA38(struct127 *obj) {
+    Struct80099140 *entry;
+    s8 unk2;
+    s32 unk1;
+
+    if (obj->unk28 > 10.0f) {
+        obj->unkCE = 0;
+        unk1 = entry->unk1; // matching: dead use of entry here sets the register allocation
+        return;
+    }
+    entry = &((Struct80099140 *)D_80099140)[obj->unk184 & 0x1F];
+    unk2 = entry->unk2;
+    if (unk2 != 0 && obj->unkAA == 0) {
+        obj->unkAA = unk2;
+    }
+    unk1 = entry->unk1;
+    if (unk1 == 0) {
+        obj->unkCE = entry->unk0;
+        return;
+    }
+    obj->unkCE = unk1 * D_800991D4 * (entry->unk0 - obj->xz_velocity);
+    if (unk2) { // matching: keeps unk2 live to the end (in a1 rather than v0)
+    }
 }
 
-void func_1504BAF0(struct127 *arg0) {
-    s16 temp_t7;
-    u8 temp_v0;
-    struct127 *temp_v1;
+void func_1504BAF0(struct127 *obj) {
+    s16 index;
+    struct127 *other;
 
-    temp_t7 = arg0->unk13C - 100;
-    if (temp_t7 >= 0) {
-        temp_v1 = &D_800CC2D0[temp_t7];
-        if (temp_v1->unk13D >= 100) {
-            temp_v0 = temp_v1->id;
-            if ((temp_v0 == 168) || (temp_v0 == 169)) {
-                D_800D1580 = 3;
-                func_1507490C();
-            }
+    index = obj->unk13C - 100;
+    if (index >= 0) {
+        other = &D_800CC2D0[index];
+        if (other->unk13D >= 100 && (other->id == 168 || other->id == 169)) {
+            D_800D1580 = 3;
+            func_1507490C();
         }
     }
     func_1506EBC0();
 }
 
-void func_1504BB88(struct127 *arg0) {
-    if ((arg0->unk25C & 0x10)) {
-        arg0->unk83 = 0xFF;
-        arg0->disable_run = 0xFF;
-        if (arg0->interaction_state == 1) {
-            func_1505E650(arg0, 0xD6, 1.149999976158142f, 3.0f, 0.0f, 0.0f, 0);
+void func_1504BB88(struct127 *obj) {
+    if (obj->unk25C & 0x10) {
+        obj->unk83 = 0xFF;
+        obj->disable_run = 0xFF;
+        if (obj->interaction_state == 1) {
+            func_1505E650(obj, 0xD6, 1.15f, 3.0f, 0.0f, 0.0f, 0);
         }
-        arg0->unk25C &= ~0x10;
+        obj->unk25C &= ~0x10;
     }
 
-    if ((arg0->unk25C & 2)) {
-        if (arg0->unk13C) {
-            func_1504BAF0(arg0);
+    if (obj->unk25C & 2) {
+        if (obj->unk13C != 0) {
+            func_1504BAF0(obj);
         }
-        arg0->unk25C &= ~2;
+        obj->unk25C &= ~2;
     }
 }
 
-void func_1504BC38(struct127 *arg0) {
+void func_1504BC38(struct127 *obj) {
+    if ((obj->disable_run != 0) && (obj->disable_run < 0xFA)) {
+        if (obj->disable_run <= D_800BE9A0) {
+            obj->disable_run = 0;
+        } else {
+            obj->disable_run -= D_800BE9A0;
+        }
+    }
+    if (obj->unk228) { // matching: "!= 0" here changes the register allocation (a2 -> a1)
+        if (obj->unk228 <= D_800BE9A0) {
+            obj->unk228 = 0;
+        } else {
+            obj->unk228 -= D_800BE9A0;
+        }
+    }
+    if (obj->unkAE != 0) {
+        obj->unkAE--;
+    }
+    if (obj->disable_jump != 0xFF) {
+        if (obj->disable_jump <= D_800BE9A0) {
+            obj->disable_jump = 0;
+        } else {
+            obj->disable_jump -= D_800BE9A0;
+        }
+    }
+    if (obj->immune != 0xFF) {
+        if (obj->immune <= D_800BE9A0) {
+            obj->immune = 0;
+        } else {
+            obj->immune -= D_800BE9A0;
+        }
+    }
+    if (obj->unk31C->chased > 0) {
+        obj->unk31C->chased -= D_800BE9A0;
+    }
+    if (obj->unk31C->chasing > 0) {
+        obj->unk31C->chasing -= D_800BE9A0;
+    }
+    if (obj->unk31C->unk44 > 0) {
+        obj->unk31C->unk44 -= D_800BE9A0;
+    }
+    if (obj->unk107 != 0) {
+        obj->unk107--;
+    }
+    if (obj->unk1D0 > 0) {
+        obj->unk1D0 -= D_800BE9A0;
+    }
+    if (obj->unk31C->unk54 > 0) {
+        obj->unk31C->unk54 -= D_800BE9A0;
+    }
+    if (obj->unk31C->unk55 != 0) {
+        obj->unk31C->unk55--;
+    }
 
-    if ((arg0->disable_run != 0) && (arg0->disable_run < 0xFA)) {
-        if (arg0->disable_run <= D_800BE9A0) {
-            arg0->disable_run = 0U;
-        } else {
-            arg0->disable_run -= D_800BE9A0;
-        }
-    }
-    if (arg0->unk228) {
-        if (arg0->unk228 <= D_800BE9A0) {
-            arg0->unk228 = 0U;
-        } else {
-            arg0->unk228 -= D_800BE9A0;
-        }
-    }
-    if (arg0->unkAE) {
-        arg0->unkAE -= 1;
-    }
-    if (arg0->disable_jump != 0xFF) {
-        if (arg0->disable_jump <= D_800BE9A0) {
-            arg0->disable_jump = 0U;
-        } else {
-            arg0->disable_jump -= D_800BE9A0;
-        }
-    }
-    if (arg0->immune != 0xFF) {
-        if (arg0->immune <= D_800BE9A0) {
-            arg0->immune = 0U;
-        } else {
-            arg0->immune -= D_800BE9A0;
-        }
-    }
-    if (arg0->unk31C->chased > 0) {
-        arg0->unk31C->chased -= D_800BE9A0;
-    }
-    if (arg0->unk31C->chasing > 0) {
-        arg0->unk31C->chasing -= D_800BE9A0;
-    }
-    if (arg0->unk31C->unk44 > 0) {
-        arg0->unk31C->unk44 -= D_800BE9A0;
-    }
-    if (arg0->unk107 != 0) {
-        arg0->unk107 -= 1;
-    }
-    if (arg0->unk1D0 > 0) {
-        arg0->unk1D0 -= D_800BE9A0;
-    }
-    if (arg0->unk31C->unk54 > 0) {
-        arg0->unk31C->unk54 -= D_800BE9A0;
-    }
-    if (arg0->unk31C->unk55 != 0) {
-        arg0->unk31C->unk55 -= 1;
-    }
+    obj->unk31C->unk52 >>= 1;
 
-    arg0->unk31C->unk52 >>= 1;
-
-    if (arg0->unk31C->unk19E != 0) {
-        if (arg0->unk31C->unk19E > D_800BE9E4) {
-            arg0->unk31C->unk19E -= D_800BE9E4;
+    if (obj->unk31C->unk19E != 0) {
+        if (obj->unk31C->unk19E > D_800BE9E4) {
+            obj->unk31C->unk19E -= D_800BE9E4;
         } else {
-            arg0->unk31C->unk19E = 0U;
+            obj->unk31C->unk19E = 0;
         }
     }
-    if (arg0->unk31C->unk1A0 != 0) {
-        if (arg0->unk31C->unk1A0 > D_800BE9E4) {
-            arg0->unk31C->unk1A0 -= D_800BE9E4;
+    if (obj->unk31C->unk1A0 != 0) {
+        if (obj->unk31C->unk1A0 > D_800BE9E4) {
+            obj->unk31C->unk1A0 -= D_800BE9E4;
         } else {
-            arg0->unk31C->unk1A0 = 0U;
+            obj->unk31C->unk1A0 = 0;
         }
     }
 }
