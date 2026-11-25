@@ -25,13 +25,12 @@ extern ParticleNode *D_800DC460;
 extern ParticleNode *D_800DC464;
 extern s16 D_800DC468[];
 
-s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 s32 func_151464B8(s16 *arg0);
 extern u8 D_800C3E90;
 extern s32 (*D_8008998C[])(s32);
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
+s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
 s32 func_1510CE60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4);
 void func_15168E54(s32 arg0, s32 arg1);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
@@ -61,11 +60,11 @@ typedef struct Particle {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 unk18;
     /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 rot[3];
-    /* 0x02C */ f32 scale[3];
-    /* 0x038 */ f32 pos[3];
-    /* 0x044 */ f32 vel[3];
-    /* 0x050 */ f32 rotVel[3];
+    /* 0x020 */ vertex rot;
+    /* 0x02C */ vertex scale;
+    /* 0x038 */ vertex pos;
+    /* 0x044 */ vertex vel;
+    /* 0x050 */ vertex rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -110,6 +109,24 @@ typedef struct Particle {
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ u8 extra[1]; // per-kind data, size passed to func_1513264C
 } Particle;
+
+/* Spawn template: the same layout as Particle 0x10..0x8B, copied into the particle by func_1513264C. */
+typedef struct {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 unk58[0x7C - 0x58];
+} ParticleSpawn; // size 0x7C
 
 typedef struct {
     u8 pad_0[0x10];
@@ -317,7 +334,7 @@ void func_151321D0(Particle *particle) {
     }
 
     if (!dead && !(particle->flags & 0x80000)) {
-        dead = func_1514672C(particle->pos) == 0;
+        dead = func_1514672C(&particle->pos.x) == 0;
     }
 
     if (dead) {
@@ -412,171 +429,121 @@ void func_151325C8(Particle *particle) {
     }
 }
 
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[0x10];
-    s32 unk50;
-    u8 pad54[2];
-    u16 unk56;
-} Arg1513264C;
-
-typedef struct Node1513264C {
-    s32 *unk0;
-    struct Node1513264C *next;
-    struct Node1513264C *prev;
-    u16 unkC;
-    u8 unkE;
-} Node1513264C;
-
-typedef struct {
-    s32 w[9];
-} Copy24_1513264C;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10[0x50];
-    s32 unk60;
-    u8 pad64[0x28];
-    Node1513264C *unk8C;
-    u8 pad90[0x80];
-    f32 unk110;
-    u8 pad114[0x14];
-    s32 unk128;
-    u8 unk12C;
-    u8 unk12D;
-    u8 pad12E[2];
-    s32 unk130;
-    f32 unk134;
-    f32 unk138;
-    f32 unk13C;
-    f32 unk140;
-    f32 unk144;
-    u8 unk148;
-    u8 unk149;
-    u8 pad14A[2];
-    s32 unk14C;
-    u8 unk150;
-    u8 pad151[3];
-    s32 unk154[4];
-    s32 unk164;
-    s32 unk168;
-} Obj1513264C;
-
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15168A9C(void *);
 extern void func_10004074(void *);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
-s32 func_151336A8(s32 arg0, s32 **arg1, s32 arg2);
+s32 func_151336A8(s32 model, ParticleNode *node, Particle *particle);
 
-#define SRC ((Arg1513264C *)arg0)
-s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    Obj1513264C *obj;
-    Node1513264C *newNode;
+/* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
+ * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
+Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, ParticleFloor *floor, s32 extraSize, u8 arg5,
+                        s32 arg6) {
+    Particle *particle;
+    ParticleNode *node;
     s32 i;
 
     if (D_800DC63C > 300) {
-        return 0;
+        return NULL;
     }
-    obj = func_15167A68((SRC->unk50 & 0x4000) ? 0x48 : 0x19, arg6, arg4 + 0x170, 1, arg5, (SRC->unk50 & 0x400000) ? 2 : 1);
-    if (obj == NULL) {
-        return 0;
+    particle = func_15167A68((spawn->flags & 0x4000) ? 0x48 : 0x19, arg6, extraSize + 0x170, 1, arg5,
+                             (spawn->flags & 0x400000) ? 2 : 1);
+    if (particle == NULL) {
+        return NULL;
     }
-    if (D_800DC468[SRC->unk56] == 0) {
-        newNode = allocate_memory(0x10, 1, 2, (SRC->unk50 & 0x400000) ? 2 : 1);
-        if (newNode == NULL) {
-            func_15168A9C(obj);
-            func_10004074(obj);
-            return 0;
+    if (D_800DC468[spawn->model] == 0) {
+        node = allocate_memory(sizeof(ParticleNode), 1, 2, (spawn->flags & 0x400000) ? 2 : 1);
+        if (node == NULL) {
+            func_15168A9C(particle);
+            func_10004074(particle);
+            return NULL;
         }
-        if (func_151336A8(SRC->unk56, (s32 **)newNode, (s32)obj)) {
-            newNode->next = (Node1513264C *)D_800DC460;
-            if (newNode->next != NULL) {
-                newNode->next->prev = newNode;
+        if (func_151336A8(spawn->model, node, particle)) {
+            node->next = D_800DC460;
+            if (node->next != NULL) {
+                node->next->prev = node;
             } else {
-                D_800DC464 = (struct Node15132444 *)newNode;
+                D_800DC464 = node;
             }
-            D_800DC460 = (struct Node15132444 *)newNode;
-            newNode->prev = NULL;
-            newNode->unkC = SRC->unk56;
-            if (SRC->unk50 & 0x100000) {
+            D_800DC460 = node;
+            node->prev = NULL;
+            node->model = spawn->model;
+            if (spawn->flags & 0x100000) {
                 if (D_800BE9F0 == 0x3B || D_800BE9F0 == 6 || D_800BE9F0 == 0x13 || D_800BE616 != 0 ||
                     D_800BE9F0 == 2) {
-                    newNode->unkE = 0;
+                    node->keepLoaded = FALSE;
                 } else {
-                    newNode->unkE = 1;
+                    node->keepLoaded = TRUE;
                 }
             } else {
-                newNode->unkE = 0;
+                node->keepLoaded = FALSE;
             }
         } else {
-            func_15168A9C(obj);
-            func_10004074(obj);
-            func_10004074(newNode);
-            return 0;
+            func_15168A9C(particle);
+            func_10004074(particle);
+            func_10004074(node);
+            return NULL;
         }
     } else {
-        s32 count;
+        s32 tries;
 
-        newNode = (Node1513264C *)D_800DC460;
-        count = 100;
-        while (newNode->unkC != SRC->unk56) {
-            count--;
-            newNode = newNode->next;
-            if (count <= 0) {
+        node = D_800DC460;
+        tries = 100;
+        while (node->model != spawn->model) {
+            tries--;
+            node = node->next;
+            if (tries <= 0) {
                 break;
             }
         }
-        if (count <= 0) {
-            func_15168A9C(obj);
-            func_10004074(obj);
-            return 0;
+        if (tries <= 0) {
+            func_15168A9C(particle);
+            func_10004074(particle);
+            return NULL;
         }
     }
-    D_800DC468[SRC->unk56]++;
-    obj->unk8C = newNode;
-    memcpy(obj->unk10, (void *)arg0, 0x7C);
-    obj->unk149 = 0;
-    obj->unk134 = 0.0f;
-    obj->unk138 = 0.0f;
-    obj->unk13C = 0.0f;
-    obj->unk140 = sqrtf(SRC->unk34 * SRC->unk34 + SRC->unk38 * SRC->unk38 + SRC->unk3C * SRC->unk3C);
-    obj->unk148 = 0;
-    obj->unk144 = 1.0f;
-    if (arg3 != 0) {
-        *(Copy24_1513264C *)&obj->unk110 = *(Copy24_1513264C *)arg3;
+    D_800DC468[spawn->model]++;
+    particle->node = node;
+    memcpy(&particle->radius, spawn, sizeof(ParticleSpawn));
+    particle->squashPhase = 0;
+    particle->squashOrigin[0] = 0.0f;
+    particle->squashOrigin[1] = 0.0f;
+    particle->squashOrigin[2] = 0.0f;
+    particle->speed = sqrtf(spawn->vel.x * spawn->vel.x + spawn->vel.y * spawn->vel.y +
+                            spawn->vel.z * spawn->vel.z);
+    particle->hitFlags = 0;
+    particle->invSpeed = 1.0f;
+    if (floor != NULL) {
+        particle->floor = *floor;
     } else {
-        obj->unk110 = -10000.0f;
-        obj->unk130 = 0;
-        obj->unk12D = 0;
-        obj->unk12C = 0;
-        obj->unk128 = 0;
+        particle->floor.height = -10000.0f;
+        particle->floor.unk20 = NULL;
+        particle->floor.type = 0;
+        particle->floor.unk1C = 0;
+        particle->floor.unk18 = 0;
     }
     D_800DC63C++;
-    obj->unk150 = 0;
-    obj->unk14C = arg1;
-    obj->unk168 = arg2;
+    particle->unk150 = 0;
+    particle->unk14C = arg1;
+    particle->unk168 = arg2;
     for (i = 0; i < 4; i++) {
-        obj->unk154[i] = 0;
+        particle->unk154[i] = 0;
     }
-    obj->unk164 = 0;
+    particle->unk164 = 0;
     if (arg1 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
-            obj->unk154[i] = func_1515D480(arg1);
+            particle->unk154[i] = func_1515D480(arg1);
         }
-        obj->unk164 = func_1515D440();
+        particle->unk164 = func_1515D440();
     }
-    obj->unk60 &= ~0x200000;
-    return (s32)obj;
+    particle->flags &= ~0x200000;
+    return particle;
 }
-#undef SRC
 
-s32 func_15132A4C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    return func_1513264C(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5) {
+    return func_1513264C(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
 }
 
 void func_15132A88(Obj15132A88 *arg0) {
@@ -967,17 +934,18 @@ void func_15133588(Func15133588Arg0 *arg0, Func15133588Arg1 *arg1, u8 arg2)
 }
 
 
-s32 func_151336A8(s32 arg0, s32 **arg1, s32 arg2) {
-    s32 sp2C;
-    s32 sp28;
+/* Load model `model` (D_800A3880 table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
+s32 func_151336A8(s32 model, ParticleNode *node, Particle *particle) {
+    s32 out1;
+    s32 out2;
 
-    *arg1 = (s32 *)func_1502B6BC(&sp2C, 0, &sp28, 2, 9, D_800A3880[arg0]);
-    if (*arg1 == 0) {
-        return 0;
+    node->resource = func_1502B6BC(&out1, 0, &out2, 2, 9, D_800A3880[model]);
+    if (node->resource == NULL) {
+        return FALSE;
     }
-    func_1510CE60(**arg1, 0, 1, 0x3E, &D_800DC640[arg0]);
-    func_15168E54(**arg1, (s32)*arg1);
-    return 1;
+    func_1510CE60(*node->resource, 0, 1, 0x3E, &D_800DC640[model]);
+    func_15168E54(*node->resource, (s32)node->resource);
+    return TRUE;
 }
 
 s32 func_15142838(s32 arg0, f32 arg1, f32 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8);
