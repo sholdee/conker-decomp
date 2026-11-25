@@ -1,0 +1,145 @@
+# The matching gate: every push to master/mw and every pull request must rebuild the US ROM
+# byte-identically from source and pass tools/accounting.py, exactly like `mw.py land`.
+#
+# Security model (zizmor reviewed):
+# - The base ROM is never stored in this repository. The gate fetches it from private storage whose
+#   location and credentials are environment secrets.
+# - pull_request_target is used so that pull requests from forks can be gated at all: plain
+#   pull_request runs from forks never receive secrets.
+# - Fork pull requests run in the `gate-fork` environment, which needs a maintainer's approval.
+#   Pushes and same-repository pull requests use the `gate` environment.
+# - The storage credentials exist only in the fetch step's environment. Everything from the code
+#   under test (Makefiles, splat, compilers, scripts) runs inside the toolchain container with
+#   `--network none`, so it can neither reach the credentials nor send the ROM anywhere.
+# - The container image is built from the trusted checkout's Containerfile, never from the code
+#   under test, and only pushes save it to the cache.
+# - The expected sha1s, the sha1 check and tools/accounting.py come from the trusted checkout.
+# - Nothing is uploaded: build outputs contain game data.
+name: Matching gate
+
+on:
+  push:
+    branches: [master, mw]
+  pull_request_target:  # zizmor: ignore[dangerous-triggers] -- see the security model above
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Build and match (US)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    environment: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) && 'gate-fork' || 'gate' }}
+    env:
+      INNER_SHA1: 842e3d348e3c8ae0039e2ab367ad492f9b5266d8
+      OUTER_SHA1: 4cbadd3c4e0729dec46af64ad018050eada4f47a
+      IMAGE: conker-toolchain
+    steps:
+      - name: Check out the trusted tree
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: trusted
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Restore the toolchain image
+        id: image-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/toolchain.tar
+          key: toolchain-${{ hashFiles('trusted/tools/toolchain/**', 'trusted/requirements.txt', 'trusted/tools/n64splat/requirements.txt') }}
+
+      - name: Load or build the toolchain image
+        env:
+          CACHE_HIT: ${{ steps.image-cache.outputs.cache-hit }}
+        run: |
+          if [ "$CACHE_HIT" = "true" ]; then
+            docker load --input "$RUNNER_TEMP/toolchain.tar"
+          else
+            docker build --tag "$IMAGE" --file trusted/tools/toolchain/Containerfile trusted
+            docker save --output "$RUNNER_TEMP/toolchain.tar" "$IMAGE"
+          fi
+
+      - name: Save the toolchain image
+        if: github.event_name == 'push' && steps.image-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/toolchain.tar
+          key: ${{ steps.image-cache.outputs.cache-primary-key }}
+
+      - name: Fetch the base ROM from private storage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.GATE_STORAGE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.GATE_STORAGE_SECRET }}
+          STORAGE_ENDPOINT: ${{ secrets.GATE_STORAGE_ENDPOINT }}
+          STORAGE_OBJECT: ${{ secrets.GATE_STORAGE_OBJECT }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          aws s3 cp "$STORAGE_OBJECT" "$RUNNER_TEMP/baserom.us.z64" \
+            --endpoint-url "$STORAGE_ENDPOINT" --only-show-errors
+          echo "${OUTER_SHA1}  ${RUNNER_TEMP}/baserom.us.z64" | sha1sum --check --quiet
+
+      - name: Check out the code under test
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: test
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Build offline
+        run: |
+          cp "$RUNNER_TEMP/baserom.us.z64" test/baserom.us.z64
+          cp trusted/tools/accounting.py test/tools/accounting.py
+          docker run --rm --network none --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE/test:/conker" --workdir /conker "$IMAGE" \
+            bash -euo pipefail -c '
+              python3 tools/toolchain/patch_splat.py
+              make extract
+              make -C conker extract
+              make -C conker -j"$(nproc)"
+              make -C conker replace
+              make -j"$(nproc)"
+              python3 tools/accounting.py'
+
+      - name: Check the ROM sha1s
+        run: |
+          echo "${INNER_SHA1}  test/conker/build/conker.us.bin" | sha1sum --check
+          echo "${OUTER_SHA1}  test/build/conker.us.z64" | sha1sum --check
+
+      - name: Check the committed accounting manifest
+        run: git -C test diff --exit-code -- tools/accounting.tsv
+
+      - name: List gate files the change touches
+        if: github.event_name == 'pull_request_target'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REPO: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          {
+            echo "### Gate files changed by this pull request"
+            if git -C test fetch --quiet --no-tags --depth=1 "$BASE_REPO" "$BASE_SHA"; then
+              changed=$(git -C test diff --name-only "$BASE_SHA" HEAD -- \
+                '**/Makefile' '*.mk' '*.yaml' '*.ld' '*.sha1' 'tools/toolchain/**' 'tools/rodata_extern.py' \
+                'tools/accounting.py' 'tools/hasm_proofs.tsv' 'tools/filter_auto_syms.py' \
+                'conker/undefined_*.txt' 'conker/jtbl_labels.us.txt' '.github/**')
+              if [ -n "$changed" ]; then
+                echo "Review these by hand: the build runs the pull request's own versions of them."
+                echo '```'; echo "$changed"; echo '```'
+              else
+                echo "None."
+              fi
+            else
+              echo "Could not fetch the base commit; review the diff by hand."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
