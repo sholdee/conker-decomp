@@ -84,29 +84,56 @@ void func_15193390(ObjectEmitter *volatile emitter) {
     emitter->cooldown = (func_150ADA20() & 0x7F) + 100;
 }
 
-void func_151934B4(struct42 *arg0) {
-    f32 sp38[4];
+typedef struct FallingObject {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x87];
+    /* 0x94 */ s16 fallSpeed;
+    /* 0x96 */ s16 unk96;
+    /* 0x98 */ s16 unk98;
+    /* 0x9A */ u8 pad9A[2];
+    /* 0x9C */ s16 x;
+    /* 0x9E */ s16 y;
+    /* 0xA0 */ s16 z;
+    /* 0xA2 */ s16 unkA2;
+    /* 0xA4 */ s16 unkA4;
+    /* 0xA6 */ s16 floorY;
+    /* 0xA8 */ u8 padA8[2];
+    /* 0xAA */ s16 timer;
+    /* 0xAC */ u8 padAC[7];
+    /* 0xB3 */ s8 unkB3;
+} FallingObject;
 
-    if (arg0->unkA4 < arg0->unk96) {
-        arg0->unkA4 = ((*(s16 *)((u8 *)arg0 + 0xAA) >> 2) * 24) / 3;
-        arg0->unkA2 = ((*(s16 *)((u8 *)arg0 + 0xAA) >> 2) * 6) / 3;
-        *(s16 *)((u8 *)arg0 + 0xAA) = *(s16 *)((u8 *)arg0 + 0xAA) + D_800BE9E4;
+/*
+ * While unkA4 is below unk96, grows unkA4/unkA2 with the timer. After that the object falls with
+ * a speed that ramps up to 20; once it drops below floorY it sets unk98 to -1, first spawning a
+ * func_151DBCBC effect at the landing point when unkB3 is 1.
+ */
+void func_151934B4(FallingObject *obj) {
+    f32 pos[4]; // matching: a 4th (unused) slot keeps pos at its original stack offset
+
+    if (obj->unkA4 < obj->unk96) {
+        obj->unkA4 = ((obj->timer >> 2) * 24) / 3;
+        obj->unkA2 = ((obj->timer >> 2) * 6) / 3;
+        obj->timer += D_800BE9E4;
         return;
     }
 
-    arg0->unk94++;
-    if (arg0->unk94 >= 0x15) {
-        arg0->unk94 = 0x14;
+    obj->fallSpeed++;
+    if (obj->fallSpeed > 20) {
+        obj->fallSpeed = 20;
     }
 
-    arg0->unk9E = arg0->unk9E - (((s32)((u32) arg0->unk94 * D_800BE9E4)) >> 1);
-    if (arg0->unk9E < arg0->unkA6) {
-        if (*(s8 *)((u8 *)arg0 + 0xB3) == 1) {
-            sp38[0] = (f32)arg0->unk9C;
-            sp38[1] = (f32)arg0->unkA6;
-            sp38[2] = (f32)*(s16 *)((u8 *)arg0 + 0xA0);
-            func_151DBCBC(5, 30.0f, 0xFF, 0, sp38, *(u8 *)((u8 *)arg0 + 0xC), *(u8 *)((u8 *)arg0 + 1));
+    obj->y -= (obj->fallSpeed * D_800BE9E4) >> 1;
+    if (obj->y < obj->floorY) {
+        if (obj->unkB3 == 1) {
+            pos[0] = obj->x;
+            pos[1] = obj->floorY;
+            pos[2] = obj->z;
+            func_151DBCBC(5, 30.0f, 0xFF, 0, pos, obj->unkC, obj->unk1);
         }
-        *(s16 *)((u8 *)arg0 + 0x98) = -1;
+        obj->unk98 = -1;
     }
 }
