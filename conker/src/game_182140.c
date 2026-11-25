@@ -212,9 +212,9 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     xh = (x + halfWidth) * 4.0f;
     yh = (y + halfHeight) * 4.0f;
     texWidth = D_80090B60[sprite->info.texture].width;
-    texWidthF = (u32)D_80090B60[sprite->info.texture].width;
+    texWidthF = D_80090B60[sprite->info.texture].width;
     while (0) {}  // matching: block boundary steers the scheduling of the texture size loads
-    texHeightF = (u32)D_80090B60[sprite->info.texture].height;
+    texHeightF = D_80090B60[sprite->info.texture].height;
     width = (xh - xl) + 1.0f;
     height = (yh - yl) + 1.0f;
     if (sprite->info.flags & 0x80) {
@@ -233,11 +233,11 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     }
     s = 0;
     t = 0;
-    if (sprite->info.flags & 2) {
+    if (sprite->info.flags & 2) { /* mirror horizontally */
         s = (texWidth - 1) << 5;
         dsdx = -dsdx & 0xFFFF;
     }
-    if (sprite->info.flags & 4) {
+    if (sprite->info.flags & 4) { /* mirror vertically */
         t = (D_80090B60[sprite->info.texture].height - 1) << 5;
         dtdy = -dtdy & 0xFFFF;
     }
