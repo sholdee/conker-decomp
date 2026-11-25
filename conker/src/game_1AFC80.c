@@ -13,7 +13,7 @@ typedef struct {
 typedef struct {
     f32 force;    /* constant added to every sample's acceleration */
     f32 damping;  /* velocity multiplier per step */
-    f32 scale;    /* samples per 1/40 world unit along the chain */
+    f32 scale;    /* sample index = scale * 40 * chain-local distance */
     s16 minZ;     /* chain-local z extent (negative) */
     s16 width;    /* chain-local x extent */
     s16 angle;    /* yaw of the chain */
@@ -30,7 +30,7 @@ extern WaveSample *D_800DDE60[];
 s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain);
 
 /*
- * Steps every active wave chain: actors standing on it push samples down, each sample is pulled
+ * Steps every active wave chain: actors on it push the samples under them, each sample is pulled
  * towards its neighbours, and a fast downward swing plays a sound at the pushing actor.
  */
 void func_151827D0(void) {
