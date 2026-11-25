@@ -54,8 +54,8 @@ typedef struct Vec3w1514F308 {
 typedef struct Struct1514F5CCArg {
     s32 unk00;
     f32 unk04;
-    struct127 *unk08;
-    u8 unk0C;
+    struct127 *obj;
+    u8 uniqueId;
     u8 pad0D[3];
     f32 unk10;
     s16 unk14;
@@ -64,13 +64,13 @@ typedef struct Struct1514F5CCArg {
 } Struct1514F5CCArg;
 
 typedef struct HudSpriteState {
-    char pad_0x00[0x9];
-    u8 field_0x09;
+    /* 0x0 */ u8 pad0[0x9];
+    /* 0x9 */ u8 unk9;
 } HudSpriteState;
 
 typedef struct HudSpriteHandle {
-    char pad_0x00[0x14];
-    HudSpriteState *field_0x14;
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ HudSpriteState *state;
 } HudSpriteHandle;
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
@@ -79,11 +79,6 @@ extern Vec3w1514F308 D_800A597C;
 extern u8 D_800A58A0;
 extern u8 D_800A5958;
 extern u8 D_800A5964;
-extern s32 D_800A58D0;
-extern s32 D_800A58E4;
-extern s32 D_800A58F8;
-extern s32 D_800A590C;
-extern s32 D_800A5920;
 s32 func_15189FF0(void *, void *, void *, s32, s32, s32, s32);
 extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
 void func_151BB044(struct127 *);
@@ -101,9 +96,10 @@ extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
 s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
+s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, char *name);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150C4120(s32, s32, s32, s32);
+void func_150C4120(struct127 *, s32, s32, s32);
+void func_1501175C(struct127 *, u8, s32);
 
 typedef struct Vec3f {
     f32 x;
@@ -111,15 +107,11 @@ typedef struct Vec3f {
     f32 z;
 } Vec3f;
 
-/* Tells a spawned emitter how to follow its owner: two points given in the space of bone `bone`
+/* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of bone `bone`
  * of `target`, which func_1518A094 transforms every frame. */
 typedef struct EmitterAttach {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 x2;
-    /* 0x10 */ f32 y2;
-    /* 0x14 */ f32 z2;
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
     /* 0x18 */ struct127 *target;
     /* 0x1C */ u8 bone;
     /* 0x1D */ u8 targetId;             // the target's unique_id
@@ -739,10 +731,10 @@ void func_1514D64C(struct127 *obj) {
 
     attach.targetId = obj->unique_id;
     attach.target = obj;
-    attach.x = 0.0f;
-    attach.y = 0.0f;
-    attach.x2 = 0.0f;
-    attach.y2 = 0.0f;
+    attach.p0.x = 0.0f;
+    attach.p0.y = 0.0f;
+    attach.p1.x = 0.0f;
+    attach.p1.y = 0.0f;
     attach.bone = 0x2B;
     emitter.unk54 = 0;
     emitter.unk55 = 0;
@@ -750,8 +742,8 @@ void func_1514D64C(struct127 *obj) {
     emitter.unk57 = 0;
     attach.handler = 1;
 
-    attach.z = 25.0f;
-    attach.z2 = 75.0f;
+    attach.p0.z = 25.0f;
+    attach.p1.z = 75.0f;
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
@@ -794,12 +786,12 @@ void func_1514D64C(struct127 *obj) {
     emitter.unk56 = 0;
     emitter.unk57 = 0;
     attach.handler = 0;
-    attach.y = 10.0f;
-    attach.x = 0.0f;
-    attach.x2 = 0.0f;
-    attach.z = -70.0f;
-    attach.y2 = 20.0f;
-    attach.z2 = -140.0f;
+    attach.p0.y = 10.0f;
+    attach.p0.x = 0.0f;
+    attach.p1.x = 0.0f;
+    attach.p0.z = -70.0f;
+    attach.p1.y = 20.0f;
+    attach.p1.z = -140.0f;
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
@@ -1060,10 +1052,10 @@ void func_1514E00C(struct127 *obj) {
     emitter.unk20 = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
-    attach.x = 35.0f;
-    attach.y = 27.0f;
-    attach.x2 = 35.0f;
-    attach.y2 = 27.0f;
+    attach.p0.x = 35.0f;
+    attach.p0.y = 27.0f;
+    attach.p1.x = 35.0f;
+    attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
     emitter.unk54 = 0;
@@ -1072,8 +1064,8 @@ void func_1514E00C(struct127 *obj) {
     emitter.unk57 = 0;
     attach.handler = -1;
 
-    attach.z = 59.0f;
-    attach.z2 = 559.0f;
+    attach.p0.z = 59.0f;
+    attach.p1.z = 559.0f;
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
@@ -1114,10 +1106,10 @@ void func_1514E194(struct127 *obj) {
     emitter.unk20 = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
-    attach.x = 35.0f;
-    attach.y = 27.0f;
-    attach.x2 = 35.0f;
-    attach.y2 = 27.0f;
+    attach.p0.x = 35.0f;
+    attach.p0.y = 27.0f;
+    attach.p1.x = 35.0f;
+    attach.p1.y = 27.0f;
     attach.target = obj;
     attach.bone = 6;
     emitter.unk54 = 0;
@@ -1126,8 +1118,8 @@ void func_1514E194(struct127 *obj) {
     emitter.unk57 = 0;
     attach.handler = -1;
 
-    attach.z = 59.0f;
-    attach.z2 = 559.0f;
+    attach.p0.z = 59.0f;
+    attach.p1.z = 559.0f;
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
@@ -1168,10 +1160,10 @@ void func_1514E31C(struct127 *obj) {
     emitter.unk20 = 9.999999975e-07f;
 
     attach.targetId = obj->unique_id;
-    attach.x = 0.0f;
-    attach.y = 0.0f;
-    attach.x2 = 0.0f;
-    attach.y2 = 0.0f;
+    attach.p0.x = 0.0f;
+    attach.p0.y = 0.0f;
+    attach.p1.x = 0.0f;
+    attach.p1.y = 0.0f;
     attach.target = obj;
     attach.bone = 0xC;
     emitter.unk54 = 0;
@@ -1180,8 +1172,8 @@ void func_1514E31C(struct127 *obj) {
     emitter.unk57 = 0;
     attach.handler = 2;
 
-    attach.z = 100.0f;
-    attach.z2 = 600.0f;
+    attach.p0.z = 100.0f;
+    attach.p1.z = 600.0f;
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
@@ -1200,7 +1192,7 @@ void func_1514E508(struct127 *obj) {
     s32 handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58D0);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->x_position; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1211,7 +1203,7 @@ void func_1514E5B8(struct127 *obj) {
     s32 handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58E4);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->x_position; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1222,7 +1214,7 @@ void func_1514E668(struct127 *obj) {
     s32 handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A58F8);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
     func_1514EC1C(handle, obj, 0xD);
     pos = (s32)&obj->x_position; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1233,7 +1225,7 @@ void func_1514E718(struct127 *obj) {
     s32 handle;
     s32 pos;
 
-    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, &D_800A590C);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
     func_1514EC1C(handle, obj, 0xE);
     pos = (s32)&obj->x_position; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
@@ -1243,7 +1235,7 @@ void func_1514E718(struct127 *obj) {
 void func_1514E7C8(struct127 *obj) {
     s32 handle;
 
-    handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, &D_800A5920);
+    handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
     func_1514EC1C(handle, obj, 0xF);
 }
 
@@ -1416,7 +1408,7 @@ void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg) {
     func_1514E89C(target, msg, arg);
 }
 
-s32 func_1514EB8C(s32 arg0, s32 arg1, s32 arg2) {
+s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
     return 1;
 }
 
@@ -1548,24 +1540,24 @@ void func_1514EDF0(s32 handle, struct127 *owner) {
 }
 
 struct Struct1514EE70 {
-    s32 unk0;
-    u8 unk4;
+    struct127 *obj;
+    u8 uniqueId;
     u8 unk5;
     u16 unk6;
 };
 
 s32 func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
-void func_1514EE70(u8 *arg0) {
-    struct Struct1514EE70 sp20;
-    s32 v0;
+void func_1514EE70(struct127 *obj) {
+    struct Struct1514EE70 desc;
+    s32 handle;
 
-    sp20.unk0 = (s32) arg0;
-    sp20.unk4 = arg0[0x3B];
-    sp20.unk5 = 0;
-    sp20.unk6 = 0x12C;
-    v0 = func_1515BE50(&sp20, 0, 0xFF, 1);
-    func_1514EC1C(v0, (s32) arg0, 0x16);
+    desc.obj = obj;
+    desc.uniqueId = obj->unique_id;
+    desc.unk5 = 0;
+    desc.unk6 = 300;
+    handle = func_1515BE50(&desc, 0, 0xFF, 1);
+    func_1514EC1C(handle, obj, 0x16);
 }
 
 typedef struct Struct1514EECC_C4 {
@@ -1604,85 +1596,75 @@ typedef struct Struct1514EECC_C4 {
     /* 0x56 */ s16 unk56;
 } Struct1514EECC_C4;
 
-typedef struct Struct1514EECC_48 {
-    /* 0x00 */ Vec3w1514F308 unk00;
-    /* 0x0C */ Vec3w1514F308 unk0C;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s8 unk1E;
-    /* 0x1F */ u8 pad1F;
-} Struct1514EECC_48;
+extern Vec3f D_800A5934;
+extern Vec3f D_800A5940;
+extern Vec3f D_800A594C;
 
-extern u8 D_800A5934;
-extern Vec3w1514F308 D_800A5940;
-extern Vec3w1514F308 D_800A594C;
+void func_1514EECC(struct127 *obj) {
+    s32 handle;
 
-void func_1514EECC(s32 arg0) {
-    s32 v0;
-    v0 = func_15160A58(arg0, 1, &D_800A5934, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
-    func_1514EC1C(v0, arg0, 0x19);
+    handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
+    func_1514EC1C(handle, obj, 0x19);
     {
-    Struct1514EECC_C4 spC4;
-    Struct1514E00C_A4 sp68;
-    Struct1514EECC_48 sp48;
+        Struct1514EECC_C4 spawn;
+        Struct1514E00C_A4 emitter;
+        EmitterAttach attach;
 
+        spawn.unk00 = 0x69;
+        spawn.unk40 = 0x04ED200A;
+        spawn.unk04 = 0x12C;
+        spawn.unk08 = 0;
+        spawn.unk0C = 0;
+        spawn.unk45 = 0xFF;
+        spawn.unk10 = 0xFF;
+        spawn.unk11 = 0;
+        spawn.unk12 = 0;
+        spawn.unk13 = 0xFF;
+        spawn.unk02 = 0x4403;
+        spawn.unk1C = 0.0f;
+        spawn.unk20 = 0.0f;
+        spawn.unk24 = 0.0f;
+        spawn.unk28 = 0.0f;
+        spawn.unk2C = 0.0f;
+        spawn.unk30 = 0.0f;
+        spawn.unk01 = 3;
+        spawn.unk18 = 100.0f;
+        spawn.unk14 = 100.0f;
+        spawn.unk34 = 1.0f;
+        spawn.unk38 = 1.0f;
+        spawn.unk3C = 1.0f;
+        spawn.unk44 = 0xFF;
+        spawn.unk46 = 0;
+        spawn.unk47 = 6;
+        spawn.unk48 = 0;
+        spawn.unk4C = 0xFF;
+        spawn.unk50 = 0;
+        spawn.unk54 = 1;
+        spawn.unk56 = 0xFF;
 
-    spC4.unk00 = 0x69;
-    spC4.unk40 = 0x04ED200A;
-    spC4.unk04 = 0x12C;
-    spC4.unk08 = 0;
-    spC4.unk0C = 0;
-    spC4.unk45 = 0xFF;
-    spC4.unk10 = 0xFF;
-    spC4.unk11 = 0;
-    spC4.unk12 = 0;
-    spC4.unk13 = 0xFF;
-    spC4.unk02 = 0x4403;
-    spC4.unk1C = 0.0f;
-    spC4.unk20 = 0.0f;
-    spC4.unk24 = 0.0f;
-    spC4.unk28 = 0.0f;
-    spC4.unk2C = 0.0f;
-    spC4.unk30 = 0.0f;
-    spC4.unk01 = 3;
-    spC4.unk18 = 100.0f;
-    spC4.unk14 = 100.0f;
-    spC4.unk34 = 1.0f;
-    spC4.unk38 = 1.0f;
-    spC4.unk3C = 1.0f;
-    spC4.unk44 = 0xFF;
-    spC4.unk46 = 0;
-    spC4.unk47 = 6;
-    spC4.unk48 = 0;
-    spC4.unk4C = 0xFF;
-    spC4.unk50 = 0;
-    spC4.unk54 = 1;
-    spC4.unk56 = 0xFF;
+        emitter.unk04 = 95.0f;
+        emitter.unk00 = 95.0f;
+        emitter.unk0C = 65.0f;
+        emitter.unk08 = 65.0f;
+        emitter.unk10 = 0.150000006f;
+        emitter.unk14 = 0.150000006f;
+        emitter.unk18 = 0.6999999881f;
+        emitter.unk1C = 0.400000006f;
+        emitter.unk20 = 9.999999975e-07f;
 
-    sp68.unk04 = 95.0f;
-    sp68.unk00 = 95.0f;
-    sp68.unk0C = 65.0f;
-    sp68.unk08 = 65.0f;
-    sp68.unk10 = 0.150000006f;
-    sp68.unk14 = 0.150000006f;
-    sp68.unk18 = 0.6999999881f;
-    sp68.unk1C = 0.400000006f;
-    sp68.unk20 = 9.999999975e-07f;
+        attach.targetId = obj->unique_id;
+        attach.target = obj;
+        attach.p0 = D_800A5940;
+        attach.p1 = D_800A594C;
+        attach.bone = 1;
+        emitter.unk54 = 0;
+        emitter.unk55 = 0;
+        emitter.unk56 = 0;
+        emitter.unk57 = 0;
+        emitter.unk48 = 1.0f;
+        attach.handler = 3;
 
-    sp48.unk1D = ((u8 *)arg0)[0x3B];
-    sp48.unk18 = arg0;
-    sp48.unk00 = D_800A5940;
-    sp48.unk0C = D_800A594C;
-    sp48.unk1C = 1;
-    sp68.unk54 = 0;
-    sp68.unk55 = 0;
-    sp68.unk56 = 0;
-    sp68.unk57 = 0;
-    sp68.unk48 = 1.0f;
-    sp48.unk1E = 3;
-
-    func_15189FF0(&spC4, &sp68, &sp48, 2, 0, 0, 0);
+        func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0);
     }
 }
 
@@ -1690,16 +1672,16 @@ void func_1514F110(struct127 *obj) {
     func_1514F194(obj);
 }
 
-s32 func_1514F130(HudSpriteHandle *arg0, s32 arg1, s32 arg2) {
-    switch (arg1) {
+s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
+    switch (msg) {
     case 13:
-        arg0->field_0x14->field_0x09 = 0;
+        target->state->unk9 = 0;
         break;
     case 14:
-        arg0->field_0x14->field_0x09 = 1;
+        target->state->unk9 = 1;
         break;
     default:
-        return func_1514E89C((s32) arg0, arg1, arg2);
+        return func_1514E89C((ToggleTarget *)target, msg, arg);
     }
     return 1;
 }
@@ -1722,83 +1704,75 @@ void func_1514F194(struct127 *obj) {
     }
 }
 
-void func_1514F308(s32 arg0) {
-    Vec3w1514F308 sp54;
-    Vec3w1514F308 sp48;
+void func_1514F308(struct127 *obj) {
+    Vec3f pointA = { 52.0f, 0.0f, 80.0f };
+    Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
-    sp54 = D_800A5970;
-    sp48 = D_800A597C;
-    func_15160CDC(arg0, 5, &sp54, &sp48, 0.02350199968f, 2, 0x12C,
+    func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514F3CC(struct127 *arg0) {
+void func_1514F3CC(struct127 *obj) {
     struct {
-        struct127 *unk0;
-        u8 unk4;
+        struct127 *obj;
+        u8 uniqueId;
         f32 unk8;
-    } sp34;
-    struct260 *temp_v0;
+    } payload;
+    struct260 *spawned;
 
-    sp34.unk0 = arg0;
-    sp34.unk4 = arg0->unique_id;
-    sp34.unk8 = 0.0f;
+    payload.obj = obj;
+    payload.uniqueId = obj->unique_id;
+    payload.unk8 = 0.0f;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x3A, -1, 0, 0x2B, (struct37 *)0xC, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0xC);
+    // the seventh argument is the payload size
+    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, (struct37 *)sizeof(payload), 0xFF, 1);
+    if (spawned != NULL) {
+        memcpy((u8 *)spawned + 0x28, &payload, sizeof(payload));
     }
 }
 
-extern s32 D_800A5988;
-s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
+void func_1514F44C(struct127 *obj) {
+    s32 handle;
 
-void func_1514F44C(s32 arg0) {
-    s32 v0;
-
-    v0 = func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, &D_800A5988);
-    func_1514EC1C(v0, arg0, 0xD);
+    handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
+    func_1514EC1C(handle, obj, 0xD);
 }
 
-extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
-
-void func_1514F4A8(s32 arg0) {
-    func_151D74B0(arg0, 1, -1, 0xFF, 1);
+void func_1514F4A8(struct127 *obj) {
+    func_151D74B0(obj, 1, -1, 0xFF, 1);
 }
 
-void func_1514F4D8(s32 arg0) {
-    func_151D74B0(arg0, 2, 1, 0xFF, 1);
+void func_1514F4D8(struct127 *obj) {
+    func_151D74B0(obj, 2, 1, 0xFF, 1);
 }
 
-void func_1514F508(s32 arg0) {
-    func_151D74B0(arg0, 3, 0, 0xFF, 1);
+void func_1514F508(struct127 *obj) {
+    func_151D74B0(obj, 3, 0, 0xFF, 1);
 }
 
-void func_1514F538(s32 arg0) {
-    func_151D74B0(arg0, 4, -1, 0xFF, 1);
+void func_1514F538(struct127 *obj) {
+    func_151D74B0(obj, 4, -1, 0xFF, 1);
 }
 
-void func_1514F568(s32 arg0) {
-    func_150C4120(arg0, -1, 0xFF, 1);
+void func_1514F568(struct127 *obj) {
+    func_150C4120(obj, -1, 0xFF, 1);
 }
 
-void func_1501175C(struct127 *arg0, u8 arg1, s32 arg2);
-
-void func_1514F590(struct127 *arg0) {
-    func_1501175C(arg0, 0xFF, 1);
-    func_15011A78(arg0, 0xFF, 1);
+void func_1514F590(struct127 *obj) {
+    func_1501175C(obj, 0xFF, 1);
+    func_15011A78(obj, 0xFF, 1);
 }
 
-void func_1514F5CC(struct127 *arg0) {
-    Struct1514F5CCArg sp1C;
+void func_1514F5CC(struct127 *obj) {
+    Struct1514F5CCArg desc;
 
-    sp1C.unk00 = 0;
-    sp1C.unk08 = arg0;
-    sp1C.unk04 = 0.0f;
-    sp1C.unk0C = arg0->unique_id;
-    sp1C.unk10 = 0.349999994f;
-    sp1C.unk14 = 0x14;
-    sp1C.unk16 = 0x12C;
-    sp1C.unk18 = 4;
-    func_150C0AC0(&sp1C, 0xFF, 1);
+    desc.unk00 = 0;
+    desc.obj = obj;
+    desc.unk04 = 0.0f;
+    desc.uniqueId = obj->unique_id;
+    desc.unk10 = 0.349999994f;
+    desc.unk14 = 20;
+    desc.unk16 = 300;
+    desc.unk18 = 4;
+    func_150C0AC0(&desc, 0xFF, 1);
 }
