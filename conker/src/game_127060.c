@@ -16,21 +16,6 @@ void *func_1513D2F0(void *spawn, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5,
                     s32 dataSize, u8 owner, s32 kind);
 
 
-extern s32 D_800BE628;
-extern s32 D_80082FA4;
-void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4);
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
-void func_150FB4C0(Gfx *gfx, f32 mtx[4][4]);
-
-typedef struct {
-    u8  pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct150F9AB0;
-void func_150F9AB0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-
 /* Per-spark data of a burst spark (func_150F9BB0), stored at 0x110 of the spawned object. */
 typedef struct {
     /* 0x00 */ struct127 *owner;
@@ -546,12 +531,18 @@ typedef struct {
     f32 unk6C;
 } ParticleSpawn; /* 0x70 */
 
+/* A particle created by func_15130280; this caller's data lives at 0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 data[5];
+} ImpactParticle;
+
 extern struct17 D_800A1CFC[];
 extern void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
 extern void func_1504715C(void *ground, struct127 *actor);
 extern void func_15153F18(s16 *, void *, void *, u8, s32);
 extern void func_15150178(s16 *, void *, void *, u8, s32);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern ImpactParticle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
 extern void func_151C329C(struct17 *, u8, s32);
 
 /*
@@ -568,108 +559,108 @@ void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15153F18 a;
 
-        a.pos = pos;
-        a.unk14 = 4.0f;
-        a.unk2C = 9;
-        a.unk2E = 6;
-        a.unk02 = 0xFF;
-        a.unk04 = -40;
-        a.unk00 = 0;
-        a.unk06 = 0x32;
-        a.unk30 = 3;
-        a.unk32 = 1;
-        a.unk34 = 0x1E;
-        a.unk36 = 0x32;
-        a.unk38 = 0x64;
-        a.unk3A = 0x64;
-        a.unk44 = 0x10;
-        a.unk46 = 0xF;
-        a.unk48 = 0;
-        a.unk3C = 1;
-        a.unk18 = 3.879999876f;
-        a.unk1C = 0.694f;
-        a.unk20 = 0.4500000179f;
-        a.unk24 = 12.0f;
-        a.unk28 = 13.90000057f;
-        a.unk40 = 1.0f;
-        func_15153F18(&a.unk00, &a.pos, ground, owner, kind);
+            a.pos = pos;
+            a.unk14 = 4.0f;
+            a.unk2C = 9;
+            a.unk2E = 6;
+            a.unk02 = 0xFF;
+            a.unk04 = -40;
+            a.unk00 = 0;
+            a.unk06 = 0x32;
+            a.unk30 = 3;
+            a.unk32 = 1;
+            a.unk34 = 0x1E;
+            a.unk36 = 0x32;
+            a.unk38 = 0x64;
+            a.unk3A = 0x64;
+            a.unk44 = 0x10;
+            a.unk46 = 0xF;
+            a.unk48 = 0;
+            a.unk3C = 1;
+            a.unk18 = 3.879999876f;
+            a.unk1C = 0.694f;
+            a.unk20 = 0.4500000179f;
+            a.unk24 = 12.0f;
+            a.unk28 = 13.90000057f;
+            a.unk40 = 1.0f;
+            func_15153F18(&a.unk00, &a.pos, ground, owner, kind);
         }
         {
             Spawn15150178 b;
 
-        b.pos = pos;
-        b.unk14 = 7;
-        b.unk16 = 6;
-        b.unk00 = 0;
-        b.unk02 = 0xFF;
-        b.unk04 = -63;
-        b.unk06 = 0x18;
-        b.unk20 = 0x23;
-        b.unk22 = 0xB;
-        b.unk2C = 0x64;
-        b.unk2D = 0x64;
-        b.unk38 = 1;
-        b.unk39 = 1;
-        b.unk40 = 1;
-        b.unk18 = 8.0f;
-        b.unk1C = 10.0f;
-        b.unk24 = -1.266f;
-        b.unk28 = 0.4660000205f;
-        b.unk30 = 123.0f;
-        b.unk34 = 104.0f;
-        b.unk3C = 1.0f;
-        b.unk44 = 0.3f;
-        func_15150178(&b.unk00, &b.pos, ground, owner, kind);
+            b.pos = pos;
+            b.unk14 = 7;
+            b.unk16 = 6;
+            b.unk00 = 0;
+            b.unk02 = 0xFF;
+            b.unk04 = -63;
+            b.unk06 = 0x18;
+            b.unk20 = 0x23;
+            b.unk22 = 0xB;
+            b.unk2C = 0x64;
+            b.unk2D = 0x64;
+            b.unk38 = 1;
+            b.unk39 = 1;
+            b.unk40 = 1;
+            b.unk18 = 8.0f;
+            b.unk1C = 10.0f;
+            b.unk24 = -1.266f;
+            b.unk28 = 0.4660000205f;
+            b.unk30 = 123.0f;
+            b.unk34 = 104.0f;
+            b.unk3C = 1.0f;
+            b.unk44 = 0.3f;
+            func_15150178(&b.unk00, &b.pos, ground, owner, kind);
         }
         {
             ParticleSpawn spawn;
             f32 data[5];
-            void *particle;
+            ImpactParticle *particle;
 
-        data[0] = 0.0f;
-        data[2] = 1369.429932f;
-        data[1] = func_150ADA68() * 3.0f + 10.0f;
-        data[3] = func_150ADA68() * 100.0f + 100.0f;
-        data[4] = data[3] / (data[1] * data[1]);
-        spawn.unk1B = data[3];
-        spawn.unk1D = 0x79;
-        spawn.unk8 = 0x4403;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk18 = 0xDC;
-        spawn.unk19 = 0xDC;
-        spawn.unk1A = 0xFF;
-        spawn.unk17 = 0xFF;
-        spawn.unk14 = 0xFF;
-        spawn.unk15 = 0xFF;
-        spawn.unk16 = 0xFF;
-        spawn.unk1C = 0xFF;
-        spawn.pos = pos;
-        spawn.unk3C = *(struct17 *)&D_800A5480;
-        spawn.unk1E = 1;
-        spawn.unk20 = 0xFF;
-        spawn.unk22 = 1;
-        spawn.unk24 = 1.0f;
-        spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-        spawn.unk60 = 6;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x27;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk5C = 0;
-        spawn.unk66 = 0xFF;
-        spawn.vel = *(struct17 *)&D_800A5480;
-        spawn.unkA = 300;
-        spawn.unk28 = 0.0f;
-        spawn.unk2C = 0.0f;
-        spawn.unk54 = 0.0f;
-        particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
-        if (particle != NULL) {
-            memcpy((u8 *)particle + 0xA8, data, sizeof(data));
-        }
+            data[0] = 0.0f;
+            data[2] = 1369.429932f;
+            data[1] = func_150ADA68() * 3.0f + 10.0f;
+            data[3] = func_150ADA68() * 100.0f + 100.0f;
+            data[4] = data[3] / (data[1] * data[1]);
+            spawn.unk1B = data[3];
+            spawn.unk1D = 0x79;
+            spawn.unk8 = 0x4403;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk18 = 0xDC;
+            spawn.unk19 = 0xDC;
+            spawn.unk1A = 0xFF;
+            spawn.unk17 = 0xFF;
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.pos = pos;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.unk1E = 1;
+            spawn.unk20 = 0xFF;
+            spawn.unk22 = 1;
+            spawn.unk24 = 1.0f;
+            spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.unk60 = 6;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x27;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.vel = *(struct17 *)&D_800A5480;
+            spawn.unkA = 300;
+            spawn.unk28 = 0.0f;
+            spawn.unk2C = 0.0f;
+            spawn.unk54 = 0.0f;
+            particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
+            if (particle != NULL) {
+                memcpy(particle->data, data, sizeof(data));
+            }
         }
         func_151C329C(&pos, owner, kind);
     }
@@ -748,17 +739,16 @@ void func_150FAAEC(EmitterEffect *effect) {
     }
 }
 
-void func_150FACE4(struct102 *arg0, s32 arg1, u8 arg2) {
-    switch (arg2) {
-        case 0x4E:
-        case 0x4F:
-            func_1516972C(arg0);
-            break;
+/* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
+void func_150FACE4(struct102 *obj, s32 arg1, u8 event) {
+    if ((event == 0x4E) || (event == 0x4F)) {
+        func_1516972C(obj);
     }
 }
 
 extern void func_1515F170(s32 arg0, u8 arg1);
 
+/* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with D_800D3098 record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     func_1515F170(8, 0);
     func_1515F170(0xB, 1);
@@ -766,6 +756,7 @@ void func_150FAD28(void) {
     func_151494E0(0, 0x4D);
 }
 
+/* Counterpart of func_150FAD28: func_1515F170 for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
 void func_150FAD78(void) {
     func_1515F170(8, 1);
     func_1515F170(7, 0);
@@ -773,16 +764,33 @@ void func_150FAD78(void) {
     func_151494E0(0, 0x4C);
 }
 
-void func_150FADC8(s32 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x53) {
-        arg0[0x16] |= 2;
-    } else if (arg2 == 0x54) {
-        arg0[0x16] &= ~2;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ s32 flags;
+} Obj150FADC8;
+
+/* Event handler: event 0x53 sets flag 2 of the object, event 0x54 clears it. */
+void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
+    if (event == 0x53) {
+        obj->flags |= 2;
+    } else if (event == 0x54) {
+        obj->flags &= ~2;
     }
 }
 
-extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
-extern void *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
+/* Objects created by func_15157010 / func_1515548C; this caller stores a tag in each. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x120];
+    /* 0x120 */ s16 tag;
+} TaggedModel;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x70];
+    /* 0x70 */ s16 tag;
+} TaggedSprite;
+
+extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
+extern TaggedSprite *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
 
 typedef struct {
     /* 0x00 */ u8 unk00;
@@ -822,7 +830,7 @@ typedef struct {
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
-} S150FAE18Main;
+} Spawn15157010;
 
 typedef struct {
     /* 0x00 */ f32 unk00;
@@ -861,98 +869,102 @@ typedef struct {
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
-} S150FAE18Part;
+} Spawn1515548C;
 
-void func_150FAE18(s16 arg0, u8 arg1, s32 arg2) {
-    s16 pad;
-    s16 id;
+/*
+ * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
+ * the rest 0xC5/0xC4), each tagged with duration in its data.
+ */
+void func_150FAE18(s16 duration, u8 owner, s32 kind) {
+    s16 pad; // matching: unused stack slot
+    s16 tag;
 
-    id = arg0;
+    tag = duration;
     {
-    S150FAE18Main spC4;
-    void *ret;
+        Spawn15157010 model;
+        void *spawned; // matching: one variable for both spawned objects (separate ones reallocate)
 
-    spC4.unk38 = 0;
-    spC4.unk00 = 0x61;
-    spC4.unk01 = 3;
-    spC4.unk02 = 4;
-    spC4.unk03 = 2;
-    spC4.unk04 = 0;
-    spC4.unk06 = arg0;
-    spC4.unk08 = 0xA5;
-    spC4.unk0C = 0x17;
-    spC4.unk10 = 0;
-    spC4.unk14 = 0x200405;
-    spC4.unk18 = 0x60200;
-    spC4.unk2D = 8;
-    spC4.unk1C = 1;
-    spC4.unk20 = 0x38;
-    spC4.unk2C = 0;
-    spC4.unk24 = 0x80;
-    spC4.unk28 = 0x20;
-    spC4.unk30 = 0xFF;
-    spC4.unk31 = 0xFF;
-    spC4.unk32 = 0xFF;
-    spC4.unk33 = 0xFF;
-    spC4.unk34 = 0xFF;
-    spC4.unk35 = 0xFF;
-    spC4.unk36 = 0xFF;
-    spC4.unk37 = 0xFF;
-    spC4.unk3C = 0;
-    spC4.unk40 = 0;
-    spC4.unk41 = 1;
-    spC4.unk44 = *(struct17 *)&D_800A5480;
-    spC4.unk54 = 0xA;
-    spC4.unk56 = 0x19;
-    ret = func_15157010(&spC4, 0, 1.0, 0, 0, 2, arg1, arg2);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x120, &id, 2);
-    }
-    {
-    S150FAE18Part sp68;
-    u8 i;
-    const s16 tbl[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
-
-    sp68.unk04 = 62.0f;
-    sp68.unk12 = arg0;
-    sp68.unk14 = 0x29;
-    sp68.unk16 = 0xA;
-    sp68.unk18 = 0x19;
-    sp68.unk08 = 16.0f;
-    sp68.unk0C = 16.0f;
-    sp68.unk1A = 0;
-    sp68.unk1B = 0xFF;
-    sp68.unk1C = 0xFF;
-    sp68.unk1D = 0xFF;
-    sp68.unk1E = 0xFF;
-    sp68.unk1F = 0xFF;
-    sp68.unk20 = 0xFF;
-    sp68.unk21 = 0xFF;
-    sp68.unk22 = 0xFF;
-    sp68.unk23 = 0xFF;
-    sp68.unk24 = 0;
-    sp68.unk28 = 0x200405;
-    sp68.unk2C = 0x60200;
-    sp68.unk40 = 0;
-    sp68.unk41 = 7;
-    sp68.unk30 = 0x19;
-    sp68.unk34 = 0x22;
-    sp68.unk38 = 0x80;
-    sp68.unk3C = 0x20;
-    sp68.unk44 = 0;
-    sp68.unk48 = 1.0f;
-    sp68.unk4C = 1.0f;
-    sp68.unk50 = 0.0f;
-    sp68.unk54 = 0.0f;
-    for (i = 0; i < 8; i++) {
-        sp68.unk00 = i * 24.75f + -65.0f;
-        sp68.unk10 = tbl[i];
-        ret = func_1515548C(&sp68, 0xE, 0, 0, 2, arg1, arg2);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x70, &id, 2);
+        model.unk38 = 0;
+        model.unk00 = 0x61;
+        model.unk01 = 3;
+        model.unk02 = 4;
+        model.unk03 = 2;
+        model.unk04 = 0;
+        model.unk06 = duration;
+        model.unk08 = 0xA5;
+        model.unk0C = 0x17;
+        model.unk10 = 0;
+        model.unk14 = 0x200405;
+        model.unk18 = 0x60200;
+        model.unk2D = 8;
+        model.unk1C = 1;
+        model.unk20 = 0x38;
+        model.unk2C = 0;
+        model.unk24 = 0x80;
+        model.unk28 = 0x20;
+        model.unk30 = 0xFF;
+        model.unk31 = 0xFF;
+        model.unk32 = 0xFF;
+        model.unk33 = 0xFF;
+        model.unk34 = 0xFF;
+        model.unk35 = 0xFF;
+        model.unk36 = 0xFF;
+        model.unk37 = 0xFF;
+        model.unk3C = 0;
+        model.unk40 = 0;
+        model.unk41 = 1;
+        model.unk44 = *(struct17 *)&D_800A5480;
+        model.unk54 = 10;
+        model.unk56 = 25;
+        spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);
+        if (spawned != NULL) {
+            memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));
         }
-    }
-    }
+        {
+            Spawn1515548C sprite;
+            u8 i;
+            const s16 kinds[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
+
+            sprite.unk04 = 62.0f;
+            sprite.unk12 = duration;
+            sprite.unk14 = 0x29;
+            sprite.unk16 = 10;
+            sprite.unk18 = 25;
+            sprite.unk08 = 16.0f;
+            sprite.unk0C = 16.0f;
+            sprite.unk1A = 0;
+            sprite.unk1B = 0xFF;
+            sprite.unk1C = 0xFF;
+            sprite.unk1D = 0xFF;
+            sprite.unk1E = 0xFF;
+            sprite.unk1F = 0xFF;
+            sprite.unk20 = 0xFF;
+            sprite.unk21 = 0xFF;
+            sprite.unk22 = 0xFF;
+            sprite.unk23 = 0xFF;
+            sprite.unk24 = 0;
+            sprite.unk28 = 0x200405;
+            sprite.unk2C = 0x60200;
+            sprite.unk40 = 0;
+            sprite.unk41 = 7;
+            sprite.unk30 = 25;
+            sprite.unk34 = 0x22;
+            sprite.unk38 = 0x80;
+            sprite.unk3C = 0x20;
+            sprite.unk44 = 0;
+            sprite.unk48 = 1.0f;
+            sprite.unk4C = 1.0f;
+            sprite.unk50 = 0.0f;
+            sprite.unk54 = 0.0f;
+            for (i = 0; i < 8; i++) {
+                sprite.unk00 = -65.0f + i * 24.75f;
+                sprite.unk10 = kinds[i];
+                spawned = func_1515548C(&sprite, 14, 0, 0, 2, owner, kind);
+                if (spawned != NULL) {
+                    memcpy(&((TaggedSprite *)spawned)->tag, &tag, sizeof(tag));
+                }
+            }
+        }
     }
 }
 
@@ -971,26 +983,28 @@ typedef struct Func150FB188Transform {
     f32 field10;
 } Func150FB188Transform;
 
-void func_15157DEC(u8 *, u8 *);
+void func_15157DEC(Func150FB188State *, Func150FB188Transform *);
 
-s32 func_150FB188(Func150FB188State *arg0) {
+/* Sets obj->field54..5C to (-95, -80, 0) and calls func_15157DEC with {0, 0, 0, 0.3, 0.3}. */
+s32 func_150FB188(Func150FB188State *obj) {
     Func150FB188Transform transform;
 
-    arg0->field5C = 0.0f;
-    arg0->field54 = -95.0f;
-    arg0->field58 = -80.0f;
+    obj->field5C = 0.0f;
+    obj->field54 = -95.0f;
+    obj->field58 = -80.0f;
     transform.field0 = 0.0f;
     transform.field4 = 0.0f;
     transform.field8 = 0.0f;
     transform.fieldC = 0.3f;
     transform.field10 = 0.3f;
-    func_15157DEC((u8 *)arg0, (u8 *)&transform);
+    func_15157DEC(obj, &transform);
     return 1;
 }
 
 extern s32 func_151D710C(s32, s32, s32, s32, s32);
 extern void func_15157F80(s32, s32, s32, s32, s32);
 
+/* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
 void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_15157F80(func_151D710C(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
 }
