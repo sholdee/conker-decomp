@@ -37,8 +37,6 @@ extern FogPreset D_8008CC70;
 
 /* Copies the level header's fog settings into preset 0 and applies the level's fog preset. */
 void func_151732E0(s32 arg0) {
-    s8 preset;
-
     if (sLevelFog->unk3C == sLevelFog->unk40 && sLevelFog->unk3C == 0) {
         sLevelFog->unk40 = 100;
     }
@@ -54,8 +52,7 @@ void func_151732E0(s32 arg0) {
     D_8008CC70.unkE = sLevelFog->unk0;
     if (sLevelFog->fogPreset != -1) {
         D_800DD2E0 = 1;
-        preset = sLevelFog->fogPreset;
-        func_151733E4(preset, preset, arg0, 0, -1);
+        func_151733E4(sLevelFog->fogPreset, sLevelFog->fogPreset, arg0, 0, -1);
     } else {
         D_800DD2E0 = 0;
         func_151733E4(0, 0, arg0, 0, -1);
