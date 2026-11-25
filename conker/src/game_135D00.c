@@ -6,464 +6,422 @@
 
 
 
+/* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc (same layout as in game_168A90.c). */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    s32 unk14;
-    u8 unk18;
-    u8 pad19[3];
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21[3];
-} Payload_15108850;
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
+    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[0xA];
+    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
+    /* 0x39 */ u8 viewportMask;
+    /* 0x3A */ u8 pad3A[2];
+} DynModelDesc; // size 0x3C
 
+/* A model with per-frame, per-viewport vertex buffers, followed by user data (see game_168A90.c). */
 typedef struct {
-    u8 unk00;
-    u8 unk01;
-    u8 unk02;
-    u8 pad03;
-    s16 unk04;
-    u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[0xA];
-    s32 unk30;
-    s32 unk34;
-    u8 unk38;
-    u8 pad39[3];
-} Init_15108850;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ DynModelDesc desc;
+    /* 0x4C */ void *asset;
+    /* 0x50 */ s32 buffersSize;     // size of all vertex buffers, i.e. the offset of the user data
+    /* 0x54 */ Gfx *displayList;
+    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
+    /* 0x78 */ Mtx mtx[2];          // [frame]
+    /* 0xF8 */ u8 buffers[1];
+} DynModel;
 
-struct Ret_15108850 {
-    u8 pad[0x50];
-    s32 off;
-};
+#define TRACK_NONE 999
 
-struct Ret_15108850 *func_1513B5E0(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
-struct225 *func_1516037C(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
+/* User data of the swinging lamp model (DynModel kind 1). */
+typedef struct {
+    /* 0x00 */ f32 swingX;   // sway offsets, sin(phase) * amplitude
+    /* 0x04 */ f32 swingZ;
+    /* 0x08 */ f32 phaseX;
+    /* 0x0C */ f32 phaseZ;
+    /* 0x10 */ f32 height;
+    /* 0x14 */ s32 track;    // sequence track that sets the height, TRACK_NONE for none
+    /* 0x18 */ u8 sceneTag;
+    /* 0x19 */ u8 pad19[3];
+    /* 0x1C */ s32 duration; // counts down; the track is dropped when it runs out
+    /* 0x20 */ u8 lightOn;   // toggled by message 0x1E
+    /* 0x21 */ u8 pad21[3];
+} LampData; // size 0x24
 
-void func_15108850(s32 arg0) {
-    struct Ret_15108850 *ret;
+#define LAMP_DATA(model) ((LampData *)((s32)(model) + (model)->buffersSize + 0xF8))
+
+DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
+struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
+
+/* Spawns the two lamp models; the first one gets an effect that drives `light`. */
+void func_15108850(struct226 *light) {
+    DynModel *model;
 
     {
-        Init_15108850 init1;
-        Payload_15108850 payload1;
+        DynModelDesc desc;
+        LampData lamp;
 
-        payload1.unk10 = 226.0f;
-        payload1.unk14 = 0x3E7;
-        payload1.unk18 = 0xFF;
-        payload1.unk1C = -1;
-        payload1.unk20 = 1;
-        init1.unk02 = 1;
-        init1.unk04 = 0x12C;
-        init1.unk30 = 9;
-        payload1.unk00 = 0.0f;
-        payload1.unk04 = 0.0f;
-        payload1.unk08 = 0.0f;
-        payload1.unk0C = 0.0f;
-        init1.unk00 = 0;
-        init1.unk01 = 0;
-        init1.unk34 = 0x1AB;
-        init1.unk08 = 1;
-        init1.unk0C = 0x220205;
-        init1.unk10 = 0x40600;
-        init1.unk24 = 0;
-        init1.unk25 = 0;
-        init1.unk14 = 1;
-        init1.unk18 = 0x36;
-        init1.unk1C = 0x80;
-        init1.unk20 = 0x20;
-        init1.unk38 = 1;
+        lamp.height = 226.0f;
+        lamp.track = TRACK_NONE;
+        lamp.sceneTag = 0xFF;
+        lamp.duration = -1;
+        lamp.lightOn = TRUE;
+        desc.drawFunc = 1;
+        desc.lifetime = 300;
+        desc.unk30 = 9;
+        lamp.swingX = 0.0f;
+        lamp.swingZ = 0.0f;
+        lamp.phaseX = 0.0f;
+        lamp.phaseZ = 0.0f;
+        desc.flags = 0;
+        desc.updateFunc = 0;
+        desc.unk34 = 427;
+        desc.unk8 = 1;
+        desc.unkC = 0x220205;
+        desc.unk10 = 0x40600;
+        desc.unk24 = 0;
+        desc.unk25 = 0;
+        desc.unk14 = 1;
+        desc.unk18 = 0x36;
+        desc.unk1C = 0x80;
+        desc.unk20 = 0x20;
+        desc.kind = 1;
 
-        ret = func_1513B5E0(&init1, 1, 0x24, 0xFF, 1);
-        if (ret != 0) {
-            memcpy((u8 *)ret + ret->off + 0xF8, &payload1, 0x24);
+        model = func_1513B5E0(&desc, 1, sizeof(LampData), 0xFF, 1);
+        if (model != NULL) {
+            memcpy(LAMP_DATA(model), &lamp, sizeof(LampData));
             {
                 Header header;
-                void *ptr;
-                ptr = ret;
+                DynModel *owner;
+                struct225 *effect;
+
+                owner = model;
                 header.unk0 = 2;
                 header.unk1 = 8;
-                header.unk2 = 0x12C;
+                header.unk2 = 300;
                 header.unk4 = 0x13;
-                ret = (struct Ret_15108850 *)func_1516037C(&header, arg0, 4, 0xFF, 1);
-                if (ret != 0) {
-                    memcpy((u8 *)ret + 0x18, &ptr, 4);
+                effect = func_1516037C(&header, light, 4, 0xFF, 1);
+                if (effect != NULL) {
+                    memcpy(&effect->unk18, &owner, sizeof(owner));
                 }
             }
         }
     }
 
     {
-        struct Ret_15108850 *ret2;
-        s32 pad;
-        Init_15108850 init2;
-        Payload_15108850 payload2;
+        DynModel *model2;
+        DynModelDesc desc;
+        LampData lamp;
 
-        payload2.unk10 = 226.0f;
-        payload2.unk14 = 0x3E7;
-        payload2.unk18 = 0xFF;
-        payload2.unk1C = -1;
-        payload2.unk20 = 1;
-        init2.unk01 = 1;
-        init2.unk02 = 4;
-        init2.unk04 = 0x12C;
-        init2.unk30 = 9;
-        payload2.unk00 = 0.0f;
-        payload2.unk04 = 0.0f;
-        payload2.unk08 = 0.0f;
-        payload2.unk0C = 0.0f;
-        init2.unk00 = 0;
-        init2.unk34 = 0x1AC;
-        init2.unk08 = 1;
-        init2.unk0C = 0x220205;
-        init2.unk10 = 0x40600;
-        init2.unk24 = 0;
-        init2.unk25 = 0;
-        init2.unk14 = 1;
-        init2.unk18 = 0x36;
-        init2.unk1C = 0x80;
-        init2.unk20 = 0x20;
-        init2.unk38 = 1;
+        lamp.height = 226.0f;
+        lamp.track = TRACK_NONE;
+        lamp.sceneTag = 0xFF;
+        lamp.duration = -1;
+        lamp.lightOn = TRUE;
+        desc.updateFunc = 1;
+        desc.drawFunc = 4;
+        desc.lifetime = 300;
+        desc.unk30 = 9;
+        lamp.swingX = 0.0f;
+        lamp.swingZ = 0.0f;
+        lamp.phaseX = 0.0f;
+        lamp.phaseZ = 0.0f;
+        desc.flags = 0;
+        desc.unk34 = 428;
+        desc.unk8 = 1;
+        desc.unkC = 0x220205;
+        desc.unk10 = 0x40600;
+        desc.unk24 = 0;
+        desc.unk25 = 0;
+        desc.unk14 = 1;
+        desc.unk18 = 0x36;
+        desc.unk1C = 0x80;
+        desc.unk20 = 0x20;
+        desc.kind = 1;
 
-        ret2 = func_1513B5E0(&init2, 1, 0x24, 0xFF, 1);
-        if (ret2 != 0) {
-            memcpy((u8 *)(ret2) + (ret2)->off + 0xF8, &payload2, 0x24);
+        model2 = func_1513B5E0(&desc, 1, sizeof(LampData), 0xFF, 1);
+        if (model2 != NULL) {
+            memcpy(LAMP_DATA(model2), &lamp, sizeof(LampData));
         }
     }
 }
-
-extern f32 D_800BE9A4;
-extern f32 D_800A2470;
-extern f32 D_800A2474;
-extern f32 D_800A2478;
-extern f32 D_800A247C;
-extern f32 D_800A2480;
-extern f32 D_800A2484;
-extern f32 D_800A2488;
-extern f32 D_800A248C;
-f32 sinf(f32);
-f32 func_15144B68(f32);
-struct Arg0_15108AB4;
-void func_15108B80(struct Arg0_15108AB4 *);
-
-struct Arg0_15108BC0;
-void func_15108BC0(struct Arg0_15108BC0 *arg0);
-
-struct Data_151090DC {
-    s32 unk0;
-    s32 unk4;
-};
-extern struct Data_151090DC D_80088C50;
-extern struct Data_151090DC D_80088C58;
-void func_15169260(struct Data_151090DC *, s32, s32, u8);
-
-struct Arg0_15108AB4 {
-    u8 pad_0[0x12];
-    u8 field_0x12;
-    u8 pad_1[0x3D];
-    s32 off;
-};
-
-struct F8StateData {
-    f32 field_0x0;
-    f32 field_0x4;
-    f32 field_0x8;
-    f32 field_0xC;
-    f32 field_0x10;
-    s32 field_0x14;
-    u8 field_0x18;
-    u8 pad_0x19[0x3];
-    s32 field_0x1C;
-    u8 field_0x20;
-};
-
-s32 func_15108AB4(struct Arg0_15108AB4 *arg0) {
-    struct F8StateData *v0 = (struct F8StateData *)((((u8 *)arg0) + arg0->off) + 0xF8);
-
-    v0->field_0x8 = v0->field_0x8 + D_800A2470 * D_800BE9A4;
-    v0->field_0xC = v0->field_0xC + D_800A2474 * D_800BE9A4;
-    v0->field_0x8 = func_15144B68(v0->field_0x8);
-    v0->field_0xC = func_15144B68(v0->field_0xC);
-    v0->field_0x0 = sinf(v0->field_0x8) * D_800A2478;
-    v0->field_0x4 = sinf(v0->field_0xC) * D_800A247C;
-    func_15108B80(arg0);
-    func_15108BC0((struct Arg0_15108BC0 *)arg0);
-    return 1;
-}
-
-void func_15108B80(struct Arg0_15108AB4 *arg0) {
-    s32 *p;
-
-    p = (s32*)((u8*)arg0 + arg0->off);
-    if ((p = (s32*)((u8*)p + 0xF8), 0x3E7) == p[0x14/4]) {
-    } else {
-        if ((p[0x1C/4] -= D_800BE9E4) < 0) {
-            p[0x14/4] = 0x3E7;
-        }
-    }
-}
-
-struct Arg0_15108BC0 {
-    u8 pad[0x50];
-    s32 off;
-};
-
-void func_15108BC0(struct Arg0_15108BC0 *arg0) {
-    struct F8StateData *v0 = (struct F8StateData *)(((u8 *)arg0 + arg0->off) + 0xF8);
-    s32 v1 = v0->field_0x14;
-
-    if (v1 == 0x3E7) {
-        v0->field_0x10 = 226.0f;
-        return;
-    }
-    if (D_800C35EA == 1) {
-        struct233 **tmp = &D_800C3958;
-        struct233 *e = *tmp + v1;
-        v0->field_0x10 = e->unk4;
-    } else {
-        v0->field_0x10 = 226.0f;
-    }
-}
-
-s32 func_15108C38(struct Arg0_15108AB4 *arg0) {
-    struct F8StateData *v0 = (struct F8StateData *)((((u8 *)arg0) + arg0->off) + 0xF8);
-
-    v0->field_0x8 = v0->field_0x8 + D_800A2480 * D_800BE9A4;
-    v0->field_0xC = v0->field_0xC + D_800A2484 * D_800BE9A4;
-    v0->field_0x8 = func_15144B68(v0->field_0x8);
-    v0->field_0xC = func_15144B68(v0->field_0xC);
-    v0->field_0x0 = sinf(v0->field_0x8) * D_800A2488;
-    v0->field_0x4 = sinf(v0->field_0xC) * D_800A248C;
-    func_15108B80(arg0);
-    func_15108BC0((struct Arg0_15108BC0 *)arg0);
-    if (v0->field_0x20 != 0) {
-        arg0->field_0x12 = 4;
-    } else {
-        arg0->field_0x12 = 2;
-    }
-    return 1;
-}
-
-extern f32 D_800A2490;
-
-s32 func_15108D24(struct Arg0_15108AB4 *arg0, s32 arg1) {
-    f32 mtx[4][4];
-    struct F8StateData *v0;
-
-    v0 = (struct F8StateData *)((s32)arg0 + arg0->off + 0xF8);
-    func_150A8050(mtx, v0->field_0x0, 0.0f, v0->field_0x4);
-    mtx[3][1] = v0->field_0x10;
-    mtx[0][0] *= D_800A2490;
-    mtx[0][1] *= D_800A2490;
-    mtx[0][2] *= D_800A2490;
-    mtx[1][0] *= D_800A2490;
-    mtx[1][1] *= D_800A2490;
-    mtx[1][2] *= D_800A2490;
-    mtx[2][0] *= D_800A2490;
-    mtx[2][1] *= D_800A2490;
-    mtx[2][2] *= D_800A2490;
-    guMtxF2L(mtx, (Mtx *)((u8 *)arg0 + (D_800BE9C0 << 6) + 0x78));
-    return 1;
-}
-
-extern f32 D_800A2494;
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-
-struct Vec3_15108E10 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-
-struct Obj_15108E10 {
-    u8 pad0[9];
-    u8 unk9;
-    u8 padA[4];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-};
-
-struct Arg0_15108E10 {
-    u8 pad0[0x14];
-    struct Obj_15108E10 *unk14;
-    struct Arg0_15108AB4 *unk18;
-};
-
-s32 func_15108E10(struct Arg0_15108E10 *arg0) {
-    s32 unused;
-    struct Arg0_15108AB4 *obj;
-    struct F8StateData *v0;
-    struct Vec3_15108E10 out;
-    f32 mtx[4][4];
-    struct Vec3_15108E10 pad;
-    struct Vec3_15108E10 hit;
-
-    obj = arg0->unk18;
-    v0 = (struct F8StateData *)((((u8 *)obj) + obj->off) + 0xF8);
-    func_150A8050(mtx, v0->field_0x0, 0.0f, v0->field_0x4);
-    mtx[3][1] = v0->field_0x10;
-    mtx[0][0] *= D_800A2494;
-    mtx[0][1] *= D_800A2494;
-    mtx[0][2] *= D_800A2494;
-    mtx[1][0] *= D_800A2494;
-    mtx[1][1] *= D_800A2494;
-    mtx[1][2] *= D_800A2494;
-    mtx[2][0] *= D_800A2494;
-    mtx[2][1] *= D_800A2494;
-    mtx[2][2] *= D_800A2494;
-    func_150A7960((f32 *)mtx, 0.0f, -1108.0f, 0.0f, &out.x, &out.y, &out.z);
-    {
-    f32 y;
-    y = out.y - v0->field_0x10;
-    if (func_150AC9C0(0.0f, v0->field_0x10, 0.0f, out.x, y, out.z, 0, 0, &hit.x, &hit.y, &hit.z, 0, 0, 0, 0.0f) == 0) {
-        hit = out;
-    }
-    }
-    arg0->unk14->unkE = (s16)(s32)hit.x;
-    arg0->unk14->unk10 = (s16)(s32)hit.y;
-    arg0->unk14->unk12 = (s16)(s32)hit.z;
-    if (v0->field_0x20 != 0) {
-        arg0->unk14->unk9 = 0;
-    } else {
-        arg0->unk14->unk9 = 1;
-    }
-    return 1;
-}
-
-struct Data_15108FFC {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-};
-
-void func_15108FFC(s32 arg0, s32 arg1, u8 arg2) {
-    struct Data_15108FFC sp24;
-    struct Data_151090DC sp1C;
-
-    sp1C = D_80088C50;
-    sp24.unk0 = arg0;
-    sp24.unk4 = arg1;
-    sp24.unk8 = arg2;
-    func_15169260(&sp1C, 2, (s32)&sp24, 0x1D);
-}
-
-struct Arg0_15109064
-{
-  u8 pad[0x50];
-  s32 off;
-};
-void func_15109064(struct Arg0_15109064 *arg0, s32 *arg1, u8 arg2)
-{
-  u8 *v0 = (((u8 *) arg0) + arg0->off) + 0xF8;
-  u8 *flag;
-  switch (arg2)
-  {
-    case 0x1D:
-      *((s32 *) (v0 + 0x14)) = arg1[0];
-      *((u8 *) (v0 + 0x18)) = *((u8 *) (((u8 *) arg1) + 0x8));
-      *((s32 *) (v0 + 0x1C)) = arg1[1];
- goto dummy_label_480240; dummy_label_480240: ;
-      break;
-
-    case 0x1E:
-      if ((*((u8 *) (flag = v0 + 0x20))) != 0)
-    {
-      *((u8 *) flag) = 0;
-    }
-    else
-    {
-      *((u8 *) (v0 + 0x20)) = 1;
-    }
-      break;
-
-  }
-
-}
-
-
-void func_151090DC(void) {
-    struct Data_151090DC sp18;
-
-    sp18 = D_80088C58;
-    func_15169260(&sp18, 2, 0, 0x1E);
-}
-
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-f32 *func_15144B34(s32);
 
 typedef struct {
-    u8 pad0[0x50];
-    s32 unk50;
-    u8 pad54[4];
-    Vtx *unk58[2][4];
-    Mtx unk78[2];
-} S15109120;
-
-s32 func_15109120(S15109120 *arg0, s16 arg1) {
-    f32 mtx[4][4];
-    f32 *src;
-    f32 *dir;
-    f32 cs;
-    f32 sn;
-    f32 inv;
     f32 x;
+    f32 y;
     f32 z;
-    f32 tu;
-    f32 tv;
-    f32 pa;
-    f32 oz;
-    f32 oy;
-    f32 ox;
+} Vec3f;
+
+f32 sinf(f32);
+void func_15108B80(DynModel *model);
+void func_15108BC0(DynModel *model);
+
+/* Update for the first lamp: advances the sway phases, then the track timer and height. */
+s32 func_15108AB4(DynModel *model) {
+    LampData *lamp = LAMP_DATA(model);
+
+    lamp->phaseX = lamp->phaseX + 0.0857f * D_800BE9A4;
+    lamp->phaseZ = lamp->phaseZ + 0.0783f * D_800BE9A4;
+    lamp->phaseX = func_15144B68(lamp->phaseX);
+    lamp->phaseZ = func_15144B68(lamp->phaseZ);
+    lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
+    lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
+    func_15108B80(model);
+    func_15108BC0(model);
+    return 1;
+}
+
+/* Counts the track duration down and drops the track when it runs out. */
+void func_15108B80(DynModel *model) {
+    LampData *lamp = LAMP_DATA(model);
+
+    if (lamp->track != TRACK_NONE) {
+        if ((lamp->duration -= D_800BE9E4) < 0) {
+            lamp->track = TRACK_NONE;
+        }
+    }
+}
+
+/* Takes the lamp height from its sequence track, or the default 226. */
+void func_15108BC0(DynModel *model) {
+    LampData *lamp = LAMP_DATA(model);
+    s32 track = lamp->track;
+
+    if (track == TRACK_NONE) {
+        lamp->height = 226.0f;
+    } else if (D_800C35EA == 1) {
+        // D_800C3958 is really the per-scene array of track states (see game_49D30.c); this is scene 0
+        struct233 **sceneTracks = &D_800C3958;
+        struct233 *state = &sceneTracks[0][track];
+
+        lamp->height = state->unk4;
+    } else {
+        lamp->height = 226.0f;
+    }
+}
+
+/* Update for the second lamp: as func_15108AB4, and picks the draw function by the light state. */
+s32 func_15108C38(DynModel *model) {
+    LampData *lamp = LAMP_DATA(model);
+
+    lamp->phaseX = lamp->phaseX + 0.0857f * D_800BE9A4;
+    lamp->phaseZ = lamp->phaseZ + 0.0783f * D_800BE9A4;
+    lamp->phaseX = func_15144B68(lamp->phaseX);
+    lamp->phaseZ = func_15144B68(lamp->phaseZ);
+    lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
+    lamp->swingZ = sinf(lamp->phaseZ) * 7.1050005f;
+    func_15108B80(model);
+    func_15108BC0(model);
+    if (lamp->lightOn) {
+        model->desc.drawFunc = 4;
+    } else {
+        model->desc.drawFunc = 2;
+    }
+    return 1;
+}
+
+/* Builds this frame's lamp matrix: swung, raised to its height and scaled by 0.157. */
+s32 func_15108D24(DynModel *model, s32 arg1) {
+    f32 mtx[4][4];
+    LampData *lamp;
+
+    lamp = LAMP_DATA(model);
+    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    mtx[3][1] = lamp->height;
+    mtx[0][0] *= 0.157f;
+    mtx[0][1] *= 0.157f;
+    mtx[0][2] *= 0.157f;
+    mtx[1][0] *= 0.157f;
+    mtx[1][1] *= 0.157f;
+    mtx[1][2] *= 0.157f;
+    mtx[2][0] *= 0.157f;
+    mtx[2][1] *= 0.157f;
+    mtx[2][2] *= 0.157f;
+    guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
+    return 1;
+}
+
+void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
+
+/*
+ * Update for the lamp's light effect (owner model stored at effect->unk18): moves the light to where a
+ * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.
+ */
+s32 func_15108E10(struct225 *effect) {
+    s32 pad; // matching: unused stack slot
+    DynModel *model;
+    LampData *lamp;
+    Vec3f end;
+    f32 mtx[4][4];
+    Vec3f pad2; // matching: unused stack slots
+    Vec3f hit;
+
+    model = (DynModel *)effect->unk18;
+    lamp = LAMP_DATA(model);
+    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    mtx[3][1] = lamp->height;
+    mtx[0][0] *= 0.157f;
+    mtx[0][1] *= 0.157f;
+    mtx[0][2] *= 0.157f;
+    mtx[1][0] *= 0.157f;
+    mtx[1][1] *= 0.157f;
+    mtx[1][2] *= 0.157f;
+    mtx[2][0] *= 0.157f;
+    mtx[2][1] *= 0.157f;
+    mtx[2][2] *= 0.157f;
+    func_150A7960(mtx, 0.0f, -1108.0f, 0.0f, &end.x, &end.y, &end.z);
+    {
+        f32 dy = end.y - lamp->height;
+
+        if (func_150AC9C0(0.0f, lamp->height, 0.0f, end.x, dy, end.z, NULL, NULL, &hit.x, &hit.y, &hit.z, NULL,
+                          NULL, NULL, 0.0f) == 0) {
+            hit = end;
+        }
+    }
+    effect->unk14->unkE = hit.x;
+    effect->unk14->unk10 = hit.y;
+    effect->unk14->unk12 = hit.z;
+    if (lamp->lightOn) {
+        effect->unk14->unk9 = 0;
+    } else {
+        effect->unk14->unk9 = 1;
+    }
+    return 1;
+}
+
+/* Payload of message 0x1D: follow a sequence track for a while. */
+typedef struct {
+    s32 track;
+    s32 duration;
+    u8 sceneTag;
+} LampTrackMsg;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} MsgTarget;
+
+extern MsgTarget D_80088C50;
+extern MsgTarget D_80088C58;
+void func_15169260(MsgTarget *target, s32 arg1, void *data, u8 event);
+
+/* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
+void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
+    LampTrackMsg msg;
+    MsgTarget target;
+
+    target = D_80088C50;
+    msg.track = track;
+    msg.duration = duration;
+    msg.sceneTag = sceneTag;
+    func_15169260(&target, 2, &msg, 0x1D);
+}
+
+/* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
+void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event) {
+    LampData *lamp = LAMP_DATA(model);
+
+    switch (event) {
+        case 0x1D:
+            lamp->track = msg->track;
+            lamp->sceneTag = msg->sceneTag;
+            lamp->duration = msg->duration;
+            // matching: this label ends the basic block, keeping the last store out of the jr delay slot
+        end_track:
+            break;
+        case 0x1E:
+            if (lamp->lightOn) {
+                lamp->lightOn = FALSE;
+            } else {
+                lamp->lightOn = TRUE;
+            }
+            break;
+    }
+}
+
+/* Sends message 0x1E: toggles the lamp light. */
+void func_151090DC(void) {
+    MsgTarget target;
+
+    target = D_80088C58;
+    func_15169260(&target, 2, NULL, 0x1E);
+}
+
+struct17 *func_15144B34(s32);
+
+/*
+ * Draw setup: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
+ * `viewport`'s buffer, projected on the horizontal axis perpendicular to the camera.
+ */
+s32 func_15109120(DynModel *model, s16 viewport) {
+    f32 mtx[4][4];
+    LampData *lamp;
+    struct17 *camera;
+    f32 dirX;
+    f32 dirZ;
+    f32 x;
+    f32 camX;
+    f32 z;
+    f32 s;
+    f32 t;
+    f32 y;
+    f32 outZ;
+    f32 outY;
+    f32 outX;
     s32 i;
 
-    src = (f32 *)((u8 *)(arg0 + 1) + arg0->unk50);
-    func_150A8050(mtx, src[0], 0.0f, src[1]);
-    mtx[3][1] = src[4];
-    mtx[0][0] *= 0.1570000052f;
-    mtx[0][1] *= 0.1570000052f;
-    mtx[0][2] *= 0.1570000052f;
-    mtx[1][0] *= 0.1570000052f;
-    mtx[1][1] *= 0.1570000052f;
-    mtx[1][2] *= 0.1570000052f;
-    mtx[2][0] *= 0.1570000052f;
-    mtx[2][1] *= 0.1570000052f;
-    mtx[2][2] *= 0.1570000052f;
-    guMtxF2L(mtx, &arg0->unk78[D_800BE9C0]);
-    dir = func_15144B34(arg1);
-    x = dir[0];
-    if (0.0000999999975f < fabsf(x) || 0.0000999999975f < fabsf(dir[1])) {
-        f32 zz;
-        f32 ii;
-        zz = dir[2];
-        ii = 1.0f / sqrtf(x * x + zz * zz);
-        cs = zz * ii;
-        sn = -x * ii;
+    lamp = LAMP_DATA(model);
+    func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
+    mtx[3][1] = lamp->height;
+    mtx[0][0] *= 0.157f;
+    mtx[0][1] *= 0.157f;
+    mtx[0][2] *= 0.157f;
+    mtx[1][0] *= 0.157f;
+    mtx[1][1] *= 0.157f;
+    mtx[1][2] *= 0.157f;
+    mtx[2][0] *= 0.157f;
+    mtx[2][1] *= 0.157f;
+    mtx[2][2] *= 0.157f;
+    guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
+    camera = func_15144B34(viewport);
+    camX = camera->unk0;
+    if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->unk4)) {
+        f32 camZ;
+        f32 invLen;
+
+        camZ = camera->unk8;
+        invLen = 1.0f / sqrtf(camX * camX + camZ * camZ);
+        dirX = camZ * invLen;
+        dirZ = -camX * invLen;
     } else {
-        cs = 1.0f;
-        sn = 0.0f;
+        dirX = 1.0f;
+        dirZ = 0.0f;
     }
-    i = 0;
-    do {
-        Vtx *v;
-        v = &arg0->unk58[D_800BE9C0][arg1][i];
-        inv = v->v.ob[0]; pa = v->v.ob[1]; z = v->v.ob[2]; func_150A7960((f32 *)mtx, inv, pa, z, &ox, &oy, &oz);
-        i++;
-        tv = oy * 0.3580000103f + 81.0f;
-        tu = ((ox * cs) + (oz * sn)) * 0.2130000144f + 26.0f;
-        v->v.tc[0] = (s16)(s32)(tu * 32.0f);
-        v->v.tc[1] = (s16)(s32)(tv * 32.0f);
-    } while (i != 16);
+    for (i = 0; i != 16; i++) {
+        Vtx *vtx;
+
+        vtx = &model->vertices[D_800BE9C0][viewport][i];
+        x = vtx->v.ob[0];
+        y = vtx->v.ob[1];
+        z = vtx->v.ob[2];
+        func_150A7960(mtx, x, y, z, &outX, &outY, &outZ);
+        t = outY * 0.358f + 81.0f;
+        s = (outX * dirX + outZ * dirZ) * 0.21300001f + 26.0f;
+        vtx->v.tc[0] = s * 32.0f;
+        vtx->v.tc[1] = t * 32.0f;
+    }
     return 1;
 }
