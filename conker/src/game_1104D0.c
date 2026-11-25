@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A1050;
-extern f32 D_800A1054;
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
@@ -211,7 +209,7 @@ void func_150E35DC(s32 handle) {
             effect = OBJ_ITER_NEXT[D_800DD190];
         }
         {
-            extern s8 D_800DD190;
+            s32 pad; // matching: -g3 block marker keeps the depth store out of the loop branch's delay slot
 
             D_800DD190--;
         }
@@ -222,15 +220,13 @@ void func_150E35DC(s32 handle) {
 void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z) {
     Effect *effect;
 
-    handle -= 1;
-    if ((handle >= 0) && (handle < 8)) {
+    handle--;
+    if (handle >= 0 && handle < 8) {
         effect = EFFECT_SLOTS[handle];
-        if (effect != NULL) {
-            if (effect->type == 0x27) {
-                *x = effect->pos.x;
-                *y = effect->pos.y;
-                *z = effect->pos.z;
-            }
+        if (effect != NULL && effect->type == 0x27) {
+            *x = effect->pos.x;
+            *y = effect->pos.y;
+            *z = effect->pos.z;
         }
     }
 }
@@ -259,31 +255,35 @@ extern void func_15143874(s16, f32, f32 *, f32 *);
 extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, ParticleDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
 
+/*
+ * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
+ * that run from origin to random points along that step, plus sparks at origin.
+ */
 void func_150E3738(Effect *arg0) {
-    Effect *effect;
-    Vec3f start;
-    Vec3f next;
+    Effect *effect; // matching: the copy of arg0 sets the frame layout
+    Vec3f prevPos;
+    Vec3f nextPos;
     Vec3f delta;
     Vec3f step;
     f32 dist;
     f32 move;
     f32 scale;
     s32 spawned;
-    Vec3f p;
-    Vec3f hit;
-    f32 pad178;
-    Vec3f pos;
+    Vec3f point;
+    Vec3f end;
+    f32 pad178; // matching: unused stack slots (this and pad158, unusedR) keep the frame layout
+    Vec3f from;
     Vec3f dir;
-    f32 len;
+    f32 length;
     f32 pad158;
-    f32 offz;
-    f32 offx;
-    f32 unused;
-    f32 r2;
-    s32 c;
+    f32 offsetZ;
+    f32 offsetX;
+    f32 unusedOut;
+    f32 randWidth;
+    s32 randByte;
     ParticleDesc particle;
-    f32 r;
-    s32 ang;
+    f32 unusedR;
+    s32 randAngle;
 
     effect = arg0;
     spawned = 0;
@@ -293,7 +293,7 @@ void func_150E3738(Effect *arg0) {
             func_150E3514(effect);
         }
     }
-    start = effect->pos;
+    prevPos = effect->pos;
     if (effect->targetObj != NULL) {
         if (effect->targetObj->interaction_state == 0) {
             func_150E3514(effect);
@@ -335,58 +335,58 @@ void func_150E3738(Effect *arg0) {
         }
     }
     if (dist != 0.0f) {
-        extern f32 D_800BE9A4;
+        extern f32 D_800BE9A4; // matching: a declaration opens a -g3 block marker without a stack slot
 
         scale = move / dist;
         step.x = scale * delta.x;
         step.y = scale * delta.y;
         step.z = scale * delta.z;
-        next.x = start.x + step.x;
-        next.y = start.y + step.y;
-        next.z = start.z + step.z;
+        nextPos.x = prevPos.x + step.x;
+        nextPos.y = prevPos.y + step.y;
+        nextPos.z = prevPos.z + step.z;
     } else {
-        next = effect->target;
+        nextPos = effect->target;
         step = delta;
     }
-    effect->pos = next;
-    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001000000047f * D_800BE9A4;
+    effect->pos = nextPos;
+    effect->particleAccum += (526.0f + func_150ADA68() * 1228.0f) * 0.001f * D_800BE9A4;
     while (effect->particleAccum > 1.0f) {
-        pos = effect->origin;
+        from = effect->origin;
         {
             f32 rnd;
 
             rnd = func_150ADA68();
-            ang = func_150ADA20();
-            func_15143874(ang & 0xFF, func_150ADA68() * 129.0f, &offx, &offz);
-            p.x = rnd * step.x + start.x + offx;
-            p.y = rnd * step.y + start.y + 200.0f;
-            p.z = rnd * step.z + start.z + offz;
+            randAngle = func_150ADA20();
+            func_15143874(randAngle & 0xFF, func_150ADA68() * 129.0f, &offsetX, &offsetZ);
+            point.x = rnd * step.x + prevPos.x + offsetX;
+            point.y = rnd * step.y + prevPos.y + 200.0f;
+            point.z = rnd * step.z + prevPos.z + offsetZ;
         }
-        hit = p;
-        if (func_15046C80(&p, 0, p.y - 1000.0f, &effect->groundY) != 0) {
-            hit.y = effect->groundY;
+        end = point;
+        if (func_15046C80(&point, 0, point.y - 1000.0f, &effect->groundY) != 0) {
+            end.y = effect->groundY;
         }
         {
-            extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+            extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *); // matching: -g3 block marker, as above
 
-            dir.x = hit.x - pos.x;
-            dir.y = hit.y - pos.y;
-            dir.z = hit.z - pos.z;
+            dir.x = end.x - from.x;
+            dir.y = end.y - from.y;
+            dir.z = end.z - from.z;
         }
-        if (func_15145128(&dir, &dir, &len, &unused) != 0) {
+        if (func_15145128(&dir, &dir, &length, &unusedOut) != 0) {
             move = func_150ADA68() * D_800BE9A4;
             scale = 190.0f * move;
-            pos.x += dir.x * scale;
-            pos.y += dir.y * scale;
-            pos.z += dir.z * scale;
-            len -= scale;
+            from.x += dir.x * scale;
+            from.y += dir.y * scale;
+            from.z += dir.z * scale;
+            length -= scale;
         }
         particle.unk0 = 0;
-        particle.unk4 = len;
-        particle.unk8 = hit;
-        particle.unk14 = hit;
-        particle.unk20 = hit;
-        particle.unk2C = pos;
+        particle.unk4 = length;
+        particle.unk8 = end;
+        particle.unk14 = end;
+        particle.unk20 = end;
+        particle.unk2C = from;
         particle.unk38 = dir;
         particle.params = effect->params;
         particle.unk56 = 0;
@@ -399,27 +399,27 @@ void func_150E3738(Effect *arg0) {
             particle.unk5C = 0;
         }
         particle.unk60 = effect->unk6C;
-        r2 = func_150ADA68();
-        scale = func_150ADA68();
-        c = func_150ADA20();
+        randWidth = func_150ADA68();
+        scale = func_150ADA68(); // matching: scale and randAngle are reused so they keep their registers
+        randByte = func_150ADA20();
         if (spawned != 0 || effect->follow != NULL) {
-            ang = 2;
+            randAngle = 2;
         } else {
-            ang = 1;
+            randAngle = 1;
         }
-        if (func_151C229C(&pos, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f, r2 * 50.0f + 10.0f,
-                          scale * 191.0f + 160.0f, 80.0f, (c % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, ang,
+        if (func_151C229C(&from, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f /* 1 / 190 */, randWidth * 50.0f + 10.0f,
+                          scale * 191.0f + 160.0f, 80.0f, (randByte % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, randAngle,
                           effect->unk40, 0.0f, 0xFF, -1, 0, effect->owner, effect->list) != 0) {
             spawned = 1;
         }
         effect->particleAccum -= 1.0f;
     }
     if (effect->follow == NULL) {
-        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001000000047f * D_800BE9A4;
+        effect->sparkAccum += (56.0f + func_150ADA68() * 235.0f) * 0.001f * D_800BE9A4;
         while (effect->sparkAccum > 1.0f) {
-            c = func_150ADA20();
-            ang = func_150ADA20();
-            func_15103254((c & 3) + 6, (ang % 156U) + 100,
+            randByte = func_150ADA20();
+            randAngle = func_150ADA20();
+            func_15103254((randByte & 3) + 6, (randAngle % 156U) + 100,
                           func_150ADA68() * 1548.0f + 1093.0f, &effect->origin, 0xFF, effect->owner, effect->list);
             effect->sparkAccum -= 1.0f;
         }
@@ -444,21 +444,20 @@ typedef struct {
     /* 0x110 */ Obj4010State state;
 } Obj4010;
 
+/* If unkA4 is set, calls func_1505D1C4 at the state position with the heading of (unk60, unk64) as a binary angle. */
 void func_150E4010(Obj4010 *obj) {
     Obj4010State *state;
 
     state = &obj->state;
     if (obj->state.unkA4 != 0) {
         func_1505D1C4(state->x, state->y, state->z, state->unkA4 | 0x60000, -1,
-                      ((u16)(u32)(func_150484A0(state->unk60, state->unk64) * D_800A1050) - 0x4000) | 1, 0, 0);
+                      ((u16)(u32)(func_150484A0(state->unk60, state->unk64) * 10430.378f /* 0x10000 / 2pi */) - 0x4000) | 1, 0, 0);
     }
 }
 
 void func_150E411C(s32 arg0) {
-    func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, D_800A1054, 0xFF, 0xFF, 0xFF);
+    func_151C3B0C(arg0, 0.352000028f, 0.701000035f, 0.566000044f, 0.228000015f, 0xFF, 0xFF, 0xFF);
 }
-
-extern f32 D_800BE9A4;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
