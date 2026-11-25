@@ -5385,7 +5385,6 @@ typedef struct {
     s32 unk4; /* tile size - 2, packed the same way */
 } Entry62D10;
 extern Entry62D10 **D_800C4488[];
-extern s32 D_800D19A0;
 /*
  * Scrolls texture tile `tile` of actor type `type` (set `set`) by (ds, dt), wrapping at the tile size;
  * with `absolute` set the coordinates are set instead. Coordinates are packed 12:12 in unk0.
@@ -5397,7 +5396,7 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
     newS = 0;
     wrapS = 0;
     wrapT = 0;
-    if ((&D_800D19A0)[type] == 0) {
+    if (D_800D19A0[type] == NULL) {
         return;
     }
     base = D_800C4488[type][set];

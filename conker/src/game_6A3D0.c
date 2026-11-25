@@ -2,11 +2,9 @@
 #include "functions.h"
 /* variables.h types these per-model tables as scalars or s32; shadow them and redeclare them below
    with their real element types. */
-#define D_800D19A0 D_800D19A0_hdr
 #define D_800D1588 D_800D1588_hdr
 #define D_800C6360 D_800C6360_hdr
 #include "variables.h"
-#undef D_800D19A0
 #undef D_800D1588
 #undef D_800C6360
 
@@ -54,7 +52,6 @@ typedef struct TexCoord {
 } TexCoord;
 
 /* Per-model tables, indexed by model id (0..186). */
-extern u8 *D_800D19A0[];      // model data (just past its ModelHeader)
 extern s32 *D_800C4020[];
 extern Gfx **D_800C4488[];
 extern Gfx **D_800C48F0[];

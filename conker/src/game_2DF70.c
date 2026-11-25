@@ -985,7 +985,7 @@ s32 func_150028BC(s32 map) {
     }
     numRuns = 0;
     numTris = 0;
-    base = (&D_800D19A0)[map];
+    base = (s32)D_800D19A0[map];
     for (i = 0; i < numLists; i++) {
         dl = D_800C4488[map][i];
         j = 0;

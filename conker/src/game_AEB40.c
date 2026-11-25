@@ -5,19 +5,13 @@
 // the way and redeclared further down.
 #include "functions.h"
 
-#define D_800D19A0 D_800D19A0_hdr
 #define D_800D1C90 D_800D1C90_hdr
-#define D_800D1F80 D_800D1F80_hdr
-#define D_800D2040 D_800D2040_hdr
 #define D_800D20FC D_800D20FC_hdr
 #define D_800D2110 D_800D2110_hdr
 #define D_800D2138 D_800D2138_hdr
 #define D_800D2132 D_800D2132_hdr
 #include "variables.h"
-#undef D_800D19A0
 #undef D_800D1C90
-#undef D_800D1F80
-#undef D_800D2040
 #undef D_800D20FC
 #undef D_800D2110
 #undef D_800D2138
@@ -96,10 +90,7 @@ typedef struct {
     /* 0x208 */ u16 unk208;     // bit per player
 } Struct800D2138;
 
-extern u8 *D_800D19A0[187];
 extern ModelDef *D_800D1C90[187];
-extern u8 D_800D1F80[187];
-extern u8 D_800D2040[187];
 extern SpawnRecord *D_800D20FC;
 extern u16 *D_800D2110;
 extern Struct800D2138 D_800D2138;

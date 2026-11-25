@@ -1,10 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 // variables.h declares these with types that don't fit this file; the real views are below.
-#define D_800D19A0 D_800D19A0_hdr
 #define D_800DD460 D_800DD460_hdr
 #include "variables.h"
-#undef D_800D19A0
 #undef D_800DD460
 
 /* One morph group: which model kind it applies to and how its vertices are split into parts. */
@@ -21,7 +19,6 @@ typedef struct {
     u8 pad5[3];
 } VtxMorphFrame;
 
-extern s32 D_800D19A0[];
 extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern VtxMorphGroup D_800A7230[2];
 extern u16 D_800C4310[];  // part count, indexed by VtxMorphGroup.kind
@@ -92,7 +89,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (set != 0) {
         set = 0;
         id = kind;
-        if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == 0) {
+        if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
             if (frame == morph->cur) {
                 if (D_800BEAC0 == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
@@ -115,7 +112,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
             return -1;
         }
     }
-    if (D_800D19A0[id] == 0) {
+    if (D_800D19A0[id] == NULL) {
         return -1;
     }
     if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL) {

@@ -3,11 +3,7 @@
 #include "functions.h"
 #undef func_1506160C
 /* variables.h types these as scalars; they are redeclared below as arrays. */
-#define D_800D19A0 D_800D19A0_hdr
-#define D_800D2040 D_800D2040_hdr
 #include "variables.h"
-#undef D_800D19A0
-#undef D_800D2040
 
 
 /* Streamed per-frame animation data (((ObjAnim *)obj->unk2D0)). */
@@ -86,8 +82,6 @@ typedef struct VtxRange {
     /* 0x8 */ s32 bone;
 } VtxRange;
 
-extern s32 D_800D19A0[]; // model data per object id
-extern u8 D_800D2040[]; // per object id counter
 
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
@@ -1000,13 +994,13 @@ void func_1502DB84(MtxF mtx, s32 index) {
     obj = &D_800CC2D0[index];
     id = obj->id;
     remap = NULL;
-    if (D_800D19A0[id] == 0) {
+    if (D_800D19A0[id] == NULL) {
         unk144 = obj->spawn;
         if (func_1503CF20(id, 0, unk144, 1, obj->unkAC) != 0) {
             obj->unk1D4 = NULL;
             return;
         }
-        if (D_800D19A0[id] == 0) {
+        if (D_800D19A0[id] == NULL) {
             obj->unk1D4 = NULL;
             return;
         }
