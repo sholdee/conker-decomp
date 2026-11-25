@@ -123,13 +123,10 @@ extern void func_1510E7A4(s32, Point3s *, f32 *, s32, s32, s32, f32, f32, f32, f
 void func_1510DA84(Shadow *shadow) {
     s32 i;
     s32 alpha;
-    f32 bx;
-    f32 bz;
     GameObj *obj;
-    s32 pad2;
-    s32 pad3;
-    f32 v[2][3];
-    f32 h;
+    s32 pad[4]; // matching: -g3 gives unused locals stack slots; these pads keep corner, x, y... at the target offsets
+    f32 corner[2][3];
+    f32 height;
     s32 pad5;
     f32 ratio;
     f32 slopeZ;
@@ -146,8 +143,8 @@ void func_1510DA84(Shadow *shadow) {
     Point3s **triPtrs;
     Point3s *tri;
     u8 angle;
-    f32 s;
-    f32 c;
+    f32 sinYaw;
+    f32 cosYaw;
     s32 pad6;
     Game13F9D0Obj *prop;
 
@@ -191,81 +188,81 @@ void func_1510DA84(Shadow *shadow) {
     if (y > top) {
         return;
     }
-lbl:
+onFloor: // matching: an unused label splits the block, so the call setup stays after the y > top branch
     if (func_1510E388(triPtrs, tri, &slopeX, &slopeZ)) {
-    h = top - y;
-    if (scale == 0.0f) {
-        scale = 1.0f;
-    }
-    dist = 200.0f + h;
-    if (dist == 0.0f) {
-        dist = 9.99999974738e-05f;
-    }
-    if (dist > 800.0f) {
-        dist = 800.0f;
-    }
-    ratio = scale / dist;
-    if (shadow->flags & 1) {
-        alpha = shadow->alpha;
-        if (alpha != 0xFF) {
-            alpha += D_800BE9E4 * 5;
-            if (alpha >= 0x100) {
-                alpha = 0xFF;
+        height = top - y;
+        if (scale == 0.0f) {
+            scale = 1.0f;
+        }
+        dist = 200.0f + height;
+        if (dist == 0.0f) {
+            dist = 0.0001f;
+        }
+        if (dist > 800.0f) {
+            dist = 800.0f;
+        }
+        ratio = scale / dist;
+        if (shadow->flags & 1) {
+            alpha = shadow->alpha;
+            if (alpha != 0xFF) {
+                alpha += D_800BE9E4 * 5;
+                if (alpha >= 0x100) {
+                    alpha = 0xFF;
+                }
+            }
+        } else {
+            alpha = 32000.0f / dist;
+            if (alpha > 0xA0) {
+                alpha = 0xA0;
             }
         }
-    } else {
-        alpha = 32000.0f / dist;
-        if (alpha > 0xA0) {
-            alpha = 0xA0;
+        shadow->alpha = alpha;
+
+        corner[0][0] = 0.0; // matching: double literals here (and below); 0.0f changes the code
+        corner[0][2] = -100.0f;
+        if (angle != 0) {
+            tmp = corner[0][0];
+            sinYaw = func_15048A40(angle);
+            cosYaw = func_150489B0(angle);
+            corner[0][0] = corner[0][2] * sinYaw + corner[0][0] * cosYaw;
+            corner[0][2] = corner[0][2] * cosYaw - tmp * sinYaw;
         }
-    }
-    shadow->alpha = alpha;
+        corner[1][0] = -100.0f;
+        corner[1][2] = 0.0;
+        corner[0][1] = slopeX * corner[0][0] + corner[0][2] * slopeZ;
+        if (angle != 0) {
+            tmp = corner[1][0];
+            corner[1][0] = corner[1][2] * sinYaw + corner[1][0] * cosYaw;
+            corner[1][2] = corner[1][2] * cosYaw - tmp * sinYaw;
+        }
+        corner[1][1] = slopeX * corner[1][0] + corner[1][2] * slopeZ;
 
-    v[0][0] = 0.0;
-    v[0][2] = -100.0f;
-    if (angle != 0) {
-        tmp = v[0][0];
-        s = func_15048A40(angle);
-        c = func_150489B0(angle);
-        v[0][0] = v[0][2] * s + v[0][0] * c;
-        v[0][2] = v[0][2] * c - tmp * s;
-    }
-    v[1][0] = -100.0f;
-    v[1][2] = 0.0;
-    v[0][1] = slopeX * v[0][0] + v[0][2] * slopeZ;
-    if (angle != 0) {
-        tmp = v[1][0];
-        v[1][0] = v[1][2] * s + v[1][0] * c;
-        v[1][2] = v[1][2] * c - tmp * s;
-    }
-    v[1][1] = slopeX * v[1][0] + v[1][2] * slopeZ;
+        lenA = corner[0][0] * corner[0][0] + corner[0][1] * corner[0][1] + corner[0][2] * corner[0][2];
+        if (lenA > 100000000.0f) {
+            lenA = 100000000.0f;
+        }
+        if (lenA < 10000.0f) {
+            lenA = 10000.0f;
+        }
+        lenA = sqrtf(lenA);
+        lenB = corner[1][0] * corner[1][0] + corner[1][1] * corner[1][1] + corner[1][2] * corner[1][2];
+        if (lenB > 100000000.0f) {
+            lenB = 100000000.0f;
+        }
+        if (lenB < 10000.0f) {
+            lenB = 10000.0f;
+        }
+        lenB = sqrtf(lenB);
 
-    lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
-    if (lenA > 100000000.0f) {
-        lenA = 100000000.0f;
-    }
-    if (lenA < 10000.0f) {
-        lenA = 10000.0f;
-    }
-    lenA = sqrtf(lenA);
-    lenB = v[1][0] * v[1][0] + v[1][1] * v[1][1] + v[1][2] * v[1][2];
-    if (lenB > 100000000.0f) {
-        lenB = 100000000.0f;
-    }
-    if (lenB < 10000.0f) {
-        lenB = 10000.0f;
-    }
-    lenB = sqrtf(lenB);
-
-    for (i = 0; i < 3; i++) {
-        v[0][i] = v[0][i] * 100.0f * ratio / lenA;
-        v[1][i] = v[1][i] * 100.0f * ratio / lenB;
-        shadow->vtx[D_800BE9C0][0].v.ob[i] = v[0][i];
-        shadow->vtx[D_800BE9C0][1].v.ob[i] = v[1][i];
-        shadow->vtx[D_800BE9C0][2].v.ob[i] = -v[0][i];
-        shadow->vtx[D_800BE9C0][3].v.ob[i] = -v[1][i];
-    }
-    shadow->visible = TRUE;
+        for (i = 0; i < 3; i++) {
+            corner[0][i] = corner[0][i] * 100.0f * ratio / lenA;
+            corner[1][i] = corner[1][i] * 100.0f * ratio / lenB;
+            shadow->vtx[D_800BE9C0][0].v.ob[i] = corner[0][i];
+            shadow->vtx[D_800BE9C0][1].v.ob[i] = corner[1][i];
+            shadow->vtx[D_800BE9C0][2].v.ob[i] = -corner[0][i];
+            shadow->vtx[D_800BE9C0][3].v.ob[i] = -corner[1][i];
+        }
+        shadow->visible = TRUE;
     }
 }
 
