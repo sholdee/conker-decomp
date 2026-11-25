@@ -3557,16 +3557,6 @@ void func_1508EC5C(s32 player, s32 param) {
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 
-/* A group of linked (kind << 12 | id) entries, D_800D23C0[D_80087380]. */
-typedef struct LinkGroup {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ u16 count;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 entries[8];
-} LinkGroup;
-
-/* D_800D23C0 is declared as s32 in variables.h; it holds a LinkGroup array. */
-#define LINK_GROUPS (*(LinkGroup **)&D_800D23C0)
 
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
 s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
@@ -3577,11 +3567,11 @@ s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
 
     key = (type << 12) + id;
     for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < LINK_GROUPS[i].count; j++) {
-            if (key == LINK_GROUPS[i].entries[j]) {
-                for (k = 0; k < LINK_GROUPS[i].count; k++) {
-                    if (kind == (LINK_GROUPS[i].entries[k] >> 12) && k != j) {
-                        return LINK_GROUPS[i].entries[k] & 0xFFF;
+        for (j = 0; j < D_800D23C0[i].count; j++) {
+            if (key == D_800D23C0[i].members[j]) {
+                for (k = 0; k < D_800D23C0[i].count; k++) {
+                    if (kind == (D_800D23C0[i].members[k] >> 12) && k != j) {
+                        return D_800D23C0[i].members[k] & 0xFFF;
                     }
                 }
                 return -1;
@@ -3594,9 +3584,9 @@ s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
 /* Clears link group `index`. */
 void func_1508EDBC(s32 index) {
     if (index < D_80087380) {
-        ((LinkGroup *)D_800D23C0)[index].count = 0;
-        ((LinkGroup *)D_800D23C0)[index].unk4 = 0;
-        ((LinkGroup *)D_800D23C0)[index].unk0 = 0;
+        D_800D23C0[index].count = 0;
+        D_800D23C0[index].unk4 = 0;
+        D_800D23C0[index].unk0 = 0;
     }
 }
 
@@ -3612,11 +3602,11 @@ void func_1508EE0C(u16 type, u16 id) {
 
     key = (type << 12) + id;
     for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < LINK_GROUPS[i].count; j++) {
-            if (LINK_GROUPS[i].entries[j] == key) {
-                for (j = 0; j < LINK_GROUPS[i].count; j++) {
-                    operand = LINK_GROUPS[i].entries[j] & 0xFFF;
-                    switch (LINK_GROUPS[i].entries[j] >> 12) {
+        for (j = 0; j < D_800D23C0[i].count; j++) {
+            if (D_800D23C0[i].members[j] == key) {
+                for (j = 0; j < D_800D23C0[i].count; j++) {
+                    operand = D_800D23C0[i].members[j] & 0xFFF;
+                    switch (D_800D23C0[i].members[j] >> 12) {
                     case 2:
                         func_15114B94(operand);
                         break;

@@ -3,32 +3,22 @@
 #include "variables.h"
 
 
-typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s8 unk2;
-    u8 pad3;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} Struct1500FE30;
-
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_150C851C(s32);
 
 void func_1500FE30(void) {
     s32 i;
 
-    D_800BE4E0 = (s32)allocate_memory(100, 1, 0, 0);
-    bzero((void *)D_800BE4E0, 100);
+    D_800BE4E0 = allocate_memory(10 * sizeof(BounceRecord), 1, 0, 0);
+    bzero(D_800BE4E0, 10 * sizeof(BounceRecord));
     for (i = 0; i < 10; i++) {
-        ((Struct1500FE30 *)D_800BE4E0)[i].unk0 = i / 5;
-        ((Struct1500FE30 *)D_800BE4E0)[i].unk2 = -1;
-        ((Struct1500FE30 *)D_800BE4E0)[i].unk4 = func_150ADA20() % 5;
+        D_800BE4E0[i].table = i / 5;
+        D_800BE4E0[i].dir = -1;
+        D_800BE4E0[i].pos = func_150ADA20() % 5;
     }
     func_150C851C(100);
     for (i = 0; i < 10; i++) {
-        ((Struct1500FE30 *)D_800BE4E0)[i].unk6 = ((Struct1500FE30 *)D_800BE4E0)[i].unk8;
+        D_800BE4E0[i].speed = D_800BE4E0[i].targetSpeed;
     }
 }
 

@@ -795,7 +795,7 @@ extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not
 
 extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;
-extern s32 D_800BE4E0;
+extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
 extern s32 D_800BE570;
 extern u8  D_800BE574;
@@ -1062,7 +1062,7 @@ extern MatchState D_800D2138;
 
 extern u16 D_800D2340;
 extern s8  D_800D23A9;
-extern s32 D_800D23C0;
+extern ObjGroup *D_800D23C0;
 extern Mtx  D_800D23D0;
 
 extern f32 D_800D2410[];

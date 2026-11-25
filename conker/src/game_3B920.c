@@ -30,7 +30,7 @@ void func_1500E470(s32 level) {
     D_800E0940 = 0;
     D_8008CD00 = 0;
     D_80088B60 = 0;
-    D_800BE4E0 = 0;
+    D_800BE4E0 = NULL;
     {
         // matching: IDO schedules the store differently without the block-scoped temp
         u8 result = func_15012720();

@@ -3685,6 +3685,27 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
+/* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game_447B0).
+ * Each member is (kind << 12 | index); kind 2 is an object, indexing D_800DBEF4. */
+typedef struct ObjGroup {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ u16 count;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 members[8];
+} ObjGroup; // size 0x18
+
+/* One of the 10 bouncing cursors in D_800BE4E0 (created by func_1500FE30 in game_3D2E0, stepped in
+ * game_F5800). */
+typedef struct BounceRecord {
+    /* 0x0 */ u8  table;        // which D_80088810 table to draw from (0 or 1)
+    /* 0x1 */ u8  pad1;
+    /* 0x2 */ s8  dir;          // +1 / -1, flips when pos bounces off either end
+    /* 0x3 */ u8  pad3;
+    /* 0x4 */ s16 pos;          // bounces within [0, 0x500); pos >> 8 picks the table entry
+    /* 0x6 */ s16 speed;        // eased towards targetSpeed each tick
+    /* 0x8 */ s16 targetSpeed;  // re-randomised by func_150C851C
+} BounceRecord; // size 0xA
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

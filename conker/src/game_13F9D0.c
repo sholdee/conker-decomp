@@ -483,14 +483,6 @@ void func_15113C88(void) {
 extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 
 /* A group of objects that move together; the first member leads. */
-typedef struct ObjGroup {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ u16 count;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 members[8]; // high nibble: kind (2 = object), low 12 bits: index into D_800DBEF4
-} ObjGroup; // size 0x18
-
-#define GROUPS (*(ObjGroup **)&D_800D23C0) // D_80087380 entries
 
 /* Runs the update callback of every flagged object: first the ungrouped ones, then each group's members,
    where followers take the leader's move delta and floor triangle. */
@@ -518,9 +510,9 @@ void func_15113E54(s32 arg0) {
     }
 
     for (i = 0; i < (s32)D_80087380; i++) {
-        if ((GROUPS[i].members[0] >> 12) == 2) {
-            for (j = 0; j < GROUPS[i].count; j++) {
-                member = GROUPS[i].members[j];
+        if ((D_800D23C0[i].members[0] >> 12) == 2) {
+            for (j = 0; j < D_800D23C0[i].count; j++) {
+                member = D_800D23C0[i].members[j];
                 if ((member >> 12) == 2) {
                     obj = (member & 0xFFF) + D_800DBEF4; // matching: operand order of the addu
                     if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
