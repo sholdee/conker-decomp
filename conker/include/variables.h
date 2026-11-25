@@ -913,6 +913,8 @@ extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;
 extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
+extern u8 (*D_800BE510)[3]; // base RGB of every level vertex, then the props'; (&D_800BE510)[i] for i < 4 is level model i's first vertex (no symbols of their own)
+extern u8 (***D_800BE520)[3]; // [set][group][i]: base RGB of each color-group vertex
 extern u16 * D_800BE524; // first D_800BE510 entry of each prop
 extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
 extern u8  D_800BE574;

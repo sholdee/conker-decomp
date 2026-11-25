@@ -6,8 +6,6 @@
 // both and takes the base colors from D_800BE520 instead of D_800BE510.
 #define sVtxColorFlags (D_800B0DF0->vtxColorFlags)
 
-extern u8 (*D_800BE510)[3];             // base RGB of each vertex
-extern u8 (***D_800BE520)[3];           // [set][group][i]: base RGB of each group vertex
 extern WorldObject *func_151149AC(u8);
 
 /* Fades the vertices of color set colorSet (group group, or every group when group is 0xFF) from their

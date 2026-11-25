@@ -6,7 +6,6 @@ extern u8 D_800DF7D1;
 extern u8 D_800DF7D2;
 extern u8 D_800DF7D3[];
 extern u8 D_800DF9B3[];
-extern u8 *D_800BE510;
 extern u16 D_800BE528;
 
 
@@ -18,8 +17,6 @@ void func_15012C84(Vtx *arg0, u32 arg1);
 extern s32 D_800B0E44;
 extern s32 D_800B0E48;
 extern s32 D_800B0E4C;
-typedef struct { u8 c[3]; } struct_func_150127B0_rgb;
-extern u8 ***D_800BE520;
 extern u8 D_800BE564;
 
 void func_150127B0(void) {
@@ -52,7 +49,7 @@ void func_150127B0(void) {
         if (D_800B0DF0->vtxColorFlags & 1) {
             for (i = 0; i < 4; i++) {
                 if (D_800B0E10[i] != NULL) {
-                    (&D_800BE510)[i] = (u8 *)&((struct_func_150127B0_rgb *)D_800BE510)[D_800BE528];
+                    (&D_800BE510)[i] = (void *)&((Color24 *)D_800BE510)[D_800BE528]; // matching: indexing through the Color24 view keeps IDO's addu operand order
                     func_15012C84(D_800B0E10[i], D_800B0E40[i]);
                 } else {
                     (&D_800BE510)[i] = NULL;
@@ -85,9 +82,9 @@ void func_150127B0(void) {
                             src = D_800DBEF4[i - 4].srcVertices;
                         }
                         for (k = 0; k < b[j].count; k++) {
-                            D_800BE520[i][j][k * 3 + 0] = src[b[j].vertexIndices[k]].v.cn[0];
-                            D_800BE520[i][j][k * 3 + 1] = src[b[j].vertexIndices[k]].v.cn[1];
-                            D_800BE520[i][j][k * 3 + 2] = src[b[j].vertexIndices[k]].v.cn[2];
+                            D_800BE520[i][j][k][0] = src[b[j].vertexIndices[k]].v.cn[0];
+                            D_800BE520[i][j][k][1] = src[b[j].vertexIndices[k]].v.cn[1];
+                            D_800BE520[i][j][k][2] = src[b[j].vertexIndices[k]].v.cn[2];
                         }
                     }
                 } else {
@@ -102,9 +99,9 @@ void func_15012C84(Vtx *arg0, u32 arg1) {
     u32 i;
 
     for (i = 0; i < arg1; i++) {
-        D_800BE510[D_800BE528 * 3] = arg0[i].v.cn[0];
-        D_800BE510[(D_800BE528 * 3) + 1] = arg0[i].v.cn[1];
-        D_800BE510[(D_800BE528 * 3) + 2] = arg0[i].v.cn[2];
+        D_800BE510[D_800BE528][0] = arg0[i].v.cn[0];
+        D_800BE510[D_800BE528][1] = arg0[i].v.cn[1];
+        D_800BE510[D_800BE528][2] = arg0[i].v.cn[2];
         D_800BE528++;
     }
 }
