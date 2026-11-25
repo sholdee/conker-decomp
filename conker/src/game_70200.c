@@ -6,7 +6,7 @@
 #undef func_15043BB8
 #include "variables.h"
 
-void func_15042ECC();
+void func_15042ECC(u8 *format, s32 *argumentWords);
 Gfx *func_15043384(Gfx *gfx);
 s32 strlen(const char *);
 
@@ -66,7 +66,7 @@ void func_15042D78(u8 flags) {
 }
 
 /** Queue formatted text at (x, y) with the given flags; see func_15042ECC for the format. */
-void func_15042D94(s32 x, s32 y, u8 flags, s32 format, ...) {
+void func_15042D94(s32 x, s32 y, u8 flags, u8 *format, ...) {
     va_list args;
     s32 argumentWords[16];
     s32 i;
@@ -82,7 +82,7 @@ void func_15042D94(s32 x, s32 y, u8 flags, s32 format, ...) {
 }
 
 /** Queue formatted text at the current text position. */
-void func_15042E3C(s32 format, ...) {
+void func_15042E3C(u8 *format, ...) {
     va_list args;
     s32 argumentWords[16];
     s32 i;
@@ -253,11 +253,12 @@ void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha) {
     D_800CBD63 = alpha;
 }
 
+/* HUD icon table entry (D_800859E0). */
 typedef struct Game70200Glyph {
     u8 width;
     u8 height;
-    u8 scale;
-    u8 flags;
+    u8 scale; /* 128 = 1.0 */
+    u8 flags; /* 1: draw the previous entry behind it, blinking; 2: 16x16 sprite instead of 32x32 */
     s32 image;
 } Game70200Glyph;
 
@@ -270,7 +271,6 @@ typedef struct Game70200Sprite {
 
 extern Gfx D_800859A0[];
 extern Game70200Glyph D_800859E0[];
-extern Game70200Glyph D_80085AA8;
 extern s32 D_80085CD0;
 extern s32 D_800BE9AC;
 extern Game70200Sprite D_80090060;
@@ -282,13 +282,15 @@ s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
 Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 
-#define GFX_RAW(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (a); _g->words.w1 = (b); }
-
+/**
+ * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and
+ * reset the text state to its defaults. Called with NULL just to discard the queue.
+ */
 Gfx *func_15043384(Gfx *gfx) {
     s32 width;
     s32 height;
     s32 lines;
-    s32 kind;
+    s32 icon;
     Game70200TextNode *node;
     Game70200TextNode *next;
     Game70200Anchor *anchor;
@@ -299,26 +301,27 @@ Gfx *func_15043384(Gfx *gfx) {
     f32 screenY;
     f32 screenZ;
     f32 screenW;
-    s32 v;
+    s32 pulse;
     s32 frame;
 
     node = (Game70200TextNode *)D_800CBD64;
+    // matching: D_80085CD0 (frame counter) is read as word 4 past D_80085CC0, i.e. D_80085CD0++
     D_80085CD0 = ((s32 *)D_80085CC0)[4] + 1;
     if (node != NULL) {
         gSPDisplayList(gfx++, D_800859A0);
-        GFX_RAW(gfx++, 0xEF002C3F, 0x504240);
+        gDPSetOtherMode(gfx++, 0x002C3F, 0x00504240);
         while (node != NULL) {
             if (node->icon == 0) {
                 visible = 1;
-                if (node->flags & 0x40) {
-                    node->flags &= ~0x40;
+                if (node->flags & TEXT_FLAG_SCREEN_SPACE) {
+                    node->flags &= ~TEXT_FLAG_SCREEN_SPACE;
                 } else {
                     node->x = node->x * D_8008FE1C;
                     node->y = node->y * D_8008FE20;
                 }
-                if (node->flags & 0x80) {
+                if (node->flags & TEXT_FLAG_SHADOW) {
                     shadow = 1;
-                    node->flags &= ~0x80;
+                    node->flags &= ~TEXT_FLAG_SHADOW;
                 } else {
                     shadow = 0;
                 }
@@ -332,11 +335,11 @@ Gfx *func_15043384(Gfx *gfx) {
                         node->y = screenY;
                     }
                 }
-                if (node->flags == 1 || node->unk15 != 0) {
+                if (node->flags == TEXT_FLAG_CENTERED || node->unk15 != 0) {
                     func_150428D4(node->text, &width, &height, &lines);
-                    width = width * node->scale;
+                    width *= node->scale;
                 }
-                if (node->flags == 1) {
+                if (node->flags == TEXT_FLAG_CENTERED) {
                     node->x -= width >> 1;
                 }
                 if (visible) {
@@ -351,49 +354,51 @@ Gfx *func_15043384(Gfx *gfx) {
                 }
                 gDPPipeSync(gfx++);
             } else {
-                kind = node->icon - 1;
-                scale = D_800859E0[kind].scale * 0.0078125f;
-                GFX_RAW(gfx++, 0xFC12D225, 0xFFA7FFFF);
-                if (D_800859E0[kind].flags & 2) {
-                    D_80090060.width = 0x10;
-                    D_80090060.height = 0x10;
+                icon = node->icon - 1;
+                scale = D_800859E0[icon].scale * 0.0078125f;
+                gDPSetCombineLERP(gfx++, TEXEL0, 0, ENVIRONMENT, 0, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, 0, ENVIRONMENT, 0,
+                                  ENVIRONMENT, 0, TEXEL0, 0);
+                if (D_800859E0[icon].flags & 2) {
+                    D_80090060.width = 16;
+                    D_80090060.height = 16;
                 }
-                if (D_800859E0[kind].flags & 1) {
+                if (D_800859E0[icon].flags & 1) {
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                    node->alpha);
-                    D_80090060.image = D_800859E0[kind - 1].image;
-                    gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[kind - 1].width,
-                                        D_800859E0[kind - 1].height, scale, 0);
-                    v = (D_800BE9AC * 2) & 0x7F;
-                    if (v >= 0x40) {
-                        v = 0x7F - v;
+                    D_80090060.image = D_800859E0[icon - 1].image;
+                    gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon - 1].width,
+                                        D_800859E0[icon - 1].height, scale, 0);
+                    /* blink the backing glyph: alpha scale follows a 0..63..0 triangle wave */
+                    pulse = (D_800BE9AC * 2) & 0x7F;
+                    if (pulse >= 64) {
+                        pulse = 127 - pulse;
                     }
-                    v = (node->alpha * (v + v + v + 0x3F)) >> 8;
-                    if (v >= 0x100) {
-                        v = 0xFF;
+                    pulse = (node->alpha * (pulse + pulse + pulse + 63)) >> 8; // matching: `pulse * 3` schedules differently
+                    if (pulse >= 256) {
+                        pulse = 255;
                     }
-                    node->alpha = v;
+                    node->alpha = pulse;
                 }
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                node->alpha);
-                D_80090060.image = D_800859E0[kind].image;
-                if (&D_80085AA8 == &D_800859E0[kind]) {
+                D_80090060.image = D_800859E0[icon].image;
+                if (icon == 25) {
                     frame = (D_80085CD0 >> 1) % 10;
-                    v = frame;
+                    pulse = frame;
                     if (frame >= 6) {
-                        v = 10 - frame;
+                        pulse = 10 - frame;
                     }
-                    D_80090060.image = D_800859E0[kind].image + v;
+                    D_80090060.image = D_800859E0[icon].image + pulse;
                 }
-                gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[kind].width,
-                                    D_800859E0[kind].height, scale, 0);
+                gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon].width,
+                                    D_800859E0[icon].height, scale, 0);
                 gSPDisplayList(gfx++, D_800859A0);
-                GFX_RAW(gfx++, 0xEF002C3F, 0x504240);
-                if (D_800859E0[kind].flags & 2) {
-                    D_80090060.width = 0x20;
-                    D_80090060.height = 0x20;
+                gDPSetOtherMode(gfx++, 0x002C3F, 0x00504240);
+                if (D_800859E0[icon].flags & 2) {
+                    D_80090060.width = 32;
+                    D_80090060.height = 32;
                 }
             }
             next = node->next;
@@ -402,10 +407,10 @@ Gfx *func_15043384(Gfx *gfx) {
         }
         gDPPipeSync(gfx++);
     }
-    D_800CBD60 = 0xFF;
-    D_800CBD61 = 0xFF;
-    D_800CBD62 = 0xFF;
-    D_800CBD63 = 0xFF;
+    D_800CBD60 = 255;
+    D_800CBD61 = 255;
+    D_800CBD62 = 255;
+    D_800CBD63 = 255;
     D_800CBD6C = 0;
     D_800CBD6D = 0;
     D_800CBD6E = 0;
