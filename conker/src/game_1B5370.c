@@ -2,188 +2,192 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Animated RGB colours: each slot blends between a "from" and a "to" colour by a factor in [0, 1].
+ * The factor is either set directly (type 0) or animated every frame by func_151880C0.
+ */
 
-extern u8 D_800DF700[0xB4];
-extern s32 D_800DF7B4;
+typedef union ColorAnimWord {
+    f32 f;
+    s32 i;
+    u32 u;
+} ColorAnimWord;
 
-typedef struct Game1B5370Fade {
-    u8 color[6];
-    u8 start[3];
-    u8 pad9[7];
-    s32 type;
-    f32 rate;
-    u8 work[0xC];
-} Game1B5370Fade;
+typedef struct ColorAnim {
+    /* 0x00 */ u8 from[3];
+    /* 0x03 */ u8 to[3];
+    /* 0x06 */ u8 current[3];
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ f32 blend; /* 0.0f = from, 1.0f = to */
+    /* 0x10 */ s32 type;
+    /* 0x14 */ f32 rate;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ ColorAnimWord state; /* type 1: sine phase (radians); types 2, 3: step */
+    /* 0x20 */ ColorAnimWord timer; /* frame countdown, or the blend target while type 3 fades */
+} ColorAnim; /* size = 0x24 */
 
-#define FADES ((Game1B5370Fade *)D_800DF700)
+#define COLOR_ANIM_MAX 5
 
-s32 func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7) {
-    if (D_800DF7B4 < 5) {
-        FADES[D_800DF7B4].type = arg0;
-        FADES[D_800DF7B4].rate = arg1;
-        FADES[D_800DF7B4].color[0] = FADES[D_800DF7B4].start[0] = arg2;
-        FADES[D_800DF7B4].color[1] = FADES[D_800DF7B4].start[1] = arg3;
-        FADES[D_800DF7B4].color[2] = FADES[D_800DF7B4].start[2] = arg4;
-        FADES[D_800DF7B4].color[3] = arg5;
-        FADES[D_800DF7B4].color[4] = arg6;
-        FADES[D_800DF7B4].color[5] = arg7;
-        bzero(FADES[D_800DF7B4].work, 0xC);
+enum ColorAnimType {
+    COLOR_ANIM_STATIC,  /* blend set by func_1518804C */
+    COLOR_ANIM_PULSE,   /* sine wave */
+    COLOR_ANIM_FLICKER, /* flashes to "to", waits per D_800A7390 */
+    COLOR_ANIM_RANDOM   /* random fades between from, half and to */
+};
+
+extern ColorAnim D_800DF700[COLOR_ANIM_MAX];
+extern s32 D_800DF7B4; /* slots in use */
+extern u8 D_800A7390[8]; /* type 2: frames to wait after each flash */
+
+s32 func_151EF610(void);
+
+/* Allocates a colour animation slot; returns its index, or -1 when all are in use. */
+s32 func_15187EC0(s32 type, f32 rate, u8 fromR, u8 fromG, u8 fromB, u8 toR, u8 toG, u8 toB) {
+    if (D_800DF7B4 < COLOR_ANIM_MAX) {
+        D_800DF700[D_800DF7B4].type = type;
+        D_800DF700[D_800DF7B4].rate = rate;
+        D_800DF700[D_800DF7B4].from[0] = D_800DF700[D_800DF7B4].current[0] = fromR;
+        D_800DF700[D_800DF7B4].from[1] = D_800DF700[D_800DF7B4].current[1] = fromG;
+        D_800DF700[D_800DF7B4].from[2] = D_800DF700[D_800DF7B4].current[2] = fromB;
+        D_800DF700[D_800DF7B4].to[0] = toR;
+        D_800DF700[D_800DF7B4].to[1] = toG;
+        D_800DF700[D_800DF7B4].to[2] = toB;
+        bzero(&D_800DF700[D_800DF7B4].unk18, 0xC); /* unk18, state, timer */
         D_800DF7B4++;
         return D_800DF7B4 - 1;
     }
     return -1;
 }
 
-extern u8 D_800DF700[0xB4];
-extern s32 D_800DF7B4;
-
+/* Frees all colour animation slots. */
 void func_15187F90(void) {
-    bzero(D_800DF700, 0xB4);
+    bzero(D_800DF700, sizeof(D_800DF700));
     D_800DF7B4 = 0;
 }
 
-struct S_DF700b { u8 pad[6]; u8 unk6; u8 unk7; u8 unk8; u8 pad2[0x1B]; };
-
-void func_15187FC0(s32 arg0, s32 *arg1) {
-    struct S_DF700b *p = (struct S_DF700b *)D_800DF700;
-    if (arg0 < D_800DF7B4 && arg0 >= 0) {
-        arg1[0] = p[arg0].unk6;
-        arg1[1] = p[arg0].unk7;
-        arg1[2] = p[arg0].unk8;
+/* Reads a slot's current colour as three ints. */
+void func_15187FC0(s32 index, s32 *rgb) {
+    if (index < D_800DF7B4 && index >= 0) {
+        rgb[0] = D_800DF700[index].current[0];
+        rgb[1] = D_800DF700[index].current[1];
+        rgb[2] = D_800DF700[index].current[2];
     }
 }
 
-struct S_DF700 { f32 unkC; s32 pad[8]; };
-extern struct S_DF700 D_800DF70C[];
-
-void func_15188010(s32 arg0, f32 *arg1) {
-    if (arg0 < D_800DF7B4 && arg0 >= 0) {
-        *arg1 = D_800DF70C[arg0].unkC;
+/* Reads a slot's blend factor. */
+void func_15188010(s32 index, f32 *blend) {
+    if (index < D_800DF7B4 && index >= 0) {
+        *blend = D_800DF700[index].blend;
     }
 }
 
-void func_1518804C(s32 arg0, f32 arg1) {
-    if (arg0 < D_800DF7B4 && arg0 >= 0) {
-        if (arg1 > 1.0f) {
-            arg1 = 1.0f;
-        } else if (arg1 < 0.0f) {
-            arg1 = 0.0f;
+/* Sets a slot's blend factor, clamped to [0, 1]. */
+void func_1518804C(s32 index, f32 blend) {
+    if (index < D_800DF7B4 && index >= 0) {
+        if (blend > 1.0f) {
+            blend = 1.0f;
+        } else if (blend < 0.0f) {
+            blend = 0.0f;
         }
-        D_800DF70C[arg0].unkC = arg1;
+        D_800DF700[index].blend = blend;
     }
 }
 
-
-#define FADES_ ((FadeB *)D_800DF700)
-typedef struct FadeB {
-    u8 cur[3];
-    u8 end[3];
-    u8 p6[3];
-    u8 pad[3];
-    f32 val;
-    s32 type;
-    f32 rate;
-    s32 pad18;
-    union { s32 i; f32 f; } st;
-    union { s32 i; f32 f; } t;
-} FadeB;
-extern u8 D_800A7390[];
-extern f32 sinf(f32);
-extern s32 func_151EF610(void);
+/* Advances every colour animation by one frame and recomputes its current colour. */
 void func_151880C0(void) {
     s32 i;
+
     for (i = 0; i < D_800DF7B4; i++) {
-        switch (FADES_[i].type) {
-        case 0:
+        switch (D_800DF700[i].type) {
+        case COLOR_ANIM_STATIC:
             break;
-        case 1:
-            FADES_[i].val = (sinf(FADES_[i].st.f) + 1.0f) * 0.5f;
-            FADES_[i].st.f = FADES_[i].rate * D_800BE9A4 + FADES_[i].st.f;
-            if (FADES_[i].st.f >= 6.283185482f) {
-                FADES_[i].st.f = FADES_[i].st.f - 6.283185482f;
+        case COLOR_ANIM_PULSE:
+            D_800DF700[i].blend = (sinf(D_800DF700[i].state.f) + 1.0f) * 0.5f;
+            D_800DF700[i].state.f = D_800DF700[i].rate * D_800BE9A4 + D_800DF700[i].state.f;
+            if (D_800DF700[i].state.f >= 6.283185482f) {
+                D_800DF700[i].state.f = D_800DF700[i].state.f - 6.283185482f;
             }
             break;
-        case 2:
-            if (FADES_[i].t.i == 0) {
-                FADES_[i].t.i = -8;
-                FADES_[i].val = 1.0f;
-            } else if (FADES_[i].t.i < 0) {
-                FADES_[i].t.i += D_800BE9E4;
-                if (FADES_[i].t.i >= 0) {
-                    FADES_[i].val = 0.0f;
-                    FADES_[i].st.i++;
-                    if ((u32)FADES_[i].st.i >= 8) {
-                        FADES_[i].st.i = 0;
+        case COLOR_ANIM_FLICKER:
+            if (D_800DF700[i].timer.i == 0) {
+                D_800DF700[i].timer.i = -8;
+                D_800DF700[i].blend = 1.0f;
+            } else if (D_800DF700[i].timer.i < 0) {
+                D_800DF700[i].timer.i += D_800BE9E4;
+                if (D_800DF700[i].timer.i >= 0) {
+                    D_800DF700[i].blend = 0.0f;
+                    D_800DF700[i].state.u++;
+                    if (D_800DF700[i].state.u >= 8) {
+                        D_800DF700[i].state.u = 0;
                     }
-                    FADES_[i].t.i = D_800A7390[FADES_[i].st.i];
+                    D_800DF700[i].timer.i = D_800A7390[D_800DF700[i].state.u];
                 }
             } else {
-                FADES_[i].t.i -= D_800BE9E4;
-                if (FADES_[i].t.i < 0) {
-                    FADES_[i].t.i = 0;
+                D_800DF700[i].timer.i -= D_800BE9E4;
+                if (D_800DF700[i].timer.i < 0) {
+                    D_800DF700[i].timer.i = 0;
                 }
             }
             break;
-        case 3:
-            switch (FADES_[i].st.i) {
-            case 0:
-                FADES_[i].val += FADES_[i].rate * D_800BE9E4;
-                if (FADES_[i].t.f <= FADES_[i].val) {
-                    FADES_[i].val = FADES_[i].t.f;
-                    if (FADES_[i].t.f == 1.0f) {
+        case COLOR_ANIM_RANDOM:
+            switch (D_800DF700[i].state.i) {
+            case 0: /* fade up towards the target */
+                D_800DF700[i].blend += D_800DF700[i].rate * D_800BE9E4;
+                if (D_800DF700[i].timer.f <= D_800DF700[i].blend) {
+                    D_800DF700[i].blend = D_800DF700[i].timer.f;
+                    if (D_800DF700[i].timer.f == 1.0f) {
                         if (!(func_151EF610() & 1)) {
-                            FADES_[i].t.f = 0.0f;
+                            D_800DF700[i].timer.f = 0.0f;
                         } else {
-                            FADES_[i].t.f = 0.5f;
+                            D_800DF700[i].timer.f = 0.5f;
                         }
-                        FADES_[i].st.i = 2;
+                        D_800DF700[i].state.i = 2;
                     } else {
-                        FADES_[i].st.i = 1;
-                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+                        D_800DF700[i].state.i = 1;
+                        D_800DF700[i].timer.i = func_151EF610() % 30 + 30;
                     }
                 }
                 break;
-            case 1:
-                FADES_[i].t.i -= D_800BE9E4;
-                if (FADES_[i].t.i <= 0) {
-                    FADES_[i].st.i = (func_151EF610() % 2) * 2;
-                    if (FADES_[i].st.i == 0) {
-                        FADES_[i].t.f = 1.0f;
+            case 1: /* hold at half, then fade up to "to" or down to "from" */
+                D_800DF700[i].timer.i -= D_800BE9E4;
+                if (D_800DF700[i].timer.i <= 0) {
+                    D_800DF700[i].state.i = (func_151EF610() % 2) * 2;
+                    if (D_800DF700[i].state.i == 0) {
+                        D_800DF700[i].timer.f = 1.0f;
                     } else {
-                        FADES_[i].t.f = 0.0f;
+                        D_800DF700[i].timer.f = 0.0f;
                     }
                 }
                 break;
-            case 2:
-                FADES_[i].val -= FADES_[i].rate * D_800BE9E4;
-                if (FADES_[i].val <= FADES_[i].t.f) {
-                    FADES_[i].val = FADES_[i].t.f;
-                    if (FADES_[i].t.f == 0.0f) {
-                        FADES_[i].st.i = 3;
-                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+            case 2: /* fade down towards the target */
+                D_800DF700[i].blend -= D_800DF700[i].rate * D_800BE9E4;
+                if (D_800DF700[i].blend <= D_800DF700[i].timer.f) {
+                    D_800DF700[i].blend = D_800DF700[i].timer.f;
+                    if (D_800DF700[i].timer.f == 0.0f) {
+                        D_800DF700[i].state.i = 3;
+                        D_800DF700[i].timer.i = func_151EF610() % 30 + 30;
                     } else {
-                        FADES_[i].st.i = 1;
-                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+                        D_800DF700[i].state.i = 1;
+                        D_800DF700[i].timer.i = func_151EF610() % 30 + 30;
                     }
                 }
                 break;
-            case 3:
-                FADES_[i].t.i -= D_800BE9E4;
-                if (FADES_[i].t.i <= 0) {
-                    FADES_[i].st.i = 0;
+            case 3: /* hold at "from", then fade up to half or "to" */
+                D_800DF700[i].timer.i -= D_800BE9E4;
+                if (D_800DF700[i].timer.i <= 0) {
+                    D_800DF700[i].state.i = 0;
                     if (!(func_151EF610() & 1)) {
-                        FADES_[i].t.f = 0.5f;
+                        D_800DF700[i].timer.f = 0.5f;
                     } else {
-                        FADES_[i].t.f = 1.0f;
+                        D_800DF700[i].timer.f = 1.0f;
                     }
                 }
                 break;
             }
             break;
         }
-        FADES_[i].p6[0] = FADES_[i].cur[0] + (FADES_[i].end[0] - FADES_[i].cur[0]) * FADES_[i].val;
-        FADES_[i].p6[1] = FADES_[i].cur[1] + (FADES_[i].end[1] - FADES_[i].cur[1]) * FADES_[i].val;
-        FADES_[i].p6[2] = FADES_[i].cur[2] + (FADES_[i].end[2] - FADES_[i].cur[2]) * FADES_[i].val;
+        D_800DF700[i].current[0] = D_800DF700[i].from[0] + (D_800DF700[i].to[0] - D_800DF700[i].from[0]) * D_800DF700[i].blend;
+        D_800DF700[i].current[1] = D_800DF700[i].from[1] + (D_800DF700[i].to[1] - D_800DF700[i].from[1]) * D_800DF700[i].blend;
+        D_800DF700[i].current[2] = D_800DF700[i].from[2] + (D_800DF700[i].to[2] - D_800DF700[i].from[2]) * D_800DF700[i].blend;
     }
 }
-
