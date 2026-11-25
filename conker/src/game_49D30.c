@@ -2165,10 +2165,10 @@ void func_150222E0(s32 track, s32 scene) {
                 ((ObjAnimBytes *)obj)->unk6A = 0;
                 ((ObjAnimBytes *)obj)->unk6B = 0;
                 obj->unk282 = 0;
-                *(u16 *)&obj->unk27A[0] = 0;
-                *(u16 *)&obj->unk27A[2] = 0;
-                *(u16 *)&obj->unk27A[4] = 0;
-                *(u16 *)&obj->unk27A[6] = 0;
+                obj->unk27A[0] = 0;
+                obj->unk27A[1] = 0;
+                obj->unk27E[0] = 0;
+                obj->unk27E[1] = 0;
                 func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
                 *(u8 *)((u8 *)obj + 0x71) = 0;
             }
@@ -2694,9 +2694,10 @@ s32 func_150235DC(s32 scene) {
             obj->unk276 = 0;
             obj->unk282 = 0;
             obj->unk278 = 0;
-            obj->unk286 = zero;
-            obj->unk285 = zero;
-            obj->unk284 = zero;
+            // matching: the (u8) casts keep the register allocation of the u8 view this was matched with
+            obj->unk286 = (u8)zero;
+            obj->unk285 = (u8)zero;
+            obj->unk284 = (u8)zero;
             return zero;
         }
     }

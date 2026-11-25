@@ -1456,15 +1456,16 @@ struct Actor {
     /* 0x270 */ f32 unk270;
     /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
     u8  pad275;
-    s8  unk276;
+    /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
     u8  pad277;
-    s16 unk278;
-    u8  unk27A[0x8];
-    s16 unk282;
-    u8  unk284;
-    u8  unk285;
-    u8  unk286;
-    u8  unk287;
+    /* 0x278 */ u16 unk278;      // effect state
+    /* 0x27A */ s16 unk27A[2];   // yaw of head parts 1 and 0
+    /* 0x27E */ s16 unk27E[2];   // pitch of head parts 1 and 0
+    /* 0x282 */ u16 unk282;      // effect frames left, 0xFFFF = endless
+    /* 0x284 */ s8  unk284;      // effect offset for unk27A[0]
+    /* 0x285 */ s8  unk285;      // ... for unk27E[0]
+    /* 0x286 */ s8  unk286;      // ... for unk27A[1]
+    /* 0x287 */ s8  unk287;      // ... for unk27E[1]
     /* 0x288 */ u8  unk288;
     u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds

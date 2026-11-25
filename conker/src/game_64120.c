@@ -1719,27 +1719,6 @@ void func_1503A7F0(void) {
 f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);
 
-/*
- * Head-turn state at Actor +0x276 (include/structs.h covers it with differently signed fields and padding).
- * The head has two yaw/pitch pairs (part 0 and part 1) that func_1503A830 eases toward the aim target; an
- * effect (unk276, running while unk282 counts down) can add per-part offsets unk284..unk287.
- */
-typedef struct {
-    /* 0x276 */ u8 unk276; /* effect kind, 0-6 */
-    /* 0x277 */ u8 pad277;
-    /* 0x278 */ u16 unk278; /* effect state */
-    /* 0x27A */ s16 unk27A; /* part 1 yaw */
-    /* 0x27C */ s16 unk27C; /* part 0 yaw */
-    /* 0x27E */ s16 unk27E; /* part 1 pitch */
-    /* 0x280 */ s16 unk280; /* part 0 pitch */
-    /* 0x282 */ u16 unk282; /* effect frames left, 0xFFFF = endless */
-    /* 0x284 */ s8 unk284; /* effect offset for unk27A */
-    /* 0x285 */ s8 unk285; /* ... for unk27E */
-    /* 0x286 */ s8 unk286; /* ... for unk27C */
-    /* 0x287 */ s8 unk287; /* ... for unk280 */
-} ObjHeadTurn;
-
-#define OBJ_HEAD(obj) (*(ObjHeadTurn *)&(obj)->unk276)
 #define OBJ_DEF(id) ((ObjTypeDef *)D_800D1C90[id])
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
@@ -1752,7 +1731,7 @@ typedef struct {
     }
 
 /*
- * Turns an object's head (two yaw/pitch pairs in OBJ_HEAD) toward its aim target, D_800C3FE8, found with
+ * Turns an object's head (two yaw/pitch pairs, Actor.unk27A/unk27E) toward its aim target, D_800C3FE8, found with
  * func_150379DC for the object types that search, and runs the head effect selected by unk276 while unk282
  * counts down. Angles are clamped to +-45 yaw and -15..30 pitch, scaled by the type's turn ranges and eased
  * by up to `step` per frame.
@@ -1850,16 +1829,16 @@ void func_1503A830(Actor *obj) {
     mtx[1][3] = 0.0f;
     mtx[0][3] = 0.0f;
     yaw[0] = pitch[0] = 0.0f;
-    if (OBJ_HEAD(obj).unk282 == 0) {
-        OBJ_HEAD(obj).unk278 = 0;
-        OBJ_HEAD(obj).unk284 = 0;
-        OBJ_HEAD(obj).unk285 = 0;
-        OBJ_HEAD(obj).unk286 = 0;
-        OBJ_HEAD(obj).unk287 = 0;
+    if (obj->unk282 == 0) {
+        obj->unk278 = 0;
+        obj->unk284 = 0;
+        obj->unk285 = 0;
+        obj->unk286 = 0;
+        obj->unk287 = 0;
     }
-    if (OBJ_HEAD(obj).unk282 != 0) {
+    if (obj->unk282 != 0) {
         aim = 0;
-        if (OBJ_HEAD(obj).unk276 == 0) {
+        if (obj->unk276 == 0) {
             s32 phase0;
             s32 phase1;
             f32 sinV;
@@ -1867,49 +1846,49 @@ void func_1503A830(Actor *obj) {
             s32 pad68; // matching: -g3 stack slot
             f32 scale;
             f32 amp;
-            OBJ_HEAD(obj).unk27A -= OBJ_HEAD(obj).unk284;
-            OBJ_HEAD(obj).unk27E -= OBJ_HEAD(obj).unk285;
-            OBJ_HEAD(obj).unk27C -= OBJ_HEAD(obj).unk286;
-            OBJ_HEAD(obj).unk280 -= OBJ_HEAD(obj).unk287;
-            phase0 = OBJ_HEAD(obj).unk278 & 0xFF;
-            phase1 = OBJ_HEAD(obj).unk278 >> 8;
+            obj->unk27A[0] -= obj->unk284;
+            obj->unk27E[0] -= obj->unk285;
+            obj->unk27A[1] -= obj->unk286;
+            obj->unk27E[1] -= obj->unk287;
+            phase0 = obj->unk278 & 0xFF;
+            phase1 = obj->unk278 >> 8;
             phase0 += D_800BE9E4 * 3;
             phase1 -= D_800BE9E4 * 4;
-            OBJ_HEAD(obj).unk278 = (phase1 << 8) | phase0;
-            if (OBJ_HEAD(obj).unk282 < 30) {
-                scale = (f32)(OBJ_HEAD(obj).unk282 + 0U) / 30.0f; // matching: unsigned int to float conversion
+            obj->unk278 = (phase1 << 8) | phase0;
+            if (obj->unk282 < 30) {
+                scale = (f32)(obj->unk282 + 0U) / 30.0f; // matching: unsigned int to float conversion
             } else {
                 scale = 1.0f;
             }
             sinV = func_15048A40(phase0);
             cosV = func_150489B0(phase0);
             amp = 11.0f * scale;
-            OBJ_HEAD(obj).unk284 = sinV * amp;
-            OBJ_HEAD(obj).unk285 = cosV * amp;
+            obj->unk284 = sinV * amp;
+            obj->unk285 = cosV * amp;
             sinV = func_15048A40(phase1);
             cosV = func_150489B0(phase1);
-            OBJ_HEAD(obj).unk286 = sinV * amp;
-            OBJ_HEAD(obj).unk287 = cosV * amp;
-        } else if (OBJ_HEAD(obj).unk276 == 1) {
-            if (OBJ_HEAD(obj).unk278 == 0) {
-                OBJ_HEAD(obj).unk278 = 1;
-                OBJ_HEAD(obj).unk287 += func_150ADA20() % 20U;
+            obj->unk286 = sinV * amp;
+            obj->unk287 = cosV * amp;
+        } else if (obj->unk276 == 1) {
+            if (obj->unk278 == 0) {
+                obj->unk278 = 1;
+                obj->unk287 += func_150ADA20() % 20U;
             }
-            if (OBJ_HEAD(obj).unk282 < 0xAE) {
-                speed = OBJ_HEAD(obj).unk282 / 6 + 1;
+            if (obj->unk282 < 0xAE) {
+                speed = obj->unk282 / 6 + 1;
             } else {
                 speed = 30;
             }
-            OBJ_HEAD(obj).unk284 = 0;
-            OBJ_HEAD(obj).unk285 += speed;
-            OBJ_HEAD(obj).unk287 += speed;
-            OBJ_HEAD(obj).unk286 = OBJ_HEAD(obj).unk284;
+            obj->unk284 = 0;
+            obj->unk285 += speed;
+            obj->unk287 += speed;
+            obj->unk286 = obj->unk284;
             snap = 1;
-            yaw[0] = OBJ_HEAD(obj).unk284;
-            pitch[0] = OBJ_HEAD(obj).unk285;
-            yaw[1] = OBJ_HEAD(obj).unk286;
-            pitch[1] = OBJ_HEAD(obj).unk287;
-        } else if (OBJ_HEAD(obj).unk276 == 2) {
+            yaw[0] = obj->unk284;
+            pitch[0] = obj->unk285;
+            yaw[1] = obj->unk286;
+            pitch[1] = obj->unk287;
+        } else if (obj->unk276 == 2) {
             u8 *model;
 
             aim = 1;
@@ -1925,52 +1904,52 @@ void func_1503A830(Actor *obj) {
                     }
                 }
             }
-        } else if (OBJ_HEAD(obj).unk276 == 3) {
+        } else if (obj->unk276 == 3) {
             f32 (*targetBone)[4];
 
-            if (OBJ_HEAD(obj).unk278 != -1) { // always true for the u16; matching: removing it changes the code
+            if (obj->unk278 != -1) { // always true for the u16; matching: removing it changes the code
                 targetBone = (f32 (*)[4])obj->unk1D4;
                 if (targetBone != NULL) {
-                    targetBone = ((f32 (*)[4][4])targetBone)[OBJ_HEAD(obj).unk278];
+                    targetBone = ((f32 (*)[4][4])targetBone)[obj->unk278];
                     D_800C3FE8[0] = targetBone[3][0];
                     D_800C3FE8[1] = targetBone[3][1];
                     D_800C3FE8[2] = targetBone[3][2];
                 }
             }
-        } else if (OBJ_HEAD(obj).unk276 == 4) {
+        } else if (obj->unk276 == 4) {
             if (obj->unk84.uh == 0x26) {
-                if (OBJ_HEAD(obj).unk278 == 0) {
-                    OBJ_HEAD(obj).unk284 -= D_800BE9E4;
-                    if (OBJ_HEAD(obj).unk284 < -20) {
-                        OBJ_HEAD(obj).unk284 = -20;
-                        OBJ_HEAD(obj).unk278 = 1;
+                if (obj->unk278 == 0) {
+                    obj->unk284 -= D_800BE9E4;
+                    if (obj->unk284 < -20) {
+                        obj->unk284 = -20;
+                        obj->unk278 = 1;
                     }
                 } else {
-                    OBJ_HEAD(obj).unk284 += D_800BE9E4 * 3;
-                    if (OBJ_HEAD(obj).unk284 > 20) {
-                        OBJ_HEAD(obj).unk284 = 20;
-                        OBJ_HEAD(obj).unk278 = 0;
+                    obj->unk284 += D_800BE9E4 * 3;
+                    if (obj->unk284 > 20) {
+                        obj->unk284 = 20;
+                        obj->unk278 = 0;
                     }
                 }
-                OBJ_HEAD(obj).unk287 = 0;
-                OBJ_HEAD(obj).unk286 = OBJ_HEAD(obj).unk284;
-                OBJ_HEAD(obj).unk285 = OBJ_HEAD(obj).unk287;
+                obj->unk287 = 0;
+                obj->unk286 = obj->unk284;
+                obj->unk285 = obj->unk287;
                 snap = 1;
             } else {
-                OBJ_HEAD(obj).unk282 = 0;
+                obj->unk282 = 0;
                 aim = 1;
             }
-        } else if (OBJ_HEAD(obj).unk276 == 5) {
+        } else if (obj->unk276 == 5) {
             f32 kx = 0.3543307185f;
             f32 ky = 0.236220479f;
 
-            yaw[0] = OBJ_HEAD(obj).unk284 * kx;
-            yaw[1] = OBJ_HEAD(obj).unk286 * kx;
-            pitch[0] = OBJ_HEAD(obj).unk285 * ky;
-            pitch[1] = OBJ_HEAD(obj).unk287 * ky;
+            yaw[0] = obj->unk284 * kx;
+            yaw[1] = obj->unk286 * kx;
+            pitch[0] = obj->unk285 * ky;
+            pitch[1] = obj->unk287 * ky;
             clamp = 0;
             mirror = 0;
-        } else if (OBJ_HEAD(obj).unk276 == 6) {
+        } else if (obj->unk276 == 6) {
             if (obj->unk31C->unk78 == 0x2A) {
                 pitch[0] = 30.0f;
                 yaw[0] = -6.0f;
@@ -1979,18 +1958,18 @@ void func_1503A830(Actor *obj) {
                 yaw[0] = 0; // matching: integer zeros; 0.0f changes the code
                 yaw[1] = 0;
                 pitch[0] = 0;
-                if (OBJ_HEAD(obj).unk27E == 0) {
-                    OBJ_HEAD(obj).unk276 = 0;
+                if (obj->unk27E[0] == 0) {
+                    obj->unk276 = 0;
                 }
             }
             mirror = 0;
             pitch[1] = pitch[0];
         }
-        if (OBJ_HEAD(obj).unk282 != 0xFFFF) {
-            if (OBJ_HEAD(obj).unk282 >= D_800BE9E4) {
-                OBJ_HEAD(obj).unk282 -= D_800BE9E4;
+        if (obj->unk282 != 0xFFFF) {
+            if (obj->unk282 >= D_800BE9E4) {
+                obj->unk282 -= D_800BE9E4;
             } else {
-                OBJ_HEAD(obj).unk282 = 0;
+                obj->unk282 = 0;
             }
         }
     }
@@ -2026,7 +2005,7 @@ void func_1503A830(Actor *obj) {
             yaw[0] = pitch[0] = 0.0f;
         }
     }
-    if (OBJ_HEAD(obj).unk282 == 0 && func_15022024(yaw, pitch, obj - D_800CC2D0, 0)) {
+    if (obj->unk282 == 0 && func_15022024(yaw, pitch, obj - D_800CC2D0, 0)) {
         clamp = 1;
         mirror = 0;
         snap = 0;
@@ -2050,21 +2029,21 @@ void func_1503A830(Actor *obj) {
     yaw1 = -yaw1;
     pitch0 = (pitch[0] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[0] / 30.0f : OBJ_DEF(id)->unk2F * pitch[0] / -15.0f;
     pitch1 = (pitch[1] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[1] / 30.0f : OBJ_DEF(id)->unk2F * pitch[1] / -15.0f;
-    APPROACH(OBJ_HEAD(obj).unk27A, (s32)yaw1);
-    APPROACH(OBJ_HEAD(obj).unk27C, (s32)yaw0);
-    APPROACH(OBJ_HEAD(obj).unk27E, (s32)pitch1);
-    APPROACH(OBJ_HEAD(obj).unk280, (s32)pitch0);
+    APPROACH(obj->unk27A[0], (s32)yaw1);
+    APPROACH(obj->unk27A[1], (s32)yaw0);
+    APPROACH(obj->unk27E[0], (s32)pitch1);
+    APPROACH(obj->unk27E[1], (s32)pitch0);
     if (snap) {
-        OBJ_HEAD(obj).unk27A = OBJ_HEAD(obj).unk284;
-        OBJ_HEAD(obj).unk27E = OBJ_HEAD(obj).unk285;
-        OBJ_HEAD(obj).unk27C = OBJ_HEAD(obj).unk286;
-        OBJ_HEAD(obj).unk280 = OBJ_HEAD(obj).unk287;
+        obj->unk27A[0] = obj->unk284;
+        obj->unk27E[0] = obj->unk285;
+        obj->unk27A[1] = obj->unk286;
+        obj->unk27E[1] = obj->unk287;
     }
-    if (OBJ_HEAD(obj).unk282 != 0 && OBJ_HEAD(obj).unk276 == 0) {
-        OBJ_HEAD(obj).unk27A += OBJ_HEAD(obj).unk284;
-        OBJ_HEAD(obj).unk27E += OBJ_HEAD(obj).unk285;
-        OBJ_HEAD(obj).unk27C += OBJ_HEAD(obj).unk286;
-        OBJ_HEAD(obj).unk280 += OBJ_HEAD(obj).unk287;
+    if (obj->unk282 != 0 && obj->unk276 == 0) {
+        obj->unk27A[0] += obj->unk284;
+        obj->unk27E[0] += obj->unk285;
+        obj->unk27A[1] += obj->unk286;
+        obj->unk27E[1] += obj->unk287;
     }
 }
 
