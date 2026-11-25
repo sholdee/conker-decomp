@@ -55,9 +55,9 @@ typedef struct {
     /* 0x10 */ f32 drag;
     /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
     /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ f32 swayAngle;
-    /* 0x28 */ f32 swaySpeed;
-    /* 0x2C */ f32 swayRadius;
+    /* 0x24 */ f32 swayLength;
+    /* 0x28 */ f32 swayLengthRate;
+    /* 0x2C */ f32 swayYaw;
     /* 0x30 */ f32 phase;
     /* 0x34 */ f32 phaseSpeed;
     /* 0x38 */ f32 phaseScale;
@@ -117,9 +117,9 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     drift.spin.x = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
     drift.spin.y = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
     drift.spin.z = (func_150ADA68() * 20000.0f + -10000.0f) * 0.001f;
-    drift.swayAngle = 0.0f;
-    drift.swaySpeed = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
-    drift.swayRadius = func_150ADA68() * 360.0f;
+    drift.swayLength = 0.0f;
+    drift.swayLengthRate = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
+    drift.swayYaw = func_150ADA68() * 360.0f;
     drift.phase = 0.0f;
     drift.phaseSpeed = func_150ADA68() * 1210.0f * 0.0001f;
     drift.phaseScale = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
@@ -131,70 +131,39 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     return effect;
 }
 
-typedef struct Drift150CD17C {
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    f32 gravity;
-    f32 drag;
-    f32 offsetX;
-    f32 offsetY;
-    f32 offsetZ;
-    u8 pad20[4];
-    f32 swayAngle;
-    f32 swaySpeed;
-    f32 swayRadius;
-    f32 phase;
-    f32 phaseSpeed;
-    f32 phaseScale;
-    f32 minVy;
-} Drift150CD17C;
+void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
 
-typedef struct Drifter150CD17C {
-    u8 pad0[0x34];
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 offsetX;
-    f32 offsetY;
-    f32 offsetZ;
-    f32 sway[3];
-    u8 pad58[0xB8];
-    Drift150CD17C drift;
-} Drifter150CD17C;
-
-void func_151436B4(f32, f32, f32, f32 *);
-
-s32 func_150CD17C(Drifter150CD17C *arg0) {
-    Drift150CD17C *drift;
+/* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
+s32 func_150CD17C(Effect *effect) {
+    DriftMotion *drift;
     s32 i;
     f32 wave;
-    f32 angle;
+    f32 pitch;
     f32 period;
 
-    drift = &arg0->drift;
-    arg0->x += drift->vx * D_800BE9A4;
-    arg0->y += drift->vy * D_800BE9A4 + 0.5f * drift->gravity * D_800BE9A4 * D_800BE9A4;
-    arg0->z += drift->vz * D_800BE9A4;
-    drift->vy += drift->gravity * D_800BE9A4;
+    drift = &effect->drift;
+    effect->pos.x += drift->vel.x * D_800BE9A4;
+    effect->pos.y += drift->vel.y * D_800BE9A4 + 0.5f * drift->gravity * D_800BE9A4 * D_800BE9A4;
+    effect->pos.z += drift->vel.z * D_800BE9A4;
+    drift->vel.y += drift->gravity * D_800BE9A4;
     for (i = D_800BE9E4; i != 0; i--) {
-        drift->vx *= drift->drag;
-        drift->vz *= drift->drag;
+        drift->vel.x *= drift->drag;
+        drift->vel.z *= drift->drag;
     }
-    if (drift->vy > 0.0f) {
+    if (drift->vel.y > 0.0f) {
         for (i = D_800BE9E4; i != 0; i--) {
-            drift->vy *= drift->drag;
+            drift->vel.y *= drift->drag;
         }
     }
-    if (drift->vy < drift->minVy) {
-        drift->vy = drift->minVy;
+    if (drift->vel.y < drift->minVy) {
+        drift->vel.y = drift->minVy;
     }
-    if (drift->vy < 0.0f) {
+    if (drift->vel.y < 0.0f) {
         wave = sinf(drift->phase);
-        angle = drift->phaseScale * wave + 1.5707964f;
-        func_151436B4(drift->swayRadius, angle, drift->swayAngle, arg0->sway);
+        pitch = drift->phaseScale * wave + 1.5707964f;
+        func_151436B4(drift->swayYaw, pitch, drift->swayLength, &effect->sway.x);
         period = 6.2831855f;
-        drift->swayAngle += drift->swaySpeed * D_800BE9A4;
+        drift->swayLength += drift->swayLengthRate * D_800BE9A4;
         drift->phase += drift->phaseSpeed * D_800BE9A4;
         while (drift->phase > period) {
             drift->phase -= period;
@@ -203,9 +172,9 @@ s32 func_150CD17C(Drifter150CD17C *arg0) {
             drift->phase += period;
         }
     }
-    arg0->offsetX += drift->offsetX;
-    arg0->offsetY += drift->offsetY;
-    arg0->offsetZ += drift->offsetZ;
+    effect->dir.x += drift->spin.x;
+    effect->dir.y += drift->spin.y;
+    effect->dir.z += drift->spin.z;
     return 1;
 }
 
