@@ -1492,10 +1492,10 @@ void func_1507911C(void) {
 }
 
 void func_150791F0(void) {
-    if (D_800D154C->unk2C9 < D_800D1890) {
-        D_800D154C->unk1C9 = 0xFF;
+    if (D_800D154C->modelCount < D_800D1890) {
+        D_800D154C->lodRequest = 0xFF;
     } else {
-        D_800D154C->unk1C9 = D_800D1890;
+        D_800D154C->lodRequest = D_800D1890;
     }
 }
 

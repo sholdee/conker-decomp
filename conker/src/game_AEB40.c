@@ -173,7 +173,7 @@ typedef struct GameObj {
     /* 0x15C */ u8 pad15C[0x4];
     /* 0x160 */ s16 unk160;
     /* 0x162 */ u8 pad162[0x67];
-    /* 0x1C9 */ u8 unk1C9;
+    /* 0x1C9 */ u8 lodRequest;
     /* 0x1CA */ u8 health;
     /* 0x1CB */ u8 pad1CB;
     /* 0x1CC */ f32 unk1CC;
@@ -215,7 +215,7 @@ typedef struct GameObj {
     /* 0x289 */ u8 pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2];  // per model in modelIds: shared or private copies of D_800D19A0[id]
     /* 0x2C4 */ u8 *modelIds;
-    /* 0x2C8 */ u8 unk2C8;
+    /* 0x2C8 */ u8 lodCount;
     /* 0x2C9 */ u8 modelCount;
     /* 0x2CA */ u8 pad2CA;
     /* 0x2CB */ s8 unk2CB;
@@ -1341,9 +1341,9 @@ void func_150839B8(GameObj *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk160 = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = D_80086CAC[def->subModelList];
-            obj->unk2C8 = def->subModelCount;
+            obj->lodCount = def->subModelCount;
         }
-        obj->modelCount = obj->unk2C8 + def->extraModelCount;
+        obj->modelCount = obj->lodCount + def->extraModelCount;
         if (def->unk29 != 0) {
             func_15036C70(obj);
         }
@@ -1752,9 +1752,9 @@ void func_15084558(GameObj *self) {
     }
 }
 
-/* Returns obj's current model id (modelIds[unk1C9 - 1], or the first). */
+/* Returns obj's current model id (modelIds[lodRequest - 1], or the first). */
 u8 func_150849A0(GameObj *obj) {
-    s32 current = obj->unk1C9;
+    s32 current = obj->lodRequest;
 
     if (current != 0) {
         return obj->modelIds[current - 1];
@@ -1762,16 +1762,16 @@ u8 func_150849A0(GameObj *obj) {
     return obj->modelIds[0];
 }
 
-/* Like func_150849A0, falling back to modelIds[unk2C8 - 1]; stores the index in *outIndex. */
+/* Like func_150849A0, falling back to modelIds[lodCount - 1]; stores the index in *outIndex. */
 u8 func_150849CC(GameObj *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 
-    n = obj->unk1C9;
+    n = obj->lodRequest;
     if (n != 0) {
         index = n - 1;
     } else {
-        n = obj->unk2C8;
+        n = obj->lodCount;
         if (n != 0) {
             index = n - 1;
         } else {

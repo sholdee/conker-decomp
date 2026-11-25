@@ -1127,6 +1127,8 @@ typedef struct {
     u8  unk1C[0x4];
     f32 unk20;
     f32 unk24;
+    u8  pad28[0x6];
+    /* 0x2E */ u8 keepTime; // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
 } struct129;
 
 typedef struct {
@@ -1165,17 +1167,10 @@ struct Actor {
     u8  unk8;
     u8  unk9;
     u8  unkA;
-    u8  unkB;
-    u8  unkC;
-    u8  unkD;
-    union {
-      s16 h;
-      u8  ub[2];
-    } unkE;
-    s8  unk10;
-    s8  unk11;
-    u8  unk12;
-    u8  unk13;
+    /* 0x0B */  u8  unkB[4];  // one per player
+    /* 0x0F */  u8  unkF;     // per-player bits (<< 4: seen by player i)
+    /* 0x10 */  u16 unk10;    // view range
+    /* 0x12 */  u16 unk12;    // frame counter
     /* 0x14 */  f32 x_position;
     /* 0x18 */  f32 y_position;
     /* 0x1C */  f32 z_position;
@@ -1185,8 +1180,7 @@ struct Actor {
     /* 0x2C */  f32 old_x_position;
     /* 0x30 */  f32 old_y_position;
     /* 0x34 */  f32 old_z_position;
-    u8  unk38;
-    u8  pad39;
+    /* 0x38 */  s16 unk38;
     s8  unk3A;
     /* 0x3B */  u8  unique_id;
     /* 0x3C */  f32 xz_velocity;
@@ -1198,7 +1192,8 @@ struct Actor {
     /* 0x54 */  f32 unk54;
     /* 0x58 */  s32 unk58;
     s32 unk5C;  // used
-    s32 unk60;
+    /* 0x60 */  s16 unk60;    // texture scroll
+    /* 0x62 */  s16 unk62;    // its speed
     s8  unk64;
     u8  unk65;  // used
     /* 0x66 */  u8  unk66;      // flags
@@ -1337,7 +1332,7 @@ struct Actor {
     f32 unk154;
     f32 unk158;
     f32 unk15C;
-    /* 0x160 */ s16 unk160;
+    /* 0x160 */ u16 unk160;  // shadow size, scaled by xz_scale (game_13AE20)
     /* 0x162 */ u8  unk162;
     u8  pad163;
     f32 unk164;
@@ -1351,7 +1346,7 @@ struct Actor {
     u32 unk184;
     /* 0x188 */ void *unk188;     // floor triangle found by the floor probe
     /* 0x18C */ s16 floorVerts[3][3]; // the floor triangle under the actor
-    /* 0x19E */ s16 floorTriIndex;
+    /* 0x19E */ u16 floorTriIndex;
     /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none
     /* 0x1A2 */ s16 floorType;
     /* 0x1A4 */ ActorAimPoints aim;
@@ -1359,15 +1354,15 @@ struct Actor {
     u32 pad1C0;
     /* 0x1C4 */ struct TimedEvent *events; // timed event list
     /* 0x1C8 */ u8  lod;       // current level of detail
-    /* 0x1C9 */ u8  unk1C9;   // requested LOD + 1, 0xFF = reset to 0
+    /* 0x1C9 */ u8  lodRequest; // requested LOD + 1, 0xFF = reset to 0
     /* 0x1CA */ u8  health;
     u8  unk1CB;
     f32 unk1CC;
     s8  unk1D0;
     s8  unk1D1;
     u16 pad1D2;
-    struct255 *unk1D4;
-    u32 pad1D8;
+    /* 0x1D4 */ MtxF *unk1D4;   // this frame's bone matrices
+    /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     u8  pad1DC;
     /* 0x1DD */ u8  unk1DD[3];
     /* 0x1E0 */ u8  unk1E0[3];
@@ -1382,7 +1377,7 @@ struct Actor {
     u16 unk1EC;
     u8  pad1EE[0x2];
     u32 pad1F0;
-    s32 unk1F4;
+    /* 0x1F4 */ f32 unk1F4;
     /* 0x1F8 */ f32 unk1F8;
     u8  unk1FC;
     u8  unk1FD;
@@ -1482,10 +1477,10 @@ struct Actor {
     /* 0x287 */ s8  unk287;      // ... for unk27E[1]
     /* 0x288 */ u8  unk288;
     u8  pad289[0x3];
-    /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds
+    /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer
     /* 0x2C4 */ u8 *modelIds;
-    /* 0x2C8 */ u8  unk2C8;
-    u8  unk2C9;
+    /* 0x2C8 */ u8  lodCount;   // models in modelIds that are LODs
+    /* 0x2C9 */ u8  modelCount; // lodCount + extra sub-models
     s8  unk2CA;
     s8  unk2CB;
     s32 unk2CC;

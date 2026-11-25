@@ -270,7 +270,7 @@ void func_151094FC(Effect1368C0 *effect) {
             local.x = segment[0].x + (segment[1].x - segment[0].x) * t;
             local.y = segment[0].y + (segment[1].y - segment[0].y) * t;
             local.z = segment[0].z + (segment[1].z - segment[0].z) * t;
-            matrix = &object->unk1D4->unk240;
+            matrix = &object->unk1D4[9];
             func_15143134(&local, &point, matrix);
             func_15143134(&segment[0], &start, matrix);
             func_15143134(&segment[1], &end, matrix);
@@ -598,7 +598,7 @@ void func_1510A40C(Effect1368C0 *effect) {
     }
     data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
     if (data->spawnAccum > 1.0f && object->unk1D4 != NULL) {
-        matrix = &object->unk1D4->unk240;
+        matrix = &object->unk1D4[9];
         func_15143134(&D_800A2604, &points[0], matrix);
         func_15143134(&D_800A2610, &points[1], matrix);
         func_15143134(&D_800A261C, &dirs[0], matrix);

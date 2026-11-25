@@ -1500,7 +1500,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x27:
         if (act != arg0->unk31C->unk78) {
             arg0->unk31C->unk78 = 0x27;
-            arg0->unk1C9 = 6;
+            arg0->lodRequest = 6;
             arg0->unk31C->unk17 = 1;
         }
         break;

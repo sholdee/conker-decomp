@@ -3935,8 +3935,8 @@ void func_1505F188(Actor *actor) {
     actor->unk84.uh = 0xFFFF;
     actor->unk13F = 0xFF;
     actor->modelIds = &actor->id;
-    actor->unk2C8 = 1;
-    actor->unk2C9 = 1;
+    actor->lodCount = 1;
+    actor->modelCount = 1;
     actor->id = 0xFF;
     actor->unk2CB = 50;
     actor->unk48 = one;
@@ -4788,8 +4788,8 @@ void func_150615DC(Actor *actor) {
     actor->unk8 = 0xFF;
     actor->unk9 = 0;
     actor->unkA = 0;
-    actor->unkE.ub[1] = 0;
-    actor->unkB = actor->unkC = actor->unkD = actor->unkE.ub[0] = 0xFF;
+    actor->unkF = 0;
+    actor->unkB[0] = actor->unkB[1] = actor->unkB[2] = actor->unkB[3] = 0xFF;
 }
 
 /*
@@ -4805,24 +4805,24 @@ void func_1506160C(Actor *actor, u8 cmd, u8 value, u8 step, s32 player) {
         if (cmd != 10) {
             if (cmd == 8) {
                 bit = 1 << (u8)player;
-                actor->unkE.ub[1] |= bit;
+                actor->unkF |= bit;
                 value = 0;
             } else {
                 bit = 1 << (u8)player;
-                actor->unkE.ub[1] &= ~bit;
+                actor->unkF &= ~bit;
                 value = 0xFF;
             }
             hi = bit << 4;
-            if (actor->unkE.ub[1] & hi) {
-                (&actor->unkB)[(u8)player] = value;
+            if (actor->unkF & hi) {
+                actor->unkB[(u8)player] = value;
             }
-            actor->unkE.ub[1] &= ~hi;
+            actor->unkF &= ~hi;
         } else {
-            actor->unkE.ub[1] |= (1 << (u8)player) << 4;
+            actor->unkF |= (1 << (u8)player) << 4;
             value = 0;
         }
         if ((actor->unk2FD != 0) || (D_800DBFF4[(u8)player] != 0)) {
-            (&actor->unkB)[(u8)player] = value;
+            actor->unkB[(u8)player] = value;
         }
     } else if (cmd >= actor->unkA) {
         if (cmd == 4) {
@@ -4862,29 +4862,29 @@ void func_150617BC(Actor *actor) {
     if (actor->interaction_state != 0) {
         mask = 1;
         for (i = 0; i <= D_80082FA0; i++) {
-            if (actor->unkE.ub[1] & mask) {
-                if ((&actor->unkB)[i] > 0) {
+            if (actor->unkF & mask) {
+                if (actor->unkB[i] > 0) {
                     if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = (&actor->unkB)[i] - 50;
+                        value = actor->unkB[i] - 50;
                         if (value < 0) {
                             value = 0;
                         }
                     } else {
                         value = 0;
                     }
-                    (&actor->unkB)[i] = value;
+                    actor->unkB[i] = value;
                 }
             } else {
-                if ((&actor->unkB)[i] < 0xFF) {
+                if (actor->unkB[i] < 0xFF) {
                     if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = (&actor->unkB)[i] + 50;
+                        value = actor->unkB[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
                         }
                     } else {
                         value = 0xFF;
                     }
-                    (&actor->unkB)[i] = value;
+                    actor->unkB[i] = value;
                 }
             }
             mask <<= 1;
@@ -4920,7 +4920,7 @@ void func_150617BC(Actor *actor) {
 
 /* The actor's alpha as seen by `player` (0..255). */
 s32 func_1506196C(Actor *actor, s32 player) {
-    s32 alpha = actor->unk7 * (&actor->unkB)[player];
+    s32 alpha = actor->unk7 * actor->unkB[player];
 
     if (alpha == 255 * 255) {
         alpha = 255;

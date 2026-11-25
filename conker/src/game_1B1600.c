@@ -882,7 +882,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         if (D_800CC2D0[i].unk65 != 0 && D_800CC2D0[i].id != 0x62) {
             continue;
         }
-        if (D_800CC2D0[i].unk2C8 != 0) {
+        if (D_800CC2D0[i].lodCount != 0) {
             modelId = func_150849CC(&D_800CC2D0[i], &modelSub);
             func_1503DA9C(&D_800CC2D0[i], modelId, modelSub, 0);
         } else {

@@ -658,7 +658,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (v == 0) {
             v = 0xFF;
         }
-        obj->unk1C9 = v;
+        obj->lodRequest = v;
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {

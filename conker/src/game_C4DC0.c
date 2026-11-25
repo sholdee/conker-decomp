@@ -699,7 +699,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk114 = cmd->a[1];
         break;
     case 0x49:
-        obj->unk1C9 = cmd->a[0];
+        obj->lodRequest = cmd->a[0];
         break;
     case 0x4A:
         func_1507EB4C(obj, cmd->a[0]);
@@ -908,7 +908,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             break;
         case 2:
             obj->unk31C->unk17 = 1;
-            obj->unk1C9 = 6;
+            obj->lodRequest = 6;
             break;
         case 3: {
             Actor *other;
