@@ -13,6 +13,47 @@ void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 void func_1505A770(struct127 *arg0);
 void func_15055B0C(struct127 *arg0, s32 arg1);
+void func_151026BC(void *, s32, s32, s32, s32, s32);
+void func_15188810(void *, s32, s32);
+void func_150836CC(struct127 *, s32);
+void func_1507C324(void *, void *);
+void func_1514AD9C(f32 *, s32, s32);
+void func_1503192C(struct127 *, s32, s32, s32);
+void func_151DCDE0(struct17 *, s32, s32);
+
+s32 func_1505C7D8(struct127 *, u8);
+void func_15059C84(struct127 *);
+
+typedef struct {
+    f32 unk0;
+    u8 pad4[0x2B];
+    s8 unk2F;
+    u8 pad30[0x54];
+} Struct800872A0;
+
+extern Struct800872A0 *D_800872A0;
+extern f32 D_800D239C;
+extern f32 D_800D23A0;
+extern f32 D_800D23A4;
+extern f32 D_800CC254;
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
+s32 func_1508855C(struct127 *arg0);
+void func_15087350(s32, s32, f32);
+struct127 *func_150883B0(s32, s32, f32 *, s32 *);
+s32 func_15104634(f32, f32, f32, f32 *);
+u8 func_15059B54(struct127 *arg0, u16 arg1);
+s32 func_151EF610(void);
+s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3);
+void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+s32 func_15081E78(struct127 *, void *, s32);
+void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505D6F0(struct127 *arg0, s32 arg1);
+void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
+void func_15088780(struct127 *);
 
 void func_150536D0(struct127 *obj) {
     obj->interaction_state = 13;
@@ -61,40 +102,6 @@ void func_15053894(struct127 *obj) {
     }
 }
 
-s32 func_1505C7D8(struct127 *, u8);
-void func_15059C84(struct127 *);
-
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x2B];
-    s8 unk2F;
-    u8 pad30[0x54];
-} Struct800872A0;
-
-extern Struct800872A0 *D_800872A0;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
-s32 func_1508855C(struct127 *arg0);
-void func_15087350(s32, s32, f32);
-struct127 *func_150883B0(s32, s32, f32 *, s32 *);
-s32 func_15104634(f32, f32, f32, f32 *);
-u8 func_15059B54(struct127 *arg0, u16 arg1);
-s32 func_151EF610(void);
-s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3);
-void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-s32 func_15081E78(struct127 *, void *, s32);
-void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_1505D6F0(struct127 *arg0, s32 arg1);
-void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
-void func_15088780(struct127 *);
-
 void func_150538CC(struct127 *obj) {
     s8 done;
     s32 left;
@@ -142,7 +149,7 @@ void func_150538CC(struct127 *obj) {
                 maxStep = 30.0f;
             }
             func_15087350(slot, 0, dist);
-            obj->pad320[8] = 1;
+            obj->pad320[8] = 1; // 0x328
             if (obj->unk221 == -1) {
                 target = func_150883B0(slot, searchDir, &slotValue, &slotFlag);
                 if ((obj->unk124 != 0) && (target + 1 == &D_800CC2D0[obj->unk124])) {
@@ -208,6 +215,7 @@ void func_150538CC(struct127 *obj) {
         if (obj->unkB2 != 0) {
             obj->unk83++;
         }
+        // variables.h declares D_800E0C20 as s32; only its first byte is read here
         if ((*(s8 *)&D_800E0C20 != 0) || (D_800E0B94 != 0)) {
             obj->unk83 = 1;
             done = 1;
@@ -495,11 +503,6 @@ void func_15054A5C(struct127 *obj, struct127 *other) {
     func_15060F28(obj, 0);
 }
 
-void func_151026BC(void *, s32, s32, s32, s32, s32);
-void func_15188810(void *, s32, s32);
-void func_150836CC(struct127 *, s32);
-void func_1507C324(void *, void *);
-
 void func_15054A94(struct127 *obj) {
     struct197 *anim;
     struct127 *other;
@@ -681,15 +684,9 @@ void func_15054F74(struct127 *obj) {
     }
 }
 
-void func_15055260(struct127 *obj, struct127 *target, s32 arg2) {
-    func_150335C8(obj, target, 0x4D, arg2, 0, 0);
+void func_15055260(struct127 *obj, struct127 *target, s32 hitIndex) {
+    func_150335C8(obj, target, 0x4D, hitIndex, 0, 0);
 }
-
-void func_1514AD9C(f32 *, s32, s32);
-void func_1503192C(struct127 *, s32, s32, s32);
-s32 func_1505C7D8(struct127 *, u8);
-void func_15059C84(struct127 *);
-void func_151DCDE0(struct17 *, s32, s32);
 
 void func_1505528C(struct127 *obj) {
     f32 prevX;
