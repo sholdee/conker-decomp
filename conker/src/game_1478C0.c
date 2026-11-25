@@ -15,6 +15,7 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     found[1] = 0;
     count = 0;
     for (i = 0; *(s8 *)&dl[i] != (s8)G_ENDDL && count < 2; i++) {
+        // matching: IDO emits the target branch layout only for a one-case switch, not an if
         switch (*(s8 *)&dl[i]) {
         case (s8)G_SETTIMG:
             found[count++] = i;
@@ -99,8 +100,7 @@ void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
         } else {
             second = (u16)(*texIndices >> 16);
         }
-        direction = (*animState >> 16) & 0xFFFF;
-        direction = (s16)direction;
+        direction = (s16)((*animState >> 16) & 0xFFFF);
         tick = *animState & 0xFFFF;
         if (direction == 0) {
             direction = 1;
@@ -114,15 +114,13 @@ void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
                 direction = -1;
                 tick = (anim->frameCount - 1) * anim->ticksPerFrame;
             }
-        } else {
-            if (tick >= anim->frameCount * anim->ticksPerFrame) {
-                tick -= anim->frameCount * anim->ticksPerFrame;
-                direction = 1;
-            }
+        } else if (tick >= anim->frameCount * anim->ticksPerFrame) {
+            tick -= anim->frameCount * anim->ticksPerFrame;
+            direction = 1;
         }
         value = anim->frames[tick / anim->ticksPerFrame];
         paletteAddr = 0;
-        if (D_800BE9F0 == 6 || D_800BE9F0 == 59) {
+        if (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
             flags = 3;
         } else {
             flags = 0x3E;
@@ -138,6 +136,7 @@ void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
 
 extern void func_15116110(TexAnimObject *);
 
+/* Runs func_15116110 while unk3C is set, then advances the texture animation. */
 void func_1511A6FC(TexAnimObject *obj) {
     if (obj->unk3C != 0) {
         func_15116110(obj);
@@ -148,12 +147,12 @@ void func_1511A6FC(TexAnimObject *obj) {
 extern s32 func_15022B08(s32, s32);
 extern void func_151162D4(TexAnimObject *);
 
+/* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
+ * then runs func_151162D4 and advances the texture animation. */
 void func_1511A738(TexAnimObject *obj) {
-    if (D_800C35EA == 1) {
-        if (func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
-            obj->unk7C = 0;
-            obj->unk18 = 0.0f;
-        }
+    if (D_800C35EA == 1 && func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
+        obj->unk7C = 0;
+        obj->unk18 = 0.0f;
     }
     func_151162D4(obj);
     func_1511A494(obj, &obj->texIndices, &obj->animState);
