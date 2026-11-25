@@ -82,7 +82,10 @@ typedef struct {
     } arg;
 } Msg15128CB0;
 
-/* Camera state; same 0x9A0-byte layout as struct108 (see include/structs.h). */
+/*
+ * Camera state: the same 0x9A0-byte object as struct108 (include/structs.h), which is why it is
+ * cast to struct108 * for the functions.h prototypes. Fields here follow this file's usage.
+ */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 unk2C;
@@ -224,6 +227,12 @@ extern s32 D_800C3678;
 extern struct17 D_80089544;
 extern f32 D_800C3648;
 
+/*
+ * Per-frame camera message pump: handles a pending unk734 request, then drains the camera's
+ * message queue (func_1512D604) and applies each message by type.
+ * matching: in the braced cases, `break` follows the closing brace (as1 orders the case-end
+ * branch by source line).
+ */
 void func_15128CB0(Camera *cam) {
     Msg15128CB0 *msg;
 
@@ -479,6 +488,7 @@ void func_15128CB0(Camera *cam) {
     }
 }
 
+/* Resets this camera's D_800DC028 entry when D_80089550 is set. */
 void func_151298C0(Camera *cam, s32 arg1) {
     if (D_80089550 != 0) {
         D_800DC028[cam->index].unk2 = 0;
