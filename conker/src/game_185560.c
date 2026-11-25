@@ -70,7 +70,6 @@ typedef struct {
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
-s32 func_15159370();
 
 /* Allocates an effect actor of extraSize type-specific bytes from a 0x44-byte template. */
 EffectActor *func_151580B0(void *template, s32 attachment, s32 arg2, u8 large, s32 extraSize, u8 arg5,
@@ -153,7 +152,7 @@ Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5,
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
-    s32 pad;
+    s32 pad; // matching: IDO's frame has an unused slot here
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
     u8 update;
@@ -1360,22 +1359,31 @@ typedef struct {
     /* 0x25 */ u8 pad25[3];
 } EmitterSettings;
 
-/* Data at 0x80 of a spawner object: emitters get a random type in [typeBase, typeBase + typeRange]. */
 typedef struct {
-    /* 0x00 */ s16 typeBase;
-    /* 0x02 */ s16 typeRange;
+    s16 base;
+    s16 range;
+} TypeRange;
+
+/* Data at 0x80 of a spawner object: emitters get a random type in [types.base, types.base + types.range]. */
+typedef struct {
+    /* 0x00 */ TypeRange types;
     /* 0x04 */ EmitterSettings settings;
 } SpawnerData;
 
+/* Spawner object created by func_151A8B20 (func_1515A974). */
 typedef struct {
-    struct UBYTES4 types;
-    EmitterSettings settings;
-} SpawnerDataBytes; // matching: the type pair is copied with lwl/lwr, as an unaligned struct
+    /* 0x00 */ u8 pad0[0x1];
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x73];
+    /* 0x80 */ SpawnerData data;
+} Spawner;
 
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
-    /* 0x08 */ SpawnerDataBytes data;
+    /* 0x08 */ SpawnerData data;
 } SpawnerTemplate;
 
 extern SpawnerTemplate D_800A636C[];
@@ -1385,39 +1393,35 @@ typedef struct {
     /* 0x1F */ u8 variant; /* index into D_800A636C */
 } SpawnerSource;
 
-s32 func_151A8B20(struct183 *arg0, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
-
-typedef struct {
-    SpawnerDataBytes data;
-    s32 pad2C[2];
-    struct183 info;
-} Locals1515A974;
+Spawner *func_151A8B20(struct183 *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
-void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
-    Locals1515A974 local;
-    void *spawner;
+void func_1515A974(SpawnerSource *volatile src, s32 arg1) { // matching: volatile makes IDO reload src from its stack slot
+    struct183 info;
+    s32 pad[2]; // matching: 8 unused frame bytes between data and info
+    SpawnerData data;
+    Spawner *spawner;
     s32 variant;
 
     variant = src->variant;
     if (variant <= 0) {
-        local.info.unk0 = 0xF;
-        local.info.unk4 = (s32)src;
-        local.info.unk8 = D_800A636C[variant].unk0;
-        local.info.unkC = D_800A636C[variant].unk4;
-        local.info.unk10 = 0.0f;
-        local.info.unk14 = 0.0f;
-        local.info.unk18 = 0.0f;
-        local.info.unk1C = 0.0f;
-        local.info.unk20 = 0.0f;
-        local.info.unk24 = 0;
-        local.info.unk25 = -1;
-        local.info.unk26 = 2;
-        local.data.types = D_800A636C[variant].data.types;
-        local.data.settings = D_800A636C[variant].data.settings;
-        spawner = func_151A8B20(&local.info, -1, sizeof(SpawnerData), 0xFF, 0);
+        info.unk0 = 0xF;
+        info.unk4 = (s32)src;
+        info.unk8 = D_800A636C[variant].unk0;
+        info.unkC = D_800A636C[variant].unk4;
+        info.unk10 = 0.0f;
+        info.unk14 = 0.0f;
+        info.unk18 = 0.0f;
+        info.unk1C = 0.0f;
+        info.unk20 = 0.0f;
+        info.unk24 = 0;
+        info.unk25 = -1;
+        info.unk26 = 2;
+        data.types = D_800A636C[variant].data.types;
+        data.settings = D_800A636C[variant].data.settings;
+        spawner = func_151A8B20(&info, -1, sizeof(SpawnerData), 0xFF, 0);
         if (spawner != NULL) {
-            memcpy((u8 *)spawner + 0x80, &local.data, sizeof(SpawnerData));
+            memcpy(&spawner->data, &data, sizeof(SpawnerData));
         }
     }
 }
@@ -1435,36 +1439,27 @@ typedef struct {
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x73];
-    /* 0x80 */ SpawnerData data;
-} Spawner;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ RiseEmitter emitter;
+} RiseEmitterObject;
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
 void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     RiseEmitter emitter;
     SpawnerData *data;
-    struct260 *obj;
+    RiseEmitterObject *obj;
 
     data = &spawner->data;
     emitter.pending = 0.0f;
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = func_15149130((u32)func_150ADA20() % (data->typeRange + 1) + data->typeBase, -1, 0x3F, -1, 1, 0,
+    obj = (RiseEmitterObject *)func_15149130((u32)func_150ADA20() % (data->types.range + 1) + data->types.base, -1, 0x3F, -1, 1, 0,
                         (struct37 *)sizeof(RiseEmitter), spawner->unkC, spawner->unk1);
     if (obj != NULL) {
-        memcpy((u8 *)obj + 0x28, &emitter, sizeof(RiseEmitter));
+        memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));
     }
 }
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1];
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ RiseEmitter emitter;
-} RiseEmitterObject;
 
 /* Emitter update: spawns rising particles (func_151596BC family) at the emitter's position. */
 void func_1515AB88(RiseEmitterObject *obj) {
