@@ -327,7 +327,7 @@ void func_151D7830(TrailEmitter *emitter) {
     TrailData data;
     TrailHeader header;
     // matching: frame size (compiler temps below header)
-    s32 pad[2];
+    s32 pad;
 
     data.emitter = emitter;
     data.lastPos = emitter->anchor.pos;
