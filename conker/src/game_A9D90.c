@@ -15,120 +15,129 @@ extern void func_1507D1D8();
 extern void func_1509C3A0(void);
 
 
-void func_1507C8E0(struct127 *arg0, s32 arg1) {
-    arg0->unk31C->unk120 = (u8)2;
-    arg0->unk31C->unk124 = arg1;
-}
+/* View of the per-object state block hung off struct127.unk31C (struct126 lacks these fields). */
+typedef struct ObjState {
+    /* 0x000 */ u8 pad0[0x46];
+    /* 0x046 */ s16 unk46;
+    /* 0x048 */ u8 pad48[0x2D];
+    /* 0x075 */ u8 unk75;
+    /* 0x076 */ u8 pad76[0xE];
+    /* 0x084 */ u8 team;
+    /* 0x085 */ u8 pad85[0x96];
+    /* 0x11B */ u8 unk11B;
+    /* 0x11C */ u8 pad11C[4];
+    /* 0x120 */ u8 state;
+    /* 0x121 */ u8 cause;
+    /* 0x122 */ u8 finished;
+    /* 0x123 */ u8 pad123;
+    /* 0x124 */ s16 timer;
+    /* 0x126 */ s16 elapsed;
+    /* 0x128 */ u8 pad128[0x82];
+    /* 0x1AA */ s16 unk1AA;
+    /* 0x1AC */ u8 unk1AC;
+    /* 0x1AD */ u8 pad1AD[2];
+    /* 0x1AF */ s8 unk1AF;
+    /* 0x1B0 */ s8 unk1B0;
+    /* 0x1B1 */ u8 unk1B1;
+} ObjState;
 
-// "goto" hell
-typedef struct C8FCStatus {
-    u8 pad0[0x84];
-    u8 team;
-    u8 pad85[0x9B];
-    u8 state;
-    u8 pad121;
-    u8 finished;
-    u8 pad123;
-    s16 timer;
-    s16 elapsed;
-} C8FCStatus;
+#define STATE(obj) ((ObjState *)(obj)->unk31C)
 
-typedef struct C8FCPlayer {
-    u8 pad0[7];
-    u8 controller;
-    u8 pad8[0x314];
-    C8FCStatus *status;
-    u8 pad320[0xC];
-} C8FCPlayer;
-
-void func_1507CD0C(struct127 *);
+void func_1507CD0C(struct127 *obj);
 void func_1506160C(struct127 *, u8, u8, u8, u8);
 void func_1507D4F8(s32);
 void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
 void func_1517EE40(s32, s32, s32, s32, s8, s32);
 void func_1517F814(s32, f32, f32, f32, s32);
 
+/* Puts obj into state 2 with the given timer. */
+void func_1507C8E0(struct127 *obj, s32 timer) {
+    STATE(obj)->state = 2;
+    STATE(obj)->timer = timer;
+}
+
+/* Per-frame update of every active player's state machine. */
 void func_1507C8FC(void) {
     s32 i;
     f32 x;
     f32 y;
     f32 z;
-    C8FCPlayer *player;
+    struct127 *player;
 
     if (D_800BEAC0 == 0) {
-        player = (C8FCPlayer *)&D_800CC2D0;
+        player = D_800CC2D0;
         for (i = 0; i < D_8008FD8C; i++, player++) {
-            if (player->status == NULL) {
+            if (STATE(player) == NULL) {
                 continue;
             }
-            if (player->status->state == 0) {
-                player->status->elapsed = 0;
+            if (STATE(player)->state == 0) {
+                STATE(player)->elapsed = 0;
                 continue;
             }
-            if (player->status->state == 1) {
+            if (STATE(player)->state == 1) {
                 continue;
             }
             if (i <= D_80082FA0) {
                 if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
-                    player->status->state = 2;
-                    player->status->timer = 60;
+                    STATE(player)->state = 2;
+                    STATE(player)->timer = 60;
                 }
-                if (player->status->state == 11) {
+                if (STATE(player)->state == 11) {
                     func_1517EE40(0, 0, 0, 15, 1, i);
-                    player->status->state = 12;
+                    STATE(player)->state = 12;
                     continue;
                 }
-                if (player->status->state == 12) {
+                if (STATE(player)->state == 12) {
                     if (func_1517EFAC(i) != 0) {
                         func_1507D4F8(i);
                     }
                     continue;
                 }
-                if (player->status->state == 2) {
-                    if (player->status->timer > 0) {
-                        player->status->timer -= D_800BE9E4;
+                if (STATE(player)->state == 2) {
+                    if (STATE(player)->timer > 0) {
+                        STATE(player)->timer -= D_800BE9E4;
                     } else {
-                        func_1507CD0C((struct127 *)player);
+                        func_1507CD0C(player);
                     }
-                } else if (player->status->state == 7) {
-                    if (player->status->timer > 0) {
-                        player->status->timer -= D_800BE9E4;
+                } else if (STATE(player)->state == 7) {
+                    if (STATE(player)->timer > 0) {
+                        STATE(player)->timer -= D_800BE9E4;
                     } else {
-                        player->status->state = 8;
-                        func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                        STATE(player)->state = 8;
+                        func_1506160C(player, 2, 0, 60, 0);
                     }
                 }
-                player->status->elapsed += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->status->team == 0) ||
-                    func_150859AC((s16)i, 3) < 2 || (player->status->team == 1 && player->status->elapsed >= 181)) {
-                    player->status->finished = 1;
+                STATE(player)->elapsed += D_800BE9E4;
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && STATE(player)->team == 0) ||
+                    func_150859AC(i, 3) < 2 || (STATE(player)->team == 1 && STATE(player)->elapsed >= 181)) {
+                    STATE(player)->finished = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
-                    player->status->finished = 0;
+                    STATE(player)->finished = FALSE;
                 }
-                func_1507E1D0((struct127 *)player, &x, &y, &z);
+                func_1507E1D0(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
-                if (player->status->finished != 0 && player->status->state == 5) {
-                    player->status->state = 6;
+                if (STATE(player)->finished && STATE(player)->state == 5) {
+                    STATE(player)->state = 6;
                 }
-                if (player->status->state == 9) {
+                if (STATE(player)->state == 9) {
                     func_1507D4F8(i);
                 }
-            } else if (player->status->state == 11) {
+            } else if (STATE(player)->state == 11) {
                 func_1507D4F8(i);
                 continue;
-            } else if (player->status->state == 2) {
-                if (player->status->timer > 0) {
-                    player->status->timer -= D_800BE9E4;
+            } else if (STATE(player)->state == 2) {
+                if (STATE(player)->timer > 0) {
+                    STATE(player)->timer -= D_800BE9E4;
                 } else {
-                    player->status->state = 7;
+                    STATE(player)->state = 7;
                 }
             } else {
-                player->status->elapsed += D_800BE9E4;
-                if (player->controller == 0xFF && player->status->elapsed >= 161) {
-                    func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                STATE(player)->elapsed += D_800BE9E4;
+                if (player->unk7 == 0xFF && STATE(player)->elapsed >= 161) {
+                    func_1506160C(player, 2, 0, 60, 0);
                 }
-                if (player->status->elapsed >= 181 && player->status->state != 10) {
+                if (STATE(player)->elapsed >= 181 && STATE(player)->state != 10) {
                     func_1507D4F8(i);
                 }
             }
@@ -137,25 +146,16 @@ void func_1507C8FC(void) {
     }
 }
 
-void func_1507CD0C(struct127 *arg0) {
-    s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
+/* Puts obj into state 3 and, for a local player slot, calls func_15181D70 on it. */
+void func_1507CD0C(struct127 *obj) {
+    s32 slot = obj - D_800CC2D0;
 
-    arg0->unk31C->unk120 = 3;
+    STATE(obj)->state = 3;
 
-    if (temp_lo <= D_80082FA0) {
-        func_15181D70(temp_lo);
+    if (slot <= D_80082FA0) {
+        func_15181D70(slot);
     }
 }
-
-typedef struct CD64Inner {
-    u8 pad0[0x46];
-    s16 unk46;
-    u8 pad48[0xD8];
-    u8 unk120;
-    u8 unk121;
-    u8 pad122[0x8A];
-    u8 unk1AC;
-} CD64Inner;
 
 typedef struct CD64Msg {
     struct127 *obj;
@@ -168,53 +168,54 @@ void func_15169040(void *, s32);
 void func_1504BAF0(struct127 *);
 void func_150E7994(s16, f32, u8, s32);
 
-void func_1507CD64(struct127 *arg0, s32 arg1) {
+/* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
+void func_1507CD64(struct127 *obj, s32 cause) {
     f32 f;
     s32 sound;
     u32 r;
     s32 mode;
-    s32 index;
+    s32 slot;
     CD64Msg msg;
     struct127 *saved;
-    s32 changed;
+    s32 again;
     s32 flag;
 
-    if (arg0->unk31C == NULL) {
+    if (STATE(obj) == NULL) {
         return;
     }
-    index = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
-    if (index >= D_8008FD8C) {
+    slot = obj - D_800CC2D0;
+    if (slot >= D_8008FD8C) {
         return;
     }
-    if (((CD64Inner *)arg0->unk31C)->unk120 != 0) {
-        if (arg1 != 9 || arg1 == ((CD64Inner *)arg0->unk31C)->unk121) {
+    if (STATE(obj)->state != 0) {
+        if (cause != 9 || cause == STATE(obj)->cause) {
             return;
         }
-        changed = 1;
+        again = TRUE;
     } else {
-        changed = 0;
+        again = FALSE;
     }
-    ((CD64Inner *)arg0->unk31C)->unk121 = arg1;
-    if (D_800BE616 != 0 && changed == 0) {
-        if (index < 16) {
-            D_800E0AD0[index]++;
+    STATE(obj)->cause = cause;
+    if (D_800BE616 != 0 && !again) {
+        if (slot < 16) {
+            D_800E0AD0[slot]++;
         }
-        if ((D_8008FDBC & 0x20) && *(u8 *)((u8 *)arg0 + 0x128) == 0) {
+        if ((D_8008FDBC & 0x20) && *(u8 *)&obj->pad128 == 0) {
             func_15085710(1, 10, 1);
         }
     }
-    msg.obj = arg0;
-    msg.id = arg0->unique_id;
+    msg.obj = obj;
+    msg.id = obj->unique_id;
     func_15169040(&msg, 3);
     D_800D18A9 = 0;
-lbl2:
+lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store
     sound = -1;
     flag = 0;
     mode = 0;
-    if (((CD64Inner *)arg0->unk31C)->unk1AC) {
+    if (STATE(obj)->unk1AC) {
         D_800D18A9 = 2;
     }
-    switch (arg1) {
+    switch (cause) {
     case 11:
         sound = 0x2D4;
         break;
@@ -247,8 +248,8 @@ lbl2:
         D_800D18A9 = 3;
         break;
     case 6:
-        if (arg0->interaction_state == 1 || arg0->interaction_state == 0x15 || arg0->unk5 == 3 ||
-            arg0->unk65 != 0) {
+        if (obj->interaction_state == 1 || obj->interaction_state == 0x15 || obj->unk5 == 3 ||
+            obj->unk65 != 0) {
             sound = 0x170;
         }
         mode = 1;
@@ -287,39 +288,40 @@ lbl2:
         break;
     }
     if (sound != -1) {
-        func_1505E650(arg0, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
+        func_1505E650(obj, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
     }
-    arg0->health = 0;
-    arg0->immune = 0xFF;
-    arg0->stunned = 0xFF;
-    arg0->disable_run = 0xFF;
-    arg0->unkF8 |= 0x200;
-    arg0->unkE4 = 0;
-    arg0->unkE6 = 0;
-    arg0->xz_velocity = 0.0f;
-    ((CD64Inner *)arg0->unk31C)->unk46 = 0;
-    if (arg0->unk13C != 0) {
+    obj->health = 0;
+    obj->immune = 0xFF;
+    obj->stunned = 0xFF;
+    obj->disable_run = 0xFF;
+    obj->unkF8 |= 0x200;
+    obj->unkE4 = 0;
+    obj->unkE6 = 0;
+    obj->xz_velocity = 0.0f;
+    STATE(obj)->unk46 = 0;
+    if (obj->unk13C != 0) {
         saved = D_800D154C;
-        D_800D154C = arg0;
-        func_1504BAF0(arg0);
+        D_800D154C = obj;
+        func_1504BAF0(obj);
         D_800D154C = saved;
     }
     if (mode == 0 || mode == 3) {
-        ((CD64Inner *)arg0->unk31C)->unk120 = 1;
+        STATE(obj)->state = 1;
     } else {
-        func_1507C8E0(arg0, 0);
+        func_1507C8E0(obj, 0);
     }
     if (mode == 2) {
-        ((CD64Inner *)arg0->unk31C)->unk120 = 0xB;
+        STATE(obj)->state = 11;
     } else if (mode == 3) {
-        func_1507D4F8(index);
+        func_1507D4F8(slot);
     }
-    if (index == 0 && D_800BE9F0 == 4) {
+    if (slot == 0 && D_800BE9F0 == 4) {
         r = func_150ADA20();
         f = func_150ADA68();
-        func_150E7994((s16)(r % 3 + 4), f * 0.1f + 0.3f, 0xFF, 0);
+        func_150E7994(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
     }
 }
+
 void func_1509BFB0(s32 num, s32, s32, ...);
 extern struct127 D_800CC40F[];
 
