@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares these three with stale signatures; hide them and declare the real ones. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #define func_1513D524 func_1513D524_decl_in_functions_h
@@ -7,10 +8,138 @@
 #undef func_151D9B8C
 #undef func_1513D524
 void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
-void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
+void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
+typedef struct { f32 x, y, z; } Vec3f;
+
+/* Ground probe result filled by func_1504715C / func_15046C80 / func_1504697C. */
+typedef struct Game1DD500Ground {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 surface[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x20 */ s32 unk20;
+} Game1DD500Ground; // size 0x24
+
+/* One row of the per-actor-type effect profile table. */
+typedef struct Game1DD500Profile {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ u8 unkE; /* 1: flagged effect, 2: no effect */
+    /* 0x0F */ u8 padF;
+} Game1DD500Profile; // size 0x10
+
+/* Parameters for the impact effect spawned by func_15153F18. */
+typedef struct Game1DD500Impact {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ f32 position[3];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ s8 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} Game1DD500Impact;
+
+void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
+void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
+                   s32, s32, s32, s32, s32, s32, s32, s32);
+void func_1504715C(Game1DD500Ground *, struct127 *);
+s32 func_15134070(struct127 *);
+void func_15143134(Vec3f *, f32 *, Mtx *);
+void func_15153F18(Game1DD500Impact *, f32 *, Game1DD500Ground *, s32, s32);
+extern Game1DD500Profile D_800A3FD8[];
+extern Vec3f D_800AA120;
+
+/* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
+#define EFFECT_PROFILE(actor) \
+    ((actor) != NULL ? (((actor)->id == 0x53 || (actor)->id == 0xA5) ? 4 : func_15134070(actor)) : 4)
+
+/* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
+s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
+                  s16 pitch, s16 yaw, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    f32 pos[3];
+    f32 dir[3];
+    f32 speed;
+
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    speed = func_150ADA68() * 5.3f + 4.4f;
+    func_15143794(yaw, pitch, speed, dir);
+    // matching: a literal 0.0f scale is folded away; IDO keeps the multiply for (0.68f - 0.68f)
+    func_151DA6F8(pos, dir, func_150ADA68() * (0.68f - 0.68f) + 0.68f, (s16)(func_150ADA20() % 20 + 31),
+                  func_150ADA20() % 101 + 155, func_150ADA68() * 2.33f + 6.7f,
+                  (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, argE, 1);
+    return 1;
+}
+
+/* Spawns an impact effect at joint 6 of actor, styled by the profile of other. */
+void func_151B01B8(struct127 *actor, struct127 *other) {
+    Game1DD500Impact impact;
+    u8 shade;
+    Game1DD500Ground ground;
+    s32 profile;
+
+    if (actor != NULL && actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+        func_1504715C(&ground, actor);
+        profile = EFFECT_PROFILE(other);
+        if (profile != 99) {
+            if (D_800A3FD8[profile].unkE != 2) {
+                shade = (actor->unk7A >> 8) + 0x40;
+                func_15143134(&D_800AA120, impact.position, &((Mtx *)actor->unk1D4)[6]);
+                impact.unk2C = 10;
+                impact.unk2E = 20;
+                impact.unk00 = shade - 0x68;
+                impact.unk14 = 7.22f;
+                impact.unk02 = 0xD0;
+                impact.unk04 = -0x1B;
+                impact.unk06 = 0x36;
+                impact.unk30 = 3;
+                impact.unk32 = 2;
+                impact.unk34 = 30;
+                impact.unk36 = 40;
+                impact.unk38 = 155;
+                impact.unk3A = 100;
+                impact.unk18 = 3.04f;
+                impact.unk1C = 0.810000062f;
+                impact.unk20 = 0.405000031f;
+                impact.unk24 = 6.0f;
+                impact.unk28 = 13.90000057f;
+                impact.unk40 = 0.5f;
+                if (D_800A3FD8[profile].unkE == 1) {
+                    impact.unk3C = 1;
+                } else {
+                    impact.unk3C = 0;
+                }
+                impact.unk44 = 16;
+                impact.unk46 = 15;
+                impact.unk48 = 0;
+                func_15153F18(&impact, impact.position, &ground, 0xFF, 1);
+            }
+        }
+    }
+}
+
+/* TEMP compat */
 typedef struct {
     u8 pad_0x0[0x10];
     u8 field_0x10;
@@ -22,7 +151,6 @@ typedef struct {
     f32 field_0x1C;
     f32 field_0x20;
 } CompactOscillatorMotionState;
-
 typedef struct {
     u8 pad_0x0[0x2C];
     f32 field_0x2C;
@@ -30,215 +158,113 @@ typedef struct {
     u8 pad_0x34[0xDC];
     CompactOscillatorMotionState field_0x110;
 } CompactOscillatorObject;
-
 void func_151B1918(struct260 *arg0);
 void func_15149368(struct260 *arg0);
+typedef Game1DD500Ground Game1DD500Hit;
+void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
+s32 func_15046C80(f32 *, s32, f32, Game1DD500Ground *);
+s32 func_1504697C(f32 *, s32, f32, Game1DD500Ground *);
+void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
+void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
+/* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
+void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
+    Game1DD500Impact impact;
+    Game1DD500Ground ground;
+    s32 count;
+    Game1DD500Ground scatterGround;
+    f32 probe[3];
+    f32 spot[3];
+    f32 center[3];
+    Game1DD500Ground centerGround;
 
-void func_15143794(s16, s16, f32, f32 *);
-void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
-                  s32, s32, s32, s32, s32, s32, s32, s32);
+    if (actor != NULL) {
+        func_1504715C(&ground, actor);
+        impact.position[0] = actor->x_position;
+        impact.position[1] = actor->y_position;
+        impact.position[2] = actor->z_position;
+        impact.unk14 = 5.08f;
+        impact.unk2C = 10;
+        impact.unk02 = 0xFF;
+        impact.unk04 = -0x3F;
+        impact.unk2E = 0;
+        impact.unk00 = 0;
+        impact.unk06 = 0x2D;
+        impact.unk30 = 3;
+        impact.unk32 = 2;
+        impact.unk34 = 40;
+        impact.unk36 = 20;
+        impact.unk38 = 155;
+        impact.unk3A = 100;
+        impact.unk3C = 0;
+        impact.unk44 = 16;
+        impact.unk46 = 15;
+        impact.unk48 = 0;
+        impact.unk18 = 3.02f;
+        impact.unk1C = 0.807000041f;
+        impact.unk20 = 0.701000035f;
+        impact.unk24 = 18.0f;
+        impact.unk28 = 11.8f;
+        impact.unk40 = 0.5f;
+        func_15153F18(&impact, impact.position, &ground, 0xFF, 1);
 
-s32 func_151B0050(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7,
-                  s16 arg8, s16 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    f32 pos[3];
-    f32 dir[3];
-    f32 speed;
-
-    pos[0] = arg2;
-    pos[1] = arg3;
-    pos[2] = arg4;
-    speed = func_150ADA68() * 5.300000191f + 4.400000095f;
-    func_15143794(arg9, arg8, speed, dir);
-    func_151DA6F8(pos, dir, func_150ADA68() * (0.6800000072f - 0.6800000072f) + 0.6800000072f, (s16)(func_150ADA20() % 20U + 0x1F),
-                  func_150ADA20() % 101U + 0x9B, func_150ADA68() * 2.329999924f + 6.699999809f,
-                  (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1);
-    return 1;
-}
-
-typedef struct Game1DD500Impact {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    f32 position[3];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    s8 field3C;
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game1DD500Impact;
-typedef struct Game1DD500Hit { f32 height; u8 geometry[0x20]; } Game1DD500Hit;
-void func_1504715C(void *, void *);
-s32 func_15134070(void *);
-void func_15143134(f32 *, f32 *, s32);
-void func_15153F18(s16 *, void *, s32, s32, s32);
-extern u8 D_800A3FD8[];
-extern f32 D_800AA120;
-
-void func_151B01B8(void *arg0, void *arg1) {
-    Game1DD500Impact packet;
-    u8 shade;
-    Game1DD500Hit hit;
-    s32 effectProfileIndex;
-
-    if ((arg0 != 0) && (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) && ((*(u8 *)((u8 *)arg0 + 0x74) & 0xF) != 0xF)) {
-        func_1504715C(&hit, arg0);
-        effectProfileIndex = arg1 != 0 ?
-            ((*(u8 *)((u8 *)arg1 + 4) == 0x53 || *(u8 *)((u8 *)arg1 + 4) == 0xA5) ?
-                4 : func_15134070(arg1)) : 4;
-        if (effectProfileIndex != 0x63) {
-            if (D_800A3FD8[effectProfileIndex * 0x10 + 0xE] != 2) {
-                shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
-                func_15143134(&D_800AA120, &packet.position[0], *(s32 *)((u8 *)arg0 + 0x1D4) + 0x180);
-                packet.field2C = 0xA;
-                packet.field2E = 0x14;
-                packet.field00 = shade - 0x68;
-                packet.field14 = 7.21999979f;
-                packet.field02 = 0xD0;
-                packet.field04 = -0x1B;
-                packet.field06 = 0x36;
-                packet.field30 = 3;
-                packet.field32 = 2;
-                packet.field34 = 0x1E;
-                packet.field36 = 0x28;
-                packet.field38 = 0x9B;
-                packet.field3A = 0x64;
-                packet.field18 = 3.039999962f;
-                packet.field1C = 0.810000062f;
-                packet.field20 = 0.405000031f;
-                packet.field24 = 6.0f;
-                packet.field28 = 13.90000057f;
-                packet.field40 = 0.5f;
-                if (D_800A3FD8[effectProfileIndex * 0x10 + 0xE] == 1) {
-                    packet.field3C = 1;
-                } else {
-                    packet.field3C = 0;
+        count = func_150ADA20() % 6 + 12;
+        scatterGround.unk18 = 0;
+        scatterGround.unk1C = 0;
+        scatterGround.unk1D = 0;
+        scatterGround.unk20 = 0;
+        scatterGround.height = -10000.0f;
+        probe[1] = actor->y_position + 100.0f;
+        if (count != 0) {
+            // matching: a do/while (--count != 0) loop schedules differently from this break form
+            for (;;) {
+                func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
+                spot[0] += actor->x_position;
+                spot[2] += actor->z_position;
+                probe[0] = spot[0];
+                probe[2] = spot[2];
+                if (!func_15046C80(probe, 0, actor->y_position - 500.0f, &scatterGround) || scatterGround.unk1D == 3) {
+                    return;
                 }
-                packet.field44 = 0x10;
-                packet.field46 = 0xF;
-                packet.field48 = 0;
-                func_15153F18(&packet.field00, &packet.position[0], (s32) &hit, 0xFF, 1);
+                spot[1] = scatterGround.height;
+                spot[1] += 10.0f;
+                // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
+                if (func_150ADA20() & 1) {
+                    func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                                  scatterGround.surface, spot, 100, 0, 1, 0, arg1, arg2);
+                } else {
+                    func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
+                                  spot, 1, arg1, arg2);
+                }
+                if (--count == 0) {
+                    break;
+                }
             }
         }
-    }
-}
 
-typedef struct {
-    f32 y;
-    u8 pad4[0x14];
-    s32 f18;
-    s8 f1C;
-    u8 f1D;
-    s32 f20;
-} Probe151B03B8;
-extern void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_15046C80(f32 *, s32, f32, void *);
-s32 func_1504697C(f32 *, s32, f32, void *);
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-void func_15136698(f32, f32, s32, s32, s32, void *, f32 *, s32, s32, u8, s32);
-extern f32 D_800AA2B4, D_800AA2B8, D_800AA2BC, D_800AA2C0, D_800AA2C4, D_800AA2C8;
-extern f32 D_800AA2CC, D_800AA2D0, D_800AA2D4, D_800AA2D8, D_800AA2DC;
+        center[0] = actor->x_position;
+        center[1] = actor->y_position;
+        center[2] = actor->z_position;
+        centerGround.unk20 = 0;
+        centerGround.unk1D = 0;
+        centerGround.unk1C = 0;
+        centerGround.unk18 = 0;
+        centerGround.height = -10000.0f;
+        {
+            f32 above[3];
 
-void func_151B03B8(void *arg0, u8 arg1, s32 arg2) {
-    Game1DD500Impact packet;
-    Game1DD500Hit hit;
-    s32 n;
-    Probe151B03B8 pa;
-    f32 spD4[3];
-    f32 spC8[3];
-    f32 spBC[3];
-    Probe151B03B8 pb;
-
-    if (arg0 != NULL) {
-        func_1504715C(&hit, arg0);
-        packet.position[0] = *(f32 *)((u8 *)arg0 + 0x14);
-        packet.position[1] = *(f32 *)((u8 *)arg0 + 0x18);
-        packet.position[2] = *(f32 *)((u8 *)arg0 + 0x1C);
-        packet.field14 = D_800AA2B4;
-        packet.field2C = 0xA;
-        packet.field02 = 0xFF;
-        packet.field04 = -0x3F;
-        packet.field2E = 0;
-        packet.field00 = 0;
-        packet.field06 = 0x2D;
-        packet.field30 = 3;
-        packet.field32 = 2;
-        packet.field34 = 0x28;
-        packet.field36 = 0x14;
-        packet.field38 = 0x9B;
-        packet.field3A = 0x64;
-        packet.field3C = 0;
-        packet.field44 = 0x10;
-        packet.field46 = 0xF;
-        packet.field48 = 0;
-        packet.field18 = D_800AA2B8;
-        packet.field1C = D_800AA2BC;
-        packet.field20 = D_800AA2C0;
-        packet.field24 = 18.0f;
-        packet.field28 = D_800AA2C4;
-        packet.field40 = 0.5f;
-        func_15153F18(&packet.field00, &packet.position[0], (s32)&hit, 0xFF, 1);
-        n = func_150ADA20() % 6U + 0xC;
-        pa.f18 = 0;
-        pa.f1C = 0;
-        pa.f1D = 0;
-        pa.f20 = 0;
-        pa.y = D_800AA2C8;
-        spD4[1] = *(f32 *)((u8 *)arg0 + 0x18) + 100.0f;
-        if (n != 0) for (;;) {
-            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * 100.0f + 110.0f, &spC8[0], &spC8[2]);
-            spC8[0] += *(f32 *)((u8 *)arg0 + 0x14);
-            spC8[2] += *(f32 *)((u8 *)arg0 + 0x1C);
-            spD4[0] = spC8[0];
-            spD4[2] = spC8[2];
-            if ((func_15046C80(spD4, 0, *(f32 *)((u8 *)arg0 + 0x18) - 500.0f, &pa.y) == 0) || (pa.f1D == 3)) {
+            above[0] = center[0];
+            above[1] = center[1] + 100.0f;
+            above[2] = center[2];
+            if (!func_1504697C(above, 0, center[1] - 500.0f, &centerGround) || centerGround.unk1D == 3) {
                 return;
             }
-            spC8[1] = pa.y;
-            spC8[1] += 10.0f;
-            if (func_150ADA20() & 1) {
-                func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f), pa.pad4, (struct17 *)spC8, 100, 0, 1, 0, arg1, arg2);
-            } else {
-                func_151DAB58(0, func_150ADA68() * D_800AA2CC + D_800AA2D0, (u32)(func_150ADA68() * (f32)100 + 155.0f), spC8, 1, arg1, arg2);
-            }
-            n--;
-            if (n == 0) break;
         }
-        spBC[0] = *(f32 *)((u8 *)arg0 + 0x14);
-        spBC[1] = *(f32 *)((u8 *)arg0 + 0x18);
-        spBC[2] = *(f32 *)((u8 *)arg0 + 0x1C);
-        pb.f20 = 0;
-        pb.f1D = 0;
-        pb.f1C = 0;
-        pb.f18 = 0;
-        pb.y = D_800AA2D4;
-        {
-        f32 sp8C[3];
-        sp8C[0] = spBC[0];
-        sp8C[1] = spBC[1] + 100.0f;
-        sp8C[2] = spBC[2];
-        if ((func_1504697C(sp8C, 0, spBC[1] - 500.0f, &pb.y) == 0) || (pb.f1D == 3)) {
-            return;
-        }
-        }
-        spBC[1] = pb.y;
-        spBC[1] += 10.0f;
-        func_15136698((func_150ADA68() * 40.0f + 120.0f) * D_800AA2D8, (func_150ADA68() * 123.0f + 123.0f) * D_800AA2DC, (func_150ADA20() % 101U + 0x9B) & 0xFF, (func_150ADA20() % 101U + 0x64) & 0xFF, func_150ADA20() % 56U + 0x46, (u8 *)&pb + 4, spBC, 0, 1, arg1, arg2);
+        center[1] = centerGround.height;
+        center[1] += 10.0f;
+        func_15136698((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
+                      func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
+                      centerGround.surface, center, 0, 1, arg1, arg2);
     }
 }
 
@@ -573,9 +599,6 @@ typedef struct {
     Game1DD500Proj proj;
 } Game1DD500ProjObj;
 
-s32 func_15046C80(f32 *, s32, f32, void *);
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-
 s32 func_151B118C(Game1DD500ProjObj *arg0) {
     f32 dx;
     f32 dz;
@@ -619,7 +642,7 @@ s32 func_151B118C(Game1DD500ProjObj *arg0) {
             pos[2] = probe[2];
             size = ((p->unk14 + p->unk1C * 0.5f) + (p->unk18 + p->unk20 * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(p->unk25, size * 1.70000005f, arg0->unk5C, (void *)&arg0->unk7C, (struct17 *)pos, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
+                func_151D9B8C(p->unk25, size * 1.70000005f, arg0->unk5C, (void *)&arg0->unk7C, pos, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
             } else {
                 func_151DAB58(p->unk25, size * 0.680000007f, arg0->unk5C, pos, 1, arg0->unkC, arg0->unk1);
             }
@@ -810,34 +833,3 @@ void func_151B1A84(struct260 *arg0) {
     func_151B1918(arg0);
     func_15149368(arg0);
 }
-void func_151B1AB0(void *arg0);
-
-typedef struct {
-    u8 pad0[0x7A];
-    u16 unk7A;
-    u8 pad7C[0x1D4 - 0x7C];
-    s32 unk1D4;
-} Obj151B1B34;
-
-typedef struct {
-    Obj151B1B34 *obj;
-    f32 unk4;
-    f32 timer;
-} Sub151B1B34;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub151B1B34 sub;
-} Arg151B1B34;
-
-typedef struct { f32 v[3]; } Vec3_151B1B34;
-extern Vec3_151B1B34 D_8008FAD0;
-extern Vec3_151B1B34 D_8008FADC;
-struct260 *func_15130374(void *, u8, s32, u8, s32);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-void func_151B1B34(Arg151B1B34 *arg0);
-void func_151B1FAC(struct260 *arg0, s32 arg1, u8 arg2);
