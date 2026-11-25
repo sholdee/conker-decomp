@@ -17,24 +17,7 @@ typedef struct {
 
 /* The particle object spawned by func_150E5FD0 (kind 0x41). */
 typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xF];
-    /* 0x01C */ s16 timer;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 length;
-    /* 0x034 */ Vec3f position;
-    /* 0x040 */ Vec3f direction;
-    /* 0x04C */ u8 pad4C[4];
-    /* 0x050 */ f32 speed;
-    /* 0x054 */ u8 pad54[8];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x63];
-    /* 0x0C0 */ u8 vertexTemplate[0x40];
-    /* 0x100 */ u8 *buffers[4];
+    /* 0x00 */ DefParticleHead head; /* head.def.height: length, head.def.rot: direction, head.def.scale.y: speed, head.def.unk44: alpha */
     /* 0x110 */ StreakImpact impact;
 } Streak;
 
@@ -116,9 +99,9 @@ s8 func_150E6230(Streak *streak) {
         Vec3f offset;
 
         if (impact->flags & 1) {
-            offset.x = impact->point.x - streak->position.x;
-            offset.y = impact->point.y - streak->position.y;
-            offset.z = impact->point.z - streak->position.z;
+            offset.x = impact->point.x - streak->head.def.pos.x;
+            offset.y = impact->point.y - streak->head.def.pos.y;
+            offset.z = impact->point.z - streak->head.def.pos.z;
             if (func_15144A74(&offset, &impact->point) < 0.0f) {
                 side = -1.0f;
             } else {
@@ -130,13 +113,13 @@ s8 func_150E6230(Streak *streak) {
         }
     }
     {
-        f32 vx = streak->direction.x * streak->speed;
-        f32 vy = streak->direction.y * streak->speed;
-        f32 vz = streak->direction.z * streak->speed;
+        f32 vx = streak->head.def.rot.x * streak->head.def.scale.y;
+        f32 vy = streak->head.def.rot.y * streak->head.def.scale.y;
+        f32 vz = streak->head.def.rot.z * streak->head.def.scale.y;
 
-        streak->position.x += vx * D_800BE9A4;
-        streak->position.y += vy * D_800BE9A4;
-        streak->position.z += vz * D_800BE9A4;
+        streak->head.def.pos.x += vx * D_800BE9A4;
+        streak->head.def.pos.y += vy * D_800BE9A4;
+        streak->head.def.pos.z += vz * D_800BE9A4;
     }
     return ret;
 }
@@ -169,23 +152,23 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     u8 fresh;
     s32 pad3; // matching: unused stack slot (frame layout)
 
-    func_151D5D60(streak->buffers, viewIdx, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(streak->head.vtxBuffers, viewIdx, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(streak->buffers[viewIdx], streak->vertexTemplate, sizeof(streak->vertexTemplate));
-            memcpy(streak->buffers[viewIdx] + 0x40, streak->vertexTemplate, sizeof(streak->vertexTemplate));
+            memcpy(streak->head.vtxBuffers[viewIdx], streak->head.vtxTemplate, sizeof(streak->head.vtxTemplate));
+            memcpy(streak->head.vtxBuffers[viewIdx] + 4, streak->head.vtxTemplate, sizeof(streak->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
     eye = &D_800DBFF0[viewIdx].eye;
-    length = streak->length;
-    start = streak->position;
+    length = streak->head.def.height;
+    start = streak->head.def.pos;
     do { // matching: a do/while(0) (a VEC3 macro body) splits uopt's block so length's f0 is reused for dx; { } does not
-        end.x = streak->position.x - streak->direction.x * length;
-        end.y = streak->position.y - streak->direction.y * length;
-        end.z = streak->position.z - streak->direction.z * length;
+        end.x = streak->head.def.pos.x - streak->head.def.rot.x * length;
+        end.y = streak->head.def.pos.y - streak->head.def.rot.y * length;
+        end.z = streak->head.def.pos.z - streak->head.def.rot.z * length;
     } while (0);
     dx = end.x - start.x;
     dy = end.y - start.y;
@@ -202,7 +185,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = streak->width / sqrtf(lengthSquared);
+        scale = streak->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
@@ -210,7 +193,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     vertices->x = start.x - nx;
     vertices->y = start.y - ny;
     vertices->z = start.z - nz;
-    vertices->alpha = streak->alpha;
+    vertices->alpha = streak->head.def.unk44;
     vertices->flag = 0;
     vertices++;
     vertices->x = end.x - nx;
@@ -228,20 +211,20 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     vertices->x = start.x + nx;
     vertices->y = start.y + ny;
     vertices->z = start.z + nz;
-    vertices->alpha = streak->alpha;
+    vertices->alpha = streak->head.def.unk44;
     vertices->flag = 0;
     return result;
 }
 
 /* Fades the streak out over its last 8 ticks. */
 s32 func_150E679C(Streak *streak) {
-    s32 timer = streak->timer;
+    s32 timer = streak->head.def.lifetime;
 
     if (timer < 8) {
         s32 fade = timer * 32;
 
-        if (fade < streak->alpha) {
-            streak->alpha = fade;
+        if (fade < streak->head.def.unk44) {
+            streak->head.def.unk44 = fade;
         }
     }
     return 1;
@@ -287,6 +270,6 @@ s32 func_150E67D0(Streak *streak) {
 
     impact = &streak->impact;
     func_1513C73C(&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
-                  50.0f, func_150ADA20() & 0xFF, 0, 0, streak->unkC, streak->unk1);
+                  50.0f, func_150ADA20() & 0xFF, 0, 0, streak->head.header.owner, streak->head.header.kind);
     return 0;
 }

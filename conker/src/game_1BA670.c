@@ -69,14 +69,7 @@ typedef struct {
 } ParticleData; /* 0x58 */
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 lifetime;
-    /* 0x01E */ u8 pad1E[0x16];
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f prevPos;
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 pad5C[0xB4];
+    /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position */
     /* 0x110 */ ParticleData data;
 } Particle;
 
@@ -408,13 +401,13 @@ void func_1518D6E0(Emitter *emitter) {
 
                 isFree = 1;
                 if (slot->particle) {
-                    slot->particle->prevPos = slot->particle->pos;
+                    slot->particle->head.def.rot = slot->particle->head.def.pos;
                     if (info->mode == 2 || attach == 2) {
-                        slot->particle->pos.x = self->pos.x + slot->offset.x;
-                        slot->particle->pos.y = self->pos.y + slot->offset.y;
-                        slot->particle->pos.z = self->pos.z + slot->offset.z;
+                        slot->particle->head.def.pos.x = self->pos.x + slot->offset.x;
+                        slot->particle->head.def.pos.y = self->pos.y + slot->offset.y;
+                        slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
-                        func_15143134(&info->points[k], &slot->particle->pos,
+                        func_15143134(&info->points[k], &slot->particle->head.def.pos,
                                       (Mtx *)self->params.owner->unk1D4 + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
@@ -422,13 +415,13 @@ void func_1518D6E0(Emitter *emitter) {
                         ParticleData *data;
 
                         data = &slot->particle->data;
-                        data->vel.x = (slot->particle->pos.x - slot->particle->prevPos.x) * D_800BE9A8;
+                        data->vel.x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
                         if (data->vel.x > 10.0f) {
                             data->vel.x = 10.0f;
                         } else if (data->vel.x < -10.0f) {
                             data->vel.x = -10.0f;
                         }
-                        data->vel.z = (slot->particle->pos.z - slot->particle->prevPos.z) * D_800BE9A8;
+                        data->vel.z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * D_800BE9A8;
                         if (data->vel.z > 10.0f) {
                             data->vel.z = 10.0f;
                         } else if (data->vel.z < -10.0f) {
@@ -437,9 +430,9 @@ void func_1518D6E0(Emitter *emitter) {
                         data->vel.y = 0.0f;
                         func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
-                        slot->particle->lifetime =
+                        slot->particle->head.def.lifetime =
                             func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
-                        slot->particle->flags |= 1;
+                        slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
                         self->count--;
                     } else {
@@ -509,7 +502,7 @@ void func_1518D6E0(Emitter *emitter) {
                                                            spawnFlag, sizeof(ParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
                             memcpy(&freeSlot->particle->data, &data, sizeof(ParticleData));
-                            freeSlot->particle->flags |= 0x40000000;
+                            freeSlot->particle->head.def.flags |= 0x40000000;
                             if (info->mode == 2 || attach == 2) {
                                 switch (info->spread) {
                                 case 1: {
@@ -545,17 +538,17 @@ void func_1518D6E0(Emitter *emitter) {
                                 }
                                     break;
                                 }
-                                freeSlot->particle->pos.x = self->pos.x + freeSlot->offset.x;
-                                freeSlot->particle->pos.y = self->pos.y + freeSlot->offset.y;
-                                freeSlot->particle->pos.z = self->pos.z + freeSlot->offset.z;
+                                freeSlot->particle->head.def.pos.x = self->pos.x + freeSlot->offset.x;
+                                freeSlot->particle->head.def.pos.y = self->pos.y + freeSlot->offset.y;
+                                freeSlot->particle->head.def.pos.z = self->pos.z + freeSlot->offset.z;
                             } else {
                                 s32 idx;
 
                                 idx = freeSlot - self->slots;
-                                func_15143134(&info->points[idx], &freeSlot->particle->pos,
+                                func_15143134(&info->points[idx], &freeSlot->particle->head.def.pos,
                                               (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
                             }
-                            freeSlot->particle->prevPos = freeSlot->particle->pos;
+                            freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;
                             freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
                             freeSlot = freeSlot->next;
                             prevFree->next = freeSlot;

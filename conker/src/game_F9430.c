@@ -303,11 +303,7 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0xA8 - 0x64];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 decay; /* set by func_150CC6B8 */
 } DecayParticle;
 
@@ -318,8 +314,8 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
 
     decay = &p->decay; // matching: IDO keeps the factor's address in a register only via this pointer
     for (i = D_800BE9E4; i != 0; i--) {
-        p->unk58 *= *decay;
-        p->unk60 *= *decay;
+        p->head.desc.vel.x *= *decay;
+        p->head.desc.vel.z *= *decay;
     }
     return 1;
 }

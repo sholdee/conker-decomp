@@ -305,12 +305,7 @@ s32 func_150CBA30(DustParticle *dust) {
 
 /* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x48];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x44];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
 } SparkParticle;
 
@@ -390,8 +385,8 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
 
     damping = &particle->damping; // matching: read through a pointer, IDO reloads it after every store
     for (i = D_800BE9E4; i != 0; i--) {
-        particle->unk58 *= *damping;
-        particle->unk60 *= *damping;
+        particle->head.desc.vel.x *= *damping;
+        particle->head.desc.vel.z *= *damping;
     }
     return 1;
 }
