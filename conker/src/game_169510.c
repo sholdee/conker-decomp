@@ -6,10 +6,8 @@
 
 /* Per-behaviour state that follows a particle. */
 typedef union {
-    struct {
-        Vec3f u;
-        Vec3f v;
-    } axes;             /* func_1513D6FC, func_1513F4B0 */
+    ParticleAxes axes;  /* func_1513D6FC, func_1513F4B0 */
+    ActorRef owner;     /* func_1513E084 */
     struct {
         f32 unk0;
         f32 unk4;
@@ -167,7 +165,7 @@ void func_1513C060(QuadSprite *sprite) {
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
 QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
-                         struct167 *pos, s32 extraSize, u8 arg9, s32 argA) {
+                         Vec3f *pos, s32 extraSize, u8 arg9, s32 argA) {
     QuadSprite *sprite;
     u8 kind;
     s32 i;
@@ -205,7 +203,7 @@ QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 
         sprite->link.sharedHandle = func_1515D440();
     }
     if (pos) {
-        sprite->pos = *(Vec3f *)pos;
+        sprite->pos = *pos;
     }
     return sprite;
 }
@@ -649,7 +647,7 @@ void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
-        (func_1513D6FC((struct211 *)&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
+        (func_1513D6FC(&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
         func_1516972C(particle);
         return NULL;
     }
@@ -671,7 +669,7 @@ s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
  * slope func_1510E388 returns (each axis keeps its length); otherwise it lies in the plane of the
  * basis func_15144E80 returns.
  */
-s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope) {
+s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope) {
     f32 slopeX;
     f32 slopeZ;
     f32 cosA;
@@ -728,9 +726,9 @@ s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s
                 v.x = 0.0f;
                 k2 = 0.0f;
             }
-            axes->unk0 = v.y * heightCos;
-            axes->unk4 = (v.y * v.z) + (k2 * v.x) + 0.5f;
-            axes->unk8 = k2 * heightSin;
+            axes->u.x = v.y * heightCos;
+            axes->u.y = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            axes->u.z = k2 * heightSin;
             t = -(width * cosA);
             p2 = t * slopeZ;
             q2 = fabsf(t);
@@ -747,9 +745,9 @@ s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s
                 v.x = 0.0f;
                 k2 = 0.0f;
             }
-            axes->unkC = v.y * widthSin;
-            axes->unk10 = (v.y * v.z) + (k2 * v.x) + 0.5f;
-            axes->unk14 = k2 * t;
+            axes->v.x = v.y * widthSin;
+            axes->v.y = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            axes->v.z = k2 * t;
         }
     } else {
         cosB = func_151423D8(angle - 0x40);
@@ -768,14 +766,14 @@ s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s
 
             sinA = width * sinB;
             t = width * cosB;
-            axes->unk0 = (sinA * basisU.x) + (t * basisV.x);
-            axes->unk4 = (sinA * basisU.y) + (t * basisV.y);
-            axes->unk8 = (sinA * basisU.z) + (t * basisV.z);
+            axes->u.x = (sinA * basisU.x) + (t * basisV.x);
+            axes->u.y = (sinA * basisU.y) + (t * basisV.y);
+            axes->u.z = (sinA * basisU.z) + (t * basisV.z);
             sinA = -height * cosB;
             t = height * sinB;
-            axes->unkC = (sinA * basisU.x) + (t * basisV.x);
-            axes->unk10 = (sinA * basisU.y) + (t * basisV.y);
-            axes->unk14 = (sinA * basisU.z) + (t * basisV.z);
+            axes->v.x = (sinA * basisU.x) + (t * basisV.x);
+            axes->v.y = (sinA * basisU.y) + (t * basisV.y);
+            axes->v.z = (sinA * basisU.z) + (t * basisV.z);
         }
         return 1;
     }
@@ -929,21 +927,21 @@ void func_1513DF9C(Particle *particle, s32 arg1, u8 arg2) {
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-/* Event handler: drops (0x1A) or retargets (0x2D) the particle's link stored at unk110. */
-void func_1513E084(DefParticleHead *particle, struct212 *event, u8 eventId) {
-    struct212 *link = (struct212 *)PARTICLE_MOTION((Particle *)particle);
+/* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
+void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
+    ActorRef *link = &PARTICLE_MOTION((Particle *)particle)->owner;
 
     if (eventId == 0x1A) {
-        if ((link->unk0 == event->unk0) || (link->unk4.b.unk0 == event->unk4.b.unk0)) {
+        if ((link->actor == msg->ref.actor) || (link->uniqueId == msg->ref.uniqueId)) {
             func_1516972C(particle);
         }
     } else if (eventId == 0x2D) {
-        if (link->unk0 == event->unk0) {
-            link->unk0 = event->unk4.i.unk0;
-            link->unk4.b.unk0 = event->unk9;
-        } else if (link->unk0 == event->unk4.i.unk0) {
-            link->unk0 = event->unk0;
-            link->unk4.b.unk0 = event->unk8;
+        if (link->actor == msg->swap.actorA) {
+            link->actor = msg->swap.actorB;
+            link->uniqueId = msg->swap.idB;
+        } else if (link->actor == msg->swap.actorB) {
+            link->actor = msg->swap.actorA;
+            link->uniqueId = msg->swap.idA;
         }
     }
 }

@@ -14,6 +14,7 @@ typedef struct BlockDebris BlockDebris;
 struct DefParticleHead;
 struct ParticleDesc;
 struct QuadSprite;
+union ActorMsg;
 
 /*
   union convention
@@ -2097,12 +2098,6 @@ typedef struct ParticleTexFile {
 } ParticleTexFile; // size 0x10
 
 typedef struct {
-    s32 unk0;  // used
-    s32 unk4;  // used
-    s32 unk8;  // used
-} struct167;
-
-typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4; // scene
     /* 0x08 */ f32 unk8;
@@ -2491,24 +2486,11 @@ typedef struct {
     s8  unk28;
 } struct202;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} struct211; //size 0x18
-
-typedef struct {
-    s32 unk0;
-    union {
-        struct UBYTES4 b;
-        struct WORD   i;
-    } unk4;
-    u8  unk8;
-    u8  unk9;
-} struct212;
+/* The two half-axes that span a particle quad (func_1513D6FC, game_169510.c). */
+typedef struct ParticleAxes {
+    /* 0x00 */ Vec3f u;
+    /* 0x0C */ Vec3f v;
+} ParticleAxes; // size 0x18
 
 typedef struct {
     u8 pad0[0x7];
@@ -2539,16 +2521,6 @@ struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
 };
-
-typedef struct {
-    s32 unk0;
-    union {
-        u8  ub;
-        s32 w;
-    } unk4;
-    u8  unk8;
-    u8  unk9;
-} struct223;
 
 /*
  * Light effect payloads (game_18D770.c, "../Effects/Light/light.c"). Each is stored inline at

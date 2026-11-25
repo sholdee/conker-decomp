@@ -385,25 +385,25 @@ s32 func_150FD514(Actor150FD514 *particle) {
 }
 
 
-/* Event handler: retargets (0x2D) or drops (0) the owner link {owner, unique_id} at the start of ext. */
-void func_150FDB0C(Actor150FD514 *actor, struct212 *event, u8 eventId) {
-    struct212 *link = (struct212 *)&actor->ext;
+/* Message handler: retargets (0x2D, an actor swap) or drops (0, the actor went away) the owner link. */
+void func_150FDB0C(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
+    Ext150FCFD4 *link = &actor->ext;
 
     if (eventId == 0x2D) {
-        if (link->unk0 == event->unk0) {
-            link->unk0 = event->unk4.i.unk0;
-            link->unk4.b.unk0 = event->unk9;
-        } else if (link->unk0 == event->unk4.i.unk0) {
-            struct212 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
+            link->ownerId = msg->swap.idB;
+        } else if (link->owner == msg->swap.actorB) {
+            Ext150FCFD4 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
 
-            dst->unk0 = event->unk0;
-            dst->unk4.b.unk0 = event->unk8;
+            dst->owner = msg->swap.actorA;
+            dst->ownerId = msg->swap.idA;
         }
     } else if (eventId == 0) {
-        s32 owner = event->unk0;
+        Actor *owner = msg->ref.actor;
 
-        if (owner == link->unk0 || event->unk4.b.unk0 == link->unk4.b.unk0) {
-            link->unk0 = 0;
+        if (owner == link->owner || msg->ref.uniqueId == link->ownerId) {
+            link->owner = NULL;
         }
     }
 }

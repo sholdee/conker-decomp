@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 typedef struct BoneFollower BoneFollower;
 typedef struct ActorFollowerGroup ActorFollowerGroup;
@@ -52,7 +53,7 @@ void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 
 void func_151D3308(BoneFollower *follower);
 void func_151D3354(BoneFollower *follower);
-void func_151D33FC(ActorFollowerGroup *group, struct223 *msg);
+void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg);
 
 extern s32 (*D_8008FC40[])(BoneFollower *, Vec3f *);
 extern void (*D_8008FC48[])(BoneFollower *, Vec3f *);
@@ -61,7 +62,7 @@ extern void (*D_8008FC50[])(ActorFollowerGroup *);
 extern void (*D_8008FC54[])(ActorFollowerGroup *);
 extern void (*D_8008FC58[])(ActorFollowerGroup *);
 extern void (*D_8008FC5C[])(ActorFollowerGroup *);
-extern void (*D_8008FC64[])(ActorFollowerGroup *, struct223 *, u8);
+extern void (*D_8008FC64[])(ActorFollowerGroup *, ActorMsg *, u8);
 
 
 /* Takes a reference on shared resource `index`, loading it on the first reference. */
@@ -157,28 +158,28 @@ void func_151D2E14(BoneFollower *arg0) {
 }
 
 /* Message handler: 0 destroys followers of the given actor; 0x2D swaps two actors. */
-void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
-    s32 actor;
-    s32 otherActor;
+void func_151D2E5C(BoneFollower *follower, ActorMsg *msg, u8 type) {
+    Actor *actor;
+    Actor *otherActor;
     s32 actorUid;
     s32 msgUid;
 
     if (type == 0) {
-        actor = (s32)follower->actor;
-        otherActor = msg->unk0;
+        actor = follower->actor;
+        otherActor = msg->ref.actor;
         actorUid = follower->actorUid;
-        msgUid = msg->unk4.ub;
+        msgUid = msg->ref.uniqueId;
         if (actor == otherActor || msgUid == actorUid) {
             func_1516972C(&follower->header);
         }
     } else if (type == 0x2D) {
-        actor = msg->unk0;
-        if (actor == (s32)follower->actor) {
-            follower->actor = (Actor *)msg->unk4.w;
-            follower->actorUid = msg->unk9;
-        } else if ((s32)follower->actor == msg->unk4.w) {
-            follower->actor = (Actor *)actor;
-            follower->actorUid = msg->unk8;
+        actor = msg->swap.actorA;
+        if (actor == follower->actor) {
+            follower->actor = msg->swap.actorB;
+            follower->actorUid = msg->swap.idB;
+        } else if (follower->actor == msg->swap.actorB) {
+            follower->actor = actor;
+            follower->actorUid = msg->swap.idA;
         }
     }
 }
@@ -276,23 +277,23 @@ void func_151D3220(ActorFollowerGroup *group) {
 }
 
 /* Message handler: like func_151D2E5C, then forwards the message to the group kind's handler. */
-void func_151D324C(ActorFollowerGroup *group, struct223 *msg, u8 type) {
-    void (*onMessage)(ActorFollowerGroup *, struct223 *, u8);
+void func_151D324C(ActorFollowerGroup *group, ActorMsg *msg, u8 type) {
+    void (*onMessage)(ActorFollowerGroup *, ActorMsg *, u8);
 
-    s32 otherActor;
+    Actor *otherActor;
 
     if (type == 0) {
         func_151D33FC(group, msg);
     done: // matching: the label splits the block so the reload of type stays out of the delay slot
         ;
     } else if (type == 0x2D) {
-        otherActor = msg->unk0;
-        if ((s32)group->actor == otherActor) {
-            group->actor = (Actor *)msg->unk4.w;
-            group->actorUid = msg->unk9;
-        } else if ((s32)group->actor == msg->unk4.w) {
-            group->actor = (Actor *)otherActor;
-            group->actorUid = msg->unk8;
+        otherActor = msg->swap.actorA;
+        if (group->actor == otherActor) {
+            group->actor = msg->swap.actorB;
+            group->actorUid = msg->swap.idB;
+        } else if (group->actor == msg->swap.actorB) {
+            group->actor = otherActor;
+            group->actorUid = msg->swap.idA;
         }
     }
 
@@ -350,16 +351,16 @@ void func_151D33B8(ActorFollowerGroup *group) {
 }
 
 /* Destroys the group when message type 0 names its actor. */
-void func_151D33FC(ActorFollowerGroup *group, struct223 *msg) {
-    s32 actor;
+void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg) {
+    Actor *actor;
     s32 actorUid;
     s32 msgUid;
-    s32 otherActor;
+    Actor *otherActor;
 
-    actor = (s32)group->actor;
+    actor = group->actor;
     actorUid = group->actorUid;
-    msgUid = msg->unk4.ub;
-    otherActor = msg->unk0;
+    msgUid = msg->ref.uniqueId;
+    otherActor = msg->ref.actor;
     if (actor == otherActor || msgUid == actorUid) {
         func_1516972C(&group->header);
     }
