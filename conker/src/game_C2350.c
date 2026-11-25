@@ -44,7 +44,6 @@ typedef struct {
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
-extern MtxF D_800D2CA8[];
 
 /* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
 void func_15094EA0(s32 view) {

@@ -822,7 +822,6 @@ void func_151BC074(Actor *obj) {
     }
 }
 
-extern f32 D_800DCA24;
 
 /* Objects returned by func_15134908 hold the owner reference at this offset. */
 typedef struct {

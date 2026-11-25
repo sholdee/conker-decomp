@@ -1285,6 +1285,7 @@ extern s8 D_800D23A8;
 extern s32 D_800D2450;
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
+extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
@@ -1501,6 +1502,7 @@ extern CamMsgQueue *D_800DC2B0; // one per camera
 extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)
 extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
+extern f32 D_800DCA24;
 extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
 extern f32 *D_800DCC10[][4];
 extern ParticleNode *D_800DC460; // loaded particle models: list head

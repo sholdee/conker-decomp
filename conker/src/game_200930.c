@@ -17,7 +17,6 @@ typedef struct {
     s16 v[9];
 } Surf151D3480;
 
-extern f32 D_800DCA24;
 extern s32 func_1000EC24();
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 u8 func_15145C90(s32);

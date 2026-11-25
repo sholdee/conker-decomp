@@ -57,7 +57,6 @@ void func_1500E70C(s32 id) {
     }
 }
 
-extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
 
