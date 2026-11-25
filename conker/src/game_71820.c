@@ -9,7 +9,6 @@
 #undef D_800DBE3C
 #undef D_800DBE5C
 
-
 /* A timed node in the D_800CBE00 list, allocated by func_15044964. */
 typedef struct TriggerNode {
     /* 0x00 */ struct TriggerNode *next;
@@ -359,13 +358,7 @@ void func_15044E88(void) {
 }
 
 typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} Vec3s_71820;
-
-typedef struct {
-    Vec3s_71820 v[3];
+    Vec3s v[3];
 } CollisionTri;
 
 /* Result of a floor/ceiling probe. */

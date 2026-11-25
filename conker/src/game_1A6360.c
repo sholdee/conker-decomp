@@ -55,12 +55,6 @@ typedef struct {
     /* 0x10 */ QuadFxData data;
 } QuadFx;
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-} Vec3s;
-
 extern u16 D_800DD430;      /* sound handle */
 extern u8 D_800DD432;       /* wind gust timer */
 extern u8 D_800DD433;       /* wind strength */

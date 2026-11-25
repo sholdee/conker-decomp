@@ -253,6 +253,20 @@ typedef struct Vec3f {
 /* 4x4 float matrix (row-major, the guMtxF2L layout) for bone and camera transforms. */
 typedef f32 MtxF[4][4];
 
+/* Three-short vector: packed positions, angles. */
+typedef struct Vec3s {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+} Vec3s; // size 0x6
+
+/* Three-int vector. */
+typedef struct Vec3i {
+    /* 0x0 */ s32 x;
+    /* 0x4 */ s32 y;
+    /* 0x8 */ s32 z;
+} Vec3i; // size 0xC
+
 typedef struct {
     s32 unk0;
     s32 unk4;

@@ -2,13 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-typedef struct {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i_20A290;
-
 void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
 extern f32 D_800AB550;
 extern f32 D_800AB554;
@@ -16,7 +9,7 @@ extern f32 D_800AB554;
 typedef struct {
     s32 field0;
     s32 field4;
-    Vec3i_20A290 position;
+    Vec3i position;
     s16 field14;
     s16 field16;
     s16 field18;
@@ -38,7 +31,7 @@ void func_151DCDE0(void *arg0, u8 arg1, s32 arg2) {
 
     config.field0 = 0xC;
     config.field4 = 5;
-    config.position = *(Vec3i_20A290 *)arg0;
+    config.position = *(Vec3i *)arg0;
     config.field14 = 0;
     config.field16 = 0xFF;
     config.field18 = -0x40;

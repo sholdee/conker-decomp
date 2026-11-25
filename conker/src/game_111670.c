@@ -13,12 +13,7 @@ extern s32 func_151EF610(void);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
-typedef struct Struct150E42F8D99F0 {
-    s16 x;
-    s16 y;
-    s16 z;
-} Struct150E42F8D99F0;
-extern Struct150E42F8D99F0 D_800D99F0;
+extern Vec3s D_800D99F0;
 
 /* Stores the point 500 units ahead of D_800DBFF0 (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
 void func_150E41C0(void) {

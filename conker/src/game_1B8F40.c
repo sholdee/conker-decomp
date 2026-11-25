@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    s16 x, y, z;
-} Vec3s;
-
 /* Link fields shared by every object (see game_1944C0.c). */
 typedef struct ObjLink {
     /* 0x0 */ u8 type;

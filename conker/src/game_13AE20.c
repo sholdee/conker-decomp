@@ -4,12 +4,6 @@
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-} Point3s; /* size = 0x6 */
-
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
 struct Shadow {
     /* 0x000 */ u8 pad0[0x10];
@@ -25,7 +19,7 @@ struct Shadow {
     /* 0x123 */ u8 visible;
     /* 0x124 */ u8 flags;
     /* 0x125 */ u8 pad125[3];
-    /* 0x128 */ Point3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
+    /* 0x128 */ Vec3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
 }; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
@@ -88,14 +82,14 @@ typedef struct {
     /* 0x162 */ u8 pad162[0x1E];
     /* 0x180 */ f32 floorY;
     /* 0x184 */ u8 pad184[4];
-    /* 0x188 */ Point3s **floorTriPtrs;
-    /* 0x18C */ Point3s floorTri[3];
+    /* 0x188 */ Vec3s **floorTriPtrs;
+    /* 0x18C */ Vec3s floorTri[3];
 } GameObj;
 
 extern f32 func_150489B0(u8 angle); /* cos */
-extern s32 func_150A3FC4(f32, f32, s32, Point3s *, f32 *);
-s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ);
-extern void func_1510E7A4(s32, Point3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
+extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
+s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
+extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */
 void func_1510DA84(Shadow *shadow) {
@@ -118,8 +112,8 @@ void func_1510DA84(Shadow *shadow) {
     f32 z;
     f32 floorY;
     f32 scale;
-    Point3s **triPtrs;
-    Point3s *tri;
+    Vec3s **triPtrs;
+    Vec3s *tri;
     u8 angle;
     f32 sinYaw;
     f32 cosYaw;
@@ -300,7 +294,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
  * Solves the plane of a triangle (given as vertices or as vertex pointers) for its slopes dy/dx and dy/dz,
  * trying each corner and edge order until the system is solvable. Returns 0 (slopes 0) if none is.
  */
-s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ) {
+s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ) {
     f32 ax;
     f32 ay;
     f32 az;
