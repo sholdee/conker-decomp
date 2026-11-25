@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern u8 D_800A1638[];
 extern u8 D_800A163C[];
@@ -79,36 +80,6 @@ void func_150EEF40(struct127 *actor, u8 slot) {
 }
 
 typedef struct { f32 x, y, z; } Vec3f;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} BeamSpawn; /* 0x58 */
 
 typedef struct {
     u8 pad0[9];
@@ -218,7 +189,7 @@ Flash *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
 Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
     Beam *beam;
-    BeamSpawn spawn;
+    ParticleDef spawn;
     BeamLink init;
     BeamLink *link;
 
@@ -237,35 +208,35 @@ Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
     init.slot = slot;
     init.direction = *(Vec3f *)&D_800A5480;
     init.flags = 0;
-    spawn.unk0 = 0x94;
-    spawn.unk1 = 7;
-    spawn.unk2 = 0x2203;
-    spawn.unk4 = 300;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0xFF;
-    spawn.unk12 = 0xFF;
-    spawn.unk13 = 0xFF;
+    spawn.texture = 0x94;
+    spawn.type = 7;
+    spawn.renderModes = 0x2203;
+    spawn.lifetime = 300;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0xFF;
+    spawn.rgba[2] = 0xFF;
+    spawn.rgba[3] = 0xFF;
     init.inverse = 1.0f;
-    spawn.unk18 = 1.0f;
+    spawn.height = 1.0f;
     init.distance = 0.0f;
-    spawn.unk34 = 0.0f;
-    spawn.unk38 = 0.0f;
-    spawn.unk3C = 0.0f;
-    spawn.unk14 = 100.0f;
-    spawn.unk1C = *(struct17 *)&D_800A5480;
-    spawn.unk28 = *(struct17 *)&D_800A5480;
-    spawn.unk40 = 0x046C0008;
+    spawn.scale.x = 0.0f;
+    spawn.scale.y = 0.0f;
+    spawn.scale.z = 0.0f;
+    spawn.width = 100.0f;
+    spawn.pos = *(vertex *)&D_800A5480;
+    spawn.rot = *(vertex *)&D_800A5480;
+    spawn.flags = 0x046C0008;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 7;
     spawn.unk48 = 0;
-    spawn.unk4C = 0xFF;
+    spawn.viewportMask = 0xFF;
     spawn.unk50 = 0;
-    spawn.unk54 = 1;
-    spawn.unk56 = 0xFF;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
     beam = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
     if (beam != NULL) {
         link = &beam->link;
@@ -688,38 +659,6 @@ typedef struct {
     u8 pad5A[2];
 } GlowSprite;
 
-typedef struct {
-    u8 unk00;
-    u8 unk01;
-    s16 unk02;
-    s16 unk04;
-    u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 pad4C[0xC];
-} GlowSpawn;
-
 typedef struct Glow {
     /* 0x000 */ u8 pad0[0x34];
     /* 0x034 */ Vec3f start;
@@ -734,7 +673,7 @@ typedef struct Glow {
 Glow *func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
     GlowSprite sprite;
-    GlowSpawn spawn;
+    ParticleDef spawn;
     GlowLink link;
 
     link.actor = actor;
@@ -742,28 +681,28 @@ Glow *func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 
     link.slot = slot;
     link.beam = beam;
 
-    spawn.unk00 = D_8008FD00((s32)actor, slot);
-    spawn.unk01 = 3;
-    spawn.unk02 = 0x2203;
-    spawn.unk04 = 300;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk10 = r;
-    spawn.unk11 = g;
-    spawn.unk12 = b;
-    spawn.unk13 = 0xFF;
-    spawn.unk18 = 100.0f;
-    spawn.unk14 = 100.0f;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
-    spawn.unk34 = 1.0f;
-    spawn.unk38 = 1.0f;
-    spawn.unk3C = 1.0f;
-    spawn.unk40 = 0xCD2002;
+    spawn.texture = D_8008FD00((s32)actor, slot);
+    spawn.type = 3;
+    spawn.renderModes = 0x2203;
+    spawn.lifetime = 300;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = r;
+    spawn.rgba[1] = g;
+    spawn.rgba[2] = b;
+    spawn.rgba[3] = 0xFF;
+    spawn.height = 100.0f;
+    spawn.width = 100.0f;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.flags = 0xCD2002;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
@@ -1154,48 +1093,6 @@ void func_150F0A24(f32 *pos) {
     func_15152B38(&packet, 0xFF, 1, pos);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} ParticleSpawn; /* 0x70 */
-
 /* State an actor-following particle (created by func_15130280) carries at +0xA8. */
 typedef struct {
     /* 0x00 */ struct127 *actor;
@@ -1232,40 +1129,40 @@ extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 /* Spawns a particle that follows `actor` (see func_150F0E48). */
 void func_150F0BEC(struct127 *actor) {
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     ActorParticleLink link;
     Particle *particle;
     s32 flipY;
     s32 flipX;
 
-    spawn.unk1D = 0x2B;
-    spawn.unk8 = 0x4403;
+    spawn.texture = 0x2B;
+    spawn.renderMode = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x70600;
-    spawn.unkA = 300;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0xFF;
-    spawn.unk19 = 0xD9;
-    spawn.unk1A = 0xA0;
-    spawn.unk1B = 0xFF;
-    spawn.unk1C = 0xFF;
-    spawn.unk2C = 250.0f;
-    spawn.unk28 = 250.0f;
-    spawn.pos.unk0 = actor->x_position;
-    spawn.pos.unk4 = actor->y_position;
-    spawn.pos.unk8 = actor->z_position;
-    spawn.unk3C = *(struct17 *)&D_800A5480;
-    spawn.vel = *(struct17 *)&D_800A5480;
-    spawn.unk1E = 1;
-    spawn.unk20 = 0xFF;
-    spawn.unk22 = 1;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.0f;
+    spawn.timer = 300;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0xFF;
+    spawn.g = 0xFF;
+    spawn.b = 0xFF;
+    spawn.a = 0xFF;
+    spawn.r2 = 0xFF;
+    spawn.g2 = 0xD9;
+    spawn.b2 = 0xA0;
+    spawn.alpha = 0xFF;
+    spawn.brightness = 0xFF;
+    spawn.height = 250.0f;
+    spawn.width = 250.0f;
+    spawn.pos.x = actor->x_position;
+    spawn.pos.y = actor->y_position;
+    spawn.pos.z = actor->z_position;
+    spawn.offset = *(vertex *)&D_800A5480;
+    spawn.vel = *(vertex *)&D_800A5480;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
+    spawn.scaleStart = 1;
+    spawn.gravity = 0.0f;
+    spawn.scaleRate = 1.0f;
     if (func_150ADA20() & 1) {
         flipX = 0x40;
     } else {
@@ -1276,18 +1173,18 @@ void func_150F0BEC(struct127 *actor) {
     } else {
         flipY = 0;
     }
-    spawn.unk58 = (flipY | flipX) | 0x8000 | 0x4000 | 0x40000;
-    spawn.unk60 = 6;
-    spawn.unk61 = 6;
-    spawn.unk62 = 0x25;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0xA;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
-    spawn.unk68 = 0;
+    spawn.flags = (flipY | flipX) | 0x8000 | 0x4000 | 0x40000;
+    spawn.primColorMode = 6;
+    spawn.envColorMode = 6;
+    spawn.updateFunc = 0x25;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 0xA;
+    spawn.viewMask = 0;
+    spawn.views = 0xFF;
+    spawn.minSize = 0;
     link.actor = actor;
-    spawn.unk6C = 10000.0f;
+    spawn.maxSize = 10000.0f;
     link.actorId = actor->unique_id;
     link.phase[0] = func_150ADA68() * 2.0f * 3.141592741f;
     link.phase[1] = func_150ADA68() * 2.0f * 3.141592741f;
@@ -1398,7 +1295,7 @@ void func_150F1170(TrailEmitter *emitter) {
     f32 dx;
     f32 dy;
     f32 dz;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     TrailParticleLink ext;
     Particle *particle;
     s32 flipY;
@@ -1421,58 +1318,58 @@ void func_150F1170(TrailEmitter *emitter) {
         s32 pad; // matching: unused stack slot
 
         ext.unkC = 0.986371994f;
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
+        spawn.texture = 0x6C;
+        spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
-        spawn.unk1E = 0x23;
-        spawn.unk20 = 7;
-        spawn.unk58 = 0x90DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x20;
-        spawn.unk63 = -1;
+        spawn.fadeStart = 0x23;
+        spawn.fadeRate = 7;
+        spawn.flags = 0x90DE07;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
+        spawn.updateFunc = 0x20;
+        spawn.deathFunc = -1;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 0x23;
-        spawn.unk14 = 0xDD;
-        spawn.unk15 = 0xD3;
-        spawn.unk16 = 0xCD;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x57;
-        spawn.unk19 = 0x55;
-        spawn.unk1A = 0x5A;
-        spawn.unk1C = 0xFF;
-        spawn.unk3C.unk0 = 0.0f;
-        spawn.unk3C.unk4 = 0.0f;
-        spawn.unk3C.unk8 = 0.0f;
-        spawn.unk24 = 1.029834032f;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleStart = 0x23;
+        spawn.r = 0xDD;
+        spawn.g = 0xD3;
+        spawn.b = 0xCD;
+        spawn.a = 0xFF;
+        spawn.r2 = 0x57;
+        spawn.g2 = 0x55;
+        spawn.b2 = 0x5A;
+        spawn.brightness = 0xFF;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
+        spawn.scaleRate = 1.029834032f;
         do {
             {
             f32 r;
             r = func_150ADA68();
-            spawn.pos.unk0 = dx * r + last.x;
-            spawn.pos.unk4 = dy * r + last.y;
-            spawn.pos.unk8 = dz * r + last.z;
+            spawn.pos.x = dx * r + last.x;
+            spawn.pos.y = dy * r + last.y;
+            spawn.pos.z = dz * r + last.z;
             }
-            spawn.vel.unk0 = dx * D_800BE9A8 * 0.3330000043f;
-            spawn.vel.unk4 = dy * D_800BE9A8 * 0.3330000043f;
-            spawn.vel.unk8 = dz * D_800BE9A8 * 0.3330000043f;
+            spawn.vel.x = dx * D_800BE9A8 * 0.3330000043f;
+            spawn.vel.y = dy * D_800BE9A8 * 0.3330000043f;
+            spawn.vel.z = dz * D_800BE9A8 * 0.3330000043f;
             ext.unk0 = func_150ADA20();
             ext.unk1 = (s16)func_150ADA20(); // matching: the s16 cast keeps the value in its own temp
             ext.unk2 = (func_150ADA20() % 5U) + 4;
             ext.unk3 = (func_150ADA20() % 5U) + 4;
             ext.unk4 = func_150ADA68() * 39.0f;
             ext.unk8 = func_150ADA68() * 39.0f;
-            spawn.unk54 = func_150ADA68() * 0.5139999986f + 0.6560000181f;
-            spawn.unk58 &= ~0xC0;
+            spawn.gravity = func_150ADA68() * 0.5139999986f + 0.6560000181f;
+            spawn.flags &= ~0xC0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipY;
-            spawn.unk1B = (func_150ADA20() % 71U) + 80;
-            spawn.unkA = (func_150ADA20() % 31U) + 60;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 514.0f + 404.0f;
+            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipY;
+            spawn.alpha = (func_150ADA20() % 71U) + 80;
+            spawn.timer = (func_150ADA20() % 31U) + 60;
+            spawn.width = spawn.height = func_150ADA68() * 514.0f + 404.0f;
             particle = func_15130280(&spawn, 1, 0, 0x10, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(&particle->link.trail, &ext, sizeof(ext));

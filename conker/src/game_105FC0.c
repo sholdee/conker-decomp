@@ -7,6 +7,7 @@
 #undef func_150ADA20
 s32 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /* Spawn description passed to func_15147A80. */
 typedef struct {
@@ -840,48 +841,6 @@ s32 func_150DA628(Spark *particle, s32 arg1) {
 }
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} SparkSpawn; /* 0x70 */
-
-typedef struct {
     struct17 unk0;
     f32 unkC;
     f32 unk10;
@@ -923,7 +882,7 @@ typedef struct {
     f32 unk20;
 } ImpactSpray; /* 0x24 */
 
-extern Spark *func_15130280(SparkSpawn *, u8, s32, s32, u8, s32);
+extern Spark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
 extern void func_15153CCC(ImpactCone *, ImpactEmitter *, ImpactOrigin *, u8, s32);
 extern void func_15153C84(ImpactSpray *, ImpactEmitter *, ImpactOrigin *, u8, s32);
@@ -939,41 +898,41 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
         if (hit->hit >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
             data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
             if (data->sparkAccum > 1.0f) {
-                SparkSpawn spawn;
+                ParticleDesc spawn;
                 SparkData sub;
                 Spark *spark;
 
                 sub.unkC = 0.9936270118f;
-                spawn.unk1D = 0x6C;
-                spawn.unk8 = 0x5103;
+                spawn.texture = 0x6C;
+                spawn.renderMode = 0x5103;
                 spawn.unk0 = 0x200005;
-                spawn.unk1E = 0x2E;
-                spawn.unk20 = 5;
-                spawn.unk58 = 0x90DE07;
-                spawn.unk60 = 8;
-                spawn.unk61 = 6;
-                spawn.unk62 = 0x24;
-                spawn.unk63 = -1;
+                spawn.fadeStart = 0x2E;
+                spawn.fadeRate = 5;
+                spawn.flags = 0x90DE07;
+                spawn.primColorMode = 8;
+                spawn.envColorMode = 6;
+                spawn.updateFunc = 0x24;
+                spawn.deathFunc = -1;
                 spawn.unk4 = 0;
-                spawn.unkC = 0;
-                spawn.unk10 = 0;
-                spawn.unk64 = -1;
-                spawn.unk65 = 0;
-                spawn.unk22 = 0x2E;
-                spawn.unk14 = 0xDD;
-                spawn.unk15 = 0xD3;
-                spawn.unk16 = 0xCD;
-                spawn.unk17 = 0xFF;
-                spawn.unk18 = 0x57;
-                spawn.unk19 = 0x55;
-                spawn.unk1A = 0x5A;
-                spawn.unk1C = 0xFF;
-                spawn.unk3C.unk0 = 0.0f;
-                spawn.unk3C.unk4 = 0.0f;
-                spawn.unk3C.unk8 = 0.0f;
-                spawn.unk24 = 1.038234949f;
-                spawn.pos = hit->pos;
-                spawn.vel = *(struct17 *)&D_800A5480;
+                spawn.frame = 0;
+                spawn.frameRate = 0;
+                spawn.drawFunc = -1;
+                spawn.handlerSet = 0;
+                spawn.scaleStart = 0x2E;
+                spawn.r = 0xDD;
+                spawn.g = 0xD3;
+                spawn.b = 0xCD;
+                spawn.a = 0xFF;
+                spawn.r2 = 0x57;
+                spawn.g2 = 0x55;
+                spawn.b2 = 0x5A;
+                spawn.brightness = 0xFF;
+                spawn.offset.x = 0.0f;
+                spawn.offset.y = 0.0f;
+                spawn.offset.z = 0.0f;
+                spawn.scaleRate = 1.038234949f;
+                spawn.pos = *(vertex *)&hit->pos; // TODO(vectors): struct17/vertex mix
+                spawn.vel = *(vertex *)&D_800A5480;
                 do {
                     sub.unk0 = func_150ADA20();
                     sub.unk1 = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
@@ -981,12 +940,12 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                     sub.unk3 = (func_150ADA20() % 5U) + 4;
                     sub.unk4 = func_150ADA68() * 10.0f;
                     sub.unk8 = func_150ADA68() * 10.0f;
-                    spawn.unk54 = func_150ADA68() * 0.0910000056f + 0.1010000035f;
-                    spawn.unk58 &= ~0xC0;
-                    spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-                    spawn.unk1B = (func_150ADA20() % 101U) + 100;
-                    spawn.unkA = (func_150ADA20() % 11U) + 70;
-                    spawn.unk28 = spawn.unk2C = func_150ADA68() * 116.0f + 131.0f;
+                    spawn.gravity = func_150ADA68() * 0.0910000056f + 0.1010000035f;
+                    spawn.flags &= ~0xC0;
+                    spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+                    spawn.alpha = (func_150ADA20() % 101U) + 100;
+                    spawn.timer = (func_150ADA20() % 11U) + 70;
+                    spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
                     spark = func_15130280(&spawn, 1, 0, 0x10, trail->unkC, trail->unk1);
                     if (spark != NULL) {
                         memcpy(&spark->spark, &sub, sizeof(sub));

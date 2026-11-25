@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
@@ -82,46 +83,6 @@ void func_150EC520(Effect *effect) {
     }
 }
 
-/* Particle spawn template passed to func_15130280 (same layout as ParticleSpawn in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67[0x70 - 0x67];
-} ParticleSpawn; /* size 0x70 */
-
 /* Per-particle data of the particles the source effect emits. */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -133,13 +94,13 @@ typedef struct {
     /* 0x0C */ f32 unkC;
 } SourceParticleData;
 
-/* Live particle, as created by func_15130280 from a ParticleSpawn. */
+/* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
     /* 0xA8 */ SourceParticleData data;
 } Particle;
 
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Particle source effect: emits particles from its position at a random rate. */
 void func_150EC6B0(Effect *effect) {
@@ -148,42 +109,42 @@ void func_150EC6B0(Effect *effect) {
     source = &effect->data.source;
     source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (source->accumulator > 1.0f) {
-        ParticleSpawn spawn;
+        ParticleDesc spawn;
         SourceParticleData data;
         Particle *particle;
 
         data.unkC = 0.9704700112f;
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
+        spawn.texture = 0x6C;
+        spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
-        spawn.unk1E = 70;
-        spawn.unk20 = 3;
+        spawn.fadeStart = 70;
+        spawn.fadeRate = 3;
         spawn.flags = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
+        spawn.primColorMode = 8;
+        spawn.envColorMode = 6;
         data.unk0 = 0;
         data.unk1 = 0;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk62 = 22;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 70;
-        spawn.unk14 = 0x47;
-        spawn.unk15 = 0xC2;
-        spawn.unk16 = 0;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0xC0;
-        spawn.unk19 = 0x49;
-        spawn.unk1A = 0;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.021028996f;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.updateFunc = 22;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleStart = 70;
+        spawn.r = 0x47;
+        spawn.g = 0xC2;
+        spawn.b = 0;
+        spawn.a = 0xFF;
+        spawn.r2 = 0xC0;
+        spawn.g2 = 0x49;
+        spawn.b2 = 0;
+        spawn.brightness = 0xFF;
+        spawn.scaleRate = 1.021028996f;
         spawn.pos = source->pos;
-        spawn.unk3C.x = 0.0f;
-        spawn.unk3C.y = 0.0f;
-        spawn.unk3C.z = 0.0f;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
         spawn.vel.x = 0.0f;
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
@@ -192,12 +153,12 @@ void func_150EC6B0(Effect *effect) {
             data.unk3 = func_150ADA20() % 5U + 4;
             data.unk4 = func_150ADA68() * 11.0f;
             data.unk8 = func_150ADA68() * 11.0f;
-            spawn.unk54 = func_150ADA68() * 0.172f + 0.09800000489f;
+            spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 101U + 100;
-            spawn.unkA = func_150ADA20() % 51U + 80;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 80.0f + 92.0f;
+            spawn.alpha = func_150ADA20() % 101U + 100;
+            spawn.timer = func_150ADA20() % 51U + 80;
+            spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, effect->owner, effect->kind);
             if (particle != NULL) {
                 memcpy(&particle->data, &data, sizeof(data));
