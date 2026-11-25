@@ -58,111 +58,114 @@ void func_150C4D20(Pendulum *pendulum) {
 }
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511A410(s32, void *);
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(void *, s32, s32, s32, s32);
+extern s32 func_1511A410(Gfx *dl, s32 *second);
+extern s32 func_1510D0EC(s32 texture, s32 *sizeOut, s32 lifetime, s32 countUse);
+extern void func_1510D874(void *owner, s32 segment4, s32 segment5, s32 segment4Id, s32 segment5Id);
+// texture indices 0x2C1 and 0x1C0, linked as absolute symbols
 extern u8 D_2C1;
 extern u8 D_1C0;
 
+/* Per-object state of func_150C4E9C, allocated on first use. */
 typedef struct {
-    u8 pad0[0xA];
-    s16 unkA;
-    u8 padC[4];
-} Struct150C4E9CKey;
+    /* 0x00 */ s32 secondSetTImg; // index of the dl's second G_SETTIMG (0 if none), from func_1511A410
+    /* 0x04 */ s16 startT;        // vertex 0's initial t texture coordinate
+    /* 0x06 */ u8  pad6[2];
+    /* 0x08 */ f32 speed;         // t units scrolled per frame
+    /* 0x0C */ f32 unkC;
+} TexScroll;
 
 typedef struct {
-    s32 unk0;
-    s16 unk4;
-    u8 pad6[2];
-    f32 unk8;
-    f32 unkC;
-} Struct150C4E9CState;
+    /* 0x00 */ u8  pad0[0x16];
+    /* 0x16 */ u16 vertexCount;
+    /* 0x18 */ u8  pad18[4];
+    /* 0x1C */ Gfx *dl;
+    /* 0x20 */ Vtx *vertices[2]; // double-buffered, indexed by D_800BE9C0
+    /* 0x28 */ Vtx *unk28;
+    /* 0x2C */ u8  pad2C[0x47];
+    /* 0x73 */ u8  state; // low two bits: scroll mode
+    /* 0x74 */ u8  pad74[8];
+    /* 0x7C */ TexScroll *scroll;
+} TexScrollObject;
 
-typedef struct {
-    u8 pad0[0x16];
-    u16 unk16;
-    u8 pad18[4];
-    s32 unk1C;
-    Struct150C4E9CKey *unk20[2];
-    Struct150C4E9CKey *unk28;
-    u8 pad2C[0x47];
-    u8 unk73;
-    u8 pad74[8];
-    Struct150C4E9CState *unk7C;
-} Struct150C4E9C;
-
-void func_150C4E9C(Struct150C4E9C *arg0) {
-    s32 anim;
-    s32 sp50;
-    s32 r;
-    s32 x;
-    Struct150C4E9CState *p;
+/*
+ * Scrolls the t texture coordinate of the object's vertices. Scroll mode (state & 3): 0 and 3 stand still,
+ * 2 speeds up to 300 per frame, 1 slows to 100 and then stops (switching to mode 3) once the scroll lines up
+ * with the start position again. Binds texture 0x2C1 (modes 0, 2) or 0x1C0 (modes 1, 3) to segment 4 and,
+ * when the dl has a second G_SETTIMG, the texture's last 0x200 bytes to segment 5.
+ */
+void func_150C4E9C(TexScrollObject *obj) {
+    s32 texture;
+    s32 size;
+    s32 addr;
+    s32 tailAddr;
+    TexScroll *scroll;
     s32 mode;
     s32 i;
 
-    mode = arg0->unk73 & 3;
-    if (arg0->unk7C == NULL) {
-        p = arg0->unk7C = allocate_memory(0x10, 1, 0, 0);
-        func_1511A410(arg0->unk1C, p);
-        p->unk4 = arg0->unk28->unkA;
-        p->unk8 = 0.0f;
-        p->unkC = 0.0f;
+    mode = obj->state & 3;
+    if (obj->scroll == NULL) {
+        scroll = obj->scroll = allocate_memory(sizeof(TexScroll), 1, 0, 0);
+        func_1511A410(obj->dl, &scroll->secondSetTImg);
+        scroll->startT = obj->unk28->v.tc[1];
+        scroll->speed = 0.0f;
+        scroll->unkC = 0.0f;
     } else {
-        p = arg0->unk7C;
+        scroll = obj->scroll;
     }
+    // matching: the texture index is loaded as a symbol address (lui/addiu), not as a literal
     if (mode == 0 || mode == 2) {
-        anim = (s32)&D_2C1;
+        texture = (s32)&D_2C1;
     } else {
-        anim = (s32)&D_1C0;
+        texture = (s32)&D_1C0;
     }
     if (mode == 0 || mode == 3) {
-        p->unk8 = 0.0f;
-        p->unkC = 0.0f;
+        scroll->speed = 0.0f;
+        scroll->unkC = 0.0f;
     } else if (mode == 2) {
-        if (p->unk8 < 300.0f) {
-            p->unk8 += 25.0f * D_800BE9E4;
+        if (scroll->speed < 300.0f) {
+            scroll->speed += 25.0f * D_800BE9E4;
         } else {
-            p->unk8 = 300.0f;
+            scroll->speed = 300.0f;
         }
     } else if (mode == 1) {
-        s32 a;
-        s32 b;
+        s32 t;
+        s32 startT;
 
-        if (100.0f < p->unk8) {
-            p->unk8 -= 25.0f * D_800BE9E4;
+        if (scroll->speed > 100.0f) {
+            scroll->speed -= 25.0f * D_800BE9E4;
         } else {
-            p->unk8 = 100.0f;
-            a = arg0->unk20[D_800BE9C0]->unkA % 0x400;
-            while (a < 0) {
-                a += 0x400;
+            scroll->speed = 100.0f;
+            t = obj->vertices[D_800BE9C0]->v.tc[1] % 1024;
+            while (t < 0) {
+                t += 1024;
             }
-            b = p->unk4 % 0x400;
-            while (b < 0) {
-                b += 0x400;
+            startT = scroll->startT % 1024;
+            while (startT < 0) {
+                startT += 1024;
             }
-            if (a >= b && (a - p->unk8 <= b)) {
-                p->unk8 = a - b;
-                arg0->unk73 &= ~3;
-                arg0->unk73 |= 3;
+            if (t >= startT && t - scroll->speed <= startT) {
+                scroll->speed = t - startT;
+                obj->state &= ~3;
+                obj->state |= 3; // mode 3: stopped
             }
         }
     }
-    if (p->unk8) {
-        for (i = 0; i < arg0->unk16; i++) {
-            arg0->unk20[D_800BE9C0][i].unkA -= p->unk8;
+    if (scroll->speed) {
+        for (i = 0; i < obj->vertexCount; i++) {
+            obj->vertices[D_800BE9C0][i].v.tc[1] -= scroll->speed;
         }
     }
-    if (arg0->unk20[D_800BE9C0]->unkA < -0x2800) {
-        for (i = 0; i < arg0->unk16; i++) {
-            arg0->unk20[D_800BE9C0][i].unkA += 0x2800;
+    if (obj->vertices[D_800BE9C0]->v.tc[1] < -0x2800) {
+        for (i = 0; i < obj->vertexCount; i++) {
+            obj->vertices[D_800BE9C0][i].v.tc[1] += 0x2800;
         }
     }
-    x = 0;
-    r = func_1510D0EC(anim, &sp50, 3, 0);
-    if (p->unk0 != 0) {
-        x = sp50 + r - 0x200;
+    tailAddr = 0;
+    addr = func_1510D0EC(texture, &size, 3, 0);
+    if (scroll->secondSetTImg != 0) {
+        tailAddr = size + addr - 0x200;
     }
-    func_1510D874(arg0, r, x, 4, 5);
+    func_1510D874(obj, addr, tailAddr, 4, 5);
 }
 
 extern s32 *D_800D98D0[];
