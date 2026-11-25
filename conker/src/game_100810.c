@@ -554,7 +554,7 @@ typedef struct {
     Vtx v[3];
 } TrailVtx;
 
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
 extern struct17 *func_15144B34(s32);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern u8 D_80091100[];
@@ -564,40 +564,44 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 frame) {
-    TrailPoint *table;
-    struct17 b;
-    struct17 a;
+/*
+ * Draws the trail as a camera-facing ribbon: each point gets an edge, centre and edge vertex, offset
+ * along (segment x view direction) by the point's width.
+ */
+Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
+    TrailPoint *points;
+    struct17 p1;
+    struct17 p0;
     TrailState *state;
-    struct127 *obj;
-    struct17 *pos;
-    TrailVtx *v;
+    struct127 *owner;
+    struct17 *eye;
+    TrailVtx *tv;
     s32 i;
-    s32 idxA;
-    s32 idxB;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    f32 ex;
-    f32 ey;
-    f32 ez;
-    f32 len;
+    s32 cur;
+    s32 next;
+    f32 viewX;
+    f32 viewY;
+    f32 viewZ;
+    f32 segX;
+    f32 segY;
+    f32 segZ;
+    f32 lenSq;
     u8 update;
-    f32 wB;
-    f32 wA;
-    f32 cx;
+    f32 width1;
+    f32 width0;
+    f32 sideX;
     Vtx *vtx;
     u8 fresh;
-    f32 cy;
-    f32 cz;
+    f32 sideY;
+    f32 sideZ;
     f32 scale;
-    s32 ix;
-    s32 iy;
-    s32 iz;
-    s32 nx;
-    s32 ny;
-    s32 nz;
-    s32 pad1;
+    s32 px;
+    s32 py;
+    s32 pz;
+    s32 ox;
+    s32 oy;
+    s32 oz;
+    s32 pad1; // matching: stack frame size
     s32 pad2;
     s32 pad3;
 
@@ -605,145 +609,150 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 frame) {
         return gfx;
     }
     state = actor->state;
-    table = actor->points;
-    obj = state->owner;
-    if (*(s32 *)((u8 *)obj + 0x1D4) == 0 || (obj->unk74 & 0xF) == 0xF) {
+    points = actor->points;
+    owner = state->owner;
+    if (owner->unk1D4 == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(actor->vtxBufs, frame, (actor->spawn.maxPoints * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), (void **)&vtx, &fresh);
+    func_151D5D60(actor->vtxBufs, view, (actor->spawn.maxPoints * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
     if (fresh != 0) {
-        v = (TrailVtx *)actor->vtxBufs[frame];
+        tv = (TrailVtx *)actor->vtxBufs[view];
         for (i = 0; i < actor->spawn.maxPoints * 2 + 10; i++) {
-            v->v[0].v.tc[0] = 5;
-            v->v[0].v.tc[1] = 0;
-            v->v[0].v.flag = 0;
-            v->v[1].v.tc[0] = 0xFFA;
-            v->v[1].v.tc[1] = 0;
-            v->v[1].v.flag = 0;
-            v->v[2].v.tc[0] = 0x1FA4;
-            v->v[2].v.tc[1] = 0;
-            v->v[2].v.flag = 0;
-            v++;
+            tv->v[0].v.tc[0] = 5;
+            tv->v[0].v.tc[1] = 0;
+            tv->v[0].v.flag = 0;
+            tv->v[1].v.tc[0] = 0xFFA;
+            tv->v[1].v.tc[1] = 0;
+            tv->v[1].v.flag = 0;
+            tv->v[2].v.tc[0] = 0x1FA4;
+            tv->v[2].v.tc[1] = 0;
+            tv->v[2].v.flag = 0;
+            tv++;
         }
     }
-    pos = func_15144B34(frame);
+    eye = func_15144B34(view);
     update = 1;
     gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x55, &update);
     gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
-    idxA = actor->head - 1;
-    if (idxA < 0) {
-        idxA = actor->spawn.maxPoints - 1;
+    cur = actor->head - 1;
+    if (cur < 0) {
+        cur = actor->spawn.maxPoints - 1;
     }
-    idxB = idxA - 1;
-    if (idxB < 0) {
-        idxB = actor->spawn.maxPoints - 1;
+    next = cur - 1;
+    if (next < 0) {
+        next = actor->spawn.maxPoints - 1;
     }
-    a = table[idxA].pos;
-    wA = table[idxA].width;
-    b = table[idxB].pos;
-    wB = table[idxB].width;
+    p0 = points[cur].pos;
+    width0 = points[cur].width;
+    p1 = points[next].pos;
+    width1 = points[next].width;
 
-    ex = a.unk0 - b.unk0;
-    ey = a.unk4 - b.unk4;
-    ez = a.unk8 - b.unk8;
-    dx = a.unk0 - pos->unk0;
-    dy = a.unk4 - pos->unk4;
-    dz = a.unk8 - pos->unk8;
-    cx = ey * dz - dy * ez;
-    cy = ez * dx - dz * ex;
-    cz = ex * dy - dx * ey;
-    len = cx * cx + cy * cy + cz * cz;
-    if (len != 0.0f) {
-        f32 sc;
+    segX = p0.unk0 - p1.unk0;
+    segY = p0.unk4 - p1.unk4;
+    segZ = p0.unk8 - p1.unk8;
+    viewX = p0.unk0 - eye->unk0;
+    viewY = p0.unk4 - eye->unk4;
+    viewZ = p0.unk8 - eye->unk8;
+    sideX = segY * viewZ - viewY * segZ;
+    sideY = segZ * viewX - viewZ * segX;
+    sideZ = segX * viewY - viewX * segY;
+    lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+    if (lenSq != 0.0f) {
+        f32 s; // matching: a separate temporary keeps the original register choice
 
-        sc = wA / sqrtf(len);
-        scale = sc;
-        cx = cx * scale;
-        cy = cy * scale;
-        cz = cz * scale;
+        s = width0 / sqrtf(lenSq);
+        scale = s;
+        sideX = sideX * scale;
+        sideY = sideY * scale;
+        sideZ = sideZ * scale;
     } else {
-        cx = 0.0f; cy = 0.0f; cz = 0.0f;
+        sideX = 0.0f;
+        sideY = 0.0f;
+        sideZ = 0.0f;
     }
     {
-        s32 ix;
+        s32 px; // matching: block-local copy of px steers register allocation
 
-        ix = a.unk0;
-        iy = a.unk4;
-        iz = a.unk8;
-        nx = cx;
-        ny = cy;
-        nz = cz;
-        vtx->v.ob[0] = ix + nx;
-        vtx->v.ob[1] = iy + ny;
-        vtx->v.ob[2] = iz + nz;
+        px = p0.unk0;
+        py = p0.unk4;
+        pz = p0.unk8;
+        ox = sideX;
+        oy = sideY;
+        oz = sideZ;
+        vtx->v.ob[0] = px + ox;
+        vtx->v.ob[1] = py + oy;
+        vtx->v.ob[2] = pz + oz;
         vtx++;
-        vtx->v.ob[0] = ix;
-        vtx->v.ob[1] = iy;
-        vtx->v.ob[2] = iz;
+        vtx->v.ob[0] = px;
+        vtx->v.ob[1] = py;
+        vtx->v.ob[2] = pz;
         vtx++;
-        vtx->v.ob[0] = ix - nx;
-        vtx->v.ob[1] = iy - ny;
-        vtx->v.ob[2] = iz - nz;
+        vtx->v.ob[0] = px - ox;
+        vtx->v.ob[1] = py - oy;
+        vtx->v.ob[2] = pz - oz;
         vtx++;
     }
+    // matching: a goto loop; IDO optimizes a do/while or for loop here differently
 loop:
-        ex = a.unk0 - b.unk0;
-        ey = a.unk4 - b.unk4;
-        ez = a.unk8 - b.unk8;
-        dx = b.unk0 - pos->unk0;
-        dy = b.unk4 - pos->unk4;
-        dz = b.unk8 - pos->unk8;
-        cx = ey * dz - dy * ez;
-        cy = ez * dx - dz * ex;
-        cz = ex * dy - dx * ey;
-        len = cx * cx + cy * cy + cz * cz;
-        if (len != 0.0f) {
-            s32 pad;
+    segX = p0.unk0 - p1.unk0;
+    segY = p0.unk4 - p1.unk4;
+    segZ = p0.unk8 - p1.unk8;
+    viewX = p1.unk0 - eye->unk0;
+    viewY = p1.unk4 - eye->unk4;
+    viewZ = p1.unk8 - eye->unk8;
+    sideX = segY * viewZ - viewY * segZ;
+    sideY = segZ * viewX - viewZ * segX;
+    sideZ = segX * viewY - viewX * segY;
+    lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+    if (lenSq != 0.0f) {
+        s32 pad; // matching: -g3 block scope that orders the scheduling
 
-            scale = wB / sqrtf(len);
-            cx = cx * scale;
-            cy = cy * scale;
-            cz = cz * scale;
-        } else {
-            cx = 0.0f; cy = 0.0f; cz = 0.0f;
-        }
-        {
-            ix = b.unk0;
-            iy = b.unk4;
-            iz = b.unk8;
-            nx = cx;
-            ny = cy;
-            nz = cz;
-            vtx->v.ob[0] = ix + nx;
-            vtx->v.ob[1] = iy + ny;
-            vtx->v.ob[2] = iz + nz;
-            vtx++;
-            vtx->v.ob[0] = ix;
-            vtx->v.ob[1] = iy;
-            vtx->v.ob[2] = iz;
-            vtx++;
-            vtx->v.ob[0] = ix - nx;
-            vtx->v.ob[1] = iy - ny;
-            vtx->v.ob[2] = iz - nz;
-            vtx++;
-        }
-        gSPVertex(gfx++, vtx - 6, 6, 0);
-        gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 4, 3, 0);
-        gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
-        idxA = idxB;
-        idxB--;
-        if (idxB < 0) {
-            idxB = actor->spawn.maxPoints - 1;
-        }
-        if (idxA != actor->tail) {
-            a = table[idxA].pos;
-            b = table[idxB].pos;
-            wB = table[idxB].width;
-        }
-        if (idxA != actor->tail) goto loop;
+        scale = width1 / sqrtf(lenSq);
+        sideX = sideX * scale;
+        sideY = sideY * scale;
+        sideZ = sideZ * scale;
+    } else {
+        sideX = 0.0f;
+        sideY = 0.0f;
+        sideZ = 0.0f;
+    }
+    {
+        px = p1.unk0;
+        py = p1.unk4;
+        pz = p1.unk8;
+        ox = sideX;
+        oy = sideY;
+        oz = sideZ;
+        vtx->v.ob[0] = px + ox;
+        vtx->v.ob[1] = py + oy;
+        vtx->v.ob[2] = pz + oz;
+        vtx++;
+        vtx->v.ob[0] = px;
+        vtx->v.ob[1] = py;
+        vtx->v.ob[2] = pz;
+        vtx++;
+        vtx->v.ob[0] = px - ox;
+        vtx->v.ob[1] = py - oy;
+        vtx->v.ob[2] = pz - oz;
+        vtx++;
+    }
+    gSPVertex(gfx++, vtx - 6, 6, 0);
+    gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 4, 3, 0);
+    gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
+    cur = next;
+    next--;
+    if (next < 0) {
+        next = actor->spawn.maxPoints - 1;
+    }
+    if (cur != actor->tail) {
+        p0 = points[cur].pos;
+        p1 = points[next].pos;
+        width1 = points[next].width;
+    }
+    if (cur != actor->tail) goto loop;
     return gfx;
 }
 
