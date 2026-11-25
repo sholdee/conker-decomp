@@ -3,7 +3,6 @@
 #include "variables.h"
 
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
@@ -75,7 +74,7 @@ RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 ar
     effect->step = 6.28318548f / effect->def.count;
     effect->pending = 0.0f;
     effect->duration = effect->def.remaining;
-    i = 0;
+    i = 0; // matching: i is zeroed before the angle scope opens
     {
         f32 angle = 0.0f;
         for (; i < effect->def.count; i++) {
@@ -203,9 +202,9 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
 
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, texAddr);
-    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0x0, G_TX_LOADTILE, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
     gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3EF, 0);
-    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0x0, 1, 0, G_TX_WRAP, 6, G_TX_NOLOD, G_TX_WRAP, 5, G_TX_NOLOD);
+    gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0, 1, 0, G_TX_WRAP, 6, G_TX_NOLOD, G_TX_WRAP, 5, G_TX_NOLOD);
     gDPSetTileSize(gdl++, 1, 0x402, 0x402, 0x47E, 0x4FE);
     gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x80, 2, 0, G_TX_WRAP, 5, 1, G_TX_WRAP, 4, 1);
     gDPSetTileSize(gdl++, 2, 0x202, 0x202, 0x23E, 0x27E);
@@ -518,6 +517,14 @@ typedef struct {
     u8 pad76[6];
 } BurstPacket; /* size 0x7C */
 
+/* Object spawned by func_15132A4C from a BurstPacket. */
+typedef struct {
+    u8 pad0[0x10];
+    BurstPacket p; /* 0x10 */
+} BurstParticle;
+
+BurstParticle *func_15132A4C(BurstPacket *packet, s32, s32, s32, u8, s32);
+
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
 void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     BurstPacket packet;
@@ -571,26 +578,16 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     func_15132A4C(&packet, 3, 0xFF, 0, effect->unkC, effect->unk1);
 }
 
-/* Spawned burst particle: the BurstPacket fields live at +0x10. */
-typedef struct {
-    u8 pad0[0x20];
-    f32 rotation[3]; /* 0x20 */
-    u8 pad2C[0xC];
-    f32 position[3]; /* 0x38 */
-    f32 velocity[3]; /* 0x44 */
-    f32 spin[3];     /* 0x50 */
-    f32 gravity;     /* 0x5C */
-} BurstParticle;
 
 /* Integrates a burst particle's position (with gravity) and rotation over one frame. */
 s32 func_150CA07C(BurstParticle *particle) {
-    particle->position[0] += particle->velocity[0] * D_800BE9A4;
-    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->position[2] += particle->velocity[2] * D_800BE9A4;
-    particle->velocity[1] += particle->gravity * D_800BE9A4;
-    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
-    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
-    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
+    particle->p.pos.x += particle->p.velocity[0] * D_800BE9A4;
+    particle->p.pos.y += (particle->p.velocity[1] * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->p.pos.z += particle->p.velocity[2] * D_800BE9A4;
+    particle->p.velocity[1] += particle->p.gravity * D_800BE9A4;
+    particle->p.rotation[0] += particle->p.spin[0] * D_800BE9A4;
+    particle->p.rotation[1] += particle->p.spin[1] * D_800BE9A4;
+    particle->p.rotation[2] += particle->p.spin[2] * D_800BE9A4;
     return 1;
 }
 
@@ -911,12 +908,12 @@ s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
 
 /* Same per-frame integration as func_150CA07C. */
 s32 func_150CB008(BurstParticle *particle) {
-    particle->position[0] += particle->velocity[0] * D_800BE9A4;
-    particle->position[1] += (particle->velocity[1] * D_800BE9A4) + (particle->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
-    particle->position[2] += particle->velocity[2] * D_800BE9A4;
-    particle->velocity[1] += particle->gravity * D_800BE9A4;
-    particle->rotation[0] += particle->spin[0] * D_800BE9A4;
-    particle->rotation[1] += particle->spin[1] * D_800BE9A4;
-    particle->rotation[2] += particle->spin[2] * D_800BE9A4;
+    particle->p.pos.x += particle->p.velocity[0] * D_800BE9A4;
+    particle->p.pos.y += (particle->p.velocity[1] * D_800BE9A4) + (particle->p.gravity * D_800BE9A4 * D_800BE9A4 * 0.5f);
+    particle->p.pos.z += particle->p.velocity[2] * D_800BE9A4;
+    particle->p.velocity[1] += particle->p.gravity * D_800BE9A4;
+    particle->p.rotation[0] += particle->p.spin[0] * D_800BE9A4;
+    particle->p.rotation[1] += particle->p.spin[1] * D_800BE9A4;
+    particle->p.rotation[2] += particle->p.spin[2] * D_800BE9A4;
     return 1;
 }
