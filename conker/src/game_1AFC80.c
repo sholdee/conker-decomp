@@ -29,73 +29,80 @@ extern WaveSample *D_800DDE60[];
 
 s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain);
 
+/*
+ * Steps every active wave chain: actors standing on it push samples down, each sample is pulled
+ * towards its neighbours, and a fast downward swing plays a sound at the pushing actor.
+ */
 void func_151827D0(void) {
-    s32 i;
-    s32 j;
-    s32 k;
-    s32 n;
-    s32 v;
-    s32 found;
-    s32 fall;
-    f32 a;
-    f32 b;
-    s32 sums[38];
-    s32 *ps;
-    s32 d0;
-    s32 d1;
+    s32 chain;
+    s32 sample;
+    s32 actor;
+    s32 pass;
+    s32 push;
+    s32 lastActor;
+    s32 falling;
+    f32 force;
+    f32 damping;
+    s32 pushes[39];
+    s32 left;
+    s32 right;
 
-    for (i = 0; i < D_800DDE50; i++) {
-        found = 0;
-        fall = 0;
-        a = D_8008D050[D_800DDE54[i]].force;
-        b = D_8008D050[D_800DDE54[i]].damping;
-        for (k = 1, ps = sums; k < 39; k++, ps++) {
-            *ps = 0;
-            for (j = 0; j < 4; j++) {
-                if (D_800CC2D0[j].interaction_state != 0) {
-                    v = func_15182FDC(&D_800CC2D0[j], k, i);
-                    if (D_800CC2D0[j].unk84.uh == 0x4B) {
-                        v *= 2;
+    for (chain = 0; chain < D_800DDE50; chain++) {
+        lastActor = 0;
+        falling = 0;
+        force = D_8008D050[D_800DDE54[chain]].force;
+        damping = D_8008D050[D_800DDE54[chain]].damping;
+        for (sample = 1; sample < 39; sample++) {
+            pushes[sample] = 0;
+            for (actor = 0; actor < 4; actor++) {
+                if (D_800CC2D0[actor].interaction_state != 0) {
+                    push = func_15182FDC(&D_800CC2D0[actor], sample, chain);
+                    if (D_800CC2D0[actor].unk84.uh == 75) {
+                        push *= 2;
                     }
-                    *ps += v;
-                    if (v != 0) {
-                        found = j + 1;
+                    pushes[sample] += push;
+                    if (push != 0) {
+                        lastActor = actor + 1;
                     }
                 }
             }
         }
-        for (n = 0; n < 3; n++) {
-            ps = sums;
-            for (k = 1; k < 39; k++, ps++) {
-                d0 = D_800DDE60[i][k - 1].pos - D_800DDE60[i][k].pos;
-                d1 = D_800DDE60[i][k + 1].pos - D_800DDE60[i][k].pos;
-                D_800DDE60[i][k].accel = (f32)(d0 + d1) + a;
-                D_800DDE60[i][k].accel += (f32)*ps;
-                D_800DDE60[i][k].vel += D_800DDE60[i][k].accel;
-                D_800DDE60[i][k].vel *= b;
-                if (fabsf(D_800DDE60[i][k].vel) < 1.0f) {
-                    D_800DDE60[i][k].vel = 0.0f;
+        for (pass = 0; pass < 3; pass++) {
+            for (sample = 1; sample < 39; sample++) {
+                left = D_800DDE60[chain][sample - 1].pos - D_800DDE60[chain][sample].pos;
+                right = D_800DDE60[chain][sample + 1].pos - D_800DDE60[chain][sample].pos;
+                D_800DDE60[chain][sample].accel = (f32)(left + right) + force;
+                D_800DDE60[chain][sample].accel += (f32)pushes[sample];
+                D_800DDE60[chain][sample].vel += D_800DDE60[chain][sample].accel;
+                D_800DDE60[chain][sample].vel *= damping;
+                if (fabsf(D_800DDE60[chain][sample].vel) < 1.0f) {
+                    D_800DDE60[chain][sample].vel = 0.0f;
                 }
             }
-            for (k = 1; k < 39; k++) {
-                D_800DDE60[i][k].pos += D_800DDE60[i][k].vel;
-                if (found != 0 && D_800DDE60[i][k].vel < -30.0f) {
-                    fall = 1;
+            for (sample = 1; sample < 39; sample++) {
+                D_800DDE60[chain][sample].pos += D_800DDE60[chain][sample].vel;
+                if (lastActor != 0 && D_800DDE60[chain][sample].vel < -30.0f) {
+                    falling = TRUE;
                 }
             }
-            if (found == 0) {
-                D_8008D050[D_800DDE54[i]].soundTimer = 0;
+            if (lastActor == 0) {
+                D_8008D050[D_800DDE54[chain]].soundTimer = 0;
             }
-            if (fall != 0 && D_8008D050[D_800DDE54[i]].soundTimer == 0) {
-                D_8008D050[D_800DDE54[i]].soundTimer = (func_150ADA20() & 0x3F) + 0xB4;
-                if (D_800DDE54[i] == 2 || D_800DDE54[i] == 3) {
-                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0, D_800CC2D0[found - 1].x_position, D_800CC2D0[found - 1].y_position, D_800CC2D0[found - 1].z_position, 300, 800);
+            if (falling && D_8008D050[D_800DDE54[chain]].soundTimer == 0) {
+                D_8008D050[D_800DDE54[chain]].soundTimer = (func_150ADA20() & 0x3F) + 180;
+                if (D_800DDE54[chain] == 2 || D_800DDE54[chain] == 3) {
+                    func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0,
+                                  D_800CC2D0[lastActor - 1].x_position, D_800CC2D0[lastActor - 1].y_position,
+                                  D_800CC2D0[lastActor - 1].z_position, 300, 800);
                 } else {
-                    func_10010F88(0xF, 0x5DC0, 0, 0, 0, D_800CC2D0[found - 1].x_position, D_800CC2D0[found - 1].y_position, D_800CC2D0[found - 1].z_position, 300, 800);
+                    func_10010F88(15, 0x5DC0, 0, 0, 0,
+                                  D_800CC2D0[lastActor - 1].x_position, D_800CC2D0[lastActor - 1].y_position,
+                                  D_800CC2D0[lastActor - 1].z_position, 300, 800);
                 }
-            } else if (fall == 0) {
-                if (D_8008D050[D_800DDE54[i]].soundTimer != 0 && D_8008D050[D_800DDE54[i]].soundTimer != 0) {
-                    D_8008D050[D_800DDE54[i]].soundTimer -= D_800BE9E4;
+            } else if (!falling) {
+                // matching: the duplicated test is in the original (it emits a second lbu/beqz)
+                if (D_8008D050[D_800DDE54[chain]].soundTimer != 0 && D_8008D050[D_800DDE54[chain]].soundTimer != 0) {
+                    D_8008D050[D_800DDE54[chain]].soundTimer -= D_800BE9E4;
                 }
             }
         }
