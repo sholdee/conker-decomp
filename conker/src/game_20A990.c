@@ -1,34 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* The eeprom PIF ram block at 0x800E0A30 and the two request layouts it carries.  These are
- * file-local because src/libultra/io/controller.h describes a DIFFERENT (already-matched)
- * copy of this code -- see the note there -- and its __OSContRequesFormat orders typeh/typel
- * the other way round from what these functions want. */
-typedef struct {
-    /* 0x00 */ u32 ramarray[15];
-    /* 0x3C */ u32 pifstatus;
-} OSPifRam;
-
-typedef struct {
-    /* 0x0 */ u8 txsize;
-    /* 0x1 */ u8 rxsize;
-    /* 0x2 */ u8 cmd;
-    /* 0x3 */ u8 address;
-    /* 0x4 */ u8 data[8];
-} __OSContEepromFormat;
-
-typedef struct {
-    /* 0x0 */ u8 dummy;
-    /* 0x1 */ u8 txsize;
-    /* 0x2 */ u8 rxsize;
-    /* 0x3 */ u8 cmd;
-    /* 0x4 */ u8 typeh;
-    /* 0x5 */ u8 typel;
-    /* 0x6 */ u8 status;
-    /* 0x7 */ u8 dummy1;
-} __OSContRequesFormat;
+#include "controller.h"
 
 extern OSPifRam D_800E0A30;
 extern u8 __osContLastCmd;
