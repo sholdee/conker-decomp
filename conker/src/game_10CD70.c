@@ -207,44 +207,38 @@ void func_150DFDA4(Actor *actor) {
     bone[3][2] = actor->z_position;
 }
 
-typedef struct {
+/* Partial view of a model attachment (ModelAttachment in game_5D2C0.c). */
+typedef struct ModelAttachment {
     /* 0x00 */ u8 pad0[0x13];
-    /* 0x13 */ u8 unk13;
+    /* 0x13 */ u8 hiddenDLists; // bit i set: display list i is not drawn
     /* 0x14 */ u8 pad14[0x10];
-    /* 0x24 */ GfxCmd **dl;
-} Game10CD70Object;
+    /* 0x24 */ GfxCmd **dlists;
+} ModelAttachment;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2D8];
-    /* 0x2D8 */ f32 timer;
-    /* 0x2DC */ f32 rate;
-    /* 0x2E0 */ u8 pad2E0[0xC];
-    /* 0x2EC */ s32 active;
-} Game10CD70FadeState;
-
-/* Counts the fade timer down (returning 1 once it expires) and rewrites the G_SETTILESIZE of
- * the object's display list: uls follows the fade, ult steps back by a third of the old uls. */
-s32 func_150DFDD0(Game10CD70Object *obj, Game10CD70FadeState *state) {
+/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (unk2EC), counts
+ * its timer (unk2D8[0]) down, returning 1 once it expires, and rewrites the G_SETTILESIZE of the
+ * attachment's display list: uls follows the fade, ult steps back by a third of the old uls. */
+s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
     f32 fade;
     GfxCmd *dl;
     u32 w0;
     s32 j;
     s32 ult;
 
-    if (state->active != 0) {
-        obj->unk13 = 2;
-        state->timer -= D_800BE9A4;
-        if (state->timer < 0.0f) {
-            state->active = 0;
+    if (owner->unk2EC != 0) {
+        att->hiddenDLists = 2;
+        owner->unk2D8[0] -= D_800BE9A4;
+        if (owner->unk2D8[0] < 0.0f) {
+            owner->unk2EC = 0;
             return 1;
         }
-        fade = 1.0f - (state->rate * state->timer);
+        fade = 1.0f - (owner->unk2D8[0] * owner->unk2D8[1]);
     } else {
         fade = 0.0f;
-        obj->unk13 = 0;
+        att->hiddenDLists = 0;
     }
 
-    dl = *obj->dl;
+    dl = *att->dlists;
     if (dl != NULL) {
         j = 0;
         while (GFX_CMD(dl, j)->w0.opcode != (s8)G_SETTILESIZE) {

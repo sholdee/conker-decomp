@@ -190,9 +190,8 @@ void func_150C44A4(Effect *effect) {
         if (bone == NULL) {
             return;
         }
-        /* Actor has no fields at 0x2D8/0x2DC yet */
-        if (owner->unk2EC != 0) {
-            progress = *(f32 *)((u8 *)owner + 0x2D8) * *(f32 *)((u8 *)owner + 0x2DC);
+        if (owner->unk2EC != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
+            progress = owner->unk2D8[0] * owner->unk2D8[1];
         } else {
             progress = 0.0f;
         }
