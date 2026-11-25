@@ -4,58 +4,65 @@
 #include "variables.h"
 
 
-struct LL155FD4 {
-    u8 pad_0x0[0x8];
-    struct LL155FD4 *field_0x8;
-    u8 pad_0xC[0x2];
-    s16 field_0xE;
-    u8 field_0x10;
-    u8 field_0x11;
-    u8 pad_0x12[0x2];
-    s32 field_0x14;
-    u8 pad_0x18[0x80];
-    f32 field_0x98;
-};
+/*
+ * Type 0x50 object: a point light that bobs above player D_800CC2D0[playerId].
+ * The link header (type, list, prev, next) is shared with every object (see ObjLink in game_1944C0.c).
+ */
+typedef struct PlayerGlow {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ struct PlayerGlow *next;
+    /* 0x0C */ u8 padC[0x2];
+    /* 0x0E */ s16 timer;
+    /* 0x10 */ u8 playerId;
+    /* 0x11 */ u8 state;
+    /* 0x12 */ u8 bobPhase;
+    /* 0x13 */ u8 pad13;
+    /* 0x14 */ struct226 *light;
+    /* 0x18 */ Mtx mtx[2];
+    /* 0x98 */ f32 heightOffset;
+} PlayerGlow;
 
-extern u8 D_800DCE50[];
+#define OBJ_TYPE_PLAYER_GLOW 0x50
 
+/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
+extern PlayerGlow *D_800DCE50[2][104];
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void func_1518C900(s32);
+PlayerGlow *func_15155FD4(s32 playerId);
 
-void *func_15155780(s32 arg0, s32 arg1) {
-    struct LL155FD4 *temp_v0;
+/* Allocates a glow object for player `playerId` in list 0. */
+PlayerGlow *func_15155780(s32 playerId, s32 owner) {
+    PlayerGlow *glow;
 
-    temp_v0 = (struct LL155FD4 *)func_15167A68(0x50, 0, 0xA0, 1, arg1, 1);
-    if (temp_v0 == 0) {
-        return temp_v0;
+    glow = func_15167A68(OBJ_TYPE_PLAYER_GLOW, 0, sizeof(PlayerGlow), 1, owner, 1);
+    if (glow == NULL) {
+        return glow;
     }
-    temp_v0->field_0x10 = arg0;
-    temp_v0->field_0x98 = 0.0f;
-    temp_v0->field_0x11 = 0;
-    temp_v0->field_0x14 = 0;
+    glow->playerId = playerId;
+    glow->heightOffset = 0.0f;
+    glow->state = 0;
+    glow->light = NULL;
     func_1518C900(0xA6);
-    return temp_v0;
+    return glow;
 }
 
-extern u8 D_800CC37D;
-extern u8 *func_15155FD4(s32 arg0);
+/* Finds or creates player `playerId`'s glow and shows it for `duration` frames, `heightOffset` higher. */
+void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
+    PlayerGlow *glow;
 
-void func_151557FC(s32 arg0, s32 arg1, f32 arg2) {
-    struct LL155FD4 *temp_v0;
-
-    temp_v0 = (struct LL155FD4 *)func_15155FD4(arg0);
-    if (temp_v0 == 0) {
-        temp_v0 = (struct LL155FD4 *)func_15155780(arg0, 0xFF);
+    glow = func_15155FD4(playerId);
+    if (glow == NULL) {
+        glow = func_15155780(playerId, 0xFF);
     }
-    if (temp_v0 != 0) {
-        temp_v0->field_0x98 = arg2;
-        if ((&D_800CC37D)[arg0 * 812] != 0) {
-            temp_v0->field_0xE = 0;
-            temp_v0->field_0x11 = 0;
+    if (glow != NULL) {
+        glow->heightOffset = heightOffset;
+        if (D_800CC2D0[playerId].in_water) {
+            glow->timer = 0;
+            glow->state = 0;
         } else {
-            temp_v0->field_0x11 = 3;
-            temp_v0->field_0xE = arg1;
+            glow->state = 3;
+            glow->timer = duration;
         }
     }
 }
@@ -209,44 +216,42 @@ void func_15155EF8(struct225 *arg0) {
     func_1518CA04(0xA6);
 }
 
-extern u8 *func_15155FD4(s32 arg0);
-
+/* Hides the current player's glow, or (while it is timed) stops it from bobbing. */
 void func_15155F3C(void) {
-    u8 *temp_v0 = func_15155FD4(D_800C3E78);
-    if (temp_v0 != NULL) {
-        if (temp_v0[0x11] == 2) {
-            temp_v0[0x11] = 0;
-        } else if (temp_v0[0x11] == 3) {
-            temp_v0[0x11] = 2;
+    PlayerGlow *glow = func_15155FD4(D_800C3E78);
+
+    if (glow != NULL) {
+        if (glow->state == 2) {
+            glow->state = 0;
+        } else if (glow->state == 3) {
+            glow->state = 2;
         }
     }
 }
 
-
+/* Switches the current player's timed glow (state 3) to state 1. */
 void func_15155F90(void) {
-    u8 *temp_v0 = func_15155FD4(D_800C3E78);
-    if (temp_v0 != NULL) {
-        if (temp_v0[0x11] == 3) {
-            temp_v0[0x11] = 1;
+    PlayerGlow *glow = func_15155FD4(D_800C3E78);
+
+    if (glow != NULL) {
+        if (glow->state == 3) {
+            glow->state = 1;
         }
     }
 }
 
-u8 *func_15155FD4(s32 arg0) {
-    s32 i;
-    struct LL155FD4 *node;
+/* Returns player `playerId`'s glow object from either object list, or NULL. */
+PlayerGlow *func_15155FD4(s32 playerId) {
+    s32 list;
+    PlayerGlow *glow;
 
-    i = 0;
-    do {
-        node = *(struct LL155FD4 **)&D_800DCE50[i + 0x140];
-        i += 0x1A0;
-        while (node != NULL) {
-            if (arg0 == node->field_0x10) {
-                return (u8 *)node;
+    for (list = 0; list < 2; list++) {
+        for (glow = D_800DCE50[list][OBJ_TYPE_PLAYER_GLOW]; glow != NULL; glow = glow->next) {
+            if (playerId == glow->playerId) {
+                return glow;
             }
-            node = node->field_0x8;
         }
-    } while ((u8 *)&D_800DD190 != &D_800DCE50[i]);
+    }
     return NULL;
 }
 
