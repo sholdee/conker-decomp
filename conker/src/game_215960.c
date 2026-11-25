@@ -11,17 +11,25 @@
 #undef D_800CC2D0
 #undef D_800BE3F8
 
+/* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
 typedef struct {
-    /* 0x00 */ Gfx **unk0;
-    /* 0x04 */ Gfx *unk4[4];
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
+    /* 0x000 */ u8 pad0[0x3E0];
+    /* 0x3E0 */ f32 (*matrices[2])[4]; /* one per frame buffer */
+    /* 0x3E8 */ s32 segment3[2];        /* segment 3 base, one per frame buffer */
+} HudModelAnim;
+
+/* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
+typedef struct {
+    /* 0x00 */ Gfx **srcDisplayLists;
+    /* 0x04 */ Gfx *displayLists[4];
+    /* 0x14 */ u8 displayListCount;
+    /* 0x15 */ u8 blinkTimer;
     /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ s32 unk1C;
+    /* 0x1C */ s32 unk1C; /* segment 1 base */
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ f32 unk28[2][4][4];
-} GameStruct151ED90C;
+    /* 0x24 */ HudModelAnim *anim;
+    /* 0x28 */ f32 matrices[2][4][4];
+} HudModel;
 
 /* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
 typedef struct {
@@ -104,7 +112,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
 extern u8 D_800E0B94;
 extern Gfx *(*D_8008FFC0[])(Gfx *);
 extern s32 D_8003C8E0;
-extern GameStruct151ED90C *D_80090058;
+extern HudModel *D_80090058;
 extern s16 D_800E0C78;
 extern u8 D_800BE9C0;
 extern Gfx *D_800BE9C8[];
@@ -943,7 +951,7 @@ extern u8 D_830;
 extern u8 D_891;
 extern s32 *D_800891BC[];
 extern s8 D_8008FEF0;
-extern GameStruct151ED90C *D_8009005C;
+extern HudModel *D_8009005C;
 extern u8 D_800BEAC1;
 extern s16 D_800C3C9E;
 typedef struct {
@@ -960,9 +968,9 @@ Gfx *func_150900F0(Gfx *, s32);
 extern s16 D_8008FDCC;
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
-void func_151EDB58();
-GameStruct151ED90C *func_151ED90C(s32, s32, s32, f32);
-Gfx *func_151EDBDC(Gfx *, GameStruct151ED90C *, f32, f32, f32);
+void func_151EDB58(HudModel *model);
+HudModel *func_151ED90C(s32, s32, s32, f32);
+Gfx *func_151EDBDC(Gfx *, HudModel *, f32, f32, f32);
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 Gfx *func_151EADFC(Gfx *, s32, s32, s32);
 
@@ -1740,7 +1748,7 @@ extern u8 D_8009DEB4[];
 extern u8 D_8009DEB8[];
 extern u8 D_8009DEBC[];
 
-/* Sets up the load and render tiles for a sprite (wrap masks from its size); returns the LoadBlock size. */
+/* Sets up the load and render tiles for a sprite; stores its LoadBlock texel count in *blockSizeOut. */
 Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
     s32 masks;
     s32 maskt;
@@ -1835,10 +1843,14 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
-extern void func_1503F5B8(s32, s32, s32, f32, f32, s32);
+extern void func_1503F5B8(HudModelAnim *, s32, s32, f32, f32, s32);
 
-GameStruct151ED90C *func_151ED90C(s32 arg0, s32 arg1, s32 arg2, f32 arg3) {
-    GameStruct151ED90C *obj;
+/*
+ * Loads a HUD model and makes patched copies of its display lists (SetOtherMode rewritten,
+ * SetCombine turned into a no-op). Returns NULL on failure.
+ */
+HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) {
+    HudModel *model;
     f32 (*mtx1)[4];
     f32 (*mtx2)[4];
     Gfx *dst;
@@ -1847,26 +1859,26 @@ GameStruct151ED90C *func_151ED90C(s32 arg0, s32 arg1, s32 arg2, f32 arg3) {
     s32 size;
     s32 i;
 
-    obj = allocate_memory(sizeof(GameStruct151ED90C), 1, 0, 1);
-    if (obj == NULL) {
+    model = allocate_memory(sizeof(HudModel), 1, 0, 1);
+    if (model == NULL) {
         return NULL;
     }
-    obj->unk15 = 1;
-    if (func_1503F62C(arg0, arg1, obj, &obj->unk14, &obj->unk1C, &obj->unk20, &obj->unk24) != 0) {
-        func_10004074(obj);
+    model->blinkTimer = 1;
+    if (func_1503F62C(loadArg0, loadArg1, model, &model->displayListCount, &model->unk1C, &model->unk20, &model->anim) != 0) {
+        func_10004074(model);
         return NULL;
     }
 
-    mtx1 = obj->unk28[0];
+    mtx1 = model->matrices[0];
     guMtxIdentF(mtx1);
-    mtx2 = obj->unk28[1];
+    mtx2 = model->matrices[1];
     guMtxIdentF(mtx2);
-    *(f32 (**)[4])(obj->unk24 + 0x3E0) = mtx1;
-    *(f32 (**)[4])(obj->unk24 + 0x3E4) = mtx2;
-    func_1503F5B8(obj->unk24, 1, arg2, arg3, 0.0f, 0);
+    model->anim->matrices[0] = mtx1;
+    model->anim->matrices[1] = mtx2;
+    func_1503F5B8(model->anim, 1, animArg0, animArg1, 0.0f, 0);
 
-    for (i = 0; i < obj->unk14; i++) {
-        src = obj->unk0[i];
+    for (i = 0; i < model->displayListCount; i++) {
+        src = model->srcDisplayLists[i];
         size = 0;
         do {
             cmd = (src->words.w0 >> 24) & 0xFF;
@@ -1875,19 +1887,19 @@ GameStruct151ED90C *func_151ED90C(s32 arg0, s32 arg1, s32 arg2, f32 arg3) {
         } while (cmd != 0xDF);
 
         dst = allocate_memory(size, 1, 1, 1);
-        obj->unk4[i] = dst;
+        model->displayLists[i] = dst;
         if (dst == NULL) {
             for (size = 0; size < i; size++) {
-                func_10004074(obj->unk4[size]);
+                func_10004074(model->displayLists[size]);
             }
-            func_10004074(obj);
+            func_10004074(model);
             return NULL;
         }
     }
 
-    for (i = 0; i < obj->unk14; i++) {
-        dst = obj->unk4[i];
-        src = obj->unk0[i];
+    for (i = 0; i < model->displayListCount; i++) {
+        dst = model->displayLists[i];
+        src = model->srcDisplayLists[i];
         do {
             dst->words.w0 = src->words.w0;
             dst->words.w1 = src->words.w1;
@@ -1904,27 +1916,21 @@ GameStruct151ED90C *func_151ED90C(s32 arg0, s32 arg1, s32 arg2, f32 arg3) {
         } while (cmd != 0xDF);
     }
 
-    return obj;
+    return model;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 *unk4[4];
-    u8 unk14;
-    u8 pad15[0xF];
-    s32 unk24;
-} GameStruct151EDB58;
 
-extern void func_1503F7B8(s32);
+extern void func_1503F7B8(HudModelAnim *);
 
-void func_151EDB58(GameStruct151EDB58 *arg0) {
+/* Frees a HUD model and its display list copies. */
+void func_151EDB58(HudModel *model) {
     s32 i;
 
-    if (arg0 != 0) {
-        func_1503F7B8(arg0->unk24);
-        func_100043B4((s32 *)arg0, 4);
-        for (i = 0; i < arg0->unk14; i++) {
-            func_100043B4(arg0->unk4[i], 4);
+    if (model != NULL) {
+        func_1503F7B8(model->anim);
+        func_100043B4((s32 *)model, 4);
+        for (i = 0; i < model->displayListCount; i++) {
+            func_100043B4((s32 *)model->displayLists[i], 4);
         }
     }
 }
@@ -1936,9 +1942,10 @@ extern Gfx D_80090128;
 extern s16 D_800E0C30;
 extern u8 D_507;
 extern u8 D_508;
-extern void func_1503F4B0(s32);
+extern void func_1503F4B0(HudModelAnim *);
 
-Gfx *func_151EDBDC(Gfx *gfx, GameStruct151ED90C *obj, f32 x, f32 y, f32 scale) {
+/* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
+Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     u8 *tex;
     Gfx *start;
     s32 image;
@@ -1951,14 +1958,14 @@ Gfx *func_151EDBDC(Gfx *gfx, GameStruct151ED90C *obj, f32 x, f32 y, f32 scale) {
         scale *= D_8008FE1C;
     }
 
-    guMtxIdentF(obj->unk28[D_800BE9C0]);
-    obj->unk28[D_800BE9C0][3][0] = x;
-    obj->unk28[D_800BE9C0][3][1] = y;
-    obj->unk28[D_800BE9C0][3][2] = -100.0f;
-    obj->unk28[D_800BE9C0][0][0] = scale;
-    obj->unk28[D_800BE9C0][1][1] = scale;
-    obj->unk28[D_800BE9C0][2][2] = scale;
-    func_1503F4B0(obj->unk24);
+    guMtxIdentF(model->matrices[D_800BE9C0]);
+    model->matrices[D_800BE9C0][3][0] = x;
+    model->matrices[D_800BE9C0][3][1] = y;
+    model->matrices[D_800BE9C0][3][2] = -100.0f;
+    model->matrices[D_800BE9C0][0][0] = scale;
+    model->matrices[D_800BE9C0][1][1] = scale;
+    model->matrices[D_800BE9C0][2][2] = scale;
+    func_1503F4B0(model->anim);
 
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -1969,15 +1976,15 @@ Gfx *func_151EDBDC(Gfx *gfx, GameStruct151ED90C *obj, f32 x, f32 y, f32 scale) {
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0C30);
     gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
-    gSPSegment(gfx++, 3, *(s32 *)(obj->unk24 + (D_800BE9C0 * 4) + 0x3E8));
-    gSPSegment(gfx++, 1, obj->unk1C);
+    gSPSegment(gfx++, 3, model->anim->segment3[D_800BE9C0]);
+    gSPSegment(gfx++, 1, model->unk1C);
 
-    if (obj == D_80090058) {
-        obj->unk15--;
-        if (obj->unk15 == 0) {
-            obj->unk15 = (func_150ADA20() & 0x7F) + 0xF;
+    if (model == D_80090058) {
+        model->blinkTimer--;
+        if (model->blinkTimer == 0) {
+            model->blinkTimer = (func_150ADA20() & 0x7F) + 0xF;
         }
-        if (obj->unk15 < 7) {
+        if (model->blinkTimer < 7) {
             tex = &D_507;
         } else {
             tex = &D_508;
@@ -1990,8 +1997,8 @@ Gfx *func_151EDBDC(Gfx *gfx, GameStruct151ED90C *obj, f32 x, f32 y, f32 scale) {
         gSPSegment(gfx++, 7, image);
     }
 
-    for (i = 0; i < obj->unk14; i++) {
-        gSPDisplayList(gfx++, obj->unk4[i]);
+    for (i = 0; i < model->displayListCount; i++) {
+        gSPDisplayList(gfx++, model->displayLists[i]);
     }
     gSPDisplayList(gfx++, &D_80090128);
     return gfx;
