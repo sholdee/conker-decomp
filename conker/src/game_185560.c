@@ -668,15 +668,6 @@ u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, 
     return ret;
 }
 
-/* Ground query result written by func_15046C00. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x18];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 surface; /* 3 spawns a splash in the particle callbacks */
-    /* 0x1E */ u8 pad1E[6];
-} GroundHit;
-
 /* Particle data at 0xA8 for the rising-and-swaying particles (func_151596BC, func_15159594). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
@@ -749,7 +740,7 @@ typedef struct {
     /* 0x64 */ u8 pad64[4];
     /* 0x68 */ u32 flags; /* 0x2000: dies above RiseMotion.ceiling */
     /* 0x6C */ u8 pad6C[0x14];
-    /* 0x80 */ GroundHit ground;
+    /* 0x80 */ CollisionHit ground;
     /* 0xA4 */ u8 padA4[4];
     /* 0xA8 */ union {
         RiseMotion rise;
@@ -766,10 +757,10 @@ typedef struct {
 
 s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
-s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, GroundHit *hit);
+s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
 s32 func_1514672C(Vec3f *pos);
 
-/* Update callback: rises and sways; dies on reaching the ground hit above it (splashing on surface 3). */
+/* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
 u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
     u8 alive;
     s32 found;
@@ -788,9 +779,9 @@ u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
             found = func_15046C00(&pos, 0, particle->position.y, &particle->ground);
             if (found != 0) {
                 pos.y = particle->ground.height;
-                if (particle->ground.surface == 3) {
+                if (particle->ground.source == 3) {
                     func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
-                                  (s32)particle->ground.unk4, &pos, particle->unkC, particle->unk1);
+                                  (s32)&particle->ground.tri, &pos, particle->unkC, particle->unk1);
                 }
                 alive = 0;
             }
@@ -1079,16 +1070,16 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
     return 1;
 }
 
-void *func_15130280(ParticleDesc6C *spawn, u8 arg1, GroundHit *ground, s32 motionSize, u8 arg4, s32 arg5);
+void *func_15130280(ParticleDesc6C *spawn, u8 arg1, CollisionHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, GroundHit *ground, f32 size,
+Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     Particle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
     ParticleDesc6C spawn;
     DriftMotion drift;
-    GroundHit hit;
+    CollisionHit hit;
     s32 flipY;
     s32 flipX;
 
@@ -1153,7 +1144,7 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Grou
         if (ground != NULL) {
             hit = *ground;
         } else {
-            hit.unk1C = 0;
+            hit.flags = 0;
         }
         if (func_1514672C(pos)) {
             if (func_15046C00(pos, 0, 19500.0f, &hit)) {
@@ -1226,9 +1217,9 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
     }
     if (alive == 0) {
         if (func_150ADA68() < 0.200000003f) {
-            if (particle->ground.surface == 3) {
+            if (particle->ground.source == 3) {
                 func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->alpha,
-                              (s32)particle->ground.unk4, &pos, particle->unkC, particle->unk1);
+                              (s32)&particle->ground.tri, &pos, particle->unkC, particle->unk1);
             }
         }
     }
