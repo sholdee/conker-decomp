@@ -32,12 +32,6 @@ typedef struct {
     /* 0x8 */ s16 unk8;
 } CornerColor;
 
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} Rgb8;
-
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
     /* 0x0 */ s16 growDelay; /* age after which the particle starts growing */

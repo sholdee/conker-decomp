@@ -99,4 +99,11 @@
  *   game_20A290.c
  */
 
+/* An RGB colour, one byte per channel (game_F8590.c, game_F9430.c). */
+typedef struct Rgb8 {
+    /* 0x0 */ u8 r;
+    /* 0x1 */ u8 g;
+    /* 0x2 */ u8 b;
+} Rgb8; /* size 0x3 */
+
 #endif

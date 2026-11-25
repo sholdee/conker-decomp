@@ -83,12 +83,6 @@ typedef struct {
     s16 unk8;
 } DustColor;
 
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} Rgb8;
-
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
