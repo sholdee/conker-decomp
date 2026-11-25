@@ -1192,10 +1192,10 @@ void func_15124C38(struct108 *camera, f32 *outY) {
             }
         } else {
             s16 top;
-            s16 unused1;
-            s16 unused2;
+            s16 discard1;
+            s16 discard2;
 
-            func_1507C3E0(CAM->player, &top, &unused1, &unused2);
+            func_1507C3E0(CAM->player, &top, &discard1, &discard2);
             height = top;
         }
         if (CAM->playerExt->unk120 != 0) {
@@ -2198,7 +2198,7 @@ void func_15127EB8(struct108 *camera) {
 
     player = CAM->player;
     linked = player->unk65;
-    // matching: [linked] - 1 rather than [linked - 1] (IDO folds the -0x32C differently)
+    // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
     target = (linked != 0) ? &D_800CC2D0[linked] - 1 : player;
 
     target->pad2FC[0] &= ~(1 << CAM->playerIndex);
