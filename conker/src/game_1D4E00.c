@@ -7,10 +7,6 @@ u32 func_150ADA20(void);
 
 extern f32 D_800A8F68;
 extern f32 D_800A8F6C;
-extern f32 D_800A8F58;
-extern f32 D_800A8F5C;
-extern f32 D_800A8F60;
-extern f32 D_800A8F64;
 extern f32 D_800A8DE0;
 extern void (*D_8008FA60[])(f32 *, void *, s32, u8, s32);
 
@@ -786,84 +782,72 @@ void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     *bottom = def->bottom;
 }
 
-void func_151A931C(u8 *, s32, u8);
+void func_151A931C(Emitter *, u8 *, u8);
 
-void func_151A9024(u8 *arg0, s32 arg1, u8 arg2) {
-    if (arg0[0x4C] == 1) {
-        func_151A931C(arg0, arg1, arg2);
+/* Message handler: type 1 emitters are switched on and off by messages. */
+void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
+    if (emitter->state.def.type == 1) {
+        func_151A931C(emitter, msg, msgType);
     }
 }
 
-extern void (*D_8008F984[])(void);
-s32 func_151A9060(u8 *arg0)
-{
-  s32 temp;
-  s32 idx;
-  arg0[0x16] |= 0x4;
-  temp = *((s32 *) (arg0 + 0x18));
-  idx = temp & 0xFFFFFFFFu;
-  temp = idx < 0;
-  if (temp || (idx >= 8))
-  {
+extern void (*D_8008F984[])(LevelObject *, s32);
+
+/* Level object setup: marks the object and runs the handler for its kind (unk18, 0 to 7). */
+s32 func_151A9060(LevelObject *obj) {
+    s32 kind;
+
+    obj->flags |= 4;
+    kind = obj->unk18;
+    if (kind < 0 || kind >= 8) {
+        return 1;
+    }
+    if (D_8008F984[kind] != NULL) {
+        D_8008F984[kind](obj, kind);
+    }
     return 1;
-  }
-  if (D_8008F984[idx])
-  {
-    D_8008F984[idx]();
-  }
-  return 1;
 }
 
+/*
+ * Kind 0-5 level object handler: an emitter anchored to obj, with message id `kind`; odd kinds
+ * spawn faster.
+ */
+void func_151A90C0(LevelObject *obj, s32 kind) {
+    EmitterDef def;
+    // matching: the id byte sits 4 bytes below this unused slot, in frame padding no declared
+    // local reaches (a u8 local lands at sp+0x2F or grows the frame)
+    s32 idSlot;
+    f32 odd;
+    Emitter *emitter;
 
-void func_151A90C0(s32 arg0, s32 arg1) {
-    struct {
-        s8 unk0;
-        u8 pad1[3];
-        s32 unk4;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        s8 unk24;
-        s8 unk25;
-        s8 unk26;
-    } sp30;
-    s32 sp28;
-    f32 temp_f0;
-    s32 temp_v0;
-
-    sp30.unk0 = 2;
-    sp30.unk4 = arg0;
-    temp_f0 = (f32)(arg1 & 1);
-    if (temp_f0) {
-        sp30.unk8 = D_800A8F58;
+    def.flags = EMITTER_ANCHORED;
+    def.anchor = obj;
+    odd = kind & 1;
+    if (odd) {
+        def.rate = 1.4e-6f;
     } else {
-        sp30.unk8 = D_800A8F5C;
+        def.rate = 4e-7f;
     }
 
-    if (temp_f0) {
-        sp30.unkC = D_800A8F60;
+    if (odd) {
+        def.rateRange = 8e-7f;
     } else {
-        sp30.unkC = D_800A8F64;
+        def.rateRange = 6e-7f;
     }
 
-    temp_f0 = 0.0f;
-    sp30.unk10 = temp_f0;
-    sp30.unk14 = temp_f0;
-    sp30.unk18 = temp_f0;
-    sp30.unk1C = temp_f0;
-    sp30.unk20 = temp_f0;
-    sp30.unk24 = 1;
-    sp30.unk25 = -1;
-    sp30.unk26 = 0;
-    ((s8 *)&sp28)[-4] = (s8)arg1;
+    def.pos.x = 0.0f;
+    def.pos.y = 0.0f;
+    def.pos.z = 0.0f;
+    def.bottom = 0.0f;
+    def.radius = 0.0f;
+    def.type = 1;
+    def.update = -1;
+    def.spawn = 0;
+    ((u8 *)&idSlot)[-4] = kind;
 
-    temp_v0 = func_151A8B20(&sp30, -1, 1, 0xFF, 0);
-    if (temp_v0 != 0) {
-        memcpy((void *)(temp_v0 + 0x80), ((s8 *)&sp28) - 4, 1);
+    emitter = func_151A8B20(&def, -1, 1, 0xFF, 0);
+    if (emitter != NULL) {
+        memcpy(emitter->data, (u8 *)&idSlot - 4, 1);
     }
 }
 
@@ -928,21 +912,23 @@ void func_151A91AC(u8 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
                   arg0[0xC], arg0[1]);
 }
 
-void func_151A931C(u8 *arg0, s32 arg1, u8 arg2) {
-    u8 *ptr;
+/* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
+void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
+    EmitterState *state;
 
-    if (arg2 == 0x17) {
-        ptr = arg0 + 0x28;
-        if (*(u8 *)arg1 != arg0[0x80]) {
+    if (msgType == 0x17) {
+        state = &emitter->state;
+        // matching: the goto keeps IDO from sharing the 0x18 branch's return
+        if (*msg != emitter->data[0]) {
             goto ret;
         }
-        *ptr |= 1;
+        state->def.flags |= EMITTER_ON;
     ret:
         return;
-    } else if (arg2 == 0x18) {
-        ptr = arg0 + 0x28;
-        if (*(u8 *)arg1 == arg0[0x80]) {
-            *ptr &= ~1;
+    } else if (msgType == 0x18) {
+        state = &emitter->state;
+        if (*msg == emitter->data[0]) {
+            state->def.flags &= ~EMITTER_ON;
         }
     }
 }
