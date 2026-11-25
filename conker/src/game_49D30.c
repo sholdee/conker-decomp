@@ -13,6 +13,17 @@
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
+/* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a
+   4-event header whose value is the start time (see game_50D80.c). */
+typedef struct {
+    /* 0x0 */ s8 type;
+    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
+    /* 0x2 */ s16 value;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s16 unk6;
+} SeqEvent;
+
 /* A path keyframe: a point the track's actor moves through (D_800C3868[slot][track][key]). */
 typedef struct {
     /* 0x0 */ s16 x;
@@ -102,9 +113,9 @@ extern void func_1502178C(struct127 *, s32, s32);
 extern void func_1501E81C(s32, s32);
 extern s32 func_150229E4(struct127 *);
 extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
-extern u8 *D_800C3688[][30];
+extern SeqEvent *D_800C3688[][30];
 extern s32 D_800C3668[];
-extern s32 func_15023BB0(void *, s32, s32, s16 **, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15022640(s32, s32);
 extern struct131 *func_151149AC(u8);
 extern struct127 *func_1505EEF4(s32);
@@ -234,101 +245,100 @@ void func_1501C880(s32 arg0, s32 swapBuffers) {
 }
 
 
+/* ROM offsets (relative to D_2D4B0) of one RSP microcode's text and data. */
 typedef struct {
     s32 textStart;
     s32 textEnd;
     s32 dataStart;
     s32 dataEnd;
-} struct_1501CC3C;
+} UcodeRomEntry;
 
 extern u8 D_2D4B0[];
 extern s8 D_80084070;
 extern s8 D_80084074;
-extern struct_1501CC3C D_80084078[];
+extern UcodeRomEntry D_80084078[];
 extern s32 D_800BEB98;
 
+/* DMA the two RSP microcodes (D_800C1060 and D_800BEBB0, each text then data) for the current
+   graphics mode, unless they are already loaded. */
 void func_1501CC3C(void) {
-    s32 idx;
-    s32 ofs;
-    struct_1501CC3C *e;
+    s32 ucode;
+    s32 altOffset;
+    UcodeRomEntry *alt;
 
-    idx = D_800B0DF0->pad2A[1];
-    if (idx >= 2) {
-        idx -= 2;
-        ofs = 0;
+    ucode = D_800B0DF0->pad2A[1];
+    if (ucode >= 2) {
+        ucode -= 2;
+        altOffset = 0;
     } else {
-        ofs = 4;
+        altOffset = 4;
     }
     if (D_800BEB98 == 1) {
-        idx += 2;
+        ucode += 2;
     }
-    if ((idx != D_80084070) || (ofs != D_80084074)) {
-        func_10004514(D_80084078[idx].textStart + (s32)D_2D4B0, D_800C1060, D_80084078[idx].textEnd - D_80084078[idx].textStart, 1);
-        D_800BEB9C = (u64 *)((D_80084078[idx].textEnd - D_80084078[idx].textStart) + (u8 *)D_800C1060);
-        func_10004514(D_80084078[idx].dataStart + (s32)D_2D4B0, D_800BEB9C, D_80084078[idx].dataEnd - D_80084078[idx].dataStart, 1);
-        D_80084070 = idx;
-        D_80084074 = ofs;
-        e = D_80084078 + (idx + ofs);
-        func_10004514(e->textStart + (s32)D_2D4B0, D_800BEBB0, e->textEnd - e->textStart, 1);
-        D_800BEAD0 = (u64 *)((e->textEnd - e->textStart) + (u8 *)D_800BEBB0);
-        func_10004514(e->dataStart + (s32)D_2D4B0, D_800BEAD0, e->dataEnd - e->dataStart, 1);
+    if ((ucode != D_80084070) || (altOffset != D_80084074)) {
+        func_10004514(D_80084078[ucode].textStart + (s32)D_2D4B0, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
+        D_800BEB9C = (u64 *)((D_80084078[ucode].textEnd - D_80084078[ucode].textStart) + (u8 *)D_800C1060);
+        func_10004514(D_80084078[ucode].dataStart + (s32)D_2D4B0, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
+        D_80084070 = ucode;
+        D_80084074 = altOffset;
+        alt = D_80084078 + (ucode + altOffset);
+        func_10004514(alt->textStart + (s32)D_2D4B0, D_800BEBB0, alt->textEnd - alt->textStart, 1);
+        D_800BEAD0 = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)D_800BEBB0);
+        func_10004514(alt->dataStart + (s32)D_2D4B0, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
     }
 }
 
 extern u8 *D_800C3960[][30];
 
-void func_1501CDC0(s32 arg0) {
+/* Mark every track's active-event table (D_800C3960) as empty. */
+void func_1501CDC0(s32 scene) {
     s32 i;
     s32 j;
 
-    for (i = 0; i < D_800C363A[arg0]; i++) {
+    for (i = 0; i < D_800C363A[scene]; i++) {
         for (j = 0; j < 16; j++) {
-            D_800C3960[arg0][i][j] = 0xFF;
+            D_800C3960[scene][i][j] = 0xFF;
         }
     }
 }
 
-typedef struct {
-    u8 pad0[0xA];
-    s16 unkA;
-    u8 padC[0x6];
-    s16 unk12;
-} struct_1501CE54_0;
-
 extern u16 *D_800C35D0[];
 extern SeqChannelKey *D_800C3778[][30];
 
-void func_1501CE54(s32 arg0) {
+/* Work out the scene's end time D_800C3640[scene]: track 0's header length if set, else the latest
+   header end time among tracks with events, else the time of the last channel key. */
+void func_1501CE54(s32 scene) {
     s32 found;
     s32 i;
-    s16 val;
-    u16 idx;
+    s16 length;
+    u16 numKeys;
 
-    D_800C3640[arg0] = 0;
-    if (D_800C363A[arg0] != 0) {
-        if (*D_800C35D8[arg0] >= 4) {
-            val = ((struct_1501CE54_0 *)D_800C3688[arg0][0])->unk12;
-            if (val != -9999) {
-                D_800C3640[arg0] = val;
+    D_800C3640[scene] = 0;
+    if (D_800C363A[scene] != 0) {
+        if (D_800C35D8[scene][0] >= 4) {
+            length = D_800C3688[scene][0][2].value;
+            if (length != -9999) {
+                D_800C3640[scene] = length;
                 return;
             }
         }
         found = 0;
-        for (i = 0; i < D_800C363A[arg0]; i++) {
-            if (D_800C35C8[arg0][i] != 0 && D_800C35D8[arg0][i] != 0) {
-                if (D_800C3640[arg0] < ((struct_1501CE54_0 *)D_800C3688[arg0][i])->unkA) {
-                    D_800C3640[arg0] = ((struct_1501CE54_0 *)D_800C3688[arg0][i])->unkA;
+        for (i = 0; i < D_800C363A[scene]; i++) {
+            if (D_800C35C8[scene][i] != 0 && D_800C35D8[scene][i] != 0) {
+                if (D_800C3640[scene] < D_800C3688[scene][i][1].value) {
+                    D_800C3640[scene] = D_800C3688[scene][i][1].value;
                     found = 1;
                 }
             }
         }
         if (found == 0) {
-            for (i = 0; i < D_800C363A[arg0]; i++) {
-                if (D_800C35C8[arg0][i] != 0) {
-                    idx = D_800C35D0[arg0][i];
-                    if (idx) {
-                        if (D_800C3640[arg0] < D_800C3778[arg0][i][idx - 1].time) {
-                            D_800C3640[arg0] = D_800C3778[arg0][i][idx - 1].time;
+            for (i = 0; i < D_800C363A[scene]; i++) {
+                if (D_800C35C8[scene][i] != 0) {
+                    numKeys = D_800C35D0[scene][i];
+                    if (numKeys) {
+                        if (D_800C3640[scene] < D_800C3778[scene][i][numKeys - 1].time) {
+                            D_800C3640[scene] = D_800C3778[scene][i][numKeys - 1].time;
                         }
                     }
                 }
@@ -337,22 +347,26 @@ void func_1501CE54(s32 arg0) {
     }
 }
 
-s32 func_1501CFF8(s32 arg0) {
+/* Total event count of all tracks of the scene. */
+/* Total event count of all tracks of the scene. */
+/* Total event count of all tracks of the scene. */
+s32 func_1501CFF8(s32 scene) {
     s32 sum;
     s32 i;
     s32 count;
     s32 limit;
-    u16 *ptr;
+    u16 *counts;
 
     sum = 0;
     i = 0;
-    if ((count = D_800C363A[arg0]) > 0) {
+    if ((count = D_800C363A[scene]) > 0) {
         limit = count;
-        ptr = D_800C35D8[arg0];
-loop:
-        sum += *ptr;
+        counts = D_800C35D8[scene];
+    // matching: a goto loop; IDO unrolls the equivalent for and do-while loops
+    loop:
+        sum += *counts;
         i++;
-        ptr++;
+        counts++;
         if (i < limit) {
             goto loop;
         }
@@ -576,7 +590,7 @@ void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             }
             for (i = 0; i < hdr->n2; i++) {
                 D_800C35D8[arg2][i] = data[k].b >> 3;
-                D_800C3688[arg2][i] = (u8 *)data[k].a;
+                D_800C3688[arg2][i] = (SeqEvent *)data[k].a;
                 k++;
             }
             for (i = 0; i < hdr->n3; i++) {
@@ -2045,65 +2059,58 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
 }
 
 
-typedef struct {
-    u16 kind;
-    u8 actor, pad3[2];
-    s8 index;
-    s16 height;
-} Game49D30Selection;
+/* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
+   track's active events in D_800C3960 (slot 2: another track's position, slot 1: this track's
+   unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
+s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s32 scene) {
+    s32 track;
+    u8 *active;
+    struct108 *player;
+    f32 none;
 
-s32 func_15021DB8(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5) {
-    s32 index;
-    u8 *choices;
-    s32 matrixOffset;
-    u8 *camera;
-    f32 sentinel;
-
-    if (D_800C35EA[arg5] != 1) {
+    if (D_800C35EA[scene] != 1) {
         return 0;
     }
-    for (index = 0; index < D_800C363A[arg5]; index++) {
-        if (((u16 *)D_800C35C8[arg5])[index] == 0) {
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[arg5][index].type != 2 ||
-            ((u8 (*)[0x32C])&D_800CC2D0)[arg4][0x3B] != D_800C35F0[arg5][index].unk2) {
+        if (D_800C35F0[scene][track].type != 2 ||
+            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].unk2) {
             continue;
         }
-        choices = ((u8 *(*)[30])D_800C3960)[arg5][index];
-        if (choices[2] != 0xFF) {
-            Game49D30Selection *selection;
-            s32 slot;
+        active = D_800C3960[scene][track];
+        if (active[2] != 0xFF) {
+            SeqEvent *event;
+            s32 other;
 
-            selection = (Game49D30Selection *)(((u8 *(*)[30])D_800C3688)[arg5][index] + choices[2] * 8);
-            slot = selection->index;
-            matrixOffset = slot * 0x44;
-            arg3[0] = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset);
-            arg3[1] = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset + 4) + (f32)selection->height;
-            arg3[2] = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset + 8);
+            event = &D_800C3688[scene][track][active[2]];
+            other = event->unk5;
+            target[0] = D_800C3958[scene][other].x;
+            target[1] = D_800C3958[scene][other].y + (f32)event->unk6;
+            target[2] = D_800C3958[scene][other].z;
             return 0;
         }
-        if (choices[1] != 0xFF) {
-            Game49D30Selection *selection;
+        if (active[1] != 0xFF) {
+            SeqEvent *event;
 
-            selection = (Game49D30Selection *)(((u8 *(*)[30])D_800C3688)[arg5][index] + choices[1] * 8);
-            if (selection->index == 0) {
-                matrixOffset = index * 0x44;
-                *arg0 = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset + 0x28);
-                *arg1 = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset + 0x24);
-                *arg2 = *(f32 *)((u8 *)D_800C3958[arg5] + matrixOffset + 0x2C);
+            event = &D_800C3688[scene][track][active[1]];
+            if (event->unk5 == 0) {
+                *outX = D_800C3958[scene][track].unk28;
+                *outY = D_800C3958[scene][track].unk24;
+                *outZ = D_800C3958[scene][track].unk2C;
                 return 1;
             }
-            camera = (u8 *)D_800DBFF0;
-            arg3[0] = *(f32 *)(camera + 0x2F8);
-            arg3[1] = *(f32 *)(camera + 0x2FC) + (f32)selection->height;
-            arg3[2] = *(f32 *)(camera + 0x300);
+            player = D_800DBFF0;
+            target[0] = player->unk2F8;
+            target[1] = player->unk2FC + (f32)event->unk6;
+            target[2] = player->unk300;
             return 0;
         }
-        sentinel = -99999.0f;
-        arg3[0] = sentinel;
-        arg3[1] = sentinel;
-        arg3[2] = sentinel;
+        none = -99999.0f;
+        target[0] = none;
+        target[1] = none;
+        target[2] = none;
         return 0;
     }
     return 0;
