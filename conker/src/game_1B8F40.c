@@ -2,126 +2,132 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-typedef struct Node1518BA90 {
-    u8 pad0[8];
-    struct Node1518BA90 *next;
-    u8 padC[0x18];
-    void *owner;
-    u8 type;
-} Node1518BA90;
+typedef struct {
+    s16 x, y, z;
+} Vec3s;
 
-typedef struct Spawn1518BA90 {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 scale;
-    s16 field10;
-    s16 field12;
-    void *owner;
-    u8 type;
-    s8 field19;
-    s8 field1A;
-} Spawn1518BA90;
+/* Link fields shared by every object (see game_1944C0.c). */
+typedef struct ObjLink {
+    /* 0x0 */ u8 type;
+    /* 0x1 */ u8 list;
+    /* 0x2 */ u8 pad2[2];
+    /* 0x4 */ struct ObjLink *prev;
+    /* 0x8 */ struct ObjLink *next;
+    /* 0xC */ u8 owner;
+} ObjLink;
 
-typedef struct Owner1518BA90 {
-    u8 pad0[4];
-    u8 kind;
-    u8 pad5[0x36];
-    u8 type;
-} Owner1518BA90;
+/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
+extern ObjLink *D_800DCE50[2][104];
 
-extern u8 D_800DCE50[];
-extern f32 D_800A7434;
-extern f32 D_800A7438;
-extern f32 D_800A743C;
-s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2);
+/* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
+#define OBJ_ITER_NEXT ((ObjLink **)D_800DD198)
 
-s32 func_1518BA90(void *arg0, u8 arg1, s32 arg2) {
-    u8 *block;
-    Spawn1518BA90 spawn;
-    Node1518BA90 *node;
+#define OBJ_TYPE_TRAIL_EMITTER 0x1F
+
+/* Emitter settings, copied into the object from a template by func_1518BCD0. */
+typedef struct {
+    /* 0x00 */ f32 speedMin;
+    /* 0x04 */ f32 speedRange;
+    /* 0x08 */ f32 halfWidthMin;
+    /* 0x0C */ f32 halfWidthRange;
+    /* 0x10 */ s16 pointRange; /* each trail gets 3 + rand % (pointRange + 1) points */
+    /* 0x12 */ s16 angleRange;
+    /* 0x14 */ struct127 *owner;
+    /* 0x18 */ u8 ownerId;     /* owner->unique_id when attached */
+    /* 0x19 */ u8 texture;
+    /* 0x1A */ u8 flags;
+} TrailEmitterParams; /* size 0x1C */
+
+/* Type 0x1F object: emits trails from two points of its owner actor. */
+typedef struct {
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ TrailEmitterParams params;
+    /* 0x2C */ s32 timers[2]; /* frames until the next trail from each point */
+    /* 0x34 */ f32 prevX[2];  /* each point's position on the previous update */
+    /* 0x3C */ f32 prevZ[2];
+} TrailEmitter; /* size 0x44 */
+
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
+
+/* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
+TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
+    ObjLink **heads;
+    TrailEmitterParams params;
+    TrailEmitter *emitter;
     s32 i;
 
-    if (arg0 == 0) {
-        return 0;
+    if (actor == NULL) {
+        return NULL;
     }
-    i = 0;
-    do {
-        block = D_800DCE50 + i * 0x1A0;
-        for (node = *(Node1518BA90 **)(block + 0x7C); node != 0; node = node->next) {
-            if (node->owner == arg0 ||
-                node->type == ((Owner1518BA90 *)arg0)->type) {
-                return (s32)node;
+    for (i = 0; i < 2; i++) {
+        heads = D_800DCE50[i];
+        for (emitter = (TrailEmitter *)heads[OBJ_TYPE_TRAIL_EMITTER]; emitter != NULL;
+             emitter = (TrailEmitter *)emitter->link.next) {
+            if (emitter->params.owner == actor || emitter->params.ownerId == actor->unique_id) {
+                return emitter;
             }
         }
-        i++;
-    } while ((u8 *)&D_800DD190 != D_800DCE50 + i * 0x1A0);
+    }
 
-    switch (*(u8 *)((u8 *)arg0 + 4) + 1) {
-    case 0:
-        return 0;
+    switch (actor->id + 1) {
+    case 0: /* id 0xFF */
+        return NULL;
     case 8:
-        spawn.field12 = 0x37;
-        spawn.field10 = 4;
-        spawn.field19 = 5;
-        spawn.field1A = 0x13;
-        spawn.x = D_800A7434;
-        spawn.y = D_800A7438;
-        spawn.z = D_800A743C;
-        spawn.scale = 5.0f;
+        params.angleRange = 55;
+        params.pointRange = 4;
+        params.texture = 5;
+        params.flags = 0x13;
+        params.speedMin = 2.75999999f;
+        params.speedRange = 5.960000038f;
+        params.halfWidthMin = 3.210000038f;
+        params.halfWidthRange = 5.0f;
         break;
     case 1:
     case 2:
     case 3:
     case 4:
     case 5:
-        spawn.field12 = 0;
-        spawn.field10 = 5;
-        spawn.field19 = 5;
-        spawn.field1A = 0x13;
-        spawn.x = 10.0f;
-        spawn.y = 10.0f;
-        spawn.z = 10.0f;
-        spawn.scale = 10.0f;
+        params.angleRange = 0;
+        params.pointRange = 5;
+        params.texture = 5;
+        params.flags = 0x13;
+        params.speedMin = 10.0f;
+        params.speedRange = 10.0f;
+        params.halfWidthMin = 10.0f;
+        params.halfWidthRange = 10.0f;
         break;
     default:
-        return 0;
+        return NULL;
     }
-    spawn.owner = arg0;
-    spawn.type = *(u8 *)((u8 *)arg0 + 0x3B);
-    return func_1518BCD0(&spawn, arg1, arg2);
+    params.owner = actor;
+    params.ownerId = actor->unique_id;
+    return func_1518BCD0(&params, owner, list);
 }
 
-extern u8 D_800DCE50[];
-
-typedef struct Node1518BBF4 {
-    u8 pad0[0x8];
-    struct Node1518BBF4 *unk8;
-    u8 padC[0x18];
-    struct Node1518BBF4 *unk24;
-    u8 unk28;
-    u8 pad29[0x12];
-    u8 unk3B;
-} Node1518BBF4;
-
-void func_1518BBF4(Node1518BBF4 *arg0) {
+/* Detaches every trail emitter onto `actor` and destroys it. */
+void func_1518BBF4(struct127 *actor) {
     s32 i;
-    Node1518BBF4 *node;
+    TrailEmitter *emitter;
 
-    if (arg0 != NULL) {
-        for (i = 0; i != 2; i++) {
+    if (actor != NULL) {
+        for (i = 0; i < 2; i++) {
             D_800DD190++;
-            node = ((Node1518BBF4 *(*)[104])D_800DCE50)[i][31];
-            while (node != NULL) {
-                ((Node1518BBF4 **)D_800DD198)[D_800DD190] = node->unk8;
-                node->unk24 = arg0;
-                if (arg0 != NULL || node->unk28 == arg0->unk3B) {
-                    func_1516972C((struct102 *)node);
+            emitter = (TrailEmitter *)D_800DCE50[i][OBJ_TYPE_TRAIL_EMITTER];
+            while (emitter != NULL) {
+                OBJ_ITER_NEXT[D_800DD190] = emitter->link.next;
+                emitter->params.owner = actor;
+                if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
+                    func_1516972C((struct102 *)emitter);
                 }
-                node = ((Node1518BBF4 **)D_800DD198)[D_800DD190];
+                emitter = (TrailEmitter *)OBJ_ITER_NEXT[D_800DD190];
             }
             {
+                // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
                 extern s8 D_800DD190;
 
                 D_800DD190--;
@@ -130,27 +136,18 @@ void func_1518BBF4(Node1518BBF4 *arg0) {
     }
 }
 
+/* Spawns a trail emitter object from `params` with random initial timers. */
+TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
+    TrailEmitter *emitter;
 
-s32 func_15167A68(s32, s32, s32, s32, s32, s32);
-
-typedef struct {
-    u8 pad_0x0[0x10];
-    u8 field_0x10[0x1C];
-    s32 field_0x2C;
-    s32 field_0x30;
-} EffectObject1F;
-
-s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2) {
-    EffectObject1F *temp_v0;
-
-    temp_v0 = (EffectObject1F *)func_15167A68(0x1F, arg2, 0x44, 1, (u8)arg1, 1);
-    if (temp_v0 == 0) {
-        return 0;
+    emitter = func_15167A68(OBJ_TYPE_TRAIL_EMITTER, list, sizeof(TrailEmitter), 1, owner, 1);
+    if (emitter == NULL) {
+        return NULL;
     }
-    memcpy(temp_v0->field_0x10, (void *)arg0, 0x1C);
-    temp_v0->field_0x2C = func_150ADA20() & 0x1F;
-    temp_v0->field_0x30 = func_150ADA20() & 0x1F;
-    return (s32)temp_v0;
+    memcpy(&emitter->params, params, sizeof(TrailEmitterParams));
+    emitter->timers[0] = func_150ADA20() & 0x1F;
+    emitter->timers[1] = func_150ADA20() & 0x1F;
+    return emitter;
 }
 
 typedef struct {
