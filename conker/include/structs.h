@@ -1611,8 +1611,8 @@ struct Camera {
     /* 0x354 */ f32 unk354;
     /* 0x358 */ f32 unk358;
     /* 0x35C */ f32 unk35C;
-    /* 0x360 */ f32 unk360;
-    /* 0x364 */ f32 unk364;
+    /* 0x360 */ f32 waterY;                           /* water surface below the eye, -10000.0f = none; eye below it = underwater */
+    /* 0x364 */ f32 zoneWaterY;                       /* water surface set by a zone (top of its box), -10000.0f = none */
     /* 0x368 */ s16 PadNumber;
     /* 0x36A */ u16 CameraButtons;
     /* 0x36C */ OSContPad *PadPtr;
@@ -1680,7 +1680,7 @@ struct Camera {
     /* 0x60C */ f32 CurrentHitsWidth;
     /* 0x610 */ f32 CurrentHitsHeight;
     /* 0x614 */ Vec3f *PivotPtr;
-    /* 0x618 */ Vec3f unk618;
+    /* 0x618 */ Vec3f pivotPos;                       /* point PivotPtr can be set to (camera commands) */
     /* 0x624 */ u8 pad624[0x4];
     /* 0x628 */ s32 unk628;
     /* 0x62C */ f32 unk62C;

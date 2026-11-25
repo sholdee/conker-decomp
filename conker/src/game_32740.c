@@ -119,7 +119,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     view->CharTrackingSpeedTarget = 1.0f;
     func_15085430(view->CharPtr, mode, 0);
     func_15005A60(view, resource);
-    view->unk364 = -10000.0f;
+    view->zoneWaterY = -10000.0f;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
     view->savedTarget = view->target;
     view->savedEye = view->eye;
@@ -149,7 +149,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->prevEye = view->eye;
 
     viewEye = &view->eye; // matching: kept live across the call in a stack slot
-    func_1510E7A4(&view->TrianglePtr, &view->unk648, &view->unk354, &view->unk360, &view->Attributes, 0,
+    func_1510E7A4(&view->TrianglePtr, &view->unk648, &view->unk354, &view->waterY, &view->Attributes, 0,
                   view->eye.x, view->eye.y, view->eye.z, view->eye.y, 0, 0, -10000.0f, view->eye.y);
 
     view->unk358 = view->unk354;

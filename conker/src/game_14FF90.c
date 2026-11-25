@@ -226,7 +226,7 @@ void func_15123070(Camera *camera) {
     if ((camera->cmdRunning != 0) && ((camera->cmd.type == 10) || (camera->cmd.type == 14))) {
         Vec3f delta;
 
-        func_15048F90(&camera->unk618, &camera->focus, &delta);
+        func_15048F90(&camera->pivotPos, &camera->focus, &delta);
         camera->CharRelAngle = camera->CameraAngle - func_15048FC8(&delta);
     } else {
         angle = camera->CharPtr->theta - camera->CameraAngle - 180.0f;
@@ -380,7 +380,7 @@ void func_151236D0(Camera *camera) {
             camera->SpecialFlags &= ~0x80;
         }
     }
-    if ((camera->eye.y <= camera->unk360) && (camera->Mode != 0x100)) {
+    if ((camera->eye.y <= camera->waterY) && (camera->Mode != 0x100)) {
         camera->SpecialFlags |= 1;
     } else {
         camera->SpecialFlags &= ~1;
@@ -887,7 +887,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
             } else if ((D_800C3671 != 0) || (camera->CharPtr->unk137 != 0) ||
                        (camera->CharPtr->animseq.uh == 0x194) || (camera->CharPtr->inwater == 1)) {
                 goalY = camera->CharPtr->ypos + height;
-            } else if ((-10000.0f == camera->unk360) && !(camera->AvailableModes & 0x20000000) && !(camera->AvailableModes & 0x200000) &&
+            } else if ((-10000.0f == camera->waterY) && !(camera->AvailableModes & 0x20000000) && !(camera->AvailableModes & 0x200000) &&
                        (camera->CharPtr->shad < 170.0f) && (300.0f < camera->TripodMagnitude)) {
                 goalY = camera->CharPtr->floorY + height;
             } else {

@@ -140,7 +140,7 @@ void func_15120158(Camera *camera) {
     aim = &camera->aim;
     zone = camera->CharContext;
     inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
-    func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0,
+    func_1510E7A4(0, 0, &probeY, &camera->waterY, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
     camera->mv->AimState = camera->DoingAim;
     camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
@@ -384,7 +384,7 @@ void func_15120158(Camera *camera) {
         if (!aim->unk4D || (yawDelta < 45.0f)) {
             camera->IdealTripodMagnitude = aim->savedTargetDistance;
             camera->height = aim->savedHeight;
-            if ((camera->SpecialFlags & 0x40) || (camera->unk360 != 0.0f)) {
+            if ((camera->SpecialFlags & 0x40) || (camera->waterY != 0.0f)) {
                 camera->unk35C = aim->savedUnk354;
                 camera->unk354 = aim->savedUnk354;
             } else {

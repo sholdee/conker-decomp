@@ -67,16 +67,16 @@ void func_1512A390(Camera *arg0) {
     }
     if ((arg0->Snap != 0) || (arg0->AvailableModes & 0x400000) || (arg0->SpecialFlags & 0x40) ||
         (func_150A3FC4(arg0->eye.x, arg0->eye.z, arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C) == 0)) {
-        func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->unk360, &arg0->Attributes, 0,
+        func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                       arg0->eye.x, arg0->unk35C, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
     }
     if (unused28) {} // matching: keeps the otherwise dead unk28 load
     if (D_800BE9F0 == 0x28) {
-        arg0->unk364 = -10000.0f;
-        arg0->unk360 = -10000.0f;
+        arg0->zoneWaterY = -10000.0f;
+        arg0->waterY = -10000.0f;
     }
-    if (-10000.0f != arg0->unk364) {
-        arg0->unk360 = arg0->unk364;
+    if (-10000.0f != arg0->zoneWaterY) {
+        arg0->waterY = arg0->zoneWaterY;
     }
     func_151236D0(arg0);
     if (!(arg0->AvailableModes & 0x10) && (arg0->CharPtr->unk102 == 0) && (D_800C3671 == 0) && (arg0->DoingRail == 0) &&
@@ -89,14 +89,14 @@ void func_1512A390(Camera *arg0) {
         } else {
             arg0->unk35C = 10000.0f;
             arg0->AvailableModes |= 0x800000;
-            func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->unk360, &arg0->Attributes, 0,
+            func_1510E8BC(&arg0->TrianglePtr, &arg0->unk648, &arg0->unk35C, &arg0->waterY, &arg0->Attributes, 0,
                           arg0->eye.x, arg0->eye.y, arg0->eye.z, arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);
         }
     } else {
         arg0->AvailableModes &= ~0x800000;
     }
-    if (-10000.0f != arg0->unk364) {
-        arg0->unk360 = arg0->unk364;
+    if (-10000.0f != arg0->zoneWaterY) {
+        arg0->waterY = arg0->zoneWaterY;
     }
     if (arg0->CharPtr->unk137 != 0) {
         arg0->unk35C = arg0->unk354 = arg0->CharPtr->ypos;
@@ -105,10 +105,10 @@ void func_1512A390(Camera *arg0) {
         arg0->unk35C = arg0->unk354 = arg0->CharPtr->floorY;
         return;
     }
-    if (((arg0->Mode & 0x100) || (arg0->Mode != 0x80)) && (arg0->unk35C < arg0->unk360) &&
-        (arg0->unk360 < arg0->eye.y)) {
-        arg0->unk35C = arg0->unk360;
-        arg0->unk354 = arg0->unk360;
+    if (((arg0->Mode & 0x100) || (arg0->Mode != 0x80)) && (arg0->unk35C < arg0->waterY) &&
+        (arg0->waterY < arg0->eye.y)) {
+        arg0->unk35C = arg0->waterY;
+        arg0->unk354 = arg0->waterY;
     } else {
         arg0->unk354 = arg0->unk35C;
     }
@@ -153,8 +153,8 @@ void func_1512A390(Camera *arg0) {
     }
     arg0->unk354 = arg0->unk35C + (arg0->unk354 - arg0->unk35C);
     if (!(arg0->AvailableModes & 0x4000) || (func_15125490(arg0) == 0)) {
-        if ((arg0->CharPtr->inwater == 1) && (arg0->Mode != 0x80) && (-10000.0f != arg0->unk360)) {
-            arg0->unk354 = arg0->unk360 + 50.0f;
+        if ((arg0->CharPtr->inwater == 1) && (arg0->Mode != 0x80) && (-10000.0f != arg0->waterY)) {
+            arg0->unk354 = arg0->waterY + 50.0f;
         }
     }
     if ((arg0->SpecialFlags & 0x40) && (arg0->CharPtr->unk137 == 0)) {
@@ -173,7 +173,7 @@ void func_1512A390(Camera *arg0) {
         arg0->unk354 = arg0->focus.y + arg0->RopeDisp + (targetHeight * 0.8500000238f);
         arg0->unk354 = (arg0->unk354 < arg0->CharPtr->floorY + arg0->height) ? arg0->CharPtr->floorY + arg0->height : arg0->unk354;
         arg0->unk354 = (arg0->unk354 < arg0->unk35C + 50.0f) ? arg0->unk35C + 50.0f : arg0->unk354;
-        arg0->unk354 = (arg0->unk354 < arg0->unk360 + 50.0f) ? arg0->unk360 + 50.0f : arg0->unk354;
+        arg0->unk354 = (arg0->unk354 < arg0->waterY + 50.0f) ? arg0->waterY + 50.0f : arg0->unk354;
         arg0->CharTrackingSpeedTarget = 0.0f;
         arg0->AvailableModes |= 0x10000000;
         arg0->unk848 = 1;

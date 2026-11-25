@@ -72,9 +72,9 @@ void func_1512E140(Camera *camera) {
     }
     camera->eye.y = camera->unk354 + height;
     camera->unk344 = camera->eye.y - camera->unk354;
-    if (camera->CharPtr->inwater == 1 && camera->DoingAim != 0 && camera->unk360 != -10000.0f) {
-        if (camera->eye.y < camera->unk360 + 5.0f) {
-            camera->eye.y = camera->unk360 + 5.0f;
+    if (camera->CharPtr->inwater == 1 && camera->DoingAim != 0 && camera->waterY != -10000.0f) {
+        if (camera->eye.y < camera->waterY + 5.0f) {
+            camera->eye.y = camera->waterY + 5.0f;
             camera->unk344 = 5.0f;
         }
     }

@@ -220,7 +220,7 @@ void func_15128CB0(Camera *cam) {
         }
             break;
         case 9:
-            cam->unk364 = *msg->arg.value;
+            cam->zoneWaterY = *msg->arg.value;
             break;
         case 10:
         {
@@ -312,7 +312,7 @@ void func_15128CB0(Camera *cam) {
                 func_1501B320(0);
             }
             if (!D_800BEAC0) {
-                func_1510E7A4(&cam->TrianglePtr, &cam->unk648, &surface, &cam->unk360, &cam->Attributes, 0,
+                func_1510E7A4(&cam->TrianglePtr, &cam->unk648, &surface, &cam->waterY, &cam->Attributes, 0,
                               cam->eye.x, cam->eye.y, cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
                 func_151236D0(cam);
             }
@@ -409,10 +409,10 @@ void func_15129934(Camera *cam) {
         func_1512C150(cam);
         if (cam->Snap || (cam->AvailableModes & 0x400000) ||
             !func_150A3FC4(cam->eye.x, cam->eye.z, cam->TrianglePtr, &cam->unk648, &cam->unk35C)) {
-            func_1510E7A4(NULL, NULL, &surface, &cam->unk360, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
+            func_1510E7A4(NULL, NULL, &surface, &cam->waterY, &cam->Attributes, 0, cam->eye.x, cam->eye.y,
                           cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
-            if (cam->unk364 != -10000.0f) {
-                cam->unk360 = cam->unk364;
+            if (cam->zoneWaterY != -10000.0f) {
+                cam->waterY = cam->zoneWaterY;
             }
             func_151236D0(cam);
         }

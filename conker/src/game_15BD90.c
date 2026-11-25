@@ -240,28 +240,28 @@ void func_1512E8E0(Camera *camera) {
                     }
                     camera->AvailableModes &= ~8;
                     camera->unk628 = 0;
-                    camera->PivotPtr = &camera->unk618;
+                    camera->PivotPtr = &camera->pivotPos;
                     camera->cmdRunning = 1;
                     camera->unk62C = 0.0f;
                     camera->PanButtonAddOn = 0.0f;
                     dist = sqrtf(((camera->eye.x - obj->xpos) * (camera->eye.x - obj->xpos)) + ((camera->eye.z - obj->zpos) * (camera->eye.z - obj->zpos)));
-                    camera->unk618.x = -sinf(camera->CameraAngle * 0.01745329238f) * dist + camera->focus.x;
-                    camera->unk618.y = camera->focus.y;
-                    camera->unk618.z = -cosf(camera->CameraAngle * 0.01745329238f) * dist + camera->focus.z;
+                    camera->pivotPos.x = -sinf(camera->CameraAngle * 0.01745329238f) * dist + camera->focus.x;
+                    camera->pivotPos.y = camera->focus.y;
+                    camera->pivotPos.z = -cosf(camera->CameraAngle * 0.01745329238f) * dist + camera->focus.z;
                     camera->LockedCameraAngle = camera->CameraAngle;
                 }
                 if (cmd->type == 14) {
-                    camera->unk618.x = movement_obj[camera->CNumber].xpos;
-                    camera->unk618.y = movement_obj[camera->CNumber].ypos;
-                    camera->unk618.z = movement_obj[camera->CNumber].zpos;
+                    camera->pivotPos.x = movement_obj[camera->CNumber].xpos;
+                    camera->pivotPos.y = movement_obj[camera->CNumber].ypos;
+                    camera->pivotPos.z = movement_obj[camera->CNumber].zpos;
                 } else if (camera->Snap != 0) {
-                    camera->unk618.x = obj->xpos;
-                    camera->unk618.y = obj->ypos;
-                    camera->unk618.z = obj->zpos;
+                    camera->pivotPos.x = obj->xpos;
+                    camera->pivotPos.y = obj->ypos;
+                    camera->pivotPos.z = obj->zpos;
                 } else {
-                    camera->unk618.x += (obj->xpos - camera->unk618.x) * 0.03999999911f;
-                    camera->unk618.y += (obj->ypos - camera->unk618.y) * 0.03999999911f;
-                    camera->unk618.z += (obj->zpos - camera->unk618.z) * 0.03999999911f;
+                    camera->pivotPos.x += (obj->xpos - camera->pivotPos.x) * 0.03999999911f;
+                    camera->pivotPos.y += (obj->ypos - camera->pivotPos.y) * 0.03999999911f;
+                    camera->pivotPos.z += (obj->zpos - camera->pivotPos.z) * 0.03999999911f;
                 }
                 // matching: two separate tests; merging them (or dropping h) changes scheduling
                 if (cmd->unk8 != 0) {
@@ -270,7 +270,7 @@ void func_1512E8E0(Camera *camera) {
                 if (cmd->unk8 != 0) {
                     f32 h;
 
-                    h = cmd->unk8 - (camera->focus.y - camera->unk618.y);
+                    h = cmd->unk8 - (camera->focus.y - camera->pivotPos.y);
                     camera->unk34C = h;
                     cmd->unk34 = cmd->unk8;
                 }
@@ -290,7 +290,7 @@ void func_1512E8E0(Camera *camera) {
             if (func_15123934(camera, 0x400, 0, camera->Tightness, CAMERA_MODE_ZONES) != 0) {
                 camera->unk628 = 0;
                 camera->AvailableModes |= 8;
-                camera->PivotPtr = &camera->unk618;
+                camera->PivotPtr = &camera->pivotPos;
                 camera->unk62C = 0.0f;
                 camera->PanButtonAddOn = 0.0f;
                 camera->IdealTripodMagnitude = cmd->unk1C;
@@ -298,9 +298,9 @@ void func_1512E8E0(Camera *camera) {
                 cmd->unk34 = cmd->unk20;
                 camera->cmdRunning = 1;
             }
-            camera->unk618.x = cmd->x;
-            camera->unk618.y = cmd->y;
-            camera->unk618.z = cmd->z;
+            camera->pivotPos.x = cmd->x;
+            camera->pivotPos.y = cmd->y;
+            camera->pivotPos.z = cmd->z;
             camera->IdealTripodMagnitude = cmd->unk1C;
             return;
         }
