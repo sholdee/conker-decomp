@@ -2,37 +2,40 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s16 D_800C3EF0;
-extern f32 D_80097D60;
+/* One queued reflection: a model's mirrored matrices plus how to draw them. */
+typedef struct ReflectionEntry {
+    /* 0x00 */ u32 mtx;        // segment address of the mirrored matrices
+    /* 0x04 */ u8 alpha;
+    /* 0x05 */ u8 color[3];
+    /* 0x08 */ u8 objIndex;    // index into D_800CC2D0
+    /* 0x09 */ u8 ownerId;     // unique_id of that object
+    /* 0x0A */ u8 setId;       // attachment set id (attachment reflections only)
+    /* 0x0B */ u8 isAttachment;
+} ReflectionEntry;
 
-struct Entry15034EB4 {
-    u8 pad[0x34];
-    f32 unk34;
-    u8 pad2[0x8];
-};
+extern u8 D_800C3F00;               // number of queued reflections
+extern ReflectionEntry D_800C3F08[]; // reflection queue (15 entries)
 
-struct Obj15034EB4 {
-    u8 pad[0x14C];
-    f32 unk14C;
-    u8 pad2[0x84];
-    struct Entry15034EB4 *unk1D4;
-};
-void func_15034EB4(struct Obj15034EB4 *obj, s32 idx, s32 idx2);
-
-extern u8 D_800C3F00;
-
+/* Clears the reflection queue. */
 void func_15034F20(void) {
     D_800C3F00 = 0;
 }
 
 void func_150A7A48(void *, void *, void *);
 void guMtxF2L2(void *, void *);
-void func_15034728(void *);
+void func_15034728(struct127 *);
 s32 func_150AD960(s32, s32, s32, s32);
 
-void func_15034F30(u8 *arg0, u8 *arg1, s32 arg2, f32 (*arg3)[4][4], f32 (*arg4)[4][4], s32 arg5,
-                   f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11, f32 arg12,
-                   f32 arg13, f32 arg14, f32 arg15, f32 arg16, s32 arg17, s32 arg18) {
+/*
+ * Mirrors `count` matrices from `srcMtx` into `dstMtx` and sets the entry's alpha from the distance
+ * to the mirror. Modes 0 and 1 mirror in the horizontal plane y = planeY; mode 2 mirrors in the
+ * vertical plane through (planeX, planeZ) at `angle`. `srcIsFixed`: the sources are fixed point
+ * (Mtx); `dstToFixed`: convert the results to fixed point.
+ */
+void func_15034F30(struct127 *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4][4],
+                   f32 (*dstMtx)[4][4], s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
+                   f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
+                   s32 srcIsFixed, s32 dstToFixed) {
     f32 flip[4][4];
     f32 rotA[4][4];
     f32 rotB[4][4];
@@ -40,112 +43,104 @@ void func_15034F30(u8 *arg0, u8 *arg1, s32 arg2, f32 (*arg3)[4][4], f32 (*arg4)[
     f32 (*src)[4];
     f32 dist;
     f32 temp[4][4];
-    void *saved;
+    struct255 *savedMtx;
 
     guMtxIdentF(flip);
-    if (arg2 == 1 || arg2 == 0) {
+    if (mode == 1 || mode == 0) {
         flip[1][1] = -1.0f;
-        for (i = 0; i < arg5; i++) {
-            if (arg17 != 0) {
-                guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)arg3));
+        // matching: both loops need the byte offset (i << 6) spelled out; srcMtx[i] is CSE'd differently
+        for (i = 0; i < count; i++) {
+            if (srcIsFixed) {
+                guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)srcMtx));
                 src = temp;
             } else {
-                arg3[i][0][3] = 0.0f;
-                arg3[i][1][3] = 0.0f;
-                arg3[i][2][3] = 0.0f;
-                arg3[i][3][3] = 1.0f;
-                src = (void *)((i << 6) + (u8 *)arg3);
+                srcMtx[i][0][3] = 0.0f;
+                srcMtx[i][1][3] = 0.0f;
+                srcMtx[i][2][3] = 0.0f;
+                srcMtx[i][3][3] = 1.0f;
+                src = (void *)((i << 6) + (u8 *)srcMtx);
             }
-            func_150A7A48(src, flip, arg4[i]);
-            arg4[i][3][1] = src[3][1] - 2.0f * (src[3][1] - arg7);
-            if (arg18 != 0) {
-                bcopy((i << 6) + (u8 *)arg4, temp, 0x40);
-                guMtxF2L2(temp, (i << 6) + (u8 *)arg4);
+            func_150A7A48(src, flip, dstMtx[i]);
+            dstMtx[i][3][1] = src[3][1] - 2.0f * (src[3][1] - planeY);
+            if (dstToFixed) {
+                bcopy((i << 6) + (u8 *)dstMtx, temp, sizeof(temp));
+                guMtxF2L2(temp, (Mtx *)dstMtx + i);
             }
         }
-        dist = arg12 - arg7;
-        if (arg15 < dist) {
-            arg1[4] = 0;
-        } else if (dist < arg14) {
-            if (arg2 == 0) {
+        dist = objY - planeY;
+        if (fadeEnd < dist) {
+            entry->alpha = 0;
+        } else if (dist < fadeStart) {
+            if (mode == 0) {
                 if (dist < 10.0f) {
-                    arg1[4] = arg16 / 10.0f * dist;
+                    entry->alpha = maxAlpha / 10.0f * dist;
                 } else {
-                    arg1[4] = arg16;
+                    entry->alpha = maxAlpha;
                 }
             } else {
-                arg1[4] = arg16;
+                entry->alpha = maxAlpha;
             }
         } else {
-            dist -= arg14;
-            dist = arg16 * dist / (arg15 - arg14);
-            dist = arg16 - dist;
-            arg1[4] = dist;
+            dist -= fadeStart;
+            dist = maxAlpha * dist / (fadeEnd - fadeStart);
+            dist = maxAlpha - dist;
+            entry->alpha = dist;
         }
-    } else if (arg2 == 2) {
+    } else if (mode == 2) {
         flip[0][0] = -1.0f;
-        func_150A8050(rotA, 0.0f, -arg10, 0.0f);
-        func_150A8050(rotB, 0.0f, arg10, 0.0f);
-        for (i = 0; i < arg5; i++) {
-            if (arg17 != 0) {
-                guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)arg3));
+        func_150A8050(rotA, 0.0f, -angle, 0.0f);
+        func_150A8050(rotB, 0.0f, angle, 0.0f);
+        for (i = 0; i < count; i++) {
+            if (srcIsFixed) {
+                guMtxL2F(temp, (Mtx *)((i << 6) + (u8 *)srcMtx));
                 src = temp;
             } else {
-                arg3[i][0][3] = 0.0f;
-                arg3[i][1][3] = 0.0f;
-                arg3[i][2][3] = 0.0f;
-                arg3[i][3][3] = 1.0f;
-                src = (void *)((i << 6) + (u8 *)arg3);
+                srcMtx[i][0][3] = 0.0f;
+                srcMtx[i][1][3] = 0.0f;
+                srcMtx[i][2][3] = 0.0f;
+                srcMtx[i][3][3] = 1.0f;
+                src = (void *)((i << 6) + (u8 *)srcMtx);
             }
-            bcopy(src, arg4[i], 0x40);
-            arg4[i][3][0] -= arg6;
-            arg4[i][3][1] -= arg7;
-            arg4[i][3][2] -= arg8;
-            func_150A7A48(arg4[i], rotA, arg4[i]);
-            func_150A7A48(arg4[i], flip, arg4[i]);
-            func_150A7A48(arg4[i], rotB, arg4[i]);
-            arg4[i][3][0] += arg6;
-            arg4[i][3][1] += arg7;
-            arg4[i][3][2] += arg8;
-            if (arg18 != 0) {
-                bcopy((i << 6) + (u8 *)arg4, temp, 0x40);
-                guMtxF2L2(temp, (i << 6) + (u8 *)arg4);
+            bcopy(src, dstMtx[i], sizeof(temp));
+            dstMtx[i][3][0] -= planeX;
+            dstMtx[i][3][1] -= planeY;
+            dstMtx[i][3][2] -= planeZ;
+            func_150A7A48(dstMtx[i], rotA, dstMtx[i]);
+            func_150A7A48(dstMtx[i], flip, dstMtx[i]);
+            func_150A7A48(dstMtx[i], rotB, dstMtx[i]);
+            dstMtx[i][3][0] += planeX;
+            dstMtx[i][3][1] += planeY;
+            dstMtx[i][3][2] += planeZ;
+            if (dstToFixed) {
+                bcopy((i << 6) + (u8 *)dstMtx, temp, sizeof(temp));
+                guMtxF2L2(temp, (Mtx *)dstMtx + i);
             }
         }
-        dist = func_150AD960(arg6, arg8, arg11, arg13);
-        if (arg15 < dist) {
-            arg1[4] = 0;
-        } else if (dist < arg14) {
-            arg1[4] = arg16;
+        dist = func_150AD960(planeX, planeZ, objX, objZ);
+        if (fadeEnd < dist) {
+            entry->alpha = 0;
+        } else if (dist < fadeStart) {
+            entry->alpha = maxAlpha;
         } else {
-            dist -= arg14;
-            dist = arg16 * dist / (arg15 - arg14);
-            dist = arg16 - dist;
-            arg1[4] = dist;
+            dist -= fadeStart;
+            dist = maxAlpha * dist / (fadeEnd - fadeStart);
+            dist = maxAlpha - dist;
+            entry->alpha = dist;
         }
     } else {
         return;
     }
-    if (arg0 != NULL && *(s32 *)(arg0 + 0x9C) != 0) {
-        saved = *(void **)(arg0 + 0x1D4);
-        *(void **)(arg0 + 0x1D4) = arg4;
-        func_15034728(arg0);
-        *(void **)(arg0 + 0x1D4) = saved;
+    if (obj != NULL && obj->unk9C != 0) {
+        savedMtx = obj->unk1D4;
+        obj->unk1D4 = (struct255 *)dstMtx;
+        func_15034728(obj);
+        obj->unk1D4 = savedMtx;
     }
 }
 
-struct Entry150356C8 {
-    u32 unk0;
-    u8 unk4;
-    u8 pad5[4];
-    u8 unk9;
-    u8 unkA;
-    u8 unkB;
-};
 
-extern struct Entry150356C8 D_800C3F08[];
-
-struct Entry150356C8 *func_150356C8(void) {
+/* Reserves the next reflection queue slot, or returns NULL when the queue is full. */
+ReflectionEntry *func_150356C8(void) {
     if (D_800C3F00 == 15) {
         return NULL;
     }
@@ -154,40 +149,47 @@ struct Entry150356C8 *func_150356C8(void) {
 }
 
 
-s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
-extern f32 D_80097D70;
-extern u8 D_800D9C10;
+/* Per model-type bounds, D_800D1C90[id] (only the fields used here). */
+typedef struct ModelBounds {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ u16 body_radius;
+    /* 0x10 */ s16 body_height;
+} ModelBounds;
 
-s32 func_15035714(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
-    f32 temp_fa0;
-    f32 temp_ft4;
-    f32 temp_ft5;
-    f32 var_fv0;
-    f32 var_fv1;
-    s32 sp28;
-    u8 *temp_v0;
-    s32 index;
+s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
+extern u8 D_800D9C10; // view matrices
+
+/*
+ * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
+ * In modes 0 and 1 the bounds centre is mirrored in the plane y = planeY.
+ */
+s32 func_15035714(s32 mode, struct127 *obj, f32 (*mtx)[4], f32 planeY) {
+    f32 height;
+    f32 radiusXZ;
+    f32 radiusY;
+    f32 radius;
+    f32 y;
+    s32 recp;
+    ModelBounds *bounds;
+    s32 id;
     f32 delta;
 
-    sp28 = D_800BE628;
-    index = arg1[4];
-    temp_v0 = (u8 *)D_800D1C90[index];
-    var_fv0 = (f32)(u32)*(u16 *)(temp_v0 + 0xE);
-    temp_ft4 = var_fv0;
-    temp_ft5 = var_fv0;
-    temp_ft4 *= *(f32 *)(arg1 + 0x14C);
-    temp_ft5 *= *(f32 *)(arg1 + 0x150);
-    temp_fa0 = *(f32 *)(arg1 + 0x150) * (f32)*(s16 *)(temp_v0 + 0x10);
-    if ((arg0 == 1) || (arg0 == 0)) {
-        delta = (*(f32 *)(arg1 + 0x18) + temp_fa0) - arg3;
-        var_fv1 = arg3 - delta;
+    recp = D_800BE628;
+    id = obj->id;
+    bounds = (ModelBounds *)D_800D1C90[id];
+    radius = bounds->body_radius;
+    radiusXZ = radius;
+    radiusY = radius;
+    radiusXZ *= obj->xz_scale;
+    radiusY *= obj->y_scale;
+    height = bounds->body_height * obj->y_scale;
+    if (mode == 1 || mode == 0) {
+        delta = (obj->y_position + height) - planeY;
+        y = planeY - delta;
     } else {
-        var_fv1 = *(f32 *)(arg1 + 0x18) + temp_fa0;
+        y = obj->y_position + height;
     }
-    if (func_150A6360((void *)sp28, &D_800D9C10,
-                      *(f32 *)(arg2 + 0x30), var_fv1,
-                      *(f32 *)(arg2 + 0x38), temp_ft4, temp_ft5,
-                      D_80097D70) == 0) {
+    if (func_150A6360(recp, &D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
     }
     return 0;
@@ -218,7 +220,7 @@ s32 func_150AD9A0(s32, s32, s32);
 
 void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9)
 {
-  struct Entry150356C8 *e;
+  ReflectionEntry *e;
   u32 mem;
   s32 col[3];
   struct255 *sp;
@@ -288,19 +290,19 @@ void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
   {
     return;
   }
-  e->unk0 = D_800C3E88;
+  e->mtx = D_800C3E88;
   func_1502D54C(arg1, col);
-  e->pad5[0] = col[0];
-  e->pad5[1] = col[1];
-  e->pad5[2] = col[2];
-  e->pad5[3] = arg1;
-  e->unkB = 0;
-  e->unk9 = D_800CC2D0[arg1].unique_id;
+  e->color[0] = col[0];
+  e->color[1] = col[1];
+  e->color[2] = col[2];
+  e->objIndex = arg1;
+  e->isAttachment = 0;
+  e->ownerId = D_800CC2D0[arg1].unique_id;
   sp = D_800CC2D0[arg1].unk1D4;
-  mem = e->unk0;
+  mem = e->mtx;
   func_15034F30(&D_800CC2D0[arg1], e, arg0, sp, mem, n, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, arg9, 0, 0);
-  e->unk4 = (e->unk4 * scale) >> 8;
-  if (func_15035714(arg0, (u8 *) (&D_800CC2D0[arg1]), (u8 *) sp, arg3) != 0)
+  e->alpha = (e->alpha * scale) >> 8;
+  if (func_15035714(arg0, &D_800CC2D0[arg1], (f32 (*)[4]) sp, arg3) != 0)
   {
     D_800C3F00--;
     return;
@@ -321,13 +323,13 @@ void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     {
       return;
     }
-    e->pad5[0] = col[0];
-    e->pad5[1] = col[1];
-    e->pad5[2] = col[2];
-    e->pad5[3] = arg1;
-    e->unkB = 1;
-    e->unk9 = D_800CC2D0[arg1].unique_id;
-    e->unkA = node->unk6;
+    e->color[0] = col[0];
+    e->color[1] = col[1];
+    e->color[2] = col[2];
+    e->objIndex = arg1;
+    e->isAttachment = 1;
+    e->ownerId = D_800CC2D0[arg1].unique_id;
+    e->setId = node->unk6;
     if (func_15031070(node, &D_800CC2D0[arg1], &sp, buf) == 0)
     {
       node = next;
@@ -342,8 +344,8 @@ void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     {
       node->unk4C[D_800BE9C0] = (u32) allocate_memory(count << 6, 1, 2, 0);
     }
-    e->unk0 = node->unk4C[D_800BE9C0];
-    mem = e->unk0;
+    e->mtx = node->unk4C[D_800BE9C0];
+    mem = e->mtx;
     scale2 = (((s32) arg9) * node->unk3) >> 8;
     if ((node->unk34 == 0) && (node->unk48 == 0))
     {
@@ -355,7 +357,7 @@ void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     }
     func_15034F30(0, e, arg0, sp, mem, count, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, scale2, flag, 1);
     node = next;
-    e->unk4 = (e->unk4 * scale) >> 8;
+    e->alpha = (e->alpha * scale) >> 8;
   }
 
 }
@@ -377,7 +379,7 @@ struct Obj15035D6C {
 };
 
 Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 blue) {
-    struct Entry150356C8 *entry;
+    ReflectionEntry *entry;
     s32 alpha;
     s32 i;
     s32 j;
@@ -390,20 +392,20 @@ Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 bl
 
     for (i = 0; i < D_800C3F00; i++) {
         entry = &D_800C3F08[i];
-        if (entry->unkB != 1) {
+        if (entry->isAttachment != 1) {
             continue;
         }
-        if (entry->unk9 != obj->unk0) {
+        if (entry->ownerId != obj->unk0) {
             continue;
         }
-        if (entry->unkA != obj->unk6) {
+        if (entry->setId != obj->unk6) {
             continue;
         }
 
-        alpha = (entry->unk4 * obj->unk3) >> 8;
+        alpha = (entry->alpha * obj->unk3) >> 8;
 
         gDPPipeSync(gfx++);
-        gSPSegment(gfx++, 3, entry->unk0);
+        gSPSegment(gfx++, 3, entry->mtx);
         gDPSetEnvColor(gfx++, red, green, blue, alpha);
 
         if (alpha < 255) {
@@ -427,7 +429,7 @@ Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 bl
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, u32, s32, s32 *, s32, s32);
 
 Gfx *func_15035FE8(Gfx *gfx, s32 arg1) {
-    struct Entry150356C8 *e;
+    ReflectionEntry *e;
     s32 col[4];
     s32 i;
 
@@ -439,14 +441,14 @@ Gfx *func_15035FE8(Gfx *gfx, s32 arg1) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     for (i = 0; i < D_800C3F00; i++) {
         e = &D_800C3F08[i];
-        if (e->unkB != 0) {
+        if (e->isAttachment != 0) {
             continue;
         }
-        col[0] = e->pad5[0];
-        col[1] = e->pad5[1];
-        col[2] = e->pad5[2];
+        col[0] = e->color[0];
+        col[1] = e->color[1];
+        col[2] = e->color[2];
         col[3] = 0xFF;
-        gfx = func_1502CCFC(gfx, e->pad5[3], arg1, e->unk0, e->unk4, col, 0, 1);
+        gfx = func_1502CCFC(gfx, e->objIndex, arg1, e->mtx, e->alpha, col, 0, 1);
     }
     return gfx;
 }
