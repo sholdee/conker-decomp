@@ -1425,15 +1425,6 @@ typedef struct {
     u16 v[3];
 } Rates150F1A00;
 
-/* D_800CC298 is typed s32 in variables.h; this file sees it as a record of s16 angles. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x12];
-    /* 0x12 */ s16 tilt;
-    /* 0x14 */ s16 pulse;
-} Struct800CC298;
-
-#define D_800CC298_REC ((Struct800CC298 *)&D_800CC298)
-
 extern Rates150F1A00 D_80088B00;
 f32 cosf(f32);
 
@@ -1442,7 +1433,7 @@ void func_150F1A00(Actor *actor) {
     f32 (*mtx)[4];
     Rates150F1A00 rates;
     s32 idx;
-    Struct800CC298 *rec;
+    TexAnimState *rec;
     u16 rate;
     f32 scale;
     s32 i;
@@ -1457,7 +1448,7 @@ void func_150F1A00(Actor *actor) {
         idx = 2;
     }
     rate = rates.v[idx];
-    rec = D_800CC298_REC;
+    rec = &D_800CC298;
     rec->pulse += rate * D_800BE9E4;
     scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
     mtx = actor->unk1D4[62];
@@ -1484,23 +1475,23 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     down = (D_800CC2D0[index].unk84.uh == 0x21) ? 1 : 0;
     step = D_800BE9E4 * 0x222;
     if (down) {
-        tilt = D_800CC298_REC->tilt - step;
+        tilt = D_800CC298.tilt - step;
         if (-6553.600098f < tilt) {
-            D_800CC298_REC->tilt = tilt;
+            D_800CC298.tilt = tilt;
         } else {
-            D_800CC298_REC->tilt = -0x1999;
+            D_800CC298.tilt = -0x1999;
         }
     } else {
-        tilt = D_800CC298_REC->tilt + step;
+        tilt = D_800CC298.tilt + step;
         if (tilt < 5461.333496f) {
-            D_800CC298_REC->tilt = tilt;
+            D_800CC298.tilt = tilt;
         } else {
-            D_800CC298_REC->tilt = 0x1555;
+            D_800CC298.tilt = 0x1555;
         }
     }
     for (i = 0; i < 6; i++) {
         cmd->opcode = 0xB2 + i * 6;
-        cmd->value = D_800CC298_REC->tilt;
+        cmd->value = D_800CC298.tilt;
         cmd++;
     }
     return cmd;

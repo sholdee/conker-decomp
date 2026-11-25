@@ -1,15 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h gets this type wrong, so it is shadowed here: D_800D3094 (s32) is the (unsigned) length
-   of the D_800D3098 trigger-zone table. */
-#define D_800D3094 D_800D3094_s32_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3094
 
 #define ZONE_TYPE(zone)  ((s32)(zone)->kind >> 2)
 #define ZONE_SHAPE(zone) ((zone)->kind & 3)
 
-extern u32 D_800D3094;          /* number of trigger zones */
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
 s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin);

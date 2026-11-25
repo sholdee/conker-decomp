@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 // variables.h declares these with types that don't fit this file; the real views are below.
-#define D_800DD460 D_800DD460_hdr
 #include "variables.h"
-#undef D_800DD460
 
 /* One morph group: which model kind it applies to and how its vertices are split into parts. */
 typedef struct {
@@ -12,14 +10,6 @@ typedef struct {
     u16 partVtxCounts[3];
 } VtxMorphGroup;
 
-/* A cached keyframe: loaded vertex positions plus ticks left before it is freed. */
-typedef struct {
-    s16 (*positions)[3];
-    u8 timer;
-    u8 pad5[3];
-} VtxMorphFrame;
-
-extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern VtxMorphGroup D_800A7230[2];
 extern u16 D_800C4310[];  // part count, indexed by VtxMorphGroup.kind
 extern s32 *D_800C4020[]; // per-id first vertex of each part

@@ -2686,6 +2686,29 @@ typedef struct {
     /* 0x8 */ s32 count;
 } VtxColorGroup; // size 0xC
 
+/* D_800CC298 (0x18 bytes): state of the per-type texture animations (func_15061B4C, game_11C2B0.c). */
+typedef struct TexAnimState {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ s8  unk8;
+    /* 0x09 */ s8  unk9;
+    /* 0x0A */ s8  unkA;
+    /* 0x0B */ u8  unkB[4];
+    /* 0x0F */ u8  unkF;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  pad11;
+    /* 0x12 */ s16 tilt;
+    /* 0x14 */ s16 pulse;
+    /* 0x16 */ u8  pad16[2];
+} TexAnimState; // size 0x18
+
+/* A cached keyframe: loaded vertex positions plus ticks left before it is freed. */
+typedef struct {
+    s16 (*positions)[3];
+    u8 timer;
+    u8 pad5[3];
+} VtxMorphFrame;
+
 typedef struct {
     s32 unk0;
     f32 unk4;

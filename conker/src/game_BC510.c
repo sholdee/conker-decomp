@@ -4,16 +4,13 @@
 void func_1509093C(void);
 #define D_800D24C8 D_800D24C8_hdr
 #define D_800D2460 D_800D2460_hdr
-#define D_800D2890 D_800D2890_hdr
 #include "variables.h"
 #undef D_800D24C8
 #undef D_800D2460
-#undef D_800D2890
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
 extern u8 D_800CC49A;
-extern f32 D_800D2890[3];
 
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);

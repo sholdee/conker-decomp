@@ -968,7 +968,7 @@ extern u8  D_800CC27C;
 extern s32 D_800CC280;
 extern s32 D_800CC284; //pointer to 6 u8s
 extern s32 D_800CC288;
-extern s32 D_800CC298; // 0x18 length
+extern TexAnimState D_800CC298;
 extern u8  D_800CC2A2;
 
 extern f32 D_800CC2C0;
@@ -1090,7 +1090,7 @@ extern Mtx  D_800D2590[6][2];
 extern s32 D_800D24C0;
 extern s32 D_800D24C8;
 
-extern Vec3f D_800D2890;
+extern f32 D_800D2890[3];
 
 extern u8  D_800D2C68;
 extern s32 D_800D2C28;
@@ -1113,7 +1113,7 @@ extern struct250 D_800D2F48; // bzero'd 0xC
 extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 
-extern s32 D_800D3094;
+extern u32 D_800D3094; // number of trigger zones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern s32 D_800D35DC;
@@ -1277,7 +1277,7 @@ extern u8   D_800DD406;
 extern s32  D_800DD410[2];
 extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer
-extern s32  D_800DD460[2];
+extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern s32  D_800DD478; // struct/array of size 0x618 (1560)
 
 extern s32  D_800DDA90; // struct/array of size 0xf0

@@ -8,24 +8,10 @@
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #define D_800D1550 D_800D1550_hdr
-#define D_800CC298 D_800CC298_hdr
 #include "variables.h"
 #undef D_800D1550
-#undef D_800CC298
 extern f32 D_800D1550; /* frame time step */
 
-/* State of the per-type texture animations in func_15061B4C. */
-typedef struct Game83300Anim298 {
-    f32 unk0;
-    f32 unk4;
-    s8 unk8;
-    s8 unk9;
-    s8 unkA;
-    u8 unkB[4];
-    u8 unkF;
-    u8 unk10;
-} Game83300Anim298;
-extern Game83300Anim298 D_800CC298;
 
 void func_15058F24(Actor *arg0, f32, f32);
 void func_1505D6F0(Actor *arg0, s32 arg1);
