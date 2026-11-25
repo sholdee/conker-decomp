@@ -52,7 +52,8 @@ void func_15048B10(s32 mtx, s32 out) {
 
 /*
  * asinf: rational approximation, with range reduction for |x| >= 0.5.
- * D_80085FD0 / D_80085FD4 are 1.0f / -1.0f; matching: they are loaded from rodata, a literal would use lui/mtc1.
+ * D_80085FD0..D_80085FE8 are shared constants (1, -1, pi/4, pi/2, -pi/4, -pi/2, cos(pi/6)) that live in another
+ * unit's rodata; matching: 1.0f / -1.0f as literals would use lui/mtc1.
  */
 f32 func_15048C30(f32 x) {
     f32 root;
@@ -80,7 +81,7 @@ f32 func_15048C30(f32 x) {
     if (exponent < 127) {
         /* 0.5 <= |x| < 1 */
         absX = fabsf(x);
-        if (absX < 0.866024971f) {
+        if (absX < D_80085FE8) {
             /* asin(x) = +-pi/4 + asin(2x^2 - 1) / 2 */
             sq = x * x;
             reduced = (sq + sq) - D_80085FD0;
@@ -89,9 +90,9 @@ f32 func_15048C30(f32 x) {
             den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
             result = ((sq * num * reduced) / den) + reduced;
             if (bits > 0) {
-                return (0.5f * result) + 0.785398006f;
+                return (0.5f * result) + D_80085FD8;
             } else {
-                return -0.785398006f - (0.5f * result);
+                return D_80085FE0 - (0.5f * result);
             }
         }
         /* asin(x) = +-(pi/2 - 2 asin(sqrt((1 - |x|) / 2))) */
@@ -101,9 +102,9 @@ f32 func_15048C30(f32 x) {
         den = ((((reduced + D_8009905C[2]) * reduced) + D_8009905C[1]) * reduced) + D_8009905C[0];
         result = ((reduced * num * root) / den) + root;
         if (bits > 0) {
-            return 1.57079601f - (result + result);
+            return D_80085FDC - (result + result);
         } else {
-            return result + result + -1.57079601f;
+            return result + result + D_80085FE4;
         }
     }
     if (x != x) {
@@ -111,10 +112,10 @@ f32 func_15048C30(f32 x) {
         return 0.0f;
     }
     if (x == D_80085FD0) {
-        return 1.57079601f;
+        return D_80085FDC;
     }
     if (x == D_80085FD4) {
-        return -1.57079601f;
+        return D_80085FE4;
     }
     return 0.0f;
 }
