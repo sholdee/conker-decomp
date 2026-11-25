@@ -1,3 +1,4 @@
+// functions.h declares func_1502B7F0 with five parameters; this file calls it with four and five.
 #define func_1502B7F0 func_1502B7F0__proto
 #include <ultra64.h>
 
@@ -5,330 +6,413 @@
 #include "variables.h"
 #undef func_1502B7F0
 
+typedef void (*ObjectFunc)();
 
-typedef struct { s32 a, b, c, d; } V16_150039E0;
+/* A level object placement as stored in the level's object lists (0x44 bytes each). */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 rotX;
+    /* 0x08 */ s16 rotY;
+    /* 0x0A */ s16 rotZ;
+    /* 0x0C */ Gfx *displayList; // NULL: load model `modelId`; 1 or 2: use level model `modelId`
+    /* 0x10 */ s32 modelId;
+    /* 0x14 */ union {
+        u32 index;         // into D_80088C90 when below 0xFFFF
+        ObjectFunc func;   // otherwise the update function itself
+    } behavior;
+    /* 0x18 */ void *data;
+    /* 0x1C */ u8 pad1C[4];
+    /* 0x20 */ f32 scaleX;
+    /* 0x24 */ f32 scaleY;
+    /* 0x28 */ f32 scaleZ;
+    /* 0x2C */ u8 unk4C;
+    /* 0x2D */ u8 unk4D;
+    /* 0x2E */ u16 unk50;
+    /* 0x30 */ u16 unk52;
+    /* 0x32 */ u8 flags;
+    /* 0x33 */ u8 id;            // 0: assign a free one
+    /* 0x34 */ u8 unk6E;
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ s32 unk40;
+    /* 0x3C */ u8 state;
+    /* 0x3D */ u8 pad3D;
+    /* 0x3E */ u16 effectFlags;
+    /* 0x40 */ u16 drawDistance;
+    /* 0x42 */ u8 pad42[2];
+} ObjectSpawn; // size 0x44
+
+/* A D_800DBEF4 entry (struct131; cf. Game13F9D0Obj in game_13F9D0.c). */
+typedef struct {
+    /* 0x00 */ f32 rotX;
+    /* 0x04 */ f32 rotY;
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ void *model;           // loaded model asset, if any
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u16 numVertices;
+    /* 0x18 */ f32 yOffset;
+    /* 0x1C */ Gfx *displayList;
+    /* 0x20 */ Vtx *vertices[2];      // per frame; both srcVertices unless state bit 0 is set
+    /* 0x28 */ Vtx *srcVertices;      // the model's own vertices
+    /* 0x2C */ f32 scaleX;
+    /* 0x30 */ f32 scaleY;
+    /* 0x34 */ f32 scaleZ;
+    /* 0x38 */ ObjectFunc update;
+    /* 0x3C */ void *data;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ u8 pad48[4];
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ u8 attach;             // 3: none (see Game13F9D0Obj)
+    /* 0x4F */ u8 flags;
+    /* 0x50 */ u16 unk50;             // bounding radius, see func_15004AAC
+    /* 0x52 */ u16 unk52;
+    /* 0x54 */ s16 modelId;           // | 0x8000 for objects without a loaded model
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s16 unk58;
+    /* 0x5A */ s16 moveX;             // translation this frame
+    /* 0x5C */ s16 moveY;
+    /* 0x5E */ s16 moveZ;
+    /* 0x60 */ f32 spinX;             // rotation this frame
+    /* 0x64 */ f32 spinY;
+    /* 0x68 */ f32 spinZ;
+    /* 0x6C */ u16 effectFlags;
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 viewFlags;
+    /* 0x70 */ u8 state;              // bit 0: vertices transformed into per-frame copies
+    /* 0x71 */ u8 index;              // own index in D_800DBEF4
+    /* 0x72 */ u8 id;
+    /* 0x73 */ u8 unk73;
+    /* 0x74 */ s16 sound;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ ObjectFunc onContact;
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;             // ground probe results, see func_150045C4
+    /* 0x84 */ s32 unk84;
+    /* 0x88 */ s16 fadeDistance;
+    /* 0x8A */ u8 alpha;
+    /* 0x8B */ u8 viewAlpha[4];
+    /* 0x8F */ u8 pad8F;
+    /* 0x90 */ u16 drawDistance;
+    /* 0x92 */ s8 unk92;
+    /* 0x93 */ u8 pad93;
+    /* 0x94 */ s32 unk94;
+    /* 0x98 */ s32 unk98;
+    /* 0x9C */ s32 unk9C;
+} LevelObject; // size 0xA0
+
+#define OBJECTS ((LevelObject *)D_800DBEF4)
+
+/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
+typedef struct {
+    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14[0x14];
+    /* 0x28 */ Vtx vertices[1];
+} ModelAsset;
+
+/* Per-behaviour handlers (D_80088C90). */
+typedef struct {
+    ObjectFunc update;
+    ObjectFunc onContact;
+    s32 unk92;
+} ObjectBehavior;
+
+/* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
+typedef struct {
+    /* 0x0 */ u8 unk4C;
+    /* 0x1 */ u8 unk4D;
+    /* 0x2 */ s16 unk52;
+    /* 0x4 */ s16 unk50;
+    /* 0x6 */ u16 drawDistance;
+    /* 0x8 */ u8 flags;
+    /* 0x9 */ u8 state;
+    /* 0xA */ u16 effectFlags;
+} GroupedObjectDefaults;
 
 typedef struct {
-    s16 x0; s16 x2; s16 x4; s16 x6; s16 x8; s16 xA;
-    s32 xC;
-    s32 x10;
-    u32 x14;
-    s32 x18;
-    u8 pad1C[4];
-    f32 x20; f32 x24; f32 x28;
-    u8 x2C; u8 x2D; u16 x2E; u16 x30; u8 x32; u8 x33;
-    u8 x34;
-    u8 pad35[3];
-    s32 x38;
-    u8 x3C;
-    u8 pad3D;
-    u16 x3E;
-    u16 x40;
-    u8 pad42[2];
-} Src150039E0;
+    ModelAsset *model;
+    s32 loaded;
+} LevelModelEntry;
 
-typedef struct {
-    f32 u0; f32 u4; f32 u8;
-    void *uC;
-    s16 u10; s16 u12; s16 u14; u16 u16;
-    f32 u18;
-    void *u1C;
-    V16_150039E0 *u20; V16_150039E0 *u24; V16_150039E0 *u28;
-    f32 u2C; f32 u30; f32 u34;
-    s32 u38; s32 u3C; s32 u40; s32 u44;
-    u8 pad48[4];
-    u8 u4C; u8 u4D; u8 u4E; u8 u4F;
-    s16 u50; s16 u52; s16 u54;
-    s16 u56; s16 u58;
-    s16 u5A; s16 u5C; s16 u5E;
-    f32 u60; f32 u64; f32 u68;
-    u16 u6C; u8 u6E; u8 u6F; u8 u70; u8 u71; u8 u72; u8 u73;
-    s16 u74; u8 pad76[2];
-    s32 u78; s32 u7C; s32 u80; s32 u84;
-    s16 u88; u8 u8A; u8 u8B; u8 u8C; u8 u8D; u8 u8E; u8 pad8F;
-    u16 u90; s8 u92; u8 pad93;
-    s32 u94; s32 u98; s32 u9C;
-} Ent150039E0;
+#define HANDLES (*(s32 **)D_800DBEF8)      // per object: handle released with func_10004074
+#define RELEASE_DELAY (*(u8 **)D_800DBEFC) // per object: frames to keep the handle once hidden
 
-typedef struct {
-    V16_150039E0 *end;
-    s32 x4;
-    s32 x8;
-    s32 xC;
-    s32 x10;
-    u8 pad14[0x14];
-    V16_150039E0 data[1];
-} Mdl150039E0;
-
-typedef struct { s32 a; s32 b; s32 c; } Tbl88C90;
-typedef struct { u8 b0; u8 b1; s16 h2; s16 h4; u16 h6; u8 b8; u8 b9; u16 hA; } TblA26C0;
-typedef struct { Mdl150039E0 *mdl; s32 x4; } TblB0E50;
-extern s32 D_800DBF98;
-extern TblB0E50 *D_800B0E50;
-extern Tbl88C90 D_80088C90[];
-extern TblA26C0 D_800A26C0[];
+extern s32 D_800DBF98; // grouped objects, kept at the end of OBJECTS
+extern LevelModelEntry *D_800B0E50;
+extern ObjectBehavior D_80088C90[];
+extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
-extern s32 D_800DBEE0;
-extern s32 D_800DBEE4;
+extern void *D_800DBEE0;
+extern void *D_800DBEE4;
 extern s32 *D_800DBF94;
 s32 func_1502B7F0();
 void *allocate_memory(s32, u32, s32, s32);
-Mdl150039E0 *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
-void func_1510CE60(void *, s32, s32, s32, s32);
+ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
+void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;
-void func_15004AAC(void *, s32);
-s32 func_15004BF0(s32);
+void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn);
+s32 func_15004BF0(s32 grouped);
 void func_15004CE0();
 
-#define ENTS ((Ent150039E0 *)D_800DBEF4)
-#define src ((Src150039E0 *)((s32)base + i * 0x44))
-
-void func_150039E0(s32 arg0, s32 arg1) {
+/* Creates the level's objects (D_800DBEF4) from its two placement lists and allocates per-object buffers. */
+void func_150039E0(s32 level, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
-    s32 spA8;
+    s32 loaded;
     s32 j;
-    Src150039E0 *spA0;
-    Src150039E0 *sp9C;
-    Mdl150039E0 *mdl;
-    s32 type;
+    ObjectSpawn *spawns;
+    ObjectSpawn *groupedSpawns;
+    ModelAsset *model;
+    ObjectFunc behavior;
     s32 off;
-    Ent150039E0 *ent;
-    s8 flag;
-    s32 hasTbl;
-    Mdl150039E0 *mdl2;
-    Src150039E0 *base;
+    LevelObject *obj;
+    s8 setStateBit2;
+    s32 isBehavior22;
+    ModelAsset *levelModel;
+    ObjectSpawn *base;
 
     D_800DBF88 = 0xFF;
-    spA0 = NULL;
-    sp9C = NULL;
-    flag = 0;
+    spawns = NULL;
+    groupedSpawns = NULL;
+    setStateBit2 = FALSE;
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
-    i = func_1502B7F0(&spA0, 2, 0xB, arg0);
-    D_800DBF00 = i / 68U;
+    i = func_1502B7F0(&spawns, 2, 0xB, level);
+    D_800DBF00 = i / sizeof(ObjectSpawn);
     D_800DBEF0 = D_800DBF00;
-    D_800DBF98 = func_1502B7F0(&sp9C, 3, 0xC, arg0, 2) / 68U;
+    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, level, 2) / sizeof(ObjectSpawn);
     D_800DBEF0 += D_800DBF98;
-    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(Ent150039E0), 1, 2, 0);
+    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(LevelObject), 1, 2, 0);
     if (D_800DBEF4 == NULL) {
         D_800DBEF0 = 0;
         D_800DBF98 = 0;
         D_800DBF00 = 0;
         return;
     }
-    base = spA0;
+    // base[i] is object i's spawn: the first list, then the grouped list
+    base = spawns;
     for (i = 0; i < D_800DBEF0; i++) {
         if (i == D_800DBF00) {
-            base = &sp9C[-i];
+            base = &groupedSpawns[-i];
         }
         found = 0;
-        hasTbl = 0;
-        ent = i + ENTS;
-        ent->u10 = src->x0;
-        ent->u12 = src->x2;
-        ent->u14 = src->x4;
-        ent->u0 = src->x6;
-        ent->u4 = src->x8;
-        ent->u8 = src->xA;
-        ent->u2C = src->x20;
-        ent->u30 = src->x24;
-        ent->u34 = src->x28;
-        ent->u1C = (void *)src->xC;
-        ent->u70 = src->x3C & 0xFFF7;
-        ent->u88 = 0;
-        ent->u6E = src->x34;
-        ent->u3C = src->x18;
-        type = *(s32 *)&src->x14;
-        if (src->x14 < 0xFFFF) {
-            if ((s32)src->x14 == 0x28 || (s32)src->x14 == 0x42) {
-                ent->u70 |= 4;
-                flag = 1;
+        isBehavior22 = FALSE;
+        obj = i + OBJECTS;
+        obj->x = base[i].x;
+        obj->y = base[i].y;
+        obj->z = base[i].z;
+        obj->rotX = base[i].rotX;
+        obj->rotY = base[i].rotY;
+        obj->rotZ = base[i].rotZ;
+        obj->scaleX = base[i].scaleX;
+        obj->scaleY = base[i].scaleY;
+        obj->scaleZ = base[i].scaleZ;
+        obj->displayList = base[i].displayList;
+        obj->state = base[i].state & ~8;
+        obj->fadeDistance = 0;
+        obj->unk6E = base[i].unk6E;
+        obj->data = base[i].data;
+        behavior = base[i].behavior.func;
+        if (base[i].behavior.index < 0xFFFF) {
+            // matching: the (s32) casts keep the compares on a copy of the loaded word
+            if ((s32)base[i].behavior.index == 0x28 || (s32)base[i].behavior.index == 0x42) {
+                obj->state |= 4;
+                setStateBit2 = TRUE;
             }
-            ent->u38 = D_80088C90[src->x14].a;
-            ent->u78 = D_80088C90[src->x14].b;
-            ent->u92 = D_80088C90[src->x14].c;
-            if (src->x14 == 0x16) {
-                hasTbl = 1;
+            obj->update = D_80088C90[base[i].behavior.index].update;
+            obj->onContact = D_80088C90[base[i].behavior.index].onContact;
+            obj->unk92 = D_80088C90[base[i].behavior.index].unk92;
+            if (base[i].behavior.index == 22) {
+                isBehavior22 = TRUE;
             }
         } else {
-            ent->u38 = type;
-            ent->u78 = 0;
+            obj->update = behavior;
+            obj->onContact = NULL;
         }
-        ent->u40 = src->x38;
-        ent->u7C = 0;
-        ent->u80 = 0;
-        ent->u84 = 0;
-        ent->u74 = 0;
-        ent->u4E = 0;
-        ent->u6C = 0;
-        ent->u73 = 4;
-        ent->u60 = ent->u64 = ent->u68 = 0.0f;
-        ent->u5A = ent->u5C = ent->u5E = ent->u68;
-        ent->u18 = 0;
-        ent->u8A = 0xFF;
-        ent->u8B = ent->u8C = ent->u8D = ent->u8E = 0xFF;
-        ent->u71 = i;
-        ent->u94 = 0;
-        ent->u98 = 0;
-        if (ent->u1C == NULL) {
-            id = src->x10;
+        obj->unk40 = base[i].unk40;
+        obj->unk7C = 0;
+        obj->unk80 = 0;
+        obj->unk84 = 0;
+        obj->sound = 0;
+        obj->attach = 0;
+        obj->effectFlags = 0;
+        obj->unk73 = 4;
+        obj->spinX = obj->spinY = obj->spinZ = 0.0f;
+        obj->moveX = obj->moveY = obj->moveZ = obj->spinZ;
+        obj->yOffset = 0;
+        obj->alpha = 0xFF;
+        obj->viewAlpha[0] = obj->viewAlpha[1] = obj->viewAlpha[2] = obj->viewAlpha[3] = 0xFF;
+        obj->index = i;
+        obj->unk94 = 0;
+        obj->unk98 = 0;
+        if (obj->displayList == NULL) {
+            id = base[i].modelId;
             for (j = D_800DBF00; j < i; j++) {
-                if (src->xC == (base + j)->xC && src->x10 == (base + j)->x10 && ENTS[j].u1C != NULL) {
+                if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
+                    && OBJECTS[j].displayList != NULL) {
                     found = j + 1;
                     break;
                 }
             }
             if (found == 0) {
-                mdl = func_1502B6BC(&spA8, 0, 0, 2, 3, id);
-                ent->uC = mdl;
+                model = func_1502B6BC(&loaded, 0, 0, 2, 3, id);
+                obj->model = model;
             }
             if (found != 0) {
-                ent->u28 = ENTS[found - 1].u28;
-                ent->u1C = ENTS[found - 1].u1C;
-                ent->u9C = ENTS[found - 1].u9C;
-                ent->u16 = ENTS[found - 1].u16;
-                ent->u44 = ENTS[found - 1].u44;
+                obj->srcVertices = OBJECTS[found - 1].srcVertices;
+                obj->displayList = OBJECTS[found - 1].displayList;
+                obj->unk9C = OBJECTS[found - 1].unk9C;
+                obj->numVertices = OBJECTS[found - 1].numVertices;
+                obj->unk44 = OBJECTS[found - 1].unk44;
             } else {
-                ent->u28 = mdl->data;
-                ent->u1C = mdl->end;
-                ent->u9C = mdl->x8;
-                ent->u16 = (V16_150039E0 *)ent->u1C - ent->u28;
-                ent->u44 = mdl->x10;
+                obj->srcVertices = model->vertices;
+                obj->displayList = model->displayList;
+                obj->unk9C = model->unk8;
+                obj->numVertices = (Vtx *)obj->displayList - obj->srcVertices;
+                obj->unk44 = model->unk10;
             }
             if (i >= D_800DBF00) {
-                ent->u4C = D_800A26C0[id].b0;
-                ent->u4D = D_800A26C0[id].b1;
-                ent->u50 = D_800A26C0[id].h4;
-                ent->u52 = D_800A26C0[id].h2;
-                ent->u4F = D_800A26C0[id].b8;
-                ent->u70 = D_800A26C0[id].b9 & ~8;
-                ent->u6C = D_800A26C0[id].hA;
-                if (flag) {
-                    ent->u70 |= 4;
+                obj->unk4C = D_800A26C0[id].unk4C;
+                obj->unk4D = D_800A26C0[id].unk4D;
+                obj->unk50 = D_800A26C0[id].unk50;
+                obj->unk52 = D_800A26C0[id].unk52;
+                obj->flags = D_800A26C0[id].flags;
+                obj->state = D_800A26C0[id].state & ~8;
+                obj->effectFlags = D_800A26C0[id].effectFlags;
+                if (setStateBit2) {
+                    obj->state |= 4;
                 }
-                ent->u90 = D_800A26C0[id].h6;
-                ent->u72 = src->x33;
+                obj->drawDistance = D_800A26C0[id].drawDistance;
+                obj->id = base[i].id;
             } else {
-                ent->u50 = src->x2E;
-                ent->u52 = src->x30;
-                ent->u4F = src->x32;
-                ent->u4C = src->x2C;
-                ent->u4D = src->x2D;
-                ent->u90 = src->x40;
-                if (src->x33 != 0) {
-                    ent->u72 = src->x33;
+                obj->unk50 = base[i].unk50;
+                obj->unk52 = base[i].unk52;
+                obj->flags = base[i].flags;
+                obj->unk4C = base[i].unk4C;
+                obj->unk4D = base[i].unk4D;
+                obj->drawDistance = base[i].drawDistance;
+                if (base[i].id != 0) {
+                    obj->id = base[i].id;
                 } else {
-                    ent->u72 = func_15004BF0(1);
+                    obj->id = func_15004BF0(TRUE);
                 }
             }
             if (id == 0x71) {
-                ent->u40 = 0xE;
+                obj->unk40 = 0xE;
             }
-            if (ent->u38 != 0 || hasTbl != 0) {
-                if (ent->u6E == 0) {
-                    ent->u6F = 0xF;
+            if (obj->update != NULL || isBehavior22) {
+                if (obj->unk6E == 0) {
+                    obj->viewFlags = 0xF;
                 } else {
-                    ent->u6F = 0;
+                    obj->viewFlags = 0;
                 }
             } else {
-                ent->u6F = 0x80;
+                obj->viewFlags = 0x80;
             }
-            ent->u54 = id;
+            obj->modelId = id;
         } else {
-            ent->u54 = src->x10 | 0x8000;
-            if ((s32)ent->u1C == 1 || (s32)ent->u1C == 2) {
+            obj->modelId = base[i].modelId | 0x8000;
+            if ((s32)obj->displayList == 1 || (s32)obj->displayList == 2) {
                 for (j = 0; j < i; j++) {
-                    if (src->xC == (base + j)->xC && src->x10 == (base + j)->x10 && ENTS[j].u1C != NULL) {
+                    if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
+                        && OBJECTS[j].displayList != NULL) {
                         found = j + 1;
                         break;
                     }
                 }
                 if (found == 0) {
-                    id = src->x10;
-                    mdl2 = D_800B0E50[id].mdl;
-                    ent->u16 = ((u32)mdl2->end - (u32)mdl2->data) >> 4;
-                    ent->u28 = mdl2->data;
-                    ent->u44 = mdl2->x10;
-                    ent->u9C = mdl2->x8;
+                    id = base[i].modelId;
+                    levelModel = D_800B0E50[id].model;
+                    obj->numVertices = ((u32)levelModel->displayList - (u32)levelModel->vertices) >> 4;
+                    obj->srcVertices = levelModel->vertices;
+                    obj->unk44 = levelModel->unk10;
+                    obj->unk9C = levelModel->unk8;
                 } else {
-                    ent->u16 = ENTS[found - 1].u16;
-                    ent->u28 = ENTS[found - 1].u28;
-                    ent->u44 = ENTS[found - 1].u44;
-                    ent->u9C = ENTS[found - 1].u9C;
+                    obj->numVertices = OBJECTS[found - 1].numVertices;
+                    obj->srcVertices = OBJECTS[found - 1].srcVertices;
+                    obj->unk44 = OBJECTS[found - 1].unk44;
+                    obj->unk9C = OBJECTS[found - 1].unk9C;
                 }
-                if ((s32)ent->u1C == 2) {
-                    ent->u6F = 0;
+                if ((s32)obj->displayList == 2) {
+                    obj->viewFlags = 0;
                 } else {
-                    ent->u6F = 0x80;
+                    obj->viewFlags = 0x80;
                 }
                 if (found == 0) {
-                    ent->u1C = mdl2->end;
+                    obj->displayList = levelModel->displayList;
                 } else {
-                    ent->u1C = ENTS[found - 1].u1C;
+                    obj->displayList = OBJECTS[found - 1].displayList;
                 }
-                ent->u6C = src->x3E;
-                ent->uC = NULL;
+                obj->effectFlags = base[i].effectFlags;
+                obj->model = NULL;
             }
-            ent->u50 = src->x2E;
-            ent->u52 = src->x30;
-            ent->u4F = src->x32;
-            ent->u4C = src->x2C;
-            ent->u4D = src->x2D;
-            ent->u90 = src->x40;
-            if (src->x33 != 0) {
-                ent->u72 = src->x33;
+            obj->unk50 = base[i].unk50;
+            obj->unk52 = base[i].unk52;
+            obj->flags = base[i].flags;
+            obj->unk4C = base[i].unk4C;
+            obj->unk4D = base[i].unk4D;
+            obj->drawDistance = base[i].drawDistance;
+            if (base[i].id != 0) {
+                obj->id = base[i].id;
             } else {
-                ent->u72 = func_15004BF0(1);
+                obj->id = func_15004BF0(TRUE);
             }
         }
-        func_15004AAC(ent, (s32)(base + i));
-        if (ent->u38 == 0 && hasTbl == 0) {
-            ent->u6F |= 0x20;
+        func_15004AAC(obj, &base[i]);
+        if (obj->update == NULL && !isBehavior22) {
+            obj->viewFlags |= 0x20;
         }
         if (found == 0) {
-            func_1510CE60(ent->u1C, 0, 1, 0x3F, 0);
-            func_15004CE0(ent->u1C, (u32)mdl);
+            func_1510CE60(obj->displayList, 0, 1, 0x3F, 0);
+            func_15004CE0(obj->displayList, model);
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        ent = i + ENTS;
-        if (ent->u28 == NULL) continue;
-        {
-            if ((ent->u70 & 1) == 1U) {
-                ent->u20 = allocate_memory(ent->u16 * sizeof(V16_150039E0), 1, 2, 0);
-                ent->u24 = allocate_memory(ent->u16 * sizeof(V16_150039E0), 1, 2, 0);
-            } else {
-                ent->u20 = ent->u24 = ent->u28;
+        obj = i + OBJECTS;
+        if (obj->srcVertices == NULL) {
+            continue;
+        }
+        if ((obj->state & 1) == 1U) {
+            obj->vertices[0] = allocate_memory(obj->numVertices * sizeof(Vtx), 1, 2, 0);
+            obj->vertices[1] = allocate_memory(obj->numVertices * sizeof(Vtx), 1, 2, 0);
+        } else {
+            obj->vertices[0] = obj->vertices[1] = obj->srcVertices;
+        }
+        if (obj->vertices[0] != obj->srcVertices) {
+            for (j = 0; j < obj->numVertices; j++) {
+                obj->vertices[0][j] = obj->srcVertices[j];
             }
-            if (ent->u20 != ent->u28) {
-                for (j = 0; j < ent->u16; j++) {
-                    ent->u20[j] = ent->u28[j];
-                }
-                if (ent->u24 != ent->u20) {
-                    for (j = 0; j < ent->u16; j++) {
-                        ent->u24[j] = ent->u28[j];
-                    }
+            if (obj->vertices[0] != obj->vertices[1]) {
+                for (j = 0; j < obj->numVertices; j++) {
+                    obj->vertices[1][j] = obj->srcVertices[j];
                 }
             }
         }
     }
-    D_800DBEE0 = (s32)allocate_memory(D_800DBEF0 << 6, 1, 2, 0);
-    D_800DBEE4 = (s32)allocate_memory(D_800DBEF0 << 6, 1, 2, 0);
-    *(s32 *)D_800DBEF8 = (s32)allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
-    *(s32 *)D_800DBEFC = (s32)allocate_memory(D_800DBEF0, 1, 0, 0);
+    D_800DBEE0 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
+    D_800DBEE4 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
+    HANDLES = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
+    RELEASE_DELAY = allocate_memory(D_800DBEF0, 1, 0, 0);
     for (i = 0; i < 4; i++) {
         D_800DBED0[i] = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
     }
-    D_800DBF94 = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
+    D_800DBF94 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
     for (i = 0; i < D_800DBEF0; i++) {
         D_800DBF94[i] = 0;
     }
     for (i = D_800DBF00; i < D_800DBEF0; i++) {
-        if (ENTS[i].u72 == 0) {
-            ENTS[i].u72 = func_15004BF0(0);
+        if (OBJECTS[i].id == 0) {
+            OBJECTS[i].id = func_15004BF0(FALSE);
         }
     }
 }
@@ -492,13 +576,11 @@ void func_15004A4C(void) {
     }
 }
 
-extern u16 D_800BE2A0;
-extern u16 D_800BE2A2;
-extern u16 D_800BE2A4;
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15004AAC(void *arg0, s32 arg1) {
+/* Sets the object's bounding radius from its scaled vertices if unset, and counts how the set ones compare. */
+void func_15004AAC(LevelObject *obj, ObjectSpawn *spawn) {
     f32 sz;
     f32 sx;
     f32 sy;
@@ -516,19 +598,19 @@ void func_15004AAC(void *arg0, s32 arg1) {
     u16 cur;
     u16 count;
 
-    count = *((u16 *)(((s8 *)arg0) + 0x16));
+    count = obj->numVertices;
     new_var2 = count;
     if (0 < ((s32)new_var2)) {
-        if ((arg0 && arg0) && arg0) {
+        if ((obj && obj) && obj) {
         }
         off = 0;
-        p = *((s16 **)(((s8 *)arg0) + 0x28));
-        sz = *((f32 *)(((s8 *)arg0) + 0x34));
+        p = (s16 *)obj->srcVertices;
+        sz = obj->scaleZ;
         z = ((f32)p[2]) * sz;
-        sx = *((f32 *)(((s8 *)arg0) + 0x2C));
+        sx = obj->scaleX;
         x = ((f32)p[0]) * sx;
-        sy = *((f32 *)(((s8 *)arg0) + 0x30));
-        if (!arg0) {
+        sy = obj->scaleY;
+        if (!obj) {
         }
         len = ((s32)new_var2) * 0x10;
         do {
@@ -545,17 +627,17 @@ void func_15004AAC(void *arg0, s32 arg1) {
         } while (off < len);
     }
     if (maxv != 0) {
-        cur = *((u16 *)(((s8 *)arg0) + 0x50));
+        cur = obj->unk50;
         root = sqrtf((f32)maxv);
-        if ((*((u16 *)(((s8 *)arg0) + 0x50))) == 0) {
+        if (obj->unk50 == 0) {
             val = (s32)root;
-            *((u16 *)(((s8 *)arg0) + 0x50)) = (u16)val;
-            *((u16 *)(((s8 *)arg0) + 0x52)) = (u16)val;
+            obj->unk50 = (u16)val;
+            obj->unk52 = (u16)val;
             D_800BE2A2 += 1;
             return;
         }
         val = (s32)root;
-        if ((((s32)cur) < val) || (((s32)(*((u16 *)(((s8 *)arg0) + 0x52)))) < val)) {
+        if ((((s32)cur) < val) || (((s32)obj->unk52) < val)) {
             D_800BE2A0 += 1;
             return;
         }
