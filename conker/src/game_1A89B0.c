@@ -238,13 +238,22 @@ extern void func_10004074(s32);
      (axis != 0 && ((dir == 1 && (k) < D_800DDD20 && D_800DDD18[k].z < maxZ) ||   \
                     (dir == -1 && (k) >= 0 && minZ < D_800DDD18[k].z))))
 
-void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s32 pz) {
+/*
+ * Builds this frame's sprite vertex buffer: walks the sprites sorted along the axis facing `angle`
+ * (re-sorting when that axis changes) from the near edge of the box of half-size `radius` around (x, y, z),
+ * and for each one within `radius` loads its type's texture on demand, runs its animation callback and
+ * fills four vertices (alpha falls off with distance; sprites within 140 of (fadeX, fadeY, fadeZ) are
+ * skipped, fading in up to 240). Then steps the per-type animation phases and turns every quad to face
+ * `angle`.
+ * Several locals are reused for unrelated values (hi, camDist, j, y); IDO's register allocation depends on it.
+ */
+void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ) {
     s32 i;
     s32 lo;
     s32 hi;
     s32 mid;
     s32 dist;
-    s16 n;
+    s16 height;
     s16 dz;
     s32 phase;
     s32 dir = 1;
@@ -254,18 +263,18 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     s16 minX;
     s16 maxZ;
     s16 minZ;
-    s32 d2;
-    s32 j;
-    s32 limit;
-    s32 bit;
-    s16 m;
+    s32 bits;
+    s32 j; /* sprites emitted so far */
+    s32 camDist; /* also the alpha, then the phase slot */
+    s32 shade;
+    s16 halfWidth;
     s16 dx;
     s32 step;
-    u32 *p;
+    u32 *nearest;
     Vtx *vtx;
-    s32 size;
-    f32 s;
-    s16 c;
+    s32 frame;
+    f32 sinA;
+    s16 cosA;
 
     D_800DDD58 = 0;
     maxX = x + radius; minX = x - radius;
@@ -326,8 +335,9 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
             }
         }
     }
-    for (p = D_800DDC40; p < &D_800DDC40[15]; p++) {
-        *p = 0x7FFF;
+    /* nearest distance per sprite type */
+    for (nearest = D_800DDC40; nearest < &D_800DDC40[15]; nearest++) {
+        *nearest = 0x7FFF;
     }
     i = mid;
     if (IN_WINDOW(mid)) {
@@ -347,10 +357,10 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
             if ((u32) dist < D_800DDC40[type]) {
                 D_800DDC40[type] = dist;
             }
-            limit = func_150AD9A0(D_800DDD18[i].x - px, D_800DDD18[i].y - py, D_800DDD18[i].z - pz);
-            if (limit > 0x8C) {
-                if (limit < 0xF0) {
-                    dist = radius - ((radius - dist) * (limit - 0x8C)) / 100;
+            camDist = func_150AD9A0(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
+            if (camDist > 140) {
+                if (camDist < 240) {
+                    dist = radius - ((radius - dist) * (camDist - 140)) / 100;
                 }
                 if (sFrames[type * FRAMES_PER_TYPE] == 0) {
                     if (sTexFiles[type].devAddr != 0) {
@@ -362,8 +372,8 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                                 func_10004514(sTexFiles[type].devAddr, (void *) sTexFiles[type].buf, sTexFiles[type].size, 1);
                                 sTexFiles[type].loaded = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
-                                for (size = 1; size < 26; size++) {
-                                    sFrames[type * FRAMES_PER_TYPE + size] = sFrames[type * FRAMES_PER_TYPE + size - 1] + hi;
+                                for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
+                                    sFrames[type * FRAMES_PER_TYPE + frame] = sFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
                                 func_10004074(sTexFiles[type].buf);
@@ -384,11 +394,11 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                 }
                 if (D_800DD470.x != 0) {
                     if (func_150AD9A0(D_800DDD18[i].x - D_800DD470.x, D_800DDD18[i].y - D_800DD470.y,
-                                      D_800DDD18[i].z - D_800DD470.z) < 0x50 &&
+                                      D_800DDD18[i].z - D_800DD470.z) < 80 &&
                         D_800DDBC0[type] == 0) {
                         if (D_800DDD18[i].unkB != 0x21) {
                             D_800DDD18[i].unkB = 0x21;
-                            func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 0x44, D_800DDD18[i].z, 0, 0, 0xFF, 0);
+                            func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
                         }
                     }
                 }
@@ -398,16 +408,16 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                     }
                     vtx[3].v.flag = D_800DDD18[i].height;
                 } else {
-                    if (dist < 0x30 && D_800DDBC0[type] == 0) {
+                    if (dist < 48 && D_800DDBC0[type] == 0) {
                         D_800DDD18[i].unkB = 0x22;
-                        func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 0x44, D_800DDD18[i].z, 0, 0, 0xFF, 0);
+                        func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 68, D_800DDD18[i].z, 0, 0, 255, 0);
                     }
                     vtx[3].v.flag = D_800DDD18[i].height;
                 }
                 vtx[2].v.flag = D_800DDD18[i].halfWidth;
                 dist = (u32) (radius - dist) >> 1;
-                if (dist >= 0x100) {
-                    dist = 0xFF;
+                if (dist >= 256) {
+                    dist = 255;
                 }
                 vtx[0].v.cn[3] = dist;
                 if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].animIdx].idx].fn != NULL) {
@@ -419,17 +429,17 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                     vtx[0].v.ob[1] = D_800DDD18[i].y;
                     vtx[0].v.ob[2] = D_800DDD18[i].z;
                 }
-                bit = D_800DDD18[i].unk6 | 0x9F;
-                limit = vtx[0].v.cn[3] & 0xFF;
-                vtx[0].v.cn[0] = vtx[0].v.cn[1] = vtx[0].v.cn[2] = bit;
-                vtx[1].v.cn[0] = vtx[1].v.cn[1] = vtx[1].v.cn[2] = bit;
-                vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = bit;
-                vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = bit;
-                vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = limit;
+                shade = D_800DDD18[i].unk6 | 0x9F;
+                camDist = vtx[0].v.cn[3] & 0xFF;
+                vtx[0].v.cn[0] = vtx[0].v.cn[1] = vtx[0].v.cn[2] = shade;
+                vtx[1].v.cn[0] = vtx[1].v.cn[1] = vtx[1].v.cn[2] = shade;
+                vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = shade;
+                vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = shade;
+                vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = camDist;
                 if (D_800DDD18[i].unkB >= 0x21) {
-                    vtx[0].v.flag = D_800DDBE0[type] + type * 26;
+                    vtx[0].v.flag = D_800DDBE0[type] + type * FRAMES_PER_TYPE;
                 } else {
-                    vtx[0].v.flag = type * 26 + (phase >> 8);
+                    vtx[0].v.flag = type * FRAMES_PER_TYPE + (phase >> 8);
                 }
                 vtx++;
                 vtx->v.flag = D_800DDBF0[type];
@@ -460,31 +470,31 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                     } else {
                         step = D_800BE9E4 << 6;
                     }
-                    limit = i << 2;
-                    for (j = 0; j != 4; j++, limit++) {
-                        d2 = D_800DDC10[i];
+                    camDist = i << 2;
+                    for (j = 0; j != 4; j++, camDist++) {
+                        bits = D_800DDC10[i];
                         y = 1 << j;
-                        if (d2 & y) {
-                            D_800DDC90[limit] -= step;
-                            if (D_800DDC90[limit] <= 0) {
-                                D_800DDC90[limit] = -D_800DDC90[limit];
-                                D_800DDC10[i] = d2 ^ y;
+                        if (bits & y) {
+                            D_800DDC90[camDist] -= step;
+                            if (D_800DDC90[camDist] <= 0) {
+                                D_800DDC90[camDist] = -D_800DDC90[camDist];
+                                D_800DDC10[i] = bits ^ y;
                             }
                         } else {
-                            D_800DDC90[limit] += step;
-                            if (D_800DDC90[limit] >= hi) {
-                                D_800DDC90[limit] = hi * 2 - D_800DDC90[limit];
-                                D_800DDC10[i] = d2 ^ y;
+                            D_800DDC90[camDist] += step;
+                            if (D_800DDC90[camDist] >= hi) {
+                                D_800DDC90[camDist] = hi * 2 - D_800DDC90[camDist];
+                                D_800DDC10[i] = bits ^ y;
                             }
                         }
                     }
                 } else {
-                    d2 = D_800BE9E4 * 48;
-                    limit = i << 2;
-                    for (j = 0; j != 4; j++, limit++) {
-                        D_800DDC90[limit] += d2;
-                        if (D_800DDC90[limit] >= hi) {
-                            D_800DDC90[limit] -= hi;
+                    bits = D_800BE9E4 * 48;
+                    camDist = i << 2;
+                    for (j = 0; j != 4; j++, camDist++) {
+                        D_800DDC90[camDist] += bits;
+                        if (D_800DDC90[camDist] >= hi) {
+                            D_800DDC90[camDist] -= hi;
                         }
                     }
                 }
@@ -500,21 +510,21 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
         }
     }
     angle *= 0.01745329238f;
-    c = cosf(angle) * 128.0f;
-    s = sinf(angle);
+    cosA = cosf(angle) * 128.0f;
+    sinA = sinf(angle);
     for (i = 0; (u32) i < (u32) D_800DDD58; i++) {
-        m = (s16) VTX((i << 2) + 2).v.flag;
+        halfWidth = (s16) VTX((i << 2) + 2).v.flag;
         x = VTX((i << 2)).v.ob[0];
-        n = VTX((i << 2) + 3).v.flag * 4;
+        height = VTX((i << 2) + 3).v.flag * 4;
         y = VTX((i << 2)).v.ob[1];
         z = VTX((i << 2)).v.ob[2];
-        dx = (m * c) >> 5;
+        dx = (halfWidth * cosA) >> 5;
         VTX((i << 2)).v.ob[0] = VTX((i << 2) + 3).v.ob[0] = dx + x;
         VTX((i << 2)).v.ob[1] = VTX((i << 2) + 1).v.ob[1] = y;
-        dz = (m * (s16) (s * 128.0f)) >> 5;
+        dz = (halfWidth * (s16) (sinA * 128.0f)) >> 5;
         VTX((i << 2)).v.ob[2] = VTX((i << 2) + 3).v.ob[2] = z - dz;
         VTX((i << 2) + 1).v.ob[0] = VTX((i << 2) + 2).v.ob[0] = x - dx;
-        VTX((i << 2) + 2).v.ob[1] = VTX((i << 2) + 3).v.ob[1] = n + y;
+        VTX((i << 2) + 2).v.ob[1] = VTX((i << 2) + 3).v.ob[1] = height + y;
         VTX((i << 2) + 1).v.ob[2] = VTX((i << 2) + 2).v.ob[2] = dz + z;
         VTX((i << 2)).v.tc[0] = VTX((i << 2)).v.tc[1] = 0;
         VTX((i << 2) + 1).v.tc[1] = VTX((i << 2) + 3).v.tc[0] = 0;
