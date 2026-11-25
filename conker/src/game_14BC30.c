@@ -190,7 +190,11 @@ void func_1511E780(Prop *prop) {
     prop->state &= ~3;
     prop->state |= motion;
 }
-/* Raises the prop up to 500 units above home while triggered (then flags it finished), lowers it back otherwise. */
+
+/*
+ * Raises the prop up to 500 units above home while triggered (then flags it finished) and lowers
+ * it back otherwise; a nonzero params word makes it move at a quarter of the speed.
+ */
 void func_1511EC50(Prop *prop) {
     f32 step;
     f32 limit;
