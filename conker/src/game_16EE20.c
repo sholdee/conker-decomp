@@ -468,6 +468,7 @@ typedef union {
 void func_15142314(Mtx *mtx, s32 index, f32 *out) {
     MtxView *m;
 
+    // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
     m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
     if (D_800C3E90 != 0) {
         // matching: the original recomputes m here; IDO keeps both computations
